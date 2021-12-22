@@ -1,11 +1,12 @@
 import { objectType } from 'nexus'
 import { BaseError } from '.'
-import { ProjectLike } from '..'
+import { ProjectLike, ScaffoldedFile, TestingTypeEnum } from '..'
 import { CurrentProject } from './gql-CurrentProject'
 import { DevState } from './gql-DevState'
 import { LocalSettings } from './gql-LocalSettings'
 import { VersionData } from './gql-VersionData'
 import { Wizard } from './gql-Wizard'
+import { Warning } from './gql-Warning'
 
 export const Query = objectType({
   name: 'Query',
@@ -14,6 +15,14 @@ export const Query = objectType({
     t.field('baseError', {
       type: BaseError,
       resolve: (root, args, ctx) => ctx.baseError,
+    })
+
+    t.nonNull.list.nonNull.field('warnings', {
+      type: Warning,
+      description: 'A list of warnings',
+      resolve: (source, args, ctx) => {
+        return ctx.coreData.warnings
+      },
     })
 
     t.nonNull.field('wizard', {
@@ -39,7 +48,13 @@ export const Query = objectType({
     t.field('currentProject', {
       type: CurrentProject,
       description: 'The currently opened project',
-      resolve: (root, args, ctx) => ctx.coreData.currentProject,
+      resolve: (root, args, ctx) => {
+        if (ctx.coreData.currentProject) {
+          return ctx.lifecycleManager
+        }
+
+        return null
+      },
     })
 
     t.nonNull.list.nonNull.field('projects', {
@@ -64,6 +79,18 @@ export const Query = objectType({
       resolve: (source, args, ctx) => {
         return ctx.coreData.localSettings
       },
+    })
+
+    t.field('currentTestingType', {
+      description: 'The mode the interactive runner was launched in',
+      type: TestingTypeEnum,
+      resolve: (_, args, ctx) => ctx.coreData.currentTestingType,
+    })
+
+    t.list.nonNull.field('scaffoldedFiles', {
+      description: 'The files that have just been scaffolded',
+      type: ScaffoldedFile,
+      resolve: (_, args, ctx) => ctx.coreData.scaffoldedFiles,
     })
   },
 })

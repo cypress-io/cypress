@@ -10,8 +10,11 @@
     <ol class="list-decimal ml-16px w-full text-gray-600">
       <li>
         <p class="mb-8px">
-          <i18n-t keypath="runs.empty.step1">
-            <span class="text-indigo-500">{{ configFilePath }}</span>
+          <i18n-t
+            scope="global"
+            keypath="runs.empty.step1"
+          >
+            <span class="text-indigo-500">{{ configFile }}</span>
           </i18n-t>
         </p>
         <ShikiHighlight
@@ -23,8 +26,11 @@
       </li>
       <li class="mt-24px">
         <p class="mb-8px">
-          <i18n-t keypath="runs.empty.step2">
-            <span class="text-indigo-400">{{ configFilePath }}</span>
+          <i18n-t
+            scope="global"
+            keypath="runs.empty.step2"
+          >
+            <span class="text-indigo-400">{{ configFile }}</span>
           </i18n-t>
         </p>
         <TerminalPrompt
@@ -62,7 +68,7 @@ fragment RunsEmpty on CurrentProject {
   id
   title
   projectId
-  configFilePath
+  configFile
   cloudProject {
     __typename
     ... on CloudProject {
@@ -88,7 +94,7 @@ const projectIdCode = computed(() => {
 })
 
 const projectName = computed(() => props.gql.title)
-const configFilePath = computed(() => props.gql.configFilePath)
+const configFile = computed(() => props.gql.configFile)
 const firstRecordKey = computed(() => {
   return props.gql.cloudProject?.__typename === 'CloudProject' && props.gql.cloudProject.recordKeys?.[0]
     ? props.gql.cloudProject?.recordKeys?.[0]?.key

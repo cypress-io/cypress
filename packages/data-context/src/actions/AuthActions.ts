@@ -17,7 +17,10 @@ export class AuthActions {
         this.ctx.coreData.user = obj
         // When we get the user at startup, check the auth by
         // hitting the network
-        this.checkAuth()
+        this.checkAuth().catch((err) => {
+          // Don't worry about handling the error here
+          this.ctx.logTraceError(err)
+        })
       }
     })
   }
@@ -35,7 +38,7 @@ export class AuthActions {
 
     if (!result.data?.cloudViewer) {
       this.ctx.coreData.user = null
-      this.logout()
+      await this.logout()
     }
   }
 
@@ -49,10 +52,12 @@ export class AuthActions {
     try {
       this.ctx.coreData.isAuthBrowserOpened = false
       await this.authApi.logOut()
-    } catch {
-      //
+    } catch (e) {
+      this.ctx.logTraceError(e)
+    } finally {
+      this.setAuthenticatedUser(null)
+      this.ctx.cloud.reset()
     }
-    this.setAuthenticatedUser(null)
   }
 
   private setAuthenticatedUser (authUser: AuthenticatedUserShape | null) {

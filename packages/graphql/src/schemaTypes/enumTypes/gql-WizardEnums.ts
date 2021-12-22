@@ -7,11 +7,6 @@ export const SupportedBundlerEnum = enumType({
   members: BUNDLERS.map((t) => t.type),
 })
 
-export const WizardNavigateDirectionEnum = enumType({
-  name: 'WizardNavigateDirection',
-  members: ['forward', 'back'],
-})
-
 export const WizardConfigFileStatusEnum = enumType({
   name: 'WizardConfigFileStatusEnum',
   members: ['changes', 'valid', 'skipped', 'error'],

@@ -14,7 +14,7 @@ describe('App: Runs', () => {
       cy.wait(1000)
       cy.get('[href="#/runs"]').click()
       cy.get('[data-cy="runs"]')
-      cy.get('[data-testid="header-bar"]').findByText('Runs').should('be.visible')
+      cy.get('[data-cy="app-header-bar"]').findByText('Runs').should('be.visible')
     })
 
     it('shows the loader', () => {
@@ -43,7 +43,7 @@ describe('App: Runs', () => {
       cy.visitApp()
       cy.get('[href="#/runs"]').click()
       cy.contains('Log In').click()
-      cy.get('h2').contains('Log In To Cypress')
+      cy.get('[id="headlessui-dialog-title-13"]').contains('Log in to Cypress')
       cy.get('button').contains('Log In')
     })
 
@@ -63,12 +63,6 @@ describe('App: Runs', () => {
   context('Runs - Connect Project', () => {
     it('when no project Id in the config file, shows call to action', () => {
       cy.withCtx(async (ctx) => {
-        if (ctx.currentProject) {
-          ctx.currentProject.configChildProcess?.process.kill()
-          ctx.currentProject.config = null
-          ctx.currentProject.configChildProcess = null
-        }
-
         await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {}')
       })
 
@@ -80,14 +74,8 @@ describe('App: Runs', () => {
     })
 
     // TODO: does not open modal
-    it.skip('opens Connect Project modal after clicking Connect Project button', () => {
+    it('opens Connect Project modal after clicking Connect Project button', () => {
       cy.withCtx(async (ctx) => {
-        if (ctx.currentProject) {
-          ctx.currentProject.configChildProcess?.process.kill()
-          ctx.currentProject.config = null
-          ctx.currentProject.configChildProcess = null
-        }
-
         await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {}')
       })
 
@@ -103,12 +91,6 @@ describe('App: Runs', () => {
     // TODO: still generates run list regardless of projectID
     it.skip('if project Id is specified in config file that does not exist, shows call to action', () => {
       cy.withCtx(async (ctx) => {
-        if (ctx.currentProject) {
-          ctx.currentProject.configChildProcess?.process.kill()
-          ctx.currentProject.config = null
-          ctx.currentProject.configChildProcess = null
-        }
-
         await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {\'projectId\': \'abcdef\'}')
       })
 
@@ -122,12 +104,6 @@ describe('App: Runs', () => {
     // TODO: does not open modal
     it.skip('opens Connect Project modal after clicking Reconnect Project button', () => {
       cy.withCtx(async (ctx) => {
-        if (ctx.currentProject) {
-          ctx.currentProject.configChildProcess?.process.kill()
-          ctx.currentProject.config = null
-          ctx.currentProject.configChildProcess = null
-        }
-
         await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {\'projectId\': \'abcdef\'}')
       })
 
@@ -163,12 +139,6 @@ describe('App: Runs', () => {
 
     it('displays the projectId as it is in their config file', () => {
       cy.withCtx(async (ctx) => {
-        if (ctx.currentProject) {
-          ctx.currentProject.configChildProcess?.process.kill()
-          ctx.currentProject.config = null
-          ctx.currentProject.configChildProcess = null
-        }
-
         await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {\'projectId\': \'abcdef\'}')
       })
 

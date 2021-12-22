@@ -1,5 +1,6 @@
 import { nonNull, objectType, stringArg } from 'nexus'
 import path from 'path'
+import { BaseError } from '.'
 import { cloudProjectBySlug } from '../../stitching/remoteGraphQLCalls'
 import { TestingTypeEnum } from '../enumTypes/gql-WizardEnums'
 import { Browser } from './gql-Browser'
@@ -16,22 +17,35 @@ export const CurrentProject = objectType({
   definition (t) {
     t.implements('ProjectLike')
 
-    t.nonNull.boolean('isRefreshingBrowsers', {
-      description: 'Whether we are currently refreshing the browsers list',
-      resolve: (source, args, ctx) => Boolean(ctx.appData.refreshingBrowsers),
+    t.field('errorLoadingConfigFile', {
+      type: BaseError,
+      description: 'If there is an error loading the config file, it is represented here',
+    })
+
+    t.field('errorLoadingNodeEvents', {
+      type: BaseError,
+      description: 'If there is an error related to the node events, it is represented here',
+    })
+
+    t.boolean('isLoadingConfigFile', {
+      description: 'Whether we are currently loading the configFile',
+    })
+
+    t.boolean('isLoadingNodeEvents', {
+      description: 'Whether we are currently loading the setupNodeEvents',
     })
 
     t.field('currentTestingType', {
       description: 'The mode the interactive runner was launched in',
       type: TestingTypeEnum,
-      resolve: (_, args, ctx) => ctx.wizard.chosenTestingType,
+      resolve: (_, args, ctx) => ctx.coreData.currentTestingType,
     })
 
     t.field('currentBrowser', {
       type: Browser,
       description: 'The currently selected browser for the application',
       resolve: (source, args, ctx) => {
-        return ctx.wizardData.chosenBrowser
+        return ctx.coreData.chosenBrowser
       },
     })
 
@@ -44,7 +58,7 @@ export const CurrentProject = objectType({
       type: 'CloudProjectResult',
       description: 'The remote associated project from Cypress Cloud',
       resolve: async (source, args, ctx, info) => {
-        const projectId = await ctx.project.projectId(source.projectRoot)
+        const projectId = await ctx.project.projectId()
 
         if (!projectId) {
           return null
@@ -56,57 +70,60 @@ export const CurrentProject = objectType({
 
     t.string('projectId', {
       description: 'Used to associate project with Cypress cloud',
-      resolve: (source, args, ctx) => ctx.project.projectId(source.projectRoot),
+      resolve: (source, args, ctx) => ctx.project.projectId(),
     })
 
-    t.nonNull.boolean('isCTConfigured', {
+    t.boolean('isCTConfigured', {
       description: 'Whether the user configured this project to use Component Testing',
       resolve: (source, args, ctx) => {
-        return ctx.project.isTestingTypeConfigured(source.projectRoot, 'component')
+        return ctx.lifecycleManager.isTestingTypeConfigured('component')
       },
     })
 
-    t.nonNull.boolean('isE2EConfigured', {
+    t.boolean('isE2EConfigured', {
       description: 'Whether the user configured this project to use e2e Testing',
       resolve: (source, args, ctx) => {
-        return ctx.project.isTestingTypeConfigured(source.projectRoot, 'e2e')
+        return ctx.lifecycleManager.isTestingTypeConfigured('e2e')
       },
     })
+
+    t.boolean('needsLegacyConfigMigration', {
+      description: 'Whether the project needs to be migrated before proceeding',
+      resolve (source, args, ctx) {
+        return ctx.lifecycleManager.metaState.needsCypressJsonMigration
+      },
+    })
+
+    // t.list.field('testingTypes', {
+    //   type: TestingTypeInfo,
+    // })
 
     t.connectionField('specs', {
       description: 'Specs for a project conforming to Relay Connection specification',
       type: Spec,
       nodes: (source, args, ctx) => {
-        return ctx.project.findSpecs(source.projectRoot, ctx.appData.currentTestingType === 'component' ? 'component' : 'integration')
+        return ctx.project.findSpecs(source.projectRoot, ctx.coreData.currentTestingType === 'component' ? 'component' : 'integration')
       },
     })
 
     t.nonNull.json('config', {
       description: 'Project configuration',
       resolve: (source, args, ctx) => {
-        return ctx.project.getResolvedConfigFields(source.projectRoot)
+        return ctx.project.getResolvedConfigFields()
       },
     })
 
-    t.string('configFilePath', {
-      description: 'Config File Path',
-      resolve: async (source, args, ctx) => {
-        const config = await ctx.project.getConfig(source.projectRoot)
-
-        return config.configFile ?? null
+    t.string('configFile', {
+      description: 'Config File, specified by the CLI or ',
+      resolve: (source, args, ctx) => {
+        return ctx.lifecycleManager.configFile.toString()
       },
     })
 
     t.string('configFileAbsolutePath', {
       description: 'Config File Absolute Path',
       resolve: async (source, args, ctx) => {
-        const config = await ctx.project.getConfig(source.projectRoot)
-
-        if (!ctx.currentProject || !config.configFile) {
-          return null
-        }
-
-        return path.join(ctx.currentProject.projectRoot, config.configFile)
+        return ctx.lifecycleManager.configFilePath
       },
     })
 
@@ -148,5 +165,8 @@ export const CurrentProject = objectType({
       },
     })
   },
-
+  sourceType: {
+    module: '@packages/data-context/src/data/ProjectLifecycleManager',
+    export: 'ProjectLifecycleManager',
+  },
 })
