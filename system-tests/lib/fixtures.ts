@@ -35,9 +35,9 @@ export function scaffold () {
 /**
  * Given a project name, copy the project's test files to the temp dir.
  */
-export function scaffoldProject (project: string): void {
-  const from = _path.join(projects, project)
+export async function scaffoldProject (project: string): Promise<void> {
   const to = _path.join(cyTmpDir, project)
+  const from = _path.join(projects, project)
 
   fs.copySync(from, to)
 }

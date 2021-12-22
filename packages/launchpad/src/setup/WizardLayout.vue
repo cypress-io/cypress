@@ -10,7 +10,7 @@
 
     <ButtonBar
       v-if="!noContainer"
-      :next-fn="nextFn"
+      :next-fn="props.nextFn"
       :can-navigate-forward="canNavigateForward"
       :back-fn="backFn"
       :alt-fn="altFn"
@@ -27,19 +27,8 @@
 <script lang="ts" setup>
 import ButtonBar from './ButtonBar.vue'
 import { computed } from 'vue'
-import { useMutation } from '@urql/vue'
 import { gql } from '@urql/core'
-import { WizardLayoutNavigateDocument } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
-
-gql`
-fragment WizardLayout on Wizard {
-  title
-  description
-  step
-  canNavigateForward
-}
-`
 
 gql`
 mutation WizardLayoutNavigate($input: WizardUpdateInput!) {
@@ -59,6 +48,7 @@ const props = withDefaults(
     noContainer?: boolean
     altFn?: (val: boolean) => void
     nextFn?: (...args: unknown[]) => any,
+    backFn?: (...args: unknown[]) => any,
   }>(), {
     next: undefined,
     showNext: true,
@@ -68,21 +58,11 @@ const props = withDefaults(
     noContainer: undefined,
     altFn: undefined,
     nextFn: undefined,
+    backFn: undefined,
   },
 )
 
 const nextLabel = computed(() => props.next || t('setupPage.step.next'))
 const backLabel = computed(() => props.back || t('setupPage.step.back'))
-
-const navigate = useMutation(WizardLayoutNavigateDocument)
-
-async function nextFn () {
-  await props.nextFn?.()
-  navigate.executeMutation({ input: { direction: 'forward', testingType: null } })
-}
-
-function backFn () {
-  navigate.executeMutation({ input: { direction: 'back', testingType: null } })
-}
 
 </script>

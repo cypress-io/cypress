@@ -2,6 +2,9 @@ import type { AllModeOptions } from '@packages/types'
 import fsExtra from 'fs-extra'
 import path from 'path'
 import util from 'util'
+import chalk from 'chalk'
+import assert from 'assert'
+import s from 'underscore.string'
 
 import 'server-destroy'
 
@@ -20,11 +23,11 @@ import {
   BrowserDataSource,
   StorybookDataSource,
   CloudDataSource,
-  ProjectConfigDataSource,
   EnvDataSource,
   GraphQLDataSource,
   HtmlDataSource,
   UtilDataSource,
+  BrowserApiShape,
 } from './sources/'
 import { cached } from './util/cached'
 import type { GraphQLSchema } from 'graphql'
@@ -32,15 +35,23 @@ import type { Server } from 'http'
 import type { AddressInfo } from 'net'
 import type { App as ElectronApp } from 'electron'
 import { VersionsDataSource } from './sources/VersionsDataSource'
-import type { SocketIOServer } from '@packages/socket'
+import type { Socket, SocketIOServer } from '@packages/socket'
 import { globalPubSub } from '.'
+import { InjectedConfigApi, ProjectLifecycleManager } from './data/ProjectLifecycleManager'
 
 const IS_DEV_ENV = process.env.CYPRESS_INTERNAL_ENV !== 'production'
 
 export type Updater = (proj: CoreDataShape) => void | undefined | CoreDataShape
 
+export type CurrentProjectUpdater = (proj: Exclude<CoreDataShape['currentProject'], null | undefined>) => void | undefined | CoreDataShape['currentProject']
+
 export interface InternalDataContextOptions {
   loadCachedProjects: boolean
+}
+
+export interface ErrorApiShape {
+  error: (type: string, ...args: any) => Error & { type: string, details: string, code?: string, isCypressErr: boolean}
+  message: (type: string, ...args: any) => string
 }
 
 export interface DataContextConfig {
@@ -55,21 +66,26 @@ export interface DataContextConfig {
   appApi: AppApiShape
   localSettingsApi: LocalSettingsApiShape
   authApi: AuthApiShape
+  errorApi: ErrorApiShape
+  configApi: InjectedConfigApi
   projectApi: ProjectApiShape
   electronApi: ElectronApiShape
+  browserApi: BrowserApiShape
 }
 
 export class DataContext {
   private _config: Omit<DataContextConfig, 'modeOptions'>
   private _modeOptions: Readonly<Partial<AllModeOptions>>
   private _coreData: CoreDataShape
+  readonly lifecycleManager: ProjectLifecycleManager
 
   constructor (_config: DataContextConfig) {
     const { modeOptions, ...rest } = _config
 
     this._config = rest
-    this._modeOptions = modeOptions
+    this._modeOptions = modeOptions ?? {} // {} For legacy tests
     this._coreData = _config.coreData ?? makeCoreData(this._modeOptions)
+    this.lifecycleManager = new ProjectLifecycleManager(this)
   }
 
   get isRunMode () {
@@ -90,10 +106,6 @@ export class DataContext {
 
   get isGlobalMode () {
     return !this.currentProject
-  }
-
-  async initializeData () {
-
   }
 
   get modeOptions () {
@@ -117,7 +129,16 @@ export class DataContext {
   }
 
   get baseError () {
-    return this.coreData.baseError
+    if (!this.coreData.baseError) {
+      return null
+    }
+
+    // TODO: Standardize approach to serializing errors
+    return {
+      title: this.coreData.baseError.title,
+      message: this.coreData.baseError.message,
+      stack: this.coreData.baseError.stack,
+    }
   }
 
   @cached
@@ -155,11 +176,6 @@ export class DataContext {
   @cached
   get wizard () {
     return new WizardDataSource(this)
-  }
-
-  @cached
-  get config () {
-    return new ProjectConfigDataSource(this)
   }
 
   @cached
@@ -222,6 +238,11 @@ export class DataContext {
 
   setAppSocketServer (socketServer: SocketIOServer | undefined) {
     this.update((d) => {
+      if (d.servers.appSocketServer !== socketServer) {
+        d.servers.appSocketServer?.off('connection', this.initialPush)
+        socketServer?.on('connection', this.initialPush)
+      }
+
       d.servers.appSocketServer = socketServer
     })
   }
@@ -235,8 +256,21 @@ export class DataContext {
 
   setGqlSocketServer (socketServer: SocketIOServer | undefined) {
     this.update((d) => {
+      if (d.servers.gqlSocketServer !== socketServer) {
+        d.servers.gqlSocketServer?.off('connection', this.initialPush)
+        socketServer?.on('connection', this.initialPush)
+      }
+
       d.servers.gqlSocketServer = socketServer
     })
+  }
+
+  initialPush = (socket: Socket) => {
+    // TODO: This is a hack that will go away when we refine the whole socket communication
+    // layer w/ GraphQL subscriptions, we shouldn't be pushing so much
+    setTimeout(() => {
+      socket.emit('data-context-push')
+    }, 100)
   }
 
   /**
@@ -270,7 +304,10 @@ export class DataContext {
     return {
       appApi: this._config.appApi,
       authApi: this._config.authApi,
+      browserApi: this._config.browserApi,
+      configApi: this._config.configApi,
       projectApi: this._config.projectApi,
+      errorApi: this._config.errorApi,
       electronApi: this._config.electronApi,
       localSettingsApi: this._config.localSettingsApi,
     }
@@ -295,10 +332,42 @@ export class DataContext {
 
   debug = debugLib('cypress:data-context')
 
-  logError (e: unknown) {
+  private _debugCache: Record<string, debug.Debugger> = {}
+
+  debugNs = (ns: string, evt: string, ...args: any[]) => {
+    const _debug = this._debugCache[ns] ??= debugLib(`cypress:data-context:${ns}`)
+
+    _debug(evt, ...args)
+  }
+
+  logTraceError (e: unknown) {
     // TODO(tim): handle this consistently
     // eslint-disable-next-line no-console
     console.error(e)
+  }
+
+  onError = (err: Error) => {
+    if (this.isRunMode) {
+      // console.error(err)
+      throw err
+    } else {
+      this.coreData.baseError = err
+    }
+  }
+
+  onWarning = (err: { message: string, type?: string, details?: string }) => {
+    if (this.isRunMode) {
+      // eslint-disable-next-line
+      console.log(chalk.yellow(err.message))
+    } else {
+      this.coreData.warnings.push({
+        title: `Warning: ${s.titleize(s.humanize(err.type ?? ''))}`,
+        message: err.message,
+        details: err.details,
+      })
+
+      this.emitter.toLaunchpad()
+    }
   }
 
   /**
@@ -338,6 +407,9 @@ export class DataContext {
 
     this._modeOptions = modeOptions
     this._coreData = makeCoreData(modeOptions)
+    // @ts-expect-error - we've already cleaned up, this is for testing only
+    this.lifecycleManager = new ProjectLifecycleManager(this)
+
     globalPubSub.emit('reset:data-context', this)
   }
 
@@ -352,17 +424,20 @@ export class DataContext {
     // this._patches.push([{ op: 'add', path: [], value: this._coreData }])
 
     return Promise.all([
+      this.lifecycleManager.destroy(),
       this.cloud.reset(),
       this.util.disposeLoaders(),
-      this.actions.project.clearActiveProject(),
+      this.actions.project.clearCurrentProject(),
       // this.actions.currentProject?.clearCurrentProject(),
       this.actions.dev.dispose(),
     ])
   }
 
   async initializeMode () {
+    assert(!this.coreData.hasInitializedMode)
+    this.coreData.hasInitializedMode = this._config.mode
     if (this._config.mode === 'run') {
-      await this.actions.app.refreshBrowsers()
+      await this.lifecycleManager.initializeRunMode()
     } else if (this._config.mode === 'open') {
       await this.initializeOpenMode()
     } else {
@@ -371,7 +446,7 @@ export class DataContext {
   }
 
   error (type: string, ...args: any[]) {
-    throw this._apis.projectApi.error.throw(type, ...args)
+    return this._apis.errorApi.error(type, ...args)
   }
 
   private async initializeOpenMode () {
@@ -380,9 +455,6 @@ export class DataContext {
     }
 
     const toAwait: Promise<any>[] = [
-      // Fetch the browsers when the app starts, so we have some by
-      // the time we're continuing.
-      this.actions.app.refreshBrowsers(),
       // load the cached user & validate the token on start
       this.actions.auth.getUser(),
       // and grab the user device settings
@@ -392,61 +464,12 @@ export class DataContext {
     // load projects from cache on start
     toAwait.push(this.actions.project.loadProjects())
 
-    if (this.modeOptions.projectRoot) {
-      await this.actions.project.setActiveProject(this.modeOptions.projectRoot)
-
-      if (this.coreData.currentProject?.preferences) {
-        // Skipping this until we sort out the lifecycle things
-        // toAwait.push(this.actions.project.launchProjectWithoutElectron())
-      }
-    }
-
     if (this.modeOptions.testingType) {
-      this.appData.currentTestingType = this.modeOptions.testingType
-      // It should be possible to skip the first step in the wizard, if the
-      // user already told us the testing type via command line argument
-      this.actions.wizard.setTestingType(this.modeOptions.testingType)
-      this.actions.wizard.navigate('forward')
-      this.emitter.toLaunchpad()
-    }
-
-    if (this.modeOptions.browser) {
-      toAwait.push(this.actions.app.setActiveBrowserByNameOrPath(this.modeOptions.browser))
+      this.lifecycleManager.initializeConfig().catch((err) => {
+        this.coreData.baseError = err
+      })
     }
 
     return Promise.all(toAwait)
   }
-
-  // async initializeRunMode () {
-  //   if (this._coreData.hasInitializedMode) {
-  //     throw new Error(`
-  //       Mode already initialized. If this is a test context, be sure to call
-  //       resetForTest in a setup hook (before / beforeEach).
-  //     `)
-  //   }
-
-  //   this.coreData.hasInitializedMode = 'run'
-
-  //   const project = this.project
-
-  //   if (!project || !project.configFilePath || !this.actions.currentProject) {
-  //     throw this.error('NO_PROJECT_FOUND_AT_PROJECT_ROOT', project?.projectRoot ?? '(unknown)')
-  //   }
-
-  //   if (project.needsCypressJsonMigration) {
-  //     throw this.error('CONFIG_FILE_MIGRATION_NEEDED', project.projectRoot)
-  //   }
-
-  //   if (project.hasLegacyJson) {
-  //     this._apis.appApi.warn('LEGACY_CONFIG_FILE', project.configFilePath)
-  //   }
-
-  //   if (project.hasMultipleConfigPaths) {
-  //     this._apis.appApi.warn('CONFIG_FILES_LANGUAGE_CONFLICT', project.projectRoot, ...project.nonJsonConfigPaths)
-  //   }
-
-  //   if (!project.currentTestingType) {
-  //     throw this.error('TESTING_TYPE_NEEDED_FOR_RUN')
-  //   }
-  // }
 }

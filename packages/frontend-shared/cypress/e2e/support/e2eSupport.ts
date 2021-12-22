@@ -13,7 +13,7 @@ import installCustomPercyCommand from '@packages/ui-components/cypress/support/c
 configure({ testIdAttribute: 'data-cy' })
 
 const NO_TIMEOUT = 1000 * 1000
-const FOUR_SECONDS = 4 * 1000
+const TEN_SECONDS = 10 * 1000
 
 export type ProjectFixture = typeof e2eProjectDirs[number]
 
@@ -39,9 +39,17 @@ export interface RemoteGraphQLInterceptPayload {
 
 export type RemoteGraphQLInterceptor = (obj: RemoteGraphQLInterceptPayload) => ExecutionResult | Promise<ExecutionResult>
 
-export interface SetFoundBrowsersOptions {
-  filter?(browser: Browser): boolean
+export interface FindBrowsersOptions {
+  // Array of FoundBrowser objects that will be used as the mock output
   browsers?: FoundBrowser[]
+  /**
+   * Function used to filter the standard set of mocked browsers. Ignored if browsers option is provided.
+   * Ex.
+   * cy.findBrowsers({
+   *   filter: (browser) => browser.name === 'chrome' // Sets Chrome, Chrome Beta, Canary
+   * })
+   */
+  filter?(browser: Browser): boolean
 }
 
 declare global {
@@ -100,7 +108,10 @@ declare global {
       disableRemoteGraphQLFakes(): void
       visitApp(href?: string): Chainable<AUTWindow>
       visitLaunchpad(href?: string): Chainable<AUTWindow>
-      findBrowsers(options?: SetFoundBrowsersOptions): void
+      /**
+       * Mocks the system browser retrieval to return the desired browsers
+       */
+      findBrowsers(options?: FindBrowsersOptions): void
     }
   }
 }
@@ -164,14 +175,13 @@ function openProject (projectName: ProjectFixture, argv: string[] = []) {
 function startAppServer (mode: 'component' | 'e2e' = 'e2e') {
   return logInternal('startAppServer', (log) => {
     return cy.withCtx(async (ctx, o) => {
-      ctx.actions.wizard.setTestingType(o.mode)
+      ctx.actions.project.setCurrentTestingType(o.mode)
+      // ctx.lifecycleManager.isReady()
       await ctx.actions.project.initializeActiveProject({
         skipPluginInitializeForTesting: true,
       })
 
-      await ctx.actions.project.launchProject(o.mode, {
-        skipBrowserOpenForTest: true,
-      })
+      await ctx.actions.project.launchProject(o.mode, {})
 
       return ctx.appServerPort
     }, { log: false, mode }).then((serverPort) => {
@@ -207,16 +217,20 @@ function visitApp (href?: string) {
 
 function visitLaunchpad () {
   return logInternal(`visitLaunchpad ${Cypress.env('e2e_gqlPort')}`, () => {
-    return cy.visit(`dist-launchpad/index.html?gqlPort=${Cypress.env('e2e_gqlPort')}`, { log: false })
+    return cy.visit(`dist-launchpad/index.html?gqlPort=${Cypress.env('e2e_gqlPort')}`, { log: false }).then((val) => {
+      return cy.get('[data-e2e]', { timeout: 10000, log: false }).then(() => {
+        return val
+      })
+    })
   })
 }
 
 type UnwrapPromise<R> = R extends PromiseLike<infer U> ? U : R
 
-function withCtx<T extends Partial<WithCtxOptions>, R> (fn: (ctx: DataContext, o: T & WithCtxInjected) => Promise<R>, opts: T = {} as T): Cypress.Chainable<UnwrapPromise<R>> {
+function withCtx<T extends Partial<WithCtxOptions>, R> (fn: (ctx: DataContext, o: T & WithCtxInjected) => R | Promise<R>, opts: T = {} as T): Cypress.Chainable<UnwrapPromise<R>> {
   const { log, timeout, ...rest } = opts
 
-  const _log = log === false ? { end () {} } : Cypress.log({
+  const _log = log === false ? { end () {}, set (key: string, val: any) {} } : Cypress.log({
     name: 'withCtx',
     message: '(view in console)',
     consoleProps () {
@@ -231,7 +245,8 @@ function withCtx<T extends Partial<WithCtxOptions>, R> (fn: (ctx: DataContext, o
   return cy.task<UnwrapPromise<R>>('__internal_withCtx', {
     fn: fn.toString(),
     options: rest,
-  }, { timeout: timeout ?? Cypress.env('e2e_isDebugging') ? NO_TIMEOUT : FOUR_SECONDS, log: Boolean(Cypress.env('e2e_isDebugging')) }).then((result) => {
+  }, { timeout: timeout ?? Cypress.env('e2e_isDebugging') ? NO_TIMEOUT : TEN_SECONDS, log: Boolean(Cypress.env('e2e_isDebugging')) }).then((result) => {
+    _log.set('result', result)
     _log.end()
 
     return result
@@ -253,7 +268,7 @@ function loginUser (userShape: Partial<AuthenticatedUserShape> = {}) {
   })
 }
 
-function findBrowsers (options: SetFoundBrowsersOptions = {}) {
+function findBrowsers (options: FindBrowsersOptions = {}) {
   let filteredBrowsers = options.browsers
 
   if (!filteredBrowsers) {
@@ -282,7 +297,7 @@ function findBrowsers (options: SetFoundBrowsersOptions = {}) {
 
   cy.withCtx(async (ctx, o) => {
     // @ts-ignore sinon is a global in the node process where this is executed
-    sinon.stub(ctx._apis.appApi, 'getBrowsers').resolves(o.browsers)
+    sinon.stub(ctx._apis.browserApi, 'getBrowsers').resolves(o.browsers)
   }, { browsers: filteredBrowsers })
 }
 
@@ -301,7 +316,7 @@ type Resolved<V> = V extends Promise<infer U> ? U : V
 function taskInternal<T extends keyof E2ETaskMap> (name: T, arg: Parameters<E2ETaskMap[T]>[0]) {
   const isDebugging = Boolean(Cypress.env('e2e_isDebugging'))
 
-  return cy.task<Resolved<ReturnType<E2ETaskMap[T]>>>(name, arg, { log: isDebugging, timeout: isDebugging ? NO_TIMEOUT : FOUR_SECONDS })
+  return cy.task<Resolved<ReturnType<E2ETaskMap[T]>>>(name, arg, { log: isDebugging, timeout: isDebugging ? NO_TIMEOUT : TEN_SECONDS })
 }
 
 function logInternal<T> (name: string | Partial<Cypress.LogConfig>, cb: (log: Cypress.Log) => Cypress.Chainable<T>, opts: Partial<Cypress.Loggable> = {}): Cypress.Chainable<T> {

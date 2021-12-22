@@ -39,7 +39,6 @@ const { t } = useI18n()
 gql`
 fragment CreateSpecContent on Query {
   ...CreateSpecCards
-  ...OpenConfigFileInIDE
 }
 `
 
