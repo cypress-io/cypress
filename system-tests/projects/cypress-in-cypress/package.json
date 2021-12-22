@@ -1,0 +1,6 @@
+{
+  "name": "specs-with-dom-content",
+  "devDependencies": {
+    "react": "16.8.6"
+  }
+}

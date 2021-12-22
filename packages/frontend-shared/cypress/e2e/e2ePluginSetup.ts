@@ -62,6 +62,7 @@ export type E2ETaskMap = ReturnType<typeof makeE2ETasks> extends Promise<infer U
 interface FixturesShape {
   scaffold (): void
   scaffoldProject (project: string): void
+  scaffoldProjectNodeModules (project: string): Promise<void>
   scaffoldWatch (): void
   remove (): void
   removeProject (name): void
@@ -190,12 +191,13 @@ async function makeE2ETasks () {
 
       return Fixtures.projectPath(opts.projectName)
     },
-    __internal_scaffoldProject (projectName: string) {
+    async __internal_scaffoldProject (projectName: string) {
       if (fs.existsSync(Fixtures.projectPath(projectName))) {
         Fixtures.removeProject(projectName)
       }
 
       Fixtures.scaffoldProject(projectName)
+      await Fixtures.scaffoldProjectNodeModules(projectName)
 
       scaffoldedProjects.add(projectName)
 
@@ -226,7 +228,7 @@ async function makeE2ETasks () {
         throw new Error(`${projectName} has not been scaffolded. Be sure to call cy.scaffoldProject('${projectName}') in the test, a before, or beforeEach hook`)
       }
 
-      const openArgv = [...argv, '--project', Fixtures.projectPath(projectName)]
+      const openArgv = [...argv, '--project', Fixtures.projectPath(projectName), '--port', '4455']
 
       // Runs the launchArgs through the whole pipeline for the CLI open process,
       // which probably needs a bit of refactoring / consolidating

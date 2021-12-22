@@ -205,7 +205,7 @@ function visitApp (href?: string) {
   return cy.withCtx(async (ctx) => {
     return JSON.stringify(await ctx.html.fetchAppInitialData())
   }, { log: false }).then((ssrData) => {
-    return cy.visit(`dist-app/index.html?serverPort=${e2e_serverPort}${href || ''}`, {
+    return cy.visit(`http://localhost:4455/__/#${href || ''}`, {
       onBeforeLoad (win) {
         // Simulates the inject SSR data when we're loading the page normally in the app
         win.__CYPRESS_INITIAL_DATA__ = JSON.parse(ssrData)

@@ -11,7 +11,8 @@ export default defineConfig({
     runMode: 2,
     openMode: 0,
   },
-
+  // @ts-expect-error
+  clientRoute: '/cy-parent/',
   testFiles: '**/*.{spec,cy}.{js,ts,tsx,jsx}',
   reporter: '../../node_modules/cypress-multi-reporters/index.js',
   reporterOptions: {
