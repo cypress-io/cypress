@@ -46,7 +46,7 @@ gql`
 fragment RunsConnectSuccessAlert on CurrentProject {
   id
   projectId
-  configFilePath
+  configFileAbsolutePath
 }`
 
 const props = defineProps<{
@@ -56,7 +56,7 @@ const props = defineProps<{
 const showAlert = ref(false)
 
 const projectId = computed(() => props.gql.projectId)
-const configFilePath = computed(() => props.gql.configFilePath)
+const configFilePath = computed(() => props.gql.configFileAbsolutePath)
 
 whenever(projectId, () => {
   showAlert.value = true

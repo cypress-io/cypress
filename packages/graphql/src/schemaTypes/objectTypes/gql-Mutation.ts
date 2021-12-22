@@ -377,7 +377,7 @@ export const mutation = mutationType({
       },
       resolve: async (_, args, ctx) => {
         try {
-          await ctx.actions.projectConfig.setProjectId(args.projectId)
+          await ctx.actions.project.setProjectIdInConfigFile(args.projectId)
         } catch (e) {
           return false
         }

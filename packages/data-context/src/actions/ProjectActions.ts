@@ -9,6 +9,7 @@ import type { ProjectShape } from '../data/coreDataShape'
 import type { DataContext } from '..'
 import { codeGenerator, SpecOptions } from '../codegen'
 import templates from '../codegen/templates'
+import { insertValuesInConfigFile } from '../util'
 
 export interface ProjectApiShape {
   findSpecs(payload: FindSpecs): Promise<FoundSpec[]>
@@ -278,6 +279,12 @@ export class ProjectActions {
     }
 
     await this.ctx.fs.writeFile(this.ctx.lifecycleManager.configFilePath, `module.exports = ${JSON.stringify(obj, null, 2)}`)
+  }
+
+  async setProjectIdInConfigFile (projectId: string) {
+    insertValuesInConfigFile(this.ctx.lifecycleManager.configFilePath, { projectId }, { get (id: string) {
+      return Error(id)
+    } })
   }
 
   async clearLatestProjectCache () {
