@@ -369,7 +369,7 @@ export const mutation = mutationType({
       },
     })
 
-    t.field('setProjectIdInConfigFile', {
+    t.liveMutation('setProjectIdInConfigFile', {
       description: 'Set the projectId field in the config file of the current project',
       type: 'Boolean',
       args: {
