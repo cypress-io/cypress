@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import _ from 'lodash'
 
 import { $Chainer } from '../../cypress/chainer'
@@ -20,8 +18,8 @@ const command = function (ctx, name, ...args) {
 export default function (Commands, Cypress, cy) {
   Commands.addChainer({
     // userInvocationStack has to be passed in here, but can be ignored
-    command (chainer, userInvocationStack, args) {
-      return command(chainer, ...args)
+    command (chainer, userInvocationStack, name, args) {
+      return command(chainer, name, ...args)
     },
   })
 
@@ -29,7 +27,8 @@ export default function (Commands, Cypress, cy) {
     command (...args) {
       args.unshift(cy)
 
-      return command.apply(window, args)
+      // casted to `any` to ignore ts error.
+      return command.apply(window, args as any)
     },
   })
 }
