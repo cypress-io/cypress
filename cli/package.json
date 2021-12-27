@@ -24,7 +24,7 @@
     "@cypress/request": "^2.88.10",
     "@cypress/xvfb": "^1.2.4",
     "@types/node": "^14.14.31",
-    "@types/sinonjs__fake-timers": "^6.0.2",
+    "@types/sinonjs__fake-timers": "8.1.1",
     "@types/sizzle": "^2.3.2",
     "arch": "^2.2.0",
     "blob-util": "^2.0.2",
