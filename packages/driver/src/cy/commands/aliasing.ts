@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import _ from 'lodash'
 import $dom from '../../dom'
 
@@ -22,9 +20,10 @@ export default function (Commands, Cypress, cy, state) {
         })
       }
 
+      // TODO: Change any to Log type.
       // we also need to set the alias on the last command log
       // that matches our chainerId
-      const log = _.last(cy.queue.logs({
+      const log: any = _.last(cy.queue.logs({
         instrument: 'command',
         event: false,
         chainerId: state('chainerId'),
