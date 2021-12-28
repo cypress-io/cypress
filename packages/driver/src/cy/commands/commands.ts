@@ -18,8 +18,9 @@ const command = function (ctx, name, ...args) {
 export default function (Commands, Cypress, cy) {
   Commands.addChainer({
     // userInvocationStack has to be passed in here, but can be ignored
-    command (chainer, userInvocationStack, name, args) {
-      return command(chainer, name, ...args)
+    command (chainer, userInvocationStack, args) {
+      // casted to `any` to ignore ts error.
+      return command(chainer, ...args as any)
     },
   })
 
