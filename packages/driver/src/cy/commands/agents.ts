@@ -270,11 +270,8 @@ export default function (Commands, Cypress, cy, state) {
   }
 
   const stub = function (obj, method: string, replacerFnOrValue) {
-    let theStub = sandbox.stub.call<
-      sinon.SinonSandbox,
-      [obj: unknown, method: string],
-      sinon.SinonStub<unknown[], unknown>
-    >(sandbox, obj, method)
+    // TODO: make the code below work with `packages/runner` type check without casting to `never`.
+    let theStub = sandbox.stub.call(sandbox, obj, method as never)
 
     // sinon 2 changed the stub signature
     // this maintains the 3-argument signature so it's not breaking
