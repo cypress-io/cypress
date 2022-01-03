@@ -16,7 +16,13 @@ export async function e2eTestScaffold () {
     const stat = await fs.stat(fullPath)
 
     if (stat.isDirectory()) {
-      return fullPath
+      const files = await fs.readdir(fullPath)
+
+      if (files.filter((f) => !f.startsWith('.')).length) {
+        return fullPath
+      }
+
+      return null
     }
   }))
   const allDirs = dirs.filter((dir) => dir) as string[]

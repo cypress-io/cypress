@@ -1,4 +1,5 @@
 module.exports = {
+  'e2e': {},
   'integrationFolder': 'tests',
   'fixturesFolder': 'tests/_fixtures',
   'supportFile': 'tests/_support/spec_helper.js',

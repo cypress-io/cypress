@@ -7,12 +7,8 @@ export const pubSubExchange = (io: Socket): Exchange => {
     const watchedOperations = new Map<number, Operation>()
     const observedOperations = new Map<number, number>()
 
-    // const x = Math.random().toString()
-
     io.on('data-context-push', (...args) => {
       watchedOperations.forEach((op) => {
-        // console.log(x)
-
         client.reexecuteOperation(
           client.createRequestOperation('query', op, {
             requestPolicy: 'cache-and-network',

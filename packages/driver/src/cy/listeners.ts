@@ -4,6 +4,7 @@ import _ from 'lodash'
 import { handleInvalidEventTarget, handleInvalidAnchorTarget } from './top_attr_guards'
 
 const HISTORY_ATTRS = 'pushState replaceState'.split(' ')
+const HISTORY_NAV_ATTRS = 'go back forward'.split(' ')
 
 let events = []
 let listenersAdded = null
@@ -76,6 +77,20 @@ export default {
     addListener(contentWindow, 'hashchange', (e) => {
       callbacks.onNavigation('hashchange', e)
     })
+
+    for (let attr of HISTORY_NAV_ATTRS) {
+      const orig = contentWindow.history?.[attr]
+
+      if (!orig) {
+        continue
+      }
+
+      contentWindow.history[attr] = function (delta) {
+        callbacks.onHistoryNav(attr === 'back' ? -1 : (attr === 'forward' ? 1 : delta))
+
+        orig.apply(this, [delta])
+      }
+    }
 
     for (let attr of HISTORY_ATTRS) {
       const orig = contentWindow.history?.[attr]

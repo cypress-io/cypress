@@ -1,7 +1,7 @@
 import type { Interception } from '@packages/net-stubbing/lib/external-types'
 
 describe('Sidebar Navigation', () => {
-  before(() => {
+  beforeEach(() => {
     cy.scaffoldProject('todos')
     cy.openProject('todos')
     cy.startAppServer()
@@ -24,13 +24,14 @@ describe('Sidebar Navigation', () => {
 
   it('closes the left nav bar when clicking the expand button (if expanded)', () => {
     cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'true')
-    cy.findByText('todos').should('be.visible')
+    cy.findByText('todos').as('title')
+    cy.get('@title').should('be.visible')
     cy.findByLabelText('toggle navigation', {
       selector: 'button',
     }).click()
 
     cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'false')
-    cy.findByText('todos').should('not.be.visible')
+    cy.get('@title').should('not.be.visible')
   })
 
   it('has unlabeled menu item that shows the keyboard shortcuts modal (unexpanded state)', () => {
@@ -49,7 +50,9 @@ describe('Sidebar Navigation', () => {
   })
 
   it('shows a tooltip when hovering over menu item', () => {
-    cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'false')
+    cy.findByLabelText('toggle navigation', {
+      selector: 'button',
+    }).click()
 
     cy.get('[data-cy="sidebar-header"').realHover()
     cy.contains('#tooltip-target > div', 'todos').should('be.visible')
@@ -73,7 +76,11 @@ describe('Sidebar Navigation', () => {
   })
 
   it('opens the left nav bar when clicking the expand button (if unexpanded)', () => {
-    cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'false')
+  it('opens the bar when clicking the expand button (if unexpanded)', () => {
+    cy.findByLabelText('toggle navigation', {
+      selector: 'button',
+    }).click()
+
     cy.findByText('todos').should('not.be.visible')
 
     cy.findByLabelText('toggle navigation', {
@@ -141,10 +148,10 @@ describe('Sidebar Navigation', () => {
   it('has a menu item labeled "Runs" which takes you to the Runs page', () => {
     cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'true')
 
-    cy.get('[data-testid="header-bar"]').findByText('Runs').should('not.exist')
+    cy.get('[data-cy="app-header-bar"]').findByText('Runs').should('not.exist')
     cy.findByText('Runs').should('be.visible')
     cy.findByText('Runs').click()
-    cy.get('[data-testid="header-bar"]').findByText('Runs').should('be.visible')
+    cy.get('[data-cy="app-header-bar"]').findByText('Runs').should('be.visible')
     cy.get('.router-link-active').findByText('Runs').should('be.visible')
     cy.get('[data-e2e-href="/runs"] > svg > path').should('have.css', 'fill', 'rgb(0, 50, 32)')
   })
@@ -152,10 +159,10 @@ describe('Sidebar Navigation', () => {
   it('has a menu item labeled "Specs" which takes you to the Spec List page', () => {
     cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'true')
 
-    cy.get('[data-testid="header-bar"]').findByText('Specs-Index').should('not.exist')
+    // cy.get('[data-cy="app-header-bar"]').findByText('Specs-Index').should('not.exist')
     cy.findByText('Specs').should('be.visible')
     cy.findByText('Specs').click()
-    cy.get('[data-testid="header-bar"]').findByText('Specs-Index').should('be.visible')
+    cy.get('[data-cy="app-header-bar"]').findByText('Specs-Index').should('be.visible')
     cy.get('.router-link-active').findByText('Specs').should('be.visible')
     cy.get('[data-e2e-href="/specs"] > svg > path').should('have.css', 'fill', 'rgb(0, 50, 32)')
   })
@@ -163,10 +170,10 @@ describe('Sidebar Navigation', () => {
   it('has a menu item labeled "Settings" which takes you to the Settings page', () => {
     cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'true')
 
-    cy.get('[data-testid="header-bar"]').findByText('Settings').should('not.exist')
+    cy.get('[data-cy="app-header-bar"]').findByText('Settings').should('not.exist')
     cy.findByText('Settings').should('be.visible')
     cy.findByText('Settings').click()
-    cy.get('[data-testid="header-bar"]').findByText('Settings').should('be.visible')
+    cy.get('[data-cy="app-header-bar"]').findByText('Settings').should('be.visible')
     cy.get('.router-link-active').findByText('Settings').should('be.visible')
     cy.get('[data-e2e-href="/settings"] > svg > path').should('have.css', 'fill', 'rgb(0, 50, 32)')
   })

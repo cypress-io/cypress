@@ -3,54 +3,64 @@
     v-if="props.gql.browsers"
     @submit.prevent="emit('launch', props.gql?.currentBrowser?.path)"
   >
-    <div class="flex flex-wrap justify-center gap-6 py-16">
+    <div
+      class="flex flex-wrap py-40px gap-24px justify-center"
+      data-cy="open-browser-list"
+    >
       <div
         v-for="browser of props.gql.browsers"
         :key="browser.id"
-        class="relative block pt-6 pb-4 text-center rounded w-160px border-1"
+        :data-cy-browser="browser.name"
+        class="rounded border-1 text-center min-h-144px pt-6 pb-4 w-160px relative block"
         :class="{
-          'border-jade-300 ring-2 ring-jade-50': browser.isSelected,
+          'border-jade-300 ring-2 ring-jade-100 focus:border-jade-400 focus:border-1 focus:outline-none': browser.isSelected,
           'border-gray-200': !browser.isSelected,
           'filter grayscale bg-gray-100': browser.disabled,
-          'hover:border-indigo-200 hover:ring-2 hover:ring-indigo-50': !browser.disabled && !browser.isSelected
+          'hover:border-indigo-300 hover:ring-2 hover:ring-indigo-100': !browser.disabled && !browser.isSelected
         }"
       >
         <input
           :id="browser.id"
           :key="browser.id"
+          v-model="selectedBrowserId"
           type="radio"
           :value="browser.id"
           :disabled="browser.disabled"
-          class="absolute opacity-0"
+          class="opacity-0 absolute"
           :class="{
             'filter grayscale': browser.disabled
           }"
-          @click="setSelected(browser.id)"
         >
         <label
           :for="browser.id"
           class="radio-label"
+          :class="{
+            'before:hocus:cursor-pointer': !browser.isSelected
+          }"
         >
           <div class="text-center">
             <img
               :src="allBrowsersIcons[browser.displayName]"
-              :alt="browser.displayName"
-              class="inline w-40px h-40px"
+              alt=""
+              class="h-40px w-40px inline"
             >
           </div>
-          <div class="pt-2 text-lg text-indigo-600">{{ browser.displayName }}</div>
-          <div class="text-xs text-gray-400">v{{ browser.majorVersion }}.x</div>
+          <div
+            class="pt-2 text-indigo-600 text-18px leading-28px"
+            :class="{ 'text-jade-600': browser.isSelected }"
+          >{{ browser.displayName }}</div>
+          <div class="text-14px text-gray-500 leading-20px">v{{ browser.majorVersion }}</div>
         </label>
       </div>
     </div>
     <div class="mb-14">
-      <div class="flex items-center justify-center mb-4">
+      <div class="flex mb-4 items-center justify-center">
         <Button
           v-if="launchText"
           type="submit"
-          class="inline mr-2"
+          class="mr-2 inline"
           :suffix-icon="openInNew"
-          data-testid="launch-button"
+          data-cy="launch-button"
           size="lg-wide"
         >
           {{ launchText }}
@@ -58,7 +68,7 @@
         <Button
           type="button"
           size="lg"
-          class="inline ml-2"
+          class="ml-2 inline"
           variant="outline"
           @click="emit('navigated-back')"
         >
@@ -72,7 +82,7 @@
 <script lang="ts" setup>
 import { useI18n } from '@cy/i18n'
 import Button from '@packages/frontend-shared/src/components/Button.vue'
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 import _clone from 'lodash/clone'
 import openInNew from '~icons/mdi/open-in-new'
 import { useMutation, gql } from '@urql/vue'
@@ -82,7 +92,10 @@ import { OpenBrowserListFragment, OpenBrowserList_SetBrowserDocument } from '../
 
 gql`
 mutation OpenBrowserList_SetBrowser($id: ID!) {
-  launchpadSetBrowser(id: $id)
+  launchpadSetBrowser(id: $id) {
+    id
+    ...OpenBrowserList
+  }
 }
 `
 
@@ -127,6 +140,16 @@ const setSelected = (browserId: string) => {
 }
 
 const launchText = computed(() => props.gql.currentBrowser ? `${t('setupPage.openBrowser.launch')} ${props.gql.currentBrowser.displayName}` : '')
+
+const selectedBrowserId = computed({
+  get: () => props.gql.currentBrowser ? props.gql.currentBrowser.id : null,
+  set: (newVal) => {
+    if (newVal) {
+      setSelected(newVal)
+    }
+  },
+})
+
 </script>
 
 <style scoped>

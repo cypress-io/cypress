@@ -6,7 +6,7 @@ const manyOptions = [
     name: 'Vue.js',
     id: 'vue',
     isSelected: false,
-    type: 'vuecli',
+    type: 'vue',
     category: 'vue',
   },
   {

@@ -9,11 +9,15 @@
     <div class="p-24px text-gray-700">
       <p class="mb-16px">
         <i18n-t
+          scope="global"
           keypath="topNav.updateCypress.currentlyRunning"
         >
           {{ installedVersion }}
         </i18n-t>
-        <i18n-t :keypath="props.projectName ? 'topNav.updateCypress.pasteToUpgradeProject' : 'topNav.updateCypress.pasteToUpgradeGlobal'">
+        <i18n-t
+          scope="global"
+          :keypath="props.projectName ? 'topNav.updateCypress.pasteToUpgradeProject' : 'topNav.updateCypress.pasteToUpgradeGlobal'"
+        >
           <span class="font-bold">{{ t('topNav.updateCypress.rememberToCloseInsert') }}</span>
         </i18n-t>
       </p>
