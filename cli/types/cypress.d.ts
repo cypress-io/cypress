@@ -3181,6 +3181,13 @@ declare namespace Cypress {
     url: string
 
     /**
+     * If the URL contains non-latin characters, encode them. 
+     *
+     * @default false
+     */
+    encodeIfNecessary: boolean
+
+    /**
      * The HTTP method to use in the visit. Can be `GET` or `POST`.
      *
      * @default "GET"

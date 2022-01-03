@@ -188,6 +188,11 @@ const createApp = (port) => {
     .send('<html><body>server error</body></html>')
   })
 
+  // https://github.com/cypress-io/cypress/issues/19355
+  app.get('/n%C3%B3n-latin', (req, res) => {
+    return res.send('<html><body>nón-latin</body></html>')
+  })
+
   let _var = ''
 
   app.get('/set-var', (req, res) => {

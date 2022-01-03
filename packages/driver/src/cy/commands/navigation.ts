@@ -704,6 +704,11 @@ export default (Commands, Cypress, cy, state, config) => {
         $errUtils.throwErrByPath('visit.invalid_1st_arg')
       }
 
+      // https://github.com/cypress-io/cypress/issues/19355
+      if (userOptions.encodeIfNecessary && /[^A-Za-z0-9_.\-~%:/]/.test(url)) {
+        url = encodeURI(url)
+      }
+
       const consoleProps = {}
 
       if (!_.isEmpty(userOptions)) {
@@ -711,6 +716,7 @@ export default (Commands, Cypress, cy, state, config) => {
       }
 
       options = _.defaults({}, userOptions, {
+        encodeIfNecessary: false,
         auth: null,
         failOnStatusCode: true,
         retryOnNetworkFailure: true,

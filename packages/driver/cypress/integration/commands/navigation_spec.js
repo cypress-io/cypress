@@ -1019,6 +1019,45 @@ describe('src/cy/commands/navigation', () => {
       })
     })
 
+    // https://github.com/cypress-io/cypress/issues/19355
+    describe('encodeIfNecessary option', () => {
+      it('latin with encodeIfNecessary option => pass', () => {
+        cy.visit('/dump-method', {
+          encodeIfNecessary: true,
+        })
+      })
+
+      it('latin w/o encodeIfNecessary option => pass', () => {
+        cy.visit('/dump-method')
+      })
+
+      it('raw non-latin with encodeIfNecessary option => pass', () => {
+        cy.visit('/nón-latin', {
+          encodeIfNecessary: true,
+        })
+      })
+
+      it('raw non-latin w/o encodeIfNecessary option => fail', () => {
+        // Some servers return `Request path contains unescaped characters` message in this case.
+        // But `404: Not Found` is our closest replication.
+        cy.on('fail', (err) => {
+          expect(err.message).to.include(`404: Not Found`)
+        })
+
+        cy.visit('/nón-latin')
+      })
+
+      it('encoded non-latin with encodeIfNecessary option => pass', () => {
+        cy.visit(encodeURI('/nón-latin'), {
+          encodeIfNecessary: true,
+        })
+      })
+
+      it('encoded non-latin w/o encodeIfNecessary option => pass', () => {
+        cy.visit(encodeURI('/nón-latin'))
+      })
+    })
+
     describe('.log', () => {
       beforeEach(function () {
         cy.stub(Cypress.runner, 'getEmissions').returns([])
