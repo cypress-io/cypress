@@ -127,7 +127,7 @@ fragment SpecRunner on Query {
     ...SpecRunnerHeader
   }
   ...ChooseExternalEditor
-  
+  ...SpecRunner_Preferences
 }
 `
 
