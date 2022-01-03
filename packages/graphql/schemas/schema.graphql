@@ -577,6 +577,33 @@ type LocalSettingsPreferences {
   specListWidth: Int
 }
 
+"""Contains all data related to the 9.X to 10.0 migration UI"""
+type Migration {
+  """contents of the cypress.json file after conversion"""
+  configAfterCode: String!
+
+  """contents of the cypress.json file before conversion"""
+  configBeforeCode: String!
+
+  """List of files needing manual conversion"""
+  manualFiles: [String!]!
+
+  """All spec files after conversion"""
+  specFilesAfter: [String!]!
+
+  """All spec files before being converted"""
+  specFilesBefore: [String!]!
+
+  """Step where the migration is right now"""
+  step: MigrationStepEnum!
+}
+
+enum MigrationStepEnum {
+  configFile
+  renameAuto
+  renameManual
+}
+
 type Mutation {
   """Add project to projects array and cache it"""
   addProject(
@@ -759,6 +786,9 @@ type Query {
   """local settings on a device-by-device basis"""
   localSettings: LocalSettings!
 
+  """Metadata about the migration, null if we aren't showing it"""
+  migration: Migration
+
   """All known projects for the app"""
   projects: [ProjectLike!]!
 
@@ -771,7 +801,7 @@ type Query {
   """A list of warnings"""
   warnings: [Warning!]!
 
-  """Metadata about the wizard, null if we arent showing the wizard"""
+  """Metadata about the wizard"""
   wizard: Wizard!
 }
 

@@ -121,6 +121,7 @@ const props = withDefaults(defineProps<{
   wrap?: boolean,
   copyOnClick?: boolean,
   copyButton?: boolean,
+  skipTrim?: boolean,
   class?: string | string[] | Record<string, any>
 }>(), {
   lineNumbers: false,
@@ -128,6 +129,7 @@ const props = withDefaults(defineProps<{
   wrap: false,
   copyOnClick: false,
   copyButton: false,
+  skipTrim: false,
   class: undefined,
 })
 
@@ -141,7 +143,7 @@ const resolvedLang = computed(() => {
 })
 
 const highlightedCode = computed(() => {
-  return highlighter?.codeToHtml(props.code.trim(), resolvedLang.value)
+  return highlighter?.codeToHtml(props.skipTrim ? props.code : props.code.trim(), resolvedLang.value)
 })
 
 const codeEl: Ref<HTMLElement | null> = ref(null)

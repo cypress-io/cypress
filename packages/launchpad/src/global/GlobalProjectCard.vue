@@ -20,7 +20,9 @@
       >
         <span
           class="text-16px row-[1] leading-normal font-medium text-indigo-500"
-        >{{ props.gql.title }}</span>
+        >
+          {{ props.gql.title }}
+        </span>
         <span class="text-sm text-gray-500 relative">{{ props.gql.projectRoot }}</span>
       </button>
     </div>
