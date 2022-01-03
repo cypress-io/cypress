@@ -15,7 +15,7 @@ run(ipc, file, projectRoot)
 
 /**
  * runs and returns the passed `requiredFile` file in the ipc `load` event
- * @param {*} ipc Inter Process Comunication protocol
+ * @param {*} ipc Inter Process Communication protocol
  * @param {*} requiredFile the file we are trying to load
  * @param {*} projectRoot the root of the typescript project (useful mainly for tsnode)
  * @returns
@@ -43,9 +43,16 @@ function run (ipc, requiredFile, projectRoot) {
   })
 
   process.on('unhandledRejection', (event) => {
-    const err = (event && event.reason) || event
+    let err = event
 
-    debug('unhandled rejection:', util.serializeError(err))
+    debug('unhandled rejection:', event)
+
+    // Rejected Bluebird promises will return a reason object.
+    // OpenSSL returns a reason as user-friendly string.
+    if (event.reason && typeof event.reason === 'object') {
+      err = event.reason
+    }
+
     ipc.send('error', util.serializeError(err))
 
     return false

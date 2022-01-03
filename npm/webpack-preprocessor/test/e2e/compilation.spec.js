@@ -45,7 +45,7 @@ describe('webpack preprocessor - e2e', () => {
     }
   })
 
-  it('correctly preprocesses the file', () => {
+  it('correctly preprocessed the file', () => {
     const options = preprocessor.defaultOptions
 
     options.webpackOptions.mode = 'production' // snapshot will be minified

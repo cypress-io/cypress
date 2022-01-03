@@ -185,7 +185,7 @@ const init = (config, options) => {
     }
 
     const handleError = (err) => {
-      debug('plugins process error:', err.stack)
+      debug('plugins process error:', err)
 
       if (!pluginsProcess) return // prevent repeating this in case of multiple errors
 
@@ -193,7 +193,6 @@ const init = (config, options) => {
 
       err = errors.get('PLUGINS_UNEXPECTED_ERROR', config.pluginsFile, err.annotated || err.stack || err.message)
       err.title = 'Error running plugin'
-
       // this can sometimes trigger before the promise is fulfilled and
       // sometimes after, so we need to handle each case differently
       if (fulfilled) {
