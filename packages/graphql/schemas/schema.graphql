@@ -686,7 +686,7 @@ type Mutation {
   setPreferences(value: String!): Boolean
 
   """Set the projectId field in the config file of the current project"""
-  setProjectIdInConfigFile(projectId: String!): Boolean
+  setProjectIdInConfigFile(projectId: String!): CurrentProject
 
   """Save the projects preferences to cache"""
   setProjectPreferences(browserPath: String!, testingType: TestingTypeEnum!): Query!

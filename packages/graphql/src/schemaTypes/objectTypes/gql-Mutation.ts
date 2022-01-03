@@ -369,9 +369,9 @@ export const mutation = mutationType({
       },
     })
 
-    t.liveMutation('setProjectIdInConfigFile', {
+    t.field('setProjectIdInConfigFile', {
       description: 'Set the projectId field in the config file of the current project',
-      type: 'Boolean',
+      type: CurrentProject,
       args: {
         projectId: nonNull(stringArg()),
       },
@@ -379,10 +379,10 @@ export const mutation = mutationType({
         try {
           await ctx.actions.project.setProjectIdInConfigFile(args.projectId)
         } catch (e) {
-          return false
+          // ignore error as not useful for end user to see
         }
 
-        return true
+        return ctx.lifecycleManager
       },
     })
   },
