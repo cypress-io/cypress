@@ -344,11 +344,7 @@ export class ProjectBase<TServer extends Server> extends EE {
     ctDevServerPort: number | undefined
     startSpecWatcher: () => void
   }> {
-    // const specs = this.ctx.project?.specs || []
-    // TODO
-    const specs = []
-
-    return this.initSpecStore({ specs, config: updatedConfig })
+    return this.initSpecStore({ specs: this.ctx.project.specs, config: updatedConfig })
   }
 
   async startCtDevServer (specs: Cypress.Cypress['spec'][], config: any) {
