@@ -661,7 +661,7 @@ describe('lib/cypress', () => {
     })
 
     it(`logs error when supportFile doesn't exist`, function () {
-      return settings.writeOnly(this.idsPath, { e2e: { supportFile: '/does/not/exist' } })
+      return settings.writeForTesting(this.idsPath, { e2e: { supportFile: '/does/not/exist' } })
       .then(() => {
         return cypress.start([`--run-project=${this.idsPath}`])
       }).then(() => {
@@ -1679,9 +1679,10 @@ describe('lib/cypress', () => {
       process.env.CYPRESS_watch_for_file_changes = 'false'
 
       ctx.actions.project.setCurrentProjectForTestSetup(this.todosPath)
+      ctx.lifecycleManager.setCurrentTestingType('e2e')
 
       return user.set({ name: 'brian', authToken: 'auth-token-123' })
-      .then(() => ctx.config.getOrCreateBaseConfig())
+      .then(() => ctx.lifecycleManager.getFullInitialConfig())
       .then((json) => {
         // this should be overriden by the env argument
         json.baseUrl = 'http://localhost:8080'

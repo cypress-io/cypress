@@ -64,7 +64,7 @@ describe('lib/config', () => {
       sinon.stub(ctx.lifecycleManager, 'verifyProjectRoot').returns(undefined)
 
       this.setup = (cypressJson = {}, cypressEnvJson = {}) => {
-        sinon.stub(ctx.lifecycleManager, 'getConfigFileContents').resolves(cypressJson)
+        sinon.stub(ctx.lifecycleManager, 'getConfigFileContents').resolves({ ...cypressJson, supportFile: cypressJson.supportFile ?? false })
         sinon.stub(ctx.lifecycleManager, 'loadCypressEnvFile').resolves(cypressEnvJson)
       }
     })
@@ -595,7 +595,7 @@ describe('lib/config', () => {
 
       context('supportFile', () => {
         it('passes if a string', function () {
-          this.setup({ supportFile: 'cypress/support/e2e.js' })
+          this.setup({ e2e: { supportFile: 'cypress/support/e2e.js' } })
 
           return this.expectValidationPasses()
         })
@@ -2123,11 +2123,11 @@ describe('lib/config', () => {
       const e = new Error('Cannot resolve TS file by default')
 
       e.code = 'MODULE_NOT_FOUND'
-      sinon.stub(config.utils, 'resolveModule').withArgs(supportFolder).throws(e)
+      sinon.stub(config.utils, 'resolveModule').withArgs(supportFilename).throws(e)
 
       const obj = config.setAbsolutePaths({
         projectRoot,
-        supportFile: 'cypress/support',
+        supportFile: 'cypress/support/index.ts',
       })
 
       return config.setSupportFileAndFolder(obj, mockSupportDefaults)

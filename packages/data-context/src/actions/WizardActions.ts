@@ -123,13 +123,15 @@ export class WizardActions {
     ])
   }
 
-  private async scaffoldSupport (directory: 'e2e' | 'component', language: CodeLanguageEnum): Promise<NexusGenObjects['ScaffoldedFile']> {
-    const supportFile = path.join(this.projectRoot, `cypress/${directory}/support.${language}`)
+  private async scaffoldSupport (fileName: 'e2e' | 'component', language: CodeLanguageEnum): Promise<NexusGenObjects['ScaffoldedFile']> {
+    const supportFile = path.join(this.projectRoot, `cypress/support/${fileName}.${language}`)
+    const supportDir = path.dirname(supportFile)
 
-    await this.ensureDir(directory)
-    await this.ctx.fs.writeFile(supportFile, dedent`
+    // @ts-ignore
+    await this.ctx.fs.mkdir(supportDir, { recursive: true })
+    await this.scaffoldFile(supportFile, dedent`
       // TODO: source the example support file
-    `)
+    `, 'Scaffold default support file')
 
     return {
       status: 'valid',
@@ -321,7 +323,7 @@ interface E2eScaffoldOpts {
 const E2E_SCAFFOLD_BODY = (opts: E2eScaffoldOpts) => {
   return `
     e2e: {
-      supportFile: ${opts.lang === 'ts' ? '\'cypress/e2e/support.ts\'' : '\'cypress/e2e/support.js\''},
+      supportFile: ${opts.lang === 'ts' ? '\'cypress/support/e2e.ts\'' : '\'cypress/support/e2e.js\''},
       specPattern: 'cypress/e2e/**/*.cy.{js,ts}',
       viewportHeight: 660,
       viewportWidth: 1000,
@@ -342,7 +344,7 @@ interface ComponentScaffoldOpts {
 const COMPONENT_SCAFFOLD_BODY = (opts: ComponentScaffoldOpts) => {
   return `
   component: {
-    supportFile: ${opts.lang === 'ts' ? '\'cypress/component/support.ts\'' : '\'cypress/component/support.js\''},
+    supportFile: ${opts.lang === 'ts' ? '\'cypress/support/component.ts\'' : '\'cypress/support/component.js\''},
     specPattern: 'cypress/**/*.cy.{js,jsx,ts,tsx}',
     devServer: import('${opts.requirePath}'),
     devServerConfig: ${opts.configOptionsString}

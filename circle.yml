@@ -1930,12 +1930,8 @@ jobs:
           environment:
             CYPRESS_INTERNAL_FORCE_SCAFFOLD: "1"
           command: |
-            echo 'module.exports = {}' > cypress.config.js
+            echo 'module.exports = { e2e: { supportFile: false } }' > cypress.config.js
             npx cypress run
-      - run:
-          name: Rename support file
-          working_directory: <<parameters.wd>>
-          command: mv cypress/support/index.ts cypress/support/e2e.js
 
   test-full-typescript-project:
     parameters:
@@ -2070,6 +2066,7 @@ jobs:
       - test-binary-against-repo:
           repo: cypress-test-awesome-typescript-loader
           browser: "electron"
+          pull_request_id: 7
 
   test-binary-against-kitchensink-firefox:
     <<: *defaults
