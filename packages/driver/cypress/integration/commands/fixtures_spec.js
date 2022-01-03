@@ -101,9 +101,7 @@ describe('src/cy/commands/fixtures', () => {
         return null
       })
 
-      it('throws if fixturesFolder is set to false', {
-        fixturesFolder: false,
-      }, function (done) {
+      it('throws if fixturesFolder is set to false', { fixturesFolder: false }, function (done) {
         cy.on('fail', () => {
           const { lastLog } = this
 
