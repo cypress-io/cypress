@@ -15,6 +15,7 @@ describe('lib/files', () => {
     this.todosPath = FixturesHelper.projectPath('todos')
 
     ctx.actions.project.setCurrentProjectForTestSetup(this.todosPath)
+    ctx.lifecycleManager.setCurrentTestingType('e2e')
 
     return config.get(this.todosPath).then((cfg) => {
       this.config = cfg;
