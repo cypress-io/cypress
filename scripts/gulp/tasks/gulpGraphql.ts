@@ -9,8 +9,7 @@ import { minifyIntrospectionQuery } from '@urql/introspection'
 
 import { nexusTypegen, watchNexusTypegen } from '../utils/nexusTypegenUtil'
 import { monorepoPaths } from '../monorepoPaths'
-import { spawned } from '../utils/childProcessUtils'
-import { spawn } from 'child_process'
+import { spawned, universalSpawn } from '../utils/childProcessUtils'
 import { DEFAULT_INTERNAL_CLOUD_ENV } from '../gulpConstants'
 
 export async function nexusCodegen () {
@@ -43,7 +42,7 @@ export async function graphqlCodegen () {
 }
 
 export async function graphqlCodegenWatch () {
-  const spawned = spawn('graphql-codegen', ['--watch', '--config', 'graphql-codegen.yml'], {
+  const spawned = universalSpawn('graphql-codegen', ['--watch', '--config', 'graphql-codegen.yml'], {
     cwd: monorepoPaths.root,
   })
   const dfd = pDefer()

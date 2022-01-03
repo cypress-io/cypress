@@ -1,11 +1,9 @@
 import type { AuthenticatedUserShape } from '@packages/data-context/src/data'
 import type {
-  WizardStep,
   CurrentProject,
   Browser,
   WizardBundler,
   WizardFrontendFramework,
-  TestingTypeEnum,
   GlobalProject,
   VersionData,
   LocalSettings,
@@ -27,15 +25,10 @@ export interface ClientTestContext {
   isAuthBrowserOpened: boolean
   localSettings: LocalSettings
   wizard: {
-    step: WizardStep
-    canNavigateForward: boolean
-    chosenTestingType: TestingTypeEnum | null
     chosenBundler: WizardBundler | null
     chosenFramework: WizardFrontendFramework | null
     chosenManualInstall: boolean
-    currentStep: WizardStep
     allBundlers: WizardBundler[]
-    history: WizardStep[]
     chosenBrowser: null
     warnings: []
   }
@@ -77,15 +70,10 @@ export function makeClientTestContext (): ClientTestContext {
     },
     isAuthBrowserOpened: false,
     wizard: {
-      step: 'configFiles',
-      canNavigateForward: false,
-      chosenTestingType: null,
       chosenBundler: null,
       chosenFramework: null,
       chosenManualInstall: false,
-      currentStep: 'welcome',
       allBundlers,
-      history: ['welcome'],
       chosenBrowser: null,
       warnings: [],
     },

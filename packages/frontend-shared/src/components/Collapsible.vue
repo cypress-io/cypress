@@ -15,6 +15,7 @@
       <slot
         name="target"
         :open="isOpen"
+        :toggle="toggle"
       />
     </div>
     <div

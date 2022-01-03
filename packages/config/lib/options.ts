@@ -481,7 +481,7 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
   },
 ]
 
-export const options: Array<ResolvedConfigOption|RuntimeConfigOption> = [
+export const options: Array<ResolvedConfigOption | RuntimeConfigOption> = [
   ...resolvedOptions,
   ...runtimeOptions,
 ]

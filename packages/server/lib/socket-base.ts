@@ -369,6 +369,11 @@ export class SocketBase {
         debug('backend:request %o', { eventName, args })
 
         const backendRequest = () => {
+          // TODO: standardize `configFile`; should it be absolute or relative to projectRoot?
+          const cfgFile = config.configFile && config.configFile.includes(config.projectRoot)
+            ? config.configFile
+            : path.join(config.projectRoot, config.configFile)
+
           switch (eventName) {
             case 'preserve:run:state':
               existingState = args[0]
@@ -407,7 +412,7 @@ export class SocketBase {
             case 'exec':
               return exec.run(config.projectRoot, args[0])
             case 'task':
-              return task.run(config.configFile ? path.join(config.projectRoot, config.configFile) : null, args[0])
+              return task.run(cfgFile ?? null, args[0])
             case 'save:session':
               return session.saveSession(args[0])
             case 'clear:session':
@@ -480,10 +485,11 @@ export class SocketBase {
       socket.on('get:user:editor', (cb) => {
         getUserEditor(false)
         .then(cb)
+        .catch(() => {})
       })
 
       socket.on('set:user:editor', (editor) => {
-        setUserEditor(editor)
+        setUserEditor(editor).catch(() => {})
       })
 
       socket.on('open:file', async (fileDetails: OpenFileDetails) => {
