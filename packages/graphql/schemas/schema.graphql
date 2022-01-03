@@ -560,9 +560,7 @@ type LocalSettingsPreferences {
   specListWidth: Int
 }
 
-"""
-The Wizard is a container for any state associated with initial onboarding to Cypress
-"""
+"""Contains all data related to the 9.X to 10.0 migration UI"""
 type Migration {
   """contents of the cypress.json file after conversion"""
   configAfterCode: String!

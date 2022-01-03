@@ -9,7 +9,7 @@ export const MigrationStepEnum = enumType({
 // TODO: implement these values for migration using the ctx
 export const Migration = objectType({
   name: 'Migration',
-  description: 'The Migration contains will contain all data related to the 9.X to 10.0 migration UI',
+  description: 'Contains all data related to the 9.X to 10.0 migration UI',
   definition (t) {
     t.nonNull.field('step', {
       type: MigrationStepEnum,
