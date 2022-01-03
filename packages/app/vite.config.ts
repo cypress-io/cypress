@@ -23,9 +23,8 @@ export default makeConfig({
     Copy({
       targets: [{
         src: resolve(__dirname, '../frontend-shared/src/assets/logos/favicon.png'),
-        dest: './dist/',
+        dest: 'dist',
       }],
-      verbose: true,
     }),
   ],
 })
