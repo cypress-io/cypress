@@ -180,5 +180,10 @@ describe('multidomain', { experimentalSessionSupport: true }, () => {
         })
       })
     })
+
+    // TODO: this following tests needs to be implemented in a cy-in-cy test or more e2e style test as we need to test the 'done' function
+    it('propagates user defined secondary domain errors to the primary')
+
+    it('short circuits the secondary domain command queue when "done()" is called early')
   })
 })
