@@ -63,8 +63,9 @@ const getCA = () => {
 const prepend = (urlPath) => {
   const endpoint = url.resolve(getBaseUrl(), urlPath)
   const platform = os.platform()
+  const pathParams = util.getEnv('CYPRESS_DOWNLOAD_PATH_PARAMS')
 
-  return `${endpoint}?platform=${platform}&arch=${arch()}`
+  return pathParams ? `${endpoint}/${platform}-${arch()}/cypress.zip` : `${endpoint}?platform=${platform}&arch=${arch()}`;
 }
 
 const getUrl = (version) => {
