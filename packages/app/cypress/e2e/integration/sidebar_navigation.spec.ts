@@ -26,6 +26,7 @@ describe('Sidebar Navigation', () => {
     cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'true')
     cy.findByText('todos').as('title')
     cy.get('@title').should('be.visible')
+
     cy.findByLabelText('toggle navigation', {
       selector: 'button',
     }).click()
@@ -35,7 +36,12 @@ describe('Sidebar Navigation', () => {
   })
 
   it('has unlabeled menu item that shows the keyboard shortcuts modal (unexpanded state)', () => {
+    cy.findByLabelText('toggle navigation', {
+      selector: 'button',
+    }).click()
+
     cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'false')
+
     cy.get('[data-cy="keyboard-shortcuts"]').should('be.visible')
     cy.get('[data-cy="keyboard-shortcuts"]').click()
     cy.get('h2').findByText('Keyboard Shortcuts').should('be.visible')
@@ -45,6 +51,7 @@ describe('Sidebar Navigation', () => {
     cy.get('li span').contains('r')
     cy.get('li span').contains('s')
     cy.get('li span').contains('f')
+
     cy.get('[aria-label="Close"]').click()
     cy.findByText('Keyboard Shortcuts').should('not.exist')
   })
@@ -53,6 +60,8 @@ describe('Sidebar Navigation', () => {
     cy.findByLabelText('toggle navigation', {
       selector: 'button',
     }).click()
+
+    cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'false')
 
     cy.get('[data-cy="sidebar-header"').realHover()
     cy.contains('#tooltip-target > div', 'todos').should('be.visible')
@@ -76,7 +85,6 @@ describe('Sidebar Navigation', () => {
   })
 
   it('opens the left nav bar when clicking the expand button (if unexpanded)', () => {
-  it('opens the bar when clicking the expand button (if unexpanded)', () => {
     cy.findByLabelText('toggle navigation', {
       selector: 'button',
     }).click()
@@ -99,6 +107,7 @@ describe('Sidebar Navigation', () => {
 
   it('has menu item labeled by current active testing type that opens a modal to switch testing type (expanded state)', () => {
     cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'true')
+
     cy.findByText('E2E Testing').should('be.visible')
     cy.get('[data-cy="switch-testing-type"]').click()
     cy.findByText('Choose a testing type').should('be.visible')
@@ -114,6 +123,7 @@ describe('Sidebar Navigation', () => {
 
   it('has unlabeled menu item that shows the keyboard shortcuts modal (expanded state)', () => {
     cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'true')
+
     cy.get('[data-cy="keyboard-shortcuts"]').should('be.visible')
     cy.get('[data-cy="keyboard-shortcuts"]').click()
     cy.findByText('Keyboard Shortcuts').should('be.visible')
@@ -158,8 +168,6 @@ describe('Sidebar Navigation', () => {
 
   it('has a menu item labeled "Specs" which takes you to the Spec List page', () => {
     cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'true')
-
-    // cy.get('[data-cy="app-header-bar"]').findByText('Specs-Index').should('not.exist')
     cy.findByText('Specs').should('be.visible')
     cy.findByText('Specs').click()
     cy.get('[data-cy="app-header-bar"]').findByText('Specs-Index').should('be.visible')
