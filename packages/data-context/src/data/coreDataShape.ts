@@ -59,6 +59,11 @@ export interface WizardDataShape {
   chosenManualInstall: boolean
 }
 
+export interface MigrationDataShape{
+  // TODO: have the model of migration here
+  step: NexusGenEnums['MigrationStepEnum']
+}
+
 export interface ElectronShape {
   app: App | null
   browserWindow: BrowserWindow | null
@@ -91,6 +96,7 @@ export interface CoreDataShape {
   currentProject: string | null
   currentTestingType: TestingType | null
   wizard: WizardDataShape
+  migration: MigrationDataShape | null
   user: AuthenticatedUserShape | null
   electron: ElectronShape
   isAuthBrowserOpened: boolean
@@ -134,6 +140,9 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
       chosenLanguage: 'js',
       chosenManualInstall: false,
       allBundlers: BUNDLERS,
+    },
+    migration: {
+      step: 'renameAuto',
     },
     warnings: [],
     chosenBrowser: null,

@@ -48,7 +48,9 @@
           <div
             class="pt-2 text-indigo-600 text-18px leading-28px"
             :class="{ 'text-jade-600': browser.isSelected }"
-          >{{ browser.displayName }}</div>
+          >
+            {{ browser.displayName }}
+          </div>
           <div class="text-14px text-gray-500 leading-20px">v{{ browser.majorVersion }}</div>
         </label>
       </div>
