@@ -163,5 +163,22 @@ describe('multidomain', { experimentalSessionSupport: true }, () => {
         })
       })
     })
+
+    // TODO: Proper stack trace printing still needs to be addressed here
+    it('propagates secondary domain errors to the primary that occur within the test', () => {
+      return new Promise((resolve) => {
+        cy.on('fail', (e) => {
+          expect(e.message).to.equal('done is not defined')
+          resolve(undefined)
+        })
+
+        // @ts-ignore
+        cy.switchToDomain('foobar.com', () => {
+          // done is not defined on purpose here as we want to test the error gets sent back to the primary domain correctly
+          // @ts-ignore
+          done()
+        })
+      })
+    })
   })
 })
