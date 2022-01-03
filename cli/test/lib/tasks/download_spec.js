@@ -263,6 +263,50 @@ describe('lib/tasks/download', function () {
     })
   })
 
+  it('handles quadruple redirect with response x-version to the latest if present', function () {
+    nock('https://aws.amazon.com')
+    .get('/some.zip')
+    .reply(200, () => {
+      return fs.createReadStream(examplePath)
+    })
+
+    nock('https://aws.amazon.com')
+    .get('/someone.zip')
+    .query(true)
+    .reply(302, undefined, {
+      Location: 'https://aws.amazon.com/somebody.zip',
+      'x-version': '0.11.2',
+    })
+
+    nock('https://aws.amazon.com')
+    .get('/something.zip')
+    .query(true)
+    .reply(302, undefined, {
+      Location: 'https://aws.amazon.com/some.zip',
+      'x-version': '0.11.4',
+    })
+
+    nock('https://aws.amazon.com')
+    .get('/somebody.zip')
+    .query(true)
+    .reply(302, undefined, {
+      Location: 'https://aws.amazon.com/something.zip',
+      'x-version': '0.11.3',
+    })
+
+    nock('https://download.cypress.io')
+    .get('/desktop/1.2.3')
+    .query(true)
+    .reply(302, undefined, {
+      Location: 'https://aws.amazon.com/someone.zip',
+      'x-version': '0.11.1',
+    })
+
+    return download.start(this.options).then((responseVersion) => {
+      expect(responseVersion).to.eq('0.11.4')
+    })
+  })
+
   it('can specify cypress version in arguments', function () {
     this.options.version = '0.13.0'
 
