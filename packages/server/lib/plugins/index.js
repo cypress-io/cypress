@@ -8,7 +8,6 @@ const inspector = require('inspector')
 const errors = require('../errors')
 const util = require('./util')
 const pkg = require('@packages/root')
-const semver = require('semver')
 
 let pluginsProcess = null
 let registeredEvents = {}
@@ -50,19 +49,6 @@ const getChildOptions = (config) => {
   if (config.resolvedNodePath) {
     debug('launching using custom node version %o', _.pick(config, ['resolvedNodePath', 'resolvedNodeVersion']))
     childOptions.execPath = config.resolvedNodePath
-  }
-
-  // https://github.com/cypress-io/cypress/issues/18914
-  // If we're on node version 17 or higher, we need the
-  // NODE_ENV --openssl-legacy-provider so that webpack can continue to use
-  // the md4 hash function. This would cause an error prior to node 17
-  // though, so we have to detect node's major version before spawning the
-  // plugins process.
-
-  // To be removed on update to webpack >= 5.61, which no longer relies on
-  // node's builtin crypto.hash function.
-  if (semver.satisfies(config.resolvedNodeVersion, '>=17.0.0')) {
-    childOptions.env.NODE_OPTIONS += ' --openssl-legacy-provider'
   }
 
   if (inspector.url()) {

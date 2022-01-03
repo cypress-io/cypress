@@ -64,24 +64,6 @@ describe('lib/plugins/index', () => {
 
       expect(childOptions.execPath).to.eq(undefined)
     })
-
-    // https://github.com/cypress-io/cypress/issues/18914
-    it('includes --openssl-legacy-provider in node 17+', () => {
-      const childOptions = plugins.getChildOptions({
-        resolvedNodeVersion: 'v17.1.0',
-      })
-
-      expect(childOptions.env.NODE_OPTIONS).to.contain('--openssl-legacy-provider')
-    })
-
-    // https://github.com/cypress-io/cypress/issues/18914
-    it('does not include --openssl-legacy-provider in node <=16', () => {
-      const childOptions = plugins.getChildOptions({
-        resolvedNodeVersion: 'v16.31.0',
-      })
-
-      expect(childOptions.env.NODE_OPTIONS).not.to.contain('--openssl-legacy-provider')
-    })
   })
 
   context('#init', () => {
