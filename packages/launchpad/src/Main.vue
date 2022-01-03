@@ -92,7 +92,7 @@ const { t } = useI18n()
 const isTestingTypeModalOpen = ref(false)
 
 gql`
-query MainLaunchpadQuery {
+fragment MainLaunchpadQueryData on Query {
   ...TestingTypeCards
   ...Wizard
   baseError {
@@ -116,6 +116,12 @@ query MainLaunchpadQuery {
   isInGlobalMode
   ...GlobalPage
   ...ScaffoldedFiles
+}
+`
+
+gql`
+query MainLaunchpadQuery {
+  ...MainLaunchpadQueryData
 }
 `
 

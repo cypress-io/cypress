@@ -107,13 +107,7 @@ import { runnerConstants } from './runner-constants'
 const { height: windowHeight, width: windowWidth } = useWindowSize()
 
 gql`
-fragment SpecRunner on Query {
-  ...Specs_InlineSpecList
-  currentProject {
-    id
-    ...SpecRunnerHeader
-  }
-  ...ChooseExternalEditor
+fragment SpecRunner_Preferences on Query {
   localSettings {
     preferences {
       isSpecsListOpen
@@ -122,6 +116,18 @@ fragment SpecRunner on Query {
       specListWidth
     }
   }
+}
+`
+
+gql`
+fragment SpecRunner on Query {
+  ...Specs_InlineSpecList
+  currentProject {
+    id
+    ...SpecRunnerHeader
+  }
+  ...ChooseExternalEditor
+  
 }
 `
 

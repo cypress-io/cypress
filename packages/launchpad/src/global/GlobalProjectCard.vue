@@ -68,7 +68,9 @@ import { useI18n } from '@cy/i18n'
 
 gql`
 mutation GlobalProjectCard_setCurrentProject($path: String!) {
-  setCurrentProject(path: $path) 
+  setCurrentProject(path: $path) {
+    ...MainLaunchpadQueryData
+  }
 }
 `
 
