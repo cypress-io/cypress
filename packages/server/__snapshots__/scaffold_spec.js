@@ -87,6 +87,9 @@ exports['lib/scaffold .fileTree returns tree-like structure of scaffolded 1'] = 
             "name": "commands.js"
           },
           {
+            "name": "component.js"
+          },
+          {
             "name": "e2e.js"
           }
         ]
@@ -184,6 +187,9 @@ exports['lib/scaffold .fileTree leaves out integration tests if using component 
             "name": "commands.js"
           },
           {
+            "name": "component.js"
+          },
+          {
             "name": "e2e.js"
           }
         ]
@@ -271,6 +277,9 @@ exports['lib/scaffold .fileTree leaves out fixtures if configured to false 1'] =
         "children": [
           {
             "name": "commands.js"
+          },
+          {
+            "name": "component.js"
           },
           {
             "name": "e2e.js"
@@ -531,6 +540,9 @@ exports['lib/scaffold .fileTree leaves out plugins if configured to false 1'] = 
         "children": [
           {
             "name": "commands.js"
+          },
+          {
+            "name": "component.js"
           },
           {
             "name": "e2e.js"
