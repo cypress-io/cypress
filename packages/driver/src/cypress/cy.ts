@@ -5,7 +5,7 @@ import debugFn from 'debug'
 
 import $dom from '../dom'
 import $utils from './utils'
-import $errUtils, { ErrorFromProjectRejectionEvent } from './error_utils'
+import $errUtils, { CypressError, ErrorFromProjectRejectionEvent } from './error_utils'
 import $stackUtils from './stack_utils'
 
 import { create as createChai, IChai } from '../cy/chai'
@@ -531,7 +531,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
           this.Cypress.action('app:window:load', this.state('window'))
 
           signalStable()
-        } catch (err) {
+        } catch (err: any) {
           // this catches errors thrown by user-registered event handlers
           // for `window:load`. this is used in the `catch` below so they
           // aren't mistaken as cross-origin errors
@@ -541,7 +541,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
           throw err
         }
-      } catch (err) {
+      } catch (err: any) {
         if (err.isFromWindowLoadEvent) {
           delete err.isFromWindowLoadEvent
 
@@ -550,12 +550,11 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
           const r = this.state('reject')
 
           if (r) {
-            const wrappedErr = $errUtils.errByPath('uncaught.fromSpec', {
+            const wrappedErr = ($errUtils.errByPath('uncaught.fromSpec', {
               errMsg: err.message,
               promiseAddendum: '',
-            })
-
-            wrappedErr.userInvocationStack = err.stack
+            }) as CypressError)
+            .setUserInvocationStack(err.stack)
 
             return r(wrappedErr)
           }
