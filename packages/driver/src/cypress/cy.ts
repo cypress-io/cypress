@@ -583,7 +583,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
         // need async:true since this is outside the command queue promise
         // chain and cy.fail needs to know to use the reference to the
         // last command to reject it
-        cy.fail(e, { async: true })
+        this.fail(e, { async: true })
       }
     })
   }
