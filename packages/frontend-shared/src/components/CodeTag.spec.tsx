@@ -5,15 +5,17 @@ describe('<CodeTag />', () => {
     cy.mount(() => (<p>
       Create a <CodeTag>sample_spec.js</CodeTag> file.
     </p>))
-
-    cy.contains('sample_spec.js').should('be.visible')
   })
 
-  it('looks good for code colored', () => {
+  it('displays colored code', () => {
     cy.mount(() => (<p>
       Create a <CodeTag class="text-red-500">sample_spec.js</CodeTag> file.
     </p>))
+  })
 
-    cy.contains('sample_spec.js').should('be.visible')
+  it('displays colored code on a background', () => {
+    cy.mount(() => (<p>
+      Create a <CodeTag class="bg-red-50 text-red-500" bg>sample_spec.js</CodeTag> file.
+    </p>))
   })
 })

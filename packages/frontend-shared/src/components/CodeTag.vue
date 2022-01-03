@@ -8,6 +8,14 @@
 </template>
 <script lang="ts" setup>
 defineProps<{
+  /**
+   * In most cases the background will be gray
+   * if it should be another color use this flag to
+   * eliminate the default
+   *
+   * NOTE: windi css does not allow specificity, so one
+   * cannot "override" a css property
+   */
   bg?: boolean;
 }>()
 </script>
