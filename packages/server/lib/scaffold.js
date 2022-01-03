@@ -184,28 +184,6 @@ module.exports = {
     })
   },
 
-  support (folder, config) {
-    debug(`support folder ${folder}, support file ${config.supportFile}`)
-
-    // skip if user has explicitly set supportFile
-    if (!config.supportFile || !isDefault(config, 'supportFile')) {
-      return Promise.resolve()
-    }
-
-    return this.verifyScaffolding(folder, () => {
-      debug(`copying commands.js and {e2e|component}.js to ${folder}`)
-
-      return cypressEx.getPathToSupportFiles()
-      .then((supportFiles) => {
-        return Promise.all(
-          supportFiles.map((supportFilePath) => {
-            return this._copy(supportFilePath, folder, config)
-          }),
-        )
-      })
-    })
-  },
-
   plugins (folder, config) {
     debug(`plugins folder ${folder}`)
     // skip if user has explicitly set pluginsFile

@@ -556,12 +556,6 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       })
     })
 
-    it('calls support.scaffold with supportFolder', function () {
-      return this.project.scaffold(this.obj).then(() => {
-        expect(scaffold.support).to.be.calledWith(this.obj.supportFolder)
-      })
-    })
-
     it('does not call support.plugins if config.pluginsFile is falsey', function () {
       this.obj.pluginsFile = false
 
@@ -588,7 +582,6 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         return this.project.scaffold(this.obj).then(() => {
           expect(scaffold.integration).to.be.calledWith(this.obj.integrationFolder)
           expect(scaffold.fixture).to.be.calledWith(this.obj.fixturesFolder)
-          expect(scaffold.support).to.be.calledWith(this.obj.supportFolder)
         })
       })
     })
@@ -612,8 +605,6 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         return this.project.scaffold(this.obj).then(() => {
           expect(scaffold.integration).to.not.be.calledWith(this.obj.integrationFolder)
           expect(scaffold.fixture).to.not.be.calledWith(this.obj.fixturesFolder)
-          // still scaffolds support folder due to old logic
-          expect(scaffold.support).to.not.be.calledWith(this.obj.supportFolder)
         })
       })
     })

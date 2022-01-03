@@ -662,7 +662,6 @@ export class ProjectBase<TServer extends Server> extends EE {
       }
 
       push(scaffold.fixture(cfg.fixturesFolder, cfg))
-      push(scaffold.support(cfg.supportFolder, cfg))
     } else {
       debug('will not scaffold integration or fixtures folder')
     }
