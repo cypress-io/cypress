@@ -2,6 +2,8 @@ import _ from 'lodash'
 import la from 'lazy-ass'
 import Debug from 'debug'
 import Bluebird from 'bluebird'
+import assert from 'assert'
+
 import { ProjectBase } from './project-base'
 import browsers from './browsers'
 import preprocessor from './plugins/preprocessor'
@@ -9,17 +11,22 @@ import runEvents from './plugins/run_events'
 import * as session from './session'
 import { getSpecUrl } from './project_utils'
 import errors from './errors'
-import type { LaunchOpts, OpenProjectLaunchOptions, FoundBrowser, InitializeProjectOptions } from '@packages/types'
+import type { LaunchOpts, OpenProjectLaunchOptions, InitializeProjectOptions } from '@packages/types'
 import { DataContext, getCtx } from '@packages/data-context'
+import { autoBindDebug } from '@packages/data-context/src/util'
 
 const debug = Debug('cypress:server:open_project')
 
 export class OpenProject {
-  openProject: ProjectBase<any> | null = null
+  projectBase: ProjectBase<any> | null = null
   relaunchBrowser: ((...args: unknown[]) => Bluebird<void>) | null = null
 
+  constructor () {
+    return autoBindDebug(this)
+  }
+
   resetOpenProject () {
-    this.openProject = null
+    this.projectBase = null
     this.relaunchBrowser = null
   }
 
@@ -28,32 +35,42 @@ export class OpenProject {
   }
 
   getConfig () {
-    return this.openProject?.getConfig()
+    return this.projectBase?.getConfig()
   }
 
   getProject () {
-    return this.openProject
+    return this.projectBase
   }
 
   changeUrlToSpec (spec: Cypress.Cypress['spec']) {
-    if (!this.openProject) {
+    if (!this.projectBase) {
       return
     }
 
     const newSpecUrl = getSpecUrl({
       spec,
-      browserUrl: this.openProject.cfg.browserUrl,
-      projectRoot: this.openProject.projectRoot,
+      browserUrl: this.projectBase.cfg.browserUrl,
+      projectRoot: this.projectBase.projectRoot,
     })
 
-    this.openProject.changeToUrl(newSpecUrl)
+    this.projectBase.changeToUrl(newSpecUrl)
   }
 
-  launch (browser, spec: Cypress.Cypress['spec'], options: LaunchOpts = {
+  async launch (browser, spec: Cypress.Cypress['spec'], options: LaunchOpts = {
     onError: () => undefined,
   }) {
-    if (!this.openProject) {
-      throw Error('Cannot launch runner if openProject is undefined!')
+    this._ctx = getCtx()
+
+    if (!this.projectBase && this._ctx.currentProject) {
+      await this.create(this._ctx.currentProject, {
+        ...this._ctx.modeOptions,
+        projectRoot: this._ctx.currentProject,
+        testingType: this._ctx.coreData.currentTestingType!,
+      }, options)
+    }
+
+    if (!this.projectBase) {
+      throw Error('Cannot launch runner if projectBase is undefined!')
     }
 
     debug('resetting project state, preparing to launch browser %s for spec %o options %o',
@@ -63,17 +80,17 @@ export class OpenProject {
 
     // reset to reset server and socket state because
     // of potential domain changes, request buffers, etc
-    this.openProject!.reset()
+    this.projectBase!.reset()
 
     let url = getSpecUrl({
       spec,
-      browserUrl: this.openProject.cfg.browserUrl,
-      projectRoot: this.openProject.projectRoot,
+      browserUrl: this.projectBase.cfg.browserUrl,
+      projectRoot: this.projectBase.projectRoot,
     })
 
     debug('open project url %s', url)
 
-    const cfg = this.openProject.getConfig()
+    const cfg = this.projectBase.getConfig()
 
     _.defaults(options, {
       browsers: cfg.browsers,
@@ -100,9 +117,9 @@ export class OpenProject {
     options.browser = browser
     options.url = url
 
-    this.openProject.setCurrentSpecAndBrowser(spec, browser)
+    this.projectBase.setCurrentSpecAndBrowser(spec, browser)
 
-    const automation = this.openProject.getAutomation()
+    const automation = this.projectBase.getAutomation()
 
     // use automation middleware if its
     // been defined here
@@ -125,7 +142,7 @@ export class OpenProject {
     }
 
     const afterSpec = () => {
-      if (!this.openProject || cfg.isTextTerminal || !cfg.experimentalInteractiveRunEvents) {
+      if (!this.projectBase || cfg.isTextTerminal || !cfg.experimentalInteractiveRunEvents) {
         return Bluebird.resolve()
       }
 
@@ -141,7 +158,7 @@ export class OpenProject {
 
       afterSpec()
       .catch((err) => {
-        this.openProject?.options.onError(err)
+        this.projectBase?.options.onError?.(err)
       })
 
       if (onBrowserClose) {
@@ -149,7 +166,7 @@ export class OpenProject {
       }
     }
 
-    options.onError = this.openProject.options.onError
+    options.onError = this.projectBase.options.onError
 
     this.relaunchBrowser = () => {
       debug(
@@ -184,27 +201,23 @@ export class OpenProject {
   }
 
   closeOpenProjectAndBrowsers () {
-    return this.closeBrowser()
-    .then(() => {
-      return this.openProject?.close()
+    this.projectBase?.close().catch((e) => {
+      this._ctx?.logTraceError(e)
     })
-    .then(() => {
-      this.resetOpenProject()
 
-      return null
-    })
+    this.resetOpenProject()
+
+    return this.closeBrowser()
   }
 
   close () {
     debug('closing opened project')
 
-    return Promise.all([
-      this.closeOpenProjectAndBrowsers(),
-    ]).then(() => null)
+    this.closeOpenProjectAndBrowsers()
   }
 
   // close existing open project if it exists, for example
-  // if  you are switching from CT to E2E or vice versa.
+  // if you are switching from CT to E2E or vice versa.
   // used by launchpad
   async closeActiveProject () {
     await this.closeOpenProjectAndBrowsers()
@@ -212,7 +225,7 @@ export class OpenProject {
 
   _ctx?: DataContext
 
-  async create (path: string, args: InitializeProjectOptions, options: OpenProjectLaunchOptions, browsers: FoundBrowser[] = []) {
+  async create (path: string, args: InitializeProjectOptions, options: OpenProjectLaunchOptions) {
     this._ctx = getCtx()
     debug('open_project create %s', path)
 
@@ -226,7 +239,7 @@ export class OpenProject {
       },
     })
 
-    if (!_.isUndefined(args.configFile)) {
+    if (!_.isUndefined(args.configFile) && !_.isNull(args.configFile)) {
       options.configFile = args.configFile
     }
 
@@ -237,10 +250,12 @@ export class OpenProject {
     debug('opening project %s', path)
     debug('and options %o', options)
 
+    assert(args.testingType)
+
     const testingType = args.testingType === 'component' ? 'component' : 'e2e'
 
     // store the currently open project
-    this.openProject = new ProjectBase({
+    this.projectBase = new ProjectBase({
       testingType,
       projectRoot: path,
       options: {
@@ -250,7 +265,7 @@ export class OpenProject {
     })
 
     try {
-      const cfg = await this.openProject.initializeConfig(browsers)
+      const cfg = await this.projectBase.initializeConfig()
 
       const specPattern = options.spec || cfg[testingType].specPattern
 
@@ -262,7 +277,7 @@ export class OpenProject {
 
       this._ctx.actions.project.setSpecs(specs)
 
-      await this.openProject.open()
+      await this.projectBase.open()
     } catch (err: any) {
       if (err.isCypressErr && err.portInUse) {
         errors.throw(err.type, err.port)

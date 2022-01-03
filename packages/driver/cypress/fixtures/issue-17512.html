@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+</head>
+<body>
+  <script>
+    function defaultBehavior(e) {
+      document.getElementById('result').innerHTML = JSON.stringify(e.target.getAttribute('target'))
+    }
+
+    function setAttributeBehavior(e) {
+      e.target.setAttribute('target', '_top')
+      document.getElementById('result2').innerHTML = JSON.stringify(e.target.getAttribute('target'))
+    }
+
+    function removeAttributeBehavior(e) {
+      e.target.setAttribute('target', '_top')
+      e.target.removeAttribute('target')
+      document.getElementById('result3').innerHTML = JSON.stringify(e.target.getAttribute('target'))
+    }
+  </script>
+
+  <div>
+    <a href="#" id="link" onclick="defaultBehavior(event)">link 1</a>
+    <div id="result"></div>
+  </div>
+
+  <div>
+    <a href="#" id="link2" onclick="setAttributeBehavior(event)">link 2</a>
+    <div id="result2"></div>
+  </div>
+
+  <div>
+    <a href="#" id="link3" onclick="removeAttributeBehavior(event)">link 3</a>
+    <div id="result3"></div>
+  </div>
+</body>
+</html>

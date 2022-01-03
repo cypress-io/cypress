@@ -5,12 +5,21 @@ function getTranspileFolders (config) {
   const rawFolders = config.addTranspiledFolders ?? []
   const folders = rawFolders.map((folder) => path.resolve(config.projectRoot, folder))
 
+  // ensure path is absolute
+  const ensureAbs = (folder) => {
+    if (!path.isAbsolute(folder)) {
+      return path.resolve(folder)
+    }
+
+    return folder
+  }
+
   if (config.fixturesFolder) {
-    folders.push(config.fixturesFolder)
+    folders.push(ensureAbs(config.fixturesFolder))
   }
 
   if (config.supportFolder) {
-    folders.push(config.supportFolder)
+    folders.push(ensureAbs(config.supportFolder))
   }
 
   // attempt to add directories based on spec pattern
