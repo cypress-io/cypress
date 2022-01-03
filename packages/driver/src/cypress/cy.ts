@@ -507,6 +507,9 @@ export class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuer
         try {
           this.Cypress.action('app:window:load', this.state('window'))
         } catch (err) {
+          // this catches errors thrown by user-registered event handlers
+          // for `window:load`. this is used in the `catch` below so they
+          // aren't mistaken as cross-origin errors
           err.isFromWindowLoadEvent = true
 
           throw err
@@ -525,7 +528,14 @@ export class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuer
           const r = this.state('reject')
 
           if (r) {
-            return r(err)
+            const wrappedErr = $errUtils.errByPath('uncaught.fromSpec', {
+              errMsg: err.message,
+              promiseAddendum: '',
+            })
+
+            wrappedErr.userInvocationStack = err.stack
+
+            return r(wrappedErr)
           }
         }
 
