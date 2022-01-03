@@ -105,7 +105,7 @@ describe('Routes', () => {
         obj.projectRoot = Fixtures.projectPath('e2e')
       }
 
-      ctx.actions.project.setCurrentProjectForTestSetup(obj.projectRoot)
+      ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(obj.projectRoot)
 
       // get all the config defaults
       // and allow us to override them

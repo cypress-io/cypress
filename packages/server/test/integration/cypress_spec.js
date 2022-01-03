@@ -428,7 +428,7 @@ describe('lib/cypress', () => {
 
     // NOTE: We no longer do this in the new flow
     it.skip('scaffolds out integration and example specs if they do not exist when not runMode', function () {
-      ctx.actions.project.setCurrentProjectForTestSetup(this.pristineWithConfigPath)
+      ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.pristineWithConfigPath)
 
       return config.get(this.pristineWithConfigPath)
       .then((cfg) => {
@@ -490,7 +490,7 @@ describe('lib/cypress', () => {
     })
 
     it('scaffolds out fixtures + files if they do not exist', function () {
-      ctx.actions.project.setCurrentProjectForTestSetup(this.pristineWithConfigPath)
+      ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.pristineWithConfigPath)
 
       return config.get(this.pristineWithConfigPath)
       .then((cfg) => {
@@ -510,7 +510,7 @@ describe('lib/cypress', () => {
     it('do not scaffolds out support + files if they do not exist in run mode', function () {
       const supportFolder = path.join(this.pristineWithConfigPath, 'cypress/support')
 
-      ctx.actions.project.setCurrentProjectForTestSetup(this.pristineWithConfigPath)
+      ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.pristineWithConfigPath)
 
       return config.get(this.pristineWithConfigPath)
       .then(() => {
@@ -533,7 +533,7 @@ describe('lib/cypress', () => {
 
     // NOTE: Removal of fixtures is not supported in new flow
     it.skip('removes fixtures when they exist and fixturesFolder is false', function (done) {
-      ctx.actions.project.setCurrentProjectForTestSetup(this.idsPath)
+      ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.idsPath)
 
       config.get(this.idsPath)
       .then((cfg) => {
@@ -593,7 +593,7 @@ describe('lib/cypress', () => {
     it('can change the reporter with cypress.config.js', function () {
       sinon.spy(Reporter, 'create')
 
-      ctx.actions.project.setCurrentProjectForTestSetup(this.idsPath)
+      ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.idsPath)
 
       return config.get(this.idsPath)
       .then((cfg) => {
@@ -1678,8 +1678,7 @@ describe('lib/cypress', () => {
       process.env.CYPRESS_responseTimeout = '5555'
       process.env.CYPRESS_watch_for_file_changes = 'false'
 
-      ctx.actions.project.setCurrentProjectForTestSetup(this.todosPath)
-      ctx.lifecycleManager.setCurrentTestingType('e2e')
+      ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.todosPath)
 
       return user.set({ name: 'brian', authToken: 'auth-token-123' })
       .then(() => ctx.lifecycleManager.getFullInitialConfig())

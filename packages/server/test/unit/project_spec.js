@@ -40,7 +40,7 @@ describe.skip('lib/project-base', () => {
 
     sinon.stub(runEvents, 'execute').resolves()
 
-    ctx.actions.project.setCurrentProjectForTestSetup(this.todosPath)
+    ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.todosPath)
 
     return settings.read(this.todosPath)
     .then((obj = {}) => {

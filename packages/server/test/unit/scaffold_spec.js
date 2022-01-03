@@ -137,7 +137,7 @@ describe('lib/scaffold', () => {
     beforeEach(function () {
       const pristinePath = Fixtures.projectPath('pristine-with-config-file')
 
-      ctx.actions.project.setCurrentProjectForTestSetup(pristinePath)
+      ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(pristinePath)
 
       return config.get(pristinePath)
       .then((cfg) => {
@@ -223,7 +223,7 @@ describe('lib/scaffold', () => {
     beforeEach(function () {
       const pristinePath = Fixtures.projectPath('pristine-with-config-file')
 
-      ctx.actions.project.setCurrentProjectForTestSetup(pristinePath)
+      ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(pristinePath)
 
       return config.get(pristinePath)
       .then((cfg) => {
@@ -311,7 +311,7 @@ describe('lib/scaffold', () => {
     beforeEach(function () {
       const pristinePath = Fixtures.projectPath('pristine-with-config-file')
 
-      ctx.actions.project.setCurrentProjectForTestSetup(pristinePath)
+      ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(pristinePath)
 
       return config.get(pristinePath)
       .then((cfg) => {
@@ -370,7 +370,7 @@ describe('lib/scaffold', () => {
     beforeEach(function () {
       const pristinePath = Fixtures.projectPath('pristine-with-config-file')
 
-      ctx.actions.project.setCurrentProjectForTestSetup(pristinePath)
+      ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(pristinePath)
 
       return config.get(pristinePath)
       .then((cfg) => {
@@ -448,7 +448,7 @@ describe('lib/scaffold', () => {
     beforeEach(function () {
       const todosPath = Fixtures.projectPath('todos')
 
-      ctx.actions.project.setCurrentProjectForTestSetup(todosPath)
+      ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(todosPath)
 
       return config.get(todosPath)
       .then((cfg) => {

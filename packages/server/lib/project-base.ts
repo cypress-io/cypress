@@ -559,6 +559,7 @@ export class ProjectBase<TServer extends Server> extends EE {
   }
 
   async initializeConfig (): Promise<Cfg> {
+    this.ctx.lifecycleManager.setCurrentTestingType(this.testingType)
     let theCfg: Cfg = await this.ctx.lifecycleManager.getFullInitialConfig() as Cfg // ?? types are definitely wrong here I think
 
     theCfg = this.testingType === 'e2e'
