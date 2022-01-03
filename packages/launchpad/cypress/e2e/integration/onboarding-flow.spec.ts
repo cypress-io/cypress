@@ -100,10 +100,12 @@ describe('Launchpad: Onboarding Flow', () => {
         const { defineConfig } = require("cypress")
         module.exports = defineConfig({
           component: {
+            supportFile: 'cypress/component/support.js',
             devServer: require('@cypress/webpack-dev-server'),
             devServerConfig: {}
           },
           e2e: {
+            supportFile: 'cypress/e2e/support.js',
             specPattern: 'cypress/e2e/**/*.cy.{js,ts}',
             viewportHeight: 660,
             viewportWidth: 1000,

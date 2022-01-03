@@ -192,7 +192,10 @@ export class WizardActions {
 
     codeBlocks.push(lang === 'ts' ? 'import { defineConfig } from "cypress"' : `const { defineConfig } = require("cypress")`)
     codeBlocks.push(lang === 'ts' ? `export default defineConfig({` : `module.exports = defineConfig({`)
-    codeBlocks.push(E2E_SCAFFOLD_BODY)
+    codeBlocks.push(E2E_SCAFFOLD_BODY({
+      lang,
+    }))
+
     codeBlocks.push('})\n')
 
     return codeBlocks.join('\n')
@@ -311,16 +314,23 @@ export class WizardActions {
   }
 }
 
-const E2E_SCAFFOLD_BODY = `
-  e2e: {
-    specPattern: 'cypress/e2e/**/*.cy.{js,ts}',
-    viewportHeight: 660,
-    viewportWidth: 1000,
-    setupNodeEvents(on, config) {
-      //
-    },
-  }
-`
+interface E2eScaffoldOpts {
+  lang: CodeLanguageEnum
+}
+
+const E2E_SCAFFOLD_BODY = (opts: E2eScaffoldOpts) => {
+  return `
+    e2e: {
+      supportFile: ${opts.lang === 'ts' ? '\'cypress/e2e/support.ts\'' : '\'cypress/e2e/support.js\''},
+      specPattern: 'cypress/e2e/**/*.cy.{js,ts}',
+      viewportHeight: 660,
+      viewportWidth: 1000,
+      setupNodeEvents(on, config) {
+        //
+      },
+    }
+  `
+}
 
 interface ComponentScaffoldOpts {
   lang: CodeLanguageEnum
@@ -332,6 +342,7 @@ interface ComponentScaffoldOpts {
 const COMPONENT_SCAFFOLD_BODY = (opts: ComponentScaffoldOpts) => {
   return `
   component: {
+    supportFile: ${opts.lang === 'ts' ? '\'cypress/component/support.ts\'' : '\'cypress/component/support.js\''},
     specPattern: 'cypress/**/*.cy.{js,jsx,ts,tsx}',
     devServer: import('${opts.requirePath}'),
     devServerConfig: ${opts.configOptionsString}
