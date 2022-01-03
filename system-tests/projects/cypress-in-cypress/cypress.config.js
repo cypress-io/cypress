@@ -3,6 +3,8 @@ module.exports = {
   // @ts-expect-error
   clientRoute: '/cy-child/',
   namespace: 'cy-child',
+  socketIoRoute: '/cy-child-socket',
+  socketIoCookie: 'cy-child-socket',
   testFiles: '**/*.{spec,cy}.{js,ts,tsx,jsx}',
   integrationFolder: 'cypress/e2e/integration',
   componentFolder: 'src',

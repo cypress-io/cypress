@@ -14,6 +14,8 @@ export default defineConfig({
   // @ts-expect-error
   clientRoute: '/cy-parent/',
   namespace: 'cy-parent',
+  socketIoRoute: '/cy-parent-socket',
+  socketIoCookie: 'cy-parent-socket',
   testFiles: '**/*.{spec,cy}.{js,ts,tsx,jsx}',
   reporter: '../../node_modules/cypress-multi-reporters/index.js',
   reporterOptions: {

@@ -136,16 +136,24 @@ function getPubSubSource (config: PubSubConfig) {
     })
   }
 
+  function decodeBase64Unicode (str: string) {
+    return decodeURIComponent(atob(str).split('').map((char) => {
+      return `%${(`00${char.charCodeAt(0).toString(16)}`).slice(-2)}`
+    }).join(''))
+  }
+
+  const { socketIoRoute } = JSON.parse(decodeBase64Unicode(window.__CYPRESS_CONFIG__.base64Config)) as Cypress.Config
+
   // Only happens during testing
   if (config.serverPort) {
     return client(`http://localhost:${config.serverPort}`, {
-      path: '/__socket.io',
+      path: socketIoRoute,
       transports: ['websocket'],
     })
   }
 
   return client({
-    path: '/__socket.io',
+    path: socketIoRoute,
     transports: ['websocket'],
   })
 }

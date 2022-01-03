@@ -28,14 +28,20 @@ import { client } from '@packages/socket/lib/browser'
 let _eventManager: EventManager | undefined
 
 export function createWebsocket () {
-  const PORT_MATCH = /serverPort=(\d+)/.exec(window.location.search)
+  function decodeBase64Unicode (str: string) {
+    return decodeURIComponent(atob(str).split('').map((char) => {
+      return `%${(`00${char.charCodeAt(0).toString(16)}`).slice(-2)}`
+    }).join(''))
+  }
+
+  const config = JSON.parse(decodeBase64Unicode(window.__CYPRESS_CONFIG__.base64Config)) as Cypress.Config
 
   const socketConfig = {
-    path: '/__socket.io',
+    path: config.socketIoRoute,
     transports: ['websocket'],
   }
 
-  const ws = PORT_MATCH ? client(`http://localhost:${PORT_MATCH[1]}`, socketConfig) : client(socketConfig)
+  const ws = client(socketConfig)
 
   ws.on('connect', () => {
     ws.emit('runner:connected')
