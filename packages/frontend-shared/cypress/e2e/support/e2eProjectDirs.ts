@@ -64,6 +64,7 @@ export const e2eProjectDirs = [
   'retries-2',
   'same-fixtures-integration-folders',
   'screen-size',
+  'selectFile',
   'shadow-dom-global-inclusion',
   'spec-generation',
   'spec-name-special-characters',
