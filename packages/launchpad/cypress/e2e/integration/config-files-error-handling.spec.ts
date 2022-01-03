@@ -1,3 +1,5 @@
+import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
+
 // TODO: add when we land the lifecycle management
 describe('Config files error handling', () => {
   beforeEach(() => {
@@ -36,7 +38,8 @@ describe('Config files error handling', () => {
 
     cy.visitLaunchpad()
 
-    cy.get('body').should('contain.text', 'Add a cypress.config.js to remove')
+    cy.get('body').should('contain.text', defaultMessages.migration.wizard.title)
+    cy.get('body').should('contain.text', defaultMessages.migration.wizard.description)
   })
 
   it('it handles config files with legacy config file in same project', () => {
