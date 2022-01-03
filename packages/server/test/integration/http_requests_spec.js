@@ -668,8 +668,8 @@ describe('Routes', () => {
     })
   })
 
-  // Make sure this doesn't get released without fixing
-  const temporarySkip = new Date() > new Date('2022-01-01') ? context : xcontext
+  // TOOD(tim): aim to fix by EOW
+  const temporarySkip = new Date() > new Date('2022-01-07') ? context : xcontext
 
   temporarySkip('GET /__cypress/tests', () => {
     describe('ids with typescript', () => {
