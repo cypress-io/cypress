@@ -7,6 +7,8 @@ import { SocketIOServer } from '@packages/socket'
 import type { Server } from 'http'
 import { graphqlHTTP, GraphQLParams } from 'express-graphql'
 import serverDestroy from 'server-destroy'
+import { Server as WebSocketServer } from 'ws'
+import { useServer } from 'graphql-ws/lib/use/ws'
 
 import { graphqlSchema } from './schema'
 import { parse } from 'graphql'
@@ -71,6 +73,27 @@ export async function makeGraphQLServer () {
   srv = graphqlPort ? app.listen(graphqlPort, listenCallback) : app.listen(listenCallback)
 
   serverDestroy(srv)
+
+  // create and use the websocket server
+  const wsServer = new WebSocketServer({
+    server: srv,
+    path: '/graphql',
+  })
+
+  useServer({
+    schema: graphqlSchema,
+    context: (ctx, msg, args) => {
+      return new Proxy(getCtx(), {
+        get (target, p, receiver) {
+          if (p === '__ctx__') {
+            return ctx
+          }
+
+          return Reflect.get(target, p, receiver)
+        },
+      })
+    },
+  }, wsServer)
 
   gqlSocketServer = new SocketIOServer(srv, {
     path: '/__gqlSocket',

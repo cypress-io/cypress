@@ -286,6 +286,9 @@ export class ProjectLifecycleManager {
     }
 
     this.initializeConfigWatchers()
+
+    // "Global" update b/c the project has changed
+    this.ctx.emitter.globalUpdate()
   }
 
   /**
@@ -526,7 +529,7 @@ export class ProjectLifecycleManager {
       }
     })
     .finally(() => {
-      this.ctx.emitter.toLaunchpad()
+      this.ctx.emitter.projectUpdate()
     })
 
     return promise.then((v) => v.initialConfig)
@@ -643,7 +646,7 @@ export class ProjectLifecycleManager {
       throw e
     })
     .finally(() => {
-      this.ctx.emitter.toLaunchpad()
+      this.ctx.emitter.projectUpdate()
     })
 
     this._envFileResult = { state: 'loading', value: promise }
@@ -731,7 +734,7 @@ export class ProjectLifecycleManager {
       this.ctx.coreData.scaffoldedFiles.filter((f) => {
         if (f.file.absolute === this.configFilePath && f.status !== 'valid') {
           f.status = 'valid'
-          this.ctx.emitter.toLaunchpad()
+          this.ctx.emitter.projectUpdate()
         }
       })
     }
@@ -789,7 +792,7 @@ export class ProjectLifecycleManager {
       this._pendingInitialize?.reject(err)
     })
     .finally(() => {
-      this.ctx.emitter.toLaunchpad()
+      this.ctx.emitter.projectUpdate()
     })
 
     return promise

@@ -4,22 +4,21 @@ import {
   dedupExchange,
   errorExchange,
   fetchExchange,
+  subscriptionExchange,
   Exchange,
   ssrExchange,
 } from '@urql/core'
 import type { SSRData } from '@urql/core/dist/types/exchanges/ssr'
 import { devtoolsExchange } from '@urql/devtools'
 import { useToast } from 'vue-toastification'
-import { client } from '@packages/socket/lib/browser'
 
 import { cacheExchange as graphcacheExchange } from '@urql/exchange-graphcache'
 import { urqlCacheKeys } from '@packages/data-context/src/util/urqlCacheKeys'
 
-import { pubSubExchange } from './urqlExchangePubsub'
 import { namedRouteExchange } from './urqlExchangeNamedRoute'
+import { createClient as createWSClient } from 'graphql-ws'
 
 const GQL_PORT_MATCH = /gqlPort=(\d+)/.exec(window.location.search)
-const SERVER_PORT_MATCH = /serverPort=(\d+)/.exec(window.location.search)
 
 const toast = useToast()
 
@@ -60,21 +59,23 @@ export function makeUrqlClient (target: 'launchpad' | 'app'): Client {
   const port = gqlPort()
 
   const GRAPHQL_URL = `http://localhost:${port}/graphql`
+  const wsClient = createWSClient({
+    url: GRAPHQL_URL.replace('http:', 'ws:'),
+  })
 
   // If we're in the launchpad, we connect to the known GraphQL Socket port,
   // otherwise we connect to the /__socket.io of the current domain, unless we've explicitly
   //
-  const io = getPubSubSource({ target, gqlPort: port, serverPort: SERVER_PORT_MATCH?.[1] })
+  // const io = getPubSubSource({ target, gqlPort: port, serverPort: SERVER_PORT_MATCH?.[1] })
 
   let hasError = false
 
   const exchanges: Exchange[] = [
     dedupExchange,
-    pubSubExchange(io),
     errorExchange({
       onError (error) {
         const message = `
-        GraphQL Field Path: [${error.graphQLErrors[0].path?.join(', ')}]:
+        GraphQL Field Path: [${error.graphQLErrors?.[0].path?.join(', ')}]:
 
         ${error.message}
 
@@ -106,6 +107,20 @@ export function makeUrqlClient (target: 'launchpad' | 'app'): Client {
     // transport layer for all operations
     // target === 'launchpad' ? fetchExchange : socketExchange(io),
     fetchExchange,
+    subscriptionExchange({
+      forwardSubscription (operation) {
+        return {
+          subscribe: (sink) => {
+            // @ts-expect-error
+            const dispose = wsClient.subscribe(operation, sink)
+
+            return {
+              unsubscribe: dispose,
+            }
+          },
+        }
+      },
+    }),
   ]
 
   if (import.meta.env.DEV) {
@@ -118,40 +133,3 @@ export function makeUrqlClient (target: 'launchpad' | 'app'): Client {
     exchanges,
   })
 }
-
-interface PubSubConfig {
-  target: 'launchpad' | 'app'
-  gqlPort: string
-  serverPort?: string
-}
-
-function getPubSubSource (config: PubSubConfig) {
-  if (config.target === 'launchpad') {
-    return client(`http://localhost:${config.gqlPort}`, {
-      path: '/__gqlSocket',
-      transports: ['websocket'],
-    })
-  }
-
-  // Only happens during testing
-  if (config.serverPort) {
-    return client(`http://localhost:${config.serverPort}`, {
-      path: '/__socket.io',
-      transports: ['websocket'],
-    })
-  }
-
-  return client({
-    path: '/__socket.io',
-    transports: ['websocket'],
-  })
-}
-
-// TODO(tim): add this when we want to use the socket as the GraphQL
-// transport layer for all operations
-// const socketExchange = (io: Socket): Exchange => {
-//   return (input) => {
-//     return (ops$) => {
-//     }
-//   }
-// }

@@ -70,8 +70,8 @@
 </template>
 
 <script lang="ts" setup>
-import { gql, useQuery } from '@urql/vue'
-import { MainLaunchpadQueryDocument } from './generated/graphql'
+import { gql, useQuery, useSubscription } from '@urql/vue'
+import { MainLaunchpadQueryDocument, MainProjectUpdateSubscriptionDocument, Main_GlobalStateUpdateDocument } from './generated/graphql'
 import TestingTypeCards from './setup/TestingTypeCards.vue'
 import Wizard from './setup/Wizard.vue'
 import GlobalPage from './global/GlobalPage.vue'
@@ -92,26 +92,65 @@ const { t } = useI18n()
 const isTestingTypeModalOpen = ref(false)
 
 gql`
+fragment Main_CommonProjectInfo on CurrentProject {
+  id
+  isCTConfigured
+  isE2EConfigured
+  currentTestingType
+  isLoadingConfigFile
+  isLoadingNodeEvents
+  needsLegacyConfigMigration
+  errorLoadingConfigFile {
+    ...BaseError_Data
+  }
+  errorLoadingNodeEvents {
+    ...BaseError_Data
+  }
+}
+`
+
+gql`
+subscription Main_GlobalStateUpdate {
+  globalUpdate {
+    baseError {
+      ...BaseError_Data
+    }
+    currentProject {
+      id
+      ...Main_CommonProjectInfo
+    }
+    ...GlobalPage
+  }
+}
+`
+
+gql`
+subscription MainProjectUpdateSubscription {
+  projectUpdate {
+    id
+    ...Main_CommonProjectInfo
+  }
+}
+`
+
+useSubscription({
+  query: Main_GlobalStateUpdateDocument,
+})
+
+useSubscription({
+  query: MainProjectUpdateSubscriptionDocument,
+})
+
+gql`
 query MainLaunchpadQuery {
   ...TestingTypeCards
   ...Wizard
   baseError {
     ...BaseError_Data
   }
-  currentTestingType
   currentProject {
     id
-    isCTConfigured
-    isLoadingConfigFile
-    isLoadingNodeEvents
-    needsLegacyConfigMigration
-    currentTestingType
-    errorLoadingConfigFile {
-      ...BaseError_Data
-    }
-    errorLoadingNodeEvents {
-      ...BaseError_Data
-    }
+    ...Main_CommonProjectInfo
   }
   isInGlobalMode
   ...GlobalPage

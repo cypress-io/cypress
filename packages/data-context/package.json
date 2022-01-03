@@ -32,13 +32,15 @@
     "getenv": "1.0.0",
     "globby": "^11.0.1",
     "graphql": "^15.5.1",
+    "graphql-ws": "^5.5.5",
     "isbinaryfile": "^4.0.8",
     "launch-editor": "2.2.1",
     "lodash": "4.17.21",
     "p-defer": "^3.0.0",
     "randomstring": "1.1.5",
     "underscore.string": "^3.3.5",
-    "wonka": "^4.0.15"
+    "wonka": "^4.0.15",
+    "ws": "^8.4.0"
   },
   "devDependencies": {
     "@packages/example": "0.0.0-development",

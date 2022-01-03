@@ -206,6 +206,7 @@ export class DataContext {
     return new EnvDataSource(this)
   }
 
+  @cached
   get emitter () {
     return new DataEmitterActions(this)
   }
@@ -366,7 +367,7 @@ export class DataContext {
         details: err.details,
       })
 
-      this.emitter.toLaunchpad()
+      this.emitter.globalUpdate()
     }
   }
 
