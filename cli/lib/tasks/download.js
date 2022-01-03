@@ -186,7 +186,11 @@ const verifyDownloadedFile = (filename, expectedSize, expectedChecksum) => {
 // downloads from given url
 // return an object with
 // {filename: ..., downloaded: true}
-const downloadFromUrl = ({ url, downloadDestination, progress, ca, version }) => {
+const downloadFromUrl = ({ url, downloadDestination, progress, ca, version, redirectTTL = 10 }) => {
+  if (redirectTTL <= 0) {
+    return Promise.reject(new Error('Excessive redirects!'))
+  }
+
   return new Promise((resolve, reject) => {
     const proxy = getProxyForUrlWithNpmConfig(url)
 
@@ -247,7 +251,7 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca, version }) =>
 
         debug('redirect version:', redirectVersion)
         debug('redirect url:', redirectUrl)
-        downloadFromUrl({ url: redirectUrl, progress, ca, downloadDestination, version: redirectVersion })
+        downloadFromUrl({ url: redirectUrl, progress, ca, downloadDestination, version: redirectVersion, redirectTTL: redirectTTL - 1 })
         .then(resolve).catch(reject)
 
         // if our status code does not start with 200
@@ -309,7 +313,9 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca, version }) =>
  * @param [string] downloadDestination Local filename to save as
  */
 const start = (opts) => {
-  let { version, downloadDestination, progress } = opts
+  let { version, downloadDestination, progress, redirectTTL: passedInTTL } = opts
+
+  const envTTL = util.getEnv('CYPRESS_DOWNLOAD_REDIRECT_TTL')
 
   if (!downloadDestination) {
     la(is.unemptyString(downloadDestination), 'missing download dir', opts)
@@ -335,7 +341,8 @@ const start = (opts) => {
     return getCA()
   })
   .then((ca) => {
-    return downloadFromUrl({ url, downloadDestination, progress, ca, version })
+    return downloadFromUrl({ url, downloadDestination, progress, ca, version,
+      ...(passedInTTL || envTTL ? { redirectTTL: passedInTTL || envTTL } : {}) })
   })
   .catch((err) => {
     return prettyDownloadErr(err, version)

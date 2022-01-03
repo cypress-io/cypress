@@ -307,6 +307,113 @@ describe('lib/tasks/download', function () {
     })
   })
 
+  it('errors on too many redirects', function () {
+    nock('https://aws.amazon.com')
+    .get('/some.zip')
+    .reply(200, () => {
+      return fs.createReadStream(examplePath)
+    })
+
+    nock('https://download.cypress.io')
+    .get('/desktop/1.2.3')
+    .query(true)
+    .reply(302, undefined, {
+      Location: 'https://aws.amazon.com/someone.zip',
+      'x-version': '0.11.1',
+    })
+
+    nock('https://aws.amazon.com')
+    .get('/someone.zip')
+    .query(true)
+    .reply(302, undefined, {
+      Location: 'https://aws.amazon.com/somebody.zip',
+      'x-version': '0.11.2',
+    })
+
+    nock('https://aws.amazon.com')
+    .get('/somebody.zip')
+    .query(true)
+    .reply(302, undefined, {
+      Location: 'https://aws.amazon.com/something.zip',
+      'x-version': '0.11.3',
+    })
+
+    nock('https://aws.amazon.com')
+    .get('/something.zip')
+    .query(true)
+    .reply(302, undefined, {
+      Location: 'https://aws.amazon.com/somewhat.zip',
+      'x-version': '0.11.4',
+    })
+
+    nock('https://aws.amazon.com')
+    .get('/somewhat.zip')
+    .query(true)
+    .reply(302, undefined, {
+      Location: 'https://aws.amazon.com/sometime.zip',
+      'x-version': '0.11.5',
+    })
+
+    nock('https://aws.amazon.com')
+    .get('/sometime.zip')
+    .query(true)
+    .reply(302, undefined, {
+      Location: 'https://aws.amazon.com/somewhen.zip',
+      'x-version': '0.11.6',
+    })
+
+    nock('https://aws.amazon.com')
+    .get('/somewhen.zip')
+    .query(true)
+    .reply(302, undefined, {
+      Location: 'https://aws.amazon.com/somewise.zip',
+      'x-version': '0.11.7',
+    })
+
+    nock('https://aws.amazon.com')
+    .get('/somewise.zip')
+    .query(true)
+    .reply(302, undefined, {
+      Location: 'https://aws.amazon.com/someways.zip',
+      'x-version': '0.11.8',
+    })
+
+    nock('https://aws.amazon.com')
+    .get('/someways.zip')
+    .query(true)
+    .reply(302, undefined, {
+      Location: 'https://aws.amazon.com/somerset.zip',
+      'x-version': '0.11.9',
+    })
+
+    nock('https://aws.amazon.com')
+    .get('/somerset.zip')
+    .query(true)
+    .reply(302, undefined, {
+      Location: 'https://aws.amazon.com/somedeal.zip',
+      'x-version': '0.11.10',
+    })
+
+    nock('https://aws.amazon.com')
+    .get('/somedeal.zip')
+    .query(true)
+    .reply(302, undefined, {
+      Location: 'https://aws.amazon.com/some.zip',
+      'x-version': '0.11.11',
+    })
+
+    return download.start(this.options).then(() => expect(true).to.equal(false)).catch((error) => {
+      expect(error).to.be.instanceof(Error)
+      expect(error.message).to.contain('Excessive redirects!')
+    })
+    .then(() => {
+      // Double check to make sure that raising redirectTTL changes result
+      download.start({ ...this.options, redirectTTL: 12 }).then((responseVersion) => {
+        expect(responseVersion).to.eq('0.11.11')
+      })
+    })
+  })
+
   it('can specify cypress version in arguments', function () {
     this.options.version = '0.13.0'
 
