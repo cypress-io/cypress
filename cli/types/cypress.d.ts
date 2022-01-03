@@ -3181,7 +3181,7 @@ declare namespace Cypress {
     url: string
 
     /**
-     * If the URL contains non-latin characters, encode them. 
+     * If the URL contains non-latin characters, encode them.
      *
      * @default false
      */
