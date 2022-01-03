@@ -298,10 +298,12 @@ describe('lib/scaffold', () => {
         return Promise.join(
           fs.readFileAsync(`${this.supportFolder}/commands.js`, 'utf8'),
           fs.readFileAsync(`${this.supportFolder}/e2e.js`, 'utf8'),
-        ).spread((commandsContents, indexContents) => {
+          fs.readFileAsync(`${this.supportFolder}/component.js`, 'utf8'),
+        ).spread((commandsContents, e2eContents, componentContents) => {
           snapshot(commandsContents)
+          snapshot(e2eContents)
 
-          return snapshot(indexContents)
+          return snapshot(componentContents)
         })
       })
     })
