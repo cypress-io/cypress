@@ -62,7 +62,7 @@ const _forceProxyMiddleware = function (clientRoute) {
   return function (req, res, next) {
     const trimmedUrl = _.trimEnd(req.proxiedUrl, '/')
 
-    if (_isNonProxiedRequest(req) && !ALLOWED_PROXY_BYPASS_URLS.includes(trimmedUrl) && (trimmedUrl !== trimmedClientRoute)) {
+    if (_isNonProxiedRequest(req) && !ALLOWED_PROXY_BYPASS_URLS.includes(trimmedUrl) && (trimmedUrl !== trimmedClientRoute) && !trimmedUrl.startsWith(`/${namespace}`)) {
       debug('Redirecting!!!!! %o', { namespace, url: req.proxiedUrl })
 
       // this request is non-proxied and non-allowed, redirect to the runner error page
