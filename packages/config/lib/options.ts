@@ -308,12 +308,6 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     validation: validate.isOneOf('center', 'top', 'bottom', 'nearest', false),
     canUpdateDuringTestTime: true,
   }, {
-    name: 'supportFile',
-    defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? 'cypress/support/component.js' : 'cypress/support/e2e.js',
-    validation: validate.isStringOrFalse,
-    isFolder: true,
-    canUpdateDuringTestTime: false,
-  }, {
     name: 'supportFolder',
     defaultValue: false,
     validation: validate.isStringOrFalse,
@@ -481,7 +475,7 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
   },
 ]
 
-export const options: Array<ResolvedConfigOption|RuntimeConfigOption> = [
+export const options: Array<ResolvedConfigOption | RuntimeConfigOption> = [
   ...resolvedOptions,
   ...runtimeOptions,
 ]
@@ -525,5 +519,10 @@ export const breakingOptions: Array<BreakingOption> = [
     value: 'bundled',
     errorKey: 'NODE_VERSION_DEPRECATION_BUNDLED',
     isWarning: true,
+  },
+  {
+    name: 'supportFile',
+    errorKey: 'SUPPORT_FILE_ROOT_NOT_SUPPORTED',
+    isWarning: false,
   },
 ]

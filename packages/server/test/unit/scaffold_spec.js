@@ -41,7 +41,8 @@ describe('lib/scaffold', () => {
       })
     })
 
-    it('is false when integrationFolder has been changed', function () {
+    // TODO: doesn't matter with new changes
+    it.skip('is false when integrationFolder has been changed', function () {
       const pristine = new ProjectBase({
         projectRoot: this.pristinePath,
         testingType: 'e2e',
@@ -136,7 +137,7 @@ describe('lib/scaffold', () => {
     beforeEach(function () {
       const pristinePath = Fixtures.projectPath('pristine-with-config-file')
 
-      ctx.actions.project.setActiveProjectForTestSetup(pristinePath)
+      ctx.actions.project.setCurrentProjectForTestSetup(pristinePath)
 
       return config.get(pristinePath)
       .then((cfg) => {
@@ -222,7 +223,7 @@ describe('lib/scaffold', () => {
     beforeEach(function () {
       const pristinePath = Fixtures.projectPath('pristine-with-config-file')
 
-      ctx.actions.project.setActiveProjectForTestSetup(pristinePath)
+      ctx.actions.project.setCurrentProjectForTestSetup(pristinePath)
 
       return config.get(pristinePath)
       .then((cfg) => {
@@ -310,7 +311,7 @@ describe('lib/scaffold', () => {
     beforeEach(function () {
       const pristinePath = Fixtures.projectPath('pristine-with-config-file')
 
-      ctx.actions.project.setActiveProjectForTestSetup(pristinePath)
+      ctx.actions.project.setCurrentProjectForTestSetup(pristinePath)
 
       return config.get(pristinePath)
       .then((cfg) => {
@@ -369,7 +370,7 @@ describe('lib/scaffold', () => {
     beforeEach(function () {
       const pristinePath = Fixtures.projectPath('pristine-with-config-file')
 
-      ctx.actions.project.setActiveProjectForTestSetup(pristinePath)
+      ctx.actions.project.setCurrentProjectForTestSetup(pristinePath)
 
       return config.get(pristinePath)
       .then((cfg) => {
@@ -447,7 +448,7 @@ describe('lib/scaffold', () => {
     beforeEach(function () {
       const todosPath = Fixtures.projectPath('todos')
 
-      ctx.actions.project.setActiveProjectForTestSetup(todosPath)
+      ctx.actions.project.setCurrentProjectForTestSetup(todosPath)
 
       return config.get(todosPath)
       .then((cfg) => {

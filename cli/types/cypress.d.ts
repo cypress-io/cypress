@@ -320,6 +320,11 @@ declare namespace Cypress {
     LocalStorage: LocalStorage
 
     /**
+     * Internal class for session management.
+     */
+    session: Session
+
+    /**
      * Current testing type, determined by the Test Runner chosen to run.
      */
     testingType: TestingType
@@ -656,6 +661,20 @@ declare namespace Cypress {
     ```
      */
     as(alias: string): Chainable<Subject>
+
+    /**
+     * Select a file with the given <input> element, or drag and drop a file over any DOM subject.
+     *
+     * @param {FileReference} files - The file(s) to select or drag onto this element.
+     * @see https://on.cypress.io/selectfile
+     * @example
+     *    cy.get('input[type=file]').selectFile(Buffer.from('text'))
+     *    cy.get('input[type=file]').selectFile({
+     *      fileName: 'users.json',
+     *      fileContents: [{name: 'John Doe'}]
+     *    })
+     */
+    selectFile(files: FileReference | FileReference[], options?: Partial<SelectFileOptions>): Chainable<Subject>
 
     /**
      * Blur a focused element. This element must currently be in focus.
@@ -2461,6 +2480,17 @@ declare namespace Cypress {
     scrollBehavior: scrollBehaviorOptions
   }
 
+  interface SelectFileOptions extends Loggable, Timeoutable, ActionableOptions {
+    /**
+     * Which user action to perform. `select` matches selecting a file while
+     * `drag-drop` matches dragging files from the operating system into the
+     * document.
+     *
+     * @default 'select'
+     */
+    action: 'select' | 'drag-drop'
+  }
+
   interface BlurOptions extends Loggable, Forceable { }
 
   interface CheckOptions extends Loggable, Timeoutable, ActionableOptions {
@@ -2932,10 +2962,11 @@ declare namespace Cypress {
    */
   type CoreConfigOptions = Partial<Omit<ResolvedConfigOptions, TestingType>>
 
+  type DevServerFn<ComponentDevServerOpts = any> = (cypressConfig: DevServerConfig, devServerConfig: ComponentDevServerOpts) => ResolvedDevServerConfig | Promise<ResolvedDevServerConfig>
   interface ComponentConfigOptions<ComponentDevServerOpts = any> extends CoreConfigOptions {
     // TODO(tim): Keeping optional until we land the implementation
-    devServer?: (cypressConfig: DevServerConfig, devServerConfig: ComponentDevServerOpts) => ResolvedDevServerConfig | Promise<ResolvedDevServerConfig>
-    devServerConfig?: ComponentDevServerOpts
+    devServer?: Promise<{ devServer: DevServerFn<ResolvedDevServerConfig>}> | { devServer: DevServerFn<ResolvedDevServerConfig> } | DevServerFn<ResolvedDevServerConfig>
+    devServerConfig?: ComponentDevServerOpts | Promise<ComponentDevServerOpts>
   }
 
   /**
@@ -3134,6 +3165,11 @@ declare namespace Cypress {
     onAnyRequest(route: RouteOptions, proxy: any): void
     onAnyResponse(route: RouteOptions, proxy: any): void
     onAnyAbort(route: RouteOptions, proxy: any): void
+  }
+
+  interface Session {
+    // Clear all saved sessions and re-run the current spec file.
+    clearAllSavedSessions: () => Promise<void>
   }
 
   type SameSiteStatus = 'no_restriction' | 'strict' | 'lax'
@@ -5648,6 +5684,16 @@ declare namespace Cypress {
     code: number
     stdout: string
     stderr: string
+  }
+
+  type FileReference = string | BufferType | FileReferenceObject
+  interface FileReferenceObject {
+    /*
+     * Buffers and strings will be used as-is. All other types will have `JSON.stringify()` applied.
+     */
+    contents: any
+    fileName?: string
+    lastModified?: number
   }
 
   interface LogAttrs {

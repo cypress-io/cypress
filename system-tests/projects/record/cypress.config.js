@@ -1,6 +1,6 @@
 module.exports = {
-  'projectId': 'abc123',
-  'e2e': {
-    'supportFile': false,
+  projectId: 'abc123',
+  e2e: {
+    supportFile: false,
   },
 }

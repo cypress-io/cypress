@@ -16,11 +16,6 @@ interface Props {
 
 const Stats = observer(({ stats }: Props) => (
   <ul aria-label='Stats' className='stats'>
-    <li className='pending'>
-      <PendingIcon aria-hidden="true" />
-      <span className='visually-hidden'>Pending:</span>
-      <span className={cs('num', { 'empty': !stats.numPending })}>{count(stats.numPending)}</span>
-    </li>
     <li className='passed'>
       <PassedIcon aria-hidden="true" />
       <span className='visually-hidden'>Passed:</span>
@@ -30,6 +25,11 @@ const Stats = observer(({ stats }: Props) => (
       <FailedIcon aria-hidden="true" />
       <span className='visually-hidden'>Failed:</span>
       <span className={cs('num', { 'empty': !stats.numFailed })}>{count(stats.numFailed)}</span>
+    </li>
+    <li className='pending'>
+      <PendingIcon aria-hidden="true" />
+      <span className='visually-hidden'>Pending:</span>
+      <span className={cs('num', { 'empty': !stats.numPending })}>{count(stats.numPending)}</span>
     </li>
   </ul>
 ))
