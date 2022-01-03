@@ -196,26 +196,16 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca, version }) =>
       downloadDestination,
     })
 
-    if (ca) debug('using custom CA details from npm config')
+    if (ca) {
+      debug('using custom CA details from npm config')
+    }
 
-    let redirectVersion
-    let redirectUrl
     const reqOptions = {
       uri: url,
       ...(proxy ? { proxy } : {}),
-      ...(ca ? { ca } : {}),
+      ...(ca ? { agentOptions: { ca } } : {}),
       method: 'GET',
-      followRedirect (response) {
-        redirectVersion = response.headers['x-version']
-        redirectUrl = response.headers.location
-
-        debug('redirect version:', redirectVersion)
-        debug('redirect url:', redirectUrl)
-
-        // no redirect, we'll handle it
-
-        return false
-      },
+      followRedirect: false,
     }
     const req = request(reqOptions)
 
@@ -251,9 +241,15 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca, version }) =>
       // response headers
       started = new Date()
 
-      if (redirectVersion && redirectUrl) {
+      if (/^3/.test(response.statusCode)) {
+        const redirectVersion = response.headers['x-version']
+        const redirectUrl = response.headers.location
+
+        debug('redirect version:', redirectVersion)
+        debug('redirect url:', redirectUrl)
         downloadFromUrl({ url: redirectUrl, progress, ca, downloadDestination, version: redirectVersion })
         .then(resolve).catch(reject)
+
         // if our status code does not start with 200
       } else if (!/^2/.test(response.statusCode)) {
         debug('response code %d', response.statusCode)
@@ -271,7 +267,7 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca, version }) =>
       } else {
         // We only enable this pipe connection when we know we've got a successful return
         // and handle the completion with verify and resolve
-        // there was a possible race condition between end of request and close of writestream
+        // there was a possible race condition between end of request and close of writeStream
         // that is made ordered with this Promise.all
         Promise.all([new Promise((r) => {
           return response.pipe(fs.createWriteStream(downloadDestination).on('close', r))
