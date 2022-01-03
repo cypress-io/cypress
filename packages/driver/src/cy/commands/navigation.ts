@@ -14,6 +14,8 @@ import { $Location } from '../../cypress/location'
 import debugFn from 'debug'
 const debug = debugFn('cypress:driver:navigation')
 
+const urlChars = /[^A-Za-z0-9_.\-~%:/]/g
+
 let id = null
 let previousDomainVisited = null
 let hasVisitedAboutBlank = null
@@ -705,7 +707,7 @@ export default (Commands, Cypress, cy, state, config) => {
       }
 
       // https://github.com/cypress-io/cypress/issues/19355
-      if (userOptions.encodeIfNecessary && /[^A-Za-z0-9_.\-~%:/]/.test(url)) {
+      if (userOptions.encodeIfNecessary && urlChars.test(url)) {
         url = encodeURI(url)
       }
 
