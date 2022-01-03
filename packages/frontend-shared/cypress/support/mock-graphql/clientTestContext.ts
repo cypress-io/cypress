@@ -103,6 +103,9 @@ export function makeClientTestContext (): ClientTestContext {
         },
       ],
     },
+    migration: {
+      manualFiles: [],
+    },
     __mockPartial: {},
   }
 }
