@@ -5,7 +5,7 @@ import debugFn from 'debug'
 
 import $dom from '../dom'
 import $utils from './utils'
-import $errUtils, { CypressError, ErrorFromProjectRejectionEvent } from './error_utils'
+import $errUtils, { ErrorFromProjectRejectionEvent } from './error_utils'
 import $stackUtils from './stack_utils'
 
 import { create as createChai, IChai } from '../cy/chai'
@@ -550,13 +550,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
           const r = this.state('reject')
 
           if (r) {
-            const wrappedErr = ($errUtils.errByPath('uncaught.fromSpec', {
-              errMsg: err.message,
-              promiseAddendum: '',
-            }) as CypressError)
-            .setUserInvocationStack(err.stack)
-
-            return r(wrappedErr)
+            return r(err)
           }
         }
 
