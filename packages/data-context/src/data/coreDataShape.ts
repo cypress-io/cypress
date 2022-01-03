@@ -1,5 +1,5 @@
-import { BUNDLERS, FoundBrowser, FoundSpec, FullConfig, Preferences, Editor, Warning, AllowedState, AllModeOptions } from '@packages/types'
-import type { NexusGenEnums, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
+import { BUNDLERS, FoundBrowser, Editor, Warning, AllowedState, AllModeOptions, TestingType } from '@packages/types'
+import type { NexusGenEnums, NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
 import type { App, BrowserWindow } from 'electron'
 import type { ChildProcess } from 'child_process'
 import type { SocketIOServer } from '@packages/socket'
@@ -42,41 +42,21 @@ export interface ConfigChildProcessShape {
   resolvedBaseConfig: Promise<Cypress.ConfigOptions>
 }
 
-export interface ActiveProjectShape extends ProjectShape {
-  title: string
-  ctPluginsInitialized: Maybe<boolean>
-  e2ePluginsInitialized: Maybe<boolean>
-  isCTConfigured: Maybe<boolean>
-  isE2EConfigured: Maybe<boolean>
-  specs?: FoundSpec[]
-  config: Promise<FullConfig> | null
-  configChildProcess?: ConfigChildProcessShape | null
-  preferences?: Preferences | null
-  browsers: FoundBrowser[] | null
-  isMissingConfigFile: boolean
-}
-
 export interface AppDataShape {
   isInGlobalMode: boolean
   browsers: ReadonlyArray<FoundBrowser> | null
   projects: ProjectShape[]
-  currentTestingType: Maybe<TestingTypeEnum>
   refreshingBrowsers: Promise<FoundBrowser[]> | null
   refreshingNodePath: Promise<string> | null
   nodePath: Maybe<string>
 }
 
 export interface WizardDataShape {
-  history: NexusGenEnums['WizardStep'][]
-  currentStep: NexusGenEnums['WizardStep']
   chosenBundler: NexusGenEnums['SupportedBundlers'] | null
   allBundlers: typeof BUNDLERS
-  chosenTestingType: NexusGenEnums['TestingTypeEnum'] | null
   chosenFramework: NexusGenEnums['FrontendFrameworkEnum'] | null
   chosenLanguage: NexusGenEnums['CodeLanguageEnum']
   chosenManualInstall: boolean
-  chosenBrowser: FoundBrowser | null
-  warnings: Warning[]
 }
 
 export interface MigrationDataShape{
@@ -96,6 +76,10 @@ export interface BaseErrorDataShape {
 }
 
 export interface CoreDataShape {
+  cliBrowser: string | null
+  cliTestingType: string | null
+  chosenBrowser: FoundBrowser | null
+  machineBrowsers: Promise<FoundBrowser[]> | FoundBrowser[] | null
   servers: {
     appServer?: Maybe<Server>
     appServerPort?: Maybe<number>
@@ -109,12 +93,15 @@ export interface CoreDataShape {
   dev: DevStateShape
   localSettings: LocalSettingsDataShape
   app: AppDataShape
-  currentProject: ActiveProjectShape | null
+  currentProject: string | null
+  currentTestingType: TestingType | null
   wizard: WizardDataShape
   migration: MigrationDataShape | null
   user: AuthenticatedUserShape | null
   electron: ElectronShape
   isAuthBrowserOpened: boolean
+  scaffoldedFiles: NexusGenObjects['ScaffoldedFile'][] | null
+  warnings: Warning[]
 }
 
 /**
@@ -123,6 +110,9 @@ export interface CoreDataShape {
 export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDataShape {
   return {
     servers: {},
+    cliBrowser: modeOptions.browser ?? null,
+    cliTestingType: modeOptions.testingType ?? null,
+    machineBrowsers: null,
     hasInitializedMode: null,
     baseError: null,
     dev: {
@@ -130,7 +120,6 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
     },
     app: {
       isInGlobalMode: Boolean(modeOptions.global),
-      currentTestingType: null,
       refreshingBrowsers: null,
       browsers: null,
       projects: [],
@@ -143,26 +132,25 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
       refreshing: null,
     },
     isAuthBrowserOpened: false,
-    currentProject: null,
+    currentProject: modeOptions.projectRoot ?? null,
+    currentTestingType: modeOptions.testingType ?? null,
     wizard: {
-      chosenTestingType: null,
       chosenBundler: null,
       chosenFramework: null,
       chosenLanguage: 'js',
       chosenManualInstall: false,
-      currentStep: 'welcome',
       allBundlers: BUNDLERS,
-      history: ['welcome'],
-      chosenBrowser: null,
-      warnings: [],
     },
     migration: {
       step: 'renameAuto',
     },
+    warnings: [],
+    chosenBrowser: null,
     user: null,
     electron: {
       app: null,
       browserWindow: null,
     },
+    scaffoldedFiles: null,
   }
 }

@@ -4,7 +4,7 @@
   bg-white pr-4px pt-13px pb-13px flex items-center space-x-3 group
   hocus-default focus-within-default"
     data-cy="project-card"
-    @click="setActiveProject(props.gql.projectRoot)"
+    @click="setCurrentProject(props.gql.projectRoot)"
   >
     <div
       class="w-73px h-40px text-center flex items-center justify-center border-r border-r-gray-100 mr-4px"
@@ -64,13 +64,13 @@
 
 <script setup lang="ts">
 import { gql, useMutation } from '@urql/vue'
-import { GlobalProjectCardFragment, GlobalProjectCard_SetActiveProjectDocument } from '../generated/graphql'
+import { GlobalProjectCardFragment, GlobalProjectCard_SetCurrentProjectDocument } from '../generated/graphql'
 import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
 import { useI18n } from '@cy/i18n'
 
 gql`
-mutation GlobalProjectCard_setActiveProject($path: String!) {
-  setActiveProject(path: $path) 
+mutation GlobalProjectCard_setCurrentProject($path: String!) {
+  setCurrentProject(path: $path) 
 }
 `
 
@@ -90,7 +90,7 @@ const emit = defineEmits<{
 
   // Used for testing, I wish we could easily spy on gql mutations inside
   // of component tests.
-  (event: '_setActiveProject', path: string): void
+  (event: '_setCurrentProject', path: string): void
 }>()
 
 const props = defineProps<{
@@ -106,11 +106,11 @@ const menuItems: { name: string, event: eventName }[] = [
   { name: t('globalPage.openInFinder'), event: 'openInFinder' },
 ]
 
-const setActiveProjectMutation = useMutation(GlobalProjectCard_SetActiveProjectDocument)
+const setCurrentProjectMutation = useMutation(GlobalProjectCard_SetCurrentProjectDocument)
 
-const setActiveProject = (project: string) => {
-  setActiveProjectMutation.executeMutation({ path: project })
-  emit('_setActiveProject', project)
+const setCurrentProject = (project: string) => {
+  setCurrentProjectMutation.executeMutation({ path: project })
+  emit('_setCurrentProject', project)
 }
 
 const handleMenuClick = (eventName: eventName) => {

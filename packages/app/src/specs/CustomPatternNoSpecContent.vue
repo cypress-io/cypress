@@ -3,7 +3,7 @@
   <SpecPatterns :gql="{...props.gql}" />
 
   <div class="flex justify-center gap-16px mt-32px">
-    <OpenConfigFileInIDE :gql="props.gql">
+    <OpenConfigFileInIDE>
       <Button
         size="lg"
       >
@@ -44,7 +44,6 @@ const emit = defineEmits<{
 gql`
 fragment CustomPatternNoSpecContent on Query {
   ...SpecPatterns
-  ...OpenConfigFileInIDE
 }
 `
 

@@ -1,3 +1,4 @@
+import assert from 'assert'
 import type { DataContext } from '../DataContext'
 import type { ParsedPath } from 'path'
 import { camelCase, capitalize } from 'lodash'
@@ -20,9 +21,10 @@ export class SpecOptions {
   }
 
   constructor (private ctx: DataContext, private options: CodeGenOptions) {
+    assert(this.ctx.currentProject)
     this.parsedPath = this.ctx.path.parse(options.codeGenPath)
     // Should always be defined
-    this.projectRoot = this.ctx.currentProject?.projectRoot as string
+    this.projectRoot = this.ctx.currentProject
   }
 
   getCodeGenOptions () {
