@@ -161,7 +161,7 @@ const runPlugins = (ipc, pluginsFile, projectRoot) => {
 
     // Rejected Bluebird promises will return a reason object.
     // OpenSSL error returns a reason as user-friendly string.
-    if (event.reason && typeof event.reason === 'object') {
+    if (event && event.reason && typeof event.reason === 'object') {
       err = event.reason
     }
 
