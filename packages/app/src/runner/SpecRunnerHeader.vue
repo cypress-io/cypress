@@ -102,8 +102,21 @@ fragment SpecRunnerHeader_Browser on Browser {
 
 gql`
 mutation SpecRunnerHeader_SetBrowser($browserId: ID!, $specPath: String!) {
-  launchpadSetBrowser(id: $browserId)
-  launchOpenProject(specPath: $specPath)
+  launchpadSetBrowser(id: $browserId) {
+    id
+    currentBrowser {
+      id
+      displayName
+      majorVersion
+    }
+    browsers {
+      id
+      isSelected
+    }
+  }
+  launchOpenProject(specPath: $specPath) {
+    id
+  }
 }
 `
 

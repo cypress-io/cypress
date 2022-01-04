@@ -207,7 +207,7 @@ export default class State extends BaseStore {
   }
 
   @action updateSpecByUrl (specUrl) {
-    const foundSpec = _.find(this.specs, { name: decodeURI(specUrl) })
+    const foundSpec = _.find(this.specs, { relative: decodeURI(specUrl) })
 
     if (foundSpec) {
       this.spec = foundSpec

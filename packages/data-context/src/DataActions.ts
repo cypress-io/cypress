@@ -2,7 +2,6 @@ import type { DataContext } from '.'
 import {
   LocalSettingsActions,
   AppActions,
-  ProjectConfigDataActions,
   ElectronActions,
   FileActions,
   ProjectActions,
@@ -53,10 +52,5 @@ export class DataActions {
   @cached
   get electron () {
     return new ElectronActions(this.ctx)
-  }
-
-  @cached
-  get projectConfig () {
-    return new ProjectConfigDataActions(this.ctx)
   }
 }

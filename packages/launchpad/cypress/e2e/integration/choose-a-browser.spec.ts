@@ -1,12 +1,4 @@
 describe('Choose a Browser Page', () => {
-  // Walks through setup pages to get to browser selection
-  const stepThroughConfigPages = () => {
-    cy.get('h1').should('contain', 'Configuration Files')
-    cy.contains('button', 'Continue').click()
-    cy.get('h1').should('contain', 'Initializing Config...')
-    cy.contains('button', 'Next Step').click()
-  }
-
   beforeEach(() => {
     cy.scaffoldProject('launchpad')
   })
@@ -24,7 +16,6 @@ describe('Choose a Browser Page', () => {
       cy.openProject('launchpad', ['--e2e', '--browser', 'edge'])
 
       cy.visitLaunchpad()
-      stepThroughConfigPages()
 
       cy.get('h1').should('contain', 'Choose a Browser')
 
@@ -35,16 +26,22 @@ describe('Choose a Browser Page', () => {
       cy.openProject('launchpad', ['--e2e', '--browser', 'doesNotExist'])
       cy.visitLaunchpad()
 
-      stepThroughConfigPages()
-
       cy.get('h1').should('contain', 'Choose a Browser')
       cy.get('[data-cy="alert-header"]').should('contain', 'Warning: Browser Not Found')
       cy.get('[data-cy="alert-body"]')
       .should('contain', 'The specified browser was not found on your system or is not supported by Cypress: doesNotExist')
 
-      cy.get('[data-cy="alert-body"] a').eq(1)
-      .should('have.attr', 'href')
-      .and('equal', 'https://on.cypress.io/troubleshooting-launching-browsers')
+      cy.get('[data-cy="alert-body"]').within(() => {
+        cy.validateExternalLink({
+          name: 'use a custom browser',
+          href: 'https://on.cypress.io/customize-browsers',
+        })
+
+        cy.validateExternalLink({
+          name: 'how to troubleshoot launching browsers',
+          href: 'https://on.cypress.io/troubleshooting-launching-browsers',
+        })
+      })
 
       // Ensure warning can be dismissed
       cy.get('[data-cy="alert-suffix-icon"]').click()
@@ -56,18 +53,16 @@ describe('Choose a Browser Page', () => {
 
       cy.visitLaunchpad()
 
-      stepThroughConfigPages()
-
       cy.get('h1').should('contain', 'Choose a Browser')
 
       cy.get('[data-cy="alert-header"]').should('contain', 'Warning: Browser Not Found')
       cy.get('[data-cy="alert-body"]')
       .should('contain', 'We could not identify a known browser at the path you specified: /path/does/not/exist')
       .should('contain', 'spawn /path/does/not/exist ENOENT')
-
-      cy.get('[data-cy="alert-body"] a')
-      .should('have.attr', 'href')
-      .and('equal', 'https://on.cypress.io/troubleshooting-launching-browsers')
+      .validateExternalLink({
+        name: 'how to troubleshoot launching browsers',
+        href: 'https://on.cypress.io/troubleshooting-launching-browsers',
+      })
 
       // Ensure warning can be dismissed
       cy.get('[data-cy="alert-suffix-icon"]').click()
@@ -78,8 +73,6 @@ describe('Choose a Browser Page', () => {
       cy.openProject('launchpad', ['--e2e'])
 
       cy.visitLaunchpad()
-
-      stepThroughConfigPages()
 
       cy.get('h1').should('contain', 'Choose a Browser')
 
@@ -96,8 +89,6 @@ describe('Choose a Browser Page', () => {
       cy.openProject('launchpad', ['--e2e'])
 
       cy.visitLaunchpad()
-
-      stepThroughConfigPages()
 
       cy.get('h1').should('contain', 'Choose a Browser')
 
@@ -132,7 +123,6 @@ describe('Choose a Browser Page', () => {
       cy.openProject('launchpad', ['--e2e'])
 
       cy.visitLaunchpad()
-      stepThroughConfigPages()
 
       cy.get('h1').should('contain', 'Choose a Browser')
 
@@ -168,8 +158,6 @@ describe('Choose a Browser Page', () => {
       cy.openProject('launchpad', ['--e2e'])
 
       cy.visitLaunchpad()
-
-      stepThroughConfigPages()
 
       cy.get('h1').should('contain', 'Choose a Browser')
 

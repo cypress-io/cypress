@@ -18,10 +18,10 @@ const videoCapture = require(`../../../lib/video_capture`)
 const env = require(`../../../lib/util/env`)
 const random = require(`../../../lib/util/random`)
 const system = require(`../../../lib/util/system`)
-const specsUtil = require(`../../../lib/util/specs`)
 const { experimental } = require(`../../../lib/experiments`)
 
-describe('lib/modes/run', () => {
+// NOTE: Covered by e2e/integration tests
+describe.skip('lib/modes/run', () => {
   beforeEach(function () {
     this.projectInstance = new ProjectBase({ projectRoot: '/_test-output/path/to/project-e2e', testingType: 'e2e' })
   })
@@ -672,21 +672,28 @@ describe('lib/modes/run', () => {
       sinon.stub(videoCapture, 'start').resolves()
       sinon.stub(openProject, 'launch').resolves()
       this.projectInstance.__setConfig(config)
-      sinon.stub(openProject, 'getProject').returns(this.projectInstance)
-      sinon.spy(errors, 'warning')
-
-      sinon.stub(specsUtil.default, 'findSpecs').resolves([
-        {
-          name: 'foo_spec.js',
-          path: 'cypress/integration/foo_spec.js',
-          absolute: '/path/to/spec.js',
-          specType: 'integration',
+      sinon.stub(openProject, 'getProject').returns({
+        getProjectId: () => Promise.resolve({}),
+        options: this.projectInstance.options,
+        getConfig: () => {
+          return {
+            e2e: {
+              specPattern: '...',
+            },
+          }
         },
-      ])
+        ctx: {
+          project: {
+            findSpecs: () => Promise.resolve([{}]),
+          },
+        },
+      })
+
+      sinon.spy(errors, 'warning')
     })
 
     it('shows no warnings for default browser', () => {
-      return runMode.run()
+      return runMode.run({ testingType: 'e2e' })
       .then(() => {
         expect(errors.warning).to.not.be.called
       })
@@ -697,7 +704,7 @@ describe('lib/modes/run', () => {
 
       sinon.stub(browsers, 'ensureAndGetByNameOrPath').resolves(browser)
 
-      return expect(runMode.run({ browser: 'opera' }))
+      return expect(runMode.run({ browser: 'opera', testingType: 'e2e' }))
       .to.be.rejectedWith(/invalid browser family in/)
     })
 
@@ -758,14 +765,6 @@ describe('lib/modes/run', () => {
       sinon.spy(runMode, 'runSpecs')
       sinon.stub(openProject, 'launch').resolves()
       sinon.stub(openProject, 'getProject').returns(this.projectInstance)
-      sinon.stub(specsUtil.default, 'findSpecs').resolves([
-        {
-          name: 'foo_spec.js',
-          path: 'cypress/integration/foo_spec.js',
-          absolute: '/path/to/spec.js',
-          specType: 'integration',
-        },
-      ])
     })
 
     it('no longer ensures user session', () => {

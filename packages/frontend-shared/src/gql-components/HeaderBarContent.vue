@@ -16,7 +16,7 @@
           :class="props.gql?.currentProject ? 'text-indigo-500' :
             'text-gray-700'"
           :href="props.gql?.currentProject ? 'global-mode' : undefined"
-          @click.prevent="clearActiveProject"
+          @click.prevent="clearCurrentProject"
         >
           Projects
         </a>
@@ -86,7 +86,7 @@
             <i-cy-profile_x16
               class="h-16px mr-8px w-16px block icon-dark-gray-500 icon-light-gray-100 group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50"
             />
-            <span class="group-hocus:text-indigo-500">{{ t('topNav.login.actionLogin') }}</span>
+            <span class="font-semibold group-hocus:text-indigo-500">{{ t('topNav.login.actionLogin') }}</span>
           </button>
         </div>
       </div>
@@ -101,7 +101,7 @@
 <script setup lang="ts">
 import { gql, useMutation } from '@urql/vue'
 import { ref, computed } from 'vue'
-import { GlobalPageHeader_ClearActiveProjectDocument, HeaderBar_HeaderBarContentFragment } from '../generated/graphql'
+import { GlobalPageHeader_ClearCurrentProjectDocument, HeaderBar_HeaderBarContentFragment } from '../generated/graphql'
 import TopNav from './topnav/TopNav.vue'
 import LoginModal from './topnav/LoginModal.vue'
 import UserAvatar from './topnav/UserAvatar.vue'
@@ -110,8 +110,12 @@ import { useI18n } from '@cy/i18n'
 import ExternalLink from './ExternalLink.vue'
 
 gql`
-mutation GlobalPageHeader_clearActiveProject {
-  clearActiveProject
+mutation GlobalPageHeader_clearCurrentProject {
+  clearCurrentProject {
+    currentProject {
+      id
+    }
+  }
 }
 `
 
@@ -127,16 +131,16 @@ fragment HeaderBar_HeaderBarContent on Query {
 `
 
 const isLoginOpen = ref(false)
-const clearActiveProjectMutation = useMutation(GlobalPageHeader_ClearActiveProjectDocument)
+const clearCurrentProjectMutation = useMutation(GlobalPageHeader_ClearCurrentProjectDocument)
 const email = computed(() => props.gql.cloudViewer?.email || undefined)
 
 const openLogin = () => {
   isLoginOpen.value = true
 }
 
-const clearActiveProject = () => {
+const clearCurrentProject = () => {
   if (props.gql.currentProject) {
-    clearActiveProjectMutation.executeMutation({})
+    clearCurrentProjectMutation.executeMutation({})
   }
 }
 

@@ -38,7 +38,7 @@ export class DevActions {
       try {
         await this.ctx.destroy()
       } catch (e) {
-        this.ctx.logError(e)
+        this.ctx.logTraceError(e)
       } finally {
         process.exitCode = 0
         await this.ctx.fs.writeFile(DevActions.CY_TRIGGER_UPDATE, JSON.stringify(new Date()))

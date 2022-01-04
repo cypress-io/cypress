@@ -11,7 +11,7 @@
         scope="global"
         keypath="settingsPage.config.description"
       >
-        <OpenConfigFileInIDE :gql="props.gql" />
+        <OpenConfigFileInIDE />
       </i18n-t>
     </template>
     <div class="flex w-full">
@@ -21,7 +21,6 @@
       />
       <ConfigLegend
         class="rounded-tr-md px-22px py-28px border-1 border-l-0 rounded-br-md min-w-280px"
-        :gql="props.gql"
       />
     </div>
   </SettingsSection>
@@ -45,8 +44,6 @@ fragment Config on Query {
     id
     config
   }
-  ...ConfigLegend
-  ...OpenConfigFileInIDE
 }
 `
 

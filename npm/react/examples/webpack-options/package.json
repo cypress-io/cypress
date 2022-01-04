@@ -6,7 +6,7 @@
     "check-coverage": "check-coverage Test.js calc.js ParentComponent.js ChildComponent.js",
     "cy:open": "node ../../../../scripts/cypress open --component",
     "only-covered": "only-covered Test.js calc.js ParentComponent.js ChildComponent.js",
-    "test": "node ../../../../scripts/cypress run ---component"
+    "test": "node ../../../../scripts/cypress run --component"
   },
   "devDependencies": {
     "@babel/core": "7.4.5",

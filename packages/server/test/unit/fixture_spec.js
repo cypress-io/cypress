@@ -26,7 +26,7 @@ describe('lib/fixture', () => {
       return fs.readFileAsync(path.join(folder, image), encoding)
     }
 
-    ctx.actions.project.setActiveProjectForTestSetup(this.todosPath)
+    ctx.actions.project.setCurrentProjectForTestSetup(this.todosPath)
 
     return config.get(this.todosPath)
     .then((cfg) => {
@@ -179,7 +179,7 @@ Expecting 'EOF', '}', ':', ',', ']', got 'STRING'\
     it('can load a fixture with no extension when a same-named folder also exists', () => {
       const projectPath = FixturesHelper.projectPath('folder-same-as-fixture')
 
-      ctx.actions.project.setActiveProjectForTestSetup(projectPath)
+      ctx.actions.project.setCurrentProjectForTestSetup(projectPath)
 
       return config.get(projectPath)
       .then((cfg) => {

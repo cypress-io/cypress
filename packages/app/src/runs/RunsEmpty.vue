@@ -14,7 +14,7 @@
             scope="global"
             keypath="runs.empty.step1"
           >
-            <span class="text-indigo-500">{{ configFilePath }}</span>
+            <span class="text-indigo-500">{{ configFile }}</span>
           </i18n-t>
         </p>
         <ShikiHighlight
@@ -30,7 +30,7 @@
             scope="global"
             keypath="runs.empty.step2"
           >
-            <span class="text-indigo-400">{{ configFilePath }}</span>
+            <span class="text-indigo-400">{{ configFile }}</span>
           </i18n-t>
         </p>
         <TerminalPrompt
@@ -68,7 +68,7 @@ fragment RunsEmpty on CurrentProject {
   id
   title
   projectId
-  configFilePath
+  configFile
   cloudProject {
     __typename
     ... on CloudProject {
@@ -94,7 +94,7 @@ const projectIdCode = computed(() => {
 })
 
 const projectName = computed(() => props.gql.title)
-const configFilePath = computed(() => props.gql.configFilePath)
+const configFile = computed(() => props.gql.configFile)
 const firstRecordKey = computed(() => {
   return props.gql.cloudProject?.__typename === 'CloudProject' && props.gql.cloudProject.recordKeys?.[0]
     ? props.gql.cloudProject?.recordKeys?.[0]?.key

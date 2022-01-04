@@ -11,7 +11,7 @@ describe('<GlobalProjectCard />', () => {
     const removeProjectSpy = cy.spy().as('removeProjectSpy')
     const openInFinderSpy = cy.spy().as('openInFinderSpy')
     const openInIDESpy = cy.spy().as('openInIDESpy')
-    const setActiveProjectSpy = cy.spy().as('setActiveProjectSpy')
+    const setCurrentProjectSpy = cy.spy().as('setCurrentProjectSpy')
 
     cy.mountFragment(GlobalProjectCardFragmentDoc, {
       render: (gqlValue) => (
@@ -20,7 +20,7 @@ describe('<GlobalProjectCard />', () => {
             onOpenInIDE={openInIDESpy}
             onOpenInFinder={openInFinderSpy}
             onRemoveProject={removeProjectSpy}
-            on_setActiveProject={setActiveProjectSpy} />
+            on_setCurrentProject={setCurrentProjectSpy} />
         </div>
       ),
     })
@@ -71,7 +71,7 @@ describe('<GlobalProjectCard />', () => {
       it('opens project when card is clicked on while menu is open', () => {
         cy.get(projectCardSelector)
         .click()
-        .get('@setActiveProjectSpy')
+        .get('@setCurrentProjectSpy')
         .should('have.been.calledOnceWith', defaultPath)
       })
 
@@ -79,7 +79,7 @@ describe('<GlobalProjectCard />', () => {
         cy.get('@openMenuButton')
         .should('be.visible')
         .click()
-        .get('@setActiveProjectSpy')
+        .get('@setCurrentProjectSpy')
         .should('not.have.been.called')
       })
 

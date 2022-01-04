@@ -56,12 +56,6 @@ describe('App: Runs Page', () => {
 
   it('when no project Id in the config file, shows call to action', () => {
     cy.withCtx(async (ctx) => {
-      if (ctx.currentProject) {
-        ctx.currentProject.configChildProcess?.process.kill()
-        ctx.currentProject.config = null
-        ctx.currentProject.configChildProcess = null
-      }
-
       await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {}')
     })
 
