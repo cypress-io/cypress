@@ -25,7 +25,9 @@ import { useMutation } from '@urql/vue'
 
 gql`
 mutation ExternalEditorSettings_SetPreferredEditorBinary ($value: String!) {
-  setPreferences (value: $value)
+  setPreferences (value: $value) {
+    ...ExternalEditorSettings
+  }
 }`
 
 const { t } = useI18n()

@@ -3,4 +3,5 @@
 
 export * from './autoBindDebug'
 export * from './cached'
+export * from './file'
 export * from './urqlCacheKeys'

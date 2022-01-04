@@ -4,7 +4,6 @@ const path = require('path')
 const os = require('os')
 const cypressEx = require('@packages/example')
 const { fs } = require('./util/fs')
-const glob = require('./util/glob')
 const cwd = require('./cwd')
 const debug = require('debug')('cypress:server:scaffold')
 const errors = require('./errors')
@@ -15,10 +14,6 @@ const getExampleFolderFullPaths = cypressEx.getPathToExampleFolders()
 
 const getPathFromIntegrationFolder = (file) => {
   return file.substring(file.indexOf('integration/') + 'integration/'.length)
-}
-
-const isDifferentNumberOfFiles = (files, exampleSpecs) => {
-  return files.length !== exampleSpecs.length
 }
 
 const getExampleSpecs = (foldersOnly = false) => {
@@ -49,12 +44,6 @@ const getIndexedExample = (file, index) => {
   return index[getPathFromIntegrationFolder(file)]
 }
 
-const filesNamesAreDifferent = (files, index) => {
-  return _.some(files, (file) => {
-    return !getIndexedExample(file, index)
-  })
-}
-
 const getFileSize = (file) => {
   return fs.statAsync(file).get('size')
 }
@@ -71,20 +60,6 @@ const fileSizeIsSame = (file, index) => {
   })
 }
 
-const filesSizesAreSame = (files, index) => {
-  return Promise.join(
-    Promise.all(_.map(files, getFileSize)),
-    Promise.all(_.map(files, (file) => {
-      return getFileSize(getIndexedExample(file, index))
-    })),
-  )
-  .spread((fileSizes, originalFileSizes) => {
-    return _.every(fileSizes, (size, i) => {
-      return size === originalFileSizes[i]
-    })
-  })
-}
-
 const componentTestingEnabled = (config) => {
   const componentTestingEnabled = _.get(config, 'resolved.testingType.value', 'e2e') === 'component'
 
@@ -92,57 +67,7 @@ const componentTestingEnabled = (config) => {
 }
 
 const isNewProject = (config) => {
-  // logic to determine if new project
-  // 1. 'integrationFolder' is still the default
-  // 2. component testing is not enabled
-  // 3. there are no files in 'integrationFolder'
-  // 4. there is the same number of files in 'integrationFolder'
-  // 5. the files are named the same as the example files
-  // 6. the bytes of the files match the example files
-
-  const { integrationFolder } = config
-
-  debug('determine if new project by globbing files in %o', { integrationFolder })
-
-  if (!isDefault(config, 'integrationFolder')) {
-    return Promise.resolve(false)
-  }
-
-  // checks for file up to 3 levels deep
-  return glob('{*,*/*,*/*/*}', { cwd: integrationFolder, realpath: true, nodir: true })
-  .then((files) => {
-    debug(`found ${files.length} files in folder ${integrationFolder}`)
-    debug('determine if we should scaffold:')
-
-    // TODO: add tests for this
-    debug('- empty?', _.isEmpty(files))
-    if (_.isEmpty(files)) {
-      return true
-    }
-
-    return getExampleSpecs()
-    .then((exampleSpecs) => {
-      const numFilesDifferent = isDifferentNumberOfFiles(files, exampleSpecs.shortPaths)
-
-      debug('- different number of files?', numFilesDifferent)
-      if (numFilesDifferent) {
-        return false
-      }
-
-      const filesNamesDifferent = filesNamesAreDifferent(files, exampleSpecs.index)
-
-      debug('- different file names?', filesNamesDifferent)
-      if (filesNamesDifferent) {
-        return false
-      }
-
-      return filesSizesAreSame(files, exampleSpecs.index)
-    })
-  }).then((sameSizes) => {
-    debug('- same sizes?', sameSizes)
-
-    return sameSizes
-  })
+  return false
 }
 
 module.exports = {
@@ -163,7 +88,7 @@ module.exports = {
       return getExampleSpecs()
       .then(({ fullPaths }) => {
         return Promise.all(_.map(fullPaths, (file) => {
-          return this._copy(file, folder, config, true)
+          return this._copy(file, folder)
         }))
       })
     })
@@ -180,7 +105,7 @@ module.exports = {
     return this.verifyScaffolding(folder, () => {
       debug(`copying example.json into ${folder}`)
 
-      return this._copy(cypressEx.getPathToFixture(), folder, config)
+      return this._copy(cypressEx.getPathToFixture(), folder)
     })
   },
 
@@ -199,7 +124,7 @@ module.exports = {
       .then((supportFiles) => {
         return Promise.all(
           supportFiles.map((supportFilePath) => {
-            return this._copy(supportFilePath, folder, config)
+            return this._copy(supportFilePath, folder)
           }),
         )
       })
@@ -216,20 +141,18 @@ module.exports = {
     return this.verifyScaffolding(folder, () => {
       debug(`copying index.js into ${folder}`)
 
-      return this._copy(cypressEx.getPathToPlugins(), folder, config)
+      return this._copy(cypressEx.getPathToPlugins(), folder)
     })
   },
 
-  _copy (file, folder, config, integration = false) {
+  _copy (file, folder) {
     // allow file to be relative or absolute
     const src = path.resolve(cwd('lib', 'scaffold'), file)
-    const destFile = integration ? getPathFromIntegrationFolder(file) : path.basename(file)
+    const destFile = path.basename(file)
     const dest = path.join(folder, destFile)
 
-    return this._assertInFileTree(dest, config)
-    .then(() => {
-      return fs.copyAsync(src, dest)
-    }).catch((error) => {
+    return fs.copyAsync(src, dest)
+    .catch((error) => {
       if (error.code === 'EACCES') {
         error = errors.get('ERROR_WRITING_FILE', dest, error)
       }
@@ -357,14 +280,7 @@ module.exports = {
   },
 
   _assertInFileTree (filePath, config) {
-    const relativeFilePath = path.relative(config.projectRoot, filePath)
-
-    return this.fileTree(config)
-    .then((fileTree) => {
-      if (!this._inFileTree(fileTree, relativeFilePath)) {
-        throw new Error(`You attempted to scaffold a file, '${relativeFilePath}', that's not in the scaffolded file tree. This is because you added, removed, or changed a scaffolded file. Make sure to update scaffold#fileTree to match your changes.`)
-      }
-    })
+    return true
   },
 
   _inFileTree (fileTree, filePath) {
