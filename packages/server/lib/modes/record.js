@@ -301,7 +301,7 @@ const createRun = Promise.method((options = {}) => {
   }
 
   // go back to being a string
-  if (specPattern) {
+  if (Array.isArray(specPattern)) {
     specPattern = specPattern.join(',')
   }
 
