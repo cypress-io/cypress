@@ -15,6 +15,7 @@ export interface AuthenticatedUserShape {
 
 export interface ProjectShape {
   projectRoot: string
+  savedState?: SavedStateShape
 }
 
 export interface DevStateShape {
@@ -25,6 +26,12 @@ export interface LocalSettingsDataShape {
   refreshing: Promise<Editor[]> | null
   availableEditors: Editor[]
   preferences: AllowedState
+}
+
+export interface SavedStateShape {
+  firstOpened?: number | null
+  lastOpened?: number | null
+  promptsShown?: object | null
 }
 
 export interface ConfigChildProcessShape {

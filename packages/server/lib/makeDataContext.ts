@@ -114,6 +114,9 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       closeActiveProject () {
         return openProject.closeActiveProject()
       },
+      getCurrentProjectSavedState () {
+        return openProject.getConfig()?.state
+      },
     },
     electronApi: {
       openExternal (url: string) {

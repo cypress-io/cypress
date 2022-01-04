@@ -115,6 +115,10 @@ export class ProjectDataSource {
     return this.ctx.lifecycleManager.loadedFullConfig
   }
 
+  getCurrentProjectSavedState () {
+    return this.api.getCurrentProjectSavedState()
+  }
+
   get specs () {
     return this._specs
   }

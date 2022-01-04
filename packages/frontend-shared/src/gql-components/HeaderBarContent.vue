@@ -31,6 +31,8 @@
         <TopNav
           :gql="props.gql"
           :show-browsers="props.showBrowsers"
+          :force-open-docs="isForceOpenAllowed && isShowablePromptInSavedSatate"
+          @clear-force-open="isForceOpenAllowed = false"
         >
           <template
             v-if="!!props.gql?.cloudViewer"
@@ -108,6 +110,8 @@ import UserAvatar from './topnav/UserAvatar.vue'
 import Auth from './Auth.vue'
 import { useI18n } from '@cy/i18n'
 import ExternalLink from './ExternalLink.vue'
+import interval from 'human-interval'
+import { sortBy } from 'lodash'
 
 gql`
 mutation GlobalPageHeader_clearCurrentProject {
@@ -124,11 +128,20 @@ fragment HeaderBar_HeaderBarContent on Query {
   currentProject {
     id
     title
+    config
+    savedState
   }
   ...TopNav
   ...Auth
 }
 `
+
+const savedState = computed(() => {
+  return props.gql?.currentProject?.savedState
+})
+const cloudProjectId = computed(() => {
+  return props.gql?.currentProject?.config?.find((item: { field: string }) => item.field === 'projectId')?.value
+})
 
 const isLoginOpen = ref(false)
 const clearCurrentProjectMutation = useMutation(GlobalPageHeader_ClearCurrentProjectDocument)
@@ -148,8 +161,59 @@ const props = defineProps<{
   gql: HeaderBar_HeaderBarContentFragment,
   showBrowsers?: boolean,
   pageName?: string,
+  allowAutomaticPromptOpen?: boolean
 }>()
 
 const { t } = useI18n()
+const prompts = sortBy([
+  {
+    slug: 'ci1',
+    interval: interval('4 days'),
+    noProjectId: true,
+  },
+  {
+    slug: 'orchestration1',
+    noProjectId: true,
+  },
+], 'interval')
+const isForceOpenAllowed = ref(true)
+const isShowablePromptInSavedSatate = computed(() => {
+  if (savedState.value) {
+    for (const prompt of prompts) {
+      if (shouldShowPrompt(prompt)) {
+        return true
+      }
+    }
+  }
 
+  return false
+})
+
+function shouldShowPrompt (prompt: { slug: string; noProjectId: boolean; interval?: number }) {
+  // we want the component using the header to control if the prompt shows at all
+  if (props.allowAutomaticPromptOpen !== true) {
+    return false
+  }
+
+  const timeSinceOpened = Date.now() - savedState.value?.firstOpened
+
+  // prompt has been shown
+  if (savedState.value?.promptsShown?.[prompt.slug]) {
+    return false
+  }
+
+  // enough time has passed
+  // no interval indicates never being shown automatically
+  if (!prompt.interval || timeSinceOpened < prompt.interval) {
+    return false
+  }
+
+  // if prompt requires no project id,
+  // check if project id exists
+  if (prompt.noProjectId && cloudProjectId.value) {
+    return false
+  }
+
+  return true
+}
 </script>

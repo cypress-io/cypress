@@ -1,0 +1,166 @@
+[
+    {
+        "from": "default",
+        "value": 5,
+        "field": "animationDistanceThreshold"
+    },
+    {
+        "from": "config",
+        "value": "http://localhost:8080",
+        "field": "baseUrl"
+    },
+    {
+        "from": "plugin",
+        "value": [
+            {
+                "name": "chrome",
+                "displayName": "Chrome",
+                "family": "chromium",
+                "version": "50.0.2661.86",
+                "path": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+                "majorVersion": "50"
+            },
+            {
+                "name": "chromium",
+                "displayName": "Chromium",
+                "family": "chromium",
+                "version": "49.0.2609.0",
+                "path": "/Users/bmann/Downloads/chrome-mac/Chromium.app/Contents/MacOS/Chromium",
+                "majorVersion": "49"
+            },
+            {
+                "name": "chrome",
+                "displayName": "Canary",
+                "family": "chromium",
+                "version": "48.0",
+                "path": "/Users/bmann/Downloads/chrome-mac/Canary.app/Contents/MacOS/Canary",
+                "majorVersion": "48"
+            },
+            {
+                "name": "electron",
+                "family": "chromium",
+                "displayName": "Electron",
+                "path": "",
+                "version": "99.101.1234",
+                "majorVersion": "99"
+            }
+        ],
+        "field": "browsers"
+    },
+    {
+        "from": "default",
+        "value": 4000,
+        "field": "commandTimeout"
+    },
+    {
+        "value": {
+            "fileServerFolder": "",
+            "fixturesFolder": "cypress/fixtures",
+            "integrationFolder": "cypress/integration/project",
+            "numTestsKeptInMemory": 10
+        },
+        "field": "env",
+        "from": "env"
+    },
+    {
+        "from": "default",
+        "value": 60000,
+        "field": "execTimeout"
+    },
+    {
+        "from": "default",
+        "value": null,
+        "field": "fileServerFolder"
+    },
+    {
+        "from": "default",
+        "value": "cypress/fixtures",
+        "field": "fixturesFolder"
+    },
+    {
+        "from": "envFile",
+        "value": "cypress/integration/project",
+        "field": "integrationFolder"
+    },
+    {
+        "from": "cli",
+        "value": 10,
+        "field": "numTestsKeptInMemory"
+    },
+    {
+        "from": "default",
+        "value": 30000,
+        "field": "pageLoadTimeout"
+    },
+    {
+        "from": "default",
+        "value": "cypress/plugins/index.js",
+        "field": "pluginsFile"
+    },
+    {
+        "from": "default",
+        "value": 2020,
+        "field": "port"
+    },
+    {
+        "from": "env",
+        "value": "mocha",
+        "field": "reporter"
+    },
+    {
+        "from": "default",
+        "value": 5000,
+        "field": "requestTimeout"
+    },
+    {
+        "from": "default",
+        "value": 20000,
+        "field": "responseTimeout"
+    },
+    {
+        "from": "default",
+        "value": "cypress/support",
+        "field": "supportFolder"
+    },
+    {
+        "from": "default",
+        "value": 660,
+        "field": "viewportHeight"
+    },
+    {
+        "from": "default",
+        "value": 1000,
+        "field": "viewportWidth"
+    },
+    {
+        "from": "default",
+        "value": true,
+        "field": "waitForAnimations"
+    },
+    {
+        "from": "default",
+        "value": "top",
+        "field": "scrollBehavior"
+    },
+    {
+        "from": "default",
+        "value": true,
+        "field": "watchForFileChanges"
+    },
+    {
+        "from": "config",
+        "value": [
+            "www.google-analytics.com",
+            "hotjar.com"
+        ],
+        "field": "blockHosts"
+    },
+    {
+        "from": "config",
+        "value": {
+            "*.foobar.com": "127.0.0.1",
+            "*.bazqux.com": "127.0.0.2"
+        },
+        "field": "hosts"
+    }
+]
