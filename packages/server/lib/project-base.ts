@@ -18,7 +18,6 @@ import errors from './errors'
 import Reporter from './reporter'
 import runEvents from './plugins/run_events'
 import * as savedState from './saved_state'
-import scaffold from './scaffold'
 import { ServerE2E } from './server-e2e'
 import system from './util/system'
 import { ensureProp } from './util/class-helpers'
@@ -246,10 +245,7 @@ export class ProjectBase<TServer extends Server> extends EE {
       projectRoot: this.projectRoot,
     })
 
-    await Promise.all([
-      this.scaffold(cfg),
-      this.saveState(stateToSave),
-    ])
+    await this.saveState(stateToSave)
 
     await Promise.all([
       checkSupportFile({ configFile: cfg.configFile, supportFile: cfg.supportFile }),
@@ -595,26 +591,6 @@ export class ProjectBase<TServer extends Server> extends EE {
 
   writeConfigFile ({ code, configFilename }: { code: string, configFilename: string }) {
     fs.writeFileSync(path.resolve(this.projectRoot, configFilename), code)
-  }
-
-  scaffold (cfg: Cfg) {
-    debug('scaffolding project %s', this.projectRoot)
-
-    const scaffolds = []
-
-    const push = scaffolds.push.bind(scaffolds) as any
-
-    // TODO: we are currently always scaffolding support
-    // even when headlessly - this is due to a major breaking
-    // change of 0.18.0
-    // we can later force this not to always happen when most
-    // of our users go beyond 0.18.0
-    //
-    // ensure support dir is created
-    // and example support file if dir doesnt exist
-    push(scaffold.support(cfg.supportFolder, cfg))
-
-    return Promise.all(scaffolds)
   }
 
   // These methods are not related to start server/sockets/runners
