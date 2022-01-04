@@ -192,8 +192,22 @@ fragment SelectCloudProjectModal on Query {
 gql`
 mutation SelectCloudProjectModal_SetProjectId( $projectId: String! ) {
   setProjectIdInConfigFile(projectId: $projectId) {
-    id
-    config
+    currentProject{
+      id
+      projectId
+      cloudProject {
+        __typename
+        ... on CloudProject {
+          id
+          runs(first: 10) {
+            nodes {
+              id
+              ...RunCard
+            }
+          }
+        }
+      }
+    }
   }
 }
 `
@@ -263,7 +277,9 @@ async function createOrConnectProject () {
   if (projectId) {
     const { data } = await setProjectIdMutation.executeMutation({ projectId })
 
-    if (data?.setProjectIdInConfigFile?.config.projectId === projectId) {
+    const updatedProjectId = data?.setProjectIdInConfigFile?.currentProject?.projectId
+
+    if (updatedProjectId === projectId) {
       emit('success') // close the popup and show success alert
     } else {
       emit('update-projectId-failed', projectId)
