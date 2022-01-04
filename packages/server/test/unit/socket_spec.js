@@ -326,7 +326,7 @@ describe('lib/socket', () => {
 
               return done()
             }
-            , 100)
+            , 1000)
           })
         })
       })
