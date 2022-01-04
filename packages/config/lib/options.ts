@@ -527,3 +527,11 @@ export const breakingOptions: Array<BreakingOption> = [
     isWarning: true,
   },
 ]
+
+export const breakingRootOptions: Array<BreakingOption> = [
+  {
+    name: 'supportFile',
+    errorKey: 'SUPPORT_FILE_ROOT_NOT_SUPPORTED',
+    isWarning: false,
+  },
+]

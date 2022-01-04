@@ -1051,9 +1051,9 @@ const getMsgByType = function (type, ...args) {
       `
     case 'SUPPORT_FILE_ROOT_NOT_SUPPORTED':
       return stripIndent`\
-          The ${chalk.yellow(`\`supportFile\``)} configuration option was removed from the root in Cypress version \`10.0.0\`. Please update this option under each testing type property.
+        The ${chalk.yellow(`\`supportFile\``)} configuration option was removed from the root in Cypress version \`10.0.0\`. Please update this option under each testing type property.
 
-          https://on.cypress.io/migration-guide`
+        https://on.cypress.io/migration-guide`
     default:
   }
 }

@@ -384,12 +384,6 @@ describe('lib/scaffold', () => {
       return scaffold.fileTree(this.cfg).then(snapshot)
     })
 
-    it('leaves out support if configured to false', function () {
-      this.cfg.supportFile = false
-
-      return scaffold.fileTree(this.cfg).then(snapshot)
-    })
-
     it('leaves out plugins if configured to false', function () {
       this.cfg.pluginsFile = false
 
