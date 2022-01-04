@@ -14,7 +14,6 @@ export default defineConfig({
     'openMode': 0,
   },
   'e2e': {
-    specPattern: 'cypress/integration/**/*.{js,ts}',
     setupNodeEvents (on, config) {
       const express = require('express')
 
