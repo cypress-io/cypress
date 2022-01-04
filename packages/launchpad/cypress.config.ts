@@ -17,7 +17,6 @@ export default defineConfig({
     'configFile': '../../mocha-reporter-config.json',
   },
   'component': {
-    'specPattern': 'src/**/*.spec.{js,ts,tsx,jsx}',
     'supportFile': 'cypress/component/support/index.ts',
     'pluginsFile': 'cypress/component/plugins/index.js',
     devServer (cypressConfig, devServerConfig) {

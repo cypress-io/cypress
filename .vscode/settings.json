@@ -37,5 +37,6 @@
 
   // Volar is the main extension that powers Vue's language features.
   "volar.autoCompleteRefs": false,
+  "C_Cpp.intelliSenseEngineFallback": "Enabled",
   // "volar.takeOverMode.enabled": true
 }
