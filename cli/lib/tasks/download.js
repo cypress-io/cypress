@@ -16,6 +16,7 @@ const fs = require('../fs')
 const util = require('../util')
 
 const defaultBaseUrl = 'https://download.cypress.io/'
+const defaultMaxRedirects = 10
 
 const getProxyForUrlWithNpmConfig = (url) => {
   return getProxyForUrl(url) ||
@@ -186,9 +187,15 @@ const verifyDownloadedFile = (filename, expectedSize, expectedChecksum) => {
 // downloads from given url
 // return an object with
 // {filename: ..., downloaded: true}
-const downloadFromUrl = ({ url, downloadDestination, progress, ca, version, redirectTTL = 10 }) => {
+const downloadFromUrl = ({ url, downloadDestination, progress, ca, version, redirectTTL = defaultMaxRedirects }) => {
   if (redirectTTL <= 0) {
-    return Promise.reject(new Error('Excessive redirects!'))
+    return Promise.reject(new Error(
+      stripIndent`
+          Failed downloading the Cypress binary.
+          There were too many redirects. The default allowance is ${defaultMaxRedirects}.
+          If you need more, use environment variable CYPRESS_DOWNLOAD_REDIRECT_TTL
+        `,
+    ))
   }
 
   return new Promise((resolve, reject) => {
