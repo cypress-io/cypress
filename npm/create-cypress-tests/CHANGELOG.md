@@ -1,3 +1,15 @@
+# [create-cypress-tests-v1.3.0](https://github.com/cypress-io/cypress/compare/create-cypress-tests-v1.2.0...create-cypress-tests-v1.3.0) (2021-12-16)
+
+
+### Bug Fixes
+
+* Restore broken gif ([#18987](https://github.com/cypress-io/cypress/issues/18987)) ([f251681](https://github.com/cypress-io/cypress/commit/f251681b814b102ca374abdef148b777c4e72c67))
+
+
+### Features
+
+* use hoisted yarn install in binary build ([#17285](https://github.com/cypress-io/cypress/issues/17285)) ([e4f5b10](https://github.com/cypress-io/cypress/commit/e4f5b106d49d6ac0857c5fdac886f83b99558c88))
+
 # [create-cypress-tests-v1.2.0](https://github.com/cypress-io/cypress/compare/create-cypress-tests-v1.1.3...create-cypress-tests-v1.2.0) (2021-11-10)
 
 

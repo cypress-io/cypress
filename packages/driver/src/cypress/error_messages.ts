@@ -250,9 +250,15 @@ export default {
       message: `Setting the config via ${cmd('Cypress.config')} failed with the following validation error:\n\n{{errMsg}}`,
       docsUrl: 'https://on.cypress.io/config',
     },
-    'invalid_test_override': {
+    invalid_test_override: {
       message: `The config override passed to your test has the following validation error:\n\n{{errMsg}}`,
       docsUrl: 'https://on.cypress.io/config',
+    },
+    invalid_cypress_config_override: {
+      message: `\`Cypress.config()\` cannot mutate option \`{{errProperty}}\` because it is a read-only property.`,
+    },
+    invalid_test_config_override: {
+      message: `Cypress test configuration cannot mutate option \`{{errProperty}}\` because it is a read-only property.`,
     },
   },
 
