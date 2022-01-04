@@ -1,6 +1,6 @@
 /// <reference types="cypress" />
 import { mount } from '@cypress/vue'
 
-Cypress.Commands.add('mount', (comp) => {
+Cypress.Commands.overwrite('mount', (fn, comp) => {
   return mount(comp)
 })

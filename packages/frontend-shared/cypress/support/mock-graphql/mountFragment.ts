@@ -25,10 +25,10 @@ export interface MountFnOptions {
 }
 
 export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
-  Cypress.Commands.add(
+  Cypress.Commands.overwrite(
     'mount',
     // @ts-ignore todo: figure out the correct types
-    <C extends Parameters<typeof mount>[0]>(comp: C, options: CyMountOptions<C> = {}) => {
+    <C extends Parameters<typeof mount>[0]>(fn, comp: C, options: CyMountOptions<C> = {}) => {
       options.global = options.global || {}
       options.global.stubs = options.global.stubs || {}
       options.global.stubs.transition = false
