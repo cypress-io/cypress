@@ -134,7 +134,13 @@ const setup = () => {
       await deferredSwitchToDomain.promise
       specBridgeCommunicator.toPrimary('run:domain:fn')
     } catch (err) {
-      specBridgeCommunicator.toPrimary('run:domain:fn', err)
+      // Native Error types currently cannot be cloned in Firefox when using 'postMessage'.
+      // Please see https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm for more details
+      specBridgeCommunicator.toPrimary('run:domain:fn', {
+        name: err.name,
+        message: err.message,
+        stack: err.stack,
+      })
     } finally {
       cy.state('done', undefined)
       cy.state('switchToDomainDeferred', undefined)
