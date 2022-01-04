@@ -8,13 +8,13 @@ exports['e2e uncaught support file errors failing 1'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (spec.cy.js)                                                               │
-  │ Searched:   cypress/e2e/**/*                                                                   │
+  │ Searched:   cypress/e2e/**/*.cy.{js,jsx,ts,tsx}                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  spec.cy.js                                                                         (1 of 1)
+  Running:  spec.cy.js                                                                      (1 of 1)
 
 
   1) An uncaught error was detected outside of a test
@@ -48,20 +48,20 @@ We dynamically generated a new test to display this failure.
   │ Screenshots:  1                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     spec.cy.js                                                                          │
+  │ Spec Ran:     spec.cy.js                                                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/spec.cy.js/An uncaught error was detected outside           (YxX)
-     of a test (failed).png                                                                         
+  -  /XXX/XXX/XXX/cypress/screenshots/spec.cy.js/An uncaught error was detected outsi          (YxX)
+     de of a test (failed).png                                                                      
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/spec.cy.js.mp4                         (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/spec.cy.js.mp4                      (X second)
 
 
 ====================================================================================================
@@ -71,7 +71,7 @@ We dynamically generated a new test to display this failure.
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  spec.cy.js                                  XX:XX        1        -        1        -        - │
+  │ ✖  spec.cy.js                               XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
 

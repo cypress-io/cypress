@@ -81,18 +81,17 @@ Although you have test retries enabled, we do not retry tests when \`before all\
 
   (Screenshots)
 
-  -  /private/XXX/XXX/XXX/cypress/screenshots/simple_failing_hook.cy.js/simple failin     (1280x720)
-     g hook spec -- beforeEach hooks -- never gets here (failed).png                                
-  -  /private/XXX/XXX/XXX/cypress/screenshots/simple_failing_hook.cy.js/simple failin     (1280x720)
-     g hook spec -- beforeEach hooks -- never gets here -- before each hook (failed)                
-     (attempt 2).png                                                                                
-  -  /private/XXX/XXX/XXX/cypress/screenshots/simple_failing_hook.cy.js/simple failin     (1280x720)
-     g hook spec -- afterEach hooks -- runs this -- after each hook (failed).png                    
-  -  /private/XXX/XXX/XXX/cypress/screenshots/simple_failing_hook.cy.js/simple failin     (1280x720)
-     g hook spec -- afterEach hooks -- runs this -- after each hook (failed) (attempt               
+  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook.cy.js/simple failing hook s     (1280x720)
+     pec -- beforeEach hooks -- never gets here (failed).png                                        
+  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook.cy.js/simple failing hook s     (1280x720)
+     pec -- beforeEach hooks -- never gets here -- before each hook (failed) (attempt               
       2).png                                                                                        
-  -  /private/XXX/XXX/XXX/cypress/screenshots/simple_failing_hook.cy.js/simple failin     (1280x720)
-     g hook spec -- after hooks -- fails on this -- after all hook (failed).png                     
+  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook.cy.js/simple failing hook s     (1280x720)
+     pec -- afterEach hooks -- runs this -- after each hook (failed).png                            
+  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook.cy.js/simple failing hook s     (1280x720)
+     pec -- afterEach hooks -- runs this -- after each hook (failed) (attempt 2).png                
+  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook.cy.js/simple failing hook s     (1280x720)
+     pec -- after hooks -- fails on this -- after all hook (failed).png                             
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -134,10 +133,10 @@ Although you have test retries enabled, we do not retry tests when \`before all\
 
   (Screenshots)
 
-  -  /private/XXX/XXX/XXX/cypress/screenshots/simple_retrying.cy.js/simple retrying s     (1280x720)
-     pec -- t1 (failed).png                                                                         
-  -  /private/XXX/XXX/XXX/cypress/screenshots/simple_retrying.cy.js/simple retrying s     (1280x720)
-     pec -- t1 (failed) (attempt 2).png                                                             
+  -  /XXX/XXX/XXX/cypress/screenshots/simple_retrying.cy.js/simple retrying spec -- t     (1280x720)
+     1 (failed).png                                                                                 
+  -  /XXX/XXX/XXX/cypress/screenshots/simple_retrying.cy.js/simple retrying spec -- t     (1280x720)
+     1 (failed) (attempt 2).png                                                                     
 
 
 ====================================================================================================
