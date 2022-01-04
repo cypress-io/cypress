@@ -17,14 +17,25 @@ export default defineConfig({
     'configFile': '../../mocha-reporter-config.json',
   },
   'component': {
+    'specPattern': 'src/**/*.spec.{js,ts,tsx,jsx}',
     'supportFile': 'cypress/component/support/index.ts',
-    devServer (cypressConfig) {
+    'pluginsFile': 'cypress/component/plugins/index.js',
+    devServer (cypressConfig, devServerConfig) {
       const { startDevServer } = require('@cypress/vite-dev-server')
 
       return startDevServer({
         options: cypressConfig,
-        viteConfig: require('./vite.config'),
+        ...devServerConfig,
       })
+    },
+    devServerConfig: {
+      viteConfig: {
+        optimizeDeps: {
+          include: [
+            '@packages/ui-components/cypress/support/customPercyCommand',
+          ],
+        },
+      },
     },
   },
   'e2e': {

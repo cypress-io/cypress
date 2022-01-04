@@ -1,21 +1,21 @@
 import _ from 'lodash'
 import path from 'path'
-import Promise from 'bluebird'
+import Bluebird from 'bluebird'
 import deepDiff from 'return-deep-diff'
-import type { ResolvedConfigurationOptions, ResolvedFromConfig, ResolvedConfigurationOptionSource } from '@packages/types'
+import type { ResolvedFromConfig, ResolvedConfigurationOptionSource, AllModeOptions, FullConfig } from '@packages/types'
 import configUtils from '@packages/config'
 
 import errors from './errors'
 import { fs } from './util/fs'
 import keys from './util/keys'
 import origin from './util/origin'
-import * as settings from './util/settings'
 import Debug from 'debug'
 import pathHelpers from './util/path_helpers'
 
 const debug = Debug('cypress:server:config')
 
 import { getProcessEnvVars, CYPRESS_SPECIAL_ENV_VARS } from './util/config'
+import { getCtx } from './makeDataContext'
 
 const folders = _(configUtils.options).filter({ isFolder: true }).map('name').value()
 
@@ -30,14 +30,6 @@ const convertRelativeToAbsolutePaths = (projectRoot, obj) => {
     return memo
   }
   , {})
-}
-
-const validateFile = (file) => {
-  return (settings) => {
-    return configUtils.validate(settings, (errMsg) => {
-      return errors.throw('SETTINGS_VALIDATION_ERROR', file, errMsg)
-    })
-  }
 }
 
 const hideSpecialVals = function (val, key) {
@@ -118,35 +110,23 @@ export function isValidCypressInternalEnvValue (value) {
   return _.includes(names, value)
 }
 
-export type FullConfig =
-  Cypress.RuntimeConfigOptions &
-  Cypress.ResolvedConfigOptions &
-  {
-    resolved: ResolvedConfigurationOptions
-  }
-
-export function get (
+export async function get (
   projectRoot,
-  options: { configFile?: string | false } = { configFile: undefined },
+  // Options are only used in testing
+  options?: Partial<AllModeOptions>,
 ): Promise<FullConfig> {
-  return Promise.all([
-    settings.read(projectRoot, options).then(validateFile(options.configFile ?? 'cypress.config.{ts|js}')),
-    settings.readEnv(projectRoot).then(validateFile('cypress.env.json')),
-  ])
-  .spread((settings, envFile) => {
-    return set({
-      projectName: getNameFromRoot(projectRoot),
-      projectRoot,
-      config: _.cloneDeep(settings),
-      envFile: _.cloneDeep(envFile),
-      options,
-    })
-  })
+  const ctx = getCtx()
+
+  options ??= ctx.modeOptions
+
+  ctx.lifecycleManager.setCurrentProject(projectRoot)
+
+  return ctx.lifecycleManager.getFullInitialConfig(options, false)
 }
 
-export function set (obj: Record<string, any> = {}) {
-  debug('setting config object')
-  let { projectRoot, projectName, config, envFile, options } = obj
+export function setupFullConfigWithDefaults (obj: Record<string, any> = {}) {
+  debug('setting config object %o', obj)
+  let { projectRoot, projectName, config, envFile, options, cliConfig } = obj
 
   // just force config to be an object so we dont have to do as much
   // work in our tests
@@ -161,10 +141,14 @@ export function set (obj: Record<string, any> = {}) {
   config.projectRoot = projectRoot
   config.projectName = projectName
 
-  return mergeDefaults(config, options)
+  return mergeDefaults(config, options, cliConfig)
 }
 
-export function mergeDefaults (config: Record<string, any> = {}, options: Record<string, any> = {}) {
+export function mergeDefaults (
+  config: Record<string, any> = {},
+  options: Record<string, any> = {},
+  cliConfig: Record<string, any> = {},
+) {
   const resolved = {}
 
   config.rawJson = _.cloneDeep(config)
@@ -173,7 +157,7 @@ export function mergeDefaults (config: Record<string, any> = {}, options: Record
   debug('merged config with options, got %o', config)
 
   _
-  .chain(configUtils.allowed(options))
+  .chain(configUtils.allowed({ ...cliConfig, ...options }))
   .omit('env')
   .omit('browsers')
   .each((val, key) => {
@@ -196,12 +180,12 @@ export function mergeDefaults (config: Record<string, any> = {}, options: Record
 
   // split out our own app wide env from user env variables
   // and delete envFile
-  config.env = parseEnv(config, options.env, resolved)
+  config.env = parseEnv(config, { ...cliConfig.env, ...options.env }, resolved)
 
   config.cypressEnv = process.env.CYPRESS_INTERNAL_ENV
   debug('using CYPRESS_INTERNAL_ENV %s', config.cypressEnv)
   if (!isValidCypressInternalEnvValue(config.cypressEnv)) {
-    errors.throw('INVALID_CYPRESS_INTERNAL_ENV', config.cypressEnv)
+    throw errors.throw('INVALID_CYPRESS_INTERNAL_ENV', config.cypressEnv)
   }
 
   delete config.envFile
@@ -222,17 +206,19 @@ export function mergeDefaults (config: Record<string, any> = {}, options: Record
     config = setUrls(config)
   }
 
-  config = setAbsolutePaths(config)
-
-  config = setNodeBinary(config, options.args?.userNodePath, options.args?.userNodeVersion)
-
   // validate config again here so that we catch configuration errors coming
   // from the CLI overrides or env var overrides
   configUtils.validate(_.omit(config, 'browsers'), (errMsg) => {
-    return errors.throw('CONFIG_VALIDATION_ERROR', errMsg)
+    throw errors.throw('CONFIG_VALIDATION_ERROR', errMsg)
   })
 
-  configUtils.validateNoBreakingConfig(config, errors.warning, errors.throw)
+  config = setAbsolutePaths(config)
+
+  config = setNodeBinary(config, options.userNodePath, options.userNodeVersion)
+
+  configUtils.validateNoBreakingConfig(config, errors.warning, (err, ...args) => {
+    throw errors.get(err, ...args)
+  })
 
   return setSupportFileAndFolder(config, defaultsForRuntime)
 }
@@ -276,10 +262,10 @@ export function updateWithPluginValues (cfg, overrides) {
   // make sure every option returned from the plugins file
   // passes our validation functions
   configUtils.validate(overrides, (errMsg) => {
-    if (cfg.configFile && cfg.projectRoot) {
-      const relativeConfigPath = path.relative(cfg.projectRoot, cfg.configFile)
+    const configFile = getCtx().lifecycleManager.configFile
 
-      return errors.throw('PLUGINS_CONFIG_VALIDATION_ERROR', relativeConfigPath, errMsg)
+    if (configFile) {
+      return errors.throw('PLUGINS_CONFIG_VALIDATION_ERROR', configFile, errMsg)
     }
 
     return errors.throw('CONFIG_VALIDATION_ERROR', errMsg)
@@ -397,7 +383,7 @@ export const setNodeBinary = (obj, userNodePath, userNodeVersion) => {
 // async function
 export function setSupportFileAndFolder (obj, defaults) {
   if (!obj.supportFile) {
-    return Promise.resolve(obj)
+    return Bluebird.resolve(obj)
   }
 
   obj = _.clone(obj)
@@ -408,7 +394,7 @@ export function setSupportFileAndFolder (obj, defaults) {
   debug(`setting support file ${sf}`)
   debug(`for project root ${obj.projectRoot}`)
 
-  return Promise
+  return Bluebird
   .try(() => {
     // resolve full path with extension
     obj.supportFile = utils.resolveModule(sf)
@@ -577,8 +563,4 @@ export function getResolvedRuntimeConfig (config, runtimeConfig) {
     ...runtimeConfig,
     resolved: { ...config.resolved, ...resolvedRuntimeFields },
   }
-}
-
-export function getNameFromRoot (root = '') {
-  return path.basename(root)
 }

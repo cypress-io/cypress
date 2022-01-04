@@ -3,6 +3,7 @@ import $Cypress from '@packages/driver'
 import { selectorPlaygroundModel, StudioRecorder } from '@packages/runner-shared'
 import { EventManager } from '@packages/app/src/runner/event-manager'
 import State from '../../src/lib/state'
+import { StubWebsocket } from '@packages/app/cypress/component/support/ctSupport'
 
 export const fakeConfig = { projectName: 'Project', env: {}, isTextTerminal: false } as Partial<Cypress.RuntimeConfigOptions>
 
@@ -27,5 +28,6 @@ export const createEventManager = () => {
     MobX,
     selectorPlaygroundModel,
     StudioRecorder,
+    StubWebsocket,
   )
 }

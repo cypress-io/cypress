@@ -1,4 +1,6 @@
 exports['e2e readonly fs / warns when unable to write to disk'] = `
+✅ not running as root
+✅ /foo/bar/.projects/read-only-project-root is not writable
 Folder /foo/bar/.projects/read-only-project-root is not writable.
 
 Writing to this directory is required by Cypress in order to store screenshots and videos.
@@ -6,8 +8,6 @@ Writing to this directory is required by Cypress in order to store screenshots a
 Enable write permissions to this directory to ensure screenshots and videos are stored.
 
 If you don't require screenshots or videos to be stored you can safely ignore this warning.
-✅ not running as root
-✅ /foo/bar/.projects/read-only-project-root is not writable
 
 ====================================================================================================
 

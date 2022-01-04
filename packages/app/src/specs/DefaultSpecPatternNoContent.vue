@@ -12,7 +12,7 @@
     >
       {{ t('createSpec.noSpecsMessage') }}
     </p>
-    <OpenConfigFileInIDE :gql="props.gql">
+    <router-link :to="{ path: 'settings', query: { section: 'project', setting: 'specPattern' } }">
       <Button
         data-testid="view-spec-pattern"
         variant="outline"
@@ -22,7 +22,7 @@
       >
         {{ t('createSpec.viewSpecPatternButton') }}
       </Button>
-    </OpenConfigFileInIDE>
+    </router-link>
   </div>
 </template>
 
@@ -33,14 +33,12 @@ import Button from '@cy/components/Button.vue'
 import CreateSpecCards from './CreateSpecCards.vue'
 import { gql } from '@urql/vue'
 import type { CreateSpecContentFragment } from '../generated/graphql'
-import OpenConfigFileInIDE from '@packages/frontend-shared/src/gql-components/OpenConfigFileInIDE.vue'
 
 const { t } = useI18n()
 
 gql`
 fragment CreateSpecContent on Query {
   ...CreateSpecCards
-  ...OpenConfigFileInIDE
 }
 `
 

@@ -8,6 +8,8 @@ const human = require('human-interval')
 const debug = require('debug')('cypress:server:run')
 const Promise = require('bluebird')
 const logSymbols = require('log-symbols')
+const assert = require('assert')
+const { getCtx } = require('@packages/data-context')
 
 const recordMode = require('./record')
 const errors = require('../errors')
@@ -25,7 +27,6 @@ const duration = require('../util/duration')
 const newlines = require('../util/newlines')
 const terminal = require('../util/terminal')
 const humanTime = require('../util/human_time')
-const settings = require('../util/settings')
 const chromePolicyCheck = require('../util/chrome_policy_check')
 const experiments = require('../experiments')
 const objUtils = require('../util/obj_utils')
@@ -643,8 +644,8 @@ async function checkAccess (folderPath) {
   })
 }
 
-const createAndOpenProject = async (socketId, options) => {
-  const { projectRoot, projectId } = options
+const createAndOpenProject = async (options) => {
+  const { projectRoot, projectId, socketId } = options
 
   await checkAccess(projectRoot)
 
@@ -661,7 +662,7 @@ const createAndOpenProject = async (socketId, options) => {
     project: _project,
     config: _config,
     projectId: _projectId,
-    configFile: project.options.configFile,
+    configFile: getCtx().lifecycleManager.configFile,
   }
 }
 
@@ -1520,8 +1521,9 @@ module.exports = {
       quiet: false,
     })
 
-    const socketId = random.id()
-    const { projectRoot, record, key, ciBuildId, parallel, group, browser: browserName, tag, testingType } = options
+    const { projectRoot, record, key, ciBuildId, parallel, group, browser: browserName, tag, testingType, socketId } = options
+
+    assert(socketId)
 
     // this needs to be a closure over `this.exitEarly` and not a reference
     // because `this.exitEarly` gets overwritten in `this.listenForProjectEnd`
@@ -1539,7 +1541,7 @@ module.exports = {
       debug('found all system browsers %o', browsers)
       options.browsers = browsers
 
-      return createAndOpenProject(socketId, options)
+      return createAndOpenProject(options)
       .then(({ project, projectId, config, configFile }) => {
         debug('project created and opened with config %o', config)
 
@@ -1548,7 +1550,7 @@ module.exports = {
         recordMode.throwIfRecordParamsWithoutRecording(record, ciBuildId, parallel, group, tag)
 
         if (record) {
-          recordMode.throwIfNoProjectId(projectId, settings.configFile(options.configFile === undefined || options.configFile === null ? { configFile } : options))
+          recordMode.throwIfNoProjectId(projectId, configFile)
           recordMode.throwIfIncorrectCiBuildIdUsage(ciBuildId, parallel, group)
           recordMode.throwIfIndeterminateCiBuildId(ciBuildId, parallel, group)
         }
@@ -1567,11 +1569,11 @@ module.exports = {
           trashAssets(config),
         ])
         .spread(async (sys = {}, browser = {}) => {
-          if (!project.ctx.currentProject.specs?.length) {
+          if (!project.ctx.project.specs.length) {
             errors.throw('NO_SPECS_FOUND', projectRoot, specPattern)
           }
 
-          const specs = project.ctx.currentProject.specs
+          const specs = project.ctx.project.specs
 
           if (browser.unsupportedVersion && browser.warning) {
             errors.throw('UNSUPPORTED_BROWSER_VERSION', browser.warning)
@@ -1663,6 +1665,11 @@ module.exports = {
       await app.whenReady()
     }
 
-    return loading.then(() => this.ready(options))
+    await loading
+    try {
+      return this.ready(options)
+    } catch (e) {
+      return this.exitEarly(e)
+    }
   },
 }

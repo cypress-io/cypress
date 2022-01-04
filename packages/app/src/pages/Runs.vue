@@ -22,5 +22,5 @@ query Runs {
   ...RunsContainer
 }`
 
-const query = useQuery({ query: RunsDocument })
+const query = useQuery({ query: RunsDocument, requestPolicy: 'network-only' })
 </script>

@@ -33,11 +33,6 @@ gulp.task(
     // Autobarrel watcher
     autobarrelWatcher,
 
-    // Codegen for our GraphQL Server so we have the latest schema to build
-    // the frontend codegen correctly
-    // Fetch the latest "remote" schema from the Cypress cloud
-    syncRemoteGraphQL,
-
     // Codegen for our GraphQL Server so we have the latest schema to build the frontend codegen correctly
     nexusCodegenWatch,
 
@@ -93,6 +88,9 @@ gulp.task(
     // And we're finally ready for electron, watching for changes in
     // /graphql to auto-restart the server
     startCypressWatch,
+
+    // Before dev, fetch the latest "remote" schema from the Cypress cloud
+    syncRemoteGraphQL,
   ),
 )
 
@@ -107,7 +105,6 @@ gulp.task('buildProd',
   gulp.series(
     viteClean,
 
-    syncRemoteGraphQL,
     nexusCodegen,
     graphqlCodegen,
     generateShikiTheme,
@@ -273,13 +270,6 @@ gulp.task(viteBuildApp)
 gulp.task(viteBuildLaunchpad)
 gulp.task(viteBuildAndWatchApp)
 gulp.task(viteBuildAndWatchLaunchpad)
-
-gulp.task('debugCypressLaunchpad', gulp.series(
-  async function setupDebugBrk () {
-    setGulpGlobal('debug', '--inspect-brk')
-  },
-  openCypressLaunchpad,
-))
 
 gulp.task(e2eTestScaffoldWatch)
 gulp.task(e2eTestScaffold)

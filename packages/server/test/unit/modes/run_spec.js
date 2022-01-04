@@ -20,8 +20,8 @@ const random = require(`../../../lib/util/random`)
 const system = require(`../../../lib/util/system`)
 const { experimental } = require(`../../../lib/experiments`)
 
-// todo(lachlan): put these back in when we've updated run.js
-xdescribe('lib/modes/run', () => {
+// NOTE: Covered by e2e/integration tests
+describe.skip('lib/modes/run', () => {
   beforeEach(function () {
     this.projectInstance = new ProjectBase({ projectRoot: '/_test-output/path/to/project-e2e', testingType: 'e2e' })
   })

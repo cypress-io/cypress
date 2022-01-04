@@ -20,7 +20,8 @@ describe('Code Generation', () => {
     cy.findByTestId('new-spec-button').click()
     cy.findByTestId('create-spec-modal').should('be.visible').within(() => {
       cy.contains('Create a new spec').should('be.visible')
-      cy.get('[data-cy="external"]').should('have.attr', 'href', 'https://on.cypress.io')
+
+      cy.validateExternalLink({ name: `${defaultMessages.links.needHelp}?`, href: 'https://on.cypress.io' })
     })
 
     cy.contains('Create from component').click()
@@ -42,7 +43,7 @@ describe('Code Generation', () => {
 
     cy.withCtx(async (ctx) => {
       const spec = (
-        await ctx.project.findSpecs(ctx.currentProject?.projectRoot ?? '', 'component', '**/*.cy.jsx')
+        await ctx.project.findSpecs(ctx.currentProject ?? '', 'component', '**/*.cy.jsx')
       ).find((spec) => spec.relative === 'src/stories/Button.cy.jsx')
 
       expect(spec).to.exist
@@ -63,7 +64,7 @@ describe('Code Generation', () => {
     cy.contains('composeStories')
 
     cy.withCtx(async (ctx) => {
-      const spec = (await ctx.project.findSpecs(ctx.currentProject?.projectRoot ?? '', 'component', '**/*.cy.jsx'))
+      const spec = (await ctx.project.findSpecs(ctx.currentProject ?? '', 'component', '**/*.cy.jsx'))
       .find((spec) => spec.relative === 'src/stories/Button.stories.cy.jsx')
 
       expect(spec).to.exist

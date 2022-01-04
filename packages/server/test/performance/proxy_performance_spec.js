@@ -347,7 +347,7 @@ describe('Proxy Performance', function () {
           https: { cert, key },
         }).start(HTTPS_PROXY_PORT),
 
-        Config.set({
+        Config.setupFullConfigWithDefaults({
           projectRoot: '/tmp/a',
         }).then((config) => {
           config.port = CY_PROXY_PORT

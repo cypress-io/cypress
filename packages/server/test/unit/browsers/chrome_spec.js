@@ -163,7 +163,7 @@ describe('lib/browsers/chrome', () => {
     })
 
     it('DEPRECATED: normalizes --load-extension if provided in plugin', function () {
-      plugins.register('before:browser:launch', (browser, config) => {
+      plugins.registerEvent('before:browser:launch', (browser, config) => {
         return Promise.resolve(['--foo=bar', '--load-extension=/foo/bar/baz.js'])
       })
 
@@ -187,7 +187,7 @@ describe('lib/browsers/chrome', () => {
     })
 
     it('normalizes --load-extension if provided in plugin', function () {
-      plugins.register('before:browser:launch', (browser, config) => {
+      plugins.registerEvent('before:browser:launch', (browser, config) => {
         return Promise.resolve({
           args: ['--foo=bar', '--load-extension=/foo/bar/baz.js'],
         })
@@ -209,7 +209,7 @@ describe('lib/browsers/chrome', () => {
     })
 
     it('normalizes multiple extensions from plugins', function () {
-      plugins.register('before:browser:launch', (browser, config) => {
+      plugins.registerEvent('before:browser:launch', (browser, config) => {
         return Promise.resolve({ args: ['--foo=bar', '--load-extension=/foo/bar/baz.js,/quux.js'] })
       })
 
@@ -300,10 +300,9 @@ describe('lib/browsers/chrome', () => {
       .then(() => {
         expect(typeof this.launchedBrowser.kill).to.eq('function')
 
-        return this.launchedBrowser.kill()
-      }).then(() => {
-        expect(this.criClient.close).to.be.calledOnce
+        this.launchedBrowser.kill()
 
+        expect(this.criClient.close).to.be.calledOnce
         expect(kill).to.be.calledOnce
       })
     })

@@ -12,7 +12,7 @@
     "binary-release": "node ./scripts/binary.js release",
     "binary-upload": "node ./scripts/binary.js upload",
     "binary-zip": "node ./scripts/binary.js zip",
-    "build": "lerna run build --stream --no-bail --ignore create-cypress-tests && lerna run build --stream --scope create-cypress-tests",
+    "build": "lerna run build --stream --no-bail --ignore create-cypress-tests --ignore \"'@packages/{runner}'\" && lerna run build --stream --scope create-cypress-tests",
     "build-prod": "lerna run build-prod-ui --stream && lerna run build-prod --stream --ignore create-cypress-tests && lerna run build-prod --stream --scope create-cypress-tests",
     "bump": "node ./scripts/binary.js bump",
     "check-node-version": "node scripts/check-node-version.js",
@@ -272,8 +272,10 @@
     "**/@types/react": "16.9.50",
     "**/jquery": "3.1.1",
     "**/pretty-format": "26.4.0",
+    "**/sharp": "0.29.3",
     "**/socket.io-parser": "4.0.4",
     "**/ua-parser-js": "0.7.24",
+    "sharp": "0.29.3",
     "vue-template-compiler": "2.6.12"
   }
 }

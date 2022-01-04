@@ -22,6 +22,14 @@ describe('App: Index', () => {
       // we just can't mock config values in GQL yet.
       cy.contains(defaultMessages.createSpec.page.defaultPatternNoSpecs.title).should('be.visible')
     })
+
+    it('routes to settings spec-pattern section', () => {
+      cy.contains(defaultMessages.createSpec.viewSpecPatternButton).scrollIntoView().click()
+      cy.get('[data-cy="Project Settings"]').within(() => {
+        cy.get('[data-cy="collapsible-header"]').should('have.attr', 'aria-expanded', 'true')
+        cy.contains(defaultMessages.settingsPage.specPattern.title).should('be.visible')
+      })
+    })
   })
 
   context('scaffold example specs', () => {

@@ -20,6 +20,9 @@ const breakingKeys = _.map(breakingOptions, 'name')
 const defaultValues = createIndex(options, 'name', 'defaultValue')
 const publicConfigKeys = _(options).reject({ isInternal: true }).map('name').value()
 const validationRules = createIndex(options, 'name', 'validation')
+const testConfigOverrideOptions = createIndex(options, 'name', 'canUpdateDuringTestTime')
+
+const issuedWarnings = new Set()
 
 module.exports = {
   allowed: (obj = {}) => {
@@ -84,6 +87,13 @@ module.exports = {
         }
 
         if (isWarning) {
+          if (issuedWarnings.has(errorKey)) {
+            return
+          }
+
+          // avoid re-issuing the same warning more than once
+          issuedWarnings.add(errorKey)
+
           return onWarning(errorKey, {
             name,
             newName,
@@ -100,5 +110,17 @@ module.exports = {
         })
       }
     })
+  },
+
+  validateNoReadOnlyConfig: (config, onErr) => {
+    let errProperty
+
+    Object.keys(config).some((option) => {
+      return errProperty = testConfigOverrideOptions[option] === false ? option : undefined
+    })
+
+    if (errProperty) {
+      return onErr(errProperty)
+    }
   },
 }

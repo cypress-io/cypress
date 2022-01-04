@@ -7,6 +7,7 @@ module.exports = {
     'coverage': true,
   },
   'component': {
+    'specPattern': 'src/**/*spec.*',
     setupNodeEvents (on, config) {
       // load Webpack file devServer that comes with this plugin
       // https://github.com/bahmutov/cypress-react-unit-test#install
