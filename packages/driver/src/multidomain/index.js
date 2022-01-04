@@ -84,7 +84,7 @@ const setup = () => {
     // TODO: await this if it's a promise, or do whatever cy.then does
     window.eval(`(${data.fn})()`)
 
-    specBridgeCommunicator.toPrimary('run:domain:fn')
+    specBridgeCommunicator.toPrimary('ran:domain:fn')
   })
 
   specBridgeCommunicator.on('run:command',

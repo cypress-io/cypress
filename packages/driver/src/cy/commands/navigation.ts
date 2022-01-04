@@ -345,13 +345,13 @@ const stabilityChanged = (Cypress, state, config, stable) => {
     debug('waiting for window:load')
 
     return new Promise((resolve) => {
-      const onWindowLoad = (e) => {
+      const onWindowLoad = (win) => {
         // this prevents a log occurring when we navigate to about:blank inbetween tests
         if (!state('duringUserTestExecution')) return
 
         cy.state('onPageLoadErr', null)
 
-        if (e.window.location.href === 'about:blank') {
+        if (win.location.href === 'about:blank') {
           // we treat this as a system log since navigating to about:blank must have been caused by Cypress
           options._log.set({ message: '', name: 'Clear Page', type: 'system' }).snapshot().end()
         } else {
@@ -378,7 +378,7 @@ const stabilityChanged = (Cypress, state, config, stable) => {
       const onInternalWindowLoad = (details) => {
         switch (details.type) {
           case 'same:domain':
-            return onWindowLoad(details.event)
+            return onWindowLoad(details.window)
           case 'cross:domain':
             return onCrossDomainWindowLoad()
           case 'cross:domain:failure':

@@ -521,7 +521,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
         try {
           this.Cypress.action('app:window:load', this.state('window'))
-        } catch (err) {
+        } catch (err: any) {
           err.isFromWindowLoadEvent = true
 
           throw err
@@ -531,7 +531,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
           // listeners time to be invoked prior to moving on
           this.isStable(true, 'load')
         }
-      } catch (err) {
+      } catch (err: any) {
         if (err.isFromWindowLoadEvent) {
           delete err.isFromWindowLoadEvent
 
@@ -568,12 +568,15 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
           e = onpl(e)
         }
 
-        Cypress.multiDomainCommunicator.emit('cross:origin:error', e)
+        this.Cypress.emit('internal:window:load', {
+          type: 'cross:domain:failure',
+          error: e,
+        })
 
         // need async:true since this is outside the command queue promise
         // chain and cy.fail needs to know to use the reference to the
         // last command to reject it
-        cy.fail(e, { async: true })
+        this.fail(e, { async: true })
       }
     })
   }

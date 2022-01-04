@@ -5,7 +5,9 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
   let timeoutId
 
   // @ts-ignore
-  Cypress.multiDomainCommunicator.on('html:received', () => {
+  const communicator = Cypress.multiDomainCommunicator
+
+  communicator.on('html:received', () => {
     // when a secondary domain is detected by the proxy, it holds it up
     // to provide time for the spec bridge to be set up. normally, the queue
     // will not continue until the page is stable, but this signals it to go
@@ -17,7 +19,6 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
     // if the next command isn't switchToDomain, this timeout will hit and
     // the test will fail with a cross-origin error
     timeoutId = setTimeout(() => {
-      // @ts-ignore
       Cypress.backend('ready:for:domain', { shouldInject: false })
     }, 2000)
   })
@@ -55,11 +56,9 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
           // own timeout
           // TODO: add a special, long timeout in case inter-domain
           // communication breaks down somehow
-          // @ts-ignore
           cy.clearTimeout()
 
-          // @ts-ignore
-          Cypress.multiDomainCommunicator.toSpecBridge('run:command', {
+          communicator.toSpecBridge('run:command', {
             name: attrs.name,
           })
 
@@ -103,43 +102,32 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
         }
       }
 
-      // @ts-ignore
-      Cypress.multiDomainCommunicator.on('command:enqueued', addCommand)
-
-      // @ts-ignore
-      Cypress.multiDomainCommunicator.on('command:update', updateCommand)
+      communicator.on('command:enqueued', addCommand)
+      communicator.on('command:update', updateCommand)
 
       return new Bluebird((resolve) => {
-        // @ts-ignore
-        Cypress.multiDomainCommunicator.once('run:domain:fn', resolve)
+        communicator.once('ran:domain:fn', resolve)
 
-        // @ts-ignore
-        Cypress.multiDomainCommunicator.once('queue:finished', () => {
-          // @ts-ignore
-          Cypress.multiDomainCommunicator.off('command:enqueued', addCommand)
-          // @ts-ignore
-          Cypress.multiDomainCommunicator.off('command:update', updateCommand)
+        communicator.once('queue:finished', () => {
+          communicator.off('command:enqueued', addCommand)
+          communicator.off('command:update', updateCommand)
         })
 
         // fired once the spec bridge is set up and ready to
         // receive messages
-        // @ts-ignore
-        Cypress.multiDomainCommunicator.once('bridge:ready', () => {
+        communicator.once('bridge:ready', () => {
           state('readyForMultidomain', true)
           // let the proxy know to let the response for the secondary
           // domain html through, so the page will finish loading
-          // @ts-ignore
           Cypress.backend('ready:for:domain', { shouldInject: true })
         })
 
-        // @ts-ignore
         cy.once('internal:window:load', ({ type }) => {
           if (type !== 'cross:domain') return
 
           // once the secondary domain page loads, send along the
           // user-specified callback to run in that domain
-          // @ts-ignore
-          Cypress.multiDomainCommunicator.toSpecBridge('run:domain:fn', {
+          communicator.toSpecBridge('run:domain:fn', {
             fn: fn.toString(),
           })
 
@@ -150,8 +138,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
 
         // this signals to the runner to create the spec bridge for
         // the specified domain
-        // @ts-ignore
-        Cypress.multiDomainCommunicator.emit('expect:domain', domain)
+        communicator.emit('expect:domain', domain)
       })
     },
   })
