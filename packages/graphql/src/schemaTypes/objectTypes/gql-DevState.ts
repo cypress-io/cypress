@@ -1,6 +1,8 @@
 import _ from 'lodash'
 import { objectType } from 'nexus'
 
+const toExpand = new Set(['ProjectLifecycleManager'])
+
 export const DevState = objectType({
   name: 'DevState',
   description: 'State associated/helpful for local development of Cypress',
@@ -10,6 +12,10 @@ export const DevState = objectType({
       resolve: (source, args, ctx) => {
         function replacer (key: string, val: unknown) {
           if (val && !Array.isArray(val) && _.isObject(val) && !_.isPlainObject(val)) {
+            if (toExpand.has(val.constructor.name)) {
+              return val
+            }
+
             return `[${val.constructor.name}]`
           }
 
@@ -19,6 +25,7 @@ export const DevState = objectType({
         return {
           coreData: JSON.parse(JSON.stringify(ctx.coreData, replacer)),
           modeOptions: ctx.modeOptions,
+          lifecycleManager: JSON.parse(JSON.stringify(ctx.lifecycleManager, replacer)),
         }
       },
     })

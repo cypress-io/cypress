@@ -17,7 +17,7 @@ import { Alias, AliasObject } from '../instruments/instrument-model'
 import CommandModel from './command-model'
 import TestError from '../errors/test-error'
 
-import ChevronIcon from '-!react-svg-loader!@packages/app/src/assets/icons/chevron-down-small_x8.svg'
+import ChevronIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/chevron-down-small_x8.svg'
 import DeleteIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/action-delete-circle_x16.svg'
 import HiddenIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/general-eye-closed_x16.svg'
 import PinIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/object-pin_x16.svg'

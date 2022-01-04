@@ -1,18 +1,18 @@
 <template>
   <Dialog
     :open="modelValue"
-    class="fixed inset-0 z-10 overflow-y-auto"
+    class="inset-0 z-10 fixed overflow-y-auto"
     @close="clickOutside && setIsOpen(false)"
   >
-    <div class="flex items-center justify-center min-h-screen">
+    <div class="flex min-h-screen items-center justify-center">
       <slot
         name="overlay"
         :classes="'fixed inset-0'"
       >
-        <DialogOverlay class="fixed inset-0 bg-gray-800 opacity-90" />
+        <DialogOverlay class="bg-gray-800 opacity-90 inset-0 fixed" />
       </slot>
       <div
-        class="relative mx-auto bg-white rounded"
+        class="bg-white rounded mx-auto ring-[#9095AD40] ring-4 relative"
         :class="props.class || ''"
       >
         <StandardModalHeader
@@ -27,7 +27,7 @@
 
         <DialogDescription
           v-if="$slots.description"
-          class="font-normal text-gray-700 p-24px"
+          class="font-normal p-24px text-gray-700"
         >
           <slot name="description" />
         </DialogDescription>

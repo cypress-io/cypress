@@ -10,7 +10,7 @@
         :key="file?.id"
         class="cursor-pointer group children:h-40px children:py-8px last:py-0 flex gap-8px
     items-center text-16px last:border-none border-b-1 border-b-gray-50 leading-normal"
-        data-testid="file-list-row"
+        data-cy="file-list-row"
         @click="$emit('selectFile', file)"
       >
         <i-cy-document-blank_x16 class="icon-light-gray-50 icon-dark-gray-300 min-w-16px min-h-16px" />

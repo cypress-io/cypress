@@ -40,6 +40,20 @@
       "command": "yarn test [fileBasename]"
     },
     {
+      "name": "packages/app cypress open",
+      "focus": true,
+      "onlySingle": true,
+      "cwd": "[cwd]/packages/app",
+      "command": "yarn cypress:open"
+    },
+    {
+      "name": "packages/app dev",
+      "focus": true,
+      "onlySingle": true,
+      "cwd": "[cwd]/packages/app",
+      "command": "yarn dev"
+    },
+    {
       "name": "packages/server test-watch",
       "focus": true,
       "onlySingle": true,

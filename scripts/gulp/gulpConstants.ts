@@ -1,6 +1,14 @@
 // Where to fetch the remote "federated" schema. If you have a long-running branch
 // against a development schema, it's probably easiest to set this manually to "develop"
-export const DEFAULT_INTERNAL_CLOUD_ENV = 'staging'
+declare global {
+  namespace NodeJS {
+    interface ProcessEnv {
+      CYPRESS_INTERNAL_ENV: 'staging' | 'development' | 'production'
+    }
+  }
+}
+
+export const DEFAULT_INTERNAL_CLOUD_ENV = process.env.CYPRESS_INTERNAL_ENV || 'staging'
 
 export type MODES = 'dev' | 'devWatch' | 'test'
 

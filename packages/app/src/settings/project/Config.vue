@@ -1,11 +1,17 @@
 <template>
-  <SettingsSection data-cy="settings-config">
+  <SettingsSection
+    data-cy="settings-config"
+    anchor-id="config"
+  >
     <template #title>
       {{ t('settingsPage.config.title') }}
     </template>
     <template #description>
-      <i18n-t keypath="settingsPage.config.description">
-        <OpenConfigFileInIDE :gql="props.gql" />
+      <i18n-t
+        scope="global"
+        keypath="settingsPage.config.description"
+      >
+        <OpenConfigFileInIDE />
       </i18n-t>
     </template>
     <div class="flex w-full">
@@ -15,7 +21,6 @@
       />
       <ConfigLegend
         class="rounded-tr-md px-22px py-28px border-1 border-l-0 rounded-br-md min-w-280px"
-        :gql="props.gql"
       />
     </div>
   </SettingsSection>
@@ -39,8 +44,6 @@ fragment Config on Query {
     id
     config
   }
-  ...ConfigLegend
-  ...OpenConfigFileInIDE
 }
 `
 
