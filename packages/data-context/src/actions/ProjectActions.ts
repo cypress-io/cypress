@@ -1,5 +1,5 @@
 import type { CodeGenType, MutationAddProjectArgs, MutationSetProjectPreferencesArgs, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
-import type { InitializeProjectOptions, FindSpecs, FoundBrowser, FoundSpec, LaunchOpts, OpenProjectLaunchOptions, Preferences, TestingType } from '@packages/types'
+import type { InitializeProjectOptions, FoundBrowser, FoundSpec, LaunchOpts, OpenProjectLaunchOptions, Preferences, TestingType } from '@packages/types'
 import execa from 'execa'
 import path from 'path'
 import assert from 'assert'
@@ -12,7 +12,6 @@ import templates from '../codegen/templates'
 import { insertValuesInConfigFile } from '../util'
 
 export interface ProjectApiShape {
-  findSpecs(payload: FindSpecs): Promise<FoundSpec[]>
   /**
    * "Initializes" the given mode, since plugins can define the browsers available
    * TODO(tim): figure out what this is actually doing, it seems it's necessary in
@@ -176,7 +175,7 @@ export class ProjectActions {
     let activeSpec: FoundSpec | undefined
 
     if (specPath) {
-      activeSpec = await this.ctx.project.getCurrentSpecByAbsolute(this.ctx.currentProject, specPath)
+      activeSpec = await this.ctx.project.getCurrentSpecByAbsolute(specPath)
     }
 
     // Ensure that we have loaded browsers to choose from
@@ -313,6 +312,10 @@ export class ProjectActions {
     }
   }
 
+  setSpecs (specs: FoundSpec[]) {
+    this.ctx.project.setSpecs(specs)
+  }
+
   async setProjectPreferences (args: MutationSetProjectPreferencesArgs) {
     if (!this.ctx.currentProject) {
       throw Error(`Cannot save preferences without currentProject.`)
@@ -405,8 +408,7 @@ export class ProjectActions {
 
     assert(projectRoot, `Cannot create spec without currentProject.`)
 
-    const config = await this.ctx.lifecycleManager.getFullInitialConfig()
-    const integrationFolder = config.integrationFolder || projectRoot
+    const integrationFolder = 'cypress/integration' || this.ctx.currentProject
 
     const results = await codeGenerator(
       { templateDir: templates['scaffoldIntegration'], target: integrationFolder },
@@ -427,6 +429,15 @@ export class ProjectActions {
         codeGenResult: res,
       }
     })
+
+    const specPattern = await this.ctx.project.specPatternForTestingType('e2e')
+
+    if (!specPattern) {
+      throw Error('Could not find specPattern for project')
+    }
+
+    // created new specs - find and cache them!
+    this.ctx.project.setSpecs(await this.ctx.project.findSpecs(projectRoot, 'e2e', specPattern))
 
     return withFileParts
   }

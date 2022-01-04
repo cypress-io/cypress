@@ -1,6 +1,7 @@
 module.exports = {
-  'e2e': {},
-  'integrationFolder': 'tests',
+  'e2e': {
+    'specPattern': 'tests/**/*',
+  },
   'fixturesFolder': 'tests/_fixtures',
   'supportFile': 'tests/_support/spec_helper.js',
   'port': 8888,

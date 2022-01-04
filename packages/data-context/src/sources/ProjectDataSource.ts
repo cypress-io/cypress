@@ -1,13 +1,102 @@
-import type { SpecType } from '@packages/graphql/src/gen/nxs.gen'
-import { FrontendFramework, FRONTEND_FRAMEWORKS, ResolvedFromConfig, RESOLVED_FROM, SpecFileWithExtension, STORYBOOK_GLOB } from '@packages/types'
+import os from 'os'
+import { FrontendFramework, FRONTEND_FRAMEWORKS, ResolvedFromConfig, RESOLVED_FROM, SpecFileWithExtension, STORYBOOK_GLOB, FoundSpec } from '@packages/types'
 import { scanFSForAvailableDependency } from 'create-cypress-tests'
 import path from 'path'
+import Debug from 'debug'
+import commonPathPrefix from 'common-path-prefix'
+
+const debug = Debug('cypress:data-context')
 import assert from 'assert'
 
 import type { DataContext } from '..'
-import type { Maybe } from '../data/coreDataShape'
+import { toPosix } from '../util/file'
+
+export type SpecWithRelativeRoot = FoundSpec & { relativeToCommonRoot: string }
+
+interface MatchedSpecs {
+  projectRoot: string
+  testingType: Cypress.TestingType
+  specAbsolutePaths: string[]
+  specPattern: string | string[]
+}
+export function matchedSpecs ({
+  projectRoot,
+  testingType,
+  specAbsolutePaths,
+}: MatchedSpecs): SpecWithRelativeRoot[] {
+  debug('found specs %o', specAbsolutePaths)
+
+  let commonRoot: string = ''
+
+  if (specAbsolutePaths.length === 1) {
+    commonRoot = path.dirname(specAbsolutePaths[0]!)
+  } else {
+    commonRoot = commonPathPrefix(specAbsolutePaths)
+  }
+
+  const specs = specAbsolutePaths.map((absolute) => {
+    return transformSpec({ projectRoot, absolute, testingType, commonRoot, platform: os.platform(), sep: path.sep })
+  })
+
+  return specs
+}
+
+export interface TranformSpec {
+  projectRoot: string
+  absolute: string
+  testingType: Cypress.TestingType
+  commonRoot: string
+  platform: NodeJS.Platform
+  sep: string
+}
+
+export function transformSpec ({
+  projectRoot,
+  absolute,
+  testingType,
+  commonRoot,
+  platform,
+  sep,
+}: TranformSpec): SpecWithRelativeRoot {
+  if (platform === 'win32') {
+    absolute = toPosix(absolute, sep)
+    projectRoot = toPosix(projectRoot, sep)
+  }
+
+  const relative = path.relative(projectRoot, absolute)
+  const parsedFile = path.parse(absolute)
+  const fileExtension = path.extname(absolute)
+
+  const specFileExtension = ['.spec', '.test', '-spec', '-test', '.cy']
+  .map((ext) => ext + fileExtension)
+  .find((ext) => absolute.endsWith(ext)) || fileExtension
+
+  const parts = absolute.split(projectRoot)
+  let name = parts[parts.length - 1] || ''
+
+  if (name.startsWith('/')) {
+    name = name.slice(1)
+  }
+
+  const LEADING_SLASH = /^\/|/g
+  const relativeToCommonRoot = absolute.replace(commonRoot, '').replace(LEADING_SLASH, '')
+
+  return {
+    fileExtension,
+    baseName: parsedFile.base,
+    fileName: parsedFile.base.replace(specFileExtension, ''),
+    specFileExtension,
+    relativeToCommonRoot,
+    specType: testingType === 'component' ? 'component' : 'integration',
+    name,
+    relative,
+    absolute,
+  }
+}
 
 export class ProjectDataSource {
+  private _specs: FoundSpec[] = []
+
   constructor (private ctx: DataContext) {}
 
   private get api () {
@@ -26,48 +115,35 @@ export class ProjectDataSource {
     return this.ctx.lifecycleManager.loadedFullConfig
   }
 
-  async findSpecs (projectRoot: string, specType: Maybe<SpecType>) {
+  get specs () {
+    return this._specs
+  }
+
+  setSpecs (specs: FoundSpec[]) {
+    this._specs = specs
+  }
+
+  async specPatternForTestingType (testingType: Cypress.TestingType) {
     const config = this.getConfig()
 
-    if (!config) {
-      return []
-    }
+    return config?.[testingType]?.specPattern
+  }
 
-    const specs = await this.api.findSpecs({
+  async findSpecs (projectRoot: string, testingType: Cypress.TestingType, specPattern: string | string[]): Promise<FoundSpec[]> {
+    const specAbsolutePaths = await this.ctx.file.getFilesByGlob(projectRoot, specPattern, { absolute: true })
+
+    const matched = matchedSpecs({
       projectRoot,
-      fixturesFolder: config.fixturesFolder ?? false,
-      supportFile: config.supportFile ?? false,
-      testFiles: config.testFiles ?? [],
-      ignoreTestFiles: config.ignoreTestFiles as string[] ?? [],
-      componentFolder: config.projectRoot ?? false,
-      integrationFolder: config.integrationFolder ?? '',
+      testingType,
+      specAbsolutePaths,
+      specPattern,
     })
 
-    if (!specType) {
-      return specs
-    }
-
-    return specs.filter((spec) => spec.specType === specType)
+    return matched
   }
 
-  async getCurrentSpecByAbsolute (projectRoot: string, absolute: string) {
-    // TODO: should cache current specs so we don't need to
-    // call findSpecs each time we ask for the current spec.
-    const specs = await this.findSpecs(projectRoot, null)
-
-    return specs.find((x) => x.absolute === absolute)
-  }
-
-  async getCurrentSpecById (projectRoot: string, base64Id: string) {
-    // TODO: should cache current specs so we don't need to
-    // call findSpecs each time we ask for the current spec.
-    const specs = await this.findSpecs(projectRoot, null)
-
-    // id is base64 formatted as per Relay: <type>:<string>
-    // in this case, Spec:/my/abs/path
-    const currentSpecAbs = Buffer.from(base64Id, 'base64').toString().split(':')[1]
-
-    return specs.find((x) => x.absolute === currentSpecAbs) ?? null
+  async getCurrentSpecByAbsolute (absolute: string) {
+    return this.ctx.project.specs.find((x) => x.absolute === absolute)
   }
 
   async getProjectPreferences (projectTitle: string) {

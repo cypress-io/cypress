@@ -278,8 +278,10 @@ fragment TopNav on Query {
 `
 
 gql`
-mutation TopNav_LaunchOpenProject  {
-  launchOpenProject
+mutation TopNav_LaunchOpenProject {
+  launchOpenProject {
+    id
+  }
 }
 `
 
