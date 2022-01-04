@@ -31,6 +31,7 @@ export const e2eProjectDirs = [
   'multiples-config-files-with-json',
   'no-scaffolding',
   'no-server',
+  'no-specs-found',
   'non-existent-spec',
   'non-proxied',
   'odd-directory-name',

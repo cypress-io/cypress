@@ -510,16 +510,6 @@ const getMsgByType = function (type, ...args) {
         ${chalk.yellow(err)}`
 
     case 'NO_SPECS_FOUND':
-      // no glob provided, searched all specs
-      if (!arg2) {
-        return stripIndent`\
-          Can't run because no spec files were found.
-
-          We searched for any files inside of this folder:
-
-          ${chalk.blue(arg1)}`
-      }
-
       return stripIndent`\
         Can't run because no spec files were found.
 

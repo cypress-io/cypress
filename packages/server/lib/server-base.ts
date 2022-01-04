@@ -32,6 +32,7 @@ import { InitializeRoutes, createCommonRoutes } from './routes'
 import { createRoutesE2E } from './routes-e2e'
 import { createRoutesCT } from './routes-ct'
 import type { DataContext } from '@packages/data-context/src/DataContext'
+import type { FoundSpec } from '@packages/types'
 
 const ALLOWED_PROXY_BYPASS_URLS = [
   '/',
@@ -102,7 +103,7 @@ export interface OpenServerOptions {
   onWarning: any
   exit?: boolean
   getCurrentBrowser: () => Browser
-  getSpec: () => Cypress.Cypress['spec'] | null
+  getSpec: () => FoundSpec | null
   shouldCorrelatePreRequests: () => boolean
 }
 

@@ -54,7 +54,9 @@ mutation OpenBrowser_ClearTestingType {
 
 gql`
 mutation OpenBrowser_LaunchProject ($testingType: TestingTypeEnum!, $browserPath: String!)  {
-  launchOpenProject
+  launchOpenProject {
+    id
+  }
   # Removing for now until we decide what the behavior should be
   # hideBrowserWindow
   setProjectPreferences(testingType: $testingType, browserPath: $browserPath) {

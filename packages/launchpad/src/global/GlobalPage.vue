@@ -51,7 +51,9 @@ import ChooseExternalEditorModal from '@packages/frontend-shared/src/gql-compone
 
 gql`
 mutation GlobalPage_addProject($path: String!, $open: Boolean = true) {
-  addProject(path: $path, open: $open) 
+  addProject(path: $path, open: $open) {
+    ...GlobalPage
+  }
 }
 `
 
@@ -66,7 +68,9 @@ fragment GlobalPage on Query {
 
 gql`
 mutation GlobalPage_RemoveProject($path: String!) {
-  removeProject(path: $path) 
+  removeProject(path: $path) {
+    ...GlobalPage
+  }
 }
 
 mutation GlobalPage_OpenDirectoryInIDE ($path: String!) {

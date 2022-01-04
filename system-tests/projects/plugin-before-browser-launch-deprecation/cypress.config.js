@@ -1,6 +1,7 @@
 module.exports = {
   'e2e': {
-    'supportFile': false,
+    supportFile: false,
+    specPattern: 'cypress/integration/**/*',
     setupNodeEvents (on, config) {
       const plugin = require('./plugins')
 

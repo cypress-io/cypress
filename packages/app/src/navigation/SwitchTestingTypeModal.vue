@@ -1,6 +1,6 @@
 <template>
   <StandardModal
-    class="transition duration-200 transition-all"
+    class="transition-all transition duration-200"
     :click-outside="false"
     variant="bare"
     :title="t('testingType.modalTitle')"
@@ -31,7 +31,10 @@ fragment SwitchTestingTypeModal on Query {
 `
 
 gql`
-mutation SwitchTestingType_ReconfigureProject {
+mutation SwitchTestingType_ReconfigureProject($testingType: TestingTypeEnum!) {
+  setCurrentTestingType(testingType: $testingType) {
+    currentTestingType
+  }
   reconfigureProject
 }
 `
@@ -47,7 +50,7 @@ const emits = defineEmits<{
 
 const openElectron = useMutation(SwitchTestingType_ReconfigureProjectDocument)
 
-function reconfigure () {
-  openElectron.executeMutation({})
+function reconfigure (testingType: 'component' | 'e2e') {
+  openElectron.executeMutation({ testingType })
 }
 </script>
