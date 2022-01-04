@@ -95,7 +95,7 @@ const { t } = useI18n()
 const isTestingTypeModalOpen = ref(false)
 
 gql`
-query MainLaunchpadQuery {
+fragment MainLaunchpadQueryData on Query {
   ...TestingTypeCards
   ...Wizard
   baseError {
@@ -122,6 +122,12 @@ query MainLaunchpadQuery {
   migration {
     ...MigrationWizard
   }
+}
+`
+
+gql`
+query MainLaunchpadQuery {
+  ...MainLaunchpadQueryData
 }
 `
 

@@ -6,18 +6,12 @@ function getTranspileFolders (config) {
   const folders = rawFolders.map((folder) => path.resolve(config.projectRoot, folder))
 
   // ensure path is absolute
-  // this is going away soon when we drop component and integration folder
   const ensureAbs = (folder) => {
     if (!path.isAbsolute(folder)) {
       return path.resolve(folder)
     }
 
     return folder
-  }
-
-  // user can disable folders, so check first
-  if (config.componentFolder) {
-    folders.push(ensureAbs(config.componentFolder))
   }
 
   if (config.fixturesFolder) {
@@ -28,7 +22,28 @@ function getTranspileFolders (config) {
     folders.push(ensureAbs(config.supportFolder))
   }
 
-  return folders
+  // attempt to add directories based on spec pattern
+  let componentDirs = config.component.specPattern || ''
+
+  // can be string or array
+  if (typeof componentDirs === 'string') {
+    componentDirs = [componentDirs]
+  }
+
+  const dirsFromSpecPattern = componentDirs.reduce((acc, curr) => {
+    // glob
+    if (curr.includes('*')) {
+      const parts = curr.slice(0, curr.indexOf('*') - 1)
+      const joined = parts.split(path.sep)
+      const dir = path.join(...joined)
+
+      return acc.concat(path.resolve(config.projectRoot, dir))
+    }
+
+    return acc
+  }, [])
+
+  return folders.concat(dirsFromSpecPattern)
 }
 
 module.exports = { getTranspileFolders }

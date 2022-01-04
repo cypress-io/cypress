@@ -5,14 +5,12 @@ module.exports = {
     'runMode': 2,
     'openMode': 0,
   },
-  'env': {
-    'CypressInternal_UseInlineSpecList': true,
-  },
   'reporter': '../../node_modules/cypress-multi-reporters/index.js',
   'reporterOptions': {
     'configFile': '../../mocha-reporter-config.json',
   },
   'e2e': {
+    'specPattern': 'cypress/integration/**/*',
     'setupNodeEvents': require('./cypress/plugins'),
   },
 }

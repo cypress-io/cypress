@@ -5,16 +5,16 @@ module.exports = {
   'viewportHeight': 400,
   'video': false,
   'projectId': 'z9dxah',
-  'testFiles': '**/*spec.{js,jsx,ts,tsx}',
   'env': {
     'reactDevtools': true,
   },
-  'ignoreTestFiles': [
+  'ignoreSpecPattern': [
     '**/__snapshots__/*',
     '**/__image_snapshots__/*',
   ],
   'experimentalFetchPolyfill': true,
   'component': {
+    'specPattern': 'cypress/component/**/*spec.{js,jsx,ts,tsx}',
     devServer (cypressConfig, devServerConfig) {
       const { startDevServer } = require('@cypress/webpack-dev-server')
       const path = require('path')

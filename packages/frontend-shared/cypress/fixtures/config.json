@@ -100,7 +100,7 @@
   {
     "value": "*.hot-update.js",
     "from": "default",
-    "field": "ignoreTestFiles"
+    "field": "ignoreSpecPattern"
   },
   {
     "value": false,
