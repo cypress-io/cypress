@@ -174,7 +174,7 @@ export class ProjectActions {
     let activeSpec: FoundSpec | undefined
 
     if (specPath) {
-      // activeSpec = await this.ctx.project.getCurrentSpecByAbsolute(specPath)
+      activeSpec = await this.ctx.project.getCurrentSpecByAbsolute(specPath)
     }
 
     // Ensure that we have loaded browsers to choose from
@@ -306,10 +306,6 @@ export class ProjectActions {
   }
 
   setSpecs (specs: FoundSpec[]) {
-    if (!this.ctx.currentProject) {
-      throw Error(`Cannot set specs without currentProject.`)
-    }
-
     this.ctx.project.setSpecs(specs)
   }
 
@@ -434,7 +430,7 @@ export class ProjectActions {
     }
 
     // created new specs - find and cache them!
-    // this.ctx.project.specs = await this.ctx.project.findSpecs(projectRoot, 'e2e', specPattern)
+    this.ctx.project.setSpecs(await this.ctx.project.findSpecs(projectRoot, 'e2e', specPattern))
 
     return withFileParts
   }

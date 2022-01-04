@@ -143,11 +143,7 @@ export class ProjectDataSource {
   }
 
   async getCurrentSpecByAbsolute (absolute: string) {
-    if (!this.ctx.currentProject) {
-      return
-    }
-
-    // return this.ctx.currentProject.specs?.find((x) => x.absolute === absolute)
+    return this.ctx.project.specs.find((x) => x.absolute === absolute)
   }
 
   async getProjectPreferences (projectTitle: string) {
