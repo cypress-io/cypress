@@ -471,6 +471,10 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   }
 
   initialize ($autIframe) {
+    const signalStable = () => {
+      this.isStable(true, 'load')
+    }
+
     this.state('$autIframe', $autIframe)
 
     // dont need to worry about a try/catch here
@@ -519,17 +523,23 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
         // about:blank in a visit, we do need these
         this.contentWindowListeners(autWindow)
 
+        // stability is signalled after the window:load event to give event
+        // listeners time to be invoked prior to moving on, but not if
+        // there is cross-origin error and the multi-domain APIs are
+        // not utilized
         try {
           this.Cypress.action('app:window:load', this.state('window'))
+
+          signalStable()
         } catch (err: any) {
+          // this catches errors thrown by user-registered event handlers
+          // for `window:load`. this is used in the `catch` below so they
+          // aren't mistaken as cross-origin errors
           err.isFromWindowLoadEvent = true
 
+          signalStable()
+
           throw err
-        } finally {
-          // we are now stable again which is purposefully
-          // the last event we call here, to give our event
-          // listeners time to be invoked prior to moving on
-          this.isStable(true, 'load')
         }
       } catch (err: any) {
         if (err.isFromWindowLoadEvent) {
@@ -551,7 +561,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
         // elsewhere to handle running cross-domain, so don't fail
         // because of it
         if (this.state('readyForMultidomain')) {
-          this.isStable(true, 'load')
+          signalStable()
 
           return
         }
