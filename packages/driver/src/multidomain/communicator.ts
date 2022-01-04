@@ -1,4 +1,7 @@
+import debugFn from 'debug'
 import { EventEmitter } from 'events'
+
+const debug = debugFn('cypress:driver:multi-domain')
 
 const CROSS_DOMAIN_PREFIX = 'cross:domain:'
 
@@ -48,9 +51,7 @@ export class PrimaryDomainCommunicator extends EventEmitter {
         return
       }
 
-      // TODO: how do we want to log unexpected messages, if at all?
-      // eslint-disable-next-line no-console
-      console.log('Unexpected postMessage:', data)
+      debug('Unexpected postMessage:', data)
     }, false)
   }
 
