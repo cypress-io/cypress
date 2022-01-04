@@ -1,37 +1,41 @@
 <template>
-  <button
-    data-testid="open-config-file"
-    @click="showCypressConfigInIDE()"
-  >
-    <slot>
-      <span
-        class="text-purple-500 cursor-pointer"
-      >
-        {{ configFile }}
-      </span>
-    </slot>
-  </button>
+  <template v-if="query?.data?.value">
+    <button
+      data-testid="open-config-file"
+      class="hocus-link-default underline-purple-500"
+      @click="showCypressConfigInIDE()"
+    >
+      <slot>
+        <span
+          class="cursor-pointer text-purple-500"
+        >
+          {{ configFile }}
+        </span>
+      </slot>
+    </button>
 
-  <ChooseExternalEditorModal
-    :open="isChooseEditorOpen"
-    :gql="props.gql"
-    @close="isChooseEditorOpen = false"
-    @selected="openFile"
-  />
+    <ChooseExternalEditorModal
+      :open="isChooseEditorOpen"
+      :gql="query.data?.value"
+      @close="isChooseEditorOpen = false"
+      @selected="openFile"
+    />
+  </template>
+  <div v-else />
 </template>
 
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
-import { gql, useMutation } from '@urql/vue'
+import { gql, useMutation, useQuery } from '@urql/vue'
 import { OpenConfigFileDocument } from '@packages/data-context/src/gen/all-operations.gen'
-import type { OpenConfigFileInIdeFragment } from '../generated/graphql'
+import { OpenConfigFileInIdeDocument } from '../generated/graphql'
 import ChooseExternalEditorModal from './ChooseExternalEditorModal.vue'
 
 gql`
-fragment OpenConfigFileInIDE on Query {
+query OpenConfigFileInIDE {
   currentProject {
     id
-    configFilePath
+    configFile
     configFileAbsolutePath
   }
   localSettings {
@@ -49,11 +53,9 @@ mutation OpenConfigFile ($input: FileDetailsInput!) {
 }
 `
 
-const props = defineProps<{
-  gql: OpenConfigFileInIdeFragment
-}>()
+const query = useQuery({ query: OpenConfigFileInIdeDocument, requestPolicy: 'network-only' })
 
-const configFile = computed(() => props.gql.currentProject?.configFilePath ?? 'cypress.config.js')
+const configFile = computed(() => query.data?.value?.currentProject?.configFile ?? 'cypress.config.js')
 
 const OpenConfigFileInIDE = useMutation(OpenConfigFileDocument)
 
@@ -70,14 +72,14 @@ const openConfigFileInIDE = (absolute: string) => {
 const openFile = () => {
   isChooseEditorOpen.value = false
 
-  if (props.gql.currentProject?.configFileAbsolutePath) {
-    openConfigFileInIDE(props.gql.currentProject.configFileAbsolutePath)
+  if (query.data?.value?.currentProject?.configFileAbsolutePath) {
+    openConfigFileInIDE(query.data?.value?.currentProject.configFileAbsolutePath)
   }
 }
 
 const showCypressConfigInIDE = () => {
-  if (props.gql.localSettings.preferences.preferredEditorBinary && props.gql.currentProject?.configFileAbsolutePath) {
-    openConfigFileInIDE(props.gql.currentProject.configFileAbsolutePath)
+  if (query.data?.value?.localSettings.preferences.preferredEditorBinary && query.data?.value?.currentProject?.configFileAbsolutePath) {
+    openConfigFileInIDE(query.data?.value?.currentProject.configFileAbsolutePath)
   } else {
     isChooseEditorOpen.value = true
   }

@@ -4,6 +4,7 @@
     :key="warning.key"
     :title="warning.title"
     :message="warning.message"
+    :details="warning.details"
     dismissible
     @update:modelValue="dismiss(warning.key)"
   />
@@ -16,12 +17,11 @@ import type { WarningListFragment } from '../generated/graphql'
 import Warning from '../warning/Warning.vue'
 
 gql`
-fragment WarningList on Wizard {
-  step
+fragment WarningList on Query {
   warnings {
     title
     message
-    setupStep
+    details
   }
 }`
 
@@ -36,7 +36,7 @@ const warnings = computed(() => {
   .filter((warning) => {
     const hasBeenDismissed = dismissed.value[warning.key]
 
-    return !hasBeenDismissed && !warning.setupStep || warning.setupStep === props.gql.step
+    return !hasBeenDismissed
   })
 })
 

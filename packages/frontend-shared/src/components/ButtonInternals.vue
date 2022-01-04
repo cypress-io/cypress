@@ -1,7 +1,7 @@
 <template>
   <span
     v-if="prefixIcon || $slots.prefix"
-    class="justify-self-start flex items-center"
+    class="flex justify-self-start items-center"
   >
     <slot name="prefix">
       <component
@@ -15,7 +15,7 @@
   </span>
   <span
     v-if="suffixIcon || $slots.suffix"
-    class="justify-self-start flex items-center"
+    class="flex justify-self-start items-center"
   >
     <slot name="suffix">
       <component

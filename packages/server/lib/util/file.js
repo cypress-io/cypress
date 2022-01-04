@@ -237,7 +237,9 @@ class File {
     return lockFile
     .unlockAsync(this._lockFilePath)
     .timeout(env.get('FILE_UNLOCK_TIMEOUT') || LOCK_TIMEOUT)
-    .catch(Promise.TimeoutError, () => {}) // ignore timeouts
+    .catch(Promise.TimeoutError, () => { // ignore timeouts
+      debug(`unlock timeout error for %s`, this._lockFilePath)
+    })
     .finally(() => {
       return debug('unlock succeeded or failed for %s', this.path)
     })

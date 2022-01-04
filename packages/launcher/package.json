@@ -18,7 +18,8 @@
     "fs-extra": "8.1.0",
     "lodash": "^4.17.21",
     "plist": "3.0.1",
-    "semver": "7.3.5"
+    "semver": "7.3.5",
+    "win-version-info": "5.0.1"
   },
   "devDependencies": {
     "@packages/ts": "0.0.0-development",

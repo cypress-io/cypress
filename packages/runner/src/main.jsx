@@ -10,8 +10,11 @@ import { Container, selectorPlaygroundModel, StudioRecorder } from '@packages/ru
 import { EventManager } from '@packages/app/src/runner/event-manager'
 import { createWebsocket } from '@packages/app/src/runner'
 import util from './lib/util'
+import { UnifiedRunner } from '@packages/runner-ct/unified-runner'
 
 const driverUtils = $Cypress.utils
+
+window.UnifiedRunner = UnifiedRunner
 
 MobX.configure({ enforceActions: 'always' })
 
@@ -41,7 +44,7 @@ const Runner = {
       const config = JSON.parse(driverUtils.decodeBase64Unicode(base64Config))
 
       const NO_COMMAND_LOG = config.env && config.env.NO_COMMAND_LOG
-      const useInlineSpecList = (config.env || {}).CypressInternal_UseInlineSpecList
+      const useInlineSpecList = false
 
       const state = new State({
         reporterWidth: NO_COMMAND_LOG ? 0 : (config.state || {}).reporterWidth,
@@ -67,7 +70,7 @@ const Runner = {
         const { spec } = state
 
         if (spec) {
-          util.updateIntegrationSpecPath(spec.name)
+          util.updateIntegrationSpecPath(spec.baseName)
         }
       })
 

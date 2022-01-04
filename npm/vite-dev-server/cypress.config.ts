@@ -4,9 +4,8 @@ export default defineConfig({
   'pluginsFile': 'cypress/plugins.js',
   'video': false,
   'fixturesFolder': false,
-  'testFiles': '**/*.spec.*',
-  'componentFolder': 'cypress/components',
   'component': {
+    'specPattern': 'cypress/components/**/*.spec.*',
     devServer (cypressConfig) {
       const path = require('path')
       const { startDevServer } = require('./dist')

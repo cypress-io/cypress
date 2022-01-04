@@ -1,4 +1,9 @@
-import { ChildProcess, exec, ExecOptions, fork, ForkOptions, spawn, SpawnOptions } from 'child_process'
+import { ChildProcess,
+  ChildProcessWithoutNullStreams,
+  exec, ExecOptions,
+  fork, ForkOptions,
+  spawn, SpawnOptions,
+} from 'child_process'
 import through2 from 'through2'
 import pDefer from 'p-defer'
 import util from 'util'
@@ -89,15 +94,10 @@ export async function spawned (
   const { waitForExit, waitForData, tapErr, tapOut, ...spawnOpts } = opts
 
   const [executable, ...rest] = command.split(' ')
-  let useExecutable = executable
-
-  if (process.platform === 'win32' && !useExecutable.endsWith('.cmd')) {
-    useExecutable = `${executable}.cmd`
-  }
 
   // console.log(useExecutable, rest, spawnOpts)
 
-  const cp = spawn(useExecutable, rest, {
+  const cp = universalSpawn(executable, rest, {
     stdio: 'pipe',
     ...spawnOpts,
     env: {
@@ -268,4 +268,21 @@ function streamHandler (cp: ChildProcess, config: StreamHandlerConfig) {
   }
 
   return dfd.promise
+}
+
+const isWin = process.platform === 'win32'
+
+/**
+ * Pretreat commands to make them compatible with windows
+ * @param command
+ * @returns
+ */
+export function universalSpawn (
+  command: string,
+  args: string[],
+  opts?: any,
+): ChildProcessWithoutNullStreams {
+  const uCommand = isWin ? `${(command).replace(/\//g, '\\')}.cmd` : command
+
+  return spawn(uCommand, args, opts)
 }
