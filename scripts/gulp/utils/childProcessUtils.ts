@@ -29,7 +29,7 @@ interface SpawnedOptions extends TapThroughConfig, SpawnOptions {
   waitForData?: boolean
 }
 
-interface SpawnUntilMatchConfig {
+interface SpawnUntilMatchConfig extends TapThroughConfig {
   command: string
   match: string | RegExp
   options?: SpawnOptions
@@ -39,18 +39,24 @@ export async function spawnUntilMatch (
   prefix: AllSpawnableApps,
   config: SpawnUntilMatchConfig,
 ) {
+  const { tapErr, tapOut } = config
   const dfd = pDefer()
   let ready = false
 
   spawned(prefix, config.command, {
     ...config.options,
+    tapErr,
     tapOut (chunk, enc, cb) {
       if (!ready && String(chunk).match(config.match)) {
         ready = true
         setTimeout(() => dfd.resolve(), 20) // flush the rest of the chunks
       }
 
-      cb(null, chunk)
+      if (tapOut) {
+        tapOut.call(this, chunk, enc, cb)
+      } else {
+        cb(null, chunk)
+      }
     },
   })
 
@@ -227,7 +233,7 @@ function streamHandler (cp: ChildProcess, config: StreamHandlerConfig) {
       }
     }),
   )
-  .pipe(prefixStream(`${prefix}:${cp.pid}`))
+  .pipe(prefixStream(`${prefix}:${cp.pid}:stderr`))
 
   prefixedStdout?.pipe(process.stdout)
   prefixedStderr?.pipe(process.stderr)

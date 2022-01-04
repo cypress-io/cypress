@@ -65,6 +65,8 @@ function watchViteBuild (
     command,
     match: /built in (\d+)(m?s)/i,
     options,
+    tapOut: removeIgnoredWarning,
+    tapErr: removeIgnoredWarning,
   })
 }
 
@@ -77,6 +79,8 @@ function spawnViteDevServer (
     command,
     match: 'dev server running at',
     options,
+    tapOut: removeIgnoredWarning,
+    tapErr: removeIgnoredWarning,
   })
 }
 
@@ -105,6 +109,14 @@ export async function symlinkViteProjects () {
         await fs.createSymlink(DIST_SOURCES[target], path.join(basePath, target), 'dir')
       }
     }
+  }
+}
+
+function removeIgnoredWarning (chunk: any, enc: any, cb: Function) {
+  if (String(chunk).includes('Conflicting namespaces')) {
+    cb(null, '')
+  } else {
+    cb(null, chunk)
   }
 }
 
