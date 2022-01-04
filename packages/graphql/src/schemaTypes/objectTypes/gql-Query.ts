@@ -4,6 +4,7 @@ import { ProjectLike, ScaffoldedFile } from '..'
 import { CurrentProject } from './gql-CurrentProject'
 import { DevState } from './gql-DevState'
 import { LocalSettings } from './gql-LocalSettings'
+import { Migration } from './gql-Migration'
 import { VersionData } from './gql-VersionData'
 import { Wizard } from './gql-Wizard'
 import { Warning } from './gql-Warning'
@@ -27,8 +28,14 @@ export const Query = objectType({
 
     t.nonNull.field('wizard', {
       type: Wizard,
-      description: 'Metadata about the wizard, null if we arent showing the wizard',
+      description: 'Metadata about the wizard',
       resolve: (root, args, ctx) => ctx.coreData.wizard,
+    })
+
+    t.field('migration', {
+      type: Migration,
+      description: 'Metadata about the migration, null if we aren\'t showing it',
+      resolve: (root, args, ctx) => ctx.coreData.migration,
     })
 
     t.nonNull.field('dev', {

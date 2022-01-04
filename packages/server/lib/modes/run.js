@@ -26,7 +26,6 @@ const system = require('../util/system')
 const duration = require('../util/duration')
 const newlines = require('../util/newlines')
 const terminal = require('../util/terminal')
-const specsUtil = require('../util/specs')
 const humanTime = require('../util/human_time')
 const chromePolicyCheck = require('../util/chrome_policy_check')
 const experiments = require('../experiments')
@@ -67,6 +66,14 @@ const getWidth = (table, index) => {
   if (columnWidth) {
     return columnWidth - (table.options.style['padding-left'] + table.options.style['padding-right'])
   }
+}
+
+const relativeSpecPattern = (projectRoot, pattern) => {
+  if (typeof pattern === 'string') {
+    return pattern.replace(`${projectRoot}/`, '')
+  }
+
+  return pattern.map((x) => x.replace(`${projectRoot}/`, ''))
 }
 
 const formatBrowser = (browser) => {
@@ -120,7 +127,16 @@ const formatSymbolSummary = (failures) => {
   return getSymbol(failures)
 }
 
-const formatPath = (name, n, colour = 'reset') => {
+const macOSRemovePrivate = (str) => {
+  // consistent snapshots when running system tests on macOS
+  if (process.platform === 'darwin' && str.startsWith('/private')) {
+    return str.slice(8)
+  }
+
+  return str
+}
+
+const formatPath = (name, n, colour = 'reset', caller) => {
   if (!name) return ''
 
   const fakeCwdPath = env.get('FAKE_CWD_PATH')
@@ -132,7 +148,7 @@ const formatPath = (name, n, colour = 'reset') => {
     const cwdPath = process.cwd()
 
     name = name
-    .split(cwdPath)
+    .split(macOSRemovePrivate(cwdPath))
     .join(fakeCwdPath)
   }
 
@@ -199,9 +215,15 @@ const displayRunStarting = function (options = {}) {
     type: 'outsideBorder',
   })
 
-  const formatSpecPattern = () => {
+  const formatSpecPattern = (projectRoot, specPattern) => {
     // foo.spec.js, bar.spec.js, baz.spec.js
     // also inserts newlines at col width
+    if (typeof specPattern === 'string') {
+      specPattern = [specPattern]
+    }
+
+    specPattern = relativeSpecPattern(projectRoot, specPattern)
+
     if (specPattern) {
       return formatPath(specPattern.join(', '), getWidth(table, 1))
     }
@@ -209,7 +231,7 @@ const displayRunStarting = function (options = {}) {
 
   const formatSpecs = (specs) => {
     // 25 found: (foo.spec.js, bar.spec.js, baz.spec.js)
-    const names = _.map(specs, 'name')
+    const names = _.map(specs, 'baseName')
     const specsTruncated = _.truncate(names.join(', '), { length: 250 })
 
     const stringifiedSpecs = [
@@ -229,7 +251,7 @@ const displayRunStarting = function (options = {}) {
     [gray('Browser:'), formatBrowser(browser)],
     [gray('Node Version:'), formatNodeVersion(config, getWidth(table, 1))],
     [gray('Specs:'), formatSpecs(specs)],
-    [gray('Searched:'), formatSpecPattern(specPattern)],
+    [gray('Searched:'), formatSpecPattern(config.projectRoot, specPattern)],
     [gray('Params:'), formatRecordParams(runUrl, parallel, group, tag)],
     [gray('Run URL:'), runUrl ? formatPath(runUrl, getWidth(table, 1)) : ''],
     [gray('Experiments:'), hasExperiments ? experiments.formatExperiments(enabledExperiments) : ''],
@@ -282,6 +304,7 @@ const displaySpecHeader = function (name, curr, total, estimated) {
 const collectTestResults = (obj = {}, estimated) => {
   return {
     name: _.get(obj, 'spec.name'),
+    baseName: _.get(obj, 'spec.baseName'),
     tests: _.get(obj, 'stats.tests'),
     passes: _.get(obj, 'stats.passes'),
     pending: _.get(obj, 'stats.pending'),
@@ -346,7 +369,7 @@ const renderSummaryTable = (runUrl) => {
 
         const ms = duration.format(stats.wallClockDuration || 0)
 
-        const formattedSpec = formatPath(spec.name, getWidth(table2, 1))
+        const formattedSpec = formatPath(spec.baseName, getWidth(table2, 1))
 
         if (run.skippedSpec) {
           return table2.push([
@@ -603,6 +626,7 @@ const openProjectCreate = (projectRoot, socketId, args) => {
     // to give user's plugins file a chance to change it
     browsers: args.browsers,
     onWarning,
+    spec: args.spec,
     onError: args.onError,
   }
 
@@ -708,7 +732,7 @@ const maybeStartVideoRecording = Promise.method(function (options = {}) {
   }
 
   const videoPath = (suffix) => {
-    return path.join(videosFolder, spec.name + suffix)
+    return path.join(videosFolder, spec.relativeToCommonRoot + suffix)
   }
 
   const videoName = videoPath('.mp4')
@@ -733,8 +757,6 @@ const warnVideoRecordingFailed = (err) => {
 }
 
 module.exports = {
-  collectTestResults,
-
   getProjectId,
 
   writeOutput,
@@ -785,7 +807,7 @@ module.exports = {
       ['Video:', results.video],
       ['Duration:', results.duration],
       estimated ? ['Estimated:', results.estimated] : undefined,
-      ['Spec Ran:', formatPath(results.name, getWidth(table, 1), c)],
+      ['Spec Ran:', formatPath(results.baseName, getWidth(table, 1), c)],
     ])
     .compact()
     .map((arr) => {
@@ -1078,7 +1100,7 @@ module.exports = {
     // path for next spec in launch browser.
     // we need it to run on every spec even in single browser mode
     this.currentSetScreenshotMetadata = (data) => {
-      data.specName = spec.name
+      data.specName = spec.relativeToCommonRoot
 
       return data
     }
@@ -1318,7 +1340,7 @@ module.exports = {
 
     const runEachSpec = (spec, index, length, estimated) => {
       if (!options.quiet) {
-        displaySpecHeader(spec.name, index + 1, length, estimated)
+        displaySpecHeader(spec.baseName, index + 1, length, estimated)
       }
 
       return this.runSpec(config, spec, options, estimated, firstSpec)
@@ -1486,23 +1508,6 @@ module.exports = {
     })
   },
 
-  findSpecs (config, specPattern) {
-    return specsUtil.default
-    .findSpecs(config, specPattern)
-    .tap((specs = []) => {
-      if (debug.enabled) {
-        const names = _.map(specs, 'name')
-
-        return debug(
-          'found \'%d\' specs using spec pattern \'%s\': %o',
-          names.length,
-          specPattern,
-          names,
-        )
-      }
-    })
-  },
-
   ready (options = {}) {
     debug('run mode ready with options %o', options)
 
@@ -1527,7 +1532,7 @@ module.exports = {
     }
 
     // alias and coerce to null
-    let specPattern = options.spec || null
+    let specPatternFromCli = options.spec || null
 
     // ensure the project exists
     // and open up the project
@@ -1554,43 +1559,21 @@ module.exports = {
         // but be defensive about it
         const userBrowsers = _.get(config, 'resolved.browsers.value', browsers)
 
-        // all these operations are independent and should be run in parallel to
-        // speed the initial booting time
+        let specPattern = specPatternFromCli || config[options.testingType].specPattern
+
+        specPattern = relativeSpecPattern(projectRoot, specPattern)
+
         return Promise.all([
           system.info(),
           browserUtils.ensureAndGetByNameOrPath(browserName, false, userBrowsers).tap(removeOldProfiles),
-          this.findSpecs(config, specPattern),
           trashAssets(config),
         ])
-        .spread((sys = {}, browser = {}, specs = []) => {
-          // only want these properties
-          specs = specs.map((x) => ({
-            name: x.name,
-            relative: x.relative,
-            absolute: x.absolute,
-            specType: x.specType,
-          }))
-
-          // return only what is return to the specPattern
-          if (specPattern) {
-            specPattern = specsUtil.default.getPatternRelativeToProjectRoot(specPattern, projectRoot)
+        .spread(async (sys = {}, browser = {}) => {
+          if (!project.ctx.project.specs.length) {
+            errors.throw('NO_SPECS_FOUND', projectRoot, specPattern)
           }
 
-          specs = specs.filter((spec) => {
-            return options.testingType === 'component'
-              ? spec.specType === 'component'
-              : spec.specType === 'integration'
-          })
-
-          if (!specs.length) {
-            // did we use the spec pattern?
-            if (specPattern) {
-              errors.throw('NO_SPECS_FOUND', projectRoot, specPattern)
-            } else {
-              // else we looked in the integration folder
-              errors.throw('NO_SPECS_FOUND', config.integrationFolder, specPattern)
-            }
-          }
+          const specs = project.ctx.project.specs
 
           if (browser.unsupportedVersion && browser.warning) {
             errors.throw('UNSUPPORTED_BROWSER_VERSION', browser.warning)

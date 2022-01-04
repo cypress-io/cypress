@@ -32,6 +32,9 @@ export interface ClientTestContext {
     chosenBrowser: null
     warnings: []
   }
+  migration: {
+    manualFiles: string[]
+  }
   user: AuthenticatedUserShape | null
   cloudTypes: typeof cloudTypes
   __mockPartial: any
@@ -99,6 +102,9 @@ export function makeClientTestContext (): ClientTestContext {
           binary: 'vim',
         },
       ],
+    },
+    migration: {
+      manualFiles: [],
     },
     __mockPartial: {},
   }

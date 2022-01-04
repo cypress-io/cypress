@@ -1,4 +1,5 @@
 import { arg, booleanArg, enumType, idArg, mutationType, nonNull, stringArg } from 'nexus'
+import { Wizard } from './gql-Wizard'
 import { CodeGenTypeEnum } from '../enumTypes/gql-CodeGenTypeEnum'
 import { TestingTypeEnum } from '../enumTypes/gql-WizardEnums'
 import { FileDetailsInput } from '../inputTypes/gql-FileDetailsInput'
@@ -6,6 +7,7 @@ import { WizardUpdateInput } from '../inputTypes/gql-WizardUpdateInput'
 import { CodeGenResultWithFileParts } from './gql-CodeGenResult'
 import { CurrentProject } from './gql-CurrentProject'
 import { GeneratedSpec } from './gql-GeneratedSpec'
+import { Query } from '.'
 
 export const mutation = mutationType({
   definition (t) {
@@ -121,7 +123,8 @@ export const mutation = mutationType({
       },
     })
 
-    t.liveMutation('wizardUpdate', {
+    t.field('wizardUpdate', {
+      type: Wizard,
       description: 'Updates the different fields of the wizard data store',
       args: {
         input: nonNull(arg({ type: WizardUpdateInput })),
@@ -138,6 +141,8 @@ export const mutation = mutationType({
         if (args.input.codeLanguage) {
           ctx.actions.wizard.setCodeLanguage(args.input.codeLanguage)
         }
+
+        return ctx.wizardData
       },
     })
 
@@ -156,17 +161,7 @@ export const mutation = mutationType({
       },
     })
 
-    t.liveMutation('appCreateComponentIndexHtml', {
-      args: {
-        template: nonNull('String'),
-      },
-      description: 'Create an Index HTML file for a new component testing project',
-      resolve: async (_, args, ctx) => {
-        await ctx.actions.project.createComponentIndexHtml(args.template)
-      },
-    })
-
-    t.liveMutation('generateSpecFromSource', {
+    t.field('generateSpecFromSource', {
       type: GeneratedSpec,
       description: 'Generate spec from source',
       args: {
@@ -185,21 +180,28 @@ export const mutation = mutationType({
       },
     })
 
-    t.liveMutation('login', {
+    t.field('login', {
+      type: Query,
       description: 'Auth with Cypress Cloud',
       resolve: async (_, args, ctx) => {
         await ctx.actions.auth.login()
+
+        return {}
       },
     })
 
-    t.liveMutation('logout', {
+    t.field('logout', {
+      type: Query,
       description: 'Log out of Cypress Cloud',
       resolve: async (_, args, ctx) => {
         await ctx.actions.auth.logout()
+
+        return {}
       },
     })
 
-    t.liveMutation('launchOpenProject', {
+    t.field('launchOpenProject', {
+      type: CurrentProject,
       description: 'Launches project from open_project global singleton',
       args: {
         specPath: stringArg(),
@@ -210,10 +212,13 @@ export const mutation = mutationType({
         } catch (e) {
           ctx.coreData.baseError = e as Error
         }
+
+        return ctx.lifecycleManager
       },
     })
 
-    t.liveMutation('addProject', {
+    t.field('addProject', {
+      type: Query,
       description: 'Add project to projects array and cache it',
       args: {
         path: nonNull(stringArg()),
@@ -222,20 +227,26 @@ export const mutation = mutationType({
       resolve: async (_, args, ctx) => {
         ctx.actions.wizard.resetWizard()
         await ctx.actions.project.addProject(args)
+
+        return {}
       },
     })
 
-    t.liveMutation('removeProject', {
+    t.field('removeProject', {
+      type: Query,
       description: 'Remove project from projects array and cache',
       args: {
         path: nonNull(stringArg()),
       },
       resolve: async (_, args, ctx) => {
         await ctx.actions.project.removeProject(args.path)
+
+        return {}
       },
     })
 
-    t.liveMutation('setCurrentProject', {
+    t.field('setCurrentProject', {
+      type: Query,
       description: 'Set active project to run tests on',
       args: {
         path: nonNull(stringArg()),
@@ -253,6 +264,8 @@ export const mutation = mutationType({
             stack: e.stack,
           }
         }
+
+        return {}
       },
     })
 
@@ -301,8 +314,8 @@ export const mutation = mutationType({
       },
     })
 
-    t.liveMutation('setPreferences', {
-      type: 'Boolean',
+    t.field('setPreferences', {
+      type: Query,
       description: [
         'Update local preferences (also known as  appData).',
         'The payload, `value`, should be a `JSON.stringified()`',
@@ -314,13 +327,8 @@ export const mutation = mutationType({
       },
       resolve: async (_, args, ctx) => {
         await ctx.actions.localSettings.setPreferences(args.value)
-      },
-    })
 
-    t.liveMutation('showElectronOnAppExit', {
-      description: 'show the launchpad at the browser picker step',
-      resolve: (_, args, ctx) => {
-        ctx.actions.electron.showElectronOnAppExit()
+        return {}
       },
     })
 

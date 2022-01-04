@@ -10,7 +10,10 @@
         v-else-if="query.data.value.isInGlobalMode || !query.data.value?.currentProject"
         :gql="query.data.value"
       />
-      <MigrationPage v-else-if="currentProject?.needsLegacyConfigMigration" />
+      <MigrationWizard
+        v-else-if="currentProject?.needsLegacyConfigMigration && query.data.value.migration"
+        :gql="query.data.value.migration"
+      />
       <template v-else>
         <ScaffoldedFiles
           v-if="query.data.value.scaffoldedFiles"
@@ -39,7 +42,7 @@
           />
           <StandardModal
             v-model="isTestingTypeModalOpen"
-            class="h-full sm:h-auto sm:w-auto w-full sm:mx-[5%]"
+            class="h-full w-full sm:h-auto sm:mx-[5%] sm:w-auto"
           >
             <template #title>
               Key Differences
@@ -47,11 +50,11 @@
             <CompareTestingTypes />
           </StandardModal>
           <button
-            class="block mx-auto text-indigo-500 text-18px hocus-link-default group mt-12px"
+            class="mx-auto mt-12px text-indigo-500 text-18px block hocus-link-default group"
             @click="isTestingTypeModalOpen = true"
           >
             {{ t('welcomePage.review') }}<i-cy-arrow-right_x16
-              class="inline-block transition-transform duration-200 ease-in transform -translate-y-1px ml-4px icon-dark-current group-hocus:translate-x-2px"
+              class="ml-4px transform transition-transform ease-in -translate-y-1px duration-200 inline-block icon-dark-current group-hocus:translate-x-2px"
             />
           </button>
           <TestingTypeCards
@@ -80,7 +83,7 @@ import StandardModal from '@cy/components/StandardModal.vue'
 import HeaderBar from '@cy/gql-components/HeaderBar.vue'
 import Spinner from '@cy/components/Spinner.vue'
 import CompareTestingTypes from './setup/CompareTestingTypes.vue'
-import MigrationPage from './setup/MigrationPage.vue'
+import MigrationWizard from './migration/MigrationWizard.vue'
 import ScaffoldedFiles from './setup/ScaffoldedFiles.vue'
 
 import { useI18n } from '@cy/i18n'
@@ -142,7 +145,7 @@ useSubscription({
 })
 
 gql`
-query MainLaunchpadQuery {
+fragment MainLaunchpadQueryData on Query {
   ...TestingTypeCards
   ...Wizard
   baseError {
@@ -155,6 +158,15 @@ query MainLaunchpadQuery {
   isInGlobalMode
   ...GlobalPage
   ...ScaffoldedFiles
+  migration {
+    ...MigrationWizard
+  }
+}
+`
+
+gql`
+query MainLaunchpadQuery {
+  ...MainLaunchpadQueryData
 }
 `
 
