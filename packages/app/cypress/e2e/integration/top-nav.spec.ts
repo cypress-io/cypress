@@ -322,7 +322,7 @@ describe('App Navigation', () => {
         email: 'test_user_b@example.com',
       }
 
-      const logInUser = (user) => {
+      const mockLogInActionsForUser = (user) => {
         cy.withCtx((ctx, options) => {
           sinon.stub(ctx._apis.authApi, 'logIn').callsFake(async (onMessage) => {
             onMessage({ browserOpened: true })
@@ -344,16 +344,20 @@ describe('App Navigation', () => {
       })
 
       it('shows log in modal workflow for user with name and email', () => {
-        logInUser(mockUser)
+        mockLogInActionsForUser(mockUser)
 
-        cy.findByTestId('app-header-bar').findByRole('button', { name: 'Log In' }).click()
+        cy.findByTestId('app-header-bar').within(() => {
+          cy.findByTestId('user-avatar').should('not.exist')
+          cy.findByRole('button', { name: 'Log In' }).click()
+        })
 
-        cy.findByRole('dialog', { name: 'Log in to Cypress' }).as('logInModal')
-        .findByRole('button', { name: 'Log In' }).click()
+        cy.findByRole('dialog', { name: 'Log in to Cypress' }).as('logInModal').within(() => {
+          cy.findByRole('button', { name: 'Log In' }).click()
 
-        // The Log In button transitions through a few states as the browser launch lifecycle completes
-        cy.findByRole('button', { name: 'Opening Browser' }).should('be.visible').and('be.disabled')
-        cy.findByRole('button', { name: 'Waiting for you to log in' }).should('be.visible').and('be.disabled')
+          // The Log In button transitions through a few states as the browser launch lifecycle completes
+          cy.findByRole('button', { name: 'Opening Browser' }).should('be.visible').and('be.disabled')
+          cy.findByRole('button', { name: 'Waiting for you to log in' }).should('be.visible').and('be.disabled')
+        })
 
         cy.findByRole('dialog', { name: 'Login Successful' }).within(() => {
           cy.findByText('You are now logged in as', { exact: false }).should('be.visible')
@@ -366,18 +370,24 @@ describe('App Navigation', () => {
         })
 
         cy.get('@logInModal').should('not.exist')
+        cy.findByTestId('app-header-bar').findByTestId('user-avatar').should('be.visible')
       })
 
       it('shows log in modal workflow for user with only email', () => {
-        logInUser(mockUserNoName)
+        mockLogInActionsForUser(mockUserNoName)
 
-        cy.findByTestId('app-header-bar').findByRole('button', { name: 'Log In' }).click()
+        cy.findByTestId('app-header-bar').within(() => {
+          cy.findByTestId('user-avatar').should('not.exist')
+          cy.findByRole('button', { name: 'Log In' }).click()
+        })
 
-        cy.findByRole('dialog', { name: 'Log in to Cypress' }).as('logInModal')
-        .findByRole('button', { name: 'Log In' }).click()
+        cy.findByRole('dialog', { name: 'Log in to Cypress' }).as('logInModal').within(() => {
+          cy.findByRole('button', { name: 'Log In' }).click()
 
-        cy.findByRole('button', { name: 'Opening Browser' }).should('be.visible').and('be.disabled')
-        cy.findByRole('button', { name: 'Waiting for you to log in' }).should('be.visible').and('be.disabled')
+          // The Log In button transitions through a few states as the browser launch lifecycle completes
+          cy.findByRole('button', { name: 'Opening Browser' }).should('be.visible').and('be.disabled')
+          cy.findByRole('button', { name: 'Waiting for you to log in' }).should('be.visible').and('be.disabled')
+        })
 
         cy.findByRole('dialog', { name: 'Login Successful' }).within(() => {
           cy.findByText('You are now logged in as', { exact: false }).should('be.visible')
@@ -390,6 +400,7 @@ describe('App Navigation', () => {
         })
 
         cy.get('@logInModal').should('not.exist')
+        cy.findByTestId('app-header-bar').findByTestId('user-avatar').should('be.visible')
       })
     })
   })
