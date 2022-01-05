@@ -5,6 +5,7 @@ const path = require('path')
 
 module.exports = {
   'e2e': {
+    'supportFile': false,
     setupNodeEvents (on, config) {
       const parentPid = process.ppid
       let { PATH_TO_CHROME_PROFILE } = config.env

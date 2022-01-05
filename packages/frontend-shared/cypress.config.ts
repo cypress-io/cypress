@@ -18,6 +18,7 @@ export default defineConfig({
   },
   'component': {
     'specPattern': 'src/**/*.spec.{js,ts,tsx,jsx}',
+    'supportFile': 'cypress/support/component.ts',
     devServer (cypressConfig, devServerConfig) {
       const { startDevServer } = require('@cypress/vite-dev-server')
 
