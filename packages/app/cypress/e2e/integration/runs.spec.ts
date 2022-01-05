@@ -42,8 +42,9 @@ describe('App: Runs', () => {
       cy.visitApp()
       cy.get('[href="#/runs"]').click()
       cy.contains('Log In').click()
-      cy.get('[id="headlessui-dialog-title-13"]').contains('Log in to Cypress')
-      cy.get('button').contains('Log In')
+      cy.findByRole('dialog', { name: 'Log in to Cypress' }).within(() => {
+        cy.get('button').contains('Log In')
+      })
     })
 
     it('if logged in and connected', { viewportWidth: 1200 }, () => {
@@ -215,14 +216,21 @@ describe('App: Runs', () => {
       cy.loginUser()
       cy.visitApp()
       cy.get('[href="#/runs"]').click()
-      cy.get('[href="http://dummy.cypress.io/runs/0"]').first().findByText('fix: make gql work CANCELLED')
-      cy.get('[href="http://dummy.cypress.io/runs/0"]').first().get('[data-cy="run-card-icon"]').get('path').get('[stroke="#BFC2D4"]')
 
-      cy.get('[href="http://dummy.cypress.io/runs/1"]').first().findByText('fix: make gql work ERRORED')
-      cy.get('[href="http://dummy.cypress.io/runs/1"]').first().get('[data-cy="run-card-icon"]').get('path').get('[fill="#DB7903"]')
+      cy.get('[href="http://dummy.cypress.io/runs/0"]').first().within(() => {
+        cy.findByText('fix: make gql work CANCELLED')
+        cy.get('[data-cy="run-card-icon"]')
+      })
 
-      cy.get('[href="http://dummy.cypress.io/runs/2"]').first().findByText('fix: make gql work FAILED')
-      cy.get('[href="http://dummy.cypress.io/runs/2"]').first().get('[data-cy="run-card-icon"]').get('path').get('[fill="#E45770"]')
+      cy.get('[href="http://dummy.cypress.io/runs/1"]').first().within(() => {
+        cy.findByText('fix: make gql work ERRORED')
+        cy.get('[data-cy="run-card-icon"]')
+      })
+
+      cy.get('[href="http://dummy.cypress.io/runs/2"]').first().within(() => {
+        cy.findByText('fix: make gql work FAILED')
+        cy.get('[data-cy="run-card-icon"]')
+      })
 
       cy.get('[href="http://dummy.cypress.io/runs/0"]').first().get('[data-cy="run-card-author"]').contains('John Appleseed')
       cy.get('[href="http://dummy.cypress.io/runs/0"]').first().get('[data-cy="run-card-avatar')
