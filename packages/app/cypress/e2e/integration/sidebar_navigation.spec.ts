@@ -31,7 +31,7 @@ describe('Sidebar Navigation', () => {
   it('has unlabeled menu item that shows the keyboard shortcuts modal (unexpanded state)', () => {
     cy.get('[data-cy="keyboard-shortcuts"]').should('be.visible')
     cy.get('[data-cy="keyboard-shortcuts"]').click()
-    cy.get('h2').findByText('Keyboard Shortcuts').should('be.visible')
+    cy.contains('h2', 'Keyboard Shortcuts').should('be.visible')
     cy.get('li p').contains('Re-run tests').should('be.visible')
     cy.get('li p').contains('Stop tests').should('be.visible')
     cy.get('li p').contains('Toggle specs list').should('be.visible')
