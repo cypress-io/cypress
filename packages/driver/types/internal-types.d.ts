@@ -1,8 +1,15 @@
 // NOTE: this is for internal Cypress types that we don't want exposed in the public API but want for development
 // TODO: find a better place for this
 
+interface InternalWindowLoadDetails {
+  type: 'same:domain' | 'cross:domain' | 'cross:domain:failure'
+  error?: Error
+  window?: AUTWindow
+}
+
 declare namespace Cypress {
   interface Actions {
+    (action: 'internal:window:load', fn: (details: InternalWindowLoadDetails) => void)
     (action: 'net:stubbing:event', frame: any)
     (action: 'request:event', data: any)
   }

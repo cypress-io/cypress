@@ -5404,12 +5404,6 @@ declare namespace Cypress {
     (action: 'task', tasks: Tasks): void
   }
 
-  interface InternalWindowLoadDetails {
-    type: 'same:domain' | 'cross:domain' | 'cross:domain:failure'
-    error?: Error
-    window?: AUTWindow
-  }
-
   // for just a few events like "window:alert" it makes sense to allow passing cy.stub() or
   // a user callback function. Others probably only need a callback function.
 
@@ -5490,13 +5484,6 @@ declare namespace Cypress {
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
     (action: 'window:load', fn: (win: AUTWindow) => void): Cypress
-    /**
-     * Fires when 'window:load' fires, as well as when a page on a secondary
-     * domain loads.
-     *
-     * WARNING: Intended for internal use. Subject to change or be removed.
-     */
-    (action: 'internal:window:load', fn: (details: InternalWindowLoadDetails) => void): Cypress
     /**
      * Fires when your application is about to navigate away.
      * The real event object is provided to you.
