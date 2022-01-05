@@ -6,7 +6,10 @@ describe('App: Index', () => {
   beforeEach(() => {
     cy.scaffoldProject('non-existent-spec')
     cy.openProject('non-existent-spec')
-    cy.withCtx(async (ctx, o) => {
+    cy.withCtx(async (ctx, { testState }) => {
+      testState.newFilePath = 'cypress/integration/new-file.spec.js'
+
+      await ctx.actions.file.removeFileInProject(testState.newFilePath)
       await ctx.actions.file.removeFileInProject('cypress/integration/spec.js')
     })
 
@@ -32,6 +35,32 @@ describe('App: Index', () => {
     })
   })
 
+  context('with specs', () => {
+    it('refreshes spec list on spec changes', () => {
+      cy.withCtx(async (ctx, { testState }) => {
+        const addedSpec = ctx.project.specs.find((spec) => spec.absolute.includes(testState.newFilePath))
+
+        expect(addedSpec).be.equal(undefined)
+
+        await ctx.actions.file.writeFileInProject(testState.newFilePath, '')
+      })
+
+      cy.wait(200)
+      cy.withCtx(async (ctx, { testState }) => {
+        expect(ctx.project.specs).have.length(1)
+
+        const addedSpec = ctx.project.specs.find((spec) => spec.absolute.includes(testState.newFilePath))
+
+        expect(addedSpec).not.be.equal(undefined)
+      })
+
+      // Hack due to ctx.emitter.toApp() not triggering a refresh in e2e test
+      // TODO: Figure out why emitter doesn't work in e2e tests
+      cy.visitApp()
+      cy.findByTestId('spec-item').should('contain', 'new-file')
+    })
+  })
+
   context('scaffold example specs', () => {
     const assertSpecs = (createdSpecs: FoundSpec[]) => cy.wrap(createdSpecs).each((spec: FoundSpec) => cy.contains(spec.baseName).scrollIntoView().should('be.visible'))
 
@@ -53,9 +82,7 @@ describe('App: Index', () => {
 
       cy.contains(defaultMessages.createSpec.e2e.importFromScaffold.specsAddedButton).click()
 
-      cy.visitApp().then(() => {
-        assertSpecs(createdSpecs)
-      })
+      cy.visitApp().then(() => assertSpecs(createdSpecs))
     })
   })
 })

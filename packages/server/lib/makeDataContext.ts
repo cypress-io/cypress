@@ -28,6 +28,7 @@ import * as savedState from './saved_state'
 import appData from './util/app_data'
 import plugins from './plugins'
 import browsers from './browsers'
+import devServer from './plugins/dev-server'
 
 const { getBrowsers, ensureAndGetByNameOrPath } = browserUtils
 
@@ -115,6 +116,9 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       },
       closeActiveProject () {
         return openProject.closeActiveProject()
+      },
+      getDevServer () {
+        return devServer
       },
     },
     electronApi: {
