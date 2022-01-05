@@ -29,7 +29,7 @@ describe('@cypress/schematic:e2e ng-generate', () => {
   })
 
   it('should create cypress files', async () => {
-    const files = ['cypress/integration/foo.spec.ts']
+    const files = ['cypress/e2e/foo.spec.ts']
     const homePath = '/projects/sandbox/'
 
     return schematicRunner.runSchematicAsync('e2e', { name: 'foo' }, appTree).toPromise().then((tree) => {
