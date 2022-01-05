@@ -404,7 +404,7 @@ describe('lib/tasks/download', function () {
 
     return download.start(this.options).then(() => expect(true).to.equal(false)).catch((error) => {
       expect(error).to.be.instanceof(Error)
-      expect(error.message).to.contain('Excessive redirects!')
+      expect(error.message).to.contain('redirect loop')
     })
     .then(() => {
       // Double check to make sure that raising redirectTTL changes result
