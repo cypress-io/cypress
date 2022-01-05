@@ -28,14 +28,14 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
   Commands.addAll({
     // this isn't fully implemented, but in place to be able to test out
     // the other parts of multidomain
-    switchToDomain<T> (domain: string, dataOrFn: T, fn?: (data?: T) => {}) {
+    switchToDomain<T> (domain: string, dataOrFn: T | (() => {}), fn?: (data?: T) => {}) {
       clearTimeout(timeoutId)
 
       if (!config('experimentalMultiDomain')) {
         $errUtils.throwErrByPath('switchToDomain.experiment_not_enabled')
       }
 
-      const callbackFn = fn ?? dataOrFn
+      const callbackFn = (fn ?? dataOrFn) as (data?: T) => {}
       const data = fn ? dataOrFn : undefined
 
       const log = Cypress.log({
