@@ -323,7 +323,7 @@ interface E2eScaffoldOpts {
 const E2E_SCAFFOLD_BODY = (opts: E2eScaffoldOpts) => {
   return `
     e2e: {
-      supportFile: '\'cypress/support/e2e.${opts.lang}\'',
+      supportFile: 'cypress/support/e2e.${opts.lang}',
       specPattern: 'cypress/e2e/**/*.cy.{js,ts}',
       viewportHeight: 660,
       viewportWidth: 1000,
@@ -344,7 +344,7 @@ interface ComponentScaffoldOpts {
 const COMPONENT_SCAFFOLD_BODY = (opts: ComponentScaffoldOpts) => {
   return `
   component: {
-    supportFile: '\'cypress/support/component.${opts.lang}\'',
+    supportFile: 'cypress/support/component.${opts.lang}',
     specPattern: 'cypress/**/*.cy.{js,jsx,ts,tsx}',
     devServer: import('${opts.requirePath}'),
     devServerConfig: ${opts.configOptionsString}
