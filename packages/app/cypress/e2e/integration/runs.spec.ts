@@ -205,7 +205,7 @@ describe('App: Runs', () => {
   })
 
   context('Runs - Runs List', () => {
-    it('if a run has been recorded, a list of recorded runs is displayed', () => {
+    it('displays a list of recorded runs if a run has been recorded', () => {
       cy.loginUser()
       cy.visitApp()
       cy.get('[href="#/runs"]').click()
