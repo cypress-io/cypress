@@ -1133,7 +1133,10 @@ export class ProjectLifecycleManager {
       await this.setActiveBrowser(this.ctx.coreData.cliBrowser)
     }
 
-    await this.ctx.actions.project.initializeActiveProject()
+    // This happens automatically with openProjectCreate in run mode
+    if (!this.ctx.isRunMode) {
+      await this.ctx.actions.project.initializeActiveProject()
+    }
 
     this._pendingInitialize?.resolve(finalConfig)
   }
