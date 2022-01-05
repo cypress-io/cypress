@@ -77,7 +77,7 @@ const launchServer = (baseLoginUrl, sendMessage, utmCode) => {
     app.get('/redirect-to-auth', (req, res) => {
       authRedirectReached = true
 
-      _buildFullLoginUrl(baseLoginUrl, server, utmCode)
+      buildFullLoginUrl(baseLoginUrl, server, utmCode)
       .then((fullLoginUrl) => {
         debug('Received GET to /redirect-to-auth, redirecting: %o', { fullLoginUrl })
 
@@ -176,7 +176,7 @@ const launchNativeAuth = Promise.method((loginUrl, sendMessage) => {
  * Grouping internal APIs under separate export to allow for stubbing
  * in public API tests.
  */
-export const _internal = {
+const _internal = {
   buildLoginRedirectUrl,
   buildFullLoginUrl,
   getOriginFromUrl,
@@ -188,7 +188,7 @@ export const _internal = {
 /**
  * @returns a promise that is resolved with a user when auth is complete or rejected when it fails
  */
-export const start = (onMessage, utmCode) => {
+const start = (onMessage, utmCode) => {
   function sendMessage (type, name, arg1) {
     onMessage({
       type,
@@ -224,4 +224,9 @@ export const start = (onMessage, utmCode) => {
     _internal.stopServer()
     require('./windows').focusMainWindow()
   })
+}
+
+export = {
+  start,
+  _internal,
 }
