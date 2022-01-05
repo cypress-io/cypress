@@ -1665,6 +1665,24 @@ export default {
     },
   },
 
+  switchToDomain: {
+    invalid_domain_argument: {
+      message: `${cmd('switchToDomain')} requires the first argument to be a string. You passed: \`{{arg}}\``,
+    },
+    invalid_fn_argument: {
+      message: `${cmd('switchToDomain')} requires the last argument to be a function. You passed: \`{{arg}}\``,
+    },
+    run_domain_fn_errored: {
+      message: stripIndent`
+      ${cmd('switchToDomain')} failed with the following error:
+
+        > {{error}}
+
+      This is likely because the data value provided is not serializable. Note that functions and DOM objects cannot be serialized.`,
+      docsUrl: 'https://on.cypress.io/switchToDomain',
+    },
+  },
+
   task: {
     docsUrl: 'https://on.cypress.io/api/task',
     known_error: stripIndent`

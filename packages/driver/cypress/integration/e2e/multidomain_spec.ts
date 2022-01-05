@@ -43,6 +43,94 @@ describe('multidomain', { experimentalSessionSupport: true }, () => {
     })
   })
 
+  describe('data argument', () => {
+    it('passes object to callback function', () => {
+      // @ts-ignore
+      cy.switchToDomain('foobar.com', { foo: 'foo', bar: 'bar' }, ({ foo, bar }) => {
+        expect(foo).to.equal('foo')
+        expect(bar).to.equal('bar')
+      })
+    })
+
+    it('passes array to callback function', () => {
+      // @ts-ignore
+      cy.switchToDomain('foobar.com', ['foo', 'bar'], ([foo, bar]) => {
+        expect(foo).to.equal('foo')
+        expect(bar).to.equal('bar')
+      })
+    })
+
+    it('passes string to callback function', () => {
+      // @ts-ignore
+      cy.switchToDomain('foobar.com', 'foo', (foo) => {
+        expect(foo).to.equal('foo')
+      })
+    })
+
+    it('passes number to callback function', () => {
+      // @ts-ignore
+      cy.switchToDomain('foobar.com', 1, (num) => {
+        expect(num).to.equal(1)
+      })
+    })
+
+    it('passes boolean to callback function', () => {
+      // @ts-ignore
+      cy.switchToDomain('foobar.com', true, (bool) => {
+        expect(bool).to.be.true
+      })
+    })
+
+    describe('errors', () => {
+      it('errors if passed a non-string for the domain argument', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.equal('`cy.switchToDomain()` requires the first argument to be a string. You passed: ``')
+
+          done()
+        })
+
+        // @ts-ignore
+        cy.switchToDomain()
+      })
+
+      it('errors if passed a non-serializable data value', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.include('data value provided is not serializable')
+          expect(err.message).to.include('Failed to execute \'postMessage\'')
+
+          done()
+        })
+
+        // @ts-ignore
+        cy.switchToDomain('foobar.com', () => {}, (bool) => {
+          expect(bool).to.be.true
+        })
+      })
+
+      it('errors if last argument is absent', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.equal('`cy.switchToDomain()` requires the last argument to be a function. You passed: ``')
+
+          done()
+        })
+
+        // @ts-ignore
+        cy.switchToDomain('foobar.com')
+      })
+
+      it('errors if last argument is not a function', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.equal('`cy.switchToDomain()` requires the last argument to be a function. You passed: `{}`')
+
+          done()
+        })
+
+        // @ts-ignore
+        cy.switchToDomain('foobar.com', {})
+      })
+    })
+  })
+
   describe('window events', () => {
     it('form:submitted', (done) => {
       expectTextMessage('form:submitted', done)

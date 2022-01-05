@@ -1,5 +1,7 @@
 import Bluebird from 'bluebird'
 import { createDeferred } from '../../util/deferred'
+import $utils from '../../cypress/utils'
+import $errUtils from '../../cypress/error_utils'
 
 export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: Cypress.State) {
   let timeoutId
@@ -26,15 +28,32 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
   Commands.addAll({
     // this isn't fully implemented, but in place to be able to test out
     // the other parts of multidomain
-    switchToDomain (domain, fn) {
+    switchToDomain (domain: string, dataOrFn: any, fn?: () => {}) {
       clearTimeout(timeoutId)
 
-      Cypress.log({
+      const callbackFn = fn ?? dataOrFn
+      const data = fn ? dataOrFn : undefined
+
+      const log = Cypress.log({
         name: 'switchToDomain',
         type: 'parent',
         message: domain,
         end: true,
       })
+
+      if (typeof domain !== 'string') {
+        $errUtils.throwErrByPath('switchToDomain.invalid_domain_argument', {
+          onFail: log,
+          args: { arg: $utils.stringify(domain) },
+        })
+      }
+
+      if (typeof callbackFn !== 'function') {
+        $errUtils.throwErrByPath('switchToDomain.invalid_fn_argument', {
+          onFail: log,
+          args: { arg: $utils.stringify(callbackFn) },
+        })
+      }
 
       // these are proxy commands that represent real commands in a
       // secondary domain. this way, the queue runs in the primary domain
@@ -105,7 +124,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
       communicator.on('command:enqueued', addCommand)
       communicator.on('command:update', updateCommand)
 
-      return new Bluebird((resolve) => {
+      return new Bluebird((resolve, reject) => {
         communicator.once('ran:domain:fn', resolve)
 
         communicator.once('queue:finished', () => {
@@ -127,9 +146,20 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
 
           // once the secondary domain page loads, send along the
           // user-specified callback to run in that domain
-          communicator.toSpecBridge('run:domain:fn', {
-            fn: fn.toString(),
-          })
+          try {
+            communicator.toSpecBridge('run:domain:fn', {
+              data,
+              fn: callbackFn.toString(),
+            })
+          } catch (err: any) {
+            const wrappedErr = $errUtils.errByPath('switchToDomain.run_domain_fn_errored', {
+              error: err.stack,
+            })
+
+            reject(wrappedErr)
+
+            return
+          }
 
           state('readyForMultidomain', false)
           // @ts-ignore
