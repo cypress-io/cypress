@@ -425,7 +425,7 @@ describe('lib/cypress', () => {
       })
     })
 
-    // TODO: We no longer do this in the new flow
+    // NOTE: We no longer do this in the new flow
     it.skip('scaffolds out integration and example specs if they do not exist when not runMode', function () {
       ctx.actions.project.setCurrentProjectForTestSetup(this.pristineWithConfigPath)
 

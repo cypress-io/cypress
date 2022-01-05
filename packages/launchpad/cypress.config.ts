@@ -5,7 +5,6 @@ const CYPRESS_INTERNAL_CLOUD_ENV = getenv('CYPRESS_INTERNAL_CLOUD_ENV', process.
 
 export default defineConfig({
   projectId: CYPRESS_INTERNAL_CLOUD_ENV === 'staging' ? 'ypt4pf' : 'sehy69',
-  video: false,
   'viewportWidth': 800,
   'viewportHeight': 850,
   'retries': {
