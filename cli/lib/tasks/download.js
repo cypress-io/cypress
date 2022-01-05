@@ -193,7 +193,7 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca, version, redi
       stripIndent`
           Failed downloading the Cypress binary.
           There were too many redirects. The default allowance is ${defaultMaxRedirects}.
-          If you need more, use environment variable CYPRESS_DOWNLOAD_REDIRECT_TTL
+          Maybe you got stuck in a redirect loop?
         `,
     ))
   }
@@ -320,9 +320,7 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca, version, redi
  * @param [string] downloadDestination Local filename to save as
  */
 const start = (opts) => {
-  let { version, downloadDestination, progress, redirectTTL: passedInTTL } = opts
-
-  const envTTL = util.getEnv('CYPRESS_DOWNLOAD_REDIRECT_TTL')
+  let { version, downloadDestination, progress, redirectTTL } = opts
 
   if (!downloadDestination) {
     la(is.unemptyString(downloadDestination), 'missing download dir', opts)
@@ -349,7 +347,7 @@ const start = (opts) => {
   })
   .then((ca) => {
     return downloadFromUrl({ url, downloadDestination, progress, ca, version,
-      ...(passedInTTL || envTTL ? { redirectTTL: passedInTTL || envTTL } : {}) })
+      ...(redirectTTL ? { redirectTTL } : {}) })
   })
   .catch((err) => {
     return prettyDownloadErr(err, version)
