@@ -1,6 +1,6 @@
 <template>
   <SpecRunnerContainer
-    v-if="query.data.value?.currentProject"
+    v-if="query.data.value?.currentProject?.specs"
     :gql="query.data.value"
   />
 </template>
