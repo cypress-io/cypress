@@ -75,8 +75,12 @@ describe('Launchpad: Global Mode', () => {
 
       setupAndValidateProjectsList(projectList)
 
-      cy.get('[data-cy="project-card"]').within((cards) => cards.get(2).click())
-      cy.get('h1').contains('Welcome to Cypress!')
+      cy.get('[data-cy="project-card"]').within((cards) => {
+        cy.log('open cookies project')
+        cards.get(2).click()
+      })
+
+      cy.contains('Welcome to Cypress!')
       cy.get('a').contains('Projects').click()
 
       cy.get('[data-cy="project-card"]')

@@ -4,7 +4,7 @@
   bg-white pr-4px pt-13px pb-13px flex items-center space-x-3 group
   hocus-default focus-within-default"
     data-cy="project-card"
-    @click="setActiveProject(props.gql.projectRoot)"
+    @click="setCurrentProject(props.gql.projectRoot)"
   >
     <div
       class="w-73px h-40px text-center flex items-center justify-center border-r border-r-gray-100 mr-4px"
