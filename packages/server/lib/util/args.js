@@ -209,8 +209,8 @@ const sanitizeAndConvertNestedArgs = (str, argname) => {
 const parseSpecArgvAsGlob = (spec, cwd) => {
   return {
     isGlob: ig(spec),
-    setGlob: (pattern) => {
-      const globbed = glob.sync(path.resolve(cwd, pattern))
+    setGlob: () => {
+      const globbed = glob.sync(path.resolve(cwd, spec))
 
       // This is needed to output the glob pattern on error.
       return globbed.length ? globbed : [spec]
@@ -322,7 +322,7 @@ module.exports = {
           const { isGlob, setGlob } = parseSpecArgvAsGlob(spec, options.cwd)
 
           if (isGlob) {
-            options.spec = setGlob(spec)
+            options.spec = setGlob()
           } else {
             options.spec = strToArray(spec).map(resolvePath)
           }
@@ -331,7 +331,7 @@ module.exports = {
           const { isGlob, setGlob } = parseSpecArgvAsGlob(stringifiedArg, options.cwd)
 
           if (isGlob) {
-            options.spec = setGlob(stringifiedArg)
+            options.spec = setGlob()
           } else {
             options.spec = spec.map(resolvePath)
           }
