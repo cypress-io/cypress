@@ -104,7 +104,7 @@ describe('Sidebar Navigation', () => {
     cy.get('[aria-expanded]').should('have.attr', 'aria-expanded', 'true')
     cy.get('[data-cy="keyboard-shortcuts"]').should('be.visible')
     cy.get('[data-cy="keyboard-shortcuts"]').click()
-    cy.findByText('Keyboard Shortcuts').should('be.visible')
+    cy.contains('h2', 'Keyboard Shortcuts').should('be.visible')
     cy.get('li p').contains('Re-run tests').should('be.visible')
     cy.get('li p').contains('Stop tests').should('be.visible')
     cy.get('li p').contains('Toggle specs list').should('be.visible')
