@@ -2978,8 +2978,7 @@ declare namespace Cypress {
 
   type DevServerFn<ComponentDevServerOpts = any> = (cypressConfig: DevServerConfig, devServerConfig: ComponentDevServerOpts) => ResolvedDevServerConfig | Promise<ResolvedDevServerConfig>
   interface ComponentConfigOptions<ComponentDevServerOpts = any> extends CoreConfigOptions {
-    // TODO(tim): Keeping optional until we land the implementation
-    devServer?: Promise<{ devServer: DevServerFn<ResolvedDevServerConfig>}> | { devServer: DevServerFn<ResolvedDevServerConfig> } | DevServerFn<ResolvedDevServerConfig>
+    devServer: Promise<{ devServer: DevServerFn<ComponentDevServerOpts>}> | { devServer: DevServerFn<ComponentDevServerOpts> } | DevServerFn<ComponentDevServerOpts>
     devServerConfig?: ComponentDevServerOpts | Promise<ComponentDevServerOpts>
   }
 
