@@ -5,6 +5,8 @@ const path = require('path')
 const debug = require('debug')('cypress:server:args')
 const minimist = require('minimist')
 const { getPublicConfigKeys } = require('@packages/config')
+const ig = require('is-glob')
+const glob = require('glob')
 
 const coerceUtil = require('./coerce')
 const proxyUtil = require('./proxy')
@@ -204,6 +206,18 @@ const sanitizeAndConvertNestedArgs = (str, argname) => {
   }
 }
 
+const parseSpecArgvAsGlob = (spec, cwd) => {
+  return {
+    isGlob: ig(spec),
+    setGlob: (pattern) => {
+      const globbed = glob.sync(path.resolve(cwd, pattern))
+
+      // This is needed to output the glob pattern on error.
+      return globbed.length ? globbed : [spec]
+    },
+  }
+}
+
 module.exports = {
   normalizeBackslashes,
 
@@ -303,12 +317,27 @@ module.exports = {
             spec = spec.substring(1, spec.length - 1)
           }
 
-          options.spec = strToArray(spec).map(resolvePath)
+          // Before blindly parsing to an array of path, check if spec is not
+          // a glob pattern with commas.
+          const { isGlob, setGlob } = parseSpecArgvAsGlob(spec, options.cwd)
+
+          if (isGlob) {
+            options.spec = setGlob(spec)
+          } else {
+            options.spec = strToArray(spec).map(resolvePath)
+          }
         } else {
-          options.spec = spec.map(resolvePath)
+          const stringifiedArg = spec.join()
+          const { isGlob, setGlob } = parseSpecArgvAsGlob(stringifiedArg, options.cwd)
+
+          if (isGlob) {
+            options.spec = setGlob(stringifiedArg)
+          } else {
+            options.spec = spec.map(resolvePath)
+          }
         }
       } catch (err) {
-        debug('could not pass config spec value %s', spec)
+        debug('could not parse config spec value %s', spec)
         debug('error %o', err)
 
         return errors.throw('COULD_NOT_PARSE_ARGUMENTS', 'spec', spec, 'spec must be a string or comma-separated list')
