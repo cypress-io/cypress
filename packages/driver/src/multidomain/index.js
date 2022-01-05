@@ -117,11 +117,16 @@ const setup = () => {
     } catch (err) {
       // Native Error types currently cannot be cloned in Firefox when using 'postMessage'.
       // Please see https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm for more details
-      specBridgeCommunicator.toPrimary('run:domain:fn', {
-        name: err.name,
-        message: err.message,
-        stack: err.stack,
-      })
+      // TODO: More standard serialization of Objects/Arrays within the communicator to avoid this type of logic
+      if (err instanceof Error) {
+        specBridgeCommunicator.toPrimary('run:domain:fn', {
+          name: err.name,
+          message: err.message,
+          stack: err.stack,
+        })
+      } else {
+        specBridgeCommunicator.toPrimary('run:domain:fn', err)
+      }
     } finally {
       cy.state('done', undefined)
     }
