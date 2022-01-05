@@ -1,15 +1,15 @@
 // This file is merged in a <script type=module> into index.html
 // it will be used to load and kick start the selected spec
-
-const supportPath = import.meta.env.__cypress_supportPath
-const originAutUrl = import.meta.env.__cypress_originAutUrl
+import specLoaders from 'cypress:spec-loaders'
+import { supportPath, originAutUrl } from 'cypress:config'
 
 const specPath = window.location.pathname.replace(originAutUrl, '')
 
-const importsToLoad = [() => import(/* @vite-ignore */ specPath)]
+const specLoader = specLoaders[specPath]
+const importsToLoad = [specLoader || (() => import(/* @vite-ignore */ specPath))]
 
 if (supportPath) {
-  importsToLoad.unshift(() => import(/* @vite-ignore */ supportPath))
+  importsToLoad.unshift(() => import('cypress:support-path'))
 }
 
 const CypressInstance = window.Cypress = parent.Cypress
@@ -46,3 +46,4 @@ CypressInstance.on('test:before:run', () => {
 
 // Make usage of node test plugins possible
 window.global = window
+window.process = typeof process !== 'undefined' ? process : {}
