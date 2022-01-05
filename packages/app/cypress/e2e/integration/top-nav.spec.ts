@@ -215,7 +215,7 @@ describe('App Top Nav Workflows', () => {
       cy.findByTestId('app-header-bar').findByRole('button', { name: 'Docs', expanded: false }).as('docsButton')
     })
 
-    it('shows shows popover with additional doc links', () => {
+    it('shows popover with additional doc links', () => {
       cy.get('@docsButton').click().should('have.attr', 'aria-expanded', 'true')
 
       cy.findByRole('heading', { name: 'Getting Started', level: 2 })
@@ -251,14 +251,28 @@ describe('App Top Nav Workflows', () => {
         name: 'API',
         href: 'https://on.cypress.io/api?utm_medium=Docs+Menu&utm_content=API',
       })
+    })
+
+    it('growth prompts appear and call SetPromptShown mutation with the correct payload', () => {
+      cy.get('@docsButton').click()
+
+      cy.intercept('mutation-TopNav_SetPromptShown').as('SetPromptShown')
 
       cy.findByRole('button', { name: 'Set up CI' }).click()
       cy.findByText('Configure CI').should('be.visible')
       cy.findByRole('button', { name: 'Close' }).click()
 
+      cy.wait('@SetPromptShown')
+      .its('request.body.variables.slug')
+      .should('equal', 'ci1')
+
       cy.findByRole('button', { name: 'Run tests faster' }).click()
       cy.findByText('Run tests faster in CI').should('be.visible')
       cy.findByRole('button', { name: 'Close' }).click()
+
+      cy.wait('@SetPromptShown')
+      .its('request.body.variables.slug')
+      .should('equal', 'orchestration1')
     })
   })
 
@@ -285,7 +299,7 @@ describe('App Top Nav Workflows', () => {
           href: 'https://on.cypress.io/dashboard/profile',
         })
 
-        cy.intercept('mutation-Logout').as('logout').pause()
+        cy.intercept('mutation-Logout').as('logout')
 
         cy.findByRole('button', { name: 'Log Out' }).should('be.visible').click()
 

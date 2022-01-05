@@ -117,6 +117,15 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       getCurrentProjectSavedState () {
         return openProject.getConfig()?.state
       },
+      setPromptShown (slug) {
+        return openProject.getProject()
+        ?.saveState({
+          promptsShown: {
+            ...(openProject.getProject()?.state?.promptsShown ?? {}),
+            [slug]: Date.now(),
+          },
+        })
+      },
     },
     electronApi: {
       openExternal (url: string) {

@@ -375,6 +375,12 @@ watchEffect(() => {
   docsMenuVariant.value = props.forceOpenDocs ? 'ci1' : 'main'
 })
 
+watch(docsMenuVariant, (newVal, oldVal) => {
+  if (oldVal !== 'main') {
+    setPromptShown.executeMutation({ slug: `${oldVal}` })
+  }
+})
+
 // reset docs menu if click or keyboard navigation happens outside
 // so it doesn't reopen on the one of the prompts
 
