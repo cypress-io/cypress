@@ -2,8 +2,8 @@ import { defineConfig } from 'cypress'
 
 export default defineConfig({
   'fixturesFolder': false,
-  'supportFile': false,
   'e2e': {
+    'supportFile': false,
     async setupNodeEvents (on, config) {
       const webpackPreprocessor = await import('../..')
 
