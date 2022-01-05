@@ -1911,6 +1911,14 @@ jobs:
           name: Scaffold full TypeScript project 🏗
           working_directory: <<parameters.wd>>
           command: npx @bahmutov/cly@1 init --typescript
+      # TODO: fork/update @bahmutov/cly@1 to scaffold `cypress/e2e/spec.cy.ts`
+      # instead of `cypress/integration/spec.ts` when Cypress v10 is released.
+      - run:
+          name: Update example spec
+          working_directory: <<parameters.wd>>
+          command: |
+            mkdir cypress/e2e
+            mv cypress/integration/spec.ts cypress/e2e/spec.cy.ts
       - run:
           name: Scaffold new config file
           working_directory: <<parameters.wd>>
@@ -1933,14 +1941,6 @@ jobs:
                       },
                     },
                   }" > cypress.config.ts
-      # TODO: fork/update @bahmutov/cly@1 to scaffold `cypress/e2e/spec.cy.ts`
-      # instead of `cypress/integration/spec.ts` when Cypress v10 is released.
-      - run:
-          name: Update example spec
-          working_directory: <<parameters.wd>>
-          command: |
-            mkdir cypress/e2e
-            mv cypress/integration/spec.ts cypress/e2e/spec.cy.ts
       - run:
           name: Run project tests 🗳
           working_directory: <<parameters.wd>>
@@ -2120,6 +2120,14 @@ jobs:
           name: Add Cypress demo
           working_directory: test-binary
           command: npx @bahmutov/cly init
+      # TODO: fork/update @bahmutov/cly@1 to scaffold `cypress/e2e/spec.cy.ts`
+      # instead of `cypress/integration/spec.ts` when Cypress v10 is released.
+      - run:
+          name: Update example spec
+          working_directory: test-binary
+          command: |
+            mkdir cypress/e2e
+            mv cypress/integration/spec.ts cypress/e2e/spec.cy.ts
       - run:
           name: Scaffold new config file
           working_directory: test-binary
