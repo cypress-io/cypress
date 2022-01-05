@@ -3,6 +3,9 @@ import type { InitializeProjectOptions, FoundBrowser, FoundSpec, LaunchOpts, Ope
 import execa from 'execa'
 import path from 'path'
 import assert from 'assert'
+import Debug from 'debug'
+
+const debug = Debug('cypress:data-context:project-actions')
 
 import type { ProjectShape } from '../data/coreDataShape'
 
@@ -396,15 +399,35 @@ export class ProjectActions {
     this.ctx.actions.electron.showBrowserWindow()
   }
 
+  get defaultE2EPath () {
+    const projectRoot = this.ctx.currentProject
+
+    assert(projectRoot, `Cannot create e2e directory without currentProject.`)
+
+    return path.join(projectRoot, 'cypress', 'e2e')
+  }
+
+  async maybeCreateE2EDir () {
+    const stats = await this.ctx.fs.stat(this.defaultE2EPath)
+
+    if (stats.isDirectory()) {
+      return
+    }
+
+    debug(`Creating ${this.defaultE2EPath}`)
+
+    return this.ctx.fs.mkdirp(this.defaultE2EPath)
+  }
+
   async scaffoldIntegration () {
     const projectRoot = this.ctx.currentProject
 
     assert(projectRoot, `Cannot create spec without currentProject.`)
 
-    const e2eFolder = 'cypress/e2e' || projectRoot
+    await this.maybeCreateE2EDir()
 
     const results = await codeGenerator(
-      { templateDir: templates['scaffoldIntegration'], target: e2eFolder },
+      { templateDir: templates['scaffoldIntegration'], target: this.defaultE2EPath },
       {},
     )
 
@@ -416,7 +439,7 @@ export class ProjectActions {
       return {
         fileParts: this.ctx.file.normalizeFileToFileParts({
           absolute: res.file,
-          searchFolder: e2eFolder,
+          searchFolder: this.defaultE2EPath,
           projectRoot,
         }),
         codeGenResult: res,
