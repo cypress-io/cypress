@@ -28,7 +28,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
   Commands.addAll({
     // this isn't fully implemented, but in place to be able to test out
     // the other parts of multidomain
-    switchToDomain (domain: string, dataOrFn: any, fn?: () => {}) {
+    switchToDomain<T> (domain: string, dataOrFn: T, fn?: (data?: T) => {}) {
       clearTimeout(timeoutId)
 
       if (!config('experimentalMultiDomain')) {
