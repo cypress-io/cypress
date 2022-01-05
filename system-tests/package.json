@@ -50,6 +50,7 @@
     "fluent-ffmpeg": "2.1.2",
     "fs-extra": "8.1.0",
     "glob": "7.2.0",
+    "hot-shots": "9.0.0",
     "http-mitm-proxy": "0.7.0",
     "https-proxy-agent": "3.0.1",
     "human-interval": "1.0.0",
