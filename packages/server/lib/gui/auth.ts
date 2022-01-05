@@ -19,13 +19,13 @@ let openExternalAttempted = false
 let authRedirectReached = false
 let server
 
-const _buildLoginRedirectUrl = (server) => {
+const buildLoginRedirectUrl = (server) => {
   const { port } = server.address()
 
   return `http://127.0.0.1:${port}/redirect-to-auth`
 }
 
-const _buildFullLoginUrl = (baseLoginUrl, server, utmCode) => {
+const buildFullLoginUrl = (baseLoginUrl, server, utmCode) => {
   const { port } = server.address()
 
   if (!authState) {
@@ -57,60 +57,19 @@ const _buildFullLoginUrl = (baseLoginUrl, server, utmCode) => {
   })
 }
 
-const _getOriginFromUrl = (originalUrl) => {
+const getOriginFromUrl = (originalUrl) => {
   const parsedUrl = url.parse(originalUrl)
 
   return url.format(_.pick(parsedUrl, ['protocol', 'slashes', 'hostname', 'port']))
 }
 
 /**
- * @returns a promise that is resolved with a user when auth is complete or rejected when it fails
- */
-const start = (onMessage, utmCode) => {
-  function sendMessage (type, name, arg1) {
-    onMessage({
-      type,
-      name,
-      message: errors.getMsgByType(name, arg1),
-      browserOpened: authRedirectReached,
-    })
-  }
-
-  authRedirectReached = false
-
-  return user.getBaseLoginUrl()
-  .then((baseLoginUrl) => {
-    return _launchServer(baseLoginUrl, sendMessage, utmCode)
-  })
-  .then(() => {
-    return _buildLoginRedirectUrl(server)
-  })
-  .then((loginRedirectUrl) => {
-    debug('Trying to open native auth to URL ', loginRedirectUrl)
-
-    return _launchNativeAuth(loginRedirectUrl, sendMessage)
-    .then(() => {
-      debug('openExternal completed')
-    })
-  })
-  .then(() => {
-    return Promise.fromCallback((cb) => {
-      authCallback = cb
-    })
-  })
-  .finally(() => {
-    _stopServer()
-    require('./windows').focusMainWindow()
-  })
-}
-
-/**
  * @returns the currently running auth server instance, launches one if there is not one
  */
-const _launchServer = (baseLoginUrl, sendMessage, utmCode) => {
+const launchServer = (baseLoginUrl, sendMessage, utmCode) => {
   if (!server) {
     // launch an express server to listen for the auth callback from dashboard
-    const origin = _getOriginFromUrl(baseLoginUrl)
+    const origin = getOriginFromUrl(baseLoginUrl)
 
     debug('Launching auth server with origin', origin)
     app = express()
@@ -179,7 +138,7 @@ const _launchServer = (baseLoginUrl, sendMessage, utmCode) => {
   return Promise.resolve()
 }
 
-const _stopServer = () => {
+const stopServer = () => {
   debug('Closing auth server')
   if (server) {
     server.close()
@@ -193,7 +152,7 @@ const _stopServer = () => {
   authRedirectReached = false
 }
 
-const _launchNativeAuth = Promise.method((loginUrl, sendMessage) => {
+const launchNativeAuth = Promise.method((loginUrl, sendMessage) => {
   const warnCouldNotLaunch = () => {
     if (openExternalAttempted && !authRedirectReached) {
       sendMessage('warning', 'AUTH_COULD_NOT_LAUNCH_BROWSER', loginUrl)
@@ -213,11 +172,56 @@ const _launchNativeAuth = Promise.method((loginUrl, sendMessage) => {
   })
 })
 
-export = {
-  _buildFullLoginUrl,
-  _getOriginFromUrl,
-  _launchServer,
-  _launchNativeAuth,
-  _stopServer,
-  start,
+/**
+ * Grouping internal APIs under separate export to allow for stubbing
+ * in public API tests.
+ */
+export const _internal = {
+  buildLoginRedirectUrl,
+  buildFullLoginUrl,
+  getOriginFromUrl,
+  launchServer,
+  stopServer,
+  launchNativeAuth,
+}
+
+/**
+ * @returns a promise that is resolved with a user when auth is complete or rejected when it fails
+ */
+export const start = (onMessage, utmCode) => {
+  function sendMessage (type, name, arg1) {
+    onMessage({
+      type,
+      name,
+      message: errors.getMsgByType(name, arg1),
+      browserOpened: authRedirectReached,
+    })
+  }
+
+  authRedirectReached = false
+
+  return user.getBaseLoginUrl()
+  .then((baseLoginUrl) => {
+    return _internal.launchServer(baseLoginUrl, sendMessage, utmCode)
+  })
+  .then(() => {
+    return _internal.buildLoginRedirectUrl(server)
+  })
+  .then((loginRedirectUrl) => {
+    debug('Trying to open native auth to URL ', loginRedirectUrl)
+
+    return _internal.launchNativeAuth(loginRedirectUrl, sendMessage)
+    .then(() => {
+      debug('openExternal completed')
+    })
+  })
+  .then(() => {
+    return Promise.fromCallback((cb) => {
+      authCallback = cb
+    })
+  })
+  .finally(() => {
+    _internal.stopServer()
+    require('./windows').focusMainWindow()
+  })
 }
