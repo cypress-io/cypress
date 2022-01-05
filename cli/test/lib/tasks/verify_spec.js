@@ -81,6 +81,14 @@ context('lib/tasks/verify', () => {
     expect(newVerifyInstance.VERIFY_TEST_RUNNER_TIMEOUT_MS).to.eql(500000)
   })
 
+  it('accepts custom verify task timeout from npm', () => {
+    process.env.npm_config_CYPRESS_VERIFY_TIMEOUT = '500000'
+    delete require.cache[require.resolve(`${lib}/tasks/verify`)]
+    const newVerifyInstance = require(`${lib}/tasks/verify`)
+
+    expect(newVerifyInstance.VERIFY_TEST_RUNNER_TIMEOUT_MS).to.eql(500000)
+  })
+
   it('falls back to default verify task timeout if custom value is invalid', () => {
     process.env.CYPRESS_VERIFY_TIMEOUT = 'foobar'
     delete require.cache[require.resolve(`${lib}/tasks/verify`)]
