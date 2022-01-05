@@ -581,12 +581,6 @@ describe('lib/config', () => {
       })
 
       context('supportFile', () => {
-        it('fails if file is missing', function () {
-          this.setup({ e2e: { supportFile: 'cypress/support/e2e.js' } })
-
-          return this.expectValidationFails('The support file is missing or invalid')
-        })
-
         it('passes if false', function () {
           this.setup({ e2e: { supportFile: false } })
 
