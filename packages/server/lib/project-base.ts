@@ -18,18 +18,17 @@ import errors from './errors'
 import Reporter from './reporter'
 import runEvents from './plugins/run_events'
 import * as savedState from './saved_state'
-import scaffold from './scaffold'
 import { ServerE2E } from './server-e2e'
 import system from './util/system'
 import { ensureProp } from './util/class-helpers'
-// import * as settings from './util/settings'
-// import plugins from './plugins'
-import specsUtil from './util/specs'
+
+import { fs } from './util/fs'
+
 import devServer from './plugins/dev-server'
 import preprocessor from './plugins/preprocessor'
 import { SpecsStore } from './specs-store'
 import { checkSupportFile } from './project_utils'
-import type { FoundBrowser, OpenProjectLaunchOptions } from '@packages/types'
+import type { FoundBrowser, OpenProjectLaunchOptions, FoundSpec } from '@packages/types'
 import { DataContext, getCtx } from '@packages/data-context'
 
 // Cannot just use RuntimeConfigOptions as is because some types are not complete.
@@ -37,7 +36,7 @@ import { DataContext, getCtx } from '@packages/data-context'
 // and are required when creating a project.
 type ReceivedCypressOptions =
   Pick<Cypress.RuntimeConfigOptions, 'hosts' | 'projectName' | 'clientRoute' | 'devServerPublicPathRoute' | 'namespace' | 'report' | 'socketIoCookie' | 'configFile' | 'isTextTerminal' | 'isNewProject' | 'proxyUrl' | 'browsers' | 'browserUrl' | 'socketIoRoute' | 'arch' | 'platform' | 'spec' | 'specs' | 'browser' | 'version' | 'remote'>
-  & Pick<Cypress.ResolvedConfigOptions, 'chromeWebSecurity' | 'supportFolder' | 'experimentalSourceRewriting' | 'fixturesFolder' | 'reporter' | 'reporterOptions' | 'screenshotsFolder' | 'pluginsFile' | 'supportFile' | 'integrationFolder' | 'baseUrl' | 'viewportHeight' | 'viewportWidth' | 'port' | 'experimentalInteractiveRunEvents' | 'componentFolder' | 'userAgent' | 'downloadsFolder' | 'env' | 'testFiles' | 'ignoreTestFiles'> // TODO: Figure out how to type this better.
+  & Pick<Cypress.ResolvedConfigOptions, 'chromeWebSecurity' | 'supportFolder' | 'experimentalSourceRewriting' | 'fixturesFolder' | 'reporter' | 'reporterOptions' | 'screenshotsFolder' | 'pluginsFile' | 'supportFile' | 'baseUrl' | 'viewportHeight' | 'viewportWidth' | 'port' | 'experimentalInteractiveRunEvents' | 'userAgent' | 'downloadsFolder' | 'env' | 'testFiles' | 'ignoreSpecPattern'> // TODO: Figure out how to type this better.
 
 export interface Cfg extends ReceivedCypressOptions {
   projectRoot: string
@@ -53,7 +52,6 @@ export interface Cfg extends ReceivedCypressOptions {
 const localCwd = cwd()
 
 const debug = Debug('cypress:server:project')
-const debugScaffold = Debug('cypress:server:scaffold')
 
 type StartWebsocketOptions = Pick<Cfg, 'socketIoCookie' | 'namespace' | 'screenshotsFolder' | 'report' | 'reporter' | 'reporterOptions' | 'projectRoot'>
 
@@ -73,7 +71,7 @@ export class ProjectBase<TServer extends Server> extends EE {
   public browser: any
   public options: OpenProjectLaunchOptions
   public testingType: Cypress.TestingType
-  public spec: Cypress.Cypress['spec'] | null
+  public spec: FoundSpec | null
   public isOpen: boolean = false
   projectRoot: string
 
@@ -247,10 +245,7 @@ export class ProjectBase<TServer extends Server> extends EE {
       projectRoot: this.projectRoot,
     })
 
-    await Promise.all([
-      this.scaffold(cfg),
-      this.saveState(stateToSave),
-    ])
+    await this.saveState(stateToSave)
 
     await Promise.all([
       checkSupportFile({ configFile: cfg.configFile, supportFile: cfg.supportFile }),
@@ -345,28 +340,7 @@ export class ProjectBase<TServer extends Server> extends EE {
     ctDevServerPort: number | undefined
     startSpecWatcher: () => void
   }> {
-    const allSpecs = await specsUtil.findSpecs({
-      projectRoot: updatedConfig.projectRoot,
-      fixturesFolder: updatedConfig.fixturesFolder,
-      supportFile: updatedConfig.supportFile,
-      testFiles: updatedConfig.testFiles,
-      ignoreTestFiles: updatedConfig.ignoreTestFiles,
-      componentFolder: updatedConfig.componentFolder,
-      integrationFolder: updatedConfig.integrationFolder,
-    })
-    const specs = allSpecs.filter((spec: Cypress.Cypress['spec']) => {
-      if (this.testingType === 'component') {
-        return spec.specType === 'component'
-      }
-
-      if (this.testingType === 'e2e') {
-        return spec.specType === 'integration'
-      }
-
-      throw Error(`Cannot return specType for testingType: ${this.testingType}`)
-    })
-
-    return this.initSpecStore({ specs, config: updatedConfig })
+    return this.initSpecStore({ specs: this.ctx.project.specs, config: updatedConfig })
   }
 
   async startCtDevServer (specs: Cypress.Cypress['spec'][], config: any) {
@@ -389,25 +363,17 @@ export class ProjectBase<TServer extends Server> extends EE {
     specs,
     config,
   }: {
-    specs: Cypress.Cypress['spec'][]
+    specs: FoundSpec[]
     config: Cfg
   }) {
-    const specsStore = new SpecsStore(config, this.testingType)
+    const specsStore = new SpecsStore()
 
     const startSpecWatcher = () => {
-      return specsStore.watch({
-        onSpecsChanged: (specs) => {
-        // both e2e and CT watch the specs and send them to the
-        // client to be shown in the SpecList.
-          this.server.sendSpecList(specs, this.testingType)
-
-          if (this.testingType === 'component') {
-          // ct uses the dev-server to build and bundle the speces.
-          // send new files to dev server
-            devServer.updateSpecs(specs)
-          }
-        },
-      })
+      if (this.testingType === 'component') {
+      // ct uses the dev-server to build and bundle the speces.
+      // send new files to dev server
+        devServer.updateSpecs(specs)
+      }
     }
 
     let ctDevServerPort: number | undefined
@@ -418,12 +384,13 @@ export class ProjectBase<TServer extends Server> extends EE {
       ctDevServerPort = port
     }
 
-    return specsStore.storeSpecFiles()
-    .return({
+    specsStore.storeSpecFiles(specs)
+
+    return {
       specsStore,
       ctDevServerPort,
       startSpecWatcher,
-    })
+    }
   }
 
   initializeReporter ({
@@ -559,6 +526,7 @@ export class ProjectBase<TServer extends Server> extends EE {
   }
 
   async initializeConfig (): Promise<Cfg> {
+    this.ctx.lifecycleManager.setCurrentTestingType(this.testingType)
     let theCfg: Cfg = await this.ctx.lifecycleManager.getFullInitialConfig() as Cfg // ?? types are definitely wrong here I think
 
     theCfg = this.testingType === 'e2e'
@@ -570,18 +538,6 @@ export class ProjectBase<TServer extends Server> extends EE {
 
       return this._cfg
     }
-
-    // decide if new project by asking scaffold
-    // and looking at previously saved user state
-    if (!theCfg.integrationFolder) {
-      throw new Error('Missing integration folder')
-    }
-
-    const untouchedScaffold = await this.determineIsNewProject(theCfg)
-
-    debugScaffold(`untouched scaffold ${untouchedScaffold} banner closed`)
-
-    theCfg.isNewProject = untouchedScaffold
 
     const cfgWithSaved = await this._setSavedState(theCfg)
 
@@ -633,49 +589,8 @@ export class ProjectBase<TServer extends Server> extends EE {
     return cfg
   }
 
-  // do not check files again and again - keep previous promise
-  // to refresh it - just close and open the project again.
-  determineIsNewProject (folder) {
-    return scaffold.isNewProject(folder)
-  }
-
-  scaffold (cfg: Cfg) {
-    debug('scaffolding project %s', this.projectRoot)
-
-    const scaffolds = []
-
-    const push = scaffolds.push.bind(scaffolds) as any
-
-    // TODO: we are currently always scaffolding support
-    // even when headlessly - this is due to a major breaking
-    // change of 0.18.0
-    // we can later force this not to always happen when most
-    // of our users go beyond 0.18.0
-    //
-    // ensure support dir is created
-    // and example support file if dir doesnt exist
-    push(scaffold.support(cfg.supportFolder, cfg))
-
-    // if we're in headed mode add these other scaffolding tasks
-    debug('scaffold flags %o', {
-      isTextTerminal: cfg.isTextTerminal,
-      CYPRESS_INTERNAL_FORCE_SCAFFOLD: process.env.CYPRESS_INTERNAL_FORCE_SCAFFOLD,
-    })
-
-    const scaffoldExamples = !cfg.isTextTerminal || process.env.CYPRESS_INTERNAL_FORCE_SCAFFOLD
-
-    if (scaffoldExamples) {
-      debug('will scaffold integration and fixtures folder')
-      if (!process.env.LAUNCHPAD) {
-        push(scaffold.integration(cfg.integrationFolder, cfg))
-      }
-
-      push(scaffold.fixture(cfg.fixturesFolder, cfg))
-    } else {
-      debug('will not scaffold integration or fixtures folder')
-    }
-
-    return Promise.all(scaffolds)
+  writeConfigFile ({ code, configFilename }: { code: string, configFilename: string }) {
+    fs.writeFileSync(path.resolve(this.projectRoot, configFilename), code)
   }
 
   // These methods are not related to start server/sockets/runners

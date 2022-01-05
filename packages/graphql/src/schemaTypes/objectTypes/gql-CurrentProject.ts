@@ -7,7 +7,6 @@ import { Browser } from './gql-Browser'
 import { CodeGenGlobs } from './gql-CodeGenGlobs'
 import { FileParts } from './gql-FileParts'
 import { ProjectPreferences } from './gql-ProjectPreferences'
-import { Spec } from './gql-Spec'
 import { Storybook } from './gql-Storybook'
 
 export const CurrentProject = objectType({
@@ -100,9 +99,9 @@ export const CurrentProject = objectType({
 
     t.connectionField('specs', {
       description: 'Specs for a project conforming to Relay Connection specification',
-      type: Spec,
+      type: 'Spec',
       nodes: (source, args, ctx) => {
-        return ctx.project.findSpecs(source.projectRoot, ctx.coreData.currentTestingType === 'component' ? 'component' : 'integration')
+        return ctx.project.specs
       },
     })
 

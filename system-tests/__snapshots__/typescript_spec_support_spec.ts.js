@@ -151,6 +151,7 @@ exports['e2e typescript in spec and support file project passes 1'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      2 found (app_spec.ts, math.ts)                                                     │
+  │ Searched:   cypress/integration/**/*                                                           │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

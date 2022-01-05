@@ -1,6 +1,5 @@
 require('../spec_helper')
 
-const mockedEnv = require('mocked-env')
 const path = require('path')
 const chokidar = require('chokidar')
 const pkg = require('@packages/root')
@@ -40,7 +39,7 @@ describe.skip('lib/project-base', () => {
 
     sinon.stub(runEvents, 'execute').resolves()
 
-    ctx.actions.project.setCurrentProjectForTestSetup(this.todosPath)
+    ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.todosPath)
 
     return settings.read(this.todosPath)
     .then((obj = {}) => {
@@ -154,7 +153,6 @@ describe.skip('lib/project-base', () => {
         expect(this.project.getConfig()).to.deep.eq({
           integrationFolder,
           browsers: [],
-          isNewProject: false,
           baz: 'quux',
           state: {
             reporterWidth: 225,
@@ -301,7 +299,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       return this.project.open().then(() => {
         expect(this.checkSupportFileStub).to.be.calledWith({
           configFile: 'cypress.config.js',
-          supportFile: '/foo/bar/cypress/support/index.js',
+          supportFile: false,
         })
       })
     })
@@ -530,92 +528,6 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       expect(this.project._automation.reset).to.be.calledOnce
 
       expect(this.project.server.reset).to.be.calledOnce
-    })
-  })
-
-  context('#scaffold', () => {
-    beforeEach(function () {
-      this.project = new ProjectBase({ projectRoot: '/_test-output/path/to/project-e2e', testingType: 'e2e' })
-      sinon.stub(scaffold, 'integration').resolves()
-      sinon.stub(scaffold, 'fixture').resolves()
-      sinon.stub(scaffold, 'support').resolves()
-      sinon.stub(scaffold, 'plugins').resolves()
-
-      this.obj = { projectRoot: 'pr', fixturesFolder: 'ff', integrationFolder: 'if', supportFolder: 'sf', pluginsFile: 'pf/index.js' }
-    })
-
-    it('calls scaffold.integration with integrationFolder', function () {
-      return this.project.scaffold(this.obj).then(() => {
-        expect(scaffold.integration).to.be.calledWith(this.obj.integrationFolder)
-      })
-    })
-
-    it('calls fixture.scaffold with fixturesFolder', function () {
-      return this.project.scaffold(this.obj).then(() => {
-        expect(scaffold.fixture).to.be.calledWith(this.obj.fixturesFolder)
-      })
-    })
-
-    it('calls support.scaffold with supportFolder', function () {
-      return this.project.scaffold(this.obj).then(() => {
-        expect(scaffold.support).to.be.calledWith(this.obj.supportFolder)
-      })
-    })
-
-    it('does not call support.plugins if config.pluginsFile is falsey', function () {
-      this.obj.pluginsFile = false
-
-      return this.project.scaffold(this.obj).then(() => {
-        expect(scaffold.plugins).not.to.be.called
-      })
-    })
-
-    describe('forced', () => {
-      let resetEnv
-
-      beforeEach(function () {
-        this.obj.isTextTerminal = true
-        resetEnv = mockedEnv({
-          CYPRESS_INTERNAL_FORCE_SCAFFOLD: '1',
-        })
-      })
-
-      afterEach(() => {
-        resetEnv()
-      })
-
-      it('calls scaffold when forced by environment variable', function () {
-        return this.project.scaffold(this.obj).then(() => {
-          expect(scaffold.integration).to.be.calledWith(this.obj.integrationFolder)
-          expect(scaffold.fixture).to.be.calledWith(this.obj.fixturesFolder)
-          expect(scaffold.support).to.be.calledWith(this.obj.supportFolder)
-        })
-      })
-    })
-
-    describe('not forced', () => {
-      let resetEnv
-
-      beforeEach(function () {
-        this.obj.isTextTerminal = true
-
-        resetEnv = mockedEnv({
-          CYPRESS_INTERNAL_FORCE_SCAFFOLD: undefined,
-        })
-      })
-
-      afterEach(() => {
-        resetEnv()
-      })
-
-      it('does not scaffold integration folder', function () {
-        return this.project.scaffold(this.obj).then(() => {
-          expect(scaffold.integration).to.not.be.calledWith(this.obj.integrationFolder)
-          expect(scaffold.fixture).to.not.be.calledWith(this.obj.fixturesFolder)
-          // still scaffolds support folder due to old logic
-          expect(scaffold.support).to.be.calledWith(this.obj.supportFolder)
-        })
-      })
     })
   })
 

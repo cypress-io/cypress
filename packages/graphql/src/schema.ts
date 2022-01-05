@@ -4,7 +4,6 @@ import { makeSchema, connectionPlugin } from 'nexus'
 import * as schemaTypes from './schemaTypes/'
 import { nodePlugin } from './plugins/nexusNodePlugin'
 import { remoteSchemaWrapped } from './stitching/remoteSchemaWrapped'
-import { NexusLiveMutationPlugin } from './plugins/nexusLiveMutation'
 
 const isCodegen = Boolean(process.env.CYPRESS_INTERNAL_NEXUS_CODEGEN)
 
@@ -36,7 +35,6 @@ export const graphqlSchema = makeSchema({
       },
     }),
     nodePlugin,
-    NexusLiveMutationPlugin,
   ],
   formatTypegen (content, type) {
     if (type === 'schema') {

@@ -1,5 +1,6 @@
 module.exports = {
   'e2e': {
-    setupNodeEvents: 'foo',
+    'supportFile': false,
+    'setupNodeEvents': 'foo',
   },
 }
