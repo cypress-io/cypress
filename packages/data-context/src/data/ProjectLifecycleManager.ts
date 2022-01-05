@@ -1133,6 +1133,8 @@ export class ProjectLifecycleManager {
       await this.setActiveBrowser(this.ctx.coreData.cliBrowser)
     }
 
+    await this.ctx.actions.project.initializeActiveProject()
+
     this._pendingInitialize?.resolve(finalConfig)
   }
 
