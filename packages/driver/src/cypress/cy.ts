@@ -525,7 +525,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
         // stability is signalled after the window:load event to give event
         // listeners time to be invoked prior to moving on, but not if
-        // there is cross-origin error and the multi-domain APIs are
+        // there is a cross-origin error and the multi-domain APIs are
         // not utilized
         try {
           this.Cypress.action('app:window:load', this.state('window'))
