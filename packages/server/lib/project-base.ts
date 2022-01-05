@@ -335,7 +335,7 @@ export class ProjectBase<TServer extends Server> extends EE {
 
     updatedConfig.specs = specs
 
-    if (this.testingType === 'component' && !this.options.skipPluginIntializeForTesting) {
+    if (this.testingType === 'component' && !this.options.skipPluginInitializeForTesting) {
       const { port } = await this.startCtDevServer(specs, updatedConfig)
 
       ctDevServerPort = port
