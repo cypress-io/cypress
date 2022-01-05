@@ -3,3 +3,4 @@ cypress-example-kitchensink
 # ignore cypress folder
 # it is copied from cypress-example-kitchensink at build
 cypress
+!cypress/e2e/todo.cy.js
