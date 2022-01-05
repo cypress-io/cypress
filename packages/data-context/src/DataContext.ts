@@ -52,6 +52,7 @@ export interface InternalDataContextOptions {
 export interface ErrorApiShape {
   error: (type: string, ...args: any) => Error & { type: string, details: string, code?: string, isCypressErr: boolean}
   message: (type: string, ...args: any) => string
+  warning: (type: string, ...args: any) => null
 }
 
 export interface DataContextConfig {
@@ -446,6 +447,10 @@ export class DataContext {
   }
 
   error (type: string, ...args: any[]) {
+    return this._apis.errorApi.error(type, ...args)
+  }
+
+  warning (type: string, ...args: any[]) {
     return this._apis.errorApi.error(type, ...args)
   }
 

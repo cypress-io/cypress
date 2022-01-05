@@ -4,6 +4,7 @@ const replacementPath = path.join(__dirname, './screenshot-replacement.png')
 
 module.exports = {
   'e2e': {
+    'supportFile': false,
     setupNodeEvents (on, config) {
       on('after:screenshot', (details) => {
         if (details.testFailure) {
