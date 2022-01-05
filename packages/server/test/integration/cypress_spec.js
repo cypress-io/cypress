@@ -1659,7 +1659,9 @@ describe('lib/cypress', () => {
         // this should be overriden by the env argument
         json.baseUrl = 'http://localhost:8080'
 
-        return settings.writeForTesting(this.todosPath, json)
+        const { supportFile, ...rest } = json
+
+        return settings.writeForTesting(this.todosPath, rest)
       }).then(() => {
         // TODO(tim): this shouldn't be needed when we refactor the ctx setup
         process.env.LAUNCHPAD = '0'

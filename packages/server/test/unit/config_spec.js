@@ -60,10 +60,11 @@ describe('lib/config', () => {
 
       this.projectRoot = '/_test-output/path/to/project'
 
+      ctx.lifecycleManager.setCurrentTestingType('e2e')
       sinon.stub(ctx.lifecycleManager, 'verifyProjectRoot').returns(undefined)
 
       this.setup = (cypressJson = {}, cypressEnvJson = {}) => {
-        sinon.stub(ctx.lifecycleManager, 'getConfigFileContents').resolves({ ...cypressJson, supportFile: cypressJson.supportFile ?? false })
+        sinon.stub(ctx.lifecycleManager, 'getConfigFileContents').resolves({ ...cypressJson, e2e: cypressJson.e2e ?? { supportFile: false } })
         sinon.stub(ctx.lifecycleManager, 'loadCypressEnvFile').resolves(cypressEnvJson)
       }
     })
@@ -580,22 +581,28 @@ describe('lib/config', () => {
       })
 
       context('supportFile', () => {
-        it('passes if a string', function () {
+        it('fails if file is missing', function () {
           this.setup({ e2e: { supportFile: 'cypress/support/e2e.js' } })
 
-          return this.expectValidationPasses()
+          return this.expectValidationFails('The support file is missing or invalid')
         })
 
         it('passes if false', function () {
-          this.setup({ supportFile: false })
+          this.setup({ e2e: { supportFile: false } })
 
           return this.expectValidationPasses()
         })
 
         it('fails if not a string or false', function () {
-          this.setup({ supportFile: true })
+          this.setup({ e2e: { supportFile: true } })
 
           return this.expectValidationFails('be a string or false')
+        })
+
+        it('fails if is set at root level', function () {
+          this.setup({ supportFile: false })
+
+          return this.expectValidationFails('was removed from the root in Cypress version `10.0.0`')
         })
       })
 
