@@ -21,7 +21,7 @@ export async function startDevServer (startDevServerArgs: StartDevServerOptions)
 
   debug('Component testing vite server started on port', port)
 
-  return { port, close: app.httpServer!.close }
+  return { port, close: viteDevServer.close }
 }
 
 export type CypressViteDevServerConfig = Omit<InlineConfig, 'base' | 'root'>
