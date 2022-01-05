@@ -130,10 +130,13 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
         communicator.once('run:domain:fn', (err) => err ? reject(err) : resolve())
 
         communicator.once('unbind:done:called', () => {
-          // if done is to be called from the secondary domain, the 'done:called' event
-          // should have already been invoked in the switchToDomain function
-          // Go ahead and remove the listener
+          // If `done()` is passed into the test, but is called in the primary domain and NOT the secondary domain
+          // Go ahead and make sure the listener is removed
           communicator.off('done:called', invokeDone)
+
+          // If done was NOT called in the secondary domain, go ahead and make sure this promise is settled.
+          // if done was called in the secondary domain, this promise should already be settled and resolving it has no effect.
+          deferredDone.resolve()
         })
 
         // By the time the command queue is finished, this promise should be settled as
