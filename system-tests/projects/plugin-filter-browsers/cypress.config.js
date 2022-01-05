@@ -2,6 +2,7 @@ const debug = require('debug')('cypress:system-tests')
 
 module.exports = {
   'e2e': {
+    'supportFile': false,
     setupNodeEvents (on, config) {
       debug('plugin file %s', __filename)
       debug('received config with browsers %o', config.browsers)

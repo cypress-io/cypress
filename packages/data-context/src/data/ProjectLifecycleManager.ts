@@ -49,6 +49,7 @@ export interface InjectedConfigApi {
   allowedConfig(config: Cypress.ConfigOptions): Cypress.ConfigOptions
   updateWithPluginValues(config: FullConfig, modifiedConfig: Partial<Cypress.ConfigOptions>): FullConfig
   setupFullConfigWithDefaults(config: SetupFullConfigOptions): Promise<FullConfig>
+  validateRootConfigBreakingChanges<T extends Cypress.ConfigOptions>(config: Partial<T>, onWarning: (warningMsg: string) => void, onErr: (errMsg: string) => never): T
 }
 
 type State<S, V = undefined> = V extends undefined ? {state: S, value?: V} : {state: S, value: V}
@@ -407,6 +408,8 @@ export class ProjectLifecycleManager {
   }
 
   private async buildBaseFullConfig (configFileContents: Cypress.ConfigOptions, envFile: Cypress.ConfigOptions, options: Partial<AllModeOptions>, withBrowsers = true) {
+    this.validateConfigRoot(configFileContents)
+
     if (this._currentTestingType) {
       const testingTypeOverrides = configFileContents[this._currentTestingType] ?? {}
 
@@ -530,6 +533,18 @@ export class ProjectLifecycleManager {
     })
 
     return promise.then((v) => v.initialConfig)
+  }
+
+  private validateConfigRoot (config: Cypress.ConfigOptions) {
+    return this.ctx._apis.configApi.validateRootConfigBreakingChanges(
+      config,
+      (warning, ...args) => {
+        return this.ctx.warning(warning, ...args)
+      },
+      (err, ...args) => {
+        throw this.ctx.error(err, ...args)
+      },
+    )
   }
 
   private validateConfigFile (file: string | false, config: Cypress.ConfigOptions) {
@@ -740,14 +755,27 @@ export class ProjectLifecycleManager {
   }
 
   private async setupNodeEvents (): Promise<SetupNodeEventsReply> {
-    const config = await this.getFullInitialConfig()
-
     assert(this._eventsIpc)
+    const ipc = this._eventsIpc
+
+    let config
+
+    try {
+      config = await this.getFullInitialConfig()
+    } catch (err) {
+      debug(`catch %o`, err)
+      this._cleanupIpc(ipc)
+      this._eventsIpcResult = { state: 'errored', value: err }
+      this._pendingInitialize?.reject(err)
+      this.ctx.emitter.toLaunchpad()
+
+      return Promise.reject(err)
+    }
+
+    assert(config)
     assert(this._currentTestingType)
 
     this._registeredEventsTarget = this._currentTestingType
-
-    const ipc = this._eventsIpc
 
     for (const handler of this._handlers) {
       handler(ipc)

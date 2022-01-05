@@ -103,7 +103,7 @@ describe('Routes', () => {
         obj.projectRoot = Fixtures.projectPath('e2e')
       }
 
-      ctx.actions.project.setCurrentProjectForTestSetup(obj.projectRoot)
+      ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(obj.projectRoot)
 
       // get all the config defaults
       // and allow us to override them
@@ -573,6 +573,9 @@ describe('Routes', () => {
 
         return this.setup({
           projectRoot: Fixtures.projectPath('failures'),
+          config: {
+            supportFile: false,
+          },
         })
       })
 
@@ -801,6 +804,7 @@ describe('Routes', () => {
             config: {
               integrationFolder: 'tests',
               fixturesFolder: 'tests/_fixtures',
+              supportFile: false,
             },
           })
         })
@@ -3108,6 +3112,7 @@ describe('Routes', () => {
           config: {
             fileServerFolder: 'dev',
             integrationFolder: 'my-tests',
+            supportFile: false,
           },
         })
         .then(() => {
