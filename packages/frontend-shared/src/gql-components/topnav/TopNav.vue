@@ -9,7 +9,7 @@
       />
       <span
         data-cy="top-nav-version-list"
-        class="font-semibold text-indigo-500"
+        class="font-semibold text-indigo-500 whitespace-nowrap"
       >v{{ versions.current.version }} <span
         class="text-indigo-300"
         aria-hidden="true"
@@ -20,7 +20,7 @@
       class="min-w-278px py-8px px-16px"
       data-cy="update-hint"
     >
-      <div class="font-semibold whitespace-nowrap">
+      <div class="font-semibold">
         <ExternalLink
           :href="`${releasesUrl}/tag/v${versions.latest.version}`"
           class="text-indigo-500"
@@ -113,7 +113,7 @@
       >
       <span
         data-cy="top-nav-active-browser"
-        class="font-semibold"
+        class="font-semibold whitespace-nowrap"
       >{{ props.gql.currentProject?.currentBrowser?.displayName }} {{ props.gql.currentProject?.currentBrowser?.majorVersion }}</span>
     </template>
     <TopNavListItem

@@ -180,6 +180,7 @@
       "titleFailed": "Login Failed",
       "titleBrowserError": "Browser Error",
       "actionLogin": "Log In",
+      "profileMenuLabel": "Profile and Log Out",
       "actionLogout": "Log Out",
       "actionContinue": "Continue",
       "actionOpening": "Opening Browser",

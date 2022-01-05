@@ -252,16 +252,11 @@ describe('App Top Nav Workflows', () => {
         href: 'https://on.cypress.io/api?utm_medium=Docs+Menu&utm_content=API',
       })
 
-      cy.validateExternalLink({
-        name: 'Run tests faster',
-        href: 'https://on.cypress.io/parallelization?utm_medium=Docs+Menu&utm_content=Parallelization',
-      })
-
       cy.findByRole('button', { name: 'Set up CI' }).click()
       cy.findByText('Configure CI').should('be.visible')
       cy.findByRole('button', { name: 'Close' }).click()
 
-      cy.findByRole('button', { name: 'Smart Orchestration' }).click()
+      cy.findByRole('button', { name: 'Run tests faster' }).click()
       cy.findByText('Run tests faster in CI').should('be.visible')
       cy.findByRole('button', { name: 'Close' }).click()
     })
@@ -276,7 +271,7 @@ describe('App Top Nav Workflows', () => {
         cy.loginUser()
         cy.visitApp()
 
-        cy.findByTestId('app-header-bar').findByRole('button', { name: 'Log In', expanded: false }).as('logInButton')
+        cy.findByTestId('app-header-bar').findByRole('button', { name: 'Profile and Log Out', expanded: false }).as('logInButton')
       })
 
       it('shows user in top nav when logged in', () => {
@@ -290,7 +285,7 @@ describe('App Top Nav Workflows', () => {
           href: 'https://on.cypress.io/dashboard/profile',
         })
 
-        cy.intercept('mutation-Logout').as('logout')
+        cy.intercept('mutation-Logout').as('logout').pause()
 
         cy.findByRole('button', { name: 'Log Out' }).should('be.visible').click()
 

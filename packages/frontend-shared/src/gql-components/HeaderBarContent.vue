@@ -1,7 +1,10 @@
 <template>
   <div class="bg-white border-b border-b-gray-100 py-15px px-6">
     <div class="flex h-full gap-12px items-center justify-between">
-      <div v-if="pageName">
+      <div
+        v-if="pageName"
+        class="whitespace-nowrap"
+      >
         {{ pageName }}
       </div>
       <div
@@ -42,7 +45,7 @@
               :email="email"
               class="h-24px w-24px"
             />
-            <span class="sr-only">{{ t('topNav.login.actionLogin') }}</span>
+            <span class="sr-only">{{ t('topNav.login.profileMenuLabel') }}</span>
           </template>
           <template
             v-if="!!props.gql?.cloudViewer"
@@ -88,7 +91,7 @@
             <i-cy-profile_x16
               class="h-16px mr-8px w-16px block icon-dark-gray-500 icon-light-gray-100 group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50"
             />
-            <span class="font-semibold group-hocus:text-indigo-500">{{ t('topNav.login.actionLogin') }}</span>
+            <span class="font-semibold whitespace-nowrap group-hocus:text-indigo-500">{{ t('topNav.login.actionLogin') }}</span>
           </button>
         </div>
       </div>
