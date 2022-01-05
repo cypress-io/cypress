@@ -2019,6 +2019,7 @@ jobs:
       - test-binary-against-repo:
           repo: cypress-test-awesome-typescript-loader
           browser: "electron"
+          pull_request_id: 8
 
   test-binary-against-kitchensink-firefox:
     <<: *defaults
@@ -2121,13 +2122,13 @@ jobs:
           working_directory: test-binary
           command: npx @bahmutov/cly init
       # TODO: fork/update @bahmutov/cly@1 to scaffold `cypress/e2e/spec.cy.ts`
-      # instead of `cypress/integration/spec.ts` when Cypress v10 is released.
+      # instead of `cypress/integration/spec.js` when Cypress v10 is released.
       - run:
           name: Update example spec
           working_directory: test-binary
           command: |
             mkdir cypress/e2e
-            mv cypress/integration/spec.ts cypress/e2e/spec.cy.ts
+            mv cypress/integration/spec.js cypress/e2e/spec.cy.js
       - run:
           name: Scaffold new config file
           working_directory: test-binary
