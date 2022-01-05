@@ -3,7 +3,7 @@ import GlobalPageHeader from './GlobalPageHeader.vue'
 import { ref } from 'vue'
 
 const searchLabel = defaultMessages.globalPage.searchPlaceholder
-const dropzoneSelector = '[data-testid="dropzone"] > div'
+const dropzoneSelector = '[data-cy="dropzone"] > div'
 const fileInputSelector = 'input[type=file]'
 const addProjectSelector = '[data-cy=addProjectButton]'
 

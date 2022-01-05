@@ -118,9 +118,9 @@ describe('Launchpad: Global Mode', () => {
         setupAndValidateProjectsList(['todos'])
         cy.log('Project cards have a menu can be opened')
         cy.get('[aria-label="Project Actions"]').click()
-        cy.get('button').contains(defaultMessages.globalPage.removeProject)
-        cy.get('button').contains(defaultMessages.globalPage.openInIDE)
-        cy.get('button').contains(defaultMessages.globalPage.openInFinder)
+        cy.get('[data-cy="Remove Project"]').contains(defaultMessages.globalPage.removeProject)
+        cy.get('[data-cy="Open In IDE"]').contains(defaultMessages.globalPage.openInIDE)
+        cy.get('[data-cy="Open In Finder"]').contains(defaultMessages.globalPage.openInFinder)
       })
 
       it('removes project from list when clicking "Remove Project" menu item', () => {
@@ -131,7 +131,7 @@ describe('Launchpad: Global Mode', () => {
           menu.get(0).click()
         })
 
-        cy.get('button').contains('Remove Project').click()
+        cy.get('[data-cy="Remove Project"]').click()
 
         cy.get('[data-cy="project-card"]')
         .should('have.length', 1)
@@ -144,14 +144,14 @@ describe('Launchpad: Global Mode', () => {
         setupAndValidateProjectsList(projectList)
         cy.get('[aria-label="Project Actions"]').click()
 
-        cy.get('button').contains('Open In IDE').click()
+        cy.get('[data-cy="Open In IDE"]').click()
         cy.contains('Select Preferred Editor')
       })
 
       it('shows file drop zone when no more projects are in list when clicking "Remove Project" menu item', () => {
         setupAndValidateProjectsList(['todos'])
         cy.get('[aria-label="Project Actions"]').click()
-        cy.get('button').contains('Remove Project').click()
+        cy.get('[data-cy="Remove Project"]').click()
 
         cy.get('[data-cy="project-card"]').should('not.exist')
         cy.get('[data-cy="dropzone"]')
