@@ -390,7 +390,8 @@ export class ProjectActions {
     }
   }
 
-  reconfigureProject () {
+  async reconfigureProject () {
+    await this.api.closeActiveProject()
     this.ctx.actions.wizard.resetWizard()
     this.ctx.actions.electron.refreshBrowserWindow()
     this.ctx.actions.electron.showBrowserWindow()
