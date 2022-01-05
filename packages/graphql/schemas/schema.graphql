@@ -688,6 +688,9 @@ type Mutation {
   """Save the projects preferences to cache"""
   setProjectPreferences(browserPath: String!, testingType: TestingTypeEnum!): Query!
 
+  """Save the prompt-shown state for this project"""
+  setPromptShown(slug: String!): Boolean
+
   """Updates the different fields of the wizard data store"""
   wizardUpdate(input: WizardUpdateInput!): Wizard
 }

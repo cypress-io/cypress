@@ -159,14 +159,17 @@
   </TopNavList>
 
   <TopNavList
+    ref="promptsEl"
     variant="panel"
     role="region"
     aria-live="polite"
+    :force-open-state="props.forceOpenDocs"
+    @clear-force-open="emit('clearForceOpen')"
   >
     <template #heading="{ open }">
       <i-cy-life-ring_x16
         class=" h-16px w-16px group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50"
-        :class="open ? 'icon-dark-indigo-500 icon-light-indigo-50' : 'icon-dark-gray-500 icon-light-gray-100'"
+        :class="(open || props.forceOpenDocs) ? 'icon-dark-indigo-500 icon-light-indigo-50' : 'icon-dark-gray-500 icon-light-gray-100'"
       />
       <span
         class="font-semibold"
@@ -197,7 +200,10 @@
           <i-cy-delete_x12 class="h-12px w-12px icon-dark-gray-400" />
         </button>
       </div>
-      <PromptContent :type="docsMenuVariant" />
+      <PromptContent
+        :type="docsMenuVariant"
+        :automatic="props.forceOpenDocs"
+      />
     </div>
   </TopNavList>
 
@@ -226,12 +232,12 @@ import TopNavList from './TopNavList.vue'
 import PromptContent from './PromptContent.vue'
 import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
 import { gql, useMutation } from '@urql/vue'
-import { TopNavFragment, TopNav_LaunchOpenProjectDocument, TopNav_SetBrowserDocument } from '../../generated/graphql'
+import { TopNavFragment, TopNav_LaunchOpenProjectDocument, TopNav_SetBrowserDocument, TopNav_SetPromptShownDocument } from '../../generated/graphql'
 import { useI18n } from '@cy/i18n'
-import { computed, ref, Ref } from 'vue'
+import { computed, ref, Ref, ComponentPublicInstance, watch, watchEffect } from 'vue'
 const { t } = useI18n()
 import { onClickOutside, onKeyStroke, useTimeAgo } from '@vueuse/core'
-import DocsMenuContent from './DocsMenuContent.vue'
+import DocsMenuContent, { DocsMenuVariant } from './DocsMenuContent.vue'
 import ExternalLink from '../ExternalLink.vue'
 import Button from '../../components/Button.vue'
 import UpdateCypressModal from './UpdateCypressModal.vue'
@@ -294,8 +300,15 @@ mutation TopNav_SetBrowser($id: ID!) {
 }
 `
 
+gql`
+mutation TopNav_SetPromptShown($slug: String!) {
+  setPromptShown(slug: $slug)
+}
+`
+
 const launchOpenProject = useMutation(TopNav_LaunchOpenProjectDocument)
 const setBrowser = useMutation(TopNav_SetBrowserDocument)
+const setPromptShown = useMutation(TopNav_SetPromptShownDocument)
 
 const launch = () => {
   launchOpenProject.executeMutation({})
@@ -308,8 +321,14 @@ const handleBrowserChoice = async (browser) => {
 
 const props = defineProps<{
   gql: TopNavFragment,
-  showBrowsers?: boolean
+  showBrowsers?: boolean,
+  forceOpenDocs?: boolean
 }>()
+
+const emit = defineEmits<{
+  (e: 'clearForceOpen'): void,
+}>()
+const promptsEl = ref<ComponentPublicInstance | null>(null)
 
 const currentReleased = useTimeAgo(
   props.gql.versions?.current?.released
@@ -350,14 +369,17 @@ const runningOldVersion = computed(() => {
 
 const showUpdateModal = ref(false)
 
-const docsMenuVariant: Ref<'main' | 'orchestration' | 'ci'> = ref('main')
+const docsMenuVariant = ref<DocsMenuVariant>('main')
 
-const promptsEl: Ref<HTMLElement | null> = ref(null)
+watchEffect(() => {
+  docsMenuVariant.value = props.forceOpenDocs ? 'ci1' : 'main'
+})
 
 // reset docs menu if click or keyboard navigation happens outside
 // so it doesn't reopen on the one of the prompts
 
 onClickOutside(promptsEl, () => {
+  emit('clearForceOpen')
   setTimeout(() => {
     // reset the content of the menu when
     docsMenuVariant.value = 'main'
@@ -373,7 +395,7 @@ const resetPrompt = (event) => {
 
   const target = event.target as HTMLElement
 
-  if (!promptsEl.value.contains(target)) {
+  if (!promptsEl.value?.$el.contains(target)) {
     docsMenuVariant.value = 'main'
   }
 }
@@ -383,6 +405,10 @@ onKeyStroke('Enter', (event) => {
 })
 
 onKeyStroke(' ', (event) => {
+  resetPrompt(event)
+})
+
+onKeyStroke('Escape', (event) => {
   resetPrompt(event)
 })
 

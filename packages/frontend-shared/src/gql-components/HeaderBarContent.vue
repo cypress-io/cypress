@@ -31,7 +31,7 @@
         <TopNav
           :gql="props.gql"
           :show-browsers="props.showBrowsers"
-          :force-open-docs="isForceOpenAllowed && isShowablePromptInSavedSatate"
+          :force-open-docs="isForceOpenAllowed && isShowablePromptInSavedState"
           @clear-force-open="isForceOpenAllowed = false"
         >
           <template
@@ -177,7 +177,7 @@ const prompts = sortBy([
   },
 ], 'interval')
 const isForceOpenAllowed = ref(true)
-const isShowablePromptInSavedSatate = computed(() => {
+const isShowablePromptInSavedState = computed(() => {
   if (savedState.value) {
     for (const prompt of prompts) {
       if (shouldShowPrompt(prompt)) {
