@@ -10,12 +10,25 @@ const cloudViewer = {
   fullName: 'Tester Test',
 }
 
-const mountSuccess = () => {
+const cloudViewerNoName = {
+  id: '2',
+  email: 'no.name@test.test',
+  fullName: null,
+}
+
+type TestCloudViewer = {
+  __typename?: 'CloudUser' | undefined
+  id: string
+  email: string | null
+  fullName: string | null
+}
+
+const mountSuccess = (viewer: TestCloudViewer = cloudViewer) => {
   cy.mountFragment(LoginModalFragmentDoc, {
     onResult: (result) => {
       result.__typename = 'Query'
       result.isAuthBrowserOpened = true
-      result.cloudViewer = cloudViewer
+      result.cloudViewer = viewer
       result.cloudViewer.__typename = 'CloudUser'
     },
     render: (gqlVal) => <div class="resize overflow-auto border-current border-1 h-700px"><LoginModal gql={gqlVal} modelValue={true} /></div>,
@@ -60,6 +73,13 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
     cy.contains('h2', text.login.titleSuccess).should('be.visible')
     cy.contains(text.login.bodySuccess.replace('{0}', cloudViewer.fullName)).should('be.visible')
     cy.contains('a', cloudViewer.fullName).should('have.attr', 'href', 'https://on.cypress.io/dashboard/profile')
+  })
+
+  it('shows successful login status with email if name not provided', () => {
+    mountSuccess(cloudViewerNoName)
+    cy.contains('h2', text.login.titleSuccess).should('be.visible')
+    cy.contains(text.login.bodySuccess.replace('{0}', cloudViewerNoName.email)).should('be.visible')
+    cy.contains('a', cloudViewerNoName.email).should('have.attr', 'href', 'https://on.cypress.io/dashboard/profile')
   })
 
   it('emits an event to close the modal when "Continue" button is clicked', () => {
