@@ -3,7 +3,7 @@ import { createDeferred } from '../../util/deferred'
 import $utils from '../../cypress/utils'
 import $errUtils from '../../cypress/error_utils'
 
-export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: Cypress.State) {
+export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: Cypress.State, config: Cypress.InternalConfig) {
   let timeoutId
 
   // @ts-ignore
@@ -13,7 +13,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
     // when a secondary domain is detected by the proxy, it holds it up
     // to provide time for the spec bridge to be set up. normally, the queue
     // will not continue until the page is stable, but this signals it to go
-    // ahead because we're anticipating multidomain
+    // ahead because we're anticipating multi-domain
     // @ts-ignore
     cy.isAnticipatingMultidomain(true)
 
@@ -30,6 +30,10 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
     // the other parts of multidomain
     switchToDomain (domain: string, dataOrFn: any, fn?: () => {}) {
       clearTimeout(timeoutId)
+
+      if (!config('experimentalMultiDomain')) {
+        $errUtils.throwErrByPath('switchToDomain.experiment_not_enabled')
+      }
 
       const callbackFn = fn ?? dataOrFn
       const data = fn ? dataOrFn : undefined

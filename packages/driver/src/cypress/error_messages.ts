@@ -1666,11 +1666,19 @@ export default {
   },
 
   switchToDomain: {
+    experiment_not_enabled: {
+      message: `${cmd('switchToDomain')} requires enabling the experimentalMultiDomain flag`,
+      docsUrl: 'https://on.cypress.io/switchToDomain',
+    },
     invalid_domain_argument: {
       message: `${cmd('switchToDomain')} requires the first argument to be a string. You passed: \`{{arg}}\``,
+      docsUrl: 'https://on.cypress.io/switchToDomain',
+
     },
     invalid_fn_argument: {
       message: `${cmd('switchToDomain')} requires the last argument to be a function. You passed: \`{{arg}}\``,
+      docsUrl: 'https://on.cypress.io/switchToDomain',
+
     },
     run_domain_fn_errored: {
       message: stripIndent`

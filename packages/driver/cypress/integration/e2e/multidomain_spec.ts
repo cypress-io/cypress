@@ -1,5 +1,5 @@
 // @ts-ignore / session support is needed for visiting about:blank between tests
-describe('multidomain', { experimentalSessionSupport: true }, () => {
+describe('multidomain', { experimentalSessionSupport: true, experimentalMultiDomain: true }, () => {
   const expectTextMessage = (expected, done) => {
     const onMessage = (event) => {
       if (event.data && event.data.actual !== undefined) {
@@ -82,6 +82,23 @@ describe('multidomain', { experimentalSessionSupport: true }, () => {
     })
 
     describe('errors', () => {
+      it('errors if experimental flag is not enabled', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.equal('`cy.switchToDomain()` requires enabling the experimentalMultiDomain flag')
+
+          // @ts-ignore
+          Cypress.config('experimentalMultiDomain', true)
+
+          done()
+        })
+
+        // @ts-ignore
+        Cypress.config('experimentalMultiDomain', false)
+
+        // @ts-ignore
+        cy.switchToDomain()
+      })
+
       it('errors if passed a non-string for the domain argument', (done) => {
         cy.on('fail', (err) => {
           expect(err.message).to.equal('`cy.switchToDomain()` requires the first argument to be a string. You passed: ``')

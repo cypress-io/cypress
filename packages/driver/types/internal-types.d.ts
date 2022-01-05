@@ -84,6 +84,10 @@ declare namespace Cypress {
     state: Cypress.state
   }
 
+  interface InternalConfig {
+    (k: keyof ResolvedConfigOptions, v?: any): any
+  }
+
   // Extend Cypress.state properties here
   interface ResolvedConfigOptions {
     $autIframe: JQuery<HTMLIFrameElement>

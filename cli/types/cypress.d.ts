@@ -2784,6 +2784,11 @@ declare namespace Cypress {
      */
     experimentalInteractiveRunEvents: boolean
     /**
+     * Enables multi-domain support in Cypress, including the switchToDomain command.
+     * @default false
+     */
+    experimentalMultiDomain: boolean
+    /**
      * Generate and save commands directly to your test suite by interacting with your app as an end user would.
      * @default false
      */
