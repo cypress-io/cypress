@@ -155,9 +155,16 @@ const runPlugins = (ipc, pluginsFile, projectRoot) => {
   })
 
   process.on('unhandledRejection', (event) => {
-    const err = (event && event.reason) || event
+    let err = event
 
-    debug('unhandled rejection:', util.serializeError(err))
+    debug('unhandled rejection:', event)
+
+    // Rejected Bluebird promises will return a reason object.
+    // OpenSSL error returns a reason as user-friendly string.
+    if (event && event.reason && typeof event.reason === 'object') {
+      err = event.reason
+    }
+
     ipc.send('error', util.serializeError(err))
 
     return false
