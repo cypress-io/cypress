@@ -1,4 +1,3 @@
-import { xor } from 'lodash'
 import os from 'os'
 import { FrontendFramework, FRONTEND_FRAMEWORKS, ResolvedFromConfig, RESOLVED_FROM, SpecFileWithExtension, STORYBOOK_GLOB, FoundSpec } from '@packages/types'
 import { scanFSForAvailableDependency } from 'create-cypress-tests'
@@ -149,19 +148,13 @@ export class ProjectDataSource {
     ignoreSpecPattern: string[],
     globToRemove: string[],
   ): Promise<FoundSpec[]> {
-    let specAbsolutePaths = await this.ctx.file.getFilesByGlob(
+    const specAbsolutePaths = await this.ctx.file.getFilesByGlob(
       projectRoot,
       specPattern, {
         absolute: true,
-        ignore: ignoreSpecPattern,
+        ignore: [...ignoreSpecPattern, ...globToRemove],
       },
     )
-
-    const specsToExclude = globToRemove
-      ? await this.ctx.file.getFilesByGlob(projectRoot, globToRemove, { absolute: true })
-      : []
-
-    specAbsolutePaths = xor(specAbsolutePaths, specsToExclude)
 
     const matched = matchedSpecs({
       projectRoot,
