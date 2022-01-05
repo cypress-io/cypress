@@ -299,7 +299,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     canUpdateDuringTestTime: true,
   }, {
     name: 'supportFile',
-    defaultValue: 'cypress/support',
+    defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? 'cypress/support/component.js' : 'cypress/support/e2e.js',
     validation: validate.isStringOrFalse,
     isFolder: true,
     canUpdateDuringTestTime: false,
@@ -510,5 +510,13 @@ export const breakingOptions: Array<BreakingOption> = [
     value: 'bundled',
     errorKey: 'NODE_VERSION_DEPRECATION_BUNDLED',
     isWarning: true,
+  },
+]
+
+export const breakingRootOptions: Array<BreakingOption> = [
+  {
+    name: 'supportFile',
+    errorKey: 'SUPPORT_FILE_ROOT_NOT_SUPPORTED',
+    isWarning: false,
   },
 ]

@@ -4,5 +4,7 @@
 [...Array(100).keys()].map((x) => `${x}`)
 
 module.exports = {
-  'supportFile': false,
+  'e2e': {
+    'supportFile': false,
+  },
 }
