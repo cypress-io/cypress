@@ -113,25 +113,21 @@ describe('Launchpad: Global Mode', () => {
       it('can be opened', () => {
         setupAndValidateProjectsList(['todos'])
         cy.log('Project cards have a menu can be opened')
-        cy.get('[data-cy="project-card"] > button').click()
-
-        cy.get('[data-cy="project-card-menu-items"] > button').then((menu) => {
-          expect(menu).to.have.lengthOf(3)
-          expect(menu.get(0)).to.contain(defaultMessages.globalPage.removeProject)
-          expect(menu.get(1)).to.contain(defaultMessages.globalPage.openInIDE)
-          expect(menu.get(2)).to.contain(defaultMessages.globalPage.openInFinder)
-        })
+        cy.get('[aria-label="Project Actions"]').click()
+        cy.get('button').contains(defaultMessages.globalPage.removeProject)
+        cy.get('button').contains(defaultMessages.globalPage.openInIDE)
+        cy.get('button').contains(defaultMessages.globalPage.openInFinder)
       })
 
       it('removes project from list when clicking "Remove Project" menu item', () => {
         const projectList = ['todos', 'cookies']
 
         setupAndValidateProjectsList(projectList)
-        cy.get('[data-cy="project-card"] > button').then((menu) => {
+        cy.get('[aria-label="Project Actions"]').then((menu) => {
           menu.get(0).click()
         })
 
-        cy.get('[data-cy="Remove Project"]').click()
+        cy.get('button').contains('Remove Project').click()
 
         cy.get('[data-cy="project-card"]')
         .should('have.length', 1)
@@ -142,16 +138,16 @@ describe('Launchpad: Global Mode', () => {
         const projectList = ['todos']
 
         setupAndValidateProjectsList(projectList)
-        cy.get('[data-cy="project-card"] > button').click()
+        cy.get('[aria-label="Project Actions"]').click()
 
-        cy.get('[data-cy="Open In IDE"]').click()
+        cy.get('button').contains('Open In IDE').click()
         cy.contains('Select Preferred Editor')
       })
 
       it('shows file drop zone when no more projects are in list when clicking "Remove Project" menu item', () => {
         setupAndValidateProjectsList(['todos'])
-        cy.get('[data-cy="project-card"] > button').click()
-        cy.get('[data-cy="Remove Project"]').click()
+        cy.get('[aria-label="Project Actions"]').click()
+        cy.get('button').contains('Remove Project').click()
 
         cy.get('[data-cy="project-card"]').should('not.exist')
         cy.get('[data-cy="dropzone"]')
