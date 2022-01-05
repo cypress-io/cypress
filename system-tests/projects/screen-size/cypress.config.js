@@ -1,5 +1,6 @@
 module.exports = {
   'e2e': {
+    'supportFile': false,
     setupNodeEvents (on, config) {
       on('before:browser:launch', (browser, options) => {
         // options.args.push('-width', '1280', '-height', '1024')

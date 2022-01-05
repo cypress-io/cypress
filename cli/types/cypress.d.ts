@@ -2616,8 +2616,14 @@ declare namespace Cypress {
     /**
      * A String or Array of glob patterns used to ignore test files that would otherwise be shown in your list of tests. Cypress uses minimatch with the options: {dot: true, matchBase: true}. We suggest using http://globtester.com to test what files would match.
      * @default "*.hot-update.js"
+     * @deprecated use `ignoreSpecPattern` instead
      */
     ignoreTestFiles: string | string[]
+    /**
+     * A String or Array of glob patterns used to ignore test files that would otherwise be shown in your list of tests. Cypress uses minimatch with the options: {dot: true, matchBase: true}. We suggest using http://globtester.com to test what files would match.
+     * @default "*.hot-update.js"
+     */
+    ignoreSpecPattern: string | string[]
     /**
      * The number of tests for which snapshots and command data are kept in memory. Reduce this number if you are experiencing high memory consumption in your browser during a test run.
      * @default 50
@@ -2691,6 +2697,7 @@ declare namespace Cypress {
     /**
      * Path to folder containing integration test files
      * @default "cypress/integration"
+     * @deprecated
      */
     integrationFolder: string
     /**
@@ -2735,7 +2742,7 @@ declare namespace Cypress {
     screenshotsFolder: string | false
     /**
      * Path to file to load before test files load. This file is compiled and bundled. (Pass false to disable)
-     * @default "cypress/support/index.js"
+     * @default "cypress/support/{e2e|component}.js"
      */
     supportFile: string | false
     /**
@@ -2835,6 +2842,7 @@ declare namespace Cypress {
     blockHosts: null | string | string[]
     /**
      * Path to folder containing component test files.
+     * @deprecated
      */
     componentFolder: false | string
     /**
@@ -2847,6 +2855,12 @@ declare namespace Cypress {
     supportFolder: string
     /**
      * Glob pattern to determine what test files to load.
+     */
+    specPattern: string | string[]
+    /**
+     * Glob pattern to determine what test files to load.
+     *
+     * @deprecated Use `specPattern` under `component` or `e2e`
      */
     testFiles: string | string[]
     /**
@@ -5462,7 +5476,7 @@ declare namespace Cypress {
     ```
       // likely want to do this in a support file
       // so it's applied to all spec files
-      // cypress/support/index.js
+      // cypress/support/{e2e|component}.js
 
       Cypress.on('uncaught:exception', (err, runnable) => {
         // returning false here prevents Cypress from

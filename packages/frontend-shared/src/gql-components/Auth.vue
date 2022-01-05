@@ -67,13 +67,17 @@ fragment Auth on Query {
 
 gql`
 mutation Logout {
-  logout 
+  logout {
+    ...Auth
+  }
 }
 `
 
 gql`
 mutation Login {
-  login 
+  login {
+    ...Auth
+  }
 }
 `
 

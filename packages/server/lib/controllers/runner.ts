@@ -66,10 +66,12 @@ export const runner = {
       config.remote = getRemoteState()
     }
 
+    const spec = getSpec()
+
     config.version = pkg.version
     config.platform = os.platform() as PlatformName
     config.arch = os.arch()
-    config.spec = getSpec() ?? null
+    config.spec = spec ? { ...spec, name: spec.baseName } : null
     config.specs = specsStore.specFiles
     config.browser = getCurrentBrowser()
     config.exit = exit ?? true

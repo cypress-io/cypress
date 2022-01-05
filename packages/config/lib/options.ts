@@ -108,12 +108,6 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     validation: isValidConfig,
     canUpdateDuringTestTime: false,
   }, {
-    name: 'componentFolder',
-    defaultValue: 'cypress/component',
-    validation: validate.isStringOrFalse,
-    isFolder: true,
-    canUpdateDuringTestTime: false,
-  }, {
     name: 'defaultCommandTimeout',
     defaultValue: 4000,
     validation: validate.isNumber,
@@ -127,7 +121,9 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
   }, {
     name: 'e2e',
     // e2e runner overrides
-    defaultValue: {},
+    defaultValue: {
+      specPattern: 'cypress/integration/**/*',
+    },
     validation: isValidConfig,
     canUpdateDuringTestTime: false,
   }, {
@@ -188,7 +184,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     isFolder: true,
     canUpdateDuringTestTime: false,
   }, {
-    name: 'ignoreTestFiles',
+    name: 'ignoreSpecPattern',
     defaultValue: '*.hot-update.js',
     validation: validate.isStringOrArrayOfStrings,
     canUpdateDuringTestTime: true,
@@ -197,12 +193,6 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     defaultValue: false,
     validation: validate.isBoolean,
     canUpdateDuringTestTime: true,
-  }, {
-    name: 'integrationFolder',
-    defaultValue: 'cypress/integration',
-    validation: validate.isString,
-    isFolder: true,
-    canUpdateDuringTestTime: false,
   }, {
     name: 'keystrokeDelay',
     defaultValue: 0,
@@ -309,7 +299,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     canUpdateDuringTestTime: true,
   }, {
     name: 'supportFile',
-    defaultValue: 'cypress/support',
+    defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? 'cypress/support/component.js' : 'cypress/support/e2e.js',
     validation: validate.isStringOrFalse,
     isFolder: true,
     canUpdateDuringTestTime: false,
@@ -324,11 +314,6 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     defaultValue: 60000,
     validation: validate.isNumber,
     canUpdateDuringTestTime: true,
-  }, {
-    name: 'testFiles',
-    defaultValue: '**/*.*',
-    validation: validate.isStringOrArrayOfStrings,
-    canUpdateDuringTestTime: false,
   }, {
     name: 'trashAssetsBeforeRuns',
     defaultValue: true,
@@ -525,5 +510,13 @@ export const breakingOptions: Array<BreakingOption> = [
     value: 'bundled',
     errorKey: 'NODE_VERSION_DEPRECATION_BUNDLED',
     isWarning: true,
+  },
+]
+
+export const breakingRootOptions: Array<BreakingOption> = [
+  {
+    name: 'supportFile',
+    errorKey: 'SUPPORT_FILE_ROOT_NOT_SUPPORTED',
+    isWarning: false,
   },
 ]

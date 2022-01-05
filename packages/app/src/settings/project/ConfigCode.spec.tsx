@@ -18,4 +18,8 @@ describe('<ConfigCode />', () => {
   it('has an edit button', () => {
     cy.findByText(defaultMessages.file.edit).should('be.visible').click()
   })
+
+  it('shows object values properly', () => {
+    cy.contains(`'{`).should('not.exist')
+  })
 })

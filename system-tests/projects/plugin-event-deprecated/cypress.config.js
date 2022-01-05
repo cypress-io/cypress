@@ -1,5 +1,6 @@
 module.exports = {
   'e2e': {
+    'supportFile': false,
     setupNodeEvents (on, config) {
       if (config.env.NO_MUTATE_RETURN) {
         on('before:browser:launch', (browser, options) => {

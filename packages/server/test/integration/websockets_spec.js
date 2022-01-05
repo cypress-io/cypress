@@ -32,7 +32,7 @@ describe('Web Sockets', () => {
 
     this.idsPath = Fixtures.projectPath('ids')
 
-    ctx.actions.project.setCurrentProjectForTestSetup(this.idsPath)
+    ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.idsPath)
 
     return config.get(this.idsPath, { port: cyPort })
     .then((cfg) => {
