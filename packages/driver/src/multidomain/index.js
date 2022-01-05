@@ -10,7 +10,6 @@ import $Commands from '../cypress/commands'
 import $Log from '../cypress/log'
 import $Listeners from '../cy/listeners'
 import { SpecBridgeDomainCommunicator } from './communicator'
-import { createDeferred } from '../util/deferred'
 
 const specBridgeCommunicator = new SpecBridgeDomainCommunicator()
 
@@ -82,24 +81,7 @@ const setup = () => {
   Cypress.on('log:changed', onLogChanged)
 
   specBridgeCommunicator.on('run:domain:fn', async ({ fn, isDoneFnAvailable = false }) => {
-    const deferredSwitchToDomain = createDeferred()
-
-    cy.state('switchToDomainDeferred', deferredSwitchToDomain)
-    const evalFn = `(${fn})()`
-
-    // await the eval func, whether it is a promise or not
-    // we should not need to transpile this as our target browsers support async/await
-    // see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function for more details
-    const asyncWrapper = `(async () => {
-      const deferredSwitchToDomain = cy.state('switchToDomainDeferred')
-
-      try {
-        await ${evalFn}
-        deferredSwitchToDomain.resolve()
-      } catch(e){
-        deferredSwitchToDomain.reject(e)
-      }
-    })()`
+    let fnWrapper = `(${fn})()`
 
     if (isDoneFnAvailable) {
       // stub out the 'done' function if available in the primary domain
@@ -120,18 +102,17 @@ const setup = () => {
       // if undefined and a user tries to call done, the same effect is granted
       cy.state('done', done)
 
-      const fnDoneWrapper = `(() => {
+      fnWrapper = `(() => {
         const done = cy.state('done');
-        ${asyncWrapper}
+        return ${fnWrapper}
       })()`
-
-      window.eval(fnDoneWrapper)
-    } else {
-      window.eval(asyncWrapper)
     }
 
     try {
-      await deferredSwitchToDomain.promise
+      // await the eval func, whether it is a promise or not
+      // we should not need to transpile this as our target browsers support async/await
+      // see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function for more details
+      await window.eval(fnWrapper)
       specBridgeCommunicator.toPrimary('run:domain:fn')
     } catch (err) {
       // Native Error types currently cannot be cloned in Firefox when using 'postMessage'.
@@ -143,7 +124,6 @@ const setup = () => {
       })
     } finally {
       cy.state('done', undefined)
-      cy.state('switchToDomainDeferred', undefined)
     }
   })
 
