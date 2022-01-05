@@ -11,8 +11,7 @@ describe('App: Runs', () => {
     it('resolves the runs page', () => {
       cy.loginUser()
       cy.visitApp()
-      cy.wait(1000)
-      cy.get('[href="#/runs"]').click()
+      cy.get('[href="#/runs"]', { timeout: 1000 }).click()
       cy.get('[data-cy="runs"]')
       cy.get('[data-cy="app-header-bar"]').findByText('Runs').should('be.visible')
     })
