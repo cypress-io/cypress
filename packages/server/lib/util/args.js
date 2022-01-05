@@ -6,7 +6,7 @@ const debug = require('debug')('cypress:server:args')
 const minimist = require('minimist')
 const { getPublicConfigKeys } = require('@packages/config')
 const ig = require('is-glob')
-const glob = require('glob')
+const braces = require('braces')
 
 const coerceUtil = require('./coerce')
 const proxyUtil = require('./proxy')
@@ -210,10 +210,13 @@ const parseSpecArgvAsGlob = (spec, cwd) => {
   return {
     isGlob: ig(spec),
     setGlob: () => {
-      const globbed = glob.sync(path.resolve(cwd, spec))
+      const hasBrackets = ['{', '}', '[', ']'].some((token) => spec.includes(token))
 
-      // This is needed to output the glob pattern on error.
-      return globbed.length ? globbed : [spec]
+      if (hasBrackets) {
+        return braces.expand(spec)
+      }
+
+      return strToArray(spec)
     },
   }
 }
@@ -322,19 +325,12 @@ module.exports = {
           const { isGlob, setGlob } = parseSpecArgvAsGlob(spec, options.cwd)
 
           if (isGlob) {
-            options.spec = setGlob()
+            options.spec = setGlob().map(resolvePath)
           } else {
             options.spec = strToArray(spec).map(resolvePath)
           }
         } else {
-          const stringifiedArg = spec.join()
-          const { isGlob, setGlob } = parseSpecArgvAsGlob(stringifiedArg, options.cwd)
-
-          if (isGlob) {
-            options.spec = setGlob()
-          } else {
-            options.spec = spec.map(resolvePath)
-          }
+          options.spec = spec.map(resolvePath)
         }
       } catch (err) {
         debug('could not parse config spec value %s', spec)
