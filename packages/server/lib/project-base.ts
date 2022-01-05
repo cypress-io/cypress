@@ -7,7 +7,7 @@ import { createHmac } from 'crypto'
 
 import browsers from './browsers'
 import pkg from '@packages/root'
-import { allowed } from '@packages/config'
+// import { allowed } from '@packages/config'
 import { ServerCt } from './server-ct'
 import { SocketCt } from './socket-ct'
 import { SocketE2E } from './socket-e2e'
@@ -22,16 +22,14 @@ import scaffold from './scaffold'
 import { ServerE2E } from './server-e2e'
 import system from './util/system'
 import { ensureProp } from './util/class-helpers'
+
 import { fs } from './util/fs'
-import * as settings from './util/settings'
-import plugins from './plugins'
-import specsUtil from './util/specs'
-import Watchers from './watchers'
+
 import devServer from './plugins/dev-server'
 import preprocessor from './plugins/preprocessor'
 import { SpecsStore } from './specs-store'
-import { checkSupportFile, getDefaultConfigFilePath } from './project_utils'
-import type { FoundBrowser, OpenProjectLaunchOptions } from '@packages/types'
+import { checkSupportFile } from './project_utils'
+import type { FoundBrowser, OpenProjectLaunchOptions, FoundSpec } from '@packages/types'
 import { DataContext, getCtx } from '@packages/data-context'
 
 // Cannot just use RuntimeConfigOptions as is because some types are not complete.
@@ -39,7 +37,7 @@ import { DataContext, getCtx } from '@packages/data-context'
 // and are required when creating a project.
 type ReceivedCypressOptions =
   Pick<Cypress.RuntimeConfigOptions, 'hosts' | 'projectName' | 'clientRoute' | 'devServerPublicPathRoute' | 'namespace' | 'report' | 'socketIoCookie' | 'configFile' | 'isTextTerminal' | 'isNewProject' | 'proxyUrl' | 'browsers' | 'browserUrl' | 'socketIoRoute' | 'arch' | 'platform' | 'spec' | 'specs' | 'browser' | 'version' | 'remote'>
-  & Pick<Cypress.ResolvedConfigOptions, 'chromeWebSecurity' | 'supportFolder' | 'experimentalSourceRewriting' | 'fixturesFolder' | 'reporter' | 'reporterOptions' | 'screenshotsFolder' | 'pluginsFile' | 'supportFile' | 'integrationFolder' | 'baseUrl' | 'viewportHeight' | 'viewportWidth' | 'port' | 'experimentalInteractiveRunEvents' | 'componentFolder' | 'userAgent' | 'downloadsFolder' | 'env' | 'testFiles' | 'ignoreTestFiles'> // TODO: Figure out how to type this better.
+  & Pick<Cypress.ResolvedConfigOptions, 'chromeWebSecurity' | 'supportFolder' | 'experimentalSourceRewriting' | 'fixturesFolder' | 'reporter' | 'reporterOptions' | 'screenshotsFolder' | 'pluginsFile' | 'supportFile' | 'baseUrl' | 'viewportHeight' | 'viewportWidth' | 'port' | 'experimentalInteractiveRunEvents' | 'userAgent' | 'downloadsFolder' | 'env' | 'testFiles' | 'ignoreSpecPattern'> // TODO: Figure out how to type this better.
 
 export interface Cfg extends ReceivedCypressOptions {
   projectRoot: string
@@ -55,7 +53,6 @@ export interface Cfg extends ReceivedCypressOptions {
 const localCwd = cwd()
 
 const debug = Debug('cypress:server:project')
-const debugScaffold = Debug('cypress:server:scaffold')
 
 type StartWebsocketOptions = Pick<Cfg, 'socketIoCookie' | 'namespace' | 'screenshotsFolder' | 'report' | 'reporter' | 'reporterOptions' | 'projectRoot'>
 
@@ -65,7 +62,6 @@ export class ProjectBase<TServer extends Server> extends EE {
   // id is sha256 of projectRoot
   public id: string
 
-  protected watchers: Watchers
   protected ctx: DataContext
   protected _cfg?: Cfg
   protected _server?: TServer
@@ -76,9 +72,8 @@ export class ProjectBase<TServer extends Server> extends EE {
   public browser: any
   public options: OpenProjectLaunchOptions
   public testingType: Cypress.TestingType
-  public spec: Cypress.Cypress['spec'] | null
+  public spec: FoundSpec | null
   public isOpen: boolean = false
-  private generatedProjectIdTimestamp: any
   projectRoot: string
 
   constructor ({
@@ -102,7 +97,6 @@ export class ProjectBase<TServer extends Server> extends EE {
 
     this.testingType = testingType
     this.projectRoot = path.resolve(projectRoot)
-    this.watchers = new Watchers()
     this.spec = null
     this.browser = null
     this.id = createHmac('sha256', 'secret-key').update(projectRoot).digest('hex')
@@ -118,20 +112,10 @@ export class ProjectBase<TServer extends Server> extends EE {
       onFocusTests () {},
       onError () {},
       onWarning () {},
-      onSettingsChanged: false,
       ...options,
     }
 
-    this.ctx.actions.projectConfig.killConfigProcess()
-    this.ctx.actions.project.setCurrentProjectProperties({
-      projectRoot: this.projectRoot,
-      configChildProcess: null,
-      ctPluginsInitialized: false,
-      e2ePluginsInitialized: false,
-      isCTConfigured: false,
-      isE2EConfigured: false,
-      config: null,
-    })
+    this.ctx.lifecycleManager.setCurrentProject(this.projectRoot)
   }
 
   protected ensureProp = ensureProp
@@ -188,21 +172,7 @@ export class ProjectBase<TServer extends Server> extends EE {
 
     process.chdir(this.projectRoot)
 
-    // TODO: we currently always scaffold the plugins file
-    // even when headlessly or else it will cause an error when
-    // we try to load it and it's not there. We must do this here
-    // else initialing the plugins will instantly fail.
-    if (cfg.pluginsFile) {
-      debug('scaffolding with plugins file %s', cfg.pluginsFile)
-
-      await scaffold.plugins(path.dirname(cfg.pluginsFile), cfg)
-    }
-
     this._server = this.createServer(this.testingType)
-
-    if (!this.options.skipPluginInitializeForTesting) {
-      cfg = await this.initializePlugins(cfg, this.options)
-    }
 
     const {
       specsStore,
@@ -262,12 +232,6 @@ export class ProjectBase<TServer extends Server> extends EE {
       stateToSave.firstOpened = now
     }
 
-    this.watchSettings({
-      onSettingsChanged: this.options.onSettingsChanged,
-      projectRoot: this.projectRoot,
-      configFile: this.options.configFile,
-    })
-
     this.startWebsockets({
       onReloadBrowser: this.options.onReloadBrowser,
       onFocusTests: this.options.onFocusTests,
@@ -289,7 +253,6 @@ export class ProjectBase<TServer extends Server> extends EE {
 
     await Promise.all([
       checkSupportFile({ configFile: cfg.configFile, supportFile: cfg.supportFile }),
-      this.watchPluginsFile(cfg, this.options),
     ])
 
     if (cfg.isTextTerminal) {
@@ -353,7 +316,6 @@ export class ProjectBase<TServer extends Server> extends EE {
 
     await Promise.all([
       this.server?.close(),
-      this.watchers?.close(),
       closePreprocessor?.(),
     ])
 
@@ -382,49 +344,7 @@ export class ProjectBase<TServer extends Server> extends EE {
     ctDevServerPort: number | undefined
     startSpecWatcher: () => void
   }> {
-    const allSpecs = await specsUtil.findSpecs({
-      projectRoot: updatedConfig.projectRoot,
-      fixturesFolder: updatedConfig.fixturesFolder,
-      supportFile: updatedConfig.supportFile,
-      testFiles: updatedConfig.testFiles,
-      ignoreTestFiles: updatedConfig.ignoreTestFiles,
-      componentFolder: updatedConfig.componentFolder,
-      integrationFolder: updatedConfig.integrationFolder,
-    })
-    const specs = allSpecs.filter((spec: Cypress.Cypress['spec']) => {
-      if (this.testingType === 'component') {
-        return spec.specType === 'component'
-      }
-
-      if (this.testingType === 'e2e') {
-        return spec.specType === 'integration'
-      }
-
-      throw Error(`Cannot return specType for testingType: ${this.testingType}`)
-    })
-
-    return this.initSpecStore({ specs, config: updatedConfig })
-  }
-
-  // TODO(tim): Improve this when we completely overhaul the rest of the code here,
-  async initializePlugins (cfg = this._cfg, options = this.options) {
-    // only init plugins with the
-    // allowed config values to
-    // prevent tampering with the
-    // internals and breaking cypress
-    const allowedCfg = allowed(cfg)
-
-    const modifiedCfg = await plugins.init(allowedCfg, {
-      projectRoot: this.projectRoot,
-      configFile: settings.pathToConfigFile(this.projectRoot, options),
-      testingType: options.testingType,
-      onError: (err: Error) => this._onError(err, options),
-      onWarning: options.onWarning,
-    }, this.ctx)
-
-    debug('plugin config yielded: %o', modifiedCfg)
-
-    return config.updateWithPluginValues(cfg, modifiedCfg)
+    return this.initSpecStore({ specs: this.ctx.project.specs, config: updatedConfig })
   }
 
   async startCtDevServer (specs: Cypress.Cypress['spec'][], config: any) {
@@ -447,25 +367,17 @@ export class ProjectBase<TServer extends Server> extends EE {
     specs,
     config,
   }: {
-    specs: Cypress.Cypress['spec'][]
+    specs: FoundSpec[]
     config: Cfg
   }) {
-    const specsStore = new SpecsStore(config, this.testingType)
+    const specsStore = new SpecsStore()
 
     const startSpecWatcher = () => {
-      return specsStore.watch({
-        onSpecsChanged: (specs) => {
-        // both e2e and CT watch the specs and send them to the
-        // client to be shown in the SpecList.
-          this.server.sendSpecList(specs, this.testingType)
-
-          if (this.testingType === 'component') {
-          // ct uses the dev-server to build and bundle the speces.
-          // send new files to dev server
-            devServer.updateSpecs(specs)
-          }
-        },
-      })
+      if (this.testingType === 'component') {
+      // ct uses the dev-server to build and bundle the speces.
+      // send new files to dev server
+        devServer.updateSpecs(specs)
+      }
     }
 
     let ctDevServerPort: number | undefined
@@ -476,86 +388,13 @@ export class ProjectBase<TServer extends Server> extends EE {
       ctDevServerPort = port
     }
 
-    return specsStore.storeSpecFiles()
-    .return({
+    specsStore.storeSpecFiles(specs)
+
+    return {
       specsStore,
       ctDevServerPort,
       startSpecWatcher,
-    })
-  }
-
-  async watchPluginsFile (cfg, options) {
-    debug(`attempt watch plugins file: ${cfg.pluginsFile}`)
-    if (!cfg.pluginsFile || options.isTextTerminal) {
-      return Promise.resolve()
     }
-
-    // TODO(tim): remove this when we properly clean all of this up
-    if (options) {
-      this.options = options
-    }
-
-    const found = await fs.pathExists(cfg.pluginsFile)
-
-    debug(`plugins file found? ${found}`)
-    // ignore if not found. plugins#init will throw the right error
-    if (!found) {
-      return
-    }
-
-    debug('watch plugins file')
-
-    return this.watchers.watchTree(cfg.pluginsFile, {
-      onChange: () => {
-        // TODO: completely re-open project instead?
-        debug('plugins file changed')
-
-        // re-init plugins after a change
-        this.initializePlugins(cfg)
-        .catch((err) => {
-          options.onError(err)
-        })
-      },
-    })
-  }
-
-  watchSettings ({
-    onSettingsChanged,
-    configFile,
-    projectRoot,
-  }: {
-    projectRoot: string
-    configFile?: string | false
-    onSettingsChanged?: false | (() => void)
-  }) {
-    // bail if we havent been told to
-    // watch anything (like in run mode)
-    if (!onSettingsChanged) {
-      return
-    }
-
-    debug('watch settings files')
-
-    const obj = {
-      onChange: () => {
-        // dont fire change events if we generated
-        // a project id less than 1 second ago
-        if (this.generatedProjectIdTimestamp &&
-          ((Date.now() - this.generatedProjectIdTimestamp) < 1000)) {
-          return
-        }
-
-        // call our callback function
-        // when settings change!
-        onSettingsChanged()
-      },
-    }
-
-    if (configFile !== false) {
-      this.watchers.watchTree(settings.pathToConfigFile(projectRoot, { configFile }), obj)
-    }
-
-    return this.watchers.watch(settings.pathToCypressEnvJson(projectRoot), obj)
   }
 
   initializeReporter ({
@@ -681,51 +520,17 @@ export class ProjectBase<TServer extends Server> extends EE {
     return family === 'chromium' || (family === 'firefox' && majorVersion >= 86)
   }
 
-  setCurrentSpecAndBrowser (spec, browser: Cypress.Browser) {
+  setCurrentSpecAndBrowser (spec, browser: FoundBrowser) {
     this.spec = spec
     this.browser = browser
-  }
-
-  async setBrowsers (browsers = []) {
-    debug('getting config before setting browsers %o', browsers)
-
-    const cfg = this.getConfig()
-
-    debug('setting config browsers to %o', browsers)
-
-    cfg.browsers = browsers
   }
 
   getAutomation () {
     return this.automation
   }
 
-  async initializeConfig (browsers: FoundBrowser[] = []): Promise<Cfg> {
-    // set default for "configFile" if undefined
-    if (this.options.configFile === undefined || this.options.configFile === null) {
-      this.options.configFile = await getDefaultConfigFilePath(this.projectRoot)
-    }
-
-    let theCfg: Cfg = await config.get(this.projectRoot, this.options)
-
-    if (!theCfg.browsers || theCfg.browsers.length === 0) {
-      // @ts-ignore - we don't know if the browser is headed or headless at this point.
-      // this is handled in open_project#launch.
-      theCfg.browsers = browsers
-    }
-
-    if (theCfg.browsers) {
-      theCfg.browsers = theCfg.browsers?.map((browser) => {
-        if (browser.family === 'chromium' || theCfg.chromeWebSecurity) {
-          return browser
-        }
-
-        return {
-          ...browser,
-          warning: browser.warning || errors.getMsgByType('CHROME_WEB_SECURITY_NOT_SUPPORTED', browser.name),
-        }
-      })
-    }
+  async initializeConfig (): Promise<Cfg> {
+    let theCfg: Cfg = await this.ctx.lifecycleManager.getFullInitialConfig() as Cfg // ?? types are definitely wrong here I think
 
     theCfg = this.testingType === 'e2e'
       ? theCfg
@@ -736,17 +541,6 @@ export class ProjectBase<TServer extends Server> extends EE {
 
       return this._cfg
     }
-
-    // decide if new project by asking scaffold
-    // and looking at previously saved user state
-    if (!theCfg.integrationFolder) {
-      throw new Error('Missing integration folder')
-    }
-
-    const untouchedScaffold = await this.determineIsNewProject(theCfg)
-
-    debugScaffold(`untouched scaffold ${untouchedScaffold} banner closed`)
-    theCfg.isNewProject = untouchedScaffold
 
     const cfgWithSaved = await this._setSavedState(theCfg)
 
@@ -798,12 +592,6 @@ export class ProjectBase<TServer extends Server> extends EE {
     return cfg
   }
 
-  // do not check files again and again - keep previous promise
-  // to refresh it - just close and open the project again.
-  determineIsNewProject (folder) {
-    return scaffold.isNewProject(folder)
-  }
-
   writeConfigFile ({ code, configFilename }: { code: string, configFilename: string }) {
     fs.writeFileSync(path.resolve(this.projectRoot, configFilename), code)
   }
@@ -825,48 +613,13 @@ export class ProjectBase<TServer extends Server> extends EE {
     // and example support file if dir doesnt exist
     push(scaffold.support(cfg.supportFolder, cfg))
 
-    // if we're in headed mode add these other scaffolding tasks
-    debug('scaffold flags %o', {
-      isTextTerminal: cfg.isTextTerminal,
-      CYPRESS_INTERNAL_FORCE_SCAFFOLD: process.env.CYPRESS_INTERNAL_FORCE_SCAFFOLD,
-    })
-
-    const scaffoldExamples = !cfg.isTextTerminal || process.env.CYPRESS_INTERNAL_FORCE_SCAFFOLD
-
-    if (scaffoldExamples) {
-      debug('will scaffold integration and fixtures folder')
-      if (!process.env.LAUNCHPAD) {
-        push(scaffold.integration(cfg.integrationFolder, cfg))
-      }
-
-      push(scaffold.fixture(cfg.fixturesFolder, cfg))
-    } else {
-      debug('will not scaffold integration or fixtures folder')
-    }
-
     return Promise.all(scaffolds)
   }
 
   // These methods are not related to start server/sockets/runners
 
   async getProjectId () {
-    await this.verifyExistence()
-
-    const readSettings = await settings.read(this.projectRoot, this.options)
-
-    if (readSettings && readSettings.projectId) {
-      return readSettings.projectId
-    }
-
-    throw errors.throw('NO_PROJECT_ID', settings.configFile(this.options), this.projectRoot)
-  }
-
-  async verifyExistence () {
-    try {
-      await fs.statAsync(this.projectRoot)
-    } catch (err) {
-      errors.throw('NO_PROJECT_FOUND_AT_PROJECT_ROOT', this.projectRoot)
-    }
+    return getCtx().lifecycleManager.getProjectId()
   }
 
   // For testing

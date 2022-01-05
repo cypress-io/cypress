@@ -1,11 +1,11 @@
 <template>
   <div
     id="selector-playground"
-    class="flex items-center bg-white"
+    class="bg-white flex items-center"
   >
     <button
       :class="{ 'bg-blue-100': selectorPlaygroundStore.isEnabled }"
-      class="rounded-md px-8px h-full"
+      class="rounded-md h-full px-8px"
       data-cy="playground-toggle"
       @click="toggleEnabled"
     >
@@ -17,7 +17,7 @@
     </button>
 
     <div
-      class="flex flex-1 mx-2 h-full items-center"
+      class="flex h-full flex-1 mx-2 items-center"
       @mouseover="setShowingHighlight"
     >
       <Select
@@ -36,7 +36,7 @@
       <input
         ref="copyText"
         v-model="selector"
-        class="flex-1 rounded-md py-8px border border-gray-500 px-1 pl-4 text-blue-500"
+        class="border rounded-md border-gray-500 flex-1 py-8px px-1 pl-4 text-blue-500"
         data-cy="playground-selector"
       >
       ')
@@ -44,12 +44,12 @@
 
     <div
       data-cy="playground-num-elements"
-      class="rounded-md bg-gray-400 text-white mx-1 px-3 h-full flex items-center"
+      class="rounded-md flex h-full bg-gray-400 mx-1 text-white px-3 items-center"
     >
       {{ selectorPlaygroundStore.numElements }}
     </div>
 
-    <div class="rounded-md border border-1 border-gray-500 flex items-center h-full divide-x-1 divide-gray-500 mr-10px">
+    <div class="border rounded-md flex h-full divide-x-1 divide-gray-500 border-1 border-gray-500 mr-10px items-center">
       <button
         data-cy="playground-copy"
         class="h-full px-8px"
@@ -68,7 +68,7 @@
     </div>
 
     <a
-      class="flex items-center text-blue-500"
+      class="flex text-blue-500 items-center"
       href="https://on.cypress.io/selector-playground"
       target="_blank"
       rel="noreferrer"

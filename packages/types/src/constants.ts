@@ -119,11 +119,6 @@ export const WIZARD_STEPS = [
     description: 'Choose which method of testing you would like to get started with for this project.',
   },
   {
-    type: 'initializePlugins',
-    title: 'Initializing Config...',
-    description: 'Please wait while we load your project and find browsers installed on your system.',
-  },
-  {
     type: 'selectFramework',
     title: 'Project Setup',
     description: 'Confirm the front-end framework and bundler used in your project.',
@@ -144,6 +139,8 @@ export const WIZARD_STEPS = [
     description: 'Choose your preferred browser for testing your components.',
   },
 ] as const
+
+export const MIGRATION_STEPS = ['renameAuto', 'renameManual', 'configFile'] as const
 
 export type AllPackages = FrontendFramework['package'] | Bundler['package'] | typeof STORYBOOK_DEPS[number]
 

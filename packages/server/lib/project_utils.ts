@@ -1,11 +1,9 @@
 import Debug from 'debug'
 import path from 'path'
 
-import * as settings from './util/settings'
 import errors from './errors'
 import { fs } from './util/fs'
 import { escapeFilenameInUrl } from './util/escape_filename'
-import { getCtx } from '@packages/data-context'
 
 const debug = Debug('cypress:server:project_utils')
 
@@ -26,24 +24,7 @@ const normalizeSpecUrl = (browserUrl: string, specUrl: string) => {
   .replace(multipleForwardSlashesRe, multipleForwardSlashesReplacer)
 }
 
-const getPrefixedPathToSpec = ({
-  integrationFolder,
-  componentFolder,
-  projectRoot,
-  type,
-  pathToSpec,
-}: {
-  integrationFolder: string
-  componentFolder: string
-  projectRoot: string
-  type: string
-  pathToSpec: string
-}) => {
-  type ??= 'integration'
-
-  // for now hard code the 'type' as integration
-  // but in the future accept something different here
-
+const getPrefixedPathToSpec = (spec: Cypress.Spec) => {
   // strip out the integration folder and prepend with "/"
   // example:
   //
@@ -52,57 +33,46 @@ const getPrefixedPathToSpec = ({
   //
   // becomes /integration/foo.js
 
-  const folderToUse = type === 'integration' ? integrationFolder : componentFolder
-
   // To avoid having invalid urls from containing backslashes,
   // we normalize specUrls to posix by replacing backslash by slash
   // Indeed, path.realtive will return something different on windows
   // than on posix systems which can lead to problems
-  const url = `/${path.join(type, path.relative(
-    folderToUse,
-    path.resolve(projectRoot, pathToSpec),
-  )).replace(backSlashesRe, '/')}`
+  const p = spec.relative.replace(backSlashesRe, '/')
+  const url = `/${p}`
 
-  debug('prefixed path for spec %o', { pathToSpec, type, url })
+  debug('prefixed path for spec url %s', url)
 
   return url
 }
 
 export const getSpecUrl = ({
-  absoluteSpecPath,
-  specType,
+  spec,
   browserUrl,
-  integrationFolder,
-  componentFolder,
   projectRoot,
 }: {
-  absoluteSpecPath?: string
   browserUrl?: string
-  integrationFolder: string
-  componentFolder: string
   projectRoot: string
-  specType?: 'integration' | 'component'
+  spec: Cypress.Spec
 }) => {
-  specType ??= 'integration'
   browserUrl ??= ''
 
   // App routes to spec with convention {browserUrl}#/specs/runner?file={relativeSpecPath}
   if (process.env.LAUNCHPAD) {
-    if (!absoluteSpecPath) {
+    if (!spec.absolute) {
       return browserUrl
     }
 
-    const relativeSpecPath = path.relative(projectRoot, path.resolve(projectRoot, absoluteSpecPath))
+    const relativeSpecPath = path.relative(projectRoot, path.resolve(projectRoot, spec.absolute))
     .replace(backSlashesRe, '/')
 
     return `${browserUrl}/#/specs/runner?file=${relativeSpecPath}`
     .replace(multipleForwardSlashesRe, multipleForwardSlashesReplacer)
   }
 
-  debug('get spec url: %s for spec type %s', absoluteSpecPath, specType)
+  debug('get spec url: %o', spec)
 
   // if we don't have a absoluteSpecPath or its __all
-  if (!absoluteSpecPath || absoluteSpecPath === '__all') {
+  if (!spec.absolute || spec.absolute === '__all') {
     const url = normalizeSpecUrl(browserUrl, '/__all')
 
     debug('returning url to run all specs: %s', url)
@@ -117,16 +87,10 @@ export const getSpecUrl = ({
   // the unit folder?
   // once we determine that we can then prefix it correctly
   // with either integration or unit
-  const prefixedPath = getPrefixedPathToSpec({
-    integrationFolder,
-    componentFolder,
-    projectRoot,
-    pathToSpec: absoluteSpecPath,
-    type: specType,
-  })
+  const prefixedPath = getPrefixedPathToSpec(spec)
   const url = normalizeSpecUrl(browserUrl, prefixedPath)
 
-  debug('return path to spec %o', { specType, absoluteSpecPath, prefixedPath, url })
+  debug('return path to spec %o', { prefixedPath, url })
 
   return url
 }
@@ -142,13 +106,9 @@ export const checkSupportFile = async ({
     const found = await fs.pathExists(supportFile)
 
     if (!found) {
-      errors.throw('SUPPORT_FILE_NOT_FOUND', supportFile, settings.configFile({ configFile }))
+      errors.throw('SUPPORT_FILE_NOT_FOUND', supportFile, configFile)
     }
   }
 
   return
-}
-
-export async function getDefaultConfigFilePath (projectRoot: string): Promise<string | undefined> {
-  return getCtx().config.getDefaultConfigBasename(projectRoot)
 }

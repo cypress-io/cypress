@@ -3,7 +3,7 @@
     v-model="show"
     dismissible
     status="warning"
-    data-testid="warning-alert"
+    data-cy="warning-alert"
     header-class="text-warning-600"
     :title="title"
     :icon="ErrorOutlineIcon"
@@ -19,7 +19,7 @@
 import ErrorOutlineIcon from '~icons/cy/status-errored-outline_x16.svg'
 import { useMarkdown } from '@packages/frontend-shared/src/composables/useMarkdown'
 import Alert from '@cy/components/Alert.vue'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useVModels } from '@vueuse/core'
 
 const emits = defineEmits<{
@@ -29,10 +29,23 @@ const emits = defineEmits<{
 const props = withDefaults(defineProps<{
   title: string,
   message: string,
+  details?: string | null,
   modelValue: boolean
-}>(), { modelValue: true })
+}>(), {
+  modelValue: true,
+  details: undefined,
+})
 
 const { modelValue: show } = useVModels(props, emits)
 const markdownTarget = ref()
-const { markdown } = useMarkdown(markdownTarget, props.message, { classes: { code: ['bg-warning-200'] } })
+
+let message = computed(() => {
+  if (props.details) {
+    return [props.message, `        ${ props.details }`].join('\n\n')
+  }
+
+  return props.message
+})
+
+const { markdown } = useMarkdown(markdownTarget, message.value, { classes: { code: ['bg-warning-200'] } })
 </script>

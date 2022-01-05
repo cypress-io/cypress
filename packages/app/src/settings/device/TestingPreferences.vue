@@ -51,7 +51,9 @@ fragment TestingPreferences on Query {
 
 gql`
 mutation SetTestingPreferences($value: String!) {
-  setPreferences (value: $value)
+  setPreferences (value: $value) {
+    ...TestingPreferences
+  }
 }`
 
 const setPreferences = useMutation(SetTestingPreferencesDocument)

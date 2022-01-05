@@ -9,24 +9,24 @@ export const stubMutation: MaybeResolver<Mutation> = {
   addProject (source, args, ctx) {
     ctx.projects.push(createTestGlobalProject(path.basename(args.path)))
 
-    return true
+    return {}
   },
-  setActiveProject (source, args, ctx) {
+  setCurrentProject (source, args, ctx) {
     const project = ctx.projects.find((p) => p.projectRoot === args.path)
 
     ctx.currentProject = project ? createTestCurrentProject(project.title) : null
 
-    return true
+    return {}
   },
-  clearActiveProject (source, args, ctx) {
+  clearCurrentProject (source, args, ctx) {
     ctx.currentProject = null
 
-    return true
+    return {}
   },
   removeProject (source, args, ctx) {
     ctx.projects = ctx.projects.filter((p) => p.projectRoot !== args.path)
 
-    return true
+    return {}
   },
   hideBrowserWindow (source, args, ctx) {
     return true
@@ -50,6 +50,7 @@ export const stubMutation: MaybeResolver<Mutation> = {
         fileName: 'Basic.spec.tsx',
         baseName: 'Basic',
         fileExtension: 'tsx',
+        contents: `it('should do stuff', () => {})`,
       },
       content: `it('should do stuff', () => {})`,
       id: 'U3BlYzovVXNlcnMvbGFjaGxhbi9jb2RlL3dvcmsvY3lwcmVzczUvcGFja2FnZXMvYXBwL3NyYy9CYXNpYy5zcGVjLnRzeA==',
@@ -81,6 +82,13 @@ export const stubMutation: MaybeResolver<Mutation> = {
         name: 'basic/todo.spec.js',
         fileName: 'todo',
         fileExtension: '.js',
+        contents: `
+          describe('Todo Spec', () => {
+            it('adds a todo', () => {
+              // TODO
+            })
+          })
+        `,
       },
     }]
   },

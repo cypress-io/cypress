@@ -48,6 +48,14 @@ const processOpenOptions = (options = {}) => {
     args.push('--global', options.global)
   }
 
+  if (options.inspect) {
+    args.push('--inspect')
+  }
+
+  if (options.inspectBrk) {
+    args.push('--inspectBrk')
+  }
+
   args.push(...processTestingType(options))
 
   debug('opening from options %j', options)

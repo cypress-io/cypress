@@ -90,7 +90,7 @@ executors:
   # https://github.com/CircleCI-Public/windows-orb/blob/master/src/executors/default.yml
   # https://circleci.com/docs/2.0/hello-world-windows/#software-pre-installed-in-the-windows-image
   windows: &windows-executor
-    machine:  
+    machine:
       image: windows-server-2019-vs2019:stable
       shell: bash.exe -eo pipefail
     resource_class: windows.medium
@@ -155,7 +155,7 @@ commands:
             - cypress
             - .ssh
             - node_modules # contains the npm i -g modules
-  
+
   install_cache_helpers_dependencies:
     steps:
       - run:
@@ -477,7 +477,7 @@ commands:
         default: ''
     steps:
       - restore_cached_workspace
-      - run: 
+      - run:
           command: |
             cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --parallel -- --') || true
             DEBUG=<<parameters.debug>> \
@@ -618,7 +618,6 @@ commands:
                   command: |
                     git fetch origin pull/<<parameters.pull_request_id>>/head:pr-<<parameters.pull_request_id>>
                     git checkout pr-<<parameters.pull_request_id>>
-                    git log -n 2
 
   test-binary-against-rwa:
     description: |
@@ -1310,7 +1309,7 @@ jobs:
       - run-runner-ct-integration-tests:
           browser: chrome
           percy: true
-  
+
   run-frontend-shared-component-tests-chrome:
     <<: *defaults
     parallelism: 1
@@ -1334,7 +1333,7 @@ jobs:
 
   run-launchpad-integration-tests-chrome:
     <<: *defaults
-    parallelism: 1
+    parallelism: 2
     steps:
       - run-new-ui-tests:
           browser: chrome
@@ -1344,7 +1343,7 @@ jobs:
 
   run-app-component-tests-chrome:
     <<: *defaults
-    parallelism: 1
+    parallelism: 7
     steps:
       - run-new-ui-tests:
           browser: chrome
@@ -1354,7 +1353,7 @@ jobs:
 
   run-app-integration-tests-chrome:
     <<: *defaults
-    parallelism: 1
+    parallelism: 2
     steps:
       - run-new-ui-tests:
           browser: chrome
@@ -1668,7 +1667,7 @@ jobs:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" &&  "$CIRCLE_BRANCH" != "test-binary-downstream-windows" && "$CIRCLE_BRANCH" != "10.0-release" && "$CIRCLE_BRANCH" != "renovate/cypress-request-2.x" && "$CIRCLE_BRANCH" != "tgriesser/fix/patch-resolutions" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "test-binary-downstream-windows" && "$CIRCLE_BRANCH" != "10.0-release" && "$CIRCLE_BRANCH" != "renovate/cypress-request-2.x" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -1882,46 +1881,6 @@ jobs:
           command: |
             echo "console.log('hello world')" > hello.ts
             npx tsc hello.ts --noEmit
-
-  # testing scaffolding examples and running them
-  # against example.cypress.io
-  test-cypress-scaffold:
-    resource_class: medium
-    parameters:
-      executor:
-        description: Executor name to use
-        type: executor
-        default: cy-doc
-      wd:
-        description: Working directory, should be OUTSIDE cypress monorepo folder
-        type: string
-        default: /root/test-scaffold
-    <<: *defaults
-    steps:
-      - restore_workspace_binaries
-      - run: mkdir <<parameters.wd>>
-      - run:
-          name: Create new NPM package ⚗️
-          working_directory: <<parameters.wd>>
-          command: npm init -y
-      - run:
-          name: Install dependencies 📦
-          working_directory: <<parameters.wd>>
-          environment:
-            CYPRESS_INSTALL_BINARY: /root/cypress/cypress.zip
-          # let's install Cypress, Jest and any other package that might conflict
-          # https://github.com/cypress-io/cypress/issues/6690
-          command: |
-            npm install /root/cypress/cypress.tgz \
-              typescript jest @types/jest enzyme @types/enzyme
-      - run:
-          name: Scaffold and test examples 🏗
-          working_directory: <<parameters.wd>>
-          environment:
-            CYPRESS_INTERNAL_FORCE_SCAFFOLD: "1"
-          command: |
-            echo 'module.exports = {}' > cypress.config.js
-            npx cypress run
 
   test-full-typescript-project:
     parameters:
@@ -2391,9 +2350,6 @@ linux-workflow: &linux-workflow
     - test-types-cypress-and-jest:
         requires:
           - create-build-artifacts
-    - test-cypress-scaffold:
-        requires:
-          - create-build-artifacts
     - test-full-typescript-project:
         requires:
           - create-build-artifacts
@@ -2564,14 +2520,14 @@ windows-workflow: &windows-workflow
         executor: windows
         requires:
           - windows-build
-      
+
     - unit-tests:
         name: windows-unit-tests
         executor: windows
         resource_class: windows.medium
         requires:
           - windows-build
-    
+
     - create-build-artifacts:
         name: windows-create-build-artifacts
         executor: windows
