@@ -29,22 +29,10 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
     switchToDomain (domain, fn) {
       const done = cy.state('done')
 
-      const deferredDone = createDeferred()
-      const invokeDone = (err) => {
-        return deferredDone.resolve({
-          crossDomainDoneCalled: true,
-          error: err,
-        })
-      }
-
       // if done has been provided to the test, allow the user to call done
       // from the switchToDomain context running in the secondary domain.
       if (done) {
-        communicator.once('done:called', invokeDone)
-      } else {
-        // if done has not been provided, settle this promise now as
-        // done should not be available in the secondary domain
-        deferredDone.resolve()
+        communicator.once('done:called', done)
       }
 
       clearTimeout(timeoutId)
@@ -122,6 +110,11 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
           }
         }
       }
+      const unbindDone = () => {
+        // If `done()` is passed into the test, but is called in the primary domain and NOT the secondary domain
+        // Go ahead and make sure the listener is removed
+        communicator.off('done:called', done)
+      }
 
       communicator.on('command:enqueued', addCommand)
       communicator.on('command:update', updateCommand)
@@ -129,30 +122,12 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
       return new Bluebird((resolve, reject) => {
         communicator.once('run:domain:fn', (err) => err ? reject(err) : resolve())
 
-        communicator.once('unbind:done:called', () => {
-          // If `done()` is passed into the test, but is called in the primary domain and NOT the secondary domain
-          // Go ahead and make sure the listener is removed
-          communicator.off('done:called', invokeDone)
-
-          // If done was NOT called in the secondary domain, go ahead and make sure this promise is settled.
-          // if done was called in the secondary domain, this promise should already be settled and resolving it has no effect.
-          deferredDone.resolve()
-        })
-
-        // By the time the command queue is finished, this promise should be settled as
-        // as done will be invoked within the secondary domain already, if applicable
-        deferredDone.promise.then(({ crossDomainDoneCalled, error } = {
-          crossDomainDoneCalled: false,
-          error: undefined,
-        }) => {
-          if (crossDomainDoneCalled) {
-            done(error)
-          }
-        })
+        communicator.once('unbind:done:called', unbindDone)
 
         communicator.once('queue:finished', () => {
           communicator.off('command:enqueued', addCommand)
           communicator.off('command:update', updateCommand)
+          communicator.off('unbind:done:called', unbindDone)
         })
 
         // fired once the spec bridge is set up and ready to
