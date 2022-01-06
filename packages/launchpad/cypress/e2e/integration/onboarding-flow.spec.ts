@@ -54,7 +54,7 @@ describe('Launchpad: Onboarding Flow', () => {
     cy.findByText('I\'ve installed them').click()
     cy.findByText('We added the following files to your project.')
     cy.findByText('Continue').click()
-    cy.findByText('Choose a Browser')
+    cy.findByText('Choose a Browser', { timeout: 10000 })
   })
 
   it('can setup e2e testing', () => {
@@ -85,7 +85,7 @@ describe('Launchpad: Onboarding Flow', () => {
     cy.findByText('I\'ve installed them').click()
     cy.findByText('We added the following files to your project.')
     cy.findByText('Continue').click()
-    cy.findByText('Choose a Browser')
+    cy.findByText('Choose a Browser', { timeout: 10000 })
 
     cy.findByText('Back').click()
 
@@ -120,6 +120,6 @@ describe('Launchpad: Onboarding Flow', () => {
     })
 
     cy.findByText('Continue').closest('button').should('not.be.disabled').click()
-    cy.findByText('Choose a Browser')
+    cy.findByText('Choose a Browser', { timeout: 10000 })
   })
 })
