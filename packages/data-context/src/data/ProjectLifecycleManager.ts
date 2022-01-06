@@ -844,6 +844,7 @@ export class ProjectLifecycleManager {
   addWatcher (file: string | string[]) {
     const w = chokidar.watch(file, {
       ignoreInitial: true,
+      cwd: this.ctx.currentProject || '.',
     })
 
     this.watchers.add(w)
