@@ -1,41 +1,10 @@
 import { defaultMessages } from '@cy/i18n'
-import { CloudUserStubs } from '@packages/frontend-shared/cypress/support/mock-graphql/stubgql-CloudTypes'
+import { CloudOrganizationConnectionStubs, CloudUserStubs } from '@packages/frontend-shared/cypress/support/mock-graphql/stubgql-CloudTypes'
 import { SelectCloudProjectModalFragmentDoc } from '../../generated/graphql-test'
 import SelectCloudProjectModal from '../modals/SelectCloudProjectModal.vue'
 
 describe('<SelectCloudProjectModal />', () => {
-  const organizations = {
-    __typename: 'CloudOrganizationConnection' as const,
-    nodes: [
-      {
-        __typename: 'CloudOrganization' as const,
-        id: '1',
-        name: 'Test Org 1',
-        projects: {
-          __typename: 'CloudProjectConnection' as const,
-          nodes: [
-            {
-              __typename: 'CloudProject' as const,
-              id: '1',
-              name: 'Test Project 1',
-              slug: 'test-project',
-            },
-          ],
-        },
-      },
-      {
-        __typename: 'CloudOrganization' as const,
-        id: '2',
-        name: 'Test Org 2',
-        projects: {
-          __typename: 'CloudProjectConnection' as const,
-          nodes: [],
-        },
-      },
-    ],
-  }
-
-  function mountDialog (noorgs = false) {
+  function mountDialog () {
     cy.mountFragment(SelectCloudProjectModalFragmentDoc, {
       onResult: (result) => {
         result.currentProject = {
@@ -48,7 +17,7 @@ describe('<SelectCloudProjectModal />', () => {
         result.cloudViewer = {
           ...CloudUserStubs.me,
           organizationControl: null,
-          organizations: noorgs ? null : organizations,
+          organizations: CloudOrganizationConnectionStubs,
         }
       },
       render (gql) {
@@ -63,17 +32,12 @@ describe('<SelectCloudProjectModal />', () => {
     mountDialog()
     cy.get('[data-cy="selectOrganization"] button').should('contain.text', 'Test Org 1')
     cy.get('[data-cy="selectProject"] button').click()
-    cy.contains('test-project').click()
+    cy.contains('Test Project').click()
   })
 
   it('prefills new project name with the current one', () => {
     mountDialog()
     cy.contains('a', defaultMessages.runs.connect.modal.selectProject.createNewProject).click()
     cy.get('#projectName').should('have.value', 'Test Project')
-  })
-
-  it('show the create org modal when no org is there', () => {
-    mountDialog(true)
-    cy.contains('button', defaultMessages.runs.connect.modal.createOrg.waitingButton).should('be.visible')
   })
 })

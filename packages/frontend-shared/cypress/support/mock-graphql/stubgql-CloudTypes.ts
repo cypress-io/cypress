@@ -87,7 +87,7 @@ export function createCloudRecordKey (config: ConfigFor<CloudRecordKey>) {
 
 const STATUS_ARRAY: CloudRunStatus[] = ['CANCELLED', 'ERRORED', 'FAILED', 'NOTESTS', 'OVERLIMIT', 'PASSED', 'RUNNING', 'TIMEDOUT']
 
-export function createCloudProject (config: ConfigFor<CloudProject>) {
+export function createCloudProject (config: Partial<ConfigFor<CloudProject>>) {
   const cloudProject = {
     ...testNodeId('CloudProject'),
     recordKeys: [CloudRecordKeyStubs.componentProject],
@@ -169,10 +169,16 @@ export function createCloudRun (config: Partial<CloudRun>): Required<CloudRun> {
   return indexNode(cloudRunData)
 }
 
-export function createCloudOrganization (config: Partial<CloudOrganization>): CloudOrganization {
-  const cloudOrgData: CloudOrganization = {
+export function createCloudOrganization (config: Partial<CloudOrganization>): Required<CloudOrganization> {
+  const cloudOrgData: Required<CloudOrganization> = {
     ...testNodeId('CloudOrganization'),
     name: `Cypress Test Account ${getNodeIdx('CloudOrganization')}`,
+    projects: {
+      __typename: 'CloudProjectConnection' as const,
+      pageInfo: {} as any,
+      edges: [] as any,
+      nodes: [] as CloudProject[],
+    },
     ...config,
   }
 
@@ -203,7 +209,32 @@ export const CloudUserStubs = {
 
 export const CloudOrganizationStubs = {
   cyOrg: createCloudOrganization({}),
-} as Record<string, CloudOrganization>
+} as Record<string, Required<CloudOrganization>>
+
+export const CloudOrganizationConnectionStubs = {
+  __typename: 'CloudOrganizationConnection' as const,
+  nodes: [createCloudOrganization(
+    {
+      id: '1',
+      name: 'Test Org 1',
+      projects: {
+        __typename: 'CloudProjectConnection' as const,
+        edges: [] as any,
+        pageInfo: {} as any,
+        nodes: [
+          createCloudProject({
+            name: 'Test Project 1',
+            slug: 'test-project',
+          }),
+        ],
+      },
+    },
+  ),
+  createCloudOrganization({
+    id: '2',
+    name: 'Test Org 2',
+  })],
+}
 
 export const CloudProjectStubs = {
   e2eProject: createCloudProject({
