@@ -1,11 +1,13 @@
 <template>
   <div
     v-if="recordKey"
-    class="gap-10px inline-flex justify-start"
+    class="mb-16px gap-10px inline-flex justify-start"
   >
     <CodeBox
       :code="recordKey"
       :prefix-icon="IconKey"
+      :title="t('settingsPage.recordKey.title')"
+      confidential
     />
     <CopyButton
       :text="recordKey"

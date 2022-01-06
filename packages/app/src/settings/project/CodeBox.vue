@@ -1,24 +1,24 @@
 <template>
-  <div class="bg-gray-50 flex items-center w-400px h-32px pr-16px border rounded border-gray-100 text-jade-500 relative">
+  <div class="border rounded flex bg-gray-50 border-gray-100 h-32px pr-16px text-jade-500 w-400px items-center relative">
     <component
       :is="prefixIcon"
-      class="h-16px w-16px icon-dark-gray-500 mx-8px"
+      class="h-16px mx-8px w-16px icon-dark-gray-500"
     />
     <button
       v-if="confidential"
-      class="absolute right-8px focus:outline-transparent"
+      class="right-8px absolute focus:outline-transparent"
       @click="localConfidential = !localConfidential"
     >
       <i-cy-eye-open_x16
         v-if="localConfidential"
 
         class="icon-dark-gray-500"
-        aria-label="Record Key Visibility Toggle"
+        :aria-label="`${title} Visibility Toggle`"
       />
       <i-cy-eye-closed_x16
         v-else
         class="icon-dark-gray-500"
-        aria-label="Record Key Visibility Toggle"
+        :aria-label="`${title} Visibility Toggle`"
       />
     </button>
     <code
@@ -35,6 +35,7 @@ import { FunctionalComponent, ref, SVGAttributes } from 'vue'
 
 const props = defineProps<{
   code: string,
+  title: string,
   prefixIcon: FunctionalComponent<SVGAttributes, {}>,
   confidential?: boolean
 }>()

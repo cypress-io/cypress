@@ -18,10 +18,6 @@ describe('<RecordKey />', () => {
     })
   })
 
-  it('renders the record key view with the correct title', () => {
-    cy.findByText('Record Key')
-  })
-
   it(`has an input that's hidden by default`, () => {
     cy.get('code').as('Record Key Input')
     .should('be.visible')

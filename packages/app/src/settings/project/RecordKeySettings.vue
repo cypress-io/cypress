@@ -24,9 +24,11 @@
           :settings-url="cloudProject.cloudProjectSettingsUrl"
         />
       </template>
-      <Alert v-else>
-        <div class="flex justify-between items-center">
-          <span>{{ t('settingsPage.recordKey.errorEmpty') }}</span>
+      <Alert
+        v-else
+        :title="t('settingsPage.recordKey.errorEmpty')"
+      >
+        <div class="flex justify-end">
           <Button
             :variant="requestStatus ? 'pending' : 'primary'"
             @click="requestAccess()"
@@ -36,9 +38,11 @@
         </div>
       </Alert>
     </template>
-    <Alert v-else-if="cloudProject?.__typename === 'CloudProjectNotFound'">
-      <div class="flex justify-between items-center">
-        <span>{{ t('settingsPage.recordKey.errorNotFound') }}</span>
+    <Alert
+      v-else-if="cloudProject?.__typename === 'CloudProjectNotFound'"
+      :title="t('settingsPage.recordKey.errorNotFound')"
+    >
+      <div class="flex justify-end">
         <Button
           @click="connectDialog = true"
         >
@@ -46,11 +50,13 @@
         </Button>
       </div>
     </Alert>
-    <Alert v-else-if="cloudProject?.__typename === 'CloudProjectUnauthorized'">
-      <div class="flex justify-between items-center">
-        <span>{{ cloudProject.hasRequestedAccess
-          ? t('settingsPage.recordKey.errorAccessPending')
-          : t('settingsPage.recordKey.errorAccess') }}</span>
+    <Alert
+      v-else-if="cloudProject?.__typename === 'CloudProjectUnauthorized'"
+      :title="cloudProject.hasRequestedAccess
+        ? t('settingsPage.recordKey.errorAccessPending')
+        : t('settingsPage.recordKey.errorAccess')"
+    >
+      <div class="flex justify-end">
         <Button
           :variant="requestStatus ? 'pending' : 'primary'"
           @click="requestAccess()"

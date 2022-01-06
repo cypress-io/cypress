@@ -23,6 +23,7 @@
       <CodeBox
         :code="props.gql?.projectId || ''"
         :prefix-icon="IconOctothorpe"
+        :title="t('settingsPage.projectId.title')"
       />
       <CopyButton
         v-if="props.gql?.projectId"
