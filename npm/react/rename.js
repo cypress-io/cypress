@@ -19,6 +19,10 @@ glob('./**/*cy.js', { onlyFiles: true }).then(arr => {
   for (const a of arr) {
     for (const repl of torep) {
       if (a.endsWith(repl.old)) {
+        if (repl.old === torep[0].old) {
+          console.log({ a })
+        }
+
         const n = a.replace(repl.old, repl.new)
         if (a !== n) {
           towrite.push({ a, n })
