@@ -38,14 +38,19 @@ describe('App: Index', () => {
   context('with specs', () => {
     it('refreshes spec list on spec changes', () => {
       cy.withCtx(async (ctx, { testState }) => {
-        const addedSpec = ctx.project.specs.find((spec) => spec.absolute.includes(testState.newFilePath))
+        await new Promise(async (res, rej) => {
+          setTimeout(() => rej('Generated spec was not detected by spec watcher'), 5000)
 
-        expect(addedSpec).be.equal(undefined)
+          ctx.project.getSpecWatcher()?.on('all', (event, path) => {
+            expect(path).eq(testState.newFilePath)
+            res(null)
+          })
 
-        await ctx.actions.file.writeFileInProject(testState.newFilePath, '')
+          await ctx.actions.file.writeFileInProject(testState.newFilePath, '')
+        })
       })
 
-      cy.wait(200)
+      cy.wait(1000)
       cy.withCtx(async (ctx, { testState }) => {
         expect(ctx.project.specs).have.length(1)
 
