@@ -3,11 +3,13 @@ import path from 'path'
 import { BaseError } from '.'
 import { cloudProjectBySlug } from '../../stitching/remoteGraphQLCalls'
 import { TestingTypeEnum } from '../enumTypes/gql-WizardEnums'
+
 import { Browser } from './gql-Browser'
 import { CodeGenGlobs } from './gql-CodeGenGlobs'
 import { FileParts } from './gql-FileParts'
 import { ProjectPreferences } from './gql-ProjectPreferences'
 import { Storybook } from './gql-Storybook'
+import { Spec } from './gql-Spec'
 
 export const CurrentProject = objectType({
   name: 'CurrentProject',
@@ -97,10 +99,10 @@ export const CurrentProject = objectType({
     //   type: TestingTypeInfo,
     // })
 
-    t.connectionField('specs', {
+    t.list.nonNull.field('specs', {
       description: 'Specs for a project conforming to Relay Connection specification',
-      type: 'Spec',
-      nodes: (source, args, ctx) => {
+      type: Spec,
+      resolve: (source, args, ctx) => {
         return ctx.project.specs
       },
     })

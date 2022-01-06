@@ -31,18 +31,16 @@ import CreateSpecModal from './CreateSpecModal.vue'
 import { FuzzyFoundSpec, fuzzySortSpecs, makeFuzzyFoundSpec, useCachedSpecs } from '@packages/frontend-shared/src/utils/spec-utils'
 
 gql`
-fragment SpecNode_InlineSpecList on SpecEdge {
-  node {
-    id
-    name
-    specType
-    absolute
-    baseName
-    fileName
-    specFileExtension
-    fileExtension
-    relative
-  }
+fragment SpecNode_InlineSpecList on Spec {
+  id
+  name
+  specType
+  absolute
+  baseName
+  fileName
+  specFileExtension
+  fileExtension
+  relative
 }
 `
 
@@ -53,10 +51,9 @@ fragment Specs_InlineSpecList on Query {
     id
     projectRoot
     currentTestingType
-    specs: specs(first: 1000) {
-      edges {
-        ...SpecNode_InlineSpecList
-      }
+    specs {
+      id
+      ...SpecNode_InlineSpecList
     }
   }
 }
@@ -68,10 +65,10 @@ const props = defineProps<{
 
 const showModal = ref(false)
 const search = ref('')
-const cachedSpecs = useCachedSpecs(computed(() => (props.gql.currentProject?.specs?.edges) || []))
+const cachedSpecs = useCachedSpecs(computed(() => props.gql.currentProject?.specs || []))
 
 const specs = computed<FuzzyFoundSpec[]>(() => {
-  const specs = cachedSpecs.value.map((x) => makeFuzzyFoundSpec(x.node))
+  const specs = cachedSpecs.value.map((x) => makeFuzzyFoundSpec(x))
 
   if (!search.value) return specs
 

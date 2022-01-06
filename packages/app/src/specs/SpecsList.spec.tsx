@@ -26,7 +26,7 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
     beforeEach(() => {
       cy.mountFragment(Specs_SpecsListFragmentDoc, {
         onResult: (ctx) => {
-          specs = ctx.currentProject?.specs?.edges || []
+          specs = ctx.currentProject?.specs ?? []
 
           return ctx
         },
@@ -38,8 +38,8 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
 
     it('should filter specs', () => {
       const longestSpec = specs.reduce((acc, spec) =>
-        acc.node.relative.length < spec.node.relative.length ? spec : acc
-      , specs[0]).node
+        acc.relative.length < spec.relative.length ? spec : acc
+      , specs[0])
 
       cy.get(inputSelector).type('garbage 🗑', { delay: 0 })
       .get(rowSelector)

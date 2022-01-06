@@ -15,8 +15,8 @@ describe('InlineSpecList', () => {
         return ctx
       }
 
-      ctx.currentProject.specs.edges = specs.map((spec) => ({ __typename: 'SpecEdge', node: { __typename: 'Spec', ...spec, id: spec.relative } }))
-      specs = ctx.currentProject?.specs?.edges || []
+      ctx.currentProject.specs = specs.map((spec) => ({ __typename: 'Spec', ...spec, id: spec.relative }))
+      specs = ctx.currentProject?.specs || []
 
       return ctx
     },
@@ -66,8 +66,8 @@ describe('InlineSpecList', () => {
 
     cy.mountFragment(Specs_InlineSpecListFragmentDoc, {
       onResult (ctx) {
-        if (ctx.currentProject?.specs?.edges) {
-          ctx.currentProject.specs.edges = ctx.currentProject.specs.edges.slice(0, 50)
+        if (ctx.currentProject?.specs) {
+          ctx.currentProject.specs = ctx.currentProject.specs.slice(0, 50)
         }
 
         return ctx
@@ -82,7 +82,7 @@ describe('InlineSpecList', () => {
         )
       },
     }).then(() => {
-      const sortedSpecs = _gqlValue?.currentProject?.specs?.edges.sort((a, b) => a.node.relative < b.node.relative ? -1 : 1) || []
+      const sortedSpecs = _gqlValue?.currentProject?.specs.sort((a, b) => a.node.relative < b.node.relative ? -1 : 1) || []
       const firstSpec = sortedSpecs[0]
       const lastSpec = sortedSpecs[sortedSpecs.length - 1]
 
@@ -91,8 +91,8 @@ describe('InlineSpecList', () => {
       cy.contains(lastSpec.node.fileName).should('be.visible')
       cy.then(() => {
         // Emulating a gql update that shouldn't cause a scroll snap
-        if (_gqlValue.currentProject?.specs?.edges) {
-          _gqlValue.currentProject.specs.edges = [..._gqlValue.currentProject.specs.edges]
+        if (_gqlValue.currentProject?.specs) {
+          _gqlValue.currentProject.specs = [..._gqlValue.currentProject.specs]
         }
       })
 
@@ -102,8 +102,8 @@ describe('InlineSpecList', () => {
 
       cy.then(() => {
         // Checking that specs list refreshes when spec is added
-        if (_gqlValue.currentProject?.specs?.edges) {
-          _gqlValue.currentProject.specs.edges = _gqlValue.currentProject.specs.edges.concat(newSpec)
+        if (_gqlValue.currentProject?.specs) {
+          _gqlValue.currentProject.specs = _gqlValue.currentProject.specs.concat(newSpec)
         }
       })
 
@@ -113,8 +113,8 @@ describe('InlineSpecList', () => {
 
       cy.then(() => {
         // Checking that specs list refreshes when spec is deleted
-        if (_gqlValue.currentProject?.specs?.edges) {
-          _gqlValue.currentProject.specs.edges = _gqlValue.currentProject.specs.edges.filter(((spec) => spec.node.relative !== newSpec.node.relative))
+        if (_gqlValue.currentProject?.specs) {
+          _gqlValue.currentProject.specs = _gqlValue.currentProject.specs.filter(((spec) => spec.node.relative !== newSpec.node.relative))
         }
       })
 

@@ -116,7 +116,7 @@ export function makeFuzzyFoundSpec (spec: FoundSpec): FuzzyFoundSpec {
   }
 }
 
-type SpecEdges = { node: FoundSpec }[]
+type SpecEdges = FoundSpec[]
 
 export function useCachedSpecs (specs) {
   const cachedSpecs = ref<SpecEdges>([])
@@ -125,7 +125,7 @@ export function useCachedSpecs (specs) {
     const specsAreDifferent =
         currentSpecs.length !== prevSpecs.length ||
         currentSpecs.some(
-          (spec, idx) => spec.node.absolute !== prevSpecs[idx]?.node?.absolute,
+          (spec, idx) => spec.absolute !== prevSpecs[idx]?.absolute,
         )
 
     if (specsAreDifferent) {

@@ -39,7 +39,7 @@ const props = defineProps<{
 }>()
 
 watch(() => route.query.file, (queryParam) => {
-  const spec = props.gql.currentProject?.specs?.edges.find((x) => x.node.relative === queryParam)?.node
+  const spec = props.gql.currentProject?.specs?.find((x) => x?.relative === queryParam)
 
   if (selectorPlaygroundStore.show) {
     const autIframe = getAutIframeModel()
