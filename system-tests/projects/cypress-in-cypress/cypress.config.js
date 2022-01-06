@@ -5,13 +5,9 @@ module.exports = {
   namespace: 'cy-child',
   socketIoRoute: '/cy-child-socket',
   socketIoCookie: 'cy-child-socket',
-  testFiles: '**/*.{spec,cy}.{js,ts,tsx,jsx}',
-  integrationFolder: 'cypress/e2e/integration',
-  componentFolder: 'src',
-  supportFile: false,
   experimentalInteractiveRunEvents: true,
   component: {
-    testFiles: '**/*.{spec,cy}.{js,ts,tsx,jsx}',
+    specPattern: 'src/**/*.{spec,cy}.{js,ts,tsx,jsx}',
     supportFile: 'cypress/component/support/index-real.ts',
     devServer (cypressConfig, devServerConfig) {
       const { startDevServer } = require('@cypress/vite-dev-server')
@@ -35,6 +31,7 @@ module.exports = {
     },
   },
   e2e: {
-    testFiles: '**/*.{spec,cy}.{js,ts,tsx,jsx}',
+    specPattern: 'cypress/e2e/integration/**/*.spec.{js,ts}',
+    supportFile: false,
   },
 }
