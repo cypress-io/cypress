@@ -272,9 +272,4 @@ export class ProjectDataSource {
       },
     )
   }
-
-  // Testing Purposes
-  getSpecWatcher () {
-    return this._specWatcher
-  }
 }
