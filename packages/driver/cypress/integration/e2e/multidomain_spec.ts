@@ -31,7 +31,7 @@ describe('multidomain', { experimentalSessionSupport: true }, () => {
   describe('window events', () => {
     it('form:submitted', (done) => {
       // @ts-ignore
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('foobar.com', done, () => {
         const $form = cy.$$('form')
 
         Cypress.once('form:submitted', (e) => {
@@ -49,7 +49,7 @@ describe('multidomain', { experimentalSessionSupport: true }, () => {
     // sort of page reloading in the AUT when it's cross-domain
     it.skip('window:before:unload', (done) => {
       // @ts-ignore
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('foobar.com', done, () => {
         Cypress.once('window:before:unload', () => {
           expect(location.host).to.equal('foobar.com')
           done()
@@ -65,7 +65,7 @@ describe('multidomain', { experimentalSessionSupport: true }, () => {
     // stability-handling on secondary domains
     it.skip('window:unload', (done) => {
       // @ts-ignore
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('foobar.com', done, () => {
         Cypress.once('window:unload', () => {
           expect(location.host).to.equal('foobar.com')
           done()
@@ -79,7 +79,7 @@ describe('multidomain', { experimentalSessionSupport: true }, () => {
 
     it('navigation:changed', (done) => {
       // @ts-ignore
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('foobar.com', done, () => {
         Cypress.once('navigation:changed', () => {
           expect(location.host).to.equal('foobar.com')
           done()
@@ -93,7 +93,7 @@ describe('multidomain', { experimentalSessionSupport: true }, () => {
 
     it('window:alert', (done) => {
       // @ts-ignore
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('foobar.com', done, () => {
         Cypress.once('window:alert', (text) => {
           expect(location.host).to.equal('foobar.com')
           expect(`window:alert ${text}`).to.equal('window:alert the alert text')
@@ -108,7 +108,7 @@ describe('multidomain', { experimentalSessionSupport: true }, () => {
 
     it('window:confirm', (done) => {
       // @ts-ignore
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('foobar.com', done, () => {
         Cypress.once('window:confirm', (text) => {
           expect(location.host).to.equal('foobar.com')
           expect(`window:confirm ${text}`).to.equal('window:confirm the confirm text')
@@ -123,7 +123,7 @@ describe('multidomain', { experimentalSessionSupport: true }, () => {
 
     it('window:confirmed - true when no window:confirm listeners return false', (done) => {
       // @ts-ignore
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('foobar.com', done, () => {
         Cypress.once('window:confirmed', (text, returnedFalse) => {
           expect(location.host).to.equal('foobar.com')
           expect(`window:confirmed ${text} - ${returnedFalse}`).to.equal('window:confirmed the confirm text - true')
@@ -144,7 +144,7 @@ describe('multidomain', { experimentalSessionSupport: true }, () => {
 
     it('window:confirmed - false when any window:confirm listeners return false', (done) => {
       // @ts-ignore
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('foobar.com', done, () => {
         Cypress.once('window:confirmed', (text, returnedFalse) => {
           expect(location.host).to.equal('foobar.com')
           expect(`window:confirmed ${text} - ${returnedFalse}`).to.equal('window:confirmed the confirm text - false')

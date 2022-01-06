@@ -1,5 +1,6 @@
 import Bluebird from 'bluebird'
 import { createDeferred } from '../../util/deferred'
+import $errUtils from '../../cypress/error_utils'
 
 export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: Cypress.State) {
   let timeoutId
@@ -26,13 +27,37 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
   Commands.addAll({
     // this isn't fully implemented, but in place to be able to test out
     // the other parts of multidomain
-    switchToDomain (domain, fn) {
-      const done = cy.state('done')
+    switchToDomain (domain, doneOrFn, fn) {
+      let done
+      const cleanup = () => {
+        communicator.off('command:enqueued', addCommand)
+        communicator.off('command:update', updateCommand)
+        communicator.off('done:called', doneAndCleanup)
+      }
+      const doneAndCleanup = (err) => {
+        cleanup()
+        done(err)
+      }
+
+      if (fn) {
+        // TODO: test this
+        const doneByReference = cy.state('done')
+
+        // done is available
+        // TODO: make sure that doneOrFn in this case is actually the done function through comparison
+        if (done !== doneByReference) {
+          $errUtils.throwErrByPath('switchToDomain.experiment_not_enabled')
+        }
+
+        done = doneOrFn
+      } else {
+        fn = doneOrFn
+      }
 
       // if done has been provided to the test, allow the user to call done
       // from the switchToDomain context running in the secondary domain.
       if (done) {
-        communicator.once('done:called', done)
+        communicator.once('done:called', doneAndCleanup)
       }
 
       clearTimeout(timeoutId)
@@ -110,26 +135,15 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
           }
         }
       }
-      const unbindDone = () => {
-        // If `done()` is passed into the test, but is called in the primary domain and NOT the secondary domain
-        // Go ahead and make sure the listener is removed
-        communicator.off('done:called', done)
-      }
 
       communicator.on('command:enqueued', addCommand)
       communicator.on('command:update', updateCommand)
 
       return new Bluebird((resolve, reject) => {
-        const cleanup = () => {
-          communicator.off('command:enqueued', addCommand)
-          communicator.off('command:update', updateCommand)
-          communicator.off('unbind:done:called', unbindDone)
-          communicator.off('queue:finished', cleanup)
-        }
-
         communicator.once('run:domain:fn', (err) => {
           if (err) {
             cleanup()
+            communicator.off('queue:finished', cleanup)
             reject(err)
 
             return
@@ -138,9 +152,9 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
           resolve()
         })
 
-        communicator.once('unbind:done:called', unbindDone)
-
-        communicator.once('queue:finished', cleanup)
+        if (!done) {
+          communicator.once('queue:finished', cleanup)
+        }
 
         // fired once the spec bridge is set up and ready to
         // receive messages
