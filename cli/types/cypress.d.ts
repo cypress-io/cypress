@@ -2602,7 +2602,7 @@ declare namespace Cypress {
     certs: PEMCert[] | PFXCert[]
   }
 
-  interface ResolvedConfigOptions {
+  interface ResolvedConfigOptions<ComponentDevServerOpts = any> {
     /**
      * Url used as prefix for [cy.visit()](https://on.cypress.io/visit) or [cy.request()](https://on.cypress.io/request) command's url
      * @default null
@@ -2876,7 +2876,7 @@ declare namespace Cypress {
      * Override default config options for Component Testing runner.
      * @default {}
      */
-    component: ComponentConfigOptions
+    component: ComponentConfigOptions<ComponentDevServerOpts>
 
     /**
      * Override default config options for E2E Testing runner.
@@ -2986,10 +2986,7 @@ declare namespace Cypress {
    * Takes ComponentDevServerOpts to track the signature of the devServerConfig for the provided `devServer`,
    * so we have proper completion for `devServerConfig`
    */
-  type ConfigOptions<ComponentDevServerOpts = any> = CoreConfigOptions & {
-    e2e?: CoreConfigOptions,
-    component?: ComponentConfigOptions<ComponentDevServerOpts>
-  }
+  type ConfigOptions<ComponentDevServerOpts = any> = Partial<ResolvedConfigOptions<ComponentDevServerOpts>>
 
   interface PluginConfigOptions extends ResolvedConfigOptions {
     /**
