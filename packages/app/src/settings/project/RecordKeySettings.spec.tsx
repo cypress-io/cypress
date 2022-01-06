@@ -1,5 +1,5 @@
 import { defaultMessages } from '@cy/i18n'
-import { createCloudRecordKey } from '@packages/frontend-shared/cypress/support/mock-graphql/stubgql-CloudTypes'
+import { createCloudRecordKey, createCloudUser } from '@packages/frontend-shared/cypress/support/mock-graphql/stubgql-CloudTypes'
 import { RecordKeySettingsFragmentDoc } from '../../generated/graphql-test'
 import RecordKeySettings from './RecordKeySettings.vue'
 
@@ -14,6 +14,8 @@ describe('<RecordKeySettings />', () => {
 
     cy.mountFragment(RecordKeySettingsFragmentDoc, {
       onResult: (res) => {
+        res.cloudViewer = { ...createCloudUser({ userIsViewer: true }), organizations: { nodes: [] }, organizationControl: null }
+
         if (res.currentProject?.cloudProject?.__typename === 'CloudProject' && recordKeys) {
           const recordKeyWithTypes = recordKeys.map((k, i) => createCloudRecordKey({ key: `${key}-${i}`, ...k }))
 
@@ -32,8 +34,8 @@ describe('<RecordKeySettings />', () => {
     })
   }
 
-  describe('normal behavior', () => {
-    it('renders the record key view with the correct title', () => {
+  context('normal', () => {
+    it('renders section correct title', () => {
       mountKeysSection({ recordKeys: [] })
       cy.findByText(defaultMessages.settingsPage.recordKey.title)
     })
@@ -49,14 +51,49 @@ describe('<RecordKeySettings />', () => {
           { id: '2' },
           { id: '3' },
           { id: '4' },
-        ] })
+        ],
+      })
     })
   })
 
-  describe('errors', () => {
+  context('errors', () => {
     it('empty', () => {
       mountKeysSection({ recordKeys: [] })
       cy.findByText(defaultMessages.settingsPage.recordKey.errorEmpty)
+    })
+
+    it('Project not found', () => {
+      mountKeysSection({
+        cloudProject: {
+          __typename: 'CloudProjectNotFound',
+        },
+      })
+
+      cy.findByText(defaultMessages.settingsPage.recordKey.errorNotFound)
+      cy.findByText(defaultMessages.settingsPage.recordKey.errorNotFoundButton).click()
+    })
+
+    it('Project not authorized', () => {
+      mountKeysSection({
+        cloudProject: {
+          __typename: 'CloudProjectUnauthorized',
+          hasRequestedAccess: false,
+        },
+      })
+
+      cy.findByText(defaultMessages.settingsPage.recordKey.errorAccess)
+      cy.findByText(defaultMessages.settingsPage.recordKey.errorAccessButton).click()
+    })
+
+    it('Project not authorized and requested', () => {
+      mountKeysSection({
+        cloudProject: {
+          __typename: 'CloudProjectUnauthorized',
+          hasRequestedAccess: true,
+        },
+      })
+
+      cy.findByText(defaultMessages.settingsPage.recordKey.errorAccessPending)
     })
   })
 })
