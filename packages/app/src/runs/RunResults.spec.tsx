@@ -1,14 +1,15 @@
 import { CloudRunStubs } from '@packages/frontend-shared/cypress/support/mock-graphql/stubgql-CloudTypes'
-import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 import { RunCardFragmentDoc } from '../generated/graphql-test'
 import RunResults from './RunResults.vue'
 
 describe('<RunResults />', { viewportHeight: 70, viewportWidth: 300 }, () => {
-  it('show number of passed tests', () => {
+  it('show number of passed, skipped and failed tests', () => {
+    const res = CloudRunStubs.someSkipped
+
     cy.mountFragment(RunCardFragmentDoc, {
       onResult (result) {
         Object.keys(result).forEach((key) => {
-          result[key] = CloudRunStubs.allPassing[key]
+          result[key] = res[key]
         })
       },
       render (gql) {
@@ -16,6 +17,10 @@ describe('<RunResults />', { viewportHeight: 70, viewportWidth: 300 }, () => {
       },
     })
 
-    cy.get(`[title=${defaultMessages.runs.results.passed}]`).should('have.text', CloudRunStubs.allPassing.totalPassed)
+    // For an unknown reason i18n cannot be used here to return "passed"
+    cy.get(`[title=passed]`).should('contain.text', res.totalPassed)
+    cy.get(`[title=failed]`).should('contain.text', res.totalFailed)
+    cy.get(`[title=skipped]`).should('contain.text', res.totalSkipped)
+    cy.get(`[title=pending]`).should('contain.text', res.totalPending)
   })
 })
