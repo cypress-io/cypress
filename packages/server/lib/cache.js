@@ -1,5 +1,7 @@
 const _ = require('lodash')
 const Promise = require('bluebird')
+const { globalPubSub } = require('@packages/data-context')
+
 const { fs } = require('./util/fs')
 const appData = require('./util/app_data')
 const FileUtil = require('./util/file')
@@ -7,6 +9,10 @@ const logger = require('./logger')
 
 const fileUtil = new FileUtil({
   path: appData.path('cache'),
+})
+
+globalPubSub.on('test:cleanup', () => {
+  fileUtil.__resetForTest()
 })
 
 const convertProjectsToArray = function (obj) {
