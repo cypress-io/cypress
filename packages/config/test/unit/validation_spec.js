@@ -3,7 +3,7 @@ const { expect } = require('chai')
 
 const validation = require('../../lib/validation')
 
-describe('src/validation', () => {
+describe('config/lib/validation', () => {
   const mockKey = 'mockConfigKey'
 
   describe('.isValidClientCertificatesSet', () => {
