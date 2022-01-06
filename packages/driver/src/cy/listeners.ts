@@ -25,7 +25,7 @@ const removeAllListeners = () => {
   for (let e of events) {
     const [win, event, cb, capture] = e
 
-    // Casted to `any` to ignore `GuardedEvent`/`GuardedAnchorEvent`.
+    // Cast to `any` to ignore `GuardedEvent`/`GuardedAnchorEvent`.
     win.removeEventListener(event, cb as any, capture)
   }
 
@@ -38,7 +38,7 @@ const removeAllListeners = () => {
 const addListener = <K extends keyof WindowEventMap>(win: Window, event: K, fn: BoundEventHandler<K>, capture?: boolean) => {
   events.push([win, event, fn, capture])
 
-  // Casted to `any` to ignore `GuardedEvent`/`GuardedAnchorEvent`.
+  // Cast to `any` to ignore `GuardedEvent`/`GuardedAnchorEvent`.
   win.addEventListener(event, fn as any, capture)
 }
 

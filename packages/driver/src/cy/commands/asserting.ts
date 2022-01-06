@@ -132,13 +132,13 @@ export default function (Commands, Cypress, cy, state) {
 
   Commands.addAll({ type: 'assertion', prevSubject: true }, {
     should () {
-      // Casted to `any` to pass all arguments
+      // Cast to `any` to pass all arguments
       // eslint-disable-next-line prefer-rest-params
       return shouldFn.apply(this, arguments as any)
     },
 
     and () {
-      // Casted to `any` to pass all arguments
+      // Cast to `any` to pass all arguments
       // eslint-disable-next-line prefer-rest-params
       return shouldFn.apply(this, arguments as any)
     },

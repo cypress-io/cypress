@@ -30,7 +30,7 @@ export default function (Commands, Cypress, cy) {
     command (...args) {
       args.unshift(cy)
 
-      // casted to `any` to ignore ts error.
+      // cast to `any` to ignore ts error.
       return command.apply(window, args as any)
     },
   })

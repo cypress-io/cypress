@@ -32,7 +32,7 @@ export default (Commands, Cypress, cy, state) => {
       }
 
       // else return null element
-      return $(null as any) // casted to any to satisfy typescript
+      return $(null as any) // cast to any to satisfy typescript
     }
 
     const resolveElements = () => {
