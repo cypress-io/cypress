@@ -25,7 +25,7 @@ export default function (Commands, Cypress, cy, state) {
 
   const shouldFn = function (subject, chainers, ...args) {
     if (_.isFunction(chainers)) {
-      return shouldFnWithCallback.apply(this, [subject, chainers]) // eslint-disable-line prefer-rest-params
+      return shouldFnWithCallback.apply(this, [subject, chainers])
     }
 
     let exp = cy.expect(subject).to
@@ -38,7 +38,7 @@ export default function (Commands, Cypress, cy, state) {
       const log = Cypress.log({
         name: 'should',
         type: 'child',
-        message: ([] as any).concat(originalChainers, args),
+        message: ([] as any[]).concat(originalChainers, args),
         end: true,
         snapshot: true,
         error: err,

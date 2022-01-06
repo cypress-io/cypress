@@ -42,7 +42,7 @@ export default function (Commands, Cypress, cy, state) {
   })
 
   return Commands.addAll({ type: 'utility' }, {
-    // TODO: change the type of `any` to Loggable.
+    // TODO: change the options type from `any` to Partial<Loggable>.
     clock (subject, now, methods, options: any = {}) {
       let userOptions = options
       const ctx = state('ctx')
@@ -77,7 +77,7 @@ export default function (Commands, Cypress, cy, state) {
         log: true,
       })
 
-      const log = (name, message?, snapshot = true, consoleProps = {}) => {
+      const log = (name, message = '', snapshot = true, consoleProps = {}) => {
         if (!options.log) {
           return
         }
@@ -138,7 +138,7 @@ export default function (Commands, Cypress, cy, state) {
 
       const { restore } = clock
 
-      clock.restore = function (options: any = {}) {
+      clock.restore = function (options: Partial<Cypress.Loggable> = {}) {
         const ret = restore.apply(this)
 
         if (options.log !== false) {
@@ -163,7 +163,7 @@ export default function (Commands, Cypress, cy, state) {
       return clock
     },
 
-    tick (subject, ms, options = {}) {
+    tick (subject, ms, options: Partial<Cypress.Loggable> = {}) {
       if (!clock) {
         $errUtils.throwErrByPath('tick.no_clock')
       }

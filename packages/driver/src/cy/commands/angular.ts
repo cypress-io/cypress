@@ -89,6 +89,7 @@ export default (Commands, Cypress, cy, state) => {
   }
 
   Commands.addAll({
+    // TODO: Change the options type from `any` to `Partial<Cypress.Loggable & Cypress.Timeoutable>`.
     ng (type, selector, options: any = {}) {
       const userOptions = options
 

@@ -42,7 +42,7 @@ export default (Commands, Cypress, cy, state, config) => {
   })
 
   Commands.addAll({ type: 'utility', prevSubject: 'optional' }, {
-    // TODO: change `any` to Loggable
+    // TODO: change the options type from `any` to `Loggable`.
     // pause should indefinitely pause until the user
     // presses a key or clicks in the UI to continue
     pause (subject, options: any = {}) {

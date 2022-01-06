@@ -20,7 +20,7 @@ export default function (Commands, Cypress, cy, state) {
         })
       }
 
-      // TODO: Change any to Log type.
+      // TODO: change the log type from `any` to `Log`.
       // we also need to set the alias on the last command log
       // that matches our chainerId
       const log: any = _.last(cy.queue.logs({
