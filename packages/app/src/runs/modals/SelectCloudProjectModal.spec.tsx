@@ -1,6 +1,7 @@
+import { defaultMessages } from '@cy/i18n'
+import { CloudUserStubs } from '@packages/frontend-shared/cypress/support/mock-graphql/stubgql-CloudTypes'
 import { SelectCloudProjectModalFragmentDoc } from '../../generated/graphql-test'
 import SelectCloudProjectModal from '../modals/SelectCloudProjectModal.vue'
-import { defaultMessages } from '@cy/i18n'
 
 describe('<SelectCloudProjectModal />', () => {
   const organizations = {
@@ -45,11 +46,7 @@ describe('<SelectCloudProjectModal />', () => {
         }
 
         result.cloudViewer = {
-          __typename: 'CloudUser' as const,
-          id: '2',
-          cloudOrganizationsUrl: null,
-          createCloudOrganizationUrl: null,
-          fullName: null,
+          ...CloudUserStubs.me,
           organizationControl: null,
           organizations: noorgs ? null : organizations,
         }
