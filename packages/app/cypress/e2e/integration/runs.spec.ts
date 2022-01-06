@@ -236,7 +236,7 @@ describe('App: Runs', () => {
       cy.get('[href="http://dummy.cypress.io/runs/0"]').first().get('[data-cy="run-card-avatar')
       cy.get('[href="http://dummy.cypress.io/runs/0"]').first().get('[data-cy="run-card-branch"]').contains('main')
       cy.get('[href="http://dummy.cypress.io/runs/0"]').first().contains(`${new Date().getHours()}:${new Date().getMinutes()}`)
-      cy.get('[href="http://dummy.cypress.io/runs/0"]').first().get('span').contains('skipped')
+      cy.get('[href="http://dummy.cypress.io/runs/0"]').first().contains('span', 'skipped')
       cy.get('[href="http://dummy.cypress.io/runs/0"]').first().get('span').contains('pending')
       cy.get('[href="http://dummy.cypress.io/runs/0"]').first().get('span').contains('passed')
       cy.get('[href="http://dummy.cypress.io/runs/0"]').first().get('span').contains('failed')
