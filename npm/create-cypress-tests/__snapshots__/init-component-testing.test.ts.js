@@ -40,6 +40,6 @@ module.exports = (on, config) => {
 
 `
 
-exports['Injected overridden webpack template support/index.js'] = `
+exports['Injected overridden webpack template support/component.js'] = `
 import "./commands.js";
 `

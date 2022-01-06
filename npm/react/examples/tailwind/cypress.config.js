@@ -6,7 +6,7 @@ module.exports = {
   'env': {
     'coverage': true,
   },
-  config: {
+  component: {
     'specPattern': 'src/**/*cy-spec.js',
     setupNodeEvents (on, config) {
       // load file devServer that comes with this plugin
