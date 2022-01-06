@@ -8,7 +8,7 @@ module.exports = {
     // TODO: remove in next breaking release
     // This will send a warning message when a deprecated API is used
     // define array-like functions on this object so we can warn about using deprecated array API
-    // while still fufiling desired behavior
+    // while still fulfilling desired behavior
     const [, launchOptions] = args
 
     let hasEmittedWarning = false
