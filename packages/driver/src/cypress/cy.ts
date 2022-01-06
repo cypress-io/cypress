@@ -578,7 +578,10 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
           e = onpl(e)
         }
 
-        Cypress.action('cy:cross:domain:failure', e)
+        this.Cypress.emit('internal:window:load', {
+          type: 'cross:domain:failure',
+          error: e,
+        })
 
         // need async:true since this is outside the command queue promise
         // chain and cy.fail needs to know to use the reference to the

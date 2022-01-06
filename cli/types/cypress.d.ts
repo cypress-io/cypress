@@ -60,6 +60,10 @@ declare namespace Cypress {
     visiting: string
   }
 
+  interface ReadyForDomainOptions {
+    shouldInject: boolean
+  }
+
   interface Backend {
     /**
      * Firefox only: Force Cypress to run garbage collection routines.
@@ -68,6 +72,7 @@ declare namespace Cypress {
      * @see https://on.cypress.io/firefox-gc-issue
      */
     (task: 'firefox:force:gc'): Promise<void>
+    (task: 'ready:for:domain', options: ReadyForDomainOptions): Promise<void>
     (task: 'net', eventName: string, frame: any): Promise<void>
   }
 

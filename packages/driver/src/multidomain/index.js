@@ -8,21 +8,40 @@ import $Cypress from '../cypress'
 import { $Cy } from '../cypress/cy'
 import $Commands from '../cypress/commands'
 import $Log from '../cypress/log'
-import { create as createFocused } from '../cy/focused'
-import { create as createJQuery } from '../cy/jquery'
 import $Listeners from '../cy/listeners'
-import { create as createSnapshots } from '../cy/snapshots'
-import { create as createOverrides } from '../cy/overrides'
+import { SpecBridgeDomainCommunicator } from './communicator'
 
-const postMessage = (event, data) => {
-  top.postMessage({ event, data }, '*')
+const specBridgeCommunicator = new SpecBridgeDomainCommunicator()
+
+const onCommandEnqueued = (commandAttrs) => {
+  const { id, name } = commandAttrs
+
+  // it's not strictly necessary to send the name, but it can be useful
+  // for debugging purposes
+  specBridgeCommunicator.toPrimary('command:enqueued', { id, name })
 }
 
-const onBeforeAppWindowLoad = (autWindow) => {
-  const specWindow = {
-    Error,
-  }
-  const Cypress = $Cypress.create({
+const onCommandEnd = (command) => {
+  const id = command.get('id')
+  const name = command.get('name')
+
+  specBridgeCommunicator.toPrimary('command:update', { id, name, end: true })
+}
+
+const onLogAdded = (attrs) => {
+  specBridgeCommunicator.toPrimary('command:update', {
+    logAdded: $Log.toSerializedJSON(attrs),
+  })
+}
+
+const onLogChanged = (attrs) => {
+  specBridgeCommunicator.toPrimary('command:update', {
+    logChanged: $Log.toSerializedJSON(attrs),
+  })
+}
+
+const setup = () => {
+  const Cypress = window.Cypress = $Cypress.create({
     browser: {
       channel: 'stable',
       displayName: 'Chrome',
@@ -36,18 +55,14 @@ const onBeforeAppWindowLoad = (autWindow) => {
       version: '90.0.4430.212',
     },
   })
-  const cy = new $Cy(specWindow, Cypress, Cypress.Cookies, Cypress.state, Cypress.config, false)
 
-  window.Cypress = Cypress
-  window.cy = cy
+  const cy = window.cy = new $Cy(window, Cypress, Cypress.Cookies, Cypress.state, Cypress.config, false)
 
   Cypress.log = $Log.create(Cypress, cy, Cypress.state, Cypress.config)
   Cypress.runner = {
     addLog () {},
   }
 
-  Cypress.state('window', autWindow)
-  Cypress.state('document', autWindow.document)
   Cypress.state('runnable', {
     ctx: {},
     clearTimeout () {},
@@ -56,39 +71,8 @@ const onBeforeAppWindowLoad = (autWindow) => {
   })
 
   const { state, config } = Cypress
-  const jquery = createJQuery(state)
-  const focused = createFocused(state)
-  const snapshots = createSnapshots(jquery.$$, state)
-
-  const overrides = createOverrides(state, config, focused, snapshots)
 
   $Commands.create(Cypress, cy, state, config)
-
-  const onCommandEnqueued = (commandAttrs) => {
-    const { id, name } = commandAttrs
-
-    // it's not strictly necessary to send the name, but it can be useful
-    // for debugging purposes
-    postMessage('cross:domain:command:enqueued', { id, name })
-  }
-
-  const onCommandEnd = (command) => {
-    const id = command.get('id')
-
-    postMessage('cross:domain:command:update', { id, end: true })
-  }
-
-  const onLogAdded = (attrs) => {
-    postMessage('cross:domain:command:update', {
-      logAdded: $Log.toSerializedJSON(attrs),
-    })
-  }
-
-  const onLogChanged = (attrs) => {
-    postMessage('cross:domain:command:update', {
-      logChanged: $Log.toSerializedJSON(attrs),
-    })
-  }
 
   Cypress.on('command:enqueued', onCommandEnqueued)
   Cypress.on('command:end', onCommandEnd)
@@ -96,52 +80,45 @@ const onBeforeAppWindowLoad = (autWindow) => {
   Cypress.on('log:added', onLogAdded)
   Cypress.on('log:changed', onLogChanged)
 
-  const run = (data) => {
-    // syncs up the log number with the primary domain
-    $Log.setCounter(data.logCounter)
-
+  specBridgeCommunicator.on('run:domain:fn', (data) => {
     // TODO: await this if it's a promise, or do whatever cy.then does
     window.eval(`(${data.fn})()`)
 
-    postMessage('cross:domain:ran:domain:fn')
-  }
+    specBridgeCommunicator.toPrimary('ran:domain:fn')
+  })
 
-  const runCommand = () => {
-    const next = state('next')
+  specBridgeCommunicator.on('run:command',
+    ({ name }) => {
+      const next = state('next')
 
-    if (next) {
-      return next()
-    }
+      if (next) {
+        return next()
+      }
 
-    // if there's no state('next') for running the next command,
-    // the queue hasn't started yet, so run it
-    cy.queue.run(false)
-    .then(() => {
-      postMessage('cross:domain:queue:finished')
+      // if there's no state('next') for running the next command,
+      // the queue hasn't started yet, so run it
+      cy.queue.run(false)
+      .then(() => {
+        specBridgeCommunicator.toPrimary('queue:finished')
+      })
     })
-  }
 
-  const onMessage = (event) => {
-    if (!event.data) return
+  cy.onBeforeAppWindowLoad = onBeforeAppWindowLoad(cy, Cypress)
 
-    switch (event.data.message) {
-      case 'run:domain:fn':
-        return run(event.data)
-      case 'run:command':
-        return runCommand()
-      default:
-        // eslint-disable-next-line no-console
-        console.log('Unknown message received in', window.location.origin, ':', event.data)
-    }
-  }
+  specBridgeCommunicator.initialize(window)
 
-  // incoming messages from the primary domain
-  window.addEventListener('message', onMessage, false)
+  return cy
+}
 
+// eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
+const onBeforeAppWindowLoad = (cy, Cypress) => (autWindow) => {
   autWindow.Cypress = Cypress
   autWindow.cy = cy
 
-  overrides.wrapNativeMethods(autWindow)
+  Cypress.state('window', autWindow)
+  Cypress.state('document', autWindow.document)
+
+  cy.overrides.wrapNativeMethods(autWindow)
   // TODO: DRY this up with the mostly-the-same code in src/cypress/cy.js
   $Listeners.bindTo(autWindow, {
     // TODO: implement this once there's a better way to forward
@@ -165,17 +142,9 @@ const onBeforeAppWindowLoad = (autWindow) => {
       return undefined
     },
     onLoad () {
-      postMessage('cross:domain:window:load')
+      specBridgeCommunicator.toPrimary('window:load')
     },
     onUnload (e) {
-      window.removeEventListener('message', onMessage)
-
-      Cypress.off('command:enqueued', onCommandEnqueued)
-      Cypress.off('command:end', onCommandEnd)
-      Cypress.off('skipped:command:end', onCommandEnd)
-      Cypress.off('log:added', onLogAdded)
-      Cypress.off('log:changed', onLogChanged)
-
       return Cypress.action('app:window:unload', e)
     },
     // TODO: this currently only works on hashchange, but needs work
@@ -198,9 +167,15 @@ const onBeforeAppWindowLoad = (autWindow) => {
     },
   })
 
-  postMessage('cross:domain:window:before:load')
+  specBridgeCommunicator.toPrimary('window:before:load')
 }
 
-window.__onBeforeAppWindowLoad = onBeforeAppWindowLoad
+// eventually, setup will get called again on rerun and cy will
+// get re-created
+const cy = setup()
 
-postMessage('cross:domain:bridge:ready')
+window.__onBeforeAppWindowLoad = (autWindow) => {
+  cy.onBeforeAppWindowLoad(autWindow)
+}
+
+specBridgeCommunicator.toPrimary('bridge:ready')
