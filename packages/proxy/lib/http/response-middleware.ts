@@ -280,7 +280,7 @@ const SetInjectionLevel: ResponseMiddleware = function () {
     const isTheAUTFrame = isAUTFrame(this.req)
 
     if (!isReqMatchOriginPolicy && isTheAUTFrame && (isHTML || isRenderedHTML)) {
-      this.debug('- multidomain injection')
+      this.debug('- multi-domain injection')
 
       return 'fullMultidomain'
     }

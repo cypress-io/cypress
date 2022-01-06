@@ -241,7 +241,7 @@ describe('http/response-middleware', function () {
           ...props.res,
         },
         req: {
-          proxiedUrl: 'http:127.0.0.1:3501/multidomain.html',
+          proxiedUrl: 'http:127.0.0.1:3501/multi-domain.html',
           headers: {},
           ...props.req,
         },

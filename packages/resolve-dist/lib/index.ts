@@ -21,7 +21,7 @@ export const getRunnerInjectionContents = () => {
 }
 
 export const getRunnerMultidomainInjectionContents = () => {
-  return getRunnerContents('injection_multidomain.js')
+  return getRunnerContents('injection_multi_domain.js')
 }
 
 export const getPathToIndex = (pkg: RunnerPkg) => {

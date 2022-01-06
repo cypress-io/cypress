@@ -7,7 +7,7 @@ import $stackUtils from './stack_utils'
 
 import { allCommands } from '../cy/commands'
 import { addCommand as addNetstubbingCommand } from '../cy/net-stubbing'
-import { addCommands as addMultidomainCommands } from '../cy/multidomain'
+import { addCommands as addMultidomainCommands } from '../cy/multi-domain'
 
 const builtInCommands = [
   ..._.toArray(allCommands).map((c) => c.default || c),
