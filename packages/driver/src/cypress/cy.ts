@@ -359,7 +359,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
     extendEvents(this)
 
-    Cypress.on('enqueue:command', (attrs) => {
+    Cypress.on('enqueue:command', (attrs: Cypress.EnqueuedCommand) => {
       this.enqueue(attrs)
     })
   }
@@ -1131,7 +1131,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     })
   }
 
-  private enqueue (obj) {
+  private enqueue (obj: PartialBy<Cypress.EnqueuedCommand, 'id'>) {
     // if we have a nestedIndex it means we're processing
     // nested commands and need to insert them into the
     // index past the current index as opposed to

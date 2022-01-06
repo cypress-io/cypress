@@ -616,7 +616,7 @@ declare namespace Cypress {
      * Trigger action
      * @private
      */
-    action: (action: string, ...args: any[]) => void
+    action: (action: string, ...args: any[]) => any[] | void
 
     /**
      * Load  files
@@ -5568,6 +5568,12 @@ declare namespace Cypress {
      */
     (action: 'command:end', fn: (command: CommandQueue) => void): Cypress
     /**
+     * Fires when a command is skipped, namely the `should` command
+     * Useful for debugging and understanding how commands are handled.
+     * @see https://on.cypress.io/catalog-of-events#App-Events
+     */
+    (action: 'skipped:command:end', fn: (command: CommandQueue) => void): Cypress
+    /**
      * Fires whenever a command begins its retrying routines.
      * This is called on the trailing edge after Cypress has internally
      * waited for the retry interval. Useful to understand **why** a command is retrying,
@@ -5657,10 +5663,13 @@ declare namespace Cypress {
   }
 
   interface EnqueuedCommand {
+    id: string
     name: string
     args: any[]
     type: string
     chainerId: string
+    injected: boolean
+    userInvocationStack?: string
     fn(...args: any[]): any
   }
 

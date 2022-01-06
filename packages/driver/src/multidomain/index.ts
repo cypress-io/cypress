@@ -13,7 +13,7 @@ import { SpecBridgeDomainCommunicator } from './communicator'
 
 const specBridgeCommunicator = new SpecBridgeDomainCommunicator()
 
-const onCommandEnqueued = (commandAttrs) => {
+const onCommandEnqueued = (commandAttrs: Cypress.EnqueuedCommand) => {
   const { id, name } = commandAttrs
 
   // it's not strictly necessary to send the name, but it can be useful
@@ -21,7 +21,7 @@ const onCommandEnqueued = (commandAttrs) => {
   specBridgeCommunicator.toPrimary('command:enqueued', { id, name })
 }
 
-const onCommandEnd = (command) => {
+const onCommandEnd = (command: Cypress.CommandQueue) => {
   const id = command.get('id')
   const name = command.get('name')
 
@@ -41,6 +41,7 @@ const onLogChanged = (attrs) => {
 }
 
 const setup = () => {
+  // @ts-ignore
   const Cypress = window.Cypress = $Cypress.create({
     browser: {
       channel: 'stable',
@@ -54,11 +55,14 @@ const setup = () => {
       path: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
       version: '90.0.4430.212',
     },
-  })
+  }) as Cypress.Cypress
 
+  // @ts-ignore
   const cy = window.cy = new $Cy(window, Cypress, Cypress.Cookies, Cypress.state, Cypress.config, false)
 
+  // @ts-ignore
   Cypress.log = $Log.create(Cypress, cy, Cypress.state, Cypress.config)
+  // @ts-ignore
   Cypress.runner = {
     addLog () {},
   }
@@ -111,9 +115,8 @@ const setup = () => {
 }
 
 // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
-const onBeforeAppWindowLoad = (cy, Cypress) => (autWindow) => {
+const onBeforeAppWindowLoad = (cy: $Cy, Cypress: Cypress.Cypress) => (autWindow: Window) => {
   autWindow.Cypress = Cypress
-  autWindow.cy = cy
 
   Cypress.state('window', autWindow)
   Cypress.state('document', autWindow.document)
@@ -156,7 +159,7 @@ const onBeforeAppWindowLoad = (cy, Cypress) => (autWindow) => {
       return Cypress.action('app:window:alert', str)
     },
     onConfirm (str) {
-      const results = Cypress.action('app:window:confirm', str)
+      const results = Cypress.action('app:window:confirm', str) as any[]
 
       // return false if ANY results are false
       const ret = !results.some((result) => result === false)
@@ -174,7 +177,8 @@ const onBeforeAppWindowLoad = (cy, Cypress) => (autWindow) => {
 // get re-created
 const cy = setup()
 
-window.__onBeforeAppWindowLoad = (autWindow) => {
+// @ts-ignore
+window.__onBeforeAppWindowLoad = (autWindow: Window) => {
   cy.onBeforeAppWindowLoad(autWindow)
 }
 
