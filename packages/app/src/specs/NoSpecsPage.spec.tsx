@@ -2,10 +2,10 @@ import NoSpecsPage from './NoSpecsPage.vue'
 import { defaultMessages } from '@cy/i18n'
 import { NoSpecsPageFragmentDoc } from '../generated/graphql-test'
 
-const pageTitleSelector = '[data-testid=create-spec-page-title]'
-const pageDescriptionSelector = '[data-testid=create-spec-page-description]'
-const noSpecsMessageSelector = '[data-testid=no-specs-message]'
-const viewSpecsSelector = '[data-testid=view-spec-pattern]'
+const pageTitleSelector = '[data-cy=create-spec-page-title]'
+const pageDescriptionSelector = '[data-cy=create-spec-page-description]'
+const noSpecsMessageSelector = '[data-cy=no-specs-message]'
+const viewSpecsSelector = '[data-cy=view-spec-pattern]'
 
 const messages = defaultMessages.createSpec
 
