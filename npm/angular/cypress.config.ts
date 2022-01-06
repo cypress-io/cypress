@@ -7,8 +7,8 @@ export default defineConfig({
   'fileServerFolder': 'src',
   'projectId': 'nf7zag',
   'component': {
-    'componentFolder': 'src/app',
-    'testFiles': '**/*cy-spec.ts',
+    'specPattern': 'src/app/**/*cy-spec.ts',
+    'supportFile': 'cypress/support/component.ts',
     setupNodeEvents (on, config) {
       return require('./cypress/plugins')(on, config)
     },

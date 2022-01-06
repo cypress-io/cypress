@@ -3,8 +3,17 @@ import electron from 'electron'
 import pkg from '@packages/root'
 import configUtils from '@packages/config'
 
-import specsUtil from './util/specs'
-import type { AllModeOptions, AllowedState, FindSpecs, FoundBrowser, FullConfig, InitializeProjectOptions, LaunchOpts, OpenProjectLaunchOptions, Preferences } from '@packages/types'
+import type {
+  AllModeOptions,
+  AllowedState,
+  FoundBrowser,
+  FullConfig
+  InitializeProjectOptions,
+  LaunchOpts,
+  OpenProjectLaunchOptions,
+  Preferences,
+} from '@packages/types'
+
 import browserUtils from './browsers/utils'
 import auth from './gui/auth'
 import user from './user'
@@ -46,6 +55,7 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
     errorApi: {
       error: errors.get,
       message: errors.getMsgByType,
+      warning: errors.warning,
     },
     configApi: {
       getServerPluginHandlers: plugins.getServerPluginHandlers,
@@ -54,6 +64,7 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       validateConfig: configUtils.validate,
       updateWithPluginValues: config.updateWithPluginValues,
       setupFullConfigWithDefaults: config.setupFullConfigWithDefaults,
+      validateRootConfigBreakingChanges: configUtils.validateNoBreakingConfigRoot,
     },
     appApi: {
       appData,
@@ -84,9 +95,6 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       },
       getProjectRootsFromCache () {
         return cache.getProjectRoots()
-      },
-      findSpecs (payload: FindSpecs) {
-        return specsUtil.findSpecs(payload)
       },
       clearLatestProjectsCache () {
         return cache.removeLatestProjects()

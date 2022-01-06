@@ -46,7 +46,17 @@ export interface WizardSetupData {
 
 gql`
 mutation Wizard_wizardUpdate($input: WizardUpdateInput!) {
-  wizardUpdate(input: $input)
+  wizardUpdate(input: $input) {
+    ...EnvironmentSetup
+    bundler {
+      id
+      type
+    }
+    framework {
+      id
+      type
+    }
+  }
 }
 `
 

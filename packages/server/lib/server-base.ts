@@ -33,6 +33,7 @@ import { createRoutesE2E } from './routes-e2e'
 import { createRoutesCT } from './routes-ct'
 import type { DataContext } from '@packages/data-context/src/DataContext'
 import { getCtx } from '@packages/data-context'
+import type { FoundSpec } from '@packages/types'
 
 const DEFAULT_DOMAIN_NAME = 'localhost'
 const fullyQualifiedRe = /^https?:\/\//
@@ -116,7 +117,7 @@ export interface OpenServerOptions {
   onWarning: any
   exit?: boolean
   getCurrentBrowser: () => Browser
-  getSpec: () => Cypress.Cypress['spec'] | null
+  getSpec: () => FoundSpec | null
   shouldCorrelatePreRequests: () => boolean
 }
 

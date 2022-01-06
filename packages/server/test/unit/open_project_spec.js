@@ -1,6 +1,5 @@
 require('../spec_helper')
 
-const path = require('path')
 const Bluebird = require('bluebird')
 const browsers = require(`../../lib/browsers`)
 const ProjectBase = require(`../../lib/project-base`).ProjectBase
@@ -22,14 +21,19 @@ describe('lib/open_project', () => {
     this.config = {
       integrationFolder: '/user/foo/cypress/integration',
       testFiles: '**/*.*',
-      ignoreTestFiles: '**/*.nope',
+      ignoreSpecPattern: '**/*.nope',
       projectRoot: todosPath,
     }
 
     this.onError = sinon.stub()
     sinon.stub(browsers, 'get').resolves()
     sinon.stub(browsers, 'open')
-    sinon.stub(ProjectBase.prototype, 'initializeConfig').resolves()
+    sinon.stub(ProjectBase.prototype, 'initializeConfig').resolves({
+      e2e: {
+        specPattern: 'cypress/integration/**/*',
+      },
+    })
+
     sinon.stub(ProjectBase.prototype, 'open').resolves()
     sinon.stub(ProjectBase.prototype, 'reset').resolves()
     sinon.stub(ProjectBase.prototype, 'getConfig').returns(this.config)
@@ -46,10 +50,11 @@ describe('lib/open_project', () => {
       await openProject.create(todosPath, { testingType: 'e2e' }, { onError: this.onError })
       openProject.getProject().__setConfig({
         browserUrl: 'http://localhost:8888/__/',
-        componentFolder: path.join(todosPath, 'component'),
-        integrationFolder: path.join(todosPath, 'tests'),
         projectRoot: todosPath,
         specType: 'integration',
+        e2e: {
+          specPattern: 'cypress/integration/**/*',
+        },
       })
 
       openProject.getProject().options = {
@@ -58,6 +63,7 @@ describe('lib/open_project', () => {
 
       this.spec = {
         absolute: 'path/to/spec',
+        relative: 'path/to/spec',
       }
 
       this.browser = { name: 'chrome' }
@@ -115,7 +121,7 @@ describe('lib/open_project', () => {
     })
 
     describe('spec events', function () {
-      beforeEach(function () {
+      this.beforeEach(function () {
         sinon.stub(runEvents, 'execute').resolves()
       })
 

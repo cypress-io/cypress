@@ -663,6 +663,20 @@ declare namespace Cypress {
     as(alias: string): Chainable<Subject>
 
     /**
+     * Select a file with the given <input> element, or drag and drop a file over any DOM subject.
+     *
+     * @param {FileReference} files - The file(s) to select or drag onto this element.
+     * @see https://on.cypress.io/selectfile
+     * @example
+     *    cy.get('input[type=file]').selectFile(Buffer.from('text'))
+     *    cy.get('input[type=file]').selectFile({
+     *      fileName: 'users.json',
+     *      fileContents: [{name: 'John Doe'}]
+     *    })
+     */
+    selectFile(files: FileReference | FileReference[], options?: Partial<SelectFileOptions>): Chainable<Subject>
+
+    /**
      * Blur a focused element. This element must currently be in focus.
      * If you want to ensure an element is focused before blurring,
      * try using .focus() before .blur().
@@ -2466,6 +2480,17 @@ declare namespace Cypress {
     scrollBehavior: scrollBehaviorOptions
   }
 
+  interface SelectFileOptions extends Loggable, Timeoutable, ActionableOptions {
+    /**
+     * Which user action to perform. `select` matches selecting a file while
+     * `drag-drop` matches dragging files from the operating system into the
+     * document.
+     *
+     * @default 'select'
+     */
+    action: 'select' | 'drag-drop'
+  }
+
   interface BlurOptions extends Loggable, Forceable { }
 
   interface CheckOptions extends Loggable, Timeoutable, ActionableOptions {
@@ -2591,8 +2616,14 @@ declare namespace Cypress {
     /**
      * A String or Array of glob patterns used to ignore test files that would otherwise be shown in your list of tests. Cypress uses minimatch with the options: {dot: true, matchBase: true}. We suggest using http://globtester.com to test what files would match.
      * @default "*.hot-update.js"
+     * @deprecated use `ignoreSpecPattern` instead
      */
     ignoreTestFiles: string | string[]
+    /**
+     * A String or Array of glob patterns used to ignore test files that would otherwise be shown in your list of tests. Cypress uses minimatch with the options: {dot: true, matchBase: true}. We suggest using http://globtester.com to test what files would match.
+     * @default "*.hot-update.js"
+     */
+    ignoreSpecPattern: string | string[]
     /**
      * The number of tests for which snapshots and command data are kept in memory. Reduce this number if you are experiencing high memory consumption in your browser during a test run.
      * @default 50
@@ -2666,6 +2697,7 @@ declare namespace Cypress {
     /**
      * Path to folder containing integration test files
      * @default "cypress/integration"
+     * @deprecated
      */
     integrationFolder: string
     /**
@@ -2710,7 +2742,7 @@ declare namespace Cypress {
     screenshotsFolder: string | false
     /**
      * Path to file to load before test files load. This file is compiled and bundled. (Pass false to disable)
-     * @default "cypress/support/index.js"
+     * @default "cypress/support/{e2e|component}.js"
      */
     supportFile: string | false
     /**
@@ -2810,6 +2842,7 @@ declare namespace Cypress {
     blockHosts: null | string | string[]
     /**
      * Path to folder containing component test files.
+     * @deprecated
      */
     componentFolder: false | string
     /**
@@ -2822,6 +2855,12 @@ declare namespace Cypress {
     supportFolder: string
     /**
      * Glob pattern to determine what test files to load.
+     */
+    specPattern: string | string[]
+    /**
+     * Glob pattern to determine what test files to load.
+     *
+     * @deprecated Use `specPattern` under `component` or `e2e`
      */
     testFiles: string | string[]
     /**
@@ -5437,7 +5476,7 @@ declare namespace Cypress {
     ```
       // likely want to do this in a support file
       // so it's applied to all spec files
-      // cypress/support/index.js
+      // cypress/support/{e2e|component}.js
 
       Cypress.on('uncaught:exception', (err, runnable) => {
         // returning false here prevents Cypress from
@@ -5659,6 +5698,16 @@ declare namespace Cypress {
     code: number
     stdout: string
     stderr: string
+  }
+
+  type FileReference = string | BufferType | FileReferenceObject
+  interface FileReferenceObject {
+    /*
+     * Buffers and strings will be used as-is. All other types will have `JSON.stringify()` applied.
+     */
+    contents: any
+    fileName?: string
+    lastModified?: number
   }
 
   interface LogAttrs {

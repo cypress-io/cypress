@@ -76,11 +76,9 @@ const retry = (fn: (res: any) => void) => {
 export class SocketBase {
   protected ended: boolean
   protected _io?: socketIo.SocketIOServer
-  protected testsDir: string | null
 
   constructor (config: Record<string, any>, private ctx: DataContext) {
     this.ended = false
-    this.testsDir = null
   }
 
   protected ensureProp = ensureProp

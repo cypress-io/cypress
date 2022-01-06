@@ -114,7 +114,9 @@ mutation SpecRunnerHeader_SetBrowser($browserId: ID!, $specPath: String!) {
       isSelected
     }
   }
-  launchOpenProject(specPath: $specPath)
+  launchOpenProject(specPath: $specPath) {
+    id
+  }
 }
 `
 
