@@ -406,7 +406,7 @@ export class ProjectActions {
 
     assert(projectRoot, `Cannot create spec without currentProject.`)
 
-    const integrationFolder = path.join(projectRoot, 'cypress/e2e')
+    const integrationFolder = path.join(projectRoot, 'cypress', 'e2e')
 
     const results = await codeGenerator(
       { templateDir: templates['scaffoldIntegration'], target: integrationFolder },

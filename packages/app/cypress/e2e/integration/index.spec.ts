@@ -37,17 +37,10 @@ describe('App: Index', () => {
 
   context('with specs', () => {
     it('refreshes spec list on spec changes', () => {
+      cy.get('[data-testid="create-spec-page-title"]').should('be.visible')
+
       cy.withCtx(async (ctx, { testState }) => {
-        await new Promise(async (res, rej) => {
-          setTimeout(() => rej('Generated spec was not detected by spec watcher'), 5000)
-
-          ctx.project.getSpecWatcher()?.on('all', (event, path) => {
-            expect(path).eq(testState.newFilePath)
-            res(null)
-          })
-
-          await ctx.actions.file.writeFileInProject(testState.newFilePath, '')
-        })
+        await ctx.actions.file.writeFileInProject(testState.newFilePath, '')
       })
 
       cy.wait(1000)
