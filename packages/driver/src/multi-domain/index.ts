@@ -84,9 +84,9 @@ const setup = () => {
   Cypress.on('log:added', onLogAdded)
   Cypress.on('log:changed', onLogChanged)
 
-  specBridgeCommunicator.on('run:domain:fn', (data) => {
+  specBridgeCommunicator.on('run:domain:fn', ({ data, fn }) => {
     // TODO: await this if it's a promise, or do whatever cy.then does
-    window.eval(`(${data.fn})`)(data.data)
+    window.eval(`(${fn})`)(data)
 
     specBridgeCommunicator.toPrimary('ran:domain:fn')
   })
