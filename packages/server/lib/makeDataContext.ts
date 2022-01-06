@@ -7,7 +7,7 @@ import type {
   AllModeOptions,
   AllowedState,
   FoundBrowser,
-  FullConfig
+  FullConfig,
   InitializeProjectOptions,
   LaunchOpts,
   OpenProjectLaunchOptions,
