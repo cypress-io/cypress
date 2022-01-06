@@ -1,5 +1,6 @@
 module.exports = {
   'e2e': {
+    'supportFile': false,
     setupNodeEvents (on, config) {
       on('before:browser:launch', (browser) => {
         const { name } = browser

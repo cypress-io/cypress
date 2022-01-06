@@ -9,6 +9,7 @@ export default defineConfig({
   'experimentalFetchPolyfill': true,
   'e2e': {
     'specPattern': 'cypress/integration/**/*',
+    'supportFile': false,
   },
   'component': {
     'specPattern': 'cypress/component/**/*spec.{js,ts,tsx}',
