@@ -227,7 +227,7 @@ const PatchExpressSetHeader: ResponseMiddleware = function () {
 
 const isAUTFrame = (req) => !!req.headers['x-cypress-is-aut-frame']
 
-const MaybeDelayForMultidomain: ResponseMiddleware = function () {
+const MaybeDelayForMultiDomain: ResponseMiddleware = function () {
   const isCrossDomain = !reqMatchesOriginPolicy(this.req, this.getRemoteState())
   const isHTML = resContentTypeIs(this.incomingRes, 'text/html')
   const isRenderedHTML = reqWillRenderHtml(this.req)
@@ -282,7 +282,7 @@ const SetInjectionLevel: ResponseMiddleware = function () {
     if (!isReqMatchOriginPolicy && isTheAUTFrame && (isHTML || isRenderedHTML)) {
       this.debug('- multi-domain injection')
 
-      return 'fullMultidomain'
+      return 'fullMultiDomain'
     }
 
     if (!isHTML || !isReqMatchOriginPolicy && !isTheAUTFrame) {
@@ -508,7 +508,7 @@ export default {
   AttachPlainTextStreamFn,
   InterceptResponse,
   PatchExpressSetHeader,
-  MaybeDelayForMultidomain,
+  MaybeDelayForMultiDomain,
   SetInjectionLevel,
   OmitProblematicHeaders,
   MaybePreventCaching,

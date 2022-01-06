@@ -138,8 +138,8 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
   isStable: IStability['isStable']
   whenStable: IStability['whenStable']
-  isAnticipatingMultidomain: IStability['isAnticipatingMultidomain']
-  whenStableOrAnticipatingMultidomain: IStability['whenStableOrAnticipatingMultidomain']
+  isAnticipatingMultiDomain: IStability['isAnticipatingMultiDomain']
+  whenStableOrAnticipatingMultiDomain: IStability['whenStableOrAnticipatingMultiDomain']
 
   assert: IAssertions['assert']
   verifyUpcomingAssertions: IAssertions['verifyUpcomingAssertions']
@@ -251,8 +251,8 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
     this.isStable = stability.isStable
     this.whenStable = stability.whenStable
-    this.isAnticipatingMultidomain = stability.isAnticipatingMultidomain
-    this.whenStableOrAnticipatingMultidomain = stability.whenStableOrAnticipatingMultidomain
+    this.isAnticipatingMultiDomain = stability.isAnticipatingMultiDomain
+    this.whenStableOrAnticipatingMultiDomain = stability.whenStableOrAnticipatingMultiDomain
 
     const assertions = createAssertions(Cypress, this)
 
@@ -560,7 +560,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
         // we expect a cross-origin error and are setting things up
         // elsewhere to handle running cross-domain, so don't fail
         // because of it
-        if (this.state('readyForMultidomain')) {
+        if (this.state('readyForMultiDomain')) {
           signalStable()
 
           return
