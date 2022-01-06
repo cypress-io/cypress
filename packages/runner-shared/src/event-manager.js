@@ -427,6 +427,7 @@ export const eventManager = {
     })
 
     Cypress.on('log:added', (log) => {
+      // console.log('log:added', log)
       const displayProps = Cypress.runner.getDisplayPropsForLog(log)
 
       this._interceptStudio(displayProps)
@@ -435,6 +436,7 @@ export const eventManager = {
     })
 
     Cypress.on('log:changed', (log) => {
+      // console.log('log:changed', log)
       const displayProps = Cypress.runner.getDisplayPropsForLog(log)
 
       this._interceptStudio(displayProps)

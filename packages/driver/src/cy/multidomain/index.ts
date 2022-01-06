@@ -2,6 +2,7 @@ import Bluebird from 'bluebird'
 import { createDeferred } from '../../util/deferred'
 import $utils from '../../cypress/utils'
 import $errUtils from '../../cypress/error_utils'
+import { difference } from '../../util/difference'
 
 export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: Cypress.State, config: Cypress.InternalConfig) {
   let timeoutId
@@ -98,16 +99,39 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
 
           const log = Cypress.log(attrs)
 
-          logs[log.get('id')] = log
+          // if the log needs to stream updates, defer its result
+          if (!attrs.ended) {
+            logs[log.get('id')] = {
+              log,
+              deferred: createDeferred(),
+            }
+          }
 
           return
         }
 
         if (details.logChanged) {
-          const log = logs[details.logChanged.id]
+          const readableLog = logs[details.logChanged.id].log.get()
 
-          if (log) {
-            log.set(details.logChanged)
+          const diff = difference(details.logChanged, readableLog)
+
+          Object.keys(diff).forEach((key) => {
+            const logResults = details.logChanged[key]
+
+            // TODO: whitelist params but try this first to see if problem resolves
+            // if its undefined or null, but is an object that is empty, skip it
+            if (logResults !== undefined && logResults !== null && !(_.isObject(logResults) && _.isEmpty(logResults))) {
+              logs[details.logChanged.id].log.set(key, logResults)
+            }
+          })
+
+          const isEnded = logs[details.logChanged.id].log.get('ended')
+
+          if (isEnded) {
+            const log = logs[details.logChanged.id]
+
+            delete logs[details.logChanged.id]
+            log.deferred.resolve()
           }
 
           return
@@ -126,13 +150,28 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
       communicator.on('command:enqueued', addCommand)
       communicator.on('command:update', updateCommand)
 
-      return new Bluebird((resolve, reject) => {
-        communicator.once('ran:domain:fn', resolve)
+      const cleanup = async () => {
+        communicator.off('command:enqueued', addCommand)
 
-        communicator.once('queue:finished', () => {
-          communicator.off('command:enqueued', addCommand)
+        // don't allow for new commands to be enqueued, but wait for commands to update in the secondary domain
+        const pendingCommands = Object.keys(commands).map((command) => commands[command].deferred.promise)
+        const pendingLogs = Object.keys(logs).filter((log) => logs[log]?.deferred).map((log) => logs[log].deferred.promise)
+
+        return Promise.all(pendingCommands.concat(pendingLogs)).then(() => {
           communicator.off('command:update', updateCommand)
         })
+      }
+
+      return new Bluebird((resolve, reject) => {
+        communicator.once('ran:domain:fn', () => {
+          // if 'done is NOT passed in
+          // all commands in the secondary should be enqueued here. go ahead and bind the cleanup method for when the queue finishes
+          // if done is passed in, wait to unbind this method
+          // cleanup()
+          resolve()
+        })
+
+        communicator.once('queue:finished', cleanup)
 
         // fired once the spec bridge is set up and ready to
         // receive messages
