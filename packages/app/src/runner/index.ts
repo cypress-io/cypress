@@ -27,13 +27,13 @@ import { client } from '@packages/socket/lib/browser'
 
 let _eventManager: EventManager | undefined
 
-export function createWebsocket () {
-  function decodeBase64Unicode (str: string) {
-    return decodeURIComponent(atob(str).split('').map((char) => {
-      return `%${(`00${char.charCodeAt(0).toString(16)}`).slice(-2)}`
-    }).join(''))
-  }
+function decodeBase64Unicode (str: string) {
+  return decodeURIComponent(atob(str).split('').map((char) => {
+    return `%${(`00${char.charCodeAt(0).toString(16)}`).slice(-2)}`
+  }).join(''))
+}
 
+export function createWebsocket () {
   const config = JSON.parse(decodeBase64Unicode(window.__CYPRESS_CONFIG__.base64Config)) as Cypress.Config
 
   const socketConfig = {
@@ -287,12 +287,6 @@ function runSpecE2E (spec: BaseSpec) {
  */
 async function initialize () {
   isTorndown = false
-
-  function decodeBase64Unicode (str: string) {
-    return decodeURIComponent(atob(str).split('').map((char) => {
-      return `%${(`00${char.charCodeAt(0).toString(16)}`).slice(-2)}`
-    }).join(''))
-  }
 
   const config = JSON.parse(decodeBase64Unicode(window.__CYPRESS_CONFIG__.base64Config)) as Cypress.Config
 

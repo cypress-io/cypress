@@ -29,7 +29,7 @@ import devServer from './plugins/dev-server'
 import preprocessor from './plugins/preprocessor'
 import { SpecsStore } from './specs-store'
 import { checkSupportFile } from './project_utils'
-import type { FoundBrowser, OpenProjectLaunchOptions } from '@packages/types'
+import type { FoundBrowser, OpenProjectLaunchOptions, TestingType } from '@packages/types'
 import { DataContext, getCtx } from '@packages/data-context'
 
 // Cannot just use RuntimeConfigOptions as is because some types are not complete.
@@ -42,6 +42,7 @@ type ReceivedCypressOptions =
 export interface Cfg extends ReceivedCypressOptions {
   projectRoot: string
   proxyServer?: Cypress.RuntimeConfigOptions['proxyUrl']
+  testingType: TestingType
   exit?: boolean
   state?: {
     firstOpened?: number | null
@@ -559,7 +560,10 @@ export class ProjectBase<TServer extends Server> extends EE {
   }
 
   async initializeConfig (): Promise<Cfg> {
-    let theCfg: Cfg = await this.ctx.lifecycleManager.getFullInitialConfig() as Cfg // ?? types are definitely wrong here I think
+    let theCfg: Cfg = {
+      ...(await this.ctx.lifecycleManager.getFullInitialConfig()),
+      testingType: this.testingType,
+    } as Cfg // ?? types are definitely wrong here I think
 
     theCfg = this.testingType === 'e2e'
       ? theCfg

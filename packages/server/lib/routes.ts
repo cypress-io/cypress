@@ -1,5 +1,4 @@
 import httpProxy from 'http-proxy'
-import _ from 'lodash'
 import Debug from 'debug'
 import { ErrorRequestHandler, Router } from 'express'
 import send from 'send'
@@ -10,7 +9,7 @@ import type { Browser } from './browsers/types'
 import type { NetworkProxy } from '@packages/proxy'
 import type { Cfg } from './project-base'
 import xhrs from './controllers/xhrs'
-import { runner, ServeOptions } from './controllers/runner'
+import { runner } from './controllers/runner'
 import { iframesController } from './controllers/iframes'
 import type { DataContext } from '@packages/data-context/src/DataContext'
 
@@ -42,34 +41,6 @@ export const createCommonRoutes = ({
   ctx,
   exit,
 }: InitializeRoutes) => {
-  const makeServeConfig = (options: Partial<ServeOptions>) => {
-    const config = {
-      ...options.config,
-      testingType,
-      browser: options.getCurrentBrowser?.(),
-      specs: options.specsStore?.specFiles,
-    } as Cfg
-
-    if (testingType === 'e2e') {
-      config.remote = getRemoteState()
-    }
-
-    // TODO: move the component file watchers in here
-    // and update them in memory when they change and serve
-    // them straight to the HTML on load
-
-    debug('serving runner index.html with config %o',
-      _.pick(config, 'version', 'platform', 'arch', 'projectName'))
-
-    // base64 before embedding so user-supplied contents can't break out of <script>
-    // https://github.com/cypress-io/cypress/issues/4952
-
-    return {
-      ...config,
-      projectName: config.projectName,
-    }
-  }
-
   const router = Router()
   const { clientRoute, namespace } = config
 
@@ -115,13 +86,7 @@ export const createCommonRoutes = ({
     debug('Serving Cypress front-end by requested URL:', req.url)
 
     if (process.env.LAUNCHPAD) {
-      const options = makeServeConfig({
-        config,
-        getCurrentBrowser,
-        specsStore,
-      })
-
-      ctx.html.appHtml(options)
+      ctx.html.appHtml()
       .then((html) => res.send(html))
       .catch((e) => res.status(500).send({ stack: e.stack }))
     } else {
