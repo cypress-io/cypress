@@ -35,7 +35,7 @@ describe('App: Runs', () => {
     it('when logged out, shows call to action', () => {
       cy.visitApp()
       cy.get('[href="#/runs"]').click()
-      cy.contains('Log In').should('exist')
+      cy.contains(defaultMessages.runs.connect.buttonUser).should('exist')
     })
 
     it('clicking the login button will open the login modal', () => {
