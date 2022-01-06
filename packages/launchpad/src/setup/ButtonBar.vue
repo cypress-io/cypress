@@ -26,7 +26,9 @@
           for="altFn"
           class="px-3 text-gray-500"
           @click="handleAlt"
-        >{{ alt }}</label>
+        >
+          {{ alt }}
+        </label>
         <Switch
           size="lg"
           name="altFn"

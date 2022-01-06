@@ -6,7 +6,6 @@ import type { ResolvedFromConfig, ResolvedConfigurationOptionSource, AllModeOpti
 import configUtils from '@packages/config'
 
 import errors from './errors'
-import scaffold from './scaffold'
 import { fs } from './util/fs'
 import keys from './util/keys'
 import origin from './util/origin'
@@ -47,59 +46,26 @@ export const utils = {
     return require.resolve(name)
   },
 
-  // tries to find support or plugins file
   // returns:
   //   false - if the file should not be set
   //   string - found filename
   //   null - if there is an error finding the file
   discoverModuleFile (options) {
     debug('discover module file %o', options)
-    const { filename, isDefault } = options
+    const { filename } = options
 
-    if (!isDefault) {
-      // they have it explicitly set, so it should be there
-      return fs.pathExists(filename)
-      .then((found) => {
-        if (found) {
-          debug('file exists, assuming it will load')
-
-          return filename
-        }
-
-        debug('could not find %o', { filename })
-
-        return null
-      })
-    }
-
-    // support or plugins file doesn't exist on disk?
-    debug(`support file is default, check if ${path.dirname(filename)} exists`)
-
+    // they have it explicitly set, so it should be there
     return fs.pathExists(filename)
     .then((found) => {
       if (found) {
-        debug('is there index.ts in the support or plugins folder %s?', filename)
-        const tsFilename = path.join(filename, 'index.ts')
+        debug('file exists, assuming it will load')
 
-        return fs.pathExists(tsFilename)
-        .then((foundTsFile) => {
-          if (foundTsFile) {
-            debug('found index TS file %s', tsFilename)
-
-            return tsFilename
-          }
-
-          // if the directory exists, set it to false so it's ignored
-          debug('setting support or plugins file to false')
-
-          return false
-        })
+        return filename
       }
 
-      debug('folder does not exist, set to default index.js')
+      debug('could not find %o', { filename })
 
-      // otherwise, set it up to be scaffolded later
-      return path.join(filename, 'index.js')
+      return null
     })
   },
 }
@@ -215,8 +181,6 @@ export function mergeDefaults (
 
   config = setAbsolutePaths(config)
 
-  config = setParentTestsPaths(config)
-
   config = setNodeBinary(config, options.userNodePath, options.userNodeVersion)
 
   configUtils.validateNoBreakingConfig(config, errors.warning, (err, ...args) => {
@@ -224,7 +188,6 @@ export function mergeDefaults (
   })
 
   return setSupportFileAndFolder(config, defaultsForRuntime)
-  .then(setScaffoldPaths)
 }
 
 export function setResolvedConfigValues (config, defaults, resolved) {
@@ -384,20 +347,6 @@ export const setNodeBinary = (obj, userNodePath, userNodeVersion) => {
   return obj
 }
 
-export function setScaffoldPaths (obj) {
-  obj = _.clone(obj)
-
-  debug('set scaffold paths')
-
-  return scaffold.fileTree(obj)
-  .then((fileTree) => {
-    debug('got file tree')
-    obj.scaffoldedFiles = fileTree
-
-    return obj
-  })
-}
-
 // async function
 export function setSupportFileAndFolder (obj, defaults) {
   if (!obj.supportFile) {
@@ -444,11 +393,8 @@ export function setSupportFileAndFolder (obj, defaults) {
   }).catch({ code: 'MODULE_NOT_FOUND' }, () => {
     debug('support JS module %s does not load', sf)
 
-    const loadingDefaultSupportFile = sf === path.resolve(obj.projectRoot, defaults.supportFile)
-
     return utils.discoverModuleFile({
       filename: sf,
-      isDefault: loadingDefaultSupportFile,
       projectRoot: obj.projectRoot,
     })
     .then((result) => {
@@ -473,24 +419,6 @@ export function setSupportFileAndFolder (obj, defaults) {
 
     return obj
   })
-}
-
-export function setParentTestsPaths (obj) {
-  // projectRoot:              "/path/to/project"
-  // integrationFolder:        "/path/to/project/cypress/integration"
-  // componentFolder:          "/path/to/project/cypress/components"
-  // parentTestsFolder:        "/path/to/project/cypress"
-  // parentTestsFolderDisplay: "project/cypress"
-
-  obj = _.clone(obj)
-
-  const ptfd = (obj.parentTestsFolder = path.dirname(obj.integrationFolder))
-
-  const prd = path.dirname(obj.projectRoot != null ? obj.projectRoot : '')
-
-  obj.parentTestsFolderDisplay = path.relative(prd, ptfd)
-
-  return obj
 }
 
 export function setAbsolutePaths (obj) {

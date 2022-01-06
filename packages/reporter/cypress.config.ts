@@ -14,6 +14,8 @@ export default defineConfig({
     'openMode': 0,
   },
   'e2e': {
+    'supportFile': 'cypress/support/e2e.ts',
+    'specPattern': 'cypress/integration/**/*.{js,ts}',
     setupNodeEvents (on, config) {
       const express = require('express')
 
@@ -21,7 +23,7 @@ export default defineConfig({
 
       return config
     },
-    viewportHeight: 660,
-    viewportWidth: 1000,
+    'viewportHeight': 660,
+    'viewportWidth': 1000,
   },
 })

@@ -64,23 +64,23 @@ describe('Sidebar Navigation', () => {
     cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'false')
 
     cy.get('[data-cy="sidebar-header"').realHover()
-    cy.contains('#tooltip-target > div', 'todos').should('be.visible')
+    cy.contains('#tooltip-target > div', 'todos')
     cy.get('[data-cy="sidebar-header"]').trigger('mouseout')
 
     cy.get('[data-cy="switch-testing-type"]').realHover()
-    cy.contains('#tooltip-target > div', 'E2E Testing').should('be.visible')
+    cy.contains('#tooltip-target > div', 'E2E Testing')
     cy.get('[data-cy="switch-testing-type"]').trigger('mouseout')
 
     cy.get('[data-e2e-href="/runs"]').realHover()
-    cy.contains('#tooltip-target > div', 'Runs').should('be.visible')
+    cy.contains('#tooltip-target > div', 'Runs')
     cy.get('[data-e2e-href="/runs"]').trigger('mouseout')
 
     cy.get('[data-e2e-href="/specs"]').realHover()
-    cy.contains('#tooltip-target > div', 'Specs').should('be.visible')
+    cy.contains('#tooltip-target > div', 'Specs')
     cy.get('[data-e2e-href="/specs"]').trigger('mouseout')
 
     cy.get('[data-e2e-href="/settings"]').realHover()
-    cy.contains('#tooltip-target > div', 'Settings').should('be.visible')
+    cy.contains('#tooltip-target > div', 'Settings')
     cy.get('[data-e2e-href="/settings"]').trigger('mouseout')
   })
 

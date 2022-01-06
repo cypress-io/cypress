@@ -44,7 +44,7 @@ const Runner = {
       const config = JSON.parse(driverUtils.decodeBase64Unicode(base64Config))
 
       const NO_COMMAND_LOG = config.env && config.env.NO_COMMAND_LOG
-      const useInlineSpecList = (config.env || {}).CypressInternal_UseInlineSpecList
+      const useInlineSpecList = false
 
       const state = new State({
         reporterWidth: NO_COMMAND_LOG ? 0 : (config.state || {}).reporterWidth,
@@ -70,7 +70,7 @@ const Runner = {
         const { spec } = state
 
         if (spec) {
-          util.updateIntegrationSpecPath(spec.name)
+          util.updateIntegrationSpecPath(spec.baseName)
         }
       })
 

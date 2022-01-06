@@ -5,7 +5,7 @@ import { executeExchange } from '@urql/exchange-execute'
 import { makeCacheExchange } from '@packages/frontend-shared/src/graphql/urqlClient'
 import { clientTestSchema } from './clientTestSchema'
 import type { ClientTestContext } from './clientTestContext'
-import { defaultTypeResolver, FieldNode, GraphQLFieldResolver, GraphQLResolveInfo, GraphQLTypeResolver, isNonNullType } from 'graphql'
+import { defaultTypeResolver, FieldNode, GraphQLFieldResolver, GraphQLResolveInfo, GraphQLTypeResolver, introspectionFromSchema, isNonNullType } from 'graphql'
 import { stubWizard } from './stubgql-Wizard'
 import type { CodegenTypeMap } from '../generated/test-graphql-types.gen'
 import type { MaybeResolver } from './clientTestUtils'
@@ -15,6 +15,7 @@ import dedent from 'dedent'
 import { stubQuery } from './stubgql-Query'
 import { stubGlobalProject, stubProject } from './stubgql-Project'
 import { CloudOrganizationStubs, CloudProjectStubs, CloudRecordKeyStubs, CloudRunStubs } from './stubgql-CloudTypes'
+import { stubMigration } from './stubgql-Migration'
 
 type MaybeResolveMap = {[K in keyof CodegenTypeMap]: MaybeResolver<CodegenTypeMap[K]>}
 
@@ -23,6 +24,7 @@ const GQLStubRegistry: Partial<MaybeResolveMap> = {
   ProjectLike: stubProject,
   GlobalProject: stubGlobalProject,
   CurrentProject: stubProject,
+  Migration: stubMigration,
   Mutation: stubMutation,
   Query: stubQuery,
   CloudOrganization: CloudOrganizationStubs.cyOrg,
@@ -42,7 +44,7 @@ export function testUrqlClient (context: ClientTestContext, onResult?: (result: 
           console.error(error)
         },
       }),
-      makeCacheExchange(),
+      makeCacheExchange(introspectionFromSchema(clientTestSchema)),
       ({ forward }) => {
         return (ops$) => {
           return pipe(
