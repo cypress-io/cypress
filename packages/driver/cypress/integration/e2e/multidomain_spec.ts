@@ -181,6 +181,32 @@ describe('multidomain', { experimentalSessionSupport: true }, () => {
       })
     })
 
+    it('propagates thrown errors in the secondary domain back to the primary w/ done', (done) => {
+      cy.on('fail', (e) => {
+        expect(e.message).to.equal('oops')
+        done()
+      })
+
+      // @ts-ignore
+      cy.switchToDomain('foobar.com', () => {
+        throw 'oops'
+      })
+    })
+
+    it('propagates thrown errors in the secondary domain back to the primary w/o done', () => {
+      return new Promise((resolve) => {
+        cy.on('fail', (e) => {
+          expect(e.message).to.equal('oops')
+          resolve(undefined)
+        })
+
+        // @ts-ignore
+        cy.switchToDomain('foobar.com', () => {
+          throw 'oops'
+        })
+      })
+    })
+
     // TODO: this following tests needs to be implemented in a cy-in-cy test or more e2e style test as we need to test the 'done' function
     it('propagates user defined secondary domain errors to the primary')
 

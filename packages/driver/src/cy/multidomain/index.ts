@@ -120,15 +120,27 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
       communicator.on('command:update', updateCommand)
 
       return new Bluebird((resolve, reject) => {
-        communicator.once('run:domain:fn', (err) => err ? reject(err) : resolve())
-
-        communicator.once('unbind:done:called', unbindDone)
-
-        communicator.once('queue:finished', () => {
+        const cleanup = () => {
           communicator.off('command:enqueued', addCommand)
           communicator.off('command:update', updateCommand)
           communicator.off('unbind:done:called', unbindDone)
+          communicator.off('queue:finished', cleanup)
+        }
+
+        communicator.once('run:domain:fn', (err) => {
+          if (err) {
+            cleanup()
+            reject(err)
+
+            return
+          }
+
+          resolve()
         })
+
+        communicator.once('unbind:done:called', unbindDone)
+
+        communicator.once('queue:finished', cleanup)
 
         // fired once the spec bridge is set up and ready to
         // receive messages
