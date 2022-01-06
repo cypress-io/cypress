@@ -1,4 +1,5 @@
 import type { Interception } from '@packages/net-stubbing/lib/external-types'
+import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 
 describe('App: Runs', () => {
   beforeEach(() => {
@@ -70,11 +71,10 @@ describe('App: Runs', () => {
       cy.visitApp()
 
       cy.get('[href="#/runs"]').click()
-      cy.contains('Connect your project').should('exist')
+      cy.contains(defaultMessages.runs.connect.buttonProject).should('exist')
     })
 
-    // TODO: does not open modal
-    it.skip('opens Connect Project modal after clicking Connect Project button', () => {
+    it('opens Connect Project modal after clicking Connect Project button', () => {
       cy.withCtx(async (ctx) => {
         await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {}')
       })
@@ -83,12 +83,12 @@ describe('App: Runs', () => {
       cy.visitApp()
 
       cy.get('[href="#/runs"]').click()
-      cy.findByText('Connect your project to the Cypress Dashboard').click()
+      cy.findByText(defaultMessages.runs.connect.buttonProject).click()
     })
   })
 
   context('Runs - Cannot Find Project', () => {
-    // TODO: still generates run list regardless of projectID
+    // TODO: cannot currently test
     it.skip('if project Id is specified in config file that does not exist, shows call to action', () => {
       cy.withCtx(async (ctx) => {
         await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {\'projectId\': \'abcdef\'}')
@@ -98,10 +98,10 @@ describe('App: Runs', () => {
       cy.visitApp()
 
       cy.get('[href="#/runs"]').click()
-      cy.contains('Reconnect project').should('exist')
+      cy.contains(defaultMessages.runs.errors.notfound.title).should('exist')
     })
 
-    // TODO: does not open modal
+    // TODO: cannot currently test
     it.skip('opens Connect Project modal after clicking Reconnect Project button', () => {
       cy.withCtx(async (ctx) => {
         await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {\'projectId\': \'abcdef\'}')
@@ -111,12 +111,16 @@ describe('App: Runs', () => {
       cy.visitApp()
 
       cy.get('[href="#/runs"]').click()
-      cy.findByText('Connect your project to the Cypress Dashboard').click()
+      cy.findByText(defaultMessages.runs.errors.notfound.button).click()
     })
   })
 
   context('Runs - No Runs', () => {
-    it('when no runs, shows call to action', () => {
+    it('when no runs and not connected, shows connect to dashboard button', () => {
+      cy.withCtx(async (ctx) => {
+        await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {projectId: null}')
+      })
+
       cy.loginUser()
       cy.remoteGraphQLIntercept(async (obj) => {
         // Currently, all remote requests go through here, we want to use this to modify the
@@ -134,12 +138,12 @@ describe('App: Runs', () => {
 
       cy.visitApp()
       cy.get('[href="#/runs"]').click()
-      cy.get('[data-cy="no-runs"]')
+      cy.findByText(defaultMessages.runs.connect.buttonProject).should('exist')
     })
 
-    it('displays the projectId as it is in their config file', () => {
+    it('displays how to record prompt when connected and no runs', () => {
       cy.withCtx(async (ctx) => {
-        await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {\'projectId\': \'abcdef\'}')
+        await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {projectId: \'abcdef\'}')
       })
 
       cy.loginUser()
@@ -157,47 +161,8 @@ describe('App: Runs', () => {
 
       cy.visitApp()
       cy.get('[href="#/runs"]').click()
-      cy.contains('projectId: \'abcdef\'')
-    })
-
-    it('displays correct source control instructions', () => {
-      cy.loginUser()
-      cy.remoteGraphQLIntercept(async (obj) => {
-        if (obj.result.data?.cloudProjectsBySlugs) {
-          for (const proj of obj.result.data.cloudProjectsBySlugs) {
-            if (proj.runs?.nodes) {
-              proj.runs.nodes = []
-            }
-          }
-        }
-
-        return obj.result
-      })
-
-      cy.visitApp()
-      cy.get('[href="#/runs"]').click()
-      cy.contains('Ensure that your cypress.config.js file is checked into source control:')
-      cy.get('[data-cy="copy-button"]').first().click()
-      cy.contains('Copied!')
-    })
-
-    it('displays correct instructions on how to record a run', () => {
-      cy.loginUser()
-      cy.remoteGraphQLIntercept(async (obj) => {
-        if (obj.result.data?.cloudProjectsBySlugs) {
-          for (const proj of obj.result.data.cloudProjectsBySlugs) {
-            if (proj.runs?.nodes) {
-              proj.runs.nodes = []
-            }
-          }
-        }
-
-        return obj.result
-      })
-
-      cy.visitApp()
-      cy.get('[href="#/runs"]').click()
-      cy.contains('Run this command in your local development terminal or in CI:')
+      cy.contains(defaultMessages.runs.empty.title)
+      cy.contains(defaultMessages.runs.empty.description)
       cy.contains('--record --key 2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa')
       cy.get('[data-cy="copy-button"]').last().click()
       cy.contains('Copied!')
