@@ -12,22 +12,26 @@ const torep = [
   { old: '-cy.tsx', new: '.cy.tsx', },
   { old: '-cy.ts', new: '.cy.ts', },
 ]
+
 glob('./**/*cy.js', { onlyFiles: true }).then(arr => {
   // console.log(arr)
+  const f = new Set()
 
   const towrite = []
-  for (const a of arr) {
+  for (const a of new Set(arr)) {
     for (const repl of torep) {
-      if (a.endsWith(repl.old)) {
-        if (repl.old === torep[0].old) {
-          console.log({ a })
+
+      if (a.endsWith(repl.old) && !f.has(a)) {
+        let n = a.replace(repl.old, repl.new)
+        towrite.push({ a, n })
+
+        if (a === 'examples/webpack-options/cypress/e2e/cy-cy.js') {
+          console.log( { a, n })
         }
 
-        const n = a.replace(repl.old, repl.new)
-        if (a !== n) {
-          towrite.push({ a, n })
-          continue
-        }
+        f.add(a)
+
+        continue
       }
     }
   }
@@ -36,7 +40,7 @@ glob('./**/*cy.js', { onlyFiles: true }).then(arr => {
   for (const { a, n } of towrite) {
     try {
       console.log(`Renaming: \n${a}\n${n}`)
-      fs.renameSync(a, n)
+      // fs.renameSync(a, n)
     } catch (e) {
       console.log('error for ', a, n)
     }
