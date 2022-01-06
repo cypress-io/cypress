@@ -3,12 +3,14 @@ const path = require('path')
 const glob = require('globby')
 
 const torep = [
+  { old: '/cy-cy.jsx', new: '/spec.cy.jsx', },
   { old: '/cy-cy.js', new: '/spec.cy.js', },
+  { old: 'cy-cy.jsx', new: 'cy.jsx', },
   { old: 'cy-cy.js', new: 'cy.js', },
   { old: 'cy-cy.jsx', new: 'cy.jsx', },
   { old: '.cy-cy.tsx', new: '.cy.tsx', },
-  { old: '-cy.js', new: '.cy.js', },
   { old: '-cy.jsx', new: '.cy.jsx', },
+  { old: '-cy.js', new: '.cy.js', },
   { old: '-cy.tsx', new: '.cy.tsx', },
   { old: '-cy.ts', new: '.cy.ts', },
 ]
@@ -40,7 +42,7 @@ glob('./**/*cy.js', { onlyFiles: true }).then(arr => {
   for (const { a, n } of towrite) {
     try {
       console.log(`Renaming: \n${a}\n${n}`)
-      // fs.renameSync(a, n)
+      fs.renameSync(a, n)
     } catch (e) {
       console.log('error for ', a, n)
     }
