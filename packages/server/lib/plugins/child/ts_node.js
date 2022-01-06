@@ -2,7 +2,7 @@
 const debugLib = require('debug')
 const path = require('path')
 const tsnode = require('ts-node')
-const resolve = require('./resolve')
+const resolve = require('../../util/resolve')
 
 const debug = debugLib('cypress:server:ts-node')
 
