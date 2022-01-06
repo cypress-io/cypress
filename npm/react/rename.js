@@ -26,6 +26,7 @@ glob('./**/*cy.js', { onlyFiles: true }).then(arr => {
 
   for (const { a, n } of towrite) {
     try {
+      console.log(`Renaming: \n${a}\n${n}`)
       fs.renameSync(a, n)
     } catch (e) {
       console.log('error for ', a, n)
