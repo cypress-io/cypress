@@ -36,7 +36,7 @@ export class SocketAllowed {
    */
   isRequestAllowed (req: Request) {
     const { remotePort, remoteAddress } = req.socket
-    const isAllowed = this.allowedLocalPorts.includes(remotePort!)
+    const isAllowed = (this.allowedLocalPorts.includes(remotePort!) || req.headers['x-cypress-forwarded-from-proxy'])
       && ['127.0.0.1', '::1'].includes(remoteAddress!)
 
     debug('is incoming request allowed? %o', { isAllowed, reqUrl: req.url, remotePort, remoteAddress })

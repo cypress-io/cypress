@@ -9,6 +9,7 @@ import type { Browser, FoundBrowser, OpenModeOptions } from '@packages/types'
 import { browsers } from '@packages/types/src/browser'
 import type { E2ETaskMap } from '../e2ePluginSetup'
 import installCustomPercyCommand from '@packages/ui-components/cypress/support/customPercyCommand'
+import browser from 'webextension-polyfill'
 
 configure({ testIdAttribute: 'data-cy' })
 
@@ -183,10 +184,12 @@ function startAppServer (mode: 'component' | 'e2e' = 'e2e') {
 
       await ctx.actions.project.launchProject(o.mode, {})
 
-      return ctx.appServerPort
-    }, { log: false, mode }).then((serverPort) => {
-      log.set({ message: `port: ${serverPort}` })
-      Cypress.env('e2e_serverPort', serverPort)
+      return { appServerPort: ctx.appServerPort, socketIoRoute: ctx.coreData.servers.appSocketServer?.path() }
+    }, { log: false, mode }).then(async ({ appServerPort, socketIoRoute }) => {
+      log.set({ message: `port: ${appServerPort}` })
+      Cypress.env('e2e_serverPort', appServerPort)
+
+      await browser.runtime.sendMessage('caljajdfkjjjdehjdoimjkkakekklcck', { host: `http://localhost:${appServerPort}`, path: socketIoRoute }, {})
     })
   })
 }
@@ -202,7 +205,8 @@ function visitApp (href?: string) {
     `)
   }
 
-  return cy.visit(`http://localhost:${e2e_serverPort}/__/#${href || ''}`)
+  // TODO: Figure out how to retrieve the client route and use that instead of cy-child
+  return cy.visit(`http://localhost:${e2e_serverPort}/cy-child/#${href || ''}`)
 }
 
 function visitLaunchpad () {
