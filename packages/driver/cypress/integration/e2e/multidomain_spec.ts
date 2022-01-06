@@ -104,8 +104,13 @@ describe('multidomain', { experimentalSessionSupport: true, experimentalMultiDom
 
       it('errors if passed a non-serializable data value', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('data value provided is not serializable')
-          expect(err.message).to.include('Failed to execute \'postMessage\'')
+          expect(err.message).to.include('data argument specified is not serializable')
+
+          if (Cypress.browser.family === 'chromium') {
+            expect(err.message).to.include('Failed to execute \'postMessage\'')
+          } else if (Cypress.browser.family === 'firefox') {
+            expect(err.message).to.include('The object could not be cloned')
+          }
 
           done()
         })

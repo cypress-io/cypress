@@ -1686,7 +1686,7 @@ export default {
 
         > {{error}}
 
-      This is likely because the data value provided is not serializable. Note that functions and DOM objects cannot be serialized.`,
+      This is likely because the data argument specified is not serializable. Note that functions and DOM objects cannot be serialized.`,
       docsUrl: 'https://on.cypress.io/switchToDomain',
     },
   },

@@ -155,7 +155,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
             })
           } catch (err: any) {
             const wrappedErr = $errUtils.errByPath('switchToDomain.run_domain_fn_errored', {
-              error: err.stack,
+              error: err.message,
             })
 
             reject(wrappedErr)
