@@ -327,7 +327,9 @@
       "errorAccessPending": "Your request for access to this project is pending approval",
       "errorAccessButton": "Request access",
       "errorNotFound": "Project not found",
-      "errorNotFoundButton": "Connect it again"
+      "errorNotFoundButton": "Connect it again",
+      "errorNotLoggedIn": "You are not connected to the Cypress Dashboard",
+      "errorNotLoggedInButton": "Log in to Cypress Dashboard"
     },
     "project": {
       "title": "Project Settings",

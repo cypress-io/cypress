@@ -39,13 +39,23 @@
       </Alert>
     </template>
     <Alert
+      v-else-if="!props.gql.cloudViewer"
+      :title="t('settingsPage.recordKey.errorNotLoggedIn')"
+    >
+      <div class="flex justify-end">
+        <Button
+          @click="isLoginOpen = true"
+        >
+          {{ t('settingsPage.recordKey.errorNotLoggedInButton') }}
+        </Button>
+      </div>
+    </Alert>
+    <Alert
       v-else-if="cloudProject?.__typename === 'CloudProjectNotFound'"
       :title="t('settingsPage.recordKey.errorNotFound')"
     >
       <div class="flex justify-end">
-        <Button
-          @click="connectDialog = true"
-        >
+        <Button @click="connectDialog = true">
           {{ t('settingsPage.recordKey.errorNotFoundButton') }}
         </Button>
       </div>
@@ -65,6 +75,10 @@
         </Button>
       </div>
     </Alert>
+    <LoginModal
+      v-model="isLoginOpen"
+      :gql="props.gql"
+    />
     <CloudConnectModals
       v-if="connectDialog"
       :gql="props.gql"
@@ -78,6 +92,7 @@
 <script lang="ts" setup>
 import { computed, Ref, ref } from 'vue'
 import { gql } from '@urql/core'
+import LoginModal from '@cy/gql-components/topnav/LoginModal.vue'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import Alert from '@cy/components/Alert.vue'
 import Button from '@cy/components/Button.vue'
@@ -111,6 +126,7 @@ fragment RecordKeySettings on Query {
     }
   }
   ...CloudConnectModals
+  ...LoginModal
 }
 `
 
@@ -129,6 +145,8 @@ mutation RecordKeySettings_RequestAccess( $projectId: String! ) {
   cloudProjectRequestAccess(projectSlug: $projectId)
 }
 `
+
+const isLoginOpen = ref(false)
 
 const requestAccessMutation = useMutation(RecordKeySettings_RequestAccessDocument)
 
