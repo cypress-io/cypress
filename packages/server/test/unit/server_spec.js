@@ -22,7 +22,7 @@ describe('lib/server', () => {
   beforeEach(function () {
     this.server = new ServerE2E()
 
-    return config.setupFullConfigWithDefaults({ projectRoot: '/foo/bar/' })
+    return config.setupFullConfigWithDefaults({ projectRoot: '/foo/bar/', config: { supportFile: false } })
     .then((cfg) => {
       this.config = cfg
     })

@@ -13,6 +13,7 @@
         "shiki",
         "testid",
         "unplugin",
+        "urql",
         "vite",
         "vitejs",
         "vueuse"

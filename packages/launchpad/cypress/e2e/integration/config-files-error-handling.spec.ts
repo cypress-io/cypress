@@ -27,7 +27,7 @@ describe('Config files error handling', () => {
     .should('not.contain.text', 'Something went wrong')
   })
 
-  it('it shows the upgrade screen if there is a legacy config file', () => {
+  it('shows the upgrade screen if there is a legacy config file', () => {
     cy.openProject('pristine-with-config-file')
     cy.withCtx(async (ctx) => {
       await ctx.actions.file.writeFileInProject('cypress.json', '{}')
@@ -42,7 +42,7 @@ describe('Config files error handling', () => {
     cy.get('body').should('contain.text', defaultMessages.migration.wizard.description)
   })
 
-  it('it handles config files with legacy config file in same project', () => {
+  it('handles config files with legacy config file in same project', () => {
     cy.openProject('pristine-with-config-file')
     cy.withCtx(async (ctx) => {
       await ctx.actions.file.writeFileInProject('cypress.json', '{}')
@@ -58,5 +58,37 @@ describe('Config files error handling', () => {
     })
 
     cy.get('body').should('not.contain.text', 'Cypress no longer supports')
+  })
+
+  it('handles deprecated config fields', () => {
+    cy.openProject('pristine')
+
+    cy.withCtx(async (ctx) => {
+      await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = { experimentalComponentTesting: true }')
+    })
+
+    cy.openProject('pristine')
+
+    cy.visitLaunchpad()
+    cy.get('[data-cy-testingType=e2e]').click()
+    cy.get('body').should('contain.text', 'Something went wrong')
+    cy.get('body').should('contain.text', 'It looks like there\'s some issues that need to be resolved before we continue.')
+    cy.findByText('Error Loading Config')
+  })
+
+  it('handles deprecated fields on root config', () => {
+    cy.openProject('pristine')
+
+    cy.withCtx(async (ctx) => {
+      await ctx.actions.file.writeFileInProject('cypress.config.js', `module.exports = { supportFile: 'cypress/support.ts' }`)
+    })
+
+    cy.openProject('pristine')
+
+    cy.visitLaunchpad()
+    cy.get('[data-cy-testingType=e2e]').click()
+    cy.get('body').should('contain.text', 'Something went wrong')
+    cy.get('body').should('contain.text', 'It looks like there\'s some issues that need to be resolved before we continue.')
+    cy.findByText('Error Loading Config')
   })
 })

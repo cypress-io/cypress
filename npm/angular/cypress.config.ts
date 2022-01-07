@@ -8,6 +8,7 @@ export default defineConfig({
   'projectId': 'nf7zag',
   'component': {
     'specPattern': 'src/app/**/*cy-spec.ts',
+    'supportFile': 'cypress/support/component.ts',
     setupNodeEvents (on, config) {
       return require('./cypress/plugins')(on, config)
     },
