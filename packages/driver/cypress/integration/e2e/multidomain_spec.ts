@@ -193,7 +193,7 @@ describe('multidomain', { experimentalSessionSupport: true }, () => {
       })
     })
 
-    it.only('propagates thrown errors in the secondary domain back to the primary w/o done', () => {
+    it('propagates thrown errors in the secondary domain back to the primary w/o done', () => {
       return new Promise((resolve) => {
         cy.on('fail', (e) => {
           expect(e.message).to.equal('oops')
@@ -207,7 +207,7 @@ describe('multidomain', { experimentalSessionSupport: true }, () => {
       })
     })
 
-    it.only('errors if three arguments are used and the second argument is not the done() fn', (done) => {
+    it('errors if three arguments are used and the second argument is not the done() fn', (done) => {
       cy.on('fail', (err) => {
         expect(err.message).to.equal('`cy.switchToDomain()` must have done as its second argument when three arguments are used.')
 
