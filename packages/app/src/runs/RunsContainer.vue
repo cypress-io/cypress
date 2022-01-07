@@ -59,7 +59,6 @@ fragment RunsContainer on Query {
           }
         }
       }
-      
     }
   }
   cloudViewer {
