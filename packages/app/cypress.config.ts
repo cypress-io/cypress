@@ -16,6 +16,7 @@ export default defineConfig({
   namespace: 'cy-parent',
   socketIoRoute: '/cy-parent-socket',
   socketIoCookie: 'cy-parent-socket',
+  devServerPublicPathRoute: '/cy-parent/src',
   reporter: '../../node_modules/cypress-multi-reporters/index.js',
   reporterOptions: {
     configFile: '../../mocha-reporter-config.json',

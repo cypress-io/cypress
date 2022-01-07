@@ -5,6 +5,7 @@ module.exports = {
   namespace: 'cy-child',
   socketIoRoute: '/cy-child-socket',
   socketIoCookie: 'cy-child-socket',
+  devServerPublicPathRoute: '/cy-child/src',
   experimentalInteractiveRunEvents: true,
   component: {
     specPattern: 'src/**/*.{spec,cy}.{js,ts,tsx,jsx}',
