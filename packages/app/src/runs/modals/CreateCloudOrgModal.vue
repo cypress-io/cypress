@@ -8,14 +8,16 @@
       <p class=" mb-16px text-gray-700">
         {{ t('runs.connect.modal.createOrg.description') }}
       </p>
-      <ExternalLink
-        class="border rounded mx-auto border-gray-100 py-4px px-16px text-indigo-500 inline-block"
-        :href="createOrgUrl"
-        :prefix-icon="OrganizationIcon"
-        prefix-icon-class="icon-light-transparent icon-dark-white"
-      >
-        {{ t('runs.connect.modal.createOrg.button') }}
-      </ExternalLink>
+      <div @click="startPolling()">
+        <ExternalLink
+          class="border rounded mx-auto border-gray-100 py-4px px-16px text-indigo-500 inline-block"
+          :href="createOrgUrl"
+          :prefix-icon="OrganizationIcon"
+          prefix-icon-class="icon-light-transparent icon-dark-white"
+        >
+          {{ t('runs.connect.modal.createOrg.button') }}
+        </ExternalLink>
+      </div>
     </div>
     <template #footer>
       <div class="flex gap-16px">
@@ -100,7 +102,7 @@ const query = useQuery({
   query: CheckCloudOrganizationsDocument,
 })
 
-const polling = ref(true)
+const polling = ref(false)
 
 const { pause, resume } = useIntervalFn(() => {
   if (props?.gql?.organizationControl?.nodes?.length || 0 > 0) {
@@ -121,8 +123,6 @@ function startPolling () {
     polling.value = false
   }, 180000)
 }
-
-startPolling()
 
 const createOrgUrl = computed(() => props.gql.createCloudOrganizationUrl || '#')
 </script>
