@@ -2,7 +2,7 @@ const arch = require('arch')
 const la = require('lazy-ass')
 const is = require('check-more-types')
 const os = require('os')
-const url = require('url')
+const Url = require('url')
 const path = require('path')
 const debug = require('debug')('cypress:cli')
 const request = require('@cypress/request')
@@ -16,6 +16,7 @@ const fs = require('../fs')
 const util = require('../util')
 
 const defaultBaseUrl = 'https://download.cypress.io/'
+const defaultMaxRedirects = 10
 
 const getProxyForUrlWithNpmConfig = (url) => {
   return getProxyForUrl(url) ||
@@ -61,7 +62,7 @@ const getCA = () => {
 }
 
 const prepend = (urlPath) => {
-  const endpoint = url.resolve(getBaseUrl(), urlPath)
+  const endpoint = Url.resolve(getBaseUrl(), urlPath)
   const platform = os.platform()
   const pathParams = util.getEnv('CYPRESS_DOWNLOAD_PATH_PARAMS')
 
@@ -187,7 +188,17 @@ const verifyDownloadedFile = (filename, expectedSize, expectedChecksum) => {
 // downloads from given url
 // return an object with
 // {filename: ..., downloaded: true}
-const downloadFromUrl = ({ url, downloadDestination, progress, ca }) => {
+const downloadFromUrl = ({ url, downloadDestination, progress, ca, version, redirectTTL = defaultMaxRedirects }) => {
+  if (redirectTTL <= 0) {
+    return Promise.reject(new Error(
+      stripIndent`
+          Failed downloading the Cypress binary.
+          There were too many redirects. The default allowance is ${defaultMaxRedirects}.
+          Maybe you got stuck in a redirect loop?
+        `,
+    ))
+  }
+
   return new Promise((resolve, reject) => {
     const proxy = getProxyForUrlWithNpmConfig(url)
 
@@ -197,32 +208,17 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca }) => {
       downloadDestination,
     })
 
-    let redirectVersion
-
-    const reqOptions = {
-      url,
-      proxy,
-      followRedirect (response) {
-        const version = response.headers['x-version']
-
-        debug('redirect version:', version)
-        if (version) {
-          // set the version in options if we have one.
-          // this insulates us from potential redirect
-          // problems where version would be set to undefined.
-          redirectVersion = version
-        }
-
-        // yes redirect
-        return true
-      },
-    }
-
     if (ca) {
       debug('using custom CA details from npm config')
-      reqOptions.agentOptions = { ca }
     }
 
+    const reqOptions = {
+      uri: url,
+      ...(proxy ? { proxy } : {}),
+      ...(ca ? { agentOptions: { ca } } : {}),
+      method: 'GET',
+      followRedirect: false,
+    }
     const req = request(reqOptions)
 
     // closure
@@ -257,8 +253,17 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca }) => {
       // response headers
       started = new Date()
 
-      // if our status code does not start with 200
-      if (!/^2/.test(response.statusCode)) {
+      if (/^3/.test(response.statusCode)) {
+        const redirectVersion = response.headers['x-version']
+        const redirectUrl = response.headers.location
+
+        debug('redirect version:', redirectVersion)
+        debug('redirect url:', redirectUrl)
+        downloadFromUrl({ url: redirectUrl, progress, ca, downloadDestination, version: redirectVersion, redirectTTL: redirectTTL - 1 })
+        .then(resolve).catch(reject)
+
+        // if our status code does not start with 200
+      } else if (!/^2/.test(response.statusCode)) {
         debug('response code %d', response.statusCode)
 
         const err = new Error(
@@ -270,9 +275,30 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca }) => {
         )
 
         reject(err)
+        // status codes here are all 2xx
+      } else {
+        // We only enable this pipe connection when we know we've got a successful return
+        // and handle the completion with verify and resolve
+        // there was a possible race condition between end of request and close of writeStream
+        // that is made ordered with this Promise.all
+        Promise.all([new Promise((r) => {
+          return response.pipe(fs.createWriteStream(downloadDestination).on('close', r))
+        }), new Promise((r) => response.on('end', r))])
+        .then(() => {
+          debug('downloading finished')
+          verifyDownloadedFile(downloadDestination, expectedSize,
+            expectedChecksum)
+          .then(() => debug('verified'))
+          .then(() => resolve(version))
+          .catch(reject)
+        })
       }
     })
-    .on('error', reject)
+    .on('error', (e) => {
+      if (e.code === 'ECONNRESET') return // sometimes proxies give ECONNRESET but we don't care
+
+      reject(e)
+    })
     .on('progress', (state) => {
       // total time we've elapsed
       // starting on our first progress notification
@@ -286,16 +312,6 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca }) => {
       // send up our percent and seconds remaining
       progress.onProgress(percentage, util.secsRemaining(eta))
     })
-    // save this download here
-    .pipe(fs.createWriteStream(downloadDestination))
-    .on('finish', () => {
-      debug('downloading finished')
-
-      verifyDownloadedFile(downloadDestination, expectedSize, expectedChecksum)
-      .then(() => {
-        return resolve(redirectVersion)
-      }, reject)
-    })
   })
 }
 
@@ -305,7 +321,7 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca }) => {
  * @param [string] downloadDestination Local filename to save as
  */
 const start = (opts) => {
-  let { version, downloadDestination, progress } = opts
+  let { version, downloadDestination, progress, redirectTTL } = opts
 
   if (!downloadDestination) {
     la(is.unemptyString(downloadDestination), 'missing download dir', opts)
@@ -331,7 +347,8 @@ const start = (opts) => {
     return getCA()
   })
   .then((ca) => {
-    return downloadFromUrl({ url, downloadDestination, progress, ca })
+    return downloadFromUrl({ url, downloadDestination, progress, ca, version,
+      ...(redirectTTL ? { redirectTTL } : {}) })
   })
   .catch((err) => {
     return prettyDownloadErr(err, version)

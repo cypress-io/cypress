@@ -408,8 +408,14 @@ describe('lib/plugins/child/run_plugins', () => {
       expect(this.ipc.send).to.be.calledWith('error', this.err)
     })
 
-    it('sends the serialized reason via ipc on process unhandledRejection', function () {
+    it('sends the serialized Bluebird error via ipc on process unhandledRejection', function () {
       process.on.withArgs('unhandledRejection').yield({ reason: this.err })
+
+      expect(this.ipc.send).to.be.calledWith('error', this.err)
+    })
+
+    it('sends the serialized OpenSSL error via ipc on process unhandledRejection', function () {
+      process.on.withArgs('unhandledRejection').yield({ ...this.err, reason: 'reason' })
 
       expect(this.ipc.send).to.be.calledWith('error', this.err)
     })
