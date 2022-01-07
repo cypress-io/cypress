@@ -2,7 +2,7 @@ require('../../../spec_helper')
 
 const tsNodeUtil = require('../../../../lib/plugins/child/ts_node')
 const runRequireAsyncChild = require('../../../../lib/plugins/child/run_require_async_child')
-const resolve = require('../../lib/util/resolve')
+const resolve = require('../../../../lib/util/resolve')
 
 describe('lib/plugins/child/run_require_async_child', () => {
   beforeEach(function () {
