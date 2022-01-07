@@ -25,15 +25,11 @@ glob('./**/*cy.js', { onlyFiles: true }).then(arr => {
 
       if (a.endsWith(repl.old) && !f.has(a)) {
         let n = a.replace(repl.old, repl.new)
-        towrite.push({ a, n })
-
-        if (a === 'examples/webpack-options/cypress/e2e/cy-cy.js') {
-          console.log( { a, n })
+        if (a !== n) {
+          f.add(a)
+          towrite.push({ a, n })
+          continue
         }
-
-        f.add(a)
-
-        continue
       }
     }
   }
