@@ -197,14 +197,16 @@ describe('App: Runs', () => {
         cy.get('[data-cy="run-card-icon"]')
       })
 
-      cy.get('[href="http://dummy.cypress.io/runs/0"]').first().get('[data-cy="run-card-author"]').contains('John Appleseed')
-      cy.get('[href="http://dummy.cypress.io/runs/0"]').first().get('[data-cy="run-card-avatar')
-      cy.get('[href="http://dummy.cypress.io/runs/0"]').first().get('[data-cy="run-card-branch"]').contains('main')
-      cy.get('[href="http://dummy.cypress.io/runs/0"]').first().contains(`${new Date().getHours()}:${new Date().getMinutes()}`)
-      cy.get('[href="http://dummy.cypress.io/runs/0"]').first().contains('span', 'skipped')
-      cy.get('[href="http://dummy.cypress.io/runs/0"]').first().get('span').contains('pending')
-      cy.get('[href="http://dummy.cypress.io/runs/0"]').first().get('span').contains('passed')
-      cy.get('[href="http://dummy.cypress.io/runs/0"]').first().get('span').contains('failed')
+      cy.get('[href="http://dummy.cypress.io/runs/0"]').first().as('firstRun')
+
+      cy.get('@firstRun').get('[data-cy="run-card-author"]').contains('John Appleseed')
+      cy.get('@firstRun').get('[data-cy="run-card-avatar')
+      cy.get('@firstRun').get('[data-cy="run-card-branch"]').contains('main')
+      cy.get('@firstRun').contains(`${new Date().getHours()}:${new Date().getMinutes()}`)
+      cy.get('@firstRun').contains('span', 'skipped')
+      cy.get('@firstRun').get('span').contains('pending')
+      cy.get('@firstRun').get('span').contains('passed')
+      cy.get('@firstRun').get('span').contains('failed')
     })
 
     it('opens the run page if a run is clicked', () => {
