@@ -146,9 +146,7 @@ export class ProjectDataSource {
   }
 
   startSpecWatcher (projectRoot: string, testingType: Cypress.TestingType, specPattern: string | string[]) {
-    if (this._specWatcher) {
-      this.stopSpecWatcher()
-    }
+    this.stopSpecWatcher()
 
     const currentProject = this.ctx.currentProject
 
@@ -173,7 +171,11 @@ export class ProjectDataSource {
   }
 
   stopSpecWatcher () {
-    this.ctx.lifecycleManager.closeWatcher(this._specWatcher!)
+    if (!this._specWatcher) {
+      return
+    }
+
+    this.ctx.lifecycleManager.closeWatcher(this._specWatcher)
   }
 
   async getCurrentSpecByAbsolute (absolute: string) {
