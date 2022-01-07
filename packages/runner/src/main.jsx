@@ -18,29 +18,29 @@ window.UnifiedRunner = UnifiedRunner
 
 MobX.configure({ enforceActions: 'always' })
 
-const ws = createWebsocket()
-
-// NOTE: this is exposed for testing, ideally we should only expose this if a test flag is set
-window.runnerWs = ws
-window.ws = ws
-
-const eventManager = new EventManager(
-  $Cypress,
-  MobX,
-  selectorPlaygroundModel,
-  StudioRecorder,
-  ws,
-)
-
-// NOTE: this is for testing Cypress-in-Cypress, window.Cypress is undefined here
-// unless Cypress has been loaded into the AUT frame
-if (window.Cypress) {
-  window.eventManager = eventManager
-}
-
 const Runner = {
   start (el, base64Config) {
     MobX.action('started', () => {
+      const ws = createWebsocket(base64Config)
+
+      // NOTE: this is exposed for testing, ideally we should only expose this if a test flag is set
+      window.runnerWs = ws
+      window.ws = ws
+
+      const eventManager = new EventManager(
+        $Cypress,
+        MobX,
+        selectorPlaygroundModel,
+        StudioRecorder,
+        ws,
+      )
+
+      // NOTE: this is for testing Cypress-in-Cypress, window.Cypress is undefined here
+      // unless Cypress has been loaded into the AUT frame
+      if (window.Cypress) {
+        window.eventManager = eventManager
+      }
+
       const config = JSON.parse(driverUtils.decodeBase64Unicode(base64Config))
 
       const NO_COMMAND_LOG = config.env && config.env.NO_COMMAND_LOG

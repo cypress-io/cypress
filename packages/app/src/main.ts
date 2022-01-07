@@ -19,7 +19,7 @@ window.__vite__ = true
 
 const app = createApp(App)
 
-const ws = createWebsocket()
+const ws = createWebsocket(window.__CYPRESS_CONFIG__.base64Config)
 
 window.ws = ws
 

@@ -32,7 +32,7 @@ const Runner: any = {
   },
 
   start (el, base64Config) {
-    const ws = createWebsocket()
+    const ws = createWebsocket(base64Config)
 
     // NOTE: this is exposed for testing, ideally we should only expose this if a test flag is set
     window.runnerWs = ws
