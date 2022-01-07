@@ -33,11 +33,9 @@ function decodeBase64Unicode (str: string) {
   }).join(''))
 }
 
-export function createWebsocket (base64Config) {
-  const config = base64Config ? JSON.parse(decodeBase64Unicode(base64Config)) as Cypress.Config : { socketIoRoute: '/__socket.io' }
-
+export function createWebsocket (socketIoRoute) {
   const socketConfig = {
-    path: config.socketIoRoute,
+    path: socketIoRoute,
     transports: ['websocket'],
   }
 

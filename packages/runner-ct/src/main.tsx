@@ -32,7 +32,15 @@ const Runner: any = {
   },
 
   start (el, base64Config) {
-    const ws = createWebsocket(base64Config)
+    function decodeBase64Unicode (str: string) {
+      return decodeURIComponent(atob(str).split('').map((char) => {
+        return `%${(`00${char.charCodeAt(0).toString(16)}`).slice(-2)}`
+      }).join(''))
+    }
+
+    const config = JSON.parse(decodeBase64Unicode(window.__CYPRESS_CONFIG__.base64Config)) as Cypress.Config
+
+    const ws = createWebsocket(config.socketIoRoute)
 
     // NOTE: this is exposed for testing, ideally we should only expose this if a test flag is set
     window.runnerWs = ws
