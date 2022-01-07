@@ -110,6 +110,7 @@ export class ProjectLifecycleManager {
   private _registeredEventsTarget: TestingType | undefined
   private _eventProcess: ChildProcess | undefined
   private _currentTestingType: TestingType | null = null
+  private _runModeExitEarly: ((error: Error) => void) | undefined
 
   private _projectRoot: string | undefined
   private _configFilePath: string | undefined
@@ -291,6 +292,14 @@ export class ProjectLifecycleManager {
     }
 
     this.initializeConfigWatchers()
+  }
+
+  setRunModeExitEarly (exitEarly: ((err: Error) => void) | undefined) {
+    this._runModeExitEarly = exitEarly
+  }
+
+  get runModeExitEarly () {
+    return this._runModeExitEarly
   }
 
   /**
@@ -954,8 +963,13 @@ export class ProjectLifecycleManager {
      * It's supposed to be caught on lib/modes/run.js:1689,
      * but it's not.
      */
-    ipc.on('childProcess:unhandledError', (err) => this.handleChildProcessError(err, ipc, dfd))
-    child.on('setupTestingType:uncaughtError', (err) => this.handleChildProcessError(err, ipc, dfd))
+    ipc.on('childProcess:unhandledError', (err) => {
+      return this.handleChildProcessError(err, ipc, dfd)
+    })
+
+    ipc.on('setupTestingType:uncaughtError', (err) => {
+      return this.handleChildProcessError(err, ipc, dfd)
+    })
 
     ipc.once('loadConfig:reply', (val) => {
       debug('loadConfig:reply')
