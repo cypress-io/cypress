@@ -1668,7 +1668,24 @@ export default {
   switchToDomain: {
     docsUrl: 'https://on.cypress.io/switchToDomain',
     done_reference_mismatch: {
-      message: `${cmd('switchToDomain')} must have done as its second argument when three arguments are used.`,
+      message: `${cmd('switchToDomain')} must have done as its second argument when three or more arguments are used.`,
+    },
+    experiment_not_enabled: {
+      message: `${cmd('switchToDomain')} requires enabling the experimentalMultiDomain flag`,
+    },
+    invalid_domain_argument: {
+      message: `${cmd('switchToDomain')} requires the first argument to be a string. You passed: \`{{arg}}\``,
+    },
+    invalid_fn_argument: {
+      message: `${cmd('switchToDomain')} requires the last argument to be a function. You passed: \`{{arg}}\``,
+    },
+    run_domain_fn_errored: {
+      message: stripIndent`
+      ${cmd('switchToDomain')} failed with the following error:
+
+        > {{error}}
+
+      This is likely because the data argument specified is not serializable. Note that functions and DOM objects cannot be serialized.`,
     },
   },
 

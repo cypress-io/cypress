@@ -98,7 +98,7 @@ const setup = () => {
     cy.state('nestedIndex', null)
   }
 
-  specBridgeCommunicator.on('run:domain:fn', async ({ fn, isDoneFnAvailable = false }) => {
+  specBridgeCommunicator.on('run:domain:fn', async ({ data, fn, isDoneFnAvailable = false }) => {
     cy.reset({})
 
     cy.state('runnable', {
@@ -108,7 +108,7 @@ const setup = () => {
       timeout () {},
     })
 
-    let fnWrapper = `(${fn})()`
+    let fnWrapper = `(${fn})`
 
     if (isDoneFnAvailable) {
       // stub out the 'done' function if available in the primary domain
@@ -129,30 +129,31 @@ const setup = () => {
       // if undefined and a user tries to call done, the same effect is granted
       cy.state('done', done)
 
-      fnWrapper = `(() => {
+      fnWrapper = `((data) => {
         const done = cy.state('done');
-        return ${fnWrapper}
-      })()`
+        return ${fnWrapper}(data)
+      })`
     }
 
     try {
       // await the eval func, whether it is a promise or not
       // we should not need to transpile this as our target browsers support async/await
       // see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function for more details
-      await window.eval(fnWrapper)
-      specBridgeCommunicator.toPrimary('run:domain:fn')
+      await window.eval(fnWrapper)(data)
+
+      specBridgeCommunicator.toPrimary('ran:domain:fn')
     } catch (err) {
       // Native Error types currently cannot be cloned in Firefox when using 'postMessage'.
       // Please see https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm for more details
       // TODO: More standard serialization of Objects/Arrays within the communicator to avoid this type of logic
       if (err instanceof Error) {
-        specBridgeCommunicator.toPrimary('run:domain:fn', {
+        specBridgeCommunicator.toPrimary('ran:domain:fn', {
           name: err.name,
           message: err.message,
           stack: err.stack,
         })
       } else {
-        specBridgeCommunicator.toPrimary('run:domain:fn', err)
+        specBridgeCommunicator.toPrimary('ran:domain:fn', err)
       }
     } finally {
       cy.state('done', undefined)

@@ -158,6 +158,12 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     isExperimental: true,
     canUpdateDuringTestTime: false,
   }, {
+    name: 'experimentalMultiDomain',
+    defaultValue: false,
+    validation: validate.isBoolean,
+    isExperimental: true,
+    canUpdateDuringTestTime: false,
+  }, {
     name: 'experimentalSessionSupport',
     defaultValue: false,
     validation: validate.isBoolean,
