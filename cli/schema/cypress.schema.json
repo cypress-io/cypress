@@ -109,10 +109,50 @@
           "default": false,
           "description": "Path to folder containing component test files (Pass false to disable)"
         },
+        "defaultCommandTimeout": {
+          "type": "number",
+          "default": 4000,
+          "description": "Time, in milliseconds, to wait until most DOM based commands are considered timed out"
+        },
+        "downloadsFolder": {
+          "type": "string",
+          "default": "cypress/downloads",
+          "description": "Path to folder where files downloaded during a test are saved"
+        },
         "env": {
           "type": "object",
           "description": "Any values to be set as environment variables. See https://on.cypress.io/environment-variables",
           "body": {}
+        },
+        "execTimeout": {
+          "type": "number",
+          "default": 60000,
+          "description": "Time, in milliseconds, to wait for a system command to finish executing during a cy.exec() command"
+        },
+        "experimentalFetchPolyfill": {
+          "type": "boolean",
+          "default": false,
+          "description": "Polyfills `window.fetch` to enable Network spying and stubbing"
+        },
+        "experimentalInteractiveRunEvents": {
+          "type": "boolean",
+          "default": false,
+          "description": "Allows listening to the `before:run`, `after:run`, `before:spec`, and `after:spec` events in the plugins file during interactive mode."
+        },
+        "experimentalSessionSupport": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable experimental session support. See https://on.cypress.io/session"
+        },
+        "experimentalSourceRewriting": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enables AST-based JS/HTML rewriting. This may fix issues caused by the existing regex-based JS/HTML replacement algorithm."
+        },
+        "experimentalStudio": {
+          "type": "boolean",
+          "default": false,
+          "description": "Generate and save commands directly to your test suite by interacting with your app as an end user would."
         },
         "ignoreSpecPattern": {
           "type": [
@@ -162,16 +202,6 @@
           "default": true,
           "description": "Whether Cypress will watch and restart tests on test file changes"
         },
-        "defaultCommandTimeout": {
-          "type": "number",
-          "default": 4000,
-          "description": "Time, in milliseconds, to wait until most DOM based commands are considered timed out"
-        },
-        "execTimeout": {
-          "type": "number",
-          "default": 60000,
-          "description": "Time, in milliseconds, to wait for a system command to finish executing during a cy.exec() command"
-        },
         "taskTimeout": {
           "type": "number",
           "default": 60000,
@@ -209,11 +239,6 @@
           "type": "string",
           "default": "cypress/integration",
           "description": "Path to folder containing integration test files"
-        },
-        "downloadsFolder": {
-          "type": "string",
-          "default": "cypress/downloads",
-          "description": "Path to folder where files downloaded during a test are saved"
         },
         "pluginsFile": {
           "type": [
@@ -317,31 +342,6 @@
           ],
           "default": "system",
           "description": "DEPRECATED: If set to 'bundled', Cypress will use the Node version bundled with Cypress. Otherwise, Cypress will use the Node version that was used to launch the Cypress. This Node version is used when executing your plugins file and building spec files."
-        },
-        "experimentalInteractiveRunEvents": {
-          "type": "boolean",
-          "default": false,
-          "description": "Allows listening to the `before:run`, `after:run`, `before:spec`, and `after:spec` events in the plugins file during interactive mode."
-        },
-        "experimentalSourceRewriting": {
-          "type": "boolean",
-          "default": false,
-          "description": "Enables AST-based JS/HTML rewriting. This may fix issues caused by the existing regex-based JS/HTML replacement algorithm."
-        },
-        "experimentalSessionSupport": {
-          "type": "boolean",
-          "default": false,
-          "description": "Enable experimental session support. See https://on.cypress.io/session"
-        },
-        "experimentalFetchPolyfill": {
-          "type": "boolean",
-          "default": false,
-          "description": "Polyfills `window.fetch` to enable Network spying and stubbing"
-        },
-        "experimentalStudio": {
-          "type": "boolean",
-          "default": false,
-          "description": "Generate and save commands directly to your test suite by interacting with your app as an end user would."
         },
         "retries": {
           "type": [
