@@ -25,7 +25,9 @@ const connect = function (host, path, extraOpts, onConnected) {
 
   // TODO: connections from Cypress in Cypress need to be cleaned up
   if (connections.has(fullPath)) {
-    onConnected()
+    if (onConnected) {
+      onConnected()
+    }
 
     return
   }
