@@ -12,10 +12,14 @@ describe('<RecordKey />', () => {
       },
       render: (gql) => (
         <div class="py-4 px-8">
-          <RecordKey gql={gql} settingsUrl="#"/>
+          <RecordKey gql={gql} />
         </div>
       ),
     })
+  })
+
+  it('renders the record key view with the correct title', () => {
+    cy.findByText('Record Key')
   })
 
   it(`has an input that's hidden by default`, () => {

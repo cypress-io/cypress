@@ -2,8 +2,20 @@
   <ProjectId
     :gql="props.gql.currentProject"
   />
-  <RecordKeySettings :gql="props.gql" />
-
+  <template
+    v-if="props.gql.currentProject?.cloudProject?.__typename === 'CloudProject'
+      && props.gql.currentProject.cloudProject.recordKeys?.length"
+  >
+    <RecordKey
+      v-for="key of props.gql.currentProject.cloudProject.recordKeys"
+      :key="key.id"
+      :gql="key"
+    />
+  </template>
+  <template v-else>
+    You don't have any record keys. You should make some so you can record
+    on Cypress Cloud.
+  </template>
   <SpecPatterns />
   <Experiments :gql="props.gql.currentProject" />
   <Config :gql="props.gql" />
@@ -11,7 +23,7 @@
 
 <script lang="ts" setup>
 import { gql } from '@urql/vue'
-import RecordKeySettings from './RecordKeySettings.vue'
+import RecordKey from './RecordKey.vue'
 import Experiments from './Experiments.vue'
 import ProjectId from './ProjectId.vue'
 import Config from './Config.vue'
@@ -24,9 +36,18 @@ fragment ProjectSettings on Query {
     id
     ...ProjectId
     ...Experiments
+    cloudProject {
+      __typename
+      ... on CloudProject {
+        id
+        recordKeys {
+          id
+          ...RecordKey
+        }
+      }
+    }
   }
   ...Config
-  ...RecordKeySettings
 }
 `
 
