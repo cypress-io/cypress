@@ -1,5 +1,5 @@
 // @ts-ignore / session support is needed for visiting about:blank between tests
-describe('multidomain', { experimentalSessionSupport: true }, () => {
+describe('multidomain', { experimentalSessionSupport: true, experimentalMultiDomain: true }, () => {
   const expectTextMessage = (expected, done) => {
     const onMessage = (event) => {
       if (event.data && event.data.actual !== undefined) {
@@ -17,12 +17,10 @@ describe('multidomain', { experimentalSessionSupport: true }, () => {
 
   beforeEach(() => {
     cy.visit('/fixtures/multidomain.html')
-    // @ts-ignore
     cy.get('a').click()
   })
 
   it('runs commands in secondary domain', () => {
-    // @ts-ignore
     cy.switchToDomain('foobar.com', () => {
       cy
       .get('[data-cy="dom-check"]')
@@ -34,7 +32,6 @@ describe('multidomain', { experimentalSessionSupport: true }, () => {
   })
 
   it('sets up window.Cypress in secondary domain', () => {
-    // @ts-ignore
     cy.switchToDomain('foobar.com', () => {
       cy
       .get('[data-cy="cypress-check"]')
@@ -43,11 +40,109 @@ describe('multidomain', { experimentalSessionSupport: true }, () => {
     })
   })
 
+  describe('data argument', () => {
+    it('passes object to callback function', () => {
+      cy.switchToDomain('foobar.com', { foo: 'foo', bar: 'bar' }, ({ foo, bar }) => {
+        expect(foo).to.equal('foo')
+        expect(bar).to.equal('bar')
+      })
+    })
+
+    it('passes array to callback function', () => {
+      cy.switchToDomain('foobar.com', ['foo', 'bar'], ([foo, bar]) => {
+        expect(foo).to.equal('foo')
+        expect(bar).to.equal('bar')
+      })
+    })
+
+    it('passes string to callback function', () => {
+      cy.switchToDomain('foobar.com', 'foo', (foo) => {
+        expect(foo).to.equal('foo')
+      })
+    })
+
+    it('passes number to callback function', () => {
+      cy.switchToDomain('foobar.com', 1, (num) => {
+        expect(num).to.equal(1)
+      })
+    })
+
+    it('passes boolean to callback function', () => {
+      cy.switchToDomain('foobar.com', true, (bool) => {
+        expect(bool).to.be.true
+      })
+    })
+
+    describe('errors', () => {
+      // @ts-ignore
+      it('errors if experimental flag is not enabled', { experimentalMultiDomain: false }, (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.equal('`cy.switchToDomain()` requires enabling the experimentalMultiDomain flag')
+
+          done()
+        })
+
+        // @ts-ignore
+        cy.switchToDomain()
+      })
+
+      it('errors if passed a non-string for the domain argument', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.equal('`cy.switchToDomain()` requires the first argument to be a string. You passed: ``')
+
+          done()
+        })
+
+        // @ts-ignore
+        cy.switchToDomain()
+      })
+
+      it('errors if passed a non-serializable data value', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.include('data argument specified is not serializable')
+
+          if (Cypress.browser.family === 'chromium') {
+            expect(err.message).to.include('Failed to execute \'postMessage\'')
+          } else if (Cypress.browser.family === 'firefox') {
+            expect(err.message).to.include('The object could not be cloned')
+          }
+
+          done()
+        })
+
+        cy.switchToDomain('foobar.com', () => {}, (bool) => {
+          expect(bool).to.be.true
+        })
+      })
+
+      it('errors if last argument is absent', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.equal('`cy.switchToDomain()` requires the last argument to be a function. You passed: ``')
+
+          done()
+        })
+
+        // @ts-ignore
+        cy.switchToDomain('foobar.com')
+      })
+
+      it('errors if last argument is not a function', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.equal('`cy.switchToDomain()` requires the last argument to be a function. You passed: `{}`')
+
+          done()
+        })
+
+        // @ts-ignore
+        cy.switchToDomain('foobar.com', {})
+      })
+    })
+  })
+
   describe('window events', () => {
     it('form:submitted', (done) => {
       expectTextMessage('form:submitted', done)
 
-      // @ts-ignore
       cy.switchToDomain('foobar.com', () => {
         Cypress.once('form:submitted', () => {
           top!.postMessage({ host: location.host, actual: 'form:submitted' }, '*')
@@ -64,7 +159,6 @@ describe('multidomain', { experimentalSessionSupport: true }, () => {
     it.skip('window:before:unload', (done) => {
       expectTextMessage('window:before:unload', done)
 
-      // @ts-ignore
       cy.switchToDomain('foobar.com', () => {
         Cypress.once('window:before:unload', () => {
           top!.postMessage({ host: location.host, actual: 'window:before:unload' }, '*')
@@ -81,7 +175,6 @@ describe('multidomain', { experimentalSessionSupport: true }, () => {
     it.skip('window:unload', (done) => {
       expectTextMessage('window:unload', done)
 
-      // @ts-ignore
       cy.switchToDomain('foobar.com', () => {
         Cypress.once('window:unload', () => {
           top!.postMessage({ host: location.host, actual: 'window:unload' }, '*')
@@ -96,7 +189,6 @@ describe('multidomain', { experimentalSessionSupport: true }, () => {
     it('navigation:changed', (done) => {
       expectTextMessage('navigation:changed', done)
 
-      // @ts-ignore
       cy.switchToDomain('foobar.com', () => {
         Cypress.once('navigation:changed', () => {
           top!.postMessage({ host: location.host, actual: 'navigation:changed' }, '*')
@@ -111,7 +203,6 @@ describe('multidomain', { experimentalSessionSupport: true }, () => {
     it('window:alert', (done) => {
       expectTextMessage('window:alert the alert text', done)
 
-      // @ts-ignore
       cy.switchToDomain('foobar.com', () => {
         Cypress.once('window:alert', (text) => {
           top!.postMessage({ host: location.host, actual: `window:alert ${text}` }, '*')
@@ -126,7 +217,6 @@ describe('multidomain', { experimentalSessionSupport: true }, () => {
     it('window:confirm', (done) => {
       expectTextMessage('window:confirm the confirm text', done)
 
-      // @ts-ignore
       cy.switchToDomain('foobar.com', () => {
         Cypress.once('window:confirm', (text) => {
           top!.postMessage({ host: location.host, actual: `window:confirm ${text}` }, '*')
@@ -141,7 +231,6 @@ describe('multidomain', { experimentalSessionSupport: true }, () => {
     it('window:confirmed - true when no window:confirm listeners return false', (done) => {
       expectTextMessage('window:confirmed the confirm text - true', done)
 
-      // @ts-ignore
       cy.switchToDomain('foobar.com', () => {
         Cypress.once('window:confirmed', (text, returnedFalse) => {
           top!.postMessage({ host: location.host, actual: `window:confirmed ${text} - ${returnedFalse}` }, '*')
@@ -152,7 +241,6 @@ describe('multidomain', { experimentalSessionSupport: true }, () => {
           return true
         })
 
-        // @ts-ignore
         cy.get('[data-cy="confirm"]').then(($el) => {
           $el.trigger('click')
         })
@@ -162,7 +250,6 @@ describe('multidomain', { experimentalSessionSupport: true }, () => {
     it('window:confirmed - false when any window:confirm listeners return false', (done) => {
       expectTextMessage('window:confirmed the confirm text - false', done)
 
-      // @ts-ignore
       cy.switchToDomain('foobar.com', () => {
         Cypress.once('window:confirmed', (text, returnedFalse) => {
           top!.postMessage({ host: location.host, actual: `window:confirmed ${text} - ${returnedFalse}` }, '*')
@@ -174,7 +261,6 @@ describe('multidomain', { experimentalSessionSupport: true }, () => {
 
         Cypress.on('window:confirm', () => {})
 
-        // @ts-ignore
         cy.get('[data-cy="confirm"]').then(($el) => {
           $el.trigger('click')
         })

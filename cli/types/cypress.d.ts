@@ -1885,6 +1885,25 @@ declare namespace Cypress {
     spread(fn: (...args: any[]) => void): Chainable<Subject>
 
     /**
+     * Enables running Cypress commands in a secondary domain
+     * @see https://on.cypress.io/switchToDomain
+     * @example
+     *    cy.switchToDomain('example.com', () => {
+     *      cy.get('h1').should('equal', 'Example Domain')
+     *    })
+     */
+    switchToDomain(domain: string, fn: () => void): Chainable<undefined>
+    /**
+     * Enables running Cypress commands in a secondary domain
+     * @see https://on.cypress.io/switchToDomain
+     * @example
+     *    cy.switchToDomain('example.com', { key: 'value' } ({ key }) => {
+     *      expect(key).to.equal('value')
+     *    })
+     */
+    switchToDomain<T>(domain: string, data: T, fn: (data: T) => void): Chainable<undefined>
+
+    /**
      * Run a task in Node via the plugins file.
      *
      * @see https://on.cypress.io/api/task
@@ -2783,6 +2802,11 @@ declare namespace Cypress {
      * @default false
      */
     experimentalInteractiveRunEvents: boolean
+    /**
+     * Enables multi-domain support in Cypress, including the switchToDomain command.
+     * @default false
+     */
+    experimentalMultiDomain: boolean
     /**
      * Generate and save commands directly to your test suite by interacting with your app as an end user would.
      * @default false
