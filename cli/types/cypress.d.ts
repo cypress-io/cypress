@@ -701,9 +701,9 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/check
      * @example
-     *    // Select the radio with the value of ‘US'
+     *    // Select the radio with the value of 'US'
      *    cy.get('[type="radio"]').check('US')
-     *    // Check the checkboxes with the values ‘ga' and ‘ca'
+     *    // Check the checkboxes with the values 'ga' and 'ca'
      *    cy.get('[type="checkbox"]').check(['ga', 'ca'])
      */
     check(value: string | string[], options?: Partial<CheckOptions>): Chainable<Subject>
@@ -1190,7 +1190,7 @@ declare namespace Cypress {
      * Get one or more DOM elements by alias.
      * @see https://on.cypress.io/get#Alias
      * @example
-     *    // Get the aliased ‘todos' elements
+     *    // Get the aliased 'todos' elements
      *    cy.get('ul#todos').as('todos')
      *    //...hack hack hack...
      *    //later retrieve the todos
@@ -2090,11 +2090,11 @@ declare namespace Cypress {
      * @example
      *    // Unchecks checkbox element
      *    cy.get('[type="checkbox"]').uncheck()
-     *    // Uncheck element with the id ‘saveUserName'
+     *    // Uncheck element with the id 'saveUserName'
      *    cy.get('#saveUserName').uncheck()
      *    // Uncheck all checkboxes
      *    cy.get(':checkbox').uncheck()
-     *    // Uncheck the checkbox with the value of ‘ga'
+     *    // Uncheck the checkbox with the value of 'ga'
      *    cy.get('input[type="checkbox"]').uncheck(['ga'])
      */
     uncheck(options?: Partial<CheckOptions>): Chainable<Subject>
@@ -2103,7 +2103,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/uncheck
      * @example
-     *    // Uncheck the checkbox with the value of ‘ga'
+     *    // Uncheck the checkbox with the value of 'ga'
      *    cy.get('input[type="checkbox"]').uncheck('ga')
      */
     uncheck(value: string, options?: Partial<CheckOptions>): Chainable<Subject>
@@ -2112,7 +2112,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/uncheck
      * @example
-     *    // Uncheck the checkbox with the value of ‘ga', 'ma'
+     *    // Uncheck the checkbox with the value of 'ga', 'ma'
      *    cy.get('input[type="checkbox"]').uncheck(['ga', 'ma'])
      */
     uncheck(values: string[], options?: Partial<CheckOptions>): Chainable<Subject>
