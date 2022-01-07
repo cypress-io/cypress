@@ -105,7 +105,7 @@ async function makeE2ETasks () {
 
   const gqlPort = await makeGraphQLServer()
 
-  const __internal_scaffoldProject = (projectName: string) => {
+  const __internal_scaffoldProject = async (projectName: string) => {
     if (fs.existsSync(Fixtures.projectPath(projectName))) {
       Fixtures.removeProject(projectName)
     }
