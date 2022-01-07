@@ -1035,14 +1035,6 @@ type WizardNpmPackage implements Node {
   package: String!
 }
 
-enum WizardStep {
-  configFiles
-  installDependencies
-  selectFramework
-  setupComplete
-  welcome
-}
-
 input WizardUpdateInput {
   bundler: SupportedBundlers
   codeLanguage: CodeLanguageEnum
