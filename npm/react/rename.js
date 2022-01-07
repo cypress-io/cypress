@@ -15,7 +15,7 @@ const torep = [
   { old: '-cy.ts', new: '.cy.ts', },
 ]
 
-glob('./**/*cy.js', { onlyFiles: true }).then(arr => {
+glob(['./**/*cy-{js,jsx,ts,tsx}', './**/*-cy.{js,jsx,ts,jsx}'], { onlyFiles: true }).then(arr => {
   // console.log(arr)
   const f = new Set()
 
@@ -38,7 +38,7 @@ glob('./**/*cy.js', { onlyFiles: true }).then(arr => {
   for (const { a, n } of towrite) {
     try {
       console.log(`Renaming: \n${a}\n${n}`)
-      fs.renameSync(a, n)
+      // fs.renameSync(a, n)
     } catch (e) {
       console.log('error for ', a, n)
     }
