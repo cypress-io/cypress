@@ -1665,6 +1665,13 @@ export default {
     },
   },
 
+  switchToDomain: {
+    docsUrl: 'https://on.cypress.io/switchToDomain',
+    done_reference_mismatch: {
+      message: `${cmd('switchToDomain')} must have done as its second argument when three arguments are used.`,
+    },
+  },
+
   task: {
     docsUrl: 'https://on.cypress.io/api/task',
     known_error: stripIndent`

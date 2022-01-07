@@ -247,6 +247,7 @@ const onBeforeAppWindowLoad = (cy, Cypress) => (autWindow) => {
 const cy = setup()
 
 window.__onBeforeAppWindowLoad = (autWindow) => {
+  console.log('__onBeforeAppWindowLoad')
   cy.onBeforeAppWindowLoad(autWindow)
 }
 

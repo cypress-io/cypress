@@ -9,6 +9,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
   const communicator = Cypress.multiDomainCommunicator
 
   communicator.on('html:received', () => {
+    console.log('html:received')
     // when a secondary domain is detected by the proxy, it holds it up
     // to provide time for the spec bridge to be set up. normally, the queue
     // will not continue until the page is stable, but this signals it to go
@@ -20,6 +21,8 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
     // if the next command isn't switchToDomain, this timeout will hit and
     // the test will fail with a cross-origin error
     timeoutId = setTimeout(() => {
+      // TODO: when we throw an error make sure to clear this timeout
+      console.log('timeout ready:for:domain')
       Cypress.backend('ready:for:domain', { shouldInject: false })
     }, 2000)
   })
@@ -40,23 +43,25 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
       }
 
       if (fn) {
-        // TODO: test this
-        const doneByReference = cy.state('done')
-
-        // done is available
-        // TODO: make sure that doneOrFn in this case is actually the done function through comparison
-        if (done !== doneByReference) {
-          $errUtils.throwErrByPath('switchToDomain.experiment_not_enabled')
-        }
-
         done = doneOrFn
+
+        // if done has been provided to the test, allow the user to call done
+        // from the switchToDomain context running in the secondary domain.
       } else {
         fn = doneOrFn
       }
 
-      // if done has been provided to the test, allow the user to call done
-      // from the switchToDomain context running in the secondary domain.
       if (done) {
+        const doneByReference = cy.state('done')
+
+        // if three arguments are passed in, verify the second argument is actually the done fn
+        // TODO: This will need to be updated when #19577 is merged in to account for all the method signatures switchToDomain can have
+        if (done !== doneByReference) {
+          $errUtils.throwErrByPath('switchToDomain.done_reference_mismatch')
+
+          return
+        }
+
         communicator.once('done:called', doneAndCleanup)
       }
 
@@ -159,6 +164,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
         // fired once the spec bridge is set up and ready to
         // receive messages
         communicator.once('bridge:ready', () => {
+          console.log('bridge:ready')
           state('readyForMultidomain', true)
           // let the proxy know to let the response for the secondary
           // domain html through, so the page will finish loading
