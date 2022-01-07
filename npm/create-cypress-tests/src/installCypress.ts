@@ -44,9 +44,10 @@ async function copyFiles ({ ignoreExamples, useTypescript }: InstallCypressOpts)
       '',
     ].join('\n')
 
-    const specFileToCreate = path.resolve('cypress', 'e2e', useTypescript ? 'spec.ts' : 'spec.js')
+    const specFileName = useTypescript ? 'spec.cy.ts' : 'spec.cy.js'
+    const specFileToCreate = path.resolve('cypress', 'e2e', specFileName)
 
-    await fs.outputFile(path.resolve('cypress', 'e2e', useTypescript ? 'spec.js' : 'spec.ts'), dummySpec)
+    await fs.outputFile(path.resolve('cypress', 'e2e', specFileName), dummySpec)
     console.log(`In order to ignore examples a spec file ${chalk.green(path.relative(process.cwd(), specFileToCreate))}.`)
   }
 
