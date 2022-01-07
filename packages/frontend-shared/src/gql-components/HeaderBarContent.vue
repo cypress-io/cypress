@@ -198,15 +198,22 @@ function shouldShowPrompt (prompt: { slug: string; noProjectId: boolean; interva
     return false
   }
 
-  const timeSinceOpened = Date.now() - savedState.value?.firstOpened
+  const now = Date.now()
+  const timeSinceOpened = now - savedState.value?.firstOpened
+  const allPromptShownTimes:number[] = Object.values(savedState.value?.promptsShown ?? {})
 
   // prompt has been shown
   if (savedState.value?.promptsShown?.[prompt.slug]) {
     return false
   }
 
+  // any other prompt has been shown in the last 24 hours
+  if (allPromptShownTimes?.find((time) => (now - time) < interval('24 hours'))) {
+    return false
+  }
+
   // enough time has passed
-  // no interval indicates never being shown automatically
+  // no interval indicates *never* being shown automatically, so don't show if there's no interval
   if (!prompt.interval || timeSinceOpened < prompt.interval) {
     return false
   }

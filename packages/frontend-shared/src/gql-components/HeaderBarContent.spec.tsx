@@ -186,7 +186,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
           cy.clock(1609891200000)
         })
 
-        function mountWithSavedState (state?: object) {
+        function mountWithSavedState (options?: {state?: object, projectId?: string }) {
           return cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
             onResult: (result) => {
               if (!result.currentProject) {
@@ -197,7 +197,13 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
                 firstOpened: 1609459200000,
                 lastOpened: 1609459200000,
                 promptsShown: {},
-                ...state,
+                ...(options?.state ?? {}),
+              }
+
+              const projectId = result.currentProject.config.find((item: {field: string, value: string}) => item.field = 'projectId')
+
+              if (projectId) {
+                projectId.value = options?.projectId
               }
             },
             render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><HeaderBarContent gql={gqlVal} show-browsers={true} allowAutomaticPromptOpen={true} /></div>,
@@ -206,6 +212,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
 
         it('opens when after 4 days from first open, no projectId, and not already shown', () => {
           mountWithSavedState()
+
           cy.contains(defaultMessages.topNav.docsMenu.prompts.ci1.description).should('be.visible')
         })
 
@@ -223,22 +230,25 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
           ).should('be.visible')
         })
 
-        it('does not open when previously shown', () => {
-          mountWithSavedState({ promptsShown: { 'ci1': 1609459200000, 'orchestration1': 1609459200000 } })
-          it('does not open when projectId exists', () => {
-            mountWithSavedState()
+        it('does not open when projectId exists', () => {
+          mountWithSavedState({ projectId: 'testid' })
 
-            cy.contains(defaultMessages.topNav.docsMenu.prompts.ci1.description).should('not.exist')
-          })
-
-          it('does not open when another prompt has been shown recently', () => {
-            mountWithSavedState({ promptsShown: { dashboard1: 1609891100000 } })
-
-            cy.contains(defaultMessages.topNav.docsMenu.prompts.ci1.description).should('not.exist')
-          })
+          cy.contains(defaultMessages.topNav.docsMenu.prompts.ci1.description).should('not.exist')
         })
 
-        it('does not open if "allowAutomaticPromptOpen" is not true', () => {
+        it('does not open when previously shown', () => {
+          mountWithSavedState({ state: { promptsShown: { 'ci1': 1609459200000, 'orchestration1': 1609459200000 } } })
+
+          cy.contains(defaultMessages.topNav.docsMenu.prompts.ci1.description).should('not.exist')
+        })
+
+        it('does not open when another prompt has been shown recently', () => {
+          mountWithSavedState({ state: { promptsShown: { dashboard1: 1609891100000 } } })
+
+          cy.contains(defaultMessages.topNav.docsMenu.prompts.ci1.description).should('not.exist')
+        })
+
+        it('does not open if "allowAutomaticPromptOpen" prop is not true', () => {
           // we should be sure that, eg, in launchpad, this would not open up after a testing type is configured
           cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
             onResult: (result) => {
