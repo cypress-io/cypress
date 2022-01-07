@@ -87,7 +87,7 @@ export function createCloudRecordKey (config: ConfigFor<CloudRecordKey>) {
 
 const STATUS_ARRAY: CloudRunStatus[] = ['CANCELLED', 'ERRORED', 'FAILED', 'NOTESTS', 'OVERLIMIT', 'PASSED', 'RUNNING', 'TIMEDOUT']
 
-export function createCloudProject (config: ConfigFor<CloudProject>) {
+export function createCloudProject (config: Partial<ConfigFor<CloudProject>>) {
   const cloudProject = {
     ...testNodeId('CloudProject'),
     recordKeys: [CloudRecordKeyStubs.componentProject],
@@ -121,19 +121,36 @@ export function createCloudProject (config: ConfigFor<CloudProject>) {
   return indexNode(cloudProject)
 }
 
-export function createCloudUser (config: ConfigFor<CloudUser>): CloudUser {
-  const cloudUser: CloudUser = {
+export function createCloudUser (config: ConfigFor<CloudUser>): Required<CloudUser> {
+  const cloudUser: Required<CloudUser> = {
     ...testNodeId('CloudUser'),
     email: 'test@example.com',
     fullName: 'Test User',
+    cloudProfileUrl: 'http://dummy.cypress.io/profile',
+    cloudOrganizationsUrl: 'http://dummy.cypress.io/organizations',
+    createCloudOrganizationUrl: 'http://dummy.cypress.io/organizations/create',
+    organizations: {
+      __typename: 'CloudOrganizationConnection',
+      nodes: [createCloudOrganization({})],
+      edges: [{
+        __typename: 'CloudOrganizationEdge',
+        cursor: 'cursor',
+        node: createCloudOrganization({}),
+      }],
+      pageInfo: {
+        __typename: 'PageInfo',
+        hasNextPage: false,
+        hasPreviousPage: false,
+      },
+    },
     ...config,
   }
 
   return indexNode(cloudUser)
 }
 
-export function createCloudRun (config: Partial<CloudRun>): CloudRun {
-  const cloudRunData: CloudRun = {
+export function createCloudRun (config: Partial<CloudRun>): Required<CloudRun> {
+  const cloudRunData: Required<CloudRun> = {
     ...testNodeId('CloudRun'),
     status: 'PASSED',
     totalFailed: 0,
@@ -142,17 +159,26 @@ export function createCloudRun (config: Partial<CloudRun>): CloudRun {
     totalRunning: 0,
     totalTests: 10,
     totalPassed: 10,
-    ...config,
+    commitInfo: null,
+    totalDuration: 300,
+    url: 'http://dummy.cypress.io/runs/1',
     createdAt: new Date().toISOString(),
+    ...config,
   }
 
   return indexNode(cloudRunData)
 }
 
-export function createCloudOrganization (config: Partial<CloudOrganization>): CloudOrganization {
-  const cloudOrgData: CloudOrganization = {
+export function createCloudOrganization (config: Partial<CloudOrganization>): Required<CloudOrganization> {
+  const cloudOrgData: Required<CloudOrganization> = {
     ...testNodeId('CloudOrganization'),
     name: `Cypress Test Account ${getNodeIdx('CloudOrganization')}`,
+    projects: {
+      __typename: 'CloudProjectConnection' as const,
+      pageInfo: {} as any,
+      edges: [] as any,
+      nodes: [] as CloudProject[],
+    },
     ...config,
   }
 
@@ -174,16 +200,41 @@ export const CloudRunStubs = {
   running: createCloudRun({ status: 'RUNNING', totalRunning: 2, totalPassed: 8 }),
   someSkipped: createCloudRun({ status: 'PASSED', totalPassed: 7, totalSkipped: 3 }),
   allSkipped: createCloudRun({ status: 'ERRORED', totalPassed: 0, totalSkipped: 10 }),
-} as const
+} as Record<string, Required<CloudRun>>
 
 export const CloudUserStubs = {
   me: createCloudUser({ userIsViewer: true }),
   // meAsAdmin: createCloudUser({ userIsViewer: true }), TODO(tim): add when we have roles
-} as const
+} as Record<string, Required<CloudUser>>
 
 export const CloudOrganizationStubs = {
   cyOrg: createCloudOrganization({}),
-} as const
+} as Record<string, Required<CloudOrganization>>
+
+export const CloudOrganizationConnectionStubs = {
+  __typename: 'CloudOrganizationConnection' as const,
+  nodes: [createCloudOrganization(
+    {
+      id: '1',
+      name: 'Test Org 1',
+      projects: {
+        __typename: 'CloudProjectConnection' as const,
+        edges: [] as any,
+        pageInfo: {} as any,
+        nodes: [
+          createCloudProject({
+            name: 'Test Project 1',
+            slug: 'test-project',
+          }),
+        ],
+      },
+    },
+  ),
+  createCloudOrganization({
+    id: '2',
+    name: 'Test Org 2',
+  })],
+}
 
 export const CloudProjectStubs = {
   e2eProject: createCloudProject({

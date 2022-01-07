@@ -270,7 +270,7 @@ export const mutation = mutationType({
     })
 
     t.nonNull.field('setProjectPreferences', {
-      type: 'Query',
+      type: Query,
       description: 'Save the projects preferences to cache',
       args: {
         testingType: nonNull(TestingTypeEnum),
@@ -374,6 +374,25 @@ export const mutation = mutationType({
         )
 
         return true
+      },
+    })
+
+    t.field('setProjectIdInConfigFile', {
+      description: 'Set the projectId field in the config file of the current project',
+      type: Query,
+      args: {
+        projectId: nonNull(stringArg()),
+      },
+      resolve: async (_, args, ctx) => {
+        try {
+          await ctx.actions.project.setProjectIdInConfigFile(args.projectId)
+          // Wait for the project config to be reloaded
+          await ctx.lifecycleManager.reloadConfig()
+        } catch (e) {
+          // ignore error as not useful for end user to see
+        }
+
+        return {}
       },
     })
   },
