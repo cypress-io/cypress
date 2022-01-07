@@ -13,6 +13,9 @@ import { Response } from 'cross-fetch'
 
 import { CloudRunQuery } from '../support/mock-graphql/stubgql-CloudTypes'
 import { getOperationName } from '@urql/core'
+import pDefer from 'p-defer'
+
+debugger
 
 interface InternalOpenProjectArgs {
   argv: string[]
@@ -71,6 +74,7 @@ interface FixturesShape {
 }
 
 async function makeE2ETasks () {
+  debugger
   // require'd from @packages/server & @tooling/system-tests so we don't import
   // types which would pollute strict type checking
   const argUtils = require('@packages/server/lib/util/args')
@@ -252,6 +256,7 @@ async function makeE2ETasks () {
         require,
         process,
         sinon,
+        pDefer,
         projectDir (projectName) {
           if (!e2eProjectDirs.includes(projectName)) {
             throw new Error(`${projectName} is not a fixture project`)

@@ -142,7 +142,7 @@ export class ProjectDataSource {
     return matched
   }
 
-  async getCurrentSpecByAbsolute (absolute: string) {
+  getCurrentSpecByAbsolute (absolute: string) {
     return this.ctx.project.specs.find((x) => x.absolute === absolute)
   }
 

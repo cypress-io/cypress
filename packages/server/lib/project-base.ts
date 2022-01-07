@@ -305,21 +305,19 @@ export class ProjectBase<TServer extends Server> extends EE {
       return
     }
 
-    const closePreprocessor = this.testingType === 'e2e' ? preprocessor.close : undefined
-
+    preprocessor.close()
     devServer.close()
+
+    process.chdir(localCwd)
 
     this.ctx.setAppServerPort(undefined)
     this.ctx.setAppSocketServer(undefined)
 
     await Promise.all([
       this.server?.close(),
-      closePreprocessor?.(),
     ])
 
     this._isServerOpen = false
-
-    process.chdir(localCwd)
     this.isOpen = false
 
     const config = this.getConfig()

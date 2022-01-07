@@ -290,7 +290,8 @@ export class ProjectLifecycleManager {
   }
 
   /**
-   * When we set the "testingType", we
+   * Setting the testing type should automatically handle any cleanup of existing
+   * processes and load the config / initialize the
    */
   setCurrentTestingType (testingType: TestingType | null) {
     this.ctx.update((d) => {
@@ -316,6 +317,10 @@ export class ProjectLifecycleManager {
     }
   }
 
+  /**
+   * Called after we've set the testing type. If we've change from the current
+   * IPC used to spawn the config, we need to get a fresh config IPC & re-execute.
+   */
   private loadTestingType () {
     const testingType = this._currentTestingType
 
