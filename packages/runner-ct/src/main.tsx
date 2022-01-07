@@ -32,13 +32,7 @@ const Runner: any = {
   },
 
   start (el, base64Config) {
-    function decodeBase64Unicode (str: string) {
-      return decodeURIComponent(atob(str).split('').map((char) => {
-        return `%${(`00${char.charCodeAt(0).toString(16)}`).slice(-2)}`
-      }).join(''))
-    }
-
-    const config = JSON.parse(decodeBase64Unicode(window.__CYPRESS_CONFIG__.base64Config)) as Cypress.Config
+    const config = window.UnifiedRunner.decodeBase64(base64Config)
 
     const ws = createWebsocket(config.socketIoRoute)
 
