@@ -86,10 +86,9 @@ gql`
 fragment LoginModal on Query {
   cloudViewer {
     id
-    email
     fullName
   }
-  isAuthBrowserOpened
+  ...Auth
 }
 `
 
