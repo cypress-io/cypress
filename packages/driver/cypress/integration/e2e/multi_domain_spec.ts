@@ -74,18 +74,13 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
     })
 
     describe('errors', () => {
-      it('errors if experimental flag is not enabled', (done) => {
+      // @ts-ignore
+      it('errors if experimental flag is not enabled', { experimentalMultiDomain: false }, (done) => {
         cy.on('fail', (err) => {
           expect(err.message).to.equal('`cy.switchToDomain()` requires enabling the experimentalMultiDomain flag')
 
-          // @ts-ignore
-          Cypress.config('experimentalMultiDomain', true)
-
           done()
         })
-
-        // @ts-ignore
-        Cypress.config('experimentalMultiDomain', false)
 
         // @ts-ignore
         cy.switchToDomain()
