@@ -166,6 +166,10 @@ export class ProjectLifecycleManager {
     }
   }
 
+  get eventsIpcResult () {
+    return Object.freeze(this._eventsIpcResult)
+  }
+
   get metaState () {
     return Object.freeze(this._projectMetaState)
   }
