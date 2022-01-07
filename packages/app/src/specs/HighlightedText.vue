@@ -18,6 +18,7 @@
 </template>
 
 <script setup lang="ts">
+import { sortedIndex } from 'lodash'
 import { computed } from 'vue'
 
 const props = withDefaults(

@@ -33,6 +33,7 @@ export const e2eProjectDirs = [
   'no-server',
   'no-specs',
   'no-specs-found',
+  'no-specs-no-storybook',
   'non-existent-spec',
   'non-proxied',
   'odd-directory-name',

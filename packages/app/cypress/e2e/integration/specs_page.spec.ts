@@ -7,7 +7,7 @@ describe('Specs Page', () => {
     viewportHeight: 768,
     viewportWidth: 1024,
   }, () => {
-    context('no specs', () => {
+    context('with storybook', () => {
       beforeEach(() => {
         cy.scaffoldProject('no-specs')
         cy.openProject('no-specs')
@@ -15,7 +15,7 @@ describe('Specs Page', () => {
         cy.visitApp()
       })
 
-      it('shows create first spec page', () => {
+      it('shows create first spec page with create from component and create from story options', () => {
         cy.findByRole('heading', {
           level: 1,
           name: defaultMessages.createSpec.page.defaultPatternNoSpecs.title,
@@ -27,11 +27,50 @@ describe('Specs Page', () => {
           cy.findByRole('heading', { level: 2, name: defaultMessages.createSpec.component.importFromComponent.header }).should('be.visible')
           cy.contains(defaultMessages.createSpec.component.importFromComponent.description).should('be.visible')
         })
+        .should('have.attr', 'tabindex', '0')
 
         cy.findAllByTestId('card').eq(1).as('StoryCard').within(() => {
           cy.findByRole('heading', { level: 2, name: defaultMessages.createSpec.component.importFromStory.header }).should('be.visible')
           cy.contains(defaultMessages.createSpec.component.importFromStory.description).should('be.visible')
         })
+        .should('have.attr', 'tabindex', '0')
+
+        cy.findByTestId('no-specs-message').should('be.visible').and('contain', defaultMessages.createSpec.noSpecsMessage)
+
+        cy.findByRole('link', { name: defaultMessages.createSpec.viewSpecPatternButton })
+        .should('be.visible')
+        .and('not.be.disabled')
+        .and('have.attr', 'href', '#/settings?section=project&setting=specPattern')
+      })
+    })
+
+    context('without storybook', () => {
+      beforeEach(() => {
+        cy.scaffoldProject('no-specs-no-storybook')
+        cy.openProject('no-specs-no-storybook')
+        cy.startAppServer('component')
+        cy.visitApp()
+      })
+
+      it('shows create first spec page with create from component option', () => {
+        cy.findByRole('heading', {
+          level: 1,
+          name: defaultMessages.createSpec.page.defaultPatternNoSpecs.title,
+        }).should('be.visible')
+
+        cy.findByTestId('create-spec-page-description').should('be.visible').and('contain', defaultMessages.createSpec.page.defaultPatternNoSpecs.component.description)
+
+        cy.findAllByTestId('card').eq(0).as('ComponentCard').within(() => {
+          cy.findByRole('heading', { level: 2, name: defaultMessages.createSpec.component.importFromComponent.header }).should('be.visible')
+          cy.contains(defaultMessages.createSpec.component.importFromComponent.description).should('be.visible')
+        })
+        .should('have.attr', 'tabindex', '0')
+
+        cy.findAllByTestId('card').eq(1).as('StoryCard').within(() => {
+          cy.findByRole('heading', { level: 2, name: defaultMessages.createSpec.component.importFromStory.header }).should('be.visible')
+          cy.contains(defaultMessages.createSpec.component.importFromStory.notSetupDescription).should('be.visible')
+        })
+        .should('have.attr', 'tabindex', '-1')
 
         cy.findByTestId('no-specs-message').should('be.visible').and('contain', defaultMessages.createSpec.noSpecsMessage)
 
