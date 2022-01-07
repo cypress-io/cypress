@@ -1,7 +1,7 @@
 import { createClient, Client, dedupExchange, ssrExchange } from '@urql/core'
 import { cacheExchange } from '@urql/exchange-graphcache'
 import { executeExchange } from '@urql/exchange-execute'
-import type { GraphQLSchema } from 'graphql'
+import { GraphQLSchema, introspectionFromSchema } from 'graphql'
 import type { DataContext } from '../DataContext'
 import type * as allOperations from '../gen/all-operations.gen'
 import { urqlCacheKeys } from '../util/urqlCacheKeys'
@@ -50,7 +50,7 @@ export class GraphQLDataSource {
       url: `__`,
       exchanges: [
         dedupExchange,
-        cacheExchange(urqlCacheKeys),
+        cacheExchange({ ...urqlCacheKeys, schema: introspectionFromSchema(this.schema) }),
         this._ssr,
         executeExchange({
           schema: this.schema,

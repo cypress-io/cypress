@@ -1,126 +1,216 @@
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
+import path from 'path'
 
-describe('Launchpad: Open Mode', () => {
-  describe('global mode', () => {
-    beforeEach(() => {
+describe('Launchpad: Global Mode', () => {
+  describe('when no projects have been added', () => {
+    it('shows "Add Project" view', () => {
       cy.openGlobalMode()
       cy.visitLaunchpad()
-    })
-
-    it('shows Add Project when no projects have been added', () => {
       cy.get('h1').should('contain', defaultMessages.globalPage.empty.title)
+      cy.get('[data-cy="dropzone"]')
+      .should('contain', defaultMessages.globalPage.empty.dropText.split('{0}')[0])
+      .find('button')
+      .should('contain', 'browse manually')
     })
 
-    it('shows the projects page when a project is not specified', () => {
-      cy.addProject('todos')
+    it('can add a project by dragging folder into project dropzone', () => {
+      cy.openGlobalMode()
       cy.visitLaunchpad()
-      cy.contains(defaultMessages.globalPage.recentProjectsHeader)
-    })
-  })
+      cy.get('h1').should('contain', defaultMessages.globalPage.empty.title)
+      cy.get('[data-cy="dropzone"]')
+      .should('contain', defaultMessages.globalPage.empty.dropText.split('{0}')[0])
 
-  it('goes directly to e2e tests when launched with --e2e', () => {
-    cy.scaffoldProject('todos')
-    cy.openProject('todos', ['--e2e'])
-    cy.visitLaunchpad()
-    // e2e testing is configured for the todo project, so we don't expect an error.
-    cy.get('h1').should('contain', 'Choose a Browser')
-  })
-
-  it('goes to component test onboarding when launched with --component and not configured', () => {
-    cy.scaffoldProject('launchpad')
-    cy.openProject('launchpad', ['--component'])
-    cy.visitLaunchpad()
-    // Component testing is not configured for the todo project
-    cy.get('h1').should('contain', 'Project Setup')
-  })
-
-  it('auto-selects the browser when launched with --browser', () => {
-    cy.scaffoldProject('launchpad')
-    cy.openProject('launchpad', ['--browser', 'firefox', '--e2e'])
-    // Need to visit after args have been configured, todo: fix in #18776
-    cy.visitLaunchpad()
-    cy.get('h1').should('contain', 'Choose a Browser')
-    cy.get('[data-cy-browser=firefox]').should('have.class', 'border-jade-300')
-    cy.get('button[data-cy=launch-button]').invoke('text').should('include', 'Launch Firefox')
-  })
-
-  describe('when there is a list of projects', () => {
-    it('goes to an active project if one is added', () => {
-      cy.openProject('todos')
-      cy.visitLaunchpad()
-
-      cy.withCtx(async (ctx, o) => {
-        ctx.emitter.toLaunchpad()
-      })
-
-      cy.get('h1').should('contain', 'Welcome to Cypress!')
-    })
-  })
-
-  describe('when a user interacts with the header', () => {
-    it('the Docs menu opens when clicked', () => {
-      cy.openProject('todos')
-      cy.visitLaunchpad()
-
-      cy.contains('Projects').should('be.visible')
-      cy.contains('button', 'Docs').click()
-      cy.contains(defaultMessages.topNav.docsMenu.gettingStartedTitle).should('be.visible')
-    })
-  })
-
-  describe('open in ide', () => {
-    it('configures an editor if one is not configured', () => {
-      cy.openProject('todos')
-      cy.withCtx(async (ctx, o) => {
-        ctx.coreData.localSettings.preferences.preferredEditorBinary = undefined
-        ctx.coreData.localSettings.availableEditors = [
-          // don't rely on CI machines to have specific editors installed
-          // so just adding one here
-          {
-            id: 'well-known-editor',
-            binary: '/usr/bin/well-known',
-            name: 'Well known editor',
-          },
-        ]
-
-        ctx.coreData.app.projects = [{ projectRoot: '/some/project' }]
-      })
-
-      cy.visitLaunchpad()
-      cy.get('a').contains('Projects').click()
-      cy.findByTestId('project-card')
-      cy.get('[aria-label="Project Actions"]').click()
-      cy.get('button').contains('Open In IDE').click()
-
-      cy.get('[data-cy="choose-editor-modal"]').as('modal')
-
-      cy.intercept('POST', 'mutation-ChooseExternalEditorModal_SetPreferredEditorBinary').as('SetPreferred')
-      cy.get('@modal').contains('Choose your editor...').click()
-      cy.get('@modal').contains('Well known editor').click()
-      cy.get('@modal').contains('Done').click()
-      cy.wait('@SetPreferred').its('request.body.variables.value').should('include', '/usr/bin/well-known')
-    })
-
-    it('opens using finder', () => {
       cy.scaffoldProject('todos')
-      cy.openProject('todos')
-      cy.withCtx(async (ctx, o) => {
-        ctx.actions.electron.showItemInFolder = o.sinon.stub()
-        ctx.coreData.app.projects = [{ projectRoot: '/some/project' }]
+      .then((projectPath) => {
+        cy.get('[data-cy="dropzone"]')
+        .dropFileWithPath(projectPath)
+      })
+
+      cy.contains('Welcome to Cypress!')
+      cy.get('a').contains('Projects').click()
+      cy.get('[data-cy="project-card"]')
+      .should('have.length', 1)
+      .should('contain', 'todos')
+    })
+  })
+
+  describe('when projects have been added', () => {
+    const setupAndValidateProjectsList = (projectList) => {
+      cy.openGlobalMode()
+      projectList.forEach((projectName) => {
+        cy.addProject(projectName)
       })
 
       cy.visitLaunchpad()
+
+      cy.log('The recents list shows all projects that have been added')
+      cy.contains(defaultMessages.globalPage.recentProjectsHeader)
+      .should('be.visible')
+
+      cy.get('[data-cy="project-card"]')
+      .should('have.length', projectList.length)
+      .each((card, index) => {
+        expect(card).to.contain(projectList[index])
+        expect(card).to.contain(path.join('cy-projects', projectList[index]))
+      })
+    }
+
+    it('shows the recent projects list sorted by most-recently opened', () => {
+      const projectList = ['todos', 'ids', 'cookies', 'plugin-empty']
+
+      setupAndValidateProjectsList(projectList)
+    })
+
+    it('takes user to the next step when clicking on a project card', () => {
+      const projectList = ['todos']
+
+      setupAndValidateProjectsList(projectList)
+      cy.get('[data-cy="project-card"]').click()
+      cy.get('[data-cy="project-card"]')
+      .should('have.length', 0)
+    })
+
+    it('updates most-recently opened project list when returning from next step', () => {
+      const projectList = ['todos', 'ids', 'cookies', 'plugin-empty']
+
+      setupAndValidateProjectsList(projectList)
+
+      cy.get('[data-cy="project-card"]').within((cards) => {
+        cy.log('open cookies project')
+        cards.get(2).click()
+      })
+
+      cy.contains('Welcome to Cypress!')
       cy.get('a').contains('Projects').click()
-      cy.findByTestId('project-card')
-      cy.get('[aria-label="Project Actions"]').click()
 
-      cy.intercept('POST', 'mutation-GlobalPage_OpenInFinder').as('OpenInFinder')
-      cy.get('button').contains('Open In Finder').click()
+      cy.get('[data-cy="project-card"]')
+      .should('have.length', projectList.length)
+      // TODO: fix most recently updated list ()
+      // https://cypress-io.atlassian.net/browse/UNIFY-646
+      // .then((list) => {
+      // expect(list.get(0)).to.contain(projectList[2])
+      // expect(list.get(0)).to.contain(path.join('cy-projects', path.sep, projectList[2]))
+      // })
+    })
 
-      cy.wait('@OpenInFinder')
+    it('can open and close the add project dropzone', () => {
+      setupAndValidateProjectsList(['todos'])
+      cy.log('Clicking the "Add Project" button shows the Project Dropzone')
+      cy.get('[data-cy="addProjectButton"').click()
+      cy.get('[data-cy="dropzone"]').should('exist')
 
-      cy.withCtx((ctx, o) => {
-        expect(ctx.actions.electron.showItemInFolder).to.have.been.calledOnceWith('/some/project')
+      cy.log('Clicking the x to close the project add area closes the Project Dropzone')
+      cy.get('[data-cy="dropzone"]')
+      .find('button[aria-label="Close"]')
+      .click()
+
+      cy.get('[data-cy="dropzone"]').should('not.exist')
+
+      cy.get('[data-cy="addProjectButton"').click()
+      cy.get('[data-cy="dropzone"]').should('exist')
+
+      cy.get('[data-cy="addProjectButton"').click()
+      cy.get('[data-cy="dropzone"]').should('not.exist')
+    })
+
+    describe('Project card menu', () => {
+      it('can be opened', () => {
+        setupAndValidateProjectsList(['todos'])
+        cy.log('Project cards have a menu can be opened')
+        cy.get('[aria-label="Project Actions"]').click()
+        cy.get('[data-cy="Remove Project"]').contains(defaultMessages.globalPage.removeProject)
+        cy.get('[data-cy="Open In IDE"]').contains(defaultMessages.globalPage.openInIDE)
+        cy.get('[data-cy="Open In Finder"]').contains(defaultMessages.globalPage.openInFinder)
+      })
+
+      it('removes project from list when clicking "Remove Project" menu item', () => {
+        const projectList = ['todos', 'cookies']
+
+        setupAndValidateProjectsList(projectList)
+        cy.get('[aria-label="Project Actions"]').then((menu) => {
+          menu.get(0).click()
+        })
+
+        cy.get('[data-cy="Remove Project"]').click()
+
+        cy.get('[data-cy="project-card"]')
+        .should('have.length', 1)
+        .should('contain', projectList[1])
+      })
+
+      it('opens "Open in IDE" modal when clicking "Open in IDE" menu item and IDE had not been configured', () => {
+        const projectList = ['todos']
+
+        setupAndValidateProjectsList(projectList)
+        cy.get('[aria-label="Project Actions"]').click()
+
+        cy.get('[data-cy="Open In IDE"]').click()
+        cy.contains('Select Preferred Editor')
+      })
+
+      it('shows file drop zone when no more projects are in list when clicking "Remove Project" menu item', () => {
+        setupAndValidateProjectsList(['todos'])
+        cy.get('[aria-label="Project Actions"]').click()
+        cy.get('[data-cy="Remove Project"]').click()
+
+        cy.get('[data-cy="project-card"]').should('not.exist')
+        cy.get('[data-cy="dropzone"]')
+        .should('contain', defaultMessages.globalPage.empty.dropText.split('{0}')[0])
+      })
+    })
+
+    describe('Searching the project list', () => {
+      const projectList = ['todos', 'ids', 'cookies', 'plugin-empty']
+
+      it('filters project results when searching by project name', () => {
+        setupAndValidateProjectsList(projectList)
+        cy.log('Searching for a project by the project name will filter the project results to only show that project')
+        cy.get('#project-search').type('tod')
+        cy.get('[data-cy="project-card"]')
+        .should('have.length', 1)
+        .contains('todos')
+        .contains(path.join('cy-projects', 'todos'))
+
+        cy.log('Deleting the search pattern restores the project list')
+        cy.get('#project-search').type('{backspace}{backspace}{backspace}')
+        cy.get('[data-cy="project-card"]')
+        .should('have.length', projectList.length)
+      })
+
+      // FIXME: fix Search by project path logic - https://cypress-io.atlassian.net/browse/UNIFY-646
+      it.skip('filters project results when searching by project path', () => {
+        setupAndValidateProjectsList(projectList)
+        cy.get('#project-search').type('packages')
+        cy.get('[data-cy="project-card"')
+        .should('have.length', projectList.length)
+
+        cy.get('#project-search').type(`${path.sep}todos`)
+        cy.contains(defaultMessages.globalPage.noResultsMessage)
+      })
+
+      it('shows "empty results" pages when searching for a non-existent name', () => {
+        setupAndValidateProjectsList(projectList)
+        cy.get('#project-search').type('hi')
+        cy.get('[data-cy="project-card"]')
+        .should('have.length', 0)
+
+        cy.contains(defaultMessages.globalPage.noResultsMessage)
+
+        cy.log('Clicking "clear search" in the empty search results will clear the searchbar and restore the project list')
+        cy.get('[data-cy="no-results-clear"]').click()
+        cy.get('[data-cy="project-card"]')
+        .should('have.length', projectList.length)
+      })
+
+      // FIXME: fix Search by project path logic - https://cypress-io.atlassian.net/browse/UNIFY-646
+      it.skip('shows "empty results" pages when searching for a non-existent path', () => {
+        setupAndValidateProjectsList(projectList)
+        cy.get('#project-search').type('packages')
+        cy.get('[data-cy="project-card"')
+        .should('have.length', projectList.length)
+
+        cy.get('#project-search').type(`${path.sep}random`)
+        cy.contains(defaultMessages.globalPage.noResultsMessage)
       })
     })
   })
