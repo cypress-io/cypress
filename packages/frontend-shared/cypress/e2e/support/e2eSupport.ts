@@ -9,7 +9,6 @@ import type { Browser, FoundBrowser, OpenModeOptions } from '@packages/types'
 import { browsers } from '@packages/types/src/browser'
 import type { E2ETaskMap } from '../e2ePluginSetup'
 import installCustomPercyCommand from '@packages/ui-components/cypress/support/customPercyCommand'
-import browser from 'webextension-polyfill'
 
 configure({ testIdAttribute: 'data-cy' })
 
@@ -205,6 +204,8 @@ function startAppServer (mode: 'component' | 'e2e' = 'e2e') {
     }, { log: false, mode }).then(async ({ appServerPort, socketIoRoute }) => {
       log.set({ message: `port: ${appServerPort}` })
       Cypress.env('e2e_serverPort', appServerPort)
+
+      const browser = require('webextension-polyfill')
 
       await browser.runtime.sendMessage('caljajdfkjjjdehjdoimjkkakekklcck', { host: `http://localhost:${appServerPort}`, path: socketIoRoute }, {})
     })
