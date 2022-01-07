@@ -17,7 +17,7 @@ export type ResolvedConfigurationOptions = Partial<{
 }>
 
 // This represents the full configuration object including a `resolved` key
-// which duplicates the config, addditional additional information such as how it was resolved
+// which duplicates the config, additional additional information such as how it was resolved
 // (eg from plugin, env, default etc...)
 // which is used for showing the config in the UI.
 export interface FullConfig extends Partial<Cypress.RuntimeConfigOptions & Cypress.ResolvedConfigOptions> {
