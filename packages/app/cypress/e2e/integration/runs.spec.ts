@@ -84,6 +84,9 @@ describe('App: Runs', () => {
 
       cy.get('[href="#/runs"]').click()
       cy.findByText(defaultMessages.runs.connect.buttonProject).click()
+      cy.get('[aria-modal="true"]').should('exist')
+      cy.get('button').get('[aria-label="Close"').click()
+      cy.get('[aria-modal="true"]').should('not.exist')
     })
   })
 
@@ -112,6 +115,9 @@ describe('App: Runs', () => {
 
       cy.get('[href="#/runs"]').click()
       cy.findByText(defaultMessages.runs.errors.notfound.button).click()
+      cy.get('[aria-modal="true"]').should('exist')
+      cy.get('button').get('[aria-label="Close"').click()
+      cy.get('[aria-modal="true"]').should('not.exist')
     })
   })
 
