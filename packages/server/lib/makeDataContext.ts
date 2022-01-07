@@ -7,7 +7,6 @@ import type {
   AllModeOptions,
   AllowedState,
   FoundBrowser,
-  FullConfig,
   InitializeProjectOptions,
   LaunchOpts,
   OpenProjectLaunchOptions,
@@ -118,7 +117,7 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
         return openProject.closeActiveProject()
       },
       getConfig () {
-        return openProject.getConfig() as FullConfig
+        return openProject.getConfig() as Partial<Cypress.RuntimeConfigOptions & Cypress.ResolvedConfigOptions>
       },
     },
     electronApi: {
