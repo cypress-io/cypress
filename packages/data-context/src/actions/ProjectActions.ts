@@ -18,8 +18,8 @@ export interface ProjectApiShape {
    */
   openProjectCreate(args: InitializeProjectOptions, options: OpenProjectLaunchOptions): Promise<unknown>
   launchProject(browser: FoundBrowser, spec: Cypress.Spec, options: LaunchOpts): void
-  insertProjectToCache(projectRoot: string): void
-  removeProjectFromCache(projectRoot: string): void
+  insertProjectToCache(projectRoot: string): Promise<void>
+  removeProjectFromCache(projectRoot: string): Promise<void>
   getProjectRootsFromCache(): Promise<string[]>
   insertProjectPreferencesToCache(projectTitle: string, preferences: Preferences): void
   getProjectPreferencesFromCache(): Promise<Record<string, Preferences>>
@@ -47,7 +47,7 @@ export class ProjectActions {
   }
 
   private get projects () {
-    return this.ctx.coreData.app.projects
+    return this.ctx.projectsList
   }
 
   private set projects (projects: ProjectShape[]) {
@@ -138,7 +138,7 @@ export class ProjectActions {
 
     if (!found) {
       this.projects.push({ projectRoot })
-      this.api.insertProjectToCache(projectRoot)
+      await this.api.insertProjectToCache(projectRoot)
     }
 
     if (args.open) {
@@ -219,7 +219,7 @@ export class ProjectActions {
     this.ctx.lifecycleManager.setCurrentTestingType(testingType)
 
     const spec = this.makeSpec(testingType)
-    const browser = this.findBrowerByPath(browserPath)
+    const browser = this.findBrowserByPath(browserPath)
 
     if (!browser) {
       throw Error(`Cannot find specified browser at given path: ${browserPath}.`)
@@ -241,19 +241,20 @@ export class ProjectActions {
     }
   }
 
-  private findBrowerByPath (browserPath: string) {
+  private findBrowserByPath (browserPath: string) {
     return this.ctx.coreData?.app?.browsers?.find((browser) => browser.path === browserPath)
   }
 
   removeProject (projectRoot: string) {
-    const found = this.ctx.projectsList.find((x) => x.projectRoot === projectRoot)
+    const found = this.projects.find((x) => x.projectRoot === projectRoot)
 
     if (!found) {
       throw new Error(`Cannot remove ${projectRoot}, it is not a known project`)
     }
 
     this.projects = this.projects.filter((project) => project.projectRoot !== projectRoot)
-    this.api.removeProjectFromCache(projectRoot)
+
+    return this.api.removeProjectFromCache(projectRoot)
   }
 
   syncProjects () {
