@@ -65,6 +65,8 @@ export class ProjectConfigIpc extends EventEmitter {
   }
 
   on(evt: 'childProcess:unhandledError', listener: (err: WarningError) => void): this
+
+  on(evt: 'setupTestingType:uncaughtError', listener: (err: Error) => void): this
   on(evt: 'warning', listener: (warningErr: WarningError) => void): this
   on (evt: string, listener: (...args: any[]) => void) {
     return super.on(evt, listener)

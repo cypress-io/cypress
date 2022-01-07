@@ -963,8 +963,13 @@ export class ProjectLifecycleManager {
      * It's supposed to be caught on lib/modes/run.js:1689,
      * but it's not.
      */
-    ipc.on('childProcess:unhandledError', (err) => this.handleChildProcessError(err, ipc, dfd))
-    child.on('setupTestingType:uncaughtError', (err) => this.handleChildProcessError(err, ipc, dfd))
+    ipc.on('childProcess:unhandledError', (err) => {
+      return this.handleChildProcessError(err, ipc, dfd)
+    })
+
+    ipc.on('setupTestingType:uncaughtError', (err) => {
+      return this.handleChildProcessError(err, ipc, dfd)
+    })
 
     ipc.once('loadConfig:reply', (val) => {
       debug('loadConfig:reply')
