@@ -349,8 +349,9 @@ export class DataContext {
 
   onError = (err: Error) => {
     if (this.isRunMode) {
+      this.lifecycleManager.runModeExitEarly?.(err)
       // console.error(err)
-      throw err
+      // throw err
     } else {
       this.coreData.baseError = err
     }

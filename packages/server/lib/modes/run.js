@@ -1026,7 +1026,7 @@ module.exports = {
           return reject(err)
         }
 
-        console.log('')
+        // console.log('')
         errors.log(err)
 
         // probably should say we ended

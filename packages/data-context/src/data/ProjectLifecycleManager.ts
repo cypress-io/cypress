@@ -110,6 +110,7 @@ export class ProjectLifecycleManager {
   private _registeredEventsTarget: TestingType | undefined
   private _eventProcess: ChildProcess | undefined
   private _currentTestingType: TestingType | null = null
+  private _runModeExitEarly: ((error: Error) => void) | undefined
 
   private _projectRoot: string | undefined
   private _configFilePath: string | undefined
@@ -291,6 +292,14 @@ export class ProjectLifecycleManager {
     }
 
     this.initializeConfigWatchers()
+  }
+
+  setRunModeExitEarly (exitEarly: ((err: Error) => void) | undefined) {
+    this._runModeExitEarly = exitEarly
+  }
+
+  get runModeExitEarly () {
+    return this._runModeExitEarly
   }
 
   /**
