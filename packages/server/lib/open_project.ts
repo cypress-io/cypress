@@ -254,6 +254,8 @@ export class OpenProject {
 
     const testingType = args.testingType === 'component' ? 'component' : 'e2e'
 
+    this._ctx.lifecycleManager.setRunModeExitEarly(options.onError ?? undefined)
+
     // store the currently open project
     this.projectBase = new ProjectBase({
       testingType,

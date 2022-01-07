@@ -9,7 +9,7 @@ const viewSpecsSelector = '[data-testid=view-spec-pattern]'
 
 const messages = defaultMessages.createSpec
 
-describe('<NoSpecsPage />', () => {
+describe('<NoSpecsPage />', { viewportHeight: 655, viewportWidth: 1032 }, () => {
   describe('mounting in component mode with default specPattern set', () => {
     beforeEach(() => {
       cy.mountFragment(NoSpecsPageFragmentDoc, {
@@ -41,11 +41,17 @@ describe('<NoSpecsPage />', () => {
       .and('contain.text', messages.noSpecsMessage)
       .get(viewSpecsSelector)
       .should('be.visible')
+      .and('contain.text', messages.viewSpecPatternButton)
+      .and('have.attr', 'href', '#/settings?section=project&setting=specPattern')
     })
 
     it('renders the correct text for component testing', () => {
       cy.get(pageTitleSelector).should('contain.text', messages.page.defaultPatternNoSpecs.title)
       .get(pageDescriptionSelector).should('contain.text', messages.page.defaultPatternNoSpecs.component.description)
+    })
+
+    it('percy snapshot', () => {
+      cy.percySnapshot()
     })
   })
 
@@ -78,28 +84,33 @@ describe('<NoSpecsPage />', () => {
       cy.get(pageTitleSelector)
       .should('contain.text', messages.page.defaultPatternNoSpecs.title)
       .get(pageDescriptionSelector).should('contain.text', messages.page.defaultPatternNoSpecs.e2e.description)
+
+      cy.percySnapshot()
     })
   })
 
   describe('mounting with custom specPattern set', () => {
-    //mode doesn't matter now as content is the same in each mode
-    beforeEach(() => {
+    it('renders the correct text for component testing', () => {
       cy.mountFragment(NoSpecsPageFragmentDoc, {
         render: (gql) => {
           return <NoSpecsPage gql={gql} isUsingDefaultSpecs={false} title={messages.page.customPatternNoSpecs.title} />
         },
       })
-    })
 
-    it('renders the correct text for component testing', () => {
       cy.get(pageTitleSelector).should('contain.text', messages.page.customPatternNoSpecs.title)
       .get(pageDescriptionSelector).should('contain.text', messages.page.customPatternNoSpecs.description.replace('{0}', ' specPattern '))
 
       // show spec pattern
       cy.contains('**/*.spec.{js,ts,tsx,jsx}')
       cy.contains(defaultMessages.createSpec.updateSpecPattern)
+
+      cy.log('state before clicking "New Spec" ')
+      cy.percySnapshot()
+
       cy.contains(defaultMessages.createSpec.newSpec).click()
       cy.contains(defaultMessages.createSpec.newSpecModalTitle)
+      cy.log('state after clicking "New Spec"')
+      cy.percySnapshot()
     })
   })
 })
