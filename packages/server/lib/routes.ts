@@ -86,7 +86,7 @@ export const createCommonRoutes = ({
   router.get(clientRoute, (req, res) => {
     debug('Serving Cypress front-end by requested URL:', req.url)
 
-    if (process.env.LAUNCHPAD) {
+    if (process.env.LAUNCHPAD || process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF) {
       ctx.html.appHtml()
       .then((html) => res.send(html))
       .catch((e) => res.status(500).send({ stack: e.stack }))

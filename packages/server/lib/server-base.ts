@@ -63,14 +63,14 @@ const _forceProxyMiddleware = function (clientRoute) {
   return function (req, res, next) {
     const trimmedUrl = _.trimEnd(req.proxiedUrl, '/')
 
+    // TODO: this is hard coded temporarily, a larger fix for this scenario is incoming.
+    if (_isNonProxiedRequest(req) && process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF) {
+      req.proxiedUrl = `http://localhost:4455${trimmedUrl}`
+
+      return next()
+    }
+
     if (_isNonProxiedRequest(req) && !ALLOWED_PROXY_BYPASS_URLS.includes(trimmedUrl) && (trimmedUrl !== trimmedClientRoute)) {
-      // TODO: this is hard coded temporarily, a larger fix for this scenario is incoming.
-      if (trimmedUrl.startsWith(`/${namespace}`) || trimmedUrl.startsWith('/cypress/e2e/integration/dom-content.html')) {
-        req.proxiedUrl = `http://localhost:4455${trimmedUrl}`
-
-        return next()
-      }
-
       debug('Redirecting!!!!! %o', { namespace, url: req.proxiedUrl })
 
       // this request is non-proxied and non-allowed, redirect to the runner error page

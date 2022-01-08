@@ -224,7 +224,7 @@ const automation = {
   },
 
   query (data) {
-    const code = `var s; (s = document.getElementById('${data.element}')) && s.textContent`
+    const code = `var s; (s = document.getElementById('${data.element}') || document.getElementsByClassName('aut-iframe').item(0).contentWindow.document.getElementById('${data.element}')) && s.textContent`
 
     const queryTab = (tab) => {
       return Promise.try(() => {

@@ -13,11 +13,11 @@ export default defineConfig({
     openMode: 0,
   },
   // @ts-expect-error
-  clientRoute: '/cy-parent/',
-  namespace: 'cy-parent',
+  clientRoute: '/cy-parent-client/',
+  namespace: 'cy-parent-namespace',
   socketIoRoute: '/cy-parent-socket',
   socketIoCookie: 'cy-parent-socket',
-  devServerPublicPathRoute: '/cy-parent/src',
+  devServerPublicPathRoute: '/cy-parent-namespace/src',
   reporter: '../../node_modules/cypress-multi-reporters/index.js',
   reporterOptions: {
     configFile: '../../mocha-reporter-config.json',

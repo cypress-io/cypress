@@ -120,12 +120,12 @@ function createIframeModel () {
  * for communication between driver, runner, reporter via event bus,
  * and server (via web socket).
  */
-function setupRunner () {
+function setupRunner (namespace) {
   const mobxRunnerStore = getMobxRunnerStore()
 
   getEventManager().addGlobalListeners(mobxRunnerStore, {
-    automationElement: '__cypress-string',
-    randomString,
+    element: `${namespace}-string`,
+    string: randomString,
   })
 
   getEventManager().start(window.UnifiedRunner.config)
@@ -318,7 +318,7 @@ async function initialize () {
     store.updateDimensions(config.viewportWidth, config.viewportHeight)
   })
 
-  window.UnifiedRunner.MobX.runInAction(() => setupRunner())
+  window.UnifiedRunner.MobX.runInAction(() => setupRunner(config.namespace))
 }
 
 /**

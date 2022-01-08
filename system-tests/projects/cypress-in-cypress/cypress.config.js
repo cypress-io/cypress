@@ -1,15 +1,15 @@
 module.exports = {
   projectId: 'abc123',
   // @ts-expect-error
-  clientRoute: '/cy-child/',
-  namespace: 'cy-child',
+  clientRoute: '/cy-child-client/',
+  namespace: 'cy-child-namespace',
   socketIoRoute: '/cy-child-socket',
   socketIoCookie: 'cy-child-socket',
-  devServerPublicPathRoute: '/cy-child/src',
+  devServerPublicPathRoute: '/cy-child-namespace/src',
   experimentalInteractiveRunEvents: true,
   component: {
     specPattern: 'src/**/*.{spec,cy}.{js,ts,tsx,jsx}',
-    supportFile: 'cypress/component/support/index-real.ts',
+    supportFile: 'cypress/component/support/index.ts',
     devServer (cypressConfig, devServerConfig) {
       const { startDevServer } = require('@cypress/vite-dev-server')
 
