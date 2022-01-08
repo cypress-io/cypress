@@ -36,12 +36,13 @@ export const serveRunner = (runnerPkg: RunnerPkg, config: Cfg, res: Response) =>
   return res.render(runnerPath, {
     base64Config,
     projectName: config.projectName,
+    namespace: config.namespace,
   })
 }
 
 export const runner = {
   serve (req, res, runnerPkg: RunnerPkg, options: ServeOptions) {
-    if (req.proxiedUrl.startsWith('/')) {
+    if (req.proxiedUrl.startsWith('/') && !req.proxiedUrl.startsWith(`/${options.config.namespace}`)) {
       debug('request was not proxied via Cypress, erroring %o', _.pick(req, 'proxiedUrl'))
 
       return _serveNonProxiedError(res)

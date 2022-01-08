@@ -207,7 +207,9 @@ function startAppServer (mode: 'component' | 'e2e' = 'e2e') {
 
       const browser = require('webextension-polyfill')
 
-      await browser.runtime.sendMessage('caljajdfkjjjdehjdoimjkkakekklcck', { host: `http://localhost:${appServerPort}`, path: socketIoRoute }, {})
+      if (browser.runtime) {
+        await browser.runtime.sendMessage('caljajdfkjjjdehjdoimjkkakekklcck', { host: `http://localhost:${appServerPort}`, path: socketIoRoute }, {})
+      }
     })
   })
 }
