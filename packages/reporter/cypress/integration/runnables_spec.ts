@@ -24,10 +24,12 @@ describe('runnables', () => {
       cy.visit('/').then((win) => {
         win.render(Object.assign({
           runner,
-          spec: {
-            name: 'foo',
-            absolute: '/foo/bar',
-            relative: 'foo/bar',
+          runnerStore: {
+            spec: {
+              name: 'foo',
+              absolute: '/foo/bar',
+              relative: 'foo/bar',
+            },
           },
           experimentalStudioEnabled: true,
         }, renderProps))
@@ -152,10 +154,12 @@ describe('runnables', () => {
 
     it('does not display links to work with file if running all specs', () => {
       start({
-        spec: {
-          name: 'All Integration Specs',
-          absolute: '__all',
-          relative: '__all',
+        runnerStore: {
+          spec: {
+            name: 'All Integration Specs',
+            absolute: '__all',
+            relative: '__all',
+          },
         },
       })
 
@@ -180,10 +184,12 @@ describe('runnables', () => {
     describe('open in ide', () => {
       beforeEach(() => {
         start({
-          spec: {
-            name: 'foo.js',
-            relative: 'relative/path/to/foo.js',
-            absolute: '/absolute/path/to/foo.js',
+          runnerStore: {
+            spec: {
+              name: 'foo.js',
+              relative: 'relative/path/to/foo.js',
+              absolute: '/absolute/path/to/foo.js',
+            },
           },
         })
       })
@@ -196,6 +202,33 @@ describe('runnables', () => {
           line: 0,
           column: 0,
         },
+      })
+    })
+  })
+
+  describe('runnable-header (unified)', () => {
+    beforeEach(() => {
+      cy.window().then((win) => win.__vite__ = true)
+
+      start({
+        runnerStore: {
+          spec: {
+            name: 'foo.js',
+            relative: 'relative/path/to/foo.js',
+            absolute: '/absolute/path/to/foo.js',
+          },
+        },
+      })
+    })
+
+    it('contains name of spec and emits when clicked', () => {
+      const selector = '.runnable-header a'
+
+      cy.stub(runner, 'emit').callThrough()
+
+      cy.get(selector).as('spec-title').contains('foo.js')
+      cy.get(selector).click().then(() => {
+        expect(runner.emit).to.be.calledWith('open:file:unified')
       })
     })
   })
