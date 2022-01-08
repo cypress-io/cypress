@@ -1236,7 +1236,6 @@ export class ProjectLifecycleManager {
     }
 
     if (testingType === 'component') {
-      // @ts-expect-error
       return Boolean(config.component?.devServer)
     }
 
