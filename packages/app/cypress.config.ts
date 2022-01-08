@@ -1,4 +1,5 @@
 import { defineConfig } from 'cypress'
+import { devServer } from '@cypress/vite-dev-server'
 import getenv from 'getenv'
 
 const CYPRESS_INTERNAL_CLOUD_ENV = getenv('CYPRESS_INTERNAL_CLOUD_ENV', process.env.CYPRESS_INTERNAL_ENV || 'development')
@@ -25,24 +26,17 @@ export default defineConfig({
   component: {
     supportFile: 'cypress/component/support/index.ts',
     specPattern: 'src/**/*.{spec,cy}.{js,ts,tsx,jsx}',
-    devServer (cypressConfig, devServerConfig) {
-      const { startDevServer } = require('@cypress/vite-dev-server')
-
-      return startDevServer({ options: cypressConfig, ...devServerConfig })
-    },
+    devServer,
     devServerConfig: {
-      viteConfig: {
-        // TODO(tim): Figure out why this isn't being picked up
-        optimizeDeps: {
-          include: [
-            '@headlessui/vue',
-            'vue3-file-selector',
-            'just-my-luck',
-            'combine-properties',
-            'faker',
-            '@packages/ui-components/cypress/support/customPercyCommand',
-          ],
-        },
+      optimizeDeps: {
+        include: [
+          '@headlessui/vue',
+          'vue3-file-selector',
+          'just-my-luck',
+          'combine-properties',
+          'faker',
+          '@packages/ui-components/cypress/support/customPercyCommand',
+        ],
       },
     },
   },
