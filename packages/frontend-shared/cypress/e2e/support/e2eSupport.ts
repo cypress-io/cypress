@@ -200,7 +200,7 @@ function startAppServer (mode: 'component' | 'e2e' = 'e2e') {
 
       await ctx.actions.project.launchProject(o.mode, {})
 
-      return { appServerPort: ctx.appServerPort, socketIoRoute: ctx.coreData.servers.appSocketServer?.path() }
+      return { appServerPort: ctx.appServerPort, socketIoRoute: ctx.lifecycleManager.loadedFullConfig?.socketIoRoute }
     }, { log: false, mode }).then(async ({ appServerPort, socketIoRoute }) => {
       log.set({ message: `port: ${appServerPort}` })
       Cypress.env('e2e_serverPort', appServerPort)
@@ -225,8 +225,11 @@ function visitApp (href?: string) {
     `)
   }
 
-  // TODO: Figure out how to retrieve the client route and use that instead of cy-child
-  return cy.visit(`http://localhost:${e2e_serverPort}/cy-child/#${href || ''}`)
+  return cy.withCtx(async (ctx) => {
+    return ctx.lifecycleManager.loadedFullConfig?.clientRoute
+  }).then((clientRoute) => {
+    return cy.visit(`http://localhost:${e2e_serverPort}${clientRoute}#${href || ''}`)
+  })
 }
 
 function visitLaunchpad () {
