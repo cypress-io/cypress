@@ -208,7 +208,7 @@ function startAppServer (mode: 'component' | 'e2e' = 'e2e') {
       const browser = require('webextension-polyfill')
 
       if (browser.runtime) {
-        await browser.runtime.sendMessage('caljajdfkjjjdehjdoimjkkakekklcck', { host: `http://localhost:${appServerPort}`, path: socketIoRoute }, {})
+        await browser.runtime.sendMessage('caljajdfkjjjdehjdoimjkkakekklcck', { host: `http://localhost:${appServerPort}`, path: socketIoRoute || '/__socket.io' }, {})
       }
     })
   })
@@ -228,7 +228,7 @@ function visitApp (href?: string) {
   return cy.withCtx(async (ctx) => {
     return ctx.lifecycleManager.loadedFullConfig?.clientRoute
   }).then((clientRoute) => {
-    return cy.visit(`http://localhost:${e2e_serverPort}${clientRoute}#${href || ''}`)
+    return cy.visit(`http://localhost:${e2e_serverPort}${clientRoute || '/__/'}#${href || ''}`)
   })
 }
 

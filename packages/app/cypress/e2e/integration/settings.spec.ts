@@ -18,7 +18,7 @@ describe('App: Settings', { viewportWidth: 600 }, () => {
   })
 
   it('can reconfigure a project', () => {
-    cy.visitApp('#settings')
+    cy.visitApp('settings')
 
     cy.intercept('mutation-SettingsContainer_ReconfigureProject', { 'data': { 'reconfigureProject': true } }).as('ReconfigureProject')
     cy.findByText('Reconfigure Project').click()
@@ -42,7 +42,7 @@ describe('App: Settings', { viewportWidth: 600 }, () => {
         ctx.coreData.localSettings.preferences.preferredEditorBinary = undefined
       })
 
-      cy.visitApp('#settings')
+      cy.visitApp('settings')
       cy.contains('Device Settings').click()
     })
 
