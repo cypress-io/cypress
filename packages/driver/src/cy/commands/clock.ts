@@ -105,7 +105,7 @@ export default function (Commands, Cypress, cy, state) {
 
       const { tick } = clock
 
-      clock.tick = function (ms, options: any = {}) {
+      clock.tick = function (ms, options: Partial<Cypress.Loggable> = {}) {
         if ((ms != null) && !_.isNumber(ms)) {
           $errUtils.throwErrByPath('tick.invalid_argument', { args: { arg: JSON.stringify(ms) } })
         }
