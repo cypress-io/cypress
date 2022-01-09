@@ -34,6 +34,7 @@ export default defineConfig({
       },
     },
   },
+  video: false,
   'e2e': {
     specPattern: 'cypress/e2e/integration/**/*.spec.{js,ts}',
     pluginsFile: 'cypress/e2e/plugins/index.ts',
