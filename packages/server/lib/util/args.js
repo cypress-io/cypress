@@ -409,7 +409,7 @@ module.exports = {
             spec = spec.substring(1, spec.length - 1)
           }
 
-          options.spec = parseSpecArgv(spec)
+          options.spec = parseSpecArgv(spec).map(resolvePath)
         } else {
           options.spec = spec.map(resolvePath)
         }
