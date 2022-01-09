@@ -1503,7 +1503,7 @@ module.exports = {
           webSecurity: options.webSecurity,
           projectRoot: options.projectRoot,
           // TODO(tim): investigate the socket disconnect
-        }, options.testingType === 'e2e' || firstSpec),
+        }, firstSpec),
       })
     })
   },
