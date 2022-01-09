@@ -1503,7 +1503,7 @@ module.exports = {
           webSecurity: options.webSecurity,
           projectRoot: options.projectRoot,
           // TODO(tim): investigate the socket disconnect
-        }, process.env.CYPRESS_INTERNAL_FORCE_BROWSER_RELAUNCH || options.testingType === 'e2e' || firstSpec),
+        }, options.testingType === 'e2e' || firstSpec),
       })
     })
   },
