@@ -1260,7 +1260,7 @@ module.exports = {
         // it exit naturally with the parent process due to
         // electron bug in windows
         debug('attempting to close the browser')
-        await openProject.closeBrowser()
+        // await openProject.closeBrowser()
       }
 
       if (videoExists && !skippedSpec && endVideoCapture && !videoCaptureFailed) {
