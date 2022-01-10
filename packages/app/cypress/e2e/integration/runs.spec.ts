@@ -1,7 +1,7 @@
 import type { Interception } from '@packages/net-stubbing/lib/external-types'
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 
-describe('App: Runs', () => {
+describe('App: Runs', { viewportWidth: 1200 }, () => {
   beforeEach(() => {
     cy.scaffoldProject('component-tests')
     cy.openProject('component-tests')
@@ -170,7 +170,7 @@ describe('App: Runs', () => {
       cy.contains(defaultMessages.runs.empty.title)
       cy.contains(defaultMessages.runs.empty.description)
       cy.contains('--record --key 2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa')
-      cy.get('[data-cy="copy-button"]').last().click()
+      cy.get('[data-cy="copy-button"]').click()
       cy.contains('Copied!')
     })
   })
@@ -208,7 +208,7 @@ describe('App: Runs', () => {
       cy.get('@firstRun').get('[data-cy="run-card-author"]').contains('John Appleseed')
       cy.get('@firstRun').get('[data-cy="run-card-avatar')
       cy.get('@firstRun').get('[data-cy="run-card-branch"]').contains('main')
-      cy.get('@firstRun').contains(`${new Date().getHours()}:${new Date().getMinutes()}`)
+      cy.get('@firstRun').contains(`3:17`)
       cy.get('@firstRun').contains('span', 'skipped')
       cy.get('@firstRun').get('span').contains('pending')
       cy.get('@firstRun').get('span').contains('passed')
