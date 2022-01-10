@@ -8,7 +8,7 @@ const util = require(`../../../../lib/plugins/util`)
 const resolve = require(`../../../../lib/util/resolve`)
 const browserUtils = require(`../../../../lib/browsers/utils`)
 
-const { RunPlugins } = require(`../../../../lib/plugins/child/RunPlugins`)
+const { RunPlugins } = require(`../../../../lib/plugins/child/run_plugins`)
 
 const deferred = () => {
   let reject
