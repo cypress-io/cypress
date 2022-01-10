@@ -1688,11 +1688,7 @@ jobs:
     steps:
       - clone-repo-and-checkout-branch:
           repo: cypress-example-kitchensink
-<<<<<<< HEAD
           pull_request_id: 524
-=======
-          pull_request_id: 523
->>>>>>> origin/10.0-release
       - install-required-node
       - run:
           name: Remove cypress.json
@@ -2026,11 +2022,7 @@ jobs:
       - test-binary-against-repo:
           repo: cypress-example-kitchensink
           browser: "electron"
-<<<<<<< HEAD
           pull_request_id: 524
-=======
-          pull_request_id: 523
->>>>>>> origin/10.0-release
 
   test-binary-against-awesome-typescript-loader:
     <<: *defaults
@@ -2038,11 +2030,7 @@ jobs:
       - test-binary-against-repo:
           repo: cypress-test-awesome-typescript-loader
           browser: "electron"
-<<<<<<< HEAD
           pull_request_id: 8
-=======
-          pull_request_id: 7
->>>>>>> origin/10.0-release
 
   test-binary-against-kitchensink-firefox:
     <<: *defaults
@@ -2051,11 +2039,7 @@ jobs:
       - test-binary-against-repo:
           repo: cypress-example-kitchensink
           browser: firefox
-<<<<<<< HEAD
           pull_request_id: 524
-=======
-          pull_request_id: 523
->>>>>>> origin/10.0-release
 
   test-binary-against-kitchensink-chrome:
     <<: *defaults
@@ -2064,11 +2048,7 @@ jobs:
       - test-binary-against-repo:
           repo: cypress-example-kitchensink
           browser: chrome
-<<<<<<< HEAD
           pull_request_id: 524
-=======
-          pull_request_id: 523
->>>>>>> origin/10.0-release
 
   test-binary-against-todomvc-firefox:
     <<: *defaults

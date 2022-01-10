@@ -531,49 +531,6 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     })
   })
 
-<<<<<<< HEAD
-  context('#scaffold', () => {
-    beforeEach(function () {
-      this.project = new ProjectBase({ projectRoot: '/_test-output/path/to/project-e2e', testingType: 'e2e' })
-      sinon.stub(scaffold, 'fixture').resolves()
-      sinon.stub(scaffold, 'support').resolves()
-      sinon.stub(scaffold, 'plugins').resolves()
-
-      this.obj = { projectRoot: 'pr', fixturesFolder: 'ff', integrationFolder: 'if', supportFolder: 'sf', pluginsFile: 'pf/index.js' }
-    })
-
-    it('calls support.scaffold with supportFolder', function () {
-      return this.project.scaffold(this.obj).then(() => {
-        expect(scaffold.support).to.be.calledWith(this.obj.supportFolder)
-      })
-    })
-
-    it('does not call support.plugins if config.pluginsFile is falsey', function () {
-      this.obj.pluginsFile = false
-
-      return this.project.scaffold(this.obj).then(() => {
-        expect(scaffold.plugins).not.to.be.called
-      })
-    })
-
-    describe('forced', () => {
-      let resetEnv
-
-      beforeEach(function () {
-        this.obj.isTextTerminal = true
-        resetEnv = mockedEnv({
-          CYPRESS_INTERNAL_FORCE_SCAFFOLD: '1',
-        })
-      })
-
-      afterEach(() => {
-        resetEnv()
-      })
-    })
-  })
-
-=======
->>>>>>> origin/10.0-release
   context('#startWebsockets', () => {
     beforeEach(function () {
       this.project = new ProjectBase({ projectRoot: '/_test-output/path/to/project-e2e', testingType: 'e2e' })

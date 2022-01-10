@@ -211,21 +211,5 @@ describe('e2e plugins', function () {
         },
       })
     })
-<<<<<<< HEAD
-
-    temporarySkip('passes false configFile to plugins function', function () {
-      return systemTests.exec(this, {
-        spec: 'plugins_config_extras.cy.js',
-        configFile: 'false',
-        config: {
-          env: {
-            projectRoot: e2eProject,
-            configFile: false,
-          },
-        },
-      })
-    })
-=======
->>>>>>> origin/10.0-release
   })
 })
