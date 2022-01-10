@@ -321,17 +321,23 @@ interface E2eScaffoldOpts {
 }
 
 const E2E_SCAFFOLD_BODY = (opts: E2eScaffoldOpts) => {
+  let e2eFields = `specPattern: 'cypress/e2e/**/*.cy.{js,ts}',`
+
+  if (opts.lang === 'ts') {
+    e2eFields = `supportFile: 'cypress/support/e2e.ts',
+    specPattern: 'cypress/e2e/**/*.cy.{js,ts}',`
+  }
+
   return `
-    e2e: {
-      supportFile: 'cypress/support/e2e.${opts.lang}',
-      specPattern: 'cypress/e2e/**/*.cy.{js,ts}',
-      viewportHeight: 660,
-      viewportWidth: 1000,
-      setupNodeEvents(on, config) {
-        //
-      },
-    }
-  `
+  e2e: {
+    ${e2eFields}
+    viewportHeight: 660,
+    viewportWidth: 1000,
+    setupNodeEvents(on, config) {
+      //
+    },
+  }
+`
 }
 
 interface ComponentScaffoldOpts {
@@ -342,10 +348,16 @@ interface ComponentScaffoldOpts {
 }
 
 const COMPONENT_SCAFFOLD_BODY = (opts: ComponentScaffoldOpts) => {
+  let componentFields = `specPattern: 'cypress/**/*.cy.{js,jsx,ts,tsx}',`
+
+  if (opts.lang === 'ts') {
+    componentFields = `supportFile: 'cypress/support/component.ts',
+    specPattern: 'cypress/**/*.cy.{js,jsx,ts,tsx}',`
+  }
+
   return `
   component: {
-    supportFile: 'cypress/support/component.${opts.lang}',
-    specPattern: 'cypress/**/*.cy.{js,jsx,ts,tsx}',
+    ${componentFields}
     devServer: import('${opts.requirePath}'),
     devServerConfig: ${opts.configOptionsString}
   }
