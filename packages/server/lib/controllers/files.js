@@ -68,12 +68,9 @@ module.exports = {
       if (spec === '__all') {
         debug('returning all specs')
 
-        const [e2ePatterns, componentPatterns] = await Promise.all([
-          ctx.project.specPatternsForTestingType(ctx.project.projectRoot, 'e2e'),
-          ctx.project.specPatternsForTestingType(ctx.project.projectRoot, 'component'),
-        ])
+        const { specPattern, ignoreSpecPattern } = await ctx.project.specPatternsForTestingType(ctx.project.projectRoot, 'e2e')
 
-        return ctx.project.findSpecs(config.projectRoot, 'e2e', e2ePatterns.specPattern, componentPatterns.specPattern)
+        return ctx.project.findSpecs(config.projectRoot, 'e2e', specPattern, [], ignoreSpecPattern)
         .then((specs) => {
           debug('found __all specs %o', specs)
 
