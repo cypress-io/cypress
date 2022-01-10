@@ -1,5 +1,5 @@
 {
-  "reporterEnabled": "spec, mocha-junit-reporter",
+  "reporterEnabled": "../../system-tests/lib/performance-reporter.js, mocha-junit-reporter",
   "mochaJunitReporterReporterOptions": {
     "mochaFile": "/tmp/cypress/junit/test-results.[hash].xml"
   }
