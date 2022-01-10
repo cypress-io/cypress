@@ -7,7 +7,7 @@
  * states that exist, and how they are managed.
  */
 import { ChildProcess, ForkOptions, fork } from 'child_process'
-import chokidar from 'chokidar'
+import chokidar, { FSWatcher } from 'chokidar'
 import path from 'path'
 import inspector from 'inspector'
 import _ from 'lodash'
@@ -857,11 +857,23 @@ export class ProjectLifecycleManager {
   addWatcher (file: string | string[]) {
     const w = chokidar.watch(file, {
       ignoreInitial: true,
+      cwd: this.projectRoot,
     })
 
     this.watchers.add(w)
 
     return w
+  }
+
+  closeWatcher (watcherToClose: FSWatcher) {
+    for (const watcher of this.watchers.values()) {
+      if (watcher === watcherToClose) {
+        watcher.close()
+        this.watchers.delete(watcher)
+
+        return
+      }
+    }
   }
 
   registerEvent (event: string, callback: Function) {

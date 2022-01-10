@@ -41,7 +41,7 @@ class RunPlugins {
   getDefaultPreprocessor (config) {
     const tsPath = resolve.typescript(config.projectRoot)
     const options = {
-      typescript: tsPath,
+      ...tsPath && { typescript: tsPath },
     }
 
     debug('creating webpack preprocessor with options %o', options)
