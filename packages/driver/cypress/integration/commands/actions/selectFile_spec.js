@@ -20,7 +20,7 @@ function getFileContents (subject) {
 describe('src/cy/commands/actions/selectFile', () => {
   beforeEach(() => {
     cy.visit('/fixtures/files-form.html')
-    cy.wrap(Buffer.from('foo')).as('foo')
+    cy.wrap(Cypress.Buffer.from('foo')).as('foo')
   })
 
   context('#selectFile', () => {
@@ -50,10 +50,10 @@ describe('src/cy/commands/actions/selectFile', () => {
           contents: '@foo',
           fileName: 'foo.txt',
         }, {
-          contents: Buffer.from('{"a":"bar"}'),
+          contents: Cypress.Buffer.from('{"a":"bar"}'),
           fileName: 'bar.json',
         },
-        Buffer.from('baz'),
+        Cypress.Buffer.from('baz'),
       ])
 
       cy.get('#multiple')
