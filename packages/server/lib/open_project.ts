@@ -297,6 +297,7 @@ export class OpenProject {
       )
 
       this._ctx.actions.project.setSpecs(specs)
+      this._ctx.project.startSpecWatcher(path, testingType, specPattern)
 
       await this.projectBase.open()
     } catch (err: any) {

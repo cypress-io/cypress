@@ -30,6 +30,9 @@ export interface ProjectApiShape {
   clearProjectPreferences(projectTitle: string): Promise<unknown>
   clearAllProjectPreferences(): Promise<unknown>
   closeActiveProject(): Promise<unknown>
+  getDevServer (): {
+    updateSpecs: (specs: FoundSpec[]) => void
+  }
 }
 
 export class ProjectActions {
