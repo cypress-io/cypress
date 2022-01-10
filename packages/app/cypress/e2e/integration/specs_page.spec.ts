@@ -13,15 +13,6 @@ describe('Specs Page', () => {
         cy.openProject('no-specs')
         cy.startAppServer('component')
         cy.visitApp()
-      })
-
-      it('shows create first spec page with create from component and create from story options', () => {
-        cy.findByRole('heading', {
-          level: 1,
-          name: defaultMessages.createSpec.page.defaultPatternNoSpecs.title,
-        }).should('be.visible')
-
-        cy.findByTestId('create-spec-page-description').should('be.visible').and('contain', defaultMessages.createSpec.page.defaultPatternNoSpecs.component.description)
 
         cy.findAllByTestId('card').eq(0).as('ComponentCard').within(() => {
           cy.findByRole('heading', { level: 2, name: defaultMessages.createSpec.component.importFromComponent.header }).should('be.visible')
@@ -34,6 +25,18 @@ describe('Specs Page', () => {
           cy.contains(defaultMessages.createSpec.component.importFromStory.description).should('be.visible')
         })
         .should('have.attr', 'tabindex', '0')
+      })
+
+      it('shows create first spec page with create from component and create from story options', () => {
+        cy.findByRole('heading', {
+          level: 1,
+          name: defaultMessages.createSpec.page.defaultPatternNoSpecs.title,
+        }).should('be.visible')
+
+        cy.findByTestId('create-spec-page-description').should('be.visible').and('contain', defaultMessages.createSpec.page.defaultPatternNoSpecs.component.description)
+
+        cy.get('@ComponentCard').should('be.visible')
+        cy.get('@StoryCard').should('be.visible')
 
         cy.findByTestId('no-specs-message').should('be.visible').and('contain', defaultMessages.createSpec.noSpecsMessage)
 
@@ -41,6 +44,15 @@ describe('Specs Page', () => {
         .should('be.visible')
         .and('not.be.disabled')
         .and('have.attr', 'href', '#/settings?section=project&setting=specPattern')
+      })
+
+      it('shows the create from story modal when option is selected', () => {
+        cy.get('@StoryCard').click()
+
+        cy.findByRole('dialog', { name: 'Create from story' }).within(() => {
+          cy.validateExternalLink({ name: 'Need help?', href: 'https://on.cypress.io' })
+          cy.findByRole('button', { name: 'Close' }).click()
+        })
       })
     })
 
