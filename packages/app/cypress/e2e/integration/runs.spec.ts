@@ -59,6 +59,9 @@ describe('App: Runs Page', () => {
       await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = { clientRoute: \'\/cy-child-client\/\' }')
     })
 
+    cy.openProject('component-tests')
+    cy.startAppServer()
+
     cy.loginUser()
     cy.visitApp()
 
