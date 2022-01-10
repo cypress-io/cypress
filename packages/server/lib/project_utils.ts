@@ -13,34 +13,18 @@ const backSlashesRe = /\\/g
 
 const normalizeSpecUrl = (browserUrl: string, specUrl: string) => {
   if (process.env.LAUNCHPAD) {
+    debug('returning browserUrl %s', browserUrl)
+
     return browserUrl
   }
 
-  return [
-    browserUrl,
-    '#/tests',
-    escapeFilenameInUrl(specUrl),
-  ].join('/')
-  .replace(multipleForwardSlashesRe, multipleForwardSlashesReplacer)
-}
+  // format is: http://localhost:<port>/__/#/specs/runner?file=<relative_url>
+  const escapedRelativeUrl = escapeFilenameInUrl(specUrl)
+  const hash = `#/specs/runner?file=${escapedRelativeUrl}`
 
-const getPrefixedPathToSpec = (spec: Cypress.Spec) => {
-  // strip out the integration folder and prepend with "/"
-  // example:
-  //
-  // /Users/bmann/Dev/cypress-app/.projects/cypress/integration
-  // /Users/bmann/Dev/cypress-app/.projects/cypress/integration/foo.js
-  //
-  // becomes /integration/foo.js
+  const url = `${browserUrl}/${hash}`.replace(multipleForwardSlashesRe, multipleForwardSlashesReplacer)
 
-  // To avoid having invalid urls from containing backslashes,
-  // we normalize specUrls to posix by replacing backslash by slash
-  // Indeed, path.realtive will return something different on windows
-  // than on posix systems which can lead to problems
-  const p = spec.relative.replace(backSlashesRe, '/')
-  const url = `/${p}`
-
-  debug('prefixed path for spec url %s', url)
+  debug('normalized url %s', url)
 
   return url
 }
@@ -59,14 +43,20 @@ export const getSpecUrl = ({
   // App routes to spec with convention {browserUrl}#/specs/runner?file={relativeSpecPath}
   if (process.env.LAUNCHPAD) {
     if (!spec.absolute) {
+      debug('no spec absolute path, returning: %s', browserUrl)
+
       return browserUrl
     }
 
     const relativeSpecPath = path.relative(projectRoot, path.resolve(projectRoot, spec.absolute))
     .replace(backSlashesRe, '/')
 
-    return `${browserUrl}/#/specs/runner?file=${relativeSpecPath}`
+    const normalized = `${browserUrl}/#/specs/runner?file=${relativeSpecPath}`
     .replace(multipleForwardSlashesRe, multipleForwardSlashesReplacer)
+
+    debug('returning spec url %s', normalized)
+
+    return normalized
   }
 
   debug('get spec url: %o', spec)
@@ -87,10 +77,9 @@ export const getSpecUrl = ({
   // the unit folder?
   // once we determine that we can then prefix it correctly
   // with either integration or unit
-  const prefixedPath = getPrefixedPathToSpec(spec)
-  const url = normalizeSpecUrl(browserUrl, prefixedPath)
+  const url = normalizeSpecUrl(browserUrl, spec.relative)
 
-  debug('return path to spec %o', { prefixedPath, url })
+  debug('return path to spec %o', { url })
 
   return url
 }
