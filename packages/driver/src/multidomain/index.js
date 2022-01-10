@@ -115,7 +115,6 @@ const setup = () => {
       // to notify the primary domain if the done() callback is invoked
       // within the spec bridge
       const done = (err = undefined) => {
-        // TODO: calling this currently causes some queue issues with subsequent tests. This needs to be explored as to why in the near future
         doneEarly()
 
         // signal to the primary domain that done has been called and to signal that the command queue is finished in the secondary domain
