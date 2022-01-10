@@ -1,3 +1,10 @@
+# [@cypress/react-v5.12.1](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.12.0...@cypress/react-v5.12.1) (2022-01-10)
+
+
+### Bug Fixes
+
+* check resolvedNodePath for Next.js 12 guard ([#19604](https://github.com/cypress-io/cypress/issues/19604)) ([6304fd7](https://github.com/cypress-io/cypress/commit/6304fd7548a0a3fee90fc8a9ba449ab81e7a7a0c))
+
 # [@cypress/react-v5.12.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.11.0...@cypress/react-v5.12.0) (2021-12-21)
 
 
