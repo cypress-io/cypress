@@ -71,15 +71,21 @@ For developer-facing behavior - props received, events emitted, any other side e
 Certain side effects, like GraphQL mutations, do not fire from component tests, but can be monitored from an E2E test with `cy.intercept`. And some entire packages, like `reporter` are independent apps that can be mounted in an E2E test and tested for interactions with other parts of the system.
 
 
-### Percy Snapshots
-Percy snapshots confirm that the appearance of a given state matches the last approved snapshot of that state. If a test only contains a percy snapshot, prefer a general name for that test as opposed to a specific detail of the snapshot. For example prefer "has expected appearance" to "has a purple outline" since nothing in the test is actually asserting that.
+## Percy Snapshots
+Percy snapshot diffs are reviewed and approved by somebody doing a PR review.
 
-NOTE: 👆 This could use more thought/discussion. Maybe "has a purple outline" is a good thing to have in the test name because it might alert somebody reviewing the snapshot about a change they should look for, or the thing we expected the snapshot to confirm.
+
+### Limitations and Notes
+Percy snapshots confirm that the appearance of a given state matches the last approved snapshot of that state. They don't in and of themselves contain any information about correctness.
+
+If a test only contains a percy snapshot, prefer a general name for that test as opposed to a specific detail of the snapshot. For example prefer "has expected appearance" to "has a purple outline" since nothing in the test is actually asserting that.
+
+NOTE: 👆 This section needs more thought/discussion. Maybe "has a purple outline" is a good thing to have in the test name because it might alert somebody reviewing the snapshot about a change they should look for, or the thing we expected the snapshot to confirm. Ideally here we would end up with instructions and examples of what Percy tests we expect with new features and any conventions we have.
 
 ## Testing Style Guide
 
 ### String constants
-Strings used in tests for locating elements or asserting content in other ways are imported from the i18n constants. All strings present in the UI should be found in some form in `en-US.json`. If a plain string is found in the UI code (we have a few of them), it should be moved into the constants file and then imported to both the component and the test code.
+Strings used in tests for locating elements or asserting content in other ways are imported from the i18n constants. All strings present in the App or Launchpad UI should be found in some form in `en-US.json`. If a plain string is found in the UI code (we have a few of them), it should be moved into the constants file and then imported to both the component and the test code.
 
 ### Element Locators
 When relevant, element locators can assert something useful about the nature or context of the element in the DOM. Often for accessibility reasons it is important what elements are rendered. If there is nothing in particular that matters about the DOM, or if needed to disambiguate, then `data-cy` attributes can be used to locate elements.
@@ -121,15 +127,39 @@ cy.contains('div > div > .special-list > li > span', 'Home Link')`
 
 In general, prefer to limit assertions about the nature of the DOM to a small surface area near the target element. Even then, only assert the DOM if there is a reason that changing the DOM in that area would harm the use experience - for example by breaking accessibility.
 
-`data-cy` attributes can be used when the content, nature, and DOM location of the element doesn't matter to the test, or are dynamic and can't be predicted/driven by test setup, for example:
+### Data-cy attributes
+
+Sometimes the specific details of an element don't matter so we don't assert what kind of element it is. Or the contents are dynamic and can't be controlled in the test, so we can't use the content to locate the element. In these cases `data-cy` attributes can be used:
 
 ```
-cy.get('[data-cy="success-toast"]') // just make sure it exists
-cy.percySnapshot() // capture the state in Percy
+cy.get('[data-cy="success-toast"]').should('be.visible') // just make sure it exists
 ```
+
+`data-cy` can also be combined with other selectors to help target a specific element we've identified in our code, while continuing to assert the appropriate DOM and content:
+
+```
+cy.contains('[data-cy="success-toast"] h2', 'Success!').should('be.visible') // toast with correct heading element and test exists
+```
+
+Be cautious when using _only_ `data-cy` to locate an element, because doing so specifically tells the test not to care about what kind of element it is, or what it contains. So we should be sure that's what is intended. This means we should rarely, if ever, rely on `data-cy` alone to locate an element we will interact with. It should always be combined with an assertion about the label/name of that element. 
+
+An exception would be when testing a something like card in the UI, if the whole card is supposed to be clickable. While there should be some focusable element inside the card for keyboard and screenreader users, the card itself does not need a label but should still be tested, alongside the properly labelled accessible control for the same function:
+
+```
+cy.get('[data-cy="ui-card"]').click() // test clicking at the level of the card itself
+// ... assert expected state ...
+
+cy.contains('[data-cy="ui-card"] button', 'Activate').click() // test the accessible trigger for that card's functionality
+// ... assert expected state ...
+
+```
+
 ### Visibility Checks
 
 Asserting `should('be.visible')` is useful when testing elements that the test won't interact with, as in certain situations it is possible for elements to be found in the DOM with the content we expect, but to still be unexpectedly hidden from the user with CSS or covered by another element. When interacting, that visibility check is already built in before `cy.click` or `cy.type` for example.
 
 ### Cypress-Testing-Library
 Feel free to use this often in tests if it makes the test easier to write or understand, except where using it provides less confidence than a plain Cypress selector. For example `cy.contains('button', 'Log In')` is slightly preferred to `cy.findByRole('button', {name: 'Log In' })`, because the ARIA role of `button` could be added to an element that does not have the expected keyboard behaviors implemented, and the test might still pass. It is also a good accessibility practice to not use ARIA to recreate the existing functionality of HTML elements, but instead use the elements directly. So using `findByRole` should not be necessary except for certain UI interactions like tabs or carousels, if we have those.
+
+### Visual Appearance
+Avoid specifying specific CSS color values in tests. Prefer Percy snapshots to validate that the approved appearance isn't changing unexpectedly.
