@@ -1708,7 +1708,7 @@ jobs:
           background: true
       - run:
           name: Rename support file
-          working_directory: /tmp/<<parameters.repo>>
+          working_directory: /tmp/cypress-example-kitchensink
           command: |
             if [[ -f cypress/support/index.js ]]; then
               mv cypress/support/index.js cypress/support/e2e.js
