@@ -68,9 +68,18 @@ module.exports = {
       if (spec === '__all') {
         debug('returning all specs')
 
-        const { specPattern, ignoreSpecPattern } = await ctx.project.specPatternsForTestingType(ctx.project.projectRoot, 'e2e')
+        const [e2ePatterns, componentPatterns] = await Promise.all([
+          ctx.project.specPatternsForTestingType(ctx.project.projectRoot, 'e2e'),
+          ctx.project.specPatternsForTestingType(ctx.project.projectRoot, 'component'),
+        ])
 
-        return ctx.project.findSpecs(config.projectRoot, 'e2e', specPattern, [], ignoreSpecPattern)
+        // It's possible that the E2E pattern matches some component tests, for example
+        // e2e.specPattern: src/**/*.cy.ts
+        // component.specPattern: src/components/**/*.cy.ts
+        // in this case, we want to remove anything that matches
+        // - the component.specPattern
+        // - the e2e.ignoreSpecPattern
+        return ctx.project.findSpecs(config.projectRoot, 'e2e', e2ePatterns.specPattern, e2ePatterns.ignoreSpecPattern, componentPatterns.specPattern)
         .then((specs) => {
           debug('found __all specs %o', specs)
 
