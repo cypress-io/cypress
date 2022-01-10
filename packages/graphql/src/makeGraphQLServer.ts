@@ -42,6 +42,34 @@ export async function makeGraphQLServer () {
     })
   })
 
+  app.get('/cloud-notification', (req, res) => {
+    const ctx = getCtx()
+
+    const operationName = req.query.operationName
+
+    if (!operationName || Array.isArray(operationName)) {
+      res.sendStatus(200)
+
+      return
+    }
+
+    switch (operationName) {
+      case 'orgCreated':
+        ctx.emitter.toLaunchpad({ queryToRefetch: null })
+        break
+
+      // TODO: remove and update the orgCreated tests
+      case 'triggerTest':
+        ctx.emitter.toLaunchpad({ queryToRefetch: 'MainLaunchpadQuery' })
+        break
+
+      default:
+        break
+    }
+
+    res.sendStatus(200)
+  })
+
   addGraphQLHTTP(app)
 
   const graphqlPort = process.env.CYPRESS_INTERNAL_GRAPHQL_PORT

@@ -214,4 +214,24 @@ describe('Launchpad: Global Mode', () => {
       })
     })
   })
+
+  describe('refetch targeted query when cloud notifies', () => {
+    it('refetch specific query when cloud sends the notification', () => {
+      cy.intercept('POST', 'query-MainLaunchpadQuery').as('MainLaunchpadQuery')
+
+      cy.openGlobalMode()
+      cy.visitLaunchpad()
+
+      cy.wait('@MainLaunchpadQuery')
+
+      cy.withCtx(async (ctx) => {
+        await ctx.util.fetch(`http://127.0.0.1:${ctx.gqlServerPort}/cloud-notification?operationName=triggerTest`)
+      })
+
+      cy.wait('@MainLaunchpadQuery')
+
+      cy.get('@MainLaunchpadQuery.all')
+      .should('have.length', 2)
+    })
+  })
 })
