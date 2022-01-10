@@ -4,8 +4,8 @@ import React, { Component, ReactElement } from 'react'
 import { StatsStore } from '../header/stats-store'
 import { formatDuration, getFilenameParts } from '../lib/util'
 import OpenFileInIDE from '../lib/open-file-in-ide'
-import TextIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/document-text_x16.svg'
 import FileNameOpener from '../lib/file-name-opener'
+import TextIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/document-text_x16.svg'
 
 const renderRunnableHeader = (children: ReactElement) => <div className="runnable-header">{children}</div>
 

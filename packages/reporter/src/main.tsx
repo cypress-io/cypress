@@ -101,7 +101,7 @@ class Reporter extends Component<SingleReporterProps> {
   }
 
   componentDidMount () {
-    const { appState, runnablesStore, runner, scroller, statsStore, autoScrollingEnabled, isSpecsListOpen } = this.props
+    const { appState, runnablesStore, runner, scroller, statsStore, autoScrollingEnabled, isSpecsListOpen, runnerStore } = this.props
 
     action('set:scrolling', () => {
       appState.setAutoScrolling(autoScrollingEnabled)
@@ -122,7 +122,7 @@ class Reporter extends Component<SingleReporterProps> {
 
     shortcuts.start()
     EQ.init()
-    this.props.runnablesStore.setRunningSpec(this.props.runnerStore.spec.relative)
+    this.props.runnablesStore.setRunningSpec(runnerStore.spec.relative)
   }
 
   componentWillUnmount () {
@@ -138,12 +138,10 @@ declare global {
   }
 }
 
-const _window = window as any
-
 // NOTE: this is for testing Cypress-in-Cypress
-if (_window.Cypress) {
-  _window.state = appState
-  _window.render = (props) => {
+if (window.Cypress) {
+  window.state = appState
+  window.render = (props) => {
     // @ts-ignore
     render(<Reporter {...props as Required<ReporterProps>} />, document.getElementById('app'))
   }
