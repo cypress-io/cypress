@@ -325,6 +325,19 @@ describe('src/cy/commands/actions/select', () => {
           expect(fired).to.deep.eq(events)
         })
       })
+
+      // https://github.com/cypress-io/cypress/issues/19494
+      it('does not fire `change`, `input` events when selecting the same option again', () => {
+        cy.visit('fixtures/select-event-counter.html')
+        cy.get('.ice-cream').select('Chocolate')
+        cy.get('#change-result').should('have.text', 'Number of times onChange event fired: 1')
+        cy.get('#input-result').should('have.text', 'Number of times input event fired: 1')
+
+        // Select the option that is already selected - `change`, `input` events should not fire.
+        cy.get('.ice-cream').select('Chocolate')
+        cy.get('#change-result').should('have.text', 'Number of times onChange event fired: 1')
+        cy.get('#input-result').should('have.text', 'Number of times input event fired: 1')
+      })
     })
 
     describe('errors', {
