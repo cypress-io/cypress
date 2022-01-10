@@ -20,7 +20,7 @@
     </template>
     <TransitionQuickFade mode="out-in">
       <span v-if="!copied">{{ t('clipboard.copy') }}</span>
-      <span v-else>{{ t('clipboard.copied') }}!</span>
+      <span v-else>{{ t('clipboard.copied') }}</span>
     </TransitionQuickFade>
   </Button>
 </template>
