@@ -15,10 +15,12 @@ describe('suites', () => {
     cy.visit('/').then((win) => {
       win.render({
         runner,
-        spec: {
-          name: 'foo.js',
-          relative: 'relative/path/to/foo.js',
-          absolute: '/absolute/path/to/foo.js',
+        runnerStore: {
+          spec: {
+            name: 'foo.js',
+            relative: 'relative/path/to/foo.js',
+            absolute: '/absolute/path/to/foo.js',
+          },
         },
         experimentalStudioEnabled: true,
       })
