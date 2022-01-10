@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "9.2.0",
+  "version": "9.2.1",
   "description": "Cypress.io end to end testing tool",
   "private": true,
   "scripts": {
@@ -66,6 +66,9 @@
     "prewatch": "yarn ensure-deps",
     "watch": "lerna exec yarn watch --parallel --stream",
     "prepare": "husky install"
+  },
+  "dependencies": {
+    "nvm": "0.0.4"
   },
   "devDependencies": {
     "@cypress/bumpercar": "2.0.12",
