@@ -35,7 +35,7 @@ describe('<GlobalPage />', { viewportHeight: 900, viewportWidth: 1200 }, () => {
       cy.findByText(testProjectPath).should('be.visible')
     })
 
-    it('can filter down the projects', () => {
+    it('can filter down the projects by name', () => {
       cy.findByText(testProject).should('be.visible')
       cy.findByLabelText(searchLabel).type(anotherTestProject, { delay: 0 })
       cy.findByText(anotherTestProject).should('be.visible')

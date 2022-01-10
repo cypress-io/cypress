@@ -42,7 +42,7 @@
               href="https://on.cypress.io/dashboard/profile"
               class="font-medium text-indigo-500"
             >
-              {{ viewer.fullName }}
+              {{ viewer.fullName || viewer.email }}
             </ExternalLink>
           </i18n-t>
         </DialogDescription>
