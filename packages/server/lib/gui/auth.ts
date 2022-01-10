@@ -208,11 +208,11 @@ const start = (onMessage, utmCode) => {
     return _internal.buildLoginRedirectUrl(server)
   })
   .then((loginRedirectUrl) => {
-    debug('Trying to open native auth to URL ', loginRedirectUrl)
+    debug('Trying to open native auth to URL %s', loginRedirectUrl)
 
     return _internal.launchNativeAuth(loginRedirectUrl, sendMessage)
     .then(() => {
-      debug('openExternal completed')
+      debug('successfully opened native auth url')
     })
   })
   .then(() => {

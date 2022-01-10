@@ -1,4 +1,4 @@
-describe('App Navigation', () => {
+describe('App Top Nav Workflows', () => {
   beforeEach(() => {
     cy.scaffoldProject('launchpad')
 
@@ -302,7 +302,7 @@ describe('App Navigation', () => {
 
         cy.intercept('mutation-Logout').as('logout')
 
-        cy.findByRole('button', { name: 'Log Out' }).should('be.visible').click()
+        cy.findByRole('button', { name: 'Log Out' }).click()
 
         cy.wait('@logout')
 
