@@ -3,31 +3,18 @@ const path = require('path')
 const Promise = require('bluebird')
 const cwd = require('../cwd')
 const glob = require('../util/glob')
-const specsUtil = require('../util/specs')
-const pathHelpers = require('../util/path_helpers')
 const debug = require('debug')('cypress:server:controllers')
 const { escapeFilenameInUrl } = require('../util/escape_filename')
 
 module.exports = {
-  handleFiles (req, res, config) {
-    debug('handle files')
-
-    return specsUtil.default.findSpecs(config)
-    .then((files) => {
-      return res.json({
-        integration: files,
-      })
-    })
-  },
-
-  handleIframe (req, res, config, getRemoteState, extraOptions) {
+  handleIframe (req, res, ctx, config, getRemoteState, extraOptions) {
     const test = req.params[0]
     const iframePath = cwd('lib', 'html', 'iframe.html')
     const specFilter = _.get(extraOptions, 'specFilter')
 
     debug('handle iframe %o', { test, specFilter })
 
-    return this.getSpecs(test, config, extraOptions)
+    return this.getSpecs(test, ctx, config, extraOptions)
     .then((specs) => {
       return this.getSupportFile(config)
       .then((js) => {
@@ -48,7 +35,7 @@ module.exports = {
     })
   },
 
-  getSpecs (spec, config, extraOptions = {}) {
+  getSpecs (spec, ctx, config, extraOptions = {}) {
     // when asking for all specs: spec = "__all"
     // otherwise it is a relative spec filename like "integration/spec.js"
     debug('get specs %o', { spec, extraOptions })
@@ -56,7 +43,7 @@ module.exports = {
     const convertSpecPath = (spec) => {
       // get the absolute path to this spec and
       // get the browser url + cache buster
-      const convertedSpec = pathHelpers.getAbsolutePathToSpec(spec, config)
+      const convertedSpec = path.join(config.projectRoot, spec)
 
       debug('converted %s to %s', spec, convertedSpec)
 
@@ -74,33 +61,28 @@ module.exports = {
     }
     const specFilterFn = specFilter ? specFilterContains : () => true
 
-    const getSpecsHelper = () => {
+    const getSpecsHelper = async () => {
       // grab all of the specs if this is ci
-      const componentTestingEnabled = _.get(config, 'resolved.testingType.value', 'e2e') === 'component'
-
       if (spec === '__all') {
         debug('returning all specs')
 
-        return specsUtil.default.findSpecs(config)
+        const pattern = await ctx.project.specPatternForTestingType(config.projectRoot, 'e2e')
+
+        return ctx.project.findSpecs(config.projectRoot, 'e2e', pattern)
         .then((specs) => {
           debug('found __all specs %o', specs)
 
           return specs
         })
         .filter(specFilterFn)
-        .filter((foundSpec) => {
-          return componentTestingEnabled
-            ? foundSpec.specType === 'component'
-            : foundSpec.specType === 'integration'
-        }).then((specs) => {
+        .then((specs) => {
           debug('filtered __all specs %o', specs)
 
           return specs
-        }).map((spec) => {
-          // grab the name of each
-          return spec.absolute
         }).map(convertSpecPath)
       }
+
+      debug('normalizing spec %o', { spec })
 
       // normalize by sending in an array of 1
       return [convertSpecPath(spec)]

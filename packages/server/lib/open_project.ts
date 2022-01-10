@@ -2,12 +2,10 @@ import _ from 'lodash'
 import la from 'lazy-ass'
 import Debug from 'debug'
 import Bluebird from 'bluebird'
-import pluralize from 'pluralize'
 import assert from 'assert'
 
 import { ProjectBase } from './project-base'
 import browsers from './browsers'
-import specsUtil from './util/specs'
 import preprocessor from './plugins/preprocessor'
 import runEvents from './plugins/run_events'
 import * as session from './session'
@@ -50,11 +48,8 @@ export class OpenProject {
     }
 
     const newSpecUrl = getSpecUrl({
-      absoluteSpecPath: spec.absolute,
-      specType: spec.specType,
+      spec,
       browserUrl: this.projectBase.cfg.browserUrl,
-      integrationFolder: this.projectBase.cfg.integrationFolder || 'integration',
-      componentFolder: this.projectBase.cfg.componentFolder || 'component',
       projectRoot: this.projectBase.projectRoot,
     })
 
@@ -88,11 +83,8 @@ export class OpenProject {
     this.projectBase!.reset()
 
     let url = getSpecUrl({
-      absoluteSpecPath: spec.absolute,
-      specType: spec.specType,
+      spec,
       browserUrl: this.projectBase.cfg.browserUrl,
-      integrationFolder: this.projectBase.cfg.integrationFolder || 'integration',
-      componentFolder: this.projectBase.cfg.componentFolder || 'component?',
       projectRoot: this.projectBase.projectRoot,
     })
 
@@ -123,7 +115,10 @@ export class OpenProject {
     // set the current browser object on options
     // so we can pass it down
     options.browser = browser
-    options.url = url
+
+    if (!process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF) {
+      options.url = url
+    }
 
     this.projectBase.setCurrentSpecAndBrowser(spec, browser)
 
@@ -194,7 +189,7 @@ export class OpenProject {
       .then(() => {
         // TODO: Stub this so we can detect it being called
         if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF) {
-          return
+          return browsers.connectToExisting(browser, options, automation)
         }
 
         return browsers.open(browser, options, automation)
@@ -202,52 +197,6 @@ export class OpenProject {
     }
 
     return this.relaunchBrowser()
-  }
-
-  getSpecs (cfg) {
-    return specsUtil.findSpecs(cfg)
-    .then((_specs: Cypress.Spec[] = []) => {
-      // only want these properties
-      const specs = _specs.map((x) => {
-        return {
-          name: x.name,
-          relative: x.relative,
-          absolute: x.absolute,
-          specType: x.specType,
-        }
-      })
-
-      // TODO merge logic with "run.js"
-      if (debug.enabled) {
-        const names = _.map(specs, 'name')
-
-        debug(
-          'found %s using spec pattern \'%s\': %o',
-          pluralize('spec', names.length, true),
-          cfg.testFiles,
-          names,
-        )
-      }
-
-      const componentTestingEnabled = _.get(cfg, 'resolved.testingType.value', 'e2e') === 'component'
-
-      if (componentTestingEnabled) {
-        // separate specs into integration and component lists
-        // note: _.remove modifies the array in place and returns removed elements
-        const component = _.remove(specs, { specType: 'component' })
-
-        return {
-          integration: specs,
-          component,
-        }
-      }
-
-      // assumes all specs are integration specs
-      return {
-        integration: specs.filter((x) => x.specType === 'integration'),
-        component: [],
-      }
-    })
   }
 
   closeBrowser () {
@@ -308,6 +257,8 @@ export class OpenProject {
 
     const testingType = args.testingType === 'component' ? 'component' : 'e2e'
 
+    this._ctx.lifecycleManager.setRunModeExitEarly(options.onError ?? undefined)
+
     // store the currently open project
     this.projectBase = new ProjectBase({
       testingType,
@@ -319,7 +270,18 @@ export class OpenProject {
     })
 
     try {
-      await this.projectBase.initializeConfig()
+      const cfg = await this.projectBase.initializeConfig()
+
+      const specPattern = options.spec || cfg[testingType].specPattern
+
+      if (!specPattern) {
+        throw Error('could not find pattern to load specs')
+      }
+
+      const specs = await this._ctx.project.findSpecs(path, testingType, specPattern)
+
+      this._ctx.actions.project.setSpecs(specs)
+
       await this.projectBase.open()
     } catch (err: any) {
       if (err.isCypressErr && err.portInUse) {

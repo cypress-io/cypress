@@ -27,15 +27,19 @@ import { client } from '@packages/socket/lib/browser'
 
 let _eventManager: EventManager | undefined
 
-export function createWebsocket () {
-  const PORT_MATCH = /serverPort=(\d+)/.exec(window.location.search)
+function decodeBase64Unicode (str: string) {
+  return decodeURIComponent(atob(str).split('').map((char) => {
+    return `%${(`00${char.charCodeAt(0).toString(16)}`).slice(-2)}`
+  }).join(''))
+}
 
+export function createWebsocket (socketIoRoute) {
   const socketConfig = {
-    path: '/__socket.io',
+    path: socketIoRoute,
     transports: ['websocket'],
   }
 
-  const ws = PORT_MATCH ? client(`http://localhost:${PORT_MATCH[1]}`, socketConfig) : client(socketConfig)
+  const ws = client(socketConfig)
 
   ws.on('connect', () => {
     ws.emit('runner:connected')
@@ -116,12 +120,12 @@ function createIframeModel () {
  * for communication between driver, runner, reporter via event bus,
  * and server (via web socket).
  */
-function setupRunner () {
+function setupRunner (namespace) {
   const mobxRunnerStore = getMobxRunnerStore()
 
   getEventManager().addGlobalListeners(mobxRunnerStore, {
-    automationElement: '__cypress-string',
-    randomString,
+    element: `${namespace}-string`,
+    string: randomString,
   })
 
   getEventManager().start(window.UnifiedRunner.config)
@@ -149,9 +153,11 @@ function setupRunner () {
 
 /**
  * Get the URL for the spec. This is the URL of the AUT IFrame.
+ * CT uses absolute URLs, and serves from the dev server.
+ * E2E uses relative, serving from our internal server's spec controller.
  */
-function getSpecUrl (namespace: string, spec: BaseSpec, prefix = '') {
-  return spec ? `${prefix}/${namespace}/iframes/${spec.absolute}` : ''
+function getSpecUrl (namespace: string, specSrc: string) {
+  return `/${namespace}/iframes/${specSrc}`
 }
 
 /**
@@ -205,7 +211,8 @@ function runSpecCT (spec: BaseSpec) {
   // create new AUT
   const autIframe = getAutIframeModel()
   const $autIframe: JQuery<HTMLIFrameElement> = autIframe.create().appendTo($runnerRoot)
-  const specSrc = getSpecUrl(config.namespace, spec)
+
+  const specSrc = getSpecUrl(config.namespace, spec.absolute)
 
   autIframe.showInitialBlankContents()
   $autIframe.prop('src', specSrc)
@@ -260,7 +267,7 @@ function runSpecE2E (spec: BaseSpec) {
   const $autIframe: JQuery<HTMLIFrameElement> = autIframe.create().appendTo($container)
 
   // create Spec IFrame
-  const specSrc = getSpecUrl(config.namespace, spec)
+  const specSrc = getSpecUrl(config.namespace, spec.relative)
   const $specIframe = createSpecIFrame(specSrc)
 
   // append to document, so the iframe will execute the spec
@@ -281,12 +288,6 @@ function runSpecE2E (spec: BaseSpec) {
  */
 async function initialize () {
   isTorndown = false
-
-  function decodeBase64Unicode (str: string) {
-    return decodeURIComponent(atob(str).split('').map((char) => {
-      return `%${(`00${char.charCodeAt(0).toString(16)}`).slice(-2)}`
-    }).join(''))
-  }
 
   const config = JSON.parse(decodeBase64Unicode(window.__CYPRESS_CONFIG__.base64Config)) as Cypress.Config
 
@@ -317,7 +318,7 @@ async function initialize () {
     store.updateDimensions(config.viewportWidth, config.viewportHeight)
   })
 
-  window.UnifiedRunner.MobX.runInAction(() => setupRunner())
+  window.UnifiedRunner.MobX.runInAction(() => setupRunner(config.namespace))
 }
 
 /**

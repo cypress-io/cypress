@@ -32,7 +32,9 @@ const Runner: any = {
   },
 
   start (el, base64Config) {
-    const ws = createWebsocket()
+    const config = window.UnifiedRunner.decodeBase64(base64Config)
+
+    const ws = createWebsocket(config.socketIoRoute)
 
     // NOTE: this is exposed for testing, ideally we should only expose this if a test flag is set
     window.runnerWs = ws
@@ -82,7 +84,7 @@ const Runner: any = {
         const { spec } = state
 
         if (spec) {
-          util.updateSpecPath(spec.name)
+          util.updateSpecPath(spec.relative)
         }
       })
 

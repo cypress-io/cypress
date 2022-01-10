@@ -1,5 +1,5 @@
 import type { CodeGenType, MutationAddProjectArgs, MutationSetProjectPreferencesArgs, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
-import type { InitializeProjectOptions, FindSpecs, FoundBrowser, FoundSpec, LaunchOpts, OpenProjectLaunchOptions, Preferences, TestingType, FullConfig } from '@packages/types'
+import type { InitializeProjectOptions, FoundBrowser, FoundSpec, LaunchOpts, OpenProjectLaunchOptions, Preferences, TestingType } from '@packages/types'
 import execa from 'execa'
 import path from 'path'
 import assert from 'assert'
@@ -11,7 +11,6 @@ import { codeGenerator, SpecOptions } from '../codegen'
 import templates from '../codegen/templates'
 
 export interface ProjectApiShape {
-  findSpecs(payload: FindSpecs): Promise<FoundSpec[]>
   /**
    * "Initializes" the given mode, since plugins can define the browsers available
    * TODO(tim): figure out what this is actually doing, it seems it's necessary in
@@ -19,8 +18,8 @@ export interface ProjectApiShape {
    */
   openProjectCreate(args: InitializeProjectOptions, options: OpenProjectLaunchOptions): Promise<unknown>
   launchProject(browser: FoundBrowser, spec: Cypress.Spec, options: LaunchOpts): void
-  insertProjectToCache(projectRoot: string): void
-  removeProjectFromCache(projectRoot: string): void
+  insertProjectToCache(projectRoot: string): Promise<void>
+  removeProjectFromCache(projectRoot: string): Promise<void>
   getProjectRootsFromCache(): Promise<string[]>
   insertProjectPreferencesToCache(projectTitle: string, preferences: Preferences): void
   getProjectPreferencesFromCache(): Promise<Record<string, Preferences>>
@@ -28,7 +27,7 @@ export interface ProjectApiShape {
   clearProjectPreferences(projectTitle: string): Promise<unknown>
   clearAllProjectPreferences(): Promise<unknown>
   closeActiveProject(): Promise<unknown>
-  getConfig(): FullConfig | undefined
+  getConfig(): Partial<Cypress.RuntimeConfigOptions & Cypress.ResolvedConfigOptions> | undefined
 }
 
 export class ProjectActions {
@@ -48,7 +47,7 @@ export class ProjectActions {
   }
 
   private get projects () {
-    return this.ctx.coreData.app.projects
+    return this.ctx.projectsList
   }
 
   private set projects (projects: ProjectShape[]) {
@@ -80,9 +79,10 @@ export class ProjectActions {
   }
 
   // Temporary: remove after other refactor lands
-  setCurrentProjectForTestSetup (projectRoot: string) {
+  setCurrentProjectAndTestingTypeForTestSetup (projectRoot: string) {
     this.ctx.lifecycleManager.clearCurrentProject()
     this.ctx.lifecycleManager.setCurrentProject(projectRoot)
+    this.ctx.lifecycleManager.setCurrentTestingType('e2e')
     // @ts-expect-error - we are setting this as a convenience for our integration tests
     this.ctx._modeOptions = {}
   }
@@ -138,7 +138,7 @@ export class ProjectActions {
 
     if (!found) {
       this.projects.push({ projectRoot })
-      this.api.insertProjectToCache(projectRoot)
+      await this.api.insertProjectToCache(projectRoot)
     }
 
     if (args.open) {
@@ -176,7 +176,7 @@ export class ProjectActions {
     let activeSpec: FoundSpec | undefined
 
     if (specPath) {
-      activeSpec = await this.ctx.project.getCurrentSpecByAbsolute(this.ctx.currentProject, specPath)
+      activeSpec = await this.ctx.project.getCurrentSpecByAbsolute(specPath)
     }
 
     // Ensure that we have loaded browsers to choose from
@@ -219,7 +219,7 @@ export class ProjectActions {
     this.ctx.lifecycleManager.setCurrentTestingType(testingType)
 
     const spec = this.makeSpec(testingType)
-    const browser = this.findBrowerByPath(browserPath)
+    const browser = this.findBrowserByPath(browserPath)
 
     if (!browser) {
       throw Error(`Cannot find specified browser at given path: ${browserPath}.`)
@@ -241,19 +241,20 @@ export class ProjectActions {
     }
   }
 
-  private findBrowerByPath (browserPath: string) {
+  private findBrowserByPath (browserPath: string) {
     return this.ctx.coreData?.app?.browsers?.find((browser) => browser.path === browserPath)
   }
 
   removeProject (projectRoot: string) {
-    const found = this.ctx.projectsList.find((x) => x.projectRoot === projectRoot)
+    const found = this.projects.find((x) => x.projectRoot === projectRoot)
 
     if (!found) {
       throw new Error(`Cannot remove ${projectRoot}, it is not a known project`)
     }
 
     this.projects = this.projects.filter((project) => project.projectRoot !== projectRoot)
-    this.api.removeProjectFromCache(projectRoot)
+
+    return this.api.removeProjectFromCache(projectRoot)
   }
 
   syncProjects () {
@@ -305,6 +306,10 @@ export class ProjectActions {
 
       await this.ctx.fs.outputFile(indexHtmlPath, template)
     }
+  }
+
+  setSpecs (specs: FoundSpec[]) {
+    this.ctx.project.setSpecs(specs)
   }
 
   async setProjectPreferences (args: MutationSetProjectPreferencesArgs) {
@@ -388,7 +393,8 @@ export class ProjectActions {
     }
   }
 
-  reconfigureProject () {
+  async reconfigureProject () {
+    await this.api.closeActiveProject()
     this.ctx.actions.wizard.resetWizard()
     this.ctx.actions.electron.refreshBrowserWindow()
     this.ctx.actions.electron.showBrowserWindow()
@@ -399,8 +405,7 @@ export class ProjectActions {
 
     assert(projectRoot, `Cannot create spec without currentProject.`)
 
-    const config = await this.ctx.lifecycleManager.getFullInitialConfig()
-    const integrationFolder = config.integrationFolder || projectRoot
+    const integrationFolder = 'cypress/integration' || this.ctx.currentProject
 
     const results = await codeGenerator(
       { templateDir: templates['scaffoldIntegration'], target: integrationFolder },
@@ -421,6 +426,15 @@ export class ProjectActions {
         codeGenResult: res,
       }
     })
+
+    const specPattern = await this.ctx.project.specPatternForTestingType('e2e')
+
+    if (!specPattern) {
+      throw Error('Could not find specPattern for project')
+    }
+
+    // created new specs - find and cache them!
+    this.ctx.project.setSpecs(await this.ctx.project.findSpecs(projectRoot, 'e2e', specPattern))
 
     return withFileParts
   }

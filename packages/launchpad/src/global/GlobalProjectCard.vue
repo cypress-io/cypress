@@ -20,7 +20,9 @@
       >
         <span
           class="text-16px row-[1] leading-normal font-medium text-indigo-500"
-        >{{ props.gql.title }}</span>
+        >
+          {{ props.gql.title }}
+        </span>
         <span class="text-sm text-gray-500 relative">{{ props.gql.projectRoot }}</span>
       </button>
     </div>
@@ -48,6 +50,7 @@
           #="{ active }"
         >
           <button
+            :data-cy="item.name"
             :class="{ 'bg-gray-700': active }"
             class="text-left px-16px py-8px border-b border-b-gray-800"
             @click.stop="handleMenuClick(item.event)"
@@ -68,7 +71,9 @@ import { useI18n } from '@cy/i18n'
 
 gql`
 mutation GlobalProjectCard_setCurrentProject($path: String!) {
-  setCurrentProject(path: $path) 
+  setCurrentProject(path: $path) {
+    ...MainLaunchpadQueryData
+  }
 }
 `
 

@@ -14,6 +14,7 @@ import { client } from '@packages/socket/lib/browser'
 
 import { cacheExchange as graphcacheExchange } from '@urql/exchange-graphcache'
 import { urqlCacheKeys } from '@packages/data-context/src/util/urqlCacheKeys'
+import { urqlSchema } from '../generated/urql-introspection.gen'
 
 import { pubSubExchange } from './urqlExchangePubsub'
 import { namedRouteExchange } from './urqlExchangeNamedRoute'
@@ -23,8 +24,8 @@ const SERVER_PORT_MATCH = /serverPort=(\d+)/.exec(window.location.search)
 
 const toast = useToast()
 
-export function makeCacheExchange () {
-  return graphcacheExchange(urqlCacheKeys)
+export function makeCacheExchange (schema: any = urqlSchema) {
+  return graphcacheExchange({ ...urqlCacheKeys, schema })
 }
 
 declare global {
@@ -77,7 +78,7 @@ export function makeUrqlClient (target: 'launchpad' | 'app'): Client {
     errorExchange({
       onError (error) {
         const message = `
-        GraphQL Field Path: [${error.graphQLErrors[0].path?.join(', ')}]:
+        GraphQL Field Path: [${error.graphQLErrors?.[0]?.path?.join(', ')}]:
 
         ${error.message}
 
@@ -136,16 +137,24 @@ function getPubSubSource (config: PubSubConfig) {
     })
   }
 
+  function decodeBase64Unicode (str: string) {
+    return decodeURIComponent(atob(str).split('').map((char) => {
+      return `%${(`00${char.charCodeAt(0).toString(16)}`).slice(-2)}`
+    }).join(''))
+  }
+
+  const { socketIoRoute } = JSON.parse(decodeBase64Unicode(window.__CYPRESS_CONFIG__.base64Config)) as Cypress.Config
+
   // Only happens during testing
   if (config.serverPort) {
     return client(`http://localhost:${config.serverPort}`, {
-      path: '/__socket.io',
+      path: socketIoRoute,
       transports: ['websocket'],
     })
   }
 
   return client({
-    path: '/__socket.io',
+    path: socketIoRoute,
     transports: ['websocket'],
   })
 }

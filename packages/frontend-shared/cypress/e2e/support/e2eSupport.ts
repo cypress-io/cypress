@@ -12,6 +12,7 @@ import installCustomPercyCommand from '@packages/ui-components/cypress/support/c
 
 configure({ testIdAttribute: 'data-cy' })
 
+const CYPRESS_EXTENSION_ID = 'caljajdfkjjjdehjdoimjkkakekklcck'
 const NO_TIMEOUT = 1000 * 1000
 const TEN_SECONDS = 10 * 1000
 
@@ -50,6 +51,18 @@ export interface FindBrowsersOptions {
    * })
    */
   filter?(browser: Browser): boolean
+}
+
+export interface ValidateExternalLinkOptions {
+  /**
+   * The user-visible descriptor for the link. If omitted, the href
+   * is assumed to be the name.
+   */
+  name?: string
+  /**
+   * The href value of the link to be validated.
+   */
+  href: string
 }
 
 declare global {
@@ -112,6 +125,11 @@ declare global {
        * Mocks the system browser retrieval to return the desired browsers
        */
       findBrowsers(options?: FindBrowsersOptions): void
+      /**
+       * Finds a link with the provided text and href, either globally or within a chained subject,
+       * and asserts that it triggers the appropriate mutation when clicked.
+       */
+      validateExternalLink(options: ValidateExternalLinkOptions | string): Chainable<JQuery<HTMLElement>>
     }
   }
 }
@@ -174,19 +192,27 @@ function openProject (projectName: ProjectFixture, argv: string[] = []) {
 
 function startAppServer (mode: 'component' | 'e2e' = 'e2e') {
   return logInternal('startAppServer', (log) => {
-    return cy.withCtx(async (ctx, o) => {
-      ctx.actions.project.setCurrentTestingType(o.mode)
-      // ctx.lifecycleManager.isReady()
-      await ctx.actions.project.initializeActiveProject({
-        skipPluginInitializeForTesting: true,
+    return cy.window({ log: false }).then((win) => {
+      return cy.withCtx(async (ctx, o) => {
+        ctx.actions.project.setCurrentTestingType(o.mode)
+        // ctx.lifecycleManager.isReady()
+        await ctx.actions.project.initializeActiveProject({
+          skipPluginInitializeForTesting: true,
+        })
+
+        await ctx.actions.project.launchProject(o.mode, { url: o.url })
+
+        return { appServerPort: ctx.appServerPort, socketIoRoute: ctx.lifecycleManager.loadedFullConfig?.socketIoRoute }
+      }, { log: false, mode, url: win.top ? win.top.location.href : undefined }).then(async ({ appServerPort, socketIoRoute }) => {
+        log.set({ message: `port: ${appServerPort}, socketIoRoute: ${socketIoRoute}}` })
+        Cypress.env('e2e_serverPort', appServerPort)
+
+        if (Cypress.config('browser').isHeaded) {
+          const browser = require('webextension-polyfill')
+
+          await browser.runtime.sendMessage(CYPRESS_EXTENSION_ID, { host: `http://localhost:${appServerPort}`, path: socketIoRoute || '/__socket.io' }, {})
+        }
       })
-
-      await ctx.actions.project.launchProject(o.mode, {})
-
-      return ctx.appServerPort
-    }, { log: false, mode }).then((serverPort) => {
-      log.set({ message: `port: ${serverPort}` })
-      Cypress.env('e2e_serverPort', serverPort)
     })
   })
 }
@@ -202,7 +228,11 @@ function visitApp (href?: string) {
     `)
   }
 
-  return cy.visit(`http://localhost:${e2e_serverPort}/__/#${href || ''}`)
+  return cy.withCtx(async (ctx) => {
+    return ctx.lifecycleManager.loadedFullConfig?.clientRoute
+  }).then((clientRoute) => {
+    return cy.visit(`http://localhost:${e2e_serverPort}${clientRoute || '/__/'}#${href || ''}`)
+  })
 }
 
 function visitLaunchpad () {
@@ -321,6 +351,33 @@ function logInternal<T> (name: string | Partial<Cypress.LogConfig>, cb: (log: Cy
   })
 }
 
+/**
+ * Finds a link with the provided text and href, either globally or within a chained subject,
+ * and asserts that it triggers the appropriate mutation when clicked.
+ */
+function validateExternalLink (subject, options: ValidateExternalLinkOptions | string): Cypress.Chainable<JQuery<HTMLElement>> {
+  let name
+  let href
+
+  if (Cypress._.isString(options)) {
+    name = href = options
+  } else {
+    ({ name, href } = options)
+  }
+
+  cy.intercept('mutation-ExternalLink_OpenExternal', { 'data': { 'openExternal': true } }).as('OpenExternal')
+
+  cy.wrap(subject, { log: false }).findByRole('link', { name: name || href }).as('Link')
+  .should('have.attr', 'href', href)
+  .click()
+
+  cy.wait('@OpenExternal')
+  .its('request.body.variables.url')
+  .should('equal', href)
+
+  return cy.get('@Link')
+}
+
 Cypress.Commands.add('scaffoldProject', scaffoldProject)
 Cypress.Commands.add('addProject', addProject)
 Cypress.Commands.add('openGlobalMode', openGlobalMode)
@@ -332,5 +389,6 @@ Cypress.Commands.add('openProject', openProject)
 Cypress.Commands.add('withCtx', withCtx)
 Cypress.Commands.add('remoteGraphQLIntercept', remoteGraphQLIntercept)
 Cypress.Commands.add('findBrowsers', findBrowsers)
+Cypress.Commands.add('validateExternalLink', { prevSubject: ['optional', 'element'] }, validateExternalLink)
 
 installCustomPercyCommand()

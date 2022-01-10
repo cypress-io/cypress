@@ -77,7 +77,7 @@ export class HtmlDataSource {
   /**
    * The app html includes the SSR'ed data to bootstrap the page for the app
    */
-  async appHtml (config: object) {
+  async appHtml () {
     const [appHtml, appInitialData, serveConfig] = await Promise.all([
       this.fetchAppHtml(),
       this.fetchAppInitialData(),

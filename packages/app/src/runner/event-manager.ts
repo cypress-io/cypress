@@ -16,8 +16,6 @@ type $Cypress = any
 
 const noop = () => {}
 
-const automationElementId = '__cypress-string' as const
-
 const driverToReporterEvents = 'paused session:add'.split(' ')
 const driverToLocalAndReporterEvents = 'run:start run:end'.split(' ')
 const driverToSocketEvents = 'backend:request automation:request mocha recorder:frame'.split(' ')
@@ -58,7 +56,7 @@ export class EventManager {
     return Cypress
   }
 
-  addGlobalListeners (state: BaseStore, connectionInfo: { automationElement: typeof automationElementId, randomString: string }) {
+  addGlobalListeners (state: BaseStore, connectionInfo: { element: string, string: string }) {
     const rerun = () => {
       if (!this) {
         // if the tests have been reloaded

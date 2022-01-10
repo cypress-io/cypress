@@ -1,23 +1,6 @@
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 
 describe('Launchpad: Open Mode', () => {
-  describe('global mode', () => {
-    beforeEach(() => {
-      cy.openGlobalMode()
-      cy.visitLaunchpad()
-    })
-
-    it('shows Add Project when no projects have been added', () => {
-      cy.get('h1').should('contain', defaultMessages.globalPage.empty.title)
-    })
-
-    it('shows the projects page when a project is not specified', () => {
-      cy.addProject('todos')
-      cy.visitLaunchpad()
-      cy.contains(defaultMessages.globalPage.recentProjectsHeader)
-    })
-  })
-
   it('goes directly to e2e tests when launched with --e2e', () => {
     cy.scaffoldProject('todos')
     cy.openProject('todos', ['--e2e'])
@@ -88,7 +71,7 @@ describe('Launchpad: Open Mode', () => {
 
       cy.visitLaunchpad()
       cy.get('a').contains('Projects').click()
-      cy.findByTestId('project-card')
+      cy.get('[data-cy="project-card"]')
       cy.get('[aria-label="Project Actions"]').click()
       cy.get('button').contains('Open In IDE').click()
 
@@ -111,7 +94,7 @@ describe('Launchpad: Open Mode', () => {
 
       cy.visitLaunchpad()
       cy.get('a').contains('Projects').click()
-      cy.findByTestId('project-card')
+      cy.get('[data-cy="project-card"]')
       cy.get('[aria-label="Project Actions"]').click()
 
       cy.intercept('POST', 'mutation-GlobalPage_OpenInFinder').as('OpenInFinder')

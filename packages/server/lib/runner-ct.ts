@@ -43,6 +43,7 @@ export const makeServeConfig = (options) => {
   return {
     base64Config,
     projectName: config.projectName,
+    namespace: config.namespace,
   }
 }
 

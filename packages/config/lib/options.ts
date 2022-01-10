@@ -108,12 +108,6 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     validation: isValidConfig,
     canUpdateDuringTestTime: false,
   }, {
-    name: 'componentFolder',
-    defaultValue: 'cypress/component',
-    validation: validate.isStringOrFalse,
-    isFolder: true,
-    canUpdateDuringTestTime: false,
-  }, {
     name: 'defaultCommandTimeout',
     defaultValue: 4000,
     validation: validate.isNumber,
@@ -127,7 +121,9 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
   }, {
     name: 'e2e',
     // e2e runner overrides
-    defaultValue: {},
+    defaultValue: {
+      specPattern: 'cypress/integration/**/*',
+    },
     validation: isValidConfig,
     canUpdateDuringTestTime: false,
   }, {
@@ -188,7 +184,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     isFolder: true,
     canUpdateDuringTestTime: false,
   }, {
-    name: 'ignoreTestFiles',
+    name: 'ignoreSpecPattern',
     defaultValue: '*.hot-update.js',
     validation: validate.isStringOrArrayOfStrings,
     canUpdateDuringTestTime: true,
@@ -197,12 +193,6 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     defaultValue: false,
     validation: validate.isBoolean,
     canUpdateDuringTestTime: true,
-  }, {
-    name: 'integrationFolder',
-    defaultValue: 'cypress/integration',
-    validation: validate.isString,
-    isFolder: true,
-    canUpdateDuringTestTime: false,
   }, {
     name: 'keystrokeDelay',
     defaultValue: 0,
@@ -309,7 +299,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     canUpdateDuringTestTime: true,
   }, {
     name: 'supportFile',
-    defaultValue: 'cypress/support',
+    defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? 'cypress/support/component.js' : 'cypress/support/e2e.js',
     validation: validate.isStringOrFalse,
     isFolder: true,
     canUpdateDuringTestTime: false,
@@ -324,11 +314,6 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     defaultValue: 60000,
     validation: validate.isNumber,
     canUpdateDuringTestTime: true,
-  }, {
-    name: 'testFiles',
-    defaultValue: '**/*.*',
-    validation: validate.isStringOrArrayOfStrings,
-    canUpdateDuringTestTime: false,
   }, {
     name: 'trashAssetsBeforeRuns',
     defaultValue: true,
@@ -397,7 +382,7 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     canUpdateDuringTestTime: false,
   }, {
     name: 'clientRoute',
-    defaultValue: '/__/',
+    defaultValue: process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF ? '/cy-child-client/' : '/__/',
     validation: validate.isString,
     isInternal: true,
     canUpdateDuringTestTime: false,
@@ -411,7 +396,7 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     canUpdateDuringTestTime: false,
   }, {
     name: 'devServerPublicPathRoute',
-    defaultValue: '/__cypress/src',
+    defaultValue: process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF ? '/cy-child-namespace/src' : '/__cypress/src',
     validation: validate.isString,
     isInternal: true,
     canUpdateDuringTestTime: false,
@@ -444,7 +429,7 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     canUpdateDuringTestTime: false,
   }, {
     name: 'namespace',
-    defaultValue: '__cypress',
+    defaultValue: process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF ? 'cy-child-namespace' : '__cypress',
     validation: validate.isString,
     isInternal: true,
     canUpdateDuringTestTime: false,
@@ -462,13 +447,13 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     canUpdateDuringTestTime: false,
   }, {
     name: 'socketIoCookie',
-    defaultValue: '__socket.io',
+    defaultValue: process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF ? 'cy-child-socket-cookie' : '__socket.io',
     validation: validate.isString,
     isInternal: true,
     canUpdateDuringTestTime: false,
   }, {
     name: 'socketIoRoute',
-    defaultValue: '/__socket.io',
+    defaultValue: process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF ? '/cy-child-socket' : '/__socket.io',
     validation: validate.isString,
     isInternal: true,
     canUpdateDuringTestTime: false,
@@ -525,5 +510,13 @@ export const breakingOptions: Array<BreakingOption> = [
     value: 'bundled',
     errorKey: 'NODE_VERSION_DEPRECATION_BUNDLED',
     isWarning: true,
+  },
+]
+
+export const breakingRootOptions: Array<BreakingOption> = [
+  {
+    name: 'supportFile',
+    errorKey: 'SUPPORT_FILE_ROOT_NOT_SUPPORTED',
+    isWarning: false,
   },
 ]

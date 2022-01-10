@@ -6,15 +6,17 @@ import App from '@packages/runner/src/app/app'
 import { AutomationDisconnected } from '../automation-disconnected'
 import { automation } from '../automation'
 import { NoAutomation } from '../no-automation'
-import { automationElementId } from '../automation-element'
 import NoSpec from '@packages/runner/src/errors/no-spec'
 
 import { Container } from '.'
+
+const automationElementId = '__cypress-string'
 
 const createProps = () => ({
   runner: 'e2e',
   hasSpecFile: sinon.stub(),
   config: {
+    namespace: '__cypress',
     browsers: [],
     integrationFolder: '',
     numTestsKeptInMemory: 1,

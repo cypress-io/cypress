@@ -92,6 +92,16 @@ module.exports = {
     return utils.getBrowsers()
   },
 
+  connectToExisting (browser, options = {}, automation) {
+    let browserLauncher
+
+    if (!(browserLauncher = getBrowserLauncher(browser))) {
+      utils.throwBrowserNotFound(browser.name, options.browsers)
+    }
+
+    return browserLauncher.connectToExisting(browser, options, automation)
+  },
+
   open (browser, options = {}, automation) {
     return kill(true)
     .then(() => {

@@ -132,6 +132,8 @@ describe('app/background', () => {
     this.httpSrv.close(() => {
       done()
     })
+
+    background.disconnect(`http://localhost:${PORT}`, '/__socket.io')
   })
 
   context('.connect', () => {
@@ -301,7 +303,7 @@ describe('app/background', () => {
 
   context('.query', () => {
     beforeEach(function () {
-      this.code = 'var s; (s = document.getElementById(\'__cypress-string\')) && s.textContent'
+      this.code = 'var s; (s = document.getElementById(\'__cypress-string\') || document.getElementsByClassName(\'aut-iframe\').item(0).contentWindow.document.getElementById(\'__cypress-string\')) && s.textContent'
     })
 
     it('resolves on the 1st tab', function () {

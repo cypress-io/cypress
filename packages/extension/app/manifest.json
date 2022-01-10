@@ -33,6 +33,11 @@
       "background.js"
     ]
   },
+  "externally_connectable": {
+    "matches": [
+      "http://localhost:*/*"
+    ]
+  },
   "chrome_url_overrides": {
     "newtab": "newtab.html"
   },

@@ -19,7 +19,15 @@ window.__vite__ = true
 
 const app = createApp(App)
 
-const ws = createWebsocket()
+function decodeBase64Unicode (str: string) {
+  return decodeURIComponent(atob(str).split('').map((char) => {
+    return `%${(`00${char.charCodeAt(0).toString(16)}`).slice(-2)}`
+  }).join(''))
+}
+
+const config = JSON.parse(decodeBase64Unicode(window.__CYPRESS_CONFIG__.base64Config)) as Cypress.Config
+
+const ws = createWebsocket(config.socketIoRoute)
 
 window.ws = ws
 

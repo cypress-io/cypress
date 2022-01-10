@@ -6,9 +6,13 @@ export default defineConfig({
   'video': false,
   'responseTimeout': 2500,
   'projectId': '134ej7',
-  'testFiles': '**/*spec.{js,ts,tsx}',
   'experimentalFetchPolyfill': true,
+  'e2e': {
+    'specPattern': 'cypress/integration/**/*',
+    'supportFile': false,
+  },
   'component': {
+    'specPattern': 'cypress/component/**/*spec.{js,ts,tsx}',
     devServer (cypressConfig) {
       const { startDevServer } = require('@cypress/webpack-dev-server')
       const webpackConfig = require('./webpack.config')

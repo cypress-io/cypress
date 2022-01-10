@@ -27,14 +27,7 @@
 <script lang="ts" setup>
 import ButtonBar from './ButtonBar.vue'
 import { computed } from 'vue'
-import { gql } from '@urql/core'
 import { useI18n } from '@cy/i18n'
-
-gql`
-mutation WizardLayoutNavigate($input: WizardUpdateInput!) {
-  wizardUpdate(input: $input)
-}
-`
 
 const { t } = useI18n()
 

@@ -59,7 +59,13 @@ fragment ChooseExternalEditorModal on Query {
 
 gql`
 mutation ChooseExternalEditorModal_SetPreferredEditorBinary ($value: String!) {
-  setPreferences (value: $value)
+  setPreferences (value: $value) {
+    localSettings {
+      preferences {
+        preferredEditorBinary
+      }
+    }
+  }
 }`
 
 const setPreferredBinaryEditor = useMutation(ChooseExternalEditorModal_SetPreferredEditorBinaryDocument)

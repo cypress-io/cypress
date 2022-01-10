@@ -18,33 +18,62 @@ window.UnifiedRunner = UnifiedRunner
 
 MobX.configure({ enforceActions: 'always' })
 
-const ws = createWebsocket()
+let ws
+let eventManager
 
-// NOTE: this is exposed for testing, ideally we should only expose this if a test flag is set
-window.runnerWs = ws
-window.ws = ws
+if (!window.__Cypress__ && !window.__CYPRESS_CONFIG__) {
+  ws = createWebsocket('/__socket.io')
 
-const eventManager = new EventManager(
-  $Cypress,
-  MobX,
-  selectorPlaygroundModel,
-  StudioRecorder,
-  ws,
-)
+  // NOTE: this is exposed for testing, ideally we should only expose this if a test flag is set
+  window.runnerWs = ws
+  window.ws = ws
 
-// NOTE: this is for testing Cypress-in-Cypress, window.Cypress is undefined here
-// unless Cypress has been loaded into the AUT frame
-if (window.Cypress) {
-  window.eventManager = eventManager
+  eventManager = new EventManager(
+    $Cypress,
+    MobX,
+    selectorPlaygroundModel,
+    StudioRecorder,
+    ws,
+  )
+
+  // NOTE: this is for testing Cypress-in-Cypress, window.Cypress is undefined here
+  // unless Cypress has been loaded into the AUT frame
+  if (window.Cypress) {
+    window.eventManager = eventManager
+  }
 }
 
 const Runner = {
   start (el, base64Config) {
-    MobX.action('started', () => {
-      const config = JSON.parse(driverUtils.decodeBase64Unicode(base64Config))
+    const config = JSON.parse(driverUtils.decodeBase64Unicode(base64Config))
 
+    if (!ws) {
+      ws = createWebsocket(config.socketIoRoute)
+
+      // NOTE: this is exposed for testing, ideally we should only expose this if a test flag is set
+      window.runnerWs = ws
+      window.ws = ws
+    }
+
+    if (!eventManager) {
+      eventManager = new EventManager(
+        $Cypress,
+        MobX,
+        selectorPlaygroundModel,
+        StudioRecorder,
+        ws,
+      )
+
+      // NOTE: this is for testing Cypress-in-Cypress, window.Cypress is undefined here
+      // unless Cypress has been loaded into the AUT frame
+      if (window.Cypress) {
+        window.eventManager = eventManager
+      }
+    }
+
+    MobX.action('started', () => {
       const NO_COMMAND_LOG = config.env && config.env.NO_COMMAND_LOG
-      const useInlineSpecList = (config.env || {}).CypressInternal_UseInlineSpecList
+      const useInlineSpecList = false
 
       const state = new State({
         reporterWidth: NO_COMMAND_LOG ? 0 : (config.state || {}).reporterWidth,
@@ -70,7 +99,7 @@ const Runner = {
         const { spec } = state
 
         if (spec) {
-          util.updateIntegrationSpecPath(spec.name)
+          util.updateIntegrationSpecPath(spec.baseName)
         }
       })
 

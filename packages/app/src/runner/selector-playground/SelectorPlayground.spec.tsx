@@ -2,9 +2,7 @@ import { createEventManager, createTestAutIframe } from '../../../cypress/compon
 import { useSelectorPlaygroundStore } from '../../store/selector-playground-store'
 import SelectorPlayground from './SelectorPlayground.vue'
 
-// TODO: Test is failing due to Percy conflict
-// eslint-disable-next-line
-describe.skip('SelectorPlayground', () => {
+describe('SelectorPlayground', () => {
   const mountSelectorPlayground = (
     eventManager = createEventManager(),
     autIframe = createTestAutIframe(),
@@ -20,15 +18,12 @@ describe.skip('SelectorPlayground', () => {
     }
   }
 
-  it('playground', () => {
-    cy.mount(() => (
-      <div class="bg-gray-100 h-100">
-        <SelectorPlayground
-          eventManager={createEventManager()}
-          getAutIframe={() => createTestAutIframe()}
-        />
-      </div>
-    ))
+  it('populates cy.get by default with a selector of body', () => {
+    const { autIframe } = mountSelectorPlayground()
+
+    cy.spy(autIframe, 'toggleSelectorHighlight')
+    cy.get('[data-cy="playground-method"]').should('contain', 'cy.get')
+    cy.get('[data-cy="playground-selector"]').should('have.value', 'body')
 
     cy.percySnapshot()
   })
@@ -73,6 +68,8 @@ describe.skip('SelectorPlayground', () => {
 
     mountSelectorPlayground()
     cy.get('[data-cy="playground-num-elements"]').contains('10')
+
+    cy.percySnapshot()
   })
 
   it('focuses and copies selector text', () => {
@@ -81,21 +78,14 @@ describe.skip('SelectorPlayground', () => {
     cy.spy(autIframe, 'toggleSelectorHighlight')
 
     cy.get('[data-cy="playground-selector"]').as('copy').clear().type('.foo-bar')
-    cy.get('@copy').click()
-    cy.get('@copy').should('be.focused')
-  })
-
-  it('copies selector text', { browser: 'electron' }, () => {
-    const { autIframe } = mountSelectorPlayground()
-
-    cy.spy(autIframe, 'toggleSelectorHighlight')
-
-    cy.get('[data-cy="playground-selector"]').as('copy').clear().type('.foo-bar')
 
     cy.get('@copy').click()
     cy.get('@copy').should('be.focused')
 
-    cy.get('@writeClipboard').should('have.been.calledWith', '.foo-bar')
+    cy.spy(document, 'execCommand')
+    cy.get('[data-cy="playground-copy"]').click().then(() => {
+      expect(document.execCommand).to.be.calledWith('copy')
+    })
   })
 
   it('prints nothing to console when no selected elements found', () => {

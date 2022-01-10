@@ -13,12 +13,25 @@ const SET_PROPS = COOKIE_PROPS.concat(['value', 'httpOnly', 'expirationDate', 's
 
 const httpRe = /^http/
 
+const connections = {}
+
 // normalize into null when empty array
 const firstOrNull = (cookies) => {
   return cookies[0] != null ? cookies[0] : null
 }
 
-const connect = function (host, path, extraOpts) {
+const connect = function (host, path, extraOpts, onConnected) {
+  const fullPath = `${host}${path}`
+
+  // TODO: connections from Cypress in Cypress need to be cleaned up
+  if (connections[fullPath]) {
+    if (onConnected) {
+      onConnected()
+    }
+
+    return connections[fullPath]
+  }
+
   const listenToCookieChanges = once(() => {
     return browser.cookies.onChanged.addListener((info) => {
       if (info.cause !== 'overwrite') {
@@ -68,6 +81,8 @@ const connect = function (host, path, extraOpts) {
 
   const ws = client.connect(host, path, extraOpts)
 
+  connections[fullPath] = ws
+
   ws.on('automation:request', (id, msg, data) => {
     switch (msg) {
       case 'get:cookies':
@@ -96,11 +111,22 @@ const connect = function (host, path, extraOpts) {
   ws.on('connect', () => {
     listenToCookieChanges()
     listenToDownloads()
+    if (onConnected) {
+      onConnected()
+    }
 
     return ws.emit('automation:client:connected')
   })
 
   return ws
+}
+
+const disconnect = (host, path) => {
+  const fullPath = `${host}${path}`
+
+  if (connections[fullPath]) {
+    delete connections[fullPath]
+  }
 }
 
 const setOneCookie = (props) => {
@@ -149,6 +175,7 @@ const clearAllCookies = (cookies) => {
 
 const automation = {
   connect,
+  disconnect,
 
   getAll (filter = {}) {
     filter = pick(filter, GET_ALL_PROPS)
@@ -206,7 +233,7 @@ const automation = {
   },
 
   query (data) {
-    const code = `var s; (s = document.getElementById('${data.element}')) && s.textContent`
+    const code = `var s; (s = document.getElementById('${data.element}') || document.getElementsByClassName('aut-iframe').item(0).contentWindow.document.getElementById('${data.element}')) && s.textContent`
 
     const queryTab = (tab) => {
       return Promise.try(() => {

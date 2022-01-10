@@ -1,4 +1,5 @@
 import { defineConfig } from 'cypress'
+import { devServer } from '@cypress/vite-dev-server'
 import getenv from 'getenv'
 
 const CYPRESS_INTERNAL_CLOUD_ENV = getenv('CYPRESS_INTERNAL_CLOUD_ENV', process.env.CYPRESS_INTERNAL_ENV || 'development')
@@ -12,42 +13,35 @@ export default defineConfig({
     openMode: 0,
   },
   // @ts-expect-error
-  clientRoute: '/cy-parent/',
-  namespace: 'cy-parent',
-  testFiles: '**/*.{spec,cy}.{js,ts,tsx,jsx}',
+  clientRoute: '/cy-parent-client/',
+  namespace: 'cy-parent-namespace',
+  socketIoRoute: '/cy-parent-socket',
+  socketIoCookie: 'cy-parent-socket',
+  devServerPublicPathRoute: '/cy-parent-namespace/src',
   reporter: '../../node_modules/cypress-multi-reporters/index.js',
   reporterOptions: {
     configFile: '../../mocha-reporter-config.json',
   },
-  integrationFolder: 'cypress/e2e/integration',
-  componentFolder: 'src',
-  supportFile: false,
   experimentalInteractiveRunEvents: true,
   component: {
-    testFiles: '**/*.{spec,cy}.{js,ts,tsx,jsx}',
     supportFile: 'cypress/component/support/index.ts',
-    devServer (cypressConfig, devServerConfig) {
-      const { startDevServer } = require('@cypress/vite-dev-server')
-
-      return startDevServer({ options: cypressConfig, ...devServerConfig })
-    },
+    specPattern: 'src/**/*.{spec,cy}.{js,ts,tsx,jsx}',
+    devServer,
     devServerConfig: {
-      viteConfig: {
-        // TODO(tim): Figure out why this isn't being picked up
-        optimizeDeps: {
-          include: [
-            '@headlessui/vue',
-            'vue3-file-selector',
-            'just-my-luck',
-            'combine-properties',
-            'faker',
-            '@packages/ui-components/cypress/support/customPercyCommand',
-          ],
-        },
+      optimizeDeps: {
+        include: [
+          '@headlessui/vue',
+          'vue3-file-selector',
+          'just-my-luck',
+          'combine-properties',
+          'faker',
+          '@packages/ui-components/cypress/support/customPercyCommand',
+        ],
       },
     },
   },
-  e2e: {
+  'e2e': {
+    specPattern: 'cypress/e2e/integration/**/*.spec.{js,ts}',
     pluginsFile: 'cypress/e2e/plugins/index.ts',
     supportFile: 'cypress/e2e/support/e2eSupport.ts',
     async setupNodeEvents (on, config) {

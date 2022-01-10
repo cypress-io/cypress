@@ -32,7 +32,7 @@ import { InitializeRoutes, createCommonRoutes } from './routes'
 import { createRoutesE2E } from './routes-e2e'
 import { createRoutesCT } from './routes-ct'
 import type { DataContext } from '@packages/data-context/src/DataContext'
-import { getCtx } from '@packages/data-context'
+import type { FoundSpec } from '@packages/types'
 
 const DEFAULT_DOMAIN_NAME = 'localhost'
 const fullyQualifiedRe = /^https?:\/\//
@@ -45,10 +45,7 @@ const _isNonProxiedRequest = (req) => {
   return req.proxiedUrl.startsWith('/')
 }
 
-const _forceProxyMiddleware = function (clientRoute) {
-  // @ts-expect-error
-  const namespace = getCtx().lifecycleManager.loadedConfigFile?.namespace ?? '__cypress'
-
+const _forceProxyMiddleware = function (clientRoute, namespace = '__cypress') {
   const ALLOWED_PROXY_BYPASS_URLS = [
     '/',
     `/${namespace}/runner/cypress_runner.css`,
@@ -61,6 +58,13 @@ const _forceProxyMiddleware = function (clientRoute) {
 
   return function (req, res, next) {
     const trimmedUrl = _.trimEnd(req.proxiedUrl, '/')
+
+    // TODO: this is hard coded temporarily, a larger fix for this scenario is incoming.
+    if (_isNonProxiedRequest(req) && process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF) {
+      req.proxiedUrl = `http://localhost:4455${trimmedUrl}`
+
+      return next()
+    }
 
     if (_isNonProxiedRequest(req) && !ALLOWED_PROXY_BYPASS_URLS.includes(trimmedUrl) && (trimmedUrl !== trimmedClientRoute)) {
       debug('Redirecting!!!!! %o', { namespace, url: req.proxiedUrl })
@@ -109,7 +113,7 @@ export interface OpenServerOptions {
   onWarning: any
   exit?: boolean
   getCurrentBrowser: () => Browser
-  getSpec: () => Cypress.Cypress['spec'] | null
+  getSpec: () => FoundSpec | null
   shouldCorrelatePreRequests: () => boolean
 }
 
@@ -245,7 +249,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   createExpressApp (config) {
-    const { morgan, clientRoute } = config
+    const { morgan, clientRoute, namespace } = config
     const app = express()
 
     // set the cypress config from the cypress.config.{ts|js} file
@@ -270,7 +274,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
       return next()
     })
 
-    app.use(_forceProxyMiddleware(clientRoute))
+    app.use(_forceProxyMiddleware(clientRoute, namespace))
 
     app.use(require('cookie-parser')())
     app.use(compression({ filter: notSSE }))
@@ -529,6 +533,9 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
           host: hostname,
           port,
           protocol,
+        },
+        headers: {
+          'x-cypress-forwarded-from-proxy': true,
         },
         agent,
       }, onProxyErr)

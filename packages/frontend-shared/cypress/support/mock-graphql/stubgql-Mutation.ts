@@ -9,14 +9,14 @@ export const stubMutation: MaybeResolver<Mutation> = {
   addProject (source, args, ctx) {
     ctx.projects.push(createTestGlobalProject(path.basename(args.path)))
 
-    return true
+    return {}
   },
   setCurrentProject (source, args, ctx) {
     const project = ctx.projects.find((p) => p.projectRoot === args.path)
 
     ctx.currentProject = project ? createTestCurrentProject(project.title) : null
 
-    return true
+    return {}
   },
   clearCurrentProject (source, args, ctx) {
     ctx.currentProject = null
@@ -26,7 +26,7 @@ export const stubMutation: MaybeResolver<Mutation> = {
   removeProject (source, args, ctx) {
     ctx.projects = ctx.projects.filter((p) => p.projectRoot !== args.path)
 
-    return true
+    return {}
   },
   hideBrowserWindow (source, args, ctx) {
     return true

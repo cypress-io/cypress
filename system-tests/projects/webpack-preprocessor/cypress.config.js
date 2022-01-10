@@ -1,6 +1,7 @@
 module.exports = {
   'retries': null,
   'e2e': {
+    'supportFile': false,
     setupNodeEvents (on, config) {
       const proxyquire = require('proxyquire')
 
