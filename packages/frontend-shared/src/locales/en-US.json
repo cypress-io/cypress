@@ -18,6 +18,12 @@
     "button": {
       "cancel": "Cancel"
     },
+    "loading": {
+      "config": {
+        "title": "Initializing Config...",
+        "description": "Please wait while we load your project and find browsers installed on your system"
+      }
+    },
     "select": {
       "placeholder": "Choose an option..."
     },
