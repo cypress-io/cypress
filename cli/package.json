@@ -33,7 +33,7 @@
     "chalk": "^4.1.0",
     "check-more-types": "^2.24.0",
     "cli-cursor": "^3.1.0",
-    "cli-table3": "~0.6.0",
+    "cli-table3": "~0.6.1",
     "commander": "^5.1.0",
     "common-tags": "^1.8.0",
     "dayjs": "^1.10.4",
