@@ -170,6 +170,28 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.contains(defaultMessages.runs.empty.title)
       cy.contains(defaultMessages.runs.empty.description)
       cy.contains('--record --key 2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa')
+    })
+
+    it('displays a copy button', { browser: 'electron' }, () => {
+      cy.withCtx(async (ctx) => {
+        await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {projectId: \'abcdef\'}')
+      })
+
+      cy.loginUser()
+      cy.remoteGraphQLIntercept(async (obj) => {
+        if (obj.result.data?.cloudProjectsBySlugs) {
+          for (const proj of obj.result.data.cloudProjectsBySlugs) {
+            if (proj.runs?.nodes) {
+              proj.runs.nodes = []
+            }
+          }
+        }
+
+        return obj.result
+      })
+
+      cy.visitApp()
+      cy.get('[href="#/runs"]').click()
       cy.get('[data-cy="copy-button"]').click()
       cy.contains('Copied!')
     })
