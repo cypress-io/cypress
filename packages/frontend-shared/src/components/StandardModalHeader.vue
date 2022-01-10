@@ -18,6 +18,7 @@
     <button
       aria-label="Close"
       class="border-transparent rounded-full p-5px border-1 hover:border-indigo-300 hocus-default"
+      type="button"
       @click="$emit('close')"
     >
       <i-cy-delete_x12 class="icon-dark-gray-400 w-12px h-12px m-4px" />

@@ -116,7 +116,7 @@ describe('lib/cypress', () => {
     Fixtures.scaffold()
     this.todosPath = Fixtures.projectPath('todos')
     this.pristinePath = Fixtures.projectPath('pristine')
-    this.pristineWithConfigPath = Fixtures.projectPath('pristine-with-config-file')
+    this.pristineWithConfigPath = Fixtures.projectPath('pristine-with-e2e-testing')
     this.noScaffolding = Fixtures.projectPath('no-scaffolding')
     this.recordPath = Fixtures.projectPath('record')
     this.pluginConfig = Fixtures.projectPath('plugin-config')
