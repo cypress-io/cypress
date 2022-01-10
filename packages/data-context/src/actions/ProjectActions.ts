@@ -29,6 +29,9 @@ export interface ProjectApiShape {
   closeActiveProject(): Promise<unknown>
   getCurrentProjectSavedState(): {} | undefined
   setPromptShown(slug: string): void
+  getDevServer (): {
+    updateSpecs: (specs: FoundSpec[]) => void
+  }
 }
 
 export class ProjectActions {
@@ -410,7 +413,7 @@ export class ProjectActions {
 
     assert(projectRoot, `Cannot create spec without currentProject.`)
 
-    const integrationFolder = 'cypress/integration' || this.ctx.currentProject
+    const integrationFolder = path.join(projectRoot, 'cypress', 'e2e')
 
     const results = await codeGenerator(
       { templateDir: templates['scaffoldIntegration'], target: integrationFolder },
@@ -437,9 +440,6 @@ export class ProjectActions {
     if (!specPattern) {
       throw Error('Could not find specPattern for project')
     }
-
-    // created new specs - find and cache them!
-    this.ctx.project.setSpecs(await this.ctx.project.findSpecs(projectRoot, 'e2e', specPattern))
 
     return withFileParts
   }
