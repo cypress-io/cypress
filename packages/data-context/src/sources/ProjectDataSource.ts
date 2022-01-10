@@ -169,7 +169,13 @@ export class ProjectDataSource {
     return matched
   }
 
-  startSpecWatcher (projectRoot: string, testingType: Cypress.TestingType, specPattern: string | string[]) {
+  startSpecWatcher (
+    projectRoot: string,
+    testingType: Cypress.TestingType,
+    specPattern: string[],
+    ignoreSpecPattern: string[],
+    additionalIgnore: string[],
+  ) {
     this.stopSpecWatcher()
 
     const currentProject = this.ctx.currentProject
@@ -179,7 +185,7 @@ export class ProjectDataSource {
     }
 
     const onSpecsChanged = debounce(async () => {
-      const specs = await this.findSpecs(projectRoot, testingType, specPattern)
+      const specs = await this.findSpecs(projectRoot, testingType, specPattern, ignoreSpecPattern, additionalIgnore)
 
       this.setSpecs(specs)
       if (testingType === 'component') {
