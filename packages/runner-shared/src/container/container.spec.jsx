@@ -15,6 +15,7 @@ const createProps = () => ({
   runner: 'e2e',
   hasSpecFile: sinon.stub(),
   config: {
+    namespace: '__cypress',
     browsers: [],
     integrationFolder: '',
     numTestsKeptInMemory: 1,

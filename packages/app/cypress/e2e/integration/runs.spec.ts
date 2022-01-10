@@ -56,7 +56,7 @@ describe('App: Runs Page', () => {
 
   it('when no project Id in the config file, shows call to action', () => {
     cy.withCtx(async (ctx) => {
-      await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {}')
+      await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = { clientRoute: \'\/cy-child-client\/\' }')
     })
 
     cy.loginUser()
