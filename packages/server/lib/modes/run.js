@@ -10,6 +10,7 @@ const Promise = require('bluebird')
 const logSymbols = require('log-symbols')
 const assert = require('assert')
 const { getCtx } = require('@packages/data-context')
+const { makeGraphQLServer } = require('@packages/graphql/src/makeGraphQLServer')
 
 const recordMode = require('./record')
 const errors = require('../errors')
@@ -1508,8 +1509,10 @@ module.exports = {
     })
   },
 
-  ready (options = {}) {
+  async ready (options = {}) {
     debug('run mode ready with options %o', options)
+
+    await makeGraphQLServer()
 
     if (process.env.ELECTRON_RUN_AS_NODE && !process.env.DISPLAY) {
       debug('running electron as a node process without xvfb')

@@ -32,6 +32,7 @@ declare global {
   interface Window {
     __CYPRESS_INITIAL_DATA__: SSRData
     __CYPRESS_GRAPHQL_PORT__?: string
+    __CYPRESS_MODE__: 'run' | 'open'
   }
 }
 
@@ -113,9 +114,15 @@ export function makeUrqlClient (target: 'launchpad' | 'app'): Client {
     exchanges.unshift(devtoolsExchange)
   }
 
+  const cypressInRunMode = window.top === window && window.__CYPRESS_MODE__ === 'run'
+
   return createClient({
     url: GRAPHQL_URL,
-    requestPolicy: 'cache-and-network',
+    // TODO(lachlan): we should use 'cache-only' in run mode for performance.
+    // since we pre-hydrate the data in the urql cache, and we do not show the UI
+    // (eg, we don't show the spec list, side nav etc), we shouldn't need to make
+    // any additional graphql requests once we are up and running.
+    requestPolicy: cypressInRunMode ? 'cache-and-network' : 'cache-and-network',
     exchanges,
   })
 }
