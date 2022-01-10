@@ -6,7 +6,7 @@ import type { namedTypes } from 'ast-types'
 import Debug from 'debug'
 import * as fs from 'fs/promises'
 
-const debug = Debug('cypress:server:config-file-updater')
+const debug = Debug('cypress:data-context:config-file-updater')
 
 interface ErrorObj {
   get(type: string, ...args: any[]): Error
@@ -15,7 +15,12 @@ interface ErrorObj {
 export async function insertValuesInConfigFile (file: string, obj: {}, errors: ErrorObj) {
   const fileContents = await fs.readFile(file, { encoding: 'utf8' })
 
-  await fs.writeFile(file, await insertValueInJSString(fileContents, obj, errors))
+  const transformedFileContents = await insertValueInJSString(fileContents, obj, errors)
+
+  debug('transformedFileContents %s', transformedFileContents)
+  await fs.writeFile(file, transformedFileContents).catch((e) => {
+    throw new Error(`Failed to update config file ${file} with ${JSON.stringify(obj)}: ${e.message}`)
+  })
 }
 
 export async function insertValueInJSString (fileContents: string, obj: Record<string, any>, errors: ErrorObj): Promise<string> {
@@ -151,8 +156,7 @@ function setRootKeysSplicers (
   const keysToUpdate = objKeys.filter((key) => {
     return objectLiteralNode.properties.find((prop) => {
       return prop.type === 'ObjectProperty'
-        && prop.key.type === 'Identifier'
-        && prop.key.name === key
+      && matchKey(prop, key)
     })
   })
 
@@ -210,8 +214,7 @@ function setSubKeysSplicers (
   const subkeysToInsertWithoutKey = objSubkeys.filter(({ parent }) => {
     return !objectLiteralNode.properties.find((prop) => {
       return prop.type === 'ObjectProperty'
-        && prop.key.type === 'Identifier'
-        && prop.key.name === parent
+        && matchKey(prop, parent)
     })
   })
   const keysToInsertForSubKeys: Record<string, string[]> = {}
@@ -246,8 +249,7 @@ function setSubKeysSplicers (
   keysToUpdateWithObjects.filter((parent) => {
     return objectLiteralNode.properties.find((prop) => {
       return prop.type === 'ObjectProperty'
-        && prop.key.type === 'Identifier'
-        && prop.key.name === parent
+        && matchKey(prop, parent)
     })
   }).forEach((key) => {
     const propertyToUpdate = propertyFromKey(objectLiteralNode, key)
@@ -278,7 +280,8 @@ function setSplicerToUpdateProperty (splicers: Splicer[],
 
 function propertyFromKey (objectLiteralNode: namedTypes.ObjectExpression | undefined, key: string): namedTypes.ObjectProperty | undefined {
   return objectLiteralNode?.properties.find((prop) => {
-    return prop.type === 'ObjectProperty' && prop.key.type === 'Identifier' && prop.key.name === key
+    return prop.type === 'ObjectProperty'
+    && matchKey(prop, key)
   }) as namedTypes.ObjectProperty
 }
 
@@ -294,4 +297,9 @@ interface Splicer{
   start: number
   end: number
   replaceString: string
+}
+
+function matchKey (prop: namedTypes.ObjectProperty, key: string): boolean {
+  return prop.key.type === 'Identifier' && prop.key.name === key
+    || prop.key.type === 'StringLiteral' && prop.key.value === key
 }
