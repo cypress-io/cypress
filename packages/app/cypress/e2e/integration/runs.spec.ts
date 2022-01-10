@@ -91,33 +91,52 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
   })
 
   context('Runs - Cannot Find Project', () => {
-    // TODO: cannot currently test
-    it.skip('if project Id is specified in config file that does not exist, shows call to action', () => {
+    beforeEach(() => {
       cy.withCtx(async (ctx) => {
-        await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {\'projectId\': \'abcdef\'}')
+        await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {\'projectId\': \'abcdef42\'}')
       })
 
       cy.loginUser()
+      cy.remoteGraphQLIntercept(async (obj) => {
+        // Currently, all remote requests go through here, we want to use this to modify the
+        // remote request before it's used and avoid touching the login query
+
+        if (obj.result.data?.cloudProjectsBySlugs && obj.variables._v0_slugs.includes('abcdef42')) {
+          for (const proj of obj.result.data.cloudProjectsBySlugs) {
+            proj.__typename = 'CloudProjectNotFound'
+            proj.message = 'Cloud Project Not Found'
+          }
+        }
+
+        if (obj.result.data?.cloudViewer?.organizations?.nodes) {
+          const projectNodes = obj.result.data?.cloudViewer.organizations.nodes[0].projects.nodes
+
+          projectNodes.push({
+            id: '1',
+            slug: 'ghijkl',
+            name: 'Mock Project',
+          })
+        }
+
+        return obj.result
+      })
+
       cy.visitApp()
 
       cy.get('[href="#/runs"]').click()
-      cy.contains(defaultMessages.runs.errors.notfound.title).should('exist')
     })
 
-    // TODO: cannot currently test
-    it.skip('opens Connect Project modal after clicking Reconnect Project button', () => {
-      cy.withCtx(async (ctx) => {
-        await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {\'projectId\': \'abcdef\'}')
-      })
+    it('if project Id is specified in config file that does not exist, shows call to action', () => {
+      cy.findByText(defaultMessages.runs.errors.notfound.button).should('be.visible')
+    })
 
-      cy.loginUser()
-      cy.visitApp()
-
-      cy.get('[href="#/runs"]').click()
+    it('opens Connect Project modal after clicking Reconnect Project button', () => {
       cy.findByText(defaultMessages.runs.errors.notfound.button).click()
       cy.get('[aria-modal="true"]').should('exist')
-      cy.get('button').get('[aria-label="Close"').click()
-      cy.get('[aria-modal="true"]').should('not.exist')
+      cy.get('[data-cy="selectProject"] button').click()
+      cy.findByText('Mock Project').click()
+      cy.findByText(defaultMessages.runs.connect.modal.selectProject.connectProject).click()
+      cy.get('[data-cy="runs"]')
     })
   })
 
