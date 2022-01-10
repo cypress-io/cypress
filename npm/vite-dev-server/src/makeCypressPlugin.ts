@@ -89,7 +89,7 @@ export const makeCypressPlugin = (
 
       if (id === 'cypress:config') {
         return `
-export const supportPath = ${JSON.stringify(!!supportFilePath)}
+export const hasSupportPath = ${JSON.stringify(!!supportFilePath)}
 export const originAutUrl = ${JSON.stringify(`/__cypress/iframes/${normalizePath(projectRoot)}/`)}`
       }
     },
