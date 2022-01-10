@@ -13,7 +13,7 @@ const SET_PROPS = COOKIE_PROPS.concat(['value', 'httpOnly', 'expirationDate', 's
 
 const httpRe = /^http/
 
-const connections = new Set()
+const connections = {}
 
 // normalize into null when empty array
 const firstOrNull = (cookies) => {
@@ -24,15 +24,13 @@ const connect = function (host, path, extraOpts, onConnected) {
   const fullPath = `${host}${path}`
 
   // TODO: connections from Cypress in Cypress need to be cleaned up
-  if (connections.has(fullPath)) {
+  if (connections[fullPath]) {
     if (onConnected) {
       onConnected()
     }
 
-    return
+    return connections[fullPath]
   }
-
-  connections.add(fullPath)
 
   const listenToCookieChanges = once(() => {
     return browser.cookies.onChanged.addListener((info) => {
@@ -83,6 +81,8 @@ const connect = function (host, path, extraOpts, onConnected) {
 
   const ws = client.connect(host, path, extraOpts)
 
+  connections[fullPath] = ws
+
   ws.on('automation:request', (id, msg, data) => {
     switch (msg) {
       case 'get:cookies':
@@ -119,6 +119,14 @@ const connect = function (host, path, extraOpts, onConnected) {
   })
 
   return ws
+}
+
+const disconnect = (host, path) => {
+  const fullPath = `${host}${path}`
+
+  if (connections[fullPath]) {
+    delete connections[fullPath]
+  }
 }
 
 const setOneCookie = (props) => {
@@ -167,6 +175,7 @@ const clearAllCookies = (cookies) => {
 
 const automation = {
   connect,
+  disconnect,
 
   getAll (filter = {}) {
     filter = pick(filter, GET_ALL_PROPS)

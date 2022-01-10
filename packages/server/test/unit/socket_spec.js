@@ -159,6 +159,8 @@ describe('lib/socket', () => {
         })
 
         afterEach(function () {
+          extensionBackgroundPage.disconnect(this.cfg.proxyUrl, this.cfg.socketIoRoute)
+
           return this.extClient.disconnect()
         })
 
@@ -238,7 +240,7 @@ describe('lib/socket', () => {
         })
 
         it('returns true when tab matches magic string', function (done) {
-          const code = 'var s; (s = document.getElementById(\'__cypress-string\')) && s.textContent'
+          const code = 'var s; (s = document.getElementById(\'__cypress-string\') || document.getElementsByClassName(\'aut-iframe\').item(0).contentWindow.document.getElementById(\'__cypress-string\')) && s.textContent'
 
           sinon.stub(chrome.tabs, 'query')
           .withArgs({ windowType: 'normal' })

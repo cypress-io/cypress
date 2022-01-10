@@ -11,7 +11,7 @@
     "cypress:launch": "cross-env TZ=America/New_York gulp open --project ${PWD}",
     "cypress:open": "cross-env TZ=America/New_York gulp open --project ${PWD}",
     "cypress:run:ct": "cross-env TZ=America/New_York node ../../scripts/cypress run --component --project ${PWD}",
-    "cypress:run:e2e": "cross-env TZ=America/New_York node ../../scripts/cypress run --project ${PWD}",
+    "cypress:run:e2e": "cross-env CYPRESS_REMOTE_DEBUGGING_PORT=6666 TZ=America/New_York node ../../scripts/cypress run --project ${PWD}",
     "debug": "gulp debug --project ${PWD}",
     "dev": "gulp dev --project ${PWD}",
     "start": "echo \"run 'yarn dev' from the root\" && exit 1",

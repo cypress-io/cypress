@@ -10,6 +10,6 @@ describe('Cypress In Cypress', () => {
     // cy.visitApp('/tests/cypress/e2e/integration/dom-content.spec.js')
     cy.visitApp()
     cy.contains('dom-content.spec').click()
-    cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
+    cy.get('[data-model-state="passed"]', { timeout: 30000 }).should('contain', 'renders the test content')
   })
 })
