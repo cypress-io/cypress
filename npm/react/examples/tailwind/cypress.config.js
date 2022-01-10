@@ -6,7 +6,12 @@ module.exports = {
   'env': {
     'coverage': true,
   },
+<<<<<<< HEAD
   config: {
+=======
+  component: {
+    'specPattern': 'src/**/*cy-spec.js',
+>>>>>>> origin/10.0-release
     setupNodeEvents (on, config) {
       // load file devServer that comes with this plugin
       // https://github.com/bahmutov/cypress-react-unit-test#install

@@ -60,10 +60,11 @@ describe('lib/config', () => {
 
       this.projectRoot = '/_test-output/path/to/project'
 
+      ctx.lifecycleManager.setCurrentTestingType('e2e')
       sinon.stub(ctx.lifecycleManager, 'verifyProjectRoot').returns(undefined)
 
       this.setup = (cypressJson = {}, cypressEnvJson = {}) => {
-        sinon.stub(ctx.lifecycleManager, 'getConfigFileContents').resolves(cypressJson)
+        sinon.stub(ctx.lifecycleManager, 'getConfigFileContents').resolves({ ...cypressJson, e2e: cypressJson.e2e ?? { supportFile: false } })
         sinon.stub(ctx.lifecycleManager, 'loadCypressEnvFile').resolves(cypressEnvJson)
       }
     })
@@ -580,22 +581,22 @@ describe('lib/config', () => {
       })
 
       context('supportFile', () => {
-        it('passes if a string', function () {
-          this.setup({ supportFile: 'cypress/support' })
-
-          return this.expectValidationPasses()
-        })
-
         it('passes if false', function () {
-          this.setup({ supportFile: false })
+          this.setup({ e2e: { supportFile: false } })
 
           return this.expectValidationPasses()
         })
 
         it('fails if not a string or false', function () {
-          this.setup({ supportFile: true })
+          this.setup({ e2e: { supportFile: true } })
 
           return this.expectValidationFails('be a string or false')
+        })
+
+        it('fails if is set at root level', function () {
+          this.setup({ supportFile: false })
+
+          return this.expectValidationFails('was removed from the root in Cypress version `10.0.0`')
         })
       })
 
@@ -1054,7 +1055,7 @@ describe('lib/config', () => {
       this.defaults = (prop, value, cfg = {}, options = {}) => {
         cfg.projectRoot = '/foo/bar/'
 
-        return config.mergeDefaults(cfg, options)
+        return config.mergeDefaults({ ...cfg, supportFile: cfg.supportFile ?? false }, options)
         .then((mergedConfig) => {
           expect(mergedConfig[prop]).to.deep.eq(value)
         })
@@ -1258,35 +1259,35 @@ describe('lib/config', () => {
     })
 
     it('resets numTestsKeptInMemory to 0 when runMode', () => {
-      return config.mergeDefaults({ projectRoot: '/foo/bar/' }, { isTextTerminal: true })
+      return config.mergeDefaults({ projectRoot: '/foo/bar/', supportFile: false }, { isTextTerminal: true })
       .then((cfg) => {
         expect(cfg.numTestsKeptInMemory).to.eq(0)
       })
     })
 
     it('resets watchForFileChanges to false when runMode', () => {
-      return config.mergeDefaults({ projectRoot: '/foo/bar/' }, { isTextTerminal: true })
+      return config.mergeDefaults({ projectRoot: '/foo/bar/', supportFile: false }, { isTextTerminal: true })
       .then((cfg) => {
         expect(cfg.watchForFileChanges).to.be.false
       })
     })
 
     it('can override morgan in options', () => {
-      return config.mergeDefaults({ projectRoot: '/foo/bar/' }, { morgan: false })
+      return config.mergeDefaults({ projectRoot: '/foo/bar/', supportFile: false }, { morgan: false })
       .then((cfg) => {
         expect(cfg.morgan).to.be.false
       })
     })
 
     it('can override isTextTerminal in options', () => {
-      return config.mergeDefaults({ projectRoot: '/foo/bar/' }, { isTextTerminal: true })
+      return config.mergeDefaults({ projectRoot: '/foo/bar/', supportFile: false }, { isTextTerminal: true })
       .then((cfg) => {
         expect(cfg.isTextTerminal).to.be.true
       })
     })
 
     it('can override socketId in options', () => {
-      return config.mergeDefaults({ projectRoot: '/foo/bar/' }, { socketId: '1234' })
+      return config.mergeDefaults({ projectRoot: '/foo/bar/', supportFile: false }, { socketId: '1234' })
       .then((cfg) => {
         expect(cfg.socketId).to.eq('1234')
       })
@@ -1295,6 +1296,7 @@ describe('lib/config', () => {
     it('deletes envFile', () => {
       const obj = {
         projectRoot: '/foo/bar/',
+        supportFile: false,
         env: {
           foo: 'bar',
           version: '0.5.2',
@@ -1322,6 +1324,7 @@ describe('lib/config', () => {
     it('merges env into @config.env', () => {
       const obj = {
         projectRoot: '/foo/bar/',
+        supportFile: false,
         env: {
           host: 'localhost',
           user: 'brian',
@@ -1404,6 +1407,7 @@ describe('lib/config', () => {
       it('sets reporter and port to cli', () => {
         const obj = {
           projectRoot: '/foo/bar',
+          supportFile: false,
         }
 
         const options = {
@@ -1456,7 +1460,7 @@ describe('lib/config', () => {
             screenshotOnRunFailure: { value: true, from: 'default' },
             screenshotsFolder: { value: 'cypress/screenshots', from: 'default' },
             slowTestThreshold: { value: 10000, from: 'default' },
-            supportFile: { value: 'cypress/support', from: 'default' },
+            supportFile: { value: false, from: 'config' },
             supportFolder: { value: false, from: 'default' },
             taskTimeout: { value: 60000, from: 'default' },
             specPattern: { value: '**/*.*', from: 'default' },
@@ -1484,6 +1488,7 @@ describe('lib/config', () => {
 
         const obj = {
           projectRoot: '/foo/bar',
+          supportFile: false,
           baseUrl: 'http://localhost:8080',
           port: 2020,
           env: {
@@ -1566,7 +1571,7 @@ describe('lib/config', () => {
             screenshotOnRunFailure: { value: true, from: 'default' },
             screenshotsFolder: { value: 'cypress/screenshots', from: 'default' },
             slowTestThreshold: { value: 10000, from: 'default' },
-            supportFile: { value: 'cypress/support', from: 'default' },
+            supportFile: { value: false, from: 'config' },
             supportFolder: { value: false, from: 'default' },
             taskTimeout: { value: 60000, from: 'default' },
             specPattern: { value: '**/*.*', from: 'default' },
@@ -1992,7 +1997,7 @@ describe('lib/config', () => {
 
   context('.setSupportFileAndFolder', () => {
     const mockSupportDefaults = {
-      supportFile: 'cypress/support',
+      supportFile: 'cypress/support/e2e.ts',
       supportFolder: false,
       configFile: 'cypress.json',
     }
@@ -2031,14 +2036,14 @@ describe('lib/config', () => {
 
       const obj = config.setAbsolutePaths({
         projectRoot,
-        supportFile: 'cypress/support',
+        supportFile: 'cypress/support/e2e.js',
       })
 
       return config.setSupportFileAndFolder(obj, mockSupportDefaults)
       .then((result) => {
         expect(result).to.eql({
           projectRoot,
-          supportFile: `${projectRoot}/cypress/support/index.js`,
+          supportFile: `${projectRoot}/cypress/support/e2e.js`,
           supportFolder: `${projectRoot}/cypress/support`,
         })
       })
@@ -2049,7 +2054,7 @@ describe('lib/config', () => {
 
       const obj = config.setAbsolutePaths({
         projectRoot,
-        supportFile: 'cypress/support',
+        supportFile: false,
       })
 
       return config.setSupportFileAndFolder(obj, mockSupportDefaults)
@@ -2083,11 +2088,11 @@ describe('lib/config', () => {
       const e = new Error('Cannot resolve TS file by default')
 
       e.code = 'MODULE_NOT_FOUND'
-      sinon.stub(config.utils, 'resolveModule').withArgs(supportFolder).throws(e)
+      sinon.stub(config.utils, 'resolveModule').withArgs(supportFilename).throws(e)
 
       const obj = config.setAbsolutePaths({
         projectRoot,
-        supportFile: 'cypress/support',
+        supportFile: 'cypress/support/index.ts',
       })
 
       return config.setSupportFileAndFolder(obj, mockSupportDefaults)

@@ -17,7 +17,6 @@ export default defineConfig({
   },
   'component': {
     'supportFile': 'cypress/component/support/index.ts',
-    'pluginsFile': 'cypress/component/plugins/index.js',
     devServer (cypressConfig, devServerConfig) {
       const { startDevServer } = require('@cypress/vite-dev-server')
 

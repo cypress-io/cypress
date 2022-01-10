@@ -5,6 +5,11 @@ export default defineConfig({
   'video': false,
   'fixturesFolder': false,
   'component': {
+<<<<<<< HEAD
+=======
+    'supportFile': 'cypress/support.js',
+    'specPattern': 'cypress/components/**/*.spec.*',
+>>>>>>> origin/10.0-release
     devServer (cypressConfig) {
       const path = require('path')
       const { startDevServer } = require('./dist')

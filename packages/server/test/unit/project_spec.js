@@ -1,6 +1,5 @@
 require('../spec_helper')
 
-const mockedEnv = require('mocked-env')
 const path = require('path')
 const chokidar = require('chokidar')
 const pkg = require('@packages/root')
@@ -40,7 +39,7 @@ describe.skip('lib/project-base', () => {
 
     sinon.stub(runEvents, 'execute').resolves()
 
-    ctx.actions.project.setCurrentProjectForTestSetup(this.todosPath)
+    ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.todosPath)
 
     return settings.read(this.todosPath)
     .then((obj = {}) => {
@@ -300,7 +299,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       return this.project.open().then(() => {
         expect(this.checkSupportFileStub).to.be.calledWith({
           configFile: 'cypress.config.js',
-          supportFile: '/foo/bar/cypress/support/index.js',
+          supportFile: false,
         })
       })
     })
@@ -532,6 +531,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     })
   })
 
+<<<<<<< HEAD
   context('#scaffold', () => {
     beforeEach(function () {
       this.project = new ProjectBase({ projectRoot: '/_test-output/path/to/project-e2e', testingType: 'e2e' })
@@ -572,6 +572,8 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     })
   })
 
+=======
+>>>>>>> origin/10.0-release
   context('#startWebsockets', () => {
     beforeEach(function () {
       this.project = new ProjectBase({ projectRoot: '/_test-output/path/to/project-e2e', testingType: 'e2e' })

@@ -491,7 +491,7 @@ commands:
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
-          path: ./packages/launchpad/cypress/videos
+          path: ./packages/<<parameters.package>>/cypress/videos
       - store-npm-logs
 
   run-runner-ct-integration-tests:
@@ -812,6 +812,13 @@ commands:
             if [[ -f cypress.json ]]; then
               rm -rf cypress.json
               echo 'module.exports = {}' > cypress.config.js
+            fi
+      - run:
+          name: Rename support file
+          working_directory: /tmp/<<parameters.repo>>
+          command: |
+            if [[ -f cypress/support/index.js ]]; then
+              mv cypress/support/index.js cypress/support/e2e.js
             fi
       - run:
           name: Print Cypress version
@@ -1681,7 +1688,11 @@ jobs:
     steps:
       - clone-repo-and-checkout-branch:
           repo: cypress-example-kitchensink
+<<<<<<< HEAD
           pull_request_id: 524
+=======
+          pull_request_id: 523
+>>>>>>> origin/10.0-release
       - install-required-node
       - run:
           name: Remove cypress.json
@@ -1942,6 +1953,10 @@ jobs:
                     },
                   }" > cypress.config.ts
       - run:
+          name: Rename support file
+          working_directory: <<parameters.wd>>
+          command: mv cypress/support/index.ts cypress/support/e2e.js
+      - run:
           name: Run project tests 🗳
           working_directory: <<parameters.wd>>
           command: npx cypress run
@@ -2011,7 +2026,11 @@ jobs:
       - test-binary-against-repo:
           repo: cypress-example-kitchensink
           browser: "electron"
+<<<<<<< HEAD
           pull_request_id: 524
+=======
+          pull_request_id: 523
+>>>>>>> origin/10.0-release
 
   test-binary-against-awesome-typescript-loader:
     <<: *defaults
@@ -2019,7 +2038,11 @@ jobs:
       - test-binary-against-repo:
           repo: cypress-test-awesome-typescript-loader
           browser: "electron"
+<<<<<<< HEAD
           pull_request_id: 8
+=======
+          pull_request_id: 7
+>>>>>>> origin/10.0-release
 
   test-binary-against-kitchensink-firefox:
     <<: *defaults
@@ -2028,7 +2051,11 @@ jobs:
       - test-binary-against-repo:
           repo: cypress-example-kitchensink
           browser: firefox
+<<<<<<< HEAD
           pull_request_id: 524
+=======
+          pull_request_id: 523
+>>>>>>> origin/10.0-release
 
   test-binary-against-kitchensink-chrome:
     <<: *defaults
@@ -2037,7 +2064,11 @@ jobs:
       - test-binary-against-repo:
           repo: cypress-example-kitchensink
           browser: chrome
+<<<<<<< HEAD
           pull_request_id: 524
+=======
+          pull_request_id: 523
+>>>>>>> origin/10.0-release
 
   test-binary-against-todomvc-firefox:
     <<: *defaults
@@ -2137,6 +2168,10 @@ jobs:
           command: |
             rm -rf cypress.json
             echo 'module.exports = {}' > cypress.config.js
+      - run:
+          name: Rename support file
+          working_directory: test-binary
+          command: mv cypress/support/index.js cypress/support/e2e.js
       - run:
           name: Verify Cypress binary
           working_directory: test-binary

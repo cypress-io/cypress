@@ -5,20 +5,14 @@ const Fixtures = require('../lib/fixtures')
 
 const e2eProject = Fixtures.projectPath('e2e')
 
-// TODO(tim): aim to fix by EOW
-const temporarySkip = new Date() > new Date('2022-01-07') ? it : xit
-
 describe('e2e plugins', function () {
   systemTests.setup()
-
-  // TODO(tim): aim to fix by EOW
-  const tempSkipSystem = new Date() > new Date('2022-01-07') ? systemTests.it : systemTests.it.skip
 
   // this tests verifies stdout manually instead of via snapshot because
   // there's a degree of randomness as to whether the error occurs before or
   // after the run output starts. the important thing is that the run is
   // failed and the right error is displayed
-  tempSkipSystem('fails when there is an async error at the root', {
+  systemTests.it('fails when there is an async error at the root', {
     browser: 'chrome',
     spec: 'app.cy.js',
     project: 'plugins-root-async-error',
@@ -30,7 +24,7 @@ describe('e2e plugins', function () {
     },
   })
 
-  temporarySkip('fails when there is an async error inside an event handler', function () {
+  it('fails when there is an async error inside an event handler', function () {
     return systemTests.exec(this, {
       spec: 'app.cy.js',
       project: 'plugins-async-error',
@@ -217,6 +211,7 @@ describe('e2e plugins', function () {
         },
       })
     })
+<<<<<<< HEAD
 
     temporarySkip('passes false configFile to plugins function', function () {
       return systemTests.exec(this, {
@@ -230,5 +225,7 @@ describe('e2e plugins', function () {
         },
       })
     })
+=======
+>>>>>>> origin/10.0-release
   })
 })

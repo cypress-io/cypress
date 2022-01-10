@@ -427,7 +427,7 @@ describe('lib/cypress', () => {
 
     // NOTE: We no longer do this in the new flow
     it.skip('scaffolds out integration and example specs if they do not exist when not runMode', function () {
-      ctx.actions.project.setCurrentProjectForTestSetup(this.pristineWithConfigPath)
+      ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.pristineWithConfigPath)
 
       return config.get(this.pristineWithConfigPath)
       .then((cfg) => {
@@ -475,28 +475,30 @@ describe('lib/cypress', () => {
     it('scaffolds out support + files if they do not exist', function () {
       const supportFolder = path.join(this.pristineWithConfigPath, 'cypress/support')
 
-      ctx.actions.project.setCurrentProjectForTestSetup(this.pristineWithConfigPath)
+      ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.pristineWithConfigPath)
 
       return config.get(this.pristineWithConfigPath)
       .then(() => {
+        return fs.rmdir(supportFolder, { recursive: true })
+      }).then(() => {
         return fs.statAsync(supportFolder)
-        .then(() => {
-          throw new Error('supportFolder should not exist!')
-        }).catch({ code: 'ENOENT' }, () => {
-          return cypress.start([`--run-project=${this.pristineWithConfigPath}`, '--no-run-mode'])
-        }).then(() => {
-          return fs.statAsync(supportFolder)
-        }).then(() => {
-          return fs.statAsync(path.join(supportFolder, 'index.js'))
-        }).then(() => {
-          return fs.statAsync(path.join(supportFolder, 'commands.js'))
-        })
+      })
+      .then(() => {
+        throw new Error('supportFolder should not exist!')
+      }).catch({ code: 'ENOENT' }, () => {
+        return cypress.start([`--run-project=${this.pristineWithConfigPath}`])
+      }).then(() => {
+        return fs.statAsync(supportFolder)
+      }).then(() => {
+        throw new Error('supportFolder should not exist!')
+      }).catch((err) => {
+        expect(err.code).eq('ENOENT')
       })
     })
 
     // NOTE: Removal of fixtures is not supported in new flow
     it.skip('removes fixtures when they exist and fixturesFolder is false', function (done) {
-      ctx.actions.project.setCurrentProjectForTestSetup(this.idsPath)
+      ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.idsPath)
 
       config.get(this.idsPath)
       .then((cfg) => {
@@ -556,7 +558,7 @@ describe('lib/cypress', () => {
     it('can change the reporter with cypress.config.js', function () {
       sinon.spy(Reporter, 'create')
 
-      ctx.actions.project.setCurrentProjectForTestSetup(this.idsPath)
+      ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.idsPath)
 
       return config.get(this.idsPath)
       .then((cfg) => {
@@ -624,7 +626,7 @@ describe('lib/cypress', () => {
     })
 
     it(`logs error when supportFile doesn't exist`, function () {
-      return settings.writeForTesting(this.idsPath, { supportFile: '/does/not/exist' })
+      return settings.writeForTesting(this.idsPath, { e2e: { supportFile: '/does/not/exist' } })
       .then(() => {
         return cypress.start([`--run-project=${this.idsPath}`])
       }).then(() => {
@@ -795,7 +797,7 @@ describe('lib/cypress', () => {
 
       return fs.mkdirAsync(permissionsPath)
       .then(() => {
-        return fs.outputFileAsync(cypressConfig, 'module.exports = {}')
+        return fs.outputFileAsync(cypressConfig, 'module.exports = { e2e: { supportFile: false } }')
       }).then(() => {
         // read only
         return fs.chmodAsync(permissionsPath, '555')
@@ -1645,15 +1647,17 @@ describe('lib/cypress', () => {
       process.env.CYPRESS_responseTimeout = '5555'
       process.env.CYPRESS_watch_for_file_changes = 'false'
 
-      ctx.actions.project.setCurrentProjectForTestSetup(this.todosPath)
+      ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.todosPath)
 
       return user.set({ name: 'brian', authToken: 'auth-token-123' })
-      .then(() => settings.read(this.todosPath))
+      .then(() => ctx.lifecycleManager.getFullInitialConfig())
       .then((json) => {
         // this should be overriden by the env argument
         json.baseUrl = 'http://localhost:8080'
 
-        return settings.writeForTesting(this.todosPath, json)
+        const { supportFile, ...rest } = json
+
+        return settings.writeForTesting(this.todosPath, rest)
       }).then(() => {
         // TODO(tim): this shouldn't be needed when we refactor the ctx setup
         process.env.LAUNCHPAD = '0'

@@ -52,6 +52,7 @@ export interface InternalDataContextOptions {
 export interface ErrorApiShape {
   error: (type: string, ...args: any) => Error & { type: string, details: string, code?: string, isCypressErr: boolean}
   message: (type: string, ...args: any) => string
+  warning: (type: string, ...args: any) => null
 }
 
 export interface DataContextConfig {
@@ -348,8 +349,11 @@ export class DataContext {
 
   onError = (err: Error) => {
     if (this.isRunMode) {
-      // console.error(err)
-      throw err
+      if (this.lifecycleManager?.runModeExitEarly) {
+        this.lifecycleManager.runModeExitEarly(err)
+      } else {
+        throw err
+      }
     } else {
       this.coreData.baseError = err
     }
@@ -446,6 +450,10 @@ export class DataContext {
   }
 
   error (type: string, ...args: any[]) {
+    return this._apis.errorApi.error(type, ...args)
+  }
+
+  warning (type: string, ...args: any[]) {
     return this._apis.errorApi.error(type, ...args)
   }
 
