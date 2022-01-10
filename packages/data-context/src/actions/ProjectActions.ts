@@ -27,6 +27,8 @@ export interface ProjectApiShape {
   clearProjectPreferences(projectTitle: string): Promise<unknown>
   clearAllProjectPreferences(): Promise<unknown>
   closeActiveProject(): Promise<unknown>
+  getCurrentProjectSavedState(): {} | undefined
+  setPromptShown(slug: string): void
   getDevServer (): {
     updateSpecs: (specs: FoundSpec[]) => void
   }
@@ -294,6 +296,10 @@ export class ProjectActions {
 
   async clearAllProjectPreferencesCache () {
     await this.api.clearAllProjectPreferences()
+  }
+
+  setPromptShown (slug: string) {
+    this.api.setPromptShown(slug)
   }
 
   async createComponentIndexHtml (template: string) {

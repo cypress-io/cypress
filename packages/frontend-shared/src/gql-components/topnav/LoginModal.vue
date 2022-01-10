@@ -1,7 +1,7 @@
 <template>
   <Dialog
     :open="modelValue"
-    class="inset-0 z-10 fixed overflow-y-auto"
+    class="inset-0 z-50 fixed overflow-y-auto"
     @close="setIsOpen"
   >
     <div class="flex min-h-screen items-center justify-center">
