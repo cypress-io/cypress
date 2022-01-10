@@ -203,6 +203,16 @@ export class CombinedAgent {
   }
 }
 
+const getProxyOrTargetOverrideForUrl = (href) => {
+  const targetHost = process.env.HTTP_PROXY_TARGET_HOST
+
+  if (targetHost && href.includes(targetHost)) {
+    return targetHost
+  }
+
+  return getProxyForUrl(href)
+}
+
 class HttpAgent extends http.Agent {
   httpsAgent: https.Agent
 
@@ -214,8 +224,8 @@ class HttpAgent extends http.Agent {
   }
 
   addRequest (req: http.ClientRequest, options: http.RequestOptions) {
-    if (process.env.HTTP_PROXY) {
-      const proxy = getProxyForUrl(options.href)
+    if (process.env.HTTP_PROXY || process.env.HTTP_PROXY_TARGET_HOST) {
+      const proxy = getProxyOrTargetOverrideForUrl(options.href)
 
       if (proxy) {
         options.proxy = proxy
