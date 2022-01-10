@@ -13,20 +13,20 @@ const nonExistentFileName = 'non existent file'
 
 /*----------  Selectors  ----------*/
 // File List
-const fileRowSelector = '[data-testid=file-list-row]'
+const fileRowSelector = '[data-cy=file-list-row]'
 
 // Inputs
 const filenameInputSelector = `[placeholder="${defaultMessages.components.fileSearch.byFilenameInput}"]:first`
 const extensionInputSelector = `[placeholder="${defaultMessages.components.fileSearch.byExtensionInput}"]`
-const fileMatchButtonSelector = '[data-testid=file-match-button]'
+const fileMatchButtonSelector = '[data-cy=file-match-button]'
 
 // File Match Indicator
 // X out of Y Matches when searching the file list
-const fileMatchIndicatorSelector = '[data-testid=file-match-indicator]'
+const fileMatchIndicatorSelector = '[data-cy=file-match-indicator]'
 
 // No Results
 const noResultsSelector = '[data-testid=no-results]'
-const noResultsClearButtonSelector = '[data-testid=no-results-clear]'
+const noResultsClearButtonSelector = '[data-cy=no-results-clear]'
 
 // Loading
 const loadingSelector = '[data-testid=loading]'

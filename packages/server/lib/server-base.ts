@@ -25,13 +25,13 @@ import origin from './util/origin'
 import { allowDestroy, DestroyableHttpServer } from './util/server_destroy'
 import { SocketAllowed } from './util/socket_allowed'
 import { createInitialWorkers } from '@packages/rewriter'
-import type { SpecsStore } from './specs-store'
 import type { Cfg } from './project-base'
 import type { Browser } from '@packages/server/lib/browsers/types'
 import { InitializeRoutes, createCommonRoutes } from './routes'
 import { createRoutesE2E } from './routes-e2e'
 import { createRoutesCT } from './routes-ct'
 import type { DataContext } from '@packages/data-context/src/DataContext'
+import type { FoundSpec } from '@packages/types'
 
 const ALLOWED_PROXY_BYPASS_URLS = [
   '/',
@@ -96,13 +96,12 @@ export type WarningErr = Record<string, any>
 
 export interface OpenServerOptions {
   SocketCtor: typeof SocketE2E | typeof SocketCt
-  specsStore: SpecsStore
   testingType: Cypress.TestingType
   onError: any
   onWarning: any
   exit?: boolean
   getCurrentBrowser: () => Browser
-  getSpec: () => Cypress.Cypress['spec'] | null
+  getSpec: () => FoundSpec | null
   shouldCorrelatePreRequests: () => boolean
 }
 
@@ -176,7 +175,6 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     onError,
     onWarning,
     shouldCorrelatePreRequests,
-    specsStore,
     testingType,
     SocketCtor,
     exit,
@@ -216,7 +214,6 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     const routeOptions: InitializeRoutes = {
       ctx: this.ctx,
       config,
-      specsStore,
       getRemoteState,
       nodeProxy: this.nodeProxy,
       networkProxy: this._networkProxy!,

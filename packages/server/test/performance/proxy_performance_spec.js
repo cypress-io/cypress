@@ -17,7 +17,6 @@ const performance = require('@tooling/system-tests/lib/performance')
 const Promise = require('bluebird')
 const sanitizeFilename = require('sanitize-filename')
 const { createRoutes } = require(`../../lib/routes`)
-const { SpecsStore } = require(`../../lib/specs-store`)
 
 process.env.CYPRESS_INTERNAL_ENV = 'development'
 
@@ -347,8 +346,11 @@ describe('Proxy Performance', function () {
           https: { cert, key },
         }).start(HTTPS_PROXY_PORT),
 
-        Config.set({
+        Config.setupFullConfigWithDefaults({
           projectRoot: '/tmp/a',
+          config: {
+            supportFile: false,
+          },
         }).then((config) => {
           config.port = CY_PROXY_PORT
 
@@ -360,7 +362,6 @@ describe('Proxy Performance', function () {
           return cyServer.open(config, {
             SocketCtor: SocketE2E,
             createRoutes,
-            specsStore: new SpecsStore({}, 'e2e'),
             testingType: 'e2e',
           })
         }),

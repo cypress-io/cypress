@@ -23,12 +23,7 @@
             :browsers="value"
             :color-classes="`rounded-sm px-2px ${colorMap[from]}`"
           />
-          <StringArray
-            v-else-if="value && Array.isArray(value)"
-            :value="value"
-            :color-classes="`rounded-sm px-2px ${colorMap[from]}`"
-          />
-          <StringRecords
+          <RenderObject
             v-else-if="value && typeof value === 'object'"
             :value="value"
             :color-classes="`rounded-sm px-2px ${colorMap[from]}`"
@@ -37,13 +32,7 @@
             v-else
             class="rounded-sm px-2px"
             :class="colorMap[from]"
-          >
-            {{ !value
-              ? 'null'
-              : typeof value === 'string'
-                ? `'${value}'`
-                : value }}
-          </span>,
+          >{{ renderPrimitive(value) }}</span>,
           <br>
         </span>
       </div>
@@ -58,9 +47,9 @@ import IconCode from '~icons/mdi/code'
 import { useI18n } from '@cy/i18n'
 import { CONFIG_LEGEND_COLOR_MAP } from './ConfigSourceColors'
 import Browsers from './renderers/Browsers.vue'
-import StringArray from './renderers/StringArray.vue'
-import StringRecords from './renderers/StringRecords.vue'
 import type { CypressResolvedConfig } from './projectSettings'
+import RenderObject from './renderers/RenderObject.vue'
+import { renderPrimitive } from './renderers/renderPrimitive'
 
 defineProps<{
   config: CypressResolvedConfig

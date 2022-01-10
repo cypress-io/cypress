@@ -6,6 +6,8 @@
       v-if="showHeader"
       :show-browsers="true"
       :page-name="currentRoute.name?.toString()"
+      data-cy="app-header-bar"
+      :allow-automatic-prompt-open="true"
     />
 
     <main

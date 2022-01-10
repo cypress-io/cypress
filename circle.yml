@@ -29,6 +29,7 @@ mainBuildFilters: &mainBuildFilters
       only:
         - develop
         - 10.0-release
+        - test-binary-downstream-windows
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -38,6 +39,7 @@ macWorkflowFilters: &mac-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ '10.0-release', << pipeline.git.branch >> ]
+    - equal: [ renovate/cypress-request-2.x, << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -47,6 +49,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ '10.0-release', << pipeline.git.branch >> ]
+    - equal: [ test-binary-downstream-windows, << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -87,7 +90,7 @@ executors:
   # https://github.com/CircleCI-Public/windows-orb/blob/master/src/executors/default.yml
   # https://circleci.com/docs/2.0/hello-world-windows/#software-pre-installed-in-the-windows-image
   windows: &windows-executor
-    machine:  
+    machine:
       image: windows-server-2019-vs2019:stable
       shell: bash.exe -eo pipefail
     resource_class: windows.medium
@@ -152,7 +155,7 @@ commands:
             - cypress
             - .ssh
             - node_modules # contains the npm i -g modules
-  
+
   install_cache_helpers_dependencies:
     steps:
       - run:
@@ -474,7 +477,7 @@ commands:
         default: ''
     steps:
       - restore_cached_workspace
-      - run: 
+      - run:
           command: |
             cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --parallel -- --') || true
             DEBUG=<<parameters.debug>> \
@@ -488,7 +491,7 @@ commands:
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
-          path: ./packages/launchpad/cypress/videos
+          path: ./packages/<<parameters.package>>/cypress/videos
       - store-npm-logs
 
   run-runner-ct-integration-tests:
@@ -615,7 +618,6 @@ commands:
                   command: |
                     git fetch origin pull/<<parameters.pull_request_id>>/head:pr-<<parameters.pull_request_id>>
                     git checkout pr-<<parameters.pull_request_id>>
-                    git log -n 2
 
   test-binary-against-rwa:
     description: |
@@ -810,6 +812,13 @@ commands:
             if [[ -f cypress.json ]]; then
               rm -rf cypress.json
               echo 'module.exports = {}' > cypress.config.js
+            fi
+      - run:
+          name: Rename support file
+          working_directory: /tmp/<<parameters.repo>>
+          command: |
+            if [[ -f cypress/support/index.js ]]; then
+              mv cypress/support/index.js cypress/support/e2e.js
             fi
       - run:
           name: Print Cypress version
@@ -1307,7 +1316,7 @@ jobs:
       - run-runner-ct-integration-tests:
           browser: chrome
           percy: true
-  
+
   run-frontend-shared-component-tests-chrome:
     <<: *defaults
     parallelism: 1
@@ -1331,7 +1340,7 @@ jobs:
 
   run-launchpad-integration-tests-chrome:
     <<: *defaults
-    parallelism: 1
+    parallelism: 2
     steps:
       - run-new-ui-tests:
           browser: chrome
@@ -1341,7 +1350,7 @@ jobs:
 
   run-app-component-tests-chrome:
     <<: *defaults
-    parallelism: 1
+    parallelism: 7
     steps:
       - run-new-ui-tests:
           browser: chrome
@@ -1351,7 +1360,7 @@ jobs:
 
   run-app-integration-tests-chrome:
     <<: *defaults
-    parallelism: 1
+    parallelism: 2
     steps:
       - run-new-ui-tests:
           browser: chrome
@@ -1665,7 +1674,7 @@ jobs:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "10.0-release" && "$CIRCLE_BRANCH" != "renovate/cypress-request-2.x" && "$CIRCLE_BRANCH" != "tgriesser/fix/patch-resolutions" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "test-binary-downstream-windows" && "$CIRCLE_BRANCH" != "10.0-release" && "$CIRCLE_BRANCH" != "renovate/cypress-request-2.x" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -1679,7 +1688,7 @@ jobs:
     steps:
       - clone-repo-and-checkout-branch:
           repo: cypress-example-kitchensink
-          pull_request_id: 510
+          pull_request_id: 523
       - install-required-node
       - run:
           name: Remove cypress.json
@@ -1750,7 +1759,12 @@ jobs:
 
   test-binary-and-npm-against-other-projects:
     <<: *defaults
-    resource_class: medium
+    parameters:
+      <<: *defaultsParameters
+      resource_class:
+        type: string
+        default: medium
+    resource_class: << parameters.resource_class >>
     steps:
       # needs uploaded NPM and test binary
       - restore_cached_workspace
@@ -1759,23 +1773,14 @@ jobs:
       - run: ls -la binary-url.json npm-package-url.json
       - run: cat binary-url.json
       - run: cat npm-package-url.json
-      - run: mkdir /tmp/testing
-      - run:
-          name: create dummy package
-          working_directory: /tmp/testing
-          command: npm init -y
       - run:
           # install NPM from unique urls
-          name: Install Cypress
+          name: Install Cypress Binary in Dummy Package
           command: |
             node scripts/test-unique-npm-and-binary.js \
               --npm npm-package-url.json \
               --binary binary-url.json \
               --cwd /tmp/testing
-      - run:
-          name: Verify Cypress binary
-          working_directory: /tmp/testing
-          command: $(yarn bin)/cypress verify
       - run:
           name: Running other test projects with new NPM package and binary
           command: |
@@ -1806,19 +1811,19 @@ jobs:
       - run:
           name: Cypress version
           working_directory: test-binary
-          command: $(yarn bin)/cypress version
+          command: $(yarn bin cypress) version
       - run:
           name: Verify Cypress binary
           working_directory: test-binary
-          command: $(yarn bin)/cypress verify
+          command: $(yarn bin cypress) verify
       - run:
           name: Cypress help
           working_directory: test-binary
-          command: $(yarn bin)/cypress help
+          command: $(yarn bin cypress) help
       - run:
           name: Cypress info
           working_directory: test-binary
-          command: $(yarn bin)/cypress info
+          command: $(yarn bin cypress) info
       - store-npm-logs
 
   test-npm-module-on-minimum-node-version:
@@ -1884,46 +1889,6 @@ jobs:
             echo "console.log('hello world')" > hello.ts
             npx tsc hello.ts --noEmit
 
-  # testing scaffolding examples and running them
-  # against example.cypress.io
-  test-cypress-scaffold:
-    resource_class: medium
-    parameters:
-      executor:
-        description: Executor name to use
-        type: executor
-        default: cy-doc
-      wd:
-        description: Working directory, should be OUTSIDE cypress monorepo folder
-        type: string
-        default: /root/test-scaffold
-    <<: *defaults
-    steps:
-      - restore_workspace_binaries
-      - run: mkdir <<parameters.wd>>
-      - run:
-          name: Create new NPM package ⚗️
-          working_directory: <<parameters.wd>>
-          command: npm init -y
-      - run:
-          name: Install dependencies 📦
-          working_directory: <<parameters.wd>>
-          environment:
-            CYPRESS_INSTALL_BINARY: /root/cypress/cypress.zip
-          # let's install Cypress, Jest and any other package that might conflict
-          # https://github.com/cypress-io/cypress/issues/6690
-          command: |
-            npm install /root/cypress/cypress.tgz \
-              typescript jest @types/jest enzyme @types/enzyme
-      - run:
-          name: Scaffold and test examples 🏗
-          working_directory: <<parameters.wd>>
-          environment:
-            CYPRESS_INTERNAL_FORCE_SCAFFOLD: "1"
-          command: |
-            echo 'module.exports = {}' > cypress.config.js
-            npx cypress run
-
   test-full-typescript-project:
     parameters:
       executor:
@@ -1976,6 +1941,10 @@ jobs:
                     },
                   }" > cypress.config.ts
       - run:
+          name: Rename support file
+          working_directory: <<parameters.wd>>
+          command: mv cypress/support/index.ts cypress/support/e2e.js
+      - run:
           name: Run project tests 🗳
           working_directory: <<parameters.wd>>
           command: npx cypress run
@@ -1999,7 +1968,7 @@ jobs:
             CYPRESS_PROJECT_ID=$TEST_TINY_PROJECT_ID \
             CYPRESS_RECORD_KEY=$TEST_TINY_RECORD_KEY \
             CYPRESS_INTERNAL_ENV=staging \
-            $(yarn bin)/cypress run --record
+            $(yarn bin cypress) run --record
       - store-npm-logs
 
   test-binary-against-recipes-firefox:
@@ -2045,7 +2014,7 @@ jobs:
       - test-binary-against-repo:
           repo: cypress-example-kitchensink
           browser: "electron"
-          pull_request_id: 510
+          pull_request_id: 523
 
   test-binary-against-awesome-typescript-loader:
     <<: *defaults
@@ -2053,6 +2022,7 @@ jobs:
       - test-binary-against-repo:
           repo: cypress-test-awesome-typescript-loader
           browser: "electron"
+          pull_request_id: 7
 
   test-binary-against-kitchensink-firefox:
     <<: *defaults
@@ -2061,7 +2031,7 @@ jobs:
       - test-binary-against-repo:
           repo: cypress-example-kitchensink
           browser: firefox
-          pull_request_id: 510
+          pull_request_id: 523
 
   test-binary-against-kitchensink-chrome:
     <<: *defaults
@@ -2070,7 +2040,7 @@ jobs:
       - test-binary-against-repo:
           repo: cypress-example-kitchensink
           browser: chrome
-          pull_request_id: 510
+          pull_request_id: 523
 
   test-binary-against-todomvc-firefox:
     <<: *defaults
@@ -2145,11 +2115,11 @@ jobs:
       - run:
           name: Cypress help
           working_directory: test-binary
-          command: $(yarn bin)/cypress help
+          command: $(yarn bin cypress) help
       - run:
           name: Cypress info
           working_directory: test-binary
-          command: $(yarn bin)/cypress info
+          command: $(yarn bin cypress) info
       - run:
           name: Add Cypress demo
           working_directory: test-binary
@@ -2163,13 +2133,17 @@ jobs:
             rm -rf cypress.json
             echo 'module.exports = {}' > cypress.config.js
       - run:
+          name: Rename support file
+          working_directory: test-binary
+          command: mv cypress/support/index.js cypress/support/e2e.js
+      - run:
           name: Verify Cypress binary
           working_directory: test-binary
-          command: DEBUG=cypress:cli $(yarn bin)/cypress verify
+          command: DEBUG=cypress:cli $(yarn bin cypress) verify
       - run:
           name: Run Cypress binary
           working_directory: test-binary
-          command: DEBUG=cypress:cli $(yarn bin)/cypress run
+          command: DEBUG=cypress:cli $(yarn bin cypress) run
       - store-npm-logs
 
 linux-workflow: &linux-workflow
@@ -2392,9 +2366,6 @@ linux-workflow: &linux-workflow
     - test-types-cypress-and-jest:
         requires:
           - create-build-artifacts
-    - test-cypress-scaffold:
-        requires:
-          - create-build-artifacts
     - test-full-typescript-project:
         requires:
           - create-build-artifacts
@@ -2565,14 +2536,14 @@ windows-workflow: &windows-workflow
         executor: windows
         requires:
           - windows-build
-      
+
     - unit-tests:
         name: windows-unit-tests
         executor: windows
         resource_class: windows.medium
         requires:
           - windows-build
-    
+
     - create-build-artifacts:
         name: windows-create-build-artifacts
         executor: windows
@@ -2583,6 +2554,14 @@ windows-workflow: &windows-workflow
           - test-runner:commit-status-checks
         requires:
           - windows-build
+
+    - test-binary-and-npm-against-other-projects:
+        context: test-runner:trigger-test-jobs
+        name: windows-test-binary-and-npm-against-other-projects
+        executor: windows
+        resource_class: windows.medium
+        requires:
+          - windows-create-build-artifacts
 
 workflows:
   linux:

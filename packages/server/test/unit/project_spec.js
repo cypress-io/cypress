@@ -1,6 +1,5 @@
 require('../spec_helper')
 
-const mockedEnv = require('mocked-env')
 const path = require('path')
 const chokidar = require('chokidar')
 const pkg = require('@packages/root')
@@ -17,15 +16,13 @@ const savedState = require(`../../lib/saved_state`)
 const plugins = require(`../../lib/plugins`)
 const runEvents = require(`../../lib/plugins/run_events`)
 const system = require(`../../lib/util/system`)
-const { fs } = require(`../../lib/util/fs`)
 const settings = require(`../../lib/util/settings`)
-const Watchers = require(`../../lib/watchers`)
-const { SocketE2E } = require(`../../lib/socket-e2e`)
 const { getCtx } = require(`../../lib/makeDataContext`)
 
 let ctx
 
-describe('lib/project-base', () => {
+// NOTE: todo: come back to this
+describe.skip('lib/project-base', () => {
   beforeEach(function () {
     ctx = getCtx()
     Fixtures.scaffold()
@@ -42,13 +39,13 @@ describe('lib/project-base', () => {
 
     sinon.stub(runEvents, 'execute').resolves()
 
-    ctx.actions.project.setActiveProjectForTestSetup(this.todosPath)
+    ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.todosPath)
 
     return settings.read(this.todosPath)
     .then((obj = {}) => {
       ({ projectId: this.projectId } = obj)
 
-      return config.set({ projectName: 'project', projectRoot: '/foo/bar' })
+      return config.setupFullConfigWithDefaults({ projectName: 'project', projectRoot: '/foo/bar' })
       .then((config1) => {
         this.config = config1
         this.project = new ProjectBase({ projectRoot: this.todosPath, testingType: 'e2e' })
@@ -156,7 +153,6 @@ describe('lib/project-base', () => {
         expect(this.project.getConfig()).to.deep.eq({
           integrationFolder,
           browsers: [],
-          isNewProject: false,
           baz: 'quux',
           state: {
             reporterWidth: 225,
@@ -227,8 +223,8 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
     // https://github.com/cypress-io/cypress/issues/17614
     it('only attaches warning to non-chrome browsers when chromeWebSecurity:true', async function () {
-      config.get.restore()
-      sinon.stub(config, 'get').returns({
+      ctx.lifecycleManager.restore?.()
+      sinon.stub(ctx.lifecycleManager, 'getFullInitialConfig').returns({
         integrationFolder,
         browsers: [{ family: 'chromium', name: 'Canary' }, { family: 'some-other-family', name: 'some-other-name' }],
         chromeWebSecurity: true,
@@ -258,7 +254,6 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
   context('#open', () => {
     beforeEach(function () {
-      sinon.stub(this.project, 'watchSettings')
       sinon.stub(this.project, 'startWebsockets')
       this.checkSupportFileStub = sinon.stub(ProjectUtils, 'checkSupportFile').resolves()
       sinon.stub(this.project, 'scaffold').resolves()
@@ -268,16 +263,6 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       sinon.stub(config, 'updateWithPluginValues').returns(this.config)
       sinon.stub(scaffold, 'plugins').resolves()
       sinon.stub(plugins, 'init').resolves()
-    })
-
-    it('calls #watchSettings with options + config', function () {
-      return this.project.open().then(() => {
-        expect(this.project.watchSettings).to.be.calledWith({
-          configFile: undefined,
-          onSettingsChanged: false,
-          projectRoot: this.todosPath,
-        })
-      })
     })
 
     it('calls #startWebsockets with options + config', function () {
@@ -314,7 +299,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       return this.project.open().then(() => {
         expect(this.checkSupportFileStub).to.be.calledWith({
           configFile: 'cypress.config.js',
-          supportFile: '/foo/bar/cypress/support/index.js',
+          supportFile: false,
         })
       })
     })
@@ -347,26 +332,6 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         pluginsOnError(err)
 
         expect(onError).to.be.calledWith(err)
-      })
-    })
-
-    // TODO: skip this for now
-    it.skip('watches cypress.config.js', function () {
-      return this.server.open().bind(this).then(() => {
-        expect(Watchers.prototype.watch).to.be.calledWith('/Users/brian/app/cypress.config.js')
-      })
-    })
-
-    // TODO: skip this for now
-    it.skip('passes watchers to Socket.startListening', function () {
-      const options = {}
-
-      return this.server.open(options).then(() => {
-        const { startListening } = SocketE2E.prototype
-
-        expect(startListening.getCall(0).args[0]).to.be.instanceof(Watchers)
-
-        expect(startListening.getCall(0).args[1]).to.eq(options)
       })
     })
 
@@ -516,14 +481,6 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       })
     })
 
-    it('closes watchers', function () {
-      this.project.watchers = sinon.stub({ close () {} })
-
-      return this.project.close().then(() => {
-        expect(this.project.watchers.close).to.be.calledOnce
-      })
-    })
-
     it('can close when server + watchers arent open', function () {
       return this.project.close()
     })
@@ -574,233 +531,12 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     })
   })
 
-  context('#scaffold', () => {
-    beforeEach(function () {
-      this.project = new ProjectBase({ projectRoot: '/_test-output/path/to/project-e2e', testingType: 'e2e' })
-      sinon.stub(scaffold, 'integration').resolves()
-      sinon.stub(scaffold, 'fixture').resolves()
-      sinon.stub(scaffold, 'support').resolves()
-      sinon.stub(scaffold, 'plugins').resolves()
-
-      this.obj = { projectRoot: 'pr', fixturesFolder: 'ff', integrationFolder: 'if', supportFolder: 'sf', pluginsFile: 'pf/index.js' }
-    })
-
-    it('calls scaffold.integration with integrationFolder', function () {
-      return this.project.scaffold(this.obj).then(() => {
-        expect(scaffold.integration).to.be.calledWith(this.obj.integrationFolder)
-      })
-    })
-
-    it('calls fixture.scaffold with fixturesFolder', function () {
-      return this.project.scaffold(this.obj).then(() => {
-        expect(scaffold.fixture).to.be.calledWith(this.obj.fixturesFolder)
-      })
-    })
-
-    it('calls support.scaffold with supportFolder', function () {
-      return this.project.scaffold(this.obj).then(() => {
-        expect(scaffold.support).to.be.calledWith(this.obj.supportFolder)
-      })
-    })
-
-    it('does not call support.plugins if config.pluginsFile is falsey', function () {
-      this.obj.pluginsFile = false
-
-      return this.project.scaffold(this.obj).then(() => {
-        expect(scaffold.plugins).not.to.be.called
-      })
-    })
-
-    describe('forced', () => {
-      let resetEnv
-
-      beforeEach(function () {
-        this.obj.isTextTerminal = true
-        resetEnv = mockedEnv({
-          CYPRESS_INTERNAL_FORCE_SCAFFOLD: '1',
-        })
-      })
-
-      afterEach(() => {
-        resetEnv()
-      })
-
-      it('calls scaffold when forced by environment variable', function () {
-        return this.project.scaffold(this.obj).then(() => {
-          expect(scaffold.integration).to.be.calledWith(this.obj.integrationFolder)
-          expect(scaffold.fixture).to.be.calledWith(this.obj.fixturesFolder)
-          expect(scaffold.support).to.be.calledWith(this.obj.supportFolder)
-        })
-      })
-    })
-
-    describe('not forced', () => {
-      let resetEnv
-
-      beforeEach(function () {
-        this.obj.isTextTerminal = true
-
-        resetEnv = mockedEnv({
-          CYPRESS_INTERNAL_FORCE_SCAFFOLD: undefined,
-        })
-      })
-
-      afterEach(() => {
-        resetEnv()
-      })
-
-      it('does not scaffold integration folder', function () {
-        return this.project.scaffold(this.obj).then(() => {
-          expect(scaffold.integration).to.not.be.calledWith(this.obj.integrationFolder)
-          expect(scaffold.fixture).to.not.be.calledWith(this.obj.fixturesFolder)
-          // still scaffolds support folder due to old logic
-          expect(scaffold.support).to.be.calledWith(this.obj.supportFolder)
-        })
-      })
-    })
-  })
-
-  context('#watchSettings', () => {
-    beforeEach(function () {
-      this.project = new ProjectBase({ projectRoot: '/_test-output/path/to/project-e2e', testingType: 'e2e' })
-      this.project._server = { close () {}, startWebsockets () {} }
-      sinon.stub(settings, 'pathToConfigFile').returns('/path/to/cypress.config.js')
-      sinon.stub(settings, 'pathToCypressEnvJson').returns('/path/to/cypress.env.json')
-      this.watch = sinon.stub(this.project.watchers, 'watch')
-      this.watchTree = sinon.stub(this.project.watchers, 'watchTree')
-    })
-
-    it('watches cypress.config.js and cypress.env.json', function () {
-      this.project.watchSettings({ onSettingsChanged () {} }, {})
-      expect(this.watch).to.be.calledOnce
-      expect(this.watchTree).to.be.calledOnce
-      expect(this.watchTree).to.be.calledWith('/path/to/cypress.config.js')
-
-      expect(this.watch).to.be.calledWith('/path/to/cypress.env.json')
-    })
-
-    it('sets onChange event when {changeEvents: true}', function (done) {
-      this.project.watchSettings({ onSettingsChanged: () => done() }, {})
-
-      // get the object passed to watchers.watch
-      const obj = this.watch.getCall(0).args[1]
-
-      expect(obj.onChange).to.be.a('function')
-
-      obj.onChange()
-    })
-
-    it('does not call watch when {changeEvents: false}', function () {
-      this.project.watchSettings({ onSettingsChanged: undefined }, {})
-
-      expect(this.watch).not.to.be.called
-    })
-
-    it('does not call onSettingsChanged when generatedProjectIdTimestamp is less than 1 second', function () {
-      let timestamp = new Date()
-
-      this.project.generatedProjectIdTimestamp = timestamp
-
-      const stub = sinon.stub()
-
-      this.project.watchSettings({ onSettingsChanged: stub }, {})
-
-      // get the object passed to watchers.watch
-      const obj = this.watch.getCall(0).args[1]
-
-      obj.onChange()
-
-      expect(stub).not.to.be.called
-
-      // subtract 1 second from our timestamp
-      timestamp.setSeconds(timestamp.getSeconds() - 1)
-
-      obj.onChange()
-
-      expect(stub).to.be.calledOnce
-    })
-  })
-
-  context('#watchPluginsFile', () => {
-    beforeEach(function () {
-      sinon.stub(fs, 'pathExists').resolves(true)
-      this.project = new ProjectBase({ projectRoot: '/_test-output/path/to/project-e2e', testingType: 'e2e' })
-      this.project.watchers = { watchTree: sinon.spy() }
-      sinon.stub(plugins, 'init').resolves()
-
-      this.config = {
-        pluginsFile: '/path/to/plugins-file',
-      }
-    })
-
-    it('does nothing when {pluginsFile: false}', function () {
-      this.config.pluginsFile = false
-
-      return this.project.watchPluginsFile(this.config, {}).then(() => {
-        expect(this.project.watchers.watchTree).not.to.be.called
-      })
-    })
-
-    it('does nothing if pluginsFile does not exist', function () {
-      fs.pathExists.resolves(false)
-
-      return this.project.watchPluginsFile(this.config, {}).then(() => {
-        expect(this.project.watchers.watchTree).not.to.be.called
-      })
-    })
-
-    it('does nothing if in run mode', function () {
-      return this.project.watchPluginsFile(this.config, {
-        isTextTerminal: true,
-      }).then(() => {
-        expect(this.project.watchers.watchTree).not.to.be.called
-      })
-    })
-
-    it('watches the pluginsFile', function () {
-      return this.project.watchPluginsFile(this.config, {}).then(() => {
-        expect(this.project.watchers.watchTree).to.be.calledWith(this.config.pluginsFile)
-        expect(this.project.watchers.watchTree.lastCall.args[1]).to.be.an('object')
-
-        expect(this.project.watchers.watchTree.lastCall.args[1].onChange).to.be.a('function')
-      })
-    })
-
-    it('calls plugins.init when file changes', function () {
-      return this.project.watchPluginsFile(this.config, {
-        onError: () => {},
-      }).then(() => {
-        this.project.watchers.watchTree.firstCall.args[1].onChange()
-
-        expect(plugins.init).to.be.calledWith(this.config)
-      })
-    })
-
-    it('handles errors from calling plugins.init', function (done) {
-      const error = { name: 'foo', message: 'foo' }
-
-      plugins.init.rejects(error)
-
-      this.project.watchPluginsFile(this.config, {
-        onError (err) {
-          expect(err).to.eql(error)
-
-          done()
-        },
-      })
-      .then(() => {
-        this.project.watchers.watchTree.firstCall.args[1].onChange()
-      })
-    })
-  })
-
   context('#startWebsockets', () => {
     beforeEach(function () {
       this.project = new ProjectBase({ projectRoot: '/_test-output/path/to/project-e2e', testingType: 'e2e' })
       this.project.watchers = {}
       this.project._server = { close () {}, startWebsockets: sinon.stub() }
       sinon.stub(ProjectBase.prototype, 'open').resolves()
-      sinon.stub(this.project, 'watchSettings')
     })
 
     it('calls server.startWebsockets with automation + config', async function () {

@@ -1,116 +1,94 @@
+import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
+
 // TODO: add when we land the lifecycle management
-describe.skip('Config files error handling', () => {
+describe('Config files error handling', () => {
   beforeEach(() => {
     cy.scaffoldProject('pristine')
     cy.scaffoldProject('pristine-with-config-file')
   })
 
-  it('it handles multiples config files', () => {
+  it('shows an error when there are multiple config files', () => {
+    cy.openProject('pristine-with-config-file')
+
+    cy.withCtx(async (ctx) => {
+      await ctx.actions.file.writeFileInProject('cypress.config.ts', 'module.exports = {}')
+    })
+
+    // Reopen the project, now that we have 2 config files
     cy.openProject('pristine-with-config-file')
     cy.visitLaunchpad()
 
-    cy.get('[data-cy-testingType=e2e]').click()
-
+    cy.get('body').should('contain.text', 'Something went wrong')
     cy.withCtx(async (ctx) => {
-      await ctx.actions.file.writeFileInProject('cypress.config.ts', 'export default {}')
+      await ctx.actions.file.removeFileInProject('cypress.config.js')
     })
 
-    cy.get('body').should('contain.text', 'Configuration Files')
-
-    cy.get('button').contains('Continue').click()
     cy.get('body')
-    .should('contain.text', 'Cypress Configuration Error')
-    .and('contain.text', 'There is both a `cypress.config.js` and a `cypress.config.ts` at the location below')
-
-    cy.withCtx(async (ctx) => {
-      await ctx.actions.file.removeFileInProject('cypress.config.ts')
-    })
-
-    cy.get('[data-testid=error-retry-button]').click()
-    cy.get('body')
-    .should('not.contain.text', 'Cypress Configuration Error')
+    .should('not.contain.text', 'Something went wrong')
   })
 
-  it('it handles legacy config file', () => {
+  it('shows the upgrade screen if there is a legacy config file', () => {
     cy.openProject('pristine-with-config-file')
     cy.withCtx(async (ctx) => {
       await ctx.actions.file.writeFileInProject('cypress.json', '{}')
       await ctx.actions.file.removeFileInProject('cypress.config.js')
     })
 
+    cy.openProject('pristine-with-config-file')
+
     cy.visitLaunchpad()
 
-    cy.get('[data-cy-testingType=e2e]').click()
-
-    cy.get('body').should('contain.text', 'Configuration Files')
-
-    cy.get('button').contains('Continue').click()
-
-    cy.get('body')
-    .should('contain.text', 'Cypress Configuration Error')
-    .and('contain.text', 'There is a cypress.json file at the location below:')
-
-    cy.withCtx(async (ctx) => {
-      await ctx.actions.file.removeFileInProject('cypress.json')
-    })
-
-    cy.get('[data-testid=error-retry-button]').click()
-    cy.get('body')
-    .should('contain.text', 'Cypress Configuration Error')
-    .and('contain.text', 'Could not find a Cypress configuration file, exiting.')
-
-    cy.withCtx(async (ctx) => {
-      await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {}')
-    })
-
-    cy.get('[data-testid=error-retry-button]').click()
-    cy.get('body')
-    .should('not.contain.text', 'Cypress Configuration Error')
+    cy.get('body').should('contain.text', defaultMessages.migration.wizard.title)
+    cy.get('body').should('contain.text', defaultMessages.migration.wizard.description)
   })
 
-  it('it handles config files with legacy config file in same project', () => {
+  it('handles config files with legacy config file in same project', () => {
     cy.openProject('pristine-with-config-file')
-    cy.visitLaunchpad()
-
-    cy.get('[data-cy-testingType=e2e]').click()
-
     cy.withCtx(async (ctx) => {
       await ctx.actions.file.writeFileInProject('cypress.json', '{}')
     })
 
-    cy.get('body').should('contain.text', 'Configuration Files')
+    cy.openProject('pristine-with-config-file')
+    cy.visitLaunchpad()
 
-    cy.get('button').contains('Continue').click()
-
-    cy.get('body')
-    .should('contain.text', 'Cypress Configuration Error')
-    .and('contain.text', 'There is both a `cypress.config.js` and a cypress.json file at the location below')
+    cy.get('body').should('contain.text', 'Cypress no longer supports')
 
     cy.withCtx(async (ctx) => {
       await ctx.actions.file.removeFileInProject('cypress.json')
     })
 
-    cy.get('[data-testid=error-retry-button]').click()
-    cy.get('body')
-    .should('not.contain.text', 'Cypress Configuration Error')
+    cy.get('body').should('not.contain.text', 'Cypress no longer supports')
   })
 
-  it('creates config file if it do not exist', () => {
-    cy.scaffoldProject('pristine')
+  it('handles deprecated config fields', () => {
     cy.openProject('pristine')
-    cy.visitLaunchpad()
-
-    cy.get('[data-cy-testingType=e2e]').click()
-
-    cy.get('body').should('contain.text', 'Configuration Files')
-
-    cy.get('button').contains('Continue').click()
-
-    cy.get('body')
-    .should('contain.text', 'Initializing Config')
 
     cy.withCtx(async (ctx) => {
-      await ctx.actions.file.checkIfFileExists('cypress.config.js')
+      await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = { experimentalComponentTesting: true }')
     })
+
+    cy.openProject('pristine')
+
+    cy.visitLaunchpad()
+    cy.get('[data-cy-testingType=e2e]').click()
+    cy.get('body').should('contain.text', 'Something went wrong')
+    cy.get('body').should('contain.text', 'It looks like there\'s some issues that need to be resolved before we continue.')
+    cy.findByText('Error Loading Config')
+  })
+
+  it('handles deprecated fields on root config', () => {
+    cy.openProject('pristine')
+
+    cy.withCtx(async (ctx) => {
+      await ctx.actions.file.writeFileInProject('cypress.config.js', `module.exports = { supportFile: 'cypress/support.ts' }`)
+    })
+
+    cy.openProject('pristine')
+
+    cy.visitLaunchpad()
+    cy.get('[data-cy-testingType=e2e]').click()
+    cy.get('body').should('contain.text', 'Something went wrong')
+    cy.get('body').should('contain.text', 'It looks like there\'s some issues that need to be resolved before we continue.')
+    cy.findByText('Error Loading Config')
   })
 })

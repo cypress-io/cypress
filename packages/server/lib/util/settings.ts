@@ -1,5 +1,4 @@
 import _ from 'lodash'
-import Promise from 'bluebird'
 import path from 'path'
 import errors from '../errors'
 import { fs } from '../util/fs'
@@ -24,24 +23,17 @@ function configCode (obj, isTS?: boolean) {
 `
 }
 
-function _pathToFile (projectRoot, file) {
-  return path.isAbsolute(file) ? file : path.join(projectRoot, file)
-}
-
 function _err (type, file, err) {
   const e = errors.get(type, file, err)
 
   e.code = err.code
   e.errno = err.errno
-  throw e
-}
 
-function _logReadErr (file, err) {
-  errors.throw('ERROR_READING_FILE', file, err)
+  return e
 }
 
 function _logWriteErr (file, err) {
-  return _err('ERROR_WRITING_FILE', file, err)
+  throw _err('ERROR_WRITING_FILE', file, err)
 }
 
 function _write (file, obj: any = {}) {
@@ -72,88 +64,36 @@ export function isComponentTesting (options: SettingsOptions = {}) {
   return options.testingType === 'component'
 }
 
-export function configFile (options: SettingsOptions = {}) {
-  // default is only used in tests.
-  // This prevents a the change from becoming bigger than it should
-  return options.configFile === false ? false : (options.configFile || 'cypress.config.js')
+export async function read (projectRoot: string) {
+  const ctx = getCtx()
+
+  // For testing purposes, no-op if the projectRoot is already the same
+  // as the one set in the DataContext, as it would be in normal execution
+  ctx.lifecycleManager.setCurrentProject(projectRoot)
+
+  return ctx.lifecycleManager.getConfigFileContents()
 }
 
-export function id (projectRoot, options = {}) {
-  return read(projectRoot, options)
-  .then((config) => config.projectId)
-  .catch(() => {
-    return null
-  })
+export async function readEnv (projectRoot: string) {
+  const ctx = getCtx()
+
+  // For testing purposes, no-op if the projectRoot is already the same
+  // as the one set in the DataContext, as it would be in normal execution
+  ctx.lifecycleManager.setCurrentProject(projectRoot)
+
+  return ctx.lifecycleManager.loadCypressEnvFile()
 }
 
-export function read (projectRoot, options: SettingsOptions = {}) {
-  if (options.configFile === false) {
-    return Promise.resolve({} as Partial<Cypress.ConfigOptions>)
-  }
+export function writeForTesting (projectRoot, objToWrite = {}) {
+  const file = path.join(projectRoot, 'cypress.config.js')
 
-  const file = pathToConfigFile(projectRoot, options)
-
-  return getCtx().config.getOrCreateBaseConfig(file)
-  .catch((err) => {
-    if (err.type === 'MODULE_NOT_FOUND' || err.code === 'ENOENT') {
-      return Promise.reject(errors.get('CONFIG_FILE_NOT_FOUND', options.configFile, projectRoot))
-    }
-
-    return Promise.reject(err)
-  })
-  .then((configObject = {}) => {
-    if (isComponentTesting(options) && 'component' in configObject) {
-      configObject = { ...configObject, ...configObject.component }
-    }
-
-    if (!isComponentTesting(options) && 'e2e' in configObject) {
-      configObject = { ...configObject, ...configObject.e2e }
-    }
-
-    return configObject
-  }).catch((err) => {
-    debug('an error occurred when reading config', err)
-    if (errors.isCypressErr(err)) {
-      throw err
-    }
-
-    throw _logReadErr(file, err)
-  })
+  return _write(file, objToWrite)
 }
 
-export function readEnv (projectRoot) {
-  const file = pathToCypressEnvJson(projectRoot)
+export function pathToConfigFile (projectRoot) {
+  const ctx = getCtx()
 
-  return fs.readJson(file)
-  .catch((err) => {
-    if (err.code === 'ENOENT') {
-      return {}
-    }
+  ctx.lifecycleManager.setCurrentProject(projectRoot)
 
-    if (errors.isCypressErr(err)) {
-      throw err
-    }
-
-    return _logReadErr(file, err)
-  })
-}
-
-export function writeOnly (projectRoot, obj = {}, options: SettingsOptions = {}) {
-  if (options.configFile === false) {
-    return Promise.resolve({})
-  }
-
-  const file = pathToConfigFile(projectRoot, options)
-
-  return _write(file, obj)
-}
-
-export function pathToConfigFile (projectRoot, options: SettingsOptions = {}) {
-  const file = configFile(options)
-
-  return file && _pathToFile(projectRoot, file)
-}
-
-export function pathToCypressEnvJson (projectRoot) {
-  return _pathToFile(projectRoot, 'cypress.env.json')
+  return ctx.lifecycleManager.configFilePath
 }

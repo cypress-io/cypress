@@ -1,124 +1,189 @@
-import type { SpecType } from '@packages/graphql/src/gen/nxs.gen'
-import { FrontendFramework, FRONTEND_FRAMEWORKS, ResolvedFromConfig, RESOLVED_FROM, SpecFileWithExtension, STORYBOOK_GLOB } from '@packages/types'
+import os from 'os'
+import { FrontendFramework, FRONTEND_FRAMEWORKS, ResolvedFromConfig, RESOLVED_FROM, SpecFileWithExtension, STORYBOOK_GLOB, FoundSpec } from '@packages/types'
 import { scanFSForAvailableDependency } from 'create-cypress-tests'
+import { debounce } from 'lodash'
 import path from 'path'
+import Debug from 'debug'
+import commonPathPrefix from 'common-path-prefix'
+import type { FSWatcher } from 'chokidar'
+
+const debug = Debug('cypress:data-context')
+import assert from 'assert'
 
 import type { DataContext } from '..'
-import type { Maybe } from '../data/coreDataShape'
+import { toPosix } from '../util/file'
+
+export type SpecWithRelativeRoot = FoundSpec & { relativeToCommonRoot: string }
+
+interface MatchedSpecs {
+  projectRoot: string
+  testingType: Cypress.TestingType
+  specAbsolutePaths: string[]
+  specPattern: string | string[]
+}
+export function matchedSpecs ({
+  projectRoot,
+  testingType,
+  specAbsolutePaths,
+}: MatchedSpecs): SpecWithRelativeRoot[] {
+  debug('found specs %o', specAbsolutePaths)
+
+  let commonRoot: string = ''
+
+  if (specAbsolutePaths.length === 1) {
+    commonRoot = path.dirname(specAbsolutePaths[0]!)
+  } else {
+    commonRoot = commonPathPrefix(specAbsolutePaths)
+  }
+
+  const specs = specAbsolutePaths.map((absolute) => {
+    return transformSpec({ projectRoot, absolute, testingType, commonRoot, platform: os.platform(), sep: path.sep })
+  })
+
+  return specs
+}
+
+export interface TranformSpec {
+  projectRoot: string
+  absolute: string
+  testingType: Cypress.TestingType
+  commonRoot: string
+  platform: NodeJS.Platform
+  sep: string
+}
+
+export function transformSpec ({
+  projectRoot,
+  absolute,
+  testingType,
+  commonRoot,
+  platform,
+  sep,
+}: TranformSpec): SpecWithRelativeRoot {
+  if (platform === 'win32') {
+    absolute = toPosix(absolute, sep)
+    projectRoot = toPosix(projectRoot, sep)
+  }
+
+  const relative = path.relative(projectRoot, absolute)
+  const parsedFile = path.parse(absolute)
+  const fileExtension = path.extname(absolute)
+
+  const specFileExtension = ['.spec', '.test', '-spec', '-test', '.cy']
+  .map((ext) => ext + fileExtension)
+  .find((ext) => absolute.endsWith(ext)) || fileExtension
+
+  const parts = absolute.split(projectRoot)
+  let name = parts[parts.length - 1] || ''
+
+  if (name.startsWith('/')) {
+    name = name.slice(1)
+  }
+
+  const LEADING_SLASH = /^\/|/g
+  const relativeToCommonRoot = absolute.replace(commonRoot, '').replace(LEADING_SLASH, '')
+
+  return {
+    fileExtension,
+    baseName: parsedFile.base,
+    fileName: parsedFile.base.replace(specFileExtension, ''),
+    specFileExtension,
+    relativeToCommonRoot,
+    specType: testingType === 'component' ? 'component' : 'integration',
+    name,
+    relative,
+    absolute,
+  }
+}
 
 export class ProjectDataSource {
+  private _specWatcher: FSWatcher | null = null
+  private _specs: FoundSpec[] = []
+
   constructor (private ctx: DataContext) {}
 
   private get api () {
     return this.ctx._apis.projectApi
   }
 
-  async projectId (projectRoot: string) {
-    const config = await this.getConfig(projectRoot)
-
-    return config?.projectId ?? null
+  projectId () {
+    return this.ctx.lifecycleManager.getProjectId()
   }
 
   projectTitle (projectRoot: string) {
     return path.basename(projectRoot)
   }
 
-  getConfig (projectRoot: string) {
-    return this.ctx.config.getConfigForProject(projectRoot)
+  getConfig () {
+    return this.ctx.lifecycleManager.loadedFullConfig
   }
 
-  async findSpecs (projectRoot: string, specType: Maybe<SpecType>) {
-    const config = await this.getConfig(projectRoot)
-    const specs = await this.api.findSpecs({
+  getCurrentProjectSavedState () {
+    return this.api.getCurrentProjectSavedState()
+  }
+
+  get specs () {
+    return this._specs
+  }
+
+  setSpecs (specs: FoundSpec[]) {
+    this._specs = specs
+  }
+
+  async specPatternForTestingType (testingType: Cypress.TestingType) {
+    const config = this.getConfig()
+
+    return config?.[testingType]?.specPattern
+  }
+
+  async findSpecs (projectRoot: string, testingType: Cypress.TestingType, specPattern: string | string[]): Promise<FoundSpec[]> {
+    const specAbsolutePaths = await this.ctx.file.getFilesByGlob(projectRoot, specPattern, { absolute: true })
+
+    const matched = matchedSpecs({
       projectRoot,
-      fixturesFolder: config.fixturesFolder ?? false,
-      supportFile: config.supportFile ?? false,
-      testFiles: config.testFiles ?? [],
-      ignoreTestFiles: config.ignoreTestFiles as string[] ?? [],
-      componentFolder: config.projectRoot ?? false,
-      integrationFolder: config.integrationFolder ?? '',
+      testingType,
+      specAbsolutePaths,
+      specPattern,
     })
 
-    if (!specType) {
-      return specs
+    return matched
+  }
+
+  startSpecWatcher (projectRoot: string, testingType: Cypress.TestingType, specPattern: string | string[]) {
+    this.stopSpecWatcher()
+
+    const currentProject = this.ctx.currentProject
+
+    if (!currentProject) {
+      throw new Error('Cannot start spec watcher without current project')
     }
 
-    return specs.filter((spec) => spec.specType === specType)
-  }
+    const onSpecsChanged = debounce(async () => {
+      const specs = await this.findSpecs(projectRoot, testingType, specPattern)
 
-  async getCurrentSpecByAbsolute (projectRoot: string, absolute: string) {
-    // TODO: should cache current specs so we don't need to
-    // call findSpecs each time we ask for the current spec.
-    const specs = await this.findSpecs(projectRoot, null)
-
-    return specs.find((x) => x.absolute === absolute)
-  }
-
-  async getCurrentSpecById (projectRoot: string, base64Id: string) {
-    // TODO: should cache current specs so we don't need to
-    // call findSpecs each time we ask for the current spec.
-    const specs = await this.findSpecs(projectRoot, null)
-
-    // id is base64 formatted as per Relay: <type>:<string>
-    // in this case, Spec:/my/abs/path
-    const currentSpecAbs = Buffer.from(base64Id, 'base64').toString().split(':')[1]
-
-    return specs.find((x) => x.absolute === currentSpecAbs) ?? null
-  }
-
-  async getResolvedConfigFields (projectRoot: string): Promise<ResolvedFromConfig[]> {
-    const config = await this.getConfig(projectRoot)
-
-    interface ResolvedFromWithField extends ResolvedFromConfig {
-      field: typeof RESOLVED_FROM[number]
-    }
-
-    const mapEnvResolvedConfigToObj = (config: ResolvedFromConfig): ResolvedFromWithField => {
-      return Object.entries(config).reduce<ResolvedFromWithField>((acc, [field, value]) => {
-        return {
-          ...acc,
-          value: { ...acc.value, [field]: value.value },
-        }
-      }, {
-        value: {},
-        field: 'env',
-        from: 'env',
-      })
-    }
-
-    return Object.entries(config.resolved).map(([key, value]) => {
-      if (key === 'env' && value) {
-        return mapEnvResolvedConfigToObj(value)
-      }
-
-      return { ...value, field: key }
-    }) as ResolvedFromConfig[]
-  }
-
-  async isTestingTypeConfigured (projectRoot: string, testingType: 'e2e' | 'component') {
-    try {
-      const config = await this.getConfig(projectRoot)
-
-      if (!config) {
-        return true
-      }
-
-      if (testingType === 'e2e') {
-        return Boolean(Object.keys(config.e2e ?? {}).length)
-      }
-
+      this.setSpecs(specs)
       if (testingType === 'component') {
-        return Boolean(Object.keys(config.component ?? {}).length)
+        this.api.getDevServer().updateSpecs(specs)
       }
 
-      return false
-    } catch (error: any) {
-      if (error.type === 'NO_DEFAULT_CONFIG_FILE_FOUND') {
-        return false
-      }
+      this.ctx.emitter.toApp()
+    })
 
-      throw error
+    this._specWatcher = this.ctx.lifecycleManager.addWatcher(specPattern)
+    this._specWatcher.on('add', onSpecsChanged)
+    this._specWatcher.on('unlink', onSpecsChanged)
+  }
+
+  stopSpecWatcher () {
+    if (!this._specWatcher) {
+      return
     }
+
+    this.ctx.lifecycleManager.closeWatcher(this._specWatcher)
+  }
+
+  async getCurrentSpecByAbsolute (absolute: string) {
+    return this.ctx.project.specs.find((x) => x.absolute === absolute)
   }
 
   async getProjectPreferences (projectTitle: string) {
@@ -145,20 +210,45 @@ export class ProjectDataSource {
   }
 
   async getCodeGenGlobs () {
-    const project = this.ctx.currentProject
-
-    if (!project) {
-      throw Error(`Cannot find glob without currentProject.`)
-    }
+    assert(this.ctx.currentProject, `Cannot find glob without currentProject.`)
 
     const looseComponentGlob = '/**/*.{js,jsx,ts,tsx,.vue}'
 
-    const framework = await this.frameworkLoader.load(project.projectRoot)
+    const framework = await this.frameworkLoader.load(this.ctx.currentProject)
 
     return {
       component: framework?.glob ?? looseComponentGlob,
       story: STORYBOOK_GLOB,
     }
+  }
+
+  async getResolvedConfigFields (): Promise<ResolvedFromConfig[]> {
+    const config = this.ctx.lifecycleManager.loadedFullConfig?.resolved ?? {}
+
+    interface ResolvedFromWithField extends ResolvedFromConfig {
+      field: typeof RESOLVED_FROM[number]
+    }
+
+    const mapEnvResolvedConfigToObj = (config: ResolvedFromConfig): ResolvedFromWithField => {
+      return Object.entries(config).reduce<ResolvedFromWithField>((acc, [field, value]) => {
+        return {
+          ...acc,
+          value: { ...acc.value, [field]: value.value },
+        }
+      }, {
+        value: {},
+        field: 'env',
+        from: 'env',
+      })
+    }
+
+    return Object.entries(config ?? {}).map(([key, value]) => {
+      if (key === 'env' && value) {
+        return mapEnvResolvedConfigToObj(value)
+      }
+
+      return { ...value, field: key }
+    }) as ResolvedFromConfig[]
   }
 
   async getCodeGenCandidates (glob: string): Promise<SpecFileWithExtension[]> {
@@ -168,13 +258,13 @@ export class ProjectDataSource {
       return this.ctx.storybook.getStories()
     }
 
-    const project = this.ctx.currentProject
+    const projectRoot = this.ctx.currentProject
 
-    if (!project) {
+    if (!projectRoot) {
       throw Error(`Cannot find components without currentProject.`)
     }
 
-    const config = await this.ctx.project.getConfig(project.projectRoot)
+    const config = await this.ctx.lifecycleManager.getFullInitialConfig()
 
     const codeGenCandidates = await this.ctx.file.getFilesByGlob(config.projectRoot || process.cwd(), glob)
 
@@ -182,8 +272,8 @@ export class ProjectDataSource {
       (file) => {
         return this.ctx.file.normalizeFileToFileParts({
           absolute: file,
-          projectRoot: project.projectRoot,
-          searchFolder: project.projectRoot ?? config.componentFolder,
+          projectRoot,
+          searchFolder: projectRoot ?? config.componentFolder,
         })
       },
     )

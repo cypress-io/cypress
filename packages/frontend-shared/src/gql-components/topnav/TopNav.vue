@@ -1,24 +1,29 @@
 <template>
-  <TopNavList v-if="versions && runningOldVersion">
-    <template #heading="{ open }">
+  <TopNavList
+    v-if="versions && runningOldVersion"
+    data-cy="cypress-update-popover"
+  >
+    <template #heading>
       <i-cy-arrow-outline-down_x16
-        class="h-16px w-16px group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50"
-        :class="open ? 'icon-dark-indigo-500 icon-light-indigo-50' : 'icon-dark-gray-500 icon-light-gray-100'"
+        class="h-16px text-indigo-500 w-16px icon-dark-indigo-500 icon-light-indigo-50"
       />
-      <span data-cy="topnav-version-list">v{{ versions.current.version }} <span
+      <span
+        data-cy="top-nav-version-list"
+        class="font-semibold text-indigo-500 whitespace-nowrap"
+      >v{{ versions.current.version }} <span
         class="text-indigo-300"
         aria-hidden="true"
-      >•</span> Upgrade</span>
+      >•</span> {{ t('topNav.upgradeText') }}</span>
     </template>
 
     <TopNavListItem
       class="min-w-278px py-8px px-16px"
       data-cy="update-hint"
     >
-      <div class="whitespace-nowrap">
+      <div class="font-semibold">
         <ExternalLink
           :href="`${releasesUrl}/tag/v${versions.latest.version}`"
-          class="font-semibold text-indigo-500"
+          class="text-indigo-500"
           data-cy="latest-version"
         >
           {{ versions.latest.version }}
@@ -49,6 +54,7 @@
 
     <TopNavListItem
       class="bg-yellow-50 py-8px px-16px"
+      data-cy="current-hint"
     >
       <div class="whitespace-nowrap">
         <ExternalLink
@@ -85,6 +91,7 @@
     :href="`${releasesUrl}/tag/v${versions.latest.version}`"
     class="flex outline-transparent text-gray-600 gap-8px items-center group hocus:text-indigo-500 hocus:outline-0"
     :use-default-hocus="false"
+    data-cy="top-nav-cypress-version-current-link"
   >
     <i-cy-box_x16
       class="h-16px w-16px group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50 icon-dark-gray-500 icon-light-gray-100"
@@ -94,23 +101,29 @@
     </span>
   </ExternalLink>
 
-  <TopNavList v-if="props.gql?.currentProject?.currentBrowser && showBrowsers">
+  <TopNavList
+    v-if="props.gql?.currentProject?.currentBrowser && showBrowsers"
+  >
     <template #heading="{ open }">
       <img
         class="w-16px filter group-hocus:grayscale-0"
+        data-cy="top-nav-active-browser-icon"
         :class="open ? 'grayscale-0' : 'grayscale'"
         :src="allBrowsersIcons[props.gql?.currentProject?.currentBrowser?.displayName || '']"
       >
       <span
-        data-cy="topnav-browser-list"
-      >{{ props.gql.currentProject?.currentBrowser?.displayName }} v{{ props.gql.currentProject?.currentBrowser?.majorVersion }}</span>
+        data-cy="top-nav-active-browser"
+        class="font-semibold whitespace-nowrap"
+      >{{ props.gql.currentProject?.currentBrowser?.displayName }} {{ props.gql.currentProject?.currentBrowser?.majorVersion }}</span>
     </template>
     <TopNavListItem
       v-for="browser in props.gql.currentProject.browsers"
       :key="browser.id"
-      class="cursor-pointer min-w-240px py-12px px-16px"
+      class="cursor-pointer min-w-240px py-12px px-16px group"
       :class="browser.isSelected ? 'bg-jade-50' : ''"
       :selectable="!browser.isSelected"
+      data-cy="top-nav-browser-list-item"
+      :data-browser-id="browser.id"
       @click="handleBrowserChoice(browser)"
     >
       <template #prefix>
@@ -123,13 +136,13 @@
       </template>
       <div>
         <button
-          class="hocus-link-default box-border"
-          :class="browser.isSelected ? 'text-jade-600' : 'text-indigo-600'"
+          class="font-medium box-border"
+          :class="browser.isSelected ? 'text-jade-700' : 'text-indigo-500 group-hover:text-indigo-700'"
         >
           {{ browser.displayName }}
         </button>
         <div
-          class="font-normal mr-20px text-gray-500 text-14px whitespace-nowrap"
+          class="font-normal mr-20px text-gray-500 text-14px filter whitespace-nowrap group-hover:mix-blend-luminosity"
         >
           {{ t('topNav.version') }} {{ browser.version }}
         </div>
@@ -138,7 +151,7 @@
         v-if="browser.isSelected"
         #suffix
       >
-        <div>
+        <div data-cy="top-nav-browser-list-selected-item">
           <i-cy-circle-check_x24 class="h-24px w-24px icon-dark-jade-100 icon-light-jade-500" />
         </div>
       </template>
@@ -146,16 +159,22 @@
   </TopNavList>
 
   <TopNavList
+    ref="promptsEl"
     variant="panel"
     role="region"
     aria-live="polite"
+    :force-open-state="props.forceOpenDocs"
+    @clear-force-open="emit('clearForceOpen')"
   >
     <template #heading="{ open }">
       <i-cy-life-ring_x16
         class=" h-16px w-16px group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50"
-        :class="open ? 'icon-dark-indigo-500 icon-light-indigo-50' : 'icon-dark-gray-500 icon-light-gray-100'"
+        :class="(open || props.forceOpenDocs) ? 'icon-dark-indigo-500 icon-light-indigo-50' : 'icon-dark-gray-500 icon-light-gray-100'"
       />
-      <span :class="{'text-indigo-600': open}">{{ t('topNav.docsMenu.docsHeading') }}</span>
+      <span
+        class="font-semibold"
+        :class="{'text-indigo-600': open}"
+      >{{ t('topNav.docsMenu.docsHeading') }}</span>
     </template>
     <div
       v-if="docsMenuVariant === 'main'"
@@ -181,7 +200,10 @@
           <i-cy-delete_x12 class="h-12px w-12px icon-dark-gray-400" />
         </button>
       </div>
-      <PromptContent :type="docsMenuVariant" />
+      <PromptContent
+        :type="docsMenuVariant"
+        :automatic="props.forceOpenDocs"
+      />
     </div>
   </TopNavList>
 
@@ -210,12 +232,12 @@ import TopNavList from './TopNavList.vue'
 import PromptContent from './PromptContent.vue'
 import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
 import { gql, useMutation } from '@urql/vue'
-import { TopNavFragment, TopNav_LaunchOpenProjectDocument, TopNav_SetBrowserDocument } from '../../generated/graphql'
+import { TopNavFragment, TopNav_LaunchOpenProjectDocument, TopNav_SetBrowserDocument, TopNav_SetPromptShownDocument } from '../../generated/graphql'
 import { useI18n } from '@cy/i18n'
-import { computed, ref, Ref } from 'vue'
+import { computed, ref, Ref, ComponentPublicInstance, watch, watchEffect } from 'vue'
 const { t } = useI18n()
 import { onClickOutside, onKeyStroke, useTimeAgo } from '@vueuse/core'
-import DocsMenuContent from './DocsMenuContent.vue'
+import DocsMenuContent, { DocsMenuVariant } from './DocsMenuContent.vue'
 import ExternalLink from '../ExternalLink.vue'
 import Button from '../../components/Button.vue'
 import UpdateCypressModal from './UpdateCypressModal.vue'
@@ -223,6 +245,22 @@ import UpdateCypressModal from './UpdateCypressModal.vue'
 const releasesUrl = 'https://github.com/cypress-io/cypress/releases'
 
 gql`
+fragment TopNav_Browsers on CurrentProject {
+  id
+  currentBrowser {
+    id
+    displayName
+    majorVersion
+  }
+  browsers {
+    id
+    isSelected
+    displayName
+    version
+    majorVersion
+  }
+}
+
 fragment TopNav on Query {
   versions {
     current {
@@ -240,36 +278,37 @@ fragment TopNav on Query {
   currentProject {
     id
     title
-    currentBrowser {
-      id
-      displayName
-      majorVersion
-    }
-    browsers {
-      id
-      isSelected
-      displayName
-      version
-      majorVersion
-    }
+    ...TopNav_Browsers
   }
 }
 `
 
 gql`
-mutation TopNav_LaunchOpenProject  {
-  launchOpenProject
+mutation TopNav_LaunchOpenProject {
+  launchOpenProject {
+    id
+  }
 }
 `
 
 gql`
 mutation TopNav_SetBrowser($id: ID!) {
-  launchpadSetBrowser(id: $id)
+  launchpadSetBrowser(id: $id) {
+    id
+    ...TopNav_Browsers
+  }
+}
+`
+
+gql`
+mutation TopNav_SetPromptShown($slug: String!) {
+  setPromptShown(slug: $slug)
 }
 `
 
 const launchOpenProject = useMutation(TopNav_LaunchOpenProjectDocument)
 const setBrowser = useMutation(TopNav_SetBrowserDocument)
+const setPromptShown = useMutation(TopNav_SetPromptShownDocument)
 
 const launch = () => {
   launchOpenProject.executeMutation({})
@@ -282,8 +321,14 @@ const handleBrowserChoice = async (browser) => {
 
 const props = defineProps<{
   gql: TopNavFragment,
-  showBrowsers?: boolean
+  showBrowsers?: boolean,
+  forceOpenDocs?: boolean
 }>()
+
+const emit = defineEmits<{
+  (e: 'clearForceOpen'): void,
+}>()
+const promptsEl = ref<ComponentPublicInstance | null>(null)
 
 const currentReleased = useTimeAgo(
   props.gql.versions?.current?.released
@@ -324,21 +369,28 @@ const runningOldVersion = computed(() => {
 
 const showUpdateModal = ref(false)
 
-const docsMenuVariant: Ref<'main' | 'orchestration' | 'ci'> = ref('main')
+const docsMenuVariant = ref<DocsMenuVariant>('main')
 
-const promptsEl: Ref<HTMLElement | null> = ref(null)
+watchEffect(() => {
+  docsMenuVariant.value = props.forceOpenDocs ? 'ci1' : 'main'
+})
+
+watch(docsMenuVariant, (newVal, oldVal) => {
+  if (oldVal !== 'main') {
+    setPromptShown.executeMutation({ slug: `${oldVal}` })
+  }
+})
 
 // reset docs menu if click or keyboard navigation happens outside
 // so it doesn't reopen on the one of the prompts
 
 onClickOutside(promptsEl, () => {
+  emit('clearForceOpen')
   setTimeout(() => {
     // reset the content of the menu when
     docsMenuVariant.value = 'main'
   }, 300)
 })
-
-// using onKeyStroke twice as array of keys is not supported till vueuse 6.6:
 
 const resetPrompt = (event) => {
   if (promptsEl.value === null) {
@@ -347,16 +399,12 @@ const resetPrompt = (event) => {
 
   const target = event.target as HTMLElement
 
-  if (!promptsEl.value.contains(target)) {
+  if (!promptsEl.value?.$el.contains(target)) {
     docsMenuVariant.value = 'main'
   }
 }
 
-onKeyStroke('Enter', (event) => {
-  resetPrompt(event)
-})
-
-onKeyStroke(' ', (event) => {
+onKeyStroke(['Enter', ' ', 'Escape'], (event) => {
   resetPrompt(event)
 })
 

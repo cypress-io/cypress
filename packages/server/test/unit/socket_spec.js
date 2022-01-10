@@ -5,16 +5,16 @@ const path = require('path')
 const Promise = require('bluebird')
 const socketIo = require('@packages/socket/lib/browser')
 const httpsAgent = require('https-proxy-agent')
+
 const errors = require(`../../lib/errors`)
 const config = require(`../../lib/config`)
 const { SocketE2E } = require(`../../lib/socket-e2e`)
 const { ServerE2E } = require(`../../lib/server-e2e`)
 const { Automation } = require(`../../lib/automation`)
-const { SpecsStore } = require(`../../lib/specs-store`)
 const exec = require(`../../lib/exec`)
 const preprocessor = require(`../../lib/plugins/preprocessor`)
 const { fs } = require(`../../lib/util/fs`)
-const open = require(`../../lib/util/open`)
+
 const Fixtures = require('@tooling/system-tests/lib/fixtures')
 const firefoxUtil = require(`../../lib/browsers/firefox-util`).default
 const { createRoutes } = require(`../../lib/routes`)
@@ -31,7 +31,7 @@ describe('lib/socket', () => {
 
     this.server = new ServerE2E(ctx)
 
-    ctx.actions.project.setActiveProjectForTestSetup(this.todosPath)
+    ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.todosPath)
 
     return config.get(this.todosPath)
     .then((cfg) => {
@@ -52,7 +52,6 @@ describe('lib/socket', () => {
       this.server.open(this.cfg, {
         SocketCtor: SocketE2E,
         createRoutes,
-        specsStore: new SpecsStore({}, 'e2e'),
         testingType: 'e2e',
       })
       .then(() => {
@@ -325,7 +324,7 @@ describe('lib/socket', () => {
 
               return done()
             }
-            , 100)
+            , 1000)
           })
         })
       })
@@ -393,20 +392,6 @@ describe('lib/socket', () => {
             message: 'Cookie Removed: \'foo\'',
             removed: true,
           })
-
-          return done()
-        })
-      })
-    })
-
-    context('on(open:finder)', () => {
-      beforeEach(() => {
-        return sinon.stub(open, 'opn').resolves()
-      })
-
-      it('calls opn with path', function (done) {
-        return this.client.emit('open:finder', this.cfg.parentTestsFolder, () => {
-          expect(open.opn).to.be.calledWith(this.cfg.parentTestsFolder)
 
           return done()
         })
@@ -583,7 +568,6 @@ describe('lib/socket', () => {
       return this.server.open(this.cfg, {
         SocketCtor: SocketE2E,
         createRoutes,
-        specsStore: new SpecsStore({}, 'e2e'),
         testingType: 'e2e',
       })
       .then(() => {
@@ -633,14 +617,18 @@ describe('lib/socket', () => {
       })
 
       it('returns undefined if trying to watch special path __all', function () {
-        const result = this.socket.watchTestFileByPath(this.cfg, 'integration/__all')
+        const result = this.socket.watchTestFileByPath(this.cfg, {
+          relative: 'integration/__all',
+        })
 
         expect(result).to.be.undefined
       })
 
       it('returns undefined if #testFilePath matches arguments', function () {
-        this.socket.testFilePath = path.join('tests', 'test1.js')
-        const result = this.socket.watchTestFileByPath(this.cfg, path.join('integration', 'test1.js'))
+        this.socket.testFilePath = path.join('integration', 'test1.js')
+        const result = this.socket.watchTestFileByPath(this.cfg, {
+          relative: path.join('integration', 'test1.js'),
+        })
 
         expect(result).to.be.undefined
       })
@@ -649,27 +637,35 @@ describe('lib/socket', () => {
         sinon.stub(preprocessor, 'removeFile')
         this.socket.testFilePath = 'tests/test1.js'
 
-        return this.socket.watchTestFileByPath(this.cfg, 'test2.js').then(() => {
+        return this.socket.watchTestFileByPath(this.cfg, {
+          relative: 'test2.js',
+        }).then(() => {
           expect(preprocessor.removeFile).to.be.calledWithMatch('test1.js', this.cfg)
         })
       })
 
       it('sets #testFilePath', function () {
-        return this.socket.watchTestFileByPath(this.cfg, `integration${path.sep}test1.js`).then(() => {
-          expect(this.socket.testFilePath).to.eq(`tests${path.sep}test1.js`)
+        return this.socket.watchTestFileByPath(this.cfg, {
+          relative: `${path.sep}test1.js`,
+        }).then(() => {
+          expect(this.socket.testFilePath).to.eq(`test1.js`)
         })
       })
 
       it('can normalizes leading slash', function () {
-        return this.socket.watchTestFileByPath(this.cfg, `${path.sep}integration${path.sep}test1.js`).then(() => {
-          expect(this.socket.testFilePath).to.eq(`tests${path.sep}test1.js`)
+        return this.socket.watchTestFileByPath(this.cfg, {
+          relative: `${path.sep}integration${path.sep}test1.js`,
+        }).then(() => {
+          expect(this.socket.testFilePath).to.eq(`integration${path.sep}test1.js`)
         })
       })
 
       it('watches file by path', function () {
-        this.socket.watchTestFileByPath(this.cfg, `integration${path.sep}test2.coffee`)
+        this.socket.watchTestFileByPath(this.cfg, {
+          relative: `integration${path.sep}test2.coffee`,
+        })
 
-        expect(preprocessor.getFile).to.be.calledWith(`tests${path.sep}test2.coffee`, this.cfg)
+        expect(preprocessor.getFile).to.be.calledWith(`integration${path.sep}test2.coffee`, this.cfg)
       })
 
       it('watches file by relative path in spec object', function () {
@@ -687,7 +683,10 @@ describe('lib/socket', () => {
       it('triggers watched:file:changed event when preprocessor \'file:updated\' is received', function (done) {
         sinon.stub(fs, 'statAsync').resolves()
         this.cfg.watchForFileChanges = true
-        this.socket.watchTestFileByPath(this.cfg, 'integration/test2.coffee')
+        this.socket.watchTestFileByPath(this.cfg, {
+          relative: 'integration/test2.coffee',
+        })
+
         preprocessor.emitter.on.withArgs('file:updated').yield('integration/test2.coffee')
 
         return setTimeout(() => {
@@ -700,14 +699,6 @@ describe('lib/socket', () => {
     })
 
     context('#startListening', () => {
-      it('sets #testsDir', function () {
-        this.cfg.integrationFolder = path.join(this.todosPath, 'does-not-exist')
-
-        this.socket.startListening(this.server.getHttpServer(), this.automation, this.cfg, {})
-
-        expect(this.socket.testsDir).to.eq(this.cfg.integrationFolder)
-      })
-
       describe('watch:test:file', () => {
         it('listens for watch:test:file event', function () {
           this.socket.startListening(this.server.getHttpServer(), this.automation, this.cfg, {})
@@ -718,11 +709,11 @@ describe('lib/socket', () => {
         it('passes filePath to #watchTestFileByPath', function () {
           const watchTestFileByPath = sinon.stub(this.socket, 'watchTestFileByPath')
 
-          this.mockClient.on.withArgs('watch:test:file').yields('foo/bar/baz')
+          this.mockClient.on.withArgs('watch:test:file').yields({ relative: 'foo/bar/baz' })
 
           this.socket.startListening(this.server.getHttpServer(), this.automation, this.cfg, {})
 
-          expect(watchTestFileByPath).to.be.calledWith(this.cfg, 'foo/bar/baz')
+          expect(watchTestFileByPath).to.be.calledWith(this.cfg, { relative: 'foo/bar/baz' })
         })
       })
 

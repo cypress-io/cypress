@@ -61,10 +61,6 @@ const handleEvent = function (options, bus, event, id, type, arg) {
     case 'open:project':
       // debug('open:project')
 
-      // const onSettingsChanged = () => {
-      //   return bus.emit('config:changed')
-      // }
-
       // const onSpecChanged = (spec) => {
       //   return bus.emit('spec:changed', spec)
       // }
@@ -103,7 +99,6 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       //   return openProject.create(arg, options, {
       //     onFocusTests,
       //     onSpecChanged,
-      //     onSettingsChanged,
       //     onError,
       //     onWarning,
       //   })

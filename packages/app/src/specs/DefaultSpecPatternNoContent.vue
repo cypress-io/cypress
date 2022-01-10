@@ -5,24 +5,23 @@
     @select="choose"
   />
 
-  <div class="text-center border-t-1 pt-32px mt-32px">
+  <div class="border-t-1 mt-32px text-center pt-32px">
     <p
       data-testid="no-specs-message"
-      class="leading-normal text-gray-600 text-16px mb-16px"
+      class="leading-normal mb-16px text-gray-600 text-16px"
     >
       {{ t('createSpec.noSpecsMessage') }}
     </p>
-    <OpenConfigFileInIDE :gql="props.gql">
-      <Button
-        data-testid="view-spec-pattern"
-        variant="outline"
-        prefix-icon-class="icon-light-gray-50 icon-dark-gray-400"
-        :prefix-icon="SettingsIcon"
-        class="mx-auto duration-300 hocus:ring-gray-50 hocus:border-gray-200"
-      >
-        {{ t('createSpec.viewSpecPatternButton') }}
-      </Button>
-    </OpenConfigFileInIDE>
+    <Button
+      :to="{ path: 'settings', query: { section: 'project', setting: 'specPattern' }}"
+      data-testid="view-spec-pattern"
+      variant="outline"
+      prefix-icon-class="icon-light-gray-50 icon-dark-gray-400"
+      :prefix-icon="SettingsIcon"
+      class="mx-auto duration-300 hocus:ring-gray-50 hocus:border-gray-200"
+    >
+      {{ t('createSpec.viewSpecPatternButton') }}
+    </Button>
   </div>
 </template>
 
@@ -33,14 +32,12 @@ import Button from '@cy/components/Button.vue'
 import CreateSpecCards from './CreateSpecCards.vue'
 import { gql } from '@urql/vue'
 import type { CreateSpecContentFragment } from '../generated/graphql'
-import OpenConfigFileInIDE from '@packages/frontend-shared/src/gql-components/OpenConfigFileInIDE.vue'
 
 const { t } = useI18n()
 
 gql`
 fragment CreateSpecContent on Query {
   ...CreateSpecCards
-  ...OpenConfigFileInIDE
 }
 `
 

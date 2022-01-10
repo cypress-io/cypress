@@ -3,7 +3,7 @@ import type { RemoteGraphQLInterceptor, ResetOptionsResult, WithCtxInjected, Wit
 import { e2eProjectDirs } from './support/e2eProjectDirs'
 // import type { CloudExecuteRemote } from '@packages/data-context/src/sources'
 import { makeGraphQLServer } from '@packages/graphql/src/makeGraphQLServer'
-import { DataContext, globalPubSub, setCtx } from '@packages/data-context'
+import { clearCtx, DataContext, globalPubSub, setCtx } from '@packages/data-context'
 import * as inspector from 'inspector'
 import sinonChai from '@cypress/sinon-chai'
 import sinon from 'sinon'
@@ -99,9 +99,22 @@ async function makeE2ETasks () {
   let remoteGraphQLIntercept: RemoteGraphQLInterceptor | undefined
   let scaffoldedProjects = new Set<string>()
 
+  clearCtx()
   ctx = setCtx(makeDataContext({ mode: 'open', modeOptions: { cwd: process.cwd() } }))
 
   const gqlPort = await makeGraphQLServer()
+
+  const __internal_scaffoldProject = (projectName: string) => {
+    if (fs.existsSync(Fixtures.projectPath(projectName))) {
+      Fixtures.removeProject(projectName)
+    }
+
+    Fixtures.scaffoldProject(projectName)
+
+    scaffoldedProjects.add(projectName)
+
+    return Fixtures.projectPath(projectName)
+  }
 
   return {
     /**
@@ -126,6 +139,7 @@ async function makeE2ETasks () {
       await ctx.actions.app.ensureAppDataDirExists()
       await ctx.resetForTest()
       sinon.reset()
+      sinon.restore()
       remoteGraphQLIntercept = undefined
 
       const fetchApi = ctx.util.fetch
@@ -181,24 +195,14 @@ async function makeE2ETasks () {
     },
     async __internal_addProject (opts: InternalAddProjectOpts) {
       if (!scaffoldedProjects.has(opts.projectName)) {
-        this.__internal_scaffoldProject(opts.projectName)
+        __internal_scaffoldProject(opts.projectName)
       }
 
       await ctx.actions.project.addProject({ path: Fixtures.projectPath(opts.projectName), open: opts.open })
 
       return Fixtures.projectPath(opts.projectName)
     },
-    __internal_scaffoldProject (projectName: string) {
-      if (fs.existsSync(Fixtures.projectPath(projectName))) {
-        Fixtures.removeProject(projectName)
-      }
-
-      Fixtures.scaffoldProject(projectName)
-
-      scaffoldedProjects.add(projectName)
-
-      return Fixtures.projectPath(projectName)
-    },
+    __internal_scaffoldProject,
     async __internal_openGlobal (argv: string[] = []): Promise<ResetOptionsResult> {
       const openArgv = ['--global', ...argv]
 
@@ -249,6 +253,7 @@ async function makeE2ETasks () {
         testState,
         require,
         process,
+        sinon,
         projectDir (projectName) {
           if (!e2eProjectDirs.includes(projectName)) {
             throw new Error(`${projectName} is not a fixture project`)

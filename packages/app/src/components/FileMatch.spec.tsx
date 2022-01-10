@@ -8,11 +8,11 @@ import { each } from 'lodash'
 const anyFilenameInputSelector = `[placeholder="${defaultMessages.components.fileSearch.byFilenameInput}"]`
 const filenameInputSelector = `${anyFilenameInputSelector}:first`
 const extensionInputSelector = `[placeholder="${defaultMessages.components.fileSearch.byExtensionInput}"]`
-const fileMatchButtonSelector = '[data-testid=file-match-button]'
+const fileMatchButtonSelector = '[data-cy=file-match-button]'
 
 // File Match Indicator
 // X out of Y Matches when searching the file list
-const fileMatchIndicatorSelector = '[data-testid=file-match-indicator]'
+const fileMatchIndicatorSelector = '[data-cy=file-match-indicator]'
 
 const initialExtension = '*.stories.*'
 const initialPattern = ''

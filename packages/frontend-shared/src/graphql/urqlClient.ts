@@ -14,18 +14,18 @@ import { client } from '@packages/socket/lib/browser'
 
 import { cacheExchange as graphcacheExchange } from '@urql/exchange-graphcache'
 import { urqlCacheKeys } from '@packages/data-context/src/util/urqlCacheKeys'
+import { urqlSchema } from '../generated/urql-introspection.gen'
 
 import { pubSubExchange } from './urqlExchangePubsub'
 import { namedRouteExchange } from './urqlExchangeNamedRoute'
-import { latestMutationExchange } from './urqlExchangeLatestMutation'
 
 const GQL_PORT_MATCH = /gqlPort=(\d+)/.exec(window.location.search)
 const SERVER_PORT_MATCH = /serverPort=(\d+)/.exec(window.location.search)
 
 const toast = useToast()
 
-export function makeCacheExchange () {
-  return graphcacheExchange(urqlCacheKeys)
+export function makeCacheExchange (schema: any = urqlSchema) {
+  return graphcacheExchange({ ...urqlCacheKeys, schema })
 }
 
 declare global {
@@ -72,11 +72,10 @@ export function makeUrqlClient (target: 'launchpad' | 'app'): Client {
   const exchanges: Exchange[] = [
     dedupExchange,
     pubSubExchange(io),
-    latestMutationExchange,
     errorExchange({
       onError (error) {
         const message = `
-        GraphQL Field Path: [${error.graphQLErrors[0].path?.join(', ')}]:
+        GraphQL Field Path: [${error.graphQLErrors?.[0]?.path?.join(', ')}]:
 
         ${error.message}
 

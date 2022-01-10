@@ -78,7 +78,9 @@ const isCypressErr = (err) => {
   return Boolean(err.isCypressErr)
 }
 
-const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
+const getMsgByType = function (type, ...args) {
+  const [arg1 = {}, arg2, arg3] = args
+
   // NOTE: declarations in case blocks are forbidden so we declare them up front
   let filePath; let err; let msg; let str
 
@@ -508,16 +510,6 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         ${chalk.yellow(err)}`
 
     case 'NO_SPECS_FOUND':
-      // no glob provided, searched all specs
-      if (!arg2) {
-        return stripIndent`\
-          Can't run because no spec files were found.
-
-          We searched for any files inside of this folder:
-
-          ${chalk.blue(arg1)}`
-      }
-
       return stripIndent`\
         Can't run because no spec files were found.
 
@@ -602,8 +594,8 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         We invoked the function exported by \`${arg1}\`, but it threw an error.`
 
       return { msg, details: arg2 }
-    case 'SETUP_NODE_EVENTS_UNEXPECTED_ERROR':
-      msg = `The following error was thrown by a plugin. We stopped running your tests because a plugin crashed. Please check your ${arg1}.setupNodeEvents method in \`${arg2}\``
+    case 'CHILD_PROCESS_UNEXPECTED_ERROR':
+      msg = `\nThe following error was thrown by a plugin. We stopped running your tests because a plugin crashed. Please check your ${arg1}.setupNodeEvents method in \`${arg2}\``
 
       return { msg, details: arg3 }
     case 'PLUGINS_VALIDATION_ERROR':
@@ -699,6 +691,13 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
 
         Learn more at https://on.cypress.io/reporters`
       // TODO: update with vetted cypress language
+    case 'TESTING_TYPE_NEEDED_FOR_RUN':
+      return stripIndent`
+        You need to specify the testing type for cypress run:
+          cypress run --e2e 
+
+          cypress run --component
+      `
     case 'NO_DEFAULT_CONFIG_FILE_FOUND':
       return stripIndent`\
         Could not find a Cypress configuration file, exiting.
@@ -721,10 +720,12 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
       // TODO: update with vetted cypress language
     case 'CONFIG_FILES_LANGUAGE_CONFLICT':
       return stripIndent`
-          There is both a \`${arg2}\` and a \`${arg3}\` at the location below:
+          There is both a \`cypress.config.js\` and a \`cypress.config.ts\` at the location below:
           ${arg1}
 
-          Cypress does not know which one to read for config. Please remove one of the two and try again.
+          This sometimes happens if you do not have cypress.config.ts excluded in your tsconfig.json.
+
+          Please add it to your "excludes" option, and remove from your project.
           `
     case 'CONFIG_FILE_NOT_FOUND':
       return stripIndent`\
@@ -1038,10 +1039,22 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
       Deprecation Warning: ${chalk.yellow(`\`${arg1.name}\``)} is currently set to ${chalk.yellow(`\`${arg1.value}\``)} in the ${chalk.yellow(`\`${arg1.configFile}\``)} configuration file. As of Cypress version \`9.0.0\` the default behavior of ${chalk.yellow(`\`${arg1.name}\``)} has changed to always use the version of Node used to start cypress via the cli. When ${chalk.yellow(`\`${arg1.name}\``)} is set to ${chalk.yellow(`\`${arg1.value}\``)}, Cypress will use the version of Node bundled with electron. This can cause problems running certain plugins or integrations. 
       As the ${chalk.yellow(`\`${arg1.name}\``)} configuration option will be removed in a future release, it is recommended to remove the ${chalk.yellow(`\`${arg1.name}\``)} configuration option from ${chalk.yellow(`\`${arg1.configFile}\``)}.
       `
+    case 'SUPPORT_FILE_ROOT_NOT_SUPPORTED':
+      return stripIndent`\
+        The ${chalk.yellow(`\`supportFile\``)} configuration option was removed from the root in Cypress version \`10.0.0\`. Please update this option under each testing type property.
+
+        https://on.cypress.io/migration-guide`
     default:
   }
 }
 
+/**
+ * @param {string} type
+ * @param {any} arg1
+ * @param {any} arg2
+ * @param {any} arg3
+ * @returns {Error & { isCypressErr: true, type: string, details: string }}
+ */
 const get = function (type, arg1, arg2, arg3) {
   let details
   let msg = getMsgByType(type, arg1, arg2, arg3)

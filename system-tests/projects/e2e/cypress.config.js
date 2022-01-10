@@ -8,6 +8,8 @@ module.exports = {
     },
   },
   'component': {
+    'supportFile': false,
+    'specPattern': 'cypress/component/**/*spec.js',
     devServer (cypressConfig, devServerConfig) {
       const { startDevServer } = require('@cypress/webpack-dev-server')
 

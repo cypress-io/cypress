@@ -3,8 +3,9 @@ import GlobalPageHeader from './GlobalPageHeader.vue'
 import { ref } from 'vue'
 
 const searchLabel = defaultMessages.globalPage.searchPlaceholder
+const dropzoneSelector = '[data-cy="dropzone"] > div'
 const fileInputSelector = 'input[type=file]'
-const addProjectSelector = '[data-testid=addProjectButton]'
+const addProjectSelector = '[data-cy=addProjectButton]'
 
 describe('<GlobalPageHeader />', () => {
   beforeEach(() => {
@@ -43,8 +44,8 @@ describe('<GlobalPageHeader />', () => {
   })
 
   it('handles a file upload', () => {
-    cy.get(fileInputSelector)
-    .attachFile('test-project/cypress.config.ts')
+    cy.get(dropzoneSelector)
+    .selectFile('cypress/fixtures/test-project/cypress.config.ts', { action: 'drag-drop' })
     .get(addProjectSelector)
     .click()
     .get('@fileUpload').should('have.been.called')

@@ -75,6 +75,7 @@ exports['e2e config applies defaultCommandTimeout globally 1'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (dom_times_out_spec.js)                                                    │
+  │ Searched:   cypress/integration/**/*                                                           │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -157,7 +158,9 @@ exports['e2e config throws error when multiple default config file are found in 
 There is both a \`cypress.config.js\` and a \`cypress.config.ts\` at the location below:
 /foo/bar/.projects/pristine-with-config-file
 
-Cypress does not know which one to read for config. Please remove one of the two and try again.
+This sometimes happens if you do not have cypress.config.ts excluded in your tsconfig.json.
+
+Please add it to your "excludes" option, and remove from your project.
 
 
 `

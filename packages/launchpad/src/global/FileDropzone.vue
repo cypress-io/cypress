@@ -13,12 +13,16 @@
           class="relative block w-full p-58px text-center border-1
         border-gray-200 border-dashed rounded-lg h-240px min-w-220px
         bg-gray-50 hocus-default"
+          data-cy="dropzone"
         >
           <i-cy-drag-project_x80
             class="mx-auto -mb-4px w-80px h-80px icon-dark-indigo-500 icon-light-indigo-200"
           />
           <span class="font-light text-body-gray-700 text-18px">
-            <i18n-t keypath="globalPage.empty.dropText">
+            <i18n-t
+              scope="global"
+              keypath="globalPage.empty.dropText"
+            >
               <button class="font-medium text-indigo-500 hocus-link-default">
                 <!--
               This button allows keyboard users to fire a click event with the Enter or Space keys,
