@@ -115,7 +115,10 @@ export class OpenProject {
     // set the current browser object on options
     // so we can pass it down
     options.browser = browser
-    options.url = url
+
+    if (!process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF) {
+      options.url = url
+    }
 
     this.projectBase.setCurrentSpecAndBrowser(spec, browser)
 
@@ -186,7 +189,7 @@ export class OpenProject {
       .then(() => {
         // TODO: Stub this so we can detect it being called
         if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF) {
-          return
+          return browsers.connectToExisting(browser, options, automation)
         }
 
         return browsers.open(browser, options, automation)

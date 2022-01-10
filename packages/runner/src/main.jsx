@@ -21,7 +21,7 @@ MobX.configure({ enforceActions: 'always' })
 let ws
 let eventManager
 
-if (!window.__Cypress__) {
+if (!window.__Cypress__ && !window.__CYPRESS_CONFIG__) {
   ws = createWebsocket('/__socket.io')
 
   // NOTE: this is exposed for testing, ideally we should only expose this if a test flag is set

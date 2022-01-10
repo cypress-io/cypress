@@ -12,6 +12,7 @@ import installCustomPercyCommand from '@packages/ui-components/cypress/support/c
 
 configure({ testIdAttribute: 'data-cy' })
 
+const CYPRESS_EXTENSION_ID = 'caljajdfkjjjdehjdoimjkkakekklcck'
 const NO_TIMEOUT = 1000 * 1000
 const TEN_SECONDS = 10 * 1000
 
@@ -191,25 +192,27 @@ function openProject (projectName: ProjectFixture, argv: string[] = []) {
 
 function startAppServer (mode: 'component' | 'e2e' = 'e2e') {
   return logInternal('startAppServer', (log) => {
-    return cy.withCtx(async (ctx, o) => {
-      ctx.actions.project.setCurrentTestingType(o.mode)
-      // ctx.lifecycleManager.isReady()
-      await ctx.actions.project.initializeActiveProject({
-        skipPluginInitializeForTesting: true,
+    return cy.window({ log: false }).then((win) => {
+      return cy.withCtx(async (ctx, o) => {
+        ctx.actions.project.setCurrentTestingType(o.mode)
+        // ctx.lifecycleManager.isReady()
+        await ctx.actions.project.initializeActiveProject({
+          skipPluginInitializeForTesting: true,
+        })
+
+        await ctx.actions.project.launchProject(o.mode, { url: o.url })
+
+        return { appServerPort: ctx.appServerPort, socketIoRoute: ctx.lifecycleManager.loadedFullConfig?.socketIoRoute }
+      }, { log: false, mode, url: win.top ? win.top.location.href : undefined }).then(async ({ appServerPort, socketIoRoute }) => {
+        log.set({ message: `port: ${appServerPort}, socketIoRoute: ${socketIoRoute}}` })
+        Cypress.env('e2e_serverPort', appServerPort)
+
+        if (Cypress.config('browser').isHeaded) {
+          const browser = require('webextension-polyfill')
+
+          await browser.runtime.sendMessage(CYPRESS_EXTENSION_ID, { host: `http://localhost:${appServerPort}`, path: socketIoRoute || '/__socket.io' }, {})
+        }
       })
-
-      await ctx.actions.project.launchProject(o.mode, {})
-
-      return { appServerPort: ctx.appServerPort, socketIoRoute: ctx.lifecycleManager.loadedFullConfig?.socketIoRoute }
-    }, { log: false, mode }).then(async ({ appServerPort, socketIoRoute }) => {
-      log.set({ message: `port: ${appServerPort}` })
-      Cypress.env('e2e_serverPort', appServerPort)
-
-      const browser = require('webextension-polyfill')
-
-      if (browser.runtime) {
-        await browser.runtime.sendMessage('caljajdfkjjjdehjdoimjkkakekklcck', { host: `http://localhost:${appServerPort}`, path: socketIoRoute || '/__socket.io' }, {})
-      }
     })
   })
 }

@@ -380,6 +380,10 @@ module.exports = {
     })
   },
 
+  async connectToExisting (browser, options, automation) {
+    // TODO: Support Cypress in Cypress in electron
+  },
+
   open (browser, url, options = {}, automation) {
     const { projectRoot, isTextTerminal } = options
 
