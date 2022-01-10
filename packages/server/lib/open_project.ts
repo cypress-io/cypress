@@ -254,6 +254,8 @@ export class OpenProject {
 
     const testingType = args.testingType === 'component' ? 'component' : 'e2e'
 
+    this._ctx.lifecycleManager.setRunModeExitEarly(options.onError ?? undefined)
+
     // store the currently open project
     this.projectBase = new ProjectBase({
       testingType,
@@ -276,6 +278,7 @@ export class OpenProject {
       const specs = await this._ctx.project.findSpecs(path, testingType, specPattern)
 
       this._ctx.actions.project.setSpecs(specs)
+      this._ctx.project.startSpecWatcher(path, testingType, specPattern)
 
       await this.projectBase.open()
     } catch (err: any) {
