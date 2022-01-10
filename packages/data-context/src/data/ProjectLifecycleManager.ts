@@ -137,22 +137,6 @@ export class ProjectLifecycleManager {
     return autoBindDebug(this)
   }
 
-  async allSettled () {
-    while (
-      this._browserResult.state === 'loading' ||
-      this._envFileResult.state === 'loading' ||
-      this._configResult.state === 'loading' ||
-      this._eventsIpcResult.state === 'loading'
-    ) {
-      await Promise.allSettled([
-        this._browserResult.value,
-        this._envFileResult.value,
-        this._configResult.value,
-        this._eventsIpcResult.value,
-      ])
-    }
-  }
-
   private onProcessExit = () => {
     this.resetInternalState()
   }
@@ -542,9 +526,7 @@ export class ProjectLifecycleManager {
         this._configResult = { state: 'errored', value: err }
       }
 
-      if (this._pendingInitialize) {
-        this._pendingInitialize.reject(err)
-      }
+      this.onLoadError(err)
     })
     .finally(() => {
       this.ctx.emitter.toLaunchpad()
@@ -784,7 +766,7 @@ export class ProjectLifecycleManager {
       debug(`catch %o`, err)
       this._cleanupIpc(ipc)
       this._eventsIpcResult = { state: 'errored', value: err }
-      this._pendingInitialize?.reject(err)
+      this.onLoadError(err)
       this.ctx.emitter.toLaunchpad()
 
       return Promise.reject(err)
@@ -832,7 +814,7 @@ export class ProjectLifecycleManager {
       debug(`catch %o`, err)
       this._cleanupIpc(ipc)
       this._eventsIpcResult = { state: 'errored', value: err }
-      this._pendingInitialize?.reject(err)
+      this.onLoadError(err)
     })
     .finally(() => {
       this.ctx.emitter.toLaunchpad()
@@ -1180,13 +1162,13 @@ export class ProjectLifecycleManager {
 
     const finalConfig = this._cachedFullConfig = this.ctx._apis.configApi.updateWithPluginValues(fullConfig, result.setupConfig ?? {})
 
-    if (this.ctx.coreData.cliBrowser) {
-      await this.setActiveBrowser(this.ctx.coreData.cliBrowser)
-    }
-
     // This happens automatically with openProjectCreate in run mode
     if (!this.ctx.isRunMode) {
       await this.ctx.actions.project.initializeActiveProject()
+    }
+
+    if (this.ctx.coreData.cliBrowser) {
+      await this.setActiveBrowser(this.ctx.coreData.cliBrowser)
     }
 
     this._pendingInitialize?.resolve(finalConfig)
@@ -1292,9 +1274,10 @@ export class ProjectLifecycleManager {
   }
 
   /**
-   * When we have an error while "loading" a resource,
-   * we handle it internally with the promise state, and therefore
-   * do not
+   * When there is an error during any part of the lifecycle
+   * initiation, we pass it through here. This allows us to intercept
+   * centrally in the e2e tests, as well as notify the "pending initialization"
+   * for run mode
    */
   private onLoadError = (err: any) => {
     this._pendingInitialize?.reject(err)

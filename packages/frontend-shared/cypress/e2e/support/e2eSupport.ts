@@ -200,12 +200,23 @@ function startAppServer (mode: 'component' | 'e2e' = 'e2e') {
       const isInitialized = o.pDefer()
       const initializeActive = ctx.actions.project.initializeActiveProject
       const onErrorStub = o.sinon.stub(ctx, 'onError')
+      // @ts-expect-error - errors b/c it's a private method
+      const onLoadErrorStub = o.sinon.stub(ctx.lifecycleManager, 'onLoadError')
       const initializeActiveProjectStub = o.sinon.stub(ctx.actions.project, 'initializeActiveProject')
 
-      onErrorStub.callsFake((e) => {
-        isInitialized.reject(e)
+      function restoreStubs () {
         onErrorStub.restore()
-      })
+        onLoadErrorStub.restore()
+        initializeActiveProjectStub.restore()
+      }
+
+      function onStartAppError (e: Error) {
+        isInitialized.reject(e)
+        restoreStubs()
+      }
+
+      onErrorStub.callsFake(onStartAppError)
+      onLoadErrorStub.callsFake(onStartAppError)
 
       initializeActiveProjectStub.callsFake(async function (...args) {
         try {
@@ -217,7 +228,7 @@ function startAppServer (mode: 'component' | 'e2e' = 'e2e') {
         } catch (e) {
           isInitialized.reject(e)
         } finally {
-          initializeActiveProjectStub.restore()
+          restoreStubs()
         }
 
         return

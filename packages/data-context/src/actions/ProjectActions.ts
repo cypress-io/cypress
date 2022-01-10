@@ -39,6 +39,7 @@ export class ProjectActions {
   async clearCurrentProject () {
     this.ctx.update((d) => {
       d.currentProject = null
+      d.baseError = null
     })
 
     this.ctx.lifecycleManager.clearCurrentProject()
@@ -98,13 +99,8 @@ export class ProjectActions {
   }
 
   async initializeActiveProject (options: OpenProjectLaunchOptions = {}) {
-    if (!this.ctx.currentProject) {
-      throw Error('Cannot initialize project without an active project')
-    }
-
-    if (!this.ctx.coreData.currentTestingType) {
-      throw Error('Cannot initialize project without choosing testingType')
-    }
+    assert(this.ctx.currentProject, 'Cannot initialize project without an active project')
+    assert(this.ctx.coreData.currentTestingType, 'Cannot initialize project without choosing testingType')
 
     const allModeOptionsWithLatest: InitializeProjectOptions = {
       ...this.ctx.modeOptions,
