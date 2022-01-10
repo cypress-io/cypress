@@ -91,52 +91,6 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
       }
 
       const updateCommand = (details) => {
-        if (details.logAdded) {
-          const attrs = details.logAdded
-
-          attrs.consoleProps = () => details.logAdded.consoleProps
-          attrs.renderProps = () => details.logAdded.renderProps
-
-          const log = Cypress.log(attrs)
-
-          // if the log needs to stream updates, defer its result
-          if (!attrs.ended) {
-            logs[log.get('id')] = {
-              log,
-              deferred: createDeferred(),
-            }
-          }
-
-          return
-        }
-
-        if (details.logChanged) {
-          const readableLog = logs[details.logChanged.id].log.get()
-
-          const diff = difference(details.logChanged, readableLog)
-
-          Object.keys(diff).forEach((key) => {
-            const logResults = details.logChanged[key]
-
-            // TODO: whitelist params but try this first to see if problem resolves
-            // if its undefined or null, but is an object that is empty, skip it
-            if (logResults !== undefined && logResults !== null && !(_.isObject(logResults) && _.isEmpty(logResults))) {
-              logs[details.logChanged.id].log.set(key, logResults)
-            }
-          })
-
-          const isEnded = logs[details.logChanged.id].log.get('ended')
-
-          if (isEnded) {
-            const log = logs[details.logChanged.id]
-
-            delete logs[details.logChanged.id]
-            log.deferred.resolve()
-          }
-
-          return
-        }
-
         if (details.end) {
           const command = commands[details.id]
 
@@ -147,11 +101,61 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
         }
       }
 
+      const onLogAdded = ({ logAdded }) => {
+        const attrs = logAdded
+
+        attrs.consoleProps = () => logAdded.consoleProps
+        attrs.renderProps = () => logAdded.renderProps
+
+        const log = Cypress.log(attrs)
+
+        // if the log needs to stream updates, defer its result
+        if (!attrs.ended) {
+          logs[log.get('id')] = {
+            log,
+            deferred: createDeferred(),
+          }
+        }
+
+        return
+      }
+
+      const onLogChanged = ({ logChanged }) => {
+        const readableLog = logs[logChanged.id].log.get()
+
+        const diff = difference(logChanged, readableLog)
+
+        Object.keys(diff).forEach((key) => {
+          const logResults = logChanged[key]
+
+          // TODO: whitelist params but try this first to see if problem resolves
+          // if its undefined or null, but is an object that is empty, skip it
+          if (logResults !== undefined && logResults !== null && !(_.isObject(logResults) && _.isEmpty(logResults))) {
+            logs[logChanged.id].log.set(key, logResults)
+          }
+        })
+
+        const isEnded = logs[logChanged.id].log.get('ended')
+
+        if (isEnded) {
+          const log = logs[logChanged.id]
+
+          delete logs[logChanged.id]
+          log.deferred.resolve()
+        }
+
+        return
+      }
+
       communicator.on('command:enqueued', addCommand)
       communicator.on('command:update', updateCommand)
 
+      communicator.on('log:added', onLogAdded)
+      communicator.on('log:changed', onLogChanged)
+
       const cleanup = async () => {
         communicator.off('command:enqueued', addCommand)
+        communicator.off('log:added', onLogAdded)
 
         // don't allow for new commands to be enqueued, but wait for commands to update in the secondary domain
         const pendingCommands = Object.keys(commands).map((command) => commands[command].deferred.promise)
@@ -159,6 +163,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
 
         return Promise.all(pendingCommands.concat(pendingLogs)).then(() => {
           communicator.off('command:update', updateCommand)
+          communicator.off('log:changed', onLogChanged)
         })
       }
 

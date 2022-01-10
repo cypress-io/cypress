@@ -29,13 +29,13 @@ const onCommandEnd = (command) => {
 }
 
 const onLogAdded = (attrs) => {
-  specBridgeCommunicator.toPrimary('command:update', {
+  specBridgeCommunicator.toPrimary('log:added', {
     logAdded: $Log.toSerializedJSON(attrs),
   })
 }
 
 const onLogChanged = (attrs) => {
-  specBridgeCommunicator.toPrimary('command:update', {
+  specBridgeCommunicator.toPrimary('log:changed', {
     logChanged: $Log.toSerializedJSON(attrs),
   })
 }
