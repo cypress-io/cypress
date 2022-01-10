@@ -3,7 +3,8 @@
     v-if="query.data.value"
     :gql="query.data.value"
     :show-browsers="props.showBrowsers"
-    :page-name="pageName"
+    :page-name="props.pageName"
+    :allow-automatic-prompt-open="props.allowAutomaticPromptOpen"
   />
   <div v-else />
 </template>
@@ -19,10 +20,16 @@ query HeaderBar_HeaderBarQuery {
 }
 `
 
-const props = defineProps<{
-    showBrowsers?: boolean,
-    pageName?: string
-}>()
+const props = withDefaults(
+  defineProps<{
+  showBrowsers?: boolean,
+  pageName?: string,
+  allowAutomaticPromptOpen?: boolean
+}>(), {
+    allowAutomaticPromptOpen: false,
+    pageName: undefined,
+  },
+)
 
 const query = useQuery({ query: HeaderBar_HeaderBarQueryDocument })
 

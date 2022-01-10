@@ -215,7 +215,7 @@ describe('App Top Nav Workflows', () => {
       cy.findByTestId('app-header-bar').findByRole('button', { name: 'Docs', expanded: false }).as('docsButton')
     })
 
-    it('shows shows popover with additional doc links', () => {
+    it('shows popover with additional doc links', () => {
       cy.get('@docsButton').click().should('have.attr', 'aria-expanded', 'true')
 
       cy.findByRole('heading', { name: 'Getting Started', level: 2 })
@@ -251,19 +251,28 @@ describe('App Top Nav Workflows', () => {
         name: 'API',
         href: 'https://on.cypress.io/api?utm_medium=Docs+Menu&utm_content=API',
       })
+    })
 
-      cy.validateExternalLink({
-        name: 'Run tests faster',
-        href: 'https://on.cypress.io/parallelization?utm_medium=Docs+Menu&utm_content=Parallelization',
-      })
+    it('growth prompts appear and call SetPromptShown mutation with the correct payload', () => {
+      cy.get('@docsButton').click()
+
+      cy.intercept('mutation-TopNav_SetPromptShown').as('SetPromptShown')
 
       cy.findByRole('button', { name: 'Set up CI' }).click()
       cy.findByText('Configure CI').should('be.visible')
       cy.findByRole('button', { name: 'Close' }).click()
 
-      cy.findByRole('button', { name: 'Smart Orchestration' }).click()
+      cy.wait('@SetPromptShown')
+      .its('request.body.variables.slug')
+      .should('equal', 'ci1')
+
+      cy.findByRole('button', { name: 'Run tests faster' }).click()
       cy.findByText('Run tests faster in CI').should('be.visible')
       cy.findByRole('button', { name: 'Close' }).click()
+
+      cy.wait('@SetPromptShown')
+      .its('request.body.variables.slug')
+      .should('equal', 'orchestration1')
     })
   })
 
@@ -276,7 +285,7 @@ describe('App Top Nav Workflows', () => {
         cy.loginUser()
         cy.visitApp()
 
-        cy.findByTestId('app-header-bar').findByRole('button', { name: 'Log In', expanded: false }).as('logInButton')
+        cy.findByTestId('app-header-bar').findByRole('button', { name: 'Profile and Log Out', expanded: false }).as('logInButton')
       })
 
       it('shows user in top nav when logged in', () => {
@@ -289,6 +298,8 @@ describe('App Top Nav Workflows', () => {
           name: 'Profile Settings',
           href: 'https://on.cypress.io/dashboard/profile',
         })
+
+        cy.findByTestId('user-avatar-panel').should('be.visible')
       })
 
       it('replaces user avatar after logout', () => {
@@ -347,7 +358,7 @@ describe('App Top Nav Workflows', () => {
         mockLogInActionsForUser(mockUser)
 
         cy.findByTestId('app-header-bar').within(() => {
-          cy.findByTestId('user-avatar').should('not.exist')
+          cy.findByTestId('user-avatar-title').should('not.exist')
           cy.findByRole('button', { name: 'Log In' }).click()
         })
 
@@ -370,14 +381,14 @@ describe('App Top Nav Workflows', () => {
         })
 
         cy.get('@logInModal').should('not.exist')
-        cy.findByTestId('app-header-bar').findByTestId('user-avatar').should('be.visible')
+        cy.findByTestId('app-header-bar').findByTestId('user-avatar-title').should('be.visible')
       })
 
       it('shows log in modal workflow for user with only email', () => {
         mockLogInActionsForUser(mockUserNoName)
 
         cy.findByTestId('app-header-bar').within(() => {
-          cy.findByTestId('user-avatar').should('not.exist')
+          cy.findByTestId('user-avatar-title').should('not.exist')
           cy.findByRole('button', { name: 'Log In' }).click()
         })
 
@@ -400,8 +411,43 @@ describe('App Top Nav Workflows', () => {
         })
 
         cy.get('@logInModal').should('not.exist')
-        cy.findByTestId('app-header-bar').findByTestId('user-avatar').should('be.visible')
+        cy.findByTestId('app-header-bar').findByTestId('user-avatar-title').should('be.visible')
       })
     })
+  })
+})
+
+describe('Growth Prompts Can Open Automatically', () => {
+  beforeEach(() => {
+    cy.clock(1609891200000)
+    cy.scaffoldProject('launchpad')
+    cy.openProject('launchpad')
+    cy.startAppServer()
+  })
+
+  it('CI prompt auto-opens 4 days after first project opened', () => {
+    cy.intercept('query-HeaderBar_HeaderBarQuery', (req) => {
+      req.on('before:response', (res) => {
+        res.body.data.currentProject.savedState = { firstOpened: 1609459200000,
+          lastOpened: 1609459200000,
+          promptsShown: {} }
+      })
+    })
+
+    cy.visitApp()
+    cy.contains('Configure CI').should('be.visible')
+  })
+
+  it('CI prompt does not auto-open when it has already been dismissed', () => {
+    cy.intercept('query-HeaderBar_HeaderBarQuery', (req) => {
+      req.on('before:response', (res) => {
+        res.body.data.currentProject.savedState = { firstOpened: 1609459200000,
+          lastOpened: 1609459200000,
+          promptsShown: { ci1: 1609459200000 } }
+      })
+    })
+
+    cy.visitApp()
+    cy.contains('Configure CI').should('not.exist')
   })
 })
