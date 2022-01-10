@@ -14,26 +14,27 @@ The goal of testing is to instill confidence in the features being built and the
 Test driven development (TDD) is a core tenet to how we write tests at Cypress. Our approach is to Shift-left testing whenever possible.
 
 ### Testing Types
-Unit - Tests the functionality of a single section of code, like a single function.
-Integration - Tests the functionality of a feature, with some portions (like a backend) mocked. 
-End-to-end (E2E) - Tests the functionality of a feature with no mocking. It tests all pieces of the feature working together.
-Component - Tests a single component or group of components.
-System - A type of E2E test that tests an entire project in the context of Cypress.
-Snapshot - Captures text output and compares them to previously captured text output (like testing output for a CLI).
-Screenshot - Captures screenshots and compares them to previously captured screenshots. 
-Performance - Tests the speed, response time, stability, reliability, scalability and resource usage of the application.
+- Unit - Tests the functionality of a single section of code, like a single function.
+- Integration - Tests the functionality of a feature, with some portions (like a backend) mocked. 
+- End-to-end (E2E) - Tests the functionality of a feature with no mocking. It tests all pieces of the feature working together.
+- Component - Tests a single component or group of components.
+- System - A type of E2E test that tests an entire project in the context of Cypress.
+- Snapshot - Captures text output and compares them to previously captured text output (like testing output for a CLI).
+- Screenshot - Captures screenshots and compares them to previously captured screenshots. 
+- Performance - Tests the speed, response time, stability, reliability, scalability and resource usage of the application.
 
 ### Testing Environments
 Tests can run in different environments:
-Different browsers
-Different OSs
-Node.js
+
+- Different browsers
+- Different OSs
+- Node.js
 
 ### Testing Tools
-Mocha
-Cypress
-Snapshot tests using [snap-shot-it](https://github.com/bahmutov/snap-shot-it) - Use `SNAPSHOT_UPDATE=1 <test command>` to update them, but make sure to check the diff to ensure it's the right update.
-Percy snapshot tests - These only run in CI and can be managed from the GitHub status check on a PR
+- Mocha
+- Cypress
+- Snapshot tests using [snap-shot-it](https://github.com/bahmutov/snap-shot-it) - Use `SNAPSHOT_UPDATE=1 <test command>` to update them, but make sure to check the diff to ensure it's the right update.
+- Percy snapshot tests - These only run in CI and can be managed from the GitHub status check on a PR
 
 ### Testing Workflow
 Developing features and fixing bugs should be test driven. 
