@@ -237,7 +237,7 @@ declare namespace Cypress {
      * @see https://on.cypress.io/buffer
      * @see https://github.com/feross/buffer
      * @example
-     *    Cypress.Blob.method()
+     *    Cypress.Buffer.method()
      */
     Buffer: BufferModule
     /**
@@ -5675,7 +5675,7 @@ declare namespace Cypress {
     stderr: string
   }
 
-  type FileReference = string | BufferModule.Buffer | FileReferenceObject
+  type FileReference = string | BufferType | FileReferenceObject
   interface FileReferenceObject {
     /*
      * Buffers will be used as-is, while strings will be interpreted as an alias or a file path.
