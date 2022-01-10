@@ -12,7 +12,7 @@ describe('<RecordKey />', () => {
       },
       render: (gql) => (
         <div class="py-4 px-8">
-          <RecordKey gql={gql} settingsUrl="#"/>
+          <RecordKey gql={gql} />
         </div>
       ),
     })

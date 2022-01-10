@@ -1,3 +1,4 @@
+import { defaultMessages } from '@cy/i18n'
 import { CloudRunStubs } from '@packages/frontend-shared/cypress/support/mock-graphql/stubgql-CloudTypes'
 import { RunCardFragmentDoc } from '../generated/graphql-test'
 import RunResults from './RunResults.vue'
@@ -17,10 +18,9 @@ describe('<RunResults />', { viewportHeight: 70, viewportWidth: 300 }, () => {
       },
     })
 
-    // For an unknown reason i18n cannot be used here to return "passed"
-    cy.get(`[title=passed]`).should('contain.text', res.totalPassed)
-    cy.get(`[title=failed]`).should('contain.text', res.totalFailed)
-    cy.get(`[title=skipped]`).should('contain.text', res.totalSkipped)
-    cy.get(`[title=pending]`).should('contain.text', res.totalPending)
+    cy.get(`[title=${defaultMessages.runs.results.passed}]`).should('contain.text', res.totalPassed)
+    cy.get(`[title=${defaultMessages.runs.results.failed}]`).should('contain.text', res.totalFailed)
+    cy.get(`[title=${defaultMessages.runs.results.skipped}]`).should('contain.text', res.totalSkipped)
+    cy.get(`[title=${defaultMessages.runs.results.pending}`).should('contain.text', res.totalPending)
   })
 })

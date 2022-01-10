@@ -76,8 +76,10 @@ export function createCloudRunCommitInfo (config: ConfigFor<CloudRunCommitInfo>)
 }
 
 export function createCloudRecordKey (config: ConfigFor<CloudRecordKey>) {
-  const cloudRecordKey: CloudRecordKey = {
+  const cloudRecordKey: Required<CloudRecordKey> = {
     ...testNodeId('CloudRecordKey'),
+    createdAt: new Date('1995-12-17T03:20:00').toISOString(),
+    lastUsedAt: new Date('1995-12-17T03:22:00').toISOString(),
     key: fakeUuid(getNodeIdx('CloudRecordKey')),
     ...config,
   }
@@ -162,7 +164,7 @@ export function createCloudRun (config: Partial<CloudRun>): Required<CloudRun> {
     commitInfo: null,
     totalDuration: 300,
     url: 'http://dummy.cypress.io/runs/1',
-    createdAt: new Date().toISOString(),
+    createdAt: new Date('1995-12-17T03:17:00').toISOString(),
     ...config,
   }
 

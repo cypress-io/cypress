@@ -84,9 +84,6 @@ function openConnection () {
   }
 }
 
-const isManualUpdateOpen = ref(false)
-const newProjectId = ref('')
-
 const notions = [
   {
     icon: SmartIcon,
