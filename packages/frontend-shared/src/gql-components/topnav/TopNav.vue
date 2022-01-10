@@ -392,8 +392,6 @@ onClickOutside(promptsEl, () => {
   }, 300)
 })
 
-// using onKeyStroke twice as array of keys is not supported till vueuse 6.6:
-
 const resetPrompt = (event) => {
   if (promptsEl.value === null) {
     return
@@ -406,15 +404,7 @@ const resetPrompt = (event) => {
   }
 }
 
-onKeyStroke('Enter', (event) => {
-  resetPrompt(event)
-})
-
-onKeyStroke(' ', (event) => {
-  resetPrompt(event)
-})
-
-onKeyStroke('Escape', (event) => {
+onKeyStroke(['Enter', ' ', 'Escape'], (event) => {
   resetPrompt(event)
 })
 

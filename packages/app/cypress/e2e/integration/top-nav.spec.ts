@@ -298,6 +298,8 @@ describe('App Top Nav Workflows', () => {
           name: 'Profile Settings',
           href: 'https://on.cypress.io/dashboard/profile',
         })
+
+        cy.findByTestId('user-avatar-panel').should('be.visible')
       })
 
       it('replaces user avatar after logout', () => {
@@ -356,7 +358,7 @@ describe('App Top Nav Workflows', () => {
         mockLogInActionsForUser(mockUser)
 
         cy.findByTestId('app-header-bar').within(() => {
-          cy.findByTestId('user-avatar').should('not.exist')
+          cy.findByTestId('user-avatar-title').should('not.exist')
           cy.findByRole('button', { name: 'Log In' }).click()
         })
 
@@ -379,14 +381,14 @@ describe('App Top Nav Workflows', () => {
         })
 
         cy.get('@logInModal').should('not.exist')
-        cy.findByTestId('app-header-bar').findByTestId('user-avatar').should('be.visible')
+        cy.findByTestId('app-header-bar').findByTestId('user-avatar-title').should('be.visible')
       })
 
       it('shows log in modal workflow for user with only email', () => {
         mockLogInActionsForUser(mockUserNoName)
 
         cy.findByTestId('app-header-bar').within(() => {
-          cy.findByTestId('user-avatar').should('not.exist')
+          cy.findByTestId('user-avatar-title').should('not.exist')
           cy.findByRole('button', { name: 'Log In' }).click()
         })
 
@@ -409,7 +411,7 @@ describe('App Top Nav Workflows', () => {
         })
 
         cy.get('@logInModal').should('not.exist')
-        cy.findByTestId('app-header-bar').findByTestId('user-avatar').should('be.visible')
+        cy.findByTestId('app-header-bar').findByTestId('user-avatar-title').should('be.visible')
       })
     })
   })

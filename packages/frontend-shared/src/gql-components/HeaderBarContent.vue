@@ -44,6 +44,7 @@
             <UserAvatar
               :email="email"
               class="h-24px w-24px"
+              data-cy="user-avatar-title"
             />
             <span class="sr-only">{{ t('topNav.login.profileMenuLabel') }}</span>
           </template>
@@ -59,6 +60,7 @@
                 <UserAvatar
                   :email="email"
                   class="h-48px mr-16px w-48px"
+                  data-cy="user-avatar-panel"
                 />
                 <div>
                   <span class="text-gray-800">{{ props.gql?.cloudViewer?.fullName }}</span>
