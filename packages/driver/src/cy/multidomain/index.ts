@@ -153,30 +153,47 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
       communicator.on('log:added', onLogAdded)
       communicator.on('log:changed', onLogChanged)
 
-      const cleanup = async () => {
+      const cleanupCommands = async () => {
         communicator.off('command:enqueued', addCommand)
-        communicator.off('log:added', onLogAdded)
 
         // don't allow for new commands to be enqueued, but wait for commands to update in the secondary domain
         const pendingCommands = Object.keys(commands).map((command) => commands[command].deferred.promise)
+
+        return Promise.all(pendingCommands).then(() => {
+          communicator.off('command:update', updateCommand)
+        })
+      }
+
+      const cleanupLogs = async () => {
+        communicator.off('log:added', onLogAdded)
+
         const pendingLogs = Object.keys(logs).filter((log) => logs[log]?.deferred).map((log) => logs[log].deferred.promise)
 
-        return Promise.all(pendingCommands.concat(pendingLogs)).then(() => {
-          communicator.off('command:update', updateCommand)
+        return Promise.all(pendingLogs).then(() => {
           communicator.off('log:changed', onLogChanged)
         })
       }
 
       return new Bluebird((resolve, reject) => {
         communicator.once('ran:domain:fn', () => {
-          // if 'done is NOT passed in
+          // if 'done is NOT passed in (add support once #19465 is merged in)
           // all commands in the secondary should be enqueued here. go ahead and bind the cleanup method for when the queue finishes
           // if done is passed in, wait to unbind this method
-          // cleanup()
+          // if no commands are enqueued, clean up the logs
+          // this case is common if there are only assertions enqueued in the secondary domain
+          if (!Object.keys(commands).length) {
+            cleanupLogs()
+            cleanupCommands()
+          }
+
           resolve()
         })
 
-        communicator.once('queue:finished', cleanup)
+        // otherwise, if commands are queued, wait for them to finish in the secondary domain and then start the cleanup methods
+        communicator.once('queue:finished', () => {
+          cleanupCommands()
+          cleanupLogs()
+        })
 
         // fired once the spec bridge is set up and ready to
         // receive messages
@@ -202,6 +219,8 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
               error: err.message,
             })
 
+            cleanupLogs()
+            cleanupCommands()
             reject(wrappedErr)
           }
 
