@@ -14,17 +14,21 @@ describe('Specs Page', () => {
         cy.startAppServer('component')
         cy.visitApp()
 
-        cy.findAllByTestId('card').eq(0).as('ComponentCard').within(() => {
+        // With no specs present, the page renders two cards, one for creating from found components,
+        // another for creating from found stories.
+        cy.findAllByTestId('card').eq(0).as('ComponentCard')
+        .should('have.attr', 'tabindex', '0')
+        .within(() => {
           cy.findByRole('heading', { level: 2, name: defaultMessages.createSpec.component.importFromComponent.header }).should('be.visible')
           cy.contains(defaultMessages.createSpec.component.importFromComponent.description).should('be.visible')
         })
-        .should('have.attr', 'tabindex', '0')
 
-        cy.findAllByTestId('card').eq(1).as('StoryCard').within(() => {
+        cy.findAllByTestId('card').eq(1).as('StoryCard')
+        .should('have.attr', 'tabindex', '0')
+        .within(() => {
           cy.findByRole('heading', { level: 2, name: defaultMessages.createSpec.component.importFromStory.header }).should('be.visible')
           cy.contains(defaultMessages.createSpec.component.importFromStory.description).should('be.visible')
         })
-        .should('have.attr', 'tabindex', '0')
       })
 
       it('shows create first spec page with create from component and create from story options', () => {
@@ -46,12 +50,88 @@ describe('Specs Page', () => {
         .and('have.attr', 'href', '#/settings?section=project&setting=specPattern')
       })
 
-      it('shows the create from story modal when option is selected', () => {
-        cy.get('@StoryCard').click()
+      context('create from story', () => {
+        beforeEach(() => {
+          cy.get('@StoryCard').click()
 
-        cy.findByRole('dialog', { name: 'Create from story' }).within(() => {
-          cy.validateExternalLink({ name: 'Need help?', href: 'https://on.cypress.io' })
-          cy.findByRole('button', { name: 'Close' }).click()
+          cy.findByRole('dialog', { name: defaultMessages.createSpec.component.importFromStory.header }).as('CreateFromStoryDialog')
+
+          cy.get('@CreateFromStoryDialog').within(() => {
+            cy.validateExternalLink({ name: 'Need help?', href: 'https://on.cypress.io' })
+          })
+
+          cy.findByRole('button', { name: 'Close' }).as('DialogCloseButton')
+        })
+
+        it('shows dialog that can be dismissed with Close (x) button press', () => {
+          cy.get('@DialogCloseButton').click()
+          cy.findByRole('dialog').should('not.exist')
+        })
+
+        it('shows input for file extension filter', () => {
+          cy.get('@CreateFromStoryDialog').within(() => {
+            cy.findByTestId('file-match-indicator').should('contain', '1 Match')
+            cy.findByRole('button', { name: '**/*.stories.*' }).click()
+            cy.findByPlaceholderText('Extensions to include e.g. *.tsx, *.vue')
+            .as('ExtensionInput')
+            .clear()
+            .type('foobar')
+
+            cy.findByTestId('file-match-indicator').should('contain', 'No Matches')
+
+            cy.findByTestId('no-results-clear').click()
+
+            cy.get('@ExtensionInput').should('have.value', '**/*.stories.*')
+
+            cy.findByTestId('file-match-indicator').should('contain', '1 Match')
+          })
+        })
+
+        it('shows input for file name filter', () => {
+          cy.get('@CreateFromStoryDialog').within(() => {
+            cy.findByLabelText('file-name-input').as('FileNameInput')
+            .should('have.value', '')
+
+            cy.findByTestId('file-match-indicator').should('contain', '1 Match')
+
+            cy.get('@FileNameInput')
+            .type('foobar')
+
+            cy.findByTestId('file-match-indicator').should('contain', 'No Matches')
+
+            cy.findByTestId('no-results-clear').click()
+
+            cy.findByTestId('file-match-indicator').should('contain', '1 Match')
+
+            cy.get('@FileNameInput')
+            .type('Button.stories.jsx')
+
+            cy.findByTestId('file-match-indicator').should('contain', '1 of 1 Matches')
+          })
+        })
+
+        it('shows success modal with spec is created from story', () => {
+          cy.get('@CreateFromStoryDialog').within(() => {
+            cy.findAllByTestId('file-list-row').eq(0).as('NewSpecFile')
+
+            // TODO: assert visibility of secondary text on hover/focus when
+            // item is made keyboard accessible
+            // cy.get('@NewSpecFile).focus()
+            // cy.findByText('src/stories/Button.stories.jsx').should('be.visible')
+
+            cy.get('@NewSpecFile').click()
+          })
+
+          cy.findByRole('dialog', { name: defaultMessages.createSpec.successPage.header }).as('SuccessDialog').within(() => {
+            cy.validateExternalLink({ name: 'Need help?', href: 'https://on.cypress.io' })
+            cy.findByRole('button', { name: 'Close' }).should('be.visible')
+            cy.findByRole('link', { name: 'Okay, run the spec' }).should('have.attr', 'href', '#/specs/runner?file=src/stories/Button.stories.cy.jsx')
+            cy.findByRole('button', { name: 'Create another spec' }).click()
+          })
+
+          // 'Create a new spec' dialog presents with options when user indicates they want to create
+          // another spec.
+          cy.findByRole('dialog', { name: defaultMessages.createSpec.newSpecModalTitle })
         })
       })
     })
@@ -62,6 +142,23 @@ describe('Specs Page', () => {
         cy.openProject('no-specs-no-storybook')
         cy.startAppServer('component')
         cy.visitApp()
+
+        // With no specs present, the page renders two cards, one for creating from found components,
+        // another for creating from found stories. The story card is disabled due to storybook not
+        // being configured for the scaffolded project.
+        cy.findAllByTestId('card').eq(0).as('ComponentCard')
+        .should('have.attr', 'tabindex', '0')
+        .within(() => {
+          cy.findByRole('heading', { level: 2, name: defaultMessages.createSpec.component.importFromComponent.header }).should('be.visible')
+          cy.contains(defaultMessages.createSpec.component.importFromComponent.description).should('be.visible')
+        })
+
+        cy.findAllByTestId('card').eq(1).as('StoryCard')
+        .should('have.attr', 'tabindex', '-1')
+        .within(() => {
+          cy.findByRole('heading', { level: 2, name: defaultMessages.createSpec.component.importFromStory.header }).should('be.visible')
+          cy.contains(defaultMessages.createSpec.component.importFromStory.notSetupDescription).should('be.visible')
+        })
       })
 
       it('shows create first spec page with create from component option', () => {
@@ -72,17 +169,8 @@ describe('Specs Page', () => {
 
         cy.findByTestId('create-spec-page-description').should('be.visible').and('contain', defaultMessages.createSpec.page.defaultPatternNoSpecs.component.description)
 
-        cy.findAllByTestId('card').eq(0).as('ComponentCard').within(() => {
-          cy.findByRole('heading', { level: 2, name: defaultMessages.createSpec.component.importFromComponent.header }).should('be.visible')
-          cy.contains(defaultMessages.createSpec.component.importFromComponent.description).should('be.visible')
-        })
-        .should('have.attr', 'tabindex', '0')
-
-        cy.findAllByTestId('card').eq(1).as('StoryCard').within(() => {
-          cy.findByRole('heading', { level: 2, name: defaultMessages.createSpec.component.importFromStory.header }).should('be.visible')
-          cy.contains(defaultMessages.createSpec.component.importFromStory.notSetupDescription).should('be.visible')
-        })
-        .should('have.attr', 'tabindex', '-1')
+        cy.get('@ComponentCard').should('be.visible')
+        cy.get('@StoryCard').should('be.visible')
 
         cy.findByTestId('no-specs-message').should('be.visible').and('contain', defaultMessages.createSpec.noSpecsMessage)
 
@@ -90,6 +178,25 @@ describe('Specs Page', () => {
         .should('be.visible')
         .and('not.be.disabled')
         .and('have.attr', 'href', '#/settings?section=project&setting=specPattern')
+      })
+
+      context('create from component', () => {
+        beforeEach(() => {
+          cy.get('@ComponentCard').click()
+
+          cy.findByRole('dialog', { name: defaultMessages.createSpec.component.importFromComponent.chooseAComponentHeader }).as('CreateFromComponentDialog')
+
+          cy.get('@CreateFromComponentDialog').within(() => {
+            cy.validateExternalLink({ name: 'Need help?', href: 'https://on.cypress.io' })
+          })
+
+          cy.findByRole('button', { name: 'Close' }).as('DialogCloseButton')
+        })
+
+        it('shows dialog that can be dismissed with Close (x) button press', () => {
+          cy.get('@DialogCloseButton').click()
+          cy.findByRole('dialog').should('not.exist')
+        })
       })
     })
   })
