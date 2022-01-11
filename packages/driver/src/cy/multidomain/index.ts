@@ -1,5 +1,5 @@
 import Bluebird from 'bluebird'
-import { createDeferred } from '../../util/deferred'
+import { createDeferred, Deferred } from '../../util/deferred'
 import $utils from '../../cypress/utils'
 import $errUtils from '../../cypress/error_utils'
 import { difference } from '../../util/difference'
@@ -62,8 +62,15 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
       // secondary domain. this way, the queue runs in the primary domain
       // with all commands, making it possible to sync up timing for
       // the reporter command log, etc
-      const commands = {}
-      const logs = {}
+      const commands: { [key: string]: {
+        deferred: Deferred
+        name: string
+      }} = {}
+
+      const logs: { [key: string]: {
+        deferred: Deferred
+        log: Cypress.Log
+      }} = {}
 
       const addCommand = (attrs) => {
         const deferred = createDeferred()
@@ -90,12 +97,12 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
         Cypress.action('cy:enqueue:command', attrs)
       }
 
-      const updateCommand = (details) => {
-        if (details.end) {
-          const command = commands[details.id]
+      const updateCommand = ({ id, end }) => {
+        if (end) {
+          const command = commands[id]
 
           if (command) {
-            delete commands[details.id]
+            delete commands[id]
             command.deferred.resolve()
           }
         }
@@ -109,42 +116,36 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
 
         const log = Cypress.log(attrs)
 
-        // if the log needs to stream updates, defer its result
+        // if the log needs to stream updates, defer its result to make sure all streamed updates come in
         if (!attrs.ended) {
           logs[log.get('id')] = {
             log,
             deferred: createDeferred(),
           }
         }
-
-        return
       }
 
       const onLogChanged = ({ logChanged }) => {
-        const readableLog = logs[logChanged.id].log.get()
+        const { deferred, log } = logs[logChanged.id]
 
-        const diff = difference(logChanged, readableLog)
+        // NOTE: Cypress.LogConfig only contains partial types of what exists on the log attributes, missing a lot of 'private' properties
+        const logAttrs = log.get()
 
-        Object.keys(diff).forEach((key) => {
-          const logResults = logChanged[key]
+        const updatedLogAttributes: Partial<Cypress.Log> = difference(logChanged, logAttrs)
 
-          // TODO: whitelist params but try this first to see if problem resolves
-          // if its undefined or null, but is an object that is empty, skip it
-          if (logResults !== undefined && logResults !== null && !(_.isObject(logResults) && _.isEmpty(logResults))) {
-            logs[logChanged.id].log.set(key, logResults)
+        _.forEach(updatedLogAttributes, (value, key) => {
+          // if the updated value from the secondary domain is undefined, null, or an empty object/array, skip the update
+          if (value !== undefined && value !== null && !(_.isObject(value) && _.isEmpty(value))) {
+            log.set(key as keyof Cypress.LogConfig, value)
           }
         })
 
-        const isEnded = logs[logChanged.id].log.get('ended')
+        const isEnded = log.get('ended' as keyof Cypress.LogConfig)
 
         if (isEnded) {
-          const log = logs[logChanged.id]
-
           delete logs[logChanged.id]
-          log.deferred.resolve()
+          deferred.resolve()
         }
-
-        return
       }
 
       communicator.on('command:enqueued', addCommand)
@@ -153,21 +154,22 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
       communicator.on('log:added', onLogAdded)
       communicator.on('log:changed', onLogChanged)
 
-      const cleanupCommands = async () => {
+      const cleanupCommands = () => {
         communicator.off('command:enqueued', addCommand)
 
         // don't allow for new commands to be enqueued, but wait for commands to update in the secondary domain
-        const pendingCommands = Object.keys(commands).map((command) => commands[command].deferred.promise)
+        const pendingCommands = _.map(commands, (command) => command.deferred.promise)
 
         return Promise.all(pendingCommands).then(() => {
           communicator.off('command:update', updateCommand)
         })
       }
 
-      const cleanupLogs = async () => {
+      const cleanupLogs = () => {
         communicator.off('log:added', onLogAdded)
 
-        const pendingLogs = Object.keys(logs).filter((log) => logs[log]?.deferred).map((log) => logs[log].deferred.promise)
+        // don't allow for new logs to be added, but wait for logs to update changes in the secondary domain
+        const pendingLogs = _.map(logs, (log) => log.deferred.promise)
 
         return Promise.all(pendingLogs).then(() => {
           communicator.off('log:changed', onLogChanged)
@@ -181,7 +183,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
           // if done is passed in, wait to unbind this method
           // if no commands are enqueued, clean up the logs
           // this case is common if there are only assertions enqueued in the secondary domain
-          if (!Object.keys(commands).length) {
+          if (_.size(commands) === 0) {
             cleanupLogs()
             cleanupCommands()
           }
