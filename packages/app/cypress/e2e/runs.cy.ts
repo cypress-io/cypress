@@ -155,7 +155,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
           for (const proj of obj.result.data.cloudProjectsBySlugs) {
             proj.__typename = 'CloudProjectUnauthorized'
             proj.message = 'Cloud Project Unauthorized'
-            proj.cloudProjectRequestAccess = false
+            proj.hasRequestedAccess = false
           }
         }
 
@@ -195,7 +195,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
           for (const proj of obj.result.data.cloudProjectsBySlugs) {
             proj.__typename = 'CloudProjectUnauthorized'
             proj.message = 'Cloud Project Unauthorized'
-            proj.cloudProjectRequestAccess = true
+            proj.hasRequestedAccess = true
           }
         }
 
@@ -332,8 +332,8 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.loginUser()
       cy.visitApp()
       cy.get('[href="#/runs"]').click()
-      cy.intercept('mutation-ExternalLink_OpenExternal').as('OpenExternal')
-      cy.get('[data-cy="external"]').first().click()
+      cy.intercept('mutation-ExternalLink_OpenExternal', { 'data': { 'openExternal': true } }).as('OpenExternal')
+      cy.get('[data-cy^="runCard-"]').first().click()
       cy.wait('@OpenExternal').then((interception: Interception) => {
         expect(interception.request.url).to.include('graphql/mutation-ExternalLink_OpenExternal')
       })

@@ -1,6 +1,6 @@
 <template>
   <ExternalLink
-    :data-e2e="run.id"
+    :data-cy="`runCard-${run.id}`"
     class="border rounded bg-light-50 border-gray-100 mb-4 w-full
   block overflow-hidden hocus-default"
     :href="run.url || '#'"
