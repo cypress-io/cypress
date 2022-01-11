@@ -28,7 +28,7 @@ describe('lib/project_utils', () => {
         },
       })
 
-      expect(str).to.eq('http://localhost:8888/__/#/tests/__all')
+      expect(str).to.eq('http://localhost:8888/__/#/specs/runner?file=/__all')
     })
 
     it('normalizes to __all when absoluteSpecUrl is __all', () => {
@@ -40,7 +40,7 @@ describe('lib/project_utils', () => {
         },
       })
 
-      expect(str).to.eq('http://localhost:8888/__/#/tests/__all')
+      expect(str).to.eq('http://localhost:8888/__/#/specs/runner?file=/__all')
     })
 
     it('normalizes to __all when absoluteSpecUrl is __all', () => {
@@ -52,7 +52,7 @@ describe('lib/project_utils', () => {
         },
       })
 
-      expect(str).to.eq('http://localhost:8888/__/#/tests/__all')
+      expect(str).to.eq('http://localhost:8888/__/#/specs/runner?file=/__all')
     })
 
     it('returns fully qualified url when spec exists', function () {
@@ -63,7 +63,7 @@ describe('lib/project_utils', () => {
         },
       })
 
-      expect(str).to.eq('http://localhost:8888/__/#/tests/cypress/integration/foo/bar.js')
+      expect(str).to.eq('http://localhost:8888/__/#/specs/runner?file=cypress/integration/foo/bar.js')
     })
 
     it('returns fully qualified url on absolute path to spec', function () {
@@ -78,7 +78,7 @@ describe('lib/project_utils', () => {
         },
       })
 
-      expect(str).to.eq('http://localhost:8888/__/#/tests/tests/sub/sub_test.coffee')
+      expect(str).to.eq('http://localhost:8888/__/#/specs/runner?file=tests/sub/sub_test.coffee')
     })
 
     it('escapses %, &', function () {
@@ -93,7 +93,7 @@ describe('lib/project_utils', () => {
         },
       })
 
-      expect(str).to.eq('http://localhost:8888/__/#/tests/tests/sub/a%26b%25c.js')
+      expect(str).to.eq('http://localhost:8888/__/#/specs/runner?file=tests/sub/a%26b%25c.js')
     })
 
     // ? is invalid in Windows, but it can be tested here
@@ -110,7 +110,7 @@ describe('lib/project_utils', () => {
         },
       })
 
-      expect(str).to.eq('http://localhost:8888/__/#/tests/tests/sub/a%3F.spec.js')
+      expect(str).to.eq('http://localhost:8888/__/#/specs/runner?file=tests/sub/a%3F.spec.js')
     })
 
     it('escapes %, &, ? in the url dir', function () {
@@ -125,7 +125,7 @@ describe('lib/project_utils', () => {
         },
       })
 
-      expect(str).to.eq('http://localhost:8888/__/#/tests/tests/s%25%26%3Fub/a.spec.js')
+      expect(str).to.eq('http://localhost:8888/__/#/specs/runner?file=tests/s%25%26%3Fub/a.spec.js')
     })
   })
 
