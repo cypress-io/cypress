@@ -11,6 +11,6 @@ describe('e2e proxying spec', () => {
   })
 
   systemTests.it('integrity check', {
-    spec: 'proxying_spec.js',
+    spec: 'proxying.cy.js',
   })
 })

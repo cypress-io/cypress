@@ -416,6 +416,9 @@ type CurrentProject implements Node & ProjectLike {
   """Absolute path to the project on the filesystem"""
   projectRoot: String!
 
+  """Project saved state"""
+  savedState: JSON
+
   """Specs for a project conforming to Relay Connection specification"""
   specs(
     """Returns the elements in the list that come after the specified cursor"""
@@ -684,6 +687,9 @@ type Mutation {
 
   """Save the projects preferences to cache"""
   setProjectPreferences(browserPath: String!, testingType: TestingTypeEnum!): Query!
+
+  """Save the prompt-shown state for this project"""
+  setPromptShown(slug: String!): Boolean
 
   """Updates the different fields of the wizard data store"""
   wizardUpdate(input: WizardUpdateInput!): Wizard

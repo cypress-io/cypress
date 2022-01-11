@@ -18,24 +18,23 @@ import shortcuts from './lib/shortcuts'
 import Header, { ReporterHeaderProps } from './header/header'
 import Runnables from './runnables/runnables'
 import TestingPreferences from './preferences/testing-preferences'
+import { BaseStore } from '@packages/runner-shared/src/store'
 
 interface BaseReporterProps {
-  appState?: AppState
+  appState: AppState
   className?: string
-  runnablesStore?: RunnablesStore
+  runnablesStore: RunnablesStore
   runner: Runner
-  scroller?: Scroller
-  statsStore?: StatsStore
+  scroller: Scroller
+  statsStore: StatsStore
   autoScrollingEnabled?: boolean
   isSpecsListOpen?: boolean
-  events?: Events
+  events: Events
   error?: RunnablesErrorModel
   resetStatsOnSpecChange?: boolean
   renderReporterHeader?: (props: ReporterHeaderProps) => JSX.Element
-  spec: Cypress.Cypress['spec']
   experimentalStudioEnabled: boolean
-  /** Used for component testing front-end */
-  specRunId?: string | null
+  runnerStore: BaseStore & {spec: Cypress.Spec, specRunId: string}
 }
 
 export interface SingleReporterProps extends BaseReporterProps{
@@ -79,7 +78,8 @@ class Reporter extends Component<SingleReporterProps> {
             error={error}
             runnablesStore={runnablesStore}
             scroller={scroller}
-            spec={this.props.spec}
+            spec={this.props.runnerStore.spec}
+            statsStore={this.props.statsStore}
           />
         )}
       </div>
@@ -89,10 +89,10 @@ class Reporter extends Component<SingleReporterProps> {
   // this hook will only trigger if we switch spec file at runtime
   // it never happens in normal e2e but can happen in component-testing mode
   componentDidUpdate (newProps: BaseReporterProps) {
-    this.props.runnablesStore.setRunningSpec(this.props.spec.relative)
+    this.props.runnablesStore.setRunningSpec(this.props.runnerStore.spec.relative)
     if (
       this.props.resetStatsOnSpecChange &&
-      this.props.specRunId !== newProps.specRunId
+      this.props.runnerStore.specRunId !== newProps.runnerStore.specRunId
     ) {
       runInAction('reporter:stats:reset', () => {
         this.props.statsStore.reset()
@@ -101,7 +101,7 @@ class Reporter extends Component<SingleReporterProps> {
   }
 
   componentDidMount () {
-    const { spec, appState, runnablesStore, runner, scroller, statsStore, autoScrollingEnabled, isSpecsListOpen } = this.props
+    const { appState, runnablesStore, runner, scroller, statsStore, autoScrollingEnabled, isSpecsListOpen, runnerStore } = this.props
 
     action('set:scrolling', () => {
       appState.setAutoScrolling(autoScrollingEnabled)
@@ -122,7 +122,7 @@ class Reporter extends Component<SingleReporterProps> {
 
     shortcuts.start()
     EQ.init()
-    this.props.runnablesStore.setRunningSpec(spec.relative)
+    this.props.runnablesStore.setRunningSpec(runnerStore.spec.relative)
   }
 
   componentWillUnmount () {

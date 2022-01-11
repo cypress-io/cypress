@@ -7,14 +7,14 @@ exports['e2e requests / passes'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (request_spec.js)                                                          │
-  │ Searched:   cypress/integration/request_spec.js                                                │
+  │ Specs:      1 found (request.cy.js)                                                            │
+  │ Searched:   cypress/e2e/request.cy.js                                                          │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  request_spec.js                                                                 (1 of 1)
+  Running:  request.cy.js                                                                   (1 of 1)
 
 
   redirects + requests
@@ -48,14 +48,14 @@ exports['e2e requests / passes'] = `
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     request_spec.js                                                                  │
+  │ Spec Ran:     request.cy.js                                                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/request_spec.js.mp4                 (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/request.cy.js.mp4                   (X second)
 
 
 ====================================================================================================
@@ -65,7 +65,7 @@ exports['e2e requests / passes'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  request_spec.js                          XX:XX       14       14        -        -        - │
+  │ ✔  request.cy.js                            XX:XX       14       14        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX       14       14        -        -        -  
 
@@ -81,14 +81,14 @@ exports['e2e requests fails when network immediately fails 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (request_http_network_error_failing_spec.js)                               │
-  │ Searched:   cypress/integration/request_http_network_error_failing_spec.js                     │
+  │ Specs:      1 found (request_http_network_error_failing.cy.js)                                 │
+  │ Searched:   cypress/e2e/request_http_network_error_failing.cy.js                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  request_http_network_error_failing_spec.js                                      (1 of 1)
+  Running:  request_http_network_error_failing.cy.js                                        (1 of 1)
 
 
   when network connection cannot be established
@@ -147,21 +147,21 @@ https://on.cypress.io/request
   │ Screenshots:  1                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     request_http_network_error_failing_spec.js                                       │
+  │ Spec Ran:     request_http_network_error_failing.cy.js                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/request_http_network_error_failing_spec.js/when     (1280x720)
-      network connection cannot be established -- fails (failed).png                                
+  -  /XXX/XXX/XXX/cypress/screenshots/request_http_network_error_failing.cy.js/when n     (1280x720)
+     etwork connection cannot be established -- fails (failed).png                                  
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
   -  Finished processing: /XXX/XXX/XXX/cypress/videos/request_http_network_error_fail     (X second)
-                          ing_spec.js.mp4                                                           
+                          ing.cy.js.mp4                                                             
 
 
 ====================================================================================================
@@ -171,8 +171,8 @@ https://on.cypress.io/request
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  request_http_network_error_failing_      XX:XX        1        -        1        -        - │
-  │    spec.js                                                                                     │
+  │ ✖  request_http_network_error_failing.      XX:XX        1        -        1        -        - │
+  │    cy.js                                                                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
 
@@ -188,14 +188,14 @@ exports['e2e requests fails on status code 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (request_status_code_failing_spec.js)                                      │
-  │ Searched:   cypress/integration/request_status_code_failing_spec.js                            │
+  │ Specs:      1 found (request_status_code_failing.cy.js)                                        │
+  │ Searched:   cypress/e2e/request_status_code_failing.cy.js                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  request_status_code_failing_spec.js                                             (1 of 1)
+  Running:  request_status_code_failing.cy.js                                               (1 of 1)
 
 
   when status code isnt 2xx or 3xx
@@ -266,21 +266,21 @@ https://on.cypress.io/request
   │ Screenshots:  1                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     request_status_code_failing_spec.js                                              │
+  │ Spec Ran:     request_status_code_failing.cy.js                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/request_status_code_failing_spec.js/when status     (1280x720)
-      code isnt 2xx or 3xx -- fails (failed).png                                                    
+  -  /XXX/XXX/XXX/cypress/screenshots/request_status_code_failing.cy.js/when status c     (1280x720)
+     ode isnt 2xx or 3xx -- fails (failed).png                                                      
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/request_status_code_failing_spe     (X second)
-                          c.js.mp4                                                                  
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/request_status_code_failing.cy.     (X second)
+                          js.mp4                                                                    
 
 
 ====================================================================================================
@@ -290,7 +290,7 @@ https://on.cypress.io/request
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  request_status_code_failing_spec.js      XX:XX        1        -        1        -        - │
+  │ ✖  request_status_code_failing.cy.js        XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
 
@@ -306,14 +306,14 @@ exports['e2e requests prints long http props on fail 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (request_long_http_props_failing_spec.js)                                  │
-  │ Searched:   cypress/integration/request_long_http_props_failing_spec.js                        │
+  │ Specs:      1 found (request_long_http_props_failing.cy.js)                                    │
+  │ Searched:   cypress/e2e/request_long_http_props_failing.cy.js                                  │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  request_long_http_props_failing_spec.js                                         (1 of 1)
+  Running:  request_long_http_props_failing.cy.js                                           (1 of 1)
 
 
   when status code isnt 2xx or 3xx
@@ -393,21 +393,21 @@ https://on.cypress.io/request
   │ Screenshots:  1                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     request_long_http_props_failing_spec.js                                          │
+  │ Spec Ran:     request_long_http_props_failing.cy.js                                            │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/request_long_http_props_failing_spec.js/when st     (1280x720)
-     atus code isnt 2xx or 3xx -- fails (failed).png                                                
+  -  /XXX/XXX/XXX/cypress/screenshots/request_long_http_props_failing.cy.js/when stat     (1280x720)
+     us code isnt 2xx or 3xx -- fails (failed).png                                                  
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
   -  Finished processing: /XXX/XXX/XXX/cypress/videos/request_long_http_props_failing     (X second)
-                          _spec.js.mp4                                                              
+                          .cy.js.mp4                                                                
 
 
 ====================================================================================================
@@ -417,8 +417,8 @@ https://on.cypress.io/request
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  request_long_http_props_failing_spe      XX:XX        1        -        1        -        - │
-  │    c.js                                                                                        │
+  │ ✖  request_long_http_props_failing.cy.      XX:XX        1        -        1        -        - │
+  │    js                                                                                          │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
 
