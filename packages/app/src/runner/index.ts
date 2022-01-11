@@ -153,7 +153,7 @@ function setupRunner () {
  * E2E uses relative, serving from our internal server's spec controller.
  */
 function getSpecUrl (namespace: string, specSrc: string) {
-  return `/${namespace}/iframes/${encodeURIComponent(specSrc)}`
+  return `/${namespace}/iframes/${specSrc}`
 }
 
 /**
@@ -264,7 +264,7 @@ function runSpecE2E (spec: BaseSpec) {
   autIframe.showInitialBlankContents()
 
   // create Spec IFrame
-  const specSrc = getSpecUrl(config.namespace, spec.relative)
+  const specSrc = getSpecUrl(config.namespace, encodeURIComponent(spec.relative))
 
   const $specIframe = createSpecIFrame(specSrc)
 
