@@ -1,15 +1,15 @@
 require('graceful-fs').gracefulify(require('fs'))
 const stripAnsi = require('strip-ansi')
 const debug = require('debug')(`cypress:lifecycle:child:run_require_async_child:${process.pid}`)
-const tsNodeUtil = require('../../util/ts_node')
+const tsNodeUtil = require('./ts_node')
 const util = require('../util')
-const { RunPlugins } = require('./RunPlugins')
+const { RunPlugins } = require('./run_plugins')
 
 let tsRegistered = false
 
 /**
  * Executes and returns the passed `configFile` file in the ipc `loadConfig` event
- * @param {*} ipc Inter Process Comunication protocol
+ * @param {*} ipc Inter Process Communication protocol
  * @param {*} configFile the file we are trying to load
  * @param {*} projectRoot the root of the typescript project (useful mainly for tsnode)
  * @returns
@@ -39,9 +39,16 @@ function run (ipc, configFile, projectRoot) {
   })
 
   process.on('unhandledRejection', (event) => {
-    const err = (event && event.reason) || event
+    let err = event
 
-    debug('unhandled rejection:', util.serializeError(err))
+    debug('unhandled rejection:', event)
+
+    // Rejected Bluebird promises will return a reason object.
+    // OpenSSL error returns a reason as user-friendly string.
+    if (event && event.reason && typeof event.reason === 'object') {
+      err = event.reason
+    }
+
     ipc.send('childProcess:unhandledError', util.serializeError(err))
 
     return false

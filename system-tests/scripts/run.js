@@ -47,7 +47,7 @@ if (!run || !run.length) {
 
     It should look something like this:
 
-      $ yarn test ./test/unit/api_spec.js
+      $ yarn test ./test/unit/api.cy.js
       $ yarn test api_spec
   `)
 }

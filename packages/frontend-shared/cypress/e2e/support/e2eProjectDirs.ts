@@ -68,6 +68,7 @@ export const e2eProjectDirs = [
   'screen-size',
   'selectFile',
   'shadow-dom-global-inclusion',
+  'simple-ct',
   'spec-generation',
   'spec-name-special-characters',
   'studio',

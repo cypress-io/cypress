@@ -3,6 +3,9 @@ import type { InitializeProjectOptions, FoundBrowser, FoundSpec, LaunchOpts, Ope
 import execa from 'execa'
 import path from 'path'
 import assert from 'assert'
+import Debug from 'debug'
+
+const debug = Debug('cypress:data-context:project-actions')
 
 import type { ProjectShape } from '../data/coreDataShape'
 
@@ -27,6 +30,8 @@ export interface ProjectApiShape {
   clearProjectPreferences(projectTitle: string): Promise<unknown>
   clearAllProjectPreferences(): Promise<unknown>
   closeActiveProject(): Promise<unknown>
+  getCurrentProjectSavedState(): {} | undefined
+  setPromptShown(slug: string): void
   getDevServer (): {
     updateSpecs: (specs: FoundSpec[]) => void
   }
@@ -296,6 +301,10 @@ export class ProjectActions {
     await this.api.clearAllProjectPreferences()
   }
 
+  setPromptShown (slug: string) {
+    this.api.setPromptShown(slug)
+  }
+
   async createComponentIndexHtml (template: string) {
     const project = this.ctx.currentProject
 
@@ -402,15 +411,35 @@ export class ProjectActions {
     this.ctx.actions.electron.showBrowserWindow()
   }
 
+  get defaultE2EPath () {
+    const projectRoot = this.ctx.currentProject
+
+    assert(projectRoot, `Cannot create e2e directory without currentProject.`)
+
+    return path.join(projectRoot, 'cypress', 'e2e')
+  }
+
+  async maybeCreateE2EDir () {
+    const stats = await this.ctx.fs.stat(this.defaultE2EPath)
+
+    if (stats.isDirectory()) {
+      return
+    }
+
+    debug(`Creating ${this.defaultE2EPath}`)
+
+    return this.ctx.fs.mkdirp(this.defaultE2EPath)
+  }
+
   async scaffoldIntegration () {
     const projectRoot = this.ctx.currentProject
 
     assert(projectRoot, `Cannot create spec without currentProject.`)
 
-    const integrationFolder = path.join(projectRoot, 'cypress', 'e2e')
+    await this.maybeCreateE2EDir()
 
     const results = await codeGenerator(
-      { templateDir: templates['scaffoldIntegration'], target: integrationFolder },
+      { templateDir: templates['scaffoldIntegration'], target: this.defaultE2EPath },
       {},
     )
 
@@ -422,18 +451,23 @@ export class ProjectActions {
       return {
         fileParts: this.ctx.file.normalizeFileToFileParts({
           absolute: res.file,
+          searchFolder: this.defaultE2EPath,
           projectRoot,
-          searchFolder: integrationFolder,
         }),
         codeGenResult: res,
       }
     })
 
-    const specPattern = await this.ctx.project.specPatternForTestingType('e2e')
+    const { specPattern, ignoreSpecPattern } = await this.ctx.project.specPatternsForTestingType(projectRoot, 'e2e')
 
     if (!specPattern) {
       throw Error('Could not find specPattern for project')
     }
+
+    // created new specs - find and cache them!
+    this.ctx.project.setSpecs(
+      await this.ctx.project.findSpecs(projectRoot, 'e2e', specPattern, ignoreSpecPattern || [], []),
+    )
 
     return withFileParts
   }

@@ -16,12 +16,16 @@ exports['src/index .getDefaultValues returns list of public config keys 1'] = {
   "blockHosts": null,
   "chromeWebSecurity": true,
   "clientCertificates": [],
-  "component": {},
+  "component": {
+    "specPattern": "**/*.cy.{js,jsx,ts,tsx}"
+  },
   "defaultCommandTimeout": 4000,
   "downloadsFolder": "cypress/downloads",
   "e2e": {
-    "specPattern": "cypress/integration/**/*"
+    "specPattern": "cypress/e2e/**/*.cy.{js,jsx,ts,tsx}"
   },
+  "defaultCommandTimeout": 4000,
+  "downloadsFolder": "cypress/downloads",
   "env": {},
   "execTimeout": 60000,
   "exit": true,

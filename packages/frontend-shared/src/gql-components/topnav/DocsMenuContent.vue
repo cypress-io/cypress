@@ -12,7 +12,7 @@
       <li
         v-for="item in list.children"
         :key="item.text"
-        class="flex items-center text-indigo-500 mb-4px"
+        class="flex mb-4px text-indigo-500 items-center"
       >
         <i-cy-book_x16 class="icon-dark-indigo-500 icon-light-indigo-50" />
         <ExternalLink
@@ -42,8 +42,10 @@ import ExternalLink from '../ExternalLink.vue'
 
 const { t } = useI18n()
 
+export type DocsMenuVariant = 'ci1' | 'orchestration1' | 'main'
+
 const emit = defineEmits<{
-  (e: 'setDocsContent', value: 'ci' | 'orchestration' | 'main'): void,
+  (e: 'setDocsContent', value:DocsMenuVariant): void,
 }>()
 
 defineProps<{
@@ -65,7 +67,7 @@ const docsMenu: {
   children: {
     text: string
     link: LinkWithParams,
-    changeContent?: 'ci' | 'orchestration' | 'main'
+    changeContent?: DocsMenuVariant
     }[]
 }[] = [{
   title: t('topNav.docsMenu.gettingStartedTitle'),
@@ -132,7 +134,7 @@ const docsMenu: {
   title: t('topNav.docsMenu.ciTitle'),
   children: [{
     text: t('topNav.docsMenu.ciSetup'),
-    changeContent: 'ci',
+    changeContent: 'ci1',
     link: {
       url: 'https://on.cypress.io/ci',
       params: {
@@ -142,22 +144,12 @@ const docsMenu: {
     },
   }, {
     text: t('topNav.docsMenu.fasterTests'),
+    changeContent: 'orchestration1',
     link: {
       url: 'https://on.cypress.io/parallelization',
       params: {
         utm_medium,
         utm_content: 'Parallelization',
-      },
-    },
-  },
-  {
-    text: t('topNav.docsMenu.smartOrchestration'),
-    changeContent: 'orchestration',
-    link: {
-      url: 'https://on.cypress.io/smart-orchestration',
-      params: {
-        utm_medium,
-        utm_content: 'Smart Orchestration',
       },
     },
   }],

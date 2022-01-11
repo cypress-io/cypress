@@ -17,7 +17,7 @@ describe('e2e reporters', () => {
 
   it('reports error if cannot load reporter', function () {
     return systemTests.exec(this, {
-      spec: 'simple_passing_spec.js',
+      spec: 'simple_passing.cy.js',
       snapshot: true,
       expectedExitCode: 1,
       reporter: 'module-does-not-exist',
@@ -27,7 +27,7 @@ describe('e2e reporters', () => {
   // https://github.com/cypress-io/cypress/issues/1192
   it('reports error when thrown from reporter', function () {
     return systemTests.exec(this, {
-      spec: 'simple_passing_spec.js',
+      spec: 'simple_passing.cy.js',
       snapshot: true,
       expectedExitCode: 1,
       reporter: 'reporters/throws.js',
@@ -36,7 +36,7 @@ describe('e2e reporters', () => {
 
   it('supports junit reporter and reporter options', function () {
     return systemTests.exec(this, {
-      spec: 'simple_passing_spec.js',
+      spec: 'simple_passing.cy.js',
       snapshot: true,
       reporter: 'junit',
       reporterOptions: 'mochaFile=junit-output/result.[hash].xml,testCaseSwitchClassnameAndName=true',
@@ -59,7 +59,7 @@ describe('e2e reporters', () => {
 
   it('supports local custom reporter', function () {
     return systemTests.exec(this, {
-      spec: 'simple_passing_spec.js',
+      spec: 'simple_passing.cy.js',
       snapshot: true,
       reporter: 'reporters/custom.js',
     })
@@ -67,11 +67,11 @@ describe('e2e reporters', () => {
 
   it('sends file to reporter', function () {
     return systemTests.exec(this, {
-      spec: 'simple_passing_spec.js',
+      spec: 'simple_passing.cy.js',
       reporter: 'reporters/uses-file.js',
     })
     .then(({ stdout }) => {
-      expect(stdout).to.include('suite.file: cypress/integration/simple_passing_spec.js')
+      expect(stdout).to.include('suite.file: cypress/e2e/simple_passing.cy.js')
     })
   })
 
@@ -79,7 +79,7 @@ describe('e2e reporters', () => {
     return mochaAwesomes.forEach((ma) => {
       it(`passes with ${ma} npm custom reporter`, function () {
         return systemTests.exec(this, {
-          spec: 'simple_passing_spec.js',
+          spec: 'simple_passing.cy.js',
           snapshot: true,
           // cypress supports passing module name, relative path, or absolute path
           reporter: require.resolve(ma),
@@ -105,7 +105,7 @@ describe('e2e reporters', () => {
 
       it(`fails with ${ma} npm custom reporter`, function () {
         return systemTests.exec(this, {
-          spec: 'simple_failing_hook_spec.js',
+          spec: 'simple_failing_hook.cy.js',
           snapshot: true,
           expectedExitCode: 3,
           reporter: require.resolve(ma),
@@ -138,7 +138,7 @@ describe('e2e reporters', () => {
 
   it('supports teamcity reporter and reporter options', function () {
     return systemTests.exec(this, {
-      spec: 'simple_passing_spec.js',
+      spec: 'simple_passing.cy.js',
       snapshot: true,
       reporter: 'teamcity',
       reporterOptions: 'topLevelSuite=top suite,flowId=12345,useStdError=\'true\',useStdError=\'true\',recordHookFailures=\'true\',actualVsExpected=\'true\'',
@@ -147,7 +147,7 @@ describe('e2e reporters', () => {
 
   it('shows slow tests in yellow', function () {
     return systemTests.exec(this, {
-      spec: 'slowTestThreshold_spec.js',
+      spec: 'slowTestThreshold.cy.js',
       snapshot: false,
       config: {
         slowTestThreshold: 1,

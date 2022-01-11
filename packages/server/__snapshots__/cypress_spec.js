@@ -206,7 +206,7 @@ This machine sent the following parameters:
   "browserName": "Electron",
   "browserVersion": "59.1.2.3",
   "specs": [
-    "cypress/integration/app_spec.js"
+    "cypress/e2e/app.cy.js"
   ]
 }
 

@@ -23,10 +23,10 @@ import system from './util/system'
 import { ensureProp } from './util/class-helpers'
 
 import { fs } from './util/fs'
-
-import devServer from './plugins/dev-server'
 import preprocessor from './plugins/preprocessor'
 import { checkSupportFile } from './project_utils'
+
+import devServer from './plugins/dev-server'
 import type { FoundBrowser, OpenProjectLaunchOptions, FoundSpec } from '@packages/types'
 import { DataContext, getCtx } from '@packages/data-context'
 
@@ -35,7 +35,7 @@ import { DataContext, getCtx } from '@packages/data-context'
 // and are required when creating a project.
 type ReceivedCypressOptions =
   Pick<Cypress.RuntimeConfigOptions, 'hosts' | 'projectName' | 'clientRoute' | 'devServerPublicPathRoute' | 'namespace' | 'report' | 'socketIoCookie' | 'configFile' | 'isTextTerminal' | 'isNewProject' | 'proxyUrl' | 'browsers' | 'browserUrl' | 'socketIoRoute' | 'arch' | 'platform' | 'spec' | 'specs' | 'browser' | 'version' | 'remote'>
-  & Pick<Cypress.ResolvedConfigOptions, 'chromeWebSecurity' | 'supportFolder' | 'experimentalSourceRewriting' | 'fixturesFolder' | 'reporter' | 'reporterOptions' | 'screenshotsFolder' | 'pluginsFile' | 'supportFile' | 'baseUrl' | 'viewportHeight' | 'viewportWidth' | 'port' | 'experimentalInteractiveRunEvents' | 'userAgent' | 'downloadsFolder' | 'env' | 'testFiles' | 'ignoreSpecPattern'> // TODO: Figure out how to type this better.
+  & Pick<Cypress.ResolvedConfigOptions, 'chromeWebSecurity' | 'supportFolder' | 'experimentalSourceRewriting' | 'fixturesFolder' | 'reporter' | 'reporterOptions' | 'screenshotsFolder' | 'pluginsFile' | 'supportFile' | 'baseUrl' | 'viewportHeight' | 'viewportWidth' | 'port' | 'experimentalInteractiveRunEvents' | 'userAgent' | 'downloadsFolder' | 'env' | 'testFiles' | 'ignoreSpecPattern' | 'specPattern'> // TODO: Figure out how to type this better.
 
 export interface Cfg extends ReceivedCypressOptions {
   projectRoot: string
@@ -46,6 +46,8 @@ export interface Cfg extends ReceivedCypressOptions {
     lastOpened?: number | null
     promptsShown?: object | null
   }
+  e2e: Partial<Cfg>
+  component: Partial<Cfg>
 }
 
 const localCwd = cwd()
