@@ -8,6 +8,8 @@ import $stackUtils from './stack_utils'
 import { allCommands } from '../cy/commands'
 import { addCommand } from '../cy/net-stubbing'
 
+const PLACEHOLDER_COMMANDS = ['mount', 'hover']
+
 const builtInCommands = [
   ..._.toArray(allCommands).map((c) => c.default || c),
   addCommand,
@@ -229,7 +231,7 @@ export default {
           })
         }
 
-        if (addingBuiltIns) {
+        if (addingBuiltIns && !PLACEHOLDER_COMMANDS.includes(name)) {
           builtInCommandNames[name] = true
         }
 
