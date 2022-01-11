@@ -356,10 +356,15 @@ module.exports = {
       return false
     }
 
+    // adds a header to the request to mark it as a request for the AUT frame
+    // itself, so the proxy can utilize that for injection purposes
     win.webContents.session.webRequest.onBeforeSendHeaders((details, cb) => {
       if (
+        // isn't an iframe
         details.resourceType !== 'subFrame'
+        // the top-level frame or a nested frame
         || !isFirstLevelIFrame(details.frame)
+        // is the spec frame, not the AUT
         || details.url.includes('__cypress')
       ) {
         cb({})

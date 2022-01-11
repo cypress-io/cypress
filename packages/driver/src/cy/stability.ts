@@ -39,22 +39,22 @@ export const create = (Cypress, state) => ({
     })
   },
 
-  isAnticipatingMultidomain (anticipating) {
-    if (state('anticipatingMultidomain') === anticipating) {
+  isAnticipatingMultiDomain (anticipating) {
+    if (state('anticipatingMultiDomain') === anticipating) {
       return
     }
 
-    const whenAnticipatingMultidomain = state('whenAnticipatingMultidomain')
+    const whenAnticipatingMultiDomain = state('whenAnticipatingMultiDomain')
 
-    if (anticipating && whenAnticipatingMultidomain) {
-      whenAnticipatingMultidomain()
+    if (anticipating && whenAnticipatingMultiDomain) {
+      whenAnticipatingMultiDomain()
     }
 
-    state('anticipatingMultidomain', anticipating)
+    state('anticipatingMultiDomain', anticipating)
   },
 
-  whenStableOrAnticipatingMultidomain (fn) {
-    if (state('anticipatingMultidomain') || state('isStable') !== false) {
+  whenStableOrAnticipatingMultiDomain (fn) {
+    if (state('anticipatingMultiDomain') || state('isStable') !== false) {
       return Promise.try(fn)
     }
 
@@ -67,7 +67,7 @@ export const create = (Cypress, state) => ({
         fulfilled = true
 
         state('whenStable', null)
-        state('whenAnticipatingMultidomain', null)
+        state('whenAnticipatingMultiDomain', null)
 
         Promise.try(fn)
         .then(resolve)
@@ -75,7 +75,7 @@ export const create = (Cypress, state) => ({
       }
 
       state('whenStable', onSignal)
-      state('whenAnticipatingMultidomain', onSignal)
+      state('whenAnticipatingMultiDomain', onSignal)
     })
   },
 })

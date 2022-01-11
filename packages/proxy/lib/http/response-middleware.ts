@@ -225,24 +225,17 @@ const PatchExpressSetHeader: ResponseMiddleware = function () {
   this.next()
 }
 
-const isAUTFrame = (req) => !!req.headers['x-cypress-is-aut-frame']
-
-const MaybeDelayForMultidomain: ResponseMiddleware = function () {
+const MaybeDelayForMultiDomain: ResponseMiddleware = function () {
   const isCrossDomain = !reqMatchesOriginPolicy(this.req, this.getRemoteState())
   const isHTML = resContentTypeIs(this.incomingRes, 'text/html')
   const isRenderedHTML = reqWillRenderHtml(this.req)
-  const isTheAUTFrame = isAUTFrame(this.req)
+  const isAUTFrame = this.req.isAUTFrame
 
-  if (isCrossDomain && isTheAUTFrame && (isHTML || isRenderedHTML)) {
+  if (isCrossDomain && isAUTFrame && (isHTML || isRenderedHTML)) {
     this.debug('is cross-domain, delay until domain:ready event')
 
-    this.serverBus.once('ready:for:domain', ({ shouldInject }) => {
-      if (shouldInject) {
-        this.debug('ready for domain, let it go')
-      } else {
-        this.debug('not ready for domain, let it go without injection')
-        this.res.wantsInjection = false
-      }
+    this.serverBus.once('ready:for:domain', () => {
+      this.debug('ready for domain, let it go')
 
       this.next()
     })
@@ -277,15 +270,15 @@ const SetInjectionLevel: ResponseMiddleware = function () {
     }
 
     const isHTML = resContentTypeIs(this.incomingRes, 'text/html')
-    const isTheAUTFrame = isAUTFrame(this.req)
+    const isAUTFrame = this.req.isAUTFrame
 
-    if (!isReqMatchOriginPolicy && isTheAUTFrame && (isHTML || isRenderedHTML)) {
-      this.debug('- multidomain injection')
+    if (!isReqMatchOriginPolicy && isAUTFrame && (isHTML || isRenderedHTML)) {
+      this.debug('- multi-domain injection')
 
-      return 'fullMultidomain'
+      return 'fullMultiDomain'
     }
 
-    if (!isHTML || !isReqMatchOriginPolicy && !isTheAUTFrame) {
+    if (!isHTML || !isReqMatchOriginPolicy && !isAUTFrame) {
       debug('- no injection (not html)')
 
       return false
@@ -499,16 +492,12 @@ const SendResponseBodyToClient: ResponseMiddleware = function () {
   this.res.on('end', () => this.end())
 }
 
-const CleanupCypressHeaders: ResponseMiddleware = function () {
-  delete this.req.headers['x-cypress-is-aut-frame']
-}
-
 export default {
   LogResponse,
   AttachPlainTextStreamFn,
   InterceptResponse,
   PatchExpressSetHeader,
-  MaybeDelayForMultidomain,
+  MaybeDelayForMultiDomain,
   SetInjectionLevel,
   OmitProblematicHeaders,
   MaybePreventCaching,
@@ -522,5 +511,4 @@ export default {
   MaybeRemoveSecurity,
   GzipBody,
   SendResponseBodyToClient,
-  CleanupCypressHeaders,
 }

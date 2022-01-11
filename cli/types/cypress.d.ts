@@ -60,10 +60,6 @@ declare namespace Cypress {
     visiting: string
   }
 
-  interface ReadyForDomainOptions {
-    shouldInject: boolean
-  }
-
   interface Backend {
     /**
      * Firefox only: Force Cypress to run garbage collection routines.
@@ -72,7 +68,7 @@ declare namespace Cypress {
      * @see https://on.cypress.io/firefox-gc-issue
      */
     (task: 'firefox:force:gc'): Promise<void>
-    (task: 'ready:for:domain', options: ReadyForDomainOptions): Promise<void>
+    (task: 'ready:for:domain'): Promise<void>
     (task: 'net', eventName: string, frame: any): Promise<void>
   }
 
@@ -616,7 +612,7 @@ declare namespace Cypress {
      * Trigger action
      * @private
      */
-    action: (action: string, ...args: any[]) => void
+    action: (action: string, ...args: any[]) => any[] | void
 
     /**
      * Load  files
@@ -1902,6 +1898,25 @@ declare namespace Cypress {
      *    })
      */
     switchToDomain<T>(domain: string, data: T, fn: (data: T) => void): Chainable<undefined>
+    /**
+     * Enables running Cypress commands in a secondary domain
+     * @see https://on.cypress.io/switchToDomain
+     * @example
+     *    cy.switchToDomain('example.com', done, () => {
+     *      done()
+     *    })
+     */
+    switchToDomain<T>(domain: string, done: Mocha.Done, fn: (data: T) => void): Chainable<undefined>
+    /**
+     * Enables running Cypress commands in a secondary domain
+     * @see https://on.cypress.io/switchToDomain
+     * @example
+     *    cy.switchToDomain('example.com', done, { key: 'value' } ({ key }) => {
+     *      expect(key).to.equal('value')
+     *      done()
+     *    })
+     */
+    switchToDomain<T>(domain: string, done: Mocha.Done, data: T, fn: (data: T) => void): Chainable<undefined>
 
     /**
      * Run a task in Node via the plugins file.
@@ -5568,6 +5583,12 @@ declare namespace Cypress {
      */
     (action: 'command:end', fn: (command: CommandQueue) => void): Cypress
     /**
+     * Fires when a command is skipped, namely the `should` command.
+     * Useful for debugging and understanding how commands are handled.
+     * @see https://on.cypress.io/catalog-of-events#App-Events
+     */
+    (action: 'skipped:command:end', fn: (command: CommandQueue) => void): Cypress
+    /**
      * Fires whenever a command begins its retrying routines.
      * This is called on the trailing edge after Cypress has internally
      * waited for the retry interval. Useful to understand **why** a command is retrying,
@@ -5657,10 +5678,13 @@ declare namespace Cypress {
   }
 
   interface EnqueuedCommand {
+    id: string
     name: string
     args: any[]
     type: string
     chainerId: string
+    injected: boolean
+    userInvocationStack?: string
     fn(...args: any[]): any
   }
 

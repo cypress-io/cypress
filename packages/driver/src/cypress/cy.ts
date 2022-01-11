@@ -138,8 +138,8 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
   isStable: IStability['isStable']
   whenStable: IStability['whenStable']
-  isAnticipatingMultidomain: IStability['isAnticipatingMultidomain']
-  whenStableOrAnticipatingMultidomain: IStability['whenStableOrAnticipatingMultidomain']
+  isAnticipatingMultiDomain: IStability['isAnticipatingMultiDomain']
+  whenStableOrAnticipatingMultiDomain: IStability['whenStableOrAnticipatingMultiDomain']
 
   assert: IAssertions['assert']
   verifyUpcomingAssertions: IAssertions['verifyUpcomingAssertions']
@@ -251,8 +251,8 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
     this.isStable = stability.isStable
     this.whenStable = stability.whenStable
-    this.isAnticipatingMultidomain = stability.isAnticipatingMultidomain
-    this.whenStableOrAnticipatingMultidomain = stability.whenStableOrAnticipatingMultidomain
+    this.isAnticipatingMultiDomain = stability.isAnticipatingMultiDomain
+    this.whenStableOrAnticipatingMultiDomain = stability.whenStableOrAnticipatingMultiDomain
 
     const assertions = createAssertions(Cypress, this)
 
@@ -359,7 +359,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
     extendEvents(this)
 
-    Cypress.on('enqueue:command', (attrs) => {
+    Cypress.on('enqueue:command', (attrs: Cypress.EnqueuedCommand) => {
       this.enqueue(attrs)
     })
   }
@@ -560,7 +560,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
         // we expect a cross-origin error and are setting things up
         // elsewhere to handle running cross-domain, so don't fail
         // because of it
-        if (this.state('readyForMultidomain')) {
+        if (this.state('readyForMultiDomain')) {
           signalStable()
 
           return
@@ -933,6 +933,9 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
             // TODO: handle no longer error when ended early
             cy.doneEarly()
 
+            // if using multi-domain, unbind any listeners waiting for a done() callback to come from cross domain
+            // @ts-ignore
+            Cypress.multiDomainCommunicator.emit('unbind:done:called')
             originalDone(err)
 
             // return null else we there are situations
@@ -1131,7 +1134,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     })
   }
 
-  private enqueue (obj) {
+  private enqueue (obj: PartialBy<Cypress.EnqueuedCommand, 'id'>) {
     // if we have a nestedIndex it means we're processing
     // nested commands and need to insert them into the
     // index past the current index as opposed to

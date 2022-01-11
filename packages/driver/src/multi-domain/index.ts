@@ -13,7 +13,7 @@ import { SpecBridgeDomainCommunicator } from './communicator'
 
 const specBridgeCommunicator = new SpecBridgeDomainCommunicator()
 
-const onCommandEnqueued = (commandAttrs) => {
+const onCommandEnqueued = (commandAttrs: Cypress.EnqueuedCommand) => {
   const { id, name } = commandAttrs
 
   // it's not strictly necessary to send the name, but it can be useful
@@ -21,7 +21,7 @@ const onCommandEnqueued = (commandAttrs) => {
   specBridgeCommunicator.toPrimary('command:enqueued', { id, name })
 }
 
-const onCommandEnd = (command) => {
+const onCommandEnd = (command: Cypress.CommandQueue) => {
   const id = command.get('id')
   const name = command.get('name')
 
@@ -41,6 +41,7 @@ const onLogChanged = (attrs) => {
 }
 
 const setup = () => {
+  // @ts-ignore
   const Cypress = window.Cypress = $Cypress.create({
     browser: {
       channel: 'stable',
@@ -54,21 +55,17 @@ const setup = () => {
       path: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
       version: '90.0.4430.212',
     },
-  })
+  }) as Cypress.Cypress
 
+  // @ts-ignore
   const cy = window.cy = new $Cy(window, Cypress, Cypress.Cookies, Cypress.state, Cypress.config, false)
 
+  // @ts-ignore
   Cypress.log = $Log.create(Cypress, cy, Cypress.state, Cypress.config)
+  // @ts-ignore
   Cypress.runner = {
     addLog () {},
   }
-
-  Cypress.state('runnable', {
-    ctx: {},
-    clearTimeout () {},
-    resetTimeout () {},
-    timeout () {},
-  })
 
   const { state, config } = Cypress
 
@@ -80,11 +77,90 @@ const setup = () => {
   Cypress.on('log:added', onLogAdded)
   Cypress.on('log:changed', onLogChanged)
 
-  specBridgeCommunicator.on('run:domain:fn', ({ data, fn }) => {
-    // TODO: await this if it's a promise, or do whatever cy.then does
-    window.eval(`(${fn})`)(data)
+  const doneEarly = () => {
+    cy.queue.stop()
 
-    specBridgeCommunicator.toPrimary('ran:domain:fn')
+    // we only need to worry about doneEarly when
+    // it comes from a manual event such as stopping
+    // Cypress or when we yield a (done) callback
+    // and could arbitrarily call it whenever we want
+    const p = cy.state('promise')
+
+    // if our outer promise is pending
+    // then cancel outer and inner
+    // and set canceled to be true
+    if (p && p.isPending()) {
+      cy.state('canceled', true)
+      cy.state('cancel')()
+    }
+
+    // if a command fails then after each commands
+    // could also fail unless we clear this out
+    cy.state('commandIntermediateValue', undefined)
+
+    // reset the nestedIndex back to null
+    cy.state('nestedIndex', null)
+  }
+
+  specBridgeCommunicator.on('run:domain:fn', async ({ data, fn, isDoneFnAvailable = false }) => {
+    cy.reset({})
+
+    cy.state('runnable', {
+      ctx: {},
+      clearTimeout () {},
+      resetTimeout () {},
+      timeout () {},
+    })
+
+    let fnWrapper = `(${fn})`
+
+    if (isDoneFnAvailable) {
+      // stub out the 'done' function if available in the primary domain
+      // to notify the primary domain if the done() callback is invoked
+      // within the spec bridge
+      const done = (err = undefined) => {
+        doneEarly()
+
+        // signal to the primary domain that done has been called and to signal that the command queue is finished in the secondary domain
+        specBridgeCommunicator.toPrimary('done:called', err)
+        specBridgeCommunicator.toPrimary('queue:finished')
+
+        return null
+      }
+
+      // similar to the primary domain, the done() callback will be stored in state
+      // if undefined and a user tries to call done, the same effect is granted
+      cy.state('done', done)
+
+      fnWrapper = `((data) => {
+        const done = cy.state('done');
+        return ${fnWrapper}(data)
+      })`
+    }
+
+    try {
+      // await the eval func, whether it is a promise or not
+      // we should not need to transpile this as our target browsers support async/await
+      // see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function for more details
+      await window.eval(fnWrapper)(data)
+
+      specBridgeCommunicator.toPrimary('ran:domain:fn')
+    } catch (err) {
+      // Native Error types currently cannot be cloned in Firefox when using 'postMessage'.
+      // Please see https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm for more details
+      // TODO: More standard serialization of Objects/Arrays within the communicator to avoid this type of logic
+      if (err instanceof Error) {
+        specBridgeCommunicator.toPrimary('ran:domain:fn', {
+          name: err.name,
+          message: err.message,
+          stack: err.stack,
+        })
+      } else {
+        specBridgeCommunicator.toPrimary('ran:domain:fn', err)
+      }
+    } finally {
+      cy.state('done', undefined)
+    }
   })
 
   specBridgeCommunicator.on('run:command',
@@ -111,9 +187,8 @@ const setup = () => {
 }
 
 // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
-const onBeforeAppWindowLoad = (cy, Cypress) => (autWindow) => {
+const onBeforeAppWindowLoad = (cy: $Cy, Cypress: Cypress.Cypress) => (autWindow: Window) => {
   autWindow.Cypress = Cypress
-  autWindow.cy = cy
 
   Cypress.state('window', autWindow)
   Cypress.state('document', autWindow.document)
@@ -156,7 +231,7 @@ const onBeforeAppWindowLoad = (cy, Cypress) => (autWindow) => {
       return Cypress.action('app:window:alert', str)
     },
     onConfirm (str) {
-      const results = Cypress.action('app:window:confirm', str)
+      const results = Cypress.action('app:window:confirm', str) as any[]
 
       // return false if ANY results are false
       const ret = !results.some((result) => result === false)
@@ -174,7 +249,8 @@ const onBeforeAppWindowLoad = (cy, Cypress) => (autWindow) => {
 // get re-created
 const cy = setup()
 
-window.__onBeforeAppWindowLoad = (autWindow) => {
+// @ts-ignore
+window.__onBeforeAppWindowLoad = (autWindow: Window) => {
   cy.onBeforeAppWindowLoad(autWindow)
 }
 
