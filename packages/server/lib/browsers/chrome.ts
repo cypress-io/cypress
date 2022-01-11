@@ -332,13 +332,13 @@ let frameTree
 
 const _onBrowserPreRequest = (client) => {
   return async (prerequest) => {
-  // this gets the frame tree ahead of the Fetch.requestPaused event, because
-  // the CDP is tied up during that event and can't be utilized. however,
-  // we avoid the overhead if it's not possible that the request will be for
-  // the AUT frame
+    // this gets the frame tree ahead of the Fetch.requestPaused event, because
+    // the CDP is tied up during that event and can't be utilized. however,
+    // we avoid the overhead if it's not possible that the request will be for
+    // the AUT frame
     if (
       prerequest.originalResourceType !== 'Document'
-    || prerequest.url.includes('__cypress')
+      || prerequest.url.includes('__cypress')
     ) {
       return
     }
@@ -397,8 +397,11 @@ const _getAUTFrame = () => {
 const _handlePausedRequests = async (client) => {
   await client.send('Fetch.enable')
 
+  // adds a header to the request to mark it as a request for the AUT frame
+  // itself, so the proxy can utilize that for injection purposes
   client.on('Fetch.requestPaused', (params: Protocol.Fetch.RequestPausedEvent) => {
     if (
+      // is a script, stylesheet, image, etc
       params.resourceType !== 'Document'
       || _getAUTFrame().id !== params.frameId
     ) {
