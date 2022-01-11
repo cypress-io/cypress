@@ -143,7 +143,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
   context('Runs - Unauthorized Project', () => {
     beforeEach(() => {
       cy.withCtx(async (ctx) => {
-        await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {\'projectId\': \'abcdef42\'}')
+        await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {\'projectId\': \'abcdef\'}')
       })
 
       cy.loginUser()
@@ -151,7 +151,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
         // Currently, all remote requests go through here, we want to use this to modify the
         // remote request before it's used and avoid touching the login query
 
-        if (obj.result.data?.cloudProjectsBySlugs && obj.variables._v0_slugs.includes('abcdef42')) {
+        if (obj.result.data?.cloudProjectsBySlugs) {
           for (const proj of obj.result.data.cloudProjectsBySlugs) {
             proj.__typename = 'CloudProjectUnauthorized'
             proj.message = 'Cloud Project Unauthorized'
@@ -177,6 +177,38 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.wait('@RequestAccess').then((interception: Interception) => {
         expect(interception.request.url).to.include('graphql/mutation-RunsErrorRenderer_RequestAccess')
       })
+    })
+  })
+
+  context('Runs - Unauthorized Project Requested', () => {
+    beforeEach(() => {
+      cy.withCtx(async (ctx) => {
+        await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {\'projectId\': \'abcdef\'}')
+      })
+
+      cy.loginUser()
+      cy.remoteGraphQLIntercept(async (obj) => {
+        // Currently, all remote requests go through here, we want to use this to modify the
+        // remote request before it's used and avoid touching the login query
+
+        if (obj.result.data?.cloudProjectsBySlugs) {
+          for (const proj of obj.result.data.cloudProjectsBySlugs) {
+            proj.__typename = 'CloudProjectUnauthorized'
+            proj.message = 'Cloud Project Unauthorized'
+            proj.cloudProjectRequestAccess = true
+          }
+        }
+
+        return obj.result
+      })
+
+      cy.visitApp()
+
+      cy.get('[href="#/runs"]').click()
+    })
+
+    it('if project Id is specified in config file that is not accessible, shows call to action', () => {
+      cy.findByText(defaultMessages.runs.errors.unauthorizedRequested.button).should('be.visible')
     })
   })
 
