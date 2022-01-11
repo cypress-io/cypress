@@ -1,7 +1,7 @@
 // @ts-ignore / session support is needed for visiting about:blank between tests
-describe('multidomain', { experimentalSessionSupport: true, experimentalMultiDomain: true }, () => {
+describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDomain: true }, () => {
   beforeEach(() => {
-    cy.visit('/fixtures/multidomain.html')
+    cy.visit('/fixtures/multi-domain.html')
     cy.get('a').click()
   })
 
@@ -95,7 +95,7 @@ describe('multidomain', { experimentalSessionSupport: true, experimentalMultiDom
         })
 
         cy.window().then((window) => {
-          window.location.href = '/fixtures/multidomain.html'
+          window.location.href = '/fixtures/multi-domain.html'
         })
       })
     })
@@ -110,7 +110,7 @@ describe('multidomain', { experimentalSessionSupport: true, experimentalMultiDom
         })
 
         cy.window().then((window) => {
-          window.location.href = '/fixtures/multidomain.html'
+          window.location.href = '/fixtures/multi-domain.html'
         })
       })
     })

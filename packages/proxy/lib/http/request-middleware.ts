@@ -18,6 +18,16 @@ const LogRequest: RequestMiddleware = function () {
   this.next()
 }
 
+const ExtractIsAUTFrameHeader: RequestMiddleware = async function () {
+  this.req.isAUTFrame = !!this.req.headers['x-cypress-is-aut-frame']
+
+  if (this.req.headers['x-cypress-is-aut-frame']) {
+    delete this.req.headers['x-cypress-is-aut-frame']
+  }
+
+  this.next()
+}
+
 const CorrelateBrowserPreRequest: RequestMiddleware = async function () {
   if (!this.shouldCorrelatePreRequests()) {
     return this.next()
@@ -185,6 +195,7 @@ const SendRequestOutgoing: RequestMiddleware = function () {
 
 export default {
   LogRequest,
+  ExtractIsAUTFrameHeader,
   MaybeEndRequestWithBufferedResponse,
   CorrelateBrowserPreRequest,
   SendToDriver,
