@@ -8,7 +8,7 @@ describe('example vite test', function () {
     Fixtures.scaffoldProject('e2e')
   })
 
-  systemTests.it(`runs a vite project properly`, {
+  systemTests.it(`should load the support file`, {
     project: 'vite-ct',
     testingType: 'component',
     spec: 'support.spec.ts',
