@@ -1,4 +1,5 @@
 import Bluebird from 'bluebird'
+import _ from 'lodash'
 import { createDeferred, Deferred } from '../../util/deferred'
 import $utils from '../../cypress/utils'
 import $errUtils from '../../cypress/error_utils'
