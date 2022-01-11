@@ -173,26 +173,24 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
         }
       }
 
-      const cleanupCommands = () => {
+      const cleanupCommands = async () => {
         communicator.off('command:enqueued', addCommand)
 
         // don't allow for new commands to be enqueued, but wait for commands to update in the secondary domain
         const pendingCommands = _.map(commands, (command) => command.deferred.promise)
 
-        return Promise.all(pendingCommands).then(() => {
-          communicator.off('command:update', updateCommand)
-        })
+        await Promise.all(pendingCommands)
+        communicator.off('command:update', updateCommand)
       }
 
-      const cleanupLogs = () => {
+      const cleanupLogs = async () => {
         communicator.off('log:added', onLogAdded)
 
         // don't allow for new logs to be added, but wait for logs to update changes in the secondary domain
         const pendingLogs = _.map(logs, (log) => log.deferred.promise)
 
-        return Promise.all(pendingLogs).then(() => {
-          communicator.off('log:changed', onLogChanged)
-        })
+        await Promise.all(pendingLogs)
+        communicator.off('log:changed', onLogChanged)
       }
 
       const cleanup = () => {
@@ -203,7 +201,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
       const doneAndCleanup = async (err) => {
         communicator.off('done:called', doneAndCleanup)
 
-        // if done is called, immediately unbind commands to prevent any commands from being enqueued, but wait for log updates to trickle in before invoking done
+        // If done is called, immediately unbind command listeners to prevent any commands from being enqueued, but wait for log updates to trickle in before invoking done
         cleanupCommands()
         await cleanupLogs()
         done(err)
@@ -212,7 +210,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
       if (done) {
         const doneByReference = cy.state('done')
 
-        // if three or more arguments are passed in, verify the second argument is actually the done fn
+        // If three or more arguments are passed in, verify the second argument is actually the done fn
         if (done !== doneByReference) {
           Cypress.backend('ready:for:domain')
 
@@ -243,10 +241,11 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
             return
           }
 
-          // If done is passed in, wait to unbind any listeners
-          // Otherwise, all commands in the secondary should be enqueued here. go ahead and bind the cleanup method for when the queue finishes
-          // Otherwise, if no commands are enqueued, clean up the logs
-          // this case is common if there are only assertions enqueued in the secondary domain
+          // If done is passed into switchToDomain, wait to unbind any listeners
+          // Otherwise, all commands in the secondary domain (SD) should be enqueued by now.
+          // Go ahead and bind the cleanup method for when the command queue finishes in the SD.
+          // Otherwise, if no commands are enqueued, clean up the command and log listeners.
+          // This case is common if there are only assertions enqueued in the SD.
           if (_.size(commands) === 0 && !done) {
             cleanup()
           }
@@ -254,7 +253,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
           resolve()
         })
 
-        // If done is NOT passed in, wait for commands to finish in the secondary domain and then start the cleanup methods
+        // If done is NOT passed into switchToDomain, wait for the command queue to finish in the secondary domain before starting any cleanup
         if (!done) {
           communicator.once('queue:finished', cleanup)
         }
