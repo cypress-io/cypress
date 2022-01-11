@@ -2,36 +2,6 @@ describe('Launchpad: Onboarding Flow', () => {
   beforeEach(() => {
     cy.scaffoldProject('pristine')
     cy.openProject('pristine')
-    cy.withCtx((ctx, o) => {
-      ctx.actions.file.writeFileInProject('node_modules/cypress/package.json', JSON.stringify({
-        name: 'cypress',
-        main: 'index.js',
-      }))
-
-      ctx.actions.file.writeFileInProject('node_modules/@cypress/webpack-dev-server/package.json', JSON.stringify({
-        name: '@cypress/webpack-dev-server',
-        main: 'index.js',
-      }))
-
-      ctx.actions.file.writeFileInProject('node_modules/cypress/index.js', `
-        module.exports = {
-          defineConfig(o) {
-            return o
-          }
-        }
-      `)
-
-      ctx.actions.file.writeFileInProject('node_modules/@cypress/webpack-dev-server/index.js', `
-        module.exports = {
-          devServer(o) {
-            return {
-              port: 7373,
-              close() {}
-            }
-          }
-        }
-      `)
-    })
   })
 
   it('can setup component testing', () => {

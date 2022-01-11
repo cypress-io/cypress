@@ -97,8 +97,23 @@ function run (ipc, configFile, projectRoot) {
           }
 
           runPlugins.runSetupNodeEvents(options, (on, config) => {
-            if (result.component?.devServer) {
+            if (typeof result.component?.devServer.then === 'function') {
+              return Promise.resolve(result.component?.devServer).then(({ devServer }) => {
+                if (typeof devServer === 'function') {
+                  on('dev-server:start', (options) => devServer(options, result.component?.devServerConfig))
+                }
+
+                const setupNodeEvents = result.component?.setupNodeEvents ?? ((on, config) => {})
+
+                return setupNodeEvents(on, config)
+              })
+            }
+
+            if (typeof result.component?.devServer === 'function') {
               on('dev-server:start', (options) => result.component.devServer(options, result.component?.devServerConfig))
+            } else {
+              // TODO: make this a standard error path
+              throw new Error(`Expected devServer to be a function, saw ${typeof result.component?.devServer}`)
             }
 
             const setupNodeEvents = result.component?.setupNodeEvents ?? ((on, config) => {})
