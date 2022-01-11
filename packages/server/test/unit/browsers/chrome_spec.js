@@ -425,9 +425,6 @@ describe('lib/browsers/chrome', () => {
 
         this.criClient.on.withArgs('Page.frameAttached').yield()
 
-        // wait for the debounce
-        await new Promise((resolve) => setTimeout(resolve, 150))
-
         await this.criClient.on.withArgs('Fetch.requestPaused').args[0][1]({
           frameId: 'aut-frame-id',
           requestId: '1234',
@@ -460,9 +457,6 @@ describe('lib/browsers/chrome', () => {
 
         this.criClient.on.withArgs('Page.frameAttached').yield()
 
-        // wait for the debounce
-        await new Promise((resolve) => setTimeout(resolve, 150))
-
         expect(this.criClient.send).to.be.calledWith('Page.getFrameTree')
       })
 
@@ -471,34 +465,7 @@ describe('lib/browsers/chrome', () => {
 
         this.criClient.on.withArgs('Page.frameDetached').yield()
 
-        // wait for the debounce
-        await new Promise((resolve) => setTimeout(resolve, 150))
-
         expect(this.criClient.send).to.be.calledWith('Page.getFrameTree')
-      })
-
-      it('gets frame tree on Page.frameNavigated', async function () {
-        await chrome.open('chrome', 'http://', {}, this.automation)
-
-        this.criClient.on.withArgs('Page.frameNavigated').yield()
-
-        // wait for the debounce
-        await new Promise((resolve) => setTimeout(resolve, 150))
-
-        expect(this.criClient.send).to.be.calledWith('Page.getFrameTree')
-      })
-
-      it('debounces getting frame tree when multiple events fire in a row', async function () {
-        await chrome.open('chrome', 'http://', {}, this.automation)
-
-        this.criClient.on.withArgs('Page.frameNavigated').yield()
-        this.criClient.on.withArgs('Page.frameDetached').yield()
-        this.criClient.on.withArgs('Page.frameNavigated').yield()
-
-        // wait for the debounce
-        await new Promise((resolve) => setTimeout(resolve, 150))
-
-        expect(this.criClient.send.withArgs('Page.getFrameTree')).to.be.calledOnce
       })
     })
   })

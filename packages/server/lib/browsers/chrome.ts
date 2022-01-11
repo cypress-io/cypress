@@ -333,12 +333,12 @@ let gettingFrameTree
 
 // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
 const _updateFrameTree = (client) => async () => {
-  debug('get frame tree')
+  debug('update frame tree')
 
   gettingFrameTree = new Promise<void>(async (resolve) => {
     frameTree = (await client.send('Page.getFrameTree')).frameTree
 
-    debug('got frame tree')
+    debug('frame tree updated')
 
     gettingFrameTree = null
 
@@ -350,14 +350,10 @@ const _updateFrameTree = (client) => async () => {
 // the CDP is tied up during that event and can't be utilized. so we maintain
 // a reference to it that's updated when it's likely to have been changed
 const _listenForFrameTreeChanges = (client) => {
-  debug('frames changed')
+  debug('listen for frame tree changes')
 
-  // these events are often called a bunch in a row, so debounce them
-  const onUpdate = _.debounce(_updateFrameTree(client), 100)
-
-  client.on('Page.frameAttached', onUpdate)
-  client.on('Page.frameDetached', onUpdate)
-  client.on('Page.frameNavigated', onUpdate)
+  client.on('Page.frameAttached', _updateFrameTree(client))
+  client.on('Page.frameDetached', _updateFrameTree(client))
 }
 
 const _continueRequest = (client, params, header?) => {
