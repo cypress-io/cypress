@@ -392,9 +392,9 @@ describe('lib/cypress', () => {
     })
 
     it('runs project by specific spec with default configuration', function () {
-      return cypress.start([`--run-project=${this.idsPath}`, `--spec=${this.idsPath}/cypress/integration/bar.js`, '--config', 'port=2020'])
+      return cypress.start([`--run-project=${this.idsPath}`, `--spec=${this.idsPath}/cypress/e2e/bar.js`, '--config', 'port=2020'])
       .then(() => {
-        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, { url: 'http://localhost:2020/__/#/tests/cypress/integration/bar.js' })
+        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, { url: 'http://localhost:2020/__/#/tests/cypress/e2e/bar.js' })
         this.expectExitWith(0)
       })
     })
@@ -470,13 +470,9 @@ describe('lib/cypress', () => {
           fs.statAsync(path.join(this.pristinePath, 'cypress.config.js')).reflect(),
         ])
       })
-      .each(ensureDoesNotExist).then(() => {
-        this.expectExitWithErr('NO_DEFAULT_CONFIG_FILE_FOUND', this.pristinePath)
-      })
     })
 
-    // NOTE: The scaffolding of files behavior has changed
-    it.skip('scaffolds out support + files if they do not exist', function () {
+    it('scaffolds out support + files if they do not exist', function () {
       const supportFolder = path.join(this.pristineWithConfigPath, 'cypress/support')
 
       ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.pristineWithConfigPath)

@@ -35,9 +35,7 @@ export const ReporterContainer = namedObserver('ReporterContainer',
         runMode={props.state.runMode}
         runner={props.eventManager.reporterBus}
         className={cs({ 'display-none': props.state.screenshotting }, styles.reporter)}
-        spec={props.state.spec}
-        specRunId={props.state.specRunId}
-        allSpecs={props.state.multiSpecs}
+        runnerStore={props.state}
         error={errorMessages.reporterError(props.state.scriptError, props.state.spec.relative)}
         resetStatsOnSpecChange={props.state.runMode === 'single'}
         renderReporterHeader={renderReporterHeader}

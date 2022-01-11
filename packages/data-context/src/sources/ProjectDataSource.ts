@@ -1,9 +1,11 @@
 import os from 'os'
 import { FrontendFramework, FRONTEND_FRAMEWORKS, ResolvedFromConfig, RESOLVED_FROM, SpecFileWithExtension, STORYBOOK_GLOB, FoundSpec } from '@packages/types'
 import { scanFSForAvailableDependency } from 'create-cypress-tests'
+import { debounce } from 'lodash'
 import path from 'path'
 import Debug from 'debug'
 import commonPathPrefix from 'common-path-prefix'
+import type { FSWatcher } from 'chokidar'
 
 const debug = Debug('cypress:data-context')
 import assert from 'assert'
@@ -95,6 +97,7 @@ export function transformSpec ({
 }
 
 export class ProjectDataSource {
+  private _specWatcher: FSWatcher | null = null
   private _specs: FoundSpec[] = []
 
   constructor (private ctx: DataContext) {}
@@ -115,6 +118,10 @@ export class ProjectDataSource {
     return this.ctx.lifecycleManager.loadedFullConfig
   }
 
+  getCurrentProjectSavedState () {
+    return this.api.getCurrentProjectSavedState()
+  }
+
   get specs () {
     return this._specs
   }
@@ -123,14 +130,38 @@ export class ProjectDataSource {
     this._specs = specs
   }
 
-  async specPatternForTestingType (testingType: Cypress.TestingType) {
+  async specPatternsForTestingType (projectRoot: string, testingType: Cypress.TestingType): Promise<{
+    specPattern?: string[]
+    ignoreSpecPattern?: string[]
+  }> {
+    const toArray = (val?: string | string[]) => val ? typeof val === 'string' ? [val] : val : undefined
+
     const config = this.getConfig()
 
-    return config?.[testingType]?.specPattern
+    if (!config) {
+      throw Error(`Config for ${projectRoot} was not loaded`)
+    }
+
+    return {
+      specPattern: toArray(config[testingType]?.specPattern),
+      ignoreSpecPattern: toArray(config[testingType]?.ignoreSpecPattern),
+    }
   }
 
-  async findSpecs (projectRoot: string, testingType: Cypress.TestingType, specPattern: string | string[]): Promise<FoundSpec[]> {
-    const specAbsolutePaths = await this.ctx.file.getFilesByGlob(projectRoot, specPattern, { absolute: true })
+  async findSpecs (
+    projectRoot: string,
+    testingType: Cypress.TestingType,
+    specPattern: string[],
+    ignoreSpecPattern: string[],
+    globToRemove: string[],
+  ): Promise<FoundSpec[]> {
+    const specAbsolutePaths = await this.ctx.file.getFilesByGlob(
+      projectRoot,
+      specPattern, {
+        absolute: true,
+        ignore: [...ignoreSpecPattern, ...globToRemove],
+      },
+    )
 
     const matched = matchedSpecs({
       projectRoot,
@@ -140,6 +171,45 @@ export class ProjectDataSource {
     })
 
     return matched
+  }
+
+  startSpecWatcher (
+    projectRoot: string,
+    testingType: Cypress.TestingType,
+    specPattern: string[],
+    ignoreSpecPattern: string[],
+    additionalIgnore: string[],
+  ) {
+    this.stopSpecWatcher()
+
+    const currentProject = this.ctx.currentProject
+
+    if (!currentProject) {
+      throw new Error('Cannot start spec watcher without current project')
+    }
+
+    const onSpecsChanged = debounce(async () => {
+      const specs = await this.findSpecs(projectRoot, testingType, specPattern, ignoreSpecPattern, additionalIgnore)
+
+      this.setSpecs(specs)
+      if (testingType === 'component') {
+        this.api.getDevServer().updateSpecs(specs)
+      }
+
+      this.ctx.emitter.toApp()
+    })
+
+    this._specWatcher = this.ctx.lifecycleManager.addWatcher(specPattern)
+    this._specWatcher.on('add', onSpecsChanged)
+    this._specWatcher.on('unlink', onSpecsChanged)
+  }
+
+  stopSpecWatcher () {
+    if (!this._specWatcher) {
+      return
+    }
+
+    this.ctx.lifecycleManager.closeWatcher(this._specWatcher)
   }
 
   getCurrentSpecByAbsolute (absolute: string) {

@@ -7,14 +7,14 @@ exports['e2e subdomain / passes'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (subdomain_spec.js)                                                        │
-  │ Searched:   cypress/integration/subdomain_spec.js                                              │
+  │ Specs:      1 found (subdomain.cy.js)                                                          │
+  │ Searched:   cypress/e2e/subdomain.cy.js                                                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  subdomain_spec.js                                                               (1 of 1)
+  Running:  subdomain.cy.js                                                                 (1 of 1)
 
 
   subdomains
@@ -44,14 +44,14 @@ exports['e2e subdomain / passes'] = `
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     subdomain_spec.js                                                                │
+  │ Spec Ran:     subdomain.cy.js                                                                  │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/subdomain_spec.js.mp4               (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/subdomain.cy.js.mp4                 (X second)
 
 
 ====================================================================================================
@@ -61,7 +61,7 @@ exports['e2e subdomain / passes'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  subdomain_spec.js                        XX:XX        9        7        -        2        - │
+  │ ✔  subdomain.cy.js                          XX:XX        9        7        -        2        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        9        7        -        2        -  
 

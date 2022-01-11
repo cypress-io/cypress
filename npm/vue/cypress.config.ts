@@ -8,11 +8,10 @@ export default defineConfig({
   'projectId': '134ej7',
   'experimentalFetchPolyfill': true,
   'e2e': {
-    'specPattern': 'cypress/integration/**/*',
     'supportFile': false,
   },
   'component': {
-    'specPattern': 'cypress/component/**/*spec.{js,ts,tsx}',
+    ignoreSpecPattern: 'examples/**/*',
     devServer (cypressConfig) {
       const { startDevServer } = require('@cypress/webpack-dev-server')
       const webpackConfig = require('./webpack.config')
