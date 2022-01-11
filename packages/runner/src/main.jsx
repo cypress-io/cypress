@@ -21,39 +21,15 @@ MobX.configure({ enforceActions: 'always' })
 let ws
 let eventManager
 
-if (!window.__Cypress__ && !window.__CYPRESS_CONFIG__) {
-  ws = createWebsocket('/__socket.io')
-
-  // NOTE: this is exposed for testing, ideally we should only expose this if a test flag is set
-  window.runnerWs = ws
-  window.ws = ws
-
-  eventManager = new EventManager(
-    $Cypress,
-    MobX,
-    selectorPlaygroundModel,
-    StudioRecorder,
-    ws,
-  )
-
-  // NOTE: this is for testing Cypress-in-Cypress, window.Cypress is undefined here
-  // unless Cypress has been loaded into the AUT frame
-  if (window.Cypress) {
-    window.eventManager = eventManager
-  }
-}
-
 const Runner = {
-  start (el, base64Config) {
-    const config = JSON.parse(driverUtils.decodeBase64Unicode(base64Config))
-
+  _initialize (socketIoRoute) {
     if (!ws) {
-      ws = createWebsocket(config.socketIoRoute)
-
-      // NOTE: this is exposed for testing, ideally we should only expose this if a test flag is set
-      window.runnerWs = ws
-      window.ws = ws
+      ws = createWebsocket(socketIoRoute)
     }
+
+    // NOTE: this is exposed for testing, ideally we should only expose this if a test flag is set
+    window.runnerWs = ws
+    window.ws = ws
 
     if (!eventManager) {
       eventManager = new EventManager(
@@ -63,13 +39,19 @@ const Runner = {
         StudioRecorder,
         ws,
       )
-
-      // NOTE: this is for testing Cypress-in-Cypress, window.Cypress is undefined here
-      // unless Cypress has been loaded into the AUT frame
-      if (window.Cypress) {
-        window.eventManager = eventManager
-      }
     }
+
+    // NOTE: this is for testing Cypress-in-Cypress, window.Cypress is undefined here
+    // unless Cypress has been loaded into the AUT frame
+    if (window.Cypress) {
+      window.eventManager = eventManager
+    }
+  },
+
+  start (el, base64Config) {
+    const config = JSON.parse(driverUtils.decodeBase64Unicode(base64Config))
+
+    this._initialize(config.socketIoRoute)
 
     MobX.action('started', () => {
       const NO_COMMAND_LOG = config.env && config.env.NO_COMMAND_LOG
