@@ -64,6 +64,20 @@ function run (ipc, configFile, projectRoot) {
     return true
   }
 
+  const isValidComponentConfig = (config) => {
+    if (isValidSetupNodeEvents(config.setupNodeEvents)) {
+      if (typeof config.devServer !== 'function' && typeof config.devServer.then !== 'function') {
+        ipc.send('setupTestingType:error', 'COMPONENT_DEV_SERVER_IS_NOT_A_FUNCTION', configFile, config)
+
+        return false
+      }
+
+      return true
+    }
+
+    return false
+  }
+
   ipc.on('loadConfig', () => {
     try {
       debug('try loading', configFile)
@@ -92,33 +106,28 @@ function run (ipc, configFile, projectRoot) {
 
         areSetupNodeEventsLoaded = true
         if (testingType === 'component') {
-          if (!isValidSetupNodeEvents(result.component?.setupNodeEvents)) {
+          if (!isValidComponentConfig(result.component || {})) {
             return
           }
 
           runPlugins.runSetupNodeEvents(options, (on, config) => {
-            if (typeof result.component?.devServer.then === 'function') {
+            const setupNodeEvents = result.component?.setupNodeEvents ?? ((on, config) => {})
+
+            if (typeof result.component.devServer === 'function') {
+              on('dev-server:start', (options) => result.component.devServer(options, result.component?.devServerConfig))
+
+              return setupNodeEvents(on, config)
+            }
+
+            if (typeof result.component.devServer.then === 'function') {
               return Promise.resolve(result.component?.devServer).then(({ devServer }) => {
                 if (typeof devServer === 'function') {
                   on('dev-server:start', (options) => devServer(options, result.component?.devServerConfig))
                 }
 
-                const setupNodeEvents = result.component?.setupNodeEvents ?? ((on, config) => {})
-
                 return setupNodeEvents(on, config)
               })
             }
-
-            if (typeof result.component?.devServer === 'function') {
-              on('dev-server:start', (options) => result.component.devServer(options, result.component?.devServerConfig))
-            } else {
-              // TODO(tim): make this a standard error path
-              throw new Error(`Expected devServer to be a function, saw ${typeof result.component?.devServer}`)
-            }
-
-            const setupNodeEvents = result.component?.setupNodeEvents ?? ((on, config) => {})
-
-            return setupNodeEvents(on, config)
           })
         } else if (testingType === 'e2e') {
           if (!isValidSetupNodeEvents(result.e2e?.setupNodeEvents)) {
