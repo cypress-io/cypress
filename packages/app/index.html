@@ -9,6 +9,12 @@
 
 <body>
   <div id="app"></div>
+
+  <script type="text/javascript">
+    // set a global so we know the 'top' window
+    window.__Cypress__ = true
+  </script>
+
   <script type="module" src="/src/main.ts"></script>
 </body>
 
