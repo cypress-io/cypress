@@ -112,6 +112,13 @@ export const CurrentProject = objectType({
       },
     })
 
+    t.json('savedState', {
+      description: 'Project saved state',
+      resolve: (source, args, ctx) => {
+        return ctx.project.getCurrentProjectSavedState()
+      },
+    })
+
     t.string('configFile', {
       description: 'Config File, specified by the CLI or ',
       resolve: (source, args, ctx) => {

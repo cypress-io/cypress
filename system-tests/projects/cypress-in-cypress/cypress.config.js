@@ -26,7 +26,7 @@ module.exports = {
     },
   },
   e2e: {
-    specPattern: 'cypress/e2e/integration/**/*.spec.{js,ts}',
+    specPattern: 'cypress/e2e/**/*.spec.{js,ts}',
     supportFile: false,
   },
 }

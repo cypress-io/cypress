@@ -21,7 +21,6 @@ const EventSource = require('eventsource')
 const config = require(`../../lib/config`)
 const { ServerE2E } = require(`../../lib/server-e2e`)
 const ProjectBase = require(`../../lib/project-base`).ProjectBase
-const { SpecsStore } = require(`../../lib/specs-store`)
 const pluginsModule = require(`../../lib/plugins`)
 const preprocessor = require(`../../lib/plugins/preprocessor`)
 const resolve = require(`../../lib/util/resolve`)
@@ -167,7 +166,6 @@ describe('Routes', () => {
               SocketCtor: SocketE2E,
               getSpec: () => spec,
               getCurrentBrowser: () => null,
-              specsStore: new SpecsStore({}, 'e2e'),
               createRoutes,
               testingType: 'e2e',
               exit: false,
@@ -509,25 +507,25 @@ describe('Routes', () => {
 
       it('processes foo.coffee spec', async function () {
         await pollUntilEventsIpcLoaded()
-        const res = await this.rp('http://localhost:2020/__cypress/tests?p=cypress/integration/foo.coffee')
+        const res = await this.rp('http://localhost:2020/__cypress/tests?p=cypress/e2e/foo.coffee')
 
         expect(res.statusCode).to.eq(200)
+        expect(res.body).to.match(sourceMapRegex)
         expect(res.body).to.include('expect("foo.coffee")')
       })
 
       it('processes dom.jsx spec', async function () {
         await pollUntilEventsIpcLoaded()
+        const res = await this.rp('http://localhost:2020/__cypress/tests?p=cypress/e2e/baz.js')
 
-        return this.rp('http://localhost:2020/__cypress/tests?p=cypress/integration/baz.js')
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-          expect(res.body).to.include('React.createElement(')
-        })
+        expect(res.statusCode).to.eq(200)
+        expect(res.body).to.match(sourceMapRegex)
+        expect(res.body).to.include('React.createElement(')
       })
 
       it('processes spec into modern javascript', async function () {
         await pollUntilEventsIpcLoaded()
-        const res = await this.rp('http://localhost:2020/__cypress/tests?p=cypress/integration/es6.js')
+        const res = await this.rp('http://localhost:2020/__cypress/tests?p=cypress/e2e/es6.js')
 
         expect(res.statusCode).to.eq(200)
         // "modern" features should remain and not be transpiled into es5
@@ -562,7 +560,7 @@ describe('Routes', () => {
 
       it('processes foo.coffee spec', async function () {
         await pollUntilEventsIpcLoaded()
-        const res = await this.rp('http://localhost:2020/__cypress/tests?p=cypress/integration/foo.coffee')
+        const res = await this.rp('http://localhost:2020/__cypress/tests?p=cypress/e2e/foo.coffee')
 
         expect(res.statusCode).to.eq(200)
         expect(res.body).to.match(sourceMapRegex)
@@ -571,7 +569,7 @@ describe('Routes', () => {
 
       it('processes dom.jsx spec', async function () {
         await pollUntilEventsIpcLoaded()
-        const res = await this.rp('http://localhost:2020/__cypress/tests?p=cypress/integration/baz.js')
+        const res = await this.rp('http://localhost:2020/__cypress/tests?p=cypress/e2e/baz.js')
 
         expect(res.statusCode).to.eq(200)
         expect(res.body).to.match(sourceMapRegex)
@@ -602,7 +600,7 @@ describe('Routes', () => {
 
       it('serves error javascript file when there\'s a syntax error', async function () {
         await pollUntilEventsIpcLoaded()
-        const res = await this.rp('http://localhost:2020/__cypress/tests?p=cypress/integration/syntax_error.js')
+        const res = await this.rp('http://localhost:2020/__cypress/tests?p=cypress/e2e/syntax_error.js')
 
         expect(res.statusCode).to.eq(200)
         expect(res.body).to.include('Cypress.action("spec:script:error", {')

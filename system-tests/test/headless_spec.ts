@@ -5,7 +5,7 @@ describe('e2e headless', function () {
 
   describe('ELECTRON_RUN_AS_NODE', () => {
     const baseSpec = {
-      spec: 'headless_spec.js',
+      spec: 'headless.cy.js',
       config: {
         env: {
           'CI': process.env.CI,
@@ -43,7 +43,7 @@ describe('e2e headless', function () {
 
   // cypress run --headless
   systemTests.it('tests in headless mode pass', {
-    spec: 'headless_spec.js',
+    spec: 'headless.cy.js',
     config: {
       env: {
         'CI': process.env.CI,
@@ -65,7 +65,7 @@ describe('e2e headless', function () {
     '!electron',
   ].map((b) => {
     systemTests.it(`tests in headed mode pass in ${b}`, {
-      spec: 'headless_spec.js',
+      spec: 'headless.cy.js',
       config: {
         env: {
           'CI': process.env.CI,
@@ -81,12 +81,12 @@ describe('e2e headless', function () {
   systemTests.it('launches maximized by default in headless mode (1920x1080)', {
     headed: false,
     project: 'screen-size',
-    spec: 'default_size.spec.js',
+    spec: 'default_size.cy.js',
   })
 
   systemTests.it('launches at DPR 1x', {
     headed: false,
     project: 'screen-size',
-    spec: 'device_pixel_ratio.spec.js',
+    spec: 'device_pixel_ratio.cy.js',
   })
 })

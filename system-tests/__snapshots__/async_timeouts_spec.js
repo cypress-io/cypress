@@ -7,14 +7,14 @@ exports['e2e async timeouts / failing1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (async_timeouts_spec.js)                                                   │
-  │ Searched:   cypress/integration/async_timeouts_spec.js                                         │
+  │ Specs:      1 found (async_timeouts.cy.js)                                                     │
+  │ Searched:   cypress/e2e/async_timeouts.cy.js                                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  async_timeouts_spec.js                                                          (1 of 1)
+  Running:  async_timeouts.cy.js                                                            (1 of 1)
 
 
   async
@@ -49,22 +49,22 @@ exports['e2e async timeouts / failing1'] = `
   │ Screenshots:  2                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     async_timeouts_spec.js                                                           │
+  │ Spec Ran:     async_timeouts.cy.js                                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/async_timeouts_spec.js/async -- bar fails (fail     (1280x720)
-     ed).png                                                                                        
-  -  /XXX/XXX/XXX/cypress/screenshots/async_timeouts_spec.js/async -- fails async aft     (1280x720)
-     er cypress command (failed).png                                                                
+  -  /XXX/XXX/XXX/cypress/screenshots/async_timeouts.cy.js/async -- bar fails (failed     (1280x720)
+     ).png                                                                                          
+  -  /XXX/XXX/XXX/cypress/screenshots/async_timeouts.cy.js/async -- fails async after     (1280x720)
+      cypress command (failed).png                                                                  
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/async_timeouts_spec.js.mp4          (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/async_timeouts.cy.js.mp4            (X second)
 
 
 ====================================================================================================
@@ -74,7 +74,7 @@ exports['e2e async timeouts / failing1'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  async_timeouts_spec.js                   XX:XX        2        -        2        -        - │
+  │ ✖  async_timeouts.cy.js                     XX:XX        2        -        2        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✖  1 of 1 failed (100%)                     XX:XX        2        -        2        -        -  
 

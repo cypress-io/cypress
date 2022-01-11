@@ -15,7 +15,6 @@ export default defineConfig({
   },
   'e2e': {
     'supportFile': 'cypress/support/e2e.ts',
-    'specPattern': 'cypress/integration/**/*.{js,ts}',
     setupNodeEvents (on, config) {
       const express = require('express')
 

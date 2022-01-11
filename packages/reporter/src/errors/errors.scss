@@ -144,7 +144,9 @@ $code-border-radius: 4px;
           color: $red-100;
         }
         .collapsible-indicator {
-          color: $red-200;
+          .icon-dark {
+            stroke: $red-200;
+          }
         }
       }
 
@@ -162,7 +164,9 @@ $code-border-radius: 4px;
 
         .collapsible-indicator {
           line-height: 18px;
-          color: $red-400;
+          .icon-dark {
+            stroke: $red-400;
+          }
         }
       }
     }
