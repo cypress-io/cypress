@@ -77,7 +77,7 @@ describe('e2e iframes', () => {
   })
 
   systemTests.it('passes', {
-    spec: 'iframe_spec.js',
+    spec: 'iframe.cy.js',
     snapshot: true,
     config: {
       hosts: {

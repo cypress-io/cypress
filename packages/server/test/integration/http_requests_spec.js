@@ -21,7 +21,6 @@ const EventSource = require('eventsource')
 const config = require(`../../lib/config`)
 const { ServerE2E } = require(`../../lib/server-e2e`)
 const ProjectBase = require(`../../lib/project-base`).ProjectBase
-const { SpecsStore } = require(`../../lib/specs-store`)
 const pluginsModule = require(`../../lib/plugins`)
 const preprocessor = require(`../../lib/plugins/preprocessor`)
 const resolve = require(`../../lib/util/resolve`)
@@ -34,6 +33,7 @@ const Fixtures = require('@tooling/system-tests/lib/fixtures')
 const { getRunnerInjectionContents } = require(`@packages/resolve-dist`)
 const { createRoutes } = require(`../../lib/routes`)
 const { getCtx } = require(`../../lib/makeDataContext`)
+const dedent = require('dedent')
 
 zlib = Promise.promisifyAll(zlib)
 
@@ -166,7 +166,6 @@ describe('Routes', () => {
               SocketCtor: SocketE2E,
               getSpec: () => spec,
               getCurrentBrowser: () => null,
-              specsStore: new SpecsStore({}, 'e2e'),
               createRoutes,
               testingType: 'e2e',
               exit: false,
@@ -475,10 +474,28 @@ describe('Routes', () => {
     })
   })
 
-  // TOOD(tim): aim to fix by EOW
-  const temporarySkip = new Date() > new Date('2022-01-07') ? context : xcontext
+  function pollUntilEventsIpcLoaded () {
+    return new Promise((resolve) => {
+      let i = 0
 
-  temporarySkip('GET /__cypress/tests', () => {
+      const interval = setInterval(() => {
+        if (ctx.lifecycleManager.eventsIpcResult.state === 'loaded') {
+          clearInterval(interval)
+          resolve()
+        }
+
+        i += 1
+
+        if (i > 50) {
+          throw Error(dedent`
+            setupNodeEvents and plugins did not complete after 10 seconds. 
+            There might be an endless loop or an uncaught exception that isn't bubbling up.`)
+        }
+      }, 200)
+    })
+  }
+
+  context('GET /__cypress/tests', () => {
     describe('ids with typescript', () => {
       beforeEach(function () {
         Fixtures.scaffold('ids')
@@ -488,41 +505,43 @@ describe('Routes', () => {
         })
       })
 
-      it('processes foo.coffee spec', function () {
-        return this.rp('http://localhost:2020/__cypress/tests?p=cypress/integration/foo.coffee')
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-          expect(res.body).to.include('expect("foo.coffee")')
-        })
+      it('processes foo.coffee spec', async function () {
+        await pollUntilEventsIpcLoaded()
+        const res = await this.rp('http://localhost:2020/__cypress/tests?p=cypress/e2e/foo.coffee')
+
+        expect(res.statusCode).to.eq(200)
+        expect(res.body).to.match(sourceMapRegex)
+        expect(res.body).to.include('expect("foo.coffee")')
       })
 
-      it('processes dom.jsx spec', function () {
-        return this.rp('http://localhost:2020/__cypress/tests?p=cypress/integration/baz.js')
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-          expect(res.body).to.include('React.createElement(')
-        })
+      it('processes dom.jsx spec', async function () {
+        await pollUntilEventsIpcLoaded()
+        const res = await this.rp('http://localhost:2020/__cypress/tests?p=cypress/e2e/baz.js')
+
+        expect(res.statusCode).to.eq(200)
+        expect(res.body).to.match(sourceMapRegex)
+        expect(res.body).to.include('React.createElement(')
       })
 
-      it('processes spec into modern javascript', function () {
-        return this.rp('http://localhost:2020/__cypress/tests?p=cypress/integration/es6.js')
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-          // "modern" features should remain and not be transpiled into es5
-          expect(res.body).to.include('const numbers')
-          expect(res.body).to.include('[...numbers]')
-          expect(res.body).to.include('async function')
-          expect(res.body).to.include('await Promise')
-        })
+      it('processes spec into modern javascript', async function () {
+        await pollUntilEventsIpcLoaded()
+        const res = await this.rp('http://localhost:2020/__cypress/tests?p=cypress/e2e/es6.js')
+
+        expect(res.statusCode).to.eq(200)
+        // "modern" features should remain and not be transpiled into es5
+        expect(res.body).to.include('const numbers')
+        expect(res.body).to.include('[...numbers]')
+        expect(res.body).to.include('async function')
+        expect(res.body).to.include('await Promise')
       })
 
-      it('serves error javascript file when the file is missing', function () {
-        return this.rp('http://localhost:2020/__cypress/tests?p=does/not/exist.coffee')
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-          expect(res.body).to.include('Cypress.action("spec:script:error", {')
-          expect(res.body).to.include('Module not found')
-        })
+      it('serves error javascript file when the file is missing', async function () {
+        await pollUntilEventsIpcLoaded()
+        const res = await this.rp('http://localhost:2020/__cypress/tests?p=does/not/exist.coffee')
+
+        expect(res.statusCode).to.eq(200)
+        expect(res.body).to.include('Module not found')
+        expect(res.body).to.include('Cypress.action("spec:script:error", {')
       })
     })
 
@@ -539,31 +558,31 @@ describe('Routes', () => {
         })
       })
 
-      it('processes foo.coffee spec', function () {
-        return this.rp('http://localhost:2020/__cypress/tests?p=cypress/integration/foo.coffee')
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-          expect(res.body).to.match(sourceMapRegex)
-          expect(res.body).to.include('expect("foo.coffee")')
-        })
+      it('processes foo.coffee spec', async function () {
+        await pollUntilEventsIpcLoaded()
+        const res = await this.rp('http://localhost:2020/__cypress/tests?p=cypress/e2e/foo.coffee')
+
+        expect(res.statusCode).to.eq(200)
+        expect(res.body).to.match(sourceMapRegex)
+        expect(res.body).to.include('expect("foo.coffee")')
       })
 
-      it('processes dom.jsx spec', function () {
-        return this.rp('http://localhost:2020/__cypress/tests?p=cypress/integration/baz.js')
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-          expect(res.body).to.match(sourceMapRegex)
-          expect(res.body).to.include('React.createElement(')
-        })
+      it('processes dom.jsx spec', async function () {
+        await pollUntilEventsIpcLoaded()
+        const res = await this.rp('http://localhost:2020/__cypress/tests?p=cypress/e2e/baz.js')
+
+        expect(res.statusCode).to.eq(200)
+        expect(res.body).to.match(sourceMapRegex)
+        expect(res.body).to.include('React.createElement(')
       })
 
-      it('serves error javascript file when the file is missing', function () {
-        return this.rp('http://localhost:2020/__cypress/tests?p=does/not/exist.coffee')
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-          expect(res.body).to.include('Cypress.action("spec:script:error", {')
-          expect(res.body).to.include('Module not found')
-        })
+      it('serves error javascript file when the file is missing', async function () {
+        await pollUntilEventsIpcLoaded()
+        const res = await this.rp('http://localhost:2020/__cypress/tests?p=does/not/exist.coffee')
+
+        expect(res.statusCode).to.eq(200)
+        expect(res.body).to.include('Cypress.action("spec:script:error", {')
+        expect(res.body).to.include('Module not found')
       })
     })
 
@@ -579,13 +598,13 @@ describe('Routes', () => {
         })
       })
 
-      it('serves error javascript file when there\'s a syntax error', function () {
-        return this.rp('http://localhost:2020/__cypress/tests?p=cypress/integration/syntax_error.js')
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-          expect(res.body).to.include('Cypress.action("spec:script:error", {')
-          expect(res.body).to.include('Unexpected token')
-        })
+      it('serves error javascript file when there\'s a syntax error', async function () {
+        await pollUntilEventsIpcLoaded()
+        const res = await this.rp('http://localhost:2020/__cypress/tests?p=cypress/e2e/syntax_error.js')
+
+        expect(res.statusCode).to.eq(200)
+        expect(res.body).to.include('Cypress.action("spec:script:error", {')
+        expect(res.body).to.include('Unexpected token')
       })
     })
 
@@ -602,22 +621,22 @@ describe('Routes', () => {
         })
       })
 
-      it('processes my-tests/test1.js spec', function () {
-        return this.rp('http://localhost:2020/__cypress/tests?p=my-tests/test1.js')
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-          expect(res.body).to.match(sourceMapRegex)
-          expect(res.body).to.include(`expect('no-server')`)
-        })
+      it('processes my-tests/test1.js spec', async function () {
+        await pollUntilEventsIpcLoaded()
+        const res = await this.rp('http://localhost:2020/__cypress/tests?p=my-tests/test1.js')
+
+        expect(res.statusCode).to.eq(200)
+        expect(res.body).to.match(sourceMapRegex)
+        expect(res.body).to.include(`expect('no-server')`)
       })
 
-      it('processes helpers/includes.js supportFile', function () {
-        return this.rp('http://localhost:2020/__cypress/tests?p=helpers/includes.js')
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-          expect(res.body).to.match(sourceMapRegex)
-          expect(res.body).to.include(`console.log('includes')`)
-        })
+      it('processes helpers/includes.js supportFile', async function () {
+        await pollUntilEventsIpcLoaded()
+        const res = await this.rp('http://localhost:2020/__cypress/tests?p=helpers/includes.js')
+
+        expect(res.statusCode).to.eq(200)
+        expect(res.body).to.match(sourceMapRegex)
+        expect(res.body).to.include(`console.log('includes')`)
       })
     })
   })

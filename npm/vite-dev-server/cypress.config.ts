@@ -6,7 +6,6 @@ export default defineConfig({
   'fixturesFolder': false,
   'component': {
     'supportFile': 'cypress/support.js',
-    'specPattern': 'cypress/components/**/*.spec.*',
     devServer (cypressConfig) {
       const path = require('path')
       const { startDevServer } = require('./dist')

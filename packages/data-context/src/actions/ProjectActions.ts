@@ -3,6 +3,9 @@ import type { InitializeProjectOptions, FoundBrowser, FoundSpec, LaunchOpts, Ope
 import execa from 'execa'
 import path from 'path'
 import assert from 'assert'
+import Debug from 'debug'
+
+const debug = Debug('cypress:data-context:project-actions')
 
 import type { ProjectShape } from '../data/coreDataShape'
 
@@ -19,8 +22,8 @@ export interface ProjectApiShape {
    */
   openProjectCreate(args: InitializeProjectOptions, options: OpenProjectLaunchOptions): Promise<unknown>
   launchProject(browser: FoundBrowser, spec: Cypress.Spec, options: LaunchOpts): void
-  insertProjectToCache(projectRoot: string): void
-  removeProjectFromCache(projectRoot: string): void
+  insertProjectToCache(projectRoot: string): Promise<void>
+  removeProjectFromCache(projectRoot: string): Promise<void>
   getProjectRootsFromCache(): Promise<string[]>
   insertProjectPreferencesToCache(projectTitle: string, preferences: Preferences): void
   getProjectPreferencesFromCache(): Promise<Record<string, Preferences>>
@@ -28,6 +31,11 @@ export interface ProjectApiShape {
   clearProjectPreferences(projectTitle: string): Promise<unknown>
   clearAllProjectPreferences(): Promise<unknown>
   closeActiveProject(): Promise<unknown>
+  getCurrentProjectSavedState(): {} | undefined
+  setPromptShown(slug: string): void
+  getDevServer (): {
+    updateSpecs: (specs: FoundSpec[]) => void
+  }
 }
 
 export class ProjectActions {
@@ -47,7 +55,7 @@ export class ProjectActions {
   }
 
   private get projects () {
-    return this.ctx.coreData.app.projects
+    return this.ctx.projectsList
   }
 
   private set projects (projects: ProjectShape[]) {
@@ -138,7 +146,7 @@ export class ProjectActions {
 
     if (!found) {
       this.projects.push({ projectRoot })
-      this.api.insertProjectToCache(projectRoot)
+      await this.api.insertProjectToCache(projectRoot)
     }
 
     if (args.open) {
@@ -219,7 +227,7 @@ export class ProjectActions {
     this.ctx.lifecycleManager.setCurrentTestingType(testingType)
 
     const spec = this.makeSpec(testingType)
-    const browser = this.findBrowerByPath(browserPath)
+    const browser = this.findBrowserByPath(browserPath)
 
     if (!browser) {
       throw Error(`Cannot find specified browser at given path: ${browserPath}.`)
@@ -241,19 +249,20 @@ export class ProjectActions {
     }
   }
 
-  private findBrowerByPath (browserPath: string) {
+  private findBrowserByPath (browserPath: string) {
     return this.ctx.coreData?.app?.browsers?.find((browser) => browser.path === browserPath)
   }
 
   removeProject (projectRoot: string) {
-    const found = this.ctx.projectsList.find((x) => x.projectRoot === projectRoot)
+    const found = this.projects.find((x) => x.projectRoot === projectRoot)
 
     if (!found) {
       throw new Error(`Cannot remove ${projectRoot}, it is not a known project`)
     }
 
     this.projects = this.projects.filter((project) => project.projectRoot !== projectRoot)
-    this.api.removeProjectFromCache(projectRoot)
+
+    return this.api.removeProjectFromCache(projectRoot)
   }
 
   syncProjects () {
@@ -297,6 +306,10 @@ export class ProjectActions {
 
   async clearAllProjectPreferencesCache () {
     await this.api.clearAllProjectPreferences()
+  }
+
+  setPromptShown (slug: string) {
+    this.api.setPromptShown(slug)
   }
 
   async createComponentIndexHtml (template: string) {
@@ -405,15 +418,35 @@ export class ProjectActions {
     this.ctx.actions.electron.showBrowserWindow()
   }
 
+  get defaultE2EPath () {
+    const projectRoot = this.ctx.currentProject
+
+    assert(projectRoot, `Cannot create e2e directory without currentProject.`)
+
+    return path.join(projectRoot, 'cypress', 'e2e')
+  }
+
+  async maybeCreateE2EDir () {
+    const stats = await this.ctx.fs.stat(this.defaultE2EPath)
+
+    if (stats.isDirectory()) {
+      return
+    }
+
+    debug(`Creating ${this.defaultE2EPath}`)
+
+    return this.ctx.fs.mkdirp(this.defaultE2EPath)
+  }
+
   async scaffoldIntegration () {
     const projectRoot = this.ctx.currentProject
 
     assert(projectRoot, `Cannot create spec without currentProject.`)
 
-    const integrationFolder = 'cypress/integration' || this.ctx.currentProject
+    await this.maybeCreateE2EDir()
 
     const results = await codeGenerator(
-      { templateDir: templates['scaffoldIntegration'], target: integrationFolder },
+      { templateDir: templates['scaffoldIntegration'], target: this.defaultE2EPath },
       {},
     )
 
@@ -425,21 +458,23 @@ export class ProjectActions {
       return {
         fileParts: this.ctx.file.normalizeFileToFileParts({
           absolute: res.file,
+          searchFolder: this.defaultE2EPath,
           projectRoot,
-          searchFolder: integrationFolder,
         }),
         codeGenResult: res,
       }
     })
 
-    const specPattern = await this.ctx.project.specPatternForTestingType('e2e')
+    const { specPattern, ignoreSpecPattern } = await this.ctx.project.specPatternsForTestingType(projectRoot, 'e2e')
 
     if (!specPattern) {
       throw Error('Could not find specPattern for project')
     }
 
     // created new specs - find and cache them!
-    this.ctx.project.setSpecs(await this.ctx.project.findSpecs(projectRoot, 'e2e', specPattern))
+    this.ctx.project.setSpecs(
+      await this.ctx.project.findSpecs(projectRoot, 'e2e', specPattern, ignoreSpecPattern || [], []),
+    )
 
     return withFileParts
   }

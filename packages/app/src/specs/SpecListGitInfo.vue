@@ -1,14 +1,14 @@
 <template>
-  <div class="h-full grid git-info-row grid-cols-[16px,auto] items-center gap-9px">
-    <span class="flex items-center justify-center w-16px">
+  <div class="h-full grid gap-9px grid-cols-[16px,auto] git-info-row items-center">
+    <span class="flex w-16px items-center justify-center">
       <span
         v-if="fileState !== 'unmodified'"
-        class="rounded-full min-w-6px max-w-6px min-h-6px max-h-6px border-1"
+        class="rounded-full border-1 min-w-6px min-h-6px max-w-6px max-h-6px"
         :class="classes?.indicator"
       />
       <IconGithub
         v-else
-        class="min-w-16px max-w-16px min-h-16px icon-dark-gray-300 group-hocus:icon-dark-indigo-500 max-h-16px"
+        class="min-w-16px min-h-16px max-w-16px max-h-16px icon-dark-gray-300 group-hocus:icon-dark-indigo-500"
       />
     </span>
     <div
@@ -47,7 +47,7 @@ const props = defineProps<{
 const gitInfo = computed(() => props.gql)
 const timeAgo = useTimeAgo(gitInfo.value.lastModifiedTimestamp || '')
 
-// TODO: File state needs to come from git,
+// TODO UNIFY-863: File state needs to come from git,
 // but the data context doesn't contain this info yet
 const fileState = computed(() => gitInfo.value ? 'unmodified' : 'modified')
 
@@ -88,7 +88,7 @@ const gitInfoText = computed(() => {
     })
   }
 
-  // TODO: implement the backend for git to report this info
+  // TODO UNIFY-863: implement the backend for git to report this info
   // Created|Deleted|Modified x days ago by AuthorName
   return t('specPage.rows.gitInfo', {
     fileState: t(`file.git.${fileState.value}`),
