@@ -27,7 +27,6 @@ describe('http/response-middleware', function () {
       'MaybeRemoveSecurity',
       'GzipBody',
       'SendResponseBodyToClient',
-      'CleanupCypressHeaders',
     ])
   })
 
@@ -166,9 +165,7 @@ describe('http/response-middleware', function () {
           },
         },
         req: {
-          headers: {
-            'x-cypress-is-aut-frame': 'true',
-          },
+          isAUTFrame: true,
         },
       })
 
@@ -189,8 +186,8 @@ describe('http/response-middleware', function () {
               'text/html',
               'application/xhtml+xml',
             ],
-            'x-cypress-is-aut-frame': 'true',
           },
+          isAUTFrame: true,
         },
       })
 
@@ -213,9 +210,7 @@ describe('http/response-middleware', function () {
           },
         },
         req: {
-          headers: {
-            'x-cypress-is-aut-frame': 'true',
-          },
+          isAUTFrame: true,
         },
       })
 
@@ -263,5 +258,3 @@ describe('http/response-middleware', function () {
     }
   })
 })
-
-// TODO: add tests for not injecting if success: false

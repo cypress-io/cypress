@@ -259,7 +259,8 @@ export class CommandQueue extends Queue<Command> {
       // start at 0 index if one is not already set
       let index = this.state('index') || this.state('index', 0)
 
-      // if at the end of the queue in a secondary domain,
+      // if at the end of the queue when not auto-running, pause will be true
+      // but since there's nothing left in the queue to move things forward,
       // ignore and reset the pause, then let the queue finish
       if (!autoRun && pause && !this.at(index)) {
         pause = false
