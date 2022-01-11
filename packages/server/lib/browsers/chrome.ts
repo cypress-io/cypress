@@ -623,6 +623,8 @@ export = {
       originalBrowserKill.apply(launchedBrowser, args)
     }
 
+    await criClient.send('Page.enable')
+
     await this._maybeRecordVideo(criClient, options, browser.majorVersion)
     await this._navigateUsingCRI(criClient, url)
     await this._handleDownloads(criClient, options.downloadsFolder, automation)

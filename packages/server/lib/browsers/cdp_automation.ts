@@ -192,8 +192,6 @@ export class CdpAutomation {
       maxResourceBufferSize: 0,
       maxPostDataSize: 0,
     })
-
-    await this.sendDebuggerCommandFn('Page.enable')
   }
 
   private onNetworkRequestWillBeSent = async (params: Protocol.Network.RequestWillBeSentEvent) => {
