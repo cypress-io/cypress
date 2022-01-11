@@ -117,7 +117,7 @@ function run (ipc, configFile, projectRoot) {
       debug('loaded config from %s %o', configFile, result)
     } catch (err) {
       if (err.name === 'TSError') {
-        // beause of this https://github.com/TypeStrong/ts-node/issues/1418
+        // because of this https://github.com/TypeStrong/ts-node/issues/1418
         // we have to do this https://stackoverflow.com/questions/25245716/remove-all-ansi-colors-styles-from-strings/29497680
         const cleanMessage = stripAnsi(err.message)
         // replace the first line with better text (remove potentially misleading word TypeScript for example)

@@ -20,7 +20,7 @@ import type { DataContext } from '..'
 import { LoadConfigReply, SetupNodeEventsReply, ProjectConfigIpc, IpcHandler } from './ProjectConfigIpc'
 import assert from 'assert'
 import type { AllModeOptions, FoundBrowser, FullConfig, TestingType } from '@packages/types'
-import type { BaseErrorDataShape, WarningError } from '.'
+import type { BaseErrorDataShape, CoreDataShape, WarningError } from '.'
 import { autoBindDebug } from '../util/autoBindDebug'
 
 const debug = debugLib(`cypress:lifecycle:ProjectLifecycleManager`)
@@ -252,8 +252,6 @@ export class ProjectLifecycleManager {
   clearCurrentProject () {
     this.resetInternalState()
     this._projectRoot = undefined
-    this._configFilePath = undefined
-    this._cachedFullConfig = undefined
   }
 
   /**
@@ -277,11 +275,14 @@ export class ProjectLifecycleManager {
       s.currentProject = projectRoot
     })
 
-    const metaState = this.refreshMetaState()
+    this.refreshMetaState()
 
     this.configFileWarningCheck()
 
-    if (metaState.hasValidConfigFile) {
+    if (this.metaState.hasValidConfigFile) {
+      // at this point, there is not a cypress configuration file to initialize
+      // the project will be scaffolded and when the user selects the testing type
+      // the would like to setup
       this.initializeConfig().catch(this.onLoadError)
     }
 
@@ -306,7 +307,7 @@ export class ProjectLifecycleManager {
    * When we set the "testingType", we
    */
   setCurrentTestingType (testingType: TestingType | null) {
-    this.ctx.update((d) => {
+    this.ctx.update((d: CoreDataShape) => {
       d.currentTestingType = testingType
     })
 
@@ -320,27 +321,33 @@ export class ProjectLifecycleManager {
       return
     }
 
-    if (!this.metaState.hasValidConfigFile) {
-      if (testingType === 'e2e' && !this.ctx.isRunMode) {
-        this.ctx.actions.wizard.scaffoldTestingType().catch(this.onLoadError)
-      }
-    } else {
-      this.loadTestingType()
-    }
+    this.loadTestingType()
   }
 
   private loadTestingType () {
     const testingType = this._currentTestingType
 
     assert(testingType, 'loadTestingType requires a testingType')
+
+    if ((!this.isTestingTypeConfigured(testingType) || !this.metaState.hasValidConfigFile) && !this.ctx.isRunMode) {
+      this.ctx.actions.wizard.scaffoldTestingType().catch(this.onLoadError)
+
+      return
+    }
+
     // If we have set a testingType, and it's not the "target" of the
     // registeredEvents (switching testing mode), we need to get a fresh
     // config IPC & re-execute the setupTestingType
     if (this._registeredEventsTarget && testingType !== this._registeredEventsTarget) {
-      this._configResult = { state: 'pending' }
-      this.initializeConfig().catch(this.onLoadError)
-    } else if (this._eventsIpc && !this._registeredEventsTarget && this._configResult.state === 'loaded') {
+      this.reloadConfig().catch(this.onLoadError)
+
+      return
+    }
+
+    if (this._eventsIpc && !this._registeredEventsTarget && this._configResult.state === 'loaded') {
       this.setupNodeEvents().catch(this.onLoadError)
+
+      return
     }
   }
 
@@ -1236,11 +1243,11 @@ export class ProjectLifecycleManager {
     process.removeListener('exit', this.onProcessExit)
   }
 
-  isTestingTypeConfigured (testingType: TestingType) {
+  isTestingTypeConfigured (testingType: TestingType): Boolean {
     const config = this.loadedFullConfig ?? this.loadedConfigFile
 
     if (!config) {
-      return null
+      return false
     }
 
     if (!_.has(config, testingType)) {

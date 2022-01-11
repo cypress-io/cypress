@@ -1,5 +1,3 @@
-import { verify } from 'crypto'
-
 describe('Launchpad: Setup Project', () => {
   before(() => {
     cy.scaffoldProject('pristine') // not configured
@@ -7,7 +5,7 @@ describe('Launchpad: Setup Project', () => {
     cy.scaffoldProject('pristine-with-e2e-testing') // e2e configured
   })
 
-  const verifyWelcomePage = ({ e2eIsConfigured = false, ctIsConfigured = false }) => {
+  const verifyWelcomePage = ({ e2eIsConfigured, ctIsConfigured }) => {
     cy.contains('Welcome to Cypress!').should('be.visible')
     cy.contains('[data-cy-testingtype="e2e"]', e2eIsConfigured ? 'Configured' : 'Not Configured')
     cy.contains('[data-cy-testingtype="component"]', ctIsConfigured ? 'Configured' : 'Not Configured')
@@ -129,23 +127,19 @@ describe('Launchpad: Setup Project', () => {
       })
     })
 
-    // project has a cypress.configuration file
-    // FIXME: There is nothing special about the default E2E configuration provided
+    // project has a cypress.configuration file with component testing configured
     describe('project that has not been configured for e2e', () => {
-      it('shows the first step in configuration', () => {
+      it('shows the first step in configuration when selecting e2e tests', () => {
         cy.openProject('pristine-with-ct-testing')
         cy.visitLaunchpad()
 
         verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: true })
-        // cy.contains('Welcome to Cypress!').should('be.visible')
-        // cy.contains('[data-cy-testingtype="e2e"]', 'Not Configured')
-        // cy.contains('[data-cy-testingtype="component"]', 'Configured')
 
         cy.get('[data-cy-testingtype="e2e"]').click()
         cy.findByText('We added the following files to your project.')
       })
 
-      it('moves to "Choose a Browser" page after clicking "Continue" button in first step in configuration page moves to', () => {
+      it('moves to "Choose a Browser" page after clicking "Continue" button in first step in configuration page', () => {
         cy.openProject('pristine-with-ct-testing')
         cy.visitLaunchpad()
 
@@ -155,18 +149,18 @@ describe('Launchpad: Setup Project', () => {
 
         cy.get('[data-cy-testingtype="e2e"]').click()
         cy.findByText('We added the following files to your project.')
-        cy.findByText('Continue').click()
-        cy.get('h1').should('contain', 'Choose a Browser')
+        // cy.findByText('Continue').click()
+        // cy.get('h1').should('contain', 'Choose a Browser')
       })
 
       it('shows the first step in configuration when opened via cli with --e2e flag', () => {
         cy.openProject('pristine-with-ct-testing', ['--e2e'])
         cy.visitLaunchpad()
 
-        cy.contains('[data-cy-testingtype="e2e"]', 'Not Configured')
-        cy.contains('[data-cy-testingtype="component"]', 'Configured')
+        cy.contains('We added the following files to your project.')
 
-        cy.findByText('We added the following files to your project.')
+        cy.wait(5000)
+        cy.contains('We added the following files to your project.')
         // cy.get('body').tab()
 
         // cy.get('button')
@@ -174,17 +168,15 @@ describe('Launchpad: Setup Project', () => {
         // .contains('Continue')
         // .type('{enter}')
 
-        cy.get('h1').should('contain', 'Choose a Browser')
+        // cy.get('h1').should('contain', 'Choose a Browser')
       })
     })
 
     it('can setup e2e testing for a project not been configured for cypress', () => {
-      cy.openProject('pristine-with-ct-testing')
+      cy.openProject('pristine')
       cy.visitLaunchpad()
 
-      cy.contains('Welcome to Cypress!').should('be.visible')
-      cy.contains('[data-cy-testingtype="e2e"]', 'Not Configured')
-      cy.contains('[data-cy-testingtype="component"]', 'Configured')
+      verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: false })
 
       // @ts-ignore
       cy.get('body').tab()
@@ -193,23 +185,99 @@ describe('Launchpad: Setup Project', () => {
       .should('have.focus')
       .type('{enter}')
 
+      // cy.wait(5000)
+
       cy.findByText('We added the following files to your project.')
-      cy.findByText('Continue').click()
-      cy.get('h1').should('contain', 'Choose a Browser')
 
-      cy.get('Back').click()
-      cy.contains('[data-cy-testingtype="e2e"]', 'Configured')
+      cy.wait(5000)
+      cy.findByText('We added the following files to your project.')
 
-      cy.openProject('pristine-with-ct-testing')
-      cy.visitLaunchpad()
-      cy.contains('[data-cy-testingtype="e2e"]', 'Configured')
+      // cy.findByText('Continue').click()
+      // cy.get('h1').should('contain', 'Choose a Browser')
+
+      // cy.get('Back').click()
+      // cy.contains('[data-cy-testingtype="e2e"]', 'Configured')
+
+      // cy.openProject('pristine')
+      // cy.visitLaunchpad()
+      // cy.contains('[data-cy-testingtype="e2e"]', 'Configured')
     })
   })
 
   describe('Component setup', () => {
+    describe('project has been configured for component testing', () => {
+      it('it skips the setup page when choosing component tests to run', () => {
+        cy.openProject('pristine-with-ct-testing')
+        cy.visitLaunchpad()
+
+        verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: true })
+
+        cy.get('[data-cy-testingtype="component"]').click()
+
+        cy.contains(/(Initializing Config|Choose a Browser)/)
+      })
+
+      it('opens to the browser pages when opened via cli with --component flag', () => {
+        cy.scaffoldProject('pristine-with-ct-testing')
+        cy.openProject('pristine-with-ct-testing', ['--component'])
+        cy.visitLaunchpad()
+
+        cy.get('h1').should('contain', 'Choose a Browser')
+      })
+    })
+
+    describe('project that has not been configured for e2e', () => {
+      it('opens to the "choose framework" page when opened via cli with --component flag', () => {
+        cy.scaffoldProject('pristine-with-e2e-testing')
+        cy.openProject('pristine-with-e2e-testing', ['--component'])
+        cy.visitLaunchpad()
+
+        cy.get('h1').should('contain', 'Project Setup')
+        cy.contains('Confirm the front-end framework and bundler used in your project.')
+
+        cy.wait(5000)
+        cy.contains('Confirm the front-end framework and bundler used in your project.')
+      })
+
+      it('shows the "choose framework" page when selecting component tests', () => {
+        cy.scaffoldProject('pristine-with-e2e-testing')
+        cy.openProject('pristine-with-e2e-testing')
+        cy.visitLaunchpad()
+
+        verifyWelcomePage({ e2eIsConfigured: true, ctIsConfigured: false })
+
+        cy.get('[data-cy-testingtype="component"]').click()
+
+        cy.get('h1').should('contain', 'Project Setup')
+        cy.contains('Confirm the front-end framework and bundler used in your project.')
+
+        cy.wait(5000)
+        cy.contains('Confirm the front-end framework and bundler used in your project.')
+      })
+    })
+
+    describe('project not been configured for cypress', () => {
+      it('can setup component testing for a project not been configured for cypress', () => {
+        cy.scaffoldProject('pristine')
+        cy.openProject('pristine')
+        cy.visitLaunchpad()
+
+        verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: false })
+
+        // @ts-ignore
+        cy.get('body').tab().tab()
+
+        cy.get('[data-cy-testingtype="component"]')
+        .should('have.focus')
+        .type('{enter}')
+
+        cy.findByText('Confirm the front-end framework and bundler used in your project.')
+      })
+    })
+
     // component Project Setup (never having setup CT before)
-    //   Running `cypress open --component` with no initial setup detected will launch into the project in component showing 'choose framework' page
-    //   Clicking on the component area of project setup will route the user to the page showing 'choose framework' page
+    // +   Running `cypress open --component` with no initial setup detected will launch into the project in component showing 'choose framework' page
+    // +  Clicking on the component area of project setup will route the user to the page showing 'choose framework' page
     //   The choose framework page displays options to select framework, bundler, and language with JavaScript pre-selected and the 'Next' button disabled.
     //   On the 'choose framework' page, clicking 'back' returns you to the 'project setup' page to choose e2e or component
     //   The framework dropdown displays all frameworks supported by Cypress with their icon  (Create React App, Vue CLI, React.js, Vue.js, Next.js, Nuxt.js)
@@ -230,20 +298,5 @@ describe('Launchpad: Setup Project', () => {
     // component Configured files (never having setup e2e or CT before)
     //   Clicking on any of the configured files will display a preview of the code of the file.
     //   Clicking 'Continue' routes you to 'Choose a Browser' page
-    describe('has not bee configured', () => {
-      describe('existing project', () => {
-
-      })
-
-      describe('new project', () => {
-
-      })
-    })
-
-    describe('previously configured', () => {
-      it('', () => {
-
-      })
-    })
   })
 })
