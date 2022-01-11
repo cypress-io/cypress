@@ -59,16 +59,7 @@ const _forceProxyMiddleware = function (clientRoute, namespace = '__cypress') {
   return function (req, res, next) {
     const trimmedUrl = _.trimEnd(req.proxiedUrl, '/')
 
-    // TODO: this is hard coded temporarily, a larger fix for this scenario is incoming.
-    if (_isNonProxiedRequest(req) && process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF) {
-      req.proxiedUrl = `http://localhost:4455${trimmedUrl}`
-
-      return next()
-    }
-
     if (_isNonProxiedRequest(req) && !ALLOWED_PROXY_BYPASS_URLS.includes(trimmedUrl) && (trimmedUrl !== trimmedClientRoute)) {
-      debug('Redirecting!!!!! %o', { namespace, url: req.proxiedUrl })
-
       // this request is non-proxied and non-allowed, redirect to the runner error page
       return res.redirect(clientRoute)
     }
