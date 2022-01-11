@@ -12,7 +12,6 @@ import installCustomPercyCommand from '@packages/ui-components/cypress/support/c
 
 configure({ testIdAttribute: 'data-cy' })
 
-const CYPRESS_EXTENSION_ID = 'caljajdfkjjjdehjdoimjkkakekklcck'
 const NO_TIMEOUT = 1000 * 1000
 const TEN_SECONDS = 10 * 1000
 
@@ -202,16 +201,10 @@ function startAppServer (mode: 'component' | 'e2e' = 'e2e') {
 
         await ctx.actions.project.launchProject(o.mode, { url: o.url })
 
-        return { appServerPort: ctx.appServerPort, socketIoRoute: ctx.lifecycleManager.loadedFullConfig?.socketIoRoute }
-      }, { log: false, mode, url: win.top ? win.top.location.href : undefined }).then(async ({ appServerPort, socketIoRoute }) => {
-        log.set({ message: `port: ${appServerPort}, socketIoRoute: ${socketIoRoute}}` })
+        return ctx.appServerPort
+      }, { log: false, mode, url: win.top ? win.top.location.href : undefined }).then((appServerPort) => {
+        log.set({ message: `port: ${appServerPort}` })
         Cypress.env('e2e_serverPort', appServerPort)
-
-        if (Cypress.config('browser').isHeaded) {
-          const browser = require('webextension-polyfill')
-
-          await browser.runtime.sendMessage(CYPRESS_EXTENSION_ID, { host: `http://localhost:${appServerPort}`, path: socketIoRoute || '/__socket.io' }, {})
-        }
       })
     })
   })

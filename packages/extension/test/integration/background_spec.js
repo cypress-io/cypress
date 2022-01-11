@@ -132,8 +132,6 @@ describe('app/background', () => {
     this.httpSrv.close(() => {
       done()
     })
-
-    background.disconnect(`http://localhost:${PORT}`, '/__socket.io')
   })
 
   context('.connect', () => {
