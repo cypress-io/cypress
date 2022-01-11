@@ -1,11 +1,11 @@
 // @ts-ignore
-describe('multidomain - rerun', { experimentalMultiDomain: true }, () => {
+describe('multi-domain - rerun', { experimentalMultiDomain: true }, () => {
   beforeEach(() => {
-    cy.visit('/fixtures/multidomain.html')
+    cy.visit('/fixtures/multi-domain.html')
     cy.get('a').click()
   })
 
-  // this test will hang without the fix for multidomain rerun
+  // this test will hang without the fix for multi-domain rerun
   // https://github.com/cypress-io/cypress/issues/18043
   it('successfully reruns tests', () => {
     // @ts-ignore

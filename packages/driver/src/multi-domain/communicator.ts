@@ -60,7 +60,7 @@ export class PrimaryDomainCommunicator extends EventEmitter {
    * @param {string} event - the name of the event to be sent.
    * @param {any} data - any meta data to be sent with the event.
    */
-  toSpecBridge (event: string, data: any) {
+  toSpecBridge (event: string, data?: any) {
     this.crossDomainDriverWindow.postMessage({
       event,
       data,
@@ -103,7 +103,7 @@ export class SpecBridgeDomainCommunicator extends EventEmitter {
    * @param {string} event - the name of the event to be sent.
    * @param {any} data - any meta data to be sent with the event.
    */
-  toPrimary (event: string, data: any) {
+  toPrimary (event: string, data?: any) {
     let prefixedEvent = `${CROSS_DOMAIN_PREFIX}${event}`
 
     this.windowReference.top.postMessage({ event: prefixedEvent, data }, '*')

@@ -225,7 +225,7 @@ const PatchExpressSetHeader: ResponseMiddleware = function () {
   this.next()
 }
 
-const MaybeDelayForMultidomain: ResponseMiddleware = function () {
+const MaybeDelayForMultiDomain: ResponseMiddleware = function () {
   const isCrossDomain = !reqMatchesOriginPolicy(this.req, this.getRemoteState())
   const isHTML = resContentTypeIs(this.incomingRes, 'text/html')
   const isRenderedHTML = reqWillRenderHtml(this.req)
@@ -278,9 +278,9 @@ const SetInjectionLevel: ResponseMiddleware = function () {
     const isAUTFrame = this.req.isAUTFrame
 
     if (!isReqMatchOriginPolicy && isAUTFrame && (isHTML || isRenderedHTML)) {
-      this.debug('- multidomain injection')
+      this.debug('- multi-domain injection')
 
-      return 'fullMultidomain'
+      return 'fullMultiDomain'
     }
 
     if (!isHTML || !isReqMatchOriginPolicy && !isAUTFrame) {
@@ -502,7 +502,7 @@ export default {
   AttachPlainTextStreamFn,
   InterceptResponse,
   PatchExpressSetHeader,
-  MaybeDelayForMultidomain,
+  MaybeDelayForMultiDomain,
   SetInjectionLevel,
   OmitProblematicHeaders,
   MaybePreventCaching,

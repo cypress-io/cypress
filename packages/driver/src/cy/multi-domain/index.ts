@@ -15,9 +15,9 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
     // will not continue until the page is stable, but this signals it to go
     // ahead because we're anticipating multi-domain
     // @ts-ignore
-    cy.isAnticipatingMultidomain(true)
+    cy.isAnticipatingMultiDomain(true)
 
-    // cy.isAnticipatingMultidomain(true) will free the queue to move forward.
+    // cy.isAnticipatingMultiDomain(true) will free the queue to move forward.
     // if the next command isn't switchToDomain, this timeout will hit and
     // the test will fail with a cross-origin error
     timeoutId = setTimeout(() => {
@@ -137,7 +137,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
         // fired once the spec bridge is set up and ready to
         // receive messages
         communicator.once('bridge:ready', () => {
-          state('readyForMultidomain', true)
+          state('readyForMultiDomain', true)
           // let the proxy know to let the response for the secondary
           // domain html through, so the page will finish loading
           Cypress.backend('ready:for:domain', { shouldInject: true })
@@ -162,7 +162,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
           } finally {
             state('readyForMultidomain', false)
             // @ts-ignore
-            cy.isAnticipatingMultidomain(false)
+            cy.isAnticipatingMultiDomain(false)
           }
         })
 

@@ -15,7 +15,7 @@ export type CypressIncomingRequest = Request & {
   isAUTFrame: boolean
 }
 
-export type CypressWantsInjection = 'full' | 'fullMultidomain' | 'partial' | false
+export type CypressWantsInjection = 'full' | 'fullMultiDomain' | 'partial' | false
 
 /**
  * An outgoing response to an incoming request to the Cypress web server.

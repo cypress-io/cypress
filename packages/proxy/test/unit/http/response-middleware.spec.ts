@@ -13,7 +13,7 @@ describe('http/response-middleware', function () {
       'AttachPlainTextStreamFn',
       'InterceptResponse',
       'PatchExpressSetHeader',
-      'MaybeDelayForMultidomain',
+      'MaybeDelayForMultiDomain',
       'SetInjectionLevel',
       'OmitProblematicHeaders',
       'MaybePreventCaching',
@@ -129,14 +129,14 @@ describe('http/response-middleware', function () {
     }
   })
 
-  describe('MaybeDelayForMultidomain', function () {
-    const { MaybeDelayForMultidomain } = ResponseMiddleware
+  describe('MaybeDelayForMultiDomain', function () {
+    const { MaybeDelayForMultiDomain } = ResponseMiddleware
     let ctx
 
     it('doesn\'t do anything when not html or rendered html', function () {
       prepareContext({})
 
-      return testMiddleware([MaybeDelayForMultidomain], ctx)
+      return testMiddleware([MaybeDelayForMultiDomain], ctx)
       .then(() => {
         expect(ctx.serverBus.emit).not.to.be.called
       })
@@ -151,7 +151,7 @@ describe('http/response-middleware', function () {
         },
       })
 
-      return testMiddleware([MaybeDelayForMultidomain], ctx)
+      return testMiddleware([MaybeDelayForMultiDomain], ctx)
       .then(() => {
         expect(ctx.serverBus.emit).not.to.be.called
       })
@@ -169,7 +169,7 @@ describe('http/response-middleware', function () {
         },
       })
 
-      const promise = testMiddleware([MaybeDelayForMultidomain], ctx)
+      const promise = testMiddleware([MaybeDelayForMultiDomain], ctx)
 
       expect(ctx.serverBus.emit).to.be.calledWith('delaying:cross:domain:html')
 
@@ -191,7 +191,7 @@ describe('http/response-middleware', function () {
         },
       })
 
-      const promise = testMiddleware([MaybeDelayForMultidomain], ctx)
+      const promise = testMiddleware([MaybeDelayForMultiDomain], ctx)
 
       expect(ctx.serverBus.emit).to.be.calledWith('delaying:cross:domain:html')
 
@@ -214,7 +214,7 @@ describe('http/response-middleware', function () {
         },
       })
 
-      const promise = testMiddleware([MaybeDelayForMultidomain], ctx)
+      const promise = testMiddleware([MaybeDelayForMultiDomain], ctx)
 
       expect(ctx.serverBus.emit).to.be.calledWith('delaying:cross:domain:html')
 
@@ -236,7 +236,7 @@ describe('http/response-middleware', function () {
           ...props.res,
         },
         req: {
-          proxiedUrl: 'http:127.0.0.1:3501/multidomain.html',
+          proxiedUrl: 'http:127.0.0.1:3501/multi-domain.html',
           headers: {},
           ...props.req,
         },

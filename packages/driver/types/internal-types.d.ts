@@ -99,3 +99,6 @@ type AliasedRequest = {
   alias: string
   request: any
 }
+
+// utility types
+type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>
