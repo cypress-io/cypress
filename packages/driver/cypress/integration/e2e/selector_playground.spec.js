@@ -3,7 +3,7 @@ describe('selector_playground', () => {
     cy.visit('/fixtures/dom.html')
     .then(() => {
       // We trick the selector-playground into rendering while the test is running
-      top.Runner.configureMobx({ enforceActions: 'never' })
+      top.UnifiedRunner.MobX.configure({ enforceActions: 'never' })
       top.Runner.state.isRunning = false
 
       const $highlightBtn = cy.$$('button.highlight-toggle:visible', top.document)
