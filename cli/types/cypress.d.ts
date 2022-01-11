@@ -5568,7 +5568,7 @@ declare namespace Cypress {
      */
     (action: 'command:end', fn: (command: CommandQueue) => void): Cypress
     /**
-     * Fires when a command is skipped, namely the `should` command
+     * Fires when a command is skipped, namely the `should` command.
      * Useful for debugging and understanding how commands are handled.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
