@@ -32,6 +32,7 @@ describe('<CloudConnectModals />', () => {
 
   it('show the create org modal when no org is there', () => {
     mountDialog(true)
+    cy.findByText(defaultMessages.runs.connect.modal.createOrg.button).click()
     cy.contains('button', defaultMessages.runs.connect.modal.createOrg.waitingButton).should('be.visible')
   })
 
