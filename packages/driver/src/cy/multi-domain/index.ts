@@ -21,20 +21,68 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
     // if the next command isn't switchToDomain, this timeout will hit and
     // the test will fail with a cross-origin error
     timeoutId = setTimeout(() => {
-      Cypress.backend('ready:for:domain', { shouldInject: false })
+      // TODO: when we throw an error make sure to clear this timeout
+      Cypress.backend('ready:for:domain')
     }, 2000)
   })
 
   Commands.addAll({
-    switchToDomain<T> (domain: string, dataOrFn: T | (() => {}), fn?: (data?: T) => {}) {
+    // this isn't fully implemented, but in place to be able to test out
+    // the other parts of multidomain
+    switchToDomain<T> (domain: string, doneOrDataOrFn: T | Mocha.Done | (() => {}), dataOrFn?: T | (() => {}), fn?: (data?: T) => {}) {
       clearTimeout(timeoutId)
 
       if (!config('experimentalMultiDomain')) {
         $errUtils.throwErrByPath('switchToDomain.experiment_not_enabled')
       }
 
-      const callbackFn = (fn ?? dataOrFn) as (data?: T) => {}
-      const data = fn ? dataOrFn : undefined
+      let done
+      let data
+      let callbackFn
+
+      const cleanup = () => {
+        communicator.off('command:enqueued', addCommand)
+        communicator.off('command:update', updateCommand)
+        communicator.off('done:called', doneAndCleanup)
+      }
+
+      const doneAndCleanup = (err) => {
+        cleanup()
+        done(err)
+      }
+
+      if (fn) {
+        callbackFn = fn
+        done = doneOrDataOrFn
+        data = dataOrFn
+
+        // if done has been provided to the test, allow the user to call done
+        // from the switchToDomain context running in the secondary domain.
+      } else if (dataOrFn) {
+        callbackFn = dataOrFn
+
+        if (typeof doneOrDataOrFn === 'function') {
+          done = doneOrDataOrFn
+        } else {
+          data = doneOrDataOrFn
+        }
+      } else {
+        callbackFn = doneOrDataOrFn
+      }
+
+      if (done) {
+        const doneByReference = cy.state('done')
+
+        // if three arguments are passed in, verify the second argument is actually the done fn
+        // TODO: This will need to be updated when #19577 is merged in to account for all the method signatures switchToDomain can have
+        if (done !== doneByReference) {
+          Cypress.backend('ready:for:domain')
+
+          $errUtils.throwErrByPath('switchToDomain.done_reference_mismatch')
+        }
+
+        communicator.once('done:called', doneAndCleanup)
+      }
 
       const log = Cypress.log({
         name: 'switchToDomain',
@@ -81,6 +129,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
 
           communicator.toSpecBridge('run:command', {
             name: attrs.name,
+            isDoneFnAvailable: !!done,
           })
 
           return deferred.promise
@@ -127,12 +176,21 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
       communicator.on('command:update', updateCommand)
 
       return new Bluebird((resolve, reject) => {
-        communicator.once('ran:domain:fn', resolve)
+        communicator.once('ran:domain:fn', (err) => {
+          if (err) {
+            cleanup()
+            communicator.off('queue:finished', cleanup)
+            reject(err)
 
-        communicator.once('queue:finished', () => {
-          communicator.off('command:enqueued', addCommand)
-          communicator.off('command:update', updateCommand)
+            return
+          }
+
+          resolve()
         })
+
+        if (!done) {
+          communicator.once('queue:finished', cleanup)
+        }
 
         // fired once the spec bridge is set up and ready to
         // receive messages
@@ -140,7 +198,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
           state('readyForMultiDomain', true)
           // let the proxy know to let the response for the secondary
           // domain html through, so the page will finish loading
-          Cypress.backend('ready:for:domain', { shouldInject: true })
+          Cypress.backend('ready:for:domain')
         })
 
         cy.once('internal:window:load', ({ type }) => {
@@ -152,6 +210,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
             communicator.toSpecBridge('run:domain:fn', {
               data,
               fn: callbackFn.toString(),
+              isDoneFnAvailable: !!done,
             })
           } catch (err: any) {
             const wrappedErr = $errUtils.errByPath('switchToDomain.run_domain_fn_errored', {

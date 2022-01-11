@@ -60,10 +60,6 @@ declare namespace Cypress {
     visiting: string
   }
 
-  interface ReadyForDomainOptions {
-    shouldInject: boolean
-  }
-
   interface Backend {
     /**
      * Firefox only: Force Cypress to run garbage collection routines.
@@ -72,7 +68,7 @@ declare namespace Cypress {
      * @see https://on.cypress.io/firefox-gc-issue
      */
     (task: 'firefox:force:gc'): Promise<void>
-    (task: 'ready:for:domain', options: ReadyForDomainOptions): Promise<void>
+    (task: 'ready:for:domain'): Promise<void>
     (task: 'net', eventName: string, frame: any): Promise<void>
   }
 
@@ -1902,6 +1898,25 @@ declare namespace Cypress {
      *    })
      */
     switchToDomain<T>(domain: string, data: T, fn: (data: T) => void): Chainable<undefined>
+    /**
+     * Enables running Cypress commands in a secondary domain
+     * @see https://on.cypress.io/switchToDomain
+     * @example
+     *    cy.switchToDomain('example.com', done, () => {
+     *      done()
+     *    })
+     */
+    switchToDomain<T>(domain: string, done: Mocha.Done, fn: (data: T) => void): Chainable<undefined>
+    /**
+     * Enables running Cypress commands in a secondary domain
+     * @see https://on.cypress.io/switchToDomain
+     * @example
+     *    cy.switchToDomain('example.com', done, { key: 'value' } ({ key }) => {
+     *      expect(key).to.equal('value')
+     *      done()
+     *    })
+     */
+    switchToDomain<T>(domain: string, done: Mocha.Done, data: T, fn: (data: T) => void): Chainable<undefined>
 
     /**
      * Run a task in Node via the plugins file.

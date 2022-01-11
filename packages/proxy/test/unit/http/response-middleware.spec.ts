@@ -173,7 +173,7 @@ describe('http/response-middleware', function () {
 
       expect(ctx.serverBus.emit).to.be.calledWith('delaying:cross:domain:html')
 
-      ctx.serverBus.once.withArgs('ready:for:domain').args[0][1]({ shouldInject: true })
+      ctx.serverBus.once.withArgs('ready:for:domain').args[0][1]()
 
       return promise
     })
@@ -195,32 +195,9 @@ describe('http/response-middleware', function () {
 
       expect(ctx.serverBus.emit).to.be.calledWith('delaying:cross:domain:html')
 
-      ctx.serverBus.once.withArgs('ready:for:domain').args[0][1]({ shouldInject: true })
+      ctx.serverBus.once.withArgs('ready:for:domain').args[0][1]()
 
       expect(ctx.res.wantsInjection).to.be.undefined
-
-      return promise
-    })
-
-    it('lets the response continue after receiving ready:for:domain with shouldInject: false, flagging it not to receive injection', function () {
-      prepareContext({
-        incomingRes: {
-          headers: {
-            'content-type': 'text/html',
-          },
-        },
-        req: {
-          isAUTFrame: true,
-        },
-      })
-
-      const promise = testMiddleware([MaybeDelayForMultiDomain], ctx)
-
-      expect(ctx.serverBus.emit).to.be.calledWith('delaying:cross:domain:html')
-
-      ctx.serverBus.once.withArgs('ready:for:domain').args[0][1]({ shouldInject: false })
-
-      expect(ctx.res.wantsInjection).to.be.false
 
       return promise
     })
