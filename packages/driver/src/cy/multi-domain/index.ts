@@ -211,7 +211,6 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
         const doneByReference = cy.state('done')
 
         // if three or more arguments are passed in, verify the second argument is actually the done fn
-        // TODO: This will need to be updated when #19577 is merged in to account for all the method signatures switchToDomain can have
         if (done !== doneByReference) {
           Cypress.backend('ready:for:domain')
 
