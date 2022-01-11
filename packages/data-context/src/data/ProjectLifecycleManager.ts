@@ -753,28 +753,30 @@ export class ProjectLifecycleManager {
     this.setupNodeEvents().catch(this.onLoadError)
   }
 
-  private async setupNodeEvents (): Promise<SetupNodeEventsReply> {
+  private setupNodeEvents (): Promise<SetupNodeEventsReply> {
     assert(this._eventsIpc, 'Expected _eventsIpc to be defined at this point')
     const ipc = this._eventsIpc
     const promise = this.callSetupNodeEventsWithConfig(ipc)
 
     this._eventsIpcResult = { state: 'loading', value: promise }
 
-    promise.then(async (val) => {
-      await this.handleSetupTestingTypeReply(ipc, val)
-      this._eventsIpcResult = { state: 'loaded', value: val }
+    return promise.then(async (val) => {
+      if (this._eventsIpcResult.value === promise) {
+        await this.handleSetupTestingTypeReply(ipc, val)
+        this._eventsIpcResult = { state: 'loaded', value: val }
+      }
+
+      return val
     })
     .catch((err) => {
       debug(`catch %o`, err)
       this._cleanupIpc(ipc)
       this._eventsIpcResult = { state: 'errored', value: err }
-      this.onLoadError(err)
+      throw err
     })
     .finally(() => {
       this.ctx.emitter.toLaunchpad()
     })
-
-    return promise
   }
 
   private async callSetupNodeEventsWithConfig (ipc: ProjectConfigIpc): Promise<SetupNodeEventsReply> {
@@ -1176,6 +1178,8 @@ export class ProjectLifecycleManager {
     }
 
     this._pendingInitialize?.resolve(finalConfig)
+
+    return result
   }
 
   private async setActiveBrowser (cliBrowser: string) {
@@ -1216,6 +1220,7 @@ export class ProjectLifecycleManager {
   }
 
   destroy () {
+    this.resetInternalState()
     // @ts-ignore
     process.removeListener('exit', this.onProcessExit)
   }

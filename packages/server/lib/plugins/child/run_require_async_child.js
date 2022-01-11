@@ -112,7 +112,7 @@ function run (ipc, configFile, projectRoot) {
             if (typeof result.component?.devServer === 'function') {
               on('dev-server:start', (options) => result.component.devServer(options, result.component?.devServerConfig))
             } else {
-              // TODO: make this a standard error path
+              // TODO(tim): make this a standard error path
               throw new Error(`Expected devServer to be a function, saw ${typeof result.component?.devServer}`)
             }
 
