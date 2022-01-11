@@ -194,11 +194,12 @@ describe('App Top Nav Workflows', () => {
 
         cy.findByTestId('cypress-update-popover').findByRole('button', { name: 'Update to 10.1.0' }).click()
 
-        cy.findByRole('dialog', { name: 'Upgrade to Cypress 10.1.0' }).as('upgradeModal')
-        .should('contain', 'You are currently running Version 10.0.0 of Cypress')
-        .and('contain', 'npm install --save-dev cypress@10.1.0')
-
-        cy.get('@upgradeModal').findByRole('button', { name: 'Close' }).click()
+        cy.findByRole('dialog', { name: 'Upgrade to Cypress 10.1.0' }).as('upgradeModal').within(() => {
+          cy.validateExternalLink({ name: 'Need help?', href: 'https://on.cypress.io' })
+          cy.contains('You are currently running Version 10.0.0 of Cypress').should('be.visible')
+          cy.contains('npm install --save-dev cypress@10.1.0').should('be.visible')
+          cy.findByRole('button', { name: 'Close' }).click()
+        })
 
         cy.findAllByRole('dialog').should('not.exist')
       })
