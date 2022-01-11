@@ -7,14 +7,14 @@ exports['e2e images / passes'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (images_spec.js)                                                           │
-  │ Searched:   cypress/integration/images_spec.js                                                 │
+  │ Specs:      1 found (images.cy.js)                                                             │
+  │ Searched:   cypress/e2e/images.cy.js                                                           │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  images_spec.js                                                                  (1 of 1)
+  Running:  images.cy.js                                                                    (1 of 1)
 
 
   images
@@ -36,14 +36,14 @@ exports['e2e images / passes'] = `
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     images_spec.js                                                                   │
+  │ Spec Ran:     images.cy.js                                                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/images_spec.js.mp4                  (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/images.cy.js.mp4                    (X second)
 
 
 ====================================================================================================
@@ -53,7 +53,7 @@ exports['e2e images / passes'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  images_spec.js                           XX:XX        2        2        -        -        - │
+  │ ✔  images.cy.js                             XX:XX        2        2        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        2        2        -        -        -  
 

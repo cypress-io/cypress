@@ -9,7 +9,7 @@ const cwd = process.cwd()
 /* global describe, it */
 describe('Cypress Example', function () {
   it('returns path to examples', function () {
-    const expected = path.normalize(`${cwd}/cypress/integration`)
+    const expected = path.normalize(`${cwd}/cypress/e2e`)
 
     return example.getPathToExamples()
       .then(expectToAllEqual(expected))

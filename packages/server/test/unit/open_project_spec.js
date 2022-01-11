@@ -19,8 +19,6 @@ describe('lib/open_project', () => {
     }
 
     this.config = {
-      integrationFolder: '/user/foo/cypress/integration',
-      testFiles: '**/*.*',
       ignoreSpecPattern: '**/*.nope',
       projectRoot: todosPath,
     }
