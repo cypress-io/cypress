@@ -132,6 +132,13 @@ const autIframe = props.getAutIframe()
 
 const selectorPlaygroundStore = useSelectorPlaygroundStore()
 
+// @ts-ignore - this is used for exposing the selector playground in e2e tests
+// TODO: migrate this to true e2e test w/o the hack using Cypress-in-Cypress when
+// that is supported.
+window.__showSelectorPlaygroundForTestingPurposes = () => {
+  togglePlayground()
+}
+
 const togglePlayground = () => {
   if (selectorPlaygroundStore.show) {
     selectorPlaygroundStore.setShow(false)

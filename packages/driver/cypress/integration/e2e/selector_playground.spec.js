@@ -4,7 +4,7 @@ describe('selector_playground', () => {
     .then(() => {
       // We trick the selector-playground into rendering while the test is running
       top.UnifiedRunner.MobX.configure({ enforceActions: 'never' })
-      top.Runner.state.isRunning = false
+      top.__showSelectorPlaygroundForTestingPurposes()
 
       const $highlightBtn = cy.$$('button.highlight-toggle:visible', top.document)
 
