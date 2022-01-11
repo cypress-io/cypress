@@ -316,5 +316,9 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
     it('propagates user defined secondary domain errors to the primary')
 
     it('short circuits the secondary domain command queue when "done()" is called early')
+
+    it('does not have pending commands in the ui invoked from switchToDomain when tests passes')
+
+    it('does not have pending commands in the ui invoked from switchToDomain when tests fail')
   })
 })

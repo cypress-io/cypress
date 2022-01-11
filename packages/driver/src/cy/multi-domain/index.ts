@@ -200,10 +200,11 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
       }
 
       const doneAndCleanup = async (err) => {
-        // if done is called, immediately unbind commands, but wait for log updates to trickle in before invoking done
+        communicator.off('done:called', doneAndCleanup)
+
+        // if done is called, immediately unbind commands to prevent any commands from being enqueued, but wait for log updates to trickle in before invoking done
         cleanupCommands()
         await cleanupLogs()
-        communicator.off('done:called', doneAndCleanup)
         done(err)
       }
 
