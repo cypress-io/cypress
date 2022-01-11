@@ -179,8 +179,6 @@ interface CdpAutomationOptions {
 }
 
 export class CdpAutomation {
-  frameTree?: Protocol.Page.FrameTree
-
   constructor (private sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn, private automation: Automation, private options: CdpAutomationOptions = {}) {
     onFn('Network.requestWillBeSent', this.onNetworkRequestWillBeSent)
     onFn('Network.responseReceived', this.onResponseReceived)
