@@ -1,10 +1,10 @@
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 
-describe('Specs Page', () => {
-  describe('Component Workflows', {
-    viewportHeight: 768,
-    viewportWidth: 1024,
-  }, () => {
+describe('Specs Page', {
+  viewportHeight: 768,
+  viewportWidth: 1024,
+}, () => {
+  describe('Component Workflows', () => {
     context('with storybook', () => {
       beforeEach(() => {
         cy.scaffoldProject('no-specs')
@@ -275,6 +275,122 @@ describe('Specs Page', () => {
             .should('have.attr', 'tabindex', '-1')
           })
         })
+      })
+    })
+  })
+
+  describe('E2E Workflows', () => {
+    beforeEach(() => {
+      cy.scaffoldProject('no-specs-no-storybook')
+      cy.openProject('no-specs-no-storybook')
+      cy.startAppServer('e2e')
+      cy.visitApp()
+
+      // With no specs present, the page renders two cards, one for creating from found components,
+      // another for creating from found stories.
+      cy.findAllByTestId('card').eq(0).as('ScaffoldCard')
+      .should('have.attr', 'tabindex', '0')
+      .within(() => {
+        cy.findByRole('heading', { level: 2, name: defaultMessages.createSpec.e2e.importFromScaffold.header }).should('be.visible')
+        cy.contains(defaultMessages.createSpec.e2e.importFromScaffold.description).should('be.visible')
+      })
+
+      cy.findAllByTestId('card').eq(1).as('EmptySpecCard')
+      .should('have.attr', 'tabindex', '0')
+      .within(() => {
+        cy.findByRole('heading', { level: 2, name: defaultMessages.createSpec.e2e.importEmptySpec.header }).should('be.visible')
+        cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.description).should('be.visible')
+      })
+    })
+
+    it('shows create first spec page with scaffold and create empty spec options', () => {
+      cy.findByRole('heading', {
+        level: 1,
+        name: defaultMessages.createSpec.page.defaultPatternNoSpecs.title,
+      }).should('be.visible')
+
+      cy.findByTestId('create-spec-page-description').should('be.visible').and('contain', defaultMessages.createSpec.page.defaultPatternNoSpecs.e2e.description)
+
+      cy.get('@ScaffoldCard').should('be.visible')
+      cy.get('@EmptySpecCard').should('be.visible')
+
+      cy.findByTestId('no-specs-message').should('be.visible').and('contain', defaultMessages.createSpec.noSpecsMessage)
+
+      cy.findByRole('link', { name: defaultMessages.createSpec.viewSpecPatternButton })
+      .should('be.visible')
+      .and('not.be.disabled')
+      .and('have.attr', 'href', '#/settings?section=project&setting=specPattern')
+    })
+
+    context('scaffold', () => {
+      const expectedScaffoldPaths = [
+        'cypress/e2e/1-getting-started/todo.cy.js',
+        ...([
+          'actions',
+          'aliasing',
+          'assertions',
+          'connectors',
+          'cookies',
+          'cypress_api',
+          'files',
+          'local_storage',
+          'location',
+          'navigation',
+          'network_requests',
+          'querying',
+          'spies_stubs_clocks',
+          'utilities',
+          'viewport',
+          'waiting',
+          'window',
+        ].map((file) => `cypress/e2e/2-advanced-examples/${file}.cy.js`)),
+      ]
+
+      it('scaffolds files when card is clicked', () => {
+        cy.get('@ScaffoldCard').click()
+
+        cy.findByRole('dialog', { name: defaultMessages.createSpec.e2e.importFromScaffold.specsAddedHeader }).within(() => {
+          cy.validateExternalLink({ name: 'Need help?', href: 'https://on.cypress.io' })
+          cy.findByRole('button', { name: 'Close' }).should('be.visible').as('CloseDialogButton')
+        })
+
+        cy.withCtx(async (ctx, options) => {
+          const generatedSpecPaths = (await ctx.project.findSpecs(ctx.currentProject ?? '', 'e2e', ['**/*.cy.js'], [], [])).map((spec) => spec.relative)
+
+          // Validate that all expected paths have been generated within the data context
+          expect(generatedSpecPaths.filter((path) => options.expectedScaffoldPaths.includes(path))).to.have.lengthOf(options.expectedScaffoldPaths.length)
+        }, { expectedScaffoldPaths })
+
+        // Dismisses dialog with close button press
+        cy.get('@CloseDialogButton').click()
+        cy.findByRole('dialog').should('not.exist')
+
+        // TODO: this forces a retrieval of the generated specs, investigate why this is necessary
+        cy.findByRole('link', { name: 'Settings' }).click()
+        cy.findByRole('link', { name: 'Specs' }).click()
+
+        // Validate that links for each generated spec are rendered
+        expectedScaffoldPaths.forEach((spec) => {
+          cy.get(`a[href="#/specs/runner?file=${spec}"`).should('exist')
+        })
+      })
+
+      it('dismisses scaffold dialog with action button press', () => {
+        cy.get('@ScaffoldCard').click()
+
+        cy.findByRole('dialog', { name: defaultMessages.createSpec.e2e.importFromScaffold.specsAddedHeader }).within(() => {
+          cy.findByRole('button', { name: defaultMessages.createSpec.e2e.importFromScaffold.specsAddedButton }).click()
+        })
+
+        // Dismisses dialog with close button press
+        cy.findByRole('dialog').should('not.exist')
+      })
+    })
+
+    context('create blank spec', () => {
+      it('shows dialog with spec options', () => {
+        cy.get('@EmptySpecCard').click()
+        // cy.pause()
       })
     })
   })
