@@ -39,6 +39,7 @@ export class ProjectActions {
   async clearCurrentProject () {
     this.ctx.update((d) => {
       d.currentProject = null
+      d.currentTestingType = null
       d.baseError = null
     })
 

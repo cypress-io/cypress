@@ -218,7 +218,7 @@ function startAppServer (mode: 'component' | 'e2e' = 'e2e') {
       onErrorStub.callsFake(onStartAppError)
       onLoadErrorStub.callsFake(onStartAppError)
 
-      initializeActiveProjectStub.callsFake(async function (...args) {
+      initializeActiveProjectStub.callsFake(async function (this: any, ...args) {
         try {
           const result = await initializeActive.apply(this, args)
 

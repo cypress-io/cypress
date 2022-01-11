@@ -56,8 +56,6 @@ type State<S, V = undefined> = V extends undefined ? {state: S, value?: V} : {st
 
 type LoadingStateFor<V> = State<'pending'> | State<'loading', Promise<V>> | State<'loaded', V> | State<'errored', unknown>
 
-type BrowsersResultState = LoadingStateFor<FoundBrowser[]>
-
 type ConfigResultState = LoadingStateFor<LoadConfigReply>
 
 type EnvFileResultState = LoadingStateFor<Cypress.ConfigOptions>
@@ -96,7 +94,6 @@ const PROJECT_META_STATE: ProjectMetaState = {
 export class ProjectLifecycleManager {
   // Registered handlers from Cypress's server, used to wrap the IPC
   private _handlers: IpcHandler[] = []
-  private _browserResult: BrowsersResultState = { state: 'pending' }
 
   // Config, from the cypress.config.{js|ts}
   private _envFileResult: EnvFileResultState = { state: 'pending' }
@@ -725,6 +722,8 @@ export class ProjectLifecycleManager {
    */
   private onConfigLoaded (child: ChildProcess, ipc: ProjectConfigIpc, result: LoadConfigReply) {
     this.watchRequires('config', result.requires)
+
+    // If there's already a dangling IPC from the previous switch of testing type, we want to clean this up
     if (this._eventsIpc) {
       this._cleanupIpc(this._eventsIpc)
     }
@@ -755,22 +754,31 @@ export class ProjectLifecycleManager {
   }
 
   private async setupNodeEvents (): Promise<SetupNodeEventsReply> {
-    assert(this._eventsIpc)
+    assert(this._eventsIpc, 'Expected _eventsIpc to be defined at this point')
     const ipc = this._eventsIpc
+    const promise = this.callSetupNodeEventsWithConfig(ipc)
 
-    let config
+    this._eventsIpcResult = { state: 'loading', value: promise }
 
-    try {
-      config = await this.getFullInitialConfig()
-    } catch (err) {
+    promise.then(async (val) => {
+      await this.handleSetupTestingTypeReply(ipc, val)
+      this._eventsIpcResult = { state: 'loaded', value: val }
+    })
+    .catch((err) => {
       debug(`catch %o`, err)
       this._cleanupIpc(ipc)
       this._eventsIpcResult = { state: 'errored', value: err }
       this.onLoadError(err)
+    })
+    .finally(() => {
       this.ctx.emitter.toLaunchpad()
+    })
 
-      return Promise.reject(err)
-    }
+    return promise
+  }
+
+  private async callSetupNodeEventsWithConfig (ipc: ProjectConfigIpc): Promise<SetupNodeEventsReply> {
+    const config = await this.getFullInitialConfig()
 
     assert(config)
     assert(this._currentTestingType)
@@ -802,22 +810,6 @@ export class ProjectLifecycleManager {
       configFile: this.configFilePath,
       version: this.ctx._apis.configApi.cypressVersion,
       testingType: this._currentTestingType,
-    })
-
-    this._eventsIpcResult = { state: 'loading', value: promise }
-
-    promise.then(async (val) => {
-      this._eventsIpcResult = { state: 'loaded', value: val }
-      await this.handleSetupTestingTypeReply(ipc, val)
-    })
-    .catch((err) => {
-      debug(`catch %o`, err)
-      this._cleanupIpc(ipc)
-      this._eventsIpcResult = { state: 'errored', value: err }
-      this.onLoadError(err)
-    })
-    .finally(() => {
-      this.ctx.emitter.toLaunchpad()
     })
 
     return promise

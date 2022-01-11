@@ -315,14 +315,15 @@ export class DataContext {
   }
 
   makeId<T extends NexusGenAbstractTypeMembers['Node']> (typeName: T, nodeString: string) {
-    return Buffer.from(`${typeName}:${nodeString}`).toString('base64')
+    return `${typeName}:${nodeString}`
+    // return Buffer.from(`${typeName}:${nodeString}`).toString('base64')
   }
 
   // TODO(tim): type check
   fromId (str: string, accepted: NexusGenAbstractTypeMembers['Node']): string {
-    const result = Buffer.from(str, 'base64').toString('utf-8')
+    // const result = Buffer.from(str, 'base64').toString('utf-8')
 
-    const [type, val] = result.split(':') as [string, string]
+    const [type, val] = str.split(':') as [string, string]
 
     if (type !== accepted) {
       throw new Error(`Expecting node with type ${accepted} saw ${type}`)
