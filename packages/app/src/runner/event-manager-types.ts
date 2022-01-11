@@ -20,3 +20,7 @@ export type LocalBusEventMap = {
 export type LocalBusEmitsMap = {
   'open:file': FileDetails
 }
+
+export type DriverToLocalBus = {
+  'visit:blank': { type?: 'session' | 'session-lifecycle' }
+}

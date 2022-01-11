@@ -273,6 +273,10 @@ onMounted(() => {
   eventManager.on('script:error', (err) => {
     autStore.scriptError = err
   })
+
+  eventManager.on('visit:blank', ({ type }) => {
+    getAutIframeModel().visitBlank({ type })
+  })
 })
 
 onBeforeUnmount(() => {

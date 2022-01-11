@@ -259,8 +259,9 @@ function runSpecE2E (spec: BaseSpec) {
   // create new AUT
   const autIframe = getAutIframeModel()
 
-  autIframe.showInitialBlankContents()
   const $autIframe: JQuery<HTMLIFrameElement> = autIframe.create().appendTo($container)
+
+  autIframe.showInitialBlankContents()
 
   // create Spec IFrame
   const specSrc = getSpecUrl(config.namespace, spec.relative)
