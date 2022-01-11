@@ -269,16 +269,35 @@ export class OpenProject {
     try {
       const cfg = await this.projectBase.initializeConfig()
 
-      const specPattern = options.spec || cfg[testingType].specPattern
+      const toArray = (val?: string | string[]) => val ? typeof val === 'string' ? [val] : val : undefined
+
+      let specPattern = options.spec || cfg[testingType].specPattern
+
+      specPattern = toArray(specPattern)
+
+      let ignoreSpecPattern = cfg[testingType].ignoreSpecPattern
+
+      ignoreSpecPattern = toArray(ignoreSpecPattern) || []
+
+      // exclude all specs matching e2e if in component testing
+      let additionalIgnorePattern = testingType === 'component' ? cfg?.e2e?.specPattern : undefined
+
+      additionalIgnorePattern = toArray(additionalIgnorePattern) || []
 
       if (!specPattern) {
         throw Error('could not find pattern to load specs')
       }
 
-      const specs = await this._ctx.project.findSpecs(path, testingType, specPattern)
+      const specs = await this._ctx.project.findSpecs(
+        path,
+        testingType,
+        specPattern,
+        ignoreSpecPattern,
+        additionalIgnorePattern,
+      )
 
       this._ctx.actions.project.setSpecs(specs)
-      this._ctx.project.startSpecWatcher(path, testingType, specPattern)
+      this._ctx.project.startSpecWatcher(path, testingType, specPattern, ignoreSpecPattern, additionalIgnorePattern)
 
       await this.projectBase.open()
     } catch (err: any) {
