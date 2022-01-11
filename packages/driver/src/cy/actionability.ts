@@ -1,10 +1,10 @@
-// @ts-nocheck
 import _ from 'lodash'
 import $ from 'jquery'
 import Promise from 'bluebird'
 
 import debugFn from 'debug'
 import $dom from '../dom'
+import type { ElWindowPostion, ElViewportPostion } from '../dom/coordinates'
 import $elements from '../dom/elements'
 import $errUtils from '../cypress/error_utils'
 const debug = debugFn('cypress:driver:actionability')
@@ -54,7 +54,7 @@ const getPositionFromArguments = function (positionOrX, y, options) {
 }
 
 const ensureElIsNotCovered = function (cy, win, $el, fromElViewport, options, log, onScroll) {
-  let $elAtCoords = null
+  let $elAtCoords: JQuery<any> | null = null
 
   const getElementAtPointFromViewport = function (fromElViewport) {
     // get the element at point from the viewport based
@@ -64,8 +64,12 @@ const ensureElIsNotCovered = function (cy, win, $el, fromElViewport, options, lo
     elAtCoords = $dom.getElementAtPointFromViewport(win.document, fromElViewport.x, fromElViewport.y)
 
     if (elAtCoords) {
-      return $elAtCoords = $dom.wrap(elAtCoords)
+      $elAtCoords = $dom.wrap(elAtCoords)
+
+      return $elAtCoords
     }
+
+    return null
   }
 
   const ensureDescendents = function (fromElViewport) {
@@ -164,7 +168,7 @@ const ensureElIsNotCovered = function (cy, win, $el, fromElViewport, options, lo
       const scrollContainers = function (scrollables) {
         // hold onto all the elements we've scrolled
         // past in this cycle
-        const elementsScrolledPast = []
+        const elementsScrolledPast: JQuery<any>[] = []
 
         // pull off scrollables starting with the most outer
         // container which is window
@@ -178,9 +182,7 @@ const ensureElIsNotCovered = function (cy, win, $el, fromElViewport, options, lo
 
         const possiblyScrollMultipleTimes = function ($fixed) {
           // if we got something AND
-          let needle
-
-          if ($fixed && ((needle = $fixed.get(0), !elementsScrolledPast.includes(needle)))) {
+          if ($fixed && !elementsScrolledPast.includes($fixed.get(0))) {
             elementsScrolledPast.push($fixed.get(0))
 
             scrollContainerPastElement($scrollableContainer, $fixed)
@@ -229,7 +231,7 @@ const ensureElIsNotCovered = function (cy, win, $el, fromElViewport, options, lo
 
   try {
     ensureDescendentsAndScroll()
-  } catch (error) {
+  } catch (error: any) {
     const err = error
 
     if (log) {
@@ -352,7 +354,7 @@ const verify = function (cy, $el, config, options, callbacks) {
   }
 
   return Promise.try(() => {
-    const coordsHistory = []
+    const coordsHistory: (ElViewportPostion | ElWindowPostion)[] = []
 
     const runAllChecks = function () {
       let $elAtCoords
