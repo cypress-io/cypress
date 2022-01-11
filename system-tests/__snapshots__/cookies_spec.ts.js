@@ -8,7 +8,7 @@ exports['e2e cookies with baseurl'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (cookies_spec_baseurl.js)                                                  │
-  │ Searched:   cypress/integration/cookies_spec_baseurl.js                                        │
+  │ Searched:   cypress/e2e/cookies_spec_baseurl.js                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -112,7 +112,7 @@ exports['e2e cookies with no baseurl'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (cookies_spec_no_baseurl.js)                                               │
-  │ Searched:   cypress/integration/cookies_spec_no_baseurl.js                                     │
+  │ Searched:   cypress/e2e/cookies_spec_no_baseurl.js                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
