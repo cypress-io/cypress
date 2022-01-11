@@ -258,5 +258,3 @@ describe('http/response-middleware', function () {
     }
   })
 })
-
-// TODO: add tests for not injecting if success: false
