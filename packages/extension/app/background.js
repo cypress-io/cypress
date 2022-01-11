@@ -18,7 +18,7 @@ const firstOrNull = (cookies) => {
   return cookies[0] != null ? cookies[0] : null
 }
 
-const connect = function (host, path, extraOpts, onConnected) {
+const connect = function (host, path, extraOpts) {
   const listenToCookieChanges = once(() => {
     return browser.cookies.onChanged.addListener((info) => {
       if (info.cause !== 'overwrite') {
@@ -96,9 +96,6 @@ const connect = function (host, path, extraOpts, onConnected) {
   ws.on('connect', () => {
     listenToCookieChanges()
     listenToDownloads()
-    if (onConnected) {
-      onConnected()
-    }
 
     return ws.emit('automation:client:connected')
   })
@@ -209,7 +206,7 @@ const automation = {
   },
 
   query (data) {
-    const code = `var s; (s = document.getElementById('${data.element}') || document.getElementsByClassName('aut-iframe').item(0).contentWindow.document.getElementById('${data.element}')) && s.textContent`
+    const code = `var s; (s = document.getElementById('${data.element}')) && s.textContent`
 
     const queryTab = (tab) => {
       return Promise.try(() => {
