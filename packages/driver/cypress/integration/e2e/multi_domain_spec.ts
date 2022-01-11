@@ -302,7 +302,7 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
       })
     })
 
-    it('errors if three arguments are used and the second argument is not the done() fn', (done) => {
+    it('errors if three or more arguments are used and the second argument is not the done() fn', (done) => {
       cy.on('fail', (err) => {
         expect(err.message).to.equal('`cy.switchToDomain()` must have done as its second argument when three or more arguments are used.')
 
