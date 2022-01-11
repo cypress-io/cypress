@@ -174,12 +174,8 @@ const ffToStandardResourceTypeMap: { [ff: string]: ResourceType } = {
   'webmanifest': 'manifest',
 }
 
-interface CdpAutomationOptions {
-  onBrowserPreRequest?: (BrowserPreRequest) => void
-}
-
 export class CdpAutomation {
-  constructor (private sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn, private automation: Automation, private options: CdpAutomationOptions = {}) {
+  constructor (private sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn, private automation: Automation) {
     onFn('Network.requestWillBeSent', this.onNetworkRequestWillBeSent)
     onFn('Network.responseReceived', this.onResponseReceived)
   }
@@ -211,7 +207,6 @@ export class CdpAutomation {
     }
 
     this.automation.onBrowserPreRequest?.(browserPreRequest)
-    this.options.onBrowserPreRequest?.(browserPreRequest)
   }
 
   private onResponseReceived = (params: Protocol.Network.ResponseReceivedEvent) => {

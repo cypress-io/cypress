@@ -329,24 +329,35 @@ const _handleDownloads = async function (client, dir, automation) {
 }
 
 let frameTree
+let gettingFrameTree
 
-const _onBrowserPreRequest = (client) => {
-  return async (prerequest) => {
-    // this gets the frame tree ahead of the Fetch.requestPaused event, because
-    // the CDP is tied up during that event and can't be utilized. however,
-    // we avoid the overhead if it's not possible that the request will be for
-    // the AUT frame
-    if (
-      prerequest.originalResourceType !== 'Document'
-      || prerequest.url.includes('__cypress')
-    ) {
-      return
-    }
+// eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
+const _updateFrameTree = (client) => async () => {
+  debug('get frame tree')
 
-    debug('get frame tree')
-
+  gettingFrameTree = new Promise<void>(async (resolve) => {
     frameTree = (await client.send('Page.getFrameTree')).frameTree
-  }
+
+    debug('got frame tree')
+
+    gettingFrameTree = null
+
+    resolve()
+  })
+}
+
+// we can't get the frame tree during the Fetch.requestPaused event, because
+// the CDP is tied up during that event and can't be utilized. so we maintain
+// a reference to it that's updated when it's likely to have been changed
+const _listenForFrameTreeChanges = (client) => {
+  debug('frames changed')
+
+  // these events are often called a bunch in a row, so debounce them
+  const onUpdate = _.debounce(_updateFrameTree(client), 100)
+
+  client.on('Page.frameAttached', onUpdate)
+  client.on('Page.frameDetached', onUpdate)
+  client.on('Page.frameNavigated', onUpdate)
 }
 
 const _continueRequest = (client, params, header?) => {
@@ -382,16 +393,26 @@ interface HasFrame {
   frame: Protocol.Page.Frame
 }
 
-const _getAUTFrame = () => {
+const _isAUTFrame = async (frameId: string) => {
+  debug('need frame tree')
+
+  // the request could come in while in the middle of geting the frame tree,
+  // which is asynchronous, so wait for it to be fetched
+  if (gettingFrameTree) {
+    debug('awaiting frame tree')
+
+    await gettingFrameTree
+  }
+
   const frame = _.find(frameTree?.childFrames || [], ({ frame }) => {
     return frame?.name?.startsWith('Your App:')
   }) as HasFrame | undefined
 
   if (frame) {
-    return { id: frame.frame.id }
+    return frame.frame.id === frameId
   }
 
-  return { id: null }
+  return false
 }
 
 const _handlePausedRequests = async (client) => {
@@ -399,11 +420,11 @@ const _handlePausedRequests = async (client) => {
 
   // adds a header to the request to mark it as a request for the AUT frame
   // itself, so the proxy can utilize that for injection purposes
-  client.on('Fetch.requestPaused', (params: Protocol.Fetch.RequestPausedEvent) => {
+  client.on('Fetch.requestPaused', async (params: Protocol.Fetch.RequestPausedEvent) => {
     if (
       // is a script, stylesheet, image, etc
       params.resourceType !== 'Document'
-      || _getAUTFrame().id !== params.frameId
+      || !(await _isAUTFrame(params.frameId))
     ) {
       return _continueRequest(client, params)
     }
@@ -418,9 +439,7 @@ const _handlePausedRequests = async (client) => {
 }
 
 const _setAutomation = async (client, automation) => {
-  const cdpAutomation = new CdpAutomation(client.send, client.on, automation, {
-    onBrowserPreRequest: _onBrowserPreRequest(client),
-  })
+  const cdpAutomation = new CdpAutomation(client.send, client.on, automation)
 
   await cdpAutomation.enable()
 
@@ -629,6 +648,7 @@ export = {
     await this._navigateUsingCRI(criClient, url)
     await this._handleDownloads(criClient, options.downloadsFolder, automation)
     await this._handlePausedRequests(criClient)
+    _listenForFrameTreeChanges(criClient)
 
     // return the launched browser process
     // with additional method to close the remote connection

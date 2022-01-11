@@ -391,12 +391,6 @@ describe('lib/browsers/chrome', () => {
       it('does not add header when not a document', async function () {
         await chrome.open('chrome', 'http://', {}, this.automation)
 
-        const cdpAutomation = this.automation.use.lastCall.args[0]
-
-        await cdpAutomation.options.onBrowserPreRequest({
-          originalResourceType: 'Script',
-        })
-
         this.criClient.on.withArgs('Fetch.requestPaused').yield({
           requestId: '1234',
           resourceType: 'Script',
@@ -410,37 +404,9 @@ describe('lib/browsers/chrome', () => {
       it('does not add header when it is a spec frame request', async function () {
         await chrome.open('chrome', 'http://', {}, this.automation)
 
-        const cdpAutomation = this.automation.use.lastCall.args[0]
+        this.criClient.on.withArgs('Page.frameAttached').yield()
 
-        await cdpAutomation.options.onBrowserPreRequest({
-          originalResourceType: 'Document',
-          url: '/__cypress/integration/spec.js',
-        })
-
-        this.criClient.on.withArgs('Fetch.requestPaused').yield({
-          requestId: '1234',
-          resourceType: 'Document',
-          request: {
-            url: '/__cypress/integration/spec.js',
-          },
-        })
-
-        expect(this.criClient.send).to.be.calledWith('Fetch.continueRequest', {
-          requestId: '1234',
-        })
-      })
-
-      it('does not add header when it is a spec frame request', async function () {
-        await chrome.open('chrome', 'http://', {}, this.automation)
-
-        const cdpAutomation = this.automation.use.lastCall.args[0]
-
-        await cdpAutomation.options.onBrowserPreRequest({
-          originalResourceType: 'Document',
-          url: '/__cypress/integration/spec.js',
-        })
-
-        this.criClient.on.withArgs('Fetch.requestPaused').yield({
+        await this.criClient.on.withArgs('Fetch.requestPaused').args[0][1]({
           frameId: 'spec-frame-id',
           requestId: '1234',
           resourceType: 'Document',
@@ -457,14 +423,12 @@ describe('lib/browsers/chrome', () => {
       it('appends X-Cypress-Is-AUT-Frame header to AUT iframe request', async function () {
         await chrome.open('chrome', 'http://', {}, this.automation)
 
-        const cdpAutomation = this.automation.use.lastCall.args[0]
+        this.criClient.on.withArgs('Page.frameAttached').yield()
 
-        await cdpAutomation.options.onBrowserPreRequest({
-          originalResourceType: 'Document',
-          url: 'http://localhost:3000/index.html',
-        })
+        // wait for the debounce
+        await new Promise((resolve) => setTimeout(resolve, 150))
 
-        this.criClient.on.withArgs('Fetch.requestPaused').yield({
+        await this.criClient.on.withArgs('Fetch.requestPaused').args[0][1]({
           frameId: 'aut-frame-id',
           requestId: '1234',
           resourceType: 'Document',
@@ -491,29 +455,50 @@ describe('lib/browsers/chrome', () => {
         })
       })
 
-      it('does not get frame tree if it is not a document', async function () {
+      it('gets frame tree on Page.frameAttached', async function () {
         await chrome.open('chrome', 'http://', {}, this.automation)
 
-        const cdpAutomation = this.automation.use.lastCall.args[0]
+        this.criClient.on.withArgs('Page.frameAttached').yield()
 
-        await cdpAutomation.options.onBrowserPreRequest({
-          originalResourceType: 'Script',
-        })
+        // wait for the debounce
+        await new Promise((resolve) => setTimeout(resolve, 150))
 
-        expect(this.criClient.send).not.to.be.calledWith('Page.getFrameTree')
+        expect(this.criClient.send).to.be.calledWith('Page.getFrameTree')
       })
 
-      it('does not get frame tree if it is a spec frame request', async function () {
+      it('gets frame tree on Page.frameDetached', async function () {
         await chrome.open('chrome', 'http://', {}, this.automation)
 
-        const cdpAutomation = this.automation.use.lastCall.args[0]
+        this.criClient.on.withArgs('Page.frameDetached').yield()
 
-        await cdpAutomation.options.onBrowserPreRequest({
-          originalResourceType: 'Document',
-          url: '/__cypress/integration/spec.js',
-        })
+        // wait for the debounce
+        await new Promise((resolve) => setTimeout(resolve, 150))
 
-        expect(this.criClient.send).not.to.be.calledWith('Page.getFrameTree')
+        expect(this.criClient.send).to.be.calledWith('Page.getFrameTree')
+      })
+
+      it('gets frame tree on Page.frameNavigated', async function () {
+        await chrome.open('chrome', 'http://', {}, this.automation)
+
+        this.criClient.on.withArgs('Page.frameNavigated').yield()
+
+        // wait for the debounce
+        await new Promise((resolve) => setTimeout(resolve, 150))
+
+        expect(this.criClient.send).to.be.calledWith('Page.getFrameTree')
+      })
+
+      it('debounces getting frame tree when multiple events fire in a row', async function () {
+        await chrome.open('chrome', 'http://', {}, this.automation)
+
+        this.criClient.on.withArgs('Page.frameNavigated').yield()
+        this.criClient.on.withArgs('Page.frameDetached').yield()
+        this.criClient.on.withArgs('Page.frameNavigated').yield()
+
+        // wait for the debounce
+        await new Promise((resolve) => setTimeout(resolve, 150))
+
+        expect(this.criClient.send.withArgs('Page.getFrameTree')).to.be.calledOnce
       })
     })
   })
