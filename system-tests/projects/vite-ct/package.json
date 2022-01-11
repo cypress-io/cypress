@@ -2,12 +2,11 @@
   "name": "@test-project/vite-ct",
   "version": "0.0.0-test",
   "private": true,
-  "devDependencies": {
+  "dependencies": {
     "@cypress/vite-dev-server": "file:../../../npm/vite-dev-server",
-    "@types/node": "^16.11.12",
+    "@testing-library/cypress": "8.0.2",
     "cypress": "file:../../../cli/build",
-    "start-server-and-test": "^1.14.0",
-    "typescript": "~4.5.3",
-    "vite": "^2.7.1"
+    "typescript": "4.2.3",
+    "vite": "2.7.10"
   }
 }
