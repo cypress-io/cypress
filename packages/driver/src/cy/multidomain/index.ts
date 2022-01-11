@@ -159,11 +159,11 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
             })
 
             reject(wrappedErr)
+          } finally {
+            state('readyForMultidomain', false)
+            // @ts-ignore
+            cy.isAnticipatingMultidomain(false)
           }
-
-          state('readyForMultidomain', false)
-          // @ts-ignore
-          cy.isAnticipatingMultidomain(false)
         })
 
         // this signals to the runner to create the spec bridge for
