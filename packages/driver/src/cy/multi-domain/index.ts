@@ -9,7 +9,13 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
   // @ts-ignore
   const communicator = Cypress.multiDomainCommunicator
 
-  communicator.on('html:received', () => {
+  const sendReadyForDomain = () => {
+    // lets the proxy know to allow the response for the secondary
+    // domain html through, so the page will finish loading
+    Cypress.backend('ready:for:domain')
+  }
+
+  communicator.on('delaying:html', () => {
     // when a secondary domain is detected by the proxy, it holds it up
     // to provide time for the spec bridge to be set up. normally, the queue
     // will not continue until the page is stable, but this signals it to go
@@ -20,10 +26,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
     // cy.isAnticipatingMultiDomain(true) will free the queue to move forward.
     // if the next command isn't switchToDomain, this timeout will hit and
     // the test will fail with a cross-origin error
-    timeoutId = setTimeout(() => {
-      // TODO: when we throw an error make sure to clear this timeout
-      Cypress.backend('ready:for:domain')
-    }, 2000)
+    timeoutId = setTimeout(sendReadyForDomain, 2000)
   })
 
   Commands.addAll({
@@ -70,20 +73,6 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
         callbackFn = doneOrDataOrFn
       }
 
-      if (done) {
-        const doneByReference = cy.state('done')
-
-        // if three arguments are passed in, verify the second argument is actually the done fn
-        // TODO: This will need to be updated when #19577 is merged in to account for all the method signatures switchToDomain can have
-        if (done !== doneByReference) {
-          Cypress.backend('ready:for:domain')
-
-          $errUtils.throwErrByPath('switchToDomain.done_reference_mismatch')
-        }
-
-        communicator.once('done:called', doneAndCleanup)
-      }
-
       const log = Cypress.log({
         name: 'switchToDomain',
         type: 'parent',
@@ -92,6 +81,8 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
       })
 
       if (typeof domain !== 'string') {
+        sendReadyForDomain()
+
         $errUtils.throwErrByPath('switchToDomain.invalid_domain_argument', {
           onFail: log,
           args: { arg: $utils.stringify(domain) },
@@ -99,10 +90,25 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
       }
 
       if (typeof callbackFn !== 'function') {
+        sendReadyForDomain()
+
         $errUtils.throwErrByPath('switchToDomain.invalid_fn_argument', {
           onFail: log,
           args: { arg: $utils.stringify(callbackFn) },
         })
+      }
+
+      if (done) {
+        const doneByReference = cy.state('done')
+
+        // if three arguments are passed in, verify the second argument is actually the done fn
+        if (done !== doneByReference) {
+          sendReadyForDomain()
+
+          $errUtils.throwErrByPath('switchToDomain.done_reference_mismatch', { onFail: log })
+        }
+
+        communicator.once('done:called', doneAndCleanup)
       }
 
       // these are proxy commands that represent real commands in a
@@ -196,9 +202,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
         // receive messages
         communicator.once('bridge:ready', () => {
           state('readyForMultiDomain', true)
-          // let the proxy know to let the response for the secondary
-          // domain html through, so the page will finish loading
-          Cypress.backend('ready:for:domain')
+          sendReadyForDomain()
         })
 
         cy.once('internal:window:load', ({ type }) => {

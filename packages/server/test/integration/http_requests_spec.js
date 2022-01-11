@@ -3021,7 +3021,7 @@ describe('Routes', () => {
           'Content-Type': 'text/html',
         })
 
-        this.server._eventBus.on('delaying:cross:domain:html', () => {
+        this.server._eventBus.on('cross:domain:delaying:html', () => {
           this.server._eventBus.emit('ready:for:domain', { shouldInject: true })
         })
 
