@@ -117,6 +117,18 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       closeActiveProject () {
         return openProject.closeActiveProject()
       },
+      getCurrentProjectSavedState () {
+        return openProject.getConfig()?.state
+      },
+      setPromptShown (slug) {
+        return openProject.getProject()
+        ?.saveState({
+          promptsShown: {
+            ...(openProject.getProject()?.state?.promptsShown ?? {}),
+            [slug]: Date.now(),
+          },
+        })
+      },
       getDevServer () {
         return devServer
       },

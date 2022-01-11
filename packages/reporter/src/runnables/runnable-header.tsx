@@ -55,7 +55,10 @@ class RunnableHeader extends Component<RunnableHeaderProps> {
     const openInIde = '__vite__' in window
       ? (
         <OpenFileInIDE fileDetails={fileDetails}>
-          <TextIcon />
+          <a href="#" onClick={(e) => e.preventDefault()}>
+            <TextIcon />
+            {fileDetails.displayFile || fileDetails.originalFile}
+          </a>
         </OpenFileInIDE>
       )
       : <FileNameOpener fileDetails={fileDetails} hasIcon />

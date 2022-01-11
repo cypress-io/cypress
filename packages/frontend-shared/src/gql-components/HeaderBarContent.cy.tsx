@@ -7,7 +7,7 @@ const text = defaultMessages.topNav
 describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
   it('renders with functional browser menu when show-browsers prop is true', () => {
     cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
-      render: (gqlVal) => <div class="resize overflow-auto border-current border-1 h-700px"><HeaderBarContent gql={gqlVal} show-browsers={true} /></div>,
+      render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><HeaderBarContent gql={gqlVal} show-browsers={true} /></div>,
     })
 
     cy.get('[data-cy="top-nav-active-browser"]')
@@ -21,7 +21,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
   it('renders without browser menu by default and other items work', () => {
     cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
       render: (gqlVal) => (
-        <div class="resize overflow-auto border-current border-1 h-700px">
+        <div class="border-current border-1 h-700px resize overflow-auto">
           <HeaderBarContent gql={gqlVal} />
         </div>
       ),
@@ -32,7 +32,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
     cy.contains('button', text.docsMenu.docsHeading).click()
     cy.contains('a', text.docsMenu.firstTest).should('be.visible')
     cy.get('body').click()
-    cy.contains('a', text.docsMenu.firstTest).should('not.exist')
+    cy.contains('a', text.docsMenu.firstTest).should('not.be.visible')
   })
 
   it('does not show hint when on latest version of Cypress', () => {
@@ -55,7 +55,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
         }
       },
       render: (gqlVal) => (
-        <div class="resize overflow-auto border-current border-1 h-700px">
+        <div class="border-current border-1 h-700px resize overflow-auto">
           <HeaderBarContent gql={gqlVal} />
         </div>
       ),
@@ -84,7 +84,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
         }
       },
       render: (gqlVal) => (
-        <div class="resize overflow-auto border-current border-1 h-700px">
+        <div class="border-current border-1 h-700px resize overflow-auto">
           <HeaderBarContent gql={gqlVal} />
         </div>
       ),
@@ -102,7 +102,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
 
   it('displays the active project name', () => {
     cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
-      render: (gqlVal) => <div class="resize overflow-auto border-current border-1 h-700px"><HeaderBarContent gql={gqlVal} /></div>,
+      render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><HeaderBarContent gql={gqlVal} /></div>,
     })
 
     cy.contains('test-project').should('be.visible')
@@ -110,7 +110,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
 
   it('the login modal reaches "opening browser" status', () => {
     cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
-      render: (gqlVal) => <div class="resize overflow-auto border-current border-1 h-700px"><HeaderBarContent gql={gqlVal} /></div>,
+      render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><HeaderBarContent gql={gqlVal} /></div>,
     })
 
     cy.findByRole('button', { name: text.login.actionLogin })
@@ -141,10 +141,10 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
         result.cloudViewer = cloudViewer
         result.cloudViewer.__typename = 'CloudUser'
       },
-      render: (gqlVal) => <div class="resize overflow-auto border-current border-1 h-700px"><HeaderBarContent gql={gqlVal} /></div>,
+      render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><HeaderBarContent gql={gqlVal} /></div>,
     })
 
-    cy.findByRole('button', { name: text.login.actionLogin }).click()
+    cy.findByRole('button', { name: text.login.profileMenuLabel }).click()
     cy.contains(cloudViewer.fullName).should('be.visible')
     cy.contains(cloudViewer.email).should('be.visible')
     cy.findByRole('button', { name: text.login.actionLogout }).should('be.visible')
@@ -152,10 +152,157 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
 
   it('Shows a page name instead of project when a page name is provided', () => {
     cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
-      render: (gqlVal) => <div class="resize overflow-auto border-current border-1 h-700px"><HeaderBarContent gql={gqlVal} pageName="Test Page" /></div>,
+      render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><HeaderBarContent gql={gqlVal} pageName="Test Page" /></div>,
     })
 
     cy.contains('Project').should('not.exist')
     cy.contains('Test Page').should('be.visible')
+  })
+
+  describe('prompts', () => {
+    describe('the CI prompt', () => {
+      context('opens on click', () => {
+        beforeEach(() => {
+          cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
+            render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><HeaderBarContent gql={gqlVal} show-browsers={true} /></div>,
+          })
+
+          cy.contains('Docs').click()
+          cy.contains('Set up CI').click()
+        })
+
+        it('opens on menu item click', () => {
+          cy.contains(defaultMessages.topNav.docsMenu.prompts.ci1.description).should('be.visible')
+        })
+
+        it('is dismissible from X icon', () => {
+          cy.findAllByLabelText('Close').click()
+          cy.contains(defaultMessages.topNav.docsMenu.prompts.ci1.description).should('not.exist')
+        })
+      })
+
+      context('opens automatically', () => {
+        beforeEach(() => {
+          cy.clock(1609891200000)
+        })
+
+        function mountWithSavedState (options?: {state?: object, projectId?: string }) {
+          return cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
+            onResult: (result) => {
+              if (!result.currentProject) {
+                return
+              }
+
+              result.currentProject.savedState = {
+                firstOpened: 1609459200000,
+                lastOpened: 1609459200000,
+                promptsShown: {},
+                ...(options?.state ?? {}),
+              }
+
+              const projectId = result.currentProject.config.find((item: {field: string, value: string}) => item.field = 'projectId')
+
+              if (projectId) {
+                projectId.value = options?.projectId
+              }
+            },
+            render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><HeaderBarContent gql={gqlVal} show-browsers={true} allowAutomaticPromptOpen={true} /></div>,
+          })
+        }
+
+        it('opens when after 4 days from first open, no projectId, and not already shown', () => {
+          mountWithSavedState()
+
+          cy.contains(defaultMessages.topNav.docsMenu.prompts.ci1.description).should('be.visible')
+        })
+
+        it('links have correct utm_content param', () => {
+          mountWithSavedState()
+
+          cy.contains(
+            'a[href="https://on.cypress.io/setup-ci?utm_medium=CI+Prompt+1&utm_campaign=Other&utm_content=Automatic"]',
+            defaultMessages.topNav.docsMenu.prompts.ci1.seeOtherGuides,
+          ).should('be.visible')
+
+          cy.contains(
+            'a[href="https://on.cypress.io/ci?utm_medium=CI+Prompt+1&utm_campaign=Learn+More"]',
+            defaultMessages.topNav.docsMenu.prompts.ci1.intro,
+          ).should('be.visible')
+        })
+
+        it('does not open when projectId exists', () => {
+          mountWithSavedState({ projectId: 'testid' })
+
+          cy.contains(defaultMessages.topNav.docsMenu.prompts.ci1.description).should('not.exist')
+        })
+
+        it('does not open when previously shown', () => {
+          mountWithSavedState({ state: { promptsShown: { 'ci1': 1609459200000, 'orchestration1': 1609459200000 } } })
+
+          cy.contains(defaultMessages.topNav.docsMenu.prompts.ci1.description).should('not.exist')
+        })
+
+        it('does not open when another prompt has been shown recently', () => {
+          mountWithSavedState({ state: { promptsShown: { dashboard1: 1609891100000 } } })
+
+          cy.contains(defaultMessages.topNav.docsMenu.prompts.ci1.description).should('not.exist')
+        })
+
+        it('does not open if "allowAutomaticPromptOpen" prop is not true', () => {
+          // we should be sure that, eg, in launchpad, this would not open up after a testing type is configured
+          cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
+            onResult: (result) => {
+              if (!result.currentProject) {
+                return
+              }
+
+              result.currentProject.savedState = {
+                firstOpened: 1609459200000,
+                lastOpened: 1609459200000,
+                promptsShown: {},
+              }
+            },
+            render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><HeaderBarContent gql={gqlVal} show-browsers={true} /></div>,
+          })
+
+          cy.contains(defaultMessages.topNav.docsMenu.prompts.ci1.description).should('not.exist')
+        })
+      })
+    })
+
+    describe('the orchestration prompt', () => {
+      it('is not open by default', () => {
+        cy.get('.prompt-orchestration1').should('not.exist')
+      })
+
+      context('opens on click', () => {
+        beforeEach(() => {
+          cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
+            render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><HeaderBarContent gql={gqlVal} show-browsers={true} /></div>,
+          })
+
+          cy.contains('Docs').click()
+          cy.contains('Run tests faster').click()
+        })
+
+        it('opens on menu item click', () => {
+          cy.contains(defaultMessages.topNav.docsMenu.prompts.orchestration1.title).should('be.visible')
+          cy.contains('Getting Started').should('not.exist')
+        })
+
+        it('is dismissible from X icon', () => {
+          cy.findAllByLabelText('Close').click()
+          cy.contains(defaultMessages.topNav.docsMenu.prompts.orchestration1.title).should('not.exist')
+        })
+
+        it('links to more information with expected utm params', () => {
+          cy.contains(
+            'a[href="https://on.cypress.io/smart-orchestration?utm_medium=CI+Prompt+1&utm_campaign=Learn+More"]',
+            defaultMessages.topNav.docsMenu.prompts.orchestration1.learnMore,
+          )
+          .should('be.visible')
+        })
+      })
+    })
   })
 })
