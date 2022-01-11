@@ -239,7 +239,7 @@ declare namespace Cypress {
      * @example
      *    Cypress.Buffer.method()
      */
-    Buffer: BufferModule
+    Buffer: BufferType
     /**
      * Cypress automatically includes minimatch and exposes it as Cypress.minimatch.
      *
