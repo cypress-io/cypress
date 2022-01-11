@@ -200,7 +200,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
       }
 
       const doneAndCleanup = async (err) => {
-        // if done is called, immediately unbind commands, but wait for log updates to trickle in
+        // if done is called, immediately unbind commands, but wait for log updates to trickle in before invoking done
         cleanupCommands()
         await cleanupLogs()
         communicator.off('done:called', doneAndCleanup)
@@ -242,8 +242,8 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
             return
           }
 
-          // all commands in the secondary should be enqueued here. go ahead and bind the cleanup method for when the queue finishes
-          // if done is passed in, wait to unbind any listeners
+          // If done is passed in, wait to unbind any listeners
+          // Otherwise, all commands in the secondary should be enqueued here. go ahead and bind the cleanup method for when the queue finishes
           // Otherwise, if no commands are enqueued, clean up the logs
           // this case is common if there are only assertions enqueued in the secondary domain
           if (_.size(commands) === 0 && !done) {
@@ -253,7 +253,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
           resolve()
         })
 
-        // otherwise, if commands are queued, wait for them to finish in the secondary domain and then start the cleanup methods
+        // If done is NOT passed in, wait for commands to finish in the secondary domain and then start the cleanup methods
         if (!done) {
           communicator.once('queue:finished', cleanup)
         }
