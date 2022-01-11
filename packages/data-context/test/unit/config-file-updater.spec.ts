@@ -36,7 +36,7 @@ describe('lib/util/config-file-updater', () => {
           expect(output).to.equal(expectedOutput)
         })
 
-        it('finds the object litteral and adds the values to it es5', async () => {
+        it('finds the object literal and adds the values to it es5', async () => {
           const src = stripIndent`\
               module.exports = {
                 foo: 42,
@@ -52,6 +52,20 @@ describe('lib/util/config-file-updater', () => {
           `
 
           const output = await insertValueInJSString(src, { projectId: 'id1234', viewportWidth: 400 }, errors)
+
+          expect(output).to.equal(expectedOutput)
+        })
+
+        it('finds the object literal by string literal and updates the values (es5)', async () => {
+          const src = stripIndent`\
+              module.exports = { 'projectId': '2'}
+            `
+
+          const expectedOutput = stripIndent`\
+            module.exports = { 'projectId': "id1234"}
+          `
+
+          const output = await insertValueInJSString(src, { projectId: 'id1234' }, errors)
 
           expect(output).to.equal(expectedOutput)
         })
@@ -206,7 +220,7 @@ describe('lib/util/config-file-updater', () => {
             export default {
               foo: 42,
               bar: 84,
-              component: {
+              'component': {
                 devServer() {
                   return null
                 }
@@ -219,7 +233,7 @@ describe('lib/util/config-file-updater', () => {
               projectId: "id1234",
               foo: 1000,
               bar: 3000,
-              component: {
+              'component': {
                 devServer() {
                   return null
                 }
@@ -258,7 +272,7 @@ describe('lib/util/config-file-updater', () => {
         it('inserts nested values into existing keys', async () => {
           const src = stripIndent`\
               module.exports = {
-                component: {
+                'component': {
                   viewportWidth: 800
                 },
                 foo: 42
@@ -269,7 +283,7 @@ describe('lib/util/config-file-updater', () => {
 
           const expectedOutput = stripIndent`\
             module.exports = {
-              component: {
+              'component': {
                 specFilePattern: "src/**/*.spec.cy.js",
                 viewportWidth: 800
               },
