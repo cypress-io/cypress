@@ -130,8 +130,8 @@ export const eventManager = {
       })
     })
 
-    ws.on('cross:domain:html:received', () => {
-      Cypress.multiDomainCommunicator.emit('html:received')
+    ws.on('cross:domain:delaying:html', () => {
+      Cypress.multiDomainCommunicator.emit('delaying:html')
     })
 
     _.each(localToReporterEvents, (event) => {

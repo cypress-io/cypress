@@ -171,7 +171,7 @@ describe('http/response-middleware', function () {
 
       const promise = testMiddleware([MaybeDelayForMultiDomain], ctx)
 
-      expect(ctx.serverBus.emit).to.be.calledWith('delaying:cross:domain:html')
+      expect(ctx.serverBus.emit).to.be.calledWith('cross:domain:delaying:html')
 
       ctx.serverBus.once.withArgs('ready:for:domain').args[0][1]()
 
@@ -193,7 +193,7 @@ describe('http/response-middleware', function () {
 
       const promise = testMiddleware([MaybeDelayForMultiDomain], ctx)
 
-      expect(ctx.serverBus.emit).to.be.calledWith('delaying:cross:domain:html')
+      expect(ctx.serverBus.emit).to.be.calledWith('cross:domain:delaying:html')
 
       ctx.serverBus.once.withArgs('ready:for:domain').args[0][1]()
 

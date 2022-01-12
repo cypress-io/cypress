@@ -240,7 +240,7 @@ const MaybeDelayForMultiDomain: ResponseMiddleware = function () {
       this.next()
     })
 
-    this.serverBus.emit('delaying:cross:domain:html')
+    this.serverBus.emit('cross:domain:delaying:html')
 
     return
   }
