@@ -104,7 +104,7 @@ function run (ipc, configFile, projectRoot) {
 
         areSetupNodeEventsLoaded = true
         if (testingType === 'component') {
-          if (!isValidSetupNodeEvents(result.setupNodeEvents) || !isValidDevServer((result.component || {}).devServer)) {
+          if (!isValidSetupNodeEvents(result.setupNodeEvents) || !isValidDevServer((result.component || {}))) {
             return
           }
 
