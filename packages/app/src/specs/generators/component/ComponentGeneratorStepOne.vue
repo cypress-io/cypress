@@ -127,7 +127,7 @@ const query = useQuery({
   query: ComponentGeneratorStepOneDocument,
 
   // @ts-ignore
-  variables: { glob: extensionPattern.value },
+  variables: { glob: extensionPattern },
 })
 
 const allFiles = computed((): any => {

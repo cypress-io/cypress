@@ -127,7 +127,7 @@ const query = useQuery({
   query: StoryGeneratorStepOneDocument,
 
   // @ts-ignore
-  variables: { glob: extensionPattern.value },
+  variables: { glob: extensionPattern },
 })
 
 const allFiles = computed(() => {
