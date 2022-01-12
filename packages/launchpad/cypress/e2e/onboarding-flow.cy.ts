@@ -98,4 +98,14 @@ describe('Launchpad: Onboarding Flow', () => {
     cy.findByText('Continue').closest('button').should('not.be.disabled').click()
     cy.findByText('Choose a Browser', { timeout: 10000 })
   })
+
+  it('can open unconfigured component testing type, go back to the testing chooser', () => {
+    cy.scaffoldProject('pristine-with-config-file')
+    cy.openProject('pristine-with-config-file')
+    cy.visitLaunchpad()
+    cy.get('[data-cy-testingType=component]').click()
+    cy.get('h1').should('not.contain', 'Welcome to Cypress!')
+    cy.contains('Back').click()
+    cy.get('h1').should('contain', 'Welcome to Cypress!')
+  })
 })
