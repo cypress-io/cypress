@@ -112,34 +112,6 @@ export const CODE_LANGUAGES = [
 
 export type CodeLanguage = typeof CODE_LANGUAGES[number]
 
-export const WIZARD_STEPS = [
-  {
-    type: 'welcome',
-    title: 'Welcome to Cypress!',
-    description: 'Choose which method of testing you would like to get started with for this project.',
-  },
-  {
-    type: 'selectFramework',
-    title: 'Project Setup',
-    description: 'Confirm the front-end framework and bundler used in your project.',
-  },
-  {
-    type: 'installDependencies',
-    title: 'Install Dev Dependencies',
-    description: 'Paste the command below into your terminal to install the required packages.',
-  },
-  {
-    type: 'configFiles',
-    title: 'Configuration Files',
-    description: 'We added the following files to your project.',
-  },
-  {
-    type: 'setupComplete',
-    title: 'Choose a Browser',
-    description: 'Choose your preferred browser for testing your components.',
-  },
-] as const
-
 export const MIGRATION_STEPS = ['renameAuto', 'renameManual', 'configFile'] as const
 
 export type AllPackages = FrontendFramework['package'] | Bundler['package'] | typeof STORYBOOK_DEPS[number]
