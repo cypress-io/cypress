@@ -24,8 +24,6 @@ exports['src/index .getDefaultValues returns list of public config keys 1'] = {
   "e2e": {
     "specPattern": "cypress/e2e/**/*.cy.{js,jsx,ts,tsx}"
   },
-  "defaultCommandTimeout": 4000,
-  "downloadsFolder": "cypress/downloads",
   "env": {},
   "execTimeout": 60000,
   "exit": true,
@@ -38,7 +36,6 @@ exports['src/index .getDefaultValues returns list of public config keys 1'] = {
   "fixturesFolder": "cypress/fixtures",
   "ignoreSpecPattern": "*.hot-update.js",
   "includeShadowDom": false,
-  "isInteractive": true,
   "keystrokeDelay": 0,
   "modifyObstructiveCode": true,
   "numTestsKeptInMemory": 50,
@@ -80,6 +77,7 @@ exports['src/index .getDefaultValues returns list of public config keys 1'] = {
   "configFile": "cypress.config.js",
   "devServerPublicPathRoute": "/__cypress/src",
   "hosts": null,
+  "isInteractive": true,
   "isTextTerminal": false,
   "morgan": true,
   "namespace": "__cypress",
@@ -92,6 +90,7 @@ exports['src/index .getDefaultValues returns list of public config keys 1'] = {
 
 exports['src/index .getPublicConfigKeys returns list of public config keys 1'] = [
   "animationDistanceThreshold",
+  "arch",
   "baseUrl",
   "blockHosts",
   "chromeWebSecurity",
@@ -116,6 +115,7 @@ exports['src/index .getPublicConfigKeys returns list of public config keys 1'] =
   "modifyObstructiveCode",
   "nodeVersion",
   "numTestsKeptInMemory",
+  "platform",
   "pageLoadTimeout",
   "pluginsFile",
   "port",

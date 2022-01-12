@@ -475,6 +475,7 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     name: 'version',
     defaultValue: pkg.version,
     validation: validate.isString,
+    isInternal: true,
     canUpdateDuringTestTime: false,
   }, {
     name: 'xhrRoute',
