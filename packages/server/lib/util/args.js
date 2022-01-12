@@ -204,6 +204,12 @@ const sanitizeAndConvertNestedArgs = (str, argname) => {
   }
 }
 
+/**
+ * Parses the '--spec' cli parameter to return an array of valid patterns.
+ *
+ * @param {Strng} pattern pattern to parse
+ * @returns Array of patterns
+ */
 const parseSpecArgv = (pattern) => {
   const TOKENS = {
     OPEN: ['{', '['],
@@ -230,7 +236,7 @@ const parseSpecArgv = (pattern) => {
   }
 
   /**
-   * Sanitizes a path from leftover commas.
+   * Sanitizes a path's leftover commas.
    *
    * @param {String} path
    * @returns String
