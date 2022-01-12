@@ -1,6 +1,6 @@
 <template>
   <form
-    v-if="props.gql.browsers"
+    v-if="browsers"
     @submit.prevent="emit('launch', props.gql?.currentBrowser?.path)"
   >
     <div
@@ -8,7 +8,7 @@
       data-cy="open-browser-list"
     >
       <div
-        v-for="browser of props.gql.browsers"
+        v-for="browser of browsers"
         :key="browser.id"
         :data-cy-browser="browser.name"
         class="rounded border-1 text-center min-h-144px pt-6 pb-4 w-160px relative block"
@@ -134,6 +134,14 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
+
+const browsers = computed(() => {
+  if (!props.gql.browsers) {
+    return undefined
+  }
+
+  return [...props.gql.browsers].sort((a, b) => a.name === 'Electron' ? 1 : -1)
+})
 
 const setBrowser = useMutation(OpenBrowserList_SetBrowserDocument)
 

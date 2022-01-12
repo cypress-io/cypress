@@ -123,15 +123,11 @@ const mutation = useMutation(StoryGeneratorStepOne_GenerateSpecDocument)
 
 const extensionPattern = ref(props.codeGenGlob)
 
-const glob = computed(() => {
-  return `**/${extensionPattern.value}`
-})
-
 const query = useQuery({
   query: StoryGeneratorStepOneDocument,
 
   // @ts-ignore
-  variables: { glob },
+  variables: { glob: extensionPattern.value },
 })
 
 const allFiles = computed(() => {
