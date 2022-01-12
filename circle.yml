@@ -427,33 +427,6 @@ commands:
           path: /tmp/artifacts
       - store-npm-logs
 
-  run-runner-integration-tests:
-    parameters:
-      browser:
-        description: browser shortname to target
-        type: string
-      percy:
-        description: enable percy
-        type: boolean
-        default: false
-    steps:
-      - restore_cached_workspace
-      - run:
-          command: |
-            cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --parallel -- --') || true
-            CYPRESS_KONFIG_ENV=production \
-            CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
-            PERCY_ENABLE=${PERCY_TOKEN:-0} \
-            PERCY_PARALLEL_TOTAL=-1 \
-            $cmd yarn workspace @packages/runner cypress:run --record --parallel --group runner-integration-<<parameters.browser>> --browser <<parameters.browser>>
-      - verify-mocha-results
-      - store_test_results:
-          path: /tmp/cypress
-      - store_artifacts:
-          path: /tmp/artifacts
-      - store-npm-logs
-
   run-new-ui-tests:
     parameters:
       package:
@@ -1283,39 +1256,6 @@ jobs:
       - store_artifacts:
           path: /tmp/artifacts
       - store-npm-logs
-
-  runner-integration-tests-chrome:
-    <<: *defaults
-    resource_class: medium
-    parallelism: 2
-    steps:
-      - run-runner-integration-tests:
-          browser: chrome
-          percy: true
-
-  runner-integration-tests-firefox:
-    <<: *defaults
-    resource_class: medium
-    parallelism: 2
-    steps:
-      - run-runner-integration-tests:
-          browser: firefox
-
-  runner-integration-tests-electron:
-    <<: *defaults
-    resource_class: medium
-    parallelism: 2
-    steps:
-      - run-runner-integration-tests:
-          browser: electron
-
-  runner-ct-integration-tests-chrome:
-    <<: *defaults
-    parallelism: 1
-    steps:
-      - run-runner-ct-integration-tests:
-          browser: chrome
-          percy: true
 
   run-frontend-shared-component-tests-chrome:
     <<: *defaults
@@ -2193,8 +2133,6 @@ linux-workflow: &linux-workflow
           - run-frontend-shared-component-tests-chrome
           - run-launchpad-component-tests-chrome
           - run-launchpad-integration-tests-chrome
-          - runner-integration-tests-chrome
-          - runner-ct-integration-tests-chrome
     - lint-types:
         requires:
           - build
@@ -2244,15 +2182,6 @@ linux-workflow: &linux-workflow
         requires:
           - build
     - driver-integration-tests-electron:
-        requires:
-          - build
-    - runner-integration-tests-chrome:
-        requires:
-          - build
-    - runner-integration-tests-firefox:
-        requires:
-          - build
-    - runner-integration-tests-electron:
         requires:
           - build
     - runner-ct-integration-tests-chrome:
@@ -2344,8 +2273,6 @@ linux-workflow: &linux-workflow
           - linux-lint
           - percy-finalize
           - runner-ct-integration-tests-chrome
-          - runner-integration-tests-firefox
-          - runner-integration-tests-electron
           - driver-integration-tests-firefox
           - driver-integration-tests-chrome
           - driver-integration-tests-chrome-beta
