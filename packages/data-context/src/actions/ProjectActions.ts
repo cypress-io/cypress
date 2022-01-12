@@ -418,6 +418,16 @@ export class ProjectActions {
     return this.ctx.fs.mkdirp(this.defaultE2EPath)
   }
 
+  async writeFile (relative: string, content: string = ''): Promise<boolean> {
+     if (!this.ctx.currentProject) {
+       return false
+     }
+
+     await this.ctx.fs.writeFile(path.join(this.ctx.currentProject, relative), content)
+
+     return true
+   }
+
   async scaffoldIntegration (): Promise<NexusGenObjects['ScaffoldedFile'][]> {
     const projectRoot = this.ctx.currentProject
 

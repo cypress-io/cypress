@@ -48,7 +48,7 @@ const props = defineProps<{
 }>()
 
 const specPatterns = computed<string[]>(() => {
-  let patterns = props.gql.currentProject?.config.find((x) => x.field === 'testFiles')?.value
+  let patterns = props.gql.currentProject?.config.find((x) => x.field === 'specPattern')?.value
 
   if (!patterns) {
     return []

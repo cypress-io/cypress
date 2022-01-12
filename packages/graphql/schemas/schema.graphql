@@ -297,11 +297,6 @@ type CloudUser implements Node {
   userIsViewer: Boolean!
 }
 
-enum CodeGenGenResultType {
-  binary
-  text
-}
-
 """Glob patterns for detecting files for code gen."""
 type CodeGenGlobs implements Node {
   component: String!
@@ -309,12 +304,6 @@ type CodeGenGlobs implements Node {
   """Relay style Node ID field for the CodeGenGlobs field"""
   id: ID!
   story: String!
-}
-
-enum CodeGenStatus {
-  add
-  overwrite
-  skipped
 }
 
 enum CodeGenType {
@@ -624,6 +613,9 @@ type Mutation {
   """Log out of Cypress Cloud"""
   logout: Query
 
+  """Check if a give spec file will match the project spec pattern"""
+  matchesSpecPattern(specFile: String!): Boolean!
+
   """Open a path in preferred IDE"""
   openDirectoryInIDE(path: String!): Boolean
   openExternal(url: String!): Boolean
@@ -662,6 +654,9 @@ type Mutation {
 
   """Updates the different fields of the wizard data store"""
   wizardUpdate(input: WizardUpdateInput!): Wizard
+
+  """Create a file relative to the current project root"""
+  writeFileRelativeToProjectRoot(content: String, file: String!): Boolean!
 }
 
 """Implements the Relay Node spec"""
