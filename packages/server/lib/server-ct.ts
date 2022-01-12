@@ -16,20 +16,17 @@ export class ServerCt extends ServerBase<SocketCt> {
     return new Bluebird((resolve, reject) => {
       const { port, baseUrl, socketIoRoute } = config
 
-      const onError = (err) => {
+      this._server = this._createHttpServer(app)
+      this.server.on('connect', this.onConnect.bind(this))
+      this.server.on('upgrade', (req, socket, head) => this.onUpgrade(req, socket, head, socketIoRoute))
+
+      return this._listen(port, (err) => {
         if (err.code === 'EADDRINUSE') {
           reject(`Port ${port} is already in use`)
         }
 
         reject(err)
-      }
-
-      this._server = this._createHttpServer(app)
-      this.server.on('connect', this.onConnect.bind(this))
-      this.server.on('upgrade', (req, socket, head) => this.onUpgrade(req, socket, head, socketIoRoute))
-      this.server.once('error', onError)
-
-      return this._listen(port, onError)
+      })
       .then((port) => {
         httpsProxy.create(appData.path('proxy'), port, {
           onRequest: this.callListeners.bind(this),

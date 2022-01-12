@@ -76,7 +76,14 @@ export class ServerE2E extends ServerBase<SocketE2E> {
       this.server.on('upgrade', (req, socket, head) => this.onUpgrade(req, socket, head, socketIoRoute))
       this.server.once('error', onError)
 
-      return this._listen(port, onError)
+      return this._listen(port, (err) => {
+        // if the server bombs before starting
+        // and the err no is EADDRINUSE
+        // then we know to display the custom err message
+        if (err.code === 'EADDRINUSE') {
+          return reject(this.portInUseErr(port))
+        }
+      })
       .then((port) => {
         return Bluebird.all([
           httpsProxy.create(appData.path('proxy'), port, {
