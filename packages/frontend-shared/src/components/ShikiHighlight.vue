@@ -58,12 +58,13 @@ shikiWrapperClasses computed property.
       v-else
       class="border rounded font-light border-gray-100 py-8px text-14px leading-24px overflow-scroll"
       :class="[props.class, lineNumbers ? 'pl-56px' : 'pl-8px' ]"
-    >{{ code }}</pre>
+    >{{ trimmedCode }}</pre>
     <CopyButton
-      v-if="copyButton"
+      v-if="copyButton && isSupported"
       variant="outline"
       tabindex="-1"
-      class="right-8px bottom-8px absolute"
+      class="absolute"
+      :class="numberOfLines === 1 ? 'bottom-5px right-5px' : 'bottom-8px right-8px'"
       :text="code"
       no-icon
     />
@@ -142,8 +143,10 @@ const resolvedLang = computed(() => {
   return props.lang && (langsSupported as readonly string[]).includes(props.lang) ? props.lang : 'plaintext'
 })
 
+const trimmedCode = computed(() => props.skipTrim ? props.code : props.code.trim())
+
 const highlightedCode = computed(() => {
-  return highlighter?.codeToHtml(props.skipTrim ? props.code : props.code.trim(), resolvedLang.value)
+  return highlighter?.codeToHtml(trimmedCode.value, resolvedLang.value)
 })
 
 const codeEl: Ref<HTMLElement | null> = ref(null)
@@ -157,6 +160,8 @@ const copyCode = () => {
     copy(text)
   }
 }
+
+const numberOfLines = computed(() => props.code.trim().split('\n').length)
 
 </script>
 
