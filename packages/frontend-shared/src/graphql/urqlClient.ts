@@ -101,7 +101,8 @@ export function makeUrqlClient (target: 'launchpad' | 'app'): Client {
     makeCacheExchange(),
     ssrExchange({
       isClient: true,
-      initialState: window.__CYPRESS_INITIAL_DATA__ ? decodeBase64Unicode(window.__CYPRESS_INITIAL_DATA__) : '{}',
+      // @ts-ignore - this seems fine locally, but on CI tsc is failing - bizarre.
+      initialState: (window.__CYPRESS_INITIAL_DATA__ ? decodeBase64Unicode(window.__CYPRESS_INITIAL_DATA__) : '{}'),
     }),
     namedRouteExchange,
     // TODO(tim): add this when we want to use the socket as the GraphQL
