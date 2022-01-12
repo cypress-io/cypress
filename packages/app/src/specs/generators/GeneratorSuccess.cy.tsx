@@ -1,6 +1,5 @@
 import GeneratorSuccess from './GeneratorSuccess.vue'
 import { randomComponents } from '@packages/frontend-shared/cypress/support/mock-graphql/testStubSpecs'
-import faker from 'faker'
 
 const targetSelector = '[data-cy=file-row]'
 const spec = randomComponents(1, 'FileParts')[0]
@@ -18,13 +17,13 @@ describe('<${spec.baseName} />', () => {
 
 describe('<GeneratorSuccess />', () => {
   it('renders the relative file path', () => {
-    cy.mount(() => (<GeneratorSuccess file={{ id: faker.datatype.uuid(), spec, content }} />))
+    cy.mount(() => (<GeneratorSuccess file={{ ...spec, contents: content }} />))
     .get('body')
     .contains(spec.relative)
   })
 
   it('can be expanded to show the content', () => {
-    cy.mount(() => (<GeneratorSuccess file={{ id: faker.datatype.uuid(), spec, content }} />))
+    cy.mount(() => (<GeneratorSuccess file={{ ...spec, contents: content }} />))
     .get(targetSelector)
     .click()
     .get('code .line')
@@ -38,6 +37,6 @@ describe('<GeneratorSuccess />', () => {
     const relative = 'src/components/deep/nested/path/to/deep/nested/path/to/component/MyComponent/MyComponent.spec.tsx'
     const longContent = Object.keys(Array.from(Array(100))).map((c) => content).join('\n')
 
-    cy.mount(() => (<GeneratorSuccess file={{ id: faker.datatype.uuid(), spec: { ...spec, relative }, content: longContent }} />))
+    cy.mount(() => (<GeneratorSuccess file={{ ...spec, relative, contents: longContent }} />))
   })
 })

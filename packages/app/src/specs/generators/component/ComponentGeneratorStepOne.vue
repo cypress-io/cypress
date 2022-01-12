@@ -18,7 +18,7 @@
     />
     <GeneratorSuccess
       v-else
-      :file="result"
+      :file="result.file"
     />
   </div>
   <div>
@@ -32,7 +32,7 @@
     >
       <router-link
         class="outline-none"
-        :to="{ path: '/specs/runner', query: { file: result.spec.relative } }
+        :to="{ path: '/specs/runner', query: { file: result.file.relative } }
         "
       >
         <Button
@@ -62,7 +62,7 @@ import FileChooser from '../FileChooser.vue'
 import GeneratorSuccess from '../GeneratorSuccess.vue'
 import { computed, ref } from 'vue'
 import { gql, useQuery, useMutation } from '@urql/vue'
-import { ComponentGeneratorStepOneDocument, ComponentGeneratorStepOne_GenerateSpecDocument } from '../../../generated/graphql'
+import { ComponentGeneratorStepOneDocument, ComponentGeneratorStepOne_GenerateSpecDocument, GeneratorSuccessFragment } from '../../../generated/graphql'
 import StandardModalFooter from '@cy/components/StandardModalFooter.vue'
 import Button from '@cy/components/Button.vue'
 import PlusButtonIcon from '~icons/cy/add-large_x16.svg'
@@ -102,7 +102,6 @@ query ComponentGeneratorStepOne($glob: String!) {
     id
     codeGenCandidates(glob: $glob) {
       id
-      name
       fileName
       fileExtension
       absolute
@@ -116,7 +115,6 @@ query ComponentGeneratorStepOne($glob: String!) {
 gql`
 mutation ComponentGeneratorStepOne_generateSpec($codeGenCandidate: String!, $type: CodeGenType!) {
   generateSpecFromSource(codeGenCandidate: $codeGenCandidate, type: $type) {
-    id
     ...GeneratorSuccess
   }
 }`
@@ -144,7 +142,7 @@ const allFiles = computed((): any => {
   return []
 })
 
-const result = ref()
+const result = ref<GeneratorSuccessFragment | null>(null)
 
 whenever(result, () => {
   title.value = t('createSpec.successPage.header')
@@ -156,7 +154,7 @@ const makeSpec = async (file) => {
     type: 'component',
   })
 
-  result.value = data?.generateSpecFromSource
+  result.value = data?.generateSpecFromSource ?? null
 }
 
 </script>
