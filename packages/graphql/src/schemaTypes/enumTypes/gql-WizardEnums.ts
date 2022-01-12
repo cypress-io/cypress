@@ -1,4 +1,4 @@
-import { BUNDLERS, CODE_LANGUAGES, FRONTEND_FRAMEWORKS, WIZARD_STEPS } from '@packages/types'
+import { BUNDLERS, CODE_LANGUAGES, FRONTEND_FRAMEWORKS } from '@packages/types'
 import { enumType } from 'nexus'
 
 export const SupportedBundlerEnum = enumType({
@@ -30,9 +30,4 @@ export const CodeLanguageEnum = enumType({
 export const TestingTypeEnum = enumType({
   name: 'TestingTypeEnum',
   members: ['e2e', 'component'],
-})
-
-export const WizardStepEnum = enumType({
-  name: 'WizardStep',
-  members: WIZARD_STEPS.map((t) => t.type),
 })

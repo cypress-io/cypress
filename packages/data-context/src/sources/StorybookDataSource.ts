@@ -1,4 +1,5 @@
-import type { SpecFileWithExtension, StorybookInfo } from '@packages/types'
+import type { FilePartsShape } from '@packages/graphql/src/schemaTypes/objectTypes/gql-FileParts'
+import type { StorybookInfo } from '@packages/types'
 import assert from 'assert'
 import * as path from 'path'
 import type { DataContext } from '..'
@@ -19,7 +20,7 @@ export class StorybookDataSource {
     return this.storybookInfoLoader.load(this.ctx.currentProject)
   }
 
-  async getStories (): Promise<SpecFileWithExtension[]> {
+  async getStories (): Promise<FilePartsShape[]> {
     const { currentProject } = this.ctx
 
     assert(currentProject)
@@ -30,24 +31,17 @@ export class StorybookDataSource {
       return []
     }
 
-    const config = await this.ctx.lifecycleManager.getFullInitialConfig()
     const normalizedGlobs = storybook.storyGlobs.map((glob) => path.join(storybook.storybookRoot, glob))
     const files = await this.ctx.file.getFilesByGlob(currentProject, normalizedGlobs)
 
     // Don't currently support mdx
-    return files.reduce((acc, file) => {
-      if (file.endsWith('.mdx')) {
+    return files.reduce((acc, absolute) => {
+      if (this.ctx.path.extname(absolute) === '.mdx') {
         return acc
       }
 
-      const spec = this.ctx.file.normalizeFileToFileParts({
-        absolute: file,
-        projectRoot: currentProject,
-        searchFolder: config.componentFolder || currentProject,
-      })
-
-      return [...acc, spec]
-    }, [] as SpecFileWithExtension[])
+      return [...acc, { absolute }]
+    }, [] as FilePartsShape[])
   }
 
   private storybookInfoLoader = this.ctx.loader<string, StorybookInfo | null>((projectRoots) => this.batchStorybookInfo(projectRoots))
