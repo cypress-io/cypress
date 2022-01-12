@@ -297,11 +297,6 @@ type CloudUser implements Node {
   userIsViewer: Boolean!
 }
 
-enum CodeGenGenResultType {
-  binary
-  text
-}
-
 """Glob patterns for detecting files for code gen."""
 type CodeGenGlobs implements Node {
   component: String!
@@ -309,12 +304,6 @@ type CodeGenGlobs implements Node {
   """Relay style Node ID field for the CodeGenGlobs field"""
   id: ID!
   story: String!
-}
-
-enum CodeGenStatus {
-  add
-  overwrite
-  skipped
 }
 
 enum CodeGenType {
@@ -1009,25 +998,6 @@ type WizardNpmPackage implements Node {
   """The package name that you would npm install"""
   name: String!
   package: String!
-}
-
-"""Each config file suggestion given by the wizard"""
-type WizardSampleConfigFile implements Node {
-  content: String!
-  description: String
-  filePath: String!
-
-  """Relay style Node ID field for the WizardSampleConfigFile field"""
-  id: ID!
-  status: WizardConfigFileStatusEnum!
-}
-
-enum WizardStep {
-  configFiles
-  installDependencies
-  selectFramework
-  setupComplete
-  welcome
 }
 
 input WizardUpdateInput {

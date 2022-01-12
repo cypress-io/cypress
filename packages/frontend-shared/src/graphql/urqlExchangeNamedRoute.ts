@@ -10,6 +10,7 @@ export const namedRouteExchange: Exchange = ({ client, forward }) => {
           return o
         }
 
+        // Only prefix the URL if it hasn't been already
         if (!o.context.url.endsWith('/graphql')) {
           return o
         }

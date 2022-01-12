@@ -114,11 +114,17 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       removeProjectFromCache (path: string) {
         return cache.removeProject(path)
       },
-      closeActiveProject () {
-        return openProject.closeActiveProject()
+      closeActiveProject (shouldCloseBrowser = true) {
+        return openProject.closeActiveProject(shouldCloseBrowser)
       },
       getCurrentProjectSavedState () {
-        return openProject.getConfig()?.state
+        // TODO: See if this is the best way we should be getting this config,
+        // shouldn't we have this already in the DataContext?
+        try {
+          return openProject.getConfig()?.state
+        } catch {
+          return {}
+        }
       },
       setPromptShown (slug) {
         return openProject.getProject()

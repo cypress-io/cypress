@@ -46,6 +46,11 @@ const { t } = useI18n()
 gql`
 mutation ScaffoldedFiles_completeSetup {
   completeSetup {
+    currentProject {
+      id
+      isLoadingConfigFile
+      isLoadingNodeEvents
+    }
     scaffoldedFiles {
       status
     }

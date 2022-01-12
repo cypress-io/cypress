@@ -5,7 +5,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
   beforeEach(() => {
     cy.scaffoldProject('component-tests')
     cy.openProject('component-tests')
-    cy.startAppServer()
+    cy.startAppServer('component')
   })
 
   context('Runs Page', () => {

@@ -37,7 +37,6 @@ export const stubQuery: MaybeResolver<Query> = {
   scaffoldedFiles () {
     // return [
     //   {
-    //     ...testNodeId('WizardSampleConfigFile'),
     //     filePath: 'cypress.config.ts',
     //     description: 'The proper config file',
     //     content: dedent`import { startDevServer } from '@cypress/vite-dev-server'
@@ -47,7 +46,6 @@ export const stubQuery: MaybeResolver<Query> = {
     //     status: 'valid',
     //   },
     //   {
-    //     ...testNodeId('WizardSampleConfigFile'),
     //     filePath: 'cypress/fixtures/example.json',
     //     description: 'Please do the necessary changes to your file',
     //     content: dedent`{
@@ -57,7 +55,6 @@ export const stubQuery: MaybeResolver<Query> = {
     //     status: 'changes',
     //   },
     //   {
-    //     ...testNodeId('WizardSampleConfigFile'),
     //     filePath: 'cypress/component/support.ts',
     //     description: 'Please do the necessary changes to your file',
     //     content: dedent`import { startDevServer } from '@cypress/vite-dev-server'
@@ -67,7 +64,6 @@ export const stubQuery: MaybeResolver<Query> = {
     //     status: 'skipped',
     //   },
     //   {
-    //     ...testNodeId('WizardSampleConfigFile'),
     //     filePath: 'cypress/component/commands.ts',
     //     description: 'Please do the necessary changes to your file',
     //     content: dedent`import { startDevServer } from '@cypress/vite-dev-server'
