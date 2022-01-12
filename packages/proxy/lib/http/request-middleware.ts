@@ -168,12 +168,22 @@ const SendRequestOutgoing: RequestMiddleware = function () {
 
   const req = this.request.create(requestOptions)
 
-  req.on('error', this.onError)
-  req.on('response', (incomingRes) => this.onResponse(incomingRes, req))
-  this.req.socket.on('close', () => {
+  const onSocketClose = () => {
     this.debug('request aborted')
     req.abort()
+  }
+
+  req.on('error', (val) => {
+    this.onError(val)
+    this.req.socket.off('close', onSocketClose)
   })
+
+  req.on('response', (incomingRes) => {
+    this.onResponse(incomingRes, req)
+    this.req.socket.off('close', onSocketClose)
+  })
+
+  this.req.socket.on('close', onSocketClose)
 
   if (!requestBodyBuffered) {
     // pipe incoming request body, headers to new request
