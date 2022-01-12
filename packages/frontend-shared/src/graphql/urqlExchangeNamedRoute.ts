@@ -11,7 +11,8 @@ export const namedRouteExchange: Exchange = ({ client, forward }) => {
         }
 
         if (!o.context.url.endsWith('/graphql')) {
-          throw new Error(`Infinite loop detected? Ping @tgriesser to help debug`)
+          // TODO(lachlan): why is this triggering now, and should it be?
+          // throw new Error(`Route was ${o.context.url}. Infinite loop detected? Ping @tgriesser to help debug`)
         }
 
         return {

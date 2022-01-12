@@ -66,8 +66,7 @@ describe('Launchpad: Global Mode', () => {
 
       setupAndValidateProjectsList(projectList)
       cy.get('[data-cy="project-card"]').click()
-      cy.get('[data-cy="project-card"]')
-      .should('have.length', 0)
+      cy.get('[data-cy="project-card"]').should('not.exist')
     })
 
     it('updates most-recently opened project list when returning from next step', () => {
@@ -75,10 +74,7 @@ describe('Launchpad: Global Mode', () => {
 
       setupAndValidateProjectsList(projectList)
 
-      cy.get('[data-cy="project-card"]').within((cards) => {
-        cy.log('open cookies project')
-        cards.get(2).click()
-      })
+      cy.get('[data-cy="project-card"]').contains('cookies').click()
 
       cy.contains('Welcome to Cypress!')
       cy.get('a').contains('Projects').click()
