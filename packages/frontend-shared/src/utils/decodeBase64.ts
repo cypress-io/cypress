@@ -24,3 +24,16 @@ export function decodeBase64Unicode (str: string) {
     return `%${(`00${char.charCodeAt(0).toString(16)}`).slice(-2)}`
   }).join(''))
 }
+
+/**
+ * Copied from driver/src/cypress/utils.ts
+ *
+ * Correctly encodes Unicode string to base64
+ * @see https://stackoverflow.com/questions/30106476/using-javascripts-atob-to-decode-base64-doesnt-properly-decode-utf-8-strings
+*/
+export function encodeBase64Unicode (str: string) {
+  return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (match, p1) => {
+    // @ts-ignore
+    return String.fromCharCode(`0x${p1}`)
+  }))
+}
