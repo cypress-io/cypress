@@ -4,7 +4,7 @@ describe('Specs Page', {
   viewportHeight: 768,
   viewportWidth: 1024,
 }, () => {
-  describe('Component Workflows', () => {
+  describe('Component Testing - Default specPattern', () => {
     context('with storybook', () => {
       beforeEach(() => {
         cy.scaffoldProject('no-specs')
@@ -279,7 +279,7 @@ describe('Specs Page', {
     })
   })
 
-  describe('E2E Workflows', () => {
+  describe('E2E Testing - Default specPattern', () => {
     beforeEach(() => {
       cy.scaffoldProject('no-specs-no-storybook')
       cy.openProject('no-specs-no-storybook')
