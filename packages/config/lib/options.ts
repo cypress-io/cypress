@@ -1,3 +1,4 @@
+import os from 'os'
 import validate from './validation'
 
 interface ResolvedConfigOption {
@@ -81,6 +82,11 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     defaultValue: 5,
     validation: validate.isNumber,
     canUpdateDuringTestTime: true,
+  }, {
+    name: 'arch',
+    defaultValue: () => os.arch(),
+    validation: validate.isString,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'baseUrl',
     defaultValue: null,
@@ -214,6 +220,11 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     defaultValue: 50,
     validation: validate.isNumber,
     canUpdateDuringTestTime: true,
+  }, {
+    name: 'platform',
+    defaultValue: () => os.platform(),
+    validation: validate.isString,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'pageLoadTimeout',
     defaultValue: 60000,
