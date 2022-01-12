@@ -1,12 +1,15 @@
 <template>
   <ExternalLink
-    :data-e2e="run.id"
+    :data-cy="`runCard-${run.id}`"
     class="border rounded bg-light-50 border-gray-100 mb-4 w-full
   block overflow-hidden hocus-default"
     :href="run.url || '#'"
     :use-default-hocus="false"
   >
-    <ListRowHeader :icon="icon">
+    <ListRowHeader
+      :icon="icon"
+      data-cy="run-card-icon"
+    >
       <template #header>
         {{ run.commitInfo?.summary }}
       </template>
@@ -15,8 +18,12 @@
           <span
             v-if="run.commitInfo?.authorName"
             class="flex mr-3 items-center"
+            data-cy="run-card-author"
           >
-            <i-cy-general-user_x16 class="mr-1 icon-dark-gray-500 icon-light-gray-200 icon-secondary-light-gray-200" />
+            <i-cy-general-user_x16
+              class="mr-1 icon-dark-gray-500 icon-light-gray-200 icon-secondary-light-gray-200"
+              data-cy="run-card-avatar"
+            />
             <span class="font-light text-sm text-gray-500">
               {{ run.commitInfo.authorName }}
             </span>
@@ -26,7 +33,10 @@
             class="flex mr-3 items-center"
           >
             <i-cy-tech-branch-h_x16 class="mr-1 icon-dark-gray-300" />
-            <span class="font-light text-sm text-gray-500">
+            <span
+              class="font-light text-sm text-gray-500"
+              data-cy="run-card-branch"
+            >
               {{ run.commitInfo.branch }}
             </span>
           </span>

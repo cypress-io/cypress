@@ -31,10 +31,10 @@
             />
           </span>
           <span
-            class="pr-4"
+            class="pr-24px text-16px leading-24px"
             :class="
               {
-                'pl-8': $slots['input-prefix'],
+                'pl-24px': $slots['input-prefix'],
               }
             "
           >
@@ -73,7 +73,7 @@
         >
           <ListboxOptions class="bg-white rounded shadow-lg ring-black mt-1 text-base w-full max-h-60 ring-1 ring-opacity-5 z-10 absolute overflow-auto sm:text-sm focus:outline-none">
             <ListboxOption
-              v-for="option in options"
+              v-for="option in props.options"
               :key="get(option, itemKey ?? '')"
               v-slot="{ active, selected }"
               as="ul"
@@ -168,6 +168,7 @@ const props = withDefaults(defineProps<{
   label?: string
   itemValue?: string // The key of the modelValue to render
   itemKey?: string
+  error?: boolean
 }>(), {
   placeholder: '',
   label: '',

@@ -64,7 +64,7 @@ describe('Config files error handling', () => {
     cy.openProject('pristine')
 
     cy.withCtx(async (ctx) => {
-      await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = { experimentalComponentTesting: true }')
+      await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = { experimentalComponentTesting: true, e2e: {} }')
     })
 
     cy.openProject('pristine')
@@ -80,7 +80,7 @@ describe('Config files error handling', () => {
     cy.openProject('pristine')
 
     cy.withCtx(async (ctx) => {
-      await ctx.actions.file.writeFileInProject('cypress.config.js', `module.exports = { supportFile: 'cypress/support.ts' }`)
+      await ctx.actions.file.writeFileInProject('cypress.config.js', `module.exports = { supportFile: 'cypress/support.ts', e2e: {} }`)
     })
 
     cy.openProject('pristine')

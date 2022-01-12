@@ -1,6 +1,6 @@
 <template>
-  <div class="h-full text-center flex flex-col justify-center max-w-714px mx-auto">
-    <h2 class="text-18px mb-40px text-gray-900">
+  <div class="flex flex-col h-full mx-auto text-center max-w-714px justify-center">
+    <h2 class="mb-40px text-18px text-gray-900">
       {{ t("runs.connect.title") }}
     </h2>
     <div class="flex gap-32px">
@@ -10,9 +10,9 @@
       >
         <component
           :is="block.icon"
-          class="h-120px w-120px mx-auto"
+          class="mx-auto h-120px w-120px"
         />
-        <p class="h-48px text-gray-600 mt-8px">
+        <p class="h-48px mt-8px text-gray-600">
           {{ block.description }}
         </p>
       </div>
@@ -27,7 +27,14 @@
     </Button>
     <LoginModal
       v-model="isLoginOpen"
-      :gql="gql"
+      :gql="props.gql"
+    />
+    <CloudConnectModals
+      v-if="isProjectConnectOpen"
+      :show="isProjectConnectOpen"
+      :gql="props.gql"
+      @cancel="isProjectConnectOpen = false"
+      @success="isProjectConnectOpen = false; emit('success')"
     />
   </div>
 </template>
@@ -41,6 +48,7 @@ import ChartIcon from '~icons/cy/illustration-chart_x120.svg'
 import UserIcon from '~icons/cy/user-outline_x16.svg'
 import ChainIcon from '~icons/cy/chain-link_x16.svg'
 import Button from '@cy/components/Button.vue'
+import CloudConnectModals from './modals/CloudConnectModals.vue'
 import LoginModal from '@cy/gql-components/topnav/LoginModal.vue'
 import { useI18n } from '@cy/i18n'
 import type { RunsConnectFragment } from '../generated/graphql'
@@ -49,18 +57,21 @@ const { t } = useI18n()
 
 gql`
 fragment RunsConnect on Query {
-  cloudViewer{
-    id
-  }
+  ...CloudConnectModals
   ...LoginModal
 }
 `
+
+const emit = defineEmits<{
+  (event: 'success'): void
+}>()
 
 const props = defineProps<{
   gql: RunsConnectFragment,
 }>()
 
 const isLoginOpen = ref(false)
+const isProjectConnectOpen = ref(false)
 const isLoggedIn = computed(() => Boolean(props.gql.cloudViewer?.id))
 
 function openConnection () {
@@ -69,6 +80,7 @@ function openConnection () {
     isLoginOpen.value = true
   } else {
     // if user is already logged in connect a cloud project
+    isProjectConnectOpen.value = true
   }
 }
 
