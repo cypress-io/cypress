@@ -1,3 +1,4 @@
+import assert from 'assert'
 import type { DataContext } from '..'
 import * as path from 'path'
 import globby, { GlobbyOptions } from 'globby'
@@ -24,6 +25,12 @@ export class FileDataSource {
       this.fileLoader.clear(absoluteFilePath)
       throw e
     })
+  }
+
+  readFileInProject (relativeFilePath: string) {
+    assert(this.ctx.currentProject, 'Cannot readFileInProject without currentProject')
+
+    return this.readFile(path.join(this.ctx.currentProject, relativeFilePath))
   }
 
   readJsonFile<Result = unknown> (absoluteFilePath: string) {

@@ -213,7 +213,7 @@ export class ProjectDataSource {
     this.ctx.lifecycleManager.closeWatcher(this._specWatcher)
   }
 
-  async getCurrentSpecByAbsolute (absolute: string) {
+  getCurrentSpecByAbsolute (absolute: string) {
     return this.ctx.project.specs.find((x) => x.absolute === absolute)
   }
 

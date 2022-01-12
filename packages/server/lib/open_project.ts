@@ -26,6 +26,7 @@ export class OpenProject {
   }
 
   resetOpenProject () {
+    this.projectBase?.__reset()
     this.projectBase = null
     this.relaunchBrowser = null
   }
@@ -61,17 +62,7 @@ export class OpenProject {
   }) {
     this._ctx = getCtx()
 
-    if (!this.projectBase && this._ctx.currentProject) {
-      await this.create(this._ctx.currentProject, {
-        ...this._ctx.modeOptions,
-        projectRoot: this._ctx.currentProject,
-        testingType: this._ctx.coreData.currentTestingType!,
-      }, options)
-    }
-
-    if (!this.projectBase) {
-      throw Error('Cannot launch runner if projectBase is undefined!')
-    }
+    assert(this.projectBase, 'Cannot launch runner if projectBase is undefined!')
 
     debug('resetting project state, preparing to launch browser %s for spec %o options %o',
       browser.name, spec, options)
@@ -200,14 +191,14 @@ export class OpenProject {
     return browsers.close()
   }
 
-  closeOpenProjectAndBrowsers () {
+  closeOpenProjectAndBrowsers (shouldCloseBrowser = true) {
     this.projectBase?.close().catch((e) => {
       this._ctx?.logTraceError(e)
     })
 
     this.resetOpenProject()
 
-    return this.closeBrowser()
+    return shouldCloseBrowser ? this.closeBrowser() : Promise.resolve()
   }
 
   close () {
@@ -219,8 +210,8 @@ export class OpenProject {
   // close existing open project if it exists, for example
   // if you are switching from CT to E2E or vice versa.
   // used by launchpad
-  async closeActiveProject () {
-    await this.closeOpenProjectAndBrowsers()
+  async closeActiveProject (shouldCloseBrowser = true) {
+    await this.closeOpenProjectAndBrowsers(shouldCloseBrowser)
   }
 
   _ctx?: DataContext
