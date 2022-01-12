@@ -89,4 +89,44 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
       .should('deep.equal', [false])
     })
   })
+
+  describe('no internet connection', () => {
+    afterEach(() => {
+      cy.goOnline()
+    })
+
+    it('renders correct components if there is no internet connection', () => {
+      cy.goOffline()
+
+      cy.mountFragment(LoginModalFragmentDoc, {
+        render: (gqlVal) => <div class="resize overflow-auto border-current border-1 h-700px"><LoginModal gql={gqlVal} modelValue={true} /></div>,
+      })
+
+      cy.contains('You have no internet connection')
+      cy.contains('a', 'Learn more.').should('have.attr', 'href', 'https://on.cypress.io/help-connect-to-api')
+    })
+
+    it('shows login action when the internet is back', () => {
+      cy.goOffline()
+
+      cy.mountFragment(LoginModalFragmentDoc, {
+        render: (gqlVal) => <div class="resize overflow-auto border-current border-1 h-700px"><LoginModal gql={gqlVal} modelValue={true} /></div>,
+      })
+
+      cy.contains('You have no internet connection')
+      cy.contains('a', 'Learn more.').should('have.attr', 'href', 'https://on.cypress.io/help-connect-to-api')
+
+      cy.goOnline()
+
+      cy.contains('h2', text.login.titleInitial).should('be.visible')
+
+      // begin the login process
+      cy.findByRole('button', { name: text.login.actionLogin }).click()
+
+      // ensure we reach "browser is opening" status on the CTA
+      cy.findByRole('button', { name: text.login.actionOpening })
+      .should('be.visible')
+      .and('be.disabled')
+    })
+  })
 })

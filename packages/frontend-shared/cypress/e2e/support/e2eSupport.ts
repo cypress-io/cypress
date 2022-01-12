@@ -9,6 +9,7 @@ import type { Browser, FoundBrowser, OpenModeOptions } from '@packages/types'
 import { browsers } from '@packages/types/src/browser'
 import type { E2ETaskMap } from '../e2ePluginSetup'
 import installCustomPercyCommand from '@packages/ui-components/cypress/support/customPercyCommand'
+import { goOffline, goOnline } from '../../support/onlineNetwork'
 
 configure({ testIdAttribute: 'data-cy' })
 
@@ -389,3 +390,5 @@ Cypress.Commands.add('findBrowsers', findBrowsers)
 Cypress.Commands.add('validateExternalLink', { prevSubject: ['optional', 'element'] }, validateExternalLink)
 
 installCustomPercyCommand()
+goOnline()
+goOffline()

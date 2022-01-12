@@ -31,10 +31,11 @@ const props = withDefaults(defineProps<{
   message: string,
   details?: string | null,
   modelValue: boolean
-  dismissible: boolean
+  dismissible?: boolean
 }>(), {
   modelValue: true,
   details: undefined,
+  dismissible: true,
 })
 
 const { modelValue: show } = useVModels(props, emits)
