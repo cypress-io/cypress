@@ -5,6 +5,7 @@
       <RunsPage
         v-else
         :gql="query.data.value"
+        @reexecute-runs-query="reexecuteRunsQuery"
       />
     </TransitionQuickFade>
   </div>
@@ -23,4 +24,8 @@ query Runs {
 }`
 
 const query = useQuery({ query: RunsDocument, requestPolicy: 'network-only' })
+
+function reexecuteRunsQuery () {
+  query.executeQuery()
+}
 </script>

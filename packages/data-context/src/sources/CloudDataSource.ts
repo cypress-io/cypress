@@ -84,6 +84,7 @@ export class CloudDataSource {
           if (!resolvedData) {
             resolvedData = res
 
+            // Ignore the error when there's no internet connection
             if (res.error?.networkError) {
               this.ctx.debug('executeRemoteGraphQL network error', res.error)
               dfd.resolve({ ...res, error: undefined, data: null })
@@ -92,7 +93,7 @@ export class CloudDataSource {
             } else {
               dfd.resolve(res)
             }
-          } else if (!_.isEqual(resolvedData.data, res.data) || !_.isEqual(resolvedData.error, res.error)) {
+          } else if ((!_.isEqual(resolvedData.data, res.data) || !_.isEqual(resolvedData.error, res.error)) && !res.error?.networkError) {
             if (res.error) {
               this.ctx.coreData.baseError = {
                 title: res.error.graphQLErrors?.[0]?.originalError?.name,
