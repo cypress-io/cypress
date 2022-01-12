@@ -49,6 +49,7 @@ export class ProjectActions {
       d.currentProject = null
       d.currentTestingType = null
       d.baseError = null
+      d.warnings = []
     })
 
     this.ctx.lifecycleManager.clearCurrentProject()

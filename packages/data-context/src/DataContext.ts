@@ -315,7 +315,6 @@ export class DataContext {
   }
 
   makeId<T extends NexusGenAbstractTypeMembers['Node']> (typeName: T, nodeString: string) {
-    // return `${typeName}:${nodeString}`
     return Buffer.from(`${typeName}:${nodeString}`).toString('base64')
   }
 

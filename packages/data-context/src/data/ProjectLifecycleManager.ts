@@ -76,7 +76,6 @@ export interface ProjectMetaState {
   hasSpecifiedConfigViaCLI: false | string
   hasMultipleConfigPaths: boolean
   needsCypressJsonMigration: boolean
-  // configuredTestingTypes: TestingType[]
 }
 
 const PROJECT_META_STATE: ProjectMetaState = {
@@ -88,7 +87,6 @@ const PROJECT_META_STATE: ProjectMetaState = {
   hasSpecifiedConfigViaCLI: false,
   hasValidConfigFile: false,
   needsCypressJsonMigration: false,
-  // configuredTestingTypes: [],
 }
 
 export class ProjectLifecycleManager {
@@ -284,8 +282,9 @@ export class ProjectLifecycleManager {
   }
 
   /**
-   * Setting the testing type should automatically handle any cleanup of existing
-   * processes and load the config / initialize the
+   * Setting the testing type should automatically handle cleanup of existing
+   * processes and load the config / initialize the plugin process associated
+   * with the chosen testing type.
    */
   setCurrentTestingType (testingType: TestingType | null) {
     this.ctx.update((d) => {
@@ -302,6 +301,8 @@ export class ProjectLifecycleManager {
       return
     }
 
+    // If we've chosen e2e and we don't have a config file, we can scaffold one
+    // without any sort of onboarding wizard.
     if (!this.metaState.hasValidConfigFile) {
       if (testingType === 'e2e' && !this.ctx.isRunMode) {
         this.ctx.actions.wizard.scaffoldTestingType().catch(this.onLoadError)
@@ -385,7 +386,7 @@ export class ProjectLifecycleManager {
 
   /**
    * Equivalent to the legacy "config.get()",
-   * this sources the config from all the
+   * this sources the config from the various config sources
    */
   async getFullInitialConfig (options: Partial<AllModeOptions> = this.ctx.modeOptions, withBrowsers = true): Promise<FullConfig> {
     if (this._cachedFullConfig) {
