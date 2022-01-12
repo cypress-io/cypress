@@ -4,10 +4,8 @@ import { CodeGenTypeEnum } from '../enumTypes/gql-CodeGenTypeEnum'
 import { TestingTypeEnum } from '../enumTypes/gql-WizardEnums'
 import { FileDetailsInput } from '../inputTypes/gql-FileDetailsInput'
 import { WizardUpdateInput } from '../inputTypes/gql-WizardUpdateInput'
-import { CodeGenResultWithFileParts } from './gql-CodeGenResult'
 import { CurrentProject } from './gql-CurrentProject'
-import { GeneratedSpec } from './gql-GeneratedSpec'
-import { Query } from '.'
+import { Query, ScaffoldedFile } from '.'
 
 export const mutation = mutationType({
   definition (t) {
@@ -173,7 +171,7 @@ export const mutation = mutationType({
     })
 
     t.field('generateSpecFromSource', {
-      type: GeneratedSpec,
+      type: ScaffoldedFile,
       description: 'Generate spec from source',
       args: {
         codeGenCandidate: nonNull(stringArg()),
@@ -185,7 +183,7 @@ export const mutation = mutationType({
     })
 
     t.nonNull.list.nonNull.field('scaffoldIntegration', {
-      type: CodeGenResultWithFileParts,
+      type: ScaffoldedFile,
       resolve: (src, args, ctx) => {
         return ctx.actions.project.scaffoldIntegration()
       },
