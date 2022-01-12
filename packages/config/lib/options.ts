@@ -1,5 +1,6 @@
 import os from 'os'
 import validate from './validation'
+import pkg from '@packages/root'
 
 interface ResolvedConfigOption {
   name: string
@@ -469,6 +470,11 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     defaultValue: '/__socket.io',
     validation: validate.isString,
     isInternal: true,
+    canUpdateDuringTestTime: false,
+  }, {
+    name: 'version',
+    defaultValue: pkg.version,
+    validation: validate.isString,
     canUpdateDuringTestTime: false,
   }, {
     name: 'xhrRoute',
