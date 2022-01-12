@@ -191,14 +191,14 @@ export class OpenProject {
     return browsers.close()
   }
 
-  closeOpenProjectAndBrowsers (shouldCloseBrowser = true) {
+  closeOpenProjectAndBrowsers () {
     this.projectBase?.close().catch((e) => {
       this._ctx?.logTraceError(e)
     })
 
     this.resetOpenProject()
 
-    return shouldCloseBrowser ? this.closeBrowser() : Promise.resolve()
+    return this.closeBrowser()
   }
 
   close () {
@@ -210,8 +210,8 @@ export class OpenProject {
   // close existing open project if it exists, for example
   // if you are switching from CT to E2E or vice versa.
   // used by launchpad
-  async closeActiveProject (shouldCloseBrowser = true) {
-    await this.closeOpenProjectAndBrowsers(shouldCloseBrowser)
+  async closeActiveProject () {
+    await this.closeOpenProjectAndBrowsers()
   }
 
   _ctx?: DataContext
