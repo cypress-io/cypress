@@ -67,7 +67,7 @@ function run (ipc, configFile, projectRoot) {
   const isValidDevServer = (config) => {
     const { devServer } = config
 
-    if (devServer && (typeof devServer.devServer === 'function' || typeof devServer === 'function' || typeof devServer.then !== 'function')) {
+    if (devServer && (typeof devServer.devServer === 'function' || typeof devServer === 'function' || typeof devServer.then === 'function')) {
       return true
     }
 

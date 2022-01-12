@@ -24,6 +24,12 @@ describe('Launchpad: Onboarding Flow', () => {
     cy.findByText('I\'ve installed them').click()
     cy.findByText('We added the following files to your project.')
     cy.findByText('Continue').click()
+    cy.withCtx(async (ctx) => {
+      return ctx.file.readFileInProject('cypress.config.js')
+    }).then((str) => {
+      cy.log(str)
+    })
+
     cy.findByText('Choose a Browser', { timeout: 10000 })
   })
 
