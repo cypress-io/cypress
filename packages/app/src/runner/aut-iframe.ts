@@ -88,7 +88,7 @@ export class AutIframe {
   visitBlank = ({ type }: { type?: 'session' | 'session-lifecycle' }) => {
     return new Promise<void>((resolve) => {
       if (!this.$iframe) {
-        return
+        throw Error(`Cannot visitBlank without this.$iframe`)
       }
 
       this.$iframe[0].src = 'about:blank'

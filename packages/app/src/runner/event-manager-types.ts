@@ -1,4 +1,5 @@
 import type { FileDetails } from '@packages/types'
+import type { ScriptError } from '../store'
 
 interface BeforeScreenshot {
   appOnly: boolean
@@ -23,4 +24,5 @@ export type LocalBusEmitsMap = {
 
 export type DriverToLocalBus = {
   'visit:blank': { type?: 'session' | 'session-lifecycle' }
+  'visit:failed': ScriptError
 }

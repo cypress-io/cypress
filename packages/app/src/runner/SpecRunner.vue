@@ -271,7 +271,11 @@ onMounted(() => {
   })
 
   eventManager.on('script:error', (err) => {
-    autStore.scriptError = err
+    autStore.setScriptError(err)
+  })
+
+  eventManager.on('visit:failed', (err) => {
+    autStore.setScriptError(err)
   })
 
   eventManager.on('visit:blank', ({ type }) => {
