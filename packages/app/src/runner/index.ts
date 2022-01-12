@@ -17,7 +17,7 @@
 import { watchEffect } from 'vue'
 import { getMobxRunnerStore, initializeMobxStore, useAutStore } from '../store'
 import { injectBundle } from './injectBundle'
-import type { BaseSpec } from '@packages/types/src/spec'
+import type { SpecFile } from '@packages/types/src/spec'
 import { UnifiedReporterAPI } from './reporter'
 import { getRunnerElement, empty } from './utils'
 import { IframeModel } from './iframe-model'
@@ -187,12 +187,12 @@ export async function teardown () {
  * Cypress on it.
  *
  */
-function runSpecCT (spec: BaseSpec) {
+function runSpecCT (spec: SpecFile) {
   // TODO: figure out how to manage window.config.
   const config = window.UnifiedRunner.config
 
   // this is how the Cypress driver knows which spec to run.
-  config.spec = spec
+  config.spec = setSpecForDriver(spec)
 
   // creates a new instance of the Cypress driver for this spec,
   // initializes a bunch of listeners
@@ -229,17 +229,26 @@ function createSpecIFrame (specSrc: string) {
   return el
 }
 
+// this is how the Cypress driver knows which spec to run.
+// we change name internally to be the relative path, and
+// the `spec.name` property is now `spec.baseName`.
+// but for backwards compatibility with the Cypress.spec API
+// just assign `name` to be `baseName`.
+function setSpecForDriver (spec: SpecFile) {
+  return { ...spec, name: spec.baseName }
+}
+
 /**
  * Set up an E2E spec by creating a fresh AUT for the spec to evaluate under,
  * a Spec IFrame to load the spec's source code, and
  * initialize Cypress on the AUT.
  */
-function runSpecE2E (spec: BaseSpec) {
+function runSpecE2E (spec: SpecFile) {
   // TODO: manage config with GraphQL, don't put it on window.
   const config = window.UnifiedRunner.config
 
   // this is how the Cypress driver knows which spec to run.
-  config.spec = spec
+  config.spec = setSpecForDriver(spec)
 
   // creates a new instance of the Cypress driver for this spec,
   // initializes a bunch of listeners
@@ -340,7 +349,7 @@ async function initialize () {
  * 5. Setup the spec. This involves a few things, see the `runSpecCT` function's
  *    description for more information.
  */
-async function executeSpec (spec: BaseSpec) {
+async function executeSpec (spec: SpecFile) {
   await teardownSpec()
 
   const mobxRunnerStore = getMobxRunnerStore()

@@ -86,7 +86,7 @@ import { REPORTER_ID, RUNNER_ID, getRunnerElement, getReporterElement, empty } f
 import InlineSpecList from '../specs/InlineSpecList.vue'
 import { getAutIframeModel, getEventManager, UnifiedRunnerAPI } from '../runner'
 import { useAutStore, useRunnerUiStore } from '../store'
-import type { BaseSpec, FileDetails } from '@packages/types'
+import type { FileDetails, SpecFile } from '@packages/types'
 import SnapshotControls from './SnapshotControls.vue'
 import SpecRunnerHeader from './SpecRunnerHeader.vue'
 import HideDuringScreenshot from './screenshot/HideDuringScreenshot.vue'
@@ -139,7 +139,7 @@ mutation OpenFileInIDE ($input: FileDetailsInput!) {
 
 const props = defineProps<{
   gql: SpecRunnerFragment
-  activeSpec: BaseSpec
+  activeSpec: SpecFile
 }>()
 
 const eventManager = getEventManager()
