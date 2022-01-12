@@ -765,12 +765,13 @@ export class ProjectLifecycleManager {
     // notify the frontend & refetch approach
     const toLaunchpad = this.ctx.emitter.toLaunchpad
 
+    this.ctx.emitter.toLaunchpad = () => {}
+
     return promise.then(async (val) => {
       if (this._eventsIpcResult.value === promise) {
         // If we're handling the events, we don't want any notifications
         // to send to the client until the `.finally` of this block.
         // TODO: Remove when GraphQL Subscriptions lands
-        this.ctx.emitter.toLaunchpad = () => {}
         await this.handleSetupTestingTypeReply(ipc, val)
         this._eventsIpcResult = { state: 'loaded', value: val }
       }
