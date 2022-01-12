@@ -50,16 +50,16 @@ module.exports = {
     })
   },
 
-  handleMultidomainIframe (req, res) {
-    const iframePath = cwd('lib', 'html', 'multidomain-iframe.html')
+  handleMultiDomainIframe (req, res) {
+    const iframePath = cwd('lib', 'html', 'multi-domain-iframe.html')
     const domain = decodeURI(req.params.domain)
 
     const iframeOptions = {
-      domain: '127.0.0.1',
+      domain,
       title: `Cypress for ${domain}`,
     }
 
-    debug('multidomain iframe with options %o', iframeOptions)
+    debug('multi-domain iframe with options %o', iframeOptions)
 
     res.render(iframePath, iframeOptions)
   },

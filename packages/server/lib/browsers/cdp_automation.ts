@@ -178,14 +178,17 @@ export class CdpAutomation {
   constructor (private sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn, private automation: Automation) {
     onFn('Network.requestWillBeSent', this.onNetworkRequestWillBeSent)
     onFn('Network.responseReceived', this.onResponseReceived)
-    sendDebuggerCommandFn('Network.enable', {
+  }
+
+  async enable () {
+    await this.sendDebuggerCommandFn('Network.enable', {
       maxTotalBufferSize: 0,
       maxResourceBufferSize: 0,
       maxPostDataSize: 0,
     })
   }
 
-  private onNetworkRequestWillBeSent = (params: Protocol.Network.RequestWillBeSentEvent) => {
+  private onNetworkRequestWillBeSent = async (params: Protocol.Network.RequestWillBeSentEvent) => {
     debugVerbose('received networkRequestWillBeSent %o', params)
     let url = params.request.url
 

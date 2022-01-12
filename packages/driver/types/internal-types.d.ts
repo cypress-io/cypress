@@ -1,8 +1,15 @@
 // NOTE: this is for internal Cypress types that we don't want exposed in the public API but want for development
 // TODO: find a better place for this
 
+interface InternalWindowLoadDetails {
+  type: 'same:domain' | 'cross:domain' | 'cross:domain:failure'
+  error?: Error
+  window?: AUTWindow
+}
+
 declare namespace Cypress {
   interface Actions {
+    (action: 'internal:window:load', fn: (details: InternalWindowLoadDetails) => void)
     (action: 'net:stubbing:event', frame: any)
     (action: 'request:event', data: any)
   }
@@ -77,6 +84,10 @@ declare namespace Cypress {
     state: Cypress.state
   }
 
+  interface InternalConfig {
+    (k: keyof ResolvedConfigOptions, v?: any): any
+  }
+
   // Extend Cypress.state properties here
   interface ResolvedConfigOptions {
     $autIframe: JQuery<HTMLIFrameElement>
@@ -88,3 +99,6 @@ type AliasedRequest = {
   alias: string
   request: any
 }
+
+// utility types
+type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>

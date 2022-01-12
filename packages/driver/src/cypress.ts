@@ -39,6 +39,7 @@ import ProxyLogging from './cypress/proxy-logging'
 import * as $Events from './cypress/events'
 import $Keyboard from './cy/keyboard'
 import * as resolvers from './cypress/resolvers'
+import { PrimaryDomainCommunicator } from './multi-domain/communicator'
 
 const debug = debugFn('cypress:driver:cypress')
 
@@ -66,6 +67,7 @@ class $Cypress {
     this.Commands = null
     this.$autIframe = null
     this.onSpecReady = null
+    this.multiDomainCommunicator = new PrimaryDomainCommunicator()
 
     this.events = $Events.extend(this)
     this.$ = jqueryProxyFn.bind(this)
@@ -551,6 +553,11 @@ class $Cypress {
         return this.emit('form:submitted', args[0])
 
       case 'app:window:load':
+        this.emit('internal:window:load', {
+          type: 'same:domain',
+          window: args[0],
+        })
+
         return this.emit('window:load', args[0])
 
       case 'app:window:before:unload':
@@ -570,33 +577,6 @@ class $Cypress {
 
       case 'spec:script:error':
         return this.emit('script:error', ...args)
-
-      // multidomain messages
-      // TODO: consider moving these elsewhere if they grow too
-      // large in number
-      case 'cy:expect:domain':
-        return this.emit('expect:domain', args[0])
-
-      case 'runner:cross:domain:bridge:ready':
-        return this.emit('cross:domain:bridge:ready')
-
-      case 'runner:cross:domain:window:load':
-        return this.emit('cross:domain:window:load')
-
-      case 'runner:cross:domain:ran:domain:fn':
-        return this.emit('cross:domain:ran:domain:fn')
-
-      case 'runner:cross:domain:queue:finished':
-        return this.emit('cross:domain:queue:finished')
-
-      case 'runner:cross:domain:command:enqueued':
-        return this.emit('cross:domain:command:enqueued', ...args)
-
-      case 'runner:cross:domain:command:update':
-        return this.emit('cross:domain:command:update', ...args)
-
-      case 'cy:cross:domain:message':
-        return this.emit('cross:domain:message', ...args)
 
       default:
         return

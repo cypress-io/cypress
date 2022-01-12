@@ -26,9 +26,9 @@ const driverToReporterEvents = 'paused session:add'.split(' ')
 const driverToLocalAndReporterEvents = 'run:start run:end'.split(' ')
 const driverToSocketEvents = 'backend:request automation:request mocha recorder:frame'.split(' ')
 const driverTestEvents = 'test:before:run:async test:after:run'.split(' ')
-const driverToLocalEvents = 'viewport:changed config stop url:changed page:loading visit:failed visit:blank expect:domain'.split(' ')
+const driverToLocalEvents = 'viewport:changed config stop url:changed page:loading visit:failed visit:blank'.split(' ')
 const socketRerunEvents = 'runner:restart watched:file:changed'.split(' ')
-const socketToDriverEvents = 'net:stubbing:event request:event script:error cross:domain:html:received'.split(' ')
+const socketToDriverEvents = 'net:stubbing:event request:event script:error'.split(' ')
 const localToReporterEvents = 'reporter:log:add reporter:log:state:changed reporter:log:remove'.split(' ')
 
 const localBus = new EventEmitter()
@@ -128,6 +128,10 @@ export const eventManager = {
       ws.on(event, (...args) => {
         Cypress.emit(event, ...args)
       })
+    })
+
+    ws.on('cross:domain:delaying:html', () => {
+      Cypress.multiDomainCommunicator.emit('delaying:html')
     })
 
     _.each(localToReporterEvents, (event) => {
@@ -313,33 +317,6 @@ export const eventManager = {
       this._clearAllCookies()
       this._setUnload()
     })
-
-    top.addEventListener('message', (event) => {
-      // currently used for tests, can be removed later
-      if (event.data && event.data.actual) return
-
-      switch (event.data.event) {
-        case 'cross:domain:window:before:load':
-          this.crossDomainDriverWindow = event.source
-
-          return
-        case 'cross:domain:window:load':
-          return Cypress.action('runner:cross:domain:window:load')
-        case 'cross:domain:bridge:ready':
-          return Cypress.action('runner:cross:domain:bridge:ready')
-        case 'cross:domain:ran:domain:fn':
-          return Cypress.action('runner:cross:domain:ran:domain:fn')
-        case 'cross:domain:queue:finished':
-          return Cypress.action('runner:cross:domain:queue:finished')
-        case 'cross:domain:command:enqueued':
-          return Cypress.action('runner:cross:domain:command:enqueued', event.data.data)
-        case 'cross:domain:command:update':
-          return Cypress.action('runner:cross:domain:command:update', event.data.data)
-        default:
-          // eslint-disable-next-line no-console
-          console.log('Unexpected postMessage:', event.data)
-      }
-    }, false)
   },
 
   start (config) {
@@ -528,8 +505,14 @@ export const eventManager = {
       }
     })
 
-    Cypress.on('cross:domain:message', (data) => {
-      this.crossDomainDriverWindow.postMessage(data, '*')
+    Cypress.multiDomainCommunicator.initialize(window)
+
+    Cypress.multiDomainCommunicator.on('window:load', () => {
+      Cypress.emit('internal:window:load', { type: 'cross:domain' })
+    })
+
+    Cypress.multiDomainCommunicator.on('expect:domain', (domain) => {
+      localBus.emit('expect:domain', domain)
     })
   },
 
@@ -624,7 +607,7 @@ export const eventManager = {
   },
 
   notifyCrossDomainBridgeReady () {
-    Cypress.emit('cross:domain:bridge:ready')
+    Cypress.multiDomainCommunicator.emit('bridge:ready')
   },
 
   focusTests () {

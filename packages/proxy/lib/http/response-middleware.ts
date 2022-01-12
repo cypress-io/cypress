@@ -48,8 +48,6 @@ function getNodeCharsetFromResponse (headers: IncomingHttpHeaders, body: Buffer)
 
 function reqMatchesOriginPolicy (req: CypressIncomingRequest, remoteState) {
   if (remoteState.strategy === 'http') {
-    if (req.proxiedUrl.includes('127.0.0.1:3501')) return true
-
     return cors.urlMatchesOriginPolicyProps(req.proxiedUrl, remoteState.props)
   }
 
@@ -227,21 +225,22 @@ const PatchExpressSetHeader: ResponseMiddleware = function () {
   this.next()
 }
 
-const MaybeDelayForMultidomain: ResponseMiddleware = function () {
+const MaybeDelayForMultiDomain: ResponseMiddleware = function () {
+  const isCrossDomain = !reqMatchesOriginPolicy(this.req, this.getRemoteState())
   const isHTML = resContentTypeIs(this.incomingRes, 'text/html')
   const isRenderedHTML = reqWillRenderHtml(this.req)
+  const isAUTFrame = this.req.isAUTFrame
 
-  // in the future, this will be any cross-origin url instead of
-  // a hard-coded one
-  if (this.req.proxiedUrl.includes('127.0.0.1:3501') && (isHTML || isRenderedHTML)) {
+  if (isCrossDomain && isAUTFrame && (isHTML || isRenderedHTML)) {
     this.debug('is cross-domain, delay until domain:ready event')
 
     this.serverBus.once('ready:for:domain', () => {
       this.debug('ready for domain, let it go')
+
       this.next()
     })
 
-    this.serverBus.emit('delaying:cross:domain:html')
+    this.serverBus.emit('cross:domain:delaying:html')
 
     return
   }
@@ -271,17 +270,18 @@ const SetInjectionLevel: ResponseMiddleware = function () {
     }
 
     const isHTML = resContentTypeIs(this.incomingRes, 'text/html')
+    const isAUTFrame = this.req.isAUTFrame
 
-    if (!isHTML || !isReqMatchOriginPolicy) {
-      this.debug('- no injection (%s, %s)', isHTML ? 'is html' : 'not html', isReqMatchOriginPolicy ? 'origin match' : 'no origin match')
+    if (!isReqMatchOriginPolicy && isAUTFrame && (isHTML || isRenderedHTML)) {
+      this.debug('- multi-domain injection')
 
-      return false
+      return 'fullMultiDomain'
     }
 
-    if (this.req.proxiedUrl.includes('127.0.0.1:3501')) {
-      this.debug('- multidomain injection')
+    if (!isHTML || !isReqMatchOriginPolicy && !isAUTFrame) {
+      debug('- no injection (not html)')
 
-      return 'fullMultidomain'
+      return false
     }
 
     if (this.res.isInitial) {
@@ -301,11 +301,11 @@ const SetInjectionLevel: ResponseMiddleware = function () {
     return 'partial'
   }
 
-  if (this.res.wantsInjection) {
+  if (this.res.wantsInjection != null) {
     this.debug('- already has injection: %s', this.res.wantsInjection)
   }
 
-  if (!this.res.wantsInjection) {
+  if (this.res.wantsInjection == null) {
     this.res.wantsInjection = getInjectionLevel()
   }
 
@@ -438,7 +438,7 @@ const MaybeInjectHtml: ResponseMiddleware = function () {
     const nodeCharset = getNodeCharsetFromResponse(this.incomingRes.headers, body)
     const decodedBody = iconv.decode(body, nodeCharset)
     const injectedBody = await rewriter.html(decodedBody, {
-      domainName: this.getRemoteState().domainName,
+      domainName: cors.getDomainNameFromUrl(this.req.proxiedUrl),
       wantsInjection: this.res.wantsInjection,
       wantsSecurityRemoved: this.res.wantsSecurityRemoved,
       isHtml: isHtml(this.incomingRes),
@@ -497,7 +497,7 @@ export default {
   AttachPlainTextStreamFn,
   InterceptResponse,
   PatchExpressSetHeader,
-  MaybeDelayForMultidomain,
+  MaybeDelayForMultiDomain,
   SetInjectionLevel,
   OmitProblematicHeaders,
   MaybePreventCaching,

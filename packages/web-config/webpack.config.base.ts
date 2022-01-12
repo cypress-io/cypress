@@ -262,10 +262,10 @@ export const getSimpleConfig = () => ({
         },
       },
       // FIXME: we don't actually want or need wasm support in the
-      // multidomain bundle that uses this config, but we need to refactor
+      // multi-domain bundle that uses this config, but we need to refactor
       // the driver so that it doesn't load the wasm code in
       // packages/driver/src/cypress/source_map_utils.js when creating
-      // the multidomain bundle. for now, this is necessary so the build
+      // the multi-domain bundle. for now, this is necessary so the build
       // doesn't fail
       {
         test: /\.wasm$/,

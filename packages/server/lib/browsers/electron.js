@@ -35,7 +35,7 @@ const tryToCall = function (win, method) {
   }
 }
 
-const _getAutomation = function (win, options, parent) {
+const _getAutomation = async function (win, options, parent) {
   const sendCommand = Bluebird.method((...args) => {
     return tryToCall(win, () => {
       return win.webContents.debugger.sendCommand
@@ -52,6 +52,8 @@ const _getAutomation = function (win, options, parent) {
   }
 
   const automation = new CdpAutomation(sendCommand, on, parent)
+
+  await automation.enable()
 
   if (!options.onScreencastFrame) {
     // after upgrading to Electron 8, CDP screenshots can hang if a screencast is not also running
@@ -185,7 +187,9 @@ module.exports = {
 
     return this._launch(win, url, automation, preferences)
     .tap(_maybeRecordVideo(win.webContents, preferences))
-    .tap(() => automation.use(_getAutomation(win, preferences, automation)))
+    .tap(async () => {
+      automation.use(await _getAutomation(win, preferences, automation))
+    })
   },
 
   _launchChild (e, url, parent, projectRoot, state, options, automation) {
@@ -256,6 +260,8 @@ module.exports = {
       return this._enableDebugger(win.webContents)
     })
     .then(() => {
+      this._listenToOnBeforeHeaders(win)
+
       return this._handleDownloads(win, options.downloadsFolder, automation)
     })
     .return(win)
@@ -340,6 +346,38 @@ module.exports = {
     return win.webContents.debugger.sendCommand('Page.setDownloadBehavior', {
       behavior: 'allow',
       downloadPath: dir,
+    })
+  },
+
+  _listenToOnBeforeHeaders (win) {
+    const isFirstLevelIFrame = (frame) => {
+      if (frame.parent && !frame.parent.parent) return true
+
+      return false
+    }
+
+    // adds a header to the request to mark it as a request for the AUT frame
+    // itself, so the proxy can utilize that for injection purposes
+    win.webContents.session.webRequest.onBeforeSendHeaders((details, cb) => {
+      if (
+        // isn't an iframe
+        details.resourceType !== 'subFrame'
+        // the top-level frame or a nested frame
+        || !isFirstLevelIFrame(details.frame)
+        // is the spec frame, not the AUT
+        || details.url.includes('__cypress')
+      ) {
+        cb({})
+
+        return
+      }
+
+      cb({
+        requestHeaders: {
+          ...details.requestHeaders,
+          'X-Cypress-Is-AUT-Frame': 'true',
+        },
+      })
     })
   },
 

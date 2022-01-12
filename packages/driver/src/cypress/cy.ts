@@ -138,8 +138,8 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
   isStable: IStability['isStable']
   whenStable: IStability['whenStable']
-  isAnticipatingMultidomain: IStability['isAnticipatingMultidomain']
-  whenStableOrAnticipatingMultidomain: IStability['whenStableOrAnticipatingMultidomain']
+  isAnticipatingMultiDomain: IStability['isAnticipatingMultiDomain']
+  whenStableOrAnticipatingMultiDomain: IStability['whenStableOrAnticipatingMultiDomain']
 
   assert: IAssertions['assert']
   verifyUpcomingAssertions: IAssertions['verifyUpcomingAssertions']
@@ -251,8 +251,8 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
     this.isStable = stability.isStable
     this.whenStable = stability.whenStable
-    this.isAnticipatingMultidomain = stability.isAnticipatingMultidomain
-    this.whenStableOrAnticipatingMultidomain = stability.whenStableOrAnticipatingMultidomain
+    this.isAnticipatingMultiDomain = stability.isAnticipatingMultiDomain
+    this.whenStableOrAnticipatingMultiDomain = stability.whenStableOrAnticipatingMultiDomain
 
     const assertions = createAssertions(Cypress, this)
 
@@ -359,7 +359,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
     extendEvents(this)
 
-    Cypress.on('enqueue:command', (attrs) => {
+    Cypress.on('enqueue:command', (attrs: Cypress.EnqueuedCommand) => {
       this.enqueue(attrs)
     })
   }
@@ -471,6 +471,10 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   }
 
   initialize ($autIframe) {
+    const signalStable = () => {
+      this.isStable(true, 'load')
+    }
+
     this.state('$autIframe', $autIframe)
 
     // dont need to worry about a try/catch here
@@ -519,21 +523,45 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
         // about:blank in a visit, we do need these
         this.contentWindowListeners(autWindow)
 
-        this.Cypress.action('app:window:load', this.state('window'))
+        // stability is signalled after the window:load event to give event
+        // listeners time to be invoked prior to moving on, but not if
+        // there is a cross-origin error and the multi-domain APIs are
+        // not utilized
+        try {
+          this.Cypress.action('app:window:load', this.state('window'))
 
-        // we are now stable again which is purposefully
-        // the last event we call here, to give our event
-        // listeners time to be invoked prior to moving on
-        this.isStable(true, 'load')
-      } catch (err) {
+          signalStable()
+        } catch (err: any) {
+          // this catches errors thrown by user-registered event handlers
+          // for `window:load`. this is used in the `catch` below so they
+          // aren't mistaken as cross-origin errors
+          err.isFromWindowLoadEvent = true
+
+          signalStable()
+
+          throw err
+        }
+      } catch (err: any) {
+        if (err.isFromWindowLoadEvent) {
+          delete err.isFromWindowLoadEvent
+
+          // the user's window:load handler threw an error, so propagate that
+          // and fail the test
+          const r = this.state('reject')
+
+          if (r) {
+            return r(err)
+          }
+        }
+
         // we failed setting the remote window props which
         // means the page navigated to a different domain
 
         // we expect a cross-origin error and are setting things up
         // elsewhere to handle running cross-domain, so don't fail
         // because of it
-        if (this.state('anticipatingMultidomain')) {
-          this.isStable(true, 'load')
+        if (this.state('readyForMultiDomain')) {
+          signalStable()
 
           return
         }
@@ -550,12 +578,15 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
           e = onpl(e)
         }
 
-        // and now reject with it
-        const r = this.state('reject')
+        this.Cypress.emit('internal:window:load', {
+          type: 'cross:domain:failure',
+          error: e,
+        })
 
-        if (r) {
-          return r(e)
-        }
+        // need async:true since this is outside the command queue promise
+        // chain and cy.fail needs to know to use the reference to the
+        // last command to reject it
+        this.fail(e, { async: true })
       }
     })
   }
@@ -902,6 +933,9 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
             // TODO: handle no longer error when ended early
             cy.doneEarly()
 
+            // if using multi-domain, unbind any listeners waiting for a done() callback to come from cross domain
+            // @ts-ignore
+            Cypress.multiDomainCommunicator.emit('unbind:done:called')
             originalDone(err)
 
             // return null else we there are situations
@@ -1100,7 +1134,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     })
   }
 
-  private enqueue (obj) {
+  private enqueue (obj: PartialBy<Cypress.EnqueuedCommand, 'id'>) {
     // if we have a nestedIndex it means we're processing
     // nested commands and need to insert them into the
     // index past the current index as opposed to

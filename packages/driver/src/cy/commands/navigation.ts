@@ -345,15 +345,13 @@ const stabilityChanged = (Cypress, state, config, stable) => {
     debug('waiting for window:load')
 
     return new Promise((resolve) => {
-      const onWindowLoad = (e) => {
-        cy.off('cross:domain:window:load', onCrossDomainWindowLoad)
-
+      const onWindowLoad = (win) => {
         // this prevents a log occurring when we navigate to about:blank inbetween tests
         if (!state('duringUserTestExecution')) return
 
         cy.state('onPageLoadErr', null)
 
-        if (e.window.location.href === 'about:blank') {
+        if (win.location.href === 'about:blank') {
           // we treat this as a system log since navigating to about:blank must have been caused by Cypress
           options._log.set({ message: '', name: 'Clear Page', type: 'system' }).snapshot().end()
         } else {
@@ -364,15 +362,33 @@ const stabilityChanged = (Cypress, state, config, stable) => {
       }
 
       const onCrossDomainWindowLoad = () => {
-        cy.off('window:load', onWindowLoad)
-
         options._log.set('message', '--page loaded--').snapshot().end()
 
         resolve()
       }
 
-      cy.once('window:load', onWindowLoad)
-      cy.once('cross:domain:window:load', onCrossDomainWindowLoad)
+      const onCrossDomainFailure = (err) => {
+        options._log.set('message', '--page loaded--').snapshot().end()
+        options._log.set('state', 'failed')
+        options._log.set('error', err)
+
+        resolve()
+      }
+
+      const onInternalWindowLoad = (details) => {
+        switch (details.type) {
+          case 'same:domain':
+            return onWindowLoad(details.window)
+          case 'cross:domain':
+            return onCrossDomainWindowLoad()
+          case 'cross:domain:failure':
+            return onCrossDomainFailure(details.error)
+          default:
+            throw new Error(`Unexpected internal:window:load type: ${details?.type}`)
+        }
+      }
+
+      cy.once('internal:window:load', onInternalWindowLoad)
     })
   }
 

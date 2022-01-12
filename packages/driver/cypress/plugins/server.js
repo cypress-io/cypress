@@ -190,9 +190,9 @@ const createApp = (port) => {
     .send('<html><body>server error</body></html>')
   })
 
-  app.get('/cypress_multidomain_runner.js', (req, res) => {
+  app.get('/cypress_multi_domain_runner.js', (req, res) => {
     res.type('application/javascript')
-    res.sendFile(getPathToDist('runner', 'cypress_multidomain_runner.js'))
+    res.sendFile(getPathToDist('runner', 'cypress_multi_domain_runner.js'))
   })
 
   let _var = ''

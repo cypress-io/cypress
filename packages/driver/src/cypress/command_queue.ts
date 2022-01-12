@@ -135,7 +135,7 @@ export class CommandQueue extends Queue<Command> {
     this.state('current', command)
     this.state('chainerId', command.get('chainerId'))
 
-    return this.stability.whenStableOrAnticipatingMultidomain(() => {
+    return this.stability.whenStableOrAnticipatingMultiDomain(() => {
       this.state('nestedIndex', this.state('index'))
 
       return command.get('args')
@@ -256,6 +256,18 @@ export class CommandQueue extends Queue<Command> {
     let pause = false
 
     const next = () => {
+      // start at 0 index if one is not already set
+      let index = this.state('index') || this.state('index', 0)
+
+      // if at the end of the queue when not auto-running, pause will be true
+      // but since there's nothing left in the queue to move things forward,
+      // ignore and reset the pause, then let the queue finish
+      if (!autoRun && pause && !this.at(index)) {
+        pause = false
+
+        return next()
+      }
+
       // when running in a secondary domain (SD), the primary domain (PD)
       // has proxy commands that represent the real commands run in the SD.
       // for everything to sync up properly, the PD controls the running of
@@ -279,9 +291,6 @@ export class CommandQueue extends Queue<Command> {
       if (this.stopped) {
         return
       }
-
-      // start at 0 index if we dont have one
-      let index = this.state('index') || this.state('index', 0)
 
       const command = this.at(index)
 
@@ -315,7 +324,7 @@ export class CommandQueue extends Queue<Command> {
         // finished running if the application under
         // test is no longer stable because we cannot
         // move onto the next test until its finished
-        return this.stability.whenStableOrAnticipatingMultidomain(() => {
+        return this.stability.whenStableOrAnticipatingMultiDomain(() => {
           Cypress.action('cy:command:queue:end')
 
           return null

@@ -88,7 +88,7 @@ const multiDomainConfig: webpack.Configuration = {
   mode: 'development',
   ...getSimpleConfig(),
   entry: {
-    cypress_multidomain_runner: [path.resolve(__dirname, 'multidomain/index.js')],
+    cypress_multi_domain_runner: [path.resolve(__dirname, 'multi-domain/index.js')],
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
@@ -110,11 +110,11 @@ const mainInjectionConfig: webpack.Configuration = {
 }
 
 // @ts-ignore
-const multidomainInjectionConfig: webpack.Configuration = {
+const multiDomainInjectionConfig: webpack.Configuration = {
   ...getSimpleConfig(),
   mode: 'production',
   entry: {
-    injection_multidomain: [path.resolve(__dirname, 'injection/multidomain.js')],
+    injection_multi_domain: [path.resolve(__dirname, 'injection/multi-domain.js')],
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
@@ -126,5 +126,5 @@ export default [
   mainConfig,
   mainInjectionConfig,
   multiDomainConfig,
-  multidomainInjectionConfig,
+  multiDomainInjectionConfig,
 ]

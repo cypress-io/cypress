@@ -3014,6 +3014,34 @@ describe('Routes', () => {
         })
       })
 
+      it('injects document.domain on AUT iframe requests that do not match current superDomain', function () {
+        nock('http://www.foobar.com')
+        .get('/')
+        .reply(200, '<html><head></head><body>hi</body></html>', {
+          'Content-Type': 'text/html',
+        })
+
+        this.server._eventBus.on('cross:domain:delaying:html', () => {
+          this.server._eventBus.emit('ready:for:domain', { shouldInject: true })
+        })
+
+        return this.rp({
+          url: 'http://www.foobar.com',
+          headers: {
+            'Cookie': '__cypress.initial=false',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'X-Cypress-Is-AUT-Frame': 'true',
+          },
+        })
+        .then((res) => {
+          expect(res.statusCode).to.eq(200)
+
+          const body = cleanResponseBody(res.body)
+
+          expect(body).to.include(`<html><head> <script type='text/javascript'> document.domain = 'foobar.com';`)
+        })
+      })
+
       it('does not inject document.domain on non http requests', function () {
         nock(this.server._remoteOrigin)
         .get('/json')
@@ -3035,7 +3063,7 @@ describe('Routes', () => {
         })
       })
 
-      it('does not inject document.domain on http requests which do not match current superDomain', function () {
+      it('does not inject document.domain on http requests which do not match current superDomain and are not the AUT iframe', function () {
         nock('http://www.foobar.com')
         .get('/')
         .reply(200, '<html><head></head><body>hi</body></html>', {
