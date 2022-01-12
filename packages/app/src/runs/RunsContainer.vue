@@ -1,33 +1,42 @@
 <template>
-  <NoInternetConnection
-    v-if="!isOnline && !isCloudProjectReturned"
-  />
-  <RunsConnect
-    v-else-if="!currentProject?.projectId || !cloudViewer?.id"
-    :gql="props.gql"
-  />
-  <template v-else-if="currentProject?.cloudProject?.__typename === 'CloudProject'">
-    <Warning
-      v-if="!isOnline"
-      :title="t('launchpadErrors.noInternet.header')"
-      :message="t('launchpadErrors.noInternet.message')"
-      :dismissible="false"
+  <div class="h-full">
+    <NoInternetConnection
+      v-if="!isOnline && !isCloudProjectReturned"
+    />
+    <RunsConnectSuccessAlert
+      v-if="currentProject && showConnectSuccessAlert"
+      :gql="currentProject"
+    />
+    <RunsConnect
+      v-if="!currentProject?.projectId || !cloudViewer?.id"
+      :gql="props.gql"
+      @success="showConnectSuccessAlert = true"
+    />
+    <RunsErrorRenderer
+      v-else-if="currentProject?.cloudProject?.__typename !== 'CloudProject'"
+      :gql="props.gql"
     />
     <RunsEmpty
-      v-if="!currentProject?.cloudProject?.runs?.nodes.length"
+      v-else-if="!currentProject?.cloudProject?.runs?.nodes.length"
       :gql="currentProject"
     />
     <div
       v-else
       data-cy="runs"
     >
+      <Warning
+        v-if="!isOnline"
+        :title="t('launchpadErrors.noInternet.header')"
+        :message="t('launchpadErrors.noInternet.message')"
+        :dismissible="false"
+      />
       <RunCard
         v-for="run of currentProject?.cloudProject?.runs?.nodes"
         :key="run.id"
         :gql="run"
       />
     </div>
-  </template>
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -38,9 +47,11 @@ import { useI18n } from '@cy/i18n'
 import NoInternetConnection from '@packages/frontend-shared/src/components/NoInternetConnection.vue'
 import RunCard from './RunCard.vue'
 import RunsConnect from './RunsConnect.vue'
+import RunsConnectSuccessAlert from './RunsConnectSuccessAlert.vue'
 import RunsEmpty from './RunsEmpty.vue'
 import type { RunsContainerFragment } from '../generated/graphql'
-import Warning from '../../../frontend-shared/src/warning/Warning.vue'
+import Warning from '@packages/frontend-shared/src/warning/Warning.vue'
+import RunsErrorRenderer from './RunsErrorRenderer.vue'
 
 const { t } = useI18n()
 
@@ -52,9 +63,12 @@ const emit = defineEmits<{
 
 gql`
 fragment RunsContainer on Query {
+  ...RunsErrorRenderer
   currentProject {
     id
+    projectId
     ...RunsEmpty
+    ...RunsConnectSuccessAlert
     cloudProject {
       __typename
       ... on CloudProject {
@@ -82,6 +96,7 @@ const isCloudProjectTypename = props.gql.currentProject?.cloudProject?.__typenam
 
 const isShowingOnlineNotification = ref(false)
 const isOnlineRef = ref(true)
+const showConnectSuccessAlert = ref(false)
 
 watchEffect(() => {
   // We want to keep track of the previous state to refetch the query
