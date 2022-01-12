@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import _ from 'lodash'
 
 import $utils from '../../cypress/utils'
@@ -44,9 +42,10 @@ export default (Commands, Cypress, cy, state, config) => {
   })
 
   Commands.addAll({ type: 'utility', prevSubject: 'optional' }, {
+    // TODO: change the options type from `any` to `Loggable`.
     // pause should indefinitely pause until the user
     // presses a key or clicks in the UI to continue
-    pause (subject, options = {}) {
+    pause (subject, options: any = {}) {
       // bail if we're in run mode, unless --headed and --no-exit flags are passed
       if (!config('isInteractive') && (!config('browser').isHeaded || config('exit'))) {
         return subject
@@ -104,7 +103,8 @@ export default (Commands, Cypress, cy, state, config) => {
       return subject
     },
 
-    debug (subject, options = {}) {
+    // TODO: change `any` to Loggable
+    debug (subject, options: any = {}) {
       const userOptions = options
 
       options = _.defaults({}, userOptions, {

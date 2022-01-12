@@ -314,7 +314,7 @@ export const isScrollable = ($el) => {
 /**
  * Getters where DOM state like focus, styling, and actionability affect the return value
  */
-export const getFirstFixedOrStickyPositionParent = ($el) => {
+export const getFirstFixedOrStickyPositionParent = ($el): JQuery<any> | null => {
   if (isUndefinedOrHTMLBodyDoc($el)) {
     return null
   }
