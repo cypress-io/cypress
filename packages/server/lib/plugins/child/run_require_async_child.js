@@ -67,11 +67,11 @@ function run (ipc, configFile, projectRoot) {
   const isValidDevServer = (config) => {
     const { devServer } = config
 
-    if (devServer && typeof devServer === 'function' || typeof devServer.then !== 'function') {
+    if (devServer && (typeof devServer.devServer === 'function' || typeof devServer === 'function' || typeof devServer.then !== 'function')) {
       return true
     }
 
-    ipc.send('setupTestingType:error', 'COMPONENT_DEV_SERVER_IS_NOT_A_FUNCTION', config)
+    ipc.send('setupTestingType:error', 'COMPONENT_DEV_SERVER_IS_NOT_A_FUNCTION', configFile, config)
 
     return false
   }
@@ -111,8 +111,16 @@ function run (ipc, configFile, projectRoot) {
           runPlugins.runSetupNodeEvents(options, (on, config) => {
             const setupNodeEvents = result.component?.setupNodeEvents ?? ((on, config) => {})
 
-            if (typeof result.component.devServer === 'function') {
-              on('dev-server:start', (options) => result.component.devServer(options, result.component?.devServerConfig))
+            const { devServer } = result.component
+
+            if (typeof devServer.devServer === 'function') {
+              on('dev-server:start', (options) => devServer.devServer(options, result.component?.devServerConfig))
+
+              return setupNodeEvents(on, config)
+            }
+
+            if (typeof devServer === 'function') {
+              on('dev-server:start', (options) => devServer(options, result.component?.devServerConfig))
 
               return setupNodeEvents(on, config)
             }
