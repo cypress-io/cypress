@@ -10,7 +10,6 @@ export default defineConfig({
     'configFile': '../../mocha-reporter-config.json',
   },
   'e2e': {
-    'specPattern': 'cypress/integration/**/*',
     'setupNodeEvents': require('./cypress/plugins'),
     'baseUrl': 'http://localhost:3500',
   },

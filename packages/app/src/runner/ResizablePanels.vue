@@ -37,7 +37,7 @@
     </div>
 
     <div
-      class="flex-grow h-full"
+      class="flex-grow h-full relative"
       :class="{'pointer-events-none':panel2IsDragging}"
       :style="{
         width: `${maxTotalWidth - panel1Width - panel2Width}px`

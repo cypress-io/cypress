@@ -148,8 +148,10 @@ const formatPath = (name, n, colour = 'reset', caller) => {
     const cwdPath = process.cwd()
 
     name = name
-    .split(macOSRemovePrivate(cwdPath))
+    .split(cwdPath)
     .join(fakeCwdPath)
+
+    name = macOSRemovePrivate(name)
   }
 
   // add newLines at each n char and colorize the path

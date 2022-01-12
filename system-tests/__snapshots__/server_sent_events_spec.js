@@ -7,14 +7,14 @@ exports['e2e server sent events / passes'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (server_sent_events_spec.js)                                               │
-  │ Searched:   cypress/integration/server_sent_events_spec.js                                     │
+  │ Specs:      1 found (server_sent_events.cy.js)                                                 │
+  │ Searched:   cypress/e2e/server_sent_events.cy.js                                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  server_sent_events_spec.js                                                      (1 of 1)
+  Running:  server_sent_events.cy.js                                                        (1 of 1)
 
 
   server sent events
@@ -36,14 +36,14 @@ exports['e2e server sent events / passes'] = `
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     server_sent_events_spec.js                                                       │
+  │ Spec Ran:     server_sent_events.cy.js                                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/server_sent_events_spec.js.mp4      (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/server_sent_events.cy.js.mp4        (X second)
 
 
 ====================================================================================================
@@ -53,7 +53,7 @@ exports['e2e server sent events / passes'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  server_sent_events_spec.js               XX:XX        2        2        -        -        - │
+  │ ✔  server_sent_events.cy.js                 XX:XX        2        2        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        2        2        -        -        -  
 
