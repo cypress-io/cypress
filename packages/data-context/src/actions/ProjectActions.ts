@@ -1,4 +1,4 @@
-import type { CodeGenType, MutationAddProjectArgs, MutationSetProjectPreferencesArgs, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
+import type { CodeGenType, MutationAddProjectArgs, MutationSetProjectPreferencesArgs, NexusGenObjects, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
 import type { InitializeProjectOptions, FoundBrowser, FoundSpec, LaunchOpts, OpenProjectLaunchOptions, Preferences, TestingType } from '@packages/types'
 import execa from 'execa'
 import path from 'path'
@@ -287,7 +287,7 @@ export class ProjectActions {
     this.api.insertProjectPreferencesToCache(this.ctx.lifecycleManager.projectTitle, { ...args })
   }
 
-  async codeGenSpec (codeGenCandidate: string, codeGenType: CodeGenType) {
+  async codeGenSpec (codeGenCandidate: string, codeGenType: CodeGenType): Promise<NexusGenObjects['ScaffoldedFile']> {
     const project = this.ctx.currentProject
 
     if (!project) {
@@ -318,15 +318,9 @@ export class ProjectActions {
         )
         : codeGenCandidate
     }
-    const getSearchFolder = () => {
-      return (codeGenType === 'integration'
-        ? config.integrationFolder
-        : config.componentFolder) || project
-    }
 
     const specFileExtension = getFileExtension()
     const codeGenPath = getCodeGenPath()
-    const searchFolder = getSearchFolder()
 
     const newSpecCodeGenOptions = new SpecOptions(this.ctx, {
       codeGenPath,
@@ -346,17 +340,10 @@ export class ProjectActions {
 
     const [newSpec] = codeGenResults.files
 
-    const spec = this.ctx.file.normalizeFileToSpec({
-      absolute: newSpec.file,
-      searchFolder,
-      specType: codeGenType === 'integration' ? 'integration' : 'component',
-      projectRoot: project,
-      specFileExtension,
-    })
-
     return {
-      spec,
-      content: newSpec.content,
+      status: 'valid',
+      file: { absolute: newSpec.file, contents: newSpec.content },
+      description: 'Generated spec',
     }
   }
 
@@ -387,7 +374,7 @@ export class ProjectActions {
     return this.ctx.fs.mkdirp(this.defaultE2EPath)
   }
 
-  async scaffoldIntegration () {
+  async scaffoldIntegration (): Promise<NexusGenObjects['ScaffoldedFile'][]> {
     const projectRoot = this.ctx.currentProject
 
     assert(projectRoot, `Cannot create spec without currentProject.`)
@@ -403,28 +390,12 @@ export class ProjectActions {
       throw new Error(`Failed generating files: ${results.failed.map((e) => `${e}`)}`)
     }
 
-    const withFileParts = results.files.map((res) => {
+    return results.files.map(({ status, file, content }) => {
       return {
-        fileParts: this.ctx.file.normalizeFileToFileParts({
-          absolute: res.file,
-          searchFolder: this.defaultE2EPath,
-          projectRoot,
-        }),
-        codeGenResult: res,
+        status: (status === 'add' || status === 'overwrite') ? 'valid' : 'skipped',
+        file: { absolute: file, contents: content },
+        description: 'Generated spec',
       }
     })
-
-    const { specPattern, ignoreSpecPattern } = await this.ctx.project.specPatternsForTestingType(projectRoot, 'e2e')
-
-    if (!specPattern) {
-      throw Error('Could not find specPattern for project')
-    }
-
-    // created new specs - find and cache them!
-    this.ctx.project.setSpecs(
-      await this.ctx.project.findSpecs(projectRoot, 'e2e', specPattern, ignoreSpecPattern || [], []),
-    )
-
-    return withFileParts
   }
 }
