@@ -760,8 +760,17 @@ export class ProjectLifecycleManager {
 
     this._eventsIpcResult = { state: 'loading', value: promise }
 
+    // This is a terrible hack until we land GraphQL subscriptions which will
+    // allow for more granular concurrent notifications then our current
+    // notify the frontend & refetch approach
+    const toLaunchpad = this.ctx.emitter.toLaunchpad
+
     return promise.then(async (val) => {
       if (this._eventsIpcResult.value === promise) {
+        // If we're handling the events, we don't want any notifications
+        // to send to the client until the `.finally` of this block.
+        // TODO: Remove when GraphQL Subscriptions lands
+        this.ctx.emitter.toLaunchpad = () => {}
         await this.handleSetupTestingTypeReply(ipc, val)
         this._eventsIpcResult = { state: 'loaded', value: val }
       }
@@ -775,6 +784,7 @@ export class ProjectLifecycleManager {
       throw err
     })
     .finally(() => {
+      this.ctx.emitter.toLaunchpad = toLaunchpad
       this.ctx.emitter.toLaunchpad()
     })
   }
@@ -1170,7 +1180,8 @@ export class ProjectLifecycleManager {
 
     // This happens automatically with openProjectCreate in run mode
     if (!this.ctx.isRunMode) {
-      await this.ctx.actions.project.initializeActiveProject()
+      // Don't worry about closing the browser for refreshing the config
+      await this.ctx.actions.project.initializeActiveProject({}, false)
     }
 
     if (this.ctx.coreData.cliBrowser) {
