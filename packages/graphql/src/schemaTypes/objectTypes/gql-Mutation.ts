@@ -43,7 +43,7 @@ export const mutation = mutationType({
       },
     })
 
-      t.nonNull.boolean('writeFileRelativeToProjectRoot', {
+    t.nonNull.boolean('writeFileRelativeToProjectRoot', {
       description: 'Create a file relative to the current project root',
       args: {
         file: nonNull(stringArg()),
