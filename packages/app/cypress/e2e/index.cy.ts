@@ -73,7 +73,7 @@ describe('App: Index', () => {
 
         expect(createdSpecs).lengthOf.above(0)
 
-        cy.contains(defaultMessages.createSpec.e2e.importFromScaffold.specsAddedHeader, { timeout: 10000 }).should('be.visible')
+        cy.contains(defaultMessages.createSpec.e2e.importFromScaffold.specsAddedHeader).should('be.visible')
         assertSpecs(createdSpecs)
       })
 
