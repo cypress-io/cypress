@@ -2,36 +2,6 @@ describe('Launchpad: Onboarding Flow', () => {
   beforeEach(() => {
     cy.scaffoldProject('pristine')
     cy.openProject('pristine')
-    cy.withCtx((ctx, o) => {
-      ctx.actions.file.writeFileInProject('node_modules/cypress/package.json', JSON.stringify({
-        name: 'cypress',
-        main: 'index.js',
-      }))
-
-      ctx.actions.file.writeFileInProject('node_modules/@cypress/webpack-dev-server/package.json', JSON.stringify({
-        name: '@cypress/webpack-dev-server',
-        main: 'index.js',
-      }))
-
-      ctx.actions.file.writeFileInProject('node_modules/cypress/index.js', `
-        module.exports = {
-          defineConfig(o) {
-            return o
-          }
-        }
-      `)
-
-      ctx.actions.file.writeFileInProject('node_modules/@cypress/webpack-dev-server/index.js', `
-        module.exports = {
-          devServer(o) {
-            return {
-              port: 7373,
-              close() {}
-            }
-          }
-        }
-      `)
-    })
   })
 
   it('can setup component testing', () => {
@@ -54,6 +24,12 @@ describe('Launchpad: Onboarding Flow', () => {
     cy.findByText('I\'ve installed them').click()
     cy.findByText('We added the following files to your project.')
     cy.findByText('Continue').click()
+    cy.withCtx(async (ctx) => {
+      return ctx.file.readFileInProject('cypress.config.js')
+    }).then((str) => {
+      cy.log(str)
+    })
+
     cy.findByText('Choose a Browser', { timeout: 10000 })
   })
 

@@ -2,7 +2,7 @@ describe('App: Runs Page', () => {
   beforeEach(() => {
     cy.scaffoldProject('component-tests')
     cy.openProject('component-tests')
-    cy.startAppServer()
+    cy.startAppServer('component')
   })
 
   it('resolves the runs page', () => {

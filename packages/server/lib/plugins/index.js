@@ -32,7 +32,8 @@ const execute = (event, ...args) => {
 
 const _reset = () => {
   handlers = []
-  getCtx().lifecycleManager.resetForTest()
+
+  return getCtx().lifecycleManager.resetForTest()
 }
 
 module.exports = {
