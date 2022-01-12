@@ -18,7 +18,7 @@ describe('Launchpad: Setup Project', () => {
     verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: false })
   })
 
-  describe('"learn about testing types" modal', () => {
+  describe.skip('"learn about testing types" modal', () => {
     beforeEach(() => {
       cy.openProject('pristine')
       cy.visitLaunchpad()
@@ -128,8 +128,9 @@ describe('Launchpad: Setup Project', () => {
     })
 
     // project has a cypress.configuration file with component testing configured
-    describe.skip('project that has not been configured for e2e', () => {
+    describe.only('project that has not been configured for e2e', () => {
       it('shows the first step in configuration when selecting e2e tests', () => {
+        cy.scaffoldProject('pristine-with-ct-testing')
         cy.openProject('pristine-with-ct-testing')
         cy.visitLaunchpad()
 
@@ -137,27 +138,64 @@ describe('Launchpad: Setup Project', () => {
 
         cy.get('[data-cy-testingtype="e2e"]').click()
         cy.findByText('We added the following files to your project.')
+
+        cy.get('[data-cy=changes]').within(() => {
+          cy.contains('cypress.config.js')
+        })
+
+        cy.get('[data-cy=valid]').within(() => {
+          cy.contains('cypress/support/e2e.js')
+          cy.contains('cypress/fixtures/example.json')
+        })
       })
 
       it('moves to "Choose a Browser" page after clicking "Continue" button in first step in configuration page', () => {
+        cy.scaffoldProject('pristine-with-ct-testing')
         cy.openProject('pristine-with-ct-testing')
         cy.visitLaunchpad()
 
-        cy.contains('Welcome to Cypress!').should('be.visible')
-        cy.contains('[data-cy-testingtype="e2e"]', 'Not Configured')
-        cy.contains('[data-cy-testingtype="component"]', 'Configured')
+        verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: true })
+        // cy.withCtx((ctx, o) => {
+        //   o.sinon.spy(ctx.actions.wizard, 'scaffoldTestingType')
+        //   // ctx.actions.wizard.scaffoldTestingType = o.sinon.stub().callThrough
+        //   // cy.spy(ctx.actions.wizard, 'scaffoldTestingType').as('scaffoldProject')
+        // })
 
         cy.get('[data-cy-testingtype="e2e"]').click()
+
         cy.findByText('We added the following files to your project.')
+
+        cy.get('[data-cy=changes]').within(() => {
+          cy.contains('cypress.config.js')
+        })
+
+        cy.get('[data-cy=valid]').within(() => {
+          cy.contains('cypress/support/e2e.js')
+          cy.contains('cypress/fixtures/example.json')
+        })
+
+        // cy.withCtx((ctx, o) => {
+        //   expect(ctx.actions.wizard.scaffoldTestingType).to.have.been.calledOnce
+        // })
         // cy.findByText('Continue').click()
         // cy.get('h1').should('contain', 'Choose a Browser')
       })
 
-      it('shows the first step in configuration when opened via cli with --e2e flag', () => {
+      it.only('shows the first step in configuration when opened via cli with --e2e flag', () => {
+        cy.scaffoldProject('pristine-with-ct-testing')
         cy.openProject('pristine-with-ct-testing', ['--e2e'])
         cy.visitLaunchpad()
 
         cy.contains('We added the following files to your project.')
+
+        cy.get('[data-cy=changes]').within(() => {
+          cy.contains('cypress.config.js')
+        })
+
+        cy.get('[data-cy=valid]').within(() => {
+          cy.contains('cypress/support/e2e.js')
+          cy.contains('cypress/fixtures/example.json')
+        })
 
         cy.wait(5000)
         cy.contains('We added the following files to your project.')
@@ -189,6 +227,12 @@ describe('Launchpad: Setup Project', () => {
 
       cy.findByText('We added the following files to your project.')
 
+      cy.get('[data-cy=valid]').within(() => {
+        cy.contains('cypress.config.js')
+        cy.contains('cypress/support/e2e.js')
+        cy.contains('cypress/fixtures/example.json')
+      })
+
       cy.wait(5000)
       cy.findByText('We added the following files to your project.')
 
@@ -207,6 +251,7 @@ describe('Launchpad: Setup Project', () => {
   describe('Component setup', () => {
     describe('project has been configured for component testing', () => {
       it('it skips the setup page when choosing component tests to run', () => {
+        cy.scaffoldProject('pristine-with-ct-testing')
         cy.openProject('pristine-with-ct-testing')
         cy.visitLaunchpad()
 
@@ -226,19 +271,8 @@ describe('Launchpad: Setup Project', () => {
       })
     })
 
-    describe.skip('project that has not been configured for component testing', () => {
-      it('opens to the "choose framework" page when opened via cli with --component flag', () => {
-        cy.scaffoldProject('pristine-with-e2e-testing')
-        cy.openProject('pristine-with-e2e-testing', ['--component'])
-        cy.visitLaunchpad()
-
-        cy.get('h1').should('contain', 'Project Setup')
-        cy.contains('Confirm the front-end framework and bundler used in your project.')
-
-        cy.wait(5000)
-        cy.contains('Confirm the front-end framework and bundler used in your project.')
-      })
-
+    // describe.only('project that has not been configured for component testing', () => {
+    describe('project that has not been configured for component testing', () => {
       it('shows the "choose framework" page when selecting component tests', () => {
         cy.scaffoldProject('pristine-with-e2e-testing')
         cy.openProject('pristine-with-e2e-testing')
@@ -247,6 +281,18 @@ describe('Launchpad: Setup Project', () => {
         verifyWelcomePage({ e2eIsConfigured: true, ctIsConfigured: false })
 
         cy.get('[data-cy-testingtype="component"]').click()
+
+        cy.get('h1').should('contain', 'Project Setup')
+        cy.contains('Confirm the front-end framework and bundler used in your project.')
+
+        cy.wait(5000)
+        cy.contains('Confirm the front-end framework and bundler used in your project.')
+      })
+
+      it('opens to the "choose framework" page when opened via cli with --component flag', () => {
+        cy.scaffoldProject('pristine-with-e2e-testing')
+        cy.openProject('pristine-with-e2e-testing', ['--component'])
+        cy.visitLaunchpad()
 
         cy.get('h1').should('contain', 'Project Setup')
         cy.contains('Confirm the front-end framework and bundler used in your project.')
