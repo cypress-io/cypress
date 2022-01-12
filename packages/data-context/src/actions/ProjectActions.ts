@@ -419,13 +419,14 @@ export class ProjectActions {
   }
 
   async writeFile (relative: string, content: string = ''): Promise<boolean> {
-     if (!this.ctx.currentProject) {
+     if (!this.ctx.currentProject || !this.ctx.coreData.currentTestingType) {
        return false
      }
 
-     await this.ctx.fs.writeFile(path.join(this.ctx.currentProject, relative), content)
+      const abs = path.join(this.ctx.currentProject, relative)
+     await this.ctx.fs.writeFile(abs, content)
 
-     return true
+    return true
    }
 
   async scaffoldIntegration (): Promise<NexusGenObjects['ScaffoldedFile'][]> {

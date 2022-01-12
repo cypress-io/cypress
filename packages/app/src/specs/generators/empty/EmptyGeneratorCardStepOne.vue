@@ -10,8 +10,6 @@
         </template>
       </Input>
 
-      </div>
-
       <div
         v-if="!isValidSpecFile"
         class="mt-16px bg-red-200"
