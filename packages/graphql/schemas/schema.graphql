@@ -1008,25 +1008,6 @@ type WizardNpmPackage implements Node {
   package: String!
 }
 
-"""Each config file suggestion given by the wizard"""
-type WizardSampleConfigFile implements Node {
-  content: String!
-  description: String
-  filePath: String!
-
-  """Relay style Node ID field for the WizardSampleConfigFile field"""
-  id: ID!
-  status: WizardConfigFileStatusEnum!
-}
-
-enum WizardStep {
-  configFiles
-  installDependencies
-  selectFramework
-  setupComplete
-  welcome
-}
-
 input WizardUpdateInput {
   bundler: SupportedBundlers
   codeLanguage: CodeLanguageEnum
