@@ -9,6 +9,7 @@ import type { FileDetails } from '@packages/types'
 import { automation } from '@packages/runner-shared/src/automation'
 import { logger } from '@packages/runner-shared/src/logger'
 import type { Socket } from '@packages/socket/lib/browser'
+import { AutomationStatus, useRunnerUiStore } from '../store'
 
 // type is default export of '@packages/driver'
 // cannot import because it's not type safe and tsc throw many type errors.
@@ -16,7 +17,13 @@ type $Cypress = any
 
 const noop = () => {}
 
-const automationElementId = '__cypress-string' as const
+export const automationElementId = '__cypress-string' as const
+
+interface addGlobalListenerOptions {
+    automationElement: typeof automationElementId
+    randomString: string
+    setAutomationStatus: (status: AutomationStatus) => void
+}
 
 const driverToReporterEvents = 'paused session:add'.split(' ')
 const driverToLocalAndReporterEvents = 'run:start run:end'.split(' ')
@@ -58,7 +65,7 @@ export class EventManager {
     return Cypress
   }
 
-  addGlobalListeners (state: BaseStore, connectionInfo: { automationElement: typeof automationElementId, randomString: string }) {
+  addGlobalListeners (state: BaseStore, options: addGlobalListenerOptions) {
     const rerun = () => {
       if (!this) {
         // if the tests have been reloaded
@@ -69,11 +76,29 @@ export class EventManager {
       return this.runSpec(state)
     }
 
-    this.ws.emit('is:automation:client:connected', connectionInfo, this.Mobx.action('automationEnsured', (isConnected) => {
-      state.automation = isConnected ? automation.CONNECTED : automation.MISSING
+    const connectionInfo = {
+      automationElement: options.automationElement,
+      randomString: options.randomString,
+    }
+
+    const runnerUiStore = useRunnerUiStore()
+
+    this.ws.emit('is:automation:client:connected', connectionInfo, this.Mobx.action('automationEnsured', (isConnected: boolean) => {
+      const connected = isConnected ? automation.CONNECTED : automation.MISSING
+
+      // legacy MobX integration
+      // TODO: can we delete this, or does the driver depend on this somehow?
+      state.automation = connected
       this.ws.on('automation:disconnected', this.Mobx.action('automationDisconnected', () => {
         state.automation = automation.DISCONNECTED
       }))
+
+      // unified integration
+      this.ws.on('automation:disconnected', this.Mobx.action('automationDisconnected', () => {
+        runnerUiStore.setAutomationStatus('DISCONNECTED')
+      }))
+
+      runnerUiStore.setAutomationStatus(isConnected ? 'CONNECTED' : 'MISSING')
     }))
 
     this.ws.on('change:to:url', (url) => {

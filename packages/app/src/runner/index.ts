@@ -15,7 +15,7 @@
  *
  */
 import { watchEffect } from 'vue'
-import { getMobxRunnerStore, initializeMobxStore, useAutStore } from '../store'
+import { AutomationStatus, getMobxRunnerStore, initializeMobxStore, useAutStore, useRunnerUiStore } from '../store'
 import { injectBundle } from './injectBundle'
 import type { SpecFile } from '@packages/types/src/spec'
 import { UnifiedReporterAPI } from './reporter'
@@ -62,8 +62,6 @@ export function getEventManager () {
 
   return _eventManager
 }
-
-const randomString = `${Math.random()}`
 
 let _autIframeModel: AutIframe
 
@@ -118,10 +116,14 @@ function createIframeModel () {
  */
 function setupRunner () {
   const mobxRunnerStore = getMobxRunnerStore()
+  const runnerUiStore = useRunnerUiStore()
 
   getEventManager().addGlobalListeners(mobxRunnerStore, {
     automationElement: '__cypress-string',
-    randomString,
+    randomString: runnerUiStore.randomString,
+    setAutomationStatus: (status: AutomationStatus) => {
+      runnerUiStore.setAutomationStatus(status)
+    },
   })
 
   getEventManager().start(window.UnifiedRunner.config)

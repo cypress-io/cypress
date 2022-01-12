@@ -59,6 +59,7 @@
         <RemoveClassesDuringScreenshotting
           class="h-full bg-gray-100 p-16px"
         >
+          <AutomationElement />
           <ScriptError
             v-if="autStore.scriptError"
             :error="autStore.scriptError.error"
@@ -103,6 +104,7 @@ import ScriptError from './ScriptError.vue'
 import { useWindowSize } from '@vueuse/core'
 import ResizablePanels, { DraggablePanel } from './ResizablePanels.vue'
 import { runnerConstants } from './runner-constants'
+import AutomationElement from './automation/AutomationElement.vue'
 
 const { height: windowHeight, width: windowWidth } = useWindowSize()
 
