@@ -297,11 +297,6 @@ type CloudUser implements Node {
   userIsViewer: Boolean!
 }
 
-enum CodeGenGenResultType {
-  binary
-  text
-}
-
 """Glob patterns for detecting files for code gen."""
 type CodeGenGlobs implements Node {
   component: String!
@@ -309,32 +304,6 @@ type CodeGenGlobs implements Node {
   """Relay style Node ID field for the CodeGenGlobs field"""
   id: ID!
   story: String!
-}
-
-"""Represents a spec on the file system"""
-type CodeGenResult implements Node {
-  """Content of generated file."""
-  content: String!
-
-  """Absolute path of generated file."""
-  file: String!
-
-  """Relay style Node ID field for the CodeGenResult field"""
-  id: ID!
-  status: CodeGenStatus!
-  type: CodeGenGenResultType!
-}
-
-"""Result of generated file with file parts"""
-type CodeGenResultWithFileParts {
-  codeGenResult: CodeGenResult!
-  fileParts: FileParts!
-}
-
-enum CodeGenStatus {
-  add
-  overwrite
-  skipped
 }
 
 enum CodeGenType {
@@ -479,24 +448,20 @@ input FileDetailsInput {
   line: Int
 }
 
-"""Represents a spec on the file system"""
+"""Represents a file on the file system"""
 type FileParts implements Node {
   """
-  Absolute path to spec (e.g. /Users/jess/my-project/src/component/MySpec.test.tsx)
+  Absolute path to file (e.g. /Users/jess/my-project/src/component/MySpec.test.tsx)
   """
   absolute: String!
 
-  """
-  Full name of spec file (e.g. MySpec.test.tsx) without the spec extension
-  """
+  """Full name of the file (e.g. MySpec.test.tsx)"""
   baseName: String!
 
   """The contents of the file"""
   contents: String!
 
-  """
-  The spec file's extension, including "spec" pattern (e.g. .spec.tsx, -spec.tsx, -test.tsx)
-  """
+  """The file's extension"""
   fileExtension: String!
 
   """The first part of the file, without extensions (e.g. MySpec)"""
@@ -508,7 +473,7 @@ type FileParts implements Node {
   """Full name of spec file (e.g. MySpec.test.tsx)"""
   name: String!
 
-  """Relative path to spec (e.g. src/component/MySpec.test.tsx)"""
+  """Relative path to file (e.g. src/component/MySpec.test.tsx)"""
   relative: String!
 }
 
@@ -524,13 +489,6 @@ enum FrontendFrameworkEnum {
   react
   vue
   vuecli
-}
-
-type GeneratedSpec {
-  """File content of most recently generated spec."""
-  content: String!
-  id: ID!
-  spec: FileParts!
 }
 
 """Git information about a spec file"""
@@ -632,7 +590,7 @@ type Mutation {
   devRelaunch(action: DevRelaunchAction!): Boolean
 
   """Generate spec from source"""
-  generateSpecFromSource(codeGenCandidate: String!, type: CodeGenType!): GeneratedSpec
+  generateSpecFromSource(codeGenCandidate: String!, type: CodeGenType!): ScaffoldedFile
 
   """Hides the launchpad windows"""
   hideBrowserWindow: Boolean!
@@ -673,7 +631,7 @@ type Mutation {
 
   """Reset the Wizard to the starting position"""
   resetWizard: Boolean!
-  scaffoldIntegration: [CodeGenResultWithFileParts!]!
+  scaffoldIntegration: [ScaffoldedFile!]!
   scaffoldTestingType: Query
 
   """Set active project to run tests on"""
@@ -830,9 +788,7 @@ type Spec implements Node {
   """
   absolute: String!
 
-  """
-  Full name of spec file (e.g. MySpec.test.tsx) without the spec extension
-  """
+  """Full name of spec file (e.g. MySpec.test.tsx)"""
   baseName: String!
 
   """The file extension (e.g. tsx, jsx)"""
@@ -854,7 +810,7 @@ type Spec implements Node {
   relative: String!
 
   """
-  The spec file's extension, including "spec" patterm (e.g. .spec.tsx, -spec.tsx, -test.tsx)
+  The spec file's extension, including "spec" pattern (e.g. .spec.tsx, -spec.tsx, -test.tsx)
   """
   specFileExtension: String!
 
@@ -1039,25 +995,6 @@ type WizardNpmPackage implements Node {
   """The package name that you would npm install"""
   name: String!
   package: String!
-}
-
-"""Each config file suggestion given by the wizard"""
-type WizardSampleConfigFile implements Node {
-  content: String!
-  description: String
-  filePath: String!
-
-  """Relay style Node ID field for the WizardSampleConfigFile field"""
-  id: ID!
-  status: WizardConfigFileStatusEnum!
-}
-
-enum WizardStep {
-  configFiles
-  installDependencies
-  selectFramework
-  setupComplete
-  welcome
 }
 
 input WizardUpdateInput {
