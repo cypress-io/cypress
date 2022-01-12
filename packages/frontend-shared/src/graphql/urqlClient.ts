@@ -7,7 +7,6 @@ import {
   Exchange,
   ssrExchange,
 } from '@urql/core'
-import type { SSRData } from '@urql/core/dist/types/exchanges/ssr'
 import { devtoolsExchange } from '@urql/devtools'
 import { useToast } from 'vue-toastification'
 import { client } from '@packages/socket/lib/browser'
@@ -18,6 +17,7 @@ import { urqlSchema } from '../generated/urql-introspection.gen'
 
 import { pubSubExchange } from './urqlExchangePubsub'
 import { namedRouteExchange } from './urqlExchangeNamedRoute'
+import { decodeBase64Unicode } from '../utils/decodeBase64'
 
 const GQL_PORT_MATCH = /gqlPort=(\d+)/.exec(window.location.search)
 const SERVER_PORT_MATCH = /serverPort=(\d+)/.exec(window.location.search)
@@ -30,7 +30,7 @@ export function makeCacheExchange (schema: any = urqlSchema) {
 
 declare global {
   interface Window {
-    __CYPRESS_INITIAL_DATA__: SSRData
+    __CYPRESS_INITIAL_DATA__: string
     __CYPRESS_GRAPHQL_PORT__?: string
     __CYPRESS_MODE__: 'run' | 'open'
   }
@@ -52,7 +52,7 @@ export async function preloadLaunchpadData () {
   try {
     const resp = await fetch(`http://localhost:${gqlPort()}/__cypress/launchpad-preload`)
 
-    window.__CYPRESS_INITIAL_DATA__ = await resp.json()
+    window.__CYPRESS_INITIAL_DATA__ = decodeBase64Unicode(await resp.json())
   } catch {
     //
   }
@@ -101,7 +101,7 @@ export function makeUrqlClient (target: 'launchpad' | 'app'): Client {
     makeCacheExchange(),
     ssrExchange({
       isClient: true,
-      initialState: window.__CYPRESS_INITIAL_DATA__ ?? {},
+      initialState: window.__CYPRESS_INITIAL_DATA__ ? decodeBase64Unicode(window.__CYPRESS_INITIAL_DATA__) : '{}',
     }),
     namedRouteExchange,
     // TODO(tim): add this when we want to use the socket as the GraphQL

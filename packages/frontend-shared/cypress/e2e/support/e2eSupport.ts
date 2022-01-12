@@ -9,6 +9,7 @@ import type { Browser, FoundBrowser, OpenModeOptions } from '@packages/types'
 import { browsers } from '@packages/types/src/browser'
 import type { E2ETaskMap } from '../e2ePluginSetup'
 import installCustomPercyCommand from '@packages/ui-components/cypress/support/customPercyCommand'
+import { decodeBase64Unicode } from '../../../src/utils/decodeBase64'
 
 configure({ testIdAttribute: 'data-cy' })
 
@@ -225,7 +226,7 @@ function visitApp (href?: string) {
     return cy.visit(`dist-app/index.html?serverPort=${e2e_serverPort}${href || ''}`, {
       onBeforeLoad (win) {
         // Simulates the inject SSR data when we're loading the page normally in the app
-        win.__CYPRESS_INITIAL_DATA__ = JSON.parse(ssrData)
+        win.__CYPRESS_INITIAL_DATA__ = JSON.parse(decodeBase64Unicode(ssrData))
         win.__CYPRESS_GRAPHQL_PORT__ = e2e_gqlPort
       },
     })
