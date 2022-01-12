@@ -521,9 +521,6 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
           port,
           protocol,
         },
-        headers: {
-          'x-cypress-forwarded-from-proxy': true,
-        },
         agent,
       }, onProxyErr)
     }

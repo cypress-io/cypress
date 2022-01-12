@@ -260,6 +260,8 @@ class HttpAgent extends http.Agent {
 
     options.port = Number(proxy.port || 80)
     options.host = proxy.hostname || 'localhost'
+    const path = options.path
+
     delete options.path // so the underlying net.connect doesn't default to IPC
 
     if (proxy.protocol === 'https:') {
@@ -267,6 +269,72 @@ class HttpAgent extends http.Agent {
       req.agent = this.httpsAgent
 
       return this.httpsAgent.addRequest(req, options)
+    }
+
+    if (options.headers && options.headers['sec-websocket-extensions']) {
+      debug(`Creating connection for ${options.href} through ${options.proxy}`)
+
+      const proxy = url.parse(options.proxy)
+      const port = options.uri.port || '443'
+      const hostname = options.uri.hostname || 'localhost'
+
+      createProxySock({ proxy, shouldRetry: options.shouldRetry }, (originalErr?, proxySocket?, triggerRetry?) => {
+        if (originalErr) {
+          const err: any = new Error(`A connection to the upstream proxy could not be established: ${originalErr.message}`)
+
+          err.originalErr = originalErr
+          err.upstreamProxyConnect = true
+
+          return
+        }
+
+        const onClose = () => {
+          triggerRetry(new Error('ERR_EMPTY_RESPONSE: The upstream proxy closed the socket after connecting but before sending a response.'))
+        }
+
+        const onError = (err: Error) => {
+          triggerRetry(err)
+          proxySocket.destroy()
+        }
+
+        let buffer = ''
+
+        const onData = (data: Buffer) => {
+          debug(`Proxy socket for ${options.href} established`)
+
+          buffer += data.toString()
+
+          if (!_.includes(buffer, _.repeat(CRLF, 2))) {
+          // haven't received end of headers yet, keep buffering
+            proxySocket.once('data', onData)
+
+            return
+          }
+
+          // we've now gotten enough of a response not to retry
+          // connecting to the proxy
+          proxySocket.removeListener('error', onError)
+          proxySocket.removeListener('close', onClose)
+
+          if (!isResponseStatusCode200(buffer)) {
+            return
+          }
+
+          return req.onSocket(proxySocket)
+        }
+
+        proxySocket.once('close', onClose)
+        proxySocket.once('error', onError)
+        proxySocket.once('data', onData)
+
+        const connectReq = buildConnectReqHead(hostname, port, proxy)
+
+        proxySocket.setNoDelay(true)
+        proxySocket.write(connectReq)
+        proxySocket.write(`${options.method} ${path}\r\n`)
+      })
+
+      return
     }
 
     super.addRequest(req, options)
