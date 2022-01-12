@@ -20,7 +20,7 @@ import type { DataContext } from '..'
 import { LoadConfigReply, SetupNodeEventsReply, ProjectConfigIpc, IpcHandler } from './ProjectConfigIpc'
 import assert from 'assert'
 import type { AllModeOptions, FoundBrowser, FullConfig, TestingType } from '@packages/types'
-import type { BaseErrorDataShape, WarningError } from '.'
+import type { BaseErrorDataShape, CoreDataShape, WarningError } from '.'
 import { autoBindDebug } from '../util/autoBindDebug'
 
 const debug = debugLib(`cypress:lifecycle:ProjectLifecycleManager`)
@@ -256,11 +256,11 @@ export class ProjectLifecycleManager {
       s.currentProject = projectRoot
     })
 
-    const metaState = this.refreshMetaState()
+    this.refreshMetaState()
 
     this.configFileWarningCheck()
 
-    if (metaState.hasValidConfigFile) {
+    if (this.metaState.hasValidConfigFile) {
       this.initializeConfig().catch(this.onLoadError)
     }
 
@@ -287,7 +287,7 @@ export class ProjectLifecycleManager {
    * with the chosen testing type.
    */
   setCurrentTestingType (testingType: TestingType | null) {
-    this.ctx.update((d) => {
+    this.ctx.update((d: CoreDataShape) => {
       d.currentTestingType = testingType
     })
 
