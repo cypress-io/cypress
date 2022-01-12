@@ -467,41 +467,6 @@ commands:
           path: ./packages/<<parameters.package>>/cypress/videos
       - store-npm-logs
 
-  run-runner-ct-integration-tests:
-    parameters:
-      browser:
-        description: browser shortname to target
-        type: string
-      percy:
-        description: enable percy
-        type: boolean
-        default: false
-    steps:
-      - restore_cached_workspace
-      - run:
-          command: |
-            cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec -- --') || true
-            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
-            PERCY_ENABLE=${PERCY_TOKEN:-0} \
-            PERCY_PARALLEL_TOTAL=-1 \
-            $cmd yarn workspace @packages/runner-ct run cypress:run --browser <<parameters.browser>>
-      - run:
-          command: |
-            if [[ <<parameters.percy>> == 'true' ]]; then
-              PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
-              PERCY_ENABLE=${PERCY_TOKEN:-0} \
-              PERCY_PARALLEL_TOTAL=-1 \
-              yarn percy upload packages/runner-ct/cypress/screenshots/screenshot.cy.tsx/percy
-            else
-              echo "skipping percy screenshots uploading"
-            fi
-      - verify-mocha-results
-      - store_test_results:
-          path: /tmp/cypress
-      - store_artifacts:
-          path: ./packages/runner-ct/cypress/videos
-      - store-npm-logs
-
   run-system-tests:
     parameters:
       browser:
@@ -2184,9 +2149,6 @@ linux-workflow: &linux-workflow
     - driver-integration-tests-electron:
         requires:
           - build
-    - runner-ct-integration-tests-chrome:
-        requires:
-          - build
     - run-frontend-shared-component-tests-chrome:
         context: test-runner:launchpad-tests
         requires:
@@ -2272,7 +2234,6 @@ linux-workflow: &linux-workflow
           - lint-types
           - linux-lint
           - percy-finalize
-          - runner-ct-integration-tests-chrome
           - driver-integration-tests-firefox
           - driver-integration-tests-chrome
           - driver-integration-tests-chrome-beta
