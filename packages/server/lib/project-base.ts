@@ -284,6 +284,13 @@ export class ProjectBase<TServer extends Server> extends EE {
     return
   }
 
+  __reset () {
+    preprocessor.close()
+    devServer.close()
+
+    process.chdir(localCwd)
+  }
+
   async close () {
     debug('closing project instance %s', this.projectRoot)
 
@@ -294,10 +301,7 @@ export class ProjectBase<TServer extends Server> extends EE {
       return
     }
 
-    preprocessor.close()
-    devServer.close()
-
-    process.chdir(localCwd)
+    this.__reset()
 
     this.ctx.setAppServerPort(undefined)
     this.ctx.setAppSocketServer(undefined)

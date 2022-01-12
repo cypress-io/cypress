@@ -433,7 +433,6 @@ export class DataContext {
       this.cloud.reset(),
       this.util.disposeLoaders(),
       this.actions.project.clearCurrentProject(),
-      // this.actions.currentProject?.clearCurrentProject(),
       this.actions.dev.dispose(),
     ])
   }

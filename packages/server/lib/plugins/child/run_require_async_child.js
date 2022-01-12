@@ -64,16 +64,14 @@ function run (ipc, configFile, projectRoot) {
     return true
   }
 
-  const isValidComponentConfig = (config) => {
-    if (isValidSetupNodeEvents(config.setupNodeEvents)) {
-      if (typeof config.devServer !== 'function' && typeof config.devServer.then !== 'function') {
-        ipc.send('setupTestingType:error', 'COMPONENT_DEV_SERVER_IS_NOT_A_FUNCTION', configFile, config)
+  const isValidDevServer = (config) => {
+    const { devServer } = config
 
-        return false
-      }
-
+    if (devServer && typeof devServer === 'function' || typeof devServer.then !== 'function') {
       return true
     }
+
+    ipc.send('setupTestingType:error', 'COMPONENT_DEV_SERVER_IS_NOT_A_FUNCTION', config)
 
     return false
   }
@@ -106,7 +104,7 @@ function run (ipc, configFile, projectRoot) {
 
         areSetupNodeEventsLoaded = true
         if (testingType === 'component') {
-          if (!isValidComponentConfig(result.component || {})) {
+          if (!isValidSetupNodeEvents(result.setupNodeEvents) || !isValidDevServer((result.component || {}).devServer)) {
             return
           }
 

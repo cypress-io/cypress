@@ -26,6 +26,7 @@ export class OpenProject {
   }
 
   resetOpenProject () {
+    this.projectBase?.__reset()
     this.projectBase = null
     this.relaunchBrowser = null
   }
