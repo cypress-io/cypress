@@ -1,11 +1,20 @@
 <template>
-  <RunsConnect
-    v-if="!currentProject?.projectId || !cloudViewer?.id"
-    :gql="props.gql"
-  />
-  <template v-else-if="currentProject?.cloudProject?.__typename === 'CloudProject'">
+  <div class="h-full">
+    <RunsConnectSuccessAlert
+      v-if="currentProject && showConnectSuccessAlert"
+      :gql="currentProject"
+    />
+    <RunsConnect
+      v-if="!currentProject?.projectId || !cloudViewer?.id"
+      :gql="props.gql"
+      @success="showConnectSuccessAlert = true"
+    />
+    <RunsErrorRenderer
+      v-else-if="currentProject?.cloudProject?.__typename !== 'CloudProject'"
+      :gql="props.gql"
+    />
     <RunsEmpty
-      v-if="!currentProject?.cloudProject?.runs?.nodes.length"
+      v-else-if="!currentProject?.cloudProject?.runs?.nodes.length"
       :gql="currentProject"
     />
     <div
@@ -18,22 +27,27 @@
         :gql="run"
       />
     </div>
-  </template>
+  </div>
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { gql } from '@urql/vue'
 import RunCard from './RunCard.vue'
 import RunsConnect from './RunsConnect.vue'
+import RunsConnectSuccessAlert from './RunsConnectSuccessAlert.vue'
 import RunsEmpty from './RunsEmpty.vue'
 import type { RunsContainerFragment } from '../generated/graphql'
+import RunsErrorRenderer from './RunsErrorRenderer.vue'
 
 gql`
 fragment RunsContainer on Query {
+  ...RunsErrorRenderer
   currentProject {
     id
+    projectId
     ...RunsEmpty
+    ...RunsConnectSuccessAlert
     cloudProject {
       __typename
       ... on CloudProject {
@@ -57,8 +71,11 @@ const props = defineProps<{
   gql: RunsContainerFragment
 }>()
 
+const showConnectSuccessAlert = ref(false)
+
 const currentProject = computed(() => props.gql.currentProject)
 const cloudViewer = computed(() => props.gql.cloudViewer)
+
 </script>
 
 <style scoped>
