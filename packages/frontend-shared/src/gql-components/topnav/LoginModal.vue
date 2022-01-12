@@ -21,7 +21,13 @@
           </button>
         </div>
 
-        <DialogDescription class="font-normal p-24px text-gray-700">
+        <NoInternetConnection
+          v-if="!isOnline"
+        />
+        <DialogDescription
+          v-else-if="isOnline"
+          class="font-normal p-24px text-gray-700"
+        >
           <i18n-t
             v-if="!viewer"
             scope="global"
@@ -48,7 +54,15 @@
         </DialogDescription>
 
         <div class="bg-gray-50 border-t-1px py-16px px-24px">
+          <ExternalLink
+            v-if="!isOnline"
+            href="https://on.cypress.io/help-connect-to-api"
+            class="font-medium text-indigo-500"
+          >
+            {{ t('links.learnMore') }}
+          </ExternalLink>
           <Auth
+            v-else-if="isOnline"
             :gql="props.gql"
             @continue="$emit('update:modelValue', false)"
           />
@@ -63,6 +77,8 @@ import { gql } from '@urql/core'
 import { computed } from 'vue'
 import Auth from '../Auth.vue'
 import ExternalLink from '../ExternalLink.vue'
+import { useOnline } from '@vueuse/core'
+import NoInternetConnection from '../../components/NoInternetConnection.vue'
 
 import {
   Dialog,
@@ -72,6 +88,8 @@ import {
 } from '@headlessui/vue'
 
 import type { LoginModalFragment } from '../../generated/graphql'
+
+const online = useOnline()
 
 const emit = defineEmits<{
   (event: 'update:modelValue', value: boolean): void
@@ -107,6 +125,8 @@ const title = computed(() => {
 
   return t('topNav.login.titleInitial')
 })
+
+const isOnline = computed(() => online.value)
 
 export type { LoginModalFragment }
 

@@ -83,7 +83,11 @@ export class CloudDataSource {
 
           if (!resolvedData) {
             resolvedData = res
-            if (res.error) {
+
+            if (res.error?.networkError) {
+              this.ctx.debug('executeRemoteGraphQL network error', res.error)
+              dfd.resolve({ ...res, error: undefined, data: null })
+            } else if (res.error) {
               dfd.reject(res.error)
             } else {
               dfd.resolve(res)

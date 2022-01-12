@@ -1,6 +1,9 @@
 <template>
+  <NoInternetConnection
+    v-if="!isOnline"
+  />
   <RunsConnect
-    v-if="!currentProject?.projectId || !cloudViewer?.id"
+    v-else-if="!currentProject?.projectId || !cloudViewer?.id"
     :gql="props.gql"
   />
   <template v-else-if="currentProject?.cloudProject?.__typename === 'CloudProject'">
@@ -24,10 +27,14 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 import { gql } from '@urql/vue'
+import { useOnline } from '@vueuse/core'
 import RunCard from './RunCard.vue'
 import RunsConnect from './RunsConnect.vue'
 import RunsEmpty from './RunsEmpty.vue'
 import type { RunsContainerFragment } from '../generated/graphql'
+import NoInternetConnection from '@packages//frontend-shared/src/components/NoInternetConnection.vue'
+
+const online = useOnline()
 
 gql`
 fragment RunsContainer on Query {
@@ -59,6 +66,7 @@ const props = defineProps<{
 
 const currentProject = computed(() => props.gql.currentProject)
 const cloudViewer = computed(() => props.gql.cloudViewer)
+const isOnline = computed(() => online.value)
 </script>
 
 <style scoped>

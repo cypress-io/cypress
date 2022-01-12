@@ -204,7 +204,8 @@
       "readTheDocsButton": "Read the docs",
       "retryButton": "Try again",
       "stackTraceLabel": "Stack Trace"
-    }
+    },
+    "noInternet": "You have no internet connection"
   },
   "setupPage": {
     "projectSetup": {
