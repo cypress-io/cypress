@@ -1,6 +1,8 @@
 module.exports = {
   component: {
-    devServer: () => {},
+    devServer: () => {
+      return { port: 3000 }
+    },
     devServerConfig: {},
   },
 }

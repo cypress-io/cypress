@@ -128,7 +128,7 @@ describe('Launchpad: Setup Project', () => {
     })
 
     // project has a cypress.configuration file with component testing configured
-    describe('project that has not been configured for e2e', () => {
+    describe.skip('project that has not been configured for e2e', () => {
       it('shows the first step in configuration when selecting e2e tests', () => {
         cy.openProject('pristine-with-ct-testing')
         cy.visitLaunchpad()
@@ -226,7 +226,7 @@ describe('Launchpad: Setup Project', () => {
       })
     })
 
-    describe('project that has not been configured for e2e', () => {
+    describe.skip('project that has not been configured for component testing', () => {
       it('opens to the "choose framework" page when opened via cli with --component flag', () => {
         cy.scaffoldProject('pristine-with-e2e-testing')
         cy.openProject('pristine-with-e2e-testing', ['--component'])

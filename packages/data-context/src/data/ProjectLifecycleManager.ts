@@ -302,16 +302,16 @@ export class ProjectLifecycleManager {
       return
     }
 
-    this.loadTestingType()
-    // // If we've chosen e2e and we don't have a config file, we can scaffold one
-    // // without any sort of onboarding wizard.
-    // if (!this.metaState.hasValidConfigFile) {
-    //   if (testingType === 'e2e' && !this.ctx.isRunMode) {
-    //     this.ctx.actions.wizard.scaffoldTestingType().catch(this.onLoadError)
-    //   }
-    // } else {
-    //   this.loadTestingType()
-    // }
+    // this.loadTestingType()
+    // If we've chosen e2e and we don't have a config file, we can scaffold one
+    // without any sort of onboarding wizard.
+    if (!this.metaState.hasValidConfigFile) {
+      if (testingType === 'e2e' && !this.ctx.isRunMode) {
+        this.ctx.actions.wizard.scaffoldTestingType().catch(this.onLoadError)
+      }
+    } else {
+      this.loadTestingType()
+    }
   }
 
   /**
@@ -323,11 +323,11 @@ export class ProjectLifecycleManager {
 
     assert(testingType, 'loadTestingType requires a testingType')
 
-    if ((!this.isTestingTypeConfigured(testingType) || !this.metaState.hasValidConfigFile) && !this.ctx.isRunMode) {
-      this.ctx.actions.wizard.scaffoldTestingType().catch(this.onLoadError)
+    // if ((!this.isTestingTypeConfigured(testingType) || !this.metaState.hasValidConfigFile) && !this.ctx.isRunMode) {
+    //   this.ctx.actions.wizard.scaffoldTestingType().catch(this.onLoadError)
 
-      return
-    }
+    //   return
+    // }
 
     // If we have set a testingType, and it's not the "target" of the
     // registeredEvents (switching testing mode), we need to get a fresh
