@@ -194,6 +194,7 @@ export class ProjectDataSource {
       const specs = await this.findSpecs(projectRoot, testingType, specPattern, ignoreSpecPattern, additionalIgnore)
 
       this.setSpecs(specs)
+
       if (testingType === 'component') {
         this.api.getDevServer().updateSpecs(specs)
       }

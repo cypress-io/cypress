@@ -16,7 +16,7 @@ query SpecPageContainer {
 }
 `
 
-const query = useQuery({ query: SpecPageContainerDocument })
+const query = useQuery({ query: SpecPageContainerDocument, requestPolicy: 'network-only' })
 </script>
 
 <route>
