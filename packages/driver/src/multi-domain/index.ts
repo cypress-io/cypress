@@ -8,7 +8,7 @@ import $Cypress from '../cypress'
 import { $Cy } from '../cypress/cy'
 import $Commands from '../cypress/commands'
 import $Log from '../cypress/log'
-import $Listeners from '../cy/listeners'
+import { bindToListeners } from '../cy/listeners'
 import { SpecBridgeDomainCommunicator } from './communicator'
 
 const specBridgeCommunicator = new SpecBridgeDomainCommunicator()
@@ -195,10 +195,11 @@ const onBeforeAppWindowLoad = (cy: $Cy, Cypress: Cypress.Cypress) => (autWindow:
 
   cy.overrides.wrapNativeMethods(autWindow)
   // TODO: DRY this up with the mostly-the-same code in src/cypress/cy.js
-  $Listeners.bindTo(autWindow, {
+  bindToListeners(autWindow, {
     // TODO: implement this once there's a better way to forward
     // messages to the top frame
-    onError () {},
+    onError: () => () => undefined,
+    onHistoryNav () {},
     onSubmit (e) {
       return Cypress.action('app:form:submitted', e)
     },

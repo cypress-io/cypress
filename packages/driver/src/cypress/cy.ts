@@ -1097,6 +1097,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       onSubmit (e) {
         return cy.Cypress.action('app:form:submitted', e)
       },
+      onLoad () {},
       onBeforeUnload (e) {
         cy.isStable(false, 'beforeunload')
 
@@ -1110,7 +1111,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
         // doesn't trigger a confirmation dialog
         return undefined
       },
-      onLoad () {},
       onUnload (e) {
         return cy.Cypress.action('app:window:unload', e)
       },
