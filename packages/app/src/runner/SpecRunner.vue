@@ -15,8 +15,8 @@
     >
       <!-- TODO(mark): - allow show-panel-2 to be true in screenshots if including the reporter is intended -->
       <template #panel1="{isDragging}">
-        <HideDuringScreenshot
-          v-if="props.gql.currentProject && isOpenMode"
+        <HideDuringScreenshotOrRunMode
+          v-if="props.gql.currentProject"
           v-show="runnerUiStore.isSpecsListOpen"
           id="inline-spec-list"
           class="h-full bg-gray-1000"
@@ -32,7 +32,7 @@
             @close="runnerUiStore.setShowChooseExternalEditorModal(false)"
             @selected="openFile"
           />
-        </HideDuringScreenshot>
+        </HideDuringScreenshotOrRunMode>
       </template>
       <template #panel2>
         <HideDuringScreenshot
@@ -48,15 +48,15 @@
       <template
         #panel3="{width}"
       >
-        <HideDuringScreenshot class="bg-white p-16px">
+        <HideDuringScreenshotOrRunMode class="bg-white p-16px">
           <SpecRunnerHeader
-            v-if="isOpenMode && props.gql.currentProject"
+            v-if="props.gql.currentProject"
             :gql="props.gql.currentProject"
             :event-manager="eventManager"
             :get-aut-iframe="getAutIframeModel"
             :width="width - 32"
           />
-        </HideDuringScreenshot>
+        </HideDuringScreenshotOrRunMode>
 
         <RemoveClassesDuringScreenshotting
           class="h-full bg-gray-100 p-16px"
@@ -107,6 +107,7 @@ import { useWindowSize } from '@vueuse/core'
 import ResizablePanels, { DraggablePanel } from './ResizablePanels.vue'
 import { runnerConstants } from './runner-constants'
 import AutomationElement from './automation/AutomationElement.vue'
+import HideDuringScreenshotOrRunMode from './screenshot/HideDuringScreenshotOrRunMode.vue'
 
 const { height: windowHeight, width: windowWidth } = useWindowSize()
 

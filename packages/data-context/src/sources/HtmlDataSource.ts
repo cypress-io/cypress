@@ -86,6 +86,7 @@ export class HtmlDataSource {
         <script>
           window.__CYPRESS_GRAPHQL_PORT__ = ${JSON.stringify(this.ctx.gqlServerPort)};
           window.__CYPRESS_INITIAL_DATA__ = "${base64InitialData}";
+          window.__CYPRESS_MODE__ = ${JSON.stringify(this.ctx.isRunMode ? 'run' : 'open')}
         </script>
     `)
   }
