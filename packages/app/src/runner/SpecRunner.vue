@@ -276,8 +276,8 @@ onMounted(() => {
     autStore.setScriptError(err)
   })
 
-  eventManager.on('visit:failed', (err) => {
-    autStore.setScriptError(err)
+  eventManager.on('visit:failed', (payload) => {
+    getAutIframeModel().showVisitFailure(payload)
   })
 
   eventManager.on('visit:blank', ({ type }) => {
