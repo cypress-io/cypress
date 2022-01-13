@@ -109,7 +109,7 @@ export class ProjectActions {
     return this.projects
   }
 
-  async initializeActiveProject (options: OpenProjectLaunchOptions = {}, shouldCloseBrowser = true) {
+  async initializeActiveProject (options: OpenProjectLaunchOptions = {}) {
     assert(this.ctx.currentProject, 'Cannot initialize project without an active project')
     assert(this.ctx.coreData.currentTestingType, 'Cannot initialize project without choosing testingType')
 
@@ -120,8 +120,9 @@ export class ProjectActions {
     }
 
     try {
-      await this.api.closeActiveProject(shouldCloseBrowser)
-      await this.api.openProjectCreate(allModeOptionsWithLatest, {
+      await this.api.closeActiveProject()
+
+      return await this.api.openProjectCreate(allModeOptionsWithLatest, {
         ...options,
         ctx: this.ctx,
       })
