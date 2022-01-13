@@ -7,14 +7,14 @@ exports['e2e sessions / session tests'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (session_spec.js)                                                          │
-  │ Searched:   cypress/integration/session_spec.js                                                │
+  │ Specs:      1 found (session.cy.js)                                                            │
+  │ Searched:   cypress/e2e/session.cy.js                                                          │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  session_spec.js                                                                 (1 of 1)
+  Running:  session.cy.js                                                                   (1 of 1)
 
 
   cross origin automations
@@ -138,7 +138,7 @@ exports['e2e sessions / session tests'] = `
   │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     session_spec.js                                                                  │
+  │ Spec Ran:     session.cy.js                                                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -149,7 +149,7 @@ exports['e2e sessions / session tests'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  session_spec.js                          XX:XX       55       54        -        1        - │
+  │ ✔  session.cy.js                            XX:XX       55       54        -        1        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX       55       54        -        1        -  
 
@@ -166,8 +166,7 @@ exports['e2e sessions / sessions persist on reload, and clear between specs'] = 
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      2 found (session_persist_spec_1.js, session_persist_spec_2.js)                     │
-  │ Searched:   cypress/integration/session_persist_spec_1.js, cypress/integration/session_persist │
-  │             _spec_2.js                                                                         │
+  │ Searched:   cypress/e2e/session_persist_spec_1.js, cypress/e2e/session_persist_spec_2.js       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

@@ -11,7 +11,6 @@ const config = require(`../../lib/config`)
 const { SocketE2E } = require(`../../lib/socket-e2e`)
 const { ServerE2E } = require(`../../lib/server-e2e`)
 const { Automation } = require(`../../lib/automation`)
-const { SpecsStore } = require(`../../lib/specs-store`)
 const exec = require(`../../lib/exec`)
 const preprocessor = require(`../../lib/plugins/preprocessor`)
 const { fs } = require(`../../lib/util/fs`)
@@ -32,7 +31,7 @@ describe('lib/socket', () => {
 
     this.server = new ServerE2E(ctx)
 
-    ctx.actions.project.setCurrentProjectForTestSetup(this.todosPath)
+    ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.todosPath)
 
     return config.get(this.todosPath)
     .then((cfg) => {
@@ -53,7 +52,6 @@ describe('lib/socket', () => {
       this.server.open(this.cfg, {
         SocketCtor: SocketE2E,
         createRoutes,
-        specsStore: new SpecsStore({}, 'e2e'),
         testingType: 'e2e',
       })
       .then(() => {
@@ -570,7 +568,6 @@ describe('lib/socket', () => {
       return this.server.open(this.cfg, {
         SocketCtor: SocketE2E,
         createRoutes,
-        specsStore: new SpecsStore({}, 'e2e'),
         testingType: 'e2e',
       })
       .then(() => {

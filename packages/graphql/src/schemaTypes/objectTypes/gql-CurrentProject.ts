@@ -35,7 +35,7 @@ export const CurrentProject = objectType({
     })
 
     t.field('currentTestingType', {
-      description: 'The mode the interactive runner was launched in',
+      description: 'The currently chosen testing type for the project',
       type: TestingTypeEnum,
       resolve: (_, args, ctx) => ctx.coreData.currentTestingType,
     })
@@ -109,6 +109,13 @@ export const CurrentProject = objectType({
       description: 'Project configuration',
       resolve: (source, args, ctx) => {
         return ctx.project.getResolvedConfigFields()
+      },
+    })
+
+    t.json('savedState', {
+      description: 'Project saved state',
+      resolve: (source, args, ctx) => {
+        return ctx.project.getCurrentProjectSavedState()
       },
     })
 

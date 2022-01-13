@@ -70,7 +70,7 @@ const { t } = useI18n()
 gql`
 mutation ScaffoldGeneratorStepOne_scaffoldIntegration {
   scaffoldIntegration {
-    fileParts {
+    file {
       id
       absolute
       relative
@@ -101,9 +101,9 @@ const scaffoldedFiles = computed(() => mutation.data.value?.scaffoldIntegration 
 const specTree = computed(() => {
   const files: FoundSpec[] = scaffoldedFiles.value.map((res) => {
     return {
-      ...res.fileParts,
+      ...res.file,
       specType: 'integration',
-      specFileExtension: res.fileParts.baseName.replace(res.fileParts.fileName, '') }
+      specFileExtension: res.file.baseName.replace(res.file.fileName, '') }
   })
 
   return useCollapsibleTree(buildSpecTree(files), { dropRoot: true })

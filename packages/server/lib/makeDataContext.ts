@@ -28,6 +28,7 @@ import * as savedState from './saved_state'
 import appData from './util/app_data'
 import plugins from './plugins'
 import browsers from './browsers'
+import devServer from './plugins/dev-server'
 
 const { getBrowsers, ensureAndGetByNameOrPath } = browserUtils
 
@@ -54,6 +55,7 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
     errorApi: {
       error: errors.get,
       message: errors.getMsgByType,
+      warning: errors.warning,
     },
     configApi: {
       getServerPluginHandlers: plugins.getServerPluginHandlers,
@@ -62,6 +64,7 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       validateConfig: configUtils.validate,
       updateWithPluginValues: config.updateWithPluginValues,
       setupFullConfigWithDefaults: config.setupFullConfigWithDefaults,
+      validateRootConfigBreakingChanges: configUtils.validateNoBreakingConfigRoot,
     },
     appApi: {
       appData,
@@ -88,7 +91,7 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
         return openProject.create(args.projectRoot, args, options)
       },
       insertProjectToCache (projectRoot: string) {
-        cache.insertProject(projectRoot)
+        return cache.insertProject(projectRoot)
       },
       getProjectRootsFromCache () {
         return cache.getProjectRoots()
@@ -113,6 +116,27 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       },
       closeActiveProject () {
         return openProject.closeActiveProject()
+      },
+      getCurrentProjectSavedState () {
+        // TODO: See if this is the best way we should be getting this config,
+        // shouldn't we have this already in the DataContext?
+        try {
+          return openProject.getConfig()?.state
+        } catch {
+          return {}
+        }
+      },
+      setPromptShown (slug) {
+        return openProject.getProject()
+        ?.saveState({
+          promptsShown: {
+            ...(openProject.getProject()?.state?.promptsShown ?? {}),
+            [slug]: Date.now(),
+          },
+        })
+      },
+      getDevServer () {
+        return devServer
       },
     },
     electronApi: {

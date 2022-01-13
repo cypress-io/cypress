@@ -1,8 +1,8 @@
 <template>
   <button
-    v-if="!href"
+    v-if="!props.href && !props.to"
     style="width: fit-content"
-    class="flex items-center leading-tight border rounded gap-8px outline-none"
+    class="border rounded flex outline-none leading-tight gap-8px items-center"
     :class="classes"
     :disabled="disabled"
   >
@@ -35,11 +35,12 @@
     </ButtonInternals>
   </button>
   <component
-    :is="internalLink ? BaseLink : ExternalLink"
+    :is="linkVersion"
     v-else
-    :href="href"
+    :href="props.href"
+    :to="props.to"
     style="width: fit-content"
-    class="flex select-none items-center border rounded gap-8px outline-none"
+    class="border rounded flex outline-none gap-8px select-none items-center"
     :class="classes"
   >
     <ButtonInternals>
@@ -87,6 +88,7 @@ export default defineComponent({
 
 // eslint-disable-next-line no-duplicate-imports
 import { computed, useAttrs } from 'vue'
+import { RouterLink } from 'vue-router'
 
 // eslint-disable-next-line no-duplicate-imports
 import type { ButtonHTMLAttributes, FunctionalComponent, SVGAttributes } from 'vue'
@@ -119,6 +121,7 @@ const props = defineProps<{
   prefixIconClass?: string
   suffixIconClass?: string
   href?: string // will cause the button to render as link element with button styles
+  to?: object | string // will render as a router-link with button styles
   internalLink?: boolean
   disabled?: boolean
 }>()
@@ -137,5 +140,13 @@ const classes = computed(() => {
     attrs.class,
     (props.disabled && props.variant !== 'pending') ? 'opacity-50' : '',
   ]
+})
+
+const linkVersion = computed(() => {
+  if (!props.to) {
+    return props.internalLink ? BaseLink : ExternalLink
+  }
+
+  return RouterLink
 })
 </script>

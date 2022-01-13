@@ -10,17 +10,19 @@ import type { CacheExchangeOpts } from '@urql/exchange-graphcache'
  */
 export const urqlCacheKeys: Partial<CacheExchangeOpts> = {
   keys: {
-    App: (data) => data.__typename,
     DevState: (data) => data.__typename,
     Wizard: (data) => data.__typename,
     Migration: (data) => data.__typename,
-    Warning: (data) => null,
+    Warning: () => null,
     CloudRunCommitInfo: () => null,
     GitInfo: () => null,
     BaseError: () => null,
     ProjectPreferences: (data) => data.__typename,
     VersionData: () => null,
+    ScaffoldedFile: () => null,
     LocalSettings: (data) => data.__typename,
     LocalSettingsPreferences: () => null,
+    CloudProjectNotFound: (data) => data.__typename,
+    CloudProjectUnauthorized: (data) => data.__typename,
   },
 }

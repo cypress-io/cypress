@@ -43,7 +43,7 @@ function getTranspileFolders (config) {
     return acc
   }, [])
 
-  return folders.concat(dirsFromSpecPattern)
+  return folders.concat(...dirsFromSpecPattern, path.resolve('cypress'))
 }
 
 module.exports = { getTranspileFolders }

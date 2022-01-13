@@ -50,6 +50,7 @@
           #="{ active }"
         >
           <button
+            :data-cy="item.name"
             :class="{ 'bg-gray-700': active }"
             class="text-left px-16px py-8px border-b border-b-gray-800"
             @click.stop="handleMenuClick(item.event)"

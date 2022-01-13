@@ -9,7 +9,6 @@ const httpsServer = require(`@packages/https-proxy/test/helpers/https_server`)
 const config = require(`../../lib/config`)
 const { ServerE2E } = require(`../../lib/server-e2e`)
 const { SocketE2E } = require(`../../lib/socket-e2e`)
-const { SpecsStore } = require(`../../lib/specs-store`)
 const Fixtures = require('@tooling/system-tests/lib/fixtures')
 const { createRoutes } = require(`../../lib/routes`)
 
@@ -87,7 +86,6 @@ describe('Server', () => {
             this.server.open(cfg, {
               SocketCtor: SocketE2E,
               createRoutes,
-              specsStore: new SpecsStore({}, 'e2e'),
               testingType: 'e2e',
             })
             .spread(async (port) => {
@@ -135,6 +133,7 @@ describe('Server', () => {
           config: {
             port: 2000,
             fileServerFolder: 'dev',
+            supportFile: false,
           },
         })
       })
@@ -332,6 +331,7 @@ describe('Server', () => {
           projectRoot: '/foo/bar/',
           config: {
             port: 2000,
+            supportFile: false,
           },
         })
       })
@@ -918,6 +918,7 @@ describe('Server', () => {
           config: {
             port: 2000,
             fileServerFolder: 'dev',
+            supportFile: false,
           },
         })
       })

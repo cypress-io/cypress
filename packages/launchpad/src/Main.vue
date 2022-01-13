@@ -1,7 +1,9 @@
 <template>
   <template v-if="query.data.value">
-    <HeaderBar />
-    <div class="p-24px">
+    <HeaderBar
+      class="w-full z-30 fixed"
+    />
+    <div class="px-24px pt-86px">
       <BaseError
         v-if="query.data.value.baseError"
         :gql="query.data.value.baseError"

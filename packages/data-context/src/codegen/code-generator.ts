@@ -24,9 +24,9 @@ export interface CodeGenResults {
 
 /**
  * Utility for generating files from ejs templates or for general scaffolding purposes.
- * Given a templte directory, all files within will be moved to the target directory specified whilst
- * maintaining the folder heirarchy. It supports both text and binary files, with text files having the
- * additional ablity to be rendered with .ejs support meaning any arguments passed in can be interpolated
+ * Given a template directory, all files within will be moved to the target directory specified whilst
+ * maintaining the folder hierarchy. It supports both text and binary files, with text files having the
+ * additional ability to be rendered with .ejs support meaning any arguments passed in can be interpolated
  * into the file. For custom file naming, front-matter can be used to specify the output fileName.
  */
 export async function codeGenerator (

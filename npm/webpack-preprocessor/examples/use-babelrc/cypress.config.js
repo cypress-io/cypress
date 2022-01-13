@@ -1,8 +1,7 @@
 module.exports = {
   'fixturesFolder': false,
-  'supportFile': false,
   'e2e': {
-    'specPattern': 'cypress/integration/**/*',
+    'supportFile': false,
     setupNodeEvents (on, config) {
       const webpackPreprocessor = require('../..')
       const defaults = webpackPreprocessor.defaultOptions

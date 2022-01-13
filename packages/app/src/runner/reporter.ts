@@ -42,14 +42,12 @@ function renderReporter (
   const reporter = window.UnifiedRunner.React.createElement(window.UnifiedRunner.Reporter, {
     runMode: 'single' as const,
     runner: eventManager.reporterBus,
-    key: store.specRunId,
-    spec: store.spec,
-    specRunId: store.specRunId,
     autoScrollingEnabled: runnerUiStore.autoScrollingEnabled,
     isSpecsListOpen: runnerUiStore.isSpecsListOpen,
     error: null, // errorMessages.reporterError(props.state.scriptError, props.state.spec.relative),
     resetStatsOnSpecChange: true,
     experimentalStudioEnabled: false,
+    runnerStore: store,
   })
 
   window.UnifiedRunner.ReactDOM.render(reporter, root)

@@ -12,8 +12,8 @@ const { isDefault } = require('./util/config')
 const getExampleSpecsFullPaths = cypressEx.getPathToExamples()
 const getExampleFolderFullPaths = cypressEx.getPathToExampleFolders()
 
-const getPathFromIntegrationFolder = (file) => {
-  return file.substring(file.indexOf('integration/') + 'integration/'.length)
+const getPathFromE2EFolder = (file) => {
+  return file.substring(file.indexOf('e2e/') + 'e2e/'.length)
 }
 
 const getExampleSpecs = (foldersOnly = false) => {
@@ -21,9 +21,9 @@ const getExampleSpecs = (foldersOnly = false) => {
 
   return paths
   .then((fullPaths) => {
-    // short paths relative to integration folder (i.e. examples/actions.spec.js)
+    // short paths relative to e2e folder (i.e. examples/actions.spec.js)
     const shortPaths = _.map(fullPaths, (file) => {
-      return getPathFromIntegrationFolder(file)
+      return getPathFromE2EFolder(file)
     })
 
     // index for quick lookup and for getting full path from short path
@@ -41,7 +41,7 @@ const getIndexedExample = (file, index) => {
     file = file.split(path.sep).join(path.posix.sep)
   }
 
-  return index[getPathFromIntegrationFolder(file)]
+  return index[getPathFromE2EFolder(file)]
 }
 
 const getFileSize = (file) => {
@@ -73,12 +73,12 @@ const isNewProject = (config) => {
 module.exports = {
   isNewProject,
 
-  integration (folder, config) {
-    debug(`integration folder ${folder}`)
+  e2e (folder, config) {
+    debug(`e2e folder ${folder}`)
 
-    // skip if user has explicitly set integrationFolder
+    // skip if user has explicitly set e2eFolder
     // or if user has set up component testing
-    if (!isDefault(config, 'integrationFolder') || componentTestingEnabled(config)) {
+    if (!isDefault(config, 'e2eFolder') || componentTestingEnabled(config)) {
       return Promise.resolve()
     }
 
@@ -106,28 +106,6 @@ module.exports = {
       debug(`copying example.json into ${folder}`)
 
       return this._copy(cypressEx.getPathToFixture(), folder)
-    })
-  },
-
-  support (folder, config) {
-    debug(`support folder ${folder}, support file ${config.supportFile}`)
-
-    // skip if user has explicitly set supportFile
-    if (!config.supportFile || !isDefault(config, 'supportFile')) {
-      return Promise.resolve()
-    }
-
-    return this.verifyScaffolding(folder, () => {
-      debug(`copying commands.js and index.js to ${folder}`)
-
-      return cypressEx.getPathToSupportFiles()
-      .then((supportFiles) => {
-        return Promise.all(
-          supportFiles.map((supportFilePath) => {
-            return this._copy(supportFilePath, folder)
-          }),
-        )
-      })
     })
   },
 
@@ -222,20 +200,13 @@ module.exports = {
 
       if (!componentTestingEnabled(config)) {
         files = _.map(specs.shortPaths, (file) => {
-          return getFilePath(config.integrationFolder, file)
+          return getFilePath(config.e2eFolder, file)
         })
       }
 
       if (config.fixturesFolder) {
         files = files.concat([
           getFilePath(config.fixturesFolder, 'example.json'),
-        ])
-      }
-
-      if (config.supportFolder && (config.supportFile !== false)) {
-        files = files.concat([
-          getFilePath(config.supportFolder, 'commands.js'),
-          getFilePath(config.supportFolder, 'index.js'),
         ])
       }
 

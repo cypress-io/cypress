@@ -1,14 +1,18 @@
-import type { CodeGenType, MutationAddProjectArgs, MutationSetProjectPreferencesArgs, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
+import type { CodeGenType, MutationAddProjectArgs, MutationSetProjectPreferencesArgs, NexusGenObjects, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
 import type { InitializeProjectOptions, FoundBrowser, FoundSpec, LaunchOpts, OpenProjectLaunchOptions, Preferences, TestingType } from '@packages/types'
 import execa from 'execa'
 import path from 'path'
 import assert from 'assert'
+import Debug from 'debug'
+
+const debug = Debug('cypress:data-context:project-actions')
 
 import type { ProjectShape } from '../data/coreDataShape'
 
 import type { DataContext } from '..'
 import { codeGenerator, SpecOptions } from '../codegen'
 import templates from '../codegen/templates'
+import { insertValuesInConfigFile } from '../util'
 
 export interface ProjectApiShape {
   /**
@@ -18,15 +22,20 @@ export interface ProjectApiShape {
    */
   openProjectCreate(args: InitializeProjectOptions, options: OpenProjectLaunchOptions): Promise<unknown>
   launchProject(browser: FoundBrowser, spec: Cypress.Spec, options: LaunchOpts): void
-  insertProjectToCache(projectRoot: string): void
-  removeProjectFromCache(projectRoot: string): void
+  insertProjectToCache(projectRoot: string): Promise<void>
+  removeProjectFromCache(projectRoot: string): Promise<void>
   getProjectRootsFromCache(): Promise<string[]>
   insertProjectPreferencesToCache(projectTitle: string, preferences: Preferences): void
   getProjectPreferencesFromCache(): Promise<Record<string, Preferences>>
   clearLatestProjectsCache(): Promise<unknown>
   clearProjectPreferences(projectTitle: string): Promise<unknown>
   clearAllProjectPreferences(): Promise<unknown>
-  closeActiveProject(): Promise<unknown>
+  closeActiveProject(shouldCloseBrowser?: boolean): Promise<unknown>
+  getCurrentProjectSavedState(): {} | undefined
+  setPromptShown(slug: string): void
+  getDevServer (): {
+    updateSpecs: (specs: FoundSpec[]) => void
+  }
 }
 
 export class ProjectActions {
@@ -39,6 +48,9 @@ export class ProjectActions {
   async clearCurrentProject () {
     this.ctx.update((d) => {
       d.currentProject = null
+      d.currentTestingType = null
+      d.baseError = null
+      d.warnings = []
     })
 
     this.ctx.lifecycleManager.clearCurrentProject()
@@ -46,7 +58,7 @@ export class ProjectActions {
   }
 
   private get projects () {
-    return this.ctx.coreData.app.projects
+    return this.ctx.projectsList
   }
 
   private set projects (projects: ProjectShape[]) {
@@ -78,9 +90,10 @@ export class ProjectActions {
   }
 
   // Temporary: remove after other refactor lands
-  setCurrentProjectForTestSetup (projectRoot: string) {
+  setCurrentProjectAndTestingTypeForTestSetup (projectRoot: string) {
     this.ctx.lifecycleManager.clearCurrentProject()
     this.ctx.lifecycleManager.setCurrentProject(projectRoot)
+    this.ctx.lifecycleManager.setCurrentTestingType('e2e')
     // @ts-expect-error - we are setting this as a convenience for our integration tests
     this.ctx._modeOptions = {}
   }
@@ -97,13 +110,8 @@ export class ProjectActions {
   }
 
   async initializeActiveProject (options: OpenProjectLaunchOptions = {}) {
-    if (!this.ctx.currentProject) {
-      throw Error('Cannot initialize project without an active project')
-    }
-
-    if (!this.ctx.coreData.currentTestingType) {
-      throw Error('Cannot initialize project without choosing testingType')
-    }
+    assert(this.ctx.currentProject, 'Cannot initialize project without an active project')
+    assert(this.ctx.coreData.currentTestingType, 'Cannot initialize project without choosing testingType')
 
     const allModeOptionsWithLatest: InitializeProjectOptions = {
       ...this.ctx.modeOptions,
@@ -113,7 +121,8 @@ export class ProjectActions {
 
     try {
       await this.api.closeActiveProject()
-      await this.api.openProjectCreate(allModeOptionsWithLatest, {
+
+      return await this.api.openProjectCreate(allModeOptionsWithLatest, {
         ...options,
         ctx: this.ctx,
       })
@@ -136,7 +145,7 @@ export class ProjectActions {
 
     if (!found) {
       this.projects.push({ projectRoot })
-      this.api.insertProjectToCache(projectRoot)
+      await this.api.insertProjectToCache(projectRoot)
     }
 
     if (args.open) {
@@ -174,7 +183,7 @@ export class ProjectActions {
     let activeSpec: FoundSpec | undefined
 
     if (specPath) {
-      activeSpec = await this.ctx.project.getCurrentSpecByAbsolute(specPath)
+      activeSpec = this.ctx.project.getCurrentSpecByAbsolute(specPath)
     }
 
     // Ensure that we have loaded browsers to choose from
@@ -202,56 +211,16 @@ export class ProjectActions {
     return this.api.launchProject(browser, activeSpec ?? emptySpec, options)
   }
 
-  async launchProjectWithoutElectron () {
-    if (!this.ctx.currentProject) {
-      throw Error('Cannot launch project without an active project')
-    }
-
-    const preferences = await this.api.getProjectPreferencesFromCache()
-    const { browserPath, testingType } = preferences[this.ctx.lifecycleManager.projectTitle] ?? {}
-
-    if (!browserPath || !testingType) {
-      throw Error('Cannot launch project without stored browserPath or testingType')
-    }
-
-    this.ctx.lifecycleManager.setCurrentTestingType(testingType)
-
-    const spec = this.makeSpec(testingType)
-    const browser = this.findBrowerByPath(browserPath)
-
-    if (!browser) {
-      throw Error(`Cannot find specified browser at given path: ${browserPath}.`)
-    }
-
-    this.ctx.actions.electron.hideBrowserWindow()
-
-    await this.initializeActiveProject()
-
-    return this.api.launchProject(browser, spec, {})
-  }
-
-  private makeSpec (testingType: TestingTypeEnum): Cypress.Spec {
-    return {
-      name: '',
-      absolute: '',
-      relative: '',
-      specType: testingType === 'e2e' ? 'integration' : 'component',
-    }
-  }
-
-  private findBrowerByPath (browserPath: string) {
-    return this.ctx.coreData?.app?.browsers?.find((browser) => browser.path === browserPath)
-  }
-
   removeProject (projectRoot: string) {
-    const found = this.ctx.projectsList.find((x) => x.projectRoot === projectRoot)
+    const found = this.projects.find((x) => x.projectRoot === projectRoot)
 
     if (!found) {
       throw new Error(`Cannot remove ${projectRoot}, it is not a known project`)
     }
 
     this.projects = this.projects.filter((project) => project.projectRoot !== projectRoot)
-    this.api.removeProjectFromCache(projectRoot)
+
+    return this.api.removeProjectFromCache(projectRoot)
   }
 
   syncProjects () {
@@ -279,6 +248,12 @@ export class ProjectActions {
     await this.ctx.fs.writeFile(this.ctx.lifecycleManager.configFilePath, `module.exports = ${JSON.stringify(obj, null, 2)}`)
   }
 
+  async setProjectIdInConfigFile (projectId: string) {
+    return insertValuesInConfigFile(this.ctx.lifecycleManager.configFilePath, { projectId }, { get (id: string) {
+      return Error(id)
+    } })
+  }
+
   async clearLatestProjectCache () {
     await this.api.clearLatestProjectsCache()
   }
@@ -289,6 +264,10 @@ export class ProjectActions {
 
   async clearAllProjectPreferencesCache () {
     await this.api.clearAllProjectPreferences()
+  }
+
+  setPromptShown (slug: string) {
+    this.api.setPromptShown(slug)
   }
 
   async createComponentIndexHtml (template: string) {
@@ -317,7 +296,7 @@ export class ProjectActions {
     this.api.insertProjectPreferencesToCache(this.ctx.lifecycleManager.projectTitle, { ...args })
   }
 
-  async codeGenSpec (codeGenCandidate: string, codeGenType: CodeGenType) {
+  async codeGenSpec (codeGenCandidate: string, codeGenType: CodeGenType): Promise<NexusGenObjects['ScaffoldedFile']> {
     const project = this.ctx.currentProject
 
     if (!project) {
@@ -348,15 +327,9 @@ export class ProjectActions {
         )
         : codeGenCandidate
     }
-    const getSearchFolder = () => {
-      return (codeGenType === 'integration'
-        ? config.integrationFolder
-        : config.componentFolder) || project
-    }
 
     const specFileExtension = getFileExtension()
     const codeGenPath = getCodeGenPath()
-    const searchFolder = getSearchFolder()
 
     const newSpecCodeGenOptions = new SpecOptions(this.ctx, {
       codeGenPath,
@@ -376,35 +349,49 @@ export class ProjectActions {
 
     const [newSpec] = codeGenResults.files
 
-    const spec = this.ctx.file.normalizeFileToSpec({
-      absolute: newSpec.file,
-      searchFolder,
-      specType: codeGenType === 'integration' ? 'integration' : 'component',
-      projectRoot: project,
-      specFileExtension,
-    })
-
     return {
-      spec,
-      content: newSpec.content,
+      status: 'valid',
+      file: { absolute: newSpec.file, contents: newSpec.content },
+      description: 'Generated spec',
     }
   }
 
-  reconfigureProject () {
+  async reconfigureProject () {
+    await this.api.closeActiveProject()
     this.ctx.actions.wizard.resetWizard()
     this.ctx.actions.electron.refreshBrowserWindow()
     this.ctx.actions.electron.showBrowserWindow()
   }
 
-  async scaffoldIntegration () {
+  get defaultE2EPath () {
+    const projectRoot = this.ctx.currentProject
+
+    assert(projectRoot, `Cannot create e2e directory without currentProject.`)
+
+    return path.join(projectRoot, 'cypress', 'e2e')
+  }
+
+  async maybeCreateE2EDir () {
+    const stats = await this.ctx.fs.stat(this.defaultE2EPath)
+
+    if (stats.isDirectory()) {
+      return
+    }
+
+    debug(`Creating ${this.defaultE2EPath}`)
+
+    return this.ctx.fs.mkdirp(this.defaultE2EPath)
+  }
+
+  async scaffoldIntegration (): Promise<NexusGenObjects['ScaffoldedFile'][]> {
     const projectRoot = this.ctx.currentProject
 
     assert(projectRoot, `Cannot create spec without currentProject.`)
 
-    const integrationFolder = 'cypress/integration' || this.ctx.currentProject
+    await this.maybeCreateE2EDir()
 
     const results = await codeGenerator(
-      { templateDir: templates['scaffoldIntegration'], target: integrationFolder },
+      { templateDir: templates['scaffoldIntegration'], target: this.defaultE2EPath },
       {},
     )
 
@@ -412,26 +399,12 @@ export class ProjectActions {
       throw new Error(`Failed generating files: ${results.failed.map((e) => `${e}`)}`)
     }
 
-    const withFileParts = results.files.map((res) => {
+    return results.files.map(({ status, file, content }) => {
       return {
-        fileParts: this.ctx.file.normalizeFileToFileParts({
-          absolute: res.file,
-          projectRoot,
-          searchFolder: integrationFolder,
-        }),
-        codeGenResult: res,
+        status: (status === 'add' || status === 'overwrite') ? 'valid' : 'skipped',
+        file: { absolute: file, contents: content },
+        description: 'Generated spec',
       }
     })
-
-    const specPattern = await this.ctx.project.specPatternForTestingType('e2e')
-
-    if (!specPattern) {
-      throw Error('Could not find specPattern for project')
-    }
-
-    // created new specs - find and cache them!
-    this.ctx.project.setSpecs(await this.ctx.project.findSpecs(projectRoot, 'e2e', specPattern))
-
-    return withFileParts
   }
 }

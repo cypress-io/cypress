@@ -31,6 +31,8 @@ query OpenBrowser {
   currentProject {
     id
     currentTestingType
+    isLoadingConfigFile
+    isLoadingNodeEvents
     ...OpenBrowserList
   }
   ...WarningList

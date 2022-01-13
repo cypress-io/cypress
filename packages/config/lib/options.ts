@@ -104,7 +104,9 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
   }, {
     name: 'component',
     // runner-ct overrides
-    defaultValue: {},
+    defaultValue: {
+      specPattern: '**/*.cy.{js,jsx,ts,tsx}',
+    },
     validation: isValidConfig,
     canUpdateDuringTestTime: false,
   }, {
@@ -122,7 +124,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     name: 'e2e',
     // e2e runner overrides
     defaultValue: {
-      specPattern: 'cypress/integration/**/*',
+      specPattern: 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
     },
     validation: isValidConfig,
     canUpdateDuringTestTime: false,
@@ -299,7 +301,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     canUpdateDuringTestTime: true,
   }, {
     name: 'supportFile',
-    defaultValue: 'cypress/support',
+    defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? 'cypress/support/component.js' : 'cypress/support/e2e.js',
     validation: validate.isStringOrFalse,
     isFolder: true,
     canUpdateDuringTestTime: false,
@@ -510,5 +512,13 @@ export const breakingOptions: Array<BreakingOption> = [
     value: 'bundled',
     errorKey: 'NODE_VERSION_DEPRECATION_BUNDLED',
     isWarning: true,
+  },
+]
+
+export const breakingRootOptions: Array<BreakingOption> = [
+  {
+    name: 'supportFile',
+    errorKey: 'SUPPORT_FILE_ROOT_NOT_SUPPORTED',
+    isWarning: false,
   },
 ]

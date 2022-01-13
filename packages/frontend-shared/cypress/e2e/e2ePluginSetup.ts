@@ -13,6 +13,7 @@ import { Response } from 'cross-fetch'
 
 import { CloudRunQuery } from '../support/mock-graphql/stubgql-CloudTypes'
 import { getOperationName } from '@urql/core'
+import pDefer from 'p-defer'
 
 interface InternalOpenProjectArgs {
   argv: string[]
@@ -62,6 +63,7 @@ export type E2ETaskMap = ReturnType<typeof makeE2ETasks> extends Promise<infer U
 interface FixturesShape {
   scaffold (): void
   scaffoldProject (project: string): void
+  scaffoldCommonNodeModules(): Promise<void>
   scaffoldWatch (): void
   remove (): void
   removeProject (name): void
@@ -103,6 +105,20 @@ async function makeE2ETasks () {
   ctx = setCtx(makeDataContext({ mode: 'open', modeOptions: { cwd: process.cwd() } }))
 
   const gqlPort = await makeGraphQLServer()
+
+  const __internal_scaffoldProject = async (projectName: string) => {
+    if (fs.existsSync(Fixtures.projectPath(projectName))) {
+      Fixtures.removeProject(projectName)
+    }
+
+    Fixtures.scaffoldProject(projectName)
+
+    await Fixtures.scaffoldCommonNodeModules()
+
+    scaffoldedProjects.add(projectName)
+
+    return Fixtures.projectPath(projectName)
+  }
 
   return {
     /**
@@ -183,24 +199,14 @@ async function makeE2ETasks () {
     },
     async __internal_addProject (opts: InternalAddProjectOpts) {
       if (!scaffoldedProjects.has(opts.projectName)) {
-        this.__internal_scaffoldProject(opts.projectName)
+        await __internal_scaffoldProject(opts.projectName)
       }
 
       await ctx.actions.project.addProject({ path: Fixtures.projectPath(opts.projectName), open: opts.open })
 
       return Fixtures.projectPath(opts.projectName)
     },
-    __internal_scaffoldProject (projectName: string) {
-      if (fs.existsSync(Fixtures.projectPath(projectName))) {
-        Fixtures.removeProject(projectName)
-      }
-
-      Fixtures.scaffoldProject(projectName)
-
-      scaffoldedProjects.add(projectName)
-
-      return Fixtures.projectPath(projectName)
-    },
+    __internal_scaffoldProject,
     async __internal_openGlobal (argv: string[] = []): Promise<ResetOptionsResult> {
       const openArgv = ['--global', ...argv]
 
@@ -252,6 +258,7 @@ async function makeE2ETasks () {
         require,
         process,
         sinon,
+        pDefer,
         projectDir (projectName) {
           if (!e2eProjectDirs.includes(projectName)) {
             throw new Error(`${projectName} is not a fixture project`)

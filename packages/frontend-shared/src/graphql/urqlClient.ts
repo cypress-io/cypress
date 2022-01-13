@@ -14,6 +14,7 @@ import { useToast } from 'vue-toastification'
 
 import { cacheExchange as graphcacheExchange } from '@urql/exchange-graphcache'
 import { urqlCacheKeys } from '@packages/data-context/src/util/urqlCacheKeys'
+import { urqlSchema } from '../generated/urql-introspection.gen'
 
 import { namedRouteExchange } from './urqlExchangeNamedRoute'
 import { createClient as createWSClient } from 'graphql-ws'
@@ -22,8 +23,8 @@ const GQL_PORT_MATCH = /gqlPort=(\d+)/.exec(window.location.search)
 
 const toast = useToast()
 
-export function makeCacheExchange () {
-  return graphcacheExchange(urqlCacheKeys)
+export function makeCacheExchange (schema: any = urqlSchema) {
+  return graphcacheExchange({ ...urqlCacheKeys, schema })
 }
 
 declare global {
@@ -75,7 +76,7 @@ export function makeUrqlClient (target: 'launchpad' | 'app'): Client {
     errorExchange({
       onError (error) {
         const message = `
-        GraphQL Field Path: [${error.graphQLErrors?.[0].path?.join(', ')}]:
+        GraphQL Field Path: [${error.graphQLErrors?.[0]?.path?.join(', ')}]:
 
         ${error.message}
 

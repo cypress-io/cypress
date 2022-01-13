@@ -1,4 +1,5 @@
 import { defineConfig } from 'cypress'
+import { devServer } from '@cypress/vite-dev-server'
 import getenv from 'getenv'
 
 const CYPRESS_INTERNAL_CLOUD_ENV = getenv('CYPRESS_INTERNAL_CLOUD_ENV', process.env.CYPRESS_INTERNAL_ENV || 'development')
@@ -19,32 +20,26 @@ export default defineConfig({
   component: {
     supportFile: 'cypress/component/support/index.ts',
     specPattern: 'src/**/*.{spec,cy}.{js,ts,tsx,jsx}',
-    devServer (cypressConfig, devServerConfig) {
-      const { startDevServer } = require('@cypress/vite-dev-server')
-
-      return startDevServer({ options: cypressConfig, ...devServerConfig })
-    },
+    devServer,
     devServerConfig: {
-      viteConfig: {
-        // TODO(tim): Figure out why this isn't being picked up
-        optimizeDeps: {
-          include: [
-            '@headlessui/vue',
-            'vue3-file-selector',
-            'just-my-luck',
-            'combine-properties',
-            'faker',
-            '@packages/ui-components/cypress/support/customPercyCommand',
-          ],
-        },
+      optimizeDeps: {
+        include: [
+          '@headlessui/vue',
+          'vue3-file-selector',
+          'just-my-luck',
+          'combine-properties',
+          'faker',
+          '@packages/ui-components/cypress/support/customPercyCommand',
+        ],
       },
     },
   },
   'e2e': {
-    specPattern: 'cypress/e2e/integration/**/*.spec.{js,ts}',
     pluginsFile: 'cypress/e2e/plugins/index.ts',
     supportFile: 'cypress/e2e/support/e2eSupport.ts',
     async setupNodeEvents (on, config) {
+      process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF = 'true'
+      // process.env.DEBUG = '*'
       const { e2ePluginSetup } = require('@packages/frontend-shared/cypress/e2e/e2ePluginSetup')
 
       return await e2ePluginSetup(on, config)

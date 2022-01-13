@@ -18,17 +18,15 @@ import errors from './errors'
 import Reporter from './reporter'
 import runEvents from './plugins/run_events'
 import * as savedState from './saved_state'
-import scaffold from './scaffold'
 import { ServerE2E } from './server-e2e'
 import system from './util/system'
 import { ensureProp } from './util/class-helpers'
 
 import { fs } from './util/fs'
+import preprocessor from './plugins/preprocessor'
+import { checkSupportFile } from './project_utils'
 
 import devServer from './plugins/dev-server'
-import preprocessor from './plugins/preprocessor'
-import { SpecsStore } from './specs-store'
-import { checkSupportFile } from './project_utils'
 import type { FoundBrowser, OpenProjectLaunchOptions, FoundSpec } from '@packages/types'
 import { DataContext, getCtx } from '@packages/data-context'
 
@@ -37,7 +35,7 @@ import { DataContext, getCtx } from '@packages/data-context'
 // and are required when creating a project.
 type ReceivedCypressOptions =
   Pick<Cypress.RuntimeConfigOptions, 'hosts' | 'projectName' | 'clientRoute' | 'devServerPublicPathRoute' | 'namespace' | 'report' | 'socketIoCookie' | 'configFile' | 'isTextTerminal' | 'isNewProject' | 'proxyUrl' | 'browsers' | 'browserUrl' | 'socketIoRoute' | 'arch' | 'platform' | 'spec' | 'specs' | 'browser' | 'version' | 'remote'>
-  & Pick<Cypress.ResolvedConfigOptions, 'chromeWebSecurity' | 'supportFolder' | 'experimentalSourceRewriting' | 'fixturesFolder' | 'reporter' | 'reporterOptions' | 'screenshotsFolder' | 'pluginsFile' | 'supportFile' | 'baseUrl' | 'viewportHeight' | 'viewportWidth' | 'port' | 'experimentalInteractiveRunEvents' | 'userAgent' | 'downloadsFolder' | 'env' | 'testFiles' | 'ignoreSpecPattern'> // TODO: Figure out how to type this better.
+  & Pick<Cypress.ResolvedConfigOptions, 'chromeWebSecurity' | 'supportFolder' | 'experimentalSourceRewriting' | 'fixturesFolder' | 'reporter' | 'reporterOptions' | 'screenshotsFolder' | 'pluginsFile' | 'supportFile' | 'baseUrl' | 'viewportHeight' | 'viewportWidth' | 'port' | 'experimentalInteractiveRunEvents' | 'userAgent' | 'downloadsFolder' | 'env' | 'testFiles' | 'ignoreSpecPattern' | 'specPattern'> // TODO: Figure out how to type this better.
 
 export interface Cfg extends ReceivedCypressOptions {
   projectRoot: string
@@ -48,6 +46,8 @@ export interface Cfg extends ReceivedCypressOptions {
     lastOpened?: number | null
     promptsShown?: object | null
   }
+  e2e: Partial<Cfg>
+  component: Partial<Cfg>
 }
 
 const localCwd = cwd()
@@ -174,11 +174,7 @@ export class ProjectBase<TServer extends Server> extends EE {
 
     this._server = this.createServer(this.testingType)
 
-    const {
-      specsStore,
-      startSpecWatcher,
-      ctDevServerPort,
-    } = await this.initializeSpecStore(cfg)
+    const { ctDevServerPort } = await this.initializeSpecsAndDevServer(cfg)
 
     if (this.testingType === 'component') {
       cfg.baseUrl = `http://localhost:${ctDevServerPort}`
@@ -193,7 +189,6 @@ export class ProjectBase<TServer extends Server> extends EE {
       shouldCorrelatePreRequests: this.shouldCorrelatePreRequests,
       testingType: this.testingType,
       SocketCtor: this.testingType === 'e2e' ? SocketE2E : SocketCt,
-      specsStore,
     })
 
     this.ctx.setAppServerPort(port)
@@ -246,10 +241,7 @@ export class ProjectBase<TServer extends Server> extends EE {
       projectRoot: this.projectRoot,
     })
 
-    await Promise.all([
-      this.scaffold(cfg),
-      this.saveState(stateToSave),
-    ])
+    await this.saveState(stateToSave)
 
     await Promise.all([
       checkSupportFile({ configFile: cfg.configFile, supportFile: cfg.supportFile }),
@@ -258,13 +250,6 @@ export class ProjectBase<TServer extends Server> extends EE {
     if (cfg.isTextTerminal) {
       return
     }
-
-    // start watching specs
-    // whenever a spec file is added or removed, we notify the
-    // <SpecList>
-    // This is only used for CT right now by general users.
-    // It is is used with E2E if the CypressInternal_UseInlineSpecList flag is true.
-    startSpecWatcher()
 
     if (!cfg.experimentalInteractiveRunEvents) {
       return
@@ -299,6 +284,13 @@ export class ProjectBase<TServer extends Server> extends EE {
     return
   }
 
+  __reset () {
+    preprocessor.close()
+    devServer.close()
+
+    process.chdir(localCwd)
+  }
+
   async close () {
     debug('closing project instance %s', this.projectRoot)
 
@@ -309,19 +301,16 @@ export class ProjectBase<TServer extends Server> extends EE {
       return
     }
 
-    const closePreprocessor = this.testingType === 'e2e' ? preprocessor.close : undefined
+    this.__reset()
 
     this.ctx.setAppServerPort(undefined)
     this.ctx.setAppSocketServer(undefined)
 
     await Promise.all([
       this.server?.close(),
-      closePreprocessor?.(),
     ])
 
     this._isServerOpen = false
-
-    process.chdir(localCwd)
     this.isOpen = false
 
     const config = this.getConfig()
@@ -339,12 +328,28 @@ export class ProjectBase<TServer extends Server> extends EE {
     options.onError(err)
   }
 
-  async initializeSpecStore (updatedConfig: Cfg): Promise<{
-    specsStore: SpecsStore
+  async initializeSpecsAndDevServer (updatedConfig: Cfg): Promise<{
     ctDevServerPort: number | undefined
-    startSpecWatcher: () => void
   }> {
-    return this.initSpecStore({ specs: this.ctx.project.specs, config: updatedConfig })
+    const specs = this.ctx.project.specs || []
+
+    let ctDevServerPort: number | undefined
+
+    if (!this.ctx.currentProject) {
+      throw new Error('Cannot set specs without current project')
+    }
+
+    updatedConfig.specs = specs
+
+    if (this.testingType === 'component' && !this.options.skipPluginInitializeForTesting) {
+      const { port } = await this.startCtDevServer(specs, updatedConfig)
+
+      ctDevServerPort = port
+    }
+
+    return {
+      ctDevServerPort,
+    }
   }
 
   async startCtDevServer (specs: Cypress.Cypress['spec'][], config: any) {
@@ -361,40 +366,6 @@ export class ProjectBase<TServer extends Server> extends EE {
     }
 
     return { port: devServerOptions.port }
-  }
-
-  async initSpecStore ({
-    specs,
-    config,
-  }: {
-    specs: FoundSpec[]
-    config: Cfg
-  }) {
-    const specsStore = new SpecsStore()
-
-    const startSpecWatcher = () => {
-      if (this.testingType === 'component') {
-      // ct uses the dev-server to build and bundle the speces.
-      // send new files to dev server
-        devServer.updateSpecs(specs)
-      }
-    }
-
-    let ctDevServerPort: number | undefined
-
-    if (this.testingType === 'component' && !this.options.skipPluginInitializeForTesting) {
-      const { port } = await this.startCtDevServer(specs, config)
-
-      ctDevServerPort = port
-    }
-
-    specsStore.storeSpecFiles(specs)
-
-    return {
-      specsStore,
-      ctDevServerPort,
-      startSpecWatcher,
-    }
   }
 
   initializeReporter ({
@@ -530,6 +501,7 @@ export class ProjectBase<TServer extends Server> extends EE {
   }
 
   async initializeConfig (): Promise<Cfg> {
+    this.ctx.lifecycleManager.setCurrentTestingType(this.testingType)
     let theCfg: Cfg = await this.ctx.lifecycleManager.getFullInitialConfig() as Cfg // ?? types are definitely wrong here I think
 
     theCfg = this.testingType === 'e2e'
@@ -594,26 +566,6 @@ export class ProjectBase<TServer extends Server> extends EE {
 
   writeConfigFile ({ code, configFilename }: { code: string, configFilename: string }) {
     fs.writeFileSync(path.resolve(this.projectRoot, configFilename), code)
-  }
-
-  scaffold (cfg: Cfg) {
-    debug('scaffolding project %s', this.projectRoot)
-
-    const scaffolds = []
-
-    const push = scaffolds.push.bind(scaffolds) as any
-
-    // TODO: we are currently always scaffolding support
-    // even when headlessly - this is due to a major breaking
-    // change of 0.18.0
-    // we can later force this not to always happen when most
-    // of our users go beyond 0.18.0
-    //
-    // ensure support dir is created
-    // and example support file if dir doesnt exist
-    push(scaffold.support(cfg.supportFolder, cfg))
-
-    return Promise.all(scaffolds)
   }
 
   // These methods are not related to start server/sockets/runners
