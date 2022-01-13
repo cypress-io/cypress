@@ -5,6 +5,10 @@ describe('Cypress In Cypress', () => {
     cy.startAppServer('component')
     cy.visitApp()
     cy.contains('TestComponent.spec').click()
-    //TODO: Validate that the test succeeds when we get CT in E2E cypress in cypress working
+    cy.location().should((location) => {
+      expect(location.hash).to.contain('TestComponent.spec')
+    })
+
+    cy.get('[data-model-state="passed"]').should('contain', 'renders the test component')
   })
 })

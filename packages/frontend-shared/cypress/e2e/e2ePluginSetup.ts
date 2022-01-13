@@ -63,7 +63,6 @@ export type E2ETaskMap = ReturnType<typeof makeE2ETasks> extends Promise<infer U
 interface FixturesShape {
   scaffold (): void
   scaffoldProject (project: string): void
-  scaffoldProjectNodeModules (project: string): Promise<void>
   scaffoldCommonNodeModules(): Promise<void>
   scaffoldWatch (): void
   remove (): void
@@ -113,7 +112,6 @@ async function makeE2ETasks () {
     }
 
     Fixtures.scaffoldProject(projectName)
-    await Fixtures.scaffoldProjectNodeModules(projectName)
 
     await Fixtures.scaffoldCommonNodeModules()
 
