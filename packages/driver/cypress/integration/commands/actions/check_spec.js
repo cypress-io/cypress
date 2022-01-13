@@ -327,6 +327,20 @@ describe('src/cy/commands/actions/check', () => {
       })
     })
 
+    it('removes indeterminate prop', () => {
+      const intermediateCheckbox = $(`<input type='checkbox' name="indeterminate">`)
+
+      intermediateCheckbox.prop('indeterminate', true)
+
+      $('body').append(intermediateCheckbox)
+
+      cy.get(':checkbox[name=\'indeterminate\']').check().then(($checkbox) => {
+        const hasIndeterminate = $checkbox.prop('indeterminate')
+
+        expect(hasIndeterminate).to.be.false
+      })
+    })
+
     describe('assertion verification', () => {
       beforeEach(function () {
         cy.on('log:added', (attrs, log) => {
@@ -927,6 +941,20 @@ describe('src/cy/commands/actions/check', () => {
       cy.get(':checkbox:first').uncheck().then(() => {
         expect(clicks).to.eq(1)
         expect(retried).to.be.true
+      })
+    })
+
+    it('removes indeterminate prop', () => {
+      const indeterminateCheckbox = $(`<input type='checkbox' name="indeterminate">`)
+
+      indeterminateCheckbox.prop('indeterminate', true)
+
+      $('body').append(indeterminateCheckbox)
+
+      cy.get(':checkbox[name=\'indeterminate\']').uncheck().then(($checkbox) => {
+        const hasIndeterminate = $checkbox.prop('indeterminate')
+
+        expect(hasIndeterminate).to.be.false
       })
     })
 

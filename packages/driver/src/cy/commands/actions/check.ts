@@ -140,12 +140,13 @@ const checkOrUncheck = (Cypress, cy, type, subject, values = [], userOptions = {
         animationDistanceThreshold: options.animationDistanceThreshold,
         scrollBehavior: options.scrollBehavior,
       }).then(() => {
-        if (options._log) {
-          options._log.snapshot().end()
+        // special case where the checkbox has an indeterminate prop
+        if ($el.prop('indeterminate')) {
+          $el.removeProp('indeterminate')
         }
 
-        if ($el.prop('intermediate')) {
-          $el.removeProp('intermediate')
+        if (options._log) {
+          options._log.snapshot().end()
         }
 
         return null
