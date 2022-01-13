@@ -2,7 +2,7 @@ const arch = require('arch')
 const la = require('lazy-ass')
 const is = require('check-more-types')
 const os = require('os')
-const Url = require('URL')
+const url = require('url')
 const path = require('path')
 const debug = require('debug')('cypress:cli')
 const request = require('@cypress/request')
@@ -62,7 +62,7 @@ const getCA = () => {
 }
 
 const prepend = (urlPath) => {
-  const endpoint = Url.resolve(getBaseUrl(), urlPath)
+  const endpoint = url.resolve(getBaseUrl(), urlPath)
   const platform = os.platform()
 
   return `${endpoint}?platform=${platform}&arch=${arch()}`
@@ -315,7 +315,7 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca, version, redi
 }
 
 /**
- * Download Cypress.zip from external url to local file.
+ * Download Cypress.zip from external versionUrl to local file.
  * @param [string] version Could be "3.3.0" or full URL
  * @param [string] downloadDestination Local filename to save as
  */
@@ -332,12 +332,12 @@ const start = (opts) => {
     } }
   }
 
-  const url = getUrl(version)
+  const versionUrl = getUrl(version)
 
   progress.throttle = 100
 
   debug('needed Cypress version: %s', version)
-  debug('source url %s', url)
+  debug('source url %s', versionUrl)
   debug(`downloading cypress.zip to "${downloadDestination}"`)
 
   // ensure download dir exists
@@ -346,7 +346,7 @@ const start = (opts) => {
     return getCA()
   })
   .then((ca) => {
-    return downloadFromUrl({ url, downloadDestination, progress, ca, version,
+    return downloadFromUrl({ versionUrl, downloadDestination, progress, ca, version,
       ...(redirectTTL ? { redirectTTL } : {}) })
   })
   .catch((err) => {
