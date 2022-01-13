@@ -25,16 +25,9 @@ import { ensureProp } from './util/class-helpers'
 import { fs } from './util/fs'
 import preprocessor from './plugins/preprocessor'
 import { checkSupportFile } from './project_utils'
-import type { FoundBrowser, OpenProjectLaunchOptions, FoundSpec, TestingType } from '@packages/types'
+import type { FoundBrowser, OpenProjectLaunchOptions, FoundSpec, TestingType, ReceivedCypressOptions } from '@packages/types'
 import devServer from './plugins/dev-server'
 import { DataContext, getCtx } from '@packages/data-context'
-
-// Cannot just use RuntimeConfigOptions as is because some types are not complete.
-// Instead, this is an interface of values that have been manually validated to exist
-// and are required when creating a project.
-type ReceivedCypressOptions =
-  Pick<Cypress.RuntimeConfigOptions, 'hosts' | 'projectName' | 'clientRoute' | 'devServerPublicPathRoute' | 'namespace' | 'report' | 'socketIoCookie' | 'configFile' | 'isTextTerminal' | 'isNewProject' | 'proxyUrl' | 'browsers' | 'browserUrl' | 'socketIoRoute' | 'arch' | 'platform' | 'spec' | 'specs' | 'browser' | 'version' | 'remote'>
-  & Pick<Cypress.ResolvedConfigOptions, 'chromeWebSecurity' | 'supportFolder' | 'experimentalSourceRewriting' | 'fixturesFolder' | 'reporter' | 'reporterOptions' | 'screenshotsFolder' | 'pluginsFile' | 'supportFile' | 'baseUrl' | 'viewportHeight' | 'viewportWidth' | 'port' | 'experimentalInteractiveRunEvents' | 'userAgent' | 'downloadsFolder' | 'env' | 'testFiles' | 'ignoreSpecPattern' | 'specPattern'> // TODO: Figure out how to type this better.
 
 export interface Cfg extends ReceivedCypressOptions {
   projectRoot: string
