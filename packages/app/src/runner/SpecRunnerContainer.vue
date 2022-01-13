@@ -11,13 +11,14 @@
     v-else-if="runnerUiStore.automationStatus === 'DISCONNECTED'"
   />
 
-  <div v-if="runnerUiStore.automationStatus === 'CONNECTED' && specStore.activeSpec">
+  <div v-else-if="runnerUiStore.automationStatus === 'CONNECTED' && specStore.activeSpec">
     <SpecRunner
       v-if="initialized"
       :gql="props.gql"
       :active-spec="specStore.activeSpec"
     />
   </div>
+
   <div v-else>
     Error, no spec matched!
   </div>
