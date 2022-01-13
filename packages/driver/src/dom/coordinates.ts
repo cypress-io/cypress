@@ -7,7 +7,7 @@ const getElementAtPointFromViewport = (doc, x, y) => {
   return $elements.elementFromPoint(doc, x, y)
 }
 
-const isAutIframe = (win) => {
+const isAUTFrame = (win) => {
   const parent = win.parent
 
   // https://github.com/cypress-io/cypress/issues/6412
@@ -23,6 +23,8 @@ const isAutIframe = (win) => {
   } catch (err) {
     // if the AUT is cross-domain, accessing parent.frameElement will throw
     // a cross-origin error, meaning this is the AUT
+    // NOTE: this will need to be updated once we add support for
+    // cross-domain iframes
     return true
   }
 }
@@ -110,7 +112,7 @@ const getElementPositioning = ($el: JQuery<HTMLElement> | HTMLElement): ElementP
     // https://github.com/cypress-io/cypress/issues/6412
     // ensure the parent is a Window before checking prop
     // walk up from a nested iframe so we continually add the x + y values
-    while ($window.isWindow(curWindow) && !isAutIframe(curWindow) && curWindow.parent !== curWindow) {
+    while ($window.isWindow(curWindow) && !isAUTFrame(curWindow) && curWindow.parent !== curWindow) {
       frame = $elements.getNativeProp(curWindow, 'frameElement')
 
       if (curWindow && frame) {
@@ -387,4 +389,6 @@ export default {
   getElementCoordinatesByPosition,
 
   getElementCoordinatesByPositionRelativeToXY,
+
+  isAUTFrame,
 }
