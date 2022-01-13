@@ -10,12 +10,9 @@ export interface StorybookFile {
 export interface StorybookInfo {
   storybookRoot: string
   files: StorybookFile[]
-  storyGlobs: string[]
 }
 
 export interface GeneratedSpec {
   spec: FoundSpec
   content: string
 }
-
-export const STORYBOOK_GLOB = '**/*.stories.*'
