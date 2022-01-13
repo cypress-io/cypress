@@ -5,7 +5,7 @@ const cwd = require('../cwd')
 const glob = require('../util/glob')
 const debug = require('debug')('cypress:server:controllers')
 const { escapeFilenameInUrl } = require('../util/escape_filename')
-import { getCtx } from '@packages/data-context'
+const { getCtx } = require('@packages/data-context')
 
 const SPEC_URL_PREFIX = '/__cypress/tests?p'
 
