@@ -1,48 +1,53 @@
 <template>
   <div
-    class="cursor-pointer relative w-full rounded border border-gray-100
-  bg-white pr-4px pt-13px pb-13px flex items-center space-x-3 group
+    class="bg-white border rounded cursor-pointer flex space-x-3
+  border-gray-100 w-full pt-13px pr-4px pb-13px relative items-center group
   hocus-default focus-within-default"
     data-cy="project-card"
     @click="setCurrentProject(props.gql.projectRoot)"
   >
     <div
-      class="w-73px h-40px text-center flex items-center justify-center border-r border-r-gray-100 mr-4px"
+      class="border-r flex border-r-gray-100 h-40px text-center mr-4px w-73px items-center justify-center"
     >
-      <i-cy-bookmark_x24
-        class="w-24px h-28px icon-dark-gray-500 icon-light-gray-50 group-hocus:icon-dark-indigo-400 group-hocus:icon-light-indigo-200"
+      <i-cy-folder-outline_x24
+        class="h-28px w-24px icon-dark-gray-500 icon-light-gray-50 group-hocus:icon-dark-indigo-400 group-hocus:icon-light-indigo-200"
       />
     </div>
 
     <div class="flex-1 min-w-0">
       <button
-        class="focus:outline-none underline-transparent grid w-full text-left children:truncate"
+        class="text-left w-full grid underline-transparent focus:outline-none children:truncate"
       >
         <span
-          class="text-16px row-[1] leading-normal font-medium text-indigo-500"
+          class="font-medium leading-normal text-16px text-indigo-500 row-[1]"
         >
           {{ props.gql.title }}
         </span>
-        <span class="text-sm text-gray-500 relative">{{ props.gql.projectRoot }}</span>
+        <span
+          class="text-sm text-gray-500 relative"
+          :title="props.gql.projectRoot"
+        >
+          {{ props.gql.projectRoot }}
+        </span>
       </button>
     </div>
 
     <Menu #="{ open }">
       <MenuButton
         aria-label="Project Actions"
-        class="focus:outline-transparent w-32px h-32px flex items-center
-      justify-center text-white focus:text-gray-300"
+        class="flex h-32px text-white w-32px items-center
+      justify-center focus:outline-transparent focus:text-gray-300"
         @click.stop
       >
         <i-cy-vertical-dots_x16
-          class="icon-dark-current transition transition-color duration-300"
+          class="transition transition-color duration-300 icon-dark-current"
           :class="open ? 'icon-dark-gray-700' : 'group-hocus:icon-dark-gray-300'"
         />
       </MenuButton>
       <MenuItems
         data-cy="project-card-menu-items"
-        class="absolute bg-gray-900 text-white flex flex-col right-0
-      -bottom-104px right-18px outline-transparent z-40 rounded overflow-scroll"
+        class="rounded flex flex-col outline-transparent bg-gray-900 text-white
+      right-0 right-18px -bottom-104px z-40 absolute overflow-scroll"
       >
         <MenuItem
           v-for="item in menuItems"
@@ -52,7 +57,7 @@
           <button
             :data-cy="item.name"
             :class="{ 'bg-gray-700': active }"
-            class="text-left px-16px py-8px border-b border-b-gray-800"
+            class="border-b border-b-gray-800 text-left py-8px px-16px"
             @click.stop="handleMenuClick(item.event)"
           >
             {{ item.name }}
