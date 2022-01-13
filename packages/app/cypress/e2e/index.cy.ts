@@ -75,11 +75,11 @@ describe('App: Index', () => {
 
         cy.contains(defaultMessages.createSpec.e2e.importFromScaffold.specsAddedHeader).should('be.visible')
         assertSpecs(createdSpecs)
+
+        cy.contains(defaultMessages.createSpec.e2e.importFromScaffold.specsAddedButton).click()
+
+        cy.visitApp().then(() => assertSpecs(createdSpecs))
       })
-
-      cy.contains(defaultMessages.createSpec.e2e.importFromScaffold.specsAddedButton).click()
-
-      cy.visitApp().then(() => assertSpecs(createdSpecs))
     })
   })
 })

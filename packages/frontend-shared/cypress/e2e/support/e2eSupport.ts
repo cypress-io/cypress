@@ -260,7 +260,9 @@ function visitApp (href?: string) {
   }
 
   return cy.withCtx(async (ctx) => {
-    return ctx.lifecycleManager.loadedFullConfig?.clientRoute
+    const config = await ctx.lifecycleManager.getFullInitialConfig()
+
+    return config.clientRoute
   }).then((clientRoute) => {
     return cy.visit(`http://localhost:${e2e_serverPort}${clientRoute || '/__/'}#${href || ''}`)
   })
