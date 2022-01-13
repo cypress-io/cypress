@@ -27,8 +27,10 @@ describe('Launchpad: Setup Project', () => {
 
     it('welcome page has "learn about testing types" link which opens modal', () => {
       cy.contains('Review the differences').click()
+
       cy.get('#app').should('have.attr', 'aria-hidden', 'true')
-      cy.contains('Key Differences').should('be.visible')
+
+      cy.findByRole('dialog', { name: 'Key Differences' }).should('be.visible')
       cy.contains('Need help?').should('be.visible')
 
       cy.get('[data-cy="end-to-end-comparison"]').within(() => {
@@ -47,7 +49,7 @@ describe('Launchpad: Setup Project', () => {
     it('close modal with escape key', () => {
       cy.contains('Review the differences').click()
       cy.get('#app').should('have.attr', 'aria-hidden', 'true')
-      cy.contains('Key Differences').should('be.visible')
+      cy.findByRole('dialog', { name: 'Key Differences' }).should('be.visible')
       cy.get('body').type('{esc}')
       cy.get('#app').should('not.have.attr', 'aria-hidden')
     })
@@ -55,7 +57,7 @@ describe('Launchpad: Setup Project', () => {
     it('closes modal by clicking outside of modal', () => {
       cy.contains('Review the differences').click()
       cy.get('#app').should('have.attr', 'aria-hidden', 'true')
-      cy.contains('Key Differences').should('be.visible')
+      cy.findByRole('dialog', { name: 'Key Differences' }).should('be.visible')
       cy.get('body').click(5, 5)
       cy.get('#app').should('not.have.attr', 'aria-hidden')
     })
@@ -63,8 +65,15 @@ describe('Launchpad: Setup Project', () => {
     it('closes modal by clicking close button', () => {
       cy.contains('Review the differences').click()
       cy.get('#app').should('have.attr', 'aria-hidden', 'true')
-      cy.get('h2').contains('Key Differences').should('be.visible')
-      cy.get('[aria-label=Close]').click()
+
+      cy.findByRole('dialog', { name: 'Key Differences' })
+      .should('be.visible')
+      .within(() => {
+        cy.get('h2').contains('Key Differences').should('be.visible')
+      })
+
+      cy.findByRole('button', { name: 'Close' }).click()
+      // cy.get('[aria-label=Close]').click()
       cy.get('#app').should('not.have.attr', 'aria-hidden')
     })
 
@@ -73,27 +82,36 @@ describe('Launchpad: Setup Project', () => {
     it.skip('closes modal by pressing enter key when close button is focused', () => {
       cy.contains('Review the differences').click()
       cy.get('#app').should('have.attr', 'aria-hidden', 'true')
-      cy.contains('h2', 'Key Differences').should('be.visible')
 
-      // @ts-ignore
-      cy.get('body').tab()
+      cy.findByRole('dialog', { name: 'Key Differences' })
+      .as('aboutTestingTypes')
+      .should('be.visible')
+      .within(() => {
+        cy.get('h2').contains('Key Differences').should('be.visible')
 
-      cy.get('[aria-label=Close]')
-      .should('have.attr', 'type', 'button')
-      .should('have.focus')
-      .type('{enter}')
+        // @ts-ignore
+        cy.get('body').tab()
+
+        cy.findByRole('button', { name: 'Close' })
+        .should('have.focus')
+        .type('{enter}')
+      })
 
       cy.get('#app').should('not.have.attr', 'aria-hidden')
-      cy.contains('h2', 'Key Differences').should('not.be.visible')
+      cy.get('@aboutTestTypes').should('not.be.visible')
     })
 
     it('clicking "Need Help?" links to Cypress documentation', () => {
       cy.contains('Review the differences').click()
       cy.get('#app').should('have.attr', 'aria-hidden', 'true')
-      cy.contains('h2', 'Key Differences').should('be.visible')
-      cy.validateExternalLink({
-        name: 'Need help?',
-        href: 'https://on.cypress.io',
+
+      cy.findByRole('dialog', { name: 'Key Differences' })
+      .should('be.visible')
+      .within(() => {
+        cy.validateExternalLink({
+          name: 'Need help?',
+          href: 'https://on.cypress.io',
+        })
       })
     })
   })
