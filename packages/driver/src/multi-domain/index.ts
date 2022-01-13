@@ -110,6 +110,7 @@ const setup = () => {
       clearTimeout () {},
       resetTimeout () {},
       timeout () {},
+      isPending () {},
     })
 
     let fnWrapper = `(${fn})`
