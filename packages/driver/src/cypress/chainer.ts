@@ -1,8 +1,13 @@
-// @ts-nocheck
 import _ from 'lodash'
 import $stackUtils from './stack_utils'
 
 export class $Chainer {
+  userInvocationStack: any
+  specWindow: Window
+  chainerId: string
+  firstCall: boolean
+  useInitialStack: boolean | null
+
   constructor (userInvocationStack, specWindow) {
     this.userInvocationStack = userInvocationStack
     this.specWindow = specWindow
@@ -11,6 +16,7 @@ export class $Chainer {
     // to the primary domain for the command log, etc.
     this.chainerId = _.uniqueId(`ch-${window.location.origin}-`)
     this.firstCall = true
+    this.useInitialStack = null
   }
 
   static remove (key) {
