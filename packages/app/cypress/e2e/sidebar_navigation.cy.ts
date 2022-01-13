@@ -140,7 +140,7 @@ describe('Sidebar Navigation', () => {
   // TODO: find out why this is failing.
   // seems the problem is related to realHover, likely we have some problems around
   // CDP
-  const tempSkip = Date.now() > +(new Date('2020-01-20')) ? it : it.only
+  const tempSkip = Date.now() > +(new Date('2020-01-20')) ? it : it.skip
 
   tempSkip('highlights the hovered menu item', () => {
     cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'true')
