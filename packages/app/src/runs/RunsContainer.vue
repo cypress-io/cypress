@@ -29,6 +29,7 @@
         :title="t('launchpadErrors.noInternet.header')"
         :message="t('launchpadErrors.noInternet.message')"
         :dismissible="false"
+        class="mx-auto mb-24px max-w-400px"
       />
       <RunCard
         v-for="run of currentProject?.cloudProject?.runs?.nodes"
