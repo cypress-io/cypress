@@ -13,12 +13,11 @@
   </head>
   <body>
     <div id="app"></div>
+    <script type="text/javascript" src="/{{namespace}}/runner/cypress_runner.js"></script>
     <script type="text/javascript">
       // set a global so we know the 'top' window
       window.__Cypress__ = true
-    </script>
-    <script type="text/javascript" src="/{{namespace}}/runner/cypress_runner.js"></script>
-    <script type="text/javascript">
+
       setTimeout(function(){
         Runner.start(document.getElementById('app'), "{{base64Config | safe}}")
       }, 0)
