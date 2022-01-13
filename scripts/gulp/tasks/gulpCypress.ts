@@ -67,6 +67,8 @@ async function spawnCypressWithMode (
 ) {
   let argv = [...additionalArgv]
 
+  env.CYPRESS_INTERNAL_MODE = mode
+
   let debugFlag = process.execArgv.find((s) => s.startsWith('--inspect'))
 
   if (debugFlag) {
