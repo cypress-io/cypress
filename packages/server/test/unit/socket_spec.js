@@ -29,7 +29,7 @@ describe('lib/socket', () => {
 
     this.todosPath = Fixtures.projectPath('todos')
 
-    this.server = new ServerE2E(ctx)
+    this.server = new ServerE2E()
 
     ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.todosPath)
 
