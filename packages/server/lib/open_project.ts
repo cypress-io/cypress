@@ -26,6 +26,7 @@ export class OpenProject {
   }
 
   resetOpenProject () {
+    this.projectBase?.__reset()
     this.projectBase = null
     this.relaunchBrowser = null
   }
@@ -61,17 +62,7 @@ export class OpenProject {
   }) {
     this._ctx = getCtx()
 
-    if (!this.projectBase && this._ctx.currentProject) {
-      await this.create(this._ctx.currentProject, {
-        ...this._ctx.modeOptions,
-        projectRoot: this._ctx.currentProject,
-        testingType: this._ctx.coreData.currentTestingType!,
-      }, options)
-    }
-
-    if (!this.projectBase) {
-      throw Error('Cannot launch runner if projectBase is undefined!')
-    }
+    assert(this.projectBase, 'Cannot launch runner if projectBase is undefined!')
 
     debug('resetting project state, preparing to launch browser %s for spec %o options %o',
       browser.name, spec, options)
