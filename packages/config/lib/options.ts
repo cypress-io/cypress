@@ -384,7 +384,7 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     canUpdateDuringTestTime: false,
   }, {
     name: 'clientRoute',
-    defaultValue: process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF ? '/cy-child-client/' : '/__/',
+    defaultValue: process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF ? '/__child/' : '/__/',
     validation: validate.isString,
     isInternal: true,
     canUpdateDuringTestTime: false,
@@ -398,7 +398,7 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     canUpdateDuringTestTime: false,
   }, {
     name: 'devServerPublicPathRoute',
-    defaultValue: process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF ? '/cy-child-namespace/src' : '/__cypress/src',
+    defaultValue: process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF ? '/__cypress-child/src' : '/__cypress/src',
     validation: validate.isString,
     isInternal: true,
     canUpdateDuringTestTime: false,
@@ -431,7 +431,7 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     canUpdateDuringTestTime: false,
   }, {
     name: 'namespace',
-    defaultValue: process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF ? 'cy-child-namespace' : '__cypress',
+    defaultValue: process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF ? '__cypress-child' : '__cypress',
     validation: validate.isString,
     isInternal: true,
     canUpdateDuringTestTime: false,
@@ -449,13 +449,13 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     canUpdateDuringTestTime: false,
   }, {
     name: 'socketIoCookie',
-    defaultValue: process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF ? 'cy-child-socket-cookie' : '__socket.io',
+    defaultValue: process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF ? '__child-socket.io' : '__socket.io',
     validation: validate.isString,
     isInternal: true,
     canUpdateDuringTestTime: false,
   }, {
     name: 'socketIoRoute',
-    defaultValue: process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF ? '/cy-child-socket' : '/__socket.io',
+    defaultValue: process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF ? '/__child-socket.io' : '/__socket.io',
     validation: validate.isString,
     isInternal: true,
     canUpdateDuringTestTime: false,
