@@ -1,11 +1,11 @@
 <template>
-  <div class="w-full border-1px border-gray-100 rounded">
+  <div class="w-full border-gray-100 rounded border-1px">
     <div class="flex justify-between p-14px">
       <InlineCodeFragment>specPattern</InlineCodeFragment>
       <div>
         <OpenConfigFileInIDE>
           <button
-            class="text-indigo-500 flex gap-8px items-center group outline-transparent"
+            class="flex items-center text-indigo-500 gap-8px group outline-transparent"
           >
             <i-cy-document-text_x16 class="icon-light-gray-100 icon-dark-gray-500" />
             <span class="group-hocus:underline">cypress.config.js</span>
@@ -14,11 +14,11 @@
       </div>
     </div>
 
-    <div class="px-16px bg-gray-50 divide-y-1 divide-gray-200">
+    <div class="divide-gray-200 px-16px bg-gray-50 divide-y-1">
       <code
         v-for="pattern in specPatterns"
         :key="pattern"
-        class="block flex py-8px text-gray-600 text-size-14px leading-24px"
+        class="flex block text-gray-600 py-8px text-size-14px leading-24px"
       >
         {{ pattern }}
       </code>
@@ -39,6 +39,7 @@ fragment SpecPatterns on Query {
   currentProject {
     id
     config
+    currentTestingType
   }
 }
 `
@@ -48,7 +49,7 @@ const props = defineProps<{
 }>()
 
 const specPatterns = computed<string[]>(() => {
-  let patterns = props.gql.currentProject?.config.find((x) => x.field === 'testFiles')?.value
+  let patterns = props.gql.currentProject?.config.find((x) => x.field === props.gql.currentProject?.currentTestingType)?.value?.specPattern
 
   if (!patterns) {
     return []

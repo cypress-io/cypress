@@ -7,6 +7,6 @@ describe('<SpecPatterns />', () => {
       render: (gql) => <SpecPatterns gql={gql} />,
     })
 
-    cy.contains('**/*.spec.{js,ts,tsx,jsx}')
+    cy.contains('cypress/e2e/**/*.cy.{js,jsx,ts,tsx}')
   })
 })

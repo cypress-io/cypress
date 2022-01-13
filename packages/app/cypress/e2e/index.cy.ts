@@ -13,11 +13,12 @@ describe('App: Index', () => {
     })
 
     cy.startAppServer()
-    cy.visitApp()
   })
 
   context('with no specs', () => {
     it('shows "Create spec" title', () => {
+      cy.visitApp()
+
       // TODO: we need more e2e tests around this, but it requires changes to how we set up config in our
       // gql mock, which would likely conflict with other ongoing changes.
       // In the meantime, the Create Spec vs No Specs Found differences are covered in component tests,
@@ -26,16 +27,45 @@ describe('App: Index', () => {
     })
 
     it('routes to settings spec-pattern section', () => {
+      cy.visitApp()
+
       cy.contains(defaultMessages.createSpec.viewSpecPatternButton).scrollIntoView().click()
       cy.get('[data-cy="Project Settings"]').within(() => {
         cy.get('[data-cy="collapsible-header"]').should('have.attr', 'aria-expanded', 'true')
         cy.contains(defaultMessages.settingsPage.specPattern.title).should('be.visible')
       })
     })
+
+    it('shows "No Specs Found" when not using default spec pattern', () => {
+      const customSpecPattern = 'cypress/**/*.cy.ts'
+
+      cy.intercept('query-SpecsPageContainer', (req) => {
+        req.on('before:response', (res) => {
+          res.body.data.currentProject.isDefaultSpecPattern = false
+          res.body.data.currentProject.config = res.body.data.currentProject.config.map((x) => {
+            if (x.field === 'e2e') {
+              return { ...x, value: { ...x.value, specPattern: customSpecPattern } }
+            }
+
+            return x
+          })
+        })
+      })
+
+      cy.visitApp()
+
+      cy.contains('h1', defaultMessages.createSpec.page.customPatternNoSpecs.title)
+
+      cy.contains('code', 'specPattern')
+
+      cy.contains('code', customSpecPattern)
+    })
   })
 
   context('with specs', () => {
     it('refreshes spec list on spec changes', () => {
+      cy.visitApp()
+
       cy.get('[data-testid="create-spec-page-title"]').should('be.visible')
 
       cy.withCtx(async (ctx, { testState }) => {

@@ -1,5 +1,5 @@
 import type { CodeLanguageEnum, NexusGenEnums, NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
-import type { Bundler, CodeLanguage, FrontendFramework } from '@packages/types'
+import { Bundler, CodeLanguage, DEFAULT_COMPONENT_SPEC_PATTERN, DEFAULT_E2E_SPEC_PATTERN, FrontendFramework } from '@packages/types'
 import assert from 'assert'
 import dedent from 'dedent'
 import fs from 'fs'
@@ -324,7 +324,7 @@ const E2E_SCAFFOLD_BODY = (opts: E2eScaffoldOpts) => {
   return `
     e2e: {
       supportFile: 'cypress/support/e2e.${opts.lang}',
-      specPattern: 'cypress/e2e/**/*.cy.{js,ts}',
+      specPattern: ${DEFAULT_E2E_SPEC_PATTERN},
       viewportHeight: 660,
       viewportWidth: 1000,
       setupNodeEvents(on, config) {
@@ -345,7 +345,7 @@ const COMPONENT_SCAFFOLD_BODY = (opts: ComponentScaffoldOpts) => {
   return `
   component: {
     supportFile: 'cypress/support/component.${opts.lang}',
-    specPattern: 'cypress/**/*.cy.{js,jsx,ts,tsx}',
+    specPattern: ${DEFAULT_COMPONENT_SPEC_PATTERN},
     devServer: import('${opts.requirePath}'),
     devServerConfig: ${opts.configOptionsString}
   }
