@@ -16,7 +16,7 @@ let mitmProxy = require('http-mitm-proxy')
 
 // TODO(lachlan): get these passing, issue is we need to hide the <TopNav />
 // so it won't make a request to npm to get the latest Cypress version,
-const tempSkip = Date.now() > new Date('2022-01-14') ? it : it.skip
+const tempSkip = Date.now() > new Date('2022-01-20') ? it : it.skip
 
 const PORT = 13370
 const PROXY_PORT = 13371

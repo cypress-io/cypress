@@ -1,7 +1,7 @@
 const systemTests = require('../lib/system-tests').default
 
 // TODO: hide UI in run mode
-const tempSkip = Date.now() > new Date('2022-01-14') ? systemTests.it : systemTests.it.skip
+const tempSkip = Date.now() > new Date('2022-01-20') ? systemTests.it : systemTests.it.skip
 
 const onServer = (app) => {
   return app.get('/fullPage', systemTests.sendHtml(`\
