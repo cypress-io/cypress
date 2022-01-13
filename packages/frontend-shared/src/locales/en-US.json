@@ -27,7 +27,7 @@
   },
   "clipboard": {
     "copy": "Copy",
-    "copied": "Copied"
+    "copied": "Copied!"
   },
   "actions": {
     "close": "Close"
@@ -321,7 +321,16 @@
     "recordKey": {
       "title": "Record Key",
       "description": "The Record Key configured for this project inside of Cypress Cloud. {0}",
-      "manageKeys": "Manage Keys"
+      "manageKeys": "Manage Keys",
+      "errorEmpty": "You do not have permission to record on this project",
+      "errorEmptyButton": "Request record rights",
+      "errorAccess": "You do not have permission to view this project",
+      "errorAccessPending": "Your request for access to this project is pending approval",
+      "errorAccessButton": "Request access",
+      "errorNotFound": "Project not found",
+      "errorNotFoundButton": "Connect it again",
+      "errorNotLoggedIn": "You are not connected to the Cypress Dashboard",
+      "errorNotLoggedInButton": "Log in to Cypress Dashboard"
     },
     "project": {
       "title": "Project Settings",
@@ -375,19 +384,75 @@
       "debugText": "Debug tests that fail in CI with visual feedback.",
       "chartText": "Keep your tests in tip-top shape with powerful analytics.",
       "buttonUser": "Log in to the Cypress Dashboard",
-      "buttonProject": "Connect your project to the Cypress Dashboard"
+      "buttonProject": "Connect your project to the Cypress Dashboard",
+      "modal": {
+        "title": "Connect Project",
+        "cancel": "Cancel",
+        "createOrg": {
+          "description": "You need to create an organization in the Cypress Dashboard to continue.",
+          "button": "Create Organization",
+          "waitingButton": "Waiting for you to create an organization...",
+          "refreshButton": "Refresh Organizations List"
+        },
+        "selectProject": {
+          "organization": "Organization",
+          "noOrganizationSelectedError": "required when creating a new project",
+          "manageOrgs": "Manage organizations",
+          "project": "Project",
+          "projectName": "Project Name",
+          "projectNameDisclaimer": "(You can change this later)",
+          "createNewProject": "Create new",
+          "chooseExistsingProject": "Choose an existing project",
+          "newProjectAccess": "Project Access",
+          "privateLabel": "Private",
+          "privateDescription": "Only invited users can view recorded test results.",
+          "publicLabel": "Public",
+          "publicDescription": "Anyone can view recorded test results.",
+          "connectProject": "Connect project",
+          "createProject": "Create project",
+          "placeholderOrganizations": "Pick an organization",
+          "placeholderProjects": "Pick an project",
+          "placeholderProjectsPending": "Pick an organization first"
+        },
+        "connectManually": {
+          "title": "Connect Project Manually",
+          "warning": "We couldn’t add the projectId to your cypress.config.js file automatically.",
+          "mainMessage": "Manually add the {projectId} to the root of the config object in your {configFile} file.",
+          "waitingButton": "Waiting for you to add the projectId..."
+        }
+      }
+    },
+    "connectSuccessAlert": {
+      "title": "This project is now connected to the Cypress Dashboard!",
+      "item1": "We automatically added the {projectId} to your {configFile} file.",
+      "item2": "Please ensure that your {0} file is checked into source control."
     },
     "empty": {
-      "title": "Follow the steps below to record your first run to the Cypress Dashboard",
-      "step1": "Ensure that your {0} file contains the following code:",
-      "step2": "Ensure that your {0} file is checked into source control:",
-      "step3": "Run this command in your local development terminal or in CI:"
+      "title": "Record your first run to the Cypress Dashboard",
+      "description": "Run the command below in your local development terminal or in CI."
     },
     "results": {
       "skipped": "skipped",
       "pending": "pending",
       "passed": "passed",
       "failed": "failed"
+    },
+    "errors": {
+      "notfound": {
+        "title": "Couldn't find your project",
+        "description": "We were unable to find an existing project matching the {0} set in your Cypress config file. You can reconnect with an existing project or create a new project.",
+        "button": "Reconnect your project"
+      },
+      "unauthorized": {
+        "title": "Request access to view the recorded runs",
+        "description": "This is a private project that you do not current have access to. Please request access from the project owner in order to view the list of runs.",
+        "button": "Request Access"
+      },
+      "unauthorizedRequested": {
+        "title": "Your access request for this project has been sent.",
+        "description": "The owner of this project has been notified of your request. We'll notify you via email when your access request has been granted.",
+        "button": "Request Sent"
+      }
     }
   },
   "testingType": {

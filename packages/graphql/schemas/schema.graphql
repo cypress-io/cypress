@@ -297,11 +297,6 @@ type CloudUser implements Node {
   userIsViewer: Boolean!
 }
 
-enum CodeGenGenResultType {
-  binary
-  text
-}
-
 """Glob patterns for detecting files for code gen."""
 type CodeGenGlobs implements Node {
   component: String!
@@ -309,12 +304,6 @@ type CodeGenGlobs implements Node {
   """Relay style Node ID field for the CodeGenGlobs field"""
   id: ID!
   story: String!
-}
-
-enum CodeGenStatus {
-  add
-  overwrite
-  skipped
 }
 
 enum CodeGenType {
@@ -653,6 +642,9 @@ type Mutation {
   Update local preferences (also known as  appData). The payload, `value`, should be a `JSON.stringified()` object of the new values you'd like to persist. Example: `setPreferences (value: JSON.stringify({ lastOpened: Date.now() }))`
   """
   setPreferences(value: String!): Query
+
+  """Set the projectId field in the config file of the current project"""
+  setProjectIdInConfigFile(projectId: String!): Query
 
   """Save the projects preferences to cache"""
   setProjectPreferences(browserPath: String!, testingType: TestingTypeEnum!): Query!

@@ -12,6 +12,7 @@ import type { ProjectShape } from '../data/coreDataShape'
 import type { DataContext } from '..'
 import { codeGenerator, SpecOptions } from '../codegen'
 import templates from '../codegen/templates'
+import { insertValuesInConfigFile } from '../util'
 
 export interface ProjectApiShape {
   /**
@@ -29,7 +30,7 @@ export interface ProjectApiShape {
   clearLatestProjectsCache(): Promise<unknown>
   clearProjectPreferences(projectTitle: string): Promise<unknown>
   clearAllProjectPreferences(): Promise<unknown>
-  closeActiveProject(): Promise<unknown>
+  closeActiveProject(shouldCloseBrowser?: boolean): Promise<unknown>
   getConfig(): Pick<Cypress.RuntimeConfigOptions, 'hosts' | 'projectName' | 'clientRoute' | 'devServerPublicPathRoute' | 'namespace' | 'report' | 'socketIoCookie' | 'configFile' | 'isTextTerminal' | 'isNewProject' | 'proxyUrl' | 'browsers' | 'browserUrl' | 'socketIoRoute' | 'arch' | 'platform' | 'spec' | 'specs' | 'browser' | 'version' | 'remote'>
   & Pick<Cypress.ResolvedConfigOptions, 'chromeWebSecurity' | 'supportFolder' | 'experimentalSourceRewriting' | 'fixturesFolder' | 'reporter' | 'reporterOptions' | 'screenshotsFolder' | 'pluginsFile' | 'supportFile' | 'baseUrl' | 'viewportHeight' | 'viewportWidth' | 'port' | 'experimentalInteractiveRunEvents' | 'userAgent' | 'downloadsFolder' | 'env' | 'testFiles' | 'ignoreSpecPattern' | 'specPattern'> | undefined // TODO: Figure out how to type this better.
   getCurrentProjectSavedState(): {} | undefined
@@ -49,6 +50,9 @@ export class ProjectActions {
   async clearCurrentProject () {
     this.ctx.update((d) => {
       d.currentProject = null
+      d.currentTestingType = null
+      d.baseError = null
+      d.warnings = []
     })
 
     this.ctx.lifecycleManager.clearCurrentProject()
@@ -108,13 +112,8 @@ export class ProjectActions {
   }
 
   async initializeActiveProject (options: OpenProjectLaunchOptions = {}) {
-    if (!this.ctx.currentProject) {
-      throw Error('Cannot initialize project without an active project')
-    }
-
-    if (!this.ctx.coreData.currentTestingType) {
-      throw Error('Cannot initialize project without choosing testingType')
-    }
+    assert(this.ctx.currentProject, 'Cannot initialize project without an active project')
+    assert(this.ctx.coreData.currentTestingType, 'Cannot initialize project without choosing testingType')
 
     const allModeOptionsWithLatest: InitializeProjectOptions = {
       ...this.ctx.modeOptions,
@@ -124,7 +123,8 @@ export class ProjectActions {
 
     try {
       await this.api.closeActiveProject()
-      await this.api.openProjectCreate(allModeOptionsWithLatest, {
+
+      return await this.api.openProjectCreate(allModeOptionsWithLatest, {
         ...options,
         ctx: this.ctx,
       })
@@ -185,7 +185,7 @@ export class ProjectActions {
     let activeSpec: FoundSpec | undefined
 
     if (specPath) {
-      activeSpec = await this.ctx.project.getCurrentSpecByAbsolute(specPath)
+      activeSpec = this.ctx.project.getCurrentSpecByAbsolute(specPath)
     }
 
     // Ensure that we have loaded browsers to choose from
@@ -211,47 +211,6 @@ export class ProjectActions {
     this.ctx.coreData.currentTestingType = testingType
 
     return this.api.launchProject(browser, activeSpec ?? emptySpec, options)
-  }
-
-  async launchProjectWithoutElectron () {
-    if (!this.ctx.currentProject) {
-      throw Error('Cannot launch project without an active project')
-    }
-
-    const preferences = await this.api.getProjectPreferencesFromCache()
-    const { browserPath, testingType } = preferences[this.ctx.lifecycleManager.projectTitle] ?? {}
-
-    if (!browserPath || !testingType) {
-      throw Error('Cannot launch project without stored browserPath or testingType')
-    }
-
-    this.ctx.lifecycleManager.setCurrentTestingType(testingType)
-
-    const spec = this.makeSpec(testingType)
-    const browser = this.findBrowserByPath(browserPath)
-
-    if (!browser) {
-      throw Error(`Cannot find specified browser at given path: ${browserPath}.`)
-    }
-
-    this.ctx.actions.electron.hideBrowserWindow()
-
-    await this.initializeActiveProject()
-
-    return this.api.launchProject(browser, spec, {})
-  }
-
-  private makeSpec (testingType: TestingTypeEnum): Cypress.Spec {
-    return {
-      name: '',
-      absolute: '',
-      relative: '',
-      specType: testingType === 'e2e' ? 'integration' : 'component',
-    }
-  }
-
-  private findBrowserByPath (browserPath: string) {
-    return this.ctx.coreData?.app?.browsers?.find((browser) => browser.path === browserPath)
   }
 
   removeProject (projectRoot: string) {
@@ -289,6 +248,12 @@ export class ProjectActions {
     }
 
     await this.ctx.fs.writeFile(this.ctx.lifecycleManager.configFilePath, `module.exports = ${JSON.stringify(obj, null, 2)}`)
+  }
+
+  async setProjectIdInConfigFile (projectId: string) {
+    return insertValuesInConfigFile(this.ctx.lifecycleManager.configFilePath, { projectId }, { get (id: string) {
+      return Error(id)
+    } })
   }
 
   async clearLatestProjectCache () {

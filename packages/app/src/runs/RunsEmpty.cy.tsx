@@ -5,7 +5,9 @@ describe('<RunsEmpty />', () => {
   it('playground', () => {
     cy.mountFragment(RunsEmptyFragmentDoc, {
       render (gqlVal) {
-        return <RunsEmpty gql={gqlVal} />
+        return (<div class="h-screen">
+          <RunsEmpty gql={gqlVal} />
+        </div>)
       },
     })
   })

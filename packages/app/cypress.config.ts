@@ -45,6 +45,8 @@ export default defineConfig({
     supportFile: 'cypress/e2e/support/e2eSupport.ts',
     async setupNodeEvents (on, config) {
       delete process.env.HTTP_PROXY_TARGET_HOST
+      process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF = 'true'
+      // process.env.DEBUG = '*'
       const { e2ePluginSetup } = require('@packages/frontend-shared/cypress/e2e/e2ePluginSetup')
 
       return await e2ePluginSetup(on, config)
