@@ -297,16 +297,21 @@ describe('Specs Page', () => {
 
     it('should generate spec from component', () => {
       cy.findByTestId('new-spec-button').click()
+      cy.findByTestId('create-spec-modal').should('be.visible').within(() => {
+        cy.contains('Create a new spec').should('be.visible')
+
+        cy.validateExternalLink({ name: `${defaultMessages.links.needHelp}?`, href: 'https://on.cypress.io' })
+      })
 
       cy.contains('Create from component').click()
-      const componentGlob = '**/*.{jsx,tsx}'
+      const componentGlob = '*.{jsx,tsx}'
 
       cy.findByTestId('file-match-button').contains(componentGlob)
       checkCodeGenCandidates(['App.cy.jsx', 'App.jsx', 'index.jsx', 'Button.jsx', 'Button.stories.jsx'])
 
       cy.intercept('query-ComponentGeneratorStepOne').as('code-gen-candidates')
       cy.findByTestId('file-match-button').click()
-      cy.findByPlaceholderText(defaultMessages.components.fileSearch.byExtensionInput).clear().type('**/App.*')
+      cy.findByPlaceholderText(defaultMessages.components.fileSearch.byExtensionInput).clear().type('App.*')
       cy.wait('@code-gen-candidates')
 
       checkCodeGenCandidates(['App.css', 'App.cy.jsx', 'App.jsx'])
@@ -328,7 +333,7 @@ describe('Specs Page', () => {
       cy.findByTestId('new-spec-button').click()
 
       cy.contains('Create from story').click()
-      const storyGlob = '**/*.stories.*'
+      const storyGlob = '*.stories.*'
 
       cy.findByTestId('file-match-button').contains(storyGlob)
       checkCodeGenCandidates(['Button.stories.jsx'])
