@@ -14,7 +14,7 @@
     </p>
     <Button
       :to="{ path: 'settings', query: { section: 'project', setting: 'specPattern' }}"
-      data-testid="view-spec-pattern"
+      data-cy="view-spec-pattern"
       variant="outline"
       prefix-icon-class="icon-light-gray-50 icon-dark-gray-400"
       :prefix-icon="SettingsIcon"

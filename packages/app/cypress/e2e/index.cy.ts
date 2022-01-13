@@ -36,7 +36,7 @@ describe('App: Index', () => {
 
   context('with specs', () => {
     it('refreshes spec list on spec changes', () => {
-      cy.get('[data-testid="create-spec-page-title"]').should('be.visible')
+      cy.get('[data-cy="create-spec-page-title"]').should('be.visible')
 
       cy.withCtx(async (ctx, { testState }) => {
         await ctx.actions.file.writeFileInProject(testState.newFilePath, '')
