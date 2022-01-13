@@ -206,8 +206,8 @@
       "stackTraceLabel": "Stack Trace"
     },
     "noInternet": {
-      "header": "You have no internet connection",
-      "message": "Check your internet connection to pull the latest data from the dashboard"
+      "header": "You have no internet connection.",
+      "message": "Check your internet connection to pull the latest data from the dashboard."
     }
   },
   "setupPage": {

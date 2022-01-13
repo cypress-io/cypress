@@ -23,6 +23,7 @@
 
         <NoInternetConnection
           v-if="!isOnline"
+          class="mt-24px"
         />
         <DialogDescription
           v-else-if="isOnline"
@@ -54,15 +55,7 @@
         </DialogDescription>
 
         <div class="bg-gray-50 border-t-1px py-16px px-24px">
-          <ExternalLink
-            v-if="!isOnline"
-            href="https://on.cypress.io/help-connect-to-api"
-            class="font-medium text-indigo-500"
-          >
-            {{ t('links.learnMore') }}
-          </ExternalLink>
           <Auth
-            v-else-if="isOnline"
             :gql="props.gql"
             @continue="$emit('update:modelValue', false)"
           />
