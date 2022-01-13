@@ -4,6 +4,7 @@
       v-for="(result, i) in results"
       :key="i"
       class="flex px-2 items-center hover:bg-indigo-50"
+      :title="result.name"
     >
       <component
         :is="result.icon"

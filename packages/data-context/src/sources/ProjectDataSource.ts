@@ -1,5 +1,5 @@
 import os from 'os'
-import { FrontendFramework, FRONTEND_FRAMEWORKS, ResolvedFromConfig, RESOLVED_FROM, SpecFileWithExtension, STORYBOOK_GLOB, FoundSpec } from '@packages/types'
+import { FrontendFramework, FRONTEND_FRAMEWORKS, ResolvedFromConfig, RESOLVED_FROM, STORYBOOK_GLOB, FoundSpec } from '@packages/types'
 import { scanFSForAvailableDependency } from 'create-cypress-tests'
 import { debounce } from 'lodash'
 import path from 'path'
@@ -12,6 +12,7 @@ import assert from 'assert'
 
 import type { DataContext } from '..'
 import { toPosix } from '../util/file'
+import type { FilePartsShape } from '@packages/graphql/src/schemaTypes/objectTypes/gql-FileParts'
 
 export type SpecWithRelativeRoot = FoundSpec & { relativeToCommonRoot: string }
 
@@ -212,7 +213,7 @@ export class ProjectDataSource {
     this.ctx.lifecycleManager.closeWatcher(this._specWatcher)
   }
 
-  async getCurrentSpecByAbsolute (absolute: string) {
+  getCurrentSpecByAbsolute (absolute: string) {
     return this.ctx.project.specs.find((x) => x.absolute === absolute)
   }
 
@@ -281,7 +282,7 @@ export class ProjectDataSource {
     }) as ResolvedFromConfig[]
   }
 
-  async getCodeGenCandidates (glob: string): Promise<SpecFileWithExtension[]> {
+  async getCodeGenCandidates (glob: string): Promise<FilePartsShape[]> {
     // Storybook can support multiple globs, so show default one while
     // still fetching all stories
     if (glob === STORYBOOK_GLOB) {
@@ -298,14 +299,6 @@ export class ProjectDataSource {
 
     const codeGenCandidates = await this.ctx.file.getFilesByGlob(config.projectRoot || process.cwd(), glob)
 
-    return codeGenCandidates.map(
-      (file) => {
-        return this.ctx.file.normalizeFileToFileParts({
-          absolute: file,
-          projectRoot,
-          searchFolder: projectRoot ?? config.componentFolder,
-        })
-      },
-    )
+    return codeGenCandidates.map((absolute) => ({ absolute }))
   }
 }

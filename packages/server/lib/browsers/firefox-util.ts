@@ -105,7 +105,9 @@ async function setupRemote (remotePort, automation, onError) {
   const wsUrl = await protocol.getWsTargetFor(remotePort, 'Firefox')
   const criClient = await CriClient.create(wsUrl, onError)
 
-  new CdpAutomation(criClient.send, criClient.on, automation)
+  return automation.use(
+    new CdpAutomation(criClient.send, criClient.on, automation),
+  )
 }
 
 const logGcDetails = () => {

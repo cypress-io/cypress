@@ -3,7 +3,7 @@ import { EventEmitter } from 'events'
 import type { BaseStore } from '@packages/runner-shared/src/store'
 import type { RunState } from '@packages/types/src/driver'
 import type MobX from 'mobx'
-import type { LocalBusEmitsMap, LocalBusEventMap, DriverToLocalBus } from './event-manager-types'
+import type { LocalBusEmitsMap, LocalBusEventMap, DriverToLocalBus, SocketToDriverMap } from './event-manager-types'
 import type { FileDetails } from '@packages/types'
 
 import { automation } from '@packages/runner-shared/src/automation'
@@ -83,23 +83,28 @@ export class EventManager {
 
     const runnerUiStore = useRunnerUiStore()
 
-    this.ws.emit('is:automation:client:connected', connectionInfo, this.Mobx.action('automationEnsured', (isConnected: boolean) => {
+    this.ws.emit('is:automation:client:connected', connectionInfo, (isConnected: boolean) => {
       const connected = isConnected ? automation.CONNECTED : automation.MISSING
 
       // legacy MobX integration
       // TODO: can we delete this, or does the driver depend on this somehow?
-      state.automation = connected
-      this.ws.on('automation:disconnected', this.Mobx.action('automationDisconnected', () => {
-        state.automation = automation.DISCONNECTED
-      }))
+      this.Mobx.runInAction(() => {
+        state.automation = connected
+      })
+
+      this.ws.on('automation:disconnected', () => {
+        this.Mobx.runInAction(() => {
+          state.automation = automation.DISCONNECTED
+        })
+      })
 
       // unified integration
-      this.ws.on('automation:disconnected', this.Mobx.action('automationDisconnected', () => {
+      this.ws.on('automation:disconnected', () => {
         runnerUiStore.setAutomationStatus('DISCONNECTED')
-      }))
+      })
 
-      runnerUiStore.setAutomationStatus(isConnected ? 'CONNECTED' : 'MISSING')
-    }))
+      runnerUiStore.setAutomationStatus(connected)
+    })
 
     this.ws.on('change:to:url', (url) => {
       window.location.href = url
@@ -642,12 +647,14 @@ export class EventManager {
 
   emit<K extends Extract<keyof LocalBusEmitsMap, string>>(k: K, v: LocalBusEmitsMap[K]): void
   emit<K extends Extract<keyof DriverToLocalBus, string>>(k: K, v: DriverToLocalBus[K]): void
+  emit<K extends Extract<keyof SocketToDriverMap, string>>(k: K, v: SocketToDriverMap[K]): void
   emit (event: string, ...args: any[]) {
     this.localBus.emit(event, ...args)
   }
 
   on<K extends Extract<keyof LocalBusEventMap, string>>(k: K, f: (v: LocalBusEventMap[K]) => void): void
   on<K extends Extract<keyof DriverToLocalBus, string>>(k: K, f: (v: DriverToLocalBus[K]) => void): void
+  on<K extends Extract<keyof SocketToDriverMap, string>>(k: K, f: (v: SocketToDriverMap[K]) => void): void
   on (event: string, listener: (...args: any[]) => void): void
   on (event: string, listener: (...args: any[]) => void) {
     this.localBus.on(event, listener)

@@ -10,9 +10,9 @@ export const namedRouteExchange: Exchange = ({ client, forward }) => {
           return o
         }
 
+        // Only prefix the URL if it hasn't been already
         if (!o.context.url.endsWith('/graphql')) {
-          // TODO(lachlan): why is this triggering now, and should it be?
-          // throw new Error(`Route was ${o.context.url}. Infinite loop detected? Ping @tgriesser to help debug`)
+          return o
         }
 
         return {
