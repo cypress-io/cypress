@@ -8,8 +8,15 @@ const util = require('./util')
 
 // cypress -> node_modules -> package dir
 const PACKAGE_PATH = path.join(__dirname, '..', '..')
+const SIXTY_MINUTES_IN_MILLISECONDS = 3600000
 
 const hashFilename = (filename) => `${crypto.createHash('md5').update(filename).digest('hex')}`
+
+const defaultRegistry = {
+  packagePath: PACKAGE_PATH,
+  binaries: {},
+  unassociatedBinaries: {},
+}
 
 const registeredBinaries = async () => {
   // get all files in registry
@@ -36,14 +43,12 @@ const registeredBinaries = async () => {
       throw e
     }
 
-    // Check the version of the registry file. If a newer version of the registry is found, it indicates that there have been non-passive changes to the registry file in a newer version of cypress and we should defer to that version to handling pruning.
-    // This check is simplistic and will have to be updated in future versions but for now this works.
-    if (registry.version !== '1') {
-      logger.always(`Newer registry files detected at: ${registryFilePath}`)
-      throw new Error('Newer registry files detected.')
-    }
+    logger.always('registry ', registry)
+    logger.always('acc', acc)
 
-    const packagePathExists = await fs.access(registry.packagePath).then(() => true).catch(() => false)
+    const { binaries, unassociatedBinaries, packagePath } = registry
+
+    const packagePathExists = await fs.access(packagePath).then(() => true).catch(() => false)
 
     // if the package path no longer exists
     if (!packagePathExists) {
@@ -54,12 +59,50 @@ const registeredBinaries = async () => {
     }
 
     // iterate through the binaries and collect unique versions in a set per binary.
-    Object.entries(registry.binaries).forEach(([binary, version]) => {
+    Object.entries(binaries).forEach(([binary, versions]) => {
       if (!acc[binary]) {
         acc[binary] = new Set()
       }
 
-      acc[binary].add(version)
+      logger.always('binary ', binary)
+
+      if (versions.length > 0) {
+        //Why the special logic? Npm installs can be tricky, a user could conceivably have two (or more) versions of cypress installed in their package json if a dependency has cypress incorrectly listed as a dependency.
+        // To counter this we allow a grace period of 60 minutes. If a version of cypress was installed within 60 minutes of the current version, we won't prune it.
+        if (binary === 'cypress') {
+          const latestCypressInstallDate = new Date(versions[0].installed).valueOf()
+
+          // Using a for loop so we can break out of it.
+          for (let index = 0; index < versions.length; index++) {
+            const instance = versions[index]
+            const installed = new Date(instance.installed).valueOf()
+
+            logger.always('instance', instance)
+            logger.always('latestCypressInstallDate', latestCypressInstallDate)
+            logger.always('installed', installed)
+            logger.always('difference', latestCypressInstallDate - installed)
+
+            // If a previous version was installed in the project within 60 minutes of the current version, do not prune it.
+            if (latestCypressInstallDate - installed < SIXTY_MINUTES_IN_MILLISECONDS) {
+              acc[binary].add(instance.version)
+            } else {
+              // if this instance is too old, any subsequent instances are also too old.
+              break
+            }
+          }
+        } else {
+          acc[binary].add(versions[0].version)
+        }
+      }
+    })
+
+    // iterate through unassociated binaries and add all of them.
+    Object.entries(unassociatedBinaries).forEach(([binary, versions]) => {
+      if (!acc[binary]) {
+        acc[binary] = new Set()
+      }
+
+      Object.keys(versions).forEach((version) => acc[binary].add(version))
     })
 
     return acc
@@ -67,8 +110,10 @@ const registeredBinaries = async () => {
 }
 
 const addUnassociatedBinaryVersion = ({ versions = {}, version }) => {
-  if (versions.hasOwnProperty(version)) {
-    return undefined
+  if (versions.version) {
+    versions.version.installed = new Date().toISOString()
+
+    return versions
   }
 
   return {
@@ -82,7 +127,9 @@ const addUnassociatedBinaryVersion = ({ versions = {}, version }) => {
 const addBinaryVersion = ({ versions = [], version }) => {
   // if the first entry is same as the version we're trying to insert, bail.
   if (versions.length > 0 && versions[0].version === version) {
-    return undefined
+    versions[0].installed = new Date().toISOString()
+
+    return versions
   }
 
   return [
@@ -111,33 +158,14 @@ const registerBinary = async ({ name, version, isUnassociated }) => {
 
   // retrieve project registry file, it's ok if the file doesn't exist.
   const registryString = await fs.readFile(path.join(registryDir, filename), 'utf8').catch(() => undefined)
-  const registry = registryString ? JSON.parse(registryString) : {
-    version: '1',
-    packagePath: PACKAGE_PATH,
-    binaries: {},
-    unassociatedBinaries: {},
-  }
+  let registry = registryString ? JSON.parse(registryString) : defaultRegistry
 
   const { unassociatedBinaries = {}, binaries = {} } = registry
 
   if (isUnassociated) {
-    const updatedUnassociatedVersions = addUnassociatedBinaryVersion({ versions: unassociatedBinaries[name], version })
-
-    if (!unassociatedBinaries) {
-      // No updates, version already present.
-      return
-    }
-
-    registry.unassociatedBinaries[name] = updatedUnassociatedVersions
+    registry.unassociatedBinaries[name] = addUnassociatedBinaryVersion({ versions: unassociatedBinaries[name], version })
   } else {
-    const updatedBinaryVersions = addBinaryVersion({ versions: binaries[name], version })
-
-    if (!updatedBinaryVersions) {
-      // No updates, version already present.
-      return
-    }
-
-    registry.binaries[name] = updatedBinaryVersions
+    registry.binaries[name] = addBinaryVersion({ versions: binaries[name], version })
   }
 
   // save registry file

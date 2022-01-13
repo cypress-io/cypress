@@ -343,7 +343,8 @@ const start = (options = {}) => {
       // our version matches, tell the user this is a noop
       alreadyInstalledMsg()
 
-      return false
+      // even if we've already installed we want to register the install time.
+      return registry.registerBinary({ name: 'cypress', version: needVersion }).then(() => false)
     }
 
     return true

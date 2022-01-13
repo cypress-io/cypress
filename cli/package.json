@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "0.0.0-development",
+  "version": "9.1.1",
   "private": true,
   "main": "index.js",
   "scripts": {

@@ -11,6 +11,7 @@ const getFolderSize = require('./get-folder-size')
 const registry = require('../registry')
 
 const MAX_BINARY_AGE = 90 //Days
+const ONE_DAY_IN_MILLISECONDS = 86400000
 
 const reservedCacheKeys = [
   'registry',
@@ -68,7 +69,7 @@ const pruneCypressVersions = async ({ cacheDir, registeredVersions }) => {
         const diff = Date.now() - new Date(binaryTime).valueOf()
 
         //convert days to milliseconds.
-        if (diff < (MAX_BINARY_AGE * 86400000)) {
+        if (diff < (MAX_BINARY_AGE * ONE_DAY_IN_MILLISECONDS)) {
           return acc
         }
       }
@@ -77,7 +78,7 @@ const pruneCypressVersions = async ({ cacheDir, registeredVersions }) => {
 
       const versionDir = join(cacheDir, version)
 
-      await fs.removeAsync(versionDir)
+      // await fs.removeAsync(versionDir)
     }
 
     return acc
@@ -93,6 +94,8 @@ const prune = async () => {
 
   try {
     const registeredBinaries = await registry.registeredBinaries()
+
+    logger.always('registered binaries', registeredBinaries)
 
     const deletedCypressVersions = await pruneCypressVersions({ cacheDir, registeredVersions: registeredBinaries.cypress })
 
