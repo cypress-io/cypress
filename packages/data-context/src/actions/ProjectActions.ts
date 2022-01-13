@@ -138,6 +138,18 @@ export class ProjectActions {
     //
   }
 
+  async addProjectFromElectronNativeFolderSelect () {
+    const path = await this.ctx.actions.electron.showOpenDialog()
+
+    if (!path) {
+      return
+    }
+
+    await this.addProject({ path })
+
+    this.ctx.emitter.toLaunchpad()
+  }
+
   async addProject (args: AddProject) {
     const projectRoot = await this.getDirectoryPath(args.path)
 

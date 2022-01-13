@@ -244,17 +244,15 @@ export const mutation = mutationType({
         let path = args.path
 
         if (!path) {
-          path = await ctx.actions.electron.showOpenDialog()
+          ctx.actions.project.addProjectFromElectronNativeFolderSelect()
+
+          return {}
         }
 
-        // path is required - and in this point it can be null, if it's not set
-        // from the launchpad and the showOpenDialog is cancel
-        if (path) {
-          await ctx.actions.project.addProject({
-            ...args,
-            path,
-          })
-        }
+        await ctx.actions.project.addProject({
+          ...args,
+          path,
+        })
 
         return {}
       },
