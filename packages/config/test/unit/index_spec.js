@@ -47,23 +47,6 @@ describe('src/index', () => {
       expect(defaultValues.env).to.deep.eq({})
       snapshot(defaultValues)
     })
-
-    it('returns list of public config keys when in a child project testing cypress in cypress', () => {
-      process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF = true
-
-      const defaultValues = configUtil.getDefaultValues()
-
-      expect(defaultValues).to.deep.include({
-        defaultCommandTimeout: 4000,
-        scrollBehavior: 'top',
-        watchForFileChanges: true,
-      })
-
-      expect(defaultValues.env).to.deep.eq({})
-      snapshot(defaultValues)
-
-      delete process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF
-    })
   })
 
   describe('.getPublicConfigKeys', () => {

@@ -66,7 +66,7 @@ describe('App: Index', () => {
 
       cy.visitApp()
 
-      cy.intercept('mutation-ScaffoldGeneratorStepOne_scaffoldIntegration').as('scaffoldIntegration')
+      cy.intercept('POST', 'mutation-ScaffoldGeneratorStepOne_scaffoldIntegration').as('scaffoldIntegration')
       cy.contains(defaultMessages.createSpec.e2e.importFromScaffold.header).click()
       cy.wait('@scaffoldIntegration').then((interception: Interception) => {
         createdSpecs = interception.response?.body.data.scaffoldIntegration.map((res) => res.file)
