@@ -266,6 +266,8 @@ export async function scaffoldProjectNodeModules (project: string, updateYarnLoc
 
 export async function scaffoldCommonNodeModules () {
   await Promise.all([
+    // Used for import { defineConfig } from 'cypress'
+    'cypress',
     '@cypress/code-coverage',
     '@cypress/webpack-dev-server',
     '@packages/socket',

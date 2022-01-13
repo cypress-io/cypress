@@ -31,6 +31,7 @@ export class AuthActions {
 
   async checkAuth () {
     const result = await this.ctx.cloud.executeRemoteGraphQL({
+      operationType: 'query',
       query: `query Cypress_CheckAuth { cloudViewer { id } }`,
       variables: {},
       requestPolicy: 'network-only',

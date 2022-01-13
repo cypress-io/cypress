@@ -19,6 +19,7 @@ export const urqlCacheKeys: Partial<CacheExchangeOpts> = {
     BaseError: () => null,
     ProjectPreferences: (data) => data.__typename,
     VersionData: () => null,
+    ScaffoldedFile: () => null,
     LocalSettings: (data) => data.__typename,
     LocalSettingsPreferences: () => null,
     CloudProjectNotFound: (data) => data.__typename,
