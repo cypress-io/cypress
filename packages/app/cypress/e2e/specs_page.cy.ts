@@ -123,6 +123,7 @@ describe('Specs Page', () => {
           cy.findByRole('dialog', { name: defaultMessages.createSpec.successPage.header }).as('SuccessDialog').within(() => {
             cy.validateExternalLink({ name: 'Need help?', href: 'https://on.cypress.io' })
             cy.findByRole('button', { name: 'Close' }).should('be.visible')
+            cy.contains('src/stories/Button.stories.cy.jsx').should('be.visible')
             cy.findByRole('link', { name: 'Okay, run the spec' }).should('have.attr', 'href', '#/specs/runner?file=src/stories/Button.stories.cy.jsx')
             cy.findByRole('button', { name: 'Create another spec' }).click()
           })
