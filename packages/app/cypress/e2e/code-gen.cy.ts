@@ -25,14 +25,14 @@ describe('Code Generation', () => {
     })
 
     cy.contains('Create from component').click()
-    const componentGlob = '**/*.{jsx,tsx}'
+    const componentGlob = '*.{jsx,tsx}'
 
     cy.findByTestId('file-match-button').contains(componentGlob)
     checkCodeGenCandidates(['App.cy.jsx', 'App.jsx', 'index.jsx', 'Button.jsx', 'Button.stories.jsx'])
 
     cy.intercept('query-ComponentGeneratorStepOne').as('code-gen-candidates')
     cy.findByTestId('file-match-button').click()
-    cy.get(extensionInputSelector).clear().type('**/App.*')
+    cy.get(extensionInputSelector).clear().type('App.*')
     cy.wait('@code-gen-candidates')
 
     checkCodeGenCandidates(['App.css', 'App.cy.jsx', 'App.jsx'])
@@ -54,7 +54,7 @@ describe('Code Generation', () => {
     cy.findByTestId('new-spec-button').click()
 
     cy.contains('Create from story').click()
-    const storyGlob = '**/*.stories.*'
+    const storyGlob = '*.stories.*'
 
     cy.findByTestId('file-match-button').contains(storyGlob)
     checkCodeGenCandidates(['Button.stories.jsx'])
