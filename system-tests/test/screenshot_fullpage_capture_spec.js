@@ -1,8 +1,5 @@
 const systemTests = require('../lib/system-tests').default
 
-// TODO: hide UI in run mode
-const tempSkip = Date.now() > new Date('2022-01-14') ? systemTests.it : systemTests.it.skip
-
 const onServer = (app) => {
   return app.get('/fullPage', systemTests.sendHtml(`\
 <style>body { margin: 0; }</style>
@@ -24,7 +21,7 @@ describe('e2e screenshot fullPage capture', () => {
 
   // this tests that consistent screenshots are taken for fullPage captures,
   // that the runner UI is hidden and that the page is scrolled properly
-  tempSkip('passes', {
+  systemTests.it('passes', {
     spec: 'screenshot_fullpage_capture.cy.js',
     snapshot: true,
   })
