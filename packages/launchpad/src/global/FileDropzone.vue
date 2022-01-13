@@ -4,11 +4,10 @@
     class="relative cursor-pointer"
   >
     <FileSelector
-      v-slot="{ openDialog }"
       v-model="files"
       allow-multiple
     >
-      <Dropzone @click="openDialog">
+      <Dropzone @click="handleOpenDialog">
         <div
           class="relative block w-full p-58px text-center border-1
         border-gray-200 border-dashed rounded-lg h-240px min-w-220px
@@ -84,8 +83,13 @@ function getFilePath (files: FileList | null | []) {
   return ''
 }
 
+function handleOpenDialog () {
+  // Set the path to null, so we can use the electron folder select on the server side
+  emit('addProject', null)
+}
+
 const emit = defineEmits<{
-  (e: 'addProject', value: string): void
+  (e: 'addProject', value: string | null): void
   (e: 'close'): void
 }>()
 

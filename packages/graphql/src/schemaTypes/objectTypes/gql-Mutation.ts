@@ -236,12 +236,25 @@ export const mutation = mutationType({
       type: Query,
       description: 'Add project to projects array and cache it',
       args: {
-        path: nonNull(stringArg()),
+        path: stringArg(),
         open: booleanArg({ description: 'Whether to open the project when added' }),
       },
       resolve: async (_, args, ctx) => {
         ctx.actions.wizard.resetWizard()
-        await ctx.actions.project.addProject(args)
+        let path = args.path
+
+        if (!path) {
+          path = await ctx.actions.electron.showOpenDialog()
+        }
+
+        // path is required - and in this point it can be null, if it's not set
+        // from the launchpad and the showOpenDialog is cancel
+        if (path) {
+          await ctx.actions.project.addProject({
+            ...args,
+            path,
+          })
+        }
 
         return {}
       },

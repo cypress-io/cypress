@@ -1,5 +1,5 @@
 import { DataContext, getCtx, clearCtx, setCtx } from '@packages/data-context'
-import electron from 'electron'
+import electron, { OpenDialogOptions } from 'electron'
 import pkg from '@packages/root'
 import configUtils from '@packages/config'
 
@@ -147,6 +147,9 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       },
       showItemInFolder (folder: string) {
         electron.shell.showItemInFolder(folder)
+      },
+      showOpenDialog (props: OpenDialogOptions) {
+        return electron.dialog.showOpenDialog(props)
       },
     },
     localSettingsApi: {

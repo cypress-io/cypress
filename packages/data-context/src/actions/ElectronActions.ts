@@ -1,10 +1,12 @@
-import type { App, BrowserWindow } from 'electron'
+import type { App, BrowserWindow, OpenDialogOptions, OpenDialogReturnValue } from 'electron'
 import os from 'os'
 import type { DataContext } from '..'
+import _ from 'lodash'
 
 export interface ElectronApiShape {
   openExternal(url: string): void
   showItemInFolder(folder: string): void
+  showOpenDialog(props: OpenDialogOptions): Promise<OpenDialogReturnValue>
 }
 
 export class ElectronActions {
@@ -62,5 +64,20 @@ export class ElectronActions {
 
   showItemInFolder (url: string) {
     this.ctx.electronApi.showItemInFolder(url)
+  }
+
+  showOpenDialog () {
+    const props: OpenDialogOptions = {
+      // we only want the user to select a single
+      // directory. not multiple, and not files
+      properties: ['openDirectory'],
+    }
+
+    return this.ctx.electronApi.showOpenDialog(props)
+    .then((obj) => {
+      // return the first path since there can only ever
+      // be a single directory selection
+      return _.get(obj, ['filePaths', 0])
+    })
   }
 }
