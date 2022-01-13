@@ -353,6 +353,19 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
       })
     })
 
+    it.only('receives command failures from the secondary domain', (done) => {
+      cy.on('fail', (e) => {
+        // TODO: implement this test
+        done()
+      })
+
+      cy.switchToDomain('foobar.com', () => {
+        cy.get('#doesnt-exist', {
+          timeout: 1000,
+        })
+      })
+    })
+
     // TODO: this following tests needs to be implemented in a cy-in-cy test or more e2e style test as we need to test the 'done' function
     it('propagates user defined secondary domain errors to the primary')
 

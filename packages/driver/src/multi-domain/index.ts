@@ -36,6 +36,11 @@ const onLogChanged = (attrs) => {
   specBridgeCommunicator.toPrimary('log:changed', $Log.toSerializedJSON(attrs))
 }
 
+const onError = (error, runnable) => {
+  // TODO: need to come up with more standard serialization for this object
+  specBridgeCommunicator.toPrimary('error', error)
+}
+
 const setup = () => {
   // @ts-ignore
   const Cypress = window.Cypress = $Cypress.create({
@@ -72,6 +77,7 @@ const setup = () => {
   Cypress.on('skipped:command:end', onCommandEnd)
   Cypress.on('log:added', onLogAdded)
   Cypress.on('log:changed', onLogChanged)
+  Cypress.on('fail', onError)
 
   const doneEarly = () => {
     cy.queue.stop()
@@ -105,6 +111,8 @@ const setup = () => {
       ctx: {},
       clearTimeout () {},
       resetTimeout () {},
+      // let the primary domain handle all Mocha pending runnables. Stub this to false in case an error arises in the SD
+      isPending: () => false,
       timeout () {},
       isPending () {},
     })
@@ -125,7 +133,7 @@ const setup = () => {
         return null
       }
 
-      // similar to the primary domain, the done() callback will be stored in state
+      // similar to the primary domain, the done() callback will be stored in state (necessary for error handling)
       // if undefined and a user tries to call done, the same effect is granted
       cy.state('done', done)
 

@@ -184,6 +184,10 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
         }
       }
 
+      const onError = (error) => {
+        // TODO: implement
+      }
+
       const cleanupCommands = async () => {
         communicator.off('command:enqueued', addCommand)
 
@@ -236,6 +240,8 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
 
       communicator.on('log:added', onLogAdded)
       communicator.on('log:changed', onLogChanged)
+
+      communicator.on('error', onError)
 
       return new Bluebird((resolve, reject) => {
         communicator.once('ran:domain:fn', (err) => {
