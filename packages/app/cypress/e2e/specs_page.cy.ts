@@ -69,7 +69,7 @@ describe('Specs Page', () => {
         it('shows input for file extension filter', () => {
           cy.get('@CreateFromStoryDialog').within(() => {
             cy.findByTestId('file-match-indicator').should('contain', '1 Match')
-            cy.findByRole('button', { name: '**/*.stories.*' }).click()
+            cy.findByRole('button', { name: '*.stories.*' }).click()
             cy.findByPlaceholderText(defaultMessages.components.fileSearch.byExtensionInput)
             .as('ExtensionInput')
             .clear()
@@ -79,7 +79,7 @@ describe('Specs Page', () => {
 
             cy.findByTestId('no-results-clear').click()
 
-            cy.get('@ExtensionInput').should('have.value', '**/*.stories.*')
+            cy.get('@ExtensionInput').should('have.value', '*.stories.*')
 
             cy.findByTestId('file-match-indicator').should('contain', '1 Match')
           })
@@ -207,7 +207,7 @@ describe('Specs Page', () => {
         it('shows input for file extension filter', () => {
           cy.get('@CreateFromComponentDialog').within(() => {
             cy.findByTestId('file-match-indicator').should('contain', '2 Matches')
-            cy.findByRole('button', { name: '**/*.{jsx,tsx}' }).click()
+            cy.findByRole('button', { name: '*.{jsx,tsx}' }).click()
             cy.findByPlaceholderText(defaultMessages.components.fileSearch.byExtensionInput)
             .as('ExtensionInput')
             .clear()
@@ -217,7 +217,7 @@ describe('Specs Page', () => {
 
             cy.findByTestId('no-results-clear').click()
 
-            cy.get('@ExtensionInput').should('have.value', '**/*.{jsx,tsx}')
+            cy.get('@ExtensionInput').should('have.value', '*.{jsx,tsx}')
 
             cy.findByTestId('file-match-indicator').should('contain', '2 Matches')
           })
