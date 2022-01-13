@@ -35,7 +35,9 @@ describe('Specs Page', () => {
           name: defaultMessages.createSpec.page.defaultPatternNoSpecs.title,
         }).should('be.visible')
 
-        cy.findByTestId('create-spec-page-description').should('be.visible').and('contain', defaultMessages.createSpec.page.defaultPatternNoSpecs.component.description)
+        cy.findByTestId('create-spec-page-description')
+        .should('be.visible')
+        .and('contain', defaultMessages.createSpec.page.defaultPatternNoSpecs.component.description)
 
         cy.get('@ComponentCard').should('be.visible')
         cy.get('@StoryCard').should('be.visible')
