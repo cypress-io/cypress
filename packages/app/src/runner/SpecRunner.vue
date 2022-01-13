@@ -8,14 +8,15 @@
       :max-total-width="windowWidth - 64"
       :initial-panel1-width="initialSpecsListWidth"
       :initial-panel2-width="initialReporterWidth"
-      :show-panel1="runnerUiStore.isSpecsListOpen && !screenshotStore.isScreenshotting"
+      :show-panel1="isOpenMode && runnerUiStore.isSpecsListOpen && !screenshotStore.isScreenshotting"
       :show-panel2="!screenshotStore.isScreenshotting"
       @resize-end="handleResizeEnd"
       @panel-width-updated="handlePanelWidthUpdated"
     >
+      <!-- TODO(mark): - allow show-panel-2 to be true in screenshots if including the reporter is intended -->
       <template #panel1="{isDragging}">
         <HideDuringScreenshot
-          v-if="props.gql.currentProject"
+          v-if="props.gql.currentProject && isOpenMode"
           v-show="runnerUiStore.isSpecsListOpen"
           id="inline-spec-list"
           class="h-full bg-gray-1000"
@@ -45,14 +46,15 @@
         </HideDuringScreenshot>
       </template>
       <template
-        #panel3
+        #panel3="{width}"
       >
         <HideDuringScreenshot class="bg-white p-16px">
           <SpecRunnerHeader
-            v-if="props.gql.currentProject"
+            v-if="isOpenMode && props.gql.currentProject"
             :gql="props.gql.currentProject"
             :event-manager="eventManager"
             :get-aut-iframe="getAutIframeModel"
+            :width="width - 32"
           />
         </HideDuringScreenshot>
 
@@ -146,6 +148,8 @@ const props = defineProps<{
 
 const eventManager = getEventManager()
 
+const isOpenMode = window.__CYPRESS_MODE__ === 'open'
+
 const autStore = useAutStore()
 const screenshotStore = useScreenshotStore()
 const runnerUiStore = useRunnerUiStore()
@@ -215,6 +219,13 @@ function runSpec () {
   UnifiedRunnerAPI.executeSpec(props.activeSpec)
 }
 
+const runnerMargin = computed(() => {
+  return screenshotStore.isScreenshotting ? 'unset' : '0 auto'
+})
+const screenshotAltHeight = computed(() => {
+  return screenshotStore.isScreenshotting ? '100vh' : '100%'
+})
+
 let fileToOpen: FileDetails
 
 const openFileInIDE = useMutation(OpenFileInIdeDocument)
@@ -261,10 +272,13 @@ onMounted(() => {
     if (payload.appOnly) {
       screenshotStore.setScreenshotting(true)
     }
+
+    getAutIframeModel().beforeScreenshot(payload)
   })
 
-  eventManager.on('after:screenshot', () => {
+  eventManager.on('after:screenshot', (config) => {
     screenshotStore.setScreenshotting(false)
+    getAutIframeModel().afterScreenshot(config)
   })
 
   eventManager.on('save:app:state', (state) => {
@@ -321,7 +335,7 @@ $navbar-width: 80px;
 
 #unified-runner {
   position: relative;
-  margin: 0 auto;
+    margin: v-bind('runnerMargin');
 }
 
 #unified-reporter {
@@ -338,8 +352,9 @@ $navbar-width: 80px;
 </route>
 
 <style>
-#unified-runner > div {
-  height: 100%
+
+#unified-runner > .screenshot-height-container {
+  height: min(100%, v-bind('screenshotAltHeight'));
 }
 
 iframe.aut-iframe {
