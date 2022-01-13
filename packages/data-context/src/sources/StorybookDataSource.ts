@@ -1,4 +1,3 @@
-import type { FilePartsShape } from '@packages/graphql/src/schemaTypes/objectTypes/gql-FileParts'
 import type { StorybookInfo } from '@packages/types'
 import assert from 'assert'
 import * as path from 'path'
@@ -11,6 +10,8 @@ const STORYBOOK_FILES = [
   'preview-body.html',
 ]
 
+export const STORIES_GLOB = '*.stories.*'
+
 export class StorybookDataSource {
   constructor (private ctx: DataContext) {}
 
@@ -18,30 +19,6 @@ export class StorybookDataSource {
     assert(this.ctx.currentProject)
 
     return this.storybookInfoLoader.load(this.ctx.currentProject)
-  }
-
-  async getStories (): Promise<FilePartsShape[]> {
-    const { currentProject } = this.ctx
-
-    assert(currentProject)
-
-    const storybook = await this.ctx.storybook.loadStorybookInfo()
-
-    if (!storybook) {
-      return []
-    }
-
-    const normalizedGlobs = storybook.storyGlobs.map((glob) => path.join(storybook.storybookRoot, glob))
-    const files = await this.ctx.file.getFilesByGlob(currentProject, normalizedGlobs)
-
-    // Don't currently support mdx
-    return files.reduce((acc, absolute) => {
-      if (this.ctx.path.extname(absolute) === '.mdx') {
-        return acc
-      }
-
-      return [...acc, { absolute }]
-    }, [] as FilePartsShape[])
   }
 
   private storybookInfoLoader = this.ctx.loader<string, StorybookInfo | null>((projectRoots) => this.batchStorybookInfo(projectRoots))
@@ -55,7 +32,6 @@ export class StorybookDataSource {
     const storybookInfo: StorybookInfo = {
       storybookRoot,
       files: [],
-      storyGlobs: [],
     }
 
     try {
@@ -78,21 +54,6 @@ export class StorybookDataSource {
       } catch (e) {
         // eslint-disable-line no-empty
       }
-    }
-
-    const mainJs = storybookInfo.files.find(({ name }) => name === 'main.js')
-
-    if (mainJs) {
-      try {
-        // Does this need to be wrapped in IPC?
-        const mainJsModule = require(mainJs.absolute)
-
-        storybookInfo.storyGlobs = mainJsModule.stories
-      } catch (e) {
-        return null
-      }
-    } else {
-      return null
     }
 
     return storybookInfo
