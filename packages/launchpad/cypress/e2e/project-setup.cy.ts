@@ -69,6 +69,7 @@ describe('Launchpad: Setup Project', () => {
     })
 
     // FIXME: enter key down isn't trigger close callback. working correctly when manually tested.
+    // could be related to this bug? https://github.com/cypress-io/cypress/issues/14864
     it.skip('closes modal by pressing enter key when close button is focused', () => {
       cy.contains('Review the differences').click()
       cy.get('#app').should('have.attr', 'aria-hidden', 'true')
@@ -128,6 +129,8 @@ describe('Launchpad: Setup Project', () => {
         verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: true })
 
         cy.get('[data-cy-testingtype="e2e"]').click()
+
+        cy.contains('h1', 'Configuration Files')
         cy.findByText('We added the following files to your project.')
 
         cy.get('[data-cy=changes]').within(() => {
@@ -149,6 +152,7 @@ describe('Launchpad: Setup Project', () => {
 
         cy.get('[data-cy-testingtype="e2e"]').click()
 
+        cy.contains('h1', 'Configuration Files')
         cy.findByText('We added the following files to your project.')
 
         cy.get('[data-cy=changes]').within(() => {
@@ -165,6 +169,7 @@ describe('Launchpad: Setup Project', () => {
         cy.openProject('pristine-with-ct-testing', ['--e2e'])
         cy.visitLaunchpad()
 
+        cy.contains('h1', 'Configuration Files')
         cy.contains('We added the following files to your project.')
 
         cy.get('[data-cy=changes]').within(() => {
@@ -191,6 +196,7 @@ describe('Launchpad: Setup Project', () => {
       .should('have.focus')
       .type('{enter}')
 
+      cy.contains('h1', 'Configuration Files')
       cy.findByText('We added the following files to your project.')
 
       cy.get('[data-cy=valid]').within(() => {
@@ -233,9 +239,6 @@ describe('Launchpad: Setup Project', () => {
 
         cy.get('h1').should('contain', 'Project Setup')
         cy.contains('Confirm the front-end framework and bundler used in your project.')
-
-        cy.wait(5000)
-        cy.contains('Confirm the front-end framework and bundler used in your project.')
       })
 
       it('opens to the "choose framework" page when opened via cli with --component flag', () => {
@@ -243,9 +246,6 @@ describe('Launchpad: Setup Project', () => {
         cy.visitLaunchpad()
 
         cy.get('h1').should('contain', 'Project Setup')
-        cy.contains('Confirm the front-end framework and bundler used in your project.')
-
-        cy.wait(5000)
         cy.contains('Confirm the front-end framework and bundler used in your project.')
       })
     })
