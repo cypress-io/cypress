@@ -67,6 +67,9 @@ describe('App: Index', () => {
       cy.visitApp()
 
       cy.intercept('POST', 'mutation-ScaffoldGeneratorStepOne_scaffoldIntegration').as('scaffoldIntegration')
+
+      cy.wait(2000)
+
       cy.contains(defaultMessages.createSpec.e2e.importFromScaffold.header).click()
       cy.wait('@scaffoldIntegration').then((interception: Interception) => {
         createdSpecs = interception.response?.body.data.scaffoldIntegration.map((res) => res.file)
@@ -75,11 +78,11 @@ describe('App: Index', () => {
 
         cy.contains(defaultMessages.createSpec.e2e.importFromScaffold.specsAddedHeader).should('be.visible')
         assertSpecs(createdSpecs)
-
-        cy.contains(defaultMessages.createSpec.e2e.importFromScaffold.specsAddedButton).click()
-
-        cy.visitApp().then(() => assertSpecs(createdSpecs))
       })
+
+      cy.contains(defaultMessages.createSpec.e2e.importFromScaffold.specsAddedButton).click()
+
+      cy.visitApp().then(() => assertSpecs(createdSpecs))
     })
   })
 })
