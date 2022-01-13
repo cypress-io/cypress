@@ -16,7 +16,7 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
     cy.log('after switchToDomain')
   })
 
-  it('handles querying nested elmeents', () => {
+  it('handles querying nested elements', () => {
     cy.switchToDomain('foobar.com', () => {
       cy
       .get('form button')
