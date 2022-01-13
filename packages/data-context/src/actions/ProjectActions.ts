@@ -12,6 +12,7 @@ import type { ProjectShape } from '../data/coreDataShape'
 import type { DataContext } from '..'
 import { codeGenerator, SpecOptions } from '../codegen'
 import templates from '../codegen/templates'
+import { insertValuesInConfigFile } from '../util'
 
 export interface ProjectApiShape {
   /**
@@ -108,7 +109,7 @@ export class ProjectActions {
     return this.projects
   }
 
-  async initializeActiveProject (options: OpenProjectLaunchOptions = {}, shouldCloseBrowser = true) {
+  async initializeActiveProject (options: OpenProjectLaunchOptions = {}) {
     assert(this.ctx.currentProject, 'Cannot initialize project without an active project')
     assert(this.ctx.coreData.currentTestingType, 'Cannot initialize project without choosing testingType')
 
@@ -119,8 +120,9 @@ export class ProjectActions {
     }
 
     try {
-      await this.api.closeActiveProject(shouldCloseBrowser)
-      await this.api.openProjectCreate(allModeOptionsWithLatest, {
+      await this.api.closeActiveProject()
+
+      return await this.api.openProjectCreate(allModeOptionsWithLatest, {
         ...options,
         ctx: this.ctx,
       })
@@ -244,6 +246,12 @@ export class ProjectActions {
     }
 
     await this.ctx.fs.writeFile(this.ctx.lifecycleManager.configFilePath, `module.exports = ${JSON.stringify(obj, null, 2)}`)
+  }
+
+  async setProjectIdInConfigFile (projectId: string) {
+    return insertValuesInConfigFile(this.ctx.lifecycleManager.configFilePath, { projectId }, { get (id: string) {
+      return Error(id)
+    } })
   }
 
   async clearLatestProjectCache () {

@@ -107,6 +107,7 @@ export class ProjectLifecycleManager {
   private _currentTestingType: TestingType | null = null
   private _runModeExitEarly: ((error: Error) => void) | undefined
 
+  private _initializedProject: unknown | undefined // open_project object
   private _projectRoot: string | undefined
   private _configFilePath: string | undefined
 
@@ -230,6 +231,7 @@ export class ProjectLifecycleManager {
 
   clearCurrentProject () {
     this.resetInternalState()
+    this._initializedProject = undefined
     this._projectRoot = undefined
     this._configFilePath = undefined
     this._cachedFullConfig = undefined
@@ -248,6 +250,7 @@ export class ProjectLifecycleManager {
     }
 
     this._projectRoot = projectRoot
+    this._initializedProject = undefined
     this.legacyPluginGuard()
     Promise.resolve(this.ctx.browser.machineBrowsers()).catch(this.onLoadError)
     this.verifyProjectRoot(projectRoot)
@@ -295,6 +298,7 @@ export class ProjectLifecycleManager {
       return
     }
 
+    this._initializedProject = undefined
     this._currentTestingType = testingType
 
     if (!testingType) {
@@ -307,7 +311,7 @@ export class ProjectLifecycleManager {
       if (testingType === 'e2e' && !this.ctx.isRunMode) {
         this.ctx.actions.wizard.scaffoldTestingType().catch(this.onLoadError)
       }
-    } else {
+    } else if (this.isTestingTypeConfigured(testingType)) {
       this.loadTestingType()
     }
   }
@@ -1182,8 +1186,11 @@ export class ProjectLifecycleManager {
 
     // This happens automatically with openProjectCreate in run mode
     if (!this.ctx.isRunMode) {
-      // Don't worry about closing the browser for refreshing the config
-      await this.ctx.actions.project.initializeActiveProject({}, false)
+      if (!this._initializedProject) {
+        this._initializedProject = await this.ctx.actions.project.initializeActiveProject({})
+      } else {
+        // TODO: modify the _initializedProject
+      }
     }
 
     if (this.ctx.coreData.cliBrowser) {
