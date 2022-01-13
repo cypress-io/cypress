@@ -320,13 +320,13 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
       const logsChangedGivingUpdate = {}
 
       cy.on('log:added', (addedLog) => {
-        if (!addedLog.ended && addedLog?.id.includes(domain)) {
+        if (!addedLog?.ended && addedLog?.id.includes(domain)) {
           logsAddedNeedingUpdate[addedLog.id] = addedLog
         }
       })
 
       cy.on('log:changed', (changedLog) => {
-        if (changedLog.ended && changedLog?.id.includes(domain)) {
+        if (changedLog?.ended && changedLog?.id.includes(domain)) {
           logsChangedGivingUpdate[changedLog.id] = changedLog
         }
 

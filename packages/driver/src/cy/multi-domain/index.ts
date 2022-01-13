@@ -3,7 +3,6 @@ import _ from 'lodash'
 import { createDeferred, Deferred } from '../../util/deferred'
 import $utils from '../../cypress/utils'
 import $errUtils from '../../cypress/error_utils'
-import { difference } from '../../util/difference'
 
 export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: Cypress.State, config: Cypress.InternalConfig) {
   let timeoutId
@@ -140,7 +139,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
         }
       }
 
-      const onLogAdded = ({ logAdded }) => {
+      const onLogAdded = (logAdded) => {
         const attrs = logAdded
 
         attrs.consoleProps = () => logAdded.consoleProps
@@ -157,13 +156,17 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
         }
       }
 
-      const onLogChanged = ({ logChanged }) => {
+      const onLogChanged = (logChanged) => {
         const { deferred, log } = logs[logChanged.id]
 
         // NOTE: Cypress.LogConfig only contains partial types of what exists on the log attributes, missing a lot of 'private' properties
         const logAttrs = log.get()
 
-        const updatedLogAttributes: Partial<Cypress.Log> = difference(logChanged, logAttrs)
+        const updatedLogAttributes: Partial<Cypress.Log> = _.transform(logChanged, (result: {[key: string]: any }, value: any, key: string) => {
+          if (!_.isEqual(value, logAttrs[key])) {
+            result[key] = value
+          }
+        })
 
         _.forEach(updatedLogAttributes, (value, key) => {
           // if the updated value from the secondary domain is undefined, null, or an empty object/array, skip the update

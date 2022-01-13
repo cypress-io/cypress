@@ -29,15 +29,11 @@ const onCommandEnd = (command: Cypress.CommandQueue) => {
 }
 
 const onLogAdded = (attrs) => {
-  specBridgeCommunicator.toPrimary('log:added', {
-    logAdded: $Log.toSerializedJSON(attrs),
-  })
+  specBridgeCommunicator.toPrimary('log:added', $Log.toSerializedJSON(attrs))
 }
 
 const onLogChanged = (attrs) => {
-  specBridgeCommunicator.toPrimary('log:changed', {
-    logChanged: $Log.toSerializedJSON(attrs),
-  })
+  specBridgeCommunicator.toPrimary('log:changed', $Log.toSerializedJSON(attrs))
 }
 
 const setup = () => {
