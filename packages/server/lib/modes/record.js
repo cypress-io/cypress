@@ -751,7 +751,7 @@ const createRunAndRecordSpecs = (options = {}) => {
           return _.pick({
             ...v,
             clientId: v.id,
-            config: v._testConfig?.unverifiedTestConfig || null,
+            config: v._testConfig && v._testConfig.unverifiedTestConfig || null,
             title: v._titlePath,
             hookIds: v.hooks.map((hook) => hook.hookId),
           },
