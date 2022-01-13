@@ -16,6 +16,17 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
     cy.log('after switchToDomain')
   })
 
+  it('handles querying nested elmeents', () => {
+    cy.switchToDomain('foobar.com', () => {
+      cy
+      .get('form button')
+      .invoke('text')
+      .should('equal', 'Submit')
+    })
+
+    cy.log('after switchToDomain')
+  })
+
   it('sets up window.Cypress in secondary domain', () => {
     cy.switchToDomain('foobar.com', () => {
       cy
@@ -136,9 +147,7 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
           done()
         })
 
-        cy.get('[data-cy="alert"]').then(($el) => {
-          $el.trigger('click')
-        })
+        cy.get('[data-cy="alert"]').click()
       })
     })
 
@@ -150,9 +159,7 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
           done()
         })
 
-        cy.get('[data-cy="confirm"]').then(($el) => {
-          $el.trigger('click')
-        })
+        cy.get('[data-cy="confirm"]').click()
       })
     })
 
@@ -169,9 +176,7 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
           return true
         })
 
-        cy.get('[data-cy="confirm"]').then(($el) => {
-          $el.trigger('click')
-        })
+        cy.get('[data-cy="confirm"]').click()
       })
     })
 
@@ -189,9 +194,7 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
 
         Cypress.on('window:confirm', () => {})
 
-        cy.get('[data-cy="confirm"]').then(($el) => {
-          $el.trigger('click')
-        })
+        cy.get('[data-cy="confirm"]').click()
       })
     })
   })

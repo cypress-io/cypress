@@ -12,7 +12,20 @@ const isAutIframe = (win) => {
 
   // https://github.com/cypress-io/cypress/issues/6412
   // ensure the parent is a Window before checking prop
-  return $window.isWindow(parent) && !$elements.getNativeProp(parent, 'frameElement')
+  if (!$window.isWindow(parent)) {
+    return false
+  }
+
+  try {
+    // window.frameElement only exists on iframe windows, so if it doesn't
+    // exist on parent, it must be the top frame, and `win` is the AUT
+    return !$elements.getNativeProp(parent, 'frameElement')
+  } catch (err) {
+    // if the AUT is cross-domain, accessing parent.frameElement will throw
+    // a cross-origin error, meaning this is the AUT
+    return true
+    // throw err
+  }
 }
 
 const getFirstValidSizedRect = (el) => {
