@@ -42,7 +42,9 @@ describe('Specs Page', () => {
         cy.get('@ComponentCard').should('be.visible')
         cy.get('@StoryCard').should('be.visible')
 
-        cy.findByTestId('no-specs-message').should('be.visible').and('contain', defaultMessages.createSpec.noSpecsMessage)
+        cy.findByTestId('no-specs-message')
+        .should('be.visible')
+        .and('contain', defaultMessages.createSpec.noSpecsMessage)
 
         cy.findByRole('link', { name: defaultMessages.createSpec.viewSpecPatternButton })
         .should('be.visible')
