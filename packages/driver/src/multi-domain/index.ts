@@ -29,11 +29,11 @@ const onCommandEnd = (command: Cypress.CommandQueue) => {
 }
 
 const onLogAdded = (attrs) => {
-  specBridgeCommunicator.toPrimary('log:added', $Log.toSerializedJSON(attrs))
+  specBridgeCommunicator.toPrimary('log:added', attrs, $Log.toSerializedJSON)
 }
 
 const onLogChanged = (attrs) => {
-  specBridgeCommunicator.toPrimary('log:changed', $Log.toSerializedJSON(attrs))
+  specBridgeCommunicator.toPrimary('log:changed', attrs, $Log.toSerializedJSON)
 }
 
 const onError = (error, runnable) => {
@@ -151,18 +151,7 @@ const setup = () => {
 
       specBridgeCommunicator.toPrimary('ran:domain:fn')
     } catch (err) {
-      // Native Error types currently cannot be cloned in Firefox when using 'postMessage'.
-      // Please see https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm for more details
-      // TODO: More standard serialization of Objects/Arrays within the communicator to avoid this type of logic
-      if (err instanceof Error) {
-        specBridgeCommunicator.toPrimary('ran:domain:fn', {
-          name: err.name,
-          message: err.message,
-          stack: err.stack,
-        })
-      } else {
-        specBridgeCommunicator.toPrimary('ran:domain:fn', err)
-      }
+      specBridgeCommunicator.toPrimary('ran:domain:fn', err)
     } finally {
       cy.state('done', undefined)
     }
