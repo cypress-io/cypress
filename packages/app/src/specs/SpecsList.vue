@@ -9,68 +9,81 @@
     <SpecsListHeader
       v-model="search"
       class="pb-32px"
-      :result-count="specs?.length"
+      :result-count="specs.length"
       @newSpec="showModal = true"
     />
 
-    <div class="grid grid-cols-2 children:font-medium children:text-gray-800">
-      <div
-        class="flex justify-between items-center"
-        data-cy="specs-testing-type-header"
-      >
-        {{ props.gql.currentProject?.currentTestingType === 'component' ?
-          t('specPage.componentSpecsHeader') : t('specPage.e2eSpecsHeader') }}
-      </div>
-      <div class="flex justify-between items-center">
-        <div>{{ t('specPage.gitStatusHeader') }}</div>
-      </div>
-    </div>
-    <div
-      class="grid pb-32px spec-list-container"
-      v-bind="containerProps"
+    <template
+      v-if="specs.length"
     >
       <div
-        v-bind="wrapperProps"
-        class="divide-y-1 children:h-40px"
+        class="grid grid-cols-2 children:font-medium children:text-gray-800"
       >
-        <SpecsListRowItem
-          v-for="row in list"
-          :key="row.index"
+        <div
+          class="flex justify-between items-center"
+          data-cy="specs-testing-type-header"
         >
-          <template #file>
-            <RouterLink
-              v-if="row.data.isLeaf && row.data"
-              :key="row.data.data?.absolute"
-              :to="{ path: '/specs/runner', query: { file: row.data.data?.relative } }"
-            >
-              <SpecItem
-                :file-name="row.data.data?.fileName || row.data.name"
-                :extension="row.data.data?.specFileExtension || ''"
-                :indexes="row.data.data?.fileIndexes"
-                :style="{ paddingLeft: `${((row.data.depth - 2) * 10) + 16 + 22}px` }"
-              />
-            </RouterLink>
-
-            <RowDirectory
-              v-else
-              :name="row.data.name"
-              :expanded="treeSpecList[row.index].expanded.value"
-              :depth="row.data.depth - 2"
-              :style="{ paddingLeft: `${((row.data.depth - 2) * 10) + 16}px` }"
-              :indexes="getDirIndexes(row.data)"
-              @click="row.data.toggle"
-            />
-          </template>
-
-          <template #git-info>
-            <SpecListGitInfo
-              v-if="row.data.data?.gitInfo"
-              :gql="row.data.data.gitInfo"
-            />
-          </template>
-        </SpecsListRowItem>
+          {{ props.gql.currentProject?.currentTestingType === 'component' ?
+            t('specPage.componentSpecsHeader') : t('specPage.e2eSpecsHeader') }}
+        </div>
+        <div class="flex justify-between items-center">
+          <div>{{ t('specPage.gitStatusHeader') }}</div>
+        </div>
       </div>
-    </div>
+      <div
+        class="grid pb-32px spec-list-container"
+        v-bind="containerProps"
+      >
+        <div
+          v-bind="wrapperProps"
+          class="divide-y-1 children:h-40px"
+        >
+          <SpecsListRowItem
+            v-for="row in list"
+            :key="row.index"
+          >
+            <template #file>
+              <RouterLink
+                v-if="row.data.isLeaf && row.data"
+                :key="row.data.data?.absolute"
+                :to="{ path: '/specs/runner', query: { file: row.data.data?.relative } }"
+              >
+                <SpecItem
+                  :file-name="row.data.data?.fileName || row.data.name"
+                  :extension="row.data.data?.specFileExtension || ''"
+                  :indexes="row.data.data?.fileIndexes"
+                  :style="{ paddingLeft: `${((row.data.depth - 2) * 10) + 16 + 22}px` }"
+                />
+              </RouterLink>
+
+              <RowDirectory
+                v-else
+                :name="row.data.name"
+                :expanded="treeSpecList[row.index].expanded.value"
+                :depth="row.data.depth - 2"
+                :style="{ paddingLeft: `${((row.data.depth - 2) * 10) + 16}px` }"
+                :indexes="getDirIndexes(row.data)"
+                @click="row.data.toggle"
+              />
+            </template>
+
+            <template #git-info>
+              <SpecListGitInfo
+                v-if="row.data.data?.gitInfo"
+                :gql="row.data.data.gitInfo"
+              />
+            </template>
+          </SpecsListRowItem>
+        </div>
+      </div>
+    </template>
+    <NoResults
+      v-else
+      :search="search"
+      :message="t('specPage.noResultsMessage')"
+      class="mt-56px"
+      @clear="handleClear"
+    />
   </div>
 </template>
 
@@ -88,6 +101,7 @@ import { useCollapsibleTree } from '@packages/frontend-shared/src/composables/us
 import RowDirectory from './RowDirectory.vue'
 import SpecItem from './SpecItem.vue'
 import { useVirtualList } from '@packages/frontend-shared/src/composables/useVirtualList'
+import NoResults from '@cy/components/NoResults.vue'
 
 const { t } = useI18n()
 
@@ -132,6 +146,11 @@ const props = defineProps<{
 
 const showModal = ref(false)
 const search = ref('')
+
+function handleClear () {
+  search.value = ''
+}
+
 const cachedSpecs = useCachedSpecs(computed(() => props.gql.currentProject?.specs?.edges || []))
 
 const specs = computed(() => {
