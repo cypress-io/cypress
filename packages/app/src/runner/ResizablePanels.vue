@@ -43,7 +43,10 @@
         width: `${maxTotalWidth - panel1Width - panel2Width}px`
       }"
     >
-      <slot name="panel3" />
+      <slot
+        name="panel3"
+        :width="maxTotalWidth - panel1Width - panel2Width"
+      />
     </div>
   </div>
 </template>

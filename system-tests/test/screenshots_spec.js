@@ -49,10 +49,6 @@ const onServer = function (app) {
 `))
 }
 
-// TODO(lachlan): get these passing, issue is we need to hide the <TopNav />
-// so it won't make a request to npm to get the latest Cypress version,
-const tempSkip = Date.now() > new Date('2022-01-20') ? it : it.skip
-
 describe('e2e screenshots', () => {
   systemTests.setup({
     servers: {
@@ -64,7 +60,7 @@ describe('e2e screenshots', () => {
   // this tests that screenshots can be manually generated
   // and are also generated automatically on failure with
   // the test title as the file name
-  tempSkip('passes', {
+  systemTests.it('passes', {
     spec: 'screenshots.cy.js',
     expectedExitCode: 5,
     snapshot: true,

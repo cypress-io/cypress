@@ -306,14 +306,8 @@ const takeScreenshot = (Cypress, state, screenshotConfig, options: TakeScreensho
   const startTime = new Date()
 
   // TODO: is this ok to make `resolve` undefined?
-  const send = (event, props, resolve?) => {
-    Cypress.action(`cy:${event}`, props, resolve)
-  }
-
-  const sendAsync = (event, props) => {
-    return new Promise((resolve) => {
-      return send(event, props, resolve)
-    })
+  const send = async (event, props, resolve?) => {
+    return Cypress.action(`cy:${event}`, props, resolve)
   }
 
   const getOptions = (isOpen) => {
@@ -338,8 +332,10 @@ const takeScreenshot = (Cypress, state, screenshotConfig, options: TakeScreensho
 
       return null
     })
-    .then(() => {
-      return sendAsync('before:screenshot', getOptions(true))
+    .then(async () => {
+      // we need to await this so that JS running to prepare for the screenshot
+      // is fully completed before we start measuring the viewport etc
+      await send('before:screenshot', getOptions(true), () => {})
     })
   }
 

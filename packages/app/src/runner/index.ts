@@ -206,9 +206,16 @@ function runSpecCT (spec: SpecFile) {
   // clear AUT, if there is one.
   empty($runnerRoot)
 
+  // create root for new AUT
+  const $container = document.createElement('div')
+
+  $container.classList.add('screenshot-height-container')
+
+  $runnerRoot.append($container)
+
   // create new AUT
   const autIframe = getAutIframeModel()
-  const $autIframe: JQuery<HTMLIFrameElement> = autIframe.create().appendTo($runnerRoot)
+  const $autIframe: JQuery<HTMLIFrameElement> = autIframe.create().appendTo($container)
 
   const specSrc = getSpecUrl(config.namespace, spec.absolute)
 
@@ -264,6 +271,8 @@ function runSpecE2E (spec: SpecFile) {
 
   // create root for new AUT
   const $container = document.createElement('div')
+
+  $container.classList.add('screenshot-height-container')
 
   $runnerRoot.append($container)
 
