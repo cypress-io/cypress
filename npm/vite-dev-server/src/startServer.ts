@@ -26,10 +26,10 @@ export interface StartDevServerOptions {
 }
 
 const resolveServerConfig = async ({ viteConfig, options, indexHtml }: StartDevServerOptions): Promise<InlineConfig> => {
-  const { projectRoot, supportFile } = options.config
+  const { projectRoot, supportFile, namespace } = options.config
 
   const requiredOptions: InlineConfig = {
-    base: `/${options.config.namespace}/src/`,
+    base: `/${namespace}/src/`,
     root: projectRoot,
   }
 
