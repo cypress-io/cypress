@@ -5,14 +5,6 @@
  */
 import type { DataContext } from '../DataContext'
 import { getPathToDist } from '@packages/resolve-dist'
-import type { FoundBrowser } from '@packages/types'
-import type { TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
-
-export interface ServeConfig {
-  config: string
-  testingType: TestingTypeEnum | null
-  browser: FoundBrowser | null
-}
 
 export class HtmlDataSource {
   constructor (private ctx: DataContext) {}
