@@ -83,23 +83,28 @@ export class EventManager {
 
     const runnerUiStore = useRunnerUiStore()
 
-    this.ws.emit('is:automation:client:connected', connectionInfo, this.Mobx.action('automationEnsured', (isConnected: boolean) => {
+    this.ws.emit('is:automation:client:connected', connectionInfo, (isConnected: boolean) => {
       const connected = isConnected ? automation.CONNECTED : automation.MISSING
 
       // legacy MobX integration
       // TODO: can we delete this, or does the driver depend on this somehow?
-      state.automation = connected
-      this.ws.on('automation:disconnected', this.Mobx.action('automationDisconnected', () => {
-        state.automation = automation.DISCONNECTED
-      }))
+      this.Mobx.runInAction(() => {
+        state.automation = connected
+      })
+
+      this.ws.on('automation:disconnected', () => {
+        this.Mobx.runInAction(() => {
+          state.automation = automation.DISCONNECTED
+        })
+      })
 
       // unified integration
-      this.ws.on('automation:disconnected', this.Mobx.action('automationDisconnected', () => {
+      this.ws.on('automation:disconnected', () => {
         runnerUiStore.setAutomationStatus('DISCONNECTED')
-      }))
+      })
 
-      runnerUiStore.setAutomationStatus(isConnected ? 'CONNECTED' : 'MISSING')
-    }))
+      runnerUiStore.setAutomationStatus(connected)
+    })
 
     this.ws.on('change:to:url', (url) => {
       window.location.href = url
