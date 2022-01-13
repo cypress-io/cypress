@@ -24,7 +24,6 @@ const isAutIframe = (win) => {
     // if the AUT is cross-domain, accessing parent.frameElement will throw
     // a cross-origin error, meaning this is the AUT
     return true
-    // throw err
   }
 }
 
