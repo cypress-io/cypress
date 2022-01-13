@@ -6,18 +6,18 @@ export class $Command {
   // @ts-ignore
   attributes: Record<string, any>
 
-  constructor (obj = {}) {
+  constructor (attrs: any = {}) {
     this.reset()
 
     // if the command came from a secondary domain, it already has an id
-    if (!obj.id) {
+    if (!attrs.id) {
       // the id prefix needs to be unique per domain, so there are not
       // collisions when commands created in a secondary domain are passed
       // to the primary domain for the command log, etc.
-      obj.id = _.uniqueId(`cmd-${window.location.origin}-`)
+      attrs.id = _.uniqueId(`cmd-${window.location.origin}-`)
     }
 
-    this.set(obj)
+    this.set(attrs)
   }
 
   set (key, val?) {
