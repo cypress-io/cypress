@@ -112,10 +112,11 @@
     "rows": {
       "gitInfoWithAuthor": "{fileState} {timeAgo} by {author}",
       "gitInfo": "{fileState} {timeAgo}"
-    }
+    },
+    "noResultsMessage": "No specs matched your search:"
   },
   "noResults": {
-    "defaultMessage": "No results matched your search",
+    "defaultMessage": "No results matched your search:",
     "clearSearch": "Clear Search"
   },
   "sideBar": {
@@ -254,7 +255,7 @@
     "removeProject": "Remove Project",
     "openInIDE": "Open In IDE",
     "openInFinder": "Open In Finder",
-    "noResultsMessage": "No projects matched your search"
+    "noResultsMessage": "No projects matched your search:"
   },
   "welcomePage": {
     "review": "Review the differences between each testing type",

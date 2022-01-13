@@ -8,7 +8,7 @@
     />
     <h2
       v-if="filteredProjects.length"
-      class="text-gray-800 mb-16px"
+      class="mb-16px text-gray-800"
     >
       {{ t('globalPage.recentProjectsHeader') }}
     </h2>
