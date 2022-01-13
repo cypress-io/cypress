@@ -121,9 +121,7 @@ export class ProjectLifecycleManager {
 
     if (ctx.coreData.currentProject) {
       this.setCurrentProject(ctx.coreData.currentProject)
-    }
-
-    if (ctx.coreData.currentTestingType && this._projectRoot) {
+    } else if (ctx.coreData.currentTestingType && this._projectRoot) {
       this.setCurrentTestingType(ctx.coreData.currentTestingType)
     }
 

@@ -100,8 +100,8 @@ describe('Launchpad: Onboarding Flow', () => {
   })
 
   it('can open unconfigured component testing type, go back to the testing chooser', () => {
-    cy.scaffoldProject('pristine-with-config-file')
-    cy.openProject('pristine-with-config-file')
+    cy.scaffoldProject('pristine-with-e2e-testing')
+    cy.openProject('pristine-with-e2e-testing')
     cy.visitLaunchpad()
     cy.get('[data-cy-testingType=component]').click()
     cy.get('h1').should('not.contain', 'Welcome to Cypress!')
