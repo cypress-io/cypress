@@ -77,6 +77,7 @@ export class EventManager {
     }
 
     const connectionInfo = {
+      element: options.automation,
       automation: options.automation,
       randomString: options.randomString,
     }
