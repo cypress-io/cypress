@@ -93,9 +93,9 @@ module.exports = {
   },
 
   connectToExisting (browser, options = {}, automation) {
-    let browserLauncher
+    const browserLauncher = getBrowserLauncher(browser)
 
-    if (!(browserLauncher = getBrowserLauncher(browser))) {
+    if (!browserLauncher) {
       utils.throwBrowserNotFound(browser.name, options.browsers)
     }
 
@@ -105,18 +105,20 @@ module.exports = {
   open (browser, options = {}, automation) {
     return kill(true)
     .then(() => {
-      let browserLauncher; let url
-
       _.defaults(options, {
         onBrowserOpen () {},
         onBrowserClose () {},
       })
 
-      if (!(browserLauncher = getBrowserLauncher(browser))) {
+      const browserLauncher = getBrowserLauncher(browser)
+
+      if (!browserLauncher) {
         utils.throwBrowserNotFound(browser.name, options.browsers)
       }
 
-      if (!(url = options.url)) {
+      const { url } = options
+
+      if (!url) {
         throw new Error('options.url must be provided when opening a browser. You passed:', options)
       }
 
