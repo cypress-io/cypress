@@ -160,7 +160,6 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
         if (attrs) {
           const { deferred, log } = logs[attrs.id]
 
-          // NOTE: Cypress.LogConfig only contains partial types of what exists on the log attributes, missing a lot of 'private' properties
           const logAttrs = log.get()
 
           _.forEach(attrs, (value: any, key: string) => {
@@ -171,7 +170,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
             }
           })
 
-          const isEnded = log.get('ended' as keyof Cypress.LogConfig)
+          const isEnded = log.get('ended')
 
           if (isEnded) {
             delete logs[attrs.id]
