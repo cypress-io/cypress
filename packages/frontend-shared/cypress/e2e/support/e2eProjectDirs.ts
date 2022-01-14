@@ -25,6 +25,7 @@ export const e2eProjectDirs = [
   'ids',
   'integration-outside-project-root',
   'issue-8111-iframe-input',
+  'kill-child-process',
   'launchpad',
   'max-listeners',
   'multiple-task-registrations',
