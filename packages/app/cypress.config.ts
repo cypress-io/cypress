@@ -6,7 +6,7 @@ const CYPRESS_INTERNAL_CLOUD_ENV = getenv('CYPRESS_INTERNAL_CLOUD_ENV', process.
 
 export default defineConfig({
   projectId: CYPRESS_INTERNAL_CLOUD_ENV === 'staging' ? 'ypt4pf' : 'sehy69',
-  // @ts-ignore
+  // @ts-ignore We are setting these namespaces in order to properly test Cypress in Cypress
   clientRoute: '/__app/',
   namespace: '__cypress-app',
   socketIoRoute: '/__app-socket.io',
