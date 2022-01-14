@@ -413,28 +413,12 @@ describe('lib/agent', function () {
           })
         })
       })
-    })
 
-    context('HttpAgent - Upstream target URL', function () {
-      beforeEach(function () {
-        // PROXY vars should override npm_config vars, so set them to cause failures if they are used
-        // @see https://github.com/cypress-io/cypress/pull/8295
-        process.env.npm_config_proxy = process.env.npm_config_https_proxy = 'http://erroneously-used-npm-proxy.invalid'
-        process.env.npm_config_noproxy = 'just,some,nonsense'
-
+      it('HTTP pages can be loaded with the Upstream target URL', function (done) {
         process.env.HTTP_PROXY = process.env.HTTPS_PROXY = ''
         process.env.NO_PROXY = ''
         process.env.HTTP_PROXY_TARGET_HOST = `http://localhost:${HTTP_PORT}`
 
-        this.agent = new CombinedAgent()
-
-        this.request = request.defaults({
-          agent: this.agent as any,
-          proxy: null,
-        })
-      })
-
-      it('HTTP pages can be loaded with the Upstream target URL', function (done) {
         this.request({
           url: `http://localhost:${HTTP_PORT}/get`,
         }).on('response', (response) => {
