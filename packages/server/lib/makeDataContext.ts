@@ -1,5 +1,5 @@
 import { DataContext, getCtx, clearCtx, setCtx } from '@packages/data-context'
-import electron, { OpenDialogOptions } from 'electron'
+import electron, { OpenDialogOptions, SaveDialogOptions, BrowserWindow } from 'electron'
 import pkg from '@packages/root'
 import configUtils from '@packages/config'
 
@@ -150,6 +150,9 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       },
       showOpenDialog (props: OpenDialogOptions) {
         return electron.dialog.showOpenDialog(props)
+      },
+      showSaveDialog (window: BrowserWindow, props: SaveDialogOptions) {
+        return electron.dialog.showSaveDialog(window, props)
       },
     },
     localSettingsApi: {
