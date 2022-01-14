@@ -18,7 +18,7 @@ import * as session from './session'
 // eslint-disable-next-line no-duplicate-imports
 import type { Socket } from '@packages/socket'
 import path from 'path'
-import type { DataContext } from '@packages/data-context'
+import { getCtx } from '@packages/data-context'
 
 type StartListeningCallbacks = {
   onSocketConnection: (socket: any) => void
@@ -77,7 +77,7 @@ export class SocketBase {
   protected ended: boolean
   protected _io?: socketIo.SocketIOServer
 
-  constructor (config: Record<string, any>, private ctx: DataContext) {
+  constructor () {
     this.ended = false
   }
 
@@ -88,11 +88,11 @@ export class SocketBase {
   }
 
   toReporter (event: string, data?: any) {
-    return this.io && this.io.to('reporter').emit(event, data)
+    return this._io?.to('reporter').emit(event, data)
   }
 
   toRunner (event: string, data?: any) {
-    return this.io && this.io.to('runner').emit(event, data)
+    return this._io?.to('runner').emit(event, data)
   }
 
   isSocketConnected (socket) {
@@ -100,7 +100,7 @@ export class SocketBase {
   }
 
   toDriver (event, ...data) {
-    return this.io && this.io.emit(event, ...data)
+    return this._io?.emit(event, ...data)
   }
 
   onAutomation (socket, message, data, id) {
@@ -162,11 +162,11 @@ export class SocketBase {
 
     const { socketIoRoute, socketIoCookie } = config
 
-    this._io = this.createIo(server, socketIoRoute, socketIoCookie)
+    const io = this._io = this.createIo(server, socketIoRoute, socketIoCookie)
 
     automation.use({
       onPush: (message, data) => {
-        return this.io.emit('automation:push:message', message, data)
+        return io.emit('automation:push:message', message, data)
       },
     })
 
@@ -186,7 +186,7 @@ export class SocketBase {
 
     const getFixture = (path, opts) => fixture.get(config.fixturesFolder, path, opts)
 
-    this.io.on('connection', (socket: Socket & { inReporterRoom?: boolean, inRunnerRoom?: boolean }) => {
+    io.on('connection', (socket: Socket & { inReporterRoom?: boolean, inRunnerRoom?: boolean }) => {
       debug('socket connected')
 
       socket.on('disconnecting', (reason) => {
@@ -241,7 +241,7 @@ export class SocketBase {
             errors.warning('AUTOMATION_SERVER_DISCONNECTED')
 
             // TODO: no longer emit this, just close the browser and display message in reporter
-            return this.io.emit('automation:disconnected')
+            io.emit('automation:disconnected')
           })
         })
 
@@ -501,7 +501,7 @@ export class SocketBase {
         // existing runner and reporter API.
         if (process.env.LAUNCHPAD) {
           fileDetails.where = {
-            binary: this.ctx.coreData.localSettings.preferences.preferredEditorBinary || 'computer',
+            binary: getCtx().coreData.localSettings.preferences.preferredEditorBinary || 'computer',
           }
         }
 
@@ -525,7 +525,7 @@ export class SocketBase {
       callbacks.onSocketConnection(socket)
     })
 
-    return this.io
+    return io
   }
 
   end () {
@@ -533,7 +533,7 @@ export class SocketBase {
 
     // TODO: we need an 'ack' from this end
     // event from the other side
-    return this.io.emit('tests:finished')
+    return this._io?.emit('tests:finished')
   }
 
   changeToUrl (url) {

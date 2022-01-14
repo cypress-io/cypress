@@ -4,7 +4,6 @@ import { SocketBase } from './socket-base'
 import { fs } from './util/fs'
 import type { DestroyableHttpServer } from './util/server_destroy'
 import * as studio from './studio'
-import type { DataContext } from '@packages/data-context'
 import type { FoundSpec } from '@packages/types'
 
 const debug = Debug('cypress:server:socket-e2e')
@@ -16,8 +15,8 @@ const isSpecialSpec = (name) => {
 export class SocketE2E extends SocketBase {
   private testFilePath: string | null
 
-  constructor (config: Record<string, any>, ctx: DataContext) {
-    super(config, ctx)
+  constructor (config: Record<string, any>) {
+    super()
 
     this.testFilePath = null
 
@@ -47,7 +46,7 @@ export class SocketE2E extends SocketBase {
 
     return fs.statAsync(filePath)
     .then(() => {
-      return this.io.emit('watched:file:changed')
+      return this._io?.emit('watched:file:changed')
     }).catch(() => {
       return debug('could not find test file that changed %o', filePath)
     })
