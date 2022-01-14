@@ -30,7 +30,6 @@ import type { Browser } from '@packages/server/lib/browsers/types'
 import { InitializeRoutes, createCommonRoutes } from './routes'
 import { createRoutesE2E } from './routes-e2e'
 import { createRoutesCT } from './routes-ct'
-import type { DataContext } from '@packages/data-context/src/DataContext'
 import type { FoundSpec } from '@packages/types'
 
 const ALLOWED_PROXY_BYPASS_URLS = [
@@ -127,7 +126,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
   protected _remoteDomainName: unknown
   protected _remoteFileServer: unknown
 
-  constructor (private ctx: DataContext) {
+  constructor () {
     this.isListening = false
     // @ts-ignore
     this.request = Request()
@@ -195,7 +194,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
       target: config.baseUrl && testingType === 'component' ? config.baseUrl : undefined,
     })
 
-    this._socket = new SocketCtor(config, this.ctx) as TSocket
+    this._socket = new SocketCtor(config) as TSocket
 
     clientCertificates.loadClientCertificateConfig(config)
 
@@ -212,7 +211,6 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     this.createHosts(config.hosts)
 
     const routeOptions: InitializeRoutes = {
-      ctx: this.ctx,
       config,
       getRemoteState,
       nodeProxy: this.nodeProxy,
