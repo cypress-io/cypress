@@ -66,8 +66,6 @@ const isValidConfig = (key, config) => {
   return true
 }
 
-const insideChildCypress = process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF
-
 // NOTE:
 // If you add/remove/change a config value, make sure to update the following
 // - cli/types/index.d.ts (including allowed config options on TestOptions)
@@ -386,7 +384,7 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     canUpdateDuringTestTime: false,
   }, {
     name: 'clientRoute',
-    defaultValue: insideChildCypress ? '/__child/' : '/__/',
+    defaultValue: '/__/',
     validation: validate.isString,
     isInternal: true,
     canUpdateDuringTestTime: false,
@@ -400,7 +398,7 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     canUpdateDuringTestTime: false,
   }, {
     name: 'devServerPublicPathRoute',
-    defaultValue: insideChildCypress ? '/__cypress-child/src' : '/__cypress/src',
+    defaultValue: '/__cypress/src',
     validation: validate.isString,
     isInternal: true,
     canUpdateDuringTestTime: false,
@@ -433,7 +431,7 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     canUpdateDuringTestTime: false,
   }, {
     name: 'namespace',
-    defaultValue: insideChildCypress ? '__cypress-child' : '__cypress',
+    defaultValue: '__cypress',
     validation: validate.isString,
     isInternal: true,
     canUpdateDuringTestTime: false,
@@ -451,13 +449,13 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     canUpdateDuringTestTime: false,
   }, {
     name: 'socketIoCookie',
-    defaultValue: insideChildCypress ? '__child-socket.io' : '__socket.io',
+    defaultValue: '__socket.io',
     validation: validate.isString,
     isInternal: true,
     canUpdateDuringTestTime: false,
   }, {
     name: 'socketIoRoute',
-    defaultValue: insideChildCypress ? '/__child-socket.io' : '/__socket.io',
+    defaultValue: '/__socket.io',
     validation: validate.isString,
     isInternal: true,
     canUpdateDuringTestTime: false,
