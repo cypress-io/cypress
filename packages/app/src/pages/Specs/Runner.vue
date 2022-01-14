@@ -16,7 +16,10 @@ query SpecPageContainer {
 }
 `
 
-const query = useQuery({ query: SpecPageContainerDocument })
+const query = useQuery({
+  query: SpecPageContainerDocument,
+  requestPolicy: window.__CYPRESS_MODE__ === 'run' ? 'cache-only' : 'cache-and-network',
+})
 </script>
 
 <route>
