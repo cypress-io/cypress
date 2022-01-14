@@ -68,7 +68,7 @@ describe('Launchpad: Onboarding Flow', () => {
     cy.visitLaunchpad()
     cy.get('[data-cy-testingType=e2e]').click()
     cy.findByText('We added the following files to your project.')
-    cy.get('[data-e2e="changes"]')
+    cy.get('[data-cy="changes"]')
     cy.findByText('Continue').closest('button').should('be.disabled')
 
     cy.withCtx((ctx, o) => {
