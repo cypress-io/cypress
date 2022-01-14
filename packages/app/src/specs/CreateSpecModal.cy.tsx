@@ -35,6 +35,8 @@ describe('<CreateSpecModal />', () => {
 
   it('renders a modal', () => {
     cy.get(modalSelector).should('be.visible')
+
+    cy.percySnapshot()
   })
 
   describe('dismissing', () => {
