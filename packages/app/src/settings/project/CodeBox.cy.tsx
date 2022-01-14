@@ -9,6 +9,7 @@ describe('<CodeBox/>', () => {
       </div>))
 
     cy.findByText('123456789').should('be.visible')
+    cy.percySnapshot()
   })
 
   it('renders the confidential', () => {
@@ -20,5 +21,15 @@ describe('<CodeBox/>', () => {
     cy.findByText('123456789').should('not.exist')
     cy.get('[aria-label="Record Key Visibility Toggle"]').click()
     cy.findByText('123456789').should('be.visible')
+    cy.percySnapshot()
+  })
+
+  it('renders the icon', () => {
+    cy.mount(() =>
+      (<div class="p-12 resize-x overflow-auto">
+        <CodeBox code="123456789" prefixIcon={() => <IconOctothorpe data-cy="icon"/>}/>
+      </div>))
+
+    cy.get('[data-cy="icon"]').should('be.visible')
   })
 })
