@@ -433,7 +433,7 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     canUpdateDuringTestTime: false,
   }, {
     name: 'namespace',
-    defaultValue: insideChildCypress ? '__cypress-child' : '__cypress',
+    defaultValue: '__cypress',
     validation: validate.isString,
     isInternal: true,
     canUpdateDuringTestTime: false,
