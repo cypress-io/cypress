@@ -5,7 +5,7 @@ describe('Specs Page', () => {
     viewportHeight: 768,
     viewportWidth: 1024,
   }, () => {
-    context('with storybook', () => {
+    context('project with storybook', () => {
       beforeEach(() => {
         cy.scaffoldProject('no-specs')
         cy.openProject('no-specs')
@@ -146,7 +146,7 @@ describe('Specs Page', () => {
       })
     })
 
-    context('without storybook', () => {
+    context('project without storybook', () => {
       beforeEach(() => {
         cy.scaffoldProject('no-specs-no-storybook')
         cy.openProject('no-specs-no-storybook')
