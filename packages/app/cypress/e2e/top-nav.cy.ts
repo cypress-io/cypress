@@ -201,8 +201,6 @@ describe('App Top Nav Workflows', () => {
           cy.findByRole('button', { name: 'Close' }).click()
         })
 
-        cy.get('@upgradeModal').findByRole('button', { name: 'Close' }).click()
-
         cy.findAllByRole('dialog').should('not.exist')
       })
     })
