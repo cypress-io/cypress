@@ -160,8 +160,8 @@ export class ProjectBase<TServer extends Server> extends EE {
 
   createServer (testingType: Cypress.TestingType) {
     return testingType === 'e2e'
-      ? new ServerE2E(this.ctx) as TServer
-      : new ServerCt(this.ctx) as TServer
+      ? new ServerE2E() as TServer
+      : new ServerCt() as TServer
   }
 
   async open () {
