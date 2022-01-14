@@ -265,66 +265,83 @@ describe('Launchpad: Setup Project', () => {
         cy.findByRole('button', { name: 'Next Step' })
         .should('have.disabled')
         .as('nextStepButton')
+      })
 
-        const bundlers = ['Webpack', 'Vite']
-        const frameworks = [
-          // FIXME: why dont I work?!
-          // {
-          //   framework: 'Create React App',
-          // },
-          {
-            framework: 'React.js',
-            bundlers,
-          },
-          {
-            framework: 'Next.js',
-          },
-          {
-            framework: 'Vue CLI',
-          },
-          {
-            framework: 'Vue.js',
-            bundlers,
-          },
-          {
-            framework: 'Nuxt.js',
-          },
-        ]
-        const languages = ['JavaScript', 'TypeScript']
+      const bundlers = ['Webpack', 'Vite']
+      const frameworks = [
+        {
+          framework: 'Create React App',
+        },
+        {
+          framework: 'React.js',
+          bundlers,
+        },
+        {
+          framework: 'Next.js',
+        },
+        {
+          framework: 'Vue CLI',
+        },
+        {
+          framework: 'Vue.js',
+          bundlers,
+        },
+        {
+          framework: 'Nuxt.js',
+        },
+      ]
+      const languages = ['JavaScript', 'TypeScript']
 
-        let selectedFramework = 'Pick a framework'
-        let selectedBundler = 'Pick a bundler'
+      frameworks.forEach(({ framework, bundlers = [null] }) => {
+        bundlers.forEach((bundler) => {
+          languages.forEach((lang) => {
+            let testTitle = `can pick ${framework} + ${bundler} + ${lang}`
 
-        frameworks.forEach(({ framework, bundlers = [null] }) => {
-          bundlers.forEach((bundler) => {
-            languages.forEach((lang) => {
-              if (bundler === null) {
-                cy.log(`can pick ${framework} + ${lang}`)
-              } else {
-                cy.log(`can pick ${framework} + ${bundler} + ${lang}`)
-              }
+            if (bundler === null) {
+              testTitle = `can pick ${framework} + ${lang}`
+            }
 
-              cy.findByRole('button', { name: `Front-end Framework ${selectedFramework}` })
+            it(testTitle, () => {
+              cy.openProject('pristine-with-e2e-testing')
+              cy.visitLaunchpad()
+
+              verifyWelcomePage({ e2eIsConfigured: true, ctIsConfigured: false })
+
+              cy.get('[data-cy-testingtype="component"]').click()
+
+              cy.get('h1').should('contain', 'Project Setup')
+              cy.contains('Confirm the front-end framework and bundler used in your project.')
+
+              cy.findByRole('button', { name: 'Front-end Framework Pick a framework' })
+              .should('have.attr', 'aria-haspopup', 'true')
+              .should('have.attr', 'aria-expanded', 'false')
+
+              cy.findByRole('button', { name: 'Next Step' })
+              .should('have.disabled')
+              .as('nextStepButton')
+
+              cy.findByRole('button', { name: `Front-end Framework Pick a framework` })
               .click()
               .should('have.attr', 'aria-expanded', 'true')
 
               cy.findByRole('option', { name: framework }).click()
-              selectedFramework = framework
 
               if (bundler !== null) {
-                cy.findByRole('button', { name: `Bundler ${selectedBundler}` })
+                cy.findByRole('button', { name: `Bundler Pick a bundler` })
                 .should('have.attr', 'aria-haspopup', 'true')
                 .should('have.attr', 'aria-expanded', 'false')
                 .click()
                 .should('have.attr', 'aria-expanded', 'true')
 
                 cy.findByRole('option', { name: bundler }).click()
-                selectedBundler = bundler
               }
 
               cy.findByRole('button', { name: lang }).click()
 
-              cy.get('@nextStepButton').should('not.have.disabled')
+              cy.get('@nextStepButton').should('not.have.disabled').click()
+
+              cy.contains('h1', 'Install Dev Dependencies')
+              cy.contains('p', 'Paste the command below into your terminal to install the required packages.')
             })
           })
         })

@@ -144,5 +144,13 @@ const onBack = () => {
 
 const languages = computed(() => props.gql.allLanguages ?? [])
 
-const canNavigateForward = computed(() => Object.values(props.data).filter((f) => f).length === 3)
+const canNavigateForward = computed(() => {
+  // if there is only one supported bundler user doesn't nee to select bundler option
+  if (bundlers.value.length > 1) {
+    return Object.values(props.data).filter((f) => f !).length === 3
+  }
+
+  return Object.values(props.data).filter((f) => f).length === 2
+})
+
 </script>
