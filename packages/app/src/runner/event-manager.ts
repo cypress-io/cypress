@@ -333,10 +333,9 @@ export class EventManager {
     // @ts-ignore
     const $window = this.$CypressDriver.$(window)
 
-    //  TODO(lachlan): best place to do this?
-    if (!('__vite__' in window)) {
-      $window.on('hashchange', rerun)
-    }
+    // This is a test-only even. It's used to
+    // trigger a re-reun for the drive rerun.cy.js spec.
+    $window.on('test:trigger:rerun', rerun)
 
     // when we actually unload then
     // nuke all of the cookies again
