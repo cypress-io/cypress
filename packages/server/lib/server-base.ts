@@ -520,7 +520,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
           protocol,
         },
         headers: {
-          'x-cypress-forwarded-from-proxy': true,
+          'x-cypress-forwarded-from-cypress': true,
         },
         agent,
       }, onProxyErr)
