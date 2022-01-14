@@ -126,7 +126,3 @@ export const PACKAGES_DESCRIPTIONS: Record<AllPackages, string> = {
   '@storybook/testing-react': 'Testing utilities that allow you to reuse your stories in your unit tests',
   '@storybook/testing-vue3': 'Testing utilities that allow you to reuse your stories in your unit tests',
 } as const
-
-export const DEFAULT_E2E_SPEC_PATTERN = 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}'
-
-export const DEFAULT_COMPONENT_SPEC_PATTERN = '**/*.cy.{js,jsx,ts,tsx}'

@@ -1,11 +1,12 @@
 import type { CodeLanguageEnum, NexusGenEnums, NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
-import { Bundler, CodeLanguage, DEFAULT_COMPONENT_SPEC_PATTERN, DEFAULT_E2E_SPEC_PATTERN, FrontendFramework } from '@packages/types'
+import type { Bundler, CodeLanguage, FrontendFramework } from '@packages/types'
 import assert from 'assert'
 import dedent from 'dedent'
 import fs from 'fs'
 import path from 'path'
 
 import type { DataContext } from '..'
+import { getDefaultSpecPatterns } from '../util/config-options'
 
 interface WizardGetCodeComponent {
   chosenLanguage: CodeLanguage
@@ -324,7 +325,7 @@ const E2E_SCAFFOLD_BODY = (opts: E2eScaffoldOpts) => {
   return `
     e2e: {
       supportFile: 'cypress/support/e2e.${opts.lang}',
-      specPattern: ${DEFAULT_E2E_SPEC_PATTERN},
+      specPattern: ${getDefaultSpecPatterns().e2e},
       viewportHeight: 660,
       viewportWidth: 1000,
       setupNodeEvents(on, config) {
@@ -345,7 +346,7 @@ const COMPONENT_SCAFFOLD_BODY = (opts: ComponentScaffoldOpts) => {
   return `
   component: {
     supportFile: 'cypress/support/component.${opts.lang}',
-    specPattern: ${DEFAULT_COMPONENT_SPEC_PATTERN},
+    specPattern: ${getDefaultSpecPatterns().component},
     devServer: import('${opts.requirePath}'),
     devServerConfig: ${opts.configOptionsString}
   }

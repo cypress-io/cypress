@@ -1,5 +1,5 @@
 import os from 'os'
-import { FrontendFramework, FRONTEND_FRAMEWORKS, ResolvedFromConfig, RESOLVED_FROM, FoundSpec, DEFAULT_E2E_SPEC_PATTERN, DEFAULT_COMPONENT_SPEC_PATTERN } from '@packages/types'
+import { FrontendFramework, FRONTEND_FRAMEWORKS, ResolvedFromConfig, RESOLVED_FROM, FoundSpec } from '@packages/types'
 import { scanFSForAvailableDependency } from 'create-cypress-tests'
 import { debounce, isEqual } from 'lodash'
 import path from 'path'
@@ -14,6 +14,7 @@ import type { DataContext } from '..'
 import { toPosix } from '../util/file'
 import type { FilePartsShape } from '@packages/graphql/src/schemaTypes/objectTypes/gql-FileParts'
 import { STORIES_GLOB } from '.'
+import { getDefaultSpecPatterns } from '../util/config-options'
 
 export type SpecWithRelativeRoot = FoundSpec & { relativeToCommonRoot: string }
 
@@ -303,12 +304,14 @@ export class ProjectDataSource {
     assert(this.ctx.currentProject)
     assert(this.ctx.coreData.currentTestingType)
 
+    const { e2e, component } = getDefaultSpecPatterns()
+
     const { specPattern } = await this.ctx.project.specPatternsForTestingType(this.ctx.currentProject, this.ctx.coreData.currentTestingType)
 
     if (this.ctx.coreData.currentTestingType === 'e2e') {
-      return isEqual(specPattern, [DEFAULT_E2E_SPEC_PATTERN])
+      return isEqual(specPattern, [e2e])
     }
 
-    return isEqual(specPattern, [DEFAULT_COMPONENT_SPEC_PATTERN])
+    return isEqual(specPattern, [component])
   }
 }

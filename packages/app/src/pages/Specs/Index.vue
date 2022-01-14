@@ -39,7 +39,6 @@ query SpecsPageContainer {
 
 const query = useQuery({ query: SpecsPageContainerDocument })
 
-// TODO: add logic here based on if default spec pattern is used
 const isDefaultSpecPattern = computed(() => !!query.data.value?.currentProject?.isDefaultSpecPattern)
 
 const title = computed(() => {
