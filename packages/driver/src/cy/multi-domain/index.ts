@@ -128,14 +128,12 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
         Cypress.action('cy:enqueue:command', attrs)
       }
 
-      const updateCommand = ({ id, end }) => {
-        if (end) {
-          const command = commands[id]
+      const endCommand = ({ id }) => {
+        const command = commands[id]
 
-          if (command) {
-            delete commands[id]
-            command.deferred.resolve()
-          }
+        if (command) {
+          delete commands[id]
+          command.deferred.resolve()
         }
       }
 
@@ -186,7 +184,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
         const pendingCommands = _.map(commands, (command) => command.deferred.promise)
 
         await Promise.all(pendingCommands)
-        communicator.off('command:update', updateCommand)
+        communicator.off('command:end', endCommand)
       }
 
       const cleanupLogs = async () => {
@@ -227,7 +225,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
       }
 
       communicator.on('command:enqueued', addCommand)
-      communicator.on('command:update', updateCommand)
+      communicator.on('command:end', endCommand)
 
       communicator.on('log:added', onLogAdded)
       communicator.on('log:changed', onLogChanged)
