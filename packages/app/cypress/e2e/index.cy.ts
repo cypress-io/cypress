@@ -16,6 +16,7 @@ describe('App: Index', () => {
     cy.visitApp()
   })
 
+  // TODO(ryan m and tim): Skipping until https://github.com/cypress-io/cypress/pull/19619 is merged
   const tempSkip = new Date() > new Date('2022-01-21') ? context : context.skip
 
   tempSkip('scaffold example specs', () => {
