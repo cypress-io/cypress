@@ -573,7 +573,7 @@ type Mutation {
   addProject(
     """Whether to open the project when added"""
     open: Boolean
-    path: String!
+    path: String
   ): Query
 
   """Clears the currently active project"""

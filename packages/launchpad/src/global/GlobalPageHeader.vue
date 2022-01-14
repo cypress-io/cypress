@@ -72,7 +72,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: string): void
-  (e: 'addProject', value: string): void
+  (e: 'addProject', value: string | null): void
 }>()
 
 const localValue = useModelWrapper(props, emit, 'modelValue')
