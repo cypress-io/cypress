@@ -140,39 +140,43 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
       }
 
       const onLogAdded = (attrs) => {
-        attrs.consoleProps = () => attrs.consoleProps
-        attrs.renderProps = () => attrs.renderProps
+        if (attrs) {
+          attrs.consoleProps = () => attrs.consoleProps
+          attrs.renderProps = () => attrs.renderProps
 
-        const log = Cypress.log(attrs)
+          const log = Cypress.log(attrs)
 
-        // if the log needs to stream updates, defer its result to make sure all streamed updates come in
-        if (!attrs.ended) {
-          logs[log.get('id')] = {
-            log,
-            deferred: createDeferred(),
+          // if the log needs to stream updates, defer its result to make sure all streamed updates come in
+          if (!attrs.ended) {
+            logs[log.get('id')] = {
+              log,
+              deferred: createDeferred(),
+            }
           }
         }
       }
 
       const onLogChanged = (attrs) => {
-        const { deferred, log } = logs[attrs.id]
+        if (attrs) {
+          const { deferred, log } = logs[attrs.id]
 
-        // NOTE: Cypress.LogConfig only contains partial types of what exists on the log attributes, missing a lot of 'private' properties
-        const logAttrs = log.get()
+          // NOTE: Cypress.LogConfig only contains partial types of what exists on the log attributes, missing a lot of 'private' properties
+          const logAttrs = log.get()
 
-        _.forEach(attrs, (value: any, key: string) => {
-          if (!_.isEqual(value, logAttrs[key])) {
-            if (value !== undefined && value !== null && !(_.isObject(value) && _.isEmpty(value))) {
-              log.set(key as keyof Cypress.LogConfig, value)
+          _.forEach(attrs, (value: any, key: string) => {
+            if (!_.isEqual(value, logAttrs[key])) {
+              if (value !== undefined && value !== null && !(_.isObject(value) && _.isEmpty(value))) {
+                log.set(key as keyof Cypress.LogConfig, value)
+              }
             }
+          })
+
+          const isEnded = log.get('ended' as keyof Cypress.LogConfig)
+
+          if (isEnded) {
+            delete logs[attrs.id]
+            deferred.resolve()
           }
-        })
-
-        const isEnded = log.get('ended' as keyof Cypress.LogConfig)
-
-        if (isEnded) {
-          delete logs[attrs.id]
-          deferred.resolve()
         }
       }
 
