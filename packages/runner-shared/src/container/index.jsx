@@ -19,7 +19,7 @@ export class Container extends Component {
   componentDidMount () {
     this.props.eventManager.addGlobalListeners(this.props.state, {
       element: automationElementId,
-      string: this.randomString,
+      randomString: this.randomString,
     })
   }
 

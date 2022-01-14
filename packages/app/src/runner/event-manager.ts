@@ -20,7 +20,7 @@ const noop = () => {}
 export const automationElementId = '__cypress-string' as const
 
 interface addGlobalListenerOptions {
-    automation: typeof automationElementId
+    element: typeof automationElementId
     randomString: string
     setAutomationStatus: (status: AutomationStatus) => void
 }
@@ -76,9 +76,8 @@ export class EventManager {
       return this.runSpec(state)
     }
 
-    const connectionInfo = {
-      element: options.automation,
-      automation: options.automation,
+    const connectionInfo: Omit<addGlobalListenerOptions, 'setAutomationStatus'> = {
+      element: options.element,
       randomString: options.randomString,
     }
 
