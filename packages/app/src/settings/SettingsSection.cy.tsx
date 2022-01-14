@@ -13,7 +13,7 @@ describe('<SettingsSection />', () => {
     const code = 'projectId'
     const anchorId = 'the-projectId'
 
-    cy.mount(() => (<div className="p-24px">
+    cy.mount(() => (<div class="p-24px">
       <SettingsSection
         v-slots={slots}
         code={code}
