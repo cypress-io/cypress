@@ -61,7 +61,6 @@
         <RemoveClassesDuringScreenshotting
           class="h-full bg-gray-100 p-16px"
         >
-          <AutomationElement />
           <ScriptError
             v-if="autStore.scriptError"
             :error="autStore.scriptError.error"
@@ -72,6 +71,13 @@
             class="origin-top-left viewport"
             :style="viewportStyle"
           />
+          <AutomationElement />
+          <!--
+            TODO: Figure out bugs in automation lifecycle
+            Put these guys back in.
+            <AutomationMissing v-if="runnerUiStore.automationStatus === 'MISSING'" />
+            <AutomationDisconnected v-if="runnerUiStore.automationStatus === 'DISCONNECTED'" />
+          -->
         </RemoveClassesDuringScreenshotting>
         <SnapshotControls
           :event-manager="eventManager"
@@ -106,8 +112,10 @@ import ScriptError from './ScriptError.vue'
 import { useWindowSize } from '@vueuse/core'
 import ResizablePanels, { DraggablePanel } from './ResizablePanels.vue'
 import { runnerConstants } from './runner-constants'
-import AutomationElement from './automation/AutomationElement.vue'
 import HideDuringScreenshotOrRunMode from './screenshot/HideDuringScreenshotOrRunMode.vue'
+import AutomationDisconnected from './automation/AutomationDisconnected.vue'
+import AutomationMissing from './automation/AutomationMissing.vue'
+import AutomationElement from './automation/AutomationElement.vue'
 
 const { height: windowHeight, width: windowWidth } = useWindowSize()
 

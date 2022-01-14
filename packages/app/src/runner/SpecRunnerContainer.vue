@@ -1,17 +1,5 @@
 <template>
-  <AutomationElement
-    v-if="runnerUiStore.automationStatus === 'CONNECTING'"
-  />
-
-  <AutomationMissing
-    v-else-if="runnerUiStore.automationStatus === 'MISSING'"
-  />
-
-  <AutomationDisconnected
-    v-else-if="runnerUiStore.automationStatus === 'DISCONNECTED'"
-  />
-
-  <div v-else-if="runnerUiStore.automationStatus === 'CONNECTED' && specStore.activeSpec">
+  <div v-if="specStore.activeSpec">
     <SpecRunner
       v-if="initialized"
       :gql="props.gql"
@@ -29,16 +17,12 @@ import { onMounted, ref, watch, onBeforeUnmount } from 'vue'
 import { useRoute } from 'vue-router'
 import type { SpecRunnerFragment } from '../generated/graphql'
 import { getAutIframeModel, UnifiedRunnerAPI } from '../runner'
-import { useRunnerUiStore, useSpecStore } from '../store'
+import { useSpecStore } from '../store'
 import { useSelectorPlaygroundStore } from '../store/selector-playground-store'
 import SpecRunner from './SpecRunner.vue'
-import AutomationDisconnected from './automation/AutomationDisconnected.vue'
-import AutomationMissing from './automation/AutomationMissing.vue'
-import AutomationElement from './automation/AutomationElement.vue'
 
 const initialized = ref(false)
 const specStore = useSpecStore()
-const runnerUiStore = useRunnerUiStore()
 const selectorPlaygroundStore = useSelectorPlaygroundStore()
 const route = useRoute()
 
