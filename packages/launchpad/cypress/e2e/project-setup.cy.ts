@@ -1,4 +1,4 @@
-import { FRONTEND_FRAMEWORKS, BUNDLERS, CODE_LANGUAGES } from '../../../types/src/constants'
+import { FRONTEND_FRAMEWORKS, BUNDLERS, CODE_LANGUAGES, PACKAGES_DESCRIPTIONS } from '../../../types/src/constants'
 
 describe('Launchpad: Setup Project', () => {
   beforeEach(() => {
@@ -264,9 +264,11 @@ describe('Launchpad: Setup Project', () => {
         .should('have.attr', 'aria-haspopup', 'true')
         .should('have.attr', 'aria-expanded', 'false')
 
-        cy.findByRole('button', { name: 'Next Step' })
-        .should('have.disabled')
-        .as('nextStepButton')
+        cy.findByRole('button', { name: 'Next Step' }).should('have.disabled')
+
+        cy.findByRole('button', { name: 'Back' }).click()
+
+        verifyWelcomePage({ e2eIsConfigured: true, ctIsConfigured: false })
       })
 
       FRONTEND_FRAMEWORKS.forEach((framework) => {
@@ -274,7 +276,7 @@ describe('Launchpad: Setup Project', () => {
           const bundler = BUNDLERS.find((b) => b.type === testBundler)
 
           if (!bundler) {
-            throw new Error(`${framework.name} claims to support th bundler, ${testBundler}, however it is not a valid Cypress bundlers.`)
+            throw new Error(`${framework.name} claims to support the bundler, ${testBundler}, however it is not a valid Cypress bundlers.`)
           }
 
           CODE_LANGUAGES.forEach((lang) => {
@@ -292,6 +294,7 @@ describe('Launchpad: Setup Project', () => {
 
               cy.get('[data-cy-testingtype="component"]').click()
 
+              cy.log('Choose project setup')
               cy.get('h1').should('contain', 'Project Setup')
               cy.contains('Confirm the front-end framework and bundler used in your project.')
 
@@ -326,16 +329,25 @@ describe('Launchpad: Setup Project', () => {
               cy.log('Verify Install Dev Dependencies page')
               cy.contains('h1', 'Install Dev Dependencies')
               cy.contains('p', 'Paste the command below into your terminal to install the required packages.')
+              cy.contains('code', `add -D ${framework.package} ${bundler.package}`)
+
+              cy.findByRole('button', { name: 'Copy' })
+              .click()
+              .should('contain', 'Copied!')
 
               cy.validateExternalLink({
                 name: framework.package,
                 href: `https://www.npmjs.com/package/${framework.package}`,
               })
 
+              cy.contains(PACKAGES_DESCRIPTIONS[framework.package].split('<span')[0])
+
               cy.validateExternalLink({
                 name: bundler.package,
                 href: `https://www.npmjs.com/package/${bundler.package}`,
               })
+
+              cy.contains(PACKAGES_DESCRIPTIONS[bundler.package].split('<span')[0])
 
               cy.findByRole('button', { name: 'I\'ve installed them' }).click()
 
