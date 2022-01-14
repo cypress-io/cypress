@@ -139,11 +139,9 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
         }
       }
 
-      const onLogAdded = (logAdded) => {
-        const attrs = logAdded
-
-        attrs.consoleProps = () => logAdded.consoleProps
-        attrs.renderProps = () => logAdded.renderProps
+      const onLogAdded = (attrs) => {
+        attrs.consoleProps = () => attrs.consoleProps
+        attrs.renderProps = () => attrs.renderProps
 
         const log = Cypress.log(attrs)
 
@@ -156,29 +154,24 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
         }
       }
 
-      const onLogChanged = (logChanged) => {
-        const { deferred, log } = logs[logChanged.id]
+      const onLogChanged = (attrs) => {
+        const { deferred, log } = logs[attrs.id]
 
         // NOTE: Cypress.LogConfig only contains partial types of what exists on the log attributes, missing a lot of 'private' properties
         const logAttrs = log.get()
 
-        const updatedLogAttributes: Partial<Cypress.Log> = _.transform(logChanged, (result: {[key: string]: any }, value: any, key: string) => {
+        _.forEach(attrs, (value: any, key: string) => {
           if (!_.isEqual(value, logAttrs[key])) {
-            result[key] = value
-          }
-        })
-
-        _.forEach(updatedLogAttributes, (value, key) => {
-          // if the updated value from the secondary domain is undefined, null, or an empty object/array, skip the update
-          if (value !== undefined && value !== null && !(_.isObject(value) && _.isEmpty(value))) {
-            log.set(key as keyof Cypress.LogConfig, value)
+            if (value !== undefined && value !== null && !(_.isObject(value) && _.isEmpty(value))) {
+              log.set(key as keyof Cypress.LogConfig, value)
+            }
           }
         })
 
         const isEnded = log.get('ended' as keyof Cypress.LogConfig)
 
         if (isEnded) {
-          delete logs[logChanged.id]
+          delete logs[attrs.id]
           deferred.resolve()
         }
       }
