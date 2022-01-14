@@ -1,5 +1,5 @@
-import type { CodeGenType, MutationAddProjectArgs, MutationSetProjectPreferencesArgs, NexusGenObjects, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
-import type { InitializeProjectOptions, FoundBrowser, FoundSpec, LaunchOpts, OpenProjectLaunchOptions, Preferences, TestingType, ReceivedCypressOptions } from '@packages/types'
+import type { CodeGenType, MutationSetProjectPreferencesArgs, NexusGenObjects, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
+import type { InitializeProjectOptions, FoundBrowser, FoundSpec, LaunchOpts, OpenProjectLaunchOptions, Preferences, TestingType, ReceivedCypressOptions, AddProject } from '@packages/types'
 import execa from 'execa'
 import path from 'path'
 import assert from 'assert'
@@ -139,7 +139,19 @@ export class ProjectActions {
     //
   }
 
-  async addProject (args: MutationAddProjectArgs) {
+  async addProjectFromElectronNativeFolderSelect () {
+    const path = await this.ctx.actions.electron.showOpenDialog()
+
+    if (!path) {
+      return
+    }
+
+    await this.addProject({ path })
+
+    this.ctx.emitter.toLaunchpad()
+  }
+
+  async addProject (args: AddProject) {
     const projectRoot = await this.getDirectoryPath(args.path)
 
     const found = this.projects.find((x) => x.projectRoot === projectRoot)

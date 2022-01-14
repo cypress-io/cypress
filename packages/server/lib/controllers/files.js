@@ -5,16 +5,17 @@ const cwd = require('../cwd')
 const glob = require('../util/glob')
 const debug = require('debug')('cypress:server:controllers')
 const { escapeFilenameInUrl } = require('../util/escape_filename')
+const { getCtx } = require('@packages/data-context')
 
 module.exports = {
-  handleIframe (req, res, ctx, config, getRemoteState, extraOptions) {
+  handleIframe (req, res, config, getRemoteState, extraOptions) {
     const test = req.params[0]
     const iframePath = cwd('lib', 'html', 'iframe.html')
     const specFilter = _.get(extraOptions, 'specFilter')
 
     debug('handle iframe %o', { test, specFilter })
 
-    return this.getSpecs(test, ctx, config, extraOptions)
+    return this.getSpecs(test, config, extraOptions)
     .then((specs) => {
       return this.getSupportFile(config)
       .then((js) => {
@@ -35,7 +36,7 @@ module.exports = {
     })
   },
 
-  getSpecs (spec, ctx, config, extraOptions = {}) {
+  getSpecs (spec, config, extraOptions = {}) {
     // when asking for all specs: spec = "__all"
     // otherwise it is a relative spec filename like "integration/spec.js"
     debug('get specs %o', { spec, extraOptions })
@@ -65,6 +66,8 @@ module.exports = {
       // grab all of the specs if this is ci
       if (spec === '__all') {
         debug('returning all specs')
+
+        const ctx = getCtx()
 
         const [e2ePatterns, componentPatterns] = await Promise.all([
           ctx.project.specPatternsForTestingType(ctx.project.projectRoot, 'e2e'),
