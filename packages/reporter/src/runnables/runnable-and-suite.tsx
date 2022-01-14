@@ -82,6 +82,7 @@ class Runnable extends Component<RunnableProps> {
           'runnable-retried': model.hasRetried,
           'runnable-studio': appState.studioActive,
         })}
+        data-model-state={model.state}
       >
         {model.type === 'test' ? <Test model={model as TestModel} /> : <Suite model={model as SuiteModel} />}
       </li>

@@ -250,12 +250,23 @@ export const mutation = mutationType({
       type: Query,
       description: 'Add project to projects array and cache it',
       args: {
-        path: nonNull(stringArg()),
+        path: stringArg(),
         open: booleanArg({ description: 'Whether to open the project when added' }),
       },
       resolve: async (_, args, ctx) => {
         ctx.actions.wizard.resetWizard()
-        await ctx.actions.project.addProject(args)
+        let path = args.path
+
+        if (!path) {
+          ctx.actions.project.addProjectFromElectronNativeFolderSelect()
+
+          return {}
+        }
+
+        await ctx.actions.project.addProject({
+          ...args,
+          path,
+        })
 
         return {}
       },

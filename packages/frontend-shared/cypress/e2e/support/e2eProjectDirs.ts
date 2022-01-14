@@ -13,6 +13,7 @@ export const e2eProjectDirs = [
   'config-with-short-timeout',
   'config-with-ts',
   'cookies',
+  'cypress-in-cypress',
   'default-layout',
   'downloads',
   'e2e',
