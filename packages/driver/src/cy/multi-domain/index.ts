@@ -155,8 +155,13 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
       }
 
       const onLogChanged = (attrs) => {
-        if (attrs) {
-          const { deferred, log } = logs[attrs.id]
+        const changedLog = logs[attrs?.id]
+
+        // NOTE: sometimes debug logs that are created in the secondary are only emitted through 'log:changed' events
+        // and no initial log is created in 'log:added
+        // These logs are not important to the primary domain, so we can ignore them
+        if (changedLog) {
+          const { deferred, log } = changedLog
 
           const logAttrs = log.get()
 
