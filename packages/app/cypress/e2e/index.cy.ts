@@ -16,6 +16,32 @@ describe('App: Index', () => {
     cy.visitApp()
   })
 
+  context('scaffold example specs', () => {
+    const assertSpecs = (createdSpecs: FoundSpec[]) => cy.wrap(createdSpecs).each((spec: FoundSpec) => cy.contains(spec.baseName).scrollIntoView().should('be.visible'))
+
+    it('should generate example specs', () => {
+      let createdSpecs: FoundSpec[]
+
+      cy.visitApp()
+
+      cy.intercept('POST', 'mutation-ScaffoldGeneratorStepOne_scaffoldIntegration').as('scaffoldIntegration')
+
+      cy.contains(defaultMessages.createSpec.e2e.importFromScaffold.header).click()
+      cy.wait('@scaffoldIntegration').then((interception: Interception) => {
+        createdSpecs = interception.response?.body.data.scaffoldIntegration.map((res) => res.file)
+
+        expect(createdSpecs).lengthOf.above(0)
+
+        cy.contains(defaultMessages.createSpec.e2e.importFromScaffold.specsAddedHeader).should('be.visible')
+        assertSpecs(createdSpecs)
+      })
+
+      cy.contains(defaultMessages.createSpec.e2e.importFromScaffold.specsAddedButton).click()
+
+      cy.visitApp().then(() => assertSpecs(createdSpecs))
+    })
+  })
+
   context('with no specs', () => {
     it('shows "Create spec" title', () => {
       // TODO: we need more e2e tests around this, but it requires changes to how we set up config in our
@@ -55,35 +81,6 @@ describe('App: Index', () => {
       // TODO: Figure out why emitter doesn't work in e2e tests
       cy.visitApp()
       cy.findByTestId('spec-item').should('contain', 'new-file')
-    })
-  })
-
-  context('scaffold example specs', () => {
-    const assertSpecs = (createdSpecs: FoundSpec[]) => cy.wrap(createdSpecs).each((spec: FoundSpec) => cy.contains(spec.baseName).scrollIntoView().should('be.visible'))
-
-    it('should generate example specs', () => {
-      let createdSpecs: FoundSpec[]
-
-      cy.visitApp()
-
-      cy.intercept('POST', 'mutation-ScaffoldGeneratorStepOne_scaffoldIntegration').as('scaffoldIntegration')
-
-      // TODO: Remove when subscription support lands
-      cy.wait(4000)
-
-      cy.contains(defaultMessages.createSpec.e2e.importFromScaffold.header).click()
-      cy.wait('@scaffoldIntegration').then((interception: Interception) => {
-        createdSpecs = interception.response?.body.data.scaffoldIntegration.map((res) => res.file)
-
-        expect(createdSpecs).lengthOf.above(0)
-
-        cy.contains(defaultMessages.createSpec.e2e.importFromScaffold.specsAddedHeader).should('be.visible')
-        assertSpecs(createdSpecs)
-      })
-
-      cy.contains(defaultMessages.createSpec.e2e.importFromScaffold.specsAddedButton).click()
-
-      cy.visitApp().then(() => assertSpecs(createdSpecs))
     })
   })
 })
