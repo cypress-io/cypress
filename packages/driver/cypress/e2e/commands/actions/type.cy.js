@@ -360,7 +360,10 @@ describe('src/cy/commands/actions/type - #type', () => {
       cy.get(':text:first').type('foo', { animationDistanceThreshold: 1000 }).then(() => {
         const { args } = cy.ensureElementIsNotAnimating.firstCall
 
-        expect(args[1]).to.deep.eq([fromElWindow, fromElWindow])
+        for (const key of Object.keys(fromElWindow)) {
+          expect(args[1][0][key]).to.eq(fromElWindow[key])
+          expect(args[1][1][key]).to.eq(fromElWindow[key])
+        }
 
         expect(args[2]).to.eq(1000)
       })
@@ -378,7 +381,10 @@ describe('src/cy/commands/actions/type - #type', () => {
       cy.get(':text:first').type('foo').then(() => {
         const { args } = cy.ensureElementIsNotAnimating.firstCall
 
-        expect(args[1]).to.deep.eq([fromElWindow, fromElWindow])
+        for (const key of Object.keys(fromElWindow)) {
+          expect(args[1][0][key]).to.eq(fromElWindow[key])
+          expect(args[1][1][key]).to.eq(fromElWindow[key])
+        }
 
         expect(args[2]).to.eq(animationDistanceThreshold)
       })
