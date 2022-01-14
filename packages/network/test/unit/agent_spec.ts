@@ -83,7 +83,7 @@ describe('lib/agent', function () {
   })
 
   afterEach(function () {
-    process.env.NO_PROXY = process.env.HTTP_PROXY = process.env.HTTPS_PROXY = process.env.HTTP_PROXY_TARGET_HOST = ''
+    process.env.NO_PROXY = process.env.HTTP_PROXY = process.env.HTTPS_PROXY = process.env.HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS = ''
     sinon.restore()
   })
 
@@ -417,7 +417,7 @@ describe('lib/agent', function () {
       it('HTTP pages can be loaded with the Upstream target URL', function (done) {
         process.env.HTTP_PROXY = process.env.HTTPS_PROXY = ''
         process.env.NO_PROXY = ''
-        process.env.HTTP_PROXY_TARGET_HOST = `http://localhost:${HTTP_PORT}`
+        process.env.HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS = `http://localhost:${HTTP_PORT}`
 
         this.request({
           url: `http://localhost:${HTTP_PORT}/get`,

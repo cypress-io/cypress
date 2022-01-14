@@ -204,7 +204,11 @@ export class CombinedAgent {
 }
 
 const getProxyOrTargetOverrideForUrl = (href) => {
-  const targetHost = process.env.HTTP_PROXY_TARGET_HOST
+  // HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS is used for Cypress in Cypress E2E testing and will
+  // force the parent Cypress server to treat the child Cypress server like a proxy without
+  // having HTTP_PROXY set and will force traffic ONLY bound to that origin to behave
+  // like a proxy
+  const targetHost = process.env.HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS
 
   if (targetHost && href.includes(targetHost)) {
     return targetHost
@@ -224,7 +228,7 @@ class HttpAgent extends http.Agent {
   }
 
   addRequest (req: http.ClientRequest, options: http.RequestOptions) {
-    if (process.env.HTTP_PROXY || process.env.HTTP_PROXY_TARGET_HOST) {
+    if (process.env.HTTP_PROXY || process.env.HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS) {
       const proxy = getProxyOrTargetOverrideForUrl(options.href)
 
       if (proxy) {
