@@ -151,6 +151,10 @@ export const mutation = mutationType({
           ctx.actions.wizard.setCodeLanguage(args.input.codeLanguage)
         }
 
+        // TODO: remove when live-mutations are implements
+        // signal to launchpad to reload the data context
+        ctx.emitter.toLaunchpad()
+
         return ctx.wizardData
       },
     })

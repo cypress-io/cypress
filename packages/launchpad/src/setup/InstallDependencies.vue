@@ -7,8 +7,7 @@
     class="max-w-640px"
   >
     <ManualInstall
-      v-if="queryData.data.value.wizard.packagesToInstall?.length"
-      :gql="queryData.data.value"
+      :gql="props.gql"
     />
   </WizardLayout>
 </template>
@@ -17,10 +16,10 @@
 import WizardLayout from './WizardLayout.vue'
 import ManualInstall from './ManualInstall.vue'
 import { gql } from '@urql/core'
-import { InstallDependencies_ScaffoldFilesDocument } from '../generated/graphql'
+import { InstallDependenciesFragment, InstallDependencies_ScaffoldFilesDocument } from '../generated/graphql'
 import type { CurrentStep } from './Wizard.vue'
 import { useI18n } from '@cy/i18n'
-import { useMutation, useQuery } from '@urql/vue'
+import { useMutation } from '@urql/vue'
 
 gql`
 mutation InstallDependencies_scaffoldFiles {
@@ -35,36 +34,14 @@ const emits = defineEmits<{
 }>()
 
 gql`
-fragment ManualInstall on Query {
-  wizard {
-    packagesToInstall {
-      id
-      name
-      description
-      package
-    }
-  }
-  currentProject {
-    id
-    title
-  }
+fragment InstallDependencies on Query {
+  ...ManualInstall
 }
 `
 
-const query = `
-    query {
-      wizard {
-        packagesToInstall {
-          id
-          name
-          description
-          package
-        }
-      }
-    }
-  `
-
-const queryData = useQuery({ query })
+const props = defineProps<{
+  gql: InstallDependenciesFragment
+}>()
 
 const { t } = useI18n()
 const mutation = useMutation(InstallDependencies_ScaffoldFilesDocument)
