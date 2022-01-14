@@ -4,6 +4,7 @@ import 'virtual:windi.css'
 import urql from '@urql/vue'
 import App from './App.vue'
 import { makeUrqlClient } from '@packages/frontend-shared/src/graphql/urqlClient'
+import { decodeBase64Unicode } from '@packages/frontend-shared/src/utils/base64'
 import { createI18n } from '@cy/i18n'
 import { createRouter } from './router/router'
 import { createPinia } from './store'
@@ -18,12 +19,6 @@ import { createWebsocket } from './runner'
 window.__vite__ = true
 
 const app = createApp(App)
-
-function decodeBase64Unicode (str: string) {
-  return decodeURIComponent(atob(str).split('').map((char) => {
-    return `%${(`00${char.charCodeAt(0).toString(16)}`).slice(-2)}`
-  }).join(''))
-}
 
 const config = JSON.parse(decodeBase64Unicode(window.__CYPRESS_CONFIG__.base64Config)) as Cypress.Config
 
