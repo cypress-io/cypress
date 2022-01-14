@@ -52,7 +52,7 @@ export async function makeGraphQLServer () {
     const ctx = getCtx()
     const port = (srv.address() as AddressInfo).port
 
-    const endpoint = `//localhost:${port}/graphql`
+    const endpoint = `http://localhost:${port}/graphql`
 
     if (process.env.NODE_ENV === 'development') {
       /* eslint-disable-next-line no-console */

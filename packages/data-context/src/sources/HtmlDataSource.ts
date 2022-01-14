@@ -26,6 +26,7 @@ export class HtmlDataSource {
 
     await Promise.all([
       graphql.executeQuery('SettingsDocument', {}),
+      graphql.executeQuery('SpecPageContainerDocument', {}),
       graphql.executeQuery('SpecsPageContainerDocument', {}),
       graphql.executeQuery('HeaderBar_HeaderBarQueryDocument', {}),
       graphql.executeQuery('SideBarNavigationDocument', {}),

@@ -61,7 +61,7 @@ export async function preloadLaunchpadData () {
 export function makeUrqlClient (target: 'launchpad' | 'app'): Client {
   const port = gqlPort()
 
-  const GRAPHQL_URL = `//localhost:${port}/graphql`
+  const GRAPHQL_URL = `http://localhost:${port}/graphql`
 
   // If we're in the launchpad, we connect to the known GraphQL Socket port,
   // otherwise we connect to the /__socket.io of the current domain, unless we've explicitly
