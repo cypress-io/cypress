@@ -119,7 +119,7 @@ function setupRunner () {
   const runnerUiStore = useRunnerUiStore()
 
   getEventManager().addGlobalListeners(mobxRunnerStore, {
-    automationElement: '__cypress-string',
+    automation: '__cypress-string',
     randomString: runnerUiStore.randomString,
     setAutomationStatus: (status: AutomationStatus) => {
       runnerUiStore.setAutomationStatus(status)
