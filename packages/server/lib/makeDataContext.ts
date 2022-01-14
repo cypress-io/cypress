@@ -117,6 +117,9 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       closeActiveProject () {
         return openProject.closeActiveProject()
       },
+      getConfig () {
+        return openProject.getConfig()
+      },
       getCurrentProjectSavedState () {
         // TODO: See if this is the best way we should be getting this config,
         // shouldn't we have this already in the DataContext?

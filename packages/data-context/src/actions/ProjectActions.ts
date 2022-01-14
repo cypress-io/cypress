@@ -1,5 +1,5 @@
 import type { CodeGenType, MutationSetProjectPreferencesArgs, NexusGenObjects, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
-import type { InitializeProjectOptions, FoundBrowser, FoundSpec, LaunchOpts, OpenProjectLaunchOptions, Preferences, TestingType, AddProject } from '@packages/types'
+import type { InitializeProjectOptions, FoundBrowser, FoundSpec, LaunchOpts, OpenProjectLaunchOptions, Preferences, TestingType, ReceivedCypressOptions, AddProject } from '@packages/types'
 import execa from 'execa'
 import path from 'path'
 import assert from 'assert'
@@ -31,6 +31,7 @@ export interface ProjectApiShape {
   clearProjectPreferences(projectTitle: string): Promise<unknown>
   clearAllProjectPreferences(): Promise<unknown>
   closeActiveProject(shouldCloseBrowser?: boolean): Promise<unknown>
+  getConfig(): ReceivedCypressOptions | undefined
   getCurrentProjectSavedState(): {} | undefined
   setPromptShown(slug: string): void
   getDevServer (): {
