@@ -221,7 +221,7 @@ const parseSpecArgv = (pattern) => {
   const hasComma = pattern.includes(',')
 
   /**
-   * Slice & mutate a string.
+   * Slice and mutate a string.
    *
    * @param {String} str String to slice & mutate
    * @param {Number} end Index to slice to
