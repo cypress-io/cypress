@@ -35,7 +35,7 @@ app.use(Toast, {
   position: POSITION.BOTTOM_RIGHT,
 })
 
-app.use(urql, makeUrqlClient('app'))
+app.use(urql, makeUrqlClient({ target: 'app', socketIoRoute: config.socketIoRoute }))
 app.use(createRouter())
 app.use(createI18n())
 app.use(createPinia())

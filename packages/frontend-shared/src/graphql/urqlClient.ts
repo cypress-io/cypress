@@ -60,7 +60,18 @@ export async function preloadLaunchpadData () {
   }
 }
 
-export function makeUrqlClient (target: 'launchpad' | 'app'): Client {
+interface LaunchpadUrqlClientConfig {
+  target: 'launchpad'
+}
+
+interface AppUrqlClientConfig {
+  target: 'app'
+  socketIoRoute: string
+}
+
+export type UrqlClientConfig = LaunchpadUrqlClientConfig | AppUrqlClientConfig
+
+export function makeUrqlClient (config: UrqlClientConfig): Client {
   const port = gqlPort()
 
   const GRAPHQL_URL = `http://localhost:${port}/graphql`
@@ -68,7 +79,7 @@ export function makeUrqlClient (target: 'launchpad' | 'app'): Client {
   // If we're in the launchpad, we connect to the known GraphQL Socket port,
   // otherwise we connect to the /__socket.io of the current domain, unless we've explicitly
   //
-  const io = getPubSubSource({ target, gqlPort: port, serverPort: SERVER_PORT_MATCH?.[1] })
+  const io = getPubSubSource({ gqlPort: port, serverPort: SERVER_PORT_MATCH?.[1], ...config })
 
   let hasError = false
 
@@ -123,11 +134,20 @@ export function makeUrqlClient (target: 'launchpad' | 'app'): Client {
   })
 }
 
-interface PubSubConfig {
-  target: 'launchpad' | 'app'
+interface LaunchpadPubSubConfig {
+  target: 'launchpad'
   gqlPort: string
   serverPort?: string
 }
+
+interface AppPubSubConfig {
+  target: 'app'
+  gqlPort: string
+  serverPort?: string
+  socketIoRoute: string
+}
+
+type PubSubConfig = LaunchpadPubSubConfig | AppPubSubConfig
 
 function getPubSubSource (config: PubSubConfig) {
   if (config.target === 'launchpad') {
@@ -137,24 +157,16 @@ function getPubSubSource (config: PubSubConfig) {
     })
   }
 
-  function decodeBase64Unicode (str: string) {
-    return decodeURIComponent(atob(str).split('').map((char) => {
-      return `%${(`00${char.charCodeAt(0).toString(16)}`).slice(-2)}`
-    }).join(''))
-  }
-
-  const { socketIoRoute } = JSON.parse(decodeBase64Unicode(window.__CYPRESS_CONFIG__.base64Config)) as Cypress.Config
-
   // Only happens during testing
   if (config.serverPort) {
     return client(`http://localhost:${config.serverPort}`, {
-      path: socketIoRoute,
+      path: config.socketIoRoute,
       transports: ['websocket'],
     })
   }
 
   return client({
-    path: socketIoRoute,
+    path: config.socketIoRoute,
     transports: ['websocket'],
   })
 }
