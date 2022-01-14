@@ -83,6 +83,10 @@ export class SocketBase {
 
   protected ensureProp = ensureProp
 
+  get io () {
+    return this.ensureProp(this._io, 'startListening')
+  }
+
   toReporter (event: string, data?: any) {
     return this._io?.to('reporter').emit(event, data)
   }

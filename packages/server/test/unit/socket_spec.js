@@ -19,12 +19,17 @@ const Fixtures = require('@tooling/system-tests/lib/fixtures')
 const firefoxUtil = require(`../../lib/browsers/firefox-util`).default
 const { createRoutes } = require(`../../lib/routes`)
 const { getCtx } = require(`../../lib/makeDataContext`)
+const { sinon } = require('../spec_helper')
 
 let ctx
 
 describe('lib/socket', () => {
   beforeEach(function () {
     ctx = getCtx()
+
+    // Don't bother initializing the child process, etc for this
+    sinon.stub(ctx.actions.project, 'initializeActiveProject')
+
     Fixtures.scaffold()
 
     this.todosPath = Fixtures.projectPath('todos')
