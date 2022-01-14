@@ -1,3 +1,5 @@
+import { FRONTEND_FRAMEWORKS, BUNDLERS, CODE_LANGUAGES } from '../../../types/src/constants'
+
 describe('Launchpad: Setup Project', () => {
   beforeEach(() => {
     cy.scaffoldProject('pristine') // not configured
@@ -267,38 +269,19 @@ describe('Launchpad: Setup Project', () => {
         .as('nextStepButton')
       })
 
-      const bundlers = ['Webpack', 'Vite']
-      const frameworks = [
-        {
-          framework: 'Create React App',
-        },
-        {
-          framework: 'React.js',
-          bundlers,
-        },
-        {
-          framework: 'Next.js',
-        },
-        {
-          framework: 'Vue CLI',
-        },
-        {
-          framework: 'Vue.js',
-          bundlers,
-        },
-        {
-          framework: 'Nuxt.js',
-        },
-      ]
-      const languages = ['JavaScript', 'TypeScript']
+      FRONTEND_FRAMEWORKS.forEach((framework) => {
+        framework.supportedBundlers.forEach((testBundler) => {
+          const bundler = BUNDLERS.find((b) => b.type === testBundler)
 
-      frameworks.forEach(({ framework, bundlers = [null] }) => {
-        bundlers.forEach((bundler) => {
-          languages.forEach((lang) => {
-            let testTitle = `can pick ${framework} + ${bundler} + ${lang}`
+          if (!bundler) {
+            throw new Error(`${framework.name} claims to support th bundler, ${testBundler}, however it is not a valid Cypress bundlers.`)
+          }
 
-            if (bundler === null) {
-              testTitle = `can pick ${framework} + ${lang}`
+          CODE_LANGUAGES.forEach((lang) => {
+            let testTitle = `can setup ${framework.name} + ${lang.name}`
+
+            if (framework.supportedBundlers.length > 1) {
+              testTitle = `can setup ${framework.name} + ${bundler.name} + ${lang.name}`
             }
 
             it(testTitle, () => {
@@ -324,24 +307,47 @@ describe('Launchpad: Setup Project', () => {
               .click()
               .should('have.attr', 'aria-expanded', 'true')
 
-              cy.findByRole('option', { name: framework }).click()
+              cy.findByRole('option', { name: framework.name }).click()
 
-              if (bundler !== null) {
+              if (framework.supportedBundlers.length > 1) {
                 cy.findByRole('button', { name: `Bundler Pick a bundler` })
                 .should('have.attr', 'aria-haspopup', 'true')
                 .should('have.attr', 'aria-expanded', 'false')
                 .click()
                 .should('have.attr', 'aria-expanded', 'true')
 
-                cy.findByRole('option', { name: bundler }).click()
+                cy.findByRole('option', { name: bundler.name }).click()
               }
 
-              cy.findByRole('button', { name: lang }).click()
+              cy.findByRole('button', { name: lang.name }).click()
 
               cy.get('@nextStepButton').should('not.have.disabled').click()
 
+              cy.log('Verify Install Dev Dependencies page')
               cy.contains('h1', 'Install Dev Dependencies')
               cy.contains('p', 'Paste the command below into your terminal to install the required packages.')
+
+              cy.validateExternalLink({
+                name: framework.package,
+                href: `https://www.npmjs.com/package/${framework.package}`,
+              })
+
+              cy.validateExternalLink({
+                name: bundler.package,
+                href: `https://www.npmjs.com/package/${bundler.package}`,
+              })
+
+              cy.findByRole('button', { name: 'I\'ve installed them' }).click()
+
+              cy.get('[data-cy=changes]').within(() => {
+                cy.contains('cypress.config.js')
+              })
+
+              cy.get('[data-cy=valid]').within(() => {
+                cy.contains('cypress/component/index.html')
+                cy.contains(`cypress/support/component.${lang.type}`)
+                cy.contains('cypress/fixtures/example.json')
+              })
             })
           })
         })

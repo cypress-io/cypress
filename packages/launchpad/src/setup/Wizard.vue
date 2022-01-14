@@ -14,7 +14,6 @@
     />
     <InstallDependencies
       v-if="currentStep === 'installDependencies'"
-      :gql="props.gql"
       @navigate="setCurrentStep"
     />
   </div>

@@ -1244,7 +1244,7 @@ export class ProjectLifecycleManager {
     process.removeListener('exit', this.onProcessExit)
   }
 
-  isTestingTypeConfigured (testingType: TestingType): Boolean {
+  isTestingTypeConfigured (testingType: TestingType): boolean {
     const config = this.loadedFullConfig ?? this.loadedConfigFile
 
     if (!config) {
