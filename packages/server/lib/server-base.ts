@@ -32,12 +32,6 @@ import { createRoutesE2E } from './routes-e2e'
 import { createRoutesCT } from './routes-ct'
 import type { FoundSpec } from '@packages/types'
 
-const ALLOWED_PROXY_BYPASS_URLS = [
-  '/',
-  '/__cypress/runner/cypress_runner.css',
-  '/__cypress/runner/cypress_runner.js', // TODO: fix this
-  '/__cypress/runner/favicon.ico',
-]
 const DEFAULT_DOMAIN_NAME = 'localhost'
 const fullyQualifiedRe = /^https?:\/\//
 
@@ -49,7 +43,14 @@ const _isNonProxiedRequest = (req) => {
   return req.proxiedUrl.startsWith('/')
 }
 
-const _forceProxyMiddleware = function (clientRoute) {
+const _forceProxyMiddleware = function (clientRoute, namespace = '__cypress') {
+  const ALLOWED_PROXY_BYPASS_URLS = [
+    '/',
+    `/${namespace}/runner/cypress_runner.css`,
+    `/${namespace}/runner/cypress_runner.js`, // TODO: fix this
+    `/${namespace}/runner/favicon.ico`,
+  ]
+
   // normalize clientRoute to help with comparison
   const trimmedClientRoute = _.trimEnd(clientRoute, '/')
 
@@ -233,7 +234,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   createExpressApp (config) {
-    const { morgan, clientRoute } = config
+    const { morgan, clientRoute, namespace } = config
     const app = express()
 
     // set the cypress config from the cypress.config.{ts|js} file
@@ -258,7 +259,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
       return next()
     })
 
-    app.use(_forceProxyMiddleware(clientRoute))
+    app.use(_forceProxyMiddleware(clientRoute, namespace))
 
     app.use(require('cookie-parser')())
     app.use(compression({ filter: notSSE }))
@@ -517,6 +518,9 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
           host: hostname,
           port,
           protocol,
+        },
+        headers: {
+          'x-cypress-forwarded-from-cypress': true,
         },
         agent,
       }, onProxyErr)
