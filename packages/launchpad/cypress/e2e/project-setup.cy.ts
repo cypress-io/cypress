@@ -118,7 +118,7 @@ describe('Launchpad: Setup Project', () => {
 
   describe('E2E test setup', () => {
     describe('project has been configured for e2e', () => {
-      it('it skips the setup page when choosing e2e tests to run', () => {
+      it('skips the setup page when choosing e2e tests to run', () => {
         cy.openProject('pristine-with-e2e-testing')
         cy.visitLaunchpad()
 
