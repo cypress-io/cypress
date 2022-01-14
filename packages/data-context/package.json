@@ -10,7 +10,7 @@
     "clean-deps": "rimraf node_modules",
     "tslint": "tslint --project tslint.json 'src/**/*.{ts,js}'",
     "clean": "rimraf './{src,test}/**/*.js'",
-    "test-unit": "mocha -r @packages/ts/register test/unit/**/*.spec.ts --config ./test/.mocharc.js --exit",
+    "test-unit": "mocha -r @packages/ts/register {test/unit/**/*.spec.ts,test/unit/*.spec.ts} --config ./test/.mocharc.js --exit",
     "test-integration": "mocha -r @packages/ts/register test/integration/**/*.spec.ts --config ./test/.mocharc.js --exit"
   },
   "dependencies": {

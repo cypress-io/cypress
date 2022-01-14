@@ -42,10 +42,11 @@ import WizardLayout from './WizardLayout.vue'
 import SelectFwOrBundler from './SelectFwOrBundler.vue'
 import SelectLanguage from './SelectLanguage.vue'
 import { gql } from '@urql/core'
-import type { EnvironmentSetupFragment } from '../generated/graphql'
+import { EnvironmentSetupFragment, EnvironmentSetup_ClearTestingTypeDocument } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
 import { sortBy } from 'lodash'
 import type { CurrentStep, WizardSetupData } from './Wizard.vue'
+import { useMutation } from '@urql/vue'
 
 const emit = defineEmits<{
   (event: 'navigate', toPage: CurrentStep): void
@@ -123,8 +124,22 @@ const onNext = () => {
   emit('navigate', 'installDependencies')
 }
 
+gql`
+mutation EnvironmentSetup_ClearTestingType {
+  clearCurrentTestingType {
+    currentTestingType
+    currentProject {
+      id
+      currentTestingType
+    }
+  }
+}
+`
+
+const mutation = useMutation(EnvironmentSetup_ClearTestingTypeDocument)
+
 const onBack = () => {
-  // Clear current testing type
+  mutation.executeMutation({})
 }
 
 const languages = computed(() => props.gql.allLanguages ?? [])

@@ -1,5 +1,5 @@
 import os from 'os'
-import { FrontendFramework, FRONTEND_FRAMEWORKS, ResolvedFromConfig, RESOLVED_FROM, STORYBOOK_GLOB, FoundSpec } from '@packages/types'
+import { FrontendFramework, FRONTEND_FRAMEWORKS, ResolvedFromConfig, RESOLVED_FROM, FoundSpec } from '@packages/types'
 import { scanFSForAvailableDependency } from 'create-cypress-tests'
 import minimatch from 'minimatch'
 import { debounce } from 'lodash'
@@ -14,6 +14,7 @@ import assert from 'assert'
 import type { DataContext } from '..'
 import { toPosix } from '../util/file'
 import type { FilePartsShape } from '@packages/graphql/src/schemaTypes/objectTypes/gql-FileParts'
+import { STORIES_GLOB } from '.'
 
 export type SpecWithRelativeRoot = FoundSpec & { relativeToCommonRoot: string }
 
@@ -239,7 +240,7 @@ export class ProjectDataSource {
     this.ctx.lifecycleManager.closeWatcher(this._specWatcher)
   }
 
-  async getCurrentSpecByAbsolute (absolute: string) {
+  getCurrentSpecByAbsolute (absolute: string) {
     return this.ctx.project.specs.find((x) => x.absolute === absolute)
   }
 
@@ -269,13 +270,13 @@ export class ProjectDataSource {
   async getCodeGenGlobs () {
     assert(this.ctx.currentProject, `Cannot find glob without currentProject.`)
 
-    const looseComponentGlob = '/**/*.{js,jsx,ts,tsx,.vue}'
+    const looseComponentGlob = '*.{js,jsx,ts,tsx,.vue}'
 
     const framework = await this.frameworkLoader.load(this.ctx.currentProject)
 
     return {
       component: framework?.glob ?? looseComponentGlob,
-      story: STORYBOOK_GLOB,
+      story: STORIES_GLOB,
     }
   }
 
@@ -309,10 +310,8 @@ export class ProjectDataSource {
   }
 
   async getCodeGenCandidates (glob: string): Promise<FilePartsShape[]> {
-    // Storybook can support multiple globs, so show default one while
-    // still fetching all stories
-    if (glob === STORYBOOK_GLOB) {
-      return this.ctx.storybook.getStories()
+    if (!glob.startsWith('**/')) {
+      glob = `**/${glob}`
     }
 
     const projectRoot = this.ctx.currentProject
@@ -321,9 +320,7 @@ export class ProjectDataSource {
       throw Error(`Cannot find components without currentProject.`)
     }
 
-    const config = await this.ctx.lifecycleManager.getFullInitialConfig()
-
-    const codeGenCandidates = await this.ctx.file.getFilesByGlob(config.projectRoot || process.cwd(), glob)
+    const codeGenCandidates = await this.ctx.file.getFilesByGlob(projectRoot, glob, { expandDirectories: true })
 
     return codeGenCandidates.map((absolute) => ({ absolute }))
   }

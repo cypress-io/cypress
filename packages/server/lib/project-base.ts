@@ -160,8 +160,8 @@ export class ProjectBase<TServer extends Server> extends EE {
 
   createServer (testingType: Cypress.TestingType) {
     return testingType === 'e2e'
-      ? new ServerE2E(this.ctx) as TServer
-      : new ServerCt(this.ctx) as TServer
+      ? new ServerE2E() as TServer
+      : new ServerCt() as TServer
   }
 
   async open () {
@@ -284,6 +284,13 @@ export class ProjectBase<TServer extends Server> extends EE {
     return
   }
 
+  __reset () {
+    preprocessor.close()
+    devServer.close()
+
+    process.chdir(localCwd)
+  }
+
   async close () {
     debug('closing project instance %s', this.projectRoot)
 
@@ -294,19 +301,16 @@ export class ProjectBase<TServer extends Server> extends EE {
       return
     }
 
-    const closePreprocessor = this.testingType === 'e2e' ? preprocessor.close : undefined
+    this.__reset()
 
     this.ctx.setAppServerPort(undefined)
     this.ctx.setAppSocketServer(undefined)
 
     await Promise.all([
       this.server?.close(),
-      closePreprocessor?.(),
     ])
 
     this._isServerOpen = false
-
-    process.chdir(localCwd)
     this.isOpen = false
 
     const config = this.getConfig()
