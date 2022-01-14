@@ -24,6 +24,7 @@ import { IframeModel } from './iframe-model'
 import { AutIframe } from './aut-iframe'
 import { EventManager } from './event-manager'
 import { client } from '@packages/socket/lib/browser'
+import { decodeBase64Unicode } from '@packages/frontend-shared/src/utils/base64'
 
 let _eventManager: EventManager | undefined
 
@@ -283,9 +284,9 @@ function runSpecE2E (spec: BaseSpec) {
 async function initialize () {
   isTorndown = false
 
-  const config = window.UnifiedRunner.decodeBase64(window.__CYPRESS_CONFIG__.base64Config) as any
+  const config = JSON.parse(decodeBase64Unicode(window.__CYPRESS_CONFIG__.base64Config))
 
-  await injectBundle(config)
+  await injectBundle(config.namespace)
 
   if (isTorndown) {
     return
