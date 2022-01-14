@@ -6,7 +6,8 @@
       "cypress",
       "cypress-real-events"
     ], /* Type declaration files to be included in compilation. */
-    "importsNotUsedAsValues": "remove"
+    "importsNotUsedAsValues": "remove",
+    "lib": ["DOM"]
   },
   "include": [
     "src/*.ts",

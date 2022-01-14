@@ -4,7 +4,6 @@ module.exports = {
   'viewportWidth': 500,
   'viewportHeight': 500,
   'component': {
-    'specPattern': 'cypress/component/**/*cy-spec.js',
     devServer (cypressConfig) {
       const path = require('path')
       const { startDevServer } = require('@cypress/webpack-dev-server')

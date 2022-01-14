@@ -18,21 +18,21 @@
 <template>
   <CreateSpecModalBody
     variant="bare"
-    class="relative bg-white px-24px flex
-  flex-col"
+    class="bg-white flex flex-col px-24px
+  relative"
   >
     <FileMatch
       ref="fileMatchRef"
       v-model:pattern="filePathSearch"
       v-model:extensionPattern="localExtensionPattern"
-      class="sticky z-10 top-0px pt-24px pb-12px bg-white"
+      class="bg-white pt-24px pb-12px top-0px z-10 sticky"
       :matches="matches"
     >
       <template
         v-if="loading"
         #matches
       >
-        <i-cy-loading_x16 class="h-24px w-24px mr-10px animate-spin" />
+        <i-cy-loading_x16 class="h-24px mr-10px animate-spin w-24px" />
       </template>
     </FileMatch>
 
@@ -40,13 +40,13 @@
       v-show="loading"
       data-testid="loading"
     >
-      <!-- TODO(ryan): Get mocks for a loading state here -->
+      <!-- TODO(ryan) UNIFY-865: Get mocks for a loading state here -->
       Loading
     </div>
     <FileList
       v-show="!loading"
       :style="{ paddingTop: `${fileMatchHeight + 36}px` }"
-      class="absolute left-24px right-24px"
+      class="right-24px left-24px absolute"
       :files="filteredFiles"
       :search="filePathSearch"
       @selectFile="selectFile"
@@ -61,7 +61,6 @@
       </template>
     </FileList>
   </CreateSpecModalBody>
-  <div class="rounded-b w-full h-24px" />
 </template>
 
 <script setup lang="ts">

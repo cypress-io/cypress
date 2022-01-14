@@ -34,7 +34,7 @@ export const FRONTEND_FRAMEWORKS = [
     name: 'Create React App',
     supportedBundlers: ['webpack'],
     package: '@cypress/react',
-    glob: '**/*.{jsx,tsx}',
+    glob: '*.{jsx,tsx}',
     deps: ['react-scripts', 'react', 'react-dom'],
     category: FRONTEND_FRAMEWORK_CATEGORIES[0],
     codeGenFramework: CODE_GEN_FRAMEWORKS[0],
@@ -45,7 +45,7 @@ export const FRONTEND_FRAMEWORKS = [
     name: 'Vue CLI',
     supportedBundlers: ['webpack'],
     package: '@cypress/vue',
-    glob: '**/*.vue',
+    glob: '*.vue',
     deps: ['@vue/cli-service', 'vue'],
     category: FRONTEND_FRAMEWORK_CATEGORIES[1],
     codeGenFramework: CODE_GEN_FRAMEWORKS[1],
@@ -56,7 +56,7 @@ export const FRONTEND_FRAMEWORKS = [
     name: 'React.js',
     supportedBundlers: ['webpack', 'vite'],
     package: '@cypress/react',
-    glob: '**/*.{jsx,tsx}',
+    glob: '*.{jsx,tsx}',
     deps: ['react', 'react-dom'],
     category: FRONTEND_FRAMEWORK_CATEGORIES[0],
     codeGenFramework: CODE_GEN_FRAMEWORKS[0],
@@ -67,7 +67,7 @@ export const FRONTEND_FRAMEWORKS = [
     name: 'Vue.js',
     supportedBundlers: ['webpack', 'vite'],
     package: '@cypress/vue',
-    glob: '**/*.vue',
+    glob: '*.vue',
     deps: ['vue'],
     category: FRONTEND_FRAMEWORK_CATEGORIES[1],
     codeGenFramework: CODE_GEN_FRAMEWORKS[1],
@@ -78,7 +78,7 @@ export const FRONTEND_FRAMEWORKS = [
     name: 'Next.js',
     supportedBundlers: ['webpack'],
     package: '@cypress/react',
-    glob: '**/*.{jsx,tsx}',
+    glob: '*.{jsx,tsx}',
     deps: ['next', 'react', 'react-dom'],
     category: FRONTEND_FRAMEWORK_CATEGORIES[0],
     codeGenFramework: CODE_GEN_FRAMEWORKS[0],
@@ -89,7 +89,7 @@ export const FRONTEND_FRAMEWORKS = [
     name: 'Nuxt.js',
     supportedBundlers: ['webpack'],
     package: '@cypress/vue',
-    glob: '**/*.vue',
+    glob: '*.vue',
     deps: ['nuxt'],
     category: FRONTEND_FRAMEWORK_CATEGORIES[1],
     codeGenFramework: CODE_GEN_FRAMEWORKS[1],
@@ -111,34 +111,6 @@ export const CODE_LANGUAGES = [
 ] as const
 
 export type CodeLanguage = typeof CODE_LANGUAGES[number]
-
-export const WIZARD_STEPS = [
-  {
-    type: 'welcome',
-    title: 'Welcome to Cypress!',
-    description: 'Choose which method of testing you would like to get started with for this project.',
-  },
-  {
-    type: 'selectFramework',
-    title: 'Project Setup',
-    description: 'Confirm the front-end framework and bundler used in your project.',
-  },
-  {
-    type: 'installDependencies',
-    title: 'Install Dev Dependencies',
-    description: 'Paste the command below into your terminal to install the required packages.',
-  },
-  {
-    type: 'configFiles',
-    title: 'Configuration Files',
-    description: 'We added the following files to your project.',
-  },
-  {
-    type: 'setupComplete',
-    title: 'Choose a Browser',
-    description: 'Choose your preferred browser for testing your components.',
-  },
-] as const
 
 export const MIGRATION_STEPS = ['renameAuto', 'renameManual', 'configFile'] as const
 

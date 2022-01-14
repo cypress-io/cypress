@@ -1,65 +1,29 @@
 <template>
   <div
     data-cy="no-runs"
-    class="flex flex-col mx-auto min-h-full max-w-688px leading-24px justify-center items-center"
+    class="flex flex-col mx-auto min-h-full max-w-688px leading-24px items-center justify-center"
   >
     <i-cy-dashboard-checkmark_x48 class="h-48px w-48px icon-dark-gray-500 icon-light-gray-100" />
-    <h2 class="mt-32px mb-24px text-18px text-gray-900">
+    <h2 class="mt-32px mb-8px text-gray-900 text-18px">
       {{ t("runs.empty.title") }}
     </h2>
-    <ol class="list-decimal ml-16px w-full text-gray-600">
-      <li>
-        <p class="mb-8px">
-          <i18n-t
-            scope="global"
-            keypath="runs.empty.step1"
-          >
-            <span class="text-indigo-500">{{ configFile }}</span>
-          </i18n-t>
-        </p>
-        <ShikiHighlight
-          class="border rounded border-gray-100 -ml-16px"
-          :code="projectIdCode"
-          lang="js"
-          line-numbers
-        />
-      </li>
-      <li class="mt-24px">
-        <p class="mb-8px">
-          <i18n-t
-            scope="global"
-            keypath="runs.empty.step2"
-          >
-            <span class="text-indigo-400">{{ configFile }}</span>
-          </i18n-t>
-        </p>
-        <TerminalPrompt
-          class="-ml-16px"
-          command="git add cypress.config.js"
-          :project-folder-name="projectName"
-        />
-      </li>
-      <li class="mt-24px">
-        <p class="mb-8px">
-          {{ t("runs.empty.step3") }}
-        </p>
-        <TerminalPrompt
-          class="-ml-16px"
-          :command="recordCommand"
-          :project-folder-name="projectName"
-        />
-      </li>
-    </ol>
+    <p class="h-48px mb-8px text-gray-600">
+      {{ t("runs.empty.description") }}
+    </p>
+    <TerminalPrompt
+      :command="recordCommand"
+      :project-folder-name="projectName"
+      class="max-w-700px"
+    />
   </div>
 </template>
 
 <script lang="ts" setup>
 import { computed } from 'vue'
 import { gql } from '@urql/vue'
-import ShikiHighlight from '@cy/components/ShikiHighlight.vue'
-import { useI18n } from '@cy/i18n'
 import TerminalPrompt from '@cy/components/TerminalPrompt.vue'
 import type { RunsEmptyFragment } from '../generated/graphql'
+import { useI18n } from '@cy/i18n'
 
 const { t } = useI18n()
 
@@ -87,17 +51,10 @@ const props = defineProps<{
   gql: RunsEmptyFragment,
 }>()
 
-const projectIdCode = computed(() => {
-  return `${'export'} default {
-  projectId: '${props.gql.projectId}'
-}`
-})
-
 const projectName = computed(() => props.gql.title)
-const configFile = computed(() => props.gql.configFile)
 const firstRecordKey = computed(() => {
-  return props.gql.cloudProject?.__typename === 'CloudProject' && props.gql.cloudProject.recordKeys?.[0]
-    ? props.gql.cloudProject?.recordKeys?.[0]?.key
+  return props.gql.cloudProject?.__typename === 'CloudProject' && props.gql.cloudProject.recordKeys?.[0]?.key
+    ? props.gql.cloudProject.recordKeys[0].key
     : '<record-key>'
 })
 const recordCommand = computed(() => {

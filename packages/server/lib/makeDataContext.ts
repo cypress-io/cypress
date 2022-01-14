@@ -28,6 +28,7 @@ import * as savedState from './saved_state'
 import appData from './util/app_data'
 import plugins from './plugins'
 import browsers from './browsers'
+import devServer from './plugins/dev-server'
 
 const { getBrowsers, ensureAndGetByNameOrPath } = browserUtils
 
@@ -115,6 +116,27 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       },
       closeActiveProject () {
         return openProject.closeActiveProject()
+      },
+      getCurrentProjectSavedState () {
+        // TODO: See if this is the best way we should be getting this config,
+        // shouldn't we have this already in the DataContext?
+        try {
+          return openProject.getConfig()?.state
+        } catch {
+          return {}
+        }
+      },
+      setPromptShown (slug) {
+        return openProject.getProject()
+        ?.saveState({
+          promptsShown: {
+            ...(openProject.getProject()?.state?.promptsShown ?? {}),
+            [slug]: Date.now(),
+          },
+        })
+      },
+      getDevServer () {
+        return devServer
       },
     },
     electronApi: {

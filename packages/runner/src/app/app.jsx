@@ -84,7 +84,7 @@ class App extends Component {
         >
           {Boolean(NO_COMMAND_LOG) || <Reporter
             runner={this.props.eventManager.reporterBus}
-            spec={spec}
+            runnerStore={{ spec }}
             autoScrollingEnabled={this.props.config.state.autoScrollingEnabled}
             error={errorMessages.reporterError(this.props.state.scriptError, spec.relative)}
             experimentalStudioEnabled={this.props.config.experimentalStudio}
@@ -92,7 +92,7 @@ class App extends Component {
         </div>
         <div
           ref='container'
-          className='runner container'
+          className='container runner'
           style={{
             left: this.props.state.absoluteReporterWidth +
             this.props.state.specListWidth,

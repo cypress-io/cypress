@@ -26,6 +26,7 @@ export class OpenProject {
   }
 
   resetOpenProject () {
+    this.projectBase?.__reset()
     this.projectBase = null
     this.relaunchBrowser = null
   }
@@ -61,17 +62,7 @@ export class OpenProject {
   }) {
     this._ctx = getCtx()
 
-    if (!this.projectBase && this._ctx.currentProject) {
-      await this.create(this._ctx.currentProject, {
-        ...this._ctx.modeOptions,
-        projectRoot: this._ctx.currentProject,
-        testingType: this._ctx.coreData.currentTestingType!,
-      }, options)
-    }
-
-    if (!this.projectBase) {
-      throw Error('Cannot launch runner if projectBase is undefined!')
-    }
+    assert(this.projectBase, 'Cannot launch runner if projectBase is undefined!')
 
     debug('resetting project state, preparing to launch browser %s for spec %o options %o',
       browser.name, spec, options)
@@ -254,6 +245,8 @@ export class OpenProject {
 
     const testingType = args.testingType === 'component' ? 'component' : 'e2e'
 
+    this._ctx.lifecycleManager.setRunModeExitEarly(options.onError ?? undefined)
+
     // store the currently open project
     this.projectBase = new ProjectBase({
       testingType,
@@ -267,15 +260,35 @@ export class OpenProject {
     try {
       const cfg = await this.projectBase.initializeConfig()
 
-      const specPattern = options.spec || cfg[testingType].specPattern
+      const toArray = (val?: string | string[]) => val ? typeof val === 'string' ? [val] : val : undefined
+
+      let specPattern = options.spec || cfg[testingType].specPattern
+
+      specPattern = toArray(specPattern)
+
+      let ignoreSpecPattern = cfg[testingType].ignoreSpecPattern
+
+      ignoreSpecPattern = toArray(ignoreSpecPattern) || []
+
+      // exclude all specs matching e2e if in component testing
+      let additionalIgnorePattern = testingType === 'component' ? cfg?.e2e?.specPattern : undefined
+
+      additionalIgnorePattern = toArray(additionalIgnorePattern) || []
 
       if (!specPattern) {
         throw Error('could not find pattern to load specs')
       }
 
-      const specs = await this._ctx.project.findSpecs(path, testingType, specPattern)
+      const specs = await this._ctx.project.findSpecs(
+        path,
+        testingType,
+        specPattern,
+        ignoreSpecPattern,
+        additionalIgnorePattern,
+      )
 
       this._ctx.actions.project.setSpecs(specs)
+      this._ctx.project.startSpecWatcher(path, testingType, specPattern, ignoreSpecPattern, additionalIgnorePattern)
 
       await this.projectBase.open()
     } catch (err: any) {

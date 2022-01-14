@@ -1,7 +1,7 @@
 <template>
   <Dialog
     :open="modelValue"
-    class="inset-0 z-10 fixed overflow-y-auto"
+    class="inset-0 z-50 fixed overflow-y-auto"
     @close="setIsOpen"
   >
     <div class="flex min-h-screen items-center justify-center">
@@ -42,7 +42,7 @@
               href="https://on.cypress.io/dashboard/profile"
               class="font-medium text-indigo-500"
             >
-              {{ viewer.fullName }}
+              {{ viewer.fullName || viewer.email }}
             </ExternalLink>
           </i18n-t>
         </DialogDescription>
@@ -86,10 +86,9 @@ gql`
 fragment LoginModal on Query {
   cloudViewer {
     id
-    email
     fullName
   }
-  isAuthBrowserOpened
+  ...Auth
 }
 `
 

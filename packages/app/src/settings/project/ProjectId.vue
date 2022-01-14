@@ -1,5 +1,6 @@
 <template>
   <SettingsSection
+    v-if="props.gql?.projectId"
     code="projectId"
     data-cy="settings-projectId"
     anchor-id="projectId"
