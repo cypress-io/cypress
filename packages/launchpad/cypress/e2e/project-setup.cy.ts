@@ -257,6 +257,77 @@ describe('Launchpad: Setup Project', () => {
 
         cy.get('h1').should('contain', 'Project Setup')
         cy.contains('Confirm the front-end framework and bundler used in your project.')
+
+        cy.findByRole('button', { name: 'Front-end Framework Pick a framework' })
+        .should('have.attr', 'aria-haspopup', 'true')
+        .should('have.attr', 'aria-expanded', 'false')
+
+        cy.findByRole('button', { name: 'Next Step' })
+        .should('have.disabled')
+        .as('nextStepButton')
+
+        const bundlers = ['Webpack', 'Vite']
+        const frameworks = [
+          // FIXME: why dont I work?!
+          // {
+          //   framework: 'Create React App',
+          // },
+          {
+            framework: 'React.js',
+            bundlers,
+          },
+          {
+            framework: 'Next.js',
+          },
+          {
+            framework: 'Vue CLI',
+          },
+          {
+            framework: 'Vue.js',
+            bundlers,
+          },
+          {
+            framework: 'Nuxt.js',
+          },
+        ]
+        const languages = ['JavaScript', 'TypeScript']
+
+        let selectedFramework = 'Pick a framework'
+        let selectedBundler = 'Pick a bundler'
+
+        frameworks.forEach(({ framework, bundlers = [null] }) => {
+          bundlers.forEach((bundler) => {
+            languages.forEach((lang) => {
+              if (bundler === null) {
+                cy.log(`can pick ${framework} + ${lang}`)
+              } else {
+                cy.log(`can pick ${framework} + ${bundler} + ${lang}`)
+              }
+
+              cy.findByRole('button', { name: `Front-end Framework ${selectedFramework}` })
+              .click()
+              .should('have.attr', 'aria-expanded', 'true')
+
+              cy.findByRole('option', { name: framework }).click()
+              selectedFramework = framework
+
+              if (bundler !== null) {
+                cy.findByRole('button', { name: `Bundler ${selectedBundler}` })
+                .should('have.attr', 'aria-haspopup', 'true')
+                .should('have.attr', 'aria-expanded', 'false')
+                .click()
+                .should('have.attr', 'aria-expanded', 'true')
+
+                cy.findByRole('option', { name: bundler }).click()
+                selectedBundler = bundler
+              }
+
+              cy.findByRole('button', { name: lang }).click()
+
+              cy.get('@nextStepButton').should('not.have.disabled')
+            })
+          })
+        })
       })
 
       it('opens to the "choose framework" page when opened via cli with --component flag', () => {
