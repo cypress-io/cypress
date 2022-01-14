@@ -7,7 +7,7 @@ import $dom from '../../../dom'
 import $errUtils from '../../../cypress/error_utils'
 import $actionability from '../../actionability'
 
-export const dispatch = (target, appWindow, eventName, options) => {
+const dispatch = (target, appWindow, eventName, options) => {
   const eventConstructor = options.eventConstructor ?? 'Event'
   const ctor = appWindow[eventConstructor]
 
@@ -36,19 +36,6 @@ export const dispatch = (target, appWindow, eventName, options) => {
   _.extend(event, options)
 
   return target.dispatchEvent(event)
-}
-
-export const addEventCoords = (eventOptions, coords) => {
-  const { fromElWindow, fromElViewport } = coords
-
-  return _.extend({
-    clientX: fromElViewport.x,
-    clientY: fromElViewport.y,
-    screenX: fromElViewport.x,
-    screenY: fromElViewport.y,
-    pageX: fromElWindow.x,
-    pageY: fromElWindow.y,
-  }, eventOptions)
 }
 
 export default (Commands, Cypress, cy, state, config) => {
@@ -130,14 +117,23 @@ export default (Commands, Cypress, cy, state, config) => {
           },
 
           onReady ($elToClick, coords) {
+            const { fromElWindow, fromElViewport, fromAutWindow } = coords
+
             if (options._log) {
               // display the red dot at these coords
               options._log.set({
-                coords: coords.fromAutWindow,
+                coords: fromAutWindow,
               })
             }
 
-            eventOptions = addEventCoords(eventOptions, coords)
+            eventOptions = _.extend({
+              clientX: fromElViewport.x,
+              clientY: fromElViewport.y,
+              screenX: fromElViewport.x,
+              screenY: fromElViewport.y,
+              pageX: fromElWindow.x,
+              pageY: fromElWindow.y,
+            }, eventOptions)
 
             return dispatch($elToClick.get(0), state('window'), eventName, eventOptions)
           },
