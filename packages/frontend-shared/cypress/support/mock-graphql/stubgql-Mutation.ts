@@ -7,6 +7,10 @@ import { createTestCurrentProject, createTestGlobalProject } from './stubgql-Pro
 export const stubMutation: MaybeResolver<Mutation> = {
   __typename: 'Mutation',
   addProject (source, args, ctx) {
+    if (!args.path) {
+      return {}
+    }
+
     ctx.projects.push(createTestGlobalProject(path.basename(args.path)))
 
     return {}

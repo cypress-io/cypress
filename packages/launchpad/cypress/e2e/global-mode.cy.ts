@@ -32,6 +32,33 @@ describe('Launchpad: Global Mode', () => {
       .should('have.length', 1)
       .should('contain', 'todos')
     })
+
+    it('adds a project using electron native folder select', () => {
+      cy.openGlobalMode()
+      cy.visitLaunchpad()
+
+      cy.scaffoldProject('todos')
+      .then((projectPath) => {
+        cy.withCtx(async (ctx, o) => {
+          ctx.actions.electron.showOpenDialog = o.sinon.stub().resolves(o.projectPath)
+        }, { projectPath })
+      })
+
+      cy.get('h1').should('contain', defaultMessages.globalPage.empty.title)
+      cy.get('[data-cy="dropzone"]')
+      .should('contain', defaultMessages.globalPage.empty.dropText.split('{0}')[0])
+      .find('button')
+      .should('contain', 'browse manually')
+      .click()
+
+      cy.wait(2000)
+
+      cy.get('[data-cy="project-card"]')
+      .should('have.length', 1)
+
+      cy.get('[data-cy="project-card"]').should('contain', 'todos')
+      cy.get('[data-cy="project-card"]').should('contain', path.join('cy-projects', 'todos'))
+    })
   })
 
   describe('when projects have been added', () => {
