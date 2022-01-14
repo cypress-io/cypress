@@ -41,6 +41,6 @@ exports['specific version desktop url 1'] = `
 https://download.cypress.io/desktop/0.20.2?platform=OS&arch=ARCH
 `
 
-exports['desktop url with path params'] = `
-https://download.cypress.io/desktop/0.20.2/OS-ARCH/cypress.zip
+exports['desktop url from template'] = `
+https://download.cypress.io/desktop/0.20.2/darwin-64x/cypress.zip
 `
