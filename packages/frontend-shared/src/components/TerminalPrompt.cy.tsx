@@ -8,6 +8,9 @@ describe('<TerminalPrompt />', () => {
         <TerminalPrompt projectFolderName="design-system" command="git add cypress.config.js"/>
       </div>
     ))
+
+    cy.contains('button', defaultMessages.clipboard.copy)
+    .should('be.visible')
     .percySnapshot()
   })
 
@@ -20,10 +23,11 @@ describe('<TerminalPrompt />', () => {
         <TerminalPrompt projectFolderName={projectFolderName} command={command}/>
       </div>
     ))
-    .percySnapshot()
 
     cy.contains(command)
     cy.contains(projectFolderName)
-    cy.contains('button', defaultMessages.clipboard.copy).should('be.visible')
+    cy.contains('button', defaultMessages.clipboard.copy)
+    .should('be.visible')
+    .percySnapshot()
   })
 })
