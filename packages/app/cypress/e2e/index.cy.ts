@@ -24,6 +24,9 @@ describe('App: Index', () => {
 
       cy.visitApp()
 
+      // TODO: Remove when subscription support lands
+      cy.wait(4000)
+
       cy.intercept('POST', 'mutation-ScaffoldGeneratorStepOne_scaffoldIntegration').as('scaffoldIntegration')
 
       cy.contains(defaultMessages.createSpec.e2e.importFromScaffold.header).click()
