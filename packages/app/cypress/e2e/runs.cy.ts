@@ -183,7 +183,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
   context('Runs - Unauthorized Project Requested', () => {
     beforeEach(() => {
       cy.withCtx(async (ctx) => {
-        await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {\'projectId\': \'abcdef\', clientRoute: \'\/__child\/\'}')
+        await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {\'projectId\': \'abcdef\', clientRoute: `/__child/` }')
       })
 
       cy.loginUser()

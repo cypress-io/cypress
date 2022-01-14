@@ -32,7 +32,7 @@ const Runner: any = {
   },
 
   start (el, base64Config) {
-    const config = window.UnifiedRunner.decodeBase64(base64Config)
+    const config = JSON.parse(driverUtils.decodeBase64Unicode(base64Config))
 
     const ws = createWebsocket(config.socketIoRoute)
 
@@ -49,8 +49,6 @@ const Runner: any = {
     )
 
     MobX.action('started', () => {
-      const config = JSON.parse(driverUtils.decodeBase64Unicode(base64Config))
-
       const NO_COMMAND_LOG = config.env && config.env.NO_COMMAND_LOG
       const configState = config.state || {}
 

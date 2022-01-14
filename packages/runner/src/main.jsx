@@ -12,8 +12,6 @@ import { createWebsocket } from '@packages/app/src/runner'
 import util from './lib/util'
 import { UnifiedRunner } from '@packages/runner-ct/unified-runner'
 
-const driverUtils = $Cypress.utils
-
 window.UnifiedRunner = UnifiedRunner
 
 MobX.configure({ enforceActions: 'always' })
@@ -49,7 +47,7 @@ const Runner = {
   },
 
   start (el, base64Config) {
-    const config = JSON.parse(driverUtils.decodeBase64Unicode(base64Config))
+    const config = UnifiedRunner.decodeBase64(base64Config)
 
     this._initialize(config.socketIoRoute)
 
