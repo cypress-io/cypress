@@ -76,6 +76,10 @@ function run (ipc, configFile, projectRoot) {
     return false
   }
 
+  let foo = undefined
+
+  foo?.any
+
   ipc.on('loadConfig', () => {
     try {
       debug('try loading', configFile)
@@ -109,29 +113,29 @@ function run (ipc, configFile, projectRoot) {
           }
 
           runPlugins.runSetupNodeEvents(options, (on, config) => {
-            const setupNodeEvents = result.component && result.component.setupNodeEvents || ((on, config) => {})
+            const setupNodeEvents = result.component?.setupNodeEvents ?? ((on, config) => {})
 
             const { devServer } = result.component
 
             // Accounts for `devServer: require('@cypress/webpack-dev-server')
             if (typeof devServer.devServer === 'function') {
-              on('dev-server:start', (options) => devServer.devServer(options, result.component && result.component.devServerConfig))
+              on('dev-server:start', (options) => devServer.devServer(options, result.component?.devServerConfig))
 
               return setupNodeEvents(on, config)
             }
 
             // Accounts for `devServer() {}`
             if (typeof devServer === 'function') {
-              on('dev-server:start', (options) => devServer(options, result.component && result.component.devServerConfig))
+              on('dev-server:start', (options) => devServer(options, result.component?.devServerConfig))
 
               return setupNodeEvents(on, config)
             }
 
             // Accounts for `devServer: import('@cypress/webpack-dev-server')`
-            if (result.component && typeof result.component.devServer.then === 'function') {
-              return Promise.resolve(result.component.devServer).then(({ devServer }) => {
+            if (typeof result.component.devServer.then === 'function') {
+              return Promise.resolve(result.component?.devServer).then(({ devServer }) => {
                 if (typeof devServer === 'function') {
-                  on('dev-server:start', (options) => devServer(options, result.component && result.component.devServerConfig))
+                  on('dev-server:start', (options) => devServer(options, result.component?.devServerConfig))
                 }
 
                 return setupNodeEvents(on, config)
@@ -139,11 +143,11 @@ function run (ipc, configFile, projectRoot) {
             }
           })
         } else if (testingType === 'e2e') {
-          if (!isValidSetupNodeEvents(result.e2e && result.e2e.setupNodeEvents)) {
+          if (!isValidSetupNodeEvents(result.e2e?.setupNodeEvents)) {
             return
           }
 
-          const setupNodeEvents = result.e2e && result.e2e.setupNodeEvents || ((on, config) => {})
+          const setupNodeEvents = result.e2e?.setupNodeEvents ?? ((on, config) => {})
 
           runPlugins.runSetupNodeEvents(options, setupNodeEvents)
         } else {

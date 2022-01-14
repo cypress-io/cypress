@@ -20,5 +20,8 @@
         ]
       }
     }
-  ]
+  ],
+  "rules": {
+    "no-unsafe-optional-chaining": "error"
+  }
 }
