@@ -64,7 +64,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
   context('Runs - Connect Project', () => {
     it('when no project Id in the config file, shows call to action', () => {
       cy.withCtx(async (ctx) => {
-        await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = { clientRoute: `/__child/` }')
+        await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {}')
       })
 
       cy.loginUser()
@@ -76,7 +76,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
     it('opens Connect Project modal after clicking Connect Project button', () => {
       cy.withCtx(async (ctx) => {
-        await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = { clientRoute: `/__child/` }')
+        await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {}')
       })
 
       cy.loginUser()
@@ -93,7 +93,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
   context('Runs - Cannot Find Project', () => {
     beforeEach(() => {
       cy.withCtx(async (ctx) => {
-        await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {\'projectId\': \'abcdef42\', clientRoute: `/__child/`}')
+        await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {\'projectId\': \'abcdef42\'}')
       })
 
       cy.loginUser()
@@ -143,7 +143,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
   context('Runs - Unauthorized Project', () => {
     beforeEach(() => {
       cy.withCtx(async (ctx) => {
-        await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {\'projectId\': \'abcdef\', clientRoute: `/__child/` }')
+        await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {\'projectId\': \'abcdef\'}')
       })
 
       cy.loginUser()
@@ -183,7 +183,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
   context('Runs - Unauthorized Project Requested', () => {
     beforeEach(() => {
       cy.withCtx(async (ctx) => {
-        await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {\'projectId\': \'abcdef\', clientRoute: `/__child/` }')
+        await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {\'projectId\': \'abcdef\' }')
       })
 
       cy.loginUser()
@@ -215,7 +215,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
   context('Runs - No Runs', () => {
     it('when no runs and not connected, shows connect to dashboard button', () => {
       cy.withCtx(async (ctx) => {
-        await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {projectId: null, clientRoute: `/__child/` }')
+        await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {projectId: null }')
       })
 
       cy.loginUser()
@@ -240,7 +240,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
     it('displays how to record prompt when connected and no runs', () => {
       cy.withCtx(async (ctx) => {
-        await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {projectId: \'abcdef\', clientRoute: `/__child/`}')
+        await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {projectId: \'abcdef\'}')
       })
 
       cy.loginUser()
@@ -265,7 +265,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
     it('displays a copy button', { browser: 'electron' }, () => {
       cy.withCtx(async (ctx) => {
-        await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {projectId: \'abcdef\', clientRoute: `/__child/`}')
+        await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {projectId: \'abcdef\'}')
       })
 
       cy.loginUser()
