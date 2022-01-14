@@ -4,24 +4,20 @@ import * as Focus from './focus'
 import * as Hover from './hover'
 import * as Scroll from './scroll'
 import * as Select from './select'
+import * as SelectFile from './selectFile'
 import * as Submit from './submit'
 import * as Type from './type'
 import * as Trigger from './trigger'
 
-export { Check }
-
-export { Click }
-
-export { Focus }
-
-export { Hover }
-
-export { Scroll }
-
-export { Select }
-
-export { Submit }
-
-export { Type }
-
-export { Trigger }
+export {
+  Check,
+  Click,
+  Focus,
+  Hover,
+  Scroll,
+  Select,
+  SelectFile,
+  Submit,
+  Type,
+  Trigger,
+}
