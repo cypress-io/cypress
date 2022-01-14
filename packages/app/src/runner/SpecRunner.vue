@@ -19,7 +19,7 @@
           v-if="props.gql.currentProject"
           v-show="runnerUiStore.isSpecsListOpen"
           id="inline-spec-list"
-          class="h-full bg-gray-1000"
+          class="h-full bg-gray-1000 border-r-1 border-gray-900"
           :class="{'pointer-events-none': isDragging}"
         >
           <InlineSpecList
@@ -336,10 +336,6 @@ $navbar-width: 80px;
   */
   position: fixed;
   height: 100vh;
-}
-
-#inline-spec-list {
-  border-right: 2px solid rgb(67 73 97);
 }
 
 #unified-runner {

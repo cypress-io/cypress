@@ -2,6 +2,10 @@ process.title = 'Cypress: Config Manager'
 
 require('../../util/suppress_warnings').suppress()
 
+process.on('disconnect', () => {
+  process.exit()
+})
+
 require('graceful-fs').gracefulify(require('fs'))
 const util = require('../util')
 const ipc = util.wrapIpc(process)

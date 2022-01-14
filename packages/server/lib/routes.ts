@@ -11,13 +11,12 @@ import type { Cfg } from './project-base'
 import xhrs from './controllers/xhrs'
 import { runner, ServeOptions } from './controllers/runner'
 import { iframesController } from './controllers/iframes'
-import type { DataContext } from '@packages/data-context/src/DataContext'
 import type { FoundSpec } from '@packages/types'
+import { getCtx } from '@packages/data-context'
 
 const debug = Debug('cypress:server:routes')
 
 export interface InitializeRoutes {
-  ctx: DataContext
   config: Cfg
   getSpec: () => FoundSpec | null
   getCurrentBrowser: () => Browser
@@ -37,7 +36,6 @@ export const createCommonRoutes = ({
   getCurrentBrowser,
   getRemoteState,
   nodeProxy,
-  ctx,
   exit,
 }: InitializeRoutes) => {
   const makeServeConfig = (options: Partial<ServeOptions>) => {
@@ -113,7 +111,7 @@ export const createCommonRoutes = ({
 
   router.get('/__cypress/iframes/*', (req, res) => {
     if (testingType === 'e2e') {
-      iframesController.e2e({ config, getSpec, ctx, getRemoteState }, req, res)
+      iframesController.e2e({ config, getSpec, getRemoteState }, req, res)
     }
 
     if (testingType === 'component') {
@@ -131,7 +129,7 @@ export const createCommonRoutes = ({
     debug('Serving Cypress front-end by requested URL:', req.url)
 
     if (process.env.LAUNCHPAD) {
-      ctx.html.appHtml()
+      getCtx().html.appHtml()
       .then((html) => res.send(html))
       .catch((e) => res.status(500).send({ stack: e.stack }))
     } else {
