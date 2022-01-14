@@ -49,7 +49,7 @@ $spec-list-width: 250px;
     bottom: 0;
     box-shadow: inset 0 0 10px #555;
     left: 33%;
-    overflow: hidden;
+    overflow: clip;
     position: absolute;
     right: 0;
     top: 0;
