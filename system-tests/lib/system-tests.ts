@@ -719,7 +719,7 @@ const systemTests = {
       browser: 'electron',
       headed: process.env.HEADED || false,
       project: 'e2e',
-      timeout: 120000,
+      timeout: 150000,
       originalTitle: null,
       expectedExitCode: 0,
       sanitizeScreenshotDimensions: false,
