@@ -25,6 +25,14 @@ describe('<CreateSpecModal />', () => {
             },
             storybook: null,
             currentTestingType: 'component',
+            config: {
+              e2e: {
+                specPattern: 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
+              },
+              component: {
+                specPattern: '**/*.cy.{js,jsx,ts,tsx}',
+              },
+            },
           },
         }}
         show={show.value}
@@ -80,6 +88,14 @@ describe('playground', () => {
             },
             storybook: null,
             currentTestingType: 'component',
+            config: {
+              e2e: {
+                specPattern: 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
+              },
+              component: {
+                specPattern: '**/*.cy.{js,jsx,ts,tsx}',
+              },
+            },
           },
         }}
         show={show.value}

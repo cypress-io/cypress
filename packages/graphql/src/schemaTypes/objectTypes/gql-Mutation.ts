@@ -43,21 +43,6 @@ export const mutation = mutationType({
       },
     })
 
-    t.nonNull.boolean('writeFileRelativeToProjectRoot', {
-      description: 'Create a file relative to the current project root',
-      args: {
-        file: nonNull(stringArg()),
-        content: stringArg(),
-      },
-      resolve: (source, args, ctx) => {
-        if (!ctx.currentProject) {
-          return false
-        }
-
-        return ctx.actions.project.writeFile(args.file, args.content ?? undefined)
-      },
-    })
-
     t.field('internal_clearLatestProjectCache', {
       type: 'Boolean',
       resolve: async (_, args, ctx) => {

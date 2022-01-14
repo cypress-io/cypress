@@ -28,10 +28,8 @@
         :style="style"
         :type="type"
         :spellcheck="false"
-        :class="_inputClasses"
-        class="block w-full pl-10 text-gray-800 leading-tight placeholder-gray-400
-      hocus-default border-gray-100 rounded-md disabled:bg-gray-100 disabled:text-gray-400
-      py-9px"
+        :class="[_inputClasses, {'hocus-default': !hasError, 'hocus-error': hasError}]"
+        class="block w-full pl-10 leading-tight text-gray-800 placeholder-gray-400 border-gray-100 rounded-md disabled:bg-gray-100 disabled:text-gray-400 py-9px"
         v-bind="inputAttrs"
       >
       <div
@@ -81,6 +79,7 @@ const props = withDefaults(defineProps<{
   suffixIconClasses?: string | string[] | Record<string, string>
   modelValue?: string
   style?: string
+  hasError?: boolean
 }>(), {
   type: 'text',
   modelValue: '',
@@ -90,6 +89,7 @@ const props = withDefaults(defineProps<{
   suffixIcon: undefined,
   suffixIconClasses: undefined,
   style: '',
+  hasError: false,
 })
 
 const emits = defineEmits(['update:modelValue'])

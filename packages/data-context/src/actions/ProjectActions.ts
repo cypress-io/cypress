@@ -304,11 +304,10 @@ export class ProjectActions {
     }
 
     const parsed = path.parse(codeGenCandidate)
-    const config = await this.ctx.lifecycleManager.getFullInitialConfig()
 
     const getFileExtension = () => {
-      if (codeGenType === 'integration') {
-        const possibleExtensions = ['.spec', '.test', '-spec', '-test']
+      if (codeGenType === 'e2e') {
+        const possibleExtensions = ['.spec', '.test', '-spec', '-test', '.cy']
 
         return (
           possibleExtensions.find((ext) => {
@@ -319,10 +318,11 @@ export class ProjectActions {
 
       return '.cy'
     }
+
     const getCodeGenPath = () => {
-      return codeGenType === 'integration'
+      return codeGenType === 'e2e'
         ? this.ctx.path.join(
-          config.integrationFolder || project,
+          project,
           codeGenCandidate,
         )
         : codeGenCandidate
@@ -381,18 +381,6 @@ export class ProjectActions {
     debug(`Creating ${this.defaultE2EPath}`)
 
     return this.ctx.fs.mkdirp(this.defaultE2EPath)
-  }
-
-  async writeFile (relative: string, content: string = ''): Promise<boolean> {
-    if (!this.ctx.currentProject || !this.ctx.coreData.currentTestingType) {
-      return false
-    }
-
-    const abs = path.join(this.ctx.currentProject, relative)
-
-    await this.ctx.fs.writeFile(abs, content)
-
-    return true
   }
 
   async scaffoldIntegration (): Promise<NexusGenObjects['ScaffoldedFile'][]> {
