@@ -1,3 +1,6 @@
+import $coordinates from '../../../src/dom/coordinates'
+import $elements from '../../../src/dom/elements'
+
 const { $ } = Cypress
 
 export {}
@@ -230,6 +233,48 @@ describe('src/dom/coordinates', () => {
         expect(obj.x).to.eq(159)
         expect(obj.y).to.eq(124)
       })
+    })
+  })
+
+  context('isAUTFrame', () => {
+    const { isAUTFrame } = $coordinates
+
+    // our test for a window is that it has a `window` that refers
+    // to itself
+    const getWindowLikeObject = () => {
+      const win = { parent: {} as any }
+
+      win.parent.window = win.parent
+
+      return win
+    }
+
+    it('returns true if parent is a window and not an iframe', () => {
+      const win = getWindowLikeObject()
+
+      expect(isAUTFrame(win)).to.be.true
+    })
+
+    it('returns true if parent is a window and getting its frameElement property throws an error', () => {
+      const win = getWindowLikeObject()
+
+      cy.stub($elements, 'getNativeProp').throws('cross-origin error')
+
+      expect(isAUTFrame(win)).to.be.true
+    })
+
+    it('returns false if parent is not a window', () => {
+      const win = { parent: {} }
+
+      expect(isAUTFrame(win)).to.be.false
+    })
+
+    it('returns false if parent is an iframe', () => {
+      const win = getWindowLikeObject()
+
+      cy.stub($elements, 'getNativeProp').returns(true)
+
+      expect(isAUTFrame(win)).to.be.false
     })
   })
 
