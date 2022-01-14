@@ -27,3 +27,7 @@ interface NodeEventEmitter {
   prependOnceListener(event: string | symbol, listener: (...args: any[]) => void): this
   eventNames(): Array<string | symbol>
 }
+
+// We use the Buffer class for dealing with binary data, especially around the
+// selectFile interface.
+type BufferType = import("buffer/").Buffer
