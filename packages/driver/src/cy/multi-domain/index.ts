@@ -161,10 +161,12 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
           const logAttrs = log.get()
 
           _.forEach(attrs, (value: any, key: string) => {
-            if (!_.isEqual(value, logAttrs[key])) {
-              if (value !== undefined && value !== null && !(_.isObject(value) && _.isEmpty(value))) {
-                log.set(key as keyof Cypress.LogConfig, value)
-              }
+            if (
+              value != null
+                && !(_.isObject(value) && _.isEmpty(value))
+                && !_.isEqual(value, logAttrs[key])
+            ) {
+              log.set(key as keyof Cypress.LogConfig, value)
             }
           })
 
