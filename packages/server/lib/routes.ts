@@ -80,7 +80,7 @@ export const createCommonRoutes = ({
 
   router.get('/__/', (req, res) => {
     debug('serving on /__/')
-    ctx.html.appHtml()
+    getCtx().html.appHtml()
     .then((html) => res.send(html))
     .catch((e) => res.status(500).send({ stack: e.stack }))
   })
