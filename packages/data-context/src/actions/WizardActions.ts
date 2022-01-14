@@ -325,7 +325,7 @@ const E2E_SCAFFOLD_BODY = (opts: E2eScaffoldOpts) => {
   return `
     e2e: {
       supportFile: 'cypress/support/e2e.${opts.lang}',
-      specPattern: ${getDefaultSpecPatterns().e2e},
+      specPattern: '${getDefaultSpecPatterns().e2e}',
       viewportHeight: 660,
       viewportWidth: 1000,
       setupNodeEvents(on, config) {
@@ -346,7 +346,7 @@ const COMPONENT_SCAFFOLD_BODY = (opts: ComponentScaffoldOpts) => {
   return `
   component: {
     supportFile: 'cypress/support/component.${opts.lang}',
-    specPattern: ${getDefaultSpecPatterns().component},
+    specPattern: '${getDefaultSpecPatterns().component}',
     devServer: import('${opts.requirePath}'),
     devServerConfig: ${opts.configOptionsString}
   }
