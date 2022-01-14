@@ -42,5 +42,5 @@ https://download.cypress.io/desktop/0.20.2?platform=OS&arch=ARCH
 `
 
 exports['desktop url from template'] = `
-https://download.cypress.io/desktop/0.20.2/darwin-64x/cypress.zip
+https://download.cypress.io/desktop/0.20.2/darwin-x64/cypress.zip
 `
