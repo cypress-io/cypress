@@ -35,7 +35,7 @@ Promise.all([
   initHighlighter(),
   preloadLaunchpadData(),
 ]).then(() => {
-  launchpadClient = makeUrqlClient('launchpad')
+  launchpadClient = makeUrqlClient({ target: 'launchpad' })
   app.use(urql, launchpadClient)
 
   app.mount('#app')

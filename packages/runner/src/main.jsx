@@ -12,37 +12,46 @@ import { createWebsocket } from '@packages/app/src/runner'
 import util from './lib/util'
 import { UnifiedRunner } from '@packages/runner-ct/unified-runner'
 
-const driverUtils = $Cypress.utils
-
 window.UnifiedRunner = UnifiedRunner
 
 MobX.configure({ enforceActions: 'always' })
 
-const ws = createWebsocket()
-
-// NOTE: this is exposed for testing, ideally we should only expose this if a test flag is set
-window.runnerWs = ws
-window.ws = ws
-
-const eventManager = new EventManager(
-  $Cypress,
-  MobX,
-  selectorPlaygroundModel,
-  StudioRecorder,
-  ws,
-)
-
-// NOTE: this is for testing Cypress-in-Cypress, window.Cypress is undefined here
-// unless Cypress has been loaded into the AUT frame
-if (window.Cypress) {
-  window.eventManager = eventManager
-}
+let ws
+let eventManager
 
 const Runner = {
-  start (el, base64Config) {
-    MobX.action('started', () => {
-      const config = JSON.parse(driverUtils.decodeBase64Unicode(base64Config))
+  _initialize (socketIoRoute) {
+    if (!ws) {
+      ws = createWebsocket(socketIoRoute)
+    }
 
+    // NOTE: this is exposed for testing, ideally we should only expose this if a test flag is set
+    window.runnerWs = ws
+    window.ws = ws
+
+    if (!eventManager) {
+      eventManager = new EventManager(
+        $Cypress,
+        MobX,
+        selectorPlaygroundModel,
+        StudioRecorder,
+        ws,
+      )
+    }
+
+    // NOTE: this is for testing Cypress-in-Cypress, window.Cypress is undefined here
+    // unless Cypress has been loaded into the AUT frame
+    if (window.Cypress) {
+      window.eventManager = eventManager
+    }
+  },
+
+  start (el, base64Config) {
+    const config = UnifiedRunner.decodeBase64(base64Config)
+
+    this._initialize(config.socketIoRoute)
+
+    MobX.action('started', () => {
       const NO_COMMAND_LOG = config.env && config.env.NO_COMMAND_LOG
       const useInlineSpecList = false
 
