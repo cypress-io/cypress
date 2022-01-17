@@ -10,6 +10,7 @@ describe('Sidebar Navigation', () => {
 
   it('expands the left nav bar by default', () => {
     cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'true')
+    cy.percySnapshot()
   })
 
   it('highlights indicator on hover showing you can click to expand', () => {
@@ -20,6 +21,8 @@ describe('Sidebar Navigation', () => {
     cy.findByLabelText('toggle navigation', {
       selector: 'button',
     }).realHover().should('have.css', 'outline', 'rgba(0, 0, 0, 0) solid 2px')
+
+    cy.percySnapshot()
   })
 
   it('closes the left nav bar when clicking the expand button (if expanded)', () => {
@@ -33,6 +36,7 @@ describe('Sidebar Navigation', () => {
 
     cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'false')
     cy.get('@title').should('not.be.visible')
+    cy.percySnapshot()
   })
 
   it('has unlabeled menu item that shows the keyboard shortcuts modal (unexpanded state)', () => {
@@ -52,6 +56,7 @@ describe('Sidebar Navigation', () => {
     cy.get('li span').contains('s')
     cy.get('li span').contains('f')
 
+    cy.percySnapshot()
     cy.get('[aria-label="Close"]').click()
     cy.findByText('Keyboard Shortcuts').should('not.exist')
   })
@@ -65,6 +70,7 @@ describe('Sidebar Navigation', () => {
 
     cy.get('[data-cy="sidebar-header"').realHover()
     cy.contains('#tooltip-target > div', 'todos')
+    cy.percySnapshot()
     cy.get('[data-cy="sidebar-header"]').trigger('mouseout')
 
     cy.get('[data-cy="switch-testing-type"]').realHover()
