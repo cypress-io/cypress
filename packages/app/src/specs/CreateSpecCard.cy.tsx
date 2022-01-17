@@ -21,6 +21,8 @@ describe('<CreateSpecCard />', { viewportWidth: 400, viewportHeight: 400 }, () =
     )).get(specCardSelector)
     .should('contain.text', longHeader)
     .and('contain.text', longDescription)
+
+    cy.percySnapshot()
   })
 
   it('renders with normal length text', () => {
