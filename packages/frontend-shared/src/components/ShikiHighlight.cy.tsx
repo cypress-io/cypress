@@ -50,13 +50,13 @@ describe('<ShikiHighlight/>', { viewportWidth: 800, viewportHeight: 500 }, () =>
     cy.percySnapshot()
   })
 
-  // TODO: unskip when `wrap` prop is needed and working (currently used nowhere)
+  // TODO: (UNIFY-921) unskip when `wrap` prop is needed and working (currently used nowhere)
   it.skip('wraps long code without line numbers', { viewportWidth: 900, viewportHeight: 500 }, () => {
     cy.mount(() => <div class="w-full p-12"><ShikiHighlight wrap code={code} lang="ts" /></div>)
     cy.get('.shiki').should('be.visible')
   })
 
-  // TODO: unskip when `wrap` prop is needed and working (currently used nowhere)
+  // TODO: (UNIFY-921) unskip when `wrap` prop is needed and working (currently used nowhere)
   it.skip('wraps long code with line numbers', () => {
     cy.mount(() => <div class="p-12"><ShikiHighlight lineNumbers wrap code={code} lang="ts" /></div>)
     cy.get('.shiki').should('be.visible')
