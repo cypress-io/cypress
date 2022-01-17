@@ -147,7 +147,6 @@
       "ciTitle": "Run in CI/CD",
       "ciSetup": "Set up CI",
       "fasterTests": "Run tests faster",
-      "smartOrchestration": "Smart Orchestration",
       "prompts": {
         "ci1": {
           "title": "Configure CI",

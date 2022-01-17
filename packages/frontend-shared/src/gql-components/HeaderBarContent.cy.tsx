@@ -24,6 +24,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
 
   it('renders without browser menu by default and other items work', () => {
     cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
+
       render: (gqlVal) => (
         <div class="border-current border-1 h-700px resize overflow-auto">
           <HeaderBarContent gql={gqlVal} />
@@ -35,10 +36,49 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
     cy.get('[data-cy="top-nav-active-browser"]').should('not.exist')
     cy.percySnapshot()
     cy.contains('button', text.docsMenu.docsHeading).click()
-    cy.contains('a', text.docsMenu.firstTest).should('be.visible')
+
+    cy.wrap(Object.values(text.docsMenu)).each((menuItem) => {
+      if (typeof menuItem === 'string') {
+        cy.contains(menuItem).should('be.visible')
+      }
+    })
+
     cy.percySnapshot()
     cy.get('body').click()
     cy.contains('a', text.docsMenu.firstTest).should('not.be.visible')
+  })
+
+  it('docs menu has expected links with no current project', () => {
+    cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
+      onResult: (result) => {
+        result.currentProject = null
+      },
+      render: (gqlVal) => (
+        <div class="border-current border-1 h-700px resize overflow-auto">
+          <HeaderBarContent gql={gqlVal} />
+        </div>
+      ),
+    })
+
+    // we render without a current project to validate ciSetup and fasterTests links
+    // because outside of global mode, those are buttons that trigger popups
+    // so this way we can assert all links at once.
+    const expectedDocsLinks = {
+      [text.docsMenu.firstTest]: 'https://on.cypress.io/writing-first-test?utm_medium=Docs+Menu&utm_content=First+Test',
+      [text.docsMenu.testingApp]: 'https://on.cypress.io/testing-your-app?utm_medium=Docs+Menu&utm_content=Testing+Your+App',
+      [text.docsMenu.organizingTests]: 'https://on.cypress.io/writing-and-organizing-tests?utm_medium=Docs+Menu&utm_content=Organizing+Tests',
+      [text.docsMenu.bestPractices]: 'https://on.cypress.io/best-practices?utm_medium=Docs+Menu&utm_content=Best+Practices',
+      [text.docsMenu.configuration]: 'https://on.cypress.io/configuration?utm_medium=Docs+Menu&utm_content=Configuration',
+      [text.docsMenu.api]: 'https://on.cypress.io/api?utm_medium=Docs+Menu&utm_content=API',
+      [text.docsMenu.ciSetup]: 'https://on.cypress.io/ci?utm_medium=Docs+Menu&utm_content=Set+Up+CI',
+      [text.docsMenu.fasterTests]: 'https://on.cypress.io/parallelization?utm_medium=Docs+Menu&utm_content=Parallelization',
+    }
+
+    cy.contains('button', text.docsMenu.docsHeading).click()
+
+    cy.wrap(Object.keys(expectedDocsLinks)).each((linkName: string) => {
+      cy.contains('a', linkName).should('have.attr', 'href', expectedDocsLinks[linkName])
+    })
   })
 
   it('does not show hint when on latest version of Cypress', () => {
