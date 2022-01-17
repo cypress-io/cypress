@@ -1,6 +1,7 @@
 <template>
   <div class="flex items-center">
     <input
+      id="editorToUse"
       v-model="editorToUse"
       type="radio"
       class="mr-5px"
@@ -8,7 +9,11 @@
       value="found"
       @change="saveEditor"
     >
-
+    <label
+      for="editorToUse"
+      class="sr-only"
+    >{{ t('settingsPage.editor.editorRadioLabel') }}
+    </label>
     <Select
       :model-value="selectedWellKnownEditor"
       :options="externalEditors"
@@ -26,7 +31,7 @@
         />
         <i-cy-terminal_x16
           v-else
-          class="text-gray-600 text-md"
+          class="text-md text-gray-600"
         />
       </template>
       <template #item-prefix="{ value }">
@@ -38,8 +43,9 @@
     </Select>
   </div>
 
-  <div class="flex items-center py-2">
+  <div class="flex py-2 items-center">
     <input
+      id="customEditor"
       v-model="editorToUse"
       type="radio"
       class="mr-5px"
@@ -47,18 +53,28 @@
       data-cy="use-custom-editor"
       @change="saveEditor"
     >
+    <label
+      for="customEditor"
+      class="sr-only"
+    >{{ t('settingsPage.editor.customEditorRadioLabel') }}
+    </label>
 
     <div class="w-400px">
       <Input
+        id="customPath"
         v-model="customBinary"
         data-cy="custom-editor"
         input-classes="text-sm"
-        placeholder="Custom path..."
+        :placeholder="t('settingsPage.editor.customPathPlaceholder')"
       >
         <template #prefix>
-          <i-cy-terminal_x16 class="text-gray-600 text-md" />
+          <i-cy-terminal_x16 class="text-md text-gray-600" />
         </template>
       </Input>
+      <label
+        for="customPath"
+        class="sr-only"
+      >{{ t('settingsPage.editor.customPathPlaceholder') }}</label>
     </div>
   </div>
 </template>
