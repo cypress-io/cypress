@@ -56,6 +56,7 @@ describe('<RunCard />', { viewportHeight: 400 }, () => {
         },
       })
 
+      // this is the human readable commit time from the stub
       cy.contains('3:17:00 AM').should('be.visible')
 
       cy.percySnapshot()
