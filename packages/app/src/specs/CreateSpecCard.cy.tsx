@@ -42,8 +42,8 @@ describe('<CreateSpecCard />', { viewportWidth: 400, viewportHeight: 400 }, () =
     .should('be.visible')
   })
 
-  // TODO: Brian says this can be fixed once the driver is hooked up properly
-  xit('emits click events bound to it', () => {
+  // TODO: restore accessibility checks when UNIFY-878 is completed
+  it('emits click events bound to it', () => {
     const onClickSpy = cy.spy().as('onClickSpy')
 
     cy.mount(() => (<div class="m-12">
@@ -52,10 +52,12 @@ describe('<CreateSpecCard />', { viewportWidth: 400, viewportHeight: 400 }, () =
         onClick={onClickSpy} />
     </div>))
     .get(specCardSelector)
-    .focus()
     .click()
-    .type('{enter}')
-    .type(' ')
-    // .get('@onClickSpy').should('have.been.calledThrice')
+
+    .get('@onClickSpy').should('have.been.calledOnce')
+
+    // keyboard checks that should work through focusing a button inside the card:
+    // .type('{enter}')
+    // .type(' ')
   })
 })
