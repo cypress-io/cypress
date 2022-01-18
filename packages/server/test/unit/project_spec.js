@@ -29,7 +29,7 @@ describe.skip('lib/project-base', () => {
 
     this.todosPath = Fixtures.projectPath('todos')
     this.idsPath = Fixtures.projectPath('ids')
-    this.pristinePath = Fixtures.projectPath('pristine-with-config-file')
+    this.pristinePath = Fixtures.projectPath('pristine-with-e2e-testing')
 
     sinon.stub(scaffold, 'isNewProject').resolves(false)
     sinon.stub(chokidar, 'watch').returns({
