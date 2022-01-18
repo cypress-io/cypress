@@ -37,7 +37,6 @@ const onLogChanged = (attrs) => {
 }
 
 const onError = (error, runnable) => {
-  // TODO: need to come up with more standard serialization for this object
   specBridgeCommunicator.toPrimary('error', error)
 }
 
@@ -111,9 +110,8 @@ const setup = () => {
       ctx: {},
       clearTimeout () {},
       resetTimeout () {},
-      // let the primary domain handle all Mocha pending runnables. Stub this to false in case an error arises in the SD
-      isPending: () => false,
       timeout () {},
+      // let the primary domain handle all Mocha pending runnables. Stub this to false in case an error arises in the SD
       isPending () {},
     })
 

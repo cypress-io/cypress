@@ -1,5 +1,6 @@
 import Bluebird from 'bluebird'
 import _ from 'lodash'
+import { AssertionError } from 'chai'
 import { createDeferred, Deferred } from '../../util/deferred'
 import $utils from '../../cypress/utils'
 import $errUtils from '../../cypress/error_utils'
@@ -178,14 +179,18 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
           const isEnded = log.get('ended')
 
           if (isEnded) {
+            if (log.get('state') === 'failed') {
+              const err = log.get('err')
+
+              // the toJSON method on the Cypress.Log converts the 'error' property to 'err', so when the log gets
+              // serialized from the SD to the PD, we need to do the opposite
+              log.set('error', err)
+            }
+
             delete logs[attrs.id]
             deferred.resolve()
           }
         }
-      }
-
-      const onError = (error) => {
-        // TODO: implement
       }
 
       const cleanupCommands = async () => {
@@ -209,17 +214,41 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
       }
 
       const cleanup = () => {
+        communicator.off('error', onError)
         cleanupCommands()
         cleanupLogs()
       }
 
       const doneAndCleanup = async (err) => {
         communicator.off('done:called', doneAndCleanup)
-
+        communicator.off('error', onError)
         // If done is called, immediately unbind command listeners to prevent any commands from being enqueued, but wait for log updates to trickle in before invoking done
         cleanupCommands()
         await cleanupLogs()
         done(err)
+      }
+
+      const onError = async (error) => {
+        const reject = cy.state('reject')
+
+        if (done) {
+          communicator.off('done:called', doneAndCleanup)
+        }
+
+        communicator.off('error', onError)
+
+        cleanupCommands()
+        await cleanupLogs()
+
+        // TODO: Since Errors sent over postMessage need to be serialized to Objects, we need a way to serialize them back
+        // This serialization likely should like in the communicator and we likely need to address some type of serialization error factory
+        if (error?.name === 'AssertionError') {
+          error = _.assignIn(new AssertionError(''), error)
+        }
+
+        // TODO: figure out how to get the correct stack trace here
+        error.isMultiDomainError = true
+        reject(error)
       }
 
       if (done) {

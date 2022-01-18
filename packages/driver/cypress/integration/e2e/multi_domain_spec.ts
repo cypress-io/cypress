@@ -353,15 +353,19 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
       })
     })
 
-    it.only('receives command failures from the secondary domain', (done) => {
+    it('receives command failures from the secondary domain', (done) => {
+      const timeout = 1000
+
       cy.on('fail', (e) => {
-        // TODO: implement this test
+        expect(e.toString()).to.have.string(`Timed out retrying after ${timeout}ms: Expected to find element: \`#doesnt-exist\`, but never found it`)
+        // TODO: improve this test to make sure that the secondary domain failures show up as spec failures and not AUT failures
+        // TODO: improve this test to make sure stack traces point to the error in `switchToDomain` and not the secondary domain stack trace
         done()
       })
 
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain('foobar.com', timeout, (timeout) => {
         cy.get('#doesnt-exist', {
-          timeout: 1000,
+          timeout,
         })
       })
     })

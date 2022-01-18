@@ -76,6 +76,7 @@ const isCypressErr = (err = {}) => {
 }
 
 const isSpecError = (spec, err) => {
+  // TODO: need to fix the stack trace for multi-domain. Can verify here
   return _.includes(err.stack, spec.relative)
 }
 

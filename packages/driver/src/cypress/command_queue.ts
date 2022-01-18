@@ -36,28 +36,35 @@ const commandRunningFailed = (Cypress, state, err) => {
 
   const current = state('current')
 
-  return Cypress.log({
-    end: true,
-    snapshot: true,
-    error: err,
-    consoleProps () {
-      if (!current) return
+  // If the error came from the secondary domain, the command log already contains the queued command that errored.
+  // Avoid creating an additional log here that will ultimately show an empty failed command
+  if (!err?.isMultiDomainError) {
+    return Cypress.log({
+      end: true,
+      snapshot: true,
+      error: err,
+      consoleProps () {
+        if (!current) return
 
-      const consoleProps = {}
-      const prev = current.get('prev')
+        const consoleProps = {}
+        const prev = current.get('prev')
 
-      if (current.get('type') === 'parent' || !prev) return
+        if (current.get('type') === 'parent' || !prev) return
 
-      // if type isn't parent then we know its dual or child
-      // and we can add Applied To if there is a prev command
-      // and it is a parent
-      consoleProps['Applied To'] = $dom.isElement(prev.get('subject')) ?
-        $dom.getElements(prev.get('subject')) :
-        prev.get('subject')
+        // if type isn't parent then we know its dual or child
+        // and we can add Applied To if there is a prev command
+        // and it is a parent
+        consoleProps['Applied To'] = $dom.isElement(prev.get('subject')) ?
+          $dom.getElements(prev.get('subject')) :
+          prev.get('subject')
 
-      return consoleProps
-    },
-  })
+        return consoleProps
+      },
+    })
+  }
+
+  // If coming from the secondary domain, delete this property as we do not want to propagate it elsewhere
+  delete err.isMultiDomainError
 }
 
 export class CommandQueue extends Queue<Command> {

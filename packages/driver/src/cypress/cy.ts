@@ -395,7 +395,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     }
 
     err.stack = $stackUtils.normalizedStack(err)
-
     err = $errUtils.enhanceStack({
       err,
       userInvocationStack: $errUtils.getUserInvocationStack(err, this.state),
@@ -403,7 +402,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     })
 
     err = $errUtils.processErr(err, this.config)
-
     err.hasFailed = true
 
     // store the error on state now
