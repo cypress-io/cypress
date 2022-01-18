@@ -40,13 +40,6 @@ export const createCommonRoutes = ({
   const router = Router()
   const { clientRoute, namespace } = config
 
-  router.get('/__/', (req, res) => {
-    debug('serving on /__/')
-    getCtx().html.appHtml()
-    .then((html) => res.send(html))
-    .catch((e) => res.status(500).send({ stack: e.stack }))
-  })
-
   if (process.env.CYPRESS_INTERNAL_VITE_DEV) {
     const proxy = httpProxy.createProxyServer({
       target: `http://localhost:${process.env.CYPRESS_INTERNAL_VITE_APP_PORT}/`,
