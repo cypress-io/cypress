@@ -24,7 +24,7 @@ describe('Sidebar Navigation', () => {
 
   it('closes the left nav bar when clicking the expand button (if expanded)', () => {
     cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'true')
-    cy.findByText('todos').as('title')
+    cy.findAllByText('todos').eq(1).as('title')
     cy.get('@title').should('be.visible')
 
     cy.findByLabelText('toggle navigation', {
@@ -89,20 +89,20 @@ describe('Sidebar Navigation', () => {
       selector: 'button',
     }).click()
 
-    cy.findByText('todos').should('not.be.visible')
+    cy.findAllByText('todos').eq(1).should('not.be.visible')
 
     cy.findByLabelText('toggle navigation', {
       selector: 'button',
     }).click()
 
     cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'true')
-    cy.findByText('todos').should('be.visible')
+    cy.findAllByText('todos').eq(1).should('be.visible')
   })
 
   it('displays the project name (expanded state)', () => {
     cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'true')
 
-    cy.findByText('todos').should('be.visible')
+    cy.findAllByText('todos').eq(1).should('be.visible')
   })
 
   it('has menu item labeled by current active testing type that opens a modal to switch testing type (expanded state)', () => {
