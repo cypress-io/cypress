@@ -19,6 +19,7 @@ import { pubSubExchange } from './urqlExchangePubsub'
 import { namedRouteExchange } from './urqlExchangeNamedRoute'
 import { decodeBase64Unicode } from '../utils/decodeBase64'
 import type { SSRData } from '@urql/core/dist/types/exchanges/ssr'
+import type { SpecFile } from '@packages/types'
 
 const GQL_PORT_MATCH = /gqlPort=(\d+)/.exec(window.location.search)
 const SERVER_PORT_MATCH = /serverPort=(\d+)/.exec(window.location.search)
@@ -34,7 +35,7 @@ declare global {
     __CYPRESS_INITIAL_DATA__: SSRData
     __CYPRESS_GRAPHQL_PORT__?: string
     __CYPRESS_MODE__: 'run' | 'open'
-    __RUN_MODE_SPECS__: string
+    __RUN_MODE_SPECS__: SpecFile[]
   }
 }
 

@@ -24,11 +24,11 @@ query SpecPageContainer {
 `
 
 const runMode = window.__CYPRESS_MODE__ === 'run'
-const specs: SpecFile[] = JSON.parse(window.__RUN_MODE_SPECS__)
+const specs: SpecFile[] = window.__RUN_MODE_SPECS__
 
 const query = useQuery({
   query: SpecPageContainerDocument,
-  requestPolicy: window.__CYPRESS_MODE__ === 'run' ? 'cache-only' : 'cache-and-network',
+  requestPolicy: window.__CYPRESS_MODE__ === 'run' && window.top === window ? 'cache-only' : 'cache-and-network',
 })
 </script>
 

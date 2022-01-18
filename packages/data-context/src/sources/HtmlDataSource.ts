@@ -85,10 +85,10 @@ export class HtmlDataSource {
     return html.replace('<body>', `
       <body>
         <script>
+          window.__RUN_MODE_SPECS__ = ${JSON.stringify(this.ctx.project.specs)}
           window.__CYPRESS_GRAPHQL_PORT__ = ${JSON.stringify(this.ctx.gqlServerPort)};
           window.__CYPRESS_INITIAL_DATA__ = "${base64InitialData}";
           window.__CYPRESS_MODE__ = ${JSON.stringify(this.ctx.isRunMode ? 'run' : 'open')}
-          window.__RUN_MODE_SPECS__ = ${JSON.stringify(this.ctx.project.specs)}
         </script>
     `)
   }
