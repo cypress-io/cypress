@@ -60,10 +60,7 @@ export default {
 <script lang="ts" setup>
 import { computed, ref, watchEffect } from 'vue'
 import { runnerConstants } from './runner-constants'
-
-export type ResizablePanelName = 'panel1' | 'panel2' | 'panel3'
-
-export type DraggablePanel = Exclude<ResizablePanelName, 'panel3'>
+import type { DraggablePanel } from './useRunnerStyle'
 
 const props = withDefaults(defineProps<{
   showPanel1?: boolean // specsList in runner

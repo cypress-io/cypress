@@ -4,7 +4,7 @@
     :run-mode-specs="specs"
   />
 
-  <SpecRunnerContainer
+  <SpecRunnerContainerOpenMode
     v-else-if="query.data.value?.currentProject?.specs"
     :gql="query.data.value"
   />
@@ -14,7 +14,7 @@
 import type { SpecFile } from '@packages/types/src'
 import { gql, useQuery } from '@urql/vue'
 import { SpecPageContainerDocument } from '../../generated/graphql'
-import SpecRunnerContainer from '../../runner/SpecRunnerContainer.vue'
+import SpecRunnerContainerOpenMode from '../../runner/SpecRunnerContainerOpenMode.vue'
 import SpecRunnerContainerRunMode from '../../runner/SpecRunnerContainerRunMode.vue'
 
 gql`
@@ -24,7 +24,7 @@ query SpecPageContainer {
 `
 
 const runMode = window.__CYPRESS_MODE__ === 'run'
-const specs: SpecFile[] = window.__RUN_MODE_SPECS__
+const specs = window.__RUN_MODE_SPECS__
 
 const query = useQuery({
   query: SpecPageContainerDocument,
