@@ -72,7 +72,7 @@ export class HtmlDataSource {
   async makeServeConfig () {
     return {
       projectName: this.ctx.lifecycleManager.projectTitle,
-      base64Config: Buffer.from(JSON.stringify(this.ctx._apis.projectApi.getConfig())).toString('base64'),
+      base64Config: Buffer.from(JSON.stringify(this.ctx._apis.projectApi.getConfig() ?? {})).toString('base64'),
     }
   }
 
