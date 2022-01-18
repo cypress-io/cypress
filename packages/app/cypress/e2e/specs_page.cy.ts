@@ -210,6 +210,7 @@ describe('Specs Page', () => {
 
         it('shows input for file extension filter', () => {
           cy.get('@CreateFromComponentDialog').within(() => {
+            cy.log('testing builds')
             cy.findByTestId('file-match-indicator').should('contain', '2 Matches')
             cy.findByRole('button', { name: '*.{jsx,tsx}' }).click()
             cy.findByPlaceholderText(defaultMessages.components.fileSearch.byExtensionInput)
