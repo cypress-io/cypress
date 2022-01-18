@@ -22,6 +22,10 @@ export class HtmlDataSource {
   }
 
   async fetchAppInitialData () {
+    if (this.ctx.isRunMode) {
+      return {}
+    }
+
     const graphql = this.ctx.graphqlClient()
 
     await Promise.all([

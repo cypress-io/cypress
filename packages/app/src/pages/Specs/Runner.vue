@@ -1,9 +1,21 @@
 <template>
+  <!--
+    Run Mode is a more minimal UI.
+    It does not render things like the SpecList,
+    Side and Top Nav, etc.
+    It also has no GraphQL dependency.
+  -->
   <SpecRunnerContainerRunMode
-    v-if="runMode"
+    v-if="isRunMode"
     :run-mode-specs="specs"
   />
 
+  <!--
+    Open Mode is the full Cypress runner UI -
+    including things like the SpecList,
+    Side and Top Nav, Selector Playgroundn etc.
+    It is driven by GraphQL and urql.
+  -->
   <SpecRunnerContainerOpenMode
     v-else-if="query.data.value?.currentProject?.specs"
     :gql="query.data.value"
@@ -24,13 +36,24 @@ query SpecPageContainer {
 }
 `
 
-const runMode = window.__CYPRESS_MODE__ === 'run'
-const specs = window.__RUN_MODE_SPECS__
+const isRunMode = window.__CYPRESS_MODE__ === 'run'
 
+// in run mode, we are not using GraphQL or urql
+// for performance - run mode does not need the
+// same level of runner interactivity as open mode.
+// by setting `cache-only` in run mode, urql will not trigger any
+// requests, which is what we want.
 const query = useQuery({
   query: SpecPageContainerDocument,
-  requestPolicy: window.__CYPRESS_MODE__ === 'run' && window.top === window ? 'cache-only' : 'cache-and-network',
+  requestPolicy: isRunMode && window.top === window ? 'cache-only' : 'cache-and-network',
 })
+
+// because we are not using GraphQL in run mode, and we still need
+// way to get the specs, we simply attach them to window when
+// serving the initial HTML.
+// this works fine - we know that during run mode, no new specs will
+// be added or removed.
+const specs = window.__RUN_MODE_SPECS__
 
 // @ts-ignore - this is used for exposing the selector playground in e2e tests
 // TODO: migrate this to true e2e test w/o the hack using Cypress-in-Cypress when
@@ -38,7 +61,6 @@ const query = useQuery({
 window.__showSelectorPlaygroundForTestingPurposes = () => {
   togglePlayground(getAutIframeModel())
 }
-
 </script>
 
 <route>
