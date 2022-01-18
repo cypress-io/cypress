@@ -36,6 +36,7 @@ export const serveRunner = (runnerPkg: RunnerPkg, config: Cfg, res: Response) =>
   return res.render(runnerPath, {
     base64Config,
     projectName: config.projectName,
+    namespace: config.namespace,
   })
 }
 
