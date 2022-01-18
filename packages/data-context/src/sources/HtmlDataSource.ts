@@ -69,19 +69,27 @@ export class HtmlDataSource {
     throw err
   }
 
+  async makeServeConfig () {
+    return {
+      projectName: this.ctx.lifecycleManager.projectTitle,
+      base64Config: Buffer.from(JSON.stringify(this.ctx._apis.projectApi.getConfig())).toString('base64'),
+    }
+  }
+
   /**
    * The app html includes the SSR'ed data to bootstrap the page for the app
    */
   async appHtml () {
-    const [appHtml, appInitialData] = await Promise.all([
+    const [appHtml, appInitialData, serveConfig] = await Promise.all([
       this.fetchAppHtml(),
       this.fetchAppInitialData(),
+      this.makeServeConfig(),
     ])
 
-    return this.replaceBody(appHtml, appInitialData)
+    return this.replaceBody(appHtml, appInitialData, serveConfig)
   }
 
-  private replaceBody (html: string, initialData: object) {
+  private replaceBody (html: string, initialData: object, serveConfig: object) {
     // base64 before embedding so user-supplied contents can't break out of <script>
     // https://github.com/cypress-io/cypress/issues/4952
     const base64InitialData = Buffer.from(JSON.stringify(initialData)).toString('base64')
@@ -93,6 +101,7 @@ export class HtmlDataSource {
           window.__CYPRESS_GRAPHQL_PORT__ = ${JSON.stringify(this.ctx.gqlServerPort)};
           window.__CYPRESS_INITIAL_DATA__ = "${base64InitialData}";
           window.__CYPRESS_MODE__ = ${JSON.stringify(this.ctx.isRunMode ? 'run' : 'open')}
+          window.__CYPRESS_CONFIG__ = ${JSON.stringify(serveConfig)}
         </script>
     `)
   }

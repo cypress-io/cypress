@@ -4,7 +4,7 @@ import React, { Component } from 'react'
 import { AutomationDisconnected } from '../automation-disconnected'
 import { automation } from '../automation'
 import { NoAutomation } from '../no-automation'
-import { automationElementId, AutomationElement } from '../automation-element'
+import { AutomationElement } from '../automation-element'
 
 @observer
 export class Container extends Component {
@@ -17,10 +17,10 @@ export class Container extends Component {
   }
 
   componentDidMount () {
-    this.props.eventManager.addGlobalListeners(this.props.state, {
-      element: automationElementId,
-      randomString: this.randomString,
-    })
+    // this.props.eventManager.addGlobalListeners(this.props.state, {
+    //   randomString: this.randomString,
+    //   element: `${this.props.config.namespace}-string`,
+    // })
   }
 
   render () {
@@ -49,7 +49,7 @@ export class Container extends Component {
 
   _automationElement () {
     return (
-      <AutomationElement randomString={this.randomString} />
+      <AutomationElement namespace={this.props.config.namespace} randomString={this.randomString} />
     )
   }
 

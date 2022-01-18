@@ -17,10 +17,12 @@ type $Cypress = any
 
 const noop = () => {}
 
-export const automationElementId = '__cypress-string' as const
+type AutomationElementId = `${string}-string`
 
-interface addGlobalListenerOptions {
-    element: typeof automationElementId
+export const automationElementId: AutomationElementId = '__cypress-string' as const
+
+interface AddGlobalListenerOptions {
+    element: AutomationElementId
     randomString: string
     setAutomationStatus: (status: AutomationStatus) => void
 }
@@ -65,7 +67,7 @@ export class EventManager {
     return Cypress
   }
 
-  addGlobalListeners (state: BaseStore, options: addGlobalListenerOptions) {
+  addGlobalListeners (state: BaseStore, options: AddGlobalListenerOptions) {
     const rerun = () => {
       if (!this) {
         // if the tests have been reloaded
@@ -76,7 +78,7 @@ export class EventManager {
       return this.runSpec(state)
     }
 
-    const connectionInfo: Omit<addGlobalListenerOptions, 'setAutomationStatus'> = {
+    const connectionInfo: Omit<AddGlobalListenerOptions, 'setAutomationStatus'> = {
       element: options.element,
       randomString: options.randomString,
     }
