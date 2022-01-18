@@ -263,7 +263,9 @@ function visitApp (href?: string) {
     return cy.visit(`dist-app/index.html?serverPort=${e2e_serverPort}${href || ''}`, {
       onBeforeLoad (win) {
         // Simulates the inject SSR data when we're loading the page normally in the app
-        win.__CYPRESS_INITIAL_DATA__ = JSON.parse(ssrData)
+        const base64InitialData = Buffer.from(JSON.stringify(ssrData)).toString('base64')
+
+        win.__CYPRESS_INITIAL_DATA__ = base64InitialData
         win.__CYPRESS_GRAPHQL_PORT__ = e2e_gqlPort
       },
     })
