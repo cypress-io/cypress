@@ -306,20 +306,48 @@ describe('Launchpad: Setup Project', () => {
               .should('have.disabled')
               .as('nextStepButton')
 
-              cy.findByRole('button', { name: `Front-end Framework Pick a framework` })
+              cy.findByRole('button', { name: 'Front-end Framework Pick a framework' })
               .click()
               .should('have.attr', 'aria-expanded', 'true')
 
-              cy.findByRole('option', { name: framework.name }).click()
+              const frameworkIconName = (frameworkName) => {
+                if (frameworkName.includes('React')) {
+                  return 'react-logo'
+                }
+
+                if (frameworkName.includes('Vue')) {
+                  return 'vue-logo'
+                }
+
+                return `${Cypress._.lowerCase(framework.name).replace(' ', '')}-logo`
+              }
+
+              cy.findByRole('option', { name: framework.name })
+              .find('svg')
+              .should('have.attr', 'data-cy', frameworkIconName(framework.name))
+              .click()
+
+              cy.findByRole('button', { name: `Front-end Framework ${framework.name}` }) // ensure selected option updates
 
               if (framework.supportedBundlers.length > 1) {
-                cy.findByRole('button', { name: `Bundler Pick a bundler` })
+                cy.findByRole('button', { name: 'Bundler Pick a bundler' })
                 .should('have.attr', 'aria-haspopup', 'true')
                 .should('have.attr', 'aria-expanded', 'false')
                 .click()
                 .should('have.attr', 'aria-expanded', 'true')
 
-                cy.findByRole('option', { name: bundler.name }).click()
+                framework.supportedBundlers.forEach((supportedBundler) => {
+                  cy.findByRole('option', { name: Cypress._.startCase(supportedBundler) })
+                  .find('svg')
+                  .should('have.attr', 'data-cy', `${Cypress._.lowerCase(supportedBundler)}-logo`)
+                })
+
+                cy.findByRole('option', { name: bundler.name })
+                .find('svg')
+                .should('have.attr', 'data-cy', `${Cypress._.lowerCase(bundler.name)}-logo`)
+                .click()
+
+                cy.findByRole('button', { name: `Bundler ${bundler.name}` }) // ensure selected option updates
               }
 
               cy.findByRole('button', { name: lang.name }).click()
