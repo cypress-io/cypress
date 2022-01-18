@@ -30,15 +30,8 @@ import type { Browser } from '@packages/server/lib/browsers/types'
 import { InitializeRoutes, createCommonRoutes } from './routes'
 import { createRoutesE2E } from './routes-e2e'
 import { createRoutesCT } from './routes-ct'
-import type { DataContext } from '@packages/data-context/src/DataContext'
 import type { FoundSpec } from '@packages/types'
 
-const ALLOWED_PROXY_BYPASS_URLS = [
-  '/',
-  '/__cypress/runner/cypress_runner.css',
-  '/__cypress/runner/cypress_runner.js', // TODO: fix this
-  '/__cypress/runner/favicon.ico',
-]
 const DEFAULT_DOMAIN_NAME = 'localhost'
 const fullyQualifiedRe = /^https?:\/\//
 
@@ -50,7 +43,14 @@ const _isNonProxiedRequest = (req) => {
   return req.proxiedUrl.startsWith('/')
 }
 
-const _forceProxyMiddleware = function (clientRoute) {
+const _forceProxyMiddleware = function (clientRoute, namespace = '__cypress') {
+  const ALLOWED_PROXY_BYPASS_URLS = [
+    '/',
+    `/${namespace}/runner/cypress_runner.css`,
+    `/${namespace}/runner/cypress_runner.js`, // TODO: fix this
+    `/${namespace}/runner/favicon.ico`,
+  ]
+
   // normalize clientRoute to help with comparison
   const trimmedClientRoute = _.trimEnd(clientRoute, '/')
 
@@ -127,7 +127,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
   protected _remoteDomainName: unknown
   protected _remoteFileServer: unknown
 
-  constructor (private ctx: DataContext) {
+  constructor () {
     this.isListening = false
     // @ts-ignore
     this.request = Request()
@@ -195,7 +195,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
       target: config.baseUrl && testingType === 'component' ? config.baseUrl : undefined,
     })
 
-    this._socket = new SocketCtor(config, this.ctx) as TSocket
+    this._socket = new SocketCtor(config) as TSocket
 
     clientCertificates.loadClientCertificateConfig(config)
 
@@ -212,7 +212,6 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     this.createHosts(config.hosts)
 
     const routeOptions: InitializeRoutes = {
-      ctx: this.ctx,
       config,
       getRemoteState,
       nodeProxy: this.nodeProxy,
@@ -235,7 +234,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   createExpressApp (config) {
-    const { morgan, clientRoute } = config
+    const { morgan, clientRoute, namespace } = config
     const app = express()
 
     // set the cypress config from the cypress.config.{ts|js} file
@@ -260,7 +259,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
       return next()
     })
 
-    app.use(_forceProxyMiddleware(clientRoute))
+    app.use(_forceProxyMiddleware(clientRoute, namespace))
 
     app.use(require('cookie-parser')())
     app.use(compression({ filter: notSSE }))
@@ -519,6 +518,9 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
           host: hostname,
           port,
           protocol,
+        },
+        headers: {
+          'x-cypress-forwarded-from-cypress': true,
         },
         agent,
       }, onProxyErr)
