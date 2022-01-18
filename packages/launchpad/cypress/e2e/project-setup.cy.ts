@@ -224,6 +224,12 @@ describe('Launchpad: Setup Project', () => {
         cy.contains('cypress/support/e2e.js')
         cy.contains('cypress/fixtures/example.json')
       })
+
+      cy.findByRole('button', { name: 'Continue' })
+      .should('not.have.disabled')
+      .click()
+
+      cy.contains(/(Initializing Config|Choose a Browser)/)
     })
   })
 
