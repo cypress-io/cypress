@@ -247,13 +247,13 @@ const _disableRestorePagesPrompt = function (userDir) {
 
 // After the browser has been opened, we can connect to
 // its remote interface via a websocket.
-const _connectToChromeRemoteInterface = function (port, onError, browserDisplayName) {
+const _connectToChromeRemoteInterface = function (port, onError, browserDisplayName, url?) {
   // @ts-ignore
   la(check.userPort(port), 'expected port number to connect CRI to', port)
 
   debug('connecting to Chrome remote interface at random port %d', port)
 
-  return protocol.getWsTargetFor(port, browserDisplayName)
+  return protocol.getWsTargetFor(port, browserDisplayName, url)
   .then((wsUrl) => {
     debug('received wsUrl %s for port %d', wsUrl, port)
 
@@ -441,6 +441,13 @@ export = {
     args.push('--remote-debugging-address=127.0.0.1')
 
     return args
+  },
+
+  async connectToExisting (browser: Browser, options: CypressConfiguration = {}, automation) {
+    const port = await protocol.getRemoteDebuggingPort()
+    const criClient = await this._connectToChromeRemoteInterface(port, options, browser.displayName, options.url)
+
+    this._setAutomation(criClient, automation)
   },
 
   async open (browser: Browser, url, options: CypressConfiguration = {}, automation) {

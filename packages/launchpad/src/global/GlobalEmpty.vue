@@ -16,7 +16,7 @@ import { useI18n } from '@cy/i18n'
 
 const { t } = useI18n()
 const emit = defineEmits<{
-  (e: 'addProject', value: string): void
+  (e: 'addProject', value: string | null): void
 }>()
 
 </script>

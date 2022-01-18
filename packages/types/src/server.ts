@@ -78,3 +78,8 @@ export interface OpenProjectLaunchOptions {
 
   [key: string]: any
 }
+
+export interface AddProject {
+  open?: boolean | null
+  path: string
+}
