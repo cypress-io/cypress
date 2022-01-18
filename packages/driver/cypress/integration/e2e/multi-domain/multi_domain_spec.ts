@@ -1,3 +1,5 @@
+import _ from 'lodash'
+
 // @ts-ignore / session support is needed for visiting about:blank between tests
 describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDomain: true }, () => {
   beforeEach(() => {
@@ -305,7 +307,7 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
       })
     })
 
-    it('errors if three arguments are used and the second argument is not the done() fn', (done) => {
+    it('errors if three or more arguments are used and the second argument is not the done() fn', (done) => {
       cy.on('fail', (err) => {
         expect(err.message).to.equal('`cy.switchToDomain()` must have done as its second argument when three or more arguments are used.')
 
@@ -313,6 +315,42 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
       })
 
       cy.switchToDomain('foobar.com', () => {}, () => {})
+    })
+
+    it('waits for all logs to finish streaming in from switchToDomain, expecting commands to not be pending', (done) => {
+      const domain = 'foobar.com'
+      const logsAddedNeedingUpdate = {}
+      const logsChangedGivingUpdate = {}
+
+      cy.on('log:added', (addedLog) => {
+        if (!addedLog?.ended && addedLog?.id.includes(domain)) {
+          logsAddedNeedingUpdate[addedLog.id] = addedLog
+        }
+      })
+
+      cy.on('log:changed', (changedLog) => {
+        if (changedLog?.ended && changedLog?.id.includes(domain)) {
+          logsChangedGivingUpdate[changedLog.id] = changedLog
+        }
+
+        const addedLogsSize = _.size(logsAddedNeedingUpdate)
+        const changedLogsSize = _.size(logsChangedGivingUpdate)
+
+        // if all logs are done streaming
+        if (addedLogsSize === changedLogsSize && addedLogsSize > 0) {
+          // make sure each log added in the secondary domain is finished and has passed
+          _.forOwn(logsAddedNeedingUpdate, (_, key) => {
+            expect(logsChangedGivingUpdate[key].ended).to.be.true
+            expect(logsChangedGivingUpdate[key].state).to.not.equal('pending')
+          })
+
+          done()
+        }
+      })
+
+      cy.switchToDomain(domain, () => {
+        cy.get('form').submit()
+      })
     })
 
     // TODO: this following tests needs to be implemented in a cy-in-cy test or more e2e style test as we need to test the 'done' function

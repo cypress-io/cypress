@@ -53,24 +53,86 @@ declare namespace Cypress {
 
   type Log = ReturnType<Cypress.log>
 
+  type ReferenceAlias = {
+    cardinal: number,
+    name: string,
+    ordinal: string,
+  }
+
+  type Snapshot = {
+    body?: {get: () => any},
+    htmlAttrs?: {[key: string]: any},
+    name?: string
+  }
+
+  type ConsoleProps = {
+    Command?: string
+    Snapshot?: string
+    Elements?: number
+    Selector?: string
+    Yielded?: HTMLElement
+    Event?: string
+    Message?: string
+    actual?: any
+    expected?: any
+  }
+
+  type RenderProps = {
+    indicator?: 'aborted' | 'pending' | 'successful' | 'bad'
+    message?: string
+  }
+
   interface LogConfig {
-    message: any[]
-    instrument?: 'route'
+    $el?: jQuery<any> | string
+    message: any
+    instrument?: 'route' | 'command'
     isStubbed?: boolean
     alias?: string
     aliasType?: 'route'
+    referencesAlias?: ReferenceAlias[]
+    chainerId?: string
     commandName?: string
-    type?: 'parent'
+    coords?: {
+      left: number
+      leftCenter: number
+      top: number
+      topCenter: number
+      x: number
+      y: number
+    }
+    count?: number
+    callCount?: number
+    type?: 'parent' | 'child'
     event?: boolean
+    end?: boolean
+    ended?: boolean
+    expected?: string
+    functionName?: string
+    name?: string
+    id?: string
+    hookId?: number
     method?: string
     url?: string
     status?: number
+    state?: "failed" | "passed" | "pending" // representative of Mocha.Runnable.constants (not publicly exposed by Mocha types)
+    numResponses?: number
+    numElements?: number
     numResponses?: number
     response?: string | object
-    renderProps?: () => {
-      indicator?: 'aborted' | 'pending' | 'successful' | 'bad'
-      message?: string
-    }
+    testCurrentRetry?: number
+    timeout?: number
+    testId?: string
+    err?: Error
+    error?: Error
+    snapshot?: boolean
+    snapshots?: []
+    selector?: any
+    viewportHeight?: number
+    viewportWidth?: number
+    visible?: boolean
+    wallClockStartedAt?: string
+    renderProps?: () => RenderProps | RenderProps
+    consoleProps?: () => Command | Command
     browserPreRequest?: any
   }
 

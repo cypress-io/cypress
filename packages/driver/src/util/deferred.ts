@@ -1,6 +1,6 @@
 import Bluebird from 'bluebird'
 
-interface Deferred {
+export interface Deferred {
   promise: Bluebird<any>
   resolve: (thenableOrResult?: unknown) => void
   reject: (thenableOrResult?: unknown) => void
