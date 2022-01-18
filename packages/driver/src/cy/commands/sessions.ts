@@ -71,7 +71,7 @@ const setPostMessageLocalStorage = async (specWindow, originOptions) => {
   if (!origins.length) return []
 
   _.each(origins, (u) => {
-    const $iframe = $(`<iframe src="${`${u}/__cypress/automation/setLocalStorage?${u}`}"></iframe>`)
+    const $iframe = $(`<iframe src="${`${u}/${Cypress.config('namespace')}/automation/setLocalStorage?${u}`}"></iframe>`)
 
     $iframe.appendTo($iframeContainer)
     iframes.push($iframe)

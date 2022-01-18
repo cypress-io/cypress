@@ -25,21 +25,14 @@ import { ensureProp } from './util/class-helpers'
 import { fs } from './util/fs'
 import preprocessor from './plugins/preprocessor'
 import { checkSupportFile } from './project_utils'
-
+import type { FoundBrowser, OpenProjectLaunchOptions, FoundSpec, TestingType, ReceivedCypressOptions } from '@packages/types'
 import devServer from './plugins/dev-server'
-import type { FoundBrowser, OpenProjectLaunchOptions, FoundSpec } from '@packages/types'
 import { DataContext, getCtx } from '@packages/data-context'
-
-// Cannot just use RuntimeConfigOptions as is because some types are not complete.
-// Instead, this is an interface of values that have been manually validated to exist
-// and are required when creating a project.
-type ReceivedCypressOptions =
-  Pick<Cypress.RuntimeConfigOptions, 'hosts' | 'projectName' | 'clientRoute' | 'devServerPublicPathRoute' | 'namespace' | 'report' | 'socketIoCookie' | 'configFile' | 'isTextTerminal' | 'isNewProject' | 'proxyUrl' | 'browsers' | 'browserUrl' | 'socketIoRoute' | 'arch' | 'platform' | 'spec' | 'specs' | 'browser' | 'version' | 'remote'>
-  & Pick<Cypress.ResolvedConfigOptions, 'chromeWebSecurity' | 'supportFolder' | 'experimentalSourceRewriting' | 'fixturesFolder' | 'reporter' | 'reporterOptions' | 'screenshotsFolder' | 'pluginsFile' | 'supportFile' | 'baseUrl' | 'viewportHeight' | 'viewportWidth' | 'port' | 'experimentalInteractiveRunEvents' | 'userAgent' | 'downloadsFolder' | 'env' | 'testFiles' | 'ignoreSpecPattern' | 'specPattern'> // TODO: Figure out how to type this better.
 
 export interface Cfg extends ReceivedCypressOptions {
   projectRoot: string
   proxyServer?: Cypress.RuntimeConfigOptions['proxyUrl']
+  testingType: TestingType
   exit?: boolean
   state?: {
     firstOpened?: number | null
@@ -502,7 +495,10 @@ export class ProjectBase<TServer extends Server> extends EE {
 
   async initializeConfig (): Promise<Cfg> {
     this.ctx.lifecycleManager.setCurrentTestingType(this.testingType)
-    let theCfg: Cfg = await this.ctx.lifecycleManager.getFullInitialConfig() as Cfg // ?? types are definitely wrong here I think
+    let theCfg: Cfg = {
+      ...(await this.ctx.lifecycleManager.getFullInitialConfig()),
+      testingType: this.testingType,
+    } as Cfg // ?? types are definitely wrong here I think
 
     theCfg = this.testingType === 'e2e'
       ? theCfg
@@ -531,7 +527,13 @@ export class ProjectBase<TServer extends Server> extends EE {
 
     debug('project has config %o', this._cfg)
 
-    return this._cfg
+    return {
+      ...this._cfg,
+      remote: this._server?._getRemoteState() ?? {} as Cypress.RemoteState,
+      browser: this.browser,
+      testingType: this.ctx.coreData.currentTestingType ?? 'e2e',
+      specs: [],
+    }
   }
 
   // Saved state

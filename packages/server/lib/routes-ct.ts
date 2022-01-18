@@ -18,7 +18,7 @@ export const createRoutesCT = ({
 }: InitializeRoutes) => {
   const routesCt = Router()
 
-  routesCt.get('/__cypress/static/*', (req, res) => {
+  routesCt.get(`/${config.namespace}/static/*`, (req, res) => {
     const pathToFile = getPathToDist('static', req.params[0])
 
     return send(req, pathToFile)
