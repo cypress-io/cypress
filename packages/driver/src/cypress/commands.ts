@@ -231,6 +231,8 @@ export default {
           })
         }
 
+        // .hover & .mount are special case commands. allow as builtins so users
+        // may add them without throwing an error
         if (addingBuiltIns && !PLACEHOLDER_COMMANDS.includes(name)) {
           builtInCommandNames[name] = true
         }
