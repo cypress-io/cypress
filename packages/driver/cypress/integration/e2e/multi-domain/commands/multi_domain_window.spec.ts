@@ -11,7 +11,7 @@ context('multi-domain window', { experimentalSessionSupport: true, experimentalM
     })
   })
 
-  it('document()', () => {
+  it('.document()', () => {
     cy.switchToDomain('foobar.com', () => {
       cy.document().should('have.property', 'charset').and('eq', 'UTF-8')
     })

@@ -5,9 +5,10 @@ context('multi-domain shadow dom', { experimentalSessionSupport: true, experimen
     cy.get('a[data-cy="shadow-dom-link"]').click()
   })
 
-  it('types into input', () => {
+  it('.shadow()', () => {
     cy.switchToDomain('foobar.com', () => {
-      cy.get('#shadow-element-1').shadow().find('input')
+      cy.get('#shadow-element-1').shadow().find('p.shadow-1')
+      .should('have.text', 'Shadow Content 1')
     })
   })
 })

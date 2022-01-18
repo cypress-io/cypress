@@ -77,10 +77,9 @@ context('multi-domain actions', { experimentalSessionSupport: true, experimental
     cy.get('a[data-cy="dom-link"]').click()
 
     cy.switchToDomain('foobar.com', done, () => {
-      const el = cy.$$('#button')
+      const $btn = cy.$$('#button')
 
-      el.on('contextmenu', () => done())
-
+      $btn.on('contextmenu', () => done())
       cy.get('#button').rightclick()
     })
   })
