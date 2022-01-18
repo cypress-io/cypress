@@ -36,7 +36,7 @@ const GQLStubRegistry: Partial<MaybeResolveMap> = {
 
 export function testUrqlClient (context: ClientTestContext, onResult?: (result: any, context: ClientTestContext) => any): Client {
   return createClient({
-    url: '/graphql',
+    url: '/__cypress/graphql',
     exchanges: [
       dedupExchange,
       errorExchange({

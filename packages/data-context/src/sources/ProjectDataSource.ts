@@ -132,6 +132,12 @@ export class ProjectDataSource {
     this._specs = specs
   }
 
+  getProjectList () {
+    return this.ctx._apis.projectApi.getProjectRootsFromCache().then((roots) => {
+      return roots.map((projectRoot) => ({ projectRoot }))
+    })
+  }
+
   async specPatternsForTestingType (projectRoot: string, testingType: Cypress.TestingType): Promise<{
     specPattern?: string[]
     ignoreSpecPattern?: string[]
