@@ -2,7 +2,7 @@
 describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDomain: true }, () => {
   beforeEach(() => {
     cy.visit('/fixtures/multi-domain.html')
-    cy.get('a').click()
+    cy.get('a[data-cy="multi-domain-secondary-link"]').click()
   })
 
   it('runs commands in secondary domain', () => {
