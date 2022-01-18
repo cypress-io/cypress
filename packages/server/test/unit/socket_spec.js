@@ -251,7 +251,7 @@ describe('lib/socket', () => {
           .withArgs(1, { code })
           .yieldsAsync(['string'])
 
-          return this.client.emit('is:automation:client:connected', { element: '__cypress-string', string: 'string' }, (resp) => {
+          return this.client.emit('is:automation:client:connected', { element: '__cypress-string', randomString: 'string' }, (resp) => {
             expect(resp).to.be.true
 
             return done()
