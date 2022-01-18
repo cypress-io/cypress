@@ -346,7 +346,7 @@ const start = (opts) => {
     return getCA()
   })
   .then((ca) => {
-    return downloadFromUrl({ versionUrl, downloadDestination, progress, ca, version,
+    return downloadFromUrl({ url: versionUrl, downloadDestination, progress, ca, version,
       ...(redirectTTL ? { redirectTTL } : {}) })
   })
   .catch((err) => {
