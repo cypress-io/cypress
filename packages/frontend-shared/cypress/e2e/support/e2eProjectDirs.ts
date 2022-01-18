@@ -59,6 +59,7 @@ export const e2eProjectDirs = [
   'pristine',
   'pristine-with-ct-testing',
   'pristine-with-e2e-testing',
+  'pristine-with-e2e-testing-and-storybook',  
   'react-code-gen',
   'read-only-project-root',
   'record',
