@@ -11,11 +11,12 @@
 </template>
 
 <script lang="ts" setup>
-import type { SpecFile } from '@packages/types/src'
 import { gql, useQuery } from '@urql/vue'
 import { SpecPageContainerDocument } from '../../generated/graphql'
+import { getAutIframeModel } from '../../runner'
 import SpecRunnerContainerOpenMode from '../../runner/SpecRunnerContainerOpenMode.vue'
 import SpecRunnerContainerRunMode from '../../runner/SpecRunnerContainerRunMode.vue'
+import { togglePlayground } from '../../runner/utils'
 
 gql`
 query SpecPageContainer {
@@ -30,6 +31,14 @@ const query = useQuery({
   query: SpecPageContainerDocument,
   requestPolicy: window.__CYPRESS_MODE__ === 'run' && window.top === window ? 'cache-only' : 'cache-and-network',
 })
+
+// @ts-ignore - this is used for exposing the selector playground in e2e tests
+// TODO: migrate this to true e2e test w/o the hack using Cypress-in-Cypress when
+// that is supported.
+window.__showSelectorPlaygroundForTestingPurposes = () => {
+  togglePlayground(getAutIframeModel())
+}
+
 </script>
 
 <route>

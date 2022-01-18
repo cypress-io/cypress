@@ -75,6 +75,7 @@ import SelectorPlayground from './selector-playground/SelectorPlayground.vue'
 import { useSelectorPlaygroundStore } from '../store/selector-playground-store'
 import type { EventManager } from './event-manager'
 import type { AutIframe } from './aut-iframe'
+import { togglePlayground as _togglePlayground } from './utils'
 
 gql`
 fragment SpecRunnerHeader on CurrentProject {
@@ -133,24 +134,7 @@ const autIframe = props.getAutIframe()
 
 const selectorPlaygroundStore = useSelectorPlaygroundStore()
 
-// @ts-ignore - this is used for exposing the selector playground in e2e tests
-// TODO: migrate this to true e2e test w/o the hack using Cypress-in-Cypress when
-// that is supported.
-window.__showSelectorPlaygroundForTestingPurposes = () => {
-  togglePlayground()
-}
-
-const togglePlayground = () => {
-  if (selectorPlaygroundStore.show) {
-    selectorPlaygroundStore.setShow(false)
-    autIframe.toggleSelectorPlayground(false)
-    selectorPlaygroundStore.setEnabled(false)
-  } else {
-    selectorPlaygroundStore.setShow(true)
-    autIframe.toggleSelectorPlayground(true)
-    selectorPlaygroundStore.setEnabled(true)
-  }
-}
+const togglePlayground = () => _togglePlayground(autIframe)
 
 const specStore = useSpecStore()
 
