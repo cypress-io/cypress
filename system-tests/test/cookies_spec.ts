@@ -191,12 +191,12 @@ describe('e2e cookies', () => {
     },
   })
 
-  context('SameSite', () => {
+  context.only('SameSite', () => {
     const baseUrl = `http://localhost${haveRoot ? '' : `:${httpPort}`}`
 
     // once browsers are shipping with the options in FORCED_SAMESITE_ENV as default,
     // we can remove this extra test case
-    it('with forced SameSite strictness', {
+    it.only('with forced SameSite strictness', {
       config: {
         baseUrl,
         env: {

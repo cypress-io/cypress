@@ -360,8 +360,10 @@ export class EventManager {
 
   start (config) {
     if (config.socketId) {
+      console.log('connected!')
       this.ws.emit('app:connect', config.socketId)
     }
+      console.log('nope!')
   }
 
   setup (config) {
