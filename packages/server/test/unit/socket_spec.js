@@ -272,7 +272,7 @@ describe('lib/socket', () => {
 
           // oA.resolves(true)
 
-          return this.client.emit('is:automation:client:connected', { element: '__cypress-string', string: 'string' }, (resp) => {
+          return this.client.emit('is:automation:client:connected', { element: '__cypress-string', randomString: 'string' }, (resp) => {
             expect(iSC.callCount).to.eq(4)
             // expect(oA.callCount).to.eq(1)
 
@@ -294,7 +294,7 @@ describe('lib/socket', () => {
           .yieldsAsync(['foobarbaz'])
 
           // reduce the timeout so we dont have to wait so long
-          return this.client.emit('is:automation:client:connected', { element: '__cypress-string', string: 'string', timeout: 100 }, (resp) => {
+          return this.client.emit('is:automation:client:connected', { element: '__cypress-string', randomString: 'string', timeout: 100 }, (resp) => {
             expect(resp).to.be.false
 
             return done()
@@ -306,7 +306,7 @@ describe('lib/socket', () => {
           const iSC = sinon.stub(this.socket, 'isSocketConnected')
 
           // reduce the timeout so we dont have to wait so long
-          return this.client.emit('is:automation:client:connected', { element: '__cypress-string', string: 'string', timeout: 100 }, (resp) => {
+          return this.client.emit('is:automation:client:connected', { element: '__cypress-string', randomString: 'string', timeout: 100 }, (resp) => {
             const {
               callCount,
             } = iSC
@@ -366,9 +366,9 @@ describe('lib/socket', () => {
         it('throws when onAutomationRequest rejects')
 
         it('is:automation:client:connected returns true', function (done) {
-          this.ar.withArgs('is:automation:client:connected', { string: 'foo' }).resolves(true)
+          this.ar.withArgs('is:automation:client:connected', { randomString: 'foo' }).resolves(true)
 
-          return this.client.emit('is:automation:client:connected', { string: 'foo' }, (resp) => {
+          return this.client.emit('is:automation:client:connected', { randomString: 'foo' }, (resp) => {
             expect(resp).to.be.true
 
             return done()
