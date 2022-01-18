@@ -232,7 +232,7 @@ async function makeE2ETasks () {
         throw new Error(`${projectName} has not been scaffolded. Be sure to call cy.scaffoldProject('${projectName}') in the test, a before, or beforeEach hook`)
       }
 
-      const openArgv = [...argv, '--project', Fixtures.projectPath(projectName)]
+      const openArgv = [...argv, '--project', Fixtures.projectPath(projectName), '--port', '4455']
 
       // Runs the launchArgs through the whole pipeline for the CLI open process,
       // which probably needs a bit of refactoring / consolidating

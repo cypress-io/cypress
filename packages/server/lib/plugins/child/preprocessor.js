@@ -30,7 +30,7 @@ const wrap = (ipc, invoke, ids, args) => {
         }
 
         delete fileObjects[filePath]
-        _child?.emit('close')
+        _child.emit('close')
       }
     })
   }

@@ -183,7 +183,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
   context('Runs - Unauthorized Project Requested', () => {
     beforeEach(() => {
       cy.withCtx(async (ctx) => {
-        await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {\'projectId\': \'abcdef\'}')
+        await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {\'projectId\': \'abcdef\' }')
       })
 
       cy.loginUser()
@@ -215,7 +215,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
   context('Runs - No Runs', () => {
     it('when no runs and not connected, shows connect to dashboard button', () => {
       cy.withCtx(async (ctx) => {
-        await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {projectId: null}')
+        await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {projectId: null }')
       })
 
       cy.loginUser()

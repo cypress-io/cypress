@@ -4,6 +4,7 @@ import 'virtual:windi.css'
 import urql from '@urql/vue'
 import App from './App.vue'
 import { makeUrqlClient } from '@packages/frontend-shared/src/graphql/urqlClient'
+import { decodeBase64Unicode } from '@packages/frontend-shared/src/utils/base64'
 import { createI18n } from '@cy/i18n'
 import { createRouter } from './router/router'
 import { createPinia } from './store'
@@ -19,7 +20,9 @@ window.__vite__ = true
 
 const app = createApp(App)
 
-const ws = createWebsocket()
+const config = JSON.parse(decodeBase64Unicode(window.__CYPRESS_CONFIG__.base64Config)) as Cypress.Config
+
+const ws = createWebsocket(config.socketIoRoute)
 
 window.ws = ws
 
@@ -27,7 +30,7 @@ app.use(Toast, {
   position: POSITION.BOTTOM_RIGHT,
 })
 
-app.use(urql, makeUrqlClient('app'))
+app.use(urql, makeUrqlClient({ target: 'app', socketIoRoute: config.socketIoRoute }))
 app.use(createRouter())
 app.use(createI18n())
 app.use(createPinia())
