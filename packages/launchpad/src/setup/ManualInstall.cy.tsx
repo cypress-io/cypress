@@ -3,7 +3,7 @@ import ManualInstall from './ManualInstall.vue'
 import { PACKAGES_DESCRIPTIONS } from '../../../types/src/constants'
 
 describe('<ManualInstall />', () => {
-  it('lists package and can copy install command to clipboard', { viewportWidth: 800, viewportHeight: 600 }, () => {
+  it('lists packages and can copy install command to clipboard', { viewportWidth: 800, viewportHeight: 600 }, () => {
     const framework = '@cypress/react'
     const bundler = '@cypress/webpack-dev-server'
 
