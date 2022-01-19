@@ -36,10 +36,6 @@ const onLogChanged = (attrs) => {
   specBridgeCommunicator.toPrimary('log:changed', attrs, $Log.toSerializedJSON)
 }
 
-const onError = (error, runnable) => {
-  specBridgeCommunicator.toPrimary('error', error)
-}
-
 const setup = () => {
   // @ts-ignore
   const Cypress = window.Cypress = $Cypress.create({
@@ -76,7 +72,6 @@ const setup = () => {
   Cypress.on('skipped:command:end', onCommandEnd)
   Cypress.on('log:added', onLogAdded)
   Cypress.on('log:changed', onLogChanged)
-  Cypress.on('fail', onError)
 
   const doneEarly = () => {
     cy.queue.stop()
@@ -142,6 +137,15 @@ const setup = () => {
     }
 
     try {
+      cy.state('onFail', (err) => {
+        const command = cy.state('current')
+        const id = command.get('id')
+        const name = command.get('name')
+        const logId = command.getLastLog()?.get('id')
+
+        specBridgeCommunicator.toPrimary('command:end', { id, name, err, logId })
+      })
+
       // await the eval func, whether it is a promise or not
       // we should not need to transpile this as our target browsers support async/await
       // see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function for more details

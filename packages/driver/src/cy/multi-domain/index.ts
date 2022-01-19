@@ -1,12 +1,25 @@
 import Bluebird from 'bluebird'
 import _ from 'lodash'
-import { AssertionError } from 'chai'
 import { createDeferred, Deferred } from '../../util/deferred'
 import $utils from '../../cypress/utils'
 import $errUtils from '../../cypress/error_utils'
 
 export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: Cypress.State, config: Cypress.InternalConfig) {
   let timeoutId
+  const correctStackForCrossDomainError = (error: any, userInvocationStack: string) => {
+    //  Since Errors sent over postMessage need to be serialized to Objects, we need to serialize them back
+    const parsedError = $errUtils.serializeCrossDomainErrorsFromObject(error)
+
+    // With just the error message at hand, attach the switchToDomain user invocation stack to point users
+    // To where the error occurred in their spec file
+    $errUtils.enhanceStack({
+      err: parsedError,
+      userInvocationStack,
+      projectRoot: config('projectRoot'),
+    })
+
+    return parsedError
+  }
 
   // @ts-ignore
   const communicator = Cypress.multiDomainCommunicator
@@ -35,6 +48,9 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
     // this isn't fully implemented, but in place to be able to test out
     // the other parts of multidomain
     switchToDomain<T> (domain: string, doneOrDataOrFn: T | Mocha.Done | (() => {}), dataOrFn?: T | (() => {}), fn?: (data?: T) => {}) {
+      // store the invocation stack in the case that `switchToDomain` errors
+      const switchToDomainUserInvocationStack = state('current').get('userInvocationStack')
+
       clearTimeout(timeoutId)
 
       if (!config('experimentalMultiDomain')) {
@@ -129,12 +145,30 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
         Cypress.action('cy:enqueue:command', attrs)
       }
 
-      const endCommand = ({ id }) => {
+      const endCommand = ({ id, name, err, logId }) => {
         const command = commands[id]
 
         if (command) {
           delete commands[id]
-          command.deferred.resolve()
+          if (err) {
+            // If the command has failed, cast the error back to a proper Error object
+            let parsedError = correctStackForCrossDomainError(err, switchToDomainUserInvocationStack)
+
+            if (logId) {
+              // Then, look up the logId associated with the failed command and stub out the onFail handler
+              // to short circuit any added reporter command logs if a log exists for the failed command
+              parsedError.onFail = () => undefined
+            } else {
+              delete parsedError.onFail
+            }
+
+            command.deferred.reject(parsedError)
+
+            // finally, free up any memory and unbind any handlers now that the command/test has failed
+            cleanup()
+          } else {
+            command.deferred.resolve()
+          }
         }
       }
 
@@ -181,10 +215,15 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
           if (isEnded) {
             if (log.get('state') === 'failed') {
               const err = log.get('err')
+              let parsedError = correctStackForCrossDomainError(err, switchToDomainUserInvocationStack)
 
-              // the toJSON method on the Cypress.Log converts the 'error' property to 'err', so when the log gets
+              // The toJSON method on the Cypress.Log converts the 'error' property to 'err', so when the log gets
               // serialized from the SD to the PD, we need to do the opposite
-              log.set('error', err)
+              log.set('error', parsedError)
+              if ((logAttrs.consoleProps as any)?.Error) {
+                // Update consoleProps for when users pin failed commands in the reporter so correct error messages are displayed in the console
+                (logAttrs.consoleProps as any).Error = parsedError.stack
+              }
             }
 
             delete logs[attrs.id]
@@ -199,8 +238,11 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
         // don't allow for new commands to be enqueued, but wait for commands to update in the secondary domain
         const pendingCommands = _.map(commands, (command) => command.deferred.promise)
 
-        await Promise.all(pendingCommands)
-        communicator.off('command:end', endCommand)
+        try {
+          await Promise.all(pendingCommands)
+        } finally {
+          communicator.off('command:end', endCommand)
+        }
       }
 
       const cleanupLogs = async () => {
@@ -209,46 +251,24 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
         // don't allow for new logs to be added, but wait for logs to update changes in the secondary domain
         const pendingLogs = _.map(logs, (log) => log.deferred.promise)
 
-        await Promise.all(pendingLogs)
-        communicator.off('log:changed', onLogChanged)
+        try {
+          await Promise.all(pendingLogs)
+        } finally {
+          communicator.off('log:changed', onLogChanged)
+        }
       }
 
       const cleanup = () => {
-        communicator.off('error', onError)
         cleanupCommands()
         cleanupLogs()
       }
 
       const doneAndCleanup = async (err) => {
         communicator.off('done:called', doneAndCleanup)
-        communicator.off('error', onError)
         // If done is called, immediately unbind command listeners to prevent any commands from being enqueued, but wait for log updates to trickle in before invoking done
         cleanupCommands()
         await cleanupLogs()
         done(err)
-      }
-
-      const onError = async (error) => {
-        const reject = cy.state('reject')
-
-        if (done) {
-          communicator.off('done:called', doneAndCleanup)
-        }
-
-        communicator.off('error', onError)
-
-        cleanupCommands()
-        await cleanupLogs()
-
-        // TODO: Since Errors sent over postMessage need to be serialized to Objects, we need a way to serialize them back
-        // This serialization likely should like in the communicator and we likely need to address some type of serialization error factory
-        if (error?.name === 'AssertionError') {
-          error = _.assignIn(new AssertionError(''), error)
-        }
-
-        // TODO: figure out how to get the correct stack trace here
-        error.isMultiDomainError = true
-        reject(error)
       }
 
       if (done) {
@@ -269,8 +289,6 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
 
       communicator.on('log:added', onLogAdded)
       communicator.on('log:changed', onLogChanged)
-
-      communicator.on('error', onError)
 
       return new Bluebird((resolve, reject) => {
         communicator.once('ran:domain:fn', (err) => {

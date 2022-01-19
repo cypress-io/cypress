@@ -373,6 +373,10 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   }
 
   fail (err, options: { async?: boolean } = {}) {
+    if (this.state('onFail')) {
+      return this.state('onFail')(err)
+    }
+
     // this means the error has already been through this handler and caught
     // again. but we don't need to run it through again, so we can re-throw
     // it and it will fail the test as-is

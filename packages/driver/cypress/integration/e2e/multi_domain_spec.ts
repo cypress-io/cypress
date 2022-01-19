@@ -357,9 +357,12 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
       const timeout = 1000
 
       cy.on('fail', (e) => {
-        expect(e.toString()).to.have.string(`Timed out retrying after ${timeout}ms: Expected to find element: \`#doesnt-exist\`, but never found it`)
-        // TODO: improve this test to make sure that the secondary domain failures show up as spec failures and not AUT failures
-        // TODO: improve this test to make sure stack traces point to the error in `switchToDomain` and not the secondary domain stack trace
+        const errString = e.toString()
+
+        expect(errString).to.have.string(`Timed out retrying after ${timeout}ms: Expected to find element: \`#doesnt-exist\`, but never found it`)
+        //  make sure that the secondary domain failures do NOT show up as spec failures or AUT failures
+        expect(errString).to.not.have.string(`The following error originated from your test code, not from Cypress`)
+        expect(errString).to.not.have.string(`The following error originated from your application code, not from Cypress`)
         done()
       })
 

@@ -76,7 +76,6 @@ const isCypressErr = (err = {}) => {
 }
 
 const isSpecError = (spec, err) => {
-  // TODO: need to fix the stack trace for multi-domain. Can verify here
   return _.includes(err.stack, spec.relative)
 }
 
@@ -553,6 +552,20 @@ const logError = (Cypress, handlerType, err, handled = false) => {
   })
 }
 
+const serializeCrossDomainErrorsFromObject = (errorAsObj: { [key: string]: any }): Error & { [key: string]: any } => {
+  switch (errorAsObj?.name) {
+    case 'AssertionError':
+      return _.assignIn(new chai.AssertionError(''), errorAsObj)
+    case 'InternalCypressError':
+      return _.assignIn(new InternalCypressError(''), errorAsObj)
+    case 'CypressError':
+      return _.assignIn(new CypressError(''), errorAsObj)
+    default:
+      // For some reason, we could not determine how to parse this Error or the Error is a standard Error
+      return _.assignIn(new Error(''), errorAsObj)
+  }
+}
+
 export default {
   stackWithReplacedProps,
   appendErrMsg,
@@ -573,6 +586,7 @@ export default {
   mergeErrProps,
   modifyErrMsg,
   processErr,
+  serializeCrossDomainErrorsFromObject,
   throwErr,
   throwErrByPath,
   warnByPath,
