@@ -42,7 +42,13 @@ declare global {
   }
 }
 
+const cypressInRunMode = window.top === window && window.__CYPRESS_MODE__ === 'run'
+
 function gqlPort () {
+  if (cypressInRunMode) {
+    return 'GQL_NOT_USED_IN_RUN_MODE'
+  }
+
   if (GQL_PORT_MATCH) {
     return GQL_PORT_MATCH[1]
   }
@@ -80,16 +86,22 @@ export function makeUrqlClient (config: UrqlClientConfig): Client {
 
   const GRAPHQL_URL = `http://localhost:${port}/graphql`
 
-  // If we're in the launchpad, we connect to the known GraphQL Socket port,
-  // otherwise we connect to the /__socket.io of the current domain, unless we've explicitly
-  //
-  const io = getPubSubSource({ gqlPort: port, serverPort: SERVER_PORT_MATCH?.[1], ...config })
-
   let hasError = false
 
-  const exchanges: Exchange[] = [
-    dedupExchange,
-    pubSubExchange(io),
+  const exchanges: Exchange[] = [dedupExchange]
+
+  // GraphQL and urql are not used in app + run mode, so we don't add the
+  // pub sub exchange.
+  if (config.target === 'launchpad' || config.target === 'app' && !cypressInRunMode) {
+    // If we're in the launchpad, we connect to the known GraphQL Socket port,
+    // otherwise we connect to the /__socket.io of the current domain, unless we've explicitly
+    //
+    const io = getPubSubSource({ gqlPort: port, serverPort: SERVER_PORT_MATCH?.[1], ...config })
+
+    exchanges.push(pubSubExchange(io))
+  }
+
+  exchanges.push(
     errorExchange({
       onError (error) {
         const message = `
@@ -126,13 +138,11 @@ export function makeUrqlClient (config: UrqlClientConfig): Client {
     // transport layer for all operations
     // target === 'launchpad' ? fetchExchange : socketExchange(io),
     fetchExchange,
-  ]
+  )
 
   if (import.meta.env.DEV) {
     exchanges.unshift(devtoolsExchange)
   }
-
-  const cypressInRunMode = window.top === window && window.__CYPRESS_MODE__ === 'run'
 
   return createClient({
     url: GRAPHQL_URL,
@@ -140,7 +150,7 @@ export function makeUrqlClient (config: UrqlClientConfig): Client {
     // since we pre-hydrate the data in the urql cache, and we do not show the UI
     // (eg, we don't show the spec list, side nav etc), we shouldn't need to make
     // any additional graphql requests once we are up and running.
-    requestPolicy: cypressInRunMode ? 'cache-and-network' : 'cache-and-network',
+    requestPolicy: cypressInRunMode ? 'cache-only' : 'cache-and-network',
     exchanges,
   })
 }
