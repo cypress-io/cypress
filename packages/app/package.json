@@ -13,7 +13,6 @@
     "cypress:open": "yarn cypress:run-cypress-in-cypress gulp open --project ${PWD}",
     "cypress:run:ct": "yarn cypress:run-cypress-in-cypress node ../../scripts/cypress run --component --project ${PWD}",
     "cypress:run:e2e": "yarn cypress:run-cypress-in-cypress node ../../scripts/cypress run --project ${PWD}",
-    "debug": "yarn cypress:run-cypress-in-cypress gulp debug --project ${PWD}",
     "dev": "yarn cypress:run-cypress-in-cypress gulp dev --project ${PWD}",
     "start": "echo \"run 'yarn dev' from the root\" && exit 1",
     "watch": "echo \"run 'yarn dev' from the root\" && exit 1"
