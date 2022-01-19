@@ -1921,7 +1921,7 @@ declare namespace Cypress {
      *      expect(foo).to.equal('foo')
      *    })
      */
-    switchToDomain(domain: string, data: any[], fn: (data: any[]) => void): Chainable<undefined>
+    switchToDomain<T>(domain: string, data: T[], fn: (data: T[]) => void): Chainable<undefined>
     /**
      * Enables running Cypress commands in a secondary domain
      * @see https://on.cypress.io/switchToDomain
@@ -1941,7 +1941,7 @@ declare namespace Cypress {
      *      done()
      *    })
      */
-    switchToDomain(domain: string, done: Mocha.Done, data: any[], fn: (data: any[]) => void): Chainable<undefined>
+    switchToDomain<T>(domain: string, done: Mocha.Done, data: T[], fn: (data: T[]) => void): Chainable<undefined>
 
     /**
      * Run a task in Node via the plugins file.
