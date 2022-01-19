@@ -2,36 +2,6 @@ describe('Launchpad: Onboarding Flow', () => {
   beforeEach(() => {
     cy.scaffoldProject('pristine')
     cy.openProject('pristine')
-    cy.withCtx((ctx, o) => {
-      ctx.actions.file.writeFileInProject('node_modules/cypress/package.json', JSON.stringify({
-        name: 'cypress',
-        main: 'index.js',
-      }))
-
-      ctx.actions.file.writeFileInProject('node_modules/@cypress/webpack-dev-server/package.json', JSON.stringify({
-        name: '@cypress/webpack-dev-server',
-        main: 'index.js',
-      }))
-
-      ctx.actions.file.writeFileInProject('node_modules/cypress/index.js', `
-        module.exports = {
-          defineConfig(o) {
-            return o
-          }
-        }
-      `)
-
-      ctx.actions.file.writeFileInProject('node_modules/@cypress/webpack-dev-server/index.js', `
-        module.exports = {
-          devServer(o) {
-            return {
-              port: 7373,
-              close() {}
-            }
-          }
-        }
-      `)
-    })
   })
 
   it('can setup component testing', () => {
@@ -54,6 +24,12 @@ describe('Launchpad: Onboarding Flow', () => {
     cy.findByText('I\'ve installed them').click()
     cy.findByText('We added the following files to your project.')
     cy.findByText('Continue').click()
+    cy.withCtx(async (ctx) => {
+      return ctx.file.readFileInProject('cypress.config.js')
+    }).then((str) => {
+      cy.log(str)
+    })
+
     cy.findByText('Choose a Browser', { timeout: 10000 })
   })
 
@@ -92,7 +68,7 @@ describe('Launchpad: Onboarding Flow', () => {
     cy.visitLaunchpad()
     cy.get('[data-cy-testingType=e2e]').click()
     cy.findByText('We added the following files to your project.')
-    cy.get('[data-e2e="changes"]')
+    cy.get('[data-cy="changes"]')
     cy.findByText('Continue').closest('button').should('be.disabled')
 
     cy.withCtx((ctx, o) => {
@@ -121,5 +97,15 @@ describe('Launchpad: Onboarding Flow', () => {
 
     cy.findByText('Continue').closest('button').should('not.be.disabled').click()
     cy.findByText('Choose a Browser', { timeout: 10000 })
+  })
+
+  it('can open unconfigured component testing type, go back to the testing chooser', () => {
+    cy.scaffoldProject('pristine-with-e2e-testing')
+    cy.openProject('pristine-with-e2e-testing')
+    cy.visitLaunchpad()
+    cy.get('[data-cy-testingType=component]').click()
+    cy.get('h1').should('not.contain', 'Welcome to Cypress!')
+    cy.contains('Back').click()
+    cy.get('h1').should('contain', 'Welcome to Cypress!')
   })
 })

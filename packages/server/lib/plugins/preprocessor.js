@@ -126,7 +126,7 @@ const API = {
 
     delete fileObjects[filePath]
 
-    return delete fileProcessors[filePath]
+    delete fileProcessors[filePath]
   },
 
   close () {
@@ -136,7 +136,7 @@ const API = {
     fileProcessors = {}
     baseEmitter.emit('close')
 
-    return baseEmitter.removeAllListeners()
+    baseEmitter.removeAllListeners()
   },
 }
 

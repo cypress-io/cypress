@@ -61,7 +61,6 @@
       </template>
     </FileList>
   </CreateSpecModalBody>
-  <div class="rounded-b h-24px w-full" />
 </template>
 
 <script setup lang="ts">

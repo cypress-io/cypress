@@ -8,7 +8,7 @@
     />
     <h2
       v-if="filteredProjects.length"
-      class="text-gray-800 mb-16px"
+      class="mb-16px text-gray-800"
     >
       {{ t('globalPage.recentProjectsHeader') }}
     </h2>
@@ -50,7 +50,7 @@ import { GlobalPageFragment, GlobalPage_AddProjectDocument, GlobalPage_OpenDirec
 import ChooseExternalEditorModal from '@packages/frontend-shared/src/gql-components/ChooseExternalEditorModal.vue'
 
 gql`
-mutation GlobalPage_addProject($path: String!, $open: Boolean = true) {
+mutation GlobalPage_addProject($path: String, $open: Boolean = true) {
   addProject(path: $path, open: $open) {
     ...GlobalPage
   }
@@ -86,7 +86,7 @@ const addProject = useMutation(GlobalPage_AddProjectDocument)
 const openDirectoryInIDE = useMutation(GlobalPage_OpenDirectoryInIdeDocument)
 const openInFinder = useMutation(GlobalPage_OpenInFinderDocument)
 
-function handleAddProject (path: string) {
+function handleAddProject (path: string | null) {
   addProject.executeMutation({ path })
 }
 

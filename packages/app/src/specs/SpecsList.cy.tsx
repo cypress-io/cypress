@@ -1,5 +1,6 @@
 import SpecsList from './SpecsList.vue'
 import { Specs_SpecsListFragmentDoc, SpecNode_SpecsListFragment, TestingTypeEnum } from '../generated/graphql-test'
+import { defaultMessages } from '@cy/i18n'
 
 const rowSelector = '[data-testid=specs-list-row]'
 const inputSelector = 'input'
@@ -45,7 +46,11 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
       .get(rowSelector)
       .should('not.exist')
 
-      cy.get(inputSelector).clear().type(longestSpec.fileName)
+      cy.contains(`${defaultMessages.specPage.noResultsMessage} garbage 🗑`)
+      cy.get('[data-cy="no-results-clear"]').click()
+      cy.get(inputSelector).invoke('val').should('be.empty')
+
+      cy.get(inputSelector).type(longestSpec.fileName)
       cy.get(rowSelector).first().should('contain', longestSpec.relative.replace(`/${longestSpec.fileName}${longestSpec.specFileExtension}`, ''))
       cy.get(rowSelector).last().should('contain', `${longestSpec.fileName}${longestSpec.specFileExtension}`)
 

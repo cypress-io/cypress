@@ -3,15 +3,15 @@
     class="border-b-1 border-gray-900 h-64px mx-16px grid gap-8px grid-cols-[minmax(0,1fr),24px] pointer-cursor items-center"
   >
     <div
-      class="cursor-pointer relative items-center group"
-      @click="input.focus()"
+      class="relative items-center group"
+      @click="input?.focus()"
     >
       <div
         class="flex h-full inset-y-0 w-32px absolute items-center"
         @mousedown.prevent.stop
       >
         <i-cy-magnifying-glass_x16
-          :class="inputFocused ? 'icon-dark-indigo-300' : 'icon-dark-gray-700'"
+          :class="inputFocused ? 'icon-dark-indigo-300' : 'icon-dark-gray-900'"
           class="icon-light-gray-1000"
         />
       </div>
@@ -40,9 +40,9 @@
       >
       <label
         for="inline-spec-list-header-search"
-        class="cursor-pointer font-light text-gray-700 select-none"
+        class="cursor-text font-light bottom-6px left-24px text-gray-700 select-none absolute"
         :class="{
-          'hidden': inputFocused || props.search.length
+          'hidden': props.search.length
         }"
       >
         {{ t('specPage.searchPlaceholder') }}
@@ -96,7 +96,7 @@ const emit = defineEmits<{
 }>()
 
 const inputFocused = ref(false)
-const input = ref()
+const input = ref<HTMLInputElement>()
 
 const onInput = (e: Event) => {
   const value = (e.target as HTMLInputElement).value

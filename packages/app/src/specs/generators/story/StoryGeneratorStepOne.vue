@@ -18,7 +18,7 @@
     />
     <GeneratorSuccess
       v-else
-      :file="result"
+      :file="result.file"
     />
   </div>
   <div>
@@ -32,7 +32,7 @@
     >
       <router-link
         class="outline-none"
-        :to="{ path: '/specs/runner', query: { file: result.spec.relative } }
+        :to="{ path: '/specs/runner', query: { file: result.file.relative } }
         "
       >
         <Button
@@ -62,7 +62,7 @@ import FileChooser from '../FileChooser.vue'
 import GeneratorSuccess from '../GeneratorSuccess.vue'
 import { computed, ref } from 'vue'
 import { gql, useQuery, useMutation } from '@urql/vue'
-import { StoryGeneratorStepOneDocument, StoryGeneratorStepOne_GenerateSpecDocument } from '../../../generated/graphql'
+import { GeneratorSuccessFragment, StoryGeneratorStepOneDocument, StoryGeneratorStepOne_GenerateSpecDocument } from '../../../generated/graphql'
 import StandardModalFooter from '@cy/components/StandardModalFooter.vue'
 import Button from '@cy/components/Button.vue'
 import PlusButtonIcon from '~icons/cy/add-large_x16.svg'
@@ -102,7 +102,6 @@ query StoryGeneratorStepOne($glob: String!) {
     id
     codeGenCandidates(glob: $glob) {
       id
-      name
       fileName
       fileExtension
       absolute
@@ -116,7 +115,6 @@ query StoryGeneratorStepOne($glob: String!) {
 gql`
 mutation StoryGeneratorStepOne_generateSpec($codeGenCandidate: String!, $type: CodeGenType!) {
   generateSpecFromSource(codeGenCandidate: $codeGenCandidate, type: $type) {
-    id
     ...GeneratorSuccess
   }
 }`
@@ -125,15 +123,11 @@ const mutation = useMutation(StoryGeneratorStepOne_GenerateSpecDocument)
 
 const extensionPattern = ref(props.codeGenGlob)
 
-const glob = computed(() => {
-  return `**/${extensionPattern.value}`
-})
-
 const query = useQuery({
   query: StoryGeneratorStepOneDocument,
 
   // @ts-ignore
-  variables: { glob },
+  variables: { glob: extensionPattern },
 })
 
 const allFiles = computed(() => {
@@ -144,7 +138,7 @@ const allFiles = computed(() => {
   return []
 }) as any
 
-const result = ref()
+const result = ref<GeneratorSuccessFragment | null>(null)
 
 whenever(result, () => {
   title.value = t('createSpec.successPage.header')
@@ -156,7 +150,7 @@ const makeSpec = async (file) => {
     type: 'story',
   })
 
-  result.value = data?.generateSpecFromSource
+  result.value = data?.generateSpecFromSource ?? null
 }
 
 </script>

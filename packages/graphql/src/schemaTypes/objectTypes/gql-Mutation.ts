@@ -4,10 +4,8 @@ import { CodeGenTypeEnum } from '../enumTypes/gql-CodeGenTypeEnum'
 import { TestingTypeEnum } from '../enumTypes/gql-WizardEnums'
 import { FileDetailsInput } from '../inputTypes/gql-FileDetailsInput'
 import { WizardUpdateInput } from '../inputTypes/gql-WizardUpdateInput'
-import { CodeGenResultWithFileParts } from './gql-CodeGenResult'
 import { CurrentProject } from './gql-CurrentProject'
-import { GeneratedSpec } from './gql-GeneratedSpec'
-import { Query } from '.'
+import { Query, ScaffoldedFile } from '.'
 
 export const mutation = mutationType({
   definition (t) {
@@ -173,7 +171,7 @@ export const mutation = mutationType({
     })
 
     t.field('generateSpecFromSource', {
-      type: GeneratedSpec,
+      type: ScaffoldedFile,
       description: 'Generate spec from source',
       args: {
         codeGenCandidate: nonNull(stringArg()),
@@ -185,7 +183,7 @@ export const mutation = mutationType({
     })
 
     t.nonNull.list.nonNull.field('scaffoldIntegration', {
-      type: CodeGenResultWithFileParts,
+      type: ScaffoldedFile,
       resolve: (src, args, ctx) => {
         return ctx.actions.project.scaffoldIntegration()
       },
@@ -197,6 +195,9 @@ export const mutation = mutationType({
       resolve: async (_, args, ctx) => {
         await ctx.actions.auth.login()
 
+        ctx.emitter.toApp()
+        ctx.emitter.toLaunchpad()
+
         return {}
       },
     })
@@ -206,6 +207,9 @@ export const mutation = mutationType({
       description: 'Log out of Cypress Cloud',
       resolve: async (_, args, ctx) => {
         await ctx.actions.auth.logout()
+
+        ctx.emitter.toApp()
+        ctx.emitter.toLaunchpad()
 
         return {}
       },
@@ -232,12 +236,23 @@ export const mutation = mutationType({
       type: Query,
       description: 'Add project to projects array and cache it',
       args: {
-        path: nonNull(stringArg()),
+        path: stringArg(),
         open: booleanArg({ description: 'Whether to open the project when added' }),
       },
       resolve: async (_, args, ctx) => {
         ctx.actions.wizard.resetWizard()
-        await ctx.actions.project.addProject(args)
+        let path = args.path
+
+        if (!path) {
+          ctx.actions.project.addProjectFromElectronNativeFolderSelect()
+
+          return {}
+        }
+
+        await ctx.actions.project.addProject({
+          ...args,
+          path,
+        })
 
         return {}
       },
@@ -281,7 +296,7 @@ export const mutation = mutationType({
     })
 
     t.nonNull.field('setProjectPreferences', {
-      type: 'Query',
+      type: Query,
       description: 'Save the projects preferences to cache',
       args: {
         testingType: nonNull(TestingTypeEnum),
@@ -385,6 +400,26 @@ export const mutation = mutationType({
         )
 
         return true
+      },
+    })
+
+    t.field('setProjectIdInConfigFile', {
+      description: 'Set the projectId field in the config file of the current project',
+      type: Query,
+      args: {
+        projectId: nonNull(stringArg()),
+      },
+      resolve: async (_, args, ctx) => {
+        try {
+          await ctx.actions.project.setProjectIdInConfigFile(args.projectId)
+        } catch (e) {
+          // ignore error as not useful for end user to see
+        }
+
+        // Wait for the project config to be reloaded
+        await ctx.lifecycleManager.reloadConfig()
+
+        return {}
       },
     })
   },

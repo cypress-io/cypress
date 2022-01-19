@@ -27,11 +27,7 @@ export async function makeGraphQLServer () {
 
   app.use(cors())
 
-  app.get('/__cypress/shiki-themes', (req, res) => {
-    res.json([{}, {}])
-  })
-
-  app.get('/__cypress/launchpad-preload', (req, res) => {
+  app.get('/__launchpad/preload', (req, res) => {
     const ctx = getCtx()
 
     ctx.html.fetchLaunchpadInitialData().then((data) => {

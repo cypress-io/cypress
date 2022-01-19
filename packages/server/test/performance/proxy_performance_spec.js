@@ -2,7 +2,7 @@ require('../spec_helper')
 
 const { makeDataContext, setCtx } = require('../../lib/makeDataContext')
 
-const ctx = setCtx(makeDataContext({}))
+setCtx(makeDataContext({}))
 
 const cp = require('child_process')
 const fse = require('fs-extra')
@@ -357,7 +357,7 @@ describe('Proxy Performance', function () {
           // turn off morgan
           config.morgan = false
 
-          cyServer = new ServerE2E(ctx)
+          cyServer = new ServerE2E()
 
           return cyServer.open(config, {
             SocketCtor: SocketE2E,

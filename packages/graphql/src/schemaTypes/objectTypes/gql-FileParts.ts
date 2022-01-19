@@ -9,24 +9,24 @@ export interface FilePartsShape {
 
 export const FileParts = objectType({
   name: 'FileParts',
-  description: 'Represents a spec on the file system',
+  description: 'Represents a file on the file system',
   node: 'absolute',
   definition (t) {
     t.nonNull.string('absolute', {
-      description: 'Absolute path to spec (e.g. /Users/jess/my-project/src/component/MySpec.test.tsx)',
+      description: 'Absolute path to file (e.g. /Users/jess/my-project/src/component/MySpec.test.tsx)',
     })
 
     t.nonNull.string('relative', {
-      description: 'Relative path to spec (e.g. src/component/MySpec.test.tsx)',
+      description: 'Relative path to file (e.g. src/component/MySpec.test.tsx)',
       resolve (root, args, ctx) {
         return path.relative(ctx.currentProject || '', root.absolute)
       },
     })
 
     t.nonNull.string('baseName', {
-      description: 'Full name of spec file (e.g. MySpec.test.tsx) without the spec extension',
+      description: 'Full name of the file (e.g. MySpec.test.tsx)',
       resolve (root, args, ctx) {
-        return path.basename(ctx.currentProject || '', root.absolute).replace(path.extname(root.absolute), '')
+        return path.basename(root.absolute)
       },
     })
 
@@ -38,7 +38,7 @@ export const FileParts = objectType({
     })
 
     t.nonNull.string('fileExtension', {
-      description: `The spec file's extension, including "spec" pattern (e.g. .spec.tsx, -spec.tsx, -test.tsx)`,
+      description: `The file's extension`,
       resolve (root) {
         return path.extname(root.absolute)
       },

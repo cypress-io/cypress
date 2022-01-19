@@ -1,11 +1,11 @@
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 
-describe('Specs Page', {
-  viewportHeight: 768,
-  viewportWidth: 1024,
-}, () => {
-  describe('Component Testing - Default specPattern', () => {
-    context('with storybook', () => {
+describe('Specs Page', () => {
+  describe('Component Workflows', {
+    viewportHeight: 768,
+    viewportWidth: 1024,
+  }, () => {
+    context('project with storybook', () => {
       beforeEach(() => {
         cy.scaffoldProject('no-specs')
         cy.openProject('no-specs')
@@ -35,12 +35,16 @@ describe('Specs Page', {
           name: defaultMessages.createSpec.page.defaultPatternNoSpecs.title,
         }).should('be.visible')
 
-        cy.findByTestId('create-spec-page-description').should('be.visible').and('contain', defaultMessages.createSpec.page.defaultPatternNoSpecs.component.description)
+        cy.findByTestId('create-spec-page-description')
+        .should('be.visible')
+        .and('contain', defaultMessages.createSpec.page.defaultPatternNoSpecs.component.description)
 
         cy.get('@ComponentCard').should('be.visible')
         cy.get('@StoryCard').should('be.visible')
 
-        cy.findByTestId('no-specs-message').should('be.visible').and('contain', defaultMessages.createSpec.noSpecsMessage)
+        cy.findByTestId('no-specs-message')
+        .should('be.visible')
+        .and('contain', defaultMessages.createSpec.noSpecsMessage)
 
         cy.findByRole('link', { name: defaultMessages.createSpec.viewSpecPatternButton })
         .should('be.visible')
@@ -69,7 +73,7 @@ describe('Specs Page', {
         it('shows input for file extension filter', () => {
           cy.get('@CreateFromStoryDialog').within(() => {
             cy.findByTestId('file-match-indicator').should('contain', '1 Match')
-            cy.findByRole('button', { name: '**/*.stories.*' }).click()
+            cy.findByRole('button', { name: '*.stories.*' }).click()
             cy.findByPlaceholderText(defaultMessages.components.fileSearch.byExtensionInput)
             .as('ExtensionInput')
             .clear()
@@ -79,7 +83,7 @@ describe('Specs Page', {
 
             cy.findByTestId('no-results-clear').click()
 
-            cy.get('@ExtensionInput').should('have.value', '**/*.stories.*')
+            cy.get('@ExtensionInput').should('have.value', '*.stories.*')
 
             cy.findByTestId('file-match-indicator').should('contain', '1 Match')
           })
@@ -123,6 +127,7 @@ describe('Specs Page', {
           cy.findByRole('dialog', { name: defaultMessages.createSpec.successPage.header }).as('SuccessDialog').within(() => {
             cy.validateExternalLink({ name: 'Need help?', href: 'https://on.cypress.io' })
             cy.findByRole('button', { name: 'Close' }).should('be.visible')
+            cy.contains('src/stories/Button.stories.cy.jsx').should('be.visible')
             cy.findByRole('link', { name: 'Okay, run the spec' }).should('have.attr', 'href', '#/specs/runner?file=src/stories/Button.stories.cy.jsx')
             cy.findByRole('button', { name: 'Create another spec' }).click()
           })
@@ -141,7 +146,7 @@ describe('Specs Page', {
       })
     })
 
-    context('without storybook', () => {
+    context('project without storybook', () => {
       beforeEach(() => {
         cy.scaffoldProject('no-specs-no-storybook')
         cy.openProject('no-specs-no-storybook')
@@ -205,8 +210,9 @@ describe('Specs Page', {
 
         it('shows input for file extension filter', () => {
           cy.get('@CreateFromComponentDialog').within(() => {
+            cy.log('testing builds')
             cy.findByTestId('file-match-indicator').should('contain', '2 Matches')
-            cy.findByRole('button', { name: '**/*.{jsx,tsx}' }).click()
+            cy.findByRole('button', { name: '*.{jsx,tsx}' }).click()
             cy.findByPlaceholderText(defaultMessages.components.fileSearch.byExtensionInput)
             .as('ExtensionInput')
             .clear()
@@ -216,7 +222,7 @@ describe('Specs Page', {
 
             cy.findByTestId('no-results-clear').click()
 
-            cy.get('@ExtensionInput').should('have.value', '**/*.{jsx,tsx}')
+            cy.get('@ExtensionInput').should('have.value', '*.{jsx,tsx}')
 
             cy.findByTestId('file-match-indicator').should('contain', '2 Matches')
           })
@@ -259,6 +265,7 @@ describe('Specs Page', {
 
           cy.findByRole('dialog', { name: defaultMessages.createSpec.successPage.header }).as('SuccessDialog').within(() => {
             cy.validateExternalLink({ name: 'Need help?', href: 'https://on.cypress.io' })
+            cy.contains('src/App.cy.jsx').should('be.visible')
             cy.findByRole('button', { name: 'Close' }).should('be.visible')
             cy.findByRole('link', { name: 'Okay, run the spec' }).should('have.attr', 'href', '#/specs/runner?file=src/App.cy.jsx')
             cy.findByRole('button', { name: 'Create another spec' }).click()
@@ -411,16 +418,21 @@ describe('Specs Page', {
 
     it('should generate spec from component', () => {
       cy.findByTestId('new-spec-button').click()
+      cy.findByTestId('create-spec-modal').should('be.visible').within(() => {
+        cy.contains('Create a new spec').should('be.visible')
+
+        cy.validateExternalLink({ name: `${defaultMessages.links.needHelp}?`, href: 'https://on.cypress.io' })
+      })
 
       cy.contains('Create from component').click()
-      const componentGlob = '**/*.{jsx,tsx}'
+      const componentGlob = '*.{jsx,tsx}'
 
       cy.findByTestId('file-match-button').contains(componentGlob)
       checkCodeGenCandidates(['App.cy.jsx', 'App.jsx', 'index.jsx', 'Button.jsx', 'Button.stories.jsx'])
 
       cy.intercept('query-ComponentGeneratorStepOne').as('code-gen-candidates')
       cy.findByTestId('file-match-button').click()
-      cy.findByPlaceholderText(defaultMessages.components.fileSearch.byExtensionInput).clear().type('**/App.*')
+      cy.findByPlaceholderText(defaultMessages.components.fileSearch.byExtensionInput).clear().type('App.*')
       cy.wait('@code-gen-candidates')
 
       checkCodeGenCandidates(['App.css', 'App.cy.jsx', 'App.jsx'])
@@ -442,7 +454,7 @@ describe('Specs Page', {
       cy.findByTestId('new-spec-button').click()
 
       cy.contains('Create from story').click()
-      const storyGlob = '**/*.stories.*'
+      const storyGlob = '*.stories.*'
 
       cy.findByTestId('file-match-button').contains(storyGlob)
       checkCodeGenCandidates(['Button.stories.jsx'])
