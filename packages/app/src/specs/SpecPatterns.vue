@@ -35,11 +35,9 @@ import type { SpecPatternsFragment } from '../generated/graphql'
 import OpenConfigFileInIDE from '@packages/frontend-shared/src/gql-components/OpenConfigFileInIDE.vue'
 
 gql`
-fragment SpecPatterns on Query {
-  currentProject {
-    id
-    config
-  }
+fragment SpecPatterns on CurrentProject {
+  id
+  config
 }
 `
 
@@ -48,7 +46,7 @@ const props = defineProps<{
 }>()
 
 const specPatterns = computed<string[]>(() => {
-  let patterns = props.gql.currentProject?.config.find((x) => x.field === 'testFiles')?.value
+  let patterns = props.gql.config.find((x) => x.field === 'testFiles')?.value
 
   if (!patterns) {
     return []

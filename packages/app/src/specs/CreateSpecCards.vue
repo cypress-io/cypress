@@ -4,7 +4,7 @@
       :is="generator.card"
       v-for="generator in generators"
       :key="generator.id"
-      :disabled="generator.disabled(props.gql.currentProject) || false"
+      :disabled="generator.disabled(props.gql) || false"
       @click="$emit('select', generator.id)"
     />
   </div>
@@ -27,17 +27,15 @@ defineEmits<{
   (eventName: 'select', id: GeneratorId): void
 }>()
 
-const generators = computed(() => generatorList.filter((g) => g.matches(props.gql.currentProject?.currentTestingType)))
+const generators = computed(() => generatorList.filter((g) => g.matches(props.gql.currentTestingType)))
 
 gql`
-fragment CreateSpecCards on Query {
-  currentProject {
+fragment CreateSpecCards on CurrentProject {
+  id
+  currentTestingType
+  storybook {
     id
-    currentTestingType
-    storybook {
-      id
-      storybookRoot
-    }
+    storybookRoot
   }
 }
 `

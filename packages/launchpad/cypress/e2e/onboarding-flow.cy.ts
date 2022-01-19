@@ -4,7 +4,7 @@ describe('Launchpad: Onboarding Flow', () => {
     cy.openProject('pristine')
   })
 
-  it('can setup component testing', () => {
+  it.only('can setup component testing', () => {
     cy.visitLaunchpad()
     cy.get('[data-cy-testingType=component]').click()
     cy.get('[data-testid=select-framework]').click()

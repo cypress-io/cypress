@@ -26,8 +26,7 @@ export class DevActions {
 
       this._chokidar.on('change', () => {
         this.ctx.coreData.dev.refreshState = new Date().toISOString()
-        this.ctx.emitter.toApp()
-        this.ctx.emitter.toLaunchpad()
+        this.ctx.emitter.devChange()
       })
     }
   }

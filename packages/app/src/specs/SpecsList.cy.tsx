@@ -8,9 +8,7 @@ const inputSelector = 'input'
 function mountWithTestingType (testingType: TestingTypeEnum) {
   cy.mountFragment(Specs_SpecsListFragmentDoc, {
     onResult: (ctx) => {
-      if (!ctx.currentProject) throw new Error('need current project')
-
-      ctx.currentProject.currentTestingType = testingType
+      ctx.currentTestingType = testingType
 
       return ctx
     },
@@ -27,7 +25,7 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
     beforeEach(() => {
       cy.mountFragment(Specs_SpecsListFragmentDoc, {
         onResult: (ctx) => {
-          specs = ctx.currentProject?.specs?.edges || []
+          specs = ctx?.specs?.edges || []
 
           return ctx
         },

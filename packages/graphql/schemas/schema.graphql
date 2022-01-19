@@ -347,7 +347,7 @@ type CurrentProject implements Node & ProjectLike {
   """The currently selected browser for the application"""
   currentBrowser: Browser
 
-  """The mode the interactive runner was launched in"""
+  """The currently chosen testing type for the project"""
   currentTestingType: TestingTypeEnum
 
   """If there is an error loading the config file, it is represented here"""
@@ -853,11 +853,21 @@ type Storybook implements Node {
 }
 
 type Subscription {
+  """Triggered when we have logged in / out of the application"""
+  authChange: Query
+
   """
   Triggered when we change the current project, add/remove from the project list
   """
   globalUpdate: Query
+
+  """
+  Triggered when the lifecyle of the project changes (loading state changes, etc.)
+  """
   projectUpdate: CurrentProject
+
+  """Triggered when we have added/removed specs from the project"""
+  specsChanged: CurrentProject
 }
 
 """The bundlers that we can use with Cypress"""

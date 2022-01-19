@@ -31,18 +31,18 @@ import SettingsIcon from '~icons/cy/settings_x16'
 import Button from '@cy/components/Button.vue'
 import CreateSpecCards from './CreateSpecCards.vue'
 import { gql } from '@urql/vue'
-import type { CreateSpecContentFragment } from '../generated/graphql'
+import type { DefaultSpecPatternNoContentFragment } from '../generated/graphql'
 
 const { t } = useI18n()
 
 gql`
-fragment CreateSpecContent on Query {
+fragment DefaultSpecPatternNoContent on CurrentProject {
   ...CreateSpecCards
 }
 `
 
 const props = defineProps<{
-  gql: CreateSpecContentFragment
+  gql: DefaultSpecPatternNoContentFragment
 }>()
 
 const emit = defineEmits<{

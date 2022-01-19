@@ -47,6 +47,8 @@ export class AuthActions {
     this.setAuthenticatedUser(await this.authApi.logIn(({ browserOpened }) => {
       this.ctx.coreData.isAuthBrowserOpened = browserOpened
     }))
+
+    this.ctx.emitter.authChange()
   }
 
   async logout () {
@@ -59,6 +61,7 @@ export class AuthActions {
       this.setAuthenticatedUser(null)
       this.ctx.cloud.reset()
     }
+    this.ctx.emitter.authChange()
   }
 
   private setAuthenticatedUser (authUser: AuthenticatedUserShape | null) {

@@ -58,13 +58,11 @@ const emits = defineEmits<{
 }>()
 
 gql`
-fragment CreateSpecModal on Query {
+fragment CreateSpecModal on CurrentProject {
+  id
   ...CreateSpecCards
-  currentProject {
-    id
-    ...ComponentGeneratorStepOne_codeGenGlob
-    ...StoryGeneratorStepOne_codeGenGlob
-  }
+  ...ComponentGeneratorStepOne_codeGenGlob
+  ...StoryGeneratorStepOne_codeGenGlob
 }
 `
 
@@ -84,7 +82,7 @@ const codeGenGlob = computed(() => {
     return null
   }
 
-  return props.gql.currentProject?.codeGenGlobs[generator.value.id]
+  return props.gql.codeGenGlobs[generator.value.id]
 })
 
 whenever(not(generator), () => {

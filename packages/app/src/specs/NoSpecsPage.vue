@@ -4,7 +4,7 @@
     :key="generator"
     :initial-generator="generator"
     :show="showModal"
-    :gql="props.gql"
+    :gql="props.gql.currentProject"
     @close="closeModal"
   />
 
@@ -38,12 +38,12 @@
 
     <DefaultSpecPatternNoContent
       v-if="props.isUsingDefaultSpecs"
-      :gql="props.gql"
+      :gql="props.gql.currentProject"
       @choose="choose"
     />
     <CustomPatternNoSpecContent
       v-else
-      :gql="props.gql"
+      :gql="props.gql.currentProject"
       @newSpec="showModal = true"
     />
   </div>
@@ -58,15 +58,23 @@ import type { NoSpecsPageFragment } from '../generated/graphql'
 import CustomPatternNoSpecContent from './CustomPatternNoSpecContent.vue'
 
 gql`
-fragment NoSpecsPage on Query {
-  ...CreateSpecCards
+fragment NoSpecsPage_CurrentProject on CurrentProject {
+  id
+  currentTestingType
+  configFileAbsolutePath
   ...CreateSpecModal
-  ...ChooseExternalEditor
+  ...CreateSpecCards
+  ...DefaultSpecPatternNoContent
   ...CustomPatternNoSpecContent
+}
+`
+
+gql`
+fragment NoSpecsPage on Query {
+  ...ChooseExternalEditor
   currentProject {
     id
-    currentTestingType
-    configFileAbsolutePath
+    ...NoSpecsPage_CurrentProject
   }
 }
 `

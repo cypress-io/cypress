@@ -67,11 +67,15 @@ describe('App: Index', () => {
     it('refreshes spec list on spec changes', () => {
       cy.get('[data-testid="create-spec-page-title"]').should('be.visible')
 
+      cy.get('h1').should('contain', defaultMessages.createSpec.page.defaultPatternNoSpecs.title)
+      cy.contains('E2E Specs').should('not.exist')
+
       cy.withCtx(async (ctx, { testState }) => {
         await ctx.actions.file.writeFileInProject(testState.newFilePath, '')
       })
 
-      cy.wait(1000)
+      cy.findByTestId('spec-item').should('contain', 'new-file')
+
       cy.withCtx(async (ctx, { testState }) => {
         expect(ctx.project.specs).have.length(1)
 
@@ -79,11 +83,6 @@ describe('App: Index', () => {
 
         expect(addedSpec).not.be.equal(undefined)
       })
-
-      // Hack due to ctx.emitter.toApp() not triggering a refresh in e2e test
-      // TODO: Figure out why emitter doesn't work in e2e tests
-      cy.visitApp()
-      cy.findByTestId('spec-item').should('contain', 'new-file')
     })
   })
 })

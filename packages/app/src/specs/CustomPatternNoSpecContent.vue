@@ -42,7 +42,7 @@ const emit = defineEmits<{
 }>()
 
 gql`
-fragment CustomPatternNoSpecContent on Query {
+fragment CustomPatternNoSpecContent on CurrentProject {
   ...SpecPatterns
 }
 `

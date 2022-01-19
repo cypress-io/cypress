@@ -108,10 +108,7 @@ export class CloudDataSource {
               this.ctx.coreData.baseError = null
             }
 
-            // TODO(tim): send a signal to the frontend so when it refetches it does 'cache-only' request,
-            // since we know we're up-to-date
-            this.ctx.deref.emitter.toApp()
-            this.ctx.deref.emitter.toLaunchpad()
+            // this.ctx.deref.emitter.toLaunchpad()
           }
 
           if (!res.stale) {

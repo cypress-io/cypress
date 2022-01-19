@@ -15,17 +15,15 @@ describe('<CreateSpecModal />', () => {
     cy.mount(() => (<div>
       <CreateSpecModal
         gql={{
-          currentProject: {
-            id: 'id',
-            codeGenGlobs: {
-              id: 'super-unique-id',
-              __typename: 'CodeGenGlobs',
-              component: '**.vue',
-              story: '**/*.stories.*',
-            },
-            storybook: null,
-            currentTestingType: 'component',
+          id: 'id',
+          codeGenGlobs: {
+            id: 'super-unique-id',
+            __typename: 'CodeGenGlobs',
+            component: '**.vue',
+            story: '**/*.stories.*',
           },
+          storybook: null,
+          currentTestingType: 'component',
         }}
         show={show.value}
         onClose={() => show.value = false}
@@ -70,17 +68,15 @@ describe('playground', () => {
       <br/>
       <CreateSpecModal
         gql={{
-          currentProject: {
-            id: 'id',
-            codeGenGlobs: {
-              id: 'super-unique-id',
-              __typename: 'CodeGenGlobs',
-              component: '**.vue',
-              story: '**/*.stories.*',
-            },
-            storybook: null,
-            currentTestingType: 'component',
+          id: 'id',
+          codeGenGlobs: {
+            id: 'super-unique-id',
+            __typename: 'CodeGenGlobs',
+            component: '**.vue',
+            story: '**/*.stories.*',
           },
+          storybook: null,
+          currentTestingType: 'component',
         }}
         show={show.value}
         onClose={() => show.value = false}

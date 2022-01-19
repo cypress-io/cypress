@@ -1,7 +1,7 @@
 <template>
   <div class="p-24px spec-container">
     <CreateSpecModal
-      v-if="props.gql.currentProject?.currentTestingType"
+      v-if="props.gql.currentTestingType"
       :show="showModal"
       :gql="props.gql"
       @close="showModal = false"
@@ -23,7 +23,7 @@
           class="flex justify-between items-center"
           data-cy="specs-testing-type-header"
         >
-          {{ props.gql.currentProject?.currentTestingType === 'component' ?
+          {{ props.gql.currentTestingType === 'component' ?
             t('specPage.componentSpecsHeader') : t('specPage.e2eSpecsHeader') }}
         </div>
         <div class="flex justify-between items-center">
@@ -125,16 +125,14 @@ fragment SpecNode_SpecsList on SpecEdge {
 `
 
 gql`
-fragment Specs_SpecsList on Query {
+fragment Specs_SpecsList on CurrentProject {
+  id
+  projectRoot
+  currentTestingType
   ...CreateSpecModal
-  currentProject {
-    id
-    projectRoot
-    currentTestingType
-    specs: specs(first: 100) {
-      edges {
-        ...SpecNode_SpecsList
-      }
+  specs: specs(first: 100) {
+    edges {
+      ...SpecNode_SpecsList
     }
   }
 }
@@ -146,12 +144,7 @@ const props = defineProps<{
 
 const showModal = ref(false)
 const search = ref('')
-
-function handleClear () {
-  search.value = ''
-}
-
-const cachedSpecs = useCachedSpecs(computed(() => props.gql.currentProject?.specs?.edges || []))
+const cachedSpecs = useCachedSpecs(computed(() => props.gql.specs?.edges || []))
 
 const specs = computed(() => {
   const specs = cachedSpecs.value.map((x) => makeFuzzyFoundSpec(x.node))

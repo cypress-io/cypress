@@ -3,7 +3,7 @@
     <CreateSpecModal
       v-if="props.gql.currentProject?.currentTestingType"
       :show="showModal"
-      :gql="props.gql"
+      :gql="props.gql.currentProject"
       @close="showModal = false"
     />
     <InlineSpecListHeader
@@ -48,7 +48,6 @@ fragment SpecNode_InlineSpecList on SpecEdge {
 
 gql`
 fragment Specs_InlineSpecList on Query {
-  ...CreateSpecModal
   currentProject {
     id
     projectRoot
@@ -58,6 +57,7 @@ fragment Specs_InlineSpecList on Query {
         ...SpecNode_InlineSpecList
       }
     }
+    ...CreateSpecModal
   }
 }
 `
