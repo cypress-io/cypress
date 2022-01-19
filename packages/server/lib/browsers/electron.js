@@ -380,6 +380,10 @@ module.exports = {
     })
   },
 
+  async connectToExisting () {
+    throw new Error('Attempting to connect to existing browser for Cypress in Cypress which is not yet implemented for electron')
+  },
+
   open (browser, url, options = {}, automation) {
     const { projectRoot, isTextTerminal } = options
 

@@ -9,6 +9,7 @@
     }"
     data-cy="card"
     :tabindex="disabled ? -1 : 1"
+    role="button"
     @click="emits('click')"
   >
     <div

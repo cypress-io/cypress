@@ -430,15 +430,14 @@ export class DataContext {
     // this._loadingManager = new LoadingManager(this)
     // this.coreData.currentProject?.watcher
     // this._coreData = makeCoreData({}, this._loadingManager)
-    // this._patches = []
-    // this._patches.push([{ op: 'add', path: [], value: this._coreData }])
+    this.setAppSocketServer(undefined)
+    this.setGqlSocketServer(undefined)
 
     return Promise.all([
       this.lifecycleManager.destroy(),
       this.cloud.reset(),
       this.util.disposeLoaders(),
       this.actions.project.clearCurrentProject(),
-      // this.actions.currentProject?.clearCurrentProject(),
       this.actions.dev.dispose(),
     ])
   }

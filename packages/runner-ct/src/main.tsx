@@ -32,7 +32,9 @@ const Runner: any = {
   },
 
   start (el, base64Config) {
-    const ws = createWebsocket()
+    const config = JSON.parse(driverUtils.decodeBase64Unicode(base64Config))
+
+    const ws = createWebsocket(config.socketIoRoute)
 
     // NOTE: this is exposed for testing, ideally we should only expose this if a test flag is set
     window.runnerWs = ws
@@ -47,8 +49,6 @@ const Runner: any = {
     )
 
     MobX.action('started', () => {
-      const config = JSON.parse(driverUtils.decodeBase64Unicode(base64Config))
-
       const NO_COMMAND_LOG = config.env && config.env.NO_COMMAND_LOG
       const configState = config.state || {}
 

@@ -570,7 +570,7 @@ type Mutation {
   addProject(
     """Whether to open the project when added"""
     open: Boolean
-    path: String!
+    path: String
   ): Query
 
   """Clears the currently active project"""
@@ -645,6 +645,9 @@ type Mutation {
   Update local preferences (also known as  appData). The payload, `value`, should be a `JSON.stringified()` object of the new values you'd like to persist. Example: `setPreferences (value: JSON.stringify({ lastOpened: Date.now() }))`
   """
   setPreferences(value: String!): Query
+
+  """Set the projectId field in the config file of the current project"""
+  setProjectIdInConfigFile(projectId: String!): Query
 
   """Save the projects preferences to cache"""
   setProjectPreferences(browserPath: String!, testingType: TestingTypeEnum!): Query!

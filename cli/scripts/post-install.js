@@ -2,12 +2,13 @@
 
 // @ts-check
 /* eslint-disable no-console */
-
+const fs = require('fs-extra')
 const { includeTypes } = require('./utils')
 const shell = require('shelljs')
-const fs = require('fs')
 const { join } = require('path')
 const resolvePkg = require('resolve-pkg')
+
+require('./clean')
 
 shell.set('-v') // verbose
 shell.set('-e') // any error is fatal
@@ -19,10 +20,12 @@ shell.set('-e') // any error is fatal
 // yet we do not install "@types/.." packages with "npm install cypress"
 // because they can conflict with user's own libraries
 
+fs.ensureDirSync(join(__dirname, '..', 'types'))
+
 includeTypes.forEach((folder) => {
   const source = resolvePkg(`@types/${folder}`, { cwd: join(__dirname, '..', '..') })
 
-  shell.cp('-R', source, 'types')
+  fs.copySync(source, join(__dirname, '..', 'types', folder))
 })
 
 // jQuery v3.3.x includes "dist" folder that just references back to itself
@@ -72,7 +75,7 @@ shell.sed('-i', 'from \'sinon\';', 'from \'../sinon\';', sinonChaiFilename)
 
 // copy experimental network stubbing type definitions
 // so users can import: `import 'cypress/types/net-stubbing'`
-shell.cp(resolvePkg('@packages/net-stubbing/lib/external-types.ts'), 'types/net-stubbing.ts')
+fs.copySync(resolvePkg('@packages/net-stubbing/lib/external-types.ts'), 'types/net-stubbing.ts')
 
 // https://github.com/cypress-io/cypress/issues/18069
 // To avoid type clashes, some files should be commented out entirely by patch-package

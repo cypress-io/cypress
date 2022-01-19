@@ -1,4 +1,4 @@
-describe('App: Settings', { viewportWidth: 600 }, () => {
+describe('App: Settings', () => {
   before(() => {
     cy.scaffoldProject('todos')
   })
@@ -17,8 +17,15 @@ describe('App: Settings', { viewportWidth: 600 }, () => {
     cy.findByText('Project Settings').should('be.visible')
   })
 
+  it('shows the projectId section when there is a projectId', () => {
+    cy.visitApp()
+    cy.findByText('Settings').click()
+    cy.findByText('Project Settings').click()
+    cy.findByText('Project ID').should('be.visible')
+  })
+
   it('can reconfigure a project', () => {
-    cy.visitApp('#settings')
+    cy.visitApp('settings')
 
     cy.intercept('mutation-SettingsContainer_ReconfigureProject', { 'data': { 'reconfigureProject': true } }).as('ReconfigureProject')
     cy.findByText('Reconfigure Project').click()
@@ -42,7 +49,7 @@ describe('App: Settings', { viewportWidth: 600 }, () => {
         ctx.coreData.localSettings.preferences.preferredEditorBinary = undefined
       })
 
-      cy.visitApp('#settings')
+      cy.visitApp('settings')
       cy.contains('Device Settings').click()
     })
 
@@ -94,5 +101,18 @@ describe('App: Settings', { viewportWidth: 600 }, () => {
       cy.get('[data-cy="use-well-known-editor"]').should('be.checked')
       cy.get('[data-cy="use-custom-editor"]').should('not.be.checked')
     })
+  })
+})
+
+describe('App: Settings without cloud', () => {
+  it('hides the projectId section when there is no projectId', () => {
+    cy.scaffoldProject('simple-ct')
+    cy.openProject('simple-ct')
+    cy.startAppServer('component')
+
+    cy.visitApp()
+    cy.findByText('Settings').click()
+    cy.findByText('Project Settings').click()
+    cy.findByText('Project ID').should('not.exist')
   })
 })

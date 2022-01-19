@@ -64,6 +64,18 @@ function run (ipc, configFile, projectRoot) {
     return true
   }
 
+  const isValidDevServer = (config) => {
+    const { devServer } = config
+
+    if (devServer && (typeof devServer.devServer === 'function' || typeof devServer === 'function' || typeof devServer.then === 'function')) {
+      return true
+    }
+
+    ipc.send('setupTestingType:error', 'COMPONENT_DEV_SERVER_IS_NOT_A_FUNCTION', configFile, config)
+
+    return false
+  }
+
   ipc.on('loadConfig', () => {
     try {
       debug('try loading', configFile)
@@ -92,25 +104,46 @@ function run (ipc, configFile, projectRoot) {
 
         areSetupNodeEventsLoaded = true
         if (testingType === 'component') {
-          if (!isValidSetupNodeEvents(result.component?.setupNodeEvents)) {
+          if (!isValidSetupNodeEvents(result.setupNodeEvents) || !isValidDevServer((result.component || {}))) {
             return
           }
 
           runPlugins.runSetupNodeEvents(options, (on, config) => {
-            if (result.component?.devServer) {
-              on('dev-server:start', (options) => result.component.devServer(options, result.component?.devServerConfig))
+            const setupNodeEvents = result.component && result.component.setupNodeEvents || ((on, config) => {})
+
+            const { devServer } = result.component
+
+            // Accounts for `devServer: require('@cypress/webpack-dev-server')
+            if (typeof devServer.devServer === 'function') {
+              on('dev-server:start', (options) => devServer.devServer(options, result.component && result.component.devServerConfig))
+
+              return setupNodeEvents(on, config)
             }
 
-            const setupNodeEvents = result.component?.setupNodeEvents ?? ((on, config) => {})
+            // Accounts for `devServer() {}`
+            if (typeof devServer === 'function') {
+              on('dev-server:start', (options) => devServer(options, result.component && result.component.devServerConfig))
 
-            return setupNodeEvents(on, config)
+              return setupNodeEvents(on, config)
+            }
+
+            // Accounts for `devServer: import('@cypress/webpack-dev-server')`
+            if (result.component && typeof result.component.devServer.then === 'function') {
+              return Promise.resolve(result.component.devServer).then(({ devServer }) => {
+                if (typeof devServer === 'function') {
+                  on('dev-server:start', (options) => devServer(options, result.component && result.component.devServerConfig))
+                }
+
+                return setupNodeEvents(on, config)
+              })
+            }
           })
         } else if (testingType === 'e2e') {
-          if (!isValidSetupNodeEvents(result.e2e?.setupNodeEvents)) {
+          if (!isValidSetupNodeEvents(result.e2e && result.e2e.setupNodeEvents)) {
             return
           }
 
-          const setupNodeEvents = result.e2e?.setupNodeEvents ?? ((on, config) => {})
+          const setupNodeEvents = result.e2e && result.e2e.setupNodeEvents || ((on, config) => {})
 
           runPlugins.runSetupNodeEvents(options, setupNodeEvents)
         } else {

@@ -31,8 +31,8 @@
         <Spinner v-else-if="currentProject?.isLoadingConfigFile" />
         <template v-else-if="currentProject?.isLoadingNodeEvents">
           <LaunchpadHeader
-            title="Initializing Config..."
-            description="Please wait while we load your project and find browsers installed on your system"
+            :title="t('components.loading.config.title')"
+            :description="t('components.loading.config.description')"
           />
           <Spinner />
         </template>

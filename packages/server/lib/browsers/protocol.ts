@@ -45,15 +45,15 @@ export function _connectAsync (opts) {
  *
  * @returns {string} web socket debugger url
  */
-const findStartPage = (targets) => {
-  debug('CRI List %o', { numTargets: targets.length, targets })
+const findStartPage = (targets, url = 'about:blank') => {
+  debug('CRI List %o', { numTargets: targets.length, targets, url })
   // activate the first available id
   // find the first target page that's a real tab
   // and not the dev tools or background page.
   // since we open a blank page first, it has a special url
   const newTabTargetFields = {
     type: 'page',
-    url: 'about:blank',
+    url,
   }
 
   const target = _.find(targets, newTabTargetFields)
@@ -65,17 +65,17 @@ const findStartPage = (targets) => {
   return target.webSocketDebuggerUrl
 }
 
-const findStartPageTarget = (connectOpts) => {
+const findStartPageTarget = (connectOpts, url) => {
   debug('CRI.List %o', connectOpts)
 
   // what happens if the next call throws an error?
   // it seems to leave the browser instance open
   // need to clone connectOpts, CRI modifies it
-  return CRI.List(_.clone(connectOpts)).then(findStartPage)
+  return CRI.List(_.clone(connectOpts)).then((targets) => findStartPage(targets, url))
 }
 
 export async function getRemoteDebuggingPort () {
-  const port = Number(process.env.CYPRESS_REMOTE_DEBUGGING_PORT)
+  const port = Number(process.env.CYPRESS_REMOTE_DEBUGGING_PORT) || utils.getPort()
 
   return port || utils.getPort()
 }
@@ -85,7 +85,7 @@ export async function getRemoteDebuggingPort () {
  * @param {number} port Port number to connect to
  * @param {string} browserName Browser name, for warning/error messages
  */
-export const getWsTargetFor = (port: number, browserName: string) => {
+export const getWsTargetFor = (port: number, browserName: string, url?: string | null) => {
   debug('Getting WS connection to CRI on port %d', port)
   la(is.port(port), 'expected port number', port)
 
@@ -108,7 +108,7 @@ export const getWsTargetFor = (port: number, browserName: string) => {
     const retry = () => {
       debug('attempting to find CRI target... %o', { retryIndex })
 
-      return findStartPageTarget(connectOpts)
+      return findStartPageTarget(connectOpts, url)
       .catch((err) => {
         retryIndex++
         const delay = _getDelayMsForRetry(retryIndex, browserName)

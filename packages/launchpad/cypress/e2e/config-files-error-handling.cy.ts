@@ -4,18 +4,18 @@ import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 describe('Config files error handling', () => {
   beforeEach(() => {
     cy.scaffoldProject('pristine')
-    cy.scaffoldProject('pristine-with-config-file')
+    cy.scaffoldProject('pristine-with-e2e-testing')
   })
 
   it('shows an error when there are multiple config files', () => {
-    cy.openProject('pristine-with-config-file')
+    cy.openProject('pristine-with-e2e-testing')
 
     cy.withCtx(async (ctx) => {
       await ctx.actions.file.writeFileInProject('cypress.config.ts', 'module.exports = {}')
     })
 
     // Reopen the project, now that we have 2 config files
-    cy.openProject('pristine-with-config-file')
+    cy.openProject('pristine-with-e2e-testing')
     cy.visitLaunchpad()
 
     cy.get('body').should('contain.text', 'Something went wrong')
@@ -28,13 +28,13 @@ describe('Config files error handling', () => {
   })
 
   it('shows the upgrade screen if there is a legacy config file', () => {
-    cy.openProject('pristine-with-config-file')
+    cy.openProject('pristine-with-e2e-testing')
     cy.withCtx(async (ctx) => {
       await ctx.actions.file.writeFileInProject('cypress.json', '{}')
       await ctx.actions.file.removeFileInProject('cypress.config.js')
     })
 
-    cy.openProject('pristine-with-config-file')
+    cy.openProject('pristine-with-e2e-testing')
 
     cy.visitLaunchpad()
 
@@ -43,12 +43,12 @@ describe('Config files error handling', () => {
   })
 
   it('handles config files with legacy config file in same project', () => {
-    cy.openProject('pristine-with-config-file')
+    cy.openProject('pristine-with-e2e-testing')
     cy.withCtx(async (ctx) => {
       await ctx.actions.file.writeFileInProject('cypress.json', '{}')
     })
 
-    cy.openProject('pristine-with-config-file')
+    cy.openProject('pristine-with-e2e-testing')
     cy.visitLaunchpad()
 
     cy.get('body').should('contain.text', 'Cypress no longer supports')
@@ -64,7 +64,7 @@ describe('Config files error handling', () => {
     cy.openProject('pristine')
 
     cy.withCtx(async (ctx) => {
-      await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = { experimentalComponentTesting: true }')
+      await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = { experimentalComponentTesting: true, e2e: {} }')
     })
 
     cy.openProject('pristine')
@@ -80,7 +80,7 @@ describe('Config files error handling', () => {
     cy.openProject('pristine')
 
     cy.withCtx(async (ctx) => {
-      await ctx.actions.file.writeFileInProject('cypress.config.js', `module.exports = { supportFile: 'cypress/support.ts' }`)
+      await ctx.actions.file.writeFileInProject('cypress.config.js', `module.exports = { supportFile: 'cypress/support.ts', e2e: {} }`)
     })
 
     cy.openProject('pristine')

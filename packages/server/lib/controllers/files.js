@@ -5,18 +5,17 @@ const cwd = require('../cwd')
 const glob = require('../util/glob')
 const debug = require('debug')('cypress:server:controllers')
 const { escapeFilenameInUrl } = require('../util/escape_filename')
-
-const SPEC_URL_PREFIX = '/__cypress/tests?p'
+const { getCtx } = require('@packages/data-context')
 
 module.exports = {
-  handleIframe (req, res, ctx, config, getRemoteState, extraOptions) {
+  handleIframe (req, res, config, getRemoteState, extraOptions) {
     const test = req.params[0]
     const iframePath = cwd('lib', 'html', 'iframe.html')
     const specFilter = _.get(extraOptions, 'specFilter')
 
     debug('handle iframe %o', { test, specFilter })
 
-    return this.getSpecs(test, ctx, config, extraOptions)
+    return this.getSpecs(test, config, extraOptions)
     .then((specs) => {
       return this.getSupportFile(config)
       .then((js) => {
@@ -37,7 +36,7 @@ module.exports = {
     })
   },
 
-  getSpecs (spec, ctx, config, extraOptions = {}) {
+  getSpecs (spec, config, extraOptions = {}) {
     // when asking for all specs: spec = "__all"
     // otherwise it is a relative spec filename like "integration/spec.js"
     debug('get specs %o', { spec, extraOptions })
@@ -49,7 +48,7 @@ module.exports = {
 
       debug('converted %s to %s', spec, convertedSpec)
 
-      return this.prepareForBrowser(convertedSpec, config.projectRoot)
+      return this.prepareForBrowser(convertedSpec, config.projectRoot, config.namespace)
     }
 
     const specFilter = _.get(extraOptions, 'specFilter')
@@ -67,6 +66,8 @@ module.exports = {
       // grab all of the specs if this is ci
       if (spec === '__all') {
         debug('returning all specs')
+
+        const ctx = getCtx()
 
         const [e2ePatterns, componentPatterns] = await Promise.all([
           ctx.project.specPatternsForTestingType(ctx.project.projectRoot, 'e2e'),
@@ -105,7 +106,9 @@ module.exports = {
     })
   },
 
-  prepareForBrowser (filePath, projectRoot) {
+  prepareForBrowser (filePath, projectRoot, namespace) {
+    const SPEC_URL_PREFIX = `/${namespace}/tests?p`
+
     filePath = filePath.replace(SPEC_URL_PREFIX, '__CYPRESS_SPEC_URL_PREFIX__')
     filePath = escapeFilenameInUrl(filePath).replace('__CYPRESS_SPEC_URL_PREFIX__', SPEC_URL_PREFIX)
     const relativeFilePath = path.relative(projectRoot, filePath)
@@ -113,12 +116,12 @@ module.exports = {
     return {
       absolute: filePath,
       relative: relativeFilePath,
-      relativeUrl: this.getTestUrl(relativeFilePath),
+      relativeUrl: this.getTestUrl(relativeFilePath, namespace),
     }
   },
 
-  getTestUrl (file) {
-    const url = `${SPEC_URL_PREFIX}=${file}`
+  getTestUrl (file, namespace) {
+    const url = `/${namespace}/tests?p=${file}`
 
     debug('test url for file %o', { file, url })
 
@@ -134,7 +137,7 @@ module.exports = {
   },
 
   getSupportFile (config) {
-    const { projectRoot, supportFile } = config
+    const { projectRoot, supportFile, namespace } = config
 
     let files = []
 
@@ -164,7 +167,7 @@ module.exports = {
       return glob(p, { nodir: true })
     }).then(_.flatten)
     .map((filePath) => {
-      return this.prepareForBrowser(filePath, projectRoot)
+      return this.prepareForBrowser(filePath, projectRoot, namespace)
     })
   },
 

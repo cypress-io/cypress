@@ -20,7 +20,7 @@ import type { DataContext } from '..'
 import { LoadConfigReply, SetupNodeEventsReply, ProjectConfigIpc, IpcHandler } from './ProjectConfigIpc'
 import assert from 'assert'
 import type { AllModeOptions, FoundBrowser, FullConfig, TestingType } from '@packages/types'
-import type { BaseErrorDataShape, WarningError } from '.'
+import type { BaseErrorDataShape, CoreDataShape, WarningError } from '.'
 import { autoBindDebug } from '../util/autoBindDebug'
 
 const debug = debugLib(`cypress:lifecycle:ProjectLifecycleManager`)
@@ -56,8 +56,6 @@ type State<S, V = undefined> = V extends undefined ? {state: S, value?: V} : {st
 
 type LoadingStateFor<V> = State<'pending'> | State<'loading', Promise<V>> | State<'loaded', V> | State<'errored', unknown>
 
-type BrowsersResultState = LoadingStateFor<FoundBrowser[]>
-
 type ConfigResultState = LoadingStateFor<LoadConfigReply>
 
 type EnvFileResultState = LoadingStateFor<Cypress.ConfigOptions>
@@ -78,7 +76,6 @@ export interface ProjectMetaState {
   hasSpecifiedConfigViaCLI: false | string
   hasMultipleConfigPaths: boolean
   needsCypressJsonMigration: boolean
-  // configuredTestingTypes: TestingType[]
 }
 
 const PROJECT_META_STATE: ProjectMetaState = {
@@ -90,13 +87,11 @@ const PROJECT_META_STATE: ProjectMetaState = {
   hasSpecifiedConfigViaCLI: false,
   hasValidConfigFile: false,
   needsCypressJsonMigration: false,
-  // configuredTestingTypes: [],
 }
 
 export class ProjectLifecycleManager {
   // Registered handlers from Cypress's server, used to wrap the IPC
   private _handlers: IpcHandler[] = []
-  private _browserResult: BrowsersResultState = { state: 'pending' }
 
   // Config, from the cypress.config.{js|ts}
   private _envFileResult: EnvFileResultState = { state: 'pending' }
@@ -112,6 +107,7 @@ export class ProjectLifecycleManager {
   private _currentTestingType: TestingType | null = null
   private _runModeExitEarly: ((error: Error) => void) | undefined
 
+  private _initializedProject: unknown | undefined // open_project object
   private _projectRoot: string | undefined
   private _configFilePath: string | undefined
 
@@ -125,9 +121,7 @@ export class ProjectLifecycleManager {
 
     if (ctx.coreData.currentProject) {
       this.setCurrentProject(ctx.coreData.currentProject)
-    }
-
-    if (ctx.coreData.currentTestingType && this._projectRoot) {
+    } else if (ctx.coreData.currentTestingType && this._projectRoot) {
       this.setCurrentTestingType(ctx.coreData.currentTestingType)
     }
 
@@ -135,22 +129,6 @@ export class ProjectLifecycleManager {
     process.on('exit', this.onProcessExit)
 
     return autoBindDebug(this)
-  }
-
-  async allSettled () {
-    while (
-      this._browserResult.state === 'loading' ||
-      this._envFileResult.state === 'loading' ||
-      this._configResult.state === 'loading' ||
-      this._eventsIpcResult.state === 'loading'
-    ) {
-      await Promise.allSettled([
-        this._browserResult.value,
-        this._envFileResult.value,
-        this._configResult.value,
-        this._eventsIpcResult.value,
-      ])
-    }
   }
 
   private onProcessExit = () => {
@@ -251,9 +229,8 @@ export class ProjectLifecycleManager {
 
   clearCurrentProject () {
     this.resetInternalState()
+    this._initializedProject = undefined
     this._projectRoot = undefined
-    this._configFilePath = undefined
-    this._cachedFullConfig = undefined
   }
 
   /**
@@ -269,6 +246,7 @@ export class ProjectLifecycleManager {
     }
 
     this._projectRoot = projectRoot
+    this._initializedProject = undefined
     this.legacyPluginGuard()
     Promise.resolve(this.ctx.browser.machineBrowsers()).catch(this.onLoadError)
     this.verifyProjectRoot(projectRoot)
@@ -277,11 +255,14 @@ export class ProjectLifecycleManager {
       s.currentProject = projectRoot
     })
 
-    const metaState = this.refreshMetaState()
+    this.refreshMetaState()
 
     this.configFileWarningCheck()
 
-    if (metaState.hasValidConfigFile) {
+    if (this.metaState.hasValidConfigFile) {
+      // at this point, there is not a cypress configuration file to initialize
+      // the project will be scaffolded and when the user selects the testing type
+      // the would like to setup
       this.initializeConfig().catch(this.onLoadError)
     }
 
@@ -303,10 +284,12 @@ export class ProjectLifecycleManager {
   }
 
   /**
-   * When we set the "testingType", we
+   * Setting the testing type should automatically handle cleanup of existing
+   * processes and load the config / initialize the plugin process associated
+   * with the chosen testing type.
    */
   setCurrentTestingType (testingType: TestingType | null) {
-    this.ctx.update((d) => {
+    this.ctx.update((d: CoreDataShape) => {
       d.currentTestingType = testingType
     })
 
@@ -314,31 +297,38 @@ export class ProjectLifecycleManager {
       return
     }
 
+    this._initializedProject = undefined
     this._currentTestingType = testingType
 
     if (!testingType) {
       return
     }
 
+    // If we've chosen e2e and we don't have a config file, we can scaffold one
+    // without any sort of onboarding wizard.
     if (!this.metaState.hasValidConfigFile) {
       if (testingType === 'e2e' && !this.ctx.isRunMode) {
         this.ctx.actions.wizard.scaffoldTestingType().catch(this.onLoadError)
       }
-    } else {
+    } else if (this.isTestingTypeConfigured(testingType)) {
       this.loadTestingType()
     }
   }
 
+  /**
+   * Called after we've set the testing type. If we've change from the current
+   * IPC used to spawn the config, we need to get a fresh config IPC & re-execute.
+   */
   private loadTestingType () {
     const testingType = this._currentTestingType
 
     assert(testingType, 'loadTestingType requires a testingType')
+
     // If we have set a testingType, and it's not the "target" of the
     // registeredEvents (switching testing mode), we need to get a fresh
     // config IPC & re-execute the setupTestingType
     if (this._registeredEventsTarget && testingType !== this._registeredEventsTarget) {
-      this._configResult = { state: 'pending' }
-      this.initializeConfig().catch(this.onLoadError)
+      this.reloadConfig().catch(this.onLoadError)
     } else if (this._eventsIpc && !this._registeredEventsTarget && this._configResult.state === 'loaded') {
       this.setupNodeEvents().catch(this.onLoadError)
     }
@@ -399,7 +389,7 @@ export class ProjectLifecycleManager {
 
   /**
    * Equivalent to the legacy "config.get()",
-   * this sources the config from all the
+   * this sources the config from the various config sources
    */
   async getFullInitialConfig (options: Partial<AllModeOptions> = this.ctx.modeOptions, withBrowsers = true): Promise<FullConfig> {
     if (this._cachedFullConfig) {
@@ -537,9 +527,7 @@ export class ProjectLifecycleManager {
         this._configResult = { state: 'errored', value: err }
       }
 
-      if (this._pendingInitialize) {
-        this._pendingInitialize.reject(err)
-      }
+      this.onLoadError(err)
     })
     .finally(() => {
       this.ctx.emitter.toLaunchpad()
@@ -738,6 +726,8 @@ export class ProjectLifecycleManager {
    */
   private onConfigLoaded (child: ChildProcess, ipc: ProjectConfigIpc, result: LoadConfigReply) {
     this.watchRequires('config', result.requires)
+
+    // If there's already a dangling IPC from the previous switch of testing type, we want to clean this up
     if (this._eventsIpc) {
       this._cleanupIpc(this._eventsIpc)
     }
@@ -767,23 +757,45 @@ export class ProjectLifecycleManager {
     this.setupNodeEvents().catch(this.onLoadError)
   }
 
-  private async setupNodeEvents (): Promise<SetupNodeEventsReply> {
-    assert(this._eventsIpc)
+  private setupNodeEvents (): Promise<SetupNodeEventsReply> {
+    assert(this._eventsIpc, 'Expected _eventsIpc to be defined at this point')
     const ipc = this._eventsIpc
+    const promise = this.callSetupNodeEventsWithConfig(ipc)
 
-    let config
+    this._eventsIpcResult = { state: 'loading', value: promise }
 
-    try {
-      config = await this.getFullInitialConfig()
-    } catch (err) {
+    // This is a terrible hack until we land GraphQL subscriptions which will
+    // allow for more granular concurrent notifications then our current
+    // notify the frontend & refetch approach
+    const toLaunchpad = this.ctx.emitter.toLaunchpad
+
+    this.ctx.emitter.toLaunchpad = () => {}
+
+    return promise.then(async (val) => {
+      if (this._eventsIpcResult.value === promise) {
+        // If we're handling the events, we don't want any notifications
+        // to send to the client until the `.finally` of this block.
+        // TODO: Remove when GraphQL Subscriptions lands
+        await this.handleSetupTestingTypeReply(ipc, val)
+        this._eventsIpcResult = { state: 'loaded', value: val }
+      }
+
+      return val
+    })
+    .catch((err) => {
       debug(`catch %o`, err)
       this._cleanupIpc(ipc)
       this._eventsIpcResult = { state: 'errored', value: err }
-      this._pendingInitialize?.reject(err)
+      throw err
+    })
+    .finally(() => {
+      this.ctx.emitter.toLaunchpad = toLaunchpad
       this.ctx.emitter.toLaunchpad()
+    })
+  }
 
-      return Promise.reject(err)
-    }
+  private async callSetupNodeEventsWithConfig (ipc: ProjectConfigIpc): Promise<SetupNodeEventsReply> {
+    const config = await this.getFullInitialConfig()
 
     assert(config)
     assert(this._currentTestingType)
@@ -815,22 +827,6 @@ export class ProjectLifecycleManager {
       configFile: this.configFilePath,
       version: this.ctx._apis.configApi.cypressVersion,
       testingType: this._currentTestingType,
-    })
-
-    this._eventsIpcResult = { state: 'loading', value: promise }
-
-    promise.then(async (val) => {
-      this._eventsIpcResult = { state: 'loaded', value: val }
-      await this.handleSetupTestingTypeReply(ipc, val)
-    })
-    .catch((err) => {
-      debug(`catch %o`, err)
-      this._cleanupIpc(ipc)
-      this._eventsIpcResult = { state: 'errored', value: err }
-      this._pendingInitialize?.reject(err)
-    })
-    .finally(() => {
-      this.ctx.emitter.toLaunchpad()
     })
 
     return promise
@@ -1187,11 +1183,22 @@ export class ProjectLifecycleManager {
 
     const finalConfig = this._cachedFullConfig = this.ctx._apis.configApi.updateWithPluginValues(fullConfig, result.setupConfig ?? {})
 
+    // This happens automatically with openProjectCreate in run mode
+    if (!this.ctx.isRunMode) {
+      if (!this._initializedProject) {
+        this._initializedProject = await this.ctx.actions.project.initializeActiveProject({})
+      } else {
+        // TODO: modify the _initializedProject
+      }
+    }
+
     if (this.ctx.coreData.cliBrowser) {
       await this.setActiveBrowser(this.ctx.coreData.cliBrowser)
     }
 
     this._pendingInitialize?.resolve(finalConfig)
+
+    return result
   }
 
   private async setActiveBrowser (cliBrowser: string) {
@@ -1232,15 +1239,16 @@ export class ProjectLifecycleManager {
   }
 
   destroy () {
+    this.resetInternalState()
     // @ts-ignore
     process.removeListener('exit', this.onProcessExit)
   }
 
-  isTestingTypeConfigured (testingType: TestingType) {
+  isTestingTypeConfigured (testingType: TestingType): boolean {
     const config = this.loadedFullConfig ?? this.loadedConfigFile
 
     if (!config) {
-      return null
+      return false
     }
 
     if (!_.has(config, testingType)) {
@@ -1294,9 +1302,10 @@ export class ProjectLifecycleManager {
   }
 
   /**
-   * When we have an error while "loading" a resource,
-   * we handle it internally with the promise state, and therefore
-   * do not
+   * When there is an error during any part of the lifecycle
+   * initiation, we pass it through here. This allows us to intercept
+   * centrally in the e2e tests, as well as notify the "pending initialization"
+   * for run mode
    */
   private onLoadError = (err: any) => {
     this._pendingInitialize?.reject(err)

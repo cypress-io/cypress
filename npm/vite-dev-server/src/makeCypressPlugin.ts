@@ -37,6 +37,7 @@ export const makeCypressPlugin = (
   supportFilePath: string | false,
   devServerEvents: NodeJS.EventEmitter,
   specs: Spec[],
+  namespace: string,
   indexHtml?: string,
 ): Plugin => {
   let base = '/'
@@ -60,7 +61,7 @@ export const makeCypressPlugin = (
         return {
           define: {
             'import.meta.env.__cypress_supportPath': JSON.stringify(normalizedSupportFilePath),
-            'import.meta.env.__cypress_originAutUrl': JSON.stringify(`__cypress/iframes/${convertPathToPosix(projectRoot)}/`),
+            'import.meta.env.__cypress_originAutUrl': JSON.stringify(`${namespace}/iframes/${convertPathToPosix(projectRoot)}/`),
           },
         }
       }

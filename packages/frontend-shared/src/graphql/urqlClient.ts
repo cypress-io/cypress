@@ -32,6 +32,9 @@ declare global {
   interface Window {
     __CYPRESS_INITIAL_DATA__: SSRData
     __CYPRESS_GRAPHQL_PORT__?: string
+    __CYPRESS_CONFIG__: {
+      base64Config: string
+    }
   }
 }
 
@@ -49,7 +52,7 @@ function gqlPort () {
 
 export async function preloadLaunchpadData () {
   try {
-    const resp = await fetch(`http://localhost:${gqlPort()}/__cypress/launchpad-preload`)
+    const resp = await fetch(`http://localhost:${gqlPort()}/__launchpad/preload`)
 
     window.__CYPRESS_INITIAL_DATA__ = await resp.json()
   } catch {
@@ -57,7 +60,18 @@ export async function preloadLaunchpadData () {
   }
 }
 
-export function makeUrqlClient (target: 'launchpad' | 'app'): Client {
+interface LaunchpadUrqlClientConfig {
+  target: 'launchpad'
+}
+
+interface AppUrqlClientConfig {
+  target: 'app'
+  socketIoRoute: string
+}
+
+export type UrqlClientConfig = LaunchpadUrqlClientConfig | AppUrqlClientConfig
+
+export function makeUrqlClient (config: UrqlClientConfig): Client {
   const port = gqlPort()
 
   const GRAPHQL_URL = `http://localhost:${port}/graphql`
@@ -65,7 +79,7 @@ export function makeUrqlClient (target: 'launchpad' | 'app'): Client {
   // If we're in the launchpad, we connect to the known GraphQL Socket port,
   // otherwise we connect to the /__socket.io of the current domain, unless we've explicitly
   //
-  const io = getPubSubSource({ target, gqlPort: port, serverPort: SERVER_PORT_MATCH?.[1] })
+  const io = getPubSubSource({ gqlPort: port, serverPort: SERVER_PORT_MATCH?.[1], ...config })
 
   let hasError = false
 
@@ -120,11 +134,20 @@ export function makeUrqlClient (target: 'launchpad' | 'app'): Client {
   })
 }
 
-interface PubSubConfig {
-  target: 'launchpad' | 'app'
+interface LaunchpadPubSubConfig {
+  target: 'launchpad'
   gqlPort: string
   serverPort?: string
 }
+
+interface AppPubSubConfig {
+  target: 'app'
+  gqlPort: string
+  serverPort?: string
+  socketIoRoute: string
+}
+
+type PubSubConfig = LaunchpadPubSubConfig | AppPubSubConfig
 
 function getPubSubSource (config: PubSubConfig) {
   if (config.target === 'launchpad') {
@@ -137,13 +160,13 @@ function getPubSubSource (config: PubSubConfig) {
   // Only happens during testing
   if (config.serverPort) {
     return client(`http://localhost:${config.serverPort}`, {
-      path: '/__socket.io',
+      path: config.socketIoRoute,
       transports: ['websocket'],
     })
   }
 
   return client({
-    path: '/__socket.io',
+    path: config.socketIoRoute,
     transports: ['websocket'],
   })
 }
