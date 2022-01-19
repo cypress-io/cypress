@@ -1,6 +1,6 @@
 import httpProxy from 'http-proxy'
 import Debug from 'debug'
-import { ErrorRequestHandler, Router } from 'express'
+import { ErrorRequestHandler, Request, Router } from 'express'
 import send from 'send'
 import { getPathToDist } from '@packages/resolve-dist'
 
@@ -78,8 +78,10 @@ export const createCommonRoutes = ({
     throw Error(`clientRoute is required. Received ${clientRoute}`)
   }
 
-  router.get(clientRoute, (req, res) => {
-    getCtx().html.appHtml()
+  router.get(clientRoute, (req: Request & { proxiedUrl?: string }, res) => {
+    const nonProxied = req.proxiedUrl?.startsWith('/') ?? false
+
+    getCtx().html.appHtml(nonProxied)
     .then((html) => res.send(html))
     .catch((e) => res.status(500).send({ stack: e.stack }))
   })
