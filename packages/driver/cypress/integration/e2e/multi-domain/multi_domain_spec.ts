@@ -245,6 +245,7 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
         done()
       })
 
+      // @ts-ignore
       cy.switchToDomain('foobar.com', 'foo', () => {})
     })
 

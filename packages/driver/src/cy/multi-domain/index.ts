@@ -33,7 +33,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
   Commands.addAll({
     // this isn't fully implemented, but in place to be able to test out
     // the other parts of multi-domain
-    switchToDomain (domain: string, doneOrDataOrFn: [] | Mocha.Done | (() => {}), dataOrFn?: [] | (() => {}), fn?: (data?: []) => {}) {
+    switchToDomain (domain: string, doneOrDataOrFn: any[] | Mocha.Done | (() => {}), dataOrFn?: any[] | (() => {}), fn?: (data?: any[]) => {}) {
       clearTimeout(timeoutId)
 
       if (!config('experimentalMultiDomain')) {
