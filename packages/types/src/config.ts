@@ -13,7 +13,7 @@ export type ResolvedFromConfig = {
 }
 
 export type ResolvedConfigurationOptions = Partial<{
-  [x in keyof Cypress.ResolvedConfigOptions]: ResolvedFromConfig
+  [x in keyof Partial<Cypress.RuntimeConfigOptions & Cypress.ResolvedConfigOptions>]: ResolvedFromConfig
 }>
 
 // This represents the full configuration object including a `resolved` key
