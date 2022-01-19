@@ -299,9 +299,11 @@ describe('Launchpad: Setup Project', () => {
         cy.get('h1').should('contain', 'Project Setup')
         cy.contains('Confirm the front-end framework and bundler used in your project.')
 
-        cy.findByRole('button', { name: 'Front-end Framework Pick a framework' })
+        cy.findByRole('button', {
+          name: 'Front-end Framework Pick a framework',
+          expanded: false,
+        })
         .should('have.attr', 'aria-haspopup', 'true')
-        .should('have.attr', 'aria-expanded', 'false')
 
         cy.findByRole('button', { name: 'Next Step' }).should('have.disabled')
 
@@ -344,9 +346,12 @@ describe('Launchpad: Setup Project', () => {
                 cy.get('h1').should('contain', 'Project Setup')
                 cy.contains('Confirm the front-end framework and bundler used in your project.')
 
-                cy.findByRole('button', { name: 'Front-end Framework Pick a framework' })
+                cy.findByRole('button', {
+                  name: 'Front-end Framework Pick a framework',
+                  expanded: false,
+                })
                 .should('have.attr', 'aria-haspopup', 'true')
-                .should('have.attr', 'aria-expanded', 'false')
+                // .should('have.attr', 'aria-expanded', 'false')
 
                 cy.findByRole('button', { name: 'Next Step' })
                 .should('have.disabled')
@@ -376,9 +381,12 @@ describe('Launchpad: Setup Project', () => {
                 cy.findByRole('button', { name: `Front-end Framework ${framework.name}` }) // ensure selected option updates
 
                 if (framework.supportedBundlers.length > 1) {
-                  cy.findByRole('button', { name: 'Bundler Pick a bundler' })
+                  cy.findByRole('button', {
+                    name: 'Bundler Pick a bundler',
+                    expanded: false,
+                  })
                   .should('have.attr', 'aria-haspopup', 'true')
-                  .should('have.attr', 'aria-expanded', 'false')
+                  // .should('have.attr', 'aria-expanded', 'false')
                   .click()
                   .should('have.attr', 'aria-expanded', 'true')
 
@@ -426,29 +434,6 @@ describe('Launchpad: Setup Project', () => {
                 }
 
                 cy.contains('code', installCommand)
-
-                // @ts-ignore
-                cy.findByRole('button', { name: 'Copy' }).realClick()
-
-                cy.findByRole('button', { name: 'Copied!' })
-
-                if (Cypress.config('browser').name === 'chrome') {
-                  cy.wrap(Cypress.automation('remote:debugger:protocol', {
-                    command: 'Browser.grantPermissions',
-                    params: {
-                      permissions: ['clipboardReadWrite', 'clipboardSanitizedWrite'],
-                      origin: window.location.origin,
-                    },
-                  }))
-                }
-
-                cy.window().its('navigator.permissions')
-                .invoke('query', { name: 'clipboard-read' })
-                .its('state').then(cy.log)
-
-                cy.window().its('navigator.clipboard')
-                .invoke('readText')
-                .should('equal', installCommand)
 
                 const validatePackage = (packageName) => {
                   cy.validateExternalLink({
