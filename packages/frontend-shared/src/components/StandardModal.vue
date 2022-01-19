@@ -2,7 +2,7 @@
   <Dialog
     :open="modelValue"
     class="inset-0 z-10 fixed overflow-y-auto"
-    @close="clickOutside && setIsOpen(false)"
+    @close="clickOutside && closeModal()"
   >
     <div class="flex min-h-screen items-center justify-center">
       <slot
@@ -18,7 +18,7 @@
         <StandardModalHeader
           :help-link="helpLink"
           :help-text="helpText"
-          @close="setIsOpen(false)"
+          @close="closeModal"
         >
           <slot name="title">
             {{ title }}
@@ -67,7 +67,7 @@ const props = withDefaults(defineProps<{
   helpText?: string
   clickOutside?: boolean
   variant?: 'bare'
-  title?: string,
+  title?: string
   class?: string | string[] | Record<string, any>
 }>(), {
   clickOutside: true,
@@ -83,4 +83,7 @@ const setIsOpen = (val: boolean) => {
   emit('update:modelValue', val)
 }
 
+const closeModal = () => {
+  setIsOpen(false)
+}
 </script>
