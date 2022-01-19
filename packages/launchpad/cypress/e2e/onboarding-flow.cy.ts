@@ -59,8 +59,6 @@ describe('Launchpad: Onboarding Flow', () => {
     }).then((str) => {
       cy.log(str)
     })
-
-    cy.findByText('Choose a Browser', { timeout: 10000 })
   })
 
   it('can setup e2e testing', () => {
