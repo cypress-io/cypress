@@ -362,7 +362,9 @@ export class ProjectLifecycleManager {
 
   private closeWatchers () {
     for (const watcher of this.watchers.values()) {
-      watcher.close()
+      // We don't care if there's an error while closing the watcher,
+      // the watch listener on our end is already removed synchronously by chokidar
+      watcher.close().catch((e) => {})
     }
     this.watchers = new Set()
   }
@@ -521,6 +523,8 @@ export class ProjectLifecycleManager {
         this.validateConfigFile(this.configFilePath, result.initialConfig)
         this.onConfigLoaded(child, ipc, result)
       }
+
+      this.ctx.emitter.toLaunchpad()
     })
     .catch((err) => {
       debug(`catch %o`, err)
@@ -530,8 +534,6 @@ export class ProjectLifecycleManager {
       }
 
       this.onLoadError(err)
-    })
-    .finally(() => {
       this.ctx.emitter.toLaunchpad()
     })
 
@@ -866,7 +868,7 @@ export class ProjectLifecycleManager {
   closeWatcher (watcherToClose: FSWatcher) {
     for (const watcher of this.watchers.values()) {
       if (watcher === watcherToClose) {
-        watcher.close()
+        watcher.close().catch(() => {})
         this.watchers.delete(watcher)
 
         return

@@ -260,7 +260,7 @@ export const mutation = mutationType({
         let path = args.path
 
         if (!path) {
-          ctx.actions.project.addProjectFromElectronNativeFolderSelect()
+          await ctx.actions.project.addProjectFromElectronNativeFolderSelect()
 
           return {}
         }
