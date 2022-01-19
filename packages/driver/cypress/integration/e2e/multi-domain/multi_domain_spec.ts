@@ -72,11 +72,8 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
     })
 
     it('passes mixed types to callback function', () => {
-      const data: [{ foo }, string, number, boolean] = [{ foo: 'bar' }, 'fuzz', 1, true]
-
-      cy.switchToDomain('foobar.com', data, ([{ foo }, fuzz, num, bool]) => {
-        expect(foo).to.equal('bar')
-        expect(fuzz).to.equal('fuzz')
+      cy.switchToDomain('foobar.com', ['foo', 1, true], ([foo, num, bool]) => {
+        expect(foo).to.equal('foo')
         expect(num).to.equal(1)
         expect(bool).to.be.true
       })
