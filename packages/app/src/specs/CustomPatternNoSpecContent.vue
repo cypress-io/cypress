@@ -1,8 +1,11 @@
 <template>
   <!-- TODO: spread on props.gql is needed due to bug in mountFragment. Fix -->
-  <SpecPatterns :gql="{...props.gql}" />
+  <SpecPatterns
+    v-if="props.gql.currentProject"
+    :gql="{...props.gql.currentProject}"
+  />
 
-  <div class="flex justify-center gap-16px mt-32px">
+  <div class="flex mt-32px gap-16px justify-center">
     <OpenConfigFileInIDE>
       <Button
         size="lg"
@@ -31,7 +34,7 @@
 import Button from '@cy/components/Button.vue'
 import { gql } from '@urql/core'
 import type { CustomPatternNoSpecContentFragment } from '../generated/graphql'
-import SpecPatterns from './SpecPatterns.vue'
+import SpecPatterns from '../components/SpecPatterns.vue'
 import { useI18n } from '@cy/i18n'
 import OpenConfigFileInIDE from '@packages/frontend-shared/src/gql-components/OpenConfigFileInIDE.vue'
 
@@ -43,7 +46,10 @@ const emit = defineEmits<{
 
 gql`
 fragment CustomPatternNoSpecContent on Query {
-  ...SpecPatterns
+  currentProject {
+    id
+    ...SpecPatterns
+  }
 }
 `
 
