@@ -46,7 +46,9 @@ describe('<BaseError />', () => {
         result.title = messages.header
         result.message = null
       },
-      render: (gqlVal) => <BaseError gql={gqlVal} />,
+      render: (gqlVal) => (<div class="p-16px">
+        <BaseError gql={gqlVal} />,
+      </div>),
     })
     .get(retryButtonSelector)
     .click()
@@ -62,7 +64,9 @@ describe('<BaseError />', () => {
         result.message = customMessage
         result.stack = customStack
       },
-      render: (gqlVal) => <BaseError gql={gqlVal} />,
+      render: (gqlVal) => (<div class="p-16px">
+        <BaseError gql={gqlVal} />
+      </div>),
     })
     .get('body')
     .should('contain.text', customHeaderMessage)
