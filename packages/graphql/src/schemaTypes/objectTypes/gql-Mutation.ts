@@ -29,6 +29,20 @@ export const mutation = mutationType({
       },
     })
 
+    t.nonNull.boolean('matchesSpecPattern', {
+      description: 'Check if a give spec file will match the project spec pattern',
+      args: {
+        specFile: nonNull(stringArg()),
+      },
+      resolve: (source, args, ctx) => {
+        if (!ctx.currentProject) {
+          return false
+        }
+
+        return ctx.project.matchesSpecPattern(args.specFile)
+      },
+    })
+
     t.field('internal_clearLatestProjectCache', {
       type: 'Boolean',
       resolve: async (_, args, ctx) => {
@@ -246,7 +260,7 @@ export const mutation = mutationType({
         let path = args.path
 
         if (!path) {
-          ctx.actions.project.addProjectFromElectronNativeFolderSelect()
+          await ctx.actions.project.addProjectFromElectronNativeFolderSelect()
 
           return {}
         }

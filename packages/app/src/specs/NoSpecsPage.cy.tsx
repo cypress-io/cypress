@@ -27,7 +27,7 @@ describe('<NoSpecsPage />', { viewportHeight: 655, viewportWidth: 1032 }, () => 
               story: '**/*.stories.*',
             },
             currentTestingType: 'component',
-            specs: { ...ctx.currentProject?.specs, edges: ctx.currentProject?.specs?.edges || [] },
+            specsBare: { ...ctx.currentProject?.specsBare, edges: ctx.currentProject?.specsBare?.edges || [] },
           }
         },
         render: (gql) => {
@@ -73,7 +73,7 @@ describe('<NoSpecsPage />', { viewportHeight: 655, viewportWidth: 1032 }, () => 
               component: '**.vue',
               story: '**/*.stories.*',
             },
-            specs: { ...ctx.currentProject?.specs, edges: ctx.currentProject?.specs?.edges || [] },
+            specsBare: { ...ctx.currentProject?.specsBare, edges: ctx.currentProject?.specsBare?.edges || [] },
           }
         },
         render: (gql) => {

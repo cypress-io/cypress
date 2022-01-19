@@ -74,3 +74,9 @@ const closeCreateSpecModal = () => {
 }
 
 </script>
+
+<route>
+{
+  name: "Specs"
+}
+</route>

@@ -83,7 +83,6 @@ export class HtmlDataSource {
     return html.replace('<body>', `
       <body>
         <script>
-          window.__CYPRESS_GRAPHQL_PORT__ = ${JSON.stringify(this.ctx.gqlServerPort)};
           window.__CYPRESS_INITIAL_DATA__ = ${JSON.stringify(initialData)};
           window.__CYPRESS_CONFIG__ = ${JSON.stringify(serveConfig)}
         </script>

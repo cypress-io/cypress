@@ -210,7 +210,7 @@ export function create (projectRoot, _options: WindowOptions = {}, newBrowserWin
 }
 
 // open launchpad BrowserWindow
-export function open (projectRoot, gqlPort: number, options: WindowOptions = {}, newBrowserWindow = _newBrowserWindow): Bluebird<BrowserWindow> {
+export function open (projectRoot, launchpadPort: number, options: WindowOptions = {}, newBrowserWindow = _newBrowserWindow): Bluebird<BrowserWindow> {
   // if we already have a window open based
   // on that type then just show + focus it!
   let win = getByType(options.type)
@@ -233,7 +233,7 @@ export function open (projectRoot, gqlPort: number, options: WindowOptions = {},
   })
 
   if (!options.url) {
-    options.url = getUrl(options.type, gqlPort)
+    options.url = getUrl(options.type, launchpadPort)
   }
 
   win = create(projectRoot, options, newBrowserWindow)
