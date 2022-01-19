@@ -6,6 +6,10 @@ export type RunnerPkg = 'app' | 'runner' | 'runner-ct'
 
 type FoldersWithDist = 'static' | 'driver' | RunnerPkg
 
+export const resolveFromPackages = (...args: string[]) => {
+  return path.join(...[__dirname, '..', '..', ...args])
+}
+
 export const getPathToDist = (folder: FoldersWithDist, ...args: string[]) => {
   return path.join(...[__dirname, '..', '..', folder, 'dist', ...args])
 }

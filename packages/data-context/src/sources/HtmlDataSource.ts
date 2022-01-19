@@ -4,7 +4,9 @@
  * initial loading
  */
 import type { DataContext } from '../DataContext'
-import { getPathToDist } from '@packages/resolve-dist'
+import { getPathToDist, resolveFromPackages } from '@packages/resolve-dist'
+
+const PATH_TO_NON_PROXIED_ERROR = resolveFromPackages('server', 'lib', 'html', 'non_proxied_error.html')
 
 export class HtmlDataSource {
   constructor (private ctx: DataContext) {}
@@ -85,36 +87,8 @@ export class HtmlDataSource {
    * The app html includes the SSR'ed data to bootstrap the page for the app
    */
   async appHtml (nonProxied: boolean) {
-    // if (req.proxiedUrl?.startsWith('/')) {
     if (nonProxied) {
-      // const PATH_TO_NON_PROXIED_ERROR = path.join(__dirname, '..', '..', 'server', 'lib', 'html', 'non_proxied_error.html')
-      // console.log('asdasdsa', PATH_TO_NON_PROXIED_ERROR)
-      return `
-        <html>
-          <head>
-            <meta http-equiv="content-type" content="text/html;charset=utf-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Cypress</title>
-
-            <link href="/__cypress/runner/favicon.ico" rel="icon">
-
-            <link rel="stylesheet" href="/__cypress/runner/cypress_runner.css">
-          </head>
-          <body>
-            <div id="app">
-              <div class="runner automation-failure">
-                <div class="automation-message">
-                  <p>Whoops, we can't run your tests.</p>
-                  <div>
-                    <p class="muted">This browser was not launched through Cypress. Tests cannot run.</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </body>
-        </html>
-
-      `
+      return this.ctx.fs.readFile(PATH_TO_NON_PROXIED_ERROR, 'utf-8')
     }
 
     const [appHtml, appInitialData, serveConfig] = await Promise.all([
