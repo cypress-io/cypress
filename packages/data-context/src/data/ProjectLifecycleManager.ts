@@ -442,6 +442,7 @@ export class ProjectLifecycleManager {
         // @ts-ignore - we don't know if the browser is headed or headless at this point.
         // this is handled in open_project#launch.
         fullConfig.browsers = browsers
+        fullConfig.resolved.browsers = { 'value': fullConfig.browsers, 'from': 'runtime' }
       }
 
       fullConfig.browsers = fullConfig.browsers?.map((browser) => {
@@ -454,8 +455,6 @@ export class ProjectLifecycleManager {
           warning: browser.warning || this.ctx._apis.errorApi.message('CHROME_WEB_SECURITY_NOT_SUPPORTED', browser.name),
         }
       })
-
-      fullConfig.resolved.browsers = { 'value': fullConfig.browsers, 'from': 'runtime' }
 
       // If we have withBrowsers set to false, it means we're coming from the legacy config.get API
       // in tests, which shouldn't be validating the config
