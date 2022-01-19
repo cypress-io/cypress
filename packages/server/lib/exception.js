@@ -17,11 +17,6 @@ const stripPath = (text) => {
   })
 }
 
-// POST https://api.cypress.io/exceptions
-// sets request body
-// err: {}
-// version: {}
-
 module.exports = {
   getErr (err) {
     return {
@@ -60,6 +55,9 @@ module.exports = {
     return Promise.join(this.getBody(err), this.getAuthToken())
     .spread((body, authToken) => {
       return api.createCrashReport(body, authToken)
+    })
+    .catch(() => {
+      // nothing to do
     })
   },
 }
