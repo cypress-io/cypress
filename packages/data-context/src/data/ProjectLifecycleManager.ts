@@ -1120,18 +1120,13 @@ export class ProjectLifecycleManager {
   }
 
   setConfigFilePath (lang: 'ts' | 'js') {
-    switch (lang) {
-      case 'ts':
-        this._configFilePath = this._pathToFile('cypress.config.ts')
-        break
+    if (lang === 'ts') {
+      this._configFilePath = this._pathToFile('cypress.config.ts')
 
-      case 'js':
-        this._configFilePath = this._pathToFile('cypress.config.js')
-        break
-
-      default:
-        throw new Error('Unreachable')
+      return
     }
+
+    this._configFilePath = this._pathToFile('cypress.config.js')
   }
 
   private _pathToFile (file: string) {
