@@ -7,7 +7,7 @@ import type { DataContext } from '..'
 export class FileActions {
   constructor (private ctx: DataContext) {}
 
-  async writeFileInProject (relativePath: string, data: any) {
+  writeFileInProject (relativePath: string, data: any) {
     if (!this.ctx.currentProject) {
       throw new Error(`Cannot write file in project without active project`)
     }

@@ -304,13 +304,9 @@ export class ProjectLifecycleManager {
       return
     }
 
-    // If we've chosen e2e and we don't have a config file, we can scaffold one
-    // without any sort of onboarding wizard.
-    if (!this.metaState.hasValidConfigFile) {
-      if (testingType === 'e2e' && !this.ctx.isRunMode) {
-        this.ctx.actions.wizard.scaffoldTestingType().catch(this.onLoadError)
-      }
-    } else if (this.isTestingTypeConfigured(testingType)) {
+    if (!this.isTestingTypeConfigured(testingType)) {
+      this.ctx.actions.wizard.scaffoldTestingType().catch(this.onLoadError)
+    } else {
       this.loadTestingType()
     }
   }

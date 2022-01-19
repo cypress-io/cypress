@@ -80,6 +80,10 @@ export class WizardActions {
         return chosenLanguage
       }
       case 'component': {
+        if (!this.canScaffoldComponent) {
+          return
+        }
+
         this.ctx.coreData.scaffoldedFiles = await this.scaffoldComponent()
         this.ctx.lifecycleManager.refreshMetaState()
 
@@ -99,6 +103,12 @@ export class WizardActions {
     ])
 
     return scaffolded
+  }
+
+  private get canScaffoldComponent () {
+    const { chosenBundler, chosenFramework, chosenLanguage } = this.ctx.wizard
+
+    return Boolean(chosenFramework && chosenLanguage && chosenBundler)
   }
 
   private async scaffoldComponent () {
@@ -127,19 +137,11 @@ export class WizardActions {
     const supportFile = path.join(this.projectRoot, `cypress/support/${fileName}.${language}`)
     const supportDir = path.dirname(supportFile)
 
-    // @ts-ignore
-    await this.ctx.fs.mkdir(supportDir, { recursive: true })
-    await this.scaffoldFile(supportFile, dedent`
-      // TODO: source the example support file
-    `, 'Scaffold default support file')
+    await this.ctx.fs.ensureDir(supportDir)
 
-    return {
-      status: 'valid',
-      description: 'Added a support file, for extending the Cypress api',
-      file: {
-        absolute: supportFile,
-      },
-    }
+    return this.scaffoldFile(supportFile, dedent`
+      // TODO: source the example support file
+    `, 'Added a support file, for extending the Cypress api')
   }
 
   private async scaffoldConfig (configCode: string): Promise<NexusGenObjects['ScaffoldedFile']> {

@@ -139,8 +139,39 @@ describe('Launchpad: Setup Project', () => {
 
     // project has a cypress.configuration file with component testing configured
     describe('project that has not been configured for e2e', () => {
-      // FIXME: ProjectLifecycleManager is skipping straight to browser pages when it should show setup page.
-      it.skip('shows the first step in configuration when selecting e2e tests', () => {
+      it('shows existing files as skipped when scaffolding e2e', () => {
+        const scaffoldingPaths = {
+          fixture: ['cypress/fixtures/example.json', '{}'],
+          support: ['cypress/support/e2e.js', '// FooBarBaz'],
+        } as const
+
+        cy.openProject('pristine')
+        cy.withCtx((ctx, o) => {
+          ctx.actions.file.writeFileInProject(...o.scaffoldingPaths.support)
+          ctx.actions.file.writeFileInProject(...o.scaffoldingPaths.fixture)
+        }, { scaffoldingPaths })
+
+        cy.visitLaunchpad()
+        cy.get('[data-cy-testingtype="e2e"]').click()
+
+        for (const [path, contents] of Object.values(scaffoldingPaths)) {
+          cy.contains('h2', path)
+          .parents('[data-cy="collapsible-header"]')
+          .should('contain', 'Skipped')
+          .should('have.attr', 'aria-expanded', 'false')
+          .parent()
+          .contains(contents)
+          .should('not.be.visible')
+
+          cy.contains('h2', path).click()
+          .parents('[data-cy="collapsible-header"]')
+          .should('have.attr', 'aria-expanded', 'true')
+          .parent()
+          .contains(contents)
+        }
+      })
+
+      it('shows the first step in configuration when selecting e2e tests', () => {
         cy.openProject('pristine-with-ct-testing')
         cy.visitLaunchpad()
 
@@ -161,8 +192,7 @@ describe('Launchpad: Setup Project', () => {
         })
       })
 
-      // FIXME: ProjectLifecycleManager is skipping straight to browser pages when it should show setup page.
-      it.skip('moves to "Choose a Browser" page after clicking "Continue" button in first step in configuration page', () => {
+      it('moves to "Choose a Browser" page after clicking "Continue" button in first step in configuration page', () => {
         cy.openProject('pristine-with-ct-testing')
         cy.visitLaunchpad()
 
@@ -194,7 +224,7 @@ describe('Launchpad: Setup Project', () => {
           cy.contains('cypress.config.js')
         })
 
-        cy.get('[data-cy=valid]').within(() => {
+        cy.get('[data-cy=skipped]').within(() => {
           cy.contains('cypress/support/e2e.js')
           cy.contains('cypress/fixtures/example.json')
         })
