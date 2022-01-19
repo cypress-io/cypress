@@ -46,7 +46,7 @@ export async function makeGraphQLServer () {
   function makeProxy (): express.Handler {
     if (process.env.CYPRESS_INTERNAL_VITE_DEV) {
       const viteProxy = httpProxy.createProxyServer({
-        target: `http://localhost:${process.env.CYPRESS_INTERNAL_VITE_APP_PORT}/`,
+        target: `http://localhost:${process.env.CYPRESS_INTERNAL_VITE_LAUNCHPAD_PORT}/`,
       })
 
       return (req, res) => {
@@ -71,7 +71,7 @@ export async function makeGraphQLServer () {
     const ctx = getCtx()
     const port = (srv.address() as AddressInfo).port
 
-    const endpoint = `http://localhost:${port}/__cypress/graphql`
+    const endpoint = `http://localhost:${port}/__launchpad/graphql`
 
     if (process.env.NODE_ENV === 'development') {
       /* eslint-disable-next-line no-console */
