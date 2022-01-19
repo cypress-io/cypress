@@ -346,38 +346,17 @@ describe('Launchpad: Setup Project', () => {
                 cy.get('h1').should('contain', 'Project Setup')
                 cy.contains('Confirm the front-end framework and bundler used in your project.')
 
-                cy.findByRole('button', {
-                  name: 'Front-end Framework Pick a framework',
-                  expanded: false,
-                })
-                .should('have.attr', 'aria-haspopup', 'true')
-                // .should('have.attr', 'aria-expanded', 'false')
-
                 cy.findByRole('button', { name: 'Next Step' })
                 .should('have.disabled')
                 .as('nextStepButton')
 
-                cy.findByRole('button', { name: 'Front-end Framework Pick a framework' })
-                .click()
-                .should('have.attr', 'aria-expanded', 'true')
-
-                const frameworkIconName = (frameworkName) => {
-                  if (frameworkName.includes('React')) {
-                    return 'react-logo'
-                  }
-
-                  if (frameworkName.includes('Vue')) {
-                    return 'vue-logo'
-                  }
-
-                  return `${Cypress._.lowerCase(framework.name).replace(' ', '')}-logo`
-                }
-
-                cy.findByRole('option', { name: framework.name })
-                .find('svg')
-                .should('have.attr', 'data-cy', frameworkIconName(framework.name))
+                cy.findByRole('button', {
+                  name: 'Front-end Framework Pick a framework',
+                  expanded: false,
+                })
                 .click()
 
+                cy.findByRole('option', { name: framework.name }).click()
                 cy.findByRole('button', { name: `Front-end Framework ${framework.name}` }) // ensure selected option updates
 
                 if (framework.supportedBundlers.length > 1) {
@@ -386,7 +365,6 @@ describe('Launchpad: Setup Project', () => {
                     expanded: false,
                   })
                   .should('have.attr', 'aria-haspopup', 'true')
-                  // .should('have.attr', 'aria-expanded', 'false')
                   .click()
                   .should('have.attr', 'aria-expanded', 'true')
 
