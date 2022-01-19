@@ -407,9 +407,13 @@ export const mutation = mutationType({
       description: 'Transforms cypress.json file into cypress.config.js file',
       type: 'Boolean',
       resolve: (_, args, ctx) => {
-        ctx.actions.migration.createConfigFile()
+        try {
+          ctx.actions.migration.createConfigFile()
 
-        return true
+          return true
+        } catch {
+          return false
+        }
       },
     })
 
