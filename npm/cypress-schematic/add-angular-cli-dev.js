@@ -7,7 +7,7 @@ async function main () {
     const pkg = require('./package.json')
 
     console.log('Adding @angular/cli to package.json')
-    pkg['devDependencies']['@angular/cli'] = '11.2.12'
+    pkg['devDependencies']['@angular/cli'] = '13.1.4'
     fs.writeFileSync('./package.json', JSON.stringify(pkg, null, 2))
 
     console.log('Running yarn install')
