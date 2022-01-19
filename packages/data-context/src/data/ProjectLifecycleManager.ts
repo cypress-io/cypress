@@ -305,7 +305,10 @@ export class ProjectLifecycleManager {
     }
 
     if (!this.isTestingTypeConfigured(testingType)) {
-      this.ctx.actions.wizard.scaffoldTestingType().catch(this.onLoadError)
+      // We can't know if the testing type needs to be scaffolded until we've loaded the config file
+      if (this.loadedConfigFile) {
+        this.ctx.actions.wizard.scaffoldTestingType().catch(this.onLoadError)
+      }
     } else {
       this.loadTestingType()
     }
