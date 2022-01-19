@@ -42,6 +42,7 @@
     "wonka": "^4.0.15"
   },
   "devDependencies": {
+    "@packages/config": "0.0.0-development",
     "@packages/example": "0.0.0-development",
     "@packages/resolve-dist": "0.0.0-development",
     "@packages/root": "0.0.0-development",
