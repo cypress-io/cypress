@@ -25,7 +25,11 @@ export class MigrationDataSource {
   async createConfigString () {
     const cfg = await this.parseCypressConfig()
     const pluginsPath = this.getPluginRelativePath(cfg)
-    const blah = Object.entries(cfg).reduce((acc, [key, val]) => {
+    const rawConfigObjects = Object.entries(cfg).reduce((acc, [key, val]) => {
+      if (key === 'pluginsFile') {
+        return acc
+      }
+
       if (key === 'e2e' || key === 'component') {
         acc = { ...acc, [key]: val }
       } else {
@@ -35,7 +39,7 @@ export class MigrationDataSource {
       return acc
     }, { global: {}, e2e: {}, component: {} })
 
-    return this.createCypressConfigJs(blah, pluginsPath)
+    return this.createCypressConfigJs(rawConfigObjects, pluginsPath)
   }
 
   private getPluginRelativePath (cfg: Partial<Cypress.ConfigOptions>) {
@@ -60,14 +64,14 @@ module.export = defineConfig({
   e2e: {
     setupNodeEvents(on, config) {
       require('${pluginPath}')
-    },
-    ${this.formatObjectForConfig(config.e2e, 4)},
+    }${config.e2e ? `
+    ${this.formatObjectForConfig(config.e2e, 4)},` : ''}
   },
   component: {
     setupNodeEvents(on, config) {
       require('${pluginPath}')
-    },
-    ${this.formatObjectForConfig(config.component, 4)},
+    },${config.component ? `
+    ${this.formatObjectForConfig(config.component, 4)},` : ''}
   },
 })
 `
