@@ -20,6 +20,7 @@
         :key="generator.id"
         v-model:title="title"
         :code-gen-glob="codeGenGlob"
+        :gql="props.gql"
         @restart="currentGeneratorId = undefined"
         @close="close"
       />
@@ -60,6 +61,7 @@ const emits = defineEmits<{
 gql`
 fragment CreateSpecModal on Query {
   ...CreateSpecCards
+  ...EmptyGeneratorCardStepOne
   currentProject {
     id
     ...ComponentGeneratorStepOne_codeGenGlob
