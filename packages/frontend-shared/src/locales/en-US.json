@@ -18,11 +18,20 @@
     "button": {
       "cancel": "Cancel"
     },
+    "loading": {
+      "config": {
+        "title": "Initializing Config...",
+        "description": "Please wait while we load your project and find browsers installed on your system"
+      }
+    },
     "select": {
       "placeholder": "Choose an option..."
     },
     "alert": {
       "dismissAriaLabel": "Dismiss"
+    },
+    "specPattern": {
+      "matches": "{0} Matches"
     }
   },
   "clipboard": {
@@ -261,9 +270,9 @@
     "codeExample": "Code Example",
     "compareTypes": {
       "e2eTitle": "End-to-end Tests",
-      "e2ebullet1": "Visit URLs via",
-      "e2ebullet2": "Test flows and functionality across multiple pages.",
-      "e2ebullet3": "Ideal for testing integrated flows in CD workflows.",
+      "e2eBullet1": "Visit URLs via",
+      "e2eBullet2": "Test flows and functionality across multiple pages.",
+      "e2eBullet3": "Ideal for testing integrated flows in CD workflows.",
       "componentTitle": "Component Tests",
       "ctBullet1": "Import components via",
       "ctBullet2": "Test individual components of a design system in isolation",
@@ -317,9 +326,7 @@
     },
     "specPattern": {
       "title": "Spec Patterns",
-      "description": "The globs pointing Cypress App to your spec files configured for this project. {0}",
-      "defaultIndicator": "Default Values",
-      "matches": "{0} Matches"
+      "description": "The globs pointing Cypress App to your spec files configured for this project. {0}"
     },
     "recordKey": {
       "title": "Record Key",

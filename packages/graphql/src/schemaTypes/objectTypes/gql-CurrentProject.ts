@@ -170,6 +170,11 @@ export const CurrentProject = objectType({
         return branchName
       },
     })
+
+    t.nonNull.boolean('isDefaultSpecPattern', {
+      description: 'True if the project is using the default spec pattern',
+      resolve: async (source, args, ctx) => ctx.project.getIsDefaultSpecPattern(),
+    })
   },
   sourceType: {
     module: '@packages/data-context/src/data/ProjectLifecycleManager',
