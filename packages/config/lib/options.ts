@@ -46,7 +46,7 @@ interface BreakingOption {
   isWarning?: boolean
 }
 
-const isValidConfig = (key, config) => {
+const isValidConfig = (key: string, config: any) => {
   const status = validate.isPlainObject(key, config)
 
   if (status !== true) {
