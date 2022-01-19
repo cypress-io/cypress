@@ -2,7 +2,7 @@
   <div class="flex-grow">
     <div
       v-if="mutation.fetching.value"
-      class="mt-48px w-full inline-flex items-center justify-center"
+      class="inline-flex items-center justify-center w-full mt-48px"
     >
       <i-cy-loading_x16 class="h-48px mr-12px animate-spin w-48px" />
       <p class="text-lg">
@@ -24,11 +24,11 @@
   <div>
     <div
       v-if="!result"
-      class="rounded-b h-24px w-full"
+      class="w-full rounded-b h-24px"
     />
     <StandardModalFooter
       v-else
-      class="flex h-72px gap-16px"
+      class="flex items-center h-72px gap-16px"
     >
       <router-link
         class="outline-none"

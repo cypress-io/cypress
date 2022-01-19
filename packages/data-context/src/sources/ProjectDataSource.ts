@@ -1,7 +1,8 @@
 import os from 'os'
 import { FrontendFramework, FRONTEND_FRAMEWORKS, ResolvedFromConfig, RESOLVED_FROM, FoundSpec } from '@packages/types'
 import { scanFSForAvailableDependency } from 'create-cypress-tests'
-import { debounce } from 'lodash'
+import minimatch from 'minimatch'
+import { debounce, isEqual } from 'lodash'
 import path from 'path'
 import Debug from 'debug'
 import commonPathPrefix from 'common-path-prefix'
@@ -14,6 +15,7 @@ import type { DataContext } from '..'
 import { toPosix } from '../util/file'
 import type { FilePartsShape } from '@packages/graphql/src/schemaTypes/objectTypes/gql-FileParts'
 import { STORIES_GLOB } from '.'
+import { getDefaultSpecPatterns } from '../util/config-options'
 
 export type SpecWithRelativeRoot = FoundSpec & { relativeToCommonRoot: string }
 
@@ -194,6 +196,7 @@ export class ProjectDataSource {
       const specs = await this.findSpecs(projectRoot, testingType, specPattern, ignoreSpecPattern, additionalIgnore)
 
       this.setSpecs(specs)
+
       if (testingType === 'component') {
         this.api.getDevServer().updateSpecs(specs)
       }
@@ -204,6 +207,30 @@ export class ProjectDataSource {
     this._specWatcher = this.ctx.lifecycleManager.addWatcher(specPattern)
     this._specWatcher.on('add', onSpecsChanged)
     this._specWatcher.on('unlink', onSpecsChanged)
+  }
+
+  async matchesSpecPattern (specFile: string): Promise<boolean> {
+    if (!this.ctx.currentProject || !this.ctx.coreData.currentTestingType) {
+      return false
+    }
+
+    const MINIMATCH_OPTIONS = { dot: true, matchBase: true }
+
+    const { specPattern = [], ignoreSpecPattern = [] } = await this.ctx.project.specPatternsForTestingType(this.ctx.currentProject, this.ctx.coreData.currentTestingType)
+
+    for (const pattern of ignoreSpecPattern) {
+      if (minimatch(specFile, pattern, MINIMATCH_OPTIONS)) {
+        return false
+      }
+    }
+
+    for (const pattern of specPattern) {
+      if (minimatch(specFile, pattern, MINIMATCH_OPTIONS)) {
+        return true
+      }
+    }
+
+    return false
   }
 
   stopSpecWatcher () {
@@ -297,5 +324,20 @@ export class ProjectDataSource {
     const codeGenCandidates = await this.ctx.file.getFilesByGlob(projectRoot, glob, { expandDirectories: true })
 
     return codeGenCandidates.map((absolute) => ({ absolute }))
+  }
+
+  async getIsDefaultSpecPattern () {
+    assert(this.ctx.currentProject)
+    assert(this.ctx.coreData.currentTestingType)
+
+    const { e2e, component } = getDefaultSpecPatterns()
+
+    const { specPattern } = await this.ctx.project.specPatternsForTestingType(this.ctx.currentProject, this.ctx.coreData.currentTestingType)
+
+    if (this.ctx.coreData.currentTestingType === 'e2e') {
+      return isEqual(specPattern, [e2e])
+    }
+
+    return isEqual(specPattern, [component])
   }
 }

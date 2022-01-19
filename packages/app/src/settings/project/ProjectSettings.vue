@@ -10,7 +10,7 @@
       :gql="key"
     />
   </template>
-  <SpecPatterns />
+  <SpecPatterns :gql="props.gql.currentProject" />
   <Experiments :gql="props.gql.currentProject" />
   <Config :gql="props.gql" />
 </template>
@@ -40,6 +40,7 @@ fragment ProjectSettings on Query {
         }
       }
     }
+    ...SpecPatterns_Settings
   }
   ...Config
 }

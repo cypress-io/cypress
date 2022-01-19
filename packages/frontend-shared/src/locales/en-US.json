@@ -29,6 +29,9 @@
     },
     "alert": {
       "dismissAriaLabel": "Dismiss"
+    },
+    "specPattern": {
+      "matches": "{0} Matches"
     }
   },
   "clipboard": {
@@ -54,6 +57,8 @@
   },
   "createSpec": {
     "newSpec": "New Spec",
+    "createSpec": "Create Spec",
+    "done": "Done!",
     "updateSpecPattern": "Update Spec Pattern",
     "newSpecModalTitle": "Create a new spec",
     "successPage": {
@@ -89,7 +94,10 @@
       "importEmptySpec": {
         "header": "Create new empty spec",
         "description": "We'll generate an empty spec file which can be used to start testing your application.",
-        "chooseFilenameHeader": "Choose a filename for this spec"
+        "chooseFilenameHeader": "Choose a filename for this spec",
+        "inputPlaceholder": "Enter spec file...",
+        "invalidSpecWarning": "Your filename is invalid because it doesn't match the following ",
+        "specExtensionWarning": "We recommend naming your spec with the pattern: "
       }
     },
     "component": {
@@ -321,9 +329,7 @@
     },
     "specPattern": {
       "title": "Spec Patterns",
-      "description": "The globs pointing Cypress App to your spec files configured for this project. {0}",
-      "defaultIndicator": "Default Values",
-      "matches": "{0} Matches"
+      "description": "The globs pointing Cypress App to your spec files configured for this project. {0}"
     },
     "recordKey": {
       "title": "Record Key",
