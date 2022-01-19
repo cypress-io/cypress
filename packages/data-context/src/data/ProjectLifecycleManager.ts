@@ -52,9 +52,9 @@ export interface InjectedConfigApi {
   validateRootConfigBreakingChanges<T extends Cypress.ConfigOptions>(config: Partial<T>, onWarning: (warningMsg: string) => void, onErr: (errMsg: string) => never): T
 }
 
-type State<S, V = undefined> = V extends undefined ? {state: S, value?: V} : {state: S, value: V}
+type State<S, V = undefined> = V extends undefined ? {state: S, value?: V } : {state: S, value: V}
 
-type LoadingStateFor<V> = State<'pending'> | State<'loading', Promise<V>> | State<'loaded', V> | State<'errored', unknown>
+type LoadingStateFor<V> = State<'pending'> | State<'loading', Promise<V>> | State<'loaded', V> | State<'errored', Error>
 
 type ConfigResultState = LoadingStateFor<LoadConfigReply>
 
@@ -183,7 +183,8 @@ export class ProjectLifecycleManager {
     if (this._configResult.state === 'errored') {
       return {
         title: 'Error Loading Config',
-        message: String(this._configResult.value), // TODO: fix
+        message: this._configResult.value?.message || '',
+        stack: this._configResult.value?.stack,
       }
     }
 
@@ -194,7 +195,8 @@ export class ProjectLifecycleManager {
     if (this._eventsIpcResult.state === 'errored') {
       return {
         title: 'Error Loading Config',
-        message: String(this._eventsIpcResult.value), // TODO: fix
+        message: this._eventsIpcResult.value?.message || '',
+        stack: this._eventsIpcResult.value?.stack,
       }
     }
 
