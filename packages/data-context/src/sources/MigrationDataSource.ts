@@ -16,30 +16,49 @@ export class MigrationDataSource {
     return JSON.stringify(config, null, 2)
   }
 
+  async createConfigString () {
+    const cfg = await this.parseCypressConfig()
+    const pluginsPath = this.getPluginRelativePath(cfg)
+    const rawConfigObjects = this.reduceConfig(cfg)
+
+    return this.createCypressConfigJs(rawConfigObjects, pluginsPath)
+  }
+
   private parseCypressConfig (): Promise<Cypress.ConfigOptions> {
     const cfgPath = path.join(this.ctx.lifecycleManager?.projectRoot, 'cypress.json')
 
     return this.ctx.file.readJsonFile(cfgPath)
   }
 
-  async createConfigString () {
-    const cfg = await this.parseCypressConfig()
-    const pluginsPath = this.getPluginRelativePath(cfg)
-    const rawConfigObjects = Object.entries(cfg).reduce((acc, [key, val]) => {
-      if (key === 'pluginsFile') {
+  private reduceConfig (cfg: Partial<Cypress.ConfigOptions>) {
+    const excludedFields = ['pluginsFile', '$schema', 'componentFolder']
+
+    return Object.entries(cfg).reduce((acc, [key, val]) => {
+      if (excludedFields.includes(key)) {
         return acc
       }
 
       if (key === 'e2e' || key === 'component') {
-        acc = { ...acc, [key]: val }
-      } else {
-        acc = { ...acc, global: { ...acc.global, [key]: val } }
+        return { ...acc, [key]: { ...acc[key], ...val } }
       }
 
-      return acc
-    }, { global: {}, e2e: {}, component: {} })
+      if (key === 'testFiles') {
+        return {
+          ...acc,
+          e2e: { ...acc.e2e, specPattern: val },
+          component: { ...acc.e2e, specPattern: val },
+        }
+      }
 
-    return this.createCypressConfigJs(rawConfigObjects, pluginsPath)
+      if (key === 'baseUrl') {
+        return {
+          ...acc,
+          e2e: { ...acc.e2e, [key]: val },
+        }
+      }
+
+      return { ...acc, global: { ...acc.global, [key]: val } }
+    }, { global: {}, e2e: {}, component: {} })
   }
 
   private getPluginRelativePath (cfg: Partial<Cypress.ConfigOptions>) {
@@ -51,7 +70,7 @@ export class MigrationDataSource {
   private formatObjectForConfig (obj: Record<string, unknown>, spaces: number) {
     return JSON.stringify(obj, null, spaces)
     .replace(/"([^"]+)":/g, '$1:') // remove quotes from fields
-    .replace(/{|(})$/g, '') // remove opening and closing {}
+    .replace(/^[{]|[}]$/g, '') // remove opening and closing {}
     .replace(/"/g, '\'') // single quotes
     .trim()
   }
@@ -63,13 +82,13 @@ module.export = defineConfig({
   ${this.formatObjectForConfig(config.global, 2)},
   e2e: {
     setupNodeEvents(on, config) {
-      require('${pluginPath}')
+      return require('${pluginPath}')
     }${config.e2e ? `
     ${this.formatObjectForConfig(config.e2e, 4)},` : ''}
   },
   component: {
     setupNodeEvents(on, config) {
-      require('${pluginPath}')
+      return require('${pluginPath}')
     },${config.component ? `
     ${this.formatObjectForConfig(config.component, 4)},` : ''}
   },
