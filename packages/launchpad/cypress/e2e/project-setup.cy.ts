@@ -269,7 +269,7 @@ describe('Launchpad: Setup Project', () => {
           cy.contains('cypress.config.js')
         })
 
-        cy.get('[data-cy=skipped]').within(() => {
+        cy.get('[data-cy=valid]').within(() => {
           cy.contains('cypress/support/e2e.js')
           cy.contains('cypress/fixtures/example.json')
         })
