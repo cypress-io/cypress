@@ -52,8 +52,8 @@ interface CreateProxySockOpts {
 type CreateProxySockCb = (
   (err: undefined, result: net.Socket, triggerRetry: (err: Error) => void) => void
 ) & (
-    (err: Error) => void
-  )
+  (err: Error) => void
+)
 
 export const createProxySock = (opts: CreateProxySockOpts, cb: CreateProxySockCb) => {
   if (opts.proxy.protocol !== 'https:' && opts.proxy.protocol !== 'http:') {
