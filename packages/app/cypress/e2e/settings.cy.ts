@@ -115,4 +115,18 @@ describe('App: Settings without cloud', () => {
     cy.findByText('Project Settings').click()
     cy.findByText('Project ID').should('not.exist')
   })
+
+  it('have returned browsers', () => {
+    cy.scaffoldProject('simple-ct')
+    cy.openProject('simple-ct')
+    cy.startAppServer('component')
+
+    cy.visitApp()
+    cy.findByText('Settings').click()
+    cy.findByText('Project Settings').click()
+
+    cy.get('[data-testid=config-code]').within(() => {
+      cy.contains('browsers: chrome, firefox')
+    })
+  })
 })
