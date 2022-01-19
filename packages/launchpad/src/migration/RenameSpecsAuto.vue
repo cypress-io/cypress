@@ -63,7 +63,6 @@ import MigrationTitle from './fragments/MigrationTitle.vue'
 import { gql } from '@urql/vue'
 import type { RenameSpecsAutoFragment } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
-import Button from '../../../frontend-shared/src/components/Button.vue'
 
 const { t } = useI18n()
 

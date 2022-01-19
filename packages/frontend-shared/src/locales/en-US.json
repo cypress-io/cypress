@@ -483,7 +483,25 @@
       "changeButton": "change",
       "changedSpecFolder": "We've changed the default spec folder from:",
       "changedSpecExt": "We've changed the default spec file extension from:",
-      "changedE2EFolder": "Since you're currently using a custom directory for the {0}, we'll temporarily be moving your specs back to the default directory."
+      "changedE2EFolder": "Since you're currently using a custom directory for the {0}, we'll temporarily be moving your specs back to the default directory.",
+      "modals": {
+        "title": "Change the existing spec file extension",
+        "step1": {
+          "warning": "We recommend using the default extension to **avoid inconsistencies, framework conflicts, and confusion** with your team.",
+          "line1": "Cypress now supports the ability to create new spec files from within the UI for both E2E and component specs.",
+          "line2": "All new spec files created within Cypress will use the default pattern of: ",
+          "line3": "We want to rename your existing specs so that they have a consistent filename pattern for both E2E and component testing.",
+          "line4": "We've changed the placement of component specs to be next to their source files (e.g. src/Button.jsx and src/Button.cy.jsx)",
+          "line5": "The new default pattern of {0} prevents targeting conflicts with other testing frameworks. (e.g. Jest)",
+          "buttonProceed": "I still want to change the spec file extension",
+          "buttonCancel": "Cancel, keep the default extension"
+        },
+        "step2": {
+          "warning": "You may need to change your `specPattern` later if you don't use the recommended filename extension.",
+          "buttonSave": "Save Changes",
+          "buttonCancel": "Cancel"
+        }
+      }
     },
     "renameManual": {
       "title": "We need you to move your component specs manually",
