@@ -2,7 +2,7 @@
   <CreateSpecCards
     data-cy="create-spec-page-cards"
     :gql="props.gql"
-    @select="choose"
+    @select="selectSpecCard"
   />
 
   <div class="border-t-1 mt-32px text-center pt-32px">
@@ -46,10 +46,10 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  (e: 'choose', id: string): void
+  (e: 'showCreateSpecModal', id: string): void
 }>()
 
-const choose = (id: string) => {
-  emit('choose', id)
+const selectSpecCard = (id: string) => {
+  emit('showCreateSpecModal', id)
 }
 </script>
