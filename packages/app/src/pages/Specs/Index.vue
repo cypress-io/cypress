@@ -48,3 +48,9 @@ const title = computed(() => {
 })
 
 </script>
+
+<route>
+{
+  name: "Specs"
+}
+</route>
