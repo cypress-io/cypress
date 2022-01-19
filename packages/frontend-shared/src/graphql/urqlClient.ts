@@ -136,7 +136,6 @@ function getPubSubSource (config: PubSubConfig) {
     })
   }
 
-  // Only happens during testing
   return client({
     path: config.socketIoRoute,
     transports: ['websocket'],
