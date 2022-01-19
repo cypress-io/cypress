@@ -4,7 +4,7 @@ import type { BaseStore } from '@packages/runner-shared/src/store'
 import type { RunState } from '@packages/types/src/driver'
 import type MobX from 'mobx'
 import type { LocalBusEmitsMap, LocalBusEventMap, DriverToLocalBus, SocketToDriverMap } from './event-manager-types'
-import type { FileDetails } from '@packages/types'
+import type { AutomationElementId, FileDetails } from '@packages/types'
 
 import { automation } from '@packages/runner-shared/src/automation'
 import { logger } from '@packages/runner-shared/src/logger'
@@ -16,8 +16,6 @@ import { AutomationStatus, useRunnerUiStore } from '../store'
 type $Cypress = any
 
 const noop = () => {}
-
-type AutomationElementId = `${string}-string`
 
 export const automationElementId: AutomationElementId = '__cypress-string' as const
 

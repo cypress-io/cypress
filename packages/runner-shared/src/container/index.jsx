@@ -17,10 +17,10 @@ export class Container extends Component {
   }
 
   componentDidMount () {
-    // this.props.eventManager.addGlobalListeners(this.props.state, {
-    //   randomString: this.randomString,
-    //   element: `${this.props.config.namespace}-string`,
-    // })
+    this.props.eventManager.addGlobalListeners(this.props.state, {
+      randomString: this.randomString,
+      element: `${this.props.config.namespace}-string`,
+    })
   }
 
   render () {

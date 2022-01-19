@@ -18,7 +18,7 @@ import { urqlSchema } from '../generated/urql-introspection.gen'
 import { pubSubExchange } from './urqlExchangePubsub'
 import { namedRouteExchange } from './urqlExchangeNamedRoute'
 import { decodeBase64Unicode } from '../utils/decodeBase64'
-import type { SpecFile } from '@packages/types'
+import type { SpecFile, AutomationElementId } from '@packages/types'
 
 const GQL_PORT_MATCH = /gqlPort=(\d+)/.exec(window.location.search)
 const SERVER_PORT_MATCH = /serverPort=(\d+)/.exec(window.location.search)
@@ -37,6 +37,7 @@ declare global {
     __RUN_MODE_SPECS__: SpecFile[]
     __CYPRESS_CONFIG__: {
       base64Config: string
+      namespace: AutomationElementId
     }
   }
 }

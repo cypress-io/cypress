@@ -15,6 +15,10 @@
     <script type="text/javascript">
       // set a global so we know the 'top' window
       window.__Cypress__ = true
+
+      setTimeout(function(){
+        Runner.start(document.getElementById('app'), "{{base64Config | safe}}")
+      }, 0)
     </script>
   </body>
 </html>

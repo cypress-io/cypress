@@ -25,6 +25,7 @@ import { AutIframe } from './aut-iframe'
 import { EventManager } from './event-manager'
 import { client } from '@packages/socket/lib/browser'
 import { decodeBase64Unicode } from '@packages/frontend-shared/src/utils/base64'
+import type { AutomationElementId } from '@packages/types/src'
 
 let _eventManager: EventManager | undefined
 
@@ -113,7 +114,7 @@ function createIframeModel () {
  * for communication between driver, runner, reporter via event bus,
  * and server (via web socket).
  */
-function setupRunner (namespace: string) {
+function setupRunner (namespace: AutomationElementId) {
   const mobxRunnerStore = getMobxRunnerStore()
   const runnerUiStore = useRunnerUiStore()
 

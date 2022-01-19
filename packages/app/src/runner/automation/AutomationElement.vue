@@ -9,7 +9,7 @@
 
 <script lang="ts" setup>
 import { useRunnerUiStore } from '../../store'
-import { automationElementId } from '../event-manager'
 
+const automationElementId = window.__CYPRESS_CONFIG__.namespace
 const runnerUiStore = useRunnerUiStore()
 </script>

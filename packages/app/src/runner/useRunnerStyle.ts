@@ -95,7 +95,7 @@ export function useResizablePanes () {
     }
   }
 
-  const handlePanelWidthUpdated = ({ panel, width }) => {
+  const handlePanelWidthUpdated = ({ panel, width }: { panel: DraggablePanel, width: number }) => {
     if (panel === 'panel1') {
       specListWidth.value = width
     } else {

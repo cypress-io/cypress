@@ -22,6 +22,8 @@ export class HtmlDataSource {
   }
 
   async fetchAppInitialData () {
+    // run mode is not driven by GraphQL, so we don't
+    // need the data from these queries.
     if (this.ctx.isRunMode) {
       return {}
     }
@@ -70,9 +72,12 @@ export class HtmlDataSource {
   }
 
   async makeServeConfig () {
+    const cfg = this.ctx._apis.projectApi.getConfig() ?? {} as any
+
     return {
       projectName: this.ctx.lifecycleManager.projectTitle,
-      base64Config: Buffer.from(JSON.stringify(this.ctx._apis.projectApi.getConfig() ?? {})).toString('base64'),
+      namespace: cfg.namespace || '__cypress-string',
+      base64Config: Buffer.from(JSON.stringify(cfg)).toString('base64'),
     }
   }
 
