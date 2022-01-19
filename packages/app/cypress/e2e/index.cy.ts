@@ -141,6 +141,11 @@ describe('App: Index', () => {
         cy.get('[data-cy="card"]').contains(defaultMessages.createSpec.e2e.importEmptySpec.header).click()
       })
 
+      cy.get('input').invoke('val').should('eq', 'cypress/e2e/filename.cy.js')
+      cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.invalidSpecWarning).should('not.exist')
+      cy.get('input').clear()
+      cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.invalidSpecWarning).should('not.exist')
+
       // Shows entered file does not match spec pattern
       cy.get('input').type('cypress/e2e/no-match')
       cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.invalidSpecWarning)

@@ -319,7 +319,7 @@ export class ProjectActions {
 
     const getFileExtension = () => {
       if (codeGenType === 'e2e') {
-        const possibleExtensions = ['.spec', '.test', '-spec', '-test', '.cy']
+        const possibleExtensions = ['.spec', '.test', '-spec', '-test', '.cy', '_spec']
 
         return (
           possibleExtensions.find((ext) => {

@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col justify-between flex-grow">
+  <div class="flex flex-col flex-grow justify-between">
     <template v-if="!result">
       <div class="p-24px w-720px">
         <Input
@@ -13,10 +13,10 @@
         </Input>
 
         <div
-          v-if="hasError"
+          v-if="hasError && props.gql.currentProject"
         >
           <div
-            class="flex items-center font-medium rounded bg-error-100 p-16px gap-8px text-error-600"
+            class="rounded flex font-medium bg-error-100 p-16px text-error-600 gap-8px items-center"
           >
             <i-cy-errored-outline_x16 class="icon-dark-error-600" />
             <span>{{ t('createSpec.e2e.importEmptySpec.invalidSpecWarning') }}<b>specPattern</b>.</span>
@@ -24,16 +24,16 @@
 
           <div class="mt-16px">
             <SpecPatterns
-              :gql="{...props.gql}"
+              :gql="props.gql.currentProject"
             />
           </div>
         </div>
         <div
           v-else-if="showExtensionWarning"
-          class="flex items-center font-medium rounded bg-warning-100 p-16px mt-16px gap-8px text-warning-600"
+          class="rounded flex font-medium bg-warning-100 mt-16px p-16px text-warning-600 gap-8px items-center"
         >
           <i-cy-errored-outline_x16 class="icon-dark-warning-600" />
-          {{ t('createSpec.e2e.importEmptySpec.specExtensionWarning') }}<span class="rounded bg-warning-200 px-8px py-2px text-warning-700">{{ recommendedFileName }}</span>
+          {{ t('createSpec.e2e.importEmptySpec.specExtensionWarning') }}<span class="rounded bg-warning-200 py-2px px-8px text-warning-700">{{ recommendedFileName }}</span>
         </div>
       </div>
       <StandardModalFooter
@@ -62,7 +62,7 @@
         :file="result.file"
       />
       <StandardModalFooter
-        class="flex items-center h-72px gap-16px"
+        class="flex h-72px gap-16px items-center"
       >
         <router-link
           class="outline-none"
@@ -97,7 +97,7 @@ import Input from '@packages/frontend-shared/src/components/Input.vue'
 import Button from '@packages/frontend-shared/src/components/Button.vue'
 import { useVModels, whenever } from '@vueuse/core'
 import { gql, useMutation } from '@urql/vue'
-import SpecPatterns from '../../SpecPatterns.vue'
+import SpecPatterns from '../../../components/SpecPatterns.vue'
 import { EmptyGeneratorCardStepOneFragment, EmptyGeneratorCardStepOne_MatchSpecFileDocument, EmptyGeneratorCardStepOne_GenerateSpecDocument, GeneratorSuccessFragment } from '../../../generated/graphql'
 import StandardModalFooter from '@packages/frontend-shared/src/components/StandardModalFooter.vue'
 import GeneratorSuccess from '../GeneratorSuccess.vue'
@@ -116,8 +116,8 @@ fragment EmptyGeneratorCardStepOne on Query {
   currentProject {
     id
     config
+    ...SpecPatterns
   }
-  ...SpecPatterns
 }
 `
 
@@ -143,12 +143,12 @@ const emits = defineEmits<{
 
 const { title } = useVModels(props, emits)
 
-const specFile = ref('')
+const specFile = ref('cypress/e2e/filename.cy.js')
 
 const matches = useMutation(EmptyGeneratorCardStepOne_MatchSpecFileDocument)
 const writeFile = useMutation(EmptyGeneratorCardStepOne_GenerateSpecDocument)
 
-const isValidSpecFile = ref(false)
+const isValidSpecFile = ref(true)
 const hasError = computed(() => !isValidSpecFile.value && !!specFile.value)
 
 const result = ref<GeneratorSuccessFragment | null>(null)
@@ -167,7 +167,7 @@ watch(specFile, async (value) => {
   const result = await matches.executeMutation({ specFile: value })
 
   isValidSpecFile.value = result.data?.matchesSpecPattern ?? false
-})
+}, { immediate: true })
 
 title.value = t('createSpec.e2e.importEmptySpec.header')
 

@@ -1,14 +1,14 @@
 <template>
   <div
-    class="p-0 m-0 border-0"
+    class="border-0 m-0 p-0"
     :class="$attrs.class"
   >
     <div class="relative">
       <div
         v-if="hasPrefix"
-        class="absolute inset-y-0 left-0 flex items-center pl-4"
+        class="flex pl-4 inset-y-0 left-0 absolute items-center"
       >
-        <span class="flex items-center justify-center text-gray-500">
+        <span class="flex text-gray-500 items-center justify-center">
           <slot name="prefix">
             <component
               :is="prefixIcon"
@@ -28,15 +28,15 @@
         :style="style"
         :type="type"
         :spellcheck="false"
-        :class="[_inputClasses, {'hocus-default': !hasError, 'hocus-error': hasError}]"
-        class="block w-full pl-10 leading-tight text-gray-800 placeholder-gray-400 border-gray-100 rounded-md disabled:bg-gray-100 disabled:text-gray-400 py-9px"
+        :class="[_inputClasses, {'hocus-default text-gray-800': !hasError, 'hocus-error text-error-500': hasError}]"
+        class="rounded-md border-gray-100 leading-tight w-full py-9px pl-10 placeholder-gray-400 text-gray-800 block disabled:bg-gray-100 disabled:text-gray-400"
         v-bind="inputAttrs"
       >
       <div
         v-if="hasSuffix"
-        class="absolute inset-y-0 right-0 flex items-center pr-3"
+        class="flex pr-3 inset-y-0 right-0 absolute items-center"
       >
-        <span class="flex items-center justify-center text-gray-500">
+        <span class="flex text-gray-500 items-center justify-center">
           <slot name="suffix">
             <component
               :is="suffixIcon"
