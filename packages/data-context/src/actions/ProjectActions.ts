@@ -86,7 +86,6 @@ export class ProjectActions {
 
   async setCurrentProject (projectRoot: string) {
     await this.clearCurrentProject()
-    this.ctx.lifecycleManager.clearCurrentProject()
     this.ctx.lifecycleManager.setCurrentProject(projectRoot)
   }
 

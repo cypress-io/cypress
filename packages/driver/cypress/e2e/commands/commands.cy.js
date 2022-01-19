@@ -97,6 +97,24 @@ describe('src/cy/commands/commands', () => {
       })
     })
 
+    it('allows calling .add with hover / mount', () => {
+      let calls = 0
+
+      Cypress.Commands.add('hover', () => {
+        calls++
+      })
+
+      Cypress.Commands.add('mount', () => {
+        calls++
+      })
+
+      cy.mount()
+      cy.hover()
+      cy.then(() => {
+        expect(calls).to.eq(2)
+      })
+    })
+
     it('throws when attempting to add a command with the same name as an internal function', (done) => {
       cy.on('fail', (err) => {
         expect(err.message).to.eq('`Cypress.Commands.add()` cannot create a new command named `addChainer` because that name is reserved internally by Cypress.')

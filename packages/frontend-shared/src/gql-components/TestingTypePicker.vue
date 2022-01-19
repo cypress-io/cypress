@@ -12,6 +12,8 @@
       :icon-size="64"
       variant="jade"
       @click="emits('pick', tt.key)"
+      @keyup.enter="emits('pick', tt.key)"
+      @keyup.space="emits('pick', tt.key)"
     >
       <template #footer>
         <StatusBadge
