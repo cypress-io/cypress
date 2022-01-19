@@ -1,5 +1,5 @@
 {
-  "name": "yarn-v2-pnp",
+  "name": "yarn-v3.1.1-pnp",
   "version": "1.0.0",
   "dependencies": {
     "lodash": "^4.17.21"
@@ -8,5 +8,5 @@
     "typescript": "^4.2.4"
   },
   "license": "MIT",
-  "_cyYarnV2": true
+  "_cyYarnV311": true
 }
