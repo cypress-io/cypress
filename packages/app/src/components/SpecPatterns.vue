@@ -6,19 +6,17 @@
           scope="global"
           keypath="components.specPattern.matches"
         >
-          {{ props.gql.specs?.edges.length }}
+          {{ props.gql.specsBare?.edges.length }}
         </i18n-t>
       </FileMatchIndicator>
-      <div>
-        <OpenConfigFileInIDE>
-          <button
-            class="flex outline-transparent text-indigo-500 gap-8px items-center group"
-          >
-            <i-cy-document-text_x16 class="icon-light-gray-100 icon-dark-gray-500" />
-            <span class="group-hocus:underline">cypress.config.js</span>
-          </button>
-        </OpenConfigFileInIDE>
-      </div>
+      <OpenConfigFileInIDE>
+        <button
+          class="flex outline-transparent text-indigo-500 gap-8px items-center group"
+        >
+          <i-cy-document-text_x16 class="icon-light-gray-100 icon-dark-gray-500" />
+          <span class="group-hocus:underline">cypress.config.js</span>
+        </button>
+      </OpenConfigFileInIDE>
     </div>
 
     <div class="divide-gray-200 divide-y-1 bg-gray-50 px-16px">
@@ -47,7 +45,7 @@ fragment SpecPatterns on CurrentProject {
   id
   config
   currentTestingType
-  specs: specs(first: 100) {
+  specsBare: specs(first: 100) {
     edges {
       node {
         id

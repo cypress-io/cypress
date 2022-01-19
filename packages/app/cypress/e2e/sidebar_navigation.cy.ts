@@ -168,9 +168,12 @@ describe('Sidebar Navigation', () => {
 
   it('has a menu item labeled "Specs" which takes you to the Spec List page', () => {
     cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'true')
-    cy.findByText('Specs').should('be.visible')
-    cy.findByText('Specs').click()
-    cy.get('[data-cy="app-header-bar"]').findByText('Specs-Index').should('be.visible')
+    cy.findByLabelText('Sidebar').within(() => {
+      cy.findByText('Specs').should('be.visible')
+      cy.findByText('Specs').click()
+    })
+
+    cy.get('[data-cy="app-header-bar"]').findByText('Specs').should('be.visible')
     cy.get('.router-link-active').findByText('Specs').should('be.visible')
     cy.get('[data-e2e-href="/specs"] > svg > path').should('have.css', 'fill', 'rgb(0, 50, 32)')
   })

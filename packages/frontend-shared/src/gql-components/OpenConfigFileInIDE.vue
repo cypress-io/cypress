@@ -7,7 +7,7 @@
     >
       <slot>
         <span
-          class="cursor-pointer text-purple-500"
+          class="text-purple-500 cursor-pointer"
         >
           {{ configFile }}
         </span>
@@ -15,6 +15,7 @@
     </button>
 
     <ChooseExternalEditorModal
+      v-if="isChooseEditorOpen"
       :open="isChooseEditorOpen"
       :gql="query.data?.value"
       @close="isChooseEditorOpen = false"
