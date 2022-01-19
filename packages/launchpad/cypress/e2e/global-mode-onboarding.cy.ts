@@ -1,0 +1,17 @@
+describe('Global Mode: Onboarding', () => {
+  it('Can scaffold a project, go back to global screen, and state is cleared', () => {
+    cy.scaffoldProject('pristine')
+    cy.openGlobalMode()
+    cy.addProject('pristine')
+    cy.visitLaunchpad()
+    cy.get('[data-cy=project-card]').click()
+    cy.get('[data-cy-testingtype="e2e"]').click()
+    cy.get('h1').should('contain', 'Configuration Files')
+    cy.get('[data-cy="global-mode-link"]').click()
+    cy.get('[data-cy=project-card]').click()
+    cy.get('h1').should('contain', 'Welcome to Cypress!')
+    cy.get('[data-cy-testingtype="e2e"]').should('not.contain', 'Not Configured')
+    cy.get('[data-cy-testingtype="e2e"]').click()
+    cy.get('h1').should('contain', 'Choose a Browser')
+  })
+})

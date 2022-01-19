@@ -50,6 +50,7 @@ export class ProjectActions {
     this.ctx.update((d) => {
       d.currentProject = null
       d.currentTestingType = null
+      d.scaffoldedFiles = null
       d.baseError = null
       d.warnings = []
     })

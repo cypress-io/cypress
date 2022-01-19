@@ -16,6 +16,7 @@
           src="../assets/logos/cypress-dark.png"
         >
         <a
+          data-cy="global-mode-link"
           :class="props.gql?.currentProject ? 'text-indigo-500' :
             'text-gray-700'"
           :href="props.gql?.currentProject ? 'global-mode' : undefined"
