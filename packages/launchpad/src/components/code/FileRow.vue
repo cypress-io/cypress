@@ -4,7 +4,7 @@
   overflow-hidden hocus-default"
     max-height="500px"
     :initially-open="statusInfo.initiallyOpen"
-    :data-e2e="status"
+    :data-cy="status"
   >
     <template #target="{open}">
       <ListRowHeader

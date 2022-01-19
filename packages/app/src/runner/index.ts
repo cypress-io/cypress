@@ -24,18 +24,17 @@ import { IframeModel } from './iframe-model'
 import { AutIframe } from './aut-iframe'
 import { EventManager } from './event-manager'
 import { client } from '@packages/socket/lib/browser'
+import { decodeBase64Unicode } from '@packages/frontend-shared/src/utils/base64'
 
 let _eventManager: EventManager | undefined
 
-export function createWebsocket () {
-  const PORT_MATCH = /serverPort=(\d+)/.exec(window.location.search)
-
+export function createWebsocket (socketIoRoute) {
   const socketConfig = {
-    path: '/__socket.io',
+    path: socketIoRoute,
     transports: ['websocket'],
   }
 
-  const ws = PORT_MATCH ? client(`http://localhost:${PORT_MATCH[1]}`, socketConfig) : client(socketConfig)
+  const ws = client(socketConfig)
 
   ws.on('connect', () => {
     ws.emit('runner:connected')
@@ -116,12 +115,12 @@ function createIframeModel () {
  * for communication between driver, runner, reporter via event bus,
  * and server (via web socket).
  */
-function setupRunner () {
+function setupRunner (namespace) {
   const mobxRunnerStore = getMobxRunnerStore()
 
   getEventManager().addGlobalListeners(mobxRunnerStore, {
-    automationElement: '__cypress-string',
-    randomString,
+    element: `${namespace}-string`,
+    string: randomString,
   })
 
   getEventManager().start(window.UnifiedRunner.config)
@@ -285,16 +284,14 @@ function runSpecE2E (spec: BaseSpec) {
 async function initialize () {
   isTorndown = false
 
-  await injectBundle()
+  const config = JSON.parse(decodeBase64Unicode(window.__CYPRESS_CONFIG__.base64Config))
+
+  await injectBundle(config.namespace)
 
   if (isTorndown) {
     return
   }
 
-  const response = await window.fetch('/api')
-  const data = await response.json()
-
-  const config = window.UnifiedRunner.decodeBase64(data.base64Config) as any
   const autStore = useAutStore()
 
   // TODO(lachlan): use GraphQL to get the viewport dimensions
@@ -316,7 +313,7 @@ async function initialize () {
     store.updateDimensions(config.viewportWidth, config.viewportHeight)
   })
 
-  window.UnifiedRunner.MobX.runInAction(() => setupRunner())
+  window.UnifiedRunner.MobX.runInAction(() => setupRunner(config.namespace))
 }
 
 /**

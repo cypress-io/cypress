@@ -196,59 +196,61 @@ function openProject (projectName: ProjectFixture, argv: string[] = []) {
 
 function startAppServer (mode: 'component' | 'e2e' = 'e2e') {
   return logInternal('startAppServer', (log) => {
-    return cy.withCtx(async (ctx, o) => {
-      ctx.actions.project.setCurrentTestingType(o.mode)
-      const isInitialized = o.pDefer()
-      const initializeActive = ctx.actions.project.initializeActiveProject
-      const onErrorStub = o.sinon.stub(ctx, 'onError')
-      // @ts-expect-error - errors b/c it's a private method
-      const onLoadErrorStub = o.sinon.stub(ctx.lifecycleManager, 'onLoadError')
-      const initializeActiveProjectStub = o.sinon.stub(ctx.actions.project, 'initializeActiveProject')
+    return cy.window({ log: false }).then((win) => {
+      return cy.withCtx(async (ctx, o) => {
+        ctx.actions.project.setCurrentTestingType(o.mode)
+        const isInitialized = o.pDefer()
+        const initializeActive = ctx.actions.project.initializeActiveProject
+        const onErrorStub = o.sinon.stub(ctx, 'onError')
+        // @ts-expect-error - errors b/c it's a private method
+        const onLoadErrorStub = o.sinon.stub(ctx.lifecycleManager, 'onLoadError')
+        const initializeActiveProjectStub = o.sinon.stub(ctx.actions.project, 'initializeActiveProject')
 
-      function restoreStubs () {
-        onErrorStub.restore()
-        onLoadErrorStub.restore()
-        initializeActiveProjectStub.restore()
-      }
+        function restoreStubs () {
+          onErrorStub.restore()
+          onLoadErrorStub.restore()
+          initializeActiveProjectStub.restore()
+        }
 
-      function onStartAppError (e: Error) {
-        isInitialized.reject(e)
-        restoreStubs()
-      }
-
-      onErrorStub.callsFake(onStartAppError)
-      onLoadErrorStub.callsFake(onStartAppError)
-
-      initializeActiveProjectStub.callsFake(async function (this: any, ...args) {
-        try {
-          const result = await initializeActive.apply(this, args)
-
-          isInitialized.resolve(result)
-
-          return result
-        } catch (e) {
+        function onStartAppError (e: Error) {
           isInitialized.reject(e)
-        } finally {
           restoreStubs()
         }
 
-        return
+        onErrorStub.callsFake(onStartAppError)
+        onLoadErrorStub.callsFake(onStartAppError)
+
+        initializeActiveProjectStub.callsFake(async function (this: any, ...args) {
+          try {
+            const result = await initializeActive.apply(this, args)
+
+            isInitialized.resolve(result)
+
+            return result
+          } catch (e) {
+            isInitialized.reject(e)
+          } finally {
+            restoreStubs()
+          }
+
+          return
+        })
+
+        await isInitialized.promise
+
+        await ctx.actions.project.launchProject(o.mode, { url: o.url })
+
+        return ctx.appServerPort
+      }, { log: false, mode, url: win.top ? win.top.location.href : undefined }).then((serverPort) => {
+        log.set({ message: `port: ${serverPort}` })
+        Cypress.env('e2e_serverPort', serverPort)
       })
-
-      await isInitialized.promise
-
-      await ctx.actions.project.launchProject(o.mode, {})
-
-      return ctx.appServerPort
-    }, { log: false, mode }).then((serverPort) => {
-      log.set({ message: `port: ${serverPort}` })
-      Cypress.env('e2e_serverPort', serverPort)
     })
   })
 }
 
 function visitApp (href?: string) {
-  const { e2e_serverPort, e2e_gqlPort } = Cypress.env()
+  const { e2e_serverPort } = Cypress.env()
 
   if (!e2e_serverPort) {
     throw new Error(`
@@ -259,15 +261,11 @@ function visitApp (href?: string) {
   }
 
   return cy.withCtx(async (ctx) => {
-    return JSON.stringify(await ctx.html.fetchAppInitialData())
-  }, { log: false }).then((ssrData) => {
-    return cy.visit(`dist-app/index.html?serverPort=${e2e_serverPort}${href || ''}`, {
-      onBeforeLoad (win) {
-        // Simulates the inject SSR data when we're loading the page normally in the app
-        win.__CYPRESS_INITIAL_DATA__ = JSON.parse(ssrData)
-        win.__CYPRESS_GRAPHQL_PORT__ = e2e_gqlPort
-      },
-    })
+    const config = await ctx.lifecycleManager.getFullInitialConfig()
+
+    return config.clientRoute
+  }).then((clientRoute) => {
+    return cy.visit(`http://localhost:${e2e_serverPort}${clientRoute || '/__/'}#${href || ''}`)
   })
 }
 

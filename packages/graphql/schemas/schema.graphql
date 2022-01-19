@@ -364,6 +364,9 @@ type CurrentProject implements Node & ProjectLike {
   """Whether the user configured this project to use Component Testing"""
   isCTConfigured: Boolean
 
+  """True if the project is using the default spec pattern"""
+  isDefaultSpecPattern: Boolean!
+
   """Whether the user configured this project to use e2e Testing"""
   isE2EConfigured: Boolean
 
@@ -570,7 +573,7 @@ type Mutation {
   addProject(
     """Whether to open the project when added"""
     open: Boolean
-    path: String!
+    path: String
   ): Query
 
   """Clears the currently active project"""

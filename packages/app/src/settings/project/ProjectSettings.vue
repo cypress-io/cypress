@@ -1,7 +1,5 @@
 <template>
-  <ProjectId
-    :gql="props.gql.currentProject"
-  />
+  <ProjectId :gql="props.gql.currentProject" />
   <template
     v-if="props.gql.currentProject?.cloudProject?.__typename === 'CloudProject'
       && props.gql.currentProject.cloudProject.recordKeys?.length"
@@ -12,11 +10,7 @@
       :gql="key"
     />
   </template>
-  <template v-else>
-    You don't have any record keys. You should make some so you can record
-    on Cypress Cloud.
-  </template>
-  <SpecPatterns />
+  <SpecPatterns :gql="props.gql.currentProject" />
   <Experiments :gql="props.gql.currentProject" />
   <Config :gql="props.gql" />
 </template>
@@ -46,6 +40,7 @@ fragment ProjectSettings on Query {
         }
       }
     }
+    ...SpecPatterns_Settings
   }
   ...Config
 }

@@ -1,5 +1,5 @@
 import { DataContext, getCtx, clearCtx, setCtx } from '@packages/data-context'
-import electron from 'electron'
+import electron, { OpenDialogOptions, SaveDialogOptions, BrowserWindow } from 'electron'
 import pkg from '@packages/root'
 import configUtils from '@packages/config'
 
@@ -117,6 +117,9 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       closeActiveProject () {
         return openProject.closeActiveProject()
       },
+      getConfig () {
+        return openProject.getConfig()
+      },
       getCurrentProjectSavedState () {
         // TODO: See if this is the best way we should be getting this config,
         // shouldn't we have this already in the DataContext?
@@ -147,6 +150,12 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       },
       showItemInFolder (folder: string) {
         electron.shell.showItemInFolder(folder)
+      },
+      showOpenDialog (props: OpenDialogOptions) {
+        return electron.dialog.showOpenDialog(props)
+      },
+      showSaveDialog (window: BrowserWindow, props: SaveDialogOptions) {
+        return electron.dialog.showSaveDialog(window, props)
       },
     },
     localSettingsApi: {

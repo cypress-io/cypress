@@ -28,17 +28,17 @@
 
 <template>
   <div>
-    <div class="inline-flex items-center w-full rounded border-1 hocus-default focus-within-default h-40px truncate">
+    <div class="rounded border-1 h-40px w-full inline-flex items-center hocus-default focus-within-default truncate">
       <FileMatchButton
         :expanded="expanded"
         @click="toggleExpanded()"
       >
         <span v-if="!expanded">{{ localExtensionPattern }}</span>
       </FileMatchButton>
-      <div class="inline-flex items-center flex-grow min-w-min group">
+      <div class="flex-grow min-w-min inline-flex items-center group">
         <i-cy-magnifying-glass_x16
           v-if="!expanded"
-          class="inline-block ml-12px mr-8px icon-light-gray-50 icon-dark-gray-500 group-focus-within:icon-light-indigo-50 group-focus-within:icon-dark-indigo-400"
+          class="mr-8px ml-12px inline-block icon-light-gray-50 icon-dark-gray-500 group-focus-within:icon-light-indigo-50 group-focus-within:icon-dark-indigo-400"
         />
 
         <FileMatchInput
@@ -56,7 +56,7 @@
       </div>
       <slot name="matches">
         <FileMatchIndicator
-          class="truncate"
+          class="mr-8px truncate"
           data-cy="file-match-indicator"
         >
           {{ indicatorText }}
@@ -65,11 +65,11 @@
     </div>
 
     <div
-      class="inline-flex items-center w-full rounded mt-8px border-1 hocus-default focus-within-default h-40px"
+      class="rounded border-1 h-40px mt-8px w-full inline-flex items-center hocus-default focus-within-default"
       :class="{ 'hidden' : !expanded }"
     >
-      <div class="inline-flex items-center flex-grow group">
-        <i-cy-magnifying-glass_x16 class="inline-block ml-12px mr-8px icon-light-gray-50 icon-dark-gray-500 group-focus-within:icon-light-indigo-50 group-focus-within:icon-dark-indigo-400" />
+      <div class="flex-grow inline-flex items-center group">
+        <i-cy-magnifying-glass_x16 class="mr-8px ml-12px inline-block icon-light-gray-50 icon-dark-gray-500 group-focus-within:icon-light-indigo-50 group-focus-within:icon-dark-indigo-400" />
         <FileMatchInput
           v-model="localPattern"
           :placeholder="t('components.fileSearch.byFilenameInput')"

@@ -1,22 +1,21 @@
 <template>
   <div
     ref="projectUpload"
-    class="relative cursor-pointer"
+    class="cursor-pointer relative"
   >
     <FileSelector
-      v-slot="{ openDialog }"
       v-model="files"
       allow-multiple
     >
-      <Dropzone @click="openDialog">
+      <Dropzone @click="handleOpenDialog">
         <div
-          class="relative block w-full p-58px text-center border-1
-        border-gray-200 border-dashed rounded-lg h-240px min-w-220px
-        bg-gray-50 hocus-default"
+          class="border-dashed bg-gray-50 border-1 border-gray-200 rounded-4px h-240px
+        text-center w-full min-w-220px p-58px relative
+        block hocus-default"
           data-cy="dropzone"
         >
           <i-cy-drag-project_x80
-            class="mx-auto -mb-4px w-80px h-80px icon-dark-indigo-500 icon-light-indigo-200"
+            class="mx-auto h-80px -mb-4px w-80px icon-dark-indigo-500 icon-light-indigo-200"
           />
           <span class="font-light text-body-gray-700 text-18px">
             <i18n-t
@@ -38,11 +37,11 @@
     <button
       v-if="closeButton"
       aria-label="Close"
-      class="text-gray-400 hocus:text-gray-500 outline-none absolute w-32px
-    h-32px right-8px top-8px flex items-center justify-center"
+      class="flex outline-none h-32px top-8px right-8px
+    text-gray-400 w-32px absolute items-center justify-center hocus:text-gray-500"
       @click="emit('close')"
     >
-      <i-cy-delete_x12 class="icon-dark-current w-12px h-12px" />
+      <i-cy-delete_x12 class="h-12px w-12px icon-dark-current" />
     </button>
   </div>
 </template>
@@ -84,8 +83,13 @@ function getFilePath (files: FileList | null | []) {
   return ''
 }
 
+function handleOpenDialog () {
+  // Set the path to null, so we can use the electron folder select on the server side
+  emit('addProject', null)
+}
+
 const emit = defineEmits<{
-  (e: 'addProject', value: string): void
+  (e: 'addProject', value: string | null): void
   (e: 'close'): void
 }>()
 

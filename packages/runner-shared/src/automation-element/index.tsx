@@ -1,16 +1,16 @@
 import React from 'react'
 
-export const automationElementId = '__cypress-string' as const
-
 interface AutomationElementProps {
+  namespace: string
   randomString: string
 }
 
 export const AutomationElement: React.FC<AutomationElementProps> = ({
+  namespace,
   randomString,
 }) => {
   return (
-    <div id={automationElementId} style={{ display: 'none' }}>
+    <div id={`${namespace}-string`} style={{ display: 'none' }}>
       {randomString}
     </div>
   )
