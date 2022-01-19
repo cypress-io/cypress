@@ -257,7 +257,7 @@ export function start () {
     return
   }
 
-  _checkProcesses()
+  _checkProcesses().catch(() => {})
 
   started = true
 }
