@@ -2060,6 +2060,7 @@ linux-workflow: &linux-workflow
           - runner-integration-tests-chrome
           - runner-ct-integration-tests-chrome
           - reporter-integration-tests
+          - npm-design-system
     - lint-types:
         requires:
           - build
