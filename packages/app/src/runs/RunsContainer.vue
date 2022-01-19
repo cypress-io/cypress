@@ -2,7 +2,9 @@
   <div class="h-full">
     <NoInternetConnection
       v-if="!isOnline && !isCloudProjectReturned"
-    />
+    >
+      Please check your internet connection to resolve this issue. When your internet connection is fixed, we will automatically attempt to fetch your latest runs for this project.
+    </NoInternetConnection>
     <RunsConnectSuccessAlert
       v-if="currentProject && showConnectSuccessAlert"
       :gql="currentProject"
