@@ -1,4 +1,14 @@
 <html>
+  <head>
+    <meta charset="utf-8" />
+    <!--
+      Our initial attempts to fix issue 3785 caused issues on pages Disallowing 'unsafe-eval'.
+      Including this meta tag ensures that #3785 remains fixed without reintroducing #19697.
+
+      https://github.com/cypress-io/cypress/issues/19697
+    !-->
+    <meta http-equiv="Content-Security-Policy" content="script-src 'unsafe-inline'" />
+  </head>
   <script>
     var x = new XMLHttpRequest()
     x.onload = function() {
