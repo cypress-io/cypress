@@ -103,7 +103,9 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
       })
 
       cy.contains('You have no internet connection')
-      cy.contains('a', 'Learn more.').should('have.attr', 'href', 'https://on.cypress.io/help-connect-to-api')
+      cy.findByRole('button', { name: text.login.actionLogin })
+      .should('be.visible')
+      .and('be.disabled')
     })
 
     it('shows login action when the internet is back', () => {
@@ -114,7 +116,9 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
       })
 
       cy.contains('You have no internet connection')
-      cy.contains('a', 'Learn more.').should('have.attr', 'href', 'https://on.cypress.io/help-connect-to-api')
+      cy.findByRole('button', { name: text.login.actionLogin })
+      .should('be.visible')
+      .and('be.disabled')
 
       cy.goOnline()
 
