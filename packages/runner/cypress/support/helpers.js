@@ -112,6 +112,7 @@ function createCypress (defaultOptions = {}) {
 
     return cy.visit('/fixtures/isolated-runner.html#/tests/cypress/fixtures/empty_spec.js')
     .then({ timeout: 60000 }, (win) => {
+      win.Runner._initialize('/__socket.io')
       win.runnerWs.destroy()
 
       allStubs = cy.stub().snapshot(enableStubSnapshots).log(false)
