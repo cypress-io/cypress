@@ -1,4 +1,3 @@
-const R = require('ramda')
 const chalk = require('chalk')
 
 let logs = []
@@ -36,7 +35,9 @@ const always = (...messages) => {
 const logLines = (text) => {
   const lines = text.split('\n')
 
-  R.forEach(log, lines)
+  for (const line of lines) {
+    log(line)
+  }
 }
 
 const print = () => {

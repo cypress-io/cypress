@@ -1,10 +1,17 @@
 import _ from 'lodash'
-import {
-  CYPRESS_ENV_PREFIX,
-  CYPRESS_ENV_PREFIX_LENGTH,
-  CYPRESS_RESERVED_ENV_VARS,
-} from '../config'
 import { coerce } from './coerce'
+
+export const CYPRESS_ENV_PREFIX = 'CYPRESS_'
+
+export const CYPRESS_ENV_PREFIX_LENGTH = 'CYPRESS_'.length
+
+export const CYPRESS_RESERVED_ENV_VARS = [
+  'CYPRESS_INTERNAL_ENV',
+]
+
+export const CYPRESS_SPECIAL_ENV_VARS = [
+  'RECORD_KEY',
+]
 
 export const isDefault = (config: Record<string, any>, prop: string) => {
   return config.resolved[prop].from === 'default'

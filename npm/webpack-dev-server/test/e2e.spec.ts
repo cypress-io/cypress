@@ -6,7 +6,7 @@ import http from 'http'
 import fs from 'fs'
 import { webpackDevServerFacts } from '../src/webpackDevServerFacts'
 
-import { startDevServer } from '../'
+import { defineDevServerConfig, devServer, startDevServer } from '../'
 
 const requestSpecFile = (port: number) => {
   return new Promise((res) => {
@@ -164,6 +164,26 @@ describe('#startDevServer', () => {
           close(() => res())
         }
       })
+    })
+  })
+
+  it('accepts the devServer signature', async function () {
+    const devServerEvents = new EventEmitter()
+    const { port, close } = await devServer(
+      {
+        config,
+        specs,
+        devServerEvents,
+      },
+      defineDevServerConfig({ webpackConfig }),
+    )
+
+    const response = await requestSpecFile(port as number)
+
+    expect(response).to.eq('const foo = () => {}\n')
+
+    return new Promise((res) => {
+      close(() => res())
     })
   })
 })

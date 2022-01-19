@@ -1,4 +1,5 @@
 const $ = require('jquery')
+const { assertLogLength } = require('../../support/utils')
 
 const { _, Promise, Screenshot } = Cypress
 
@@ -27,6 +28,7 @@ describe('src/cy/commands/screenshot', () => {
       capture: 'viewport',
       screenshotOnRunFailure: true,
       disableTimersAndAnimations: true,
+      overwrite: false,
       scale: true,
       blackout: ['.foo'],
     }
@@ -135,6 +137,7 @@ describe('src/cy/commands/screenshot', () => {
           isOpen: true,
           appOnly: false,
           scale: true,
+          overwrite: false,
           waitForCommandSynchronization: true,
           disableTimersAndAnimations: true,
           blackout: [],
@@ -146,6 +149,7 @@ describe('src/cy/commands/screenshot', () => {
           isOpen: false,
           appOnly: false,
           scale: true,
+          overwrite: false,
           waitForCommandSynchronization: true,
           disableTimersAndAnimations: true,
           blackout: [],
@@ -276,7 +280,7 @@ describe('src/cy/commands/screenshot', () => {
       })
     })
 
-    it('takes screenshot of hook title with test', () => {})
+    it('takes screenshot of hook title with test', () => { })
   })
 
   context('#screenshot', () => {
@@ -411,6 +415,7 @@ describe('src/cy/commands/screenshot', () => {
             isOpen: true,
             appOnly: true,
             scale: true,
+            overwrite: false,
             waitForCommandSynchronization: false,
             disableTimersAndAnimations: true,
             blackout: ['.foo'],
@@ -431,6 +436,7 @@ describe('src/cy/commands/screenshot', () => {
             isOpen: false,
             appOnly: true,
             scale: true,
+            overwrite: false,
             waitForCommandSynchronization: false,
             disableTimersAndAnimations: true,
             blackout: ['.foo'],
@@ -453,6 +459,7 @@ describe('src/cy/commands/screenshot', () => {
             isOpen: true,
             appOnly: false,
             scale: true,
+            overwrite: false,
             waitForCommandSynchronization: true,
             disableTimersAndAnimations: true,
             blackout: [],
@@ -474,6 +481,7 @@ describe('src/cy/commands/screenshot', () => {
             isOpen: true,
             appOnly: true,
             scale: true,
+            overwrite: false,
             waitForCommandSynchronization: false,
             disableTimersAndAnimations: true,
             blackout: ['.foo'],
@@ -1043,7 +1051,7 @@ describe('src/cy/commands/screenshot', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error').message).to.eq(error.message)
           expect(lastLog.get('error').name).to.eq(error.name)
           expect(lastLog.get('error').stack).to.eq(error.stack)
@@ -1061,7 +1069,7 @@ describe('src/cy/commands/screenshot', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
           expect(lastLog.get('name')).to.eq('screenshot')

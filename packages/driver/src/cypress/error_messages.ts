@@ -78,7 +78,7 @@ const getRedirects = (obj, phrase, listIndentSize) => {
 const getHttpProps = (fields: { value: string, key: string }[] = []) => {
   return _
   .chain(fields)
-  .reduce(formatProp, [])
+  .reduce<string[]>(formatProp, [])
   .join('\n')
   .value()
 }
@@ -113,40 +113,56 @@ export default {
   },
 
   as: {
+    docsUrl: 'https://on.cypress.io/as',
     empty_string: {
       message: `${cmd('as')} cannot be passed an empty string.`,
-      docsUrl: 'https://on.cypress.io/as',
     },
     invalid_type: {
       message: `${cmd('as')} can only accept a string.`,
-      docsUrl: 'https://on.cypress.io/as',
     },
     invalid_first_token: {
       message: '`{{alias}}` cannot be named starting with the `@` symbol. Try renaming the alias to `{{suggestedName}}`, or something else that does not start with the `@` symbol.',
-      docsUrl: 'https://on.cypress.io/as',
     },
     reserved_word: {
       message: `${cmd('as')} cannot be aliased as: \`{{alias}}\`. This word is reserved.`,
-      docsUrl: 'https://on.cypress.io/as',
+    },
+  },
+
+  selectFile: {
+    docsUrl: 'https://on.cypress.io/selectfile',
+    invalid_action: {
+      message: `${cmd('selectFile')} \`action\` can only be \`select\` or \`drag-drop\`. You passed: \`{{action}}\`.`,
+    },
+    invalid_array_file_reference: {
+      message: `${cmd('selectFile')} must be passed an array of Buffers or objects with non-null \`contents\`. At files[{{index}}] you passed: \`{{file}}\`.`,
+    },
+    invalid_single_file_reference: {
+      message: `${cmd('selectFile')} must be passed a Buffer or an object with a non-null \`contents\` property as its 1st argument. You passed: \`{{file}}\`.`,
+    },
+    multiple_elements: {
+      message: `${cmd('selectFile')} can only be called on a single element. Your subject contained {{num}} elements.`,
+    },
+    not_file_input: {
+      message: `${cmd('selectFile')} can only be called on an \`<input type="file">\` or a \`<label for="fileInput">\` pointing to or containing one. Your subject is: \`{{node}}\`.`,
+    },
+    invalid_alias: {
+      message: `${cmd('selectFile')} can only attach strings, Buffers or objects, while your alias \`{{alias}}\` resolved to: \`{{subject}}\`.`,
     },
   },
 
   blur: {
+    docsUrl: 'https://on.cypress.io/blur',
     multiple_elements: {
       message: `${cmd('blur')} can only be called on a single element. Your subject contained {{num}} elements.`,
-      docsUrl: 'https://on.cypress.io/blur',
     },
     no_focused_element: {
       message: `${cmd('blur')} can only be called when there is a currently focused element.`,
-      docsUrl: 'https://on.cypress.io/blur',
     },
     timed_out: {
       message: `${cmd('blur')} timed out because your browser did not receive any \`blur\` events. This is a known bug in Chrome when it is not the currently focused window.`,
-      docsUrl: 'https://on.cypress.io/blur',
     },
     wrong_focused_element: {
       message: `${cmd('blur')} can only be called on the focused element. Currently the focused element is a: \`{{node}}\``,
-      docsUrl: 'https://on.cypress.io/blur',
     },
   },
 
@@ -242,6 +258,23 @@ export default {
     invalid_2nd_arg: {
       message: `${cmd('clock')} only accepts an array of function names or an \`options\` object for its second argument. You passed: \`{{arg}}\``,
       docsUrl: 'https://on.cypress.io/clock',
+    },
+  },
+
+  config: {
+    invalid_argument: {
+      message: `Setting the config via ${cmd('Cypress.config')} failed with the following validation error:\n\n{{errMsg}}`,
+      docsUrl: 'https://on.cypress.io/config',
+    },
+    invalid_test_override: {
+      message: `The config override passed to your test has the following validation error:\n\n{{errMsg}}`,
+      docsUrl: 'https://on.cypress.io/config',
+    },
+    invalid_cypress_config_override: {
+      message: `\`Cypress.config()\` cannot mutate option \`{{errProperty}}\` because it is a read-only property.`,
+    },
+    invalid_test_config_override: {
+      message: `Cypress test configuration cannot mutate option \`{{errProperty}}\` because it is a read-only property.`,
     },
   },
 
@@ -452,12 +485,14 @@ export default {
         docsUrl: `https://on.cypress.io/${_.toLower(obj.cmd)}`,
       }
     },
-    existent: {
-      message: stripIndent`
-        ${cmd('readFile', '"{{file}}"')} failed because the file exists when expected not to exist at the following path:
+    existent (obj) {
+      return {
+        message: stripIndent`
+          ${cmd('{{cmd}}', '"{{file}}"')} failed because the file exists when expected not to exist at the following path:
 
-        \`{{filePath}}\``,
-      docsUrl: 'https://on.cypress.io/readfile',
+          \`{{filePath}}\``,
+        docsUrl: `https://on.cypress.io/${_.toLower(obj.cmd)}`,
+      }
     },
     invalid_argument (obj) {
       return {
@@ -469,12 +504,14 @@ export default {
       message: `${cmd('writeFile')} must be passed a non-empty string, an object, or an array as its 2nd argument. You passed: \`{{contents}}\`.`,
       docsUrl: 'https://on.cypress.io/writefile',
     },
-    nonexistent: {
-      message: stripIndent`
-        ${cmd('readFile', '"{{file}}"')} failed because the file does not exist at the following path:
+    nonexistent (obj) {
+      return {
+        message: stripIndent`
+          ${cmd('{{cmd}}', '"{{file}}"')} failed because the file does not exist at the following path:
 
-        \`{{filePath}}\``,
-      docsUrl: 'https://on.cypress.io/readfile',
+          \`{{filePath}}\``,
+        docsUrl: `https://on.cypress.io/${_.toLower(obj.cmd)}`,
+      }
     },
     timed_out (obj) {
       return {
@@ -803,6 +840,10 @@ export default {
       message: 'Could not find a command for: `{{name}}`.\n\nAvailable commands are: {{cmds}}.\n',
       docsUrl: 'https://on.cypress.io/api',
     },
+    invalid_new_command: {
+      message: '`Cypress.Commands.add()` is used to create new commands, but `{{name}}` is an existing Cypress command.\n\nPlease use `Cypress.Commands.overwrite()` if you would like to overwrite an existing command.\n',
+      docsUrl: 'https://on.cypress.io/custom-commands',
+    },
     invalid_overwrite: {
       message: 'Cannot overwite command for: `{{name}}`. An existing command does not exist by that name.',
       docsUrl: 'https://on.cypress.io/api',
@@ -1095,11 +1136,7 @@ export default {
       message: stripIndent`\
         ${cmd('request')} was invoked with \`{ failOnStatusCode: false, retryOnStatusCodeFailure: true }\`.
 
-        These options are incompatible with each other.
-
-        - To retry on non-2xx status codes, pass \`{ failOnStatusCode: true, retryOnStatusCodeFailure: true }\`.
-        - To not retry on non-2xx status codes, pass \`{ failOnStatusCode: true, retryOnStatusCodeFailure: true }\`.
-        - To fail on non-2xx status codes without retrying (the default behavior), pass \`{ failOnStatusCode: true, retryOnStatusCodeFailure: false }\``,
+        \`failOnStatusCode\` must be \`true\` if \`retryOnStatusCodeFailure\` is \`true\`.`,
       docsUrl: 'https://on.cypress.io/request',
     },
     auth_invalid: {
@@ -1148,9 +1185,9 @@ export default {
           The request we sent was:
 
           ${getHttpProps([
-            { key: 'method', value: obj.method },
-            { key: 'URL', value: obj.url },
-          ])}
+          { key: 'method', value: obj.method },
+          { key: 'URL', value: obj.url },
+        ])}
 
           ${divider(60, '-')}
 
@@ -1182,22 +1219,22 @@ export default {
           The request we sent was:
 
           ${getHttpProps([
-              { key: 'method', value: obj.method },
-              { key: 'URL', value: obj.url },
-              { key: 'headers', value: obj.requestHeaders },
-              { key: 'body', value: obj.requestBody },
-              { key: 'redirects', value: obj.redirects },
-            ])}
+          { key: 'method', value: obj.method },
+          { key: 'URL', value: obj.url },
+          { key: 'headers', value: obj.requestHeaders },
+          { key: 'body', value: obj.requestBody },
+          { key: 'redirects', value: obj.redirects },
+        ])}
 
           ${divider(60, '-')}
 
           The response we got was:
 
           ${getHttpProps([
-              { key: 'status', value: `${obj.status} - ${obj.statusText}` },
-              { key: 'headers', value: obj.responseHeaders },
-              { key: 'body', value: obj.responseBody },
-            ])}
+          { key: 'status', value: `${obj.status} - ${obj.statusText}` },
+          { key: 'headers', value: obj.responseHeaders },
+          { key: 'body', value: obj.responseBody },
+        ])}
           `, 10),
         docsUrl: 'https://on.cypress.io/request',
       }
@@ -1210,9 +1247,9 @@ export default {
           The request we sent was:
 
           ${getHttpProps([
-              { key: 'method', value: obj.method },
-              { key: 'URL', value: obj.url },
-            ])}
+          { key: 'method', value: obj.method },
+          { key: 'URL', value: obj.url },
+        ])}
 
           No response was received within the timeout.`, 10),
         docsUrl: 'https://on.cypress.io/request',
@@ -1381,6 +1418,14 @@ export default {
   },
 
   select: {
+    invalid_argument: {
+      message: `${cmd('select')} must be passed a string, number, or array as its 1st argument. You passed: \`{{value}}\`.`,
+      docsUrl: 'https://on.cypress.io/select',
+    },
+    invalid_array_argument: {
+      message: `${cmd('select')} must be passed an array containing only strings and/or numbers. You passed: \`{{value}}\`.`,
+      docsUrl: 'https://on.cypress.io/select',
+    },
     disabled: {
       message: `${cmd('select')} failed because this element is currently disabled:\n\n\`{{node}}\``,
       docsUrl: 'https://on.cypress.io/select',
@@ -1393,6 +1438,10 @@ export default {
       message: `${cmd('select')} was called with an array of arguments but does not have a \`multiple\` attribute set.`,
       docsUrl: 'https://on.cypress.io/select',
     },
+    invalid_number: {
+      message: `${cmd('select')} was called with an invalid index: \`{{index}}\`. Index must be a non-negative integer.`,
+      docsUrl: 'https://on.cypress.io/select',
+    },
     multiple_elements: {
       message: `${cmd('select')} can only be called on a single \`<select>\`. Your subject contained {{num}} elements.`,
       docsUrl: 'https://on.cypress.io/select',
@@ -1402,7 +1451,7 @@ export default {
       docsUrl: 'https://on.cypress.io/select',
     },
     no_matches: {
-      message: `${cmd('select')} failed because it could not find a single \`<option>\` with value or text matching: \`{{value}}\``,
+      message: `${cmd('select')} failed because it could not find a single \`<option>\` with value, index, or text matching: \`{{value}}\``,
       docsUrl: 'https://on.cypress.io/select',
     },
     option_disabled: {
@@ -1420,8 +1469,12 @@ export default {
       message: '`Cypress.SelectorPlayground.defaults()` must be called with an object. You passed: `{{arg}}`',
       docsUrl: 'https://on.cypress.io/selector-playground-api',
     },
-    defaults_invalid_priority: {
+    defaults_invalid_priority_type: {
       message: '`Cypress.SelectorPlayground.defaults()` called with invalid `selectorPriority` property. It must be an array. You passed: `{{arg}}`',
+      docsUrl: 'https://on.cypress.io/selector-playground-api',
+    },
+    defaults_invalid_priority: {
+      message: '`Cypress.SelectorPlayground.defaults()` called with invalid `selectorPriority` property. It must be one of: `data-*`, `id`, `class`, `tag`, `attributes`, `nth-child`. You passed: `{{arg}}`. Consider using the `onElement` property if a specific selector is desired.',
       docsUrl: 'https://on.cypress.io/selector-playground-api',
     },
     defaults_invalid_on_element: {

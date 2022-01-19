@@ -1,3 +1,4 @@
+const { assertLogLength } = require('../../support/utils')
 const { _, $ } = Cypress
 
 describe('src/cy/commands/aliasing', () => {
@@ -291,7 +292,7 @@ describe('src/cy/commands/aliasing', () => {
         cy.foo().as('foo').then(function () {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('alias')).to.eq('foo')
           expect(lastLog.get('aliasType')).to.eq('dom')
         })
@@ -305,7 +306,7 @@ describe('src/cy/commands/aliasing', () => {
         .then(function () {
           // 1 log from visit
           // 1 log from route
-          expect(this.logs.length).to.eq(2)
+          assertLogLength(this.logs, 2)
 
           expect(this.logs[0].get('name')).to.eq('visit')
           expect(this.logs[0].get('alias')).not.to.be.ok

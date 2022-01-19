@@ -4,8 +4,9 @@ const is = require('check-more-types')
 const path = require('path')
 const debug = require('debug')('cypress:server:args')
 const minimist = require('minimist')
+const { getPublicConfigKeys } = require('@packages/config')
+
 const coerceUtil = require('./coerce')
-const configUtil = require('../config')
 const proxyUtil = require('./proxy')
 const errors = require('../errors')
 
@@ -13,7 +14,48 @@ const nestedObjectsInCurlyBracesRe = /\{(.+?)\}/g
 const nestedArraysInSquareBracketsRe = /\[(.+?)\]/g
 const everythingAfterFirstEqualRe = /=(.*)/
 
-const allowList = 'appPath apiKey browser ci ciBuildId clearLogs config configFile cwd env execPath exit exitWithCode group headed inspectBrk key logs mode outputPath parallel ping port project proxySource quiet record reporter reporterOptions returnPkg runMode runProject smokeTest spec tag updating version testingType'.split(' ')
+const allowList = [
+  'apiKey',
+  'appPath',
+  'browser',
+  'ci',
+  'ciBuildId',
+  'clearLogs',
+  'userNodePath',
+  'userNodeVersion',
+  'config',
+  'configFile',
+  'cwd',
+  'env',
+  'execPath',
+  'exit',
+  'exitWithCode',
+  'group',
+  'headed',
+  'inspectBrk',
+  'key',
+  'logs',
+  'mode',
+  'outputPath',
+  'parallel',
+  'ping',
+  'port',
+  'project',
+  'proxySource',
+  'quiet',
+  'record',
+  'reporter',
+  'reporterOptions',
+  'returnPkg',
+  'runMode',
+  'runProject',
+  'smokeTest',
+  'spec',
+  'tag',
+  'testingType',
+  'updating',
+  'version',
+]
 // returns true if the given string has double quote character "
 // only at the last position.
 const hasStrayEndQuote = (s) => {
@@ -162,6 +204,118 @@ const sanitizeAndConvertNestedArgs = (str, argname) => {
   }
 }
 
+/**
+ * Parses the '--spec' cli parameter to return an array of valid patterns.
+ *
+ * @param {Strng} pattern pattern to parse
+ * @returns Array of patterns
+ */
+const parseSpecArgv = (pattern) => {
+  const TOKENS = {
+    OPEN: ['{', '['],
+    CLOSE: ['}', ']'],
+  }
+  const hasToken = [...TOKENS.OPEN, ...TOKENS.CLOSE].some((t) => {
+    return pattern.includes(t)
+  })
+  const hasComma = pattern.includes(',')
+
+  /**
+   * Slice and mutate a string.
+   *
+   * @param {String} str String to slice & mutate
+   * @param {Number} end Index to slice to
+   * @returns [String, String, Number]
+   */
+  const sliceAndMutate = (str, end) => {
+    return [
+      str.slice(0, end),
+      str.substring(end, str.length),
+      str.slice(0, end).length,
+    ]
+  }
+
+  /**
+   * Sanitizes a path's leftover commas.
+   *
+   * @param {String} path
+   * @returns String
+   */
+  const sanitizeFinalPath = (path) => {
+    return path.split('')[0] === ',' ? path.substring(1, path.length) : path
+  }
+
+  if (!hasToken) {
+    return [].concat(pattern.split(','))
+  }
+
+  if (!hasComma) {
+    return pattern
+  }
+
+  // Get comma rules.
+  let opens = []
+  let closes = []
+  const rules = pattern
+  .split('')
+  .map((token, index) => {
+    if (TOKENS.OPEN.includes(token)) {
+      opens.push(index)
+    }
+
+    if (TOKENS.CLOSE.includes(token)) {
+      closes.push(index)
+    }
+
+    if (token === ',') {
+      const isBreakable =
+          index > opens[opens.length - 1] &&
+          index > closes[closes.length - 1] &&
+          opens.length === closes.length
+
+      if (isBreakable) {
+        return {
+          comma: index,
+          isBreakable: true,
+        }
+      }
+
+      return {
+        comma: index,
+        isBreakable: false,
+      }
+    }
+
+    return null
+  })
+  .filter(Boolean)
+
+  // Perform comma breaking logic.
+  let carry = pattern
+  let offset = 0
+  const partial = rules
+  .map((rule) => {
+    if (!rule.isBreakable) {
+      return null
+    }
+
+    const [res, mutated, offsettedBy] = sliceAndMutate(
+      carry,
+      rule.comma - offset,
+    )
+
+    offset = offsettedBy
+    carry = mutated
+
+    return res
+  })
+  .filter(Boolean)
+  .map(sanitizeFinalPath)
+
+  // In the end, carry will be left with the last path that hasn't been cut.
+  return [...partial, sanitizeFinalPath(carry)]
+}
+
 module.exports = {
   normalizeBackslashes,
 
@@ -247,22 +401,29 @@ module.exports = {
     }
 
     if (spec) {
-      const resolvePath = (p) => {
-        return path.resolve(options.cwd, p)
-      }
-
-      // https://github.com/cypress-io/cypress/issues/8818
-      // Sometimes spec is parsed to array. Because of that, we need check.
-      if (typeof spec === 'string') {
-        // clean up single quotes wrapping the spec for Windows users
-        // https://github.com/cypress-io/cypress/issues/2298
-        if (spec[0] === '\'' && spec[spec.length - 1] === '\'') {
-          spec = spec.substring(1, spec.length - 1)
+      try {
+        const resolvePath = (p) => {
+          return path.resolve(options.cwd, p)
         }
 
-        options.spec = strToArray(spec).map(resolvePath)
-      } else {
-        options.spec = spec.map(resolvePath)
+        // https://github.com/cypress-io/cypress/issues/8818
+        // Sometimes spec is parsed to array. Because of that, we need check.
+        if (typeof spec === 'string') {
+          // clean up single quotes wrapping the spec for Windows users
+          // https://github.com/cypress-io/cypress/issues/2298
+          if (spec[0] === '\'' && spec[spec.length - 1] === '\'') {
+            spec = spec.substring(1, spec.length - 1)
+          }
+
+          options.spec = parseSpecArgv(spec).map(resolvePath)
+        } else {
+          options.spec = spec.map(resolvePath)
+        }
+      } catch (err) {
+        debug('could not parse config spec value %s', spec)
+        debug('error %o', err)
+
+        return errors.throw('COULD_NOT_PARSE_ARGUMENTS', 'spec', spec, 'spec must be a string or comma-separated list')
       }
     }
 
@@ -296,7 +457,7 @@ module.exports = {
     }
 
     // get a list of the available config keys
-    const configKeys = configUtil.getConfigKeys()
+    const configKeys = getPublicConfigKeys()
 
     // and if any of our options match this
     const configValues = _.pick(options, configKeys)

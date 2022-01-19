@@ -1,3 +1,5 @@
+import _ from 'lodash'
+
 import { s3helpers } from './s3-api'
 const debug = require('debug')('cypress:binary')
 import la from 'lazy-ass'
@@ -5,7 +7,6 @@ import is from 'check-more-types'
 // using "arg" module for parsing CLI arguments
 // because it plays really nicely with TypeScript
 import arg from 'arg'
-import { prop, sortBy, last, equals } from 'ramda'
 import pluralize from 'pluralize'
 
 // inquirer-confirm is missing type definition
@@ -33,7 +34,7 @@ type semver = string
 /**
  * Platform plus architecture string like "darwin-x64"
  */
-type platformArch = 'darwin-x64' | 'linux-x64'| 'win32-ia32' | 'win32-x64'
+type platformArch = 'darwin-x64' | 'linux-x64' | 'win32-x64'
 
 interface ReleaseInformation {
   commit: commit
@@ -87,9 +88,9 @@ export const findBuildByCommit = (commit: commit, s3paths: string[]) => {
 
   // each path includes commit SHA and build number, let's pick the last build
   const parsedBuilds = matching.map(parseBuildPath)
-  const sortedBuilds = sortBy(prop('build'))(parsedBuilds)
+  const sortedBuilds = _.sortBy(parsedBuilds, 'build')
 
-  return prop('s3path', last(sortedBuilds))
+  return _.last(sortedBuilds).s3path
 }
 
 /**
@@ -141,14 +142,14 @@ export const moveBinaries = async (args = []) => {
   // found s3 paths with last build for same commit for all platforms
   const lastBuilds: Desktop[] = []
 
-  let platforms: platformArch[] = uploadUtils.getValidPlatformArchs()
+  let platforms: platformArch[] = uploadUtils.getValidPlatformArchs() as platformArch[]
 
   if (options['--platformArch']) {
     const onlyPlatform = options['--platformArch']
 
     console.log('only moving single platform %s', onlyPlatform)
     la(uploadUtils.isValidPlatformArch(onlyPlatform), 'invalid platform-arch', onlyPlatform)
-    platforms = platforms.filter(equals(onlyPlatform))
+    platforms = platforms.filter((p) => p === onlyPlatform)
   }
 
   la(platforms.length, 'no platforms to move', platforms)
@@ -193,7 +194,7 @@ export const moveBinaries = async (args = []) => {
   console.log('Copying %s for commit %s',
     pluralize('last build', lastBuilds.length, true), releaseOptions.commit)
 
-  console.log(lastBuilds.map(prop('s3zipPath')).join('\n'))
+  console.log(lastBuilds.map((v) => v.s3zipPath).join('\n'))
 
   try {
     await prompts.shouldCopy()

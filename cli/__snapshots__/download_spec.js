@@ -28,7 +28,7 @@ URL: https://download.cypress.io/desktop?platform=OS&arch=ARCH
 
 ----------
 
-Platform: darwin (Foo-OsVersion)
+Platform: darwin-x64 (Foo-OsVersion)
 Cypress Version: 1.2.3
 
 `
@@ -39,4 +39,8 @@ https://download.cypress.io/desktop?platform=OS&arch=ARCH
 
 exports['specific version desktop url 1'] = `
 https://download.cypress.io/desktop/0.20.2?platform=OS&arch=ARCH
+`
+
+exports['desktop url from template'] = `
+https://download.cypress.io/desktop/0.20.2/darwin-x64/cypress.zip
 `

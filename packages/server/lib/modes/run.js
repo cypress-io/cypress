@@ -11,7 +11,6 @@ const logSymbols = require('log-symbols')
 
 const recordMode = require('./record')
 const errors = require('../errors')
-const ProjectStatic = require('../project_static')
 const Reporter = require('../reporter')
 const browserUtils = require('../browsers')
 const { openProject } = require('../open_project')
@@ -609,22 +608,34 @@ const openProjectCreate = (projectRoot, socketId, args) => {
   return openProject.create(projectRoot, args, options)
 }
 
-const createAndOpenProject = function (socketId, options) {
+async function checkAccess (folderPath) {
+  return fs.access(folderPath, fs.W_OK).catch((err) => {
+    if (['EACCES', 'EPERM'].includes(err.code)) {
+      // we cannot write due to folder permissions
+      return errors.warning('FOLDER_NOT_WRITABLE', folderPath)
+    }
+
+    throw err
+  })
+}
+
+const createAndOpenProject = async (socketId, options) => {
   const { projectRoot, projectId } = options
 
-  return ProjectStatic.ensureExists(projectRoot, options)
-  .then(() => {
-    // open this project without
-    // adding it to the global cache
-    return openProjectCreate(projectRoot, socketId, options)
-  })
-  .call('getProject')
+  await checkAccess(projectRoot)
+
+  return openProjectCreate(projectRoot, socketId, options)
+  .then((open_project) => open_project.getProject())
   .then((project) => {
-    return Promise.props({
+    return Promise.all([
       project,
-      config: project.getConfig(),
-      projectId: getProjectId(project, projectId),
-    })
+      project.getConfig(),
+      getProjectId(project, projectId),
+    ]).then(([project, config, projectId]) => ({
+      project,
+      config,
+      projectId,
+    }))
   })
 }
 
@@ -1417,7 +1428,6 @@ module.exports = {
     })
 
     if (browser.family !== 'chromium' && !options.config.chromeWebSecurity) {
-      console.log()
       errors.warning('CHROME_WEB_SECURITY_NOT_SUPPORTED', browser.family)
     }
 
@@ -1449,7 +1459,7 @@ module.exports = {
           compressedVideoName: videoRecordProps.compressedVideoName,
           endVideoCapture: videoRecordProps.endVideoCapture,
           startedVideoCapture: videoRecordProps.startedVideoCapture,
-          exit: options.exit,
+          exit: config.exit,
           videoCompression: options.videoCompression,
           videoUploadOnPasses: options.videoUploadOnPasses,
           quiet: options.quiet,
@@ -1597,7 +1607,6 @@ module.exports = {
               video: config.video,
               videoCompression: config.videoCompression,
               videoUploadOnPasses: config.videoUploadOnPasses,
-              exit: options.exit,
               headed: options.headed,
               quiet: options.quiet,
               outputPath: options.outputPath,

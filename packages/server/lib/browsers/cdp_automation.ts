@@ -19,9 +19,11 @@ export type CyCookie = Pick<chrome.cookies.Cookie, 'name' | 'value' | 'expiratio
 // https://developer.chrome.com/extensions/cookies#method-getAll
 type CyCookieFilter = chrome.cookies.GetAllDetails
 
-export const screencastOpts: Protocol.Page.StartScreencastRequest = {
-  format: 'jpeg',
-  everyNthFrame: Number(process.env.CYPRESS_EVERY_NTH_FRAME || 5),
+export function screencastOpts (everyNthFrame = Number(process.env.CYPRESS_EVERY_NTH_FRAME || 5)): Protocol.Page.StartScreencastRequest {
+  return {
+    format: 'jpeg',
+    everyNthFrame,
+  }
 }
 
 function convertSameSiteExtensionToCdp (str: CyCookie['sameSite']): Protocol.Network.CookieSameSite | undefined {

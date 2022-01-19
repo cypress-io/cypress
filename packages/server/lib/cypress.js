@@ -9,9 +9,9 @@ require('./environment')
 // essentially do it all again when we boot the correct
 // mode.
 
-const R = require('ramda')
 const Promise = require('bluebird')
 const debug = require('debug')('cypress:server:cypress')
+const { getPublicConfigKeys } = require('@packages/config')
 const argsUtils = require('./util/args')
 const chalk = require('chalk')
 const { openProject } = require('../lib/open_project')
@@ -30,8 +30,9 @@ const exit = (code = 0) => {
 }
 
 const showWarningForInvalidConfig = (options) => {
+  const publicConfigKeys = getPublicConfigKeys()
   const invalidConfigOptions = require('lodash').keys(options.config).reduce((invalid, option) => {
-    if (!require('./config').getConfigKeys().find((configKey) => configKey === option)) {
+    if (!publicConfigKeys.find((configKey) => configKey === option)) {
       invalid.push(option)
     }
 
@@ -123,7 +124,7 @@ module.exports = {
 
     // if the CLI passed "--" somewhere, we need to remove it
     // for https://github.com/cypress-io/cypress/issues/5466
-    argv = R.without('--', argv)
+    argv = argv.filter((val) => val !== '--')
 
     let options
 

@@ -10,7 +10,7 @@ const config = require(`${root}lib/config`)
 const { ServerE2E } = require(`${root}lib/server-e2e`)
 const { SocketE2E } = require(`${root}lib/socket-e2e`)
 const { SpecsStore } = require(`${root}/lib/specs-store`)
-const Fixtures = require(`${root}test/support/helpers/fixtures`)
+const Fixtures = require('@tooling/system-tests/lib/fixtures')
 const { createRoutes } = require(`${root}lib/routes`)
 
 const s3StaticHtmlUrl = 'https://s3.amazonaws.com/internal-test-runner-assets.cypress.io/index.html'

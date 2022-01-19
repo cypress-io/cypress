@@ -1,5 +1,4 @@
 import _ from 'lodash'
-import R from 'ramda'
 import la from 'lazy-ass'
 import path from 'path'
 import check from 'check-more-types'
@@ -171,15 +170,13 @@ function findSpecsOfType (searchFolder: string, commonSearchOptions: CommonSearc
   return Bluebird.mapSeries(testFilesPatterns, findOnePattern).then(_.flatten)
 }
 
-const setTestType = (testType: Cypress.CypressSpecType) => R.map(R.set(R.lensProp('specType'), testType))
-
 const findIntegrationSpecs = (searchFolder: string | undefined, commonSearchOptions: CommonSearchOptions, specPattern: string | undefined) => {
   if (!searchFolder) {
     return []
   }
 
   return findSpecsOfType(searchFolder, commonSearchOptions, specPattern)
-  .then(setTestType(SPEC_TYPES.INTEGRATION))
+  .then((val) => val.map((s) => ({ ...s, specType: SPEC_TYPES.INTEGRATION })))
 }
 
 const findComponentSpecs = (searchFolder: string | undefined | false, commonSearchOptions: CommonSearchOptions, specPattern: string | undefined) => {
@@ -188,7 +185,7 @@ const findComponentSpecs = (searchFolder: string | undefined | false, commonSear
   }
 
   return findSpecsOfType(searchFolder, commonSearchOptions, specPattern)
-  .then(setTestType(SPEC_TYPES.COMPONENT))
+  .then((val) => val.map((s) => ({ ...s, specType: SPEC_TYPES.COMPONENT })))
 }
 
 const printFoundSpecs = (foundSpecs: Cypress.Spec[]) => {

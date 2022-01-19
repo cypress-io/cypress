@@ -297,6 +297,7 @@ export async function process (name, cname, videoCompression, ffmpegchaptersConf
     const outputOptions = [
       '-preset fast',
         `-crf ${videoCompression}`,
+        '-pix_fmt yuv420p',
     ]
 
     if (addChaptersMeta) {

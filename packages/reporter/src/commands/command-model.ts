@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import { action, computed, observable } from 'mobx'
 
-import Err from '../errors/err-model'
+import Err, { ErrProps } from '../errors/err-model'
 import Instrument, { InstrumentProps } from '../instruments/instrument-model'
 import type { TimeoutID } from '../lib/types'
 
@@ -20,7 +20,7 @@ interface RenderProps {
 }
 
 export interface CommandProps extends InstrumentProps {
-  err?: Err
+  err?: ErrProps
   event?: boolean
   number?: number
   numElements: number

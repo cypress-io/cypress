@@ -7,6 +7,7 @@ const debugCiInfo = require('debug')('cypress:server:record:ci-info')
 const Promise = require('bluebird')
 const isForkPr = require('is-fork-pr')
 const commitInfo = require('@cypress/commit-info')
+
 const api = require('../api')
 const logger = require('../logger')
 const errors = require('../errors')
@@ -32,7 +33,7 @@ const logException = (err) => {
 // dont yell about any errors either
 
 const runningInternalTests = () => {
-  return env.get('CYPRESS_INTERNAL_E2E_TESTS') === '1'
+  return env.get('CYPRESS_INTERNAL_SYSTEM_TESTS') === '1'
 }
 
 const haveProjectIdAndKeyButNoRecordOption = (projectId, options) => {
@@ -749,7 +750,7 @@ const createRunAndRecordSpecs = (options = {}) => {
           return _.pick({
             ...v,
             clientId: v.id,
-            config: v._testConfig || null,
+            config: v._testConfig?.unverifiedTestConfig || null,
             title: v._titlePath,
             hookIds: v.hooks.map((hook) => hook.hookId),
           },

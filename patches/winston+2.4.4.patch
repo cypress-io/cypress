@@ -1,0 +1,16 @@
+diff --git a/node_modules/winston/lib/winston/common.js b/node_modules/winston/lib/winston/common.js
+index 8ed9973..ecc59f8 100644
+--- a/node_modules/winston/lib/winston/common.js
++++ b/node_modules/winston/lib/winston/common.js
+@@ -32,7 +32,10 @@ exports.setLevels = function (target, past, current, isDefault) {
+   }
+ 
+   target.levels = current || config.npm.levels;
+-  if (target.padLevels) {
++  // Check if `padLevels` exists to suppress a warning about accessing
++  // a non-existing property on `exports`.
++  // @see https://github.com/winstonjs/winston/issues/1882
++  if (target.hasOwnProperty('padLevels') && target.padLevels) {
+     target.levelLength = exports.longestElement(Object.keys(target.levels));
+   }
+ 

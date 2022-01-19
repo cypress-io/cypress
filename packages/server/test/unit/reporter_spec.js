@@ -111,7 +111,6 @@ describe('lib/reporter', () => {
     it('recursively creates suites for fullTitle', function () {
       const args = this.reporter.parseArgs('fail', [this.testObj])
 
-      console.log(args)
       expect(args[0]).to.eq('fail')
 
       const title = 'TodoMVC - React When page is initially opened should focus on the todo input field'

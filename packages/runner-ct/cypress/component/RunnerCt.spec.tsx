@@ -20,8 +20,10 @@ interface Overrides {
 const noop = () => {}
 
 class FakeEventManager {
+  reporterBus: { on: () => void }
   constructor (overrides: Overrides = {}) {
     this.saveState = overrides.saveState || noop
+    this.reporterBus = { on: noop }
   }
 
   start = noop
@@ -130,6 +132,31 @@ describe('RunnerCt', () => {
       />)
 
       cy.get(selectors.noSpecSelectedReporter).should('exist')
+    })
+  })
+
+  context('current spec is deleted', () => {
+    it('removes selection', () => {
+      const state = makeState({
+        spec: { relative: '/test.js', absolute: 'root/test.js', name: 'test.js' },
+        specs: [
+          { relative: '/test2.js', absolute: 'root/test2.js', name: 'test2.js' },
+          { relative: '/test.js', absolute: 'root/test.js', name: 'test.js' },
+        ],
+      })
+
+      mount(<RunnerCt
+        state={state}
+        // @ts-ignore - this is difficult to stub. Real one breaks things.
+        eventManager={new FakeEventManager()}
+        config={fakeConfig}
+      />)
+
+      cy.contains('Your tests are loading').then(() => {
+        state.setSpecs([{ relative: '/test2.js', absolute: 'root/test2.js', name: 'test2.js' }])
+      })
+
+      cy.contains('No spec selected')
     })
   })
 })

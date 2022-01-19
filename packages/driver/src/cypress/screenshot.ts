@@ -12,6 +12,7 @@ const _reset = () => {
     disableTimersAndAnimations: true,
     screenshotOnRunFailure: true,
     blackout: [],
+    overwrite: false,
     onBeforeScreenshot () {},
     onAfterScreenshot () {},
   }
@@ -133,9 +134,9 @@ const validate = (props, cmd, log) => {
     values.capture = capture
   }
 
-  validateAndSetBoolean(props, values, cmd, log, 'scale')
-  validateAndSetBoolean(props, values, cmd, log, 'disableTimersAndAnimations')
-  validateAndSetBoolean(props, values, cmd, log, 'screenshotOnRunFailure')
+  ['scale', 'disableTimersAndAnimations', 'screenshotOnRunFailure', 'overwrite'].forEach((key) => {
+    validateAndSetBoolean(props, values, cmd, log, key)
+  })
 
   if (blackout) {
     const existsNonString = _.some(blackout, (selector) => {

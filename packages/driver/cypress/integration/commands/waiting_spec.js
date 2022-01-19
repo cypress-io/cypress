@@ -1,3 +1,4 @@
+const { assertLogLength } = require('../../support/utils')
 const { _, Promise } = Cypress
 let reqQueue = []
 
@@ -1000,7 +1001,7 @@ describe('src/cy/commands/waiting', () => {
 
         it('only logs once', function (done) {
           cy.on('fail', (err) => {
-            expect(this.logs.length).to.eq(1)
+            assertLogLength(this.logs, 1)
             expect(err.message).to.eq('`cy.wait()` could not find a registered alias for: `@foo`.\nYou have not aliased anything yet.')
 
             done()

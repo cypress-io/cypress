@@ -44,10 +44,10 @@ export const isAttached = function ($el) {
   })
 }
 
-export const isDetachedEl = (el: HTMLElement) => {
+export const isDetachedEl = (el: HTMLElement | JQuery<any>) => {
   return !isAttachedEl(el)
 }
 
-export const isAttachedEl = function (el: HTMLElement) {
+export const isAttachedEl = function (el: HTMLElement | JQuery<any>) {
   return isAttached($(el))
 }

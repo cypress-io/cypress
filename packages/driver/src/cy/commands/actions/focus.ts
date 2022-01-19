@@ -7,7 +7,8 @@ import $elements from '../../../dom/elements'
 
 export default (Commands, Cypress, cy) => {
   return Commands.addAll({ prevSubject: ['element', 'window'] }, {
-    focus (subject, options = {}) {
+    // TODO: any -> Partial<Cypress.Loggable & Cypress.Timeoutable>
+    focus (subject, options: any = {}) {
       const userOptions = options
 
       // we should throw errors by default!
@@ -84,7 +85,8 @@ export default (Commands, Cypress, cy) => {
       return verifyAssertions()
     },
 
-    blur (subject, options = {}) {
+    // TODO: any -> Partial<Cypress.BlurOptions>
+    blur (subject, options: any = {}) {
       const userOptions = options
 
       // we should throw errors by default!

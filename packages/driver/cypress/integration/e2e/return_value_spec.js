@@ -1,3 +1,5 @@
+const { assertLogLength } = require('../../support/utils')
+
 describe('return values', () => {
   beforeEach(function () {
     this.logs = []
@@ -13,7 +15,7 @@ describe('return values', () => {
 
   it('can return undefined and invoke cy commands', (done) => {
     cy.wrap(null).then(function () {
-      expect(this.logs.length).to.eq(1)
+      assertLogLength(this.logs, 1)
       done()
     })
 
@@ -60,7 +62,7 @@ describe('return values', () => {
   it('can return undefined when invoking cy commands in custom command', (done) => {
     Cypress.Commands.add('foo', () => {
       cy.wrap(null).then(function () {
-        expect(this.logs.length).to.eq(1)
+        assertLogLength(this.logs, 1)
         done()
       })
 
@@ -74,7 +76,7 @@ describe('return values', () => {
     cy.on('fail', (err) => {
       const { lastLog } = this
 
-      expect(this.logs.length).to.eq(1)
+      assertLogLength(this.logs, 1)
       expect(lastLog.get('name')).to.eq('foo')
       expect(lastLog.get('error')).to.eq(err)
       expect(err.message).to.include('> `cy.foo()`')
@@ -98,7 +100,7 @@ describe('return values', () => {
     cy.on('fail', (err) => {
       const { lastLog } = this
 
-      expect(this.logs.length).to.eq(1)
+      assertLogLength(this.logs, 1)
       expect(lastLog.get('name')).to.eq('foo')
       expect(lastLog.get('error')).to.eq(err)
       expect(err.message).to.include('> `cy.foo()`')

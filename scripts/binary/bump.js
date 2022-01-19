@@ -4,7 +4,6 @@ const bumpercar = require('@cypress/bumpercar')
 const path = require('path')
 const la = require('lazy-ass')
 const check = require('check-more-types')
-const R = require('ramda')
 const { configFromEnvOrJsonFile, filenameToShellVariable } = require('@cypress/env-or-json-file')
 const makeEmptyGithubCommit = require('make-empty-github-commit')
 const parse = require('parse-github-repo-url')
@@ -14,14 +13,6 @@ let car = null
 
 // all the projects to trigger / run / change environment variables for
 const _PROVIDERS = {
-  appVeyor: {
-    main: 'cypress-io/cypress',
-    win32: [
-      'cypress-io/cypress-test-tiny',
-      'cypress-io/cypress-test-example-repos',
-    ],
-  },
-
   circle: {
     main: 'cypress-io/cypress',
     linux: [
@@ -33,6 +24,10 @@ const _PROVIDERS = {
       'cypress-io/cypress-test-example-repos',
     ],
     darwin: [
+      'cypress-io/cypress-test-tiny',
+      'cypress-io/cypress-test-example-repos',
+    ],
+    win32: [
       'cypress-io/cypress-test-tiny',
       'cypress-io/cypress-test-example-repos',
     ],
@@ -88,7 +83,7 @@ const getCiConfig = function () {
   return config
 }
 
-const awaitEachProjectAndProvider = function (projects, fn, filter = R.identity) {
+const awaitEachProjectAndProvider = function (projects, fn, filter = (val) => val) {
   const creds = getCiConfig()
 
   // configure a new Bumpercar
@@ -106,12 +101,6 @@ const awaitEachProjectAndProvider = function (projects, fn, filter = R.identity)
     }
   }
 
-  if (check.unemptyString(creds.appVeyorToken)) {
-    providers.appVeyor = {
-      appVeyorToken: creds.appVeyorToken,
-    }
-  }
-
   const providerNames = Object.keys(providers)
 
   console.log('configured providers', providerNames)
@@ -119,7 +108,7 @@ const awaitEachProjectAndProvider = function (projects, fn, filter = R.identity)
 
   car = bumpercar.create({ providers })
 
-  const filteredProjects = R.filter(filter, projects)
+  const filteredProjects = projects.filter(filter)
 
   if (check.empty(filteredProjects)) {
     console.log('⚠️ zero filtered projects left after filtering')
@@ -134,28 +123,18 @@ const awaitEachProjectAndProvider = function (projects, fn, filter = R.identity)
 }
 
 // do not trigger all projects if there is specific provider
-// for example appVeyor should be used for Windows testing
 const getFilterByProvider = function (providerName, platformName) {
-  let platformFilter; let providerFilter
+  return (val) => {
+    if (providerName && val.provider !== providerName) {
+      return false
+    }
 
-  if (providerName) {
-    console.log('only allow projects for provider', providerName)
-    providerFilter = R.propEq('provider', providerName)
-  } else {
-    providerFilter = R.identity
+    if (platformName && val.platform !== platformName) {
+      return false
+    }
+
+    return val
   }
-
-  if (platformName) {
-    console.log('only allow projects for platform', platformName)
-    platformFilter = R.propEq('platform', platformName)
-  } else {
-    platformFilter = R.identity
-  }
-
-  // combined filter is when both filters pass
-  const projectFilter = R.allPass([providerFilter, platformFilter])
-
-  return projectFilter
 }
 
 module.exports = {
@@ -199,7 +178,7 @@ module.exports = {
     }
 
     return awaitEachProjectAndProvider(PROJECTS, updateProject, projectFilter)
-    .then(R.always(result))
+    .then(() => result)
   },
 
   // triggers test projects on multiple CIs
@@ -235,14 +214,6 @@ Testing new Cypress version ${version}
         if (process.env.CIRCLE_BUILD_URL) {
           message += '\n'
           message += `Circle CI build url ${process.env.CIRCLE_BUILD_URL}`
-        }
-
-        if (process.env.APPVEYOR) {
-          const slug = process.env.APPVEYOR_PROJECT_SLUG
-          const build = process.env.APPVEYOR_BUILD_ID
-
-          message += '\n'
-          message += `AppVeyor CI ${slug} ${build}`
         }
       }
 

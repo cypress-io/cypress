@@ -45,7 +45,6 @@ describe('/lib/tasks/install', function () {
     beforeEach(function () {
       logger.reset()
 
-      // sinon.stub(os, 'tmpdir').returns('/tmp')
       sinon.stub(util, 'isCi').returns(false)
       sinon.stub(util, 'isPostInstall').returns(false)
       sinon.stub(util, 'pkgVersion').returns(packageVersion)
@@ -442,6 +441,23 @@ describe('/lib/tasks/install', function () {
         )
       })
     })
+
+    it('exits with error when installing on unsupported os', function () {
+      sinon.stub(util, 'getPlatformInfo').resolves('Platform: win32-ia32')
+
+      return install.start()
+      .then(() => {
+        throw new Error('should have caught error')
+      })
+      .catch((err) => {
+        logger.error(err)
+
+        snapshot(
+          'error when installing on unsupported os',
+          normalize(this.stdout.toString()),
+        )
+      })
+    })
   })
 
   context('._getBinaryUrlFromPrereleaseNpmUrl', function () {
@@ -456,6 +472,9 @@ describe('/lib/tasks/install', function () {
 
       expect(install._getBinaryUrlFromPrereleaseNpmUrl('https://cdn.cypress.io/beta/npm/5.1.1/circle-develop-3fdfc3b453eb38ad3c0b079531e4dde6668e3dd0-436710/cypress.tgz'))
       .to.eq('https://cdn.cypress.io/beta/binary/5.1.1/linux-x64/circle-develop-3fdfc3b453eb38ad3c0b079531e4dde6668e3dd0-436710/cypress.zip')
+
+      expect(install._getBinaryUrlFromPrereleaseNpmUrl('https://cdn.cypress.io/beta/npm/5.1.1/circle-develop/some/branch-3fdfc3b453eb38ad3c0b079531e4dde6668e3dd0-436710/cypress.tgz'))
+      .to.eq('https://cdn.cypress.io/beta/binary/5.1.1/linux-x64/circle-develop/some/branch-3fdfc3b453eb38ad3c0b079531e4dde6668e3dd0-436710/cypress.zip')
     })
 
     it('returns nothing for an invalid url', function () {
@@ -481,6 +500,14 @@ describe('/lib/tasks/install', function () {
         npm_config_argv: JSON.stringify({
           original: ['npm', 'i', 'https://foo.com/cypress.tgz'],
         }),
+      })
+
+      expect(await install._getVersionSpecifier('/foo/bar/baz')).to.eq('https://foo.com/cypress.tgz')
+    })
+
+    it('resolves with cypress.tgz URL if specified in npm env npm_package_resolved', async function () {
+      restoreEnv = mockedEnv({
+        npm_package_resolved: 'https://foo.com/cypress.tgz',
       })
 
       expect(await install._getVersionSpecifier('/foo/bar/baz')).to.eq('https://foo.com/cypress.tgz')

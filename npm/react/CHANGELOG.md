@@ -1,3 +1,53 @@
+# [@cypress/react-v5.12.1](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.12.0...@cypress/react-v5.12.1) (2022-01-10)
+
+
+### Bug Fixes
+
+* check resolvedNodePath for Next.js 12 guard ([#19604](https://github.com/cypress-io/cypress/issues/19604)) ([6304fd7](https://github.com/cypress-io/cypress/commit/6304fd7548a0a3fee90fc8a9ba449ab81e7a7a0c))
+
+# [@cypress/react-v5.12.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.11.0...@cypress/react-v5.12.0) (2021-12-21)
+
+
+### Features
+
+* support create-react-app v5 ([#19434](https://github.com/cypress-io/cypress/issues/19434)) ([415a7b1](https://github.com/cypress-io/cypress/commit/415a7b149aaac37ae605dc1a11007bad29187dc5))
+
+# [@cypress/react-v5.11.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.10.3...@cypress/react-v5.11.0) (2021-12-16)
+
+
+### Bug Fixes
+
+* **react:** link to rerender example ([#19020](https://github.com/cypress-io/cypress/issues/19020)) ([2a471d6](https://github.com/cypress-io/cypress/commit/2a471d633a7cf5bd94cfa7d876ddb27cc32626d1))
+
+
+### Features
+
+* use hoisted yarn install in binary build ([#17285](https://github.com/cypress-io/cypress/issues/17285)) ([e4f5b10](https://github.com/cypress-io/cypress/commit/e4f5b106d49d6ac0857c5fdac886f83b99558c88))
+
+# [@cypress/react-v5.10.3](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.10.2...@cypress/react-v5.10.3) (2021-11-01)
+
+
+### Bug Fixes
+
+* **@cypress/react:** throw if using Next.js swc-loader without nodeVersion=system ([#18686](https://github.com/cypress-io/cypress/issues/18686)) ([d274a5b](https://github.com/cypress-io/cypress/commit/d274a5b5d92323cb6a9c9d0af3e41bf40e679ac1))
+
+# [@cypress/react-v5.10.2](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.10.1...@cypress/react-v5.10.2) (2021-10-29)
+
+
+### Bug Fixes
+
+* Next.JS 12 components testing failing with ` TypeError: Cannot read property 'traceChild' of undefined` ([#18648](https://github.com/cypress-io/cypress/issues/18648)) ([cb0cbdf](https://github.com/cypress-io/cypress/commit/cb0cbdf4c35da09a7dedcc4563a242cb4748e994))
+* remove outdated registry link ([#18710](https://github.com/cypress-io/cypress/issues/18710)) ([e2a869d](https://github.com/cypress-io/cypress/commit/e2a869d2a984abb6703aec966dd9124ee693b8c1))
+* **cypress/react:** disable react-refresh for craco setups ([#18517](https://github.com/cypress-io/cypress/issues/18517)) ([ea10795](https://github.com/cypress-io/cypress/commit/ea1079559473fc672b5e0e188b5b54bf8ebe2f98))
+
+# [@cypress/react-v5.10.1](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.10.0...@cypress/react-v5.10.1) (2021-10-04)
+
+
+### Bug Fixes
+
+* configure proper pages directory for next application ([#18009](https://github.com/cypress-io/cypress/issues/18009)) ([70c7c36](https://github.com/cypress-io/cypress/commit/70c7c3678180d5408c144fa37f94ba5f5f8ceeb8))
+* next trace error ([#18189](https://github.com/cypress-io/cypress/issues/18189)) ([db6f909](https://github.com/cypress-io/cypress/commit/db6f9096bd6668db1937d0e38d3928866f6cd5df))
+
 # [@cypress/react-v5.10.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.9.4...@cypress/react-v5.10.0) (2021-09-10)
 
 

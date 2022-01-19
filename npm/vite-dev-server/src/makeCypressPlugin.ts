@@ -1,12 +1,9 @@
-import { resolve, posix, sep } from 'path'
-import { readFile } from 'fs'
-import { promisify } from 'util'
+import { resolve, sep } from 'path'
+import { readFile } from 'fs/promises'
 import Debug from 'debug'
-import { ModuleNode, Plugin, ViteDevServer } from 'vite'
+import { ModuleNode, normalizePath, Plugin, ViteDevServer } from 'vite'
 
 const debug = Debug('cypress:vite-dev-server:plugin')
-
-const read = promisify(readFile)
 
 const pluginName = 'cypress-transform-html'
 const OSSepRE = new RegExp(`\\${sep}`, 'g')
@@ -48,40 +45,56 @@ export const makeCypressPlugin = (
 
   const posixSupportFilePath = supportFilePath ? convertPathToPosix(resolve(projectRoot, supportFilePath)) : undefined
 
-  const normalizedSupportFilePath = posixSupportFilePath ? `${base}@fs/${posixSupportFilePath}` : undefined
-
   return {
     name: pluginName,
     enforce: 'pre',
-    config (_, env) {
-      if (env) {
-        return {
-          define: {
-            'import.meta.env.__cypress_supportPath': JSON.stringify(normalizedSupportFilePath),
-            'import.meta.env.__cypress_originAutUrl': JSON.stringify(`__cypress/iframes/${convertPathToPosix(projectRoot)}/`),
-          },
-        }
-      }
-    },
     configResolved (config) {
       base = config.base
     },
-    transformIndexHtml () {
-      debug('transformIndexHtml with base', base)
+    async transformIndexHtml () {
+      const indexHtmlPath = resolve(__dirname, '..', 'index.html')
+      const indexHtmlContent = await readFile(indexHtmlPath, { encoding: 'utf8' })
+      // find </body> last index
+      const endOfBody = indexHtmlContent.lastIndexOf('</body>')
 
-      return [
-        // load the script at the end of the body
-        // script has to be loaded when the vite client is connected
-        {
-          tag: 'script',
-          injectTo: 'body',
-          attrs: { type: 'module' },
-          children: `import(${JSON.stringify(`${base}@fs/${INIT_FILEPATH}`)})`,
-        },
-      ]
+      // insert the script in the end of the body
+      return `${indexHtmlContent.substring(0, endOfBody)
+    }<script src="${base}cypress:client-init-test" type="module"></script>${
+      indexHtmlContent.substring(endOfBody)
+    }`
+    },
+    resolveId (id) {
+      if (id === 'cypress:config') {
+        return id
+      }
+
+      if (id === 'cypress:support-path') {
+        return posixSupportFilePath
+      }
+
+      if (id === 'cypress:spec-loaders') {
+        return id
+      }
+
+      if (id === '/cypress:client-init-test') {
+        return INIT_FILEPATH
+      }
+    },
+    load (id) {
+      if (id === 'cypress:spec-loaders') {
+        return `export default {\n${specs.map((s) => {
+          return `${JSON.stringify(s.relative)}:()=>import(${JSON.stringify(s.absolute)})`
+        }).join(',\n')}\n}`
+      }
+
+      if (id === 'cypress:config') {
+        return `
+export const hasSupportPath = ${JSON.stringify(!!supportFilePath)}
+export const originAutUrl = ${JSON.stringify(`/__cypress/iframes/${normalizePath(projectRoot)}/`)}`
+      }
     },
     configureServer: async (server: ViteDevServer) => {
-      const indexHtml = await read(resolve(__dirname, '..', 'index.html'), { encoding: 'utf8' })
+      const indexHtml = await readFile(resolve(__dirname, '..', 'index.html'), { encoding: 'utf8' })
 
       const transformedIndexHtml = await server.transformIndexHtml(base, indexHtml)
 

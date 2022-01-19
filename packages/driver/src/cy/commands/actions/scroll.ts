@@ -30,7 +30,8 @@ const isNaNOrInfinity = (item) => {
 
 export default (Commands, Cypress, cy, state) => {
   Commands.addAll({ prevSubject: 'element' }, {
-    scrollIntoView (subject, options = {}) {
+    // TODO: any -> Partial<Cypress.ScrollToOptions>
+    scrollIntoView (subject, options: any = {}) {
       const userOptions = options
 
       if (!_.isObject(userOptions)) {
@@ -114,6 +115,9 @@ export default (Commands, Cypress, cy, state) => {
       const scrollIntoView = () => {
         return new Promise((resolve, reject) => {
           // scroll our axes
+          // TODO: done() came from jQuery animate(), specifically, EffectsOptions at misc.d.ts
+          // The type definition should be fixed at @types/jquery.scrollto.
+          // @ts-ignore
           return $(options.$parent).scrollTo(options.$el, {
             axis: options.axis,
             easing: options.easing,
@@ -132,7 +136,7 @@ export default (Commands, Cypress, cy, state) => {
             },
             always () {
               if (parentIsWin) {
-                return delete options.$parent.contentWindow
+                delete options.$parent.contentWindow
               }
             },
           })
@@ -153,7 +157,8 @@ export default (Commands, Cypress, cy, state) => {
   })
 
   Commands.addAll({ prevSubject: ['optional', 'element', 'window'] }, {
-    scrollTo (subject, xOrPosition, yOrOptions, options = {}) {
+    // TODO: any -> Partial<Cypress.ScrollToOptions>
+    scrollTo (subject, xOrPosition, yOrOptions, options: any = {}) {
       let x; let y
       let userOptions = options
 
@@ -168,7 +173,7 @@ export default (Commands, Cypress, cy, state) => {
         y = yOrOptions
       }
 
-      let position = null
+      let position: string | null = null
 
       // we may be '50%' or 'bottomCenter'
       if (_.isString(xOrPosition)) {
@@ -293,7 +298,7 @@ export default (Commands, Cypress, cy, state) => {
           $utils.filterOutOptions(options, { duration: 0, easing: 'swing' }),
         )
 
-        const messageArgs = []
+        const messageArgs: string[] = []
 
         if (position) {
           messageArgs.push(position)
@@ -306,12 +311,12 @@ export default (Commands, Cypress, cy, state) => {
           messageArgs.push(deltaOptions)
         }
 
-        const log = {
+        const log: Record<string, any> = {
           message: messageArgs.join(', '),
           timeout: options.timeout,
           consoleProps () {
             // merge into consoleProps without mutating it
-            const obj = {}
+            const obj: Record<string, any> = {}
 
             if (position) {
               obj.Position = position
@@ -357,10 +362,16 @@ export default (Commands, Cypress, cy, state) => {
       const scrollTo = () => {
         return new Promise((resolve, reject) => {
           // scroll our axis'
+          // TODO: done() came from jQuery animate(), specifically, EffectsOptions at misc.d.ts
+          // The type definition should be fixed at @types/jquery.scrollto.
+          // @ts-ignore
           $(options.$el).scrollTo({ left: x, top: y }, {
             axis: options.axis,
             easing: options.easing,
             duration: options.duration,
+            // TODO: ensureScrollable option does not exist on jQuery or config/jquery.scrollto.ts.
+            // It can be removed.
+            // @ts-ignore
             ensureScrollable: options.ensureScrollable,
             done () {
               return resolve(options.$el)
@@ -376,7 +387,7 @@ export default (Commands, Cypress, cy, state) => {
           })
 
           if (isWin) {
-            return delete options.$el.contentWindow
+            delete options.$el.contentWindow
           }
         })
       }

@@ -1,14 +1,16 @@
 import type httpProxy from 'http-proxy'
+import Debug from 'debug'
 import { ErrorRequestHandler, Router } from 'express'
 
 import type { SpecsStore } from './specs-store'
-import { staticCtrl } from './controllers/static'
 import type { Browser } from './browsers/types'
 import type { NetworkProxy } from '@packages/proxy'
 import type { Cfg } from './project-base'
 import xhrs from './controllers/xhrs'
 import { runner } from './controllers/runner'
 import { iframesController } from './controllers/iframes'
+
+const debug = Debug('cypress:server:routes')
 
 export interface InitializeRoutes {
   specsStore: SpecsStore
@@ -20,6 +22,7 @@ export interface InitializeRoutes {
   getRemoteState: () => Cypress.RemoteState
   onError: (...args: unknown[]) => any
   testingType: Cypress.TestingType
+  exit?: boolean
 }
 
 export const createCommonRoutes = ({
@@ -27,8 +30,11 @@ export const createCommonRoutes = ({
   networkProxy,
   testingType,
   getSpec,
+  getCurrentBrowser,
+  specsStore,
   getRemoteState,
   nodeProxy,
+  exit,
 }: InitializeRoutes) => {
   const router = Router()
 
@@ -40,10 +46,6 @@ export const createCommonRoutes = ({
     xhrs.handle(req, res, config, next)
   })
 
-  router.get('/__cypress/static/*', (req, res) => {
-    staticCtrl.handle(req, res)
-  })
-
   router.get('/__cypress/iframes/*', (req, res) => {
     if (testingType === 'e2e') {
       iframesController.e2e({ config, getSpec, getRemoteState }, req, res)
@@ -52,6 +54,26 @@ export const createCommonRoutes = ({
     if (testingType === 'component') {
       iframesController.component({ config, nodeProxy }, req, res)
     }
+  })
+
+  const clientRoute = config.clientRoute
+
+  if (!clientRoute) {
+    throw Error(`clientRoute is required. Received ${clientRoute}`)
+  }
+
+  router.get(clientRoute, (req, res) => {
+    debug('Serving Cypress front-end by requested URL:', req.url)
+
+    runner.serve(req, res, testingType === 'e2e' ? 'runner' : 'runner-ct', {
+      config,
+      testingType,
+      getSpec,
+      getCurrentBrowser,
+      getRemoteState,
+      specsStore,
+      exit,
+    })
   })
 
   router.all('*', (req, res) => {

@@ -476,5 +476,20 @@ describe('driver/src/cypress/cy', () => {
         expect(cy.state('current').get('prev').get('args')[0].foo).to.equal('foo')
       })
     })
+
+    // https://github.com/cypress-io/cypress/issues/18892
+    it('passes this through to overwritten command', () => {
+      Cypress.Commands.add('bar', function () {
+        expect(this.test.title).to.exist
+      })
+
+      cy.bar()
+
+      Cypress.Commands.overwrite('bar', function (originalFn) {
+        return originalFn.call(this)
+      })
+
+      cy.bar()
+    })
   })
 })

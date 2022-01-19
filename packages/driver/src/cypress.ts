@@ -1,5 +1,6 @@
 // @ts-nocheck
 
+import { validate, validateNoReadOnlyConfig } from '@packages/config'
 import _ from 'lodash'
 import $ from 'jquery'
 import * as blobUtil from 'blob-util'
@@ -13,7 +14,7 @@ import browserInfo from './cypress/browser'
 import $scriptUtils from './cypress/script_utils'
 
 import $Commands from './cypress/commands'
-import $Cy from './cypress/cy'
+import { $Cy } from './cypress/cy'
 import $dom from './dom'
 import $Downloads from './cypress/downloads'
 import $errorMessages from './cypress/error_messages'
@@ -21,7 +22,7 @@ import $errUtils from './cypress/error_utils'
 import $Log from './cypress/log'
 import $LocalStorage from './cypress/local_storage'
 import $Mocha from './cypress/mocha'
-import $Mouse from './cy/mouse'
+import { create as createMouse } from './cy/mouse'
 import $Runner from './cypress/runner'
 import $Screenshot from './cypress/screenshot'
 import $SelectorPlayground from './cypress/selector_playground'
@@ -116,7 +117,7 @@ class $Cypress {
     // normalize this into boolean
     config.isTextTerminal = !!config.isTextTerminal
 
-    // we asumme we're interactive based on whether or
+    // we assume we're interactive based on whether or
     // not we're in a text terminal, but we keep this
     // as a separate property so we can potentially
     // slice up the behavior
@@ -142,7 +143,30 @@ class $Cypress {
 
     this.state = $SetterGetter.create({})
     this.originalConfig = _.cloneDeep(config)
-    this.config = $SetterGetter.create(config)
+    this.config = $SetterGetter.create(config, (config) => {
+      if (!window.top.__cySkipValidateConfig) {
+        validateNoReadOnlyConfig(config, (errProperty) => {
+          let errMessage
+
+          if (this.state('runnable')) {
+            errMessage = $errUtils.errByPath('config.invalid_cypress_config_override', {
+              errProperty,
+            })
+          } else {
+            errMessage = $errUtils.errByPath('config.invalid_test_config_override', {
+              errProperty,
+            })
+          }
+
+          throw new this.state('specWindow').Error(errMessage)
+        })
+      }
+
+      validate(config, (errMsg) => {
+        throw new this.state('specWindow').Error(errMsg)
+      })
+    })
+
     this.env = $SetterGetter.create(env)
     this.getTestRetries = function () {
       const testRetries = this.config('retries')
@@ -203,12 +227,8 @@ class $Cypress {
   // or parsed. we have not received any custom commands
   // at this point
   onSpecWindow (specWindow, scripts) {
-    const logFn = (...args) => {
-      return this.log.apply(this, args)
-    }
-
     // create cy and expose globally
-    this.cy = $Cy.create(specWindow, this, this.Cookies, this.state, this.config, logFn)
+    this.cy = new $Cy(specWindow, this, this.Cookies, this.state, this.config)
     window.cy = this.cy
     this.isCy = this.cy.isCy
     this.log = $Log.create(this, this.cy, this.state, this.config)
@@ -269,6 +289,8 @@ class $Cypress {
         return this.emit('stop')
 
       case 'cypress:config':
+        // emit config event used to:
+        //   - trigger iframe viewport update
         return this.emit('config', args[0])
 
       case 'runner:start':
@@ -390,16 +412,12 @@ class $Cypress {
         return this.runner.onRunnableRun(...args)
 
       case 'runner:test:before:run':
-        // get back to a clean slate
-        this.cy.reset(...args)
-
         if (this.config('isTextTerminal')) {
           // needed for handling test retries
           this.emit('mocha', 'test:before:run', args[0])
         }
 
         this.emit('test:before:run', ...args)
-
         break
 
       case 'runner:test:before:run:async':
@@ -423,7 +441,6 @@ class $Cypress {
         }
 
         break
-
       case 'cy:before:all:screenshots':
         return this.emit('before:all:screenshots', ...args)
 
@@ -497,6 +514,9 @@ class $Cypress {
 
       case 'cy:scrolled':
         return this.emit('scrolled', ...args)
+
+      case 'cy:snapshot':
+        return this.emit('snapshot', ...args)
 
       case 'app:uncaught:exception':
         return this.emitMap('uncaught:exception', ...args)
@@ -661,7 +681,10 @@ $Cypress.prototype.LocalStorage = $LocalStorage
 $Cypress.prototype.Mocha = $Mocha
 $Cypress.prototype.resolveWindowReference = resolvers.resolveWindowReference
 $Cypress.prototype.resolveLocationReference = resolvers.resolveLocationReference
-$Cypress.prototype.Mouse = $Mouse
+$Cypress.prototype.Mouse = {
+  create: createMouse,
+}
+
 $Cypress.prototype.Runner = $Runner
 $Cypress.prototype.Server = $Server
 $Cypress.prototype.Screenshot = $Screenshot
@@ -669,6 +692,7 @@ $Cypress.prototype.SelectorPlayground = $SelectorPlayground
 $Cypress.prototype.utils = $utils
 $Cypress.prototype._ = _
 $Cypress.prototype.Blob = blobUtil
+$Cypress.prototype.Buffer = Buffer
 $Cypress.prototype.Promise = Promise
 $Cypress.prototype.minimatch = minimatch
 $Cypress.prototype.sinon = sinon

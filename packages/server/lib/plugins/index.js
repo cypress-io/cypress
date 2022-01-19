@@ -8,6 +8,7 @@ const inspector = require('inspector')
 const errors = require('../errors')
 const util = require('./util')
 const pkg = require('@packages/root')
+const semver = require('semver')
 
 let pluginsProcess = null
 let registeredEvents = {}
@@ -37,12 +38,51 @@ const registerHandler = (handler) => {
   handlers.push(handler)
 }
 
+const getChildOptions = (config) => {
+  const childOptions = {
+    stdio: 'pipe',
+    env: {
+      ...process.env,
+      NODE_OPTIONS: process.env.ORIGINAL_NODE_OPTIONS || '',
+    },
+  }
+
+  if (config.resolvedNodePath) {
+    debug('launching using custom node version %o', _.pick(config, ['resolvedNodePath', 'resolvedNodeVersion']))
+    childOptions.execPath = config.resolvedNodePath
+  }
+
+  // https://github.com/cypress-io/cypress/issues/18914
+  // Node 17+ ships with OpenSSL 3 by default, so we may need the option
+  // --openssl-legacy-provider so that webpack@4 can use the legacy MD4 hash
+  // function. This option doesn't exist on Node <17 or when it is built
+  // against OpenSSL 1, so we have to detect Node's major version and check
+  // which version of OpenSSL it was built against before spawning the plugins
+  // process.
+
+  // To be removed on update to webpack >= 5.61, which no longer relies on
+  // Node's builtin crypto.hash function.
+  if (semver.satisfies(config.resolvedNodeVersion, '>=17.0.0') &&
+      !process.versions.openssl.startsWith('1.')) {
+    childOptions.env.NODE_OPTIONS += ' --openssl-legacy-provider'
+  }
+
+  if (inspector.url()) {
+    childOptions.execArgv = _.chain(process.execArgv.slice(0))
+    .remove('--inspect-brk')
+    .push(`--inspect=${process.debugPort + 1}`)
+    .value()
+  }
+
+  return childOptions
+}
+
 const init = (config, options) => {
   debug('plugins.init', config.pluginsFile)
 
   // test and warn for incompatible plugin
   try {
-    const retriesPluginPath = path.dirname(resolve.sync('cypress-plugin-retries', {
+    const retriesPluginPath = path.dirname(resolve.sync('cypress-plugin-retries/package.json', {
       basedir: options.projectRoot,
     }))
 
@@ -82,28 +122,9 @@ const init = (config, options) => {
     const pluginsFile = config.pluginsFile || path.join(__dirname, 'child', 'default_plugins_file.js')
     const childIndexFilename = path.join(__dirname, 'child', 'index.js')
     const childArguments = ['--file', pluginsFile, '--projectRoot', options.projectRoot]
-    const childOptions = {
-      stdio: 'pipe',
-      env: {
-        ...process.env,
-        NODE_OPTIONS: process.env.ORIGINAL_NODE_OPTIONS || '',
-      },
-    }
-
-    if (config.resolvedNodePath) {
-      debug('launching using custom node version %o', _.pick(config, ['resolvedNodePath', 'resolvedNodeVersion']))
-      childOptions.execPath = config.resolvedNodePath
-    }
+    const childOptions = getChildOptions(config)
 
     debug('forking to run %s', childIndexFilename)
-
-    if (inspector.url()) {
-      childOptions.execArgv = _.chain(process.execArgv.slice(0))
-      .remove('--inspect-brk')
-      .push(`--inspect=${process.debugPort + 1}`)
-      .value()
-    }
-
     pluginsProcess = cp.fork(childIndexFilename, childArguments, childOptions)
 
     if (pluginsProcess.stdout && pluginsProcess.stderr) {
@@ -241,6 +262,7 @@ const _setPluginsProcess = (_pluginsProcess) => {
 }
 
 module.exports = {
+  getChildOptions,
   getPluginPid,
   execute,
   has,

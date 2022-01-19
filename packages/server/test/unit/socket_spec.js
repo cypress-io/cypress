@@ -15,7 +15,7 @@ const exec = require(`${root}lib/exec`)
 const preprocessor = require(`${root}lib/plugins/preprocessor`)
 const { fs } = require(`${root}lib/util/fs`)
 const open = require(`${root}lib/util/open`)
-const Fixtures = require(`${root}/test/support/helpers/fixtures`)
+const Fixtures = require('@tooling/system-tests/lib/fixtures')
 const firefoxUtil = require(`${root}lib/browsers/firefox-util`).default
 const { createRoutes } = require(`${root}lib/routes`)
 
@@ -455,6 +455,16 @@ describe('lib/socket', () => {
         }
 
         return this.client.emit('backend:request', 'get:fixture', 'does-not-exist.txt', {}, cb)
+      })
+
+      it('passes Buffers through intact', function (done) {
+        const cb = function (resp) {
+          expect(resp.response).to.eql(Buffer.from('[{"json": true}]'))
+
+          return done()
+        }
+
+        return this.client.emit('backend:request', 'get:fixture', 'foo', { encoding: null }, cb)
       })
     })
 

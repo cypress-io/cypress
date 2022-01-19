@@ -1,4 +1,5 @@
 const { stripIndent } = require('common-tags')
+const { assertLogLength } = require('../../support/utils')
 const { _, $, Promise } = Cypress
 
 describe('src/cy/commands/xhr', () => {
@@ -1026,14 +1027,25 @@ describe('src/cy/commands/xhr', () => {
       })
 
       it('sets err on log when caused by code errors', function (done) {
-        cy.on('fail', (err) => {
+        done = _.once(done)
+        cy.once('fail', (err) => {
+          // suppress failure
+        })
+
+        cy.on('log:changed', () => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
-          expect(lastLog.get('name')).to.eq('request')
-          expect(lastLog.get('error').message).contain('foo is not defined')
+          if (!lastLog || lastLog.get('name') !== 'request') return
 
-          done()
+          try {
+            assertLogLength(this.logs, 1)
+            expect(lastLog.get('error').message).contain('foo is not defined')
+
+            done()
+          } catch (err) {
+            // eslint-disable-next-line no-console
+            console.log('assertion failure', err)
+          }
         })
 
         cy.window().then((win) => {
@@ -1047,17 +1059,27 @@ describe('src/cy/commands/xhr', () => {
       })
 
       it('causes errors caused by onreadystatechange callback function', function (done) {
+        done = _.once(done)
         const e = new Error('onreadystatechange caused this error')
 
-        cy.on('fail', (err) => {
+        cy.once('fail', (err) => {
+          // suppress failure
+        })
+
+        cy.on('log:changed', () => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
-          expect(lastLog.get('name')).to.eq('request')
-          expect(err.message).to.include(lastLog.get('error').message)
-          expect(err.message).to.include(e.message)
+          if (!lastLog || lastLog.get('name') !== 'request') return
 
-          done()
+          try {
+            assertLogLength(this.logs, 1)
+            expect(lastLog.get('name')).to.eq('request')
+            expect(e.message).to.include(lastLog.get('error').message)
+            done()
+          } catch (err) {
+            // eslint-disable-next-line no-console
+            console.log('assertion failure', err)
+          }
         })
 
         cy
@@ -1638,6 +1660,33 @@ describe('src/cy/commands/xhr', () => {
       })
     })
 
+    // https://github.com/cypress-io/cypress/issues/18858
+    it('can stub headers', (done) => {
+      cy
+      .route({
+        url: '/foo',
+        response: '',
+        headers: {
+          'some-header': 'header-value',
+        },
+      }).as('getFoo')
+      .window().then((win) => {
+        win.$.ajax({
+          url: '/foo',
+          error (_a, _b, err) {
+            done(`Errored but should not have: ${err.stack}`)
+          },
+        })
+
+        return null
+      })
+      .wait('@getFoo')
+      .then((xhr) => {
+        expect(xhr.response.headers['some-header']).to.equal('header-value')
+        done()
+      })
+    })
+
     // https://github.com/cypress-io/cypress/issues/2372
     it('warns if a percent-encoded URL is used', () => {
       cy.spy(Cypress.utils, 'warning')
@@ -1976,7 +2025,7 @@ describe('src/cy/commands/xhr', () => {
           const { lastLog } = this
 
           // route + window + xhr log === 3
-          expect(this.logs.length).to.eq(3)
+          assertLogLength(this.logs, 3)
           expect(lastLog.get('name')).to.eq('xhr')
           expect(err.message).to.include(lastLog.get('error').message)
 
@@ -2016,7 +2065,7 @@ describe('src/cy/commands/xhr', () => {
           const { lastLog } = this
 
           expect(err.message).to.eq('some error')
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('name')).to.eq('route')
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('message')).to.eq('/foo/, fixture:bar')
@@ -2067,7 +2116,7 @@ describe('src/cy/commands/xhr', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(2)
+          assertLogLength(this.logs, 2)
           expect(err.message).to.eq('`cy.route()` could not find a registered alias for: `@bar`.\nAvailable aliases are: `foo`.')
           expect(lastLog.get('name')).to.eq('route')
           expect(lastLog.get('error')).to.eq(err)
@@ -2386,12 +2435,12 @@ describe('src/cy/commands/xhr', () => {
       it('logs response', () => {
         cy.then(function () {
           cy.wrap(this).its('lastLog').invoke('invoke', 'consoleProps').should((consoleProps) => {
-            expect(consoleProps['Response Body']).to.deep.eq({
+            expect(consoleProps['Response Body'].trim()).to.deep.eq(JSON.stringify({
               some: 'json',
               foo: {
                 bar: 'baz',
               },
-            })
+            }, null, 2))
           })
         })
       })
@@ -2563,7 +2612,9 @@ describe('src/cy/commands/xhr', () => {
 
         xhr.open('GET', '/timeout?ms=999')
         xhr.send()
-        xhr.abort()
+
+        // allow the request time to make it out of the browser so proxy logging has a chance to see it
+        requestAnimationFrame(() => xhr.abort())
 
         cy.wrap(null).should(() => {
           expect(log.get('state')).to.eq('failed')
