@@ -20,9 +20,6 @@ import { namedRouteExchange } from './urqlExchangeNamedRoute'
 import { decodeBase64Unicode } from '../utils/decodeBase64'
 import type { SpecFile, AutomationElementId } from '@packages/types'
 
-const GQL_PORT_MATCH = /gqlPort=(\d+)/.exec(window.location.search)
-const SERVER_PORT_MATCH = /serverPort=(\d+)/.exec(window.location.search)
-
 const toast = useToast()
 
 export function makeCacheExchange (schema: any = urqlSchema) {
@@ -32,7 +29,6 @@ export function makeCacheExchange (schema: any = urqlSchema) {
 declare global {
   interface Window {
     __CYPRESS_INITIAL_DATA__: string
-    __CYPRESS_GRAPHQL_PORT__?: string
     __CYPRESS_MODE__: 'run' | 'open'
     __RUN_MODE_SPECS__: SpecFile[]
     __CYPRESS_CONFIG__: {
@@ -44,25 +40,9 @@ declare global {
 
 const cypressInRunMode = window.top === window && window.__CYPRESS_MODE__ === 'run'
 
-function gqlPort () {
-  if (cypressInRunMode) {
-    return 'GQL_NOT_USED_IN_RUN_MODE'
-  }
-
-  if (GQL_PORT_MATCH) {
-    return GQL_PORT_MATCH[1]
-  }
-
-  if (window.__CYPRESS_GRAPHQL_PORT__) {
-    return window.__CYPRESS_GRAPHQL_PORT__
-  }
-
-  throw new Error(`${window.location.href} cannot be visited without a gqlPort`)
-}
-
 export async function preloadLaunchpadData () {
   try {
-    const resp = await fetch(`http://localhost:${gqlPort()}/__launchpad/preload`)
+    const resp = await fetch('/__launchpad/preload')
 
     window.__CYPRESS_INITIAL_DATA__ = JSON.parse(decodeBase64Unicode(await resp.json()))
   } catch {
@@ -76,16 +56,13 @@ interface LaunchpadUrqlClientConfig {
 
 interface AppUrqlClientConfig {
   target: 'app'
+  namespace: string
   socketIoRoute: string
 }
 
 export type UrqlClientConfig = LaunchpadUrqlClientConfig | AppUrqlClientConfig
 
 export function makeUrqlClient (config: UrqlClientConfig): Client {
-  const port = gqlPort()
-
-  const GRAPHQL_URL = `http://localhost:${port}/graphql`
-
   let hasError = false
 
   const exchanges: Exchange[] = [dedupExchange]
@@ -96,7 +73,7 @@ export function makeUrqlClient (config: UrqlClientConfig): Client {
     // If we're in the launchpad, we connect to the known GraphQL Socket port,
     // otherwise we connect to the /__socket.io of the current domain, unless we've explicitly
     //
-    const io = getPubSubSource({ gqlPort: port, serverPort: SERVER_PORT_MATCH?.[1], ...config })
+    const io = getPubSubSource(config)
 
     exchanges.push(pubSubExchange(io))
   }
@@ -144,12 +121,10 @@ export function makeUrqlClient (config: UrqlClientConfig): Client {
     exchanges.unshift(devtoolsExchange)
   }
 
+  const url = config.target === 'launchpad' ? `/__launchpad/graphql` : `/${config.namespace}/graphql`
+
   return createClient({
-    url: GRAPHQL_URL,
-    // TODO(lachlan): we should use 'cache-only' in run mode for performance.
-    // since we pre-hydrate the data in the urql cache, and we do not show the UI
-    // (eg, we don't show the spec list, side nav etc), we shouldn't need to make
-    // any additional graphql requests once we are up and running.
+    url,
     requestPolicy: cypressInRunMode ? 'cache-only' : 'cache-and-network',
     exchanges,
   })
@@ -157,14 +132,10 @@ export function makeUrqlClient (config: UrqlClientConfig): Client {
 
 interface LaunchpadPubSubConfig {
   target: 'launchpad'
-  gqlPort: string
-  serverPort?: string
 }
 
 interface AppPubSubConfig {
   target: 'app'
-  gqlPort: string
-  serverPort?: string
   socketIoRoute: string
 }
 
@@ -172,16 +143,8 @@ type PubSubConfig = LaunchpadPubSubConfig | AppPubSubConfig
 
 function getPubSubSource (config: PubSubConfig) {
   if (config.target === 'launchpad') {
-    return client(`http://localhost:${config.gqlPort}`, {
+    return client({
       path: '/__gqlSocket',
-      transports: ['websocket'],
-    })
-  }
-
-  // Only happens during testing
-  if (config.serverPort) {
-    return client(`http://localhost:${config.serverPort}`, {
-      path: config.socketIoRoute,
       transports: ['websocket'],
     })
   }

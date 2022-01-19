@@ -8,7 +8,7 @@
       v-else
       :gql="query.data.value"
       :title="title"
-      :is-using-default-specs="isUsingDefaultSpecs"
+      :is-default-spec-pattern="isDefaultSpecPattern"
     />
   </div>
 
@@ -30,18 +30,27 @@ gql`
 query SpecsPageContainer {
   ...Specs_SpecsList
   ...NoSpecsPage
+  currentProject {
+    id
+    isDefaultSpecPattern
+  }
 }
 `
 
 const query = useQuery({ query: SpecsPageContainerDocument })
 
-// TODO: add logic here based on if default spec pattern is used
-const isUsingDefaultSpecs = ref(true)
+const isDefaultSpecPattern = computed(() => !!query.data.value?.currentProject?.isDefaultSpecPattern)
 
 const title = computed(() => {
-  return isUsingDefaultSpecs.value ?
+  return isDefaultSpecPattern.value ?
     t('createSpec.page.defaultPatternNoSpecs.title') :
     t('createSpec.page.customPatternNoSpecs.title')
 })
 
 </script>
+
+<route>
+{
+  name: "Specs"
+}
+</route>

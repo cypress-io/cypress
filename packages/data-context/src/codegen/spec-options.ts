@@ -168,7 +168,7 @@ export class SpecOptions {
 
     // Integration test comes with specFileExtension already so don't append it
     const fileName =
-      this.options.codeGenType === 'integration'
+      this.options.codeGenType === 'e2e'
         ? base.replace(cyWithExt, '')
         : name
 

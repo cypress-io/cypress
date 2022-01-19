@@ -51,8 +51,6 @@ describe('Launchpad: Global Mode', () => {
       .should('contain', 'browse manually')
       .click()
 
-      cy.wait(2000)
-
       cy.get('[data-cy="project-card"]')
       .should('have.length', 1)
 

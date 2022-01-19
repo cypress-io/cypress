@@ -25,8 +25,7 @@
         <Alert
           :title="props.gql.title ?? ''"
           status="error"
-          :divider="false"
-          body-class="p-0px bg-red-50"
+          body-class="px-0px bg-red-50"
           alert-class="bg-red-50"
           header-class="bg-red-100 text-red-600 rounded-b-none"
           :icon="ErrorOutlineIcon"
@@ -34,13 +33,13 @@
         >
           <p
             v-if="errorMessage"
-            class="border-b-1 border-b-red-100 p-16px text-red-500"
+            class="border-b-1 border-b-red-100 p-16px pt-0 text-red-500"
           >
             {{ errorMessage }}
           </p>
           <p
             v-if="stack"
-            class="m-16px overflow-hidden"
+            class="m-16px mb-0 overflow-hidden"
           >
             <Collapsible
               disable
@@ -65,8 +64,7 @@
                 </p>
               </template>
               <pre
-                v-if="
-                  stack"
+                v-if="stack"
                 class="bg-white rounded font-light border-1 border-red-200 p-16px overflow-auto"
                 v-html="stack"
               />

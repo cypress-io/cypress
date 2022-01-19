@@ -12,6 +12,7 @@ import { runner } from './controllers/runner'
 import { iframesController } from './controllers/iframes'
 import type { FoundSpec } from '@packages/types'
 import { getCtx } from '@packages/data-context'
+import { graphQLHTTP } from '@packages/graphql/src/makeGraphQLServer'
 
 const debug = Debug('cypress:server:routes')
 
@@ -55,6 +56,8 @@ export const createCommonRoutes = ({
       return send(req, pathToFile).pipe(res)
     })
   }
+
+  router.use(`/${namespace}/graphql/*`, graphQLHTTP)
 
   router.get(`/${namespace}/runner/*`, (req, res) => {
     runner.handle(testingType, req, res)
