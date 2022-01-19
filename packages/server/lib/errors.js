@@ -3,7 +3,6 @@ const _ = require('lodash')
 const strip = require('strip-ansi')
 const chalk = require('chalk')
 const AU = require('ansi_up')
-const Promise = require('bluebird')
 const { stripIndent } = require('./util/strip_indent')
 
 const ansi_up = new AU.default
@@ -1167,16 +1166,11 @@ const log = function (err, color = 'red') {
   return err
 }
 
-const logException = Promise.method(function (err) {
-  // TODO: remove context here
-  if (this.log(err) && isProduction()) {
-    // log this exception since
-    // its not a known error
-    return require('./logger')
-    .createException(err)
-    .catch(() => {})
-  }
-})
+const logException = async (err) => {
+  log(err)
+
+  if (isProduction()) await require('./exception').create(err)
+}
 
 module.exports = {
   get,
