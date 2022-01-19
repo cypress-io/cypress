@@ -37,7 +37,7 @@
     </div>
 
     <DefaultSpecPatternNoContent
-      v-if="props.isUsingDefaultSpecs"
+      v-if="props.isDefaultSpecPattern"
       :gql="props.gql"
       @choose="choose"
     />
@@ -74,7 +74,7 @@ fragment NoSpecsPage on Query {
 const props = defineProps<{
   gql: NoSpecsPageFragment
   title: string
-  isUsingDefaultSpecs: boolean
+  isDefaultSpecPattern: boolean
 }>()
 
 const showModal = ref(false)
@@ -82,7 +82,7 @@ const showModal = ref(false)
 const generator = ref()
 
 const descriptionKeyPath = computed(() => {
-  return props.isUsingDefaultSpecs ?
+  return props.isDefaultSpecPattern ?
     `createSpec.page.defaultPatternNoSpecs.${props.gql.currentProject?.currentTestingType}.description` :
     'createSpec.page.customPatternNoSpecs.description'
 })
