@@ -165,6 +165,8 @@ export const mutation = mutationType({
           ctx.actions.wizard.setCodeLanguage(args.input.codeLanguage)
         }
 
+        ctx.emitter.toLaunchpad()
+
         return ctx.wizardData
       },
     })

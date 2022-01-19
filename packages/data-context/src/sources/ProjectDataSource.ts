@@ -2,7 +2,7 @@ import os from 'os'
 import { FrontendFramework, FRONTEND_FRAMEWORKS, ResolvedFromConfig, RESOLVED_FROM, FoundSpec } from '@packages/types'
 import { scanFSForAvailableDependency } from 'create-cypress-tests'
 import minimatch from 'minimatch'
-import { debounce } from 'lodash'
+import { debounce, isEqual } from 'lodash'
 import path from 'path'
 import Debug from 'debug'
 import commonPathPrefix from 'common-path-prefix'
@@ -15,6 +15,7 @@ import type { DataContext } from '..'
 import { toPosix } from '../util/file'
 import type { FilePartsShape } from '@packages/graphql/src/schemaTypes/objectTypes/gql-FileParts'
 import { STORIES_GLOB } from '.'
+import { getDefaultSpecPatterns } from '../util/config-options'
 
 export type SpecWithRelativeRoot = FoundSpec & { relativeToCommonRoot: string }
 
@@ -323,5 +324,20 @@ export class ProjectDataSource {
     const codeGenCandidates = await this.ctx.file.getFilesByGlob(projectRoot, glob, { expandDirectories: true })
 
     return codeGenCandidates.map((absolute) => ({ absolute }))
+  }
+
+  async getIsDefaultSpecPattern () {
+    assert(this.ctx.currentProject)
+    assert(this.ctx.coreData.currentTestingType)
+
+    const { e2e, component } = getDefaultSpecPatterns()
+
+    const { specPattern } = await this.ctx.project.specPatternsForTestingType(this.ctx.currentProject, this.ctx.coreData.currentTestingType)
+
+    if (this.ctx.coreData.currentTestingType === 'e2e') {
+      return isEqual(specPattern, [e2e])
+    }
+
+    return isEqual(specPattern, [component])
   }
 }
