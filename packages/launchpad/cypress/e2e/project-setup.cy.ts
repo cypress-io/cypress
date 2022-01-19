@@ -52,17 +52,27 @@ describe('Launchpad: Setup Project', () => {
     it('close modal with escape key', () => {
       cy.contains('Review the differences').click()
       cy.get('#app').should('have.attr', 'aria-hidden', 'true')
-      cy.findByRole('dialog', { name: 'Key Differences' }).should('be.visible')
+
+      cy.findByRole('dialog', { name: 'Key Differences' })
+      .as('aboutTestingTypes')
+      .should('be.visible')
+
       cy.get('body').type('{esc}')
       cy.get('#app').should('not.have.attr', 'aria-hidden')
+      cy.get('@aboutTestingTypes').should('not.exist')
     })
 
     it('closes modal by clicking outside of modal', () => {
       cy.contains('Review the differences').click()
       cy.get('#app').should('have.attr', 'aria-hidden', 'true')
-      cy.findByRole('dialog', { name: 'Key Differences' }).should('be.visible')
+
+      cy.findByRole('dialog', { name: 'Key Differences' })
+      .as('aboutTestingTypes')
+      .should('be.visible')
+
       cy.get('body').click(5, 5)
       cy.get('#app').should('not.have.attr', 'aria-hidden')
+      cy.get('@aboutTestingTypes').should('not.exist')
     })
 
     it('closes modal by clicking close button', () => {
@@ -70,19 +80,21 @@ describe('Launchpad: Setup Project', () => {
       cy.get('#app').should('have.attr', 'aria-hidden', 'true')
 
       cy.findByRole('dialog', { name: 'Key Differences' })
+      .as('aboutTestingTypes')
       .should('be.visible')
       .within(() => {
         cy.get('h2').contains('Key Differences').should('be.visible')
       })
 
       cy.findByRole('button', { name: 'Close' }).click()
-      // cy.get('[aria-label=Close]').click()
       cy.get('#app').should('not.have.attr', 'aria-hidden')
+      cy.get('@aboutTestingTypes').should('not.exist')
     })
 
-    // FIXME: enter key down isn't trigger close callback. working correctly when manually tested.
-    // could be related to this bug? https://github.com/cypress-io/cypress/issues/14864
-    it.skip('closes modal by pressing enter key when close button is focused', () => {
+    // Cypress enter key down isn't trigger close callback. Working correctly when manually tested
+    // or when using the cypress-real-evens plugin.
+    // Could be related to this bug? https://github.com/cypress-io/cypress/issues/14864
+    it('closes modal by pressing enter key when close button is focused', () => {
       cy.contains('Review the differences').click()
       cy.get('#app').should('have.attr', 'aria-hidden', 'true')
 
@@ -93,15 +105,16 @@ describe('Launchpad: Setup Project', () => {
         cy.get('h2').contains('Key Differences').should('be.visible')
 
         // @ts-ignore
-        cy.get('body').tab()
+        cy.realPress('Tab')
 
         cy.findByRole('button', { name: 'Close' })
         .should('have.focus')
-        .type('{enter}')
+        // @ts-ignore
+        .realType('{enter}')
       })
 
       cy.get('#app').should('not.have.attr', 'aria-hidden')
-      cy.get('@aboutTestTypes').should('not.be.visible')
+      cy.get('@aboutTestingTypes').should('not.exist')
     })
 
     it('clicking "Need Help?" links to Cypress documentation', () => {
@@ -406,18 +419,36 @@ describe('Launchpad: Setup Project', () => {
                 cy.log('Go to next step and verify Install Dev Dependencies page')
                 cy.contains('h1', 'Install Dev Dependencies')
 
-                let dependencies = `add -D ${framework.package} ${bundler.package}`
+                let installCommand = `yarn add -D ${framework.package} ${bundler.package}`
 
                 if (hasStorybookDep) {
-                  dependencies += ` ${framework.storybookDep}`
+                  installCommand += ` ${framework.storybookDep}`
                 }
 
-                cy.contains('code', dependencies)
+                cy.contains('code', installCommand)
 
-                cy.findByRole('button', { name: 'Copy' })
-                .focus()
-                .click()
-                .should('contain', 'Copied!')
+                // @ts-ignore
+                cy.findByRole('button', { name: 'Copy' }).realClick()
+
+                cy.findByRole('button', { name: 'Copied!' })
+
+                if (Cypress.config('browser').name === 'chrome') {
+                  cy.wrap(Cypress.automation('remote:debugger:protocol', {
+                    command: 'Browser.grantPermissions',
+                    params: {
+                      permissions: ['clipboardReadWrite', 'clipboardSanitizedWrite'],
+                      origin: window.location.origin,
+                    },
+                  }))
+                }
+
+                cy.window().its('navigator.permissions')
+                .invoke('query', { name: 'clipboard-read' })
+                .its('state').then(cy.log)
+
+                cy.window().its('navigator.clipboard')
+                .invoke('readText')
+                .should('equal', installCommand)
 
                 const validatePackage = (packageName) => {
                   cy.validateExternalLink({
@@ -460,7 +491,8 @@ describe('Launchpad: Setup Project', () => {
       })
     })
 
-    describe('project not been configured for cypress', () => {
+    // FIXME: once https://github.com/cypress-io/cypress/pull/19776 merges
+    describe.skip('project not been configured for cypress', () => {
       it('can setup component testing', () => {
         cy.openProject('pristine')
         cy.visitLaunchpad()
@@ -476,16 +508,22 @@ describe('Launchpad: Setup Project', () => {
 
         cy.findByText('Confirm the front-end framework and bundler used in your project.')
 
-        cy.findByRole('button', { name: 'Front-end Framework Create React App' })
+        cy.findByRole('button', { name: 'Front-end Framework Pick a framework' }).click()
+        cy.findByRole('option', { name: 'Create React App' }).click()
+
         cy.findByRole('button', { name: 'TypeScript' }).click()
         cy.findByRole('button', { name: 'Next Step' }).click()
+        cy.findByRole('button', { name: 'I\'ve installed them' }).click()
 
         cy.get('[data-cy=valid]').within(() => {
-          cy.contains('cypress/config.ts')
+          cy.contains('cypress.config.ts')
           cy.contains('cypress/component/index.html')
           cy.contains(`cypress/support/component.ts`)
           cy.contains('cypress/fixtures/example.json')
         })
+
+        cy.findByRole('button', { name: 'Continue' }).click()
+        cy.contains(/(Initializing Config|Choose a Browser)/)
       })
 
       it('opens to the "choose framework" page when opened via cli with --component flag', () => {
@@ -503,16 +541,21 @@ describe('Launchpad: Setup Project', () => {
 
         cy.findByText('Confirm the front-end framework and bundler used in your project.')
 
-        cy.findByRole('button', { name: 'Front-end Framework Create React App' })
+        cy.findByRole('button', { name: 'Front-end Framework Pick a framework' }).click()
+        cy.findByRole('option', { name: 'Create React App' }).click()
         cy.findByRole('button', { name: 'TypeScript' }).click()
         cy.findByRole('button', { name: 'Next Step' }).click()
+        cy.findByRole('button', { name: 'I\'ve installed them' }).click()
 
         cy.get('[data-cy=valid]').within(() => {
-          cy.contains('cypress/config.ts')
+          cy.contains('cypress.config.ts')
           cy.contains('cypress/component/index.html')
           cy.contains(`cypress/support/component.ts`)
           cy.contains('cypress/fixtures/example.json')
         })
+
+        cy.findByRole('button', { name: 'Continue' }).click()
+        cy.contains(/(Initializing Config|Choose a Browser)/)
       })
     })
   })

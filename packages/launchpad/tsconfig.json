@@ -11,6 +11,7 @@
     "../frontend-shared/cypress/**/*.ts"
   ],
   "compilerOptions": {
+    "types": ["cypress", "cypress-real-events"],
     "paths": {
       "@cy/i18n": ["../frontend-shared/src/locales/i18n"],
       "@cy/components/*": ["../frontend-shared/src/components/*"],
