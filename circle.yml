@@ -1097,13 +1097,12 @@ jobs:
           name: Check if <<parameters.required_env_var>> is set
           command: |
             if [[ -v <<parameters.required_env_var>> ]]; then
-              echo "Internal PR, good to go" \
-              PERCY_PARALLEL_NONCE=$CIRCLE_SHA1
+              echo "Internal PR, good to go"
             else
               echo "This is an external PR, cannot access other services"
               circleci-agent step halt
             fi
-      - run: yarn percy build:finalize
+      - run: PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 yarn percy build:finalize
 
   cli-visual-tests:
     <<: *defaults
