@@ -27,6 +27,7 @@ export const e2eProjectDirs = [
   'issue-8111-iframe-input',
   'launchpad',
   'max-listeners',
+  'migration',
   'multiple-task-registrations',
   'multiples-config-files-with-json',
   'no-scaffolding',

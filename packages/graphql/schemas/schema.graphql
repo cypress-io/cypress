@@ -297,11 +297,6 @@ type CloudUser implements Node {
   userIsViewer: Boolean!
 }
 
-enum CodeGenGenResultType {
-  binary
-  text
-}
-
 """Glob patterns for detecting files for code gen."""
 type CodeGenGlobs implements Node {
   component: String!
@@ -309,12 +304,6 @@ type CodeGenGlobs implements Node {
   """Relay style Node ID field for the CodeGenGlobs field"""
   id: ID!
   story: String!
-}
-
-enum CodeGenStatus {
-  add
-  overwrite
-  skipped
 }
 
 enum CodeGenType {
@@ -623,6 +612,9 @@ type Mutation {
 
   """Log out of Cypress Cloud"""
   logout: Query
+
+  """Transforms cypress.json file into cypress.config.js file"""
+  migrateConfigFile: Boolean
 
   """Open a path in preferred IDE"""
   openDirectoryInIDE(path: String!): Boolean

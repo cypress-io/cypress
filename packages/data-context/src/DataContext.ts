@@ -28,6 +28,7 @@ import {
   HtmlDataSource,
   UtilDataSource,
   BrowserApiShape,
+  MigrationDataSource,
 } from './sources/'
 import { cached } from './util/cached'
 import type { GraphQLSchema } from 'graphql'
@@ -223,6 +224,11 @@ export class DataContext {
   @cached
   get util () {
     return new UtilDataSource(this)
+  }
+
+  @cached
+  get migration () {
+    return new MigrationDataSource(this)
   }
 
   get projectsList () {

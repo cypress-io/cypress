@@ -13,8 +13,7 @@
         :gql="query.data.value"
       />
       <MigrationWizard
-        v-else-if="currentProject?.needsLegacyConfigMigration && query.data.value.migration"
-        :gql="query.data.value.migration"
+        v-else-if="currentProject?.needsLegacyConfigMigration"
       />
       <template v-else>
         <ScaffoldedFiles
@@ -121,9 +120,6 @@ fragment MainLaunchpadQueryData on Query {
   isInGlobalMode
   ...GlobalPage
   ...ScaffoldedFiles
-  migration {
-    ...MigrationWizard
-  }
 }
 `
 

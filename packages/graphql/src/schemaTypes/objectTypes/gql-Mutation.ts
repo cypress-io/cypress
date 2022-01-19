@@ -385,5 +385,15 @@ export const mutation = mutationType({
         return true
       },
     })
+
+    t.field('migrateConfigFile', {
+      description: 'Transforms cypress.json file into cypress.config.js file',
+      type: 'Boolean',
+      resolve: (_, args, ctx) => {
+        ctx.actions.migration.createConfigFile()
+
+        return true
+      },
+    })
   },
 })

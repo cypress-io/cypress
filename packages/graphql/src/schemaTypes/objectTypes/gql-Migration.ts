@@ -14,7 +14,7 @@ export const Migration = objectType({
     t.nonNull.field('step', {
       type: MigrationStepEnum,
       description: 'Step where the migration is right now',
-      resolve: () => 'renameManual',
+      resolve: () => 'configFile',
     })
 
     t.nonNull.list.nonNull.string('specFilesBefore', {
@@ -40,15 +40,15 @@ export const Migration = objectType({
 
     t.nonNull.string('configBeforeCode', {
       description: 'contents of the cypress.json file before conversion',
-      resolve: () => {
-        return ``
+      resolve: (source, args, ctx) => {
+        return ctx.migration.getConfig()
       },
     })
 
     t.nonNull.string('configAfterCode', {
       description: 'contents of the cypress.json file after conversion',
-      resolve: () => {
-        return ``
+      resolve: (source, args, ctx) => {
+        return ctx.migration.createConfigString()
       },
     })
   },
