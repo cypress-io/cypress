@@ -85,7 +85,7 @@ describe('App: Index', () => {
 
       cy.contains('h1', defaultMessages.createSpec.page.customPatternNoSpecs.title)
 
-      cy.contains('code', 'specPattern')
+      cy.get('[data-cy="file-match-indicator"').contains('0 Matches')
 
       cy.contains('code', customSpecPattern)
     })
