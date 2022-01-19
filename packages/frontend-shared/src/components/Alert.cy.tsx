@@ -13,8 +13,6 @@ const alertHeaderSelector = '[data-cy=alert-header]'
 const suffixIconSelector = '[data-cy=alert-suffix-icon]'
 const prefixIconSelector = '[data-cy=alert-prefix-icon]'
 
-// This divider should eventually be tested inside of a visual regression test.
-const dividerLineSelector = '[data-cy=alert-body-divider]'
 const dismissSelector = `[aria-label=${messages.dismissAriaLabel}]`
 
 const alertTitle = faker.hacker.phrase()
@@ -170,7 +168,7 @@ describe('<Alert />', () => {
       })
 
       cy.mount(() => <div class="space-y-2 p-4">{ alerts }</div>)
-      cy.get(alertBodySelector).each((el) => cy.wrap(el).should('be.visible').get(dividerLineSelector).should('be.visible'))
+      cy.get(alertBodySelector).each((el) => cy.wrap(el).should('be.visible'))
     })
   })
 
@@ -181,19 +179,6 @@ describe('<Alert />', () => {
       cy.mount(<Alert collapsible title={alertTitle} modelValue={modelValue.value} {...methods}/>)
       cy.get(alertBodySelector).should('not.exist')
       cy.get(alertHeaderSelector).click().get(alertBodySelector).should('not.exist')
-    })
-
-    it('renders each alert type without the divider line', () => {
-      const types = [{ 'dismissible': true }, { 'collapsible': true }, { 'static': true }]
-
-      const alerts = types.map((type) => (<div>
-        <h2 class="capitalize">{Object.keys(type)[0]}</h2>
-        <Alert {...type} title={alertTitle} />
-      </div>
-      ))
-
-      cy.mount(() => <div class="space-y-2 p-4">{ alerts }</div>)
-      cy.get(alertHeaderSelector).each((el) => cy.wrap(el).click()).get(dividerLineSelector).should('not.exist')
     })
   })
 
