@@ -8,8 +8,6 @@
  */
 
 import type { SpawnOptions } from 'child_process'
-import fs from 'fs-extra'
-import path from 'path'
 
 import { monorepoPaths } from '../monorepoPaths'
 import { AllSpawnableApps, spawned, spawnUntilMatch } from '../utils/childProcessUtils'
@@ -27,7 +25,7 @@ export function viteApp () {
 
   // TODO: remove once we have sourcemap
   if (process.env.CYPRESS_INTERNAL_VITE_DEV) {
-    const port = process.env.CYPRESS_INTERNAL_VITE_APP_PORT ??= '3333'
+    const port = process.env.CYPRESS_INTERNAL_VITE_APP_PORT
 
     return spawnViteDevServer('vite-app', `yarn vite --port ${port} ${baseSuffix}`, {
       cwd: monorepoPaths.pkgApp,
@@ -40,10 +38,12 @@ export function viteApp () {
 }
 
 export function viteLaunchpad () {
-  if (process.env.CYPRESS_INTERNAL_VITE_DEV) {
-    const port = process.env.CYPRESS_INTERNAL_VITE_LAUNCHPAD_PORT ??= '3001'
+  const baseSuffix = `--base /__launchpad/`
 
-    return spawnViteDevServer('vite-launchpad', `yarn vite --port ${port}`, {
+  if (process.env.CYPRESS_INTERNAL_VITE_DEV) {
+    const port = process.env.CYPRESS_INTERNAL_VITE_LAUNCHPAD_PORT
+
+    return spawnViteDevServer('vite-launchpad', `yarn vite --port ${port} ${baseSuffix}`, {
       cwd: monorepoPaths.pkgLaunchpad,
     })
   }
@@ -87,26 +87,6 @@ function spawnViteDevServer (
  *  * viteBuildApp
  *  * viteBuildLaunchpad
  *------------------------------------------------------------------------**/
-
-const DIST_SOURCES = {
-  'dist-launchpad': path.join(monorepoPaths.pkgLaunchpad, 'dist'),
-  'dist-app': path.join(monorepoPaths.pkgApp, 'dist'),
-} as const
-
-export async function symlinkViteProjects () {
-  // If we're running the vite server script, we don't have a dist
-  if (process.env.CYPRESS_INTERNAL_VITE_DEV) {
-    return
-  }
-
-  for (const basePath of [monorepoPaths.pkgLaunchpad, monorepoPaths.pkgApp]) {
-    for (const target of ['dist-launchpad', 'dist-app'] as const) {
-      if (!fs.existsSync(path.join(basePath, target))) {
-        await fs.createSymlink(DIST_SOURCES[target], path.join(basePath, target), 'dir')
-      }
-    }
-  }
-}
 
 export function viteBuildApp () {
   return spawned('vite:build-app', `yarn vite build --outDir dist`, {
