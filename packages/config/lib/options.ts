@@ -1,5 +1,6 @@
 import os from 'os'
 import validate from './validation'
+// @ts-ignore
 import pkg from '@packages/root'
 
 interface ResolvedConfigOption {
