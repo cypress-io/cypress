@@ -154,7 +154,7 @@ export class WizardActions {
 
     return {
       status: 'changes',
-      description: 'Merge this code with your existing config file (add the ',
+      description: 'Merge this code with your existing config file',
       file: {
         absolute: this.ctx.lifecycleManager.configFilePath,
         contents: configCode,
