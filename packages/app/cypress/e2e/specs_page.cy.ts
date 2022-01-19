@@ -284,6 +284,77 @@ describe('Specs Page', () => {
         })
       })
     })
+
+    context('project with custom spec pattern', () => {
+      beforeEach(() => {
+        cy.scaffoldProject('no-specs-custom-pattern')
+        cy.openProject('no-specs-custom-pattern')
+
+        cy.withCtx((ctx) => {
+          ctx.coreData.localSettings.availableEditors = [
+            ...ctx.coreData.localSettings.availableEditors,
+            {
+              id: 'test-editor',
+              binary: '/usr/bin/test-editor',
+              name: 'Test editor',
+            },
+          ]
+
+          ctx.coreData.localSettings.preferences.preferredEditorBinary = 'test-editor'
+        })
+
+        cy.startAppServer('component')
+        cy.visitApp()
+      })
+
+      it('shows no specs page with specPattern from config', () => {
+        cy.findByRole('heading', {
+          level: 1,
+          name: defaultMessages.createSpec.page.customPatternNoSpecs.title,
+        }).should('be.visible')
+
+        cy.findByTestId('create-spec-page-description')
+        .should('be.visible')
+        .and('contain', defaultMessages.createSpec.page.customPatternNoSpecs.description.split('{0}')[0])
+
+        cy.findByTestId('file-match-indicator').should('contain', '0 Matches')
+        cy.findByRole('button', { name: 'cypress.config.js' })
+        cy.findByTestId('spec-pattern').should('contain', 'src/**/*.cy.{js,jsx}')
+
+        cy.findByRole('button', { name: defaultMessages.createSpec.updateSpecPattern })
+        cy.findByRole('button', { name: 'New Spec', exact: false })
+      })
+
+      it('opens config file in ide from SpecPattern', () => {
+        cy.intercept('/graphql/query-OpenConfigFileInIDE').as('OpenIDE')
+
+        cy.findByRole('button', { name: 'cypress.config.js' }).click()
+
+        cy.wait('@OpenIDE')
+      })
+
+      it('opens config file in ide from footer button', () => {
+        cy.intercept('/graphql/query-OpenConfigFileInIDE').as('OpenIDE')
+
+        cy.findByRole('button', { name: defaultMessages.createSpec.updateSpecPattern }).click()
+
+        cy.wait('@OpenIDE')
+      })
+
+      it('shows new spec button to start creation workflow', () => {
+        cy.findByRole('button', { name: 'New Spec', exact: false }).click()
+
+        cy.findByRole('dialog', { name: defaultMessages.createSpec.newSpecModalTitle }).within(() => {
+          cy.findAllByTestId('card').eq(0)
+          .should('have.attr', 'tabindex', '0')
+          .and('contain', defaultMessages.createSpec.component.importFromComponent.description)
+
+          cy.findAllByTestId('card').eq(1)
+          .should('have.attr', 'tabindex', '0')
+          .and('contain', defaultMessages.createSpec.component.importFromStory.description)
+        })
+      })
+    })
   })
 
   describe('Code Generation', () => {

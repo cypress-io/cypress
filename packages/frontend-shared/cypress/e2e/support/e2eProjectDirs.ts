@@ -34,6 +34,7 @@ export const e2eProjectDirs = [
   'no-scaffolding',
   'no-server',
   'no-specs',
+  'no-specs-custom-pattern',
   'no-specs-found',
   'no-specs-no-storybook',
   'non-existent-spec',
