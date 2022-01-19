@@ -67,7 +67,8 @@
           v-else-if="currentProject.currentTestingType === 'component' && !currentProject.isCTConfigured"
           :gql="query.data.value"
         />
-        <OpenBrowser v-else />
+        <OpenBrowser v-else-if="currentProject.browsers?.length" />
+        <Spinner v-else />
       </template>
     </div>
   </template>
@@ -109,6 +110,9 @@ fragment MainLaunchpadQueryData on Query {
     isCTConfigured
     isLoadingConfigFile
     isLoadingNodeEvents
+    browsers {
+      id
+    }
     needsLegacyConfigMigration
     currentTestingType
     errorLoadingConfigFile {
