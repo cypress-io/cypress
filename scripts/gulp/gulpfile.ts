@@ -11,7 +11,7 @@ import gulp from 'gulp'
 import { autobarrelWatcher } from './tasks/gulpAutobarrel'
 import { startCypressWatch, openCypressLaunchpad, openCypressApp, runCypressLaunchpad, wrapRunWithExit, runCypressApp, killExistingCypress } from './tasks/gulpCypress'
 import { graphqlCodegen, graphqlCodegenWatch, nexusCodegen, nexusCodegenWatch, generateFrontendSchema, syncRemoteGraphQL } from './tasks/gulpGraphql'
-import { viteApp, viteCleanApp, viteCleanLaunchpad, viteLaunchpad, viteBuildApp, viteBuildAndWatchApp, viteBuildLaunchpad, viteBuildAndWatchLaunchpad, symlinkViteProjects, generateShikiTheme, viteClean } from './tasks/gulpVite'
+import { viteApp, viteCleanApp, viteCleanLaunchpad, viteLaunchpad, viteBuildApp, viteBuildAndWatchApp, viteBuildLaunchpad, viteBuildAndWatchLaunchpad, generateShikiTheme, viteClean } from './tasks/gulpVite'
 import { checkTs } from './tasks/gulpTsc'
 import { makePathMap } from './utils/makePathMap'
 import { makePackage } from './tasks/gulpMakePackage'
@@ -19,6 +19,11 @@ import { exitAfterAll } from './tasks/gulpRegistry'
 import { execSync } from 'child_process'
 import { webpackRunner } from './tasks/gulpWebpack'
 import { e2eTestScaffold, e2eTestScaffoldWatch } from './tasks/gulpE2ETestScaffold'
+
+if (process.env.CYPRESS_INTERNAL_VITE_DEV) {
+  process.env.CYPRESS_INTERNAL_VITE_APP_PORT ??= '3333'
+  process.env.CYPRESS_INTERNAL_VITE_LAUNCHPAD_PORT ??= '3001'
+}
 
 /**------------------------------------------------------------------------
  *                      Local Development Workflow
@@ -72,8 +77,6 @@ gulp.task(
         e2eTestScaffoldWatch,
       ),
 
-      symlinkViteProjects,
-
       // And we're finally ready for electron, watching for changes in
       // /graphql to auto-restart the server
     ),
@@ -114,7 +117,7 @@ gulp.task('buildProd',
       viteBuildApp,
       viteBuildLaunchpad,
     ),
-    symlinkViteProjects,
+
   ))
 
 gulp.task(
@@ -136,7 +139,7 @@ gulp.task('watchForE2E', gulp.series(
       ),
       webpackRunner,
     ),
-    symlinkViteProjects,
+
     e2eTestScaffold,
   ),
 ))
@@ -188,8 +191,6 @@ const cyOpenLaunchpad = gulp.series(
     viteBuildApp,
   ),
 
-  symlinkViteProjects,
-
   // 2. Start the REAL (dev) Cypress App, which will launch in open mode.
   openCypressLaunchpad,
 )
@@ -205,8 +206,6 @@ const cyOpenApp = gulp.series(
     ),
     webpackRunner,
   ),
-
-  symlinkViteProjects,
 
   // 2. Start the REAL (dev) Cypress App, which will launch in open mode.
   openCypressApp,
@@ -254,7 +253,6 @@ gulp.task(makePackage)
  * here for debugging, e.g. `yarn gulp syncRemoteGraphQL`
  *------------------------------------------------------------------------**/
 
-gulp.task(symlinkViteProjects)
 gulp.task(syncRemoteGraphQL)
 gulp.task(generateFrontendSchema)
 gulp.task(makePathMap)

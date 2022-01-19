@@ -199,7 +199,7 @@ module.exports = {
             {
               label: 'GraphiQL',
               click () {
-                return shell.openExternal(`http://localhost:${options.getGraphQLPort()}/graphql`)
+                return shell.openExternal(`http://localhost:${options.getGraphQLPort()}/__launchpad/graphql`)
               },
             },
             {

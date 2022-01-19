@@ -104,7 +104,7 @@ async function makeE2ETasks () {
   clearCtx()
   ctx = setCtx(makeDataContext({ mode: 'open', modeOptions: { cwd: process.cwd() } }))
 
-  const gqlPort = await makeGraphQLServer()
+  const launchpadPort = await makeGraphQLServer()
 
   const __internal_scaffoldProject = async (projectName: string) => {
     if (fs.existsSync(Fixtures.projectPath(projectName))) {
@@ -122,7 +122,7 @@ async function makeE2ETasks () {
 
   return {
     /**
-     * Called before all tests, cleans up any scaffolded projects and returns the global "gqlPort".
+     * Called before all tests, cleans up any scaffolded projects and returns the global "launchpadPort".
      * The same GraphQL server is used for all integration tests, so we can
      * go to http://localhost:5555/graphql and debug the internal state of the application
      */
@@ -130,7 +130,7 @@ async function makeE2ETasks () {
       Fixtures.remove()
       scaffoldedProjects = new Set()
 
-      return { gqlPort }
+      return { launchpadPort }
     },
 
     /**
