@@ -27,10 +27,11 @@ describe('<NoSpecsPage />', { viewportHeight: 655, viewportWidth: 1032 }, () => 
               story: '**/*.stories.*',
             },
             currentTestingType: 'component',
+            specs: { ...ctx.currentProject?.specs, edges: ctx.currentProject?.specs?.edges || [] },
           }
         },
         render: (gql) => {
-          return <NoSpecsPage gql={gql} isUsingDefaultSpecs={true} title={messages.page.defaultPatternNoSpecs.title} />
+          return <NoSpecsPage gql={gql} isDefaultSpecPattern={true} title={messages.page.defaultPatternNoSpecs.title} />
         },
       })
     })
@@ -72,10 +73,11 @@ describe('<NoSpecsPage />', { viewportHeight: 655, viewportWidth: 1032 }, () => 
               component: '**.vue',
               story: '**/*.stories.*',
             },
+            specs: { ...ctx.currentProject?.specs, edges: ctx.currentProject?.specs?.edges || [] },
           }
         },
         render: (gql) => {
-          return <NoSpecsPage gql={gql} isUsingDefaultSpecs={true} title={messages.page.defaultPatternNoSpecs.title} />
+          return <NoSpecsPage gql={gql} isDefaultSpecPattern={true} title={messages.page.defaultPatternNoSpecs.title} />
         },
       })
     })
@@ -91,9 +93,22 @@ describe('<NoSpecsPage />', { viewportHeight: 655, viewportWidth: 1032 }, () => 
 
   describe('mounting with custom specPattern set', () => {
     it('renders the correct text for component testing', () => {
+      const customSpecPattern = 'cypress/**/*.cy.ts'
+
       cy.mountFragment(NoSpecsPageFragmentDoc, {
+        onResult: (res) => {
+          if (res.currentProject?.config) {
+            res.currentProject.config = res.currentProject.config.map((x) => {
+              if (x.field === 'e2e') {
+                return { ...x, value: { ...x.value, specPattern: customSpecPattern } }
+              }
+
+              return x
+            })
+          }
+        },
         render: (gql) => {
-          return <NoSpecsPage gql={gql} isUsingDefaultSpecs={false} title={messages.page.customPatternNoSpecs.title} />
+          return <NoSpecsPage gql={gql} isDefaultSpecPattern={false} title={messages.page.customPatternNoSpecs.title} />
         },
       })
 
@@ -101,7 +116,7 @@ describe('<NoSpecsPage />', { viewportHeight: 655, viewportWidth: 1032 }, () => 
       .get(pageDescriptionSelector).should('contain.text', messages.page.customPatternNoSpecs.description.replace('{0}', ' specPattern '))
 
       // show spec pattern
-      cy.contains('**/*.spec.{js,ts,tsx,jsx}')
+      cy.contains(customSpecPattern)
       cy.contains(defaultMessages.createSpec.updateSpecPattern)
 
       cy.log('state before clicking "New Spec" ')
