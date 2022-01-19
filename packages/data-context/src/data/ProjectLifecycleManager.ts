@@ -453,6 +453,8 @@ export class ProjectLifecycleManager {
         }
       })
 
+      fullConfig.resolved.browsers = { 'value': fullConfig.browsers, 'from': 'runtime' }
+
       // If we have withBrowsers set to false, it means we're coming from the legacy config.get API
       // in tests, which shouldn't be validating the config
       this.validateConfigFile(this.configFile, fullConfig)
