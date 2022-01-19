@@ -21,6 +21,13 @@
         <CodeTag
           class="text-jade-500"
         >[filename].cy.[ext]</CodeTag>
+        <span class="m-8px text-gray-100">——</span>
+        <a
+          class="cursor-pointer text-indigo-500 hover:underline"
+          @click="() => {}"
+        >
+          change
+        </a>
       </template>
       <template #line-3>
         <i18n-t keypath="migration.renameAuto.changedE2EFolder">
@@ -56,6 +63,7 @@ import MigrationTitle from './fragments/MigrationTitle.vue'
 import { gql } from '@urql/vue'
 import type { RenameSpecsAutoFragment } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
+import Button from '../../../frontend-shared/src/components/Button.vue'
 
 const { t } = useI18n()
 

@@ -480,6 +480,7 @@
     "heresWhy": "here's why",
     "renameAuto": {
       "title": "We'll automatically rename your specs in this step",
+      "changeButton": "change",
       "changedSpecFolder": "We've changed the default spec folder from:",
       "changedSpecExt": "We've changed the default spec file extension from:",
       "changedE2EFolder": "Since you're currently using a custom directory for the {0}, we'll temporarily be moving your specs back to the default directory."
