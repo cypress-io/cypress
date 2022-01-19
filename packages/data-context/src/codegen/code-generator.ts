@@ -36,6 +36,9 @@ export async function codeGenerator (
   const templateFiles = await allFilesInDir(action.templateDir)
   const codeGenResults: CodeGenResults = { files: [], failed: [] }
 
+  // checks if the target directory exists and creates it if necessary
+  await fs.ensureDir(action.target)
+
   for (const file of templateFiles) {
     const isBinary = await isBinaryFile(file)
     const parsedFile = path.parse(file)
