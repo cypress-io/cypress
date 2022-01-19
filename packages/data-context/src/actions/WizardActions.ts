@@ -6,6 +6,7 @@ import fs from 'fs'
 import path from 'path'
 
 import type { DataContext } from '..'
+import { getDefaultSpecPatterns } from '../util/config-options'
 
 interface WizardGetCodeComponent {
   chosenLanguage: CodeLanguage
@@ -324,7 +325,7 @@ const E2E_SCAFFOLD_BODY = (opts: E2eScaffoldOpts) => {
   return `
     e2e: {
       supportFile: 'cypress/support/e2e.${opts.lang}',
-      specPattern: 'cypress/e2e/**/*.cy.{js,ts}',
+      specPattern: '${getDefaultSpecPatterns().e2e}',
       viewportHeight: 660,
       viewportWidth: 1000,
       setupNodeEvents(on, config) {
@@ -345,7 +346,7 @@ const COMPONENT_SCAFFOLD_BODY = (opts: ComponentScaffoldOpts) => {
   return `
   component: {
     supportFile: 'cypress/support/component.${opts.lang}',
-    specPattern: 'cypress/**/*.cy.{js,jsx,ts,tsx}',
+    specPattern: '${getDefaultSpecPatterns().component}',
     devServer: import('${opts.requirePath}'),
     devServerConfig: ${opts.configOptionsString}
   }

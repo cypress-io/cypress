@@ -308,7 +308,7 @@ type CodeGenGlobs implements Node {
 
 enum CodeGenType {
   component
-  integration
+  e2e
   scaffoldIntegration
   story
 }
@@ -363,6 +363,9 @@ type CurrentProject implements Node & ProjectLike {
 
   """Whether the user configured this project to use Component Testing"""
   isCTConfigured: Boolean
+
+  """True if the project is using the default spec pattern"""
+  isDefaultSpecPattern: Boolean!
 
   """Whether the user configured this project to use e2e Testing"""
   isE2EConfigured: Boolean
@@ -612,6 +615,9 @@ type Mutation {
 
   """Log out of Cypress Cloud"""
   logout: Query
+
+  """Check if a give spec file will match the project spec pattern"""
+  matchesSpecPattern(specFile: String!): Boolean!
 
   """Open a path in preferred IDE"""
   openDirectoryInIDE(path: String!): Boolean

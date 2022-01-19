@@ -21,4 +21,5 @@ export const shortcuts = {
   'focus-within-default': focusWithinDefault,
   'focus-default': focusDefault,
   'hocus-link-default': 'focus:outline-transparent hocus:underline',
+  'hocus-error': focusDefault.replace(/indigo/g, 'error'),
 }
