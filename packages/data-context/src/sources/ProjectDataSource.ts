@@ -69,9 +69,9 @@ export function transformSpec ({
     projectRoot = toPosix(projectRoot, sep)
   }
 
-  const relative = path.relative(projectRoot, absolute)
-  const parsedFile = path.parse(absolute)
-  const fileExtension = path.extname(absolute)
+  const relative = path.posix.relative(projectRoot, absolute)
+  const parsedFile = path.posix.parse(absolute)
+  const fileExtension = path.posix.extname(absolute)
 
   const specFileExtension = ['.spec', '.test', '-spec', '-test', '.cy']
   .map((ext) => ext + fileExtension)
