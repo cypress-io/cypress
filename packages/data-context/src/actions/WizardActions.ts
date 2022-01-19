@@ -144,6 +144,7 @@ export class WizardActions {
   }
 
   private async scaffoldConfig (configCode: string): Promise<NexusGenObjects['ScaffoldedFile']> {
+    this.ctx.lifecycleManager.setConfigFilePath(this.ctx.coreData.wizard.chosenLanguage)
     if (!fs.existsSync(this.ctx.lifecycleManager.configFilePath)) {
       return this.scaffoldFile(
         this.ctx.lifecycleManager.configFilePath,
@@ -323,15 +324,15 @@ interface E2eScaffoldOpts {
 
 const E2E_SCAFFOLD_BODY = (opts: E2eScaffoldOpts) => {
   return `
-    e2e: {
-      supportFile: 'cypress/support/e2e.${opts.lang}',
-      specPattern: '${getDefaultSpecPatterns().e2e}',
-      viewportHeight: 660,
-      viewportWidth: 1000,
-      setupNodeEvents(on, config) {
-        //
-      },
-    }
+  e2e: {
+    supportFile: 'cypress/support/e2e.${opts.lang}',
+    specPattern: '${getDefaultSpecPatterns().e2e}',
+    viewportHeight: 660,
+    viewportWidth: 1000,
+    setupNodeEvents(on, config) {
+      //
+    },
+  }
   `
 }
 
