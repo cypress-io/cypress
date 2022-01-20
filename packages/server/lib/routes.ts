@@ -60,7 +60,7 @@ export const createCommonRoutes = ({
   router.use(`/${namespace}/graphql/*`, graphQLHTTP)
 
   router.get(`/${namespace}/runner/*`, (req, res) => {
-    runner.handle(testingType, req, res)
+    runner.handle(req, res)
   })
 
   router.all(`/${namespace}/xhrs/*`, (req, res, next) => {
