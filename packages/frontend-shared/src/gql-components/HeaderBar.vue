@@ -1,12 +1,13 @@
 <template>
-  <HeaderBarContent
-    v-if="query.data.value"
-    :gql="query.data.value"
-    :show-browsers="props.showBrowsers"
-    :page-name="props.pageName"
-    :allow-automatic-prompt-open="props.allowAutomaticPromptOpen"
-  />
-  <div v-else />
+  <div>
+    <HeaderBarContent
+      v-if="query.data.value"
+      :gql="query.data.value"
+      :show-browsers="props.showBrowsers"
+      :page-name="props.pageName"
+      :allow-automatic-prompt-open="props.allowAutomaticPromptOpen"
+    />
+  </div>
 </template>
 
 <script setup lang="ts">

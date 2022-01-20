@@ -9,6 +9,7 @@ import type { Browser, FoundBrowser, OpenModeOptions } from '@packages/types'
 import { browsers } from '@packages/types/src/browser'
 import type { E2ETaskMap } from '../e2ePluginSetup'
 import installCustomPercyCommand from '@packages/ui-components/cypress/support/customPercyCommand'
+import { addNetworkCommands } from '../../support/onlineNetwork'
 import type sinon from 'sinon'
 import type pDefer from 'p-defer'
 
@@ -140,9 +141,9 @@ declare global {
 cy.i18n = i18n
 
 before(() => {
-  Cypress.env('e2e_gqlPort', undefined)
-  taskInternal('__internal__before', undefined).then(({ gqlPort }) => {
-    Cypress.env('e2e_gqlPort', gqlPort)
+  Cypress.env('e2e_launchpadPort', undefined)
+  taskInternal('__internal__before', undefined).then(({ launchpadPort }) => {
+    Cypress.env('e2e_launchpadPort', launchpadPort)
   })
 })
 
@@ -185,7 +186,7 @@ function openProject (projectName: ProjectFixture, argv: string[] = []) {
   }
 
   return logInternal({ name: 'openProject', message: argv.join(' ') }, () => {
-    return taskInternal('__internal_openProject', { projectName, argv })
+    return taskInternal('__internal_openProject', { projectName, argv, browser: Cypress.browser.name })
   }).then((obj) => {
     Cypress.env('e2e_serverPort', obj.e2eServerPort)
 
@@ -269,8 +270,8 @@ function visitApp (href?: string) {
 }
 
 function visitLaunchpad () {
-  return logInternal(`visitLaunchpad ${Cypress.env('e2e_gqlPort')}`, () => {
-    return cy.visit(`dist-launchpad/index.html?gqlPort=${Cypress.env('e2e_gqlPort')}`, { log: false }).then((val) => {
+  return logInternal(`visitLaunchpad ${Cypress.env('e2e_launchpadPort')}`, () => {
+    return cy.visit(`http://localhost:${Cypress.env('e2e_launchpadPort')}/__launchpad/index.html`, { log: false }).then((val) => {
       return cy.get('[data-e2e]', { timeout: 10000, log: false }).then(() => {
         return val
       })
@@ -428,3 +429,4 @@ Cypress.Commands.add('findBrowsers', findBrowsers)
 Cypress.Commands.add('validateExternalLink', { prevSubject: ['optional', 'element'] }, validateExternalLink)
 
 installCustomPercyCommand()
+addNetworkCommands()

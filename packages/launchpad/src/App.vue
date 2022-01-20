@@ -44,19 +44,6 @@ const query = useQuery({
   requestPolicy: 'cache-and-network',
 })
 
-let interval: number
-const poll = () => {
-  try {
-    if (backendInitialized.value) {
-      window.clearInterval(interval)
-    } else {
-      query.executeQuery()
-    }
-  } catch (e) {
-    // probably graphql server has not initialized yet
-  }
-}
-
 let isShowingRelaunch = ref(false)
 
 const toast = useToast()
@@ -78,8 +65,6 @@ watch(query.data, () => {
     }
   }
 })
-
-interval = window.setInterval(poll, 200)
 
 const backendInitialized = computed(() => !!query.data?.value?.__typename)
 

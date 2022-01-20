@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 
-type ScriptError = { type: string, error: string } | null
+export type ScriptError = { type: string, error: string } | null
 
 interface AutStoreState {
   url?: string
