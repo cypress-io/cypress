@@ -8,7 +8,6 @@
   <SpecRunnerContainerRunMode
     v-if="isRunMode"
     :run-mode-specs="specs"
-    :class="{'is-screenshotting': screenshotStore.isScreenshotting}"
   />
 
   <!--
@@ -20,7 +19,6 @@
   <SpecRunnerContainerOpenMode
     v-else-if="query.data.value?.currentProject?.specs"
     :gql="query.data.value"
-    :class="{'is-screenshotting': screenshotStore.isScreenshotting}"
   />
 </template>
 
@@ -116,11 +114,11 @@ iframe.spec-iframe {
 }
 
 #unified-runner > .screenshot-height-container {
-  height: min(100%, 100vh);
+  height: 100%
 }
 
 .is-screenshotting #unified-runner > .screenshot-height-container {
-  height: 100vh;
+  height: min(100%, 100vh);
 }
 
 </style>
