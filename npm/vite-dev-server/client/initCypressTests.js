@@ -29,8 +29,8 @@ if (!CypressInstance) {
  * https://github.com/cypress-io/cypress/issues/19697
  */
 CypressInstance.bridgeContentWindowListener = function (fn) {
-  return function () {
-    fn.apply(this, arguments)
+  return function (...args) {
+    fn.apply(this, args)
   }
 }
 
