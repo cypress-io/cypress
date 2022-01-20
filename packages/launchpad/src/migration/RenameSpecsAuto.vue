@@ -44,8 +44,10 @@
         </a>
       </template>
       <template #line-3>
-        <i18n-t keypath="migration.renameAuto.changedE2EFolder">
-          <CodeTag>integrationFolder</CodeTag>
+        <i18n-t keypath="migration.renameAuto.changedSpecPatternExplain">
+          <CodeTag class="text-jade-500">
+            [filename].cy.[ext]
+          </CodeTag>
         </i18n-t>
       </template>
     </MigrationList>

@@ -492,7 +492,7 @@
       "changeButton": "change",
       "changedSpecFolder": "We've changed the default spec folder from:",
       "changedSpecExt": "We've changed the default spec file extension from:",
-      "changedE2EFolder": "Since you're currently using a custom directory for the {0}, we'll temporarily be moving your specs back to the default directory.",
+      "changedSpecPatternExplain": "We've made the default spec file extension to {0} in order to avoid conflicts with any existing testing frameworks.",
       "optedOutMessage": "You've opted not to rename your spec file extension",
       "modals": {
         "title": "Change the existing spec file extension",
