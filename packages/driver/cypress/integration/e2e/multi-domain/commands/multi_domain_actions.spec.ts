@@ -138,8 +138,33 @@ context('multi-domain actions', { experimentalSessionSupport: true, experimental
     cy.switchToDomain('foobar.com', done, () => {
       const $btn = cy.$$('#button')
 
-      $btn.on('click', (e) => done())
+      $btn.on('click', () => done())
       cy.get('#button').trigger('click')
+    })
+  })
+
+  it('.selectFile()', () => {
+    cy.get('a[data-cy="files-form-link"]').click()
+
+    cy.switchToDomain('foobar.com', () => {
+      cy.wrap(Cypress.Buffer.from('foo')).as('foo')
+
+      cy.get('#basic')
+      .selectFile({ contents: '@foo', fileName: 'foo.txt' })
+      .should(($input) => {
+        const input = $input[0] as HTMLInputElement
+        const file = input!.files![0]
+
+        expect(file.name).to.equal('foo.txt')
+
+        return file.arrayBuffer()
+        .then((c) => {
+          const decoder = new TextDecoder('utf8')
+          const contents = decoder.decode(c)
+
+          expect(contents).to.equal('foo')
+        })
+      })
     })
   })
 })
