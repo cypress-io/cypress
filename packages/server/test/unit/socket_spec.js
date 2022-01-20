@@ -306,7 +306,7 @@ describe('lib/socket', () => {
           const iSC = sinon.stub(this.socket, 'isSocketConnected')
 
           // reduce the timeout so we dont have to wait so long
-          return this.client.emit('is:automation:client:connected', { element: '__cypress-string', randomString: 'string', timeout: 100 }, (resp) => {
+          return this.client.emit('is:automation:client:connected', { element: '__cypress-string', randomString: 'string', timeout: 200 }, (resp) => {
             const {
               callCount,
             } = iSC
