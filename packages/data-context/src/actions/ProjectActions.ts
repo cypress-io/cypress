@@ -424,7 +424,7 @@ export class ProjectActions {
     // We can't use this.ctx.project.projectId because this method
     // spawns the child process to get the ID, messing with the state if there's
     // no config file
-    const projectConfig = this.ctx.project.getConfig()
+    const projectConfig = this.ctx.lifecycleManager.loadedConfigFile
 
     const projectId = projectConfig?.projectId
 

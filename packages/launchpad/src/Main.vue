@@ -146,9 +146,9 @@ const currentProject = computed(() => query.data.value?.currentProject)
 const projectTitleHasBeenUpdates = ref('')
 
 watch(query.data, async () => {
-  if (query.data.value?.currentProject?.id && query.data.value.currentProject.id !== projectTitleHasBeenUpdates.value) {
+  if (!query.data.value?.currentProject?.isLoadingConfigFile && query.data.value?.currentProject && query.data.value.currentProject.id !== projectTitleHasBeenUpdates.value) {
     await mutation.executeMutation({})
-    projectTitleHasBeenUpdates.value = query.data.value?.currentProject.id
+    projectTitleHasBeenUpdates.value = query.data.value?.currentProject?.id
   }
 })
 

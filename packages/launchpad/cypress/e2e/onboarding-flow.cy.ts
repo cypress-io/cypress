@@ -115,6 +115,6 @@ describe('Launchpad: Onboarding Flow', () => {
     cy.loginUser()
 
     cy.visitLaunchpad()
-    cy.contains('cloud-project-abc123')
+    cy.contains('component-project')
   })
 })
