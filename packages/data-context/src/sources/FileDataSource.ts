@@ -74,6 +74,16 @@ export class FileDataSource {
     }
   }
 
+  isValidJsFile (absolutePath: string) {
+    try {
+      require(absolutePath)
+
+      return true
+    } catch {
+      return false
+    }
+  }
+
   private trackFile () {
     // this.watchedFilePaths.clear()
     // this.fileLoader.clear()
