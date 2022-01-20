@@ -19,7 +19,8 @@ export function init (importPromises: Array<() => Promise<void>>, parent: Window
    */
   Cypress.bridgeContentWindowListener = function (fn) {
     return function () {
-      fn.apply(this as any, arguments)
+      // @ts-ignore
+      fn.apply(this, arguments)
     }
   }
 
