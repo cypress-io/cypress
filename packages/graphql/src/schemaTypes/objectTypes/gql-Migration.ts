@@ -51,5 +51,19 @@ export const Migration = objectType({
         return ctx.migration.createConfigString()
       },
     })
+
+    t.nonNull.string('integrationFolder', {
+      description: 'the integration folder path used to store e2e tests',
+      resolve: (source, args, ctx) => {
+        return ctx.migration.getIntegrationFolder()
+      },
+    })
+
+    t.nonNull.string('componentFolder', {
+      description: 'the component folder path used to store components tests',
+      resolve: (source, args, ctx) => {
+        return ctx.migration.getComponentFolder()
+      },
+    })
   },
 })
