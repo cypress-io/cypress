@@ -26,4 +26,21 @@ describe('<RenameSpecsAuto/>', { viewportWidth: 1119 }, () => {
 
     cy.findByText(defaultMessages.migration.renameAuto.changeButton).should('be.visible')
   })
+
+  it('changes the skip status when proceeding to change', () => {
+    cy.mountFragment(RenameSpecsAutoFragmentDoc, {
+      render (gql) {
+        return (<div class="p-16px">
+          <RenameSpecsAuto gql={gql} />
+        </div>)
+      },
+    })
+
+    cy.findByText(defaultMessages.migration.renameAuto.optedOutMessage).should('not.exist')
+    cy.findByText(defaultMessages.migration.renameAuto.changeButton).click()
+    cy.findByText(defaultMessages.migration.renameAuto.modals.step1.buttonProceed).click()
+    cy.findByText(defaultMessages.migration.renameAuto.modals.step2.option2).click()
+    cy.findByText(defaultMessages.migration.renameAuto.modals.step2.buttonSave).click()
+    cy.findByText(defaultMessages.migration.renameAuto.optedOutMessage).should('be.visible')
+  })
 })

@@ -3,12 +3,12 @@
     :model-value="true"
     :title="t('migration.renameAuto.modals.title')"
   >
-    <Alert status="warning">
-      <p
-        ref="warningRef"
-        v-html="markdownWarning"
-      />
-    </Alert>
+    <Alert
+      status="warning"
+      :title="t('migration.renameAuto.modals.step1.warning')"
+      :icon="WarningIcon"
+      icon-classes="icon-dark-orange-400"
+    />
     <MigrationTitle
       :title="t('migration.renameAuto.title')"
       class="mt-24px"
@@ -63,17 +63,12 @@ import Button from '@cy/components/Button.vue'
 import CodeTag from '@cy/components/CodeTag.vue'
 import StandardModal from '@cy/components/StandardModal.vue'
 import ArrowRightIcon from '~icons/cy/arrow-right_x16.svg'
+import WarningIcon from '~icons/cy/warning_x16.svg'
 import MigrationList from './fragments/MigrationList.vue'
 import MigrationTitle from './fragments/MigrationTitle.vue'
-import { useMarkdown } from '@packages/frontend-shared/src/composables/useMarkdown'
 import { useI18n } from '@cy/i18n'
-import { ref } from 'vue'
 
 const { t } = useI18n()
-
-const warningRef = ref()
-
-const { markdown: markdownWarning } = useMarkdown(warningRef, t('migration.renameAuto.modals.step1.warning'))
 
 const emit = defineEmits([
   'proceed',

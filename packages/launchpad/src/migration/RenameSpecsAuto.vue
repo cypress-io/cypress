@@ -12,21 +12,35 @@
           class="text-jade-500"
         >cypress/e2e</CodeTag>
       </template>
+
+      <a
+        class="cursor-pointer text-indigo-500 hover:underline"
+        @click="step1Modal = true"
+      >
+        {{ t('migration.renameAuto.changeButton') }}
+      </a>
       <template #line-2>
-        {{ t('migration.renameAuto.changedSpecExt') }}
-        <CodeTag
-          class="text-red-500"
-        >[filename].spec.[ext]</CodeTag>
-        <i-cy-arrow-right_x16 class="h-16px w-16px inline-block icon-dark-gray-300" />
-        <CodeTag
-          class="text-jade-500"
-        >[filename].cy.[ext]</CodeTag>
+        <template
+          v-if="skipRename"
+        >
+          {{ t('migration.renameAuto.optedOutMessage') }}
+        </template>
+        <template v-else>
+          {{ t('migration.renameAuto.changedSpecExt') }}
+          <CodeTag
+            class="text-red-500"
+          >[filename].spec.[ext]</CodeTag>
+          <i-cy-arrow-right_x16 class="h-16px w-16px inline-block icon-dark-gray-300" />
+          <CodeTag
+            class="text-jade-500"
+          >[filename].cy.[ext]</CodeTag>
+        </template>
         <span class="m-8px text-gray-100">——</span>
         <a
           class="cursor-pointer text-indigo-500 hover:underline"
-          @click="() => {}"
+          @click="step1Modal = true"
         >
-          change
+          {{ t('migration.renameAuto.changeButton') }}
         </a>
       </template>
       <template #line-3>
@@ -51,15 +65,34 @@
         />
       </template>
     </BeforeAfter>
+    <ChangeExtensionModalStep1
+      v-if="step1Modal"
+      @proceed="
+        step1Modal = false;
+        step2Modal = true;
+      "
+      @cancel="step1Modal = false"
+    />
+    <ChangeExtensionModalStep2
+      v-if="step2Modal"
+      @cancel="step2Modal = false"
+      @save="(val) => {
+        step2Modal = false;
+        applySkipResult(val)
+      }"
+    />
   </div>
 </template>
 
 <script lang="ts" setup>
+import { ref } from 'vue'
 import CodeTag from '@cy/components/CodeTag.vue'
 import BeforeAfter from './fragments/BeforeAfter.vue'
 import HighlightedFilesList from './fragments/HighlightedFilesList.vue'
 import MigrationList from './fragments/MigrationList.vue'
 import MigrationTitle from './fragments/MigrationTitle.vue'
+import ChangeExtensionModalStep1 from './ChangeExtensionModalStep1.vue'
+import ChangeExtensionModalStep2 from './ChangeExtensionModalStep2.vue'
 import { gql } from '@urql/vue'
 import type { RenameSpecsAutoFragment } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
@@ -75,4 +108,15 @@ fragment RenameSpecsAuto on Migration {
 const props = defineProps<{
   gql: RenameSpecsAutoFragment
 }>()
+
+const step1Modal = ref(false)
+const step2Modal = ref(false)
+
+// probably to be changed for a GQL field
+const skipRename = ref(false)
+
+function applySkipResult (val:string) {
+  // TODO: add a GQL mutation here
+  skipRename.value = val === 'skip'
+}
 </script>
