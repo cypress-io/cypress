@@ -484,7 +484,7 @@ describe('App: Index', () => {
           })
         })
 
-        it('shows success modal with spec is created from component', () => {
+        it('shows success modal when spec is created from component', () => {
           cy.get('@CreateFromComponentDialog').within(() => {
             cy.findAllByTestId('file-list-row').eq(0).as('NewSpecFile')
 
@@ -514,6 +514,20 @@ describe('App: Index', () => {
             cy.findAllByTestId('card').eq(1)
             .should('have.attr', 'tabindex', '-1')
           })
+        })
+
+        it('navigates to spec runner when selected', () => {
+          cy.get('@CreateFromComponentDialog').within(() => {
+            cy.findAllByTestId('file-list-row').eq(0).as('NewSpecFile')
+            cy.get('@NewSpecFile').click()
+          })
+
+          cy.findByRole('dialog', { name: defaultMessages.createSpec.successPage.header }).as('SuccessDialog').within(() => {
+            cy.pause()
+            cy.findByRole('link', { name: 'Okay, run the spec' }).should('have.attr', 'href', '#/specs/runner?file=src/App.cy.jsx').click()
+          })
+
+          cy.findByTestId('spec-gen-component-app', { timeout: 5000 }).should('be.visible')
         })
       })
     })
