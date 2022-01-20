@@ -339,4 +339,42 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       })
     })
   })
+
+  describe('no internet connection', () => {
+    afterEach(() => {
+      cy.goOnline()
+    })
+
+    it('shows alert warning if runs have been returned already', () => {
+      cy.loginUser()
+      cy.visitApp()
+      cy.wait(1000)
+      cy.get('[href="#/runs"]').click()
+      cy.get('[data-cy="runs"]')
+
+      cy.goOffline()
+
+      cy.get('[data-cy=warning-alert]')
+      .should('contain.text', 'You have no internet connection')
+      .and('contain.text', 'Check your internet connection to pull the latest data from the dashboard')
+    })
+
+    it('should remove the alert warning if the app reconnects to the internet', () => {
+      cy.loginUser()
+      cy.visitApp()
+      cy.wait(1000)
+      cy.get('[href="#/runs"]').click()
+      cy.get('[data-cy="runs"]')
+
+      cy.goOffline()
+
+      cy.get('[data-cy=warning-alert]')
+      .should('contain.text', 'You have no internet connection')
+      .and('contain.text', 'Check your internet connection to pull the latest data from the dashboard')
+
+      cy.goOnline()
+
+      cy.get('[data-cy=warning-alert]').should('not.exist')
+    })
+  })
 })
