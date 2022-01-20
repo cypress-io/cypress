@@ -6,7 +6,6 @@ import fs from 'fs'
 import path from 'path'
 
 import type { DataContext } from '..'
-import { getDefaultSpecPatterns } from '../util/config-options'
 
 interface WizardGetCodeComponent {
   chosenLanguage: CodeLanguage
@@ -325,12 +324,19 @@ interface E2eScaffoldOpts {
 }
 
 const E2E_SCAFFOLD_BODY = (opts: E2eScaffoldOpts) => {
+  if (opts.lang === 'ts') {
+    return dedent`
+  e2e: {
+    supportFile: 'cypress/support/e2e.ts',
+    setupNodeEvents(on, config) {
+      // implement node event listeners here
+    },
+  },
+    `
+  }
+
   return dedent`
   e2e: {
-    supportFile: 'cypress/support/e2e.${opts.lang}',
-    specPattern: '${getDefaultSpecPatterns().e2e}',
-    viewportHeight: 660,
-    viewportWidth: 1000,
     setupNodeEvents(on, config) {
       // implement node event listeners here
     },
@@ -346,10 +352,17 @@ interface ComponentScaffoldOpts {
 }
 
 const COMPONENT_SCAFFOLD_BODY = (opts: ComponentScaffoldOpts) => {
+  if (opts.lang === 'ts') {
+    return dedent`
+  component: {
+    supportFile: 'cypress/support/component.ts',
+    devServer: import('${opts.requirePath}'),
+    devServerConfig: ${opts.configOptionsString}
+  },`
+  }
+
   return dedent`
   component: {
-    supportFile: 'cypress/support/component.${opts.lang}',
-    specPattern: '${getDefaultSpecPatterns().component}',
     devServer: import('${opts.requirePath}'),
     devServerConfig: ${opts.configOptionsString}
   },
