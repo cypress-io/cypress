@@ -30,7 +30,7 @@ const props = withDefaults(defineProps<{
   title: string,
   message: string,
   details?: string | null,
-  modelValue: boolean
+  modelValue?: boolean
   dismissible?: boolean
 }>(), {
   modelValue: true,
