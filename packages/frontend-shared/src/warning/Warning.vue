@@ -1,7 +1,7 @@
 <template>
   <Alert
     v-model="show"
-    dismissible
+    :dismissible="dismissible"
     status="warning"
     data-cy="warning-alert"
     header-class="text-warning-600"
@@ -30,10 +30,12 @@ const props = withDefaults(defineProps<{
   title: string,
   message: string,
   details?: string | null,
-  modelValue: boolean
+  modelValue?: boolean
+  dismissible?: boolean
 }>(), {
   modelValue: true,
   details: undefined,
+  dismissible: true,
 })
 
 const { modelValue: show } = useVModels(props, emits)
