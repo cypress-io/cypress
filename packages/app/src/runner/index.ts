@@ -15,7 +15,7 @@
  *
  */
 import { watchEffect } from 'vue'
-import { AutomationStatus, getMobxRunnerStore, initializeMobxStore, useAutStore, useRunnerUiStore } from '../store'
+import { getMobxRunnerStore, initializeMobxStore, useAutStore, useRunnerUiStore } from '../store'
 import { injectBundle } from './injectBundle'
 import type { SpecFile } from '@packages/types/src/spec'
 import { UnifiedReporterAPI } from './reporter'
@@ -120,9 +120,6 @@ function setupRunner (namespace: AutomationElementId) {
 
   getEventManager().addGlobalListeners(mobxRunnerStore, {
     randomString: runnerUiStore.randomString,
-    setAutomationStatus: (status: AutomationStatus) => {
-      runnerUiStore.setAutomationStatus(status)
-    },
     element: `${namespace}-string`,
   })
 

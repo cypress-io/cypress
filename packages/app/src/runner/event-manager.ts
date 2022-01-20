@@ -9,7 +9,7 @@ import type { AutomationElementId, FileDetails } from '@packages/types'
 import { automation } from '@packages/runner-shared/src/automation'
 import { logger } from '@packages/runner-shared/src/logger'
 import type { Socket } from '@packages/socket/lib/browser'
-import { AutomationStatus, useRunnerUiStore } from '../store'
+import { useRunnerUiStore } from '../store'
 
 // type is default export of '@packages/driver'
 // cannot import because it's not type safe and tsc throw many type errors.
@@ -18,9 +18,8 @@ type $Cypress = any
 const noop = () => {}
 
 interface AddGlobalListenerOptions {
-    element: AutomationElementId
-    randomString: string
-    setAutomationStatus: (status: AutomationStatus) => void
+  element: AutomationElementId
+  randomString: string
 }
 
 const driverToReporterEvents = 'paused session:add'.split(' ')
@@ -74,7 +73,7 @@ export class EventManager {
       return this.runSpec(state)
     }
 
-    const connectionInfo: Omit<AddGlobalListenerOptions, 'setAutomationStatus'> = {
+    const connectionInfo: AddGlobalListenerOptions = {
       element: options.element,
       randomString: options.randomString,
     }
