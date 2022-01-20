@@ -8,6 +8,7 @@
   <SpecRunnerContainerRunMode
     v-if="isRunMode"
     :run-mode-specs="specs"
+    :class="{'is-screenshotting': screenshotStore.isScreenshotting}"
   />
 
   <!--
@@ -19,6 +20,7 @@
   <SpecRunnerContainerOpenMode
     v-else-if="query.data.value?.currentProject?.specs"
     :gql="query.data.value"
+    :class="{'is-screenshotting': screenshotStore.isScreenshotting}"
   />
 </template>
 
@@ -29,6 +31,7 @@ import { getAutIframeModel } from '../../runner'
 import SpecRunnerContainerOpenMode from '../../runner/SpecRunnerContainerOpenMode.vue'
 import SpecRunnerContainerRunMode from '../../runner/SpecRunnerContainerRunMode.vue'
 import { togglePlayground } from '../../runner/utils'
+import { useScreenshotStore } from '../../store'
 
 gql`
 query SpecPageContainer {
@@ -62,6 +65,8 @@ const specs = window.__RUN_MODE_SPECS__
 window.__showSelectorPlaygroundForTestingPurposes = () => {
   togglePlayground(getAutIframeModel())
 }
+
+const screenshotStore = useScreenshotStore()
 </script>
 
 <route>
@@ -72,3 +77,25 @@ window.__showSelectorPlaygroundForTestingPurposes = () => {
     }
   }
 </route>
+
+<style lang="scss">
+@import "./spec-runner-global.scss";
+
+#unified-runner {
+  position: relative;
+    margin: 0 auto;
+}
+
+.is-screenshotting #unified-runner {
+    margin: unset;
+}
+
+#unified-runner > .screenshot-height-container {
+  height: min(100%, 100vh);
+}
+
+.is-screenshotting #unified-runner > .screenshot-height-container {
+  height: 100%;
+}
+
+</style>
