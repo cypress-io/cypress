@@ -1,21 +1,14 @@
 require('../../../spec_helper')
 
 const _ = require('lodash')
-const snapshot = require('snap-shot-it')
 const Promise = require('bluebird')
 
-const preprocessor = require(`${root}../../lib/plugins/child/preprocessor`)
-const task = require(`${root}../../lib/plugins/child/task`)
-const util = require(`${root}../../lib/plugins/util`)
-const resolve = require(`${root}../../lib/util/resolve`)
-const browserUtils = require(`${root}../../lib/browsers/utils`)
-const Fixtures = require('@tooling/system-tests/lib/fixtures')
-const tsNodeUtil = require(`${root}../../lib/util/ts_node`)
+const preprocessor = require(`../../../../lib/plugins/child/preprocessor`)
+const util = require(`../../../../lib/plugins/util`)
+const resolve = require(`../../../../lib/util/resolve`)
+const browserUtils = require(`../../../../lib/browsers/utils`)
 
-const runPlugins = require(`${root}../../lib/plugins/child/run_plugins`)
-
-const colorCodeRe = /\[[0-9;]+m/gm
-const pathRe = /\/?([a-z0-9_-]+\/)*[a-z0-9_-]+\/([a-z_]+\.\w+)[:0-9]+/gmi
+const { RunPlugins } = require(`../../../../lib/plugins/child/run_plugins`)
 
 const deferred = () => {
   let reject
@@ -28,92 +21,50 @@ const deferred = () => {
   return { promise, resolve, reject }
 }
 
-const withoutColorCodes = (str) => {
-  return str.replace(colorCodeRe, '<color-code>')
-}
-const withoutPath = (str) => {
-  return str.replace(pathRe, '<path>$2)')
-}
+// TODO: tim, come back to this later
+describe.skip('lib/plugins/child/run_plugins', () => {
+  let runPlugins
 
-describe('lib/plugins/child/run_plugins', () => {
   beforeEach(function () {
-    runPlugins.__reset()
-
     this.ipc = {
       send: sinon.spy(),
       on: sinon.stub(),
       removeListener: sinon.spy(),
     }
+
+    runPlugins = new RunPlugins(this.ipc, 'proj-root', 'cypress.config.js')
   })
 
   afterEach(() => {
-    mockery.deregisterMock('plugins-file')
-    mockery.deregisterSubstitute('plugins-file')
     mockery.deregisterMock('@cypress/webpack-batteries-included-preprocessor')
   })
 
-  it('sends error message if pluginsFile is missing', function () {
-    mockery.registerSubstitute('plugins-file', '/does/not/exist.coffee')
-    runPlugins(this.ipc, 'plugins-file', 'proj-root')
-    expect(this.ipc.send).to.be.calledWith('load:error', 'PLUGINS_FILE_ERROR', 'plugins-file')
+  it('sends error message if setupNodeEvents is not a function', function () {
+    const config = { projectRoot: '/project/root' }
 
-    return snapshot(this.ipc.send.lastCall.args[3].split('\n')[0])
-  })
+    const setupNodeEventsFn = (on, config) => {
+      on('dev-server:start', (options) => {})
+      on('after:screenshot', () => {})
+      on('task', {})
 
-  it('sends error message if requiring pluginsFile errors', function () {
-    // path for substitute is relative to lib/plugins/child/plugins_child.js
-    mockery.registerSubstitute(
-      'plugins-file',
-      Fixtures.path('server/throws_error.js'),
-    )
+      return config
+    }
 
-    runPlugins(this.ipc, 'plugins-file', 'proj-root')
-    expect(this.ipc.send).to.be.calledWith('load:error', 'PLUGINS_FILE_ERROR', 'plugins-file')
+    const foo = ((on, config) => {
+      on('dev-server:start', (options) => {})
 
-    return snapshot(this.ipc.send.lastCall.args[3].split('\n')[0])
-  })
-
-  it('sends error message if pluginsFile has syntax error', function () {
-    // path for substitute is relative to lib/plugins/child/plugins_child.js
-    mockery.registerSubstitute(
-      'plugins-file',
-      Fixtures.path('server/syntax_error.js'),
-    )
-
-    runPlugins(this.ipc, 'plugins-file', 'proj-root')
-    expect(this.ipc.send).to.be.calledWith('load:error', 'PLUGINS_FILE_ERROR', 'plugins-file')
-
-    return snapshot(withoutColorCodes(withoutPath(this.ipc.send.lastCall.args[3].replace(/( +at[^$]+$)+/g, '[stack trace]'))))
-  })
-
-  it('sends error message if pluginsFile does not export a function', function () {
-    mockery.registerMock('plugins-file', null)
-    runPlugins(this.ipc, 'plugins-file', 'proj-root')
-    expect(this.ipc.send).to.be.calledWith('load:error', 'PLUGINS_DIDNT_EXPORT_FUNCTION', 'plugins-file')
-
-    return snapshot(JSON.stringify(this.ipc.send.lastCall.args[3]))
-  })
-
-  describe('typescript registration', () => {
-    beforeEach(() => {
-      sinon.stub(tsNodeUtil, 'register')
-      sinon.stub(resolve, 'typescript').returns('/path/to/typescript.js')
+      return setupNodeEventsFn(on, config)
     })
 
-    it('registers ts-node', function () {
-      runPlugins(this.ipc, '/path/to/plugins/file.js', 'proj-root')
+    runPlugins.runSetupNodeEvents(foo, setupNodeEventsFn)
 
-      expect(tsNodeUtil.register).to.be.calledWith(
-        'proj-root',
-        '/path/to/plugins/file.js',
-      )
-    })
+    this.ipc.on.withArgs('setupTestingType').yield(config)
 
-    it('only registers ts-node once', function () {
-      runPlugins(this.ipc, '/path/to/plugins/file.js', 'proj-root')
-      runPlugins(this.ipc, '/path/to/plugins/file.js', 'proj-root')
-
-      expect(tsNodeUtil.register).to.be.calledOnce
+    return Promise
+    .delay(10)
+    .then(() => {
+      expect(this.ipc.send).to.be.calledWith('setupTestingType:reply', config)
+      expect(this.ipc.send).to.be.calledWith('setupTestingType:error', 'SETUP_NODE_EVENTS_DO_NOT_SUPPORT_DEV_SERVER', 'cypress.config.js')
     })
   })
 
@@ -122,23 +73,23 @@ describe('lib/plugins/child/run_plugins', () => {
       const pluginsDeferred = deferred()
       const config = { projectRoot: '/project/root' }
 
-      mockery.registerMock('plugins-file', (on) => {
+      const setupNodeEventsFn = (on) => {
         on('after:screenshot', () => {})
         on('task', {})
 
         return config
-      })
+      }
 
-      runPlugins(this.ipc, 'plugins-file', 'proj-root')
+      runPlugins.runSetupNodeEvents(config, setupNodeEventsFn)
 
-      this.ipc.on.withArgs('load').yield(config)
+      this.ipc.on.withArgs('load:plugins').yield(config)
 
       pluginsDeferred.resolve(config)
 
       return Promise
       .delay(10)
       .then(() => {
-        expect(this.ipc.send).to.be.calledWith('loaded', config)
+        expect(this.ipc.send).to.be.calledWith('setupTestingType:reply', config)
         const registrations = this.ipc.send.lastCall.args[2]
 
         expect(registrations).to.have.length(5)
@@ -161,17 +112,18 @@ describe('lib/plugins/child/run_plugins', () => {
 
       sinon.stub(resolve, 'typescript').returns('/path/to/typescript.js')
 
-      mockery.registerMock('plugins-file', (on) => {
+      const setupNodeEventsFn = (on) => {
         on('after:screenshot', () => {})
         on('task', {})
 
         return config
-      })
+      }
 
       mockery.registerMock('@cypress/webpack-batteries-included-preprocessor', webpackPreprocessor)
-      runPlugins(this.ipc, 'plugins-file', 'proj-root')
 
-      this.ipc.on.withArgs('load').yield(config)
+      runPlugins.runSetupNodeEvents(setupNodeEventsFn)
+
+      this.ipc.on.withArgs('load:plugins').yield(config)
 
       pluginsDeferred.resolve(config)
 
@@ -189,7 +141,7 @@ describe('lib/plugins/child/run_plugins', () => {
           eventId: 4,
         })
 
-        this.ipc.on.withArgs('execute').yield('file:preprocessor', { eventId: 4, invocationId: '00' }, ['arg1', 'arg2'])
+        this.ipc.on.withArgs('execute:plugins').yield('file:preprocessor', { eventId: 4, invocationId: '00' }, ['arg1', 'arg2'])
         expect(webpackPreprocessorFn, 'webpackPreprocessor').to.be.called
       })
     })
@@ -202,18 +154,18 @@ describe('lib/plugins/child/run_plugins', () => {
 
       sinon.stub(resolve, 'typescript').returns('/path/to/typescript.js')
 
-      mockery.registerMock('plugins-file', (on) => {
+      const setupNodeEventsFn = (on) => {
         on('after:screenshot', () => {})
         on('file:preprocessor', userPreprocessorFn)
         on('task', {})
 
         return config
-      })
+      }
 
       mockery.registerMock('@cypress/webpack-batteries-included-preprocessor', webpackPreprocessor)
-      runPlugins(this.ipc, 'plugins-file', 'proj-root')
+      runPlugins.runSetupNodeEvents(config, setupNodeEventsFn)
 
-      this.ipc.on.withArgs('load').yield(config)
+      this.ipc.on.withArgs('load:plugins').yield(config)
 
       pluginsDeferred.resolve(config)
 
@@ -229,23 +181,21 @@ describe('lib/plugins/child/run_plugins', () => {
           eventId: 3,
         })
 
-        this.ipc.on.withArgs('execute').yield('file:preprocessor', { eventId: 3, invocationId: '00' }, ['arg1', 'arg2'])
+        this.ipc.on.withArgs('execute:plugins').yield('file:preprocessor', { eventId: 3, invocationId: '00' }, ['arg1', 'arg2'])
         expect(userPreprocessorFn).to.be.called
       })
     })
 
     it('sends error if pluginsFile function rejects the promise', function (done) {
       const err = new Error('foo')
-      const pluginsFn = sinon.stub().rejects(err)
+      const setupNodeEventsFn = sinon.stub().rejects(err)
 
-      mockery.registerMock('plugins-file', pluginsFn)
-      this.ipc.on.withArgs('load').yields({})
-      runPlugins(this.ipc, 'plugins-file', 'proj-root')
+      this.ipc.on.withArgs('load:plugins').yields({})
+      runPlugins.runSetupNodeEvents(setupNodeEventsFn)
 
-      this.ipc.send = _.once((event, errorType, pluginsFile, stack) => {
-        expect(event).to.eq('load:error')
+      this.ipc.send = _.once((event, errorType, stack) => {
+        expect(event).to.eq('setupTestingType:error')
         expect(errorType).to.eq('PLUGINS_FUNCTION_ERROR')
-        expect(pluginsFile).to.eq('plugins-file')
         expect(stack).to.eq(err.stack)
 
         return done()
@@ -253,33 +203,33 @@ describe('lib/plugins/child/run_plugins', () => {
     })
 
     it('calls function exported by pluginsFile with register function and config', function () {
-      const pluginsFn = sinon.spy()
+      const setupNodeEventsFn = sinon.spy()
 
-      mockery.registerMock('plugins-file', pluginsFn)
-      runPlugins(this.ipc, 'plugins-file', 'proj-root')
+      runPlugins.runSetupNodeEvents(setupNodeEventsFn)
+
       const config = {}
 
-      this.ipc.on.withArgs('load').yield(config)
-      expect(pluginsFn).to.be.called
-      expect(pluginsFn.lastCall.args[0]).to.be.a('function')
+      this.ipc.on.withArgs('load:plugins').yield(config)
+      expect(setupNodeEventsFn).to.be.called
+      expect(setupNodeEventsFn.lastCall.args[0]).to.be.a('function')
 
-      expect(pluginsFn.lastCall.args[1]).to.equal(config)
+      expect(setupNodeEventsFn.lastCall.args[1]).to.equal(config)
     })
 
     it('sends error if pluginsFile function throws an error', function (done) {
       const err = new Error('foo')
 
-      mockery.registerMock('plugins-file', () => {
+      const setupNodeEventsFn = () => {
         throw err
-      })
+      }
 
-      runPlugins(this.ipc, 'plugins-file', 'proj-root')
-      this.ipc.on.withArgs('load').yield({})
+      runPlugins.runSetupNodeEvents(setupNodeEventsFn)
 
-      this.ipc.send = _.once((event, errorType, pluginsFile, stack) => {
-        expect(event).to.eq('load:error')
+      this.ipc.on.withArgs('load:plugins').yield({})
+
+      this.ipc.send = _.once((event, errorType, stack) => {
+        expect(event).to.eq('setupTestingType:error')
         expect(errorType).to.eq('PLUGINS_FUNCTION_ERROR')
-        expect(pluginsFile).to.eq('plugins-file')
         expect(stack).to.eq(err.stack)
 
         return done()
@@ -295,18 +245,16 @@ describe('lib/plugins/child/run_plugins', () => {
       this.beforeBrowserLaunch = sinon.stub().resolves()
       this.taskRequested = sinon.stub().resolves('foo')
 
-      const pluginsFn = (register) => {
+      const setupNodeEventsFn = (register) => {
         register('file:preprocessor', this.onFilePreprocessor)
         register('before:browser:launch', this.beforeBrowserLaunch)
 
         return register('task', this.taskRequested)
       }
 
-      mockery.registerMock('plugins-file', pluginsFn)
+      runPlugins.runSetupNodeEvents(setupNodeEventsFn)
 
-      runPlugins(this.ipc, 'plugins-file', 'proj-root')
-
-      return this.ipc.on.withArgs('load').yield({})
+      return this.ipc.on.withArgs('load:plugins').yield({})
     })
 
     context('file:preprocessor', () => {
@@ -317,7 +265,7 @@ describe('lib/plugins/child/run_plugins', () => {
       it('calls preprocessor handler', function () {
         const args = ['arg1', 'arg2']
 
-        this.ipc.on.withArgs('execute').yield('file:preprocessor', this.ids, args)
+        this.ipc.on.withArgs('execute:plugins').yield('file:preprocessor', this.ids, args)
         expect(preprocessor.wrap).to.be.called
         expect(preprocessor.wrap.lastCall.args[0]).to.equal(this.ipc)
         expect(preprocessor.wrap.lastCall.args[1]).to.be.a('function')
@@ -327,7 +275,7 @@ describe('lib/plugins/child/run_plugins', () => {
       })
 
       it('invokes registered function when invoked by handler', function () {
-        this.ipc.on.withArgs('execute').yield('file:preprocessor', this.ids, [])
+        this.ipc.on.withArgs('execute:plugins').yield('file:preprocessor', this.ids, [])
         preprocessor.wrap.lastCall.args[1](2, ['one', 'two'])
 
         expect(this.onFilePreprocessor).to.be.calledWith('one', 'two')
@@ -346,7 +294,7 @@ describe('lib/plugins/child/run_plugins', () => {
       })
 
       it('wraps child promise', function () {
-        this.ipc.on.withArgs('execute').yield('before:browser:launch', this.ids, this.args)
+        this.ipc.on.withArgs('execute:plugins').yield('before:browser:launch', this.ids, this.args)
         expect(util.wrapChildPromise).to.be.called
         expect(util.wrapChildPromise.lastCall.args[0]).to.equal(this.ipc)
         expect(util.wrapChildPromise.lastCall.args[1]).to.be.a('function')
@@ -356,7 +304,7 @@ describe('lib/plugins/child/run_plugins', () => {
       })
 
       it('invokes registered function when invoked by handler', function () {
-        this.ipc.on.withArgs('execute').yield('before:browser:launch', this.ids, this.args)
+        this.ipc.on.withArgs('execute:plugins').yield('before:browser:launch', this.ids, this.args)
         util.wrapChildPromise.lastCall.args[1](3, this.args)
 
         expect(this.beforeBrowserLaunch).to.be.calledWith(...this.args)
@@ -365,59 +313,101 @@ describe('lib/plugins/child/run_plugins', () => {
 
     context('task', () => {
       beforeEach(function () {
-        sinon.stub(task, 'wrap')
+        sinon.stub(runPlugins, 'execute')
         this.ids = { eventId: 5, invocationId: '00' }
       })
 
       it('calls task handler', function () {
         const args = ['arg1']
 
-        this.ipc.on.withArgs('execute').yield('task', this.ids, args)
-        expect(task.wrap).to.be.called
-        expect(task.wrap.lastCall.args[0]).to.equal(this.ipc)
-        expect(task.wrap.lastCall.args[1]).to.be.an('object')
-        expect(task.wrap.lastCall.args[2]).to.equal(this.ids)
+        this.ipc.on.withArgs('execute:plugins').yield('task', this.ids, args)
+        expect(runPlugins.execute).to.be.called
+        expect(runPlugins.execute.lastCall.args[0]).to.equal(this.ipc)
+        expect(runPlugins.execute.lastCall.args[1]).to.be.an('object')
+        expect(runPlugins.execute.lastCall.args[2]).to.equal(this.ids)
 
-        expect(task.wrap.lastCall.args[3]).to.equal(args)
+        expect(runPlugins.execute.lastCall.args[3]).to.equal(args)
       })
     })
   })
 
-  describe('errors', () => {
+  describe('tasks', () => {
     beforeEach(function () {
-      mockery.registerMock('plugins-file', () => {})
-      sinon.stub(process, 'on')
-
-      this.err = {
-        name: 'error name',
-        message: 'error message',
+      this.ipc = {
+        send: sinon.spy(),
+        on: sinon.stub(),
+        removeListener: sinon.spy(),
       }
 
-      return runPlugins(this.ipc, 'plugins-file', 'proj-root')
+      this.events = {
+        '1': {
+          event: 'task',
+          handler: {
+            'the:task': sinon.stub().returns('result'),
+            'another:task': sinon.stub().returns('result'),
+            'a:third:task' () {
+              return 'foo'
+            },
+          },
+        },
+      }
+
+      this.ids = {}
+
+      return sinon.stub(util, 'wrapChildPromise')
     })
 
-    it('sends the serialized error via ipc on process uncaughtException', function () {
-      process.on.withArgs('uncaughtException').yield(this.err)
+    context('.taskGetBody', () => {
+      it('returns the stringified body of the event handler', function () {
+        runPlugins.taskGetBody(this.ids, ['a:third:task'])
+        expect(util.wrapChildPromise).to.be.called
+        const result = util.wrapChildPromise.lastCall.args[1]('1')
 
-      expect(this.ipc.send).to.be.calledWith('error', this.err)
+        expect(result.replace(/\s+/g, '')).to.equal('\'a:third:task\'(){return\'foo\'}')
+      })
+
+      it('returns an empty string if event handler cannot be found', function () {
+        runPlugins.taskGetBody(this.ids, ['non:existent'])
+        expect(util.wrapChildPromise).to.be.called
+        const result = util.wrapChildPromise.lastCall.args[1]('1')
+
+        expect(result).to.equal('')
+      })
     })
 
-    it('sends the serialized error via ipc on process unhandledRejection', function () {
-      process.on.withArgs('unhandledRejection').yield(this.err)
+    context('.taskGetKeys', () => {
+      it('returns the registered task keys', function () {
+        runPlugins.taskGetKeys(this.ipc, this.events, this.ids)
+        expect(util.wrapChildPromise).to.be.called
+        const result = util.wrapChildPromise.lastCall.args[1]('1')
 
-      expect(this.ipc.send).to.be.calledWith('error', this.err)
+        expect(result).to.eql(['the:task', 'another:task', 'a:third:task'])
+      })
     })
 
-    it('sends the serialized Bluebird error via ipc on process unhandledRejection', function () {
-      process.on.withArgs('unhandledRejection').yield({ reason: this.err })
+    context('.taskExecute', () => {
+      it('passes through ipc and ids', function () {
+        runPlugins.taskExecute(this.ids, ['the:task'])
+        expect(util.wrapChildPromise).to.be.called
+        expect(util.wrapChildPromise.lastCall.args[0]).to.be.equal(this.ipc)
 
-      expect(this.ipc.send).to.be.calledWith('error', this.err)
-    })
+        expect(util.wrapChildPromise.lastCall.args[2]).to.be.equal(this.ids)
+      })
 
-    it('sends the serialized OpenSSL error via ipc on process unhandledRejection', function () {
-      process.on.withArgs('unhandledRejection').yield({ ...this.err, reason: 'reason' })
+      it('invokes the callback for the given task if it exists and returns the result', function () {
+        runPlugins.taskExecute(this.ids, ['the:task', 'the:arg'])
+        const result = util.wrapChildPromise.lastCall.args[1]('1', ['the:arg'])
 
-      expect(this.ipc.send).to.be.calledWith('error', this.err)
+        expect(this.events['1'].handler['the:task']).to.be.calledWith('the:arg')
+
+        expect(result).to.equal('result')
+      })
+
+      it('returns __cypress_unhandled__ if the task doesn\'t exist', function () {
+        runPlugins.taskExecute(this.ids, ['nope'])
+
+        expect(util.wrapChildPromise.lastCall.args[1]('1')).to.equal('__cypress_unhandled__')
+      })
     })
   })
 })

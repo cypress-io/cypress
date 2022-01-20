@@ -2,10 +2,10 @@ require('../../spec_helper')
 
 const Fixtures = require('@tooling/system-tests/lib/fixtures')
 const path = require('path')
-const appData = require(`${root}../lib/util/app_data`)
+const appData = require(`../../../lib/util/app_data`)
 
-const plugins = require(`${root}../lib/plugins`)
-const preprocessor = require(`${root}../lib/plugins/preprocessor`)
+const plugins = require(`../../../lib/plugins`)
+const preprocessor = require(`../../../lib/plugins/preprocessor`)
 
 describe('lib/plugins/preprocessor', () => {
   beforeEach(function () {
@@ -20,7 +20,7 @@ describe('lib/plugins/preprocessor', () => {
     this.localPreprocessorPath = path.join(this.todosPath, 'prep.coffee')
 
     this.plugin = sinon.stub().returns('/path/to/output.js')
-    plugins.register('file:preprocessor', this.plugin)
+    plugins.registerEvent('file:preprocessor', this.plugin)
 
     preprocessor.close()
 

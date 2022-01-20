@@ -6,7 +6,7 @@ import * as os from 'os'
 import * as path from 'path'
 import * as plist from 'plist'
 import * as semver from 'semver'
-import type { FoundBrowser } from '../types'
+import type { FoundBrowser } from '@packages/types'
 import * as findSystemNode from '@packages/server/lib/util/find_system_node'
 
 /** parses Info.plist file from given application and returns a property */

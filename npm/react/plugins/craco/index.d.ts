@@ -4,12 +4,13 @@ declare namespace legacyDevServer {
      * The object exported of your craco.config.js file
      */
     cracoConfig: any
-  }
 
-  /**
-   * Type helper to make writing `CypressCracoDevServerConfig` easier
-   */
-  function defineDevServerConfig(devServerConfig: CypressCracoDevServerConfig): CypressCracoDevServerConfig
+    /**
+     * Path to an index.html file that will serve as the template in
+     * which your components will be rendered.
+     */
+    indexHtml?: string
+  }
 
   /**
    * Sets up a dev server for using Cypress compoennt testing with CRACO (https://github.com/gsoft-inc/craco)

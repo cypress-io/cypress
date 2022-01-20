@@ -45,6 +45,13 @@ describe('src/index', () => {
       })
 
       expect(defaultValues.env).to.deep.eq({})
+
+      // remove these since they are different depending on your machine
+      ;['platform', 'arch', 'version'].forEach((x) => {
+        expect(defaultValues[x]).to.exist
+        delete defaultValues[x]
+      })
+
       snapshot(defaultValues)
     })
   })
@@ -60,12 +67,6 @@ describe('src/index', () => {
   })
 
   describe('.matchesConfigKey', () => {
-    it('returns key when config key has a default value', () => {
-      const normalizedKey = configUtil.matchesConfigKey('testFiles')
-
-      expect(normalizedKey).to.eq('testFiles')
-    })
-
     it('returns normalized key when config key has a default value', () => {
       let normalizedKey = configUtil.matchesConfigKey('EXEC_TIMEOUT')
 
@@ -73,10 +74,6 @@ describe('src/index', () => {
 
       normalizedKey = configUtil.matchesConfigKey('Base-url')
       expect(normalizedKey).to.eq('baseUrl')
-
-      normalizedKey = configUtil.matchesConfigKey('TEST-FILES')
-
-      expect(normalizedKey).to.eq('testFiles')
     })
 
     it('returns nothing when config key does not has a default value', () => {

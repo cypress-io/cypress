@@ -19,10 +19,18 @@ const format = (data) => {
   return data
 }
 
-const formatConfigFile = (configFile) => {
+function removeLeadingSlash (str: string) {
+  let li = Math.max(str.indexOf('/'), str.indexOf('\\'))
+
+  return str.substring(li + 1)
+}
+
+const formatConfigFile = (projectRoot: string, configFile: string | false) => {
   if (configFile === false) {
-    return '`cypress.json` (currently disabled by --config-file=false)'
+    return '`cypress.config.{ts|js}` (currently disabled by --config-file=false)'
   }
+
+  configFile = removeLeadingSlash(configFile.replace(projectRoot, ''))
 
   return `\`${format(configFile)}\``
 }
@@ -844,6 +852,10 @@ export default {
       message: '`Cypress.Commands.add()` is used to create new commands, but `{{name}}` is an existing Cypress command.\n\nPlease use `Cypress.Commands.overwrite()` if you would like to overwrite an existing command.\n',
       docsUrl: 'https://on.cypress.io/custom-commands',
     },
+    reserved_command: {
+      message: '`Cypress.Commands.add()` cannot create a new command named `{{name}}` because that name is reserved internally by Cypress.',
+      docsUrl: 'https://on.cypress.io/custom-commands',
+    },
     invalid_overwrite: {
       message: 'Cannot overwite command for: `{{name}}`. An existing command does not exist by that name.',
       docsUrl: 'https://on.cypress.io/api',
@@ -941,8 +953,18 @@ export default {
 
   },
 
+  mount: {
+    not_implemented: {
+      message: [
+        `${cmd('mount')} must be implemented by the user. There are`,
+        'full instructions for doing so at the following location.',
+      ].join('\n'),
+      docsUrl: 'https://on.cypress.io/mount',
+    },
+  },
+
   navigation: {
-    cross_origin ({ message, originPolicy, configFile }) {
+    cross_origin ({ message, originPolicy, configFile, projectRoot }) {
       return {
         message: stripIndent`\
           Cypress detected a cross origin error happened on page load:
@@ -961,17 +983,17 @@ export default {
 
           You may need to restructure some of your test code to avoid this problem.
 
-          Alternatively you can also disable Chrome Web Security in Chromium-based browsers which will turn off this restriction by setting { chromeWebSecurity: false } in ${formatConfigFile(configFile)}.`,
+          Alternatively you can also disable Chrome Web Security in Chromium-based browsers which will turn off this restriction by setting { chromeWebSecurity: false } in ${formatConfigFile(projectRoot, configFile)}.`,
         docsUrl: 'https://on.cypress.io/cross-origin-violation',
       }
     },
-    timed_out ({ ms, configFile }) {
+    timed_out ({ ms, configFile, projectRoot }) {
       return stripIndent`\
         Timed out after waiting \`${ms}ms\` for your remote page to load.
 
         Your page did not fire its \`load\` event within \`${ms}ms\`.
 
-        You can try increasing the \`pageLoadTimeout\` value in ${formatConfigFile(configFile)} to wait longer.
+        You can try increasing the \`pageLoadTimeout\` value in ${formatConfigFile(projectRoot, configFile)} to wait longer.
 
         Browsers will not fire the \`load\` event until all stylesheets and scripts are done downloading.
 
@@ -1260,9 +1282,9 @@ export default {
       message: `${cmd('request')} requires a \`url\`. You did not provide a \`url\`.`,
       docsUrl: 'https://on.cypress.io/request',
     },
-    url_invalid ({ configFile }) {
+    url_invalid ({ configFile, projectRoot }) {
       return {
-        message: `${cmd('request')} must be provided a fully qualified \`url\` - one that begins with \`http\`. By default ${cmd('request')} will use either the current window's origin or the \`baseUrl\` in ${formatConfigFile(configFile)}. Neither of those values were present.`,
+        message: `${cmd('request')} must be provided a fully qualified \`url\` - one that begins with \`http\`. By default ${cmd('request')} will use either the current window's origin or the \`baseUrl\` in ${formatConfigFile(projectRoot, configFile)}. Neither of those values were present.`,
         docsUrl: 'https://on.cypress.io/request',
       }
     },

@@ -6,7 +6,7 @@
   "types": "index.d.ts",
   "scripts": {
     "postinstall": "echo '@packages/example needs: yarn build'",
-    "clean-deps": "rm -rf node_modules",
+    "clean-deps": "rimraf node_modules",
     "test": "yarn test-unit",
     "test-e2e": "cypress run",
     "test-debug": "yarn test-unit --inspect-brk=5566",
@@ -28,13 +28,14 @@
   "devDependencies": {
     "chai": "3.5.0",
     "cross-env": "6.0.3",
-    "cypress-example-kitchensink": "1.15.2",
+    "cypress-example-kitchensink": "cypress-io/cypress-example-kitchensink#feat/use-supportFiles",
     "gulp": "4.0.2",
     "gulp-clean": "0.4.0",
     "gulp-gh-pages": "0.6.0-6",
     "gulp-rev-all": "2.0.2",
     "mocha": "2.5.3",
     "resolve-pkg": "2.0.0",
+    "rimraf": "3.0.2",
     "shelljs": "0.8.4"
   }
 }

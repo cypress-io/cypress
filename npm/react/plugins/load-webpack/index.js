@@ -12,10 +12,10 @@ function normalizeWebpackPath (config, webpackConfigPath) {
 /**
  * Injects dev-server based on the webpack config file.
  *
- * **Important:** `webpackFilename` path is relative to the project root (cypress.json location)
+ * **Important:** `webpackFilename` path is relative to the project root (cypress.config.{ts|js} location)
  * @type {(on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions, options: { webpackFilename: string  }) => Cypress.PluginConfigOptions}
  */
-function devServer (cypressDevServerConfig, { webpackFilename }) {
+function devServer (cypressDevServerConfig, { webpackFilename, indexHtml }) {
   const webpackConfig = tryLoadWebpackConfig(normalizeWebpackPath(cypressDevServerConfig.config, webpackFilename))
 
   if (!webpackConfig) {
@@ -25,6 +25,7 @@ function devServer (cypressDevServerConfig, { webpackFilename }) {
   return startDevServer({
     options: cypressDevServerConfig,
     webpackConfig,
+    indexHtml,
   })
 }
 
@@ -37,7 +38,3 @@ module.exports = getLegacyDevServer(devServer, (config) => {
 
 // New signature
 module.exports.devServer = devServer
-
-module.exports.defineDevServerConfig = function (devServerConfig) {
-  return devServerConfig
-}

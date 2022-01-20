@@ -1,7 +1,7 @@
 require('../../spec_helper')
 
-const { coerce } = require(`${root}../lib/util/coerce`)
-const { getProcessEnvVars } = require(`${root}../lib/util/config`)
+const { coerce } = require(`../../../lib/util/coerce`)
+const { getProcessEnvVars } = require(`../../../lib/util/config`)
 
 describe('lib/util/coerce', () => {
   beforeEach(function () {

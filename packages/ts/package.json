@@ -4,17 +4,20 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "clean-deps": "rm -rf node_modules",
+    "clean-deps": "rimraf node_modules",
     "postinstall": "patch-package",
     "test": "yarn test-unit",
     "test-unit": "node test",
     "test-watch": "echo 'no watching of tests'"
   },
   "dependencies": {
-    "debug": "^4.3.2"
+    "debug": "^4.3.2",
+    "tslib": "2.3.0"
   },
   "devDependencies": {
-    "ts-node": "5.0.1"
+    "rimraf": "3.0.2",
+    "ts-node": "^10.2.1",
+    "typescript-cached-transpile": "^0.0.6"
   },
   "files": [
     "register.js"

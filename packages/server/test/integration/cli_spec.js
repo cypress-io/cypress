@@ -44,7 +44,7 @@ describe('CLI Interface', () => {
     })
   })
 
-  it('writes out package.json and exits', (done) => {
+  xit('writes out package.json and exits', (done) => {
     return cp.exec('npm run dev -- --return-pkg', { env }, (err, stdout, stderr) => {
       if (err) {
         done(err)

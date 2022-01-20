@@ -1,3 +1,3 @@
-export * from './iframe-model'
-
 export * from './aut-iframe'
+
+export * from './iframe-model'

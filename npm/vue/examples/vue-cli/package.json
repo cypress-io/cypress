@@ -5,15 +5,16 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "cy:open": "node ../../../../scripts/cypress open-ct",
-    "test": "node ../../../../scripts/cypress run-ct",
+    "cy:open": "node ../../../../scripts/cypress open --component",
+    "test": "node ../../../../scripts/cypress run --component",
     "report:coverage": "nyc report",
-    "coveralls": "nyc report --reporter=text-lcov | coveralls"
+    "coveralls": "nyc report --reporter=text-lcov | coveralls",
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "core-js": "^3.6.5",
     "register-service-worker": "^1.7.1",
-    "vue": "^3.0.11"
+    "vue": "3.2.6"
   },
   "devDependencies": {
     "@cypress/code-coverage": "^3.9.5",
@@ -24,6 +25,7 @@
     "babel-plugin-istanbul": "~6.0.0",
     "mocha-junit-reporter": "^2.0.0",
     "mocha-multi-reporters": "^1.5.1",
+    "patch-package": "6.4.7",
     "vue-template-compiler": "^2.6.11"
   }
 }

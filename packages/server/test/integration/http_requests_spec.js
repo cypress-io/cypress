@@ -7,35 +7,32 @@ const compression = require('compression')
 const dns = require('dns')
 const express = require('express')
 const http = require('http')
-const path = require('path')
 const url = require('url')
 let zlib = require('zlib')
 const str = require('underscore.string')
 const evilDns = require('evil-dns')
 const Promise = require('bluebird')
-const { SocketE2E } = require(`${root}lib/socket-e2e`)
+const { SocketE2E } = require(`../../lib/socket-e2e`)
 
-const httpsServer = require(`${root}../https-proxy/test/helpers/https_server`)
-const pkg = require('@packages/root')
+const httpsServer = require(`@packages/https-proxy/test/helpers/https_server`)
 const SseStream = require('ssestream')
 const EventSource = require('eventsource')
-const config = require(`${root}lib/config`)
-const { ServerE2E } = require(`${root}lib/server-e2e`)
-const ProjectBase = require(`${root}lib/project-base`).ProjectBase
-const { SpecsStore } = require(`${root}/lib/specs-store`)
-const Watchers = require(`${root}lib/watchers`)
-const pluginsModule = require(`${root}lib/plugins`)
-const preprocessor = require(`${root}lib/plugins/preprocessor`)
-const resolve = require(`${root}lib/util/resolve`)
-const { fs } = require(`${root}lib/util/fs`)
-const glob = require(`${root}lib/util/glob`)
-const CacheBuster = require(`${root}lib/util/cache_buster`)
+const config = require(`../../lib/config`)
+const { ServerE2E } = require(`../../lib/server-e2e`)
+const ProjectBase = require(`../../lib/project-base`).ProjectBase
+const pluginsModule = require(`../../lib/plugins`)
+const preprocessor = require(`../../lib/plugins/preprocessor`)
+const resolve = require(`../../lib/util/resolve`)
+const { fs } = require(`../../lib/util/fs`)
+const CacheBuster = require(`../../lib/util/cache_buster`)
 const Fixtures = require('@tooling/system-tests/lib/fixtures')
 /**
  * @type {import('@packages/resolve-dist')}
  */
 const { getRunnerInjectionContents } = require(`@packages/resolve-dist`)
-const { createRoutes } = require(`${root}lib/routes`)
+const { createRoutes } = require(`../../lib/routes`)
+const { getCtx } = require(`../../lib/makeDataContext`)
+const dedent = require('dedent')
 
 zlib = Promise.promisifyAll(zlib)
 
@@ -77,10 +74,14 @@ function getHugeJsFile () {
   .catch(getHugeFile)
 }
 
+let ctx
+
 describe('Routes', () => {
   require('mocha-banner').register()
 
-  beforeEach(function () {
+  beforeEach(async function () {
+    await Fixtures.scaffoldCommonNodeModules()
+    ctx = getCtx()
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
 
     sinon.stub(CacheBuster, 'get').returns('-123')
@@ -89,6 +90,8 @@ describe('Routes', () => {
 
     nock.enableNetConnect()
 
+    Fixtures.scaffold()
+
     this.setup = (initialUrl, obj = {}, spec) => {
       if (_.isObject(initialUrl)) {
         obj = initialUrl
@@ -96,13 +99,15 @@ describe('Routes', () => {
       }
 
       if (!obj.projectRoot) {
-        obj.projectRoot = '/foo/bar/'
+        obj.projectRoot = Fixtures.projectPath('e2e')
       }
+
+      ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(obj.projectRoot)
 
       // get all the config defaults
       // and allow us to override them
       // for each test
-      return config.set(obj)
+      return config.setupFullConfigWithDefaults(obj)
       .then((cfg) => {
         // use a jar for each test
         // but reset it automatically
@@ -145,7 +150,7 @@ describe('Routes', () => {
         }
 
         const open = () => {
-          this.project = new ProjectBase({ projectRoot: '/path/to/project-e2e', testingType: 'e2e' })
+          this.project = new ProjectBase({ projectRoot: Fixtures.projectPath('e2e'), testingType: 'e2e' })
 
           cfg.pluginsFile = false
 
@@ -154,13 +159,12 @@ describe('Routes', () => {
             httpsServer.start(8443),
 
             // and open our cypress server
-            (this.server = new ServerE2E(new Watchers())),
+            (this.server = new ServerE2E()),
 
             this.server.open(cfg, {
               SocketCtor: SocketE2E,
               getSpec: () => spec,
               getCurrentBrowser: () => null,
-              specsStore: new SpecsStore({}, 'e2e'),
               createRoutes,
               testingType: 'e2e',
               exit: false,
@@ -183,9 +187,10 @@ describe('Routes', () => {
               this.proxy = `http://localhost:${port}`
             }),
 
-            pluginsModule.init(cfg, {
-              projectRoot: cfg.projectRoot,
-            }),
+            // pluginsModule.init(cfg, {
+            //   projectRoot: cfg.projectRoot,
+            //   testingType: 'e2e',
+            // }, ctx),
           ])
         }
 
@@ -213,6 +218,7 @@ describe('Routes', () => {
     return Promise.join(
       this.server.close(),
       httpsServer.stop(),
+      ctx.actions.project.clearCurrentProject(),
     )
   })
 
@@ -308,7 +314,7 @@ describe('Routes', () => {
       .then((res) => {
         expect(res.statusCode).to.eq(200)
 
-        expect(res.body).to.match(/Runner.start/)
+        expect(res.body).to.match(/window.__Cypress__ = true/)
       })
     })
 
@@ -317,7 +323,7 @@ describe('Routes', () => {
       .then((res) => {
         expect(res.statusCode).to.eq(200)
 
-        expect(res.body).to.include('<title>foobarbaz</title>')
+        expect(res.body).to.include('<title>e2e</title>')
       })
     })
 
@@ -337,11 +343,12 @@ describe('Routes', () => {
         .then((res) => {
           expect(res.statusCode).to.eq(200)
 
-          expect(res.body).to.match(/Runner.start\(.+\)/)
+          expect(res.body).to.match(/window.__Cypress__ = true/)
         })
       })
     })
 
+    // TODO: no automation in unified app
     it('clientRoute routes to \'not launched through Cypress\' without a proxy set', function () {
       return this.rp({
         url: `${this.proxy}/__`,
@@ -374,39 +381,7 @@ describe('Routes', () => {
         .then((res) => {
           expect(res.statusCode).to.eq(200)
 
-          expect(res.body).to.match(/Runner.start/)
-        })
-      })
-    })
-
-    it('sends Cypress.version', function () {
-      return this.setup({ baseUrl: 'http://localhost:9999/app' })
-      .then(() => {
-        return this.rp('http://localhost:9999/__')
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-
-          const base64Config = /Runner\.start\(.*, "(.*)"\)/.exec(res.body)[1]
-          const configStr = Buffer.from(base64Config, 'base64').toString()
-
-          expect(configStr).to.include('version')
-
-          expect(configStr).to.include(pkg.version)
-        })
-      })
-    })
-
-    it('sends exit config', function () {
-      return this.setup({ baseUrl: 'http://localhost:9999/app' })
-      .then(() => {
-        return this.rp('http://localhost:9999/__')
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-
-          const base64Config = /Runner\.start\(.*, "(.*)"\)/.exec(res.body)[1]
-          const configStr = Buffer.from(base64Config, 'base64').toString()
-
-          expect(configStr).to.include('"exit":false')
+          expect(res.body).to.match(/window.__Cypress__ = true/)
         })
       })
     })
@@ -467,196 +442,26 @@ describe('Routes', () => {
     })
   })
 
-  context('GET /__cypress/files', () => {
-    beforeEach(() => {
-      Fixtures.scaffold('todos')
+  function pollUntilEventsIpcLoaded () {
+    return new Promise((resolve) => {
+      let i = 0
 
-      return Fixtures.scaffold('ids')
+      const interval = setInterval(() => {
+        if (ctx.lifecycleManager.eventsIpcResult.state === 'loaded') {
+          clearInterval(interval)
+          resolve()
+        }
+
+        i += 1
+
+        if (i > 50) {
+          throw Error(dedent`
+            setupNodeEvents and plugins did not complete after 10 seconds. 
+            There might be an endless loop or an uncaught exception that isn't bubbling up.`)
+        }
+      }, 200)
     })
-
-    describe('todos with specific configuration', () => {
-      beforeEach(function () {
-        return this.setup({
-          projectRoot: Fixtures.projectPath('todos'),
-          config: {
-            integrationFolder: 'tests',
-            fixturesFolder: 'tests/_fixtures',
-            supportFile: 'tests/_support/spec_helper.js',
-          },
-        })
-      })
-
-      it('returns base json file path objects of only tests', function () {
-        // this should omit any _fixture files, _support files
-        return glob(path.join(Fixtures.projectPath('todos'), 'tests', '_fixtures', '**', '*'))
-        .then((files) => {
-          // make sure there are fixtures in here!
-          expect(files.length).to.be.gt(0)
-
-          return glob(path.join(Fixtures.projectPath('todos'), 'tests', '_support', '**', '*'))
-          .then((files) => {
-            // make sure there are support files in here!
-            expect(files.length).to.be.gt(0)
-
-            return this.rp({
-              url: 'http://localhost:2020/__cypress/files',
-              json: true,
-            })
-            .then((res) => {
-              expect(res.statusCode).to.eq(200)
-
-              const {
-                body,
-              } = res
-
-              expect(body.integration).to.have.length(5)
-
-              // remove the absolute path key
-              body.integration = _.map(body.integration, (obj) => {
-                return _.pick(obj, 'name', 'relative')
-              })
-
-              expect(res.body).to.deep.eq({
-                integration: [
-                  {
-                    name: 'etc/etc.js',
-                    relative: 'tests/etc/etc.js',
-                  },
-                  {
-                    name: 'sub/a&b%c.js',
-                    relative: 'tests/sub/a&b%c.js',
-                  },
-                  {
-                    name: 'sub/sub_test.coffee',
-                    relative: 'tests/sub/sub_test.coffee',
-                  },
-                  {
-                    name: 'test1.js',
-                    relative: 'tests/test1.js',
-                  },
-                  {
-                    name: 'test2.coffee',
-                    relative: 'tests/test2.coffee',
-                  },
-                ],
-              })
-            })
-          })
-        })
-      })
-    })
-
-    describe('ids with regular configuration', () => {
-      it('returns test files as json ignoring *.hot-update.js', function () {
-        return this.setup({
-          projectRoot: Fixtures.projectPath('ids'),
-        })
-        .then(() => {
-          return this.rp({
-            url: 'http://localhost:2020/__cypress/files',
-            json: true,
-          })
-          .then((res) => {
-            expect(res.statusCode).to.eq(200)
-
-            const {
-              body,
-            } = res
-
-            expect(body.integration).to.have.length(7)
-
-            // remove the absolute path key
-            body.integration = _.map(body.integration, (obj) => {
-              return _.pick(obj, 'name', 'relative')
-            })
-
-            expect(body).to.deep.eq({
-              integration: [
-                {
-                  name: 'bar.js',
-                  relative: 'cypress/integration/bar.js',
-                },
-                {
-                  name: 'baz.js',
-                  relative: 'cypress/integration/baz.js',
-                },
-                {
-                  name: 'dom.jsx',
-                  relative: 'cypress/integration/dom.jsx',
-                },
-                {
-                  name: 'es6.js',
-                  relative: 'cypress/integration/es6.js',
-                },
-                {
-                  name: 'foo.coffee',
-                  relative: 'cypress/integration/foo.coffee',
-                },
-                {
-                  name: 'nested/tmp.js',
-                  relative: 'cypress/integration/nested/tmp.js',
-                },
-                {
-                  name: 'noop.coffee',
-                  relative: 'cypress/integration/noop.coffee',
-                },
-              ],
-            })
-          })
-        })
-      })
-
-      it('can ignore other files as well', function () {
-        return this.setup({
-          projectRoot: Fixtures.projectPath('ids'),
-          config: {
-            ignoreTestFiles: ['**/bar.js', 'foo.coffee', '**/*.hot-update.js', '**/nested/*'],
-          },
-        })
-        .then(() => {
-          return this.rp({
-            url: 'http://localhost:2020/__cypress/files',
-            json: true,
-          })
-          .then((res) => {
-            expect(res.statusCode).to.eq(200)
-
-            const {
-              body,
-            } = res
-
-            expect(body.integration).to.have.length(4)
-
-            // remove the absolute path key
-            body.integration = _.map(body.integration, (obj) => {
-              return _.pick(obj, 'name', 'relative')
-            })
-
-            expect(body).to.deep.eq({
-              integration: [
-                {
-                  name: 'baz.js',
-                  relative: 'cypress/integration/baz.js',
-                },
-                {
-                  name: 'dom.jsx',
-                  relative: 'cypress/integration/dom.jsx',
-                },
-                {
-                  name: 'es6.js',
-                  relative: 'cypress/integration/es6.js',
-                },
-                {
-                  name: 'noop.coffee',
-                  relative: 'cypress/integration/noop.coffee',
-                },
-              ],
-            })
-          })
-        })
-      })
-    })
-  })
+  }
 
   context('GET /__cypress/tests', () => {
     describe('ids with typescript', () => {
@@ -668,41 +473,43 @@ describe('Routes', () => {
         })
       })
 
-      it('processes foo.coffee spec', function () {
-        return this.rp('http://localhost:2020/__cypress/tests?p=cypress/integration/foo.coffee')
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-          expect(res.body).to.include('expect("foo.coffee")')
-        })
+      it('processes foo.coffee spec', async function () {
+        await pollUntilEventsIpcLoaded()
+        const res = await this.rp('http://localhost:2020/__cypress/tests?p=cypress/e2e/foo.coffee')
+
+        expect(res.statusCode).to.eq(200)
+        expect(res.body).to.match(sourceMapRegex)
+        expect(res.body).to.include('expect("foo.coffee")')
       })
 
-      it('processes dom.jsx spec', function () {
-        return this.rp('http://localhost:2020/__cypress/tests?p=cypress/integration/baz.js')
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-          expect(res.body).to.include('React.createElement(')
-        })
+      it('processes dom.jsx spec', async function () {
+        await pollUntilEventsIpcLoaded()
+        const res = await this.rp('http://localhost:2020/__cypress/tests?p=cypress/e2e/baz.js')
+
+        expect(res.statusCode).to.eq(200)
+        expect(res.body).to.match(sourceMapRegex)
+        expect(res.body).to.include('React.createElement(')
       })
 
-      it('processes spec into modern javascript', function () {
-        return this.rp('http://localhost:2020/__cypress/tests?p=cypress/integration/es6.js')
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-          // "modern" features should remain and not be transpiled into es5
-          expect(res.body).to.include('const numbers')
-          expect(res.body).to.include('[...numbers]')
-          expect(res.body).to.include('async function')
-          expect(res.body).to.include('await Promise')
-        })
+      it('processes spec into modern javascript', async function () {
+        await pollUntilEventsIpcLoaded()
+        const res = await this.rp('http://localhost:2020/__cypress/tests?p=cypress/e2e/es6.js')
+
+        expect(res.statusCode).to.eq(200)
+        // "modern" features should remain and not be transpiled into es5
+        expect(res.body).to.include('const numbers')
+        expect(res.body).to.include('[...numbers]')
+        expect(res.body).to.include('async function')
+        expect(res.body).to.include('await Promise')
       })
 
-      it('serves error javascript file when the file is missing', function () {
-        return this.rp('http://localhost:2020/__cypress/tests?p=does/not/exist.coffee')
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-          expect(res.body).to.include('Cypress.action("spec:script:error", {')
-          expect(res.body).to.include('Module not found')
-        })
+      it('serves error javascript file when the file is missing', async function () {
+        await pollUntilEventsIpcLoaded()
+        const res = await this.rp('http://localhost:2020/__cypress/tests?p=does/not/exist.coffee')
+
+        expect(res.statusCode).to.eq(200)
+        expect(res.body).to.include('Module not found')
+        expect(res.body).to.include('Cypress.action("spec:script:error", {')
       })
     })
 
@@ -719,31 +526,31 @@ describe('Routes', () => {
         })
       })
 
-      it('processes foo.coffee spec', function () {
-        return this.rp('http://localhost:2020/__cypress/tests?p=cypress/integration/foo.coffee')
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-          expect(res.body).to.match(sourceMapRegex)
-          expect(res.body).to.include('expect("foo.coffee")')
-        })
+      it('processes foo.coffee spec', async function () {
+        await pollUntilEventsIpcLoaded()
+        const res = await this.rp('http://localhost:2020/__cypress/tests?p=cypress/e2e/foo.coffee')
+
+        expect(res.statusCode).to.eq(200)
+        expect(res.body).to.match(sourceMapRegex)
+        expect(res.body).to.include('expect("foo.coffee")')
       })
 
-      it('processes dom.jsx spec', function () {
-        return this.rp('http://localhost:2020/__cypress/tests?p=cypress/integration/baz.js')
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-          expect(res.body).to.match(sourceMapRegex)
-          expect(res.body).to.include('React.createElement(')
-        })
+      it('processes dom.jsx spec', async function () {
+        await pollUntilEventsIpcLoaded()
+        const res = await this.rp('http://localhost:2020/__cypress/tests?p=cypress/e2e/baz.js')
+
+        expect(res.statusCode).to.eq(200)
+        expect(res.body).to.match(sourceMapRegex)
+        expect(res.body).to.include('React.createElement(')
       })
 
-      it('serves error javascript file when the file is missing', function () {
-        return this.rp('http://localhost:2020/__cypress/tests?p=does/not/exist.coffee')
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-          expect(res.body).to.include('Cypress.action("spec:script:error", {')
-          expect(res.body).to.include('Module not found')
-        })
+      it('serves error javascript file when the file is missing', async function () {
+        await pollUntilEventsIpcLoaded()
+        const res = await this.rp('http://localhost:2020/__cypress/tests?p=does/not/exist.coffee')
+
+        expect(res.statusCode).to.eq(200)
+        expect(res.body).to.include('Cypress.action("spec:script:error", {')
+        expect(res.body).to.include('Module not found')
       })
     })
 
@@ -753,16 +560,19 @@ describe('Routes', () => {
 
         return this.setup({
           projectRoot: Fixtures.projectPath('failures'),
+          config: {
+            supportFile: false,
+          },
         })
       })
 
-      it('serves error javascript file when there\'s a syntax error', function () {
-        return this.rp('http://localhost:2020/__cypress/tests?p=cypress/integration/syntax_error.js')
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-          expect(res.body).to.include('Cypress.action("spec:script:error", {')
-          expect(res.body).to.include('Unexpected token')
-        })
+      it('serves error javascript file when there\'s a syntax error', async function () {
+        await pollUntilEventsIpcLoaded()
+        const res = await this.rp('http://localhost:2020/__cypress/tests?p=cypress/e2e/syntax_error.js')
+
+        expect(res.statusCode).to.eq(200)
+        expect(res.body).to.include('Cypress.action("spec:script:error", {')
+        expect(res.body).to.include('Unexpected token')
       })
     })
 
@@ -779,22 +589,22 @@ describe('Routes', () => {
         })
       })
 
-      it('processes my-tests/test1.js spec', function () {
-        return this.rp('http://localhost:2020/__cypress/tests?p=my-tests/test1.js')
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-          expect(res.body).to.match(sourceMapRegex)
-          expect(res.body).to.include(`expect('no-server')`)
-        })
+      it('processes my-tests/test1.js spec', async function () {
+        await pollUntilEventsIpcLoaded()
+        const res = await this.rp('http://localhost:2020/__cypress/tests?p=my-tests/test1.js')
+
+        expect(res.statusCode).to.eq(200)
+        expect(res.body).to.match(sourceMapRegex)
+        expect(res.body).to.include(`expect('no-server')`)
       })
 
-      it('processes helpers/includes.js supportFile', function () {
-        return this.rp('http://localhost:2020/__cypress/tests?p=helpers/includes.js')
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-          expect(res.body).to.match(sourceMapRegex)
-          expect(res.body).to.include(`console.log('includes')`)
-        })
+      it('processes helpers/includes.js supportFile', async function () {
+        await pollUntilEventsIpcLoaded()
+        const res = await this.rp('http://localhost:2020/__cypress/tests?p=helpers/includes.js')
+
+        expect(res.statusCode).to.eq(200)
+        expect(res.body).to.match(sourceMapRegex)
+        expect(res.body).to.include(`console.log('includes')`)
       })
     })
   })
@@ -981,6 +791,7 @@ describe('Routes', () => {
             config: {
               integrationFolder: 'tests',
               fixturesFolder: 'tests/_fixtures',
+              supportFile: false,
             },
           })
         })
@@ -1125,191 +936,6 @@ describe('Routes', () => {
   //       .expect(200)
   //       .expect("Content-Type", /application\/json/)
   //       .expect(JSON.parse(json))
-
-  context('GET /__cypress/iframes/*', () => {
-    beforeEach(() => {
-      Fixtures.scaffold('e2e')
-      Fixtures.scaffold('todos')
-      Fixtures.scaffold('no-server')
-
-      return Fixtures.scaffold('ids')
-    })
-
-    describe('todos', () => {
-      beforeEach(function () {
-        this.setupServer = (spec = null) => {
-          return this.setup({
-            projectRoot: Fixtures.projectPath('todos'),
-            config: {
-              integrationFolder: 'tests',
-              fixturesFolder: 'tests/_fixtures',
-              supportFile: 'tests/_support/spec_helper.js',
-            },
-          }, {}, spec)
-        }
-      })
-
-      it('renders iframe with variables passed in', async function () {
-        await this.setupServer()
-        const contents = removeWhitespace(Fixtures.get('server/expected_todos_iframe.html'))
-
-        return this.rp('http://localhost:2020/__cypress/iframes/integration/test2.coffee')
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-
-          const body = cleanResponseBody(res.body)
-
-          expect(body).to.eq(contents)
-        })
-      })
-
-      it('can send back all tests', async function () {
-        await this.setupServer()
-        const contents = removeWhitespace(Fixtures.get('server/expected_todos_all_tests_iframe.html'))
-
-        return this.rp('http://localhost:2020/__cypress/iframes/__all')
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-
-          const body = cleanResponseBody(res.body)
-
-          expect(body).to.eq(contents)
-        })
-      })
-
-      it('can send back tests matching spec filter', async function () {
-        await this.setupServer({
-          specFilter: 'sub_test',
-        })
-
-        // only returns tests with "sub_test" in their names
-        const contents = removeWhitespace(Fixtures.get('server/expected_todos_filtered_tests_iframe.html'))
-
-        this.spec = {
-          specFilter: 'sub_test',
-        }
-
-        return this.rp('http://localhost:2020/__cypress/iframes/__all')
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-
-          const body = cleanResponseBody(res.body)
-
-          expect(body).to.eq(contents)
-        })
-      })
-    })
-
-    describe('no-server', () => {
-      beforeEach(function () {
-        return this.setup({
-          projectRoot: Fixtures.projectPath('no-server'),
-          config: {
-            integrationFolder: 'my-tests',
-            supportFile: 'helpers/includes.js',
-            fileServerFolder: 'foo',
-          },
-        })
-      })
-
-      it('renders iframe with variables passed in', function () {
-        const contents = removeWhitespace(Fixtures.get('server/expected_no_server_iframe.html'))
-
-        return this.rp('http://localhost:2020/__cypress/iframes/integration/test1.js')
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-
-          const body = cleanResponseBody(res.body)
-
-          expect(body).to.eq(contents)
-        })
-      })
-    })
-
-    describe('no-server with supportFile: false', () => {
-      beforeEach(function () {
-        return this.setup({
-          projectRoot: Fixtures.projectPath('no-server'),
-          config: {
-            integrationFolder: 'my-tests',
-            supportFile: false,
-          },
-        })
-      })
-
-      it('renders iframe without support file', function () {
-        const contents = removeWhitespace(Fixtures.get('server/expected_no_server_no_support_iframe.html'))
-
-        return this.rp('http://localhost:2020/__cypress/iframes/__all')
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-
-          const body = cleanResponseBody(res.body)
-
-          expect(body).to.eq(contents)
-        })
-      })
-    })
-
-    describe('e2e', () => {
-      beforeEach(function () {
-        return this.setup({
-          projectRoot: Fixtures.projectPath('e2e'),
-          config: {
-            integrationFolder: 'cypress/integration',
-            supportFile: 'cypress/support/commands.js',
-          },
-        })
-      })
-
-      it('omits support directories', function () {
-        const contents = removeWhitespace(Fixtures.get('server/expected_e2e_iframe.html'))
-
-        return this.rp('http://localhost:2020/__cypress/iframes/integration/app_spec.coffee')
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-
-          const body = cleanResponseBody(res.body)
-
-          expect(body).to.eq(contents)
-        })
-      })
-    })
-
-    describe('ids', () => {
-      beforeEach(function () {
-        return this.setup({
-          projectRoot: Fixtures.projectPath('ids'),
-        })
-      })
-
-      it('renders iframe with variables passed in', function () {
-        const contents = removeWhitespace(Fixtures.get('server/expected_ids_iframe.html'))
-
-        return this.rp('http://localhost:2020/__cypress/iframes/integration/foo.coffee')
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-
-          const body = cleanResponseBody(res.body)
-
-          expect(body).to.eq(contents)
-        })
-      })
-
-      it('can send back all tests', function () {
-        const contents = removeWhitespace(Fixtures.get('server/expected_ids_all_tests_iframe.html'))
-
-        return this.rp('http://localhost:2020/__cypress/iframes/__all')
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-
-          const body = cleanResponseBody(res.body)
-
-          expect(body).to.eq(contents)
-        })
-      })
-    })
-  })
 
   context('GET *', () => {
     context('basic request', () => {
@@ -3473,6 +3099,7 @@ describe('Routes', () => {
           config: {
             fileServerFolder: 'dev',
             integrationFolder: 'my-tests',
+            supportFile: false,
           },
         })
         .then(() => {
@@ -3945,30 +3572,33 @@ describe('Routes', () => {
     })
 
     context('when body should be empty', function () {
-      this.timeout(1000)
+      this.timeout(10000) // TODO(tim): figure out why this is flaky now?
 
       beforeEach(function (done) {
-        this.httpSrv = http.createServer((req, res) => {
-          const { query } = url.parse(req.url, true)
+        Fixtures.scaffoldProject('e2e')
+        .then(() => {
+          this.httpSrv = http.createServer((req, res) => {
+            const { query } = url.parse(req.url, true)
 
-          if (_.has(query, 'chunked')) {
-            res.setHeader('tranfer-encoding', 'chunked')
-          } else {
-            res.setHeader('content-length', '0')
-          }
+            if (_.has(query, 'chunked')) {
+              res.setHeader('tranfer-encoding', 'chunked')
+            } else {
+              res.setHeader('content-length', '0')
+            }
 
-          res.writeHead(Number(query.status), {
-            'x-foo': 'bar',
+            res.writeHead(Number(query.status), {
+              'x-foo': 'bar',
+            })
+
+            return res.end()
           })
 
-          return res.end()
-        })
+          return this.httpSrv.listen(() => {
+            this.port = this.httpSrv.address().port
 
-        return this.httpSrv.listen(() => {
-          this.port = this.httpSrv.address().port
-
-          return this.setup(`http://localhost:${this.port}`)
-          .then(_.ary(done, 0))
+            return this.setup(`http://localhost:${this.port}`)
+            .then(_.ary(done, 0))
+          })
         })
       })
 
@@ -3980,7 +3610,7 @@ describe('Routes', () => {
         it(`passes through a ${status} response immediately`, function () {
           return this.rp({
             url: `http://localhost:${this.port}/?status=${status}`,
-            timeout: 100,
+            timeout: 1000,
           })
           .then((res) => {
             expect(res.headers['x-foo']).to.eq('bar')
@@ -3992,7 +3622,7 @@ describe('Routes', () => {
         it(`passes through a ${status} response with chunked encoding immediately`, function () {
           return this.rp({
             url: `http://localhost:${this.port}/?status=${status}&chunked`,
-            timeout: 100,
+            timeout: 1000,
           })
           .then((res) => {
             expect(res.headers['x-foo']).to.eq('bar')

@@ -1,4 +1,5 @@
 const _ = require('lodash')
+const path = require('path')
 const la = require('lazy-ass')
 const chalk = require('chalk')
 const check = require('check-more-types')
@@ -18,7 +19,6 @@ const env = require('../util/env')
 const keys = require('../util/keys')
 const terminal = require('../util/terminal')
 const ciProvider = require('../util/ci_provider')
-const settings = require('../util/settings')
 const testsUtils = require('../util/tests_utils')
 const specWriter = require('../util/spec_writer')
 
@@ -301,7 +301,7 @@ const createRun = Promise.method((options = {}) => {
   }
 
   // go back to being a string
-  if (specPattern) {
+  if (Array.isArray(specPattern)) {
     specPattern = specPattern.join(',')
   }
 
@@ -445,7 +445,7 @@ const createRun = Promise.method((options = {}) => {
         }
       }
       case 404:
-        return errors.throw('DASHBOARD_PROJECT_NOT_FOUND', projectId, settings.configFile(options))
+        return errors.throw('DASHBOARD_PROJECT_NOT_FOUND', projectId, path.basename(options.configFile))
       case 412:
         return errors.throw('DASHBOARD_INVALID_RUN_REQUEST', err.error)
       case 422: {
@@ -621,6 +621,7 @@ const createRunAndRecordSpecs = (options = {}) => {
       projectId,
       specPattern,
       testingType,
+      configFile: config ? config.configFile : null,
     })
     .then((resp) => {
       if (!resp) {

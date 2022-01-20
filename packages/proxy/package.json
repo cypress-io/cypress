@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "build-prod": "tsc --project .",
-    "clean-deps": "rm -rf node_modules",
+    "clean": "rimraf 'lib/**/*.js'",
+    "clean-deps": "rimraf node_modules",
     "run-mocha": "mocha -r @packages/ts/register -r test/pretest.ts --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
     "test": "yarn run-mocha \"test/integration/*.spec.ts\" \"test/unit/**/*.spec.ts\"",
     "test-integration": "yarn run-mocha \"test/integration/*.spec.ts\"",
@@ -31,6 +32,7 @@
     "@types/express": "4.17.2",
     "@types/supertest": "2.0.10",
     "express": "4.17.1",
+    "rimraf": "3.0.2",
     "supertest": "6.0.1",
     "typescript": "^4.2.3"
   },

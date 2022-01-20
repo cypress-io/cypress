@@ -37,6 +37,8 @@ export const makeCypressPlugin = (
   supportFilePath: string | false,
   devServerEvents: NodeJS.EventEmitter,
   specs: Spec[],
+  namespace: string,
+  indexHtml?: string,
 ): Plugin => {
   let base = '/'
 
@@ -47,6 +49,7 @@ export const makeCypressPlugin = (
   })
 
   const posixSupportFilePath = supportFilePath ? convertPathToPosix(resolve(projectRoot, supportFilePath)) : undefined
+  const posixIndexHtml = indexHtml ? convertPathToPosix(resolve(projectRoot, indexHtml)) : undefined
 
   const normalizedSupportFilePath = posixSupportFilePath ? `${base}@fs/${posixSupportFilePath}` : undefined
 
@@ -58,7 +61,7 @@ export const makeCypressPlugin = (
         return {
           define: {
             'import.meta.env.__cypress_supportPath': JSON.stringify(normalizedSupportFilePath),
-            'import.meta.env.__cypress_originAutUrl': JSON.stringify(`__cypress/iframes/${convertPathToPosix(projectRoot)}/`),
+            'import.meta.env.__cypress_originAutUrl': JSON.stringify(`${namespace}/iframes/${convertPathToPosix(projectRoot)}/`),
           },
         }
       }
@@ -66,29 +69,42 @@ export const makeCypressPlugin = (
     configResolved (config) {
       base = config.base
     },
-    transformIndexHtml () {
+    async transformIndexHtml () {
       debug('transformIndexHtml with base', base)
+      const indexHtmlPath = indexHtml ? resolve(projectRoot, indexHtml) : resolve(__dirname, '..', 'index.html')
+      const indexHtmlContent = await read(indexHtmlPath, { encoding: 'utf8' })
 
-      return [
+      return {
+        html: indexHtmlContent,
         // load the script at the end of the body
         // script has to be loaded when the vite client is connected
-        {
+        tags: [{
           tag: 'script',
           injectTo: 'body',
           attrs: { type: 'module' },
           children: `import(${JSON.stringify(`${base}@fs/${INIT_FILEPATH}`)})`,
-        },
-      ]
+        }],
+      }
     },
     configureServer: async (server: ViteDevServer) => {
-      const indexHtml = await read(resolve(__dirname, '..', 'index.html'), { encoding: 'utf8' })
+      server.middlewares.use(`${base}index.html`, async (req, res) => {
+        const transformedIndexHtml = await server.transformIndexHtml(base, '')
 
-      const transformedIndexHtml = await server.transformIndexHtml(base, indexHtml)
-
-      server.middlewares.use(`${base}index.html`, (req, res) => res.end(transformedIndexHtml))
+        return res.end(transformedIndexHtml)
+      })
     },
     handleHotUpdate: ({ server, file }) => {
       debug('handleHotUpdate - file', file)
+
+      // If the user provided IndexHtml is changed, do a full-reload
+      if (file === posixIndexHtml) {
+        server.ws.send({
+          type: 'full-reload',
+        })
+
+        return
+      }
+
       // get the graph node for the file that just got updated
       let moduleImporters = server.moduleGraph.fileToModulesMap.get(file)
       let iterationNumber = 0

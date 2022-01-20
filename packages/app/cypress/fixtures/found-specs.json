@@ -1,0 +1,42 @@
+[
+  {
+    "baseName": "Spec-A.spec.tsx",
+    "fileName": "Spec-A",
+    "specFileExtension": ".spec.tsx",
+    "relative": "src/components/Spec-A.spec.tsx",
+    "absolute": "",
+    "fileExtension": ".tsx",
+    "specType": "component",
+    "name": ""
+  },
+  {
+    "baseName": "Spec-B.spec.tsx",
+    "fileName": "Spec-B",
+    "specFileExtension": ".spec.tsx",
+    "relative": "src/components/Spec-B.spec.tsx",
+    "absolute": "",
+    "fileExtension": ".tsx",
+    "specType": "component",
+    "name": ""
+  },
+  {
+    "baseName": "Spec-C.spec.tsx",
+    "fileName": "Spec-C",
+    "specFileExtension": ".spec.tsx",
+    "relative": "src/components/Spec-C.spec.tsx",
+    "absolute": "",
+    "fileExtension": ".tsx",
+    "specType": "component",
+    "name": ""
+  },
+  {
+    "baseName": "Spec-D.spec.tsx",
+    "fileName": "Spec-D",
+    "specFileExtension": ".spec.tsx",
+    "relative": "src/utils/Spec-D.spec.tsx",
+    "absolute": "",
+    "fileExtension": ".tsx",
+    "specType": "component",
+    "name": ""
+  }
+]

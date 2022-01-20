@@ -1,9 +1,10 @@
 require('../spec_helper')
-require(`${root}lib/cwd`)
+require(`../../lib/cwd`)
 
 const Promise = require('bluebird')
-const cache = require(`${root}lib/cache`)
-const { fs } = require(`${root}lib/util/fs`)
+const { __get } = require('../../lib/cache')
+const cache = require(`../../lib/cache`)
+const { fs } = require(`../../lib/util/fs`)
 const Fixtures = require('@tooling/system-tests/lib/fixtures')
 
 describe('lib/cache', () => {
@@ -167,6 +168,46 @@ describe('lib/cache', () => {
     })
   })
 
+  context('project preferences', () => {
+    it('should insert a projects preferences into the cache', () => {
+      const testProjectTitle = 'launchpad'
+      const testPreferences = { testingType: 'e2e', browserPath: '/some/test/path' }
+
+      return cache.insertProjectPreferences(testProjectTitle, testPreferences)
+      .then(() => cache.__get('PROJECT_PREFERENCES'))
+      .then((preferences) => {
+        expect(preferences[testProjectTitle]).to.deep.equal(testPreferences)
+      })
+    })
+
+    it('should insert multiple projects preferences into the cache', () => {
+      const testProjectTitle = 'launchpad'
+      const testPreferences = { testingType: 'e2e', browserPath: '/some/test/path' }
+      const anotherTestProjectTitle = 'launchpad'
+      const anotherTestPreferene = { testingType: 'e2e', browserPath: '/some/test/path' }
+
+      return cache.insertProjectPreferences(testProjectTitle, testPreferences)
+      .then(() => cache.insertProjectPreferences(anotherTestProjectTitle, anotherTestPreferene))
+      .then(() => cache.__get('PROJECT_PREFERENCES'))
+      .then((preferences) => {
+        expect(preferences).to.have.property(testProjectTitle)
+        expect(preferences).to.have.property(anotherTestProjectTitle)
+      })
+    })
+
+    it('should clear the projects preferred preferences', async () => {
+      const testProjectTitle = 'launchpad'
+      const testPreferences = { testingType: 'e2e', browserPath: '/some/test/path' }
+
+      return cache.insertProjectPreferences(testProjectTitle, testPreferences)
+      .then(() => cache.removeProjectPreferences(testProjectTitle))
+      .then(() => __get('PROJECT_PREFERENCES'))
+      .then((preferences) => {
+        expect(preferences[testProjectTitle]).to.equal(null)
+      })
+    })
+  })
+
   context('#setUser / #getUser', () => {
     beforeEach(function () {
       this.user = {
@@ -213,6 +254,8 @@ describe('lib/cache', () => {
             authToken: 'auth-token-123',
           },
           PROJECTS: ['foo'],
+          PROJECT_PREFERENCES: {},
+          PROJECTS_CONFIG: {},
         })
       })
     })

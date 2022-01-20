@@ -1,0 +1,22 @@
+.testing-preferences {
+  .testing-preferences-header {
+    @include inner-header;
+    font-size: 16px;
+    font-weight: 400;
+    color: $gray-700;
+  }
+
+  .testing-preference {
+    color: $gray-600;
+    margin: 16px;
+
+    .testing-preference-header {
+      color: $white;
+      display: flex;
+      font-size: 16px;
+      font-weight: 600;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+  }
+}

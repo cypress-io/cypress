@@ -5,8 +5,8 @@ const os = require('os')
 const snapshot = require('snap-shot-it')
 const stripAnsi = require('strip-ansi')
 const minimist = require('minimist')
-const argsUtil = require(`${root}../lib/util/args`)
-const getWindowsProxyUtil = require(`${root}../lib/util/get-windows-proxy`)
+const argsUtil = require(`../../../lib/util/args`)
+const getWindowsProxyUtil = require(`../../../lib/util/get-windows-proxy`)
 
 const cwd = process.cwd()
 
@@ -454,8 +454,6 @@ describe('lib/util/args', () => {
         '--ci=ci',
         '--ciBuildId=ciBuildId',
         '--clearLogs=clearLogs',
-        '--userNodePath=userNodePath',
-        '--userNodeVersion=userNodeVersion',
         '--config=config',
         '--configFile=configFile',
         '--cwd=cwd',
@@ -487,6 +485,8 @@ describe('lib/util/args', () => {
         '--tag=tag',
         '--testingType=testingType',
         '--updating=updating',
+        '--userNodePath=userNodePath',
+        '--userNodeVersion=userNodeVersion',
         '--version=version',
       ])
     })
@@ -545,7 +545,6 @@ describe('lib/util/args', () => {
         config: this.config,
         invokedFromCli: false,
         spec: this.specs,
-        testingType: 'e2e',
       })
     })
 
@@ -566,7 +565,6 @@ describe('lib/util/args', () => {
         `--config=${mergedConfig}`,
         `--cwd=${cwd}`,
         `--spec=${JSON.stringify(this.specs)}`,
-        '--testingType=e2e',
       ])
 
       expect(argsUtil.toObject(args)).to.deep.eq({
@@ -575,7 +573,6 @@ describe('lib/util/args', () => {
         invokedFromCli: true,
         config: this.config,
         spec: this.specs,
-        testingType: 'e2e',
       })
     })
 
@@ -587,7 +584,6 @@ describe('lib/util/args', () => {
         cwd,
         _: [],
         invokedFromCli: false,
-        testingType: 'e2e',
         config: {},
       })
     })
@@ -615,7 +611,6 @@ describe('lib/util/args', () => {
         appPath: '/Applications/Cypress.app',
         execPath: '/Applications/Cypress.app',
         invokedFromCli: false,
-        testingType: 'e2e',
         updating: true,
       })
     })
@@ -641,7 +636,6 @@ describe('lib/util/args', () => {
         appPath: 'a',
         execPath: 'e',
         invokedFromCli: false,
-        testingType: 'e2e',
         updating: true,
       })
     })

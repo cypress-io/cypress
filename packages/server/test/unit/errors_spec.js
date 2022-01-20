@@ -2,8 +2,8 @@ require('../spec_helper')
 
 const style = require('ansi-styles')
 const chalk = require('chalk')
-const errors = require(`${root}lib/errors`)
-const logger = require(`${root}lib/logger`)
+const errors = require(`../../lib/errors`)
+const logger = require(`../../lib/logger`)
 const snapshot = require('snap-shot-it')
 
 describe('lib/errors', () => {
@@ -52,6 +52,22 @@ describe('lib/errors', () => {
       expect(ret).to.be.undefined
 
       expect(console.log).to.be.calledWithMatch('foo/bar/baz')
+    })
+
+    it('converts markdown links in err.message', () => {
+      const err = errors.get('NO_PROJECT_ID', `
+        This line has [linked text](https://on.cypress.io) in it. There's a period in the middle.
+
+        This line has [linked text at the end](https://on.cypress.io).
+
+        This line has [linked text](https://on.cypress.io) with no period
+      `)
+
+      errors.log(err)
+
+      expect(console.log).to.be.calledWithMatch('This line has linked text in it. There\'s a period in the middle: https://on.cypress.io')
+      expect(console.log).to.be.calledWithMatch('This line has linked text at the end: https://on.cypress.io')
+      expect(console.log).to.be.calledWithMatch('This line has linked text with no period: https://on.cypress.io')
     })
 
     it('logs err.details', () => {

@@ -6,7 +6,7 @@
   "main": "lib/index.js",
   "scripts": {
     "build-prod": "tsc --project .",
-    "clean": "rm lib/options.js",
+    "clean": "rm lib/options.js || echo 'ok'",
     "test": "yarn test-unit",
     "test-debug": "yarn test-unit --inspect-brk=5566",
     "test-unit": "mocha --configFile=../../mocha-reporter-config.json -r @packages/ts/register -extension=.js,.ts test/unit/*spec.* --exit"
@@ -18,6 +18,7 @@
     "lodash": "^4.17.21"
   },
   "devDependencies": {
+    "@packages/root": "0.0.0-development",
     "@packages/ts": "0.0.0-development",
     "chai": "1.10.0",
     "mocha": "7.0.1",

@@ -8,7 +8,7 @@ exports['e2e es modules passes 1'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (es_modules_in_coffee_spec.coffee)                                         │
-  │ Searched:   cypress/integration/es_modules_in_coffee_spec.coffee                               │
+  │ Searched:   cypress/e2e/es_modules_in_coffee_spec.coffee                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -71,18 +71,18 @@ exports['e2e es modules fails 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (es_module_import_failing_spec.js)                                         │
-  │ Searched:   cypress/integration/es_module_import_failing_spec.js                               │
+  │ Specs:      1 found (es_module_import_failing.cy.js)                                           │
+  │ Searched:   cypress/e2e/es_module_import_failing.cy.js                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  es_module_import_failing_spec.js                                                (1 of 1)
+  Running:  es_module_import_failing.cy.js                                                  (1 of 1)
 
 Oops...we found an error preparing this test file:
 
-  cypress/integration/es_module_import_failing_spec.js
+  cypress/e2e/es_module_import_failing.cy.js
 
 The error was:
 
@@ -94,7 +94,7 @@ SyntaxError: /foo/bar/.projects/e2e/lib/fail.js: Unexpected token (2:0)
   1 | export default {
 > 2 |
     | ^
- @ ./cypress/integration/es_module_import_failing_spec.js 3:0-25
+ @ ./cypress/e2e/es_module_import_failing.cy.js 3:0-25
       [stack trace lines]
 
 This occurred while Cypress was compiling and bundling your test code. This is usually caused by:
@@ -115,15 +115,15 @@ Fix the error in your code and re-run your tests.
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     es_module_import_failing_spec.js                                                 │
+  │ Spec Ran:     es_module_import_failing.cy.js                                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/es_module_import_failing_spec.j     (X second)
-                          s.mp4                                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/es_module_import_failing.cy.js.     (X second)
+                          mp4                                                                       
 
 
 ====================================================================================================
@@ -133,7 +133,7 @@ Fix the error in your code and re-run your tests.
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  es_module_import_failing_spec.js         XX:XX        -        -        1        -        - │
+  │ ✖  es_module_import_failing.cy.js           XX:XX        -        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✖  1 of 1 failed (100%)                     XX:XX        -        -        1        -        -  
 
