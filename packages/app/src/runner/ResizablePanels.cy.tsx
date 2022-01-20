@@ -1,4 +1,5 @@
-import ResizablePanels, { ResizablePanelName, DraggablePanel } from './ResizablePanels.vue'
+import ResizablePanels from './ResizablePanels.vue'
+import type { ResizablePanelName, DraggablePanel } from './useRunnerStyle'
 import { runnerConstants } from './runner-constants'
 
 // default values

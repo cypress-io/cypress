@@ -18,8 +18,8 @@ export class Container extends Component {
 
   componentDidMount () {
     this.props.eventManager.addGlobalListeners(this.props.state, {
+      randomString: this.randomString,
       element: `${this.props.config.namespace}-string`,
-      string: this.randomString,
     })
   }
 

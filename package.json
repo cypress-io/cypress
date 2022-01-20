@@ -50,7 +50,7 @@
     "stop-only": "npx stop-only --skip .cy,.publish,.projects,node_modules,dist,dist-test,fixtures,lib,bower_components,src,__snapshots__ --exclude cypress-tests.ts,*only.cy.js",
     "stop-only-all": "yarn stop-only --folder packages",
     "pretest": "yarn ensure-deps",
-    "test": "yarn lerna exec yarn test --scope cypress --scope \"'@packages/{config,electron,extension,https-proxy,launcher,net-stubbing,network,proxy,rewriter,runner,runner-shared,socket}'\"",
+    "test": "yarn lerna exec yarn test --scope cypress --scope \"'@packages/{config,electron,extension,https-proxy,launcher,net-stubbing,network,proxy,rewriter,socket}'\"",
     "test-debug": "lerna exec yarn test-debug --ignore \"'@packages/{driver,root,static,web-config}'\"",
     "pretest-e2e": "yarn ensure-deps",
     "test-integration": "lerna exec yarn test-integration --ignore \"'@packages/{driver,root,static,web-config}'\"",
@@ -67,7 +67,6 @@
     "test-watch": "lerna exec yarn test-watch --ignore \"'@packages/{driver,root,static,web-config}'\"",
     "type-check": "node scripts/type_check",
     "verify:mocha:results": "node ./scripts/verify_mocha_results",
-    "prewatch": "yarn ensure-deps",
     "watch": "yarn gulp dev:watch",
     "prepare": "husky install"
   },

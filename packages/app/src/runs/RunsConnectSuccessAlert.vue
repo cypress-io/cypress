@@ -2,7 +2,7 @@
   <Alert
     v-model="showAlert"
     status="success"
-    class="top-24px right-24px left-24px absolute"
+    class="mb-24px"
     dismissible
     :title="t('runs.connectSuccessAlert.title')"
   >
@@ -51,7 +51,7 @@ const props = defineProps<{
 const showAlert = ref(true)
 
 const projectId = computed(() => props.gql.projectId)
-const configFilePath = computed(() => props.gql.configFileAbsolutePath?.replace(props.gql.projectRoot, ''))
+const configFilePath = computed(() => props.gql.configFileAbsolutePath?.replace(props.gql.projectRoot, '').replace(/^\//, ''))
 
 whenever(projectId, () => {
   showAlert.value = true

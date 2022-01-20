@@ -3,18 +3,24 @@ import { EventEmitter } from 'events'
 import type { BaseStore } from '@packages/runner-shared/src/store'
 import type { RunState } from '@packages/types/src/driver'
 import type MobX from 'mobx'
-import type { LocalBusEmitsMap, LocalBusEventMap } from './event-manager-types'
-import type { FileDetails } from '@packages/types'
+import type { LocalBusEmitsMap, LocalBusEventMap, DriverToLocalBus, SocketToDriverMap } from './event-manager-types'
+import type { AutomationElementId, FileDetails } from '@packages/types'
 
 import { automation } from '@packages/runner-shared/src/automation'
 import { logger } from '@packages/runner-shared/src/logger'
 import type { Socket } from '@packages/socket/lib/browser'
+import { useRunnerUiStore } from '../store'
 
 // type is default export of '@packages/driver'
 // cannot import because it's not type safe and tsc throw many type errors.
 type $Cypress = any
 
 const noop = () => {}
+
+interface AddGlobalListenerOptions {
+  element: AutomationElementId
+  randomString: string
+}
 
 const driverToReporterEvents = 'paused session:add'.split(' ')
 const driverToLocalAndReporterEvents = 'run:start run:end'.split(' ')
@@ -56,7 +62,7 @@ export class EventManager {
     return Cypress
   }
 
-  addGlobalListeners (state: BaseStore, connectionInfo: { element: string, string: string }) {
+  addGlobalListeners (state: BaseStore, options: AddGlobalListenerOptions) {
     const rerun = () => {
       if (!this) {
         // if the tests have been reloaded
@@ -67,12 +73,35 @@ export class EventManager {
       return this.runSpec(state)
     }
 
-    this.ws.emit('is:automation:client:connected', connectionInfo, this.Mobx.action('automationEnsured', (isConnected) => {
-      state.automation = isConnected ? automation.CONNECTED : automation.MISSING
-      this.ws.on('automation:disconnected', this.Mobx.action('automationDisconnected', () => {
-        state.automation = automation.DISCONNECTED
-      }))
-    }))
+    const connectionInfo: AddGlobalListenerOptions = {
+      element: options.element,
+      randomString: options.randomString,
+    }
+
+    const runnerUiStore = useRunnerUiStore()
+
+    this.ws.emit('is:automation:client:connected', connectionInfo, (isConnected: boolean) => {
+      const connected = isConnected ? automation.CONNECTED : automation.MISSING
+
+      // legacy MobX integration
+      // TODO: can we delete this, or does the driver depend on this somehow?
+      this.Mobx.runInAction(() => {
+        state.automation = connected
+      })
+
+      this.ws.on('automation:disconnected', () => {
+        this.Mobx.runInAction(() => {
+          state.automation = automation.DISCONNECTED
+        })
+      })
+
+      // unified integration
+      this.ws.on('automation:disconnected', () => {
+        runnerUiStore.setAutomationStatus('DISCONNECTED')
+      })
+
+      runnerUiStore.setAutomationStatus(connected)
+    })
 
     this.ws.on('change:to:url', (url) => {
       window.location.href = url
@@ -301,10 +330,9 @@ export class EventManager {
     // @ts-ignore
     const $window = this.$CypressDriver.$(window)
 
-    //  TODO(lachlan): best place to do this?
-    if (!('__vite__' in window)) {
-      $window.on('hashchange', rerun)
-    }
+    // This is a test-only even. It's used to
+    // trigger a re-reun for the drive rerun.cy.js spec.
+    $window.on('test:trigger:rerun', rerun)
 
     // when we actually unload then
     // nuke all of the cookies again
@@ -502,8 +530,10 @@ export class EventManager {
     })
 
     driverToLocalEvents.forEach((event) => {
-      Cypress.on(event, (...args) => {
-        return this.localBus.emit(event, ...args)
+      Cypress.on(event, (...args: unknown[]) => {
+        // @ts-ignore
+        // TODO: strongly typed event emitter.
+        return this.emit(event, ...args)
       })
     })
 
@@ -612,11 +642,15 @@ export class EventManager {
   }
 
   emit<K extends Extract<keyof LocalBusEmitsMap, string>>(k: K, v: LocalBusEmitsMap[K]): void
+  emit<K extends Extract<keyof DriverToLocalBus, string>>(k: K, v: DriverToLocalBus[K]): void
+  emit<K extends Extract<keyof SocketToDriverMap, string>>(k: K, v: SocketToDriverMap[K]): void
   emit (event: string, ...args: any[]) {
     this.localBus.emit(event, ...args)
   }
 
   on<K extends Extract<keyof LocalBusEventMap, string>>(k: K, f: (v: LocalBusEventMap[K]) => void): void
+  on<K extends Extract<keyof DriverToLocalBus, string>>(k: K, f: (v: DriverToLocalBus[K]) => void): void
+  on<K extends Extract<keyof SocketToDriverMap, string>>(k: K, f: (v: SocketToDriverMap[K]) => void): void
   on (event: string, listener: (...args: any[]) => void): void
   on (event: string, listener: (...args: any[]) => void) {
     this.localBus.on(event, listener)

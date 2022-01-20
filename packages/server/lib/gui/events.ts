@@ -176,7 +176,7 @@ export = {
     return ipc.removeAllListeners()
   },
 
-  async start (options: EventsStartArgs, bus: EventEmitter) {
+  start (options: EventsStartArgs, bus: EventEmitter) {
     // curry left options
     // ipc.on('request', _.partial(this.handleEvent, options, bus))
   },
