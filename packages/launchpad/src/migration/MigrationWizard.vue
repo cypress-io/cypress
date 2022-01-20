@@ -7,69 +7,71 @@
   >
     {{ t('migration.wizard.description') }}
   </p>
-
-  <MigrationStep
-    :open="props.gql.step === 'renameAuto'"
-    :checked="props.gql.step !== 'renameAuto'"
-    :step="1"
-    :title="t('migration.wizard.step1.title')"
-    :description="t('migration.wizard.step1.description')"
-  >
-    <RenameSpecsAuto :gql="props.gql" />
-    <template #footer>
-      <Button
-        @click="renameSpecs"
-      >
-        {{ t('migration.wizard.step1.button') }}
-      </Button>
-    </template>
-  </MigrationStep>
-  <MigrationStep
-    :open="props.gql.step === 'renameManual'"
-    :checked="props.gql.step === 'configFile'"
-    :step="2"
-    :title="t('migration.wizard.step2.title')"
-    :description="t('migration.wizard.step2.description')"
-  >
-    <RenameSpecsManual :gql="props.gql" />
-    <template #footer>
-      <div class="flex gap-16px">
+  <template v-if="query.data.value?.migration">
+    <MigrationStep
+      :open="migration.step === 'renameAuto'"
+      :checked="migration.step !== 'renameAuto'"
+      :step="1"
+      :title="t('migration.wizard.step1.title')"
+      :description="t('migration.wizard.step1.description')"
+    >
+      <RenameSpecsAuto :gql="query.data.value?.migration" />
+      <template #footer>
         <Button
-          disabled
-          variant="pending"
+          @click="renameSpecs"
         >
-          <template #prefix>
-            <i-cy-loading_x16
+          {{ t('migration.wizard.step1.button') }}
+        </Button>
+      </template>
+    </MigrationStep>
+    <MigrationStep
+      :open="migration.step === 'renameManual'"
+      :checked="migration.step === 'configFile'"
+      :step="2"
+      :title="t('migration.wizard.step2.title')"
+      :description="t('migration.wizard.step2.description')"
+    >
+      <RenameSpecsManual :gql="query.data.value?.migration" />
+      <template #footer>
+        <div class="flex gap-16px">
+          <Button
+            disabled
+            variant="pending"
+          >
+            <template #prefix>
+              <i-cy-loading_x16
 
-              class="animate-spin icon-dark-white icon-light-gray-400"
-            />
-          </template>
-          {{ t('migration.wizard.step2.buttonWait') }}
-        </Button>
+                class="animate-spin icon-dark-white icon-light-gray-400"
+              />
+            </template>
+            {{ t('migration.wizard.step2.buttonWait') }}
+          </Button>
+          <Button
+            variant="outline"
+            @click="skipStep2"
+          >
+            {{ t('migration.wizard.step2.button') }}
+          </Button>
+        </div>
+      </template>
+    </MigrationStep>
+    <MigrationStep
+      :open="migration.step === 'configFile'"
+      :step="3"
+      :title="t('migration.wizard.step3.title')"
+      :description="t('migration.wizard.step3.description')"
+    >
+      <ConvertConfigFile :gql="query.data.value?.migration" />
+      <template #footer>
         <Button
-          variant="outline"
-          @click="skipStep2"
+          data-cy="convertConfigButton"
+          @click="convertConfig"
         >
-          {{ t('migration.wizard.step2.button') }}
+          {{ t('migration.wizard.step3.button') }}
         </Button>
-      </div>
-    </template>
-  </MigrationStep>
-  <MigrationStep
-    :open="props.gql.step === 'configFile'"
-    :step="3"
-    :title="t('migration.wizard.step3.title')"
-    :description="t('migration.wizard.step3.description')"
-  >
-    <ConvertConfigFile :gql="props.gql" />
-    <template #footer>
-      <Button
-        @click="convertConfig"
-      >
-        {{ t('migration.wizard.step3.button') }}
-      </Button>
-    </template>
-  </MigrationStep>
+      </template>
+    </MigrationStep>
+  </template>
 </template>
 
 <script setup lang="ts">
@@ -79,22 +81,39 @@ import RenameSpecsAuto from './RenameSpecsAuto.vue'
 import RenameSpecsManual from './RenameSpecsManual.vue'
 import ConvertConfigFile from './ConvertConfigFile.vue'
 import { useI18n } from '@cy/i18n'
-import { gql } from '@urql/vue'
-import type { MigrationWizardFragment } from '../generated/graphql'
+import { gql, useMutation, useQuery } from '@urql/vue'
+import { MigrationWizardQueryDocument } from '../generated/graphql'
+import { computed } from 'vue'
 
 const { t } = useI18n()
 
 gql`
-fragment MigrationWizard on Migration {
-  step
-  ...RenameSpecsAuto
-  ...RenameSpecsManual
-  ...ConvertConfigFile
+fragment MigrationWizardData on Query {
+  migration {
+    step
+    ...RenameSpecsAuto
+    ...RenameSpecsManual
+    ...ConvertConfigFile
+  }
 }`
 
-const props = defineProps<{
-  gql: MigrationWizardFragment
-}>()
+gql`
+query MigrationWizardQuery {
+  ...MigrationWizardData
+}
+`
+
+const convertConfigMutation = gql`
+mutation MigrationWizard_ConvertFile {
+  migrateConfigFile
+}
+`
+
+const query = useQuery({ query: MigrationWizardQueryDocument })
+
+const configMutation = useMutation(convertConfigMutation)
+
+const migration = computed(() => query.data.value?.migration ?? { step: 'renameAuto' })
 
 function renameSpecs () {
 
@@ -105,6 +124,6 @@ function skipStep2 () {
 }
 
 function convertConfig () {
-
+  configMutation.executeMutation({})
 }
 </script>
