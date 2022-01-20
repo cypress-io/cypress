@@ -4,7 +4,9 @@
  * initial loading
  */
 import type { DataContext } from '../DataContext'
-import { getPathToDist } from '@packages/resolve-dist'
+import { getPathToDist, resolveFromPackages } from '@packages/resolve-dist'
+
+const PATH_TO_NON_PROXIED_ERROR = resolveFromPackages('server', 'lib', 'html', 'non_proxied_error.html')
 
 export class HtmlDataSource {
   constructor (private ctx: DataContext) {}
@@ -22,10 +24,17 @@ export class HtmlDataSource {
   }
 
   async fetchAppInitialData () {
+    // run mode is not driven by GraphQL, so we don't
+    // need the data from these queries.
+    if (this.ctx.isRunMode) {
+      return {}
+    }
+
     const graphql = this.ctx.graphqlClient()
 
     await Promise.all([
       graphql.executeQuery('SettingsDocument', {}),
+      graphql.executeQuery('SpecPageContainerDocument', {}),
       graphql.executeQuery('SpecsPageContainerDocument', {}),
       graphql.executeQuery('HeaderBar_HeaderBarQueryDocument', {}),
       graphql.executeQuery('SideBarNavigationDocument', {}),
@@ -49,7 +58,12 @@ export class HtmlDataSource {
 
     while (retryCount < 5) {
       try {
-        return await this.ctx.fs.readFile(getPathToDist('app', 'index.html'), 'utf8')
+        let html = await this.ctx.fs.readFile(getPathToDist('app', 'index.html'), 'utf8')
+
+        return html.replace(
+          '<title>Cypress</title>',
+          `<title>${this.ctx.project.projectTitle(this.ctx.currentProject || '')}</title>`,
+        )
       } catch (e) {
         err = e
         await new Promise((resolve) => setTimeout(resolve, 1000))
@@ -60,16 +74,23 @@ export class HtmlDataSource {
   }
 
   async makeServeConfig () {
+    const cfg = this.ctx._apis.projectApi.getConfig() ?? {} as any
+
     return {
       projectName: this.ctx.lifecycleManager.projectTitle,
-      base64Config: Buffer.from(JSON.stringify(this.ctx._apis.projectApi.getConfig())).toString('base64'),
+      namespace: cfg.namespace || '__cypress-string',
+      base64Config: Buffer.from(JSON.stringify(cfg)).toString('base64'),
     }
   }
 
   /**
    * The app html includes the SSR'ed data to bootstrap the page for the app
    */
-  async appHtml () {
+  async appHtml (nonProxied: boolean) {
+    if (nonProxied) {
+      return this.ctx.fs.readFile(PATH_TO_NON_PROXIED_ERROR, 'utf-8')
+    }
+
     const [appHtml, appInitialData, serveConfig] = await Promise.all([
       this.fetchAppHtml(),
       this.fetchAppInitialData(),
@@ -80,10 +101,16 @@ export class HtmlDataSource {
   }
 
   private replaceBody (html: string, initialData: object, serveConfig: object) {
+    // base64 before embedding so user-supplied contents can't break out of <script>
+    // https://github.com/cypress-io/cypress/issues/4952
+    const base64InitialData = Buffer.from(JSON.stringify(initialData)).toString('base64')
+
     return html.replace('<body>', `
       <body>
         <script>
-          window.__CYPRESS_INITIAL_DATA__ = ${JSON.stringify(initialData)};
+          window.__RUN_MODE_SPECS__ = ${JSON.stringify(this.ctx.project.specs)}
+          window.__CYPRESS_INITIAL_DATA__ = "${base64InitialData}";
+          window.__CYPRESS_MODE__ = ${JSON.stringify(this.ctx.isRunMode ? 'run' : 'open')}
           window.__CYPRESS_CONFIG__ = ${JSON.stringify(serveConfig)}
         </script>
     `)

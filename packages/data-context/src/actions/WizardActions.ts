@@ -194,11 +194,12 @@ export class WizardActions {
   private wizardGetConfigCodeE2E (lang: CodeLanguageEnum): string {
     const codeBlocks: string[] = []
 
-    codeBlocks.push(lang === 'ts' ? 'import { defineConfig } from "cypress"' : `const { defineConfig } = require("cypress")`)
+    codeBlocks.push(lang === 'ts' ? `import { defineConfig } from 'cypress'` : `const { defineConfig } = require('cypress')`)
+    codeBlocks.push('')
     codeBlocks.push(lang === 'ts' ? `export default defineConfig({` : `module.exports = defineConfig({`)
-    codeBlocks.push(E2E_SCAFFOLD_BODY({
+    codeBlocks.push(`  ${E2E_SCAFFOLD_BODY({
       lang,
-    }))
+    }).replace(/\n/g, '\n  ')}`)
 
     codeBlocks.push('})\n')
 
@@ -209,15 +210,16 @@ export class WizardActions {
     const codeBlocks: string[] = []
     const { chosenBundler, chosenFramework, chosenLanguage } = opts
 
-    codeBlocks.push(chosenLanguage.type === 'ts' ? 'import { defineConfig } from "cypress"' : `const { defineConfig } = require("cypress")`)
+    codeBlocks.push(chosenLanguage.type === 'ts' ? `import { defineConfig } from 'cypress'` : `const { defineConfig } = require('cypress')`)
+    codeBlocks.push('')
     codeBlocks.push(chosenLanguage.type === 'ts' ? `export default defineConfig({` : `module.exports = defineConfig({`)
     codeBlocks.push(`// Component testing, ${chosenLanguage.name}, ${chosenFramework.name}, ${chosenBundler.name}`)
 
-    codeBlocks.push(COMPONENT_SCAFFOLD_BODY({
+    codeBlocks.push(`  ${COMPONENT_SCAFFOLD_BODY({
       lang: chosenLanguage.type,
       requirePath: chosenBundler.package,
       configOptionsString: '{}',
-    }))
+    }).replace(/\n/g, '\n  ')}`)
 
     codeBlocks.push(`})\n`)
 
@@ -323,16 +325,16 @@ interface E2eScaffoldOpts {
 }
 
 const E2E_SCAFFOLD_BODY = (opts: E2eScaffoldOpts) => {
-  return `
+  return dedent`
   e2e: {
     supportFile: 'cypress/support/e2e.${opts.lang}',
     specPattern: '${getDefaultSpecPatterns().e2e}',
     viewportHeight: 660,
     viewportWidth: 1000,
     setupNodeEvents(on, config) {
-      //
+      // implement node event listeners here
     },
-  }
+  },
   `
 }
 
@@ -344,13 +346,13 @@ interface ComponentScaffoldOpts {
 }
 
 const COMPONENT_SCAFFOLD_BODY = (opts: ComponentScaffoldOpts) => {
-  return `
+  return dedent`
   component: {
     supportFile: 'cypress/support/component.${opts.lang}',
     specPattern: '${getDefaultSpecPatterns().component}',
     devServer: import('${opts.requirePath}'),
     devServerConfig: ${opts.configOptionsString}
-  }
+  },
 `
 }
 

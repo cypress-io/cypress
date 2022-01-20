@@ -18,6 +18,7 @@ import pDefer from 'p-defer'
 interface InternalOpenProjectArgs {
   argv: string[]
   projectName: string
+  browser: string
 }
 
 interface InternalAddProjectOpts {
@@ -227,9 +228,13 @@ async function makeE2ETasks () {
         e2eServerPort: ctx.appServerPort,
       }
     },
-    async __internal_openProject ({ argv, projectName }: InternalOpenProjectArgs): Promise<ResetOptionsResult> {
+    async __internal_openProject ({ argv, projectName, browser }: InternalOpenProjectArgs): Promise<ResetOptionsResult> {
       if (!scaffoldedProjects.has(projectName)) {
         throw new Error(`${projectName} has not been scaffolded. Be sure to call cy.scaffoldProject('${projectName}') in the test, a before, or beforeEach hook`)
+      }
+
+      if (browser !== 'chrome') {
+        throw new Error(`Cypress in cypress does not support running in the ${browser} browser`)
       }
 
       const openArgv = [...argv, '--project', Fixtures.projectPath(projectName), '--port', '4455']
