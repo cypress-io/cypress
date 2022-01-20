@@ -185,7 +185,7 @@ function openProject (projectName: ProjectFixture, argv: string[] = []) {
   }
 
   return logInternal({ name: 'openProject', message: argv.join(' ') }, () => {
-    return taskInternal('__internal_openProject', { projectName, argv })
+    return taskInternal('__internal_openProject', { projectName, argv, browser: Cypress.browser.name })
   }).then((obj) => {
     Cypress.env('e2e_serverPort', obj.e2eServerPort)
 

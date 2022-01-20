@@ -7,7 +7,6 @@ import {
   Exchange,
   ssrExchange,
 } from '@urql/core'
-import type { SSRData } from '@urql/core/dist/types/exchanges/ssr'
 import { devtoolsExchange } from '@urql/devtools'
 import { useToast } from 'vue-toastification'
 import { client } from '@packages/socket/lib/browser'
@@ -18,6 +17,8 @@ import { urqlSchema } from '../generated/urql-introspection.gen'
 
 import { pubSubExchange } from './urqlExchangePubsub'
 import { namedRouteExchange } from './urqlExchangeNamedRoute'
+import { decodeBase64Unicode } from '../utils/decodeBase64'
+import type { SpecFile, AutomationElementId } from '@packages/types'
 
 const toast = useToast()
 
@@ -27,18 +28,23 @@ export function makeCacheExchange (schema: any = urqlSchema) {
 
 declare global {
   interface Window {
-    __CYPRESS_INITIAL_DATA__: SSRData
+    __CYPRESS_INITIAL_DATA__: string
+    __CYPRESS_MODE__: 'run' | 'open'
+    __RUN_MODE_SPECS__: SpecFile[]
     __CYPRESS_CONFIG__: {
       base64Config: string
+      namespace: AutomationElementId
     }
   }
 }
+
+const cypressInRunMode = window.top === window && window.__CYPRESS_MODE__ === 'run'
 
 export async function preloadLaunchpadData () {
   try {
     const resp = await fetch('/__launchpad/preload')
 
-    window.__CYPRESS_INITIAL_DATA__ = await resp.json()
+    window.__CYPRESS_INITIAL_DATA__ = JSON.parse(decodeBase64Unicode(await resp.json()))
   } catch {
     //
   }
@@ -57,16 +63,22 @@ interface AppUrqlClientConfig {
 export type UrqlClientConfig = LaunchpadUrqlClientConfig | AppUrqlClientConfig
 
 export function makeUrqlClient (config: UrqlClientConfig): Client {
-  // If we're in the launchpad, we connect to the known GraphQL Socket port,
-  // otherwise we connect to the /__socket.io of the current domain, unless we've explicitly
-  //
-  const io = getPubSubSource({ ...config })
-
   let hasError = false
 
-  const exchanges: Exchange[] = [
-    dedupExchange,
-    pubSubExchange(io),
+  const exchanges: Exchange[] = [dedupExchange]
+
+  // GraphQL and urql are not used in app + run mode, so we don't add the
+  // pub sub exchange.
+  if (config.target === 'launchpad' || config.target === 'app' && !cypressInRunMode) {
+    // If we're in the launchpad, we connect to the known GraphQL Socket port,
+    // otherwise we connect to the /__socket.io of the current domain, unless we've explicitly
+    //
+    const io = getPubSubSource(config)
+
+    exchanges.push(pubSubExchange(io))
+  }
+
+  exchanges.push(
     errorExchange({
       onError (error) {
         const message = `
@@ -95,14 +107,15 @@ export function makeUrqlClient (config: UrqlClientConfig): Client {
     makeCacheExchange(),
     ssrExchange({
       isClient: true,
-      initialState: window.__CYPRESS_INITIAL_DATA__ ?? {},
+      // @ts-ignore - this seems fine locally, but on CI tsc is failing - bizarre.
+      initialState: (window.__CYPRESS_INITIAL_DATA__ ? JSON.parse(decodeBase64Unicode(window.__CYPRESS_INITIAL_DATA__)) : {}),
     }),
     namedRouteExchange,
     // TODO(tim): add this when we want to use the socket as the GraphQL
     // transport layer for all operations
     // target === 'launchpad' ? fetchExchange : socketExchange(io),
     fetchExchange,
-  ]
+  )
 
   if (import.meta.env.DEV) {
     exchanges.unshift(devtoolsExchange)
@@ -112,7 +125,7 @@ export function makeUrqlClient (config: UrqlClientConfig): Client {
 
   return createClient({
     url,
-    requestPolicy: 'cache-and-network',
+    requestPolicy: cypressInRunMode ? 'cache-only' : 'cache-and-network',
     exchanges,
   })
 }

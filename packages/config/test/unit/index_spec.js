@@ -45,6 +45,13 @@ describe('src/index', () => {
       })
 
       expect(defaultValues.env).to.deep.eq({})
+
+      // remove these since they are different depending on your machine
+      ;['platform', 'arch', 'version'].forEach((x) => {
+        expect(defaultValues[x]).to.exist
+        delete defaultValues[x]
+      })
+
       snapshot(defaultValues)
     })
   })
