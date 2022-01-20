@@ -349,6 +349,11 @@ declare namespace Cypress {
     backend: Backend
 
     /**
+     * Bridge function to ensure proper binding of events to application window.
+     */
+    bridgeContentWindowListener(...args: any[]): any
+
+    /**
      * Returns all configuration objects.
      * @see https://on.cypress.io/config
      * @example
