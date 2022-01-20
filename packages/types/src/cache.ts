@@ -7,6 +7,7 @@ export interface Cache {
 export interface Preferences {
   browserPath: string | null
   testingType: 'e2e' | 'component' | null
+  cloudTitle?: string | null
 }
 
 export interface CachedUser {

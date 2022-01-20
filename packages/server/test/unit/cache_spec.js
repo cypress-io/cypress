@@ -169,41 +169,52 @@ describe('lib/cache', () => {
   })
 
   context('project preferences', () => {
-    it('should insert a projects preferences into the cache', () => {
-      const testProjectTitle = 'launchpad'
-      const testPreferences = { testingType: 'e2e', browserPath: '/some/test/path' }
+    it('should insert a projects partial preferences into the cache', () => {
+      const testProjectRoot = '/Users/bmann/Dev/examples-angular-circle-ci'
+      const testPreferences = { cloudTitle: 'examples-angular-circle-ci' }
 
-      return cache.insertProjectPreferences(testProjectTitle, testPreferences)
+      return cache.insertProjectPreferences(testProjectRoot, testPreferences)
       .then(() => cache.__get('PROJECT_PREFERENCES'))
       .then((preferences) => {
-        expect(preferences[testProjectTitle]).to.deep.equal(testPreferences)
+        expect(preferences[testProjectRoot]).to.deep.equal(testPreferences)
+      })
+    })
+
+    it('should insert a projects preferences into the cache', () => {
+      const testProjectRoot = '/Users/bmann/Dev/examples-angular-circle-ci'
+      const testPreferences = { testingType: 'e2e', browserPath: '/some/test/path', cloudTitle: 'examples-angular-circle-ci' }
+
+      return cache.insertProjectPreferences(testProjectRoot, testPreferences)
+      .then(() => cache.__get('PROJECT_PREFERENCES'))
+      .then((preferences) => {
+        expect(preferences[testProjectRoot]).to.deep.equal(testPreferences)
       })
     })
 
     it('should insert multiple projects preferences into the cache', () => {
-      const testProjectTitle = 'launchpad'
-      const testPreferences = { testingType: 'e2e', browserPath: '/some/test/path' }
-      const anotherTestProjectTitle = 'launchpad'
-      const anotherTestPreferene = { testingType: 'e2e', browserPath: '/some/test/path' }
+      const testProjectRoot = '/Users/bmann/Dev/examples-angular-circle-ci'
+      const testPreferences = { testingType: 'e2e', browserPath: '/some/test/path', cloudTitle: 'examples-angular-circle-ci' }
+      const anotherTestProjectRoot = '/Users/bmann/Dev/cypress-core-gui'
+      const anotherTestPreferene = { testingType: 'e2e', browserPath: '/some/test/path', cloudTitle: 'cypress-core-gui' }
 
-      return cache.insertProjectPreferences(testProjectTitle, testPreferences)
-      .then(() => cache.insertProjectPreferences(anotherTestProjectTitle, anotherTestPreferene))
+      return cache.insertProjectPreferences(testProjectRoot, testPreferences)
+      .then(() => cache.insertProjectPreferences(anotherTestProjectRoot, anotherTestPreferene))
       .then(() => cache.__get('PROJECT_PREFERENCES'))
       .then((preferences) => {
-        expect(preferences).to.have.property(testProjectTitle)
-        expect(preferences).to.have.property(anotherTestProjectTitle)
+        expect(preferences).to.have.property(testProjectRoot)
+        expect(preferences).to.have.property(anotherTestProjectRoot)
       })
     })
 
     it('should clear the projects preferred preferences', async () => {
-      const testProjectTitle = 'launchpad'
-      const testPreferences = { testingType: 'e2e', browserPath: '/some/test/path' }
+      const testProjectRoot = '/Users/bmann/Dev/examples-angular-circle-ci'
+      const testPreferences = { testingType: 'e2e', browserPath: '/some/test/path', cloudTitle: 'examples-angular-circle-ci' }
 
-      return cache.insertProjectPreferences(testProjectTitle, testPreferences)
-      .then(() => cache.removeProjectPreferences(testProjectTitle))
+      return cache.insertProjectPreferences(testProjectRoot, testPreferences)
+      .then(() => cache.removeProjectPreferences(testProjectRoot))
       .then(() => __get('PROJECT_PREFERENCES'))
       .then((preferences) => {
-        expect(preferences[testProjectTitle]).to.equal(null)
+        expect(preferences[testProjectRoot]).to.equal(null)
       })
     })
   })

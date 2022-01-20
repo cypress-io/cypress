@@ -159,13 +159,13 @@ module.exports = {
     return fileUtil.get('PROJECT_PREFERENCES', {})
   },
 
-  insertProjectPreferences (projectTitle, projectPreferences) {
+  insertProjectPreferences (projectRoot, projectPreferences) {
     return fileUtil.transaction((tx) => {
       return tx.get('PROJECT_PREFERENCES', {}).then((preferences) => {
         return tx.set('PROJECT_PREFERENCES', {
           ...preferences,
-          [projectTitle]: {
-            ...preferences[projectTitle],
+          [projectRoot]: {
+            ...preferences[projectRoot],
             ...projectPreferences,
           },
         })

@@ -438,5 +438,19 @@ export const mutation = mutationType({
         return {}
       },
     })
+
+    t.field('updateProjectTitleFromCloud', {
+      description: 'Update project title with cloud project if it exist',
+      type: 'Boolean',
+      resolve: (_, args, ctx) => {
+        if (!ctx.coreData.currentProject) {
+          return false
+        }
+
+        ctx.actions.project.updateCurrentProjectTitleWithCloudProjectTitle()
+
+        return true
+      },
+    })
   },
 })

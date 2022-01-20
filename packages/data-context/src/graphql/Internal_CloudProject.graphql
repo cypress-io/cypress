@@ -1,0 +1,12 @@
+query Internal_CloudProject {
+  currentProject {
+    id
+    cloudProject {
+      __typename
+      ... on CloudProject {
+        id
+        name
+      }
+    }
+  }
+}

@@ -108,8 +108,8 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       clearAllProjectPreferences () {
         return cache.removeAllProjectPreferences()
       },
-      insertProjectPreferencesToCache (projectTitle: string, preferences: Preferences) {
-        cache.insertProjectPreferences(projectTitle, preferences)
+      insertProjectPreferencesToCache (projectRoot: string, preferences: Preferences) {
+        cache.insertProjectPreferences(projectRoot, preferences)
       },
       removeProjectFromCache (path: string) {
         return cache.removeProject(path)

@@ -53,6 +53,7 @@ generates:
       - './packages/frontend-shared/src/gql-components/**/*.{vue,ts,tsx,js,jsx}'
       - './packages/app/src/**/*.{vue,ts,tsx,js,jsx}'
       - './packages/launchpad/src/**/*.{vue,ts,tsx,js,jsx}'
+      - './packages/data-context/src/**/*.graphql'
     plugins:
       - add:
           content: '/* eslint-disable */'

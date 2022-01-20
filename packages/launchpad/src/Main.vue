@@ -75,8 +75,8 @@
 </template>
 
 <script lang="ts" setup>
-import { gql, useQuery } from '@urql/vue'
-import { MainLaunchpadQueryDocument } from './generated/graphql'
+import { gql, useQuery, useMutation } from '@urql/vue'
+import { MainLaunchpadQueryDocument, UpdateProjectTitleFromCloudDocument } from './generated/graphql'
 import TestingTypeCards from './setup/TestingTypeCards.vue'
 import Wizard from './setup/Wizard.vue'
 import GlobalPage from './global/GlobalPage.vue'
@@ -89,7 +89,7 @@ import MigrationWizard from './migration/MigrationWizard.vue'
 import ScaffoldedFiles from './setup/ScaffoldedFiles.vue'
 
 import { useI18n } from '@cy/i18n'
-import { computed, ref } from 'vue'
+import { computed, watch, ref } from 'vue'
 import LaunchpadHeader from './setup/LaunchpadHeader.vue'
 import OpenBrowser from './setup/OpenBrowser.vue'
 
@@ -133,6 +133,23 @@ query MainLaunchpadQuery {
 }
 `
 
+gql`
+mutation UpdateProjectTitleFromCloud {
+  updateProjectTitleFromCloud
+}
+`
+
+const mutation = useMutation(UpdateProjectTitleFromCloudDocument)
 const query = useQuery({ query: MainLaunchpadQueryDocument })
 const currentProject = computed(() => query.data.value?.currentProject)
+
+const projectTitleHasBeenUpdates = ref(false)
+
+watch(query.data, async () => {
+  if (query.data.value?.currentProject && !projectTitleHasBeenUpdates.value) {
+    await mutation.executeMutation({})
+    projectTitleHasBeenUpdates.value = true
+  }
+})
+
 </script>

@@ -658,6 +658,9 @@ type Mutation {
   """Save the prompt-shown state for this project"""
   setPromptShown(slug: String!): Boolean
 
+  """Update project title with cloud project if it exist"""
+  updateProjectTitleFromCloud: Boolean
+
   """Updates the different fields of the wizard data store"""
   wizardUpdate(input: WizardUpdateInput!): Wizard
 }

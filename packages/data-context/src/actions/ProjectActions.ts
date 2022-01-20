@@ -1,4 +1,4 @@
-import type { CodeGenType, MutationSetProjectPreferencesArgs, NexusGenObjects, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
+import type { CodeGenType, NexusGenObjects, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
 import type { InitializeProjectOptions, FoundBrowser, FoundSpec, LaunchOpts, OpenProjectLaunchOptions, Preferences, TestingType, ReceivedCypressOptions, AddProject } from '@packages/types'
 import execa from 'execa'
 import path from 'path'
@@ -25,7 +25,7 @@ export interface ProjectApiShape {
   insertProjectToCache(projectRoot: string): Promise<void>
   removeProjectFromCache(projectRoot: string): Promise<void>
   getProjectRootsFromCache(): Promise<string[]>
-  insertProjectPreferencesToCache(projectTitle: string, preferences: Preferences): void
+  insertProjectPreferencesToCache(projectRoot: string, preferences: Partial<Preferences>): void
   getProjectPreferencesFromCache(): Promise<Record<string, Preferences>>
   clearLatestProjectsCache(): Promise<unknown>
   clearProjectPreferences(projectTitle: string): Promise<unknown>
@@ -300,12 +300,12 @@ export class ProjectActions {
     this.ctx.project.setSpecs(specs)
   }
 
-  async setProjectPreferences (args: MutationSetProjectPreferencesArgs) {
+  async setProjectPreferences (args: Partial<Preferences>) {
     if (!this.ctx.currentProject) {
       throw Error(`Cannot save preferences without currentProject.`)
     }
 
-    this.api.insertProjectPreferencesToCache(this.ctx.lifecycleManager.projectTitle, { ...args })
+    this.api.insertProjectPreferencesToCache(this.ctx.lifecycleManager.projectRoot, { ...args })
   }
 
   async codeGenSpec (codeGenCandidate: string, codeGenType: CodeGenType): Promise<NexusGenObjects['ScaffoldedFile']> {
@@ -418,5 +418,17 @@ export class ProjectActions {
         description: 'Generated spec',
       }
     })
+  }
+
+  async updateCurrentProjectTitleWithCloudProjectTitle () {
+    const graphql = this.ctx.graphqlClient()
+
+    const response = await graphql.executeQuery('Internal_CloudProjectDocument', {})
+
+    const cloudTitle: string | null = response?.data?.currentProject?.cloudProject?.name ?? null
+
+    await this.ctx.actions.project.setProjectPreferences({ cloudTitle })
+
+    this.ctx.emitter.toLaunchpad()
   }
 }

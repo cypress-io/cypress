@@ -1,5 +1,4 @@
 import { nonNull, objectType, stringArg } from 'nexus'
-import path from 'path'
 import { BaseError } from '.'
 import { cloudProjectBySlug } from '../../stitching/remoteGraphQLCalls'
 import { TestingTypeEnum } from '../enumTypes/gql-WizardEnums'
@@ -137,7 +136,7 @@ export const CurrentProject = objectType({
       type: ProjectPreferences,
       description: 'Cached preferences for this project',
       resolve: (source, args, ctx) => {
-        return ctx.project.getProjectPreferences(path.basename(source.projectRoot))
+        return ctx.project.getProjectPreferences(source.projectRoot)
       },
     })
 

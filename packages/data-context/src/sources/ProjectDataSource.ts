@@ -114,8 +114,10 @@ export class ProjectDataSource {
     return this.ctx.lifecycleManager.getProjectId()
   }
 
-  projectTitle (projectRoot: string) {
-    return path.basename(projectRoot)
+  async projectTitle (projectRoot: string) {
+    const preferences = await this.ctx.project.getProjectPreferences(projectRoot)
+
+    return preferences?.cloudTitle ?? path.basename(projectRoot)
   }
 
   getConfig () {
@@ -245,10 +247,10 @@ export class ProjectDataSource {
     return this.ctx.project.specs.find((x) => x.absolute === absolute)
   }
 
-  async getProjectPreferences (projectTitle: string) {
+  async getProjectPreferences (projectRoot: string) {
     const preferences = await this.api.getProjectPreferencesFromCache()
 
-    return preferences[projectTitle] ?? null
+    return preferences[projectRoot] ?? null
   }
 
   frameworkLoader = this.ctx.loader<string, FrontendFramework | null>((projectRoots) => {
