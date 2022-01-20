@@ -36,6 +36,7 @@ export default defineConfig({
     },
   },
   'e2e': {
+    baseUrl: 'http://localhost:5555',
     'supportFile': 'cypress/e2e/support/e2eSupport.ts',
     async setupNodeEvents (on, config) {
       process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF = 'true'
