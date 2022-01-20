@@ -120,7 +120,7 @@ iframe.spec-iframe {
 }
 
 .is-screenshotting #unified-runner > .screenshot-height-container {
-  height: 100%;
+  height: 100vh;
 }
 
 </style>
