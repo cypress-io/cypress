@@ -13,6 +13,11 @@
         if (!Cypress) {
           throw new Error("Tests cannot run without a reference to Cypress!");
         }
+
+        Cypress.bridgeContentWindowListener = function (fn) {
+          return function () { fn.apply(this, arguments) }
+        }
+
         return Cypress.onSpecWindow(window, [{"absolute":"/<path-to-project>/no-server/helpers/includes.js","relative":"helpers/includes.js","relativeUrl":"/__cypress/tests?p=helpers/includes.js"},{"absolute":"/<path-to-project>/no-server/my-tests/test1.js","relative":"my-tests/test1.js","relativeUrl":"/__cypress/tests?p=my-tests/test1.js"}]);
       })(window.opener || window.parent);
     </script>
