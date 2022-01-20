@@ -1,6 +1,15 @@
 import { defineStore } from 'pinia'
 import { runnerConstants } from '../runner/runner-constants'
 
+export const automation = {
+  CONNECTING: 'CONNECTING',
+  MISSING: 'MISSING',
+  CONNECTED: 'CONNECTED',
+  DISCONNECTED: 'DISCONNECTED',
+} as const
+
+export type AutomationStatus = keyof typeof automation
+
 /**
  * Store for reactive properties used in the runner UI.
  * Examples:
@@ -15,6 +24,8 @@ export interface RunnerUiState {
   isSpecsListOpen: boolean
   specListWidth: number
   reporterWidth: number
+  automationStatus: AutomationStatus
+  randomString: string
 }
 
 export const useRunnerUiStore = defineStore({
@@ -27,10 +38,16 @@ export const useRunnerUiStore = defineStore({
       isSpecsListOpen: true,
       specListWidth: runnerConstants.defaultSpecListWidth,
       reporterWidth: runnerConstants.defaultReporterWidth,
+      automationStatus: automation.CONNECTING,
+      randomString: `${Math.random()}`,
     }
   },
 
   actions: {
+    setAutomationStatus (status: AutomationStatus) {
+      this.automationStatus = status
+    },
+
     setShowChooseExternalEditorModal (value: boolean) {
       this.showChooseExternalEditorModal = value
     },

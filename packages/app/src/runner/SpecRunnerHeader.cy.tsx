@@ -105,8 +105,10 @@ describe('SpecRunnerHeader', () => {
 
     specStore.setActiveSpec({
       relative: 'packages/app/src/runner/SpecRunnerHeader.spec.tsx',
+      name: 'packages/app/src/runner/SpecRunnerHeader.spec.tsx',
+      fileName: 'packages/app/src/runner/SpecRunnerHeader.spec.tsx',
       absolute: '/Users/zachjw/work/cypress/packages/app/src/runner/SpecRunnerHeader.spec.tsx',
-      name: 'SpecRunnerHeader.spec.tsx',
+      baseName: 'SpecRunnerHeader.spec.tsx',
     })
 
     cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
