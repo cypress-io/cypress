@@ -515,6 +515,9 @@ class $Cypress {
       case 'cy:scrolled':
         return this.emit('scrolled', ...args)
 
+      case 'cy:snapshot':
+        return this.emit('snapshot', ...args)
+
       case 'app:uncaught:exception':
         return this.emitMap('uncaught:exception', ...args)
 
@@ -689,6 +692,7 @@ $Cypress.prototype.SelectorPlayground = $SelectorPlayground
 $Cypress.prototype.utils = $utils
 $Cypress.prototype._ = _
 $Cypress.prototype.Blob = blobUtil
+$Cypress.prototype.Buffer = Buffer
 $Cypress.prototype.Promise = Promise
 $Cypress.prototype.minimatch = minimatch
 $Cypress.prototype.sinon = sinon

@@ -114,6 +114,13 @@ export type KeyEventType =
   | 'textInput'
   | 'beforeinput'
 
+export type ModifiersEventOptions = {
+  altKey: boolean
+  ctrlKey: boolean
+  metaKey: boolean
+  shiftKey: boolean
+}
+
 const toModifiersEventOptions = (modifiers: KeyboardModifiers) => {
   return {
     altKey: modifiers.alt,
@@ -305,9 +312,9 @@ const shouldIgnoreEvent = <
   T extends KeyEventType,
   K extends { [key in T]?: boolean }
 >(
-    eventName: T,
-    options: K,
-  ) => {
+  eventName: T,
+  options: K,
+) => {
   return options[eventName] === false
 }
 

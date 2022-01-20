@@ -53,15 +53,17 @@ const getChildOptions = (config) => {
   }
 
   // https://github.com/cypress-io/cypress/issues/18914
-  // If we're on node version 17 or higher, we need the
-  // NODE_ENV --openssl-legacy-provider so that webpack can continue to use
-  // the md4 hash function. This would cause an error prior to node 17
-  // though, so we have to detect node's major version before spawning the
-  // plugins process.
+  // Node 17+ ships with OpenSSL 3 by default, so we may need the option
+  // --openssl-legacy-provider so that webpack@4 can use the legacy MD4 hash
+  // function. This option doesn't exist on Node <17 or when it is built
+  // against OpenSSL 1, so we have to detect Node's major version and check
+  // which version of OpenSSL it was built against before spawning the plugins
+  // process.
 
   // To be removed on update to webpack >= 5.61, which no longer relies on
-  // node's builtin crypto.hash function.
-  if (semver.satisfies(config.resolvedNodeVersion, '>=17.0.0')) {
+  // Node's builtin crypto.hash function.
+  if (semver.satisfies(config.resolvedNodeVersion, '>=17.0.0') &&
+      !process.versions.openssl.startsWith('1.')) {
     childOptions.env.NODE_OPTIONS += ' --openssl-legacy-provider'
   }
 

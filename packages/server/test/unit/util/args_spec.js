@@ -164,6 +164,19 @@ describe('lib/util/args', () => {
         return snapshot('invalid spec error', stripAnsi(err.message))
       }
     })
+
+    it('should be correctly parsing globs with lists & ranges', function () {
+      const options = this.setup('--spec', 'cypress/integration/{[!a]*.spec.js,sub1,{sub2,sub3/sub4}}/*.js')
+
+      expect(options.spec[0]).to.eq(`${cwd}/cypress/integration/{[!a]*.spec.js,sub1,{sub2,sub3/sub4}}/*.js`)
+    })
+
+    it('should be correctly parsing globs with a mix of lists, ranges & regular paths', function () {
+      const options = this.setup('--spec', 'cypress/integration/{[!a]*.spec.js,sub1,{sub2,sub3/sub4}}/*.js,cypress/integration/foo.spec.js')
+
+      expect(options.spec[0]).to.eq(`${cwd}/cypress/integration/{[!a]*.spec.js,sub1,{sub2,sub3/sub4}}/*.js`)
+      expect(options.spec[1]).to.eq(`${cwd}/cypress/integration/foo.spec.js`)
+    })
   })
 
   context('--tag', () => {
