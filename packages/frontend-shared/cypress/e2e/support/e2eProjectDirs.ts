@@ -29,6 +29,7 @@ export const e2eProjectDirs = [
   'kill-child-process',
   'launchpad',
   'max-listeners',
+  'migration',
   'multiple-task-registrations',
   'multiples-config-files-with-json',
   'no-scaffolding',
