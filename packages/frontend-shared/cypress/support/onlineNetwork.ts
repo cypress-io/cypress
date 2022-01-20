@@ -1,4 +1,4 @@
-export function goOnline () {
+export function addNetworkCommands () {
   Cypress.Commands.add('goOnline', () => {
     cy.log('**go online**')
     .then(() => {
@@ -20,9 +20,7 @@ export function goOnline () {
         })
     })
   })
-}
 
-export function goOffline () {
   Cypress.Commands.add('goOffline', () => {
     cy.log('**go offline**')
     .then(() => {
@@ -52,11 +50,11 @@ declare global {
       /**
       * Simulates offline network mode
       */
-        goOffline(): void
+        goOffline(): Chainable<void>
       /**
        * Simulates online network mode
        */
-        goOnline(): void
+        goOnline(): Chainable<void>
     }
   }
 }

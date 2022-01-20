@@ -1,7 +1,7 @@
 <template>
   <div class="h-full">
     <NoInternetConnection
-      v-if="!isOnline && !isCloudProjectReturned"
+      v-if="!online && !isCloudProjectReturned"
     >
       Please check your internet connection to resolve this issue. When your internet connection is fixed, we will automatically attempt to fetch your latest runs for this project.
     </NoInternetConnection>
@@ -27,7 +27,7 @@
       data-cy="runs"
     >
       <Warning
-        v-if="!isOnline"
+        v-if="!online"
         :title="t('launchpadErrors.noInternet.header')"
         :message="t('launchpadErrors.noInternet.message')"
         :dismissible="false"
@@ -95,9 +95,8 @@ const props = defineProps<{
   gql: RunsContainerFragment
 }>()
 
-const isCloudProjectTypename = props.gql.currentProject?.cloudProject?.__typename === 'CloudProject'
+const isCloudProjectReturned = computed(() => props.gql.currentProject?.cloudProject?.__typename === 'CloudProject')
 
-const isShowingOnlineNotification = ref(false)
 const isOnlineRef = ref(true)
 const showConnectSuccessAlert = ref(false)
 
@@ -114,10 +113,8 @@ watchEffect(() => {
   }
 })
 
-const isCloudProjectReturned = computed(() => isCloudProjectTypename)
 const currentProject = computed(() => props.gql.currentProject)
 const cloudViewer = computed(() => props.gql.cloudViewer)
-const isOnline = computed(() => online.value)
 </script>
 
 <style scoped>

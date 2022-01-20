@@ -31,14 +31,14 @@ const mountSuccess = (viewer: TestCloudViewer = cloudViewer) => {
       result.cloudViewer = viewer
       result.cloudViewer.__typename = 'CloudUser'
     },
-    render: (gqlVal) => <div class="resize overflow-auto border-current border-1 h-700px"><LoginModal gql={gqlVal} modelValue={true} /></div>,
+    render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><LoginModal gql={gqlVal} modelValue={true} /></div>,
   })
 }
 
 describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
   it('renders and reaches "opening browser" status', () => {
     cy.mountFragment(LoginModalFragmentDoc, {
-      render: (gqlVal) => <div class="resize overflow-auto border-current border-1 h-700px"><LoginModal gql={gqlVal} modelValue={true} /></div>,
+      render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><LoginModal gql={gqlVal} modelValue={true} /></div>,
     })
 
     cy.contains('h2', text.login.titleInitial).should('be.visible')
@@ -58,7 +58,7 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
         result.__typename = 'Query'
         result.isAuthBrowserOpened = true
       },
-      render: (gqlVal) => <div class="resize overflow-auto border-current border-1 h-700px"><LoginModal gql={gqlVal} modelValue={true} /></div>,
+      render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><LoginModal gql={gqlVal} modelValue={true} /></div>,
     })
 
     cy.findByRole('button', { name: text.login.actionLogin }).click()
@@ -99,7 +99,7 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
       cy.goOffline()
 
       cy.mountFragment(LoginModalFragmentDoc, {
-        render: (gqlVal) => <div class="resize overflow-auto border-current border-1 h-700px"><LoginModal gql={gqlVal} modelValue={true} /></div>,
+        render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><LoginModal gql={gqlVal} modelValue={true} /></div>,
       })
 
       cy.contains('You have no internet connection')
@@ -110,9 +110,8 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
 
     it('shows login action when the internet is back', () => {
       cy.goOffline()
-
       cy.mountFragment(LoginModalFragmentDoc, {
-        render: (gqlVal) => <div class="resize overflow-auto border-current border-1 h-700px"><LoginModal gql={gqlVal} modelValue={true} /></div>,
+        render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><LoginModal gql={gqlVal} modelValue={true} /></div>,
       })
 
       cy.contains('You have no internet connection')
