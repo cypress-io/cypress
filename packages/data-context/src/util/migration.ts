@@ -25,7 +25,9 @@ function reduceConfig (cfg: Partial<Cypress.ConfigOptions>) {
     }
 
     if (key === 'e2e' || key === 'component') {
-      return { ...acc, [key]: { ...acc[key], ...val } }
+      const value = val as Record<string, unknown>
+
+      return { ...acc, [key]: { ...acc[key], ...value } }
     }
 
     if (key === 'testFiles') {
