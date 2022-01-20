@@ -65,20 +65,11 @@ export const useRunnerStyle = ({
       transform: scale(${scale});`
   })
 
-  const runnerMargin = computed(() => {
-    return screenshotStore.isScreenshotting ? 'unset' : '0 auto'
-  })
-  const screenshotAltHeight = computed(() => {
-    return screenshotStore.isScreenshotting ? '100vh' : '100%'
-  })
-
   return {
     viewportStyle,
     reporterWidth,
     specListWidth,
     containerHeight,
-    runnerMargin,
-    screenshotAltHeight,
     containerWidth,
     windowWidth: computed(() => windowWidth.value - collapsedNavBarWidth),
   }
