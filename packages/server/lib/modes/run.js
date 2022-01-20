@@ -1510,7 +1510,7 @@ module.exports = {
     })
   },
 
-  async ready (options = {}) {
+  ready (options = {}) {
     debug('run mode ready with options %o', options)
 
     if (process.env.ELECTRON_RUN_AS_NODE && !process.env.DISPLAY) {
