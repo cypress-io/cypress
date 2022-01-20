@@ -1,20 +1,24 @@
 const { defineConfig } = require('cypress')
 
 module.export = defineConfig({
-  baseUrl: 'http://localhost:3000',
   retries: 2,
   defaultCommandTimeout: 5000,
+  fixturesFolder: false,
   e2e: {
     setupNodeEvents(on, config) {
-      require('/cypress/plugins/index.js')
+      return require('cypress/plugins/index.ts')
     },
+    baseUrl: 'http://localhost:3000',
+    specPattern: '**/*.spec.{tsx,js}',
     defaultCommandTimeout: 10000,
     slowTestThreshold: 5000,
   },
   component: {
     setupNodeEvents(on, config) {
-      require('/cypress/plugins/index.js')
+      return require('cypress/plugins/index.ts')
     },
+    baseUrl: 'http://localhost:3000',
+    specPattern: '**/*.spec.{tsx,js}',
     slowTestThreshold: 5000,
     retries: 1,
   },

@@ -6,7 +6,13 @@ export class MigrationActions {
   async createConfigFile () {
     const config = await this.ctx.migration.createConfigString()
 
-    this.ctx.actions.file.writeFileInProject('cypress.config.js', config).catch((error) => {
+    await this.ctx.actions.file.writeFileInProject('cypress.config.js', config).catch((error) => {
+      throw error
+    })
+
+    this.ctx.lifecycleManager.refreshMetaState()
+
+    await this.ctx.actions.file.removeFileInProject('cypress.json').catch((error) => {
       throw error
     })
   }

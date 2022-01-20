@@ -18,16 +18,18 @@ export class MigrationDataSource {
 
   async createConfigString () {
     const cfg = await this.parseCypressConfig()
-    const pluginsPath = this.getPluginRelativePath(cfg)
-    const rawConfigObjects = this.reduceConfig(cfg)
 
-    return this.createCypressConfigJs(rawConfigObjects, pluginsPath)
+    return this.createCypressConfigJs(this.reduceConfig(cfg), this.getPluginRelativePath(cfg))
   }
 
-  private parseCypressConfig (): Promise<Cypress.ConfigOptions> {
-    const cfgPath = path.join(this.ctx.lifecycleManager?.projectRoot, 'cypress.json')
+  private parseCypressConfig (): Promise<Cypress.ConfigOptions> | Cypress.ConfigOptions {
+    if (this.ctx.lifecycleManager.metaState.hasLegacyCypressJson) {
+      const cfgPath = path.join(this.ctx.lifecycleManager?.projectRoot, 'cypress.json')
 
-    return this.ctx.file.readJsonFile(cfgPath)
+      return this.ctx.file.readJsonFile(cfgPath)
+    }
+
+    return {}
   }
 
   private reduceConfig (cfg: Partial<Cypress.ConfigOptions>) {
@@ -83,7 +85,7 @@ module.export = defineConfig({
   e2e: {
     setupNodeEvents(on, config) {
       return require('${pluginPath}')
-    }${config.e2e ? `
+    },${config.e2e ? `
     ${this.formatObjectForConfig(config.e2e, 4)},` : ''}
   },
   component: {
