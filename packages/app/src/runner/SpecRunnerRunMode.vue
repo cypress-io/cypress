@@ -94,8 +94,6 @@ const runnerUiStore = useRunnerUiStore()
 const {
   viewportStyle,
   windowWidth,
-  screenshotAltHeight,
-  runnerMargin,
   reporterWidth,
   specListWidth,
 } = useRunnerStyle()

@@ -162,8 +162,6 @@ const preferences = usePreferences()
 const {
   viewportStyle,
   windowWidth,
-  screenshotAltHeight,
-  runnerMargin,
   reporterWidth,
   specListWidth,
 } = useRunnerStyle()
