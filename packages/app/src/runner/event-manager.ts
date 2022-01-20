@@ -17,8 +17,6 @@ type $Cypress = any
 
 const noop = () => {}
 
-export const automationElementId: AutomationElementId = '__cypress-string' as const
-
 interface AddGlobalListenerOptions {
     element: AutomationElementId
     randomString: string
