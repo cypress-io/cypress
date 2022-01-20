@@ -170,6 +170,12 @@ const createVerifyTest = (modifier) => {
       return runIsolatedCypress(`cypress/fixtures/errors/${props.file}`, {
         visitUrl: props.visitUrl,
         onBeforeRun ({ specWindow, win, autCypress }) {
+          autCypress.bridgeContentWindowListener = function (fn) {
+            return function (...args) {
+              fn.apply(win, args)
+            }
+          }
+
           specWindow.testToRun = title
           specWindow.autWindow = win
           specWindow.autCypress = autCypress
