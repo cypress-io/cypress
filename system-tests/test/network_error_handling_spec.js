@@ -14,8 +14,6 @@ const random = require('@packages/server/lib/util/random')
 const Fixtures = require('../lib/fixtures')
 let mitmProxy = require('http-mitm-proxy')
 
-// TODO(lachlan): get these passing, issue is we need to hide the <TopNav />
-// so it won't make a request to npm to get the latest Cypress version,
 const PORT = 13370
 const PROXY_PORT = 13371
 const HTTPS_PORT = 13372
