@@ -85,7 +85,7 @@ In the following instructions, "X.Y.Z" is used to denote the [next version of Cy
 
 4. Publish the new npm package under the `dev` tag, using your personal npm account.
     - To find the link to the package file `cypress.tgz`:
-        1. CAUTION: The `linux x64`, `win32 x64`, and `darwin x64` artifacts produced by CI are all placed in the same directory in S3. The version that was built last will overwrite the other versions in the directory. Until work is done to complete [#19771](https://github.com/cypress-io/cypress/issues/19771), you must ensure that the `windows x64` build did not finish last prior to publishing. You can install the beta version from the CDN if additional validation is desired. 
+        1. CAUTION: The `linux x64`, `win32 x64`, and `darwin x64` artifacts produced by CI are all placed in the same directory on the CDN. The version that was built last will overwrite the other versions in the directory. Until work is done to complete [#19771](https://github.com/cypress-io/cypress/issues/19771), you must ensure that the `windows x64` build did not finish last prior to publishing. You can install the beta version from the CDN if additional validation is desired. 
         2. In GitHub, go to the latest commit (the one whose sha you used in the last step).
             ![commit-link](https://user-images.githubusercontent.com/1157043/80608728-33fe6100-8a05-11ea-8b53-375303757b67.png)
         3. Scroll down past the changes to the comments. The first comment should be a `cypress-bot` comment that includes a line beginning `npm install ...`. Grab the `https://cdn.../npm/X.Y.Z/<long sha>/cypress.tgz` link.
