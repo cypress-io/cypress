@@ -21,7 +21,7 @@ describe('<SpecPatterns />', () => {
         }
 
         res.currentTestingType = 'component'
-        res.specs = { ...res.specs, edges: res.specs?.edges.slice(0, 50) || [] }
+        res.specsBare = { ...res.specsBare, edges: res.specsBare?.edges.slice(0, 50) || [] }
       },
       render: (gql) => <div class="p-16px"><SpecPatterns gql={gql} /></div>,
     })

@@ -3,6 +3,7 @@
     <RunsConnectSuccessAlert
       v-if="currentProject && showConnectSuccessAlert"
       :gql="currentProject"
+      :class="{ 'absolute left-24px right-24px top-24px': currentProject?.cloudProject?.__typename === 'CloudProject' && !currentProject.cloudProject.runs?.nodes.length }"
     />
     <RunsConnect
       v-if="!currentProject?.projectId || !cloudViewer?.id"

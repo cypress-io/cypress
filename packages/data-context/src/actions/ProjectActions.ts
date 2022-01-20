@@ -313,11 +313,10 @@ export class ProjectActions {
     }
 
     const parsed = path.parse(codeGenCandidate)
-    const config = await this.ctx.lifecycleManager.getFullInitialConfig()
 
     const getFileExtension = () => {
-      if (codeGenType === 'integration') {
-        const possibleExtensions = ['.spec', '.test', '-spec', '-test']
+      if (codeGenType === 'e2e') {
+        const possibleExtensions = ['.spec', '.test', '-spec', '-test', '.cy', '_spec']
 
         return (
           possibleExtensions.find((ext) => {
@@ -328,10 +327,11 @@ export class ProjectActions {
 
       return '.cy'
     }
+
     const getCodeGenPath = () => {
-      return codeGenType === 'integration'
+      return codeGenType === 'e2e'
         ? this.ctx.path.join(
-          config.integrationFolder || project,
+          project,
           codeGenCandidate,
         )
         : codeGenCandidate
