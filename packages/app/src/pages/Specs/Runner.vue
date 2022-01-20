@@ -29,7 +29,6 @@ import { getAutIframeModel } from '../../runner'
 import SpecRunnerContainerOpenMode from '../../runner/SpecRunnerContainerOpenMode.vue'
 import SpecRunnerContainerRunMode from '../../runner/SpecRunnerContainerRunMode.vue'
 import { togglePlayground } from '../../runner/utils'
-import { useScreenshotStore } from '../../store'
 
 gql`
 query SpecPageContainer {
@@ -64,7 +63,6 @@ window.__showSelectorPlaygroundForTestingPurposes = () => {
   togglePlayground(getAutIframeModel())
 }
 
-const screenshotStore = useScreenshotStore()
 </script>
 
 <route>
