@@ -10,6 +10,7 @@
 
 <script lang="ts" setup>
 import { useSpecStore } from '../store'
+
 import SpecRunnerRunMode from './SpecRunnerRunMode.vue'
 import type { SpecFile } from '@packages/types/src'
 import { useUnifiedRunner } from './unifiedRunner'
