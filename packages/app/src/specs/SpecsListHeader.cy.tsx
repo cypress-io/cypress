@@ -42,6 +42,21 @@ describe('<SpecsListHeader />', { keystrokeDelay: 0 }, () => {
     .should('have.been.called')
   })
 
+  it('emits a spec pattern event', () => {
+    const onSpecPattern = cy.stub().as('spec-pattern')
+    const search = ref('')
+
+    cy.mount(() => (<div class="max-w-800px p-12 resize overflow-auto"><SpecsListHeader
+      modelValue={search.value}
+      onSpecPattern={onSpecPattern}
+      resultCount={0}
+    /></div>))
+    .get('[data-cy="open-spec-pattern-modal"]')
+    .click()
+    .get('@spec-pattern')
+    .should('have.been.called')
+  })
+
   it('shows the result count correctly', () => {
     const mountWithResultCount = (count = 0) => {
       cy.mount(() => (<div class="max-w-800px p-12 resize overflow-auto"><SpecsListHeader

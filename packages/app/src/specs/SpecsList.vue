@@ -1,7 +1,7 @@
 <template>
   <div class="p-24px spec-container">
     <CreateSpecModal
-      v-if="props.gql.currentProject?.currentTestingType"
+      v-if="props.gql.currentProject?.currentTestingType && showModal"
       :show="showModal"
       :gql="props.gql"
       @close="showModal = false"
@@ -11,6 +11,13 @@
       class="pb-32px"
       :result-count="specs.length"
       @newSpec="showModal = true"
+      @spec-pattern="bindingsOpen = true"
+    />
+    <SpecPatternModal
+      v-if="props.gql.currentProject && bindingsOpen"
+      :show="bindingsOpen"
+      :gql="props.gql.currentProject"
+      @close="bindingsOpen = false"
     />
 
     <template
@@ -20,13 +27,13 @@
         class="grid grid-cols-2 children:font-medium children:text-gray-800"
       >
         <div
-          class="flex justify-between items-center"
+          class="flex items-center justify-between"
           data-cy="specs-testing-type-header"
         >
           {{ props.gql.currentProject?.currentTestingType === 'component' ?
             t('specPage.componentSpecsHeader') : t('specPage.e2eSpecsHeader') }}
         </div>
-        <div class="flex justify-between items-center">
+        <div class="flex items-center justify-between">
           <div>{{ t('specPage.gitStatusHeader') }}</div>
         </div>
       </div>
@@ -102,6 +109,7 @@ import RowDirectory from './RowDirectory.vue'
 import SpecItem from './SpecItem.vue'
 import { useVirtualList } from '@packages/frontend-shared/src/composables/useVirtualList'
 import NoResults from '@cy/components/NoResults.vue'
+import SpecPatternModal from '../components/SpecPatternModal.vue'
 
 const { t } = useI18n()
 
@@ -126,7 +134,6 @@ fragment SpecNode_SpecsList on SpecEdge {
 
 gql`
 fragment Specs_SpecsList on Query {
-  ...CreateSpecModal
   currentProject {
     id
     projectRoot
@@ -136,7 +143,10 @@ fragment Specs_SpecsList on Query {
         ...SpecNode_SpecsList
       }
     }
+    config
+    ...SpecPatternModal
   }
+  ...CreateSpecModal
 }
 `
 
@@ -145,6 +155,7 @@ const props = defineProps<{
 }>()
 
 const showModal = ref(false)
+const bindingsOpen = ref(false)
 const search = ref('')
 
 function handleClear () {
