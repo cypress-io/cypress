@@ -201,6 +201,8 @@ const runPlugins = (ipc, pluginsFile, projectRoot) => {
   ipc.on('execute', (event, ids, args) => {
     execute(ipc, event, ids, args)
   })
+
+  ipc.send('ready')
 }
 
 // for testing purposes
