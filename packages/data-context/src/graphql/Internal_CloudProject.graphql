@@ -1,12 +1,9 @@
-query Internal_CloudProject {
-  currentProject {
-    id
-    cloudProject {
-      __typename
-      ... on CloudProject {
-        id
-        name
-      }
+query Internal_CloudProject($slug: String!) {
+  cloudProjectBySlug(slug: $slug) {
+    __typename
+    ... on CloudProject {
+      id
+      name
     }
   }
 }

@@ -421,11 +421,22 @@ export class ProjectActions {
   }
 
   async updateCurrentProjectTitleWithCloudProjectTitle () {
+    // We can't use this.ctx.project.projectId because this method
+    // spawns the child process to get the ID, messing with the state if there's
+    // no config file
+    const projectConfig = this.ctx.project.getConfig()
+
+    const projectId = projectConfig?.projectId
+
+    if (!projectId) {
+      return
+    }
+
     const graphql = this.ctx.graphqlClient()
 
-    const response = await graphql.executeQuery('Internal_CloudProjectDocument', {})
+    const response = await graphql.executeQuery('Internal_CloudProjectDocument', { slug: projectId })
 
-    const cloudTitle: string | null = response?.data?.currentProject?.cloudProject?.name ?? null
+    const cloudTitle: string | null = response?.data?.cloudProjectBySlug?.name ?? null
 
     await this.ctx.actions.project.setProjectPreferences({ cloudTitle })
 

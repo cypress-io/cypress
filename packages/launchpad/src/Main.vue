@@ -143,12 +143,12 @@ const mutation = useMutation(UpdateProjectTitleFromCloudDocument)
 const query = useQuery({ query: MainLaunchpadQueryDocument })
 const currentProject = computed(() => query.data.value?.currentProject)
 
-const projectTitleHasBeenUpdates = ref(false)
+const projectTitleHasBeenUpdates = ref('')
 
 watch(query.data, async () => {
-  if (query.data.value?.currentProject && !projectTitleHasBeenUpdates.value) {
+  if (query.data.value?.currentProject?.id && query.data.value.currentProject.id !== projectTitleHasBeenUpdates.value) {
     await mutation.executeMutation({})
-    projectTitleHasBeenUpdates.value = true
+    projectTitleHasBeenUpdates.value = query.data.value?.currentProject.id
   }
 })
 
