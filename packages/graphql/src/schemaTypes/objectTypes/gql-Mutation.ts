@@ -447,7 +447,9 @@ export const mutation = mutationType({
           return false
         }
 
-        ctx.actions.project.updateCurrentProjectTitleWithCloudProjectTitle()
+        ctx.actions.project.updateCurrentProjectTitleWithCloudProjectTitle().catch((e) => {
+          ctx.logTraceError(e)
+        })
 
         return true
       },

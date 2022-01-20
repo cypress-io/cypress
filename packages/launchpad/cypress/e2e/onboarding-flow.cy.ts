@@ -108,4 +108,13 @@ describe('Launchpad: Onboarding Flow', () => {
     cy.contains('Back').click()
     cy.get('h1').should('contain', 'Welcome to Cypress!')
   })
+
+  it('updates project title with cloud project title', () => {
+    cy.scaffoldProject('todos')
+    cy.openProject('todos')
+    cy.loginUser()
+
+    cy.visitLaunchpad()
+    cy.contains('cloud-project-abc123')
+  })
 })

@@ -58,11 +58,14 @@ export class HtmlDataSource {
 
     while (retryCount < 5) {
       try {
-        let html = await this.ctx.fs.readFile(getPathToDist('app', 'index.html'), 'utf8')
+        const [html, projectTitle] = await Promise.all([
+          this.ctx.fs.readFile(getPathToDist('app', 'index.html'), 'utf8'),
+          this.ctx.project.projectTitle(this.ctx.currentProject || ''),
+        ])
 
         return html.replace(
           '<title>Cypress</title>',
-          `<title>${this.ctx.project.projectTitle(this.ctx.currentProject || '')}</title>`,
+          `<title>${projectTitle}</title>`,
         )
       } catch (e) {
         err = e
