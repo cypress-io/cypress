@@ -1659,9 +1659,6 @@ describe('lib/cypress', () => {
 
         return settings.writeForTesting(this.todosPath, rest)
       }).then(() => {
-        // TODO(tim): this shouldn't be needed when we refactor the ctx setup
-        process.env.LAUNCHPAD = '0'
-
         return cypress.start([
           '--port=2121',
           '--config',
@@ -1670,7 +1667,6 @@ describe('lib/cypress', () => {
           '--env=baz=baz',
         ])
       }).then(() => {
-        delete process.env.LAUNCHPAD
         const options = Events.start.firstCall.args[0]
 
         return openProject.create(this.todosPath, { ...options, testingType: 'e2e' }, [])
@@ -1744,12 +1740,8 @@ describe('lib/cypress', () => {
 
       sinon.stub(ServerE2E.prototype, 'open').resolves([2121, warning])
 
-      // TODO(tim): this shouldn't be needed when we refactor the ctx setup
-      process.env.LAUNCHPAD = '0'
-
       return cypress.start(['--port=2121', '--config', 'pageLoadTimeout=1000', '--foo=bar', '--env=baz=baz'])
       .then(() => {
-        delete process.env.LAUNCHPAD
         const options = Events.start.firstCall.args[0]
 
         Events.handleEvent(options, bus, event, 123, 'on:project:warning')

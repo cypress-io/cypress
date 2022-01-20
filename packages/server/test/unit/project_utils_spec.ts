@@ -19,42 +19,6 @@ const expect = Chai.expect
 
 describe('lib/project_utils', () => {
   describe('getSpecUrl', () => {
-    it('normalizes to __all when absoluteSpecUrl is undefined', () => {
-      const str = getSpecUrl({
-        ...defaultProps,
-        spec: {
-          ...defaultProps.spec,
-          absolute: undefined,
-        },
-      })
-
-      expect(str).to.eq('http://localhost:8888/__/#/specs/runner?file=/__all')
-    })
-
-    it('normalizes to __all when absoluteSpecUrl is __all', () => {
-      const str = getSpecUrl({
-        ...defaultProps,
-        spec: {
-          ...defaultProps.spec,
-          absolute: '__all',
-        },
-      })
-
-      expect(str).to.eq('http://localhost:8888/__/#/specs/runner?file=/__all')
-    })
-
-    it('normalizes to __all when absoluteSpecUrl is __all', () => {
-      const str = getSpecUrl({
-        ...defaultProps,
-        spec: {
-          ...defaultProps.spec,
-          absolute: '__all',
-        },
-      })
-
-      expect(str).to.eq('http://localhost:8888/__/#/specs/runner?file=/__all')
-    })
-
     it('returns fully qualified url when spec exists', function () {
       const str = getSpecUrl({
         ...defaultProps,

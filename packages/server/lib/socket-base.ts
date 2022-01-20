@@ -499,10 +499,8 @@ export class SocketBase {
         // maintain two sources of truth for the preferred editor
         // adding this conditional to maintain backwards compat with
         // existing runner and reporter API.
-        if (process.env.LAUNCHPAD) {
-          fileDetails.where = {
-            binary: getCtx().coreData.localSettings.preferences.preferredEditorBinary || 'computer',
-          }
+        fileDetails.where = {
+          binary: getCtx().coreData.localSettings.preferences.preferredEditorBinary || 'computer',
         }
 
         debug('opening file %o', fileDetails)

@@ -85,8 +85,8 @@ export const runner = {
     return serveRunner(runnerPkg, config, res)
   },
 
-  handle (testingType: Cypress.TestingType, req: Request, res: Response) {
-    const pathToFile = getPathToDist(process.env.LAUNCHPAD || testingType === 'component' ? 'runner-ct' : 'runner', req.params[0])
+  handle (req: Request, res: Response) {
+    const pathToFile = getPathToDist('runner-ct', req.params[0])
 
     return send(req, pathToFile)
     .pipe(res)
