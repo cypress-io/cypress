@@ -9,6 +9,7 @@ import type { Browser, FoundBrowser, OpenModeOptions } from '@packages/types'
 import { browsers } from '@packages/types/src/browser'
 import type { E2ETaskMap } from '../e2ePluginSetup'
 import installCustomPercyCommand from '@packages/ui-components/cypress/support/customPercyCommand'
+import { addNetworkCommands } from '../../support/onlineNetwork'
 import type sinon from 'sinon'
 import type pDefer from 'p-defer'
 
@@ -185,7 +186,7 @@ function openProject (projectName: ProjectFixture, argv: string[] = []) {
   }
 
   return logInternal({ name: 'openProject', message: argv.join(' ') }, () => {
-    return taskInternal('__internal_openProject', { projectName, argv })
+    return taskInternal('__internal_openProject', { projectName, argv, browser: Cypress.browser.name })
   }).then((obj) => {
     Cypress.env('e2e_serverPort', obj.e2eServerPort)
 
@@ -428,3 +429,4 @@ Cypress.Commands.add('findBrowsers', findBrowsers)
 Cypress.Commands.add('validateExternalLink', { prevSubject: ['optional', 'element'] }, validateExternalLink)
 
 installCustomPercyCommand()
+addNetworkCommands()

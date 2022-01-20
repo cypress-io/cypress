@@ -1,4 +1,7 @@
+import os from 'os'
 import validate from './validation'
+// @ts-ignore
+import pkg from '@packages/root'
 
 interface ResolvedConfigOption {
   name: string
@@ -81,6 +84,11 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     defaultValue: 5,
     validation: validate.isNumber,
     canUpdateDuringTestTime: true,
+  }, {
+    name: 'arch',
+    defaultValue: () => os.arch(),
+    validation: validate.isString,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'baseUrl',
     defaultValue: null,
@@ -214,6 +222,11 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     defaultValue: 50,
     validation: validate.isNumber,
     canUpdateDuringTestTime: true,
+  }, {
+    name: 'platform',
+    defaultValue: () => os.platform(),
+    validation: validate.isString,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'pageLoadTimeout',
     defaultValue: 60000,
@@ -456,6 +469,12 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
   }, {
     name: 'socketIoRoute',
     defaultValue: '/__socket.io',
+    validation: validate.isString,
+    isInternal: true,
+    canUpdateDuringTestTime: false,
+  }, {
+    name: 'version',
+    defaultValue: pkg.version,
     validation: validate.isString,
     isInternal: true,
     canUpdateDuringTestTime: false,

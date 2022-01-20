@@ -1,6 +1,6 @@
 import httpProxy from 'http-proxy'
 import Debug from 'debug'
-import { ErrorRequestHandler, Router } from 'express'
+import { ErrorRequestHandler, Request, Router } from 'express'
 import send from 'send'
 import { getPathToDist } from '@packages/resolve-dist'
 
@@ -60,7 +60,7 @@ export const createCommonRoutes = ({
   router.use(`/${namespace}/graphql/*`, graphQLHTTP)
 
   router.get(`/${namespace}/runner/*`, (req, res) => {
-    runner.handle(testingType, req, res)
+    runner.handle(req, res)
   })
 
   router.all(`/${namespace}/xhrs/*`, (req, res, next) => {
@@ -81,23 +81,12 @@ export const createCommonRoutes = ({
     throw Error(`clientRoute is required. Received ${clientRoute}`)
   }
 
-  router.get(clientRoute, (req, res) => {
-    debug('Serving Cypress front-end by requested URL:', req.url)
+  router.get(clientRoute, (req: Request & { proxiedUrl?: string }, res) => {
+    const nonProxied = req.proxiedUrl?.startsWith('/') ?? false
 
-    if (process.env.LAUNCHPAD || process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF) {
-      getCtx().html.appHtml()
-      .then((html) => res.send(html))
-      .catch((e) => res.status(500).send({ stack: e.stack }))
-    } else {
-      runner.serve(req, res, testingType === 'e2e' ? 'runner' : 'runner-ct', {
-        config,
-        testingType,
-        getSpec,
-        getCurrentBrowser,
-        getRemoteState,
-        exit,
-      })
-    }
+    getCtx().html.appHtml(nonProxied)
+    .then((html) => res.send(html))
+    .catch((e) => res.status(500).send({ stack: e.stack }))
   })
 
   // serve static assets from the dist'd Vite app

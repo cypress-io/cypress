@@ -15,7 +15,6 @@ const Promise = require('bluebird')
 const { SocketE2E } = require(`../../lib/socket-e2e`)
 
 const httpsServer = require(`@packages/https-proxy/test/helpers/https_server`)
-const pkg = require('@packages/root')
 const SseStream = require('ssestream')
 const EventSource = require('eventsource')
 const config = require(`../../lib/config`)
@@ -315,7 +314,7 @@ describe('Routes', () => {
       .then((res) => {
         expect(res.statusCode).to.eq(200)
 
-        expect(res.body).to.match(/Runner.start/)
+        expect(res.body).to.match(/window.__Cypress__ = true/)
       })
     })
 
@@ -324,7 +323,7 @@ describe('Routes', () => {
       .then((res) => {
         expect(res.statusCode).to.eq(200)
 
-        expect(res.body).to.include('<title>foobarbaz</title>')
+        expect(res.body).to.include('<title>e2e</title>')
       })
     })
 
@@ -344,11 +343,12 @@ describe('Routes', () => {
         .then((res) => {
           expect(res.statusCode).to.eq(200)
 
-          expect(res.body).to.match(/Runner.start\(.+\)/)
+          expect(res.body).to.match(/window.__Cypress__ = true/)
         })
       })
     })
 
+    // TODO: no automation in unified app
     it('clientRoute routes to \'not launched through Cypress\' without a proxy set', function () {
       return this.rp({
         url: `${this.proxy}/__`,
@@ -381,39 +381,7 @@ describe('Routes', () => {
         .then((res) => {
           expect(res.statusCode).to.eq(200)
 
-          expect(res.body).to.match(/Runner.start/)
-        })
-      })
-    })
-
-    it('sends Cypress.version', function () {
-      return this.setup({ baseUrl: 'http://localhost:9999/app' })
-      .then(() => {
-        return this.rp('http://localhost:9999/__')
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-
-          const base64Config = /Runner\.start\(.*, "(.*)"\)/.exec(res.body)[1]
-          const configStr = Buffer.from(base64Config, 'base64').toString()
-
-          expect(configStr).to.include('version')
-
-          expect(configStr).to.include(pkg.version)
-        })
-      })
-    })
-
-    it('sends exit config', function () {
-      return this.setup({ baseUrl: 'http://localhost:9999/app' })
-      .then(() => {
-        return this.rp('http://localhost:9999/__')
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-
-          const base64Config = /Runner\.start\(.*, "(.*)"\)/.exec(res.body)[1]
-          const configStr = Buffer.from(base64Config, 'base64').toString()
-
-          expect(configStr).to.include('"exit":false')
+          expect(res.body).to.match(/window.__Cypress__ = true/)
         })
       })
     })
