@@ -8,6 +8,6 @@ module.exports = {
     },
   },
   e2e: {
-    supportFile: 'cypress/component/support.js',
+    supportFile: 'cypress/e2e/support.js',
   },
 }

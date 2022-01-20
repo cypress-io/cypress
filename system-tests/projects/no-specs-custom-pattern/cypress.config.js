@@ -10,5 +10,6 @@ module.exports = {
   },
   e2e: {
     supportFile: 'cypress/component/support.js',
+    specPattern: 'src/**/*.cy.{js,jsx}',
   },
 }

@@ -1,181 +1,235 @@
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
-import type { Interception } from '@packages/net-stubbing/lib/external-types'
-import type { FoundSpec } from '@packages/types/src'
 
 describe('App: Index', () => {
-  describe('Testing Type:E2E', () => {
-    beforeEach(() => {
-      cy.scaffoldProject('non-existent-spec')
-      cy.openProject('non-existent-spec')
-      cy.withCtx(async (ctx, { testState }) => {
-        testState.newFilePath = 'cypress/e2e/new-file.cy.js'
-
-        await ctx.actions.file.removeFileInProject(testState.newFilePath)
-      })
-
-      cy.startAppServer()
-    })
-
-    // TODO(ryan m and tim): Skipping until https://github.com/cypress-io/cypress/pull/19619 is merged
-    const tempSkip = new Date() > new Date('2022-01-21') ? context : context.skip
-
-    tempSkip('scaffold example specs', () => {
-      const assertSpecs = (createdSpecs: FoundSpec[]) => cy.wrap(createdSpecs).each((spec: FoundSpec) => cy.contains(spec.baseName).scrollIntoView().should('be.visible'))
-
-      it('should generate example specs', () => {
-        let createdSpecs: FoundSpec[]
-
+  describe('Testing Type: E2E', () => {
+    context('project with default spec pattern', () => {
+      beforeEach(() => {
+        cy.scaffoldProject('no-specs-no-storybook')
+        cy.openProject('no-specs-no-storybook')
+        cy.startAppServer('e2e')
         cy.visitApp()
 
-        cy.intercept('POST', 'mutation-ScaffoldGeneratorStepOne_scaffoldIntegration').as('scaffoldIntegration')
-
-        cy.contains(defaultMessages.createSpec.e2e.importFromScaffold.header).click()
-        cy.wait('@scaffoldIntegration').then((interception: Interception) => {
-          createdSpecs = interception.response?.body.data.scaffoldIntegration.map((res) => res.file)
-
-          expect(createdSpecs).lengthOf.above(0)
-
-          cy.contains(defaultMessages.createSpec.e2e.importFromScaffold.specsAddedHeader).should('be.visible')
-          assertSpecs(createdSpecs)
+        // With no specs present, the page renders two cards, one for scaffolding example specs,
+        // another for creating a new blank spec.
+        cy.findAllByTestId('card').eq(0).as('ScaffoldCard')
+        .should('have.attr', 'tabindex', '0')
+        .within(() => {
+          cy.findByRole('heading', { level: 2, name: defaultMessages.createSpec.e2e.importFromScaffold.header }).should('be.visible')
+          cy.contains(defaultMessages.createSpec.e2e.importFromScaffold.description).should('be.visible')
         })
 
-        cy.contains(defaultMessages.createSpec.e2e.importFromScaffold.specsAddedButton).click()
-
-        cy.visitApp().then(() => assertSpecs(createdSpecs))
-      })
-    })
-
-    context('with no specs', () => {
-      it('shows "Create spec" title', () => {
-        cy.visitApp()
-
-        // TODO: we need more e2e tests around this, but it requires changes to how we set up config in our
-        // gql mock, which would likely conflict with other ongoing changes.
-        // In the meantime, the Create Spec vs No Specs Found differences are covered in component tests,
-        // we just can't mock config values in GQL yet.
-        cy.contains(defaultMessages.createSpec.page.defaultPatternNoSpecs.title).should('be.visible')
-      })
-
-      it('routes to settings spec-pattern section', () => {
-        cy.visitApp()
-
-        cy.contains(defaultMessages.createSpec.viewSpecPatternButton).scrollIntoView().click()
-        cy.get('[data-cy="Project Settings"]').within(() => {
-          cy.get('[data-cy="collapsible-header"]').should('have.attr', 'aria-expanded', 'true')
-          cy.contains(defaultMessages.settingsPage.specPattern.title).should('be.visible')
+        cy.findAllByTestId('card').eq(1).as('EmptySpecCard')
+        .should('have.attr', 'tabindex', '0')
+        .within(() => {
+          cy.findByRole('heading', { level: 2, name: defaultMessages.createSpec.e2e.importEmptySpec.header }).should('be.visible')
+          cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.description).should('be.visible')
         })
       })
 
-      it('shows "No Specs Found" when not using default spec pattern', () => {
-        const customSpecPattern = 'cypress/**/*.cy.ts'
+      it('shows create first spec page with scaffold and create empty spec options', () => {
+        cy.findByRole('heading', {
+          level: 1,
+          name: defaultMessages.createSpec.page.defaultPatternNoSpecs.title,
+        }).should('be.visible')
 
-        cy.intercept('query-SpecsPageContainer', (req) => {
-          req.on('before:response', (res) => {
-            res.body.data.currentProject.isDefaultSpecPattern = false
-            res.body.data.currentProject.config = res.body.data.currentProject.config.map((x) => {
-              if (x.field === 'e2e') {
-                return { ...x, value: { ...x.value, specPattern: customSpecPattern } }
-              }
+        cy.findByTestId('create-spec-page-description').should('be.visible').and('contain', defaultMessages.createSpec.page.defaultPatternNoSpecs.e2e.description)
 
-              return x
-            })
+        cy.get('@ScaffoldCard').should('be.visible')
+        cy.get('@EmptySpecCard').should('be.visible')
+
+        cy.findByTestId('no-specs-message').should('be.visible').and('contain', defaultMessages.createSpec.noSpecsMessage)
+
+        cy.findByRole('link', { name: defaultMessages.createSpec.viewSpecPatternButton })
+        .should('be.visible')
+        .and('not.be.disabled')
+        .and('have.attr', 'href', '#/settings?section=project&setting=specPattern')
+      })
+
+      context('scaffold examples', () => {
+        const expectedScaffoldPaths = [
+          'cypress/e2e/1-getting-started/todo.cy.js',
+          ...([
+            'actions',
+            'aliasing',
+            'assertions',
+            'connectors',
+            'cookies',
+            'cypress_api',
+            'files',
+            'local_storage',
+            'location',
+            'navigation',
+            'network_requests',
+            'querying',
+            'spies_stubs_clocks',
+            'utilities',
+            'viewport',
+            'waiting',
+            'window',
+          ].map((file) => `cypress/e2e/2-advanced-examples/${file}.cy.js`)),
+        ]
+
+        it('scaffolds example files when card is clicked', () => {
+          cy.get('@ScaffoldCard').click()
+
+          cy.findByRole('dialog', { name: defaultMessages.createSpec.e2e.importFromScaffold.specsAddedHeader }).within(() => {
+            cy.validateExternalLink({ name: 'Need help?', href: 'https://on.cypress.io' })
+            cy.findByRole('button', { name: 'Close' }).should('be.visible').as('CloseDialogButton')
+          })
+
+          cy.withCtx(async (ctx, options) => {
+            const generatedSpecPaths = (await ctx.project.findSpecs(ctx.currentProject ?? '', 'e2e', ['**/*.cy.js'], [], [])).map((spec) => spec.relative)
+
+            // Validate that all expected paths have been generated within the data context
+            expect(generatedSpecPaths.filter((path) => options.expectedScaffoldPaths.includes(path))).to.have.lengthOf(options.expectedScaffoldPaths.length)
+          }, { expectedScaffoldPaths })
+
+          // Dismisses dialog with close button press
+          cy.get('@CloseDialogButton').click()
+          cy.findByRole('dialog').should('not.exist')
+
+          // Validate that links for each generated spec are rendered
+          expectedScaffoldPaths.forEach((spec) => {
+            cy.get(`a[href="#/specs/runner?file=${spec}"`).scrollIntoView().should('be.visible')
           })
         })
 
-        cy.visitApp()
+        it('dismisses scaffold dialog with action button press', () => {
+          cy.get('@ScaffoldCard').click()
 
-        cy.contains('h1', defaultMessages.createSpec.page.customPatternNoSpecs.title)
+          cy.findByRole('dialog', { name: defaultMessages.createSpec.e2e.importFromScaffold.specsAddedHeader }).within(() => {
+            cy.findByRole('button', { name: defaultMessages.createSpec.e2e.importFromScaffold.specsAddedButton }).click()
+          })
 
-        cy.get('[data-cy="file-match-indicator"').contains('0 Matches')
-
-        cy.contains('code', customSpecPattern)
-      })
-    })
-
-    context('with specs', () => {
-      it('refreshes spec list on spec changes', () => {
-        cy.visitApp()
-
-        cy.get('[data-cy="create-spec-page-title"]').should('be.visible')
-
-        cy.withCtx(async (ctx, { testState }) => {
-          await ctx.actions.file.writeFileInProject(testState.newFilePath, '')
+          // Dismisses dialog with close button press
+          cy.findByRole('dialog').should('not.exist')
         })
-
-        cy.wait(1000)
-        cy.withCtx(async (ctx, { testState }) => {
-          expect(ctx.project.specs).have.length(1)
-
-          const addedSpec = ctx.project.specs.find((spec) => spec.absolute.includes(testState.newFilePath))
-
-          expect(addedSpec).not.be.equal(undefined)
-        })
-
-        // Hack due to ctx.emitter.toApp() not triggering a refresh in e2e test
-        // TODO: Figure out why emitter doesn't work in e2e tests
-        cy.visitApp()
-        cy.findByTestId('spec-item').should('contain', 'new-file')
       })
-    })
 
-    context('scaffold empty spec', () => {
-      it('should generate empty spec', () => {
-        cy.visitApp()
+      context('scaffold empty spec', () => {
+        it('should generate empty spec', () => {
+          cy.visitApp()
 
-        const openEmptySpecModal = () => {
-          cy.contains('h2', defaultMessages.createSpec.e2e.importEmptySpec.header).click()
+          // Verify the modal can be closed
+          cy.get('@EmptySpecCard').click()
+          cy.get('body').click(0, 0)
+          cy.get('[data-cy="create-spec-modal"]').should('not.exist')
+          cy.get('@EmptySpecCard').click()
+          cy.get('[aria-label="Close"]').click()
+          cy.get('[data-cy="create-spec-modal"]').should('not.exist')
+          cy.get('@EmptySpecCard').click()
+          cy.contains('button', defaultMessages.components.button.cancel).click()
           cy.get('[data-cy="create-spec-modal"]').within(() => {
-            cy.contains('h2', defaultMessages.createSpec.e2e.importEmptySpec.header)
+            cy.get('[data-cy="card"]').contains(defaultMessages.createSpec.e2e.importEmptySpec.header).click()
           })
-        }
 
-        // Verify the modal can be closed
-        openEmptySpecModal()
-        cy.get('body').click(0, 0)
-        cy.get('[data-cy="create-spec-modal"]').should('not.exist')
-        openEmptySpecModal()
-        cy.get('[aria-label="Close"]').click()
-        cy.get('[data-cy="create-spec-modal"]').should('not.exist')
-        openEmptySpecModal()
-        cy.contains('button', defaultMessages.components.button.cancel).click()
-        cy.get('[data-cy="create-spec-modal"]').within(() => {
-          cy.get('[data-cy="card"]').contains(defaultMessages.createSpec.e2e.importEmptySpec.header).click()
+          cy.get('input').invoke('val').should('eq', 'cypress/e2e/filename.cy.js')
+          cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.invalidSpecWarning).should('not.exist')
+          cy.get('input').clear()
+          cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.invalidSpecWarning).should('not.exist')
+
+          // Shows entered file does not match spec pattern
+          cy.get('input').type('cypress/e2e/no-match')
+          cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.invalidSpecWarning)
+          cy.contains('button', defaultMessages.createSpec.createSpec).should('be.disabled')
+
+          //Shows extension warning
+          cy.get('input').clear().type('cypress/e2e/MyTest.spec.j')
+          cy.intercept('mutation-EmptyGeneratorCardStepOne_MatchSpecFile', (req) => {
+            if (req.body.variables.specFile === 'cypress/e2e/MyTest.spec.jx') {
+              req.on('before:response', (res) => {
+                res.body.data.matchesSpecPattern = true
+              })
+            }
+          })
+
+          cy.get('input').type('x')
+          cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.specExtensionWarning)
+          cy.contains('span', '{filename}.cy.jx')
+
+          // Create spec
+          cy.get('input').clear().type('cypress/e2e/MyTest.cy.js')
+          cy.contains('button', defaultMessages.createSpec.createSpec).should('not.be.disabled').click()
+          cy.contains('h2', defaultMessages.createSpec.successPage.header)
+
+          cy.get('[data-cy="file-row"]').contains('cypress/e2e/MyTest.cy.js').click()
+          cy.contains('code', 'describe(\'MyTest.cy.js\'')
+          cy.get('[aria-label="Close"]').click()
+
+          cy.visitApp().get('[data-cy="specs-list-row"]').contains('MyTest.cy.js')
+        })
+      })
+    })
+
+    context('project with custom spec pattern', () => {
+      beforeEach(() => {
+        cy.scaffoldProject('no-specs-custom-pattern')
+        cy.openProject('no-specs-custom-pattern')
+
+        // set preferred editor to bypass IDE selection dialog
+        cy.withCtx((ctx) => {
+          ctx.coreData.localSettings.availableEditors = [
+            ...ctx.coreData.localSettings.availableEditors,
+            {
+              id: 'test-editor',
+              binary: '/usr/bin/test-editor',
+              name: 'Test editor',
+            },
+          ]
+
+          ctx.coreData.localSettings.preferences.preferredEditorBinary = 'test-editor'
         })
 
-        cy.get('input').invoke('val').should('eq', 'cypress/e2e/filename.cy.js')
-        cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.invalidSpecWarning).should('not.exist')
-        cy.get('input').clear()
-        cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.invalidSpecWarning).should('not.exist')
+        cy.startAppServer('e2e')
+        cy.visitApp()
+      })
 
-        // Shows entered file does not match spec pattern
-        cy.get('input').type('cypress/e2e/no-match')
-        cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.invalidSpecWarning)
-        cy.contains('button', defaultMessages.createSpec.createSpec).should('be.disabled')
+      it('shows No Specs page with specPattern from config', () => {
+        cy.findByRole('heading', {
+          level: 1,
+          name: defaultMessages.createSpec.page.customPatternNoSpecs.title,
+        }).should('be.visible')
 
-        //Shows extension warning
-        cy.get('input').clear().type('cypress/e2e/MyTest.spec.j')
-        cy.intercept('mutation-EmptyGeneratorCardStepOne_MatchSpecFile', (req) => {
-          if (req.body.variables.specFile === 'cypress/e2e/MyTest.spec.jx') {
-            req.on('before:response', (res) => {
-              res.body.data.matchesSpecPattern = true
-            })
-          }
+        cy.findByTestId('create-spec-page-description')
+        .should('be.visible')
+        .and('contain', defaultMessages.createSpec.page.customPatternNoSpecs.description.split('{0}')[0])
+
+        cy.findByTestId('file-match-indicator').should('contain', '0 Matches')
+        cy.findByRole('button', { name: 'cypress.config.js' })
+        cy.findByTestId('spec-pattern').should('contain', 'src/**/*.cy.{js,jsx}')
+
+        cy.findByRole('button', { name: defaultMessages.createSpec.updateSpecPattern })
+        cy.findByRole('button', { name: 'New Spec', exact: false })
+      })
+
+      it('opens config file in ide from SpecPattern', () => {
+        cy.intercept('mutation-OpenConfigFile', { data: { 'openFileInIDE': true } }).as('OpenIDE')
+
+        cy.findByRole('button', { name: 'cypress.config.js' }).click()
+
+        cy.wait('@OpenIDE')
+      })
+
+      it('opens config file in ide from footer button', () => {
+        cy.intercept('mutation-OpenConfigFile').as('OpenIDE')
+
+        cy.findByRole('button', { name: defaultMessages.createSpec.updateSpecPattern }).click()
+
+        cy.wait('@OpenIDE')
+      })
+
+      it('shows new spec button to start creation workflow', () => {
+        cy.findByRole('button', { name: 'New Spec', exact: false }).click()
+
+        cy.findByRole('dialog', { name: defaultMessages.createSpec.newSpecModalTitle }).within(() => {
+          cy.findAllByTestId('card').eq(0)
+          .should('have.attr', 'tabindex', '0')
+          .and('contain', defaultMessages.createSpec.e2e.importFromScaffold.header)
+
+          cy.findAllByTestId('card').eq(1)
+          .should('have.attr', 'tabindex', '0')
+          .and('contain', defaultMessages.createSpec.e2e.importEmptySpec.header)
         })
-
-        cy.get('input').type('x')
-        cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.specExtensionWarning)
-        cy.contains('span', '{filename}.cy.jx')
-
-        // Create spec
-        cy.get('input').clear().type('cypress/e2e/MyTest.cy.js')
-        cy.contains('button', defaultMessages.createSpec.createSpec).should('not.be.disabled').click()
-        cy.contains('h2', defaultMessages.createSpec.successPage.header)
-
-        cy.get('[data-cy="file-row"]').contains('cypress/e2e/MyTest.cy.js').click()
-        cy.contains('code', 'describe(\'MyTest.cy.js\'')
-        cy.get('[aria-label="Close"]').click()
-
-        cy.visitApp().get('[data-testid="specs-list-row"]').contains('MyTest.cy.js')
       })
     })
   })
@@ -469,6 +523,7 @@ describe('App: Index', () => {
         cy.scaffoldProject('no-specs-custom-pattern')
         cy.openProject('no-specs-custom-pattern')
 
+        // set preferred editor to bypass IDE selection dialog
         cy.withCtx((ctx) => {
           ctx.coreData.localSettings.availableEditors = [
             ...ctx.coreData.localSettings.availableEditors,
@@ -486,7 +541,7 @@ describe('App: Index', () => {
         cy.visitApp()
       })
 
-      it('shows no specs page with specPattern from config', () => {
+      it('shows No Specs page with specPattern from config', () => {
         cy.findByRole('heading', {
           level: 1,
           name: defaultMessages.createSpec.page.customPatternNoSpecs.title,
@@ -505,7 +560,7 @@ describe('App: Index', () => {
       })
 
       it('opens config file in ide from SpecPattern', () => {
-        cy.intercept('/graphql/query-OpenConfigFileInIDE').as('OpenIDE')
+        cy.intercept('mutation-OpenConfigFile', { data: { 'openFileInIDE': true } }).as('OpenIDE')
 
         cy.findByRole('button', { name: 'cypress.config.js' }).click()
 
@@ -513,7 +568,7 @@ describe('App: Index', () => {
       })
 
       it('opens config file in ide from footer button', () => {
-        cy.intercept('/graphql/query-OpenConfigFileInIDE').as('OpenIDE')
+        cy.intercept('mutation-OpenConfigFile').as('OpenIDE')
 
         cy.findByRole('button', { name: defaultMessages.createSpec.updateSpecPattern }).click()
 
