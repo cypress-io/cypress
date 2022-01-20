@@ -30,20 +30,4 @@ Cypress.on('app:timers:pause', timers.pause)
 
 timers.wrap()
 
-/**
- * When we create a listener from the runner for the AUT, we need to ensure the function
- * is sourced from the AUT, otherwise the event will not be associated correctly.
- *
- * We do this by creating a function from the AUT window, keeping in state to ensure we
- * only have a single fn
- *
- * https://github.com/cypress-io/cypress/pull/15995
- * https://github.com/cypress-io/cypress/issues/19697
- */
-Cypress.bridgeContentWindowListener = function (fn) {
-  return function () {
-    fn.apply(this, arguments)
-  }
-}
-
 Cypress.action('app:window:before:load', window)
