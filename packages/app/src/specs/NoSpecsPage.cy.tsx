@@ -20,12 +20,6 @@ describe('<NoSpecsPage />', { viewportHeight: 655, viewportWidth: 1032 }, () => 
             id: 'id',
             storybook: null,
             configFileAbsolutePath: '/usr/bin/cypress.config.ts',
-            codeGenGlobs: {
-              id: 'super-unique-id',
-              __typename: 'CodeGenGlobs',
-              component: '**.vue',
-              story: '**/*.stories.*',
-            },
             currentTestingType: 'component',
             specsBare: { ...ctx.currentProject?.specsBare, edges: ctx.currentProject?.specsBare?.edges || [] },
           }
@@ -67,12 +61,6 @@ describe('<NoSpecsPage />', { viewportHeight: 655, viewportWidth: 1032 }, () => 
             id: 'id',
             storybook: null,
             currentTestingType: 'e2e',
-            codeGenGlobs: {
-              id: 'super-unique-id',
-              __typename: 'CodeGenGlobs',
-              component: '**.vue',
-              story: '**/*.stories.*',
-            },
             specsBare: { ...ctx.currentProject?.specsBare, edges: ctx.currentProject?.specsBare?.edges || [] },
           }
         },
@@ -95,6 +83,8 @@ describe('<NoSpecsPage />', { viewportHeight: 655, viewportWidth: 1032 }, () => 
     it('renders the correct text for component testing', () => {
       const customSpecPattern = 'cypress/**/*.cy.ts'
 
+      const showCreateSpecModal = cy.spy().as('showCreateSpecModal')
+
       cy.mountFragment(NoSpecsPageFragmentDoc, {
         onResult: (res) => {
           if (res.currentProject?.config) {
@@ -108,7 +98,9 @@ describe('<NoSpecsPage />', { viewportHeight: 655, viewportWidth: 1032 }, () => 
           }
         },
         render: (gql) => {
-          return <NoSpecsPage gql={gql} isDefaultSpecPattern={false} title={messages.page.customPatternNoSpecs.title} />
+          return (
+            <NoSpecsPage gql={gql} onShowCreateSpecModal={showCreateSpecModal} isDefaultSpecPattern={false} title={messages.page.customPatternNoSpecs.title} />
+          )
         },
       })
 
@@ -119,13 +111,9 @@ describe('<NoSpecsPage />', { viewportHeight: 655, viewportWidth: 1032 }, () => 
       cy.contains(customSpecPattern)
       cy.contains(defaultMessages.createSpec.updateSpecPattern)
 
-      cy.log('state before clicking "New Spec" ')
-      cy.percySnapshot()
-
       cy.contains(defaultMessages.createSpec.newSpec).click()
-      cy.contains(defaultMessages.createSpec.newSpecModalTitle)
-      cy.log('state after clicking "New Spec"')
-      cy.percySnapshot()
+
+      cy.get('@showCreateSpecModal').should('have.been.called')
     })
   })
 })
