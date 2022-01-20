@@ -91,13 +91,16 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
   })
 
   describe('no internet connection', () => {
+    beforeEach(() => {
+      cy.goOnline()
+      cy.goOffline()
+    })
+
     afterEach(() => {
       cy.goOnline()
     })
 
     it('renders correct components if there is no internet connection', () => {
-      cy.goOffline()
-
       cy.mountFragment(LoginModalFragmentDoc, {
         render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><LoginModal gql={gqlVal} modelValue={true} /></div>,
       })
@@ -109,7 +112,6 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
     })
 
     it('shows login action when the internet is back', () => {
-      cy.goOffline()
       cy.mountFragment(LoginModalFragmentDoc, {
         render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><LoginModal gql={gqlVal} modelValue={true} /></div>,
       })
