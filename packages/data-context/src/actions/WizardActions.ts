@@ -196,9 +196,7 @@ export class WizardActions {
     codeBlocks.push(lang === 'ts' ? `import { defineConfig } from 'cypress'` : `const { defineConfig } = require('cypress')`)
     codeBlocks.push('')
     codeBlocks.push(lang === 'ts' ? `export default defineConfig({` : `module.exports = defineConfig({`)
-    codeBlocks.push(`  ${E2E_SCAFFOLD_BODY({
-      lang,
-    }).replace(/\n/g, '\n  ')}`)
+    codeBlocks.push(`  ${E2E_SCAFFOLD_BODY.replace(/\n/g, '\n  ')}`)
 
     codeBlocks.push('})\n')
 
@@ -319,30 +317,13 @@ export class WizardActions {
   }
 }
 
-interface E2eScaffoldOpts {
-  lang: CodeLanguageEnum
-}
-
-const E2E_SCAFFOLD_BODY = (opts: E2eScaffoldOpts) => {
-  if (opts.lang === 'ts') {
-    return dedent`
-  e2e: {
-    supportFile: 'cypress/support/e2e.ts',
-    setupNodeEvents(on, config) {
-      // implement node event listeners here
-    },
-  },
-    `
-  }
-
-  return dedent`
+const E2E_SCAFFOLD_BODY = dedent`
   e2e: {
     setupNodeEvents(on, config) {
       // implement node event listeners here
     },
   },
-  `
-}
+`
 
 interface ComponentScaffoldOpts {
   lang: CodeLanguageEnum
@@ -352,21 +333,12 @@ interface ComponentScaffoldOpts {
 }
 
 const COMPONENT_SCAFFOLD_BODY = (opts: ComponentScaffoldOpts) => {
-  if (opts.lang === 'ts') {
-    return dedent`
-  component: {
-    supportFile: 'cypress/support/component.ts',
-    devServer: import('${opts.requirePath}'),
-    devServerConfig: ${opts.configOptionsString}
-  },`
-  }
-
   return dedent`
-  component: {
-    devServer: import('${opts.requirePath}'),
-    devServerConfig: ${opts.configOptionsString}
-  },
-`
+    component: {
+      devServer: import('${opts.requirePath}'),
+      devServerConfig: ${opts.configOptionsString}
+    },
+  `
 }
 
 const FIXTURE_DATA = {
