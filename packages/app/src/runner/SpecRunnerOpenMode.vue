@@ -114,7 +114,7 @@ import HideDuringScreenshotOrRunMode from './screenshot/HideDuringScreenshotOrRu
 import AutomationDisconnected from './automation/AutomationDisconnected.vue'
 import AutomationMissing from './automation/AutomationMissing.vue'
 import AutomationElement from './automation/AutomationElement.vue'
-import { useResizablePanes, useRunnerStyle } from './useRunnerStyle'
+import { useResizablePanels, useRunnerStyle } from './useRunnerStyle'
 import { useEventManager } from './useEventManager'
 
 gql`
@@ -171,7 +171,7 @@ const {
 const {
   handlePanelWidthUpdated,
   handleResizeEnd,
-} = useResizablePanes()
+} = useResizablePanels()
 
 const {
   initializeRunnerLifecycleEvents,

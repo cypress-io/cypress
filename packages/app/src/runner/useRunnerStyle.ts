@@ -84,7 +84,7 @@ export const useRunnerStyle = ({
   }
 }
 
-export function useResizablePanes () {
+export function useResizablePanels () {
   const preferences = usePreferences()
 
   const handleResizeEnd = (panel: DraggablePanel) => {
