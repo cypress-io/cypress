@@ -349,7 +349,7 @@ describe('Routes', () => {
     })
 
     // TODO: no automation in unified app
-    it.skip('clientRoute routes to \'not launched through Cypress\' without a proxy set', function () {
+    it('clientRoute routes to \'not launched through Cypress\' without a proxy set', function () {
       return this.rp({
         url: `${this.proxy}/__`,
         proxy: null,
