@@ -41,11 +41,12 @@ const isRunMode = window.__CYPRESS_MODE__ === 'run'
 // in run mode, we are not using GraphQL or urql
 // for performance - run mode does not need the
 // same level of runner interactivity as open mode.
-// by setting `cache-only` in run mode, urql will not trigger any
+// by setting `pause: true` in run mode, urql will not trigger any
 // requests, which is what we want.
 const query = useQuery({
   query: SpecPageContainerDocument,
-  requestPolicy: isRunMode && window.top === window ? 'cache-only' : 'cache-and-network',
+  requestPolicy: 'cache-and-network',
+  pause: isRunMode && window.top === window,
 })
 
 // because we are not using GraphQL in run mode, and we still need
