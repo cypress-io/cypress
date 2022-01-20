@@ -67,7 +67,7 @@
         />
       </template>
     </BeforeAfter>
-    <ChangeExtensionModalStep1
+    <OptOutModalStep1
       v-if="step1Modal"
       @proceed="
         step1Modal = false;
@@ -75,7 +75,7 @@
       "
       @cancel="step1Modal = false"
     />
-    <ChangeExtensionModalStep2
+    <OptOutModalStep2
       v-if="step2Modal"
       @cancel="step2Modal = false"
       @save="(val) => {
@@ -93,8 +93,8 @@ import BeforeAfter from './fragments/BeforeAfter.vue'
 import HighlightedFilesList from './fragments/HighlightedFilesList.vue'
 import MigrationList from './fragments/MigrationList.vue'
 import MigrationTitle from './fragments/MigrationTitle.vue'
-import ChangeExtensionModalStep1 from './ChangeExtensionModalStep1.vue'
-import ChangeExtensionModalStep2 from './ChangeExtensionModalStep2.vue'
+import OptOutModalStep1 from './OptOutModalStep1.vue'
+import OptOutModalStep2 from './OptOutModalStep2.vue'
 import { gql } from '@urql/vue'
 import type { RenameSpecsAutoFragment } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
