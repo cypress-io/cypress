@@ -10,7 +10,7 @@
     "codecov": "codecov",
     "dev": "node index.js",
     "docker": "cd ../.. && WORKING_DIR=/packages/server ./scripts/run-docker-local.sh",
-    "tslint": "tslint --project tslint.json 'lib/**/*.{ts,js}'",
+    "tslint": "tslint --config ../ts/tslint.json --project .",
     "postinstall": "patch-package",
     "repl": "node repl.js",
     "start": "node ../../scripts/cypress open --dev --global",

@@ -12,7 +12,7 @@ describe('App Top Nav Workflows', () => {
       cy.startAppServer()
       cy.visitApp()
 
-      cy.findByTestId('app-header-bar').should('be.visible').and('contain', 'Specs-Index')
+      cy.findByTestId('app-header-bar').should('be.visible').and('contain', 'Specs')
     })
   })
 
