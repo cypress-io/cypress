@@ -28,9 +28,9 @@ export const verify = (ctx, options) => {
   const fileRegex = new RegExp(`${Cypress.spec.relative}:${line}:${column}`)
 
   it(`✓ VERIFY`, function () {
-    const runnerWs = window.top.runnerWs
+    const runnerWs = window.top.ws
 
-    cy.stub(window.top.runnerWs, 'emit').callThrough().withArgs('get:user:editor')
+    cy.stub(window.top.ws, 'emit').callThrough().withArgs('get:user:editor')
     .yields({
       preferredOpener: {
         id: 'foo-editor',
@@ -40,7 +40,7 @@ export const verify = (ctx, options) => {
       },
     })
 
-    window.top.runnerWs.emit.callThrough().withArgs('open:file')
+    window.top.ws.emit.callThrough().withArgs('open:file')
 
     cy.wrap(Cypress.$(window.top.document.body))
     .find('.reporter')

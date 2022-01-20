@@ -69,8 +69,12 @@ describe('Launchpad: Open Mode', () => {
   })
 
   describe('open in ide', () => {
+    beforeEach(() => {
+      cy.scaffoldProject('todos')
+      cy.openGlobalMode()
+    })
+
     it('configures an editor if one is not configured', () => {
-      cy.openProject('todos')
       cy.withCtx(async (ctx, o) => {
         ctx.coreData.localSettings.preferences.preferredEditorBinary = undefined
         ctx.coreData.localSettings.availableEditors = [
@@ -102,8 +106,6 @@ describe('Launchpad: Open Mode', () => {
     })
 
     it('opens using finder', () => {
-      cy.scaffoldProject('todos')
-      cy.openProject('todos')
       cy.withCtx(async (ctx, o) => {
         ctx.actions.electron.showItemInFolder = o.sinon.stub()
         ctx.coreData.app.projects = [{ projectRoot: '/some/project' }]
