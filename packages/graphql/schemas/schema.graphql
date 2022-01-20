@@ -616,11 +616,11 @@ type Mutation {
   """Log out of Cypress Cloud"""
   logout: Query
 
-  """Transforms cypress.json file into cypress.config.js file"""
-  migrateConfigFile: Boolean
-  
   """Check if a give spec file will match the project spec pattern"""
   matchesSpecPattern(specFile: String!): Boolean!
+
+  """Transforms cypress.json file into cypress.config.js file"""
+  migrateConfigFile: Boolean
 
   """Open a path in preferred IDE"""
   openDirectoryInIDE(path: String!): Boolean
