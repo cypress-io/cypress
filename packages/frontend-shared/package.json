@@ -18,6 +18,7 @@
   "dependencies": {
     "@toycode/markdown-it-class": "1.2.3",
     "markdown-it": "12.2.0",
+    "onigasm": "^2.2.5",
     "shiki": "^0.9.12"
   },
   "devDependencies": {
