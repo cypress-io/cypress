@@ -170,14 +170,11 @@ describe('App: Index', () => {
       cy.contains('button', defaultMessages.createSpec.createSpec).should('not.be.disabled').click()
       cy.contains('h2', defaultMessages.createSpec.successPage.header)
 
-      // TODO: App requery is causing page to refresh, closing the modal on spec creation
-      // see: https://github.com/cypress-io/cypress/pull/19619
+      cy.get('[data-cy="file-row"]').contains('cypress/e2e/MyTest.cy.js').click()
+      cy.contains('code', 'describe(\'MyTest.cy.js\'')
+      cy.get('[aria-label="Close"]').click()
 
-      // cy.get('[data-cy="file-row"]').contains('cypress/e2e/MyTest.cy.js').click()
-      // cy.contains('code', 'describe(\'MyTest.cy.js\'')
-      // cy.get('[aria-label="Close"]').click()
-
-      // cy.visitApp().get('[data-testid="specs-list-row"]').contains('MyTest.cy.js')
+      cy.visitApp().get('[data-testid="specs-list-row"]').contains('MyTest.cy.js')
     })
   })
 })
