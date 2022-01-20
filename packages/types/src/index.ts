@@ -4,6 +4,8 @@ export * from './constants'
 
 export * from './preferences'
 
+export * from './automation'
+
 export * from './driver'
 
 export * from './spec'

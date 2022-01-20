@@ -51,7 +51,9 @@ describe('InlineSpecListTree', () => {
     specStore.setActiveSpec({
       relative: 'src/components/Spec-B.spec.tsx',
       absolute: '',
-      name: 'Spec-B.spec.tsx',
+      name: 'src/components/Spec-B.spec.tsx',
+      fileName: 'src/components/Spec-B.spec.tsx',
+      baseName: 'Spec-B.spec.tsx',
     })
 
     const specProp = ref(foundSpecs.slice(0, 4))

@@ -1,8 +1,8 @@
-import type { BaseSpec } from '@packages/types/src'
+import type { SpecFile } from '@packages/types/src'
 import { defineStore } from 'pinia'
 
 export interface SpecState {
-  activeSpec: BaseSpec | null
+  activeSpec: SpecFile | null
 }
 
 export const useSpecStore = defineStore({
@@ -15,7 +15,7 @@ export const useSpecStore = defineStore({
   },
 
   actions: {
-    setActiveSpec (activeSpec: BaseSpec | null) {
+    setActiveSpec (activeSpec: SpecFile | null) {
       this.activeSpec = activeSpec
     },
   },
