@@ -1,20 +1,20 @@
 <template>
   <CreateSpecCards
-    data-testid="create-spec-page-cards"
+    data-cy="create-spec-page-cards"
     :gql="props.gql"
-    @select="choose"
+    @select="selectSpecCard"
   />
 
   <div class="border-t-1 mt-32px text-center pt-32px">
     <p
-      data-testid="no-specs-message"
+      data-cy="no-specs-message"
       class="leading-normal mb-16px text-gray-600 text-16px"
     >
       {{ t('createSpec.noSpecsMessage') }}
     </p>
     <Button
       :to="{ path: 'settings', query: { section: 'project', setting: 'specPattern' }}"
-      data-testid="view-spec-pattern"
+      data-cy="view-spec-pattern"
       variant="outline"
       prefix-icon-class="icon-light-gray-50 icon-dark-gray-400"
       :prefix-icon="SettingsIcon"
@@ -46,10 +46,10 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  (e: 'choose', id: string): void
+  (e: 'showCreateSpecModal', id: string): void
 }>()
 
-const choose = (id: string) => {
-  emit('choose', id)
+const selectSpecCard = (id: string) => {
+  emit('showCreateSpecModal', id)
 }
 </script>
