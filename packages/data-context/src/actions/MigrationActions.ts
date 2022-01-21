@@ -28,7 +28,7 @@ export class MigrationActions {
     return
   }
 
-  async reconfigureComponent () {
+  async startWizardReconfiguration () {
     // TODO: implement reconfiguration of component testing
   }
 

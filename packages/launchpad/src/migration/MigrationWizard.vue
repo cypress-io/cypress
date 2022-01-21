@@ -184,8 +184,20 @@ function skipStep2 () {
 
 // rename support files
 
+const renameSupportFileMutation = gql`
+mutation MigrationWizard_RenameSupport {
+  migrateRenameSupport {
+    migration {
+      step
+    }
+  }
+}
+`
+
+const renameSupportMutation = useMutation(renameSupportFileMutation)
+
 function launchRenameSupportFile () {
-  // TODO: mutate the migration state here
+  renameSupportMutation.executeMutation({})
 }
 
 // config file migration
@@ -204,7 +216,15 @@ function convertConfig () {
 
 // launch reconfigure component testing
 
+const launchReconfigureCTMutation = gql`
+mutation MigrationWizard_ReconfigureComponentTesting {
+  migrateComponentTesting
+}
+`
+
+const launchReconfigureMutation = useMutation(launchReconfigureCTMutation)
+
 function launchReconfigureComponentTesting () {
-  // TODO: mutate things here
+  launchReconfigureMutation.executeMutation({})
 }
 </script>

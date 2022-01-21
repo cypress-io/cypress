@@ -1,5 +1,5 @@
 <template>
-  <div>SupportFile</div>
+  <div>Component testing</div>
 </template>
 
 <script lang="ts" setup>

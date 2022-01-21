@@ -488,7 +488,7 @@ export const mutation = mutationType({
       type: 'Boolean',
       resolve: async (_, args, ctx) => {
         try {
-          await ctx.actions.migration.reconfigureComponent()
+          await ctx.actions.migration.startWizardReconfiguration()
 
           return true
         } catch {
