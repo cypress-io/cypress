@@ -107,7 +107,7 @@ export async function moveSpecFiles (e2eDirPath: string) {
 }
 
 export function getHighlightRegex (defaultFolder: 'e2e'|'integration') {
-  return `(${defaultFolder})|([._-]?[s|S]pec.|[.])(?=[j|t]s[x]?)`
+  return `cypress\/(?<dir>${defaultFolder})\/.*?(?<ext>[._-]?[s|S]pec.|[.])(?=[j|t]s[x]?)`
 }
 
 async function getSpecFiles (dirPath: string) {

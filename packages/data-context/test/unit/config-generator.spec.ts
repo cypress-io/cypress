@@ -1,5 +1,5 @@
 import snapshot from 'snap-shot-it'
-import { createConfigString, getSpecs, moveSpecFiles } from '../../src/util/migration'
+import { createConfigString, getSpecs } from '../../src/util/migration'
 import { expect } from 'chai'
 const util = require('util')
 const exec = util.promisify(require('child_process').exec)
@@ -93,7 +93,8 @@ describe('migration utils', () => {
       expect(specs.before).to.include('cypress/integration/app_spec.js')
       expect(specs.after).to.include('cypress/e2e/app.cy.js')
 
-      moveSpecFiles(e2eDirPath)
+      // not sure how to test this without messing up file tree
+      //moveSpecFiles(e2eDirPath)
     })
   })
 })
