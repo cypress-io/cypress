@@ -1080,8 +1080,7 @@ jobs:
           command: NODE_OPTIONS=--max_old_space_size=4096 yarn gulp checkTs
 
 
-  # a special job that keeps polling Circle and when all
-  # individual jobs are finished, it closes the Percy build
+# closes the Percy build when required jobs are passing
   percy-finalize:
     <<: *defaults
     parameters:
@@ -2193,8 +2192,7 @@ linux-workflow: &linux-workflow
           - run-frontend-shared-component-tests-chrome
           - run-launchpad-component-tests-chrome
           - run-launchpad-integration-tests-chrome
-          - runner-integration-tests-chrome
-          - runner-ct-integration-tests-chrome
+          - npm-design-system
     - lint-types:
         requires:
           - build
