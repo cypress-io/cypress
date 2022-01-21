@@ -113,40 +113,56 @@ export default {
   },
 
   as: {
+    docsUrl: 'https://on.cypress.io/as',
     empty_string: {
       message: `${cmd('as')} cannot be passed an empty string.`,
-      docsUrl: 'https://on.cypress.io/as',
     },
     invalid_type: {
       message: `${cmd('as')} can only accept a string.`,
-      docsUrl: 'https://on.cypress.io/as',
     },
     invalid_first_token: {
       message: '`{{alias}}` cannot be named starting with the `@` symbol. Try renaming the alias to `{{suggestedName}}`, or something else that does not start with the `@` symbol.',
-      docsUrl: 'https://on.cypress.io/as',
     },
     reserved_word: {
       message: `${cmd('as')} cannot be aliased as: \`{{alias}}\`. This word is reserved.`,
-      docsUrl: 'https://on.cypress.io/as',
+    },
+  },
+
+  selectFile: {
+    docsUrl: 'https://on.cypress.io/selectfile',
+    invalid_action: {
+      message: `${cmd('selectFile')} \`action\` can only be \`select\` or \`drag-drop\`. You passed: \`{{action}}\`.`,
+    },
+    invalid_array_file_reference: {
+      message: `${cmd('selectFile')} must be passed an array of Buffers or objects with non-null \`contents\`. At files[{{index}}] you passed: \`{{file}}\`.`,
+    },
+    invalid_single_file_reference: {
+      message: `${cmd('selectFile')} must be passed a Buffer or an object with a non-null \`contents\` property as its 1st argument. You passed: \`{{file}}\`.`,
+    },
+    multiple_elements: {
+      message: `${cmd('selectFile')} can only be called on a single element. Your subject contained {{num}} elements.`,
+    },
+    not_file_input: {
+      message: `${cmd('selectFile')} can only be called on an \`<input type="file">\` or a \`<label for="fileInput">\` pointing to or containing one. Your subject is: \`{{node}}\`.`,
+    },
+    invalid_alias: {
+      message: `${cmd('selectFile')} can only attach strings, Buffers or objects, while your alias \`{{alias}}\` resolved to: \`{{subject}}\`.`,
     },
   },
 
   blur: {
+    docsUrl: 'https://on.cypress.io/blur',
     multiple_elements: {
       message: `${cmd('blur')} can only be called on a single element. Your subject contained {{num}} elements.`,
-      docsUrl: 'https://on.cypress.io/blur',
     },
     no_focused_element: {
       message: `${cmd('blur')} can only be called when there is a currently focused element.`,
-      docsUrl: 'https://on.cypress.io/blur',
     },
     timed_out: {
       message: `${cmd('blur')} timed out because your browser did not receive any \`blur\` events. This is a known bug in Chrome when it is not the currently focused window.`,
-      docsUrl: 'https://on.cypress.io/blur',
     },
     wrong_focused_element: {
       message: `${cmd('blur')} can only be called on the focused element. Currently the focused element is a: \`{{node}}\``,
-      docsUrl: 'https://on.cypress.io/blur',
     },
   },
 
@@ -469,12 +485,14 @@ export default {
         docsUrl: `https://on.cypress.io/${_.toLower(obj.cmd)}`,
       }
     },
-    existent: {
-      message: stripIndent`
-        ${cmd('readFile', '"{{file}}"')} failed because the file exists when expected not to exist at the following path:
+    existent (obj) {
+      return {
+        message: stripIndent`
+          ${cmd('{{cmd}}', '"{{file}}"')} failed because the file exists when expected not to exist at the following path:
 
-        \`{{filePath}}\``,
-      docsUrl: 'https://on.cypress.io/readfile',
+          \`{{filePath}}\``,
+        docsUrl: `https://on.cypress.io/${_.toLower(obj.cmd)}`,
+      }
     },
     invalid_argument (obj) {
       return {
@@ -486,12 +504,14 @@ export default {
       message: `${cmd('writeFile')} must be passed a non-empty string, an object, or an array as its 2nd argument. You passed: \`{{contents}}\`.`,
       docsUrl: 'https://on.cypress.io/writefile',
     },
-    nonexistent: {
-      message: stripIndent`
-        ${cmd('readFile', '"{{file}}"')} failed because the file does not exist at the following path:
+    nonexistent (obj) {
+      return {
+        message: stripIndent`
+          ${cmd('{{cmd}}', '"{{file}}"')} failed because the file does not exist at the following path:
 
-        \`{{filePath}}\``,
-      docsUrl: 'https://on.cypress.io/readfile',
+          \`{{filePath}}\``,
+        docsUrl: `https://on.cypress.io/${_.toLower(obj.cmd)}`,
+      }
     },
     timed_out (obj) {
       return {

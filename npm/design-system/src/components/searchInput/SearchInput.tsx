@@ -13,11 +13,11 @@ export interface SearchInputProps extends CoreComponent {
   /**
    * Defaults to 'm'
    */
-   size?: TextSize
+  size?: TextSize
 
-   onInput: (input: string) => void
-   onEnter?: (input: string) => void
-   onVerticalArrowKey?: (key: 'up' | 'down') => void
+  onInput: (input: string) => void
+  onEnter?: (input: string) => void
+  onVerticalArrowKey?: (key: 'up' | 'down') => void
 
   ['aria-label']: string
 }

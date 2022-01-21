@@ -2,7 +2,7 @@
 describe('multi-domain - rerun', { experimentalMultiDomain: true }, () => {
   beforeEach(() => {
     cy.visit('/fixtures/multi-domain.html')
-    cy.get('a').click()
+    cy.get('a[data-cy="multi-domain-secondary-link"]').click()
   })
 
   // this test will hang without the fix for multi-domain rerun
