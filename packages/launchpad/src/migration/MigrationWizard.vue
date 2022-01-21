@@ -110,7 +110,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { gql, useMutation, useQuery } from '@urql/vue'
-import { MIGRATION_STEPS } from '@packages/types'
 import Button from '@cy/components/Button.vue'
 import MigrationStep from './fragments/MigrationStep.vue'
 import RenameSpecsAuto from './RenameSpecsAuto.vue'
