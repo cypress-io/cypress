@@ -62,6 +62,7 @@ const specs = window.__RUN_MODE_SPECS__
 window.__showSelectorPlaygroundForTestingPurposes = () => {
   togglePlayground(getAutIframeModel())
 }
+
 </script>
 
 <route>
@@ -72,3 +73,50 @@ window.__showSelectorPlaygroundForTestingPurposes = () => {
     }
   }
 </route>
+
+<style lang="scss">
+
+iframe.aut-iframe {
+  width: 100%;
+  height: 100%;
+  background: white;
+}
+
+iframe.spec-iframe {
+    border: none;
+    height: 0;
+    position: absolute;
+    visibility: hidden;
+    width: 0;
+}
+
+.highlight {
+  background: rgba(159, 196, 231, 0.6);
+  border: solid 2px #9FC4E7;
+  cursor: pointer;
+}
+
+.tooltip {
+  font-family: sans-serif;
+  font-size: 14px;
+  max-width: 400px !important;
+}
+
+#unified-runner {
+  position: relative;
+    margin: 0 auto;
+}
+
+.is-screenshotting #unified-runner {
+    margin: unset;
+}
+
+#unified-runner > .screenshot-height-container {
+  height: 100%
+}
+
+.is-screenshotting #unified-runner > .screenshot-height-container {
+  height: min(100%, 100vh);
+}
+
+</style>
