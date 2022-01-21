@@ -542,6 +542,15 @@ const getMsgByType = function (type, ...args) {
         https://on.cypress.io/renderer-process-crashed`
     case 'AUTOMATION_SERVER_DISCONNECTED':
       return 'The automation client disconnected. Cannot continue running tests.'
+
+    case 'MULTIPLES_SUPPORT_FILES_FOUND':
+      return stripIndent`\
+        There are multiples support files.
+
+        Your \`supportFile\` is set to \`${arg1}\`, and we found \`${arg2}\`.
+
+        Correct your supportFile config or merge the files into one.`
+
     case 'SUPPORT_FILE_NOT_FOUND':
       return stripIndent`\
         The support file is missing or invalid.
