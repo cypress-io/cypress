@@ -11,13 +11,22 @@ export class Validator {
     this.onFailure = onFailure
   }
 
-  validate ({ callbackFn, domain, done, doneReference }) {
+  validate ({ callbackFn, data, domain, done, doneReference }) {
     if (typeof domain !== 'string') {
       this.onFailure()
 
       $errUtils.throwErrByPath('switchToDomain.invalid_domain_argument', {
         onFail: this.log,
         args: { arg: $utils.stringify(domain) },
+      })
+    }
+
+    if (data && !Array.isArray(data)) {
+      this.onFailure()
+
+      $errUtils.throwErrByPath('switchToDomain.invalid_data_argument', {
+        onFail: this.log,
+        args: { arg: $utils.stringify(data) },
       })
     }
 

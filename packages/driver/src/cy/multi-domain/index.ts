@@ -32,7 +32,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
   })
 
   Commands.addAll({
-    switchToDomain<T> (domain: string, doneOrDataOrFn: T | Mocha.Done | (() => {}), dataOrFn?: T | (() => {}), fn?: (data?: T) => {}) {
+    switchToDomain<T> (domain: string, doneOrDataOrFn: T[] | Mocha.Done | (() => {}), dataOrFn?: T[] | (() => {}), fn?: (data?: T[]) => {}) {
       clearTimeout(timeoutId)
 
       if (!config('experimentalMultiDomain')) {
@@ -76,6 +76,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
 
       validator.validate({
         callbackFn,
+        data,
         domain,
         done,
         doneReference: state('done'),
