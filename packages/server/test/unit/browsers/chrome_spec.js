@@ -7,10 +7,10 @@ const _ = require('lodash')
 
 const extension = require('@packages/extension')
 const launch = require('@packages/launcher/lib/browsers')
-const plugins = require(`${root}../lib/plugins`)
-const utils = require(`${root}../lib/browsers/utils`)
-const chrome = require(`${root}../lib/browsers/chrome`)
-const { fs } = require(`${root}../lib/util/fs`)
+const plugins = require(`../../../lib/plugins`)
+const utils = require(`../../../lib/browsers/utils`)
+const chrome = require(`../../../lib/browsers/chrome`)
+const { fs } = require(`../../../lib/util/fs`)
 
 describe('lib/browsers/chrome', () => {
   context('#open', () => {
@@ -163,7 +163,7 @@ describe('lib/browsers/chrome', () => {
     })
 
     it('DEPRECATED: normalizes --load-extension if provided in plugin', function () {
-      plugins.register('before:browser:launch', (browser, config) => {
+      plugins.registerEvent('before:browser:launch', (browser, config) => {
         return Promise.resolve(['--foo=bar', '--load-extension=/foo/bar/baz.js'])
       })
 
@@ -187,7 +187,7 @@ describe('lib/browsers/chrome', () => {
     })
 
     it('normalizes --load-extension if provided in plugin', function () {
-      plugins.register('before:browser:launch', (browser, config) => {
+      plugins.registerEvent('before:browser:launch', (browser, config) => {
         return Promise.resolve({
           args: ['--foo=bar', '--load-extension=/foo/bar/baz.js'],
         })
@@ -209,7 +209,7 @@ describe('lib/browsers/chrome', () => {
     })
 
     it('normalizes multiple extensions from plugins', function () {
-      plugins.register('before:browser:launch', (browser, config) => {
+      plugins.registerEvent('before:browser:launch', (browser, config) => {
         return Promise.resolve({ args: ['--foo=bar', '--load-extension=/foo/bar/baz.js,/quux.js'] })
       })
 
@@ -298,7 +298,7 @@ describe('lib/browsers/chrome', () => {
 
       return chrome.open('chrome', 'http://', {}, this.automation)
       .then(() => {
-        expect(this.launchedBrowser.kill).to.be.a('function')
+        expect(typeof this.launchedBrowser.kill).to.eq('function')
 
         this.launchedBrowser.kill()
 

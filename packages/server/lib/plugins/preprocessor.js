@@ -36,13 +36,13 @@ plugins.registerHandler((ipc) => {
   ipc.on('preprocessor:rerun', (filePath) => {
     debug('ipc preprocessor:rerun event')
 
-    return baseEmitter.emit('file:updated', filePath)
+    baseEmitter.emit('file:updated', filePath)
   })
 
-  return baseEmitter.on('close', (filePath) => {
+  baseEmitter.on('close', (filePath) => {
     debug('base emitter plugin close event')
 
-    return ipc.send('preprocessor:close', filePath)
+    ipc.send('preprocessor:close', filePath)
   })
 })
 
@@ -126,7 +126,7 @@ const API = {
 
     delete fileObjects[filePath]
 
-    return delete fileProcessors[filePath]
+    delete fileProcessors[filePath]
   },
 
   close () {
@@ -136,7 +136,7 @@ const API = {
     fileProcessors = {}
     baseEmitter.emit('close')
 
-    return baseEmitter.removeAllListeners()
+    baseEmitter.removeAllListeners()
   },
 }
 

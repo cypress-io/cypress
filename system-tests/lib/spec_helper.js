@@ -1,10 +1,8 @@
-const root = '@packages/server'
-
 const chai = require('chai')
 
 chai.use(require('chai-subset'))
 
-global.root = root
+global.IS_TEST = true
 global.supertest = require('supertest')
 global.nock = require('nock')
 global.expect = chai.expect

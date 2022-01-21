@@ -10,6 +10,7 @@ import $errUtils from '../../cypress/error_utils'
 import $Log from '../../cypress/log'
 import { bothUrlsMatchAndOneHasHash } from '../navigation'
 import { $Location } from '../../cypress/location'
+import type { RunState } from '../../cypress/runner'
 
 import debugFn from 'debug'
 const debug = debugFn('cypress:driver:navigation')
@@ -1000,7 +1001,7 @@ export default (Commands, Cypress, cy, state, config) => {
           // tell our backend we're changing domains
           // TODO: add in other things we want to preserve
           // state for like scrollTop
-          let s = {
+          let s: RunState = {
             currentId: id,
             tests: Cypress.runner.getTestsState(),
             startTime: Cypress.runner.getStartTime(),

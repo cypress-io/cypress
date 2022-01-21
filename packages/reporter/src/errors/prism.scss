@@ -3,13 +3,14 @@
 
 code[class*="language-"],
 pre[class*="language-"] {
-	color: #70787a;
+	color: $gray-400;
 	margin: 0;
+	text-shadow: $black 0px 1px;
 }
 
 :not(pre) > code[class*="language-"],
 pre[class*="language-"] {
-	background: #fff;
+	background: $gray-1000;
 }
 
 // .token.comment,
@@ -20,7 +21,7 @@ pre[class*="language-"] {
 // }
 
 .token.punctuation {
-	color: #70787a;
+	color: $gray-400;
 }
 
 .token.property,
@@ -30,7 +31,7 @@ pre[class*="language-"] {
 .token.constant,
 .token.symbol,
 .token.deleted {
-	color: #c1434f;
+	color: $red-400;
 }
 
 .token.selector,
@@ -39,7 +40,7 @@ pre[class*="language-"] {
 .token.char,
 .token.builtin,
 .token.inserted {
-	color: #469b76;
+	color: $jade-400;
 }
 
 .token.operator,
@@ -50,7 +51,8 @@ pre[class*="language-"] {
 .token.regex,
 .token.important,
 .token.variable {
-	color: #e08a45;
+	color: $orange-400;
+  background: $gray-1000;
 }
 
 .token.atrule,
@@ -58,7 +60,7 @@ pre[class*="language-"] {
 .token.keyword,
 .token.function,
 .token.class-name {
-	color: #3e76ad;
+	color: $indigo-400;
 }
 
 .line-numbers .line-numbers-rows {
@@ -66,11 +68,11 @@ pre[class*="language-"] {
 }
 
 .line-numbers-rows > span:before {
-	color: #c4c8cb;
+	color: $gray-800;
 }
 
 .line-highlight {
-	background: linear-gradient(to right, hsla(24, 20%, 50%,.1) 100%, hsla(24, 20%, 50%,0));
+	background: linear-gradient(to right, rgba($gray-100,.1) 100%, rgba($gray-100,0));
 
 	&:before {
 		display: none;

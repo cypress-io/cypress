@@ -1,8 +1,9 @@
-exports['injects guessed next.js template cypress.json'] = `
-{
-  "componentFolder": "src",
-  "testFiles": "**/*.spec.{js,ts,jsx,tsx}"
-}
+exports['injects guessed next.js template cypress.config.ts'] = `
+export default {
+  componentFolder: "src",
+  testFiles: "**/*.spec.{js,ts,jsx,tsx}"
+};
+
 `
 
 exports['injects guessed next.js template plugins/index.js'] = `
@@ -18,11 +19,12 @@ module.exports = (on, config) => {
 
 `
 
-exports['Injected overridden webpack template cypress.json'] = `
-{
-  "componentFolder": "cypress/component",
-  "testFiles": "**/*.spec.{js,ts,jsx,tsx}"
-}
+exports['Injected overridden webpack template cypress.config.ts'] = `
+export default {
+  componentFolder: "cypress/component",
+  testFiles: "**/*.spec.{js,ts,jsx,tsx}"
+};
+
 `
 
 exports['Injected overridden webpack template plugins/index.js'] = `
@@ -38,6 +40,6 @@ module.exports = (on, config) => {
 
 `
 
-exports['Injected overridden webpack template support/index.js'] = `
+exports['Injected overridden webpack template support/component.js'] = `
 import "./commands.js";
 `

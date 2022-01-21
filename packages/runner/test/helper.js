@@ -1,4 +1,5 @@
 import { returnMockRequire, register } from '@packages/web-config/node-jsdom-setup'
+import 'regenerator-runtime/runtime'
 import sinon from 'sinon'
 
 const driverMock = {}
@@ -19,9 +20,11 @@ register({
   },
 })
 
-const io = returnMockRequire('@packages/socket/lib/browser', { client: {} })
-
-io.client.connect = sinon.stub().returns({ emit: () => {}, on: () => {} })
+returnMockRequire('@packages/socket/lib/browser', {
+  client () {
+    return { emit: () => {}, on: () => {} }
+  },
+})
 
 const _useFakeTimers = sinon.useFakeTimers
 let timers = []

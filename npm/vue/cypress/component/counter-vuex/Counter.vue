@@ -13,10 +13,11 @@
 
 <script>
 import { mapState, mapGetters, mapMutations, mapActions } from 'vuex'
+
 export default {
   computed: {
     ...mapState(['count']),
-    ...mapGetters(['evenOrOdd'])
+    ...mapGetters(['evenOrOdd']),
   },
   methods: {
     ...mapMutations(['set']),
@@ -24,8 +25,8 @@ export default {
       'increment',
       'decrement',
       'incrementIfOdd',
-      'incrementAsync'
-    ])
-  }
+      'incrementAsync',
+    ]),
+  },
 }
 </script>

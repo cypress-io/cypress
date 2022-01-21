@@ -22,7 +22,7 @@ describe('e2e go', () => {
   // there have been regressions in electron which would
   // otherwise cause these tests to fail
   systemTests.it('passes', {
-    spec: 'go_spec.js',
+    spec: 'go.cy.js',
     snapshot: true,
   })
 })

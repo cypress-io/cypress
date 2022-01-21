@@ -12,17 +12,17 @@ Do not forget to replace the cypress commands in the `package.json` scripts:
 
 - Open `package.json`
 - find the `test` and `cy:open` scripts
-- In those scripts, replace `node ../../../../scripts/cypress` with  `cypress`. The command becomes `cypress open-ct` and `cypress run-ct`.
+- In those scripts, replace `node ../../../../scripts/cypress` with  `cypress`. The command becomes `cypress open --component` and `cypress run --component`.
 
-You should obtain 
+You should obtain
 
 ```diff
 {
   "scripts":{
--    "cy:open": "node ../../../../scripts/cypress open-ct",
-+    "cy:open": "cypress open-ct",
--    "test": "node ../../../../scripts/cypress run-ct"
-+    "test": "cypress run-ct"
+-    "cy:open": "node ../../../../scripts/cypress open --component",
++    "cy:open": "cypress open --component",
+-    "test": "node ../../../../scripts/cypress run --component"
++    "test": "cypress run --component"
   }
 }
 ```
@@ -33,7 +33,7 @@ You should obtain
   `yarn add -D babel-plugin-istanbul @cypress/code-coverage`
 - Add the istanbul plugin to your `babel.config.js`
 - Install `@cypress/code-coverage/task` in `cypress/plugins/index.js`
-- Install `@cypress/code-coverage/support` in `cypress/support/index.js`
+- Install `@cypress/code-coverage/support` in `cypress/support/component.js`
 - Enjoy
 
 **NOTE** Code coverage has been added to the vue-cli example. If you are using `vue-cli`, use the same steps described above to install coverage.

@@ -6,22 +6,22 @@ const electron = require('electron')
 const stripAnsi = require('strip-ansi')
 const snapshot = require('snap-shot-it')
 const pkg = require('@packages/root')
-const { fs } = require(`${root}../lib/util/fs`)
-const user = require(`${root}../lib/user`)
-const errors = require(`${root}../lib/errors`)
-const ProjectBase = require(`${root}../lib/project-base`).ProjectBase
-const browsers = require(`${root}../lib/browsers`)
-const Reporter = require(`${root}../lib/reporter`)
-const runMode = require(`${root}../lib/modes/run`)
-const { openProject } = require(`${root}../lib/open_project`)
-const videoCapture = require(`${root}../lib/video_capture`)
-const env = require(`${root}../lib/util/env`)
-const random = require(`${root}../lib/util/random`)
-const system = require(`${root}../lib/util/system`)
-const specsUtil = require(`${root}../lib/util/specs`)
-const { experimental } = require(`${root}../lib/experiments`)
+const { fs } = require(`../../../lib/util/fs`)
+const user = require(`../../../lib/user`)
+const errors = require(`../../../lib/errors`)
+const ProjectBase = require(`../../../lib/project-base`).ProjectBase
+const browsers = require(`../../../lib/browsers`)
+const Reporter = require(`../../../lib/reporter`)
+const runMode = require(`../../../lib/modes/run`)
+const { openProject } = require(`../../../lib/open_project`)
+const videoCapture = require(`../../../lib/video_capture`)
+const env = require(`../../../lib/util/env`)
+const random = require(`../../../lib/util/random`)
+const system = require(`../../../lib/util/system`)
+const { experimental } = require(`../../../lib/experiments`)
 
-describe('lib/modes/run', () => {
+// NOTE: Covered by e2e/integration tests
+describe.skip('lib/modes/run', () => {
   beforeEach(function () {
     this.projectInstance = new ProjectBase({ projectRoot: '/_test-output/path/to/project-e2e', testingType: 'e2e' })
   })
@@ -403,7 +403,7 @@ describe('lib/modes/run', () => {
         startedVideoCapture,
         endVideoCapture,
         spec: {
-          path: 'cypress/integration/spec.js',
+          path: 'cypress/e2e/spec.cy.js',
         },
       })
       .then((obj) => {
@@ -425,7 +425,7 @@ describe('lib/modes/run', () => {
           shouldUploadVideo: true,
           tests: results.tests,
           spec: {
-            path: 'cypress/integration/spec.js',
+            path: 'cypress/e2e/spec.cy.js',
           },
           stats: {
             tests: 1,
@@ -467,7 +467,7 @@ describe('lib/modes/run', () => {
         startedVideoCapture,
         endVideoCapture,
         spec: {
-          path: 'cypress/integration/spec.js',
+          path: 'cypress/e2e/spec.cy.js',
         },
       })
       .then((obj) => {
@@ -488,7 +488,7 @@ describe('lib/modes/run', () => {
           reporterStats: null,
           shouldUploadVideo: true,
           spec: {
-            path: 'cypress/integration/spec.js',
+            path: 'cypress/e2e/spec.cy.js',
           },
           stats: {
             failures: 1,
@@ -672,21 +672,28 @@ describe('lib/modes/run', () => {
       sinon.stub(videoCapture, 'start').resolves()
       sinon.stub(openProject, 'launch').resolves()
       this.projectInstance.__setConfig(config)
-      sinon.stub(openProject, 'getProject').resolves(this.projectInstance)
-      sinon.spy(errors, 'warning')
-
-      sinon.stub(specsUtil.default, 'findSpecs').resolves([
-        {
-          name: 'foo_spec.js',
-          path: 'cypress/integration/foo_spec.js',
-          absolute: '/path/to/spec.js',
-          specType: 'integration',
+      sinon.stub(openProject, 'getProject').returns({
+        getProjectId: () => Promise.resolve({}),
+        options: this.projectInstance.options,
+        getConfig: () => {
+          return {
+            e2e: {
+              specPattern: '...',
+            },
+          }
         },
-      ])
+        ctx: {
+          project: {
+            findSpecs: () => Promise.resolve([{}]),
+          },
+        },
+      })
+
+      sinon.spy(errors, 'warning')
     })
 
     it('shows no warnings for default browser', () => {
-      return runMode.run()
+      return runMode.run({ testingType: 'e2e' })
       .then(() => {
         expect(errors.warning).to.not.be.called
       })
@@ -697,7 +704,7 @@ describe('lib/modes/run', () => {
 
       sinon.stub(browsers, 'ensureAndGetByNameOrPath').resolves(browser)
 
-      return expect(runMode.run({ browser: 'opera' }))
+      return expect(runMode.run({ browser: 'opera', testingType: 'e2e' }))
       .to.be.rejectedWith(/invalid browser family in/)
     })
 
@@ -757,15 +764,7 @@ describe('lib/modes/run', () => {
       sinon.spy(runMode, 'waitForBrowserToConnect')
       sinon.spy(runMode, 'runSpecs')
       sinon.stub(openProject, 'launch').resolves()
-      sinon.stub(openProject, 'getProject').resolves(this.projectInstance)
-      sinon.stub(specsUtil.default, 'findSpecs').resolves([
-        {
-          name: 'foo_spec.js',
-          path: 'cypress/integration/foo_spec.js',
-          absolute: '/path/to/spec.js',
-          specType: 'integration',
-        },
-      ])
+      sinon.stub(openProject, 'getProject').returns(this.projectInstance)
     })
 
     it('no longer ensures user session', () => {
@@ -836,7 +835,6 @@ describe('lib/modes/run', () => {
           browser,
           {
             name: 'foo_spec.js',
-            path: 'cypress/integration/foo_spec.js',
             absolute: '/path/to/spec.js',
           },
           {

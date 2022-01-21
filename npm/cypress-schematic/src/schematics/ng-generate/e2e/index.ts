@@ -49,7 +49,7 @@ export default function (options: Schema): Rule {
     }
 
     if (options.path === undefined) {
-      options.path = `${project.root}/cypress/integration`
+      options.path = `${project.root}/cypress/e2e`
     }
 
     const templateSource = apply(url('../files/__path__'), [

@@ -11,18 +11,18 @@
 <script>
 export default {
   name: 'Counter',
-  data() {
+  data () {
     return {
       counter: 0,
-    };
+    }
   },
   methods: {
-    increment() {
-      this.counter++;
+    increment () {
+      this.counter++
     },
-    decrement() {
-      this.counter--;
+    decrement () {
+      this.counter--
     },
   },
-};
+}
 </script>

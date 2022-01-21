@@ -3,12 +3,12 @@
 </template>
 
 <script>
-  export default {
-    name: 'AlertMessage',
-    methods: {
-      handleClick() {
-        alert('Hello Vue')
-      }
-    }
-  }
+export default {
+  name: 'AlertMessage',
+  methods: {
+    handleClick () {
+      alert('Hello Vue')
+    },
+  },
+}
 </script>

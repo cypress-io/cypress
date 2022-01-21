@@ -1,5 +1,4 @@
 import React, { Component } from 'react'
-import { eventManager } from '@packages/runner-shared'
 
 class NoSpec extends Component {
   componentDidMount () {
@@ -13,7 +12,7 @@ class NoSpec extends Component {
           <p>Whoops, there is no test to run.</p>
           <p className='muted'>Choose a test to run from the desktop application.</p>
           <p>
-            <button onClick={() => eventManager.focusTests()}>
+            <button onClick={() => this.props.eventManager.focusTests()}>
               <i className='fas fa-chevron-left'></i>
               View All Tests
             </button>

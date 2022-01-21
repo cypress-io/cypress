@@ -69,7 +69,7 @@ $resizerLineSize: 4px;
   }
 
   &.horizontal {
-    margin: -($resize-thickness / 2) 0;
+    margin: -($resize-thickness * 0.5) 0;
     height: $resize-thickness;
     width: 100%;
     cursor: row-resize;
@@ -83,7 +83,7 @@ $resizerLineSize: 4px;
   }
 
   &.vertical {
-    margin: 0 -($resize-thickness / 2);
+    margin: 0 -($resize-thickness * 0.5);
     width: $resize-thickness;
     height: 100%;
     cursor: col-resize;

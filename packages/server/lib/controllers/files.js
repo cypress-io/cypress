@@ -3,25 +3,11 @@ const path = require('path')
 const Promise = require('bluebird')
 const cwd = require('../cwd')
 const glob = require('../util/glob')
-const specsUtil = require('../util/specs')
-const pathHelpers = require('../util/path_helpers')
 const debug = require('debug')('cypress:server:controllers')
 const { escapeFilenameInUrl } = require('../util/escape_filename')
-
-const SPEC_URL_PREFIX = '/__cypress/tests?p'
+const { getCtx } = require('@packages/data-context')
 
 module.exports = {
-  handleFiles (req, res, config) {
-    debug('handle files')
-
-    return specsUtil.default.findSpecs(config)
-    .then((files) => {
-      return res.json({
-        integration: files,
-      })
-    })
-  },
-
   handleIframe (req, res, config, getRemoteState, extraOptions) {
     const test = req.params[0]
     const iframePath = cwd('lib', 'html', 'iframe.html')
@@ -58,11 +44,11 @@ module.exports = {
     const convertSpecPath = (spec) => {
       // get the absolute path to this spec and
       // get the browser url + cache buster
-      const convertedSpec = pathHelpers.getAbsolutePathToSpec(spec, config)
+      const convertedSpec = path.join(config.projectRoot, spec)
 
       debug('converted %s to %s', spec, convertedSpec)
 
-      return this.prepareForBrowser(convertedSpec, config.projectRoot)
+      return this.prepareForBrowser(convertedSpec, config.projectRoot, config.namespace)
     }
 
     const specFilter = _.get(extraOptions, 'specFilter')
@@ -76,33 +62,39 @@ module.exports = {
     }
     const specFilterFn = specFilter ? specFilterContains : () => true
 
-    const getSpecsHelper = () => {
+    const getSpecsHelper = async () => {
       // grab all of the specs if this is ci
-      const componentTestingEnabled = _.get(config, 'resolved.testingType.value', 'e2e') === 'component'
-
       if (spec === '__all') {
         debug('returning all specs')
 
-        return specsUtil.default.findSpecs(config)
+        const ctx = getCtx()
+
+        const [e2ePatterns, componentPatterns] = await Promise.all([
+          ctx.project.specPatternsForTestingType(ctx.project.projectRoot, 'e2e'),
+          ctx.project.specPatternsForTestingType(ctx.project.projectRoot, 'component'),
+        ])
+
+        // It's possible that the E2E pattern matches some component tests, for example
+        // e2e.specPattern: src/**/*.cy.ts
+        // component.specPattern: src/components/**/*.cy.ts
+        // in this case, we want to remove anything that matches
+        // - the component.specPattern
+        // - the e2e.ignoreSpecPattern
+        return ctx.project.findSpecs(config.projectRoot, 'e2e', e2ePatterns.specPattern, e2ePatterns.ignoreSpecPattern, componentPatterns.specPattern)
         .then((specs) => {
           debug('found __all specs %o', specs)
 
           return specs
         })
         .filter(specFilterFn)
-        .filter((foundSpec) => {
-          return componentTestingEnabled
-            ? foundSpec.specType === 'component'
-            : foundSpec.specType === 'integration'
-        }).then((specs) => {
+        .then((specs) => {
           debug('filtered __all specs %o', specs)
 
           return specs
-        }).map((spec) => {
-          // grab the name of each
-          return spec.absolute
         }).map(convertSpecPath)
       }
+
+      debug('normalizing spec %o', { spec })
 
       // normalize by sending in an array of 1
       return [convertSpecPath(spec)]
@@ -114,7 +106,9 @@ module.exports = {
     })
   },
 
-  prepareForBrowser (filePath, projectRoot) {
+  prepareForBrowser (filePath, projectRoot, namespace) {
+    const SPEC_URL_PREFIX = `/${namespace}/tests?p`
+
     filePath = filePath.replace(SPEC_URL_PREFIX, '__CYPRESS_SPEC_URL_PREFIX__')
     filePath = escapeFilenameInUrl(filePath).replace('__CYPRESS_SPEC_URL_PREFIX__', SPEC_URL_PREFIX)
     const relativeFilePath = path.relative(projectRoot, filePath)
@@ -122,12 +116,12 @@ module.exports = {
     return {
       absolute: filePath,
       relative: relativeFilePath,
-      relativeUrl: this.getTestUrl(relativeFilePath),
+      relativeUrl: this.getTestUrl(relativeFilePath, namespace),
     }
   },
 
-  getTestUrl (file) {
-    const url = `${SPEC_URL_PREFIX}=${file}`
+  getTestUrl (file, namespace) {
+    const url = `/${namespace}/tests?p=${file}`
 
     debug('test url for file %o', { file, url })
 
@@ -143,7 +137,7 @@ module.exports = {
   },
 
   getSupportFile (config) {
-    const { projectRoot, supportFile } = config
+    const { projectRoot, supportFile, namespace } = config
 
     let files = []
 
@@ -173,7 +167,7 @@ module.exports = {
       return glob(p, { nodir: true })
     }).then(_.flatten)
     .map((filePath) => {
-      return this.prepareForBrowser(filePath, projectRoot)
+      return this.prepareForBrowser(filePath, projectRoot, namespace)
     })
   },
 

@@ -150,7 +150,7 @@ describe('create-cypress-tests', () => {
       expect(await fsExtra.pathExists(path.resolve(e2eTestOutputPath, 'cypress', 'plugins', 'index.js'))).to.equal(true)
       expect(await fsExtra.pathExists(path.resolve(e2eTestOutputPath, 'cypress', 'support', 'index.js'))).to.equal(true)
       expect(await fsExtra.pathExists(path.resolve(e2eTestOutputPath, 'cypress', 'support', 'commands.js'))).to.equal(true)
-      expect(await fsExtra.pathExists(path.resolve(e2eTestOutputPath, 'cypress.json'))).to.equal(true)
+      expect(await fsExtra.pathExists(path.resolve(e2eTestOutputPath, 'cypress.config.ts'))).to.equal(true)
     })
 
     it('Copies tsconfig if typescript is installed', async () => {

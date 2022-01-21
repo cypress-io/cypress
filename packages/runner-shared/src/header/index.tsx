@@ -8,8 +8,8 @@ import $ from 'jquery'
 import { ViewportInfo } from '../viewport-info'
 import { SelectorPlayground } from '../selector-playground/SelectorPlayground'
 import { selectorPlaygroundModel } from '../selector-playground'
-import { Studio, studioRecorder } from '../studio'
-import { eventManager } from '../event-manager'
+import { Studio } from '../studio'
+import type { EventManager } from '@packages/app/src/runner/event-manager'
 
 interface BaseState {
   isLoading: boolean
@@ -45,6 +45,7 @@ interface HeaderBaseProps {
     configFile: string
     [k: string]: unknown
   }
+  eventManager: EventManager
 }
 
 type CtHeaderProps = StateCT & HeaderBaseProps;
@@ -126,7 +127,7 @@ export class Header extends Component<HeaderProps> {
         ref={this.headerRef}
         className={cs({
           'showing-selector-playground': selectorPlaygroundModel.isOpen,
-          'showing-studio': studioRecorder.isOpen,
+          'showing-studio': this.props.eventManager.studioRecorder.isOpen,
           'display-none':
             this.props.runner === 'component' && this.props.state.screenshotting,
         })}
@@ -135,7 +136,7 @@ export class Header extends Component<HeaderProps> {
           <Tooltip
             title="Open Selector Playground"
             visible={
-              selectorPlaygroundModel.isOpen || studioRecorder.isOpen
+              selectorPlaygroundModel.isOpen || this.props.eventManager.studioRecorder.isOpen
                 ? false
                 : null
             }
@@ -148,7 +149,7 @@ export class Header extends Component<HeaderProps> {
               disabled={
                 this.props.state.isLoading ||
                 state.isRunning ||
-                studioRecorder.isOpen
+                this.props.eventManager.studioRecorder.isOpen
               }
               onClick={this._togglePlaygroundOpen}
             >
@@ -180,10 +181,10 @@ export class Header extends Component<HeaderProps> {
 
         <SelectorPlayground
           model={selectorPlaygroundModel}
-          eventManager={eventManager}
+          eventManager={this.props.eventManager}
         />
         {this.props.runner === 'e2e' && (
-          <Studio model={studioRecorder} hasUrl={!!this.props.state.url} />
+          <Studio model={this.props.eventManager.studioRecorder} hasUrl={!!this.props.state.url} />
         )}
       </header>
     )
@@ -191,7 +192,7 @@ export class Header extends Component<HeaderProps> {
 
   @action componentDidMount () {
     this.previousSelectorPlaygroundOpen = selectorPlaygroundModel.isOpen
-    this.previousRecorderIsOpen = studioRecorder.isOpen
+    this.previousRecorderIsOpen = this.props.eventManager.studioRecorder.isOpen
 
     this.urlInput = this.props.config.baseUrl
       ? `${this.props.config.baseUrl}/`
@@ -206,9 +207,9 @@ export class Header extends Component<HeaderProps> {
       this.previousSelectorPlaygroundOpen = selectorPlaygroundModel.isOpen
     }
 
-    if (studioRecorder.isOpen !== this.previousRecorderIsOpen) {
+    if (this.props.eventManager.studioRecorder.isOpen !== this.previousRecorderIsOpen) {
       this._updateWindowDimensions()
-      this.previousRecorderIsOpen = studioRecorder.isOpen
+      this.previousRecorderIsOpen = this.props.eventManager.studioRecorder.isOpen
     }
 
     if (this._studioNeedsUrl && this.urlInputRef.current) {
@@ -247,7 +248,7 @@ export class Header extends Component<HeaderProps> {
       return
     }
 
-    return studioRecorder.needsUrl && !this.props.state.url
+    return this.props.eventManager.studioRecorder.needsUrl && !this.props.state.url
   }
 
   @action _onUrlInput = (e) => {
@@ -266,12 +267,12 @@ export class Header extends Component<HeaderProps> {
     // ts interprets visitUrl below as (url: null | undefined) => never
     // TODO: studio/studio-recorder.js should be converted to ts. And add proper type.
     // @ts-ignore
-    studioRecorder.visitUrl(this.urlInput)
+    this.props.eventManager.studioRecorder.visitUrl(this.urlInput)
 
     this.urlInput = ''
   };
 
   _cancelStudio = () => {
-    eventManager.emit('studio:cancel')
+    this.props.eventManager.emit('studio:cancel')
   };
 }

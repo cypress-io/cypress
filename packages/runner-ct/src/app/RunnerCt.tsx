@@ -14,7 +14,7 @@ library.add(fas)
 library.add(fab)
 
 import State from '../lib/state'
-import { eventManager as EventManager, namedObserver, SpecList } from '@packages/runner-shared'
+import { EventManager, namedObserver, SpecList } from '@packages/runner-shared'
 import styles from '@packages/runner-shared/src/styles.module.scss'
 import { useGlobalHotKey } from '../lib/useHotKey'
 import { animationFrameDebounce } from '../lib/debounce'
@@ -28,7 +28,7 @@ import './RunnerCt.scss'
 
 interface RunnerCtProps {
   state: State
-  eventManager: typeof EventManager
+  eventManager: EventManager
   config: Cypress.RuntimeConfigOptions & Cypress.ResolvedConfigOptions
 }
 
@@ -49,7 +49,7 @@ export const AUT_IFRAME_MARGIN = {
   Y: 16,
 }
 
-const buildNavItems = (eventManager: typeof EventManager, toggleIsSetListOpen: () => boolean): NavItem[] => [
+const buildNavItems = (eventManager: EventManager, toggleIsSetListOpen: () => boolean): NavItem[] => [
   {
     id: 'file-explorer-nav',
     title: 'File Explorer',

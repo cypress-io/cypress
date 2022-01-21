@@ -1,0 +1,157 @@
+<!--
+/**==============================================
+ * *             FileChooser.vue
+ * Filter a list of files by a mix of glob pattern
+ * and a search string that includes a file's relative
+ * path.
+ *
+ * Features to note: debouncing + loading
+ * ==============================================
+ * *                Debouncing
+ *
+ * ? To prevent calling update too frequently we debounce
+ * ? both the "No Results" UI and the update event
+ *
+ * ============================================**/
+-->
+
+<template>
+  <CreateSpecModalBody
+    variant="bare"
+    class="bg-white flex flex-col px-24px
+  relative"
+  >
+    <FileMatch
+      ref="fileMatchRef"
+      v-model:pattern="filePathSearch"
+      v-model:extensionPattern="localExtensionPattern"
+      class="bg-white pt-24px pb-12px top-0px z-10 sticky"
+      :matches="matches"
+    >
+      <template
+        v-if="loading"
+        #matches
+      >
+        <i-cy-loading_x16 class="h-24px mr-10px animate-spin w-24px" />
+      </template>
+    </FileMatch>
+
+    <div
+      v-show="loading"
+      data-testid="loading"
+    >
+      <!-- TODO(ryan) UNIFY-865: Get mocks for a loading state here -->
+      Loading
+    </div>
+    <FileList
+      v-show="!loading"
+      :style="{ paddingTop: `${fileMatchHeight + 36}px` }"
+      class="right-24px left-24px absolute"
+      :files="filteredFiles"
+      :search="filePathSearch"
+      @selectFile="selectFile"
+    >
+      <template #no-results>
+        <NoResults
+          empty-search
+          :search="noResults.search"
+          :message="noResults.message"
+          @clear="noResults.clear"
+        />
+      </template>
+    </FileList>
+  </CreateSpecModalBody>
+</template>
+
+<script setup lang="ts">
+import { computed, ref, Ref, ComputedRef } from 'vue'
+import { debouncedWatch, useDebounce, useElementSize } from '@vueuse/core'
+import { useI18n } from '@cy/i18n'
+
+import NoResults from '@cy/components/NoResults.vue'
+import CreateSpecModalBody from './CreateSpecModalBody.vue'
+import FileList from './FileList.vue'
+import FileMatch from '../../components/FileMatch.vue'
+import { gql } from '@urql/core'
+
+const props = withDefaults(defineProps<{
+  files: any[]
+  extensionPattern: string,
+  loading?: boolean
+}>(), {
+
+  loading: false,
+})
+
+const { t } = useI18n()
+
+gql`
+fragment FileChooser on FileParts {
+  relative
+  id
+  ...FileListItem
+}
+`
+
+const emits = defineEmits<{
+  (eventName: 'selectFile', value: File)
+  (eventName: 'update:extensionPattern', value: string)
+}>()
+
+// eslint-disable-next-line
+const initialExtensionPattern = props.extensionPattern
+const localExtensionPattern = ref(props.extensionPattern)
+const filePathSearch = ref('')
+
+const selectFile = (file) => {
+  emits('selectFile', file)
+}
+
+///*------- Styling -------*/
+
+// For the FileList to be searchable without jumping to the top of the
+// FileMatcher's top when focused, we need to use some manual layout.
+// If we concede on position: sticky for the FileMatcher or on making the
+// FileList accessible, we could position the FileList relatively.
+const fileMatchRef = ref(null)
+const { height: fileMatchHeight } = useElementSize(fileMatchRef)
+
+///*------- Debounce -------*/
+
+const debounce = 200
+const debouncedExtensionPattern = useDebounce(localExtensionPattern, debounce)
+
+debouncedWatch(localExtensionPattern, (value) => {
+  emits('update:extensionPattern', value)
+}, { debounce })
+
+///*------- Searching files -------*/
+
+const filteredFiles = computed(() => {
+  return props.files?.filter((file) => {
+    return file.relative.toLowerCase().includes(filePathSearch.value.toLowerCase())
+  })
+})
+
+///*------- Matches Indicator -------*/
+
+const matches = computed(() => {
+  return {
+    total: props.files.length,
+    found: filteredFiles.value.length,
+  }
+})
+
+///*------- No Results Options -------*/
+
+const noResults = computed(() => {
+  return {
+    search: filePathSearch.value || debouncedExtensionPattern.value,
+    message: filePathSearch.value ? t('noResults.defaultMessage') : t('components.fileSearch.noMatchesForExtension'),
+    clear: filePathSearch.value ?
+      () => filePathSearch.value = '' :
+      () => localExtensionPattern.value = initialExtensionPattern,
+  }
+})
+
+</script>

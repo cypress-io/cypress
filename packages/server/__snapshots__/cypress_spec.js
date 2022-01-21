@@ -206,7 +206,7 @@ This machine sent the following parameters:
   "browserName": "Electron",
   "browserVersion": "59.1.2.3",
   "specs": [
-    "cypress/integration/app_spec.js"
+    "cypress/e2e/app.cy.js"
   ]
 }
 
@@ -282,7 +282,7 @@ Cypress encountered an error while parsing the argument config
 
 You passed: xyz
 
-The error was: Cannot read property 'split' of undefined
+The error was: Cannot parse as valid JSON
 `
 
 exports['could not parse env error'] = `
@@ -290,7 +290,7 @@ Cypress encountered an error while parsing the argument env
 
 You passed: a123
 
-The error was: Cannot read property 'split' of undefined
+The error was: Cannot parse as valid JSON
 `
 
 exports['could not parse reporter options error'] = `
@@ -298,7 +298,7 @@ Cypress encountered an error while parsing the argument reporterOptions
 
 You passed: nonono
 
-The error was: Cannot read property 'split' of undefined
+The error was: Cannot parse as valid JSON
 `
 
 exports['INVALID_CONFIG_OPTION'] = `

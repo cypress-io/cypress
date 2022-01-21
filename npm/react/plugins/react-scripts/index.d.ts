@@ -4,12 +4,13 @@ declare namespace legacyDevServer {
      * Location of the weppack.config Cypress should use
      */
     webpackConfigPath?: string
-  }
 
-  /**
-   * Type helper to make writing `CypressCRADevServerConfig` easier
-   */
-  function defineDevServerConfig(devServerConfig: CypressCRADevServerConfig): CypressCRADevServerConfig
+    /**
+     * Path to an index.html file that will serve as the template in
+     * which your components will be rendered.
+     */
+    indexHtml?: string
+  }
 
   /**
    * Sets up a Cypress component testing environment for your Create React App environment

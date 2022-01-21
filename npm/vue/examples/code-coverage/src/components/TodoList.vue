@@ -1,37 +1,40 @@
 <script>
-import BaseInputText from "./BaseInputText.vue";
-import TodoListItem from "./TodoListItem.vue";
-let nextTodoId = 1;
+import BaseInputText from './BaseInputText.vue'
+import TodoListItem from './TodoListItem.vue'
+let nextTodoId = 1
+
 export default {
   components: {
     BaseInputText,
-    TodoListItem
+    TodoListItem,
   },
-  data() {
+  data () {
     return {
-      newTodoText: "",
+      newTodoText: '',
       // empty list at first, each item like with "id" and "text"
-      todos: []
-    };
+      todos: [],
+    }
   },
   methods: {
-    addTodo() {
-      const trimmedText = this.newTodoText.trim();
+    addTodo () {
+      const trimmedText = this.newTodoText.trim()
+
       if (trimmedText) {
         this.todos.push({
           id: nextTodoId++,
-          text: trimmedText
-        });
-        this.newTodoText = "";
+          text: trimmedText,
+        })
+
+        this.newTodoText = ''
       }
     },
-    removeTodo(idToRemove) {
-      this.todos = this.todos.filter(todo => {
-        return todo.id !== idToRemove;
-      });
-    }
-  }
-};
+    removeTodo (idToRemove) {
+      this.todos = this.todos.filter((todo) => {
+        return todo.id !== idToRemove
+      })
+    },
+  },
+}
 </script>
 
 <template>

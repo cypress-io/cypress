@@ -1,0 +1,45 @@
+diff --git a/node_modules/@cypress/code-coverage/support-utils.js b/node_modules/@cypress/code-coverage/support-utils.js
+index 31e00ee..0c56908 100644
+--- a/node_modules/@cypress/code-coverage/support-utils.js
++++ b/node_modules/@cypress/code-coverage/support-utils.js
+@@ -10,7 +10,7 @@ const filterSpecsFromCoverage = (totalCoverage, config = Cypress.config) => {
+   const integrationFolder = config('integrationFolder')
+   /** @type {string} Cypress run-time config has test files string pattern */
+   // @ts-ignore
+-  const testFilePattern = config('testFiles')
++  const testFilePattern = config(Cypress.testingType).specPattern
+ 
+   // test files chould be:
+   //  wild card string "**/*.*" (default)
+diff --git a/node_modules/@cypress/code-coverage/support.js b/node_modules/@cypress/code-coverage/support.js
+index c99ceb2..f51ce4e 100644
+--- a/node_modules/@cypress/code-coverage/support.js
++++ b/node_modules/@cypress/code-coverage/support.js
+@@ -37,7 +37,6 @@ const logMessage = (s) => {
+  * If there are more files loaded from support folder, also removes them
+  */
+ const filterSupportFilesFromCoverage = (totalCoverage) => {
+-  const integrationFolder = Cypress.config('integrationFolder')
+   const supportFile = Cypress.config('supportFile')
+ 
+   /** @type {string} Cypress run-time config has the support folder string */
+@@ -50,16 +49,9 @@ const filterSupportFilesFromCoverage = (totalCoverage) => {
+     isSupportFile(filename)
+   )
+ 
+-  // check the edge case
+-  //   if we have files from support folder AND the support folder is not same
+-  //   as the integration, or its prefix (this might remove all app source files)
+-  //   then remove all files from the support folder
+-  if (!integrationFolder.startsWith(supportFolder)) {
+-    // remove all covered files from support folder
+-    coverage = Cypress._.omitBy(totalCoverage, (fileCoverage, filename) =>
+-      filename.startsWith(supportFolder)
+-    )
+-  }
++  coverage = Cypress._.omitBy(totalCoverage, (fileCoverage, filename) =>
++    filename.startsWith(supportFolder)
++  )
+   return coverage
+ }
+ 

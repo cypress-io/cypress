@@ -13,15 +13,8 @@ cypress.zip
 Cached Theme.pak
 Cached Theme Material Design.pak
 
-# from config, compiled .js files
-packages/config/lib/*.js
-
 # from data-context, compiled .js files
 packages/data-context/src/**/*.js
-
-# from desktop-gui
-packages/desktop-gui/cypress/videos
-packages/desktop-gui/src/jsconfig.json
 
 # from driver
 packages/driver/cypress/videos
@@ -86,6 +79,7 @@ system-tests/fixtures/large-img
 # graphql, auto-generated
 /packages/launchpad/src/generated
 /packages/app/src/generated
+/packages/frontend-shared/src/generated
 
 # from npm/create-cypress-tests
 /npm/create-cypress-tests/initial-template
@@ -97,7 +91,6 @@ package-lock.json
 binary-url.json
 
 # Allows us to dynamically create eslint rules that override the default for Decaffeinate scripts
-.eslintrc.js
 cli/visual-snapshots
 
 # Created by https://www.gitignore.io/api/osx,git,node,windows,intellij,linux

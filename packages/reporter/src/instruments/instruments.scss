@@ -1,20 +1,18 @@
 .reporter {
   .instruments-container {
     .route-alias-name {
-      border-radius: 10px;
-      background-color: $yellow-medium;
-      color: #777888;
+      border-radius: 4px;
+      background-color: $teal-500;
+      color: $teal-50;
       padding: 0px 5px;
       display: inline-block;
     }
 
     .instrument-content {
-      background-color: #eef1f4;
-      border-bottom: 1px solid #d9d9d9;
-      border-left: 1px solid #ECECEC;
+      background-color: $reporter-section-background;
+      border-left: 1px solid $reporter-section-background;
       border-radius: 0 3px 3px;
-      border-right: 1px solid #ECECEC;
-      box-shadow: 0 1px 0 0 rgba(0, 0, 0, 0.04);
+      border-right: 1px solid $reporter-section-background;
       margin-bottom: 10px;
       overflow: auto;
       padding: 3px 10px;

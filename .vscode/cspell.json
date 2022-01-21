@@ -4,6 +4,8 @@
     "dictionaryDefinitions": [],
     "dictionaries": [],
     "words": [
+        "Chainable",
+        "composables",
         "Iconify",
         "Lachlan",
         "msapplication",
@@ -12,6 +14,7 @@
         "shiki",
         "testid",
         "unplugin",
+        "urql",
         "vite",
         "vitejs",
         "vueuse"

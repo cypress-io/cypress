@@ -35,9 +35,9 @@ export function scaffold () {
 /**
  * Given a project name, copy the project's test files to the temp dir.
  */
-export function scaffoldProject (project: string): void {
-  const from = _path.join(projects, project)
+export async function scaffoldProject (project: string): Promise<void> {
   const to = _path.join(cyTmpDir, project)
+  const from = _path.join(projects, project)
 
   fs.copySync(from, to)
 }
@@ -173,7 +173,7 @@ export async function scaffoldProjectNodeModules (project: string, updateYarnLoc
 
   const runCmd = async (cmd) => {
     console.log(`📦 Running "${cmd}" in ${projectDir}`)
-    await execa.shell(cmd, { cwd: projectDir, stdio: 'inherit' })
+    await execa(cmd, { cwd: projectDir, stdio: 'inherit', shell: true })
   }
 
   const cacheDir = _path.join(cachedir('cy-system-tests-node-modules'), project, 'node_modules')
@@ -264,7 +264,13 @@ export async function scaffoldProjectNodeModules (project: string, updateYarnLoc
 
 export async function scaffoldCommonNodeModules () {
   await Promise.all([
+    '@babel/preset-env',
+    '@babel/preset-react',
+    'babel-loader',
+    // Used for import { defineConfig } from 'cypress'
+    'cypress',
     '@cypress/code-coverage',
+    '@cypress/react',
     '@cypress/webpack-dev-server',
     '@packages/socket',
     '@packages/ts',
@@ -321,6 +327,10 @@ export function scaffoldWatch () {
 // from the cyTmpDir .projects in the root
 export function remove () {
   return fs.removeSync(cyTmpDir)
+}
+
+export function removeProject (name) {
+  return fs.removeSync(projectPath(name))
 }
 
 // returns the path to project fixture

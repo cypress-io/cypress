@@ -4,7 +4,7 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "clean-deps": "rm -rf node_modules",
+    "clean-deps": "rimraf node_modules",
     "https": "node https.js",
     "regenerate:certs": "cd ./test/helpers/certs && ./regenerate-certs.sh",
     "start": "node index.js",
@@ -19,6 +19,7 @@
     "fs-extra": "8.1.0",
     "lodash": "^4.17.21",
     "node-forge": "1.0.0",
+    "rimraf": "3.0.2",
     "semaphore": "1.1.0"
   },
   "devDependencies": {

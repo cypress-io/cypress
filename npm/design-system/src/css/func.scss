@@ -7,6 +7,8 @@
 * @return {String} - Updated string
 */
 // Taken from https://gist.github.com/PuddingNL/51866d4b9f1151963fbd973bf1d66116
+@use "sass:math";
+
 @function str-replace($string, $search, $replace: '') {
   $index: str-index($string, $search);
 
@@ -18,5 +20,5 @@
 }
 
 @function change-rem-unit-to-em($number) {
-  @return ($number / 1rem) + 0em;
+  @return math.div($number, 1rem) + 0em;
 }

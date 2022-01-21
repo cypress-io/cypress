@@ -5,11 +5,11 @@ const debug = require('debug')('test')
 const commitInfo = require('@cypress/commit-info')
 const mockedEnv = require('mocked-env')
 
-const errors = require(`${root}../lib/errors`)
-const api = require(`${root}../lib/api`)
-const logger = require(`${root}../lib/logger`)
-const recordMode = require(`${root}../lib/modes/record`)
-const ciProvider = require(`${root}../lib/util/ci_provider`)
+const errors = require(`../../../lib/errors`)
+const api = require(`../../../lib/api`)
+const logger = require(`../../../lib/logger`)
+const recordMode = require(`../../../lib/modes/record`)
+const ciProvider = require(`../../../lib/util/ci_provider`)
 
 const initialEnv = _.clone(process.env)
 
