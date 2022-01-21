@@ -210,7 +210,7 @@ export class WizardActions {
     codeBlocks.push(chosenLanguage.type === 'ts' ? `import { defineConfig } from 'cypress'` : `const { defineConfig } = require('cypress')`)
     codeBlocks.push('')
     codeBlocks.push(chosenLanguage.type === 'ts' ? `export default defineConfig({` : `module.exports = defineConfig({`)
-    codeBlocks.push(`// Component testing, ${chosenLanguage.name}, ${chosenFramework.name}, ${chosenBundler.name}`)
+    codeBlocks.push(`  // Component testing, ${chosenLanguage.name}, ${chosenFramework.name}, ${chosenBundler.name}`)
 
     codeBlocks.push(`  ${COMPONENT_SCAFFOLD_BODY({
       lang: chosenLanguage.type,
