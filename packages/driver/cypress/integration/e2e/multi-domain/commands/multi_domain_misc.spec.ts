@@ -7,7 +7,7 @@ context('multi-domain misc', { experimentalSessionSupport: true, experimentalMul
 
   it('verifies number of cy commands', () => {
     // @ts-ignore
-    expect(Object.keys(cy.commandFns).length).to.equal(85,
+    expect(Object.keys(cy.commandFns).length).to.equal(86,
       'The number of cy commands has changed. Please ensure any newly added commands are also tested in multi-domain.')
   })
 

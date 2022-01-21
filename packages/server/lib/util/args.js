@@ -250,7 +250,7 @@ const parseSpecArgv = (pattern) => {
   }
 
   if (!hasComma) {
-    return pattern
+    return [pattern]
   }
 
   // Get comma rules.

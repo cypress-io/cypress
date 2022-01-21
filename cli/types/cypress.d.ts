@@ -5736,6 +5736,7 @@ declare namespace Cypress {
      */
     contents: any
     fileName?: string
+    mimeType?: string
     lastModified?: number
   }
 
