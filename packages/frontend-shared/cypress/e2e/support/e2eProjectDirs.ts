@@ -31,6 +31,7 @@ export const e2eProjectDirs = [
   'max-listeners',
   'multiple-task-registrations',
   'multiples-config-files-with-json',
+  'multiples-support-files',
   'no-scaffolding',
   'no-server',
   'no-specs-found',
