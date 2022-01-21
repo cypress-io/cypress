@@ -12,8 +12,6 @@ export class MigrationActions {
       throw error
     })
 
-    this.ctx.lifecycleManager.refreshMetaState()
-
     await this.ctx.actions.file.removeFileInProject('cypress.json').catch((error) => {
       throw error
     })
@@ -34,7 +32,9 @@ export class MigrationActions {
   }
 
   async startWizardReconfiguration () {
-    // TODO: start component testing config wizard here
+    this.ctx.lifecycleManager.initializeConfigWatchers()
+    this.ctx.lifecycleManager.refreshMetaState()
+    this.ctx.lifecycleManager.setCurrentTestingType('component')
   }
 
   setStep (step: MIGRATION_STEP) {

@@ -52,8 +52,7 @@ describe('Migration', () => {
       cy.findByText(defaultMessages.migration.wizard.step2.button).click()
       cy.findByText(defaultMessages.migration.wizard.step3.button).click()
       cy.findByText(defaultMessages.migration.wizard.step4.button).click()
-      // FIXME: should work
-      // cy.findByText(defaultMessages.migration.wizard.step5.button).click()
+      cy.findByText(defaultMessages.migration.wizard.step5.button).click()
     })
   })
 })
