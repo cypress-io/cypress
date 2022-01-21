@@ -97,8 +97,8 @@
     <MigrationStep
       step="setupComponent"
       :current-step="migration.step"
-      :title="t('migration.wizard.step3.title')"
-      :description="t('migration.wizard.step3.description')"
+      :title="t('migration.wizard.step5.title')"
+      :description="t('migration.wizard.step5.description')"
     >
       <SetupComponentTesting />
       <template #footer>
