@@ -3,10 +3,12 @@ import { InstallDependenciesFragmentDoc } from '../generated/graphql-test'
 import { defaultMessages } from '@cy/i18n'
 
 describe('<InstallDependencies />', () => {
-  beforeEach(() => {
+  beforeEach(function () {
+    this.onBack = cy.stub()
+
     cy.mountFragment(InstallDependenciesFragmentDoc, {
       render: (gqlVal) => {
-        return <InstallDependencies gql={gqlVal} />
+        return <InstallDependencies gql={gqlVal} backFn={this.onBack}/>
       },
     })
   })
@@ -28,5 +30,16 @@ describe('<InstallDependencies />', () => {
     cy.contains('button', defaultMessages.clipboard.copy).should('be.visible')
     cy.contains('button', defaultMessages.setupPage.install.confirmManualInstall).should('be.visible')
     cy.contains('button', defaultMessages.setupPage.step.back).should('be.visible')
+  })
+
+  it('triggers back button callback', function () {
+    cy.findByRole('button', {
+      name: defaultMessages.setupPage.step.back,
+    })
+    .should('be.visible')
+    .click()
+    .then(() => {
+      expect(this.onBack).to.have.been.calledOnce
+    })
   })
 })

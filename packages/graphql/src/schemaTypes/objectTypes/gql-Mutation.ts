@@ -153,12 +153,12 @@ export const mutation = mutationType({
         input: nonNull(arg({ type: WizardUpdateInput })),
       },
       resolve: async (source, args, ctx) => {
-        if (args.input.bundler !== undefined) {
-          ctx.actions.wizard.setBundler(args.input.bundler)
+        if (args.input.framework) {
+          ctx.actions.wizard.setFramework(args.input.framework)
         }
 
-        if (args.input.framework !== undefined) {
-          ctx.actions.wizard.setFramework(args.input.framework)
+        if (args.input.bundler) {
+          ctx.actions.wizard.setBundler(args.input.bundler)
         }
 
         if (args.input.codeLanguage) {
