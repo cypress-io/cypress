@@ -85,9 +85,9 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
   describe('window events', () => {
     it('form:submitted', (done) => {
       cy.switchToDomain('foobar.com', done, () => {
-        const $form = cy.$$('form')
-
         Cypress.once('form:submitted', (e) => {
+          const $form = cy.$$('form')
+
           expect(e.target).to.eq($form.get(0))
           done()
         })
