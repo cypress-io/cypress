@@ -1,6 +1,6 @@
 <template>
   <label
-    class="text-gray-800 mt-24px block"
+    class="mt-24px text-gray-800 block"
     :for="props.name"
   >{{ props.label }}</label>
   <div
@@ -9,18 +9,23 @@
     class="mt-8px"
   >
     <label
-      class="flex items-center text-16px leading-24px"
+      class="flex text-16px leading-24px items-center"
     >
       <input
         type="radio"
         :name="props.name"
         :value="opt.value"
-        class="radio mr-8px hocus-default checked:border-indigo-500 checked:bg-transparent"
+        class="mr-8px radio hocus-default checked:bg-transparent checked:border-indigo-500"
         :checked="props.value === opt.value"
         @click="emits('update:value', opt.value)"
       >
-      <span class="text-gray-800">{{ opt.label }}</span>
-      <span class="text-gray-500"> - {{ opt.description }}</span>
+      <slot
+        name="option"
+        :option="opt"
+      >
+        <span class="text-gray-800">{{ opt.label }}</span>
+        <span class="text-gray-500"> - {{ opt.description }}</span>
+      </slot>
     </label>
   </div>
 </template>
