@@ -419,16 +419,91 @@ export const mutation = mutationType({
       },
     })
 
+    t.field('migrateStart', {
+      description: 'Initialize the migration wizard to the first step',
+      type: Query,
+      resolve: async (_, args, ctx) => {
+        ctx.actions.migration.initialize()
+
+        return {}
+      },
+    })
+
+    t.field('migrateRenameSpecs', {
+      description: 'While migrating to 10+ renames files to match the new .cy pattern',
+      type: Query,
+      args: {
+        skip: booleanArg(),
+      },
+      resolve: async (_, { skip }, ctx) => {
+        if (!skip) {
+          try {
+            await ctx.actions.migration.renameSpecFiles()
+          } catch (e) {
+            // add the error to an error stack
+            return {}
+          }
+        }
+
+        ctx.actions.migration.setStep('renameManual')
+
+        return {}
+      },
+    })
+
+    t.field('migrateSkipManualRename', {
+      description: 'While migrating to 10+ skip manual rename step',
+      type: Query,
+      resolve: async (_, args, ctx) => {
+        ctx.actions.migration.setStep('renameSupport')
+
+        return {}
+      },
+    })
+
+    t.field('migrateRenameSupport', {
+      description: 'While migrating to 10+ launch renaming of support file',
+      type: Query,
+      resolve: async (_, args, ctx) => {
+        try {
+          await ctx.actions.migration.renameSupportFile()
+        } catch (e) {
+          // add the error to an error stack
+          return {}
+        }
+        ctx.actions.migration.setStep('configFile')
+
+        return {}
+      },
+    })
+
     t.field('migrateConfigFile', {
       description: 'Transforms cypress.json file into cypress.config.js file',
-      type: 'Boolean',
+      type: Query,
       resolve: async (_, args, ctx) => {
         try {
           await ctx.actions.migration.createConfigFile()
+        } catch (e) {
+          // add the error to an error stack
+          return {}
+        }
 
-          return true
+        ctx.actions.migration.setStep('setupComponent')
+
+        return {}
+      },
+    })
+
+    t.field('migrateComponentTesting', {
+      description: 'Merges the component testing config in cypress.config.{js,ts}',
+      type: Query,
+      resolve: async (_, args, ctx) => {
+        try {
+          await ctx.actions.migration.startWizardReconfiguration()
+
+          return {}
         } catch {
-          return false
+          return {}
         }
       },
     })

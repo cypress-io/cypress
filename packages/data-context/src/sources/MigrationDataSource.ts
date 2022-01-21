@@ -1,4 +1,4 @@
-import type { TestingType } from '@packages/types'
+import type { TestingType, MIGRATION_STEPS } from '@packages/types'
 import Debug from 'debug'
 import path from 'path'
 import type { DataContext } from '..'
@@ -24,8 +24,11 @@ interface SpecsForMigrationUI {
   after: MigrationSpec[]
 }
 
+type MIGRATION_STEP = typeof MIGRATION_STEPS[number]
+
 export class MigrationDataSource {
   private _config: Cypress.ConfigOptions | null = null
+  private _step: MIGRATION_STEP = 'renameAuto'
   constructor (private ctx: DataContext) { }
 
   async getSpecsRelativeToFolder () {
@@ -131,5 +134,13 @@ export class MigrationDataSource {
     }
 
     return {}
+  }
+
+  get step (): MIGRATION_STEP {
+    return this._step
+  }
+
+  setStep (step: MIGRATION_STEP) {
+    this._step = step
   }
 }

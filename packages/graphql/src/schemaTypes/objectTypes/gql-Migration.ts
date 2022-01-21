@@ -79,7 +79,9 @@ export const Migration = objectType({
     t.nonNull.field('step', {
       type: MigrationStepEnum,
       description: 'Step where the migration is right now',
-      resolve: () => 'renameAuto',
+      resolve: (source, args, ctx) => {
+        return ctx.migration.step
+      },
     })
 
     t.nonNull.field('regexps', {
@@ -120,6 +122,20 @@ export const Migration = objectType({
       description: 'List of files needing manual conversion',
       resolve: () => {
         return []
+      },
+    })
+
+    t.nonNull.string('supportFileBefore', {
+      description: 'Support files needing automated rename',
+      resolve: () => {
+        return 'cypress/support/index.js'
+      },
+    })
+
+    t.nonNull.string('supportFileAfter', {
+      description: 'Support files after rename',
+      resolve: () => {
+        return 'cypress/support/e2e.js'
       },
     })
 

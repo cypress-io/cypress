@@ -4,7 +4,7 @@ import { regexps } from '@packages/data-context/src/util/migration'
 
 export const stubMigration: MaybeResolver<Migration> = {
   __typename: 'Migration',
-  step: `renameManual`,
+  step: `renameAuto`,
   regexps: {
     __typename: 'MigrationRegexp',
     beforeE2E: regexps.e2e.beforeRegexp,
@@ -93,4 +93,6 @@ export const stubMigration: MaybeResolver<Migration> = {
   })`,
   integrationFolder: 'cypress/integration',
   componentFolder: 'cypress/component',
+  supportFileBefore: 'cypress/support/index.js',
+  supportFileAfter: 'cypress/support/e2e.js',
 }
