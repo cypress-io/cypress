@@ -6,7 +6,6 @@ const express = require('express')
 const Promise = require('bluebird')
 const { connect } = require('@packages/network')
 const config = require(`../../lib/config`)
-const logger = require(`../../lib/logger`)
 const { ServerE2E } = require(`../../lib/server-e2e`)
 const { SocketE2E } = require(`../../lib/socket-e2e`)
 const fileServer = require(`../../lib/file_server`)
@@ -143,15 +142,6 @@ xdescribe('lib/server', () => {
       return this.server.open(this.config)
       .then(() => {
         expect(this.server.createServer).to.be.calledWith(obj, this.config)
-      })
-    })
-
-    it('calls logger.setSettings with config', function () {
-      sinon.spy(logger, 'setSettings')
-
-      return this.server.open(this.config)
-      .then((ret) => {
-        expect(logger.setSettings).to.be.calledWith(this.config)
       })
     })
   })
@@ -321,15 +311,6 @@ xdescribe('lib/server', () => {
         return this.server.close()
       }).then(() => {
         expect(this.server.isListening).to.be.false
-      })
-    })
-
-    it('clears settings from Log', function () {
-      logger.setSettings({})
-
-      return this.server.close()
-      .then(() => {
-        expect(logger.getSettings()).to.be.undefined
       })
     })
 
