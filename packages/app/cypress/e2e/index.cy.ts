@@ -104,7 +104,7 @@ describe('App: Index', () => {
 
           // Validate that links for each generated spec are rendered
           expectedScaffoldPaths.forEach((spec) => {
-            cy.get(`a[href="#/specs/runner?file=${spec}"`).should('be.exist')
+            cy.get(`a[href="#/specs/runner?file=${spec}"`).should('exist')
           })
         })
 
@@ -171,7 +171,7 @@ describe('App: Index', () => {
           cy.contains('h2', defaultMessages.createSpec.successPage.header)
 
           cy.get('[data-cy="file-row"]').contains('cypress/e2e/MyTest.cy.js').click()
-          cy.contains('code', 'describe(\'MyTest.cy.js\'')
+          cy.contains('code', 'describe(\'MyTest.cy.js\'', { timeout: 8000 })
           cy.get('[aria-label="Close"]').click()
 
           cy.visitApp().get('[data-cy="specs-list-row"]').contains('MyTest.cy.js')

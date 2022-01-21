@@ -1,12 +1,12 @@
 module.exports = {
   component: {
-    supportFile: 'cypress/component/support.js',
+    supportFile: false,
     devServer: require('@cypress/react/plugins/load-webpack'),
     devServerConfig: {
       webpackFilename: 'webpack.config.js',
     },
   },
   e2e: {
-    supportFile: 'cypress/component/support.js',
+    supportFile: false,
   },
 }
