@@ -36,30 +36,35 @@ export const stubMigration: MaybeResolver<Migration> = {
       testingType: 'e2e',
     },
   ],
-  specFilesAfter: [
-    {
-      __typename: 'MigrationSpec',
-      parts: [
-        { __typename: 'MigrationSpecPart', text: 'cypress/', highlight: false },
-        { __typename: 'MigrationSpecPart', text: 'e2e', highlight: true },
-        { __typename: 'MigrationSpecPart', text: '/app', highlight: false },
-        { __typename: 'MigrationSpecPart', text: '.cy.', highlight: true },
-        { __typename: 'MigrationSpecPart', text: 'js', highlight: false },
-      ],
-      testingType: 'e2e',
-    },
-    {
-      __typename: 'MigrationSpec',
-      parts: [
-        { __typename: 'MigrationSpecPart', text: 'cypress/', highlight: false },
-        { __typename: 'MigrationSpecPart', text: 'e2e', highlight: true },
-        { __typename: 'MigrationSpecPart', text: '/blog-post', highlight: false },
-        { __typename: 'MigrationSpecPart', text: '.cy.', highlight: true },
-        { __typename: 'MigrationSpecPart', text: 'js', highlight: false },
-      ],
-      testingType: 'e2e',
-    },
-  ],
+  specFiles: {
+    __typename: 'MigrationSpecs',
+    after: [
+      {
+        __typename: 'MigrationSpec',
+        parts: [
+          { __typename: 'MigrationSpecPart', text: 'cypress/', highlight: false },
+          { __typename: 'MigrationSpecPart', text: 'e2e', highlight: true },
+          { __typename: 'MigrationSpecPart', text: '/app', highlight: false },
+          { __typename: 'MigrationSpecPart', text: '.cy.', highlight: true },
+          { __typename: 'MigrationSpecPart', text: 'js', highlight: false },
+        ],
+        testingType: 'e2e',
+      },
+    ],
+    before: [
+      {
+        __typename: 'MigrationSpec',
+        parts: [
+          { __typename: 'MigrationSpecPart', text: 'cypress/', highlight: false },
+          { __typename: 'MigrationSpecPart', text: 'e2e', highlight: true },
+          { __typename: 'MigrationSpecPart', text: '/blog-post', highlight: false },
+          { __typename: 'MigrationSpecPart', text: '.cy.', highlight: true },
+          { __typename: 'MigrationSpecPart', text: 'js', highlight: false },
+        ],
+        testingType: 'e2e',
+      },
+    ],
+  },
   manualFiles: [
     'cypress/component/button.cy.js',
     'cypress/component/modal.cy.js',
