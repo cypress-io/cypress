@@ -558,14 +558,44 @@ type Migration {
   """List of files needing manual conversion"""
   manualFiles: [String!]!
 
+  """The regexp describing how the user e2e specs changed"""
+  regexps: MigrationRegexp!
+
   """All spec files after conversion"""
-  specFilesAfter: [String!]!
+  specFilesAfter: [MigrationSpec!]!
 
   """All spec files before being converted"""
-  specFilesBefore: [String!]!
+  specFilesBefore: [MigrationSpec!]!
 
   """Step where the migration is right now"""
   step: MigrationStepEnum!
+}
+
+type MigrationRegexp {
+  """regexp to use to rename existing specs in component"""
+  afterComponent: String!
+
+  """regexp to use to rename existing specs in e2e"""
+  afterE2E: String!
+
+  """regexp to identiey existing specs in component"""
+  beforeComponent: String!
+
+  """regexp to identify existing specs in e2e"""
+  beforeE2E: String!
+}
+
+type MigrationSpec {
+  parts: [MigrationSpecPart!]!
+  testingType: TestingTypeEnum!
+}
+
+type MigrationSpecPart {
+  """should highlight in migration UI"""
+  highlight: Boolean!
+
+  """part of filename"""
+  text: String!
 }
 
 enum MigrationStepEnum {
