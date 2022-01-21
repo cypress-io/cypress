@@ -1,3 +1,4 @@
+import dedent from 'dedent'
 import path from 'path'
 
 type ConfigOptions = {
@@ -56,7 +57,7 @@ function createCypressConfigJs (config: ConfigOptions, pluginPath: string) {
 
   return `const { defineConfig } = require('cypress')
 
-module.export = defineConfig({
+module.exports = defineConfig({
   ${globalString}${e2eString}${componentString}
 })`
 }
@@ -70,7 +71,7 @@ function formatObjectForConfig (obj: Record<string, unknown>, spaces: number) {
 }
 
 function createTestingTypeTemplate (testingType: 'e2e' | 'component', pluginPath: string, options: Record<string, unknown>) {
-  return `
+  return dedent`
   ${testingType}: {
     setupNodeEvents(on, config) {
       return require('${pluginPath}')
