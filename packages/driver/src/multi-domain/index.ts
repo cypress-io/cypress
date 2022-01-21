@@ -106,7 +106,6 @@ const setup = () => {
       clearTimeout () {},
       resetTimeout () {},
       timeout () {},
-      // let the primary domain handle all Mocha pending runnables. Stub this to false in case an error arises in the SD
       isPending () {},
     })
 

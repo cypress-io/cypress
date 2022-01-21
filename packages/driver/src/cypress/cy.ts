@@ -373,6 +373,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   }
 
   fail (err, options: { async?: boolean } = {}) {
+    // if an onFail handler is provided, call this in is placed (currently used for multi-domain)
     if (this.state('onFail')) {
       return this.state('onFail')(err)
     }
@@ -399,6 +400,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     }
 
     err.stack = $stackUtils.normalizedStack(err)
+
     err = $errUtils.enhanceStack({
       err,
       userInvocationStack: $errUtils.getUserInvocationStack(err, this.state),
@@ -406,6 +408,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     })
 
     err = $errUtils.processErr(err, this.config)
+
     err.hasFailed = true
 
     // store the error on state now
