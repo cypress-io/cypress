@@ -529,6 +529,13 @@
       "willConvert": "We'll automatically create a new {jsFile} file and seed it with your options from your existing {jsonFile}.",
       "removeJson": "We'll remove your existing {0} as part of this step."
     },
+    "setupComponent": {
+      "title": "You need to reconfigure Cypress for component testing",
+      "line1": "We've detected that you are currently using the experimental version of component testing.",
+      "line2": "Your existing configuration is no longer compatible with new component testing configuration options.",
+      "line3": "In a previous step, we renamed your component specs, but can't automatically migrate your existing component testing configuration.",
+      "line4": "In the next screen, you'll be able to reconfigure component testing in a new guided configuration wizard."
+    },
     "wizard": {
       "title": "Migration Helper",
       "description": "Complete the steps below to migrate your project to Cypress 10",

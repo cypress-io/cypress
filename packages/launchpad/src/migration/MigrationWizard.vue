@@ -20,6 +20,8 @@
       />
       <template #footer>
         <Button
+          :suffix-icon="ArrowRightIcon"
+          suffix-icon-class="w-16px h-16px icon-dark-white"
           @click="renameSpecs"
         >
           {{ skipRename ? t('migration.wizard.step1.buttonSkip') : t('migration.wizard.step1.button') }}
@@ -65,6 +67,8 @@
       <RenameSupport :gql="migration" />
       <template #footer>
         <Button
+          :suffix-icon="ArrowRightIcon"
+          suffix-icon-class="w-16px h-16px icon-dark-white"
           data-cy="renameSupportButton"
           @click="launchRenameSupportFile"
         >
@@ -81,6 +85,8 @@
       <ConvertConfigFile :gql="migration" />
       <template #footer>
         <Button
+          :suffix-icon="ArrowRightIcon"
+          suffix-icon-class="w-16px h-16px icon-dark-white"
           data-cy="convertConfigButton"
           @click="convertConfig"
         >
@@ -97,6 +103,8 @@
       <SetupComponentTesting />
       <template #footer>
         <Button
+          :suffix-icon="ArrowRightIcon"
+          suffix-icon-class="w-16px h-16px icon-dark-white"
           data-cy="launchReconfigureButton"
           @click="launchReconfigureComponentTesting"
         >
@@ -111,6 +119,7 @@
 import { computed, ref } from 'vue'
 import { gql, useMutation, useQuery } from '@urql/vue'
 import Button from '@cy/components/Button.vue'
+import ArrowRightIcon from '~icons/cy/arrow-right_x16.svg'
 import MigrationStep from './fragments/MigrationStep.vue'
 import RenameSpecsAuto from './RenameSpecsAuto.vue'
 import RenameSpecsManual from './RenameSpecsManual.vue'
