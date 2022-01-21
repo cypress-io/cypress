@@ -409,11 +409,5 @@ describe.skip('lib/plugins/child/run_plugins', () => {
         expect(util.wrapChildPromise.lastCall.args[1]('1')).to.equal('__cypress_unhandled__')
       })
     })
-
-    it('sends the serialized OpenSSL error via ipc on process unhandledRejection', function () {
-      process.on.withArgs('unhandledRejection').yield({ ...this.err, reason: 'reason' })
-
-      expect(this.ipc.send).to.be.calledWith('error', this.err)
-    })
   })
 })
