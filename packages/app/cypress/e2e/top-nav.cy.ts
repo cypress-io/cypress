@@ -107,7 +107,8 @@ describe('App Top Nav Workflows', () => {
       it('renders link to external docs if version is current', () => {
         cy.findBrowsers()
         cy.withCtx(async (ctx) => {
-          Cypress.sinon.stub(ctx, 'versions').resolves({
+          // @ts-ignore sinon is a global in the node process where this is executed
+          sinon.stub(ctx, 'versions').resolves({
             current: {
               id: '1',
               version: '10.0.0',
@@ -139,7 +140,8 @@ describe('App Top Nav Workflows', () => {
           const currRelease = new Date(Date.UTC(2021, 9, 30))
           const prevRelease = new Date(Date.UTC(2021, 9, 29))
 
-          Cypress.sinon.stub(ctx, 'versions').resolves({
+          // @ts-ignore sinon is a global in the node process where this is executed
+          sinon.stub(ctx, 'versions').resolves({
             current: {
               id: '1',
               version: '10.0.0',
@@ -307,7 +309,8 @@ describe('App Top Nav Workflows', () => {
         cy.get('@logInButton').click()
 
         cy.withCtx((ctx) => {
-          Cypress.sinon.stub(ctx._apis.authApi, 'logOut').callsFake(async () => {
+        // @ts-ignore sinon is a global in the node process where this is executed
+          sinon.stub(ctx._apis.authApi, 'logOut').callsFake(async () => {
             // resolves
           })
         })
@@ -336,7 +339,8 @@ describe('App Top Nav Workflows', () => {
 
       const mockLogInActionsForUser = (user) => {
         cy.withCtx((ctx, options) => {
-          Cypress.sinon.stub(ctx._apis.authApi, 'logIn').callsFake(async (onMessage) => {
+        // @ts-ignore sinon is a global in the node process where this is executed
+          sinon.stub(ctx._apis.authApi, 'logIn').callsFake(async (onMessage) => {
             onMessage({ browserOpened: true } as AuthMessage)
 
             return new Promise((resolve) => {
