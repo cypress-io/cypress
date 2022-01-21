@@ -7,7 +7,10 @@
     :message="t('runs.errors.notfound.title')"
     @button-click="showConnectDialog = true"
   >
-    <i18n-t keypath="runs.errors.notfound.description">
+    <i18n-t
+      scope="global"
+      keypath="runs.errors.notfound.description"
+    >
       <CodeTag
         bg
         class="bg-purple-50 text-purple-500"

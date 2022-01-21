@@ -1,14 +1,21 @@
+import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
+
 describe('Migration', () => {
   beforeEach(() => {
     cy.scaffoldProject('migration')
     cy.openProject('migration')
-    cy.visitLaunchpad()
   })
 
   describe('Configuration', () => {
-    it('should create the cypress.config.js file and delete old config', () => {
-      cy.get('[data-cy="convertConfigButton"]').click()
+    beforeEach(() => {
+      cy.visitLaunchpad()
+      cy.findByText(defaultMessages.migration.wizard.step1.button).click()
+      cy.findByText(defaultMessages.migration.wizard.step2.button).click()
+      cy.findByText(defaultMessages.migration.wizard.step3.button).click()
+      cy.findByText(defaultMessages.migration.wizard.step4.button).click()
+    })
 
+    it('should create the cypress.config.js file and delete old config', () => {
       cy.withCtx(async (ctx) => {
         const stats = await ctx.actions.file.checkIfFileExists('cypress.config.js')
 
@@ -27,8 +34,6 @@ describe('Migration', () => {
     })
 
     it('should create a valid js file', () => {
-      cy.get('[data-cy="convertConfigButton"]').click()
-
       cy.withCtx(async (ctx) => {
         const configPath = ctx.path.join(ctx.lifecycleManager.projectRoot, 'cypress.config.js')
 
@@ -36,6 +41,20 @@ describe('Migration', () => {
 
         expect(isValidJsFile).to.be.true
       })
+    })
+  })
+
+  describe('Full flow', () => {
+    it('goes to each step', () => {
+      cy.visitLaunchpad()
+
+      cy.findByText(defaultMessages.migration.wizard.step1.button).click()
+      cy.findByText(defaultMessages.migration.wizard.step2.button).click()
+      cy.findByText(defaultMessages.migration.wizard.step3.button).click()
+      cy.findByText(defaultMessages.migration.wizard.step4.button).click()
+      cy.findByText(defaultMessages.migration.wizard.step5.button).click()
+
+      cy.findByText(defaultMessages.setupWizard.selectFramework.description).should('be.visible')
     })
   })
 })

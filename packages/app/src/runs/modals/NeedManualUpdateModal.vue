@@ -11,7 +11,10 @@
       icon-classes="icon-dark-orange-400"
     />
     <p class="mt-24px mb-16px text-16px leading-24px">
-      <i18n-t keypath="runs.connect.modal.connectManually.mainMessage">
+      <i18n-t
+        scope="global"
+        keypath="runs.connect.modal.connectManually.mainMessage"
+      >
         <template #projectId>
           <code class="border rounded border-gray-200 m-2px py-2px px-3px text-purple-500 text-16px">projectId</code>
         </template>
