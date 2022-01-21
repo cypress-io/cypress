@@ -158,9 +158,9 @@ context('multi-domain actions', { experimentalSessionSupport: true, experimental
         expect(file.name).to.equal('foo.txt')
 
         return file.arrayBuffer()
-        .then((c) => {
+        .then((arrayBuffer) => {
           const decoder = new TextDecoder('utf8')
-          const contents = decoder.decode(c)
+          const contents = decoder.decode(arrayBuffer)
 
           expect(contents).to.equal('foo')
         })
