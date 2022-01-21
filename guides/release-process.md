@@ -69,9 +69,9 @@ of Cypress. You can see the progress of the test projects by opening the status 
 
 #### :bangbang: Important :bangbang:
 
-The `linux x64`, `win32 x64`, and `darwin x64` artifacts produced by CI are all placed in the same directory on the CDN. The version that was built last will overwrite the other versions in the directory. Until work is done to complete [#19771](https://github.com/cypress-io/cypress/issues/19771), you must ensure that the `linux` workflow publishes its artifacts **after** the `windows`/`mac` workflows. To guarantee this, you can re-run the `linux` workflow within CircleCI by selecting the 'Rerun workflow from start' option for the `linux` workflow after the initial builds have completed.
+The `linux x64`, `win32 x64`, and `darwin x64` artifacts produced by CI are all placed in the same directory on the CDN. The version that was built last will overwrite the other versions in the directory. Until work is done to complete [#19771](https://github.com/cypress-io/cypress/issues/19771), you must ensure that the `linux` workflow publishes its artifacts **after** the `windows`/`mac` workflows. To guarantee this, you can re-run the `create-build-artifacts` job for the `linux` workflow within CircleCI after the initial builds have completed.
       
-![rerun-linux](https://user-images.githubusercontent.com/1711637/150599988-2ce18e1d-86fb-474d-b058-3b5838db8bb8.png)
+![rerun-linux](https://user-images.githubusercontent.com/1711637/150612076-ac1d233b-519a-443b-9fd4-950a8f0439ef.png)
 
 Once the `develop` branch for all test projects are reliably passing with the new changes and the `linux` binary is present at `https://cdn.cypress.io/beta/npm/X.Y.Z/<sha>/cypress.tgz`, publishing can proceed.
 
