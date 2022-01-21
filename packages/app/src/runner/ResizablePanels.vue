@@ -45,6 +45,7 @@
     >
       <slot
         name="panel3"
+        :width="panel3width"
       />
     </div>
   </div>
