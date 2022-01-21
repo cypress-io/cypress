@@ -20,7 +20,10 @@
           v-if="option.value === 'rename'"
           class="text-jade-500"
         >
-          <i18n-t keypath="migration.renameAuto.modals.step2.option1">
+          <i18n-t
+            scope="global"
+            keypath="migration.renameAuto.modals.step2.option1"
+          >
             <CodeTag class="ml-0 text-jade-500">
               [filename].cy.[ext]
             </CodeTag>
