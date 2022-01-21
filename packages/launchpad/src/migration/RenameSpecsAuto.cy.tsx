@@ -1,8 +1,23 @@
 import { defaultMessages } from '@cy/i18n'
 import { RenameSpecsAutoFragmentDoc } from '../generated/graphql-test'
 import RenameSpecsAuto from './RenameSpecsAuto.vue'
+import { formatMigrationFile } from '../utils/stringToRegexp'
 
 describe('<RenameSpecsAuto/>', { viewportWidth: 1119 }, () => {
+  it('converts string to RegExp', () => {
+    const spec = 'cypress/integration/app.spec.js'
+    const re = new RegExp('cypress\/(?<dir>integration)\/.*?(?<ext>[._-]?[s|S]pec.|[.])(?=[j|t]s[x]?)')
+    const actual = formatMigrationFile(spec, re)
+
+    expect(actual).to.eql([
+      { text: 'cypress/', highlight: false },
+      { text: 'integration', highlight: true },
+      { text: '/app', highlight: false },
+      { text: '.spec.', highlight: true },
+      { text: 'js', highlight: false },
+    ])
+  })
+
   it('renders the title', () => {
     cy.mountFragment(RenameSpecsAutoFragmentDoc, {
       render (gql) {
