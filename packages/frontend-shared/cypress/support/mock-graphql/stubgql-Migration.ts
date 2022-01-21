@@ -3,7 +3,7 @@ import type { MaybeResolver } from './clientTestUtils'
 
 export const stubMigration: MaybeResolver<Migration> = {
   __typename: 'Migration',
-  step: `renameManual`,
+  step: `renameAuto`,
 
   specFilesBefore: [
     'cypress/integration/app_spec.js',

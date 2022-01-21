@@ -419,6 +419,16 @@ export const mutation = mutationType({
       },
     })
 
+    t.field('migrateStart', {
+      description: 'Initialize the migration wizard to the first step',
+      type: Query,
+      resolve: async (_, args, ctx) => {
+        ctx.actions.migration.initialize()
+
+        return {}
+      },
+    })
+
     t.field('migrateRenameSpecs', {
       description: 'While migrating to 10+ renames files to match the new .cy pattern',
       type: Query,
@@ -469,30 +479,31 @@ export const mutation = mutationType({
 
     t.field('migrateConfigFile', {
       description: 'Transforms cypress.json file into cypress.config.js file',
-      type: 'Boolean',
+      type: Query,
       resolve: async (_, args, ctx) => {
         try {
           await ctx.actions.migration.createConfigFile()
-        } catch {
-          return false
+        } catch (e) {
+          // add the error to an error stack
+          return {}
         }
 
         ctx.actions.migration.setStep('setupComponent')
 
-        return true
+        return {}
       },
     })
 
     t.field('migrateComponentTesting', {
       description: 'Merges the component testing config in cypress.config.{js,ts}',
-      type: 'Boolean',
+      type: Query,
       resolve: async (_, args, ctx) => {
         try {
           await ctx.actions.migration.startWizardReconfiguration()
 
-          return true
+          return {}
         } catch {
-          return false
+          return {}
         }
       },
     })

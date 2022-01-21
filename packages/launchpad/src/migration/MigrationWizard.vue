@@ -116,7 +116,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { gql, useMutation, useQuery } from '@urql/vue'
 import Button from '@cy/components/Button.vue'
 import ArrowRightIcon from '~icons/cy/arrow-right_x16.svg'
@@ -151,6 +151,24 @@ query MigrationWizardQuery {
 const query = useQuery({ query: MigrationWizardQueryDocument })
 
 const migration = computed(() => query.data.value?.migration)
+
+// start migration
+
+const migrateStartMutation = gql`
+mutation MigrationWizard_Start {
+  migrateStart {
+    migration {
+      step
+    }
+  }
+}
+`
+
+const start = useMutation(migrateStartMutation)
+
+onMounted(() => {
+  start.executeMutation({ })
+})
 
 // specs rename
 
@@ -212,7 +230,11 @@ function launchRenameSupportFile () {
 
 const convertConfigMutation = gql`
 mutation MigrationWizard_ConvertFile {
-  migrateConfigFile
+  migrateConfigFile {
+    migration {
+      step
+    }
+  }
 }
 `
 
@@ -226,7 +248,13 @@ function convertConfig () {
 
 const launchReconfigureCTMutation = gql`
 mutation MigrationWizard_ReconfigureComponentTesting {
-  migrateComponentTesting
+  migrateComponentTesting {
+    currentTestingType
+    currentProject {
+      id
+      currentTestingType
+    }
+  }
 }
 `
 

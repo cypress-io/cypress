@@ -634,10 +634,10 @@ type Mutation {
   matchesSpecPattern(specFile: String!): Boolean!
 
   """Merges the component testing config in cypress.config.{js,ts}"""
-  migrateComponentTesting: Boolean
+  migrateComponentTesting: Query
 
   """Transforms cypress.json file into cypress.config.js file"""
-  migrateConfigFile: Boolean
+  migrateConfigFile: Query
 
   """While migrating to 10+ renames files to match the new .cy pattern"""
   migrateRenameSpecs(skip: Boolean): Query
@@ -647,6 +647,9 @@ type Mutation {
 
   """While migrating to 10+ skip manual rename step"""
   migrateSkipManualRename: Query
+
+  """Initialize the migration wizard to the first step"""
+  migrateStart: Query
 
   """Open a path in preferred IDE"""
   openDirectoryInIDE(path: String!): Boolean

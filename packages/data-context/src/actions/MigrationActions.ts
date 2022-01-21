@@ -1,4 +1,4 @@
-import type { MIGRATION_STEPS } from '@packages/types'
+import { MIGRATION_STEPS } from '@packages/types'
 import type { DataContext } from '..'
 
 type MIGRATION_STEP = typeof MIGRATION_STEPS[number]
@@ -19,6 +19,11 @@ export class MigrationActions {
     })
   }
 
+  initialize () {
+    // FIXME: stop watchers before migrating
+    this.setStep(MIGRATION_STEPS[0])
+  }
+
   async renameSpecFiles () {
     // TODO: implement the renaming of spec files here
   }
@@ -29,7 +34,7 @@ export class MigrationActions {
   }
 
   async startWizardReconfiguration () {
-    // TODO: implement reconfiguration of component testing
+    // TODO: start component testing config wizard here
   }
 
   setStep (step: MIGRATION_STEP) {
