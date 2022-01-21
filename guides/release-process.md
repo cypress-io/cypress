@@ -87,7 +87,7 @@ In the following instructions, "X.Y.Z" is used to denote the [next version of Cy
     - To find the link to the package file `cypress.tgz`:
         1. CAUTION: The `linux x64`, `win32 x64`, and `darwin x64` artifacts produced by CI are all placed in the same directory on the CDN. The version that was built last will overwrite the other versions in the directory. Until work is done to complete [#19771](https://github.com/cypress-io/cypress/issues/19771), you must ensure that the `linux` workflow publishes its artifacts **after** the `windows`/`mac` workflows. To guarantee this, you can re-run the `linux` workflow within CircleCI by selecting the 'Rerun workflow from start' option for the `linux` workflow after the initial builds have completed.
             ![rerun-linux](https://user-images.githubusercontent.com/1711637/150599988-2ce18e1d-86fb-474d-b058-3b5838db8bb8.png)
-        3. In GitHub, go to the latest commit (the one whose sha you used in the last step).
+        2. In GitHub, go to the latest commit (the one whose sha you used in the last step).
             ![commit-link](https://user-images.githubusercontent.com/1157043/80608728-33fe6100-8a05-11ea-8b53-375303757b67.png)
         3. Scroll down past the changes to the comments. The first comment should be a `cypress-bot` comment that includes a line beginning `npm install ...`. Grab the `https://cdn.../npm/X.Y.Z/<long sha>/cypress.tgz` link.
             ![cdn-tgz-link](https://user-images.githubusercontent.com/1157043/80608736-3791e800-8a05-11ea-8d75-e4f80128e857.png)
