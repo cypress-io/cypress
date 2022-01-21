@@ -54,6 +54,7 @@ describe('src/cy/commands/actions/selectFile', () => {
           fileName: 'bar.json',
         },
         Cypress.Buffer.from('baz'),
+        // 'baz' in ascii
         Uint8Array.from([98, 97, 122]),
       ])
 
