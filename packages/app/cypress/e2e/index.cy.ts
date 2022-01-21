@@ -15,10 +15,8 @@ describe('App: Index', () => {
     cy.startAppServer()
   })
 
-  // TODO(ryan m and tim): Skipping until https://github.com/cypress-io/cypress/pull/19619 is merged
-  const tempSkip = new Date() > new Date('2022-01-21') ? context : context.skip
-
-  tempSkip('scaffold example specs', () => {
+  // TODO: (ryan m and tim): Skipping until https://github.com/cypress-io/cypress/pull/19619 is merged
+  context.skip('scaffold example specs', () => {
     const assertSpecs = (createdSpecs: FoundSpec[]) => cy.wrap(createdSpecs).each((spec: FoundSpec) => cy.contains(spec.baseName).scrollIntoView().should('be.visible'))
 
     it('should generate example specs', () => {

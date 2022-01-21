@@ -43,8 +43,14 @@
           {{ t('migration.renameAuto.changeButton') }}
         </a>
       </template>
-      <template #line-3>
-        <i18n-t keypath="migration.renameAuto.changedSpecPatternExplain">
+      <template
+        v-if="!skipRename"
+        #line-3
+      >
+        <i18n-t
+          scope="global"
+          keypath="migration.renameAuto.changedSpecPatternExplain"
+        >
           <CodeTag class="text-jade-500">
             [filename].cy.[ext]
           </CodeTag>
@@ -55,7 +61,7 @@
       <template #before>
         <HighlightedFilesList
           :files="props.gql.specFilesBefore"
-          :highlight-reg-exp="/(integration|[_,-,.]?spec)/gi"
+          :highlight-reg-exp="/(integration|[_,-,.]?(spec|test))/gi"
           highlight-class="text-red-500"
         />
       </template>
@@ -111,6 +117,10 @@ const props = defineProps<{
   gql: RenameSpecsAutoFragment
 }>()
 
+const emits = defineEmits<{
+  (eventName: 'skipChange', value: boolean): void
+  }>()
+
 const step1Modal = ref(false)
 const step2Modal = ref(false)
 
@@ -120,5 +130,6 @@ const skipRename = ref(false)
 function applySkipResult (val:string) {
   // TODO: add a GQL mutation here
   skipRename.value = val === 'skip'
+  emits('skipChange', skipRename.value)
 }
 </script>

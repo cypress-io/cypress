@@ -13,13 +13,18 @@
 </template>
 
 <script lang="ts" setup>
-import { useSlots } from 'vue'
+import { computed, useSlots } from 'vue'
 
 const slots = useSlots()
-const slotNames:string[] = []
-let i = 0
+const slotNames = computed(() => {
+  const slotNamesTmp = [] as string[]
+  let i = 0
 
-while (slots[`line-${++i}`]) {
-  slotNames.push(`line-${i}`)
-}
+  while (slots[`line-${++i}`]?.()) {
+    slotNamesTmp.push(`line-${i}`)
+  }
+
+  return slotNamesTmp
+})
+
 </script>
