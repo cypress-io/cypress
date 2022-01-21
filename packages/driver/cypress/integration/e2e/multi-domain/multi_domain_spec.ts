@@ -40,7 +40,7 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
 
   describe('data argument', () => {
     it('passes object to callback function', () => {
-      cy.switchToDomain('foobar.com', { foo: 'foo', bar: 'bar' }, ({ foo, bar }) => {
+      cy.switchToDomain('foobar.com', [{ foo: 'foo', bar: 'bar' }], ([{ foo, bar }]) => {
         expect(foo).to.equal('foo')
         expect(bar).to.equal('bar')
       })
@@ -54,26 +54,36 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
     })
 
     it('passes string to callback function', () => {
-      cy.switchToDomain('foobar.com', 'foo', (foo) => {
+      cy.switchToDomain('foobar.com', ['foo'], ([foo]) => {
         expect(foo).to.equal('foo')
       })
     })
 
     it('passes number to callback function', () => {
-      cy.switchToDomain('foobar.com', 1, (num) => {
+      cy.switchToDomain('foobar.com', [1], ([num]) => {
         expect(num).to.equal(1)
       })
     })
 
     it('passes boolean to callback function', () => {
-      cy.switchToDomain('foobar.com', true, (bool) => {
+      cy.switchToDomain('foobar.com', [true], ([bool]) => {
+        expect(bool).to.be.true
+      })
+    })
+
+    it('passes mixed types to callback function', () => {
+      cy.switchToDomain('foobar.com', ['foo', 1, true], ([foo, num, bool]) => {
+        expect(foo).to.equal('foo')
+        expect(num).to.equal(1)
         expect(bool).to.be.true
       })
     })
 
     it('works with done callback', (done) => {
-      cy.switchToDomain('foobar.com', done, true, (bool) => {
-        Cypress.once('form:submitted', (e) => {
+      cy.switchToDomain('foobar.com', done, [true], ([bool]) => {
+        expect(bool).to.be.true
+
+        Cypress.once('form:submitted', () => {
           done()
         })
 
@@ -225,6 +235,17 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
       cy.switchToDomain()
     })
 
+    it('errors passing non-array to callback function', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.equal('`cy.switchToDomain()` requires the \'data\' argument to be an array. You passed: `foo`')
+
+        done()
+      })
+
+      // @ts-ignore
+      cy.switchToDomain('foobar.com', 'foo', () => {})
+    })
+
     it('errors if passed a non-serializable data value', (done) => {
       cy.on('fail', (err) => {
         expect(err.message).to.include('data argument specified is not serializable')
@@ -240,9 +261,7 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
 
       const el = document.createElement('div')
 
-      cy.switchToDomain('foobar.com', el, (bool) => {
-        expect(bool).to.be.true
-      })
+      cy.switchToDomain('foobar.com', ['foo', '1', el], () => {})
     })
 
     it('errors if last argument is absent', (done) => {
