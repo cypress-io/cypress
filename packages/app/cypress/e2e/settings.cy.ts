@@ -1,3 +1,7 @@
+import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
+
+const i18n = defaultMessages.settingsPage
+
 describe('App: Settings', () => {
   before(() => {
     cy.scaffoldProject('todos')
@@ -13,22 +17,43 @@ describe('App: Settings', () => {
     cy.findByText('Settings').click()
 
     cy.get('div[data-cy="app-header-bar"]').should('contain', 'Settings')
-    cy.findByText('Device Settings').should('be.visible')
-    cy.findByText('Project Settings').should('be.visible')
+    cy.findByText(i18n.device.title).should('be.visible')
+    cy.findByText(i18n.project.title).should('be.visible')
   })
 
   it('shows the projectId section when there is a projectId', () => {
     cy.visitApp()
     cy.findByText('Settings').click()
-    cy.findByText('Project Settings').click()
-    cy.findByText('Project ID').should('be.visible')
+    cy.findByText(i18n.project.title).click()
+    cy.findByText(i18n.projectId.title).should('be.visible')
+  })
+
+  it('shows the recordKeys section', () => {
+    cy.loginUser()
+
+    cy.visitApp()
+    cy.findByText('Settings').click()
+    cy.findByText(i18n.project.title).click()
+    cy.findByText(i18n.recordKey.title).should('be.visible')
+  })
+
+  it('opens cloud settings when clicking on "Manage Keys"', () => {
+    cy.loginUser()
+    cy.intercept('mutation-ExternalLink_OpenExternal', { 'data': { 'openExternal': true } }).as('OpenExternal')
+    cy.visitApp()
+    cy.findByText('Settings').click()
+    cy.findByText(i18n.project.title).click()
+    cy.findByText(i18n.recordKey.manageKeys).click()
+    cy.wait('@OpenExternal')
+    .its('request.body.variables.url')
+    .should('equal', 'http:/test.cloud/cloud-project/settings')
   })
 
   it('can reconfigure a project', () => {
     cy.visitApp('settings')
 
     cy.intercept('mutation-SettingsContainer_ReconfigureProject', { 'data': { 'reconfigureProject': true } }).as('ReconfigureProject')
-    cy.findByText('Reconfigure Project').click()
+    cy.findByText(i18n.footer.button).click()
     cy.wait('@ReconfigureProject')
   })
 
@@ -50,13 +75,13 @@ describe('App: Settings', () => {
       })
 
       cy.visitApp('settings')
-      cy.contains('Device Settings').click()
+      cy.contains(i18n.device.title).click()
     })
 
     it('selects well known editor', () => {
       cy.intercept('POST', 'mutation-ExternalEditorSettings_SetPreferredEditorBinary').as('SetPreferred')
 
-      cy.contains('Choose your editor...').click()
+      cy.contains(i18n.editor.noEditorSelectedPlaceholder).click()
       cy.contains('Well known editor').click()
       cy.wait('@SetPreferred').its('request.body.variables.value').should('include', '/usr/bin/well-known')
 
@@ -94,7 +119,7 @@ describe('App: Settings', () => {
     it('lists file browser as available editor', () => {
       cy.intercept('POST', 'mutation-ExternalEditorSettings_SetPreferredEditorBinary').as('SetPreferred')
 
-      cy.contains('Choose your editor...').click()
+      cy.contains(i18n.editor.noEditorSelectedPlaceholder).click()
       cy.get('[data-cy="computer"]').click()
 
       cy.wait('@SetPreferred').its('request.body.variables.value').should('include', 'computer')
@@ -112,8 +137,8 @@ describe('App: Settings without cloud', () => {
 
     cy.visitApp()
     cy.findByText('Settings').click()
-    cy.findByText('Project Settings').click()
-    cy.findByText('Project ID').should('not.exist')
+    cy.findByText(i18n.project.title).click()
+    cy.findByText(i18n.projectId.title).should('not.exist')
   })
 
   it('have returned browsers', () => {
@@ -123,7 +148,7 @@ describe('App: Settings without cloud', () => {
 
     cy.visitApp()
     cy.findByText('Settings').click()
-    cy.findByText('Project Settings').click()
+    cy.findByText(i18n.project.title).click()
 
     cy.get('[data-testid=config-code]').within(() => {
       cy.contains('browsers: chrome, firefox')
