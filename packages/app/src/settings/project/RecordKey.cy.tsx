@@ -12,7 +12,7 @@ describe('<RecordKey />', () => {
       },
       render: (gql) => (
         <div class="py-4 px-8">
-          <RecordKey gql={gql} />
+          <RecordKey gql={gql} manageKeysUrl="http://project.cypress.io/settings" />
         </div>
       ),
     })
