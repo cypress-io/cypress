@@ -1,5 +1,5 @@
 import snapshot from 'snap-shot-it'
-import { createConfigString, getSpecs } from '../../src/util/migration'
+import { createConfigString, getSpecs, moveSpecFiles } from '../../src/util/migration'
 import { expect } from 'chai'
 const util = require('util')
 const exec = util.promisify(require('child_process').exec)
@@ -82,12 +82,18 @@ describe('migration utils', () => {
     it('should rename all specs', async () => {
       const { stdout } = await exec('git rev-parse --show-toplevel')
       const repoRoot = stdout.trim()
-      const specs = await getSpecs(`${repoRoot}/system-tests/projects/migration/cypress/component`, `${repoRoot}/system-tests/projects/migration/cypress/integration`)
+      const componentDirPath = `${repoRoot}/system-tests/projects/migration/cypress/component`
+      const e2eDirPath = `${repoRoot}/system-tests/projects/migration/cypress/integration`
+      const specs = await getSpecs(componentDirPath, e2eDirPath)
 
       expect(specs.after).to.have.length(8)
       expect(specs.before).to.have.length(8)
-      expect(specs.before).to.include('button.spec.js')
-      expect(specs.after).to.include('button.cy.js')
+      expect(specs.before).to.include('cypress/component/button.spec.js')
+      expect(specs.after).to.include('cypress/component/button.cy.js')
+      expect(specs.before).to.include('cypress/integration/app_spec.js')
+      expect(specs.after).to.include('cypress/e2e/app.cy.js')
+
+      moveSpecFiles(e2eDirPath)
     })
   })
 })

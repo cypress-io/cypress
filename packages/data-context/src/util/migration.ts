@@ -81,17 +81,36 @@ function createTestingTypeTemplate (testingType: 'e2e' | 'component', pluginPath
 }
 
 export async function getSpecs (componentDirPath: string, e2eDirPath: string) {
-  const componentSpecs = await getFiles(componentDirPath)
-  const e2eSpecs = await getFiles(e2eDirPath)
+  const componentSpecs = mapRelativePath(await getSpecFiles(componentDirPath), componentDirPath)
+  const e2eSpecs = mapRelativePath(await getSpecFiles(e2eDirPath), e2eDirPath)
   const specs = [...componentSpecs, ...e2eSpecs]
 
   return {
     before: specs,
-    after: renameSpecPath(specs),
+    after: specs.map(renameSpecPath),
   }
 }
 
-async function getFiles (dirPath: string) {
+export async function moveSpecFiles (e2eDirPath: string) {
+  const specs = (await getSpecFiles(e2eDirPath)).map((spec) => {
+    const specPath = `${e2eDirPath}/${spec}`
+
+    return {
+      from: specPath,
+      to: renameSpecPath(specPath),
+    }
+  })
+
+  specs.forEach((spec) => {
+    fs.moveSync(spec.from, spec.to)
+  })
+}
+
+export function getHighlightRegex (defaultFolder: 'e2e'|'integration') {
+  return `(${defaultFolder})|([._-]?[s|S]pec.|[.])(?=[j|t]s[x]?)`
+}
+
+async function getSpecFiles (dirPath: string) {
   const files = await fs.readdir(dirPath)
 
   return files.filter((file) => {
@@ -101,8 +120,16 @@ async function getFiles (dirPath: string) {
   })
 }
 
-function renameSpecPath (specs: string[]) {
-  return specs.map((spec) => {
-    return spec.replace(/([._-]?[s|S]pec.|[.])(?=[j|t]s[x]?)/, '.cy.')
+function mapRelativePath (specs: string[], dirPath: string) {
+  return specs.map((file) => {
+    const filePath = path.join(dirPath, file)
+
+    return path.relative(path.join(filePath, path.normalize('../../..')), filePath)
   })
+}
+
+function renameSpecPath (spec: string) {
+  return spec
+  .replace('integration', 'e2e')
+  .replace(/([._-]?[s|S]pec.|[.])(?=[j|t]s[x]?)/, '.cy.')
 }
