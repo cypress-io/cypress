@@ -1,3 +1,5 @@
+import type { AuthMessage } from '../../../data-context/src/actions/AuthActions'
+
 describe('App Top Nav Workflows', () => {
   beforeEach(() => {
     cy.scaffoldProject('launchpad')
@@ -105,8 +107,7 @@ describe('App Top Nav Workflows', () => {
       it('renders link to external docs if version is current', () => {
         cy.findBrowsers()
         cy.withCtx(async (ctx) => {
-        // @ts-ignore sinon is a global in the node process where this is executed
-          sinon.stub(ctx, 'versions').resolves({
+          Cypress.sinon.stub(ctx, 'versions').resolves({
             current: {
               id: '1',
               version: '10.0.0',
@@ -138,8 +139,7 @@ describe('App Top Nav Workflows', () => {
           const currRelease = new Date(Date.UTC(2021, 9, 30))
           const prevRelease = new Date(Date.UTC(2021, 9, 29))
 
-          // @ts-ignore sinon is a global in the node process where this is executed
-          sinon.stub(ctx, 'versions').resolves({
+          Cypress.sinon.stub(ctx, 'versions').resolves({
             current: {
               id: '1',
               version: '10.0.0',
@@ -307,7 +307,7 @@ describe('App Top Nav Workflows', () => {
         cy.get('@logInButton').click()
 
         cy.withCtx((ctx) => {
-          sinon.stub(ctx._apis.authApi, 'logOut').callsFake(async () => {
+          Cypress.sinon.stub(ctx._apis.authApi, 'logOut').callsFake(async () => {
             // resolves
           })
         })
@@ -336,8 +336,8 @@ describe('App Top Nav Workflows', () => {
 
       const mockLogInActionsForUser = (user) => {
         cy.withCtx((ctx, options) => {
-          sinon.stub(ctx._apis.authApi, 'logIn').callsFake(async (onMessage) => {
-            onMessage({ browserOpened: true })
+          Cypress.sinon.stub(ctx._apis.authApi, 'logIn').callsFake(async (onMessage) => {
+            onMessage({ browserOpened: true } as AuthMessage)
 
             return new Promise((resolve) => {
               setTimeout(() => {
