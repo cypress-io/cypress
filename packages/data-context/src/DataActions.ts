@@ -6,6 +6,7 @@ import {
   FileActions,
   ProjectActions,
   WizardActions,
+  MigrationActions,
 } from './actions'
 import { AuthActions } from './actions/AuthActions'
 import { DevActions } from './actions/DevActions'
@@ -52,5 +53,10 @@ export class DataActions {
   @cached
   get electron () {
     return new ElectronActions(this.ctx)
+  }
+
+  @cached
+  get migration () {
+    return new MigrationActions(this.ctx)
   }
 }
