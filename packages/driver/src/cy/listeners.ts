@@ -6,8 +6,8 @@ const HISTORY_NAV_ATTRS = 'go back forward'.split(' ')
 
 type BoundEventHandler<K extends keyof WindowEventMap> =
   K extends 'click' ? (this: Window, ev: GuardedAnchorEvent) => any
-  : K extends 'submit' ? (this: Window, ev: GuardedEvent) => any
-  : (this: Window, ev: WindowEventMap[K]) => any
+    : K extends 'submit' ? (this: Window, ev: GuardedEvent) => any
+      : (this: Window, ev: WindowEventMap[K]) => any
 
 type BoundEvent<K extends keyof WindowEventMap> = [
   win: Window,
