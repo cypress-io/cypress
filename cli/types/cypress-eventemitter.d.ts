@@ -30,4 +30,4 @@ interface NodeEventEmitter {
 
 // We use the Buffer class for dealing with binary data, especially around the
 // selectFile interface.
-type BufferType = import("buffer/").Buffer
+type BufferType = typeof import("buffer/").Buffer
