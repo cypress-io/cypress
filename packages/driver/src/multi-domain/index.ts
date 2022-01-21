@@ -63,7 +63,9 @@ const setup = () => {
     addLog () {},
   }
 
+  // @ts-ignore
   Cypress.cy = cy
+  // @ts-ignore
   Cypress.events.proxyTo(Cypress.cy)
 
   const { state, config } = Cypress

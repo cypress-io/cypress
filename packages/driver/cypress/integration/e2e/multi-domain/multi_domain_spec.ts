@@ -212,14 +212,14 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
 
     it('window:before:load event', () => {
       cy.visit('/fixtures/multi-domain.html')
-      cy.on('window:before:load', (win) => {
+      cy.on('window:before:load', (win: {testPrimaryDomainGlobal: boolean}) => {
         win.testPrimaryDomainGlobal = true
       })
 
       cy.window().its('testPrimaryDomainGlobal').should('be.true')
       cy.get('a[data-cy="multi-domain-secondary-link"]').click()
       cy.switchToDomain('foobar.com', () => {
-        cy.on('window:before:load', (win) => {
+        cy.on('window:before:load', (win: {testSecondaryDomainGlobal: boolean}) => {
           win.testSecondaryDomainGlobal = true
         })
 
