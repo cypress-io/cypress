@@ -1,6 +1,7 @@
+import { defaultMessages } from '@cy/i18n'
 import InstallDependencies from './InstallDependencies.vue'
 import { InstallDependenciesFragmentDoc } from '../generated/graphql-test'
-import { defaultMessages } from '@cy/i18n'
+import { PACKAGES_DESCRIPTIONS } from '../../../types/src/constants'
 
 describe('<InstallDependencies />', () => {
   beforeEach(function () {
@@ -22,8 +23,8 @@ describe('<InstallDependencies />', () => {
     .should('be.visible')
     .and('have.attr', 'href', 'https://www.npmjs.com/package/@cypress/webpack-dev-server')
 
-    cy.contains('Used to interact with React components via Cypress').should('be.visible')
-    cy.contains('Used to bundle code').should('be.visible')
+    cy.contains(PACKAGES_DESCRIPTIONS['@cypress/react'].split('<span')[0])
+    cy.contains(PACKAGES_DESCRIPTIONS['@cypress/webpack-dev-server'].split('<span')[0])
   })
 
   it('shows expected actions', () => {

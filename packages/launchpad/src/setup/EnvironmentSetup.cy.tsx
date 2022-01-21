@@ -1,22 +1,15 @@
 import { EnvironmentSetupFragmentDoc } from '../generated/graphql-test'
 import EnvironmentSetup from './EnvironmentSetup.vue'
-import type { WizardSetupData } from './Wizard.vue'
 import { FRONTEND_FRAMEWORKS, CODE_LANGUAGES } from '../../../types/src/constants'
 
 describe('<EnvironmentSetup />', () => {
   it('default component', { viewportWidth: 800 }, () => {
-    const wizardSetupData: WizardSetupData = {
-      bundler: undefined,
-      framework: undefined,
-      codeLanguage: undefined,
-    }
-
     cy.mountFragment(EnvironmentSetupFragmentDoc, {
       render: (gqlVal) => (
         <div class="m-10">
           <EnvironmentSetup
             gql={gqlVal}
-            data={wizardSetupData}
+            nextFn={cy.stub()}
           />
         </div>
       ),
