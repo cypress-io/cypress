@@ -535,7 +535,8 @@
       "step1": {
         "title": "Automatically rename existing specs",
         "description": "In this step, we'll automatically rename and move your existing spec files.",
-        "button": "Rename these specs for me"
+        "button": "Rename these specs for me",
+        "buttonSkip": "Skip renaming specs"
       },
       "step2": {
         "title": "Manually move your existing component specs",

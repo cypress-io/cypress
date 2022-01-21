@@ -15,12 +15,15 @@
       :title="t('migration.wizard.step1.title')"
       :description="t('migration.wizard.step1.description')"
     >
-      <RenameSpecsAuto :gql="query.data.value?.migration" />
+      <RenameSpecsAuto
+        :gql="query.data.value?.migration"
+        @skipChange="(newVal) => skipRename = newVal"
+      />
       <template #footer>
         <Button
           @click="renameSpecs"
         >
-          {{ t('migration.wizard.step1.button') }}
+          {{ skipRename ? t('migration.wizard.step1.buttonSkip') : t('migration.wizard.step1.button') }}
         </Button>
       </template>
     </MigrationStep>
@@ -83,7 +86,7 @@ import ConvertConfigFile from './ConvertConfigFile.vue'
 import { useI18n } from '@cy/i18n'
 import { gql, useMutation, useQuery } from '@urql/vue'
 import { MigrationWizardQueryDocument } from '../generated/graphql'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 
 const { t } = useI18n()
 
@@ -126,4 +129,6 @@ function skipStep2 () {
 function convertConfig () {
   configMutation.executeMutation({})
 }
+
+const skipRename = ref(false)
 </script>
