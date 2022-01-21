@@ -832,7 +832,7 @@ namespace CypressMultiDomainTests {
   cy.switchToDomain('example.com', () => {})
   cy.switchToDomain('example.com', [{}], (value: object[]) => {})
   cy.switchToDomain('example.com', [], (value: any[]) => {})
-  cy.switchToDomain('example.com', [1, 'value', {}, true], (value: (string | number | boolean | {})[]) => { })
+  cy.switchToDomain('example.com', [1, 'value', {}, true], (value: Array<string | number | boolean | {}>) => {})
   cy.switchToDomain('example.com', ['value'], (value: string[]) => {})
   cy.switchToDomain('example.com', [1], (value: number[]) => {})
   cy.switchToDomain('example.com', [true], (value: boolean[]) => {})
