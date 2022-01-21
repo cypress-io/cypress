@@ -31,6 +31,7 @@ export interface ProjectApiShape {
   clearProjectPreferences(projectTitle: string): Promise<unknown>
   clearAllProjectPreferences(): Promise<unknown>
   closeActiveProject(shouldCloseBrowser?: boolean): Promise<unknown>
+  focusActiveBrowserWindow(): Promise<unknown>
   getConfig(): ReceivedCypressOptions | undefined
   getCurrentProjectSavedState(): {} | undefined
   setPromptShown(slug: string): void

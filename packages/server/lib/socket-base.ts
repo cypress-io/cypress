@@ -74,6 +74,8 @@ const retry = (fn: (res: any) => void) => {
 }
 
 export class SocketBase {
+  private _sendFocusBrowserMessage
+
   protected ended: boolean
   protected _io?: socketIo.SocketIOServer
 
@@ -101,6 +103,12 @@ export class SocketBase {
 
   toDriver (event, ...data) {
     return this._io?.emit(event, ...data)
+  }
+
+  async sendFocusBrowserMessage () {
+    console.log('Calling send focus browser from within socket!!!')
+
+    await this._sendFocusBrowserMessage()
   }
 
   onAutomation (socket, message, data, id) {
@@ -272,6 +280,11 @@ export class SocketBase {
           return cb({ error: errors.clone(err) })
         })
       })
+
+      this._sendFocusBrowserMessage = async () => {
+        console.log('Private set focus')
+        await automationRequest('focus:browser:window', {})
+      }
 
       socket.on('reporter:connected', () => {
         if (socket.inReporterRoom) {

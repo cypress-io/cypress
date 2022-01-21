@@ -19,6 +19,7 @@ const firstOrNull = (cookies) => {
 }
 
 const connect = function (host, path, extraOpts) {
+  console.log('Connecting!!!')
   const listenToCookieChanges = once(() => {
     return browser.cookies.onChanged.addListener((info) => {
       if (info.cause !== 'overwrite') {
@@ -56,12 +57,16 @@ const connect = function (host, path, extraOpts) {
 
   const invoke = function (method, id, ...args) {
     const respond = (data) => {
+      console.log(data)
+
       return ws.emit('automation:response', id, { response: data })
     }
 
     return Promise.try(() => {
       return automation[method].apply(automation, args.concat(respond))
     }).catch((err) => {
+      console.log(err)
+
       return fail(id, err)
     })
   }
@@ -85,6 +90,8 @@ const connect = function (host, path, extraOpts) {
       case 'is:automation:client:connected':
         return invoke('verify', id, data)
       case 'focus:browser:window':
+        console.log('Background set focus')
+
         return invoke('focus', id)
       case 'take:screenshot':
         return invoke('takeScreenshot', id)
@@ -199,9 +206,7 @@ const automation = {
     // figure out the exact window that's running Cypress but
     // that's too much work with too little value at the moment
     return Promise.try(() => {
-      return browser.windows.getCurrent()
-    }).then((window) => {
-      return browser.windows.update(window.id, { focused: true })
+      return browser.windows.update(browser.windows.WINDOW_ID_CURRENT, { focused: true })
     }).then(fn)
   },
 
@@ -251,6 +256,10 @@ const automation = {
     .then(fn)
   },
 
+}
+
+window.stuff = () => {
+  browser.windows.update(3, { focused: true })
 }
 
 module.exports = automation

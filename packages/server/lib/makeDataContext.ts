@@ -117,6 +117,11 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       closeActiveProject () {
         return openProject.closeActiveProject()
       },
+      async focusActiveBrowserWindow () {
+        console.log('Focussing!!!')
+
+        return openProject.projectBase?.server.socket.sendFocusBrowserMessage()
+      },
       getConfig () {
         return openProject.getConfig()
       },

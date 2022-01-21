@@ -72,7 +72,7 @@
           size="lg"
           class="ml-2 inline"
           variant="outline"
-          @click="emit('navigated-back')"
+          @click="emit('set-focus')"
         >
           {{ t('setupPage.step.back') }}
         </Button>
@@ -131,6 +131,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'navigated-back'): void
   (e: 'launch', value: string | undefined): void
+  (e: 'set-focus'): void
 }>()
 
 const { t } = useI18n()

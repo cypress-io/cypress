@@ -32,6 +32,9 @@ export const stubMutation: MaybeResolver<Mutation> = {
 
     return {}
   },
+  focusActiveBrowserWindow (sourc, args, ctx) {
+    return true
+  },
   hideBrowserWindow (source, args, ctx) {
     return true
   },

@@ -12,6 +12,7 @@
       :gql="query.data.value.currentProject"
       @navigated-back="backFn"
       @launch="launch"
+      @set-focus="setFocus"
     />
   </template>
 </template>
@@ -20,7 +21,7 @@
 import { useMutation, gql, useQuery } from '@urql/vue'
 import OpenBrowserList from './OpenBrowserList.vue'
 import WarningList from '../warning/WarningList.vue'
-import { OpenBrowserDocument, OpenBrowser_ClearTestingTypeDocument, OpenBrowser_LaunchProjectDocument } from '../generated/graphql'
+import { OpenBrowserDocument, OpenBrowser_ClearTestingTypeDocument, OpenBrowser_LaunchProjectDocument, OpenBrowser_FocusActiveBrowserWindowDocument } from '../generated/graphql'
 import LaunchpadHeader from './LaunchpadHeader.vue'
 import { useI18n } from '@cy/i18n'
 
@@ -70,8 +71,15 @@ mutation OpenBrowser_LaunchProject ($testingType: TestingTypeEnum!, $browserPath
 }
 `
 
+gql`
+mutation OpenBrowser_FocusActiveBrowserWindow {
+  focusActiveBrowserWindow
+}
+`
+
 const launchOpenProject = useMutation(OpenBrowser_LaunchProjectDocument)
 const clearCurrentTestingType = useMutation(OpenBrowser_ClearTestingTypeDocument)
+const focusActiveBrowserWindow = useMutation(OpenBrowser_FocusActiveBrowserWindowDocument)
 
 const launch = (browserPath?: string) => {
   const testingType = query.data.value?.currentTestingType
@@ -86,5 +94,12 @@ const launch = (browserPath?: string) => {
 
 const backFn = () => {
   clearCurrentTestingType.executeMutation({})
+}
+
+const setFocus = () => {
+  setTimeout(() => {
+    window.blur()
+    focusActiveBrowserWindow.executeMutation({})
+  }, 1000)
 }
 </script>

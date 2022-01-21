@@ -54,24 +54,33 @@ const _getAutomation = function (win, options, parent) {
 
   const automation = new CdpAutomation(sendCommand, on, parent)
 
-  if (!options.onScreencastFrame) {
-    // after upgrading to Electron 8, CDP screenshots can hang if a screencast is not also running
-    // workaround: start and stop screencasts between screenshots
-    // @see https://github.com/cypress-io/cypress/pull/6555#issuecomment-596747134
-    automation.onRequest = _.wrap(automation.onRequest, async (fn, message, data) => {
-      if (message !== 'take:screenshot') {
+  automation.onRequest = _.wrap(automation.onRequest, async (fn, message, data) => {
+    switch (message) {
+      case 'take:screenshot': {
+        // after upgrading to Electron 8, CDP screenshots can hang if a screencast is not also running
+        // workaround: start and stop screencasts between screenshots
+        // @see https://github.com/cypress-io/cypress/pull/6555#issuecomment-596747134
+        if (!options.onScreencastFrame) {
+          await sendCommand('Page.startScreencast', screencastOpts)
+          const ret = await fn(message, data)
+
+          await sendCommand('Page.stopScreencast')
+
+          return ret
+        }
+
         return fn(message, data)
       }
+      case 'focus:browser:window': {
+        win.focus()
 
-      await sendCommand('Page.startScreencast', screencastOpts)
-
-      const ret = await fn(message, data)
-
-      await sendCommand('Page.stopScreencast')
-
-      return ret
-    })
-  }
+        return
+      }
+      default: {
+        return fn(message, data)
+      }
+    }
+  })
 
   return automation
 }

@@ -32,6 +32,10 @@ export class AppActions {
     }
   }
 
+  async focusActiveBrowserWindow () {
+    await this.ctx._apis.projectApi.focusActiveBrowserWindow()
+  }
+
   async removeAppDataDir () {
     await this.ctx._apis.appApi.appData.remove()
   }

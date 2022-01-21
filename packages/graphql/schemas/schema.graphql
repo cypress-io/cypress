@@ -592,6 +592,9 @@ type Mutation {
   """
   devRelaunch(action: DevRelaunchAction!): Boolean
 
+  """Sets focus to the active browser window"""
+  focusActiveBrowserWindow: Boolean!
+
   """Generate spec from source"""
   generateSpecFromSource(codeGenCandidate: String!, type: CodeGenType!): ScaffoldedFile
 
