@@ -173,7 +173,7 @@ describe('App: Index', () => {
           cy.contains('h2', defaultMessages.createSpec.successPage.header)
 
           cy.get('[data-cy="file-row"]').contains('cypress/e2e/MyTest.cy.js').click()
-          cy.contains('code', 'describe(\'MyTest.cy.js\'', { timeout: 8000 })
+          cy.get('code').should('contain', 'describe(\'MyTest.cy.js\'')
           cy.get('[aria-label="Close"]').click()
 
           cy.visitApp().get('[data-cy="specs-list-row"]').contains('MyTest.cy.js')
@@ -218,7 +218,7 @@ describe('App: Index', () => {
         cy.findByRole('button', { name: 'cypress.config.js' })
         cy.findByTestId('spec-pattern').should('contain', 'src/**/*.cy.{js,jsx}')
 
-        cy.findByRole('button', { name: defaultMessages.createSpec.updateSpecPattern })
+        cy.contains('button', defaultMessages.createSpec.updateSpecPattern)
         cy.findByRole('button', { name: 'New Spec', exact: false })
       })
 
@@ -233,7 +233,7 @@ describe('App: Index', () => {
       it('opens config file in ide from footer button', () => {
         cy.intercept('mutation-OpenConfigFile').as('OpenIDE')
 
-        cy.findByRole('button', { name: defaultMessages.createSpec.updateSpecPattern }).click()
+        cy.contains('button', defaultMessages.createSpec.updateSpecPattern).click()
 
         cy.wait('@OpenIDE')
       })
@@ -627,7 +627,7 @@ describe('App: Index', () => {
         cy.findByRole('button', { name: 'cypress.config.js' })
         cy.findByTestId('spec-pattern').should('contain', 'src/**/*.cy.{js,jsx}')
 
-        cy.findByRole('button', { name: defaultMessages.createSpec.updateSpecPattern })
+        cy.contains('button', defaultMessages.createSpec.updateSpecPattern)
         cy.findByRole('button', { name: 'New Spec', exact: false })
       })
 
@@ -642,7 +642,7 @@ describe('App: Index', () => {
       it('opens config file in ide from footer button', () => {
         cy.intercept('mutation-OpenConfigFile').as('OpenIDE')
 
-        cy.findByRole('button', { name: defaultMessages.createSpec.updateSpecPattern }).click()
+        cy.contains('button', defaultMessages.createSpec.updateSpecPattern).click()
 
         cy.wait('@OpenIDE')
       })

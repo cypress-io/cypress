@@ -1,7 +1,6 @@
 <template>
   <template v-if="query?.data?.value">
-    <div
-      data-cy="open-config-file"
+    <button
       class="hocus-link-default underline-purple-500"
       @click="showCypressConfigInIDE()"
     >
@@ -12,7 +11,7 @@
           {{ configFile }}
         </span>
       </slot>
-    </div>
+    </button>
 
     <ChooseExternalEditorModal
       v-if="isChooseEditorOpen"
