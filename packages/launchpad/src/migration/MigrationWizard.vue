@@ -7,16 +7,15 @@
   >
     {{ t('migration.wizard.description') }}
   </p>
-  <template v-if="query.data.value?.migration">
+  <template v-if="migration">
     <MigrationStep
-      :open="migration.step === 'renameAuto'"
-      :checked="migration.step !== 'renameAuto'"
-      :step="1"
+      step="renameAuto"
+      :current-step="migration.step"
       :title="t('migration.wizard.step1.title')"
       :description="t('migration.wizard.step1.description')"
     >
       <RenameSpecsAuto
-        :gql="query.data.value?.migration"
+        :gql="migration"
         @skipChange="(newVal) => skipRename = newVal"
       />
       <template #footer>
@@ -28,13 +27,12 @@
       </template>
     </MigrationStep>
     <MigrationStep
-      :open="migration.step === 'renameManual'"
-      :checked="migration.step === 'configFile'"
-      :step="2"
+      step="renameManual"
+      :current-step="migration.step"
       :title="t('migration.wizard.step2.title')"
       :description="t('migration.wizard.step2.description')"
     >
-      <RenameSpecsManual :gql="query.data.value?.migration" />
+      <RenameSpecsManual :gql="migration" />
       <template #footer>
         <div class="flex gap-16px">
           <Button
@@ -59,18 +57,50 @@
       </template>
     </MigrationStep>
     <MigrationStep
-      :open="migration.step === 'configFile'"
-      :step="3"
+      step="renameSupport"
+      :current-step="migration.step"
       :title="t('migration.wizard.step3.title')"
       :description="t('migration.wizard.step3.description')"
     >
-      <ConvertConfigFile :gql="query.data.value?.migration" />
+      <RenameSupport :gql="migration" />
+      <template #footer>
+        <Button
+          data-cy="renameSupportButton"
+          @click="launchRenameSupportFile"
+        >
+          {{ t('migration.wizard.step3.button') }}
+        </Button>
+      </template>
+    </MigrationStep>
+    <MigrationStep
+      step="configFile"
+      :current-step="migration.step"
+      :title="t('migration.wizard.step4.title')"
+      :description="t('migration.wizard.step4.description')"
+    >
+      <ConvertConfigFile :gql="migration" />
       <template #footer>
         <Button
           data-cy="convertConfigButton"
           @click="convertConfig"
         >
-          {{ t('migration.wizard.step3.button') }}
+          {{ t('migration.wizard.step4.button') }}
+        </Button>
+      </template>
+    </MigrationStep>
+    <MigrationStep
+      step="setupComponent"
+      :current-step="migration.step"
+      :title="t('migration.wizard.step3.title')"
+      :description="t('migration.wizard.step3.description')"
+    >
+      <SetupComponentTesting />
+      <template #footer>
+        <Button
+          data-cy="launchReconfigureButton"
+          @click="launchReconfigureComponentTesting"
+        >
+          {{ t('migration.wizard.step5.button') }}
         </Button>
       </template>
     </MigrationStep>
@@ -78,15 +108,18 @@
 </template>
 
 <script setup lang="ts">
+import { computed, ref } from 'vue'
+import { gql, useMutation, useQuery } from '@urql/vue'
+import { MIGRATION_STEPS } from '@packages/types'
 import Button from '@cy/components/Button.vue'
 import MigrationStep from './fragments/MigrationStep.vue'
 import RenameSpecsAuto from './RenameSpecsAuto.vue'
 import RenameSpecsManual from './RenameSpecsManual.vue'
+import RenameSupport from './RenameSupport.vue'
 import ConvertConfigFile from './ConvertConfigFile.vue'
-import { useI18n } from '@cy/i18n'
-import { gql, useMutation, useQuery } from '@urql/vue'
+import SetupComponentTesting from './SetupComponentTesting.vue'
 import { MigrationWizardQueryDocument } from '../generated/graphql'
-import { computed, ref } from 'vue'
+import { useI18n } from '@cy/i18n'
 
 const { t } = useI18n()
 
@@ -96,6 +129,7 @@ fragment MigrationWizardData on Query {
     step
     ...RenameSpecsAuto
     ...RenameSpecsManual
+    ...RenameSupport
     ...ConvertConfigFile
   }
 }`
@@ -108,7 +142,7 @@ query MigrationWizardQuery {
 
 const query = useQuery({ query: MigrationWizardQueryDocument })
 
-const migration = computed(() => query.data.value?.migration ?? { step: 'renameAuto' })
+const migration = computed(() => query.data.value?.migration)
 
 // specs rename
 
@@ -133,7 +167,7 @@ function renameSpecs () {
 // manual rename
 
 const skipManualRenameMutation = gql`
-mutation MigrationWizard_ConvertFile {
+mutation MigrationWizard_SkipManualRename {
   migrateSkipManualRename {
     migration {
       step
@@ -146,6 +180,12 @@ const skipManualMutation = useMutation(skipManualRenameMutation)
 
 function skipStep2 () {
   skipManualMutation.executeMutation({})
+}
+
+// rename support files
+
+function launchRenameSupportFile () {
+  // TODO: mutate the migration state here
 }
 
 // config file migration
@@ -162,4 +202,9 @@ function convertConfig () {
   configMutation.executeMutation({})
 }
 
+// launch reconfigure component testing
+
+function launchReconfigureComponentTesting () {
+  // TODO: mutate things here
+}
 </script>

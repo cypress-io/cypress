@@ -20,8 +20,16 @@ export class MigrationActions {
   }
 
   async renameSpecFiles () {
-    // here be dragons
+    // TODO: implement the renaming of spec files here
+  }
+
+  async renameSupportFile () {
+    // TODO: build rename of support file
     return
+  }
+
+  async reconfigureComponent () {
+    // TODO: implement reconfiguration of component testing
   }
 
   setStep (step: MIGRATION_STEP) {

@@ -40,6 +40,20 @@ export const Migration = objectType({
       },
     })
 
+    t.nonNull.string('supportFileBefore', {
+      description: 'Support files needing automated rename',
+      resolve: () => {
+        return 'cypress/support/index.js'
+      },
+    })
+
+    t.nonNull.string('supportFileAfter', {
+      description: 'Support files after rename',
+      resolve: () => {
+        return 'cypress/support/e2e.js'
+      },
+    })
+
     t.nonNull.string('configBeforeCode', {
       description: 'contents of the cypress.json file before conversion',
       resolve: (source, args, ctx) => {

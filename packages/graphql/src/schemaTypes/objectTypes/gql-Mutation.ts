@@ -445,6 +445,22 @@ export const mutation = mutationType({
       description: 'While migrating to 10+ skip manual rename step',
       type: Query,
       resolve: async (_, args, ctx) => {
+        ctx.actions.migration.setStep('renameSupport')
+
+        return {}
+      },
+    })
+
+    t.field('migrateRenameSupport', {
+      description: 'While migrating to 10+ launch renaming of support file',
+      type: Query,
+      resolve: async (_, args, ctx) => {
+        try {
+          await ctx.actions.migration.renameSupportFile()
+        } catch (e) {
+          // add the error to an error stack
+          return {}
+        }
         ctx.actions.migration.setStep('configFile')
 
         return {}
@@ -457,6 +473,22 @@ export const mutation = mutationType({
       resolve: async (_, args, ctx) => {
         try {
           await ctx.actions.migration.createConfigFile()
+        } catch {
+          return false
+        }
+
+        ctx.actions.migration.setStep('setupComponent')
+
+        return true
+      },
+    })
+
+    t.field('migrateComponentTesting', {
+      description: 'Merges the component testing config in cypress.config.{js,ts}',
+      type: 'Boolean',
+      resolve: async (_, args, ctx) => {
+        try {
+          await ctx.actions.migration.reconfigureComponent()
 
           return true
         } catch {
