@@ -23,7 +23,7 @@ export class FileActions {
     )
   }
 
-  async removeFileInProject (relativePath: string) {
+  removeFileInProject (relativePath: string) {
     if (!this.ctx.currentProject) {
       throw new Error(`Cannot remove file in project without active project`)
     }
