@@ -1167,9 +1167,10 @@ const log = function (err, color = 'red') {
 }
 
 const logException = async (err) => {
-  log(err)
-
-  if (isProduction()) await require('./exception').create(err)
+  if (log(err) && isProduction()) {
+    // log this exception since its not a known error
+    await require('./exception').create(err)
+  }
 }
 
 module.exports = {
