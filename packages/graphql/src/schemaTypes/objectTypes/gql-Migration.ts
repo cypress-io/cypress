@@ -14,7 +14,9 @@ export const Migration = objectType({
     t.nonNull.field('step', {
       type: MigrationStepEnum,
       description: 'Step where the migration is right now',
-      resolve: () => 'configFile',
+      resolve: (source, args, ctx) => {
+        return ctx.migration.step
+      },
     })
 
     t.nonNull.list.nonNull.string('specFilesBefore', {

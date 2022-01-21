@@ -106,29 +106,60 @@ query MigrationWizardQuery {
 }
 `
 
+const query = useQuery({ query: MigrationWizardQueryDocument })
+
+const migration = computed(() => query.data.value?.migration ?? { step: 'renameAuto' })
+
+// specs rename
+
+const skipRename = ref(false)
+
+const renameSpecsMutation = gql`
+mutation MigrationWizard_RenameSpecs($skip: Boolean) {
+  migrateRenameSpecs(skip: $skip){
+    migration {
+      step
+    }
+  }
+}
+`
+
+const renameMutation = useMutation(renameSpecsMutation)
+
+function renameSpecs () {
+  renameMutation.executeMutation({ skip: skipRename.value })
+}
+
+// manual rename
+
+const skipManualRenameMutation = gql`
+mutation MigrationWizard_ConvertFile {
+  migrateSkipManualRename {
+    migration {
+      step
+    }
+  }
+}
+`
+
+const skipManualMutation = useMutation(skipManualRenameMutation)
+
+function skipStep2 () {
+  skipManualMutation.executeMutation({})
+}
+
+// config file migration
+
 const convertConfigMutation = gql`
 mutation MigrationWizard_ConvertFile {
   migrateConfigFile
 }
 `
 
-const query = useQuery({ query: MigrationWizardQueryDocument })
-
 const configMutation = useMutation(convertConfigMutation)
-
-const migration = computed(() => query.data.value?.migration ?? { step: 'renameAuto' })
-
-function renameSpecs () {
-
-}
-
-function skipStep2 () {
-
-}
 
 function convertConfig () {
   configMutation.executeMutation({})
 }
 
-const skipRename = ref(false)
 </script>

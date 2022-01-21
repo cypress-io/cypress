@@ -419,6 +419,38 @@ export const mutation = mutationType({
       },
     })
 
+    t.field('migrateRenameSpecs', {
+      description: 'While migrating to 10+ renames files to match the new .cy pattern',
+      type: Query,
+      args: {
+        skip: booleanArg(),
+      },
+      resolve: async (_, { skip }, ctx) => {
+        if (!skip) {
+          try {
+            await ctx.actions.migration.renameSpecFiles()
+          } catch (e) {
+            // add the error to an error stack
+            return {}
+          }
+        }
+
+        ctx.actions.migration.setStep('renameManual')
+
+        return {}
+      },
+    })
+
+    t.field('migrateSkipManualRename', {
+      description: 'While migrating to 10+ skip manual rename step',
+      type: Query,
+      resolve: async (_, args, ctx) => {
+        ctx.actions.migration.setStep('configFile')
+
+        return {}
+      },
+    })
+
     t.field('migrateConfigFile', {
       description: 'Transforms cypress.json file into cypress.config.js file',
       type: 'Boolean',

@@ -628,6 +628,12 @@ type Mutation {
   """Transforms cypress.json file into cypress.config.js file"""
   migrateConfigFile: Boolean
 
+  """While migrating to 10+ renames files to match the new .cy pattern"""
+  migrateRenameSpecs(skip: Boolean): Query
+
+  """While migrating to 10+ skip manual rename step"""
+  migrateSkipManualRename: Query
+
   """Open a path in preferred IDE"""
   openDirectoryInIDE(path: String!): Boolean
   openExternal(url: String!): Boolean
