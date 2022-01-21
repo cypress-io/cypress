@@ -3,21 +3,30 @@
     <MigrationTitle :title="t('migration.renameManual.title')" />
     <MigrationList>
       <template #line-1>
-        <i18n-t keypath="migration.renameManual.componentFolderRemoved">
+        <i18n-t
+          scope="global"
+          keypath="migration.renameManual.componentFolderRemoved"
+        >
           <CodeTag class="text-red-500">
             componentFolder
           </CodeTag>
         </i18n-t>
       </template>
       <template #line-2>
-        <i18n-t keypath="migration.renameManual.cannotAuto">
+        <i18n-t
+          scope="global"
+          keypath="migration.renameManual.cannotAuto"
+        >
           <CodeTag class="text-jade-500">
             src/component/button/button.cy.js
           </CodeTag>
         </i18n-t>
       </template>
       <template #line-3>
-        <i18n-t keypath="migration.renameManual.ifSkipNote" />
+        <i18n-t
+          scope="global"
+          keypath="migration.renameManual.ifSkipNote"
+        />
       </template>
     </MigrationList>
     <div class="border rounded border-gray-100 mt-16px">

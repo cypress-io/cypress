@@ -1,9 +1,13 @@
 import path from 'path'
+import type { MIGRATION_STEPS } from '@packages/types'
 import type { DataContext } from '..'
 import { createConfigString } from '../util/migration'
 
+type MIGRATION_STEP = typeof MIGRATION_STEPS[number]
+
 export class MigrationDataSource {
   private _config: Cypress.ConfigOptions | null = null
+  private _step: MIGRATION_STEP = 'renameAuto'
   constructor (private ctx: DataContext) { }
 
   async getConfig () {
@@ -60,5 +64,13 @@ export class MigrationDataSource {
     }
 
     return {}
+  }
+
+  get step (): MIGRATION_STEP {
+    return this._step
+  }
+
+  setStep (step: MIGRATION_STEP) {
+    this._step = step
   }
 }

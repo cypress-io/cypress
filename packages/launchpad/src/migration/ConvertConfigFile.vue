@@ -3,7 +3,10 @@
     <MigrationTitle :title="t('migration.configFile.title')" />
     <MigrationList>
       <template #line-1>
-        <i18n-t keypath="migration.configFile.changedTheFile">
+        <i18n-t
+          scope="global"
+          keypath="migration.configFile.changedTheFile"
+        >
           <template #jsonFile>
             <CodeTag class="text-red-500">
               cypress.json
@@ -17,7 +20,10 @@
         </i18n-t>
       </template>
       <template #line-2>
-        <i18n-t keypath="migration.configFile.willConvert">
+        <i18n-t
+          scope="global"
+          keypath="migration.configFile.willConvert"
+        >
           <template #jsonFile>
             <CodeTag class="text-red-500">
               cypress.json
@@ -31,7 +37,10 @@
         </i18n-t>
       </template>
       <template #line-3>
-        <i18n-t keypath="migration.configFile.removeJson">
+        <i18n-t
+          scope="global"
+          keypath="migration.configFile.removeJson"
+        >
           <CodeTag class="text-red-500">
             cypress.json
           </CodeTag>
