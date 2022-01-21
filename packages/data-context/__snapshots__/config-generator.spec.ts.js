@@ -2,7 +2,9 @@ exports['migration utils should create a string when passed only a global option
 const { defineConfig } = require('cypress')
 
 module.exports = defineConfig({
-  visualViewport: 300,
+  
+  visualViewport: 300
+,
 })
 `
 
@@ -23,7 +25,9 @@ module.exports = defineConfig({
     setupNodeEvents(on, config) {
       return require('/cypress/plugins/index.js')
     },
+    
     baseUrl: 'localhost:3000'
+
   },
 })
 `
@@ -32,19 +36,25 @@ exports['migration utils should create a string for a config with global, compon
 const { defineConfig } = require('cypress')
 
 module.exports = defineConfig({
-  visualViewport: 300,
+  
+  visualViewport: 300
+,
   e2e: {
     setupNodeEvents(on, config) {
       return require('/cypress/plugins/index.js')
     },
+    
     baseUrl: 'localhost:300',
     retries: 2
+
   },
   component: {
     setupNodeEvents(on, config) {
       return require('/cypress/plugins/index.js')
     },
+    
     retries: 1
+
   },
 })
 `
@@ -58,7 +68,9 @@ module.exports = defineConfig({
     setupNodeEvents(on, config) {
       return require('/cypress/plugins/index.js')
     },
+    
     retries: 2
+
   },
 })
 `

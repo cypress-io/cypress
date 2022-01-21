@@ -1,4 +1,4 @@
-import dedent from 'dedent'
+import stringify from 'stringify-object'
 import path from 'path'
 
 type ConfigOptions = {
@@ -63,15 +63,13 @@ module.exports = defineConfig({
 }
 
 function formatObjectForConfig (obj: Record<string, unknown>, spaces: number) {
-  return JSON.stringify(obj, null, spaces)
-  .replace(/"([^"]+)":/g, '$1:') // remove quotes from fields
-  .replace(/^[{]|[}]$/g, '') // remove opening and closing {}
-  .replace(/"/g, '\'') // single quotes
-  .trim()
+  return stringify(obj, {
+    indent: Array(spaces).fill(' ').join(''),
+  }).replace(/^[{]|[}]$/g, '') // remove opening and closing {}
 }
 
 function createTestingTypeTemplate (testingType: 'e2e' | 'component', pluginPath: string, options: Record<string, unknown>) {
-  return dedent`
+  return `
   ${testingType}: {
     setupNodeEvents(on, config) {
       return require('${pluginPath}')
