@@ -53,6 +53,8 @@ describe('Migration', () => {
       cy.findByText(defaultMessages.migration.wizard.step3.button).click()
       cy.findByText(defaultMessages.migration.wizard.step4.button).click()
       cy.findByText(defaultMessages.migration.wizard.step5.button).click()
+
+      cy.findByText(defaultMessages.setupWizard.selectFramework.description).should('be.visible')
     })
   })
 })
