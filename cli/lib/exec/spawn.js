@@ -88,6 +88,7 @@ module.exports = {
       env: process.env,
       detached: false,
       stdio: getStdio(needsXvfb),
+      processVersions: process.versions,
     })
 
     const spawn = (overrides = {}) => {
