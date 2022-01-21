@@ -199,6 +199,28 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
         cy.get('[data-cy="confirm"]').click()
       })
     })
+
+    it('window:before:load event', () => {
+      cy.visit('/fixtures/multi-domain.html')
+      cy.on('window:before:load', (win) => {
+        win.testPrimaryDomainGlobal = true
+      })
+
+      cy.window().its('testPrimaryDomainGlobal').should('be.true')
+      cy.get('a[data-cy="multi-domain-secondary-link"]').click()
+      cy.switchToDomain('foobar.com', () => {
+        cy.on('window:before:load', (win) => {
+          win.testSecondaryDomainGlobal = true
+        })
+
+        cy.window().its('testSecondaryDomainGlobal').should('be.true')
+        cy.window().its('testPrimaryDomainGlobal').should('be.undefined')
+        cy
+        .get('[data-cy="window-before-load"]')
+        .invoke('text')
+        .should('equal', 'Window Before Load Called')
+      })
+    })
   })
 
   describe('errors', () => {

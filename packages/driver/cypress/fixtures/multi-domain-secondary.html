@@ -5,6 +5,7 @@
 <body>
   <p data-cy="dom-check">From a secondary domain</p>
   <p data-cy="cypress-check"></p>
+  <p data-cy="window-before-load"></p>
   <form>
     <button type="submit">Submit</button>
   </form>
@@ -14,6 +15,10 @@
   <script>
     if (window.Cypress) {
       document.querySelector('[data-cy="cypress-check"]').innerText = 'Has window.Cypress'
+    }
+
+    if (window.testSecondaryDomainGlobal){
+      document.querySelector('[data-cy="window-before-load"]').innerText = 'Window Before Load Called'
     }
 
     document.querySelector('[data-cy="alert"]').addEventListener('click', () => {
