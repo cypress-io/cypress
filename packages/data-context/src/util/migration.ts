@@ -1,10 +1,63 @@
+import type { TestingType } from '@packages/types'
 import fs from 'fs-extra'
 import path from 'path'
+import globby from 'globby'
 
 type ConfigOptions = {
   global: Record<string, unknown>
   e2e: Record<string, unknown>
   component: Record<string, unknown>
+}
+
+function getHighlightRegexE2E (defaultFolder: 'e2e'|'integration') {
+  return `cypress\/(?<dir>${defaultFolder})\/.*?(?<ext>[._-]?[s|S]pec.|[.])(?=[j|t]s[x]?)`
+}
+
+const highlightRegexComponent = `cypress\/(?<dir>component)\/.*?(?<ext>[._-]?[s|S]pec.|[.])(?=[j|t]s[x]?)`
+
+export const regexps = {
+  e2e: {
+    beforeRegexp: getHighlightRegexE2E('integration'),
+    afterRegexp: getHighlightRegexE2E('e2e'),
+  },
+  component: {
+    beforeRegexp: highlightRegexComponent,
+    afterRegexp: '(?<ext>.cy.)',
+  },
+} as const
+
+export interface FilePart {
+  text: string
+  highlight: boolean
+}
+
+export class NonSpecFileError extends Error {
+  constructor (message: string) {
+    super()
+    this.message = message
+  }
+}
+
+export function formatMigrationFile (file: string, regexp: RegExp): FilePart[] {
+  const match = regexp.exec(file)
+
+  if (!match?.groups) {
+    throw new NonSpecFileError(`Expected groups in ${file} using ${regexp}. Perhaps this isn't a spec file?`)
+  }
+
+  // sometimes `.` gets in here as the <ext> group
+  // filter it out
+  const higlights = Object.values(match.groups).filter((x) => x.length > 1)
+  const delimiters = higlights.join('|')
+  const re = new RegExp(`(${delimiters})`)
+  const split = file.split(re)
+
+  return split.map<FilePart>((text) => {
+    return {
+      text,
+      highlight: higlights.includes(text),
+    }
+  })
 }
 
 export async function createConfigString (cfg: Partial<Cypress.ConfigOptions>) {
@@ -80,14 +133,41 @@ function createTestingTypeTemplate (testingType: 'e2e' | 'component', pluginPath
   },`
 }
 
-export async function getSpecs (componentDirPath: string, e2eDirPath: string) {
-  const componentSpecs = mapRelativePath(await getSpecFiles(componentDirPath), componentDirPath)
-  const e2eSpecs = mapRelativePath(await getSpecFiles(e2eDirPath), e2eDirPath)
-  const specs = [...componentSpecs, ...e2eSpecs]
+export interface RelativeSpecWithTestingType {
+  testingType: TestingType
+  relative: string
+}
+
+async function findByTestingType (cwd: string, dir: string | null, testingType: TestingType) {
+  if (!dir) {
+    return []
+  }
+
+  return (await globby(`${dir}/**/*`, { onlyFiles: true, cwd }))
+  .map((relative) => ({ relative, testingType }))
+}
+
+export async function getSpecs (
+  projectRoot: string,
+  componentDirPath: string | null,
+  e2eDirPath: string | null,
+): Promise<{
+  before: RelativeSpecWithTestingType[]
+  after: RelativeSpecWithTestingType[]
+}> {
+  const [comp, e2e] = await Promise.all([
+    findByTestingType(projectRoot, componentDirPath, 'component'),
+    findByTestingType(projectRoot, e2eDirPath, 'e2e'),
+  ])
 
   return {
-    before: specs,
-    after: specs.map(renameSpecPath),
+    before: [...comp, ...e2e],
+    after: [...comp, ...e2e].map((x) => {
+      return {
+        testingType: x.testingType,
+        relative: renameSpecPath(x.relative),
+      }
+    }),
   }
 }
 
@@ -106,10 +186,6 @@ export async function moveSpecFiles (e2eDirPath: string) {
   })
 }
 
-export function getHighlightRegex (defaultFolder: 'e2e'|'integration') {
-  return `cypress\/(?<dir>${defaultFolder})\/.*?(?<ext>[._-]?[s|S]pec.|[.])(?=[j|t]s[x]?)`
-}
-
 async function getSpecFiles (dirPath: string) {
   const files = await fs.readdir(dirPath)
 
@@ -120,15 +196,7 @@ async function getSpecFiles (dirPath: string) {
   })
 }
 
-function mapRelativePath (specs: string[], dirPath: string) {
-  return specs.map((file) => {
-    const filePath = path.join(dirPath, file)
-
-    return path.relative(path.join(filePath, path.normalize('../../..')), filePath)
-  })
-}
-
-function renameSpecPath (spec: string) {
+export function renameSpecPath (spec: string) {
   return spec
   .replace('integration', 'e2e')
   .replace(/([._-]?[s|S]pec.|[.])(?=[j|t]s[x]?)/, '.cy.')

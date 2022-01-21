@@ -1,14 +1,3 @@
-export const regexps = {
-  e2e: {
-    beforeRegexp: 'cypress\/(?<dir>integration)\/.*?(?<ext>[._-]?[s|S]pec.|[.])(?=[j|t]s[x]?)',
-    afterRegexp: 'cypress\/(?<dir>e2e)\/.*?(?<ext>.cy.)',
-  },
-  component: {
-    beforeRegexp: 'cypress\/(?<dir>component)\/.*?(?<ext>[._-]?[s|S]pec.|[.])(?=[j|t]s[x]?)',
-    afterRegexp: '(?<ext>.cy.)',
-  },
-}
-
 export function stringToRegexp (s: string): RegExp {
   return new RegExp(s)
 }

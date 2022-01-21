@@ -50,6 +50,7 @@
     "@packages/types": "0.0.0-development",
     "@types/dedent": "^0.7.0",
     "@types/ejs": "^3.1.0",
+    "@types/mocha": "^8.0.3",
     "mocha": "7.0.1",
     "rimraf": "3.0.2",
     "tslint": "^6.1.3"

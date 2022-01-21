@@ -1,64 +1,124 @@
-import path from 'path'
+import type { TestingType } from '@packages/types'
 import type { DataContext } from '..'
-import { createConfigString } from '../util/migration'
+import {
+  // createConfigString,
+  getSpecs,
+  RelativeSpecWithTestingType,
+  formatMigrationFile,
+  FilePart,
+  regexps,
+  NonSpecFileError,
+} from '../util/migration'
+
+interface MigrationSpec {
+  testingType: TestingType
+  parts: FilePart[]
+}
+
+interface SpecsForMigrationUI {
+  before: MigrationSpec[]
+  after: MigrationSpec[]
+}
 
 export class MigrationDataSource {
   private _config: Cypress.ConfigOptions | null = null
   constructor (private ctx: DataContext) { }
 
-  async getConfig () {
-    const config = await this.parseCypressConfig()
+  async getSpecsRelativeToFolder () {
+    if (!this.ctx.currentProject) {
+      throw Error('cannot get specs without a project path')
+    }
 
-    return JSON.stringify(config, null, 2)
+    const config = await this.ctx.lifecycleManager.getFullInitialConfig()
+
+    return getSpecs(
+      this.ctx.currentProject,
+      config.componentFolder ? config.componentFolder : null,
+      config.integrationFolder ? config.integrationFolder : null,
+    )
   }
 
-  async createConfigString () {
-    const config = await this.parseCypressConfig()
+  async getSpecsForMigrationGuide (): Promise<SpecsForMigrationUI> {
+    const specs = await this.getSpecsRelativeToFolder()
 
-    return createConfigString(config)
+    const processSpecs = (regexp: 'beforeRegexp' | 'afterRegexp') => {
+      return (acc: MigrationSpec[], x: RelativeSpecWithTestingType) => {
+        try {
+          return acc.concat({
+            testingType: x.testingType,
+            parts: formatMigrationFile(x.relative, new RegExp(regexps[x.testingType][regexp])),
+          })
+        } catch (e) {
+          if (e instanceof NonSpecFileError) {
+          // it's possible they have a non spec file in their cypress/integration directory,
+          // if that happens, we just skip that file and carry on.
+            return acc
+          }
+
+          throw e
+        }
+      }
+    }
+
+    return {
+      before: specs.before.reduce(processSpecs('beforeRegexp'), []),
+      after: specs.before.reduce(processSpecs('afterRegexp'), []),
+    }
   }
 
-  async getIntegrationFolder () {
-    const config = await this.parseCypressConfig()
+  // async getConfig () {
+  //   const config = await this.parseCypressConfig()
 
-    if (config.e2e?.integrationFolder) {
-      return config.e2e.integrationFolder
-    }
+  //   return JSON.stringify(config, null, 2)
+  // }
 
-    if (config.integrationFolder) {
-      return config.integrationFolder
-    }
+  // async createConfigString () {
+  //   const config = await this.parseCypressConfig()
 
-    return 'cypress/integration'
-  }
+  //   return createConfigString(config)
+  // }
 
-  async getComponentFolder () {
-    const config = await this.parseCypressConfig()
+  // async getIntegrationFolder () {
+  //   const config = await this.parseCypressConfig()
 
-    if (config.component?.componentFolder) {
-      return config.component.componentFolder
-    }
+  //   if (config.e2e?.integrationFolder) {
+  //     return config.e2e.integrationFolder
+  //   }
 
-    if (config.componentFolder) {
-      return config.componentFolder
-    }
+  //   if (config.integrationFolder) {
+  //     return config.integrationFolder
+  //   }
 
-    return 'cypress/component'
-  }
+  //   return 'cypress/integration'
+  // }
 
-  private async parseCypressConfig (): Promise<Cypress.ConfigOptions> {
-    if (this._config) {
-      return this._config
-    }
+  // async getComponentFolder () {
+  //   const config = await this.parseCypressConfig()
 
-    if (this.ctx.lifecycleManager.metaState.hasLegacyCypressJson) {
-      const cfgPath = path.join(this.ctx.lifecycleManager?.projectRoot, 'cypress.json')
+  //   if (config.component?.componentFolder) {
+  //     return config.component.componentFolder
+  //   }
 
-      this._config = this.ctx.file.readJsonFile(cfgPath) as Cypress.ConfigOptions
+  //   if (config.componentFolder) {
+  //     return config.componentFolder
+  //   }
 
-      return this._config
-    }
+  //   return 'cypress/component'
+  // }
 
-    return {}
-  }
+  // private async parseCypressConfig (): Promise<Cypress.ConfigOptions> {
+  //   if (this._config) {
+  //     return this._config
+  //   }
+
+  //   if (this.ctx.lifecycleManager.metaState.hasLegacyCypressJson) {
+  //     const cfgPath = path.join(this.ctx.lifecycleManager?.projectRoot, 'cypress.json')
+
+  //     this._config = this.ctx.file.readJsonFile(cfgPath) as Cypress.ConfigOptions
+
+  //     return this._config
+  //   }
+
+  //   return {}
+  // }
 }

@@ -1,6 +1,6 @@
 import type { Migration } from '../generated/test-graphql-types.gen'
 import type { MaybeResolver } from './clientTestUtils'
-import { regexps } from '@packages/launchpad/src/utils/stringToRegexp'
+import { regexps } from '@packages/data-context/src/util/migration'
 
 export const stubMigration: MaybeResolver<Migration> = {
   __typename: 'Migration',

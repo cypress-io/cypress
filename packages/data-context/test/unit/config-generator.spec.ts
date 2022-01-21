@@ -1,8 +1,12 @@
 import snapshot from 'snap-shot-it'
-import { createConfigString, getSpecs } from '../../src/util/migration'
+import path from 'path'
+import fs from 'fs-extra'
+import { createConfigString, getSpecs, formatMigrationFile, regexps } from '../../src/util/migration'
 import { expect } from 'chai'
-const util = require('util')
-const exec = util.promisify(require('child_process').exec)
+import tempDir from 'temp-dir'
+
+// const util = require('util')
+// const exec = util.promisify(require('child_process').exec)
 
 describe('migration utils', () => {
   describe('cypress.config.js generation', () => {
@@ -80,21 +84,65 @@ describe('migration utils', () => {
 
   describe('spec renaming', () => {
     it('should rename all specs', async () => {
-      const { stdout } = await exec('git rev-parse --show-toplevel')
-      const repoRoot = stdout.trim()
-      const componentDirPath = `${repoRoot}/system-tests/projects/migration/cypress/component`
-      const e2eDirPath = `${repoRoot}/system-tests/projects/migration/cypress/integration`
-      const specs = await getSpecs(componentDirPath, e2eDirPath)
+      const tmpDir = path.join(tempDir, 'cy-projects')
+      const testProject = path.join(__dirname, '..', '..', '..', '..', 'system-tests', 'projects', 'migration')
+      const cwd = path.join(tmpDir, 'migration')
 
-      expect(specs.after).to.have.length(8)
-      expect(specs.before).to.have.length(8)
-      expect(specs.before).to.include('cypress/component/button.spec.js')
-      expect(specs.after).to.include('cypress/component/button.cy.js')
-      expect(specs.before).to.include('cypress/integration/app_spec.js')
-      expect(specs.after).to.include('cypress/e2e/app.cy.js')
+      try {
+        fs.rmdirSync(cwd)
+      } catch {
+        // all good
+      }
+
+      fs.cpSync(testProject, cwd, { recursive: true })
+
+      const specs = await getSpecs(cwd, 'cypress/component', 'cypress/integration')
+
+      expect(specs.before[0].relative).to.eql('cypress/component/button.spec.js')
+      expect(specs.after[0].relative).to.eql('cypress/component/button.cy.js')
+
+      expect(specs.before[1].relative).to.eql('cypress/component/input-spec.tsx')
+      expect(specs.after[1].relative).to.eql('cypress/component/input.cy.tsx')
+
+      expect(specs.before[2].relative).to.eql('cypress/integration/app_spec.js')
+      expect(specs.after[2].relative).to.eql('cypress/e2e/app.cy.js')
+
+      expect(specs.before[3].relative).to.eql('cypress/integration/blog-post-spec.ts')
+      expect(specs.after[3].relative).to.eql('cypress/e2e/blog-post.cy.ts')
+
+      expect(specs.before[4].relative).to.eql('cypress/integration/company.js')
+      expect(specs.after[4].relative).to.eql('cypress/e2e/company.cy.js')
+
+      expect(specs.before[5].relative).to.eql('cypress/integration/homeSpec.js')
+      expect(specs.after[5].relative).to.eql('cypress/e2e/home.cy.js')
+
+      expect(specs.before[6].relative).to.eql('cypress/integration/sign-up.js')
+      expect(specs.after[6].relative).to.eql('cypress/e2e/sign-up.cy.js')
+
+      expect(specs.before[7].relative).to.eql('cypress/integration/spectacleBrowser.ts')
+      expect(specs.after[7].relative).to.eql('cypress/e2e/spectacleBrowser.cy.ts')
+
+      expect(specs.before[8].relative).to.eql('cypress/integration/someDir/someFile.js')
+      expect(specs.after[8].relative).to.eql('cypress/e2e/someDir/someFile.cy.js')
 
       // not sure how to test this without messing up file tree
-      //moveSpecFiles(e2eDirPath)
+      // moveSpecFiles(e2eDirPath)
+    })
+  })
+
+  describe('formatMigrationFile', () => {
+    it('breaks into parts', () => {
+      const spec = 'cypress/integration/app.spec.js'
+      const re = new RegExp(regexps.e2e.beforeRegexp)
+      const actual = formatMigrationFile(spec, re)
+
+      expect(actual).to.eql([
+        { text: 'cypress/', highlight: false },
+        { text: 'integration', highlight: true },
+        { text: '/app', highlight: false },
+        { text: '.spec.', highlight: true },
+        { text: 'js', highlight: false },
+      ])
     })
   })
 })
