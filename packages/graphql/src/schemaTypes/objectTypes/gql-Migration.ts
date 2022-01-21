@@ -1,7 +1,7 @@
 import { MIGRATION_STEPS } from '@packages/types'
 import { enumType, objectType } from 'nexus'
 import { TestingTypeEnum } from '..'
-import { regexps } from '@packages/launchpad/src/utils/stringToRegexp'
+import { regexps } from '@packages/data-context/src/util/migration'
 
 export const MigrationStepEnum = enumType({
   name: 'MigrationStepEnum',
