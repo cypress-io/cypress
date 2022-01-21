@@ -67,6 +67,8 @@ of Cypress. You can see the progress of the test projects by opening the status 
 
 ![Screenshot of status checks](https://i.imgur.com/AsQwzgO.png)
 
+#### :bangbang: Important :bangbang:
+
 The `linux x64`, `win32 x64`, and `darwin x64` artifacts produced by CI are all placed in the same directory on the CDN. The version that was built last will overwrite the other versions in the directory. Until work is done to complete [#19771](https://github.com/cypress-io/cypress/issues/19771), you must ensure that the `linux` workflow publishes its artifacts **after** the `windows`/`mac` workflows. To guarantee this, you can re-run the `linux` workflow within CircleCI by selecting the 'Rerun workflow from start' option for the `linux` workflow after the initial builds have completed.
       
 ![rerun-linux](https://user-images.githubusercontent.com/1711637/150599988-2ce18e1d-86fb-474d-b058-3b5838db8bb8.png)
