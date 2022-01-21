@@ -2,7 +2,7 @@
   <button
     v-if="!props.href && !props.to"
     style="width: fit-content"
-    class="border rounded flex outline-none leading-tight gap-8px items-center"
+    class="flex items-center leading-tight border rounded outline-none gap-8px"
     :class="classes"
     :disabled="disabled"
   >
@@ -40,7 +40,7 @@
     :href="props.href"
     :to="props.to"
     style="width: fit-content"
-    class="border rounded flex outline-none gap-8px select-none items-center"
+    class="flex items-center border rounded outline-none select-none gap-8px"
     :class="classes"
   >
     <ButtonInternals>
@@ -94,12 +94,13 @@ import { RouterLink } from 'vue-router'
 import type { ButtonHTMLAttributes, FunctionalComponent, SVGAttributes } from 'vue'
 
 const VariantClassesTable = {
-  primary: 'border-indigo-500 bg-indigo-500 text-white',
-  outline: 'border-gray-100 text-indigo-600',
-  tertiary: 'text-indigo-500 bg-indigo-50 border-transparent',
+  primary: 'border-indigo-500 bg-indigo-500 text-white hocus-default',
+  outline: 'border-gray-100 text-indigo-600 hocus-default',
+  tertiary: 'text-indigo-500 bg-indigo-50 border-transparent hocus-default',
   pending: 'bg-gray-500 text-white',
-  link: 'border-transparent text-indigo-600',
+  link: 'border-transparent text-indigo-600 hocus-default',
   text: 'border-0',
+  secondary: 'bg-jade-500 text-white hocus-secondary',
 } as const
 
 export type ButtonVariants = keyof(typeof VariantClassesTable)
@@ -134,7 +135,6 @@ const sizeClasses = computed(() => (SizeClassesTable[props.size || 'md']))
 
 const classes = computed(() => {
   return [
-    { 'hocus-default': props.variant !== 'pending' },
     variantClasses.value,
     sizeClasses.value,
     attrs.class,

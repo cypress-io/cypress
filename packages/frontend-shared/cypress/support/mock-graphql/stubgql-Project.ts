@@ -63,6 +63,7 @@ export const createTestCurrentProject = (title: string, currentProject: Partial<
     currentBrowser: stubBrowsers[0],
     browsers: stubBrowsers,
     isDefaultSpecPattern: true,
+    isBrowserOpen: false,
     ...currentProject,
   }
 }

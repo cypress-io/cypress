@@ -5,11 +5,14 @@
     <WarningList :gql="query.data.value" />
     <LaunchpadHeader
       :title="t('setupWizard.chooseBrowser.title')"
-      :description="t('setupWizard.chooseBrowser.description')"
+      :description="headingDescription"
     />
+    {{ query.data.value.currentProject.isBrowserOpen }}
     <OpenBrowserList
       variant=""
       :gql="query.data.value.currentProject"
+      :is-browser-open="isBrowserOpen"
+      :browser-is-opening="isBrowserOpening"
       @navigated-back="backFn"
       @launch="launch"
     />
@@ -23,6 +26,7 @@ import WarningList from '../warning/WarningList.vue'
 import { OpenBrowserDocument, OpenBrowser_ClearTestingTypeDocument, OpenBrowser_LaunchProjectDocument } from '../generated/graphql'
 import LaunchpadHeader from './LaunchpadHeader.vue'
 import { useI18n } from '@cy/i18n'
+import { computed } from 'vue'
 
 const { t } = useI18n()
 
@@ -33,6 +37,7 @@ query OpenBrowser {
     currentTestingType
     isLoadingConfigFile
     isLoadingNodeEvents
+    isBrowserOpen
     ...OpenBrowserList
   }
   ...WarningList
@@ -87,4 +92,12 @@ const launch = (browserPath?: string) => {
 const backFn = () => {
   clearCurrentTestingType.executeMutation({})
 }
+
+const isBrowserOpen = computed(() => !!query.data.value?.currentProject?.isBrowserOpen)
+
+const isBrowserOpening = computed(() => !!launchOpenProject.fetching.value)
+
+const headingDescription = computed(() => {
+  return t('setupWizard.chooseBrowser.description', { testingType: query.data.value?.currentProject?.currentTestingType === 'component' ? 'component' : 'E2E' })
+})
 </script>
