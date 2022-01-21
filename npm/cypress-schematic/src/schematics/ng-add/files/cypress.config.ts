@@ -6,7 +6,6 @@ export default defineConfig({
     'supportFile': '<%= root%>cypress/support/e2e.ts',
     'videosFolder': '<%= root%>cypress/videos',
     'screenshotsFolder': '<%= root%>cypress/screenshots',
-    'pluginsFile': '<%= root%>cypress/plugins/index.ts',
     'fixturesFolder': '<%= root%>cypress/fixtures',
   },
 })
