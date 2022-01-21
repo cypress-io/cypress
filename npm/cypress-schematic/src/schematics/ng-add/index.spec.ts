@@ -1,7 +1,7 @@
 /// <reference path="../../../../../cli/types/mocha/index.d.ts" />
 
 import { SchematicTestRunner, UnitTestTree } from '@angular-devkit/schematics/testing'
-import { join, resolve } from 'path'
+import { join } from 'path'
 import { expect } from 'chai'
 
 describe('@cypress/schematic: ng-add', () => {
@@ -32,15 +32,13 @@ describe('@cypress/schematic: ng-add', () => {
   })
 
   it('should create cypress files', async () => {
-    const files = ['cypress/e2e/spec.cy.ts', 'cypress/support/commands.ts', 'cypress/tsconfig.json', 'cypress.config.ts']
-    const homePath = '/projects/sandbox/'
-
     return schematicRunner.runSchematicAsync('ng-add', {}, appTree).toPromise().then((tree) => {
-      files.forEach((f) => {
-        const pathToFile = resolve(homePath, f)
+      const files = tree.files
 
-        expect(tree.exists(pathToFile), pathToFile).equal(true)
-      })
+      expect(files).to.contain('/projects/sandbox/cypress/e2e/spec.cy.ts')
+      expect(files).to.contain('/projects/sandbox/cypress/support/commands.ts')
+      expect(files).to.contain('/projects/sandbox/cypress/tsconfig.json')
+      expect(files).to.contain('/projects/sandbox/cypress.config.ts')
     })
   })
 })

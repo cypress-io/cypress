@@ -181,7 +181,7 @@ In order to bypass the prompt asking for your e2e spec name, simply add a `--nam
 ng generate @cypress/schematic:e2e --name=login
 ```
 
-This will create a new spec file named `login.spec.ts` in the default Cypress folder location.
+This will create a new spec file named `login.cy.ts` in the default Cypress folder location.
 
 
 ### Specify Project

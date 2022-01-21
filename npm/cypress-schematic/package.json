@@ -5,7 +5,6 @@
   "private": false,
   "main": "./src",
   "scripts": {
-    "add:angular-cli": "node ./add-angular-cli-dev.js",
     "build": "tsc -p tsconfig.json",
     "build:test": "tsc -p tsconfig.spec.json",
     "build:all": "tsc -p tsconfig.json && tsc -p tsconfig.spec.json",
@@ -19,23 +18,23 @@
     "unlink:sandbox": "cd sandbox && yarn unlink @cypress/schematic && cd .. && yarn unlink"
   },
   "dependencies": {
-    "@angular-devkit/architect": "^0.1301.4",
-    "@angular-devkit/core": "^13.1.4",
-    "@angular-devkit/schematics": "^13.1.4",
-    "@schematics/angular": "^13.1.4",
+    "@angular-devkit/architect": "^0.1202.10",
+    "@angular-devkit/core": "^12.2.10",
+    "@angular-devkit/schematics": "^12.2.10",
+    "@schematics/angular": "^12.2.10",
     "jsonc-parser": "^3.0.0",
     "rxjs": "~6.6.0"
   },
   "devDependencies": {
-    "@angular-devkit/schematics-cli": "^13.1.4",
-    "@angular/cli": "^13.1.4",
+    "@angular-devkit/schematics-cli": "^12.2.10",
+    "@angular/cli": "^12",
     "@types/chai-enzyme": "0.6.7",
     "@types/mocha": "8.0.3",
     "@types/node": "^12.11.1",
     "chai": "4.2.0",
     "cypress": "0.0.0-development",
     "mocha": "3.5.3",
-    "typescript": "~4.5.4"
+    "typescript": "~4.2.4"
   },
   "license": "MIT",
   "repository": {
