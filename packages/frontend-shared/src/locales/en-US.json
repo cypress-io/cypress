@@ -523,6 +523,11 @@
       "cannotAuto": "We can't automatically migrate your existing component spec files. We recommend that you move the following component spec files next to your source component files (e.g. {0})",
       "ifSkipNote": "If you skip this step, Cypress will still be able to find them, but any new specs that you create will automatically be created next to your component files."
     },
+    "renameSupport": {
+      "title": "We'll automatically rename your existing E2E support file in this step",
+      "serveDifferentTypes": "We now serve different support files for E2E and component testing.",
+      "changedSupportFile": "We've renamed the E2E support file from:"
+    },
     "configFile": {
       "title": "We need to move the Cypress configuration file",
       "changedTheFile": "We've removed {jsonFile} in favor of a {jsFile} file.",
