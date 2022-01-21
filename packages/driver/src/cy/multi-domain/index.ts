@@ -32,8 +32,8 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
 
   Commands.addAll({
     // this isn't fully implemented, but in place to be able to test out
-    // the other parts of multidomain
-    switchToDomain<T> (domain: string, doneOrDataOrFn: T | Mocha.Done | (() => {}), dataOrFn?: T | (() => {}), fn?: (data?: T) => {}) {
+    // the other parts of multi-domain
+    switchToDomain<T> (domain: string, doneOrDataOrFn: T[] | Mocha.Done | (() => {}), dataOrFn?: T[] | (() => {}), fn?: (data?: T[]) => {}) {
       clearTimeout(timeoutId)
 
       if (!config('experimentalMultiDomain')) {
@@ -76,6 +76,15 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
         $errUtils.throwErrByPath('switchToDomain.invalid_domain_argument', {
           onFail: log,
           args: { arg: $utils.stringify(domain) },
+        })
+      }
+
+      if (data && !Array.isArray(data)) {
+        sendReadyForDomain()
+
+        $errUtils.throwErrByPath('switchToDomain.invalid_data_argument', {
+          onFail: log,
+          args: { arg: $utils.stringify(data) },
         })
       }
 

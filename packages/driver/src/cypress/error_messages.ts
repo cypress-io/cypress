@@ -1696,6 +1696,9 @@ export default {
     invalid_domain_argument: {
       message: `${cmd('switchToDomain')} requires the first argument to be a string. You passed: \`{{arg}}\``,
     },
+    invalid_data_argument: {
+      message: `${cmd('switchToDomain')} requires the 'data' argument to be an array. You passed: \`{{arg}}\``,
+    },
     invalid_fn_argument: {
       message: `${cmd('switchToDomain')} requires the last argument to be a function. You passed: \`{{arg}}\``,
     },

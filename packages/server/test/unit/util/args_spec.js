@@ -177,6 +177,18 @@ describe('lib/util/args', () => {
       expect(options.spec[0]).to.eq(`${cwd}/cypress/integration/{[!a]*.spec.js,sub1,{sub2,sub3/sub4}}/*.js`)
       expect(options.spec[1]).to.eq(`${cwd}/cypress/integration/foo.spec.js`)
     })
+
+    it('should be correctly parsing single glob with range', function () {
+      const options = this.setup('--spec', 'cypress/integration/[a-c]*/**')
+
+      expect(options.spec[0]).to.eq(`${cwd}/cypress/integration/[a-c]*/**`)
+    })
+
+    it('should be correctly parsing single glob with list', function () {
+      const options = this.setup('--spec', 'cypress/integration/{a,b,c}/*.js')
+
+      expect(options.spec[0]).to.eq(`${cwd}/cypress/integration/{a,b,c}/*.js`)
+    })
   })
 
   context('--tag', () => {
