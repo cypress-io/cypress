@@ -2,6 +2,7 @@ import type { TestingType } from '@packages/types'
 import fs from 'fs-extra'
 import path from 'path'
 import globby from 'globby'
+import dedent from 'dedent'
 
 type ConfigOptions = {
   global: Record<string, unknown>
@@ -9,20 +10,22 @@ type ConfigOptions = {
   component: Record<string, unknown>
 }
 
-function getHighlightRegexE2E (defaultFolder: 'e2e'|'integration') {
+function getLegacyHighlightRegexp (defaultFolder: 'integration' | 'component') {
   return `cypress\/(?<dir>${defaultFolder})\/.*?(?<ext>[._-]?[s|S]pec.|[.])(?=[j|t]s[x]?)`
 }
 
-const highlightRegexComponent = `cypress\/(?<dir>component)\/.*?(?<ext>[._-]?[s|S]pec.|[.])(?=[j|t]s[x]?)`
+function getNewHighlightRegexp (defaultFolder: 'e2e' | 'component') {
+  return `cypress\/(?<dir>${defaultFolder})\/.*?(?<ext>.cy.)`
+}
 
 export const regexps = {
   e2e: {
-    beforeRegexp: getHighlightRegexE2E('integration'),
-    afterRegexp: getHighlightRegexE2E('e2e'),
+    beforeRegexp: getLegacyHighlightRegexp('integration'),
+    afterRegexp: getNewHighlightRegexp('e2e'),
   },
   component: {
-    beforeRegexp: highlightRegexComponent,
-    afterRegexp: '(?<ext>.cy.)',
+    beforeRegexp: getLegacyHighlightRegexp('component'),
+    afterRegexp: getNewHighlightRegexp('component'),
   },
 } as const
 
@@ -42,7 +45,9 @@ export function formatMigrationFile (file: string, regexp: RegExp): FilePart[] {
   const match = regexp.exec(file)
 
   if (!match?.groups) {
-    throw new NonSpecFileError(`Expected groups in ${file} using ${regexp}. Perhaps this isn't a spec file?`)
+    throw new NonSpecFileError(dedent`
+      Expected groups dir and ext in ${file} using ${regexp}. 
+      Perhaps this isn't a spec file, or it is an unexpected format?`)
   }
 
   // sometimes `.` gets in here as the <ext> group

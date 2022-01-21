@@ -2,6 +2,9 @@ import { MIGRATION_STEPS } from '@packages/types'
 import { enumType, objectType } from 'nexus'
 import { TestingTypeEnum } from '..'
 import { regexps } from '@packages/data-context/src/util/migration'
+import Debug from 'debug'
+
+const debug = Debug('cypress:graphql:gql-Migration')
 
 export const MigrationStepEnum = enumType({
   name: 'MigrationStepEnum',
@@ -17,6 +20,19 @@ export const MigrationSpecPart = objectType({
 
     t.nonNull.boolean('highlight', {
       description: 'should highlight in migration UI',
+    })
+  },
+})
+
+export const MigrationSpecs = objectType({
+  name: 'MigrationSpecs',
+  definition (t) {
+    t.nonNull.list.nonNull.field('before', {
+      type: MigrationSpec,
+    })
+
+    t.nonNull.list.nonNull.field('after', {
+      type: MigrationSpec,
     })
   },
 })
@@ -63,7 +79,7 @@ export const Migration = objectType({
     t.nonNull.field('step', {
       type: MigrationStepEnum,
       description: 'Step where the migration is right now',
-      resolve: () => 'configFile',
+      resolve: () => 'renameAuto',
     })
 
     t.nonNull.field('regexps', {
@@ -88,12 +104,15 @@ export const Migration = objectType({
       },
     })
 
-    t.nonNull.list.nonNull.field('specFilesAfter', {
+    t.nonNull.field('specFiles', {
       description: 'All spec files after conversion',
-      type: MigrationSpec,
-      resolve: () => {
-        return [
-        ]
+      type: MigrationSpecs,
+      resolve: async (source, args, ctx) => {
+        const result = await ctx.migration.getSpecsForMigrationGuide()
+
+        debug('got migration specs %o', result)
+
+        return result
       },
     })
 

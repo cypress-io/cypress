@@ -562,7 +562,7 @@ type Migration {
   regexps: MigrationRegexp!
 
   """All spec files after conversion"""
-  specFilesAfter: [MigrationSpec!]!
+  specFiles: MigrationSpecs!
 
   """All spec files before being converted"""
   specFilesBefore: [MigrationSpec!]!
@@ -596,6 +596,11 @@ type MigrationSpecPart {
 
   """part of filename"""
   text: String!
+}
+
+type MigrationSpecs {
+  after: [MigrationSpec!]!
+  before: [MigrationSpec!]!
 }
 
 enum MigrationStepEnum {

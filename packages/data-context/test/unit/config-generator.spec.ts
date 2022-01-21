@@ -131,7 +131,7 @@ describe('migration utils', () => {
   })
 
   describe('formatMigrationFile', () => {
-    it('breaks into parts', () => {
+    it('breaks pre-migration spec into parts', () => {
       const spec = 'cypress/integration/app.spec.js'
       const re = new RegExp(regexps.e2e.beforeRegexp)
       const actual = formatMigrationFile(spec, re)
@@ -141,6 +141,20 @@ describe('migration utils', () => {
         { text: 'integration', highlight: true },
         { text: '/app', highlight: false },
         { text: '.spec.', highlight: true },
+        { text: 'js', highlight: false },
+      ])
+    })
+
+    it('breaks post-migration spec into parts', () => {
+      const spec = 'cypress/e2e/app.cy.js'
+      const re = new RegExp(regexps.e2e.afterRegexp)
+      const actual = formatMigrationFile(spec, re)
+
+      expect(actual).to.eql([
+        { text: 'cypress/', highlight: false },
+        { text: 'e2e', highlight: true },
+        { text: '/app', highlight: false },
+        { text: '.cy.', highlight: true },
         { text: 'js', highlight: false },
       ])
     })
