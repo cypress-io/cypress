@@ -1,3 +1,4 @@
+import fs from 'fs-extra'
 import path from 'path'
 
 type ConfigOptions = {
@@ -77,4 +78,31 @@ function createTestingTypeTemplate (testingType: 'e2e' | 'component', pluginPath
     },
     ${formatObjectForConfig(options, 4)}
   },`
+}
+
+export async function getSpecs (componentDirPath: string, e2eDirPath: string) {
+  const componentSpecs = await getFiles(componentDirPath)
+  const e2eSpecs = await getFiles(e2eDirPath)
+  const specs = [...componentSpecs, ...e2eSpecs]
+
+  return {
+    before: specs,
+    after: renameSpecPath(specs),
+  }
+}
+
+async function getFiles (dirPath: string) {
+  const files = await fs.readdir(dirPath)
+
+  return files.filter((file) => {
+    const filePath = path.join(dirPath, file)
+
+    return fs.statSync(filePath).isFile()
+  })
+}
+
+function renameSpecPath (specs: string[]) {
+  return specs.map((spec) => {
+    return spec.replace(/([._-]?[s|S]pec.|[.])(?=[j|t]s[x]?)/, '.cy.')
+  })
 }
