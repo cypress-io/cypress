@@ -360,7 +360,7 @@ export async function setSupportFileAndFolder (obj, defaults) {
   const supportFilesByGlob = await ctx.file.getFilesByGlob(obj.projectRoot, obj.supportFile, { absolute: false })
 
   if (supportFilesByGlob.length > 1) {
-    return errors.throw('MULTIPLES_SUPPORT_FILES_FOUND', obj.supportFile, supportFilesByGlob.join(', '))
+    return errors.throw('MULTIPLE_SUPPORT_FILES_FOUND', obj.supportFile, supportFilesByGlob.join(', '))
   }
 
   if (supportFilesByGlob.length === 0) {

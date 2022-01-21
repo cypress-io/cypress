@@ -543,9 +543,9 @@ const getMsgByType = function (type, ...args) {
     case 'AUTOMATION_SERVER_DISCONNECTED':
       return 'The automation client disconnected. Cannot continue running tests.'
 
-    case 'MULTIPLES_SUPPORT_FILES_FOUND':
+    case 'MULTIPLE_SUPPORT_FILES_FOUND':
       return stripIndent`\
-        There are multiples support files.
+        There are multiple support files.
 
         Your \`supportFile\` is set to \`${arg1}\`, and we found \`${arg2}\`.
 
