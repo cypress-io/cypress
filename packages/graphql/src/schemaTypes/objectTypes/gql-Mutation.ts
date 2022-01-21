@@ -418,6 +418,20 @@ export const mutation = mutationType({
       },
     })
 
+    t.field('migrateConfigFile', {
+      description: 'Transforms cypress.json file into cypress.config.js file',
+      type: 'Boolean',
+      resolve: async (_, args, ctx) => {
+        try {
+          await ctx.actions.migration.createConfigFile()
+
+          return true
+        } catch {
+          return false
+        }
+      },
+    })
+
     t.field('setProjectIdInConfigFile', {
       description: 'Set the projectId field in the config file of the current project',
       type: Query,

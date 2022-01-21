@@ -162,8 +162,6 @@ const preferences = usePreferences()
 const {
   viewportStyle,
   windowWidth,
-  screenshotAltHeight,
-  runnerMargin,
   reporterWidth,
   specListWidth,
 } = useRunnerStyle()
@@ -249,18 +247,4 @@ onBeforeUnmount(() => {
 
 <style scoped lang="scss">
 @import "./spec-runner-scoped.scss";
-
-#unified-runner {
-  position: relative;
-    margin: v-bind('runnerMargin');
-}
-
-</style>
-
-<style lang="scss">
-#unified-runner > .screenshot-height-container {
-  height: min(100%, v-bind('screenshotAltHeight'));
-}
-
-@import "./spec-runner-global.scss";
 </style>

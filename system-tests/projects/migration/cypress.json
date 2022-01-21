@@ -1,0 +1,18 @@
+{
+  "$schema": "https://on.cypress.io/cypress.schema.json",
+  "baseUrl": "http://localhost:3000",
+  "retries": 2,
+  "defaultCommandTimeout": 5000,
+  "fixturesFolder": false,
+  "componentFolder": "src",
+  "testFiles": "**/*.spec.{tsx,js}",
+  "pluginsFile": "cypress/plugins/index.ts",
+  "e2e": {
+    "defaultCommandTimeout": 10000,
+    "slowTestThreshold": 5000
+  },
+  "component": {
+    "slowTestThreshold": 5000,
+    "retries": 1
+  }
+}
