@@ -1,0 +1,42 @@
+import type $Log from '../../cypress/log'
+import $utils from '../../cypress/utils'
+import $errUtils from '../../cypress/error_utils'
+
+export class Validator {
+  log: typeof $Log
+  onFailure: () => {}
+
+  constructor ({ log, onFailure }) {
+    this.log = log
+    this.onFailure = onFailure
+  }
+
+  validate ({ callbackFn, domain, done, doneReference }) {
+    if (typeof domain !== 'string') {
+      this.onFailure()
+
+      $errUtils.throwErrByPath('switchToDomain.invalid_domain_argument', {
+        onFail: this.log,
+        args: { arg: $utils.stringify(domain) },
+      })
+    }
+
+    if (typeof callbackFn !== 'function') {
+      this.onFailure()
+
+      $errUtils.throwErrByPath('switchToDomain.invalid_fn_argument', {
+        onFail: this.log,
+        args: { arg: $utils.stringify(callbackFn) },
+      })
+    }
+
+    // verifies the done argument is actually the done fn
+    if (done && done !== doneReference) {
+      this.onFailure()
+
+      $errUtils.throwErrByPath('switchToDomain.done_reference_mismatch', {
+        onFail: this.log,
+      })
+    }
+  }
+}
