@@ -17,7 +17,7 @@
       ref="loginButtonRef"
       size="lg"
       :variant="buttonVariant"
-      :disabled="isLoggingIn"
+      :disabled="isLoggingIn || !isOnline"
       aria-live="polite"
       @click="handleAuth"
     >
@@ -39,6 +39,7 @@
 import { computed, ref, onMounted } from 'vue'
 import { gql } from '@urql/core'
 import { useMutation, useQuery } from '@urql/vue'
+import { useOnline } from '@vueuse/core'
 
 import {
   LoginDocument,
@@ -48,6 +49,8 @@ import {
 } from '../generated/graphql'
 import Button from '@cy/components/Button.vue'
 import { useI18n } from '@cy/i18n'
+
+const isOnline = useOnline()
 
 const props = defineProps<{
   gql: AuthFragment,

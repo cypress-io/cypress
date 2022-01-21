@@ -47,4 +47,6 @@ export const stubMigration: MaybeResolver<Migration> = {
       }
     },
   })`,
+  integrationFolder: 'cypress/integration',
+  componentFolder: 'cypress/component',
 }
