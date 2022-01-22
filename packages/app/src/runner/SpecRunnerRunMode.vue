@@ -4,9 +4,8 @@
     class="flex border-gray-900 border-l-1"
   >
     <ResizablePanels
-      :offset-left="64"
-      :max-total-width="windowWidth - 64"
-      :initial-panel1-width="specListWidth"
+      :max-total-width="windowWidth"
+      :initial-panel1-width="0"
       :initial-panel2-width="reporterWidth"
       :show-panel1="false"
       :show-panel2="!screenshotStore.isScreenshotting"
