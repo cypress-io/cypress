@@ -124,9 +124,6 @@ describe('migration utils', () => {
 
       expect(specs.before[8].relative).to.eql('cypress/integration/someDir/someFile.js')
       expect(specs.after[8].relative).to.eql('cypress/e2e/someDir/someFile.cy.js')
-
-      // not sure how to test this without messing up file tree
-      // moveSpecFiles(e2eDirPath)
     })
   })
 

@@ -1,5 +1,6 @@
 import { MIGRATION_STEPS } from '@packages/types'
 import type { DataContext } from '..'
+import { moveSpecFiles } from '../util'
 
 type MIGRATION_STEP = typeof MIGRATION_STEPS[number]
 export class MigrationActions {
@@ -23,7 +24,15 @@ export class MigrationActions {
   }
 
   async renameSpecFiles () {
-    // TODO: implement the renaming of spec files here
+    if (!this.ctx.currentProject) {
+      throw Error('Need to set currentProject before you can rename files')
+    }
+
+    const e2eDirPath = this.ctx.path.join(this.ctx.currentProject, 'cypress', 'integration')
+
+    moveSpecFiles(e2eDirPath).catch((error) => {
+      throw error
+    })
   }
 
   async renameSupportFile () {

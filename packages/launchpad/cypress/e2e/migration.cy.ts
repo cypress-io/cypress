@@ -17,19 +17,13 @@ describe('Migration', () => {
 
     it('should create the cypress.config.js file and delete old config', () => {
       cy.withCtx(async (ctx) => {
-        const stats = await ctx.actions.file.checkIfFileExists('cypress.config.js')
+        const configStats = await ctx.actions.file.checkIfFileExists('cypress.config.js')
 
-        expect(stats).to.not.be.null.and.not.be.undefined
+        expect(configStats).to.not.be.null.and.not.be.undefined
 
-        let doesFileExist = true
+        const oldConfigStats = await ctx.actions.file.checkIfFileExists('cypress.json')
 
-        try {
-          await ctx.actions.file.checkIfFileExists('cypress.json')
-        } catch (error) {
-          doesFileExist = false
-        }
-
-        expect(doesFileExist).to.be.false
+        expect(oldConfigStats).to.be.null
       })
     })
 
@@ -40,6 +34,27 @@ describe('Migration', () => {
         const isValidJsFile = ctx.file.isValidJsFile(configPath)
 
         expect(isValidJsFile).to.be.true
+      })
+    })
+  })
+
+  describe('File Renames', () => {
+    beforeEach(() => {
+      cy.visitLaunchpad()
+    })
+
+    it('should move files to correct location', () => {
+      cy.findByText(defaultMessages.migration.wizard.step1.button).click()
+
+      cy.withCtx(async (ctx) => {
+        const e2eDirPath = ctx.path.join('cypress', 'e2e')
+        const files = ['app.cy.js', 'blog-post.cy.ts', 'company.cy.js', 'home.cy.js', 'sign-up.cy.js', 'spectacleBrowser.cy.ts'].map((file) => ctx.path.join(e2eDirPath, file))
+
+        for (let i = 0; i < files.length; i++) {
+          const stats = await ctx.actions.file.checkIfFileExists(files[i])
+
+          expect(stats).to.not.be.null
+        }
       })
     })
   })
