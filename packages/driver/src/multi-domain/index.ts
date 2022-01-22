@@ -1,4 +1,5 @@
 import 'setimmediate'
+import { client } from '@packages/socket'
 
 import '../config/bluebird'
 import '../config/jquery'
@@ -51,6 +52,12 @@ const setup = () => {
       path: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
       version: '90.0.4430.212',
     },
+    defaultCommandTimeout: 4000,
+    execTimeout: 60000,
+    taskTimeout: 60000,
+    pageLoadTimeout: 60000,
+    requestTimeout: 5000,
+    responseTimeout: 30000,
   }) as Cypress.Cypress
 
   // @ts-ignore
@@ -72,6 +79,21 @@ const setup = () => {
   Cypress.on('skipped:command:end', onCommandEnd)
   Cypress.on('log:added', onLogAdded)
   Cypress.on('log:changed', onLogChanged)
+
+  // @ts-ignore
+  const ws = client.connect({
+    path: '/__socket.io',
+    transports: ['websocket'],
+  })
+
+  const events = ['backend:request', 'automation:request']
+
+  events.forEach((event) => {
+    // @ts-ignore
+    Cypress.on(event, (...args) => {
+      return ws.emit(event, ...args)
+    })
+  })
 
   const doneEarly = () => {
     cy.queue.stop()

@@ -1,6 +1,5 @@
 // @ts-ignore / session support is needed for visiting about:blank between tests
-// FIXME: hangs
-context.skip('multi-domain cookies', { experimentalSessionSupport: true, experimentalMultiDomain: true }, () => {
+context('multi-domain cookies', { experimentalSessionSupport: true, experimentalMultiDomain: true }, () => {
   beforeEach(() => {
     cy.visit('/fixtures/multi-domain.html')
     cy.get('a[data-cy="multi-domain-secondary-link"]').click()
