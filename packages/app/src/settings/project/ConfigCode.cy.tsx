@@ -37,8 +37,6 @@ describe('<ConfigCode />', () => {
 
       const expectedText = `{${Object.entries(objectTest).map(([key, value]) => `'${key}': '${value}'`).join(',')},}`
 
-      cy.log(expectedText)
-
       cy.contains(`objectTest:`).should('contain.text', expectedText)
     })
   })
@@ -76,7 +74,3 @@ describe('<ConfigCode />', () => {
     })
   })
 })
-
-/*
-
-*/
