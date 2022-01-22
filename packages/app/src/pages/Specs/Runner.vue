@@ -1,22 +1,22 @@
 <template>
   <div>
     <!--
-    Run Mode is a more minimal UI.
-    It does not render things like the SpecList,
-    Side and Top Nav, etc.
-    It also has no GraphQL dependency.
-  -->
+      Run Mode is a more minimal UI.
+      It does not render things like the SpecList,
+      Side and Top Nav, etc.
+      It also has no GraphQL dependency.
+    -->
     <SpecRunnerContainerRunMode
       v-if="isRunMode"
       :run-mode-specs="specs"
     />
 
     <!--
-    Open Mode is the full Cypress runner UI -
-    including things like the SpecList,
-    Side and Top Nav, Selector Playgroundn etc.
-    It is driven by GraphQL and urql.
-  -->
+      Open Mode is the full Cypress runner UI -
+      including things like the SpecList,
+      Side and Top Nav, Selector Playgroundn etc.
+      It is driven by GraphQL and urql.
+    -->
     <SpecRunnerContainerOpenMode
       v-else-if="query.data.value?.currentProject?.specs"
       :gql="query.data.value"
