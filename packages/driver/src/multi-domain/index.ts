@@ -14,6 +14,11 @@ import { SpecBridgeDomainCommunicator } from './communicator'
 
 const specBridgeCommunicator = new SpecBridgeDomainCommunicator()
 
+const webSocket = client({
+  path: '/__socket.io',
+  transports: ['websocket'],
+}).connect()
+
 const onCommandEnqueued = (commandAttrs: Cypress.EnqueuedCommand) => {
   const { id, name } = commandAttrs
 
@@ -35,6 +40,14 @@ const onLogAdded = (attrs) => {
 
 const onLogChanged = (attrs) => {
   specBridgeCommunicator.toPrimary('log:changed', $Log.toSerializedJSON(attrs))
+}
+
+const onBackendRequest = (...args) => {
+  webSocket.emit('backend:request', ...args)
+}
+
+const onAutomationRequest = (...args) => {
+  webSocket.emit('automation:request', ...args)
 }
 
 const setup = () => {
@@ -79,21 +92,8 @@ const setup = () => {
   Cypress.on('skipped:command:end', onCommandEnd)
   Cypress.on('log:added', onLogAdded)
   Cypress.on('log:changed', onLogChanged)
-
-  // @ts-ignore
-  const ws = client.connect({
-    path: '/__socket.io',
-    transports: ['websocket'],
-  })
-
-  const events = ['backend:request', 'automation:request']
-
-  events.forEach((event) => {
-    // @ts-ignore
-    Cypress.on(event, (...args) => {
-      return ws.emit(event, ...args)
-    })
-  })
+  Cypress.on('backend:request', onBackendRequest)
+  Cypress.on('automation:request', onAutomationRequest)
 
   const doneEarly = () => {
     cy.queue.stop()

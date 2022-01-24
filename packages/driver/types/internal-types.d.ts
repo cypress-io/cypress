@@ -12,6 +12,8 @@ declare namespace Cypress {
     (action: 'internal:window:load', fn: (details: InternalWindowLoadDetails) => void)
     (action: 'net:stubbing:event', frame: any)
     (action: 'request:event', data: any)
+    (action: 'backend:request', fn: (...any) => void)
+    (action: 'automation:request', fn: (...any) => void)
   }
 
   interface cy {
