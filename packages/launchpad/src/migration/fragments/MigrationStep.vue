@@ -21,7 +21,7 @@
           v-else
           class="rounded-full bg-gray-100 h-24px text-center w-24px"
         >
-          {{ step }}
+          {{ stepNumber }}
         </div>
       </template>
       <template #header>
@@ -55,19 +55,20 @@
 </template>
 
 <script setup lang="ts">
-import { useSlots } from 'vue'
+import { computed } from 'vue'
 import ListRowHeader from '@cy/components/ListRowHeader.vue'
+import { MIGRATION_STEPS } from '@packages/types'
 
-withDefaults(defineProps<{
-  open?: boolean,
-  checked?: boolean,
-  step: number,
+const props = defineProps<{
+  currentStep: typeof MIGRATION_STEPS[number],
+  step: typeof MIGRATION_STEPS[number],
   title: string,
   description: string,
-}>(), {
-  open: false,
-  checked: false,
-})
+}>()
+
+const stepNumber = computed(() => MIGRATION_STEPS.indexOf(props.step) + 1)
+const open = computed(() => props.currentStep === props.step)
+const checked = computed(() => stepNumber.value <= MIGRATION_STEPS.indexOf(props.currentStep))
 
 const emit = defineEmits(['toggle'])
 </script>
