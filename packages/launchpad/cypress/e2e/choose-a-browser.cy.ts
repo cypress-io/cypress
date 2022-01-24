@@ -122,6 +122,34 @@ describe('Choose a Browser Page', () => {
       })
     })
 
+    it('sends mutation to launch selected browser only once', () => {
+      cy.openProject('launchpad', ['--e2e'])
+
+      cy.visitLaunchpad()
+
+      cy.get('h1').should('contain', 'Choose a Browser')
+
+      cy.contains('button', 'Launch Chrome').as('launchButton')
+
+      const spyMutation = cy.spy().as('launchBrowserMutation')
+
+      // Stub out response to prevent browser launch but not break internals
+      cy.intercept('mutation-OpenBrowser_LaunchProject', (req) => {
+        spyMutation()
+        // do nothing with the req, only call the response with a 10ms delay.
+        req.continue((res) => {
+          res.delay = 10
+          res.send()
+        })
+      }).as('launchProject')
+
+      cy.get('@launchButton').click().click().click()
+
+      cy.wait(50).then(() => {
+        cy.get('@launchBrowserMutation').should('have.been.calledOnce')
+      })
+    })
+
     it('performs mutation to change selected browser when browser item is clicked', () => {
       cy.openProject('launchpad', ['--e2e'])
 
