@@ -438,9 +438,14 @@ export const mutation = mutationType({
         if (!skip) {
           try {
             await ctx.actions.migration.renameSpecFiles()
-          } catch (e) {
-            // add the error to an error stack
-            return {}
+          } catch (error) {
+            const e = error as Error
+
+            ctx.coreData.baseError = {
+              title: 'Spec Files Migration Error',
+              message: e.message,
+              stack: e.stack,
+            }
           }
         }
 
@@ -466,9 +471,14 @@ export const mutation = mutationType({
       resolve: async (_, args, ctx) => {
         try {
           await ctx.actions.migration.renameSupportFile()
-        } catch (e) {
-          // add the error to an error stack
-          return {}
+        } catch (error) {
+          const e = error as Error
+
+          ctx.coreData.baseError = {
+            title: 'Support File Migration Error',
+            message: e.message,
+            stack: e.stack,
+          }
         }
         ctx.actions.migration.setStep('configFile')
 
@@ -482,9 +492,14 @@ export const mutation = mutationType({
       resolve: async (_, args, ctx) => {
         try {
           await ctx.actions.migration.createConfigFile()
-        } catch (e) {
-          // add the error to an error stack
-          return {}
+        } catch (error) {
+          const e = error as Error
+
+          ctx.coreData.baseError = {
+            title: 'Config File Migration Error',
+            message: e.message,
+            stack: e.stack,
+          }
         }
 
         ctx.actions.migration.setStep('setupComponent')
@@ -497,13 +512,7 @@ export const mutation = mutationType({
       description: 'Merges the component testing config in cypress.config.{js,ts}',
       type: Query,
       resolve: async (_, args, ctx) => {
-        try {
-          await ctx.actions.migration.startWizardReconfiguration()
-
-          return {}
-        } catch {
-          return {}
-        }
+        await ctx.actions.migration.startWizardReconfiguration()
       },
     })
 
@@ -516,7 +525,7 @@ export const mutation = mutationType({
       resolve: async (_, args, ctx) => {
         try {
           await ctx.actions.project.setProjectIdInConfigFile(args.projectId)
-        } catch (e) {
+        } catch {
           // ignore error as not useful for end user to see
         }
 
