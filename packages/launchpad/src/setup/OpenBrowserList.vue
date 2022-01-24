@@ -1,7 +1,7 @@
 <template>
   <form
     v-if="browsers"
-    @submit.prevent="emit('launch', props.gql?.currentBrowser?.path)"
+    @submit.prevent="emit('launch')"
   >
     <div
       class="flex flex-wrap py-40px gap-24px justify-center"
@@ -130,7 +130,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'navigated-back'): void
-  (e: 'launch', value: string | undefined): void
+  (e: 'launch'): void
 }>()
 
 const { t } = useI18n()
