@@ -5,6 +5,7 @@ export interface BrowserApiShape {
   close(): Promise<any>
   ensureAndGetByNameOrPath(nameOrPath: string): Promise<FoundBrowser | undefined>
   getBrowsers(): Promise<FoundBrowser[]>
+  focusActiveBrowserWindow(): Promise<any>
 }
 
 export class BrowserDataSource {

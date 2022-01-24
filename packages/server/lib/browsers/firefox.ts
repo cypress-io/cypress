@@ -308,6 +308,7 @@ const defaultPreferences = {
   'browser.download.folderList': 2,
   // prevents the download prompt for the specified types of files
   'browser.helperApps.neverAsk.saveToDisk': downloadMimeTypes,
+  'dom.disable_window_flip': false,
 }
 
 const FIREFOX_HEADED_USERCSS = `\
@@ -390,6 +391,10 @@ export async function open (browser: Browser, url, options: any = {}, automation
     // and the browser will spawn maximized. The user may still supply these args to override
     // defaultLaunchOptions.args.push('--width=1920')
     // defaultLaunchOptions.args.push('--height=1081')
+  } else {
+    _.extend(defaultLaunchOptions.preferences, {
+      'focusmanager.testmode': false,
+    })
   }
 
   debug('firefox open %o', options)

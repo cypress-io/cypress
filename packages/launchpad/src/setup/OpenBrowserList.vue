@@ -106,6 +106,7 @@
             :prefix-icon="ExportIcon"
             prefix-icon-class="icon-dark-gray-500"
             class="font-medium"
+            @click="setFocusToActiveBrowserWindow"
           >
             {{ browserText.focus }}
           </Button>
@@ -151,7 +152,7 @@ import ArrowLeftIcon from '~icons/cy/arrow-left_x16'
 import StatusRunningIcon from '~icons/cy/status-running_x16'
 import TestingTypeE2E from '~icons/cy/testing-type-e2e_x24'
 
-import { OpenBrowserListFragment, OpenBrowserList_CloseBrowserDocument, OpenBrowserList_SetBrowserDocument } from '../generated/graphql'
+import { OpenBrowserListFragment, OpenBrowserList_CloseBrowserDocument, OpenBrowserList_SetBrowserDocument, OpenBrowser_FocusActiveBrowserWindowDocument } from '../generated/graphql'
 
 gql`
 mutation OpenBrowserList_SetBrowser($id: ID!) {
@@ -189,6 +190,12 @@ fragment OpenBrowserList on CurrentProject {
     majorVersion
   }
   currentTestingType
+}
+`
+
+gql`
+mutation OpenBrowser_FocusActiveBrowserWindow {
+  focusActiveBrowserWindow
 }
 `
 
@@ -237,6 +244,12 @@ const selectedBrowserName = computed(() => {
 
 function closeBrowser () {
   closeBrowserMutation.executeMutation({})
+}
+
+const focusActiveBrowserWindow = useMutation(OpenBrowser_FocusActiveBrowserWindowDocument)
+
+const setFocusToActiveBrowserWindow = () => {
+  focusActiveBrowserWindow.executeMutation({})
 }
 
 const browserText = computed(() => {

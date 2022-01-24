@@ -40,6 +40,10 @@ export class ElectronActions {
     // }
   }
 
+  blurWindow () {
+    this.electron.browserWindow?.blur()
+  }
+
   showBrowserWindow () {
     this.electron.browserWindow?.show()
 

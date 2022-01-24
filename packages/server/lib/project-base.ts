@@ -474,6 +474,10 @@ export class ProjectBase<TServer extends Server> extends EE {
     this.server.changeToUrl(url)
   }
 
+  async sendFocusBrowserMessage () {
+    await this.server.sendFocusBrowserMessage()
+  }
+
   shouldCorrelatePreRequests = () => {
     if (!this.browser) {
       return false
