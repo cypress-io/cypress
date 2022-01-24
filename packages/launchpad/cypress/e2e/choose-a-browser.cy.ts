@@ -139,6 +139,20 @@ describe('Choose a Browser Page', () => {
         // do nothing with the req, only call the response with a 10ms delay.
         req.continue((res) => {
           res.delay = 10
+          res.body = {
+            data: {
+              launchOpenProject: true,
+              setProjectPreferences: {
+                currentProject: {
+                  id: 'test-id',
+                  title: 'launchpad',
+                  __typename: 'CurrentProject',
+                },
+                __typename: 'Query',
+              },
+            },
+          }
+
           res.send()
         })
       }).as('launchProject')
