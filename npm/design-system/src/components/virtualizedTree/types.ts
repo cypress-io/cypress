@@ -150,8 +150,8 @@ export const isParent = <
   TLeaf extends LeafTreeBase,
   TParent extends ParentTreeBase<TLeaf>
 >(
-    input: TLeaf | TParent,
-  ): input is TParent => {
+  input: TLeaf | TParent,
+): input is TParent => {
   return 'children' in input
 }
 

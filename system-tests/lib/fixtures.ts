@@ -101,18 +101,16 @@ async function makeWorkspacePackagesAbsolute (pathToPkgJson: string): Promise<st
 }
 
 function getYarnCommand (opts: {
-  yarnV2: boolean
+  yarnV311: boolean
   updateYarnLock: boolean
   isCI: boolean
   runScripts: boolean
 }): string {
   let cmd = `yarn install`
 
-  if (opts.yarnV2) {
-    // yarn v2's docs are no longer available on their site now that yarn v3 is out,
-    // Internet Archive has them here:
-    // @see https://web.archive.org/web/20210102223647/https://yarnpkg.com/cli/install
-    if (!opts.runScripts) cmd += ' --skip-builds'
+  if (opts.yarnV311) {
+    // @see https://yarnpkg.com/cli/install
+    if (!opts.runScripts) cmd += ' --mode=skip-build'
 
     if (!opts.updateYarnLock) cmd += ' --immutable'
 
@@ -150,7 +148,7 @@ type SystemTestPkgJson = {
   /**
    * Run the yarn v2-style install command instead of yarn v1-style.
    */
-  _cyYarnV2?: boolean
+  _cyYarnV311?: boolean
   /**
    * By default, the automatic `yarn install` will not run postinstall scripts. This
    * option, if set, will cause postinstall scripts to run for this project.
@@ -230,7 +228,7 @@ export async function scaffoldProjectNodeModules (project: string, updateYarnLoc
     // 4. Run `yarn install`.
     const cmd = getYarnCommand({
       updateYarnLock,
-      yarnV2: pkgJson._cyYarnV2,
+      yarnV311: pkgJson._cyYarnV311,
       isCI: !!process.env.CI,
       runScripts: pkgJson._cyRunScripts,
     })
