@@ -348,15 +348,29 @@ export const setNodeBinary = (obj, userNodePath, userNodeVersion) => {
 }
 
 // async function
-export function setSupportFileAndFolder (obj, defaults) {
+export async function setSupportFileAndFolder (obj, defaults) {
   if (!obj.supportFile) {
     return Bluebird.resolve(obj)
   }
 
   obj = _.clone(obj)
 
+  const ctx = getCtx()
+
+  const supportFilesByGlob = await ctx.file.getFilesByGlob(obj.projectRoot, obj.supportFile, { absolute: false })
+
+  if (supportFilesByGlob.length > 1) {
+    return errors.throw('MULTIPLE_SUPPORT_FILES_FOUND', obj.supportFile, supportFilesByGlob.join(', '))
+  }
+
+  if (supportFilesByGlob.length === 0) {
+    const configFile = obj.configFile || defaults.configFile
+
+    return errors.throw('SUPPORT_FILE_NOT_FOUND', path.resolve(obj.projectRoot, obj.supportFile), configFile)
+  }
+
   // TODO move this logic to find support file into util/path_helpers
-  const sf = obj.supportFile
+  const sf = supportFilesByGlob[0]
 
   debug(`setting support file ${sf}`)
   debug(`for project root ${obj.projectRoot}`)

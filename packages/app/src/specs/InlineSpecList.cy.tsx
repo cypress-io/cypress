@@ -34,6 +34,8 @@ describe('InlineSpecList', () => {
     cy.get('li')
     .should('exist')
     .and('have.length', 7)
+
+    cy.percySnapshot()
   })
 
   it('should support fuzzy sort', () => {
@@ -51,6 +53,8 @@ describe('InlineSpecList', () => {
 
     cy.get(newSpecSelector).click()
     cy.contains(defaultMessages.createSpec.newSpecModalTitle).should('be.visible')
+
+    cy.percySnapshot()
   })
 
   it('should handle spec refresh', () => {

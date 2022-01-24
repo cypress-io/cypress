@@ -24,7 +24,7 @@
       <ExperimentRow
         v-for="experiment in localExperiments"
         :key="experiment.key"
-        data-testid="experiment"
+        :data-cy="`experiment-${experiment.key}`"
         class="border-t-1 border-gray-100 py-24px first:border-0"
         :experiment="experiment"
       />

@@ -43,9 +43,13 @@ describe('<NoSpecsPage />', { viewportHeight: 655, viewportWidth: 1032 }, () => 
     it('renders the correct text for component testing', () => {
       cy.get(pageTitleSelector).should('contain.text', messages.page.defaultPatternNoSpecs.title)
       .get(pageDescriptionSelector).should('contain.text', messages.page.defaultPatternNoSpecs.component.description)
-    })
 
-    it('percy snapshot', () => {
+      const text = defaultMessages.createSpec.component
+
+      cy.contains(text.importFromComponent.header).should('be.visible')
+      cy.contains(text.importFromComponent.description).should('be.visible')
+      cy.contains(text.importFromStory.header).should('be.visible')
+      cy.contains(text.importFromStory.notSetupDescription).should('be.visible')
       cy.percySnapshot()
     })
   })
@@ -75,6 +79,12 @@ describe('<NoSpecsPage />', { viewportHeight: 655, viewportWidth: 1032 }, () => 
       .should('contain.text', messages.page.defaultPatternNoSpecs.title)
       .get(pageDescriptionSelector).should('contain.text', messages.page.defaultPatternNoSpecs.e2e.description)
 
+      const text = defaultMessages.createSpec.e2e
+
+      cy.contains(text.importFromScaffold.header).should('be.visible')
+      cy.contains(text.importFromScaffold.description).should('be.visible')
+      cy.contains(text.importEmptySpec.header).should('be.visible')
+      cy.contains(text.importEmptySpec.description).should('be.visible')
       cy.percySnapshot()
     })
   })

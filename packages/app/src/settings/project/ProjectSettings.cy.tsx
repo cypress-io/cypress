@@ -18,6 +18,8 @@ describe('<ProjectSettings />', () => {
     cy.findByText(defaultMessages.settingsPage.projectId.title).should('be.visible')
     cy.findByText(defaultMessages.settingsPage.recordKey.title).should('be.visible')
     cy.findByText(defaultMessages.settingsPage.experiments.title).should('be.visible')
+
+    cy.percySnapshot()
   })
 
   it('hides project Id, and record key when not present', () => {
@@ -39,5 +41,7 @@ describe('<ProjectSettings />', () => {
 
     cy.findByText(defaultMessages.settingsPage.projectId.title).should('not.exist')
     cy.findByText(defaultMessages.settingsPage.recordKey.title).should('not.exist')
+
+    cy.percySnapshot()
   })
 })
