@@ -22,19 +22,19 @@ export default createStorybookConfig({
 })
 
 export const Elevation = createStory<{
-    elevation: SurfaceElevation
-  }>(({ elevation }) => (
-    <div>
+  elevation: SurfaceElevation
+}>(({ elevation }) => (
+  <div>
+    <ElevationComponent elevation={elevation}>
+      {lorem}
+    </ElevationComponent>
+    <br />
+    <StoryHighlightWrapper>
       <ElevationComponent elevation={elevation}>
         {lorem}
       </ElevationComponent>
-      <br />
-      <StoryHighlightWrapper>
-        <ElevationComponent elevation={elevation}>
-          {lorem}
-        </ElevationComponent>
-      </StoryHighlightWrapper>
-    </div>
-  ), {
-    elevation: 'bordered',
-  })
+    </StoryHighlightWrapper>
+  </div>
+), {
+  elevation: 'bordered',
+})

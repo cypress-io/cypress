@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import _ from 'lodash'
 import fakeTimers from '@sinonjs/fake-timers'
 
@@ -59,3 +57,5 @@ export const create = (win, now, methods) => {
 
   }
 }
+
+export type Clock = ReturnType<typeof create>
