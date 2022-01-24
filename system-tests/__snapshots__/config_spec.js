@@ -176,7 +176,7 @@ Cypress no longer supports 'cypress.json', please migrate to 'cypress.config.{ts
 
 exports['e2e config throws error when cypress.json is found in project and cypress.config.{ts|js} exists as well 1'] = `
 There is both a \`cypress.config.js\` and a cypress.json file at the location below:
-/foo/bar/.projects/multiples-config-files-with-json
+/foo/bar/.projects/multiple-config-files-with-json
 
 Cypress no longer supports 'cypress.json' config, please remove it from your project.
 
