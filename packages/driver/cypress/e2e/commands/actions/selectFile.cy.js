@@ -20,7 +20,7 @@ function getFileContents (subject) {
 describe('src/cy/commands/actions/selectFile', () => {
   beforeEach(() => {
     cy.visit('/fixtures/files-form.html')
-    cy.wrap(Buffer.from('foo')).as('foo')
+    cy.wrap(Cypress.Buffer.from('foo')).as('foo')
   })
 
   context('#selectFile', () => {
@@ -32,7 +32,7 @@ describe('src/cy/commands/actions/selectFile', () => {
       .then((input) => {
         expect(input[0].files.length).to.eq(1)
         expect(input[0].files[0].name).to.eq('foo.txt')
-        expect(input[0].files[0].type).to.eq('')
+        expect(input[0].files[0].type).to.eq('text/plain')
         expect(input[0].files[0].lastModified).to.be.closeTo(Date.now(), 1000)
       })
 
@@ -50,10 +50,12 @@ describe('src/cy/commands/actions/selectFile', () => {
           contents: '@foo',
           fileName: 'foo.txt',
         }, {
-          contents: Buffer.from('{"a":"bar"}'),
+          contents: Cypress.Buffer.from('{"a":"bar"}'),
           fileName: 'bar.json',
         },
-        Buffer.from('baz'),
+        Cypress.Buffer.from('baz'),
+        // 'baz' in ascii
+        Uint8Array.from([98, 97, 122]),
       ])
 
       cy.get('#multiple')
@@ -62,6 +64,7 @@ describe('src/cy/commands/actions/selectFile', () => {
         expect(input[0].files[0].name).to.eq('foo.txt')
         expect(input[0].files[1].name).to.eq('bar.json')
         expect(input[0].files[2].name).to.eq('')
+        expect(input[0].files[3].name).to.eq('')
       })
 
       cy.get('#multiple')
@@ -70,6 +73,7 @@ describe('src/cy/commands/actions/selectFile', () => {
         expect(contents[0]).to.eq('foo')
         expect(contents[1]).to.eq('{"a":"bar"}')
         expect(contents[2]).to.eq('baz')
+        expect(contents[3]).to.eq('baz')
       })
     })
 
@@ -247,6 +251,40 @@ describe('src/cy/commands/actions/selectFile', () => {
         .then((input) => {
           expect(input[0].files[0].name).to.eq('valid.json')
           expect(input[0].files[1].name).to.eq('app.js')
+        })
+      })
+    })
+
+    describe('mime types', () => {
+      it('uses empty string for unknown extensions', () => {
+        cy.get('#basic')
+        .selectFile({ contents: '@foo', fileName: 'foo.barbaz' })
+        .then((input) => {
+          expect(input[0].files[0].type).to.eq('')
+        })
+      })
+
+      it('works with several common extensions', () => {
+        [
+          ['png', 'image/png'],
+          ['jpg', 'image/jpeg'],
+          ['zip', 'application/zip'],
+          ['yaml', 'text/yaml'],
+          ['json', 'application/json'],
+        ].forEach(([extension, mimeType]) => {
+          cy.get('#basic')
+          .selectFile({ contents: '@foo', fileName: `foo.${extension}` })
+          .then((input) => {
+            expect(input[0].files[0].type).to.eq(mimeType)
+          })
+        })
+      })
+
+      it('allows users to specify a mimetype', () => {
+        cy.get('#basic')
+        .selectFile({ contents: '@foo', fileName: 'foo.zip', mimeType: 'image/png' })
+        .then((input) => {
+          expect(input[0].files[0].type).to.eq('image/png')
         })
       })
     })

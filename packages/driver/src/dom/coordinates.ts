@@ -22,30 +22,34 @@ const getFirstValidSizedRect = (el) => {
   }) || el.getBoundingClientRect() // otherwise fall back to the parent client rect
 }
 
-type ElementPositioning = {
+export type ElViewportPostion = {
+  doc: Document
+  x?: number
+  y?: number
+  top: number
+  left: number
+  right: number
+  bottom: number
+  topCenter: number
+  leftCenter: number
+}
+
+export type ElWindowPostion = {
+  x?: number
+  y?: number
+  top: number
+  left: number
+  topCenter: number
+  leftCenter: number
+}
+
+export type ElementPositioning = {
   scrollTop: number
   scrollLeft: number
   width: number
   height: number
-  fromElViewport: {
-    doc: Document
-    x?: number
-    y?: number
-    top: number
-    left: number
-    right: number
-    bottom: number
-    topCenter: number
-    leftCenter: number
-  }
-  fromElWindow: {
-    x?: number
-    y?: number
-    top: number
-    left: number
-    topCenter: number
-    leftCenter: number
-  }
+  fromElViewport: ElViewportPostion
+  fromElWindow: ElWindowPostion
   fromAutWindow: {
     x?: number
     y?: number
