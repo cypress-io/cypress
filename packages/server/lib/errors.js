@@ -1175,8 +1175,9 @@ const log = function (err, color = 'red') {
   return err
 }
 
-const logException = async (err) => {
-  if (log(err) && isProduction()) {
+const logException = async function (err) {
+  // TODO: remove context here
+  if (this.log(err) && isProduction()) {
     // log this exception since its not a known error
     await require('./exception').create(err)
   }
