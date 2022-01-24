@@ -6,7 +6,10 @@ describe('Launchpad: Onboarding Flow', () => {
 
   it('can setup component testing', () => {
     cy.visitLaunchpad()
+    cy.percySnapshot()
     cy.get('[data-cy-testingType=component]').click()
+    cy.get('[data-testid=select-framework]').should('be.visible')
+    cy.percySnapshot()
     cy.get('[data-testid=select-framework]').click()
     cy.findByText('Vue.js').click()
     cy.get('[data-testid=select-framework]').should('contain', 'Vue.js')
@@ -16,6 +19,9 @@ describe('Launchpad: Onboarding Flow', () => {
 
     cy.findByText('Webpack').click()
     cy.get('[data-testid=select-bundler]').should('contain', 'Webpack')
+
+    cy.percySnapshot()
+
     cy.reload()
     cy.get('[data-testid=select-framework]').should('contain', 'Vue.js')
     cy.get('[data-testid=select-bundler]').should('contain', 'Webpack')
@@ -23,6 +29,7 @@ describe('Launchpad: Onboarding Flow', () => {
     cy.get('h1').should('contain', 'Dependencies')
     cy.findByText('I\'ve installed them').click()
     cy.findByText('We added the following files to your project.')
+    cy.percySnapshot()
     cy.findByText('Continue').click()
     cy.withCtx((ctx) => {
       return ctx.file.readFileInProject('cypress.config.js')
@@ -61,6 +68,7 @@ describe('Launchpad: Onboarding Flow', () => {
     cy.visitLaunchpad()
     cy.get('[data-cy-testingType=e2e]').click()
     cy.findByText('We added the following files to your project.')
+    cy.percySnapshot()
     cy.findByText('Continue').click()
     cy.findByText('Choose a Browser')
   })
