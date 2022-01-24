@@ -38,4 +38,6 @@
 // test out visiting a 3rd domain
 const cyBridgeFrame = window.parent.frames[2]
 
-cyBridgeFrame.__onBeforeAppWindowLoad(window)
+const Cypress = cyBridgeFrame.Cypress
+
+Cypress.action('app:window:before:load', window)

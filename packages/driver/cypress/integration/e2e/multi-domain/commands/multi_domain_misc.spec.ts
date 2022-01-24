@@ -7,8 +7,18 @@ context('multi-domain misc', { experimentalSessionSupport: true, experimentalMul
 
   it('verifies number of cy commands', () => {
     // @ts-ignore
-    expect(Object.keys(cy.commandFns).length).to.equal(86,
-      'The number of cy commands has changed. Please ensure any newly added commands are also tested in multi-domain.')
+    expect(Object.keys(cy.commandFns)).to.deep.equal(
+      [
+        'check', 'uncheck', 'click', 'dblclick', 'rightclick', 'focus', 'blur', 'hover', 'scrollIntoView', 'scrollTo', 'select',
+        'selectFile', 'submit', 'type', 'clear', 'trigger', 'as', 'ng', 'should', 'and', 'clock', 'tick', 'spread', 'each', 'then',
+        'invoke', 'its', 'getCookie', 'getCookies', 'setCookie', 'clearCookie', 'clearCookies', 'pause', 'debug', 'exec', 'readFile',
+        'writeFile', 'fixture', 'clearLocalStorage', 'url', 'hash', 'location', 'end', 'noop', 'log', 'wrap', 'reload', 'go', 'visit',
+        'focused', 'get', 'root', 'contains', 'within', 'shadow', 'request', 'session', 'screenshot', 'task', 'find', 'filter', 'not',
+        'children', 'eq', 'closest', 'first', 'last', 'next', 'nextAll', 'nextUntil', 'parent', 'parents', 'parentsUntil', 'prev',
+        'prevAll', 'prevUntil', 'siblings', 'wait', 'title', 'window', 'document', 'viewport', 'server', 'route', 'intercept', 'switchToDomain',
+      ],
+      'The number of cy commands has changed. Please ensure any newly added commands are also tested in multi-domain.',
+    )
   })
 
   it('.end()', () => {

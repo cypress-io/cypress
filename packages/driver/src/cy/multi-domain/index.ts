@@ -248,6 +248,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
 
       return new Bluebird((resolve, reject) => {
         communicator.once('ran:domain:fn', (err) => {
+          sendReadyForDomain()
           if (err) {
             if (done) {
               communicator.off('done:called', doneAndCleanup)
@@ -282,11 +283,6 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
         // receive messages
         communicator.once('bridge:ready', () => {
           state('readyForMultiDomain', true)
-          sendReadyForDomain()
-        })
-
-        cy.once('internal:window:load', ({ type }) => {
-          if (type !== 'cross:domain') return
 
           // once the secondary domain page loads, send along the
           // user-specified callback to run in that domain
