@@ -194,6 +194,10 @@ export class OpenProject {
     return browsers.close()
   }
 
+  async resetBrowser () {
+    return this.projectBase?.resetBrowser()
+  }
+
   closeOpenProjectAndBrowsers () {
     this.projectBase?.close().catch((e) => {
       this._ctx?.logTraceError(e)

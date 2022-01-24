@@ -3,6 +3,13 @@ const Promise = require('bluebird')
 const debug = require('debug')('cypress:server:browsers')
 const utils = require('./utils')
 const check = require('check-more-types')
+const { exec } = require('child_process')
+const { promisify } = require('util')
+const os = require('os')
+const winInfo = require('@arcsine/win-info')
+const forcefocus = require('forcefocus')
+
+const execPromise = promisify(exec)
 
 // returns true if the passed string is a known browser family name
 const isBrowserFamily = check.oneOf(['chromium', 'firefox'])
@@ -38,6 +45,22 @@ const kill = function (unbind, isProcessExit) {
 
     _instance.kill()
   })
+}
+
+const setFocus = async () => {
+  const { platform } = os
+
+  switch (platform) {
+    case 'darwin':
+      return execPromise(`open -a "$(ps -p ${instance.pid} -o comm=)"`)
+    case 'win32': {
+      const { id } = winInfo.getByPid(instance.pid)
+
+      return forcefocus.focusWindow(id)
+    }
+    default:
+      throw new Error(`Unexpected os platform ${platform}`)
+  }
 }
 
 const getBrowserLauncher = function (browser) {
@@ -167,4 +190,5 @@ module.exports = {
       })
     })
   },
+  setFocus,
 }

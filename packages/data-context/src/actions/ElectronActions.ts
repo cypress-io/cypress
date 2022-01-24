@@ -41,7 +41,7 @@ export class ElectronActions {
   }
 
   blurWindow () {
-    this.electron.browserWindow?.blur()
+    // this.electron.browserWindow?.blur()
   }
 
   showBrowserWindow () {

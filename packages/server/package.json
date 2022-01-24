@@ -21,6 +21,7 @@
     "test-watch": "./test/support/watch test"
   },
   "dependencies": {
+    "@arcsine/win-info": "0.2.13",
     "@babel/parser": "7.13.0",
     "@benmalka/foxdriver": "0.4.1",
     "@cypress/commit-info": "2.2.0",
@@ -63,6 +64,7 @@
     "firefox-profile": "4.0.0",
     "fix-path": "3.0.0",
     "fluent-ffmpeg": "2.1.2",
+    "forcefocus": "1.1.0",
     "fs-extra": "8.1.0",
     "get-port": "5.1.1",
     "getenv": "1.0.0",
