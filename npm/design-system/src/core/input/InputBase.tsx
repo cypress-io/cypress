@@ -89,7 +89,7 @@ export type BasicInputProps = SizingProps & Omit<InputHTMLAttributes<HTMLInputEl
   /**
    * If true, render as a textarea (multiline) instead of an input. Defaults to false
    */
-   textArea?: boolean
+  textArea?: boolean
 }
 
 /**
