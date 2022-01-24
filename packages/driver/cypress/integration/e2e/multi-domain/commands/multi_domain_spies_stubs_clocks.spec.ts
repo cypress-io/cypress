@@ -25,9 +25,7 @@ context('multi-domain spies, stubs, and clock', { experimentalSessionSupport: tr
     })
   })
 
-  // FIXME: TypeError: Cannot set properties of undefined (setting 'clock')
-  // at Object.clock (webpack:///../driver/src/cy/commands/clock.ts?:170:17)
-  it.skip('clock() and tick()', () => {
+  it('clock() and tick()', () => {
     cy.switchToDomain('foobar.com', () => {
       const now = Date.UTC(2022, 0, 12)
 
