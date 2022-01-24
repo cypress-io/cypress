@@ -1,65 +1,55 @@
 import type { Migration } from '../generated/test-graphql-types.gen'
 import type { MaybeResolver } from './clientTestUtils'
-import { regexps } from '@packages/data-context/src/util/migration'
 
 export const stubMigration: MaybeResolver<Migration> = {
   __typename: 'Migration',
   step: `renameAuto`,
-  regexps: {
-    __typename: 'MigrationRegexp',
-    beforeE2E: regexps.e2e.beforeRegexp,
-    afterE2E: regexps.e2e.afterRegexp,
-    beforeComponent: regexps.component.beforeRegexp,
-    afterComponent: regexps.component.afterRegexp,
-  },
-  specFilesBefore: [
-    {
-      __typename: 'MigrationSpec',
-      parts: [
-        { __typename: 'MigrationSpecPart', text: 'cypress/', highlight: false },
-        { __typename: 'MigrationSpecPart', text: 'integration', highlight: true },
-        { __typename: 'MigrationSpecPart', text: '/app', highlight: false },
-        { __typename: 'MigrationSpecPart', text: '.spec.', highlight: true },
-        { __typename: 'MigrationSpecPart', text: 'js', highlight: false },
-      ],
-      testingType: 'e2e',
-    },
-    {
-      __typename: 'MigrationSpec',
-      parts: [
-        { __typename: 'MigrationSpecPart', text: 'cypress/', highlight: false },
-        { __typename: 'MigrationSpecPart', text: 'integration', highlight: true },
-        { __typename: 'MigrationSpecPart', text: '/blog-post', highlight: false },
-        { __typename: 'MigrationSpecPart', text: '-spec.', highlight: true },
-        { __typename: 'MigrationSpecPart', text: 'js', highlight: false },
-      ],
-      testingType: 'e2e',
-    },
-  ],
   specFiles: {
-    __typename: 'MigrationSpecs',
-    after: [
+    __typename: 'MigrationFiles',
+    before: [
       {
-        __typename: 'MigrationSpec',
+        __typename: 'MigrationFile',
         parts: [
-          { __typename: 'MigrationSpecPart', text: 'cypress/', highlight: false },
-          { __typename: 'MigrationSpecPart', text: 'e2e', highlight: true },
-          { __typename: 'MigrationSpecPart', text: '/app', highlight: false },
-          { __typename: 'MigrationSpecPart', text: '.cy.', highlight: true },
-          { __typename: 'MigrationSpecPart', text: 'js', highlight: false },
+          { __typename: 'MigrationFilePart', text: 'cypress/', highlight: false },
+          { __typename: 'MigrationFilePart', text: 'integration', highlight: true },
+          { __typename: 'MigrationFilePart', text: '/app', highlight: false },
+          { __typename: 'MigrationFilePart', text: '.spec.', highlight: true },
+          { __typename: 'MigrationFilePart', text: 'js', highlight: false },
+        ],
+        testingType: 'e2e',
+      },
+      {
+        __typename: 'MigrationFile',
+        parts: [
+          { __typename: 'MigrationFilePart', text: 'cypress/', highlight: false },
+          { __typename: 'MigrationFilePart', text: 'integration', highlight: true },
+          { __typename: 'MigrationFilePart', text: '/blog-post', highlight: false },
+          { __typename: 'MigrationFilePart', text: '-spec.', highlight: true },
+          { __typename: 'MigrationFilePart', text: 'js', highlight: false },
         ],
         testingType: 'e2e',
       },
     ],
-    before: [
+    after: [
       {
-        __typename: 'MigrationSpec',
+        __typename: 'MigrationFile',
         parts: [
-          { __typename: 'MigrationSpecPart', text: 'cypress/', highlight: false },
-          { __typename: 'MigrationSpecPart', text: 'e2e', highlight: true },
-          { __typename: 'MigrationSpecPart', text: '/blog-post', highlight: false },
-          { __typename: 'MigrationSpecPart', text: '.cy.', highlight: true },
-          { __typename: 'MigrationSpecPart', text: 'js', highlight: false },
+          { __typename: 'MigrationFilePart', text: 'cypress/', highlight: false },
+          { __typename: 'MigrationFilePart', text: 'e2e', highlight: true },
+          { __typename: 'MigrationFilePart', text: '/app', highlight: false },
+          { __typename: 'MigrationFilePart', text: '.cy.', highlight: true },
+          { __typename: 'MigrationFilePart', text: 'js', highlight: false },
+        ],
+        testingType: 'e2e',
+      },
+      {
+        __typename: 'MigrationFile',
+        parts: [
+          { __typename: 'MigrationFilePart', text: 'cypress/', highlight: false },
+          { __typename: 'MigrationFilePart', text: 'e2e', highlight: true },
+          { __typename: 'MigrationFilePart', text: '/blog-post', highlight: false },
+          { __typename: 'MigrationFilePart', text: '.cy.', highlight: true },
+          { __typename: 'MigrationFilePart', text: 'js', highlight: false },
         ],
         testingType: 'e2e',
       },
@@ -93,6 +83,53 @@ export const stubMigration: MaybeResolver<Migration> = {
   })`,
   integrationFolder: 'cypress/integration',
   componentFolder: 'cypress/component',
-  supportFileBefore: 'cypress/support/index.js',
-  supportFileAfter: 'cypress/support/e2e.js',
+  supportFiles: {
+    __typename: 'MigrationFiles',
+    before: [
+      {
+        __typename: 'MigrationFile',
+        testingType: 'e2e',
+        parts: [
+          {
+            __typename: 'MigrationFilePart',
+            text: 'cypress/support/',
+            highlight: false,
+          },
+          {
+            __typename: 'MigrationFilePart',
+            text: 'index',
+            highlight: true,
+          },
+          {
+            __typename: 'MigrationFilePart',
+            text: '.js',
+            highlight: false,
+          },
+        ],
+      },
+    ],
+    after: [
+      {
+        __typename: 'MigrationFile',
+        testingType: 'e2e',
+        parts: [
+          {
+            __typename: 'MigrationFilePart',
+            text: 'cypress/support/',
+            highlight: false,
+          },
+          {
+            __typename: 'MigrationFilePart',
+            text: 'e2e',
+            highlight: true,
+          },
+          {
+            __typename: 'MigrationFilePart',
+            text: '.js',
+            highlight: false,
+          },
+        ],
+      },
+    ],
+  },
 }

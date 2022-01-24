@@ -4,6 +4,7 @@ import stringify from 'stringify-object'
 import path from 'path'
 import globby from 'globby'
 import dedent from 'dedent'
+import type { FilesForMigrationUI } from '../sources'
 
 type ConfigOptions = {
   global: Record<string, unknown>
@@ -11,15 +12,40 @@ type ConfigOptions = {
   component: Record<string, unknown>
 }
 
+export const defaultSupportFiles = {
+  before: path.join('cypress', 'support', 'index.js'),
+}
+
+interface MigrationRegexp {
+    beforeRegexp: string
+    afterRegexp: string
+}
+
+interface MigrationRegexpGroup {
+  e2e: MigrationRegexp
+  component: MigrationRegexp
+}
+
 function getLegacyHighlightRegexp (defaultFolder: 'integration' | 'component') {
-  return `cypress\/(?<dir>${defaultFolder})\/.*?(?<ext>[._-]?[s|S]pec.|[.])(?=[j|t]s[x]?)`
+  return `cypress\/(?<main>${defaultFolder})\/.*?(?<ext>[._-]?[s|S]pec.|[.])(?=[j|t]s[x]?)`
 }
 
 function getNewHighlightRegexp (defaultFolder: 'e2e' | 'component') {
-  return `cypress\/(?<dir>${defaultFolder})\/.*?(?<ext>.cy.)`
+  return `cypress\/(?<main>${defaultFolder})\/.*?(?<ext>.cy.)`
 }
 
-export const regexps = {
+export const supportFileRegexps: MigrationRegexpGroup = {
+  e2e: {
+    beforeRegexp: 'cypress/\support\/(?<main>index)\.(?=[j|t]s[x]?)',
+    afterRegexp: 'cypress/\support\/(?<main>e2e)\.(?=[j|t]s[x]?)',
+  },
+  component: {
+    beforeRegexp: 'cypress/\support\/(?<file>index)\.(?=[j|t]s[x]?)',
+    afterRegexp: 'cypress/\support\/(?<file>e2e)\.(?=[j|t]s[x]?)',
+  },
+}
+
+export const regexps: MigrationRegexpGroup = {
   e2e: {
     beforeRegexp: getLegacyHighlightRegexp('integration'),
     afterRegexp: getNewHighlightRegexp('e2e'),
@@ -42,12 +68,19 @@ export class NonSpecFileError extends Error {
   }
 }
 
+export class NonStandardMigrationError extends Error {
+  constructor (fileType: 'support' | 'config') {
+    super()
+    this.message = `Failed to find default ${fileType}. Bailing automation migration.`
+  }
+}
+
 export function formatMigrationFile (file: string, regexp: RegExp): FilePart[] {
   const match = regexp.exec(file)
 
   if (!match?.groups) {
     throw new NonSpecFileError(dedent`
-      Expected groups dir and ext in ${file} using ${regexp}. 
+      Expected groups main and ext in ${file} using ${regexp} when matching ${file}
       Perhaps this isn't a spec file, or it is an unexpected format?`)
   }
 
@@ -175,6 +208,42 @@ export async function getSpecs (
   }
 }
 
+export async function getDefaultLegacySupportFile (projectRoot: string) {
+  const files = await globby(path.join(projectRoot, 'cypress', 'support', 'index.*'))
+
+  const defaultSupportFile = files[0]
+
+  if (!defaultSupportFile) {
+    throw new NonStandardMigrationError('support')
+  }
+
+  return defaultSupportFile
+}
+
+export async function supportFilesForMigration (projectRoot: string): Promise<FilesForMigrationUI> {
+  const defaultSupportFile = await getDefaultLegacySupportFile(projectRoot)
+
+  const defaultOldSupportFile = path.relative(projectRoot, defaultSupportFile)
+  const defaultNewSupportFile = renameSupportFilePath(defaultOldSupportFile)
+
+  return {
+    before: [
+      {
+        relative: defaultOldSupportFile,
+        parts: formatMigrationFile(defaultOldSupportFile, new RegExp(supportFileRegexps.e2e.beforeRegexp)),
+        testingType: 'e2e',
+      },
+    ],
+    after: [
+      {
+        relative: defaultNewSupportFile,
+        parts: formatMigrationFile(defaultNewSupportFile, new RegExp(supportFileRegexps.e2e.afterRegexp)),
+        testingType: 'e2e',
+      },
+    ],
+  }
+}
+
 export async function moveSpecFiles (e2eDirPath: string) {
   const specs = (await getSpecFiles(e2eDirPath)).map((spec) => {
     const specPath = `${e2eDirPath}/${spec}`
@@ -198,6 +267,17 @@ async function getSpecFiles (dirPath: string) {
 
     return fs.statSync(filePath).isFile()
   })
+}
+
+export function renameSupportFilePath (relative: string) {
+  const re = /cypress\/support\/(?<name>index)\.[j|t|s[x]?/
+  const res = new RegExp(re).exec(relative)
+
+  if (!res?.groups?.name) {
+    throw new NonStandardMigrationError('support')
+  }
+
+  return relative.replace(res.groups.name, 'e2e')
 }
 
 export function renameSpecPath (spec: string) {

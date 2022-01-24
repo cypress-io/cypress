@@ -59,6 +59,19 @@ describe('Migration', () => {
     })
   })
 
+  it('renames support file', () => {
+    cy.visitLaunchpad()
+    cy.findByText(defaultMessages.migration.wizard.step1.button).click()
+    cy.findByText(`I'll do this later`).click()
+    cy.findByText(`Rename the support file for me`).click()
+
+    cy.withCtx(async (ctx) => {
+      expect(
+        await ctx.actions.file.checkIfFileExists(ctx.path.join('cypress', 'support', 'e2e.js')),
+      ).not.to.be.null
+    })
+  })
+
   describe('Full flow', () => {
     it('goes to each step', () => {
       cy.visitLaunchpad()

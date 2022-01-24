@@ -558,23 +558,32 @@ type Migration {
   """List of files needing manual conversion"""
   manualFiles: [String!]!
 
-  """The regexp describing how the user e2e specs changed"""
-  regexps: MigrationRegexp!
-
   """All spec files after conversion"""
-  specFiles: MigrationSpecs!
-
-  """All spec files before being converted"""
-  specFilesBefore: [MigrationSpec!]!
+  specFiles: MigrationFiles!
 
   """Step where the migration is right now"""
   step: MigrationStepEnum!
 
-  """Support files after rename"""
-  supportFileAfter: String!
-
   """Support files needing automated rename"""
-  supportFileBefore: String!
+  supportFiles: MigrationFiles!
+}
+
+type MigrationFile {
+  parts: [MigrationFilePart!]!
+  testingType: TestingTypeEnum!
+}
+
+type MigrationFilePart {
+  """should highlight in migration UI"""
+  highlight: Boolean!
+
+  """part of filename"""
+  text: String!
+}
+
+type MigrationFiles {
+  after: [MigrationFile!]!
+  before: [MigrationFile!]!
 }
 
 type MigrationRegexp {
@@ -589,24 +598,6 @@ type MigrationRegexp {
 
   """regexp to identify existing specs in e2e"""
   beforeE2E: String!
-}
-
-type MigrationSpec {
-  parts: [MigrationSpecPart!]!
-  testingType: TestingTypeEnum!
-}
-
-type MigrationSpecPart {
-  """should highlight in migration UI"""
-  highlight: Boolean!
-
-  """part of filename"""
-  text: String!
-}
-
-type MigrationSpecs {
-  after: [MigrationSpec!]!
-  before: [MigrationSpec!]!
 }
 
 enum MigrationStepEnum {

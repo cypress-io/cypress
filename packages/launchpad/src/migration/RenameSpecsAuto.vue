@@ -61,7 +61,6 @@
       <template #before>
         <HighlightedFilesList
           :files="props.gql.specFiles.before"
-          :highlight-reg-exp="/(integration|[_,-,.]?(spec|test))/gi"
           highlight-class="text-red-500"
         />
       </template>
@@ -122,13 +121,6 @@ fragment RenameSpecsAuto on Migration {
         highlight
       }
     }
-  }
-
-  regexps {
-    beforeE2E
-    afterE2E
-    beforeComponent
-    afterComponent
   }
 }`
 

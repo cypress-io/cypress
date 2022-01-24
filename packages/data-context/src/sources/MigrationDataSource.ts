@@ -5,23 +5,26 @@ import type { DataContext } from '..'
 import {
   createConfigString,
   getSpecs,
+  getDefaultLegacySupportFile,
   RelativeSpecWithTestingType,
   formatMigrationFile,
   FilePart,
   regexps,
+  supportFilesForMigration,
   NonSpecFileError,
 } from '../util/migration'
 
 const debug = Debug('cypress:data-context:MigrationDataSource')
 
-interface MigrationSpec {
+interface MigrationFile {
   testingType: TestingType
+  relative: string
   parts: FilePart[]
 }
 
-interface SpecsForMigrationUI {
-  before: MigrationSpec[]
-  after: MigrationSpec[]
+export interface FilesForMigrationUI {
+  before: MigrationFile[]
+  after: MigrationFile[]
 }
 
 type MIGRATION_STEP = typeof MIGRATION_STEPS[number]
@@ -46,14 +49,31 @@ export class MigrationDataSource {
     return specs
   }
 
-  async getSpecsForMigrationGuide (): Promise<SpecsForMigrationUI> {
+  async getDefaultLegacySupportFile (): Promise<string> {
+    if (!this.ctx.currentProject) {
+      throw Error(`Need this.ctx.projectRoot!`)
+    }
+
+    return getDefaultLegacySupportFile(this.ctx.currentProject)
+  }
+
+  async supportFilesForMigrationGuide (): Promise<FilesForMigrationUI> {
+    if (!this.ctx.currentProject) {
+      throw Error(`Need this.ctx.projectRoot!`)
+    }
+
+    return supportFilesForMigration(this.ctx.currentProject)
+  }
+
+  async getSpecsForMigrationGuide (): Promise<FilesForMigrationUI> {
     const specs = await this.getSpecsRelativeToFolder()
 
     const processSpecs = (regexp: 'beforeRegexp' | 'afterRegexp') => {
-      return (acc: MigrationSpec[], x: RelativeSpecWithTestingType) => {
+      return (acc: MigrationFile[], x: RelativeSpecWithTestingType) => {
         try {
           return acc.concat({
             testingType: x.testingType,
+            relative: x.relative,
             parts: formatMigrationFile(x.relative, new RegExp(regexps[x.testingType][regexp])),
           })
         } catch (e) {
@@ -68,7 +88,7 @@ export class MigrationDataSource {
       }
     }
 
-    const result: SpecsForMigrationUI = {
+    const result: FilesForMigrationUI = {
       before: specs.before.reduce(processSpecs('beforeRegexp'), []),
       after: specs.after.reduce(processSpecs('afterRegexp'), []),
     }
