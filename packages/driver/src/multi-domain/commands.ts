@@ -1,8 +1,6 @@
 import type { $Cy } from '../cypress/cy'
 import type { SpecBridgeDomainCommunicator } from './communicator'
 
-import $Log from '../cypress/log'
-
 export const handleCommands = (Cypress: Cypress.Cypress, cy: $Cy, specBridgeCommunicator: SpecBridgeDomainCommunicator) => {
   const onCommandEnqueued = (commandAttrs: Cypress.EnqueuedCommand) => {
     const { id, name } = commandAttrs
@@ -17,14 +15,6 @@ export const handleCommands = (Cypress: Cypress.Cypress, cy: $Cy, specBridgeComm
     const name = command.get('name')
 
     specBridgeCommunicator.toPrimary('command:end', { id, name })
-  }
-
-  const onLogAdded = (attrs) => {
-    specBridgeCommunicator.toPrimary('log:added', $Log.toSerializedJSON(attrs))
-  }
-
-  const onLogChanged = (attrs) => {
-    specBridgeCommunicator.toPrimary('log:changed', $Log.toSerializedJSON(attrs))
   }
 
   const onRunCommand = () => {
@@ -45,8 +35,6 @@ export const handleCommands = (Cypress: Cypress.Cypress, cy: $Cy, specBridgeComm
   Cypress.on('command:enqueued', onCommandEnqueued)
   Cypress.on('command:end', onCommandEnd)
   Cypress.on('skipped:command:end', onCommandEnd)
-  Cypress.on('log:added', onLogAdded)
-  Cypress.on('log:changed', onLogChanged)
 
   specBridgeCommunicator.on('run:command', onRunCommand)
 }

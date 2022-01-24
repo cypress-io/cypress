@@ -12,6 +12,7 @@ import { bindToListeners } from '../cy/listeners'
 import { SpecBridgeDomainCommunicator } from './communicator'
 import { handleDomainFn } from './domain_fn'
 import { handleCommands } from './commands'
+import { handleLogs } from './logs'
 
 const specBridgeCommunicator = new SpecBridgeDomainCommunicator()
 
@@ -48,6 +49,7 @@ const setup = () => {
 
   handleDomainFn(cy, specBridgeCommunicator)
   handleCommands(Cypress, cy, specBridgeCommunicator)
+  handleLogs(Cypress, specBridgeCommunicator)
 
   cy.onBeforeAppWindowLoad = onBeforeAppWindowLoad(Cypress, cy)
 
