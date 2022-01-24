@@ -1,3 +1,4 @@
+import stringify from 'stringify-object'
 import path from 'path'
 
 type ConfigOptions = {
@@ -50,23 +51,21 @@ function reduceConfig (cfg: Partial<Cypress.ConfigOptions>) {
 }
 
 function createCypressConfigJs (config: ConfigOptions, pluginPath: string) {
-  const globalString = Object.keys(config.global).length > 0 ? `${formatObjectForConfig(config.global, 2)},` : ''
+  const globalString = Object.keys(config.global).length > 0 ? `\n${formatObjectForConfig(config.global, 2)},` : ''
   const componentString = Object.keys(config.component).length > 0 ? createTestingTypeTemplate('component', pluginPath, config.component) : ''
   const e2eString = Object.keys(config.e2e).length > 0 ? createTestingTypeTemplate('e2e', pluginPath, config.e2e) : ''
 
   return `const { defineConfig } = require('cypress')
 
-module.export = defineConfig({
-  ${globalString}${e2eString}${componentString}
+module.exports = defineConfig({${globalString}${e2eString}${componentString}
 })`
 }
 
 function formatObjectForConfig (obj: Record<string, unknown>, spaces: number) {
-  return JSON.stringify(obj, null, spaces)
-  .replace(/"([^"]+)":/g, '$1:') // remove quotes from fields
-  .replace(/^[{]|[}]$/g, '') // remove opening and closing {}
-  .replace(/"/g, '\'') // single quotes
-  .trim()
+  return stringify(obj, {
+    indent: Array(spaces).fill(' ').join(''),
+  }).replace(/^[{]|[}]$/g, '') // remove opening and closing {}
+  .trim() // remove trailing spaces
 }
 
 function createTestingTypeTemplate (testingType: 'e2e' | 'component', pluginPath: string, options: Record<string, unknown>) {

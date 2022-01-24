@@ -30,7 +30,10 @@
         {{ t('migration.renameAuto.modals.step1.line4') }}
       </template>
       <template #line-5>
-        <i18n-t keypath="migration.renameAuto.modals.step1.line5">
+        <i18n-t
+          scope="global"
+          keypath="migration.renameAuto.modals.step1.line5"
+        >
           <CodeTag class="text-jade-500">
             [filename].cy.[ext]
           </CodeTag>

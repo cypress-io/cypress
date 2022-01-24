@@ -55,13 +55,13 @@ mutation OpenBrowser_ClearTestingType {
 `
 
 gql`
-mutation OpenBrowser_LaunchProject ($testingType: TestingTypeEnum!, $browserPath: String!)  {
+mutation OpenBrowser_LaunchProject ($testingType: TestingTypeEnum!)  {
   launchOpenProject {
     id
   }
   # Removing for now until we decide what the behavior should be
   # hideBrowserWindow
-  setProjectPreferences(testingType: $testingType, browserPath: $browserPath) {
+  setProjectPreferences(testingType: $testingType) {
     currentProject {
       id
       title
@@ -73,12 +73,11 @@ mutation OpenBrowser_LaunchProject ($testingType: TestingTypeEnum!, $browserPath
 const launchOpenProject = useMutation(OpenBrowser_LaunchProjectDocument)
 const clearCurrentTestingType = useMutation(OpenBrowser_ClearTestingTypeDocument)
 
-const launch = (browserPath?: string) => {
+const launch = () => {
   const testingType = query.data.value?.currentTestingType
 
-  if (browserPath && testingType) {
+  if (testingType) {
     launchOpenProject.executeMutation({
-      browserPath,
       testingType,
     })
   }
