@@ -556,7 +556,7 @@ type Migration {
   integrationFolder: String!
 
   """List of files needing manual conversion"""
-  manualFiles: [String!]!
+  manualFiles: [MigrationFile!]!
 
   """All spec files after conversion"""
   specFiles: MigrationFiles!

@@ -95,8 +95,9 @@ export const Migration = objectType({
       },
     })
 
-    t.nonNull.list.nonNull.string('manualFiles', {
+    t.nonNull.list.nonNull.field('manualFiles', {
       description: 'List of files needing manual conversion',
+      type: MigrationFile,
       resolve: () => {
         return []
       },

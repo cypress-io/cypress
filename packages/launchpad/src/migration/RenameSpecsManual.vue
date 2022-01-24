@@ -48,7 +48,12 @@ import type { RenameSpecsManualFragment } from '../generated/graphql'
 
 gql`
 fragment RenameSpecsManual on Migration {
-  manualFiles
+  manualFiles {
+    parts {
+      text
+      highlight
+    }
+  }
 }`
 
 const props = defineProps<{

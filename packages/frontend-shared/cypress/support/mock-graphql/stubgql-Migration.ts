@@ -56,11 +56,28 @@ export const stubMigration: MaybeResolver<Migration> = {
     ],
   },
   manualFiles: [
-    'cypress/component/button.cy.js',
-    'cypress/component/modal.cy.js',
-    'cypress/component/toggle.cy.js',
-    'cypress/component/alert.cy.js',
-    'cypress/component/tooltip.cy.js',
+    {
+      __typename: 'MigrationFile',
+      parts: [
+        { __typename: 'MigrationFilePart', text: 'cypress/', highlight: false },
+        { __typename: 'MigrationFilePart', text: 'e2e', highlight: true },
+        { __typename: 'MigrationFilePart', text: '/app', highlight: false },
+        { __typename: 'MigrationFilePart', text: '.cy.', highlight: true },
+        { __typename: 'MigrationFilePart', text: 'js', highlight: false },
+      ],
+      testingType: 'e2e',
+    },
+    {
+      __typename: 'MigrationFile',
+      parts: [
+        { __typename: 'MigrationFilePart', text: 'cypress/', highlight: false },
+        { __typename: 'MigrationFilePart', text: 'e2e', highlight: true },
+        { __typename: 'MigrationFilePart', text: '/blog-post', highlight: false },
+        { __typename: 'MigrationFilePart', text: '.cy.', highlight: true },
+        { __typename: 'MigrationFilePart', text: 'js', highlight: false },
+      ],
+      testingType: 'e2e',
+    },
   ],
   configBeforeCode: `{
     "baseUrl": "http://localhost:1234/",
