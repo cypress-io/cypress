@@ -20,6 +20,8 @@ describe('Choose a Browser Page', () => {
       cy.get('h1').should('contain', 'Choose a Browser')
 
       cy.findByRole('radio', { name: 'Edge v8', checked: true })
+
+      cy.percySnapshot()
     })
 
     it('shows warning when launched with --browser name that cannot be matched to found browsers', () => {
@@ -63,6 +65,8 @@ describe('Choose a Browser Page', () => {
         name: 'how to troubleshoot launching browsers',
         href: 'https://on.cypress.io/troubleshooting-launching-browsers',
       })
+
+      cy.percySnapshot()
 
       // Ensure warning can be dismissed
       cy.get('[data-cy="alert-suffix-icon"]').click()
@@ -181,6 +185,7 @@ describe('Choose a Browser Page', () => {
       cy.get('[data-cy="open-browser-list"]').children().should('have.length', 1)
 
       cy.findByRole('radio', { name: 'Electron v12', checked: true })
+      cy.percySnapshot()
     })
   })
 })

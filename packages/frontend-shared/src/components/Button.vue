@@ -34,11 +34,15 @@
       </template>
     </ButtonInternals>
   </button>
+
+  <!-- context for use of aria role and disabled here: https://www.scottohara.me/blog/2021/05/28/disabled-links.html -->
   <component
     :is="linkVersion"
     v-else
-    :href="props.href"
-    :to="props.to"
+    :href="props.disabled ? null : props.href"
+    :to="props.disabled ? null : props.to"
+    :role="props.disabled ? 'link' : null"
+    :aria-disabled="props.disabled ? 'disabled' : null "
     style="width: fit-content"
     class="flex items-center border rounded outline-none select-none gap-8px"
     :class="classes"
@@ -139,6 +143,7 @@ const classes = computed(() => {
     sizeClasses.value,
     attrs.class,
     (props.disabled && props.variant !== 'pending') ? 'opacity-50' : '',
+    props.disabled ? 'cursor-default' : '',
   ]
 })
 

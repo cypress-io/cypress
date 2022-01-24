@@ -15,7 +15,38 @@
     "field": "blockHosts"
   },
   {
-    "value": [],
+    "value": [
+      {
+        "name": "chrome",
+        "family": "chromium",
+        "channel": "stable",
+        "displayName": "Chrome",
+        "version": "97.0.4692.71",
+        "path": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+        "minSupportedVersion": 64,
+        "majorVersion": 97
+      },
+      {
+        "name": "firefox",
+        "family": "firefox",
+        "channel": "stable",
+        "displayName": "Firefox",
+        "version": "95.0.2",
+        "path": "/Applications/Firefox.app/Contents/MacOS/firefox-bin",
+        "minSupportedVersion": 86,
+        "majorVersion": 95
+      },
+      {
+        "name": "electron",
+        "channel": "stable",
+        "family": "chromium",
+        "displayName": "Electron",
+        "version": "94.0.4606.81",
+        "path": "",
+        "majorVersion": 94,
+        "info": "Electron is the default browser that comes with Cypress. This is the default browser that runs in headless mode. Selecting this browser is useful when debugging. The version number indicates the underlying Chromium version that Electron uses."
+      }
+    ],
     "from": "default",
     "field": "browsers"
   },
@@ -261,7 +292,6 @@
     "value": {
       "specPattern": "cypress/e2e/**/*.cy.{js,jsx,ts,tsx}",
       "supportFile": "cypress/e2e/support/e2eSupport.ts",
-      "integrationFolder": "cypress/e2e/integration",
       "pluginsFile": "cypress/e2e/plugins/index.ts"
     },
     "from": "config",

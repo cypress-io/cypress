@@ -59,6 +59,7 @@ describe('<Select />', () => {
 
   it('renders a list of options', () => {
     mountSelect().then(openSelect).get(optionsSelector).should('be.visible')
+    cy.percySnapshot()
   })
 
   it('can open and choose an option', () => {
@@ -67,6 +68,8 @@ describe('<Select />', () => {
     .then(($selectedOption) => {
       cy.get(inputSelector).should('have.text', $selectedOption.text())
     }).get(optionsSelector).should('not.exist')
+
+    cy.percySnapshot()
   })
 
   it('closes when clicking off of the options when open', () => {
@@ -191,6 +194,7 @@ describe('<Select />', () => {
       .get(optionsSelector).should('be.visible')
       .get(`[data-testid=item-prefix]`).should('be.visible')
       .get(`[data-testid=item-suffix]`).should('be.visible')
+      .percySnapshot()
 
       // Choose an option
       .then(selectFirstOption)

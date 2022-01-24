@@ -161,7 +161,6 @@
       "ciTitle": "Run in CI/CD",
       "ciSetup": "Set up CI",
       "fasterTests": "Run tests faster",
-      "smartOrchestration": "Smart Orchestration",
       "prompts": {
         "ci1": {
           "title": "Configure CI",
@@ -322,7 +321,10 @@
     "editor": {
       "title": "External Editor",
       "description": "External editor to use for editing code opened when using Cypress.",
-      "noEditorSelectedPlaceholder": "Choose your editor..."
+      "noEditorSelectedPlaceholder": "Choose your editor...",
+      "editorRadioLabel": "Choose editor",
+      "customEditorRadioLabel": "Add custom editor by path",
+      "customPathPlaceholder": "Custom path..."
     },
     "projectId": {
       "title": "Project ID",

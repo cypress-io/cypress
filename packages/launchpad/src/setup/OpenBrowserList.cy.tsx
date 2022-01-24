@@ -3,6 +3,10 @@ import OpenBrowserList from './OpenBrowserList.vue'
 import { longBrowsersList } from '@packages/frontend-shared/cypress/support/mock-graphql/longBrowsersList'
 import { defaultMessages } from '@cy/i18n'
 
+// Testing Note: because state for this component is maintained on the server and updated via gql mutations,
+// this component test can't do interactions that change the chosen browser at the moment. Interactions and states
+// are covered in the choose-a-browser.cy.ts e2e tests.
+
 describe('<OpenBrowserList />', () => {
   beforeEach(() => {
     cy.viewport(1000, 750)

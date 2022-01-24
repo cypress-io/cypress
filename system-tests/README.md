@@ -84,7 +84,7 @@ You can also set special properties in a test project's `package.json` to influe
 `package.json` Property Name | Type | Description
 --- | --- | ---
 `_cySkipYarnInstall` | `boolean` | If `true`, skip the automatic `yarn install` for this package, even though it has a `package.json`.
-`_cyYarnV2` | `boolean` | Run the yarn v2-style install command instead of yarn v1-style.
+`_cyYarnV311` | `boolean` | Run the yarn v3.1.1-style install command instead of yarn v1-style.
 `_cyRunScripts` | `boolean` | By default, the automatic `yarn install` will not run postinstall scripts. This option, if set, will cause postinstall scripts to run for this project.
 
 Run `yarn projects:yarn:install` to run `yarn install` for all projects with a `package.json`.
