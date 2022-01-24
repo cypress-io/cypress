@@ -28,7 +28,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { gql, useQuery } from '@urql/vue'
 import { useI18n } from '@cy/i18n'
 import SpecsList from '../../specs/SpecsList.vue'
