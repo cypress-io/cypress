@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 // Changes made: added 'formatValueHook' to process value before being formatted.
 // For example the hook can be used to turn `window` objects into the string '[window]'
 // to avoid deep recursion.
@@ -272,7 +270,7 @@ export function create (chai) {
   }
 
   function formatArray (ctx, value, recurseTimes, visibleKeys, keys) {
-    let output = []
+    let output: string[] = []
 
     for (let i = 0, l = value.length; i < l; ++i) {
       if (Object.prototype.hasOwnProperty.call(value, String(i))) {
