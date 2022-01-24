@@ -302,7 +302,7 @@ export class ProjectActions {
       throw Error(`Cannot save preferences without currentProject.`)
     }
 
-    this.api.insertProjectPreferencesToCache(this.ctx.lifecycleManager.projectTitle, { ...args })
+    this.api.insertProjectPreferencesToCache(this.ctx.lifecycleManager.projectTitle, args)
   }
 
   async codeGenSpec (codeGenCandidate: string, codeGenType: CodeGenType): Promise<NexusGenObjects['ScaffoldedFile']> {

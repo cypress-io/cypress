@@ -114,7 +114,6 @@ describe('Choose a Browser Page', () => {
       cy.get('@launchButton').click()
 
       cy.wait('@launchProject').then(({ request }) => {
-        expect(request?.body.variables.browserPath).to.contain('/test/chrome/path')
         expect(request?.body.variables.testingType).to.eq('e2e')
       })
     })
