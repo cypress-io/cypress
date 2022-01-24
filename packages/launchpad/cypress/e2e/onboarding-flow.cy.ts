@@ -31,13 +31,37 @@ describe('Launchpad: Onboarding Flow', () => {
     cy.findByText('We added the following files to your project.')
     cy.percySnapshot()
     cy.findByText('Continue').click()
-    cy.withCtx(async (ctx) => {
+    cy.withCtx((ctx) => {
       return ctx.file.readFileInProject('cypress.config.js')
-    }).then((str) => {
-      cy.log(str)
     })
 
     cy.findByText('Choose a Browser', { timeout: 10000 })
+  })
+
+  it('can setup component testing with TS', () => {
+    cy.visitLaunchpad()
+    cy.get('[data-cy-testingType=component]').click()
+    cy.get('[data-testid=select-framework]').click()
+    cy.findByText('React.js').click()
+    cy.get('[data-testid=select-framework]').should('contain', 'React.js')
+    cy.get('[data-testid=select-bundler]')
+    .findByText(cy.i18n.setupPage.projectSetup.bundlerPlaceholder)
+    .click()
+
+    cy.findByText('Webpack').click()
+    cy.get('[data-testid=select-bundler]').should('contain', 'Webpack')
+    cy.reload()
+    cy.get('[data-testid=select-framework]').should('contain', 'React.js')
+    cy.get('[data-testid=select-bundler]').should('contain', 'Webpack')
+    cy.findByText('TypeScript').click()
+    cy.findByText('Next Step').click()
+    cy.get('h1').should('contain', 'Dependencies')
+    cy.findByText('I\'ve installed them').click()
+    cy.findByText('We added the following files to your project.')
+    cy.findByText('Continue').click()
+    cy.withCtx((ctx) => {
+      return ctx.file.readFileInProject('cypress.config.ts')
+    })
   })
 
   it('can setup e2e testing', () => {
