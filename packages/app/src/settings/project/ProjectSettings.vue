@@ -8,6 +8,7 @@
       v-for="key of props.gql.currentProject.cloudProject.recordKeys"
       :key="key.id"
       :gql="key"
+      :manage-keys-url="props.gql.currentProject.cloudProject.cloudProjectSettingsUrl"
     />
   </template>
   <SpecPatterns :gql="props.gql.currentProject" />
@@ -34,6 +35,7 @@ fragment ProjectSettings on Query {
       __typename
       ... on CloudProject {
         id
+        cloudProjectSettingsUrl
         recordKeys {
           id
           ...RecordKey

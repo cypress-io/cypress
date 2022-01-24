@@ -34,7 +34,11 @@ export const useRunnerStyle = ({
 
   const containerWidth = computed(() => {
     const miscBorders = 4
-    const nonAutWidth = reporterWidth.value + specListWidth.value + (autMargin * 2) + miscBorders + collapsedNavBarWidth
+    let nonAutWidth = reporterWidth.value + specListWidth.value + (autMargin * 2) + miscBorders
+
+    if (window.__CYPRESS_MODE__ !== 'run') {
+      nonAutWidth += collapsedNavBarWidth
+    }
 
     return windowWidth.value - nonAutWidth
   })
@@ -71,7 +75,13 @@ export const useRunnerStyle = ({
     specListWidth,
     containerHeight,
     containerWidth,
-    windowWidth: computed(() => windowWidth.value - collapsedNavBarWidth),
+    windowWidth: computed(() => {
+      if (window.__CYPRESS_MODE__ === 'run') {
+        return windowWidth.value
+      }
+
+      return windowWidth.value - collapsedNavBarWidth
+    }),
   }
 }
 

@@ -257,7 +257,7 @@ export class ProjectLifecycleManager {
       s.currentProject = projectRoot
     })
 
-    this.refreshMetaState()
+    const { needsCypressJsonMigration } = this.refreshMetaState()
 
     this.configFileWarningCheck()
 
@@ -274,7 +274,15 @@ export class ProjectLifecycleManager {
       this.setCurrentTestingType(this.ctx.coreData.currentTestingType)
     }
 
-    this.initializeConfigWatchers()
+    // If migration is needed only initialize the watchers
+    // when the migration is done.
+    //
+    // NOTE: If we watch the files while initializing,
+    // the config will be loaded before the migration is complete.
+    // The migration screen will disappear see `Main.vue` & `MigrationAction.ts`
+    if (!needsCypressJsonMigration) {
+      this.initializeConfigWatchers()
+    }
   }
 
   setRunModeExitEarly (exitEarly: ((err: Error) => void) | undefined) {
@@ -571,7 +579,7 @@ export class ProjectLifecycleManager {
    * Initializes the "watchers" for the current
    * config for "open" mode.
    */
-  private initializeConfigWatchers () {
+  initializeConfigWatchers () {
     if (this.ctx.isRunMode) {
       return
     }

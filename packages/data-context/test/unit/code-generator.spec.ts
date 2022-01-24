@@ -95,12 +95,12 @@ describe('code-generator', () => {
     mTimesAfter.forEach((time, i) => expect(time > mTimesBefore[i]))
   })
 
-  it('should generate from integration template', async () => {
+  it('should generate from e2e template', async () => {
     const fileName = 'my-integration-file.js'
     const target = path.join(tmpPath, 'integration')
     const fileAbsolute = path.join(target, fileName)
     const action: Action = {
-      templateDir: templates.integration,
+      templateDir: templates.e2e,
       target,
     }
     const codeGenArgs = { fileName }
@@ -112,12 +112,12 @@ describe('code-generator', () => {
           type: 'text',
           status: 'add',
           file: fileAbsolute,
-          content: dedent`
+          content: `${dedent`
             describe('my-integration-file.js', () => {
               it('should visit', () => {
                 cy.visit('/')
               })
-            })`,
+            })` }\n`,
         },
       ],
       failed: [],
