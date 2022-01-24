@@ -17,8 +17,8 @@ export const defaultSupportFiles = {
 }
 
 interface MigrationRegexp {
-    beforeRegexp: string
-    afterRegexp: string
+  beforeRegexp: string
+  afterRegexp: string
 }
 
 interface MigrationRegexpGroup {
@@ -244,28 +244,18 @@ export async function supportFilesForMigration (projectRoot: string): Promise<Fi
   }
 }
 
-export async function moveSpecFiles (e2eDirPath: string) {
-  const specs = (await getSpecFiles(e2eDirPath)).map((spec) => {
-    const specPath = `${e2eDirPath}/${spec}`
+export function moveSpecFiles (e2eDirPath: string) {
+  const specs = fs.readdirSync(e2eDirPath).map((file) => {
+    const filePath = path.join(e2eDirPath, file)
 
     return {
-      from: specPath,
-      to: renameSpecPath(specPath),
+      from: filePath,
+      to: renameSpecPath(filePath),
     }
   })
 
   specs.forEach((spec) => {
     fs.moveSync(spec.from, spec.to)
-  })
-}
-
-async function getSpecFiles (dirPath: string) {
-  const files = await fs.readdir(dirPath)
-
-  return files.filter((file) => {
-    const filePath = path.join(dirPath, file)
-
-    return fs.statSync(filePath).isFile()
   })
 }
 

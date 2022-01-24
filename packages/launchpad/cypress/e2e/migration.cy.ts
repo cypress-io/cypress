@@ -48,7 +48,15 @@ describe('Migration', () => {
 
       cy.withCtx(async (ctx) => {
         const e2eDirPath = ctx.path.join('cypress', 'e2e')
-        const files = ['app.cy.js', 'blog-post.cy.ts', 'company.cy.js', 'home.cy.js', 'sign-up.cy.js', 'spectacleBrowser.cy.ts'].map((file) => ctx.path.join(e2eDirPath, file))
+        const files = [
+          'app.cy.js',
+          'blog-post.cy.ts',
+          'company.cy.js',
+          'home.cy.js',
+          'sign-up.cy.js',
+          'spectacleBrowser.cy.ts',
+          ctx.path.join('someDir', 'someFile.js'),
+        ].map((file) => ctx.path.join(e2eDirPath, file))
 
         for (let i = 0; i < files.length; i++) {
           const stats = await ctx.actions.file.checkIfFileExists(files[i])
@@ -82,7 +90,7 @@ describe('Migration', () => {
       cy.findByText(defaultMessages.migration.wizard.step4.button).click()
       cy.findByText(defaultMessages.migration.wizard.step5.button).click()
 
-      cy.findByText(defaultMessages.setupWizard.selectFramework.description).should('be.visible')
+      // cy.findByText(defaultMessages.setupWizard.selectFramework.description).should('be.visible')
     })
   })
 })
