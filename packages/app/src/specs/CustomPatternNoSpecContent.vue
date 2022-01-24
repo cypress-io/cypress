@@ -20,7 +20,6 @@
     <Button
       size="lg"
       variant="outline"
-      data-cy="custom-pattern-create-spec"
       @click="emit('showCreateSpecModal')"
     >
       <template #prefix>

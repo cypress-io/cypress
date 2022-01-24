@@ -128,8 +128,6 @@ describe('App: Index', () => {
 
       context('scaffold empty spec', () => {
         it('should generate empty spec', () => {
-          cy.visitApp()
-
           // Verify the modal can be closed
           cy.get('@EmptySpecCard').click()
           cy.get('body').click(0, 0)
@@ -386,6 +384,7 @@ describe('App: Index', () => {
 
             // TODO: assert visibility of secondary text on hover/focus when
             // item is made keyboard accessible
+            // https://cypress-io.atlassian.net/browse/UNIFY-864
             // cy.get('@NewSpecFile).focus()
             // cy.findByText('src/stories/Button.stories.jsx').should('be.visible')
 
@@ -544,6 +543,7 @@ describe('App: Index', () => {
 
             // TODO: assert visibility of secondary text on hover/focus when
             // item is made keyboard accessible
+            // https://cypress-io.atlassian.net/browse/UNIFY-864
             // cy.get('@NewSpecFile).focus()
             // cy.findByText('src/stories/Button.stories.jsx').should('be.visible')
 
@@ -643,7 +643,7 @@ describe('App: Index', () => {
       })
 
       it('opens config file in ide from footer button', () => {
-        cy.intercept('mutation-OpenConfigFile').as('OpenIDE')
+        cy.intercept('mutation-OpenConfigFile', { data: { 'openFileInIDE': true } }).as('OpenIDE')
 
         cy.contains('button', defaultMessages.createSpec.updateSpecPattern).click()
 
