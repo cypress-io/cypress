@@ -21,7 +21,7 @@ describe('<FileList />', { viewportHeight: 500, viewportWidth: 400 }, () => {
     beforeEach(() => {
       const selectFileSpy = cy.spy().as('selectFileSpy')
 
-      cy.mount(() => (<div class="resize overflow-auto min-w-300px m-2">
+      cy.mount(() => (<div class="m-2 min-w-300px resize overflow-auto">
         <FileList onSelectFile={selectFileSpy} files={files} />
       </div>))
     })
@@ -41,6 +41,7 @@ describe('<FileList />', { viewportHeight: 500, viewportWidth: 400 }, () => {
 
     it('correctly formats a difficult file', () => {
       cy.get('body').contains('[...all]')
+      cy.percySnapshot()
     })
   })
 
@@ -63,7 +64,10 @@ describe('<FileList />', { viewportHeight: 500, viewportWidth: 400 }, () => {
 
       </div>))
       .get(noResultsSelector).should('be.visible')
-      .get('[data-testid=add-file]')
+
+      cy.percySnapshot()
+
+      cy.get('[data-testid=add-file]')
       .click()
       .get(noResultsSelector).should('not.exist')
     })
