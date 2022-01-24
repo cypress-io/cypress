@@ -1,4 +1,3 @@
-// @ts-nocheck
 import _ from 'lodash'
 import $utils from './utils'
 import $errUtils from './error_utils'
@@ -36,12 +35,13 @@ const _isBrowser = (browser, matcher, errPrefix) => {
   }
 }
 
-const isBrowser = (config, obj = '', errPrefix = '`Cypress.isBrowser()`') => {
+// TODO: change the type of `any` to `IsBrowserMatcher`
+const isBrowser = (config, obj: any = '', errPrefix = '`Cypress.isBrowser()`') => {
   return _
   .chain(obj)
   .concat([])
   .map((matcher) => _isBrowser(config.browser, matcher, errPrefix))
-  .reduce((a, b) => {
+  .reduce((a: null | { isMatch: boolean, exclusive: boolean }, b) => {
     if (!a) return b
 
     if (a.exclusive && b.exclusive) {
