@@ -97,8 +97,8 @@ describe('LeftNav', () => {
           icon: 'ad',
           interaction: {
             type: 'js',
-            onClick (idx) {
-              if (idx === activeIndex) {
+            onClick ({ index }) {
+              if (index === activeIndex) {
                 return setActiveIndex(undefined)
               }
 
@@ -111,8 +111,8 @@ describe('LeftNav', () => {
           itemClasses: 'second-item-button',
           interaction: {
             type: 'js',
-            onClick (idx) {
-              if (idx === activeIndex) {
+            onClick ({ index }) {
+              if (index === activeIndex) {
                 return setActiveIndex(undefined)
               }
 
