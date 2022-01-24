@@ -131,7 +131,7 @@
 <script lang="ts" setup>
 import { useI18n } from '@cy/i18n'
 import Button from '@packages/frontend-shared/src/components/Button.vue'
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import _clone from 'lodash/clone'
 import { useMutation, gql } from '@urql/vue'
 import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
@@ -188,6 +188,9 @@ const emit = defineEmits<{
   (e: 'navigated-back'): void
   (e: 'launch'): void
   (e: 'close-browser'): void
+  // TODO: Add browser focus
+  // see: https://cypress-io.atlassian.net/browse/UNIFY-953
+  // (e: 'focus-browser'): void
 }>()
 
 const { t } = useI18n()
@@ -202,12 +205,10 @@ const browsers = computed(() => {
 
 const setBrowser = useMutation(OpenBrowserList_SetBrowserDocument)
 
-const _selectedBrowserId = ref(props.gql.currentBrowser?.id || props.gql.browsers?.find((browser) => browser.displayName === 'Electron')?.id)
 const selectedBrowserId = computed({
-  get: () => _selectedBrowserId.value,
+  get: () => props.gql.currentBrowser?.id || props.gql.browsers?.find((browser) => browser.displayName === 'Electron')?.id,
   set (browserId) {
     if (browserId) {
-      _selectedBrowserId.value = browserId
       setBrowser.executeMutation({ id: browserId })
     }
   },
