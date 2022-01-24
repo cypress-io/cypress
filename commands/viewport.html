@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Kitchen Sink | Cypress Example">
+  <meta name="author" content="Cypress.io">
+  <meta name="copyright" content="Cypress.io, Inc">
+
+  <title>Cypress.io: Kitchen Sink</title>
+
+  <link rel="icon" href="/assets/img/favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="/assets/css/vendor/bootstrap.min.3cdc65ed.css">
+  <link rel="stylesheet" href="/assets/css/vendor/fira.css">
+  <link rel="stylesheet" href="/assets/css/styles.2fbabb3d.css">
+</head>
+
+<body>
+  <nav class="navbar navbar-inverse">
+    <div class="container">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="/">cypress.io</a>
+      </div>
+      <div id="navbar" class="navbar-collapse collapse">
+        <ul class="nav navbar-nav">
+          <li class="active" class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button">Commands <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="/commands/querying">Querying</a></li>
+              <li><a href="/commands/traversal">Traversal</a></li>
+              <li><a href="/commands/actions">Actions</a></li>
+              <li><a href="/commands/window">Window</a></li>
+              <li class="active"><a href="/commands/viewport">Viewport</a></li>
+              <li><a href="/commands/location">Location</a></li>
+              <li><a href="/commands/navigation">Navigation</a></li>
+              <li><a href="/commands/assertions">Assertions</a></li>
+              <li><a href="/commands/misc">Misc</a></li>
+              <li><a href="/commands/connectors">Connectors</a></li>
+              <li><a href="/commands/aliasing">Aliasing</a></li>
+              <li><a href="/commands/waiting">Waiting</a></li>
+              <li><a href="/commands/network-requests">Network Requests</a></li>
+              <li><a href="/commands/files">Files</a></li>
+              <li><a href="/commands/local-storage">Local Storage</a></li>
+              <li><a href="/commands/cookies">Cookies</a></li>
+              <li><a href="/commands/spies-stubs-clocks">Spies, Stubs &amp; Clocks</a></li>
+            </ul>
+          </li>
+          <li><a href="/utilities">Utilities</a></li>
+          <li><a href="/cypress-api">Cypress API</a></li>
+        </ul>
+        <ul class="nav navbar-nav pull-right">
+          <li><a href="https://github.com/cypress-io/cypress-example-kitchensink">GitHub</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="banner">
+    <div class="container">
+      <h1>Viewport</h1>
+      <p>Examples of changing the size of your application's viewport in Cypress, for a full reference of commands, go to <a href="https://on.cypress.io/api" target="_blank">docs.cypress.io</a>
+      </p>
+    </div>
+  </div>
+  <div class="container content-container">
+    <div id="viewport">
+      <div class="row">
+
+        <div class="col-xs-12">
+          <h4><a href="https://on.cypress.io/viewport">cy.viewport()</a></h4>
+          <p>To set the viewport size and dimension, use the <a href="https://on.cypress.io/viewport"><code>cy.viewport()</code></a> command.</p>
+          <pre><code class="javascript">cy.get('#navbar').should('be.visible')
+cy.viewport(320, 480)
+
+// the navbar should have collapse since our screen is smaller
+cy.get('#navbar').should('not.be.visible')
+cy.get('.navbar-toggle').should('be.visible').click()
+cy.get('.nav').find('a').should('be.visible')
+
+// lets see what our app looks like on a super large screen
+cy.viewport(2999, 2999)
+
+// cy.viewport() accepts a set of preset sizes
+// to easily set the screen to a device's width and height
+
+// We added a cy.wait() between each viewport change so you can see
+// the change otherwise it is a little too fast to see :)
+
+cy.viewport('macbook-15')
+cy.wait(200)
+cy.viewport('macbook-13')
+cy.wait(200)
+cy.viewport('macbook-11')
+cy.wait(200)
+cy.viewport('ipad-2')
+cy.wait(200)
+cy.viewport('ipad-mini')
+cy.wait(200)
+cy.viewport('iphone-6+')
+cy.wait(200)
+cy.viewport('iphone-6')
+cy.wait(200)
+cy.viewport('iphone-5')
+cy.wait(200)
+cy.viewport('iphone-4')
+cy.wait(200)
+cy.viewport('iphone-3')
+cy.wait(200)
+
+// cy.viewport() accepts an orientation for all presets
+// the default orientation is 'portrait'
+cy.viewport('ipad-2', 'portrait')
+cy.wait(200)
+cy.viewport('iphone-4', 'landscape')
+cy.wait(200)
+
+// The viewport will be reset back to the default dimensions
+// in between tests (the  default can be set in cypress.json)</code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/assets/js/vendor/jquery-1.12.0.min.cbb11b58.js"></script>
+  <script src="/assets/js/vendor/bootstrap.min.c5b5b2fa.js"></script>
+  <script src="/assets/js/vendor/highlight.pack.4cbe7783.js"></script>
+  <script src="/assets/js/scripts.4a26d59a.js"></script>
+</body>
+</html>

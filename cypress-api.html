@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Kitchen Sink | Cypress Example">
+  <meta name="author" content="Cypress.io">
+  <meta name="copyright" content="Cypress.io, Inc">
+
+  <title>Cypress.io: Kitchen Sink</title>
+
+  <link rel="icon" href="/assets/img/favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="/assets/css/vendor/bootstrap.min.3cdc65ed.css">
+  <link rel="stylesheet" href="/assets/css/vendor/fira.css">
+  <link rel="stylesheet" href="/assets/css/styles.2fbabb3d.css">
+</head>
+
+<body>
+  <nav class="navbar navbar-inverse">
+    <div class="container">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="/">cypress.io</a>
+      </div>
+      <div id="navbar" class="navbar-collapse collapse">
+        <ul class="nav navbar-nav">
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button">Commands <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="/commands/querying">Querying</a></li>
+              <li><a href="/commands/traversal">Traversal</a></li>
+              <li><a href="/commands/actions">Actions</a></li>
+              <li><a href="/commands/window">Window</a></li>
+              <li><a href="/commands/viewport">Viewport</a></li>
+              <li><a href="/commands/location">Location</a></li>
+              <li><a href="/commands/navigation">Navigation</a></li>
+              <li><a href="/commands/assertions">Assertions</a></li>
+              <li><a href="/commands/misc">Misc</a></li>
+              <li><a href="/commands/connectors">Connectors</a></li>
+              <li><a href="/commands/aliasing">Aliasing</a></li>
+              <li><a href="/commands/waiting">Waiting</a></li>
+              <li><a href="/commands/network-requests">Network Requests</a></li>
+              <li><a href="/commands/files">Files</a></li>
+              <li><a href="/commands/local-storage">Local Storage</a></li>
+              <li><a href="/commands/cookies">Cookies</a></li>
+              <li><a href="/commands/spies-stubs-clocks">Spies, Stubs &amp; Clocks</a></li>
+            </ul>
+          </li>
+          <li><a href="/utilities">Utilities</a></li>
+          <li class="active"><a href="/cypress-api">Cypress API</a></li>
+        </ul>
+        <ul class="nav navbar-nav pull-right">
+          <li><a href="https://github.com/cypress-io/cypress-example-kitchensink">GitHub</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="banner">
+    <div class="container">
+      <h1>Cypress API</h1>
+      <p>Examples of uses of the Cypress API, for a full reference, go to <a href="https://on.cypress.io/custom-commands" target="_blank">docs.cypress.io</a>
+      </p>
+    </div>
+  </div>
+  <div class="container content-container">
+    <div id="api-commands">
+      <div class="row">
+
+        <div class="col-xs-12">
+          <h4 id="Commands.add"><a href="https://on.cypress.io/custom-commands">Cypress.Commands.add()</a></h4>
+          <p>To add a command, use <a href="https://on.cypress.io/custom-commands"><code>Cypress.Commands.add()</code></a>.</p>
+          <pre><code class="javascript">Cypress.Commands.add('console', {
+  prevSubject: true,
+}, (subject, method) => {
+  method = method || 'log'
+
+  // log the subject to the console
+  console[method]('The subject is', subject)
+  return subject</code></pre>
+        </div>
+
+        <div class="col-xs-12"><hr></div>
+
+        <div class="col-xs-12">
+          <h4 id="Cookies.debug"><a href="https://on.cypress.io/cookies">Cypress.Cookies.debug()</a></h4>
+          <p>To enable or disable cookie debugging, use <a href="https://on.cypress.io/cookies"><code>Cypress.Cookies.debug()</code></a>.</p>
+          <pre><code class="javascript">// Cypress will now log in the console when
+// cookies are set or removed
+Cypress.Cookies.debug(true)
+
+cy.setCookie('fakeCookie', '123ABC')
+cy.clearCookie('fakeCookie')
+cy.setCookie('fakeCookie', '123ABC')
+cy.clearCookie('fakeCookie')
+cy.setCookie('fakeCookie', '123ABC')
+</code></pre>
+        </div>
+
+        <div class="col-xs-12"><hr></div>
+
+        <div class="col-xs-12">
+          <h4 id="Cookies.preserveOnce"><a href="https://on.cypress.io/cookies">Cypress.Cookies.preserveOnce()</a></h4>
+          <p>To preserve cookies by its key, use <a href="https://on.cypress.io/cookies"><code>Cypress.Cookies.preserveOnce()</code></a>.</p>
+          <pre><code class="javascript">cy.getCookie('fakeCookie').should('not.be.ok')
+
+// preserving a cookie will not clear it when
+// the next test starts
+cy.setCookie('lastCookie', '789XYZ')
+Cypress.Cookies.preserveOnce('lastCookie')</code></pre>
+        </div>
+
+        <div class="col-xs-12"><hr></div>
+
+        <div class="col-xs-12">
+          <h4 id="Cookies.default"><a href="https://on.cypress.io/cookies">Cypress.Cookies.default()</a></h4>
+          <p>To set defaults for all cookies, use <a href="https://on.cypress.io/cookies"><code>Cypress.Cookies.default()</code></a>.</p>
+          <pre><code class="javascript">Cypress.Cookies.defaults({
+  preserve: 'session_id'
+})</code></pre>
+        </div>
+
+        <div class="col-xs-12"><hr></div>
+
+        <div class="col-xs-12">
+          <h4 id="arch"><a href="https://on.cypress.io/arch">Cypress.arch</a></h4>
+          <p>To get CPU architecture name of underlying OS, use <a href="https://on.cypress.io/arch"><code>Cypress.arch</code></a>.</p>
+          <pre><code class="javascript">expect(Cypress.arch).to.exist</code></pre>
+        </div>
+
+        <div class="col-xs-12"><hr></div>
+
+        <div class="col-xs-12">
+          <h4 id="config"><a href="https://on.cypress.io/config">Cypress.config()</a></h4>
+          <p>To get or set configuration options, use <a href="https://on.cypress.io/config"><code>Cypress.config()</code></a>.</p>
+          <pre><code class="javascript">var myConfig = Cypress.config()
+
+expect(myConfig).to.have.property('animationDistanceThreshold', 5)
+expect(myConfig).to.have.property('baseUrl', null)
+expect(myConfig).to.have.property('defaultCommandTimeout', 4000)
+expect(myConfig).to.have.property('requestTimeout', 5000)
+expect(myConfig).to.have.property('responseTimeout', 30000)
+expect(myConfig).to.have.property('viewportHeight', 660)
+expect(myConfig).to.have.property('viewportWidth', 1000)
+expect(myConfig).to.have.property('pageLoadTimeout', 60000)
+expect(myConfig).to.have.property('waitForAnimations', true)
+
+expect(Cypress.config('pageLoadTimeout')).to.eq(60000)
+
+Cypress.config('pageLoadTimeout', 20000)
+
+expect(Cypress.config('pageLoadTimeout')).to.eq(20000)
+
+Cypress.config('pageLoadTimeout', 60000)
+  </code></pre>
+        </div>
+
+        <div class="col-xs-12"><hr></div>
+
+        <div class="col-xs-7">
+          <h4 id="dom.isHidden"><a href="https://on.cypress.io/dom">Cypress.dom.isHidden()</a></h4>
+          <p>To see whether a DOM element is hidden, use <a href="https://on.cypress.io/dom"><code>Cypress.dom.isHidden()</code></a>.</p>
+          <pre><code class="javascript">let hiddenP = Cypress.$('.dom-p p.hidden').get(0)
+let visibleP = Cypress.$('.dom-p p.visible').get(0)
+
+// our first paragraph has css class 'hidden'
+expect(Cypress.dom.isHidden(hiddenP)).to.be.true
+expect(Cypress.dom.isHidden(visibleP)).to.be.false</code></pre>
+        </div>
+        <div class="col-xs-5">
+          <div class="well">
+            <div class="dom-p">
+              <p class="hidden">I'm hiding!</p>
+              <p class="visible">I'm visible!</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-xs-12"><hr></div>
+
+        <div class="col-xs-12">
+          <h4 id="env"><a href="https://on.cypress.io/env">Cypress.env()</a></h4>
+          <p>To get or set environment variable, use <a href="https://on.cypress.io/env"><code>Cypress.env()</code></a>.</p>
+          <pre><code class="javascript">// set multiple environment variables
+Cypress.env({
+  host: 'veronica.dev.local',
+  api_server: 'http://localhost:8888/v1/',
+})
+
+// get environment variable
+expect(Cypress.env('host')).to.eq('veronica.dev.local')
+
+// set environment variable
+Cypress.env('api_server', 'http://localhost:8888/v2/')
+expect(Cypress.env('api_server')).to.eq('http://localhost:8888/v2/')
+
+// get all environment variable
+expect(Cypress.env()).to.have.property('host', 'veronica.dev.local')
+expect(Cypress.env()).to.have.property('api_server', 'http://localhost:8888/v2/')</code></pre>
+        </div>
+
+        <div class="col-xs-12"><hr></div>
+
+        <div class="col-xs-12">
+          <h4 id="log">Cypress.log()</h4>
+          <p>To control what is printed to the Command Log <a href="https://on.cypress.io/cypress-log"><code>Cypress.log()</code></a>.</p>
+          <pre><code class="javascript"></code></pre>
+        </div>
+
+        <div class="col-xs-12"><hr></div>
+
+        <div class="col-xs-12">
+          <h4 id="platform"><a href="https://on.cypress.io/platform">Cypress.platform</a></h4>
+          <p>To get name of underlying OS, use <a href="https://on.cypress.io/platform"><code>Cypress.platform</code></a>.</p>
+          <pre><code class="javascript">expect(Cypress.platform).to.exist</code></pre>
+        </div>
+
+        <div class="col-xs-12"><hr></div>
+
+        <div class="col-xs-12">
+          <h4 id="version"><a href="https://on.cypress.io/version">Cypress.version</a></h4>
+          <p>To get version of Cypress being run, use <a href="https://on.cypress.io/version"><code>Cypress.version</code></a>.</p>
+          <pre><code class="javascript">expect(Cypress.version).to.exist</code></pre>
+        </div>
+
+        <div class="col-xs-12"><hr></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/assets/js/vendor/jquery-1.12.0.min.cbb11b58.js"></script>
+  <script src="/assets/js/vendor/bootstrap.min.c5b5b2fa.js"></script>
+  <script src="/assets/js/vendor/highlight.pack.4cbe7783.js"></script>
+  <script src="/assets/js/scripts.4a26d59a.js"></script>
+</body>
+</html>

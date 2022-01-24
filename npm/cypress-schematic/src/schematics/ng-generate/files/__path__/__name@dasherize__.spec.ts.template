@@ -1,4 +1,0 @@
-describe('<%= classify(name) %>', () => {
-  it('', () => {
-  });
-});

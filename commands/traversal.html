@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Kitchen Sink | Cypress Example">
+  <meta name="author" content="Cypress.io">
+  <meta name="copyright" content="Cypress.io, Inc">
+
+  <title>Cypress.io: Kitchen Sink</title>
+
+  <link rel="icon" href="/assets/img/favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="/assets/css/vendor/bootstrap.min.3cdc65ed.css">
+  <link rel="stylesheet" href="/assets/css/vendor/fira.css">
+  <link rel="stylesheet" href="/assets/css/styles.2fbabb3d.css">
+</head>
+
+<body>
+  <nav class="navbar navbar-inverse">
+    <div class="container">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="/">cypress.io</a>
+      </div>
+      <div id="navbar" class="navbar-collapse collapse">
+        <ul class="nav navbar-nav">
+          <li class="active" class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button">Commands <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="/commands/querying">Querying</a></li>
+              <li class="active"><a href="/commands/traversal">Traversal</a></li>
+              <li><a href="/commands/actions">Actions</a></li>
+              <li><a href="/commands/window">Window</a></li>
+              <li><a href="/commands/viewport">Viewport</a></li>
+              <li><a href="/commands/location">Location</a></li>
+              <li><a href="/commands/navigation">Navigation</a></li>
+              <li><a href="/commands/assertions">Assertions</a></li>
+              <li><a href="/commands/misc">Misc</a></li>
+              <li><a href="/commands/connectors">Connectors</a></li>
+              <li><a href="/commands/aliasing">Aliasing</a></li>
+              <li><a href="/commands/waiting">Waiting</a></li>
+              <li><a href="/commands/network-requests">Network Requests</a></li>
+              <li><a href="/commands/files">Files</a></li>
+              <li><a href="/commands/local-storage">Local Storage</a></li>
+              <li><a href="/commands/cookies">Cookies</a></li>
+              <li><a href="/commands/spies-stubs-clocks">Spies, Stubs &amp; Clocks</a></li>
+            </ul>
+          </li>
+          <li><a href="/utilities">Utilities</a></li>
+          <li><a href="/cypress-api">Cypress API</a></li>
+        </ul>
+        <ul class="nav navbar-nav pull-right">
+          <li><a href="https://github.com/cypress-io/cypress-example-kitchensink">GitHub</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="banner">
+    <div class="container">
+      <h1>Traversal</h1>
+      <p>Examples of traversing DOM elements in Cypress, for a full reference of commands, go to <a href="https://on.cypress.io/api" target="_blank">docs.cypress.io</a>
+      </p>
+    </div>
+  </div>
+  <div class="container content-container">
+    <div id="traversal" class="row">
+      <div class="col-xs-7">
+        <h4 id="children"><a href="https://on.cypress.io/children">.children()</a></h4>
+        <p>To get children of DOM elements, use the <a href="https://on.cypress.io/children"><code>.children()</code></a> command.</p>
+        <pre><code class="javascript">cy.get('.traversal-breadcrumb')
+  .children('.active')
+  .should('contain', 'Data')</code></pre>
+      </div>
+      <div class="col-xs-5">
+        <div class="well">
+          <ol class="traversal-breadcrumb breadcrumb">
+            <li><a href="#">Home</a></li>
+            <li><a href="#">Library</a></li>
+            <li class="active">Data</li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="col-xs-12"><hr></div>
+
+      <div class="col-xs-7">
+        <h4 id="closest"><a href="https://on.cypress.io/closest">.closest()</a></h4>
+        <p>To get the closest ancestor DOM element, use the <a href="https://on.cypress.io/closest"><code>.closest()</code></a> command.</p>
+        <pre><code class="javascript">cy.get('.traversal-badge')
+  .closest('ul')
+  .should('have.class', 'list-group')</code></pre>
+      </div>
+      <div class="col-xs-5">
+        <div class="well">
+          <ul class="list-group">
+            <li class="list-group-item">
+              <span class="badge">14</span>
+              Events
+            </li>
+            <li class="list-group-item">
+              <span class="badge traversal-badge">54</span>
+              Friends
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="col-xs-12"><hr></div>
+
+      <div class="col-xs-7">
+        <h4 id="eq"><a href="https://on.cypress.io/eq">.eq()</a></h4>
+        <p>To get a DOM element at a specific index, use the <a href="https://on.cypress.io/eq"><code>.eq()</code></a> command.</p>
+        <pre><code class="javascript">cy.get('.traversal-list>li')
+  .eq(1).should('contain', 'siamese')</code></pre>
+      </div>
+      <div class="col-xs-5">
+        <div class="well">
+          <ul class="traversal-list">
+            <li>tabby</li>
+            <li>siamese</li>
+            <li>persian</li>
+            <li>sphynx</li>
+            <li>burmese</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="col-xs-12"><hr></div>
+
+      <div class="col-xs-7">
+        <h4 id="filter"><a href="https://on.cypress.io/filter">.filter()</a></h4>
+        <p>To get DOM elements that match a specific selector, use the <a href="https://on.cypress.io/filter"><code>.filter()</code></a> command.</p>
+        <pre><code class="javascript">cy.get('.traversal-nav>li')
+  .filter('.active').should('contain', 'About')</code></pre>
+      </div>
+      <div class="col-xs-5">
+        <div class="well">
+          <ul class="traversal-nav nav nav-tabs">
+            <li><a href="#">Home</a></li>
+            <li class="active"><a href="#">About</a></li>
+            <li><a href="#">Services</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="col-xs-12"><hr></div>
+
+      <div class="col-xs-7">
+        <h4 id="find"><a href="https://on.cypress.io/find">.find()</a></h4>
+        <p>To get descendant DOM elements of the selector, use the <a href="https://on.cypress.io/api/find"><code>.find()</code></a> command.</p>
+        <pre><code class="javascript">cy.get('.traversal-pagination').find('li').find('a').should('have.length', 7)</code></pre>
+      </div>
+      <div class="col-xs-5">
+        <div class="well">
+          <nav>
+            <ul class="pagination traversal-pagination">
+              <li>
+                <a href="#">
+                  <span>&laquo;</span>
+                </a>
+              </li>
+              <li><a href="#">1</a></li>
+              <li><a href="#">2</a></li>
+              <li><a href="#">3</a></li>
+              <li><a href="#">4</a></li>
+              <li><a href="#">5</a></li>
+              <li>
+                <a href="#">
+                  <span>&raquo;</span>
+                </a>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </div>
+
+      <div class="col-xs-12"><hr></div>
+
+      <div class="col-xs-7">
+        <h4 id="first"><a href="https://on.cypress.io/first">.first()</a></h4>
+        <p>To get the first DOM element within elements, use the <a href="https://on.cypress.io/first"><code>.first()</code></a> command.</p>
+        <pre><code class="javascript">cy.get('.traversal-table td')
+  .first().should('contain', '1')</code></pre>
+      </div>
+      <div class="col-xs-5">
+        <div class="well">
+          <table class="table traversal-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>1</td>
+                <td>Jane</td>
+                <td>Lane</td>
+              </tr>
+              <tr>
+                <td>2</td>
+                <td>John</td>
+                <td>Doe</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="col-xs-12"><hr></div>
+
+      <div class="col-xs-7">
+        <h4 id="last"><a href="https://on.cypress.io/last">.last()</a></h4>
+        <p>To get the last DOM element within elements, use the <a href="https://on.cypress.io/last"><code>.last()</code></a> command.</p>
+        <pre><code class="javascript">cy.get('.traversal-buttons .btn')
+  .last().should('contain', 'Submit')</code></pre>
+      </div>
+      <div class="col-xs-5">
+        <div class="well">
+          <div class="traversal-buttons">
+            <a class="btn btn-default" href="#" role="button">Link</a>
+            <button class="btn btn-default" type="submit">Button</button>
+            <input class="btn btn-default" type="button" value="Input">
+            <input class="btn btn-default" type="submit" value="Submit">
+          </div>
+        </div>
+      </div>
+
+      <div class="col-xs-12"><hr></div>
+
+      <div class="col-xs-7">
+        <h4 id="next"><a href="https://on.cypress.io/next">.next()</a></h4>
+        <p>To get the next sibling DOM element within elements, use the <a href="https://on.cypress.io/next"><code>.next()</code></a> command.</p>
+        <pre><code class="javascript">cy.get('.traversal-ul')
+  .contains('apples').next().should('contain', 'oranges')</code></pre>
+      </div>
+      <div class="col-xs-5">
+        <div class="well">
+          <ul class="traversal-ul">
+            <li>apples</li>
+            <li class="second">oranges</li>
+            <li>bananas</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="col-xs-12"><hr></div>
+
+      <div class="col-xs-7">
+        <h4 id="nextAll"><a href="https://on.cypress.io/nextall">.nextAll()</a></h4>
+        <p>To get all of the next sibling DOM elements within elements, use the <a href="https://on.cypress.io/nextall"><code>.nextAll()</code></a> command.</p>
+        <pre><code class="javascript">cy.get('.traversal-next-all')
+  .contains('oranges')
+  .nextAll().should('have.length', 3)</code></pre>
+      </div>
+      <div class="col-xs-5">
+        <div class="well">
+          <ul class="traversal-next-all">
+            <li>apples</li>
+            <li class="second">oranges</li>
+            <li>bananas</li>
+            <li>pineapples</li>
+            <li>grapes</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="col-xs-12"><hr></div>
+
+      <div class="col-xs-7">
+        <h4 id="nextUntil"><a href="https://on.cypress.io/nextuntil">.nextUntil()</a></h4>
+        <p>To get all of the next sibling DOM elements within elements until another element, use the <a href="https://on.cypress.io/nextuntil"><code>.nextUntil()</code></a> command.</p>
+        <pre><code class="javascript">cy.get('#veggies')
+  .nextUntil('#nuts').should('have.length', 3)</code></pre>
+      </div>
+      <div class="col-xs-5">
+        <div class="well">
+          <ul class="healthy-foods">
+            <li id="fruits" class="header">Fruits</li>
+            <li>apples</li>
+            <li>oranges</li>
+            <li>bananas</li>
+            <li id="veggies" class="header">Vegetables</li>
+            <li>cucumbers</li>
+            <li>carrots</li>
+            <li>corn</li>
+            <li id="nuts" class="header">Nuts</li>
+            <li>walnuts</li>
+            <li>cashews</li>
+            <li>almonds</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="col-xs-12"><hr></div>
+
+      <div class="col-xs-7">
+        <h4 id="not"><a href="https://on.cypress.io/not">.not()</a></h4>
+        <p>To remove DOM element(s) from the set of elements, use the <a href="https://on.cypress.io/not"><code>.not()</code></a> command.</p>
+        <pre><code class="javascript">cy.get('.traversal-disabled .btn')
+  .not('[disabled]').should('not.contain', 'Disabled')</code></pre>
+      </div>
+      <div class="col-xs-5">
+        <div class="well">
+          <div class="traversal-disabled">
+            <button type="button" class="btn btn-default" disabled="disabled">Disabled</button>
+            <button type="button" class="btn btn-default">Button</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-xs-12"><hr></div>
+
+      <div class="col-xs-7">
+        <h4 id="parent"><a href="https://on.cypress.io/parent">.parent()</a></h4>
+        <p>To get parent DOM element of elements, use the <a href="https://on.cypress.io/parent"><code>.parent()</code></a> command.</p>
+        <pre><code class="javascript">cy.get('.traversal-mark')
+  .parent().should('contain', 'Morbi leo risus')</code></pre>
+      </div>
+      <div class="col-xs-5">
+        <div class="well">
+          <p>Morbi leo risus, porta ac consectetur ac, <mark class="traversal-mark">highlight</mark> vestibulum at eros.</p>
+        </div>
+      </div>
+
+      <div class="col-xs-12"><hr></div>
+
+      <div class="col-xs-7">
+        <h4 id="parents"><a href="https://on.cypress.io/parents">.parents()</a></h4>
+        <p>To get parents DOM element of elements, use the <a href="https://on.cypress.io/parents"><code>.parents()</code></a> command.</p>
+        <pre><code class="javascript">cy.get('.traversal-cite')
+  .parents().should('match', 'blockquote')</code></pre>
+      </div>
+      <div class="col-xs-5">
+        <div class="well">
+          <blockquote>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+            <footer>Someone famous in <cite class="traversal-cite">Source Title</cite></footer>
+          </blockquote>
+        </div>
+      </div>
+
+      <div class="col-xs-12"><hr></div>
+
+      <div class="col-xs-7">
+        <h4 id="parentsUntil"><a href="https://on.cypress.io/parentsuntil">.parentsUntil()</a></h4>
+        <p>To get parents DOM element of elements until other element, use the <a href="https://on.cypress.io/parentsuntil"><code>.parentsUntil()</code></a> command.</p>
+        <pre><code class="javascript">cy.get('.clothes-nav')
+  .find('.active')
+  .parentsUntil('.clothes-nav')
+  .should('have.length', 2)</code></pre>
+      </div>
+      <div class="col-xs-5">
+        <div class="well">
+          <ul class="nav clothes-nav">
+            <li>
+              <a href="#">Clothes</a>
+              <ul class="menu">
+                <li>
+                  <a href="/shirts">Shirts</a>
+                </li>
+                <li class="active">
+                  <a href="/pants">Pants</a>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="col-xs-12"><hr></div>
+
+      <div class="col-xs-7">
+        <h4 id="prev"><a href="https://on.cypress.io/prev">.prev()</a></h4>
+        <p>To get the previous sibling DOM element within elements, use the <a href="https://on.cypress.io/prev"><code>.prev()</code></a> command.</p>
+        <pre><code class="javascript">cy.get('.birds').find('.active')
+  .prev().should('contain', 'Lorikeets')</code></pre>
+      </div>
+      <div class="col-xs-5">
+        <div class="well">
+          <ul class="birds list-group">
+            <li class="list-group-item">Cockatiels</li>
+            <li class="list-group-item">Lorikeets</li>
+            <li class="list-group-item active">Cockatoos</li>
+            <li class="list-group-item">Conures</li>
+            <li class="list-group-item">Eclectus</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="col-xs-12"><hr></div>
+
+      <div class="col-xs-7">
+        <h4 id="prevAll"><a href="https://on.cypress.io/prevall">.prevAll()</a></h4>
+        <p>To get all previous sibling DOM elements within elements, use the <a href="https://on.cypress.io/prevall"><code>.prevAll()</code></a> command.</p>
+        <pre><code class="javascript">cy.get('.fruits-list').find('.third')
+  .prevAll().should('have.length', 2)</code></pre>
+      </div>
+      <div class="col-xs-5">
+        <div class="well">
+          <ul class="fruits-list">
+            <li>apples</li>
+            <li>oranges</li>
+            <li class="third">bananas</li>
+            <li>pineapples</li>
+            <li>grapes</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="col-xs-12"><hr></div>
+
+      <div class="col-xs-7">
+        <h4 id="prevUntil"><a href="https://on.cypress.io/prevuntil">.prevUntil()</a></h4>
+        <p>To get all previous sibling DOM elements within elements until other element, use the <a href="https://on.cypress.io/prevuntil"><code>.prevUntil()</code></a> command.</p>
+        <pre><code class="javascript">cy.get('.foods-list').find('#nuts')
+  .prevUntil('#veggies').should('have.length', 3)</code></pre>
+      </div>
+      <div class="col-xs-5">
+        <div class="well">
+          <ul class="foods-list">
+            <li id="fruits" class="header">Fruits</li>
+            <li>apples</li>
+            <li>oranges</li>
+            <li>bananas</li>
+            <li id="veggies" class="header">Vegetables</li>
+            <li>cucumbers</li>
+            <li>carrots</li>
+            <li>corn</li>
+            <li id="nuts" class="header">Nuts</li>
+            <li>walnuts</li>
+            <li>cashews</li>
+            <li>almonds</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="col-xs-12"><hr></div>
+
+      <div class="col-xs-7">
+        <h4 id="siblings"><a href="https://on.cypress.io/siblings">.siblings()</a></h4>
+        <p>To get all sibling DOM elements of elements, use the <a href="https://on.cypress.io/siblings"><code>.siblings()</code></a> command.</p>
+        <pre><code class="javascript">cy.get('.traversal-pills .active')
+  .siblings().should('have.length', 2)</code></pre>
+      </div>
+      <div class="col-xs-5">
+        <div class="well">
+          <ul class="nav nav-pills traversal-pills">
+            <li class="active"><a href="#">Home</a></li>
+            <li><a href="#">Profile</a></li>
+            <li><a href="#">Messages</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="col-xs-12"><hr></div>
+    </div>
+  </div>
+
+  <script src="/assets/js/vendor/jquery-1.12.0.min.cbb11b58.js"></script>
+  <script src="/assets/js/vendor/bootstrap.min.c5b5b2fa.js"></script>
+  <script src="/assets/js/vendor/highlight.pack.4cbe7783.js"></script>
+  <script src="/assets/js/scripts.4a26d59a.js"></script>
+</body>
+</html>

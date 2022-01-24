@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Kitchen Sink | Cypress Example">
+    <meta name="author" content="Cypress.io">
+    <meta name="copyright" content="Cypress.io, Inc">
+
+    <title>Cypress.io: Kitchen Sink</title>
+
+    <link rel="icon" href="/assets/img/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="/assets/css/vendor/bootstrap.min.3cdc65ed.css">
+    <link rel="stylesheet" href="/assets/css/vendor/fira.css">
+    <link rel="stylesheet" href="/assets/css/styles.2fbabb3d.css">
+    <link rel="stylesheet" href="/assets/css/todo.e33f4ced.css">
+  </head>
+
+  <body>
+    <nav class="navbar navbar-inverse">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">cypress.io</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button">Commands <span class="caret"></span></a>
+              <ul class="dropdown-menu">
+                <li><a href="/commands/querying">Querying</a></li>
+                <li><a href="/commands/traversal">Traversal</a></li>
+                <li><a href="/commands/actions">Actions</a></li>
+                <li><a href="/commands/window">Window</a></li>
+                <li><a href="/commands/viewport">Viewport</a></li>
+                <li><a href="/commands/location">Location</a></li>
+                <li><a href="/commands/navigation">Navigation</a></li>
+                <li><a href="/commands/assertions">Assertions</a></li>
+                <li><a href="/commands/misc">Misc</a></li>
+                <li><a href="/commands/connectors">Connectors</a></li>
+                <li><a href="/commands/aliasing">Aliasing</a></li>
+                <li><a href="/commands/waiting">Waiting</a></li>
+                <li><a href="/commands/network-requests">Network Requests</a></li>
+                <li><a href="/commands/files">Files</a></li>
+                <li><a href="/commands/local-storage">Local Storage</a></li>
+                <li><a href="/commands/cookies">Cookies</a></li>
+                <li><a href="/commands/spies-stubs-clocks">Spies, Stubs &amp; Clocks</a></li>
+              </ul>
+            </li>
+            <li><a href="/utilities">Utilities</a></li>
+            <li><a href="/cypress-api">Cypress API</a></li>
+          </ul>
+          <ul class="nav navbar-nav pull-right">
+            <li><a href="https://github.com/cypress-io/cypress-example-kitchensink">GitHub</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <!--
+      Forked from TodoMVC
+      https://todomvc.com
+      
+      MIT License © Addy Osmani, Sindre Sorhus, Pascal Hartig, Stephen Sawchuk
+    -->
+
+    <section class="todoapp-wrapper">
+      <div class="todoapp">
+        <header class="header">
+          <h1>todos</h1>
+          <input class="new-todo" placeholder="What needs to be done?" data-test="new-todo" autofocus>
+        </header>
+        <section class="main">
+          <input id="toggle-all" class="toggle-all" type="checkbox">
+          <label for="toggle-all">Mark all as complete</label>
+          <ul class="todo-list"></ul>
+        </section>
+        <footer class="footer">
+          <span class="todo-count"></span>
+          <ul class="filters">
+            <li>
+              <a href="#/" class="selected">All</a>
+            </li>
+            <li>
+              <a href="#/active">Active</a>
+            </li>
+            <li>
+              <a href="#/completed">Completed</a>
+            </li>
+          </ul>
+          <button class="todo-button clear-completed">Clear completed</button>
+        </footer>
+      </div>
+      <footer class="info">
+        <p>Double-click to edit a todo</p>
+        <p>Forked from <a href="http://todomvc.com">TodoMVC</a></p>
+      </footer>
+    </section>
+
+    <script src="/assets/js/vendor/jquery-1.12.0.min.cbb11b58.js"></script>
+    <script src="/assets/js/vendor/bootstrap.min.c5b5b2fa.js"></script>
+    <script src="/assets/js/vendor/highlight.pack.4cbe7783.js"></script>
+    <script src="/assets/js/scripts.4a26d59a.js"></script>
+    <script src="/assets/js/todo/helpers.3af50a88.js"></script>
+    <script src="/assets/js/todo/store.059d3908.js"></script>
+    <script src="/assets/js/todo/model.30673de1.js"></script>
+    <script src="/assets/js/todo/template.5d1628aa.js"></script>
+    <script src="/assets/js/todo/view.7a3cecbb.js"></script>
+    <script src="/assets/js/todo/controller.151c6cd3.js"></script>
+    <script src="/assets/js/todo/app.8f874310.js"></script>
+  </body>
+</html>

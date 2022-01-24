@@ -1,2 +1,0 @@
-require('../register')
-require('./spec')

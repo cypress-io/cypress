@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Kitchen Sink | Cypress Example" />
+    <meta name="author" content="Cypress.io" />
+    <meta name="copyright" content="Cypress.io, Inc" />
+
+    <title>Cypress.io: Kitchen Sink</title>
+
+    <link rel="icon" href="/assets/img/favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="/assets/css/vendor/bootstrap.min.3cdc65ed.css" />
+    <link rel="stylesheet" href="/assets/css/vendor/fira.css" />
+    <link rel="stylesheet" href="/assets/css/styles.2fbabb3d.css" />
+  </head>
+
+  <body>
+    <nav class="navbar navbar-inverse">
+      <div class="container">
+        <div class="navbar-header">
+          <button
+            type="button"
+            class="navbar-toggle collapsed"
+            data-toggle="collapse"
+            data-target="#navbar"
+          >
+            <span class="icon-bar"></span> <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">cypress.io</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="active" class="dropdown">
+              <a
+                href="#"
+                class="dropdown-toggle"
+                data-toggle="dropdown"
+                role="button"
+                >Commands <span class="caret"></span
+              ></a>
+              <ul class="dropdown-menu">
+                <li><a href="/commands/querying">Querying</a></li>
+                <li><a href="/commands/traversal">Traversal</a></li>
+                <li><a href="/commands/actions">Actions</a></li>
+                <li><a href="/commands/window">Window</a></li>
+                <li><a href="/commands/viewport">Viewport</a></li>
+                <li><a href="/commands/location">Location</a></li>
+                <li><a href="/commands/navigation">Navigation</a></li>
+                <li class="active">
+                  <a href="/commands/assertions">Assertions</a>
+                </li>
+                <li><a href="/commands/misc">Misc</a></li>
+                <li><a href="/commands/connectors">Connectors</a></li>
+                <li><a href="/commands/aliasing">Aliasing</a></li>
+                <li><a href="/commands/waiting">Waiting</a></li>
+                <li>
+                  <a href="/commands/network-requests">Network Requests</a>
+                </li>
+                <li><a href="/commands/files">Files</a></li>
+                <li><a href="/commands/local-storage">Local Storage</a></li>
+                <li><a href="/commands/cookies">Cookies</a></li>
+                <li>
+                  <a href="/commands/spies-stubs-clocks"
+                    >Spies, Stubs &amp; Clocks</a
+                  >
+                </li>
+              </ul>
+            </li>
+            <li><a href="/utilities">Utilities</a></li>
+            <li><a href="/cypress-api">Cypress API</a></li>
+          </ul>
+          <ul class="nav navbar-nav pull-right">
+            <li>
+              <a
+                href="https://github.com/cypress-io/cypress-example-kitchensink"
+                >GitHub</a
+              >
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="banner">
+      <div class="container">
+        <h1>Assertions</h1>
+        <p>
+          Examples of asserting the state or behavior of your application in
+          Cypress, for a full reference of commands, go to
+          <a href="https://on.cypress.io/api" target="_blank"
+            >docs.cypress.io</a
+          >
+        </p>
+      </div>
+    </div>
+    <div class="container content-container">
+      <div id="assertions">
+        <div class="row">
+          <div class="col-xs-12">
+            <h3>Implicit Assertions</h3>
+            <hr />
+          </div>
+
+          <div class="col-xs-7">
+            <h4 id="should"><a href="https://on.cypress.io/should" target="_blank">.should()</a></h4>
+            <p>
+              To make an assertion about the current subject, use the
+              <a href="https://on.cypress.io/should" target="_blank"><code>.should()</code></a>
+              command.
+            </p>
+            <pre><code class="javascript">cy.get('.assertion-table')
+  .find('tbody tr:last').should('have.class', 'success')
+  .find('td')
+  .first()
+  // checking the text of the <td> element in various ways
+  .should('have.text', 'Column content')
+  .should('contain', 'Column content')
+  .should('have.html', 'Column content')
+  // chai-jquery uses "is()" to check if element matches selector
+  .should('match', 'td')
+  // to match text content against a regular expression
+  // first need to invoke jQuery method text()
+  // and then match using regular expression
+  .invoke('text')
+  .should('match', /column content/i)
+
+// a better way to check element's text content against a regular expression
+// is to use "cy.contains"
+// https://on.cypress.io/contains
+cy.get('.assertion-table')
+  .find('tbody tr:last')
+  // finds first <td> element with text content matching regular expression
+  .contains('td', /column content/i)
+  .should('be.visible')</code></pre>
+
+            <p>Note: find even more examples of matching element's text content in this
+              <a href="https://on.cypress.io/using-cypress-faq#How-do-I-get-an-element’s-text-contents" target="_blank">FAQ answer</a>.
+            </p>
+          </div>
+          <div class="col-xs-5">
+            <div class="well">
+              <table class="table table-bordered assertion-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Column heading</th>
+                    <th>Column heading</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <th scope="row">1</th>
+                    <td>Column content</td>
+                    <td>Column content</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">2</th>
+                    <td>Column content</td>
+                    <td>Column content</td>
+                  </tr>
+                  <tr class="success">
+                    <th scope="row">3</th>
+                    <td>Column content</td>
+                    <td>Column content</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="col-xs-12"><hr /></div>
+
+          <div class="col-xs-7">
+            <h4 id="and"><a href="https://on.cypress.io/and" target="_blank">.and()</a></h4>
+            <p>
+              To chain multiple assertions together, use the
+              <a href="https://on.cypress.io/and" target="_blank"><code>.and()</code></a>
+              command.
+            </p>
+            <pre><code class="javascript">cy.get('.assertions-link')
+  .should('have.class', 'active')
+  .and('have.attr', 'href')
+  .and('include', 'cypress.io')</code></pre>
+          </div>
+          <div class="col-xs-5">
+            <div class="well">
+              <a class="assertions-link active" href="https://on.cypress.io" target="_blank"
+                >Cypress Docs</a
+              >
+            </div>
+          </div>
+
+          <div class="col-xs-12"><hr /></div>
+
+          <div class="col-xs-12">
+            <h3>Explicit Assertions</h3>
+            <hr />
+          </div>
+
+          <div class="col-xs-12">
+            <h4 id="expect">expect</h4>
+            <p>
+              To make a BDD assertion about a specified subject, use
+              <a href="https://on.cypress.io/assertions" target="_blank"><code>expect</code></a
+              >.
+            </p>
+          </div>
+
+          <div class="col-xs-7">
+            <pre><code class="javascript">expect(true).to.be.true
+const o = { foo: 'bar' }
+expect(o).to.equal(o)
+expect(o).to.deep.equal({ foo: 'bar' })
+// matching text using regular expression
+expect('FooBar').to.match(/bar$/i)</code></pre>
+          </div>
+
+          <div class="col-xs-12"><hr /></div>
+
+          <div class="col-xs-7">
+            <h4 id="assert">assert</h4>
+            <p>
+              To make a TDD assertion about a specified subject, use
+              <a href="https://on.cypress.io/assertions" target="_blank"><code>assert</code></a
+              >.
+            </p>
+            <pre><code class="javascript">const person = {
+  name: 'Joe',
+  age: 20,
+}
+assert.isObject(person, 'value is object')</code></pre>
+          </div>
+
+          <div class="col-xs-12"><hr /></div>
+
+          <div class="col-xs-12">
+            <h3><a href="https://on.cypress.io/should#Function" target="_blank">Should with callback function</a></h3>
+            <hr />
+          </div>
+
+          <div class="col-xs-12">
+            <p>
+              You can write your own complicated checks using
+              <code>.should(cb)</code> function if included assertions are not
+              enough. Pass a function to <code>should()</code> with any number
+              of explicit assertions within it. The callback function will be
+              retried until it passes all your explicit assertions or times out.
+            </p>
+          </div>
+
+          <div class="col-xs-7">
+            <pre><code class="javascript">cy.get('.assertions-p').find('p')
+  .should(($p) => {
+    // return an array of texts from all of the p's
+    let texts = $p.map((i, el) => // https://on.cypress.io/$
+      Cypress.$(el).text())
+
+    // jquery map returns jquery object
+    // and .get() convert this to simple array
+    texts = texts.get()
+
+    // array should have length of 3
+    expect(texts).to.have.length(3)
+
+    // use second argument to expect(...) to provide clear
+    // message with each assertion
+    expect(texts, 'has expected text in each paragraph').to.deep.eq([
+      'Some text from first p',
+      'More text from second p',
+      'And even more text from third p',
+    ])
+  })</code></pre>
+          </div>
+          <div class="col-xs-5">
+            <div class="well">
+              <div class="assertions-p">
+                <p>Some text from first p</p>
+                <p>More text from second p</p>
+                <p>And even more text from third p</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-xs-12">
+            <p>Assert that element's class includes <code>heading-</code>.</p>
+          </div>
+
+          <div class="col-xs-7">
+            <pre><code class="javascript">cy.get('.docs-header').find('div')
+  // .should(cb) callback function will be retried
+  .should(($div) => {
+    expect($div).to.have.length(1)
+
+    const className = $div[0].className
+
+    expect(className).to.match(/heading-/)
+  })
+  // .then(cb) callback is not retried,
+  // it either passes or fails
+  .then(($div) => {
+    expect($div).to.have.text('Introduction')
+  })</code></pre>
+          </div>
+
+          <div class="col-xs-5">
+            <div class="well">
+              <div class="docs-header">
+                <div class="main-abc123 heading-xyz987">Introduction</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-xs-12">
+            <p>
+              You can throw any error from the callback function. The callback
+              will be retried, but the assertions will not be shown as nicely in
+              the Command Log UI as Chai assertions.
+            </p>
+          </div>
+
+          <div class="col-xs-7">
+            <pre><code class="javascript">cy.get('.docs-header').find('div')
+  .should(($div) => {
+    if ($div.length !== 1) {
+      // you can throw your own errors
+      throw new Error('Did not find 1 element')
+    }
+
+    const className = $div[0].className
+
+    if (!className.match(/heading-/)) {
+      throw new Error(`Could not find class "heading-" in ${className}`)
+    }
+  })</code></pre>
+          </div>
+
+          <div class="col-xs-12">
+            <p>
+              We <a href="https://on.cypress.io/conditional-testing">strongly recommend that your tests are deterministic</a>.
+              But sometimes you might need to match text between two elements, and you
+              do not know what that text should be. Save the value from the first element,
+              then compare it from a <code>should(cb)</code> callback.
+            </p>
+          </div>
+
+          <div class="col-xs-7">
+            <pre><code class="javascript">let text
+/**
+* Normalizes passed text,
+* useful before comparing text with spaces and different capitalization.
+* @param {string} s Text to normalize
+*/
+const normalizeText = (s) => s.replace(/\s/g, '').toLowerCase()
+
+cy.get('.two-elements')
+.find('.first')
+.then(($first) => {
+  // save text from the first element
+  text = normalizeText($first.text())
+})
+
+cy.get('.two-elements')
+.find('.second')
+.should(($div) => {
+  // we can massage text before comparing
+  const secondText = normalizeText($div.text())
+  expect(secondText, 'second text').to.equal(text)
+})</code></pre>
+          </div>
+
+          <div class="col-xs-5">
+            <div class="well">
+              <div class="two-elements">
+                <div class="first">Foo Bar</div>
+                <div class="second">foo b a r</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-xs-12">
+            <p>
+              Remember that Cypress only <a href="https://on.cypress.io/retry-ability">retries the very last command</a>,
+              if it allows retrying. If you need to perform additional steps before running an assertion,
+              you can use <code>.should(callbackFn)</code> to retry multiple operations.
+            </p>
+          </div>
+
+          <div class="col-xs-7">
+            <pre><code class="javascript">cy.get('#random-number')
+  .should(($div) => {
+    // retries getting the element
+    // while the "🎁" is converted into NaN
+    // and only passes when a number is set
+    const n = parseFloat($div.text())
+    expect(n).to.be.gte(1).and.be.lte(10)
+  })</code></pre>
+</div>
+
+          <div class="col-xs-5">
+            <div class="well">
+              <div class="random-number-example">
+                Random number: <span id="random-number">🎁</span>
+              </div>
+              <script>
+                const el = document.getElementById('random-number')
+                setTimeout(() => {
+                  el.innerText = Math.floor(Math.random() * 10 + 1)
+                }, 1500)
+              </script>
+            </div>
+          </div>
+
+          <div class="col-xs-12"><hr /></div>
+        </div>
+      </div>
+    </div>
+
+    <script src="/assets/js/vendor/jquery-1.12.0.min.cbb11b58.js"></script>
+    <script src="/assets/js/vendor/bootstrap.min.c5b5b2fa.js"></script>
+    <script src="/assets/js/vendor/highlight.pack.4cbe7783.js"></script>
+    <script src="/assets/js/scripts.4a26d59a.js"></script>
+  </body>
+</html>

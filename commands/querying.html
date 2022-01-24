@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Kitchen Sink | Cypress Example" />
+    <meta name="author" content="Cypress.io" />
+    <meta name="copyright" content="Cypress.io, Inc" />
+
+    <title>Cypress.io: Kitchen Sink</title>
+
+    <link rel="icon" href="/assets/img/favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="/assets/css/vendor/bootstrap.min.3cdc65ed.css" />
+    <link rel="stylesheet" href="/assets/css/vendor/fira.css" />
+    <link rel="stylesheet" href="/assets/css/styles.2fbabb3d.css" />
+  </head>
+
+  <body>
+    <nav class="navbar navbar-inverse">
+      <div class="container">
+        <div class="navbar-header">
+          <button
+            type="button"
+            class="navbar-toggle collapsed"
+            data-toggle="collapse"
+            data-target="#navbar"
+          >
+            <span class="icon-bar"></span> <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">cypress.io</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="active" class="dropdown">
+              <a
+                href="#"
+                class="dropdown-toggle"
+                data-toggle="dropdown"
+                role="button"
+                >Commands <span class="caret"></span
+              ></a>
+              <ul class="dropdown-menu">
+                <li class="active">
+                  <a href="/commands/querying">Querying</a>
+                </li>
+                <li><a href="/commands/traversal">Traversal</a></li>
+                <li><a href="/commands/actions">Actions</a></li>
+                <li><a href="/commands/window">Window</a></li>
+                <li><a href="/commands/viewport">Viewport</a></li>
+                <li><a href="/commands/location">Location</a></li>
+                <li><a href="/commands/navigation">Navigation</a></li>
+                <li><a href="/commands/assertions">Assertions</a></li>
+                <li><a href="/commands/misc">Misc</a></li>
+                <li><a href="/commands/connectors">Connectors</a></li>
+                <li><a href="/commands/aliasing">Aliasing</a></li>
+                <li><a href="/commands/waiting">Waiting</a></li>
+                <li>
+                  <a href="/commands/network-requests">Network Requests</a>
+                </li>
+                <li><a href="/commands/files">Files</a></li>
+                <li><a href="/commands/local-storage">Local Storage</a></li>
+                <li><a href="/commands/cookies">Cookies</a></li>
+                <li>
+                  <a href="/commands/spies-stubs-clocks"
+                    >Spies, Stubs &amp; Clocks</a
+                  >
+                </li>
+              </ul>
+            </li>
+            <li><a href="/utilities">Utilities</a></li>
+            <li><a href="/cypress-api">Cypress API</a></li>
+          </ul>
+          <ul class="nav navbar-nav pull-right">
+            <li>
+              <a
+                href="https://github.com/cypress-io/cypress-example-kitchensink"
+                >GitHub</a
+              >
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="banner">
+      <div class="container">
+        <h1>Querying</h1>
+        <p>
+          Examples of querying for DOM elements in Cypress, for a full reference
+          of commands, go to
+          <a href="https://on.cypress.io/api" target="_blank"
+            >docs.cypress.io</a
+          >
+          and read
+          <a
+            href="https://on.cypress.io/best-practices#Selecting-Elements"
+            target="_blank"
+            >Selecting Elements: Best Practices Guide</a
+          >
+        </p>
+      </div>
+    </div>
+    <div class="container content-container">
+      <div id="querying">
+        <div class="row">
+          <div class="col-xs-7">
+            <h4 id="get"><a href="https://on.cypress.io/get">cy.get()</a></h4>
+            <p>
+              To query for the button, use the
+              <a href="https://on.cypress.io/get"><code>cy.get()</code></a>
+              command.
+            </p>
+            <pre><code class="javascript">cy.get('#query-btn').should('contain', 'Button')
+
+cy.get('.query-btn').should('contain', 'Button')
+
+cy.get('#querying .well>button:first').should('contain', 'Button')
+//              ↲
+// Use CSS selectors just like jQuery</code></pre>
+          </div>
+
+          <div class="col-xs-5">
+            <div class="well">
+              <button id="query-btn" class="query-btn btn btn-primary">
+                Button
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-xs-7">
+            <p>
+              To find elements by data attribute, query using the attribute
+              selector.
+            </p>
+            <pre><code class="javascript">cy.get('[data-test-id="test-example"]').should('have.class', 'example')</code></pre>
+          </div>
+
+          <div class="col-xs-5">
+            <div class="well well-1-line">
+              <div data-test-id="test-example" class="example">
+                Div with <code>data-test-id</code>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-xs-7">
+            <p>
+              <code>cy.get()</code> yields a jQuery object, you can get its attribute by invoking the <code>.attr()</code> method.
+            </p>
+            <pre><code class="javascript">cy.get('[data-test-id="test-example"]')
+  .invoke('attr', 'data-test-id')
+  .should('equal', 'test-example')
+
+// or you can get an element's CSS property
+cy.get('[data-test-id="test-example"]')
+  .invoke('css', 'position')
+  .should('equal', 'static')</code></pre>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-xs-7">
+            <p>
+              Alternatively, chain assertions directly to the <code>cy.get()</code> call.
+              See <a href="https://on.cypress.io/assertions" target="_blank">assertions documentation</a>.
+            </p>
+            <pre><code class="javascript">cy.get('[data-test-id="test-example"]')
+  .should('have.attr', 'data-test-id', 'test-example')
+  .and('have.css', 'position', 'static')</code></pre>
+          </div>
+        </div>
+
+        <div class="col-xs-12"><hr /></div>
+
+        <div class="row">
+          <div class="col-xs-7">
+            <h4 id="contains"><a href="https://on.cypress.io/contains">cy.contains()</a></h4>
+            <p>
+              We can find elements by their content using
+              <a href="https://on.cypress.io/contains"
+                ><code>cy.contains()</code></a
+              >
+            </p>
+            <pre><code class="javascript">cy.get('.query-list')
+  .contains('bananas').should('have.class', 'third')
+
+// we can pass a regexp to `.contains()`
+cy.get('.query-list')
+  .contains(/^b\w+/).should('have.class', 'third')
+
+cy.get('.query-list')
+  .contains('apples').should('have.class', 'first')
+
+// passing a selector to contains will
+// yield the selector containing the text
+cy.get('#querying')
+  .contains('ul', 'oranges')
+  .should('have.class', 'query-list')
+
+cy.get('.query-button')
+  .contains('Save Form')
+  .should('have.class', 'btn')</code></pre>
+          </div>
+          <div class="col-xs-5">
+            <div class="well">
+              <ul class="query-list">
+                <li class="first">apples</li>
+                <li class="second">oranges</li>
+                <li class="third">bananas</li>
+                <li class="fourth">more apples</li>
+              </ul>
+              <div class="query-button">
+                <button class="btn btn-default"><span>Save Form</span></button>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-xs-12"><hr /></div>
+
+          <div class="col-xs-7">
+            <h4 id="within"><a href="https://on.cypress.io/within">.within()</a></h4>
+            <p>
+              We can find elements within a specific DOM element
+              <a href="https://on.cypress.io/within"><code>.within()</code></a>
+            </p>
+            <pre><code class="javascript">cy.get('.query-form').within(() => {
+  cy.get('input:first').should('have.attr', 'placeholder', 'Email')
+  cy.get('input:last').should('have.attr', 'placeholder', 'Password')
+})</code></pre>
+          </div>
+          <div class="col-xs-5">
+            <div class="well">
+              <input
+                type="text"
+                id="inputName"
+                class="form-control"
+                placeholder="Name"
+              />
+              <h6>Form</h6>
+              <form class="query-form">
+                <input
+                  type="text"
+                  id="inputEmail"
+                  class="form-control"
+                  placeholder="Email"
+                />
+                <input
+                  type="text"
+                  id="inputPassword"
+                  class="form-control"
+                  placeholder="Password"
+                />
+              </form>
+            </div>
+          </div>
+
+          <div class="col-xs-12"><hr /></div>
+
+          <div class="col-xs-7">
+            <h4 id="root"><a href="https://on.cypress.io/root">cy.root()</a></h4>
+            <p>
+              We can find the root DOM element<a
+                href="https://on.cypress.io/root"
+                ><code>cy.root()</code></a
+              >
+            </p>
+            <pre><code class="javascript">// By default, root is the document
+cy.root().should('match', 'html')
+
+cy.get('.query-ul').within(() => {
+  // In this within, the root is now the ul DOM element
+  cy.root().should('have.class', 'query-ul')
+})</code></pre>
+          </div>
+          <div class="col-xs-5">
+            <div class="well">
+              <ul class="query-ul">
+                <li>One</li>
+                <li>Two</li>
+                <li>Buckle my shoe</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="col-xs-12"><hr /></div>
+        </div>
+
+        <div class="row">
+          <div class="col-xs-7">
+            <h4 id="best-practices"><a href="https://on.cypress.io/best-practices#Selecting-Elements">Best Practices: Selecting elements</a></h4>
+            <p>
+              Prefer dedicated <code>data-cy</code> or <code>data-test</code> attributes to CSS class names and element IDs.
+              See detailed discussion at <a href="https://on.cypress.io/best-practices#Selecting-Elements">Best Practices: Selecting elements</a>
+            </p>
+            <pre><code class="javascript">// Worst - too generic, no context
+  cy.get('button').click()
+
+  // Bad. Coupled to styling. Highly subject to change.
+  cy.get('.btn.btn-large').click()
+
+  // Average. Coupled to the `name` attribute which has HTML semantics.
+  cy.get('[name=submission]').click()
+
+  // Better. But still coupled to styling or JS event listeners.
+  cy.get('#main').click()
+
+  // Slightly better. Uses an ID but also ensures the element
+  // has an ARIA role attribute
+  cy.get('#main[role=button]').click()
+
+  // Much better. But still coupled to text content that may change.
+  cy.contains('Submit').click()
+
+  // Best. Insulated from all changes.
+  cy.get('[data-cy=submit]').click()</code></pre>
+          </div>
+
+          <div class="col-xs-5">
+            <div class="well" data-cy="best-practices-selecting-elements">
+              <button id="main" class="btn btn-large" name="submission" role="button" data-cy="submit">Submit</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <script src="/assets/js/vendor/jquery-1.12.0.min.cbb11b58.js"></script>
+    <script src="/assets/js/vendor/bootstrap.min.c5b5b2fa.js"></script>
+    <script src="/assets/js/vendor/highlight.pack.4cbe7783.js"></script>
+    <script src="/assets/js/scripts.4a26d59a.js"></script>
+  </body>
+</html>

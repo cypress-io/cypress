@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Kitchen Sink | Cypress Example">
+  <meta name="author" content="Cypress.io">
+  <meta name="copyright" content="Cypress.io, Inc">
+
+  <title>Cypress.io: Kitchen Sink</title>
+
+  <link rel="icon" href="/assets/img/favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="/assets/css/vendor/bootstrap.min.3cdc65ed.css">
+  <link rel="stylesheet" href="/assets/css/vendor/fira.css">
+  <link rel="stylesheet" href="/assets/css/styles.2fbabb3d.css">
+</head>
+
+<body>
+  <nav class="navbar navbar-inverse">
+    <div class="container">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="/">cypress.io</a>
+      </div>
+      <div id="navbar" class="navbar-collapse collapse">
+        <ul class="nav navbar-nav">
+          <li class="active" class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button">Commands <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="/commands/querying">Querying</a></li>
+              <li><a href="/commands/traversal">Traversal</a></li>
+              <li><a href="/commands/actions">Actions</a></li>
+              <li><a href="/commands/window">Window</a></li>
+              <li><a href="/commands/viewport">Viewport</a></li>
+              <li><a href="/commands/location">Location</a></li>
+              <li><a href="/commands/navigation">Navigation</a></li>
+              <li><a href="/commands/assertions">Assertions</a></li>
+              <li><a href="/commands/misc">Misc</a></li>
+              <li><a href="/commands/connectors">Connectors</a></li>
+              <li><a href="/commands/aliasing">Aliasing</a></li>
+              <li><a href="/commands/waiting">Waiting</a></li>
+              <li><a href="/commands/network-requests">Network Requests</a></li>
+              <li><a href="/commands/files">Files</a></li>
+              <li><a href="/commands/local-storage">Local Storage</a></li>
+              <li class="active"><a href="/commands/cookies">Cookies</a></li>
+              <li><a href="/commands/spies-stubs-clocks">Spies, Stubs &amp; Clocks</a></li>
+            </ul>
+          </li>
+          <li><a href="/utilities">Utilities</a></li>
+          <li><a href="/cypress-api">Cypress API</a></li>
+        </ul>
+        <ul class="nav navbar-nav pull-right">
+          <li><a href="https://github.com/cypress-io/cypress-example-kitchensink">GitHub</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="banner">
+    <div class="container">
+      <h1>Cookies</h1>
+      <p>Examples of managing cookies in Cypress, for a full reference of commands, go to <a href="https://on.cypress.io/api" target="_blank">docs.cypress.io</a>
+      </p>
+    </div>
+  </div>
+  <div class="container content-container">
+    <div id="getCookie">
+      <div class="row">
+
+        <div class="col-xs-7">
+          <h4 id="getCookie"><a href="https://on.cypress.io/getcookie">cy.getCookie()</a></h4>
+          <p>To get a browser cookie, use the <a href="https://on.cypress.io/getcookie"><code>cy.getCookie()</code></a> command.</p>
+          <pre><code class="javascript">cy.get('#getCookie .set-a-cookie').click()
+
+// cy.getCookie() yields a cookie object
+cy.getCookie('token').should('have.property', 'value', '123ABC')</code></pre>
+        </div>
+        <div class="col-xs-5">
+          <div class="well">
+            <button class="set-a-cookie btn btn-success">Set Cookie</button>
+          </div>
+        </div>
+
+        <div class="col-xs-12"><hr></div>
+      </div>
+    </div>
+
+    <div id="getCookies">
+      <div class="row">
+
+        <div class="col-xs-7">
+          <h4 id="getCookies"><a href="https://on.cypress.io/getcookies">cy.getCookies()</a></h4>
+          <p>To get all browser cookies, use the <a href="https://on.cypress.io/getcookies"><code>cy.getCookies()</code></a> command.</p>
+          <pre><code class="javascript">cy.getCookies().should('be.empty')
+
+cy.get('#getCookies .set-a-cookie').click()
+
+// cy.getCookies() yields an array of cookies
+cy.getCookies().should('have.length', 1).should((cookies) => {
+
+  // each cookie has these properties
+  expect(cookies[0]).to.have.property('name', 'token')
+  expect(cookies[0]).to.have.property('value', '123ABC')
+  expect(cookies[0]).to.have.property('httpOnly', false)
+  expect(cookies[0]).to.have.property('secure', false)
+  expect(cookies[0]).to.have.property('domain')
+  expect(cookies[0]).to.have.property('path')
+})</code></pre>
+        </div>
+        <div class="col-xs-5">
+          <div class="well">
+            <button class="set-a-cookie btn btn-success">Set Cookie</button>
+          </div>
+        </div>
+
+        <div class="col-xs-12"><hr></div>
+      </div>
+    </div>
+
+    <div id="setCookie">
+      <div class="row">
+
+        <div class="col-xs-12">
+          <h4 id="setCookie"><a href="https://on.cypress.io/setcookie">cy.setCookie()</a></h4>
+          <p>To set a browser cookie, use the <a href="https://on.cypress.io/setcookie"><code>cy.setCookie()</code></a> command.</p>
+          <pre><code class="javascript">cy.getCookies().should('be.empty')
+
+cy.setCookie('foo', 'bar')
+
+// cy.getCookie() yields a cookie object
+cy.getCookie('foo').should('have.property', 'value', 'bar')</code></pre>
+        </div>
+
+        <div class="col-xs-12"><hr></div>
+      </div>
+    </div>
+
+    <div id="clearCookie">
+      <div class="row">
+
+        <div class="col-xs-7">
+          <h4 id="clearCookie"><a href="https://on.cypress.io/clearcookie">cy.clearCookie()</a></h4>
+          <p>To clear a browser cookie, use the <a href="https://on.cypress.io/clearcookie"><code>cy.clearCookie()</code></a> command.</p>
+          <pre><code class="javascript">cy.getCookie('token').should('be.null')
+
+cy.get('#clearCookie .set-a-cookie').click()
+
+cy.getCookie('token').should('have.property', 'value', '123ABC')
+
+// cy.clearCookies() yields null
+cy.clearCookie('token').should('be.null')
+
+cy.getCookie('token').should('be.null')</code></pre>
+        </div>
+        <div class="col-xs-5">
+          <div class="well">
+            <button class="set-a-cookie btn btn-success">Set Cookie</button>
+          </div>
+        </div>
+
+        <div class="col-xs-12"><hr></div>
+      </div>
+    </div>
+
+    <div id="clearCookies">
+      <div class="row">
+
+        <div class="col-xs-7">
+          <h4 id="clearCookies"><a href="https://on.cypress.io/clearcookies">cy.clearCookies()</a></h4>
+          <p>To clear all browser cookies, use the <a href="https://on.cypress.io/clearcookies"><code>cy.clearCookies()</code></a> command.</p>
+          <pre><code class="javascript">cy.getCookies().should('be.empty')
+
+cy.get('#clearCookies .set-a-cookie').click()
+
+cy.getCookies().should('have.length', 1)
+
+// cy.clearCookies() yields null
+cy.clearCookies()
+
+cy.getCookies().should('be.empty')</code></pre>
+        </div>
+        <div class="col-xs-5">
+          <div class="well">
+            <button class="set-a-cookie btn btn-success">Set Cookie</button>
+          </div>
+        </div>
+
+        <div class="col-xs-12"><hr></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/assets/js/vendor/jquery-1.12.0.min.cbb11b58.js"></script>
+  <script src="/assets/js/vendor/bootstrap.min.c5b5b2fa.js"></script>
+  <script src="/assets/js/vendor/highlight.pack.4cbe7783.js"></script>
+  <script src="/assets/js/scripts.4a26d59a.js"></script>
+</body>
+</html>

@@ -1,5 +1,0 @@
-test/unit
-test/integration
---reporter spec
---compilers ts:@packages/ts/register
---recursive

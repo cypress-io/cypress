@@ -1,1 +1,0 @@
-this is an invalid spec file 

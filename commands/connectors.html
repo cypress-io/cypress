@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Kitchen Sink | Cypress Example">
+  <meta name="author" content="Cypress.io">
+  <meta name="copyright" content="Cypress.io, Inc">
+
+  <title>Cypress.io: Kitchen Sink</title>
+
+  <link rel="icon" href="/assets/img/favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="/assets/css/vendor/bootstrap.min.3cdc65ed.css">
+  <link rel="stylesheet" href="/assets/css/vendor/fira.css">
+  <link rel="stylesheet" href="/assets/css/styles.2fbabb3d.css">
+</head>
+
+<body>
+  <nav class="navbar navbar-inverse">
+    <div class="container">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="/">cypress.io</a>
+      </div>
+      <div id="navbar" class="navbar-collapse collapse">
+        <ul class="nav navbar-nav">
+          <li class="active" class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button">Commands <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="/commands/querying">Querying</a></li>
+              <li><a href="/commands/traversal">Traversal</a></li>
+              <li><a href="/commands/actions">Actions</a></li>
+              <li><a href="/commands/window">Window</a></li>
+              <li><a href="/commands/viewport">Viewport</a></li>
+              <li><a href="/commands/location">Location</a></li>
+              <li><a href="/commands/navigation">Navigation</a></li>
+              <li><a href="/commands/assertions">Assertions</a></li>
+              <li><a href="/commands/misc">Misc</a></li>
+              <li class="active"><a href="/commands/connectors">Connectors</a></li>
+              <li><a href="/commands/aliasing">Aliasing</a></li>
+              <li><a href="/commands/waiting">Waiting</a></li>
+              <li><a href="/commands/network-requests">Network Requests</a></li>
+              <li><a href="/commands/files">Files</a></li>
+              <li><a href="/commands/local-storage">Local Storage</a></li>
+              <li><a href="/commands/cookies">Cookies</a></li>
+              <li><a href="/commands/spies-stubs-clocks">Spies, Stubs &amp; Clocks</a></li>
+            </ul>
+          </li>
+          <li><a href="/utilities">Utilities</a></li>
+          <li><a href="/cypress-api">Cypress API</a></li>
+        </ul>
+        <ul class="nav navbar-nav pull-right">
+          <li><a href="https://github.com/cypress-io/cypress-example-kitchensink">GitHub</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="banner">
+    <div class="container">
+      <h1>Connectors</h1>
+      <p>Examples of connecting commands in Cypress, for a full reference of commands, go to <a href="https://on.cypress.io/api" target="_blank">docs.cypress.io</a>
+      </p>
+    </div>
+  </div>
+  <div class="container content-container">
+    <div id="connectors">
+      <div class="row">
+
+        <div class="col-xs-7">
+          <h4 id="each"><a href="https://on.cypress.io/each">.each()</a></h4>
+          <p>To iterate over the elements of a current subject, use the <a href="https://on.cypress.io/each"><code>.each()</code></a> command.</p>
+          <pre><code class="javascript">cy.get('.connectors-each-ul>li')
+  .each(function($el, index, $list){
+    console.log($el, index, $list)
+  })</code></pre>
+      </div>
+        <div class="col-xs-5">
+          <div class="well">
+            <ul class="connectors-each-ul">
+              <li>Lara Williams</li>
+              <li>William Grey</li>
+              <li>Monica Pharrel</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="col-xs-12"><hr></div>
+
+        <div class="col-xs-7">
+          <h4 id="its"><a href="https://on.cypress.io/its">.its()</a></h4>
+          <p>To get the properties on the current subject, use the <a href="https://on.cypress.io/its"><code>.its()</code></a> command.</p>
+          <pre><code class="javascript">cy.get('.connectors-its-ul>li')
+  // calls the 'length' property returning that value
+  .its('length')
+  .should('be.gt', 2)</code></pre>
+      </div>
+        <div class="col-xs-5">
+          <div class="well">
+            <ul class="connectors-its-ul">
+              <li>Chai</li>
+              <li>Chai-jQuery</li>
+              <li>Chai-Sinon</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="col-xs-12"><hr></div>
+
+        <div class="col-xs-7">
+          <h4 id="invoke"><a href="https://on.cypress.io/invoke">.invoke()</a></h4>
+          <p>To invoke a function on a current subject, use the <a href="https://on.cypress.io/invoke"><code>.invoke()</code></a> command.</p>
+          <pre><code class="javascript">cy.get('.connectors-div').should('be.hidden')
+  // call the jquery method 'show' on the 'div.container'
+  .invoke('show')
+  .should('be.visible')</code></pre>
+      </div>
+        <div class="col-xs-5">
+          <div class="well">
+            <div class="connectors-div">
+              This is a div
+            </div>
+          </div>
+        </div>
+
+        <div class="col-xs-12"><hr></div>
+
+        <div class="col-xs-12">
+          <h4 id="spread"><a href="https://on.cypress.io/spread">.spread()</a></h4>
+          <p>To spread an array as individual arguments to a callback function, use the <a href="https://on.cypress.io/spread"><code>.spread()</code></a> command.</p>
+          <pre><code class="javascript">const arr = ['foo', 'bar', 'baz']
+
+cy.wrap(arr).spread(function(foo, bar, baz){
+  expect(foo).to.eq('foo')
+  expect(bar).to.eq('bar')
+  expect(baz).to.eq('baz')
+})</code></pre>
+      </div>
+
+        <div class="col-xs-12"><hr></div>
+
+        <div class="col-xs-7">
+          <h4 id="then"><a href="https://on.cypress.io/then">.then()</a></h4>
+          <p>To invoke a callback function with the current subject, use the <a href="https://on.cypress.io/then"><code>.then()</code></a> command.</p>
+          <pre><code class="javascript">cy.get('.connectors-list>li').then(function($lis){
+  expect($lis).to.have.length(3)
+  expect($lis.eq(0)).to.contain('Walk the dog')
+  expect($lis.eq(1)).to.contain('Feed the cat')
+  expect($lis.eq(2)).to.contain('Write JavaScript')
+})</code></pre>
+
+          <p>If the callback function returns a value, it is yielded to the next callback, just like in a Promise callback.</p>
+          <pre><code class="javascript">cy.wrap(1)
+  .then((num) => {
+    expect(num).to.equal(1)
+
+    return 2
+  })
+  .then((num) => {
+    expect(num).to.equal(2)
+  })</code></pre>
+
+          <p>But unlike a Promise, if <code>undefined</code> is returned, then the original value passed into the <code>.then(cb)</code> is yielded to the next callback.</p>
+          <pre><code class="javascript">cy.wrap(1)
+  .then((num) => {
+    expect(num).to.equal(1)
+    // note that nothing is returned from this callback
+  })
+  .then((num) => {
+    // this callback receives the original unchanged value 1
+    expect(num).to.equal(1)
+  })</code></pre>
+          <p>If there are Cypress commands in the <code>.then(cb)</code> callback, then the value yielded by the last command will be passed to the next callback.</p>
+          <pre><code class="javascript">cy.wrap(1)
+  .then((num) => {
+    expect(num).to.equal(1)
+    // note how we run a Cypress command
+    // the result yielded by this Cypress command
+    // will be passed to the second ".then"
+    cy.wrap(2)
+  })
+  .then((num) => {
+    // this callback receives the value yielded by "cy.wrap(2)"
+    expect(num).to.equal(2)
+  })</code></pre>
+        </div>
+        <div class="col-xs-5">
+          <div class="well">
+            <ul class="connectors-list">
+              <li>Walk the dog</li>
+              <li>Feed the cat</li>
+              <li>Write JavaScript</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="col-xs-12"><hr></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/assets/js/vendor/jquery-1.12.0.min.cbb11b58.js"></script>
+  <script src="/assets/js/vendor/bootstrap.min.c5b5b2fa.js"></script>
+  <script src="/assets/js/vendor/highlight.pack.4cbe7783.js"></script>
+  <script src="/assets/js/scripts.4a26d59a.js"></script>
+</body>
+</html>

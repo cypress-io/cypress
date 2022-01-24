@@ -1,4 +1,0 @@
-{
-  foo: "foo"
-  bar: "bar
-}

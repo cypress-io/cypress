@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Kitchen Sink | Cypress Example">
+  <meta name="author" content="Cypress.io">
+  <meta name="copyright" content="Cypress.io, Inc">
+
+  <title>Cypress.io: Kitchen Sink</title>
+
+  <link rel="icon" href="assets/img/favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="assets/css/vendor/bootstrap.min.3cdc65ed.css">
+  <link rel="stylesheet" href="assets/css/vendor/fira.css">
+  <link rel="stylesheet" href="assets/css/styles.2fbabb3d.css">
+</head>
+
+<body>
+  <nav class="navbar navbar-inverse">
+    <div class="container">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="/">cypress.io</a>
+      </div>
+      <div id="navbar" class="navbar-collapse collapse">
+        <ul class="nav navbar-nav">
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button">Commands <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="/commands/querying">Querying</a></li>
+              <li><a href="/commands/traversal">Traversal</a></li>
+              <li><a href="/commands/actions">Actions</a></li>
+              <li><a href="/commands/window">Window</a></li>
+              <li><a href="/commands/viewport">Viewport</a></li>
+              <li><a href="/commands/location">Location</a></li>
+              <li><a href="/commands/navigation">Navigation</a></li>
+              <li><a href="/commands/assertions">Assertions</a></li>
+              <li><a href="/commands/misc">Misc</a></li>
+              <li><a href="/commands/connectors">Connectors</a></li>
+              <li><a href="/commands/aliasing">Aliasing</a></li>
+              <li><a href="/commands/waiting">Waiting</a></li>
+              <li><a href="/commands/network-requests">Network Requests</a></li>
+              <li><a href="/commands/files">Files</a></li>
+              <li><a href="/commands/local-storage">Local Storage</a></li>
+              <li><a href="/commands/cookies">Cookies</a></li>
+              <li><a href="/commands/spies-stubs-clocks">Spies, Stubs &amp; Clocks</a></li>
+            </ul>
+          </li>
+          <li class="active"><a href="/utilities">Utilities</a></li>
+          <li><a href="/cypress-api">Cypress API</a></li>
+        </ul>
+        <ul class="nav navbar-nav pull-right">
+          <li><a href="https://github.com/cypress-io/cypress-example-kitchensink">GitHub</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="banner">
+    <div class="container">
+      <h1>Utilities</h1>
+      <p>Examples of the use of methods from other commonly used libraries in Cypress, for a full reference of commands, go to <a href="https://on.cypress.io/_" target="_blank">docs.cypress.io</a>
+      </p>
+    </div>
+  </div>
+  <div class="container content-container">
+    <div>
+      <div class="row">
+        <div class="col-xs-12">
+          <h4 id="_"><a href="https://on.cypress.io/_">Cypress._</a></h4>
+          <p>To call a lodash method, use the <a href="https://on.cypress.io/_"><code>Cypress._.method()</code></a> command.</p>
+          <pre><code class="javascript">cy.request('https://jsonplaceholder.cypress.io/users')
+.then((response) => {
+  let ids = Cypress._.chain(response.body).map('id').take(3).value()
+
+  expect(ids).to.deep.eq([1, 2, 3])
+})</code></pre>
+        </div>
+
+        <div class="col-xs-12"><hr></div>
+
+        <div class="col-xs-7">
+          <h4 id="$"><a href="https://on.cypress.io/$">Cypress.$</a></h4>
+          <p>To call a jQuery method, use the <a href="https://on.cypress.io/$"><code>Cypress.$</code></a> command.</p>
+          <pre><code class="javascript">let $li = Cypress.$('.utility-jquery li:first')
+
+cy.wrap($li)
+  .should('not.have.class', 'active')
+  .click()
+  .should('have.class', 'active')</code></pre>
+        </div>
+        <div class="col-xs-5">
+          <div class="well">
+            <ul class="list-group utility-jquery">
+              <li class="list-group-item">
+                <span class="badge">5</span>
+                Watches
+              </li>
+              <li class="list-group-item">
+                <span class="badge">14</span>
+                Sweaters
+              </li>
+              <li class="list-group-item">
+                <span class="badge">22</span>
+                Scarves
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="col-xs-7">
+          <h4 id="Blob"><a href="https://on.cypress.io/blob">Cypress.Blob</a></h4>
+          <p>To work with blobs, convert strings, and other utility functions, use the <a href="https://on.cypress.io/blob"><code>Cypress.Blob</code></a> library.</p>
+          <pre><code class="javascript">cy.get('.utility-blob').then(($div) =>
+// https://github.com/nolanlawson/blob-util#imgSrcToDataURL
+// get the dataUrl string for the javascript-logo
+  Cypress.Blob.imgSrcToDataURL('https://example.cypress.io/assets/img/javascript-logo.png', undefined, 'anonymous')
+  .then((dataUrl) => {
+    // create an <img> element and set its src to the dataUrl
+    let img = Cypress.$('<img />', { src: dataUrl })
+    // need to explicitly return cy here since we are initially returning
+    // the Cypress.Blob.imgSrcToDataURL promise to our test
+    // append the image
+    $div.append(img)
+
+    cy.get('.utility-blob img').click()
+      .should('have.attr', 'src', dataUrl)
+  }))</code></pre>
+        </div>
+        <div class="col-xs-5">
+          <div class="well">
+            <div class="utility-blob"></div>
+          </div>
+        </div>
+        <div class="col-xs-12"><hr></div>
+
+        <div class="col-xs-12">
+          <h4 id="minimatch"><a href="https://on.cypress.io/minimatch">Cypress.minimatch</a></h4>
+          <p>To test out glob patterns against strings, use the <a href="https://on.cypress.io/minimatch"><code>Cypress.minimatch</code></a> library.</p>
+          <pre><code class="javascript">Cypress.minimatch('/users/1/comments', '/users/*/comments', {
+  matchBase: true,
+})</code></pre>
+        </div>
+
+        <div class="col-xs-12"><hr></div>
+
+        <div class="col-xs-12">
+          <h4 id="Promise"><a href="https://on.cypress.io/promise">Cypress.Promise</a></h4>
+          <p>To instantiate a new bluebird promise, use <a href="https://on.cypress.io/promise"><code> Cypress.Promise</code></a>.</p>
+          <pre><code class="javascript">let waited = false
+
+function waitOneSecond () {
+  // return a promise that resolves after 1 second
+  return new Cypress.Promise((resolve, reject) => {
+    setTimeout(() => {
+      // set waited to true
+      waited = true
+
+      // resolve with 'foo' string
+      resolve('foo')
+    }, 1000)
+  })
+}
+
+cy.then(() =>
+  // return a promise to cy.then() that
+  // is awaited until it resolves
+  waitOneSecond().then((str) => {
+    expect(str).to.eq('foo')
+    expect(waited).to.be.true
+  }))</code></pre>
+        </div>
+
+        <div class="col-xs-12"><hr></div>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="assets/js/vendor/jquery-1.12.0.min.cbb11b58.js"></script>
+  <script src="assets/js/vendor/bootstrap.min.c5b5b2fa.js"></script>
+  <script src="assets/js/vendor/highlight.pack.4cbe7783.js"></script>
+  <script src="assets/js/scripts.4a26d59a.js"></script>
+</body>
+</html>
