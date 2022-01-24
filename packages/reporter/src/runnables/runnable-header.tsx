@@ -7,7 +7,7 @@ import OpenFileInIDE from '../lib/open-file-in-ide'
 import FileNameOpener from '../lib/file-name-opener'
 import TextIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/document-text_x16.svg'
 
-const renderRunnableHeader = (children: ReactElement) => <div className="runnable-header">{children}</div>
+const renderRunnableHeader = (children: ReactElement) => <div className="runnable-header" data-cy="runnable-header">{children}</div>
 
 interface RunnableHeaderProps {
   spec: Cypress.Cypress['spec']
@@ -67,7 +67,7 @@ class RunnableHeader extends Component<RunnableHeaderProps> {
       <>
         {openInIde}
         {Boolean(statsStore.duration) && (
-          <span className='duration'>{formatDuration(statsStore.duration)}</span>
+          <span className='duration' data-cy="spec-duration">{formatDuration(statsStore.duration)}</span>
         )}
       </>,
     )
