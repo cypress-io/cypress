@@ -84,7 +84,7 @@
 <script lang="ts" setup>
 import { useI18n } from '@cy/i18n'
 import Button from '@packages/frontend-shared/src/components/Button.vue'
-import { computed, watch } from 'vue'
+import { computed } from 'vue'
 import _clone from 'lodash/clone'
 import openInNew from '~icons/mdi/open-in-new'
 import { useMutation, gql } from '@urql/vue'
