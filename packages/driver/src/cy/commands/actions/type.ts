@@ -1,4 +1,3 @@
-// @ts-nocheck
 import _ from 'lodash'
 import Promise from 'bluebird'
 
@@ -15,7 +14,8 @@ const debug = debugFn('cypress:driver:command:type')
 export default function (Commands, Cypress, cy, state, config) {
   const { keyboard } = cy.devices
 
-  function type (subject, chars, options = {}) {
+  // TODO: change the type of `any` to `Partial<Cypress.TypeOptions>`
+  function type (subject, chars, options: any = {}) {
     const userOptions = options
     let updateTable
 
@@ -510,7 +510,8 @@ export default function (Commands, Cypress, cy, state, config) {
     })
   }
 
-  function clear (subject, options = {}) {
+  // TODO: change the type of `any` to `Partial<ClearOptions>`
+  function clear (subject, options: any = {}) {
     const userOptions = options
 
     options = _.defaults({}, userOptions, {
