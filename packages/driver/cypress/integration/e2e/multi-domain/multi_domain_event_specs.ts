@@ -2,24 +2,30 @@
 describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDomain: true }, () => {
   it('window:before:load event', () => {
     cy.visit('/fixtures/multi-domain.html')
-    cy.on('window:before:load', (win: {testPrimaryDomainGlobal: boolean}) => {
-      win.testPrimaryDomainGlobal = true
+    cy.on('window:before:load', (win: {testPrimaryDomainBeforeLoad: boolean}) => {
+      win.testPrimaryDomainBeforeLoad = true
     })
 
-    cy.window().its('testPrimaryDomainGlobal').should('be.true')
+    cy.window().its('testPrimaryDomainBeforeLoad').should('be.true')
     cy.get('a[data-cy="multi-domain-secondary-link"]').click()
     cy.switchToDomain('foobar.com', () => {
-      cy.on('window:before:load', (win: {testSecondaryDomainGlobal: boolean}) => {
-        win.testSecondaryDomainGlobal = true
+      cy.on('window:before:load', (win: {testSecondaryWindowBeforeLoad: boolean}) => {
+        win.testSecondaryWindowBeforeLoad = true
       })
 
-      cy.window().its('testSecondaryDomainGlobal').should('be.true')
-      cy.window().its('testPrimaryDomainGlobal').should('be.undefined')
+      cy.window().its('testSecondaryWindowBeforeLoad').should('be.true')
+      cy.window().its('testPrimaryDomainBeforeLoad').should('be.undefined')
       cy
       .get('[data-cy="window-before-load"]')
       .invoke('text')
       .should('equal', 'Window Before Load Called')
     })
+
+    // TODO enable once we can re-visit the primary domain.
+    // cy.visit('/fixtures/multi-domain.html')
+
+    // cy.window().its('testPrimaryDomainBeforeLoad').should('be.true')
+    // cy.window().its('testSecondaryWindowBeforeLoad').should('be.undefined')
   })
 
   describe('post window load events', () => {
