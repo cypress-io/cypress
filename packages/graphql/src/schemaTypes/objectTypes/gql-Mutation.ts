@@ -316,7 +316,6 @@ export const mutation = mutationType({
       description: 'Save the projects preferences to cache',
       args: {
         testingType: nonNull(TestingTypeEnum),
-        browserPath: nonNull(stringArg()),
       },
       async resolve (_, args, ctx) {
         await ctx.actions.project.setProjectPreferences(args)
