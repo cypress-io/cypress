@@ -314,7 +314,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     canUpdateDuringTestTime: true,
   }, {
     name: 'supportFile',
-    defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? 'cypress/support/component.js' : 'cypress/support/e2e.js',
+    defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? 'cypress/support/component.{js,jsx,ts,tsx}' : 'cypress/support/e2e.{js,jsx,ts,tsx}',
     validation: validate.isStringOrFalse,
     isFolder: true,
     canUpdateDuringTestTime: false,
