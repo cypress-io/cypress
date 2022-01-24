@@ -1,23 +1,23 @@
 <template>
   <div class="p-24px spec-container">
     <CreateSpecModal
-      v-if="props.gql.currentProject?.currentTestingType && showModal"
-      :show="showModal"
+      v-if="props.gql.currentProject"
+      :show="showCreateSpecModal"
       :gql="props.gql"
-      @close="showModal = false"
+      @close="showCreateSpecModal = false"
     />
     <SpecsListHeader
       v-model="search"
       class="pb-32px"
       :result-count="specs.length"
-      @newSpec="showModal = true"
-      @spec-pattern="bindingsOpen = true"
+      @newSpec="showCreateSpecModal = true"
+      @spec-pattern="showSpecPatternModal = true"
     />
     <SpecPatternModal
-      v-if="props.gql.currentProject && bindingsOpen"
-      :show="bindingsOpen"
+      v-if="props.gql.currentProject"
+      :show="showSpecPatternModal"
       :gql="props.gql.currentProject"
-      @close="bindingsOpen = false"
+      @close="showSpecPatternModal = false"
     />
 
     <template
@@ -154,8 +154,8 @@ const props = defineProps<{
   gql: Specs_SpecsListFragment
 }>()
 
-const showModal = ref(false)
-const bindingsOpen = ref(false)
+const showCreateSpecModal = ref(false)
+const showSpecPatternModal = ref(false)
 const search = ref('')
 
 function handleClear () {
