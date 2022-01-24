@@ -1,7 +1,8 @@
 import type { DataContext } from '..'
 import type { AuthenticatedUserShape } from '../data'
 
-interface AuthMessage {type: string, browserOpened: boolean, name: string, message: string}
+export interface AuthMessage {type: string, browserOpened: boolean, name: string, message: string}
+
 export interface AuthApiShape {
   getUser(): Promise<Partial<AuthenticatedUserShape>>
   logIn(onMessage: (message: AuthMessage) => void): Promise<AuthenticatedUserShape>

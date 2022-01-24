@@ -13,19 +13,19 @@ export const TreeChild = <
   TLeaf extends LeafTreeBase,
   TParent extends ParentTreeBase<TLeaf>
 >({
-    data,
-    isOpen,
-    style,
-    height,
-    indentSize,
-    showRoot,
-    shouldMeasure,
-    onNodePress,
-    setOpen,
-    resize,
-    onRenderLeaf,
-    onRenderParent,
-  }: InternalChildProps<TLeaf, TParent>) => {
+  data,
+  isOpen,
+  style,
+  height,
+  indentSize,
+  showRoot,
+  shouldMeasure,
+  onNodePress,
+  setOpen,
+  resize,
+  onRenderLeaf,
+  onRenderParent,
+}: InternalChildProps<TLeaf, TParent>) => {
   const globalFocusId = useFocusState()
   const id = data.node.id
 
@@ -67,26 +67,26 @@ const OnRenderChild = <
   TLeaf extends LeafTreeBase,
   TParent extends ParentTreeBase<TLeaf>
 >({
-    data: { node, nestingLevel },
-    isOpen,
-    setOpen,
-    remeasure,
-    onRenderLeaf,
-    onRenderParent,
-  }: InternalOnRenderChildProps<TLeaf, TParent>) =>
-    isParent(node)
-      ? onRenderParent({
-        parent: node,
-        depth: nestingLevel,
-        isOpen,
-        setOpen,
-        remeasure,
-      })
-      : onRenderLeaf({
-        leaf: node,
-        depth: nestingLevel,
-        remeasure,
-      })
+  data: { node, nestingLevel },
+  isOpen,
+  setOpen,
+  remeasure,
+  onRenderLeaf,
+  onRenderParent,
+}: InternalOnRenderChildProps<TLeaf, TParent>) =>
+  isParent(node)
+    ? onRenderParent({
+      parent: node,
+      depth: nestingLevel,
+      isOpen,
+      setOpen,
+      remeasure,
+    })
+    : onRenderLeaf({
+      leaf: node,
+      depth: nestingLevel,
+      remeasure,
+    })
 
 // Memo `onRender` callback results to double the speed of height calculation
 const MemoedOnRenderChild = memo(OnRenderChild) as typeof OnRenderChild

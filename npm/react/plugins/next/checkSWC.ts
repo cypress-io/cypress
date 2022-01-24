@@ -10,9 +10,11 @@ export function checkSWC (
     )
   })
 
-  if (hasSWCLoader && cypressConfig.nodeVersion !== 'system') {
-    throw new Error(`Cypress requires "nodeVersion" to be set to "system" in order to run Next.js with SWC optimizations.
-Please add "nodeVersion": "system" to your Cypress configuration and try again.`)
+  // "resolvedNodePath" is only set when using the user's Node.js, which is required to compile Next.js with SWC optimizations
+  // If it is not set, they have either explicitly set "nodeVersion" to "bundled" or are are using Cypress < 9.0.0 where it was set to "bundled" by default
+  if (hasSWCLoader && !cypressConfig.resolvedNodePath) {
+    throw new Error(`Cannot compile Next.js application with configured Node.js.
+If you are on Cypress version >= \`9.0.0\`, remove the "nodeVersion" property from your Cypress config. Otherwise, please add "nodeVersion": "system" to your Cypress config and try again.`)
   }
 
   return false

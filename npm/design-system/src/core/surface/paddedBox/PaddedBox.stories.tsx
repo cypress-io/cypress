@@ -22,18 +22,18 @@ export default createStorybookConfig({
 })
 
 export const PaddedBox = createStory<{
-    padding: Spacing
-  }>(({ padding }) => (
-    <div>
-      <StoryHighlightWrapper>
-        <PaddedComponent padding={padding}>
-          {lorem}
-        </PaddedComponent>
-      </StoryHighlightWrapper>
-    </div>
-  ), {
-    padding: 'm',
-  })
+  padding: Spacing
+}>(({ padding }) => (
+  <div>
+    <StoryHighlightWrapper>
+      <PaddedComponent padding={padding}>
+        {lorem}
+      </PaddedComponent>
+    </StoryHighlightWrapper>
+  </div>
+), {
+  padding: 'm',
+})
 
 // Required to prevent Storybook from separating into two words and creating unnecessary nesting
 PaddedBox.storyName = 'PaddedBox'
