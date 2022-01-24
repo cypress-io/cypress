@@ -146,7 +146,7 @@ describe('App: Settings without cloud', () => {
     cy.findByText('Settings').click()
     cy.findByText('Project Settings').click()
 
-    cy.get('[data-testid=config-code]').within(() => {
+    cy.get('[data-cy=config-code]').within(() => {
       cy.contains('browsers: chrome, firefox')
     })
   })
