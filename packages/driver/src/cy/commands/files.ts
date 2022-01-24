@@ -80,7 +80,7 @@ export default (Commands, Cypress, cy, state) => {
           }
 
           // Add the filename as a symbol, in case we need it later (such as when storing an alias)
-          state('current').attributes.fileName = basename(filePath)
+          state('current').set('fileName', basename(filePath))
 
           consoleProps['File Path'] = filePath
           consoleProps['Contents'] = contents

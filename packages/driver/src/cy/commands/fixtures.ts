@@ -86,7 +86,7 @@ export default (Commands, Cypress, cy, state, config) => {
         cache[fixture] = response
 
         // Add the filename as a symbol, in case we need it later (such as when storing an alias)
-        state('current').attributes.fileName = basename(fixture)
+        state('current').set('fileName', basename(fixture))
 
         // return the cloned response
         return clone(response)
