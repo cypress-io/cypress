@@ -17,6 +17,7 @@
 </template>
 
 <script lang="ts" setup>
+import { ref } from 'vue'
 import { useMutation, gql, useQuery } from '@urql/vue'
 import OpenBrowserList from './OpenBrowserList.vue'
 import WarningList from '../warning/WarningList.vue'
@@ -73,13 +74,18 @@ mutation OpenBrowser_LaunchProject ($testingType: TestingTypeEnum!)  {
 const launchOpenProject = useMutation(OpenBrowser_LaunchProjectDocument)
 const clearCurrentTestingType = useMutation(OpenBrowser_ClearTestingTypeDocument)
 
-const launch = () => {
+const launching = ref(false)
+
+const launch = async () => {
   const testingType = query.data.value?.currentTestingType
 
-  if (testingType) {
-    launchOpenProject.executeMutation({
+  if (testingType && !launching.value) {
+    launching.value = true
+    await launchOpenProject.executeMutation({
       testingType,
     })
+
+    launching.value = false
   }
 }
 
