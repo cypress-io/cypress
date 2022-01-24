@@ -92,7 +92,7 @@ describe('Choose a Browser Page', () => {
 
       cy.get('h1').should('contain', 'Choose a Browser')
 
-      cy.contains('button', 'Launch Chrome').as('launchButton')
+      cy.contains('button', 'Start E2E testing in Chrome').as('launchButton')
 
       // Stub out response to prevent browser launch but not break internals
       cy.intercept('mutation-OpenBrowser_LaunchProject', {
@@ -109,9 +109,11 @@ describe('Choose a Browser Page', () => {
             },
           },
         },
+        delay: 500,
       }).as('launchProject')
 
       cy.get('@launchButton').click()
+      cy.contains('button', 'Opening E2E Testing in Chrome')
 
       cy.wait('@launchProject').then(({ request }) => {
         expect(request?.body.variables.testingType).to.eq('e2e')
@@ -128,20 +130,36 @@ describe('Choose a Browser Page', () => {
       cy.findByRole('radio', { name: 'Chrome v1', checked: true }).as('chromeItem')
       cy.findByRole('radio', { name: 'Firefox v5', checked: false }).as('firefoxItem')
 
-      cy.contains('button', 'Launch Chrome').should('be.visible')
+      cy.contains('button', 'Start E2E testing in Chrome').should('be.visible')
 
       cy.intercept('mutation-OpenBrowserList_SetBrowser').as('setBrowser')
 
-      cy.get('@firefoxItem').then(($input) => {
-        cy.get(`label[for=${$input.attr('id')}]`).click().then(() => {
-          cy.wait('@setBrowser').its('request.body.variables.id').should('eq', $input.attr('id'))
-        })
+      cy.get('@firefoxItem').click().find('label').then(($label) => {
+        cy.wait('@setBrowser').its('request.body.variables.id').should('eq', $label.attr('for'))
       })
 
       cy.findByRole('radio', { name: 'Chrome v1', checked: false })
       cy.findByRole('radio', { name: 'Firefox v5', checked: true })
 
-      cy.contains('button', 'Launch Firefox').should('be.visible')
+      cy.contains('button', 'Start E2E testing in Firefox').should('be.visible')
+    })
+
+    it('performs mutation to close browser', () => {
+      cy.intercept('query-OpenBrowser', (req) => {
+        req.on('before:response', (res) => {
+          res.body.data.currentProject.isBrowserOpen = true
+        })
+      })
+
+      cy.openProject('launchpad', ['--e2e'])
+
+      cy.visitLaunchpad()
+
+      cy.contains('button', 'Running Chrome')
+
+      cy.intercept('mutation-OpenBrowser_CloseBrowser').as('closeBrowser')
+      cy.contains('button', 'Close').click()
+      cy.wait('@closeBrowser')
     })
   })
 

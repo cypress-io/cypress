@@ -7,14 +7,14 @@
       :title="t('setupWizard.chooseBrowser.title')"
       :description="headingDescription"
     />
-    {{ query.data.value.currentProject.isBrowserOpen }}
     <OpenBrowserList
       variant=""
       :gql="query.data.value.currentProject"
       :is-browser-open="isBrowserOpen"
-      :browser-is-opening="isBrowserOpening"
+      :is-browser-opening="isBrowserOpening"
       @navigated-back="backFn"
       @launch="launch"
+      @close-browser="closeBrowserFn"
     />
   </template>
 </template>
@@ -23,7 +23,7 @@
 import { useMutation, gql, useQuery } from '@urql/vue'
 import OpenBrowserList from './OpenBrowserList.vue'
 import WarningList from '../warning/WarningList.vue'
-import { OpenBrowserDocument, OpenBrowser_ClearTestingTypeDocument, OpenBrowser_LaunchProjectDocument } from '../generated/graphql'
+import { OpenBrowserDocument, OpenBrowser_CloseBrowserDocument, OpenBrowser_ClearTestingTypeDocument, OpenBrowser_LaunchProjectDocument } from '../generated/graphql'
 import LaunchpadHeader from './LaunchpadHeader.vue'
 import { useI18n } from '@cy/i18n'
 import { computed } from 'vue'
@@ -75,8 +75,15 @@ mutation OpenBrowser_LaunchProject ($testingType: TestingTypeEnum!)  {
 }
 `
 
+gql`
+mutation OpenBrowser_CloseBrowser {
+  closeBrowser
+}
+`
+
 const launchOpenProject = useMutation(OpenBrowser_LaunchProjectDocument)
 const clearCurrentTestingType = useMutation(OpenBrowser_ClearTestingTypeDocument)
+const closeBrowser = useMutation(OpenBrowser_CloseBrowserDocument)
 
 const launch = () => {
   const testingType = query.data.value?.currentTestingType
@@ -90,6 +97,10 @@ const launch = () => {
 
 const backFn = () => {
   clearCurrentTestingType.executeMutation({})
+}
+
+const closeBrowserFn = () => {
+  closeBrowser.executeMutation({})
 }
 
 const isBrowserOpen = computed(() => !!query.data.value?.currentProject?.isBrowserOpen)

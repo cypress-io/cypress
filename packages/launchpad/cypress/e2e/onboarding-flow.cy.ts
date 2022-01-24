@@ -29,6 +29,7 @@ describe('Launchpad: Onboarding Flow', () => {
     })
 
     cy.findByText('Choose a Browser', { timeout: 10000 })
+    cy.findByText('Choose your preferred browser for component testing.')
   })
 
   it('can setup component testing with TS', () => {
@@ -63,6 +64,7 @@ describe('Launchpad: Onboarding Flow', () => {
     cy.findByText('We added the following files to your project.')
     cy.findByText('Continue').click()
     cy.findByText('Choose a Browser')
+    cy.findByText('Choose your preferred browser for E2E testing.')
   })
 
   it('can setup e2e testing after component has been setup', () => {
@@ -87,7 +89,7 @@ describe('Launchpad: Onboarding Flow', () => {
     cy.findByText('Continue').click()
     cy.findByText('Choose a Browser', { timeout: 10000 })
 
-    cy.findByText('Back').click()
+    cy.findByText('Switch testing type').click()
 
     cy.visitLaunchpad()
     cy.get('[data-cy-testingType=e2e]').click()
