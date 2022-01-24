@@ -4,7 +4,7 @@
     data-cy="cypress-update-popover"
   >
     <template #heading>
-      <i-cy-arrow-outline-down_x16
+      <i-cy-cypress-logo_x16
         class="h-16px text-indigo-500 w-16px icon-dark-indigo-500 icon-light-indigo-50"
       />
       <span
@@ -93,7 +93,7 @@
     :use-default-hocus="false"
     data-cy="top-nav-cypress-version-current-link"
   >
-    <i-cy-box_x16
+    <i-cy-cypress-logo_x16
       class="h-16px w-16px group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50 icon-dark-gray-500 icon-light-gray-100"
     />
     <span>
