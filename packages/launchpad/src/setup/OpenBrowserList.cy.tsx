@@ -32,27 +32,6 @@ describe('<OpenBrowserList />', () => {
     cy.percySnapshot()
   })
 
-  it('switches browser and updates launch', () => {
-    cy.mountFragment(OpenBrowserListFragmentDoc, {
-      onResult: (res) => {
-        res.currentTestingType = 'component'
-        const firefoxNightly = res.browsers?.find(((browser) => browser.displayName === 'Firefox Nightly'))!
-
-        res.currentBrowser = firefoxNightly
-      },
-      render: (gqlVal) => <div class="border-current border-1 resize overflow-auto"><OpenBrowserList gql={gqlVal} isBrowserOpen={false} isBrowserOpening={false}/></div>,
-    })
-
-    cy.get('[data-cy-browser="firefox"][aria-checked="true"]').contains('Firefox Nightly')
-    cy.get('[data-cy="launch-button"]').contains(defaultMessages.openBrowser.startComponent.replace('{browser}', 'Firefox Nightly'))
-    cy.get('[data-cy="launch-button"]').get('[data-cy="component-testing-icon"]')
-
-    cy.percySnapshot()
-
-    cy.get('[data-cy-browser="electron"]').click().should('have.attr', 'aria-checked', 'true')
-    cy.get('[data-cy="launch-button"]').contains(defaultMessages.openBrowser.startComponent.replace('{browser}', 'Electron'))
-  })
-
   it('emits navigates back', () => {
     cy.mountFragment(OpenBrowserListFragmentDoc, {
       render: (gqlVal) => (

@@ -141,7 +141,6 @@ module.exports = {
         // enable the browser to configure the interface
         instance.once('exit', () => {
           ctx.project.setIsBrowserOpen(false)
-          ctx.coreData.app.isBrowserOpen = false
           ctx.emitter.toLaunchpad()
           options.onBrowserClose()
           instance = null
