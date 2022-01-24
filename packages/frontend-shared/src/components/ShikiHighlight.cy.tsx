@@ -22,6 +22,9 @@ describe('<ShikiHighlight/>', { viewportWidth: 800, viewportHeight: 500 }, () =>
     cy.mount(() => (<div class="p-12">
       <ShikiHighlight code={devServerCode} lang="js" lineNumbers />
     </div>))
+
+    cy.contains(devServerCode).should('be.visible')
+    cy.percySnapshot()
   })
 
   it('trims whitespace to show the correct number of lines', { viewportWidth: 500, viewportHeight: 500 }, () => {
@@ -43,14 +46,18 @@ describe('<ShikiHighlight/>', { viewportWidth: 800, viewportHeight: 500 }, () =>
     </div>))
     .get('.line')
     .should('have.length', numLines)
+
+    cy.percySnapshot()
   })
 
-  it('wraps long code without line numbers', { viewportWidth: 900, viewportHeight: 500 }, () => {
-    cy.mount(() => <div class="p-12"><ShikiHighlight wrap code={code} lang="ts" /></div>)
+  // TODO: (UNIFY-921) unskip when `wrap` prop is needed and working (currently used nowhere)
+  it.skip('wraps long code without line numbers', { viewportWidth: 900, viewportHeight: 500 }, () => {
+    cy.mount(() => <div class="w-full p-12"><ShikiHighlight wrap code={code} lang="ts" /></div>)
     cy.get('.shiki').should('be.visible')
   })
 
-  it('wraps long code with line numbers', () => {
+  // TODO: (UNIFY-921) unskip when `wrap` prop is needed and working (currently used nowhere)
+  it.skip('wraps long code with line numbers', () => {
     cy.mount(() => <div class="p-12"><ShikiHighlight lineNumbers wrap code={code} lang="ts" /></div>)
     cy.get('.shiki').should('be.visible')
   })
@@ -58,15 +65,18 @@ describe('<ShikiHighlight/>', { viewportWidth: 800, viewportHeight: 500 }, () =>
   it('render the code without arguments', () => {
     cy.mount(() => <div class="p-12"><ShikiHighlight code={code} lang="ts" /></div>)
     cy.get('.shiki').should('be.visible')
+    cy.percySnapshot()
   })
 
   it('display inline and remove some of the padding when "inline"', { viewportWidth: 300, viewportHeight: 100 }, () => {
     cy.mount(() => <ShikiHighlight code={'project: xv123456'} lang="yaml" inline />)
     cy.get('.shiki').should('be.visible')
+    cy.percySnapshot()
   })
 
   it('show line numbers when the prop is passed', () => {
     cy.mount(() => <div class="p-12"><ShikiHighlight code={code} lang="ts" lineNumbers /></div>)
     cy.get('.shiki').should('be.visible')
+    cy.percySnapshot()
   })
 })

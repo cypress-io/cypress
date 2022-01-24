@@ -13,6 +13,8 @@ describe('<ExternalEditorSettings />', () => {
     })
 
     cy.findByText(editorText.noEditorSelectedPlaceholder).should('be.visible')
+
+    cy.percySnapshot()
   })
 
   it('renders the title and description', () => {
@@ -40,6 +42,8 @@ describe('<ExternalEditorSettings />', () => {
     .get(optionsSelector).should('be.visible')
     .get(optionsSelector).then(($options) => {
       cy.wrap($options.first()).click()
+
+      cy.percySnapshot()
     })
   })
 
@@ -56,5 +60,7 @@ describe('<ExternalEditorSettings />', () => {
 
     cy.get('@custom').should('be.focused')
     cy.get('[data-cy="use-well-known-editor"]').should('not.be.focused')
+
+    cy.percySnapshot()
   })
 })
