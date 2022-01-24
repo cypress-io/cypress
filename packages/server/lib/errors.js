@@ -1183,6 +1183,14 @@ const logException = async function (err) {
   }
 }
 
+const globalExceptionHandler = async (err) => {
+  await module.exports.logException(err)
+  process.exit(1)
+}
+
+process.on('unhandledRejection', globalExceptionHandler)
+process.on('uncaughtException', globalExceptionHandler)
+
 module.exports = {
   get,
 
