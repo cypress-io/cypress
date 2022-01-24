@@ -1,32 +1,64 @@
 const path = require('path')
-const chalk = require('chalk')
 const mochaReporters = require('mocha-7.0.1/lib/reporters')
-const StatsD = require('hot-shots')
+const Libhoney = require('libhoney')
+const pkg = require('@packages/root')
+
+const ciProvider = require('@packages/server/lib/util/ci_provider')
+const { commitInfo } = require('@cypress/commit-info')
 
 class StatsdReporter extends mochaReporters.Spec {
   constructor (runner) {
     super(runner)
+    if (process.env.CIRCLECI) {
+      console.log('Reporting results to honeycomb')
 
-    if (process.env.CYPRESS_STATSD_TIMINGS) {
-      const statsD = new StatsD({})
-      let testTime
-
-      runner.on('start', () => {
-        console.log(chalk.bold.green('  Reporting performance to statsd'))
+      this.hny = new Libhoney({
+        writeKey: '531a9eae0fcdde85b2ebccbe2b79e83c',
+        dataset: 'systemtest-performance',
       })
 
-      runner.on('test', () => {
-        testTime = Date.now()
+      runner.on('test', (test) => {
+        test.honeycombEvent = this.hny.newEvent()
+        test.honeycombEvent.timestamp = Date.now()
+
+        commitInfo().then((commitInformation) => {
+          const ciInformation = ciProvider.commitParams() || {}
+
+          test.honeycombEvent.add({
+            specFile: path.basename(test.file),
+            test: test.title,
+            branch: commitInformation.branch || ciInformation.branch,
+            commitSha: commitInformation.sha || ciInformation.sha,
+            buildUrl: process.env.CIRCLE_BUILD_URL,
+            platform: process.platform,
+            arch: process.arch,
+            version: pkg.version,
+          })
+        })
       })
 
-      runner.on('test end', (test) => {
-        const specName = path.basename(runner.suite.file).replace(/\W/g, '_')
-        const testTitle = test.title.replace(/\W/g, '_')
-        const statsdPath = `cy_system_tests.${'branch'}.${specName}.${testTitle}`
+      runner.on('test end', (test, done) => {
+        // Skipped tests never get a 'start' event, but they still get 'test end' somehow.
+        if (test.honeycombEvent) {
+          test.honeycombEvent.add({
+            // This is slightly longer than mocha's reported time
+            durationMs: Date.now() - test.honeycombEvent.timestamp,
+            mochaDurationMs: test.duration,
+            state: test.state,
+          })
 
-        statsD.timing(`${statsdPath}`, Date.now() - testTime)
+          test.honeycombEvent.send()
+        }
+      })
+
+      runner.on('end', () => {
+        console.log('ending!')
       })
     }
+  }
+
+  done (failures, callback) {
+    this.hny.flush().then(callback)
   }
 }
 
