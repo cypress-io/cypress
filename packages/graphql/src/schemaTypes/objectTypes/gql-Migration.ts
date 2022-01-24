@@ -1,7 +1,6 @@
 import { MIGRATION_STEPS } from '@packages/types'
 import { enumType, objectType } from 'nexus'
 import { TestingTypeEnum } from '..'
-import { regexps } from '@packages/data-context/src/util/migration'
 import Debug from 'debug'
 
 const debug = Debug('cypress:graphql:gql-Migration')
@@ -11,8 +10,8 @@ export const MigrationStepEnum = enumType({
   members: MIGRATION_STEPS,
 })
 
-export const MigrationSpecPart = objectType({
-  name: 'MigrationSpecPart',
+export const MigrationFilePart = objectType({
+  name: 'MigrationFilePart',
   definition (t) {
     t.nonNull.string('text', {
       description: 'part of filename',
@@ -24,24 +23,24 @@ export const MigrationSpecPart = objectType({
   },
 })
 
-export const MigrationSpecs = objectType({
-  name: 'MigrationSpecs',
+export const MigrationFiles = objectType({
+  name: 'MigrationFiles',
   definition (t) {
     t.nonNull.list.nonNull.field('before', {
-      type: MigrationSpec,
+      type: MigrationFile,
     })
 
     t.nonNull.list.nonNull.field('after', {
-      type: MigrationSpec,
+      type: MigrationFile,
     })
   },
 })
 
-export const MigrationSpec = objectType({
-  name: 'MigrationSpec',
+export const MigrationFile = objectType({
+  name: 'MigrationFile',
   definition (t) {
     t.nonNull.list.nonNull.field('parts', {
-      type: MigrationSpecPart,
+      type: MigrationFilePart,
     })
 
     t.nonNull.field('testingType', {
@@ -84,31 +83,9 @@ export const Migration = objectType({
       },
     })
 
-    t.nonNull.field('regexps', {
-      type: MigrationRegexp,
-      description: 'The regexp describing how the user e2e specs changed',
-      resolve: () => {
-        return {
-          beforeE2E: regexps.e2e.beforeRegexp,
-          afterE2E: regexps.e2e.afterRegexp,
-          beforeComponent: regexps.component.beforeRegexp,
-          afterComponent: regexps.component.beforeRegexp,
-        }
-      },
-    })
-
-    t.nonNull.list.nonNull.field('specFilesBefore', {
-      type: MigrationSpec,
-      description: 'All spec files before being converted',
-      resolve: () => {
-        return [
-        ]
-      },
-    })
-
     t.nonNull.field('specFiles', {
       description: 'All spec files after conversion',
-      type: MigrationSpecs,
+      type: MigrationFiles,
       resolve: async (source, args, ctx) => {
         const result = await ctx.migration.getSpecsForMigrationGuide()
 
@@ -125,17 +102,11 @@ export const Migration = objectType({
       },
     })
 
-    t.nonNull.string('supportFileBefore', {
+    t.nonNull.field('supportFiles', {
       description: 'Support files needing automated rename',
-      resolve: () => {
-        return 'cypress/support/index.js'
-      },
-    })
-
-    t.nonNull.string('supportFileAfter', {
-      description: 'Support files after rename',
-      resolve: () => {
-        return 'cypress/support/e2e.js'
+      type: MigrationFiles,
+      resolve: (source, args, ctx) => {
+        return ctx.migration.supportFilesForMigrationGuide()
       },
     })
 

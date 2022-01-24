@@ -32,7 +32,6 @@
     <div class="border rounded border-gray-100 mt-16px">
       <HighlightedFilesList
         :files="props.gql.manualFiles"
-        :highlight-reg-exp="/\.cy\.(js|ts)x?$/gi"
       />
     </div>
   </div>
