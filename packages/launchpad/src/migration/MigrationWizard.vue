@@ -128,7 +128,15 @@ import RenameSpecsManual from './RenameSpecsManual.vue'
 import RenameSupport from './RenameSupport.vue'
 import ConvertConfigFile from './ConvertConfigFile.vue'
 import SetupComponentTesting from './SetupComponentTesting.vue'
-import { MigrationWizardQueryDocument } from '../generated/graphql'
+import {
+  MigrationWizardQueryDocument,
+  MigrationWizard_ConvertFileDocument,
+  MigrationWizard_ReconfigureComponentTestingDocument,
+  MigrationWizard_RenameSpecsDocument,
+  MigrationWizard_RenameSupportDocument,
+  MigrationWizard_SkipManualRenameDocument,
+  MigrationWizard_StartDocument,
+} from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
 
 const { t } = useI18n()
@@ -156,7 +164,7 @@ const migration = computed(() => query.data.value?.migration)
 
 // start migration
 
-const migrateStartMutation = gql`
+gql`
 mutation MigrationWizard_Start {
   migrateStart {
     migration {
@@ -166,7 +174,7 @@ mutation MigrationWizard_Start {
 }
 `
 
-const start = useMutation(migrateStartMutation)
+const start = useMutation(MigrationWizard_StartDocument)
 
 onMounted(() => {
   start.executeMutation({ })
@@ -176,7 +184,7 @@ onMounted(() => {
 
 const skipRename = ref(false)
 
-const renameSpecsMutation = gql`
+gql`
 mutation MigrationWizard_RenameSpecs($skip: Boolean) {
   migrateRenameSpecs(skip: $skip){
     migration {
@@ -186,7 +194,7 @@ mutation MigrationWizard_RenameSpecs($skip: Boolean) {
 }
 `
 
-const renameMutation = useMutation(renameSpecsMutation)
+const renameMutation = useMutation(MigrationWizard_RenameSpecsDocument)
 
 function renameSpecs () {
   renameMutation.executeMutation({ skip: skipRename.value })
@@ -194,7 +202,7 @@ function renameSpecs () {
 
 // manual rename
 
-const skipManualRenameMutation = gql`
+gql`
 mutation MigrationWizard_SkipManualRename {
   migrateSkipManualRename {
     migration {
@@ -204,7 +212,7 @@ mutation MigrationWizard_SkipManualRename {
 }
 `
 
-const skipManualMutation = useMutation(skipManualRenameMutation)
+const skipManualMutation = useMutation(MigrationWizard_SkipManualRenameDocument)
 
 function skipStep2 () {
   skipManualMutation.executeMutation({})
@@ -212,7 +220,7 @@ function skipStep2 () {
 
 // rename support files
 
-const renameSupportFileMutation = gql`
+gql`
 mutation MigrationWizard_RenameSupport {
   migrateRenameSupport {
     migration {
@@ -222,7 +230,7 @@ mutation MigrationWizard_RenameSupport {
 }
 `
 
-const renameSupportMutation = useMutation(renameSupportFileMutation)
+const renameSupportMutation = useMutation(MigrationWizard_RenameSupportDocument)
 
 function launchRenameSupportFile () {
   renameSupportMutation.executeMutation({})
@@ -230,7 +238,7 @@ function launchRenameSupportFile () {
 
 // config file migration
 
-const convertConfigMutation = gql`
+gql`
 mutation MigrationWizard_ConvertFile {
   migrateConfigFile {
     migration {
@@ -240,7 +248,7 @@ mutation MigrationWizard_ConvertFile {
 }
 `
 
-const configMutation = useMutation(convertConfigMutation)
+const configMutation = useMutation(MigrationWizard_ConvertFileDocument)
 
 function convertConfig () {
   configMutation.executeMutation({})
@@ -248,7 +256,7 @@ function convertConfig () {
 
 // launch reconfigure component testing
 
-const launchReconfigureCTMutation = gql`
+gql`
 mutation MigrationWizard_ReconfigureComponentTesting {
   migrateComponentTesting {
     currentTestingType
@@ -261,7 +269,7 @@ mutation MigrationWizard_ReconfigureComponentTesting {
 }
 `
 
-const launchReconfigureMutation = useMutation(launchReconfigureCTMutation)
+const launchReconfigureMutation = useMutation(MigrationWizard_ReconfigureComponentTestingDocument)
 
 function launchReconfigureComponentTesting () {
   launchReconfigureMutation.executeMutation({})
