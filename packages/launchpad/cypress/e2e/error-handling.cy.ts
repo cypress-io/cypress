@@ -49,7 +49,7 @@ describe('Error handling', () => {
     cy.log('Fix error and validate it reloads configuration')
 
     cy.withCtx(async (ctx) => {
-      await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.export = {}')
+      await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {}')
     })
 
     cy.get('body')
