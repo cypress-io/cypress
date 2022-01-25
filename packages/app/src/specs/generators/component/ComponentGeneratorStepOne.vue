@@ -1,57 +1,65 @@
 <template>
-  <div class="flex-grow">
-    <div
-      v-if="mutation.fetching.value"
-      class="inline-flex items-center justify-center w-full mt-48px"
-    >
-      <i-cy-loading_x16 class="h-48px mr-12px animate-spin w-48px" />
-      <p class="text-lg">
-        Loading
-      </p>
-    </div>
-    <FileChooser
-      v-else-if="!result"
-      v-model:extensionPattern="extensionPattern"
-      :files="allFiles"
-      :loading="query.fetching.value"
-      @selectFile="makeSpec"
-    />
-    <GeneratorSuccess
-      v-else
-      :file="result.file"
-    />
-  </div>
-  <div>
-    <div
-      v-if="!result"
-      class="w-full rounded-b h-24px"
-    />
-    <StandardModalFooter
-      v-else
-      class="flex items-center h-72px gap-16px"
-    >
-      <router-link
-        class="outline-none"
-        :to="{ path: '/specs/runner', query: { file: result.file.relative } }
-        "
-      >
-        <Button
-          :prefix-icon="TestResultsIcon"
-          prefix-icon-class="w-16px h-16px icon-dark-white"
-          @click="emits('close')"
+  <div class="flex flex-col flex-grow justify-between">
+    <template v-if="generatedSpecErrorFileName">
+      <GeneratorCustomFile :gql="generateSpecFromSource" />
+    </template>
+
+    <template v-else>
+      <div class="flex-grow">
+        <div
+          v-if="mutation.fetching.value"
+          class="inline-flex items-center justify-center w-full mt-48px"
         >
-          {{ t('createSpec.successPage.runSpecButton') }}
-        </Button>
-      </router-link>
-      <Button
-        :prefix-icon="PlusButtonIcon"
-        prefix-icon-class="w-16px h-16px icon-dark-gray-500"
-        variant="outline"
-        @click="emits('restart')"
-      >
-        {{ t('createSpec.successPage.createAnotherSpecButton') }}
-      </Button>
-    </StandardModalFooter>
+          <i-cy-loading_x16 class="h-48px mr-12px animate-spin w-48px" />
+          <p class="text-lg">
+            Loading
+          </p>
+        </div>
+        <FileChooser
+          v-else-if="!result"
+          v-model:extensionPattern="extensionPattern"
+          :files="allFiles"
+          :loading="query.fetching.value"
+          @selectFile="makeSpec"
+        />
+        <GeneratorSuccess
+          v-else
+          :file="result.file"
+        />
+      </div>
+      <div>
+        <div
+          v-if="!result"
+          class="w-full rounded-b h-24px"
+        />
+        <StandardModalFooter
+          v-else
+          class="flex items-center h-72px gap-16px"
+        >
+          <router-link
+            class="outline-none"
+            :to="{ path: '/specs/runner', query: { file: result.file.relative } }
+            "
+          >
+            <Button
+              :prefix-icon="TestResultsIcon"
+              prefix-icon-class="w-16px h-16px icon-dark-white"
+              @click="emits('close')"
+            >
+              {{ t('createSpec.successPage.runSpecButton') }}
+            </Button>
+          </router-link>
+          <Button
+            :prefix-icon="PlusButtonIcon"
+            prefix-icon-class="w-16px h-16px icon-dark-gray-500"
+            variant="outline"
+            @click="emits('restart')"
+          >
+            {{ t('createSpec.successPage.createAnotherSpecButton') }}
+          </Button>
+        </StandardModalFooter>
+      </div>
+    </template>
   </div>
 </template>
 
@@ -62,11 +70,12 @@ import FileChooser from '../FileChooser.vue'
 import GeneratorSuccess from '../GeneratorSuccess.vue'
 import { computed, ref } from 'vue'
 import { gql, useQuery, useMutation } from '@urql/vue'
-import { ComponentGeneratorStepOneDocument, ComponentGeneratorStepOne_GenerateSpecDocument, GeneratorSuccessFragment } from '../../../generated/graphql'
+import { ComponentGeneratorStepOneDocument, ComponentGeneratorStepOne_GenerateSpecDocument, GeneratorSuccessFileFragment } from '../../../generated/graphql'
 import StandardModalFooter from '@cy/components/StandardModalFooter.vue'
 import Button from '@cy/components/Button.vue'
 import PlusButtonIcon from '~icons/cy/add-large_x16.svg'
 import TestResultsIcon from '~icons/cy/test-results_x24.svg'
+import GeneratorCustomFile from '../GeneratorCustomFile.vue'
 
 const props = defineProps<{
   title: string,
@@ -115,6 +124,7 @@ query ComponentGeneratorStepOne($glob: String!) {
 gql`
 mutation ComponentGeneratorStepOne_generateSpec($codeGenCandidate: String!, $type: CodeGenType!) {
   generateSpecFromSource(codeGenCandidate: $codeGenCandidate, type: $type) {
+    ...GeneratorCustomFile
     ...GeneratorSuccess
   }
 }`
@@ -138,7 +148,9 @@ const allFiles = computed((): any => {
   return []
 })
 
-const result = ref<GeneratorSuccessFragment | null>(null)
+const result = ref<GeneratorSuccessFileFragment | null>(null)
+const generatedSpecErrorFileName = ref()
+const generateSpecFromSource = ref()
 
 whenever(result, () => {
   title.value = t('createSpec.successPage.header')
@@ -150,7 +162,9 @@ const makeSpec = async (file) => {
     type: 'component',
   })
 
-  result.value = data?.generateSpecFromSource ?? null
+  generateSpecFromSource.value = data?.generateSpecFromSource
+  result.value = data?.generateSpecFromSource?.generatedSpecResult?.__typename === 'ScaffoldedFile' ? data?.generateSpecFromSource?.generatedSpecResult : null
+  generatedSpecErrorFileName.value = data?.generateSpecFromSource?.generatedSpecResult?.__typename === 'GeneratedSpecError' ? data?.generateSpecFromSource?.generatedSpecResult.fileName : null
 }
 
 </script>

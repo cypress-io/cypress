@@ -98,7 +98,7 @@ import Button from '@packages/frontend-shared/src/components/Button.vue'
 import { useVModels, whenever } from '@vueuse/core'
 import { gql, useMutation } from '@urql/vue'
 import SpecPatterns from '../../../components/SpecPatterns.vue'
-import { EmptyGeneratorCardStepOneFragment, EmptyGeneratorCardStepOne_MatchSpecFileDocument, EmptyGeneratorCardStepOne_GenerateSpecDocument, GeneratorSuccessFragment } from '../../../generated/graphql'
+import { EmptyGeneratorCardStepOneFragment, EmptyGeneratorCardStepOne_MatchSpecFileDocument, EmptyGeneratorCardStepOne_GenerateSpecDocument, GeneratorSuccessFileFragment } from '../../../generated/graphql'
 import StandardModalFooter from '@packages/frontend-shared/src/components/StandardModalFooter.vue'
 import GeneratorSuccess from '../GeneratorSuccess.vue'
 import TestResultsIcon from '~icons/cy/test-results_x24.svg'
@@ -151,7 +151,7 @@ const writeFile = useMutation(EmptyGeneratorCardStepOne_GenerateSpecDocument)
 const isValidSpecFile = ref(true)
 const hasError = computed(() => !isValidSpecFile.value && !!specFile.value)
 
-const result = ref<GeneratorSuccessFragment | null>(null)
+const result = ref<GeneratorSuccessFileFragment | null>(null)
 
 whenever(result, () => {
   title.value = t('createSpec.successPage.header')
@@ -160,7 +160,7 @@ whenever(result, () => {
 const createSpec = async () => {
   const { data } = await writeFile.executeMutation({ codeGenCandidate: specFile.value, type: 'e2e' })
 
-  result.value = data?.generateSpecFromSource ?? null
+  result.value = data?.generateSpecFromSource?.generatedSpecResult?.__typename === 'ScaffoldedFile' ? data?.generateSpecFromSource?.generatedSpecResult : null
 }
 
 watch(specFile, async (value) => {

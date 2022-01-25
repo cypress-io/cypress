@@ -5,7 +5,9 @@ import { TestingTypeEnum } from '../enumTypes/gql-WizardEnums'
 import { FileDetailsInput } from '../inputTypes/gql-FileDetailsInput'
 import { WizardUpdateInput } from '../inputTypes/gql-WizardUpdateInput'
 import { CurrentProject } from './gql-CurrentProject'
-import { Query, ScaffoldedFile } from '.'
+import { GenerateSpecResponse } from './gql-GenerateSpecResponse'
+import { Query } from './gql-Query'
+import { ScaffoldedFile } from './gql-ScaffoldedFile'
 
 export const mutation = mutationType({
   definition (t) {
@@ -187,7 +189,7 @@ export const mutation = mutationType({
     })
 
     t.field('generateSpecFromSource', {
-      type: ScaffoldedFile,
+      type: GenerateSpecResponse,
       description: 'Generate spec from source',
       args: {
         codeGenCandidate: nonNull(stringArg()),

@@ -62,7 +62,7 @@ import FileChooser from '../FileChooser.vue'
 import GeneratorSuccess from '../GeneratorSuccess.vue'
 import { computed, ref } from 'vue'
 import { gql, useQuery, useMutation } from '@urql/vue'
-import { GeneratorSuccessFragment, StoryGeneratorStepOneDocument, StoryGeneratorStepOne_GenerateSpecDocument } from '../../../generated/graphql'
+import { GeneratorSuccessFileFragment, StoryGeneratorStepOneDocument, StoryGeneratorStepOne_GenerateSpecDocument } from '../../../generated/graphql'
 import StandardModalFooter from '@cy/components/StandardModalFooter.vue'
 import Button from '@cy/components/Button.vue'
 import PlusButtonIcon from '~icons/cy/add-large_x16.svg'
@@ -115,6 +115,7 @@ query StoryGeneratorStepOne($glob: String!) {
 gql`
 mutation StoryGeneratorStepOne_generateSpec($codeGenCandidate: String!, $type: CodeGenType!) {
   generateSpecFromSource(codeGenCandidate: $codeGenCandidate, type: $type) {
+    ...GeneratorCustomFile
     ...GeneratorSuccess
   }
 }`
@@ -138,7 +139,7 @@ const allFiles = computed(() => {
   return []
 }) as any
 
-const result = ref<GeneratorSuccessFragment | null>(null)
+const result = ref<GeneratorSuccessFileFragment | null>(null)
 
 whenever(result, () => {
   title.value = t('createSpec.successPage.header')
@@ -150,7 +151,7 @@ const makeSpec = async (file) => {
     type: 'story',
   })
 
-  result.value = data?.generateSpecFromSource ?? null
+  result.value = data?.generateSpecFromSource?.generatedSpecResult?.__typename === 'ScaffoldedFile' ? data?.generateSpecFromSource?.generatedSpecResult : null
 }
 
 </script>

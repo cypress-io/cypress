@@ -1,4 +1,4 @@
-import type { CodeGenType, MutationSetProjectPreferencesArgs, NexusGenObjects, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
+import type { CodeGenType, MutationSetProjectPreferencesArgs, NexusGenObjects, NexusGenUnions, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
 import type { InitializeProjectOptions, FoundBrowser, FoundSpec, LaunchOpts, OpenProjectLaunchOptions, Preferences, TestingType, ReceivedCypressOptions, AddProject } from '@packages/types'
 import execa from 'execa'
 import path from 'path'
@@ -308,7 +308,7 @@ export class ProjectActions {
     this.api.insertProjectPreferencesToCache(this.ctx.lifecycleManager.projectTitle, args)
   }
 
-  async codeGenSpec (codeGenCandidate: string, codeGenType: CodeGenType): Promise<NexusGenObjects['ScaffoldedFile']> {
+  async codeGenSpec (codeGenCandidate: string, codeGenType: CodeGenType): Promise<NexusGenUnions['GeneratedSpecResult']> {
     const project = this.ctx.currentProject
 
     if (!project) {
@@ -316,10 +316,10 @@ export class ProjectActions {
     }
 
     const parsed = path.parse(codeGenCandidate)
+    const defaultCText = '.cy'
+    const possibleExtensions = ['.cy', '.spec', '.test', '-spec', '-test', '_spec']
 
     const getFileExtension = () => {
-      const possibleExtensions = ['.cy', '.spec', '.test', '-spec', '-test', '_spec']
-
       if (codeGenType === 'e2e') {
         return (
           possibleExtensions.find((ext) => {
@@ -328,24 +328,7 @@ export class ProjectActions {
         )
       }
 
-      const cfg = this.ctx.project.getConfig()
-
-      if (!cfg?.component?.specPattern) {
-        return '.cy'
-      }
-
-      const foundExt = possibleExtensions.find((ext) => {
-        const regexString = `^.*\.${ext}\..*$`
-        const regex = new RegExp(regexString)
-
-        if (Array.isArray(cfg.component.specPattern)) {
-          return cfg.component.specPattern.some((val) => regex.test(val))
-        }
-
-        return new RegExp(regex).test(cfg.component.specPattern)
-      })
-
-      return foundExt
+      return defaultCText
     }
 
     const getCodeGenPath = () => {
@@ -366,7 +349,37 @@ export class ProjectActions {
       specFileExtension,
     })
 
-    const codeGenOptions = await newSpecCodeGenOptions.getCodeGenOptions()
+    let codeGenOptions = await newSpecCodeGenOptions.getCodeGenOptions()
+
+    if (codeGenType === 'component') {
+      const filePathAbsolute = path.join(path.parse(codeGenPath).dir, codeGenOptions.fileName)
+      const filePathRelative = path.relative(this.ctx.currentProject || '', filePathAbsolute)
+
+      let foundExt
+
+      for await (const ext of possibleExtensions) {
+        const file = filePathRelative.replace(defaultCText, ext)
+
+        const matchesSpecPattern = await this.ctx.project.matchesSpecPattern(file)
+
+        if (matchesSpecPattern) {
+          foundExt = ext
+          break
+        }
+      }
+
+      if (!foundExt) {
+        return {
+          fileName: filePathRelative,
+        }
+      }
+
+      codeGenOptions = {
+        ...codeGenOptions,
+        fileName: codeGenOptions.fileName.replace(defaultCText, foundExt),
+      }
+    }
+
     const codeGenResults = await codeGenerator(
       { templateDir: templates[codeGenType], target: path.parse(codeGenPath).dir },
       codeGenOptions,
@@ -378,7 +391,27 @@ export class ProjectActions {
 
     const [newSpec] = codeGenResults.files
 
-    // setSpec
+    const cfg = this.ctx.project.getConfig()
+
+    if (cfg) {
+      const toArray = (x: string | string[] | undefined) => Array.isArray(x) ? x : x ? [x] : undefined
+
+      const testingType = codeGenType === 'component' ? 'component' : 'e2e'
+
+      const specPattern = toArray(cfg[testingType]?.specPattern)
+      const ignoreSpecPattern = toArray(cfg[testingType]?.ignoreSpecPattern) ?? []
+      const additionalIgnore = toArray(codeGenType === 'component' ? cfg?.e2e?.specPattern : undefined) ?? []
+
+      if (this.ctx.currentProject && specPattern) {
+        const specs = await this.ctx.project.findSpecs(this.ctx.currentProject, testingType, specPattern, ignoreSpecPattern, additionalIgnore)
+
+        this.ctx.project.setSpecs(specs)
+
+        if (testingType === 'component') {
+          this.api.getDevServer().updateSpecs(specs)
+        }
+      }
+    }
 
     return {
       status: 'valid',

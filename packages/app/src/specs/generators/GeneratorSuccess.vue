@@ -32,10 +32,11 @@
 import ShikiHighlight from '@cy/components/ShikiHighlight.vue'
 import Collapsible from '@cy/components/Collapsible.vue'
 import { gql } from '@urql/core'
-import type { GeneratorSuccessFragment } from '../../generated/graphql'
+import type { GeneratorSuccessFileFragment } from '../../generated/graphql'
+import { ref } from 'vue'
 
 gql`
-fragment GeneratorSuccess on ScaffoldedFile {
+fragment GeneratorSuccessFile on ScaffoldedFile {
   file {
     id
     fileName
@@ -47,7 +48,17 @@ fragment GeneratorSuccess on ScaffoldedFile {
 }
 `
 
+gql`
+fragment GeneratorSuccess on GenerateSpecResponse {
+  generatedSpecResult {
+    ... on ScaffoldedFile {
+      ...GeneratorSuccessFile
+    }
+  }
+}
+`
+
 defineProps<{
-  file: GeneratorSuccessFragment['file']
+  file: GeneratorSuccessFileFragment['file']
 }>()
 </script>
