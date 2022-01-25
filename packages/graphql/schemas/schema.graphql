@@ -361,6 +361,9 @@ type CurrentProject implements Node & ProjectLike {
   """Relay style Node ID field for the CurrentProject field"""
   id: ID!
 
+  """If the browser is open or not"""
+  isBrowserOpen: Boolean!
+
   """Whether the user configured this project to use Component Testing"""
   isCTConfigured: Boolean
 
@@ -641,6 +644,9 @@ type Mutation {
   """Clears the currently active project"""
   clearCurrentProject: Query
   clearCurrentTestingType: Query
+
+  """Close active browser"""
+  closeBrowser: Boolean
 
   """Create a project in the dashboard and return its object"""
   cloudProjectCreate(ciProviders: [String!], name: String!, orgId: ID!, public: Boolean!): CloudProject

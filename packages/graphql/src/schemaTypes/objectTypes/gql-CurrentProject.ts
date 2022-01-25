@@ -176,6 +176,11 @@ export const CurrentProject = objectType({
       description: 'True if the project is using the default spec pattern',
       resolve: async (source, args, ctx) => ctx.project.getIsDefaultSpecPattern(),
     })
+
+    t.nonNull.boolean('isBrowserOpen', {
+      description: 'If the browser is open or not',
+      resolve: (source, args, ctx) => ctx.coreData.app.isBrowserOpen,
+    })
   },
   sourceType: {
     module: '@packages/data-context/src/data/ProjectLifecycleManager',
