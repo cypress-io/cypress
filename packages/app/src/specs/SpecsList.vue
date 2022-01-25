@@ -4,8 +4,8 @@
       v-model="search"
       class="pb-32px"
       :result-count="specs.length"
-      @showCreateSpecModal="emit('showCreateSpecModal')"
-      @spec-pattern="showSpecPatternModal = true"
+      @show-create-spec-modal="emit('showCreateSpecModal')"
+      @show-spec-pattern-modal="showSpecPatternModal = true"
     />
     <SpecPatternModal
       v-if="props.gql.currentProject"

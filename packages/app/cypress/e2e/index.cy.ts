@@ -49,10 +49,22 @@ describe('App: Index', () => {
         cy.findByTestId('no-specs-message').should('be.visible')
         .and('contain', defaultMessages.createSpec.noSpecsMessage)
 
-        cy.findByRole('link', { name: defaultMessages.createSpec.viewSpecPatternButton })
+        cy.findByRole('button', { name: defaultMessages.createSpec.viewSpecPatternButton })
         .should('be.visible')
         .and('not.be.disabled')
-        .and('have.attr', 'href', '#/settings?section=project&setting=specPattern')
+        .click()
+
+        cy.findByRole('dialog', {
+          name: defaultMessages.components.specPatternModal.title,
+        }).should('be.visible').within(() => {
+          cy.validateExternalLink({ name: 'Need help', href: 'https://on.cypress.io' })
+          cy.findByRole('button', { name: 'Close' }).should('be.visible').as('CloseDialogButton')
+          cy.get('[data-cy="file-match-indicator"]').contains('0 Matches')
+          cy.get('[data-cy="spec-pattern"]').contains('cypress/e2e/**/*.cy.{js,jsx,ts,tsx}')
+        })
+
+        cy.get('@CloseDialogButton').click()
+        cy.findByRole('dialog').should('not.exist')
       })
 
       context('scaffold examples', () => {
@@ -85,7 +97,7 @@ describe('App: Index', () => {
           cy.findByRole('dialog', {
             name: defaultMessages.createSpec.e2e.importFromScaffold.specsAddedHeader,
           }).within(() => {
-            cy.validateExternalLink({ name: 'Need help?', href: 'https://on.cypress.io' })
+            cy.validateExternalLink({ name: 'Need help', href: 'https://on.cypress.io' })
             cy.findByRole('button', { name: 'Close' }).should('be.visible').as('CloseDialogButton')
           })
 
@@ -310,10 +322,22 @@ describe('App: Index', () => {
         .should('be.visible')
         .and('contain', defaultMessages.createSpec.noSpecsMessage)
 
-        cy.findByRole('link', { name: defaultMessages.createSpec.viewSpecPatternButton })
+        cy.findByRole('button', { name: defaultMessages.createSpec.viewSpecPatternButton })
         .should('be.visible')
         .and('not.be.disabled')
-        .and('have.attr', 'href', '#/settings?section=project&setting=specPattern')
+        .click()
+
+        cy.findByRole('dialog', {
+          name: defaultMessages.components.specPatternModal.title,
+        }).should('be.visible').within(() => {
+          cy.validateExternalLink({ name: 'Need help', href: 'https://on.cypress.io' })
+          cy.findByRole('button', { name: 'Close' }).should('be.visible').as('CloseDialogButton')
+          cy.get('[data-cy="file-match-indicator"]').contains('0 Matches')
+          cy.get('[data-cy="spec-pattern"]').contains('**/*.cy.{js,jsx,ts,tsx}')
+        })
+
+        cy.get('@CloseDialogButton').click()
+        cy.findByRole('dialog').should('not.exist')
       })
 
       context('create from story', () => {
@@ -325,7 +349,7 @@ describe('App: Index', () => {
           }).as('CreateFromStoryDialog')
 
           cy.get('@CreateFromStoryDialog').within(() => {
-            cy.validateExternalLink({ name: 'Need help?', href: 'https://on.cypress.io' })
+            cy.validateExternalLink({ name: 'Need help', href: 'https://on.cypress.io' })
           })
 
           cy.findByRole('button', { name: 'Close' }).as('DialogCloseButton')
@@ -394,7 +418,7 @@ describe('App: Index', () => {
           cy.findByRole('dialog', {
             name: defaultMessages.createSpec.successPage.header,
           }).as('SuccessDialog').within(() => {
-            cy.validateExternalLink({ name: 'Need help?', href: 'https://on.cypress.io' })
+            cy.validateExternalLink({ name: 'Need help', href: 'https://on.cypress.io' })
             cy.findByRole('button', { name: 'Close' }).should('be.visible')
             cy.contains('src/stories/Button.stories.cy.jsx').should('be.visible')
 
@@ -468,10 +492,9 @@ describe('App: Index', () => {
         cy.findByTestId('no-specs-message').should('be.visible')
         .and('contain', defaultMessages.createSpec.noSpecsMessage)
 
-        cy.findByRole('link', { name: defaultMessages.createSpec.viewSpecPatternButton })
+        cy.findByRole('button', { name: defaultMessages.createSpec.viewSpecPatternButton })
         .should('be.visible')
         .and('not.be.disabled')
-        .and('have.attr', 'href', '#/settings?section=project&setting=specPattern')
       })
 
       context('create from component', () => {
@@ -483,7 +506,7 @@ describe('App: Index', () => {
           }).as('CreateFromComponentDialog')
 
           cy.get('@CreateFromComponentDialog').within(() => {
-            cy.validateExternalLink({ name: 'Need help?', href: 'https://on.cypress.io' })
+            cy.validateExternalLink({ name: 'Need help', href: 'https://on.cypress.io' })
           })
 
           cy.findByRole('button', { name: 'Close' }).as('DialogCloseButton')
@@ -553,7 +576,7 @@ describe('App: Index', () => {
           cy.findByRole('dialog', {
             name: defaultMessages.createSpec.successPage.header,
           }).as('SuccessDialog').within(() => {
-            cy.validateExternalLink({ name: 'Need help?', href: 'https://on.cypress.io' })
+            cy.validateExternalLink({ name: 'Need help', href: 'https://on.cypress.io' })
             cy.contains('src/App.cy.jsx').should('be.visible')
             cy.findByRole('button', { name: 'Close' }).should('be.visible')
 
@@ -684,7 +707,7 @@ describe('App: Index', () => {
         cy.findByTestId('create-spec-modal').should('be.visible').within(() => {
           cy.contains('Create a new spec').should('be.visible')
 
-          cy.validateExternalLink({ name: `${defaultMessages.links.needHelp}?`, href: 'https://on.cypress.io' })
+          cy.validateExternalLink({ name: `${defaultMessages.links.needHelp}`, href: 'https://on.cypress.io' })
         })
 
         cy.contains('Create from component').click()
