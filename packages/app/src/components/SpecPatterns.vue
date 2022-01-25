@@ -6,7 +6,7 @@
           scope="global"
           keypath="components.specPattern.matches"
         >
-          {{ props.gql.specsBare?.edges.length }}
+          {{ props.gql.specs.length }}
         </i18n-t>
       </FileMatchIndicator>
       <OpenConfigFileInIDE>
@@ -32,7 +32,6 @@
 
 <script lang="ts" setup>
 import { computed } from 'vue'
-import Button from '@cy/components/Button.vue'
 import { gql } from '@urql/core'
 import type { SpecPatternsFragment } from '../generated/graphql'
 import OpenConfigFileInIDE from '@packages/frontend-shared/src/gql-components/OpenConfigFileInIDE.vue'
@@ -43,12 +42,8 @@ fragment SpecPatterns on CurrentProject {
   id
   config
   currentTestingType
-  specsBare: specs(first: 100) {
-    edges {
-      node {
-        id
-      }
-    }
+  specs {
+    id
   }
 }
 `

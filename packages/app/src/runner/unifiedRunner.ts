@@ -21,7 +21,7 @@ export function useUnifiedRunner () {
   return {
     initialized: readonly(initialized),
 
-    watchSpec: (specs: Ref<SpecFile[]>) => {
+    watchSpec: (specs: Ref<ReadonlyArray<SpecFile>>) => {
       const specStore = useSpecStore()
       const route = useRoute()
       const selectorPlaygroundStore = useSelectorPlaygroundStore()

@@ -9,7 +9,7 @@
       @close="closeCreateSpecModal"
     />
     <SpecsList
-      v-if="query.data.value.currentProject?.specs?.edges.length"
+      v-if="query.data.value.currentProject?.specs.length"
       :gql="query.data.value"
       @showCreateSpecModal="showCreateSpecModal"
     />

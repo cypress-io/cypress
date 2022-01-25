@@ -99,20 +99,18 @@ import NoResults from '@cy/components/NoResults.vue'
 const { t } = useI18n()
 
 gql`
-fragment SpecNode_SpecsList on SpecEdge {
-  node {
-    id
-    name
-    specType
-    absolute
-    baseName
-    fileName
-    specFileExtension
-    fileExtension
-    relative
-    gitInfo {
-      ...SpecListRow
-    }
+fragment SpecsList on Spec {
+  id
+  name
+  specType
+  absolute
+  baseName
+  fileName
+  specFileExtension
+  fileExtension
+  relative
+  gitInfo {
+    ...SpecListRow
   }
 }
 `
@@ -123,10 +121,9 @@ fragment Specs_SpecsList on Query {
     id
     projectRoot
     currentTestingType
-    specs: specs(first: 100) {
-      edges {
-        ...SpecNode_SpecsList
-      }
+    specs {
+      id
+      ...SpecsList
     }
   }
 }
@@ -146,10 +143,10 @@ function handleClear () {
   search.value = ''
 }
 
-const cachedSpecs = useCachedSpecs(computed(() => props.gql.currentProject?.specs?.edges || []))
+const cachedSpecs = useCachedSpecs(computed(() => props.gql.currentProject?.specs || []))
 
 const specs = computed(() => {
-  const specs = cachedSpecs.value.map((x) => makeFuzzyFoundSpec(x.node))
+  const specs = cachedSpecs.value.map((x) => makeFuzzyFoundSpec(x))
 
   if (!search.value) {
     return specs
