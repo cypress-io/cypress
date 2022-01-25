@@ -318,9 +318,9 @@ export class ProjectActions {
     const parsed = path.parse(codeGenCandidate)
 
     const getFileExtension = () => {
-      if (codeGenType === 'e2e') {
-        const possibleExtensions = ['.spec', '.test', '-spec', '-test', '.cy', '_spec']
+      const possibleExtensions = ['.cy', '.spec', '.test', '-spec', '-test', '_spec']
 
+      if (codeGenType === 'e2e') {
         return (
           possibleExtensions.find((ext) => {
             return codeGenCandidate.endsWith(ext + parsed.ext)
@@ -328,7 +328,24 @@ export class ProjectActions {
         )
       }
 
-      return '.cy'
+      const cfg = this.ctx.project.getConfig()
+
+      if (!cfg?.component?.specPattern) {
+        return '.cy'
+      }
+
+      const foundExt = possibleExtensions.find((ext) => {
+        const regexString = `^.*\.${ext}\..*$`
+        const regex = new RegExp(regexString)
+
+        if (Array.isArray(cfg.component.specPattern)) {
+          return cfg.component.specPattern.some((val) => regex.test(val))
+        }
+
+        return new RegExp(regex).test(cfg.component.specPattern)
+      })
+
+      return foundExt
     }
 
     const getCodeGenPath = () => {
@@ -360,6 +377,8 @@ export class ProjectActions {
     }
 
     const [newSpec] = codeGenResults.files
+
+    // setSpec
 
     return {
       status: 'valid',
