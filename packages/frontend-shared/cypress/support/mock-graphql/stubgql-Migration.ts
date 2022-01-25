@@ -1,9 +1,19 @@
+import { MIGRATION_STEPS } from '@packages/types'
 import type { Migration } from '../generated/test-graphql-types.gen'
 import type { MaybeResolver } from './clientTestUtils'
 
 export const stubMigration: MaybeResolver<Migration> = {
   __typename: 'Migration',
-  step: `renameAuto`,
+  filteredSteps: MIGRATION_STEPS.map((name, index) => {
+    return {
+      id: (index + 1).toString(),
+      index: index + 1,
+      isCompleted: false,
+      isCurrentStep: name === 'renameAuto',
+      __typename: 'MigrationStep',
+      name,
+    }
+  }),
   specFiles: {
     __typename: 'MigrationFiles',
     before: [

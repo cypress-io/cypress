@@ -23,7 +23,7 @@ export class MigrationActions {
   }
 
   initialize () {
-    this.ctx.migration.initialize()
+    return this.ctx.migration.initialize()
   }
 
   async renameSpecFiles () {
