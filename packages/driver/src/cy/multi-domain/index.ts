@@ -54,8 +54,8 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
 
   Commands.addAll({
     // this isn't fully implemented, but in place to be able to test out
-    // the other parts of multidomain
-    switchToDomain<T> (domain: string, doneOrDataOrFn: T | Mocha.Done | (() => {}), dataOrFn?: T | (() => {}), fn?: (data?: T) => {}) {
+    // the other parts of multi-domain
+    switchToDomain<T> (domain: string, doneOrDataOrFn: T[] | Mocha.Done | (() => {}), dataOrFn?: T[] | (() => {}), fn?: (data?: T[]) => {}) {
       // store the invocation stack in the case that `switchToDomain` errors
       const switchToDomainUserInvocationStack = state('current').get('userInvocationStack')
 
@@ -101,6 +101,15 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
         $errUtils.throwErrByPath('switchToDomain.invalid_domain_argument', {
           onFail: log,
           args: { arg: $utils.stringify(domain) },
+        })
+      }
+
+      if (data && !Array.isArray(data)) {
+        sendReadyForDomain()
+
+        $errUtils.throwErrByPath('switchToDomain.invalid_data_argument', {
+          onFail: log,
+          args: { arg: $utils.stringify(data) },
         })
       }
 
@@ -300,6 +309,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
 
       return new Bluebird((resolve, reject) => {
         communicator.once('ran:domain:fn', (err) => {
+          sendReadyForDomain()
           if (err) {
             if (done) {
               communicator.off('done:called', doneAndCleanup)
@@ -334,11 +344,6 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
         // receive messages
         communicator.once('bridge:ready', () => {
           state('readyForMultiDomain', true)
-          sendReadyForDomain()
-        })
-
-        cy.once('internal:window:load', ({ type }) => {
-          if (type !== 'cross:domain') return
 
           // once the secondary domain page loads, send along the
           // user-specified callback to run in that domain

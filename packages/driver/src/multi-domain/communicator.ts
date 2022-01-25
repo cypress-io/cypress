@@ -83,14 +83,14 @@ export class PrimaryDomainCommunicator extends EventEmitter {
       if (data?.event?.includes(CROSS_DOMAIN_PREFIX)) {
         const messageName = data.event.replace(CROSS_DOMAIN_PREFIX, '')
 
-        // NOTE: need a special case here for 'window:before:load'
+        // NOTE: need a special case here for 'bridge:ready'
         // where we need to set the crossDomainDriverWindow to source to
         // communicate back to the iframe
-        if (messageName === 'window:before:load') {
+        if (messageName === 'bridge:ready') {
           this.crossDomainDriverWindow = source
-        } else {
-          this.emit(messageName, data.data)
         }
+
+        this.emit(messageName, data.data)
 
         return
       }
