@@ -190,7 +190,7 @@ describe('Choose a Browser Page', () => {
 
       cy.get('h1').should('contain', 'Choose a Browser')
 
-      cy.contains('button', 'Launch Chrome').as('launchButton')
+      cy.contains('button', 'Start E2E Testing in Chrome').as('launchButton')
 
       // Stub out response to prevent browser launch but not break internals
       cy.intercept('mutation-OpenBrowser_LaunchProject', {
@@ -207,21 +207,28 @@ describe('Choose a Browser Page', () => {
             },
           },
         },
+        delay: 500,
       }).as('launchProject')
 
       cy.get('@launchButton').click()
+      cy.contains('button', 'Opening E2E Testing in Chrome').should('be.visible')
 
       cy.wait('@launchProject').then(({ request }) => {
-        expect(request?.body.variables.browserPath).to.contain('/test/chrome/path')
         expect(request?.body.variables.testingType).to.eq('e2e')
+      })
+
+      cy.intercept('query-OpenBrowser', (req) => {
+        req.on('before:response', (res) => {
+          res.body.data.currentProject.isBrowserOpen = true
+        })
       })
 
       cy.contains('button', 'Focus').as('focusButton')
 
-      cy.intercept('mutation-OpenBrowser_FocusActiveBrowserWindow').as('@focusBrowser')
+      cy.intercept('mutation-OpenBrowser_FocusActiveBrowserWindow').as('focusBrowser')
 
       cy.withCtx((ctx) => {
-        sinon.stub(ctx.actions.browser.focusActiveBrowserWindow)
+        sinon.spy(ctx.actions.browser, 'focusActiveBrowserWindow')
       })
 
       cy.get('@focusButton').click()
