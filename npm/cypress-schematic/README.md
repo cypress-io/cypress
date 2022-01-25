@@ -183,7 +183,6 @@ ng generate @cypress/schematic:e2e --name=login
 
 This will create a new spec file named `login.cy.ts` in the default Cypress folder location.
 
-
 ### Specify Project
 
 Add a `--project=` flag to specify the project:
