@@ -18,15 +18,13 @@
   <BeforeAfter>
     <template #before>
       <HighlightedFilesList
-        :files="[props.gql.supportFileBefore]"
-        :highlight-reg-exp="/index/gi"
+        :files="props.gql.supportFiles.before"
         highlight-class="text-red-500"
       />
     </template>
     <template #after>
       <HighlightedFilesList
-        :files="[props.gql.supportFileAfter]"
-        :highlight-reg-exp="/e2e/gi"
+        :files="props.gql.supportFiles.after"
         highlight-class="text-jade-500"
       />
     </template>
@@ -48,8 +46,20 @@ const { t } = useI18n()
 
 gql`
 fragment RenameSupport on Migration {
-  supportFileBefore
-  supportFileAfter
+  supportFiles {
+    before {
+      parts {
+        text
+        highlight
+      }
+    }
+    after {
+      parts {
+        text
+        highlight
+      }
+    }
+  }
 }`
 
 const props = defineProps<{

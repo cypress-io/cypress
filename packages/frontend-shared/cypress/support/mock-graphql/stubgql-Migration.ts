@@ -4,29 +4,80 @@ import type { MaybeResolver } from './clientTestUtils'
 export const stubMigration: MaybeResolver<Migration> = {
   __typename: 'Migration',
   step: `renameAuto`,
-
-  specFilesBefore: [
-    'cypress/integration/app_spec.js',
-    'cypress/integration/blog-post-spec.js',
-    'cypress/integration/homeSpec.js',
-    'cypress/integration/company.js',
-    'cypress/integration/sign-up.spec.js',
-    'cypress/component/button.spec.js',
-  ],
-  specFilesAfter: [
-    'cypress/e2e/app.cy.js',
-    'cypress/e2e/blog-post.cy.js',
-    'cypress/e2e/homeSpec.cy.js',
-    'cypress/e2e/company.cy.js',
-    'cypress/e2e/sign-up.cy.js',
-    'cypress/component/button.cy.js',
-  ],
+  specFiles: {
+    __typename: 'MigrationFiles',
+    before: [
+      {
+        __typename: 'MigrationFile',
+        parts: [
+          { __typename: 'MigrationFilePart', text: 'cypress/', highlight: false },
+          { __typename: 'MigrationFilePart', text: 'integration', highlight: true },
+          { __typename: 'MigrationFilePart', text: '/app', highlight: false },
+          { __typename: 'MigrationFilePart', text: '.spec.', highlight: true },
+          { __typename: 'MigrationFilePart', text: 'js', highlight: false },
+        ],
+        testingType: 'e2e',
+      },
+      {
+        __typename: 'MigrationFile',
+        parts: [
+          { __typename: 'MigrationFilePart', text: 'cypress/', highlight: false },
+          { __typename: 'MigrationFilePart', text: 'integration', highlight: true },
+          { __typename: 'MigrationFilePart', text: '/blog-post', highlight: false },
+          { __typename: 'MigrationFilePart', text: '-spec.', highlight: true },
+          { __typename: 'MigrationFilePart', text: 'js', highlight: false },
+        ],
+        testingType: 'e2e',
+      },
+    ],
+    after: [
+      {
+        __typename: 'MigrationFile',
+        parts: [
+          { __typename: 'MigrationFilePart', text: 'cypress/', highlight: false },
+          { __typename: 'MigrationFilePart', text: 'e2e', highlight: true },
+          { __typename: 'MigrationFilePart', text: '/app', highlight: false },
+          { __typename: 'MigrationFilePart', text: '.cy.', highlight: true },
+          { __typename: 'MigrationFilePart', text: 'js', highlight: false },
+        ],
+        testingType: 'e2e',
+      },
+      {
+        __typename: 'MigrationFile',
+        parts: [
+          { __typename: 'MigrationFilePart', text: 'cypress/', highlight: false },
+          { __typename: 'MigrationFilePart', text: 'e2e', highlight: true },
+          { __typename: 'MigrationFilePart', text: '/blog-post', highlight: false },
+          { __typename: 'MigrationFilePart', text: '.cy.', highlight: true },
+          { __typename: 'MigrationFilePart', text: 'js', highlight: false },
+        ],
+        testingType: 'e2e',
+      },
+    ],
+  },
   manualFiles: [
-    'cypress/component/button.cy.js',
-    'cypress/component/modal.cy.js',
-    'cypress/component/toggle.cy.js',
-    'cypress/component/alert.cy.js',
-    'cypress/component/tooltip.cy.js',
+    {
+      __typename: 'MigrationFile',
+      parts: [
+        { __typename: 'MigrationFilePart', text: 'cypress/', highlight: false },
+        { __typename: 'MigrationFilePart', text: 'e2e', highlight: true },
+        { __typename: 'MigrationFilePart', text: '/app', highlight: false },
+        { __typename: 'MigrationFilePart', text: '.cy.', highlight: true },
+        { __typename: 'MigrationFilePart', text: 'js', highlight: false },
+      ],
+      testingType: 'e2e',
+    },
+    {
+      __typename: 'MigrationFile',
+      parts: [
+        { __typename: 'MigrationFilePart', text: 'cypress/', highlight: false },
+        { __typename: 'MigrationFilePart', text: 'e2e', highlight: true },
+        { __typename: 'MigrationFilePart', text: '/blog-post', highlight: false },
+        { __typename: 'MigrationFilePart', text: '.cy.', highlight: true },
+        { __typename: 'MigrationFilePart', text: 'js', highlight: false },
+      ],
+      testingType: 'e2e',
+    },
   ],
   configBeforeCode: `{
     "baseUrl": "http://localhost:1234/",
@@ -49,6 +100,53 @@ export const stubMigration: MaybeResolver<Migration> = {
   })`,
   integrationFolder: 'cypress/integration',
   componentFolder: 'cypress/component',
-  supportFileBefore: 'cypress/support/index.js',
-  supportFileAfter: 'cypress/support/e2e.js',
+  supportFiles: {
+    __typename: 'MigrationFiles',
+    before: [
+      {
+        __typename: 'MigrationFile',
+        testingType: 'e2e',
+        parts: [
+          {
+            __typename: 'MigrationFilePart',
+            text: 'cypress/support/',
+            highlight: false,
+          },
+          {
+            __typename: 'MigrationFilePart',
+            text: 'index',
+            highlight: true,
+          },
+          {
+            __typename: 'MigrationFilePart',
+            text: '.js',
+            highlight: false,
+          },
+        ],
+      },
+    ],
+    after: [
+      {
+        __typename: 'MigrationFile',
+        testingType: 'e2e',
+        parts: [
+          {
+            __typename: 'MigrationFilePart',
+            text: 'cypress/support/',
+            highlight: false,
+          },
+          {
+            __typename: 'MigrationFilePart',
+            text: 'e2e',
+            highlight: true,
+          },
+          {
+            __typename: 'MigrationFilePart',
+            text: '.js',
+            highlight: false,
+          },
+        ],
+      },
+    ],
+  },
 }

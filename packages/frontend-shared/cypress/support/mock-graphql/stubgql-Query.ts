@@ -13,6 +13,9 @@ export const stubQuery: MaybeResolver<Query> = {
   wizard (source, args, ctx) {
     return ctx.wizard
   },
+  migration (source, args, ctx) {
+    return ctx.migration
+  },
   currentProject (source, args, ctx) {
     return ctx.currentProject
   },
@@ -35,43 +38,6 @@ export const stubQuery: MaybeResolver<Query> = {
     return []
   },
   scaffoldedFiles () {
-    // return [
-    //   {
-    //     filePath: 'cypress.config.ts',
-    //     description: 'The proper config file',
-    //     content: dedent`import { startDevServer } from '@cypress/vite-dev-server'
-
-    //                     /* This is some test data. It does not need to be valid code. */
-    //           `,
-    //     status: 'valid',
-    //   },
-    //   {
-    //     filePath: 'cypress/fixtures/example.json',
-    //     description: 'Please do the necessary changes to your file',
-    //     content: dedent`{
-    //       "foo": 1,
-    //       "bar": 42
-    //     }`,
-    //     status: 'changes',
-    //   },
-    //   {
-    //     filePath: 'cypress/component/support.ts',
-    //     description: 'Please do the necessary changes to your file',
-    //     content: dedent`import { startDevServer } from '@cypress/vite-dev-server'
-
-    //                     /* This is some test data. It does not need to be valid code. */
-    //                     `,
-    //     status: 'skipped',
-    //   },
-    //   {
-    //     filePath: 'cypress/component/commands.ts',
-    //     description: 'Please do the necessary changes to your file',
-    //     content: dedent`import { startDevServer } from '@cypress/vite-dev-server'
-
-    //     /* This is some test data. It does not need to be valid code. */`,
-    //     status: 'error',
-    //   },
-    // ],
     return null
   },
 }

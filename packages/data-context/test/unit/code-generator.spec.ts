@@ -95,7 +95,7 @@ describe('code-generator', () => {
     mTimesAfter.forEach((time, i) => expect(time > mTimesBefore[i]))
   })
 
-  it('should generate from e2e template', async () => {
+  it('should generate from integration template', async () => {
     const fileName = 'my-integration-file.js'
     const target = path.join(tmpPath, 'integration')
     const fileAbsolute = path.join(target, fileName)

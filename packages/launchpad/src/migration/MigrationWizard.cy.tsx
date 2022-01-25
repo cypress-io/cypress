@@ -3,26 +3,9 @@ import MigrationWizard from './MigrationWizard.vue'
 import { defaultMessages } from '@cy/i18n'
 import dedent from 'dedent'
 
-const migration = {
-  __typename: 'Migration' as const,
-  specFilesAfter: ['test.cy.tsx'],
-  specFilesBefore: ['test.spec.tsx'],
-  manualFiles: ['test.cy.tsx'],
-  configAfterCode: '{}',
-  configBeforeCode: '{}',
-  supportFileBefore: 'cypress/support/index.js',
-  supportFileAfter: 'cypress/support/e2e.js',
-}
-
 describe('<MigrationWizard/>', { viewportWidth: 1280, viewportHeight: 1100 }, () => {
   it('renders Automatic rename', () => {
     cy.mountFragment(MigrationWizardDataFragmentDoc, {
-      onResult (res) {
-        res.migration = {
-          ...migration,
-          step: 'renameAuto',
-        }
-      },
       render () {
         return (<div class="p-16px">
           <MigrationWizard />
@@ -35,12 +18,6 @@ describe('<MigrationWizard/>', { viewportWidth: 1280, viewportHeight: 1100 }, ()
 
   it('renders Automatic rename with skip', () => {
     cy.mountFragment(MigrationWizardDataFragmentDoc, {
-      onResult (res) {
-        res.migration = {
-          ...migration,
-          step: 'renameAuto',
-        }
-      },
       render () {
         return (<div class="p-16px">
           <MigrationWizard />
@@ -58,10 +35,7 @@ describe('<MigrationWizard/>', { viewportWidth: 1280, viewportHeight: 1100 }, ()
   it('renders Manual rename', () => {
     cy.mountFragment(MigrationWizardDataFragmentDoc, {
       onResult (res) {
-        res.migration = {
-          ...migration,
-          step: 'renameManual',
-        }
+        res!.migration!.step = 'renameManual'
       },
       render () {
         return (<div class="p-16px">
@@ -76,10 +50,7 @@ describe('<MigrationWizard/>', { viewportWidth: 1280, viewportHeight: 1100 }, ()
   it('renders Support file rename', () => {
     cy.mountFragment(MigrationWizardDataFragmentDoc, {
       onResult (res) {
-        res.migration = {
-          ...migration,
-          step: 'renameSupport',
-        }
+        res!.migration!.step = 'renameSupport'
       },
       render () {
         return (<div class="p-16px">
@@ -94,18 +65,16 @@ describe('<MigrationWizard/>', { viewportWidth: 1280, viewportHeight: 1100 }, ()
   it('renders Config File migration', () => {
     cy.mountFragment(MigrationWizardDataFragmentDoc, {
       onResult (res) {
-        res.migration = {
-          ...migration,
-          step: 'configFile',
-          configBeforeCode: dedent`{
-            "viewportWidth": 1280, 
-            "viewportHeight": 1100
-          }`,
-          configAfterCode: dedent`module.exports = {
+        res.migration!.step = 'configFile'
+        res.migration!.configBeforeCode = dedent`{
+          "viewportWidth": 1280, 
+          "viewportHeight": 1100
+        }`
+
+        res.migration!.configAfterCode = dedent`{
             viewportWidth: 1280, 
             viewportHeight: 1100
-          }`,
-        }
+        }`
       },
       render () {
         return (<div class="p-16px">
@@ -120,10 +89,7 @@ describe('<MigrationWizard/>', { viewportWidth: 1280, viewportHeight: 1100 }, ()
   it('renders component reconfigure section', () => {
     cy.mountFragment(MigrationWizardDataFragmentDoc, {
       onResult (res) {
-        res.migration = {
-          ...migration,
-          step: 'setupComponent',
-        }
+        res.migration!.step = 'setupComponent'
       },
       render () {
         return (<div class="p-16px">

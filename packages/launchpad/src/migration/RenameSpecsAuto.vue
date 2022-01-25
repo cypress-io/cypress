@@ -50,15 +50,13 @@
     <BeforeAfter>
       <template #before>
         <HighlightedFilesList
-          :files="props.gql.specFilesBefore"
-          :highlight-reg-exp="/(integration|[_,-,.]?(spec|test))/gi"
+          :files="props.gql.specFiles.before"
           highlight-class="text-red-500"
         />
       </template>
       <template #after>
         <HighlightedFilesList
-          :files="props.gql.specFilesAfter"
-          :highlight-reg-exp="/(e2e|\.cy)/gi"
+          :files="props.gql.specFiles.after"
           highlight-class="text-jade-500"
         />
       </template>
@@ -100,8 +98,21 @@ const { t } = useI18n()
 
 gql`
 fragment RenameSpecsAuto on Migration {
-  specFilesBefore
-  specFilesAfter
+  specFiles {
+    before {
+      parts {
+        text
+        highlight
+      }
+    }
+
+    after {
+      parts {
+        text
+        highlight
+      }
+    }
+  }
 }`
 
 const props = defineProps<{
