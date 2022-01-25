@@ -320,7 +320,7 @@ describe('Launchpad: Setup Project', () => {
             const bundler = BUNDLERS.find((b) => b.type === testBundler)
 
             if (!bundler) {
-              throw new Error(`${framework.name} claims to support the bundler, ${testBundler}, however it is not a valid Cypress bundlers.`)
+              throw new Error(`${framework.name} claims to support the bundler, ${testBundler}, however it is not a valid Cypress bundler.`)
             }
 
             CODE_LANGUAGES.forEach((lang) => {
