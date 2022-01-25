@@ -1,4 +1,5 @@
 import type { TestingType } from '@packages/types'
+import chokidar from 'chokidar'
 import fs from 'fs-extra'
 import stringify from 'stringify-object'
 import path from 'path'
@@ -101,6 +102,75 @@ export function formatMigrationFile (file: string, regexp: RegExp): FilePart[] {
 
 export async function createConfigString (cfg: Partial<Cypress.ConfigOptions>) {
   return createCypressConfigJs(reduceConfig(cfg), getPluginRelativePath(cfg))
+}
+
+interface FileToBeMigratedManually {
+  relative: string
+  moved: boolean
+}
+
+export interface ComponentTestingMigrationStatus {
+  files: Map<string, FileToBeMigratedManually>
+  completed: boolean
+}
+
+export function initComponentTestingMigration (
+  projectRoot: string,
+  componentFolder: string,
+  testFiles: string | string[],
+  onFileMoved: (status: ComponentTestingMigrationStatus) => void,
+): Promise<{
+  status: ComponentTestingMigrationStatus
+  watcher: chokidar.FSWatcher
+}> {
+  const globs = Array.isArray(testFiles) ? testFiles : [testFiles]
+
+  const watchPaths = globs.map((glob) => {
+    return path.join(componentFolder, glob)
+  })
+
+  const watcher = chokidar.watch(
+    watchPaths, {
+      cwd: projectRoot,
+    },
+  )
+
+  let filesToBeMoved: Map<string, FileToBeMigratedManually> = globby.sync(watchPaths, {
+    cwd: projectRoot,
+  }).reduce<Map<string, FileToBeMigratedManually>>((acc, relative) => {
+    acc.set(relative, { relative, moved: false })
+
+    return acc
+  }, new Map())
+
+  watcher.on('unlink', (unlinkedPath) => {
+    const file = filesToBeMoved.get(unlinkedPath)
+
+    if (!file) {
+      throw Error(`Watcher incorrectly triggered while watching ${file}`)
+    }
+
+    file.moved = true
+
+    const completed = Array.from(filesToBeMoved.values()).every((value) => value.moved === true)
+
+    onFileMoved({
+      files: filesToBeMoved,
+      completed,
+    })
+  })
+
+  return new Promise((resolve) => {
+    watcher.on('ready', () => {
+      resolve({
+        status: {
+          files: filesToBeMoved,
+          completed: false,
+        },
+        watcher,
+      })
+    })
+  })
 }
 
 function getPluginRelativePath (cfg: Partial<Cypress.ConfigOptions>) {

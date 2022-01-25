@@ -3,6 +3,8 @@ import path from 'path'
 import fs from 'fs-extra'
 import {
   createConfigString,
+  initComponentTestingMigration,
+  ComponentTestingMigrationStatus,
   NonStandardMigrationError,
   getSpecs,
   formatMigrationFile,
@@ -13,6 +15,23 @@ import {
 } from '../../../src/util/migration'
 import { expect } from 'chai'
 import tempDir from 'temp-dir'
+
+function scaffoldMigrationProject (project: string) {
+  const tmpDir = path.join(tempDir, 'cy-projects')
+  const testProject = path.join(__dirname, '..', '..', '..', '..', '..', 'system-tests', 'projects', project)
+  const cwd = path.join(tmpDir, project)
+
+  try {
+    fs.rmSync(cwd, { recursive: true, force: true })
+  } catch (e) {
+    /* eslint-disable no-console */
+    console.error(`error, could not remove ${cwd}`, e.message)
+  }
+
+  fs.cpSync(testProject, cwd, { recursive: true })
+
+  return cwd
+}
 
 describe('cypress.config.js generation', () => {
   it('should create a string when passed only a global option', async () => {
@@ -87,25 +106,9 @@ describe('cypress.config.js generation', () => {
   })
 })
 
-function scaffoldMigrationProject () {
-  const tmpDir = path.join(tempDir, 'cy-projects')
-  const testProject = path.join(__dirname, '..', '..', '..', '..', '..', 'system-tests', 'projects', 'migration')
-  const cwd = path.join(tmpDir, 'migration')
-
-  try {
-    fs.rmdirSync(cwd)
-  } catch {
-    // all good
-  }
-
-  fs.cpSync(testProject, cwd, { recursive: true })
-
-  return cwd
-}
-
 describe('spec renaming', () => {
   it('should rename all specs', async () => {
-    const cwd = scaffoldMigrationProject()
+    const cwd = scaffoldMigrationProject('migration')
     const specs = await getSpecs(cwd, 'cypress/component', 'cypress/integration')
 
     expect(specs.before[0].relative).to.eql('cypress/component/button.spec.js')
@@ -139,10 +142,11 @@ describe('spec renaming', () => {
 
 describe('supportFilesForMigrationGuide', () => {
   it('finds and represents correct supportFile migration guide', async () => {
-    const cwd = scaffoldMigrationProject()
+    const cwd = scaffoldMigrationProject('migration')
     const actual = await supportFilesForMigration(cwd)
 
     expect(actual.before[0]).to.eql({
+      relative: 'cypress/support/index.js',
       parts: [
         {
           'text': 'cypress/support/',
@@ -161,6 +165,7 @@ describe('supportFilesForMigrationGuide', () => {
     })
 
     expect(actual.after[0]).to.eql({
+      relative: 'cypress/support/e2e.js',
       parts: [
         {
           'text': 'cypress/support/',
@@ -255,5 +260,71 @@ describe('formatMigrationFile', () => {
         { text: `.${ext}`, highlight: false },
       ])
     })
+  })
+})
+
+describe('initComponentTestingMigration', () => {
+  it('calls callback with status each time file is removed', async () => {
+    const cwd = scaffoldMigrationProject('migration-component-testing')
+
+    const delay = () => new Promise((res) => setTimeout(res, 250))
+
+    let updatedStatus: ComponentTestingMigrationStatus
+
+    const onFileMoved = (_status: ComponentTestingMigrationStatus) => {
+      updatedStatus = _status
+    }
+
+    const { status, watcher } = await initComponentTestingMigration(
+      cwd,
+      'src',
+      '**/*.{js,tsx}',
+      onFileMoved,
+    )
+
+    expect(status.completed).to.be.false
+    expect(status.files).to.eql(new Map([
+      ['src/button.spec.js', { moved: false,
+        relative: 'src/button.spec.js',
+      }],
+      ['src/input-spec.tsx', {
+        moved: false,
+        relative: 'src/input-spec.tsx',
+      }],
+    ]))
+
+    fs.moveSync(
+      path.join(cwd, 'src', 'input-spec.tsx'),
+      path.join(cwd, 'src', 'input.cy.tsx'),
+    )
+
+    // give watcher time to trigger
+    await delay()
+
+    expect(updatedStatus).to.eql({
+      files: new Map([
+        ['src/button.spec.js', { moved: false, relative: 'src/button.spec.js' }],
+        ['src/input-spec.tsx', { moved: true, relative: 'src/input-spec.tsx' }],
+      ]),
+      completed: false,
+    })
+
+    fs.moveSync(
+      path.join(cwd, 'src', 'button.spec.js'),
+      path.join(cwd, 'src', 'button.cy.js'),
+    )
+
+    // give watcher time to trigger
+    await delay()
+
+    expect(updatedStatus).to.eql({
+      files: new Map([
+        ['src/button.spec.js', { moved: true, relative: 'src/button.spec.js' }],
+        ['src/input-spec.tsx', { moved: true, relative: 'src/input-spec.tsx' }],
+      ]),
+      completed: true,
+    })
+
+    await watcher.close()
   })
 })
