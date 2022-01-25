@@ -35,6 +35,6 @@
     "gulp-rev-all": "2.0.2",
     "mocha": "2.5.3",
     "resolve-pkg": "2.0.0",
-    "shelljs": "0.8.4"
+    "shelljs": "0.8.5"
   }
 }
