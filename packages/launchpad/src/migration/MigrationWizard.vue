@@ -191,6 +191,7 @@ const start = useMutation(MigrationWizard_StartDocument)
 
 onBeforeMount(async () => {
   await start.executeMutation({ })
+  await query.executeQuery()
 })
 
 // specs rename
