@@ -96,7 +96,7 @@ describe('Choose a Browser Page', () => {
 
       cy.get('h1').should('contain', 'Choose a Browser')
 
-      cy.contains('button', 'Start E2E testing in Chrome').as('launchButton')
+      cy.contains('button', 'Start E2E Testing in Chrome').as('launchButton')
 
       // Stub out response to prevent browser launch but not break internals
       cy.intercept('mutation-OpenBrowser_LaunchProject', {
@@ -134,7 +134,7 @@ describe('Choose a Browser Page', () => {
       cy.findByRole('radio', { name: 'Chrome v1', checked: true }).as('chromeItem')
       cy.findByRole('radio', { name: 'Firefox v5', checked: false }).as('firefoxItem')
 
-      cy.contains('button', 'Start E2E testing in Chrome').should('be.visible')
+      cy.contains('button', 'Start E2E Testing in Chrome').should('be.visible')
 
       cy.intercept('mutation-OpenBrowserList_SetBrowser').as('setBrowser')
 
@@ -145,7 +145,24 @@ describe('Choose a Browser Page', () => {
       cy.findByRole('radio', { name: 'Chrome v1', checked: false })
       cy.findByRole('radio', { name: 'Firefox v5', checked: true })
 
-      cy.contains('button', 'Start E2E testing in Firefox').should('be.visible')
+      cy.contains('button', 'Start E2E Testing in Firefox').should('be.visible')
+    })
+
+    it('prevents calling launchProject multiple times', () => {
+      cy.openProject('launchpad', ['--e2e'])
+
+      cy.visitLaunchpad()
+
+      cy.get('h1').should('contain', 'Choose a Browser')
+
+      cy.withCtx((ctx) => {
+        ctx.actions.project.launchProject = sinon.spy()
+      })
+
+      cy.intercept('mutation-OpenBrowser_LaunchProject', cy.stub().as('launchProject'))
+      cy.contains('button', 'Start E2E Testing in Chrome').dblclick()
+
+      cy.get('@launchProject').its('callCount').should('equal', 1)
     })
 
     it('performs mutation to close browser', () => {
