@@ -23,8 +23,7 @@ context('multi-domain files', { experimentalSessionSupport: true, experimentalMu
     })
   })
 
-  // FIXME: stub on Cypress.backend is causing an infinite loop
-  it.skip('.writeFile()', () => {
+  it('.writeFile()', () => {
     cy.switchToDomain('foobar.com', () => {
       cy.stub(Cypress, 'backend')
       // @ts-ignore
