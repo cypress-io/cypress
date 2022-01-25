@@ -4,6 +4,21 @@ import type { ChildProcess } from 'child_process'
 import EventEmitter from 'events'
 import { autoBindDebug } from '../util'
 
+export interface SerializedError {
+  code?: string | number
+  type?: string | number
+  stack?: string
+  annotated?: string
+  message?: string
+  name: string
+  isCypressErr?: boolean
+}
+
+export type SetupTestingTypeError = {
+  type: 'PLUGINS_FUNCTION_ERROR' | 'PLUGINS_VALIDATION_ERROR' | 'SETUP_NODE_EVENTS_DO_NOT_SUPPORT_DEV_SERVER'
+  serializedError: SerializedError
+}
+
 export type IpcHandler = (ipc: ProjectConfigIpc) => void
 
 export interface SetupNodeEventsReply {
@@ -85,7 +100,7 @@ export class ProjectConfigIpc extends EventEmitter {
    * When
    */
   once(evt: 'setupTestingType:reply', listener: (payload: SetupNodeEventsReply) => void): this
-  once(evt: 'setupTestingType:error', listener: (error: string, requiredFile: string, stack: string) => void): this
+  once(evt: 'setupTestingType:error', listener: (payload: SetupTestingTypeError) => void): this
   once (evt: string, listener: (...args: any[]) => void) {
     return super.once(evt, listener)
   }

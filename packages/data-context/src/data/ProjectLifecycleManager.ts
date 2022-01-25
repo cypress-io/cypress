@@ -20,8 +20,9 @@ import type { DataContext } from '..'
 import { LoadConfigReply, SetupNodeEventsReply, ProjectConfigIpc, IpcHandler } from './ProjectConfigIpc'
 import assert from 'assert'
 import type { AllModeOptions, FoundBrowser, FullConfig, TestingType } from '@packages/types'
-import type { BaseErrorDataShape, CoreDataShape, WarningError } from '.'
+import type { CoreDataShape, WarningError } from '.'
 import { autoBindDebug } from '../util/autoBindDebug'
+import type { ErrorWrapperSource } from '@packages/graphql/src/schemaTypes/objectTypes/gql-BaseError'
 
 const debug = debugLib(`cypress:lifecycle:ProjectLifecycleManager`)
 
@@ -179,7 +180,7 @@ export class ProjectLifecycleManager {
     return null
   }
 
-  get errorLoadingConfigFile (): BaseErrorDataShape | null {
+  get errorLoadingConfigFile (): ErrorWrapperSource | null {
     if (this._configResult.state === 'errored') {
       return {
         title: 'Error Loading Config',
@@ -191,7 +192,7 @@ export class ProjectLifecycleManager {
     return null
   }
 
-  get errorLoadingNodeEvents (): BaseErrorDataShape | null {
+  get errorLoadingNodeEvents (): ErrorWrapperSource | null {
     if (this._eventsIpcResult.state === 'errored') {
       return {
         title: 'Error Loading Config',
@@ -1240,7 +1241,7 @@ export class ProjectLifecycleManager {
 
     // For every registration event, we want to turn into an RPC with the child process
     ipc.once('setupTestingType:reply', dfd.resolve)
-    ipc.once('setupTestingType:error', (type, ...args) => {
+    ipc.once('setupTestingType:error', ({ type, serializedError }) => {
       dfd.reject(this.ctx.error(type, ...args))
     })
 

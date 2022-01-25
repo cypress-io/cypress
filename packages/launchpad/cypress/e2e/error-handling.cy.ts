@@ -1,7 +1,19 @@
 describe('Error handling', () => {
-  it('it handles a plugin error', () => {
-    cy.scaffoldProject('unify-plugin-errors')
-    cy.openProject('unify-plugin-errors')
+  it('handles sync error when loading the config (top level)', () => {
+    cy.scaffoldProject('config-with-uncaught-exception-sync')
+    cy.openProject('config-with-uncaught-exception-sync')
+    cy.visitLaunchpad()
+  })
+
+  it('displays errors in the setupNodeEvents function with proper stack trace', () => {
+    cy.scaffoldProject('config-with-setup-function-error')
+    cy.openProject('config-with-setup-function-error', ['--e2e'])
+    cy.visitLaunchpad()
+  })
+
+  it('it reloads the after the user fixes an error in setupNodeEvents', () => {
+    cy.scaffoldProject('config-with-setup-function-error')
+    cy.openProject('config-with-setup-function-error')
     cy.loginUser()
 
     cy.visitLaunchpad()
@@ -19,7 +31,7 @@ describe('Error handling', () => {
 
     cy.log('Fix error and validate it reloads configuration')
     cy.withCtx(async (ctx) => {
-      await ctx.actions.file.writeFileInProject('cypress.config.js', `module.exports = { e2e: { baseUrl: 'https://cypress.com', supportFile: false } }`)
+      ctx.actions.file.writeFileInProject('cypress.config.js', `module.exports = { e2e: { baseUrl: 'https://cypress.com', supportFile: false } }`)
     })
 
     cy.get('body')
