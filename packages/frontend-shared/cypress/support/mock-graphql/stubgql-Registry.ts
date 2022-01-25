@@ -6,6 +6,7 @@ import { stubGlobalProject, stubProject } from './stubgql-Project'
 import { CloudOrganizationStubs, CloudProjectStubs, CloudRecordKeyStubs, CloudRunStubs, CloudUserStubs } from './stubgql-CloudTypes'
 import { stubMigration } from './stubgql-Migration'
 import type { CodegenTypeMap } from '../generated/test-graphql-types.gen'
+import { StubErrorWrapper } from './stubgql-ErrorWrapper'
 
 type MaybeResolveMap = {[K in keyof CodegenTypeMap]: MaybeResolver<CodegenTypeMap[K]>}
 
@@ -22,8 +23,9 @@ export const GQLStubRegistry = {
   CloudRun: CloudRunStubs.allPassing,
   CloudRecordKey: CloudRecordKeyStubs.componentProject,
   CloudUser: CloudUserStubs.me,
+  ErrorWrapper: StubErrorWrapper,
 } as const
 
-// Line below added so we can refer to the above as a const value, but ensure it fits the type contract
+// For Type checking
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const _typeCheck: Partial<MaybeResolveMap> = GQLStubRegistry
+const _x: Partial<MaybeResolveMap> = GQLStubRegistry
