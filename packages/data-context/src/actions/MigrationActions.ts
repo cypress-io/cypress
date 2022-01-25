@@ -1,7 +1,12 @@
-import { MIGRATION_STEPS } from '@packages/types'
+import path from 'path'
+import fs from 'fs-extra'
 import type { DataContext } from '..'
+import {
+  moveSpecFiles,
+  NonStandardMigrationError,
+  supportFilesForMigration,
+} from '../util'
 
-type MIGRATION_STEP = typeof MIGRATION_STEPS[number]
 export class MigrationActions {
   constructor (private ctx: DataContext) { }
 
@@ -18,17 +23,37 @@ export class MigrationActions {
   }
 
   initialize () {
-    // FIXME: stop watchers before migrating
-    this.setStep(MIGRATION_STEPS[0])
+    return this.ctx.migration.initialize()
   }
 
   async renameSpecFiles () {
-    // TODO: implement the renaming of spec files here
+    if (!this.ctx.currentProject) {
+      throw Error('Need to set currentProject before you can rename files')
+    }
+
+    const e2eDirPath = this.ctx.path.join(this.ctx.currentProject, 'cypress', 'integration')
+
+    moveSpecFiles(e2eDirPath)
   }
 
   async renameSupportFile () {
-    // TODO: build rename of support file
-    return
+    if (!this.ctx.currentProject) {
+      throw Error(`Need current project before starting migration!`)
+    }
+
+    const result = await supportFilesForMigration(this.ctx.currentProject)
+
+    const beforeRelative = result.before[0]?.relative
+    const afterRelative = result.after[0]?.relative
+
+    if (!beforeRelative || !afterRelative) {
+      throw new NonStandardMigrationError('support')
+    }
+
+    fs.renameSync(
+      path.join(this.ctx.currentProject, beforeRelative),
+      path.join(this.ctx.currentProject, afterRelative),
+    )
   }
 
   async startWizardReconfiguration () {
@@ -37,7 +62,7 @@ export class MigrationActions {
     this.ctx.lifecycleManager.setCurrentTestingType('component')
   }
 
-  setStep (step: MIGRATION_STEP) {
-    this.ctx.migration.setStep(step)
+  nextStep () {
+    this.ctx.migration.nextStep()
   }
 }

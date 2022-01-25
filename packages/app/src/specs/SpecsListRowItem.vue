@@ -1,7 +1,7 @@
 <template>
   <div
     class="grid grid-cols-2 outline-none children:cursor-pointer group h-full"
-    data-testid="specs-list-row"
+    data-cy="specs-list-row"
     tabindex="0"
   >
     <div>

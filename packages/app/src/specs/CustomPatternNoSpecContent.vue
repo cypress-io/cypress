@@ -20,7 +20,7 @@
     <Button
       size="lg"
       variant="outline"
-      @click="emit('newSpec')"
+      @click="emit('showCreateSpecModal')"
     >
       <template #prefix>
         <i-cy-add-large_x16 class="icon-dark-gray-500" />
@@ -40,10 +40,6 @@ import OpenConfigFileInIDE from '@packages/frontend-shared/src/gql-components/Op
 
 const { t } = useI18n()
 
-const emit = defineEmits<{
-  (e: 'newSpec'): void
-}>()
-
 gql`
 fragment CustomPatternNoSpecContent on Query {
   currentProject {
@@ -56,4 +52,9 @@ fragment CustomPatternNoSpecContent on Query {
 const props = defineProps<{
   gql: CustomPatternNoSpecContentFragment
 }>()
+
+const emit = defineEmits<{
+  (e: 'showCreateSpecModal'): void
+}>()
+
 </script>
