@@ -114,6 +114,9 @@ const setup = () => {
       isPending () {},
     })
 
+    // Set the state ctx to the runnable ctx to ensure they remain in sync
+    cy.state('ctx', cy.state('runnable').ctx)
+
     let fnWrapper = `(${fn})`
 
     if (isDoneFnAvailable) {
