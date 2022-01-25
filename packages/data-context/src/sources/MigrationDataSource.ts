@@ -73,9 +73,13 @@ export class MigrationDataSource {
     if (!this.componentTestingMigrationWatcher) {
       const onFileMoved = (status: ComponentTestingMigrationStatus) => {
         this.componentTestingMigrationStatus = status
+
         if (status.completed) {
           this.componentTestingMigrationWatcher?.close()
         }
+
+        // TODO(lachlan): is this the right plcae to use the emitter?
+        this.ctx.deref.emitter.toLaunchpad()
       }
 
       const { status, watcher } = await initComponentTestingMigration(
