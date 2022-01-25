@@ -142,6 +142,7 @@ export default (Commands, Cypress, cy, state, config) => {
     }
 
     return {
+      fileName: aliasObj.fileName,
       ...file,
       contents: aliasObj.subject,
     }
