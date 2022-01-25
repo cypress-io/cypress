@@ -30,20 +30,20 @@ const VirtualizedTreeContents = <
   TLeaf extends LeafTreeBase,
   TParent extends ParentTreeBase<TLeaf>
 >({
-    innerRef,
-    treeRef,
-    tree,
-    defaultItemSize,
-    overscanCount = 20,
-    indentSize,
-    showRoot,
-    shouldMeasure,
-    onNodePress: externalOnNodePress,
-    onNodeKeyDown,
-    onRenderLeaf,
-    onRenderParent,
-    ...props
-  }: VirtualizedTreeProps<TLeaf, TParent>) => {
+  innerRef,
+  treeRef,
+  tree,
+  defaultItemSize,
+  overscanCount = 20,
+  indentSize,
+  showRoot,
+  shouldMeasure,
+  onNodePress: externalOnNodePress,
+  onNodeKeyDown,
+  onRenderLeaf,
+  onRenderParent,
+  ...props
+}: VirtualizedTreeProps<TLeaf, TParent>) => {
   type TNodeData = TreeNodeData<TLeaf, TParent>
 
   const wrapperRef = useRef<HTMLDivElement | null>(null)
@@ -320,7 +320,7 @@ export const VirtualizedTree = <
   TLeaf extends LeafTreeBase,
   TParent extends ParentTreeBase<TLeaf>
 >(props: VirtualizedTreeProps<TLeaf, TParent>) => (
-    <FocusStateContext>
-      <VirtualizedTreeContents {...props} />
-    </FocusStateContext>
-  )
+  <FocusStateContext>
+    <VirtualizedTreeContents {...props} />
+  </FocusStateContext>
+)

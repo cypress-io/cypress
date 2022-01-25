@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "9.1.1",
+  "version": "9.3.1",
   "description": "Cypress.io end to end testing tool",
   "private": true,
   "scripts": {
@@ -50,7 +50,7 @@
     "stop-only": "npx stop-only --skip .cy,.publish,.projects,node_modules,dist,dist-test,fixtures,lib,bower_components,src,__snapshots__ --exclude cypress-tests.ts,*only.cy.js",
     "stop-only-all": "yarn stop-only --folder packages",
     "pretest": "yarn ensure-deps",
-    "test": "yarn lerna exec yarn test --scope cypress --scope \"'@packages/{config,electron,extension,https-proxy,launcher,net-stubbing,network,proxy,rewriter,socket}'\"",
+    "test": "yarn lerna exec yarn test --scope cypress --scope \"'@packages/{config,data-context,electron,extension,https-proxy,launcher,net-stubbing,network,proxy,rewriter,socket}'\"",
     "test-debug": "lerna exec yarn test-debug --ignore \"'@packages/{driver,root,static,web-config}'\"",
     "pretest-e2e": "yarn ensure-deps",
     "test-integration": "lerna exec yarn test-integration --ignore \"'@packages/{driver,root,static,web-config}'\"",
@@ -69,6 +69,9 @@
     "verify:mocha:results": "node ./scripts/verify_mocha_results",
     "watch": "yarn gulp dev:watch",
     "prepare": "husky install"
+  },
+  "dependencies": {
+    "nvm": "0.0.4"
   },
   "devDependencies": {
     "@cypress/bumpercar": "2.0.12",
@@ -273,6 +276,7 @@
     "**/sharp": "0.29.3",
     "**/socket.io-parser": "4.0.4",
     "**/ua-parser-js": "0.7.24",
+    "@typescript-eslint/eslint-plugin": "4.18.0",
     "sharp": "0.29.3",
     "vue-template-compiler": "2.6.12"
   }

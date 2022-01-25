@@ -23,8 +23,11 @@ describe('<SettingsCard />', () => {
     cy.get(contentSelector).should('not.exist')
     cy.findByText(title).click()
     cy.get(contentSelector).should('be.visible')
+    cy.percySnapshot()
     cy.findByText(title).click()
     .get(contentSelector).should('not.exist')
+
+    cy.percySnapshot()
 
     // expected aria and keyboard behavior with space and enter keys:
     cy.get(collapsibleSelector).should('be.focused')
@@ -45,7 +48,7 @@ describe('<SettingsCard />', () => {
     const description2 = 'Lorem ipsum dolor sit amet'
 
     cy.mount(() => (
-      <div class="p-24px">
+      <div class="flex flex-col p-24px gap-24px">
         <SettingsCard title={title} description={description} icon={IconLaptop} maxHeight="800px">
           <div data-testid="content">
             <p>The body of the content</p>
@@ -60,5 +63,7 @@ describe('<SettingsCard />', () => {
     ))
 
     cy.contains(collapsibleSelector, title).focus().type(' ')
+
+    cy.percySnapshot()
   })
 })

@@ -48,7 +48,7 @@ yarn test-watch /test/path/to/spec.js
 
 ### Running individual unit tests
 
-```bashtest-kitchensink
+```bash
 yarn test <path/to/test>
 yarn test test/unit/api_spec.js
 ## or
@@ -68,7 +68,7 @@ yarn test-integration cli_spec ## shorthand, uses globbing to find spec
 
 > With the addition of Component Testing, `e2e` tests have been renamed to `system-tests` and moved to the [`system-tests`](../../system-tests) directory.
 
-### Updating snaphots
+### Updating snapshots
 
 Prepend `SNAPSHOT_UPDATE=1` to any test command. See [`snap-shot-it` instructions](https://github.com/bahmutov/snap-shot-it#advanced-use) for more info.
 
