@@ -30,13 +30,17 @@ export const handleDomainFn = (cy: $Cy, specBridgeCommunicator: SpecBridgeDomain
   const reset = () => {
     cy.reset({})
 
-    cy.state('runnable', {
+    const runnable = {
       ctx: {},
       clearTimeout () {},
       resetTimeout () {},
       timeout () {},
       isPending () {},
-    })
+    }
+
+    cy.state('runnable', runnable)
+    // Set the state ctx to the runnable ctx to ensure they remain in sync
+    cy.state('ctx', runnable.ctx)
   }
 
   specBridgeCommunicator.on('run:domain:fn', async ({ data, fn, isDoneFnAvailable = false }: { data: any[], fn: string, isDoneFnAvailable: boolean }) => {

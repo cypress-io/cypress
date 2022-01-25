@@ -43,6 +43,11 @@ const setup = () => {
     addLog () {},
   }
 
+  // @ts-ignore
+  Cypress.cy = cy
+  // @ts-ignore
+  Cypress.events.proxyTo(Cypress.cy)
+
   const { state, config } = Cypress
 
   $Commands.create(Cypress, cy, state, config)
@@ -114,17 +119,10 @@ const onBeforeAppWindowLoad = (Cypress: Cypress.Cypress, cy: $Cy) => (autWindow:
       return ret
     },
   })
-
-  specBridgeCommunicator.toPrimary('window:before:load')
 }
 
 // eventually, setup will get called again on rerun and cy will
 // get re-created
-const cy = setup()
-
-// @ts-ignore
-window.__onBeforeAppWindowLoad = (autWindow: Window) => {
-  cy.onBeforeAppWindowLoad(autWindow)
-}
+setup()
 
 specBridgeCommunicator.toPrimary('bridge:ready')

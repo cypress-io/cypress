@@ -43,6 +43,7 @@ declare namespace Cypress {
     sinon: sinon.SinonApi
     utils: CypressUtils
     state: State
+    events: Events
   }
 
   interface CypressUtils {
