@@ -3,25 +3,26 @@
     :title="t('migration.setupComponent.title')"
   />
   <MigrationList>
-    <template #line-1>
+    <MigrationListItem>
       {{ t('migration.setupComponent.line1') }}
-    </template>
-    <template #line-2>
+    </MigrationListItem>
+    <MigrationListItem>
       {{ t('migration.setupComponent.line2') }}
-    </template>
-    <template #line-3>
+    </MigrationListItem>
+    <MigrationListItem>
       {{ t('migration.setupComponent.line3') }}
-    </template>
-    <template #line-4>
+    </MigrationListItem>
+    <MigrationListItem>
       {{ t('migration.setupComponent.line4') }}
-    </template>
+    </MigrationListItem>
   </MigrationList>
 </template>
 
 <script lang="ts" setup>
 import { useI18n } from '@cy/i18n'
-import MigrationList from './fragments/MigrationList.vue'
 import MigrationTitle from './fragments/MigrationTitle.vue'
+import MigrationList from './fragments/MigrationList.vue'
+import MigrationListItem from './fragments/MigrationListItem.vue'
 
 const { t } = useI18n()
 

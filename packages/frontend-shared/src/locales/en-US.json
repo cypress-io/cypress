@@ -553,6 +553,7 @@
         "title": "Manually move your existing component specs",
         "description": "In this step, you'll manually move your existing component specs to their new default location.",
         "buttonWait": "Waiting for you to move your component specs...",
+        "buttonDone": "I have moved my component specs",
         "button": "I'll do this later"
       },
       "step3": {
