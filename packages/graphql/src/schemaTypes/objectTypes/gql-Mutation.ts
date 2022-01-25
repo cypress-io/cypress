@@ -547,5 +547,15 @@ export const mutation = mutationType({
         return {}
       },
     })
+
+    t.field('closeBrowser', {
+      description: 'Close active browser',
+      type: 'Boolean',
+      resolve: async (source, args, ctx) => {
+        await ctx.actions.browser.closeBrowser()
+
+        return true
+      },
+    })
   },
 })

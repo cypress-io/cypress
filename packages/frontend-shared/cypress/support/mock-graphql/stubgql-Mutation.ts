@@ -92,4 +92,7 @@ export const stubMutation: MaybeResolver<Mutation> = {
   matchesSpecPattern (src, args, ctx) {
     return true
   },
+  closeBrowser (src, args, ctx) {
+    return true
+  },
 }

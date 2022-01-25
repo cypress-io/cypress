@@ -1,16 +1,10 @@
 <template>
   <div class="p-24px spec-container">
-    <CreateSpecModal
-      v-if="props.gql.currentProject?.currentTestingType"
-      :show="showModal"
-      :gql="props.gql"
-      @close="showModal = false"
-    />
     <SpecsListHeader
       v-model="search"
       class="pb-32px"
       :result-count="specs.length"
-      @newSpec="showModal = true"
+      @showCreateSpecModal="emit('showCreateSpecModal')"
     />
 
     <template
@@ -93,7 +87,6 @@ import SpecListGitInfo from './SpecListGitInfo.vue'
 import SpecsListRowItem from './SpecsListRowItem.vue'
 import { gql } from '@urql/vue'
 import { computed, ref, watch } from 'vue'
-import CreateSpecModal from './CreateSpecModal.vue'
 import type { Specs_SpecsListFragment, SpecListRowFragment } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
 import { buildSpecTree, FuzzyFoundSpec, fuzzySortSpecs, getDirIndexes, makeFuzzyFoundSpec, useCachedSpecs } from '@packages/frontend-shared/src/utils/spec-utils'
@@ -106,35 +99,31 @@ import NoResults from '@cy/components/NoResults.vue'
 const { t } = useI18n()
 
 gql`
-fragment SpecNode_SpecsList on SpecEdge {
-  node {
-    id
-    name
-    specType
-    absolute
-    baseName
-    fileName
-    specFileExtension
-    fileExtension
-    relative
-    gitInfo {
-      ...SpecListRow
-    }
+fragment SpecsList on Spec {
+  id
+  name
+  specType
+  absolute
+  baseName
+  fileName
+  specFileExtension
+  fileExtension
+  relative
+  gitInfo {
+    ...SpecListRow
   }
 }
 `
 
 gql`
 fragment Specs_SpecsList on Query {
-  ...CreateSpecModal
   currentProject {
     id
     projectRoot
     currentTestingType
-    specs: specs(first: 100) {
-      edges {
-        ...SpecNode_SpecsList
-      }
+    specs {
+      id
+      ...SpecsList
     }
   }
 }
@@ -144,17 +133,20 @@ const props = defineProps<{
   gql: Specs_SpecsListFragment
 }>()
 
-const showModal = ref(false)
+const emit = defineEmits<{
+  (e: 'showCreateSpecModal'): void
+}>()
+
 const search = ref('')
 
 function handleClear () {
   search.value = ''
 }
 
-const cachedSpecs = useCachedSpecs(computed(() => props.gql.currentProject?.specs?.edges || []))
+const cachedSpecs = useCachedSpecs(computed(() => props.gql.currentProject?.specs || []))
 
 const specs = computed(() => {
-  const specs = cachedSpecs.value.map((x) => makeFuzzyFoundSpec(x.node))
+  const specs = cachedSpecs.value.map((x) => makeFuzzyFoundSpec(x))
 
   if (!search.value) {
     return specs
