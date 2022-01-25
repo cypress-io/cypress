@@ -240,7 +240,7 @@
     "**/@types/cheerio": "0.22.21",
     "**/@types/enzyme": "3.10.5",
     "**/@types/react": "16.9.50",
-    "**/jquery": "3.1.1",
+    "**/jquery": "3.5.0",
     "**/pretty-format": "26.4.0",
     "**/socket.io-parser": "4.0.4",
     "**/ua-parser-js": "0.7.24",

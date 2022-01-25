@@ -54,7 +54,7 @@
     "express": "4.17.1",
     "is-valid-domain": "0.0.20",
     "is-valid-hostname": "1.0.1",
-    "jquery": "3.1.1",
+    "jquery": "3.5.0",
     "js-cookie": "2.2.1",
     "jsdom": "14.1.0",
     "json-stable-stringify": "1.0.1",

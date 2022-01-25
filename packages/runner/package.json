@@ -45,7 +45,7 @@
     "debug": "^4.3.2",
     "enzyme": "3.11.0",
     "enzyme-adapter-react-16": "1.15.2",
-    "jquery": "3.1.1",
+    "jquery": "3.5.0",
     "jsdom": "14.1.0",
     "lodash": "^4.17.21",
     "mobx": "5.15.4",
