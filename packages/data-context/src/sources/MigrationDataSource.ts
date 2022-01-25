@@ -257,21 +257,7 @@ export class MigrationDataSource {
     return this._step
   }
 
-  private setStep (step: MIGRATION_STEP) {
+  setStep (step: MIGRATION_STEP) {
     this._step = step
-  }
-
-  nextStep () {
-    const index = this.filteredSteps.indexOf(this._step)
-
-    if (index === -1) {
-      throw new Error('Invalid step')
-    }
-
-    const nextStep = this.filteredSteps[index + 1]
-
-    if (nextStep) {
-      this.setStep(nextStep)
-    }
   }
 }

@@ -216,35 +216,36 @@ export const Migration = objectType({
     t.nonNull.boolean('hasCustomIntegrationFolder', {
       description: 'whether the integration folder is custom or not',
       resolve: (source, args, ctx) => {
-        ctx.migration.hasCustomIntegrationFolder
-      },
+        return ctx.migration.hasCustomIntegrationFolder
+      }
+      ,
     })
 
     t.nonNull.boolean('hasCustomIntegrationSpecPattern', {
       description: 'whether the testFiles member is custom or not in integration',
       resolve: (source, args, ctx) => {
-        ctx.migration.hasCustomIntegrationSpecPattern
+        return ctx.migration.hasCustomIntegrationSpecPattern
       },
     })
 
     t.nonNull.boolean('hasCustomComponentFolder', {
       description: 'whether the component folder is custom or not',
       resolve: (source, args, ctx) => {
-        ctx.migration.hasCustomComponentFolder
+        return ctx.migration.hasCustomComponentFolder
       },
     })
 
     t.nonNull.boolean('hasCustomComponentSpecPattern', {
       description: 'whether the testFiles member is custom or not in component testing',
       resolve: (source, args, ctx) => {
-        ctx.migration.hasCustomComponentSpecPattern
+        return ctx.migration.hasCustomComponentSpecPattern
       },
     })
 
     t.nonNull.boolean('hasComponentTesting', {
       description: 'whether component testing is set up in the migrated config or not',
       resolve: (source, args, ctx) => {
-        ctx.migration.hasComponentTesting
+        return ctx.migration.hasComponentTesting
       },
     })
   },
