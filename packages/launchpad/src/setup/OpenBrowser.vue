@@ -7,7 +7,6 @@
       :title="t('setupWizard.chooseBrowser.title')"
       :description="headingDescription"
     />
-    {{ query.data.value.currentProject.isBrowserOpen }}
     <OpenBrowserList
       variant=""
       :gql="query.data.value.currentProject"

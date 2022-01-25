@@ -406,11 +406,6 @@
   dependencies:
     "@types/throttle-debounce" "^2.1.0"
 
-"@arcsine/win-info@0.2.13":
-  version "0.2.13"
-  resolved "https://registry.yarnpkg.com/@arcsine/win-info/-/win-info-0.2.13.tgz#ea97d2eee6c7239aa09f8b441f3ecc1c4b2b8494"
-  integrity sha512-iwqzRU6+PuWn33wDcJQln0tg8mRNIQu9ZvJ2ylsPCji+AeVs5ivQhtxZVoGeBieMcie2qeqZJJpxiSe4Vpt+rg==
-
 "@ardatan/aggregate-error@0.0.6":
   version "0.0.6"
   resolved "https://registry.yarnpkg.com/@ardatan/aggregate-error/-/aggregate-error-0.0.6.tgz#fe6924771ea40fc98dc7a7045c2e872dc8527609"
@@ -13511,7 +13506,7 @@ binaryextensions@^4.18.0:
   resolved "https://registry.yarnpkg.com/binaryextensions/-/binaryextensions-4.18.0.tgz#22aeada2d14de062c60e8ca59a504a5636a76ceb"
   integrity sha512-PQu3Kyv9dM4FnwB7XGj1+HucW+ShvJzJqjuw1JkKVs1mWdwOKVcRjOi+pV9X52A0tNvrPCsPkbFFQb+wE1EAXw==
 
-bindings@^1.3.0, bindings@^1.5.0:
+bindings@^1.5.0:
   version "1.5.0"
   resolved "https://registry.yarnpkg.com/bindings/-/bindings-1.5.0.tgz#10353c9e945334bc0511a6d90b38fbc7c9c504df"
   integrity sha512-p2q/t/mhvuOj/UeLlV6566GD/guowlr0hHxClI0W9m7MWYkL1F0hLo+0Aexs9HSPCtR1SXQ0TD3MMKrXZajbiQ==
@@ -21069,14 +21064,6 @@ for-own@^1.0.0:
   integrity sha1-xjMy9BXO3EsE2/5wz4NklMU8tEs=
   dependencies:
     for-in "^1.0.1"
-
-forcefocus@1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/forcefocus/-/forcefocus-1.1.0.tgz#815bd26c7c7944060f02d88d6dd7f003569da880"
-  integrity sha512-bnY7rul5kBLyNoCn0FHNiFAF+GGUZx6TvxWhurUS4PlmOzF+FMixGIigHH5UcyM3w1gp2TxAtP6MOUSXA15Sgw==
-  dependencies:
-    bindings "^1.3.0"
-    prebuild-install "^5.0.0"
 
 foreach@^2.0.5, foreach@~2.0.1:
   version "2.0.5"
@@ -33345,7 +33332,7 @@ postinstall-postinstall@2.1.0:
   resolved "https://registry.yarnpkg.com/postinstall-postinstall/-/postinstall-postinstall-2.1.0.tgz#4f7f77441ef539d1512c40bd04c71b06a4704ca3"
   integrity sha512-7hQX6ZlZXIoRiWNrbMQaLzUUfH+sSx39u8EJ9HYuDc1kLo9IXKWjM5RSquZN1ad5GnH8CGFM78fsAAQi3OKEEQ==
 
-prebuild-install@^5.0.0, prebuild-install@^5.2.4, prebuild-install@^5.3.5:
+prebuild-install@^5.2.4, prebuild-install@^5.3.5:
   version "5.3.6"
   resolved "https://registry.yarnpkg.com/prebuild-install/-/prebuild-install-5.3.6.tgz#7c225568d864c71d89d07f8796042733a3f54291"
   integrity sha512-s8Aai8++QQGi4sSbs/M1Qku62PFK49Jm1CbgXklGz4nmHveDq0wzJkg7Na5QbnO1uNH8K7iqx2EQ/mV0MZEmOg==
