@@ -1,4 +1,4 @@
-import { FilePart, formatMigrationFile, regexps } from '@packages/data-context/src/util'
+import { FilePart, formatMigrationFile, regexps } from '@packages/data-context/src/util/migrationFormat'
 import HighlightedFile from './HighlightedFile.vue'
 
 describe('<HighlightedFile/>', { viewportWidth: 1119 }, () => {
