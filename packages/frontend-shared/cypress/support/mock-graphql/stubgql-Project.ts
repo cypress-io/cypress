@@ -32,26 +32,14 @@ export const createTestCurrentProject = (title: string, currentProject: Partial<
     isE2EConfigured: true,
     currentTestingType: 'e2e',
     projectId: `${globalProject.title}-id`,
-    specs: {
-      pageInfo: {
-        __typename: 'PageInfo',
-        hasNextPage: true,
-        hasPreviousPage: false,
-      },
-      __typename: 'SpecConnection' as const,
-      edges: [
-        ...randomComponents(200, 'Spec').map((c) => {
-          return {
-            __typename: 'SpecEdge' as const,
-            cursor: 'eoifjew',
-            node: {
-              ...c,
-              id: c.absolute,
-            },
-          }
-        }),
-      ],
-    },
+    specs: [
+      ...randomComponents(200, 'Spec').map((c) => {
+        return {
+          ...c,
+          id: c.absolute,
+        }
+      }),
+    ],
     config,
     cloudProject: CloudProjectStubs.componentProject,
     codeGenGlobs: {
