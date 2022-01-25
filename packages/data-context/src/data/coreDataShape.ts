@@ -4,6 +4,7 @@ import type { App, BrowserWindow } from 'electron'
 import type { ChildProcess } from 'child_process'
 import type { SocketIOServer } from '@packages/socket'
 import type { Server } from 'http'
+import type { ErrorWrapperSource } from '@packages/graphql/src/schemaTypes/objectTypes/gql-BaseError'
 
 export type Maybe<T> = T | null | undefined
 
@@ -76,12 +77,6 @@ export interface ElectronShape {
   browserWindow: BrowserWindow | null
 }
 
-export interface BaseErrorDataShape {
-  title?: string
-  message: string
-  stack?: string
-}
-
 export interface CoreDataShape {
   cliBrowser: string | null
   cliTestingType: string | null
@@ -96,7 +91,7 @@ export interface CoreDataShape {
     gqlSocketServer?: Maybe<SocketIOServer>
   }
   hasInitializedMode: 'run' | 'open' | null
-  baseError: BaseErrorDataShape | null
+  baseError: ErrorWrapperSource | null
   dev: DevStateShape
   localSettings: LocalSettingsDataShape
   app: AppDataShape

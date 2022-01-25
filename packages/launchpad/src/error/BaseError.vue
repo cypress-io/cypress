@@ -2,28 +2,18 @@
   <div class="mx-auto space-y-32px text-center min-w-476px max-w-848px pt-16px children:text-center">
     <div>
       <h1
-        class="font-medium leading-snug text-32px text-gray-900"
+        class="font-medium leading-snug text-32px text-gray-900 pb-24px"
         data-testid="error-header"
       >
         <slot name="header">
-          {{ headerText }}
+          {{ props.gql.title }}
         </slot>
       </h1>
       <!-- eslint-disable vue/multiline-html-element-content-newline  -->
 
       <slot name="message">
-        <!-- Can't pull this out because of the i18n-t component -->
-        <i18n-t
-          scope="global"
-          keypath="launchpadErrors.generic.message"
-          tag="p"
-          class="font-light pb-24px"
-          data-testid="error-message"
-        >
-          <OpenConfigFileInIDE />
-        </i18n-t>
         <Alert
-          :title="props.gql.title ?? ''"
+          :title="props.gql.originalError?.name ?? 'Error'"
           status="error"
           body-class="px-0px bg-red-50"
           alert-class="bg-red-50"
@@ -31,20 +21,21 @@
           :icon="ErrorOutlineIcon"
           icon-classes="icon-dark-red-400"
         >
-          <p
-            v-if="errorMessage"
+          <div
+            v-if="props.gql.description"
+            ref="markdownTarget"
             class="border-b-1 border-b-red-100 p-16px pt-0 text-red-500"
-          >
-            {{ errorMessage }}
-          </p>
+            data-testid="error-message"
+            v-html="markdown"
+          />
           <p
-            v-if="stack"
+            v-if="props.gql.originalError?.stack"
             class="m-16px mb-0 overflow-hidden"
           >
             <Collapsible
               disable
               max-height="400px"
-              initially-open
+              :initially-open="props.gql.isUserCodeError"
             >
               <template #target="{open, toggle}">
                 <p
@@ -64,9 +55,9 @@
                 </p>
               </template>
               <pre
-                v-if="stack"
+                data-testid="error-header"
                 class="bg-white rounded font-light border-1 border-red-200 p-16px overflow-auto"
-                v-html="stack"
+                v-html="props.gql.originalError?.stack"
               />
             </Collapsible>
           </p>
@@ -79,7 +70,7 @@
     <div class="w-full gap-16px inline-flex">
       <slot name="footer">
         <Button
-          v-if="retry"
+          v-if="props.gql.isRetryable"
           size="lg"
           variant="primary"
           data-testid="error-retry-button"
@@ -103,23 +94,37 @@
 </template>
 
 <script lang="ts" setup>
+import { ref, computed } from 'vue'
 import { gql } from '@urql/vue'
 import Button from '@cy/components/Button.vue'
-import { computed } from 'vue'
 import { useI18n } from '@cy/i18n'
 import type { BaseError_DataFragment } from '../generated/graphql'
 import Alert from '@cy/components/Alert.vue'
-import OpenConfigFileInIDE from '@packages/frontend-shared/src/gql-components/OpenConfigFileInIDE.vue'
 import Collapsible from '@cy/components/Collapsible.vue'
+import { useMarkdown } from '@packages/frontend-shared/src/composables/useMarkdown'
 import RestartIcon from '~icons/cy/restart_x16.svg'
 import { useExternalLink } from '@packages/frontend-shared/src/gql-components/useExternalLink'
 import ErrorOutlineIcon from '~icons/cy/status-errored-outline_x16.svg'
 
 gql`
-fragment BaseError_Data on BaseError {
+fragment BaseError_Data on ErrorWrapper {
   title
-  message
-  stack
+  description
+  errorType
+  isRetryable
+  isUserCodeError
+  fileToOpen {
+    id
+    relative
+    absolute
+    line
+    column
+  }
+  originalError {
+    name
+    stack
+    message
+  }
 }
 `
 
@@ -133,8 +138,7 @@ const props = defineProps<{
   onReadDocs?: () => void
 }>()
 
-const headerText = computed(() => t('launchpadErrors.generic.header'))
-const errorMessage = computed(() => props.gql.message ?? null)
-const stack = computed(() => props.gql.stack ?? null)
-
+const markdownTarget = ref()
+const description = computed(() => props.gql.description)
+const { markdown } = useMarkdown(markdownTarget, description.value, { classes: { code: ['bg-error-200'] } })
 </script>

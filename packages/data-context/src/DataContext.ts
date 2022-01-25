@@ -4,7 +4,7 @@ import path from 'path'
 import util from 'util'
 import chalk from 'chalk'
 import assert from 'assert'
-import s from 'underscore.string'
+import str from 'underscore.string'
 
 import 'server-destroy'
 
@@ -371,7 +371,7 @@ export class DataContext {
       console.log(chalk.yellow(err.message))
     } else {
       this.coreData.warnings.push({
-        title: `Warning: ${s.titleize(s.humanize(err.type ?? ''))}`,
+        title: `Warning: ${str.titleize(str.humanize(err.type ?? ''))}`,
         message: err.message,
         details: err.details,
       })

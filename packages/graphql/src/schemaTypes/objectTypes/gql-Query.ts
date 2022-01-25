@@ -1,5 +1,5 @@
 import { objectType } from 'nexus'
-import { BaseError } from '.'
+import { ErrorWrapper } from '.'
 import { ProjectLike, ScaffoldedFile, TestingTypeEnum } from '..'
 import { CurrentProject } from './gql-CurrentProject'
 import { DevState } from './gql-DevState'
@@ -14,7 +14,7 @@ export const Query = objectType({
   description: 'The root "Query" type containing all entry fields for our querying',
   definition (t) {
     t.field('baseError', {
-      type: BaseError,
+      type: ErrorWrapper,
       resolve: (root, args, ctx) => ctx.baseError,
     })
 

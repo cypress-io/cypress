@@ -1,12 +1,12 @@
 /* eslint-disable padding-line-between-statements */
 // created by autobarrel, do not modify directly
 
-export * from './gql-BaseError'
 export * from './gql-Browser'
 export * from './gql-CodeGenGlobs'
 export * from './gql-CurrentProject'
 export * from './gql-DevState'
 export * from './gql-Editor'
+export * from './gql-ErrorWrapper'
 export * from './gql-FileParts'
 export * from './gql-GitInfo'
 export * from './gql-GlobalProject'

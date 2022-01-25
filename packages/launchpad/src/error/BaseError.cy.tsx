@@ -1,4 +1,3 @@
-import { defaultMessages } from '@cy/i18n'
 import BaseError from './BaseError.vue'
 import Button from '@cy/components/Button.vue'
 import { BaseError_DataFragmentDoc } from '../generated/graphql-test'
@@ -11,7 +10,7 @@ const docsButtonSelector = '[data-testid=error-read-the-docs-button]'
 const customFooterSelector = '[data-testid=custom-error-footer]'
 
 // Constants
-const messages = defaultMessages.launchpadErrors.generic
+const messages = cy.i18n.launchpadErrors.generic
 const customHeaderMessage = 'Well, this was unexpected!'
 const customMessage = `Don't worry, just click the "It's fixed now" button to try again.`
 const customFooterText = `Yikes, try again!`
@@ -24,28 +23,44 @@ describe('<BaseError />', () => {
 
   it('renders the default error the correct messages', () => {
     cy.mountFragment(BaseError_DataFragmentDoc, {
-      onResult: (result) => {
-        result.title = messages.header
-      },
       render: (gqlVal) => <BaseError gql={gqlVal} retry={() => {}} />,
     })
     .get(headerSelector)
-    .should('contain.text', messages.header)
+    .should('contain.text', cy.gqlStub.ErrorWrapper.title)
     .get(messageSelector)
-    .should('contain.text', `It looks like there's some issues that need to be resolved before we continue`)
-    .get(retryButtonSelector)
-    .should('contain.text', messages.retryButton)
+    .should('contain.text', cy.gqlStub.ErrorWrapper.description.slice(0, 10))
     .get(docsButtonSelector)
     .should('contain.text', messages.readTheDocsButton)
+    .get(retryButtonSelector)
+    .should('not.exist')
+  })
+
+  it('renders the retry button if isRetryable is true', () => {
+    cy.mountFragment(BaseError_DataFragmentDoc, {
+      onResult (result) {
+        result.isRetryable = true
+      },
+      render: (gqlVal) => <BaseError gql={gqlVal} />,
+    })
+    .get(retryButtonSelector)
+    .should('contain.text', messages.retryButton)
+  })
+
+  it('does not open the stack by default if it is not a user error', () => {
+    cy.mountFragment(BaseError_DataFragmentDoc, {
+      onResult (result) {
+        result.isUserCodeError = false
+      },
+      render: (gqlVal) => <BaseError gql={gqlVal} />,
+    }).then(() => {
+      cy.get('[data-testid="stack-contents"]')
+      .should('be.hidden')
+    })
   })
 
   // NOTE: Figure out how to stub the graphql mutation call
   it.skip('emits the retry event by default', () => {
     cy.mountFragment(BaseError_DataFragmentDoc, {
-      onResult: (result) => {
-        result.title = messages.header
-        result.message = null
-      },
       render: (gqlVal) => (<div class="p-16px">
         <BaseError gql={gqlVal} />,
       </div>),
@@ -62,7 +77,7 @@ describe('<BaseError />', () => {
       onResult: (result) => {
         result.title = customHeaderMessage
         result.message = customMessage
-        result.stack = customStack
+        result.originalError!.stack = customStack
       },
       render: (gqlVal) => (<div class="p-16px">
         <BaseError gql={gqlVal} />

@@ -3,6 +3,7 @@
 
 export * from './gql-BrowserFamilyEnum'
 export * from './gql-CodeGenTypeEnum'
+export * from './gql-ErrorTypeEnum'
 export * from './gql-ProjectEnums'
 export * from './gql-SpecEnum'
 export * from './gql-WizardEnums'
