@@ -88,7 +88,7 @@ const multiDomainConfig: webpack.Configuration = {
   mode: 'development',
   ...getSimpleConfig(),
   entry: {
-    cypress_multi_domain_runner: [path.resolve(__dirname, 'multi-domain/index.js')],
+    cypress_multi_domain_runner: [path.resolve(__dirname, 'src/multi-domain.js')],
   },
   output: {
     path: path.resolve(__dirname, 'dist'),

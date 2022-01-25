@@ -55,10 +55,9 @@ context('multi-domain actions', { experimentalSessionSupport: true, experimental
     cy.get('a[data-cy="dom-link"]').click()
 
     cy.switchToDomain('foobar.com', done, () => {
-      const $btn = cy.$$('#button')
-
-      $btn.on('click', () => done())
-      cy.get('#button').click()
+      cy.get('#button').then((btn) => {
+        btn.on('click', () => done())
+      }).click()
     })
   })
 
@@ -66,10 +65,9 @@ context('multi-domain actions', { experimentalSessionSupport: true, experimental
     cy.get('a[data-cy="dom-link"]').click()
 
     cy.switchToDomain('foobar.com', done, () => {
-      const $btn = cy.$$('#button')
-
-      $btn.on('dblclick', () => done())
-      cy.get('#button').dblclick()
+      cy.get('#button').then((btn) => {
+        btn.on('dblclick', () => done())
+      }).dblclick()
     })
   })
 
@@ -77,10 +75,9 @@ context('multi-domain actions', { experimentalSessionSupport: true, experimental
     cy.get('a[data-cy="dom-link"]').click()
 
     cy.switchToDomain('foobar.com', done, () => {
-      const $btn = cy.$$('#button')
-
-      $btn.on('contextmenu', () => done())
-      cy.get('#button').rightclick()
+      cy.get('#button').then((btn) => {
+        btn.on('contextmenu', () => done())
+      }).rightclick()
     })
   })
 
@@ -136,10 +133,9 @@ context('multi-domain actions', { experimentalSessionSupport: true, experimental
     cy.get('a[data-cy="dom-link"]').click()
 
     cy.switchToDomain('foobar.com', done, () => {
-      const $btn = cy.$$('#button')
-
-      $btn.on('click', () => done())
-      cy.get('#button').trigger('click')
+      cy.get('#button').then((btn) => {
+        btn.on('click', () => done())
+      }).trigger('click')
     })
   })
 
