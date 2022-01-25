@@ -37,7 +37,6 @@ describe('<NoSpecsPage />', { viewportHeight: 655, viewportWidth: 1032 }, () => 
       .get(viewSpecsSelector)
       .should('be.visible')
       .and('contain.text', messages.viewSpecPatternButton)
-      .and('have.attr', 'href', '#/settings?section=project&setting=specPattern')
     })
 
     it('renders the correct text for component testing', () => {
