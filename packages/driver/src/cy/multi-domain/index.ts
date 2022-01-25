@@ -1,4 +1,5 @@
 import Bluebird from 'bluebird'
+import { AssertionError } from 'chai'
 import _ from 'lodash'
 import { createDeferred, Deferred } from '../../util/deferred'
 import $utils from '../../cypress/utils'
@@ -6,19 +7,26 @@ import $errUtils from '../../cypress/error_utils'
 
 export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: Cypress.State, config: Cypress.InternalConfig) {
   let timeoutId
-  const correctStackForCrossDomainError = (error: any, userInvocationStack: string) => {
-    //  Since Errors sent over postMessage need to be serialized to Objects, we need to serialize them back
-    const parsedError = $errUtils.serializeCrossDomainErrorsFromObject(error)
+  const correctStackForCrossDomainError = (serializedError: any, userInvocationStack: string) => {
+    //  Since Errors sent over postMessage need to be serialized to Objects, we need to serialize them back into Error instances
+    let errorClass
 
-    // With just the error message at hand, attach the switchToDomain user invocation stack to point users
-    // To where the error occurred in their spec file
-    $errUtils.enhanceStack({
-      err: parsedError,
-      userInvocationStack,
-      projectRoot: config('projectRoot'),
+    switch (serializedError?.name) {
+      case 'AssertionError':
+        errorClass = AssertionError
+        break
+      default:
+        errorClass = Error
+    }
+
+    // only assign missing properties on the object to reify the error properly
+    const reifiedError = _.assignWith(new errorClass(serializedError?.message), serializedError, (objValue, srcValue) => {
+      return _.isUndefined(objValue) ? srcValue : objValue
     })
 
-    return parsedError
+    reifiedError.stack = userInvocationStack
+
+    return reifiedError
   }
 
   // @ts-ignore
