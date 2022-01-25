@@ -28,7 +28,7 @@ function scaffoldMigrationProject (project: string) {
     console.error(`error, could not remove ${cwd}`, e.message)
   }
 
-  fs.cpSync(testProject, cwd, { recursive: true })
+  fs.copySync(testProject, cwd, { recursive: true })
 
   return cwd
 }
