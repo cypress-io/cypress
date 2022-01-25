@@ -36,9 +36,7 @@ export class MigrationActions {
 
     const e2eDirPath = this.ctx.path.join(this.ctx.currentProject, 'cypress', 'integration')
 
-    moveSpecFiles(e2eDirPath).catch((error) => {
-      throw error
-    })
+    moveSpecFiles(e2eDirPath)
   }
 
   async renameSupportFile () {
