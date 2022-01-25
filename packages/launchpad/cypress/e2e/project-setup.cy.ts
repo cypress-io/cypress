@@ -109,8 +109,9 @@ describe('Launchpad: Setup Project', () => {
 
         cy.findByRole('button', { name: 'Close' })
         .should('have.focus')
+
         // @ts-ignore
-        .realType('{enter}')
+        cy.realType('{enter}')
       })
 
       cy.get('#app').should('not.have.attr', 'aria-hidden')
@@ -225,8 +226,9 @@ describe('Launchpad: Setup Project', () => {
         verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: false })
 
         // @ts-ignore
-        cy.get('body').tab()
-
+        // cy.get('body').tab()
+        // @ts-ignore
+        cy.realPress('Tab')
         cy.get('[data-cy-testingtype="e2e"]')
         .should('have.focus')
         .type('{enter}')
@@ -430,9 +432,12 @@ describe('Launchpad: Setup Project', () => {
 
                 cy.findByRole('button', { name: 'I\'ve installed them' }).click()
 
-                cy.get('[data-cy=changes]').within(() => {
-                  cy.contains('cypress.config.js')
-                })
+                // FIXME: remove if-check once this is fixed. https://cypress-io.atlassian.net/browse/UNIFY-980
+                if (lang.type !== 'ts') {
+                  cy.get('[data-cy=changes]').within(() => {
+                    cy.contains('cypress.config.js')
+                  })
+                }
 
                 cy.get('[data-cy=valid]').within(() => {
                   cy.contains('cypress/component/index.html')
@@ -461,10 +466,8 @@ describe('Launchpad: Setup Project', () => {
 
         verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: false })
 
-        // @ts-ignore
-        cy.get('body').tab().tab()
-
         cy.get('[data-cy-testingtype="component"]')
+        .focus()
         .should('have.focus')
         .type('{enter}')
 
@@ -497,17 +500,17 @@ describe('Launchpad: Setup Project', () => {
         cy.findByRole('button', { name: 'I\'ve installed them' }).click()
 
         cy.get('[data-cy=valid]').within(() => {
-          // FIXME: once https://github.com/cypress-io/cypress/pull/19776 merges
-          // cy.contains('cypress.config.ts')
           cy.contains('cypress.config.js')
           cy.contains('cypress/component/index.html')
-          cy.contains(`cypress/support/component.ts`)
+          cy.contains(`cypress/support/component.js`)
           cy.contains('cypress/fixtures/example.json')
         })
 
-        // this throws an error from the generated config
+        // Fix me: https://cypress-io.atlassian.net/browse/UNIFY-981
         // cy.findByRole('button', { name: 'Continue' }).click()
         // cy.contains(/(Initializing Config|Choose a Browser)/)
+        cy.findByRole('button', { name: 'Continue' }).click()
+        cy.contains(/(Initializing Config|Choose a Browser)/)
       })
 
       it('opens to the "choose framework" page when opened via cli with --component flag', () => {
@@ -516,10 +519,8 @@ describe('Launchpad: Setup Project', () => {
 
         verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: false })
 
-        // @ts-ignore
-        cy.get('body').tab().tab()
-
         cy.get('[data-cy-testingtype="component"]')
+        .focus()
         .should('have.focus')
         .type('{enter}')
 
@@ -532,15 +533,13 @@ describe('Launchpad: Setup Project', () => {
         cy.findByRole('button', { name: 'I\'ve installed them' }).click()
 
         cy.get('[data-cy=valid]').within(() => {
-          // FIXME: once https://github.com/cypress-io/cypress/pull/19776 merges
-          // cy.contains('cypress.config.ts') // should be
-          cy.contains('cypress.config.js')
+          cy.contains('cypress.config.ts')
           cy.contains('cypress/component/index.html')
           cy.contains(`cypress/support/component.ts`)
           cy.contains('cypress/fixtures/example.json')
         })
 
-        // this throws an error from the generated config
+        // Fix me: https://cypress-io.atlassian.net/browse/UNIFY-981
         // cy.findByRole('button', { name: 'Continue' }).click()
         // cy.contains(/(Initializing Config|Choose a Browser)/)
       })

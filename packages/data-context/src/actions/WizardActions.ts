@@ -33,7 +33,7 @@ export class WizardActions {
       return this.setBundler('webpack')
     }
 
-    return this.data
+    return this.setBundler(null)
   }
 
   setBundler (bundler: NexusGenEnums['SupportedBundlers'] | null) {
