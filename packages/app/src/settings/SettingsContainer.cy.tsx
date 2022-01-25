@@ -71,7 +71,7 @@ describe('<SettingsContainer />', { viewportHeight: 800, viewportWidth: 900 }, (
 
         cy.get(`[data-cy="${name}"]`).within(() => {
           cy.get('[data-cy="collapsible-header"]').should('have.attr', 'aria-expanded', 'true')
-          cy.contains(defaultMessages.settingsPage[setting].title).should('be.visible')
+          cy.contains(defaultMessages.settingsPage[setting].title, { timeout: 10000 }).should('be.visible')
         })
       })
     }))

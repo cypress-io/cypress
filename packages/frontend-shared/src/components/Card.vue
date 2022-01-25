@@ -8,7 +8,7 @@
       'bg-gray-50 border-gray-100 pointer-events-none': disabled
     }"
     data-cy="card"
-    :tabindex="disabled ? -1 : 1"
+    :tabindex="disabled ? -1 : 0"
     role="button"
     @click="emits('click')"
   >

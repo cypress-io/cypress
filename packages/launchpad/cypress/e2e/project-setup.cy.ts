@@ -90,7 +90,7 @@ describe('Launchpad: Setup Project', () => {
         cy.get('h2').contains('Key Differences').should('be.visible')
 
         // @ts-ignore
-        cy.get('body').tab()
+        cy.get('body').tab().tab()
 
         cy.findByRole('button', { name: 'Close' })
         .should('have.focus')
@@ -208,7 +208,7 @@ describe('Launchpad: Setup Project', () => {
       verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: false })
 
       // @ts-ignore
-      cy.get('body').tab()
+      cy.get('body').tab().tab()
 
       cy.get('[data-cy-testingtype="e2e"]')
       .should('have.focus')
@@ -276,7 +276,7 @@ describe('Launchpad: Setup Project', () => {
         verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: false })
 
         // @ts-ignore
-        cy.get('body').tab().tab()
+        cy.get('body').tab().tab().tab()
 
         cy.get('[data-cy-testingtype="component"]')
         .should('have.focus')
