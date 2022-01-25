@@ -39,15 +39,12 @@ describe('Migration', { viewportWidth: 1200 }, () => {
   })
 
   describe('File Renames', () => {
-    beforeEach(() => {
+    it('should move files to correct location', () => {
       cy.withCtx(async (ctx) => {
         await ctx.actions.file.writeFileInProject('cypress.json', '{}')
       })
 
       cy.visitLaunchpad()
-    })
-
-    it('should move files to correct location', () => {
       cy.findByText(defaultMessages.migration.wizard.step1.button).click()
 
       cy.withCtx(async (ctx) => {
