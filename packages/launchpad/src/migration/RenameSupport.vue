@@ -1,10 +1,10 @@
 <template>
   <MigrationTitle :title="t('migration.renameSupport.title')" />
   <MigrationList>
-    <template #line-1>
+    <MigrationListItem>
       {{ t('migration.renameSupport.serveDifferentTypes') }}
-    </template>
-    <template #line-2>
+    </MigrationListItem>
+    <MigrationListItem>
       {{ t('migration.renameSupport.changedSupportFile') }}
       <CodeTag
         class="text-red-500"
@@ -13,20 +13,18 @@
       <CodeTag
         class="text-jade-500"
       >cypress/support/e2e.js</CodeTag>
-    </template>
+    </MigrationListItem>
   </MigrationList>
   <BeforeAfter>
     <template #before>
       <HighlightedFilesList
-        :files="[props.gql.supportFileBefore]"
-        :highlight-reg-exp="/index/gi"
+        :files="props.gql.supportFiles.before"
         highlight-class="text-red-500"
       />
     </template>
     <template #after>
       <HighlightedFilesList
-        :files="[props.gql.supportFileAfter]"
-        :highlight-reg-exp="/e2e/gi"
+        :files="props.gql.supportFiles.after"
         highlight-class="text-jade-500"
       />
     </template>
@@ -42,13 +40,26 @@ import HighlightedFilesList from './fragments/HighlightedFilesList.vue'
 import BeforeAfter from './fragments/BeforeAfter.vue'
 import type { RenameSupportFragment } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
+import MigrationListItem from './fragments/MigrationListItem.vue'
 
 const { t } = useI18n()
 
 gql`
 fragment RenameSupport on Migration {
-  supportFileBefore
-  supportFileAfter
+  supportFiles {
+    before {
+      parts {
+        text
+        highlight
+      }
+    }
+    after {
+      parts {
+        text
+        highlight
+      }
+    }
+  }
 }`
 
 const props = defineProps<{
