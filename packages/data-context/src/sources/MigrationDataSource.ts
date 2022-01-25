@@ -11,6 +11,8 @@ import {
   getDefaultLegacySupportFile,
   RelativeSpecWithTestingType,
   supportFilesForMigration,
+  OldCypressConfig,
+  hasComponentSpecFile,
 } from '../util/migration'
 import {
   formatMigrationFile,
@@ -35,7 +37,7 @@ export interface FilesForMigrationUI {
 type MIGRATION_STEP = typeof MIGRATION_STEPS[number]
 
 export class MigrationDataSource {
-  private _config: Cypress.ConfigOptions | null = null
+  private _config: OldCypressConfig | null = null
   private _step: MIGRATION_STEP = 'renameAuto'
   filteredSteps: MIGRATION_STEP[] = MIGRATION_STEPS.filter(() => true)
   hasCustomIntegrationFolder: boolean = false
@@ -55,6 +57,7 @@ export class MigrationDataSource {
     this.filteredSteps = MIGRATION_STEPS.filter((step) => this.shouldShowStep(step))
     if (this.filteredSteps[0]) {
       this.setStep(this.filteredSteps[0])
+      debug('ready to start migration')
     }
   }
 
@@ -201,10 +204,7 @@ export class MigrationDataSource {
     return 'cypress/component'
   }
 
-  // FIXME: Cypress.ConfigOptions is the updated type for options but
-  // cypress.json uses the old model and won't fit the new one.
-  // If it did, why would we even be migrating ;)
-  private async parseCypressConfig (): Promise<Cypress.ConfigOptions> {
+  private async parseCypressConfig (): Promise<OldCypressConfig> {
     if (this._config) {
       return this._config
     }
@@ -212,7 +212,7 @@ export class MigrationDataSource {
     if (this.ctx.lifecycleManager.metaState.hasLegacyCypressJson) {
       const cfgPath = path.join(this.ctx.lifecycleManager?.projectRoot, 'cypress.json')
 
-      this._config = this.ctx.file.readJsonFile(cfgPath) as Cypress.ConfigOptions
+      this._config = await this.ctx.file.readJsonFile(cfgPath) as OldCypressConfig
 
       return this._config
     }
@@ -227,12 +227,21 @@ export class MigrationDataSource {
 
     this.hasCustomIntegrationFolder = config.e2e?.integrationFolder !== undefined || config.integrationFolder !== undefined
 
-    this.hasCustomComponentSpecPattern = config.component?.testFiles !== undefined || config.testFiles !== undefined
+    const customComponentTestFiles = config.component?.testFiles ?? config.testFiles
+    const customComponentFolder = config.component?.componentFolder ?? config.componentFolder
 
-    this.hasCustomComponentFolder = config.component?.componentFolder !== undefined || config.componentFolder !== undefined
+    this.hasCustomComponentSpecPattern = customComponentTestFiles !== '*/**' && customComponentTestFiles !== undefined && customComponentTestFiles !== null
 
-    // TODO: implement this properly
-    this.hasComponentTesting = true
+    this.hasCustomComponentFolder = customComponentFolder !== 'cypress/component' && customComponentFolder !== undefined && customComponentFolder !== null
+
+    const componentFolder = customComponentFolder ?? 'cypress/component'
+    const componentGlob = customComponentTestFiles ?? '**/*'
+
+    this.hasComponentTesting = await hasComponentSpecFile(
+      this.ctx.lifecycleManager?.projectRoot,
+      componentFolder,
+      componentGlob,
+    )
   }
 
   private shouldShowStep (step: MIGRATION_STEP): boolean {
