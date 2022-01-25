@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import { AssertionError } from 'chai'
 
 export const correctStackForCrossDomainError = (serializedError: any, userInvocationStack: string) => {
