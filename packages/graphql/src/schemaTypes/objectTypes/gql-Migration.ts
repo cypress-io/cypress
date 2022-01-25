@@ -36,6 +36,33 @@ export const MigrationFiles = objectType({
   },
 })
 
+export const ManualMigrationFile = objectType({
+  name: 'ManualMigrationFile',
+  definition (t) {
+    t.nonNull.boolean('moved', {
+      description: 'has the file been moved since opening the migration helper',
+    })
+
+    t.nonNull.string('relative', {
+      description: 'name of file to migrate',
+    })
+  },
+})
+
+export const ManualMigration = objectType({
+  name: 'ManualMigration',
+  definition (t) {
+    t.nonNull.list.nonNull.field('files', {
+      type: ManualMigrationFile,
+      description: 'files needing manual migration',
+    })
+
+    t.nonNull.boolean('completed', {
+      description: 'is the manual migration completed (all files are moved)',
+    })
+  },
+})
+
 export const MigrationFile = objectType({
   name: 'MigrationFile',
   definition (t) {
@@ -95,11 +122,19 @@ export const Migration = objectType({
       },
     })
 
-    t.nonNull.list.nonNull.field('manualFiles', {
+    t.field('manualFiles', {
       description: 'List of files needing manual conversion',
-      type: MigrationFile,
-      resolve: () => {
-        return []
+      type: ManualMigration,
+      resolve: async (source, args, ctx) => {
+        const status = await ctx.migration.getComponentTestingMigrationStatus()
+
+        return {
+          completed: status.completed,
+          // we sort it to make sure the endpoint always returns the
+          // specs in the same order, so things don't jump around.
+          files: [...status.files.values()]
+          .sort((x, y) => y.relative.length - x.relative.length),
+        }
       },
     })
 

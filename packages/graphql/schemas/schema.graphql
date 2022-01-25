@@ -541,6 +541,22 @@ type LocalSettingsPreferences {
   specListWidth: Int
 }
 
+type ManualMigration {
+  """is the manual migration completed (all files are moved)"""
+  completed: Boolean!
+
+  """files needing manual migration"""
+  files: [ManualMigrationFile!]!
+}
+
+type ManualMigrationFile {
+  """has the file been moved since opening the migration helper"""
+  moved: Boolean!
+
+  """name of file to migrate"""
+  relative: String!
+}
+
 """Contains all data related to the 9.X to 10.0 migration UI"""
 type Migration {
   """the component folder path used to store components tests"""
@@ -556,7 +572,7 @@ type Migration {
   integrationFolder: String!
 
   """List of files needing manual conversion"""
-  manualFiles: [MigrationFile!]!
+  manualFiles: ManualMigration
 
   """All spec files after conversion"""
   specFiles: MigrationFiles!

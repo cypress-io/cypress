@@ -49,9 +49,10 @@ import type { RenameSpecsManualFragment } from '../generated/graphql'
 gql`
 fragment RenameSpecsManual on Migration {
   manualFiles {
-    parts {
-      text
-      highlight
+    completed
+    files {
+      relative
+      moved
     }
   }
 }`

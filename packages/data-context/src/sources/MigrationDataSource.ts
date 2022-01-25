@@ -1,9 +1,12 @@
 import type { TestingType, MIGRATION_STEPS } from '@packages/types'
 import Debug from 'debug'
+import type chokidar from 'chokidar'
 import path from 'path'
 import type { DataContext } from '..'
 import {
   createConfigString,
+  initComponentTestingMigration,
+  ComponentTestingMigrationStatus,
   getSpecs,
   getDefaultLegacySupportFile,
   RelativeSpecWithTestingType,
@@ -32,6 +35,9 @@ type MIGRATION_STEP = typeof MIGRATION_STEPS[number]
 export class MigrationDataSource {
   private _config: Cypress.ConfigOptions | null = null
   private _step: MIGRATION_STEP = 'renameAuto'
+  private componentTestingMigrationWatcher?: chokidar.FSWatcher
+  componentTestingMigrationStatus?: ComponentTestingMigrationStatus
+
   constructor (private ctx: DataContext) { }
 
   async getSpecsRelativeToFolder () {
@@ -55,6 +61,39 @@ export class MigrationDataSource {
     }
 
     return getDefaultLegacySupportFile(this.ctx.currentProject)
+  }
+
+  async getComponentTestingMigrationStatus () {
+    const config = await this.parseCypressConfig()
+
+    if (!config || !this.ctx.currentProject) {
+      throw Error('Need currentProject and config to continue')
+    }
+
+    if (!this.componentTestingMigrationWatcher) {
+      const onFileMoved = (status: ComponentTestingMigrationStatus) => {
+        this.componentTestingMigrationStatus = status
+        if (status.completed) {
+          this.componentTestingMigrationWatcher?.close()
+        }
+      }
+
+      const { status, watcher } = await initComponentTestingMigration(
+        this.ctx.currentProject,
+        config.componentFolder || 'component',
+        config.component?.testFiles || config.testFiles || '**/*',
+        onFileMoved,
+      )
+
+      this.componentTestingMigrationStatus = status
+      this.componentTestingMigrationWatcher = watcher
+    }
+
+    if (!this.componentTestingMigrationStatus) {
+      throw Error(`Status should have been assigned by the watcher. Somethign is wrong`)
+    }
+
+    return this.componentTestingMigrationStatus
   }
 
   async supportFilesForMigrationGuide (): Promise<FilesForMigrationUI> {
