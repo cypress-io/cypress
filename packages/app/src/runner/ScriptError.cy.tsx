@@ -6,6 +6,7 @@ describe('ScriptError', () => {
   it('renders', () => {
     cy.mount(() => <ScriptError error={scriptError} />)
 
-    cy.get('span').contains('beforeEach')
+    cy.get('span').contains('beforeEach').should('be.visible')
+    cy.percySnapshot()
   })
 })

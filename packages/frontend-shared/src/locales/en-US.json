@@ -161,7 +161,6 @@
       "ciTitle": "Run in CI/CD",
       "ciSetup": "Set up CI",
       "fasterTests": "Run tests faster",
-      "smartOrchestration": "Smart Orchestration",
       "prompts": {
         "ci1": {
           "title": "Configure CI",
@@ -241,16 +240,6 @@
       "continue": "Continue",
       "next": "Next Step",
       "back": "Back"
-    },
-    "openBrowser": {
-      "startComponent": "Start Component Testing in {browser}",
-      "startE2E": "Start E2E testing in {browser}",
-      "openingComponent": "Opening Component Testing in {browser}",
-      "openingE2E": "Opening E2E Testing in {browser}",
-      "running": "Running {browser}",
-      "focus": "Focus",
-      "close": "Close",
-      "switchTestingType": "Switch testing type"
     },
     "configFile": {
       "createManually": "Create file manually",
@@ -332,7 +321,10 @@
     "editor": {
       "title": "External Editor",
       "description": "External editor to use for editing code opened when using Cypress.",
-      "noEditorSelectedPlaceholder": "Choose your editor..."
+      "noEditorSelectedPlaceholder": "Choose your editor...",
+      "editorRadioLabel": "Choose editor",
+      "customEditorRadioLabel": "Add custom editor by path",
+      "customPathPlaceholder": "Custom path..."
     },
     "projectId": {
       "title": "Project ID",
@@ -561,6 +553,7 @@
         "title": "Manually move your existing component specs",
         "description": "In this step, you'll manually move your existing component specs to their new default location.",
         "buttonWait": "Waiting for you to move your component specs...",
+        "buttonDone": "I have moved my component specs",
         "button": "I'll do this later"
       },
       "step3": {
@@ -597,5 +590,15 @@
       "title": "Choose a Browser",
       "description": "Choose your preferred browser for {testingType} testing."
     }
+  },
+  "openBrowser": {
+    "startComponent": "Start Component Testing in {browser}",
+    "startE2E": "Start E2E Testing in {browser}",
+    "openingComponent": "Opening Component Testing in {browser}",
+    "openingE2E": "Opening E2E Testing in {browser}",
+    "running": "Running {browser}",
+    "focus": "Focus",
+    "close": "Close",
+    "switchTestingType": "Switch testing type"
   }
 }

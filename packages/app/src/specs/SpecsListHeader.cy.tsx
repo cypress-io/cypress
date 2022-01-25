@@ -28,12 +28,12 @@ describe('<SpecsListHeader />', { keystrokeDelay: 0 }, () => {
   })
 
   it('emits a new spec event', () => {
-    const onNewSpec = cy.spy().as('new-spec')
+    const showCreateSpecModal = cy.spy().as('new-spec')
     const search = ref('')
 
     cy.mount(() => (<div class="max-w-800px p-12 resize overflow-auto"><SpecsListHeader
       modelValue={search.value}
-      onNewSpec={onNewSpec}
+      onShowCreateSpecModal={showCreateSpecModal}
       resultCount={0}
     /></div>))
     .get(buttonSelector)

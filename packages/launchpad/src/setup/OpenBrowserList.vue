@@ -1,42 +1,30 @@
 <template>
   <form
     v-if="browsers"
-    @submit.prevent="emit('launch', props.gql?.currentBrowser?.path)"
+    @submit.prevent="emit('launch')"
   >
-    <div
+    <RadioGroup
+      v-model="selectedBrowserId"
       class="flex flex-wrap justify-center py-40px gap-24px"
       data-cy="open-browser-list"
     >
-      <div
+      <RadioGroupOption
         v-for="browser of browsers"
+        v-slot="{ checked }"
         :key="browser.id"
         :data-cy-browser="browser.name"
-        class="relative block pt-6 pb-4 text-center rounded border-1 min-h-144px w-160px"
-        :class="{
-          'border-jade-300 ring-2 ring-jade-100 focus:border-jade-400 focus:border-1 focus:outline-none': browser.isSelected,
-          'border-gray-200': !browser.isSelected,
-          'filter grayscale bg-gray-100': browser.disabled,
-          'filter grayscale border-gray-200': (browserIsOpening || isBrowserOpen) && !browser.isSelected,
-          'hover:border-indigo-300 hover:ring-2 hover:ring-indigo-100': !browser.disabled && !browser.isSelected
-        }"
+        :value="browser.id"
+        :disabled="browser.disabled || (isBrowserOpening || isBrowserOpen)"
       >
-        <input
-          :id="browser.id"
-          :key="browser.id"
-          v-model="selectedBrowserId"
-          type="radio"
-          :value="browser.id"
-          :disabled="browser.disabled || (browserIsOpening || isBrowserOpen)"
-          class="absolute opacity-0"
-          :class="{
-            'filter grayscale': browser.disabled
-          }"
-        >
-        <label
+        <RadioGroupLabel
           :for="browser.id"
-          class="radio-label"
+          class="relative block pt-6 pb-4 text-center rounded radio-label border-1 min-h-144px w-160px"
           :class="{
-            'before:hocus:cursor-pointer': !browser.isSelected
+            'border-jade-300 ring-2 ring-jade-100 focus:border-jade-400 focus:border-1 focus:outline-none': checked,
+            'border-gray-200 before:hocus:cursor-pointer': !checked && !(isBrowserOpening || isBrowserOpen) ,
+            'filter grayscale bg-gray-100': browser.disabled,
+            'filter grayscale border-gray-200': (isBrowserOpening || isBrowserOpen) && !checked,
+            'hover:border-indigo-300 hover:ring-2 hover:ring-indigo-100': !browser.disabled && !checked && !(isBrowserOpening || isBrowserOpen)
           }"
         >
           <div class="text-center">
@@ -52,10 +40,12 @@
           >
             {{ browser.displayName }}
           </div>
-          <div class="text-gray-500 text-14px leading-20px">v{{ browser.majorVersion }}</div>
-        </label>
-      </div>
-    </div>
+          <div class="text-gray-500 text-14px leading-20px">
+            v{{ browser.majorVersion }}
+          </div>
+        </RadioGroupLabel>
+      </RadioGroupOption>
+    </RadioGroup>
     <div
       v-if="props.gql.currentTestingType"
       class="mb-14"
@@ -63,7 +53,7 @@
       <div class="flex items-center justify-center mb-4 gap-16px">
         <template v-if="!isBrowserOpen">
           <Button
-            v-if="!browserIsOpening"
+            v-if="!isBrowserOpening"
             size="lg"
             type="submit"
             :prefix-icon="props.gql.currentTestingType === 'component' ? TestingTypeComponentIcon : TestingTypeE2E"
@@ -78,8 +68,9 @@
             v-else
             size="lg"
             type="button"
+            disabled
             variant="pending"
-            class="font-medium"
+            class="font-medium disabled:cursor-default"
             :prefix-icon="StatusRunningIcon"
             prefix-icon-class="icon-light-gray-300 icon-dark-white animate-spin"
           >
@@ -95,7 +86,7 @@
             variant="pending"
             :prefix-icon="TestingTypeComponentIcon"
             prefix-icon-class="icon-dark-white"
-            class="font-medium"
+            class="font-medium disabled:cursor-default"
           >
             {{ browserText.running }}
           </Button>
@@ -117,7 +108,7 @@
             :prefix-icon="PowerStandbyIcon"
             prefix-icon-class="icon-dark-gray-500"
             class="font-medium"
-            @click="closeBrowser"
+            @click="emit('close-browser')"
           >
             {{ browserText.close }}
           </Button>
@@ -151,6 +142,7 @@ import PowerStandbyIcon from '~icons/cy/power-standby'
 import ArrowLeftIcon from '~icons/cy/arrow-left_x16'
 import StatusRunningIcon from '~icons/cy/status-running_x16'
 import TestingTypeE2E from '~icons/cy/testing-type-e2e_x24'
+import { RadioGroup, RadioGroupOption, RadioGroupLabel } from '@headlessui/vue'
 
 import { OpenBrowserListFragment, OpenBrowserList_CloseBrowserDocument, OpenBrowserList_SetBrowserDocument, OpenBrowser_FocusActiveBrowserWindowDocument } from '../generated/graphql'
 
@@ -201,13 +193,17 @@ mutation OpenBrowser_FocusActiveBrowserWindow {
 
 const props = defineProps<{
   gql: OpenBrowserListFragment,
-  browserIsOpening: boolean,
+  isBrowserOpening: boolean,
   isBrowserOpen: boolean
 }>()
 
 const emit = defineEmits<{
   (e: 'navigated-back'): void
-  (e: 'launch', value: string | undefined): void
+  (e: 'launch'): void
+  (e: 'close-browser'): void
+  // TODO: Add browser focus
+  // see: https://cypress-io.atlassian.net/browse/UNIFY-953
+  // (e: 'focus-browser'): void
 }>()
 
 const { t } = useI18n()
@@ -223,15 +219,11 @@ const browsers = computed(() => {
 const setBrowser = useMutation(OpenBrowserList_SetBrowserDocument)
 const closeBrowserMutation = useMutation(OpenBrowserList_CloseBrowserDocument)
 
-const setSelected = (browserId: string) => {
-  setBrowser.executeMutation({ id: browserId })
-}
-
 const selectedBrowserId = computed({
-  get: () => props.gql.currentBrowser ? props.gql.currentBrowser.id : null,
-  set: (newVal) => {
-    if (newVal) {
-      setSelected(newVal)
+  get: () => props.gql.currentBrowser?.id || props.gql.browsers?.find((browser) => browser.displayName === 'Electron')?.id,
+  set (browserId) {
+    if (browserId) {
+      setBrowser.executeMutation({ id: browserId })
     }
   },
 })
@@ -242,9 +234,24 @@ const selectedBrowserName = computed(() => {
   )?.displayName
 })
 
-function closeBrowser () {
-  closeBrowserMutation.executeMutation({})
-}
+const browserText = computed(() => {
+  const tArgs = { browser: selectedBrowserName.value }
+
+  return {
+    e2e: {
+      start: t('openBrowser.startE2E', tArgs),
+      opening: t('openBrowser.openingE2E', tArgs),
+    },
+    component: {
+      start: t('openBrowser.startComponent', tArgs),
+      opening: t('openBrowser.openingComponent', tArgs),
+    },
+    running: t('openBrowser.running', tArgs),
+    focus: t('openBrowser.focus'),
+    close: t('openBrowser.close'),
+    switchTestingType: t('openBrowser.switchTestingType'),
+  }
+})
 
 const focusActiveBrowserWindow = useMutation(OpenBrowser_FocusActiveBrowserWindowDocument)
 
@@ -252,35 +259,4 @@ const setFocusToActiveBrowserWindow = () => {
   focusActiveBrowserWindow.executeMutation({})
 }
 
-const browserText = computed(() => {
-  const tArgs = { browser: selectedBrowserName.value }
-
-  return {
-    e2e: {
-      start: t('setupPage.openBrowser.startE2E', tArgs),
-      opening: t('setupPage.openBrowser.openingE2E', tArgs),
-    },
-    component: {
-      start: t('setupPage.openBrowser.startComponent', tArgs),
-      opening: t('setupPage.openBrowser.openingComponent', tArgs),
-    },
-    running: t('setupPage.openBrowser.running', tArgs),
-    focus: t('setupPage.openBrowser.focus'),
-    close: t('setupPage.openBrowser.close'),
-    switchTestingType: t('setupPage.openBrowser.switchTestingType'),
-  }
-})
-
 </script>
-
-<style scoped>
-/* Make whole card clickable */
-.radio-label::before {
-  position: absolute;
-  top: 0;
-  left: 0;
-  content: "";
-  height: 100%;
-  width: 100%;
-}
-</style>

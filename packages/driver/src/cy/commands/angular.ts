@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import _ from 'lodash'
 import $ from 'jquery'
 import Promise from 'bluebird'
@@ -34,7 +32,7 @@ export default (Commands, Cypress, cy, state) => {
       }
 
       // else return null element
-      return $(null)
+      return $(null as any) // cast to any to satisfy typescript
     }
 
     const resolveElements = () => {
@@ -52,7 +50,7 @@ export default (Commands, Cypress, cy, state) => {
   }
 
   const findByNgAttr = (name, attr, el, options) => {
-    const selectors = []
+    const selectors: string[] = []
     let error = `Could not find element for ${name}: '${el}'.  Searched `
 
     _.extend(options, { verify: false, log: false })
@@ -91,7 +89,8 @@ export default (Commands, Cypress, cy, state) => {
   }
 
   Commands.addAll({
-    ng (type, selector, options = {}) {
+    // TODO: Change the options type from `any` to `Partial<Cypress.Loggable & Cypress.Timeoutable>`.
+    ng (type, selector, options: any = {}) {
       const userOptions = options
 
       // what about requirejs / browserify?

@@ -30,7 +30,6 @@ import HighlightedText from './HighlightedText.vue'
 withDefaults(defineProps<{
   fileName: string
   extension: string
-  selected?: boolean
-  indexes: number[]
-}>(), { indexes: () => [], selected: false })
+  indexes?: number[]
+}>(), { indexes: () => [] })
 </script>

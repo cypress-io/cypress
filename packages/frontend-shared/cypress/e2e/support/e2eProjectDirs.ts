@@ -30,11 +30,16 @@ export const e2eProjectDirs = [
   'launchpad',
   'max-listeners',
   'migration',
+  'migration-component-testing',
+  'multiple-config-files-with-json',
+  'multiple-support-files',
   'multiple-task-registrations',
-  'multiples-config-files-with-json',
   'no-scaffolding',
   'no-server',
+  'no-specs',
+  'no-specs-custom-pattern',
   'no-specs-found',
+  'no-specs-no-storybook',
   'non-existent-spec',
   'non-proxied',
   'odd-directory-name',
@@ -96,5 +101,5 @@ export const e2eProjectDirs = [
   'webpack-preprocessor-ts-loader',
   'webpack-preprocessor-ts-loader-compiler-options',
   'working-preprocessor',
-  'yarn-v2-pnp'
+  'yarn-v3.1.1-pnp'
 ] as const

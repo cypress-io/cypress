@@ -15,12 +15,13 @@ export function useUnifiedRunner () {
 
   onBeforeUnmount(() => {
     UnifiedRunnerAPI.teardown()
+    initialized.value = false
   })
 
   return {
     initialized: readonly(initialized),
 
-    watchSpec: (specs: Ref<SpecFile[]>) => {
+    watchSpec: (specs: Ref<ReadonlyArray<SpecFile>>) => {
       const specStore = useSpecStore()
       const route = useRoute()
       const selectorPlaygroundStore = useSelectorPlaygroundStore()

@@ -91,9 +91,9 @@ const _mount = (type: 'mount' | 'rerender', jsx: React.ReactNode, options: Mount
     // since we always surround the component with a fragment
     // let's get back the original component
     const userComponent = (reactComponent.props as {
-        key: string
-        children: React.ReactNode
-      }).children
+      key: string
+      children: React.ReactNode
+    }).children
 
     reactDomToUse.render(reactComponent, el)
 

@@ -20,7 +20,7 @@ import { create as createMouse, Mouse } from '../cy/mouse'
 import { Keyboard } from '../cy/keyboard'
 import { create as createLocation, ILocation } from '../cy/location'
 import { create as createAssertions, IAssertions } from '../cy/assertions'
-import $Listeners from '../cy/listeners'
+import { bindToListeners } from '../cy/listeners'
 import { $Chainer } from './chainer'
 import { create as createTimer, ITimer } from '../cy/timers'
 import { create as createTimeouts, ITimeouts } from '../cy/timeouts'
@@ -1076,7 +1076,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   private contentWindowListeners (contentWindow) {
     const cy = this
 
-    $Listeners.bindTo(contentWindow, {
+    bindToListeners(contentWindow, {
       // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
       onError: (handlerType) => (event) => {
         const { originalErr, err, promise } = $errUtils.errorFromUncaughtEvent(handlerType, event) as ErrorFromProjectRejectionEvent

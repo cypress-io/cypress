@@ -17,16 +17,19 @@ const files = [
 
 const assertSelectedBorder = ($els: JQuery<HTMLElement>) => {
   const win = $els[0].ownerDocument.defaultView
-  const after = win.getComputedStyle($els[0], 'after')
 
-  // Verify that we see at least some border, indicating it is highlighted
-  const leftStyle = after.getPropertyValue('border-left-style')
+  if (win) {
+    const after = win.getComputedStyle($els[0], 'after')
 
-  expect(leftStyle).to.eq('solid')
+    // Verify that we see at least some border, indicating it is highlighted
+    const leftStyle = after.getPropertyValue('border-left-style')
 
-  const leftWidth = after.getPropertyValue('border-left-width')
+    expect(leftStyle).to.eq('solid')
 
-  expect(leftWidth).to.eq('2px')
+    const leftWidth = after.getPropertyValue('border-left-width')
+
+    expect(leftWidth).to.eq('2px')
+  }
 }
 
 beforeEach(() => {

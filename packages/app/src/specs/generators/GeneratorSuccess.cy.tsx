@@ -20,6 +20,8 @@ describe('<GeneratorSuccess />', () => {
     cy.mount(() => (<GeneratorSuccess file={{ ...spec, contents: content }} />))
     .get('body')
     .contains(spec.relative)
+
+    cy.percySnapshot()
   })
 
   it('can be expanded to show the content', () => {
@@ -31,6 +33,8 @@ describe('<GeneratorSuccess />', () => {
     .wait(200) // just to show off the animation
     .get(targetSelector)
     .click()
+
+    cy.percySnapshot()
   })
 
   it('handles really long file names and really long content', () => {
@@ -38,5 +42,6 @@ describe('<GeneratorSuccess />', () => {
     const longContent = Object.keys(Array.from(Array(100))).map((c) => content).join('\n')
 
     cy.mount(() => (<GeneratorSuccess file={{ ...spec, relative, contents: longContent }} />))
+    cy.percySnapshot()
   })
 })

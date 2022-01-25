@@ -33,10 +33,7 @@ describe('<CreateSpecModal />', () => {
                 specPattern: '**/*.cy.{js,jsx,ts,tsx}',
               },
             },
-            specsBare: {
-              __typename: 'SpecConnection',
-              edges: [],
-            },
+            specs: [],
           },
         }}
         show={show.value}
@@ -47,6 +44,8 @@ describe('<CreateSpecModal />', () => {
 
   it('renders a modal', () => {
     cy.get(modalSelector).should('be.visible')
+
+    cy.percySnapshot()
   })
 
   describe('dismissing', () => {
@@ -100,10 +99,7 @@ describe('playground', () => {
                 specPattern: '**/*.cy.{js,jsx,ts,tsx}',
               },
             },
-            specsBare: {
-              __typename: 'SpecConnection',
-              edges: [],
-            },
+            specs: [],
           },
         }}
         show={show.value}
