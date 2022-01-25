@@ -6,6 +6,18 @@ describe('Migration', { viewportWidth: 1200 }, () => {
     cy.openProject('migration')
   })
 
+  it('renames support file', () => {
+    cy.visitLaunchpad()
+    cy.findByText(`I'll do this later`).click()
+    cy.findByText(`Rename the support file for me`).click()
+
+    cy.withCtx(async (ctx) => {
+      expect(
+        await ctx.actions.file.checkIfFileExists(ctx.path.join('cypress', 'support', 'e2e.js')),
+      ).not.to.be.null
+    })
+  })
+
   describe('Configuration', () => {
     beforeEach(() => {
       cy.visitLaunchpad()
@@ -40,6 +52,10 @@ describe('Migration', { viewportWidth: 1200 }, () => {
 
   describe('File Renames', () => {
     beforeEach(() => {
+      cy.withCtx(async (ctx) => {
+        await ctx.actions.file.writeFileInProject('cypress.json', '{}')
+      })
+
       cy.visitLaunchpad()
     })
 
@@ -64,19 +80,6 @@ describe('Migration', { viewportWidth: 1200 }, () => {
           expect(stats).to.not.be.null
         }
       })
-    })
-  })
-
-  it('renames support file', () => {
-    cy.visitLaunchpad()
-    cy.findByText(defaultMessages.migration.wizard.step1.button).click()
-    cy.findByText(`I'll do this later`).click()
-    cy.findByText(`Rename the support file for me`).click()
-
-    cy.withCtx(async (ctx) => {
-      expect(
-        await ctx.actions.file.checkIfFileExists(ctx.path.join('cypress', 'support', 'e2e.js')),
-      ).not.to.be.null
     })
   })
 
