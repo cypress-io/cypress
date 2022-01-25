@@ -37,16 +37,20 @@
           class="flex border-t-gray-50 h-40px mx-16px items-center"
           :class="{'border-t': index > 0}"
         >
-          <span v-if="file.moved">
-            ✅
-          </span>
-          <i-cy-document-text_x16
-            v-else
-            class="h-16px mr-8px w-16px inline-block icon-dark-gray-400 icon-light-gray-50"
-          />
-          <span>
-            {{ file.relative }}
-          </span>
+          <template v-if="file.moved">
+            <span>✅</span>
+            <span class="line-through text-gray-400">
+              {{ file.relative }}
+            </span>
+          </template>
+          <template v-else>
+            <i-cy-document-text_x16
+              class="h-16px mr-8px w-16px inline-block icon-dark-gray-400 icon-light-gray-50"
+            />
+            <span>
+              {{ file.relative }}
+            </span>
+          </template>
         </div>
       </div>
     </div>
