@@ -1,5 +1,5 @@
 import SpecsList from './SpecsList.vue'
-import { Specs_SpecsListFragmentDoc, SpecNode_SpecsListFragment, TestingTypeEnum } from '../generated/graphql-test'
+import { Specs_SpecsListFragmentDoc, SpecsListFragment, TestingTypeEnum } from '../generated/graphql-test'
 import { defaultMessages } from '@cy/i18n'
 
 const rowSelector = '[data-cy=specs-list-row]'
@@ -20,14 +20,14 @@ function mountWithTestingType (testingType: TestingTypeEnum) {
   })
 }
 
-let specs: Array<SpecNode_SpecsListFragment> = []
+let specs: Array<SpecsListFragment> = []
 
 describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
   context('when testingType is unset', () => {
     beforeEach(() => {
       cy.mountFragment(Specs_SpecsListFragmentDoc, {
         onResult: (ctx) => {
-          specs = ctx.currentProject?.specs?.edges || []
+          specs = ctx.currentProject?.specs || []
 
           return ctx
         },
@@ -39,8 +39,8 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
 
     it('should filter specs', () => {
       const longestSpec = specs.reduce((acc, spec) =>
-        acc.node.relative.length < spec.node.relative.length ? spec : acc
-      , specs[0]).node
+        acc.relative.length < spec.relative.length ? spec : acc
+      , specs[0])
 
       cy.get(inputSelector).type('garbage 🗑', { delay: 0 })
       .get(rowSelector)
@@ -62,7 +62,7 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
 
     it('should close directories', () => {
       // close all directories
-      const directories: string[] = Array.from(new Set(specs.map((spec) => spec.node.relative.split('/')[0]))).sort()
+      const directories: string[] = Array.from(new Set(specs.map((spec) => spec.relative.split('/')[0]))).sort()
 
       directories.forEach((dir) => {
         cy.get('[data-cy="row-directory-depth-0"]').contains(dir).click()
