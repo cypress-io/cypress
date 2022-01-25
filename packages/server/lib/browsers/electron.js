@@ -72,7 +72,7 @@ const _getAutomation = function (win, options, parent) {
         return fn(message, data)
       }
       case 'focus:browser:window': {
-        win.focus()
+        win.show()
 
         return
       }
