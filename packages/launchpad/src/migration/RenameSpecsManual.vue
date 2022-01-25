@@ -2,7 +2,7 @@
   <div class="text-16px leading-24px">
     <MigrationTitle :title="t('migration.renameManual.title')" />
     <MigrationList>
-      <template #line-1>
+      <MigrationListItem>
         <i18n-t
           scope="global"
           keypath="migration.renameManual.componentFolderRemoved"
@@ -11,8 +11,8 @@
             componentFolder
           </CodeTag>
         </i18n-t>
-      </template>
-      <template #line-2>
+      </MigrationListItem>
+      <MigrationListItem>
         <i18n-t
           scope="global"
           keypath="migration.renameManual.cannotAuto"
@@ -21,13 +21,13 @@
             src/component/button/button.cy.js
           </CodeTag>
         </i18n-t>
-      </template>
-      <template #line-3>
+      </MigrationListItem>
+      <MigrationListItem>
         <i18n-t
           scope="global"
           keypath="migration.renameManual.ifSkipNote"
         />
-      </template>
+      </MigrationListItem>
     </MigrationList>
     <div class="border rounded border-gray-100 mt-16px">
       <HighlightedFilesList
@@ -44,6 +44,7 @@ import HighlightedFilesList from './fragments/HighlightedFilesList.vue'
 import { useI18n } from '@cy/i18n'
 import MigrationTitle from './fragments/MigrationTitle.vue'
 import MigrationList from './fragments/MigrationList.vue'
+import MigrationListItem from './fragments/MigrationListItem.vue'
 import { gql } from '@urql/vue'
 import type { RenameSpecsManualFragment } from '../generated/graphql'
 

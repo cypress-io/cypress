@@ -1,10 +1,10 @@
 <template>
   <MigrationTitle :title="t('migration.renameSupport.title')" />
   <MigrationList>
-    <template #line-1>
+    <MigrationListItem>
       {{ t('migration.renameSupport.serveDifferentTypes') }}
-    </template>
-    <template #line-2>
+    </MigrationListItem>
+    <MigrationListItem>
       {{ t('migration.renameSupport.changedSupportFile') }}
       <CodeTag
         class="text-red-500"
@@ -13,7 +13,7 @@
       <CodeTag
         class="text-jade-500"
       >cypress/support/e2e.js</CodeTag>
-    </template>
+    </MigrationListItem>
   </MigrationList>
   <BeforeAfter>
     <template #before>
@@ -42,6 +42,7 @@ import HighlightedFilesList from './fragments/HighlightedFilesList.vue'
 import BeforeAfter from './fragments/BeforeAfter.vue'
 import type { RenameSupportFragment } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
+import MigrationListItem from './fragments/MigrationListItem.vue'
 
 const { t } = useI18n()
 
