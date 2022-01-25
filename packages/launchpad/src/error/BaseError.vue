@@ -1,19 +1,22 @@
 <template>
-  <div class="mx-auto space-y-32px text-center min-w-476px max-w-848px py-16px children:text-center">
+  <div
+    v-if="baseError"
+    class="mx-auto space-y-32px text-center min-w-476px max-w-848px pt-16px children:text-center"
+  >
     <div>
       <h1
-        class="font-medium leading-snug text-32px text-gray-900 pb-24px"
+        class="font-medium leading-snug pb-24px text-32px text-gray-900"
         data-testid="error-header"
       >
         <slot name="header">
-          {{ props.gql.title }}
+          {{ baseError.title }}
         </slot>
       </h1>
       <!-- eslint-disable vue/multiline-html-element-content-newline  -->
 
       <slot name="message">
         <Alert
-          :title="props.gql.originalError?.name ?? 'Error'"
+          :title="baseError.originalError?.name ?? 'Error'"
           status="error"
           body-class="px-0px bg-red-50"
           alert-class="bg-red-50"
@@ -22,21 +25,28 @@
           icon-classes="icon-dark-red-400"
           max-height="none"
         >
+          <div class="border-b-1 border-b-red-100 p-16px pt-0">
+            <div
+              v-if="baseError.description"
+              ref="markdownTarget"
+              class="text-red-500"
+              data-testid="error-message"
+              v-html="markdown"
+            />
+            <ErrorCodeFrame
+              v-if="baseError.fileToOpen"
+              :file="baseError.fileToOpen"
+              :gql="props.gql"
+            />
+          </div>
           <div
-            v-if="props.gql.description"
-            ref="markdownTarget"
-            class="border-b-1 border-b-red-100 p-16px pt-0 text-red-500"
-            data-testid="error-message"
-            v-html="markdown"
-          />
-          <p
-            v-if="props.gql.originalError?.stack"
+            v-if="baseError.originalError?.stack"
             class="m-16px mb-0 overflow-hidden"
           >
             <Collapsible
               disable
               max-height="none"
-              :initially-open="props.gql.isUserCodeError"
+              :initially-open="baseError.isUserCodeError"
             >
               <template #target="{open, toggle}">
                 <p
@@ -58,10 +68,10 @@
               <pre
                 data-testid="error-header"
                 class="bg-white rounded font-light border-1 border-red-200 p-16px overflow-auto"
-                v-html="props.gql.originalError?.stack"
+                v-html="baseError.originalError?.stack"
               />
             </Collapsible>
-          </p>
+          </div>
         </Alert>
       </slot>
       <!-- eslint-enable vue/multiline-html-element-content-newline  -->
@@ -71,7 +81,7 @@
     <div class="w-full gap-16px inline-flex">
       <slot name="footer">
         <Button
-          v-if="props.gql.isRetryable"
+          v-if="baseError.isRetryable"
           size="lg"
           variant="primary"
           data-testid="error-retry-button"
@@ -99,13 +109,14 @@ import { ref, computed } from 'vue'
 import { gql } from '@urql/vue'
 import Button from '@cy/components/Button.vue'
 import { useI18n } from '@cy/i18n'
-import type { BaseError_DataFragment } from '../generated/graphql'
+import type { BaseErrorFragment } from '../generated/graphql'
 import Alert from '@cy/components/Alert.vue'
 import Collapsible from '@cy/components/Collapsible.vue'
 import { useMarkdown } from '@packages/frontend-shared/src/composables/useMarkdown'
 import RestartIcon from '~icons/cy/restart_x16.svg'
 import { useExternalLink } from '@packages/frontend-shared/src/gql-components/useExternalLink'
 import ErrorOutlineIcon from '~icons/cy/status-errored-outline_x16.svg'
+import ErrorCodeFrame from './ErrorCodeFrame.vue'
 
 gql`
 fragment BaseError_Data on ErrorWrapper {
@@ -116,10 +127,7 @@ fragment BaseError_Data on ErrorWrapper {
   isUserCodeError
   fileToOpen {
     id
-    relative
-    absolute
-    line
-    column
+    ...ErrorCodeFrame
   }
   originalError {
     name
@@ -129,17 +137,26 @@ fragment BaseError_Data on ErrorWrapper {
 }
 `
 
+gql`
+fragment BaseError on Query {
+  ...ErrorCodeFrame_ExternalEditor
+  baseError {
+    ...BaseError_Data
+  }
+}`
+
 const openDocs = useExternalLink('https://on.cypress.io/')
 
 const { t } = useI18n()
 
 const props = defineProps<{
-  gql: BaseError_DataFragment
+  gql: BaseErrorFragment
   retry?: () => void
   onReadDocs?: () => void
 }>()
 
 const markdownTarget = ref()
-const description = computed(() => props.gql.description)
+const baseError = computed(() => props.gql.baseError)
+const description = computed(() => baseError.value?.description || '')
 const { markdown } = useMarkdown(markdownTarget, description.value, { classes: { code: ['bg-error-200'] } })
 </script>
