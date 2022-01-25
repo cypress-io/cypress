@@ -444,7 +444,7 @@ export const mutation = mutationType({
           }
         }
 
-        ctx.actions.migration.setStep('renameManual')
+        ctx.actions.migration.nextStep()
 
         return {}
       },
@@ -454,7 +454,7 @@ export const mutation = mutationType({
       description: 'While migrating to 10+ skip manual rename step',
       type: Query,
       resolve: async (_, args, ctx) => {
-        ctx.actions.migration.setStep('renameSupport')
+        ctx.actions.migration.nextStep()
 
         return {}
       },
@@ -470,7 +470,7 @@ export const mutation = mutationType({
           // add the error to an error stack
           return {}
         }
-        ctx.actions.migration.setStep('configFile')
+        ctx.actions.migration.nextStep()
 
         return {}
       },
@@ -487,7 +487,7 @@ export const mutation = mutationType({
           return {}
         }
 
-        ctx.actions.migration.setStep('setupComponent')
+        ctx.actions.migration.nextStep()
 
         return {}
       },

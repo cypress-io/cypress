@@ -1,10 +1,5 @@
-import { MIGRATION_STEPS } from '@packages/types'
-import { enumType, objectType } from 'nexus'
-
-export const MigrationStepEnum = enumType({
-  name: 'MigrationStepEnum',
-  members: MIGRATION_STEPS,
-})
+import { objectType } from 'nexus'
+import { MigrationStep, MigrationStepEnum } from './gql-MigrationStep'
 
 // TODO: implement these values for migration using the ctx
 export const Migration = objectType({
@@ -16,6 +11,16 @@ export const Migration = objectType({
       description: 'Step where the migration is right now',
       resolve: (source, args, ctx) => {
         return ctx.migration.step
+      },
+    })
+
+    t.nonNull.list.nonNull.field('filteredSteps', {
+      type: MigrationStep,
+      description: 'Steps filtered with the current context',
+      resolve: (source, args, ctx) => {
+        return ctx.migration.filteredSteps.map((name) => {
+          name
+        })
       },
     })
 

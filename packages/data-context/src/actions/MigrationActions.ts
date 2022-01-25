@@ -1,7 +1,5 @@
-import { MIGRATION_STEPS } from '@packages/types'
 import type { DataContext } from '..'
 
-type MIGRATION_STEP = typeof MIGRATION_STEPS[number]
 export class MigrationActions {
   constructor (private ctx: DataContext) { }
 
@@ -18,8 +16,7 @@ export class MigrationActions {
   }
 
   initialize () {
-    // FIXME: stop watchers before migrating
-    this.setStep(MIGRATION_STEPS[0])
+    this.ctx.migration.initialize()
   }
 
   async renameSpecFiles () {
@@ -37,7 +34,7 @@ export class MigrationActions {
     this.ctx.lifecycleManager.setCurrentTestingType('component')
   }
 
-  setStep (step: MIGRATION_STEP) {
-    this.ctx.migration.setStep(step)
+  nextStep () {
+    this.ctx.migration.nextStep()
   }
 }
