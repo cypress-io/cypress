@@ -660,11 +660,11 @@ type Mutation {
   """
   devRelaunch(action: DevRelaunchAction!): Boolean
 
-  """Sets focus to the active browser window"""
-  focusActiveBrowserWindow: Boolean!
-
   """user has finished migration component specs - move to next step"""
   finishedRenamingComponentSpecs: Query
+
+  """Sets focus to the active browser window"""
+  focusActiveBrowserWindow: Boolean!
 
   """Generate spec from source"""
   generateSpecFromSource(codeGenCandidate: String!, type: CodeGenType!): ScaffoldedFile

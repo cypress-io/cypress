@@ -199,7 +199,9 @@ const automation = {
     // figure out the exact window that's running Cypress but
     // that's too much work with too little value at the moment
     return Promise.try(() => {
-      return browser.windows.update(browser.windows.WINDOW_ID_CURRENT, { focused: true })
+      return browser.windows.getCurrent()
+    }).then((window) => {
+      return browser.windows.update(window.id, { focused: true })
     }).then(fn)
   },
 

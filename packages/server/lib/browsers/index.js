@@ -4,10 +4,8 @@ const debug = require('debug')('cypress:server:browsers')
 const utils = require('./utils')
 const check = require('check-more-types')
 const { exec } = require('child_process')
-const { promisify } = require('util')
+const util = require('util')
 const os = require('os')
-
-const execPromise = promisify(exec)
 
 // returns true if the passed string is a known browser family name
 const isBrowserFamily = check.oneOf(['chromium', 'firefox'])
@@ -45,14 +43,15 @@ const kill = function (unbind, isProcessExit) {
   })
 }
 
-const setFocus = async () => {
+const setFocus = async function () {
   const platform = os.platform()
+  const execAsync = util.promisify(exec)
 
   switch (platform) {
     case 'darwin':
-      return execPromise(`open -a "$(ps -p ${instance.pid} -o comm=)"`)
+      return execAsync(`open -a "$(ps -p ${instance.pid} -o comm=)"`)
     case 'win32': {
-      return execPromise(`(New-Object -ComObject WScript.Shell).AppActivate(((Get-WmiObject -Class win32_process -Filter "ParentProcessID = '${instance.pid}'") | Select -ExpandProperty ProcessId))`, { shell: 'powershell.exe' })
+      return execAsync(`(New-Object -ComObject WScript.Shell).AppActivate(((Get-WmiObject -Class win32_process -Filter "ParentProcessID = '${instance.pid}'") | Select -ExpandProperty ProcessId))`, { shell: 'powershell.exe' })
     }
     default:
       debug(`Unexpected os platform ${platform}. Set focus is only functional on Windows and MacOS`)
