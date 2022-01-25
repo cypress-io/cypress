@@ -106,6 +106,7 @@ describe('Launchpad: Setup Project', () => {
 
         // @ts-ignore
         cy.realPress('Tab')
+        cy.realPress('Tab')
 
         cy.findByRole('button', { name: 'Close' })
         .should('have.focus')
