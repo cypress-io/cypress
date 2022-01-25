@@ -39,7 +39,11 @@ export class FileActions {
 
     const filePath = path.join(this.ctx.currentProject, relativePath)
 
-    return await this.ctx.fs.stat(filePath)
+    try {
+      return await this.ctx.fs.stat(filePath)
+    } catch {
+      return null
+    }
   }
 
   openFile (absolute: string, line: number = 1, column: number = 1) {

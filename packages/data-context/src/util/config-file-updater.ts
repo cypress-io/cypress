@@ -4,7 +4,7 @@ import type { NodePath } from 'ast-types/lib/node-path'
 import { visit } from 'recast'
 import type { namedTypes } from 'ast-types'
 import Debug from 'debug'
-import * as fs from 'fs/promises'
+import fs from 'fs-extra'
 import stringify from 'stringify-object'
 
 const debug = Debug('cypress:data-context:config-file-updater')

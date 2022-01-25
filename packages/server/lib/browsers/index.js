@@ -102,7 +102,7 @@ module.exports = {
     return browserLauncher.connectToExisting(browser, options, automation)
   },
 
-  open (browser, options = {}, automation) {
+  open (browser, options = {}, automation, ctx) {
     return kill(true)
     .then(() => {
       _.defaults(options, {
@@ -127,6 +127,8 @@ module.exports = {
       return browserLauncher.open(browser, url, options, automation)
       .then((i) => {
         debug('browser opened')
+        ctx.project.setIsBrowserOpen(true)
+        ctx.emitter.toLaunchpad()
         // TODO: bind to process.exit here
         // or move this functionality into cypress-core-launder
 
@@ -138,6 +140,8 @@ module.exports = {
         // so that there is a default for each browser but
         // enable the browser to configure the interface
         instance.once('exit', () => {
+          ctx.project.setIsBrowserOpen(false)
+          ctx.emitter.toLaunchpad()
           options.onBrowserClose()
           instance = null
         })

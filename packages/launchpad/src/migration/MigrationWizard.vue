@@ -10,8 +10,7 @@
     </p>
     <template v-if="migration">
       <MigrationStep
-        step="renameAuto"
-        :current-step="migration.step"
+        :step="steps.find(step => step.name === 'renameAuto')"
         :title="t('migration.wizard.step1.title')"
         :description="t('migration.wizard.step1.description')"
       >
@@ -30,8 +29,7 @@
         </template>
       </MigrationStep>
       <MigrationStep
-        step="renameManual"
-        :current-step="migration.step"
+        :step="steps.find(step => step.name === 'renameManual')"
         :title="t('migration.wizard.step2.title')"
         :description="t('migration.wizard.step2.description')"
       >
@@ -39,6 +37,14 @@
         <template #footer>
           <div class="flex gap-16px">
             <Button
+              v-if="migration.manualFiles?.completed"
+              @click="finishedRenamingComponentSpecs"
+            >
+              {{ t('migration.wizard.step2.buttonDone') }}
+            </Button>
+
+            <Button
+              v-else
               disabled
               variant="pending"
             >
@@ -50,6 +56,7 @@
               </template>
               {{ t('migration.wizard.step2.buttonWait') }}
             </Button>
+
             <Button
               variant="outline"
               @click="skipStep2"
@@ -59,9 +66,9 @@
           </div>
         </template>
       </MigrationStep>
+
       <MigrationStep
-        step="renameSupport"
-        :current-step="migration.step"
+        :step="steps.find(step => step.name === 'renameSupport')"
         :title="t('migration.wizard.step3.title')"
         :description="t('migration.wizard.step3.description')"
       >
@@ -78,8 +85,7 @@
         </template>
       </MigrationStep>
       <MigrationStep
-        step="configFile"
-        :current-step="migration.step"
+        :step="steps.find(step => step.name === 'configFile')"
         :title="t('migration.wizard.step4.title')"
         :description="t('migration.wizard.step4.description')"
       >
@@ -96,8 +102,7 @@
         </template>
       </MigrationStep>
       <MigrationStep
-        step="setupComponent"
-        :current-step="migration.step"
+        :step="steps.find(step => step.name === 'setupComponent')"
         :title="t('migration.wizard.step5.title')"
         :description="t('migration.wizard.step5.description')"
       >
@@ -128,7 +133,16 @@ import RenameSpecsManual from './RenameSpecsManual.vue'
 import RenameSupport from './RenameSupport.vue'
 import ConvertConfigFile from './ConvertConfigFile.vue'
 import SetupComponentTesting from './SetupComponentTesting.vue'
-import { MigrationWizardQueryDocument } from '../generated/graphql'
+import {
+  MigrationWizardQueryDocument,
+  MigrationWizard_ConvertFileDocument,
+  MigrationWizard_FinishedRenamingComponentSpecsDocument,
+  MigrationWizard_ReconfigureComponentTestingDocument,
+  MigrationWizard_RenameSpecsDocument,
+  MigrationWizard_RenameSupportDocument,
+  MigrationWizard_SkipManualRenameDocument,
+  MigrationWizard_StartDocument,
+} from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
 
 const { t } = useI18n()
@@ -136,7 +150,11 @@ const { t } = useI18n()
 gql`
 fragment MigrationWizardData on Query {
   migration {
-    step
+    filteredSteps {
+      id
+      name
+      ...MigrationStep
+    }
     ...RenameSpecsAuto
     ...RenameSpecsManual
     ...RenameSupport
@@ -153,40 +171,48 @@ query MigrationWizardQuery {
 const query = useQuery({ query: MigrationWizardQueryDocument })
 
 const migration = computed(() => query.data.value?.migration)
+const steps = computed(() => migration.value?.filteredSteps || [])
 
 // start migration
 
-const migrateStartMutation = gql`
+gql`
 mutation MigrationWizard_Start {
   migrateStart {
     migration {
-      step
+      filteredSteps {
+        id
+      }
     }
   }
 }
 `
 
-const start = useMutation(migrateStartMutation)
+const start = useMutation(MigrationWizard_StartDocument)
 
-onMounted(() => {
-  start.executeMutation({ })
+onMounted(async () => {
+  await start.executeMutation({ })
+  await query.executeQuery()
 })
 
 // specs rename
 
 const skipRename = ref(false)
 
-const renameSpecsMutation = gql`
+gql`
 mutation MigrationWizard_RenameSpecs($skip: Boolean) {
   migrateRenameSpecs(skip: $skip){
     migration {
-      step
+      filteredSteps {
+        id
+        isCurrentStep
+        isCompleted
+      }
     }
   }
 }
 `
 
-const renameMutation = useMutation(renameSpecsMutation)
+const renameMutation = useMutation(MigrationWizard_RenameSpecsDocument)
 
 function renameSpecs () {
   renameMutation.executeMutation({ skip: skipRename.value })
@@ -194,17 +220,21 @@ function renameSpecs () {
 
 // manual rename
 
-const skipManualRenameMutation = gql`
+gql`
 mutation MigrationWizard_SkipManualRename {
   migrateSkipManualRename {
     migration {
-      step
+      filteredSteps {
+        id
+        isCurrentStep
+        isCompleted
+      }
     }
   }
 }
 `
 
-const skipManualMutation = useMutation(skipManualRenameMutation)
+const skipManualMutation = useMutation(MigrationWizard_SkipManualRenameDocument)
 
 function skipStep2 () {
   skipManualMutation.executeMutation({})
@@ -212,35 +242,65 @@ function skipStep2 () {
 
 // rename support files
 
-const renameSupportFileMutation = gql`
+gql`
 mutation MigrationWizard_RenameSupport {
   migrateRenameSupport {
     migration {
-      step
+      filteredSteps {
+        id
+        isCurrentStep
+        isCompleted
+      }
     }
   }
 }
 `
 
-const renameSupportMutation = useMutation(renameSupportFileMutation)
+const renameSupportMutation = useMutation(MigrationWizard_RenameSupportDocument)
 
 function launchRenameSupportFile () {
   renameSupportMutation.executeMutation({})
 }
 
-// config file migration
+// done renaming component specs
 
-const convertConfigMutation = gql`
-mutation MigrationWizard_ConvertFile {
-  migrateConfigFile {
+gql`
+mutation MigrationWizard_FinishedRenamingComponentSpecs {
+  finishedRenamingComponentSpecs {
     migration {
-      step
+      filteredSteps {
+        id
+        isCurrentStep
+        isCompleted
+      }
     }
   }
 }
 `
 
-const configMutation = useMutation(convertConfigMutation)
+const finishedRenamingComponentSpecsMutation = useMutation(MigrationWizard_FinishedRenamingComponentSpecsDocument)
+
+function finishedRenamingComponentSpecs () {
+  finishedRenamingComponentSpecsMutation.executeMutation({})
+}
+
+// config file migration
+
+gql`
+mutation MigrationWizard_ConvertFile {
+  migrateConfigFile {
+    migration {
+      filteredSteps{
+        id
+        isCurrentStep
+        isCompleted
+      }
+    }
+  }
+}
+`
+
+const configMutation = useMutation(MigrationWizard_ConvertFileDocument)
 
 function convertConfig () {
   configMutation.executeMutation({})
@@ -248,7 +308,7 @@ function convertConfig () {
 
 // launch reconfigure component testing
 
-const launchReconfigureCTMutation = gql`
+gql`
 mutation MigrationWizard_ReconfigureComponentTesting {
   migrateComponentTesting {
     currentTestingType
@@ -261,7 +321,7 @@ mutation MigrationWizard_ReconfigureComponentTesting {
 }
 `
 
-const launchReconfigureMutation = useMutation(launchReconfigureCTMutation)
+const launchReconfigureMutation = useMutation(MigrationWizard_ReconfigureComponentTestingDocument)
 
 function launchReconfigureComponentTesting () {
   launchReconfigureMutation.executeMutation({})
