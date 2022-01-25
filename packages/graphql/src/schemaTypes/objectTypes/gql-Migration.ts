@@ -133,7 +133,6 @@ export const MigrationRegexp = objectType({
   },
 })
 
-// TODO: implement these values for migration using the ctx
 export const Migration = objectType({
   name: 'Migration',
   description: 'Contains all data related to the 9.X to 10.0 migration UI',
@@ -211,6 +210,41 @@ export const Migration = objectType({
       description: 'the component folder path used to store components tests',
       resolve: (source, args, ctx) => {
         return ctx.migration.getComponentFolder()
+      },
+    })
+
+    t.nonNull.boolean('hasCustomIntegrationFolder', {
+      description: 'whether the integration folder is custom or not',
+      resolve: (source, args, ctx) => {
+        ctx.migration.hasCustomIntegrationFolder
+      },
+    })
+
+    t.nonNull.boolean('hasCustomIntegrationSpecPattern', {
+      description: 'whether the testFiles member is custom or not in integration',
+      resolve: (source, args, ctx) => {
+        ctx.migration.hasCustomIntegrationSpecPattern
+      },
+    })
+
+    t.nonNull.boolean('hasCustomComponentFolder', {
+      description: 'whether the component folder is custom or not',
+      resolve: (source, args, ctx) => {
+        ctx.migration.hasCustomComponentFolder
+      },
+    })
+
+    t.nonNull.boolean('hasCustomComponentSpecPattern', {
+      description: 'whether the testFiles member is custom or not in component testing',
+      resolve: (source, args, ctx) => {
+        ctx.migration.hasCustomComponentSpecPattern
+      },
+    })
+
+    t.nonNull.boolean('hasComponentTesting', {
+      description: 'whether component testing is set up in the migrated config or not',
+      resolve: (source, args, ctx) => {
+        ctx.migration.hasComponentTesting
       },
     })
   },
