@@ -6,8 +6,6 @@ const check = require('check-more-types')
 const { exec } = require('child_process')
 const { promisify } = require('util')
 const os = require('os')
-const winInfo = require('@arcsine/win-info')
-const forcefocus = require('forcefocus')
 
 const execPromise = promisify(exec)
 
@@ -48,18 +46,16 @@ const kill = function (unbind, isProcessExit) {
 }
 
 const setFocus = async () => {
-  const { platform } = os
+  const platform = os.platform()
 
   switch (platform) {
     case 'darwin':
       return execPromise(`open -a "$(ps -p ${instance.pid} -o comm=)"`)
     case 'win32': {
-      const { id } = winInfo.getByPid(instance.pid)
-
-      return forcefocus.focusWindow(id)
+      return execPromise(`(New-Object -ComObject WScript.Shell).AppActivate(((Get-WmiObject -Class win32_process -Filter "ParentProcessID = '${instance.pid}'") | Select -ExpandProperty ProcessId))`, { shell: 'powershell.exe' })
     }
     default:
-      throw new Error(`Unexpected os platform ${platform}`)
+      debug(`Unexpected os platform ${platform}. Set focus is only functional on Windows and MacOS`)
   }
 }
 

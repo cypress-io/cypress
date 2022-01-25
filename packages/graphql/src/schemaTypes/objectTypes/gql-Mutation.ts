@@ -350,7 +350,6 @@ export const mutation = mutationType({
       description: 'Sets focus to the active browser window',
       resolve: async (_, args, ctx) => {
         await ctx.actions.browser.focusActiveBrowserWindow()
-        ctx.actions.electron.blurWindow()
 
         return true
       },

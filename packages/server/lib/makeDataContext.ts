@@ -80,7 +80,17 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
         return user.get()
       },
       logIn (onMessage) {
-        return auth.start(onMessage, 'launchpad')
+        const windows = require('./gui/windows')
+        const originalIsMainWindowFocused = windows.isMainWindowFocused()
+        const onLogin = async () => {
+          if (originalIsMainWindowFocused) {
+            windows.focusMainWindow()
+          } else {
+            await ctx.actions.browser.focusActiveBrowserWindow()
+          }
+        }
+
+        return auth.start(onMessage, 'launchpad', onLogin)
       },
       logOut () {
         return user.logOut()

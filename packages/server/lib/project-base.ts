@@ -475,9 +475,11 @@ export class ProjectBase<TServer extends Server> extends EE {
   }
 
   async sendFocusBrowserMessage () {
-    await browsers.setFocus()
-    // execPromise(`open -a "$(ps -p ${this.browser.instance.pid} -o comm=)`)
-    // await this.server.sendFocusBrowserMessage()
+    if (this.browser.family === 'firefox') {
+      await browsers.setFocus()
+    } else {
+      await this.server.sendFocusBrowserMessage()
+    }
   }
 
   shouldCorrelatePreRequests = () => {
