@@ -41,7 +41,7 @@ describe('Launchpad: Open Mode', () => {
     cy.visitLaunchpad()
     cy.get('h1').should('contain', 'Choose a Browser')
     cy.get('[data-cy-browser=firefox]').should('have.attr', 'aria-checked', 'true')
-    cy.get('button[data-cy=launch-button]').invoke('text').should('include', 'Start E2E testing in Firefox')
+    cy.get('button[data-cy=launch-button]').invoke('text').should('include', 'Start E2E Testing in Firefox')
   })
 
   describe('when there is a list of projects', () => {
