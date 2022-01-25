@@ -465,6 +465,16 @@ export const mutation = mutationType({
       },
     })
 
+    t.field('finishedRenamingComponentSpecs', {
+      description: 'user has finished migration component specs - move to next step',
+      type: Query,
+      resolve: async (_, args, ctx) => {
+        ctx.actions.migration.nextStep()
+
+        return {}
+      },
+    })
+
     t.field('migrateRenameSupport', {
       description: 'While migrating to 10+ launch renaming of support file',
       type: Query,
@@ -513,6 +523,8 @@ export const mutation = mutationType({
       type: Query,
       resolve: async (_, args, ctx) => {
         await ctx.actions.migration.startWizardReconfiguration()
+
+        return {}
       },
     })
 

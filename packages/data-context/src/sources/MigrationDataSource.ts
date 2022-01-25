@@ -102,7 +102,7 @@ export class MigrationDataSource {
 
       const { status, watcher } = await initComponentTestingMigration(
         this.ctx.currentProject,
-        config.componentFolder || 'component',
+        await this.getComponentFolder(),
         config.component?.testFiles || config.testFiles || '**/*',
         onFileMoved,
       )

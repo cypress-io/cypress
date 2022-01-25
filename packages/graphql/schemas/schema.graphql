@@ -666,6 +666,9 @@ type Mutation {
   """
   devRelaunch(action: DevRelaunchAction!): Boolean
 
+  """user has finished migration component specs - move to next step"""
+  finishedRenamingComponentSpecs: Query
+
   """Generate spec from source"""
   generateSpecFromSource(codeGenCandidate: String!, type: CodeGenType!): ScaffoldedFile
 
