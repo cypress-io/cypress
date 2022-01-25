@@ -605,12 +605,6 @@ const localItFn = function (title: string, opts: ItOptions) {
     const testTitle = `${title} [${browser}]`
 
     return mochaItFn(testTitle, function () {
-      if (this.test.honeycombEvent) {
-        this.test.honeycombEvent.add({
-          browser,
-        })
-      }
-
       if (options.useSeparateBrowserSnapshots) {
         title = testTitle
       }
