@@ -1,6 +1,6 @@
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 
-describe('Migration', () => {
+describe('Migration', { viewportWidth: 1200 }, () => {
   beforeEach(() => {
     cy.scaffoldProject('migration')
     cy.openProject('migration')
@@ -9,7 +9,7 @@ describe('Migration', () => {
   describe('Configuration', () => {
     beforeEach(() => {
       cy.visitLaunchpad()
-      cy.findByText(defaultMessages.migration.wizard.step1.button).click()
+
       cy.findByText(defaultMessages.migration.wizard.step2.button).click()
       cy.findByText(defaultMessages.migration.wizard.step3.button).click()
       cy.findByText(defaultMessages.migration.wizard.step4.button).click()
@@ -46,6 +46,10 @@ describe('Migration', () => {
 
   describe('Full flow', () => {
     it('goes to each step', () => {
+      cy.withCtx(async (ctx) => {
+        await ctx.actions.file.writeFileInProject('cypress.json', '{}')
+      })
+
       cy.visitLaunchpad()
 
       cy.findByText(defaultMessages.migration.wizard.step1.button).click()

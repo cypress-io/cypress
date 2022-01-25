@@ -1,25 +1,19 @@
 import { objectType } from 'nexus'
-import { MigrationStep, MigrationStepEnum } from './gql-MigrationStep'
+import { MigrationStep } from './gql-MigrationStep'
 
 // TODO: implement these values for migration using the ctx
 export const Migration = objectType({
   name: 'Migration',
   description: 'Contains all data related to the 9.X to 10.0 migration UI',
   definition (t) {
-    t.nonNull.field('step', {
-      type: MigrationStepEnum,
-      description: 'Step where the migration is right now',
-      resolve: (source, args, ctx) => {
-        return ctx.migration.step
-      },
-    })
-
     t.nonNull.list.nonNull.field('filteredSteps', {
       type: MigrationStep,
       description: 'Steps filtered with the current context',
       resolve: (source, args, ctx) => {
         return ctx.migration.filteredSteps.map((name) => {
-          name
+          return {
+            name,
+          }
         })
       },
     })

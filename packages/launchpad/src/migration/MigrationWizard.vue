@@ -10,8 +10,7 @@
     </p>
     <template v-if="migration">
       <MigrationStep
-        step="renameAuto"
-        :current-step="migration.step"
+        :step="steps.find(step => step.name === 'renameAuto')"
         :title="t('migration.wizard.step1.title')"
         :description="t('migration.wizard.step1.description')"
       >
@@ -30,8 +29,7 @@
         </template>
       </MigrationStep>
       <MigrationStep
-        step="renameManual"
-        :current-step="migration.step"
+        :step="steps.find(step => step.name === 'renameManual')"
         :title="t('migration.wizard.step2.title')"
         :description="t('migration.wizard.step2.description')"
       >
@@ -60,8 +58,7 @@
         </template>
       </MigrationStep>
       <MigrationStep
-        step="renameSupport"
-        :current-step="migration.step"
+        :step="steps.find(step => step.name === 'renameSupport')"
         :title="t('migration.wizard.step3.title')"
         :description="t('migration.wizard.step3.description')"
       >
@@ -78,8 +75,7 @@
         </template>
       </MigrationStep>
       <MigrationStep
-        step="configFile"
-        :current-step="migration.step"
+        :step="steps.find(step => step.name === 'configFile')"
         :title="t('migration.wizard.step4.title')"
         :description="t('migration.wizard.step4.description')"
       >
@@ -96,8 +92,7 @@
         </template>
       </MigrationStep>
       <MigrationStep
-        step="setupComponent"
-        :current-step="migration.step"
+        :step="steps.find(step => step.name === 'setupComponent')"
         :title="t('migration.wizard.step5.title')"
         :description="t('migration.wizard.step5.description')"
       >
@@ -136,7 +131,11 @@ const { t } = useI18n()
 gql`
 fragment MigrationWizardData on Query {
   migration {
-    step
+    filteredSteps {
+      id
+      name
+      ...MigrationStep
+    }
     ...RenameSpecsAuto
     ...RenameSpecsManual
     ...RenameSupport
@@ -153,6 +152,7 @@ query MigrationWizardQuery {
 const query = useQuery({ query: MigrationWizardQueryDocument })
 
 const migration = computed(() => query.data.value?.migration)
+const steps = computed(() => migration.value?.filteredSteps || [])
 
 // start migration
 
@@ -160,7 +160,9 @@ const migrateStartMutation = gql`
 mutation MigrationWizard_Start {
   migrateStart {
     migration {
-      step
+      filteredSteps {
+        id
+      }
     }
   }
 }
@@ -168,8 +170,9 @@ mutation MigrationWizard_Start {
 
 const start = useMutation(migrateStartMutation)
 
-onMounted(() => {
-  start.executeMutation({ })
+onMounted(async () => {
+  await start.executeMutation({ })
+  await query.executeQuery()
 })
 
 // specs rename
@@ -180,7 +183,11 @@ const renameSpecsMutation = gql`
 mutation MigrationWizard_RenameSpecs($skip: Boolean) {
   migrateRenameSpecs(skip: $skip){
     migration {
-      step
+      filteredSteps {
+        id
+        isCurrentStep
+        isCompleted
+      }
     }
   }
 }
@@ -198,7 +205,11 @@ const skipManualRenameMutation = gql`
 mutation MigrationWizard_SkipManualRename {
   migrateSkipManualRename {
     migration {
-      step
+      filteredSteps{
+        id
+        isCurrentStep
+        isCompleted
+      }
     }
   }
 }
@@ -216,7 +227,11 @@ const renameSupportFileMutation = gql`
 mutation MigrationWizard_RenameSupport {
   migrateRenameSupport {
     migration {
-      step
+      filteredSteps{
+        id
+        isCurrentStep
+        isCompleted
+      }
     }
   }
 }
@@ -234,7 +249,11 @@ const convertConfigMutation = gql`
 mutation MigrationWizard_ConvertFile {
   migrateConfigFile {
     migration {
-      step
+      filteredSteps{
+        id
+        isCurrentStep
+        isCompleted
+      }
     }
   }
 }

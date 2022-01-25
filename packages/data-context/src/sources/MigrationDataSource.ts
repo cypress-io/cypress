@@ -17,6 +17,7 @@ export class MigrationDataSource {
   constructor (private ctx: DataContext) { }
 
   async initialize () {
+    this._config = null
     await this.initializeFlags()
     this.filteredSteps = MIGRATION_STEPS.filter((step) => this.shouldShowStep(step))
     if (this.filteredSteps[0]) {
@@ -86,21 +87,13 @@ export class MigrationDataSource {
   private async initializeFlags () {
     const config = await this.parseCypressConfig()
 
-    if (config.testFiles || config.e2e?.testFiles) {
-      this.hasCustomIntegrationSpecPattern = true
-    }
+    this.hasCustomIntegrationSpecPattern = config.testFiles !== undefined || config.e2e?.testFiles !== undefined
 
-    if (config.integrationFolder || config.e2e?.integrationFolder) {
-      this.hasCustomIntegrationFolder = true
-    }
+    this.hasCustomIntegrationFolder = config.e2e?.integrationFolder !== undefined || config.integrationFolder !== undefined
 
-    if (config.componentFolder || config.component?.componentFolder) {
-      this.hasCustomComponentFolder = true
-    }
+    this.hasCustomComponentSpecPattern = config.component?.testFiles !== undefined || config.testFiles !== undefined
 
-    if (config.testFiles || config.component?.testFiles) {
-      this.hasCustomComponentSpecPattern = true
-    }
+    this.hasCustomComponentFolder = config.component?.componentFolder !== undefined || config.componentFolder !== undefined
 
     // TODO: implement this properly
     this.hasComponentTesting = true
@@ -108,7 +101,7 @@ export class MigrationDataSource {
 
   private shouldShowStep (step: MIGRATION_STEP): boolean {
     switch (step) {
-      case 'renameAuto': return !this.hasCustomIntegrationSpecPattern || !this.hasCustomComponentSpecPattern
+      case 'renameAuto': return !(this.hasCustomIntegrationSpecPattern && this.hasCustomComponentSpecPattern)
       case 'renameManual': return this.hasComponentTesting
       case 'setupComponent': return this.hasComponentTesting
       default: return true

@@ -8,6 +8,7 @@ export const MigrationStepEnum = enumType({
 
 export const MigrationStep = objectType({
   name: 'MigrationStep',
+  node: 'name',
   description: 'Contains all data related to the 9.X to 10.0 migration UI',
   definition (t) {
     t.nonNull.field('name', {
@@ -25,9 +26,10 @@ export const MigrationStep = objectType({
     t.nonNull.boolean('isCompleted', {
       description: 'Has the current step been completed',
       resolve: (source, args, ctx) => {
-        const indexOfCurrentStep = ctx.migration.filteredSteps.indexOf(ctx.migration.step) + 1
+        const indexOfObservedStep = ctx.migration.filteredSteps.indexOf(source.name)
+        const indexOfCurrentStep = ctx.migration.filteredSteps.indexOf(ctx.migration.step)
 
-        return source.index < indexOfCurrentStep
+        return indexOfObservedStep < indexOfCurrentStep
       },
     })
 
