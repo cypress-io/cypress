@@ -4,6 +4,10 @@ import { longBrowsersList } from '@packages/frontend-shared/cypress/support/mock
 
 const launchButtonSelector = 'button[data-cy=launch-button]'
 
+// Testing Note: because state for this component is maintained on the server and updated via gql mutations,
+// this component test can't do interactions that change the chosen browser at the moment. Interactions and states
+// are covered in the choose-a-browser.cy.ts e2e tests.
+
 describe('<OpenBrowserList />', () => {
   beforeEach(() => {
     cy.viewport(1000, 750)
@@ -14,7 +18,7 @@ describe('<OpenBrowserList />', () => {
       onResult: (result) => {
         result.currentBrowser = null
       },
-      render: (gqlVal) => <div class="resize overflow-auto border-current border-1"><OpenBrowserList gql={gqlVal} /></div>,
+      render: (gqlVal) => <div class="border-current border-1 resize overflow-auto"><OpenBrowserList gql={gqlVal} /></div>,
     })
 
     longBrowsersList.forEach((browser) => {
@@ -27,7 +31,7 @@ describe('<OpenBrowserList />', () => {
 
   it('renders launch button when a browser is selected', () => {
     cy.mountFragment(OpenBrowserListFragmentDoc, {
-      render: (gqlVal) => <div class="resize overflow-auto border-current border-1"><OpenBrowserList gql={gqlVal} /></div>,
+      render: (gqlVal) => <div class="border-current border-1 resize overflow-auto"><OpenBrowserList gql={gqlVal} /></div>,
     })
 
     cy.get(launchButtonSelector).should('be.visible').and('have.text', 'Launch Electron')

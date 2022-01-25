@@ -4,16 +4,22 @@ import SettingsContainer from './SettingsContainer.vue'
 import { useRoute, useRouter } from 'vue-router'
 
 describe('<SettingsContainer />', { viewportHeight: 800, viewportWidth: 900 }, () => {
-  const mountSettingsConatainer = () => cy.mountFragment(SettingsContainerFragmentDoc, { render: (gql) => <SettingsContainer gql={gql} /> })
+  const mountSettingsContainer = () => cy.mountFragment(SettingsContainerFragmentDoc, { render: (gql) => <SettingsContainer gql={gql} /> })
+
+  it('renders', () => {
+    mountSettingsContainer()
+    cy.percySnapshot()
+  })
 
   it('expands and collapses device settings', () => {
-    mountSettingsConatainer()
+    mountSettingsContainer()
 
     cy.contains('Device Settings').click()
 
     cy.findByText(defaultMessages.settingsPage.editor.title).should('be.visible')
     cy.findByText(defaultMessages.settingsPage.proxy.title).should('be.visible')
     cy.findByText(defaultMessages.settingsPage.testingPreferences.title).should('be.visible')
+    cy.percySnapshot()
 
     cy.findByText('Device Settings').click()
 
@@ -21,7 +27,7 @@ describe('<SettingsContainer />', { viewportHeight: 800, viewportWidth: 900 }, (
   })
 
   it('expands and collapses project settings', () => {
-    mountSettingsConatainer()
+    mountSettingsContainer()
 
     cy.contains('Project Settings').click()
 
@@ -29,7 +35,7 @@ describe('<SettingsContainer />', { viewportHeight: 800, viewportWidth: 900 }, (
     cy.findByText(defaultMessages.settingsPage.experiments.title).scrollIntoView().should('be.visible')
     cy.findByText(defaultMessages.settingsPage.specPattern.title).scrollIntoView().should('be.visible')
     cy.findByText(defaultMessages.settingsPage.config.title).scrollIntoView().should('be.visible')
-
+    cy.percySnapshot()
     cy.findByText('Project Settings').click()
 
     cy.findByText(defaultMessages.settingsPage.projectId.title).should('not.exist')

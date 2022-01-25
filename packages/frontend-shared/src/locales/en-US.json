@@ -164,7 +164,6 @@
       "ciTitle": "Run in CI/CD",
       "ciSetup": "Set up CI",
       "fasterTests": "Run tests faster",
-      "smartOrchestration": "Smart Orchestration",
       "prompts": {
         "ci1": {
           "title": "Configure CI",
@@ -328,7 +327,10 @@
     "editor": {
       "title": "External Editor",
       "description": "External editor to use for editing code opened when using Cypress.",
-      "noEditorSelectedPlaceholder": "Choose your editor..."
+      "noEditorSelectedPlaceholder": "Choose your editor...",
+      "editorRadioLabel": "Choose editor",
+      "customEditorRadioLabel": "Add custom editor by path",
+      "customPathPlaceholder": "Custom path..."
     },
     "projectId": {
       "title": "Project ID",
@@ -557,6 +559,7 @@
         "title": "Manually move your existing component specs",
         "description": "In this step, you'll manually move your existing component specs to their new default location.",
         "buttonWait": "Waiting for you to move your component specs...",
+        "buttonDone": "I have moved my component specs",
         "button": "I'll do this later"
       },
       "step3": {

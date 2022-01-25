@@ -32,9 +32,7 @@ export interface ClientTestContext {
     chosenBrowser: null
     warnings: []
   }
-  migration: {
-    manualFiles: string[]
-  }
+  migration: {}
   user: AuthenticatedUserShape | null
   cloudTypes: typeof cloudTypes
   __mockPartial: any
@@ -103,9 +101,7 @@ export function makeClientTestContext (): ClientTestContext {
         },
       ],
     },
-    migration: {
-      manualFiles: [],
-    },
+    migration: {},
     __mockPartial: {},
   }
 }

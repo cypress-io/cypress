@@ -1,16 +1,10 @@
 <template>
   <div class="p-24px spec-container">
-    <CreateSpecModal
-      v-if="props.gql.currentProject"
-      :show="showCreateSpecModal"
-      :gql="props.gql"
-      @close="showCreateSpecModal = false"
-    />
     <SpecsListHeader
       v-model="search"
       class="pb-32px"
       :result-count="specs.length"
-      @newSpec="showCreateSpecModal = true"
+      @showCreateSpecModal="emit('showCreateSpecModal')"
       @spec-pattern="showSpecPatternModal = true"
     />
     <SpecPatternModal
@@ -100,7 +94,6 @@ import SpecListGitInfo from './SpecListGitInfo.vue'
 import SpecsListRowItem from './SpecsListRowItem.vue'
 import { gql } from '@urql/vue'
 import { computed, ref, watch } from 'vue'
-import CreateSpecModal from './CreateSpecModal.vue'
 import type { Specs_SpecsListFragment, SpecListRowFragment } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
 import { buildSpecTree, FuzzyFoundSpec, fuzzySortSpecs, getDirIndexes, makeFuzzyFoundSpec, useCachedSpecs } from '@packages/frontend-shared/src/utils/spec-utils'
@@ -146,7 +139,6 @@ fragment Specs_SpecsList on Query {
     config
     ...SpecPatternModal
   }
-  ...CreateSpecModal
 }
 `
 
@@ -154,8 +146,12 @@ const props = defineProps<{
   gql: Specs_SpecsListFragment
 }>()
 
-const showCreateSpecModal = ref(false)
+const emit = defineEmits<{
+  (e: 'showCreateSpecModal'): void
+}>()
+
 const showSpecPatternModal = ref(false)
+
 const search = ref('')
 
 function handleClear () {

@@ -22,6 +22,8 @@ describe('<InstallDependencies />', () => {
 
     cy.contains('Used to interact with React components via Cypress').should('be.visible')
     cy.contains('Used to bundle code').should('be.visible')
+
+    cy.percySnapshot()
   })
 
   it('shows expected actions', () => {

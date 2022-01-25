@@ -32,17 +32,19 @@ import LaunchpadHeader from './LaunchpadHeader.vue'
 import { useI18n } from '@cy/i18n'
 import { useMutation } from '@urql/vue'
 
-const props = defineProps<{
-  gql: WizardFragment
-}>()
-
-const { t } = useI18n()
-
 export interface WizardSetupData {
   bundler: Bundler['type'] | null
   framework: FrontendFramework['type'] | null
   codeLanguage: CodeLanguageEnum
 }
+
+export type CurrentStep = 'selectFramework' | 'installDependencies'
+
+const props = defineProps<{
+  gql: WizardFragment
+}>()
+
+const { t } = useI18n()
 
 gql`
 mutation Wizard_wizardUpdate($input: WizardUpdateInput!) {
@@ -59,8 +61,6 @@ mutation Wizard_wizardUpdate($input: WizardUpdateInput!) {
   }
 }
 `
-
-export type CurrentStep = 'selectFramework' | 'installDependencies'
 
 const currentStep = ref<CurrentStep>('selectFramework')
 const wizardSetupData = ref<WizardSetupData>({

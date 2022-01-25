@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import _ from 'lodash'
 import sinon from 'sinon'
 
@@ -8,7 +6,13 @@ import Promise from 'bluebird'
 import $utils from '../../cypress/utils'
 import $errUtils from '../../cypress/error_utils'
 
-let counts = null
+type Counts = {
+  spy: number
+  stub: number
+  children: Record<string, number>
+}
+
+let counts: Counts | null = null
 
 sinon.setFormatter($utils.stringifyArg.bind($utils))
 
@@ -24,6 +28,8 @@ const display = (name) => {
   if (name === 'stub') {
     return 'Stubbed Obj'
   }
+
+  return ''
 }
 
 const formatArgs = (args) => {
@@ -59,7 +65,7 @@ const onInvoke = function (Cypress, obj, args) {
     return
   }
 
-  const logProps = {
+  const logProps: Record<string, any> = {
     name: agentName,
     message: obj.message,
     error: obj.error,
@@ -68,7 +74,7 @@ const onInvoke = function (Cypress, obj, args) {
     snapshot: !agent._noSnapshot,
     event: true,
     consoleProps () {
-      const consoleObj = {}
+      const consoleObj: Record<string, any> = {}
 
       consoleObj.Command = null
       consoleObj.Error = null
@@ -147,15 +153,15 @@ export default function (Commands, Cypress, cy, state) {
   // to reset the counts + the sandbox
   Cypress.on('test:before:run', resetAndSetSandbox)
 
-  const wrap = function (ctx, type, agent, obj, method, count) {
+  const wrap = function (ctx, type, agent, obj, method, count?) {
     if (!count) {
-      count = (counts[type] += 1)
+      count = (counts![type] += 1)
     }
 
     const name = `${type}-${count}`
 
     if (!agent.parent) {
-      counts.children[name] = 0
+      counts!.children[name] = 0
     }
 
     const log = Cypress.log({
@@ -184,7 +190,7 @@ export default function (Commands, Cypress, cy, state) {
       // and the user can easily find the error
       try {
         returned = invoke.call(this, func, thisValue, args)
-      } catch (e) {
+      } catch (e: any) {
         error = e
       }
 
@@ -249,7 +255,7 @@ export default function (Commands, Cypress, cy, state) {
     const { withArgs } = agent
 
     agent.withArgs = function (...args) {
-      const childCount = (counts.children[name] += 1)
+      const childCount = (counts!.children[name] += 1)
 
       return wrap(ctx, type, withArgs.apply(this, args), obj, method, `${count}.${childCount}`)
     }
@@ -263,8 +269,9 @@ export default function (Commands, Cypress, cy, state) {
     return wrap(this, 'spy', theSpy, obj, method)
   }
 
-  const stub = function (obj, method, replacerFnOrValue) {
-    let theStub = sandbox.stub.call(sandbox, obj, method)
+  const stub = function (obj, method: string, replacerFnOrValue) {
+    // TODO: make the code below work with `packages/runner` type check without casting to `never`.
+    let theStub = sandbox.stub.call(sandbox, obj, method as never)
 
     // sinon 2 changed the stub signature
     // this maintains the 3-argument signature so it's not breaking

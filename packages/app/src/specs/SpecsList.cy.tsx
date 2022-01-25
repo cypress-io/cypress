@@ -2,7 +2,7 @@ import SpecsList from './SpecsList.vue'
 import { Specs_SpecsListFragmentDoc, SpecNode_SpecsListFragment, TestingTypeEnum } from '../generated/graphql-test'
 import { defaultMessages } from '@cy/i18n'
 
-const rowSelector = '[data-testid=specs-list-row]'
+const rowSelector = '[data-cy=specs-list-row]'
 const inputSelector = 'input'
 
 function mountWithTestingType (testingType: TestingTypeEnum) {

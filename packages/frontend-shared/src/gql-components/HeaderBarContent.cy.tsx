@@ -10,16 +10,21 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
       render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><HeaderBarContent gql={gqlVal} show-browsers={true} /></div>,
     })
 
+    cy.percySnapshot()
+
     cy.get('[data-cy="top-nav-active-browser"]')
     .should('be.visible')
     .click()
 
     cy.contains('Edge Canary')
     .should('be.visible')
+
+    cy.percySnapshot()
   }),
 
   it('renders without browser menu by default and other items work', () => {
     cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
+
       render: (gqlVal) => (
         <div class="border-current border-1 h-700px resize overflow-auto">
           <HeaderBarContent gql={gqlVal} />
@@ -29,10 +34,51 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
 
     cy.contains('Projects').should('be.visible')
     cy.get('[data-cy="top-nav-active-browser"]').should('not.exist')
+    cy.percySnapshot()
     cy.contains('button', text.docsMenu.docsHeading).click()
-    cy.contains('a', text.docsMenu.firstTest).should('be.visible')
+
+    cy.wrap(Object.values(text.docsMenu)).each((menuItem) => {
+      if (typeof menuItem === 'string') {
+        cy.contains(menuItem).should('be.visible')
+      }
+    })
+
+    cy.percySnapshot()
     cy.get('body').click()
     cy.contains('a', text.docsMenu.firstTest).should('not.be.visible')
+  })
+
+  it('docs menu has expected links with no current project', () => {
+    cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
+      onResult: (result) => {
+        result.currentProject = null
+      },
+      render: (gqlVal) => (
+        <div class="border-current border-1 h-700px resize overflow-auto">
+          <HeaderBarContent gql={gqlVal} />
+        </div>
+      ),
+    })
+
+    // we render without a current project to validate ciSetup and fasterTests links
+    // because outside of global mode, those are buttons that trigger popups
+    // so this way we can assert all links at once.
+    const expectedDocsLinks = {
+      [text.docsMenu.firstTest]: 'https://on.cypress.io/writing-first-test?utm_medium=Docs+Menu&utm_content=First+Test',
+      [text.docsMenu.testingApp]: 'https://on.cypress.io/testing-your-app?utm_medium=Docs+Menu&utm_content=Testing+Your+App',
+      [text.docsMenu.organizingTests]: 'https://on.cypress.io/writing-and-organizing-tests?utm_medium=Docs+Menu&utm_content=Organizing+Tests',
+      [text.docsMenu.bestPractices]: 'https://on.cypress.io/best-practices?utm_medium=Docs+Menu&utm_content=Best+Practices',
+      [text.docsMenu.configuration]: 'https://on.cypress.io/configuration?utm_medium=Docs+Menu&utm_content=Configuration',
+      [text.docsMenu.api]: 'https://on.cypress.io/api?utm_medium=Docs+Menu&utm_content=API',
+      [text.docsMenu.ciSetup]: 'https://on.cypress.io/ci?utm_medium=Docs+Menu&utm_content=Set+Up+CI',
+      [text.docsMenu.fasterTests]: 'https://on.cypress.io/parallelization?utm_medium=Docs+Menu&utm_content=Parallelization',
+    }
+
+    cy.contains('button', text.docsMenu.docsHeading).click()
+
+    cy.wrap(Object.keys(expectedDocsLinks)).each((linkName: string) => {
+      cy.contains('a', linkName).should('have.attr', 'href', expectedDocsLinks[linkName])
+    })
   })
 
   it('does not show hint when on latest version of Cypress', () => {
@@ -62,6 +108,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
     })
 
     cy.contains('a', '8.7.0').should('be.visible').and('have.attr', 'href', 'https://github.com/cypress-io/cypress/releases/tag/v8.7.0')
+    cy.percySnapshot()
   })
 
   it('shows hint and modal to upgrade to latest version of cypress', () => {
@@ -90,14 +137,21 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
       ),
     })
 
+    cy.contains('v8.6.0 • Upgrade').should('be.visible')
+    cy.percySnapshot()
     cy.contains('v8.6.0 • Upgrade').click()
     cy.get('[data-cy="latest-version"]').contains('8.7.0')
     cy.get('[data-cy="current-version"]').contains('8.6.0')
     cy.get('[data-cy="update-hint"]').should('be.visible')
+    cy.percySnapshot()
     cy.contains('button', 'Update to').click()
 
     cy.contains(`${defaultMessages.topNav.updateCypress.title} 8.7.0`).should('be.visible')
     cy.contains('test-project').should('be.visible')
+    cy.percySnapshot()
+
+    cy.get('body').type('{esc}') // dismiss modal with keyboard
+    cy.contains(`${defaultMessages.topNav.updateCypress.title} 8.7.0`).should('not.exist')
   })
 
   it('displays the active project name', () => {
@@ -117,6 +171,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
     .click()
 
     cy.contains('h2', text.login.titleInitial).should('be.visible')
+    cy.percySnapshot()
 
     cy.findByRole('button', { name: text.login.actionLogin })
     .should('be.visible')
@@ -148,6 +203,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
     cy.contains(cloudViewer.fullName).should('be.visible')
     cy.contains(cloudViewer.email).should('be.visible')
     cy.findByRole('button', { name: text.login.actionLogout }).should('be.visible')
+    cy.percySnapshot()
   })
 
   it('Shows a page name instead of project when a page name is provided', () => {
@@ -173,6 +229,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
 
         it('opens on menu item click', () => {
           cy.contains(defaultMessages.topNav.docsMenu.prompts.ci1.description).should('be.visible')
+          cy.percySnapshot()
         })
 
         it('is dismissible from X icon', () => {
@@ -283,6 +340,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
 
           cy.contains('Docs').click()
           cy.contains('Run tests faster').click()
+          cy.percySnapshot()
         })
 
         it('opens on menu item click', () => {

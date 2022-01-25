@@ -10,12 +10,10 @@
         </i18n-t>
       </FileMatchIndicator>
       <OpenConfigFileInIDE>
-        <button
-          class="flex items-center text-indigo-500 outline-transparent gap-8px group"
-        >
+        <span class="flex items-center text-indigo-500 outline-transparent gap-8px group">
           <i-cy-document-text_x16 class="icon-light-gray-50 icon-dark-gray-300" />
           <span class="group-hocus:underline">cypress.config.js</span>
-        </button>
+        </span>
       </OpenConfigFileInIDE>
     </div>
 

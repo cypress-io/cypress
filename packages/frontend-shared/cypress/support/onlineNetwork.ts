@@ -50,11 +50,11 @@ declare global {
       /**
       * Simulates offline network mode
       */
-        goOffline(): Chainable<void>
+      goOffline(): Chainable<void>
       /**
        * Simulates online network mode
        */
-        goOnline(): Chainable<void>
+      goOnline(): Chainable<void>
     }
   }
 }

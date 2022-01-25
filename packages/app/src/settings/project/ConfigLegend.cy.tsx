@@ -12,5 +12,7 @@ describe('<ConfigLegend/>', () => {
       cy.contains(label)
       each(description.split('{0}'), (desc) => desc && cy.contains(desc))
     })
+
+    cy.percySnapshot()
   })
 })
