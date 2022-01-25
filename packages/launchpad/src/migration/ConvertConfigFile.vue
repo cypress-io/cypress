@@ -3,19 +3,74 @@
     <MigrationTitle :title="t('migration.configFile.title')" />
     <MigrationList>
       <MigrationListItem>
+        {{ t("migration.configFile.changedDefault") }}
+        <CodeTag class="text-red-500">
+          cypress.json
+        </CodeTag>
+        <i-cy-arrow-right_x16 class="h-16px w-16px inline-block icon-dark-gray-300" />
+        <CodeTag class="text-jade-500">
+          cypress.config.js
+        </CodeTag>
+      </MigrationListItem>
+      <MigrationListItem v-if="props.gql.hasCustomIntegrationFolder || props.gql.hasCustomIntegrationSpecPattern">
         <i18n-t
           scope="global"
-          keypath="migration.configFile.changedTheFile"
+          keypath="migration.configFile.customOptions"
         >
-          <template #jsonFile>
-            <CodeTag class="text-red-500">
-              cypress.json
+          <template #specPattern>
+            <CodeTag class="text-jade-500">
+              e2e/specPattern
             </CodeTag>
           </template>
-          <template #jsFile>
+          <template #options>
+            <template v-if="props.gql.hasCustomIntegrationFolder && props.gql.hasCustomIntegrationSpecPattern">
+              <CodeTag class="text-red-500">
+                integrationFolder
+              </CodeTag> and <CodeTag class="text-red-500">
+                testFiles
+              </CodeTag> options
+            </template>
+            <template v-else-if="props.gql.hasCustomIntegrationFolder">
+              <CodeTag class="text-red-500">
+                integrationFolder
+              </CodeTag> option
+            </template>
+            <template v-else-if="props.gql.hasCustomIntegrationSpecPattern">
+              <CodeTag class="text-red-500">
+                testFiles
+              </CodeTag> option
+            </template>
+          </template>
+        </i18n-t>
+      </MigrationListItem>
+      <MigrationListItem v-if="props.gql.hasCustomComponentFolder || props.gql.hasCustomComponentSpecPattern">
+        <i18n-t
+          scope="global"
+          keypath="migration.configFile.customOptions"
+        >
+          <template #specPattern>
             <CodeTag class="text-jade-500">
-              cypress.config.js
+              component/specPattern
             </CodeTag>
+          </template>
+          <template #options>
+            <template v-if="props.gql.hasCustomComponentFolder && props.gql.hasCustomComponentSpecPattern">
+              <CodeTag class="text-red-500">
+                componentFolder
+              </CodeTag> and <CodeTag class="text-red-500">
+                testFiles
+              </CodeTag> options
+            </template>
+            <template v-else-if="props.gql.hasCustomComponentFolder">
+              <CodeTag class="text-red-500">
+                componentFolder
+              </CodeTag> option
+            </template>
+            <template v-else-if="props.gql.hasCustomComponentSpecPattern">
+              <CodeTag class="text-red-500">
+                testFiles
+              </CodeTag> option
+            </template>
           </template>
         </i18n-t>
       </MigrationListItem>
@@ -34,16 +89,6 @@
               cypress.config.js
             </CodeTag>
           </template>
-        </i18n-t>
-      </MigrationListItem>
-      <MigrationListItem>
-        <i18n-t
-          scope="global"
-          keypath="migration.configFile.removeJson"
-        >
-          <CodeTag class="text-red-500">
-            cypress.json
-          </CodeTag>
         </i18n-t>
       </MigrationListItem>
     </MigrationList>
@@ -104,6 +149,10 @@ gql`
 fragment ConvertConfigFile on Migration {
   configBeforeCode
   configAfterCode
+  hasCustomIntegrationFolder
+  hasCustomIntegrationSpecPattern
+  hasCustomComponentFolder
+  hasCustomComponentSpecPattern
 }`
 
 const props = defineProps<{
