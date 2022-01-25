@@ -1,9 +1,10 @@
 // @ts-nocheck
 import _ from 'lodash'
+import { basename } from 'path'
 
 import $errUtils from '../../cypress/error_utils'
 
-export default (Commands, Cypress, cy) => {
+export default (Commands, Cypress, cy, state) => {
   Commands.addAll({
     readFile (file, encoding, options = {}) {
       let userOptions = options
@@ -77,6 +78,9 @@ export default (Commands, Cypress, cy) => {
           if (options.encoding === null) {
             contents = Buffer.from(contents)
           }
+
+          // Add the filename as a symbol, in case we need it later (such as when storing an alias)
+          state('current').set('fileName', basename(filePath))
 
           consoleProps['File Path'] = filePath
           consoleProps['Contents'] = contents
