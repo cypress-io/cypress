@@ -55,30 +55,22 @@ export const stubMigration: MaybeResolver<Migration> = {
       },
     ],
   },
-  manualFiles: [
-    {
-      __typename: 'MigrationFile',
-      parts: [
-        { __typename: 'MigrationFilePart', text: 'cypress/', highlight: false },
-        { __typename: 'MigrationFilePart', text: 'e2e', highlight: true },
-        { __typename: 'MigrationFilePart', text: '/app', highlight: false },
-        { __typename: 'MigrationFilePart', text: '.cy.', highlight: true },
-        { __typename: 'MigrationFilePart', text: 'js', highlight: false },
-      ],
-      testingType: 'e2e',
-    },
-    {
-      __typename: 'MigrationFile',
-      parts: [
-        { __typename: 'MigrationFilePart', text: 'cypress/', highlight: false },
-        { __typename: 'MigrationFilePart', text: 'e2e', highlight: true },
-        { __typename: 'MigrationFilePart', text: '/blog-post', highlight: false },
-        { __typename: 'MigrationFilePart', text: '.cy.', highlight: true },
-        { __typename: 'MigrationFilePart', text: 'js', highlight: false },
-      ],
-      testingType: 'e2e',
-    },
-  ],
+  manualFiles: {
+    __typename: 'ManualMigration',
+    completed: false,
+    files: [
+      {
+        __typename: 'ManualMigrationFile',
+        moved: false,
+        relative: 'cypress/component/button-spec.js',
+      },
+      {
+        __typename: 'ManualMigrationFile',
+        moved: true,
+        relative: 'cypress/component/hello.spec.tsx',
+      },
+    ],
+  },
   configBeforeCode: `{
     "baseUrl": "http://localhost:1234/",
     "retries": 2

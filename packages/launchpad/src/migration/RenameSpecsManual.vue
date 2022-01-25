@@ -30,16 +30,31 @@
       </MigrationListItem>
     </MigrationList>
     <div class="border rounded border-gray-100 mt-16px">
-      <HighlightedFilesList
-        :files="props.gql.manualFiles"
-      />
+      <div class="py-4px">
+        <div
+          v-for="(file, index) of props.gql.manualFiles?.files"
+          :key="index"
+          class="flex border-t-gray-50 h-40px mx-16px items-center"
+          :class="{'border-t': index > 0}"
+        >
+          <span v-if="file.moved">
+            ✅
+          </span>
+          <i-cy-document-text_x16
+            v-else
+            class="h-16px mr-8px w-16px inline-block icon-dark-gray-400 icon-light-gray-50"
+          />
+          <span>
+            {{ file.relative }}
+          </span>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
 import CodeTag from '@cy/components/CodeTag.vue'
-import HighlightedFilesList from './fragments/HighlightedFilesList.vue'
 import { useI18n } from '@cy/i18n'
 import MigrationTitle from './fragments/MigrationTitle.vue'
 import MigrationList from './fragments/MigrationList.vue'
@@ -50,9 +65,10 @@ import type { RenameSpecsManualFragment } from '../generated/graphql'
 gql`
 fragment RenameSpecsManual on Migration {
   manualFiles {
-    parts {
-      text
-      highlight
+    completed
+    files {
+      relative
+      moved
     }
   }
 }`

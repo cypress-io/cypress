@@ -46,7 +46,12 @@
                   class="animate-spin icon-dark-white icon-light-gray-400"
                 />
               </template>
-              {{ t('migration.wizard.step2.buttonWait') }}
+              <span v-if="migration.manualFiles?.completed">
+                {{ t('migration.wizard.step2.buttonDone') }}
+              </span>
+              <span v-else>
+                {{ t('migration.wizard.step2.buttonWait') }}
+              </span>
             </Button>
             <Button
               variant="outline"
