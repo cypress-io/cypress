@@ -25,6 +25,8 @@ describe('<InstallDependencies />', () => {
 
     cy.contains(PACKAGES_DESCRIPTIONS['@cypress/react'].split('<span')[0])
     cy.contains(PACKAGES_DESCRIPTIONS['@cypress/webpack-dev-server'].split('<span')[0])
+
+    cy.percySnapshot()
   })
 
   it('shows expected actions', () => {

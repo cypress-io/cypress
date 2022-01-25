@@ -25,7 +25,7 @@ describe('lib/util/config-file-updater', () => {
 
           const expectedOutput = stripIndent`\
             export default {
-              projectId: "id1234",
+              projectId: 'id1234',
               viewportWidth: 400,
               foo: 42,
             }
@@ -45,7 +45,7 @@ describe('lib/util/config-file-updater', () => {
 
           const expectedOutput = stripIndent`\
             module.exports = {
-              projectId: "id1234",
+              projectId: 'id1234',
               viewportWidth: 400,
               foo: 42,
             }
@@ -62,7 +62,7 @@ describe('lib/util/config-file-updater', () => {
             `
 
           const expectedOutput = stripIndent`\
-            module.exports = { 'projectId': "id1234"}
+            module.exports = { 'projectId': 'id1234'}
           `
 
           const output = await insertValueInJSString(src, { projectId: 'id1234' }, errors)
@@ -73,15 +73,15 @@ describe('lib/util/config-file-updater', () => {
         it('works with and without the quotes around keys', async () => {
           const src = stripIndent`\
               export default {
-                "foo": 42,
+                'foo': 42,
               }
             `
 
           const expectedOutput = stripIndent`\
               export default {
-                projectId: "id1234",
+                projectId: 'id1234',
                 viewportWidth: 400,
-                "foo": 42,
+                'foo': 42,
               }
             `
 
@@ -94,16 +94,16 @@ describe('lib/util/config-file-updater', () => {
       describe('defineConfig', () => {
         it('skips defineConfig and add to the object inside', async () => {
           const src = stripIndent`\
-              import { defineConfig } from "cypress"
+              import { defineConfig } from 'cypress'
               export default defineConfig({
                 foo: 42,
               })
             `
 
           const expectedOutput = stripIndent`\
-              import { defineConfig } from "cypress"
+              import { defineConfig } from 'cypress'
               export default defineConfig({
-                projectId: "id1234",
+                projectId: 'id1234',
                 viewportWidth: 400,
                 foo: 42,
               })
@@ -116,16 +116,16 @@ describe('lib/util/config-file-updater', () => {
 
         it('skips defineConfig even if it renamed in an import (es6)', async () => {
           const src = stripIndent`\
-              import { defineConfig as cy_defineConfig } from "cypress"
+              import { defineConfig as cy_defineConfig } from 'cypress'
               export default cy_defineConfig({
                 foo: 42,
               })
             `
 
           const expectedOutput = stripIndent`\
-              import { defineConfig as cy_defineConfig } from "cypress"
+              import { defineConfig as cy_defineConfig } from 'cypress'
               export default cy_defineConfig({
-                projectId: "id1234",
+                projectId: 'id1234',
                 viewportWidth: 400,
                 foo: 42,
               })
@@ -138,16 +138,16 @@ describe('lib/util/config-file-updater', () => {
 
         it('skips defineConfig even if it renamed in a require (es5)', async () => {
           const src = stripIndent`\
-              const { defineConfig: cy_defineConfig } = require("cypress")
+              const { defineConfig: cy_defineConfig } = require('cypress')
               module.exports = cy_defineConfig({
                 foo: 42,
               })
             `
 
           const expectedOutput = stripIndent`\
-              const { defineConfig: cy_defineConfig } = require("cypress")
+              const { defineConfig: cy_defineConfig } = require('cypress')
               module.exports = cy_defineConfig({
-                projectId: "id1234",
+                projectId: 'id1234',
                 viewportWidth: 400,
                 foo: 42,
               })
@@ -230,7 +230,7 @@ describe('lib/util/config-file-updater', () => {
 
           const expectedOutput = stripIndent`\
             export default {
-              projectId: "id1234",
+              projectId: 'id1234',
               foo: 1000,
               bar: 3000,
               'component': {
@@ -260,7 +260,7 @@ describe('lib/util/config-file-updater', () => {
           const expectedOutput = stripIndent`\
               module.exports = {
                 component: {
-                  specFilePattern: "src/**/*.spec.cy.js",
+                  specFilePattern: 'src/**/*.spec.cy.js',
                 },
                 foo: 42
               }
@@ -284,7 +284,7 @@ describe('lib/util/config-file-updater', () => {
           const expectedOutput = stripIndent`\
             module.exports = {
               'component': {
-                specFilePattern: "src/**/*.spec.cy.js",
+                specFilePattern: 'src/**/*.spec.cy.js',
                 viewportWidth: 800
               },
               foo: 42
@@ -310,7 +310,7 @@ describe('lib/util/config-file-updater', () => {
           module.exports = {
             foo: 42,
             component: {
-              specFilePattern: "src/**/*.spec.cy.js",
+              specFilePattern: 'src/**/*.spec.cy.js',
               foo: 82
             }
           }`

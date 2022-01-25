@@ -4,7 +4,8 @@ import type { NodePath } from 'ast-types/lib/node-path'
 import { visit } from 'recast'
 import type { namedTypes } from 'ast-types'
 import Debug from 'debug'
-import * as fs from 'fs/promises'
+import fs from 'fs-extra'
+import stringify from 'stringify-object'
 
 const debug = Debug('cypress:data-context:config-file-updater')
 
@@ -19,7 +20,7 @@ export async function insertValuesInConfigFile (file: string, obj: {}, errors: E
 
   debug('transformedFileContents %s', transformedFileContents)
   await fs.writeFile(file, transformedFileContents).catch((e) => {
-    throw new Error(`Failed to update config file ${file} with ${JSON.stringify(obj)}: ${e.message}`)
+    throw new Error(`Failed to update config file ${file} with ${stringify(obj)}: ${e.message}`)
   })
 }
 
@@ -177,7 +178,7 @@ function setRootKeysSplicers (
   debug('keys to instert %O', keysToInsert)
 
   if (keysToInsert.length) {
-    const valuesInserted = `\n${lineStartSpacer}${ keysToInsert.map((key) => `${key}: ${JSON.stringify(obj[key])},`).join(`\n${lineStartSpacer}`)}`
+    const valuesInserted = `\n${lineStartSpacer}${ keysToInsert.map((key) => `${key}: ${stringify(obj[key])},`).join(`\n${lineStartSpacer}`)}`
 
     splicers.push({
       start: objectLiteralStartIndex,
@@ -231,7 +232,7 @@ function setSubKeysSplicers (
   for (const key in keysToInsertForSubKeys) {
     subvaluesInserted += `\n${parentLineStartSpacer}${key}: {`
     keysToInsertForSubKeys[key]?.forEach((subkey) => {
-      subvaluesInserted += `\n${parentLineStartSpacer}${lineStartSpacer}${subkey}: ${JSON.stringify(obj[key][subkey])},`
+      subvaluesInserted += `\n${parentLineStartSpacer}${lineStartSpacer}${subkey}: ${stringify(obj[key][subkey])},`
     })
 
     subvaluesInserted += `\n${parentLineStartSpacer}},`
@@ -270,7 +271,7 @@ function setSplicerToUpdateProperty (splicers: Splicer[],
     splicers.push({
       start: (propertyToUpdate.value as any).start,
       end: (propertyToUpdate.value as any).end,
-      replaceString: JSON.stringify(updatedValue),
+      replaceString: stringify(updatedValue),
     })
   } else {
     debug('error', propertyToUpdate?.value)

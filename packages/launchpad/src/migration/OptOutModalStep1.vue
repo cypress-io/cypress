@@ -14,28 +14,31 @@
       class="mt-24px"
     />
     <MigrationList>
-      <template #line-1>
+      <MigrationListItem>
         {{ t('migration.renameAuto.modals.step1.line1') }}
-      </template>
-      <template #line-2>
+      </MigrationListItem>
+      <MigrationListItem>
         {{ t('migration.renameAuto.modals.step1.line2') }}
         <CodeTag class="text-jade-500">
           [filename].cy.[ext]
         </CodeTag>
-      </template>
-      <template #line-3>
+      </MigrationListItem>
+      <MigrationListItem>
         {{ t('migration.renameAuto.modals.step1.line3') }}
-      </template>
-      <template #line-4>
+      </MigrationListItem>
+      <MigrationListItem>
         {{ t('migration.renameAuto.modals.step1.line4') }}
-      </template>
-      <template #line-5>
-        <i18n-t keypath="migration.renameAuto.modals.step1.line5">
+      </MigrationListItem>
+      <MigrationListItem>
+        <i18n-t
+          scope="global"
+          keypath="migration.renameAuto.modals.step1.line5"
+        >
           <CodeTag class="text-jade-500">
             [filename].cy.[ext]
           </CodeTag>
         </i18n-t>
-      </template>
+      </MigrationListItem>
     </MigrationList>
     <template #footer>
       <div class="flex gap-16px">
@@ -66,6 +69,7 @@ import ArrowRightIcon from '~icons/cy/arrow-right_x16.svg'
 import WarningIcon from '~icons/cy/warning_x16.svg'
 import MigrationList from './fragments/MigrationList.vue'
 import MigrationTitle from './fragments/MigrationTitle.vue'
+import MigrationListItem from './fragments/MigrationListItem.vue'
 import { useI18n } from '@cy/i18n'
 
 const { t } = useI18n()

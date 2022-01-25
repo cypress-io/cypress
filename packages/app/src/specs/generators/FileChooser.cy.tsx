@@ -36,6 +36,8 @@ describe('<FileChooser />', () => {
     cy.mount(() => (<FileChooser extensionPattern={extensionPattern} files={allFiles} />))
     .get(fileRowSelector)
     .should('have.length', numFiles)
+
+    cy.percySnapshot()
   })
 
   it('can search by file name', () => {
@@ -157,6 +159,8 @@ describe('<FileChooser />', () => {
           files={[]} />))
         .get(noResultsSelector)
         .findByText(extensionPattern).should('be.visible')
+
+        cy.percySnapshot()
       })
 
       it('resets the extension to the initial extension', () => {

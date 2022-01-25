@@ -2,8 +2,11 @@
   <div class="text-16px leading-24px">
     <MigrationTitle :title="t('migration.configFile.title')" />
     <MigrationList>
-      <template #line-1>
-        <i18n-t keypath="migration.configFile.changedTheFile">
+      <MigrationListItem>
+        <i18n-t
+          scope="global"
+          keypath="migration.configFile.changedTheFile"
+        >
           <template #jsonFile>
             <CodeTag class="text-red-500">
               cypress.json
@@ -15,9 +18,12 @@
             </CodeTag>
           </template>
         </i18n-t>
-      </template>
-      <template #line-2>
-        <i18n-t keypath="migration.configFile.willConvert">
+      </MigrationListItem>
+      <MigrationListItem>
+        <i18n-t
+          scope="global"
+          keypath="migration.configFile.willConvert"
+        >
           <template #jsonFile>
             <CodeTag class="text-red-500">
               cypress.json
@@ -29,14 +35,17 @@
             </CodeTag>
           </template>
         </i18n-t>
-      </template>
-      <template #line-3>
-        <i18n-t keypath="migration.configFile.removeJson">
+      </MigrationListItem>
+      <MigrationListItem>
+        <i18n-t
+          scope="global"
+          keypath="migration.configFile.removeJson"
+        >
           <CodeTag class="text-red-500">
             cypress.json
           </CodeTag>
         </i18n-t>
-      </template>
+      </MigrationListItem>
     </MigrationList>
     <BeforeAfter>
       <template #beforeHeader>
@@ -87,6 +96,7 @@ import MigrationTitle from './fragments/MigrationTitle.vue'
 import { useI18n } from '@cy/i18n'
 import { gql } from '@urql/vue'
 import type { ConvertConfigFileFragment } from '../generated/graphql'
+import MigrationListItem from './fragments/MigrationListItem.vue'
 
 const { t } = useI18n()
 

@@ -318,7 +318,6 @@ export const mutation = mutationType({
       description: 'Save the projects preferences to cache',
       args: {
         testingType: nonNull(TestingTypeEnum),
-        browserPath: nonNull(stringArg()),
       },
       async resolve (_, args, ctx) {
         await ctx.actions.project.setProjectPreferences(args)
@@ -421,17 +420,113 @@ export const mutation = mutationType({
       },
     })
 
+    t.field('migrateStart', {
+      description: 'Initialize the migration wizard to the first step',
+      type: Query,
+      resolve: async (_, args, ctx) => {
+        await ctx.actions.migration.initialize()
+
+        return {}
+      },
+    })
+
+    t.field('migrateRenameSpecs', {
+      description: 'While migrating to 10+ renames files to match the new .cy pattern',
+      type: Query,
+      args: {
+        skip: booleanArg(),
+      },
+      resolve: async (_, { skip }, ctx) => {
+        if (!skip) {
+          try {
+            await ctx.actions.migration.renameSpecFiles()
+          } catch (error) {
+            const e = error as Error
+
+            ctx.coreData.baseError = {
+              title: 'Spec Files Migration Error',
+              message: e.message,
+              stack: e.stack,
+            }
+          }
+        }
+
+        ctx.actions.migration.nextStep()
+
+        return {}
+      },
+    })
+
+    t.field('migrateSkipManualRename', {
+      description: 'While migrating to 10+ skip manual rename step',
+      type: Query,
+      resolve: async (_, args, ctx) => {
+        ctx.actions.migration.nextStep()
+
+        return {}
+      },
+    })
+
+    t.field('finishedRenamingComponentSpecs', {
+      description: 'user has finished migration component specs - move to next step',
+      type: Query,
+      resolve: async (_, args, ctx) => {
+        ctx.actions.migration.nextStep()
+
+        return {}
+      },
+    })
+
+    t.field('migrateRenameSupport', {
+      description: 'While migrating to 10+ launch renaming of support file',
+      type: Query,
+      resolve: async (_, args, ctx) => {
+        try {
+          await ctx.actions.migration.renameSupportFile()
+        } catch (error) {
+          const e = error as Error
+
+          ctx.coreData.baseError = {
+            title: 'Support File Migration Error',
+            message: e.message,
+            stack: e.stack,
+          }
+        }
+        ctx.actions.migration.nextStep()
+
+        return {}
+      },
+    })
+
     t.field('migrateConfigFile', {
       description: 'Transforms cypress.json file into cypress.config.js file',
-      type: 'Boolean',
+      type: Query,
       resolve: async (_, args, ctx) => {
         try {
           await ctx.actions.migration.createConfigFile()
+        } catch (error) {
+          const e = error as Error
 
-          return true
-        } catch {
-          return false
+          ctx.coreData.baseError = {
+            title: 'Config File Migration Error',
+            message: e.message,
+            stack: e.stack,
+          }
         }
+
+        ctx.actions.migration.nextStep()
+
+        return {}
+      },
+    })
+
+    t.field('migrateComponentTesting', {
+      description: 'Merges the component testing config in cypress.config.{js,ts}',
+      type: Query,
+      resolve: async (_, args, ctx) => {
+        await ctx.actions.migration.startWizardReconfiguration()
+
+        return {}
       },
     })
 
@@ -444,7 +539,7 @@ export const mutation = mutationType({
       resolve: async (_, args, ctx) => {
         try {
           await ctx.actions.project.setProjectIdInConfigFile(args.projectId)
-        } catch (e) {
+        } catch {
           // ignore error as not useful for end user to see
         }
 

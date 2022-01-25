@@ -24,6 +24,27 @@ describe('App: Settings', () => {
     cy.findByText('Project ID').should('be.visible')
   })
 
+  it('shows the recordKeys section', () => {
+    cy.loginUser()
+
+    cy.visitApp()
+    cy.findByText('Settings').click()
+    cy.findByText('Project Settings').click()
+    cy.findByText('Record Key').should('be.visible')
+  })
+
+  it('opens cloud settings when clicking on "Manage Keys"', () => {
+    cy.loginUser()
+    cy.intercept('mutation-ExternalLink_OpenExternal', { 'data': { 'openExternal': true } }).as('OpenExternal')
+    cy.visitApp()
+    cy.findByText('Settings').click()
+    cy.findByText('Project Settings').click()
+    cy.findByText('Manage Keys').click()
+    cy.wait('@OpenExternal')
+    .its('request.body.variables.url')
+    .should('equal', 'http:/test.cloud/cloud-project/settings')
+  })
+
   it('can reconfigure a project', () => {
     cy.visitApp('settings')
 
@@ -125,7 +146,7 @@ describe('App: Settings without cloud', () => {
     cy.findByText('Settings').click()
     cy.findByText('Project Settings').click()
 
-    cy.get('[data-testid=config-code]').within(() => {
+    cy.get('[data-cy=config-code]').within(() => {
       cy.contains('browsers: chrome, firefox')
     })
   })

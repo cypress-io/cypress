@@ -20,9 +20,11 @@ describe('<ProjectId />', () => {
           />
         </div>
       ),
-    }).then(() => {
-      cy.findByText(givenProjectId).should('be.visible')
-      cy.findByText('Copy')
     })
+
+    cy.findByText(givenProjectId).should('be.visible')
+    cy.findByText('Copy')
+
+    cy.percySnapshot()
   })
 })

@@ -10,5 +10,5 @@ const props = defineProps<{
   colorClasses?: string
 }>()
 
-const browsers = computed(() => props.browsers.map((b) => b.name).join(', '))
+const browsers = computed(() => props.browsers.length ? props.browsers.map((b) => b.name).join(', ') : '<None>')
 </script>

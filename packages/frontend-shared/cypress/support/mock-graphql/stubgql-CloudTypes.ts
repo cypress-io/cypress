@@ -201,6 +201,7 @@ export const CloudRunStubs = {
   failing: createCloudRun({ status: 'FAILED', totalPassed: 8, totalFailed: 2 }),
   running: createCloudRun({ status: 'RUNNING', totalRunning: 2, totalPassed: 8 }),
   someSkipped: createCloudRun({ status: 'PASSED', totalPassed: 7, totalSkipped: 3 }),
+  somePending: createCloudRun({ status: 'PASSED', totalPassed: 100, totalSkipped: 3000, totalPending: 20 }),
   allSkipped: createCloudRun({ status: 'ERRORED', totalPassed: 0, totalSkipped: 10 }),
 } as Record<string, Required<CloudRun>>
 

@@ -232,6 +232,15 @@ declare namespace Cypress {
      */
     Blob: BlobUtil.BlobUtilStatic
     /**
+     * Cypress automatically includes a Buffer library and exposes it as Cypress.Buffer.
+     *
+     * @see https://on.cypress.io/buffer
+     * @see https://github.com/feross/buffer
+     * @example
+     *    Cypress.Buffer.method()
+     */
+    Buffer: BufferType
+    /**
      * Cypress automatically includes minimatch and exposes it as Cypress.minimatch.
      *
      * @see https://on.cypress.io/minimatch
@@ -668,7 +677,7 @@ declare namespace Cypress {
      * @param {FileReference} files - The file(s) to select or drag onto this element.
      * @see https://on.cypress.io/selectfile
      * @example
-     *    cy.get('input[type=file]').selectFile(Buffer.from('text'))
+     *    cy.get('input[type=file]').selectFile(Cypress.Buffer.from('text'))
      *    cy.get('input[type=file]').selectFile({
      *      fileName: 'users.json',
      *      fileContents: [{name: 'John Doe'}]
@@ -5699,10 +5708,12 @@ declare namespace Cypress {
   type FileReference = string | BufferType | FileReferenceObject
   interface FileReferenceObject {
     /*
-     * Buffers and strings will be used as-is. All other types will have `JSON.stringify()` applied.
+     * Buffers will be used as-is, while strings will be interpreted as an alias or a file path.
+     * All other types will have `Buffer.from(JSON.stringify())` applied.
      */
     contents: any
     fileName?: string
+    mimeType?: string
     lastModified?: number
   }
 

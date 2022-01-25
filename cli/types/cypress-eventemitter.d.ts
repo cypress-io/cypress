@@ -28,7 +28,6 @@ interface NodeEventEmitter {
   eventNames(): Array<string | symbol>
 }
 
-// The Buffer type is automatically imported for the browser by webpack
-// and we use it for dealing with binary data, especially around the
+// We use the Buffer class for dealing with binary data, especially around the
 // selectFile interface.
 type BufferType = import("buffer/").Buffer

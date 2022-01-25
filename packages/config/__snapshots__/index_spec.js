@@ -58,7 +58,7 @@ exports['src/index .getDefaultValues returns list of public config keys 1'] = {
   "screenshotsFolder": "cypress/screenshots",
   "slowTestThreshold": 10000,
   "scrollBehavior": "top",
-  "supportFile": "cypress/support/e2e.js",
+  "supportFile": "cypress/support/e2e.{js,jsx,ts,tsx}",
   "supportFolder": false,
   "taskTimeout": 60000,
   "trashAssetsBeforeRuns": true,

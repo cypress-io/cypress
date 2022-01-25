@@ -1,3 +1,29 @@
+# [@cypress/react-v5.12.1](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.12.0...@cypress/react-v5.12.1) (2022-01-10)
+
+
+### Bug Fixes
+
+* check resolvedNodePath for Next.js 12 guard ([#19604](https://github.com/cypress-io/cypress/issues/19604)) ([6304fd7](https://github.com/cypress-io/cypress/commit/6304fd7548a0a3fee90fc8a9ba449ab81e7a7a0c))
+
+# [@cypress/react-v5.12.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.11.0...@cypress/react-v5.12.0) (2021-12-21)
+
+
+### Features
+
+* support create-react-app v5 ([#19434](https://github.com/cypress-io/cypress/issues/19434)) ([415a7b1](https://github.com/cypress-io/cypress/commit/415a7b149aaac37ae605dc1a11007bad29187dc5))
+
+# [@cypress/react-v5.11.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.10.3...@cypress/react-v5.11.0) (2021-12-16)
+
+
+### Bug Fixes
+
+* **react:** link to rerender example ([#19020](https://github.com/cypress-io/cypress/issues/19020)) ([2a471d6](https://github.com/cypress-io/cypress/commit/2a471d633a7cf5bd94cfa7d876ddb27cc32626d1))
+
+
+### Features
+
+* use hoisted yarn install in binary build ([#17285](https://github.com/cypress-io/cypress/issues/17285)) ([e4f5b10](https://github.com/cypress-io/cypress/commit/e4f5b106d49d6ac0857c5fdac886f83b99558c88))
+
 # [@cypress/react-v5.10.3](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.10.2...@cypress/react-v5.10.3) (2021-11-01)
 
 

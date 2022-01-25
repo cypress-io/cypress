@@ -2,7 +2,7 @@
   <div class="text-16px leading-24px">
     <MigrationTitle :title="t('migration.renameAuto.title')" />
     <MigrationList>
-      <template #line-1>
+      <MigrationListItem>
         {{ t('migration.renameAuto.changedSpecFolder') }}
         <CodeTag
           class="text-red-500"
@@ -11,15 +11,8 @@
         <CodeTag
           class="text-jade-500"
         >cypress/e2e</CodeTag>
-      </template>
-
-      <a
-        class="cursor-pointer text-indigo-500 hover:underline"
-        @click="step1Modal = true"
-      >
-        {{ t('migration.renameAuto.changeButton') }}
-      </a>
-      <template #line-2>
+      </MigrationListItem>
+      <MigrationListItem>
         <template
           v-if="skipRename"
         >
@@ -42,27 +35,28 @@
         >
           {{ t('migration.renameAuto.changeButton') }}
         </a>
-      </template>
-      <template #line-3>
-        <i18n-t keypath="migration.renameAuto.changedSpecPatternExplain">
+      </MigrationListItem>
+      <MigrationListItem v-if="!skipRename">
+        <i18n-t
+          scope="global"
+          keypath="migration.renameAuto.changedSpecPatternExplain"
+        >
           <CodeTag class="text-jade-500">
             [filename].cy.[ext]
           </CodeTag>
         </i18n-t>
-      </template>
+      </MigrationListItem>
     </MigrationList>
     <BeforeAfter>
       <template #before>
         <HighlightedFilesList
-          :files="props.gql.specFilesBefore"
-          :highlight-reg-exp="/(integration|[_,-,.]?spec)/gi"
+          :files="props.gql.specFiles.before"
           highlight-class="text-red-500"
         />
       </template>
       <template #after>
         <HighlightedFilesList
-          :files="props.gql.specFilesAfter"
-          :highlight-reg-exp="/(e2e|\.cy)/gi"
+          :files="props.gql.specFiles.after"
           highlight-class="text-jade-500"
         />
       </template>
@@ -92,6 +86,7 @@ import CodeTag from '@cy/components/CodeTag.vue'
 import BeforeAfter from './fragments/BeforeAfter.vue'
 import HighlightedFilesList from './fragments/HighlightedFilesList.vue'
 import MigrationList from './fragments/MigrationList.vue'
+import MigrationListItem from './fragments/MigrationListItem.vue'
 import MigrationTitle from './fragments/MigrationTitle.vue'
 import OptOutModalStep1 from './OptOutModalStep1.vue'
 import OptOutModalStep2 from './OptOutModalStep2.vue'
@@ -103,13 +98,30 @@ const { t } = useI18n()
 
 gql`
 fragment RenameSpecsAuto on Migration {
-  specFilesBefore
-  specFilesAfter
+  specFiles {
+    before {
+      parts {
+        text
+        highlight
+      }
+    }
+
+    after {
+      parts {
+        text
+        highlight
+      }
+    }
+  }
 }`
 
 const props = defineProps<{
   gql: RenameSpecsAutoFragment
 }>()
+
+const emits = defineEmits<{
+  (eventName: 'skipChange', value: boolean): void
+  }>()
 
 const step1Modal = ref(false)
 const step2Modal = ref(false)
@@ -120,5 +132,6 @@ const skipRename = ref(false)
 function applySkipResult (val:string) {
   // TODO: add a GQL mutation here
   skipRename.value = val === 'skip'
+  emits('skipChange', skipRename.value)
 }
 </script>
