@@ -1,5 +1,6 @@
 import { basename } from 'path'
 import _ from 'lodash'
+import mime from 'mime-types'
 
 import $dom from '../../../dom'
 import $errUtils from '../../../cypress/error_utils'
@@ -37,8 +38,13 @@ const tryMockWebkit = (item) => {
 const createDataTransfer = (files: Cypress.FileReferenceObject[]): DataTransfer => {
   const dataTransfer = new DataTransfer()
 
-  files.forEach(({ contents, fileName = '', lastModified = Date.now() }) => {
-    const file = new File([contents], fileName, { lastModified })
+  files.forEach(({
+    contents,
+    fileName = '',
+    mimeType = mime.lookup(fileName) || '',
+    lastModified = Date.now(),
+  }) => {
+    const file = new File([contents], fileName, { lastModified, type: mimeType })
 
     dataTransfer.items.add(file)
   })
@@ -136,6 +142,7 @@ export default (Commands, Cypress, cy, state, config) => {
     }
 
     return {
+      fileName: aliasObj.fileName,
       ...file,
       contents: aliasObj.subject,
     }
@@ -150,7 +157,7 @@ export default (Commands, Cypress, cy, state, config) => {
       // We default to the filename on the path, but allow them to override
         fileName: basename(file.contents),
         ...file,
-        contents: Buffer.from(contents),
+        contents: Cypress.Buffer.from(contents),
       }
     })
     .catch((err) => {
@@ -168,7 +175,7 @@ export default (Commands, Cypress, cy, state, config) => {
   }
 
   /*
-   * Turns a user-provided file - a string shorthand, Buffer, or object
+   * Turns a user-provided file - a string shorthand, ArrayBuffer, or object
    * into an object of form {
    *   contents,
    *   fileName?,
@@ -180,7 +187,7 @@ export default (Commands, Cypress, cy, state, config) => {
    */
   const parseFile = (options) => {
     return async (file: any, index: number, filesArray: any[]): Promise<Cypress.FileReferenceObject> => {
-      if (typeof file === 'string' || Buffer.isBuffer(file)) {
+      if (typeof file === 'string' || ArrayBuffer.isView(file)) {
         file = { contents: file }
       }
 
@@ -203,7 +210,7 @@ export default (Commands, Cypress, cy, state, config) => {
         file = handleAlias(file, options) ?? await handlePath(file, options)
       }
 
-      if (!_.isString(file.contents) && !Buffer.isBuffer(file.contents)) {
+      if (!_.isString(file.contents) && !ArrayBuffer.isView(file.contents)) {
         file.contents = JSON.stringify(file.contents)
       }
 
