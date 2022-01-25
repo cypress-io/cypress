@@ -10,12 +10,14 @@ import {
   getSpecs,
   getDefaultLegacySupportFile,
   RelativeSpecWithTestingType,
+  supportFilesForMigration,
+} from '../util/migration'
+import {
   formatMigrationFile,
   FilePart,
   regexps,
-  supportFilesForMigration,
   NonSpecFileError,
-} from '../util/migration'
+} from '../util/migrationFormat'
 
 const debug = Debug('cypress:data-context:MigrationDataSource')
 
