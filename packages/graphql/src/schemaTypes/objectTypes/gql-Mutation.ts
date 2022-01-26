@@ -136,11 +136,7 @@ export const mutation = mutationType({
         // if necessary init the wizard for configuration
         if (ctx.coreData.currentTestingType
           && !ctx.lifecycleManager.isTestingTypeConfigured(ctx.coreData.currentTestingType)) {
-          try {
-            await ctx.actions.wizard.initialize()
-          } catch (e) {
-            ctx.coreData.baseError = e as Error
-          }
+          await ctx.actions.wizard.initialize()
         }
 
         return {}
@@ -254,19 +250,7 @@ export const mutation = mutationType({
         specPath: stringArg(),
       },
       resolve: async (_, args, ctx) => {
-        try {
-          await ctx.actions.project.launchProject(ctx.coreData.currentTestingType, {}, args.specPath)
-        } catch (e) {
-          ctx.coreData.baseError = {
-            description: e.message,
-            errorType: 'UNKNOWN_ERROR',
-            originalError: {
-              name: e.name,
-              message: e.message,
-              stack: e.stack,
-            },
-          }
-        }
+        await ctx.actions.project.launchProject(ctx.coreData.currentTestingType, {}, args.specPath)
 
         return ctx.lifecycleManager
       },
@@ -318,23 +302,7 @@ export const mutation = mutationType({
         path: nonNull(stringArg()),
       },
       resolve: async (_, args, ctx) => {
-        try {
-          await ctx.actions.project.setCurrentProject(args.path)
-          ctx.coreData.baseError = null
-        } catch (error) {
-          const e = error as Error
-
-          ctx.coreData.baseError = {
-            errorType: 'CONFIG_VALIDATION_ERROR',
-            title: 'Cypress Configuration Error',
-            description: e.message,
-            originalError: {
-              name: e.name,
-              message: e.message,
-              stack: e.stack,
-            },
-          }
-        }
+        await ctx.actions.project.setCurrentProject(args.path)
 
         return {}
       },
@@ -502,17 +470,7 @@ export const mutation = mutationType({
       },
       resolve: async (_, { skip, before, after }, ctx) => {
         if (!skip && before && after) {
-          try {
-            await ctx.actions.migration.renameSpecFiles(before, after)
-          } catch (error) {
-            const e = error as Error
-
-            ctx.coreData.baseError = {
-              title: 'Spec Files Migration Error',
-              message: e.message,
-              stack: e.stack,
-            }
-          }
+          await ctx.actions.migration.renameSpecFiles(before, after)
         }
 
         await ctx.actions.migration.nextStep()
@@ -525,20 +483,7 @@ export const mutation = mutationType({
       description: 'When the user decides to skip specs rename',
       type: Query,
       resolve: async (_, args, ctx) => {
-        try {
-          await ctx.actions.migration.renameSpecsFolder()
-        } catch (error) {
-          const e = error as Error
-
-          const message = e.message === 'dest already exists.' ? 'e2e folder already exists.' : e.message
-
-          ctx.coreData.baseError = {
-            title: 'Spec Folder Migration Error',
-            message,
-            stack: e.stack,
-          }
-        }
-
+        await ctx.actions.migration.renameSpecsFolder()
         await ctx.actions.migration.nextStep()
 
         return {}
@@ -579,17 +524,7 @@ export const mutation = mutationType({
       description: 'While migrating to 10+ launch renaming of support file',
       type: Query,
       resolve: async (_, args, ctx) => {
-        try {
-          await ctx.actions.migration.renameSupportFile()
-        } catch (error) {
-          const e = error as Error
-
-          ctx.coreData.baseError = {
-            title: 'Support File Migration Error',
-            message: e.message,
-            stack: e.stack,
-          }
-        }
+        await ctx.actions.migration.renameSupportFile()
         await ctx.actions.migration.nextStep()
 
         return {}
@@ -601,18 +536,7 @@ export const mutation = mutationType({
       type: Query,
       slowLogThreshold: 5000, // This mutation takes a little time
       resolve: async (_, args, ctx) => {
-        try {
-          await ctx.actions.migration.createConfigFile()
-        } catch (error) {
-          const e = error as Error
-
-          ctx.coreData.baseError = {
-            title: 'Config File Migration Error',
-            message: e.message,
-            stack: e.stack,
-          }
-        }
-
+        await ctx.actions.migration.createConfigFile()
         await ctx.actions.migration.nextStep()
 
         return {}
@@ -690,6 +614,14 @@ export const mutation = mutationType({
         }
 
         return true
+      },
+    })
+
+    t.field('dismissWarning', {
+      type: Query,
+      description: `Dismisses a warning displayed by the frontend`,
+      resolve: (source) => {
+        return {}
       },
     })
   },

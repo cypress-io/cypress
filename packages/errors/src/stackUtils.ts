@@ -31,6 +31,18 @@ export const getStackLines = (stack: string) => {
   return stackLines
 }
 
+const reLineCapture = /^\s*(?:at )?.*@?\((.*?)\:(\d+)\:(\d+)\)?$/
+
+export const parseStackLine = (line: string): null | { absolute: string, line: number, column: number } => {
+  const result = reLineCapture.exec(line)
+
+  if (!result?.[1]) {
+    return null
+  }
+
+  return { absolute: result[1], line: Number(result[2]), column: Number(result[3]) }
+}
+
 /**
  * Takes the stack and returns only the lines that contain stack-frame like entries,
  * matching the `stackLineRegex` above

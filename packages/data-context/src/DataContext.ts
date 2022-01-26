@@ -125,16 +125,7 @@ export class DataContext {
   }
 
   get baseError () {
-    if (!this.coreData.baseError) {
-      return null
-    }
-
-    // TODO: Standardize approach to serializing errors
-    return {
-      title: this.coreData.baseError.title,
-      message: this.coreData.baseError.message,
-      stack: this.coreData.baseError.stack,
-    }
+    return this.coreData.baseError
   }
 
   @cached
@@ -347,15 +338,16 @@ export class DataContext {
     console.error(e)
   }
 
-  onError = (err: Error) => {
+  onError = (cypressError: CypressError) => {
     if (this.isRunMode) {
       if (this.lifecycleManager?.runModeExitEarly) {
-        this.lifecycleManager.runModeExitEarly(err)
+        this.lifecycleManager.runModeExitEarly(cypressError)
       } else {
-        throw err
+        throw cypressError
       }
     } else {
-      this.coreData.baseError = err
+      this.coreData.baseError = { cypressError }
+      this.emitter.toLaunchpad()
     }
   }
 
@@ -366,8 +358,7 @@ export class DataContext {
     } else {
       this.coreData.warnings.push({
         title: `Warning: ${str.titleize(str.humanize(err.type ?? ''))}`,
-        message: err.messageMarkdown || err.message,
-        details: err.details,
+        cypressError: err,
       })
 
       this.emitter.toLaunchpad()
@@ -464,9 +455,7 @@ export class DataContext {
     toAwait.push(this.actions.project.loadProjects())
 
     if (this.modeOptions.testingType) {
-      this.lifecycleManager.initializeConfig().catch((err) => {
-        this.coreData.baseError = err
-      })
+      this.lifecycleManager.initializeConfig().catch(this.onError)
     }
 
     return Promise.all(toAwait)

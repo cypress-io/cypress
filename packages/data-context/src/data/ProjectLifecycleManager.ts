@@ -16,13 +16,12 @@ import debugLib from 'debug'
 import pDefer from 'p-defer'
 import fs from 'fs'
 
-import { getError, CypressError, ConfigValidationError } from '@packages/errors'
+import { getError, CypressError, ConfigValidationError, ErrorWrapperSource } from '@packages/errors'
 import type { DataContext } from '..'
 import { LoadConfigReply, SetupNodeEventsReply, ProjectConfigIpc, IpcHandler } from './ProjectConfigIpc'
 import assert from 'assert'
 import type { AllModeOptions, BreakingErrResult, BreakingOption, FoundBrowser, FullConfig, TestingType } from '@packages/types'
 import { autoBindDebug } from '../util/autoBindDebug'
-import type { ErrorWrapperSource } from '@packages/graphql'
 
 const debug = debugLib(`cypress:lifecycle:ProjectLifecycleManager`)
 
@@ -188,12 +187,7 @@ export class ProjectLifecycleManager {
     if (this._configResult.state === 'errored') {
       return {
         title: 'Error Loading Config',
-        description: this._configResult.value?.message || '',
-        errorType: 'ERROR_READING_FILE',
-        originalError: {
-          name: 'Error',
-          stack: this._configResult.value?.stack,
-        },
+        cypressError: this._configResult.value,
       }
     }
 
@@ -204,12 +198,7 @@ export class ProjectLifecycleManager {
     if (this._eventsIpcResult.state === 'errored') {
       return {
         title: 'Error Loading Config',
-        description: this._eventsIpcResult.value?.message || '',
-        errorType: 'PLUGINS_FUNCTION_ERROR',
-        originalError: {
-          name: 'Error',
-          stack: this._eventsIpcResult.value?.stack,
-        },
+        cypressError: this._eventsIpcResult.value,
       }
     }
 
@@ -643,9 +632,11 @@ export class ProjectLifecycleManager {
         this.ctx.coreData.baseError = null
         this.reloadConfig().catch(this.onLoadError)
       }
-    }).on('error', (err) => {
+    })
+
+    legacyFileWatcher.on('error', (err) => {
       debug('error watching config files %O', err)
-      this.ctx.coreData.baseError = err
+      this.ctx.onWarning(getError('UNEXPECTED_INTERNAL_ERROR', err))
     })
 
     const cypressEnvFileWatcher = this.addWatcher(this.envFilePath)

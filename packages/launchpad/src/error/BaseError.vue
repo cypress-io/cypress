@@ -16,7 +16,7 @@
 
       <slot name="message">
         <Alert
-          :title="baseError.originalError?.name ?? 'Error'"
+          :title="baseError.title ?? 'Error'"
           status="error"
           body-class="px-0px bg-red-50"
           alert-class="bg-red-50"
@@ -35,11 +35,10 @@
             />
             <ErrorCodeFrame
               v-if="baseError.fileToOpen"
-              :gql="props.gql.fileToOpen"
+              :gql="baseError.fileToOpen"
             />
           </div>
           <div
-            v-if="baseError.originalError?.stack"
             class="m-16px mb-0 overflow-hidden"
           >
             <Collapsible
@@ -51,6 +50,7 @@
                 <p
                   class="gap-8px inline-flex items-center justify-center"
                   :class="{'pb-8px': open}"
+                  :data-cy="`stack-open-${open}`"
                 >
                   <i-cy-chevron-right-small_x16
                     class="min-w-8px min-h-8px transform duration-150 icon-dark-red-400"
@@ -67,7 +67,7 @@
               <pre
                 data-testid="error-header"
                 class="bg-white rounded font-light border-1 border-red-200 p-16px overflow-auto"
-                v-html="baseError.originalError?.stack"
+                v-html="baseError.errorStack"
               />
             </Collapsible>
           </div>
@@ -124,16 +124,13 @@ fragment BaseError on ErrorWrapper {
   errorType
   isRetryable
   isUserCodeError
+  errorStack
   fileToOpen {
     id
     ...ErrorCodeFrame
   }
-  originalError {
-    name
-    stack
-    message
-  }
-}`
+}
+`
 
 const openDocs = useExternalLink('https://on.cypress.io/')
 

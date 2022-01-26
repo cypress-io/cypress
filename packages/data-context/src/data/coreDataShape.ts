@@ -1,10 +1,10 @@
-import { BUNDLERS, FoundBrowser, Editor, Warning, AllowedState, AllModeOptions, TestingType, PACKAGE_MANAGERS, BrowserStatus, AuthStateName } from '@packages/types'
+import { BUNDLERS, FoundBrowser, Editor, AllowedState, AllModeOptions, TestingType, PACKAGE_MANAGERS, BrowserStatus, AuthStateName } from '@packages/types'
 import type { NexusGenEnums, NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
 import type { App, BrowserWindow } from 'electron'
 import type { ChildProcess } from 'child_process'
 import type { SocketIOServer } from '@packages/socket'
 import type { Server } from 'http'
-import type { ErrorWrapperSource } from '@packages/graphql'
+import type { ErrorWrapperSource } from '@packages/errors'
 
 export type Maybe<T> = T | null | undefined
 
@@ -108,6 +108,7 @@ export interface CoreDataShape {
   }
   hasInitializedMode: 'run' | 'open' | null
   baseError: ErrorWrapperSource | null
+  dashboardGraphQLError: ErrorWrapperSource | null
   dev: DevStateShape
   localSettings: LocalSettingsDataShape
   app: AppDataShape
@@ -119,7 +120,7 @@ export interface CoreDataShape {
   electron: ElectronShape
   authState: AuthStateShape
   scaffoldedFiles: NexusGenObjects['ScaffoldedFile'][] | null
-  warnings: Warning[]
+  warnings: ErrorWrapperSource[]
   packageManager: typeof PACKAGE_MANAGERS[number]
   forceReconfigureProject: ForceReconfigureProjectDataShape | null
 }
@@ -135,6 +136,7 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
     machineBrowsers: null,
     hasInitializedMode: null,
     baseError: null,
+    dashboardGraphQLError: null,
     dev: {
       refreshState: null,
     },

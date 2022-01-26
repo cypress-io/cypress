@@ -2,6 +2,8 @@
   <OpenFileInIDE
     v-slot="{onClick}"
     :file-path="props.gql.absolute"
+    :line="props.gql.line ?? 0"
+    :column="props.gql.column ?? 0"
   >
     <div
       class="border rounded cursor-pointer flex flex-row bg-gray-50 border-red-100 mt-16px text-indigo-500 text-14px leading-24px items-center"

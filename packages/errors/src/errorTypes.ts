@@ -66,3 +66,11 @@ export interface SerializedError {
   name: string
   isCypressErr?: boolean
 }
+
+/**
+ * Used in the GraphQL Error / Warning objects
+ */
+export interface ErrorWrapperSource {
+  title?: string | null
+  cypressError: CypressError
+}

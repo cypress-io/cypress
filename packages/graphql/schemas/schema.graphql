@@ -468,8 +468,6 @@ type ErrorCodeFrame {
 }
 
 enum ErrorTypeEnum {
-  AUTH_BROWSER_LAUNCHED
-  AUTH_COULD_NOT_LAUNCH_BROWSER
   AUTOMATION_SERVER_DISCONNECTED
   BAD_POLICY_WARNING
   BAD_POLICY_WARNING_TOOLTIP
@@ -488,16 +486,22 @@ enum ErrorTypeEnum {
   CDP_COULD_NOT_RECONNECT
   CDP_RETRYING_CONNECTION
   CDP_VERSION_TOO_OLD
-  CHILD_PROCESS_UNEXPECTED_ERROR
   CHROME_WEB_SECURITY_NOT_SUPPORTED
-  COMPONENT_DEV_SERVER_IS_NOT_A_FUNCTION
   CONFIG_FILES_LANGUAGE_CONFLICT
+  CONFIG_FILE_DEV_SERVER_IS_NOT_A_FUNCTION
+  CONFIG_FILE_INVALID_DEV_START_EVENT
+  CONFIG_FILE_INVALID_ROOT_CONFIG
+  CONFIG_FILE_INVALID_ROOT_CONFIG_E2E
+  CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_COMPONENT
   CONFIG_FILE_MIGRATION_NEEDED
   CONFIG_FILE_NOT_FOUND
+  CONFIG_FILE_REQUIRE_ERROR
+  CONFIG_FILE_SETUP_NODE_EVENTS_ERROR
+  CONFIG_FILE_UNEXPECTED_ERROR
   CONFIG_VALIDATION_ERROR
+  CONFIG_VALIDATION_MSG_ERROR
   COULD_NOT_FIND_SYSTEM_NODE
   COULD_NOT_PARSE_ARGUMENTS
-  CT_NO_DEV_START_EVENT
   DASHBOARD_ALREADY_COMPLETE
   DASHBOARD_API_RESPONSE_FAILED_RETRYING
   DASHBOARD_CANCEL_SKIPPED_SPEC
@@ -505,6 +509,7 @@ enum ErrorTypeEnum {
   DASHBOARD_CANNOT_PROCEED_IN_PARALLEL
   DASHBOARD_CANNOT_PROCEED_IN_SERIAL
   DASHBOARD_CANNOT_UPLOAD_RESULTS
+  DASHBOARD_GRAPHQL_ERROR
   DASHBOARD_INVALID_RUN_REQUEST
   DASHBOARD_PARALLEL_DISALLOWED
   DASHBOARD_PARALLEL_GROUP_PARAMS_MISMATCH
@@ -555,10 +560,8 @@ enum ErrorTypeEnum {
   PARALLEL_FEATURE_NOT_AVAILABLE_IN_PLAN
   PLAN_EXCEEDS_MONTHLY_TESTS
   PLAN_IN_GRACE_PERIOD_RUN_GROUPING_FEATURE_USED
-  PLUGINS_CONFIG_VALIDATION_ERROR
-  PLUGINS_FUNCTION_ERROR
+  PLUGINS_INVALID_EVENT_NAME_ERROR
   PLUGINS_RUN_EVENT_ERROR
-  PLUGINS_VALIDATION_ERROR
   PORT_IN_USE_LONG
   PORT_IN_USE_SHORT
   PROJECT_ID_AND_KEY_BUT_MISSING_RECORD_OPTION
@@ -568,20 +571,17 @@ enum ErrorTypeEnum {
   RENAMED_CONFIG_OPTION
   RENDERER_CRASHED
   RUN_GROUPING_FEATURE_NOT_AVAILABLE_IN_PLAN
-  SETTINGS_VALIDATION_ERROR
   SETUP_NODE_EVENTS_DO_NOT_SUPPORT_DEV_SERVER
   SETUP_NODE_EVENTS_IS_NOT_FUNCTION
   SUPPORT_FILE_NOT_FOUND
-  SUPPORT_FILE_ROOT_NOT_SUPPORTED
-  TESTING_TYPE_NEEDED_FOR_RUN
   TESTS_DID_NOT_START_FAILED
   TESTS_DID_NOT_START_RETRYING
   UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES
-  UNKNOWN_ERROR
+  UNEXPECTED_INTERNAL_ERROR
+  UNEXPECTED_MUTATION_ERROR
   UNSUPPORTED_BROWSER_VERSION
   VIDEO_POST_PROCESSING_FAILED
   VIDEO_RECORDING_FAILED
-  WIN32_UNSUPPORTED
 }
 
 """Base error"""
@@ -590,6 +590,12 @@ type ErrorWrapper {
 
   """The markdown formatted content associated with the ErrorTypeEnum"""
   description: String!
+
+  """Name of the error class"""
+  errorName: String!
+
+  """The error stack of either the original error from the user"""
+  errorStack: String!
   errorType: ErrorTypeEnum!
 
   """Relative file path to open, if there is one associated with this error"""
@@ -602,9 +608,6 @@ type ErrorWrapper {
   Whether the error came from user code, can be used to determine whether to open a stack trace by default
   """
   isUserCodeError: Boolean!
-
-  """The user error thrown, if there is one"""
-  originalError: OriginalError
 
   """Formatted errorType"""
   title: String!
@@ -899,6 +902,9 @@ type Mutation {
   """
   devRelaunch(action: DevRelaunchAction!): Boolean
 
+  """Dismisses a warning displayed by the frontend"""
+  dismissWarning: Query
+
   """user has finished migration component specs - move to next step"""
   finishedRenamingComponentSpecs: Query
 
@@ -1026,15 +1032,6 @@ interface Node {
   id: ID!
 }
 
-"""Error handled from user code (config / setupNodeEvents)"""
-type OriginalError {
-  message: String
-
-  """The error."""
-  name: String!
-  stack: String
-}
-
 enum PackageManagerEnum {
   npm
   pnpm
@@ -1144,7 +1141,7 @@ type Query {
   versions: VersionData
 
   """A list of warnings"""
-  warnings: [Warning!]!
+  warnings: [ErrorWrapper!]!
 
   """Metadata about the wizard"""
   wizard: Wizard!
@@ -1252,13 +1249,6 @@ type VersionData {
 
   """latest version of cypress"""
   latest: Version!
-}
-
-"""A generic warning"""
-type Warning {
-  details: String
-  message: String!
-  title: String!
 }
 
 """

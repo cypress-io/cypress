@@ -345,7 +345,7 @@ function withCtx<T extends Partial<WithCtxOptions>, R> (fn: (ctx: DataContext, o
   const { log, timeout, ...rest } = opts
 
   const _log = log === false ? { end () {}, set (key: string, val: any) {} } : Cypress.log({
-    name: opts.retry ? 'withCtx' : 'withRetryableCtx',
+    name: opts.retry ? 'withRetryableCtx' : 'withCtx',
     message: '(view in console)',
     consoleProps () {
       return {
