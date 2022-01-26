@@ -7,6 +7,17 @@ describe('App: Index', () => {
         cy.scaffoldProject('no-specs-no-storybook')
         cy.openProject('no-specs-no-storybook')
         cy.startAppServer('e2e')
+        cy.intercept('query-HeaderBar_HeaderBarQuery', (req) => {
+          req.on('before:response', (res) => {
+            res.body.data.currentProject.savedState = { firstOpened: 1609459200000,
+              lastOpened: 1609459200000,
+              promptsShown: {
+                ci1: 1609459200000,
+                orchestration1: 1609459200000,
+              } }
+          })
+        })
+
         cy.visitApp()
 
         // With no specs present, the page renders two cards, one for scaffolding example specs,
@@ -187,6 +198,17 @@ describe('App: Index', () => {
         cy.scaffoldProject('no-specs-custom-pattern')
         cy.openProject('no-specs-custom-pattern')
 
+        cy.intercept('query-HeaderBar_HeaderBarQuery', (req) => {
+          req.on('before:response', (res) => {
+            res.body.data.currentProject.savedState = { firstOpened: 1609459200000,
+              lastOpened: 1609459200000,
+              promptsShown: {
+                ci1: 1609459200000,
+                orchestration1: 1609459200000,
+              } }
+          })
+        })
+
         // set preferred editor to bypass IDE selection dialog
         cy.withCtx((ctx) => {
           ctx.coreData.localSettings.availableEditors = [
@@ -259,6 +281,17 @@ describe('App: Index', () => {
         cy.scaffoldProject('pristine')
         cy.openProject('pristine')
         cy.startAppServer()
+        cy.intercept('query-HeaderBar_HeaderBarQuery', (req) => {
+          req.on('before:response', (res) => {
+            res.body.data.currentProject.savedState = { firstOpened: 1609459200000,
+              lastOpened: 1609459200000,
+              promptsShown: {
+                ci1: 1609459200000,
+                orchestration1: 1609459200000,
+              } }
+          })
+        })
+
         cy.visitApp()
       })
 
@@ -285,6 +318,17 @@ describe('App: Index', () => {
         cy.scaffoldProject('no-specs')
         cy.openProject('no-specs')
         cy.startAppServer('component')
+        cy.intercept('query-HeaderBar_HeaderBarQuery', (req) => {
+          req.on('before:response', (res) => {
+            res.body.data.currentProject.savedState = { firstOpened: 1609459200000,
+              lastOpened: 1609459200000,
+              promptsShown: {
+                ci1: 1609459200000,
+                orchestration1: 1609459200000,
+              } }
+          })
+        })
+
         cy.visitApp()
 
         // With no specs present, the page renders two cards, one for creating from found components,
@@ -446,6 +490,17 @@ describe('App: Index', () => {
         cy.scaffoldProject('no-specs-no-storybook')
         cy.openProject('no-specs-no-storybook')
         cy.startAppServer('component')
+        cy.intercept('query-HeaderBar_HeaderBarQuery', (req) => {
+          req.on('before:response', (res) => {
+            res.body.data.currentProject.savedState = { firstOpened: 1609459200000,
+              lastOpened: 1609459200000,
+              promptsShown: {
+                ci1: 1609459200000,
+                orchestration1: 1609459200000,
+              } }
+          })
+        })
+
         cy.visitApp()
 
         // With no specs present, the page renders two cards, one for creating from found components,
@@ -619,6 +674,17 @@ describe('App: Index', () => {
         cy.scaffoldProject('no-specs-custom-pattern')
         cy.openProject('no-specs-custom-pattern')
 
+        cy.intercept('query-HeaderBar_HeaderBarQuery', (req) => {
+          req.on('before:response', (res) => {
+            res.body.data.currentProject.savedState = { firstOpened: 1609459200000,
+              lastOpened: 1609459200000,
+              promptsShown: {
+                ci1: 1609459200000,
+                orchestration1: 1609459200000,
+              } }
+          })
+        })
+
         // set preferred editor to bypass IDE selection dialog
         cy.withCtx((ctx) => {
           ctx.coreData.localSettings.availableEditors = [
@@ -691,6 +757,17 @@ describe('App: Index', () => {
         cy.scaffoldProject('react-code-gen')
         cy.openProject('react-code-gen')
         cy.startAppServer('component')
+        cy.intercept('query-HeaderBar_HeaderBarQuery', (req) => {
+          req.on('before:response', (res) => {
+            res.body.data.currentProject.savedState = { firstOpened: 1609459200000,
+              lastOpened: 1609459200000,
+              promptsShown: {
+                ci1: 1609459200000,
+                orchestration1: 1609459200000,
+              } }
+          })
+        })
+
         cy.visitApp()
       })
 
