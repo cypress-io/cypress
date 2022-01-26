@@ -614,12 +614,9 @@ type MigrationFilePart implements Node {
   text: String!
 }
 
-type MigrationFiles implements Node {
+type MigrationFiles {
   after: [MigrationFile!]!
   before: [MigrationFile!]!
-
-  """Relay style Node ID field for the MigrationFiles field"""
-  id: ID!
 }
 
 type MigrationRegexp {

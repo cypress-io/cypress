@@ -62,9 +62,6 @@ export const MigrationFilePart = objectType({
 
 export const MigrationFiles = objectType({
   name: 'MigrationFiles',
-  node: (obj) => {
-    return JSON.stringify(obj)
-  },
   definition (t) {
     t.nonNull.list.nonNull.field('before', {
       type: MigrationFile,
