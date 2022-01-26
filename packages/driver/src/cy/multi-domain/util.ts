@@ -1,24 +1,17 @@
 import _ from 'lodash'
 import { AssertionError } from 'chai'
+import $stackUtils from '../../cypress/stack_utils'
 
 export const correctStackForCrossDomainError = (serializedError: any, userInvocationStack: string) => {
   //  Since Errors sent over postMessage need to be serialized to Objects, we need to serialize them back into Error instances
-  let errorClass
-
-  switch (serializedError?.name) {
-    case 'AssertionError':
-      errorClass = AssertionError
-      break
-    default:
-      errorClass = Error
-  }
+  const ErrorClass = serializedError?.name === 'AssertionError' ? AssertionError : Error
 
   // only assign missing properties on the object to reify the error properly
-  const reifiedError = _.assignWith(new errorClass(serializedError?.message), serializedError, (objValue, srcValue) => {
+  const reifiedError = _.assignWith(new ErrorClass(serializedError?.message), serializedError, (objValue, srcValue) => {
     return _.isUndefined(objValue) ? srcValue : objValue
   })
 
-  reifiedError.stack = userInvocationStack
+  reifiedError.stack = $stackUtils.replacedStack(reifiedError, userInvocationStack)
 
   return reifiedError
 }

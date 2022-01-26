@@ -60,28 +60,29 @@ export class CommandsManager {
   endCommand = ({ id, name, err, logId }) => {
     const command = this.commands[id]
 
-    if (command) {
-      delete this.commands[id]
-      if (err) {
-        // If the command has failed, cast the error back to a proper Error object
-        let parsedError = correctStackForCrossDomainError(err, this.userInvocationStack)
+    if (!command) return
 
-        if (logId) {
-          // Then, look up the logId associated with the failed command and stub out the onFail handler
-          // to short circuit any added reporter command logs if a log exists for the failed command
-          parsedError.onFail = () => undefined
-        } else {
-          delete parsedError.onFail
-        }
+    delete this.commands[id]
 
-        command.deferred.reject(parsedError)
-
-        // finally, free up any memory and unbind any handlers now that the command/test has failed
-        this.cleanup()
-      } else {
-        command.deferred.resolve()
-      }
+    if (!err) {
+      return command.deferred.resolve()
     }
+
+    // If the command has failed, cast the error back to a proper Error object
+    let parsedError = correctStackForCrossDomainError(err, this.userInvocationStack)
+
+    if (logId) {
+      // Then, look up the logId associated with the failed command and stub out the onFail handler
+      // to short circuit any added reporter command logs if a log exists for the failed command
+      parsedError.onFail = () => undefined
+    } else {
+      delete parsedError.onFail
+    }
+
+    command.deferred.reject(parsedError)
+
+    // finally, free up any memory and unbind any handlers now that the command/test has failed
+    this.cleanup()
   }
 
   async cleanup () {
