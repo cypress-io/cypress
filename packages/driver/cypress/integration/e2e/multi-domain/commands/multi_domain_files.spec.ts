@@ -25,23 +25,28 @@ context('multi-domain files', { experimentalSessionSupport: true, experimentalMu
 
   it('.writeFile()', () => {
     cy.switchToDomain('foobar.com', () => {
-      cy.stub(Cypress, 'backend')
-      // @ts-ignore
-      Cypress.backend.resolves({
-        contents: JSON.stringify({ foo: 'bar' }),
+      const contents = JSON.stringify({ foo: 'bar' })
+
+      cy.stub(Cypress, 'backend').resolves({
+        contents,
         filePath: 'foo.json',
       })
 
-      cy.writeFile('foo.json', JSON.stringify({ foo: 'bar' })).then(() => {
+      cy.writeFile('foo.json', contents).then(() => {
         expect(Cypress.backend).to.be.calledWith(
           'write:file',
           'foo.json',
-          JSON.stringify({ foo: 'bar' }),
+          contents,
           {
             encoding: 'utf8',
             flag: 'w',
           },
         )
+
+        //@ts-ignore
+        // FIXME: the stub is not getting restored on its
+        // own causing other tests to fail
+        Cypress.backend.restore()
       })
     })
   })
