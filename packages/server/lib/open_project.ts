@@ -43,7 +43,7 @@ export class OpenProject {
     return this.projectBase
   }
 
-  changeUrlToSpec (spec: Cypress.Cypress['spec']) {
+  async changeUrlToSpec (spec: Cypress.Cypress['spec']) {
     if (!this.projectBase) {
       return
     }
@@ -54,7 +54,10 @@ export class OpenProject {
       projectRoot: this.projectBase.projectRoot,
     })
 
-    this.projectBase.changeToUrl(newSpecUrl)
+    await this.startNewBrowserTabWithUrl(newSpecUrl)
+    await browsers.connectToExisting(this.projectBase.browser, { url: newSpecUrl }, this.projectBase.automation)
+
+    // this.projectBase.changeToUrl(newSpecUrl)
   }
 
   async launch (browser, spec: Cypress.Cypress['spec'], options: LaunchOpts = {
@@ -192,6 +195,14 @@ export class OpenProject {
 
   closeBrowser () {
     return browsers.close()
+  }
+
+  async closeBrowserTab () {
+    return this.projectBase?.closeBrowserTab()
+  }
+
+  async startNewBrowserTabWithUrl (url) {
+    return this.projectBase?.startNewBrowserTabWithUrl(url)
   }
 
   closeOpenProjectAndBrowsers () {

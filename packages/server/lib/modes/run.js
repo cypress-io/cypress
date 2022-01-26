@@ -1009,7 +1009,7 @@ module.exports = {
     return openProject.launch(browser, spec, browserOpts)
   },
 
-  navigateToNextSpec (spec) {
+  async navigateToNextSpec (spec) {
     debug('navigating to next spec')
 
     return openProject.changeUrlToSpec(spec)
@@ -1118,7 +1118,7 @@ module.exports = {
         // If we do not launch the browser,
         // we tell it that we are ready
         // to receive the next spec
-        return Promise.resolve(this.navigateToNextSpec(options.spec))
+        return this.navigateToNextSpec(options.spec)
       }
 
       return Promise.join(
@@ -1181,7 +1181,7 @@ module.exports = {
   },
 
   waitForTestsToFinishRunning (options = {}) {
-    const { project, screenshots, startedVideoCapture, endVideoCapture, videoName, compressedVideoName, videoCompression, videoUploadOnPasses, exit, spec, estimated, quiet, config, testingType } = options
+    const { project, screenshots, startedVideoCapture, endVideoCapture, videoName, compressedVideoName, videoCompression, videoUploadOnPasses, exit, spec, estimated, quiet, config } = options
 
     // https://github.com/cypress-io/cypress/issues/2370
     // delay 1 second if we're recording a video to give
@@ -1257,14 +1257,6 @@ module.exports = {
         }
       }
 
-      if (testingType === 'e2e') {
-        // always close the browser now as opposed to letting
-        // it exit naturally with the parent process due to
-        // electron bug in windows
-        debug('attempting to close the browser')
-        await openProject.closeBrowser()
-      }
-
       if (videoExists && !skippedSpec && endVideoCapture && !videoCaptureFailed) {
         const ffmpegChaptersConfig = videoCapture.generateFfmpegChaptersConfig(results.tests)
 
@@ -1278,6 +1270,8 @@ module.exports = {
         )
         .catch(warnVideoRecordingFailed)
       }
+
+      await openProject.closeBrowserTab()
 
       return results
     })

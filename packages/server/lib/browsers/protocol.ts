@@ -77,6 +77,8 @@ const findStartPageTarget = (connectOpts, url) => {
 export async function getRemoteDebuggingPort () {
   const port = Number(process.env.CYPRESS_REMOTE_DEBUGGING_PORT) || utils.getPort()
 
+  process.env.CYPRESS_REMOTE_DEBUGGING_PORT = `${await port}`
+
   return port || utils.getPort()
 }
 

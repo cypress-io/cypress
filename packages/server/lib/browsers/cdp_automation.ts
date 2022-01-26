@@ -322,6 +322,14 @@ export class CdpAutomation {
         .then(({ data }) => {
           return `data:image/png;base64,${data}`
         })
+      case 'close:browser:tab':
+        return this.sendDebuggerCommandFn('Target.getTargets').then((targets) => {
+          return this.sendDebuggerCommandFn('Target.closeTarget', { targetId: targets.targetInfos.find((target) => target.attached).targetId })
+        })
+      case 'start:browser:tab':
+        return this.sendDebuggerCommandFn('Target.createTarget', data).then((target) => {
+          return this.sendDebuggerCommandFn('Target.attachToTarget', target)
+        })
       default:
         throw new Error(`No automation handler registered for: '${message}'`)
     }
