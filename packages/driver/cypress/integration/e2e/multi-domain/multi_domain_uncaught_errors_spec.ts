@@ -20,6 +20,7 @@ describe('multi-domain - uncaught errors', { experimentalSessionSupport: true, e
           expect(err.message).to.include('sync error')
           expect(err.message).to.include('The following error originated from your application code, not from Cypress.')
           expect(err.message).to.not.include('https://on.cypress.io/uncaught-exception-from-application')
+          // @ts-ignore
           expect(err.docsUrl).to.deep.eq(['https://on.cypress.io/uncaught-exception-from-application'])
 
           // lastly, make sure the `uncaught:exception' handler is NOT called in the primary
@@ -85,6 +86,7 @@ describe('multi-domain - uncaught errors', { experimentalSessionSupport: true, e
           expect(err.message).to.include('async error')
           expect(err.message).to.include('The following error originated from your application code, not from Cypress.')
           expect(err.message).to.not.include('https://on.cypress.io/uncaught-exception-from-application')
+          // @ts-ignore
           expect(err.docsUrl).to.deep.eq(['https://on.cypress.io/uncaught-exception-from-application'])
 
           expect(uncaughtExceptionSpy.notCalled).to.be.true
