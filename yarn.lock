@@ -17218,7 +17218,7 @@ cypress-plugin-snapshots@1.4.4:
     source-map-support "^0.5.10"
     unidiff "1.0.2"
 
-cypress-plugin-tab@1.6.0:
+cypress-plugin-tab@1.0.5:
   version "1.0.5"
   resolved "https://registry.yarnpkg.com/cypress-plugin-tab/-/cypress-plugin-tab-1.0.5.tgz#a40714148104004bb05ed62b1bf46bb544f8eb4a"
   integrity sha512-QtTJcifOVwwbeMP3hsOzQOKf3EqKsLyjtg9ZAGlYDntrCRXrsQhe4ZQGIthRMRLKpnP6/tTk6G0gJ2sZUfRliQ==
