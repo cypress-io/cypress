@@ -241,9 +241,6 @@
       "next": "Next Step",
       "back": "Back"
     },
-    "openBrowser": {
-      "launch": "Launch"
-    },
     "configFile": {
       "createManually": "Create file manually",
       "skippedLabel": "Skipped",
@@ -556,6 +553,7 @@
         "title": "Manually move your existing component specs",
         "description": "In this step, you'll manually move your existing component specs to their new default location.",
         "buttonWait": "Waiting for you to move your component specs...",
+        "buttonDone": "I have moved my component specs",
         "button": "I'll do this later"
       },
       "step3": {
@@ -590,7 +588,17 @@
     },
     "chooseBrowser": {
       "title": "Choose a Browser",
-      "description": "Choose your preferred browser for testing your components."
+      "description": "Choose your preferred browser for {testingType} testing."
     }
+  },
+  "openBrowser": {
+    "startComponent": "Start Component Testing in {browser}",
+    "startE2E": "Start E2E Testing in {browser}",
+    "openingComponent": "Opening Component Testing in {browser}",
+    "openingE2E": "Opening E2E Testing in {browser}",
+    "running": "Running {browser}",
+    "focus": "Focus",
+    "close": "Close",
+    "switchTestingType": "Switch testing type"
   }
 }
