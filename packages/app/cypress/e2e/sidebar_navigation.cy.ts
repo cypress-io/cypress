@@ -1,5 +1,3 @@
-import type { Interception } from '@packages/net-stubbing/lib/external-types'
-
 describe('Sidebar Navigation', () => {
   beforeEach(() => {
     cy.scaffoldProject('todos')
@@ -73,10 +71,6 @@ describe('Sidebar Navigation', () => {
     cy.percySnapshot()
     cy.get('[data-cy="sidebar-header"]').trigger('mouseout')
 
-    cy.get('[data-cy="switch-testing-type"]').realHover()
-    cy.contains('#tooltip-target > div', 'E2E Testing')
-    cy.get('[data-cy="switch-testing-type"]').trigger('mouseout')
-
     cy.get('[data-e2e-href="/runs"]').realHover()
     cy.contains('#tooltip-target > div', 'Runs')
     cy.get('[data-e2e-href="/runs"]').trigger('mouseout')
@@ -105,26 +99,26 @@ describe('Sidebar Navigation', () => {
     cy.findAllByText('todos').eq(1).should('be.visible')
   })
 
-  it('displays the project name (expanded state)', () => {
+  it('displays the project name and opens a modal to switch testing type', () => {
     cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'true')
 
-    cy.findAllByText('todos').eq(1).should('be.visible')
-  })
-
-  it('has menu item labeled by current active testing type that opens a modal to switch testing type (expanded state)', () => {
-    cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'true')
-
-    cy.findByText('E2E Testing').should('be.visible')
-    cy.get('[data-cy="switch-testing-type"]').click()
+    cy.findAllByText('todos').eq(1).should('be.visible').click()
     cy.findByText('Choose a testing type').should('be.visible')
     cy.intercept('mutation-SwitchTestingType_ReconfigureProject').as('SwitchTestingType')
     cy.get('[data-cy-testingtype="component"]').click()
-    cy.wait('@SwitchTestingType').then((interception: Interception) => {
-      expect(interception.request.url).to.include('graphql/mutation-SwitchTestingType_ReconfigureProject')
+    cy.wait('@SwitchTestingType').then((interception) => {
+      expect(interception.request.body.variables.testingType).eq('component')
     })
 
     cy.get('[aria-label="Close"]').click()
     cy.findByText('Choose a testing type').should('not.exist')
+
+    cy.findByLabelText('toggle navigation', {
+      selector: 'button',
+    }).click()
+
+    cy.get('[data-cy="sidebar-header"]').click()
+    cy.findByText('Choose a testing type').should('be.visible')
   })
 
   it('has unlabeled menu item that shows the keyboard shortcuts modal (expanded state)', () => {
