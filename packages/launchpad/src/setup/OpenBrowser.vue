@@ -82,6 +82,12 @@ mutation OpenBrowser_CloseBrowser {
 }
 `
 
+gql`
+mutation OpenBrowser_FocusActiveBrowserWindow {
+  focusActiveBrowserWindow
+}
+`
+
 const launchOpenProject = useMutation(OpenBrowser_LaunchProjectDocument)
 const clearCurrentTestingType = useMutation(OpenBrowser_ClearTestingTypeDocument)
 const closeBrowser = useMutation(OpenBrowser_CloseBrowserDocument)
