@@ -431,13 +431,16 @@ describe('Growth Prompts Can Open Automatically', () => {
   })
 
   it('CI prompt auto-opens 4 days after first project opened', () => {
-    cy.intercept('query-HeaderBar_HeaderBarQuery', (req) => {
-      req.on('before:response', (res) => {
-        res.body.data.currentProject.savedState = { firstOpened: 1609459200000,
+    cy.withCtx(
+      (ctx) => {
+        // @ts-ignore sinon is a global in the node process where this is executed
+        sinon.stub(ctx._apis.projectApi, 'getCurrentProjectSavedState').resolves({
+          firstOpened: 1609459200000,
           lastOpened: 1609459200000,
-          promptsShown: {} }
-      })
-    })
+          promptsShown: {},
+        })
+      },
+    )
 
     cy.visitApp()
     cy.contains('Configure CI').should('be.visible')
