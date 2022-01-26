@@ -18,6 +18,7 @@ type Browser implements Node {
 
   """Relay style Node ID field for the Browser field"""
   id: ID!
+  isFocusSupported: Boolean!
   isSelected: Boolean!
   majorVersion: String
   name: String!

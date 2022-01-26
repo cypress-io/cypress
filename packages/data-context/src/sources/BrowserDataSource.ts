@@ -1,4 +1,5 @@
 import type { FoundBrowser } from '@packages/types'
+import os from 'os'
 import type { DataContext } from '..'
 
 export interface BrowserApiShape {
@@ -48,5 +49,9 @@ export class BrowserDataSource {
     }
 
     return this.idForBrowser(this.ctx.coreData.chosenBrowser) === this.idForBrowser(obj)
+  }
+
+  isFocusSupported (obj: FoundBrowser) {
+    return ['darwin', 'win32'].includes(os.platform()) || obj.family !== 'firefox'
   }
 }
