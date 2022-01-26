@@ -38,9 +38,7 @@ describe('<BaseError />', () => {
   it('renders the retry button if isRetryable is true', () => {
     cy.mountFragment(BaseErrorFragmentDoc, {
       onResult (result) {
-        if (result.baseError) {
-          result.baseError.isRetryable = true
-        }
+        result.isRetryable = true
       },
       render: (gqlVal) => <BaseError gql={gqlVal} />,
     })
@@ -51,14 +49,14 @@ describe('<BaseError />', () => {
   it('does not open the stack by default if it is not a user error', () => {
     cy.mountFragment(BaseErrorFragmentDoc, {
       onResult (result) {
-        if (result.baseError) {
-          result.baseError.isUserCodeError = false
-        }
+        result.isUserCodeError = false
       },
       render: (gqlVal) => <BaseError gql={gqlVal} />,
     }).then(() => {
-      cy.get('[data-testid="stack-contents"]')
-      .should('be.hidden')
+      cy.get('[data-cy=stack-open-true]').should('not.exist')
+      cy.contains('Stack Trace').click()
+      cy.contains('Error: foobar').should('be.visible')
+      cy.get('[data-cy=stack-open-true]')
     })
   })
 
@@ -79,11 +77,9 @@ describe('<BaseError />', () => {
   it('renders custom error messages and headers with props', () => {
     cy.mountFragment(BaseErrorFragmentDoc, {
       onResult: (result) => {
-        if (result.baseError) {
-          result.baseError.title = customHeaderMessage
-          result.baseError.description = customMessage
-          result.baseError.originalError!.stack = customStack
-        }
+        result.title = customHeaderMessage
+        result.description = customMessage
+        result.originalError!.stack = customStack
       },
       render: (gqlVal) => (<div class="p-16px">
         <BaseError gql={gqlVal} />
@@ -98,10 +94,8 @@ describe('<BaseError />', () => {
   it('renders the header, message, and footer slots', () => {
     cy.mountFragment(BaseErrorFragmentDoc, {
       onResult: (result) => {
-        if (result.baseError) {
-          result.baseError.title = messages.header
-          result.baseError.description = messages.message
-        }
+        result.title = messages.header
+        result.description = messages.message
       },
       render: (gqlVal) => (
         <BaseError
@@ -122,16 +116,14 @@ describe('<BaseError />', () => {
   it('renders the header, message, and footer slots', () => {
     cy.mountFragment(BaseErrorFragmentDoc, {
       onResult: (result) => {
-        if (result.baseError) {
-          result.baseError.title = messages.header
-          result.baseError.fileToOpen = {
-            __typename: 'FileParts',
-            id: '123',
-            relative: 'cypress/e2e/file.cy.js',
-            line: 12,
-            column: 25,
-            absolute: '/absolute/full/path/cypress/e2e/file.cy.js',
-          }
+        result.title = messages.header
+        result.fileToOpen = {
+          __typename: 'FileParts',
+          id: '123',
+          relative: 'cypress/e2e/file.cy.js',
+          line: 12,
+          column: 25,
+          absolute: '/absolute/full/path/cypress/e2e/file.cy.js',
         }
       },
       render: (gqlVal) => (

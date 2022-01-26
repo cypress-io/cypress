@@ -50,6 +50,7 @@
                 <p
                   class="gap-8px inline-flex items-center justify-center"
                   :class="{'pb-8px': open}"
+                  :data-cy="`stack-open-${open}`"
                 >
                   <i-cy-chevron-right-small_x16
                     class="min-w-8px min-h-8px transform duration-150 icon-dark-red-400"
