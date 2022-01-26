@@ -21,7 +21,6 @@ import {
   NonSpecFileError,
 } from '../util/migrationFormat'
 import {
-  shouldShowAutoRenameStep,
   getStepsForMigration,
   shouldShowRenameSupport,
   getIntegrationTestFiles,
@@ -271,12 +270,6 @@ export class MigrationDataSource {
         componentTestFiles,
       )
     }
-  }
-
-  async shouldShowAutoRenameStep () {
-    const config = await this.parseCypressConfig()
-
-    return shouldShowAutoRenameStep(config)
   }
 
   get step (): MIGRATION_STEP {
