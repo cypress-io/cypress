@@ -327,6 +327,7 @@ describe('src/cy/commands/actions/check', () => {
       })
     })
 
+    // https://github.com/cypress-io/cypress/issues/19098
     it('removes indeterminate prop', () => {
       const intermediateCheckbox = $(`<input type='checkbox' name="indeterminate">`)
 
@@ -944,6 +945,7 @@ describe('src/cy/commands/actions/check', () => {
       })
     })
 
+    // https://github.com/cypress-io/cypress/issues/19098
     it('removes indeterminate prop', () => {
       const indeterminateCheckbox = $(`<input type='checkbox' name="indeterminate">`)
 

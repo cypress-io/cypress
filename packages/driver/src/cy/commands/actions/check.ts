@@ -109,6 +109,13 @@ const checkOrUncheck = (Cypress, cy, type, subject, values = [], userOptions = {
       // then notify the user of this note
       // and bail
       if (isNoop($el)) {
+        // if the checkbox is in an indeterminate state, checking or unchecking should remove the
+        // prop to move into a "determinate" state
+        // https://github.com/cypress-io/cypress/issues/19098
+        if ($el.prop('indeterminate')) {
+          $el.removeProp('indeterminate')
+        }
+
         if (!options.force) {
           // still ensure visibility even if the command is noop
           cy.ensureVisibility($el, options._log)
@@ -140,11 +147,6 @@ const checkOrUncheck = (Cypress, cy, type, subject, values = [], userOptions = {
         animationDistanceThreshold: options.animationDistanceThreshold,
         scrollBehavior: options.scrollBehavior,
       }).then(() => {
-        // special case where the checkbox has an indeterminate prop
-        if ($el.prop('indeterminate')) {
-          $el.removeProp('indeterminate')
-        }
-
         if (options._log) {
           options._log.snapshot().end()
         }
