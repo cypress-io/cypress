@@ -1,19 +1,18 @@
 <template>
-  <slot @click="showCypressConfigInIDE()" />
+  <slot :on-click="maybeShowFileInIDE" />
   <ChooseExternalEditorModal
-    v-if="isChooseEditorOpen"
+    v-if="isChooseEditorOpen && query.data.value"
     :open="isChooseEditorOpen"
-    :gql="query.data?.value"
+    :gql="query.data.value"
     @close="isChooseEditorOpen = false"
     @selected="openFile"
   />
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 import { gql, useMutation, useQuery } from '@urql/vue'
-import { OpenConfigFileDocument } from '@packages/data-context/src/gen/all-operations.gen'
-import { OpenConfigFileInIdeDocument } from '../generated/graphql'
+import { OpenFileInIdeDocument, OpenFileInIde_MutationDocument } from '../generated/graphql'
 import ChooseExternalEditorModal from './ChooseExternalEditorModal.vue'
 
 gql`
@@ -33,22 +32,22 @@ mutation OpenFileInIDE_Mutation ($input: FileDetailsInput!) {
 }
 `
 
-defineProps<{
-  absolutePath: string
+const props = defineProps<{
+  line?: number
+  column?: number
+  filePath: string
 }>()
 
-const query = useQuery({ query: OpenConfigFileInIdeDocument, requestPolicy: 'network-only' })
+const query = useQuery({ query: OpenFileInIdeDocument, requestPolicy: 'network-only' })
 
-const configFile = computed(() => query.data?.value?.currentProject?.configFile ?? 'cypress.config.js')
+const OpenFileInIDE = useMutation(OpenFileInIde_MutationDocument)
 
-const OpenConfigFileInIDE = useMutation(OpenConfigFileDocument)
-
-const openConfigFileInIDE = (absolute: string) => {
-  OpenConfigFileInIDE.executeMutation({
+const openFileInIDE = () => {
+  OpenFileInIDE.executeMutation({
     input: {
-      absolute,
-      line: 1,
-      column: 1,
+      filePath: props.filePath,
+      line: props.line ?? 1,
+      column: props.column ?? 1,
     },
   })
 }
@@ -56,14 +55,12 @@ const openConfigFileInIDE = (absolute: string) => {
 const openFile = () => {
   isChooseEditorOpen.value = false
 
-  if (query.data?.value?.currentProject?.configFileAbsolutePath) {
-    openConfigFileInIDE(query.data?.value?.currentProject.configFileAbsolutePath)
-  }
+  openFileInIDE()
 }
 
-const showCypressConfigInIDE = () => {
-  if (query.data?.value?.localSettings.preferences.preferredEditorBinary && query.data?.value?.currentProject?.configFileAbsolutePath) {
-    openConfigFileInIDE(query.data?.value?.currentProject.configFileAbsolutePath)
+const maybeShowFileInIDE = () => {
+  if (query.data?.value?.localSettings.preferences.preferredEditorBinary) {
+    openFileInIDE()
   } else {
     isChooseEditorOpen.value = true
   }

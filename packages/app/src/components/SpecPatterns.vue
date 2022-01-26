@@ -9,10 +9,16 @@
           {{ props.gql.specs.length }}
         </i18n-t>
       </FileMatchIndicator>
-      <OpenConfigFileInIDE>
-        <span class="flex outline-transparent text-indigo-500 gap-8px items-center group">
+      <OpenConfigFileInIDE
+        v-slot="{onClick}"
+        :gql="props.gql"
+      >
+        <span
+          class="flex outline-transparent text-indigo-500 gap-8px items-center group"
+          @click="onClick"
+        >
           <i-cy-document-text_x16 class="icon-light-gray-100 icon-dark-gray-500" />
-          <span class="group-hocus:underline">cypress.config.js</span>
+          <span class="group-hocus:underline">{{ props.gql.configFile }}</span>
         </span>
       </OpenConfigFileInIDE>
     </div>
@@ -42,6 +48,8 @@ fragment SpecPatterns on CurrentProject {
   id
   config
   currentTestingType
+  ...OpenConfigFileInIDE
+  configFile
   specs {
     id
   }

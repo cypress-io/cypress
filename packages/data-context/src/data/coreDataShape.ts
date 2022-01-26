@@ -4,7 +4,7 @@ import type { App, BrowserWindow } from 'electron'
 import type { ChildProcess } from 'child_process'
 import type { SocketIOServer } from '@packages/socket'
 import type { Server } from 'http'
-import type { ErrorWrapperSource } from '@packages/graphql/src/schemaTypes/objectTypes/gql-BaseError'
+import type { ErrorWrapperSource } from '@packages/graphql'
 
 export type Maybe<T> = T | null | undefined
 

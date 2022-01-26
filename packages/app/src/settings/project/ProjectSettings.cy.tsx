@@ -25,9 +25,9 @@ describe('<ProjectSettings />', () => {
   it('hides project Id, and record key when not present', () => {
     cy.mountFragment(ProjectSettingsFragmentDoc, {
       onResult (ctx) {
-        if (ctx.currentProject?.cloudProject?.__typename === 'CloudProject') {
-          ctx.currentProject.projectId = null
-          ctx.currentProject.cloudProject.recordKeys = []
+        if (ctx.cloudProject?.__typename === 'CloudProject') {
+          ctx.projectId = null
+          ctx.cloudProject.recordKeys = []
         }
       },
       render: (gqlVal) => {

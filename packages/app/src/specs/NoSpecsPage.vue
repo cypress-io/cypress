@@ -34,7 +34,7 @@
     />
     <CustomPatternNoSpecContent
       v-else
-      :gql="props.gql"
+      :gql="props.gql.currentProject"
       @showCreateSpecModal="showCreateSpecModal"
     />
   </div>
@@ -51,11 +51,11 @@ gql`
 fragment NoSpecsPage on Query {
   ...CreateSpecCards
   ...ChooseExternalEditor
-  ...CustomPatternNoSpecContent
   currentProject {
     id
     currentTestingType
     configFileAbsolutePath
+    ...CustomPatternNoSpecContent
   }
 }
 `

@@ -105,8 +105,7 @@ import ScreenshotHelperPixels from './screenshot/ScreenshotHelperPixels.vue'
 import { useScreenshotStore } from '../store/screenshot-store'
 import ChooseExternalEditorModal from '@packages/frontend-shared/src/gql-components/ChooseExternalEditorModal.vue'
 import { useMutation, gql } from '@urql/vue'
-import { OpenFileInIdeDocument } from '@packages/data-context/src/gen/all-operations.gen'
-import type { SpecRunnerFragment } from '../generated/graphql'
+import { SpecRunnerFragment, SpecRunnerOpenMode_OpenFileInIdeDocument } from '../generated/graphql'
 import { usePreferences } from '../composables/usePreferences'
 import ScriptError from './ScriptError.vue'
 import ResizablePanels from './ResizablePanels.vue'
@@ -143,7 +142,7 @@ fragment SpecRunner on Query {
 `
 
 gql`
-mutation OpenFileInIDE ($input: FileDetailsInput!) {
+mutation SpecRunnerOpenMode_OpenFileInIDE ($input: FileDetailsInput!) {
   openFileInIDE (input: $input)
 }
 `
@@ -192,7 +191,7 @@ preferences.update('specListWidth', specListWidth.value)
 
 let fileToOpen: FileDetails
 
-const openFileInIDE = useMutation(OpenFileInIdeDocument)
+const openFileInIDE = useMutation(SpecRunnerOpenMode_OpenFileInIdeDocument)
 
 function openFile () {
   runnerUiStore.setShowChooseExternalEditorModal(false)
@@ -204,7 +203,7 @@ function openFile () {
 
   openFileInIDE.executeMutation({
     input: {
-      absolute: fileToOpen.absoluteFile,
+      filePath: fileToOpen.absoluteFile,
       line: fileToOpen.line,
       column: fileToOpen.column,
     },

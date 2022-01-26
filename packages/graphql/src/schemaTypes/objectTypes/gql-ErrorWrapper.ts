@@ -10,7 +10,7 @@ export interface ErrorWrapperSource {
   title?: string | null
   description: string
   errorType: NexusGenEnums['ErrorTypeEnum']
-  originalError?: SerializedError
+  originalError: SerializedError
 }
 
 export const ErrorWrapper = objectType({
@@ -20,16 +20,20 @@ export const ErrorWrapper = objectType({
     t.nonNull.string('title', {
       description: 'Formatted errorType',
       resolve (root) {
-        return root.title || str.titleize(root.errorType)
+        return root.title || str.titleize(root.errorType) || 'SOME ERROR'
       },
     })
 
     t.nonNull.field('errorType', {
       type: ErrorTypeEnum,
+      resolve: () => 'PLUGINS_FUNCTION_ERROR',
     })
 
     t.nonNull.string('description', {
       description: 'The markdown formatted content associated with the ErrorTypeEnum',
+      resolve (root) {
+        return root.description || 'MISSING'
+      },
     })
 
     t.nonNull.boolean('isUserCodeError', {
@@ -43,18 +47,18 @@ export const ErrorWrapper = objectType({
       type: FileParts,
       description: 'Relative file path to open, if there is one associated with this error',
       resolve (root) {
-        if (root.originalError) {
-          // todo: parse from stack root.originalError.stack
-          // return { absolute: '', line: 0, column: 0 }
-          return null
-        }
-
-        return null
+        // todo: parse from stack root.originalError.stack
+        return { absolute: __filename, line: 52, column: 0 }
       },
     })
 
     t.field('codeFrame', {
       type: ErrorCodeFrame,
+      resolve: () => {
+        return {
+          filename: __filename,
+        }
+      },
     })
 
     t.boolean('isRetryable', {

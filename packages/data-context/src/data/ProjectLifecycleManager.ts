@@ -22,7 +22,7 @@ import assert from 'assert'
 import type { AllModeOptions, FoundBrowser, FullConfig, TestingType } from '@packages/types'
 import type { CoreDataShape, WarningError } from '.'
 import { autoBindDebug } from '../util/autoBindDebug'
-import type { ErrorWrapperSource } from '@packages/graphql/src/schemaTypes/objectTypes/gql-BaseError'
+import type { ErrorWrapperSource } from '@packages/graphql'
 
 const debug = debugLib(`cypress:lifecycle:ProjectLifecycleManager`)
 
@@ -184,8 +184,12 @@ export class ProjectLifecycleManager {
     if (this._configResult.state === 'errored') {
       return {
         title: 'Error Loading Config',
-        message: this._configResult.value?.message || '',
-        stack: this._configResult.value?.stack,
+        description: this._configResult.value?.message || '',
+        errorType: 'ERROR_READING_FILE',
+        originalError: {
+          name: 'Error',
+          stack: this._configResult.value?.stack,
+        },
       }
     }
 
@@ -196,8 +200,12 @@ export class ProjectLifecycleManager {
     if (this._eventsIpcResult.state === 'errored') {
       return {
         title: 'Error Loading Config',
-        message: this._eventsIpcResult.value?.message || '',
-        stack: this._eventsIpcResult.value?.stack,
+        description: this._eventsIpcResult.value?.message || '',
+        errorType: 'PLUGINS_FUNCTION_ERROR',
+        originalError: {
+          name: 'Error',
+          stack: this._eventsIpcResult.value?.stack,
+        },
       }
     }
 

@@ -241,7 +241,15 @@ export const mutation = mutationType({
         try {
           await ctx.actions.project.launchProject(ctx.coreData.currentTestingType, {}, args.specPath)
         } catch (e) {
-          ctx.coreData.baseError = e as Error
+          ctx.coreData.baseError = {
+            description: e.message,
+            errorType: 'UNKNOWN_ERROR',
+            originalError: {
+              name: e.name,
+              message: e.message,
+              stack: e.stack,
+            },
+          }
         }
 
         return ctx.lifecycleManager
@@ -301,9 +309,14 @@ export const mutation = mutationType({
           const e = error as Error
 
           ctx.coreData.baseError = {
+            errorType: 'CONFIG_VALIDATION_ERROR',
             title: 'Cypress Configuration Error',
-            message: e.message,
-            stack: e.stack,
+            description: e.message,
+            originalError: {
+              name: e.name,
+              message: e.message,
+              stack: e.stack,
+            },
           }
         }
 
@@ -409,7 +422,7 @@ export const mutation = mutationType({
       },
       resolve: (_, args, ctx) => {
         ctx.actions.file.openFile(
-          args.input.absolute,
+          args.input.filePath,
           args.input.line || 1,
           args.input.column || 1,
         )

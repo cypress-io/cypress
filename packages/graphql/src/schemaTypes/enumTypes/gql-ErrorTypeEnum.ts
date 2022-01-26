@@ -3,6 +3,9 @@ import { enumType } from 'nexus'
 export const ErrorTypeEnum = enumType({
   name: 'ErrorTypeEnum',
   members: [
+    // TODO: Get rid of this
+    'UNKNOWN_ERROR',
+
     'CANNOT_TRASH_ASSETS',
     'CANNOT_REMOVE_OLD_BROWSER_PROFILES',
     'VIDEO_RECORDING_FAILED',
