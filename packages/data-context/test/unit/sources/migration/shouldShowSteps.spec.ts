@@ -67,8 +67,18 @@ describe('getStepsForMigration', () => {
     const cwd = scaffoldMigrationProject('migration-e2e-custom-test-files')
     const config = fs.readJsonSync(path.join(cwd, 'cypress.json'))
 
-    const actual = getStepsForMigration(cwd, config)
+    const actual = getStepsForMigration(config)
     const expected: Step[] = ['renameAuto', 'renameSupport', 'configFile']
+
+    expect(actual).to.eql(expected)
+  })
+
+  it('returns all steps for project with e2e and component set up', async () => {
+    const cwd = scaffoldMigrationProject('migration')
+    const config = fs.readJsonSync(path.join(cwd, 'cypress.json'))
+
+    const actual = getStepsForMigration(config)
+    const expected: Step[] = ['renameAuto', 'renameManual', 'renameSupport', 'configFile', 'setupComponent']
 
     expect(actual).to.eql(expected)
   })

@@ -28,6 +28,18 @@ function shouldShowRenameSupport (config: Config) {
   return supportFile === defaultSupportFile
 }
 
+// if they have component testing configured, they will need to
+// rename/move their specs.
+function shouldShowRenameManual (config: Config) {
+  return config.component !== undefined
+}
+
+// if they have component testing configured, they will need to
+// reconfigure it.
+function shouldShowSetupComponent (config: Config) {
+  return config.component !== undefined
+}
+
 // All projects must move from cypress.json to cypress.config.js!
 export function shouldShowConfigFileStep (config: Config) {
   return true
@@ -43,11 +55,19 @@ export function getStepsForMigration (
       return acc.concat(curr)
     }
 
+    if (curr === 'renameManual' && shouldShowRenameManual(config)) {
+      return acc.concat(curr)
+    }
+
     if (curr === 'renameSupport' && shouldShowRenameSupport(config)) {
       return acc.concat(curr)
     }
 
     if (curr === 'configFile' && shouldShowConfigFileStep(config)) {
+      return acc.concat(curr)
+    }
+
+    if (curr === 'setupComponent' && shouldShowSetupComponent(config)) {
       return acc.concat(curr)
     }
 
