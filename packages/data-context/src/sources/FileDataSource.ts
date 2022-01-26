@@ -3,6 +3,10 @@ import type { DataContext } from '..'
 import * as path from 'path'
 import globby, { GlobbyOptions } from 'globby'
 import type { FoundSpec, SpecFile } from '@packages/types'
+import Debug from 'debug'
+import { toPosix } from '../util/file'
+
+const debug = Debug('cypress:data-context:sources:FileDataSource')
 
 interface CreateFileParts {
   absolute: string
@@ -65,11 +69,25 @@ export class FileDataSource {
   async getFilesByGlob (cwd: string, glob: string | string[], globOptions?: GlobbyOptions) {
     const globs = (Array.isArray(glob) ? glob : [glob]).concat('!**/node_modules/**')
 
+    if (process.platform === 'win32') {
+      // globby can't work with backwards slashes
+      // https://github.com/sindresorhus/globby/issues/179
+      for (const i in globs) {
+        const cur = globs[i]
+
+        if (!cur) throw new Error('undefined glob received')
+
+        globs[i] = toPosix(cur)
+      }
+    }
+
     try {
       const files = await globby(globs, { onlyFiles: true, absolute: true, cwd, ...globOptions })
 
       return files
     } catch (e) {
+      debug('error in getFilesByGlob %o', e)
+
       return []
     }
   }
