@@ -3,11 +3,11 @@ import { GeneratedSpecResult } from '../unions'
 import { CurrentProject } from './gql-CurrentProject'
 import type { FilePartsShape } from './gql-FileParts'
 
-export interface ScaffoldedFileSource {
+export type ScaffoldedFileSource = {
   status: 'changes' | 'valid' | 'skipped' | 'error'
   description: string
   file: FilePartsShape
-}
+} | { fileName: string }
 
 export const GenerateSpecResponse = objectType({
   name: 'GenerateSpecResponse',

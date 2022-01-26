@@ -316,6 +316,8 @@ export class ProjectActions {
     }
 
     const parsed = path.parse(codeGenCandidate)
+    let parsedCTExt
+
     const defaultCText = '.cy'
     const possibleExtensions = ['.cy', '.spec', '.test', '-spec', '-test', '_spec']
 
@@ -328,7 +330,11 @@ export class ProjectActions {
         )
       }
 
-      return defaultCText
+      parsedCTExt = possibleExtensions.find((ext) => {
+        return codeGenCandidate.endsWith(ext + parsed.ext)
+      })
+
+      return parsedCTExt || defaultCText
     }
 
     const getCodeGenPath = () => {
@@ -351,7 +357,7 @@ export class ProjectActions {
 
     let codeGenOptions = await newSpecCodeGenOptions.getCodeGenOptions()
 
-    if (codeGenType === 'component') {
+    if (codeGenType === 'component' && !parsedCTExt) {
       const filePathAbsolute = path.join(path.parse(codeGenPath).dir, codeGenOptions.fileName)
       const filePathRelative = path.relative(this.ctx.currentProject || '', filePathAbsolute)
 

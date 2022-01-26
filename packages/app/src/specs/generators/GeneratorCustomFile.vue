@@ -1,9 +1,9 @@
-<template v-if="fileName">
+<template v-if="specFile">
   <div class="p-24px w-720px">
     <Input
-      v-model="fileName"
+      v-model="specFile"
       :placeholder="t('createSpec.e2e.importEmptySpec.inputPlaceholder')"
-      :has-error="true"
+      :has-error="hasError"
     >
       <template #prefix>
         <i-cy-document-blank_x16 class="icon-light-gray-50 icon-dark-gray-300" />
@@ -11,7 +11,7 @@
     </Input>
 
     <div
-      v-if="true && props.gql.currentProject"
+      v-if="hasError && props.gql.currentProject"
     >
       <div
         class="rounded flex font-medium bg-error-100 p-16px text-error-600 gap-8px items-center"
@@ -28,12 +28,13 @@
     </div>
   </div>
   <StandardModalFooter
-    v-if="fileName"
+    v-if="specFile"
     class="flex gap-16px"
   >
     <Button
       class="w-110px"
-      :disabled="!false"
+      :disabled="!isValidSpecFile"
+      @click="createSpec"
     >
       {{ t('createSpec.createSpec') }}
     </Button>
@@ -49,13 +50,13 @@
 
 <script setup lang="ts">
 import { useI18n } from '@cy/i18n'
-import { gql } from '@urql/vue'
+import { gql, useMutation } from '@urql/vue'
 import StandardModalFooter from '@cy/components/StandardModalFooter.vue'
 import Button from '@cy/components/Button.vue'
 import Input from '@packages/frontend-shared/src/components/Input.vue'
 import SpecPatterns from '../../components/SpecPatterns.vue'
-import type { GeneratorCustomFileFragment } from '../../generated/graphql'
-import { ref } from 'vue'
+import { GeneratorCustomFileFragment, GeneratorCustomFile_GenerateSpecDocument, GeneratorCustomFile_MatchSpecFileDocument, GeneratorSuccessFileFragment } from '../../generated/graphql'
+import { computed, ref, watch } from 'vue'
 
 const props = defineProps<{
   gql: GeneratorCustomFileFragment,
@@ -64,7 +65,10 @@ const props = defineProps<{
 const { t } = useI18n()
 
 const emits = defineEmits<{
+  (event: 'update:title', value: string): void,
+  (event: 'update:description', value: string): void
   (event: 'restart'): void
+  (event: 'close'): void
 }>()
 
 gql`
@@ -74,10 +78,9 @@ fragment GeneratorCustomFile on GenerateSpecResponse {
   currentProject {
     id
     ...SpecPatterns
-    specs: specs(first: 1000) {
-      edges {
-        ...SpecNode_InlineSpecList
-      }
+    specs {
+      id
+      ...SpecNode_InlineSpecList
     }
   }
   generatedSpecResult {
@@ -88,6 +91,39 @@ fragment GeneratorCustomFile on GenerateSpecResponse {
 }
 `
 
-const fileName = ref(props.gql.generatedSpecResult?.__typename === 'GeneratedSpecError' ? props.gql.generatedSpecResult.fileName : '')
+gql`
+mutation GeneratorCustomFile_MatchSpecFile($specFile: String!) {
+  matchesSpecPattern (specFile: $specFile) 
+}
+`
+
+gql`
+mutation GeneratorCustomFile_generateSpec($codeGenCandidate: String!, $type: CodeGenType!) {
+  generateSpecFromSource(codeGenCandidate: $codeGenCandidate, type: $type) {
+    ...GeneratorSuccess
+  }
+}`
+
+const specFile = ref(props.gql.generatedSpecResult?.__typename === 'GeneratedSpecError' ? props.gql.generatedSpecResult.fileName : '')
+
+const matches = useMutation(GeneratorCustomFile_MatchSpecFileDocument)
+const writeFile = useMutation(GeneratorCustomFile_GenerateSpecDocument)
+
+const isValidSpecFile = ref(true)
+const hasError = computed(() => !isValidSpecFile.value && !!specFile.value)
+
+const result = ref<GeneratorSuccessFileFragment | null>(null)
+
+const createSpec = async () => {
+  const { data } = await writeFile.executeMutation({ codeGenCandidate: specFile.value, type: 'component' })
+
+  result.value = data?.generateSpecFromSource?.generatedSpecResult?.__typename === 'ScaffoldedFile' ? data?.generateSpecFromSource?.generatedSpecResult : null
+}
+
+watch(specFile, async (value) => {
+  const result = await matches.executeMutation({ specFile: value })
+
+  isValidSpecFile.value = result.data?.matchesSpecPattern ?? false
+}, { immediate: true })
 
 </script>
