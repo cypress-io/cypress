@@ -39,7 +39,7 @@
         >
           <template v-if="file.moved">
             <span>✅</span>
-            <span class="line-through text-gray-400">
+            <span class="text-gray-400 line-through">
               {{ file.relative }}
             </span>
           </template>
@@ -71,6 +71,7 @@ fragment RenameSpecsManual on Migration {
   manualFiles {
     completed
     files {
+      id
       relative
       moved
     }

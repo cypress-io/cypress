@@ -540,7 +540,10 @@ type ManualMigration {
   files: [ManualMigrationFile!]!
 }
 
-type ManualMigrationFile {
+type ManualMigrationFile implements Node {
+  """Relay style Node ID field for the ManualMigrationFile field"""
+  id: ID!
+
   """has the file been moved since opening the migration helper"""
   moved: Boolean!
 
@@ -590,22 +593,30 @@ type Migration {
   supportFiles: MigrationFiles
 }
 
-type MigrationFile {
+type MigrationFile implements Node {
+  """Relay style Node ID field for the MigrationFile field"""
+  id: ID!
   parts: [MigrationFilePart!]!
   testingType: TestingTypeEnum!
 }
 
-type MigrationFilePart {
+type MigrationFilePart implements Node {
   """should highlight in migration UI"""
   highlight: Boolean!
+
+  """Relay style Node ID field for the MigrationFilePart field"""
+  id: ID!
 
   """part of filename"""
   text: String!
 }
 
-type MigrationFiles {
+type MigrationFiles implements Node {
   after: [MigrationFile!]!
   before: [MigrationFile!]!
+
+  """Relay style Node ID field for the MigrationFiles field"""
+  id: ID!
 }
 
 type MigrationRegexp {

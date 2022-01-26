@@ -47,14 +47,19 @@ const { t } = useI18n()
 gql`
 fragment RenameSupport on Migration {
   supportFiles {
+    id
     before {
+      id
       parts {
+        id
         text
         highlight
       }
     }
     after {
+      id
       parts {
+        id
         text
         highlight
       }

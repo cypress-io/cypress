@@ -99,15 +99,20 @@ const { t } = useI18n()
 gql`
 fragment RenameSpecsAuto on Migration {
   specFiles {
+    id
     before {
+      id
       parts {
+        id
         text
         highlight
       }
     }
 
     after {
+      id
       parts {
+        id
         text
         highlight
       }

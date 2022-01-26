@@ -48,6 +48,7 @@ export const MigrationStep = objectType({
 
 export const MigrationFilePart = objectType({
   name: 'MigrationFilePart',
+  node: (obj) => obj.text,
   definition (t) {
     t.nonNull.string('text', {
       description: 'part of filename',
@@ -61,6 +62,9 @@ export const MigrationFilePart = objectType({
 
 export const MigrationFiles = objectType({
   name: 'MigrationFiles',
+  node: (obj) => {
+    return JSON.stringify(obj)
+  },
   definition (t) {
     t.nonNull.list.nonNull.field('before', {
       type: MigrationFile,
@@ -74,6 +78,7 @@ export const MigrationFiles = objectType({
 
 export const ManualMigrationFile = objectType({
   name: 'ManualMigrationFile',
+  node: 'relative',
   definition (t) {
     t.nonNull.boolean('moved', {
       description: 'has the file been moved since opening the migration helper',
@@ -101,6 +106,7 @@ export const ManualMigration = objectType({
 
 export const MigrationFile = objectType({
   name: 'MigrationFile',
+  node: (obj) => obj.parts.map((file) => file.text).join(''),
   definition (t) {
     t.nonNull.list.nonNull.field('parts', {
       type: MigrationFilePart,
