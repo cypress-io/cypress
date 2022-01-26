@@ -1268,7 +1268,7 @@ export class ProjectLifecycleManager {
   }
 
   isTestingTypeConfigured (testingType: TestingType): boolean {
-    const config = this.loadedFullConfig ?? this.loadedConfigFile
+    const config = this.loadedConfigFile
 
     if (!config) {
       return false

@@ -7,12 +7,13 @@
   <div class="mb-5 children:relative">
     <WizardLayout
       class="max-w-640px"
+      :back-fn="onBack"
       :next-fn="onScaffoldConfirm"
       :can-navigate-forward="true"
     >
       <div class="m-24px">
         <SelectLanguage
-          :name="t('setupPage.projectSetup.languageLabel')"
+          :name="t('setupPage.projectSetup.configFileLanguageLabel')"
           :options="languages || []"
           :value="props.gql.wizard.language?.id ?? 'js'"
           @select="val => onLanguageSelect(val)"
@@ -24,7 +25,7 @@
 
 <script lang="ts" setup>
 import { gql } from '@urql/core'
-import { CodeLanguageEnum, ScaffoldLanguageSelectFragment, ScaffoldLanguageSelect_ScaffoldTestingTypeDocument, ScaffoldLanguageSelect_WizardUpdateDocument, Wizard_WizardUpdateDocument } from '../generated/graphql'
+import { CodeLanguageEnum, EnvironmentSetup_ClearTestingTypeDocument, ScaffoldLanguageSelectFragment, ScaffoldLanguageSelect_ScaffoldTestingTypeDocument, ScaffoldLanguageSelect_WizardUpdateDocument } from '../generated/graphql'
 import WarningList from '../warning/WarningList.vue'
 import { computed } from 'vue'
 import type { FrontendFramework, Bundler } from '@packages/types/src/constants'
@@ -63,7 +64,7 @@ mutation ScaffoldLanguageSelect_scaffoldTestingType {
   scaffoldTestingType {
     currentProject {
       id
-      hasValidConfigFile
+      isE2EConfigured
     }
     ...ScaffoldedFiles
   }
@@ -73,6 +74,7 @@ mutation ScaffoldLanguageSelect_scaffoldTestingType {
 
 const wizardUpdateMutation = useMutation(ScaffoldLanguageSelect_WizardUpdateDocument)
 const scaffoldTestingTypeMutation = useMutation(ScaffoldLanguageSelect_ScaffoldTestingTypeDocument)
+const clearTestingTypeMutation = useMutation(EnvironmentSetup_ClearTestingTypeDocument)
 
 const onLanguageSelect = (codeLanguage) => {
   wizardUpdateMutation.executeMutation({
@@ -86,6 +88,10 @@ const onLanguageSelect = (codeLanguage) => {
 
 const onScaffoldConfirm = () => {
   scaffoldTestingTypeMutation.executeMutation({})
+}
+
+const onBack = () => {
+  clearTestingTypeMutation.executeMutation({})
 }
 
 gql`

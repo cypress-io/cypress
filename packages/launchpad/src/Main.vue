@@ -67,7 +67,7 @@
           :gql="query.data.value"
         />
         <ScaffoldLanguageSelect
-          v-else-if="currentProject.currentTestingType === 'e2e' && !currentProject.hasValidConfigFile"
+          v-else-if="currentProject.currentTestingType === 'e2e' && !currentProject.isE2EConfigured"
           :gql="query.data.value"
         />
         <OpenBrowser v-else />
@@ -112,7 +112,7 @@ fragment MainLaunchpadQueryData on Query {
   currentProject {
     id
     isCTConfigured
-    hasValidConfigFile
+    isE2EConfigured
     isLoadingConfigFile
     isLoadingNodeEvents
     needsLegacyConfigMigration

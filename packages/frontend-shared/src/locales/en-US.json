@@ -230,7 +230,8 @@
       "frameworkPlaceholder": "Pick a framework",
       "bundlerLabel": "Bundler",
       "bundlerPlaceholder": "Pick a bundler",
-      "languageLabel": "Language"
+      "languageLabel": "Language",
+      "configFileLanguageLabel": "Cypress Config File"
     },
     "install": {
       "startButton": "Install",
