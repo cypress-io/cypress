@@ -148,8 +148,6 @@ const alertStyles: Record<AlertStatus, AlertClasses> = {
   },
 }
 
-// Note: alertClass and headerClass both target the same element,
-// which can lead to conflicts. Not sure what
 const classes = computed(() => {
   return {
     ...alertStyles[props.status],
