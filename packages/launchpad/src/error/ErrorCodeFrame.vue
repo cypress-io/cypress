@@ -4,7 +4,7 @@
     :file-path="props.gql.absolute"
   >
     <div
-      class="border rounded cursor-pointer flex flex-row bg-gray-50 border-red-100 mt-16px text-indigo-500 text-14px leading-24px items-center"
+      class="border rounded cursor-pointer flex flex-row bg-gray-50 border-red-100 mt-16px text-indigo-500 text-14px leading-24px overflow-auto items-center"
       tab-index="1"
       @click="onClick"
     >
