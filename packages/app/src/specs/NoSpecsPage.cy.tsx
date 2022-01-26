@@ -15,13 +15,12 @@ describe('<NoSpecsPage />', { viewportHeight: 655, viewportWidth: 1032 }, () => 
       cy.mountFragment(NoSpecsPageFragmentDoc, {
         onResult: (ctx) => {
           ctx.currentProject = {
-            ...ctx.currentProject,
+            ...ctx.currentProject!,
             config: {},
             id: 'id',
             storybook: null,
             configFileAbsolutePath: '/usr/bin/cypress.config.ts',
             currentTestingType: 'component',
-            specsBare: { ...ctx.currentProject?.specsBare, edges: ctx.currentProject?.specsBare?.edges || [] },
           }
         },
         render: (gql) => {
@@ -59,13 +58,12 @@ describe('<NoSpecsPage />', { viewportHeight: 655, viewportWidth: 1032 }, () => 
       cy.mountFragment(NoSpecsPageFragmentDoc, {
         onResult: (ctx) => {
           ctx.currentProject = {
-            ...ctx.currentProject,
+            ...ctx.currentProject!,
             config: {},
             configFileAbsolutePath: '/usr/bin/cypress.config.ts',
             id: 'id',
             storybook: null,
             currentTestingType: 'e2e',
-            specsBare: { ...ctx.currentProject?.specsBare, edges: ctx.currentProject?.specsBare?.edges || [] },
           }
         },
         render: (gql) => {
