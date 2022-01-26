@@ -38,14 +38,14 @@ export class WizardDataSource {
   }
 
   get chosenFramework () {
-    return FRONTEND_FRAMEWORKS.find((f) => f.type === this.ctx.wizardData.chosenFramework)
+    return FRONTEND_FRAMEWORKS.find((f) => f.type === this.ctx.wizardData.chosenFramework) || null
   }
 
   get chosenBundler () {
-    return BUNDLERS.find((f) => f.type === this.ctx.wizardData.chosenBundler)
+    return BUNDLERS.find((f) => f.type === this.ctx.wizardData.chosenBundler) || null
   }
 
   get chosenLanguage () {
-    return CODE_LANGUAGES.find((f) => f.type === this.ctx.wizardData.chosenLanguage)
+    return CODE_LANGUAGES.find((f) => f.type === this.ctx.wizardData.chosenLanguage) || null
   }
 }
