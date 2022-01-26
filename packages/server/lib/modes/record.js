@@ -10,7 +10,7 @@ const isForkPr = require('is-fork-pr')
 const commitInfo = require('@cypress/commit-info')
 
 const api = require('../api')
-const logger = require('../logger')
+const exception = require('../exception')
 const errors = require('../errors')
 const capture = require('../capture')
 const upload = require('../upload')
@@ -21,14 +21,6 @@ const terminal = require('../util/terminal')
 const ciProvider = require('../util/ci_provider')
 const testsUtils = require('../util/tests_utils')
 const specWriter = require('../util/spec_writer')
-
-const logException = (err) => {
-  // give us up to 1 second to
-  // create this exception report
-  return logger.createException(err)
-  .timeout(1000)
-  .catch(() => {})
-}
 
 // dont yell about any errors either
 
@@ -174,7 +166,7 @@ const uploadArtifacts = (options = {}) => {
   .catch((err) => {
     errors.warning('DASHBOARD_CANNOT_UPLOAD_RESULTS', err)
 
-    return logException(err)
+    return exception.create(err)
   })
 }
 
@@ -196,7 +188,7 @@ const updateInstanceStdout = (options = {}) => {
 
     // dont log exceptions if we have a 503 status code
     if (err.statusCode !== 503) {
-      return logException(err)
+      return exception.create(err)
     }
   }).finally(capture.restore)
 }

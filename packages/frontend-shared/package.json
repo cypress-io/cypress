@@ -8,10 +8,10 @@
     "clean": "rimraf dist ./node_modules/.vite src/*.js src/**/*.js && echo 'cleaned'",
     "test": "yarn cypress:run && yarn types",
     "windi": "yarn windicss-analysis",
-    "cypress:open": "cross-env TZ=America/New_York node ../../scripts/cypress open --component --project ${PWD}",
+    "cypress:open": "cross-env TZ=America/New_York node ../../scripts/cypress open --component --project .",
     "cypress:run:e2e": "echo 'no e2e in frontend-shared'",
-    "cypress:run:ct": "cross-env TZ=America/New_York node ../../scripts/cypress run --component --project ${PWD}",
-    "dev": "gulp dev --project ${PWD}",
+    "cypress:run:ct": "cross-env TZ=America/New_York node ../../scripts/cypress run --component --project .",
+    "dev": "gulp dev --project .",
     "generate-shiki-theme": "node ./script/generate-shiki-theme.js",
     "postinstall": "patch-package"
   },
