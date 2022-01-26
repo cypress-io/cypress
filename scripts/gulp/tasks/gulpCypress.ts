@@ -80,9 +80,17 @@ async function spawnCypressWithMode (
   if (mode === 'open') {
     env.CYPRESS_INTERNAL_GRAPHQL_PORT = process.env.CYPRESS_INTERNAL_GRAPHQL_PORT ?? '4444'
     if (!argv.includes('--project') && !argv.includes('--global')) {
+      // if cypress is run without `--project` or `--global`, it will be run in the root
+      // if the run was triggered from a package using yarn workspace or navigating to the package
+      // directory we want it to run for the package directory and use this package directory
+      // as the project.
+
+      // process.env.INIT_CWD contains where yarn run has been called from.
       const project = process.env.INIT_CWD && /packages[\/\\]\w+$/.exec(process.env.INIT_CWD)?.[0]
 
+      // if it is a package (app of launchpad)...
       if (process.env.INIT_CWD && project) {
+        // append the project option to the cypress command
         argv.push('--project', process.env.INIT_CWD)
       } else {
         argv.push('--global')
