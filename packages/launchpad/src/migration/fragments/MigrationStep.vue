@@ -1,6 +1,7 @@
 <template>
   <div
     v-if="step"
+    :data-cy="`migration-step ${step?.name}`"
     class="border rounded bg-light-50 border-gray-100 mb-4 w-full block
   overflow-hidden hocus-default"
   >
