@@ -7,8 +7,8 @@
   >
     <ListRowHeader
       :class="{
-        'border-b border-b-gray-100 rounded-b-none': open,
-        'bg-gray-50': !open
+        'border-b border-b-gray-100 rounded-b-none': step.isCurrentStep,
+        'bg-gray-50': !step.isCurrentStep
       }"
       class="cursor-pointer"
       :description="description"
