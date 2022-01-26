@@ -144,9 +144,8 @@ import ArrowLeftIcon from '~icons/cy/arrow-left_x16'
 import StatusRunningIcon from '~icons/cy/status-running_x16'
 import TestingTypeE2E from '~icons/cy/testing-type-e2e_x24'
 import { RadioGroup, RadioGroupOption, RadioGroupLabel } from '@headlessui/vue'
-import os from 'os'
 
-import { OpenBrowserListFragment, OpenBrowserList_SetBrowserDocument, OpenBrowser_FocusActiveBrowserWindowDocument } from '../generated/graphql'
+import { OpenBrowserListFragment, OpenBrowserList_SetBrowserDocument } from '../generated/graphql'
 
 gql`
 mutation OpenBrowserList_SetBrowser($id: ID!) {
@@ -154,12 +153,6 @@ mutation OpenBrowserList_SetBrowser($id: ID!) {
     id
     ...OpenBrowserList
   }
-}
-`
-
-gql`
-mutation OpenBrowserList_CloseBrowser {
-  closeBrowser
 }
 `
 
