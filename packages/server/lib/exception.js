@@ -46,18 +46,21 @@ module.exports = {
     })
   },
 
-  create (err) {
+  async create (err) {
     if ((process.env['CYPRESS_INTERNAL_ENV'] !== 'production') ||
        (process.env['CYPRESS_CRASH_REPORTS'] === '0')) {
-      return Promise.resolve()
+      return
     }
 
-    return Promise.join(this.getBody(err), this.getAuthToken())
-    .spread((body, authToken) => {
-      return api.createCrashReport(body, authToken)
-    })
-    .catch(() => {
+    try {
+      const [body, authToken] = await Promise.all([
+        this.getBody(err),
+        this.getAuthToken(),
+      ])
+
+      await api.createCrashReport(body, authToken)
+    } catch (_err) {
       // nothing to do
-    })
+    }
   },
 }
