@@ -253,6 +253,27 @@ describe('App: Index', () => {
         })
       })
     })
+
+    context('pristine app', () => {
+      beforeEach(() => {
+        cy.scaffoldProject('pristine')
+        cy.openProject('pristine')
+        cy.startAppServer()
+        cy.visitApp()
+      })
+
+      context('scaffold example files', () => {
+        it('should create example files on an empty project', () => {
+          cy.contains('[data-cy="card"]', defaultMessages.createSpec.e2e.importFromScaffold.header).click()
+          // TODO: Check that the popup stays open
+          cy.withCtx(async (ctx) => {
+            const stats = await ctx.actions.file.checkIfFileExists('cypress/e2e/1-getting-started/todo.cy.js')
+
+            expect(stats?.isFile()).to.be.true
+          })
+        })
+      })
+    })
   })
 
   describe('Testing Type: Component', {
