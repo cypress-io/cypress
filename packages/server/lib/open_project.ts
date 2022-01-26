@@ -183,7 +183,7 @@ export class OpenProject {
           return browsers.connectToExisting(browser, options, automation)
         }
 
-        return browsers.open(browser, options, automation)
+        return browsers.open(browser, options, automation, this._ctx)
       })
     }
 
