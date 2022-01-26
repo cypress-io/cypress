@@ -532,12 +532,15 @@ type LocalSettingsPreferences {
   specListWidth: Int
 }
 
-type ManualMigration {
+type ManualMigration implements Node {
   """is the manual migration completed (all files are moved)"""
   completed: Boolean!
 
   """files needing manual migration"""
   files: [ManualMigrationFile!]!
+
+  """Relay style Node ID field for the ManualMigration field"""
+  id: ID!
 }
 
 type ManualMigrationFile implements Node {

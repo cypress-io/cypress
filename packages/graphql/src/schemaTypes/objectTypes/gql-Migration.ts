@@ -92,6 +92,7 @@ export const ManualMigrationFile = objectType({
 
 export const ManualMigration = objectType({
   name: 'ManualMigration',
+  node: ({ files }) => files.map((f) => f.relative).join(),
   definition (t) {
     t.nonNull.list.nonNull.field('files', {
       type: ManualMigrationFile,
