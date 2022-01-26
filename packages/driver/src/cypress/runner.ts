@@ -1313,6 +1313,7 @@ export default {
           _runner.suite._onlySuites = []
 
           // create a runnable to associate for the failure
+          debugger
           mocha.createRootTest('An uncaught error was detected outside of a test', _uncaughtFn)
         }
 

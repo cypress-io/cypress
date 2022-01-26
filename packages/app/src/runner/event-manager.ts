@@ -385,9 +385,13 @@ export class EventManager {
     return Cypress.initialize({
       $autIframe,
       onSpecReady: () => {
+        debugger
         // get the current runnable in case we reran mid-test due to a visit
         // to a new domain
         this.ws.emit('get:existing:run:state', (state: RunState = {}) => {
+
+          debugger
+
           if (!Cypress.runner) {
             // the tests have been reloaded
             return

@@ -1,6 +1,9 @@
 // This file is merged in a <script type=module> into index.html
 // it will be used to load and kick start the selected spec
 
+
+debugger 
+
 const supportPath = import.meta.env.__cypress_supportPath
 const originAutUrl = import.meta.env.__cypress_originAutUrl
 
