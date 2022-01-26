@@ -33,7 +33,7 @@
     "chai": "^4.2.0",
     "classnames": "2.3.1",
     "clean-webpack-plugin": "^3.0.0",
-    "cypress-real-events": "1.4.0",
+    "cypress-real-events": "1.6.0",
     "eslint-plugin-mocha": "^8.0.0",
     "eslint-plugin-react": "^7.22.0",
     "eslint-plugin-react-hooks": "^4.2.0",
