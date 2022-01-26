@@ -39,24 +39,6 @@ describe('<BaseError />', () => {
     .should('contain.text', messages.readTheDocsButton)
   })
 
-  // NOTE: Figure out how to stub the graphql mutation call
-  it.skip('emits the retry event by default', () => {
-    cy.mountFragment(BaseError_DataFragmentDoc, {
-      onResult: (result) => {
-        result.title = messages.header
-        result.message = null
-      },
-      render: (gqlVal) => (<div class="p-16px">
-        <BaseError gql={gqlVal} />,
-      </div>),
-    })
-    .get(retryButtonSelector)
-    .click()
-    .click()
-    .get('@retry')
-    .should('have.been.calledTwice')
-  })
-
   it('renders custom error messages and headers with props', () => {
     cy.mountFragment(BaseError_DataFragmentDoc, {
       onResult: (result) => {
