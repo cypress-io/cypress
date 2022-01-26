@@ -132,7 +132,7 @@
 
 <script setup lang="ts">
 import type { MIGRATION_STEPS } from '@packages/types'
-import { computed, onMounted, ref } from 'vue'
+import { computed, onBeforeMount, ref } from 'vue'
 import { gql, useMutation, useQuery } from '@urql/vue'
 import Button from '@cy/components/Button.vue'
 import ArrowRightIcon from '~icons/cy/arrow-right_x16.svg'
@@ -202,7 +202,7 @@ mutation MigrationWizard_Start {
 
 const start = useMutation(MigrationWizard_StartDocument)
 
-onMounted(async () => {
+onBeforeMount(async () => {
   await start.executeMutation({ })
   await query.executeQuery()
 })

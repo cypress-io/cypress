@@ -151,4 +151,9 @@ export const stubMigration: MaybeResolver<Migration> = {
       },
     ],
   },
+  hasComponentTesting: true,
+  hasCustomComponentFolder: false,
+  hasCustomComponentTestFiles: false,
+  hasCustomIntegrationFolder: false,
+  hasCustomIntegrationTestFiles: false,
 }

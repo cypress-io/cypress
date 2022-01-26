@@ -1,8 +1,50 @@
-import { objectType } from 'nexus'
-import { MigrationStep, TestingTypeEnum } from '..'
+import { enumType, objectType } from 'nexus'
+import { TestingTypeEnum } from '..'
 import Debug from 'debug'
+import { MIGRATION_STEPS } from '@packages/types'
 
 const debug = Debug('cypress:graphql:gql-Migration')
+
+export const MigrationStepEnum = enumType({
+  name: 'MigrationStepEnum',
+  members: MIGRATION_STEPS,
+})
+
+export const MigrationStep = objectType({
+  name: 'MigrationStep',
+  node: 'name',
+  description: 'Contains all data related to the 9.X to 10.0 migration UI',
+  definition (t) {
+    t.nonNull.field('name', {
+      type: MigrationStepEnum,
+      description: 'Identifier of the step',
+    })
+
+    t.nonNull.boolean('isCurrentStep', {
+      description: 'This is the current step',
+      resolve: (source, args, ctx) => {
+        return ctx.migration.step === source.name
+      },
+    })
+
+    t.nonNull.boolean('isCompleted', {
+      description: 'Has the current step been completed',
+      resolve: (source, args, ctx) => {
+        const indexOfObservedStep = ctx.migration.filteredSteps.indexOf(source.name)
+        const indexOfCurrentStep = ctx.migration.filteredSteps.indexOf(ctx.migration.step)
+
+        return indexOfObservedStep < indexOfCurrentStep
+      },
+    })
+
+    t.nonNull.int('index', {
+      description: 'Index of the step in the list',
+      resolve: (source, args, ctx) => {
+        return ctx.migration.filteredSteps.indexOf(source.name) + 1
+      },
+    })
+  },
+})
 
 export const MigrationFilePart = objectType({
   name: 'MigrationFilePart',
@@ -91,7 +133,6 @@ export const MigrationRegexp = objectType({
   },
 })
 
-// TODO: implement these values for migration using the ctx
 export const Migration = objectType({
   name: 'Migration',
   description: 'Contains all data related to the 9.X to 10.0 migration UI',
@@ -169,6 +210,42 @@ export const Migration = objectType({
       description: 'the component folder path used to store components tests',
       resolve: (source, args, ctx) => {
         return ctx.migration.getComponentFolder()
+      },
+    })
+
+    t.nonNull.boolean('hasCustomIntegrationFolder', {
+      description: 'whether the integration folder is custom or not',
+      resolve: (source, args, ctx) => {
+        return ctx.migration.hasCustomIntegrationFolder
+      }
+      ,
+    })
+
+    t.nonNull.boolean('hasCustomIntegrationTestFiles', {
+      description: 'whether the testFiles member is custom or not in integration',
+      resolve: (source, args, ctx) => {
+        return ctx.migration.hasCustomIntegrationTestFiles
+      },
+    })
+
+    t.nonNull.boolean('hasCustomComponentFolder', {
+      description: 'whether the component folder is custom or not',
+      resolve: (source, args, ctx) => {
+        return ctx.migration.hasCustomComponentFolder
+      },
+    })
+
+    t.nonNull.boolean('hasCustomComponentTestFiles', {
+      description: 'whether the testFiles member is custom or not in component testing',
+      resolve: (source, args, ctx) => {
+        return ctx.migration.hasCustomComponentTestFiles
+      },
+    })
+
+    t.nonNull.boolean('hasComponentTesting', {
+      description: 'whether component testing is set up in the migrated config or not',
+      resolve: (source, args, ctx) => {
+        return ctx.migration.hasComponentTesting
       },
     })
   },

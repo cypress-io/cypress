@@ -1,10 +1,25 @@
 import { MIGRATION_STEPS } from '@packages/types'
+import type { OldCypressConfig } from '../../util'
 
-type Config = Partial<Cypress.ResolvedConfigOptions>
+export function getIntegrationTestFiles (config: OldCypressConfig) {
+  return config.e2e?.testFiles ?? config.testFiles ?? '**/*'
+}
 
-export function shouldShowAutoRenameStep (config: Config) {
-  const integrationFolder = config.e2e?.integrationFolder ?? config.integrationFolder ?? 'cypress/integration'
-  const testFiles = config.e2e?.testFiles ?? config.testFiles ?? '**/*'
+export function getIntegrationFolder (config: OldCypressConfig) {
+  return config.e2e?.integrationFolder ?? config.integrationFolder ?? 'cypress/integration'
+}
+
+export function getComponentTestFiles (config: OldCypressConfig) {
+  return config.component?.testFiles ?? config.testFiles ?? '**/*'
+}
+
+export function getComponentFolder (config: OldCypressConfig) {
+  return config.component?.componentFolder ?? config.componentFolder ?? 'cypress/component'
+}
+
+export function shouldShowAutoRenameStep (config: OldCypressConfig) {
+  const integrationFolder = getIntegrationFolder(config)
+  const testFiles = getIntegrationTestFiles(config)
 
   // defaults, migrate
   if (integrationFolder === 'cypress/integration') {
@@ -21,7 +36,7 @@ export function shouldShowAutoRenameStep (config: Config) {
 
 // we only show rename support file if they are using the default
 // if they have anything set in their config, we will not try to rename it.
-function shouldShowRenameSupport (config: Config) {
+export function shouldShowRenameSupport (config: OldCypressConfig) {
   const defaultSupportFile = 'cypress/support/index.js'
   const supportFile = config.e2e?.supportFile ?? config.supportFile ?? defaultSupportFile
 
@@ -30,25 +45,25 @@ function shouldShowRenameSupport (config: Config) {
 
 // if they have component testing configured, they will need to
 // rename/move their specs.
-function shouldShowRenameManual (config: Config) {
+function shouldShowRenameManual (config: OldCypressConfig) {
   return config.component !== undefined
 }
 
 // if they have component testing configured, they will need to
 // reconfigure it.
-function shouldShowSetupComponent (config: Config) {
+function shouldShowSetupComponent (config: OldCypressConfig) {
   return config.component !== undefined
 }
 
 // All projects must move from cypress.json to cypress.config.js!
-export function shouldShowConfigFileStep (config: Config) {
+export function shouldShowConfigFileStep (config: OldCypressConfig) {
   return true
 }
 
 export type Step = typeof MIGRATION_STEPS[number]
 
 export function getStepsForMigration (
-  config: Config,
+  config: OldCypressConfig,
 ): Step[] {
   return MIGRATION_STEPS.reduce<Step[]>((acc, curr) => {
     if (curr === 'renameAuto' && shouldShowAutoRenameStep(config)) {

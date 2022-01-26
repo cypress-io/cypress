@@ -4,7 +4,6 @@ import type chokidar from 'chokidar'
 import path from 'path'
 import type { DataContext } from '..'
 import {
-  tryGetDefaultLegacySupportFile,
   createConfigString,
   initComponentTestingMigration,
   ComponentTestingMigrationStatus,
@@ -12,6 +11,8 @@ import {
   getDefaultLegacySupportFile,
   RelativeSpecWithTestingType,
   supportFilesForMigration,
+  OldCypressConfig,
+  hasComponentSpecFile,
 } from '../util/migration'
 import {
   formatMigrationFile,
@@ -22,6 +23,11 @@ import {
 import {
   shouldShowAutoRenameStep,
   getStepsForMigration,
+  shouldShowRenameSupport,
+  getIntegrationTestFiles,
+  getIntegrationFolder,
+  getComponentTestFiles,
+  getComponentFolder,
 } from './migration/shouldShowSteps'
 
 const debug = Debug('cypress:data-context:MigrationDataSource')
@@ -40,14 +46,17 @@ export interface FilesForMigrationUI {
 type MIGRATION_STEP = typeof MIGRATION_STEPS[number]
 
 export class MigrationDataSource {
-  private _config: Cypress.ConfigOptions | null = null
+  private _config: OldCypressConfig | null = null
   private _step: MIGRATION_STEP = 'renameAuto'
   filteredSteps: MIGRATION_STEP[] = MIGRATION_STEPS.filter(() => true)
+
   hasCustomIntegrationFolder: boolean = false
-  hasCustomIntegrationSpecPattern: boolean = false
+  hasCustomIntegrationTestFiles: boolean = false
+
   hasCustomComponentFolder: boolean = false
+  hasCustomComponentTestFiles: boolean = false
+
   hasCustomSupportFile = false
-  hasCustomComponentSpecPattern: boolean = false
   hasComponentTesting: boolean = true
 
   private componentTestingMigrationWatcher?: chokidar.FSWatcher
@@ -58,6 +67,8 @@ export class MigrationDataSource {
   async initialize () {
     this._config = null
     const config = await this.parseCypressConfig()
+
+    await this.initializeFlags()
 
     this.filteredSteps = getStepsForMigration(config)
 
@@ -129,7 +140,9 @@ export class MigrationDataSource {
   }
 
   async supportFilesForMigrationGuide (): Promise<FilesForMigrationUI | null> {
-    if (!await this.shouldShowSupportFileRenameStep()) {
+    const config = await this.parseCypressConfig()
+
+    if (!shouldShowRenameSupport(config)) {
       return null
     }
 
@@ -215,10 +228,7 @@ export class MigrationDataSource {
     return 'cypress/component'
   }
 
-  // FIXME: Cypress.ConfigOptions is the updated type for options but
-  // cypress.json uses the old model and won't fit the new one.
-  // If it did, why would we even be migrating ;)
-  private async parseCypressConfig (): Promise<Cypress.ConfigOptions> {
+  private async parseCypressConfig (): Promise<OldCypressConfig> {
     if (this._config) {
       return this._config
     }
@@ -226,7 +236,7 @@ export class MigrationDataSource {
     if (this.ctx.lifecycleManager.metaState.hasLegacyCypressJson) {
       const cfgPath = path.join(this.ctx.lifecycleManager?.projectRoot, 'cypress.json')
 
-      this._config = this.ctx.file.readJsonFile(cfgPath) as Cypress.ConfigOptions
+      this._config = await this.ctx.file.readJsonFile(cfgPath) as OldCypressConfig
 
       return this._config
     }
@@ -234,17 +244,33 @@ export class MigrationDataSource {
     return {}
   }
 
-  async shouldShowSupportFileRenameStep () {
+  private async initializeFlags () {
     if (!this.ctx.currentProject) {
-      throw Error()
+      throw Error('Need currentProject to do migration')
     }
 
     const config = await this.parseCypressConfig()
 
-    return Boolean(
-      config.supportFile === undefined &&
-      tryGetDefaultLegacySupportFile(this.ctx.currentProject),
-    )
+    this.hasCustomIntegrationTestFiles = getIntegrationTestFiles(config) !== '**/*'
+    this.hasCustomIntegrationFolder = getIntegrationFolder(config) !== 'cypress/integration'
+
+    const componentFolder = getComponentFolder(config)
+
+    this.hasCustomComponentFolder = componentFolder !== 'cypress/component'
+
+    const componentTestFiles = getComponentTestFiles(config)
+
+    this.hasCustomComponentTestFiles = componentTestFiles !== '**/*'
+
+    if (componentFolder === false) {
+      this.hasComponentTesting = false
+    } else {
+      this.hasComponentTesting = await hasComponentSpecFile(
+        this.ctx.currentProject,
+        componentFolder,
+        componentTestFiles,
+      )
+    }
   }
 
   async shouldShowAutoRenameStep () {
@@ -257,21 +283,7 @@ export class MigrationDataSource {
     return this._step
   }
 
-  private setStep (step: MIGRATION_STEP) {
+  setStep (step: MIGRATION_STEP) {
     this._step = step
-  }
-
-  nextStep () {
-    const index = this.filteredSteps.indexOf(this._step)
-
-    if (index === -1) {
-      throw new Error('Invalid step')
-    }
-
-    const nextStep = this.filteredSteps[index + 1]
-
-    if (nextStep) {
-      this.setStep(nextStep)
-    }
   }
 }

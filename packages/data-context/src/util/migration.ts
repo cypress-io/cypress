@@ -16,6 +16,19 @@ type ConfigOptions = {
   component: Record<string, unknown>
 }
 
+/**
+ * config format pre-10.0
+ */
+export interface OldCypressConfig {
+  component?: Omit<OldCypressConfig, 'component' | 'e2e'>
+  e2e?: Omit<OldCypressConfig, 'component' | 'e2e'>
+  pluginsFile?: string | false
+  supportFile?: string | false
+  componentFolder?: string | false
+  integrationFolder?: string | false
+  testFiles?: string | string[]
+}
+
 export const defaultSupportFiles = {
   before: path.join('cypress', 'support', 'index.js'),
 }
@@ -27,7 +40,7 @@ export class NonStandardMigrationError extends Error {
   }
 }
 
-export async function createConfigString (cfg: Partial<Cypress.ConfigOptions>) {
+export async function createConfigString (cfg: OldCypressConfig) {
   return createCypressConfigJs(reduceConfig(cfg), getPluginRelativePath(cfg))
 }
 
@@ -100,13 +113,13 @@ export function initComponentTestingMigration (
   })
 }
 
-function getPluginRelativePath (cfg: Partial<Cypress.ConfigOptions>) {
+function getPluginRelativePath (cfg: OldCypressConfig): string {
   const DEFAULT_PLUGIN_PATH = path.normalize('/cypress/plugins/index.js')
 
   return cfg.pluginsFile ? cfg.pluginsFile : DEFAULT_PLUGIN_PATH
 }
 
-function reduceConfig (cfg: Partial<Cypress.ConfigOptions>) {
+function reduceConfig (cfg: OldCypressConfig): ConfigOptions {
   const excludedFields = ['pluginsFile', '$schema', 'componentFolder']
 
   return Object.entries(cfg).reduce((acc, [key, val]) => {
@@ -203,6 +216,22 @@ export async function getSpecs (
       }
     }),
   }
+}
+
+/**
+ * Checks that at least one spec file exist for component testing
+ *
+ * NOTE: this is what we use to see if CT is set up
+ * @param projectRoot
+ * @param componentFolder
+ * @param componentGlob
+ * @returns
+ */
+export async function hasComponentSpecFile (projectRoot: string, componentFolder: string, componentGlob: string | string[]): Promise<boolean> {
+  return (await globby(componentGlob, {
+    cwd: path.join(projectRoot, componentFolder),
+    onlyFiles: true,
+  })).length > 0
 }
 
 export async function tryGetDefaultLegacySupportFile (projectRoot: string) {
