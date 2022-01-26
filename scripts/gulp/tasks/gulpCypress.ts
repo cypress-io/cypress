@@ -100,7 +100,7 @@ async function spawnCypressWithMode (
   }
 
   return await forked(`cy:${mode}:${type}`, pathToCli, [mode, ...argv], {
-    cwd: monorepoPaths.root,
+    cwd: process.env.INIT_CWD,
     env: finalEnv,
     waitForData: false,
     execArgv: [],

@@ -33,10 +33,7 @@ describe('<CreateSpecModal />', () => {
                 specPattern: '**/*.cy.{js,jsx,ts,tsx}',
               },
             },
-            specsBare: {
-              __typename: 'SpecConnection',
-              edges: [],
-            },
+            specs: [],
           },
         }}
         show={show.value}
@@ -102,10 +99,7 @@ describe('playground', () => {
                 specPattern: '**/*.cy.{js,jsx,ts,tsx}',
               },
             },
-            specsBare: {
-              __typename: 'SpecConnection',
-              edges: [],
-            },
+            specs: [],
           },
         }}
         show={show.value}

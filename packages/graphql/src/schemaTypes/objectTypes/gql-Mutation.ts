@@ -153,18 +153,20 @@ export const mutation = mutationType({
         input: nonNull(arg({ type: WizardUpdateInput })),
       },
       resolve: async (source, args, ctx) => {
-        if (args.input.bundler !== undefined) {
-          ctx.actions.wizard.setBundler(args.input.bundler)
+        if (args.input.framework) {
+          ctx.actions.wizard.setFramework(args.input.framework)
         }
 
-        if (args.input.framework !== undefined) {
-          ctx.actions.wizard.setFramework(args.input.framework)
+        if (args.input.bundler) {
+          ctx.actions.wizard.setBundler(args.input.bundler)
         }
 
         if (args.input.codeLanguage) {
           ctx.actions.wizard.setCodeLanguage(args.input.codeLanguage)
         }
 
+        // TODO: remove when live-mutations are implements
+        // signal to launchpad to reload the data context
         ctx.emitter.toLaunchpad()
 
         return ctx.wizardData
@@ -545,6 +547,16 @@ export const mutation = mutationType({
         await ctx.lifecycleManager.reloadConfig()
 
         return {}
+      },
+    })
+
+    t.field('closeBrowser', {
+      description: 'Close active browser',
+      type: 'Boolean',
+      resolve: async (source, args, ctx) => {
+        await ctx.actions.browser.closeBrowser()
+
+        return true
       },
     })
   },

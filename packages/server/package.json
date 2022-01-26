@@ -122,8 +122,7 @@
     "url-parse": "1.5.2",
     "uuid": "8.3.2",
     "which": "2.0.2",
-    "widest-line": "3.1.0",
-    "winston": "2.4.4"
+    "widest-line": "3.1.0"
   },
   "devDependencies": {
     "@babel/core": "7.9.0",

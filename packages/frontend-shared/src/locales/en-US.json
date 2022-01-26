@@ -244,9 +244,6 @@
       "next": "Next Step",
       "back": "Back"
     },
-    "openBrowser": {
-      "launch": "Launch"
-    },
     "configFile": {
       "createManually": "Create file manually",
       "skippedLabel": "Skipped",
@@ -594,7 +591,17 @@
     },
     "chooseBrowser": {
       "title": "Choose a Browser",
-      "description": "Choose your preferred browser for testing your components."
+      "description": "Choose your preferred browser for {testingType} testing."
     }
+  },
+  "openBrowser": {
+    "startComponent": "Start Component Testing in {browser}",
+    "startE2E": "Start E2E Testing in {browser}",
+    "openingComponent": "Opening Component Testing in {browser}",
+    "openingE2E": "Opening E2E Testing in {browser}",
+    "running": "Running {browser}",
+    "focus": "Focus",
+    "close": "Close",
+    "switchTestingType": "Switch testing type"
   }
 }

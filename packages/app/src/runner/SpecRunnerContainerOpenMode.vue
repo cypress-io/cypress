@@ -12,7 +12,6 @@
 </template>
 
 <script lang="ts" setup>
-import type { SpecFile } from '@packages/types/src'
 import { computed } from 'vue'
 import type { SpecRunnerFragment } from '../generated/graphql'
 import { useSpecStore } from '../store'
@@ -27,8 +26,8 @@ const specStore = useSpecStore()
 
 const { initialized, watchSpec } = useUnifiedRunner()
 
-const specs = computed<SpecFile[]>(() => {
-  return props.gql.currentProject?.specs?.edges.map((x) => x.node) ?? []
+const specs = computed(() => {
+  return props.gql.currentProject?.specs ?? []
 })
 
 watchSpec(specs)
