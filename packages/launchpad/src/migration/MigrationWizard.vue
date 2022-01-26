@@ -29,6 +29,7 @@
           </Button>
         </template>
       </MigrationStep>
+
       <MigrationStep
         v-if="shouldShowStep('renameManual')"
         :step="steps.find(step => step.name === 'renameManual')"

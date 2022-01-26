@@ -16,6 +16,7 @@ describe('Migration', { viewportWidth: 1200 }, () => {
 
   it('renames support file', () => {
     cy.visitLaunchpad()
+    cy.findByText(`Rename these specs for me`).click()
     cy.findByText(`I'll do this later`).click()
     cy.findByText(`Rename the support file for me`).click()
 
@@ -30,7 +31,8 @@ describe('Migration', { viewportWidth: 1200 }, () => {
     beforeEach(() => {
       cy.visitLaunchpad()
 
-      cy.findByText(defaultMessages.migration.wizard.step2.button).click()
+      cy.findByText(`Rename these specs for me`).click()
+      cy.findByText(`I'll do this later`).click()
       cy.findByText(defaultMessages.migration.wizard.step3.button).click()
       cy.findByText(defaultMessages.migration.wizard.step4.button).click()
     })
@@ -93,10 +95,6 @@ describe('Migration', { viewportWidth: 1200 }, () => {
 
   describe('Full flow', () => {
     it('goes to each step', () => {
-      cy.withCtx(async (ctx) => {
-        await ctx.actions.file.writeFileInProject('cypress.json', '{}')
-      })
-
       cy.visitLaunchpad()
 
       cy.findByText(defaultMessages.migration.wizard.step1.button).click()
@@ -104,8 +102,7 @@ describe('Migration', { viewportWidth: 1200 }, () => {
       cy.findByText(defaultMessages.migration.wizard.step3.button).click()
       cy.findByText(defaultMessages.migration.wizard.step4.button).click()
       cy.findByText(defaultMessages.migration.wizard.step5.button).click()
-
-      // cy.findByText(defaultMessages.setupWizard.selectFramework.description).should('be.visible')
+      cy.findByText(defaultMessages.setupWizard.selectFramework.description).should('be.visible')
     })
   })
 })
