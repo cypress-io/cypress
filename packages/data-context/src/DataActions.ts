@@ -7,9 +7,10 @@ import {
   ProjectActions,
   WizardActions,
   MigrationActions,
+  BrowserActions,
+  DevActions,
+  AuthActions,
 } from './actions'
-import { AuthActions } from './actions/AuthActions'
-import { DevActions } from './actions/DevActions'
 import { cached } from './util'
 
 export class DataActions {
@@ -58,5 +59,10 @@ export class DataActions {
   @cached
   get migration () {
     return new MigrationActions(this.ctx)
+  }
+
+  @cached
+  get browser () {
+    return new BrowserActions(this.ctx)
   }
 }

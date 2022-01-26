@@ -354,6 +354,9 @@ type CurrentProject implements Node & ProjectLike {
   """Relay style Node ID field for the CurrentProject field"""
   id: ID!
 
+  """If the browser is open or not"""
+  isBrowserOpen: Boolean!
+
   """Whether the user configured this project to use Component Testing"""
   isCTConfigured: Boolean
 
@@ -384,20 +387,8 @@ type CurrentProject implements Node & ProjectLike {
   """Project saved state"""
   savedState: JSON
 
-  """Specs for a project conforming to Relay Connection specification"""
-  specs(
-    """Returns the elements in the list that come after the specified cursor"""
-    after: String
-
-    """Returns the elements in the list that come before the specified cursor"""
-    before: String
-
-    """Returns the first n elements from the list."""
-    first: Int
-
-    """Returns the last n elements from the list."""
-    last: Int
-  ): SpecConnection
+  """A list of specs for the currently open testing type of a project"""
+  specs: [Spec!]!
   storybook: Storybook
   title: String!
 }
@@ -690,6 +681,22 @@ type LocalSettingsPreferences {
   specListWidth: Int
 }
 
+type ManualMigration {
+  """is the manual migration completed (all files are moved)"""
+  completed: Boolean!
+
+  """files needing manual migration"""
+  files: [ManualMigrationFile!]!
+}
+
+type ManualMigrationFile {
+  """has the file been moved since opening the migration helper"""
+  moved: Boolean!
+
+  """name of file to migrate"""
+  relative: String!
+}
+
 """Contains all data related to the 9.X to 10.0 migration UI"""
 type Migration {
   """the component folder path used to store components tests"""
@@ -701,26 +708,70 @@ type Migration {
   """contents of the cypress.json file before conversion"""
   configBeforeCode: String!
 
+  """Steps filtered with the current context"""
+  filteredSteps: [MigrationStep!]!
+
   """the integration folder path used to store e2e tests"""
   integrationFolder: String!
 
   """List of files needing manual conversion"""
-  manualFiles: [String!]!
+  manualFiles: ManualMigration
 
   """All spec files after conversion"""
-  specFilesAfter: [String!]!
-
-  """All spec files before being converted"""
-  specFilesBefore: [String!]!
-
-  """Step where the migration is right now"""
-  step: MigrationStepEnum!
-
-  """Support files after rename"""
-  supportFileAfter: String!
+  specFiles: MigrationFiles!
 
   """Support files needing automated rename"""
-  supportFileBefore: String!
+  supportFiles: MigrationFiles!
+}
+
+type MigrationFile {
+  parts: [MigrationFilePart!]!
+  testingType: TestingTypeEnum!
+}
+
+type MigrationFilePart {
+  """should highlight in migration UI"""
+  highlight: Boolean!
+
+  """part of filename"""
+  text: String!
+}
+
+type MigrationFiles {
+  after: [MigrationFile!]!
+  before: [MigrationFile!]!
+}
+
+type MigrationRegexp {
+  """regexp to use to rename existing specs in component"""
+  afterComponent: String!
+
+  """regexp to use to rename existing specs in e2e"""
+  afterE2E: String!
+
+  """regexp to identiey existing specs in component"""
+  beforeComponent: String!
+
+  """regexp to identify existing specs in e2e"""
+  beforeE2E: String!
+}
+
+"""Contains all data related to the 9.X to 10.0 migration UI"""
+type MigrationStep implements Node {
+  """Relay style Node ID field for the MigrationStep field"""
+  id: ID!
+
+  """Index of the step in the list"""
+  index: Int!
+
+  """Has the current step been completed"""
+  isCompleted: Boolean!
+
+  """This is the current step"""
+  isCurrentStep: Boolean!
+
+  """Identifier of the step"""
+  name: MigrationStepEnum!
 }
 
 enum MigrationStepEnum {
@@ -743,6 +794,9 @@ type Mutation {
   clearCurrentProject: Query
   clearCurrentTestingType: Query
 
+  """Close active browser"""
+  closeBrowser: Boolean
+
   """Create a project in the dashboard and return its object"""
   cloudProjectCreate(ciProviders: [String!], name: String!, orgId: ID!, public: Boolean!): CloudProject
 
@@ -754,6 +808,9 @@ type Mutation {
   Development only: Triggers or dismisses a prompted refresh by touching the file watched by our development scripts
   """
   devRelaunch(action: DevRelaunchAction!): Boolean
+
+  """user has finished migration component specs - move to next step"""
+  finishedRenamingComponentSpecs: Query
 
   """Generate spec from source"""
   generateSpecFromSource(codeGenCandidate: String!, type: CodeGenType!): ScaffoldedFile
@@ -1015,26 +1072,6 @@ type Spec implements Node {
 
   """Type of spec (e.g. component | integration)"""
   specType: SpecType!
-}
-
-type SpecConnection {
-  """
-  https://facebook.github.io/relay/graphql/connections.htm#sec-Edge-Types
-  """
-  edges: [SpecEdge!]!
-
-  """
-  https://facebook.github.io/relay/graphql/connections.htm#sec-undefined.PageInfo
-  """
-  pageInfo: PageInfo!
-}
-
-type SpecEdge {
-  """https://facebook.github.io/relay/graphql/connections.htm#sec-Cursor"""
-  cursor: String!
-
-  """https://facebook.github.io/relay/graphql/connections.htm#sec-Node"""
-  node: Spec!
 }
 
 enum SpecType {

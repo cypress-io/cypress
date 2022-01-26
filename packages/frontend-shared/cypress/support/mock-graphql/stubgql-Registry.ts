@@ -26,6 +26,6 @@ export const GQLStubRegistry = {
   ErrorWrapper: StubErrorWrapper,
 } as const
 
-// For Type checking
+// Line below added so we can refer to the above as a const value, but ensure it fits the type contract
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const _x: Partial<MaybeResolveMap> = GQLStubRegistry
+const _typeCheck: Partial<MaybeResolveMap> = GQLStubRegistry

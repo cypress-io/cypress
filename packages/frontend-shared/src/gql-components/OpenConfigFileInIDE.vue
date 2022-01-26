@@ -1,7 +1,6 @@
 <template>
   <OpenFileInIDE>
     <button
-      data-testid="open-config-file"
       class="hocus-link-default underline-purple-500"
     >
       <span

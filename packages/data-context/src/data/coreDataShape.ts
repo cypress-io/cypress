@@ -57,6 +57,7 @@ export interface AppDataShape {
   refreshingBrowsers: Promise<FoundBrowser[]> | null
   refreshingNodePath: Promise<string> | null
   nodePath: Maybe<string>
+  isBrowserOpen: boolean
 }
 
 export interface WizardDataShape {
@@ -127,6 +128,7 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
       projects: [],
       refreshingNodePath: null,
       nodePath: modeOptions.userNodePath,
+      isBrowserOpen: false,
     },
     localSettings: {
       availableEditors: [],

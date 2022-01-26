@@ -1,0 +1,9 @@
+{
+  "description": "This project is configured with no existing specs and no storybook integration for the purposes of testing the Specs page",
+  "dependencies": {
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-scripts": "4.0.3"
+  },
+  "_cySkipYarnInstall": true
+}

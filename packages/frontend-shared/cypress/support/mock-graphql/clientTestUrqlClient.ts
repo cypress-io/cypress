@@ -7,9 +7,9 @@ import { clientTestSchema } from './clientTestSchema'
 import type { ClientTestContext } from './clientTestContext'
 import { defaultTypeResolver, FieldNode, GraphQLFieldResolver, GraphQLResolveInfo, GraphQLTypeResolver, introspectionFromSchema, isNonNullType } from 'graphql'
 import type { CodegenTypeMap } from '../generated/test-graphql-types.gen'
-import { GQLStubRegistry } from './stubgql-Registry'
 import { pathToArray } from 'graphql/jsutils/Path'
 import dedent from 'dedent'
+import { GQLStubRegistry } from './stubgql-Registry'
 
 export function testUrqlClient (context: ClientTestContext, onResult?: (result: any, context: ClientTestContext) => any): Client {
   return createClient({

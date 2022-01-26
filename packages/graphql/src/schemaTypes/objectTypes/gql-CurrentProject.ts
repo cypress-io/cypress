@@ -7,6 +7,7 @@ import { Browser } from './gql-Browser'
 import { CodeGenGlobs } from './gql-CodeGenGlobs'
 import { FileParts } from './gql-FileParts'
 import { ProjectPreferences } from './gql-ProjectPreferences'
+import { Spec } from './gql-Spec'
 import { Storybook } from './gql-Storybook'
 
 export const CurrentProject = objectType({
@@ -97,10 +98,10 @@ export const CurrentProject = objectType({
     //   type: TestingTypeInfo,
     // })
 
-    t.connectionField('specs', {
-      description: 'Specs for a project conforming to Relay Connection specification',
-      type: 'Spec',
-      nodes: (source, args, ctx) => {
+    t.nonNull.list.nonNull.field('specs', {
+      description: 'A list of specs for the currently open testing type of a project',
+      type: Spec,
+      resolve: (source, args, ctx) => {
         return ctx.project.specs
       },
     })
@@ -174,6 +175,11 @@ export const CurrentProject = objectType({
     t.nonNull.boolean('isDefaultSpecPattern', {
       description: 'True if the project is using the default spec pattern',
       resolve: async (source, args, ctx) => ctx.project.getIsDefaultSpecPattern(),
+    })
+
+    t.nonNull.boolean('isBrowserOpen', {
+      description: 'If the browser is open or not',
+      resolve: (source, args, ctx) => ctx.coreData.app.isBrowserOpen,
     })
   },
   sourceType: {

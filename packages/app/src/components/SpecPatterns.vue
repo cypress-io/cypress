@@ -6,16 +6,14 @@
           scope="global"
           keypath="components.specPattern.matches"
         >
-          {{ props.gql.specsBare?.edges.length }}
+          {{ props.gql.specs.length }}
         </i18n-t>
       </FileMatchIndicator>
       <OpenConfigFileInIDE>
-        <button
-          class="flex outline-transparent text-indigo-500 gap-8px items-center group"
-        >
+        <span class="flex outline-transparent text-indigo-500 gap-8px items-center group">
           <i-cy-document-text_x16 class="icon-light-gray-100 icon-dark-gray-500" />
           <span class="group-hocus:underline">cypress.config.js</span>
-        </button>
+        </span>
       </OpenConfigFileInIDE>
     </div>
 
@@ -34,7 +32,6 @@
 
 <script lang="ts" setup>
 import { computed } from 'vue'
-import Button from '@cy/components/Button.vue'
 import { gql } from '@urql/core'
 import type { SpecPatternsFragment } from '../generated/graphql'
 import OpenConfigFileInIDE from '@packages/frontend-shared/src/gql-components/OpenConfigFileInIDE.vue'
@@ -45,12 +42,8 @@ fragment SpecPatterns on CurrentProject {
   id
   config
   currentTestingType
-  specsBare: specs(first: 100) {
-    edges {
-      node {
-        id
-      }
-    }
+  specs {
+    id
   }
 }
 `
