@@ -17,7 +17,7 @@ module.exports = {
       return require('./src/the-plugin-file.js')
     },
     specPattern: "src/somewhere/**/*.spec.js"
-    supportFiler: "some/support.js"
+    supportFile: "src/some/support.js"
   }
 }
 ```
