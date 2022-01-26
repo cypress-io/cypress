@@ -3,12 +3,9 @@ context('multi-domain files', { experimentalSessionSupport: true, experimentalMu
   beforeEach(() => {
     cy.visit('/fixtures/multi-domain.html')
     cy.get('a[data-cy="multi-domain-secondary-link"]').click()
-    cy.stub(Cypress, 'backend').callThrough()
   })
 
-  // FIXME: CypressError: `cy.fixture()` timed out waiting `undefinedms` to receive a fixture. No fixture was ever sent by the server.
-  // at eval (webpack:///../driver/src/cy/commands/fixtures.ts?:89:85)
-  it.skip('.fixture()', () => {
+  it('.fixture()', () => {
     cy.switchToDomain('foobar.com', () => {
       cy.fixture('example.json').then((json) => {
         expect(json).to.be.an('object')
@@ -17,9 +14,7 @@ context('multi-domain files', { experimentalSessionSupport: true, experimentalMu
     })
   })
 
-  // FIXME: CypressError: `cy.readFile("cypress/fixtures/multi-domain.json")` timed out after waiting `undefinedms`.
-  // at eval (webpack:///../driver/src/cy/commands/files.ts?:59:89)
-  it.skip('.readFile()', () => {
+  it('.readFile()', () => {
     cy.switchToDomain('foobar.com', () => {
       cy.readFile('cypress/fixtures/example.json').then((json) => {
         expect(json).to.be.an('object')
@@ -28,26 +23,30 @@ context('multi-domain files', { experimentalSessionSupport: true, experimentalMu
     })
   })
 
-  // FIXME: Cypress.backend.resolves is not a function
-  // Works when not using switchToDomain
-  it.skip('.writeFile()', () => {
+  it('.writeFile()', () => {
     cy.switchToDomain('foobar.com', () => {
-      // @ts-ignore
-      Cypress.backend.resolves({
-        contents: JSON.stringify({ foo: 'bar' }),
+      const contents = JSON.stringify({ foo: 'bar' })
+
+      cy.stub(Cypress, 'backend').resolves({
+        contents,
         filePath: 'foo.json',
       })
 
-      cy.writeFile('foo.json', JSON.stringify({ foo: 'bar' })).then(() => {
+      cy.writeFile('foo.json', contents).then(() => {
         expect(Cypress.backend).to.be.calledWith(
           'write:file',
           'foo.json',
-          JSON.stringify({ foo: 'bar' }),
+          contents,
           {
             encoding: 'utf8',
             flag: 'w',
           },
         )
+
+        //@ts-ignore
+        // FIXME: the stub is not getting restored on its
+        // own causing other tests to fail
+        Cypress.backend.restore()
       })
     })
   })

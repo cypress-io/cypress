@@ -13,6 +13,7 @@ import { SpecBridgeDomainCommunicator } from './communicator'
 import { handleDomainFn } from './domain_fn'
 import { handleCommands } from './commands'
 import { handleLogs } from './logs'
+import { handleSocketEvents } from './socket'
 
 const specBridgeCommunicator = new SpecBridgeDomainCommunicator()
 
@@ -31,6 +32,12 @@ const setup = () => {
       path: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
       version: '90.0.4430.212',
     },
+    defaultCommandTimeout: 4000,
+    execTimeout: 60000,
+    taskTimeout: 60000,
+    pageLoadTimeout: 60000,
+    requestTimeout: 5000,
+    responseTimeout: 30000,
   }) as Cypress.Cypress
 
   // @ts-ignore
@@ -55,6 +62,7 @@ const setup = () => {
   handleDomainFn(cy, specBridgeCommunicator)
   handleCommands(Cypress, cy, specBridgeCommunicator)
   handleLogs(Cypress, specBridgeCommunicator)
+  handleSocketEvents(Cypress)
 
   cy.onBeforeAppWindowLoad = onBeforeAppWindowLoad(Cypress, cy)
 

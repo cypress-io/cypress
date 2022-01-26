@@ -27,9 +27,7 @@ context('multi-domain misc', { experimentalSessionSupport: true, experimentalMul
     })
   })
 
-  // FIXME: CypressError: `cy.exec('echo foobar')` timed out after waiting `undefinedms`.
-  // at eval (webpack:///../driver/src/cy/commands/exec.ts?:89:85)
-  it.skip('.exec()', () => {
+  it('.exec()', () => {
     cy.switchToDomain('foobar.com', () => {
       cy.exec('echo foobar').its('stdout').should('contain', 'foobar')
     })
@@ -81,10 +79,7 @@ context('multi-domain misc', { experimentalSessionSupport: true, experimentalMul
     })
   })
 
-  // FIXME: CypressError: `cy.task('return:arg')` timed out after waiting `undefinedms`.
-  // at eval(webpack:///../driver/src/cy/commands/task.ts?:72:78)
-  // From previous event:    at task(webpack:///../driver/src/cy/commands/task.ts?:71:15)
-  it.skip('.task()', () => {
+  it('.task()', () => {
     cy.switchToDomain('foobar.com', () => {
       cy.task('return:arg', 'works').should('eq', 'works')
     })
