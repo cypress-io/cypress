@@ -16,7 +16,6 @@ import { agent, clientCertificates, cors, httpUtils, uri } from '@packages/netwo
 import { NetworkProxy, BrowserPreRequest } from '@packages/proxy'
 import type { SocketCt } from './socket-ct'
 import errors from './errors'
-import logger from './logger'
 import Request from './request'
 import type { SocketE2E } from './socket-e2e'
 import templateEngine from './template_engine'
@@ -188,8 +187,6 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     }
 
     const app = this.createExpressApp(config)
-
-    logger.setSettings(config)
 
     this._nodeProxy = httpProxy.createProxyServer({
       target: config.baseUrl && testingType === 'component' ? config.baseUrl : undefined,
@@ -549,8 +546,6 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     }
 
     this.reset()
-
-    logger.unsetSettings()
 
     evilDns.clear()
 

@@ -30,10 +30,10 @@ export class WizardActions {
     this.ctx.coreData.wizard.chosenFramework = framework
 
     if (framework !== 'react' && framework !== 'vue') {
-      this.setBundler('webpack')
+      return this.setBundler('webpack')
     }
 
-    return this.data
+    return this.setBundler(null)
   }
 
   setBundler (bundler: NexusGenEnums['SupportedBundlers'] | null) {
