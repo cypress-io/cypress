@@ -1,9 +1,10 @@
 // @ts-nocheck
 import _ from 'lodash'
+import { basename } from 'path'
 
 import $errUtils from '../../cypress/error_utils'
 
-export default (Commands, Cypress, cy) => {
+export default (Commands, Cypress, cy, state) => {
   Commands.addAll({
     readFile (file, encoding, options = {}) {
       let userOptions = options
@@ -78,6 +79,9 @@ export default (Commands, Cypress, cy) => {
             contents = Buffer.from(contents)
           }
 
+          // Add the filename as a symbol, in case we need it later (such as when storing an alias)
+          state('current').set('fileName', basename(filePath))
+
           consoleProps['File Path'] = filePath
           consoleProps['Contents'] = contents
 
@@ -91,7 +95,7 @@ export default (Commands, Cypress, cy) => {
               // file exists but it shouldn't - or - file doesn't exist but it should
               const errPath = contents ? 'files.existent' : 'files.nonexistent'
               const { message, docsUrl } = $errUtils.cypressErrByPath(errPath, {
-                args: { file, filePath },
+                args: { cmd: 'readFile', file, filePath },
               })
 
               err.message = message

@@ -26,6 +26,7 @@ const packageVersion = '1.2.3'
 const cacheDir = '/cache/Cypress'
 const executablePath = '/cache/Cypress/1.2.3/Cypress.app/Contents/MacOS/Cypress'
 const binaryStatePath = '/cache/Cypress/1.2.3/binary_state.json'
+const DEFAULT_VERIFY_TIMEOUT = 30000
 
 let stdout
 let spawnedProcess
@@ -69,7 +70,31 @@ context('lib/tasks/verify', () => {
   })
 
   it('has verify task timeout', () => {
-    expect(verify.VERIFY_TEST_RUNNER_TIMEOUT_MS).to.be.gt(10000)
+    expect(verify.VERIFY_TEST_RUNNER_TIMEOUT_MS).to.eql(DEFAULT_VERIFY_TIMEOUT)
+  })
+
+  it('accepts custom verify task timeout', () => {
+    process.env.CYPRESS_VERIFY_TIMEOUT = '500000'
+    delete require.cache[require.resolve(`${lib}/tasks/verify`)]
+    const newVerifyInstance = require(`${lib}/tasks/verify`)
+
+    expect(newVerifyInstance.VERIFY_TEST_RUNNER_TIMEOUT_MS).to.eql(500000)
+  })
+
+  it('accepts custom verify task timeout from npm', () => {
+    process.env.npm_config_CYPRESS_VERIFY_TIMEOUT = '500000'
+    delete require.cache[require.resolve(`${lib}/tasks/verify`)]
+    const newVerifyInstance = require(`${lib}/tasks/verify`)
+
+    expect(newVerifyInstance.VERIFY_TEST_RUNNER_TIMEOUT_MS).to.eql(500000)
+  })
+
+  it('falls back to default verify task timeout if custom value is invalid', () => {
+    process.env.CYPRESS_VERIFY_TIMEOUT = 'foobar'
+    delete require.cache[require.resolve(`${lib}/tasks/verify`)]
+    const newVerifyInstance = require(`${lib}/tasks/verify`)
+
+    expect(newVerifyInstance.VERIFY_TEST_RUNNER_TIMEOUT_MS).to.eql(DEFAULT_VERIFY_TIMEOUT)
   })
 
   it('logs error and exits when no version of Cypress is installed', () => {

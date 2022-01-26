@@ -29,6 +29,7 @@ mainBuildFilters: &mainBuildFilters
       only:
         - develop
         - 10.0-release
+        - test-binary-downstream-windows
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -37,7 +38,6 @@ macWorkflowFilters: &mac-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ tgriesser/fix/patch-resolutions, << pipeline.git.branch >> ]
     - equal: [ renovate/cypress-request-2.x, << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
@@ -48,7 +48,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     or:
     - equal: [ master, << pipeline.git.branch >> ]
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ tgriesser/fix/patch-resolutions, << pipeline.git.branch >> ]
+    - equal: [ test-binary-downstream-windows, << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -407,7 +407,7 @@ commands:
               yarn cypress:run --record --parallel --group 5x-driver-<<parameters.browser>> --browser <<parameters.browser>>
             else
               # external PR
-              TESTFILES=$(circleci tests glob "cypress/integration/**/*_spec.*" | circleci tests split --total=$CIRCLE_NODE_TOTAL)
+              TESTFILES=$(circleci tests glob "cypress/integration/**/*spec.*" | circleci tests split --total=$CIRCLE_NODE_TOTAL)
               echo "Test files for this machine are $TESTFILES"
 
               if [[ -z "$TESTFILES" ]]; then
@@ -439,7 +439,7 @@ commands:
             cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --parallel -- --') || true
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
+            PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
             $cmd yarn workspace @packages/runner cypress:run --record --parallel --group runner-integration-<<parameters.browser>> --browser <<parameters.browser>>
@@ -464,14 +464,14 @@ commands:
       - run:
           command: |
             cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec -- --') || true
-            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
+            PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
             $cmd yarn workspace @packages/runner-ct run cypress:run --browser <<parameters.browser>>
       - run:
           command: |
             if [[ <<parameters.percy>> == 'true' ]]; then
-              PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
+              PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
               PERCY_ENABLE=${PERCY_TOKEN:-0} \
               PERCY_PARALLEL_TOTAL=-1 \
               yarn percy upload packages/runner-ct/cypress/screenshots/screenshot.spec.tsx/percy
@@ -1005,8 +1005,7 @@ jobs:
           command: node cli/bin/cypress info --dev
       - store-npm-logs
 
-  # a special job that keeps polling Circle and when all
-  # individual jobs are finished, it closes the Percy build
+  # closes the Percy build when required jobs are passing
   percy-finalize:
     <<: *defaults
     parameters:
@@ -1027,7 +1026,7 @@ jobs:
               echo "This is an external PR, cannot access other services"
               circleci-agent step halt
             fi
-      - run: yarn percy build:finalize
+      - run: PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 yarn percy build:finalize
 
   cli-visual-tests:
     <<: *defaults
@@ -1048,7 +1047,7 @@ jobs:
       - run:
           name: Upload CLI snapshots for diffing
           command: |
-            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
+            PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy snapshot ./cli/visual-snapshots
@@ -1285,7 +1284,7 @@ jobs:
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
+            PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy exec --parallel -- -- \
@@ -1308,7 +1307,7 @@ jobs:
           # will use PERCY_TOKEN environment variable if available
           command: |
             CYPRESS_KONFIG_ENV=production \
-            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
+            PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy exec --parallel -- -- \
@@ -1330,7 +1329,7 @@ jobs:
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
+            PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy exec --parallel -- -- \
@@ -1470,7 +1469,7 @@ jobs:
           # will use PERCY_TOKEN environment variable if available
           command: |
             CYPRESS_KONFIG_ENV=production \
-            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
+            PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy exec --parallel -- -- \
@@ -1588,7 +1587,7 @@ jobs:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "tgriesser/fix/patch-resolutions" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "test-binary-downstream-windows" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -1664,7 +1663,12 @@ jobs:
 
   test-binary-and-npm-against-other-projects:
     <<: *defaults
-    resource_class: medium
+    parameters:
+      <<: *defaultsParameters
+      resource_class:
+        type: string
+        default: medium
+    resource_class: << parameters.resource_class >>
     steps:
       # needs uploaded NPM and test binary
       - restore_cached_workspace
@@ -1673,23 +1677,14 @@ jobs:
       - run: ls -la binary-url.json npm-package-url.json
       - run: cat binary-url.json
       - run: cat npm-package-url.json
-      - run: mkdir /tmp/testing
-      - run:
-          name: create dummy package
-          working_directory: /tmp/testing
-          command: npm init -y
       - run:
           # install NPM from unique urls
-          name: Install Cypress
+          name: Install Cypress Binary in Dummy Package
           command: |
             node scripts/test-unique-npm-and-binary.js \
               --npm npm-package-url.json \
               --binary binary-url.json \
               --cwd /tmp/testing
-      - run:
-          name: Verify Cypress binary
-          working_directory: /tmp/testing
-          command: $(yarn bin)/cypress verify
       - run:
           name: Running other test projects with new NPM package and binary
           command: |
@@ -1720,19 +1715,19 @@ jobs:
       - run:
           name: Cypress version
           working_directory: test-binary
-          command: $(yarn bin)/cypress version
+          command: $(yarn bin cypress) version
       - run:
           name: Verify Cypress binary
           working_directory: test-binary
-          command: $(yarn bin)/cypress verify
+          command: $(yarn bin cypress) verify
       - run:
           name: Cypress help
           working_directory: test-binary
-          command: $(yarn bin)/cypress help
+          command: $(yarn bin cypress) help
       - run:
           name: Cypress info
           working_directory: test-binary
-          command: $(yarn bin)/cypress info
+          command: $(yarn bin cypress) info
       - store-npm-logs
 
   test-npm-module-on-minimum-node-version:
@@ -1891,7 +1886,7 @@ jobs:
             CYPRESS_PROJECT_ID=$TEST_TINY_PROJECT_ID \
             CYPRESS_RECORD_KEY=$TEST_TINY_RECORD_KEY \
             CYPRESS_INTERNAL_ENV=staging \
-            $(yarn bin)/cypress run --record
+            $(yarn bin cypress) run --record
       - store-npm-logs
 
   test-binary-against-recipes-firefox:
@@ -2026,11 +2021,11 @@ jobs:
       - run:
           name: Cypress help
           working_directory: test-binary
-          command: $(yarn bin)/cypress help
+          command: $(yarn bin cypress) help
       - run:
           name: Cypress info
           working_directory: test-binary
-          command: $(yarn bin)/cypress info
+          command: $(yarn bin cypress) info
       - run:
           name: Add Cypress demo
           working_directory: test-binary
@@ -2038,11 +2033,11 @@ jobs:
       - run:
           name: Verify Cypress binary
           working_directory: test-binary
-          command: DEBUG=cypress:cli $(yarn bin)/cypress verify
+          command: DEBUG=cypress:cli $(yarn bin cypress) verify
       - run:
           name: Run Cypress binary
           working_directory: test-binary
-          command: DEBUG=cypress:cli $(yarn bin)/cypress run
+          command: DEBUG=cypress:cli $(yarn bin cypress) run
       - store-npm-logs
 
 linux-workflow: &linux-workflow
@@ -2065,6 +2060,7 @@ linux-workflow: &linux-workflow
           - runner-integration-tests-chrome
           - runner-ct-integration-tests-chrome
           - reporter-integration-tests
+          - npm-design-system
     - lint-types:
         requires:
           - build
@@ -2431,6 +2427,14 @@ windows-workflow: &windows-workflow
           - test-runner:commit-status-checks
         requires:
           - windows-build
+
+    - test-binary-and-npm-against-other-projects:
+        context: test-runner:trigger-test-jobs
+        name: windows-test-binary-and-npm-against-other-projects
+        executor: windows
+        resource_class: windows.medium
+        requires:
+          - windows-create-build-artifacts
 
 workflows:
   linux:

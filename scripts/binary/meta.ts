@@ -38,7 +38,13 @@ export const buildDir = function (...args: string[]) {
       // subfolder and it is NOT "darwin" but "mac"
       return path.resolve(root, 'mac', ...args)
     case 'linux':
-      return path.resolve(root, 'linux-unpacked', ...args)
+      // https://github.com/cypress-io/cypress/pull/19498
+      switch (os.arch()) {
+        case 'arm64':
+          return path.resolve(root, 'linux-arm64-unpacked', ...args)
+        default:
+          return path.resolve(root, 'linux-unpacked', ...args)
+      }
     case 'win32':
       return path.resolve(root, 'win-unpacked', ...args)
     default:
