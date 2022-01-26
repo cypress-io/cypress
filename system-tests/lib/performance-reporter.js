@@ -1,20 +1,22 @@
 const path = require('path')
-const pkg = require('@packages/root')
-const rp = require('@cypress/request-promise')
+const chalk = require('chalk')
+const Libhoney = require('libhoney')
 
+const pkg = require('@packages/root')
 const ciProvider = require('@packages/server/lib/util/ci_provider')
 const { commitInfo } = require('@cypress/commit-info')
 
-const dataset = 'systemtest-performance'
-const writeKey = '531a9eae0fcdde85b2ebccbe2b79e83c'
-
 class StatsdReporter {
   constructor (runner) {
-    if (!process.env.CIRCLECI) {
+    if (!process.env.HONEYCOMB_API_KEY) {
       return
     }
 
-    console.log('Reporting to honeycomb')
+    console.log(chalk.green('Reporting to honeycomb'))
+    this.honey = new Libhoney({
+      dataset: 'systemtest-performance',
+      writeKey: process.env.HONEYCOMB_API_KEY,
+    })
 
     runner.on('test', (test) => {
       test.wallclockStart = Date.now()
@@ -30,38 +32,33 @@ class StatsdReporter {
         const ciInformation = ciProvider.commitParams() || {}
         const [, testTitle, browser] = test.title.match(/(.+?)(?: \[([a-z]+)\])?$/)
 
-        const body = [{
-          time: new Date(),
-          samplerate: 1,
-          data: {
-            durationMs: Date.now() - test.wallclockStart,
-            mochaDurationMs: test.duration,
-            state: test.state,
-            specFile: path.basename(test.file),
-            test: testTitle,
-            browser,
-            branch: commitInformation.branch || ciInformation.branch,
-            commitSha: commitInformation.sha || ciInformation.sha,
-            buildUrl: process.env.CIRCLE_BUILD_URL,
-            platform: process.platform,
-            arch: process.arch,
-            version: pkg.version,
-          },
-        }]
+        const honeycombEvent = this.honey.newEvent()
 
-        rp.post({
-          url: `https://api.honeycomb.io/1/batch/${dataset}`,
-          json: true,
-          headers: { 'X-Honeycomb-Team': writeKey },
-          body,
-          timeout: 5000,
+        honeycombEvent.timestamp = test.wallclockStart
+        honeycombEvent.add({
+          test: testTitle,
+          specFile: path.basename(test.file),
+          browser,
+          state: test.state,
+          durationMs: Date.now() - test.wallclockStart,
+          mochaDurationMs: test.duration,
+          branch: commitInformation.branch || ciInformation.branch,
+          commitSha: commitInformation.sha || ciInformation.sha,
+          buildUrl: process.env.CIRCLE_BUILD_URL,
+          platform: process.platform,
+          arch: process.arch,
+          version: pkg.version,
         })
+
+        honeycombEvent.send()
       })
     })
   }
 
   // If there is no done callback, then mocha-multi-reporter will kill the process without waiting for our honeycomb post to complete.
-  done (failures, callback) {}
+  done (failures, callback) {
+    this.honey.flush().then(callback)
+  }
 }
 
 module.exports = StatsdReporter
