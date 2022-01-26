@@ -181,12 +181,6 @@ fragment OpenBrowserList on CurrentProject {
 }
 `
 
-gql`
-mutation OpenBrowser_FocusActiveBrowserWindow {
-  focusActiveBrowserWindow
-}
-`
-
 const props = defineProps<{
   gql: OpenBrowserListFragment,
   isBrowserOpening: boolean,
