@@ -574,14 +574,13 @@ describe('src/cy/commands/actions/type - #type', () => {
 
       targets.forEach((targetId) => {
         it(`${targetId}`, () => {
-          cy.get(`#target-${targetId}`).click()
+          cy.get(`#target-${targetId}`).focus()
           cy.get(`#target-${targetId}`).type('{enter}')
 
-          cy.get('li').eq(0).should('have.text', 'click')
-          cy.get('li').eq(1).should('have.text', 'keydown')
-          cy.get('li').eq(2).should('have.text', 'keypress')
-          cy.get('li').eq(3).should('have.text', 'click')
-          cy.get('li').eq(4).should('have.text', 'keyup')
+          cy.get('li').eq(0).should('have.text', 'keydown')
+          cy.get('li').eq(1).should('have.text', 'keypress')
+          cy.get('li').eq(2).should('have.text', 'click')
+          cy.get('li').eq(3).should('have.text', 'keyup')
         })
       })
     })
@@ -594,13 +593,12 @@ describe('src/cy/commands/actions/type - #type', () => {
 
       targets.forEach((targetId) => {
         it(`${targetId}`, () => {
-          cy.get(`#target-${targetId}`).click()
+          cy.get(`#target-${targetId}`).focus()
           cy.get(`#target-${targetId}`).type('{enter}')
 
-          cy.get('li').eq(0).should('have.text', 'click')
-          cy.get('li').eq(1).should('have.text', 'keydown')
-          cy.get('li').eq(2).should('have.text', 'keypress')
-          cy.get('li').eq(3).should('have.text', 'keyup')
+          cy.get('li').eq(0).should('have.text', 'keydown')
+          cy.get('li').eq(1).should('have.text', 'keypress')
+          cy.get('li').eq(2).should('have.text', 'keyup')
         })
       })
     })

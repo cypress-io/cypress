@@ -275,7 +275,7 @@ export default function (Commands, Cypress, cy, state, config) {
       // click event is only fired on button, image, submit, reset elements.
       // That's why we cannot use $elements.isButtonLike() here.
       const type = (type) => $elements.isInputType(options.$el.get(0), type)
-      const isButtonLike = type('button') || type('image') || type('submit') || type('reset')
+      const sendClickEvent = type('button') || type('image') || type('submit') || type('reset')
 
       return keyboard.type({
         $el: options.$el,
@@ -362,7 +362,7 @@ export default function (Commands, Cypress, cy, state, config) {
 
           // https://github.com/cypress-io/cypress/issues/19541
           // Send click event on type('{enter}')
-          if (isButtonLike) {
+          if (sendClickEvent) {
             // Firefox sends a click event automatically.
             if (!Cypress.isBrowser('firefox')) {
               const ctor = $dom.getDocumentFromElement(el).defaultView?.PointerEvent
