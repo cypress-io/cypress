@@ -166,11 +166,11 @@ fragment SelectCloudProjectModal on Query {
   cloudViewer {
     id
     cloudOrganizationsUrl
-    organizations(first: 10) {
+    organizations(first: 100) { # Not expecting there will be > 100 orgs for a user. If there are we will implement pagination
       nodes {
         id
         name
-        projects(first: 10) {
+        projects(first: 100) { # Not expecting there will be > 100 projects. If there are we will implement pagination
           nodes {
             id
             slug

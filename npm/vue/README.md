@@ -122,10 +122,10 @@ You can pass extensions (global components, mixins, modules to use)
 when mounting Vue component. Use `{ extensions: { ... }}` object inside
 the `options`.
 
-- `components` - object of 'id' and components to register globally, see [Components](cypress/component/basic/components) example
-- `use` (alias `plugins`) - list of plugins, see [Plugins](cypress/component/basic/plugins)
-- `mixin` (alias `mixins`) - list of global mixins, see [Mixins](cypress/component/basic/mixins) example
-- `filters` - hash of global filters, see [Filters](cypress/component/basic/filters) example
+- `components` - object of 'id' and components to register globally, see [Components](npm/vue/cypress/component/basic/components) example
+- `use` (alias `plugins`) - list of plugins, see [Plugins](npm/vue/cypress/component/basic/plugins)
+- `mixin` (alias `mixins`) - list of global mixins, see [Mixins](npm/vue/cypress/component/basic/mixins) example
+- `filters` - hash of global filters, see [Filters](npm/vue/cypress/component/basic/filters) example
 
 ### intro example
 

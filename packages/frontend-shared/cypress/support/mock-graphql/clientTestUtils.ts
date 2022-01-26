@@ -15,9 +15,9 @@ type ArgsFor<T, K> = T extends { __typename: infer U }
   ? U extends keyof NexusGenArgTypes
     ? K extends keyof NexusGenArgTypes[U]
       ? NexusGenArgTypes[U][K]
+      : unknown
     : unknown
   : unknown
-: unknown
 
 type NullableKeys<T> = {
   [K in keyof Required<T>]: null extends T[K] ? Extract<K, string> : never

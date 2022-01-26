@@ -340,4 +340,8 @@ export class ProjectDataSource {
 
     return isEqual(specPattern, [component])
   }
+
+  setIsBrowserOpen (isBrowserOpen: boolean) {
+    this.ctx.coreData.app.isBrowserOpen = isBrowserOpen
+  }
 }

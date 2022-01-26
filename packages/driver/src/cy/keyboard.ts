@@ -312,9 +312,9 @@ const shouldIgnoreEvent = <
   T extends KeyEventType,
   K extends { [key in T]?: boolean }
 >(
-    eventName: T,
-    options: K,
-  ) => {
+  eventName: T,
+  options: K,
+) => {
   return options[eventName] === false
 }
 
