@@ -6,7 +6,6 @@
     :disable="!canCollapse"
     class="rounded-t rounded-b outline-none overflow-hidden group"
     :class="[
-      classes.alertClass,
       classes.headerClass,
       {[`hocus-default border-1 border-transparent rounded ${classes.ring}`]: canCollapse}]"
     height="300"
@@ -69,7 +68,6 @@ export type AlertClasses = {
   headerClass: string,
   suffixIconClass: string
   suffixButtonClass: string
-  alertClass: string
   bodyClass: string
   ring: string
 }
@@ -96,7 +94,6 @@ const props = withDefaults(defineProps<{
   icon?: FunctionalComponent<SVGAttributes, {}>,
   headerClass?: string,
   bodyClass?: string,
-  alertClass?: string,
   dismissible?: boolean,
   collapsible?: boolean,
   modelValue?: boolean,
@@ -104,11 +101,10 @@ const props = withDefaults(defineProps<{
 }>(), {
   title: undefined,
   modelValue: true,
-  alertClass: undefined,
   status: 'info',
   icon: undefined,
   headerClass: undefined,
-  bodyClass: '',
+  bodyClass: undefined,
   iconClasses: '',
 })
 
@@ -119,7 +115,6 @@ const alertStyles: Record<AlertStatus, AlertClasses> = {
     headerClass: 'text-gray-800 bg-gray-100',
     suffixIconClass: 'icon-dark-gray-600',
     suffixButtonClass: 'text-gray-600',
-    alertClass: 'bg-gray-100',
     bodyClass: 'bg-gray-50',
     ring: 'hocus:(ring-gray-200 border-gray-300)',
   },
@@ -127,7 +122,6 @@ const alertStyles: Record<AlertStatus, AlertClasses> = {
     headerClass: 'text-info-700 bg-info-100',
     suffixIconClass: 'icon-dark-info-500',
     suffixButtonClass: 'text-info-500',
-    alertClass: 'bg-info-100',
     bodyClass: 'bg-info-50',
     ring: 'hocus:(ring-info-200 border-info-300)',
   },
@@ -135,7 +129,6 @@ const alertStyles: Record<AlertStatus, AlertClasses> = {
     headerClass: 'text-warning-500 bg-warning-100',
     suffixIconClass: 'icon-dark-warning-500',
     suffixButtonClass: 'text-warning-500',
-    alertClass: 'bg-warning-100',
     bodyClass: 'bg-warning-50',
     ring: 'hocus:(ring-warning-200 border-warning-300)',
   },
@@ -143,7 +136,6 @@ const alertStyles: Record<AlertStatus, AlertClasses> = {
     headerClass: 'text-error-600 bg-error-100',
     suffixIconClass: 'icon-dark-error-500',
     suffixButtonClass: 'text-error-500',
-    alertClass: 'bg-error-100',
     bodyClass: 'bg-error-50',
     ring: 'hocus:(ring-error-200 border-error-300)',
   },
@@ -151,16 +143,18 @@ const alertStyles: Record<AlertStatus, AlertClasses> = {
     headerClass: 'text-success-600 bg-success-100',
     suffixIconClass: 'icon-dark-success-500',
     suffixButtonClass: 'text-success-500',
-    alertClass: 'bg-success-100',
     bodyClass: 'bg-success-50',
     ring: 'hocus:(ring-success-200 border-success-300)',
   },
 }
 
+// Note: alertClass and headerClass both target the same element,
+// which can lead to conflicts. Not sure what
 const classes = computed(() => {
   return {
     ...alertStyles[props.status],
-    alertClass: props.alertClass ?? alertStyles[props.status].alertClass,
+    bodyClass: props.bodyClass ?? alertStyles[props.status].bodyClass,
+    headerClass: props.headerClass ?? alertStyles[props.status].headerClass,
   }
 })
 const canCollapse = computed(() => slots.default && props.collapsible)
