@@ -5,7 +5,6 @@ const { globalPubSub } = require('@packages/data-context')
 const { fs } = require('./util/fs')
 const appData = require('./util/app_data')
 const FileUtil = require('./util/file')
-const logger = require('./logger')
 
 const fileUtil = new FileUtil({
   path: appData.path('cache'),
@@ -71,8 +70,6 @@ module.exports = {
   },
 
   write (obj = {}) {
-    logger.info('writing to .cy cache', { cache: obj })
-
     return fileUtil.set(obj).return(obj)
   },
 
@@ -136,14 +133,10 @@ module.exports = {
   },
 
   getUser () {
-    logger.info('getting user')
-
     return fileUtil.get('USER', {})
   },
 
   setUser (user) {
-    logger.info('setting user', { user })
-
     return fileUtil.set({ USER: user })
   },
 
