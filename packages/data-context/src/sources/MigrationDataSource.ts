@@ -72,7 +72,7 @@ export class MigrationDataSource {
     this.filteredSteps = getStepsForMigration(config)
 
     if (!this.filteredSteps[0]) {
-      throw Error(`No steps for project! This is impossible.`)
+      throw Error(`Impossible to initialize a migration. No steps fit the configuration of this project.`)
     }
 
     this.setStep(this.filteredSteps[0])
