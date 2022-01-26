@@ -253,6 +253,7 @@ describe('App: Index', () => {
         })
       })
     })
+  })
 
   describe('Testing Type: Component', {
     viewportHeight: 768,
