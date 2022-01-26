@@ -39,6 +39,25 @@ describe('<BaseError />', () => {
     .should('contain.text', messages.readTheDocsButton)
   })
 
+  it('calls the retry function passed in', () => {
+    const retrySpy = cy.spy().as('retry')
+
+    cy.mountFragment(BaseError_DataFragmentDoc, {
+      onResult: (result) => {
+        result.title = messages.header
+        result.message = null
+      },
+      render: (gqlVal) => (<div class="p-16px">
+        <BaseError gql={gqlVal} retry={retrySpy} />,
+      </div>),
+    })
+    .get(retryButtonSelector)
+    .click()
+    .click()
+    .get('@retry')
+    .should('have.been.calledTwice')
+  })
+
   it('renders custom error messages and headers with props', () => {
     cy.mountFragment(BaseError_DataFragmentDoc, {
       onResult: (result) => {
