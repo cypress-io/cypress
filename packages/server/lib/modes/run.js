@@ -1257,6 +1257,8 @@ module.exports = {
         }
       }
 
+      await openProject.closeBrowserTab()
+
       if (videoExists && !skippedSpec && endVideoCapture && !videoCaptureFailed) {
         const ffmpegChaptersConfig = videoCapture.generateFfmpegChaptersConfig(results.tests)
 
@@ -1270,8 +1272,6 @@ module.exports = {
         )
         .catch(warnVideoRecordingFailed)
       }
-
-      await openProject.closeBrowserTab()
 
       return results
     })

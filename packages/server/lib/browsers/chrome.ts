@@ -456,9 +456,11 @@ export = {
     const userDir = utils.getProfileDir(browser, isTextTerminal)
 
     const [port, preferences] = await Bluebird.all([
-      protocol.getRemoteDebuggingPort(),
+      browser.debuggingPort || protocol.getRemoteDebuggingPort(),
       _getChromePreferences(userDir),
     ])
+
+    browser.debuggingPort = port
 
     const defaultArgs = this._getArgs(browser, options, port)
 
