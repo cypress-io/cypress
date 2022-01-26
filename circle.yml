@@ -2007,6 +2007,24 @@ jobs:
           browser: chrome
           wait-on: http://localhost:3000
 
+  test-binary-against-cy-ct-examples-vue-cli-2:
+    <<: *defaults
+    steps:
+      - test-binary-against-repo:
+          repo: cypress-component-testing-examples
+          browser: chrome
+          folder: "vue-cli-2"
+          command: "yarn cypress run-ct"
+
+  test-binary-against-cy-ct-examples-vue-cli-2-firefox:
+    <<: *defaults
+    steps:
+      - test-binary-against-repo:
+          repo: cypress-component-testing-examples
+          browser: firefox
+          folder: "vue-cli-2"
+          command: "yarn cypress run-ct"
+
   test-binary-as-specific-user:
     <<: *defaults
     resource_class: medium
@@ -2355,6 +2373,14 @@ linux-workflow: &linux-workflow
         requires:
           - create-build-artifacts
     - test-binary-against-cypress-realworld-app:
+        <<: *mainBuildFilters
+        requires:
+          - create-build-artifacts
+    - test-binary-against-cy-ct-examples-vue-cli-2:
+        <<: *mainBuildFilters
+        requires:
+          - create-build-artifacts
+    - test-binary-against-cy-ct-examples-vue-cli-2-firefox:
         <<: *mainBuildFilters
         requires:
           - create-build-artifacts
