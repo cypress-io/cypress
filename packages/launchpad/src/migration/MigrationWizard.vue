@@ -10,6 +10,7 @@
     </p>
     <template v-if="migration">
       <MigrationStep
+        v-if="shouldShowStep('renameAuto')"
         :step="steps.find(step => step.name === 'renameAuto')"
         :title="t('migration.wizard.step1.title')"
         :description="t('migration.wizard.step1.description')"
@@ -29,6 +30,7 @@
         </template>
       </MigrationStep>
       <MigrationStep
+        v-if="shouldShowStep('renameManual')"
         :step="steps.find(step => step.name === 'renameManual')"
         :title="t('migration.wizard.step2.title')"
         :description="t('migration.wizard.step2.description')"
@@ -68,6 +70,7 @@
       </MigrationStep>
 
       <MigrationStep
+        v-if="shouldShowStep('renameSupport')"
         :step="steps.find(step => step.name === 'renameSupport')"
         :title="t('migration.wizard.step3.title')"
         :description="t('migration.wizard.step3.description')"
@@ -84,7 +87,9 @@
           </Button>
         </template>
       </MigrationStep>
+
       <MigrationStep
+        v-if="shouldShowStep('configFile')"
         :step="steps.find(step => step.name === 'configFile')"
         :title="t('migration.wizard.step4.title')"
         :description="t('migration.wizard.step4.description')"
@@ -101,7 +106,9 @@
           </Button>
         </template>
       </MigrationStep>
+
       <MigrationStep
+        v-if="shouldShowStep('setupComponent')"
         :step="steps.find(step => step.name === 'setupComponent')"
         :title="t('migration.wizard.step5.title')"
         :description="t('migration.wizard.step5.description')"
@@ -123,6 +130,7 @@
 </template>
 
 <script setup lang="ts">
+import type { MIGRATION_STEPS } from '@packages/types'
 import { computed, onMounted, ref } from 'vue'
 import { gql, useMutation, useQuery } from '@urql/vue'
 import Button from '@cy/components/Button.vue'
@@ -172,6 +180,10 @@ const query = useQuery({ query: MigrationWizardQueryDocument })
 
 const migration = computed(() => query.data.value?.migration)
 const steps = computed(() => migration.value?.filteredSteps || [])
+
+function shouldShowStep (step: typeof MIGRATION_STEPS[number]) {
+  return Boolean(migration?.value?.filteredSteps?.some((x) => x.name === step))
+}
 
 // start migration
 

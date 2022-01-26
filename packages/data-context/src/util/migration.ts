@@ -205,10 +205,14 @@ export async function getSpecs (
   }
 }
 
-export async function getDefaultLegacySupportFile (projectRoot: string) {
+export async function tryGetDefaultLegacySupportFile (projectRoot: string) {
   const files = await globby(path.join(projectRoot, 'cypress', 'support', 'index.*'))
 
-  const defaultSupportFile = files[0]
+  return files[0]
+}
+
+export async function getDefaultLegacySupportFile (projectRoot: string) {
+  const defaultSupportFile = await tryGetDefaultLegacySupportFile(projectRoot)
 
   if (!defaultSupportFile) {
     throw new NonStandardMigrationError('support')

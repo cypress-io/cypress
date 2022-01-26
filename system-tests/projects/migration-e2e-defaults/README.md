@@ -1,4 +1,4 @@
-An e2e project with a custom testFiles but default integrationFolder. We won't rename the specs, but we will rename `integration` to `e2e`.
+An e2e project with a custom integrationFolder but default spec pattern. We will rename the specs to use `.cy.js`, but keep the custom integrationFolder.
 
 Steps:
 
@@ -6,7 +6,7 @@ Steps:
 - [ ] manual file rename
 - [x] rename support
 - [x] update config file
-- [ ] setup component testing
+- [x] setup component testing
 
 Output:
 
@@ -16,7 +16,7 @@ module.exports = {
     setupNodeEvents(on, config) {
       return require('./cypress/plugins/index.js')
     },
-    specPattern: "cypress/e2e/**/*.test.js"
+    specPattern: "src/**/*.cy.{js,jsx,ts,tsx}"
   }
 }
 ```

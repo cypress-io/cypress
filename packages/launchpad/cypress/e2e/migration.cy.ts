@@ -1,5 +1,13 @@
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 
+describe('Steps', () => {
+  it('only shows update config file for highly customized project', () => {
+    cy.scaffoldProject('migration-e2e-fully-custom')
+    cy.openProject('migration-e2e-fully-custom')
+    cy.visitLaunchpad()
+  })
+})
+
 describe('Migration', { viewportWidth: 1200 }, () => {
   beforeEach(() => {
     cy.scaffoldProject('migration')

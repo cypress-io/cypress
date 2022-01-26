@@ -4,6 +4,7 @@ import type chokidar from 'chokidar'
 import path from 'path'
 import type { DataContext } from '..'
 import {
+  tryGetDefaultLegacySupportFile,
   createConfigString,
   initComponentTestingMigration,
   ComponentTestingMigrationStatus,
@@ -18,6 +19,10 @@ import {
   regexps,
   NonSpecFileError,
 } from '../util/migrationFormat'
+import {
+  shouldShowAutoRenameStep,
+  getStepsForMigration,
+} from './migration/shouldShowSteps'
 
 const debug = Debug('cypress:data-context:MigrationDataSource')
 
@@ -41,6 +46,7 @@ export class MigrationDataSource {
   hasCustomIntegrationFolder: boolean = false
   hasCustomIntegrationSpecPattern: boolean = false
   hasCustomComponentFolder: boolean = false
+  hasCustomSupportFile = false
   hasCustomComponentSpecPattern: boolean = false
   hasComponentTesting: boolean = true
 
@@ -51,11 +57,15 @@ export class MigrationDataSource {
 
   async initialize () {
     this._config = null
-    await this.initializeFlags()
-    this.filteredSteps = MIGRATION_STEPS.filter((step) => this.shouldShowStep(step))
-    if (this.filteredSteps[0]) {
-      this.setStep(this.filteredSteps[0])
+    const config = await this.parseCypressConfig()
+
+    this.filteredSteps = getStepsForMigration(config)
+
+    if (!this.filteredSteps[0]) {
+      throw Error(`No steps for project! This is impossible.`)
     }
+
+    this.setStep(this.filteredSteps[0])
   }
 
   async getSpecsRelativeToFolder () {
@@ -118,7 +128,11 @@ export class MigrationDataSource {
     return this.componentTestingMigrationStatus
   }
 
-  async supportFilesForMigrationGuide (): Promise<FilesForMigrationUI> {
+  async supportFilesForMigrationGuide (): Promise<FilesForMigrationUI | null> {
+    if (!await this.shouldShowSupportFileRenameStep()) {
+      return null
+    }
+
     if (!this.ctx.currentProject) {
       throw Error(`Need this.ctx.projectRoot!`)
     }
@@ -220,28 +234,23 @@ export class MigrationDataSource {
     return {}
   }
 
-  private async initializeFlags () {
+  async shouldShowSupportFileRenameStep () {
+    if (!this.ctx.currentProject) {
+      throw Error()
+    }
+
     const config = await this.parseCypressConfig()
 
-    this.hasCustomIntegrationSpecPattern = config.testFiles !== undefined || config.e2e?.testFiles !== undefined
-
-    this.hasCustomIntegrationFolder = config.e2e?.integrationFolder !== undefined || config.integrationFolder !== undefined
-
-    this.hasCustomComponentSpecPattern = config.component?.testFiles !== undefined || config.testFiles !== undefined
-
-    this.hasCustomComponentFolder = config.component?.componentFolder !== undefined || config.componentFolder !== undefined
-
-    // TODO: implement this properly
-    this.hasComponentTesting = true
+    return Boolean(
+      config.supportFile === undefined &&
+      tryGetDefaultLegacySupportFile(this.ctx.currentProject),
+    )
   }
 
-  private shouldShowStep (step: MIGRATION_STEP): boolean {
-    switch (step) {
-      case 'renameAuto': return !(this.hasCustomIntegrationSpecPattern && this.hasCustomComponentSpecPattern)
-      case 'renameManual': return this.hasComponentTesting
-      case 'setupComponent': return this.hasComponentTesting
-      default: return true
-    }
+  async shouldShowAutoRenameStep () {
+    const config = await this.parseCypressConfig()
+
+    return shouldShowAutoRenameStep(config)
   }
 
   get step (): MIGRATION_STEP {

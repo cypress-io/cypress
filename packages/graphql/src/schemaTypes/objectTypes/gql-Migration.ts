@@ -136,7 +136,7 @@ export const Migration = objectType({
       },
     })
 
-    t.nonNull.field('supportFiles', {
+    t.field('supportFiles', {
       description: 'Support files needing automated rename',
       type: MigrationFiles,
       resolve: (source, args, ctx) => {

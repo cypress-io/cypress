@@ -572,7 +572,7 @@ type Migration {
   specFiles: MigrationFiles!
 
   """Support files needing automated rename"""
-  supportFiles: MigrationFiles!
+  supportFiles: MigrationFiles
 }
 
 type MigrationFile {
