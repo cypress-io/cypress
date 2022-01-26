@@ -358,6 +358,9 @@ type CurrentProject implements Node & ProjectLike {
   """
   errorLoadingNodeEvents: BaseError
 
+  """Whether the project has a valid config file"""
+  hasValidConfigFile: Boolean
+
   """Relay style Node ID field for the CurrentProject field"""
   id: ID!
 
