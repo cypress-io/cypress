@@ -80,13 +80,7 @@ async function spawnCypressWithMode (
   if (mode === 'open') {
     env.CYPRESS_INTERNAL_GRAPHQL_PORT = process.env.CYPRESS_INTERNAL_GRAPHQL_PORT ?? '4444'
     if (!argv.includes('--project') && !argv.includes('--global')) {
-      const project = process.env.INIT_CWD && /packages[\/\\]\w+$/.exec(process.env.INIT_CWD)?.[0]
-
-      if (process.env.INIT_CWD && project) {
-        argv.push('--project', process.env.INIT_CWD)
-      } else {
-        argv.push('--global')
-      }
+      argv.push('--global')
     }
 
     // If we've passed --record, it's for a "run" mode, probably in the same pipeline.
