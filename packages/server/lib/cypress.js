@@ -173,10 +173,6 @@ module.exports = {
         mode = 'smokeTest'
       } else if (options.returnPkg) {
         mode = 'returnPkg'
-      } else if (options.logs) {
-        mode = 'logs'
-      } else if (options.clearLogs) {
-        mode = 'clearLogs'
       } else if (!(options.exitWithCode == null)) {
         mode = 'exitWithCode'
       } else if (options.runProject) {
@@ -226,18 +222,6 @@ module.exports = {
         .then((pkg) => {
           return console.log(JSON.stringify(pkg)) // eslint-disable-line no-console
         }).then(exit0)
-        .catch(exitErr)
-
-      case 'logs':
-        // print the logs + exit
-        return require('./gui/logs').print()
-        .then(exit0)
-        .catch(exitErr)
-
-      case 'clearLogs':
-        // clear the logs + exit
-        return require('./gui/logs').clear()
-        .then(exit0)
         .catch(exitErr)
 
       case 'exitWithCode':
