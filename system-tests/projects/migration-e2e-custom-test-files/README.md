@@ -8,6 +8,7 @@ Steps:
 - [x] update config file
 - [ ] setup component testing
 
+
 Output:
 
 ```js
