@@ -288,14 +288,6 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
       }).should('equal', 'From a secondary domain')
     })
 
-    it('yields another value', () => {
-      cy.switchToDomain('foobar.com', () => {
-        cy
-        .get('[data-cy="dom-check"]')
-        .invoke('text')
-      }).should('equal', 'From a secondary domain')
-    })
-
     it('yields the cy value even if a return is present', () => {
       cy.switchToDomain('foobar.com', () => {
         cy
@@ -312,7 +304,7 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
       }).should('equal', 'From a secondary domain')
     })
 
-    it('yields undefined', () => {
+    it('yields undefined if subject cannot be serialized', () => {
       cy.switchToDomain('foobar.com', () => {
         cy
         .get('[data-cy="dom-check"]')
