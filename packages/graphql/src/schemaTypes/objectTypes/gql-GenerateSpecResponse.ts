@@ -7,7 +7,7 @@ export type ScaffoldedFileSource = {
   status: 'changes' | 'valid' | 'skipped' | 'error'
   description: string
   file: FilePartsShape
-} | { fileName: string }
+} | { fileName: string, erroredCodegenCandidate: string }
 
 export const GenerateSpecResponse = objectType({
   name: 'GenerateSpecResponse',

@@ -575,8 +575,7 @@ describe('App: Index', () => {
           })
         })
 
-        // TODO: Generated spec is no longer found by runner, need to determine why
-        it.skip('navigates to spec runner when selected', () => {
+        it('navigates to spec runner when selected', () => {
           cy.get('@CreateFromComponentDialog').within(() => {
             cy.findAllByTestId('file-list-row').eq(0).as('NewSpecFile')
             cy.get('@NewSpecFile').click()

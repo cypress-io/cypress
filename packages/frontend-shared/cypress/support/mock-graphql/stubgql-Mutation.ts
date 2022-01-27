@@ -47,20 +47,24 @@ export const stubMutation: MaybeResolver<Mutation> = {
     }
 
     return {
-      __typename: 'ScaffoldedFile',
-      status: 'valid',
-      description: 'Generated Spec',
-      file: {
-        __typename: 'FileParts',
-        id: 'U3BlYzovVXNlcnMvbGFjaGxhbi9jb2RlL3dvcmsvY3lwcmVzczUvcGFja2FnZXMvYXBwL3NyYy9CYXNpYy5zcGVjLnRzeA==',
-        absolute: '/Users/lachlan/code/work/cypress5/packages/app/src/Basic.spec.tsx',
-        relative: 'app/src/Basic.spec.tsx',
-        name: 'Basic',
-        fileName: 'Basic.spec.tsx',
-        baseName: 'Basic',
-        fileExtension: 'tsx',
-        contents: `it('should do stuff', () => {})`,
+      currentProject: ctx.currentProject,
+      generatedSpecResult: {
+        __typename: 'ScaffoldedFile',
+        status: 'valid',
+        description: 'Generated Spec',
+        file: {
+          __typename: 'FileParts',
+          id: 'U3BlYzovVXNlcnMvbGFjaGxhbi9jb2RlL3dvcmsvY3lwcmVzczUvcGFja2FnZXMvYXBwL3NyYy9CYXNpYy5zcGVjLnRzeA==',
+          absolute: '/Users/lachlan/code/work/cypress5/packages/app/src/Basic.spec.tsx',
+          relative: 'app/src/Basic.spec.tsx',
+          name: 'Basic',
+          fileName: 'Basic.spec.tsx',
+          baseName: 'Basic',
+          fileExtension: 'tsx',
+          contents: `it('should do stuff', () => {})`,
+        },
       },
+
     }
   },
   reconfigureProject (src, args, ctx) {
