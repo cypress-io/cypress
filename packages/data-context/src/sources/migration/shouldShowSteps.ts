@@ -6,6 +6,10 @@ export function getIntegrationTestFiles (config: OldCypressConfig) {
 }
 
 export function getIntegrationFolder (config: OldCypressConfig) {
+  if (config.e2e?.integrationFolder === false || config.integrationFolder === false) {
+    return false
+  }
+
   return config.e2e?.integrationFolder ?? config.integrationFolder ?? 'cypress/integration'
 }
 
@@ -14,6 +18,10 @@ export function getComponentTestFiles (config: OldCypressConfig) {
 }
 
 export function getComponentFolder (config: OldCypressConfig) {
+  if (config.component?.componentFolder === false || config.componentFolder === false) {
+    return false
+  }
+
   return config.component?.componentFolder ?? config.componentFolder ?? 'cypress/component'
 }
 
