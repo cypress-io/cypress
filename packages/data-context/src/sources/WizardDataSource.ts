@@ -37,6 +37,21 @@ export class WizardDataSource {
     return packages
   }
 
+  async resolvePackagesToInstall (): Promise<string[]> {
+    const packagesInitial = await this.packagesToInstall() || []
+    const installedPackages: (string|null)[] = await Promise.all(packagesInitial.map((p) => {
+      try {
+        require.resolve(p.package)
+
+        return p.package
+      } catch (e) {
+        return null
+      }
+    }))
+
+    return installedPackages.filter((p) => p !== null) as string[]
+  }
+
   get chosenFramework () {
     return FRONTEND_FRAMEWORKS.find((f) => f.type === this.ctx.wizardData.chosenFramework) || null
   }

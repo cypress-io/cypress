@@ -235,7 +235,8 @@
     },
     "install": {
       "startButton": "Install",
-      "confirmManualInstall": "I've installed them"
+      "confirmManualInstall": "I've installed them",
+      "waitForInstall": "Install your modules..."
     },
     "step": {
       "continue": "Continue",

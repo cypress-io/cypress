@@ -3,6 +3,16 @@ import ManualInstall from './ManualInstall.vue'
 import { PACKAGES_DESCRIPTIONS } from '../../../types/src/constants'
 
 describe('<ManualInstall />', () => {
+  it('playground', () => {
+    cy.mountFragment(ManualInstallFragmentDoc, {
+      render: (gqlVal) => (
+        <div class="rounded border-1 border-gray-400 m-10">
+          <ManualInstall gql={gqlVal} />
+        </div>
+      ),
+    })
+  })
+
   it('lists packages and can copy install command to clipboard', { viewportWidth: 800, viewportHeight: 600 }, () => {
     const framework = '@cypress/react'
     const bundler = '@cypress/webpack-dev-server'

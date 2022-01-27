@@ -1,18 +1,20 @@
 <template>
   <WizardLayout
-    :next=" t('setupPage.install.confirmManualInstall')"
-    :can-navigate-forward="true"
+    :next="canNavigateForward ? t('setupPage.install.confirmManualInstall') : t('setupPage.install.waitForInstall')"
+    :can-navigate-forward="canNavigateForward"
     :back-fn="props.backFn"
     :next-fn="confirmInstalled"
     class="max-w-640px"
   >
     <ManualInstall
       :gql="props.gql"
+      @all-packages-installed="canNavigateForward = true"
     />
   </WizardLayout>
 </template>
 
 <script lang="ts" setup>
+import { ref } from 'vue'
 import WizardLayout from './WizardLayout.vue'
 import ManualInstall from './ManualInstall.vue'
 import { gql } from '@urql/core'
@@ -33,6 +35,8 @@ fragment InstallDependencies on Query {
   ...ManualInstall
 }
 `
+
+const canNavigateForward = ref(false)
 
 const props = defineProps<{
   gql: InstallDependenciesFragment
