@@ -1,11 +1,14 @@
 import { isFunction, isSymbol } from 'lodash'
+import debugFn from 'debug'
+
+const debug = debugFn('cypress:driver:cypress')
 
 /**
  * serialize. Used for serializing subject to be returned from subdomains to the primary domain.
  * @param value any object to be serialized.
  * @returns the serialized object as a string or undefined, if the object cannot be serialized.
  */
-const serialize = (value: any): string => {
+const serialize = (value: any): string | undefined => {
   let serializedSubject: string = undefined!
 
   try {
@@ -19,7 +22,9 @@ const serialize = (value: any): string => {
     })
   } catch (error) {
     // we only want to silence serialization errors.
-    if (error !== 'abort serialization') {
+    if (error === 'abort serialization') {
+      debug(`Serialization aborted for subject: ${value}`)
+    } else {
       throw error
     }
   }
