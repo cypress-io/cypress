@@ -49,9 +49,14 @@ describe('multi-domain - uncaught errors', { experimentalSessionSupport: true, e
       })
     })
 
-    it('returns true from cy.on(uncaught:exception), resulting in cy:fail to be called in the primary', (done) => {
-      cy.on('fail', () => {
-        done()
+    it('returns true from cy.on(uncaught:exception), resulting in cy:fail to be called in the primary', () => {
+      cy.on('fail', (err) => {
+        expect(err.name).to.eq('Error')
+        expect(err.message).to.include('sync error')
+        expect(err.message).to.include('The following error originated from your application code, not from Cypress.')
+        expect(err.message).to.not.include('https://on.cypress.io/uncaught-exception-from-application')
+        // @ts-ignore
+        expect(err.docsUrl).to.deep.eq(['https://on.cypress.io/uncaught-exception-from-application'])
       })
 
       cy.switchToDomain('foobar.com', () => {
