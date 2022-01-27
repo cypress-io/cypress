@@ -358,6 +358,9 @@ type CurrentProject implements Node & ProjectLike {
   """
   errorLoadingNodeEvents: BaseError
 
+  """Whether the project has a valid config file"""
+  hasValidConfigFile: Boolean
+
   """Relay style Node ID field for the CurrentProject field"""
   id: ID!
 
@@ -548,15 +551,21 @@ type LocalSettingsPreferences {
   specListWidth: Int
 }
 
-type ManualMigration {
+type ManualMigration implements Node {
   """is the manual migration completed (all files are moved)"""
   completed: Boolean!
 
   """files needing manual migration"""
   files: [ManualMigrationFile!]!
+
+  """Relay style Node ID field for the ManualMigration field"""
+  id: ID!
 }
 
-type ManualMigrationFile {
+type ManualMigrationFile implements Node {
+  """Relay style Node ID field for the ManualMigrationFile field"""
+  id: ID!
+
   """has the file been moved since opening the migration helper"""
   moved: Boolean!
 
@@ -578,6 +587,21 @@ type Migration {
   """Steps filtered with the current context"""
   filteredSteps: [MigrationStep!]!
 
+  """whether component testing is set up in the migrated config or not"""
+  hasComponentTesting: Boolean!
+
+  """whether the component folder is custom or not"""
+  hasCustomComponentFolder: Boolean!
+
+  """whether the testFiles member is custom or not in component testing"""
+  hasCustomComponentTestFiles: Boolean!
+
+  """whether the integration folder is custom or not"""
+  hasCustomIntegrationFolder: Boolean!
+
+  """whether the testFiles member is custom or not in integration"""
+  hasCustomIntegrationTestFiles: Boolean!
+
   """the integration folder path used to store e2e tests"""
   integrationFolder: String!
 
@@ -588,17 +612,22 @@ type Migration {
   specFiles: MigrationFiles!
 
   """Support files needing automated rename"""
-  supportFiles: MigrationFiles!
+  supportFiles: MigrationFiles
 }
 
-type MigrationFile {
+type MigrationFile implements Node {
+  """Relay style Node ID field for the MigrationFile field"""
+  id: ID!
   parts: [MigrationFilePart!]!
   testingType: TestingTypeEnum!
 }
 
-type MigrationFilePart {
+type MigrationFilePart implements Node {
   """should highlight in migration UI"""
   highlight: Boolean!
+
+  """Relay style Node ID field for the MigrationFilePart field"""
+  id: ID!
 
   """part of filename"""
   text: String!

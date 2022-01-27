@@ -155,18 +155,20 @@ export const mutation = mutationType({
         input: nonNull(arg({ type: WizardUpdateInput })),
       },
       resolve: async (source, args, ctx) => {
-        if (args.input.bundler !== undefined) {
-          ctx.actions.wizard.setBundler(args.input.bundler)
+        if (args.input.framework) {
+          ctx.actions.wizard.setFramework(args.input.framework)
         }
 
-        if (args.input.framework !== undefined) {
-          ctx.actions.wizard.setFramework(args.input.framework)
+        if (args.input.bundler) {
+          ctx.actions.wizard.setBundler(args.input.bundler)
         }
 
         if (args.input.codeLanguage) {
           ctx.actions.wizard.setCodeLanguage(args.input.codeLanguage)
         }
 
+        // TODO: remove when live-mutations are implements
+        // signal to launchpad to reload the data context
         ctx.emitter.toLaunchpad()
 
         return ctx.wizardData
@@ -451,7 +453,7 @@ export const mutation = mutationType({
           }
         }
 
-        ctx.actions.migration.nextStep()
+        await ctx.actions.migration.nextStep()
 
         return {}
       },
@@ -461,7 +463,7 @@ export const mutation = mutationType({
       description: 'While migrating to 10+ skip manual rename step',
       type: Query,
       resolve: async (_, args, ctx) => {
-        ctx.actions.migration.nextStep()
+        await ctx.actions.migration.nextStep()
 
         return {}
       },
@@ -471,7 +473,7 @@ export const mutation = mutationType({
       description: 'user has finished migration component specs - move to next step',
       type: Query,
       resolve: async (_, args, ctx) => {
-        ctx.actions.migration.nextStep()
+        await ctx.actions.migration.nextStep()
 
         return {}
       },
@@ -492,7 +494,7 @@ export const mutation = mutationType({
             stack: e.stack,
           }
         }
-        ctx.actions.migration.nextStep()
+        await ctx.actions.migration.nextStep()
 
         return {}
       },
@@ -514,7 +516,7 @@ export const mutation = mutationType({
           }
         }
 
-        ctx.actions.migration.nextStep()
+        await ctx.actions.migration.nextStep()
 
         return {}
       },
@@ -524,7 +526,7 @@ export const mutation = mutationType({
       description: 'Merges the component testing config in cypress.config.{js,ts}',
       type: Query,
       resolve: async (_, args, ctx) => {
-        await ctx.actions.migration.startWizardReconfiguration()
+        await ctx.actions.migration.nextStep()
 
         return {}
       },

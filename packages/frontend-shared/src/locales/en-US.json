@@ -231,7 +231,8 @@
       "frameworkPlaceholder": "Pick a framework",
       "bundlerLabel": "Bundler",
       "bundlerPlaceholder": "Pick a bundler",
-      "languageLabel": "Language"
+      "languageLabel": "Language",
+      "configFileLanguageLabel": "Cypress Config File"
     },
     "install": {
       "startButton": "Install",
@@ -530,9 +531,9 @@
     },
     "configFile": {
       "title": "We need to move the Cypress configuration file",
-      "changedTheFile": "We've removed {jsonFile} in favor of a {jsFile} file.",
-      "willConvert": "We'll automatically create a new {jsFile} file and seed it with your options from your existing {jsonFile}.",
-      "removeJson": "We'll remove your existing {0} as part of this step."
+      "changedDefault": "We've changed the default Cypress config file from:",
+      "customOptions": "We've set a custom {specPattern} option based on your {options}.",
+      "willConvert": "We'll automatically create a new {jsFile} file and seed it with your options from your existing {jsonFile}."
     },
     "setupComponent": {
       "title": "You need to reconfigure Cypress for component testing",

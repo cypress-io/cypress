@@ -219,7 +219,7 @@ describe('initComponentTestingMigration', () => {
     const { status, watcher } = await initComponentTestingMigration(
       cwd,
       'src',
-      '**/*.{js,tsx}',
+      ['**/*.{js,tsx}'],
       onFileMoved,
     )
 
