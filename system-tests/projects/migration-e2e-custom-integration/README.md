@@ -6,7 +6,7 @@ Steps:
 - [ ] manual file rename
 - [x] rename support
 - [x] update config file
-- [x] setup component testing
+- [ ] setup component testing
 
 Output:
 

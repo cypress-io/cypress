@@ -32,12 +32,10 @@ import { useI18n } from '@cy/i18n'
 import Button from '@cy/components/Button.vue'
 import FileRow from '../components/code/FileRow.vue'
 import LaunchpadHeader from './LaunchpadHeader.vue'
-import type { CurrentStep } from './Wizard.vue'
 import { ScaffoldedFilesFragment, ScaffoldedFiles_CompleteSetupDocument } from '../generated/graphql'
 import { useMutation } from '@urql/vue'
 
 const emit = defineEmits<{
-  (event: 'navigate', currentStep: CurrentStep): void
   (event: 'completeSetup')
 }>()
 

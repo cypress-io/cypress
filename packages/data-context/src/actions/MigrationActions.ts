@@ -6,6 +6,7 @@ import {
   NonStandardMigrationError,
   supportFilesForMigration,
 } from '../util'
+import type { TestingType } from '@packages/types'
 
 export class MigrationActions {
   constructor (private ctx: DataContext) { }
@@ -56,13 +57,32 @@ export class MigrationActions {
     )
   }
 
-  async startWizardReconfiguration () {
+  async startWizardReconfiguration (type?: TestingType) {
     this.ctx.lifecycleManager.initializeConfigWatchers()
     this.ctx.lifecycleManager.refreshMetaState()
-    this.ctx.lifecycleManager.setCurrentTestingType('component')
+    if (type) {
+      this.ctx.lifecycleManager.setCurrentTestingType(type)
+    }
   }
 
-  nextStep () {
-    this.ctx.migration.nextStep()
+  async nextStep () {
+    const filteredSteps = this.ctx.migration.filteredSteps
+    const index = filteredSteps.indexOf(this.ctx.migration.step)
+
+    if (index === -1) {
+      throw new Error('Invalid step')
+    }
+
+    const nextIndex = index + 1
+
+    if (nextIndex < filteredSteps.length) {
+      const nextStep = filteredSteps[nextIndex]
+
+      if (nextStep) {
+        this.ctx.migration.setStep(nextStep)
+      }
+    } else {
+      await this.startWizardReconfiguration()
+    }
   }
 }

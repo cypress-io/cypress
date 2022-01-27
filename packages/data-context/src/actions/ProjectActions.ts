@@ -366,7 +366,8 @@ export class ProjectActions {
   }
 
   async reconfigureProject () {
-    await this.api.closeActiveProject()
+    // Initialize active project close first the current project
+    await this.initializeActiveProject()
     this.ctx.actions.wizard.resetWizard()
     this.ctx.actions.electron.refreshBrowserWindow()
     this.ctx.actions.electron.showBrowserWindow()
