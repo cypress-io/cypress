@@ -7,11 +7,12 @@
       :prefix-icon="IconMagnifyingGlass"
       :model-value="props.modelValue"
       :placeholder="t('specPage.searchPlaceholder')"
+      :aria-label="t('specPage.searchPlaceholder')"
       @input="onInput"
     >
       <template #suffix>
         <div
-          class="text-gray-500 border-l border-l-gray-100 pl-16px"
+          class="border-l border-l-gray-100 pl-16px text-gray-500"
           aria-live="polite"
         >
           {{ resultCount }} {{ resultCount === 1 ? t('specPage.matchSingular') : t('specPage.matchPlural') }}
@@ -19,7 +20,7 @@
       </template>
     </Input>
 
-    <div class="flex h-40px gap-16px min-w-127px">
+    <div class="flex h-40px min-w-127px gap-16px">
       <Button
         data-cy="new-spec-button"
         :prefix-icon="IconAdd"
