@@ -218,7 +218,7 @@ describe('Launchpad: Setup Project', () => {
     })
 
     describe('project not been configured for cypress', () => {
-      it('can setup e2e testing for a project', () => {
+      it('can go back before selecting e2e scaffold lang', () => {
         cy.openProject('pristine')
         cy.visitLaunchpad()
 
@@ -230,6 +230,29 @@ describe('Launchpad: Setup Project', () => {
         cy.get('[data-cy-testingtype="e2e"]')
         .should('have.focus')
         .type('{enter}')
+
+        cy.contains('h1', 'Project Setup')
+        cy.findByRole('button', { name: 'Back' }).click()
+
+        verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: false })
+      })
+
+      it('can setup e2e testing for a project selecting JS', () => {
+        cy.openProject('pristine')
+        cy.visitLaunchpad()
+
+        verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: false })
+
+        // @ts-ignore
+        cy.get('body').tab().tab()
+
+        cy.get('[data-cy-testingtype="e2e"]')
+        .should('have.focus')
+        .type('{enter}')
+
+        cy.contains('h1', 'Project Setup')
+        cy.findByRole('button', { name: 'JavaScript' }).click()
+        cy.findByRole('button', { name: 'Next Step' }).click()
 
         cy.contains('h1', 'Configuration Files')
         cy.findByText('We added the following files to your project.')
@@ -245,6 +268,116 @@ describe('Launchpad: Setup Project', () => {
         .click()
 
         cy.contains(/(Initializing Config|Choose a Browser)/)
+      })
+
+      it('can setup e2e testing for a project selecting TS', () => {
+        cy.openProject('pristine')
+        cy.visitLaunchpad()
+
+        verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: false })
+
+        // @ts-ignore
+        cy.get('body').tab().tab()
+
+        cy.get('[data-cy-testingtype="e2e"]')
+        .should('have.focus')
+        .type('{enter}')
+
+        cy.contains('h1', 'Project Setup')
+        cy.findByRole('button', { name: 'TypeScript' }).click()
+        cy.findByRole('button', { name: 'Next Step' }).click()
+
+        cy.contains('h1', 'Configuration Files')
+        cy.findByText('We added the following files to your project.')
+
+        cy.get('[data-cy=valid]').within(() => {
+          cy.contains('cypress.config.ts')
+          cy.contains('cypress/support/e2e.ts')
+          cy.contains('cypress/fixtures/example.json')
+        })
+      })
+
+      it('can setup e2e testing for a project selecting TS when CT is configured and config file is JS', () => {
+        cy.openProject('pristine-with-ct-testing')
+        cy.visitLaunchpad()
+
+        verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: true })
+
+        // @ts-ignore
+        cy.get('body').tab().tab()
+
+        cy.get('[data-cy-testingtype="e2e"]')
+        .should('have.focus')
+        .type('{enter}')
+
+        cy.contains('h1', 'Project Setup')
+        cy.findByRole('button', { name: 'TypeScript' }).click()
+        cy.findByRole('button', { name: 'Next Step' }).click()
+
+        cy.contains('h1', 'Configuration Files')
+        cy.findByText('We added the following files to your project.')
+
+        cy.get('[data-cy=changes]').within(() => {
+          cy.contains('cypress.config.js')
+        })
+
+        cy.get('[data-cy=valid]').within(() => {
+          cy.contains('cypress/support/e2e.ts')
+          cy.contains('cypress/fixtures/example.json')
+        })
+      })
+
+      it('can setup CT testing for a project selecting TS when E2E is configured and config file is JS', () => {
+        cy.openProject('pristine-with-e2e-testing')
+        cy.visitLaunchpad()
+
+        verifyWelcomePage({ e2eIsConfigured: true, ctIsConfigured: false })
+
+        cy.get('[data-cy-testingtype="component"]')
+        .focus()
+        .should('have.focus')
+        .type('{enter}')
+
+        cy.findByText('Confirm the front-end framework and bundler used in your project.')
+
+        cy.findByRole('button', { name: 'Front-end Framework Pick a framework' }).click()
+        cy.findByRole('option', { name: 'Create React App' }).click()
+
+        cy.get('[data-testid="select-bundler"').should('not.exist')
+        cy.findByRole('button', { name: 'Next Step' }).should('not.have.disabled')
+
+        cy.findByRole('button', { name: 'Back' }).click()
+        cy.get('[data-cy-testingtype="component"]').click()
+
+        cy.findByRole('button', { name: 'Front-end Framework Create React App' }).click()
+        cy.findByRole('option', { name: 'React.js' }).click()
+
+        cy.findByRole('button', { name: 'Next Step' }).should('have.disabled')
+
+        cy.findByRole('button', { name: 'Bundler Pick a bundler' }).click()
+        cy.findByRole('option', { name: 'Webpack' }).click()
+        cy.findByRole('button', { name: 'Next Step' }).should('not.have.disabled')
+
+        cy.findByRole('button', { name: 'Front-end Framework React.js' }).click()
+        cy.findByRole('option', { name: 'Create React App' }).click()
+        cy.findByRole('button', { name: 'Bundler Webpack' }).should('not.exist')
+        cy.findByRole('button', { name: 'Next Step' }).should('not.have.disabled')
+
+        cy.findByRole('button', { name: 'TypeScript' }).click()
+
+        cy.findByRole('button', { name: 'Next Step' }).click()
+        cy.findByRole('button', { name: 'I\'ve installed them' }).click()
+
+        cy.get('[data-cy=changes]').within(() => {
+          cy.contains('cypress.config.js')
+        })
+
+        cy.get('[data-cy=valid]').within(() => {
+          cy.contains('cypress/component/index.html')
+          cy.contains(`cypress/support/component.ts`)
+        })
+
+        cy.findByRole('button', { name: 'Continue' }).should('have.disabled')
       })
 
       it('shows the configuration setup page when opened via cli with --e2e flag', () => {

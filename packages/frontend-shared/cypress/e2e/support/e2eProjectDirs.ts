@@ -34,6 +34,7 @@ export const e2eProjectDirs = [
   'migration-e2e-custom-integration',
   'migration-e2e-custom-test-files',
   'migration-e2e-defaults',
+  'migration-e2e-defaults-no-specs',
   'migration-e2e-fully-custom',
   'multiple-config-files-with-json',
   'multiple-support-files',
