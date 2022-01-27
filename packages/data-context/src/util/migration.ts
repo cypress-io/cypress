@@ -178,41 +178,15 @@ function createTestingTypeTemplate (testingType: 'e2e' | 'component', pluginPath
   },`
 }
 
-export interface RelativeSpecWithTestingType {
-  testingType: TestingType
-  relative: string
+export interface GetSpecs {
+  before: string[]
+  after: string[]
 }
 
-async function findByTestingType (cwd: string, dir: string | null, testingType: TestingType) {
-  if (!dir) {
-    return []
-  }
-
-  return (await globby(`${dir}/**/*`, { onlyFiles: true, cwd }))
-  .map((relative) => ({ relative, testingType }))
-}
-
-export async function getSpecs (
-  projectRoot: string,
-  componentDirPath: string | null,
-  e2eDirPath: string | null,
-): Promise<{
-  before: RelativeSpecWithTestingType[]
-  after: RelativeSpecWithTestingType[]
-}> {
-  const [comp, e2e] = await Promise.all([
-    findByTestingType(projectRoot, componentDirPath, 'component'),
-    findByTestingType(projectRoot, e2eDirPath, 'e2e'),
-  ])
-
+export async function getSpecs (before: string[]): Promise<GetSpecs> {
   return {
-    before: [...comp, ...e2e],
-    after: [...comp, ...e2e].map((x) => {
-      return {
-        testingType: x.testingType,
-        relative: renameSpecPath(x.relative),
-      }
-    }),
+    before: before,
+    after: before.map((relative) => renameSpecPath(relative)),
   }
 }
 

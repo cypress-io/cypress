@@ -46,6 +46,19 @@ describe('Steps', () => {
     cy.get(setupComponentStep).should('not.exist')
   })
 
+  it.only('shows all e2e steps for an e2e project with custom testFiles', () => {
+    cy.scaffoldProject('migration-e2e-custom-integration')
+    cy.openProject('migration-e2e-custom-integration')
+    cy.visitLaunchpad()
+    cy.waitForWizard()
+
+    cy.get(renameAutoStep).should('exist')
+    cy.get(renameManualStep).should('not.exist')
+    cy.get(renameSupportStep).should('exist')
+    cy.get(configFileStep).should('exist')
+    cy.get(setupComponentStep).should('not.exist')
+  })
+
   it('shows all e2e steps for an e2e project with custom testFiles', () => {
     cy.scaffoldProject('migration-e2e-custom-test-files')
     cy.openProject('migration-e2e-custom-test-files')

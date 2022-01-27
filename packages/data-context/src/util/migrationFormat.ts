@@ -13,8 +13,8 @@ export class NonSpecFileError extends Error {
 }
 
 interface MigrationRegexp {
-  beforeRegexp: string
-  afterRegexp: string
+  beforeRegexp: (dir?: string) => string
+  afterRegexp: (dir?: string) => string
 }
 
 interface MigrationRegexpGroup {
@@ -22,33 +22,34 @@ interface MigrationRegexpGroup {
   component: MigrationRegexp
 }
 
-function getLegacyHighlightRegexp (defaultFolder: 'integration' | 'component') {
-  return `cypress\/(?<main>${defaultFolder})\/.*?(?<ext>[._-]?[s|S]pec.|[.])(?=[j|t]s[x]?)`
+// can be custom integration/component folder
+function getLegacyHighlightRegexp (defaultFolder: 'cypress/integration' | 'cypress/component' | string) {
+  return `${defaultFolder}\/(?<main>${defaultFolder})\/.*?(?<ext>[._-]?[s|S]pec.|[.])(?=[j|t]s[x]?)`
 }
 
-function getNewHighlightRegexp (defaultFolder: 'e2e' | 'component') {
-  return `cypress\/(?<main>${defaultFolder})\/.*?(?<ext>.cy.)`
+function getNewHighlightRegexp (defaultFolder: 'cypress/e2e' | 'cypress/component') {
+  return `${defaultFolder}\/(?<main>${defaultFolder})\/.*?(?<ext>.cy.)`
 }
 
 export const supportFileRegexps: MigrationRegexpGroup = {
   e2e: {
-    beforeRegexp: 'cypress/\support\/(?<main>index)\.(?=[j|t]s[x]?)',
-    afterRegexp: 'cypress/\support\/(?<main>e2e)\.(?=[j|t]s[x]?)',
+    beforeRegexp: () => 'cypress/\support\/(?<main>index)\.(?=[j|t]s[x]?)',
+    afterRegexp: () => 'cypress/\support\/(?<main>e2e)\.(?=[j|t]s[x]?)',
   },
   component: {
-    beforeRegexp: 'cypress/\support\/(?<file>index)\.(?=[j|t]s[x]?)',
-    afterRegexp: 'cypress/\support\/(?<file>e2e)\.(?=[j|t]s[x]?)',
+    beforeRegexp: () => 'cypress/\support\/(?<file>index)\.(?=[j|t]s[x]?)',
+    afterRegexp: () => 'cypress/\support\/(?<file>e2e)\.(?=[j|t]s[x]?)',
   },
 }
 
 export const regexps: MigrationRegexpGroup = {
   e2e: {
-    beforeRegexp: getLegacyHighlightRegexp('integration'),
-    afterRegexp: getNewHighlightRegexp('e2e'),
+    beforeRegexp: (integrationFolder: string = 'integration') => getLegacyHighlightRegexp(integrationFolder),
+    afterRegexp: () => getNewHighlightRegexp('e2e'),
   },
   component: {
-    beforeRegexp: getLegacyHighlightRegexp('component'),
-    afterRegexp: getNewHighlightRegexp('component'),
+    beforeRegexp: (componentFolder = 'component') => getLegacyHighlightRegexp(componentFolder),
+    afterRegexp: () => getNewHighlightRegexp('component'),
   },
 } as const
 

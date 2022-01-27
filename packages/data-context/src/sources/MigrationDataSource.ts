@@ -9,10 +9,10 @@ import {
   ComponentTestingMigrationStatus,
   getSpecs,
   getDefaultLegacySupportFile,
-  RelativeSpecWithTestingType,
   supportFilesForMigration,
   OldCypressConfig,
   hasComponentSpecFile,
+  GetSpecs
 } from '../util/migration'
 import {
   formatMigrationFile,
@@ -27,7 +27,9 @@ import {
   isDefaultTestFiles,
   getComponentTestFiles,
   getComponentFolder,
+  getIntegrationTestFiles
 } from './migration/shouldShowSteps'
+import globby from 'globby'
 
 const debug = Debug('cypress:data-context:MigrationDataSource')
 
@@ -82,19 +84,30 @@ export class MigrationDataSource {
     this.setStep(this.filteredSteps[0])
   }
 
-  async getSpecsRelativeToFolder () {
-    if (!this.ctx.currentProject) {
+  async getSpecsRelativeToFolder (): Promise<GetSpecs> {
+    const currentProject = this.ctx.currentProject
+
+    if (!currentProject) {
       throw Error('cannot get specs without a project path')
     }
 
-    const compFolder = await this.getComponentFolder()
-    const intFolder = await this.getIntegrationFolder()
+    const config = await this.parseCypressConfig()
 
-    const specs = await getSpecs(this.ctx.currentProject, compFolder, intFolder)
+    const integrationFolder = getIntegrationFolder(config)
+    const integrationTestFiles = getIntegrationTestFiles(config)
 
-    debug('looked in %s and %s and found %o', compFolder, intFolder, specs)
+    if (integrationFolder === false) {
+      return {
+        before: [],
+        after: []
+      }
+    }
 
-    return specs
+    const files = await globby(
+      integrationTestFiles.map(x => path.join(integrationFolder, x)),
+    { onlyFiles: true, cwd: currentProject })
+
+    return getSpecs(files)
   }
 
   async getDefaultLegacySupportFile (): Promise<string> {
@@ -107,9 +120,17 @@ export class MigrationDataSource {
 
   async getComponentTestingMigrationStatus () {
     const config = await this.parseCypressConfig()
+    const componentFolder = getComponentFolder(config)
 
     if (!config || !this.ctx.currentProject) {
       throw Error('Need currentProject and config to continue')
+    }
+
+    // no component folder, so no specs to migrate
+    // this should never happen since we never show the
+    // component specs migration step ("renameManual")
+    if (componentFolder === false) {
+      return null
     }
 
     if (!this.componentTestingMigrationWatcher) {
@@ -126,7 +147,7 @@ export class MigrationDataSource {
 
       const { status, watcher } = await initComponentTestingMigration(
         this.ctx.currentProject,
-        await this.getComponentFolder(),
+        componentFolder,
         getComponentTestFiles(config),
         onFileMoved,
       )
@@ -158,17 +179,29 @@ export class MigrationDataSource {
 
   async getSpecsForMigrationGuide (): Promise<FilesForMigrationUI> {
     const specs = await this.getSpecsRelativeToFolder()
+    const integrationFolder = await this.integrationFolder()
+
+    // this should never happen! Cannot migrate if integrationFolder === false.
+    // we should not show the step in this case.
+    if (integrationFolder === false) {
+      return {
+        before: [],
+        after: []
+      }
+    }
 
     const processSpecs = (regexp: 'beforeRegexp' | 'afterRegexp') => {
-      return (acc: MigrationFile[], x: RelativeSpecWithTestingType) => {
+      return (acc: MigrationFile[], relative: string) => {
+        console.log(acc, relative, integrationFolder, regexps.e2e[regexp](integrationFolder))
         try {
           return acc.concat({
-            testingType: x.testingType,
-            relative: x.relative,
-            parts: formatMigrationFile(x.relative, new RegExp(regexps[x.testingType][regexp])),
+            testingType: 'e2e',
+            relative,
+            parts: formatMigrationFile(relative, new RegExp(regexps.e2e[regexp](integrationFolder))),
           })
         } catch (e) {
           if (e instanceof NonSpecFileError) {
+            console.log('asdfasdfsad')
             // it's possible they have a non spec file in their cypress/integration directory,
             // if that happens, we just skip that file and carry on.
             return acc
@@ -203,35 +236,17 @@ export class MigrationDataSource {
     return createConfigString(config)
   }
 
-  async getIntegrationFolder () {
+  async componentFolder () {
     const config = await this.parseCypressConfig()
-
-    if (config.e2e?.integrationFolder) {
-      return config.e2e.integrationFolder
-    }
-
-    if (config.integrationFolder) {
-      return config.integrationFolder
-    }
-
-    return 'cypress/integration'
+    return getComponentFolder(config)
   }
 
-  async getComponentFolder () {
+  async integrationFolder () {
     const config = await this.parseCypressConfig()
-
-    if (config.component?.componentFolder) {
-      return config.component.componentFolder
-    }
-
-    if (config.componentFolder) {
-      return config.componentFolder
-    }
-
-    return 'cypress/component'
+    return getIntegrationFolder(config)
   }
 
-  private async parseCypressConfig (): Promise<OldCypressConfig> {
+  async parseCypressConfig (): Promise<OldCypressConfig> {
     if (this._config) {
       return this._config
     }
