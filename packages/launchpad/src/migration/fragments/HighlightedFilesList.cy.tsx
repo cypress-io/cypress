@@ -10,7 +10,7 @@ describe('<HighlightedFilesList/>', { viewportWidth: 1119 }, () => {
       'cypress/e2e/homeSpec.cy.js',
       'cypress/e2e/company.cy.js',
       'cypress/e2e/sign-up.cy.js',
-    ].map((x) => formatMigrationFile(x, new RegExp(regexps.e2e.afterRegexp)))
+    ].map((x) => formatMigrationFile(x, new RegExp(regexps.e2e.usingDefaultIntegrationFolder.afterRegexp)))
 
     const files: PropType = _files.map((x) => ({ parts: x }))
 
