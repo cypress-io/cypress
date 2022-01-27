@@ -141,18 +141,21 @@ describe('App: Index', () => {
             cy.get('[data-cy="card"]').contains(defaultMessages.createSpec.e2e.importEmptySpec.header).click()
           })
 
-          cy.get('input').invoke('val').should('eq', 'cypress/e2e/filename.cy.js')
+          cy.findAllByLabelText(defaultMessages.createSpec.e2e.importEmptySpec.inputPlaceholder)
+          .as('enterSpecInput')
+
+          cy.get('@enterSpecInput').invoke('val').should('eq', 'cypress/e2e/filename.cy.js')
           cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.invalidSpecWarning).should('not.exist')
-          cy.get('input').clear()
+          cy.get('@enterSpecInput').clear()
           cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.invalidSpecWarning).should('not.exist')
 
           // Shows entered file does not match spec pattern
-          cy.get('input').type('cypress/e2e/no-match')
+          cy.get('@enterSpecInput').type('cypress/e2e/no-match')
           cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.invalidSpecWarning)
           cy.contains('button', defaultMessages.createSpec.createSpec).should('be.disabled')
 
           //Shows extension warning
-          cy.get('input').clear().type('cypress/e2e/MyTest.spec.j')
+          cy.get('@enterSpecInput').clear().type('cypress/e2e/MyTest.spec.j')
           cy.intercept('mutation-EmptyGeneratorCardStepOne_MatchSpecFile', (req) => {
             if (req.body.variables.specFile === 'cypress/e2e/MyTest.spec.jx') {
               req.on('before:response', (res) => {
@@ -161,12 +164,12 @@ describe('App: Index', () => {
             }
           })
 
-          cy.get('input').type('x')
+          cy.get('@enterSpecInput').type('x')
           cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.specExtensionWarning)
           cy.contains('span', '{filename}.cy.jx')
 
           // Create spec
-          cy.get('input').clear().type('cypress/e2e/MyTest.cy.js')
+          cy.get('@enterSpecInput').clear().type('cypress/e2e/MyTest.cy.js')
           cy.contains('button', defaultMessages.createSpec.createSpec).should('not.be.disabled').click()
           cy.contains('h2', defaultMessages.createSpec.successPage.header)
 
