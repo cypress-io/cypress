@@ -154,9 +154,7 @@ describe('multi-domain - uncaught errors', { experimentalSessionSupport: true, e
 
   it('does not fail if thrown custom error with readonly name', (done) => {
     cy.once('fail', (err) => {
-      // TODO: we cannot currently serialize custom user errors back to the primary
-      // ideally, we want the name of this error to be 'CustomError'
-      expect(err.name).to.include('Error')
+      expect(err.name).to.include('CustomError')
       expect(err.message).to.include('custom error')
 
       done()
