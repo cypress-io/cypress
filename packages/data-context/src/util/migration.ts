@@ -117,39 +117,6 @@ function getPluginRelativePath (cfg: OldCypressConfig): string {
   return cfg.pluginsFile ? cfg.pluginsFile : DEFAULT_PLUGIN_PATH
 }
 
-function reduceConfig (cfg: OldCypressConfig): ConfigOptions {
-  const excludedFields = ['pluginsFile', '$schema', 'componentFolder']
-
-  return Object.entries(cfg).reduce((acc, [key, val]) => {
-    if (excludedFields.includes(key)) {
-      return acc
-    }
-
-    if (key === 'e2e' || key === 'component') {
-      const value = val as Record<string, unknown>
-
-      return { ...acc, [key]: { ...acc[key], ...value } }
-    }
-
-    if (key === 'testFiles') {
-      return {
-        ...acc,
-        e2e: { ...acc.e2e, specPattern: val },
-        component: { ...acc.component, specPattern: val },
-      }
-    }
-
-    if (key === 'baseUrl') {
-      return {
-        ...acc,
-        e2e: { ...acc.e2e, [key]: val },
-      }
-    }
-
-    return { ...acc, global: { ...acc.global, [key]: val } }
-  }, { global: {}, e2e: {}, component: {} })
-}
-
 function createCypressConfigJs (config: ConfigOptions, pluginPath: string) {
   const globalString = Object.keys(config.global).length > 0 ? `\n${formatObjectForConfig(config.global, 2)},` : ''
   const componentString = Object.keys(config.component).length > 0 ? createTestingTypeTemplate('component', pluginPath, config.component) : ''
@@ -302,4 +269,54 @@ export function renameSpecPath (spec: string) {
   return spec
   .replace('integration', 'e2e')
   .replace(/([._-]?[s|S]pec.|[.])(?=[j|t]s[x]?)/, '.cy.')
+}
+
+export function reduceConfig (cfg: OldCypressConfig): ConfigOptions {
+  const excludedFields = ['pluginsFile', '$schema', 'componentFolder']
+
+  return Object.entries(cfg).reduce((acc, [key, val]) => {
+    if (excludedFields.includes(key)) {
+      return acc
+    }
+
+    if (key === 'e2e' || key === 'component') {
+      const value = val as Record<string, unknown>
+
+      return { ...acc, [key]: { ...acc[key], ...value } }
+    }
+
+    if (key === 'testFiles') {
+      return {
+        ...acc,
+        e2e: { ...acc.e2e, specPattern: getSpecPattern(cfg, 'e2e') },
+        component: { ...acc.component, specPattern: getSpecPattern(cfg, 'component') },
+      }
+    }
+
+    if (key === 'baseUrl') {
+      return {
+        ...acc,
+        e2e: { ...acc.e2e, [key]: val },
+      }
+    }
+
+    return { ...acc, global: { ...acc.global, [key]: val } }
+  }, { global: {}, e2e: {}, component: {} })
+}
+
+function getSpecPattern (cfg: OldCypressConfig, testType: TestingType) {
+  const specPattern = cfg[testType]?.testFiles ?? cfg.testFiles ?? '**/*.cy.js'
+  const customComponentFolder = cfg.component?.componentFolder ?? cfg.componentFolder ?? null
+
+  if (testType === 'component' && customComponentFolder) {
+    return `${customComponentFolder}/${specPattern}`
+  }
+
+  const customIntegrationFolder = cfg.e2e?.integrationFolder ?? cfg.integrationFolder ?? null
+
+  if (testType === 'e2e' && customIntegrationFolder) {
+    return `${customIntegrationFolder}/${specPattern}`
+  }
+
+  return specPattern
 }

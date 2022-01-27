@@ -8,6 +8,7 @@ import {
   NonStandardMigrationError,
   getSpecs,
   supportFilesForMigration,
+  reduceConfig,
   renameSupportFilePath,
 } from '../../../src/util/migration'
 import { expect } from 'chai'
@@ -267,5 +268,58 @@ describe('initComponentTestingMigration', () => {
     })
 
     await watcher.close()
+  })
+})
+
+describe('reduceConfig', () => {
+  describe('testFiles', () => {
+    it('should move the testFiles field to e2e', () => {
+      const config = { testFiles: '**/**.cy.js' }
+      const newConfig = reduceConfig(config)
+
+      expect(newConfig.e2e.specPattern).to.eq('**/**.cy.js')
+    })
+
+    it('should combine componentFolder and integrationFolder with testFiles field in component', () => {
+      const config = { testFiles: '**/**.cy.js', componentFolder: 'src', integrationFolder: 'cypress/integration' }
+      const newConfig = reduceConfig(config)
+
+      expect(newConfig.component.specPattern).to.eq(`${config.componentFolder}/${config.testFiles}`)
+      expect(newConfig.e2e.specPattern).to.eq(`${config.integrationFolder}/${config.testFiles}`)
+    })
+
+    it('should combine nested componentFolder and integrationFolder with testFiles field in component', () => {
+      const config = {
+        testFiles: '**/**.cy.js',
+        component: {
+          componentFolder: 'src',
+        },
+        e2e: {
+          integrationFolder: 'cypress/integration',
+        },
+      }
+      const newConfig = reduceConfig(config)
+
+      expect(newConfig.component.specPattern).to.eq(`${config.component.componentFolder}/${config.testFiles}`)
+      expect(newConfig.e2e.specPattern).to.eq(`${config.e2e.integrationFolder}/${config.testFiles}`)
+    })
+
+    it('should combine testFiles with highest specificity', () => {
+      const config = {
+        testFiles: '**/**.cy.js',
+        componentFolder: 'lower/specificity',
+        integrationFolder: 'lower/specificity',
+        component: {
+          componentFolder: 'higher/specificity',
+        },
+        e2e: {
+          integrationFolder: 'higher/specificity',
+        },
+      }
+      const newConfig = reduceConfig(config)
+
+      expect(newConfig.component.specPattern).to.eq(`${config.component.componentFolder}/${config.testFiles}`)
+      expect(newConfig.e2e.specPattern).to.eq(`${config.e2e.integrationFolder}/${config.testFiles}`)
+    })
   })
 })
