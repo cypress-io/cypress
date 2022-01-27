@@ -8,6 +8,7 @@ import $Cypress from '../cypress'
 import { $Cy } from '../cypress/cy'
 import $Commands from '../cypress/commands'
 import $Log from '../cypress/log'
+import $errUtils, { ErrorFromProjectRejectionEvent } from '../cypress/error_utils'
 import { bindToListeners } from '../cy/listeners'
 import { SpecBridgeDomainCommunicator } from './communicator'
 import { handleDomainFn } from './domain_fn'
@@ -81,9 +82,32 @@ const onBeforeAppWindowLoad = (Cypress: Cypress.Cypress, cy: $Cy) => (autWindow:
   cy.overrides.wrapNativeMethods(autWindow)
   // TODO: DRY this up with the mostly-the-same code in src/cypress/cy.js
   bindToListeners(autWindow, {
-    // TODO: implement this once there's a better way to forward
-    // messages to the top frame
-    onError: () => () => undefined,
+    onError: (handlerType) => {
+      return (event) => {
+        const { originalErr, err, promise } = $errUtils.errorFromUncaughtEvent(handlerType, event) as ErrorFromProjectRejectionEvent
+        const handled = cy.onUncaughtException({
+          err,
+          promise,
+          handlerType,
+          frameType: 'app',
+        })
+
+        $errUtils.logError(cy.Cypress, handlerType, originalErr, handled)
+
+        if (!handled) {
+          // if unhandled, fail the current command to fail the current test in the primary domain
+          // a current command may not exist if an error occurs in the spec bridge after the test is over
+          const command = cy.state('current')
+          const log = command?.getLastLog()
+
+          if (log) log.error(err)
+        }
+
+        // return undefined so the browser does its default
+        // uncaught exception behavior (logging to console)
+        return undefined
+      }
+    },
     onHistoryNav () {},
     onSubmit (e) {
       return Cypress.action('app:form:submitted', e)

@@ -11,6 +11,8 @@ export const correctStackForCrossDomainError = (serializedError: any, userInvoca
     return _.isUndefined(objValue) ? srcValue : objValue
   })
 
+  reifiedError.name = serializedError?.name ?? reifiedError.name
+
   reifiedError.stack = $stackUtils.replacedStack(reifiedError, userInvocationStack)
 
   return reifiedError
