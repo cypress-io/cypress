@@ -23,8 +23,8 @@ describe('multi-domain - uncaught errors', { experimentalSessionSupport: true, e
         expect(err.docsUrl).to.deep.eq(['https://on.cypress.io/uncaught-exception-from-application'])
 
         // lastly, make sure the `uncaught:exception' handler is NOT called in the primary
-        expect(uncaughtExceptionSpy.notCalled).to.be.true
-        expect(runnable === r).to.be.true
+        expect(uncaughtExceptionSpy).not.to.be.called
+        expect(runnable).to.be.equal(r)
       })
 
       cy.switchToDomain('foobar.com', () => {
@@ -44,8 +44,8 @@ describe('multi-domain - uncaught errors', { experimentalSessionSupport: true, e
         cy.on('uncaught:exception', () => false)
         cy.get('.trigger-sync-error').click()
       }).then(() => {
-        expect(uncaughtExceptionSpy.notCalled).to.be.true
-        expect(failureSpy.notCalled).to.be.true
+        expect(uncaughtExceptionSpy).not.to.be.called
+        expect(failureSpy).not.to.be.called
       })
     })
 
@@ -88,8 +88,8 @@ describe('multi-domain - uncaught errors', { experimentalSessionSupport: true, e
         // @ts-ignore
         expect(err.docsUrl).to.deep.eq(['https://on.cypress.io/uncaught-exception-from-application'])
 
-        expect(uncaughtExceptionSpy.notCalled).to.be.true
-        expect(runnable === r).to.be.true
+        expect(uncaughtExceptionSpy).not.to.be.called
+        expect(runnable).to.be.equal(r)
       })
 
       cy.switchToDomain('foobar.com', () => {
@@ -113,8 +113,8 @@ describe('multi-domain - uncaught errors', { experimentalSessionSupport: true, e
         // the async error here should be thrown AFTER the current command and test has finished, resulting in a passed test with no fail being triggered in the primary
         cy.get('.trigger-async-error').click()
       }).then(() => {
-        expect(uncaughtExceptionSpy.notCalled).to.be.true
-        expect(failureSpy.notCalled).to.be.true
+        expect(uncaughtExceptionSpy).not.to.be.called
+        expect(failureSpy).not.to.be.called
       })
     })
   })
@@ -129,7 +129,7 @@ describe('multi-domain - uncaught errors', { experimentalSessionSupport: true, e
           expect(err.stack).to.include('one')
           expect(err.stack).to.include('two')
           expect(err.stack).to.include('three')
-          expect(runnable === r).to.be.true
+          expect(runnable).to.be.equal(r)
           expect(promise).to.be.a('promise')
 
           done()
