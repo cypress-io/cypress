@@ -66,7 +66,7 @@ class StatsdReporter {
         version: pkg.version,
       })
 
-      //       honeycombEvent.send()
+      honeycombEvent.send()
     })
   }
 
