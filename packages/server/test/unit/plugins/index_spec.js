@@ -152,7 +152,8 @@ describe('lib/plugins/index', () => {
       })
     })
 
-    it('sends \'load\' event with config via ipc', () => {
+    it('sends \'load\' event with config via ipc once it receives \'ready\'', () => {
+      ipc.on.withArgs('ready').yields([])
       ipc.on.withArgs('loaded').yields([])
       const config = { pluginsFile: 'cypress-plugin', testingType: 'e2e' }
 
