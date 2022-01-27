@@ -39,7 +39,10 @@
         >
           <template v-if="file.moved">
             <span>✅</span>
-            <span class="line-through text-gray-400">
+            <span
+              class="text-gray-400 line-through"
+              data-cy="moved"
+            >
               {{ file.relative }}
             </span>
           </template>
@@ -69,8 +72,10 @@ import type { RenameSpecsManualFragment } from '../generated/graphql'
 gql`
 fragment RenameSpecsManual on Migration {
   manualFiles {
+    id
     completed
     files {
+      id
       relative
       moved
     }
