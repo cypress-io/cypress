@@ -35,7 +35,6 @@ export const e2eProjectDirs = [
   'migration-e2e-custom-test-files',
   'migration-e2e-fully-custom',
   'multiple-config-files-with-json',
-  'multiple-support-files',
   'multiple-task-registrations',
   'no-scaffolding',
   'no-server',

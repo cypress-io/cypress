@@ -100,14 +100,18 @@ gql`
 fragment RenameSpecsAuto on Migration {
   specFiles {
     before {
+      id
       parts {
+        id
         text
         highlight
       }
     }
 
     after {
+      id
       parts {
+        id
         text
         highlight
       }
