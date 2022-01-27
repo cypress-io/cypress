@@ -57,15 +57,13 @@ export interface ComponentTestingMigrationStatus {
 export function initComponentTestingMigration (
   projectRoot: string,
   componentFolder: string,
-  testFiles: string | string[],
+  testFiles: string[],
   onFileMoved: (status: ComponentTestingMigrationStatus) => void,
 ): Promise<{
   status: ComponentTestingMigrationStatus
   watcher: chokidar.FSWatcher
 }> {
-  const globs = Array.isArray(testFiles) ? testFiles : [testFiles]
-
-  const watchPaths = globs.map((glob) => {
+  const watchPaths = testFiles.map((glob) => {
     return path.join(componentFolder, glob)
   })
 

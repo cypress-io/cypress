@@ -3,8 +3,12 @@ import { MIGRATION_STEPS } from '@packages/types'
 import type { OldCypressConfig } from '../../util'
 import path from 'path'
 
-export function getIntegrationTestFiles (config: OldCypressConfig): string[] {
-  const glob = config.e2e?.testFiles ?? config.testFiles
+function getTestFiles (config: OldCypressConfig, type: 'component' | 'integration'): string[] {
+  // super awkward how we call it integration tests, but the key to override
+  // the config is `e2e`
+  const k = type === 'component' ? 'component' : 'e2e'
+
+  const glob = config[k]?.testFiles ?? config.testFiles
 
   if (glob && Array.isArray(glob)) {
     return glob
@@ -17,8 +21,18 @@ export function getIntegrationTestFiles (config: OldCypressConfig): string[] {
   return ['**/*']
 }
 
-export function isDefaultTestFiles (config: OldCypressConfig) {
-  const testFiles = getIntegrationTestFiles(config)
+export function getIntegrationTestFiles (config: OldCypressConfig): string[] {
+  return getTestFiles(config, 'integration')
+}
+
+export function getComponentTestFiles (config: OldCypressConfig): string[] {
+  return getTestFiles(config, 'component')
+}
+
+export function isDefaultTestFiles (config: OldCypressConfig, type: 'component' | 'integration') {
+  const testFiles = type === 'component'
+    ? getComponentTestFiles(config)
+    : getIntegrationTestFiles(config)
 
   return testFiles.length === 1 && testFiles[0] === '**/*'
 }
@@ -29,10 +43,6 @@ export function getIntegrationFolder (config: OldCypressConfig) {
   }
 
   return config.e2e?.integrationFolder ?? config.integrationFolder ?? 'cypress/integration'
-}
-
-export function getComponentTestFiles (config: OldCypressConfig) {
-  return config.component?.testFiles ?? config.testFiles ?? '**/*'
 }
 
 export function getComponentFolder (config: OldCypressConfig) {

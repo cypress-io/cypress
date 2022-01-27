@@ -88,6 +88,34 @@ describe('Steps', () => {
   })
 })
 
+describe('component testing migration', () => {
+  // TODO: toApp emitter not working in Cypress in Cypress.
+  it.skip('live update migration UI as user moves files', () => {
+    cy.scaffoldProject('migration-component-testing')
+    cy.openProject('migration-component-testing')
+    cy.visitLaunchpad()
+    cy.waitForWizard()
+
+    // need to move your specs before this button shows
+    cy.get('button').contains('I have moved my component specs').should('not.exist')
+
+    // two files to move, src/button.spec.js and src/input-spec.tsx.
+    cy.withCtx((ctx) => {
+      return ctx.actions.file.moveFileInProject('src/button.spec.js', 'src/button.cy.js')
+    }).then(() => {
+      cy.get('[data-cy="moved"]').contains('src/button.spec.js')
+    })
+
+    cy.withCtx((ctx) => {
+      return ctx.actions.file.moveFileInProject('src/input-spec.tsx', 'src/input.cy.tsx')
+    }).then(() => {
+      cy.get('[data-cy="moved"]').contains('src/input-spec.tsx')
+    })
+
+    cy.get('button').contains('I have moved my component specs')
+  })
+})
+
 describe('Migration', { viewportWidth: 1200 }, () => {
   beforeEach(() => {
     cy.scaffoldProject('migration')

@@ -127,7 +127,7 @@ export class MigrationDataSource {
       const { status, watcher } = await initComponentTestingMigration(
         this.ctx.currentProject,
         await this.getComponentFolder(),
-        config.component?.testFiles || config.testFiles || '**/*',
+        getComponentTestFiles(config),
         onFileMoved,
       )
 
@@ -254,7 +254,7 @@ export class MigrationDataSource {
 
     const config = await this.parseCypressConfig()
 
-    this.hasCustomIntegrationTestFiles = !isDefaultTestFiles(config)
+    this.hasCustomIntegrationTestFiles = !isDefaultTestFiles(config, 'integration')
     this.hasCustomIntegrationFolder = getIntegrationFolder(config) !== 'cypress/integration'
 
     const componentFolder = getComponentFolder(config)
@@ -263,7 +263,7 @@ export class MigrationDataSource {
 
     const componentTestFiles = getComponentTestFiles(config)
 
-    this.hasCustomComponentTestFiles = componentTestFiles !== '**/*'
+    this.hasCustomComponentTestFiles = !isDefaultTestFiles(config, 'component')
 
     if (componentFolder === false) {
       this.hasComponentTesting = false

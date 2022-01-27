@@ -39,7 +39,10 @@
         >
           <template v-if="file.moved">
             <span>✅</span>
-            <span class="text-gray-400 line-through">
+            <span
+              class="text-gray-400 line-through"
+              data-cy="moved"
+            >
               {{ file.relative }}
             </span>
           </template>
