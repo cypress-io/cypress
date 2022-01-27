@@ -8,8 +8,6 @@ import { toPosix } from '../util/file'
 const debug = Debug('cypress:data-context:sources:FileDataSource')
 
 export class FileDataSource {
-  private watchedFilePaths = new Set<string>()
-
   constructor (private ctx: DataContext) {}
 
   readFile (absoluteFilePath: string) {
