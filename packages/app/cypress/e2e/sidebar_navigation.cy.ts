@@ -116,6 +116,10 @@ describe('Sidebar Navigation', () => {
       })
 
       cy.intercept('mutation-SwitchTestingType_ReconfigureProject').as('SwitchTestingType')
+      cy.withCtx((ctx) => {
+        ctx.actions.project.reconfigureProject = sinon.stub()
+      })
+
       cy.get('[data-cy-testingtype="component"]').within(() => {
         cy.contains('Not Configured')
       }).click()
@@ -196,6 +200,10 @@ describe('Sidebar Navigation', () => {
       })
 
       cy.intercept('mutation-SwitchTestingType_ReconfigureProject').as('SwitchTestingType')
+      cy.withCtx((ctx) => {
+        ctx.actions.project.reconfigureProject = sinon.stub()
+      })
+
       cy.get('[data-cy-testingtype="e2e"]').within(() => {
         cy.contains('Not Configured')
       }).click()
