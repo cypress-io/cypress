@@ -13,13 +13,9 @@ import {
   supportFilesForMigration,
   OldCypressConfig,
   hasComponentSpecFile,
+  getSpecsForMigrationGuide
 } from '../util/migration'
-import {
-  formatMigrationFile,
-  FilePart,
-  regexps,
-  NonSpecFileError,
-} from '../util/migrationFormat'
+import type { FilePart } from '../util/migrationFormat'
 import {
   getStepsForMigration,
   shouldShowRenameSupport,
@@ -31,10 +27,14 @@ import {
 
 const debug = Debug('cypress:data-context:MigrationDataSource')
 
-interface MigrationFile {
+export interface MigrationFile {
   testingType: TestingType
   relative: string
   parts: FilePart[]
+}
+
+export interface MigrationRelativeSpecs {
+  before: RelativeSpecWithTestingType
 }
 
 export interface FilesForMigrationUI {
@@ -166,37 +166,8 @@ export class MigrationDataSource {
 
   async getSpecsForMigrationGuide (): Promise<FilesForMigrationUI> {
     const specs = await this.getSpecsRelativeToFolder()
+    return getSpecsForMigrationGuide(specs)
 
-    const processSpecs = (regexp: 'beforeRegexp' | 'afterRegexp') => {
-      return (acc: MigrationFile[], x: RelativeSpecWithTestingType) => {
-        try {
-          return acc.concat({
-            testingType: x.testingType,
-            relative: x.relative,
-            parts: formatMigrationFile(x.relative, new RegExp(regexps[x.testingType][regexp])),
-          })
-        } catch (e) {
-          if (e instanceof NonSpecFileError) {
-            // it's possible they have a non spec file in their cypress/integration directory,
-            // if that happens, we just skip that file and carry on.
-            return acc
-          }
-
-          throw e
-        }
-      }
-    }
-
-    const result: FilesForMigrationUI = {
-      before: specs.before.reduce(processSpecs('beforeRegexp'), []),
-      after: specs.after.reduce(processSpecs('afterRegexp'), []),
-    }
-
-    if (result.before.length !== result.after.length) {
-      throw Error(`Before and after should have same lengths, got ${result.before.length} and ${result.after.length}`)
-    }
-
-    return result
   }
 
   async getConfig () {

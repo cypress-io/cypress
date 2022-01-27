@@ -8,7 +8,8 @@ import {
   supportFileRegexps,
   formatMigrationFile,
 } from './migrationFormat'
-import type { FilesForMigrationUI } from '../sources'
+import type { FilesForMigrationUI, MigrationFile } from '../sources'
+import { regexps } from '.'
 
 type ConfigOptions = {
   global: Record<string, unknown>
@@ -192,14 +193,16 @@ async function findByTestingType (cwd: string, dir: string | null, testingType: 
   .map((relative) => ({ relative, testingType }))
 }
 
+export interface GetRelativeSpecs {
+  before: RelativeSpecWithTestingType[]
+  after: RelativeSpecWithTestingType[]
+}
+
 export async function getSpecs (
   projectRoot: string,
   componentDirPath: string | null,
   e2eDirPath: string | null,
-): Promise<{
-  before: RelativeSpecWithTestingType[]
-  after: RelativeSpecWithTestingType[]
-}> {
+): Promise<GetRelativeSpecs> {
   const [comp, e2e] = await Promise.all([
     findByTestingType(projectRoot, componentDirPath, 'component'),
     findByTestingType(projectRoot, e2eDirPath, 'e2e'),
@@ -302,4 +305,38 @@ export function renameSpecPath (spec: string) {
   return spec
   .replace('integration', 'e2e')
   .replace(/([._-]?[s|S]pec.|[.])(?=[j|t]s[x]?)/, '.cy.')
+}
+
+
+export function getSpecsForMigrationGuide (specs: GetRelativeSpecs): FilesForMigrationUI {
+  const processSpecs = (regexp: 'beforeRegexp' | 'afterRegexp') => {
+    return (acc: MigrationFile[], x: RelativeSpecWithTestingType) => {
+      try {
+        return acc.concat({
+          testingType: x.testingType,
+          relative: x.relative,
+          parts: formatMigrationFile(x.relative, new RegExp(regexps[x.testingType][regexp])),
+        })
+      } catch (e) {
+        // if (e instanceof NonSpecFileError) {
+        //   // it's possible they have a non spec file in their cypress/integration directory,
+        //   // if that happens, we just skip that file and carry on.
+        //   return acc
+        // }
+
+        throw e
+      }
+    }
+  }
+
+  const result: FilesForMigrationUI = {
+    before: specs.before.reduce(processSpecs('beforeRegexp'), []),
+    after: specs.after.reduce(processSpecs('afterRegexp'), []),
+  }
+
+  if (result.before.length !== result.after.length) {
+    throw Error(`Before and after should have same lengths, got ${result.before.length} and ${result.after.length}`)
+  }
+
+  return result
 }

@@ -7,13 +7,15 @@ import {
   ComponentTestingMigrationStatus,
   NonStandardMigrationError,
   getSpecs,
+  getSpecsForMigrationGuide,
   supportFilesForMigration,
   renameSupportFilePath,
 } from '../../../src/util/migration'
 import { expect } from 'chai'
 import tempDir from 'temp-dir'
+import type { e2eProjectDirs } from '@packages/frontend-shared/cypress/e2e/support/e2eProjectDirs'
 
-function scaffoldMigrationProject (project: string) {
+function scaffoldMigrationProject (project: typeof e2eProjectDirs[number]) {
   const tmpDir = path.join(tempDir, 'cy-projects')
   const testProject = path.join(__dirname, '..', '..', '..', '..', '..', 'system-tests', 'projects', project)
   const cwd = path.join(tmpDir, project)
@@ -104,6 +106,17 @@ describe('cypress.config.js generation', () => {
 })
 
 describe('spec renaming', () => {
+  it('should work for custom integration folder all specs', async () => {
+    const cwd = scaffoldMigrationProject('migration-e2e-custom-integration')
+    const specs = await getSpecs(cwd, null, 'src')
+    expect(specs).to.eql(
+      {
+        before: [ { relative: 'src/basic.spec.js', testingType: 'e2e' } ],
+        after: [ { testingType: 'e2e', relative: 'src/basic.cy.js' } ]
+      }
+    )
+  })
+
   it('should rename all specs', async () => {
     const cwd = scaffoldMigrationProject('migration')
     const specs = await getSpecs(cwd, 'cypress/component', 'cypress/integration')
@@ -267,5 +280,144 @@ describe('initComponentTestingMigration', () => {
     })
 
     await watcher.close()
+  })
+})
+
+describe('getSpecsForMigrationGuide', () => {
+  it('handles default integration folder', () => {
+    const actual = getSpecsForMigrationGuide({
+      before: [
+        { 
+          testingType: 'e2e',
+          relative: 'cypress/integration/foo.spec.js',
+        },
+      ],
+      after: [
+        { 
+          testingType: 'e2e',
+          relative: 'cypress/e2e/foo.cy.js',
+        },
+      ]
+    })
+
+    expect(actual).to.eql({
+      'before': [
+        {
+          'testingType': 'e2e',
+          'relative': 'cypress/integration/foo.spec.js',
+          'parts': [
+            {
+              'text': 'cypress/',
+              'highlight': false
+            },
+            {
+              'text': 'integration',
+              'highlight': true
+            },
+            {
+              'text': '/foo',
+              'highlight': false
+            },
+            {
+              'text': '.spec.',
+              'highlight': true
+            },
+            {
+              'text': 'js',
+              'highlight': false
+            }
+          ]
+        }
+      ],
+      'after': [
+        {
+          'testingType': 'e2e',
+          'relative': 'cypress/e2e/foo.cy.js',
+          'parts': [
+            {
+              'text': 'cypress/',
+              'highlight': false
+            },
+            {
+              'text': 'e2e',
+              'highlight': true
+            },
+            {
+              'text': '/foo',
+              'highlight': false
+            },
+            {
+              'text': '.cy.',
+              'highlight': true
+            },
+            {
+              'text': 'js',
+              'highlight': false
+            }
+          ]
+        }
+      ]
+    })
+
+  })
+
+  it.only('handles custom integration folder', () => {
+    const actual = getSpecsForMigrationGuide({
+      before: [
+        { 
+          testingType: 'e2e',
+          relative: 'src/foo.spec.js',
+        },
+      ],
+      after: [
+        { 
+          testingType: 'e2e',
+          relative: 'src/foo.cy.js',
+        },
+      ]
+    })
+
+    expect(actual).to.eql({
+      'before': [
+        {
+          'testingType': 'e2e',
+          'relative': 'src/foo.spec.js',
+          'parts': [
+            {
+              'text': 'src/foo',
+              'highlight': false
+            },
+            {
+              'text': '.spec.',
+              'highlight': true
+            },
+            {
+              'text': 'js',
+              'highlight': false
+            }
+          ]
+        }
+      ],
+      'after': [
+        {
+          'testingType': 'e2e',
+          'relative': 'src/foo.cy.js',
+          'parts': [
+            {
+              'text': 'src/foo',
+              'highlight': false
+            },
+            {
+              'text': '.cy.',
+              'highlight': true
+            },
+            {
+              'text': 'js',
+              'highlight': false
+            }
+          ]
+        }
+      ]
+    })
   })
 })
