@@ -1,5 +1,6 @@
 export const longBrowsersList = [
   {
+    id: '1',
     name: 'electron',
     displayName: 'Electron',
     family: 'chromium',
@@ -8,8 +9,10 @@ export const longBrowsersList = [
     path: '',
     majorVersion: '73',
     info: 'Info about electron browser',
+    isFocusSupported: true,
   },
   {
+    id: '2',
     name: 'chrome',
     displayName: 'Chrome',
     family: 'chromium',
@@ -17,8 +20,10 @@ export const longBrowsersList = [
     version: '78.0.3904.108',
     path: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
     majorVersion: '78',
+    isFocusSupported: true,
   },
   {
+    id: '3',
     name: 'chrome',
     displayName: 'Chrome',
     family: 'chromium',
@@ -26,8 +31,10 @@ export const longBrowsersList = [
     version: '88.0.3904.00',
     path: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
     majorVersion: '88',
+    isFocusSupported: true,
   },
   {
+    id: '4',
     name: 'chrome',
     displayName: 'Canary',
     family: 'chromium',
@@ -35,8 +42,10 @@ export const longBrowsersList = [
     version: '80.0.3977.4',
     path: '/Applications/Google Chrome Canary.app/Contents/MacOS/Google Chrome Canary',
     majorVersion: '80',
+    isFocusSupported: true,
   },
   {
+    id: '5',
     name: 'chromium',
     displayName: 'Chromium',
     family: 'chromium',
@@ -44,8 +53,10 @@ export const longBrowsersList = [
     version: '74.0.3729.0',
     path: '/Applications/Chromium.app/Contents/MacOS/Chromium',
     majorVersion: '74',
+    isFocusSupported: true,
   },
   {
+    id: '6',
     name: 'chromium',
     displayName: 'Chromium',
     family: 'chromium',
@@ -53,8 +64,10 @@ export const longBrowsersList = [
     version: '85.0.3729.0',
     path: '/Applications/Chromium.app/Contents/MacOS/Chromium',
     majorVersion: '85',
+    isFocusSupported: true,
   },
   {
+    id: '7',
     name: 'edge',
     displayName: 'Edge Beta',
     family: 'chromium',
@@ -62,8 +75,10 @@ export const longBrowsersList = [
     version: '79.0.309.71',
     path: '/Applications/Microsoft Edge Beta.app/Contents/MacOS/Microsoft Edge Beta',
     majorVersion: '79',
+    isFocusSupported: true,
   },
   {
+    id: '8',
     name: 'edge',
     displayName: 'Edge Canary',
     family: 'chromium',
@@ -71,8 +86,10 @@ export const longBrowsersList = [
     version: '79.0.309.71',
     path: '/Applications/Microsoft Edge Canary.app/Contents/MacOS/Microsoft Edge Canary',
     majorVersion: '79',
+    isFocusSupported: true,
   },
   {
+    id: '9',
     name: 'edge',
     displayName: 'Edge Dev',
     family: 'chromium',
@@ -80,8 +97,10 @@ export const longBrowsersList = [
     version: '80.0.309.71',
     path: '/Applications/Microsoft Edge Dev.app/Contents/MacOS/Microsoft Edge Dev',
     majorVersion: '79',
+    isFocusSupported: true,
   },
   {
+    id: '10',
     name: 'firefox',
     displayName: 'Firefox',
     family: 'firefox',
@@ -90,8 +109,10 @@ export const longBrowsersList = [
     path: '/Applications/Firefox/Contents/MacOS/Firefox',
     majorVersion: '69',
     unsupportedVersion: true,
+    isFocusSupported: true,
   },
   {
+    id: '11',
     name: 'firefox',
     displayName: 'Firefox',
     family: 'firefox',
@@ -100,8 +121,10 @@ export const longBrowsersList = [
     path: '/Applications/Firefox/Contents/MacOS/Firefox',
     majorVersion: '75',
     unsupportedVersion: true,
+    isFocusSupported: true,
   },
   {
+    id: '12',
     name: 'firefox',
     displayName: 'Firefox Developer Edition',
     channel: 'dev',
@@ -109,8 +132,10 @@ export const longBrowsersList = [
     version: '69.0.2',
     path: '/Applications/Firefox Developer/Contents/MacOS/Firefox Developer',
     majorVersion: '69',
+    isFocusSupported: true,
   },
   {
+    id: '13',
     name: 'firefox',
     displayName: 'Firefox Nightly',
     channel: 'beta',
@@ -118,5 +143,6 @@ export const longBrowsersList = [
     version: '69.0.3',
     path: '/Applications/Firefox Nightly/Contents/MacOS/Firefox Nightly',
     majorVersion: '69',
+    isFocusSupported: false,
   },
 ] as const
