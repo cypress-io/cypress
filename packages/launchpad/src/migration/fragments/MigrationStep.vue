@@ -1,13 +1,14 @@
 <template>
   <div
     v-if="step"
+    :data-cy="`migration-step ${step?.name}`"
     class="border rounded bg-light-50 border-gray-100 mb-4 w-full block
   overflow-hidden hocus-default"
   >
     <ListRowHeader
       :class="{
-        'border-b border-b-gray-100 rounded-b-none': open,
-        'bg-gray-50': !open
+        'border-b border-b-gray-100 rounded-b-none': step.isCurrentStep,
+        'bg-gray-50': !step.isCurrentStep
       }"
       class="cursor-pointer"
       :description="description"

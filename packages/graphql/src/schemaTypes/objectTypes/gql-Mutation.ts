@@ -451,7 +451,7 @@ export const mutation = mutationType({
           }
         }
 
-        ctx.actions.migration.nextStep()
+        await ctx.actions.migration.nextStep()
 
         return {}
       },
@@ -461,7 +461,7 @@ export const mutation = mutationType({
       description: 'While migrating to 10+ skip manual rename step',
       type: Query,
       resolve: async (_, args, ctx) => {
-        ctx.actions.migration.nextStep()
+        await ctx.actions.migration.nextStep()
 
         return {}
       },
@@ -471,7 +471,7 @@ export const mutation = mutationType({
       description: 'user has finished migration component specs - move to next step',
       type: Query,
       resolve: async (_, args, ctx) => {
-        ctx.actions.migration.nextStep()
+        await ctx.actions.migration.nextStep()
 
         return {}
       },
@@ -492,7 +492,7 @@ export const mutation = mutationType({
             stack: e.stack,
           }
         }
-        ctx.actions.migration.nextStep()
+        await ctx.actions.migration.nextStep()
 
         return {}
       },
@@ -514,7 +514,7 @@ export const mutation = mutationType({
           }
         }
 
-        ctx.actions.migration.nextStep()
+        await ctx.actions.migration.nextStep()
 
         return {}
       },
@@ -524,7 +524,7 @@ export const mutation = mutationType({
       description: 'Merges the component testing config in cypress.config.{js,ts}',
       type: Query,
       resolve: async (_, args, ctx) => {
-        await ctx.actions.migration.startWizardReconfiguration()
+        await ctx.actions.migration.nextStep()
 
         return {}
       },

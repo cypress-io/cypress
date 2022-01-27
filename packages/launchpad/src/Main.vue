@@ -66,6 +66,10 @@
           v-else-if="currentProject.currentTestingType === 'component' && !currentProject.isCTConfigured"
           :gql="query.data.value"
         />
+        <ScaffoldLanguageSelect
+          v-else-if="currentProject.currentTestingType === 'e2e' && !currentProject.isE2EConfigured"
+          :gql="query.data.value"
+        />
         <OpenBrowser v-else />
       </template>
     </div>
@@ -78,6 +82,7 @@ import { gql, useQuery } from '@urql/vue'
 import { MainLaunchpadQueryDocument } from './generated/graphql'
 import TestingTypeCards from './setup/TestingTypeCards.vue'
 import Wizard from './setup/Wizard.vue'
+import ScaffoldLanguageSelect from './setup/ScaffoldLanguageSelect.vue'
 import GlobalPage from './global/GlobalPage.vue'
 import BaseError from './error/BaseError.vue'
 import StandardModal from '@cy/components/StandardModal.vue'
@@ -99,6 +104,7 @@ gql`
 fragment MainLaunchpadQueryData on Query {
   ...TestingTypeCards
   ...Wizard
+  ...ScaffoldLanguageSelect
   baseError {
     ...BaseError_Data
   }
@@ -106,6 +112,7 @@ fragment MainLaunchpadQueryData on Query {
   currentProject {
     id
     isCTConfigured
+    isE2EConfigured
     isLoadingConfigFile
     isLoadingNodeEvents
     needsLegacyConfigMigration
