@@ -39,6 +39,10 @@ export default defineConfig({
     pluginsFile: 'cypress/e2e/plugins/index.ts',
     supportFile: 'cypress/e2e/support/e2eSupport.ts',
     async setupNodeEvents (on, config) {
+      if (!process.env.HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS) {
+        throw new Error('HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS is missing. Close Cypress and run tests using the `yarn cypress:*` commands from the `packages/app` directory')
+      }
+
       // Delete this as we only want to honor it on parent Cypress when doing E2E Cypress in Cypress testing
       delete process.env.HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS
       process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF = 'true'

@@ -111,6 +111,7 @@ export class ProjectLifecycleManager {
   private _initializedProject: unknown | undefined // open_project object
   private _projectRoot: string | undefined
   private _configFilePath: string | undefined
+  private _configWatcher: FSWatcher | null = null
 
   private _cachedFullConfig: FullConfig | undefined
 
@@ -323,13 +324,7 @@ export class ProjectLifecycleManager {
       return
     }
 
-    // If we've chosen e2e and we don't have a config file, we can scaffold one
-    // without any sort of onboarding wizard.
-    if (!this.metaState.hasValidConfigFile) {
-      if (testingType === 'e2e' && !this.ctx.isRunMode) {
-        this.ctx.actions.wizard.scaffoldTestingType().catch(this.onLoadError)
-      }
-    } else if (this.isTestingTypeConfigured(testingType)) {
+    if (this.isTestingTypeConfigured(testingType)) {
       this.loadTestingType()
     }
   }
@@ -609,18 +604,22 @@ export class ProjectLifecycleManager {
       }
     })
 
-    const configFileWatcher = this.addWatcher(this.configFilePath)
-
-    configFileWatcher.on('all', () => {
-      this.ctx.coreData.baseError = null
-      this.reloadConfig().catch(this.onLoadError)
-    })
+    this.initializeConfigFileWatcher()
 
     const cypressEnvFileWatcher = this.addWatcher(this.envFilePath)
 
     cypressEnvFileWatcher.on('all', () => {
       this.ctx.coreData.baseError = null
       this.reloadCypressEnvFile().catch(this.onLoadError)
+    })
+  }
+
+  initializeConfigFileWatcher () {
+    this._configWatcher = this.addWatcher(this.configFilePath)
+
+    this._configWatcher.on('all', () => {
+      this.ctx.coreData.baseError = null
+      this.reloadConfig().catch(this.onLoadError)
     })
   }
 
@@ -1140,7 +1139,14 @@ export class ProjectLifecycleManager {
   }
 
   setConfigFilePath (lang: 'ts' | 'js') {
+    const configFilePath = this._configFilePath
+
     this._configFilePath = this._pathToFile(`cypress.config.${lang}`)
+
+    if (configFilePath !== this._configFilePath && this._configWatcher) {
+      this.closeWatcher(this._configWatcher)
+      this.initializeConfigFileWatcher()
+    }
   }
 
   private _pathToFile (file: string) {
@@ -1271,7 +1277,7 @@ export class ProjectLifecycleManager {
   }
 
   isTestingTypeConfigured (testingType: TestingType): boolean {
-    const config = this.loadedFullConfig ?? this.loadedConfigFile
+    const config = this.loadedConfigFile
 
     if (!config) {
       return false

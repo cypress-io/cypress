@@ -1,5 +1,5 @@
 import type { CodeLanguageEnum, NexusGenEnums, NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
-import type { Bundler, CodeLanguage, FrontendFramework } from '@packages/types'
+import { Bundler, CodeLanguage, CODE_LANGUAGES, FrontendFramework } from '@packages/types'
 import assert from 'assert'
 import dedent from 'dedent'
 import fs from 'fs'
@@ -30,10 +30,10 @@ export class WizardActions {
     this.ctx.coreData.wizard.chosenFramework = framework
 
     if (framework !== 'react' && framework !== 'vue') {
-      this.setBundler('webpack')
+      return this.setBundler('webpack')
     }
 
-    return this.data
+    return this.setBundler(null)
   }
 
   setBundler (bundler: NexusGenEnums['SupportedBundlers'] | null) {
@@ -91,9 +91,8 @@ export class WizardActions {
   }
 
   private async scaffoldE2E () {
-    const configCode = this.wizardGetConfigCodeE2E(this.ctx.coreData.wizard.chosenLanguage)
     const scaffolded = await Promise.all([
-      this.scaffoldConfig(configCode),
+      this.scaffoldConfig('e2e'),
       this.scaffoldSupport('e2e', this.ctx.coreData.wizard.chosenLanguage),
       this.scaffoldFixtures(),
     ])
@@ -105,14 +104,9 @@ export class WizardActions {
     const { chosenBundler, chosenFramework, chosenLanguage } = this.ctx.wizard
 
     assert(chosenFramework && chosenLanguage && chosenBundler)
-    const configCode = this.wizardGetConfigCodeComponent({
-      chosenLanguage,
-      chosenFramework,
-      chosenBundler,
-    })
 
     return await Promise.all([
-      this.scaffoldConfig(configCode),
+      this.scaffoldConfig('component'),
       this.scaffoldFixtures(),
       this.scaffoldSupport('component', chosenLanguage.type),
       this.getComponentIndexHtml({
@@ -142,15 +136,40 @@ export class WizardActions {
     }
   }
 
-  private async scaffoldConfig (configCode: string): Promise<NexusGenObjects['ScaffoldedFile']> {
-    this.ctx.lifecycleManager.setConfigFilePath(this.ctx.coreData.wizard.chosenLanguage)
+  private configCode (testingType: 'e2e' | 'component', language: CodeLanguageEnum) {
+    if (testingType === 'component') {
+      const chosenLanguage = CODE_LANGUAGES.find((f) => f.type === language)
+
+      const { chosenBundler, chosenFramework } = this.ctx.wizard
+
+      assert(chosenFramework && chosenLanguage && chosenBundler)
+
+      return this.wizardGetConfigCodeComponent({
+        chosenLanguage,
+        chosenFramework,
+        chosenBundler,
+      })
+    }
+
+    return this.wizardGetConfigCodeE2E(language)
+  }
+
+  private async scaffoldConfig (testingType: 'e2e' | 'component'): Promise<NexusGenObjects['ScaffoldedFile']> {
     if (!fs.existsSync(this.ctx.lifecycleManager.configFilePath)) {
+      this.ctx.lifecycleManager.setConfigFilePath(this.ctx.coreData.wizard.chosenLanguage)
+
+      const configCode = this.configCode(testingType, this.ctx.coreData.wizard.chosenLanguage)
+
       return this.scaffoldFile(
         this.ctx.lifecycleManager.configFilePath,
         configCode,
         'Created a new config file',
       )
     }
+
+    const { ext } = path.parse(this.ctx.lifecycleManager.configFilePath)
+
+    const configCode = this.configCode(testingType, ext === '.ts' ? 'ts' : 'js')
 
     return {
       status: 'changes',

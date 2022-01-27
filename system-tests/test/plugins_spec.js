@@ -19,6 +19,7 @@ describe('e2e plugins', function () {
     expectedExitCode: 1,
     onRun (exec) {
       return exec().then(({ stdout }) => {
+        expect(stdout).to.include('The following error was thrown by a plugin. We stopped running your tests because a plugin crashed. Please check your e2e.setupNodeEvents method in `cypress.config.js`')
         expect(stdout).to.include('Error: Root async error from config file')
       })
     },
