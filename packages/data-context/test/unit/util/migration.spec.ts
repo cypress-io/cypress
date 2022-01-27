@@ -342,4 +342,12 @@ describe('reduceConfig', () => {
     expect(newConfig.e2e.specExcludePattern).to.eq(config.ignoreTestFiles)
     expect(newConfig.component.specExcludePattern).to.eq(config.ignoreTestFiles)
   })
+
+  it('should nest supportFile under component and e2e', () => {
+    const config = { supportFile: 'cypress/support/index.js' }
+    const newConfig = reduceConfig(config)
+
+    expect(newConfig.e2e.supportFile).to.eq(config.supportFile)
+    expect(newConfig.component.supportFile).to.eq(config.supportFile)
+  })
 })

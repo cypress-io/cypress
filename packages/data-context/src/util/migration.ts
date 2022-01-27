@@ -302,6 +302,14 @@ export function reduceConfig (cfg: OldCypressConfig): ConfigOptions {
       }
     }
 
+    if (key === 'supportFile') {
+      return {
+        ...acc,
+        e2e: { ...acc.e2e, supportFile: val },
+        component: { ...acc.component, supportFile: val },
+      }
+    }
+
     if (key === 'baseUrl') {
       return {
         ...acc,
