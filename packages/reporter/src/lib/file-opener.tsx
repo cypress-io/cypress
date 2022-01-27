@@ -1,9 +1,7 @@
 import { observer } from 'mobx-react'
 import React, { ReactNode } from 'react'
 import type { FileDetails } from '@packages/types'
-import { GetUserEditorResult, Editor, FileOpener as Opener } from '@packages/ui-components'
-
-import events from './events'
+import OpenFileInIDE from './open-file-in-ide'
 
 interface Props {
   fileDetails: FileDetails
@@ -11,33 +9,15 @@ interface Props {
   className?: string
 }
 
-const openFile = (where: Editor, { absoluteFile: file, line, column }: FileDetails) => {
-  events.emit('open:file', {
-    where,
-    file,
-    line,
-    column,
-  })
-}
-
-const getUserEditor = (callback: (result: GetUserEditorResult) => any) => {
-  events.emit('get:user:editor', callback)
-}
-
-const setUserEditor = (editor: Editor) => {
-  events.emit('set:user:editor', editor)
-}
-
 const FileOpener = observer(({ fileDetails, children, className }: Props) => (
-  <Opener
-    openFile={openFile}
-    getUserEditor={getUserEditor}
-    setUserEditor={setUserEditor}
+  <OpenFileInIDE
     fileDetails={fileDetails}
     className={className}
   >
-    {children}
-  </Opener>
+    <a href="#" onClick={(e) => e.preventDefault()}>
+      {children}
+    </a>
+  </OpenFileInIDE>
 ))
 
 export default FileOpener
