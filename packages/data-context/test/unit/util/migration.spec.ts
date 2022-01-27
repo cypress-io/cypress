@@ -272,54 +272,74 @@ describe('initComponentTestingMigration', () => {
 })
 
 describe('reduceConfig', () => {
-  describe('testFiles', () => {
-    it('should move the testFiles field to e2e', () => {
-      const config = { testFiles: '**/**.cy.js' }
-      const newConfig = reduceConfig(config)
+  it('should move the testFiles field to e2e', () => {
+    const config = { testFiles: '**/**.cy.js' }
+    const newConfig = reduceConfig(config)
 
-      expect(newConfig.e2e.specPattern).to.eq('**/**.cy.js')
-    })
+    expect(newConfig.e2e.specPattern).to.eq('**/**.cy.js')
+  })
 
-    it('should combine componentFolder and integrationFolder with testFiles field in component', () => {
-      const config = { testFiles: '**/**.cy.js', componentFolder: 'src', integrationFolder: 'cypress/integration' }
-      const newConfig = reduceConfig(config)
+  it('should combine componentFolder and integrationFolder with testFiles field in component', () => {
+    const config = { testFiles: '**/**.cy.js', componentFolder: 'src', integrationFolder: 'cypress/integration' }
+    const newConfig = reduceConfig(config)
 
-      expect(newConfig.component.specPattern).to.eq(`${config.componentFolder}/${config.testFiles}`)
-      expect(newConfig.e2e.specPattern).to.eq(`${config.integrationFolder}/${config.testFiles}`)
-    })
+    expect(newConfig.component.specPattern).to.eq(`${config.componentFolder}/${config.testFiles}`)
+    expect(newConfig.e2e.specPattern).to.eq(`${config.integrationFolder}/${config.testFiles}`)
+  })
 
-    it('should combine nested componentFolder and integrationFolder with testFiles field in component', () => {
-      const config = {
-        testFiles: '**/**.cy.js',
-        component: {
-          componentFolder: 'src',
-        },
-        e2e: {
-          integrationFolder: 'cypress/integration',
-        },
-      }
-      const newConfig = reduceConfig(config)
+  it('should combine nested componentFolder and integrationFolder with testFiles field in component', () => {
+    const config = {
+      testFiles: '**/**.cy.js',
+      component: {
+        componentFolder: 'src',
+      },
+      e2e: {
+        integrationFolder: 'cypress/integration',
+      },
+    }
+    const newConfig = reduceConfig(config)
 
-      expect(newConfig.component.specPattern).to.eq(`${config.component.componentFolder}/${config.testFiles}`)
-      expect(newConfig.e2e.specPattern).to.eq(`${config.e2e.integrationFolder}/${config.testFiles}`)
-    })
+    expect(newConfig.component.specPattern).to.eq(`${config.component.componentFolder}/${config.testFiles}`)
+    expect(newConfig.e2e.specPattern).to.eq(`${config.e2e.integrationFolder}/${config.testFiles}`)
+  })
 
-    it('should combine testFiles with highest specificity', () => {
-      const config = {
-        testFiles: '**/**.cy.js',
-        componentFolder: 'lower/specificity',
-        integrationFolder: 'lower/specificity',
-        component: {
-          componentFolder: 'higher/specificity',
-        },
-        e2e: {
-          integrationFolder: 'higher/specificity',
-        },
-      }
-      const newConfig = reduceConfig(config)
+  it('should combine testFiles with highest specificity', () => {
+    const config = {
+      testFiles: '**/**.cy.js',
+      componentFolder: 'lower/specificity',
+      integrationFolder: 'lower/specificity',
+      component: {
+        componentFolder: 'higher/specificity',
+      },
+      e2e: {
+        integrationFolder: 'higher/specificity',
+      },
+    }
+    const newConfig = reduceConfig(config)
 
-      expect(newConfig.component.specPattern).to.eq(`${config.component.componentFolder}/${config.testFiles}`)
-      expect(newConfig.e2e.specPattern).to.eq(`${config.e2e.integrationFolder}/${config.testFiles}`)
-    })
+    expect(newConfig.component.specPattern).to.eq(`${config.component.componentFolder}/${config.testFiles}`)
+    expect(newConfig.e2e.specPattern).to.eq(`${config.e2e.integrationFolder}/${config.testFiles}`)
+  })
+
+  it('should remove integration and componentFolders', () => {
+    const config = {
+      componentFolder: 'src',
+      integrationFolder: 'cypress/integration',
+    }
+
+    const newConfig = reduceConfig(config)
+
+    // @ts-ignore field not on ConfigOptions type
+    expect(newConfig.componentFolder).to.not.exist
+    // @ts-ignore field not on ConfigOptions type
+    expect(newConfig.integrationFolder).to.not.exist
+  })
+
+  it('should rename ignoreTestFiles to specExcludePattern', () => {
+    const config = { ignoreTestFiles: 'path/to/**/*.js' }
+    const newConfig = reduceConfig(config)
+
+    expect(newConfig.e2e.specExcludePattern).to.eq(config.ignoreTestFiles)
+    expect(newConfig.component.specExcludePattern).to.eq(config.ignoreTestFiles)
   })
 })

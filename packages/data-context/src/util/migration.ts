@@ -27,6 +27,7 @@ export interface OldCypressConfig {
   componentFolder?: string | false
   integrationFolder?: string | false
   testFiles?: string | string[]
+  ignoreTestFiles?: string
 }
 
 export const defaultSupportFiles = {
@@ -290,6 +291,14 @@ export function reduceConfig (cfg: OldCypressConfig): ConfigOptions {
         ...acc,
         e2e: { ...acc.e2e, specPattern: getSpecPattern(cfg, 'e2e') },
         component: { ...acc.component, specPattern: getSpecPattern(cfg, 'component') },
+      }
+    }
+
+    if (key === 'ignoreTestFiles') {
+      return {
+        ...acc,
+        e2e: { ...acc.e2e, specExcludePattern: val },
+        component: { ...acc.component, specExcludePattern: val },
       }
     }
 
