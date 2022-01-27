@@ -385,15 +385,10 @@ export class ProjectActions {
   }
 
   async maybeCreateE2EDir () {
-    const stats = await this.ctx.fs.stat(this.defaultE2EPath)
+    // fs-extra yields a string if a folder was created
+    const result = await this.ctx.fs.mkdirp(this.defaultE2EPath) as string | undefined
 
-    if (stats.isDirectory()) {
-      return
-    }
-
-    debug(`Creating ${this.defaultE2EPath}`)
-
-    return this.ctx.fs.mkdirp(this.defaultE2EPath)
+    if (result) debug(`Created e2eDir at ${this.defaultE2EPath}}`)
   }
 
   async scaffoldIntegration (): Promise<NexusGenObjects['ScaffoldedFile'][]> {
