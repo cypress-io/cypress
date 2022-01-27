@@ -448,9 +448,12 @@ export = {
     const criClient = await this._connectToChromeRemoteInterface(port, options, browser.displayName, options.url)
 
     this._setAutomation(criClient, automation)
+
+    await this._maybeRecordVideo(criClient, options, browser.majorVersion)
+    await this._handleDownloads(criClient, options.downloadsFolder, automation)
   },
 
-  async open (browser: Browser, url, options: CypressConfiguration = {}, automation) {
+  async open (browser: Browser, url, options: CypressConfiguration = {}, automation, shouldLaunchBrowser) {
     const { isTextTerminal } = options
 
     const userDir = utils.getProfileDir(browser, isTextTerminal)

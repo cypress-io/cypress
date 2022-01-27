@@ -43,19 +43,19 @@ export class OpenProject {
     return this.projectBase
   }
 
-  async changeUrlToSpec (spec: Cypress.Cypress['spec']) {
+  async changeUrlToSpec (options) {
     if (!this.projectBase) {
       return
     }
 
     const newSpecUrl = getSpecUrl({
-      spec,
+      spec: options.spec,
       browserUrl: this.projectBase.cfg.browserUrl,
       projectRoot: this.projectBase.projectRoot,
     })
 
     await this.startNewBrowserTabWithUrl(newSpecUrl)
-    await browsers.connectToExisting(this.projectBase.browser, { url: newSpecUrl }, this.projectBase.automation)
+    await browsers.connectToExisting(this.projectBase.browser, { downloadsFolder: this.projectBase.getConfig().downloadsFolder, url: newSpecUrl, ...options }, this.projectBase.automation)
 
     // this.projectBase.changeToUrl(newSpecUrl)
   }

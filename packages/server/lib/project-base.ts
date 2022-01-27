@@ -479,7 +479,7 @@ export class ProjectBase<TServer extends Server> extends EE {
   }
 
   async startNewBrowserTabWithUrl (url) {
-    this.automation.request('start:browser:tab', { url }, () => {})
+    await this.automation.request('start:browser:tab', { url }, () => {})
   }
 
   shouldCorrelatePreRequests = () => {

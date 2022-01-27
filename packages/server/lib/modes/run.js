@@ -957,7 +957,7 @@ module.exports = {
   },
 
   launchBrowser (options = {}) {
-    const { browser, spec, writeVideoFrame, setScreenshotMetadata, project, screenshots, projectRoot, onError } = options
+    const { browser, spec, writeVideoFrame, setScreenshotMetadata, project, screenshots, projectRoot, onError, shouldLaunchBrowser } = options
 
     const browserOpts = getDefaultBrowserOptsByFamily(browser, project, writeVideoFrame, onError)
 
@@ -1004,15 +1004,22 @@ module.exports = {
       return project.onWarning
     }
 
+    if (!shouldLaunchBrowser) {
+      // If we do not launch the browser,
+      // we tell it that we are ready
+      // to receive the next spec
+      return this.navigateToNextSpec({ spec, ...browserOpts })
+    }
+
     debug('browser launched')
 
     return openProject.launch(browser, spec, browserOpts)
   },
 
-  async navigateToNextSpec (spec) {
+  async navigateToNextSpec (options) {
     debug('navigating to next spec')
 
-    return openProject.changeUrlToSpec(spec)
+    return openProject.changeUrlToSpec(options)
   },
 
   listenForProjectEnd (project, exit) {
@@ -1086,7 +1093,7 @@ module.exports = {
     return this.currentWriteVideoFrameCallback(...arguments)
   },
 
-  waitForBrowserToConnect (options = {}, shouldLaunchBrowser = true) {
+  waitForBrowserToConnect (options = {}) {
     const { project, socketId, timeout, onError, writeVideoFrame, spec } = options
     const browserTimeout = process.env.CYPRESS_INTERNAL_BROWSER_CONNECT_TIMEOUT || timeout || 60000
     let attempts = 0
@@ -1113,13 +1120,6 @@ module.exports = {
 
     const wait = () => {
       debug('waiting for socket to connect and browser to launch...')
-
-      if (!shouldLaunchBrowser) {
-        // If we do not launch the browser,
-        // we tell it that we are ready
-        // to receive the next spec
-        return this.navigateToNextSpec(options.spec)
-      }
 
       return Promise.join(
         this.waitForSocketConnection(project, socketId)
@@ -1257,8 +1257,6 @@ module.exports = {
         }
       }
 
-      await openProject.closeBrowserTab()
-
       if (videoExists && !skippedSpec && endVideoCapture && !videoCaptureFailed) {
         const ffmpegChaptersConfig = videoCapture.generateFfmpegChaptersConfig(results.tests)
 
@@ -1272,6 +1270,9 @@ module.exports = {
         )
         .catch(warnVideoRecordingFailed)
       }
+
+      await openProject.closeBrowserTab()
+      openProject.projectBase.server.reset()
 
       return results
     })
@@ -1497,8 +1498,9 @@ module.exports = {
           socketId: options.socketId,
           webSecurity: options.webSecurity,
           projectRoot: options.projectRoot,
+          shouldLaunchBrowser: process.env.CYPRESS_INTERNAL_FORCE_BROWSER_RELAUNCH || firstSpec,
           // TODO(tim): investigate the socket disconnect
-        }, process.env.CYPRESS_INTERNAL_FORCE_BROWSER_RELAUNCH || options.testingType === 'e2e' || firstSpec),
+        }),
       })
     })
   },
