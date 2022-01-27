@@ -1,9 +1,13 @@
 require('../../spec_helper')
 
+const os = require('os')
 const browsers = require(`../../../lib/browsers`)
 const utils = require(`../../../lib/browsers/utils`)
 const snapshot = require('snap-shot-it')
 const { EventEmitter } = require('events')
+const { sinon } = require('../../spec_helper')
+const { exec } = require('child_process')
+const util = require('util')
 
 const normalizeBrowsers = (message) => {
   return message.replace(/(found on your system are:)(?:\n- .*)*/, '$1\n- chrome\n- firefox\n- electron')
@@ -158,6 +162,40 @@ describe('lib/browsers/index', () => {
       const vers = 'VMware Fusion 12.1.0'
 
       expect(utils.getMajorVersion(vers)).to.eq(vers)
+    })
+  })
+
+  context('setFocus', () => {
+    it('calls open when running MacOS', () => {
+      const mockExec = sinon.stub()
+
+      sinon.stub(os, 'platform').returns('darwin')
+      sinon.stub(util, 'promisify').returns(mockExec)
+
+      browsers._setInstance({
+        pid: 3333,
+      })
+
+      browsers.setFocus()
+
+      expect(util.promisify).to.be.calledWith(exec)
+      expect(mockExec).to.be.calledWith(`open -a "$(ps -p 3333 -o comm=)"`)
+    })
+
+    it('calls WScript AppActivate to activate the window when running Windows', () => {
+      const mockExec = sinon.stub()
+
+      sinon.stub(os, 'platform').returns('win32')
+      sinon.stub(util, 'promisify').returns(mockExec)
+
+      browsers._setInstance({
+        pid: 3333,
+      })
+
+      browsers.setFocus()
+
+      expect(util.promisify).to.be.calledWith(exec)
+      expect(mockExec).to.be.calledWith(`(New-Object -ComObject WScript.Shell).AppActivate(((Get-WmiObject -Class win32_process -Filter "ParentProcessID = '3333'") | Select -ExpandProperty ProcessId))`, { shell: 'powershell.exe' })
     })
   })
 })

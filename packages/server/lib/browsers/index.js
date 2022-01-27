@@ -3,6 +3,9 @@ const Promise = require('bluebird')
 const debug = require('debug')('cypress:server:browsers')
 const utils = require('./utils')
 const check = require('check-more-types')
+const { exec } = require('child_process')
+const util = require('util')
+const os = require('os')
 
 // returns true if the passed string is a known browser family name
 const isBrowserFamily = check.oneOf(['chromium', 'firefox'])
@@ -38,6 +41,25 @@ const kill = function (unbind, isProcessExit) {
 
     _instance.kill()
   })
+}
+
+const setFocus = async function () {
+  const platform = os.platform()
+  const execAsync = util.promisify(exec)
+
+  try {
+    switch (platform) {
+      case 'darwin':
+        return execAsync(`open -a "$(ps -p ${instance.pid} -o comm=)"`)
+      case 'win32': {
+        return execAsync(`(New-Object -ComObject WScript.Shell).AppActivate(((Get-WmiObject -Class win32_process -Filter "ParentProcessID = '${instance.pid}'") | Select -ExpandProperty ProcessId))`, { shell: 'powershell.exe' })
+      }
+      default:
+        debug(`Unexpected os platform ${platform}. Set focus is only functional on Windows and MacOS`)
+    }
+  } catch (error) {
+    debug(`Failure to set focus. ${error}`)
+  }
 }
 
 const getBrowserLauncher = function (browser) {
@@ -166,4 +188,5 @@ module.exports = {
       })
     })
   },
+  setFocus,
 }
