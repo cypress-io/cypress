@@ -253,6 +253,26 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
       })
     })
 
+    it('receives command failures from the secondary domain', (done) => {
+      const timeout = 1000
+
+      cy.on('fail', (e) => {
+        const errString = e.toString()
+
+        expect(errString).to.have.string(`Timed out retrying after ${timeout}ms: Expected to find element: \`#doesnt-exist\`, but never found it`)
+        //  make sure that the secondary domain failures do NOT show up as spec failures or AUT failures
+        expect(errString).to.not.have.string(`The following error originated from your test code, not from Cypress`)
+        expect(errString).to.not.have.string(`The following error originated from your application code, not from Cypress`)
+        done()
+      })
+
+      cy.switchToDomain('foobar.com', [timeout], ([timeout]) => {
+        cy.get('#doesnt-exist', {
+          timeout,
+        })
+      })
+    })
+
     // TODO: this following tests needs to be implemented in a cy-in-cy test or more e2e style test as we need to test the 'done' function
     it('propagates user defined secondary domain errors to the primary')
 
