@@ -32,7 +32,7 @@ class StatsdReporter {
       test.wallclockStart = Date.now()
     })
 
-    runner.on('test end', (test, done) => {
+    runner.on('test end', (test) => {
       // Skipped tests never get a 'start' event, but they still get 'test end' somehow.
       if (!test.state || test.state === 'skipped') {
         return
