@@ -9,6 +9,8 @@
       {{ t('migration.wizard.description') }}
     </p>
     <template v-if="migration">
+      <!-- used to ensure the wizard is actually rendered before running assertions-->
+      <span data-cy="migration-wizard" />
       <MigrationStep
         :step="steps.find(step => step.name === 'renameAuto')"
         :title="t('migration.wizard.step1.title')"
@@ -28,6 +30,7 @@
           </Button>
         </template>
       </MigrationStep>
+
       <MigrationStep
         :step="steps.find(step => step.name === 'renameManual')"
         :title="t('migration.wizard.step2.title')"
@@ -84,6 +87,7 @@
           </Button>
         </template>
       </MigrationStep>
+
       <MigrationStep
         :step="steps.find(step => step.name === 'configFile')"
         :title="t('migration.wizard.step4.title')"
@@ -101,6 +105,7 @@
           </Button>
         </template>
       </MigrationStep>
+
       <MigrationStep
         :step="steps.find(step => step.name === 'setupComponent')"
         :title="t('migration.wizard.step5.title')"
@@ -123,7 +128,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import type { MIGRATION_STEPS } from '@packages/types'
+import { computed, onBeforeMount, ref } from 'vue'
 import { gql, useMutation, useQuery } from '@urql/vue'
 import Button from '@cy/components/Button.vue'
 import ArrowRightIcon from '~icons/cy/arrow-right_x16.svg'
@@ -189,7 +195,7 @@ mutation MigrationWizard_Start {
 
 const start = useMutation(MigrationWizard_StartDocument)
 
-onMounted(async () => {
+onBeforeMount(async () => {
   await start.executeMutation({ })
   await query.executeQuery()
 })
