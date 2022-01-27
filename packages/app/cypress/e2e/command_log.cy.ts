@@ -129,7 +129,7 @@ describe('Command Log', {
     })
   })
 
-  it.only('shows each spec as its own collapsible group', () => {
+  it('shows each spec as its own collapsible group', () => {
     // wait for all tests to succeed
     cy.findByLabelText('Stats').get('.passed', { timeout: 10000 }).should('have.text', 'Passed:4')
 

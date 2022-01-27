@@ -1,10 +1,31 @@
 import _ from 'lodash'
+import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
+
+// Assert that either the the dialog is presented or the mutation is emitted, depending on
+// whether the test has a preferred IDE defined.
+const verifyIdeOpen = ({ file, action, hasPreferredIde }) => {
+  if (hasPreferredIde) {
+    cy.intercept('mutation-OpenFileInIDE', { data: { 'openFileInIDE': true } }).as('OpenIDE')
+
+    action()
+
+    cy.wait('@OpenIDE').then(({ request }) => {
+      expect(request.body.variables.input.absolute).to.include(file)
+    })
+  } else {
+    action()
+
+    cy.contains(defaultMessages.globalPage.selectPreferredEditor).should('be.visible')
+    cy.findByRole('button', { name: defaultMessages.actions.close }).click()
+  }
+}
 
 export const verifyFailure = (options) => {
   const {
     specTitle,
     hasCodeFrame = true,
     verifyOpenInIde = true,
+    hasPreferredIde,
     column,
     codeFrameText,
     originalMessage,
@@ -20,7 +41,9 @@ export const verifyFailure = (options) => {
 
   regex = regex || new RegExp(`${file}:${line || '\\d+'}:${column}`)
 
-  cy.contains('.runnable-title', specTitle).closest('.runnable').within(() => {
+  cy.contains('.runnable-title', specTitle).closest('.runnable').as('Root')
+
+  cy.get('@Root').within(() => {
     cy.contains('View stack trace').click()
 
     const messageLines = [].concat(message)
@@ -83,18 +106,20 @@ export const verifyFailure = (options) => {
         expect(match.length, `'From Your Spec Code' should only be in the stack once, but found ${match.length} instances`).to.equal(1)
       }
     })
+  })
 
-    if (verifyOpenInIde) {
-      cy.intercept('mutation-OpenFileInIDE', { data: { 'openFileInIDE': true } }).as('OpenIDE')
+  if (verifyOpenInIde) {
+    verifyIdeOpen({
+      file,
+      hasPreferredIde,
+      action: () => {
+        cy.get('@Root').contains('.runnable-err-stack-trace .runnable-err-file-path a', file)
+        .click('left')
+      },
+    })
+  }
 
-      cy.contains('.runnable-err-stack-trace .runnable-err-file-path a', file)
-      .click('left')
-
-      cy.wait('@OpenIDE').then(({ request }) => {
-        expect(request.body.variables.input.absolute).to.include(file)
-      })
-    }
-
+  cy.get('@Root').within(() => {
     if (command) {
       cy.log('the error is attributed to the correct command')
       cy
@@ -126,18 +151,18 @@ export const verifyFailure = (options) => {
     .should('match', regex)
 
     cy.get('.test-err-code-frame pre span').should('include.text', codeFrameText)
-
-    if (verifyOpenInIde) {
-      cy.intercept('mutation-OpenFileInIDE', { data: { 'openFileInIDE': true } }).as('OpenIDE')
-
-      cy.contains('.test-err-code-frame .runnable-err-file-path a', file)
-      .click()
-
-      cy.wait('@OpenIDE').then(({ request }) => {
-        expect(request.body.variables.input.absolute).to.include(file)
-      })
-    }
   })
+
+  if (verifyOpenInIde) {
+    verifyIdeOpen({
+      file,
+      hasPreferredIde,
+      action: () => {
+        cy.get('@Root').contains('.test-err-code-frame .runnable-err-file-path a', file)
+        .click()
+      },
+    })
+  }
 }
 
 const createVerifyTest = (modifier?: string) => {
