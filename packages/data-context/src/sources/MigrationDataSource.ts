@@ -23,8 +23,8 @@ import {
 import {
   getStepsForMigration,
   shouldShowRenameSupport,
-  getIntegrationTestFiles,
   getIntegrationFolder,
+  isDefaultTestFiles,
   getComponentTestFiles,
   getComponentFolder,
 } from './migration/shouldShowSteps'
@@ -254,7 +254,7 @@ export class MigrationDataSource {
 
     const config = await this.parseCypressConfig()
 
-    this.hasCustomIntegrationTestFiles = getIntegrationTestFiles(config) !== '**/*'
+    this.hasCustomIntegrationTestFiles = !isDefaultTestFiles(config)
     this.hasCustomIntegrationFolder = getIntegrationFolder(config) !== 'cypress/integration'
 
     const componentFolder = getComponentFolder(config)

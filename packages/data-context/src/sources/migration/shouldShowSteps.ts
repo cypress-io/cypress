@@ -17,6 +17,12 @@ export function getIntegrationTestFiles (config: OldCypressConfig): string[] {
   return ['**/*']
 }
 
+export function isDefaultTestFiles (config: OldCypressConfig) {
+  const testFiles = getIntegrationTestFiles(config)
+
+  return testFiles.length === 1 && testFiles[0] === '**/*'
+}
+
 export function getIntegrationFolder (config: OldCypressConfig) {
   if (config.e2e?.integrationFolder === false || config.integrationFolder === false) {
     return false
