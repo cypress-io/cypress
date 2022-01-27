@@ -2,7 +2,7 @@ import path from 'path'
 import type { RemoteGraphQLInterceptor, ResetOptionsResult, WithCtxInjected, WithCtxOptions } from './support/e2eSupport'
 import { e2eProjectDirs } from './support/e2eProjectDirs'
 // import type { CloudExecuteRemote } from '@packages/data-context/src/sources'
-import { makeGraphQLServer } from '@packages/graphql/src/makeGraphQLServer'
+import { addGraphQLOnErrorHandler, makeGraphQLServer } from '@packages/graphql/src/makeGraphQLServer'
 import { clearCtx, DataContext, globalPubSub, setCtx } from '@packages/data-context'
 import * as inspector from 'inspector'
 import sinonChai from '@cypress/sinon-chai'
@@ -14,6 +14,7 @@ import { Response } from 'cross-fetch'
 import { CloudRunQuery } from '../support/mock-graphql/stubgql-CloudTypes'
 import { getOperationName } from '@urql/core'
 import pDefer from 'p-defer'
+import _ from 'lodash'
 
 interface InternalOpenProjectArgs {
   argv: string[]
@@ -106,6 +107,12 @@ async function makeE2ETasks () {
 
   const launchpadPort = await makeGraphQLServer()
 
+  let errors: GraphQLError[] = []
+
+  addGraphQLOnErrorHandler((err) => {
+    errors.push(err)
+  })
+
   const __internal_scaffoldProject = async (projectName: string) => {
     if (fs.existsSync(Fixtures.projectPath(projectName))) {
       Fixtures.removeProject(projectName)
@@ -127,6 +134,7 @@ async function makeE2ETasks () {
      * go to http://localhost:5555/graphql and debug the internal state of the application
      */
     async __internal__before () {
+      errors = []
       Fixtures.remove()
       scaffoldedProjects = new Set()
 
@@ -190,6 +198,16 @@ async function makeE2ETasks () {
       })
 
       return null
+    },
+
+    async __internal__afterEach () {
+      return errors.map((e) => {
+        return _.pick(e, 'name', 'stack', 'message', 'path', 'extensions',
+          'nodes',
+          'source',
+          'positions',
+          'originalError')
+      })
     },
 
     __internal_remoteGraphQLIntercept (fn: string) {

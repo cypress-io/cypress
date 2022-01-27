@@ -153,6 +153,29 @@ beforeEach(() => {
   taskInternal('__internal__beforeEach', undefined)
 })
 
+afterEach(() => {
+  // Reset the ports so we know we need to call "openProject" before each test
+  Cypress.env('e2e_serverPort', undefined)
+  taskInternal('__internal__afterEach', undefined).then(([firstError, ...otherErrors]) => {
+    if (firstError) {
+      let msg = `${firstError.message}`
+
+      if (otherErrors.length) {
+        msg += ` saw ${otherErrors.length} total errors`
+      }
+
+      const err = new Error(
+        firstError.message,
+      )
+
+      Object.assign(err, firstError)
+
+      Cypress.log({ name: 'GraphQL Error', message: msg }).error(err)
+      throw err
+    }
+  })
+})
+
 function scaffoldProject (projectName: ProjectFixture) {
   return logInternal({ name: 'scaffoldProject', message: projectName }, () => {
     return taskInternal('__internal_scaffoldProject', projectName)

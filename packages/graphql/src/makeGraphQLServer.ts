@@ -12,7 +12,7 @@ import { getPathToDist } from '@packages/resolve-dist'
 import httpProxy from 'http-proxy'
 
 import { graphqlSchema } from './schema'
-import { parse } from 'graphql'
+import { GraphQLError, parse } from 'graphql'
 
 const SHOW_GRAPHIQL = process.env.CYPRESS_INTERNAL_ENV !== 'production'
 
@@ -23,6 +23,18 @@ globalPubSub.on('reset:data-context', (ctx) => {
   ctx.setGqlServer(gqlServer)
   ctx.setGqlSocketServer(gqlSocketServer)
 })
+
+type OnErrorHandler = (err: GraphQLError) => void
+
+let onErrorHandlers: OnErrorHandler[] = []
+
+export function addGraphQLOnErrorHandler (onError: OnErrorHandler) {
+  onErrorHandlers.push(onError)
+}
+
+export function clearGraphQLOnErrorHandlers () {
+  onErrorHandlers = []
+}
 
 export async function makeGraphQLServer () {
   const dfd = pDefer<number>()
@@ -109,6 +121,19 @@ export const graphQLHTTP = graphqlHTTP((req, res, params) => {
     schema: graphqlSchema,
     graphiql: SHOW_GRAPHIQL,
     context: ctx,
+    customFormatErrorFn (err) {
+      for (const errorHandler of onErrorHandlers) {
+        errorHandler(err)
+      }
+
+      return {
+        message: err.message,
+        locations: err.locations,
+        stack: err.stack,
+        path: err.path,
+        extensions: err.extensions,
+      }
+    },
   }
 })
 
