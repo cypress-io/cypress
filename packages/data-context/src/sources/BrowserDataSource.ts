@@ -1,6 +1,18 @@
 import type { FoundBrowser } from '@packages/types'
 import os from 'os'
+import { execSync } from 'child_process'
 import type { DataContext } from '..'
+
+let isPowerShellAvailable = false
+
+try {
+  execSync(`[void] ''`, { shell: 'powershell' })
+  isPowerShellAvailable = true
+} catch {
+  // Powershell is unavailable
+}
+
+const platform = os.platform()
 
 export interface BrowserApiShape {
   close(): Promise<any>
@@ -52,6 +64,15 @@ export class BrowserDataSource {
   }
 
   isFocusSupported (obj: FoundBrowser) {
-    return ['darwin', 'win32'].includes(os.platform()) || obj.family !== 'firefox'
+    if (platform === 'darwin' || obj.family !== 'firefox') {
+      return true
+    }
+
+    // Only allow focusing if PowerShell is available on Windows, since that's what we use to do it
+    if (obj.family === 'firefox' && platform === 'win32') {
+      return isPowerShellAvailable
+    }
+
+    return false
   }
 }

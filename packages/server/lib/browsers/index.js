@@ -47,14 +47,18 @@ const setFocus = async function () {
   const platform = os.platform()
   const execAsync = util.promisify(exec)
 
-  switch (platform) {
-    case 'darwin':
-      return execAsync(`open -a "$(ps -p ${instance.pid} -o comm=)"`)
-    case 'win32': {
-      return execAsync(`(New-Object -ComObject WScript.Shell).AppActivate(((Get-WmiObject -Class win32_process -Filter "ParentProcessID = '${instance.pid}'") | Select -ExpandProperty ProcessId))`, { shell: 'powershell.exe' })
+  try {
+    switch (platform) {
+      case 'darwin':
+        return execAsync(`open -a "$(ps -p ${instance.pid} -o comm=)"`)
+      case 'win32': {
+        return execAsync(`(New-Object -ComObject WScript.Shell).AppActivate(((Get-WmiObject -Class win32_process -Filter "ParentProcessID = '${instance.pid}'") | Select -ExpandProperty ProcessId))`, { shell: 'powershell.exe' })
+      }
+      default:
+        debug(`Unexpected os platform ${platform}. Set focus is only functional on Windows and MacOS`)
     }
-    default:
-      debug(`Unexpected os platform ${platform}. Set focus is only functional on Windows and MacOS`)
+  } catch (error) {
+    debug(`Failure to set focus. ${error}`)
   }
 }
 
