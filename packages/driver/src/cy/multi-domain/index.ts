@@ -1,5 +1,4 @@
 import Bluebird from 'bluebird'
-
 import $errUtils from '../../cypress/error_utils'
 import { CommandsManager } from './commands_manager'
 import { LogsManager } from './logs_manager'
@@ -34,6 +33,9 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
 
   Commands.addAll({
     switchToDomain<T> (domain: string, doneOrDataOrFn: T[] | Mocha.Done | (() => {}), dataOrFn?: T[] | (() => {}), fn?: (data?: T[]) => {}) {
+      // store the invocation stack in the case that `switchToDomain` errors
+      const userInvocationStack = state('current').get('userInvocationStack')
+
       clearTimeout(timeoutId)
 
       if (!config('experimentalMultiDomain')) {
@@ -86,10 +88,12 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
       const commandsManager = new CommandsManager({
         communicator,
         isDoneFnAvailable: !!done,
+        userInvocationStack,
       })
 
       const logsManager = new LogsManager({
         communicator,
+        userInvocationStack,
       })
 
       const cleanup = () => {
@@ -99,7 +103,6 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
 
       const doneAndCleanup = async (err) => {
         communicator.off('done:called', doneAndCleanup)
-
         // If done is called, immediately unbind command listeners to prevent
         // any commands from being enqueued, but wait for log updates to
         // trickle in before invoking done

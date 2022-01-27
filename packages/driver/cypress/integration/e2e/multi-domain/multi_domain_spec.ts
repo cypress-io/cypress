@@ -253,69 +253,70 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
       })
     })
 
+    it('receives command failures from the secondary domain', (done) => {
+      const timeout = 1000
+
+      cy.on('fail', (e) => {
+        const errString = e.toString()
+
+        expect(errString).to.have.string(`Timed out retrying after ${timeout}ms: Expected to find element: \`#doesnt-exist\`, but never found it`)
+        //  make sure that the secondary domain failures do NOT show up as spec failures or AUT failures
+        expect(errString).to.not.have.string(`The following error originated from your test code, not from Cypress`)
+        expect(errString).to.not.have.string(`The following error originated from your application code, not from Cypress`)
+        done()
+      })
+
+      cy.switchToDomain('foobar.com', [timeout], ([timeout]) => {
+        cy.get('#doesnt-exist', {
+          timeout,
+        })
+      })
+    })
+
     // TODO: this following tests needs to be implemented in a cy-in-cy test or more e2e style test as we need to test the 'done' function
     it('propagates user defined secondary domain errors to the primary')
 
     it('short circuits the secondary domain command queue when "done()" is called early')
   })
 
-  // it.only('testing', async () => {
-  //   cy.wrap('derp').then((testThing) => {
-  //     return 'junk'
-  //   }).then((result) => {
-  //     console.log('last result:', result)
-  //   })
-  // })
   describe('yields', () => {
-    it.only('yields a value', async () => {
+    it('yields a value', () => {
       cy.switchToDomain('foobar.com', () => {
         cy
         .get('[data-cy="dom-check"]')
         .invoke('text')
       }).should('equal', 'From a secondary domain')
-
-      // .then((result) => {
-      //   console.log('last result:', result)
-      // })
     })
 
-    it.only('yields a value again', async () => {
+    it('yields another value', () => {
       cy.switchToDomain('foobar.com', () => {
         cy
         .get('[data-cy="dom-check"]')
         .invoke('text')
       }).should('equal', 'From a secondary domain')
-
-      // .then((result) => {
-      //   console.log('last result:', result)
-      // })
     })
 
-    it('yields synchronously ', async () => {
+    it('yields the cy value even if a return is present', () => {
       cy.switchToDomain('foobar.com', () => {
-        // const $form = cy.$$('[data-cy="dom-check"]')
+        cy
+        .get('[data-cy="dom-check"]')
+        .invoke('text')
 
+        return 'text'
+      }).should('equal', 'From a secondary domain')
+    })
+
+    it('yields synchronously ', () => {
+      cy.switchToDomain('foobar.com', () => {
         return 'From a secondary domain'
       }).should('equal', 'From a secondary domain')
-
-      // .then((result) => {
-      //   console.log('result synchronous:', result)
-
-      //   return result
-      // }).should('equal', 'From a secondary domain')
     })
 
-    it('yields undefined', async () => {
+    it('yields undefined', () => {
       cy.switchToDomain('foobar.com', () => {
         cy
         .get('[data-cy="dom-check"]')
       }).should('equal', undefined)
-
-      // .then((result) => {
-      //   console.log('result undefined:', result)
-
-      //   return result
-      // }).should('equal', undefined)
     })
 
     it('yields undefined if an object contains undefined', () => {

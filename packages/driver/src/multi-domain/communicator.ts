@@ -1,9 +1,53 @@
+import clone from 'clone'
 import debugFn from 'debug'
 import { EventEmitter } from 'events'
+import _ from 'lodash'
+import $dom from '../dom'
 
 const debug = debugFn('cypress:driver:multi-domain')
 
 const CROSS_DOMAIN_PREFIX = 'cross:domain:'
+
+const serializeForPostMessage = (value) => {
+  const { isDom } = $dom
+
+  if (_.isError(value)) {
+    const serializedError = _.mapValues(clone(value), serializeForPostMessage)
+
+    return {
+      ... serializedError,
+      // Native Error types currently cannot be cloned in Firefox when using 'postMessage'.
+      // Please see https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm for more details
+      name: value.name,
+      message: value.message,
+      stack: value.stack,
+    }
+  }
+
+  if (_.isArray(value)) {
+    return _.map(value, serializeForPostMessage)
+  }
+
+  if (isDom(value)) {
+    return $dom.stringify(value, 'short')
+  }
+
+  if (_.isFunction(value)) {
+    return value.toString()
+  }
+
+  if (_.isObject(value)) {
+    // clone to nuke circular references
+    // and blow away anything that throws
+    try {
+      return _.mapValues(clone(value), serializeForPostMessage)
+    } catch (err) {
+      return null
+    }
+  }
+
+  return value
+}
 
 /**
  * Primary domain communicator. Responsible for sending/receiving events throughout
@@ -103,10 +147,11 @@ export class SpecBridgeDomainCommunicator extends EventEmitter {
    * @param {string} event - the name of the event to be sent.
    * @param {any} data - any meta data to be sent with the event.
    */
-  toPrimary (event: string, data?: any) {
+  toPrimary (event: string, data?: any, serializer?: (data: any) => any) {
     console.log('event', event)
     let prefixedEvent = `${CROSS_DOMAIN_PREFIX}${event}`
 
+    data = serializer ? serializer(data) : serializeForPostMessage(data)
     this.windowReference.top.postMessage({ event: prefixedEvent, data }, '*')
   }
 }

@@ -63,8 +63,9 @@ export const handleDomainFn = (cy: $Cy, specBridgeCommunicator: SpecBridgeDomain
         return null
       }
 
-      // similar to the primary domain, the done() callback will be stored in state
-      // if undefined and a user tries to call done, the same effect is granted
+      // similar to the primary domain, the done() callback will be stored in
+      // state (necessary for error handling). if undefined and a user tries to
+      // call done, the same effect is granted
       cy.state('done', done)
 
       fnWrapper = `((data) => {
@@ -72,6 +73,15 @@ export const handleDomainFn = (cy: $Cy, specBridgeCommunicator: SpecBridgeDomain
         return ${fnWrapper}(data)
       })`
     }
+
+    cy.state('onFail', (err) => {
+      const command = cy.state('current')
+      const id = command.get('id')
+      const name = command.get('name')
+      const logId = command.getLastLog()?.get('id')
+
+      specBridgeCommunicator.toPrimary('command:end', { id, name, err, logId })
+    })
 
     try {
       // await the eval func, whether it is a promise or not
@@ -81,18 +91,7 @@ export const handleDomainFn = (cy: $Cy, specBridgeCommunicator: SpecBridgeDomain
 
       specBridgeCommunicator.toPrimary('ran:domain:fn', { subject: serialize(subject) })
     } catch (err) {
-      // Native Error types currently cannot be cloned in Firefox when using 'postMessage'.
-      // Please see https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm for more details
-      // TODO: More standard serialization of Objects/Arrays within the communicator to avoid this type of logic
-      if (err instanceof Error) {
-        specBridgeCommunicator.toPrimary('ran:domain:fn', { err: {
-          name: err.name,
-          message: err.message,
-          stack: err.stack,
-        } })
-      } else {
-        specBridgeCommunicator.toPrimary('ran:domain:fn', { err })
-      }
+      specBridgeCommunicator.toPrimary('ran:domain:fn', { err })
     } finally {
       cy.state('done', undefined)
     }

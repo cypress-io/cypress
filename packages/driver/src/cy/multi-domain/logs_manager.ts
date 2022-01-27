@@ -1,6 +1,7 @@
 import _ from 'lodash'
 import type { PrimaryDomainCommunicator } from '../../multi-domain/communicator'
 import { createDeferred, Deferred } from '../../util/deferred'
+import { correctStackForCrossDomainError } from './util'
 
 export class LogsManager {
   logs: { [key: string]: {
@@ -9,9 +10,11 @@ export class LogsManager {
   }} = {}
 
   communicator: PrimaryDomainCommunicator
+  userInvocationStack: string
 
-  constructor ({ communicator }) {
+  constructor ({ communicator, userInvocationStack }) {
     this.communicator = communicator
+    this.userInvocationStack = userInvocationStack
   }
 
   listen () {
@@ -59,10 +62,22 @@ export class LogsManager {
 
     const isEnded = log.get('ended')
 
-    if (isEnded) {
-      delete this.logs[attrs.id]
-      deferred.resolve()
+    if (!isEnded) return
+
+    if (log.get('state') === 'failed') {
+      let parsedError = correctStackForCrossDomainError(log.get('err'), this.userInvocationStack)
+
+      // The toJSON method on the Cypress.Log converts the 'error' property to 'err', so when the log gets
+      // serialized from the SD to the PD, we need to do the opposite
+      log.set('error', parsedError)
+      if ((logAttrs.consoleProps as any)?.Error) {
+        // Update consoleProps for when users pin failed commands in the reporter so correct error messages are displayed in the console
+        (logAttrs.consoleProps as any).Error = parsedError.stack
+      }
     }
+
+    delete this.logs[attrs.id]
+    deferred.resolve()
   }
 
   async cleanup () {
@@ -74,7 +89,10 @@ export class LogsManager {
       return log.deferred.promise
     })
 
-    await Promise.all(pendingLogs)
-    this.communicator.off('log:changed', this.onLogChanged)
+    try {
+      await Promise.all(pendingLogs)
+    } finally {
+      this.communicator.off('log:changed', this.onLogChanged)
+    }
   }
 }

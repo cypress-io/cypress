@@ -157,6 +157,7 @@ declare namespace Cypress {
   interface ResolvedConfigOptions {
     $autIframe: JQuery<HTMLIFrameElement>
     document: Document
+    projectRoot?: string
   }
 }
 
