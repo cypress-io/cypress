@@ -104,10 +104,22 @@ describe('Sidebar Navigation', () => {
     it('displays the project name and opens a modal to switch testing type', () => {
       cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'true')
 
-      cy.findAllByText('todos').eq(1).should('be.visible').click()
+      cy.get('[data-cy="sidebar-header"]').within(() => {
+        cy.get('[data-cy="testing-type-e2e"]').should('be.visible')
+        cy.findByText('todos').should('be.visible')
+      }).click()
+
       cy.findByText('Choose a testing type').should('be.visible')
+
+      cy.get('[data-cy-testingtype=e2e]').within(() => {
+        cy.contains('Configured')
+      })
+
       cy.intercept('mutation-SwitchTestingType_ReconfigureProject').as('SwitchTestingType')
-      cy.get('[data-cy-testingtype="component"]').click()
+      cy.get('[data-cy-testingtype="component"]').within(() => {
+        cy.contains('Not Configured')
+      }).click()
+
       cy.wait('@SwitchTestingType').then((interception) => {
         expect(interception.request.body.variables.testingType).eq('component')
       })
@@ -169,20 +181,6 @@ describe('Sidebar Navigation', () => {
       cy.get('[data-cy="app-header-bar"]').findByText('Settings').should('be.visible')
       cy.get('.router-link-active').findByText('Settings').should('be.visible')
     })
-
-    it('shows if testing type is configured when clicking switch testing type', () => {
-      cy.openProject('pristine-with-e2e-testing')
-
-      cy.findByText('E2E Testing').should('be.visible')
-      cy.get('[data-cy="switch-testing-type"]').click()
-      cy.get('[data-cy-testingtype=e2e]').within(() => {
-        cy.contains('Configured')
-      })
-
-      cy.get('[data-cy-testingtype=component]').within(() => {
-        cy.contains('Not Configured')
-      })
-    })
   })
 
   context('as component testing type', () => {
@@ -192,14 +190,18 @@ describe('Sidebar Navigation', () => {
       cy.startAppServer('component')
       cy.visitApp()
 
-      cy.findByText('Component Testing').should('be.visible')
-      cy.get('[data-cy="switch-testing-type"]').click()
-      cy.get('[data-cy-testingtype=e2e]').within(() => {
-        cy.contains('Not Configured')
-      })
-
+      cy.get('[data-cy="sidebar-header"]').within(() => cy.get('[data-cy="testing-type-component"]')).click()
       cy.get('[data-cy-testingtype=component]').within(() => {
         cy.contains('Configured')
+      })
+
+      cy.intercept('mutation-SwitchTestingType_ReconfigureProject').as('SwitchTestingType')
+      cy.get('[data-cy-testingtype="e2e"]').within(() => {
+        cy.contains('Not Configured')
+      }).click()
+
+      cy.wait('@SwitchTestingType').then((interception) => {
+        expect(interception.request.body.variables.testingType).eq('e2e')
       })
     })
   })

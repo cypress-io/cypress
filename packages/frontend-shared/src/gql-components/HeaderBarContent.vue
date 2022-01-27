@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-white border-b border-b-gray-100 h-64px py-15px px-6">
+  <div class="bg-white border-b h-full border-b-gray-100 py-15px px-6">
     <div class="flex h-full gap-12px items-center justify-between">
       <div
         v-if="pageName"
