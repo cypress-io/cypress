@@ -1,57 +1,70 @@
 <template>
-  <div class="flex-grow">
-    <div
-      v-if="mutation.fetching.value"
-      class="inline-flex items-center justify-center w-full mt-48px"
-    >
-      <i-cy-loading_x16 class="h-48px mr-12px animate-spin w-48px" />
-      <p class="text-lg">
-        Loading
-      </p>
+  <div class="flex flex-col flex-grow justify-between">
+    <template v-if="generatedSpecError">
+      <EmptyGenerator
+        :gql="generateSpecFromSource.currentProject"
+        title=""
+        type="story"
+        :spec-file-name="generatedSpecError.fileName"
+        :errored-codegen-candidate="generatedSpecError.erroredCodegenCandidate"
+        @restart="cancelSpecNameCreation"
+      />
+    </template>
+
+    <div class="flex-grow">
+      <div
+        v-if="mutation.fetching.value"
+        class="inline-flex items-center justify-center w-full mt-48px"
+      >
+        <i-cy-loading_x16 class="h-48px mr-12px animate-spin w-48px" />
+        <p class="text-lg">
+          Loading
+        </p>
+      </div>
+      <FileChooser
+        v-else-if="!result"
+        v-model:extensionPattern="extensionPattern"
+        :files="allFiles || []"
+        :loading="query.fetching.value"
+        @selectFile="makeSpec"
+      />
+      <GeneratorSuccess
+        v-else
+        :file="result.file"
+      />
     </div>
-    <FileChooser
-      v-else-if="!result"
-      v-model:extensionPattern="extensionPattern"
-      :files="allFiles || []"
-      :loading="query.fetching.value"
-      @selectFile="makeSpec"
-    />
-    <GeneratorSuccess
-      v-else
-      :file="result.file"
-    />
-  </div>
-  <div>
-    <div
-      v-if="!result"
-      class="w-full rounded-b h-24px"
-    />
-    <StandardModalFooter
-      v-else
-      class="flex items-center h-72px gap-16px"
-    >
-      <router-link
-        class="outline-none"
-        :to="{ path: '/specs/runner', query: { file: result.file.relative } }
-        "
+    <div>
+      <div
+        v-if="!result"
+        class="w-full rounded-b h-24px"
+      />
+      <StandardModalFooter
+        v-else
+        class="flex items-center h-72px gap-16px"
       >
-        <Button
-          :prefix-icon="TestResultsIcon"
-          prefix-icon-class="w-16px h-16px icon-dark-white"
-          @click="emits('close')"
+        <router-link
+          class="outline-none"
+          :to="{ path: '/specs/runner', query: { file: result.file.relative } }
+          "
         >
-          {{ t('createSpec.successPage.runSpecButton') }}
+          <Button
+            :prefix-icon="TestResultsIcon"
+            prefix-icon-class="w-16px h-16px icon-dark-white"
+            @click="emits('close')"
+          >
+            {{ t('createSpec.successPage.runSpecButton') }}
+          </Button>
+        </router-link>
+        <Button
+          :prefix-icon="PlusButtonIcon"
+          prefix-icon-class="w-16px h-16px icon-dark-gray-500"
+          variant="outline"
+          @click="$emit('restart')"
+        >
+          {{ t('createSpec.successPage.createAnotherSpecButton') }}
         </Button>
-      </router-link>
-      <Button
-        :prefix-icon="PlusButtonIcon"
-        prefix-icon-class="w-16px h-16px icon-dark-gray-500"
-        variant="outline"
-        @click="$emit('restart')"
-      >
-        {{ t('createSpec.successPage.createAnotherSpecButton') }}
-      </Button>
-    </StandardModalFooter>
+      </StandardModalFooter>
+    </div>
   </div>
 </template>
 
@@ -67,6 +80,7 @@ import StandardModalFooter from '@cy/components/StandardModalFooter.vue'
 import Button from '@cy/components/Button.vue'
 import PlusButtonIcon from '~icons/cy/add-large_x16.svg'
 import TestResultsIcon from '~icons/cy/test-results_x24.svg'
+import EmptyGenerator from '../EmptyGenerator.vue'
 
 const props = defineProps<{
   title: string,
@@ -115,8 +129,16 @@ query StoryGeneratorStepOne($glob: String!) {
 gql`
 mutation StoryGeneratorStepOne_generateSpec($codeGenCandidate: String!, $type: CodeGenType!) {
   generateSpecFromSource(codeGenCandidate: $codeGenCandidate, type: $type) {
-    ...GeneratorCustomFile
     ...GeneratorSuccess
+    currentProject {
+      id
+      ...EmptyGenerator
+    }
+    generatedSpecResult {
+      ... on GeneratedSpecError {
+        fileName
+      }
+    }
   }
 }`
 
@@ -140,6 +162,8 @@ const allFiles = computed(() => {
 }) as any
 
 const result = ref<GeneratorSuccessFileFragment | null>(null)
+const generatedSpecError = ref()
+const generateSpecFromSource = ref()
 
 whenever(result, () => {
   title.value = t('createSpec.successPage.header')
@@ -151,7 +175,13 @@ const makeSpec = async (file) => {
     type: 'story',
   })
 
+  generateSpecFromSource.value = data?.generateSpecFromSource
   result.value = data?.generateSpecFromSource?.generatedSpecResult?.__typename === 'ScaffoldedFile' ? data?.generateSpecFromSource?.generatedSpecResult : null
+  generatedSpecError.value = data?.generateSpecFromSource?.generatedSpecResult?.__typename === 'GeneratedSpecError' ? data?.generateSpecFromSource?.generatedSpecResult : null
+}
+
+const cancelSpecNameCreation = () => {
+  generatedSpecError.value = null
 }
 
 </script>

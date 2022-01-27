@@ -5,5 +5,6 @@ export const GeneratedSpecError = objectType({
   description: 'Error from generated spec',
   definition (t) {
     t.nonNull.string('fileName')
+    t.nonNull.string('erroredCodegenCandidate')
   },
 })

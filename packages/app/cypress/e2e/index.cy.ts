@@ -153,7 +153,7 @@ describe('App: Index', () => {
 
           //Shows extension warning
           cy.get('input').clear().type('cypress/e2e/MyTest.spec.j')
-          cy.intercept('mutation-EmptyGeneratorCardStepOne_MatchSpecFile', (req) => {
+          cy.intercept('mutation-EmptyGenerator_MatchSpecFile', (req) => {
             if (req.body.variables.specFile === 'cypress/e2e/MyTest.spec.jx') {
               req.on('before:response', (res) => {
                 res.body.data.matchesSpecPattern = true

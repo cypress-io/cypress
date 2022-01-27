@@ -196,9 +196,10 @@ export const mutation = mutationType({
       args: {
         codeGenCandidate: nonNull(stringArg()),
         type: nonNull(CodeGenTypeEnum),
+        erroredCodegenCandidate: stringArg(),
       },
       resolve: (_, args, ctx) => {
-        return ctx.actions.project.codeGenSpec(args.codeGenCandidate, args.type)
+        return ctx.actions.project.codeGenSpec(args.codeGenCandidate, args.type, args.erroredCodegenCandidate)
       },
     })
 

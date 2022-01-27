@@ -308,7 +308,7 @@ export class ProjectActions {
     this.api.insertProjectPreferencesToCache(this.ctx.lifecycleManager.projectTitle, args)
   }
 
-  async codeGenSpec (codeGenCandidate: string, codeGenType: CodeGenType): Promise<NexusGenUnions['GeneratedSpecResult']> {
+  async codeGenSpec (codeGenCandidate: string, codeGenType: CodeGenType, erroredCodegenCandidate?: string | null): Promise<NexusGenUnions['GeneratedSpecResult']> {
     const project = this.ctx.currentProject
 
     if (!project) {
@@ -316,12 +316,15 @@ export class ProjectActions {
     }
 
     const parsed = path.parse(codeGenCandidate)
-    let parsedCTExt
 
     const defaultCText = '.cy'
     const possibleExtensions = ['.cy', '.spec', '.test', '-spec', '-test', '_spec']
 
     const getFileExtension = () => {
+      if (erroredCodegenCandidate) {
+        return ''
+      }
+
       if (codeGenType === 'e2e') {
         return (
           possibleExtensions.find((ext) => {
@@ -330,15 +333,11 @@ export class ProjectActions {
         )
       }
 
-      parsedCTExt = possibleExtensions.find((ext) => {
-        return codeGenCandidate.endsWith(ext + parsed.ext)
-      })
-
-      return parsedCTExt || defaultCText
+      return defaultCText
     }
 
     const getCodeGenPath = () => {
-      return codeGenType === 'e2e'
+      return codeGenType === 'e2e' || erroredCodegenCandidate
         ? this.ctx.path.join(
           project,
           codeGenCandidate,
@@ -353,11 +352,12 @@ export class ProjectActions {
       codeGenPath,
       codeGenType,
       specFileExtension,
+      erroredCodegenCandidate,
     })
 
     let codeGenOptions = await newSpecCodeGenOptions.getCodeGenOptions()
 
-    if (codeGenType === 'component' && !parsedCTExt) {
+    if (codeGenType === 'component' && !erroredCodegenCandidate) {
       const filePathAbsolute = path.join(path.parse(codeGenPath).dir, codeGenOptions.fileName)
       const filePathRelative = path.relative(this.ctx.currentProject || '', filePathAbsolute)
 
@@ -377,6 +377,7 @@ export class ProjectActions {
       if (!foundExt) {
         return {
           fileName: filePathRelative,
+          erroredCodegenCandidate: codeGenPath,
         }
       }
 
@@ -400,7 +401,7 @@ export class ProjectActions {
     const cfg = this.ctx.project.getConfig()
 
     if (cfg) {
-      const toArray = (x: string | string[] | undefined) => Array.isArray(x) ? x : x ? [x] : undefined
+      const toArray = (v: string | string[] | undefined) => Array.isArray(v) ? v : v ? [v] : undefined
 
       const testingType = codeGenType === 'component' ? 'component' : 'e2e'
 

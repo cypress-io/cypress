@@ -499,6 +499,7 @@ type GenerateSpecResponse {
 
 """Error from generated spec"""
 type GeneratedSpecError {
+  erroredCodegenCandidate: String!
   fileName: String!
 }
 
@@ -709,7 +710,7 @@ type Mutation {
   finishedRenamingComponentSpecs: Query
 
   """Generate spec from source"""
-  generateSpecFromSource(codeGenCandidate: String!, type: CodeGenType!): GenerateSpecResponse
+  generateSpecFromSource(codeGenCandidate: String!, erroredCodegenCandidate: String, type: CodeGenType!): GenerateSpecResponse
 
   """Hides the launchpad windows"""
   hideBrowserWindow: Boolean!

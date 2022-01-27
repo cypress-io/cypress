@@ -10,11 +10,13 @@ interface CodeGenOptions {
   codeGenPath: string
   codeGenType: CodeGenType
   specFileExtension: string
+  erroredCodegenCandidate?: string | null
 }
 
 export class SpecOptions {
   private parsedPath: ParsedPath;
   private projectRoot: string;
+  private parsedErroredCodegenCandidate?: ParsedPath
 
   private getFrontendFramework () {
     return this.ctx.project.frameworkLoader.load(this.projectRoot)
@@ -23,6 +25,10 @@ export class SpecOptions {
   constructor (private ctx: DataContext, private options: CodeGenOptions) {
     assert(this.ctx.currentProject)
     this.parsedPath = this.ctx.path.parse(options.codeGenPath)
+    if (options.erroredCodegenCandidate) {
+      this.parsedErroredCodegenCandidate = this.ctx.path.parse(options.erroredCodegenCandidate)
+    }
+
     // Should always be defined
     this.projectRoot = this.ctx.currentProject
   }
@@ -59,17 +65,28 @@ export class SpecOptions {
   }
 
   private async getFrameworkComponentOptions (framework: CodeGenFramework) {
-    const componentName = capitalize(camelCase(this.parsedPath.name))
+    const componentName = capitalize(camelCase(this.parsedErroredCodegenCandidate?.name ?? this.parsedPath.name))
+
+    let componentPath = `./${this.parsedPath.base}`
+
+    if (this.parsedErroredCodegenCandidate?.base) {
+      const componentPathRelative = this.ctx.path.relative(this.parsedPath.dir, this.parsedErroredCodegenCandidate.dir)
+
+      componentPath = this.ctx.path.join(componentPathRelative, this.parsedErroredCodegenCandidate.base)
+
+      componentPath = componentPath.startsWith('.') ? componentPath : `./${componentPath}`
+    }
+
     const frameworkOptions = {
       react: {
-        imports: ['import React from "react"', 'import { mount } from "@cypress/react"', `import ${componentName} from "./${this.parsedPath.name}"`],
+        imports: ['import React from "react"', 'import { mount } from "@cypress/react"', `import ${componentName} from "${componentPath}"`],
         componentName,
         docsLink: '// see: https://reactjs.org/docs/test-utils.html',
         mount: `mount(<${componentName} />)`,
         fileName: this.getFilename(this.parsedPath.ext),
       },
       vue: {
-        imports: ['import { mount } from "@cypress/vue"', `import ${componentName} from "./${this.parsedPath.base}"`],
+        imports: ['import { mount } from "@cypress/vue"', `import ${componentName} from "${componentPath}"`],
         componentName,
         docsLink: '// see: https://vue-test-utils.vuejs.org/',
         mount: `mount(${componentName}, { props: {} })`,
@@ -88,6 +105,12 @@ export class SpecOptions {
 
       return fileContent.includes('lang="ts"') ? '.ts' : '.js'
     } catch (e) {
+      const possibleExtension = this.parsedPath.ext
+
+      if (possibleExtension === '.js' || possibleExtension === '.ts') {
+        return possibleExtension
+      }
+
       return '.js'
     }
   }

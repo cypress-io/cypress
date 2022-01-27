@@ -1,7 +1,14 @@
 <template>
   <div class="flex flex-col flex-grow justify-between">
-    <template v-if="generatedSpecErrorFileName">
-      <GeneratorCustomFile :gql="generateSpecFromSource" />
+    <template v-if="generatedSpecError">
+      <EmptyGenerator
+        :gql="generateSpecFromSource.currentProject"
+        title=""
+        type="component"
+        :spec-file-name="generatedSpecError.fileName"
+        :errored-codegen-candidate="generatedSpecError.erroredCodegenCandidate"
+        @restart="cancelSpecNameCreation"
+      />
     </template>
 
     <template v-else>
@@ -75,7 +82,7 @@ import StandardModalFooter from '@cy/components/StandardModalFooter.vue'
 import Button from '@cy/components/Button.vue'
 import PlusButtonIcon from '~icons/cy/add-large_x16.svg'
 import TestResultsIcon from '~icons/cy/test-results_x24.svg'
-import GeneratorCustomFile from '../GeneratorCustomFile.vue'
+import EmptyGenerator from '../EmptyGenerator.vue'
 
 const props = defineProps<{
   title: string,
@@ -124,8 +131,17 @@ query ComponentGeneratorStepOne($glob: String!) {
 gql`
 mutation ComponentGeneratorStepOne_generateSpec($codeGenCandidate: String!, $type: CodeGenType!) {
   generateSpecFromSource(codeGenCandidate: $codeGenCandidate, type: $type) {
-    ...GeneratorCustomFile
     ...GeneratorSuccess
+    currentProject {
+      id
+      ...EmptyGenerator
+    }
+    generatedSpecResult {
+      ... on GeneratedSpecError {
+        fileName
+        erroredCodegenCandidate
+      }
+    }
   }
 }`
 
@@ -149,7 +165,7 @@ const allFiles = computed((): any => {
 })
 
 const result = ref<GeneratorSuccessFileFragment | null>(null)
-const generatedSpecErrorFileName = ref()
+const generatedSpecError = ref()
 const generateSpecFromSource = ref()
 
 whenever(result, () => {
@@ -164,7 +180,11 @@ const makeSpec = async (file) => {
 
   generateSpecFromSource.value = data?.generateSpecFromSource
   result.value = data?.generateSpecFromSource?.generatedSpecResult?.__typename === 'ScaffoldedFile' ? data?.generateSpecFromSource?.generatedSpecResult : null
-  generatedSpecErrorFileName.value = data?.generateSpecFromSource?.generatedSpecResult?.__typename === 'GeneratedSpecError' ? data?.generateSpecFromSource?.generatedSpecResult.fileName : null
+  generatedSpecError.value = data?.generateSpecFromSource?.generatedSpecResult?.__typename === 'GeneratedSpecError' ? data?.generateSpecFromSource?.generatedSpecResult : null
+}
+
+const cancelSpecNameCreation = () => {
+  generatedSpecError.value = null
 }
 
 </script>

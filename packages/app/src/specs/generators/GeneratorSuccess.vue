@@ -50,6 +50,15 @@ fragment GeneratorSuccessFile on ScaffoldedFile {
 
 gql`
 fragment GeneratorSuccess on GenerateSpecResponse {
+  # Used to update the cache after a spec is created, so when the user tries to
+  # run it, it already exists
+  currentProject {
+    id
+    specs {
+      id
+      ...SpecNode_InlineSpecList
+    }
+  }
   generatedSpecResult {
     ... on ScaffoldedFile {
       ...GeneratorSuccessFile
