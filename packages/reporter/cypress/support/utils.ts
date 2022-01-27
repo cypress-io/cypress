@@ -19,6 +19,10 @@ interface HandlesFileOpeningProps {
 export const itHandlesFileOpening = ({ getRunner, selector, file, stackTrace = false }: HandlesFileOpeningProps) => {
   beforeEach(() => {
     cy.stub(getRunner(), 'emit').callThrough()
+
+    if (stackTrace) {
+      cy.contains('View stack trace').click()
+    }
   })
 
   it('emits unified file open event', () => {
