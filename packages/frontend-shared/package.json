@@ -43,6 +43,7 @@
     "@windicss/plugin-interaction-variants": "1.0.0",
     "bluebird": "3.5.3",
     "classnames": "2.3.1",
+    "cypress-real-events": "1.6.0",
     "fake-uuid": "^1.0.0",
     "graphql": "^15.5.1",
     "graphql-relay": "^0.9.0",
