@@ -256,9 +256,9 @@ describe('App: Index', () => {
 
     context('pristine app', () => {
       beforeEach(() => {
-        cy.scaffoldProject('pristine')
-        cy.openProject('pristine')
-        cy.startAppServer()
+        cy.scaffoldProject('pristine-with-e2e-testing')
+        cy.openProject('pristine-with-e2e-testing')
+        cy.startAppServer('e2e')
         cy.visitApp()
       })
 
