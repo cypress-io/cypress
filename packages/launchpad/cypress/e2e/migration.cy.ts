@@ -48,7 +48,7 @@ describe('Steps', () => {
 
   // TODO: the current logic is wrong and does not consider
   // the case of a custom integration folder!
-  it.only('shows all e2e steps for an e2e project with custom integrationFolder', () => {
+  it('shows all e2e steps for an e2e project with custom integrationFolder', () => {
     cy.scaffoldProject('migration-e2e-custom-integration')
     cy.openProject('migration-e2e-custom-integration')
     cy.visitLaunchpad()

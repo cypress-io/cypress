@@ -13,7 +13,7 @@ import {
   supportFilesForMigration,
   OldCypressConfig,
   hasComponentSpecFile,
-  getSpecsForMigrationGuide
+  getSpecsForMigrationGuide,
 } from '../util/migration'
 import type { FilePart } from '../util/migrationFormat'
 import {
@@ -87,12 +87,11 @@ export class MigrationDataSource {
       throw Error('cannot get specs without a project path')
     }
 
-    const compFolder = await this.componentFolder()
     const intFolder = await this.integrationFolder()
 
-    const specs = await getSpecs(this.ctx.currentProject, compFolder || null, intFolder || null)
+    const specs = await getSpecs(this.ctx.currentProject, intFolder || null)
 
-    debug('looked in %s and %s and found %o', compFolder, intFolder, specs)
+    debug('looked in %s and %s and found %o', intFolder, specs)
 
     return specs
   }
@@ -165,9 +164,18 @@ export class MigrationDataSource {
   }
 
   async getSpecsForMigrationGuide (): Promise<FilesForMigrationUI> {
-    const specs = await this.getSpecsRelativeToFolder()
-    return getSpecsForMigrationGuide(specs)
+    const integrationFolder = await this.integrationFolder()
 
+    if (integrationFolder === false) {
+      return {
+        before: [],
+        after: [],
+      }
+    }
+
+    const specs = await this.getSpecsRelativeToFolder()
+
+    return getSpecsForMigrationGuide(specs, integrationFolder)
   }
 
   async getConfig () {

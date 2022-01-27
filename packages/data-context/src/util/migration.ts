@@ -200,17 +200,13 @@ export interface GetRelativeSpecs {
 
 export async function getSpecs (
   projectRoot: string,
-  componentDirPath: string | null,
   e2eDirPath: string | null,
 ): Promise<GetRelativeSpecs> {
-  const [comp, e2e] = await Promise.all([
-    findByTestingType(projectRoot, componentDirPath, 'component'),
-    findByTestingType(projectRoot, e2eDirPath, 'e2e'),
-  ])
+  const e2e = await findByTestingType(projectRoot, e2eDirPath, 'e2e')
 
   return {
-    before: [...comp, ...e2e],
-    after: [...comp, ...e2e].map((x) => {
+    before: e2e,
+    after: e2e.map((x) => {
       return {
         testingType: x.testingType,
         relative: renameSpecPath(x.relative),
@@ -307,25 +303,20 @@ export function renameSpecPath (spec: string) {
   .replace(/([._-]?[s|S]pec.|[.])(?=[j|t]s[x]?)/, '.cy.')
 }
 
+export function getSpecsForMigrationGuide (specs: GetRelativeSpecs, integrationFolder: string): FilesForMigrationUI {
+  const isDefaultIntegrationFolder = integrationFolder === 'cypress/integration'
 
-export function getSpecsForMigrationGuide (specs: GetRelativeSpecs): FilesForMigrationUI {
   const processSpecs = (regexp: 'beforeRegexp' | 'afterRegexp') => {
-    return (acc: MigrationFile[], x: RelativeSpecWithTestingType) => {
-      try {
-        return acc.concat({
-          testingType: x.testingType,
-          relative: x.relative,
-          parts: formatMigrationFile(x.relative, new RegExp(regexps[x.testingType][regexp])),
-        })
-      } catch (e) {
-        // if (e instanceof NonSpecFileError) {
-        //   // it's possible they have a non spec file in their cypress/integration directory,
-        //   // if that happens, we just skip that file and carry on.
-        //   return acc
-        // }
+    const re = isDefaultIntegrationFolder
+      ? new RegExp(regexps.e2e.usingDefaultIntegrationFolder[regexp])
+      : new RegExp(regexps.e2e.usingCustomIntegrationFolder[regexp](integrationFolder))
 
-        throw e
-      }
+    return (acc: MigrationFile[], x: RelativeSpecWithTestingType) => {
+      return acc.concat({
+        testingType: x.testingType,
+        relative: x.relative,
+        parts: formatMigrationFile(x.relative, re),
+      })
     }
   }
 

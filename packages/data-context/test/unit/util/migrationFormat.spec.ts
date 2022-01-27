@@ -8,7 +8,7 @@ import {
 describe('formatMigrationFile', () => {
   it('breaks pre-migration spec into parts', () => {
     const spec = 'cypress/integration/app.spec.js'
-    const re = new RegExp(regexps.e2e.beforeRegexp)
+    const re = new RegExp(regexps.e2e.usingDefaultIntegrationFolder.beforeRegexp)
     const actual = formatMigrationFile(spec, re)
 
     expect(actual).to.eql([
@@ -22,7 +22,7 @@ describe('formatMigrationFile', () => {
 
   it('breaks post-migration spec into parts', () => {
     const spec = 'cypress/e2e/app.cy.js'
-    const re = new RegExp(regexps.e2e.afterRegexp)
+    const re = new RegExp(regexps.e2e.usingDefaultIntegrationFolder.afterRegexp)
     const actual = formatMigrationFile(spec, re)
 
     expect(actual).to.eql([
