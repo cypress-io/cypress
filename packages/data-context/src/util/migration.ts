@@ -9,6 +9,7 @@ import {
   formatMigrationFile,
 } from './migrationFormat'
 import type { FilesForMigrationUI } from '../sources'
+import { getComponentFolder, getIntegrationFolder } from '../sources/migration'
 
 type ConfigOptions = {
   global: Record<string, unknown>
@@ -323,13 +324,13 @@ export function reduceConfig (cfg: OldCypressConfig): ConfigOptions {
 
 function getSpecPattern (cfg: OldCypressConfig, testType: TestingType) {
   const specPattern = cfg[testType]?.testFiles ?? cfg.testFiles ?? '**/*.cy.js'
-  const customComponentFolder = cfg.component?.componentFolder ?? cfg.componentFolder ?? null
+  const customComponentFolder = getComponentFolder(cfg)
 
   if (testType === 'component' && customComponentFolder) {
     return `${customComponentFolder}/${specPattern}`
   }
 
-  const customIntegrationFolder = cfg.e2e?.integrationFolder ?? cfg.integrationFolder ?? null
+  const customIntegrationFolder = getIntegrationFolder(cfg)
 
   if (testType === 'e2e' && customIntegrationFolder) {
     return `${customIntegrationFolder}/${specPattern}`

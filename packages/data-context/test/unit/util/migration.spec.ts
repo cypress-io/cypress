@@ -321,7 +321,7 @@ describe('reduceConfig', () => {
     expect(newConfig.e2e.specPattern).to.eq(`${config.e2e.integrationFolder}/${config.testFiles}`)
   })
 
-  it('should remove integration and componentFolders', () => {
+  it('should exclude integrationFolder and componentFolder', () => {
     const config = {
       componentFolder: 'src',
       integrationFolder: 'cypress/integration',
@@ -349,5 +349,13 @@ describe('reduceConfig', () => {
 
     expect(newConfig.e2e.supportFile).to.eq(config.supportFile)
     expect(newConfig.component.supportFile).to.eq(config.supportFile)
+  })
+
+  it('should exclude the pluginsFile', () => {
+    const config = { pluginsFile: 'cypress/plugins/index.js' }
+    const newConfig = reduceConfig(config)
+
+    // @ts-ignore field not on ConfigOptions type
+    expect(newConfig.pluginsFile).to.not.exist
   })
 })
