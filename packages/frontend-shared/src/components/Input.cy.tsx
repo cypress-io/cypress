@@ -24,6 +24,7 @@ describe('<Input/>', { viewportWidth: 400, viewportHeight: 80 }, () => {
 
     cy.mount(() => (
       <Input
+        // @ts-ignore = vModel is v-model in vue
         vModel={value.value}
         prefixIcon={CoffeeIcon}
         suffixIcon={LoadingIcon}
