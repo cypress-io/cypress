@@ -9,6 +9,8 @@
       {{ t('migration.wizard.description') }}
     </p>
     <template v-if="migration">
+      <!-- used to ensure the wizard is actually rendered before running assertions-->
+      <span data-cy="migration-wizard" />
       <MigrationStep
         :step="steps.find(step => step.name === 'renameAuto')"
         :title="t('migration.wizard.step1.title')"

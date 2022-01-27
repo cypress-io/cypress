@@ -64,12 +64,16 @@ export class MigrationDataSource {
   constructor (private ctx: DataContext) { }
 
   async initialize () {
+    if (!this.ctx.currentProject) {
+      throw Error('cannot do migration without currentProject!')
+    }
+
     this._config = null
     const config = await this.parseCypressConfig()
 
     await this.initializeFlags()
 
-    this.filteredSteps = getStepsForMigration(config)
+    this.filteredSteps = await getStepsForMigration(this.ctx.currentProject, config)
 
     if (!this.filteredSteps[0]) {
       throw Error(`Impossible to initialize a migration. No steps fit the configuration of this project.`)

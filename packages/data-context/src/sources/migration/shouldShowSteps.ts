@@ -1,8 +1,20 @@
+import globby from 'globby'
 import { MIGRATION_STEPS } from '@packages/types'
 import type { OldCypressConfig } from '../../util'
+import path from 'path'
 
-export function getIntegrationTestFiles (config: OldCypressConfig) {
-  return config.e2e?.testFiles ?? config.testFiles ?? '**/*'
+export function getIntegrationTestFiles (config: OldCypressConfig): string[] {
+  const glob = config.e2e?.testFiles ?? config.testFiles
+
+  if (glob && Array.isArray(glob)) {
+    return glob
+  }
+
+  if (glob && typeof glob === 'string') {
+    return [glob]
+  }
+
+  return ['**/*']
 }
 
 export function getIntegrationFolder (config: OldCypressConfig) {
@@ -25,17 +37,23 @@ export function getComponentFolder (config: OldCypressConfig) {
   return config.component?.componentFolder ?? config.componentFolder ?? 'cypress/component'
 }
 
-export function shouldShowAutoRenameStep (config: OldCypressConfig) {
+export async function shouldShowAutoRenameStep (projectRoot: string, config: OldCypressConfig) {
   const integrationFolder = getIntegrationFolder(config)
   const testFiles = getIntegrationTestFiles(config)
 
-  // defaults, migrate
-  if (integrationFolder === 'cypress/integration') {
-    return true
+  const hasSpecFiles = async (dir: string, testFilesGlob: string[]): Promise<boolean> => {
+    const f = await globby(testFilesGlob.map((x) => path.join(projectRoot, dir, x)))
+
+    return f.length > 0
   }
 
-  // non default integration, but default test files, we can migrate
-  if (testFiles === '**/*') {
+  // default or custom integrationFolder,
+  // non custom test files glob
+  // migrate (unless they have no specs, nothing to rename?)
+  if (
+    integrationFolder !== false &&
+    await hasSpecFiles(integrationFolder, testFiles)
+  ) {
     return true
   }
 
@@ -70,30 +88,33 @@ export function shouldShowConfigFileStep (config: OldCypressConfig) {
 
 export type Step = typeof MIGRATION_STEPS[number]
 
-export function getStepsForMigration (
+export async function getStepsForMigration (
+  projectRoot: string,
   config: OldCypressConfig,
-): Step[] {
-  return MIGRATION_STEPS.reduce<Step[]>((acc, curr) => {
-    if (curr === 'renameAuto' && shouldShowAutoRenameStep(config)) {
-      return acc.concat(curr)
+): Promise<Step[]> {
+  const steps: Step[] = []
+
+  for (const step of MIGRATION_STEPS) {
+    if (step === 'renameAuto' && await shouldShowAutoRenameStep(projectRoot, config)) {
+      steps.push(step)
     }
 
-    if (curr === 'renameManual' && shouldShowRenameManual(config)) {
-      return acc.concat(curr)
+    if (step === 'renameManual' && shouldShowRenameManual(config)) {
+      steps.push(step)
     }
 
-    if (curr === 'renameSupport' && shouldShowRenameSupport(config)) {
-      return acc.concat(curr)
+    if (step === 'renameSupport' && shouldShowRenameSupport(config)) {
+      steps.push(step)
     }
 
-    if (curr === 'configFile' && shouldShowConfigFileStep(config)) {
-      return acc.concat(curr)
+    if (step === 'configFile' && shouldShowConfigFileStep(config)) {
+      steps.push(step)
     }
 
-    if (curr === 'setupComponent' && shouldShowSetupComponent(config)) {
-      return acc.concat(curr)
+    if (step === 'setupComponent' && shouldShowSetupComponent(config)) {
+      steps.push(step)
     }
+  }
 
-    return acc
-  }, [])
+  return steps
 }

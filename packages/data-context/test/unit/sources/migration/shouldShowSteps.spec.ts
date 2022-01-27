@@ -12,7 +12,7 @@ describe('shouldShowAutoRenameStep', () => {
   it('false when integrationFolder and testFiles are custom', async () => {
     const cwd = scaffoldMigrationProject('migration-e2e-fully-custom')
     const config = fs.readJsonSync(path.join(cwd, 'cypress.json'))
-    const actual = shouldShowAutoRenameStep(config)
+    const actual = await shouldShowAutoRenameStep(cwd, config)
 
     expect(actual).to.be.false
   })
@@ -20,7 +20,7 @@ describe('shouldShowAutoRenameStep', () => {
   it('true when integrationFolder custom and testFiles default', async () => {
     const cwd = scaffoldMigrationProject('migration-e2e-custom-integration')
     const config = fs.readJsonSync(path.join(cwd, 'cypress.json'))
-    const actual = shouldShowAutoRenameStep(config)
+    const actual = await shouldShowAutoRenameStep(cwd, config)
 
     expect(actual).to.be.true
   })
@@ -28,17 +28,25 @@ describe('shouldShowAutoRenameStep', () => {
   it('true when integrationFolder default and testFiles custom', async () => {
     const cwd = scaffoldMigrationProject('migration-e2e-custom-test-files')
     const config = fs.readJsonSync(path.join(cwd, 'cypress.json'))
-    const actual = shouldShowAutoRenameStep(config)
+    const actual = await shouldShowAutoRenameStep(cwd, config)
 
     expect(actual).to.be.true
   })
 
-  it('true when integrationFolder and testFiles default', async () => {
+  it('true when integrationFolder and testFiles default and spec exists', async () => {
     const cwd = scaffoldMigrationProject('migration-e2e-defaults')
     const config = fs.readJsonSync(path.join(cwd, 'cypress.json'))
-    const actual = shouldShowAutoRenameStep(config)
+    const actual = await shouldShowAutoRenameStep(cwd, config)
 
     expect(actual).to.be.true
+  })
+
+  it('false when integrationFolder and testFiles default by no spec to migrate', async () => {
+    const cwd = scaffoldMigrationProject('migration-e2e-defaults-no-specs')
+    const config = fs.readJsonSync(path.join(cwd, 'cypress.json'))
+    const actual = await shouldShowAutoRenameStep(cwd, config)
+
+    expect(actual).to.be.false
   })
 })
 
@@ -47,7 +55,7 @@ describe('getStepsForMigration', () => {
     const cwd = scaffoldMigrationProject('migration-e2e-fully-custom')
     const config = fs.readJsonSync(path.join(cwd, 'cypress.json'))
 
-    const actual = getStepsForMigration(config)
+    const actual = await getStepsForMigration(cwd, config)
     const expected: Step[] = ['configFile']
 
     expect(actual).to.eql(expected)
@@ -57,7 +65,7 @@ describe('getStepsForMigration', () => {
     const cwd = scaffoldMigrationProject('migration-e2e-defaults')
     const config = fs.readJsonSync(path.join(cwd, 'cypress.json'))
 
-    const actual = getStepsForMigration(config)
+    const actual = await getStepsForMigration(cwd, config)
     const expected: Step[] = ['renameAuto', 'renameSupport', 'configFile']
 
     expect(actual).to.eql(expected)
@@ -67,18 +75,28 @@ describe('getStepsForMigration', () => {
     const cwd = scaffoldMigrationProject('migration-e2e-custom-test-files')
     const config = fs.readJsonSync(path.join(cwd, 'cypress.json'))
 
-    const actual = getStepsForMigration(config)
+    const actual = await getStepsForMigration(cwd, config)
     const expected: Step[] = ['renameAuto', 'renameSupport', 'configFile']
 
     expect(actual).to.eql(expected)
   })
 
-  it('returns all steps for project with e2e and component set up', async () => {
+  it('skips renameAuto for customized integrationFolder+tesFiles, but returns all steps', async () => {
     const cwd = scaffoldMigrationProject('migration')
     const config = fs.readJsonSync(path.join(cwd, 'cypress.json'))
 
-    const actual = getStepsForMigration(config)
-    const expected: Step[] = ['renameAuto', 'renameManual', 'renameSupport', 'configFile', 'setupComponent']
+    const actual = await getStepsForMigration(cwd, config)
+    const expected: Step[] = ['renameManual', 'renameSupport', 'configFile', 'setupComponent']
+
+    expect(actual).to.eql(expected)
+  })
+
+  it('returns component steps for component testing project (no e2e)', async () => {
+    const cwd = scaffoldMigrationProject('migration-component-testing')
+    const config = fs.readJsonSync(path.join(cwd, 'cypress.json'))
+
+    const actual = await getStepsForMigration(cwd, config)
+    const expected: Step[] = ['renameManual', 'configFile', 'setupComponent']
 
     expect(actual).to.eql(expected)
   })

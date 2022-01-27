@@ -6,6 +6,18 @@ const renameSupportStep = `[data-cy="migration-step renameSupport"]`
 const configFileStep = `[data-cy="migration-step configFile"]`
 const setupComponentStep = `[data-cy="migration-step setupComponent"]`
 
+declare global {
+  namespace Cypress {
+    interface Chainable {
+      waitForWizard(): Cypress.Chainable<JQuery<HTMLDivElement>>
+    }
+  }
+}
+
+Cypress.Commands.add('waitForWizard', () => {
+  return cy.get('[data-cy="migration-wizard"]')
+})
+
 describe('Steps', () => {
   // note: see the README.md inside each of these projects
   // to understand why certain steps are shown.
@@ -14,6 +26,7 @@ describe('Steps', () => {
     cy.scaffoldProject('migration-e2e-fully-custom')
     cy.openProject('migration-e2e-fully-custom')
     cy.visitLaunchpad()
+    cy.waitForWizard()
     cy.get(renameAutoStep).should('not.exist')
     cy.get(renameManualStep).should('not.exist')
     cy.get(renameSupportStep).should('not.exist')
@@ -25,6 +38,7 @@ describe('Steps', () => {
     cy.scaffoldProject('migration-e2e-defaults')
     cy.openProject('migration-e2e-defaults')
     cy.visitLaunchpad()
+    cy.waitForWizard()
     cy.get(renameAutoStep).should('exist')
     cy.get(renameManualStep).should('not.exist')
     cy.get(renameSupportStep).should('exist')
@@ -36,6 +50,7 @@ describe('Steps', () => {
     cy.scaffoldProject('migration-e2e-custom-test-files')
     cy.openProject('migration-e2e-custom-test-files')
     cy.visitLaunchpad()
+    cy.waitForWizard()
     cy.get(renameAutoStep).should('exist')
     cy.get(renameManualStep).should('not.exist')
     cy.get(renameSupportStep).should('exist')
@@ -47,6 +62,7 @@ describe('Steps', () => {
     cy.scaffoldProject('migration-e2e-custom-test-files')
     cy.openProject('migration-e2e-custom-test-files')
     cy.visitLaunchpad()
+    cy.waitForWizard()
     cy.get(renameAutoStep).should('exist')
     cy.get(renameManualStep).should('not.exist')
     cy.get(renameSupportStep).should('exist')
@@ -58,7 +74,9 @@ describe('Steps', () => {
     cy.scaffoldProject('migration-component-testing')
     cy.openProject('migration-component-testing')
     cy.visitLaunchpad()
+    cy.waitForWizard()
     cy.get(renameAutoStep).should('not.exist')
+    cy.contains('Automatically rename existing specs').should('not.exist')
     cy.get(renameManualStep).should('exist')
     // supportFile: false in this project
     cy.get(renameSupportStep).should('not.exist')
@@ -78,7 +96,6 @@ describe('Migration', { viewportWidth: 1200 }, () => {
 
   it('renames support file', () => {
     cy.visitLaunchpad()
-    cy.findByText(`Rename these specs for me`).click()
     cy.findByText(`I'll do this later`).click()
     cy.findByText(`Rename the support file for me`).click()
 
@@ -93,7 +110,6 @@ describe('Migration', { viewportWidth: 1200 }, () => {
     beforeEach(() => {
       cy.visitLaunchpad()
 
-      cy.findByText(`Rename these specs for me`).click()
       cy.findByText(`I'll do this later`).click()
       cy.findByText(defaultMessages.migration.wizard.step3.button).click()
       cy.findByText(defaultMessages.migration.wizard.step4.button).click()
@@ -150,26 +166,12 @@ describe('Migration', { viewportWidth: 1200 }, () => {
         }
       })
     })
-
-    it('renames support file', () => {
-      cy.visitLaunchpad()
-      cy.findByText(`Rename these specs for me`).click()
-      cy.findByText(`I'll do this later`).click()
-      cy.findByText(`Rename the support file for me`).click()
-
-      cy.withCtx(async (ctx) => {
-        expect(
-          await ctx.actions.file.checkIfFileExists(ctx.path.join('cypress', 'support', 'e2e.js')),
-        ).not.to.be.null
-      })
-    })
   })
 
   describe('Full flow', () => {
     it('goes to each step', () => {
       cy.visitLaunchpad()
 
-      cy.findByText(defaultMessages.migration.wizard.step1.button).click()
       cy.findByText(defaultMessages.migration.wizard.step2.button).click()
       cy.findByText(defaultMessages.migration.wizard.step3.button).click()
       cy.findByText(defaultMessages.migration.wizard.step4.button).click()

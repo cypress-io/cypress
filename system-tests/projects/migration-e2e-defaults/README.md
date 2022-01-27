@@ -1,8 +1,8 @@
-An e2e project with all defaults, but no spec files. We should not show the auto rename step - nothing to rename.
+An e2e project with all defaults. We should not show the auto rename step - nothing to rename.
 
 Steps:
 
-- [ ] automatic file rename
+- [x] automatic file rename
 - [ ] manual file rename
 - [x] rename support
 - [x] update config file
