@@ -100,6 +100,10 @@ export function hideAllUnlessAnotherWindowIsFocused () {
   return _.invoke(windows, 'hide')
 }
 
+export function isMainWindowFocused () {
+  return getByType('INDEX').isFocused()
+}
+
 export function focusMainWindow () {
   return getByType('INDEX').show()
 }

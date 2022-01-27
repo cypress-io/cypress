@@ -132,7 +132,9 @@ describe('lib/gui/auth', function () {
       sinon.stub(auth._internal, 'stopServer')
       sinon.stub(windows, 'focusMainWindow').callsFake(() => {})
 
-      await auth.start(() => {}, 'code')
+      await auth.start(() => {}, 'code', () => {
+        windows.focusMainWindow()
+      })
 
       expect(auth._internal.stopServer).to.be.calledOnce
       expect(windows.focusMainWindow).to.be.calledOnce
@@ -144,7 +146,9 @@ describe('lib/gui/auth', function () {
       sinon.stub(windows, 'focusMainWindow').callsFake(() => {})
 
       try {
-        await auth.start(() => {}, 'code')
+        await auth.start(() => {}, 'code', () => {
+          windows.focusMainWindow()
+        })
       } catch (e) {
         expect(e.message).to.eql('test error')
       }

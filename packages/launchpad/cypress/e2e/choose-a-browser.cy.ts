@@ -182,6 +182,63 @@ describe('Choose a Browser Page', () => {
       cy.contains('button', 'Close').click()
       cy.wait('@closeBrowser')
     })
+
+    it('performs mutation to focus open browser when focus button is pressed', () => {
+      cy.openProject('launchpad', ['--e2e'])
+
+      cy.visitLaunchpad()
+
+      cy.get('h1').should('contain', 'Choose a Browser')
+
+      cy.contains('button', 'Start E2E Testing in Chrome').as('launchButton')
+
+      // Stub out response to prevent browser launch but not break internals
+      cy.intercept('mutation-OpenBrowser_LaunchProject', {
+        body: {
+          data: {
+            launchOpenProject: true,
+            setProjectPreferences: {
+              currentProject: {
+                id: 'test-id',
+                title: 'launchpad',
+                __typename: 'CurrentProject',
+              },
+              __typename: 'Query',
+            },
+          },
+        },
+        delay: 500,
+      }).as('launchProject')
+
+      cy.get('@launchButton').click()
+      cy.contains('button', 'Opening E2E Testing in Chrome').should('be.visible')
+
+      cy.wait('@launchProject').then(({ request }) => {
+        expect(request?.body.variables.testingType).to.eq('e2e')
+      })
+
+      cy.intercept('query-OpenBrowser', (req) => {
+        req.on('before:response', (res) => {
+          res.body.data.currentProject.isBrowserOpen = true
+        })
+      })
+
+      cy.contains('button', 'Focus').as('focusButton')
+
+      cy.intercept('mutation-OpenBrowser_FocusActiveBrowserWindow').as('focusBrowser')
+
+      cy.withCtx((ctx) => {
+        sinon.spy(ctx.actions.browser, 'focusActiveBrowserWindow')
+      })
+
+      cy.get('@focusButton').click()
+
+      cy.wait('@focusBrowser').then(() => {
+        cy.withCtx((ctx) => {
+          expect(ctx.actions.browser.focusActiveBrowserWindow).to.be.called
+        })
+      })
+    })
   })
 
   describe('No System Browsers Detected', () => {
