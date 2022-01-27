@@ -350,6 +350,16 @@ export const mutation = mutationType({
       },
     })
 
+    t.nonNull.field('focusActiveBrowserWindow', {
+      type: 'Boolean',
+      description: 'Sets focus to the active browser window',
+      resolve: async (_, args, ctx) => {
+        await ctx.actions.browser.focusActiveBrowserWindow()
+
+        return true
+      },
+    })
+
     t.nonNull.field('reconfigureProject', {
       type: 'Boolean',
       description: 'show the launchpad windows',

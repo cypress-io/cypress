@@ -188,7 +188,7 @@ const _internal = {
 /**
  * @returns a promise that is resolved with a user when auth is complete or rejected when it fails
  */
-const start = (onMessage, utmCode) => {
+const start = (onMessage, utmCode, onLogin) => {
   function sendMessage (type, name, arg1) {
     onMessage({
       type,
@@ -222,7 +222,7 @@ const start = (onMessage, utmCode) => {
   })
   .finally(() => {
     _internal.stopServer()
-    require('./windows').focusMainWindow()
+    onLogin()
   })
 }
 
