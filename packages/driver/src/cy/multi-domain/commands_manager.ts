@@ -67,8 +67,6 @@ export class CommandsManager {
 
     if (!err) {
       const deserializedSubject = deserialize(subject)
-      
-      console.log('Parsed Obj', deserializedSubject)
 
       return command.deferred.resolve(deserializedSubject)
     }

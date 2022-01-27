@@ -17,8 +17,8 @@ export const handleCommands = (Cypress: Cypress.Cypress, cy: $Cy, specBridgeComm
 
     let serializedSubject = serialize(cy.state('subject'))
 
-    console.log('state subject', serializedSubject)
-
+    // we need to seralize and send back the subject on each command because the next chained c
+    // command outside of the multi-domain context will not wait for the queue finished event.
     specBridgeCommunicator.toPrimary('command:end', { id, name, subject: serializedSubject })
   }
 

@@ -140,11 +140,9 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
           // the command queue finishes in the SD. Otherwise, if no commands
           // are enqueued, clean up the command and log listeners. This case
           // is common if there are only assertions enqueued in the SD.
-          console.log('has commands?', commandsManager.hasCommands)
-          console.log('!done?', !done)
           if (!commandsManager.hasCommands && !done) {
             cleanup()
-            console.log('sync result:', subject)
+            // This handles when a subject is returned synchronously
             const deserializedSubject = deserialize(subject)
 
             resolve(deserializedSubject)

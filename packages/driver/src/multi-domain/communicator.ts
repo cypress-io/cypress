@@ -148,7 +148,6 @@ export class SpecBridgeDomainCommunicator extends EventEmitter {
    * @param {any} data - any meta data to be sent with the event.
    */
   toPrimary (event: string, data?: any, serializer?: (data: any) => any) {
-    console.log('event', event)
     let prefixedEvent = `${CROSS_DOMAIN_PREFIX}${event}`
 
     data = serializer ? serializer(data) : serializeForPostMessage(data)
