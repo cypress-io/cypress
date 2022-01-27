@@ -46,16 +46,30 @@ describe('Steps', () => {
     cy.get(setupComponentStep).should('not.exist')
   })
 
-  it('shows all e2e steps for an e2e project with custom testFiles', () => {
-    cy.scaffoldProject('migration-e2e-custom-test-files')
-    cy.openProject('migration-e2e-custom-test-files')
+  // TODO: the current logic is wrong and does not consider
+  // the case of a custom integration folder!
+  it.skip('shows all e2e steps for an e2e project with custom integrationFolder', () => {
+    cy.scaffoldProject('migration-e2e-custom-integration')
+    cy.openProject('migration-e2e-custom-integration')
     cy.visitLaunchpad()
     cy.waitForWizard()
+
     cy.get(renameAutoStep).should('exist')
     cy.get(renameManualStep).should('not.exist')
     cy.get(renameSupportStep).should('exist')
     cy.get(configFileStep).should('exist')
     cy.get(setupComponentStep).should('not.exist')
+
+    cy.contains('src/basic.spec.js')
+    cy.contains('src/basic.cy.js')
+
+    cy.get('button').contains('Rename these specs for me').click()
+    // wait for a bit to make sure the file was actually move before
+    // asserting it exists
+    cy.wait(100)
+    cy.withCtx((ctx) => {
+      ctx.actions.file.checkIfFileExists('src/basic.cy.js')
+    })
   })
 
   it('shows all e2e steps for an e2e project with custom testFiles', () => {
