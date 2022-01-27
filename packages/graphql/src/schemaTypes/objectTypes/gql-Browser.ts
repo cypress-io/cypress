@@ -24,6 +24,9 @@ export const Browser = objectType({
     t.nonNull.string('name')
     t.nonNull.string('path')
     t.nonNull.string('version')
+    t.nonNull.boolean('isFocusSupported', {
+      resolve: (source, args, ctx) => ctx.browser.isFocusSupported(source),
+    })
   },
   sourceType: {
     module: '@packages/types',

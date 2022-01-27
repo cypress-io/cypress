@@ -218,5 +218,13 @@ context('lib/browsers/cdp_automation', () => {
         .to.be.rejectedWith('The browser responded with an error when Cypress attempted to take a screenshot.')
       })
     })
+
+    describe('focus:browser:window', function () {
+      it('sends Page.bringToFront when focus is requested', function () {
+        this.sendDebuggerCommand.withArgs('Page.bringToFront').resolves()
+
+        return this.onRequest('focus:browser:window').then((resp) => expect(resp).to.be.undefined)
+      })
+    })
   })
 })
