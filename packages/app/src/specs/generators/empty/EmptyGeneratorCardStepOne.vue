@@ -5,6 +5,7 @@
         <Input
           v-model="specFile"
           :placeholder="t('createSpec.e2e.importEmptySpec.inputPlaceholder')"
+          :aria-label="t('createSpec.e2e.importEmptySpec.inputPlaceholder')"
           :has-error="hasError"
         >
           <template #prefix>
