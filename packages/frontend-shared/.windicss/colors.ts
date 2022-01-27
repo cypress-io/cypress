@@ -196,4 +196,13 @@ export const cyColors = {
   },
 }
 
-export const colors = { ...Colors, ...cyColors }
+// filter out this deprecated color to remove the annoying warning
+const FilteredColors = Object.keys(Colors).reduce((acc, key) => {
+  if (key !== 'lightBlue') {
+    acc[key] = Colors[key]
+  }
+
+  return acc
+}, {})
+
+export const colors = { ...FilteredColors, ...cyColors }

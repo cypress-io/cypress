@@ -3,9 +3,6 @@ import type { InitializeProjectOptions, FoundBrowser, FoundSpec, LaunchOpts, Ope
 import execa from 'execa'
 import path from 'path'
 import assert from 'assert'
-import Debug from 'debug'
-
-const debug = Debug('cypress:data-context:project-actions')
 
 import type { ProjectShape } from '../data/coreDataShape'
 
@@ -384,19 +381,10 @@ export class ProjectActions {
     return path.join(projectRoot, 'cypress', 'e2e')
   }
 
-  async maybeCreateE2EDir () {
-    // fs-extra yields a string if a folder was created
-    const result = await this.ctx.fs.mkdirp(this.defaultE2EPath) as string | undefined
-
-    if (result) debug(`Created e2eDir at ${this.defaultE2EPath}}`)
-  }
-
   async scaffoldIntegration (): Promise<NexusGenObjects['ScaffoldedFile'][]> {
     const projectRoot = this.ctx.currentProject
 
     assert(projectRoot, `Cannot create spec without currentProject.`)
-
-    await this.maybeCreateE2EDir()
 
     const results = await codeGenerator(
       { templateDir: templates['scaffoldIntegration'], target: this.defaultE2EPath },
