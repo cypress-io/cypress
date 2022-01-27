@@ -1,5 +1,6 @@
 import type { $Cy } from '../cypress/cy'
 import type { SpecBridgeDomainCommunicator } from './communicator'
+import { serialize } from './serializer'
 
 export const handleDomainFn = (cy: $Cy, specBridgeCommunicator: SpecBridgeDomainCommunicator) => {
   const doneEarly = () => {
@@ -76,21 +77,21 @@ export const handleDomainFn = (cy: $Cy, specBridgeCommunicator: SpecBridgeDomain
       // await the eval func, whether it is a promise or not
       // we should not need to transpile this as our target browsers support async/await
       // see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function for more details
-      await window.eval(fnWrapper)(data)
+      const subject = await window.eval(fnWrapper)(data)
 
-      specBridgeCommunicator.toPrimary('ran:domain:fn')
+      specBridgeCommunicator.toPrimary('ran:domain:fn', { subject: serialize(subject) })
     } catch (err) {
       // Native Error types currently cannot be cloned in Firefox when using 'postMessage'.
       // Please see https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm for more details
       // TODO: More standard serialization of Objects/Arrays within the communicator to avoid this type of logic
       if (err instanceof Error) {
-        specBridgeCommunicator.toPrimary('ran:domain:fn', {
+        specBridgeCommunicator.toPrimary('ran:domain:fn', { err: {
           name: err.name,
           message: err.message,
           stack: err.stack,
-        })
+        } })
       } else {
-        specBridgeCommunicator.toPrimary('ran:domain:fn', err)
+        specBridgeCommunicator.toPrimary('ran:domain:fn', { err })
       }
     } finally {
       cy.state('done', undefined)

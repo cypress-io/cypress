@@ -1,5 +1,6 @@
 import type { PrimaryDomainCommunicator } from '../../multi-domain/communicator'
 import { createDeferred, Deferred } from '../../util/deferred'
+import { deserialize } from '../../multi-domain/serializer'
 
 export class CommandsManager {
   // these are proxy commands that represent real commands in a
@@ -54,12 +55,16 @@ export class CommandsManager {
     Cypress.action('cy:enqueue:command', attrs)
   }
 
-  endCommand = ({ id }) => {
+  endCommand = ({ id, subject }) => {
     const command = this.commands[id]
+
+    const deserializedSubject = deserialize(subject)
+
+    console.log('Parsed Obj', deserializedSubject)
 
     if (command) {
       delete this.commands[id]
-      command.deferred.resolve()
+      command.deferred.resolve(deserializedSubject)
     }
   }
 

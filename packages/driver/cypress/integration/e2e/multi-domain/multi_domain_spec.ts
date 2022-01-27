@@ -258,4 +258,120 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
 
     it('short circuits the secondary domain command queue when "done()" is called early')
   })
+
+  // it.only('testing', async () => {
+  //   cy.wrap('derp').then((testThing) => {
+  //     return 'junk'
+  //   }).then((result) => {
+  //     console.log('last result:', result)
+  //   })
+  // })
+  describe('yields', () => {
+    it.only('yields a value', async () => {
+      cy.switchToDomain('foobar.com', () => {
+        cy
+        .get('[data-cy="dom-check"]')
+        .invoke('text')
+      }).should('equal', 'From a secondary domain')
+
+      // .then((result) => {
+      //   console.log('last result:', result)
+      // })
+    })
+
+    it.only('yields a value again', async () => {
+      cy.switchToDomain('foobar.com', () => {
+        cy
+        .get('[data-cy="dom-check"]')
+        .invoke('text')
+      }).should('equal', 'From a secondary domain')
+
+      // .then((result) => {
+      //   console.log('last result:', result)
+      // })
+    })
+
+    it('yields synchronously ', async () => {
+      cy.switchToDomain('foobar.com', () => {
+        // const $form = cy.$$('[data-cy="dom-check"]')
+
+        return 'From a secondary domain'
+      }).should('equal', 'From a secondary domain')
+
+      // .then((result) => {
+      //   console.log('result synchronous:', result)
+
+      //   return result
+      // }).should('equal', 'From a secondary domain')
+    })
+
+    it('yields undefined', async () => {
+      cy.switchToDomain('foobar.com', () => {
+        cy
+        .get('[data-cy="dom-check"]')
+      }).should('equal', undefined)
+
+      // .then((result) => {
+      //   console.log('result undefined:', result)
+
+      //   return result
+      // }).should('equal', undefined)
+    })
+
+    it('yields undefined if an object contains undefined', () => {
+      cy.switchToDomain('foobar.com', () => {
+        cy.wrap({
+          key: undefined,
+        })
+      }).should('equal', undefined)
+    })
+
+    it('yields undefined if an object contains a function', () => {
+      cy.switchToDomain('foobar.com', () => {
+        cy.wrap({
+          key: () => {
+            return 'whoops'
+          },
+        })
+      }).should('equal', undefined)
+    })
+
+    it('yields undefined if an object contains a symbol', () => {
+      cy.switchToDomain('foobar.com', () => {
+        cy.wrap({
+          key: Symbol('whoops'),
+        })
+      }).should('equal', undefined)
+    })
+
+    it('yields an object containing valid types', () => {
+      cy.switchToDomain('foobar.com', () => {
+        cy.wrap({
+          array: [
+            1,
+            2,
+          ],
+          bool: true,
+          null: null,
+          number: 12,
+          object: {
+            key: 'key',
+          },
+          string: 'string',
+        })
+      }).should('deep.equal', {
+        array: [
+          1,
+          2,
+        ],
+        bool: true,
+        null: null,
+        number: 12,
+        object: {
+          key: 'key',
+        },
+        string: 'string',
+      })
+    })
+  })
 })

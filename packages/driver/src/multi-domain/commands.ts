@@ -1,5 +1,6 @@
 import type { $Cy } from '../cypress/cy'
 import type { SpecBridgeDomainCommunicator } from './communicator'
+import { serialize } from './serializer'
 
 export const handleCommands = (Cypress: Cypress.Cypress, cy: $Cy, specBridgeCommunicator: SpecBridgeDomainCommunicator) => {
   const onCommandEnqueued = (commandAttrs: Cypress.EnqueuedCommand) => {
@@ -14,7 +15,11 @@ export const handleCommands = (Cypress: Cypress.Cypress, cy: $Cy, specBridgeComm
     const id = command.get('id')
     const name = command.get('name')
 
-    specBridgeCommunicator.toPrimary('command:end', { id, name })
+    let serializedSubject = serialize(cy.state('subject'))
+
+    console.log('state subject', serializedSubject)
+
+    specBridgeCommunicator.toPrimary('command:end', { id, name, subject: serializedSubject })
   }
 
   const onRunCommand = () => {

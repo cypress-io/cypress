@@ -4,6 +4,7 @@ import $errUtils from '../../cypress/error_utils'
 import { CommandsManager } from './commands_manager'
 import { LogsManager } from './logs_manager'
 import { Validator } from './validator'
+import { deserialize } from '../../multi-domain/serializer'
 
 export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: Cypress.State, config: Cypress.InternalConfig) {
   let timeoutId
@@ -115,7 +116,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
       logsManager.listen()
 
       return new Bluebird((resolve, reject) => {
-        communicator.once('ran:domain:fn', (err) => {
+        communicator.once('ran:domain:fn', ({ subject, err }) => {
           sendReadyForDomain()
           if (err) {
             if (done) {
@@ -136,11 +137,17 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
           // the command queue finishes in the SD. Otherwise, if no commands
           // are enqueued, clean up the command and log listeners. This case
           // is common if there are only assertions enqueued in the SD.
+          console.log('has commands?', commandsManager.hasCommands)
+          console.log('!done?', !done)
           if (!commandsManager.hasCommands && !done) {
             cleanup()
-          }
+            console.log('sync result:', subject)
+            const deserializedSubject = deserialize(subject)
 
-          resolve()
+            resolve(deserializedSubject)
+          } else {
+            resolve()
+          }
         })
 
         // If done is NOT passed into switchToDomain, wait for the command queue

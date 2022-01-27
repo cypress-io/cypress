@@ -587,6 +587,8 @@ export default function (Commands, Cypress, cy, state) {
   // promises
   Commands.addAll({ prevSubject: 'optional' }, {
     then () {
+      console.log('in then state:', cy.state('subject'))
+
       // eslint-disable-next-line prefer-rest-params
       return thenFn.apply(this, arguments)
     },
