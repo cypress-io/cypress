@@ -171,6 +171,10 @@ export const Migration = objectType({
       resolve: async (source, args, ctx) => {
         const status = await ctx.migration.getComponentTestingMigrationStatus()
 
+        if (!status) {
+          return null
+        }
+
         return {
           completed: status.completed,
           // we sort it to make sure the endpoint always returns the
@@ -205,16 +209,12 @@ export const Migration = objectType({
 
     t.nonNull.string('integrationFolder', {
       description: 'the integration folder path used to store e2e tests',
-      resolve: (source, args, ctx) => {
-        return ctx.migration.getIntegrationFolder()
-      },
+      resolve: async (source, args, ctx) => (await ctx.migration.integrationFolder()).toString(),
     })
 
     t.nonNull.string('componentFolder', {
       description: 'the component folder path used to store components tests',
-      resolve: (source, args, ctx) => {
-        return ctx.migration.getComponentFolder()
-      },
+      resolve: async (source, args, ctx) => (await ctx.migration.componentFolder()).toString(),
     })
 
     t.nonNull.boolean('hasCustomIntegrationFolder', {

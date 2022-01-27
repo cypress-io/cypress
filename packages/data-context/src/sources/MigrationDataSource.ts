@@ -87,10 +87,10 @@ export class MigrationDataSource {
       throw Error('cannot get specs without a project path')
     }
 
-    const compFolder = await this.getComponentFolder()
-    const intFolder = await this.getIntegrationFolder()
+    const compFolder = await this.componentFolder()
+    const intFolder = await this.integrationFolder()
 
-    const specs = await getSpecs(this.ctx.currentProject, compFolder, intFolder)
+    const specs = await getSpecs(this.ctx.currentProject, compFolder || null, intFolder || null)
 
     debug('looked in %s and %s and found %o', compFolder, intFolder, specs)
 
@@ -107,9 +107,17 @@ export class MigrationDataSource {
 
   async getComponentTestingMigrationStatus () {
     const config = await this.parseCypressConfig()
+    const componentFolder = getComponentFolder(config)
 
     if (!config || !this.ctx.currentProject) {
       throw Error('Need currentProject and config to continue')
+    }
+
+    // no component folder, so no specs to migrate
+    // this should never happen since we never show the
+    // component specs migration step ("renameManual")
+    if (componentFolder === false) {
+      return null
     }
 
     if (!this.componentTestingMigrationWatcher) {
@@ -126,7 +134,7 @@ export class MigrationDataSource {
 
       const { status, watcher } = await initComponentTestingMigration(
         this.ctx.currentProject,
-        await this.getComponentFolder(),
+        componentFolder,
         getComponentTestFiles(config),
         onFileMoved,
       )
@@ -203,32 +211,16 @@ export class MigrationDataSource {
     return createConfigString(config)
   }
 
-  async getIntegrationFolder () {
+  async integrationFolder () {
     const config = await this.parseCypressConfig()
 
-    if (config.e2e?.integrationFolder) {
-      return config.e2e.integrationFolder
-    }
-
-    if (config.integrationFolder) {
-      return config.integrationFolder
-    }
-
-    return 'cypress/integration'
+    return getIntegrationFolder(config)
   }
 
-  async getComponentFolder () {
+  async componentFolder () {
     const config = await this.parseCypressConfig()
 
-    if (config.component?.componentFolder) {
-      return config.component.componentFolder
-    }
-
-    if (config.componentFolder) {
-      return config.componentFolder
-    }
-
-    return 'cypress/component'
+    return getComponentFolder(config)
   }
 
   private async parseCypressConfig (): Promise<OldCypressConfig> {
