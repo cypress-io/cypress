@@ -23,7 +23,7 @@
       <component
         :is="icon"
         class="opacity-100"
-        :class="[ hoverIcon ? 'group-hover:opacity-0 group-focus:opacity-100' : undefined,
+        :class="[ hoverIcon ? 'group-hover:opacity-0' : undefined,
                   iconClass]
         "
         data-cy="card-icon"
@@ -36,6 +36,7 @@
       :class="{
         'text-gray-700': disabled
       }"
+      :disabled="disabled"
     >
       {{ title }}
     </button>
