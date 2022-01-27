@@ -357,7 +357,7 @@ export class ProjectActions {
 
     let codeGenOptions = await newSpecCodeGenOptions.getCodeGenOptions()
 
-    if (codeGenType === 'component' && !erroredCodegenCandidate) {
+    if ((codeGenType === 'component' || codeGenType === 'story') && !erroredCodegenCandidate) {
       const filePathAbsolute = path.join(path.parse(codeGenPath).dir, codeGenOptions.fileName)
       const filePathRelative = path.relative(this.ctx.currentProject || '', filePathAbsolute)
 
@@ -403,11 +403,11 @@ export class ProjectActions {
     if (cfg) {
       const toArray = (v: string | string[] | undefined) => Array.isArray(v) ? v : v ? [v] : undefined
 
-      const testingType = codeGenType === 'component' ? 'component' : 'e2e'
+      const testingType = (codeGenType === 'component' || codeGenType === 'story') ? 'component' : 'e2e'
 
       const specPattern = toArray(cfg[testingType]?.specPattern)
       const ignoreSpecPattern = toArray(cfg[testingType]?.ignoreSpecPattern) ?? []
-      const additionalIgnore = toArray(codeGenType === 'component' ? cfg?.e2e?.specPattern : undefined) ?? []
+      const additionalIgnore = toArray(testingType === 'component' ? cfg?.e2e?.specPattern : undefined) ?? []
 
       if (this.ctx.currentProject && specPattern) {
         const specs = await this.ctx.project.findSpecs(this.ctx.currentProject, testingType, specPattern, ignoreSpecPattern, additionalIgnore)

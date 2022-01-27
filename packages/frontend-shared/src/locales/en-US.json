@@ -110,7 +110,10 @@
       "importFromComponent": {
         "header": "Create from component",
         "description": "We'll generate an empty spec file which can be used to import and test any component in this project.",
-        "chooseAComponentHeader": "Choose a component",
+        "chooseAComponentHeader": "Choose a component"
+      },
+      "importEmptySpec": {
+        "header": "Create a new spec",
         "invalidComponentWarning": "We couldn't generate a valid filename matching your custom "
       }
     }

@@ -140,6 +140,7 @@ const emits = defineEmits<{
   (event: 'update:description', value: string): void
   (event: 'restart'): void
   (event: 'close'): void
+  (event: 'updateTitle', value: string): void
 }>()
 
 const { title } = useVModels(props, emits)
@@ -156,6 +157,7 @@ const result = ref<GeneratorSuccessFileFragment | null>(null)
 
 whenever(result, () => {
   title.value = t('createSpec.successPage.header')
+  emits('updateTitle', t('createSpec.successPage.header'))
 })
 
 const createSpec = async () => {
@@ -179,6 +181,6 @@ const recommendedFileName = computed(() => {
   return `{filename}.cy.${split[split.length - 1]}`
 })
 
-const invalidSpecWarning = computed(() => props.type === 'e2e' ? t('createSpec.e2e.importEmptySpec.invalidSpecWarning') : t('createSpec.component.importFromComponent.invalidComponentWarning'))
+const invalidSpecWarning = computed(() => props.type === 'e2e' ? t('createSpec.e2e.importEmptySpec.invalidSpecWarning') : t('createSpec.component.importEmptySpec.invalidComponentWarning'))
 
 </script>

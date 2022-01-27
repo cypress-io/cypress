@@ -8,6 +8,7 @@
         :spec-file-name="generatedSpecError.fileName"
         :errored-codegen-candidate="generatedSpecError.erroredCodegenCandidate"
         @restart="cancelSpecNameCreation"
+        @updateTitle="(value) => emits('update:title', value)"
       />
     </template>
 
@@ -170,6 +171,10 @@ const generateSpecFromSource = ref()
 
 whenever(result, () => {
   title.value = t('createSpec.successPage.header')
+})
+
+whenever(generatedSpecError, () => {
+  title.value = t('createSpec.component.importEmptySpec.header')
 })
 
 const makeSpec = async (file) => {

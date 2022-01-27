@@ -13,6 +13,8 @@ interface CodeGenOptions {
   erroredCodegenCandidate?: string | null
 }
 
+type PossiblesExtension = '.js' | '.ts' | '.jsx' | '.tsx'
+
 export class SpecOptions {
   private parsedPath: ParsedPath;
   private projectRoot: string;
@@ -64,18 +66,22 @@ export class SpecOptions {
     return frameworkOptions
   }
 
+  private relativePath () {
+    if (!this.parsedErroredCodegenCandidate?.base) {
+      return `./${this.parsedPath.base}`
+    }
+
+    const componentPathRelative = this.ctx.path.relative(this.parsedPath.dir, this.parsedErroredCodegenCandidate.dir)
+
+    const componentPath = this.ctx.path.join(componentPathRelative, this.parsedErroredCodegenCandidate.base)
+
+    return componentPath.startsWith('.') ? componentPath : `./${componentPath}`
+  }
+
   private async getFrameworkComponentOptions (framework: CodeGenFramework) {
     const componentName = capitalize(camelCase(this.parsedErroredCodegenCandidate?.name ?? this.parsedPath.name))
 
-    let componentPath = `./${this.parsedPath.base}`
-
-    if (this.parsedErroredCodegenCandidate?.base) {
-      const componentPathRelative = this.ctx.path.relative(this.parsedPath.dir, this.parsedErroredCodegenCandidate.dir)
-
-      componentPath = this.ctx.path.join(componentPathRelative, this.parsedErroredCodegenCandidate.base)
-
-      componentPath = componentPath.startsWith('.') ? componentPath : `./${componentPath}`
-    }
+    const componentPath = this.relativePath()
 
     const frameworkOptions = {
       react: {
@@ -90,14 +96,14 @@ export class SpecOptions {
         componentName,
         docsLink: '// see: https://vue-test-utils.vuejs.org/',
         mount: `mount(${componentName}, { props: {} })`,
-        fileName: this.getFilename(await this.getVueExtenstion()),
+        fileName: this.getFilename(await this.getVueExtension()),
       },
     } as const
 
     return frameworkOptions[framework]
   }
 
-  private async getVueExtenstion (): Promise<'.js' | '.ts'> {
+  private async getVueExtension (): Promise<PossiblesExtension> {
     try {
       const fileContent = await this.ctx.fs
       .readFile(this.options.codeGenPath)
@@ -105,10 +111,11 @@ export class SpecOptions {
 
       return fileContent.includes('lang="ts"') ? '.ts' : '.js'
     } catch (e) {
+      const validExtensions = ['.js', '.jsx', '.ts', '.tsx']
       const possibleExtension = this.parsedPath.ext
 
-      if (possibleExtension === '.js' || possibleExtension === '.ts') {
-        return possibleExtension
+      if (validExtensions.includes(possibleExtension)) {
+        return possibleExtension as PossiblesExtension
       }
 
       return '.js'
@@ -123,7 +130,8 @@ export class SpecOptions {
     }
 
     const defaultTitle = this.parsedPath.name.split('.')[0] || ''
-    const csf = await readCsfOrMdx(this.options.codeGenPath, {
+
+    const csf = await readCsfOrMdx(this.options.erroredCodegenCandidate ?? this.options.codeGenPath, {
       defaultTitle,
     }).then((res) => res.parse())
 
@@ -145,13 +153,15 @@ export class SpecOptions {
   }
 
   private getFrameworkStoryOptions (framework: CodeGenFramework, csf: CsfFile) {
+    const storyPath = this.relativePath()
+
     const frameworkOptions = {
       react: {
         imports: [
           'import React from "react"',
           'import { mount } from "@cypress/react"',
           'import { composeStories } from "@storybook/testing-react"',
-          `import * as stories from "./${this.parsedPath.name}"`,
+          `import * as stories from "${storyPath}"`,
         ],
         stories: csf.stories.map((story) => {
           const component = story.name.replace(/\s+/, '')
@@ -167,7 +177,7 @@ export class SpecOptions {
         imports: [
           'import { mount } from "@cypress/vue"',
           'import { composeStories } from "@storybook/testing-vue3"',
-          `import * as stories from "./${this.parsedPath.name}"`,
+          `import * as stories from "${storyPath}"`,
         ],
         stories: csf.stories.map((story) => {
           const component = story.name.replace(/\s+/, '')
