@@ -444,6 +444,8 @@ export = {
   },
 
   async connectToNewSpec (browser: Browser, options: CypressConfiguration = {}, automation) {
+    await automation.request('start:browser:tab', { url: options.url }, () => {})
+
     const port = browser.debuggingPort
     const criClient = await this._connectToChromeRemoteInterface(port, options, browser.displayName, options.url)
 

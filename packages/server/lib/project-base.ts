@@ -475,15 +475,15 @@ export class ProjectBase<TServer extends Server> extends EE {
   }
 
   async closeBrowserTab (urlToExclude) {
-    await this.automation.request('close:browser:tab', { urlToExclude }, () => {})
+    return this.automation.request('close:browser:tab', { urlToExclude }, () => {})
   }
 
   async resetBrowserState () {
-    await this.automation.request('reset:browser:state', {}, () => {})
+    return this.automation.request('reset:browser:state', {}, () => {})
   }
 
   async startNewBrowserTabWithUrl (url) {
-    await this.automation.request('start:browser:tab', { url }, () => {})
+    return this.automation.request('start:browser:tab', { url }, () => {})
   }
 
   shouldCorrelatePreRequests = () => {

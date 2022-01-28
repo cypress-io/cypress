@@ -380,6 +380,10 @@ module.exports = {
     })
   },
 
+  async connectToNewSpec (browser, options, automation) {
+    this.open(browser, options.url, options, automation)
+  },
+
   async connectToExisting () {
 
   },

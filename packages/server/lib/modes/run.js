@@ -1008,7 +1008,7 @@ module.exports = {
       // If we do not launch the browser,
       // we tell it that we are ready
       // to receive the next spec
-      return this.navigateToNextSpec({ spec, ...browserOpts })
+      return this.navigateToNextSpec(browser, spec, browserOpts)
     }
 
     debug('browser launched')
@@ -1016,10 +1016,10 @@ module.exports = {
     return openProject.launch(browser, spec, browserOpts)
   },
 
-  async navigateToNextSpec (options) {
+  async navigateToNextSpec (browser, spec, browserOpts) {
     debug('navigating to next spec')
 
-    return openProject.changeUrlToSpec(options)
+    return openProject.changeUrlToSpec(browser, spec, browserOpts)
   },
 
   listenForProjectEnd (project, exit) {
