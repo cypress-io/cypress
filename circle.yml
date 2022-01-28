@@ -2035,6 +2035,16 @@ jobs:
           pull_request_id: 87
           command: "yarn cypress run-ct"
 
+  test-binary-against-cy-ct-examples-cra-ant-design:
+    <<: *defaults
+    steps:
+      - test-binary-against-repo:
+          repo: cypress-component-testing-examples
+          browser: chrome
+          folder: "create-react-app-ant-design"
+          pull_request_id: 85
+          command: "yarn cypress run-ct"
+
   test-binary-as-specific-user:
     <<: *defaults
     resource_class: medium
@@ -2399,6 +2409,10 @@ linux-workflow: &linux-workflow
         requires:
           - create-build-artifacts
     - test-binary-against-cy-ct-examples-quasar-ui:
+        <<: *mainBuildFilters
+        requires:
+          - create-build-artifacts
+    - test-binary-against-cy-ct-examples-cra-ant-design:
         <<: *mainBuildFilters
         requires:
           - create-build-artifacts
