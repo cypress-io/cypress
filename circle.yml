@@ -2065,6 +2065,16 @@ jobs:
           pull_request_id: 83
           command: "npx cypress run-ct"
 
+  test-binary-against-cy-ct-examples-cra-tailwind:
+    <<: *defaults
+    steps:
+      - test-binary-against-repo:
+          repo: cypress-component-testing-examples
+          browser: chrome
+          folder: "create-react-app-tailwind"
+          pull_request_id: 79
+          command: "yarn cypress run-ct"
+
   test-binary-as-specific-user:
     <<: *defaults
     resource_class: medium
@@ -2441,6 +2451,10 @@ linux-workflow: &linux-workflow
         requires:
           - create-build-artifacts
     - test-binary-against-cy-ct-examples-cra-chakra-ui:
+        <<: *mainBuildFilters
+        requires:
+          - create-build-artifacts
+    - test-binary-against-cy-ct-examples-cra-tailwind:
         <<: *mainBuildFilters
         requires:
           - create-build-artifacts
