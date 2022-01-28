@@ -8,6 +8,7 @@ import {
   formatMigrationFile,
 } from './migrationFormat'
 import type { MigrationFile } from '../sources'
+import { substitute } from '../sources/migration/autoRename'
 
 type ConfigOptions = {
   global: Record<string, unknown>
@@ -219,6 +220,11 @@ export async function supportFilesForMigration (projectRoot: string): Promise<Mi
   const defaultOldSupportFile = path.relative(projectRoot, defaultSupportFile)
   const defaultNewSupportFile = renameSupportFilePath(defaultOldSupportFile)
 
+  const afterParts = formatMigrationFile(
+    defaultOldSupportFile,
+    new RegExp(supportFileRegexps.e2e.beforeRegexp),
+  ).map(substitute)
+
   return {
     testingType: 'e2e',
     before: {
@@ -227,7 +233,7 @@ export async function supportFilesForMigration (projectRoot: string): Promise<Mi
     },
     after: {
       relative: defaultNewSupportFile,
-      parts: formatMigrationFile(defaultOldSupportFile, new RegExp(supportFileRegexps.e2e.beforeRegexp)),
+      parts: afterParts,
     },
   }
 }

@@ -3,7 +3,7 @@ import {
   formatMigrationFile,
   supportFileRegexps,
 } from '../../../src/util/migrationFormat'
-import { regexps } from '../../../src/sources/migration/autoRename'
+import { regexps } from '../../../src/sources/migration/regexps'
 
 describe('formatMigrationFile', () => {
   describe('e2e - defaultFolderDefaultTestFiles', () => {
@@ -23,26 +23,26 @@ describe('formatMigrationFile', () => {
   })
 
   ;['js', 'ts'].forEach((ext) => {
-    xit(`handles e2e support pre file migration [${ext}]`, () => {
+    it(`handles e2e support pre file migration [${ext}]`, () => {
       const file = `cypress/support/index.${ext}`
       const re = new RegExp(supportFileRegexps.e2e.beforeRegexp)
       const actual = formatMigrationFile(file, re)
 
       expect(actual).to.eql([
         { text: 'cypress/support/', highlight: false },
-        { text: 'index', highlight: true },
+        { text: 'index', highlight: true, group: 'name' },
         { text: `.${ext}`, highlight: false },
       ])
     })
 
-    xit(`handles e2e support post file migration [${ext}]`, () => {
+    it(`handles e2e support post file migration [${ext}]`, () => {
       const file = `cypress/support/e2e.${ext}`
       const re = new RegExp(supportFileRegexps.e2e.afterRegexp)
       const actual = formatMigrationFile(file, re)
 
       expect(actual).to.eql([
         { text: 'cypress/support/', highlight: false },
-        { text: 'e2e', highlight: true },
+        { text: 'e2e', highlight: true, group: 'name' },
         { text: `.${ext}`, highlight: false },
       ])
     })

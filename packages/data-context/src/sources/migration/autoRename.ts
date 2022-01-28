@@ -24,13 +24,26 @@ interface GetSpecs {
   integration: MigrationSpec[]
 }
 
-function substitute (part: FilePart): FilePart {
+export function substitute (part: FilePart): FilePart {
+  // nothing to substitite, just a regular
+  // part of the file
+  if (!('group' in part)) {
+    return part
+  }
+
+  // cypress/integration -> cypress/e2e
   if (part.group === 'folder' && part.text === 'integration') {
     return { ...part, text: 'e2e' }
   }
 
+  // basic.spec.js -> basic.cy.js
   if (part.group === 'extension') {
     return { ...part, text: '.cy.' }
+  }
+
+  // support/index.js -> support/e2e.js
+  if (part.group === 'name' && part.text === 'index') {
+    return { ...part, text: 'e2e' }
   }
 
   return part

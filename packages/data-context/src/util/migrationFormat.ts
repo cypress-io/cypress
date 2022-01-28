@@ -1,19 +1,22 @@
 import dedent from 'dedent'
 
-export interface FilePart {
+export interface FilePartNoHighlight {
   text: string
-  group?: 'folder' | 'extension'
-  highlight: boolean
+  highlight: false
 }
+
+export interface FilePartHighlight {
+  text: string
+  group: 'folder' | 'extension' | 'name'
+  highlight: true
+}
+
+export type FilePart = FilePartNoHighlight | FilePartHighlight
 
 export const supportFileRegexps = {
   e2e: {
-    beforeRegexp: 'cypress/\support\/(?<main>index)\.(?=[j|t]s[x]?)',
-    afterRegexp: 'cypress/\support\/(?<main>e2e)\.(?=[j|t]s[x]?)',
-  },
-  component: {
-    beforeRegexp: 'cypress/\support\/(?<file>index)\.(?=[j|t]s[x]?)',
-    afterRegexp: 'cypress/\support\/(?<file>e2e)\.(?=[j|t]s[x]?)',
+    beforeRegexp: 'cypress/\support\/(?<name>index)\.(?=[j|t]s[x]?)',
+    afterRegexp: 'cypress/\support\/(?<name>e2e)\.(?=[j|t]s[x]?)',
   },
 } as const
 
@@ -22,7 +25,7 @@ export function formatMigrationFile (file: string, regexp: RegExp): FilePart[] {
 
   if (!match?.groups) {
     throw new Error(dedent`
-      Expected groups main and ext in ${file} using ${regexp} when matching ${file}
+      Expected groups main,ext or file in ${file} using ${regexp} when matching ${file}
       Perhaps this isn't a spec file, or it is an unexpected format?`)
   }
 
@@ -38,13 +41,23 @@ export function formatMigrationFile (file: string, regexp: RegExp): FilePart[] {
       ? 'folder'
       : text === match.groups?.ext
         ? 'extension'
-        : undefined
+        : text === match.groups?.name
+          ? 'name'
+          : undefined
 
-    const data: FilePart = {
-      text,
-      highlight: higlights.includes(text),
+    const hasHighlight = higlights.includes(text)
+
+    if (hasHighlight && group) {
+      return {
+        text,
+        highlight: true,
+        group,
+      }
     }
 
-    return group ? { ...data, group } : data
+    return {
+      text,
+      highlight: false,
+    }
   })
 }

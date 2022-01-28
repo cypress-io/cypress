@@ -12,6 +12,7 @@ import {
 import { expect } from 'chai'
 import tempDir from 'temp-dir'
 import type { e2eProjectDirs } from '@packages/frontend-shared/cypress/e2e/support/e2eProjectDirs'
+import { MigrationFile } from '../../../src/sources'
 
 function scaffoldMigrationProject (project: typeof e2eProjectDirs[number]) {
   const tmpDir = path.join(tempDir, 'cy-projects')
@@ -166,43 +167,48 @@ describe('supportFilesForMigrationGuide', () => {
     const cwd = scaffoldMigrationProject('migration')
     const actual = await supportFilesForMigration(cwd)
 
-    expect(actual.before[0]).to.eql({
-      relative: 'cypress/support/index.js',
-      parts: [
-        {
-          'text': 'cypress/support/',
-          'highlight': false,
-        },
-        {
-          'text': 'index',
-          'highlight': true,
-        },
-        {
-          'text': '.js',
-          'highlight': false,
-        },
-      ],
-      'testingType': 'e2e',
-    })
+    const expected: MigrationFile = {
+      testingType: 'e2e',
+      before: {
+        relative: 'cypress/support/index.js',
+        parts: [
+          {
+            'text': 'cypress/support/',
+            'highlight': false,
+          },
+          {
+            'text': 'index',
+            'highlight': true,
+            group: 'name',
+          },
+          {
+            'text': '.js',
+            'highlight': false,
+          },
+        ],
+      },
+      after: {
+        relative: 'cypress/support/e2e.js',
+        parts: [
+          {
+            'text': 'cypress/support/',
+            'highlight': false,
+          },
+          {
+            'text': 'e2e',
+            'highlight': true,
+            group: 'name',
+          },
+          {
+            'text': '.js',
+            'highlight': false,
+          },
+        ],
+      },
+    }
 
-    expect(actual.after[0]).to.eql({
-      relative: 'cypress/support/e2e.js',
-      parts: [
-        {
-          'text': 'cypress/support/',
-          'highlight': false,
-        },
-        {
-          'text': 'e2e',
-          'highlight': true,
-        },
-        {
-          'text': '.js',
-          'highlight': false,
-        },
-      ],
-      'testingType': 'e2e',
-    })
+    // expect(actual.before).to.eql(expected.before)
+    expect(actual.after).to.eql(expected.after)
   })
 })
 
