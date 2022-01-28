@@ -178,59 +178,16 @@ describe('Migration', { viewportWidth: 1200 }, () => {
     cy.openProject('migration')
   })
 
-  it('renames integration specs', () => {
-    cy.visitLaunchpad()
-    cy.waitForWizard()
-    // only one spec matches the testFiles pattern - this one.
-    // since we use a custom testFiles pattern, we do NOT change
-    // the spec extension to .cy.js, just change the folder from
-    // integration to e2e.
-
-    ;[
-      'app_spec.js',
-      'blog-post-spec.ts',
-      'homeSpec.js',
-      'someDir/someFile.js',
-      'bar.spec.js',
-      'company.js',
-      'sign-up.js',
-      'spectacleBrowser.ts',
-    ].forEach((spec) => {
-      // before
-      cy.contains(`cypress/integration/${spec}`)
-      // after
-      cy.contains(`cypress/e2e/${spec}`)
-    })
-
-    // do the rename!
-    cy.get('button').contains('Rename these specs for me').click()
-
-    // ensure file has been moved
-    cy.wait(100)
-
-    cy.withCtx((ctx) => {
-      [
-        'app_spec.js',
-        'blog-post-spec.ts',
-        'homeSpec.js',
-        'someDir/someFile.js',
-        'bar.spec.js',
-        'company.js',
-        'sign-up.js',
-        'spectacleBrowser.ts',
-      ].forEach(async (spec) => {
-        const exists = await ctx.actions.file.checkIfFileExists(ctx.path.join('cypress', 'e2e', spec))
-
-        if (!exists) {
-          // need some way to fail!
-        }
-      })
-    })
-  })
-
   it('renames support file', () => {
     cy.visitLaunchpad()
+    cy.waitForWizard()
+
+    // rename specs
+    cy.get('button').contains('Rename these specs for me').click()
+
+    // skip component for now
     cy.findByText(`I'll do this later`).click()
+
     cy.findByText(`Rename the support file for me`).click()
 
     cy.withCtx(async (ctx) => {
@@ -243,6 +200,10 @@ describe('Migration', { viewportWidth: 1200 }, () => {
   describe('Configuration', () => {
     beforeEach(() => {
       cy.visitLaunchpad()
+      cy.waitForWizard()
+
+      // rename specs
+      cy.get('button').contains('Rename these specs for me').click()
 
       cy.findByText(`I'll do this later`).click()
       cy.findByText(defaultMessages.migration.wizard.step3.button).click()
@@ -274,30 +235,46 @@ describe('Migration', { viewportWidth: 1200 }, () => {
 
   describe('File Renames', () => {
     it('should move files to correct location', () => {
-      cy.withCtx(async (ctx) => {
-        await ctx.actions.file.writeFileInProject('cypress.json', '{}')
+      cy.visitLaunchpad()
+      cy.waitForWizard()
+
+      ;[
+        'app_spec.js',
+        'blog-post-spec.ts',
+        'homeSpec.js',
+        'someDir/someFile.js',
+        'bar.spec.js',
+        'company.js',
+        'sign-up.js',
+        'spectacleBrowser.ts',
+      ].forEach((spec) => {
+        // before
+        cy.contains(`cypress/integration/${spec}`)
+        // after
+        cy.contains(`cypress/e2e/${spec}`)
       })
 
-      cy.visitLaunchpad()
-      cy.findByText(defaultMessages.migration.wizard.step1.button).click()
+      // do the rename!
+      cy.get('button').contains('Rename these specs for me').click()
 
-      cy.withCtx(async (ctx) => {
-        const e2eDirPath = ctx.path.join('cypress', 'e2e')
-        const files = [
-          'app.cy.js',
-          'blog-post.cy.ts',
-          'company.cy.js',
-          'home.cy.js',
-          'sign-up.cy.js',
-          'spectacleBrowser.cy.ts',
-          ctx.path.join('someDir', 'someFile.js'),
-        ].map((file) => ctx.path.join(e2eDirPath, file))
+      // ensure file has been moved
+      cy.wait(100)
 
-        for (let i = 0; i < files.length; i++) {
-          const stats = await ctx.actions.file.checkIfFileExists(files[i])
+      cy.withCtx((ctx) => {
+        [
+          'app_spec.js',
+          'blog-post-spec.ts',
+          'homeSpec.js',
+          'someDir/someFile.js',
+          'bar.spec.js',
+          'company.js',
+          'sign-up.js',
+          'spectacleBrowser.ts',
+        ].forEach(async (spec) => {
+          const stats = await ctx.actions.file.checkIfFileExists(ctx.path.join('cypress', 'e2e', spec))
 
           expect(stats).to.not.be.null
-        }
+        })
       })
     })
   })
