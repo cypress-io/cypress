@@ -2043,7 +2043,7 @@ jobs:
           browser: chrome
           folder: "create-react-app-ant-design"
           pull_request_id: 85
-          command: "yarn cypress run-ct"
+          command: "npx cypress run-ct"
 
   test-binary-against-cy-ct-examples-cra-react-bootstrap:
     <<: *defaults
@@ -2053,7 +2053,17 @@ jobs:
           browser: chrome
           folder: "create-react-app-react-bootstrap"
           pull_request_id: 84
-          command: "yarn cypress run-ct"
+          command: "npx cypress run-ct"
+
+  test-binary-against-cy-ct-examples-cra-chakra-ui:
+    <<: *defaults
+    steps:
+      - test-binary-against-repo:
+          repo: cypress-component-testing-examples
+          browser: chrome
+          folder: "create-react-app-chakra-ui"
+          pull_request_id: 83
+          command: "npx cypress run-ct"
 
   test-binary-as-specific-user:
     <<: *defaults
@@ -2427,6 +2437,10 @@ linux-workflow: &linux-workflow
         requires:
           - create-build-artifacts
     - test-binary-against-cy-ct-examples-cra-react-bootstrap:
+        <<: *mainBuildFilters
+        requires:
+          - create-build-artifacts
+    - test-binary-against-cy-ct-examples-cra-chakra-ui:
         <<: *mainBuildFilters
         requires:
           - create-build-artifacts
