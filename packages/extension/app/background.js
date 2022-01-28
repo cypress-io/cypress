@@ -88,6 +88,12 @@ const connect = function (host, path, extraOpts) {
         return invoke('focus', id)
       case 'take:screenshot':
         return invoke('takeScreenshot', id)
+      case 'reset:browser:state':
+        return invoke('resetBrowserState', id)
+      case 'close:browser:tab':
+        return invoke('closeBrowserTab', id, data)
+      case 'start:browser:tab':
+        return invoke('startBrowserTab', id, data)
       default:
         return fail(id, { message: `No handler registered for: '${msg}'` })
     }
@@ -203,6 +209,22 @@ const automation = {
     }).then((window) => {
       return browser.windows.update(window.id, { focused: true })
     }).then(fn)
+  },
+
+  resetBrowserState (fn) {
+    return browser.browsingData.remove({}, { cache: true, cookies: true, downloads: true, formData: true, history: true, indexedDB: true, localStorage: true, passwords: true, pluginData: true, serverBoundCertificates: true, serviceWorkers: true }).then(fn)
+  },
+
+  closeBrowserTab ({ urlToExclude }, fn) {
+    return Promise.try(() => {
+      return browser.tabs.query({ windowType: 'normal' })
+    }).filter((tab) => {
+      return tab.url !== urlToExclude
+    }).then((tabs) => browser.tabs.remove(tabs.map((tab) => tab.id))).then(fn)
+  },
+
+  startBrowserTab ({ url }, fn) {
+    return browser.tabs.create({ url }).then(fn)
   },
 
   query (data) {

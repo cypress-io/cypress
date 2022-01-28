@@ -74,6 +74,9 @@ const retry = (fn: (res: any) => void) => {
 }
 
 export class SocketBase {
+  private _sendCloseBrowserTabMessage
+  private _sendResetBrowserStateMessage
+  private _sendStartNewBrowserTabMessage
   protected ended: boolean
   protected _io?: socketIo.SocketIOServer
 
@@ -272,6 +275,18 @@ export class SocketBase {
           return cb({ error: errors.clone(err) })
         })
       })
+
+      this._sendCloseBrowserTabMessage = async (urlToExclude) => {
+        await automationRequest('close:browser:tab', { urlToExclude })
+      }
+
+      this._sendResetBrowserStateMessage = async () => {
+        await automationRequest('reset:browser:state', {})
+      }
+
+      this._sendStartNewBrowserTabMessage = async (url) => {
+        await automationRequest('start:browser:tab', { url })
+      }
 
       socket.on('reporter:connected', () => {
         if (socket.inReporterRoom) {
@@ -536,6 +551,18 @@ export class SocketBase {
 
   changeToUrl (url) {
     return this.toRunner('change:to:url', url)
+  }
+
+  async closeBrowserTab (urlToExclude) {
+    await this._sendCloseBrowserTabMessage(urlToExclude)
+  }
+
+  async resetBrowserState () {
+    await this._sendResetBrowserStateMessage()
+  }
+
+  async startNewBrowserTabWithUrl (url) {
+    await this._sendStartNewBrowserTabMessage(url)
   }
 
   close () {

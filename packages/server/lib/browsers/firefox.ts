@@ -357,6 +357,10 @@ export function _createDetachedInstance (browserInstance: BrowserInstance): Brow
   return detachedInstance
 }
 
+export async function connectToNewSpec (browser: Browser, options: any = {}, automation) {
+  return firefoxUtil.setupRemote(browser.debuggingPort, automation, options.url, options.onError)
+}
+
 export function connectToExisting () {
 }
 
@@ -379,6 +383,7 @@ export async function open (browser: Browser, url, options: any = {}, automation
 
   if (hasCdp) {
     remotePort = await getRemoteDebuggingPort()
+    browser.debuggingPort = remotePort
 
     defaultLaunchOptions.args.push(`--remote-debugging-port=${remotePort}`)
   }
