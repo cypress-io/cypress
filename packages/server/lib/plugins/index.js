@@ -8,7 +8,6 @@ const inspector = require('inspector')
 const errors = require('../errors')
 const util = require('./util')
 const pkg = require('@packages/root')
-const semver = require('semver')
 
 let pluginsProcess = null
 let registeredEvents = {}

@@ -303,10 +303,11 @@ const util = {
     // which version of OpenSSL it was built against before spawning the plugins
     // process.
 
-    // To be removed on update to webpack >= 5.61, which no longer relies on
+    // To be removed when the Cypress binary pulls in the @cypress/webpack-batteries-included-preprocessor
+    // version that has been updated to webpack >= 5.61, which no longer relies on
     // Node's builtin crypto.hash function.
     if (processVersions && semver.satisfies(processVersions.node, '>=17.0.0') && processVersions.openssl.startsWith('3.')) {
-      opts.ORIGINAL_NODE_OPTIONS += ' --openssl-legacy-provider'
+      opts.ORIGINAL_NODE_OPTIONS = `${opts.ORIGINAL_NODE_OPTIONS || ''} --openssl-legacy-provider`
     }
 
     return opts
