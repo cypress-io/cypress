@@ -601,6 +601,16 @@ describe('lib/socket', () => {
       })
     })
 
+    context('#sendFocusBrowserMessage', function () {
+      it('sends an automation request of focus:browser:window', function () {
+        sinon.stub(this.automation, 'request')
+
+        this.socket.sendFocusBrowserMessage()
+
+        expect(this.automation.request).to.be.calledWith('focus:browser:window', {})
+      })
+    })
+
     context('#close', () => {
       it('calls close on #io', function () {
         this.socket.close()

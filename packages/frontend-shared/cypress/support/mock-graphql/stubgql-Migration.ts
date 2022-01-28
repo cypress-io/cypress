@@ -22,12 +22,14 @@ export const stubMigration: MaybeResolver<Migration> = {
       name,
     }
   }),
-  specFiles: {
-    __typename: 'MigrationFiles',
-    before: [
-      {
+  specFiles: [
+    {
+      __typename: 'MigrationFile',
+      testingType: 'e2e',
+      before: {
+        __typename: 'MigrationFileData',
         id: id(),
-        __typename: 'MigrationFile',
+        relative: 'cypress/integration/app.spec.js',
         parts: [
           { id: id(), __typename: 'MigrationFilePart', text: 'cypress/', highlight: false },
           { id: id(), __typename: 'MigrationFilePart', text: 'integration', highlight: true },
@@ -35,45 +37,21 @@ export const stubMigration: MaybeResolver<Migration> = {
           { id: id(), __typename: 'MigrationFilePart', text: '.spec.', highlight: true },
           { id: id(), __typename: 'MigrationFilePart', text: 'js', highlight: false },
         ],
-        testingType: 'e2e',
       },
-      {
-        id: id(), __typename: 'MigrationFile',
+      after: {
+        __typename: 'MigrationFileData',
+        id: id(),
+        relative: 'cypress/integration/app.spec.js',
         parts: [
           { id: id(), __typename: 'MigrationFilePart', text: 'cypress/', highlight: false },
           { id: id(), __typename: 'MigrationFilePart', text: 'integration', highlight: true },
-          { id: id(), __typename: 'MigrationFilePart', text: '/blog-post', highlight: false },
-          { id: id(), __typename: 'MigrationFilePart', text: '-spec.', highlight: true },
-          { id: id(), __typename: 'MigrationFilePart', text: 'js', highlight: false },
-        ],
-        testingType: 'e2e',
-      },
-    ],
-    after: [
-      {
-        id: id(), __typename: 'MigrationFile',
-        parts: [
-          { id: id(), __typename: 'MigrationFilePart', text: 'cypress/', highlight: false },
-          { id: id(), __typename: 'MigrationFilePart', text: 'e2e', highlight: true },
           { id: id(), __typename: 'MigrationFilePart', text: '/app', highlight: false },
           { id: id(), __typename: 'MigrationFilePart', text: '.cy.', highlight: true },
           { id: id(), __typename: 'MigrationFilePart', text: 'js', highlight: false },
         ],
-        testingType: 'e2e',
       },
-      {
-        id: id(), __typename: 'MigrationFile',
-        parts: [
-          { id: id(), __typename: 'MigrationFilePart', text: 'cypress/', highlight: false },
-          { id: id(), __typename: 'MigrationFilePart', text: 'e2e', highlight: true },
-          { id: id(), __typename: 'MigrationFilePart', text: '/blog-post', highlight: false },
-          { id: id(), __typename: 'MigrationFilePart', text: '.cy.', highlight: true },
-          { id: id(), __typename: 'MigrationFilePart', text: 'js', highlight: false },
-        ],
-        testingType: 'e2e',
-      },
-    ],
-  },
+    },
+  ],
   manualFiles: {
     id: id(),
     __typename: 'ManualMigration',
@@ -114,13 +92,14 @@ export const stubMigration: MaybeResolver<Migration> = {
   })`,
   integrationFolder: 'cypress/integration',
   componentFolder: 'cypress/component',
-  supportFiles: {
-    __typename: 'MigrationFiles',
-    before: [
-      {
+  supportFiles:
+    {
+      __typename: 'MigrationFile',
+      testingType: 'e2e',
+      before: {
         id: id(),
-        __typename: 'MigrationFile',
-        testingType: 'e2e',
+        relative: 'cypress/support/index.js',
+        __typename: 'MigrationFileData',
         parts: [
           {
             id: id(),
@@ -142,12 +121,10 @@ export const stubMigration: MaybeResolver<Migration> = {
           },
         ],
       },
-    ],
-    after: [
-      {
+      after: {
         id: id(),
-        __typename: 'MigrationFile',
-        testingType: 'e2e',
+        relative: 'cypress/support/e2e.js',
+        __typename: 'MigrationFileData',
         parts: [
           {
             id: id(),
@@ -169,8 +146,7 @@ export const stubMigration: MaybeResolver<Migration> = {
           },
         ],
       },
-    ],
-  },
+    },
   hasComponentTesting: true,
   hasCustomComponentFolder: false,
   hasCustomComponentTestFiles: false,

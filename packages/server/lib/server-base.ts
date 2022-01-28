@@ -577,6 +577,10 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return this._socket && this._socket.changeToUrl(url)
   }
 
+  async sendFocusBrowserMessage () {
+    this._socket && await this._socket.sendFocusBrowserMessage()
+  }
+
   onRequest (fn) {
     this._middleware = fn
   }

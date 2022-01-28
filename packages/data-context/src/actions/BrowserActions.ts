@@ -10,4 +10,8 @@ export class BrowserActions {
   closeBrowser () {
     return this.browserApi.close()
   }
+
+  async focusActiveBrowserWindow () {
+    await this.browserApi.focusActiveBrowserWindow()
+  }
 }

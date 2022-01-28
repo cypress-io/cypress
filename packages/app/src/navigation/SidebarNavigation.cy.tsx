@@ -41,10 +41,6 @@ describe('SidebarNavigation', () => {
     cy.contains('#tooltip-target > div', 'test-project').should('be.visible')
     cy.get('[data-cy="sidebar-header"]').trigger('mouseout')
 
-    cy.get('[data-cy="switch-testing-type"]').realHover()
-    cy.contains('#tooltip-target > div', 'E2E Testing').should('be.visible')
-    cy.get('[data-cy="switch-testing-type"]').trigger('mouseout')
-
     cy.get('[data-e2e-href="/runs"]').realHover()
     cy.contains('#tooltip-target > div', 'Runs').should('be.visible')
     cy.get('[data-e2e-href="/runs"]').trigger('mouseout')
@@ -52,6 +48,6 @@ describe('SidebarNavigation', () => {
 
   it('opens a modal to switch testing type', { viewportWidth: 1280 }, () => {
     mountComponent()
-    cy.get('[data-cy="switch-testing-type"]').click()
+    cy.get('[data-cy="sidebar-header"]').click()
   })
 })

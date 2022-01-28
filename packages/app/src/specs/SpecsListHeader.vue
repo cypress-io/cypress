@@ -7,6 +7,7 @@
       :prefix-icon="IconMagnifyingGlass"
       :model-value="props.modelValue"
       :placeholder="t('specPage.searchPlaceholder')"
+      :aria-label="t('specPage.searchPlaceholder')"
       @input="onInput"
     >
       <template #suffix>
@@ -25,7 +26,7 @@
       </template>
     </Input>
 
-    <div class="flex h-40px gap-16px min-w-127px">
+    <div class="flex h-40px min-w-127px gap-16px">
       <Button
         data-cy="new-spec-button"
         :prefix-icon="IconAdd"
