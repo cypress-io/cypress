@@ -1,4 +1,4 @@
-declare namespace legacyDevServer {
+declare namespace CypressNextDevServer {
   interface CypressNextDevServerConfig {
     /**
      * Path to an index.html file that will serve as the template in
@@ -21,6 +21,6 @@ declare namespace legacyDevServer {
  * @param config comes from the argument of the `pluginsFile` function
  * @param devServerConfig additional config object (create an empty object to see how to use it)
  */
-declare function legacyDevServer(on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions, devServerConfig?: legacyDevServer.CypressNextDevServerConfig): void
+declare function CypressNextDevServer(on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions, devServerConfig?: CypressNextDevServer.CypressNextDevServerConfig): void
 
-export = legacyDevServer;
+export = CypressNextDevServer;
