@@ -33,6 +33,8 @@ export const e2eProjectDirs = [
   'migration-component-testing',
   'migration-component-testing-customized',
   'migration-component-testing-defaults',
+  'migration-e2e-component-default-everything',
+  'migration-e2e-component-default-test-files',
   'migration-e2e-custom-integration',
   'migration-e2e-custom-test-files',
   'migration-e2e-defaults',

@@ -1,4 +1,3 @@
-import type { TestingType } from '@packages/types'
 import chokidar from 'chokidar'
 import fs from 'fs-extra'
 import stringify from 'stringify-object'
@@ -8,8 +7,6 @@ import {
   supportFileRegexps,
   formatMigrationFile,
 } from './migrationFormat'
-import type { FilesForMigrationUI, MigrationFile } from '../sources'
-import { regexps } from '.'
 
 type ConfigOptions = {
   global: Record<string, unknown>
@@ -179,44 +176,8 @@ function createTestingTypeTemplate (testingType: 'e2e' | 'component', pluginPath
   },`
 }
 
-export interface RelativeSpecWithTestingType {
-  testingType: TestingType
+export interface RelativeSpec {
   relative: string
-}
-
-async function findByTestingType (cwd: string, dir: string | null, testingType: TestingType) {
-  if (!dir) {
-    return []
-  }
-
-  return (await globby(`${dir}/**/*`, { onlyFiles: true, cwd }))
-  .map((relative) => ({ relative, testingType }))
-}
-
-export interface GetRelativeSpecs {
-  before: RelativeSpecWithTestingType[]
-  after: RelativeSpecWithTestingType[]
-}
-
-export async function getSpecs (
-  projectRoot: string,
-  componentFolder: string | null,
-  integrationFolder: string | null,
-): Promise<GetRelativeSpecs> {
-  const integration = integrationFolder ? (await findByTestingType(projectRoot, integrationFolder, 'e2e')) : []
-  const component = componentFolder ? (await findByTestingType(projectRoot, componentFolder, 'component')) : []
-
-  const all = [...integration, ...component]
-
-  return {
-    before: all,
-    after: all.map((x) => {
-      return {
-        testingType: x.testingType,
-        relative: renameSpecPath(x.relative),
-      }
-    }),
-  }
 }
 
 /**
@@ -305,33 +266,4 @@ export function renameSpecPath (spec: string) {
   return spec
   .replace('integration', 'e2e')
   .replace(/([._-]?[s|S]pec.|[.])(?=[j|t]s[x]?)/, '.cy.')
-}
-
-export function getSpecsForMigrationGuide (specs: GetRelativeSpecs, integrationFolder: string): FilesForMigrationUI {
-  const isDefaultIntegrationFolder = integrationFolder === 'cypress/integration'
-
-  const processSpecs = (regexp: 'beforeRegexp' | 'afterRegexp') => {
-    const re = isDefaultIntegrationFolder
-      ? new RegExp(regexps.e2e.usingDefaultIntegrationFolder[regexp])
-      : new RegExp(regexps.e2e.usingCustomIntegrationFolder[regexp](integrationFolder))
-
-    return (acc: MigrationFile[], x: RelativeSpecWithTestingType) => {
-      return acc.concat({
-        testingType: x.testingType,
-        relative: x.relative,
-        parts: formatMigrationFile(x.relative, re),
-      })
-    }
-  }
-
-  const result: FilesForMigrationUI = {
-    before: specs.before.reduce(processSpecs('beforeRegexp'), []),
-    after: specs.after.reduce(processSpecs('afterRegexp'), []),
-  }
-
-  if (result.before.length !== result.after.length) {
-    throw Error(`Before and after should have same lengths, got ${result.before.length} and ${result.after.length}`)
-  }
-
-  return result
 }

@@ -1,9 +1,6 @@
 import { enumType, objectType } from 'nexus'
 import { TestingTypeEnum } from '..'
-import Debug from 'debug'
 import { MIGRATION_STEPS } from '@packages/types'
-
-const debug = Debug('cypress:graphql:gql-Migration')
 
 export const MigrationStepEnum = enumType({
   name: 'MigrationStepEnum',
@@ -57,11 +54,15 @@ export const MigrationFilePart = objectType({
     t.nonNull.boolean('highlight', {
       description: 'should highlight in migration UI',
     })
+
+    t.string('group', {
+      description: 'is this part a folder or extension that needs migration',
+    })
   },
 })
 
-export const MigrationFiles = objectType({
-  name: 'MigrationFiles',
+export const FilesForMigrationUI = objectType({
+  name: 'FilesForMigrationUI',
   definition (t) {
     t.nonNull.list.nonNull.field('before', {
       type: MigrationFile,
@@ -102,16 +103,31 @@ export const ManualMigration = objectType({
   },
 })
 
-export const MigrationFile = objectType({
-  name: 'MigrationFile',
+export const MigrationFileData = objectType({
+  name: 'MigrationFileData',
   node: (obj) => obj.parts.map((file) => file.text).join(''),
   definition (t) {
+    t.nonNull.string('relative')
+
     t.nonNull.list.nonNull.field('parts', {
       type: MigrationFilePart,
     })
+  },
+})
 
+export const MigrationFile = objectType({
+  name: 'MigrationFile',
+  definition (t) {
     t.nonNull.field('testingType', {
       type: TestingTypeEnum,
+    })
+
+    t.nonNull.field('before', {
+      type: MigrationFileData,
+    })
+
+    t.nonNull.field('after', {
+      type: MigrationFileData,
     })
   },
 })
@@ -153,13 +169,11 @@ export const Migration = objectType({
       },
     })
 
-    t.nonNull.field('specFiles', {
+    t.nonNull.list.nonNull.field('specFiles', {
       description: 'All spec files after conversion',
-      type: MigrationFiles,
+      type: MigrationFile,
       resolve: async (source, args, ctx) => {
         const result = await ctx.migration.getSpecsForMigrationGuide()
-
-        debug('got migration specs %o', result)
 
         return result
       },
@@ -185,9 +199,9 @@ export const Migration = objectType({
       },
     })
 
-    t.field('supportFiles', {
+    t.list.nonNull.field('supportFiles', {
       description: 'Support files needing automated rename',
-      type: MigrationFiles,
+      type: MigrationFile,
       resolve: (source, args, ctx) => {
         return ctx.migration.supportFilesForMigrationGuide()
       },

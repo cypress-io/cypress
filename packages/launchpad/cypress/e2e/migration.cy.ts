@@ -34,9 +34,9 @@ describe('Steps', () => {
     cy.get(configFileStep).should('exist')
   })
 
-  it('shows auto and manual rename for component project with defaults', () => {
+  xit('shows auto and manual rename for component project with defaults', () => {
     cy.scaffoldProject('migration-component-testing-defaults')
-    cy.openProject('migration-e2e-fully-custom')
+    cy.openProject('migration-component-testing-defaults')
     cy.visitLaunchpad()
     cy.waitForWizard()
     cy.get(renameAutoStep).should('exist')

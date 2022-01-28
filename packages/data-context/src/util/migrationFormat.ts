@@ -2,15 +2,8 @@ import dedent from 'dedent'
 
 export interface FilePart {
   text: string
+  group?: 'folder' | 'extension'
   highlight: boolean
-}
-
-function getLegacyHighlightRegexp (defaultFolder: 'integration' | 'component') {
-  return `cypress\/(?<main>${defaultFolder})\/.*?(?<ext>[._-]?[s|S]pec.|[.])(?=[j|t]s[x]?)`
-}
-
-function getNewHighlightRegexp (defaultFolder: 'e2e' | 'component') {
-  return `cypress\/(?<main>${defaultFolder})\/.*?(?<ext>.cy.)`
 }
 
 export const supportFileRegexps = {
@@ -21,19 +14,6 @@ export const supportFileRegexps = {
   component: {
     beforeRegexp: 'cypress/\support\/(?<file>index)\.(?=[j|t]s[x]?)',
     afterRegexp: 'cypress/\support\/(?<file>e2e)\.(?=[j|t]s[x]?)',
-  },
-} as const
-
-export const regexps = {
-  e2e: {
-    usingDefaultIntegrationFolder: {
-      beforeRegexp: getLegacyHighlightRegexp('integration'),
-      afterRegexp: getNewHighlightRegexp('e2e'),
-    },
-    usingCustomIntegrationFolder: {
-      beforeRegexp: (folder: string) => `${folder}\/.*?(?<ext>[._-]?[s|S]pec.|[.])(?=[j|t]s[x]?)`,
-      afterRegexp: (folder: string) => `${folder}\/.*?(?<ext>.cy.)`,
-    },
   },
 } as const
 
@@ -54,9 +34,17 @@ export function formatMigrationFile (file: string, regexp: RegExp): FilePart[] {
   const split = file.split(re)
 
   return split.map<FilePart>((text) => {
-    return {
+    const group = text === match.groups?.main
+      ? 'folder'
+      : text === match.groups?.ext
+        ? 'extension'
+        : undefined
+
+    const data: FilePart = {
       text,
       highlight: higlights.includes(text),
     }
+
+    return group ? { ...data, group } : data
   })
 }

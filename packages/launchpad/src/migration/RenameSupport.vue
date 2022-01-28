@@ -18,13 +18,13 @@
   <BeforeAfter>
     <template #before>
       <HighlightedFilesList
-        :files="props.gql.supportFiles?.before || []"
+        :files="props.gql.supportFiles?.map(x => x.before) || []"
         highlight-class="text-red-500"
       />
     </template>
     <template #after>
       <HighlightedFilesList
-        :files="props.gql.supportFiles?.after || []"
+        :files="props.gql.supportFiles?.map(x => x.after) || []"
         highlight-class="text-jade-500"
       />
     </template>

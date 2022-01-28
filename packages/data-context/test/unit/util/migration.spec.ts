@@ -6,11 +6,8 @@ import {
   initComponentTestingMigration,
   ComponentTestingMigrationStatus,
   NonStandardMigrationError,
-  getSpecs,
-  getSpecsForMigrationGuide,
   supportFilesForMigration,
   renameSupportFilePath,
-  GetRelativeSpecs,
 } from '../../../src/util/migration'
 import { expect } from 'chai'
 import tempDir from 'temp-dir'
@@ -106,63 +103,63 @@ describe('cypress.config.js generation', () => {
   })
 })
 
-describe('spec renaming', () => {
-  it('should work for custom integration folder all specs', async () => {
-    const cwd = scaffoldMigrationProject('migration-e2e-custom-integration')
-    const specs = await getSpecs(cwd, null, 'src')
+// describe('spec renaming', () => {
+//   it('should work for custom integration folder all specs', async () => {
+//     const cwd = scaffoldMigrationProject('migration-e2e-custom-integration')
+//     const specs = await getSpecs(cwd, null, 'src')
 
-    expect(specs).to.eql(
-      {
-        before: [{ relative: 'src/basic.spec.js', testingType: 'e2e' }],
-        after: [{ testingType: 'e2e', relative: 'src/basic.cy.js' }],
-      },
-    )
-  })
+//     expect(specs).to.eql(
+//       {
+//         before: [{ relative: 'src/basic.spec.js', testingType: 'e2e' }],
+//         after: [{ testingType: 'e2e', relative: 'src/basic.cy.js' }],
+//       },
+//     )
+//   })
 
-  it('should work for default component folder all specs', async () => {
-    const cwd = scaffoldMigrationProject('migration-component-testing-defaults')
-    const specs = await getSpecs(cwd, 'cypress/component', null)
+//   it('should work for default component folder all specs', async () => {
+//     const cwd = scaffoldMigrationProject('migration-component-testing-defaults')
+//     const specs = await getSpecs(cwd, 'cypress/component', null)
 
-    expect(specs).to.eql(
-      {
-        before: [
-          { relative: 'cypress/component/button.spec.js', testingType: 'component' },
-          { relative: 'cypress/component/input-spec.tsx', testingType: 'component' },
-        ],
-        after: [
-          { testingType: 'component', relative: 'cypress/component/button.cy.js' },
-          { testingType: 'component', relative: 'cypress/component/input.cy.tsx' },
-        ],
-      },
-    )
-  })
+//     expect(specs).to.eql(
+//       {
+//         before: [
+//           { relative: 'cypress/component/button.spec.js', testingType: 'component' },
+//           { relative: 'cypress/component/input-spec.tsx', testingType: 'component' },
+//         ],
+//         after: [
+//           { testingType: 'component', relative: 'cypress/component/button.cy.js' },
+//           { testingType: 'component', relative: 'cypress/component/input.cy.tsx' },
+//         ],
+//       },
+//     )
+//   })
 
-  it('should rename all specs in default integration folder', async () => {
-    const cwd = scaffoldMigrationProject('migration')
-    const specs = await getSpecs(cwd, null, 'cypress/integration')
+//   it('should rename all specs in default integration folder', async () => {
+//     const cwd = scaffoldMigrationProject('migration')
+//     const specs = await getSpecs(cwd, null, 'cypress/integration')
 
-    expect(specs.before[0].relative).to.eql('cypress/integration/app_spec.js')
-    expect(specs.after[0].relative).to.eql('cypress/e2e/app.cy.js')
+//     expect(specs.before[0].relative).to.eql('cypress/integration/app_spec.js')
+//     expect(specs.after[0].relative).to.eql('cypress/e2e/app.cy.js')
 
-    expect(specs.before[1].relative).to.eql('cypress/integration/blog-post-spec.ts')
-    expect(specs.after[1].relative).to.eql('cypress/e2e/blog-post.cy.ts')
+//     expect(specs.before[1].relative).to.eql('cypress/integration/blog-post-spec.ts')
+//     expect(specs.after[1].relative).to.eql('cypress/e2e/blog-post.cy.ts')
 
-    expect(specs.before[2].relative).to.eql('cypress/integration/company.js')
-    expect(specs.after[2].relative).to.eql('cypress/e2e/company.cy.js')
+//     expect(specs.before[2].relative).to.eql('cypress/integration/company.js')
+//     expect(specs.after[2].relative).to.eql('cypress/e2e/company.cy.js')
 
-    expect(specs.before[3].relative).to.eql('cypress/integration/homeSpec.js')
-    expect(specs.after[3].relative).to.eql('cypress/e2e/home.cy.js')
+//     expect(specs.before[3].relative).to.eql('cypress/integration/homeSpec.js')
+//     expect(specs.after[3].relative).to.eql('cypress/e2e/home.cy.js')
 
-    expect(specs.before[4].relative).to.eql('cypress/integration/sign-up.js')
-    expect(specs.after[4].relative).to.eql('cypress/e2e/sign-up.cy.js')
+//     expect(specs.before[4].relative).to.eql('cypress/integration/sign-up.js')
+//     expect(specs.after[4].relative).to.eql('cypress/e2e/sign-up.cy.js')
 
-    expect(specs.before[5].relative).to.eql('cypress/integration/spectacleBrowser.ts')
-    expect(specs.after[5].relative).to.eql('cypress/e2e/spectacleBrowser.cy.ts')
+//     expect(specs.before[5].relative).to.eql('cypress/integration/spectacleBrowser.ts')
+//     expect(specs.after[5].relative).to.eql('cypress/e2e/spectacleBrowser.cy.ts')
 
-    expect(specs.before[6].relative).to.eql('cypress/integration/someDir/someFile.js')
-    expect(specs.after[6].relative).to.eql('cypress/e2e/someDir/someFile.cy.js')
-  })
-})
+//     expect(specs.before[6].relative).to.eql('cypress/integration/someDir/someFile.js')
+//     expect(specs.after[6].relative).to.eql('cypress/e2e/someDir/someFile.cy.js')
+//   })
+// })
 
 describe('supportFilesForMigrationGuide', () => {
   it('finds and represents correct supportFile migration guide', async () => {
@@ -294,142 +291,5 @@ describe('initComponentTestingMigration', () => {
     })
 
     await watcher.close()
-  })
-})
-
-describe('getSpecsForMigrationGuide', () => {
-  it('handles default integration folder', () => {
-    const specs: GetRelativeSpecs = {
-      before: [
-        {
-          testingType: 'e2e',
-          relative: 'cypress/integration/foo.spec.js',
-        },
-      ],
-      after: [
-        {
-          testingType: 'e2e',
-          relative: 'cypress/e2e/foo.cy.js',
-        },
-      ],
-    }
-
-    const actual = getSpecsForMigrationGuide(specs, 'cypress/integration')
-
-    expect(actual).to.eql({
-      'before': [
-        {
-          'testingType': 'e2e',
-          'relative': 'cypress/integration/foo.spec.js',
-          'parts': [
-            {
-              'text': 'cypress/',
-              'highlight': false,
-            },
-            {
-              'text': 'integration',
-              'highlight': true,
-            },
-            {
-              'text': '/foo',
-              'highlight': false,
-            },
-            {
-              'text': '.spec.',
-              'highlight': true,
-            },
-            {
-              'text': 'js',
-              'highlight': false,
-            },
-          ],
-        },
-      ],
-      'after': [
-        {
-          'testingType': 'e2e',
-          'relative': 'cypress/e2e/foo.cy.js',
-          'parts': [
-            {
-              'text': 'cypress/',
-              'highlight': false,
-            },
-            {
-              'text': 'e2e',
-              'highlight': true,
-            },
-            {
-              'text': '/foo',
-              'highlight': false,
-            },
-            {
-              'text': '.cy.',
-              'highlight': true,
-            },
-            {
-              'text': 'js',
-              'highlight': false,
-            },
-          ],
-        },
-      ],
-    })
-  })
-
-  it('handles custom integration folder', () => {
-    const specs: GetRelativeSpecs = {
-      before: [
-        {
-          testingType: 'e2e',
-          relative: 'src/foo.spec.js',
-        },
-      ],
-      after: [
-        {
-          testingType: 'e2e',
-          relative: 'src/foo.cy.js',
-        },
-      ],
-    }
-
-    const actual = getSpecsForMigrationGuide(specs, 'src')
-
-    expect(actual.before[0]).to.eql({
-      'testingType': 'e2e',
-      'relative': 'src/foo.spec.js',
-      'parts': [
-        {
-          'text': 'src/foo',
-          'highlight': false,
-        },
-        {
-          'text': '.spec.',
-          'highlight': true,
-        },
-        {
-          'text': 'js',
-          'highlight': false,
-        },
-      ],
-    })
-
-    expect(actual.after[0]).to.eql({
-      'testingType': 'e2e',
-      'relative': 'src/foo.cy.js',
-      'parts': [
-        {
-          'text': 'src/foo',
-          'highlight': false,
-        },
-        {
-          'text': '.cy.',
-          'highlight': true,
-        },
-        {
-          'text': 'js',
-          'highlight': false,
-        },
-      ],
-    })
   })
 })

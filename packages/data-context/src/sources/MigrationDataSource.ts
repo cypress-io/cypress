@@ -1,5 +1,4 @@
 import { TestingType, MIGRATION_STEPS } from '@packages/types'
-import Debug from 'debug'
 import type chokidar from 'chokidar'
 import path from 'path'
 import type { DataContext } from '..'
@@ -7,14 +6,15 @@ import {
   createConfigString,
   initComponentTestingMigration,
   ComponentTestingMigrationStatus,
-  getSpecs,
   getDefaultLegacySupportFile,
-  RelativeSpecWithTestingType,
   supportFilesForMigration,
   OldCypressConfig,
   hasComponentSpecFile,
-  getSpecsForMigrationGuide,
 } from '../util/migration'
+import {
+  getSpecs,
+  applyMigrationTransform,
+} from './migration/autoRename'
 import type { FilePart } from '../util/migrationFormat'
 import {
   getStepsForMigration,
@@ -25,21 +25,16 @@ import {
   getComponentFolder,
 } from './migration/shouldShowSteps'
 
-const debug = Debug('cypress:data-context:MigrationDataSource')
-
 export interface MigrationFile {
   testingType: TestingType
-  relative: string
-  parts: FilePart[]
-}
-
-export interface MigrationRelativeSpecs {
-  before: RelativeSpecWithTestingType
-}
-
-export interface FilesForMigrationUI {
-  before: MigrationFile[]
-  after: MigrationFile[]
+  before: {
+    relative: string
+    parts: FilePart[]
+  }
+  after: {
+    relative: string
+    parts: FilePart[]
+  }
 }
 
 type MIGRATION_STEP = typeof MIGRATION_STEPS[number]
@@ -82,19 +77,24 @@ export class MigrationDataSource {
     this.setStep(this.filteredSteps[0])
   }
 
-  async getSpecsRelativeToFolder () {
-    if (!this.ctx.currentProject) {
-      throw Error('cannot get specs without a project path')
-    }
+  // async getSpecsRelativeToFolder () {
+  //   if (!this.ctx.currentProject) {
+  //     throw Error('cannot get specs without a project path')
+  //   }
 
-    const intFolder = await this.integrationFolder()
+  //   const integrationFolder = await this.integrationFolder()
+  //   const componentFolder = await this.componentFolder()
 
-    const specs = await getSpecs(this.ctx.currentProject, intFolder || null)
+  //   const specs = await getSpecs(
+  //     this.ctx.currentProject,
+  //     componentFolder || null,
+  //     integrationFolder || null,
+  //   )
 
-    debug('looked in %s and %s and found %o', intFolder, specs)
+  //   debug('looked in %s and %s and found %o', integrationFolder, specs)
 
-    return specs
-  }
+  //   return specs
+  // }
 
   async getDefaultLegacySupportFile (): Promise<string> {
     if (!this.ctx.currentProject) {
@@ -149,7 +149,7 @@ export class MigrationDataSource {
     return this.componentTestingMigrationStatus
   }
 
-  async supportFilesForMigrationGuide (): Promise<FilesForMigrationUI | null> {
+  async supportFilesForMigrationGuide (): Promise<MigrationFile[] | null> {
     const config = await this.parseCypressConfig()
 
     if (!shouldShowRenameSupport(config)) {
@@ -163,19 +163,19 @@ export class MigrationDataSource {
     return supportFilesForMigration(this.ctx.currentProject)
   }
 
-  async getSpecsForMigrationGuide (): Promise<FilesForMigrationUI> {
-    const integrationFolder = await this.integrationFolder()
-
-    if (integrationFolder === false) {
-      return {
-        before: [],
-        after: [],
-      }
+  async getSpecsForMigrationGuide (): Promise<MigrationFile[]> {
+    if (!this.ctx.currentProject) {
+      throw Error(`Need this.ctx.projectRoot!`)
     }
 
-    const specs = await this.getSpecsRelativeToFolder()
+    const config = await this.parseCypressConfig()
 
-    return getSpecsForMigrationGuide(specs, integrationFolder)
+    const specs = await getSpecs(this.ctx.currentProject, config)
+
+    return [
+      ...specs.integration.map(applyMigrationTransform),
+      ...specs.component.map(applyMigrationTransform),
+    ]
   }
 
   async getConfig () {
