@@ -1,7 +1,6 @@
 <template>
   <SettingsSection
     data-cy="settings-experiments"
-    anchor-id="experiments"
   >
     <template #title>
       {{ t('settingsPage.experiments.title') }}

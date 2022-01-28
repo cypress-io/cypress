@@ -3,7 +3,6 @@ import { defineComponent, ref, h } from 'vue'
 import { defaultMessages } from '@cy/i18n'
 
 const buttonSelector = '[data-cy=new-spec-button]'
-const inputSelector = 'input[type=search]'
 
 describe('<SpecsListHeader />', { keystrokeDelay: 0 }, () => {
   it('can be searched', () => {
@@ -20,7 +19,8 @@ describe('<SpecsListHeader />', { keystrokeDelay: 0 }, () => {
         })
       },
     }))
-    .get(inputSelector)
+
+    cy.findByLabelText(defaultMessages.specPage.searchPlaceholder)
     .type(searchString, { delay: 0 })
     .then(() => {
       expect(search.value).to.equal(searchString)
@@ -39,6 +39,25 @@ describe('<SpecsListHeader />', { keystrokeDelay: 0 }, () => {
     .get(buttonSelector)
     .click()
     .get('@new-spec')
+    .should('have.been.called')
+  })
+
+  it('emits a spec pattern event', () => {
+    const onShowSpecPatternModal = cy.stub().as('show-spec-pattern-modal')
+    const search = ref('')
+
+    cy.mount(() => (
+      <div class="max-w-800px p-12 resize overflow-auto">
+        <SpecsListHeader
+          modelValue={search.value}
+          onShowSpecPatternModal={onShowSpecPatternModal}
+          resultCount={0}
+        />
+      </div>))
+
+    cy.contains('button', defaultMessages.createSpec.viewSpecPatternButton)
+    .click()
+    .get('@show-spec-pattern-modal')
     .should('have.been.called')
   })
 

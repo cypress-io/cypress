@@ -3,7 +3,6 @@ import { Specs_SpecsListFragmentDoc, SpecsListFragment, TestingTypeEnum } from '
 import { defaultMessages } from '@cy/i18n'
 
 const rowSelector = '[data-cy=specs-list-row]'
-const inputSelector = 'input'
 
 function mountWithTestingType (testingType: TestingTypeEnum) {
   cy.mountFragment(Specs_SpecsListFragmentDoc, {
@@ -42,21 +41,24 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
         acc.relative.length < spec.relative.length ? spec : acc
       , specs[0])
 
-      cy.get(inputSelector).type('garbage 🗑', { delay: 0 })
+      cy.findByLabelText(defaultMessages.specPage.searchPlaceholder)
+      .as('specsListInput')
+
+      cy.get('@specsListInput').type('garbage 🗑', { delay: 0 })
       .get(rowSelector)
       .should('not.exist')
 
       cy.contains(`${defaultMessages.specPage.noResultsMessage} garbage 🗑`)
       cy.get('[data-cy="no-results-clear"]').click()
-      cy.get(inputSelector).invoke('val').should('be.empty')
+      cy.get('@specsListInput').invoke('val').should('be.empty')
 
-      cy.get(inputSelector).type(longestSpec.fileName)
+      cy.get('@specsListInput').type(longestSpec.fileName)
       cy.get(rowSelector).first().should('contain', longestSpec.relative.replace(`/${longestSpec.fileName}${longestSpec.specFileExtension}`, ''))
       cy.get(rowSelector).last().should('contain', `${longestSpec.fileName}${longestSpec.specFileExtension}`)
 
       const directory = longestSpec.relative.slice(0, longestSpec.relative.lastIndexOf('/'))
 
-      cy.get(inputSelector).clear().type(directory)
+      cy.get('@specsListInput').clear().type(directory)
       cy.get(rowSelector).first().should('contain', directory)
     })
 

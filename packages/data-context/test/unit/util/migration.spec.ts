@@ -6,15 +6,16 @@ import {
   initComponentTestingMigration,
   ComponentTestingMigrationStatus,
   NonStandardMigrationError,
-  getSpecs,
   supportFilesForMigration,
   reduceConfig,
   renameSupportFilePath,
 } from '../../../src/util/migration'
 import { expect } from 'chai'
 import tempDir from 'temp-dir'
+import type { e2eProjectDirs } from '@packages/frontend-shared/cypress/e2e/support/e2eProjectDirs'
+import { MigrationFile } from '../../../src/sources'
 
-function scaffoldMigrationProject (project: string) {
+function scaffoldMigrationProject (project: typeof e2eProjectDirs[number]) {
   const tmpDir = path.join(tempDir, 'cy-projects')
   const testProject = path.join(__dirname, '..', '..', '..', '..', '..', 'system-tests', 'projects', project)
   const cwd = path.join(tmpDir, project)
@@ -104,82 +105,53 @@ describe('cypress.config.js generation', () => {
   })
 })
 
-describe('spec renaming', () => {
-  it('should rename all specs', async () => {
-    const cwd = scaffoldMigrationProject('migration')
-    const specs = await getSpecs(cwd, 'cypress/component', 'cypress/integration')
-
-    expect(specs.before[0].relative).to.eql('cypress/component/button.spec.js')
-    expect(specs.after[0].relative).to.eql('cypress/component/button.cy.js')
-
-    expect(specs.before[1].relative).to.eql('cypress/component/input-spec.tsx')
-    expect(specs.after[1].relative).to.eql('cypress/component/input.cy.tsx')
-
-    expect(specs.before[2].relative).to.eql('cypress/integration/app_spec.js')
-    expect(specs.after[2].relative).to.eql('cypress/e2e/app.cy.js')
-
-    expect(specs.before[3].relative).to.eql('cypress/integration/blog-post-spec.ts')
-    expect(specs.after[3].relative).to.eql('cypress/e2e/blog-post.cy.ts')
-
-    expect(specs.before[4].relative).to.eql('cypress/integration/company.js')
-    expect(specs.after[4].relative).to.eql('cypress/e2e/company.cy.js')
-
-    expect(specs.before[5].relative).to.eql('cypress/integration/homeSpec.js')
-    expect(specs.after[5].relative).to.eql('cypress/e2e/home.cy.js')
-
-    expect(specs.before[6].relative).to.eql('cypress/integration/sign-up.js')
-    expect(specs.after[6].relative).to.eql('cypress/e2e/sign-up.cy.js')
-
-    expect(specs.before[7].relative).to.eql('cypress/integration/spectacleBrowser.ts')
-    expect(specs.after[7].relative).to.eql('cypress/e2e/spectacleBrowser.cy.ts')
-
-    expect(specs.before[8].relative).to.eql('cypress/integration/someDir/someFile.js')
-    expect(specs.after[8].relative).to.eql('cypress/e2e/someDir/someFile.cy.js')
-  })
-})
-
 describe('supportFilesForMigrationGuide', () => {
   it('finds and represents correct supportFile migration guide', async () => {
     const cwd = scaffoldMigrationProject('migration')
     const actual = await supportFilesForMigration(cwd)
 
-    expect(actual.before[0]).to.eql({
-      relative: 'cypress/support/index.js',
-      parts: [
-        {
-          'text': 'cypress/support/',
-          'highlight': false,
-        },
-        {
-          'text': 'index',
-          'highlight': true,
-        },
-        {
-          'text': '.js',
-          'highlight': false,
-        },
-      ],
-      'testingType': 'e2e',
-    })
+    const expected: MigrationFile = {
+      testingType: 'e2e',
+      before: {
+        relative: 'cypress/support/index.js',
+        parts: [
+          {
+            'text': 'cypress/support/',
+            'highlight': false,
+          },
+          {
+            'text': 'index',
+            'highlight': true,
+            group: 'name',
+          },
+          {
+            'text': '.js',
+            'highlight': false,
+          },
+        ],
+      },
+      after: {
+        relative: 'cypress/support/e2e.js',
+        parts: [
+          {
+            'text': 'cypress/support/',
+            'highlight': false,
+          },
+          {
+            'text': 'e2e',
+            'highlight': true,
+            group: 'name',
+          },
+          {
+            'text': '.js',
+            'highlight': false,
+          },
+        ],
+      },
+    }
 
-    expect(actual.after[0]).to.eql({
-      relative: 'cypress/support/e2e.js',
-      parts: [
-        {
-          'text': 'cypress/support/',
-          'highlight': false,
-        },
-        {
-          'text': 'e2e',
-          'highlight': true,
-        },
-        {
-          'text': '.js',
-          'highlight': false,
-        },
-      ],
-      'testingType': 'e2e',
-    })
+    // expect(actual.before).to.eql(expected.before)
+    expect(actual.after).to.eql(expected.after)
   })
 })
 
@@ -207,7 +179,7 @@ describe('renameSupportFilePath', () => {
 
 describe('initComponentTestingMigration', () => {
   it('calls callback with status each time file is removed', async () => {
-    const cwd = scaffoldMigrationProject('migration-component-testing')
+    const cwd = scaffoldMigrationProject('migration-component-testing-customized')
 
     const delay = () => new Promise((res) => setTimeout(res, 250))
 

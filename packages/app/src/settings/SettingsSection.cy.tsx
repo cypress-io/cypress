@@ -11,19 +11,16 @@ describe('<SettingsSection />', () => {
       title: () => <h1>{title}</h1>,
     }
     const code = 'projectId'
-    const anchorId = 'the-projectId'
 
     cy.mount(() => (<div class="p-24px">
       <SettingsSection
         v-slots={slots}
         code={code}
-        anchorId={anchorId}
       />
     </div>))
     .get('h1').should('contain.text', title)
     .get('p').should('contain.text', description)
     .get('code').should('contain.text', code)
-    .get(`#${anchorId}-anchor`).should('exist')
 
     cy.percySnapshot()
   })

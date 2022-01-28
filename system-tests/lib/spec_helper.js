@@ -101,6 +101,7 @@ beforeEach(function () {
 
   nock.disableNetConnect()
   nock.enableNetConnect(/localhost/)
+  nock.enableNetConnect(/api.honeycomb.io/)
 
   // always clean up the cache
   // before each test

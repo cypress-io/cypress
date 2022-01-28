@@ -1,7 +1,6 @@
 <template>
   <SettingsSection
     data-cy="settings-config"
-    anchor-id="config"
   >
     <template #title>
       {{ t('settingsPage.config.title') }}

@@ -42,7 +42,9 @@ export default function (Commands, Cypress, cy, state) {
         }
       }
 
-      cy.addAlias(ctx, { subject, command: prev, alias: str })
+      const fileName = prev.get('fileName')
+
+      cy.addAlias(ctx, { subject, command: prev, alias: str, fileName })
 
       return subject
     },
