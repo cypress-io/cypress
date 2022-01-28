@@ -1,6 +1,7 @@
 /* eslint-disable no-restricted-properties */
 require('../spec_helper')
 
+const chalk = require('chalk')
 const _ = require('lodash')
 const path = require('path')
 const EE = require('events')
@@ -684,7 +685,7 @@ describe('lib/cypress', () => {
       .then(() => {
         return cypress.start([`--run-project=${this.idsPath}`])
       }).then(() => {
-        this.expectExitWithErr('SUPPORT_FILE_NOT_FOUND', 'Your `supportFile` is set to `/does/not/exist`,')
+        this.expectExitWithErr('SUPPORT_FILE_NOT_FOUND', `Your ${chalk.blue('supportFile')} is set to ${chalk.blue('/does/not/exist')}`)
       })
     })
 
@@ -701,12 +702,12 @@ describe('lib/cypress', () => {
         const found1 = _.find(argsSet, (args) => {
           return _.find(args, (arg) => {
             return arg.message && arg.message.includes(
-              'Browser: \'foo\' was not found on your system or is not supported by Cypress.',
+              `Browser: ${chalk.blue('foo')} was not found on your system or is not supported by Cypress.`,
             )
           })
         })
 
-        expect(found1, 'foo should not be found').to.be.ok
+        expect(found1, `foo should not be found`).to.be.ok
 
         const found2 = _.find(argsSet, (args) => {
           return _.find(args, (arg) => {

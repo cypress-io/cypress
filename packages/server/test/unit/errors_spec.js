@@ -166,7 +166,7 @@ describe('lib/errors', () => {
       }
       const text = errors.displayFlags(options, mapping)
 
-      return snapshot('tags and name only', text)
+      return snapshot('tags and name only', text.val)
     })
   })
 })

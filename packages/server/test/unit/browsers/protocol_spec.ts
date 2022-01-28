@@ -59,9 +59,10 @@ describe('lib/browsers/protocol', () => {
       sinon.stub(connect, 'createRetryingSocket').callsArgWith(1, innerErr)
       const p = protocol.getWsTargetFor(12345, 'FooBrowser')
 
-      return expect(p).to.eventually.be.rejected
-      .and.property('message').include(expectedCdpFailedError)
-      .and.include(innerErr.message)
+      return expect(p).to.eventually.be.rejected.then((val) => {
+        expect(val).property('message').include(expectedCdpFailedError)
+        expect(val).property('details').include(innerErr.message)
+      })
     })
 
     it('rejects if CRI.List fails', () => {
@@ -79,9 +80,10 @@ describe('lib/browsers/protocol', () => {
 
       const p = protocol.getWsTargetFor(12345, 'FooBrowser')
 
-      return expect(p).to.eventually.be.rejected
-      .and.property('message').include(expectedCdpFailedError)
-      .and.include(innerErr.message)
+      return expect(p).to.eventually.be.rejected.then((val) => {
+        expect(val).property('message').include(expectedCdpFailedError)
+        expect(val).property('details').include(innerErr.message)
+      })
     })
 
     it('returns the debugger URL of the first about:blank tab', async () => {

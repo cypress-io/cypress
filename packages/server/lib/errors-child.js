@@ -13,7 +13,7 @@ const log = function (err, color = 'red') {
   console.log(chalk[color](err.message))
 
   if (err.details) {
-    console.log('\n', chalk['yellow'](err.details))
+    console.log(`\n${chalk['yellow'](err.details)}`)
   }
 
   // bail if this error came from known
