@@ -9,7 +9,6 @@ import {
   formatMigrationFile,
 } from './migrationFormat'
 import type { FilesForMigrationUI } from '../sources'
-import { getComponentFolder, getIntegrationFolder } from '../sources/migration'
 
 type ConfigOptions = {
   global: Record<string, unknown>
@@ -121,8 +120,8 @@ function getPluginRelativePath (cfg: OldCypressConfig): string {
 
 function createCypressConfigJs (config: ConfigOptions, pluginPath: string) {
   const globalString = Object.keys(config.global).length > 0 ? `\n${formatObjectForConfig(config.global, 2)},` : ''
-  const componentString = Object.keys(config.component).length > 0 ? createTestingTypeTemplate('component', pluginPath, config.component) : ''
-  const e2eString = Object.keys(config.e2e).length > 0 ? createTestingTypeTemplate('e2e', pluginPath, config.e2e) : ''
+  const componentString = Object.keys(config.component).length > 0 ? createComponentTemplate(config.component) : ''
+  const e2eString = Object.keys(config.e2e).length > 0 ? createE2eTemplate(pluginPath, config.e2e) : ''
 
   return `const { defineConfig } = require('cypress')
 
@@ -137,12 +136,19 @@ function formatObjectForConfig (obj: Record<string, unknown>, spaces: number) {
   .trim() // remove trailing spaces
 }
 
-function createTestingTypeTemplate (testingType: 'e2e' | 'component', pluginPath: string, options: Record<string, unknown>) {
+function createE2eTemplate (pluginPath: string, options: Record<string, unknown>) {
   return `
-  ${testingType}: {
+  e2e: {
     setupNodeEvents(on, config) {
       return require('${pluginPath}')
     },
+    ${formatObjectForConfig(options, 4)}
+  },`
+}
+
+function createComponentTemplate (options: Record<string, unknown>) {
+  return `
+  component: {
     ${formatObjectForConfig(options, 4)}
   },`
 }
@@ -274,7 +280,7 @@ export function renameSpecPath (spec: string) {
 }
 
 export function reduceConfig (cfg: OldCypressConfig): ConfigOptions {
-  const excludedFields = ['pluginsFile', '$schema', 'componentFolder']
+  const excludedFields = ['pluginsFile', '$schema', 'componentFolder', 'integrationFolder']
 
   return Object.entries(cfg).reduce((acc, [key, val]) => {
     if (excludedFields.includes(key)) {
@@ -307,7 +313,6 @@ export function reduceConfig (cfg: OldCypressConfig): ConfigOptions {
       return {
         ...acc,
         e2e: { ...acc.e2e, supportFile: val },
-        component: { ...acc.component, supportFile: val },
       }
     }
 
@@ -324,13 +329,13 @@ export function reduceConfig (cfg: OldCypressConfig): ConfigOptions {
 
 function getSpecPattern (cfg: OldCypressConfig, testType: TestingType) {
   const specPattern = cfg[testType]?.testFiles ?? cfg.testFiles ?? '**/*.cy.js'
-  const customComponentFolder = getComponentFolder(cfg)
+  const customComponentFolder = cfg.component?.componentFolder ?? cfg.componentFolder ?? null
 
   if (testType === 'component' && customComponentFolder) {
     return `${customComponentFolder}/${specPattern}`
   }
 
-  const customIntegrationFolder = getIntegrationFolder(cfg)
+  const customIntegrationFolder = cfg.e2e?.integrationFolder ?? cfg.integrationFolder ?? null
 
   if (testType === 'e2e' && customIntegrationFolder) {
     return `${customIntegrationFolder}/${specPattern}`

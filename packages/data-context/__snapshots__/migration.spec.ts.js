@@ -24,9 +24,6 @@ const { defineConfig } = require('cypress')
 
 module.exports = defineConfig({
   component: {
-    setupNodeEvents(on, config) {
-      return require('/cypress/plugins/index.js')
-    },
     retries: 2
   },
 })
@@ -45,9 +42,6 @@ visualViewport: 300,
     retries: 2
   },
   component: {
-    setupNodeEvents(on, config) {
-      return require('/cypress/plugins/index.js')
-    },
     retries: 1
   },
 })

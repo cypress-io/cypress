@@ -272,11 +272,12 @@ describe('initComponentTestingMigration', () => {
 })
 
 describe('reduceConfig', () => {
-  it('should move the testFiles field to e2e', () => {
+  it('should move the testFiles field to e2e and component', () => {
     const config = { testFiles: '**/**.cy.js' }
     const newConfig = reduceConfig(config)
 
     expect(newConfig.e2e.specPattern).to.eq('**/**.cy.js')
+    expect(newConfig.component.specPattern).to.eq('**/**.cy.js')
   })
 
   it('should combine componentFolder and integrationFolder with testFiles field in component', () => {
@@ -330,9 +331,9 @@ describe('reduceConfig', () => {
     const newConfig = reduceConfig(config)
 
     // @ts-ignore field not on ConfigOptions type
-    expect(newConfig.componentFolder).to.not.exist
+    expect(newConfig.global.componentFolder).to.not.exist
     // @ts-ignore field not on ConfigOptions type
-    expect(newConfig.integrationFolder).to.not.exist
+    expect(newConfig.global.integrationFolder).to.not.exist
   })
 
   it('should rename ignoreTestFiles to specExcludePattern', () => {
@@ -348,7 +349,6 @@ describe('reduceConfig', () => {
     const newConfig = reduceConfig(config)
 
     expect(newConfig.e2e.supportFile).to.eq(config.supportFile)
-    expect(newConfig.component.supportFile).to.eq(config.supportFile)
   })
 
   it('should exclude the pluginsFile', () => {
@@ -356,6 +356,6 @@ describe('reduceConfig', () => {
     const newConfig = reduceConfig(config)
 
     // @ts-ignore field not on ConfigOptions type
-    expect(newConfig.pluginsFile).to.not.exist
+    expect(newConfig.global.pluginsFile).to.not.exist
   })
 })
