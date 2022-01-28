@@ -730,7 +730,6 @@ describe('App: Index', () => {
         cy.contains('h2', defaultMessages.createSpec.successPage.header)
 
         cy.get('[data-cy="file-row"]').contains('src/specs-folder/MyTest.cy.jsx').click()
-        cy.get('.shiki').should('contain', 'import App from "../App.jsx"')
 
         cy.findByRole('dialog', { name: defaultMessages.createSpec.successPage.header }).as('SuccessDialog').within(() => {
           cy.findByRole('link', {
@@ -762,7 +761,6 @@ describe('App: Index', () => {
         cy.contains('h2', defaultMessages.createSpec.successPage.header)
 
         cy.get('[data-cy="file-row"]').contains('src/specs-folder/Button.stories.cy.jsx').click()
-        cy.get('.shiki').should('contain', 'import * as stories from "../stories/Button.stories.jsx"')
 
         cy.findByRole('dialog', { name: defaultMessages.createSpec.successPage.header }).as('SuccessDialog').within(() => {
           cy.findByRole('link', {
