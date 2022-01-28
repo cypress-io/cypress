@@ -205,8 +205,8 @@ onBeforeMount(async () => {
 const skipRename = ref(false)
 
 gql`
-mutation MigrationWizard_RenameSpecs($skip: Boolean) {
-  migrateRenameSpecs(skip: $skip){
+mutation MigrationWizard_RenameSpecs($skip: Boolean, $before: [String!], $after: [String!]) {
+  migrateRenameSpecs(skip: $skip, before: $before, after: $after) {
     migration {
       filteredSteps {
         id
@@ -221,7 +221,34 @@ mutation MigrationWizard_RenameSpecs($skip: Boolean) {
 const renameMutation = useMutation(MigrationWizard_RenameSpecsDocument)
 
 function renameSpecs () {
-  renameMutation.executeMutation({ skip: skipRename.value })
+  if (skipRename.value) {
+    renameMutation.executeMutation({
+      skip: skipRename.value,
+      before: null,
+      after: null,
+    })
+  } else {
+    // we are renaming!
+    interface BeforeAfterPairs {
+      before: string[]
+      after: string[]
+    }
+
+    const relativePath = (arr: Readonly<Array<{ text: string }>>) => arr.map((x) => x.text).join('')
+
+    const result = migration.value?.specFiles?.reduce<BeforeAfterPairs>((acc, curr) => {
+      return {
+        before: acc.before.concat(relativePath(curr.before.parts)),
+        after: acc.after.concat(relativePath(curr.after.parts)),
+      }
+    }, { before: [], after: [] })
+
+    renameMutation.executeMutation({
+      skip: false,
+      before: result?.before || [],
+      after: result?.after || [],
+    })
+  }
 }
 
 // manual rename
