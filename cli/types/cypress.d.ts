@@ -3,7 +3,9 @@
 
 // The new Awaited type added in 4.5 would work here, but we seem to need to
 // support older versions of Typescript
-type AwaitedLike<T> = T extends PromiseLike<infer U> ? AwaitedLike<U> : T
+type AwaitedLike<T> = T extends PromiseLike<infer U>
+  ? { 0: AwaitedLike<U>; 1: U }[U extends PromiseLike<any> ? 0 : 1]
+  : T
 
 declare namespace Cypress {
   type FileContents = string | any[] | object
