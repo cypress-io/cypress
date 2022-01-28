@@ -26,7 +26,6 @@ function scaffoldMigrationProject (project: typeof e2eProjectDirs[number]) {
 
   return cwd
 }
-
 describe('getSpecs', () => {
   it('handles custom folders', async () => {
     // CASE 1: E2E + CT, custom folders, default test files
@@ -388,6 +387,62 @@ describe('applyMigrationTransform', () => {
 
       expect(result.before).to.eql(expected.before)
       expect(result.after).to.eql(expected.after)
+    })
+  })
+
+  describe('component with custom folder, default testFiles', () => {
+    it('handles custom folders and default extensions', async () => {
+      const input: MigrationSpec = {
+        relative: 'cypress/custom-component/button.spec.js',
+        usesDefaultFolder: false,
+        usesDefaultTestFiles: true,
+        testingType: 'component',
+      }
+
+      const expected: MigrationFile = {
+        'testingType': 'component',
+        'before': {
+          'relative': 'cypress/custom-component/button.spec.js',
+          'parts': [
+            {
+              'text': 'cypress/custom-component/button',
+              'highlight': false,
+            },
+            {
+              'text': '.spec.',
+              'highlight': true,
+              'group': 'extension',
+            },
+            {
+              'text': 'js',
+              'highlight': false,
+            },
+          ],
+        },
+        'after': {
+          'relative': 'cypress/custom-component/button.cy.js',
+          'parts': [
+            {
+              'text': 'cypress/custom-component/button',
+              'highlight': false,
+            },
+            {
+              'text': '.cy.',
+              'highlight': true,
+              'group': 'extension',
+            },
+            {
+              'text': 'js',
+              'highlight': false,
+            },
+          ],
+        },
+      }
+
+      const actual = applyMigrationTransform(input)
+
+      expect(actual.before).to.eql(expected.before)
+      expect(actual.after).to.eql(expected.after)
     })
   })
 })

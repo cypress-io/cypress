@@ -11,6 +11,7 @@ export const regexps = {
   component: {
     before: {
       defaultFolderDefaultTestFiles: `cypress\/component\/.*?(?<ext>${specExtRe})`,
+      customFolderDefaultTestFiles: `.*?(?<ext>${specExtRe})`,
     },
   },
 } as const

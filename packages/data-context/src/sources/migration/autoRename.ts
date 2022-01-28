@@ -66,6 +66,9 @@ export function applyMigrationTransform (
   } else if (spec.testingType === 'component' && spec.usesDefaultFolder && spec.usesDefaultTestFiles) {
     // component, cypress/component , (default testFiles)
     regexp = new RegExp(regexps.component.before.defaultFolderDefaultTestFiles)
+  } else if (spec.testingType === 'component' && !spec.usesDefaultFolder && spec.usesDefaultTestFiles) {
+    // component, cypress/custom-component , (default testFiles)
+    regexp = new RegExp(regexps.component.before.customFolderDefaultTestFiles)
   } else {
     // custom folder AND test files pattern
     // should be impossble, we should not calling this function in the first place.
