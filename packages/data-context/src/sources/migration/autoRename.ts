@@ -101,7 +101,7 @@ export async function getSpecs (projectRoot: string, config: OldCypressConfig): 
   let integrationSpecs: MigrationSpec[]
   let componentSpecs: MigrationSpec[]
 
-  if (integrationFolder === false) {
+  if (integrationFolder === false || !isDefaultTestFiles(config, 'integration')) {
     integrationSpecs = []
   } else {
     const globs = integrationTestFiles.map((glob) => {
@@ -121,7 +121,7 @@ export async function getSpecs (projectRoot: string, config: OldCypressConfig): 
     })
   }
 
-  if (componentFolder === false) {
+  if (componentFolder === false || !isDefaultTestFiles(config, 'component')) {
     componentSpecs = []
   } else {
     const globs = componentTestFiles.map((glob) => {

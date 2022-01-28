@@ -44,8 +44,8 @@ export class MigrationActions {
 
     const result = await supportFilesForMigration(this.ctx.currentProject)
 
-    const beforeRelative = result.before[0]?.relative
-    const afterRelative = result.after[0]?.relative
+    const beforeRelative = result.before.relative
+    const afterRelative = result.after.relative
 
     if (!beforeRelative || !afterRelative) {
       throw new NonStandardMigrationError('support')

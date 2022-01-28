@@ -87,9 +87,13 @@ describe('Steps', () => {
     cy.openProject('migration-component-testing-customized')
     cy.visitLaunchpad()
     cy.waitForWizard()
+    // cannot rename specs automatically because this project
+    // uses a custom testFiles pattern.
     cy.get(renameAutoStep).should('not.exist')
-    cy.contains('Automatically rename existing specs').should('not.exist')
+
+    // you'll need to migrate manaully.
     cy.get(renameManualStep).should('exist')
+
     // supportFile: false in this project
     cy.get(renameSupportStep).should('not.exist')
     cy.get(configFileStep).should('exist')

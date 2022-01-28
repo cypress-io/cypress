@@ -7,6 +7,7 @@ import {
   supportFileRegexps,
   formatMigrationFile,
 } from './migrationFormat'
+import type { MigrationFile } from '../sources'
 
 type ConfigOptions = {
   global: Record<string, unknown>
@@ -212,27 +213,22 @@ export async function getDefaultLegacySupportFile (projectRoot: string) {
   return defaultSupportFile
 }
 
-export async function supportFilesForMigration (projectRoot: string): Promise<FilesForMigrationUI> {
+export async function supportFilesForMigration (projectRoot: string): Promise<MigrationFile> {
   const defaultSupportFile = await getDefaultLegacySupportFile(projectRoot)
 
   const defaultOldSupportFile = path.relative(projectRoot, defaultSupportFile)
   const defaultNewSupportFile = renameSupportFilePath(defaultOldSupportFile)
 
   return {
-    before: [
-      {
-        relative: defaultOldSupportFile,
-        parts: formatMigrationFile(defaultOldSupportFile, new RegExp(supportFileRegexps.e2e.beforeRegexp)),
-        testingType: 'e2e',
-      },
-    ],
-    after: [
-      {
-        relative: defaultNewSupportFile,
-        parts: formatMigrationFile(defaultNewSupportFile, new RegExp(supportFileRegexps.e2e.afterRegexp)),
-        testingType: 'e2e',
-      },
-    ],
+    testingType: 'e2e',
+    before: {
+      relative: defaultOldSupportFile,
+      parts: formatMigrationFile(defaultOldSupportFile, new RegExp(supportFileRegexps.e2e.beforeRegexp)),
+    },
+    after: {
+      relative: defaultNewSupportFile,
+      parts: formatMigrationFile(defaultOldSupportFile, new RegExp(supportFileRegexps.e2e.beforeRegexp)),
+    },
   }
 }
 

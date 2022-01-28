@@ -1,7 +1,6 @@
 import { expect } from 'chai'
 import {
   formatMigrationFile,
-  // regexps,
   supportFileRegexps,
 } from '../../../src/util/migrationFormat'
 import { regexps } from '../../../src/sources/migration/autoRename'
@@ -18,20 +17,6 @@ describe('formatMigrationFile', () => {
         { text: 'integration', highlight: true, group: 'folder' },
         { text: '/app', highlight: false },
         { text: '.spec.', highlight: true, group: 'extension' },
-        { text: 'js', highlight: false },
-      ])
-    })
-
-    it('breaks post-migration spec into parts', () => {
-      const spec = 'cypress/e2e/app.cy.js'
-      const re = new RegExp(regexps.e2e.after.defaultFolderDefaultTestFiles)
-      const actual = formatMigrationFile(spec, re)
-
-      expect(actual).to.eql([
-        { text: 'cypress/', highlight: false },
-        { text: 'e2e', highlight: true, group: 'folder' },
-        { text: '/app', highlight: false },
-        { text: '.cy.', highlight: true, group: 'extension' },
         { text: 'js', highlight: false },
       ])
     })

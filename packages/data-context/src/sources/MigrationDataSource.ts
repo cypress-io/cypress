@@ -149,7 +149,7 @@ export class MigrationDataSource {
     return this.componentTestingMigrationStatus
   }
 
-  async supportFilesForMigrationGuide (): Promise<MigrationFile[] | null> {
+  async supportFilesForMigrationGuide (): Promise<MigrationFile | null> {
     const config = await this.parseCypressConfig()
 
     if (!shouldShowRenameSupport(config)) {
