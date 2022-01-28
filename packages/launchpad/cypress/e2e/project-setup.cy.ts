@@ -365,8 +365,33 @@ describe('Launchpad: Setup Project', () => {
 
         cy.findByRole('button', { name: 'TypeScript' }).click()
 
+        let calls = 0
+
+        // simulate progressive installation of modules
+        cy.intercept('query-Wizard_InstalledPackages', (req) => {
+          req.reply({ data: {
+            wizard: {
+              __typename: 'Wizard',
+              installedPackages: ++calls <= 2 ? [] :
+                calls <= 3 ? ['@cypress/react'] :
+                  ['@cypress/react', '@cypress/webpack-dev-server'],
+            },
+          } })
+        }).as('InstalledPackages')
+
         cy.findByRole('button', { name: 'Next Step' }).click()
-        cy.findByRole('button', { name: 'I\'ve installed them' }).click()
+        cy.findByRole('button', { name: 'Waiting for you to install the dependencies...' })
+
+        cy.wait('@InstalledPackages')
+
+        cy.contains('li', '@cypress/react').findByLabelText('installed').should('be.visible')
+
+        cy.wait('@InstalledPackages')
+        cy.contains('li', '@cypress/webpack-dev-server').findByLabelText('installed').should('be.visible').then(() => {
+          expect(calls).to.eq(4)
+        })
+
+        cy.findByRole('button', { name: 'Continue' }).click()
 
         cy.get('[data-cy=changes]').within(() => {
           cy.contains('cypress.config.js')
