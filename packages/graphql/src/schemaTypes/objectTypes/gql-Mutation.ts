@@ -1,4 +1,4 @@
-import { arg, booleanArg, enumType, idArg, mutationType, nonNull, stringArg } from 'nexus'
+import { arg, booleanArg, enumType, idArg, mutationType, nonNull, stringArg, list } from 'nexus'
 import { Wizard } from './gql-Wizard'
 import { CodeGenTypeEnum } from '../enumTypes/gql-CodeGenTypeEnum'
 import { TestingTypeEnum } from '../enumTypes/gql-WizardEnums'
@@ -448,11 +448,17 @@ export const mutation = mutationType({
       type: Query,
       args: {
         skip: booleanArg(),
+        before: list(nonNull(stringArg({
+          description: 'specs to move - current name',
+        }))),
+        after: list(nonNull(stringArg({
+          description: 'specs to move - current name',
+        }))),
       },
-      resolve: async (_, { skip }, ctx) => {
-        if (!skip) {
+      resolve: async (_, { skip, before, after }, ctx) => {
+        if (!skip && before && after) {
           try {
-            await ctx.actions.migration.renameSpecFiles()
+            await ctx.actions.migration.renameSpecFiles(before, after)
           } catch (error) {
             const e = error as Error
 

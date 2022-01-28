@@ -1,4 +1,3 @@
-import type { TestingType } from '@packages/types'
 import chokidar from 'chokidar'
 import fs from 'fs-extra'
 import stringify from 'stringify-object'
@@ -8,7 +7,8 @@ import {
   supportFileRegexps,
   formatMigrationFile,
 } from './migrationFormat'
-import type { FilesForMigrationUI } from '../sources'
+import type { MigrationFile } from '../sources'
+import { substitute } from '../sources/migration/autoRename'
 
 type ConfigOptions = {
   global: Record<string, unknown>
@@ -178,42 +178,8 @@ function createTestingTypeTemplate (testingType: 'e2e' | 'component', pluginPath
   },`
 }
 
-export interface RelativeSpecWithTestingType {
-  testingType: TestingType
+export interface RelativeSpec {
   relative: string
-}
-
-async function findByTestingType (cwd: string, dir: string | null, testingType: TestingType) {
-  if (!dir) {
-    return []
-  }
-
-  return (await globby(`${dir}/**/*`, { onlyFiles: true, cwd }))
-  .map((relative) => ({ relative, testingType }))
-}
-
-export async function getSpecs (
-  projectRoot: string,
-  componentDirPath: string | null,
-  e2eDirPath: string | null,
-): Promise<{
-  before: RelativeSpecWithTestingType[]
-  after: RelativeSpecWithTestingType[]
-}> {
-  const [comp, e2e] = await Promise.all([
-    findByTestingType(projectRoot, componentDirPath, 'component'),
-    findByTestingType(projectRoot, e2eDirPath, 'e2e'),
-  ])
-
-  return {
-    before: [...comp, ...e2e],
-    after: [...comp, ...e2e].map((x) => {
-      return {
-        testingType: x.testingType,
-        relative: renameSpecPath(x.relative),
-      }
-    }),
-  }
 }
 
 /**
@@ -248,42 +214,41 @@ export async function getDefaultLegacySupportFile (projectRoot: string) {
   return defaultSupportFile
 }
 
-export async function supportFilesForMigration (projectRoot: string): Promise<FilesForMigrationUI> {
+export async function supportFilesForMigration (projectRoot: string): Promise<MigrationFile> {
   const defaultSupportFile = await getDefaultLegacySupportFile(projectRoot)
 
   const defaultOldSupportFile = path.relative(projectRoot, defaultSupportFile)
   const defaultNewSupportFile = renameSupportFilePath(defaultOldSupportFile)
 
+  const afterParts = formatMigrationFile(
+    defaultOldSupportFile,
+    new RegExp(supportFileRegexps.e2e.beforeRegexp),
+  ).map(substitute)
+
   return {
-    before: [
-      {
-        relative: defaultOldSupportFile,
-        parts: formatMigrationFile(defaultOldSupportFile, new RegExp(supportFileRegexps.e2e.beforeRegexp)),
-        testingType: 'e2e',
-      },
-    ],
-    after: [
-      {
-        relative: defaultNewSupportFile,
-        parts: formatMigrationFile(defaultNewSupportFile, new RegExp(supportFileRegexps.e2e.afterRegexp)),
-        testingType: 'e2e',
-      },
-    ],
+    testingType: 'e2e',
+    before: {
+      relative: defaultOldSupportFile,
+      parts: formatMigrationFile(defaultOldSupportFile, new RegExp(supportFileRegexps.e2e.beforeRegexp)),
+    },
+    after: {
+      relative: defaultNewSupportFile,
+      parts: afterParts,
+    },
   }
 }
 
-export function moveSpecFiles (e2eDirPath: string) {
-  const specs = fs.readdirSync(e2eDirPath).map((file) => {
-    const filePath = path.join(e2eDirPath, file)
+export interface SpecToMove {
+  from: string
+  to: string
+}
 
-    return {
-      from: filePath,
-      to: renameSpecPath(filePath),
-    }
-  })
-
+export function moveSpecFiles (projectRoot: string, specs: SpecToMove[]) {
   specs.forEach((spec) => {
-    fs.moveSync(spec.from, spec.to)
+    const from = path.join(projectRoot, spec.from)
+    const to = path.join(projectRoot, spec.to)
+
+    fs.moveSync(from, to)
   })
 }
 
@@ -296,10 +261,4 @@ export function renameSupportFilePath (relative: string) {
   }
 
   return relative.replace(res.groups.name, 'e2e')
-}
-
-export function renameSpecPath (spec: string) {
-  return spec
-  .replace('integration', 'e2e')
-  .replace(/([._-]?[s|S]pec.|[.])(?=[j|t]s[x]?)/, '.cy.')
 }
