@@ -26,7 +26,7 @@ function startMigrationFor (project: typeof e2eProjectDirs[number]) {
   cy.waitForWizard()
 }
 
-describe.only('Steps', () => {
+describe('Steps', () => {
   it('completes journey for migration-component-testing', () => {
     startMigrationFor('migration-component-testing')
     // custom testFiles - cannot auto
@@ -49,8 +49,7 @@ describe.only('Steps', () => {
     cy.get(configFileStep).should('exist')
   })
 
-  // FAILS
-  it.only('completes journey for migration-component-testing-defaults', () => {
+  it('completes journey for migration-component-testing-defaults', () => {
     startMigrationFor('migration-component-testing-defaults')
     // default testFiles - auto
     cy.get(renameAutoStep).should('exist')
@@ -61,7 +60,6 @@ describe.only('Steps', () => {
     cy.get(configFileStep).should('exist')
   })
 
-  // FAILS
   it('completes journey for migration-e2e-component-default-everything', () => {
     startMigrationFor('migration-e2e-component-default-everything')
     // default testFiles - auto
@@ -72,7 +70,6 @@ describe.only('Steps', () => {
     cy.get(configFileStep).should('exist')
   })
 
-  // FAILS
   it('completes journey for migration-e2e-component-default-test-files', () => {
     startMigrationFor('migration-e2e-component-default-test-files')
     // default testFiles - auto
@@ -98,7 +95,7 @@ describe.only('Steps', () => {
 
   it('completes journey for migration-e2e-custom-test-files', () => {
     startMigrationFor('migration-e2e-custom-test-files')
-    // default integration but custom testFiles 
+    // default integration but custom testFiles
     // can rename integration->e2e
     cy.get(renameAutoStep).should('exist')
     // no CT
@@ -146,92 +143,92 @@ describe.only('Steps', () => {
     cy.get(configFileStep).should('exist')
   })
 
-//   it('only all steps for kitchen sink migration project', () => {
-//     cy.get(renameAutoStep).should('exist')
-//     cy.get(renameManualStep).should('exist')
-//     cy.get(renameSupportStep).should('exist')
-//     cy.get(setupComponentStep).should('exist')
-//     cy.get(configFileStep).should('exist')
-//   })
+  //   it('only all steps for kitchen sink migration project', () => {
+  //     cy.get(renameAutoStep).should('exist')
+  //     cy.get(renameManualStep).should('exist')
+  //     cy.get(renameSupportStep).should('exist')
+  //     cy.get(setupComponentStep).should('exist')
+  //     cy.get(configFileStep).should('exist')
+  //   })
 
-//   // note: see the README.md inside each of these projects
-//   // to understand why certain steps are shown.
-//   // eg system-tests/migration-e2e-fully-custom/README.md
-//   it('only shows update config file for highly customized project', () => {
-//     cy.scaffoldProject('migration-e2e-fully-custom')
-//     cy.openProject('migration-e2e-fully-custom')
-//     cy.visitLaunchpad()
-//     cy.waitForWizard()
-//     cy.get(renameAutoStep).should('not.exist')
-//     cy.get(renameManualStep).should('not.exist')
-//     cy.get(renameSupportStep).should('not.exist')
-//     cy.get(setupComponentStep).should('not.exist')
-//     cy.get(configFileStep).should('exist')
-//   })
+  //   // note: see the README.md inside each of these projects
+  //   // to understand why certain steps are shown.
+  //   // eg system-tests/migration-e2e-fully-custom/README.md
+  //   it('only shows update config file for highly customized project', () => {
+  //     cy.scaffoldProject('migration-e2e-fully-custom')
+  //     cy.openProject('migration-e2e-fully-custom')
+  //     cy.visitLaunchpad()
+  //     cy.waitForWizard()
+  //     cy.get(renameAutoStep).should('not.exist')
+  //     cy.get(renameManualStep).should('not.exist')
+  //     cy.get(renameSupportStep).should('not.exist')
+  //     cy.get(setupComponentStep).should('not.exist')
+  //     cy.get(configFileStep).should('exist')
+  //   })
 
-//   it('shows auto and manual rename for component project with defaults', () => {
-//     cy.scaffoldProject('migration-component-testing-defaults')
-//     cy.openProject('migration-component-testing-defaults')
-//     cy.visitLaunchpad()
-//     cy.waitForWizard()
-//     cy.get(renameAutoStep).should('exist')
-//     cy.get(renameManualStep).should('exist')
-//     cy.get(renameSupportStep).should('not.exist')
-//     cy.get(setupComponentStep).should('exist')
-//     cy.get(configFileStep).should('exist')
-//   })
+  //   it('shows auto and manual rename for component project with defaults', () => {
+  //     cy.scaffoldProject('migration-component-testing-defaults')
+  //     cy.openProject('migration-component-testing-defaults')
+  //     cy.visitLaunchpad()
+  //     cy.waitForWizard()
+  //     cy.get(renameAutoStep).should('exist')
+  //     cy.get(renameManualStep).should('exist')
+  //     cy.get(renameSupportStep).should('not.exist')
+  //     cy.get(setupComponentStep).should('exist')
+  //     cy.get(configFileStep).should('exist')
+  //   })
 
-//   it('shows all e2e steps for an e2e project with all defaults', () => {
-//     cy.scaffoldProject('migration-e2e-defaults')
-//     cy.openProject('migration-e2e-defaults')
-//     cy.visitLaunchpad()
-//     cy.waitForWizard()
-//     cy.get(renameAutoStep).should('exist')
-//     cy.get(renameManualStep).should('not.exist')
-//     cy.get(renameSupportStep).should('exist')
-//     cy.get(configFileStep).should('exist')
-//     cy.get(setupComponentStep).should('not.exist')
-//   })
+  //   it('shows all e2e steps for an e2e project with all defaults', () => {
+  //     cy.scaffoldProject('migration-e2e-defaults')
+  //     cy.openProject('migration-e2e-defaults')
+  //     cy.visitLaunchpad()
+  //     cy.waitForWizard()
+  //     cy.get(renameAutoStep).should('exist')
+  //     cy.get(renameManualStep).should('not.exist')
+  //     cy.get(renameSupportStep).should('exist')
+  //     cy.get(configFileStep).should('exist')
+  //     cy.get(setupComponentStep).should('not.exist')
+  //   })
 
-//   it('shows all e2e steps for an e2e project with custom testFiles', () => {
-//     cy.scaffoldProject('migration-e2e-custom-test-files')
-//     cy.openProject('migration-e2e-custom-test-files')
-//     cy.visitLaunchpad()
-//     cy.waitForWizard()
-//     cy.get(renameAutoStep).should('exist')
-//     cy.get(renameManualStep).should('not.exist')
-//     cy.get(renameSupportStep).should('exist')
-//     cy.get(configFileStep).should('exist')
-//     cy.get(setupComponentStep).should('not.exist')
-//   })
+  //   it('shows all e2e steps for an e2e project with custom testFiles', () => {
+  //     cy.scaffoldProject('migration-e2e-custom-test-files')
+  //     cy.openProject('migration-e2e-custom-test-files')
+  //     cy.visitLaunchpad()
+  //     cy.waitForWizard()
+  //     cy.get(renameAutoStep).should('exist')
+  //     cy.get(renameManualStep).should('not.exist')
+  //     cy.get(renameSupportStep).should('exist')
+  //     cy.get(configFileStep).should('exist')
+  //     cy.get(setupComponentStep).should('not.exist')
+  //   })
 
-//   it('shows all e2e steps for an e2e project with custom testFiles', () => {
-//     cy.scaffoldProject('migration-e2e-custom-test-files')
-//     cy.openProject('migration-e2e-custom-test-files')
-//     cy.visitLaunchpad()
-//     cy.waitForWizard()
-//     cy.get(renameAutoStep).should('exist')
-//     cy.get(renameManualStep).should('not.exist')
-//     cy.get(renameSupportStep).should('exist')
-//     cy.get(configFileStep).should('exist')
-//     cy.get(setupComponentStep).should('not.exist')
-//   })
+  //   it('shows all e2e steps for an e2e project with custom testFiles', () => {
+  //     cy.scaffoldProject('migration-e2e-custom-test-files')
+  //     cy.openProject('migration-e2e-custom-test-files')
+  //     cy.visitLaunchpad()
+  //     cy.waitForWizard()
+  //     cy.get(renameAutoStep).should('exist')
+  //     cy.get(renameManualStep).should('not.exist')
+  //     cy.get(renameSupportStep).should('exist')
+  //     cy.get(configFileStep).should('exist')
+  //     cy.get(setupComponentStep).should('not.exist')
+  //   })
 
-//   it('shows all component steps for a component testing project w/o e2e set up', () => {
-//     cy.scaffoldProject('migration-component-testing-customized')
-//     cy.openProject('migration-component-testing-customized')
-//     cy.visitLaunchpad()
-//     cy.waitForWizard()
-//     // cannot rename specs automatically because this project
-//     // uses a custom testFiles pattern.
-//     cy.get(renameAutoStep).should('not.exist')
+  //   it('shows all component steps for a component testing project w/o e2e set up', () => {
+  //     cy.scaffoldProject('migration-component-testing-customized')
+  //     cy.openProject('migration-component-testing-customized')
+  //     cy.visitLaunchpad()
+  //     cy.waitForWizard()
+  //     // cannot rename specs automatically because this project
+  //     // uses a custom testFiles pattern.
+  //     cy.get(renameAutoStep).should('not.exist')
 
-//     // you'll need to migrate manaully.
-//     cy.get(renameManualStep).should('exist')
+  //     // you'll need to migrate manaully.
+  //     cy.get(renameManualStep).should('exist')
 
-//     // supportFile: false in this project
-//     cy.get(renameSupportStep).should('not.exist')
-//     cy.get(configFileStep).should('exist')
+  //     // supportFile: false in this project
+  //     cy.get(renameSupportStep).should('not.exist')
+  //     cy.get(configFileStep).should('exist')
 
 //     // we require re-configuring component testing,
 //     // even if you already had it set up.

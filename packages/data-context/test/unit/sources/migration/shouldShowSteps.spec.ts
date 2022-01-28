@@ -99,6 +99,16 @@ describe('getStepsForMigration', () => {
     expect(actual).to.eql(expected)
   })
 
+  it('returns all steps except supportFile for default CT project', async () => {
+    const cwd = scaffoldMigrationProject('migration-component-testing-defaults')
+    const config = fs.readJsonSync(path.join(cwd, 'cypress.json'))
+
+    const actual = await getStepsForMigration(cwd, config)
+    const expected: Step[] = ['renameAuto', 'renameManual', 'configFile', 'setupComponent']
+
+    expect(actual).to.eql(expected)
+  })
+
   it('returns component steps for component testing project (no e2e)', async () => {
     const cwd = scaffoldMigrationProject('migration-component-testing-customized')
     const config = fs.readJsonSync(path.join(cwd, 'cypress.json'))
