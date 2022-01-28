@@ -34,7 +34,7 @@ describe('Launchpad: Setup Project', () => {
       cy.get('#app').should('have.attr', 'aria-hidden', 'true')
 
       cy.findByRole('dialog', { name: 'Key Differences' }).should('be.visible')
-      cy.contains('Need help?').should('be.visible')
+      cy.contains('Need help').should('be.visible')
 
       cy.get('[data-cy="end-to-end-comparison"]').within(() => {
         cy.contains('End-to-end Tests').should('be.visible')
@@ -125,7 +125,7 @@ describe('Launchpad: Setup Project', () => {
       .should('be.visible')
       .within(() => {
         cy.validateExternalLink({
-          name: 'Need help?',
+          name: 'Need help',
           href: 'https://on.cypress.io',
         })
       })
