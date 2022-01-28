@@ -1,5 +1,5 @@
 import type { CodeGenType, MutationSetProjectPreferencesArgs, NexusGenObjects, NexusGenUnions, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
-import type { InitializeProjectOptions, FoundBrowser, FoundSpec, LaunchOpts, OpenProjectLaunchOptions, Preferences, TestingType, ReceivedCypressOptions, AddProject } from '@packages/types'
+import type { InitializeProjectOptions, FoundBrowser, FoundSpec, LaunchOpts, OpenProjectLaunchOptions, Preferences, TestingType, ReceivedCypressOptions, AddProject, SetSpecsFoundBySpecPattern } from '@packages/types'
 import execa from 'execa'
 import path from 'path'
 import assert from 'assert'
@@ -397,20 +397,18 @@ export class ProjectActions {
 
     const cfg = this.ctx.project.getConfig()
 
-    if (cfg) {
-      const toArray = (v: string | string[] | undefined) => Array.isArray(v) ? v : v ? [v] : undefined
-
+    if (cfg && this.ctx.currentProject) {
       const testingType = (codeGenType === 'component' || codeGenType === 'story') ? 'component' : 'e2e'
 
-      const specPattern = toArray(cfg[testingType]?.specPattern)
-      const ignoreSpecPattern = toArray(cfg[testingType]?.ignoreSpecPattern) ?? []
-      const additionalIgnore = toArray(testingType === 'component' ? cfg?.e2e?.specPattern : undefined) ?? []
+      const { specs } = await this.setSpecsFoundBySpecPattern({
+        path: this.ctx.currentProject,
+        testingType,
+        specPattern: cfg[testingType]?.specPattern,
+        ignoreSpecPattern: cfg[testingType]?.ignoreSpecPattern,
+        additionalIgnorePattern: testingType === 'component' ? cfg?.e2e?.specPattern : undefined,
+      })
 
-      if (this.ctx.currentProject && specPattern) {
-        const specs = await this.ctx.project.findSpecs(this.ctx.currentProject, testingType, specPattern, ignoreSpecPattern, additionalIgnore)
-
-        this.ctx.project.setSpecs(specs)
-
+      if (specs) {
         if (testingType === 'component') {
           this.api.getDevServer().updateSpecs(specs)
         }
@@ -422,6 +420,33 @@ export class ProjectActions {
       file: { absolute: newSpec.file, contents: newSpec.content },
       description: 'Generated spec',
     }
+  }
+
+  async setSpecsFoundBySpecPattern ({ path, testingType, specPattern, ignoreSpecPattern, additionalIgnorePattern }: SetSpecsFoundBySpecPattern) {
+    const toArray = (val?: string | string[]) => val ? typeof val === 'string' ? [val] : val : undefined
+
+    specPattern = toArray(specPattern)
+
+    ignoreSpecPattern = toArray(ignoreSpecPattern) || []
+
+    // exclude all specs matching e2e if in component testing
+    additionalIgnorePattern = toArray(additionalIgnorePattern) || []
+
+    if (!specPattern) {
+      throw Error('could not find pattern to load specs')
+    }
+
+    const specs = await this.ctx.project.findSpecs(
+      path,
+      testingType,
+      specPattern,
+      ignoreSpecPattern,
+      additionalIgnorePattern,
+    )
+
+    this.ctx.actions.project.setSpecs(specs)
+
+    return { specs, specPattern, ignoreSpecPattern, additionalIgnorePattern }
   }
 
   async reconfigureProject () {
