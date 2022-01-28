@@ -1,54 +1,22 @@
 import dedent from 'dedent'
 
-export interface FilePart {
+export interface FilePartNoHighlight {
   text: string
-  highlight: boolean
+  highlight: false
 }
 
-export class NonSpecFileError extends Error {
-  constructor (message: string) {
-    super()
-    this.message = message
-  }
+export interface FilePartHighlight {
+  text: string
+  group: 'folder' | 'extension' | 'name'
+  highlight: true
 }
 
-interface MigrationRegexp {
-  beforeRegexp: string
-  afterRegexp: string
-}
+export type FilePart = FilePartNoHighlight | FilePartHighlight
 
-interface MigrationRegexpGroup {
-  e2e: MigrationRegexp
-  component: MigrationRegexp
-}
-
-function getLegacyHighlightRegexp (defaultFolder: 'integration' | 'component') {
-  return `cypress\/(?<main>${defaultFolder})\/.*?(?<ext>[._-]?[s|S]pec.|[.])(?=[j|t]s[x]?)`
-}
-
-function getNewHighlightRegexp (defaultFolder: 'e2e' | 'component') {
-  return `cypress\/(?<main>${defaultFolder})\/.*?(?<ext>.cy.)`
-}
-
-export const supportFileRegexps: MigrationRegexpGroup = {
+export const supportFileRegexps = {
   e2e: {
-    beforeRegexp: 'cypress/\support\/(?<main>index)\.(?=[j|t]s[x]?)',
-    afterRegexp: 'cypress/\support\/(?<main>e2e)\.(?=[j|t]s[x]?)',
-  },
-  component: {
-    beforeRegexp: 'cypress/\support\/(?<file>index)\.(?=[j|t]s[x]?)',
-    afterRegexp: 'cypress/\support\/(?<file>e2e)\.(?=[j|t]s[x]?)',
-  },
-}
-
-export const regexps: MigrationRegexpGroup = {
-  e2e: {
-    beforeRegexp: getLegacyHighlightRegexp('integration'),
-    afterRegexp: getNewHighlightRegexp('e2e'),
-  },
-  component: {
-    beforeRegexp: getLegacyHighlightRegexp('component'),
-    afterRegexp: getNewHighlightRegexp('component'),
+    beforeRegexp: 'cypress/\support\/(?<name>index)\.(?=[j|t]s[x]?)',
+    afterRegexp: 'cypress/\support\/(?<name>e2e)\.(?=[j|t]s[x]?)',
   },
 } as const
 
@@ -56,8 +24,8 @@ export function formatMigrationFile (file: string, regexp: RegExp): FilePart[] {
   const match = regexp.exec(file)
 
   if (!match?.groups) {
-    throw new NonSpecFileError(dedent`
-      Expected groups main and ext in ${file} using ${regexp} when matching ${file}
+    throw new Error(dedent`
+      Expected groups main,ext or file in ${file} using ${regexp} when matching ${file}
       Perhaps this isn't a spec file, or it is an unexpected format?`)
   }
 
@@ -69,9 +37,27 @@ export function formatMigrationFile (file: string, regexp: RegExp): FilePart[] {
   const split = file.split(re)
 
   return split.map<FilePart>((text) => {
+    const group = text === match.groups?.main
+      ? 'folder'
+      : text === match.groups?.ext
+        ? 'extension'
+        : text === match.groups?.name
+          ? 'name'
+          : undefined
+
+    const hasHighlight = higlights.includes(text)
+
+    if (hasHighlight && group) {
+      return {
+        text,
+        highlight: true,
+        group,
+      }
+    }
+
     return {
       text,
-      highlight: higlights.includes(text),
+      highlight: false,
     }
   })
 }

@@ -1,7 +1,7 @@
 import type { SpecGenerator } from '../types'
 import { filters } from '../GeneratorsCommon'
 import EmptyGeneratorCard from './EmptyGeneratorCard.vue'
-import EmptyGeneratorCardStepOne from './EmptyGeneratorCardStepOne.vue'
+import EmptyGeneratorCardStepOne from '../EmptyGenerator.vue'
 
 export const EmptyGenerator: SpecGenerator = {
   card: EmptyGeneratorCard,

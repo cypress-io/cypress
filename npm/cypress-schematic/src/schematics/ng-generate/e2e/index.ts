@@ -36,16 +36,20 @@ export default function (options: Schema): Rule {
     const host = createSpec(tree)
     const { workspace } = await workspaces.readWorkspace('/', host)
 
-    if (!options.project) {
-      // @ts-ignore
-      options.project = workspace.extensions.defaultProject
-    }
+    let project
 
-    //@ts-ignore
-    const project = workspace.projects.get(options.project)
+    if (!options.project) {
+      project = workspace.projects.get(workspace.extensions.defaultProject as string)
+    } else {
+      project = workspace.projects.get(options.project)
+    }
 
     if (!project) {
       throw new SchematicsException(`Invalid project name: ${options.project}`)
+    }
+
+    if (options.name === undefined) {
+      throw new SchematicsException(`No file name specified. This is required to generate a new Cypress file.`)
     }
 
     if (options.path === undefined) {
