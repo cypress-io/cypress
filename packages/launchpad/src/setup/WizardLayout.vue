@@ -18,6 +18,7 @@
       :show-next="showNext"
       :back="backLabel"
       :alt="alt"
+      :main-variant="mainButtonVariant"
     >
       <slot name="button-bar" />
     </ButtonBar>

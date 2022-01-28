@@ -4,13 +4,22 @@
     :can-navigate-forward="canNavigateForward"
     :back-fn="props.backFn"
     :next-fn="confirmInstalled"
-    class="max-w-640px"
+    class="max-w-640px relative"
     :main-button-variant="canNavigateForward ? 'primary' : 'pending'"
   >
     <ManualInstall
       :gql="props.gql"
       :packages-installed="packagesInstalled"
     />
+    <Button
+      v-if="intervalQueryTrigger.isActive.value === false"
+      class="right-16px bottom-16px absolute"
+      size="lg"
+      variant="link"
+      @click="intervalQueryTrigger.resume()"
+    >
+      {{ t('setupPage.install.checkForUpdates') }}
+    </Button>
   </WizardLayout>
 </template>
 
@@ -25,7 +34,8 @@ import { InstallDependenciesFragment,
 } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
 import { useMutation, useQuery } from '@urql/vue'
-import { useIntervalFn } from '@vueuse/core'
+import { useIntervalFn, useTimeoutFn } from '@vueuse/core'
+import Button from '../../../frontend-shared/src/components/Button.vue'
 
 gql`
 mutation InstallDependencies_scaffoldFiles {
@@ -71,18 +81,22 @@ const toInstall = computed(() => {
   return props.gql.wizard.packagesToInstall?.map((p) => p.package)
 })
 
-useIntervalFn(async () => {
+const intervalQueryTrigger = useIntervalFn(async () => {
   const res = await queryInstalled.executeQuery({})
 
   packagesInstalled.value = res.data?.value?.wizard?.installedPackages?.map(
     (pkg) => pkg,
   ) || []
 
-  if (!toInstall.value?.every((pkg) => packagesInstalled.value.includes(pkg))) {
-    queryInstalled.pause()
+  if (toInstall.value?.every((pkg) => packagesInstalled.value.includes(pkg))) {
+    intervalQueryTrigger.pause()
     canNavigateForward.value = true
   }
-}, 500)
+}, 1000)
+
+useTimeoutFn(() => {
+  intervalQueryTrigger.pause()
+}, 180000)
 
 const canNavigateForward = ref(false)
 
