@@ -101,11 +101,54 @@ const attachToTabMemory = Bluebird.method((tab) => {
   })
 })
 
-async function setupRemote (remotePort, automation, url, onError) {
-  const wsUrl = await protocol.getWsTargetFor(remotePort, 'Firefox', url)
+async function closeBrowserTab (client) {
+  const targets = await client.send('Target.getTargets')
+  const targetIdToClose = targets.targetInfos.find((target) => !target.attached && target.type === 'page').targetId
+
+  await client.send('Target.closeTarget', { targetId: targetIdToClose })
+}
+
+async function connectMarionetteToNewTab () {
+  // TODO: Probably need to validate that the tab is 'about:blank'.
+  const handles = await sendMarionette({
+    name: 'WebDriver:GetWindowHandles',
+  })
+  const currentHandle = (await sendMarionette({
+    name: 'WebDriver:GetWindowHandle',
+  })).value
+
+  const nonCurrentHandle = handles.find((handle) => handle !== currentHandle)
+
+  await sendMarionette({
+    name: 'WebDriver:SwitchToWindow',
+    parameters: { handle: nonCurrentHandle },
+  })
+}
+
+async function connectToNewSpec (browser, options, automation) {
+  await connectMarionetteToNewTab()
+
+  const criClient = await setupRemote(browser.debuggingPort, automation, options.onError)
+
+  await closeBrowserTab(criClient)
+
+  await navigateToUrl(options.url)
+}
+
+async function setupRemote (remotePort, automation, onError) {
+  const wsUrl = await protocol.getWsTargetFor(remotePort, 'Firefox')
   const criClient = await CriClient.create(wsUrl, onError)
 
   new CdpAutomation(criClient.send, criClient.on, automation)
+
+  return criClient
+}
+
+async function navigateToUrl (url) {
+  sendMarionette({
+    name: 'WebDriver:Navigate',
+    parameters: { url },
+  })
 }
 
 const logGcDetails = () => {
@@ -184,9 +227,13 @@ export default {
     return Bluebird.all([
       this.setupFoxdriver(foxdriverPort),
       this.setupMarionette(extensions, url, marionettePort),
-      remotePort && setupRemote(remotePort, automation, url, onError),
+      remotePort && setupRemote(remotePort, automation, onError),
     ])
   },
+
+  connectToNewSpec,
+
+  navigateToUrl,
 
   setupRemote,
 
@@ -307,10 +354,7 @@ export default {
         }))
       })
       .then(() => {
-        return sendMarionette({
-          name: 'WebDriver:Navigate',
-          parameters: { url },
-        })
+        return navigateToUrl(url)
       })
       .then(resolve)
       .catch(_onError('commands'))

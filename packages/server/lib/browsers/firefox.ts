@@ -358,7 +358,7 @@ export function _createDetachedInstance (browserInstance: BrowserInstance): Brow
 }
 
 export async function connectToNewSpec (browser: Browser, options: any = {}, automation) {
-  return firefoxUtil.setupRemote(browser.debuggingPort, automation, options.url, options.onError)
+  await firefoxUtil.connectToNewSpec(browser, options, automation)
 }
 
 export function connectToExisting () {

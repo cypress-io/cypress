@@ -561,7 +561,7 @@ export class SocketBase {
     await this._sendResetBrowserStateMessage()
   }
 
-  async startNewBrowserTabWithUrl (url) {
+  async startNewBrowserTab (url) {
     await this._sendStartNewBrowserTabMessage(url)
   }
 

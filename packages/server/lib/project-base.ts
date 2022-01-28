@@ -482,8 +482,8 @@ export class ProjectBase<TServer extends Server> extends EE {
     return this.server.socket.resetBrowserState()
   }
 
-  async startNewBrowserTabWithUrl (url) {
-    return this.server.socket.startNewBrowserTabWithUrl(url)
+  async startNewBrowserTab (url) {
+    return this.server.socket.startNewBrowserTab(url)
   }
 
   shouldCorrelatePreRequests = () => {

@@ -132,12 +132,8 @@ export class OpenProject {
 
     options.onError = this.projectBase.options.onError
 
-    if (browser.name !== 'electron') {
-      await this.startNewBrowserTabWithUrl(options.url)
-    }
-
+    await this.startNewBrowserTab('about:blank')
     await browsers.connectToNewSpec(this.projectBase.browser, options, this.projectBase.automation)
-    await this.closeBrowserTab(url)
   }
 
   async launch (browser, spec: Cypress.Cypress['spec'], options: LaunchOpts = {
@@ -285,8 +281,8 @@ export class OpenProject {
     return this.projectBase?.resetBrowserState()
   }
 
-  async startNewBrowserTabWithUrl (url) {
-    return this.projectBase?.startNewBrowserTabWithUrl(url)
+  async startNewBrowserTab (url) {
+    return this.projectBase?.startNewBrowserTab(url)
   }
 
   closeOpenProjectAndBrowsers () {

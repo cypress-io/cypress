@@ -279,6 +279,14 @@ const _maybeRecordVideo = async function (client, options, browserMajorVersion) 
   return client
 }
 
+const _closeBrowserTab = async function (client) {
+  const targets = await client.send('Target.getTargets')
+
+  const targetIdToClose = targets.targetInfos.find((target) => target.url !== 'about:blank' && target.type === 'page').targetId
+
+  await client.send('Target.closeTarget', { targetId: targetIdToClose })
+}
+
 // a utility function that navigates to the given URL
 // once Chrome remote interface client is passed to it.
 const _navigateUsingCRI = async function (client, url) {
@@ -349,6 +357,8 @@ export = {
   _connectToChromeRemoteInterface,
 
   _maybeRecordVideo,
+
+  _closeBrowserTab,
 
   _navigateUsingCRI,
 
@@ -445,11 +455,13 @@ export = {
 
   async connectToNewSpec (browser: Browser, options: CypressConfiguration = {}, automation) {
     const port = browser.debuggingPort
-    const criClient = await this._connectToChromeRemoteInterface(port, options, browser.displayName, options.url)
+    const criClient = await this._connectToChromeRemoteInterface(port, options, browser.displayName)
 
     this._setAutomation(criClient, automation)
 
+    await this._closeBrowserTab(criClient)
     await this._maybeRecordVideo(criClient, options, browser.majorVersion)
+    await this._navigateUsingCRI(criClient, options.url)
     await this._handleDownloads(criClient, options.downloadsFolder, automation)
   },
 

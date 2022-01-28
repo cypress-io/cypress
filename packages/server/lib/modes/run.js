@@ -957,7 +957,7 @@ module.exports = {
   },
 
   launchBrowser (options = {}) {
-    const { browser, spec, writeVideoFrame, setScreenshotMetadata, project, screenshots, projectRoot, onError, shouldLaunchBrowser } = options
+    const { browser, spec, writeVideoFrame, setScreenshotMetadata, project, screenshots, projectRoot, onError } = options
 
     const browserOpts = getDefaultBrowserOptsByFamily(browser, project, writeVideoFrame, onError)
 
@@ -1004,20 +1004,59 @@ module.exports = {
       return project.onWarning
     }
 
-    if (!shouldLaunchBrowser) {
-      // If we do not launch the browser,
-      // we tell it that we are ready
-      // to receive the next spec
-      return this.navigateToNextSpec(browser, spec, browserOpts)
-    }
-
     debug('browser launched')
 
     return openProject.launch(browser, spec, browserOpts)
   },
 
-  async navigateToNextSpec (browser, spec, browserOpts) {
+  async navigateToNextSpec (options) {
     debug('navigating to next spec')
+    const { browser, spec, writeVideoFrame, setScreenshotMetadata, project, screenshots, projectRoot, onError } = options
+
+    const browserOpts = getDefaultBrowserOptsByFamily(browser, project, writeVideoFrame, onError)
+
+    browserOpts.automationMiddleware = {
+      onBeforeRequest (message, data) {
+        if (message === 'take:screenshot') {
+          return setScreenshotMetadata(data)
+        }
+      },
+      onAfterResponse: (message, data, resp) => {
+        if (message === 'take:screenshot' && resp) {
+          const existingScreenshot = _.findIndex(screenshots, { path: resp.path })
+
+          if (existingScreenshot !== -1) {
+            // NOTE: saving screenshots to the same path will overwrite the previous one
+            // so we shouldn't report more screenshots than exist on disk.
+            // this happens when cy.screenshot is used in a retried test
+            screenshots.splice(existingScreenshot, 1, this.screenshotMetadata(data, resp))
+          } else {
+            screenshots.push(this.screenshotMetadata(data, resp))
+          }
+        }
+
+        return resp
+      },
+    }
+
+    const warnings = {}
+
+    browserOpts.projectRoot = projectRoot
+
+    browserOpts.onWarning = (err) => {
+      const { message } = err
+
+      // if this warning has already been
+      // seen for this browser launch then
+      // suppress it
+      if (warnings[message]) {
+        return
+      }
+
+      warnings[message] = err
+
+      return project.onWarning
+    }
 
     return openProject.changeUrlToSpec(browser, spec, browserOpts)
   },
@@ -1121,6 +1160,13 @@ module.exports = {
     const wait = () => {
       debug('waiting for socket to connect and browser to launch...')
 
+      if (!options.shouldLaunchBrowser) {
+        // If we do not launch the browser,
+        // we tell it that we are ready
+        // to receive the next spec
+        return this.navigateToNextSpec(options)
+      }
+
       return Promise.join(
         this.waitForSocketConnection(project, socketId)
         .tap(() => {
@@ -1181,7 +1227,7 @@ module.exports = {
   },
 
   waitForTestsToFinishRunning (options = {}) {
-    const { project, screenshots, startedVideoCapture, endVideoCapture, videoName, compressedVideoName, videoCompression, videoUploadOnPasses, exit, spec, estimated, quiet, config } = options
+    const { project, screenshots, startedVideoCapture, endVideoCapture, videoName, compressedVideoName, videoCompression, videoUploadOnPasses, exit, spec, estimated, quiet, config, browser } = options
 
     // https://github.com/cypress-io/cypress/issues/2370
     // delay 1 second if we're recording a video to give
@@ -1255,6 +1301,14 @@ module.exports = {
         if (screenshots && screenshots.length) {
           this.displayScreenshots(screenshots)
         }
+      }
+
+      if (browser.name === 'electron') {
+        // always close the browser now as opposed to letting
+        // it exit naturally with the parent process due to
+        // electron bug in windows
+        debug('attempting to close the browser')
+        await openProject.closeBrowser()
       }
 
       if (videoExists && !skippedSpec && endVideoCapture && !videoCaptureFailed) {
@@ -1485,7 +1539,7 @@ module.exports = {
           videoCompression: options.videoCompression,
           videoUploadOnPasses: options.videoUploadOnPasses,
           quiet: options.quiet,
-          testingType: options.testingType,
+          browser,
         }),
 
         connection: this.waitForBrowserToConnect({
@@ -1498,7 +1552,7 @@ module.exports = {
           socketId: options.socketId,
           webSecurity: options.webSecurity,
           projectRoot: options.projectRoot,
-          shouldLaunchBrowser: process.env.CYPRESS_INTERNAL_FORCE_BROWSER_RELAUNCH || firstSpec,
+          shouldLaunchBrowser: process.env.CYPRESS_INTERNAL_FORCE_BROWSER_RELAUNCH || firstSpec || browser.name === 'electron',
           // TODO(tim): investigate the socket disconnect
         }),
       })
