@@ -32,6 +32,9 @@
     },
     "specPattern": {
       "matches": "{0} Matches"
+    },
+    "specPatternModal": {
+      "title": "Spec pattern settings"
     }
   },
   "clipboard": {

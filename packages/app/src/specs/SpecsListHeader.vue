@@ -1,5 +1,5 @@
 <template>
-  <div class="flex w-full gap-16px relative">
+  <div class="relative flex w-full gap-16px">
     <Input
       type="search"
       class="flex-grow h-full min-w-200px"
@@ -11,12 +11,18 @@
       @input="onInput"
     >
       <template #suffix>
-        <div
-          class="border-l border-l-gray-100 pl-16px text-gray-500"
+        <button
+          class="mr-[-0.75rem] h-40px outline-none hover:(bg-indigo-50 text-indigo-500) transition-all rounded-r-md group"
           aria-live="polite"
+          @click="emit('showSpecPatternModal')"
         >
-          {{ resultCount }} {{ resultCount === 1 ? t('specPage.matchSingular') : t('specPage.matchPlural') }}
-        </div>
+          <span
+            class="block border-l h-24px px-16px border-l-gray-100 group-hover:border-none"
+          >
+            {{ resultCount }} {{ resultCount === 1 ? t('specPage.matchSingular') : t('specPage.matchPlural') }}
+            <span class="sr-only">{{ t(`createSpec.viewSpecPatternButton`) }} </span>
+          </span>
+        </button>
       </template>
     </Input>
 
@@ -53,6 +59,7 @@ const props = withDefaults(defineProps<{
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: string): void,
+  (e: 'showSpecPatternModal'): void
   (e: 'showCreateSpecModal'): void
 }>()
 
