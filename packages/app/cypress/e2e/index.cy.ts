@@ -489,7 +489,7 @@ describe('App: Index', () => {
           cy.findByRole('button', {
             name: defaultMessages.createSpec.component.importFromStory.header,
           }).should('be.visible')
-          .and('be.disabled').pause()
+          .and('be.disabled')
 
           cy.contains(defaultMessages.createSpec.component.importFromStory.notSetupDescription)
           .should('be.visible')
@@ -708,7 +708,6 @@ describe('App: Index', () => {
 
         cy.findByRole('dialog', { name: defaultMessages.createSpec.newSpecModalTitle }).within(() => {
           cy.findAllByTestId('card').eq(0)
-          .should('have.attr', 'tabindex', '0')
           .and('contain', defaultMessages.createSpec.component.importFromComponent.description).click()
         })
 
@@ -727,7 +726,6 @@ describe('App: Index', () => {
 
         cy.findByRole('dialog', { name: defaultMessages.createSpec.newSpecModalTitle }).within(() => {
           cy.findAllByTestId('card').eq(0)
-          .should('have.attr', 'tabindex', '0')
           .and('contain', defaultMessages.createSpec.component.importFromComponent.description).click()
         })
 
@@ -758,7 +756,6 @@ describe('App: Index', () => {
 
         cy.findByRole('dialog', { name: defaultMessages.createSpec.newSpecModalTitle }).within(() => {
           cy.findAllByTestId('card').eq(1)
-          .should('have.attr', 'tabindex', '0')
           .and('contain', defaultMessages.createSpec.component.importFromStory.description).click()
         })
 
