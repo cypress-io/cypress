@@ -132,7 +132,10 @@ export class OpenProject {
 
     options.onError = this.projectBase.options.onError
 
-    await this.startNewBrowserTabWithUrl(options.url)
+    if (browser.name !== 'electron') {
+      await this.startNewBrowserTabWithUrl(options.url)
+    }
+
     await browsers.connectToNewSpec(this.projectBase.browser, options, this.projectBase.automation)
     await this.closeBrowserTab(url)
   }
