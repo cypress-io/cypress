@@ -1,6 +1,6 @@
 <template>
-  <div class="rounded border-gray-100 border-1px w-full">
-    <div class="flex p-16px justify-between items-center">
+  <div class="w-full border-gray-100 rounded border-1px">
+    <div class="flex items-center justify-between p-16px">
       <FileMatchIndicator>
         <i18n-t
           scope="global"
@@ -10,8 +10,8 @@
         </i18n-t>
       </FileMatchIndicator>
       <OpenConfigFileInIDE>
-        <span class="flex outline-transparent text-indigo-500 gap-8px items-center group">
-          <i-cy-document-text_x16 class="icon-light-gray-100 icon-dark-gray-500" />
+        <span class="flex items-center text-indigo-500 outline-transparent gap-8px group">
+          <i-cy-document-text_x16 class="icon-light-gray-50 icon-dark-gray-300" />
           <span class="group-hocus:underline">cypress.config.js</span>
         </span>
       </OpenConfigFileInIDE>
@@ -21,7 +21,7 @@
       <code
         v-for="pattern in specPatterns"
         :key="pattern"
-        class="flex py-8px text-gray-600 text-size-14px leading-24px block"
+        class="flex block text-gray-600 py-8px text-size-14px leading-24px"
         data-cy="spec-pattern"
       >
         {{ pattern }}
