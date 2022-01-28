@@ -282,7 +282,8 @@ describe('Migration', { viewportWidth: 1200 }, () => {
   describe('Full flow', () => {
     it('goes to each step', () => {
       cy.visitLaunchpad()
-
+      cy.waitForWizard()
+      cy.findByText(defaultMessages.migration.wizard.step1.button).click()
       cy.findByText(defaultMessages.migration.wizard.step2.button).click()
       cy.findByText(defaultMessages.migration.wizard.step3.button).click()
       cy.findByText(defaultMessages.migration.wizard.step4.button).click()
