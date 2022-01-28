@@ -372,6 +372,7 @@ describe('App Top Nav Workflows', () => {
 
           // The Log In button transitions through a few states as the browser launch lifecycle completes
           cy.findByRole('button', { name: 'Opening Browser' }).should('be.visible').and('be.disabled')
+          cy.findByRole('button', { name: 'Waiting for you to log in' }).should('be.visible').and('be.disabled')
         })
 
         cy.findByRole('dialog', { name: 'Login Successful' }).within(() => {
@@ -401,6 +402,7 @@ describe('App Top Nav Workflows', () => {
 
           // The Log In button transitions through a few states as the browser launch lifecycle completes
           cy.findByRole('button', { name: 'Opening Browser' }).should('be.visible').and('be.disabled')
+          cy.findByRole('button', { name: 'Waiting for you to log in' }).should('be.visible').and('be.disabled')
         })
 
         cy.findByRole('dialog', { name: 'Login Successful' }).within(() => {
