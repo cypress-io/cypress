@@ -11,6 +11,16 @@
         :key="dep.id"
         class="border-b border-b-gray-100 py-16px last-of-type:border-b-0"
       >
+        <i-cy-status-download-done_x24
+          v-if="props.packagesInstalled.includes(dep.package)"
+          class="h-24px my-12px ml-24px w-24px float-right"
+          :aria-label="t('setupPage.install.installed')"
+        />
+        <i-cy-status-download-pending_x24
+          v-else
+          class="h-24px my-8px ml-24px w-24px float-right"
+          :aria-label="t('setupPage.install.pendingInstall')"
+        />
         <ExternalLink
           :href="`https://www.npmjs.com/package/${dep.package}`"
           class="text-indigo-500 text-14px hocus-link-default"
@@ -28,12 +38,13 @@
 
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
-import { useQuery } from '@urql/vue'
 import { gql } from '@urql/core'
-import { useIntervalFn } from '@vueuse/shared'
 import TerminalPrompt from '@cy/components/TerminalPrompt.vue'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
-import { ManualInstallFragment, Wizard_InstalledPackagesDocument } from '../generated/graphql'
+import type { ManualInstallFragment } from '../generated/graphql'
+import { useI18n } from '@cy/i18n'
+
+const { t } = useI18n()
 
 gql`
 fragment ManualInstall on Query {
@@ -52,41 +63,11 @@ fragment ManualInstall on Query {
 }
 `
 
-gql`
-query Wizard_InstalledPackages{
-  wizard {
-    installedPackages
-  }
-}`
-
-const queryInstalled = useQuery({
-  query: Wizard_InstalledPackagesDocument,
-  requestPolicy: 'network-only',
-})
-
-const packagesInstalled = ref<string[]>([])
-
-const emit = defineEmits<{
-  (event: 'all-packages-installed'): void
-}>()
-
-useIntervalFn(async () => {
-  const res = await queryInstalled.executeQuery({})
-
-  packagesInstalled.value = res.data?.value?.wizard?.installedPackages?.map(
-    (pkg) => pkg,
-  ) || []
-
-  if (!toInstall.value?.filter((p) => !packagesInstalled.value.includes(p.package)).length) {
-    queryInstalled.pause()
-    emit('all-packages-installed')
-  }
-}, 500)
-
 const projectFolder = computed(() => props.gql.currentProject?.title ?? '')
 
 const props = defineProps<{
   gql: ManualInstallFragment
+  packagesInstalled: string[]
 }>()
 
 const toInstall = computed(() => {

@@ -7,7 +7,7 @@ describe('<ManualInstall />', () => {
     cy.mountFragment(ManualInstallFragmentDoc, {
       render: (gqlVal) => (
         <div class="rounded border-1 border-gray-400 m-10">
-          <ManualInstall gql={gqlVal} />
+          <ManualInstall gql={gqlVal} packagesInstalled={[]}/>
         </div>
       ),
     })
@@ -20,7 +20,7 @@ describe('<ManualInstall />', () => {
     cy.mountFragment(ManualInstallFragmentDoc, {
       render: (gqlVal) => (
         <div class="rounded border-1 border-gray-400 m-10">
-          <ManualInstall gql={gqlVal} />
+          <ManualInstall gql={gqlVal} packagesInstalled={[]} />
         </div>
       ),
     })
@@ -59,5 +59,17 @@ describe('<ManualInstall />', () => {
 
     validatePackage(framework)
     validatePackage(bundler)
+  })
+
+  it('flags packages already installed', () => {
+    cy.mountFragment(ManualInstallFragmentDoc, {
+      render: (gqlVal) => (
+        <div class="rounded border-1 border-gray-400 m-10">
+          <ManualInstall gql={gqlVal} packagesInstalled={['@cypress/react']} />
+        </div>
+      ),
+    })
+
+    cy.findByLabelText('installed').should('be.visible')
   })
 })
