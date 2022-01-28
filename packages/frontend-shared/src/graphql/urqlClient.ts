@@ -125,7 +125,7 @@ export function makeUrqlClient (config: UrqlClientConfig): Client {
 
   return createClient({
     url,
-    requestPolicy: 'cache-first',
+    requestPolicy: cypressInRunMode ? 'cache-only' : 'cache-first',
     exchanges,
   })
 }
