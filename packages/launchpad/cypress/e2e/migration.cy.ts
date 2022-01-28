@@ -34,6 +34,18 @@ describe('Steps', () => {
     cy.get(configFileStep).should('exist')
   })
 
+  it('shows auto and manual rename for component project with defaults', () => {
+    cy.scaffoldProject('migration-component-testing-defaults')
+    cy.openProject('migration-e2e-fully-custom')
+    cy.visitLaunchpad()
+    cy.waitForWizard()
+    cy.get(renameAutoStep).should('exist')
+    cy.get(renameManualStep).should('exist')
+    cy.get(renameSupportStep).should('not.exist')
+    cy.get(setupComponentStep).should('exist')
+    cy.get(configFileStep).should('exist')
+  })
+
   it('shows all e2e steps for an e2e project with all defaults', () => {
     cy.scaffoldProject('migration-e2e-defaults')
     cy.openProject('migration-e2e-defaults')
@@ -46,30 +58,16 @@ describe('Steps', () => {
     cy.get(setupComponentStep).should('not.exist')
   })
 
-  // TODO: the current logic is wrong and does not consider
-  // the case of a custom integration folder!
-  it('shows all e2e steps for an e2e project with custom integrationFolder', () => {
-    cy.scaffoldProject('migration-e2e-custom-integration')
-    cy.openProject('migration-e2e-custom-integration')
+  it('shows all e2e steps for an e2e project with custom testFiles', () => {
+    cy.scaffoldProject('migration-e2e-custom-test-files')
+    cy.openProject('migration-e2e-custom-test-files')
     cy.visitLaunchpad()
     cy.waitForWizard()
-
     cy.get(renameAutoStep).should('exist')
     cy.get(renameManualStep).should('not.exist')
     cy.get(renameSupportStep).should('exist')
     cy.get(configFileStep).should('exist')
     cy.get(setupComponentStep).should('not.exist')
-
-    cy.contains('src/basic.spec.js')
-    cy.contains('src/basic.cy.js')
-
-    cy.get('button').contains('Rename these specs for me').click()
-    // wait for a bit to make sure the file was actually move before
-    // asserting it exists
-    cy.wait(100)
-    cy.withCtx((ctx) => {
-      ctx.actions.file.checkIfFileExists('src/basic.cy.js')
-    })
   })
 
   it('shows all e2e steps for an e2e project with custom testFiles', () => {
@@ -85,8 +83,8 @@ describe('Steps', () => {
   })
 
   it('shows all component steps for a component testing project w/o e2e set up', () => {
-    cy.scaffoldProject('migration-component-testing')
-    cy.openProject('migration-component-testing')
+    cy.scaffoldProject('migration-component-testing-customized')
+    cy.openProject('migration-component-testing-customized')
     cy.visitLaunchpad()
     cy.waitForWizard()
     cy.get(renameAutoStep).should('not.exist')
@@ -102,11 +100,39 @@ describe('Steps', () => {
   })
 })
 
+describe('component testing migration - defaults', () => {
+  // TODO: toApp emitter not working in Cypress in Cypress.
+  it.skip('live update migration UI as user moves files', () => {
+    cy.scaffoldProject('migration-component-testing-customized')
+    cy.openProject('migration-component-testing-customized')
+    cy.visitLaunchpad()
+    cy.waitForWizard()
+
+    // need to move your specs before this button shows
+    cy.get('button').contains('I have moved my component specs').should('not.exist')
+
+    // two files to move, src/button.spec.js and src/input-spec.tsx.
+    cy.withCtx((ctx) => {
+      return ctx.actions.file.moveFileInProject('src/button.spec.js', 'src/button.cy.js')
+    }).then(() => {
+      cy.get('[data-cy="moved"]').contains('src/button.spec.js')
+    })
+
+    cy.withCtx((ctx) => {
+      return ctx.actions.file.moveFileInProject('src/input-spec.tsx', 'src/input.cy.tsx')
+    }).then(() => {
+      cy.get('[data-cy="moved"]').contains('src/input-spec.tsx')
+    })
+
+    cy.get('button').contains('I have moved my component specs')
+  })
+})
+
 describe('component testing migration', () => {
   // TODO: toApp emitter not working in Cypress in Cypress.
   it.skip('live update migration UI as user moves files', () => {
-    cy.scaffoldProject('migration-component-testing')
-    cy.openProject('migration-component-testing')
+    cy.scaffoldProject('migration-component-testing-customized')
+    cy.openProject('migration-component-testing-customized')
     cy.visitLaunchpad()
     cy.waitForWizard()
 

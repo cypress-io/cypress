@@ -92,7 +92,7 @@ describe('getStepsForMigration', () => {
   })
 
   it('returns component steps for component testing project (no e2e)', async () => {
-    const cwd = scaffoldMigrationProject('migration-component-testing')
+    const cwd = scaffoldMigrationProject('migration-component-testing-customized')
     const config = fs.readJsonSync(path.join(cwd, 'cypress.json'))
 
     const actual = await getStepsForMigration(cwd, config)

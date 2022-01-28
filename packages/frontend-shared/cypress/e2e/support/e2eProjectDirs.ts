@@ -30,7 +30,7 @@ export const e2eProjectDirs = [
   'launchpad',
   'max-listeners',
   'migration',
-  'migration-component-testing',
+  'migration-component-testing-customized',
   'migration-e2e-custom-integration',
   'migration-e2e-custom-test-files',
   'migration-e2e-defaults',

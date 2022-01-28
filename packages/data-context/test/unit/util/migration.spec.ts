@@ -215,7 +215,7 @@ describe('renameSupportFilePath', () => {
 
 describe('initComponentTestingMigration', () => {
   it('calls callback with status each time file is removed', async () => {
-    const cwd = scaffoldMigrationProject('migration-component-testing')
+    const cwd = scaffoldMigrationProject('migration-component-testing-customized')
 
     const delay = () => new Promise((res) => setTimeout(res, 250))
 
