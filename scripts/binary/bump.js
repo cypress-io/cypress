@@ -18,7 +18,7 @@ const _PROVIDERS = {
     linux: [
       'cypress-io/cypress-test-tiny',
       'cypress-io/cypress-test-module-api',
-      'cypress-io/cypress-test-node-versions',
+      'cypress-io/cypress-test-node-versions/tree/add-small-cypress-test',
       'cypress-io/cypress-test-nested-projects',
       'cypress-io/cypress-test-ci-environments',
       'cypress-io/cypress-test-example-repos',
