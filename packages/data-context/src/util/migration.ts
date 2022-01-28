@@ -238,18 +238,17 @@ export async function supportFilesForMigration (projectRoot: string): Promise<Mi
   }
 }
 
-export function moveSpecFiles (e2eDirPath: string) {
-  const specs = fs.readdirSync(e2eDirPath).map((file) => {
-    const filePath = path.join(e2eDirPath, file)
+export interface SpecToMove {
+  from: string
+  to: string
+}
 
-    return {
-      from: filePath,
-      to: renameSpecPath(filePath),
-    }
-  })
-
+export function moveSpecFiles (projectRoot: string, specs: SpecToMove[]) {
   specs.forEach((spec) => {
-    fs.moveSync(spec.from, spec.to)
+    const from = path.join(projectRoot, spec.from)
+    const to = path.join(projectRoot, spec.to)
+
+    fs.moveSync(from, to)
   })
 }
 
@@ -262,10 +261,4 @@ export function renameSupportFilePath (relative: string) {
   }
 
   return relative.replace(res.groups.name, 'e2e')
-}
-
-export function renameSpecPath (spec: string) {
-  return spec
-  .replace('integration', 'e2e')
-  .replace(/([._-]?[s|S]pec.|[.])(?=[j|t]s[x]?)/, '.cy.')
 }

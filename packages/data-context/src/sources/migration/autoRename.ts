@@ -98,9 +98,28 @@ export async function getSpecs (projectRoot: string, config: OldCypressConfig): 
   let integrationSpecs: MigrationSpec[]
   let componentSpecs: MigrationSpec[]
 
-  if (integrationFolder === false || !isDefaultTestFiles(config, 'integration')) {
+  if (integrationFolder === false) {
     integrationSpecs = []
+  } else if (
+    // don't care about the testFiles pattern, just get
+    // everything in the default integration folder
+    integrationFolder === 'cypress/integration' &&
+    !isDefaultTestFiles(config, 'integration')
+  ) {
+    integrationSpecs = (await globby(integrationFolder, {
+      onlyFiles: true,
+      cwd: projectRoot,
+    })).map((relative) => {
+      return {
+        relative,
+        usesDefaultFolder: true,
+        usesDefaultTestFiles: false,
+        testingType: 'e2e',
+      }
+    })
   } else {
+    // don't care about the testFiles pattern, just get
+    // everything in the default integration folder
     const globs = integrationTestFiles.map((glob) => {
       return path.join(integrationFolder, glob)
     })
@@ -118,7 +137,7 @@ export async function getSpecs (projectRoot: string, config: OldCypressConfig): 
     })
   }
 
-  if (componentFolder === false || !isDefaultTestFiles(config, 'component')) {
+  if (componentFolder === false) {
     componentSpecs = []
   } else {
     const globs = componentTestFiles.map((glob) => {

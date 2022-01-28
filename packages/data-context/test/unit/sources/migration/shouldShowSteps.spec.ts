@@ -9,6 +9,14 @@ import {
 import { expect } from 'chai'
 
 describe('shouldShowAutoRenameStep', () => {
+  it('true when testFiles is custom, but default integration folder', async () => {
+    const cwd = scaffoldMigrationProject('migration')
+    const config = fs.readJsonSync(path.join(cwd, 'cypress.json'))
+    const actual = await shouldShowAutoRenameStep(cwd, config)
+
+    expect(actual).to.be.true
+  })
+
   it('false when integrationFolder and testFiles are custom', async () => {
     const cwd = scaffoldMigrationProject('migration-e2e-fully-custom')
     const config = fs.readJsonSync(path.join(cwd, 'cypress.json'))
@@ -81,12 +89,12 @@ describe('getStepsForMigration', () => {
     expect(actual).to.eql(expected)
   })
 
-  it('skips renameAuto for customized integrationFolder+tesFiles, but returns all steps', async () => {
+  it('returns all steps for default integrationFolder, custom testFiles', async () => {
     const cwd = scaffoldMigrationProject('migration')
     const config = fs.readJsonSync(path.join(cwd, 'cypress.json'))
 
     const actual = await getStepsForMigration(cwd, config)
-    const expected: Step[] = ['renameManual', 'renameSupport', 'configFile', 'setupComponent']
+    const expected: Step[] = ['renameAuto', 'renameManual', 'renameSupport', 'configFile', 'setupComponent']
 
     expect(actual).to.eql(expected)
   })

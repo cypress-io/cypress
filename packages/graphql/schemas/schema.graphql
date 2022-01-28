@@ -730,7 +730,14 @@ type Mutation {
   migrateConfigFile: Query
 
   """While migrating to 10+ renames files to match the new .cy pattern"""
-  migrateRenameSpecs(skip: Boolean): Query
+  migrateRenameSpecs(
+    """specs to move - current name"""
+    after: [String!]
+
+    """specs to move - current name"""
+    before: [String!]
+    skip: Boolean
+  ): Query
 
   """While migrating to 10+ launch renaming of support file"""
   migrateRenameSupport: Query

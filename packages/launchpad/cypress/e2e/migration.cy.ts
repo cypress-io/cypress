@@ -19,6 +19,18 @@ Cypress.Commands.add('waitForWizard', () => {
 })
 
 describe('Steps', () => {
+  it('only all steps for kitchen sink migration project', () => {
+    cy.scaffoldProject('migration')
+    cy.openProject('migration')
+    cy.visitLaunchpad()
+    cy.waitForWizard()
+    cy.get(renameAutoStep).should('exist')
+    cy.get(renameManualStep).should('exist')
+    cy.get(renameSupportStep).should('exist')
+    cy.get(setupComponentStep).should('exist')
+    cy.get(configFileStep).should('exist')
+  })
+
   // note: see the README.md inside each of these projects
   // to understand why certain steps are shown.
   // eg system-tests/migration-e2e-fully-custom/README.md
@@ -164,6 +176,56 @@ describe('Migration', { viewportWidth: 1200 }, () => {
   beforeEach(() => {
     cy.scaffoldProject('migration')
     cy.openProject('migration')
+  })
+
+  it('renames integration specs', () => {
+    cy.visitLaunchpad()
+    cy.waitForWizard()
+    // only one spec matches the testFiles pattern - this one.
+    // since we use a custom testFiles pattern, we do NOT change
+    // the spec extension to .cy.js, just change the folder from
+    // integration to e2e.
+
+    ;[
+      'app_spec.js',
+      'blog-post-spec.ts',
+      'homeSpec.js',
+      'someDir/someFile.js',
+      'bar.spec.js',
+      'company.js',
+      'sign-up.js',
+      'spectacleBrowser.ts',
+    ].forEach((spec) => {
+      // before
+      cy.contains(`cypress/integration/${spec}`)
+      // after
+      cy.contains(`cypress/e2e/${spec}`)
+    })
+
+    // do the rename!
+    cy.get('button').contains('Rename these specs for me').click()
+
+    // ensure file has been moved
+    cy.wait(100)
+
+    cy.withCtx((ctx) => {
+      [
+        'app_spec.js',
+        'blog-post-spec.ts',
+        'homeSpec.js',
+        'someDir/someFile.js',
+        'bar.spec.js',
+        'company.js',
+        'sign-up.js',
+        'spectacleBrowser.ts',
+      ].forEach(async (spec) => {
+        const exists = await ctx.actions.file.checkIfFileExists(ctx.path.join('cypress', 'e2e', spec))
+
+        if (!exists) {
+          // need some way to fail!
+        }
+      })
+    })
   })
 
   it('renames support file', () => {

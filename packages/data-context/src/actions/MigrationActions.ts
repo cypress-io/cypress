@@ -4,6 +4,7 @@ import type { DataContext } from '..'
 import {
   moveSpecFiles,
   NonStandardMigrationError,
+  SpecToMove,
   supportFilesForMigration,
 } from '../util'
 import type { TestingType } from '@packages/types'
@@ -27,14 +28,27 @@ export class MigrationActions {
     return this.ctx.migration.initialize()
   }
 
-  async renameSpecFiles () {
+  async renameSpecFiles (beforeSpecs: string[], afterSpecs: string[]) {
     if (!this.ctx.currentProject) {
       throw Error('Need to set currentProject before you can rename files')
     }
 
-    const e2eDirPath = this.ctx.path.join(this.ctx.currentProject, 'cypress', 'integration')
+    const specsToMove: SpecToMove[] = []
 
-    moveSpecFiles(e2eDirPath)
+    for (let i = 0; i < beforeSpecs.length; i++) {
+      const from = beforeSpecs[i]
+      const to = afterSpecs[i]
+
+      if (!from || !to) {
+        throw Error(`Must have matching to and from. Got from: ${from} and to: ${to}`)
+      }
+
+      specsToMove.push({ from, to })
+    }
+
+    const projectRoot = this.ctx.path.join(this.ctx.currentProject)
+
+    moveSpecFiles(projectRoot, specsToMove)
   }
 
   async renameSupportFile () {

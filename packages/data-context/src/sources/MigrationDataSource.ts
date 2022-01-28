@@ -153,10 +153,16 @@ export class MigrationDataSource {
 
     const specs = await getSpecs(this.ctx.currentProject, config)
 
-    return [
-      ...specs.integration.map(applyMigrationTransform),
-      ...specs.component.map(applyMigrationTransform),
-    ]
+    const canBeAutomaticallyMigrated: MigrationFile[] = specs.integration.map(applyMigrationTransform)
+
+    const defaultComponentPattern = isDefaultTestFiles(await this.parseCypressConfig(), 'component')
+
+    // Can only migration component specs if they use the default testFiles pattern.
+    if (defaultComponentPattern) {
+      canBeAutomaticallyMigrated.push(...specs.component.map(applyMigrationTransform))
+    }
+
+    return canBeAutomaticallyMigrated
   }
 
   async getConfig () {

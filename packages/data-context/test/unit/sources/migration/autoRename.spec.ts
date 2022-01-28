@@ -55,6 +55,75 @@ describe('getSpecs', () => {
     ])
   })
 
+  it('handles default folder and custom testFiles', async () => {
+    // CASE 1: E2E + CT, custom folders, default test files
+    // We want to rename specs, but keep current folders.
+    const cwd = scaffoldMigrationProject('migration')
+    const json = fs.readJsonSync(path.join(cwd, 'cypress.json'))
+
+    const actual = await getSpecs(cwd, json)
+
+    expect(actual.integration).to.eql([
+      {
+        'relative': 'cypress/integration/app_spec.js',
+        'testingType': 'e2e',
+        'usesDefaultFolder': true,
+        'usesDefaultTestFiles': false,
+      },
+      {
+        relative: 'cypress/integration/bar.spec.js',
+        usesDefaultFolder: true,
+        usesDefaultTestFiles: false,
+        testingType: 'e2e',
+      },
+      {
+        'relative': 'cypress/integration/blog-post-spec.ts',
+        'testingType': 'e2e',
+        'usesDefaultFolder': true,
+        'usesDefaultTestFiles': false,
+      },
+      {
+        'relative': 'cypress/integration/company.js',
+        'testingType': 'e2e',
+        'usesDefaultFolder': true,
+        'usesDefaultTestFiles': false,
+      },
+      {
+        'relative': 'cypress/integration/homeSpec.js',
+        'testingType': 'e2e',
+        'usesDefaultFolder': true,
+        'usesDefaultTestFiles': false,
+      },
+      {
+        'relative': 'cypress/integration/sign-up.js',
+        'testingType': 'e2e',
+        'usesDefaultFolder': true,
+        'usesDefaultTestFiles': false,
+      },
+      {
+        'relative': 'cypress/integration/spectacleBrowser.ts',
+        'testingType': 'e2e',
+        'usesDefaultFolder': true,
+        'usesDefaultTestFiles': false,
+      },
+      {
+        'relative': 'cypress/integration/someDir/someFile.js',
+        'testingType': 'e2e',
+        'usesDefaultFolder': true,
+        'usesDefaultTestFiles': false,
+      },
+    ])
+
+    expect(actual.component).to.eql([
+      {
+        relative: 'src/Radio.spec.js',
+        usesDefaultFolder: false,
+        usesDefaultTestFiles: false,
+        testingType: 'component',
+      },
+    ])
+  })
+
   it('handles default folders', async () => {
     // CASE 1: E2E + CT, custom folders, default test files
     // We want to rename specs, but keep current folders.
