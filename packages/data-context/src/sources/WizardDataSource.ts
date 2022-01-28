@@ -1,9 +1,9 @@
-import { stat } from 'fs-extra'
-import resolveFrom from 'resolve-from'
+import { readJson } from 'fs-extra'
 import Debug from 'debug'
 import { BUNDLERS, CODE_LANGUAGES, FRONTEND_FRAMEWORKS, PACKAGES_DESCRIPTIONS } from '@packages/types'
 import type { NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
 import type { DataContext } from '..'
+import path from 'path'
 
 const debug = Debug('cypress:data-context:wizard-data-source')
 
@@ -45,26 +45,36 @@ export class WizardDataSource {
   async resolvePackagesToInstall (): Promise<string[]> {
     const packagesInitial = await this.packagesToInstall() || []
 
-    debug('packages to install: %o', packagesInitial)
-    const installedPackages: (string|null)[] = await Promise.all(packagesInitial.map(async (p) => {
+    if (!this.ctx.currentProject) {
+      throw Error('currentProject is not defined')
+    }
+
+    debug('packages to install: %O', packagesInitial)
+
+    const { dependencies, devDependencies } = await readJson(path.join(this.ctx.currentProject, 'package.json'))
+    const installedPackages: (string|null)[] = packagesInitial.map((p) => {
       if (this.ctx.currentProject) {
+        debug('package checked: %s', p.package)
+        const isDependency = !!(dependencies[p.package] || devDependencies[p.package])
+
+        // At startup, node will only resolve the main files of packages it knows of.
+        // Adding a package after the app started will not be resolved in the same way
+        // It will only be resolved as a package whose main is `index.js`, ignoring the "main" field
+        // to avoid this bug, we resolve a file we know has to be in a node module:
+        // `package.json`
+        const packageJsonPath = path.join(p.package, 'package.json')
+
         try {
-          debug('package checked: %s', p.package)
-          const pkgPath = resolveFrom(this.ctx.currentProject, p.package)
+          require.resolve(packageJsonPath, { paths: [this.ctx.currentProject] })
 
-          debug('package path: %s', pkgPath)
-          const statFound = await stat(pkgPath)
-
-          debug('package stat: %o', statFound)
-
-          return statFound ? p.package : null
+          return isDependency ? p.package : null
         } catch (e) {
-          // nope
+          debug('ERROR - resolving package "%s": %O', p.package, e)
         }
       }
 
       return null
-    }))
+    })
 
     return installedPackages.filter((p) => p !== null) as string[]
   }

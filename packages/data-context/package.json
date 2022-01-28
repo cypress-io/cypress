@@ -38,7 +38,6 @@
     "lodash": "4.17.21",
     "p-defer": "^3.0.0",
     "randomstring": "1.1.5",
-    "resolve-from": "5.0.0",
     "stringify-object": "^3.0.0",
     "underscore.string": "^3.3.5",
     "wonka": "^4.0.15"
