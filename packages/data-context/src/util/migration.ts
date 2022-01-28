@@ -200,13 +200,17 @@ export interface GetRelativeSpecs {
 
 export async function getSpecs (
   projectRoot: string,
-  e2eDirPath: string | null,
+  componentFolder: string | null,
+  integrationFolder: string | null,
 ): Promise<GetRelativeSpecs> {
-  const e2e = await findByTestingType(projectRoot, e2eDirPath, 'e2e')
+  const integration = integrationFolder ? (await findByTestingType(projectRoot, integrationFolder, 'e2e')) : []
+  const component = componentFolder ? (await findByTestingType(projectRoot, componentFolder, 'component')) : []
+
+  const all = [...integration, ...component]
 
   return {
-    before: e2e,
-    after: e2e.map((x) => {
+    before: all,
+    after: all.map((x) => {
       return {
         testingType: x.testingType,
         relative: renameSpecPath(x.relative),

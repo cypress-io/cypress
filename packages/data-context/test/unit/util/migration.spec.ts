@@ -109,7 +109,7 @@ describe('cypress.config.js generation', () => {
 describe('spec renaming', () => {
   it('should work for custom integration folder all specs', async () => {
     const cwd = scaffoldMigrationProject('migration-e2e-custom-integration')
-    const specs = await getSpecs(cwd, 'src')
+    const specs = await getSpecs(cwd, null, 'src')
 
     expect(specs).to.eql(
       {
@@ -119,9 +119,27 @@ describe('spec renaming', () => {
     )
   })
 
-  it('should rename all specs', async () => {
+  it('should work for default component folder all specs', async () => {
+    const cwd = scaffoldMigrationProject('migration-component-testing-defaults')
+    const specs = await getSpecs(cwd, 'cypress/component', null)
+
+    expect(specs).to.eql(
+      {
+        before: [
+          { relative: 'cypress/component/button.spec.js', testingType: 'component' },
+          { relative: 'cypress/component/input-spec.tsx', testingType: 'component' },
+        ],
+        after: [
+          { testingType: 'component', relative: 'cypress/component/button.cy.js' },
+          { testingType: 'component', relative: 'cypress/component/input.cy.tsx' },
+        ],
+      },
+    )
+  })
+
+  it('should rename all specs in default integration folder', async () => {
     const cwd = scaffoldMigrationProject('migration')
-    const specs = await getSpecs(cwd, 'cypress/integration')
+    const specs = await getSpecs(cwd, null, 'cypress/integration')
 
     expect(specs.before[0].relative).to.eql('cypress/integration/app_spec.js')
     expect(specs.after[0].relative).to.eql('cypress/e2e/app.cy.js')

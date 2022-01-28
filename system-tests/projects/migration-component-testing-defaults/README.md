@@ -1,4 +1,4 @@
-A component tesing project without e2e and all defaults. We rename their specs for them in step 1, then we ask them to move them in step 2.
+A component tesing project without e2e, and all defaults for CT. We rename their specs for them in step 1, then we ask them to move them in step 2.
 
 Steps:
 
