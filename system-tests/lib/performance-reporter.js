@@ -14,7 +14,8 @@ class StatsdReporter {
 
     console.log(chalk.green('Reporting to honeycomb'))
 
-    let branch; let commitSha
+    let branch
+    let commitSha
 
     this.honey = new Libhoney({
       dataset: 'systemtest-performance',
@@ -24,8 +25,8 @@ class StatsdReporter {
     commitInfo().then((commitInformation) => {
       const ciInformation = ciProvider.commitParams() || {}
 
-      this.branch = commitInformation.branch || ciInformation.branch
-      this.commitSha = commitInformation.sha || ciInformation.sha
+      branch = commitInformation.branch || ciInformation.branch
+      commitSha = commitInformation.sha || ciInformation.sha
     })
 
     runner.on('test', (test) => {
