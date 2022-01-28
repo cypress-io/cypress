@@ -35,7 +35,10 @@ const suffixIcon = () => <LoadingIcon data-cy="loading-icon" class="animate-spin
 describe('<Alert />', () => {
   describe('classes', () => {
     it('can change the text and background color for the alert', () => {
-      cy.mount(() => <Alert headerClass="underline text-pink-500" alertClass="bg-pink-100" icon={suffixIcon}/>)
+      cy.mount(() => <Alert headerClass="underline text-pink-500 bg-pink-100" bodyClass="bg-pink-50" icon={suffixIcon}>test</Alert>)
+      cy.mount(() => <Alert headerClass="underline text-teal-500 bg-teal-100" bodyClass="bg-teal-50" icon={suffixIcon}>test</Alert>)
+
+      cy.percySnapshot()
     })
   })
 
@@ -236,5 +239,8 @@ describe('playground', () => {
         </div>
       )
     })
+
+    cy.contains('Coffee, please').should('be.visible')
+    cy.percySnapshot()
   })
 })

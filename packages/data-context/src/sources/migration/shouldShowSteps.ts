@@ -53,22 +53,34 @@ export function getComponentFolder (config: OldCypressConfig) {
   return config.component?.componentFolder ?? config.componentFolder ?? 'cypress/component'
 }
 
+async function hasSpecFiles (projectRoot: string, dir: string, testFilesGlob: string[]): Promise<boolean> {
+  const f = await globby(testFilesGlob.map((x) => path.join(projectRoot, dir, x)))
+
+  return f.length > 0
+}
 export async function shouldShowAutoRenameStep (projectRoot: string, config: OldCypressConfig) {
   const integrationFolder = getIntegrationFolder(config)
-  const testFiles = getIntegrationTestFiles(config)
-
-  const hasSpecFiles = async (dir: string, testFilesGlob: string[]): Promise<boolean> => {
-    const f = await globby(testFilesGlob.map((x) => path.join(projectRoot, dir, x)))
-
-    return f.length > 0
-  }
+  const integrationTestFiles = getIntegrationTestFiles(config)
 
   // default or custom integrationFolder,
   // non custom test files glob
   // migrate (unless they have no specs, nothing to rename?)
   if (
     integrationFolder !== false &&
-    await hasSpecFiles(integrationFolder, testFiles)
+    await hasSpecFiles(projectRoot, integrationFolder, integrationTestFiles)
+  ) {
+    return true
+  }
+
+  const componentFolder = getComponentFolder(config)
+  const componentTestFiles = getComponentTestFiles(config)
+
+  // we can only auto migrate component specs
+  // if they are using all the defaults (folder and testFiles)
+  if (
+    componentFolder !== false &&
+    isDefaultTestFiles(config, 'component') &&
+    await hasSpecFiles(projectRoot, componentFolder, componentTestFiles)
   ) {
     return true
   }
@@ -87,14 +99,16 @@ export function shouldShowRenameSupport (config: OldCypressConfig) {
 
 // if they have component testing configured, they will need to
 // rename/move their specs.
-function shouldShowRenameManual (config: OldCypressConfig) {
-  return config.component !== undefined
-}
+function shouldShowRenameManual (projectRoot: string, config: OldCypressConfig) {
+  const componentFolder = getComponentFolder(config)
 
-// if they have component testing configured, they will need to
-// reconfigure it.
-function shouldShowSetupComponent (config: OldCypressConfig) {
-  return config.component !== undefined
+  if (componentFolder === false) {
+    return false
+  }
+
+  const componentTestFiles = getComponentTestFiles(config)
+
+  return hasSpecFiles(projectRoot, componentFolder, componentTestFiles)
 }
 
 // All projects must move from cypress.json to cypress.config.js!
@@ -115,7 +129,7 @@ export async function getStepsForMigration (
       steps.push(step)
     }
 
-    if (step === 'renameManual' && shouldShowRenameManual(config)) {
+    if (step === 'renameManual' && await shouldShowRenameManual(projectRoot, config)) {
       steps.push(step)
     }
 
@@ -127,7 +141,9 @@ export async function getStepsForMigration (
       steps.push(step)
     }
 
-    if (step === 'setupComponent' && shouldShowSetupComponent(config)) {
+    // if we are showing rename manual, this implies
+    // component testing is configured.
+    if (step === 'setupComponent' && steps.includes('renameManual')) {
       steps.push(step)
     }
   }
