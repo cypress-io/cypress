@@ -46,12 +46,16 @@ describe('<SpecsListHeader />', { keystrokeDelay: 0 }, () => {
     const onShowSpecPatternModal = cy.stub().as('show-spec-pattern-modal')
     const search = ref('')
 
-    cy.mount(() => (<div class="max-w-800px p-12 resize overflow-auto"><SpecsListHeader
-      modelValue={search.value}
-      onShowSpecPatternModal={onShowSpecPatternModal}
-      resultCount={0}
-    /></div>))
-    .get('[data-cy="open-spec-pattern-modal"]')
+    cy.mount(() => (
+      <div class="max-w-800px p-12 resize overflow-auto">
+        <SpecsListHeader
+          modelValue={search.value}
+          onShowSpecPatternModal={onShowSpecPatternModal}
+          resultCount={0}
+        />
+      </div>))
+
+    cy.contains('button', defaultMessages.createSpec.viewSpecPatternButton)
     .click()
     .get('@show-spec-pattern-modal')
     .should('have.been.called')

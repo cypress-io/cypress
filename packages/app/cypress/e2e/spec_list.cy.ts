@@ -7,7 +7,7 @@ describe('App: Spec List', () => {
   })
 
   it('opens spec pattern modal', () => {
-    cy.get('[data-cy="open-spec-pattern-modal"]').click()
+    cy.contains('button', 'View spec pattern').click()
 
     cy.get('[data-cy="spec-pattern-modal"]').should('be.visible')
     cy.get('[data-cy="spec-pattern"]').contains('cypress/component-tests/**/*')
