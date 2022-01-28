@@ -77,25 +77,6 @@ export class MigrationDataSource {
     this.setStep(this.filteredSteps[0])
   }
 
-  // async getSpecsRelativeToFolder () {
-  //   if (!this.ctx.currentProject) {
-  //     throw Error('cannot get specs without a project path')
-  //   }
-
-  //   const integrationFolder = await this.integrationFolder()
-  //   const componentFolder = await this.componentFolder()
-
-  //   const specs = await getSpecs(
-  //     this.ctx.currentProject,
-  //     componentFolder || null,
-  //     integrationFolder || null,
-  //   )
-
-  //   debug('looked in %s and %s and found %o', integrationFolder, specs)
-
-  //   return specs
-  // }
-
   async getDefaultLegacySupportFile (): Promise<string> {
     if (!this.ctx.currentProject) {
       throw Error(`Need this.ctx.projectRoot!`)
