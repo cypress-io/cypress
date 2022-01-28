@@ -179,9 +179,9 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         Because you passed the --parallel flag, this run cannot proceed because it requires a valid response from our servers.
 
         ${displayFlags(arg1.flags, {
-          group: '--group',
-          ciBuildId: '--ciBuildId',
-        })}
+        group: '--group',
+        ciBuildId: '--ciBuildId',
+      })}
 
         The server's response was:
 
@@ -192,9 +192,9 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         We encountered an unexpected error talking to our servers.
 
         ${displayFlags(arg1.flags, {
-          group: '--group',
-          ciBuildId: '--ciBuildId',
-        })}
+        group: '--group',
+        ciBuildId: '--ciBuildId',
+      })}
 
         The server's response was:
 
@@ -206,11 +206,11 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         There is likely something wrong with the request.
 
         ${displayFlags(arg1.flags, {
-            tags: '--tag',
-            group: '--group',
-            parallel: '--parallel',
-            ciBuildId: '--ciBuildId',
-          })}
+        tags: '--tag',
+        group: '--group',
+        parallel: '--parallel',
+        ciBuildId: '--ciBuildId',
+      })}
 
         The server's response was:
 
@@ -230,11 +230,11 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         You cannot parallelize a run that has been complete for that long.
 
         ${displayFlags(arg1, {
-            tags: '--tag',
-            group: '--group',
-            parallel: '--parallel',
-            ciBuildId: '--ciBuildId',
-          })}
+        tags: '--tag',
+        group: '--group',
+        parallel: '--parallel',
+        ciBuildId: '--ciBuildId',
+      })}
 
         https://on.cypress.io/stale-run`
     case 'DASHBOARD_ALREADY_COMPLETE':
@@ -246,11 +246,11 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         When a run finishes all of its groups, it waits for a configurable set of time before finally completing. You must add more groups during that time period.
 
         ${displayFlags(arg1, {
-            tags: '--tag',
-            group: '--group',
-            parallel: '--parallel',
-            ciBuildId: '--ciBuildId',
-          })}
+        tags: '--tag',
+        group: '--group',
+        parallel: '--parallel',
+        ciBuildId: '--ciBuildId',
+      })}
 
         https://on.cypress.io/already-complete`
     case 'DASHBOARD_PARALLEL_REQUIRED':
@@ -260,11 +260,11 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         The existing run is: ${arg1.runUrl}
 
         ${displayFlags(arg1, {
-            tags: '--tag',
-            group: '--group',
-            parallel: '--parallel',
-            ciBuildId: '--ciBuildId',
-          })}
+        tags: '--tag',
+        group: '--group',
+        parallel: '--parallel',
+        ciBuildId: '--ciBuildId',
+      })}
 
         You must use the --parallel flag with this group.
 
@@ -276,10 +276,10 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         The existing run is: ${arg1.runUrl}
 
         ${displayFlags(arg1, {
-            group: '--group',
-            parallel: '--parallel',
-            ciBuildId: '--ciBuildId',
-          })}
+        group: '--group',
+        parallel: '--parallel',
+        ciBuildId: '--ciBuildId',
+      })}
 
         You can not use the --parallel flag with this group.
 
@@ -295,12 +295,12 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         In order to run in parallel mode each machine must send identical environment parameters such as:
 
         ${listItems([
-            'specs',
-            'osName',
-            'osVersion',
-            'browserName',
-            'browserVersion (major)',
-          ])}
+        'specs',
+        'osName',
+        'osVersion',
+        'browserName',
+        'browserVersion (major)',
+      ])}
 
         This machine sent the following parameters:
 
@@ -314,10 +314,10 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         The existing run is: ${arg1.runUrl}
 
         ${displayFlags(arg1, {
-            group: '--group',
-            parallel: '--parallel',
-            ciBuildId: '--ciBuildId',
-          })}
+        group: '--group',
+        parallel: '--parallel',
+        ciBuildId: '--ciBuildId',
+      })}
 
         If you are trying to parallelize this run, then also pass the --parallel flag, else pass a different group name.
 
@@ -329,9 +329,9 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         You passed the --group or --parallel flag but we could not automatically determine or generate a ciBuildId.
 
         ${displayFlags(arg1, {
-            group: '--group',
-            parallel: '--parallel',
-          })}
+        group: '--group',
+        parallel: '--parallel',
+      })}
 
         In order to use either of these features a ciBuildId must be determined.
 
@@ -347,11 +347,11 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         You passed the --ci-build-id, --group, --tag, or --parallel flag without also passing the --record flag.
 
         ${displayFlags(arg1, {
-            ciBuildId: '--ci-build-id',
-            tags: '--tag',
-            group: '--group',
-            parallel: '--parallel',
-          })}
+        ciBuildId: '--ci-build-id',
+        tags: '--tag',
+        group: '--group',
+        parallel: '--parallel',
+      })}
 
         These flags can only be used when recording to the Cypress Dashboard service.
 
@@ -361,8 +361,8 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         You passed the --ci-build-id flag but did not provide either a --group or --parallel flag.
 
         ${displayFlags(arg1, {
-            ciBuildId: '--ci-build-id',
-          })}
+        ciBuildId: '--ci-build-id',
+      })}
 
         The --ci-build-id flag is used to either group or parallelize multiple runs together.
 
@@ -1120,7 +1120,7 @@ const logException = Promise.method(function (err) {
   }
 })
 
-module.exports = {
+export = {
   get,
 
   log,
