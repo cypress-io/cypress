@@ -47,7 +47,7 @@ export function matchedSpecs ({
   return specs
 }
 
-export interface TranformSpec {
+export interface TransformSpec {
   projectRoot: string
   absolute: string
   testingType: Cypress.TestingType
@@ -63,7 +63,7 @@ export function transformSpec ({
   commonRoot,
   platform,
   sep,
-}: TranformSpec): SpecWithRelativeRoot {
+}: TransformSpec): SpecWithRelativeRoot {
   if (platform === 'win32') {
     absolute = toPosix(absolute, sep)
     projectRoot = toPosix(projectRoot, sep)
