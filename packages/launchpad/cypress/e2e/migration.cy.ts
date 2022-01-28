@@ -44,11 +44,18 @@ function runAutoRename () {
 
 function renameSupport () {
   cy.contains(`Rename the support file for me`).click()
+
   // give to to finish the file rename
-  cy.wait(500)
+  cy.wait(200)
+
+  cy.withCtx(async (ctx) => {
+    expect(
+      await ctx.actions.file.checkIfFileExists(ctx.path.join('cypress', 'support', 'e2e.js')),
+    ).not.to.be.null
+  })
 }
 
-describe.only('Steps', () => {
+describe('Full migration flow for each project', () => {
   it('completes journey for migration-component-testing', () => {
     startMigrationFor('migration-component-testing')
     // custom testFiles - cannot auto
@@ -80,7 +87,6 @@ describe.only('Steps', () => {
     cy.get(setupComponentStep).should('exist')
     cy.get(configFileStep).should('exist')
 
-
     // Migration workflow
     // before auto migration
     cy.contains('cypress/component/button.spec.js')
@@ -103,6 +109,7 @@ describe.only('Steps', () => {
         expect(stats).to.not.be.null
       })
     })
+
     skipCTMigration()
     migrateAndVerifyConfig()
     finishMigrationAndContinue()
@@ -139,6 +146,7 @@ describe.only('Steps', () => {
         expect(stats).to.not.be.null
       })
     })
+
     skipCTMigration()
     renameSupport()
     migrateAndVerifyConfig()
@@ -206,8 +214,7 @@ describe.only('Steps', () => {
 
     cy.wait(100)
     cy.withCtx((ctx) => {
-      ;['src/basic.cy.js'
-      ].forEach(async (spec) => {
+      ['src/basic.cy.js'].forEach(async (spec) => {
         const stats = await ctx.actions.file.checkIfFileExists(ctx.path.join(spec))
 
         expect(stats).to.not.be.null
@@ -251,8 +258,7 @@ describe.only('Steps', () => {
 
     cy.wait(100)
     cy.withCtx((ctx) => {
-      ;['cypress/e2e/basic.test.js'
-      ].forEach(async (spec) => {
+      ['cypress/e2e/basic.test.js'].forEach(async (spec) => {
         const stats = await ctx.actions.file.checkIfFileExists(ctx.path.join(spec))
 
         expect(stats).to.not.be.null
@@ -295,8 +301,7 @@ describe.only('Steps', () => {
 
     cy.wait(100)
     cy.withCtx((ctx) => {
-      ;['cypress/e2e/foo.cy.js'
-      ].forEach(async (spec) => {
+      ['cypress/e2e/foo.cy.js'].forEach(async (spec) => {
         const stats = await ctx.actions.file.checkIfFileExists(ctx.path.join(spec))
 
         expect(stats).to.not.be.null
@@ -363,9 +368,7 @@ describe('component testing migration - defaults', () => {
 
     cy.get('button').contains('I have moved my component specs')
   })
-})
 
-describe('component testing migration', () => {
   // TODO: toApp emitter not working in Cypress in Cypress.
   it.skip('live update migration UI as user moves files', () => {
     cy.scaffoldProject('migration-component-testing-customized')
@@ -394,109 +397,21 @@ describe('component testing migration', () => {
 })
 
 describe('Migration', { viewportWidth: 1200 }, () => {
-  beforeEach(() => {
-    cy.scaffoldProject('migration')
-    cy.openProject('migration')
-  })
-
-  it('renames support file', () => {
-    cy.visitLaunchpad()
-    cy.waitForWizard()
-
-    // rename specs
-    cy.get('button').contains('Rename these specs for me').click()
-
-    // skip component for now
+  it('should create the cypress.config.js file and delete old config', () => {
+    startMigrationFor('migration')
+    runAutoRename()
     cy.findByText(`I'll do this later`).click()
-
-    cy.findByText(`Rename the support file for me`).click()
+    cy.findByText(defaultMessages.migration.wizard.step3.button).click()
+    cy.findByText(defaultMessages.migration.wizard.step4.button).click()
 
     cy.withCtx(async (ctx) => {
-      expect(
-        await ctx.actions.file.checkIfFileExists(ctx.path.join('cypress', 'support', 'e2e.js')),
-      ).not.to.be.null
-    })
-  })
+      const configStats = await ctx.actions.file.checkIfFileExists('cypress.config.js')
 
-  describe('Configuration', () => {
-    beforeEach(() => {
-      cy.visitLaunchpad()
-      cy.waitForWizard()
+      expect(configStats).to.not.be.null.and.not.be.undefined
 
-      // rename specs
-      cy.get('button').contains('Rename these specs for me').click()
+      const oldConfigStats = await ctx.actions.file.checkIfFileExists('cypress.json')
 
-      cy.findByText(`I'll do this later`).click()
-      cy.findByText(defaultMessages.migration.wizard.step3.button).click()
-      cy.findByText(defaultMessages.migration.wizard.step4.button).click()
-    })
-
-    it('should create the cypress.config.js file and delete old config', () => {
-      cy.withCtx(async (ctx) => {
-        const configStats = await ctx.actions.file.checkIfFileExists('cypress.config.js')
-
-        expect(configStats).to.not.be.null.and.not.be.undefined
-
-        const oldConfigStats = await ctx.actions.file.checkIfFileExists('cypress.json')
-
-        expect(oldConfigStats).to.be.null
-      })
-    })
-
-    it('should create a valid js file', () => {
-      cy.withCtx(async (ctx) => {
-        const configPath = ctx.path.join(ctx.lifecycleManager.projectRoot, 'cypress.config.js')
-
-        const isValidJsFile = ctx.file.isValidJsFile(configPath)
-
-        expect(isValidJsFile).to.be.true
-      })
-    })
-  })
-
-  describe('File Renames', () => {
-    it('should move files to correct location', () => {
-      cy.visitLaunchpad()
-      cy.waitForWizard()
-
-      ;[
-        'app_spec.js',
-        'blog-post-spec.ts',
-        'homeSpec.js',
-        'someDir/someFile.js',
-        'bar.spec.js',
-        'company.js',
-        'sign-up.js',
-        'spectacleBrowser.ts',
-      ].forEach((spec) => {
-        // before
-        cy.contains(`cypress/integration/${spec}`)
-        // after
-        cy.contains(`cypress/e2e/${spec}`)
-      })
-
-      // do the rename!
-      cy.get('button').contains('Rename these specs for me').click()
-
-      // ensure file has been moved
-      cy.wait(100)
-
-      cy.withCtx((ctx) => {
-        [
-          'app_spec.js',
-          'blog-post-spec.ts',
-          'homeSpec.js',
-          'someDir/someFile.js',
-          'bar.spec.js',
-          'company.js',
-          'sign-up.js',
-          'spectacleBrowser.ts',
-        ].forEach(async (spec) => {
-          const stats = await ctx.actions.file.checkIfFileExists(ctx.path.join('cypress', 'e2e', spec))
-
-          expect(stats).to.not.be.null
-        })
-      })
+      expect(oldConfigStats).to.be.null
     })
   })
 
