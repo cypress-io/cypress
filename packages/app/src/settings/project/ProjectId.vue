@@ -3,7 +3,6 @@
     v-if="props.gql?.projectId"
     code="projectId"
     data-cy="settings-projectId"
-    anchor-id="projectId"
   >
     <template #title>
       {{ t('settingsPage.projectId.title') }}

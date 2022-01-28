@@ -1,6 +1,5 @@
 <template>
   <SettingsSection
-    anchor-id="specPattern"
     code="specPattern"
     data-cy="settings-specPatterns"
   >
