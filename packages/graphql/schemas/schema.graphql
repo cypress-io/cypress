@@ -611,20 +611,29 @@ type Migration {
   manualFiles: ManualMigration
 
   """All spec files after conversion"""
-  specFiles: MigrationFiles!
+  specFiles: [MigrationFile!]!
 
   """Support files needing automated rename"""
-  supportFiles: MigrationFiles
+  supportFiles: MigrationFile
 }
 
-type MigrationFile implements Node {
-  """Relay style Node ID field for the MigrationFile field"""
-  id: ID!
-  parts: [MigrationFilePart!]!
+type MigrationFile {
+  after: MigrationFileData!
+  before: MigrationFileData!
   testingType: TestingTypeEnum!
 }
 
+type MigrationFileData implements Node {
+  """Relay style Node ID field for the MigrationFileData field"""
+  id: ID!
+  parts: [MigrationFilePart!]!
+  relative: String!
+}
+
 type MigrationFilePart implements Node {
+  """is this part a folder or extension that needs migration"""
+  group: String
+
   """should highlight in migration UI"""
   highlight: Boolean!
 
@@ -633,11 +642,6 @@ type MigrationFilePart implements Node {
 
   """part of filename"""
   text: String!
-}
-
-type MigrationFiles {
-  after: [MigrationFile!]!
-  before: [MigrationFile!]!
 }
 
 type MigrationRegexp {
@@ -747,7 +751,14 @@ type Mutation {
   migrateConfigFile: Query
 
   """While migrating to 10+ renames files to match the new .cy pattern"""
-  migrateRenameSpecs(skip: Boolean): Query
+  migrateRenameSpecs(
+    """specs to move - current name"""
+    after: [String!]
+
+    """specs to move - current name"""
+    before: [String!]
+    skip: Boolean
+  ): Query
 
   """While migrating to 10+ launch renaming of support file"""
   migrateRenameSupport: Query
