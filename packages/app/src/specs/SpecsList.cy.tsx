@@ -101,6 +101,8 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
         .should('have.attr', 'aria-expanded', 'true')
         .focus()
         .realPress('Enter')
+
+        cy.contains('button[data-cy="row-directory-depth-0"]', dir)
         .should('have.attr', 'aria-expanded', 'false')
       })
 
@@ -115,6 +117,8 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
         .should('have.attr', 'aria-expanded', 'true')
         .focus()
         .realPress('Enter')
+
+        cy.contains('button[data-cy="row-directory-depth-0"]', dir)
         .should('have.attr', 'aria-expanded', 'false')
       })
 
