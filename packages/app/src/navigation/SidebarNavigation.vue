@@ -20,45 +20,14 @@
       </div>
     </button>
     <div class="flex flex-col flex-1 overflow-y-auto ">
-      <SidebarTooltip
-        class="border-b flex border-gray-900 flex-shrink-0 h-64px items-center"
-        :disabled="mainStore.navBarExpanded"
-        :popper-top-offset="4"
-        popper-class="h-56px"
-        data-cy="sidebar-header"
-      >
-        <i-cy-bookmark_x24
-          class="flex-shrink-0
-          h-24px
-          mx-20px
-          w-24px
-          icon-dark-gray-200 icon-light-gray-900"
-        />
-        <div class="text-gray-50 text-size-16px leading-24px truncate">
-          {{ currentProject?.title ?? 'Cypress' }}
-          <p class="text-gray-600 text-size-14px leading-20px truncate">
-            {{ currentProject?.branch }}
-          </p>
-        </div>
-
-        <template #popper>
-          <div class="text-left text-gray-50 text-size-16px leading-16px truncate">
-            {{ currentProject?.title ?? 'Cypress' }}
-            <p class="text-gray-600 text-size-14px leading-20px truncate">
-              {{ currentProject?.branch }}
-            </p>
-          </div>
-        </template>
-      </SidebarTooltip>
-
+      <SidebarNavigationHeader
+        v-if="query.data.value"
+        :gql="query.data.value"
+      />
       <nav
         class="space-y-1 bg-gray-1000 flex-1"
         aria-label="Sidebar"
       >
-        <SwitchTestingTypeButton
-          v-if="query.data.value"
-          :gql="query.data.value"
-        />
         <RouterLink
           v-for="item in navigation"
           v-slot="{ isActive }"
@@ -108,7 +77,6 @@
 import { computed, ref } from 'vue'
 import { gql, useQuery } from '@urql/vue'
 import SidebarNavigationRow from './SidebarNavigationRow.vue'
-import SwitchTestingTypeButton from './SwitchTestingTypeButton.vue'
 import KeyboardBindingsModal from './KeyboardBindingsModal.vue'
 import CodeIcon from '~icons/cy/code-editor_x24'
 import RunsIcon from '~icons/cy/runs_x24'
@@ -120,6 +88,7 @@ import { SideBarNavigationDocument } from '../generated/graphql'
 import CypressLogo from '@packages/frontend-shared/src/assets/logos/cypress_s.png'
 import { useI18n } from '@cy/i18n'
 import { useRoute } from 'vue-router'
+import SidebarNavigationHeader from './SidebarNavigationHeader.vue'
 
 const { t } = useI18n()
 
@@ -131,18 +100,11 @@ const navigation = [
 
 gql`
 query SideBarNavigation {
-  ...SwitchTestingTypeButton
-  currentProject {
-    id
-    title
-    branch
-  }
+  ...SidebarNavigationHeader
 }
 `
 
 const query = useQuery({ query: SideBarNavigationDocument, requestPolicy: 'network-only' })
-
-const currentProject = computed(() => query.data.value?.currentProject)
 
 const bindingsOpen = ref(false)
 

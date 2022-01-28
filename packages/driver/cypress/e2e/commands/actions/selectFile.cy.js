@@ -218,6 +218,10 @@ describe('src/cy/commands/actions/selectFile', () => {
         cy.fixture('valid.json').as('myFixture')
 
         cy.get('#basic').selectFile('@myFixture')
+        .then((input) => {
+          expect(input[0].files[0].name).to.eq('valid.json')
+          expect(input[0].files[0].type).to.eq('application/json')
+        })
         .then(getFileContents)
         .then((contents) => {
           // Because json files are loaded as objects, they get reencoded before
@@ -232,6 +236,10 @@ describe('src/cy/commands/actions/selectFile', () => {
         cy.readFile('cypress/fixtures/valid.json', { encoding: null }).as('myFile')
 
         cy.get('#basic').selectFile('@myFile')
+        .then((input) => {
+          expect(input[0].files[0].name).to.eq('valid.json')
+          expect(input[0].files[0].type).to.eq('application/json')
+        })
         .then(getFileContents)
         .then((contents) => {
           expect(contents[0]).to.eql(validJsonString)
@@ -251,6 +259,32 @@ describe('src/cy/commands/actions/selectFile', () => {
         .then((input) => {
           expect(input[0].files[0].name).to.eq('valid.json')
           expect(input[0].files[1].name).to.eq('app.js')
+          expect(input[0].files[0].type).to.eq('application/json')
+          expect(input[0].files[1].type).to.eq('application/javascript')
+        })
+      })
+
+      it('allows users to override the inferred filenames and mimetypes', () => {
+        cy.fixture('valid.json').as('myFixture')
+
+        cy.get('#multiple').selectFile([{
+          contents: 'cypress/fixtures/valid.json',
+          fileName: '1.png',
+        },
+        {
+          contents: '@myFixture',
+          fileName: '2.png',
+          mimeType: 'text/plain',
+        }])
+        .then((input) => {
+          expect(input[0].files[0].name).to.eq('1.png')
+          expect(input[0].files[1].name).to.eq('2.png')
+          // The mimetype should be inferred from the user-supplied filename,
+          // rather than the actual path
+          expect(input[0].files[0].type).to.eq('image/png')
+          // And ever if they supply a filename, explicit mimetype
+          // should always take precedent.
+          expect(input[0].files[1].type).to.eq('text/plain')
         })
       })
     })
