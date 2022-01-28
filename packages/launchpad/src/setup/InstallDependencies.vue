@@ -12,7 +12,7 @@
       :packages-installed="packagesInstalled"
     />
     <Button
-      v-if="intervalQueryTrigger.isActive.value === false"
+      v-if="!canNavigateForward && !intervalQueryTrigger.isActive.value"
       class="right-16px bottom-16px absolute"
       size="lg"
       variant="link"
