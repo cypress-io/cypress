@@ -2,7 +2,7 @@ This is the "kitchen sink" of migrations. It has E2E and Component Testing, a bu
 
 Steps:
 
-- [x] automatic file rename
+- [x] automatic file rename of test found in cypress/integration
 - [x] manual file rename
 - [x] rename support
 - [x] update config file
