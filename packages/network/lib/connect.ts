@@ -7,15 +7,21 @@ import tls from 'tls'
 
 const debug = debugModule('cypress:network:connect')
 
-export function byPortAndAddress (port: number, address: net.Address) {
+export function byPortAndAddress (hostname: string, port: number, address: net.Address) {
   // https://nodejs.org/api/net.html#net_net_connect_port_host_connectlistener
   return new Bluebird<net.Address>((resolve, reject) => {
     const onConnect = () => {
-      client.end()
+      client.destroy()
       resolve(address)
     }
 
-    const client = net.connect(port, address.address, onConnect)
+    let client
+
+    if (port === 443) {
+      client = tls.connect({ port, host: address.address, servername: hostname }, onConnect)
+    } else {
+      client = net.connect({ port, host: address.address }, onConnect)
+    }
 
     client.on('error', reject)
   })
@@ -23,8 +29,7 @@ export function byPortAndAddress (port: number, address: net.Address) {
 
 export function getAddress (port: number, hostname: string): Bluebird<net.Address> {
   debug('beginning getAddress %o', { hostname, port })
-
-  const fn = byPortAndAddress.bind({}, port)
+  const fn = byPortAndAddress.bind({}, hostname, port)
 
   // promisify at the very last second which enables us to
   // modify dns lookup function (via hosts overrides)
