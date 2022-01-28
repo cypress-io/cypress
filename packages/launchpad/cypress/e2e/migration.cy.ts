@@ -26,7 +26,29 @@ function startMigrationFor (project: typeof e2eProjectDirs[number]) {
   cy.waitForWizard()
 }
 
-describe('Steps', () => {
+function skipCTMigration () {
+  cy.contains(`I'll do this later`).click()
+}
+
+function migrateAndVerifyConfig () {
+  cy.contains('Migrate the configuration for me').click()
+}
+
+function finishMigrationAndContinue () {
+  cy.contains('Finish migration and continue').click()
+}
+
+function runAutoRename () {
+  cy.get('button').contains('Rename these specs for me').click()
+}
+
+function renameSupport () {
+  cy.contains(`Rename the support file for me`).click()
+  // give to to finish the file rename
+  cy.wait(500)
+}
+
+describe.only('Steps', () => {
   it('completes journey for migration-component-testing', () => {
     startMigrationFor('migration-component-testing')
     // custom testFiles - cannot auto
@@ -36,17 +58,16 @@ describe('Steps', () => {
     cy.get(renameSupportStep).should('not.exist')
     cy.get(setupComponentStep).should('exist')
     cy.get(configFileStep).should('exist')
-  })
 
-  it('completes journey for migration-component-testing-customized', () => {
-    startMigrationFor('migration-component-testing-customized')
-    // custom testFiles - cannot auto
-    cy.get(renameAutoStep).should('not.exist')
-    cy.get(renameManualStep).should('exist')
-    // supportFile is false - cannot migrate
-    cy.get(renameSupportStep).should('not.exist')
-    cy.get(setupComponentStep).should('exist')
-    cy.get(configFileStep).should('exist')
+    // needs some time for the CT migration tool to kick in
+    cy.wait(1000)
+    // Migration workflow
+    cy.contains('src/button.spec.js')
+    cy.contains('src/input-spec.tsx')
+
+    skipCTMigration()
+    migrateAndVerifyConfig()
+    finishMigrationAndContinue()
   })
 
   it('completes journey for migration-component-testing-defaults', () => {
@@ -58,6 +79,33 @@ describe('Steps', () => {
     cy.get(renameSupportStep).should('not.exist')
     cy.get(setupComponentStep).should('exist')
     cy.get(configFileStep).should('exist')
+
+
+    // Migration workflow
+    // before auto migration
+    cy.contains('cypress/component/button.spec.js')
+    cy.contains('cypress/component/input-spec.tsx')
+
+    // after auto migration
+    cy.contains('cypress/component/button.cy.js')
+    cy.contains('cypress/component/input.cy.tsx')
+
+    runAutoRename()
+
+    cy.wait(100)
+    cy.withCtx((ctx) => {
+      [
+        'cypress/component/button.cy.js',
+        'cypress/component/input.cy.tsx',
+      ].forEach(async (spec) => {
+        const stats = await ctx.actions.file.checkIfFileExists(ctx.path.join(spec))
+
+        expect(stats).to.not.be.null
+      })
+    })
+    skipCTMigration()
+    migrateAndVerifyConfig()
+    finishMigrationAndContinue()
   })
 
   it('completes journey for migration-e2e-component-default-everything', () => {
@@ -68,6 +116,33 @@ describe('Steps', () => {
     cy.get(renameSupportStep).should('exist')
     cy.get(setupComponentStep).should('exist')
     cy.get(configFileStep).should('exist')
+
+    // Migration workflow
+    // before auto migration
+    cy.contains('cypress/integration/foo.spec.ts')
+    cy.contains('cypress/component/button.spec.js')
+
+    // after auto migration
+    cy.contains('cypress/e2e/foo.cy.ts')
+    cy.contains('cypress/component/button.cy.js')
+
+    runAutoRename()
+
+    cy.wait(100)
+    cy.withCtx((ctx) => {
+      [
+        'cypress/e2e/foo.cy.ts',
+        'cypress/component/button.cy.js',
+      ].forEach(async (spec) => {
+        const stats = await ctx.actions.file.checkIfFileExists(ctx.path.join(spec))
+
+        expect(stats).to.not.be.null
+      })
+    })
+    skipCTMigration()
+    renameSupport()
+    migrateAndVerifyConfig()
+    finishMigrationAndContinue()
   })
 
   it('completes journey for migration-e2e-component-default-test-files', () => {
@@ -79,6 +154,34 @@ describe('Steps', () => {
     cy.get(renameSupportStep).should('exist')
     cy.get(setupComponentStep).should('exist')
     cy.get(configFileStep).should('exist')
+
+    // Migration workflow
+    // before auto migration
+    cy.contains('cypress/custom-integration/foo.spec.ts')
+    cy.contains('cypress/custom-component/button.spec.js')
+
+    // after auto migration
+    cy.contains('cypress/custom-integration/foo.cy.ts')
+    cy.contains('cypress/custom-component/button.cy.js')
+
+    runAutoRename()
+
+    cy.wait(100)
+    cy.withCtx((ctx) => {
+      [
+        'cypress/custom-integration/foo.cy.ts',
+        'cypress/custom-component/button.cy.js',
+      ].forEach(async (spec) => {
+        const stats = await ctx.actions.file.checkIfFileExists(ctx.path.join(spec))
+
+        expect(stats).to.not.be.null
+      })
+    })
+
+    skipCTMigration()
+    renameSupport()
+    migrateAndVerifyConfig()
+    finishMigrationAndContinue()
   })
 
   it('completes journey for migration-e2e-custom-integration', () => {
@@ -91,6 +194,28 @@ describe('Steps', () => {
     cy.get(renameSupportStep).should('exist')
     cy.get(setupComponentStep).should('not.exist')
     cy.get(configFileStep).should('exist')
+
+    // Migration workflow
+    // before auto migration
+    cy.contains('src/basic.spec.js')
+
+    // after auto migration
+    cy.contains('src/basic.cy.js')
+
+    runAutoRename()
+
+    cy.wait(100)
+    cy.withCtx((ctx) => {
+      ;['src/basic.cy.js'
+      ].forEach(async (spec) => {
+        const stats = await ctx.actions.file.checkIfFileExists(ctx.path.join(spec))
+
+        expect(stats).to.not.be.null
+      })
+    })
+
+    renameSupport()
+    migrateAndVerifyConfig()
   })
 
   it('completes journey for migration-e2e-custom-test-files', () => {
@@ -104,6 +229,38 @@ describe('Steps', () => {
     cy.get(renameSupportStep).should('exist')
     cy.get(setupComponentStep).should('not.exist')
     cy.get(configFileStep).should('exist')
+
+    startMigrationFor('migration-e2e-custom-test-files')
+    // default testFiles but custom integration - can rename automatically
+    cy.get(renameAutoStep).should('exist')
+    // no CT
+    cy.get(renameManualStep).should('not.exist')
+    // supportFile is false - cannot migrate
+    cy.get(renameSupportStep).should('exist')
+    cy.get(setupComponentStep).should('not.exist')
+    cy.get(configFileStep).should('exist')
+
+    // Migration workflow
+    // before auto migration
+    cy.contains('cypress/integration/basic.test.js')
+
+    // after auto migration
+    cy.contains('cypress/e2e/basic.test.js')
+
+    runAutoRename()
+
+    cy.wait(100)
+    cy.withCtx((ctx) => {
+      ;['cypress/e2e/basic.test.js'
+      ].forEach(async (spec) => {
+        const stats = await ctx.actions.file.checkIfFileExists(ctx.path.join(spec))
+
+        expect(stats).to.not.be.null
+      })
+    })
+
+    renameSupport()
+    migrateAndVerifyConfig()
   })
 
   it('completes journey for migration-e2e-defaults', () => {
@@ -117,6 +274,37 @@ describe('Steps', () => {
     cy.get(renameSupportStep).should('exist')
     cy.get(setupComponentStep).should('not.exist')
     cy.get(configFileStep).should('exist')
+
+    // default testFiles but custom integration - can rename automatically
+    cy.get(renameAutoStep).should('exist')
+    // no CT
+    cy.get(renameManualStep).should('not.exist')
+    // supportFile is false - cannot migrate
+    cy.get(renameSupportStep).should('exist')
+    cy.get(setupComponentStep).should('not.exist')
+    cy.get(configFileStep).should('exist')
+
+    // Migration workflow
+    // before auto migration
+    cy.contains('cypress/integration/foo.spec.js')
+
+    // after auto migration
+    cy.contains('cypress/e2e/foo.cy.js')
+
+    runAutoRename()
+
+    cy.wait(100)
+    cy.withCtx((ctx) => {
+      ;['cypress/e2e/foo.cy.js'
+      ].forEach(async (spec) => {
+        const stats = await ctx.actions.file.checkIfFileExists(ctx.path.join(spec))
+
+        expect(stats).to.not.be.null
+      })
+    })
+
+    renameSupport()
+    migrateAndVerifyConfig()
   })
 
   it('completes journey for migration-e2e-defaults-no-specs', () => {
@@ -129,6 +317,9 @@ describe('Steps', () => {
     cy.get(renameSupportStep).should('exist')
     cy.get(setupComponentStep).should('not.exist')
     cy.get(configFileStep).should('exist')
+
+    renameSupport()
+    migrateAndVerifyConfig()
   })
 
   it('completes journey for migration-e2e-fully-custom', () => {
@@ -141,99 +332,9 @@ describe('Steps', () => {
     cy.get(renameSupportStep).should('not.exist')
     cy.get(setupComponentStep).should('not.exist')
     cy.get(configFileStep).should('exist')
+
+    migrateAndVerifyConfig()
   })
-
-  //   it('only all steps for kitchen sink migration project', () => {
-  //     cy.get(renameAutoStep).should('exist')
-  //     cy.get(renameManualStep).should('exist')
-  //     cy.get(renameSupportStep).should('exist')
-  //     cy.get(setupComponentStep).should('exist')
-  //     cy.get(configFileStep).should('exist')
-  //   })
-
-  //   // note: see the README.md inside each of these projects
-  //   // to understand why certain steps are shown.
-  //   // eg system-tests/migration-e2e-fully-custom/README.md
-  //   it('only shows update config file for highly customized project', () => {
-  //     cy.scaffoldProject('migration-e2e-fully-custom')
-  //     cy.openProject('migration-e2e-fully-custom')
-  //     cy.visitLaunchpad()
-  //     cy.waitForWizard()
-  //     cy.get(renameAutoStep).should('not.exist')
-  //     cy.get(renameManualStep).should('not.exist')
-  //     cy.get(renameSupportStep).should('not.exist')
-  //     cy.get(setupComponentStep).should('not.exist')
-  //     cy.get(configFileStep).should('exist')
-  //   })
-
-  //   it('shows auto and manual rename for component project with defaults', () => {
-  //     cy.scaffoldProject('migration-component-testing-defaults')
-  //     cy.openProject('migration-component-testing-defaults')
-  //     cy.visitLaunchpad()
-  //     cy.waitForWizard()
-  //     cy.get(renameAutoStep).should('exist')
-  //     cy.get(renameManualStep).should('exist')
-  //     cy.get(renameSupportStep).should('not.exist')
-  //     cy.get(setupComponentStep).should('exist')
-  //     cy.get(configFileStep).should('exist')
-  //   })
-
-  //   it('shows all e2e steps for an e2e project with all defaults', () => {
-  //     cy.scaffoldProject('migration-e2e-defaults')
-  //     cy.openProject('migration-e2e-defaults')
-  //     cy.visitLaunchpad()
-  //     cy.waitForWizard()
-  //     cy.get(renameAutoStep).should('exist')
-  //     cy.get(renameManualStep).should('not.exist')
-  //     cy.get(renameSupportStep).should('exist')
-  //     cy.get(configFileStep).should('exist')
-  //     cy.get(setupComponentStep).should('not.exist')
-  //   })
-
-  //   it('shows all e2e steps for an e2e project with custom testFiles', () => {
-  //     cy.scaffoldProject('migration-e2e-custom-test-files')
-  //     cy.openProject('migration-e2e-custom-test-files')
-  //     cy.visitLaunchpad()
-  //     cy.waitForWizard()
-  //     cy.get(renameAutoStep).should('exist')
-  //     cy.get(renameManualStep).should('not.exist')
-  //     cy.get(renameSupportStep).should('exist')
-  //     cy.get(configFileStep).should('exist')
-  //     cy.get(setupComponentStep).should('not.exist')
-  //   })
-
-  //   it('shows all e2e steps for an e2e project with custom testFiles', () => {
-  //     cy.scaffoldProject('migration-e2e-custom-test-files')
-  //     cy.openProject('migration-e2e-custom-test-files')
-  //     cy.visitLaunchpad()
-  //     cy.waitForWizard()
-  //     cy.get(renameAutoStep).should('exist')
-  //     cy.get(renameManualStep).should('not.exist')
-  //     cy.get(renameSupportStep).should('exist')
-  //     cy.get(configFileStep).should('exist')
-  //     cy.get(setupComponentStep).should('not.exist')
-  //   })
-
-  //   it('shows all component steps for a component testing project w/o e2e set up', () => {
-  //     cy.scaffoldProject('migration-component-testing-customized')
-  //     cy.openProject('migration-component-testing-customized')
-  //     cy.visitLaunchpad()
-  //     cy.waitForWizard()
-  //     // cannot rename specs automatically because this project
-  //     // uses a custom testFiles pattern.
-  //     cy.get(renameAutoStep).should('not.exist')
-
-  //     // you'll need to migrate manaully.
-  //     cy.get(renameManualStep).should('exist')
-
-  //     // supportFile: false in this project
-  //     cy.get(renameSupportStep).should('not.exist')
-  //     cy.get(configFileStep).should('exist')
-
-//     // we require re-configuring component testing,
-//     // even if you already had it set up.
-//     cy.get(setupComponentStep).should('exist')
-//   })
 })
 
 describe('component testing migration - defaults', () => {
