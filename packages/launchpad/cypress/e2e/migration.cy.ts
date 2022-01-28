@@ -414,17 +414,4 @@ describe('Migration', { viewportWidth: 1200 }, () => {
       expect(oldConfigStats).to.be.null
     })
   })
-
-  describe('Full flow', () => {
-    it('goes to each step', () => {
-      cy.visitLaunchpad()
-      cy.waitForWizard()
-      cy.findByText(defaultMessages.migration.wizard.step1.button).click()
-      cy.findByText(defaultMessages.migration.wizard.step2.button).click()
-      cy.findByText(defaultMessages.migration.wizard.step3.button).click()
-      cy.findByText(defaultMessages.migration.wizard.step4.button).click()
-      cy.findByText(defaultMessages.migration.wizard.step5.button).click()
-      cy.findByText('Welcome to Cypress!').should('be.visible')
-    })
-  })
 })
