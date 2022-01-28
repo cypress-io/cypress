@@ -21,7 +21,7 @@ const FileNameOpener = observer((props: Props) => {
   const { displayFile, originalFile, line, column } = props.fileDetails
 
   return (
-    <Tooltip title={'Open in IDE'} className='cy-tooltip' wrapperClassName={props.className}>
+    <Tooltip title={'Open in IDE'} wrapperClassName={props.className} className='cy-tooltip'>
       <span>
         <OpenFileInIDE fileDetails={props.fileDetails} >
           <a href="#" onClick={(e) => e.preventDefault()}>
