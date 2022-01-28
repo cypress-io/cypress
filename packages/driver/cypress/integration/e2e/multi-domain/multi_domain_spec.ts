@@ -298,7 +298,7 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
       }).should('equal', 'From a secondary domain')
     })
 
-    it('yields synchronously ', () => {
+    it('yields synchronously', () => {
       cy.switchToDomain('foobar.com', () => {
         return 'From a secondary domain'
       }).should('equal', 'From a secondary domain')
