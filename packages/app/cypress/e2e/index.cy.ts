@@ -141,18 +141,21 @@ describe('App: Index', () => {
             cy.get('[data-cy="card"]').contains(defaultMessages.createSpec.e2e.importEmptySpec.header).click()
           })
 
-          cy.get('input').invoke('val').should('eq', 'cypress/e2e/filename.cy.js')
+          cy.findAllByLabelText(defaultMessages.createSpec.e2e.importEmptySpec.inputPlaceholder)
+          .as('enterSpecInput')
+
+          cy.get('@enterSpecInput').invoke('val').should('eq', 'cypress/e2e/filename.cy.js')
           cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.invalidSpecWarning).should('not.exist')
-          cy.get('input').clear()
+          cy.get('@enterSpecInput').clear()
           cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.invalidSpecWarning).should('not.exist')
 
           // Shows entered file does not match spec pattern
-          cy.get('input').type('cypress/e2e/no-match')
+          cy.get('@enterSpecInput').type('cypress/e2e/no-match')
           cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.invalidSpecWarning)
           cy.contains('button', defaultMessages.createSpec.createSpec).should('be.disabled')
 
           //Shows extension warning
-          cy.get('input').clear().type('cypress/e2e/MyTest.spec.j')
+          cy.get('@enterSpecInput').clear().type('cypress/e2e/MyTest.spec.j')
           cy.intercept('mutation-EmptyGenerator_MatchSpecFile', (req) => {
             if (req.body.variables.specFile === 'cypress/e2e/MyTest.spec.jx') {
               req.on('before:response', (res) => {
@@ -161,12 +164,12 @@ describe('App: Index', () => {
             }
           })
 
-          cy.get('input').type('x')
+          cy.get('@enterSpecInput').type('x')
           cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.specExtensionWarning)
           cy.contains('span', '{filename}.cy.jx')
 
           // Create spec
-          cy.get('input').clear().type('cypress/e2e/MyTest.cy.js')
+          cy.get('@enterSpecInput').clear().type('cypress/e2e/MyTest.cy.js')
           cy.contains('button', defaultMessages.createSpec.createSpec).should('not.be.disabled').click()
           cy.contains('h2', defaultMessages.createSpec.successPage.header)
 
@@ -250,6 +253,27 @@ describe('App: Index', () => {
           cy.findAllByTestId('card').eq(1)
           .should('have.attr', 'tabindex', '0')
           .and('contain', defaultMessages.createSpec.e2e.importEmptySpec.header)
+        })
+      })
+    })
+
+    context('pristine app', () => {
+      beforeEach(() => {
+        cy.scaffoldProject('pristine-with-e2e-testing')
+        cy.openProject('pristine-with-e2e-testing')
+        cy.startAppServer('e2e')
+        cy.visitApp()
+      })
+
+      context('scaffold example files', () => {
+        it('should create example files on an empty project', () => {
+          cy.contains('[data-cy="card"]', defaultMessages.createSpec.e2e.importFromScaffold.header).click()
+          // TODO: Check that the popup stays open
+          cy.withCtx(async (ctx) => {
+            const stats = await ctx.actions.file.checkIfFileExists('cypress/e2e/1-getting-started/todo.cy.js')
+
+            expect(stats?.isFile()).to.be.true
+          })
         })
       })
     })
