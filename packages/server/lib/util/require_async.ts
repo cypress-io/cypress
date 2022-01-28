@@ -3,7 +3,7 @@ import * as path from 'path'
 import * as cp from 'child_process'
 import * as inspector from 'inspector'
 import * as util from '../plugins/util'
-import * as errors from '../errors'
+import errors from '../errors'
 import Debug from 'debug'
 
 const debug = Debug('cypress:server:require_async')

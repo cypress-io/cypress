@@ -535,7 +535,7 @@ export const setPluginsFile = Promise.method((obj, defaults) => {
     })
     .then((result) => {
       if (result === null) {
-        return errors.throw('PLUGINS_FILE_ERROR', path.resolve(obj.projectRoot, pluginsFile))
+        return errors.throw('PLUGINS_FILE_ERROR', path.resolve(obj.projectRoot, pluginsFile), new Error().stack ?? '')
       }
 
       debug('setting plugins file to %o', { result })

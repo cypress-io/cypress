@@ -126,7 +126,7 @@ export const checkSupportFile = async ({
     const found = await fs.pathExists(supportFile)
 
     if (!found) {
-      errors.throw('SUPPORT_FILE_NOT_FOUND', supportFile, settings.configFile({ configFile }))
+      errors.throw('SUPPORT_FILE_NOT_FOUND', supportFile, settings.configFile({ configFile }) || '')
     }
   }
 
@@ -145,7 +145,7 @@ export async function getDefaultConfigFilePath (projectRoot: string, returnDefau
 
   // if we found more than one, throw a language conflict
   if (foundConfigFiles.length > 1) {
-    throw errors.throw('CONFIG_FILES_LANGUAGE_CONFLICT', projectRoot, ...foundConfigFiles)
+    throw errors.throw('CONFIG_FILES_LANGUAGE_CONFLICT', projectRoot, foundConfigFiles[0], foundConfigFiles[1])
   }
 
   if (returnDefaultValueIfNotFound) {

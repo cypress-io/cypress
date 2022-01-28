@@ -849,7 +849,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       return readSettings.projectId
     }
 
-    errors.throw('NO_PROJECT_ID', settings.configFile(this.options), this.projectRoot)
+    errors.throw('NO_PROJECT_ID', settings.configFile(this.options) || '', this.projectRoot)
   }
 
   async verifyExistence () {

@@ -1,9 +1,11 @@
 import _ from 'lodash'
 import type { FoundBrowser } from '@packages/launcher'
-// @ts-ignore
+
 import errors from '../errors'
 // @ts-ignore
 import plugins from '../plugins'
+
+const errorsChild = require('../errors-child')
 
 const path = require('path')
 const debug = require('debug')('cypress:server:browsers:utils')
@@ -138,7 +140,7 @@ function extendLaunchOptionsFromPlugins (launchOptions, pluginConfigResult, opti
   // interface and we need to warn them
   // TODO: remove this logic in >= v5.0.0
   if (pluginConfigResult[0]) {
-    options.onWarning(errors.get(
+    options.onWarning(errorsChild.get(
       'DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS',
     ))
 
