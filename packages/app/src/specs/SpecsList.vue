@@ -7,8 +7,8 @@
       @showCreateSpecModal="emit('showCreateSpecModal')"
     />
 
-    <template
-      v-if="specs.length"
+    <div
+      v-show="specs.length"
     >
       <div
         class="grid grid-cols-2 children:font-medium children:text-gray-800"
@@ -40,7 +40,10 @@
               <RouterLink
                 v-if="row.data.isLeaf && row.data"
                 :key="row.data.data?.absolute"
+                class="focus:outline-transparent"
                 :to="{ path: '/specs/runner', query: { file: row.data.data?.relative } }"
+                @click.meta.prevent="handleCtrlClick"
+                @click.ctrl.prevent="handleCtrlClick"
               >
                 <SpecItem
                   :file-name="row.data.data?.fileName || row.data.name"
@@ -70,9 +73,9 @@
           </SpecsListRowItem>
         </div>
       </div>
-    </template>
+    </div>
     <NoResults
-      v-else
+      v-show="!specs.length"
       :search="search"
       :message="t('specPage.noResultsMessage')"
       class="mt-56px"
@@ -163,6 +166,11 @@ const { containerProps, list, wrapperProps, scrollTo } = useVirtualList(treeSpec
 // If you are scrolled down the virtual list and list changes,
 // reset scroll position to top of list
 watch(() => treeSpecList.value, () => scrollTo(0))
+
+function handleCtrlClick () {
+  // noop intended to reduce the chances of opening tests multiple tabs
+  // which is not a supported state in Cypress
+}
 </script>
 
 <style scoped>
