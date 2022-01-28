@@ -34,6 +34,7 @@
         >
           <SpecsListRowItem
             v-for="row in list"
+            :id="getIdIfDirectory(row)"
             :key="row.index"
           >
             <template #file>
@@ -60,6 +61,7 @@
                 :depth="row.data.depth - 2"
                 :style="{ paddingLeft: `${((row.data.depth - 2) * 10) + 16}px` }"
                 :indexes="getDirIndexes(row.data)"
+                :aria-controls="getIdIfDirectory(row)"
                 @click="row.data.toggle"
               />
             </template>
@@ -170,6 +172,14 @@ watch(() => treeSpecList.value, () => scrollTo(0))
 function handleCtrlClick () {
   // noop intended to reduce the chances of opening tests multiple tabs
   // which is not a supported state in Cypress
+}
+
+function getIdIfDirectory (row) {
+  if (row.data.isLeaf && row.data) {
+    return null
+  }
+
+  return row.data.data.relative.replace(row.data.data.baseName, '')
 }
 </script>
 
