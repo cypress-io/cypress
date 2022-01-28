@@ -7,6 +7,7 @@ import {
   getIntegrationTestFiles,
   isDefaultTestFiles,
 } from '.'
+import { regexps } from './regexps'
 import type { MigrationFile } from '../MigrationDataSource'
 import path from 'path'
 import type { TestingType } from '@packages/types'
@@ -22,23 +23,6 @@ interface GetSpecs {
   component: MigrationSpec[]
   integration: MigrationSpec[]
 }
-
-const specExtRe = '[._-]?[s|S]pec.|[.])(?=[j|t]s[x]?'
-
-export const regexps = {
-  e2e: {
-    before: {
-      defaultFolderDefaultTestFiles: `cypress\/(?<main>integration)\/.*?(?<ext>${specExtRe})`,
-      defaultFolderCustomTestFiles: /cypress\/(?<main>integration)\/.*/,
-      customFolderDefaultTestFiles: `.*?(?<ext>${specExtRe})`,
-    },
-  },
-  component: {
-    before: {
-      defaultFolderDefaultTestFiles: `cypress\/component\/.*?(?<ext>${specExtRe})`,
-    },
-  },
-} as const
 
 function substitute (part: FilePart): FilePart {
   if (part.group === 'folder' && part.text === 'integration') {

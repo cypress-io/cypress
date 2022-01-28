@@ -474,11 +474,6 @@ type FileParts implements Node {
   relative: String!
 }
 
-type FilesForMigrationUI {
-  after: [MigrationFile!]!
-  before: [MigrationFile!]!
-}
-
 enum FrontendFrameworkCategoryEnum {
   react
   vue
@@ -601,7 +596,7 @@ type Migration {
   specFiles: [MigrationFile!]!
 
   """Support files needing automated rename"""
-  supportFiles: [MigrationFile!]
+  supportFiles: MigrationFile
 }
 
 type MigrationFile {

@@ -61,19 +61,6 @@ export const MigrationFilePart = objectType({
   },
 })
 
-export const FilesForMigrationUI = objectType({
-  name: 'FilesForMigrationUI',
-  definition (t) {
-    t.nonNull.list.nonNull.field('before', {
-      type: MigrationFile,
-    })
-
-    t.nonNull.list.nonNull.field('after', {
-      type: MigrationFile,
-    })
-  },
-})
-
 export const ManualMigrationFile = objectType({
   name: 'ManualMigrationFile',
   node: 'relative',
@@ -199,7 +186,7 @@ export const Migration = objectType({
       },
     })
 
-    t.list.nonNull.field('supportFiles', {
+    t.field('supportFiles', {
       description: 'Support files needing automated rename',
       type: MigrationFile,
       resolve: (source, args, ctx) => {
