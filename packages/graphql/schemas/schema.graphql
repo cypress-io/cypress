@@ -489,6 +489,23 @@ enum FrontendFrameworkEnum {
   vuecli
 }
 
+"""Error from generated spec"""
+type GenerateSpecResponse {
+  """The currently opened project"""
+  currentProject: CurrentProject
+
+  """The file that have just been scaffolded or the fileName that errored"""
+  generatedSpecResult: GeneratedSpecResult
+}
+
+"""Error from generated spec"""
+type GeneratedSpecError {
+  erroredCodegenCandidate: String!
+  fileName: String!
+}
+
+union GeneratedSpecResult = GeneratedSpecError | ScaffoldedFile
+
 """Git information about a spec file"""
 type GitInfo {
   """Last person to change the file in git"""
@@ -697,7 +714,7 @@ type Mutation {
   focusActiveBrowserWindow: Boolean!
 
   """Generate spec from source"""
-  generateSpecFromSource(codeGenCandidate: String!, type: CodeGenType!): ScaffoldedFile
+  generateSpecFromSource(codeGenCandidate: String!, erroredCodegenCandidate: String, type: CodeGenType!): GenerateSpecResponse
 
   """Hides the launchpad windows"""
   hideBrowserWindow: Boolean!
