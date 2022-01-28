@@ -1,10 +1,3 @@
-/**
- * Sets up a Cypress component testing environment for your NextJs application
- * @param on comes from the argument of the `pluginsFile` function
- * @param config comes from the argument of the `pluginsFile` function
- */
-declare function legacyDevServer(on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions): void
-
 declare namespace legacyDevServer {
   interface CypressNextDevServerConfig {
     /**
