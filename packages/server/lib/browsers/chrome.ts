@@ -443,14 +443,21 @@ export = {
     return args
   },
 
-  async connectToExisting (browser: Browser, options: CypressConfiguration = {}, automation) {
-    const port = await protocol.getRemoteDebuggingPort()
+  async connectToNewSpec (browser: Browser, options: CypressConfiguration = {}, automation) {
+    const port = browser.debuggingPort
     const criClient = await this._connectToChromeRemoteInterface(port, options, browser.displayName, options.url)
 
     this._setAutomation(criClient, automation)
 
     await this._maybeRecordVideo(criClient, options, browser.majorVersion)
     await this._handleDownloads(criClient, options.downloadsFolder, automation)
+  },
+
+  async connectToExisting (browser: Browser, options: CypressConfiguration = {}, automation) {
+    const port = await protocol.getRemoteDebuggingPort()
+    const criClient = await this._connectToChromeRemoteInterface(port, options, browser.displayName, options.url)
+
+    this._setAutomation(criClient, automation)
   },
 
   async open (browser: Browser, url, options: CypressConfiguration = {}, automation, shouldLaunchBrowser) {

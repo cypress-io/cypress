@@ -322,14 +322,18 @@ export class CdpAutomation {
         .then(({ data }) => {
           return `data:image/png;base64,${data}`
         })
+      case 'reset:browser:state':
+        return this.sendDebuggerCommandFn('Storage.clearDataForOrigin', { origin: '*', storageTypes: 'all' }).then(() => {
+          return this.sendDebuggerCommandFn('Network.clearBrowserCache')
+        })
       case 'close:browser:tab':
         return this.sendDebuggerCommandFn('Target.getTargets').then((targets) => {
-          return this.sendDebuggerCommandFn('Target.closeTarget', { targetId: targets.targetInfos.find((target) => target.attached).targetId })
+          const targetIdToClose = targets.targetInfos.find((target) => target.url !== data.urlToExclude && target.type === 'page').targetId
+
+          return this.sendDebuggerCommandFn('Target.closeTarget', { targetId: targetIdToClose })
         })
       case 'start:browser:tab':
-        return this.sendDebuggerCommandFn('Target.createTarget', data).then((target) => {
-          return this.sendDebuggerCommandFn('Target.attachToTarget', target)
-        })
+        return this.sendDebuggerCommandFn('Target.createTarget', data)
       default:
         throw new Error(`No automation handler registered for: '${message}'`)
     }

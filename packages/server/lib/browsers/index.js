@@ -92,7 +92,7 @@ module.exports = {
     return utils.getBrowsers()
   },
 
-  connectToExisting (browser, options = {}, automation) {
+  async connectToExisting (browser, options = {}, automation) {
     const browserLauncher = getBrowserLauncher(browser)
 
     if (!browserLauncher) {
@@ -100,6 +100,16 @@ module.exports = {
     }
 
     return browserLauncher.connectToExisting(browser, options, automation)
+  },
+
+  async connectToNewSpec (browser, options = {}, automation) {
+    const browserLauncher = getBrowserLauncher(browser)
+
+    if (!browserLauncher) {
+      utils.throwBrowserNotFound(browser.name, options.browsers)
+    }
+
+    return browserLauncher.connectToNewSpec(browser, options, automation)
   },
 
   open (browser, options = {}, automation, ctx) {

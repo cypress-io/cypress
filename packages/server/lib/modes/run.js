@@ -1271,7 +1271,7 @@ module.exports = {
         .catch(warnVideoRecordingFailed)
       }
 
-      await openProject.closeBrowserTab()
+      await openProject.resetBrowserState()
       openProject.projectBase.server.reset()
 
       return results

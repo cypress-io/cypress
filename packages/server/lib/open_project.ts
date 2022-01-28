@@ -55,9 +55,8 @@ export class OpenProject {
     })
 
     await this.startNewBrowserTabWithUrl(newSpecUrl)
-    await browsers.connectToExisting(this.projectBase.browser, { downloadsFolder: this.projectBase.getConfig().downloadsFolder, url: newSpecUrl, ...options }, this.projectBase.automation)
-
-    // this.projectBase.changeToUrl(newSpecUrl)
+    await browsers.connectToNewSpec(this.projectBase.browser, { downloadsFolder: this.projectBase.getConfig().downloadsFolder, url: newSpecUrl, ...options }, this.projectBase.automation)
+    await this.closeBrowserTab(newSpecUrl)
   }
 
   async launch (browser, spec: Cypress.Cypress['spec'], options: LaunchOpts = {
@@ -197,8 +196,12 @@ export class OpenProject {
     return browsers.close()
   }
 
-  async closeBrowserTab () {
-    return this.projectBase?.closeBrowserTab()
+  async closeBrowserTab (urlToExclude) {
+    return this.projectBase?.closeBrowserTab(urlToExclude)
+  }
+
+  async resetBrowserState () {
+    return this.projectBase?.resetBrowserState()
   }
 
   async startNewBrowserTabWithUrl (url) {

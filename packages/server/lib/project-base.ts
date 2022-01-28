@@ -474,8 +474,12 @@ export class ProjectBase<TServer extends Server> extends EE {
     this.server.changeToUrl(url)
   }
 
-  async closeBrowserTab () {
-    this.automation.request('close:browser:tab', {}, () => {})
+  async closeBrowserTab (urlToExclude) {
+    await this.automation.request('close:browser:tab', { urlToExclude }, () => {})
+  }
+
+  async resetBrowserState () {
+    await this.automation.request('reset:browser:state', {}, () => {})
   }
 
   async startNewBrowserTabWithUrl (url) {
