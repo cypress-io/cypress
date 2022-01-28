@@ -86,4 +86,28 @@ describe('<OpenBrowserList />', () => {
 
     cy.percySnapshot()
   })
+
+  it('hides focus button when unsupported', () => {
+    cy.mountFragment(OpenBrowserListFragmentDoc, {
+      onResult: (result) => {
+        result.currentBrowser = longBrowsersList.find((browser) => !browser.isFocusSupported) || null
+      },
+      render: (gqlVal) => (
+        <div class="border-current border-1 resize overflow-auto">
+          <OpenBrowserList
+            gql={gqlVal}
+            isBrowserOpen={true}
+            isBrowserOpening={false}
+            onClose-browser={cy.stub().as('closeBrowser')}/>
+        </div>),
+    })
+
+    cy.get('[data-cy-browser]').each((browser) => cy.wrap(browser).should('have.attr', 'aria-disabled', 'true'))
+    cy.contains('button', defaultMessages.openBrowser.running.replace('{browser}', 'Electron')).should('be.disabled')
+    cy.contains('button', defaultMessages.openBrowser.focus).should('not.exist')
+    cy.contains('button', defaultMessages.openBrowser.close).click()
+    cy.get('@closeBrowser').should('have.been.called')
+
+    cy.percySnapshot()
+  })
 })

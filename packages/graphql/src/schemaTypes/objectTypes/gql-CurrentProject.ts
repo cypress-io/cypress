@@ -94,6 +94,13 @@ export const CurrentProject = objectType({
       },
     })
 
+    t.boolean('hasValidConfigFile', {
+      description: 'Whether the project has a valid config file',
+      resolve (source, args, ctx) {
+        return ctx.lifecycleManager.metaState.hasValidConfigFile
+      },
+    })
+
     // t.list.field('testingTypes', {
     //   type: TestingTypeInfo,
     // })

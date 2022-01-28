@@ -38,6 +38,7 @@ describe('<SelectCloudProjectModal />', () => {
   it('prefills new project name with the current one', () => {
     mountDialog()
     cy.contains('a', defaultMessages.runs.connect.modal.selectProject.createNewProject).click()
-    cy.get('#projectName').should('have.value', 'Test Project')
+    cy.findByLabelText(`${defaultMessages.runs.connect.modal.selectProject.projectName }*${defaultMessages.runs.connect.modal.selectProject.projectNameDisclaimer}`)
+    .should('have.value', 'Test Project')
   })
 })

@@ -74,6 +74,8 @@ const retry = (fn: (res: any) => void) => {
 }
 
 export class SocketBase {
+  private _sendFocusBrowserMessage
+
   protected ended: boolean
   protected _io?: socketIo.SocketIOServer
 
@@ -272,6 +274,10 @@ export class SocketBase {
           return cb({ error: errors.clone(err) })
         })
       })
+
+      this._sendFocusBrowserMessage = async () => {
+        await automationRequest('focus:browser:window', {})
+      }
 
       socket.on('reporter:connected', () => {
         if (socket.inReporterRoom) {
@@ -536,6 +542,10 @@ export class SocketBase {
 
   changeToUrl (url) {
     return this.toRunner('change:to:url', url)
+  }
+
+  async sendFocusBrowserMessage () {
+    await this._sendFocusBrowserMessage()
   }
 
   close () {

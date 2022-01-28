@@ -17,7 +17,7 @@ export const urqlCacheKeys: Partial<CacheExchangeOpts> = {
     CloudRunCommitInfo: () => null,
     GitInfo: () => null,
     MigrationFilePart: () => null,
-    RenameSupport: () => null,
+    MigrationFiles: () => null,
     BaseError: () => null,
     ProjectPreferences: (data) => data.__typename,
     VersionData: () => null,
@@ -26,5 +26,7 @@ export const urqlCacheKeys: Partial<CacheExchangeOpts> = {
     LocalSettingsPreferences: () => null,
     CloudProjectNotFound: (data) => data.__typename,
     CloudProjectUnauthorized: (data) => data.__typename,
+    GeneratedSpecError: () => null,
+    GenerateSpecResponse: (data) => data.__typename,
   },
 }

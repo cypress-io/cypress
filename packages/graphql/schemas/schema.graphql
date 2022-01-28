@@ -18,6 +18,7 @@ type Browser implements Node {
 
   """Relay style Node ID field for the Browser field"""
   id: ID!
+  isFocusSupported: Boolean!
   isSelected: Boolean!
   majorVersion: String
   name: String!
@@ -358,6 +359,9 @@ type CurrentProject implements Node & ProjectLike {
   """
   errorLoadingNodeEvents: BaseError
 
+  """Whether the project has a valid config file"""
+  hasValidConfigFile: Boolean
+
   """Relay style Node ID field for the CurrentProject field"""
   id: ID!
 
@@ -485,6 +489,23 @@ enum FrontendFrameworkEnum {
   vuecli
 }
 
+"""Error from generated spec"""
+type GenerateSpecResponse {
+  """The currently opened project"""
+  currentProject: CurrentProject
+
+  """The file that have just been scaffolded or the fileName that errored"""
+  generatedSpecResult: GeneratedSpecResult
+}
+
+"""Error from generated spec"""
+type GeneratedSpecError {
+  erroredCodegenCandidate: String!
+  fileName: String!
+}
+
+union GeneratedSpecResult = GeneratedSpecError | ScaffoldedFile
+
 """Git information about a spec file"""
 type GitInfo {
   """Last person to change the file in git"""
@@ -532,15 +553,21 @@ type LocalSettingsPreferences {
   specListWidth: Int
 }
 
-type ManualMigration {
+type ManualMigration implements Node {
   """is the manual migration completed (all files are moved)"""
   completed: Boolean!
 
   """files needing manual migration"""
   files: [ManualMigrationFile!]!
+
+  """Relay style Node ID field for the ManualMigration field"""
+  id: ID!
 }
 
-type ManualMigrationFile {
+type ManualMigrationFile implements Node {
+  """Relay style Node ID field for the ManualMigrationFile field"""
+  id: ID!
+
   """has the file been moved since opening the migration helper"""
   moved: Boolean!
 
@@ -562,6 +589,21 @@ type Migration {
   """Steps filtered with the current context"""
   filteredSteps: [MigrationStep!]!
 
+  """whether component testing is set up in the migrated config or not"""
+  hasComponentTesting: Boolean!
+
+  """whether the component folder is custom or not"""
+  hasCustomComponentFolder: Boolean!
+
+  """whether the testFiles member is custom or not in component testing"""
+  hasCustomComponentTestFiles: Boolean!
+
+  """whether the integration folder is custom or not"""
+  hasCustomIntegrationFolder: Boolean!
+
+  """whether the testFiles member is custom or not in integration"""
+  hasCustomIntegrationTestFiles: Boolean!
+
   """the integration folder path used to store e2e tests"""
   integrationFolder: String!
 
@@ -569,28 +611,37 @@ type Migration {
   manualFiles: ManualMigration
 
   """All spec files after conversion"""
-  specFiles: MigrationFiles!
+  specFiles: [MigrationFile!]!
 
   """Support files needing automated rename"""
-  supportFiles: MigrationFiles!
+  supportFiles: MigrationFile
 }
 
 type MigrationFile {
-  parts: [MigrationFilePart!]!
+  after: MigrationFileData!
+  before: MigrationFileData!
   testingType: TestingTypeEnum!
 }
 
-type MigrationFilePart {
+type MigrationFileData implements Node {
+  """Relay style Node ID field for the MigrationFileData field"""
+  id: ID!
+  parts: [MigrationFilePart!]!
+  relative: String!
+}
+
+type MigrationFilePart implements Node {
+  """is this part a folder or extension that needs migration"""
+  group: String
+
   """should highlight in migration UI"""
   highlight: Boolean!
 
+  """Relay style Node ID field for the MigrationFilePart field"""
+  id: ID!
+
   """part of filename"""
   text: String!
-}
-
-type MigrationFiles {
-  after: [MigrationFile!]!
-  before: [MigrationFile!]!
 }
 
 type MigrationRegexp {
@@ -663,8 +714,11 @@ type Mutation {
   """user has finished migration component specs - move to next step"""
   finishedRenamingComponentSpecs: Query
 
+  """Sets focus to the active browser window"""
+  focusActiveBrowserWindow: Boolean!
+
   """Generate spec from source"""
-  generateSpecFromSource(codeGenCandidate: String!, type: CodeGenType!): ScaffoldedFile
+  generateSpecFromSource(codeGenCandidate: String!, erroredCodegenCandidate: String, type: CodeGenType!): GenerateSpecResponse
 
   """Hides the launchpad windows"""
   hideBrowserWindow: Boolean!
@@ -697,7 +751,14 @@ type Mutation {
   migrateConfigFile: Query
 
   """While migrating to 10+ renames files to match the new .cy pattern"""
-  migrateRenameSpecs(skip: Boolean): Query
+  migrateRenameSpecs(
+    """specs to move - current name"""
+    after: [String!]
+
+    """specs to move - current name"""
+    before: [String!]
+    skip: Boolean
+  ): Query
 
   """While migrating to 10+ launch renaming of support file"""
   migrateRenameSupport: Query

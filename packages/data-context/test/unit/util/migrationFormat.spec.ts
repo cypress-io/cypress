@@ -1,37 +1,25 @@
 import { expect } from 'chai'
 import {
   formatMigrationFile,
-  regexps,
   supportFileRegexps,
 } from '../../../src/util/migrationFormat'
+import { regexps } from '../../../src/sources/migration/regexps'
 
 describe('formatMigrationFile', () => {
-  it('breaks pre-migration spec into parts', () => {
-    const spec = 'cypress/integration/app.spec.js'
-    const re = new RegExp(regexps.e2e.beforeRegexp)
-    const actual = formatMigrationFile(spec, re)
+  describe('e2e - defaultFolderDefaultTestFiles', () => {
+    it('breaks pre-migration spec into parts', () => {
+      const spec = 'cypress/integration/app.spec.js'
+      const re = new RegExp(regexps.e2e.before.defaultFolderDefaultTestFiles)
+      const actual = formatMigrationFile(spec, re)
 
-    expect(actual).to.eql([
-      { text: 'cypress/', highlight: false },
-      { text: 'integration', highlight: true },
-      { text: '/app', highlight: false },
-      { text: '.spec.', highlight: true },
-      { text: 'js', highlight: false },
-    ])
-  })
-
-  it('breaks post-migration spec into parts', () => {
-    const spec = 'cypress/e2e/app.cy.js'
-    const re = new RegExp(regexps.e2e.afterRegexp)
-    const actual = formatMigrationFile(spec, re)
-
-    expect(actual).to.eql([
-      { text: 'cypress/', highlight: false },
-      { text: 'e2e', highlight: true },
-      { text: '/app', highlight: false },
-      { text: '.cy.', highlight: true },
-      { text: 'js', highlight: false },
-    ])
+      expect(actual).to.eql([
+        { text: 'cypress/', highlight: false },
+        { text: 'integration', highlight: true, group: 'folder' },
+        { text: '/app', highlight: false },
+        { text: '.spec.', highlight: true, group: 'extension' },
+        { text: 'js', highlight: false },
+      ])
+    })
   })
 
   ;['js', 'ts'].forEach((ext) => {
@@ -42,7 +30,7 @@ describe('formatMigrationFile', () => {
 
       expect(actual).to.eql([
         { text: 'cypress/support/', highlight: false },
-        { text: 'index', highlight: true },
+        { text: 'index', highlight: true, group: 'name' },
         { text: `.${ext}`, highlight: false },
       ])
     })
@@ -54,7 +42,7 @@ describe('formatMigrationFile', () => {
 
       expect(actual).to.eql([
         { text: 'cypress/support/', highlight: false },
-        { text: 'e2e', highlight: true },
+        { text: 'e2e', highlight: true, group: 'name' },
         { text: `.${ext}`, highlight: false },
       ])
     })

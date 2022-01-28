@@ -4,8 +4,10 @@ import type { DataContext } from '..'
 import {
   moveSpecFiles,
   NonStandardMigrationError,
+  SpecToMove,
   supportFilesForMigration,
 } from '../util'
+import type { TestingType } from '@packages/types'
 
 export class MigrationActions {
   constructor (private ctx: DataContext) { }
@@ -26,14 +28,27 @@ export class MigrationActions {
     return this.ctx.migration.initialize()
   }
 
-  async renameSpecFiles () {
+  async renameSpecFiles (beforeSpecs: string[], afterSpecs: string[]) {
     if (!this.ctx.currentProject) {
       throw Error('Need to set currentProject before you can rename files')
     }
 
-    const e2eDirPath = this.ctx.path.join(this.ctx.currentProject, 'cypress', 'integration')
+    const specsToMove: SpecToMove[] = []
 
-    moveSpecFiles(e2eDirPath)
+    for (let i = 0; i < beforeSpecs.length; i++) {
+      const from = beforeSpecs[i]
+      const to = afterSpecs[i]
+
+      if (!from || !to) {
+        throw Error(`Must have matching to and from. Got from: ${from} and to: ${to}`)
+      }
+
+      specsToMove.push({ from, to })
+    }
+
+    const projectRoot = this.ctx.path.join(this.ctx.currentProject)
+
+    moveSpecFiles(projectRoot, specsToMove)
   }
 
   async renameSupportFile () {
@@ -43,8 +58,8 @@ export class MigrationActions {
 
     const result = await supportFilesForMigration(this.ctx.currentProject)
 
-    const beforeRelative = result.before[0]?.relative
-    const afterRelative = result.after[0]?.relative
+    const beforeRelative = result.before.relative
+    const afterRelative = result.after.relative
 
     if (!beforeRelative || !afterRelative) {
       throw new NonStandardMigrationError('support')
@@ -56,13 +71,32 @@ export class MigrationActions {
     )
   }
 
-  async startWizardReconfiguration () {
+  async startWizardReconfiguration (type?: TestingType) {
     this.ctx.lifecycleManager.initializeConfigWatchers()
     this.ctx.lifecycleManager.refreshMetaState()
-    this.ctx.lifecycleManager.setCurrentTestingType('component')
+    if (type) {
+      this.ctx.lifecycleManager.setCurrentTestingType(type)
+    }
   }
 
-  nextStep () {
-    this.ctx.migration.nextStep()
+  async nextStep () {
+    const filteredSteps = this.ctx.migration.filteredSteps
+    const index = filteredSteps.indexOf(this.ctx.migration.step)
+
+    if (index === -1) {
+      throw new Error('Invalid step')
+    }
+
+    const nextIndex = index + 1
+
+    if (nextIndex < filteredSteps.length) {
+      const nextStep = filteredSteps[nextIndex]
+
+      if (nextStep) {
+        this.ctx.migration.setStep(nextStep)
+      }
+    } else {
+      await this.startWizardReconfiguration()
+    }
   }
 }
