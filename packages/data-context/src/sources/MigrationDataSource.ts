@@ -6,7 +6,6 @@ import {
   createConfigString,
   initComponentTestingMigration,
   ComponentTestingMigrationStatus,
-  getDefaultLegacySupportFile,
   supportFilesForMigration,
   OldCypressConfig,
   hasComponentSpecFile,
@@ -77,14 +76,6 @@ export class MigrationDataSource {
     this.setStep(this.filteredSteps[0])
   }
 
-  async getDefaultLegacySupportFile (): Promise<string> {
-    if (!this.ctx.currentProject) {
-      throw Error(`Need this.ctx.projectRoot!`)
-    }
-
-    return getDefaultLegacySupportFile(this.ctx.currentProject)
-  }
-
   async getComponentTestingMigrationStatus () {
     const config = await this.parseCypressConfig()
     const componentFolder = getComponentFolder(config)
@@ -124,7 +115,7 @@ export class MigrationDataSource {
     }
 
     if (!this.componentTestingMigrationStatus) {
-      throw Error(`Status should have been assigned by the watcher. Somethign is wrong`)
+      throw Error(`Status should have been assigned by the watcher. Something is wrong`)
     }
 
     return this.componentTestingMigrationStatus
@@ -141,7 +132,13 @@ export class MigrationDataSource {
       throw Error(`Need this.ctx.projectRoot!`)
     }
 
-    return supportFilesForMigration(this.ctx.currentProject)
+    try {
+      const supportFiles = await supportFilesForMigration(this.ctx.currentProject)
+
+      return supportFiles
+    } catch {
+      return null
+    }
   }
 
   async getSpecsForMigrationGuide (): Promise<MigrationFile[]> {

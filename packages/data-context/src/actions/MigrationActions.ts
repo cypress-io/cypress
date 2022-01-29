@@ -1,5 +1,4 @@
 import path from 'path'
-import fs from 'fs-extra'
 import type { DataContext } from '..'
 import {
   moveSpecFiles,
@@ -7,7 +6,6 @@ import {
   SpecToMove,
   supportFilesForMigration,
 } from '../util'
-import type { TestingType } from '@packages/types'
 
 export class MigrationActions {
   constructor (private ctx: DataContext) { }
@@ -65,18 +63,16 @@ export class MigrationActions {
       throw new NonStandardMigrationError('support')
     }
 
-    fs.renameSync(
+    this.ctx.fs.renameSync(
       path.join(this.ctx.currentProject, beforeRelative),
       path.join(this.ctx.currentProject, afterRelative),
     )
   }
 
-  async startWizardReconfiguration (type?: TestingType) {
+  async finishReconfigurationWizard () {
     this.ctx.lifecycleManager.initializeConfigWatchers()
     this.ctx.lifecycleManager.refreshMetaState()
-    if (type) {
-      this.ctx.lifecycleManager.setCurrentTestingType(type)
-    }
+    await this.ctx.lifecycleManager.reloadConfig()
   }
 
   async nextStep () {
@@ -96,7 +92,7 @@ export class MigrationActions {
         this.ctx.migration.setStep(nextStep)
       }
     } else {
-      await this.startWizardReconfiguration()
+      await this.finishReconfigurationWizard()
     }
   }
 }
