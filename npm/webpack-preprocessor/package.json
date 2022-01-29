@@ -83,5 +83,8 @@
     "cypress-plugin",
     "cypress-preprocessor",
     "webpack"
-  ]
+  ],
+  "resolutions": {
+    "shell-quote": "1.7.3"
+  }
 }

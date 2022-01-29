@@ -15,7 +15,7 @@
   "devDependencies": {
     "@cypress/react": "file:../../dist",
     "@mdx-js/loader": "^1.6.16",
-    "@next/mdx": "10.1.2",
+    "@next/mdx": "10.2.3",
     "@zeit/next-sass": "^1.0.1",
     "check-code-coverage": "1.9.2",
     "mocha-junit-reporter": "^2.0.0",
