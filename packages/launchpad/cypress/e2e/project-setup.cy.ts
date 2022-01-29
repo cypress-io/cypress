@@ -6,6 +6,9 @@ describe('Launchpad: Setup Project', () => {
     cy.scaffoldProject('pristine-with-ct-testing') // component configured
     cy.scaffoldProject('pristine-with-e2e-testing') // e2e configured
     cy.scaffoldProject('pristine-with-e2e-testing-and-storybook') // e2e configured
+    cy.scaffoldProject('pristine-npm')
+    cy.scaffoldProject('pristine-yarn')
+    cy.scaffoldProject('pristine-pnpm')
   })
 
   const verifyWelcomePage = ({ e2eIsConfigured, ctIsConfigured }) => {
@@ -678,6 +681,44 @@ describe('Launchpad: Setup Project', () => {
         // cy.findByRole('button', { name: 'Continue' }).click()
         // cy.contains(/(Initializing Config|Choose a Browser)/)
       })
+    })
+  })
+
+  describe('Command for package managers', () => {
+    it('makes the right command for yarn', () => {
+      cy.openProject('pristine-yarn')
+
+      cy.visitLaunchpad()
+
+      cy.get('[data-cy-testingtype="component"]').click()
+      cy.get('[data-testid="select-framework"]').click()
+      cy.findByText('Create React App').click()
+      cy.findByText('Next Step').click()
+      cy.get('code').should('contain.text', 'yarn add -D ')
+    })
+
+    it('makes the right command for pnpm', () => {
+      cy.openProject('pristine-pnpm')
+
+      cy.visitLaunchpad()
+
+      cy.get('[data-cy-testingtype="component"]').click()
+      cy.get('[data-testid="select-framework"]').click()
+      cy.findByText('Create React App').click()
+      cy.findByText('Next Step').click()
+      cy.get('code').should('contain.text', 'pnpm install -D ')
+    })
+
+    it('makes the right command for npm', () => {
+      cy.openProject('pristine-npm')
+
+      cy.visitLaunchpad()
+
+      cy.get('[data-cy-testingtype="component"]').click()
+      cy.get('[data-testid="select-framework"]').click()
+      cy.findByText('Create React App').click()
+      cy.findByText('Next Step').click()
+      cy.get('code').should('contain.text', 'npm install -D ')
     })
   })
 })

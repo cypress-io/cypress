@@ -19,7 +19,7 @@ import fs from 'fs'
 import type { DataContext } from '..'
 import { LoadConfigReply, SetupNodeEventsReply, ProjectConfigIpc, IpcHandler } from './ProjectConfigIpc'
 import assert from 'assert'
-import type { AllModeOptions, FoundBrowser, FullConfig, PACKAGE_MANAGERS, TestingType } from '@packages/types'
+import type { AllModeOptions, FoundBrowser, FullConfig, TestingType } from '@packages/types'
 import type { BaseErrorDataShape, WarningError } from '.'
 import { autoBindDebug } from '../util/autoBindDebug'
 
@@ -236,7 +236,7 @@ export class ProjectLifecycleManager {
     this._projectRoot = undefined
   }
 
-  getPackageManagerUsed (projectRoot: string): typeof PACKAGE_MANAGERS[number] {
+  getPackageManagerUsed (projectRoot: string) {
     if (fs.existsSync(path.join(projectRoot, 'package-lock.json'))) {
       return 'npm'
     }
