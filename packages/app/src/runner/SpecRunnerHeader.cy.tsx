@@ -12,7 +12,7 @@ function renderWithGql (gqlVal: SpecRunnerHeaderFragment) {
     getAutIframe={() => autIframe} />)
 }
 
-describe('SpecRunnerHeader', () => {
+describe('SpecRunnerHeader', { viewportHeight: 500 }, () => {
   it('renders', () => {
     const autStore = useAutStore()
 

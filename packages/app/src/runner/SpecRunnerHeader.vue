@@ -1,6 +1,6 @@
 <template>
   <div :style="{width: `${props.width}px`}">
-    <div class="flex justify-between">
+    <div class="flex gap-24px justify-between">
       <!--
         TODO: Studio. Out of scope for GA.
         <button
@@ -10,36 +10,33 @@
         Studio
       </button> -->
 
-      <button
+      <Button
         data-cy="header-selector"
         :disabled="isDisabled"
         class="px-8px"
+        variant="outline"
         @click="togglePlayground"
       >
-        <Icon
-          height="22px"
-          width="22px"
-          :icon="IconCrosshairsGPS"
-        />
-      </button>
+        <i-cy-action-record_x16 class="h-32px w-32px" />
+      </Button>
 
       <div
         v-if="props.gql.currentTestingType === 'e2e'"
         data-cy="aut-url"
+        class="flex flex-grow"
       >
+        <div class="grid items-center">
+          <i-cy-crosshairs_x16 />
+        </div>
         <div
-          class="rounded-md flex shadow-md mx-2 px-4 url"
+          class="rounded-md flex-grow shadow-md mx-2 px-4"
           :class="{
             'bg-yellow-50': autStore.isLoadingUrl,
             'bg-white': !autStore.isLoadingUrl,
           }"
         >
-          <div>
-            {{ autStore.url }}
-          </div>
+          {{ autStore.url }}
         </div>
-
-        <div>Loading URL: {{ autStore.isLoadingUrl }}</div>
       </div>
 
       <Select
@@ -49,6 +46,34 @@
         item-value="displayName"
         @update:model-value="changeBrowser"
       />
+      <Popover class="relative">
+        <PopoverButton class="flex">
+          <span>Viewport</span>
+          <i-cy-chevron-down-small_x8 />
+        </PopoverButton>
+        <PopoverPanel class="bg-white p-16px right-0 absolute">
+          <p>
+            The <strong>viewport</strong> determines the width and height of your application. By default the viewport will be
+            <strong>{` ${defaults.width}`}px</strong> by
+            <strong>{` ${defaults.height}`}px</strong> unless specified by a
+            {' '}<code>cy.viewport</code> command.
+          </p>
+          <p>Additionally you can override the default viewport dimensions by specifying these values in your {configFileFormatted(config.configFile)}.</p>
+          <pre>
+            {
+  "viewportWidth": ${defaults.width},
+  "viewportHeight": ${defaults.height}
+}
+          </pre>
+          <p>
+            <ExternalLink
+              href="https://on.cypress.io/viewport"
+            >
+              Read more about viewport here.
+            </ExternalLink>
+          </p>
+        </PopoverPanel>
+      </Popover>
     </div>
 
     <div
@@ -68,14 +93,15 @@ import { computed, ref } from 'vue'
 import { useAutStore, useSpecStore } from '../store'
 import Select from '@packages/frontend-shared/src/components/Select.vue'
 import { gql, useMutation } from '@urql/vue'
-import IconCrosshairsGPS from '~icons/mdi/crosshairs-gps'
-import Icon from '@packages/frontend-shared/src/components/Icon.vue'
 import { SpecRunnerHeaderFragment, SpecRunnerHeader_SetBrowserDocument, SpecRunnerHeader_BrowserFragment } from '../generated/graphql'
 import SelectorPlayground from './selector-playground/SelectorPlayground.vue'
 import { useSelectorPlaygroundStore } from '../store/selector-playground-store'
 import type { EventManager } from './event-manager'
 import type { AutIframe } from './aut-iframe'
 import { togglePlayground as _togglePlayground } from './utils'
+import ExternalLink from '@cy/gql-components/ExternalLink.vue'
+import Button from '@packages/frontend-shared/src/components/Button.vue'
+import { Popover, PopoverButton, PopoverPanel } from '@headlessui/vue'
 
 gql`
 fragment SpecRunnerHeader on CurrentProject {
@@ -90,6 +116,7 @@ fragment SpecRunnerHeader on CurrentProject {
     id
     ...SpecRunnerHeader_Browser
   }
+  config
 }
 `
 
@@ -155,10 +182,5 @@ function changeBrowser (browser: SpecRunnerHeader_BrowserFragment) {
 const autStore = useAutStore()
 
 const isDisabled = computed(() => autStore.isRunning || autStore.isLoading)
-</script>
 
-<style scoped lang="scss">
-.url {
-  @apply flex items-center justify-center;
-}
-</style>
+</script>
