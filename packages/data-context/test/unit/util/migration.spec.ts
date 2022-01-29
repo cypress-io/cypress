@@ -276,6 +276,13 @@ describe('reduceConfig', () => {
     expect(newConfig.e2e.specPattern).to.eq(`${config.e2e.integrationFolder}/${config.testFiles}`)
   })
 
+  it('should add custom integrationFolder to default testFiles if testFiles is not present', () => {
+    const config = { integrationFolder: 'cypress/custom-integration' }
+    const newConfig = reduceConfig(config)
+
+    expect(newConfig.e2e.specPattern).to.eq(`${config.integrationFolder}/**/*.cy.{js,jsx,ts,tsx}`)
+  })
+
   it('should combine testFiles with highest specificity', () => {
     const config = {
       testFiles: '**/**.cy.js',

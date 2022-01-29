@@ -245,7 +245,7 @@ export function renameSpecPath (spec: string) {
 }
 
 export function reduceConfig (cfg: OldCypressConfig): ConfigOptions {
-  const excludedFields = ['pluginsFile', '$schema', 'componentFolder', 'integrationFolder']
+  const excludedFields = ['pluginsFile', '$schema', 'componentFolder']
 
   return Object.entries(cfg).reduce((acc, [key, val]) => {
     if (excludedFields.includes(key)) {
@@ -256,6 +256,13 @@ export function reduceConfig (cfg: OldCypressConfig): ConfigOptions {
       const value = val as Record<string, unknown>
 
       return { ...acc, [key]: { ...acc[key], ...value } }
+    }
+
+    if (key === 'integrationFolder') {
+      return {
+        ...acc,
+        e2e: { ...acc.e2e, specPattern: getSpecPattern(cfg, 'e2e') },
+      }
     }
 
     if (key === 'testFiles') {
@@ -293,7 +300,7 @@ export function reduceConfig (cfg: OldCypressConfig): ConfigOptions {
 }
 
 function getSpecPattern (cfg: OldCypressConfig, testType: TestingType) {
-  const specPattern = cfg[testType]?.testFiles ?? cfg.testFiles ?? '**/*.cy.js'
+  const specPattern = cfg[testType]?.testFiles ?? cfg.testFiles ?? '**/*.cy.{js,jsx,ts,tsx}'
   const customComponentFolder = cfg.component?.componentFolder ?? cfg.componentFolder ?? null
 
   if (testType === 'component' && customComponentFolder) {
