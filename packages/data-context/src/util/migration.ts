@@ -9,6 +9,7 @@ import {
 } from './migrationFormat'
 import type { MigrationFile } from '../sources'
 import { substitute } from '../sources/migration/autoRename'
+import type { TestingType } from '@packages/types'
 
 type ConfigOptions = {
   global: Record<string, unknown>
