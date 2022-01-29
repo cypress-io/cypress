@@ -248,7 +248,7 @@ describe('reduceConfig', () => {
     const config = { testFiles: '**/**.cy.js' }
     const newConfig = reduceConfig(config)
 
-    expect(newConfig.e2e.specPattern).to.eq('**/**.cy.js')
+    expect(newConfig.e2e.specPattern).to.eq('cypress/e2e/**/**.cy.js')
     expect(newConfig.component.specPattern).to.eq('**/**.cy.js')
   })
 

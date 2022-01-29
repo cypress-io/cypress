@@ -307,7 +307,7 @@ function getSpecPattern (cfg: OldCypressConfig, testType: TestingType) {
     return `${customComponentFolder}/${specPattern}`
   }
 
-  const customIntegrationFolder = cfg.e2e?.integrationFolder ?? cfg.integrationFolder ?? null
+  const customIntegrationFolder = cfg.e2e?.integrationFolder ?? cfg.integrationFolder ?? 'cypress/e2e'
 
   if (testType === 'e2e' && customIntegrationFolder) {
     return `${customIntegrationFolder}/${specPattern}`
