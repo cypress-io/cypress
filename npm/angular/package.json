@@ -92,5 +92,8 @@
       "name": "Jean-Michel Leclercq",
       "social": "@LeJeanbono"
     }
-  ]
+  ],
+  "resolutions": {
+    "shell-quote": "1.7.3"
+  }
 }
