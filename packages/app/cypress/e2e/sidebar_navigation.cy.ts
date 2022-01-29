@@ -115,17 +115,21 @@ describe('Sidebar Navigation', () => {
         cy.contains('Configured')
       })
 
-      cy.intercept('mutation-SwitchTestingType_ReconfigureProject').as('SwitchTestingType')
+      cy.intercept('mutation-SwitchTestingTypeAndRelaunch').as('SwitchTestingTypeAndRelaunch')
       cy.withCtx((ctx) => {
-        ctx.actions.project.reconfigureProject = sinon.stub()
+        ctx.actions.project.launchProject = sinon.stub()
       })
 
       cy.get('[data-cy-testingtype="component"]').within(() => {
         cy.contains('Not Configured')
       }).click()
 
-      cy.wait('@SwitchTestingType').then((interception) => {
+      cy.wait('@SwitchTestingTypeAndRelaunch').then((interception) => {
         expect(interception.request.body.variables.testingType).eq('component')
+      })
+
+      cy.withCtx((ctx) => {
+        expect(ctx.coreData.app.relaunchBrowser).eq(true)
       })
 
       cy.get('[aria-label="Close"]').click()
@@ -199,7 +203,7 @@ describe('Sidebar Navigation', () => {
         cy.contains('Configured')
       })
 
-      cy.intercept('mutation-SwitchTestingType_ReconfigureProject').as('SwitchTestingType')
+      cy.intercept('mutation-SwitchTestingTypeAndRelaunch').as('SwitchTestingTypeAndRelaunch')
       cy.withCtx((ctx) => {
         ctx.actions.project.reconfigureProject = sinon.stub()
       })
@@ -208,7 +212,7 @@ describe('Sidebar Navigation', () => {
         cy.contains('Not Configured')
       }).click()
 
-      cy.wait('@SwitchTestingType').then((interception) => {
+      cy.wait('@SwitchTestingTypeAndRelaunch').then((interception) => {
         expect(interception.request.body.variables.testingType).eq('e2e')
       })
     })

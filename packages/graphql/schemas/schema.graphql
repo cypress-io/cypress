@@ -31,6 +31,12 @@ enum BrowserFamily {
   firefox
 }
 
+enum BrowserStatus {
+  closed
+  open
+  opening
+}
+
 """
 A CloudOrganization represents an Organization stored in the Cypress Cloud
 """
@@ -326,6 +332,9 @@ type CurrentProject implements Node & ProjectLike {
   """The current branch of the project"""
   branch: String
 
+  """If the browser is open or not"""
+  browserStatus: BrowserStatus!
+
   """Browsers found that are compatible with Cypress"""
   browsers: [Browser!]
 
@@ -364,9 +373,6 @@ type CurrentProject implements Node & ProjectLike {
 
   """Relay style Node ID field for the CurrentProject field"""
   id: ID!
-
-  """If the browser is open or not"""
-  isBrowserOpen: Boolean!
 
   """Whether the user configured this project to use Component Testing"""
   isCTConfigured: Boolean
@@ -807,6 +813,9 @@ type Mutation {
 
   """Save the prompt-shown state for this project"""
   setPromptShown(slug: String!): Boolean
+
+  """Switch Testing type and relaunch browser"""
+  switchTestingTypeAndRelaunch(testingType: TestingTypeEnum!): Boolean
 
   """Updates the different fields of the wizard data store"""
   wizardUpdate(input: WizardUpdateInput!): Wizard

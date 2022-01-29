@@ -18,7 +18,7 @@ export interface ProjectApiShape {
    *   order for CT to startup
    */
   openProjectCreate(args: InitializeProjectOptions, options: OpenProjectLaunchOptions): Promise<unknown>
-  launchProject(browser: FoundBrowser, spec: Cypress.Spec, options: LaunchOpts): void
+  launchProject(browser: FoundBrowser, spec: Cypress.Spec, options: LaunchOpts): Promise<void>
   insertProjectToCache(projectRoot: string): Promise<void>
   removeProjectFromCache(projectRoot: string): Promise<void>
   getProjectRootsFromCache(): Promise<string[]>
@@ -122,6 +122,12 @@ export class ProjectActions {
       return await this.api.openProjectCreate(allModeOptionsWithLatest, {
         ...options,
         ctx: this.ctx,
+      }).finally(async () => {
+        // When switching testing type, the project should be relaunched in the previously selected browser
+        if (this.ctx.coreData.app.relaunchBrowser) {
+          this.ctx.project.setRelaunchBrowser(false)
+          await this.ctx.actions.project.launchProject(this.ctx.coreData.currentTestingType, {})
+        }
       })
     } catch (e) {
       // TODO(tim): remove / replace with ctx.log.error
@@ -217,7 +223,11 @@ export class ProjectActions {
 
     this.ctx.coreData.currentTestingType = testingType
 
-    return this.api.launchProject(browser, activeSpec ?? emptySpec, options)
+    this.ctx.browser.setBrowserStatus('opening')
+    await this.api.launchProject(browser, activeSpec ?? emptySpec, options)
+    this.ctx.browser.setBrowserStatus('open')
+
+    return
   }
 
   removeProject (projectRoot: string) {
@@ -426,7 +436,7 @@ export class ProjectActions {
 
   async reconfigureProject () {
     // Initialize active project close first the current project
-    await this.initializeActiveProject()
+    await this.ctx.actions.browser.closeBrowser()
     this.ctx.actions.wizard.resetWizard()
     this.ctx.actions.electron.refreshBrowserWindow()
     this.ctx.actions.electron.showBrowserWindow()
