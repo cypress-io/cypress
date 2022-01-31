@@ -7,6 +7,7 @@ import Bluebird from 'bluebird'
 import { path as ffmpegPath } from '@ffmpeg-installer/ffmpeg'
 import BlackHoleStream from 'black-hole-stream'
 import { fs } from './util/fs'
+import os from 'os'
 
 const debug = Debug('cypress:server:video')
 // extra verbose logs for logging individual frames
@@ -274,31 +275,38 @@ export function start (name, options: StartOptions = {}) {
 type OnProgress = (p: number) => void
 
 export async function process (name, cname, videoCompression, ffmpegchaptersConfig, onProgress: OnProgress = function () {}) {
-  const metaFileName = `${name}.meta`
-
-  const maybeGenerateMetaFile = Bluebird.method(() => {
-    if (!ffmpegchaptersConfig) {
-      return false
-    }
-
-    // Writing the metadata to filesystem is necessary because fluent-ffmpeg is just a wrapper of ffmpeg command.
-    return fs.writeFile(metaFileName, ffmpegchaptersConfig).then(() => true)
-  })
-
-  const addChaptersMeta = await maybeGenerateMetaFile()
-
   let total = null
+
+  const metaFileName = `${name}.meta`
+  const addChaptersMeta = ffmpegchaptersConfig && await fs.writeFile(metaFileName, ffmpegchaptersConfig)
 
   return new Bluebird((resolve, reject) => {
     debug('processing video from %s to %s video compression %o',
       name, cname, videoCompression)
 
     const command = ffmpeg()
+    .addOptions([
+      // These flags all serve to reduce initial buffering, especially important
+      // when dealing with very short videos (such as during component tests)
+      '-avioflags direct',
+      '-fpsprobesize 0',
+      '-probesize 32',
+      '-analyzeduration 0',
+
+    ])
+
     const outputOptions = [
       '-preset fast',
-        `-crf ${videoCompression}`,
-        '-pix_fmt yuv420p',
+      `-crf ${videoCompression}`,
+      '-pix_fmt yuv420p',
     ]
+
+    // On low-resource machines - estimated here by CPU count - limit the encoder
+    // to a single thread. While this can slow down video processing, it
+    // significantly reduces CPU contention, leading to a faster overall test time.
+    if (os.cpus().length < 4) {
+      outputOptions.push('-threads 1')
+    }
 
     if (addChaptersMeta) {
       command.input(metaFileName)
