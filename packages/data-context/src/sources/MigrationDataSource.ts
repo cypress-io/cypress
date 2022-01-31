@@ -172,12 +172,17 @@ export class MigrationDataSource {
   }
 
   async createConfigString () {
+    if (!this.ctx.currentProject) {
+      throw Error('Need currentProject!')
+    }
+
     const config = await this.parseCypressConfig()
 
     return createConfigString(config, {
       hasComponentTesting: this.hasComponentTesting,
       hasE2ESpec: this.hasE2ESpec,
       hasPluginsFile: this.hasPluginsFile,
+      projectRoot: this.ctx.currentProject,
     })
   }
 

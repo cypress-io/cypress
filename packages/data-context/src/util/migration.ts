@@ -51,6 +51,7 @@ export interface CreateConfigOptions {
   hasE2ESpec: boolean
   hasPluginsFile: boolean
   hasComponentTesting: boolean
+  projectRoot: string
 }
 
 export async function createConfigString (cfg: OldCypressConfig, options: CreateConfigOptions) {
@@ -130,6 +131,27 @@ function getPluginRelativePath (cfg: OldCypressConfig): string {
   return cfg.pluginsFile ? cfg.pluginsFile : DEFAULT_PLUGIN_PATH
 }
 
+/**
+ * Ensure they have Cypress installed locally AND
+ * it's version 10. We don't want to include
+ * const { defineConfig } = require('cypress')
+ * if they don't have Cypress in their project,
+ * or they have an old version, since the `defineConfig`
+ * export won't exist and it'll crash when we execute
+ * their cypress.config.js.
+ */
+function isCypress10InstalledLocally (projectRoot: string) {
+  try {
+    const pkgJsonPath = require.resolve('cypress/package.json', {
+      paths: [projectRoot],
+    })
+
+    return parseInt(require(pkgJsonPath)?.version, 10) >= 10
+  } catch (e) {
+    return false
+  }
+}
+
 function createCypressConfigJs (config: ConfigOptions, pluginPath: string, options: CreateConfigOptions): string {
   const globalString = Object.keys(config.global).length > 0 ? `${formatObjectForConfig(config.global)},` : ''
   const componentString = options.hasComponentTesting ? createComponentTemplate(config.component) : ''
@@ -137,13 +159,15 @@ function createCypressConfigJs (config: ConfigOptions, pluginPath: string, optio
     ? createE2eTemplate(pluginPath, options.hasPluginsFile, config.e2e)
     : ''
 
-  const conf = `
-    const { defineConfig } = require('cypress')
+  if (isCypress10InstalledLocally(options.projectRoot)) {
+    return formatConfig(
+      `const { defineConfig } = require('cypress')
 
-    module.exports = {${globalString}${e2eString}${componentString}
-    }`
+      module.exports = defineConfig({${globalString}${e2eString}${componentString}})`,
+    )
+  }
 
-  return formatConfig(conf)
+  return formatConfig(`module.exports = {${globalString}${e2eString}${componentString}}`)
 }
 
 function formatObjectForConfig (obj: Record<string, unknown>) {
