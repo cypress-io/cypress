@@ -9,7 +9,7 @@
       <li
         v-for="dep in props.gql.wizard.packagesToInstall"
         :key="dep.id"
-        class="py-16px border-b border-b-gray-100 last-of-type:border-b-0"
+        class="border-b border-b-gray-100 py-16px last-of-type:border-b-0"
       >
         <ExternalLink
           :href="`https://www.npmjs.com/package/${dep.package}`"
@@ -46,6 +46,7 @@ fragment ManualInstall on Query {
   currentProject {
     id
     title
+    packageManager
   }
 }
 `
@@ -60,12 +61,18 @@ defineEmits<{
   (event: 'back'): void
 }>()
 
+const commands = {
+  'npm': 'npm install -D ',
+  'pnpm': 'pnpm install -D ',
+  'yarn': 'yarn add -D ',
+}
+
 const installDependenciesCode = computed(
   () => {
-    return `yarn add -D ${
+    return commands[props.gql.currentProject?.packageManager ?? 'npm'] +
     (props.gql.wizard.packagesToInstall ?? [])
     .map((pack) => `${pack.package}`)
-    .join(' ')}`
+    .join(' ')
   },
 )
 </script>

@@ -391,6 +391,7 @@ type CurrentProject implements Node & ProjectLike {
 
   """Whether the project needs to be migrated before proceeding"""
   needsLegacyConfigMigration: Boolean
+  packageManager: PackageManagerEnum!
 
   """Cached preferences for this project"""
   preferences: ProjectPreferences
@@ -825,6 +826,12 @@ type Mutation {
 interface Node {
   """Globally unique identifier representing a concrete GraphQL ObjectType"""
   id: ID!
+}
+
+enum PackageManagerEnum {
+  npm
+  pnpm
+  yarn
 }
 
 """
