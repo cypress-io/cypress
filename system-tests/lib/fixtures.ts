@@ -11,6 +11,21 @@ const serverRoot = _path.join(__dirname, '../../packages/server/')
 const projects = _path.join(root, 'projects')
 const cyTmpDir = _path.join(tempDir, 'cy-projects')
 
+const safeRemove = (path) => {
+  try {
+    fs.removeSync(path)
+  } catch (err) {
+    // Windows does not like the en masse deleting of files, since the AV will hold
+    // a lock on files when they are written. This skips deleting if the lock is
+    // encountered.
+    if (err.code === 'EBUSY' && process.platform === 'win32') {
+      return console.error(`Remove failed for ${ path } due to EBUSY. Skipping on Windows.`)
+    }
+
+    throw err
+  }
+}
+
 // copy contents instead of deleting+creating new file, which can cause
 // filewatchers to lose track of toFile.
 const copyContents = (fromFile, toFile) => {
@@ -182,7 +197,7 @@ export async function scaffoldProjectNodeModules (project: string, updateYarnLoc
     for (const dep of packages) {
       const depDir = _path.join(cacheDir, dep)
 
-      await fs.remove(depDir)
+      safeRemove(depDir)
     }
   }
 
@@ -326,11 +341,11 @@ export function scaffoldWatch () {
 // removes all of the project fixtures
 // from the cyTmpDir .projects in the root
 export function remove () {
-  return fs.removeSync(cyTmpDir)
+  safeRemove(cyTmpDir)
 }
 
 export function removeProject (name) {
-  return fs.removeSync(projectPath(name))
+  safeRemove(projectPath(name))
 }
 
 // returns the path to project fixture

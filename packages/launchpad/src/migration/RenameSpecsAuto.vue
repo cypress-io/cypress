@@ -50,13 +50,13 @@
     <BeforeAfter>
       <template #before>
         <HighlightedFilesList
-          :files="props.gql.specFiles.before"
+          :files="props.gql.specFiles.map(x => x.before)"
           highlight-class="text-red-500"
         />
       </template>
       <template #after>
         <HighlightedFilesList
-          :files="props.gql.specFiles.after"
+          :files="props.gql.specFiles.map(x => x.after)"
           highlight-class="text-jade-500"
         />
       </template>
@@ -100,14 +100,18 @@ gql`
 fragment RenameSpecsAuto on Migration {
   specFiles {
     before {
+      id
       parts {
+        id
         text
         highlight
       }
     }
 
     after {
+      id
       parts {
+        id
         text
         highlight
       }

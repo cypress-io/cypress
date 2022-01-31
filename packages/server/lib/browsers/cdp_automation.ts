@@ -336,6 +336,8 @@ export class CdpAutomation {
         return this.sendDebuggerCommandFn('Target.createTarget', { url: data.url })
       case 'stop:screencast':
         return this.sendDebuggerCommandFn('Page.stopScreencast')
+      case 'focus:browser:window':
+        return this.sendDebuggerCommandFn('Page.bringToFront')
       default:
         throw new Error(`No automation handler registered for: '${message}'`)
     }

@@ -122,8 +122,7 @@
     "url-parse": "1.5.2",
     "uuid": "8.3.2",
     "which": "2.0.2",
-    "widest-line": "3.1.0",
-    "winston": "2.4.4"
+    "widest-line": "3.1.0"
   },
   "devDependencies": {
     "@babel/core": "7.9.0",
@@ -152,6 +151,7 @@
     "@types/chai-as-promised": "7.1.2",
     "@types/chrome": "0.0.101",
     "@types/http-proxy": "1.17.4",
+    "@types/node": "14.14.31",
     "awesome-typescript-loader": "5.2.1",
     "babel-loader": "8.1.0",
     "body-parser": "1.19.0",

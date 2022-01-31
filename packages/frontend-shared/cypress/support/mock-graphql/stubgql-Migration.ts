@@ -2,6 +2,14 @@ import { MIGRATION_STEPS } from '@packages/types'
 import type { Migration } from '../generated/test-graphql-types.gen'
 import type { MaybeResolver } from './clientTestUtils'
 
+let _id = 0
+
+const id = () => {
+  _id++
+
+  return _id.toString()
+}
+
 export const stubMigration: MaybeResolver<Migration> = {
   __typename: 'Migration',
   filteredSteps: MIGRATION_STEPS.map((name, index) => {
@@ -14,67 +22,49 @@ export const stubMigration: MaybeResolver<Migration> = {
       name,
     }
   }),
-  specFiles: {
-    __typename: 'MigrationFiles',
-    before: [
-      {
-        __typename: 'MigrationFile',
+  specFiles: [
+    {
+      __typename: 'MigrationFile',
+      testingType: 'e2e',
+      before: {
+        __typename: 'MigrationFileData',
+        id: id(),
+        relative: 'cypress/integration/app.spec.js',
         parts: [
-          { __typename: 'MigrationFilePart', text: 'cypress/', highlight: false },
-          { __typename: 'MigrationFilePart', text: 'integration', highlight: true },
-          { __typename: 'MigrationFilePart', text: '/app', highlight: false },
-          { __typename: 'MigrationFilePart', text: '.spec.', highlight: true },
-          { __typename: 'MigrationFilePart', text: 'js', highlight: false },
+          { id: id(), __typename: 'MigrationFilePart', text: 'cypress/', highlight: false },
+          { id: id(), __typename: 'MigrationFilePart', text: 'integration', highlight: true },
+          { id: id(), __typename: 'MigrationFilePart', text: '/app', highlight: false },
+          { id: id(), __typename: 'MigrationFilePart', text: '.spec.', highlight: true },
+          { id: id(), __typename: 'MigrationFilePart', text: 'js', highlight: false },
         ],
-        testingType: 'e2e',
       },
-      {
-        __typename: 'MigrationFile',
+      after: {
+        __typename: 'MigrationFileData',
+        id: id(),
+        relative: 'cypress/integration/app.spec.js',
         parts: [
-          { __typename: 'MigrationFilePart', text: 'cypress/', highlight: false },
-          { __typename: 'MigrationFilePart', text: 'integration', highlight: true },
-          { __typename: 'MigrationFilePart', text: '/blog-post', highlight: false },
-          { __typename: 'MigrationFilePart', text: '-spec.', highlight: true },
-          { __typename: 'MigrationFilePart', text: 'js', highlight: false },
+          { id: id(), __typename: 'MigrationFilePart', text: 'cypress/', highlight: false },
+          { id: id(), __typename: 'MigrationFilePart', text: 'integration', highlight: true },
+          { id: id(), __typename: 'MigrationFilePart', text: '/app', highlight: false },
+          { id: id(), __typename: 'MigrationFilePart', text: '.cy.', highlight: true },
+          { id: id(), __typename: 'MigrationFilePart', text: 'js', highlight: false },
         ],
-        testingType: 'e2e',
       },
-    ],
-    after: [
-      {
-        __typename: 'MigrationFile',
-        parts: [
-          { __typename: 'MigrationFilePart', text: 'cypress/', highlight: false },
-          { __typename: 'MigrationFilePart', text: 'e2e', highlight: true },
-          { __typename: 'MigrationFilePart', text: '/app', highlight: false },
-          { __typename: 'MigrationFilePart', text: '.cy.', highlight: true },
-          { __typename: 'MigrationFilePart', text: 'js', highlight: false },
-        ],
-        testingType: 'e2e',
-      },
-      {
-        __typename: 'MigrationFile',
-        parts: [
-          { __typename: 'MigrationFilePart', text: 'cypress/', highlight: false },
-          { __typename: 'MigrationFilePart', text: 'e2e', highlight: true },
-          { __typename: 'MigrationFilePart', text: '/blog-post', highlight: false },
-          { __typename: 'MigrationFilePart', text: '.cy.', highlight: true },
-          { __typename: 'MigrationFilePart', text: 'js', highlight: false },
-        ],
-        testingType: 'e2e',
-      },
-    ],
-  },
+    },
+  ],
   manualFiles: {
+    id: id(),
     __typename: 'ManualMigration',
     completed: false,
     files: [
       {
+        id: id(),
         __typename: 'ManualMigrationFile',
         moved: false,
         relative: 'cypress/component/button-spec.js',
       },
       {
+        id: id(),
         __typename: 'ManualMigrationFile',
         moved: true,
         relative: 'cypress/component/hello.spec.tsx',
@@ -102,53 +92,64 @@ export const stubMigration: MaybeResolver<Migration> = {
   })`,
   integrationFolder: 'cypress/integration',
   componentFolder: 'cypress/component',
-  supportFiles: {
-    __typename: 'MigrationFiles',
-    before: [
-      {
-        __typename: 'MigrationFile',
-        testingType: 'e2e',
+  supportFiles:
+    {
+      __typename: 'MigrationFile',
+      testingType: 'e2e',
+      before: {
+        id: id(),
+        relative: 'cypress/support/index.js',
+        __typename: 'MigrationFileData',
         parts: [
           {
+            id: id(),
             __typename: 'MigrationFilePart',
             text: 'cypress/support/',
             highlight: false,
           },
           {
+            id: id(),
             __typename: 'MigrationFilePart',
             text: 'index',
             highlight: true,
           },
           {
+            id: id(),
             __typename: 'MigrationFilePart',
             text: '.js',
             highlight: false,
           },
         ],
       },
-    ],
-    after: [
-      {
-        __typename: 'MigrationFile',
-        testingType: 'e2e',
+      after: {
+        id: id(),
+        relative: 'cypress/support/e2e.js',
+        __typename: 'MigrationFileData',
         parts: [
           {
+            id: id(),
             __typename: 'MigrationFilePart',
             text: 'cypress/support/',
             highlight: false,
           },
           {
+            id: id(),
             __typename: 'MigrationFilePart',
             text: 'e2e',
             highlight: true,
           },
           {
+            id: id(),
             __typename: 'MigrationFilePart',
             text: '.js',
             highlight: false,
           },
         ],
       },
-    ],
-  },
+    },
+  hasComponentTesting: true,
+  hasCustomComponentFolder: false,
+  hasCustomComponentTestFiles: false,
+  hasCustomIntegrationFolder: false,
+  hasCustomIntegrationTestFiles: false,
 }

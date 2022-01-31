@@ -78,6 +78,8 @@ export class SocketBase {
   private _sendResetBrowserStateMessage
   private _sendStartNewBrowserTabMessage
   private _sendStopScreencastMessage
+  private _sendFocusBrowserMessage
+
   protected ended: boolean
   protected _io?: socketIo.SocketIOServer
 
@@ -291,6 +293,10 @@ export class SocketBase {
 
       this._sendStopScreencastMessage = async () => {
         await automationRequest('stop:screencast', {})
+      }
+
+      this._sendFocusBrowserMessage = async () => {
+        await automationRequest('focus:browser:window', {})
       }
 
       socket.on('reporter:connected', () => {
@@ -580,6 +586,10 @@ export class SocketBase {
     if (this._sendStopScreencastMessage) {
       await this._sendStopScreencastMessage()
     }
+  }
+
+  async sendFocusBrowserMessage () {
+    await this._sendFocusBrowserMessage()
   }
 
   close () {

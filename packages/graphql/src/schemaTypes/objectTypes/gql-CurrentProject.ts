@@ -1,4 +1,5 @@
-import { nonNull, objectType, stringArg } from 'nexus'
+import { PACKAGE_MANAGERS } from '@packages/types'
+import { enumType, nonNull, objectType, stringArg } from 'nexus'
 import path from 'path'
 import { BaseError } from '.'
 import { cloudProjectBySlug } from '../../stitching/remoteGraphQLCalls'
@@ -10,12 +11,22 @@ import { ProjectPreferences } from './gql-ProjectPreferences'
 import { Spec } from './gql-Spec'
 import { Storybook } from './gql-Storybook'
 
+export const PackageManagerEnum = enumType({
+  name: 'PackageManagerEnum',
+  members: PACKAGE_MANAGERS,
+})
+
 export const CurrentProject = objectType({
   name: 'CurrentProject',
   description: 'The currently opened Cypress project, represented by a cypress.config.{ts|js} file',
   node: 'projectRoot',
   definition (t) {
     t.implements('ProjectLike')
+
+    t.nonNull.field('packageManager', {
+      type: PackageManagerEnum,
+      resolve: (source, args, ctx) => ctx.coreData.packageManager,
+    })
 
     t.field('errorLoadingConfigFile', {
       type: BaseError,
@@ -94,9 +105,12 @@ export const CurrentProject = objectType({
       },
     })
 
-    // t.list.field('testingTypes', {
-    //   type: TestingTypeInfo,
-    // })
+    t.boolean('hasValidConfigFile', {
+      description: 'Whether the project has a valid config file',
+      resolve (source, args, ctx) {
+        return ctx.lifecycleManager.metaState.hasValidConfigFile
+      },
+    })
 
     t.nonNull.list.nonNull.field('specs', {
       description: 'A list of specs for the currently open testing type of a project',

@@ -1,4 +1,3 @@
-import type { TestingType } from '@packages/types'
 import chokidar from 'chokidar'
 import fs from 'fs-extra'
 import stringify from 'stringify-object'
@@ -8,12 +7,26 @@ import {
   supportFileRegexps,
   formatMigrationFile,
 } from './migrationFormat'
-import type { FilesForMigrationUI } from '../sources'
+import type { MigrationFile } from '../sources'
+import { substitute } from '../sources/migration/autoRename'
 
 type ConfigOptions = {
   global: Record<string, unknown>
   e2e: Record<string, unknown>
   component: Record<string, unknown>
+}
+
+/**
+ * config format pre-10.0
+ */
+export interface OldCypressConfig {
+  component?: Omit<OldCypressConfig, 'component' | 'e2e'>
+  e2e?: Omit<OldCypressConfig, 'component' | 'e2e'>
+  pluginsFile?: string | false
+  supportFile?: string | false
+  componentFolder?: string | false
+  integrationFolder?: string | false
+  testFiles?: string | string[]
 }
 
 export const defaultSupportFiles = {
@@ -27,7 +40,7 @@ export class NonStandardMigrationError extends Error {
   }
 }
 
-export async function createConfigString (cfg: Partial<Cypress.ConfigOptions>) {
+export async function createConfigString (cfg: OldCypressConfig) {
   return createCypressConfigJs(reduceConfig(cfg), getPluginRelativePath(cfg))
 }
 
@@ -44,15 +57,13 @@ export interface ComponentTestingMigrationStatus {
 export function initComponentTestingMigration (
   projectRoot: string,
   componentFolder: string,
-  testFiles: string | string[],
+  testFiles: string[],
   onFileMoved: (status: ComponentTestingMigrationStatus) => void,
 ): Promise<{
   status: ComponentTestingMigrationStatus
   watcher: chokidar.FSWatcher
 }> {
-  const globs = Array.isArray(testFiles) ? testFiles : [testFiles]
-
-  const watchPaths = globs.map((glob) => {
+  const watchPaths = testFiles.map((glob) => {
     return path.join(componentFolder, glob)
   })
 
@@ -100,13 +111,13 @@ export function initComponentTestingMigration (
   })
 }
 
-function getPluginRelativePath (cfg: Partial<Cypress.ConfigOptions>) {
+function getPluginRelativePath (cfg: OldCypressConfig): string {
   const DEFAULT_PLUGIN_PATH = path.normalize('/cypress/plugins/index.js')
 
   return cfg.pluginsFile ? cfg.pluginsFile : DEFAULT_PLUGIN_PATH
 }
 
-function reduceConfig (cfg: Partial<Cypress.ConfigOptions>) {
+function reduceConfig (cfg: OldCypressConfig): ConfigOptions {
   const excludedFields = ['pluginsFile', '$schema', 'componentFolder']
 
   return Object.entries(cfg).reduce((acc, [key, val]) => {
@@ -167,48 +178,34 @@ function createTestingTypeTemplate (testingType: 'e2e' | 'component', pluginPath
   },`
 }
 
-export interface RelativeSpecWithTestingType {
-  testingType: TestingType
+export interface RelativeSpec {
   relative: string
 }
 
-async function findByTestingType (cwd: string, dir: string | null, testingType: TestingType) {
-  if (!dir) {
-    return []
-  }
-
-  return (await globby(`${dir}/**/*`, { onlyFiles: true, cwd }))
-  .map((relative) => ({ relative, testingType }))
+/**
+ * Checks that at least one spec file exist for component testing
+ *
+ * NOTE: this is what we use to see if CT is set up
+ * @param projectRoot
+ * @param componentFolder
+ * @param componentGlob
+ * @returns
+ */
+export async function hasComponentSpecFile (projectRoot: string, componentFolder: string, componentGlob: string | string[]): Promise<boolean> {
+  return (await globby(componentGlob, {
+    cwd: path.join(projectRoot, componentFolder),
+    onlyFiles: true,
+  })).length > 0
 }
 
-export async function getSpecs (
-  projectRoot: string,
-  componentDirPath: string | null,
-  e2eDirPath: string | null,
-): Promise<{
-  before: RelativeSpecWithTestingType[]
-  after: RelativeSpecWithTestingType[]
-}> {
-  const [comp, e2e] = await Promise.all([
-    findByTestingType(projectRoot, componentDirPath, 'component'),
-    findByTestingType(projectRoot, e2eDirPath, 'e2e'),
-  ])
+export async function tryGetDefaultLegacySupportFile (projectRoot: string) {
+  const files = await globby(path.join(projectRoot, 'cypress', 'support', 'index.*'))
 
-  return {
-    before: [...comp, ...e2e],
-    after: [...comp, ...e2e].map((x) => {
-      return {
-        testingType: x.testingType,
-        relative: renameSpecPath(x.relative),
-      }
-    }),
-  }
+  return files[0]
 }
 
 export async function getDefaultLegacySupportFile (projectRoot: string) {
-  const files = await globby(path.join(projectRoot, 'cypress', 'support', 'index.*'))
-
-  const defaultSupportFile = files[0]
+  const defaultSupportFile = await tryGetDefaultLegacySupportFile(projectRoot)
 
   if (!defaultSupportFile) {
     throw new NonStandardMigrationError('support')
@@ -217,42 +214,41 @@ export async function getDefaultLegacySupportFile (projectRoot: string) {
   return defaultSupportFile
 }
 
-export async function supportFilesForMigration (projectRoot: string): Promise<FilesForMigrationUI> {
+export async function supportFilesForMigration (projectRoot: string): Promise<MigrationFile> {
   const defaultSupportFile = await getDefaultLegacySupportFile(projectRoot)
 
   const defaultOldSupportFile = path.relative(projectRoot, defaultSupportFile)
   const defaultNewSupportFile = renameSupportFilePath(defaultOldSupportFile)
 
+  const afterParts = formatMigrationFile(
+    defaultOldSupportFile,
+    new RegExp(supportFileRegexps.e2e.beforeRegexp),
+  ).map(substitute)
+
   return {
-    before: [
-      {
-        relative: defaultOldSupportFile,
-        parts: formatMigrationFile(defaultOldSupportFile, new RegExp(supportFileRegexps.e2e.beforeRegexp)),
-        testingType: 'e2e',
-      },
-    ],
-    after: [
-      {
-        relative: defaultNewSupportFile,
-        parts: formatMigrationFile(defaultNewSupportFile, new RegExp(supportFileRegexps.e2e.afterRegexp)),
-        testingType: 'e2e',
-      },
-    ],
+    testingType: 'e2e',
+    before: {
+      relative: defaultOldSupportFile,
+      parts: formatMigrationFile(defaultOldSupportFile, new RegExp(supportFileRegexps.e2e.beforeRegexp)),
+    },
+    after: {
+      relative: defaultNewSupportFile,
+      parts: afterParts,
+    },
   }
 }
 
-export function moveSpecFiles (e2eDirPath: string) {
-  const specs = fs.readdirSync(e2eDirPath).map((file) => {
-    const filePath = path.join(e2eDirPath, file)
+export interface SpecToMove {
+  from: string
+  to: string
+}
 
-    return {
-      from: filePath,
-      to: renameSpecPath(filePath),
-    }
-  })
-
+export function moveSpecFiles (projectRoot: string, specs: SpecToMove[]) {
   specs.forEach((spec) => {
-    fs.moveSync(spec.from, spec.to)
+    const from = path.join(projectRoot, spec.from)
+    const to = path.join(projectRoot, spec.to)
+
+    fs.moveSync(from, to)
   })
 }
 
@@ -265,10 +261,4 @@ export function renameSupportFilePath (relative: string) {
   }
 
   return relative.replace(res.groups.name, 'e2e')
-}
-
-export function renameSpecPath (spec: string) {
-  return spec
-  .replace('integration', 'e2e')
-  .replace(/([._-]?[s|S]pec.|[.])(?=[j|t]s[x]?)/, '.cy.')
 }

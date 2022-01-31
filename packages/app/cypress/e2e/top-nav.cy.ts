@@ -197,7 +197,7 @@ describe('App Top Nav Workflows', () => {
         cy.findByTestId('cypress-update-popover').findByRole('button', { name: 'Update to 10.1.0' }).click()
 
         cy.findByRole('dialog', { name: 'Upgrade to Cypress 10.1.0' }).as('upgradeModal').within(() => {
-          cy.validateExternalLink({ name: 'Need help?', href: 'https://on.cypress.io' })
+          cy.validateExternalLink({ name: 'Need help', href: 'https://on.cypress.io' })
           cy.contains('You are currently running Version 10.0.0 of Cypress').should('be.visible')
           cy.contains('npm install --save-dev cypress@10.1.0').should('be.visible')
           cy.findByRole('button', { name: 'Close' }).click()
@@ -431,26 +431,32 @@ describe('Growth Prompts Can Open Automatically', () => {
   })
 
   it('CI prompt auto-opens 4 days after first project opened', () => {
-    cy.intercept('query-HeaderBar_HeaderBarQuery', (req) => {
-      req.on('before:response', (res) => {
-        res.body.data.currentProject.savedState = { firstOpened: 1609459200000,
+    cy.withCtx(
+      (ctx) => {
+        // @ts-ignore sinon is a global in the node process where this is executed
+        sinon.stub(ctx._apis.projectApi, 'getCurrentProjectSavedState').resolves({
+          firstOpened: 1609459200000,
           lastOpened: 1609459200000,
-          promptsShown: {} }
-      })
-    })
+          promptsShown: {},
+        })
+      },
+    )
 
     cy.visitApp()
     cy.contains('Configure CI').should('be.visible')
   })
 
   it('CI prompt does not auto-open when it has already been dismissed', () => {
-    cy.intercept('query-HeaderBar_HeaderBarQuery', (req) => {
-      req.on('before:response', (res) => {
-        res.body.data.currentProject.savedState = { firstOpened: 1609459200000,
+    cy.withCtx(
+      (ctx) => {
+        // @ts-ignore sinon is a global in the node process where this is executed
+        sinon.stub(ctx._apis.projectApi, 'getCurrentProjectSavedState').resolves({
+          firstOpened: 1609459200000,
           lastOpened: 1609459200000,
-          promptsShown: { ci1: 1609459200000 } }
-      })
-    })
+          promptsShown: { ci1: 1609459200000 },
+        })
+      },
+    )
 
     cy.visitApp()
     cy.contains('Configure CI').should('not.exist')

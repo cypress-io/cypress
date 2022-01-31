@@ -49,10 +49,22 @@ describe('App: Index', () => {
         cy.findByTestId('no-specs-message').should('be.visible')
         .and('contain', defaultMessages.createSpec.noSpecsMessage)
 
-        cy.findByRole('link', { name: defaultMessages.createSpec.viewSpecPatternButton })
+        cy.findByRole('button', { name: defaultMessages.createSpec.viewSpecPatternButton })
         .should('be.visible')
         .and('not.be.disabled')
-        .and('have.attr', 'href', '#/settings?section=project&setting=specPattern')
+        .click()
+
+        cy.findByRole('dialog', {
+          name: defaultMessages.components.specPatternModal.title,
+        }).should('be.visible').within(() => {
+          cy.validateExternalLink({ name: 'Need help', href: 'https://on.cypress.io' })
+          cy.findByRole('button', { name: 'Close' }).should('be.visible').as('CloseDialogButton')
+          cy.get('[data-cy="file-match-indicator"]').contains('0 Matches')
+          cy.get('[data-cy="spec-pattern"]').contains('cypress/e2e/**/*.cy.{js,jsx,ts,tsx}')
+        })
+
+        cy.get('@CloseDialogButton').click()
+        cy.findByRole('dialog').should('not.exist')
       })
 
       context('scaffold examples', () => {
@@ -85,7 +97,7 @@ describe('App: Index', () => {
           cy.findByRole('dialog', {
             name: defaultMessages.createSpec.e2e.importFromScaffold.specsAddedHeader,
           }).within(() => {
-            cy.validateExternalLink({ name: 'Need help?', href: 'https://on.cypress.io' })
+            cy.validateExternalLink({ name: 'Need help', href: 'https://on.cypress.io' })
             cy.findByRole('button', { name: 'Close' }).should('be.visible').as('CloseDialogButton')
           })
 
@@ -141,19 +153,22 @@ describe('App: Index', () => {
             cy.get('[data-cy="card"]').contains(defaultMessages.createSpec.e2e.importEmptySpec.header).click()
           })
 
-          cy.get('input').invoke('val').should('eq', 'cypress/e2e/filename.cy.js')
+          cy.findAllByLabelText(defaultMessages.createSpec.e2e.importEmptySpec.inputPlaceholder)
+          .as('enterSpecInput')
+
+          cy.get('@enterSpecInput').invoke('val').should('eq', 'cypress/e2e/filename.cy.js')
           cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.invalidSpecWarning).should('not.exist')
-          cy.get('input').clear()
+          cy.get('@enterSpecInput').clear()
           cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.invalidSpecWarning).should('not.exist')
 
           // Shows entered file does not match spec pattern
-          cy.get('input').type('cypress/e2e/no-match')
+          cy.get('@enterSpecInput').type('cypress/e2e/no-match')
           cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.invalidSpecWarning)
           cy.contains('button', defaultMessages.createSpec.createSpec).should('be.disabled')
 
           //Shows extension warning
-          cy.get('input').clear().type('cypress/e2e/MyTest.spec.j')
-          cy.intercept('mutation-EmptyGeneratorCardStepOne_MatchSpecFile', (req) => {
+          cy.get('@enterSpecInput').clear().type('cypress/e2e/MyTest.spec.j')
+          cy.intercept('mutation-EmptyGenerator_MatchSpecFile', (req) => {
             if (req.body.variables.specFile === 'cypress/e2e/MyTest.spec.jx') {
               req.on('before:response', (res) => {
                 res.body.data.matchesSpecPattern = true
@@ -161,12 +176,12 @@ describe('App: Index', () => {
             }
           })
 
-          cy.get('input').type('x')
+          cy.get('@enterSpecInput').type('x')
           cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.specExtensionWarning)
           cy.contains('span', '{filename}.cy.jx')
 
           // Create spec
-          cy.get('input').clear().type('cypress/e2e/MyTest.cy.js')
+          cy.get('@enterSpecInput').clear().type('cypress/e2e/MyTest.cy.js')
           cy.contains('button', defaultMessages.createSpec.createSpec).should('not.be.disabled').click()
           cy.contains('h2', defaultMessages.createSpec.successPage.header)
 
@@ -253,6 +268,27 @@ describe('App: Index', () => {
         })
       })
     })
+
+    context('pristine app', () => {
+      beforeEach(() => {
+        cy.scaffoldProject('pristine-with-e2e-testing')
+        cy.openProject('pristine-with-e2e-testing')
+        cy.startAppServer('e2e')
+        cy.visitApp()
+      })
+
+      context('scaffold example files', () => {
+        it('should create example files on an empty project', () => {
+          cy.contains('[data-cy="card"]', defaultMessages.createSpec.e2e.importFromScaffold.header).click()
+          // TODO: Check that the popup stays open
+          cy.withCtx(async (ctx) => {
+            const stats = await ctx.actions.file.checkIfFileExists('cypress/e2e/1-getting-started/todo.cy.js')
+
+            expect(stats?.isFile()).to.be.true
+          })
+        })
+      })
+    })
   })
 
   describe('Testing Type: Component', {
@@ -310,10 +346,22 @@ describe('App: Index', () => {
         .should('be.visible')
         .and('contain', defaultMessages.createSpec.noSpecsMessage)
 
-        cy.findByRole('link', { name: defaultMessages.createSpec.viewSpecPatternButton })
+        cy.findByRole('button', { name: defaultMessages.createSpec.viewSpecPatternButton })
         .should('be.visible')
         .and('not.be.disabled')
-        .and('have.attr', 'href', '#/settings?section=project&setting=specPattern')
+        .click()
+
+        cy.findByRole('dialog', {
+          name: defaultMessages.components.specPatternModal.title,
+        }).should('be.visible').within(() => {
+          cy.validateExternalLink({ name: 'Need help', href: 'https://on.cypress.io' })
+          cy.findByRole('button', { name: 'Close' }).should('be.visible').as('CloseDialogButton')
+          cy.get('[data-cy="file-match-indicator"]').contains('0 Matches')
+          cy.get('[data-cy="spec-pattern"]').contains('**/*.cy.{js,jsx,ts,tsx}')
+        })
+
+        cy.get('@CloseDialogButton').click()
+        cy.findByRole('dialog').should('not.exist')
       })
 
       context('create from story', () => {
@@ -325,7 +373,7 @@ describe('App: Index', () => {
           }).as('CreateFromStoryDialog')
 
           cy.get('@CreateFromStoryDialog').within(() => {
-            cy.validateExternalLink({ name: 'Need help?', href: 'https://on.cypress.io' })
+            cy.validateExternalLink({ name: 'Need help', href: 'https://on.cypress.io' })
           })
 
           cy.findByRole('button', { name: 'Close' }).as('DialogCloseButton')
@@ -394,7 +442,7 @@ describe('App: Index', () => {
           cy.findByRole('dialog', {
             name: defaultMessages.createSpec.successPage.header,
           }).as('SuccessDialog').within(() => {
-            cy.validateExternalLink({ name: 'Need help?', href: 'https://on.cypress.io' })
+            cy.validateExternalLink({ name: 'Need help', href: 'https://on.cypress.io' })
             cy.findByRole('button', { name: 'Close' }).should('be.visible')
             cy.contains('src/stories/Button.stories.cy.jsx').should('be.visible')
 
@@ -468,10 +516,9 @@ describe('App: Index', () => {
         cy.findByTestId('no-specs-message').should('be.visible')
         .and('contain', defaultMessages.createSpec.noSpecsMessage)
 
-        cy.findByRole('link', { name: defaultMessages.createSpec.viewSpecPatternButton })
+        cy.findByRole('button', { name: defaultMessages.createSpec.viewSpecPatternButton })
         .should('be.visible')
         .and('not.be.disabled')
-        .and('have.attr', 'href', '#/settings?section=project&setting=specPattern')
       })
 
       context('create from component', () => {
@@ -483,7 +530,7 @@ describe('App: Index', () => {
           }).as('CreateFromComponentDialog')
 
           cy.get('@CreateFromComponentDialog').within(() => {
-            cy.validateExternalLink({ name: 'Need help?', href: 'https://on.cypress.io' })
+            cy.validateExternalLink({ name: 'Need help', href: 'https://on.cypress.io' })
           })
 
           cy.findByRole('button', { name: 'Close' }).as('DialogCloseButton')
@@ -553,7 +600,7 @@ describe('App: Index', () => {
           cy.findByRole('dialog', {
             name: defaultMessages.createSpec.successPage.header,
           }).as('SuccessDialog').within(() => {
-            cy.validateExternalLink({ name: 'Need help?', href: 'https://on.cypress.io' })
+            cy.validateExternalLink({ name: 'Need help', href: 'https://on.cypress.io' })
             cy.contains('src/App.cy.jsx').should('be.visible')
             cy.findByRole('button', { name: 'Close' }).should('be.visible')
 
@@ -628,7 +675,7 @@ describe('App: Index', () => {
 
         cy.findByTestId('file-match-indicator').should('contain', '0 Matches')
         cy.findByRole('button', { name: 'cypress.config.js' })
-        cy.findByTestId('spec-pattern').should('contain', 'src/**/*.cy.{js,jsx}')
+        cy.findByTestId('spec-pattern').should('contain', 'src/specs-folder/*.cy.{js,jsx}')
 
         cy.contains('button', defaultMessages.createSpec.updateSpecPattern)
         cy.findByRole('button', { name: 'New Spec', exact: false })
@@ -663,6 +710,87 @@ describe('App: Index', () => {
           .and('contain', defaultMessages.createSpec.component.importFromStory.description)
         })
       })
+
+      it('shows create first spec page with create from component option and goes back if it is cancel', () => {
+        cy.findByRole('button', { name: 'New Spec', exact: false }).click()
+
+        cy.findByRole('dialog', { name: defaultMessages.createSpec.newSpecModalTitle }).within(() => {
+          cy.findAllByTestId('card').eq(0)
+          .should('have.attr', 'tabindex', '0')
+          .and('contain', defaultMessages.createSpec.component.importFromComponent.description).click()
+        })
+
+        cy.get('[data-cy=file-list-row]').first().click()
+
+        cy.get('input').invoke('val').should('eq', 'src/App.cy.jsx')
+        cy.contains(defaultMessages.createSpec.component.importEmptySpec.header)
+
+        cy.contains(defaultMessages.components.button.cancel).click()
+
+        cy.contains(defaultMessages.createSpec.newSpecModalTitle)
+      })
+
+      it('shows create first spec page with create from component option', () => {
+        cy.findByRole('button', { name: 'New Spec', exact: false }).click()
+
+        cy.findByRole('dialog', { name: defaultMessages.createSpec.newSpecModalTitle }).within(() => {
+          cy.findAllByTestId('card').eq(0)
+          .should('have.attr', 'tabindex', '0')
+          .and('contain', defaultMessages.createSpec.component.importFromComponent.description).click()
+        })
+
+        cy.get('[data-cy=file-list-row]').first().click()
+
+        cy.get('input').invoke('val').should('eq', 'src/App.cy.jsx')
+        cy.contains(defaultMessages.createSpec.component.importEmptySpec.header)
+        cy.contains(defaultMessages.createSpec.component.importEmptySpec.invalidComponentWarning)
+        cy.get('input').clear()
+        cy.contains(defaultMessages.createSpec.component.importEmptySpec.invalidComponentWarning).should('not.exist')
+        cy.contains('button', defaultMessages.createSpec.createSpec).should('be.disabled')
+
+        cy.get('input').clear().type('src/specs-folder/MyTest.cy.jsx')
+        cy.contains('button', defaultMessages.createSpec.createSpec).should('not.be.disabled').click()
+        cy.contains('h2', defaultMessages.createSpec.successPage.header)
+
+        cy.get('[data-cy="file-row"]').contains('src/specs-folder/MyTest.cy.jsx').click()
+
+        cy.findByRole('dialog', { name: defaultMessages.createSpec.successPage.header }).as('SuccessDialog').within(() => {
+          cy.findByRole('link', {
+            name: 'Okay, run the spec',
+          }).should('have.attr', 'href', '#/specs/runner?file=src/specs-folder/MyTest.cy.jsx')
+        })
+      })
+
+      it('shows create first spec page with create from story option', () => {
+        cy.findByRole('button', { name: 'New Spec', exact: false }).click()
+
+        cy.findByRole('dialog', { name: defaultMessages.createSpec.newSpecModalTitle }).within(() => {
+          cy.findAllByTestId('card').eq(1)
+          .should('have.attr', 'tabindex', '0')
+          .and('contain', defaultMessages.createSpec.component.importFromStory.description).click()
+        })
+
+        cy.get('[data-cy=file-list-row]').first().click()
+
+        cy.get('input').invoke('val').should('eq', 'src/stories/Button.stories.cy.jsx')
+        cy.contains(defaultMessages.createSpec.component.importEmptySpec.header)
+        cy.contains(defaultMessages.createSpec.component.importEmptySpec.invalidComponentWarning)
+        cy.get('input').clear()
+        cy.contains(defaultMessages.createSpec.component.importEmptySpec.invalidComponentWarning).should('not.exist')
+        cy.contains('button', defaultMessages.createSpec.createSpec).should('be.disabled')
+
+        cy.get('input').clear().type('src/specs-folder/Button.stories.cy.jsx')
+        cy.contains('button', defaultMessages.createSpec.createSpec).should('not.be.disabled').click()
+        cy.contains('h2', defaultMessages.createSpec.successPage.header)
+
+        cy.get('[data-cy="file-row"]').contains('src/specs-folder/Button.stories.cy.jsx').click()
+
+        cy.findByRole('dialog', { name: defaultMessages.createSpec.successPage.header }).as('SuccessDialog').within(() => {
+          cy.findByRole('link', {
+            name: 'Okay, run the spec',
+          }).should('have.attr', 'href', '#/specs/runner?file=src/specs-folder/Button.stories.cy.jsx')
+        })
+      })
     })
 
     describe('Code Generation', () => {
@@ -684,7 +812,7 @@ describe('App: Index', () => {
         cy.findByTestId('create-spec-modal').should('be.visible').within(() => {
           cy.contains('Create a new spec').should('be.visible')
 
-          cy.validateExternalLink({ name: `${defaultMessages.links.needHelp}?`, href: 'https://on.cypress.io' })
+          cy.validateExternalLink({ name: `${defaultMessages.links.needHelp}`, href: 'https://on.cypress.io' })
         })
 
         cy.contains('Create from component').click()
