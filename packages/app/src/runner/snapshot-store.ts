@@ -95,7 +95,7 @@ export const useSnapshotStore = defineStore({
       this.messageTitle = defaultMessages.runner.snapshot.testsRunningError
     },
 
-    setMessage (messageTitle: string, messageType: SnapshotMessageType) {
+    setMessage (messageTitle: string) {
       this.messageTitle = messageTitle
     },
 

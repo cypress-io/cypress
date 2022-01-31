@@ -45,8 +45,6 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 import { useSnapshotStore } from './snapshot-store'
-import SnapshotMessage from './SnapshotMessage.vue'
-import SnapshotChangeState from './SnapshotChangeState.vue'
 import SnapshotHighlightControls from './SnapshotHighlightControls.vue'
 import type { EventManager } from '../runner/event-manager'
 import type { AutIframe } from '../runner/aut-iframe'
@@ -57,7 +55,6 @@ const props = defineProps<{
   getAutIframe: () => AutIframe
 }>()
 
-const snapshotStatic = computed(() => true)
 const snapshotStore = useSnapshotStore()
 
 const snapshots = computed(() => snapshotStore.snapshotProps?.snapshots)
@@ -66,9 +63,9 @@ const snapshotMessages = computed(() => {
   if (!snapshots.value) return []
 
   return snapshots.value.map(({ name }, idx) => {
-    if (!name) return { text: idx + 1, id: `${idx }` }
+    if (!name) return { text: `${idx + 1}`, id: `${idx}` }
 
-    return { text: name, id: `${idx }` }
+    return { text: `${name}`, id: `${idx}` }
   })
 })
 

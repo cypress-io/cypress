@@ -10,9 +10,8 @@ export const autSnapshot: AutSnapshot = {
     y: 0,
   },
   highlightAttr: '',
-  snapshots: [{
-    name: 'Before',
-  }, { name: 'After' }],
+  // @ts-ignore
+  snapshots: [{ name: 'Before' }, { name: 'After' }],
   htmlAttrs: {},
   viewportHeight: 500,
   viewportWidth: 500,
