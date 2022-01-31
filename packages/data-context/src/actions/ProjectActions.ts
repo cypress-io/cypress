@@ -1,11 +1,8 @@
-import type { CodeGenType, MutationSetProjectPreferencesArgs, NexusGenObjects, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
+import type { CodeGenType, MutationSetProjectPreferencesArgs, NexusGenObjects, NexusGenUnions, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
 import type { InitializeProjectOptions, FoundBrowser, FoundSpec, LaunchOpts, OpenProjectLaunchOptions, Preferences, TestingType, ReceivedCypressOptions, AddProject } from '@packages/types'
 import execa from 'execa'
 import path from 'path'
 import assert from 'assert'
-import Debug from 'debug'
-
-const debug = Debug('cypress:data-context:project-actions')
 
 import type { ProjectShape } from '../data/coreDataShape'
 
@@ -37,6 +34,14 @@ export interface ProjectApiShape {
   getDevServer (): {
     updateSpecs: (specs: FoundSpec[]) => void
   }
+}
+
+type SetSpecsFoundBySpecPattern = {
+  path: string
+  testingType: Cypress.TestingType
+  specPattern?: Cypress.Config['specPattern']
+  ignoreSpecPattern?: Cypress.Config['ignoreSpecPattern']
+  additionalIgnorePattern?: string | string[]
 }
 
 export class ProjectActions {
@@ -308,7 +313,7 @@ export class ProjectActions {
     this.api.insertProjectPreferencesToCache(this.ctx.lifecycleManager.projectTitle, args)
   }
 
-  async codeGenSpec (codeGenCandidate: string, codeGenType: CodeGenType): Promise<NexusGenObjects['ScaffoldedFile']> {
+  async codeGenSpec (codeGenCandidate: string, codeGenType: CodeGenType, erroredCodegenCandidate?: string | null): Promise<NexusGenUnions['GeneratedSpecResult']> {
     const project = this.ctx.currentProject
 
     if (!project) {
@@ -317,10 +322,15 @@ export class ProjectActions {
 
     const parsed = path.parse(codeGenCandidate)
 
-    const getFileExtension = () => {
-      if (codeGenType === 'e2e') {
-        const possibleExtensions = ['.spec', '.test', '-spec', '-test', '.cy', '_spec']
+    const defaultCText = '.cy'
+    const possibleExtensions = ['.cy', '.spec', '.test', '-spec', '-test', '_spec']
 
+    const getFileExtension = () => {
+      if (erroredCodegenCandidate) {
+        return ''
+      }
+
+      if (codeGenType === 'e2e') {
         return (
           possibleExtensions.find((ext) => {
             return codeGenCandidate.endsWith(ext + parsed.ext)
@@ -328,11 +338,11 @@ export class ProjectActions {
         )
       }
 
-      return '.cy'
+      return defaultCText
     }
 
     const getCodeGenPath = () => {
-      return codeGenType === 'e2e'
+      return codeGenType === 'e2e' || erroredCodegenCandidate
         ? this.ctx.path.join(
           project,
           codeGenCandidate,
@@ -347,9 +357,41 @@ export class ProjectActions {
       codeGenPath,
       codeGenType,
       specFileExtension,
+      erroredCodegenCandidate,
     })
 
-    const codeGenOptions = await newSpecCodeGenOptions.getCodeGenOptions()
+    let codeGenOptions = await newSpecCodeGenOptions.getCodeGenOptions()
+
+    if ((codeGenType === 'component' || codeGenType === 'story') && !erroredCodegenCandidate) {
+      const filePathAbsolute = path.join(path.parse(codeGenPath).dir, codeGenOptions.fileName)
+      const filePathRelative = path.relative(this.ctx.currentProject || '', filePathAbsolute)
+
+      let foundExt
+
+      for await (const ext of possibleExtensions) {
+        const file = filePathRelative.replace(defaultCText, ext)
+
+        const matchesSpecPattern = await this.ctx.project.matchesSpecPattern(file)
+
+        if (matchesSpecPattern) {
+          foundExt = ext
+          break
+        }
+      }
+
+      if (!foundExt) {
+        return {
+          fileName: filePathRelative,
+          erroredCodegenCandidate: codeGenPath,
+        }
+      }
+
+      codeGenOptions = {
+        ...codeGenOptions,
+        fileName: codeGenOptions.fileName.replace(defaultCText, foundExt),
+      }
+    }
+
     const codeGenResults = await codeGenerator(
       { templateDir: templates[codeGenType], target: path.parse(codeGenPath).dir },
       codeGenOptions,
@@ -361,11 +403,58 @@ export class ProjectActions {
 
     const [newSpec] = codeGenResults.files
 
+    const cfg = this.ctx.project.getConfig()
+
+    if (cfg && this.ctx.currentProject) {
+      const testingType = (codeGenType === 'component' || codeGenType === 'story') ? 'component' : 'e2e'
+
+      const { specs } = await this.setSpecsFoundBySpecPattern({
+        path: this.ctx.currentProject,
+        testingType,
+        specPattern: cfg[testingType]?.specPattern,
+        ignoreSpecPattern: cfg[testingType]?.ignoreSpecPattern,
+        additionalIgnorePattern: testingType === 'component' ? cfg?.e2e?.specPattern : undefined,
+      })
+
+      if (specs) {
+        if (testingType === 'component') {
+          this.api.getDevServer().updateSpecs(specs)
+        }
+      }
+    }
+
     return {
       status: 'valid',
       file: { absolute: newSpec.file, contents: newSpec.content },
       description: 'Generated spec',
     }
+  }
+
+  async setSpecsFoundBySpecPattern ({ path, testingType, specPattern, ignoreSpecPattern, additionalIgnorePattern }: SetSpecsFoundBySpecPattern) {
+    const toArray = (val?: string | string[]) => val ? typeof val === 'string' ? [val] : val : undefined
+
+    specPattern = toArray(specPattern)
+
+    ignoreSpecPattern = toArray(ignoreSpecPattern) || []
+
+    // exclude all specs matching e2e if in component testing
+    additionalIgnorePattern = toArray(additionalIgnorePattern) || []
+
+    if (!specPattern) {
+      throw Error('could not find pattern to load specs')
+    }
+
+    const specs = await this.ctx.project.findSpecs(
+      path,
+      testingType,
+      specPattern,
+      ignoreSpecPattern,
+      additionalIgnorePattern,
+    )
+
+    this.ctx.actions.project.setSpecs(specs)
+
+    return { specs, specPattern, ignoreSpecPattern, additionalIgnorePattern }
   }
 
   async reconfigureProject () {
@@ -384,24 +473,10 @@ export class ProjectActions {
     return path.join(projectRoot, 'cypress', 'e2e')
   }
 
-  async maybeCreateE2EDir () {
-    const stats = await this.ctx.fs.stat(this.defaultE2EPath)
-
-    if (stats.isDirectory()) {
-      return
-    }
-
-    debug(`Creating ${this.defaultE2EPath}`)
-
-    return this.ctx.fs.mkdirp(this.defaultE2EPath)
-  }
-
   async scaffoldIntegration (): Promise<NexusGenObjects['ScaffoldedFile'][]> {
     const projectRoot = this.ctx.currentProject
 
     assert(projectRoot, `Cannot create spec without currentProject.`)
-
-    await this.maybeCreateE2EDir()
 
     const results = await codeGenerator(
       { templateDir: templates['scaffoldIntegration'], target: this.defaultE2EPath },

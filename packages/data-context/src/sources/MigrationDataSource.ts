@@ -1,5 +1,4 @@
 import { TestingType, MIGRATION_STEPS } from '@packages/types'
-import Debug from 'debug'
 import type chokidar from 'chokidar'
 import path from 'path'
 import type { DataContext } from '..'
@@ -7,19 +6,16 @@ import {
   createConfigString,
   initComponentTestingMigration,
   ComponentTestingMigrationStatus,
-  getSpecs,
   getDefaultLegacySupportFile,
-  RelativeSpecWithTestingType,
   supportFilesForMigration,
   OldCypressConfig,
   hasComponentSpecFile,
 } from '../util/migration'
 import {
-  formatMigrationFile,
-  FilePart,
-  regexps,
-  NonSpecFileError,
-} from '../util/migrationFormat'
+  getSpecs,
+  applyMigrationTransform,
+} from './migration/autoRename'
+import type { FilePart } from '../util/migrationFormat'
 import {
   getStepsForMigration,
   shouldShowRenameSupport,
@@ -29,17 +25,16 @@ import {
   getComponentFolder,
 } from './migration/shouldShowSteps'
 
-const debug = Debug('cypress:data-context:MigrationDataSource')
-
-interface MigrationFile {
+export interface MigrationFile {
   testingType: TestingType
-  relative: string
-  parts: FilePart[]
-}
-
-export interface FilesForMigrationUI {
-  before: MigrationFile[]
-  after: MigrationFile[]
+  before: {
+    relative: string
+    parts: FilePart[]
+  }
+  after: {
+    relative: string
+    parts: FilePart[]
+  }
 }
 
 type MIGRATION_STEP = typeof MIGRATION_STEPS[number]
@@ -80,21 +75,6 @@ export class MigrationDataSource {
     }
 
     this.setStep(this.filteredSteps[0])
-  }
-
-  async getSpecsRelativeToFolder () {
-    if (!this.ctx.currentProject) {
-      throw Error('cannot get specs without a project path')
-    }
-
-    const compFolder = await this.componentFolder()
-    const intFolder = await this.integrationFolder()
-
-    const specs = await getSpecs(this.ctx.currentProject, compFolder || null, intFolder || null)
-
-    debug('looked in %s and %s and found %o', compFolder, intFolder, specs)
-
-    return specs
   }
 
   async getDefaultLegacySupportFile (): Promise<string> {
@@ -150,7 +130,7 @@ export class MigrationDataSource {
     return this.componentTestingMigrationStatus
   }
 
-  async supportFilesForMigrationGuide (): Promise<FilesForMigrationUI | null> {
+  async supportFilesForMigrationGuide (): Promise<MigrationFile | null> {
     const config = await this.parseCypressConfig()
 
     if (!shouldShowRenameSupport(config)) {
@@ -164,39 +144,25 @@ export class MigrationDataSource {
     return supportFilesForMigration(this.ctx.currentProject)
   }
 
-  async getSpecsForMigrationGuide (): Promise<FilesForMigrationUI> {
-    const specs = await this.getSpecsRelativeToFolder()
-
-    const processSpecs = (regexp: 'beforeRegexp' | 'afterRegexp') => {
-      return (acc: MigrationFile[], x: RelativeSpecWithTestingType) => {
-        try {
-          return acc.concat({
-            testingType: x.testingType,
-            relative: x.relative,
-            parts: formatMigrationFile(x.relative, new RegExp(regexps[x.testingType][regexp])),
-          })
-        } catch (e) {
-          if (e instanceof NonSpecFileError) {
-            // it's possible they have a non spec file in their cypress/integration directory,
-            // if that happens, we just skip that file and carry on.
-            return acc
-          }
-
-          throw e
-        }
-      }
+  async getSpecsForMigrationGuide (): Promise<MigrationFile[]> {
+    if (!this.ctx.currentProject) {
+      throw Error(`Need this.ctx.projectRoot!`)
     }
 
-    const result: FilesForMigrationUI = {
-      before: specs.before.reduce(processSpecs('beforeRegexp'), []),
-      after: specs.after.reduce(processSpecs('afterRegexp'), []),
+    const config = await this.parseCypressConfig()
+
+    const specs = await getSpecs(this.ctx.currentProject, config)
+
+    const canBeAutomaticallyMigrated: MigrationFile[] = specs.integration.map(applyMigrationTransform)
+
+    const defaultComponentPattern = isDefaultTestFiles(await this.parseCypressConfig(), 'component')
+
+    // Can only migration component specs if they use the default testFiles pattern.
+    if (defaultComponentPattern) {
+      canBeAutomaticallyMigrated.push(...specs.component.map(applyMigrationTransform))
     }
 
-    if (result.before.length !== result.after.length) {
-      throw Error(`Before and after should have same lengths, got ${result.before.length} and ${result.after.length}`)
-    }
-
-    return result
+    return canBeAutomaticallyMigrated
   }
 
   async getConfig () {
