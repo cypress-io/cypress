@@ -9,7 +9,7 @@ const snapshotPinned = { ...autSnapshot, snapshots: [] }
 const snapshotControlsSelector = '[data-testid=snapshot-controls]'
 const unpinButtonSelector = '[data-testid=unpin]'
 
-describe('SnapshotControls', { viewportHeight: 100, viewportWidth: 500 }, () => {
+describe('SnapshotControls', { viewportHeight: 200, viewportWidth: 500 }, () => {
   afterEach(() => {
     cy.wait(100).percySnapshot()
   })
