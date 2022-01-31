@@ -53,13 +53,13 @@ describe('Card', { viewportHeight: 400 }, () => {
     // health check that expected icons and hover icons are present in the dom
     cy.get('svg').should('have.length', 4)
 
-    cy.percySnapshot('both cards unfocused')
+    cy.percySnapshot()
 
     cy.get('@e2eTitle').focus()
-    cy.percySnapshot('card-1 focused')
+    cy.percySnapshot()
 
     cy.get('@ctTitle').focus()
-    cy.percySnapshot('card-2 focused')
+    cy.percySnapshot()
 
     // clicks work on card or button
     cy.get('[data-cy="card"]').eq(0).click()
@@ -102,6 +102,6 @@ describe('Card', { viewportHeight: 400 }, () => {
 
     cy.get('@clickSpy').should('not.have.been.called')
 
-    cy.percySnapshot('disabled card')
+    cy.percySnapshot()
   })
 })

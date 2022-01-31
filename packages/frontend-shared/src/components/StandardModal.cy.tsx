@@ -30,7 +30,7 @@ describe('<StandardModal />', { viewportWidth: 500, viewportHeight: 400 }, () =>
       cy.contains('h2', title).should('be.visible')
       cy.contains(body).should('be.visible')
 
-      cy.percySnapshot('basic modal')
+      cy.percySnapshot()
     })
 
     it('bare variant renders without padding in body', () => {
@@ -44,7 +44,7 @@ describe('<StandardModal />', { viewportWidth: 500, viewportHeight: 400 }, () =>
 
       cy.contains(title).should('be.visible')
 
-      cy.percySnapshot('bare variant no padding on body')
+      cy.percySnapshot()
     })
 
     it('click-outside can be turned off', () => {
@@ -83,7 +83,7 @@ describe('<StandardModal />', { viewportWidth: 500, viewportHeight: 400 }, () =>
       .closest(`[data-cy=standard-modal].${testClass}`)
       .should('exist')
 
-      cy.percySnapshot('modal classes pass through')
+      cy.percySnapshot()
     })
   })
 
