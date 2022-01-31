@@ -11,5 +11,5 @@ Steps:
 Output:
 
 ```js
-// TODO
+// TO
 ```
