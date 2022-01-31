@@ -175,7 +175,7 @@ const ffToStandardResourceTypeMap: { [ff: string]: ResourceType } = {
 }
 
 export class CdpAutomation {
-  constructor (private sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn, private automation: Automation) {
+  constructor (private sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn, private automation: Automation, private sendCloseTargetCommandFn?) {
     onFn('Network.requestWillBeSent', this.onNetworkRequestWillBeSent)
     onFn('Network.responseReceived', this.onResponseReceived)
     sendDebuggerCommandFn('Network.enable', {
@@ -326,8 +326,16 @@ export class CdpAutomation {
         return this.sendDebuggerCommandFn('Storage.clearDataForOrigin', { origin: '*', storageTypes: 'all' }).then(() => {
           return this.sendDebuggerCommandFn('Network.clearBrowserCache')
         })
+      case 'close:browser:tab':
+        return this.sendDebuggerCommandFn('Target.getTargets').then((targets) => {
+          const targetIdToClose = targets.targetInfos.find((target) => target.attached).targetId
+
+          return this.sendCloseTargetCommandFn(targetIdToClose)
+        })
       case 'start:browser:tab':
         return this.sendDebuggerCommandFn('Target.createTarget', { url: data.url })
+      case 'stop:screencast':
+        return this.sendDebuggerCommandFn('Page.stopScreencast')
       default:
         throw new Error(`No automation handler registered for: '${message}'`)
     }

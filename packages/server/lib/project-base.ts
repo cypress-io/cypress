@@ -474,8 +474,8 @@ export class ProjectBase<TServer extends Server> extends EE {
     this.server.changeToUrl(url)
   }
 
-  async closeBrowserTab (urlToExclude) {
-    return this.server.socket.closeBrowserTab(urlToExclude)
+  async closeBrowserTab () {
+    return this.server.socket.closeBrowserTab()
   }
 
   async resetBrowserState () {
@@ -484,6 +484,10 @@ export class ProjectBase<TServer extends Server> extends EE {
 
   async startNewBrowserTab (url) {
     return this.server.socket.startNewBrowserTab(url)
+  }
+
+  async stopScreencast () {
+    return this.server.socket.stopScreencast()
   }
 
   shouldCorrelatePreRequests = () => {

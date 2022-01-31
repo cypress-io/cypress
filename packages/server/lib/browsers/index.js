@@ -92,6 +92,16 @@ module.exports = {
     return utils.getBrowsers()
   },
 
+  async closeBrowserTab (browser, options) {
+    const browserLauncher = getBrowserLauncher(browser)
+
+    if (!browserLauncher) {
+      utils.throwBrowserNotFound(browser.name, options.browsers)
+    }
+
+    await browserLauncher.closeBrowserTab()
+  },
+
   async connectToExisting (browser, options = {}, automation) {
     const browserLauncher = getBrowserLauncher(browser)
 

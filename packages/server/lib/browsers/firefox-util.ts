@@ -101,11 +101,10 @@ const attachToTabMemory = Bluebird.method((tab) => {
   })
 })
 
-async function closeBrowserTab (client) {
-  const targets = await client.send('Target.getTargets')
-  const targetIdToClose = targets.targetInfos.find((target) => !target.attached && target.type === 'page').targetId
-
-  await client.send('Target.closeTarget', { targetId: targetIdToClose })
+async function closeBrowserTab () {
+  await sendMarionette({
+    name: 'WebDriver:CloseWindow',
+  })
 }
 
 async function connectMarionetteToNewTab () {
@@ -113,16 +112,13 @@ async function connectMarionetteToNewTab () {
   const handles = await sendMarionette({
     name: 'WebDriver:GetWindowHandles',
   })
-  const currentHandle = (await sendMarionette({
-    name: 'WebDriver:GetWindowHandle',
-  })).value
-
-  const nonCurrentHandle = handles.find((handle) => handle !== currentHandle)
 
   await sendMarionette({
     name: 'WebDriver:SwitchToWindow',
-    parameters: { handle: nonCurrentHandle },
+    parameters: { handle: handles[0] },
   })
+
+  await navigateToUrl('about:blank')
 }
 
 async function connectToNewSpec (browser, options, automation) {
@@ -130,7 +126,7 @@ async function connectToNewSpec (browser, options, automation) {
 
   const criClient = await setupRemote(browser.debuggingPort, automation, options.onError)
 
-  await closeBrowserTab(criClient)
+  new CdpAutomation(criClient.send, criClient.on, automation)
 
   await navigateToUrl(options.url)
 }
@@ -230,6 +226,8 @@ export default {
       remotePort && setupRemote(remotePort, automation, onError),
     ])
   },
+
+  closeBrowserTab,
 
   connectToNewSpec,
 

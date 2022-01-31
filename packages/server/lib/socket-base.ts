@@ -77,6 +77,7 @@ export class SocketBase {
   private _sendCloseBrowserTabMessage
   private _sendResetBrowserStateMessage
   private _sendStartNewBrowserTabMessage
+  private _sendStopScreencastMessage
   protected ended: boolean
   protected _io?: socketIo.SocketIOServer
 
@@ -276,8 +277,8 @@ export class SocketBase {
         })
       })
 
-      this._sendCloseBrowserTabMessage = async (urlToExclude) => {
-        await automationRequest('close:browser:tab', { urlToExclude })
+      this._sendCloseBrowserTabMessage = async () => {
+        await automationRequest('close:browser:tab', {})
       }
 
       this._sendResetBrowserStateMessage = async () => {
@@ -286,6 +287,10 @@ export class SocketBase {
 
       this._sendStartNewBrowserTabMessage = async (url) => {
         await automationRequest('start:browser:tab', { url })
+      }
+
+      this._sendStopScreencastMessage = async () => {
+        await automationRequest('stop:screencast', {})
       }
 
       socket.on('reporter:connected', () => {
@@ -553,8 +558,8 @@ export class SocketBase {
     return this.toRunner('change:to:url', url)
   }
 
-  async closeBrowserTab (urlToExclude) {
-    await this._sendCloseBrowserTabMessage(urlToExclude)
+  async closeBrowserTab () {
+    await this._sendCloseBrowserTabMessage()
   }
 
   async resetBrowserState () {
@@ -563,6 +568,10 @@ export class SocketBase {
 
   async startNewBrowserTab (url) {
     await this._sendStartNewBrowserTabMessage(url)
+  }
+
+  async stopScreencast () {
+    await this._sendStopScreencastMessage()
   }
 
   close () {

@@ -357,6 +357,10 @@ export function _createDetachedInstance (browserInstance: BrowserInstance): Brow
   return detachedInstance
 }
 
+export async function closeBrowserTab () {
+  await firefoxUtil.closeBrowserTab()
+}
+
 export async function connectToNewSpec (browser: Browser, options: any = {}, automation) {
   await firefoxUtil.connectToNewSpec(browser, options, automation)
 }

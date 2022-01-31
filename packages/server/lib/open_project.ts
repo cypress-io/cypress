@@ -132,7 +132,6 @@ export class OpenProject {
 
     options.onError = this.projectBase.options.onError
 
-    await this.startNewBrowserTab('about:blank')
     await browsers.connectToNewSpec(this.projectBase.browser, options, this.projectBase.automation)
   }
 
@@ -273,8 +272,8 @@ export class OpenProject {
     return browsers.close()
   }
 
-  async closeBrowserTab (urlToExclude) {
-    return this.projectBase?.closeBrowserTab(urlToExclude)
+  async closeBrowserTab () {
+    return this.projectBase?.closeBrowserTab()
   }
 
   async resetBrowserState () {
@@ -283,6 +282,10 @@ export class OpenProject {
 
   async startNewBrowserTab (url) {
     return this.projectBase?.startNewBrowserTab(url)
+  }
+
+  async stopScreencast () {
+    return this.projectBase?.stopScreencast()
   }
 
   closeOpenProjectAndBrowsers () {

@@ -64,6 +64,7 @@ interface CRIWrapper {
    * @see https://github.com/cyrus-and/chrome-remote-interface#class-cdp
    */
   on (eventName: CRI.EventName, cb: Function): void
+  closeTarget (targetId: string): Bluebird<any>
   /**
    * Calls underlying remote interface client close
   */
@@ -136,6 +137,12 @@ const maybeDebugCdpMessages = (cri) => {
 export { chromeRemoteInterface }
 
 type DeferredPromise = { resolve: Function, reject: Function }
+
+export const newTab = async (host, port, onAsynchronousError) => {
+  return chromeRemoteInterface.New({ host, port }).then((target) => {
+    return create(target.webSocketDebuggerUrl, onAsynchronousError)
+  })
+}
 
 export const create = Bluebird.method((target: websocketUrl, onAsynchronousError: Function): Bluebird<CRIWrapper> => {
   const subscriptions: {eventName: CRI.EventName, cb: Function}[] = []
@@ -222,6 +229,11 @@ export const create = Bluebird.method((target: websocketUrl, onAsynchronousError
     client = {
       ensureMinimumProtocolVersion,
       getProtocolVersion,
+      closeTarget: Bluebird.method(async (targetId) => {
+        const { port } = new URL(target)
+
+        return chromeRemoteInterface.Close({ host: '127.0.0.1', port, id: targetId })
+      }),
       send: Bluebird.method((command: CRI.Command, params?: object) => {
         const enqueue = () => {
           return new Bluebird((resolve, reject) => {

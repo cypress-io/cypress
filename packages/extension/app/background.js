@@ -94,6 +94,8 @@ const connect = function (host, path, extraOpts) {
         return invoke('closeBrowserTab', id, data)
       case 'start:browser:tab':
         return invoke('startBrowserTab', id, data)
+      case 'stop:screencast':
+        return invoke('stopScreencast', id)
       default:
         return fail(id, { message: `No handler registered for: '${msg}'` })
     }
@@ -218,13 +220,15 @@ const automation = {
   closeBrowserTab ({ urlToExclude }, fn) {
     return Promise.try(() => {
       return browser.tabs.query({ windowType: 'normal' })
-    }).filter((tab) => {
-      return tab.url !== urlToExclude
     }).then((tabs) => browser.tabs.remove(tabs.map((tab) => tab.id))).then(fn)
   },
 
   startBrowserTab ({ url }, fn) {
     return browser.tabs.create({ url }).then(fn)
+  },
+
+  stopScreencast (fn) {
+    return Promise.resolve(true).then(fn)
   },
 
   query (data) {

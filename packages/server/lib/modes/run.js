@@ -1311,6 +1311,11 @@ module.exports = {
         await openProject.closeBrowser()
       }
 
+      await openProject.stopScreencast()
+      await openProject.resetBrowserState()
+      await openProject.closeBrowserTab()
+      openProject.projectBase.server.reset()
+
       if (videoExists && !skippedSpec && endVideoCapture && !videoCaptureFailed) {
         const ffmpegChaptersConfig = videoCapture.generateFfmpegChaptersConfig(results.tests)
 
@@ -1324,9 +1329,6 @@ module.exports = {
         )
         .catch(warnVideoRecordingFailed)
       }
-
-      await openProject.resetBrowserState()
-      openProject.projectBase.server.reset()
 
       return results
     })

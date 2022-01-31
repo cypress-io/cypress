@@ -245,6 +245,10 @@ const _disableRestorePagesPrompt = function (userDir) {
   .catch(() => { })
 }
 
+const _connectToNewTab = async function (port, onError) {
+  return CriClient.newTab('127.0.0.1', port, onError)
+}
+
 // After the browser has been opened, we can connect to
 // its remote interface via a websocket.
 const _connectToChromeRemoteInterface = function (port, onError, browserDisplayName, url?) {
@@ -277,14 +281,6 @@ const _maybeRecordVideo = async function (client, options, browserMajorVersion) 
   await client.send('Page.startScreencast', browserMajorVersion >= CHROME_VERSION_WITH_FPS_INCREASE ? screencastOpts() : screencastOpts(1))
 
   return client
-}
-
-const _closeBrowserTab = async function (client) {
-  const targets = await client.send('Target.getTargets')
-
-  const targetIdToClose = targets.targetInfos.find((target) => target.url !== 'about:blank' && target.type === 'page').targetId
-
-  await client.send('Target.closeTarget', { targetId: targetIdToClose })
 }
 
 // a utility function that navigates to the given URL
@@ -339,7 +335,7 @@ const _handleDownloads = async function (client, dir, automation) {
 
 const _setAutomation = (client, automation) => {
   return automation.use(
-    new CdpAutomation(client.send, client.on, automation),
+    new CdpAutomation(client.send, client.on, automation, client.closeTarget),
   )
 }
 
@@ -357,8 +353,6 @@ export = {
   _connectToChromeRemoteInterface,
 
   _maybeRecordVideo,
-
-  _closeBrowserTab,
 
   _navigateUsingCRI,
 
@@ -453,13 +447,31 @@ export = {
     return args
   },
 
+  _connectToNewTab,
+
   async connectToNewSpec (browser: Browser, options: CypressConfiguration = {}, automation) {
+    const { isTextTerminal } = options
+    const userDir = utils.getProfileDir(browser, isTextTerminal)
+    const preferences = await _getChromePreferences(userDir)
+    const defaultArgs = this._getArgs(browser, options, String(browser.debuggingPort))
+    const defaultLaunchOptions = utils.getDefaultLaunchOptions({
+      preferences,
+      args: defaultArgs,
+    })
+
+    await Bluebird.all([
+      // ensure that we have a clean cache dir
+      // before launching the browser every time
+      utils.ensureCleanCache(browser, isTextTerminal),
+      utils.executeBeforeBrowserLaunch(browser, defaultLaunchOptions, options),
+    ])
+
     const port = browser.debuggingPort
-    const criClient = await this._connectToChromeRemoteInterface(port, options, browser.displayName)
+
+    const criClient = await this._connectToNewTab(port, options)
 
     this._setAutomation(criClient, automation)
 
-    await this._closeBrowserTab(criClient)
     await this._maybeRecordVideo(criClient, options, browser.majorVersion)
     await this._navigateUsingCRI(criClient, options.url)
     await this._handleDownloads(criClient, options.downloadsFolder, automation)
