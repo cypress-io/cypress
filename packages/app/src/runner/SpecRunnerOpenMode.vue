@@ -48,7 +48,7 @@
       <template
         #panel3="{width}"
       >
-        <HideDuringScreenshotOrRunMode class="bg-white p-16px">
+        <HideDuringScreenshotOrRunMode class="bg-white">
           <SpecRunnerHeader
             v-if="props.gql.currentProject"
             :gql="props.gql.currentProject"

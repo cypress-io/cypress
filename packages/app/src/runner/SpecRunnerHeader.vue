@@ -1,35 +1,37 @@
 <template>
-  <div :style="{width: `${props.width}px`}">
+  <div
+    :style="{ width: `${props.width}px` }"
+    class="h-64px grid items-center"
+  >
     <div class="flex gap-24px justify-between">
       <!--
         TODO: Studio. Out of scope for GA.
-        <button
+      <Button
         data-cy="header-studio"
         :disabled="isDisabled"
-      >
-        Studio
-      </button> -->
-
-      <Button
-        data-cy="header-selector"
-        :disabled="isDisabled"
-        class="px-8px"
+        class="m-16px mr-12px"
         variant="outline"
         @click="togglePlayground"
       >
         <i-cy-action-record_x16 class="h-32px w-32px" />
       </Button>
-
+      -->
       <div
         v-if="props.gql.currentTestingType === 'e2e'"
         data-cy="aut-url"
-        class="flex flex-grow"
+        class="border rounded flex flex-grow border-1px border-solid-gray-100 h-32px ml-16px align-middle"
       >
-        <div class="grid items-center">
-          <i-cy-crosshairs_x16 />
-        </div>
+        <Button
+          data-cy="header-selector"
+          :disabled="isDisabled"
+          class="rounded-none border-r-1px border-solid-gray-100 mr-12px"
+          variant="text"
+          @click="togglePlayground"
+        >
+          <i-cy-crosshairs_x16 class="icon-dark-gray-600" />
+        </Button>
         <div
-          class="rounded-md flex-grow shadow-md mx-2 px-4"
+          class="grid items-center"
           :class="{
             'bg-yellow-50': autStore.isLoadingUrl,
             'bg-white': !autStore.isLoadingUrl,
@@ -39,24 +41,41 @@
         </div>
       </div>
 
-      <Select
+      <!-- <Select
         :model-value="browser"
         data-cy="select-browser"
         :options="browsers"
         item-value="displayName"
+        size="sm"
         @update:model-value="changeBrowser"
-      />
-      <Popover class="relative">
-        <PopoverButton class="flex">
-          <span>Viewport</span>
-          <i-cy-chevron-down-small_x8 />
-        </PopoverButton>
-        <PopoverPanel class="bg-white p-16px right-0 absolute">
+      /> -->
+
+      <SpecRunnerDropdown v-if="browser">
+        <template #heading>
+          {{ browser.displayName }}
+        </template>
+        <template #default>
+          <li
+            v-for="browserItem in browsers"
+            :key="browserItem.id"
+          >
+            {{ browserItem.displayName }}
+          </li>
+        </template>
+      </SpecRunnerDropdown>
+      <SpecRunnerDropdown variant="panel">
+        <template #heading>
+          Viewport
+        </template>
+        <template #default>
           <p>
-            The <strong>viewport</strong> determines the width and height of your application. By default the viewport will be
+            The
+            <strong>viewport</strong> determines the width and height of your application. By default the viewport will be
             <strong>{` ${defaults.width}`}px</strong> by
-            <strong>{` ${defaults.height}`}px</strong> unless specified by a
-            {' '}<code>cy.viewport</code> command.
+            <strong>{` ${defaults.height}`}px</strong>
+            unless specified by a
+            {' '}
+            <code>cy.viewport</code> command.
           </p>
           <p>Additionally you can override the default viewport dimensions by specifying these values in your {configFileFormatted(config.configFile)}.</p>
           <pre>
@@ -66,14 +85,12 @@
 }
           </pre>
           <p>
-            <ExternalLink
-              href="https://on.cypress.io/viewport"
-            >
+            <ExternalLink href="https://on.cypress.io/viewport">
               Read more about viewport here.
             </ExternalLink>
           </p>
-        </PopoverPanel>
-      </Popover>
+        </template>
+      </SpecRunnerDropdown>
     </div>
 
     <div
@@ -91,7 +108,6 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
 import { useAutStore, useSpecStore } from '../store'
-import Select from '@packages/frontend-shared/src/components/Select.vue'
 import { gql, useMutation } from '@urql/vue'
 import { SpecRunnerHeaderFragment, SpecRunnerHeader_SetBrowserDocument, SpecRunnerHeader_BrowserFragment } from '../generated/graphql'
 import SelectorPlayground from './selector-playground/SelectorPlayground.vue'
@@ -101,7 +117,7 @@ import type { AutIframe } from './aut-iframe'
 import { togglePlayground as _togglePlayground } from './utils'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import Button from '@packages/frontend-shared/src/components/Button.vue'
-import { Popover, PopoverButton, PopoverPanel } from '@headlessui/vue'
+import SpecRunnerDropdown from './SpecRunnerDropdown.vue'
 
 gql`
 fragment SpecRunnerHeader on CurrentProject {
