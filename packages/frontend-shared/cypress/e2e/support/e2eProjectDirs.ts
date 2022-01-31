@@ -85,6 +85,7 @@ export const e2eProjectDirs = [
   'remote-debugging-disconnect',
   'remote-debugging-port-removed',
   'retries-2',
+  'runner-e2e-specs',
   'same-fixtures-integration-folders',
   'screen-size',
   'selectFile',
