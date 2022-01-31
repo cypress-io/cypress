@@ -1,8 +1,9 @@
+import Bluebird from 'bluebird'
 /* eslint-disable no-console */
 import chalk from 'chalk'
 import _ from 'lodash'
-import Bluebird from 'bluebird'
-import { errTemplate, details, guard, ErrTemplateResult, backtick } from './util/err_template'
+import { backtick, details, errTemplate, guard, ErrTemplateResult } from './util/err_template'
+
 const strip = require('strip-ansi')
 const AU = require('ansi_up')
 const { stripIndent } = require('./util/strip_indent')
@@ -148,7 +149,7 @@ const AllCypressErrors = {
         We could not identify a known browser at the path you provided: ${arg1}
 
         The output from the command we ran was:
-        
+
         ${details(arg2)}`
   },
   NOT_LOGGED_IN: () => {
@@ -164,7 +165,7 @@ const AllCypressErrors = {
     return errTemplate`The browser never connected. Something is wrong. The tests cannot run. Aborting...`
   },
   DASHBOARD_CANCEL_SKIPPED_SPEC: () => {
-    return errTemplate`\n  This spec and its tests were skipped because the run has been canceled.`
+    return errTemplate`${guard(`\n  `)}This spec and its tests were skipped because the run has been canceled.`
   },
   DASHBOARD_API_RESPONSE_FAILED_RETRYING: (arg1: {tries: number, delay: number, response: string}) => {
     return errTemplate`\
@@ -626,7 +627,7 @@ const AllCypressErrors = {
       We loaded the \`pluginsFile\` from: ${arg1}
 
       It exported:
-      
+
       ${details(arg2)}
     `
   },
@@ -635,7 +636,7 @@ const AllCypressErrors = {
       The function exported by the plugins file threw an error.
 
       We invoked the function exported by ${arg1}, but it threw an error.
-    
+
       ${details(arg2)}
     `
   },
@@ -649,7 +650,7 @@ const AllCypressErrors = {
   PLUGINS_VALIDATION_ERROR: (arg1: string, arg2: string) => {
     return errTemplate`
       The following validation error was thrown by your plugins file (${arg1}).
-    
+
       ${details(arg2)}
     `
   },
@@ -1097,7 +1098,7 @@ const AllCypressErrors = {
   },
   NODE_VERSION_DEPRECATION_BUNDLED: (arg1: {name: string, value: any, configFile: string}) => {
     return errTemplate`\
-      Deprecation Warning: ${chalk.yellow(`\`${arg1.name}\``)} is currently set to ${chalk.yellow(`\`${arg1.value}\``)} in the ${chalk.yellow(`\`${arg1.configFile}\``)} configuration file. As of Cypress version \`9.0.0\` the default behavior of ${chalk.yellow(`\`${arg1.name}\``)} has changed to always use the version of Node used to start cypress via the cli. When ${chalk.yellow(`\`${arg1.name}\``)} is set to ${chalk.yellow(`\`${arg1.value}\``)}, Cypress will use the version of Node bundled with electron. This can cause problems running certain plugins or integrations. 
+      Deprecation Warning: ${chalk.yellow(`\`${arg1.name}\``)} is currently set to ${chalk.yellow(`\`${arg1.value}\``)} in the ${chalk.yellow(`\`${arg1.configFile}\``)} configuration file. As of Cypress version \`9.0.0\` the default behavior of ${chalk.yellow(`\`${arg1.name}\``)} has changed to always use the version of Node used to start cypress via the cli. When ${chalk.yellow(`\`${arg1.name}\``)} is set to ${chalk.yellow(`\`${arg1.value}\``)}, Cypress will use the version of Node bundled with electron. This can cause problems running certain plugins or integrations.
       As the ${chalk.yellow(`\`${arg1.name}\``)} configuration option will be removed in a future release, it is recommended to remove the ${chalk.yellow(`\`${arg1.name}\``)} configuration option from ${chalk.yellow(`\`${arg1.configFile}\``)}.
       `
   },

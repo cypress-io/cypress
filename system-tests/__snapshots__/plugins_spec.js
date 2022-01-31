@@ -415,7 +415,7 @@ module.exports = function (on, config) {
 
 Learn more: https://on.cypress.io/plugins-api
 
-We loaded the \`pluginsFile\` from: \`/foo/bar/.projects/plugin-empty/cypress/plugins/index.js\`
+We loaded the \`pluginsFile\` from: /foo/bar/.projects/plugin-empty/cypress/plugins/index.js
 
 It exported:
 
