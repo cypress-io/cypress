@@ -191,7 +191,7 @@ function getIdIfDirectory (row) {
     return null
   }
 
-  return row.data.data.relative.replace(row.data.data.baseName, '')
+  return `speclist-${row.data.data.relative.replace(row.data.data.baseName, '')}`
 }
 </script>
 
