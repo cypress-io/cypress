@@ -59,6 +59,7 @@ fragment ManualInstall on Query {
   currentProject {
     id
     title
+    packageManager
   }
 }
 `
@@ -70,12 +71,18 @@ const props = defineProps<{
   packagesInstalled: string[]
 }>()
 
+const commands = {
+  'npm': 'npm install -D ',
+  'pnpm': 'pnpm install -D ',
+  'yarn': 'yarn add -D ',
+}
+
 const installDependenciesCode = computed(
   () => {
-    return `yarn add -D ${
+    return commands[props.gql.currentProject?.packageManager ?? 'npm'] +
     (props.gql.wizard.packagesToInstall ?? [])
     .map((pack) => `${pack.package}`)
-    .join(' ')}`
+    .join(' ')
   },
 )
 </script>
