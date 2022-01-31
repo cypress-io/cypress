@@ -1,5 +1,5 @@
 import type { CodeGenType, MutationSetProjectPreferencesArgs, NexusGenObjects, NexusGenUnions, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
-import type { InitializeProjectOptions, FoundBrowser, FoundSpec, LaunchOpts, OpenProjectLaunchOptions, Preferences, TestingType, ReceivedCypressOptions, AddProject, SetSpecsFoundBySpecPattern } from '@packages/types'
+import type { InitializeProjectOptions, FoundBrowser, FoundSpec, LaunchOpts, OpenProjectLaunchOptions, Preferences, TestingType, ReceivedCypressOptions, AddProject } from '@packages/types'
 import execa from 'execa'
 import path from 'path'
 import assert from 'assert'
@@ -34,6 +34,14 @@ export interface ProjectApiShape {
   getDevServer (): {
     updateSpecs: (specs: FoundSpec[]) => void
   }
+}
+
+type SetSpecsFoundBySpecPattern = {
+  path: string
+  testingType: Cypress.TestingType
+  specPattern?: Cypress.Config['specPattern']
+  ignoreSpecPattern?: Cypress.Config['ignoreSpecPattern']
+  additionalIgnorePattern?: string | string[]
 }
 
 export class ProjectActions {
