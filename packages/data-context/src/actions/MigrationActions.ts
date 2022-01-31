@@ -1,6 +1,7 @@
 import path from 'path'
 import type { DataContext } from '..'
 import {
+  formatConfig,
   moveSpecFiles,
   NonStandardMigrationError,
   SpecToMove,
@@ -93,6 +94,15 @@ export class MigrationActions {
       }
     } else {
       await this.finishReconfigurationWizard()
+    }
+  }
+
+  async assertSuccessfulConfigMigration () {
+    const actual = formatConfig(await this.ctx.actions.file.readFileInProject('cypress.config.js'))
+    const expected = formatConfig(await this.ctx.actions.file.readFileInProject('expected-cypress.config.js'))
+
+    if (actual !== expected) {
+      throw Error(`Expected ${actual} to equal ${expected}`)
     }
   }
 }

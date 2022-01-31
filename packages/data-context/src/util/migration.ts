@@ -1,6 +1,5 @@
 import chokidar from 'chokidar'
 import fs from 'fs-extra'
-import stringify from 'stringify-object'
 import path from 'path'
 import globby from 'globby'
 import {
@@ -10,6 +9,7 @@ import {
 import type { MigrationFile } from '../sources'
 import { substitute } from '../sources/migration/autoRename'
 import type { TestingType } from '@packages/types'
+import prettier from 'prettier'
 
 type ConfigOptions = {
   global: Record<string, unknown>
@@ -119,38 +119,35 @@ function getPluginRelativePath (cfg: OldCypressConfig): string {
   return cfg.pluginsFile ? cfg.pluginsFile : DEFAULT_PLUGIN_PATH
 }
 
-function createCypressConfigJs (config: ConfigOptions, pluginPath: string) {
-  const globalString = Object.keys(config.global).length > 0 ? `\n${formatObjectForConfig(config.global, 2)},` : ''
+function createCypressConfigJs (config: ConfigOptions, pluginPath: string): string {
+  const globalString = Object.keys(config.global).length > 0 ? `${formatObjectForConfig(config.global)},` : ''
   const componentString = Object.keys(config.component).length > 0 ? createComponentTemplate(config.component) : ''
   const e2eString = Object.keys(config.e2e).length > 0 ? createE2eTemplate(pluginPath, config.e2e) : ''
 
-  return `const { defineConfig } = require('cypress')
+  const conf = `
+    const { defineConfig } = require('cypress')
 
-module.exports = defineConfig({${globalString}${e2eString}${componentString}
-})`
+    module.exports = defineConfig({${globalString}${e2eString}${componentString}
+    })`
+
+  return formatConfig(conf)
 }
 
-function formatObjectForConfig (obj: Record<string, unknown>, spaces: number) {
-  return stringify(obj, {
-    indent: Array(spaces).fill(' ').join(''),
-  }).replace(/^[{]|[}]$/g, '') // remove opening and closing {}
-  .trim() // remove trailing spaces
+function formatObjectForConfig (obj: Record<string, unknown>) {
+  return JSON.stringify(obj, null, 2).replace(/^[{]|[}]$/g, '') // remove opening and closing {}
 }
 
 function createE2eTemplate (pluginPath: string, options: Record<string, unknown>) {
-  return `
-  e2e: {
+  return `e2e: {
     setupNodeEvents(on, config) {
-      return require('${pluginPath}')
-    },
-    ${formatObjectForConfig(options, 4)}
+      return require('${pluginPath}')(on, config)
+    },${formatObjectForConfig(options)}
   },`
 }
 
 function createComponentTemplate (options: Record<string, unknown>) {
-  return `
-  component: {
-    ${formatObjectForConfig(options, 4)}
+  return `component: {
+    ${formatObjectForConfig(options)}
   },`
 }
 
@@ -315,4 +312,12 @@ function getSpecPattern (cfg: OldCypressConfig, testType: TestingType) {
   }
 
   return specPattern
+}
+
+export function formatConfig (config: string) {
+  return prettier.format(config, {
+    semi: false,
+    singleQuote: true,
+    endOfLine: 'auto',
+  })
 }
