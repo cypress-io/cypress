@@ -9,6 +9,7 @@ import {
   supportFilesForMigration,
   reduceConfig,
   renameSupportFilePath,
+  OldCypressConfig,
 } from '../../../src/util/migration'
 import { expect } from 'chai'
 import tempDir from 'temp-dir'
@@ -34,42 +35,54 @@ function scaffoldMigrationProject (project: typeof e2eProjectDirs[number]) {
 
 describe('cypress.config.js generation', () => {
   it('should create a string when passed only a global option', async () => {
-    const config = {
-      visualViewport: 300,
+    const config: OldCypressConfig = {
+      viewportWidth: 300,
     }
 
-    const generatedConfig = await createConfigString(config)
+    const generatedConfig = await createConfigString(config, {
+      hasE2ESpec: true,
+      hasComponentTesting: false,
+      hasPluginsFile: true,
+    })
 
     snapshot(generatedConfig)
   })
 
   it('should create a string when passed only a e2e options', async () => {
-    const config = {
+    const config: OldCypressConfig = {
       e2e: {
         baseUrl: 'localhost:3000',
       },
     }
 
-    const generatedConfig = await createConfigString(config)
+    const generatedConfig = await createConfigString(config, {
+      hasE2ESpec: true,
+      hasComponentTesting: false,
+      hasPluginsFile: true,
+    })
 
     snapshot(generatedConfig)
   })
 
   it('should create a string when passed only a component options', async () => {
-    const config = {
+    const config: OldCypressConfig = {
       component: {
         retries: 2,
       },
     }
 
-    const generatedConfig = await createConfigString(config)
+    const generatedConfig = await createConfigString(config, {
+      hasE2ESpec: true,
+      hasComponentTesting: false,
+      hasPluginsFile: true,
+    })
 
     snapshot(generatedConfig)
   })
 
   it('should create a string for a config with global, component, and e2e options', async () => {
     const config = {
-      visualViewport: 300,
+      viewportWidth: 300,
       baseUrl: 'localhost:300',
       e2e: {
         retries: 2,
@@ -79,7 +92,11 @@ describe('cypress.config.js generation', () => {
       },
     }
 
-    const generatedConfig = await createConfigString(config)
+    const generatedConfig = await createConfigString(config, {
+      hasE2ESpec: true,
+      hasComponentTesting: false,
+      hasPluginsFile: true,
+    })
 
     snapshot(generatedConfig)
   })
@@ -87,7 +104,11 @@ describe('cypress.config.js generation', () => {
   it('should create a string when passed an empty object', async () => {
     const config = {}
 
-    const generatedConfig = await createConfigString(config)
+    const generatedConfig = await createConfigString(config, {
+      hasE2ESpec: true,
+      hasComponentTesting: false,
+      hasPluginsFile: true,
+    })
 
     snapshot(generatedConfig)
   })
@@ -99,7 +120,11 @@ describe('cypress.config.js generation', () => {
       componentFolder: 'path/to/component/folder',
     }
 
-    const generatedConfig = await createConfigString(config)
+    const generatedConfig = await createConfigString(config, {
+      hasE2ESpec: true,
+      hasComponentTesting: false,
+      hasPluginsFile: true,
+    })
 
     snapshot(generatedConfig)
   })

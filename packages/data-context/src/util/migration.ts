@@ -21,6 +21,8 @@ type ConfigOptions = {
  * config format pre-10.0
  */
 export interface OldCypressConfig {
+  viewportWidth?: number
+  retries?: number
   component?: Omit<OldCypressConfig, 'component' | 'e2e'>
   e2e?: Omit<OldCypressConfig, 'component' | 'e2e'>
   pluginsFile?: string | false
@@ -42,8 +44,14 @@ export class NonStandardMigrationError extends Error {
   }
 }
 
-export async function createConfigString (cfg: OldCypressConfig) {
-  return createCypressConfigJs(reduceConfig(cfg), getPluginRelativePath(cfg))
+export interface CreateConfigOptions {
+  hasE2ESpec: boolean
+  hasPluginsFile: boolean
+  hasComponentTesting: boolean
+}
+
+export async function createConfigString (cfg: OldCypressConfig, options: CreateConfigOptions) {
+  return createCypressConfigJs(reduceConfig(cfg), getPluginRelativePath(cfg), options)
 }
 
 interface FileToBeMigratedManually {
@@ -114,15 +122,17 @@ export function initComponentTestingMigration (
 }
 
 function getPluginRelativePath (cfg: OldCypressConfig): string {
-  const DEFAULT_PLUGIN_PATH = path.normalize('/cypress/plugins/index.js')
+  const DEFAULT_PLUGIN_PATH = path.normalize('cypress/plugins/index.js')
 
   return cfg.pluginsFile ? cfg.pluginsFile : DEFAULT_PLUGIN_PATH
 }
 
-function createCypressConfigJs (config: ConfigOptions, pluginPath: string): string {
+function createCypressConfigJs (config: ConfigOptions, pluginPath: string, options: CreateConfigOptions): string {
   const globalString = Object.keys(config.global).length > 0 ? `${formatObjectForConfig(config.global)},` : ''
-  const componentString = Object.keys(config.component).length > 0 ? createComponentTemplate(config.component) : ''
-  const e2eString = Object.keys(config.e2e).length > 0 ? createE2eTemplate(pluginPath, config.e2e) : ''
+  const componentString = options.hasComponentTesting ? createComponentTemplate(config.component) : ''
+  const e2eString = (options.hasE2ESpec || options.hasPluginsFile)
+    ? createE2eTemplate(pluginPath, options.hasPluginsFile, config.e2e)
+    : ''
 
   const conf = `
     const { defineConfig } = require('cypress')
@@ -137,11 +147,15 @@ function formatObjectForConfig (obj: Record<string, unknown>) {
   return JSON.stringify(obj, null, 2).replace(/^[{]|[}]$/g, '') // remove opening and closing {}
 }
 
-function createE2eTemplate (pluginPath: string, options: Record<string, unknown>) {
-  return `e2e: {
-    setupNodeEvents(on, config) {
+function createE2eTemplate (pluginPath: string, hasPluginsFile: boolean, options: Record<string, unknown>) {
+  const setupNodeEvents = hasPluginsFile
+    ? `setupNodeEvents(on, config) {
       return require('${pluginPath}')(on, config)
-    },${formatObjectForConfig(options)}
+    }`
+    : ``
+
+  return `e2e: {
+    ${setupNodeEvents},${formatObjectForConfig(options)}
   },`
 }
 
@@ -156,23 +170,25 @@ export interface RelativeSpec {
 }
 
 /**
- * Checks that at least one spec file exist for component testing
+ * Checks that at least one spec file exist for testing type
  *
- * NOTE: this is what we use to see if CT is set up
- * @param projectRoot
- * @param componentFolder
- * @param componentGlob
- * @returns
+ * NOTE: this is what we use to see if CT/E2E is set up
  */
-export async function hasComponentSpecFile (projectRoot: string, componentFolder: string, componentGlob: string | string[]): Promise<boolean> {
-  return (await globby(componentGlob, {
-    cwd: path.join(projectRoot, componentFolder),
+export async function hasSpecFile (projectRoot: string, folder: string, glob: string | string[]): Promise<boolean> {
+  return (await globby(glob, {
+    cwd: path.join(projectRoot, folder),
     onlyFiles: true,
   })).length > 0
 }
 
 export async function tryGetDefaultLegacySupportFile (projectRoot: string) {
   const files = await globby(path.join(projectRoot, 'cypress', 'support', 'index.*'))
+
+  return files[0]
+}
+
+export async function tryGetDefaultLegacyPluginsFile (projectRoot: string) {
+  const files = await globby(path.join(projectRoot, 'cypress', 'plugins', 'index.*'))
 
   return files[0]
 }
@@ -234,12 +250,6 @@ export function renameSupportFilePath (relative: string) {
   }
 
   return relative.replace(res.groups.name, 'e2e')
-}
-
-export function renameSpecPath (spec: string) {
-  return spec
-  .replace('integration', 'e2e')
-  .replace(/([._-]?[s|S]pec.|[.])(?=[j|t]s[x]?)/, '.cy.')
 }
 
 export function reduceConfig (cfg: OldCypressConfig): ConfigOptions {

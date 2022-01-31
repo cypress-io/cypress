@@ -37,6 +37,14 @@ export function isDefaultTestFiles (config: OldCypressConfig, type: 'component' 
   return testFiles.length === 1 && testFiles[0] === '**/*'
 }
 
+export function getPluginsFile (config: OldCypressConfig) {
+  if (config.e2e?.pluginsFile === false || config.pluginsFile === false) {
+    return false
+  }
+
+  return config.e2e?.pluginsFile ?? config.pluginsFile ?? 'cypress/plugins/index.js'
+}
+
 export function getIntegrationFolder (config: OldCypressConfig) {
   if (config.e2e?.integrationFolder === false || config.integrationFolder === false) {
     return false

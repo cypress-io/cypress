@@ -8,7 +8,7 @@ import {
   ComponentTestingMigrationStatus,
   supportFilesForMigration,
   OldCypressConfig,
-  hasComponentSpecFile,
+  hasSpecFile,
 } from '../util/migration'
 import {
   getSpecs,
@@ -19,6 +19,7 @@ import {
   getStepsForMigration,
   shouldShowRenameSupport,
   getIntegrationFolder,
+  getPluginsFile,
   isDefaultTestFiles,
   getComponentTestFiles,
   getComponentFolder,
@@ -50,7 +51,9 @@ export class MigrationDataSource {
   hasCustomComponentTestFiles: boolean = false
 
   hasCustomSupportFile = false
-  hasComponentTesting: boolean = true
+  hasComponentTesting = true
+  hasE2ESpec = true
+  hasPluginsFile = true
 
   private componentTestingMigrationWatcher?: chokidar.FSWatcher
   componentTestingMigrationStatus?: ComponentTestingMigrationStatus
@@ -171,7 +174,11 @@ export class MigrationDataSource {
   async createConfigString () {
     const config = await this.parseCypressConfig()
 
-    return createConfigString(config)
+    return createConfigString(config, {
+      hasComponentTesting: this.hasComponentTesting,
+      hasE2ESpec: this.hasE2ESpec,
+      hasPluginsFile: this.hasPluginsFile,
+    })
   }
 
   async integrationFolder () {
@@ -223,11 +230,27 @@ export class MigrationDataSource {
     if (componentFolder === false) {
       this.hasComponentTesting = false
     } else {
-      this.hasComponentTesting = await hasComponentSpecFile(
+      this.hasComponentTesting = await hasSpecFile(
         this.ctx.currentProject,
         componentFolder,
         componentTestFiles,
       )
+    }
+
+    const integrationFolder = getIntegrationFolder(config)
+
+    if (integrationFolder === false) {
+      this.hasE2ESpec = false
+    } else {
+      this.hasE2ESpec = await hasSpecFile(
+        this.ctx.currentProject,
+        integrationFolder,
+        componentTestFiles,
+      )
+    }
+
+    if (getPluginsFile(config) === false) {
+      this.hasPluginsFile = false
     }
   }
 

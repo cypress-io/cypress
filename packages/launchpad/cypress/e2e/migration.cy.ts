@@ -32,6 +32,18 @@ function skipCTMigration () {
 
 function migrateAndVerifyConfig () {
   cy.contains('Migrate the configuration for me').click()
+
+  cy.withCtx(async (ctx) => {
+    const configStats = await ctx.actions.file.checkIfFileExists('cypress.config.js')
+
+    expect(configStats).to.not.be.null.and.not.be.undefined
+
+    const oldConfigStats = await ctx.actions.file.checkIfFileExists('cypress.json')
+
+    expect(oldConfigStats).to.be.null
+
+    await ctx.actions.migration.assertSuccessfulConfigMigration()
+  })
 }
 
 function finishMigrationAndContinue () {
@@ -412,6 +424,8 @@ describe('Migration', { viewportWidth: 1200 }, () => {
       const oldConfigStats = await ctx.actions.file.checkIfFileExists('cypress.json')
 
       expect(oldConfigStats).to.be.null
+
+      await ctx.actions.migration.assertSuccessfulConfigMigration()
     })
   })
 })
