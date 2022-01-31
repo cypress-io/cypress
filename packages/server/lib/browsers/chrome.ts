@@ -450,22 +450,6 @@ export = {
   _connectToNewTab,
 
   async connectToNewSpec (browser: Browser, options: CypressConfiguration = {}, automation) {
-    const { isTextTerminal } = options
-    const userDir = utils.getProfileDir(browser, isTextTerminal)
-    const preferences = await _getChromePreferences(userDir)
-    const defaultArgs = this._getArgs(browser, options, String(browser.debuggingPort))
-    const defaultLaunchOptions = utils.getDefaultLaunchOptions({
-      preferences,
-      args: defaultArgs,
-    })
-
-    await Bluebird.all([
-      // ensure that we have a clean cache dir
-      // before launching the browser every time
-      utils.ensureCleanCache(browser, isTextTerminal),
-      utils.executeBeforeBrowserLaunch(browser, defaultLaunchOptions, options),
-    ])
-
     const port = browser.debuggingPort
 
     const criClient = await this._connectToNewTab(port, options)
