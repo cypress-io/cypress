@@ -306,7 +306,11 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
 
     it('yields asynchronously', () => {
       cy.switchToDomain('foobar.com', async () => {
-        return 'From a secondary domain'
+        return new Promise((resolve: (val: string) => any, reject) => {
+          setTimeout(() => {
+            resolve('From a secondary domain')
+          }, 1000)
+        })
       }).should('equal', 'From a secondary domain')
     })
 
@@ -336,7 +340,7 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
     })
 
     // This test will only work on chrome.
-    it.skip('yields undefined if an object contains an error', () => {
+    it.skip('yields an error if an object contains an error', () => {
       cy.switchToDomain('foobar.com', () => {
         cy.wrap({
           key: new Error('Boom goes the dynamite'),

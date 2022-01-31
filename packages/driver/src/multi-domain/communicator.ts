@@ -125,6 +125,26 @@ export class PrimaryDomainCommunicator extends EventEmitter {
 export class SpecBridgeDomainCommunicator extends EventEmitter {
   private windowReference
 
+  private handleSubjectAndErr = (event, data) => {
+    const { subject, err, ...other } = data
+
+    // We always want to make sure errors are posted, so clean it up to send.
+    const preProcessedError = preprocessErrorForPostMessage(err)
+
+    try {
+      this.toPrimary(event, { subject, err: preProcessedError, ...other })
+    } catch (error: any) {
+      if (subject && error.name === 'DataCloneError') {
+        // If the subject threw the 'DataCloneError', the subject cannot be serialized at which point try again with an undefined subject.
+        this.handleSubjectAndErr(event, { subject: undefined, ...other })
+      } else {
+        // Try to send the message again, with the new error.
+        this.handleSubjectAndErr(event, { err: error, ...other })
+        throw error
+      }
+    }
+  }
+
   /**
    * Initializes the event handler to receive messages from the primary domain.
    * @param {Window} win - a reference to the window object in the spec bridge/iframe.
@@ -153,23 +173,11 @@ export class SpecBridgeDomainCommunicator extends EventEmitter {
     this.windowReference.top.postMessage({ event: prefixedEvent, data }, '*')
   }
 
-  toPrimaryCommandEnd (data: {id: string, subject?: any, name: string, err?: Error, logId: string }) {
-    const { id, subject, name, err, logId } = data
+  toPrimaryCommandEnd (data: {id: string, subject?: any, name: string, err?: any, logId: string }) {
+    this.handleSubjectAndErr('command:end', data)
+  }
 
-    // We always want to make sure errors are posted, so clean it up to send.
-    const preProcessedError = preprocessErrorForPostMessage(err)
-
-    try {
-      this.toPrimary('command:end', { id, subject, name, err: preProcessedError, logId })
-    } catch (error: any) {
-      if (subject && error.name === 'DataCloneError') {
-        // If the subject threw the 'DataCloneError', the subject cannot be serialized at which point try again with an undefined subject.
-        this.toPrimaryCommandEnd({ id, name, subject: undefined, logId })
-      } else {
-        // Try to send the message again, with the new error.
-        this.toPrimaryCommandEnd({ id, name, err: error, logId })
-        throw error
-      }
-    }
+  toPrimaryRanDomainFn (data: { subject?: any, err?: any }) {
+    this.handleSubjectAndErr('ran:domain:fn', data)
   }
 }
