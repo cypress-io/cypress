@@ -117,12 +117,22 @@ describe('Choose a Browser Page', () => {
       }).as('launchProject')
 
       cy.get('@launchButton').click()
-      // TODO: Relies on ctx.emitter.toLaunchpad which doesn't refresh AUT
-      // cy.contains('button', 'Opening E2E Testing in Chrome')
 
       cy.wait('@launchProject').then(({ request }) => {
         expect(request?.body.variables.testingType).to.eq('e2e')
       })
+
+      cy.withCtx((ctx) => {
+        ctx.browser.setBrowserStatus('opening')
+      })
+
+      cy.contains('button', 'Opening E2E Testing in Chrome')
+
+      cy.withCtx((ctx) => {
+        ctx.browser.setBrowserStatus('open')
+      })
+
+      cy.contains('button', 'Running Chrome')
     })
 
     it('performs mutation to change selected browser when browser item is clicked', () => {
