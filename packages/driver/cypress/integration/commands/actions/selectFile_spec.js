@@ -32,7 +32,7 @@ describe('src/cy/commands/actions/selectFile', () => {
       .then((input) => {
         expect(input[0].files.length).to.eq(1)
         expect(input[0].files[0].name).to.eq('foo.txt')
-        expect(input[0].files[0].type).to.eq('')
+        expect(input[0].files[0].type).to.eq('text/plain')
         expect(input[0].files[0].lastModified).to.be.closeTo(Date.now(), 1000)
       })
 
@@ -54,6 +54,8 @@ describe('src/cy/commands/actions/selectFile', () => {
           fileName: 'bar.json',
         },
         Cypress.Buffer.from('baz'),
+        // 'baz' in ascii
+        Uint8Array.from([98, 97, 122]),
       ])
 
       cy.get('#multiple')
@@ -62,6 +64,7 @@ describe('src/cy/commands/actions/selectFile', () => {
         expect(input[0].files[0].name).to.eq('foo.txt')
         expect(input[0].files[1].name).to.eq('bar.json')
         expect(input[0].files[2].name).to.eq('')
+        expect(input[0].files[3].name).to.eq('')
       })
 
       cy.get('#multiple')
@@ -70,6 +73,7 @@ describe('src/cy/commands/actions/selectFile', () => {
         expect(contents[0]).to.eq('foo')
         expect(contents[1]).to.eq('{"a":"bar"}')
         expect(contents[2]).to.eq('baz')
+        expect(contents[3]).to.eq('baz')
       })
     })
 
@@ -214,6 +218,10 @@ describe('src/cy/commands/actions/selectFile', () => {
         cy.fixture('valid.json').as('myFixture')
 
         cy.get('#basic').selectFile('@myFixture')
+        .then((input) => {
+          expect(input[0].files[0].name).to.eq('valid.json')
+          expect(input[0].files[0].type).to.eq('application/json')
+        })
         .then(getFileContents)
         .then((contents) => {
           // Because json files are loaded as objects, they get reencoded before
@@ -228,6 +236,10 @@ describe('src/cy/commands/actions/selectFile', () => {
         cy.readFile('cypress/fixtures/valid.json', { encoding: null }).as('myFile')
 
         cy.get('#basic').selectFile('@myFile')
+        .then((input) => {
+          expect(input[0].files[0].name).to.eq('valid.json')
+          expect(input[0].files[0].type).to.eq('application/json')
+        })
         .then(getFileContents)
         .then((contents) => {
           expect(contents[0]).to.eql(validJsonString)
@@ -247,6 +259,66 @@ describe('src/cy/commands/actions/selectFile', () => {
         .then((input) => {
           expect(input[0].files[0].name).to.eq('valid.json')
           expect(input[0].files[1].name).to.eq('app.js')
+          expect(input[0].files[0].type).to.eq('application/json')
+          expect(input[0].files[1].type).to.eq('application/javascript')
+        })
+      })
+
+      it('allows users to override the inferred filenames and mimetypes', () => {
+        cy.fixture('valid.json').as('myFixture')
+
+        cy.get('#multiple').selectFile([{
+          contents: 'cypress/fixtures/valid.json',
+          fileName: '1.png',
+        },
+        {
+          contents: '@myFixture',
+          fileName: '2.png',
+          mimeType: 'text/plain',
+        }])
+        .then((input) => {
+          expect(input[0].files[0].name).to.eq('1.png')
+          expect(input[0].files[1].name).to.eq('2.png')
+          // The mimetype should be inferred from the user-supplied filename,
+          // rather than the actual path
+          expect(input[0].files[0].type).to.eq('image/png')
+          // And ever if they supply a filename, explicit mimetype
+          // should always take precedent.
+          expect(input[0].files[1].type).to.eq('text/plain')
+        })
+      })
+    })
+
+    describe('mime types', () => {
+      it('uses empty string for unknown extensions', () => {
+        cy.get('#basic')
+        .selectFile({ contents: '@foo', fileName: 'foo.barbaz' })
+        .then((input) => {
+          expect(input[0].files[0].type).to.eq('')
+        })
+      })
+
+      it('works with several common extensions', () => {
+        [
+          ['png', 'image/png'],
+          ['jpg', 'image/jpeg'],
+          ['zip', 'application/zip'],
+          ['yaml', 'text/yaml'],
+          ['json', 'application/json'],
+        ].forEach(([extension, mimeType]) => {
+          cy.get('#basic')
+          .selectFile({ contents: '@foo', fileName: `foo.${extension}` })
+          .then((input) => {
+            expect(input[0].files[0].type).to.eq(mimeType)
+          })
+        })
+      })
+
+      it('allows users to specify a mimetype', () => {
+        cy.get('#basic')
+        .selectFile({ contents: '@foo', fileName: 'foo.zip', mimeType: 'image/png' })
+        .then((input) => {
+          expect(input[0].files[0].type).to.eq('image/png')
         })
       })
     })

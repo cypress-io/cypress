@@ -312,9 +312,9 @@ const shouldIgnoreEvent = <
   T extends KeyEventType,
   K extends { [key in T]?: boolean }
 >(
-    eventName: T,
-    options: K,
-  ) => {
+  eventName: T,
+  options: K,
+) => {
   return options[eventName] === false
 }
 
@@ -582,7 +582,7 @@ const simulatedDefaultKeyMap: { [key: string]: SimulatedDefault } = {
       $selection.replaceSelectionContents(el, '\n')
     }
 
-    options.onEnterPressed && options.onEnterPressed()
+    options.onEnterPressed && options.onEnterPressed(el)
   },
   Delete: (el, key) => {
     key.events.input = $selection.deleteRightOfCursor(el)
