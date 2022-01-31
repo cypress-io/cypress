@@ -571,7 +571,9 @@ export class SocketBase {
   }
 
   async stopScreencast () {
-    await this._sendStopScreencastMessage()
+    if (this._sendStopScreencastMessage) {
+      await this._sendStopScreencastMessage()
+    }
   }
 
   close () {

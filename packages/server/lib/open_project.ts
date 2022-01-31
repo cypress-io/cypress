@@ -137,6 +137,7 @@ export class OpenProject {
 
   async launch (browser, spec: Cypress.Cypress['spec'], options: LaunchOpts = {
     onError: () => undefined,
+    shouldLaunchBrowser: true,
   }) {
     this._ctx = getCtx()
 
@@ -256,6 +257,13 @@ export class OpenProject {
         session.clearSessions()
       })
       .then(() => {
+        if (!options.shouldLaunchBrowser) {
+          // If we do not launch the browser,
+          // we tell it that we are ready
+          // to receive the next spec
+          return this.changeUrlToSpec(browser, spec, options)
+        }
+
         // TODO: Stub this so we can detect it being called
         if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF) {
           return browsers.connectToExisting(browser, options, automation)

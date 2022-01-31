@@ -957,7 +957,7 @@ module.exports = {
   },
 
   launchBrowser (options = {}) {
-    const { browser, spec, writeVideoFrame, setScreenshotMetadata, project, screenshots, projectRoot, onError } = options
+    const { browser, spec, writeVideoFrame, setScreenshotMetadata, project, screenshots, projectRoot, shouldLaunchBrowser, onError } = options
 
     const browserOpts = getDefaultBrowserOptsByFamily(browser, project, writeVideoFrame, onError)
 
@@ -988,6 +988,7 @@ module.exports = {
     const warnings = {}
 
     browserOpts.projectRoot = projectRoot
+    browserOpts.shouldLaunchBrowser = shouldLaunchBrowser
 
     browserOpts.onWarning = (err) => {
       const { message } = err
@@ -1160,13 +1161,6 @@ module.exports = {
     const wait = () => {
       debug('waiting for socket to connect and browser to launch...')
 
-      if (!options.shouldLaunchBrowser) {
-        // If we do not launch the browser,
-        // we tell it that we are ready
-        // to receive the next spec
-        return this.navigateToNextSpec(options)
-      }
-
       return Promise.join(
         this.waitForSocketConnection(project, socketId)
         .tap(() => {
@@ -1303,6 +1297,7 @@ module.exports = {
         }
       }
 
+      // TODO: Figure out how to handle no video and no-exit
       await openProject.stopScreencast()
       await openProject.resetBrowserState()
 
