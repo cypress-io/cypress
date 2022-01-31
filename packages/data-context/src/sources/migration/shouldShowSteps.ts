@@ -74,9 +74,28 @@ export async function shouldShowAutoRenameStep (projectRoot: string, config: Old
   return specsToAutoMigrate.integration.length > 0 || specsToAutoMigrate.component.length > 0
 }
 
+async function anyIntegrationSpecsExist (projectRoot: string, config: OldCypressConfig) {
+  const integrationFolder = getIntegrationFolder(config)
+
+  if (integrationFolder === false) {
+    return false
+  }
+
+  const integrationTestFiles = getIntegrationTestFiles(config)
+
+  return hasSpecFiles(projectRoot, integrationFolder, integrationTestFiles)
+}
+
 // we only show rename support file if they are using the default
 // if they have anything set in their config, we will not try to rename it.
-export function shouldShowRenameSupport (config: OldCypressConfig) {
+// Also, if there are no **no** integration specs, we are doing a CT only migration,
+// in which case we don't migrate the supportFile - they'll make a new support/component.js
+// when they set CT up.
+export async function shouldShowRenameSupport (projectRoot: string, config: OldCypressConfig) {
+  if (!await anyIntegrationSpecsExist(projectRoot, config)) {
+    return false
+  }
+
   const defaultSupportFile = 'cypress/support/index.js'
   const supportFile = config.e2e?.supportFile ?? config.supportFile ?? defaultSupportFile
 
@@ -119,7 +138,7 @@ export async function getStepsForMigration (
       steps.push(step)
     }
 
-    if (step === 'renameSupport' && shouldShowRenameSupport(config)) {
+    if (step === 'renameSupport' && await shouldShowRenameSupport(projectRoot, config)) {
       steps.push(step)
     }
 

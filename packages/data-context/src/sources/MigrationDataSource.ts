@@ -125,9 +125,13 @@ export class MigrationDataSource {
   }
 
   async supportFilesForMigrationGuide (): Promise<MigrationFile | null> {
+    if (!this.ctx.currentProject) {
+      throw Error('Need this.ctx.currentProject')
+    }
+
     const config = await this.parseCypressConfig()
 
-    if (!shouldShowRenameSupport(config)) {
+    if (!await shouldShowRenameSupport(this.ctx.currentProject, config)) {
       return null
     }
 
