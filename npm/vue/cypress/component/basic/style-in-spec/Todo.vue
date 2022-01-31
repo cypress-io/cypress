@@ -6,24 +6,24 @@
 </template>
 
 <script>
-  export default {
-    name: 'Todo',
-    props: {
-      title: {
-        type: String,
-        required: true,
-        default: ''
-      },
-      done: {
-        type: Boolean,
-        required: true,
-        default: false
-      }
+export default {
+  name: 'Todo',
+  props: {
+    title: {
+      type: String,
+      required: true,
+      default: '',
     },
-    data () {
-      return {
-        isDone: this.done
-      }
+    done: {
+      type: Boolean,
+      required: true,
+      default: false,
+    },
+  },
+  data () {
+    return {
+      isDone: this.done,
     }
-  }
+  },
+}
 </script>

@@ -3,8 +3,7 @@ import Bluebird from 'bluebird'
 import contextMenu from 'electron-context-menu'
 import { BrowserWindow } from 'electron'
 import Debug from 'debug'
-import cwd from '../cwd'
-import savedState from '../saved_state'
+import * as savedState from '../saved_state'
 import { getPathToDesktopIndex } from '@packages/resolve-dist'
 
 const debug = Debug('cypress:server:windows')
@@ -13,20 +12,21 @@ export type WindowOptions = Electron.BrowserWindowConstructorOptions & {
   type?: 'INDEX'
   url?: string
   devTools?: boolean
+  graphqlPort?: number
 }
 
 let windows = {}
 let recentlyCreatedWindow = false
 
-const getUrl = function (type) {
+const getUrl = function (type, port: number) {
   switch (type) {
     case 'INDEX':
-      return getPathToDesktopIndex()
+      return getPathToDesktopIndex(port)
+
     default:
       throw new Error(`No acceptable window type found for: '${type}'`)
   }
 }
-
 const getByType = (type) => {
   return windows[type]
 }
@@ -98,6 +98,10 @@ export function hideAllUnlessAnotherWindowIsFocused () {
 
   // else hide all windows
   return _.invoke(windows, 'hide')
+}
+
+export function isMainWindowFocused () {
+  return getByType('INDEX').isFocused()
 }
 
 export function focusMainWindow () {
@@ -209,13 +213,11 @@ export function create (projectRoot, _options: WindowOptions = {}, newBrowserWin
   return win
 }
 
-// open desktop-gui BrowserWindow
-export function open (projectRoot, options: WindowOptions = {}, newBrowserWindow = _newBrowserWindow) {
+// open launchpad BrowserWindow
+export function open (projectRoot, launchpadPort: number, options: WindowOptions = {}, newBrowserWindow = _newBrowserWindow): Bluebird<BrowserWindow> {
   // if we already have a window open based
   // on that type then just show + focus it!
-  let win
-
-  win = getByType(options.type)
+  let win = getByType(options.type)
 
   if (win) {
     win.show()
@@ -231,12 +233,11 @@ export function open (projectRoot, options: WindowOptions = {}, newBrowserWindow
     show: true,
     webPreferences: {
       contextIsolation: true,
-      preload: cwd('lib', 'ipc', 'ipc.js'),
     },
   })
 
   if (!options.url) {
-    options.url = getUrl(options.type)
+    options.url = getUrl(options.type, launchpadPort)
   }
 
   win = create(projectRoot, options, newBrowserWindow)
@@ -320,7 +321,7 @@ export function trackState (projectRoot, isTextTerminal, win, keys) {
     })
   })
 
-  return win.webContents.on('devtools-closed', () => {
+  win.webContents.on('devtools-closed', () => {
     const newState = {}
 
     newState[keys.devTools] = false

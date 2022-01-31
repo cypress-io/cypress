@@ -43,7 +43,6 @@ const getCDN = function ({ version, hash, filename, platform }) {
 }
 
 // returns folder that contains beta (unreleased) binaries for given version
-//
 const getUploadVersionDirName = function (options) {
   la(check.unemptyString(options.version), 'missing version', options)
 

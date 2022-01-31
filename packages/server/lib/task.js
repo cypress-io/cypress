@@ -14,13 +14,13 @@ module.exports = {
   run (pluginsFilePath, options) {
     debug('run task', options.task, 'with arg', options.arg)
 
-    const fileText = `\n\nFix this in your plugins file here:\n${pluginsFilePath}`
+    const fileText = pluginsFilePath ? `\n\nFix this in your setupNodeEvents method here:\n${pluginsFilePath}` : ''
 
     return Promise
     .try(() => {
       if (!plugins.has('task')) {
         debug('\'task\' event is not registered')
-        throwKnownError(`The 'task' event has not been registered in the plugins file. You must register it before using cy.task()${fileText}`)
+        throwKnownError(`The 'task' event has not been registered in the setupNodeEvents method. You must register it before using cy.task()${fileText}`)
       }
 
       return plugins.execute('task', options.task, options.arg)
@@ -29,7 +29,7 @@ module.exports = {
         debug('task is unhandled')
 
         return plugins.execute('_get:task:keys').then((keys) => {
-          return throwKnownError(`The task '${options.task}' was not handled in the plugins file. The following tasks are registered: ${keys.join(', ')}${fileText}`)
+          return throwKnownError(`The task '${options.task}' was not handled in the setupNodeEvents method. The following tasks are registered: ${keys.join(', ')}${fileText}`)
         })
       }
 

@@ -75,7 +75,7 @@ describe('<App />', () => {
     props.config.integrationFolder = 'path/to/int'
     const component = shallowRender(<App {...props} />)
 
-    expect(component.find(Reporter)).to.have.prop('spec').deep.eq(props.config.spec)
+    expect(component.find(Reporter)).to.have.prop('runnerStore').deep.eq({ spec: props.config.spec })
   })
 
   it('renders the <Reporter /> with the autoScrollingEnabled flag', () => {

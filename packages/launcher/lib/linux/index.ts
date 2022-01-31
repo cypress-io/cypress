@@ -1,5 +1,6 @@
 import { log } from '../log'
-import type { FoundBrowser, Browser, PathData } from '../types'
+import type { FoundBrowser, Browser } from '@packages/types'
+import type { PathData } from '../types'
 import { notInstalledErr } from '../errors'
 import { utils } from '../utils'
 import os from 'os'
@@ -54,7 +55,7 @@ function getLinuxBrowser (
   return getVersionString(binary)
   .tap(maybeSetSnapProfilePath)
   .then(getVersion)
-  .then((version: string): FoundBrowser => {
+  .then((version?: string): FoundBrowser => {
     foundBrowser.version = version
 
     return foundBrowser
@@ -79,7 +80,7 @@ export function getVersionString (path: string) {
 export function getVersionNumber (version: string, browser: Browser) {
   const regexExec = browser.versionRegex.exec(version) as Array<string>
 
-  return regexExec ? regexExec[1] : version
+  return (regexExec && regexExec[1]) ?? version
 }
 
 export function getPathData (pathStr: string): PathData {

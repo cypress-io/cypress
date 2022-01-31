@@ -17,6 +17,12 @@ import { Alias, AliasObject } from '../instruments/instrument-model'
 import CommandModel from './command-model'
 import TestError from '../errors/test-error'
 
+import ChevronIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/chevron-down-small_x8.svg'
+import DeleteIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/action-delete-circle_x16.svg'
+import HiddenIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/general-eye-closed_x16.svg'
+import PinIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/object-pin_x16.svg'
+import RunningIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/status-running_x16.svg'
+
 const md = new Markdown()
 
 const displayName = (model: CommandModel) => model.displayName || model.name
@@ -252,14 +258,14 @@ class Command extends Component<Props> {
           >
             <div className='command-wrapper-text'>
               <span className='command-expander' >
-                <i className='fas' />
+                <ChevronIcon />
               </span>
               <span className='command-number'>
-                <i className='fas fa-spinner fa-spin' />
+                <RunningIcon className='fa-spin' />
                 <span>{model.number || ''}</span>
               </span>
               <span className='command-pin'>
-                <i className='fas fa-thumbtack' />
+                <PinIcon />
               </span>
               <span className='command-method'>
                 <span>{model.event && model.type !== 'system' ? `(${displayName(model)})` : displayName(model)}</span>
@@ -268,9 +274,11 @@ class Command extends Component<Props> {
                 {model.referencesAlias ? <AliasesReferences model={model} aliasesWithDuplicates={aliasesWithDuplicates} /> : <Message model={model} />}
               </span>
               <span className='command-controls'>
-                <i className='far fa-times-circle studio-command-remove' onClick={this._removeStudioCommand} />
+                <DeleteIcon className="studio-command-remove" onClick={this._removeStudioCommand} />
                 <Tooltip placement='top' title={visibleMessage(model)} className='cy-tooltip'>
-                  <i className='command-invisible far fa-eye-slash' />
+                  <span>
+                    <HiddenIcon className="command-invisible" />
+                  </span>
                 </Tooltip>
                 <Tooltip placement='top' title={`${model.numElements} matched elements`} className='cy-tooltip'>
                   <span className='num-elements'>{model.numElements}</span>

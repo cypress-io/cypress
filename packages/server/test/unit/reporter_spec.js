@@ -1,6 +1,6 @@
 require('../spec_helper')
 
-const Reporter = require(`${root}lib/reporter`)
+const Reporter = require(`../../lib/reporter`)
 const snapshot = require('snap-shot-it')
 
 describe('lib/reporter', () => {

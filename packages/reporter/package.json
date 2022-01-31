@@ -5,7 +5,7 @@
   "browser": "src/main.tsx",
   "scripts": {
     "build-for-tests": "webpack",
-    "clean-deps": "rm -rf node_modules",
+    "clean-deps": "rimraf node_modules",
     "cypress:open": "node ../../scripts/cypress open --project .",
     "cypress:run": "node ../../scripts/cypress run --project .",
     "watch": "yarn build-for-tests --watch --progress"
@@ -24,7 +24,7 @@
     "classnames": "2.3.1",
     "css-element-queries": "1.2.3",
     "cypress-multi-reporters": "1.4.0",
-    "cypress-real-events": "1.4.0",
+    "cypress-real-events": "1.6.0",
     "lodash": "^4.17.21",
     "markdown-it": "11.0.0",
     "mobx": "5.15.4",
@@ -33,8 +33,10 @@
     "prop-types": "15.7.2",
     "react": "16.8.6",
     "react-dom": "16.8.6",
+    "react-svg-loader": "3.0.3",
+    "rimraf": "3.0.2",
     "sinon": "7.5.0",
-    "webpack": "4.35.3",
+    "webpack": "^4.44.2",
     "webpack-cli": "3.3.2"
   },
   "files": []

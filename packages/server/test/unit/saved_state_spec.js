@@ -2,11 +2,11 @@ require('../spec_helper')
 
 const path = require('path')
 const Promise = require('bluebird')
-const { fs } = require(`${root}lib/util/fs`)
-const FileUtil = require(`${root}lib/util/file`)
-const appData = require(`${root}lib/util/app_data`)
+const { fs } = require(`../../lib/util/fs`)
+const FileUtil = require(`../../lib/util/file`)
+const appData = require(`../../lib/util/app_data`)
 
-const savedState = require(`${root}lib/saved_state`)
+const savedState = require(`../../lib/saved_state`)
 
 describe('lib/saved_state', () => {
   context('#create', () => {

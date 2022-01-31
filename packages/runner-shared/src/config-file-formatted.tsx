@@ -1,11 +1,13 @@
 import React from 'react'
-import { isUndefined } from 'lodash'
 
 const configFileFormatted = (configFile) => {
   if (configFile === false) {
     return (
       <>
-        <code>cypress.json</code>
+        <code>
+cypress.config.
+          {`{ts | js}`}
+        </code>
         {' '}
 file (currently disabled by
         {' '}
@@ -15,10 +17,12 @@ file (currently disabled by
     )
   }
 
-  if (isUndefined(configFile) || configFile === 'cypress.json') {
+  if (['cypress.config.ts', 'cypress.config.js'].includes(configFile)) {
     return (
       <>
-        <code>cypress.json</code>
+        <code>
+          {configFile}
+        </code>
         {' '}
 file
       </>

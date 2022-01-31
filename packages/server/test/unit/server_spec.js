@@ -5,12 +5,11 @@ const os = require('os')
 const express = require('express')
 const Promise = require('bluebird')
 const { connect } = require('@packages/network')
-const config = require(`${root}lib/config`)
-const logger = require(`${root}lib/logger`)
-const { ServerE2E } = require(`${root}lib/server-e2e`)
-const { SocketE2E } = require(`${root}lib/socket-e2e`)
-const fileServer = require(`${root}lib/file_server`)
-const ensureUrl = require(`${root}lib/util/ensure-url`)
+const config = require(`../../lib/config`)
+const { ServerE2E } = require(`../../lib/server-e2e`)
+const { SocketE2E } = require(`../../lib/socket-e2e`)
+const fileServer = require(`../../lib/file_server`)
+const ensureUrl = require(`../../lib/util/ensure-url`)
 
 const morganFn = function () {}
 
@@ -22,7 +21,7 @@ describe('lib/server', () => {
   beforeEach(function () {
     this.server = new ServerE2E()
 
-    return config.set({ projectRoot: '/foo/bar/' })
+    return config.setupFullConfigWithDefaults({ projectRoot: '/foo/bar/', config: { supportFile: false } })
     .then((cfg) => {
       this.config = cfg
     })
@@ -51,7 +50,7 @@ xdescribe('lib/server', () => {
 
     sinon.stub(fileServer, 'create').returns(this.fileServer)
 
-    return config.set({ projectRoot: '/foo/bar/' })
+    return config.setupFullConfigWithDefaults({ projectRoot: '/foo/bar/' })
     .then((cfg) => {
       this.config = cfg
       this.server = new ServerE2E()
@@ -143,15 +142,6 @@ xdescribe('lib/server', () => {
       return this.server.open(this.config)
       .then(() => {
         expect(this.server.createServer).to.be.calledWith(obj, this.config)
-      })
-    })
-
-    it('calls logger.setSettings with config', function () {
-      sinon.spy(logger, 'setSettings')
-
-      return this.server.open(this.config)
-      .then((ret) => {
-        expect(logger.setSettings).to.be.calledWith(this.config)
       })
     })
   })
@@ -321,15 +311,6 @@ xdescribe('lib/server', () => {
         return this.server.close()
       }).then(() => {
         expect(this.server.isListening).to.be.false
-      })
-    })
-
-    it('clears settings from Log', function () {
-      logger.setSettings({})
-
-      return this.server.close()
-      .then(() => {
-        expect(logger.getSettings()).to.be.undefined
       })
     })
 

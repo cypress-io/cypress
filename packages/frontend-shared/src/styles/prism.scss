@@ -1,0 +1,76 @@
+code[class*="language-"],
+pre[class*="language-"] {
+  @apply text-gray-500;
+	text-shadow: $white 0px 1px;
+}
+
+.token.property,
+.token.tag,
+.token.boolean,
+.token.number,
+.token.constant,
+.token.symbol,
+.token.deleted {
+  @apply text-red-500;
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+  @apply text-jade-500;
+}
+
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string,
+.token.regex,
+.token.important,
+.token.variable {
+  @apply text-orange-500;
+  @apply bg-gray-50;
+}
+
+.token.operator,
+.token.punctuation {
+  @apply text-gray-500;
+}
+
+.token.atrule,
+.token.attr-value,
+.token.class-name {
+  @apply text-indigo-500;
+}
+
+.token.keyword,
+.token.function {
+  @apply text-purple-500;
+}
+
+.token.comment {
+  @apply text-gray-500;
+}
+
+.line-numbers .line-numbers-rows {
+  @apply border-r-0;
+}
+
+.line-numbers-rows > span:before {
+  @apply text-gray-200;
+}
+
+.line-highlight {
+  @apply bg-gray-100;
+
+	&:before {
+    @apply hidden;
+	}
+}
+
+.test-error-code-frame pre[data-line] {
+  @apply pl-2;
+  @apply relative;
+}

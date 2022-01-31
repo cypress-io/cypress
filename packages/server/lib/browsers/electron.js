@@ -3,6 +3,7 @@ const EE = require('events')
 const path = require('path')
 const Bluebird = require('bluebird')
 const debug = require('debug')('cypress:server:browsers:electron')
+const debugVerbose = require('debug')('cypress-verbose:server:browsers:electron')
 const menu = require('../gui/menu')
 const Windows = require('../gui/windows')
 const { CdpAutomation, screencastOpts } = require('./cdp_automation')
@@ -53,24 +54,33 @@ const _getAutomation = function (win, options, parent) {
 
   const automation = new CdpAutomation(sendCommand, on, parent)
 
-  if (!options.onScreencastFrame) {
-    // after upgrading to Electron 8, CDP screenshots can hang if a screencast is not also running
-    // workaround: start and stop screencasts between screenshots
-    // @see https://github.com/cypress-io/cypress/pull/6555#issuecomment-596747134
-    automation.onRequest = _.wrap(automation.onRequest, async (fn, message, data) => {
-      if (message !== 'take:screenshot') {
+  automation.onRequest = _.wrap(automation.onRequest, async (fn, message, data) => {
+    switch (message) {
+      case 'take:screenshot': {
+        // after upgrading to Electron 8, CDP screenshots can hang if a screencast is not also running
+        // workaround: start and stop screencasts between screenshots
+        // @see https://github.com/cypress-io/cypress/pull/6555#issuecomment-596747134
+        if (!options.onScreencastFrame) {
+          await sendCommand('Page.startScreencast', screencastOpts)
+          const ret = await fn(message, data)
+
+          await sendCommand('Page.stopScreencast')
+
+          return ret
+        }
+
         return fn(message, data)
       }
+      case 'focus:browser:window': {
+        win.show()
 
-      await sendCommand('Page.startScreencast', screencastOpts)
-
-      const ret = await fn(message, data)
-
-      await sendCommand('Page.stopScreencast')
-
-      return ret
-    })
-  }
+        return
+      }
+      default: {
+        return fn(message, data)
+      }
+    }
+  })
 
   return automation
 }
@@ -273,7 +283,7 @@ module.exports = {
     const originalSendCommand = webContents.debugger.sendCommand
 
     webContents.debugger.sendCommand = function (message, data) {
-      debug('debugger: sending %s with params %o', message, data)
+      debugVerbose('debugger: sending %s with params %o', message, data)
 
       return originalSendCommand.call(webContents.debugger, message, data)
       .then((res) => {
@@ -284,7 +294,7 @@ module.exports = {
           debugRes.data = `${debugRes.data.slice(0, 100)} [truncated]`
         }
 
-        debug('debugger: received response to %s: %o', message, debugRes)
+        debugVerbose('debugger: received response to %s: %o', message, debugRes)
 
         return res
       }).catch((err) => {
@@ -377,6 +387,10 @@ module.exports = {
       // https://github.com/cypress-io/cypress/issues/1872
       proxyBypassRules: '<-loopback>',
     })
+  },
+
+  async connectToExisting () {
+    throw new Error('Attempting to connect to existing browser for Cypress in Cypress which is not yet implemented for electron')
   },
 
   open (browser, url, options = {}, automation) {

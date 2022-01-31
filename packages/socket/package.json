@@ -4,8 +4,10 @@
   "private": true,
   "browser": "lib/browser.ts",
   "scripts": {
-    "build-prod": "tsc",
-    "clean-deps": "rm -rf node_modules",
+    "build-prod": "tsc || echo 'built, with type errors' && rm lib/browser.js",
+    "clean": "rimraf lib/*.js",
+    "check-ts": "tsc --noEmit",
+    "clean-deps": "rimraf node_modules",
     "postinstall": "patch-package",
     "test": "yarn test-unit",
     "test-debug": "yarn test-unit --inspect-brk=5566",
@@ -23,13 +25,15 @@
     "chai": "3.5.0",
     "cross-env": "6.0.3",
     "mocha": "3.5.3",
-    "resolve-pkg": "2.0.0"
+    "resolve-pkg": "2.0.0",
+    "rimraf": "3.0.2"
   },
   "files": [
     "index.js",
     "lib",
     "patches"
   ],
+  "types": "lib/socket.ts",
   "workspaces": {
     "nohoist": [
       "engine.io",

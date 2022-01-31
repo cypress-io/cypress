@@ -1,10 +1,14 @@
+import cs from 'classnames'
 import { observer } from 'mobx-react'
 import React from 'react'
 
 import { StatsStore } from './stats-store'
 
+import FailedIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/status-failed_x12.svg'
+import PassedIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/status-passed_x12.svg'
+import PendingIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/status-pending_x12.svg'
+
 const count = (num: number) => num > 0 ? num : '--'
-const formatDuration = (duration: number) => duration ? String((duration / 1000).toFixed(2)).padStart(5, '0') : '--'
 
 interface Props {
   stats: StatsStore
@@ -13,22 +17,19 @@ interface Props {
 const Stats = observer(({ stats }: Props) => (
   <ul aria-label='Stats' className='stats'>
     <li className='passed'>
-      <i aria-hidden="true" className='fas fa-check' />
+      <PassedIcon aria-hidden="true" />
       <span className='visually-hidden'>Passed:</span>
-      <span className='num'>{count(stats.numPassed)}</span>
+      <span className={cs('num', { 'empty': !stats.numPassed })}>{count(stats.numPassed)}</span>
     </li>
     <li className='failed'>
-      <i aria-hidden="true" className='fas fa-times' />
+      <FailedIcon aria-hidden="true" />
       <span className='visually-hidden'>Failed:</span>
-      <span className='num'>{count(stats.numFailed)}</span>
+      <span className={cs('num', { 'empty': !stats.numFailed })}>{count(stats.numFailed)}</span>
     </li>
     <li className='pending'>
-      <i aria-hidden="true" className='fas fa-circle-notch' />
+      <PendingIcon aria-hidden="true" />
       <span className='visually-hidden'>Pending:</span>
-      <span className='num'>{count(stats.numPending)}</span>
-    </li>
-    <li className='duration'>
-      <span className='num'>{formatDuration(stats.duration)}</span>
+      <span className={cs('num', { 'empty': !stats.numPending })}>{count(stats.numPending)}</span>
     </li>
   </ul>
 ))

@@ -268,7 +268,7 @@
 
 * Added the need to install a preprocessor or a dev-server plugin
 * Removed the pre-instalation of test coverage 
-  * Install it manually by following [the documentation](https://docs.cypress.io/guides/tooling/code-coverage.html#Introduction)
+  * Install it manually by following [the documentation](https://on.cypress.io/code-coverage-introduction)
 * removed the pre-installation of `cypress-react-selector`
   * If you use `cy.react()` in your tests, the command will not work anymore. [Install it back in your support file](https://www.npmjs.com/package/cypress-react-selector) 
 

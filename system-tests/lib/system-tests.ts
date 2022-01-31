@@ -347,7 +347,12 @@ const replaceDurationFromReporter = (str, p1, p2, p3) => {
   return p1 + _.padEnd('X', p2.length, 'X') + p3
 }
 
-const replaceNodeVersion = (str, p1, p2, p3) => _.padEnd(`${p1}X (/foo/bar/node)`, (p1.length + p2.length + p3.length))
+const replaceNodeVersion = (str, p1, p2, p3) => {
+  // Accounts for paths that break across lines
+  const p3Length = p3.includes('\n') ? p3.split('\n')[0].length - 1 : p3.length
+
+  return _.padEnd(`${p1}X (/foo/bar/node)`, (p1.length + p2.length + p3Length))
+}
 
 const replaceCypressVersion = (str, p1, p2) => {
   // Cypress: 12.10.10 -> Cypress: 1.2.3 (handling padding)
@@ -428,7 +433,7 @@ const normalizeStdout = function (str, options: any = {}) {
   // Cypress: 2.1.0 -> Cypress: 1.2.3
   .replace(/(Cypress\:\s+)(\d+\.\d+\.\d+)/g, replaceCypressVersion)
   // Node Version: 10.2.3 (Users/jane/node) -> Node Version: X (foo/bar/node)
-  .replace(/(Node Version\:\s+v)(\d+\.\d+\.\d+)( \(.*\)\s+)/g, replaceNodeVersion)
+  .replace(/(Node Version\:\s+v)(\d+\.\d+\.\d+)( \((?:.|\n)*?\)\s+)/g, replaceNodeVersion)
   // 15 seconds -> X second
   .replace(/(Duration\:\s+)(\d+\sminutes?,\s+)?(\d+\sseconds?)(\s+)/g, replaceDurationSeconds)
   // duration='1589' -> duration='XXXX'
@@ -748,9 +753,11 @@ const systemTests = {
           return spec
         }
 
-        const specDir = options.testingType === 'component' ? 'component' : 'integration'
+        if (options.testingType === 'component') {
+          return path.join(projectPath, spec)
+        }
 
-        return path.join(projectPath, 'cypress', specDir, spec)
+        return path.join(projectPath, 'cypress', 'e2e', spec)
       })
 
       // normalize the path to the spec
@@ -769,10 +776,6 @@ const systemTests = {
       `--run-project=${Fixtures.projectPath(options.project)}`,
       `--testingType=${options.testingType || 'e2e'}`,
     ]
-
-    if (options.testingType === 'component') {
-      args.push('--component-testing')
-    }
 
     if (options.spec) {
       args.push(`--spec=${options.spec}`)
@@ -915,7 +918,7 @@ const systemTests = {
     }
 
     if (ctx.settings) {
-      await settings.write(e2ePath, ctx.settings)
+      await settings.writeForTesting(e2ePath, ctx.settings)
     }
 
     args = options.args || ['index.js'].concat(args)

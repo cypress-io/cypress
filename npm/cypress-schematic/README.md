@@ -84,7 +84,7 @@ Read our docs to learn more about [launching browsers](https://on.cypress.io/lau
 
 ### Recording test results to the Cypress Dashboard
 
-We recommend setting your [Cypress Dashboard](https://docs.cypress.io/guides/dashboard/introduction) recording key as an environment variable and NOT as a builder option when running it in CI.
+We recommend setting your [Cypress Dashboard](https://on.cypress.io/features-dashboard) recording key as an environment variable and NOT as a builder option when running it in CI.
 
 ```json
 "cypress-run": {
@@ -102,7 +102,7 @@ We recommend setting your [Cypress Dashboard](https://docs.cypress.io/guides/das
 }
 ```
 
-Read our docs to learn more about [recording test results](https://on.cypress.io/recording-project-runs) to the [Cypress Dashboard](https://docs.cypress.io/guides/dashboard/introduction).
+Read our docs to learn more about [recording test results](https://on.cypress.io/recording-project-runs) to the [Cypress Dashboard](https://on.cypress.io/features-dashboard).
 
 ### Specifying a custom `cypress.json` config file
 
@@ -181,8 +181,7 @@ In order to bypass the prompt asking for your e2e spec name, simply add a `--nam
 ng generate @cypress/schematic:e2e --name=login
 ```
 
-This will create a new spec file named `login.spec.ts` in the default Cypress folder location.
-
+This will create a new spec file named `login.cy.ts` in the default Cypress folder location.
 
 ### Specify Project
 

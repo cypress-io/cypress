@@ -1,19 +1,17 @@
+$code-border-radius: 4px;
+
 .reporter {
   .error {
-    background-color: #f5f5f5;
+    background-color: $gray-1000;
     min-height: 20px;
     padding: 24px;
 
     h2 {
-      color: #e94f5f;
+      color: $err-text;
       font-size: 1.3em;
       font-weight: 500;
       line-height: 1.4;
       margin-bottom: 0.6em;
-
-      > i {
-        margin-right: 5px;
-      }
 
       a {
         float: right;
@@ -25,7 +23,8 @@
     }
 
     pre {
-      background: #fcf8e3;
+      border-color: $orange-300;
+      color: $orange-300;
       display: block;
       width: 100%;
       white-space: initial;
@@ -54,9 +53,9 @@
 
   .runnable-err-wrapper {
     cursor: default;
-    margin: 5px 0 5px 5px;
+    margin: 5px 0 5px 9px;
     padding-left: 10px;
-    border-left: 1px dotted #DDD;
+    border-left: 1px dotted $gray-900;
   }
 
   .studio-err-wrapper {
@@ -82,19 +81,19 @@
   }
 
   .runnable-err-header {
+    background-color: rgba($red-400, 0.05);
     display: flex;
     justify-content: space-between;
-    background-color: $err-header-background;
     padding: 5px 10px;
     font-weight: bold;
 
     .runnable-err-name {
       flex-grow: 2;
       font-size: 13px;
-      line-height: 22px;;
+      line-height: 22px;
+      color: $err-header-text;
 
-      i {
-        font-size: 10px;
+      svg {
         margin-right: 10px;
       }
     }
@@ -107,24 +106,25 @@
   }
 
   .runnable-err-message {
-    padding: 10px;
     font-family: $monospace;
-    color: $err-text;
     font-size: 1em;
+    padding: 10px;
 
     code {
-      background-color: $err-code-background;
-      border-radius: 5px;
+      background-color: rgba($black, 0.2);
+      border-radius: 4px;
+      color: $err-code-text;
       padding: 2px 5px;
     }
 
     strong {
-      color: $err-text;
+      color: $err-code-text;
       font-weight: bold;
     }
   }
 
   .runnable-err-stack-expander {
+    border-top: 1px solid rgba($red-400, 0.1);
     display: flex;
 
     .collapsible-header {
@@ -134,33 +134,39 @@
         outline: 0;
 
         div {
-          background: #fee0e3;
+          background: $red-900;
+        }
+      }
+
+      &:active,
+      &:hover {
+        .collapsible-header-text {
+          color: $red-100;
+        }
+        .collapsible-indicator {
+          .icon-dark {
+            stroke: $red-200;
+          }
         }
       }
 
       div {
-        background: #ffeaec;
         cursor: pointer;
         outline: none;
-        padding: 7px 5px;
+        padding: 14px 10px;
         width: 100%;
 
-        &:hover {
-          background: $err-header-background;
-        }
-
-        &:active {
-          background: darken($err-header-background, 2%);
-        }
-
         .collapsible-header-text {
-          color: #4f4f4f;
-          font-size: 13px;
+          color: $red-300;
+          font-size: 14px;
+          font-weight: 500;
         }
 
         .collapsible-indicator {
           line-height: 18px;
-          color: #bbbcbd !important;
+          .icon-dark {
+            stroke: $red-400;
+          }
         }
       }
     }
@@ -168,38 +174,35 @@
     .runnable-err-print {
       &:focus {
         outline: none;
+      }
 
+      &:active,
+      &:hover {
         div {
-          background: $err-header-background;
+          color: $red-100;
+        }
+
+        svg {
+          color: $red-200;
         }
       }
 
       div {
-        background: #ffeaec;
-        color: #4f4f4f;
+        color: $red-300;
         cursor: pointer;
-        font-size: 13px;
+        font-size: 14px;
+        font-weight: 500;
         height: 100%;
-        padding: 7px 10px;
+        padding: 14px 10px;
         width: 100%;
 
         &:focus {
           outline: none;
         }
 
-        &:hover {
-          background: $err-header-background;
-        }
-
-        &:active {
-          background: darken($err-header-background, 2%);
-        }
-
-        i {
-          border: solid 1px #4f4f4f;
-          border-radius: 4px;
-          font-size: 6px;
-          padding: 4px 3px;
+        svg {
+          color: $red-400;
+          margin: 4px 3px;
           vertical-align: middle;
         }
 
@@ -213,7 +216,7 @@
   .runnable-err-stack-trace {
     font-family: $monospace;
     overflow: auto;
-    padding: 10px;
+    padding: 0 10px 10px;
 
     .err-stack-line {
       white-space: pre;
@@ -226,19 +229,15 @@
   }
 
   .test-err-code-frame {
-    background-color: #fff;
-    border: 1px solid #ffe4e7;
+    background-color: $gray-1000;
+    border: 1px solid rgba($red-400, 0.25);
+    border-radius: $code-border-radius;
     margin: 0 10px 10px;
 
     .runnable-err-file-path {
-      &:before {
-        @extend .#{$fa-css-prefix};
-        @extend .#{$fa-css-prefix}-file;
-        color: #bdbdbd;
-        margin-right: 5px;
-      }
-
-      background: #f6f6f6;
+      background: rgba($gray-900, 0.5);
+      border-top-left-radius: $code-border-radius;
+      border-top-right-radius: $code-border-radius;
       display: block;
       font-size: 13px;
       line-height: 24px;
@@ -247,8 +246,9 @@
     }
 
     pre {
-      background-color: #fff;
       border: 0;
+      border-bottom-left-radius: $code-border-radius;
+      border-bottom-right-radius: $code-border-radius;
       padding-left: 10px;
     }
   }

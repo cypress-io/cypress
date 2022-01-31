@@ -15,7 +15,7 @@
           "description": "Any values to be set as environment variables. See https://on.cypress.io/environment-variables",
           "body": {}
         },
-        "ignoreTestFiles": {
+        "ignoreSpecPattern": {
           "type": [
             "string",
             "array"
@@ -147,7 +147,7 @@
             "string",
             "boolean"
           ],
-          "default": "cypress/support/index.js",
+          "default": "cypress/support/e2e.{js,jsx,ts,tsx}",
           "description": "Path to file to load before test files load. This file is compiled and bundled. (Pass false to disable)"
         },
         "videosFolder": {
@@ -288,7 +288,7 @@
         "includeShadowDom": {
           "type": "boolean",
           "default": false,
-          "description": "Enables including elements within the shadow DOM when using querying commands (e.g. cy.get(), cy.find()). Can be set globally in cypress.json, per-suite or per-test in the test configuration object, or programmatically with Cypress.config()"
+          "description": "Enables including elements within the shadow DOM when using querying commands (e.g. cy.get(), cy.find()). Can be set globally in cypress.config.{ts|js}, per-suite or per-test in the test configuration object, or programmatically with Cypress.config()"
         },
         "clientCertificates": {
           "description": "Defines client certificates to use when sending requests to the specified URLs",

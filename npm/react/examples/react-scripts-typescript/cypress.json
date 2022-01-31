@@ -1,7 +1,0 @@
-{
-  "video": false,
-  "testFiles": "**/*cy-spec.tsx",
-  "viewportWidth": 500,
-  "viewportHeight": 800,
-  "componentFolder": "src"
-}

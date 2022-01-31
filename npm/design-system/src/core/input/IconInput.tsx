@@ -23,7 +23,7 @@ export type IconSettings = {
   ['aria-label']: string
 } | {
   onPress?: undefined
-  ['aria-label']?: undefined
+  ['aria-label']?: string | undefined
 })
 
 export type IconInputProps = InputProps<{

@@ -20,7 +20,7 @@ describe('init component tests script', () => {
   let execStub: SinonStub | null = null
 
   const e2eTestOutputPath = path.resolve(__dirname, '..', 'test-output')
-  const cypressConfigPath = path.join(e2eTestOutputPath, 'cypress.json')
+  const cypressConfigPath = path.join(e2eTestOutputPath, 'cypress.config.ts')
 
   beforeEach(async () => {
     logSpy = sinon.spy(global.console, 'log')
@@ -55,9 +55,9 @@ describe('init component tests script', () => {
 
   function snapshotGeneratedFiles (name: string) {
     snapshot(
-      `${name} cypress.json`,
+      `${name} cypress.config.ts`,
       fs.readFileSync(
-        path.join(e2eTestOutputPath, 'cypress.json'),
+        path.join(e2eTestOutputPath, 'cypress.config.ts'),
         { encoding: 'utf-8' },
       ),
     )
@@ -71,7 +71,7 @@ describe('init component tests script', () => {
     )
 
     const supportFile = fs.readFileSync(
-      path.join(e2eTestOutputPath, 'cypress', 'support', 'index.js'),
+      path.join(e2eTestOutputPath, 'cypress', 'support', 'component.js'),
       { encoding: 'utf-8' },
     )
 
@@ -81,9 +81,9 @@ describe('init component tests script', () => {
     }
 
     snapshot(
-      `${name} support/index.js`,
+      `${name} support/component.js`,
       fs.readFileSync(
-        path.join(e2eTestOutputPath, 'cypress', 'support', 'index.js'),
+        path.join(e2eTestOutputPath, 'cypress', 'support', 'component.js'),
         { encoding: 'utf-8' },
       ),
     )
@@ -91,8 +91,8 @@ describe('init component tests script', () => {
 
   it('determines more presumable configuration to suggest', async () => {
     createTempFiles({
-      '/cypress.json': '{}',
-      '/cypress/support/index.js': '',
+      '/cypress.config.ts': 'export default {}',
+      '/cypress/support/component.js': '',
       '/cypress/plugins/index.js': 'module.exports = (on, config) => {}',
       // For next.js user will have babel config, but we want to suggest to use the closest config for the application code
       '/babel.config.js': 'module.exports = { }',
@@ -114,8 +114,8 @@ describe('init component tests script', () => {
 
   it('automatically suggests to the user which config to use', async () => {
     createTempFiles({
-      '/cypress.json': '{}',
-      '/cypress/support/index.js': 'import "./commands.js";',
+      '/cypress.config.ts': 'export default {}',
+      '/cypress/support/component.js': 'import "./commands.js";',
       '/cypress/plugins/index.js': 'module.exports = () => {}',
       '/package.json': JSON.stringify({
         dependencies: {
@@ -145,7 +145,7 @@ describe('init component tests script', () => {
 
   it('Asks for preferred bundling tool if can not determine the right one', async () => {
     createTempFiles({
-      '/cypress.json': '{}',
+      '/cypress.config.ts': 'export default {}',
       '/webpack.config.js': 'module.exports = { }',
       '/package.json': JSON.stringify({ dependencies: { } }),
     })
@@ -170,7 +170,7 @@ describe('init component tests script', () => {
 
   it('Asks for framework if more than 1 option was auto detected', async () => {
     createTempFiles({
-      '/cypress.json': '{}',
+      '/cypress.config.ts': 'export default {}',
       '/webpack.config.js': 'module.exports = { }',
       '/package.json': JSON.stringify({ dependencies: { react: '*', vue: '^2.4.5' } }),
     })
@@ -195,7 +195,7 @@ describe('init component tests script', () => {
 
   it('installs the right adapter', async () => {
     createTempFiles({
-      '/cypress.json': '{}',
+      '/cypress.config.ts': 'export default {}',
       '/webpack.config.js': 'module.exports = { }',
       '/package.json': JSON.stringify({ dependencies: { react: '16.4.5' } }),
     })
@@ -213,7 +213,7 @@ describe('init component tests script', () => {
 
   it('installs the right adapter for vue 3', async () => {
     createTempFiles({
-      '/cypress.json': '{}',
+      '/cypress.config.ts': 'export default {}',
       '/vite.config.js': 'module.exports = { }',
       '/package.json': JSON.stringify({ dependencies: { vue: '^3.0.0' } }),
     })
@@ -236,7 +236,7 @@ describe('init component tests script', () => {
           react: '^16.0.0',
         },
       }),
-      '/cypress.json': '{}',
+      '/cypress.config.ts': 'export default {}',
     })
 
     promptSpy = sinon.stub(inquirer, 'prompt').returns(Promise.resolve({
@@ -253,9 +253,9 @@ describe('init component tests script', () => {
     ).to.be.true
   })
 
-  it('suggests right docs example and cypress.json config based on the `componentFolder` answer', async () => {
+  it('suggests right docs example and cypress.config.ts config based on the `componentFolder` answer', async () => {
     createTempFiles({
-      '/cypress.json': '{}',
+      '/cypress.config.ts': 'export default {}',
       '/package.json': JSON.stringify({
         dependencies: {
           react: '^16.0.0',
@@ -270,9 +270,9 @@ describe('init component tests script', () => {
 
     await initComponentTesting({ config: {}, cypressConfigPath, useYarn: true })
 
-    const injectedCode = fs.readFileSync(path.join(e2eTestOutputPath, 'cypress.json'), { encoding: 'utf-8' })
+    const injectedCode = require(path.join(e2eTestOutputPath, 'cypress.config.ts'))
 
-    expect(injectedCode).to.equal(JSON.stringify(
+    expect(JSON.stringify(injectedCode.default, null, 2)).to.equal(JSON.stringify(
       {
         componentFolder: 'cypress/component',
         testFiles: '**/*.spec.{js,ts,jsx,tsx}',
@@ -284,7 +284,7 @@ describe('init component tests script', () => {
 
   it('Shows help message if cypress files are not created', async () => {
     createTempFiles({
-      '/cypress.json': '{}',
+      '/cypress.config.ts': 'export default {}',
       '/package.json': JSON.stringify({
         dependencies: {
           react: '^16.0.0',
@@ -310,7 +310,7 @@ describe('init component tests script', () => {
   it('Doesn\'t affect injected code if user has custom babel.config.js', async () => {
     createTempFiles({
       '/cypress/plugins/index.js': 'module.exports = (on, config) => {}',
-      '/cypress.json': '{}',
+      '/cypress.config.ts': 'export default {}',
       'babel.config.js': `module.exports = ${JSON.stringify({
         presets: [
           '@babel/preset-env',

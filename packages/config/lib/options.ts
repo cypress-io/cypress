@@ -1,4 +1,7 @@
-const validate = require('./validation')
+import os from 'os'
+import validate from './validation'
+// @ts-ignore
+import pkg from '@packages/root'
 
 interface ResolvedConfigOption {
   name: string
@@ -46,7 +49,7 @@ interface BreakingOption {
   isWarning?: boolean
 }
 
-const isValidConfig = (key, config) => {
+const isValidConfig = (key: string, config: any) => {
   const status = validate.isPlainObject(key, config)
 
   if (status !== true) {
@@ -82,6 +85,11 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     validation: validate.isNumber,
     canUpdateDuringTestTime: true,
   }, {
+    name: 'arch',
+    defaultValue: () => os.arch(),
+    validation: validate.isString,
+    canUpdateDuringTestTime: false,
+  }, {
     name: 'baseUrl',
     defaultValue: null,
     validation: validate.isFullyQualifiedUrl,
@@ -104,14 +112,10 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
   }, {
     name: 'component',
     // runner-ct overrides
-    defaultValue: {},
+    defaultValue: {
+      specPattern: '**/*.cy.{js,jsx,ts,tsx}',
+    },
     validation: isValidConfig,
-    canUpdateDuringTestTime: false,
-  }, {
-    name: 'componentFolder',
-    defaultValue: 'cypress/component',
-    validation: validate.isStringOrFalse,
-    isFolder: true,
     canUpdateDuringTestTime: false,
   }, {
     name: 'defaultCommandTimeout',
@@ -127,7 +131,9 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
   }, {
     name: 'e2e',
     // e2e runner overrides
-    defaultValue: {},
+    defaultValue: {
+      specPattern: 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
+    },
     validation: isValidConfig,
     canUpdateDuringTestTime: false,
   }, {
@@ -188,7 +194,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     isFolder: true,
     canUpdateDuringTestTime: false,
   }, {
-    name: 'ignoreTestFiles',
+    name: 'ignoreSpecPattern',
     defaultValue: '*.hot-update.js',
     validation: validate.isStringOrArrayOfStrings,
     canUpdateDuringTestTime: true,
@@ -197,12 +203,6 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     defaultValue: false,
     validation: validate.isBoolean,
     canUpdateDuringTestTime: true,
-  }, {
-    name: 'integrationFolder',
-    defaultValue: 'cypress/integration',
-    validation: validate.isString,
-    isFolder: true,
-    canUpdateDuringTestTime: false,
   }, {
     name: 'keystrokeDelay',
     defaultValue: 0,
@@ -222,6 +222,11 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     defaultValue: 50,
     validation: validate.isNumber,
     canUpdateDuringTestTime: true,
+  }, {
+    name: 'platform',
+    defaultValue: () => os.platform(),
+    validation: validate.isString,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'pageLoadTimeout',
     defaultValue: 60000,
@@ -309,7 +314,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     canUpdateDuringTestTime: true,
   }, {
     name: 'supportFile',
-    defaultValue: 'cypress/support',
+    defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? 'cypress/support/component.{js,jsx,ts,tsx}' : 'cypress/support/e2e.{js,jsx,ts,tsx}',
     validation: validate.isStringOrFalse,
     isFolder: true,
     canUpdateDuringTestTime: false,
@@ -324,11 +329,6 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     defaultValue: 60000,
     validation: validate.isNumber,
     canUpdateDuringTestTime: true,
-  }, {
-    name: 'testFiles',
-    defaultValue: '**/*.*',
-    validation: validate.isStringOrArrayOfStrings,
-    canUpdateDuringTestTime: false,
   }, {
     name: 'trashAssetsBeforeRuns',
     defaultValue: true,
@@ -403,7 +403,7 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     canUpdateDuringTestTime: false,
   }, {
     name: 'configFile',
-    defaultValue: 'cypress.json',
+    defaultValue: 'cypress.config.js',
     validation: validate.isStringOrFalse,
     // not truly internal, but can only be set via cli,
     // so we don't consider it a "public" option
@@ -473,6 +473,12 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     isInternal: true,
     canUpdateDuringTestTime: false,
   }, {
+    name: 'version',
+    defaultValue: pkg.version,
+    validation: validate.isString,
+    isInternal: true,
+    canUpdateDuringTestTime: false,
+  }, {
     name: 'xhrRoute',
     defaultValue: '/xhrs/',
     validation: validate.isString,
@@ -481,7 +487,7 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
   },
 ]
 
-export const options: Array<ResolvedConfigOption|RuntimeConfigOption> = [
+export const options: Array<ResolvedConfigOption | RuntimeConfigOption> = [
   ...resolvedOptions,
   ...runtimeOptions,
 ]
@@ -525,5 +531,13 @@ export const breakingOptions: Array<BreakingOption> = [
     value: 'bundled',
     errorKey: 'NODE_VERSION_DEPRECATION_BUNDLED',
     isWarning: true,
+  },
+]
+
+export const breakingRootOptions: Array<BreakingOption> = [
+  {
+    name: 'supportFile',
+    errorKey: 'SUPPORT_FILE_ROOT_NOT_SUPPORTED',
+    isWarning: false,
   },
 ]

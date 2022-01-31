@@ -1,6 +1,6 @@
 import { Configuration } from "webpack";
 
-declare namespace legacyDevServer {
+declare namespace CypressBabelDevServer {
   interface CypressBabelDevServerConfig {
     /**
      * Allows to adjust the webpackConfig that our dev-server will use
@@ -8,12 +8,13 @@ declare namespace legacyDevServer {
      * @returns modified final configuration
      */
     setWebpackConfig?(config:Configuration): Configuration
-  }
 
-  /**
-   * Type helper to make writing `CypressBabelDevServerConfig` easier
-   */
-  function defineDevServerConfig(devServerConfig: CypressBabelDevServerConfig): CypressBabelDevServerConfig
+    /**
+     * Path to an index.html file that will serve as the template in
+     * which your components will be rendered.
+     */
+    indexHtml?: string
+  }
 
   /**
    * Sets up a webpack dev server with the proper configuration for babel transpilation
@@ -30,6 +31,6 @@ declare namespace legacyDevServer {
  * @param config comes from the argument of the `pluginsFile` function
  * @param devServerConfig additional config object (create an empty object it to see how to use it)
  */
-declare function legacyDevServer(on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions, devServerConfig?: legacyDevServer.CypressBabelDevServerConfig): void
+declare function CypressBabelDevServer(on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions, devServerConfig?: CypressBabelDevServer.CypressBabelDevServerConfig): void
 
-export = legacyDevServer;
+export = CypressBabelDevServer;

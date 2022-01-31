@@ -1,6 +1,6 @@
 require('../spec_helper')
 
-const statusCode = require(`${root}lib/util/status_code`)
+const statusCode = require(`../../lib/util/status_code`)
 
 describe('lib/util/status_code', () => {
   context('.isOk', () => {

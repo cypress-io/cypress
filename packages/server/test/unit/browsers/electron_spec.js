@@ -5,12 +5,12 @@ const EE = require('events')
 const la = require('lazy-ass')
 const check = require('check-more-types')
 
-const menu = require(`${root}../lib/gui/menu`)
-const plugins = require(`${root}../lib/plugins`)
-const Windows = require(`${root}../lib/gui/windows`)
-const electron = require(`${root}../lib/browsers/electron`)
-const savedState = require(`${root}../lib/saved_state`)
-const { Automation } = require(`${root}../lib/automation`)
+const menu = require(`../../../lib/gui/menu`)
+const plugins = require(`../../../lib/plugins`)
+const Windows = require(`../../../lib/gui/windows`)
+const electron = require(`../../../lib/browsers/electron`)
+const savedState = require(`../../../lib/saved_state`)
+const { Automation } = require(`../../../lib/automation`)
 
 const ELECTRON_PID = 10001
 
@@ -289,6 +289,7 @@ describe('lib/browsers/electron', () => {
       this.newWin = {
         maximize: sinon.stub(),
         setSize: sinon.stub(),
+        show: sinon.stub(),
         webContents: this.win.webContents,
       }
 
@@ -339,14 +340,19 @@ describe('lib/browsers/electron', () => {
       })
     })
 
-    it('registers onRequest automation middleware', function () {
+    it('registers onRequest automation middleware and calls show when requesting to be focused', function () {
       sinon.spy(this.automation, 'use')
 
-      return electron._render(this.url, this.automation, this.preferences, this.options)
+      electron._render(this.url, this.automation, this.preferences, this.options)
       .then(() => {
         expect(Windows.create).to.be.calledWith(this.options.projectRoot, this.options)
+
         expect(this.automation.use).to.be.called
         expect(this.automation.use.lastCall.args[0].onRequest).to.be.a('function')
+
+        this.automation.use.lastCall.args[0].onRequest('focus:browser:window')
+
+        expect(this.newWin.show).to.be.called
       })
     })
   })

@@ -6,7 +6,7 @@ import http from 'http'
 import fs from 'fs'
 import { webpackDevServerFacts } from '../src/webpackDevServerFacts'
 
-import { defineDevServerConfig, devServer, startDevServer } from '../'
+import { devServer, startDevServer } from '../'
 
 const requestSpecFile = (port: number) => {
   return new Promise((res) => {
@@ -164,7 +164,7 @@ describe('#startDevServer', () => {
         specs,
         devServerEvents,
       },
-      defineDevServerConfig({ webpackConfig }),
+      { webpackConfig },
     )
 
     const response = await requestSpecFile(port as number)
