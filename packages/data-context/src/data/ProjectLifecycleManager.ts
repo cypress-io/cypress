@@ -15,6 +15,7 @@ import resolve from 'resolve'
 import debugLib from 'debug'
 import pDefer from 'p-defer'
 import fs from 'fs'
+import semver from 'semver'
 
 import type { DataContext } from '..'
 import { LoadConfigReply, SetupNodeEventsReply, ProjectConfigIpc, IpcHandler } from './ProjectConfigIpc'
@@ -946,7 +947,7 @@ export class ProjectLifecycleManager {
   private forkConfigProcess () {
     const configProcessArgs = ['--projectRoot', this.projectRoot, '--file', this.configFilePath]
 
-    const childOptions: ForkOptions = {
+    const childOptions: Partial<ForkOptions> = {
       stdio: 'pipe',
       cwd: path.dirname(this.configFilePath),
       env: {
@@ -955,6 +956,21 @@ export class ProjectLifecycleManager {
         // DEBUG: '*',
       },
       execPath: this.ctx.nodePath ?? undefined,
+    }
+
+    const nodeVersion = this.ctx.modeOptions.userNodeVersion || process.versions.node
+
+    // https://github.com/cypress-io/cypress/issues/18914
+    // If we're on node version 17 or higher, we need the
+    // NODE_ENV --openssl-legacy-provider so that webpack can continue to use
+    // the md4 hash function. This would cause an error prior to node 17
+    // though, so we have to detect node's major version before spawning the
+    // plugins process.
+
+    // To be removed on update to webpack >= 5.61, which no longer relies on
+    // node's builtin crypto.hash function.
+    if (semver.satisfies(nodeVersion, '>=17.0.0') && childOptions.env && !childOptions.env.NODE_OPTIONS?.includes('--openssl-legacy-provider')) {
+      childOptions.env.NODE_OPTIONS += ' --openssl-legacy-provider'
     }
 
     if (inspector.url()) {

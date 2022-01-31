@@ -59,6 +59,26 @@ describe.skip('lib/plugins/index', () => {
     sinon.stub(util, 'wrapIpc').returns(ipc)
   })
 
+  context('#getChildOptions', () => {
+    it('uses system Node when available', () => {
+      const config = {
+        resolvedNodePath: '/my/path/to/system/node',
+      }
+
+      const childOptions = plugins.getChildOptions(config)
+
+      expect(childOptions.execPath).to.eq(config.resolvedNodePath)
+    })
+
+    it('uses bundled Node when cannot find system Node', () => {
+      const config = {}
+
+      const childOptions = plugins.getChildOptions(config)
+
+      expect(childOptions.execPath).to.eq(undefined)
+    })
+  })
+
   context('#init', () => {
     it('uses noop plugins file if no pluginsFile', () => {
       // have to fire "loaded" message, otherwise plugins.init promise never resolves
