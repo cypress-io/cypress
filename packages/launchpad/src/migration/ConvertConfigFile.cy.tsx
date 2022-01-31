@@ -6,7 +6,9 @@ describe('<ConvertConfigFile/>', { viewportWidth: 1119 }, () => {
   it('renders the lines for components folder', () => {
     cy.mountFragment(ConvertConfigFileFragmentDoc, {
       onResult (res) {
-        res.hasCustomComponentFolder = true
+        if (res.migration) {
+          res.migration.hasCustomComponentFolder = true
+        }
 
         return res
       },
@@ -24,7 +26,9 @@ describe('<ConvertConfigFile/>', { viewportWidth: 1119 }, () => {
   it('renders the lines for components testFiles', () => {
     cy.mountFragment(ConvertConfigFileFragmentDoc, {
       onResult (res) {
-        res.hasCustomComponentTestFiles = true
+        if (res.migration) {
+          res.migration.hasCustomComponentTestFiles = true
+        }
 
         return res
       },
@@ -42,7 +46,9 @@ describe('<ConvertConfigFile/>', { viewportWidth: 1119 }, () => {
   it('renders the lines for e2e folder', () => {
     cy.mountFragment(ConvertConfigFileFragmentDoc, {
       onResult (res) {
-        res.hasCustomIntegrationFolder = true
+        if (res.migration) {
+          res.migration.hasCustomIntegrationFolder = true
+        }
 
         return res
       },
@@ -60,7 +66,9 @@ describe('<ConvertConfigFile/>', { viewportWidth: 1119 }, () => {
   it('renders the lines for e2e testFiles', () => {
     cy.mountFragment(ConvertConfigFileFragmentDoc, {
       onResult (res) {
-        res.hasCustomIntegrationTestFiles = true
+        if (res.migration) {
+          res.migration.hasCustomIntegrationTestFiles = true
+        }
 
         return res
       },
@@ -78,8 +86,10 @@ describe('<ConvertConfigFile/>', { viewportWidth: 1119 }, () => {
   it('renders all lines if both are custom', () => {
     cy.mountFragment(ConvertConfigFileFragmentDoc, {
       onResult (res) {
-        res.hasCustomIntegrationTestFiles = true
-        res.hasCustomComponentFolder = true
+        if (res.migration) {
+          res.migration.hasCustomIntegrationTestFiles = true
+          res.migration.hasCustomComponentFolder = true
+        }
 
         return res
       },

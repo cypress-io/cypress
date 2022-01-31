@@ -180,6 +180,8 @@ export class MigrationDataSource {
       throw Error('Need currentProject!')
     }
 
+    const { hasTypescript } = this.ctx.lifecycleManager.metaState
+
     const config = await this.parseCypressConfig()
 
     return createConfigString(config, {
@@ -187,6 +189,7 @@ export class MigrationDataSource {
       hasE2ESpec: this.hasE2ESpec,
       hasPluginsFile: this.hasPluginsFile,
       projectRoot: this.ctx.currentProject,
+      hasTypescript,
     })
   }
 

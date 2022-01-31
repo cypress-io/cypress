@@ -14,7 +14,7 @@ export class MigrationActions {
   async createConfigFile () {
     const config = await this.ctx.migration.createConfigString()
 
-    await this.ctx.actions.file.writeFileInProject('cypress.config.js', config).catch((error) => {
+    await this.ctx.fs.writeFile(this.ctx.lifecycleManager.configFilePath, config).catch((error) => {
       throw error
     })
 
