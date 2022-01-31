@@ -52,6 +52,7 @@ export const createTestCurrentProject = (title: string, currentProject: Partial<
     browsers: stubBrowsers,
     isDefaultSpecPattern: true,
     isBrowserOpen: false,
+    packageManager: 'yarn',
     ...currentProject,
   }
 }
