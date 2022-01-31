@@ -559,15 +559,21 @@ export class SocketBase {
   }
 
   async closeBrowserTab () {
-    await this._sendCloseBrowserTabMessage()
+    if (this._sendCloseBrowserTabMessage) {
+      await this._sendCloseBrowserTabMessage()
+    }
   }
 
   async resetBrowserState () {
-    await this._sendResetBrowserStateMessage()
+    if (this._sendResetBrowserStateMessage) {
+      await this._sendResetBrowserStateMessage()
+    }
   }
 
   async startNewBrowserTab (url) {
-    await this._sendStartNewBrowserTabMessage(url)
+    if (this._sendStartNewBrowserTabMessage) {
+      await this._sendStartNewBrowserTabMessage(url)
+    }
   }
 
   async stopScreencast () {

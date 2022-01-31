@@ -43,98 +43,6 @@ export class OpenProject {
     return this.projectBase
   }
 
-  async changeUrlToSpec (browser, spec: Cypress.Cypress['spec'], options: LaunchOpts = {
-    onError: () => undefined,
-  }) {
-    assert(this.projectBase, 'Cannot change url to spec if projectBase is undefined!')
-
-    let url = getSpecUrl({
-      spec,
-      browserUrl: this.projectBase.cfg.browserUrl,
-      projectRoot: this.projectBase.projectRoot,
-    })
-
-    const cfg = this.projectBase.getConfig()
-
-    _.defaults(options, {
-      browsers: cfg.browsers,
-      userAgent: cfg.userAgent,
-      proxyUrl: cfg.proxyUrl,
-      proxyServer: cfg.proxyServer,
-      socketIoRoute: cfg.socketIoRoute,
-      chromeWebSecurity: cfg.chromeWebSecurity,
-      isTextTerminal: cfg.isTextTerminal,
-      downloadsFolder: cfg.downloadsFolder,
-    })
-
-    // if we don't have the isHeaded property
-    // then we're in interactive mode and we
-    // can assume its a headed browser
-    // TODO: we should clean this up
-    if (!_.has(browser, 'isHeaded')) {
-      browser.isHeaded = true
-      browser.isHeadless = false
-    }
-
-    // set the current browser object on options
-    // so we can pass it down
-    options.browser = browser
-    options.url = url
-
-    this.projectBase.setCurrentSpecAndBrowser(spec, browser)
-
-    const automation = this.projectBase.getAutomation()
-
-    // use automation middleware if its
-    // been defined here
-    let am = options.automationMiddleware
-
-    if (am) {
-      automation.use(am)
-    }
-
-    if (!am || !am.onBeforeRequest) {
-      automation.use({
-        onBeforeRequest (message, data) {
-          if (message === 'take:screenshot') {
-            data.specName = spec.name
-
-            return data
-          }
-        },
-      })
-    }
-
-    const afterSpec = () => {
-      if (!this.projectBase || cfg.isTextTerminal || !cfg.experimentalInteractiveRunEvents) {
-        return Bluebird.resolve()
-      }
-
-      return runEvents.execute('after:spec', cfg, spec)
-    }
-
-    const { onBrowserClose } = options
-
-    options.onBrowserClose = () => {
-      if (spec && spec.absolute) {
-        preprocessor.removeFile(spec.absolute, cfg)
-      }
-
-      afterSpec()
-      .catch((err) => {
-        this.projectBase?.options.onError?.(err)
-      })
-
-      if (onBrowserClose) {
-        return onBrowserClose()
-      }
-    }
-
-    options.onError = this.projectBase.options.onError
-
-    await browsers.connectToNewSpec(this.projectBase.browser, options, this.projectBase.automation)
-  }
-
   async launch (browser, spec: Cypress.Cypress['spec'], options: LaunchOpts = {
     onError: () => undefined,
     shouldLaunchBrowser: true,
@@ -257,16 +165,16 @@ export class OpenProject {
         session.clearSessions()
       })
       .then(() => {
+        // TODO: Stub this so we can detect it being called
+        if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF) {
+          return browsers.connectToExisting(browser, options, automation)
+        }
+
         if (!options.shouldLaunchBrowser) {
           // If we do not launch the browser,
           // we tell it that we are ready
           // to receive the next spec
-          return this.changeUrlToSpec(browser, spec, options)
-        }
-
-        // TODO: Stub this so we can detect it being called
-        if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF) {
-          return browsers.connectToExisting(browser, options, automation)
+          return browsers.connectToNewSpec(browser, options, automation)
         }
 
         return browsers.open(browser, options, automation, this._ctx)
