@@ -1,7 +1,6 @@
 const { defineConfig } = require('cypress')
 
 module.exports = defineConfig({
-  $schema: 'https://on.cypress.io/cypress.schema.json',
   baseUrl: 'http://localhost:3000',
   retries: 2,
   defaultCommandTimeout: 5000,
