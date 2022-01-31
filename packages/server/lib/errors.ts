@@ -1189,7 +1189,13 @@ interface ClonedError {
   message?: string
 }
 
-const clone = function (err: CypressErr, options: {html?: boolean} = {}) {
+// For when the error is passed via the socket-base
+interface GenericError extends Error {
+  forBrowser?: never
+  stackWithoutMessage?: never
+}
+
+const clone = function (err: CypressErr | GenericError, options: {html?: boolean} = {}) {
   _.defaults(options, {
     html: false,
   })
