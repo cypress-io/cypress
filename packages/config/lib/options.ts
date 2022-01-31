@@ -540,4 +540,14 @@ export const breakingRootOptions: Array<BreakingOption> = [
     errorKey: 'SUPPORT_FILE_ROOT_NOT_SUPPORTED',
     isWarning: false,
   },
+  {
+    name: 'specPattern',
+    errorKey: 'SPEC_PATTERN_ROOT_NOT_SUPPORTED',
+    isWarning: false,
+  },
+  {
+    name: 'ignoreSpecPattern',
+    errorKey: 'IGNORE_SPEC_PATTERN_ROOT_NOT_SUPPORTED',
+    isWarning: false,
+  },
 ]

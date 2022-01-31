@@ -1064,6 +1064,16 @@ const getMsgByType = function (type, ...args) {
         The ${chalk.yellow(`\`supportFile\``)} configuration option was removed from the root in Cypress version \`10.0.0\`. Please update this option under each testing type property.
 
         https://on.cypress.io/migration-guide`
+    case 'SPEC_PATTERN_ROOT_NOT_SUPPORTED':
+      return stripIndent`\
+        The ${chalk.yellow(`\`specPattern\``)} configuration option was removed from the root in Cypress version \`10.0.0\`. Please update this option under each testing type property.
+
+        https://on.cypress.io/migration-guide`
+    case 'IGNORE_SPEC_PATTERN_ROOT_NOT_SUPPORTED':
+      return stripIndent`\
+        The ${chalk.yellow(`\`ignoreSpecPattern\``)} configuration option was removed from the root in Cypress version \`10.0.0\`. Please update this option under each testing type property.
+
+        https://on.cypress.io/migration-guide`
     default:
   }
 }
