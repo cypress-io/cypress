@@ -6,7 +6,7 @@ The following migration steps will be used during this migration:
 
 - [ ] automatic file rename
 - [ ] manual file rename
-- [x] rename support
+- [ ] rename support
 - [x] update config file
 - [ ] setup component testing
 

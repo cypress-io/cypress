@@ -324,7 +324,8 @@ describe('Full migration flow for each project', () => {
     migrateAndVerifyConfig()
   })
 
-  it('completes journey for migration-e2e-defaults-no-specs', () => {
+  // TODO: Do we need to consider this case?
+  it.skip('completes journey for migration-e2e-defaults-no-specs', () => {
     startMigrationFor('migration-e2e-defaults-no-specs')
     // no specs, nothing to rename?
     cy.get(renameAutoStep).should('not.exist')
@@ -429,6 +430,14 @@ describe('component testing migration - defaults', () => {
 describe('Migration', { viewportWidth: 1200 }, () => {
   it('should create the cypress.config.js file and delete old config', () => {
     startMigrationFor('migration')
+
+    // all steps
+    cy.get(renameAutoStep).should('exist')
+    cy.get(renameManualStep).should('exist')
+    cy.get(renameSupportStep).should('exist')
+    cy.get(setupComponentStep).should('exist')
+    cy.get(configFileStep).should('exist')
+
     runAutoRename()
     cy.findByText(`I'll do this later`).click()
     cy.findByText(defaultMessages.migration.wizard.step3.button).click()

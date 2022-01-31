@@ -2,6 +2,7 @@ import globby from 'globby'
 import { MIGRATION_STEPS } from '@packages/types'
 import type { OldCypressConfig } from '../../util'
 import path from 'path'
+import { getSpecs } from '.'
 
 function getTestFiles (config: OldCypressConfig, type: 'component' | 'integration'): string[] {
   // super awkward how we call it integration tests, but the key to override
@@ -67,33 +68,10 @@ async function hasSpecFiles (projectRoot: string, dir: string, testFilesGlob: st
   return f.length > 0
 }
 export async function shouldShowAutoRenameStep (projectRoot: string, config: OldCypressConfig) {
-  const integrationFolder = getIntegrationFolder(config)
-  const integrationTestFiles = getIntegrationTestFiles(config)
+  const specsToAutoMigrate = await getSpecs(projectRoot, config)
 
-  // default or custom integrationFolder,
-  // non custom test files glob
-  // migrate (unless they have no specs, nothing to rename?)
-  if (
-    integrationFolder !== false &&
-    await hasSpecFiles(projectRoot, integrationFolder, integrationTestFiles)
-  ) {
-    return true
-  }
-
-  const componentFolder = getComponentFolder(config)
-  const componentTestFiles = getComponentTestFiles(config)
-
-  // we can only auto migrate component specs
-  // if they are using all the defaults (folder and testFiles)
-  if (
-    componentFolder !== false &&
-    isDefaultTestFiles(config, 'component') &&
-    await hasSpecFiles(projectRoot, componentFolder, componentTestFiles)
-  ) {
-    return true
-  }
-
-  return false
+  // if we have at least one spec to auto migrate in either Ct or E2E, we return true.
+  return specsToAutoMigrate.integration.length > 0 || specsToAutoMigrate.component.length > 0
 }
 
 // we only show rename support file if they are using the default

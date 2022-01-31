@@ -266,10 +266,26 @@ export function reduceConfig (cfg: OldCypressConfig): ConfigOptions {
 
       const { testFiles, ignoreTestFiles, ...rest } = value
 
+      // don't include if it's the default! No need.
+      const specPattern = getSpecPattern(cfg, key)
+      const ext = '**/*.cy.{js,jsx,ts,tsx}'
+      const isDefaultE2E = key === 'e2e' && specPattern === `cypress/e2e/${ext}`
+      const isDefaultCT = key === 'component' && specPattern === ext
+
+      if (isDefaultE2E || isDefaultCT) {
+        return {
+          ...acc, [key]: {
+            ...rest,
+            ...acc[key],
+          },
+        }
+      }
+
       return {
         ...acc, [key]: {
           ...rest,
-          specPattern: getSpecPattern(cfg, key),
+          ...acc[key],
+          specPattern,
         },
       }
     }
@@ -322,19 +338,40 @@ export function reduceConfig (cfg: OldCypressConfig): ConfigOptions {
   }, { global: {}, e2e: {}, component: {} })
 }
 
-function getSpecPattern (cfg: OldCypressConfig, testingType: TestingType) {
-  // `componentFolder` is no longer a thing, we are forcing the user to co-locate
-  // component specs.
-  if (testingType === 'component') {
-    return '**/*.cy.{js,jsx,ts,tsx}'
+// function getSpecPattern (cfg: OldCypressConfig, testingType: TestingType) {
+//   // `componentFolder` is no longer a thing, we are forcing the user to co-locate
+//   // component specs.
+//   if (testingType === 'component') {
+//     return '**/*.cy.{js,jsx,ts,tsx}'
+//   }
+
+//   const specPattern = cfg.e2e?.testFiles ?? cfg.testFiles ?? '**/*.cy.{js,jsx,ts,tsx}'
+
+//   const customIntegrationFolder = cfg.e2e?.integrationFolder ?? cfg.integrationFolder ?? 'cypress/e2e'
+
+//   if (customIntegrationFolder) {
+//     return `${customIntegrationFolder}/${specPattern}`
+//   }
+
+//   return specPattern
+// }
+
+function getSpecPattern (cfg: OldCypressConfig, testType: TestingType) {
+  const specPattern = cfg[testType]?.testFiles ?? cfg.testFiles ?? '**/*.cy.{js,jsx,ts,tsx}'
+  const customComponentFolder = cfg.component?.componentFolder ?? cfg.componentFolder ?? null
+
+  if (testType === 'component' && customComponentFolder) {
+    return specPattern
   }
 
-  const specPattern = cfg.e2e?.testFiles ?? cfg.testFiles ?? '**/*.cy.{js,jsx,ts,tsx}'
+  if (testType === 'e2e') {
+    const customIntegrationFolder = cfg.e2e?.integrationFolder ?? cfg.integrationFolder ?? null
 
-  const customIntegrationFolder = cfg.e2e?.integrationFolder ?? cfg.integrationFolder ?? 'cypress/e2e'
+    if (customIntegrationFolder) {
+      return `${customIntegrationFolder}/${specPattern}`
+    }
 
-  if (customIntegrationFolder) {
-    return `${customIntegrationFolder}/${specPattern}`
+    return `cypress/e2e/${specPattern}`
   }
 
   return specPattern

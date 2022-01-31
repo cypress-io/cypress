@@ -1,4 +1,4 @@
-## Migration E2E Custom testFiles
+## Migration E2E Defaults
 
 An e2e project with all defaults. We rename the `integrationFolder` and spec extension.
 

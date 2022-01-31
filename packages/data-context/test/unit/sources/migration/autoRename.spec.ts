@@ -113,14 +113,14 @@ describe('getSpecs', () => {
       },
     ])
 
-    expect(actual.component).to.eql([
-      {
-        relative: 'src/Radio.spec.js',
-        usesDefaultFolder: false,
-        usesDefaultTestFiles: false,
-        testingType: 'component',
-      },
-    ])
+    // expect(actual.component).to.eql([
+    //   {
+    //     relative: 'src/Radio.spec.js',
+    //     usesDefaultFolder: false,
+    //     usesDefaultTestFiles: false,
+    //     testingType: 'component',
+    //   },
+    // ])
   })
 
   it('handles default folders', async () => {

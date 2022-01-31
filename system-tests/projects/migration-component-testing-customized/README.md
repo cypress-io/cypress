@@ -1,4 +1,4 @@
-## Migration Component Testing Customized
+# Migration Component Testing Customized
 
 A component tesing project without e2e. We ask the users to migrate their specs manually.
 

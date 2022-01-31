@@ -281,7 +281,7 @@ describe('reduceConfig', () => {
     const config = { testFiles: '**/**.cy.js', componentFolder: 'src', integrationFolder: 'cypress/integration' }
     const newConfig = reduceConfig(config)
 
-    expect(newConfig.component.specPattern).to.eq(`${config.componentFolder}/${config.testFiles}`)
+    expect(newConfig.component.specPattern).to.eq(config.testFiles)
     expect(newConfig.e2e.specPattern).to.eq(`${config.integrationFolder}/${config.testFiles}`)
   })
 
@@ -297,7 +297,7 @@ describe('reduceConfig', () => {
     }
     const newConfig = reduceConfig(config)
 
-    expect(newConfig.component.specPattern).to.eq(`${config.component.componentFolder}/${config.testFiles}`)
+    expect(newConfig.component.specPattern).to.eq(config.testFiles)
     expect(newConfig.e2e.specPattern).to.eq(`${config.e2e.integrationFolder}/${config.testFiles}`)
   })
 
@@ -322,7 +322,7 @@ describe('reduceConfig', () => {
     }
     const newConfig = reduceConfig(config)
 
-    expect(newConfig.component.specPattern).to.eq(`${config.component.componentFolder}/${config.testFiles}`)
+    expect(newConfig.component.specPattern).to.eq(config.testFiles)
     expect(newConfig.e2e.specPattern).to.eq(`${config.e2e.integrationFolder}/${config.testFiles}`)
   })
 
