@@ -7,7 +7,6 @@ import Bluebird from 'bluebird'
 import { path as ffmpegPath } from '@ffmpeg-installer/ffmpeg'
 import BlackHoleStream from 'black-hole-stream'
 import { fs } from './util/fs'
-import os from 'os'
 
 const debug = Debug('cypress:server:video')
 // extra verbose logs for logging individual frames
@@ -299,13 +298,13 @@ export async function process (name, cname, videoCompression, ffmpegchaptersConf
       '-preset fast',
       `-crf ${videoCompression}`,
       '-pix_fmt yuv420p',
+      // Limit the encoder to a single thread, so we aren't competing with the
+      // main cypress process for CPU time on low-resource machines.
+      '-threads 1',
     ]
 
-    // On low-resource machines - estimated here by CPU count - limit the encoder
-    // to a single thread. While this can slow down video processing, it
-    // significantly reduces CPU contention, leading to a faster overall test time.
     if (os.cpus().length < 4) {
-      outputOptions.push('-threads 1')
+      outputOptions.push()
     }
 
     if (addChaptersMeta) {
