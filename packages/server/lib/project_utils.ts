@@ -7,10 +7,6 @@ import { escapeFilenameInUrl } from './util/escape_filename'
 
 const debug = Debug('cypress:server:project_utils')
 
-const multipleForwardSlashesRe = /[^:\/\/](\/{2,})/g
-const multipleForwardSlashesReplacer = (match: string) => match.replace('//', '/')
-const backSlashesRe = /\\/g
-
 // format is: http://localhost:<port>/__/#/specs/runner?file=<relative_url>
 export const getSpecUrl = ({
   spec,
@@ -31,16 +27,14 @@ export const getSpecUrl = ({
   }
 
   const relativeSpecPath = path.relative(projectRoot, path.resolve(projectRoot, spec.relative))
-  .replace(backSlashesRe, '/')
 
   const escapedRelativePath = escapeFilenameInUrl(relativeSpecPath)
 
-  const normalized = `${browserUrl}/#/specs/runner?file=${escapedRelativePath}`
-  .replace(multipleForwardSlashesRe, multipleForwardSlashesReplacer)
+  const specUrl = `${browserUrl}#/specs/runner?file=${escapedRelativePath}`
 
-  debug('returning spec url %s', normalized)
+  debug('returning spec url %s', specUrl)
 
-  return normalized
+  return specUrl
 }
 
 export const checkSupportFile = async ({
