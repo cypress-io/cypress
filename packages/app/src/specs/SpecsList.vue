@@ -4,7 +4,14 @@
       v-model="search"
       class="pb-32px"
       :result-count="specs.length"
-      @showCreateSpecModal="emit('showCreateSpecModal')"
+      @show-create-spec-modal="emit('showCreateSpecModal')"
+      @show-spec-pattern-modal="showSpecPatternModal = true"
+    />
+    <SpecPatternModal
+      v-if="props.gql.currentProject"
+      :show="showSpecPatternModal"
+      :gql="props.gql.currentProject"
+      @close="showSpecPatternModal = false"
     />
 
     <template
@@ -14,13 +21,13 @@
         class="grid grid-cols-2 children:font-medium children:text-gray-800"
       >
         <div
-          class="flex justify-between items-center"
+          class="flex items-center justify-between"
           data-cy="specs-testing-type-header"
         >
           {{ props.gql.currentProject?.currentTestingType === 'component' ?
             t('specPage.componentSpecsHeader') : t('specPage.e2eSpecsHeader') }}
         </div>
-        <div class="flex justify-between items-center">
+        <div class="flex items-center justify-between">
           <div>{{ t('specPage.gitStatusHeader') }}</div>
         </div>
       </div>
@@ -95,6 +102,7 @@ import RowDirectory from './RowDirectory.vue'
 import SpecItem from './SpecItem.vue'
 import { useVirtualList } from '@packages/frontend-shared/src/composables/useVirtualList'
 import NoResults from '@cy/components/NoResults.vue'
+import SpecPatternModal from '../components/SpecPatternModal.vue'
 
 const { t } = useI18n()
 
@@ -125,6 +133,8 @@ fragment Specs_SpecsList on Query {
       id
       ...SpecsList
     }
+    config
+    ...SpecPatternModal
   }
 }
 `
@@ -136,6 +146,8 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'showCreateSpecModal'): void
 }>()
+
+const showSpecPatternModal = ref(false)
 
 const search = ref('')
 

@@ -1,7 +1,6 @@
 <template>
   <SettingsSection
     data-cy="settings-recordKey"
-    anchor-id="recordKey"
   >
     <template #title>
       {{ t('settingsPage.recordKey.title') }}

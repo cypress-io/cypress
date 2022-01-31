@@ -1,15 +1,15 @@
 <template>
   <Dialog
     :open="modelValue"
-    class="inset-0 z-10 fixed overflow-y-auto"
+    class="fixed inset-0 z-10 overflow-y-auto"
     @close="clickOutside && closeModal()"
   >
-    <div class="flex min-h-screen items-center justify-center">
+    <div class="flex items-center justify-center min-h-screen">
       <slot
         name="overlay"
         :classes="'fixed inset-0'"
       >
-        <DialogOverlay class="bg-gray-800 opacity-90 inset-0 fixed" />
+        <DialogOverlay class="fixed inset-0 bg-gray-800 opacity-90" />
       </slot>
       <div
         class="bg-white rounded mx-auto ring-[#9095AD40] ring-4 relative"
@@ -27,7 +27,7 @@
 
         <DialogDescription
           v-if="$slots.description"
-          class="font-normal p-24px text-gray-700"
+          class="font-normal text-gray-700 p-24px"
         >
           <slot name="description" />
         </DialogDescription>
@@ -72,7 +72,7 @@ const props = withDefaults(defineProps<{
 }>(), {
   clickOutside: true,
   modelValue: false,
-  helpText: 'Need help?',
+  helpText: 'Need help',
   helpLink: 'https://on.cypress.io',
   class: undefined,
   variant: undefined,
