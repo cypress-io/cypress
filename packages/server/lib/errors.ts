@@ -670,8 +670,7 @@ const AllCypressErrors = {
       - A missing file or dependency
       - A syntax error in the file or one of its dependencies
 
-      Fix the error in your code and re-run your tests.
-    `
+      Fix the error in your code and re-run your tests.`
     // happens when there is an error in configuration file like "cypress.json"
   },
   SETTINGS_VALIDATION_ERROR: (arg1: string, arg2: string) => {
