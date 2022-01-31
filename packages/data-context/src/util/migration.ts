@@ -21,8 +21,11 @@ type ConfigOptions = {
  * config format pre-10.0
  */
 export interface OldCypressConfig {
+  // limited subset of properties, used for unit tests
   viewportWidth?: number
+  baseUrl?: string
   retries?: number
+
   component?: Omit<OldCypressConfig, 'component' | 'e2e'>
   e2e?: Omit<OldCypressConfig, 'component' | 'e2e'>
   pluginsFile?: string | false
