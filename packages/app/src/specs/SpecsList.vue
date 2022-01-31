@@ -188,7 +188,7 @@ function handleCtrlClick () {
 
 function getIdIfDirectory (row) {
   if (row.data.isLeaf && row.data) {
-    return null
+    return undefined
   }
 
   return `speclist-${row.data.data.relative.replace(row.data.data.baseName, '')}`
