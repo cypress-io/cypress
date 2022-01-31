@@ -33,5 +33,7 @@ export const urqlCacheKeys: Partial<CacheExchangeOpts> & CacheKeys = {
     LocalSettingsPreferences: () => null,
     CloudProjectNotFound: (data) => data.__typename,
     CloudProjectUnauthorized: (data) => data.__typename,
+    GeneratedSpecError: () => null,
+    GenerateSpecResponse: (data) => data.__typename,
   },
 }

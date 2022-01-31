@@ -60,11 +60,12 @@ describe('<BaseError />', () => {
     })
   })
 
-  // NOTE: Figure out how to stub the graphql mutation call
-  it.skip('emits the retry event by default', () => {
+  it('calls the retry function passed in', () => {
+    const retrySpy = cy.spy().as('retry')
+
     cy.mountFragment(BaseErrorFragmentDoc, {
       render: (gqlVal) => (<div class="p-16px">
-        <BaseError gql={gqlVal} />,
+        <BaseError gql={gqlVal} retry={retrySpy} />,
       </div>),
     })
     .get(retryButtonSelector)

@@ -1,5 +1,5 @@
 <template>
-  <div class="flex w-full gap-16px relative">
+  <div class="relative flex w-full gap-16px">
     <Input
       type="search"
       class="flex-grow h-full min-w-200px"
@@ -7,19 +7,26 @@
       :prefix-icon="IconMagnifyingGlass"
       :model-value="props.modelValue"
       :placeholder="t('specPage.searchPlaceholder')"
+      :aria-label="t('specPage.searchPlaceholder')"
       @input="onInput"
     >
       <template #suffix>
-        <div
-          class="text-gray-500 border-l border-l-gray-100 pl-16px"
+        <button
+          class="mr-[-0.75rem] h-40px outline-none hover:(bg-indigo-50 text-indigo-500) transition-all rounded-r-md group"
           aria-live="polite"
+          @click="emit('showSpecPatternModal')"
         >
-          {{ resultCount }} {{ resultCount === 1 ? t('specPage.matchSingular') : t('specPage.matchPlural') }}
-        </div>
+          <span
+            class="block border-l h-24px px-16px border-l-gray-100 group-hover:border-none"
+          >
+            {{ resultCount }} {{ resultCount === 1 ? t('specPage.matchSingular') : t('specPage.matchPlural') }}
+            <span class="sr-only">{{ t(`createSpec.viewSpecPatternButton`) }} </span>
+          </span>
+        </button>
       </template>
     </Input>
 
-    <div class="flex h-40px gap-16px min-w-127px">
+    <div class="flex h-40px min-w-127px gap-16px">
       <Button
         data-cy="new-spec-button"
         :prefix-icon="IconAdd"
@@ -52,6 +59,7 @@ const props = withDefaults(defineProps<{
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: string): void,
+  (e: 'showSpecPatternModal'): void
   (e: 'showCreateSpecModal'): void
 }>()
 

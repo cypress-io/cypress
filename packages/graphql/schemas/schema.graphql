@@ -11,6 +11,7 @@ type Browser implements Node {
 
   """Relay style Node ID field for the Browser field"""
   id: ID!
+  isFocusSupported: Boolean!
   isSelected: Boolean!
   majorVersion: String
   name: String!
@@ -642,6 +643,23 @@ enum FrontendFrameworkEnum {
   vuecli
 }
 
+"""Error from generated spec"""
+type GenerateSpecResponse {
+  """The currently opened project"""
+  currentProject: CurrentProject
+
+  """The file that have just been scaffolded or the fileName that errored"""
+  generatedSpecResult: GeneratedSpecResult
+}
+
+"""Error from generated spec"""
+type GeneratedSpecError {
+  erroredCodegenCandidate: String!
+  fileName: String!
+}
+
+union GeneratedSpecResult = GeneratedSpecError | ScaffoldedFile
+
 """Git information about a spec file"""
 type GitInfo {
   """Last person to change the file in git"""
@@ -747,20 +765,29 @@ type Migration {
   manualFiles: ManualMigration
 
   """All spec files after conversion"""
-  specFiles: MigrationFiles!
+  specFiles: [MigrationFile!]!
 
   """Support files needing automated rename"""
-  supportFiles: MigrationFiles
+  supportFiles: MigrationFile
 }
 
-type MigrationFile implements Node {
-  """Relay style Node ID field for the MigrationFile field"""
-  id: ID!
-  parts: [MigrationFilePart!]!
+type MigrationFile {
+  after: MigrationFileData!
+  before: MigrationFileData!
   testingType: TestingTypeEnum!
 }
 
+type MigrationFileData implements Node {
+  """Relay style Node ID field for the MigrationFileData field"""
+  id: ID!
+  parts: [MigrationFilePart!]!
+  relative: String!
+}
+
 type MigrationFilePart implements Node {
+  """is this part a folder or extension that needs migration"""
+  group: String
+
   """should highlight in migration UI"""
   highlight: Boolean!
 
@@ -769,11 +796,6 @@ type MigrationFilePart implements Node {
 
   """part of filename"""
   text: String!
-}
-
-type MigrationFiles {
-  after: [MigrationFile!]!
-  before: [MigrationFile!]!
 }
 
 type MigrationRegexp {
@@ -846,8 +868,11 @@ type Mutation {
   """user has finished migration component specs - move to next step"""
   finishedRenamingComponentSpecs: Query
 
+  """Sets focus to the active browser window"""
+  focusActiveBrowserWindow: Boolean!
+
   """Generate spec from source"""
-  generateSpecFromSource(codeGenCandidate: String!, type: CodeGenType!): ScaffoldedFile
+  generateSpecFromSource(codeGenCandidate: String!, erroredCodegenCandidate: String, type: CodeGenType!): GenerateSpecResponse
 
   """Hides the launchpad windows"""
   hideBrowserWindow: Boolean!
@@ -880,7 +905,14 @@ type Mutation {
   migrateConfigFile: Query
 
   """While migrating to 10+ renames files to match the new .cy pattern"""
-  migrateRenameSpecs(skip: Boolean): Query
+  migrateRenameSpecs(
+    """specs to move - current name"""
+    after: [String!]
+
+    """specs to move - current name"""
+    before: [String!]
+    skip: Boolean
+  ): Query
 
   """While migrating to 10+ launch renaming of support file"""
   migrateRenameSupport: Query

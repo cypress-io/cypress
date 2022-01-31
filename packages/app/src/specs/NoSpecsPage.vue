@@ -6,13 +6,13 @@
     <div class="m-x-auto max-w-600px">
       <h1
         data-cy="create-spec-page-title"
-        class="mb-12px text-gray-900 text-32px"
+        class="text-gray-900 mb-12px text-32px"
       >
         {{ props.title }}
       </h1>
       <p
         data-cy="create-spec-page-description"
-        class="leading-normal mb-32px text-gray-600 text-18px"
+        class="leading-normal text-gray-600 mb-32px text-18px"
       >
         <i18n-t
           scope="global"
@@ -41,7 +41,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed } from 'vue'
+import { computed } from 'vue'
 import DefaultSpecPatternNoContent from './DefaultSpecPatternNoContent.vue'
 import { gql } from '@urql/vue'
 import type { NoSpecsPageFragment } from '../generated/graphql'

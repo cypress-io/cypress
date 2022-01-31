@@ -5,7 +5,7 @@
   >
     <RadioGroup
       v-model="selectedBrowserId"
-      class="flex flex-wrap justify-center py-40px gap-24px"
+      class="flex flex-wrap py-40px gap-24px justify-center"
       data-cy="open-browser-list"
     >
       <RadioGroupOption
@@ -18,7 +18,7 @@
       >
         <RadioGroupLabel
           :for="browser.id"
-          class="relative block pt-6 pb-4 text-center rounded radio-label border-1 min-h-144px w-160px"
+          class="rounded border-1 text-center min-h-144px pt-6 pb-4 w-160px relative block radio-label"
           :class="{
             'border-jade-300 ring-2 ring-jade-100 focus:border-jade-400 focus:border-1 focus:outline-none': checked,
             'border-gray-200 before:hocus:cursor-pointer': !checked && !(isBrowserOpening || isBrowserOpen) ,
@@ -31,7 +31,7 @@
             <img
               :src="allBrowsersIcons[browser.displayName]"
               alt=""
-              class="inline h-40px w-40px"
+              class="h-40px w-40px inline"
             >
           </div>
           <div
@@ -50,7 +50,7 @@
       v-if="props.gql.currentTestingType"
       class="mb-14"
     >
-      <div class="flex items-center justify-center mb-4 gap-16px">
+      <div class="flex mb-4 gap-16px items-center justify-center">
         <template v-if="!isBrowserOpen">
           <Button
             v-if="!isBrowserOpening"
@@ -91,12 +91,14 @@
             {{ browserText.running }}
           </Button>
           <Button
+            v-if="props.gql.currentBrowser?.isFocusSupported"
             size="lg"
             type="button"
             variant="outline"
             :prefix-icon="ExportIcon"
             prefix-icon-class="icon-dark-gray-500"
             class="font-medium"
+            @click="emit('focus-browser')"
           >
             {{ browserText.focus }}
           </Button>
@@ -119,7 +121,7 @@
         variant="text"
         :prefix-icon="ArrowLeftIcon"
         prefix-icon-class="icon-dark-gray-500"
-        class="mx-auto font-medium text-gray-600 hover:text-indigo-500"
+        class="font-medium mx-auto text-gray-600 hover:text-indigo-500"
         @click="emit('navigated-back')"
       >
         {{ browserText.switchTestingType }}
@@ -161,6 +163,7 @@ fragment OpenBrowserList on CurrentProject {
     id
     displayName
     path
+    isFocusSupported
   }
   browsers {
     id
@@ -188,9 +191,7 @@ const emit = defineEmits<{
   (e: 'navigated-back'): void
   (e: 'launch'): void
   (e: 'close-browser'): void
-  // TODO: Add browser focus
-  // see: https://cypress-io.atlassian.net/browse/UNIFY-953
-  // (e: 'focus-browser'): void
+  (e: 'focus-browser'): void
 }>()
 
 const { t } = useI18n()
