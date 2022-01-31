@@ -395,13 +395,13 @@ describe('lib/config', () => {
 
       context('ignoreSpecPattern', () => {
         it('passes if a string', function () {
-          this.setup({ e2e: { ignoreSpecPattern: '*.jsx' } })
+          this.setup({ e2e: { ignoreSpecPattern: '*.jsx', supportFile: false } })
 
           return this.expectValidationPasses()
         })
 
         it('passes if an array of strings', function () {
-          this.setup({ e2e: { ignoreSpecPattern: ['*.jsx'] } })
+          this.setup({ e2e: { ignoreSpecPattern: ['*.jsx'], supportFile: false } })
 
           return this.expectValidationPasses()
         })
