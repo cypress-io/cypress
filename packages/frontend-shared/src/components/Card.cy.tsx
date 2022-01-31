@@ -53,13 +53,13 @@ describe('Card', { viewportHeight: 400 }, () => {
     // health check that expected icons and hover icons are present in the dom
     cy.get('svg').should('have.length', 4)
 
-    cy.percySnapshot()
+    cy.percySnapshot('both cards unfocused')
 
     cy.get('@e2eTitle').focus()
-    cy.percySnapshot()
+    cy.percySnapshot('card-1 focused')
 
     cy.get('@ctTitle').focus()
-    cy.percySnapshot()
+    cy.percySnapshot('card-2 focused')
 
     // clicks work on card or button
     cy.get('[data-cy="card"]').eq(0).click()

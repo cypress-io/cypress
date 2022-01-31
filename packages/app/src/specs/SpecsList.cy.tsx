@@ -40,8 +40,14 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
 
     it('should filter specs', () => {
       // make sure things have rendered for snapshot
-      cy.get('[data-cy="specs-list-row"]').should('have.length.above', 2)
+      // and that only a subset of the specs are displayed
+      // (this means the virtualized list is working)
 
+      cy.get('[data-cy="specs-list-row"]')
+      .should('have.length.above', 2)
+      .should('have.length.below', specs.length)
+
+      cy.percySnapshot('full list')
       const longestSpec = specs.reduce((acc, spec) =>
         acc.relative.length < spec.relative.length ? spec : acc
       , specs[0])
@@ -54,6 +60,8 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
       .should('not.exist')
 
       cy.contains(`${defaultMessages.specPage.noResultsMessage} garbage 🗑`)
+
+      cy.percySnapshot('no results')
 
       cy.get('[data-cy="no-results-clear"]').click()
       cy.get('@specsListInput').invoke('val').should('be.empty')
@@ -73,6 +81,7 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
 
       cy.get('@specsListInput').clear().type(directory)
       cy.get(rowSelector).first().should('contain', directory)
+      cy.percySnapshot('matching directory search')
     })
 
     it('should close directories with click', () => {
@@ -87,6 +96,7 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
       })
 
       cy.get('[data-cy="spec-item"]').should('not.exist')
+      cy.percySnapshot()
     })
 
     it('should close directories with Enter', () => {

@@ -16,7 +16,7 @@ describe('<Input/>', { viewportWidth: 400, viewportHeight: 80 }, () => {
       expect(value.value).to.equal(textToType)
     })
 
-    cy.percySnapshot()
+    cy.percySnapshot('without icons')
   })
 
   it('renders icons', () => {
@@ -33,6 +33,6 @@ describe('<Input/>', { viewportWidth: 400, viewportHeight: 80 }, () => {
     ))
 
     cy.findAllByLabelText('status').should('have.value', 'Coffee Loading')
-    cy.percySnapshot()
+    cy.percySnapshot('with icons')
   })
 })

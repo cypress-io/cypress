@@ -13,74 +13,79 @@
       :gql="props.gql.currentProject"
       @close="showSpecPatternModal = false"
     />
-
+    <!--
+      The markup around the virtualized list is pretty delicate. We might be tempted to
+      combine the `v-if="specs.length"` and the `:class="specs.length ? 'grid': 'hidden'"` below
+      into a single v-if on a `<template>` that would wrap both. This creates a problem
+      recovering from the empty results state as the `.spec-list-container` element is needed
+      in order to render the virtual dom. Virtualized lists require stable containers and it
+      can be tricky to debug after this has happened.
+    -->
     <div
-      v-show="specs.length"
+      v-if="specs.length"
+      class="grid grid-cols-2 children:font-medium children:text-gray-800 "
     >
       <div
-        class="grid grid-cols-2 children:font-medium children:text-gray-800"
+        class="flex items-center justify-between"
+        data-cy="specs-testing-type-header"
       >
-        <div
-          class="flex items-center justify-between"
-          data-cy="specs-testing-type-header"
-        >
-          {{ props.gql.currentProject?.currentTestingType === 'component' ?
-            t('specPage.componentSpecsHeader') : t('specPage.e2eSpecsHeader') }}
-        </div>
-        <div class="flex items-center justify-between">
-          <div>{{ t('specPage.gitStatusHeader') }}</div>
-        </div>
+        {{ props.gql.currentProject?.currentTestingType === 'component' ?
+          t('specPage.componentSpecsHeader') : t('specPage.e2eSpecsHeader') }}
       </div>
+      <div class="flex items-center justify-between">
+        <div>{{ t('specPage.gitStatusHeader') }}</div>
+      </div>
+    </div>
+    <div
+      class="pb-32px spec-list-container"
+      :class="specs.length ? 'grid': 'hidden'"
+      v-bind="containerProps"
+    >
       <div
-        class="grid pb-32px spec-list-container"
-        v-bind="containerProps"
+        v-bind="wrapperProps"
+        class="divide-y-1 children:h-40px"
       >
-        <div
-          v-bind="wrapperProps"
-          class="divide-y-1 children:h-40px"
+        <SpecsListRowItem
+          v-for="row in list"
+          :id="getIdIfDirectory(row)"
+          :key="row.index"
         >
-          <SpecsListRowItem
-            v-for="row in list"
-            :id="getIdIfDirectory(row)"
-            :key="row.index"
-          >
-            <template #file>
-              <RouterLink
-                v-if="row.data.isLeaf && row.data"
-                :key="row.data.data?.absolute"
-                class="focus:outline-transparent"
-                :to="{ path: '/specs/runner', query: { file: row.data.data?.relative } }"
-                @click.meta.prevent="handleCtrlClick"
-                @click.ctrl.prevent="handleCtrlClick"
-              >
-                <SpecItem
-                  :file-name="row.data.data?.fileName || row.data.name"
-                  :extension="row.data.data?.specFileExtension || ''"
-                  :indexes="row.data.data?.fileIndexes"
-                  :style="{ paddingLeft: `${((row.data.depth - 2) * 10) + 16 + 22}px` }"
-                />
-              </RouterLink>
-
-              <RowDirectory
-                v-else
-                :name="row.data.name"
-                :expanded="treeSpecList[row.index].expanded.value"
-                :depth="row.data.depth - 2"
-                :style="{ paddingLeft: `${((row.data.depth - 2) * 10) + 16}px` }"
-                :indexes="getDirIndexes(row.data)"
-                :aria-controls="getIdIfDirectory(row)"
-                @click="row.data.toggle"
+          <template #file>
+            <RouterLink
+              v-if="row.data.isLeaf && row.data"
+              :key="row.data.data?.absolute"
+              class="focus:outline-transparent"
+              :to="{ path: '/specs/runner', query: { file: row.data.data?.relative } }"
+              @click.meta.prevent="handleCtrlClick"
+              @click.ctrl.prevent="handleCtrlClick"
+            >
+              <SpecItem
+                :file-name="row.data.data?.fileName || row.data.name"
+                :extension="row.data.data?.specFileExtension || ''"
+                :indexes="row.data.data?.fileIndexes"
+                :style="{ paddingLeft: `${((row.data.depth - 2) * 10) + 16 + 22}px` }"
               />
-            </template>
+            </RouterLink>
 
-            <template #git-info>
-              <SpecListGitInfo
-                v-if="row.data.data?.gitInfo"
-                :gql="row.data.data.gitInfo"
-              />
-            </template>
-          </SpecsListRowItem>
-        </div>
+            <RowDirectory
+              v-else
+              :name="row.data.name"
+              :expanded="treeSpecList[row.index].expanded.value"
+              :depth="row.data.depth - 2"
+              :style="{ paddingLeft: `${((row.data.depth - 2) * 10) + 16}px` }"
+              :indexes="getDirIndexes(row.data)"
+              :aria-controls="getIdIfDirectory(row)"
+              @click="row.data.toggle"
+            />
+          </template>
+
+          <template #git-info>
+            <SpecListGitInfo
+              v-if="row.data.data?.gitInfo"
+              :gql="row.data.data.gitInfo"
+            />
+          </template>
+        </SpecsListRowItem>
       </div>
     </div>
     <NoResults
