@@ -10,12 +10,13 @@ export const autSnapshot: AutSnapshot = {
     y: 0,
   },
   highlightAttr: '',
-  snapshots: [],
+  // @ts-ignore
+  snapshots: [{ name: 'Before' }, { name: 'After' }],
   htmlAttrs: {},
   viewportHeight: 500,
   viewportWidth: 500,
   url: 'http://localhost:3000',
   body: {
-    get: () => null,
+    get: () => {},
   },
 }
