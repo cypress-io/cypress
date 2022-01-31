@@ -89,6 +89,7 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
       const directories: string[] = Array.from(new Set(specs.map((spec) => spec.relative.split('/')[0]))).sort()
 
       directories.forEach((dir) => {
+        cy.wait(10)
         cy.contains('button[data-cy="row-directory-depth-0"]', dir)
         .should('have.attr', 'aria-expanded', 'true')
         .click()
@@ -103,6 +104,7 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
       const directories: string[] = Array.from(new Set(specs.map((spec) => spec.relative.split('/')[0]))).sort()
 
       directories.forEach((dir) => {
+        cy.wait(10)
         cy.contains('button[data-cy="row-directory-depth-0"]', dir)
         .should('have.attr', 'aria-expanded', 'true')
         .focus()
@@ -119,6 +121,7 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
       const directories: string[] = Array.from(new Set(specs.map((spec) => spec.relative.split('/')[0]))).sort()
 
       directories.forEach((dir) => {
+        cy.wait(10)
         cy.contains('button[data-cy="row-directory-depth-0"]', dir)
         .should('have.attr', 'aria-expanded', 'true')
         .focus()
