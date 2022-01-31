@@ -339,7 +339,7 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
       }).should('equal', undefined)
     })
 
-    // This test will only work on chrome.
+    // NOTE: This test will only work on chrome.
     it.skip('yields an error if an object contains an error', () => {
       cy.switchToDomain('foobar.com', () => {
         cy.wrap({
