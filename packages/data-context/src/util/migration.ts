@@ -140,8 +140,8 @@ function createCypressConfigJs (config: ConfigOptions, pluginPath: string, optio
   const conf = `
     const { defineConfig } = require('cypress')
 
-    module.exports = defineConfig({${globalString}${e2eString}${componentString}
-    })`
+    module.exports = {${globalString}${e2eString}${componentString}
+    }`
 
   return formatConfig(conf)
 }
@@ -153,7 +153,7 @@ function formatObjectForConfig (obj: Record<string, unknown>) {
 function createE2eTemplate (pluginPath: string, hasPluginsFile: boolean, options: Record<string, unknown>) {
   const setupNodeEvents = hasPluginsFile
     ? `setupNodeEvents(on, config) {
-      return require('${pluginPath}')(on, config)
+      return require('.${path.sep}${pluginPath}')(on, config)
     }`
     : ``
 

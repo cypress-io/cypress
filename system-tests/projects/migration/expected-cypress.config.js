@@ -6,7 +6,7 @@ module.exports = defineConfig({
   fixturesFolder: false,
   e2e: {
     setupNodeEvents (on, config) {
-      return require('cypress/plugins/index.ts')(on, config)
+      return require('./cypress/plugins/index.ts')(on, config)
     },
     defaultCommandTimeout: 10000,
     slowTestThreshold: 5000,
