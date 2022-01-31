@@ -278,7 +278,7 @@ export async function process (name, cname, videoCompression, ffmpegchaptersConf
   let total = null
 
   const metaFileName = `${name}.meta`
-  const addChaptersMeta = ffmpegchaptersConfig && await fs.writeFile(metaFileName, ffmpegchaptersConfig)
+  const addChaptersMeta = ffmpegchaptersConfig && await fs.writeFile(metaFileName, ffmpegchaptersConfig).then(() => true)
 
   return new Bluebird((resolve, reject) => {
     debug('processing video from %s to %s video compression %o',
