@@ -321,10 +321,6 @@ export async function process (name, cname, videoCompression, ffmpegchaptersConf
       // https://en.wikipedia.org/wiki/Chroma_subsampling if you want the gritty details.
       // Short version: yuv420p is a standard video format supported everywhere.
       '-pix_fmt yuv420p',
-
-      // Limit the encoder to a single thread, so we aren't competing with the
-      // main cypress process for CPU time on low-resource machines.
-      '-threads 1',
     ]
 
     if (addChaptersMeta) {
