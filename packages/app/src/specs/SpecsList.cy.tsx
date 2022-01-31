@@ -118,7 +118,7 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
         cy.contains('button[data-cy="row-directory-depth-0"]', dir)
         .should('have.attr', 'aria-expanded', 'true')
         .focus()
-        .realPress('Enter')
+        .realPress('Space')
 
         cy.contains('button[data-cy="row-directory-depth-0"]', dir)
         .should('have.attr', 'aria-expanded', 'false')
