@@ -395,25 +395,25 @@ describe('lib/config', () => {
 
       context('ignoreSpecPattern', () => {
         it('passes if a string', function () {
-          this.setup({ ignoreSpecPattern: '*.jsx' })
+          this.setup({ e2e: { ignoreSpecPattern: '*.jsx' } })
 
           return this.expectValidationPasses()
         })
 
         it('passes if an array of strings', function () {
-          this.setup({ ignoreSpecPattern: ['*.jsx'] })
+          this.setup({ e2e: { ignoreSpecPattern: ['*.jsx'] } })
 
           return this.expectValidationPasses()
         })
 
         it('fails if not a string or array', function () {
-          this.setup({ ignoreSpecPattern: 5 })
+          this.setup({ e2e: { ignoreSpecPattern: 5 } })
 
           return this.expectValidationFails('be a string or an array of strings')
         })
 
         it('fails if not an array of strings', function () {
-          this.setup({ ignoreSpecPattern: [5] })
+          this.setup({ e2e: { ignoreSpecPattern: [5] } })
           this.expectValidationFails('be a string or an array of strings')
 
           return this.expectValidationFails('the value was: `[5]`')

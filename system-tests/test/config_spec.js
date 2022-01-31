@@ -112,4 +112,40 @@ describe('e2e config', () => {
       snapshot: true,
     })
   })
+
+  it('throws an error if supportFile is set on the root level', function () {
+    Fixtures.scaffoldProject('invalid-root-level-config')
+    Fixtures.projectPath('invalid-root-level-config')
+
+    return systemTests.exec(this, {
+      project: 'invalid-root-level-config',
+      configFile: 'invalid-supportFile.config.js',
+      expectedExitCode: 1,
+      snapshot: true,
+    })
+  })
+
+  it('throws an error if specPattern is set on the root level', function () {
+    Fixtures.scaffoldProject('invalid-root-level-config')
+    Fixtures.projectPath('invalid-root-level-config')
+
+    return systemTests.exec(this, {
+      project: 'invalid-root-level-config',
+      configFile: 'invalid-specPattern.config.js',
+      expectedExitCode: 1,
+      snapshot: true,
+    })
+  })
+
+  it('throws an error if ignoreSpecPattern is set on the root level', function () {
+    Fixtures.scaffoldProject('invalid-root-level-config')
+    Fixtures.projectPath('invalid-root-level-config')
+
+    return systemTests.exec(this, {
+      project: 'invalid-root-level-config',
+      configFile: 'invalid-ignoreSpecPattern.config.js',
+      expectedExitCode: 1,
+      snapshot: true,
+    })
+  })
 })

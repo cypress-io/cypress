@@ -182,3 +182,24 @@ Cypress no longer supports 'cypress.json' config, please remove it from your pro
 
 
 `
+
+exports['e2e config throws an error if supportFile is set on the root level 1'] = `
+The \`supportFile\` configuration option was removed from the root in Cypress version \`10.0.0\`. Please update this option under each testing type property.
+
+https://on.cypress.io/migration-guide
+
+`
+
+exports['e2e config throws an error if specPattern is set on the root level 1'] = `
+The \`specPattern\` configuration option was removed from the root in Cypress version \`10.0.0\`. Please update this option under each testing type property.
+
+https://on.cypress.io/migration-guide
+
+`
+
+exports['e2e config throws an error if ignoreSpecPattern is set on the root level 1'] = `
+The \`ignoreSpecPattern\` configuration option was removed from the root in Cypress version \`10.0.0\`. Please update this option under each testing type property.
+
+https://on.cypress.io/migration-guide
+
+`
