@@ -257,6 +257,7 @@ describe('util', () => {
 
   context('.getOriginalNodeOptions', () => {
     let restoreEnv
+    const sandbox = sinon.createSandbox()
 
     afterEach(() => {
       if (restoreEnv) {
@@ -266,6 +267,9 @@ describe('util', () => {
     })
 
     it('copy NODE_OPTIONS to ORIGINAL_NODE_OPTIONS', () => {
+      sandbox.stub(process.versions, 'node').value('v16.5.0')
+      sandbox.stub(process.versions, 'openssl').value('1.0.0')
+
       restoreEnv = mockedEnv({
         NODE_OPTIONS: '--require foo.js',
       })
@@ -277,59 +281,53 @@ describe('util', () => {
 
     // https://github.com/cypress-io/cypress/issues/18914
     it('includes --openssl-legacy-provider in Node 17+ w/ OpenSSL 3', () => {
-      const processVersions = {
-        node: 'v17.1.0',
-        openssl: '3.0.0-quic',
-      }
+      sandbox.stub(process.versions, 'node').value('v17.1.0')
+      sandbox.stub(process.versions, 'openssl').value('3.0.0-quic')
 
       restoreEnv = mockedEnv({
         NODE_OPTIONS: '--require foo.js',
       })
 
-      let childOptions = util.getOriginalNodeOptions({ processVersions })
+      let childOptions = util.getOriginalNodeOptions()
 
       expect(childOptions.ORIGINAL_NODE_OPTIONS).to.eq('--require foo.js --openssl-legacy-provider')
 
       restoreEnv()
       restoreEnv = mockedEnv({})
-      childOptions = util.getOriginalNodeOptions({ processVersions })
+      childOptions = util.getOriginalNodeOptions()
 
       expect(childOptions.ORIGINAL_NODE_OPTIONS).to.eq(' --openssl-legacy-provider')
     })
 
     // https://github.com/cypress-io/cypress/issues/19320
     it('does not include --openssl-legacy-provider in Node 17+ w/ OpenSSL 1', () => {
-      const processVersions = {
-        node: 'v17.1.0',
-        openssl: '1.0.0',
-      }
+      sandbox.stub(process.versions, 'node').value('v17.1.0')
+      sandbox.stub(process.versions, 'openssl').value('1.0.0')
 
       restoreEnv = mockedEnv({
         NODE_OPTIONS: '--require foo.js',
       })
 
-      let childOptions = util.getOriginalNodeOptions({ processVersions })
+      let childOptions = util.getOriginalNodeOptions()
 
       expect(childOptions.ORIGINAL_NODE_OPTIONS).to.eq('--require foo.js')
       expect(childOptions.ORIGINAL_NODE_OPTIONS).not.to.contain('--openssl-legacy-provider')
 
       restoreEnv()
       restoreEnv = mockedEnv({})
-      childOptions = util.getOriginalNodeOptions({ processVersions })
+      childOptions = util.getOriginalNodeOptions()
 
       expect(childOptions.ORIGINAL_NODE_OPTIONS).to.be.undefined
     })
 
     // https://github.com/cypress-io/cypress/issues/18914
     it('does not include --openssl-legacy-provider in Node <=16', () => {
-      const processVersions = {
-        node: 'v16.31.0',
-        openssl: '1.0.0',
-      }
+      sandbox.stub(process.versions, 'node').value('v16.5.0')
+      sandbox.stub(process.versions, 'openssl').value('1.0.0')
 
       restoreEnv = mockedEnv({})
 
-      let childOptions = util.getOriginalNodeOptions({ processVersions })
+      let childOptions = util.getOriginalNodeOptions()
 
       expect(childOptions.ORIGINAL_NODE_OPTIONS).to.be.undefined
 
@@ -337,7 +335,7 @@ describe('util', () => {
         NODE_OPTIONS: '--require foo.js',
       })
 
-      childOptions = util.getOriginalNodeOptions({ processVersions })
+      childOptions = util.getOriginalNodeOptions()
 
       expect(childOptions.ORIGINAL_NODE_OPTIONS).to.eq('--require foo.js')
       expect(childOptions.ORIGINAL_NODE_OPTIONS).not.to.contain('--openssl-legacy-provider')

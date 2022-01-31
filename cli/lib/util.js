@@ -284,11 +284,11 @@ const util = {
     .mapValues((value) => { // stringify to 1 or 0
       return value ? '1' : '0'
     })
-    .extend(util.getOriginalNodeOptions(options))
+    .extend(util.getOriginalNodeOptions())
     .value()
   },
 
-  getOriginalNodeOptions ({ processVersions }) {
+  getOriginalNodeOptions () {
     const opts = {}
 
     if (process.env.NODE_OPTIONS) {
@@ -306,7 +306,7 @@ const util = {
     // To be removed when the Cypress binary pulls in the @cypress/webpack-batteries-included-preprocessor
     // version that has been updated to webpack >= 5.61, which no longer relies on
     // Node's builtin crypto.hash function.
-    if (processVersions && semver.satisfies(processVersions.node, '>=17.0.0') && processVersions.openssl.startsWith('3.')) {
+    if (process.versions && semver.satisfies(process.versions.node, '>=17.0.0') && process.versions.openssl.startsWith('3.')) {
       opts.ORIGINAL_NODE_OPTIONS = `${opts.ORIGINAL_NODE_OPTIONS || ''} --openssl-legacy-provider`
     }
 
