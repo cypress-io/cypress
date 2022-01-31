@@ -1,14 +1,14 @@
 require('../spec_helper')
 
-const style = require('ansi-styles')
 const chalk = require('chalk')
+const style = require('ansi-styles')
+const snapshot = require('snap-shot-it')
 const errors = require(`${root}lib/errors`)
 const logger = require(`${root}lib/logger`)
-const snapshot = require('snap-shot-it')
 
 describe('lib/errors', () => {
   beforeEach(() => {
-    return sinon.spy(console, 'log')
+    sinon.stub(console, 'log')
   })
 
   context('.log', () => {
@@ -63,7 +63,7 @@ describe('lib/errors', () => {
 
       expect(console.log).to.be.calledWithMatch('foo/bar/baz')
 
-      expect(console.log).to.be.calledWithMatch('\n', 'details huh')
+      expect(console.log).to.be.calledWithMatch(`\n${ chalk.yellow('details huh')}`)
     })
 
     it('logs err.stack in development', () => {
