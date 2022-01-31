@@ -1,8 +1,13 @@
 require('../../spec_helper')
 
+const snapshot = require('snap-shot-it')
+const stripAnsi = require('strip-ansi')
 const browsers = require(`${root}../lib/browsers`)
 const utils = require(`${root}../lib/browsers/utils`)
-const snapshot = require('snap-shot-it')
+
+const normalizeSnapshot = (str) => {
+  return snapshot(stripAnsi(str))
+}
 
 const normalizeBrowsers = (message) => {
   return message.replace(/(found on your system are:)(?:\n- .*)*/, '$1\n- chrome\n- firefox\n- electron')
@@ -64,7 +69,7 @@ describe('lib/browsers/index', () => {
       return expect(browsers.ensureAndGetByNameOrPath('browserNotGonnaBeFound'))
       .to.be.rejectedWith({ type: 'BROWSER_NOT_FOUND_BY_NAME' })
       .then((err) => {
-        return snapshot(normalizeBrowsers(err.message))
+        return normalizeSnapshot(normalizeBrowsers(err.message))
       })
     })
 
@@ -78,7 +83,7 @@ describe('lib/browsers/index', () => {
       return expect(browsers.ensureAndGetByNameOrPath('canary'))
       .to.be.rejectedWith({ type: 'BROWSER_NOT_FOUND_BY_NAME' })
       .then((err) => {
-        return snapshot(err.message)
+        return normalizeSnapshot(err.message)
       })
     })
   })
