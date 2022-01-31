@@ -1,6 +1,5 @@
 import type { $Cy } from '../cypress/cy'
 import type { SpecBridgeDomainCommunicator } from './communicator'
-import { serialize } from './serializer'
 
 export const handleCommands = (Cypress: Cypress.Cypress, cy: $Cy, specBridgeCommunicator: SpecBridgeDomainCommunicator) => {
   const onCommandEnqueued = (commandAttrs: Cypress.EnqueuedCommand) => {
@@ -14,12 +13,12 @@ export const handleCommands = (Cypress: Cypress.Cypress, cy: $Cy, specBridgeComm
   const onCommandEnd = (command: Cypress.CommandQueue) => {
     const id = command.get('id')
     const name = command.get('name')
-
-    let serializedSubject = serialize(cy.state('subject'))
+    const logId = command.getLastLog()?.get('id')
+    const subject = cy.state('subject')
 
     // we need to serialize and send back the subject on each command because the next chained
     // command outside of the multi-domain context will not wait for the queue finished event.
-    specBridgeCommunicator.toPrimary('command:end', { id, name, subject: serializedSubject })
+    specBridgeCommunicator.toPrimaryCommandEnd({ id, name, subject, logId })
   }
 
   const onRunCommand = () => {

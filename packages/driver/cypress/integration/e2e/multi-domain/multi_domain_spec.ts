@@ -304,18 +304,16 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
       }).should('equal', 'From a secondary domain')
     })
 
+    it('yields asynchronously', () => {
+      cy.switchToDomain('foobar.com', async () => {
+        return 'From a secondary domain'
+      }).should('equal', 'From a secondary domain')
+    })
+
     it('yields undefined if subject cannot be serialized', () => {
       cy.switchToDomain('foobar.com', () => {
         cy
         .get('[data-cy="dom-check"]')
-      }).should('equal', undefined)
-    })
-
-    it('yields undefined if an object contains undefined', () => {
-      cy.switchToDomain('foobar.com', () => {
-        cy.wrap({
-          key: undefined,
-        })
       }).should('equal', undefined)
     })
 
@@ -337,6 +335,16 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
       }).should('equal', undefined)
     })
 
+    // This test will only work on chrome.
+    it.skip('yields undefined if an object contains an error', () => {
+      cy.switchToDomain('foobar.com', () => {
+        cy.wrap({
+          key: new Error('Boom goes the dynamite'),
+        })
+      }).its('key.message')
+      .should('equal', 'Boom goes the dynamite')
+    })
+
     it('yields an object containing valid types', () => {
       cy.switchToDomain('foobar.com', () => {
         cy.wrap({
@@ -344,6 +352,7 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
             1,
             2,
           ],
+          undefined,
           bool: true,
           null: null,
           number: 12,
@@ -357,6 +366,7 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
           1,
           2,
         ],
+        undefined,
         bool: true,
         null: null,
         number: 12,

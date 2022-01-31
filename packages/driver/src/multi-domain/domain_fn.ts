@@ -1,6 +1,5 @@
 import type { $Cy } from '../cypress/cy'
 import type { SpecBridgeDomainCommunicator } from './communicator'
-import { serialize } from './serializer'
 
 export const handleDomainFn = (cy: $Cy, specBridgeCommunicator: SpecBridgeDomainCommunicator) => {
   const doneEarly = () => {
@@ -80,7 +79,7 @@ export const handleDomainFn = (cy: $Cy, specBridgeCommunicator: SpecBridgeDomain
       const name = command.get('name')
       const logId = command.getLastLog()?.get('id')
 
-      specBridgeCommunicator.toPrimary('command:end', { id, name, err, logId })
+      specBridgeCommunicator.toPrimaryCommandEnd({ id, name, err, logId })
     })
 
     try {
@@ -89,7 +88,7 @@ export const handleDomainFn = (cy: $Cy, specBridgeCommunicator: SpecBridgeDomain
       // see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function for more details
       const subject = await window.eval(fnWrapper)(data)
 
-      specBridgeCommunicator.toPrimary('ran:domain:fn', { subject: serialize(subject) })
+      specBridgeCommunicator.toPrimary('ran:domain:fn', { subject })
     } catch (err) {
       specBridgeCommunicator.toPrimary('ran:domain:fn', { err })
     } finally {

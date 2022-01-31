@@ -8,11 +8,11 @@ const debug = debugFn('cypress:driver:multi-domain')
 
 const CROSS_DOMAIN_PREFIX = 'cross:domain:'
 
-const serializeForPostMessage = (value) => {
+const preprocessErrorForPostMessage = (value) => {
   const { isDom } = $dom
 
   if (_.isError(value)) {
-    const serializedError = _.mapValues(clone(value), serializeForPostMessage)
+    const serializedError = _.mapValues(clone(value), preprocessErrorForPostMessage)
 
     return {
       ... serializedError,
@@ -25,7 +25,7 @@ const serializeForPostMessage = (value) => {
   }
 
   if (_.isArray(value)) {
-    return _.map(value, serializeForPostMessage)
+    return _.map(value, preprocessErrorForPostMessage)
   }
 
   if (isDom(value)) {
@@ -40,7 +40,7 @@ const serializeForPostMessage = (value) => {
     // clone to nuke circular references
     // and blow away anything that throws
     try {
-      return _.mapValues(clone(value), serializeForPostMessage)
+      return _.mapValues(clone(value), preprocessErrorForPostMessage)
     } catch (err) {
       return null
     }
@@ -147,10 +147,29 @@ export class SpecBridgeDomainCommunicator extends EventEmitter {
    * @param {string} event - the name of the event to be sent.
    * @param {any} data - any meta data to be sent with the event.
    */
-  toPrimary (event: string, data?: any, serializer?: (data: any) => any) {
+  toPrimary (event: string, data?: any) {
     let prefixedEvent = `${CROSS_DOMAIN_PREFIX}${event}`
 
-    data = serializer ? serializer(data) : serializeForPostMessage(data)
     this.windowReference.top.postMessage({ event: prefixedEvent, data }, '*')
+  }
+
+  toPrimaryCommandEnd (data: {id: string, subject?: any, name: string, err?: Error, logId: string }) {
+    const { id, subject, name, err, logId } = data
+
+    // We always want to make sure errors are posted, so clean it up to send.
+    const preProcessedError = preprocessErrorForPostMessage(err)
+
+    try {
+      this.toPrimary('command:end', { id, subject, name, err: preProcessedError, logId })
+    } catch (error: any) {
+      if (subject && error.name === 'DataCloneError') {
+        // If the subject threw the 'DataCloneError', the subject cannot be serialized at which point try again with an undefined subject.
+        this.toPrimaryCommandEnd({ id, name, subject: undefined, logId })
+      } else {
+        // Try to send the message again, with the new error.
+        this.toPrimaryCommandEnd({ id, name, err: error, logId })
+        throw error
+      }
+    }
   }
 }

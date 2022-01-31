@@ -3,7 +3,6 @@ import $errUtils from '../../cypress/error_utils'
 import { CommandsManager } from './commands_manager'
 import { LogsManager } from './logs_manager'
 import { Validator } from './validator'
-import { deserialize } from '../../multi-domain/serializer'
 
 export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: Cypress.State, config: Cypress.InternalConfig) {
   let timeoutId
@@ -143,9 +142,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
           if (!commandsManager.hasCommands && !done) {
             cleanup()
             // This handles when a subject is returned synchronously
-            const deserializedSubject = deserialize(subject)
-
-            resolve(deserializedSubject)
+            resolve(subject)
           } else {
             resolve()
           }

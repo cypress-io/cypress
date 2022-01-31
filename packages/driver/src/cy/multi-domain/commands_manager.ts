@@ -1,7 +1,6 @@
 import type { PrimaryDomainCommunicator } from '../../multi-domain/communicator'
 import { createDeferred, Deferred } from '../../util/deferred'
 import { correctStackForCrossDomainError } from './util'
-import { deserialize } from '../../multi-domain/serializer'
 
 export class CommandsManager {
   // these are proxy commands that represent real commands in a
@@ -66,9 +65,7 @@ export class CommandsManager {
     delete this.commands[id]
 
     if (!err) {
-      const deserializedSubject = deserialize(subject)
-
-      return command.deferred.resolve(deserializedSubject)
+      return command.deferred.resolve(subject)
     }
 
     // If the command has failed, cast the error back to a proper Error object
