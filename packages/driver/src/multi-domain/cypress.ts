@@ -8,13 +8,14 @@ import $Cypress from '../cypress'
 import { $Cy } from '../cypress/cy'
 import $Commands from '../cypress/commands'
 import $Log from '../cypress/log'
-import $errUtils, { ErrorFromProjectRejectionEvent } from '../cypress/error_utils'
 import { bindToListeners } from '../cy/listeners'
 import { SpecBridgeDomainCommunicator } from './communicator'
 import { handleDomainFn } from './domain_fn'
 import { handleCommands } from './commands'
 import { handleLogs } from './logs'
 import { handleSocketEvents } from './socket'
+import { handleSpecWindowEvents } from './spec_window_events'
+import { handleErrorEvent } from './errors'
 
 const specBridgeCommunicator = new SpecBridgeDomainCommunicator()
 
@@ -64,6 +65,7 @@ const setup = () => {
   handleCommands(Cypress, cy, specBridgeCommunicator)
   handleLogs(Cypress, specBridgeCommunicator)
   handleSocketEvents(Cypress)
+  handleSpecWindowEvents(cy)
 
   cy.onBeforeAppWindowLoad = onBeforeAppWindowLoad(Cypress, cy)
 
@@ -82,32 +84,7 @@ const onBeforeAppWindowLoad = (Cypress: Cypress.Cypress, cy: $Cy) => (autWindow:
   cy.overrides.wrapNativeMethods(autWindow)
   // TODO: DRY this up with the mostly-the-same code in src/cypress/cy.js
   bindToListeners(autWindow, {
-    onError: (handlerType) => {
-      return (event) => {
-        const { originalErr, err, promise } = $errUtils.errorFromUncaughtEvent(handlerType, event) as ErrorFromProjectRejectionEvent
-        const handled = cy.onUncaughtException({
-          err,
-          promise,
-          handlerType,
-          frameType: 'app',
-        })
-
-        $errUtils.logError(cy.Cypress, handlerType, originalErr, handled)
-
-        if (!handled) {
-          // if unhandled, fail the current command to fail the current test in the primary domain
-          // a current command may not exist if an error occurs in the spec bridge after the test is over
-          const command = cy.state('current')
-          const log = command?.getLastLog()
-
-          if (log) log.error(err)
-        }
-
-        // return undefined so the browser does its default
-        // uncaught exception behavior (logging to console)
-        return undefined
-      }
-    },
+    onError: handleErrorEvent(cy),
     onHistoryNav () {},
     onSubmit (e) {
       return Cypress.action('app:form:submitted', e)

@@ -79,6 +79,26 @@ describe('multi-domain - uncaught errors', { experimentalSessionSupport: true, e
   })
 
   describe('async errors', () => {
+    it('fails the current test/command if async errors are thrown from the test code in switchToDomain while the callback window is still open', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.name).to.eq('Error')
+        expect(err.message).to.include('setTimeout error')
+        expect(err.message).to.include('The following error originated from your test code, not from Cypress.')
+
+        done()
+      })
+
+      cy.switchToDomain('foobar.com', () => {
+        setTimeout(() => {
+          throw new Error('setTimeout error')
+        }, 50)
+
+        // add the cy.wait here to keep commands streaming in, forcing the
+        // switchToDomain callback window to be open long enough for the error to occur
+        cy.wait(250)
+      })
+    })
+
     it('fails the current test/command if async errors are thrown from the switchToDomain context while the callback window is still open', () => {
       const uncaughtExceptionSpy = cy.spy()
       const r = cy.state('runnable')
@@ -153,6 +173,25 @@ describe('multi-domain - uncaught errors', { experimentalSessionSupport: true, e
         cy.get('.trigger-unhandled-rejection').click()
         cy.get('.error-one').invoke('text').should('equal', 'promise rejection')
         cy.get('.error-two').invoke('text').should('equal', 'promise rejection')
+      })
+    })
+
+    it('fails the current test/command if a promise is rejected from the test code in switchToDomain while the callback window is still open', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.name).to.eq('Error')
+        expect(err.message).to.include('rejected promise')
+        expect(err.message).to.include('The following error originated from your test code, not from Cypress. It was caused by an unhandled promise rejection.')
+        expect(err.message).to.not.include('https://on.cypress.io/uncaught-exception-from-application')
+
+        done()
+      })
+
+      cy.switchToDomain('foobar.com', () => {
+        Promise.reject(new Error('rejected promise'))
+
+        // add the cy.wait here to keep commands streaming in, forcing the
+        // switchToDomain callback window to be open long enough for the error to occur
+        cy.wait(250)
       })
     })
   })
