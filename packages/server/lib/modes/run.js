@@ -1303,17 +1303,19 @@ module.exports = {
         }
       }
 
+      await openProject.stopScreencast()
+      await openProject.resetBrowserState()
+
       if (browser.name === 'electron') {
         // always close the browser now as opposed to letting
         // it exit naturally with the parent process due to
         // electron bug in windows
         debug('attempting to close the browser')
         await openProject.closeBrowser()
+      } else {
+        await openProject.closeBrowserTab()
       }
 
-      await openProject.stopScreencast()
-      await openProject.resetBrowserState()
-      await openProject.closeBrowserTab()
       openProject.projectBase.server.reset()
 
       if (videoExists && !skippedSpec && endVideoCapture && !videoCaptureFailed) {
