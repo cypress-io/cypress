@@ -70,14 +70,10 @@ const props = defineProps<{
   packagesInstalled: string[]
 }>()
 
-const toInstall = computed(() => {
-  return props.gql.wizard.packagesToInstall
-})
-
 const installDependenciesCode = computed(
   () => {
     return `yarn add -D ${
-    (toInstall.value ?? [])
+    (props.gql.wizard.packagesToInstall ?? [])
     .map((pack) => `${pack.package}`)
     .join(' ')}`
   },
