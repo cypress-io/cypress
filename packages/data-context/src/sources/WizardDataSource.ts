@@ -1,4 +1,3 @@
-import { readJson } from 'fs-extra'
 import Debug from 'debug'
 import { BUNDLERS, CODE_LANGUAGES, FRONTEND_FRAMEWORKS, PACKAGES_DESCRIPTIONS } from '@packages/types'
 import type { NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
@@ -51,11 +50,9 @@ export class WizardDataSource {
 
     debug('packages to install: %O', packagesInitial)
 
-    const { dependencies, devDependencies } = await readJson(path.join(this.ctx.currentProject, 'package.json'))
     const installedPackages: (string|null)[] = packagesInitial.map((p) => {
       if (this.ctx.currentProject) {
         debug('package checked: %s', p.package)
-        const isDependency = !!(dependencies[p.package] || devDependencies[p.package])
 
         // At startup, node will only resolve the main files of packages it knows of.
         // Adding a package after the app started will not be resolved in the same way
@@ -67,7 +64,7 @@ export class WizardDataSource {
         try {
           require.resolve(packageJsonPath, { paths: [this.ctx.currentProject] })
 
-          return isDependency ? p.package : null
+          return p.package
         } catch (e) {
           debug('ERROR - resolving package "%s": %O', p.package, e)
         }
