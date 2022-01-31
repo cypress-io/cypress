@@ -757,8 +757,9 @@ const AllCypressErrors = {
     // TODO: update with vetted cypress language
   },
   CONFIG_FILES_LANGUAGE_CONFLICT: (arg1: string, arg2: string, arg3: string) => {
-    return stripIndent`
-          There is both a \`${arg2}\` and a \`${arg3}\` at the location below:
+    return errTemplate`
+          There is both a ${backtick(arg2)} and a ${backtick(arg3)} at the location below:
+
           ${arg1}
 
           Cypress does not know which one to read for config. Please remove one of the two and try again.
@@ -1092,14 +1093,22 @@ const AllCypressErrors = {
   },
   NODE_VERSION_DEPRECATION_SYSTEM: (arg1: {name: string, value: any, configFile: string}) => {
     return errTemplate`\
-      Deprecation Warning: ${chalk.yellow(`\`${arg1.name}\``)} is currently set to ${chalk.yellow(`\`${arg1.value}\``)} in the ${chalk.yellow(`\`${arg1.configFile}\``)} configuration file. As of Cypress version \`9.0.0\` the default behavior of ${chalk.yellow(`\`${arg1.name}\``)} has changed to always use the version of Node used to start cypress via the cli.
-      Please remove the ${chalk.yellow(`\`${arg1.name}\``)} configuration option from ${chalk.yellow(`\`${arg1.configFile}\``)}.
+      Deprecation Warning: ${backtick(arg1.name)} is currently set to ${backtick(arg1.value)} in the ${backtick(arg1.configFile)} configuration file.
+
+      As of Cypress version \`9.0.0\` the default behavior of ${backtick(arg1.name)} has changed to always use the version of Node used to start cypress via the cli.
+
+      Please remove the ${backtick(arg1.name)} configuration option from ${backtick(arg1.configFile)}.
       `
   },
   NODE_VERSION_DEPRECATION_BUNDLED: (arg1: {name: string, value: any, configFile: string}) => {
     return errTemplate`\
-      Deprecation Warning: ${chalk.yellow(`\`${arg1.name}\``)} is currently set to ${chalk.yellow(`\`${arg1.value}\``)} in the ${chalk.yellow(`\`${arg1.configFile}\``)} configuration file. As of Cypress version \`9.0.0\` the default behavior of ${chalk.yellow(`\`${arg1.name}\``)} has changed to always use the version of Node used to start cypress via the cli. When ${chalk.yellow(`\`${arg1.name}\``)} is set to ${chalk.yellow(`\`${arg1.value}\``)}, Cypress will use the version of Node bundled with electron. This can cause problems running certain plugins or integrations.
-      As the ${chalk.yellow(`\`${arg1.name}\``)} configuration option will be removed in a future release, it is recommended to remove the ${chalk.yellow(`\`${arg1.name}\``)} configuration option from ${chalk.yellow(`\`${arg1.configFile}\``)}.
+      Deprecation Warning: ${backtick(arg1.name)} is currently set to ${backtick(arg1.value)} in the ${backtick(arg1.configFile)} configuration file.
+
+      As of Cypress version \`9.0.0\` the default behavior of ${backtick(arg1.name)} has changed to always use the version of Node used to start cypress via the cli.
+
+      When ${backtick(arg1.name)} is set to ${backtick(arg1.value)}, Cypress will use the version of Node bundled with electron. This can cause problems running certain plugins or integrations.
+
+      As the ${backtick(arg1.name)} configuration option will be removed in a future release, it is recommended to remove the ${backtick(arg1.name)} configuration option from ${backtick(arg1.configFile)}.
       `
   },
 } as const

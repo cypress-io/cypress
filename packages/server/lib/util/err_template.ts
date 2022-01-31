@@ -1,10 +1,9 @@
+import assert from 'assert'
 /**
  * Guarding the value, involves
  */
 import chalk from 'chalk'
-import assert from 'assert'
 import stripAnsi from 'strip-ansi'
-
 import { trimMultipleNewLines } from '../errors-child'
 
 const { stripIndent } = require('./strip_indent')
@@ -105,7 +104,7 @@ export const errTemplate = (strings: TemplateStringsArray, ...args: Array<string
 
     for (const arg of args) {
       if (arg instanceof Backtick) {
-        templateArgs.push(forTerminal ? arg.val : `\`${arg.val}\``)
+        templateArgs.push(`\`${arg.val}\``)
       } else if (arg instanceof Guard) {
         templateArgs.push(arg.val)
       } else if (arg instanceof Details) {
