@@ -435,6 +435,11 @@ commands:
     steps:
       - restore_cached_workspace
       - run:
+          # TODO: How can we have preinstalled browsers on CircleCI?
+          name: 'Install Chrome on Windows' 
+          command: |
+            [[ $PLATFORM == 'windows' && '<<parameters.browser>>' == 'chrome' ]] && choco install googlechrome || true
+      - run:
           command: |
             cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --parallel -- --') || true
             CYPRESS_KONFIG_ENV=production \
