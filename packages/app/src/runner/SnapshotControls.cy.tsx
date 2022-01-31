@@ -62,7 +62,7 @@ describe('SnapshotControls', { viewportHeight: 100, viewportWidth: 500 }, () => 
     .findByText('Pinned')
     .should('be.visible')
     .get(unpinButtonSelector)
-    .click()
+    .click({ force: true })
     .get('body')
     .findByText('Pinned')
     .should('not.exist')
@@ -94,7 +94,7 @@ describe('SnapshotControls', { viewportHeight: 100, viewportWidth: 500 }, () => 
     .findByText('Highlights')
     .should('be.visible')
     .findByLabelText('Toggle highlights')
-    .click()
+    .click({ force: true })
   })
 
   it('shows running test error', () => {
