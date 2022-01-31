@@ -303,10 +303,6 @@ export async function process (name, cname, videoCompression, ffmpegchaptersConf
       '-threads 1',
     ]
 
-    if (os.cpus().length < 4) {
-      outputOptions.push()
-    }
-
     if (addChaptersMeta) {
       command.input(metaFileName)
       outputOptions.push('-map_metadata 1')
