@@ -133,7 +133,7 @@ function getPluginRelativePath (cfg: OldCypressConfig): string {
 function createCypressConfigJs (config: ConfigOptions, pluginPath: string, options: CreateConfigOptions): string {
   const globalString = Object.keys(config.global).length > 0 ? `${formatObjectForConfig(config.global)},` : ''
   const componentString = options.hasComponentTesting ? createComponentTemplate(config.component) : ''
-  const e2eString = (options.hasE2ESpec || options.hasPluginsFile)
+  const e2eString = (options.hasE2ESpec && options.hasPluginsFile)
     ? createE2eTemplate(pluginPath, options.hasPluginsFile, config.e2e)
     : ''
 
@@ -164,7 +164,7 @@ function createE2eTemplate (pluginPath: string, hasPluginsFile: boolean, options
 
 function createComponentTemplate (options: Record<string, unknown>) {
   return `component: {
-    ${formatObjectForConfig(options)}
+    setupNodeEvents(on, config) {},${formatObjectForConfig(options)}
   },`
 }
 
@@ -250,7 +250,7 @@ export function renameSupportFilePath (relative: string) {
 }
 
 export function reduceConfig (cfg: OldCypressConfig): ConfigOptions {
-  const excludedFields = ['pluginsFile', '$schema', 'componentFolder']
+  const excludedFields = ['pluginsFile', '$schema']
 
   return Object.entries(cfg).reduce((acc, [key, val]) => {
     if (excludedFields.includes(key)) {
@@ -258,15 +258,33 @@ export function reduceConfig (cfg: OldCypressConfig): ConfigOptions {
     }
 
     if (key === 'e2e' || key === 'component') {
-      const value = val as Record<string, unknown>
+      const value = val as Cypress.ResolvedConfigOptions
 
-      return { ...acc, [key]: { ...acc[key], ...value } }
+      if (!value) {
+        return acc
+      }
+
+      const { testFiles, ignoreTestFiles, ...rest } = value
+
+      return {
+        ...acc, [key]: {
+          ...rest,
+          specPattern: getSpecPattern(cfg, key),
+        },
+      }
     }
 
     if (key === 'integrationFolder') {
       return {
         ...acc,
         e2e: { ...acc.e2e, specPattern: getSpecPattern(cfg, 'e2e') },
+      }
+    }
+
+    if (key === 'componentFolder') {
+      return {
+        ...acc,
+        component: { ...acc.component, specPattern: getSpecPattern(cfg, 'component') },
       }
     }
 
@@ -304,17 +322,18 @@ export function reduceConfig (cfg: OldCypressConfig): ConfigOptions {
   }, { global: {}, e2e: {}, component: {} })
 }
 
-function getSpecPattern (cfg: OldCypressConfig, testType: TestingType) {
-  const specPattern = cfg[testType]?.testFiles ?? cfg.testFiles ?? '**/*.cy.{js,jsx,ts,tsx}'
-  const customComponentFolder = cfg.component?.componentFolder ?? cfg.componentFolder ?? null
-
-  if (testType === 'component' && customComponentFolder) {
-    return `${customComponentFolder}/${specPattern}`
+function getSpecPattern (cfg: OldCypressConfig, testingType: TestingType) {
+  // `componentFolder` is no longer a thing, we are forcing the user to co-locate
+  // component specs.
+  if (testingType === 'component') {
+    return '**/*.cy.{js,jsx,ts,tsx}'
   }
+
+  const specPattern = cfg.e2e?.testFiles ?? cfg.testFiles ?? '**/*.cy.{js,jsx,ts,tsx}'
 
   const customIntegrationFolder = cfg.e2e?.integrationFolder ?? cfg.integrationFolder ?? 'cypress/e2e'
 
-  if (testType === 'e2e' && customIntegrationFolder) {
+  if (customIntegrationFolder) {
     return `${customIntegrationFolder}/${specPattern}`
   }
 

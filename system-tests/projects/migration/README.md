@@ -41,7 +41,7 @@ The project has a default support file, `cypress/support/index.js`. We can renam
 
 ## Update Config
 
-We can migrate to the new `cypress.config.js`. The expected output is in`expected-cypress.config.js`. The main points are:
+We can migrate to the new `cypress.config.js`. The expected output is in `expected-cypress.config.js`. The main points are:
 
 - `specPattern` is nested under `e2e` and `component`, and formed by `integrationFolder` + `testFiles` for E2E and `componentFolder` + `testFiles` for component. We do NOT use the new default of `.cy.{js,jsx,ts,tsx}` because the project already has specified a custom testFiles pattern.
 - `pluginsFile` is gone - it's now required inside of `setupNodeEvents`.

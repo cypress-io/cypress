@@ -352,6 +352,24 @@ describe('Full migration flow for each project', () => {
 
     migrateAndVerifyConfig()
   })
+
+  it('completes journey for migration-component-testing-customized', () => {
+    startMigrationFor('migration-component-testing-customized')
+    // cannot rename anything automatically here, testFiles are customized
+    cy.get(renameAutoStep).should('not.exist')
+
+    cy.get(renameManualStep).should('exist')
+
+    // no supportFile rename for CT
+    cy.get(renameSupportStep).should('not.exist')
+
+    cy.get(setupComponentStep).should('exist')
+    cy.get(configFileStep).should('exist')
+
+    skipCTMigration()
+    migrateAndVerifyConfig()
+    finishMigrationAndContinue()
+  })
 })
 
 describe('component testing migration - defaults', () => {
