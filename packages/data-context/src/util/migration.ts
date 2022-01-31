@@ -131,22 +131,19 @@ function getPluginRelativePath (cfg: OldCypressConfig): string {
   return cfg.pluginsFile ? cfg.pluginsFile : DEFAULT_PLUGIN_PATH
 }
 
-/**
- * Ensure they have Cypress installed locally AND
- * it's version 10. We don't want to include
- * const { defineConfig } = require('cypress')
- * if they don't have Cypress in their project,
- * or they have an old version, since the `defineConfig`
- * export won't exist and it'll crash when we execute
- * their cypress.config.js.
- */
-function isCypress10InstalledLocally (projectRoot: string) {
+// If they are running an old version of Cypress
+// or running Cypress that isn't installed in their
+// project's node_modules, we don't want to include
+// defineConfig(/***/) in their cypress.config.js,
+// since it won't exist.
+function defineConfigAvailable (projectRoot: string) {
   try {
-    const pkgJsonPath = require.resolve('cypress/package.json', {
+    const cypress = require.resolve('cypress', {
       paths: [projectRoot],
     })
+    const api = require(cypress)
 
-    return parseInt(require(pkgJsonPath)?.version, 10) >= 10
+    return 'defineConfig' in api
   } catch (e) {
     return false
   }
@@ -159,7 +156,7 @@ function createCypressConfigJs (config: ConfigOptions, pluginPath: string, optio
     ? createE2eTemplate(pluginPath, options.hasPluginsFile, config.e2e)
     : ''
 
-  if (isCypress10InstalledLocally(options.projectRoot)) {
+  if (defineConfigAvailable(options.projectRoot)) {
     return formatConfig(
       `const { defineConfig } = require('cypress')
 

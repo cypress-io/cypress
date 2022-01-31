@@ -33,6 +33,8 @@ function scaffoldMigrationProject (project: typeof e2eProjectDirs[number]) {
   return cwd
 }
 
+const projectRoot = path.join(__dirname, '..', '..', '..', '..', '..')
+
 describe('cypress.config.js generation', () => {
   it('should create a string when passed only a global option', async () => {
     const config: OldCypressConfig = {
@@ -43,6 +45,7 @@ describe('cypress.config.js generation', () => {
       hasE2ESpec: true,
       hasComponentTesting: false,
       hasPluginsFile: true,
+      projectRoot,
     })
 
     snapshot(generatedConfig)
@@ -59,6 +62,7 @@ describe('cypress.config.js generation', () => {
       hasE2ESpec: true,
       hasComponentTesting: false,
       hasPluginsFile: true,
+      projectRoot,
     })
 
     snapshot(generatedConfig)
@@ -75,6 +79,7 @@ describe('cypress.config.js generation', () => {
       hasE2ESpec: true,
       hasComponentTesting: false,
       hasPluginsFile: true,
+      projectRoot,
     })
 
     snapshot(generatedConfig)
@@ -96,6 +101,7 @@ describe('cypress.config.js generation', () => {
       hasE2ESpec: true,
       hasComponentTesting: false,
       hasPluginsFile: true,
+      projectRoot,
     })
 
     snapshot(generatedConfig)
@@ -108,6 +114,7 @@ describe('cypress.config.js generation', () => {
       hasE2ESpec: true,
       hasComponentTesting: false,
       hasPluginsFile: true,
+      projectRoot,
     })
 
     snapshot(generatedConfig)
@@ -124,6 +131,7 @@ describe('cypress.config.js generation', () => {
       hasE2ESpec: true,
       hasComponentTesting: false,
       hasPluginsFile: true,
+      projectRoot,
     })
 
     snapshot(generatedConfig)
