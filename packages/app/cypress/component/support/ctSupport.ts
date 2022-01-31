@@ -6,6 +6,8 @@ import _ from 'lodash'
 import { visitFailure } from '@packages/runner-shared/src/visit-failure'
 import type { Socket } from '@packages/socket/lib/browser'
 
+Cypress.on('uncaught:exception', (err) => !err.message.includes('ResizeObserver loop limit exceeded'))
+
 class StudioRecorderMock {}
 
 export const StubWebsocket = new Proxy<Socket>(Object.create(null), {
