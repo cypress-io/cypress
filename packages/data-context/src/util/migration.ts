@@ -187,12 +187,6 @@ export async function tryGetDefaultLegacySupportFile (projectRoot: string) {
   return files[0]
 }
 
-export async function tryGetDefaultLegacyPluginsFile (projectRoot: string) {
-  const files = await globby(path.join(projectRoot, 'cypress', 'plugins', 'index.*'))
-
-  return files[0]
-}
-
 export async function getDefaultLegacySupportFile (projectRoot: string) {
   const defaultSupportFile = await tryGetDefaultLegacySupportFile(projectRoot)
 
