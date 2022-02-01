@@ -21,7 +21,7 @@
           class="rounded border-1 text-center min-h-144px pt-6 pb-4 w-160px relative block radio-label"
           :class="{
             'border-jade-300 ring-2 ring-jade-100 focus:border-jade-400 focus:border-1 focus:outline-none': checked,
-            'filter grayscale bg-gray-100 before:hocus:cursor-not-allowed': browser.disabled,
+            'filter grayscale bg-gray-50 before:hocus:cursor-not-allowed': browser.disabled,
             'filter grayscale border-gray-200': (isBrowserOpening || isBrowserOpen) && !checked,
             'border-gray-200 before:hocus:cursor-pointer hover:border-indigo-300 hover:ring-2 hover:ring-indigo-100': !browser.disabled && !checked && !(isBrowserOpening || isBrowserOpen)
           }"
@@ -30,7 +30,7 @@
             v-if="!browser.isVersionSupported"
             class="top-0 right-0 absolute"
           >
-            <i-cy-circle-bg-question-mark_x16 class="ml-8px -top-2px relative inline-block icon-dark-gray-700 icon-light-gray-200" />
+            <i-cy-circle-bg-question-mark_x16 class="mt-4px mr-8px relative inline-block icon-dark-gray-700 icon-light-gray-200" />
           </div>
           <div class="text-center">
             <img
