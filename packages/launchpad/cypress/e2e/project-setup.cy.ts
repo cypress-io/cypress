@@ -230,9 +230,9 @@ describe('Launchpad: Setup Project', () => {
         // @ts-ignore
         cy.get('body').tab().tab()
 
-        cy.get('[data-cy-testingtype="e2e"]')
+        cy.contains('button', 'E2E Testing')
         .should('have.focus')
-        .type('{enter}')
+        .realPress('Enter')
 
         cy.contains('h1', 'Project Setup')
         cy.findByRole('button', { name: 'Back' }).click()
@@ -249,9 +249,9 @@ describe('Launchpad: Setup Project', () => {
         // @ts-ignore
         cy.get('body').tab().tab()
 
-        cy.get('[data-cy-testingtype="e2e"]')
+        cy.contains('button', 'E2E Testing')
         .should('have.focus')
-        .type('{enter}')
+        .realPress('Enter')
 
         cy.contains('h1', 'Project Setup')
         cy.findByRole('button', { name: 'JavaScript' }).click()
@@ -282,9 +282,9 @@ describe('Launchpad: Setup Project', () => {
         // @ts-ignore
         cy.get('body').tab().tab()
 
-        cy.get('[data-cy-testingtype="e2e"]')
+        cy.contains('button', 'E2E Testing')
         .should('have.focus')
-        .type('{enter}')
+        .realPress('Enter')
 
         cy.contains('h1', 'Project Setup')
         cy.findByRole('button', { name: 'TypeScript' }).click()
@@ -309,9 +309,9 @@ describe('Launchpad: Setup Project', () => {
         // @ts-ignore
         cy.get('body').tab().tab()
 
-        cy.get('[data-cy-testingtype="e2e"]')
+        cy.contains('button', 'E2E Testing')
         .should('have.focus')
-        .type('{enter}')
+        .realPress('Enter')
 
         cy.contains('h1', 'Project Setup')
         cy.findByRole('button', { name: 'TypeScript' }).click()
@@ -336,10 +336,9 @@ describe('Launchpad: Setup Project', () => {
 
         verifyWelcomePage({ e2eIsConfigured: true, ctIsConfigured: false })
 
-        cy.get('[data-cy-testingtype="component"]')
+        cy.contains('button', 'Component Testing')
         .focus()
-        .should('have.focus')
-        .type('{enter}')
+        .realPress('Enter')
 
         cy.findByText('Confirm the front-end framework and bundler used in your project.')
 
@@ -604,10 +603,9 @@ describe('Launchpad: Setup Project', () => {
 
         verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: false })
 
-        cy.get('[data-cy-testingtype="component"]')
+        cy.contains('button', 'Component Testing')
         .focus()
-        .should('have.focus')
-        .type('{enter}')
+        .realPress('Enter')
 
         cy.findByText('Confirm the front-end framework and bundler used in your project.')
 
@@ -657,10 +655,9 @@ describe('Launchpad: Setup Project', () => {
 
         verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: false })
 
-        cy.get('[data-cy-testingtype="component"]')
+        cy.contains('button', 'Component Testing')
         .focus()
-        .should('have.focus')
-        .type('{enter}')
+        .realPress('Enter')
 
         cy.findByText('Confirm the front-end framework and bundler used in your project.')
 

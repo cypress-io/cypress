@@ -1,6 +1,6 @@
 <template>
   <div
-    class="sticky top-0 flex items-center justify-between bg-white rounded-t border-b-1px border-b-gray-100 min-h-56px px-24px z-1"
+    class="bg-white rounded-t flex border-b-1px border-b-gray-100 min-h-56px px-24px top-0 z-1 sticky items-center justify-between"
   >
     <div>
       <DialogTitle class="text-gray-900 text-18px inline-block">
@@ -8,22 +8,22 @@
       </DialogTitle>
       <span
         v-if="helpLink.length"
-        class="inline-block border-t border-t-gray-100 w-32px h-6px mx-8px"
+        class="border-t border-t-gray-100 h-6px mx-8px w-32px inline-block"
       /> <ExternalLink
         v-if="helpLink.length"
         :href="helpLink"
-        class="text-indigo-500 group outline-transparent text-16px"
+        class="outline-transparent text-indigo-500 text-16px group"
       >
         <span class="group-hocus:underline">{{ helpText }}</span>
-        <i-cy-circle-bg-question-mark_x16 class="relative inline-block icon-dark-indigo-500 icon-light-indigo-100 -top-2px ml-8px" />
+        <i-cy-circle-bg-question-mark_x16 class="ml-8px -top-2px relative inline-block icon-dark-indigo-500 icon-light-indigo-100" />
       </ExternalLink>
     </div>
     <button
-      aria-label="Close"
-      class="border-transparent rounded-full p-5px border-1 hover:border-indigo-300 hocus-default"
+      :aria-label="t(`actions.close`)"
+      class="border-transparent rounded-full border-1 p-5px hocus-default hover:border-indigo-300"
       @click="$emit('close')"
     >
-      <i-cy-delete_x12 class="icon-dark-gray-400 w-12px h-12px m-4px" />
+      <i-cy-delete_x12 class="h-12px m-4px w-12px icon-dark-gray-400" />
     </button>
   </div>
 </template>
@@ -31,6 +31,9 @@
 <script lang="ts" setup>
 import { DialogTitle } from '@headlessui/vue'
 import ExternalLink from '../gql-components/ExternalLink.vue'
+import { useI18n } from '@cy/i18n'
+
+const { t } = useI18n()
 
 defineProps<{
   helpLink: string,
