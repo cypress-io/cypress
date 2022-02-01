@@ -1,9 +1,9 @@
 <template>
   <div
     :style="{ width: `${props.width}px` }"
-    class="h-64px grid items-center"
+    class="h-64px mx-16px grid items-center"
   >
-    <div class="flex gap-24px justify-between">
+    <div class="flex gap-12px justify-between">
       <!--
         TODO: Studio. Out of scope for GA.
       <Button
@@ -19,7 +19,7 @@
       <div
         v-if="props.gql.currentTestingType === 'e2e'"
         data-cy="aut-url"
-        class="border rounded flex flex-grow border-1px border-solid-gray-100 h-32px ml-16px align-middle"
+        class="border rounded flex flex-grow border-1px border-solid-gray-100 h-32px align-middle"
       >
         <Button
           data-cy="header-selector"
@@ -50,17 +50,14 @@
         @update:model-value="changeBrowser"
       /> -->
 
-      <SpecRunnerDropdown v-if="browser">
+      <SpecRunnerDropdown v-if="selectedBrowser">
         <template #heading>
-          {{ browser.displayName }}
+          {{ selectedBrowser.displayName }}
         </template>
         <template #default>
-          <li
-            v-for="browserItem in browsers"
-            :key="browserItem.id"
-          >
-            {{ browserItem.displayName }}
-          </li>
+          <VerticalBrowserListItems
+            :gql="props.gql"
+          />
         </template>
       </SpecRunnerDropdown>
       <SpecRunnerDropdown variant="panel">
@@ -117,6 +114,7 @@ import type { AutIframe } from './aut-iframe'
 import { togglePlayground as _togglePlayground } from './utils'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import Button from '@packages/frontend-shared/src/components/Button.vue'
+import VerticalBrowserListItems from '@packages/frontend-shared/src/gql-components/topnav/VerticalBrowserListItems.vue'
 import SpecRunnerDropdown from './SpecRunnerDropdown.vue'
 
 gql`
@@ -128,11 +126,8 @@ fragment SpecRunnerHeader on CurrentProject {
     id
     displayName
   }
-  browsers {
-    id
-    ...SpecRunnerHeader_Browser
-  }
   config
+  ...VerticalBrowserListItems
 }
 `
 
@@ -182,7 +177,7 @@ const togglePlayground = () => _togglePlayground(autIframe)
 const specStore = useSpecStore()
 
 // Have to spread gql props since binding it to v-model causes error when testing
-const browser = ref({ ...props.gql.currentBrowser })
+const selectedBrowser = ref({ ...props.gql.currentBrowser })
 const browsers = computed(() => props.gql.browsers?.slice().map((browser) => ({ ...browser })) ?? [])
 
 function changeBrowser (browser: SpecRunnerHeader_BrowserFragment) {

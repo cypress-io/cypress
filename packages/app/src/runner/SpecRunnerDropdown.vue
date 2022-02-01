@@ -1,10 +1,10 @@
 <template>
   <Popover
-    class="bg-white rounded border-1px border-gray-100 h-32px px-12px relative"
+    class="bg-white rounded border-1px border-gray-100 h-32px relative"
     #="{ open, close }"
   >
     <PopoverButton
-      class="flex-grow h-full group focus:outline-none focus:ring-0"
+      class="border-transparent flex-grow h-full border-1px px-12px group hocus-default"
     >
       <div
         class="flex text-gray-600 gap-8px items-center group-hocus:text-indigo-600"
