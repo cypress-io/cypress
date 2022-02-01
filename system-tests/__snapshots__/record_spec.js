@@ -2639,7 +2639,7 @@ exports['e2e record empty specs succeeds when empty spec file 1'] = `
 `
 
 exports['e2e record misconfiguration errors and exits when no browser found 1'] = `
-The specified browser was not found on your system or is not supported by Cypress: \`browserDoesNotExist\`
+The specified browser was not found on your system or is not supported by Cypress: browserDoesNotExist
 
 Cypress supports the following browsers:
 - chrome

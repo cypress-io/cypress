@@ -8,8 +8,12 @@
     "./../ts/index.d.ts"
   ],
   "compilerOptions": {
-    "types": ["mocha", "node"],
+    "types": [
+      "mocha",
+      "node"
+    ],
     "resolveJsonModule": true,
     "noUnusedLocals": false,
+    "importHelpers": true
   }
 }

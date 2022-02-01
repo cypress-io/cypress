@@ -302,7 +302,8 @@ The error was: Cannot parse as valid JSON
 `
 
 exports['INVALID_CONFIG_OPTION'] = `
-\`test\` is not a valid configuration option,\`foo\` is not a valid configuration option
+\`test\` is not a valid configuration option
+\`foo\` is not a valid configuration option
 
 https://on.cypress.io/configuration
 

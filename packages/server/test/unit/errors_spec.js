@@ -1,14 +1,14 @@
 require('../spec_helper')
 
-const style = require('ansi-styles')
 const chalk = require('chalk')
 const errors = require(`../../lib/errors`)
 const exception = require(`../../lib/exception`)
 const snapshot = require('snap-shot-it')
+const style = require('ansi-styles')
 
 describe('lib/errors', () => {
   beforeEach(() => {
-    return sinon.spy(console, 'log')
+    sinon.stub(console, 'log')
   })
 
   context('.log', () => {
@@ -79,7 +79,7 @@ describe('lib/errors', () => {
 
       expect(console.log).to.be.calledWithMatch('foo/bar/baz')
 
-      expect(console.log).to.be.calledWithMatch('\n', 'details huh')
+      expect(console.log).to.be.calledWithMatch(`\n${ chalk.yellow('details huh')}`)
     })
 
     it('logs err.stack in development', () => {
@@ -182,7 +182,7 @@ describe('lib/errors', () => {
       }
       const text = errors.displayFlags(options, mapping)
 
-      return snapshot('tags and name only', text)
+      return snapshot('tags and name only', text.val)
     })
   })
 })

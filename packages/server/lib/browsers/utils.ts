@@ -7,6 +7,8 @@ import errors from '../errors'
 // @ts-ignore
 import plugins from '../plugins'
 
+const errorsChild = require('../errors-child')
+
 const path = require('path')
 const debug = require('debug')('cypress:server:browsers:utils')
 const getPort = require('get-port')
@@ -139,7 +141,7 @@ function extendLaunchOptionsFromPlugins (launchOptions, pluginConfigResult, opti
   // interface and we need to warn them
   // TODO: remove this logic in >= v5.0.0
   if (pluginConfigResult[0]) {
-    options.onWarning(errors.get(
+    options.onWarning(errorsChild.get(
       'DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS',
     ))
 
