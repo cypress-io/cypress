@@ -76,6 +76,7 @@ fragment EnvironmentSetup on Wizard {
     id
     name
     isSelected
+    isDetected
     type
     category
   }
@@ -83,6 +84,7 @@ fragment EnvironmentSetup on Wizard {
     id
     name
     type
+    isDetected
   }
   language {
     id
@@ -94,6 +96,7 @@ fragment EnvironmentSetup on Wizard {
     id
     name
     type
+    isDetected
   }
 }
 `
