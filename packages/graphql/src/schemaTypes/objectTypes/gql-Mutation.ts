@@ -578,5 +578,20 @@ export const mutation = mutationType({
         return true
       },
     })
+
+    t.field('switchTestingTypeAndRelaunch', {
+      description: 'Switch Testing type and relaunch browser',
+      type: 'Boolean',
+      args: {
+        testingType: nonNull(arg({ type: TestingTypeEnum })),
+      },
+      resolve: async (source, args, ctx) => {
+        ctx.project.setRelaunchBrowser(true)
+        ctx.actions.project.setCurrentTestingType(args.testingType)
+        await ctx.actions.project.reconfigureProject()
+
+        return true
+      },
+    })
   },
 })
