@@ -36,6 +36,14 @@ export interface ProjectApiShape {
   }
 }
 
+type SetSpecsFoundBySpecPattern = {
+  path: string
+  testingType: Cypress.TestingType
+  specPattern?: Cypress.Config['specPattern']
+  ignoreSpecPattern?: Cypress.Config['ignoreSpecPattern']
+  additionalIgnorePattern?: string | string[]
+}
+
 export class ProjectActions {
   constructor (private ctx: DataContext) {}
 
@@ -397,20 +405,18 @@ export class ProjectActions {
 
     const cfg = this.ctx.project.getConfig()
 
-    if (cfg) {
-      const toArray = (v: string | string[] | undefined) => Array.isArray(v) ? v : v ? [v] : undefined
-
+    if (cfg && this.ctx.currentProject) {
       const testingType = (codeGenType === 'component' || codeGenType === 'story') ? 'component' : 'e2e'
 
-      const specPattern = toArray(cfg[testingType]?.specPattern)
-      const ignoreSpecPattern = toArray(cfg[testingType]?.ignoreSpecPattern) ?? []
-      const additionalIgnore = toArray(testingType === 'component' ? cfg?.e2e?.specPattern : undefined) ?? []
+      const { specs } = await this.setSpecsFoundBySpecPattern({
+        path: this.ctx.currentProject,
+        testingType,
+        specPattern: cfg[testingType]?.specPattern,
+        ignoreSpecPattern: cfg[testingType]?.ignoreSpecPattern,
+        additionalIgnorePattern: testingType === 'component' ? cfg?.e2e?.specPattern : undefined,
+      })
 
-      if (this.ctx.currentProject && specPattern) {
-        const specs = await this.ctx.project.findSpecs(this.ctx.currentProject, testingType, specPattern, ignoreSpecPattern, additionalIgnore)
-
-        this.ctx.project.setSpecs(specs)
-
+      if (specs) {
         if (testingType === 'component') {
           this.api.getDevServer().updateSpecs(specs)
         }
@@ -422,6 +428,33 @@ export class ProjectActions {
       file: { absolute: newSpec.file, contents: newSpec.content },
       description: 'Generated spec',
     }
+  }
+
+  async setSpecsFoundBySpecPattern ({ path, testingType, specPattern, ignoreSpecPattern, additionalIgnorePattern }: SetSpecsFoundBySpecPattern) {
+    const toArray = (val?: string | string[]) => val ? typeof val === 'string' ? [val] : val : undefined
+
+    specPattern = toArray(specPattern)
+
+    ignoreSpecPattern = toArray(ignoreSpecPattern) || []
+
+    // exclude all specs matching e2e if in component testing
+    additionalIgnorePattern = toArray(additionalIgnorePattern) || []
+
+    if (!specPattern) {
+      throw Error('could not find pattern to load specs')
+    }
+
+    const specs = await this.ctx.project.findSpecs(
+      path,
+      testingType,
+      specPattern,
+      ignoreSpecPattern,
+      additionalIgnorePattern,
+    )
+
+    this.ctx.actions.project.setSpecs(specs)
+
+    return { specs, specPattern, ignoreSpecPattern, additionalIgnorePattern }
   }
 
   async reconfigureProject () {
