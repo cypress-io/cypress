@@ -1,7 +1,7 @@
 import globby from 'globby'
 import { MIGRATION_STEPS } from '@packages/types'
 import path from 'path'
-import { getSpecs, OldCypressConfig } from '.'
+import { getSpecs, OldCypressConfig, tryGetDefaultLegacySupportFile } from '.'
 
 function getTestFilesGlobs (config: OldCypressConfig, type: 'component' | 'integration'): string[] {
   // super awkward how we call it integration tests, but the key to override
@@ -99,14 +99,22 @@ export async function shouldShowRenameSupport (projectRoot: string, config: OldC
   let supportFile = config.e2e?.supportFile ?? config.supportFile
 
   if (supportFile === undefined) {
-    const foundDefaultSupportFiles = await globby(`${defaultSupportFile}{ts,js}`, { cwd: projectRoot })
+    const foundDefaultSupportFile = await tryGetDefaultLegacySupportFile(projectRoot)
 
-    if (foundDefaultSupportFiles.length > 0) {
-      supportFile = foundDefaultSupportFiles[0]
+    if (foundDefaultSupportFile) {
+      supportFile = foundDefaultSupportFile
     }
   }
 
-  return supportFile && supportFile.startsWith(defaultSupportFile)
+  // if the support file is set to false, we don't show the rename step
+  // if the support file does not exist (value is undefined), we don't show the rename step
+  if (!supportFile) {
+    return false
+  }
+
+  // if the support file is custom, we don't show the rename step
+  // only if the support file matches the default do we show the rename step
+  return supportFile.startsWith(defaultSupportFile)
 }
 
 // if they have component testing configured, they will need to

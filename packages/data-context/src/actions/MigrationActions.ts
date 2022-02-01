@@ -6,7 +6,7 @@ import {
   NonStandardMigrationError,
   SpecToMove,
   supportFilesForMigration,
-} from '../util'
+} from '../sources'
 
 export class MigrationActions {
   constructor (private ctx: DataContext) { }
