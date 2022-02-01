@@ -582,7 +582,7 @@ const simulatedDefaultKeyMap: { [key: string]: SimulatedDefault } = {
       $selection.replaceSelectionContents(el, '\n')
     }
 
-    options.onEnterPressed && options.onEnterPressed()
+    options.onEnterPressed && options.onEnterPressed(el)
   },
   Delete: (el, key) => {
     key.events.input = $selection.deleteRightOfCursor(el)
