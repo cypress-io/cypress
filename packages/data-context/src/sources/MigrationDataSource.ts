@@ -9,21 +9,18 @@ import {
   supportFilesForMigration,
   OldCypressConfig,
   hasSpecFile,
-} from './migration/utils'
-import {
   getSpecs,
   applyMigrationTransform,
-} from './migration/autoRename'
-import type { FilePart } from './migration/format'
-import {
   getStepsForMigration,
   shouldShowRenameSupport,
   getIntegrationFolder,
   getPluginsFile,
   isDefaultTestFiles,
-  getComponentTestFiles,
+  getComponentTestFilesGlobs,
   getComponentFolder,
-} from './migration/shouldShowSteps'
+} from './migration'
+
+import type { FilePart } from './migration/format'
 
 export interface MigrationFile {
   testingType: TestingType
@@ -109,7 +106,7 @@ export class MigrationDataSource {
       const { status, watcher } = await initComponentTestingMigration(
         this.ctx.currentProject,
         componentFolder,
-        getComponentTestFiles(config),
+        getComponentTestFilesGlobs(config),
         onFileMoved,
       )
 
@@ -235,7 +232,7 @@ export class MigrationDataSource {
 
     this.hasCustomComponentFolder = componentFolder !== 'cypress/component'
 
-    const componentTestFiles = getComponentTestFiles(config)
+    const componentTestFiles = getComponentTestFilesGlobs(config)
 
     this.hasCustomComponentTestFiles = !isDefaultTestFiles(config, 'component')
 

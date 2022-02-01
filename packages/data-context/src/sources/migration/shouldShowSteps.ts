@@ -1,10 +1,9 @@
 import globby from 'globby'
 import { MIGRATION_STEPS } from '@packages/types'
-import type { OldCypressConfig } from '../../util'
 import path from 'path'
-import { getSpecs } from '.'
+import { getSpecs, OldCypressConfig } from '.'
 
-function getTestFiles (config: OldCypressConfig, type: 'component' | 'integration'): string[] {
+function getTestFilesGlobs (config: OldCypressConfig, type: 'component' | 'integration'): string[] {
   // super awkward how we call it integration tests, but the key to override
   // the config is `e2e`
   const k = type === 'component' ? 'component' : 'e2e'
@@ -22,18 +21,18 @@ function getTestFiles (config: OldCypressConfig, type: 'component' | 'integratio
   return ['**/*']
 }
 
-export function getIntegrationTestFiles (config: OldCypressConfig): string[] {
-  return getTestFiles(config, 'integration')
+export function getIntegrationTestFilesGlobs (config: OldCypressConfig): string[] {
+  return getTestFilesGlobs(config, 'integration')
 }
 
-export function getComponentTestFiles (config: OldCypressConfig): string[] {
-  return getTestFiles(config, 'component')
+export function getComponentTestFilesGlobs (config: OldCypressConfig): string[] {
+  return getTestFilesGlobs(config, 'component')
 }
 
 export function isDefaultTestFiles (config: OldCypressConfig, type: 'component' | 'integration') {
   const testFiles = type === 'component'
-    ? getComponentTestFiles(config)
-    : getIntegrationTestFiles(config)
+    ? getComponentTestFilesGlobs(config)
+    : getIntegrationTestFilesGlobs(config)
 
   return testFiles.length === 1 && testFiles[0] === '**/*'
 }
@@ -81,7 +80,7 @@ async function anyIntegrationSpecsExist (projectRoot: string, config: OldCypress
     return false
   }
 
-  const integrationTestFiles = getIntegrationTestFiles(config)
+  const integrationTestFiles = getIntegrationTestFilesGlobs(config)
 
   return hasSpecFiles(projectRoot, integrationFolder, integrationTestFiles)
 }
@@ -119,7 +118,7 @@ function shouldShowRenameManual (projectRoot: string, config: OldCypressConfig) 
     return false
   }
 
-  const componentTestFiles = getComponentTestFiles(config)
+  const componentTestFiles = getComponentTestFilesGlobs(config)
 
   return hasSpecFiles(projectRoot, componentFolder, componentTestFiles)
 }
