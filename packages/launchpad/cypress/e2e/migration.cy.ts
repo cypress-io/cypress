@@ -54,17 +54,17 @@ function runAutoRename () {
   cy.get('button').contains('Rename these specs for me').click()
 }
 
-function renameSupport () {
+function renameSupport (lang: 'js' | 'ts' = 'js') {
   cy.contains(`Rename the support file for me`).click()
 
   // give to to finish the file rename
   cy.wait(200)
 
-  cy.withCtx(async (ctx) => {
+  cy.withCtx(async (ctx, { lang }) => {
     expect(
-      await ctx.actions.file.checkIfFileExists(ctx.path.join('cypress', 'support', 'e2e.js')),
+      await ctx.actions.file.checkIfFileExists(ctx.path.join('cypress', 'support', `e2e.${lang}`)), 'support file not renamed',
     ).not.to.be.null
-  })
+  }, { lang })
 }
 
 describe('Full migration flow for each project', () => {
@@ -209,7 +209,6 @@ describe('Full migration flow for each project', () => {
     // default testFiles but custom integration - can rename automatically
     cy.get(renameAutoStep).should('exist')
     // no CT
-    cy.pause()
     cy.get(renameManualStep).should('not.exist')
     // supportFile is false - cannot migrate
     cy.get(renameSupportStep).should('exist')
@@ -313,15 +312,15 @@ describe('Full migration flow for each project', () => {
     runAutoRename()
 
     cy.wait(100)
-    cy.withCtx((ctx) => {
+    cy.withCtx(async (ctx) => {
       ['cypress/e2e/foo.cy.js'].forEach(async (spec) => {
         const stats = await ctx.actions.file.checkIfFileExists(ctx.path.join(spec))
 
-        expect(stats).to.not.be.null
+        expect(stats, `spec file not renamed ${spec}`).to.not.be.null
       })
     })
 
-    renameSupport()
+    renameSupport('ts')
     migrateAndVerifyConfig()
   })
 

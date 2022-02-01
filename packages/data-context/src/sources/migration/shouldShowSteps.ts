@@ -1,10 +1,9 @@
 import globby from 'globby'
 import { MIGRATION_STEPS } from '@packages/types'
-import { OldCypressConfig, tryGetDefaultLegacySupportFile } from '../../util'
 import path from 'path'
-import { getSpecs } from '.'
+import { getSpecs, OldCypressConfig, tryGetDefaultLegacySupportFile } from '.'
 
-function getTestFiles (config: OldCypressConfig, type: 'component' | 'integration'): string[] {
+function getTestFilesGlobs (config: OldCypressConfig, type: 'component' | 'integration'): string[] {
   // super awkward how we call it integration tests, but the key to override
   // the config is `e2e`
   const k = type === 'component' ? 'component' : 'e2e'
@@ -22,18 +21,18 @@ function getTestFiles (config: OldCypressConfig, type: 'component' | 'integratio
   return ['**/*']
 }
 
-export function getIntegrationTestFiles (config: OldCypressConfig): string[] {
-  return getTestFiles(config, 'integration')
+export function getIntegrationTestFilesGlobs (config: OldCypressConfig): string[] {
+  return getTestFilesGlobs(config, 'integration')
 }
 
-export function getComponentTestFiles (config: OldCypressConfig): string[] {
-  return getTestFiles(config, 'component')
+export function getComponentTestFilesGlobs (config: OldCypressConfig): string[] {
+  return getTestFilesGlobs(config, 'component')
 }
 
 export function isDefaultTestFiles (config: OldCypressConfig, type: 'component' | 'integration') {
   const testFiles = type === 'component'
-    ? getComponentTestFiles(config)
-    : getIntegrationTestFiles(config)
+    ? getComponentTestFilesGlobs(config)
+    : getIntegrationTestFilesGlobs(config)
 
   return testFiles.length === 1 && testFiles[0] === '**/*'
 }
@@ -81,7 +80,7 @@ async function anyIntegrationSpecsExist (projectRoot: string, config: OldCypress
     return false
   }
 
-  const integrationTestFiles = getIntegrationTestFiles(config)
+  const integrationTestFiles = getIntegrationTestFilesGlobs(config)
 
   return hasSpecFiles(projectRoot, integrationFolder, integrationTestFiles)
 }
@@ -96,20 +95,14 @@ export async function shouldShowRenameSupport (projectRoot: string, config: OldC
     return false
   }
 
-  // if they do not have a supportFile specified in cypress.json AND
-  // no default is present, skip this step.
-  if (
-    (config.e2e?.supportFile ?? undefined) === undefined &&
-    config.supportFile === undefined &&
-    !await tryGetDefaultLegacySupportFile(projectRoot)
-  ) {
-    return false
+  const defaultSupportFile = 'cypress/support/index.'
+  let supportFile = config.e2e?.supportFile ?? config.supportFile
+
+  if (supportFile === undefined) {
+    supportFile = await tryGetDefaultLegacySupportFile(projectRoot)
   }
 
-  const defaultSupportFile = 'cypress/support/index.js'
-  const supportFile = config.e2e?.supportFile ?? config.supportFile ?? defaultSupportFile
-
-  return supportFile === defaultSupportFile
+  return supportFile && supportFile.startsWith(defaultSupportFile)
 }
 
 // if they have component testing configured, they will need to
@@ -121,7 +114,7 @@ function shouldShowRenameManual (projectRoot: string, config: OldCypressConfig) 
     return false
   }
 
-  const componentTestFiles = getComponentTestFiles(config)
+  const componentTestFiles = getComponentTestFilesGlobs(config)
 
   return hasSpecFiles(projectRoot, componentFolder, componentTestFiles)
 }

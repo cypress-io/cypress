@@ -1,16 +1,17 @@
-import { FilePart, formatMigrationFile, OldCypressConfig } from '../../util'
 import globby from 'globby'
-import {
-  getComponentFolder,
-  getComponentTestFiles,
-  getIntegrationFolder,
-  getIntegrationTestFiles,
-  isDefaultTestFiles,
-} from '.'
-import { regexps } from './regexps'
-import type { MigrationFile } from '../MigrationDataSource'
 import path from 'path'
 import type { TestingType } from '@packages/types'
+import {
+  FilePart,
+  formatMigrationFile,
+  getComponentFolder,
+  getComponentTestFilesGlobs,
+  getIntegrationFolder,
+  getIntegrationTestFilesGlobs,
+  isDefaultTestFiles,
+  regexps,
+} from '.'
+import type { MigrationFile } from '../MigrationDataSource'
 
 export interface MigrationSpec {
   relative: string
@@ -93,10 +94,10 @@ export function applyMigrationTransform (
 
 export async function getSpecs (projectRoot: string, config: OldCypressConfig): Promise<GetSpecs> {
   const integrationFolder = getIntegrationFolder(config)
-  const integrationTestFiles = getIntegrationTestFiles(config)
+  const integrationTestFiles = getIntegrationTestFilesGlobs(config)
 
   const componentFolder = getComponentFolder(config)
-  const componentTestFiles = getComponentTestFiles(config)
+  const componentTestFiles = getComponentTestFilesGlobs(config)
 
   let integrationSpecs: MigrationSpec[] = []
   let componentSpecs: MigrationSpec[] = []
