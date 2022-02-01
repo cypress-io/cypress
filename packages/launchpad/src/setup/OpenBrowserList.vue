@@ -21,27 +21,35 @@
           class="rounded border-1 text-center min-h-144px pt-6 pb-4 w-160px relative block radio-label"
           :class="{
             'border-jade-300 ring-2 ring-jade-100 focus:border-jade-400 focus:border-1 focus:outline-none': checked,
-            'filter grayscale bg-gray-50 before:hocus:cursor-not-allowed': browser.disabled,
+            'bg-gray-50 before:hocus:cursor-not-allowed': browser.disabled,
             'filter grayscale border-gray-200': (isBrowserOpening || isBrowserOpen) && !checked,
             'border-gray-200 before:hocus:cursor-pointer hover:border-indigo-300 hover:ring-2 hover:ring-indigo-100': !browser.disabled && !checked && !(isBrowserOpening || isBrowserOpen)
           }"
         >
-          <div
+          <TempTooltip
             v-if="!browser.isVersionSupported"
             class="top-0 right-0 absolute"
           >
             <i-cy-circle-bg-question-mark_x16 class="mt-4px mr-8px relative inline-block icon-dark-gray-700 icon-light-gray-200" />
-          </div>
+            <template #popper>
+              <div>
+                <div class="font-medium text-white mb-2">
+                  Unsupported browser
+                </div>
+                {{ browser.warning }}
+              </div>
+            </template>
+          </TempTooltip>
           <div class="text-center">
             <img
               :src="allBrowsersIcons[browser.displayName] || allBrowsersIcons.generic"
               alt=""
-              class="h-40px w-40px inline"
+              class="h-40px w-40px filter grayscale inline"
             >
           </div>
           <div
             class="pt-2 text-indigo-600 text-18px leading-28px"
-            :class="{ 'text-jade-600': browser.isSelected }"
+            :class="{ 'text-jade-600': browser.isSelected, 'text-gray-500': browser.disabled }"
           >
             {{ browser.displayName }}
           </div>
@@ -149,6 +157,7 @@ import ArrowLeftIcon from '~icons/cy/arrow-left_x16'
 import StatusRunningIcon from '~icons/cy/status-running_x16'
 import TestingTypeE2E from '~icons/cy/testing-type-e2e_x24'
 import { RadioGroup, RadioGroupOption, RadioGroupLabel } from '@headlessui/vue'
+import TempTooltip from './TempTooltip.vue'
 
 import { OpenBrowserListFragment, OpenBrowserList_SetBrowserDocument } from '../generated/graphql'
 
