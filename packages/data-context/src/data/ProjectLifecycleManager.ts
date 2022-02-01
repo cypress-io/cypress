@@ -318,7 +318,7 @@ export class ProjectLifecycleManager {
    * processes and load the config / initialize the plugin process associated
    * with the chosen testing type.
    */
-  setCurrentTestingType (testingType: TestingType | null) {
+  async setCurrentTestingType (testingType: TestingType | null) {
     this.ctx.update((d) => {
       d.currentTestingType = testingType
     })
@@ -336,6 +336,9 @@ export class ProjectLifecycleManager {
 
     if (this.isTestingTypeConfigured(testingType)) {
       this.loadTestingType()
+    } else {
+      debug('testing type not configured, starting the wizard')
+      this.ctx.actions.wizard.init()
     }
   }
 

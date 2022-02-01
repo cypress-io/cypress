@@ -75,7 +75,7 @@ export class MigrationActions {
     this.ctx.lifecycleManager.initializeConfigWatchers()
     this.ctx.lifecycleManager.refreshMetaState()
     if (type) {
-      this.ctx.lifecycleManager.setCurrentTestingType(type)
+      await this.ctx.lifecycleManager.setCurrentTestingType(type)
     }
   }
 

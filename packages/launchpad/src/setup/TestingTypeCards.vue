@@ -32,6 +32,7 @@ mutation TestingTypeSelection($testingType: TestingTypeEnum!) {
       isLoadingConfigFile
       isLoadingNodeEvents
     }
+    ...Wizard
   }
 }
 `

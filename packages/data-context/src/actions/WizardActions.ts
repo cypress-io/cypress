@@ -68,9 +68,9 @@ export class WizardActions {
     return this.data
   }
 
-  async init () {
+  init () {
     if (this.ctx.currentProject) {
-      const packageJson = await this.ctx.fs.readJson(join(this.ctx.currentProject, 'package.json')) as {
+      const packageJson = this.ctx.fs.readJsonSync(join(this.ctx.currentProject, 'package.json')) as {
         dependencies: { [key: string]: string }
         devDependencies: { [key: string]: string }
       }
