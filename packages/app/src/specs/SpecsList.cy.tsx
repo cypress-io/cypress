@@ -28,9 +28,7 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
 
       cy.mountFragment(Specs_SpecsListFragmentDoc, {
         onResult: (ctx) => {
-          if (!specs.length) {
-            specs = ctx.currentProject?.specs || []
-          }
+          specs = ctx.currentProject?.specs || []
 
           return ctx
         },
