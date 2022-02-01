@@ -1,4 +1,4 @@
-## Migration E2E Defaults
+## Migration E2E No Plugins No Support
 
 An e2e project without `plugins/index.js` or `support/index.js`. As unlikely as this is, we need to handle this case.
 
