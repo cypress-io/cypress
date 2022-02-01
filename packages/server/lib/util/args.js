@@ -204,6 +204,118 @@ const sanitizeAndConvertNestedArgs = (str, argname) => {
   }
 }
 
+/**
+ * Parses the '--spec' cli parameter to return an array of valid patterns.
+ *
+ * @param {Strng} pattern pattern to parse
+ * @returns Array of patterns
+ */
+const parseSpecArgv = (pattern) => {
+  const TOKENS = {
+    OPEN: ['{', '['],
+    CLOSE: ['}', ']'],
+  }
+  const hasToken = [...TOKENS.OPEN, ...TOKENS.CLOSE].some((t) => {
+    return pattern.includes(t)
+  })
+  const hasComma = pattern.includes(',')
+
+  /**
+   * Slice and mutate a string.
+   *
+   * @param {String} str String to slice & mutate
+   * @param {Number} end Index to slice to
+   * @returns [String, String, Number]
+   */
+  const sliceAndMutate = (str, end) => {
+    return [
+      str.slice(0, end),
+      str.substring(end, str.length),
+      str.slice(0, end).length,
+    ]
+  }
+
+  /**
+   * Sanitizes a path's leftover commas.
+   *
+   * @param {String} path
+   * @returns String
+   */
+  const sanitizeFinalPath = (path) => {
+    return path.split('')[0] === ',' ? path.substring(1, path.length) : path
+  }
+
+  if (!hasToken) {
+    return [].concat(pattern.split(','))
+  }
+
+  if (!hasComma) {
+    return [pattern]
+  }
+
+  // Get comma rules.
+  let opens = []
+  let closes = []
+  const rules = pattern
+  .split('')
+  .map((token, index) => {
+    if (TOKENS.OPEN.includes(token)) {
+      opens.push(index)
+    }
+
+    if (TOKENS.CLOSE.includes(token)) {
+      closes.push(index)
+    }
+
+    if (token === ',') {
+      const isBreakable =
+          index > opens[opens.length - 1] &&
+          index > closes[closes.length - 1] &&
+          opens.length === closes.length
+
+      if (isBreakable) {
+        return {
+          comma: index,
+          isBreakable: true,
+        }
+      }
+
+      return {
+        comma: index,
+        isBreakable: false,
+      }
+    }
+
+    return null
+  })
+  .filter(Boolean)
+
+  // Perform comma breaking logic.
+  let carry = pattern
+  let offset = 0
+  const partial = rules
+  .map((rule) => {
+    if (!rule.isBreakable) {
+      return null
+    }
+
+    const [res, mutated, offsettedBy] = sliceAndMutate(
+      carry,
+      rule.comma - offset,
+    )
+
+    offset = offsettedBy
+    carry = mutated
+
+    return res
+  })
+  .filter(Boolean)
+  .map(sanitizeFinalPath)
+
+  // In the end, carry will be left with the last path that hasn't been cut.
+  return [...partial, sanitizeFinalPath(carry)]
+}
+
 module.exports = {
   normalizeBackslashes,
 
@@ -303,12 +415,12 @@ module.exports = {
             spec = spec.substring(1, spec.length - 1)
           }
 
-          options.spec = strToArray(spec).map(resolvePath)
+          options.spec = parseSpecArgv(spec).map(resolvePath)
         } else {
           options.spec = spec.map(resolvePath)
         }
       } catch (err) {
-        debug('could not pass config spec value %s', spec)
+        debug('could not parse config spec value %s', spec)
         debug('error %o', err)
 
         return errors.throw('COULD_NOT_PARSE_ARGUMENTS', 'spec', spec, 'spec must be a string or comma-separated list')

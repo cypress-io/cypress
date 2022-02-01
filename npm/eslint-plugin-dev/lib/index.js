@@ -269,6 +269,7 @@ module.exports = {
           rules: {
             'no-undef': 'off',
             'no-unused-vars': 'off',
+            'indent': 'off',
             '@typescript-eslint/no-unused-vars': [
               'error',
               {
@@ -288,6 +289,15 @@ module.exports = {
                 'singleline': {
                   'delimiter': 'comma',
                 },
+              },
+            ],
+            '@typescript-eslint/indent': [
+              'error',
+              2,
+              {
+                'ignoredNodes': ['TemplateLiteral', 'TSTypeParameterInstantiation'],
+                'SwitchCase': 1,
+                'MemberExpression': 0,
               },
             ],
           },
