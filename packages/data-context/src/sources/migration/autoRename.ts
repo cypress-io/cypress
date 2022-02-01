@@ -9,6 +9,7 @@ import {
   getIntegrationFolder,
   getIntegrationTestFilesGlobs,
   isDefaultTestFiles,
+  OldCypressConfig,
   regexps,
 } from '.'
 import type { MigrationFile } from '../MigrationDataSource'

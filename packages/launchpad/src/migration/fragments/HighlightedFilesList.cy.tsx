@@ -1,5 +1,5 @@
 import HighlightedFilesList from './HighlightedFilesList.vue'
-import { FilePart, formatMigrationFile } from '@packages/data-context/src/util/migrationFormat'
+import { FilePart, formatMigrationFile } from '@packages/data-context/src/sources/migration'
 import { regexps } from '@packages/data-context/src/sources/migration/regexps'
 
 describe('<HighlightedFilesList/>', { viewportWidth: 1119 }, () => {
