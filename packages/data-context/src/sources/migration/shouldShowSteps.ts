@@ -114,7 +114,7 @@ export async function shouldShowRenameSupport (projectRoot: string, config: OldC
 
   // if the support file is custom, we don't show the rename step
   // only if the support file matches the default do we show the rename step
-  return supportFile.startsWith(defaultSupportFile)
+  return supportFile.includes(defaultSupportFile)
 }
 
 // if they have component testing configured, they will need to
