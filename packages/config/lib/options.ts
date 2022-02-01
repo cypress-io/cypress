@@ -563,7 +563,7 @@ export const testingTypeBreakingOptions: { e2e: Array<BreakingOption>, component
   component: [
     {
       name: 'baseUrl',
-      errorKey: 'BASE_URL_ROOT_NOT_SUPPORTED',
+      errorKey: 'BASE_URL_CT_NOT_SUPPORTED',
       isWarning: false,
     },
   ],

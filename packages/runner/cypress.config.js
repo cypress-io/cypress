@@ -1,6 +1,5 @@
 module.exports = {
   'projectId': 'ypt4pf',
-  'baseUrl': 'http://localhost:3500',
   'retries': {
     'runMode': 2,
     'openMode': 0,
@@ -10,6 +9,7 @@ module.exports = {
     'configFile': '../../mocha-reporter-config.json',
   },
   'e2e': {
+    'baseUrl': 'http://localhost:3500',
     'setupNodeEvents': require('./cypress/plugins'),
   },
 }

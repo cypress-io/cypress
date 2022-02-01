@@ -64,7 +64,7 @@ describe('lib/config', () => {
       sinon.stub(ctx.lifecycleManager, 'verifyProjectRoot').returns(undefined)
 
       this.setup = (cypressJson = {}, cypressEnvJson = {}) => {
-        sinon.stub(ctx.lifecycleManager, 'getConfigFileContents').resolves({ ...cypressJson, e2e: cypressJson.e2e ?? { supportFile: false } })
+        sinon.stub(ctx.lifecycleManager, 'getConfigFileContents').resolves({ ...cypressJson, e2e: { supportFile: false, ...cypressJson.e2e } })
         sinon.stub(ctx.lifecycleManager, 'loadCypressEnvFile').resolves(cypressEnvJson)
       }
     })
@@ -188,27 +188,33 @@ describe('lib/config', () => {
 
       context('baseUrl', () => {
         it('passes if begins with http://', function () {
-          this.setup({ baseUrl: 'http://example.com' })
+          this.setup({ e2e: { baseUrl: 'http://example.com' } })
 
           return this.expectValidationPasses()
         })
 
         it('passes if begins with https://', function () {
-          this.setup({ baseUrl: 'https://example.com' })
+          this.setup({ e2e: { baseUrl: 'https://example.com' } })
 
           return this.expectValidationPasses()
         })
 
         it('fails if not a string', function () {
-          this.setup({ baseUrl: false })
+          this.setup({ e2e: { baseUrl: false } })
 
           return this.expectValidationFails('be a fully qualified URL')
         })
 
         it('fails if not a fully qualified url', function () {
-          this.setup({ baseUrl: 'localhost' })
+          this.setup({ e2e: { baseUrl: 'localhost' } })
 
           return this.expectValidationFails('be a fully qualified URL')
+        })
+
+        it('fails if it is set on root level', function () {
+          this.setup({ baseUrl: 'localhost' })
+
+          return this.expectValidationFails('Please update this option under e2e testing type property')
         })
       })
 
