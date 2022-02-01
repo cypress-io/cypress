@@ -19,19 +19,19 @@
       <div
         v-if="props.gql.currentTestingType === 'e2e'"
         data-cy="aut-url"
-        class="border rounded flex flex-grow border-1px border-solid-gray-100 h-32px align-middle"
+        class="border rounded flex flex-grow border-1px border-gray-100 h-32px align-middle"
       >
         <Button
           data-cy="header-selector"
           :disabled="isDisabled"
-          class="rounded-none border-r-1px border-solid-gray-100 mr-12px"
+          class="rounded-none border-r-1px border-gray-100 mr-12px "
           variant="text"
           @click="togglePlayground"
         >
           <i-cy-crosshairs_x16 class="icon-dark-gray-600" />
         </Button>
         <div
-          class="grid items-center"
+          class="grid text-gray-600 items-center whitespace-nowrap"
           :class="{
             'bg-yellow-50': autStore.isLoadingUrl,
             'bg-white': !autStore.isLoadingUrl,
@@ -50,36 +50,43 @@
         @update:model-value="changeBrowser"
       /> -->
 
-      <SpecRunnerDropdown v-if="selectedBrowser">
+      <SpecRunnerDropdown v-if="selectedBrowser?.displayName">
         <template #heading>
-          {{ selectedBrowser.displayName }}
+          <img
+            class="min-w-16px w-16px"
+            :src="allBrowsersIcons[selectedBrowser.displayName]"
+          > {{ selectedBrowser.displayName }}
         </template>
+
         <template #default>
-          <VerticalBrowserListItems
-            :gql="props.gql"
-          />
+          <ul class="max-h-50vh overflow-auto">
+            <VerticalBrowserListItems
+              :gql="props.gql"
+            />
+          </ul>
         </template>
       </SpecRunnerDropdown>
       <SpecRunnerDropdown variant="panel">
         <template #heading>
-          Viewport
+          <i-cy-ruler_x16 class="icon-dark-gray-500 icon-light-gray-400" />
+          <span class="text-14px whitespace-nowrap">{{ autStore.viewportWidth }}x{{ autStore.viewportHeight }}</span>
         </template>
         <template #default>
-          <div class="max-w-400px p-16px">
-            <p>
+          <div class="max-h-50vw p-16px text-gray-700 w-400px overflow-auto">
+            <p class="mb-16px">
               The
               <strong>viewport</strong> determines the width and height of your application. By default the viewport will be
-              <strong>{` ${defaults.width}`}px</strong> by
-              <strong>{` ${defaults.height}`}px</strong>
-              unless specified by a
-              {' '}
-              <code>cy.viewport</code> command.
+              <strong>{{ autStore.viewportWidth }}px</strong> by
+              <strong>{{ autStore.viewportHeight }}px</strong>
+              unless specified by a <InlineCodeFragment>cy.viewport</InlineCodeFragment> command.
             </p>
-            <p>Additionally you can override the default viewport dimensions by specifying these values in your {configFileFormatted(config.configFile)}.</p>
+            <p class="mb-16px">
+              Additionally you can override the default viewport dimensions by specifying these values in your config file.
+            </p>
             <pre>
-            {
-  "viewportWidth": ${defaults.width},
-  "viewportHeight": ${defaults.height}
+{
+  "viewportWidth": {{ autStore.viewportWidth }},
+  "viewportHeight": {{ autStore.viewportHeight }}
 }
           </pre>
             <p>
@@ -117,7 +124,9 @@ import { togglePlayground as _togglePlayground } from './utils'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import Button from '@packages/frontend-shared/src/components/Button.vue'
 import VerticalBrowserListItems from '@packages/frontend-shared/src/gql-components/topnav/VerticalBrowserListItems.vue'
+import InlineCodeFragment from '@packages/frontend-shared/src/components/InlineCodeFragment.vue'
 import SpecRunnerDropdown from './SpecRunnerDropdown.vue'
+import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
 
 gql`
 fragment SpecRunnerHeader on CurrentProject {
@@ -180,17 +189,6 @@ const specStore = useSpecStore()
 
 // Have to spread gql props since binding it to v-model causes error when testing
 const selectedBrowser = ref({ ...props.gql.currentBrowser })
-const browsers = computed(() => props.gql.browsers?.slice().map((browser) => ({ ...browser })) ?? [])
-
-function changeBrowser (browser: SpecRunnerHeader_BrowserFragment) {
-  const activeSpec = specStore.activeSpec
-
-  if (props.gql.currentBrowser?.id === browser.id || !activeSpec) {
-    return
-  }
-
-  setBrowser.executeMutation({ browserId: browser.id, specPath: activeSpec.absolute })
-}
 
 const autStore = useAutStore()
 
