@@ -10,14 +10,14 @@
   >
     <TestingTypePicker
       :gql="props.gql"
-      @pick="reconfigure"
+      @pick="switchAndRelaunchFn"
     />
   </StandardModal>
 </template>
 
 <script lang="ts" setup>
 import { gql, useMutation } from '@urql/vue'
-import { SwitchTestingType_ReconfigureProjectDocument, SwitchTestingTypeModalFragment } from '../generated/graphql'
+import { SwitchTestingTypeAndRelaunchDocument, SwitchTestingTypeModalFragment } from '../generated/graphql'
 import StandardModal from '@cy/components/StandardModal.vue'
 import TestingTypePicker from '@cy/gql-components/TestingTypePicker.vue'
 import { useI18n } from '@cy/i18n'
@@ -31,11 +31,8 @@ fragment SwitchTestingTypeModal on Query {
 `
 
 gql`
-mutation SwitchTestingType_ReconfigureProject($testingType: TestingTypeEnum!) {
-  setCurrentTestingType(testingType: $testingType) {
-    currentTestingType
-  }
-  reconfigureProject
+mutation SwitchTestingTypeAndRelaunch($testingType: TestingTypeEnum!) {
+  switchTestingTypeAndRelaunch(testingType: $testingType)
 }
 `
 
@@ -48,9 +45,9 @@ const emits = defineEmits<{
   (eventName: 'close'): void
 }>()
 
-const openElectron = useMutation(SwitchTestingType_ReconfigureProjectDocument)
+const switchAndRelaunch = useMutation(SwitchTestingTypeAndRelaunchDocument)
 
-function reconfigure (testingType: 'component' | 'e2e') {
-  openElectron.executeMutation({ testingType })
+function switchAndRelaunchFn (testingType: 'component' | 'e2e') {
+  switchAndRelaunch.executeMutation({ testingType })
 }
 </script>

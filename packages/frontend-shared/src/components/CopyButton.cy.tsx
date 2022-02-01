@@ -1,6 +1,6 @@
 import CopyButton from './CopyButton.vue'
 
-describe('<CopyButton />', { viewportHeight: 450, viewportWidth: 350 }, () => {
+describe('<CopyButton />', { viewportHeight: 80, viewportWidth: 120 }, () => {
   it('copies text to clipboard', () => {
     cy.mount(() => (<>
       <CopyButton text="Foobar" />
@@ -11,8 +11,9 @@ describe('<CopyButton />', { viewportHeight: 450, viewportWidth: 350 }, () => {
     .get('svg')
     .should('exist')
 
-    // This button is broken on Firefox, but works properly on Chromium/Chrome/Electron
-    // TODO: Add assertions about actually clicking the button.
+    // TODO: UNIFY-999 Solve "write permission denied" error to test this in run mode
+    // cy.findByRole('button', { name: 'Copy' }).realClick()
+    // cy.findByRole('button', { name: 'Copied!' }).should('be.visible')
   })
 
   it('noIcon hides the icon', () => {
