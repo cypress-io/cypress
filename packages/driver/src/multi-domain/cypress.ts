@@ -84,7 +84,7 @@ const onBeforeAppWindowLoad = (Cypress: Cypress.Cypress, cy: $Cy) => (autWindow:
   cy.overrides.wrapNativeMethods(autWindow)
   // TODO: DRY this up with the mostly-the-same code in src/cypress/cy.js
   bindToListeners(autWindow, {
-    onError: handleErrorEvent(cy),
+    onError: handleErrorEvent(cy, 'app'),
     onHistoryNav () {},
     onSubmit (e) {
       return Cypress.action('app:form:submitted', e)

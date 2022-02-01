@@ -2,8 +2,8 @@ import type { $Cy } from '../cypress/cy'
 import { handleErrorEvent } from './errors'
 
 export const handleSpecWindowEvents = (cy: $Cy) => {
-  const handleWindowErrorEvent = handleErrorEvent(cy)('error', 'spec')
-  const handleWindowUnhandledRejectionEvent = handleErrorEvent(cy)('unhandledrejection', 'spec')
+  const handleWindowErrorEvent = handleErrorEvent(cy, 'spec')('error')
+  const handleWindowUnhandledRejectionEvent = handleErrorEvent(cy, 'spec')('unhandledrejection')
 
   const handleUnload = () => {
     window.removeEventListener('unload', handleUnload)
