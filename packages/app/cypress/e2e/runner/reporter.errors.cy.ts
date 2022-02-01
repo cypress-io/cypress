@@ -5,7 +5,7 @@ const setup = ({ fileName, mockPreferredEditor, onLoadStatsMessage }) => {
   cy.openProject('runner-e2e-specs')
 
   if (mockPreferredEditor) {
-  // set preferred editor to bypass IDE selection dialog
+    // set preferred editor to bypass IDE selection dialog
     cy.withCtx((ctx) => {
       ctx.coreData.localSettings.availableEditors = [
         ...ctx.coreData.localSettings.availableEditors,
@@ -975,6 +975,7 @@ describe('errors ui', {
 
     // FIXME: the eval doesn't seem to take effect and overwrite the method
     // so it ends up not failing properly
+    // @ts-ignore
     verify.it.skip('Cypress method error', {
       file,
       verifyFn: verifyInternalFailure,
