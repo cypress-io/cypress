@@ -1,0 +1,107 @@
+<template>
+  <template v-if="props.gql">
+    <li
+      v-for="browser in props.gql.browsers"
+      :key="browser.id"
+      class="border-b cursor-pointer flex border-b-gray-50 min-w-240px py-12px px-16px transition-colors duration-300 group"
+      :class="browser.isSelected ? 'bg-jade-50' : 'hover:bg-indigo-50'"
+      data-cy="top-nav-browser-list-item"
+      :data-browser-id="browser.id"
+      @click="handleBrowserChoice(browser)"
+    >
+      <img
+        class="mr-16px min-w-26px w-26px"
+        :src="allBrowsersIcons[browser.displayName]"
+      >
+      <div class="flex-grow">
+        <div>
+          <button
+            class="font-medium box-border"
+            :class="browser.isSelected ? 'text-jade-700' : 'text-indigo-500 group-hover:text-indigo-700'"
+          >
+            {{ browser.displayName }}
+          </button>
+          <div
+            class="font-normal mr-20px text-gray-500 text-14px filter whitespace-nowrap group-hover:mix-blend-luminosity"
+          >
+            {{ t('topNav.version') }} {{ browser.version }}
+          </div>
+        </div>
+      </div>
+      <div>
+        <div
+          class="flex h-full items-center align-middle"
+        >
+          <template
+            v-if="browser.isSelected"
+          >
+            <div data-cy="top-nav-browser-list-selected-item">
+              <i-cy-circle-check_x24 class="h-24px w-24px icon-dark-jade-100 icon-light-jade-500" />
+            </div>
+          </template>
+        </div>
+      </div>
+    </li>
+  </template>
+</template>
+<script setup lang="ts">
+import { useI18n } from '@cy/i18n'
+import { VerticalBrowserListItemsFragment, VerticalBrowserListItems_LaunchOpenProjectDocument, VerticalBrowserListItems_SetBrowserDocument } from '../../generated/graphql'
+import { gql, useMutation } from '@urql/vue'
+import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
+
+const { t } = useI18n()
+
+gql`
+fragment VerticalBrowserListItems on CurrentProject {
+  id
+  currentBrowser {
+    id
+    displayName
+    majorVersion
+  }
+  browsers {
+    id
+    isSelected
+    displayName
+    version
+    majorVersion
+  }
+}
+`
+
+gql`
+mutation VerticalBrowserListItems_LaunchOpenProject {
+  launchOpenProject {
+    id
+  }
+}
+`
+
+gql`
+mutation VerticalBrowserListItems_SetBrowser($id: ID!) {
+  launchpadSetBrowser(id: $id) {
+    id
+    ...VerticalBrowserListItems
+  }
+}
+`
+
+const props = defineProps<{
+  selectable?: Boolean,
+  gql: VerticalBrowserListItemsFragment,
+}>()
+
+const launchOpenProject = useMutation(VerticalBrowserListItems_LaunchOpenProjectDocument)
+const setBrowser = useMutation(VerticalBrowserListItems_SetBrowserDocument)
+
+const launch = () => {
+  launchOpenProject.executeMutation({})
+}
+
+const handleBrowserChoice = async (browser) => {
+  await setBrowser.executeMutation({ id: browser.id })
+  launch()
+}
+
+</script>

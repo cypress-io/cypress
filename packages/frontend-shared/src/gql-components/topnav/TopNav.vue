@@ -116,46 +116,9 @@
         class="font-semibold whitespace-nowrap"
       >{{ props.gql.currentProject?.currentBrowser?.displayName }} {{ props.gql.currentProject?.currentBrowser?.majorVersion }}</span>
     </template>
-    <TopNavListItem
-      v-for="browser in props.gql.currentProject.browsers"
-      :key="browser.id"
-      class="cursor-pointer min-w-240px py-12px px-16px group"
-      :class="browser.isSelected ? 'bg-jade-50' : ''"
-      :selectable="!browser.isSelected"
-      data-cy="top-nav-browser-list-item"
-      :data-browser-id="browser.id"
-      @click="handleBrowserChoice(browser)"
-    >
-      <template #prefix>
-        <!-- setting both width and min-width on these icons looks odd,
-        but makes all possible browser icons happy about what size to be-->
-        <img
-          class="mr-16px min-w-26px w-26px"
-          :src="allBrowsersIcons[browser.displayName]"
-        >
-      </template>
-      <div>
-        <button
-          class="font-medium box-border"
-          :class="browser.isSelected ? 'text-jade-700' : 'text-indigo-500 group-hover:text-indigo-700'"
-        >
-          {{ browser.displayName }}
-        </button>
-        <div
-          class="font-normal mr-20px text-gray-500 text-14px filter whitespace-nowrap group-hover:mix-blend-luminosity"
-        >
-          {{ t('topNav.version') }} {{ browser.version }}
-        </div>
-      </div>
-      <template
-        v-if="browser.isSelected"
-        #suffix
-      >
-        <div data-cy="top-nav-browser-list-selected-item">
-          <i-cy-circle-check_x24 class="h-24px w-24px icon-dark-jade-100 icon-light-jade-500" />
-        </div>
-      </template>
-    </TopNavListItem>
+    <VerticalBrowserListItems
+      :gql="props.gql.currentProject"
+    />
   </TopNavList>
 
   <TopNavList
@@ -232,35 +195,21 @@ import TopNavList from './TopNavList.vue'
 import PromptContent from './PromptContent.vue'
 import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
 import { gql, useMutation } from '@urql/vue'
-import { TopNavFragment, TopNav_LaunchOpenProjectDocument, TopNav_SetBrowserDocument, TopNav_SetPromptShownDocument } from '../../generated/graphql'
+import { TopNavFragment, TopNav_SetPromptShownDocument } from '../../generated/graphql'
 import { useI18n } from '@cy/i18n'
 import { computed, ref, Ref, ComponentPublicInstance, watch, watchEffect } from 'vue'
-const { t } = useI18n()
 import { onClickOutside, onKeyStroke, useTimeAgo } from '@vueuse/core'
 import DocsMenuContent, { DocsMenuVariant } from './DocsMenuContent.vue'
 import ExternalLink from '../ExternalLink.vue'
 import Button from '../../components/Button.vue'
 import UpdateCypressModal from './UpdateCypressModal.vue'
+import VerticalBrowserListItems from './VerticalBrowserListItems.vue'
+
+const { t } = useI18n()
 
 const releasesUrl = 'https://github.com/cypress-io/cypress/releases'
 
 gql`
-fragment TopNav_Browsers on CurrentProject {
-  id
-  currentBrowser {
-    id
-    displayName
-    majorVersion
-  }
-  browsers {
-    id
-    isSelected
-    displayName
-    version
-    majorVersion
-  }
-}
-
 fragment TopNav on Query {
   versions {
     current {
@@ -278,24 +227,7 @@ fragment TopNav on Query {
   currentProject {
     id
     title
-    ...TopNav_Browsers
-  }
-}
-`
-
-gql`
-mutation TopNav_LaunchOpenProject {
-  launchOpenProject {
-    id
-  }
-}
-`
-
-gql`
-mutation TopNav_SetBrowser($id: ID!) {
-  launchpadSetBrowser(id: $id) {
-    id
-    ...TopNav_Browsers
+    ...VerticalBrowserListItems
   }
 }
 `
@@ -306,18 +238,7 @@ mutation TopNav_SetPromptShown($slug: String!) {
 }
 `
 
-const launchOpenProject = useMutation(TopNav_LaunchOpenProjectDocument)
-const setBrowser = useMutation(TopNav_SetBrowserDocument)
 const setPromptShown = useMutation(TopNav_SetPromptShownDocument)
-
-const launch = () => {
-  launchOpenProject.executeMutation({})
-}
-
-const handleBrowserChoice = async (browser) => {
-  await setBrowser.executeMutation({ id: browser.id })
-  launch()
-}
 
 const props = defineProps<{
   gql: TopNavFragment,
