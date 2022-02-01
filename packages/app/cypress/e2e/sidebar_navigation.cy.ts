@@ -117,7 +117,7 @@ describe('Sidebar Navigation', () => {
 
       cy.intercept('mutation-SwitchTestingTypeAndRelaunch').as('SwitchTestingTypeAndRelaunch')
       cy.withCtx((ctx) => {
-        ctx.actions.project.launchProject = sinon.stub()
+        ctx.actions.project.reconfigureProject = sinon.stub()
       })
 
       cy.get('[data-cy-testingtype="component"]').within(() => {
