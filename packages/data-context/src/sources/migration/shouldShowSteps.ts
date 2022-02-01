@@ -99,10 +99,22 @@ export async function shouldShowRenameSupport (projectRoot: string, config: OldC
   let supportFile = config.e2e?.supportFile ?? config.supportFile
 
   if (supportFile === undefined) {
-    supportFile = await tryGetDefaultLegacySupportFile(projectRoot)
+    const foundDefaultSupportFile = await tryGetDefaultLegacySupportFile(projectRoot)
+
+    if (foundDefaultSupportFile) {
+      supportFile = foundDefaultSupportFile
+    }
   }
 
-  return supportFile && supportFile.startsWith(defaultSupportFile)
+  // if the support file is set to false, we don't show the rename step
+  // if the support file does not exist (value is undefined), we don't show the rename step
+  if (!supportFile) {
+    return false
+  }
+
+  // if the support file is custom, we don't show the rename step
+  // only if the support file matches the default do we show the rename step
+  return supportFile.startsWith(defaultSupportFile)
 }
 
 // if they have component testing configured, they will need to
