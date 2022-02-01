@@ -126,3 +126,5 @@ export const PACKAGES_DESCRIPTIONS: Record<AllPackages, string> = {
   '@storybook/testing-react': 'Testing utilities that allow you to reuse your stories in your unit tests',
   '@storybook/testing-vue3': 'Testing utilities that allow you to reuse your stories in your unit tests',
 } as const
+
+export const PACKAGE_MANAGERS = ['npm', 'yarn', 'pnpm'] as const

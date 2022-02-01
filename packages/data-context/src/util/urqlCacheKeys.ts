@@ -25,7 +25,6 @@ export const urqlCacheKeys: Partial<CacheExchangeOpts> & CacheKeys = {
     ErrorCodeFrame: () => null,
     OriginalError: () => null,
     MigrationFilePart: () => null,
-    MigrationFiles: () => null,
     ProjectPreferences: (data) => data.__typename,
     VersionData: () => null,
     ScaffoldedFile: () => null,

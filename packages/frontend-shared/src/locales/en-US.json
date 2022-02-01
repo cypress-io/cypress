@@ -608,5 +608,16 @@
     "focus": "Focus",
     "close": "Close",
     "switchTestingType": "Switch testing type"
+  },
+  "runner": {
+    "snapshot": {
+      "toggleHighlights": "Toggle highlights",
+      "highlightsLabel": "Highlights",
+      "testsRunningError": "Cannot show Snapshot while tests are running",
+      "snapshotMissingError": "The snapshot is missing. Displaying current state of the DOM.",
+      "defaultTitle": "DOM Snapshot",
+      "pinnedTitle": "Pinned",
+      "studioActiveError": "Cannot show Snapshot while creating commands in Studio"
+    }
   }
 }

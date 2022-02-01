@@ -378,6 +378,7 @@ type CurrentProject implements Node & ProjectLike {
 
   """Whether the project needs to be migrated before proceeding"""
   needsLegacyConfigMigration: Boolean
+  packageManager: PackageManagerEnum!
 
   """Cached preferences for this project"""
   preferences: ProjectPreferences
@@ -979,6 +980,12 @@ type OriginalError {
   """The error."""
   name: String!
   stack: String
+}
+
+enum PackageManagerEnum {
+  npm
+  pnpm
+  yarn
 }
 
 """
