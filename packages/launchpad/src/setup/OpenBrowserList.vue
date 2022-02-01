@@ -21,10 +21,9 @@
           class="rounded border-1 text-center min-h-144px pt-6 pb-4 w-160px relative block radio-label"
           :class="{
             'border-jade-300 ring-2 ring-jade-100 focus:border-jade-400 focus:border-1 focus:outline-none': checked,
-            'border-gray-200 before:hocus:cursor-pointer': !checked && !(isBrowserOpening || isBrowserOpen) ,
-            'filter grayscale bg-gray-100': browser.disabled,
+            'filter grayscale bg-gray-100 before:hocus:cursor-not-allowed': browser.disabled,
             'filter grayscale border-gray-200': (isBrowserOpening || isBrowserOpen) && !checked,
-            'hover:border-indigo-300 hover:ring-2 hover:ring-indigo-100': !browser.disabled && !checked && !(isBrowserOpening || isBrowserOpen)
+            'border-gray-200 before:hocus:cursor-pointer hover:border-indigo-300 hover:ring-2 hover:ring-indigo-100': !browser.disabled && !checked && !(isBrowserOpening || isBrowserOpen)
           }"
         >
           <div

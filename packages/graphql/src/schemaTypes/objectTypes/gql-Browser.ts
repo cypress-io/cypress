@@ -8,7 +8,7 @@ export const Browser = objectType({
   definition (t) {
     t.nonNull.string('channel')
     t.nonNull.boolean('disabled', {
-      resolve: () => false,
+      resolve: (source, args, ctx) => Boolean(!ctx.browser.isVersionSupported(source)),
     })
 
     t.nonNull.boolean('isSelected', {

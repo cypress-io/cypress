@@ -119,12 +119,16 @@
     <TopNavListItem
       v-for="browser in props.gql.currentProject.browsers"
       :key="browser.id"
-      class="cursor-pointer min-w-240px py-12px px-16px group"
-      :class="browser.isSelected ? 'bg-jade-50' : ''"
+      class="min-w-240px py-12px px-16px group"
+      :class="{
+        'bg-jade-50': browser.isSelected,
+        'filter grayscale bg-gray-50 cursor-not-allowed': browser.disabled,
+        'cursor-pointer': !browser.disabled
+      }"
       :selectable="!browser.isSelected"
       data-cy="top-nav-browser-list-item"
       :data-browser-id="browser.id"
-      @click="handleBrowserChoice(browser)"
+      @click="!browser.disabled && handleBrowserChoice(browser)"
     >
       <template #prefix>
         <!-- setting both width and min-width on these icons looks odd,
@@ -267,6 +271,7 @@ fragment TopNav_Browsers on CurrentProject {
     majorVersion
     isVersionSupported
     warning
+    disabled
   }
 }
 
