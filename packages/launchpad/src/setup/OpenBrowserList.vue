@@ -29,7 +29,7 @@
         >
           <div class="text-center">
             <img
-              :src="allBrowsersIcons[browser.displayName]"
+              :src="allBrowsersIcons[browser.displayName] || allBrowsersIcons.generic"
               alt=""
               class="h-40px w-40px inline"
             >

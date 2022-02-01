@@ -109,7 +109,7 @@
         class="w-16px filter group-hocus:grayscale-0"
         data-cy="top-nav-active-browser-icon"
         :class="open ? 'grayscale-0' : 'grayscale'"
-        :src="allBrowsersIcons[props.gql?.currentProject?.currentBrowser?.displayName || '']"
+        :src="allBrowsersIcons[props.gql?.currentProject?.currentBrowser?.displayName] || allBrowsersIcons.generic"
       >
       <span
         data-cy="top-nav-active-browser"
@@ -130,8 +130,8 @@
         <!-- setting both width and min-width on these icons looks odd,
         but makes all possible browser icons happy about what size to be-->
         <img
-          class="mr-16px min-w-26px w-26px"
-          :src="allBrowsersIcons[browser.displayName]"
+          class="mr-16px min-w-32px w-32px"
+          :src="allBrowsersIcons[browser.displayName] || allBrowsersIcons.generic"
         >
       </template>
       <div>
