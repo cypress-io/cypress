@@ -26,6 +26,7 @@ import { EventManager } from './event-manager'
 import { client } from '@packages/socket/lib/browser'
 import { decodeBase64Unicode } from '@packages/frontend-shared/src/utils/base64'
 import type { AutomationElementId } from '@packages/types/src'
+import { useSnapshotStore } from './snapshot-store'
 
 let _eventManager: EventManager | undefined
 
@@ -162,6 +163,8 @@ function getSpecUrl (namespace: string, specSrc: string) {
  * or re-running the current spec.
  */
 function teardownSpec () {
+  useSnapshotStore().$reset()
+
   return getEventManager().teardown(getMobxRunnerStore())
 }
 
