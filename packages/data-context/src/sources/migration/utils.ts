@@ -5,11 +5,11 @@ import globby from 'globby'
 import {
   supportFileRegexps,
   formatMigrationFile,
-} from './migrationFormat'
-import type { MigrationFile } from '../sources'
-import { substitute } from '../sources/migration/autoRename'
+} from './format'
+import { substitute } from './autoRename'
 import type { TestingType } from '@packages/types'
 import prettier from 'prettier'
+import type { MigrationFile } from '..'
 
 type ConfigOptions = {
   global: Record<string, unknown>

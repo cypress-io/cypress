@@ -9,12 +9,12 @@ import {
   supportFilesForMigration,
   OldCypressConfig,
   hasSpecFile,
-} from '../util/migration'
+} from './migration/utils'
 import {
   getSpecs,
   applyMigrationTransform,
 } from './migration/autoRename'
-import type { FilePart } from '../util/migrationFormat'
+import type { FilePart } from './migration/format'
 import {
   getStepsForMigration,
   shouldShowRenameSupport,
