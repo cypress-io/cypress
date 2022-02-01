@@ -6,6 +6,7 @@ import {
   createConfigString,
   initComponentTestingMigration,
   ComponentTestingMigrationStatus,
+  tryGetDefaultLegacyPluginsFile,
   supportFilesForMigration,
   OldCypressConfig,
   hasSpecFile,
@@ -39,21 +40,34 @@ export interface MigrationFile {
 
 type MIGRATION_STEP = typeof MIGRATION_STEPS[number]
 
+const flags = {
+  hasCustomIntegrationFolder: false,
+  hasCustomIntegrationTestFiles: false,
+
+  hasCustomComponentFolder: false,
+  hasCustomComponentTestFiles: false,
+
+  hasCustomSupportFile: false,
+  hasComponentTesting: true,
+  hasE2ESpec: true,
+  hasPluginsFile: true,
+} as const
+
 export class MigrationDataSource {
   private _config: OldCypressConfig | null = null
   private _step: MIGRATION_STEP = 'renameAuto'
   filteredSteps: MIGRATION_STEP[] = MIGRATION_STEPS.filter(() => true)
 
-  hasCustomIntegrationFolder: boolean = false
-  hasCustomIntegrationTestFiles: boolean = false
+  hasCustomIntegrationFolder: boolean = flags.hasCustomIntegrationFolder
+  hasCustomIntegrationTestFiles: boolean = flags.hasCustomIntegrationTestFiles
 
-  hasCustomComponentFolder: boolean = false
-  hasCustomComponentTestFiles: boolean = false
+  hasCustomComponentFolder: boolean = flags.hasCustomComponentFolder
+  hasCustomComponentTestFiles: boolean = flags.hasCustomComponentTestFiles
 
-  hasCustomSupportFile = false
-  hasComponentTesting = true
-  hasE2ESpec = true
-  hasPluginsFile = true
+  hasCustomSupportFile: boolean = flags.hasCustomSupportFile
+  hasComponentTesting: boolean = flags.hasComponentTesting
+  hasE2ESpec: boolean = flags.hasE2ESpec
+  hasPluginsFile: boolean = flags.hasPluginsFile
 
   private componentTestingMigrationWatcher?: chokidar.FSWatcher
   componentTestingMigrationStatus?: ComponentTestingMigrationStatus
@@ -61,6 +75,9 @@ export class MigrationDataSource {
   constructor (private ctx: DataContext) { }
 
   async initialize () {
+    // for testing mainly, we want to ensure the flags are reset each test
+    this.resetFlags()
+
     if (!this.ctx.currentProject) {
       throw Error('cannot do migration without currentProject!')
     }
@@ -77,6 +94,12 @@ export class MigrationDataSource {
     }
 
     this.setStep(this.filteredSteps[0])
+  }
+
+  private resetFlags () {
+    for (const [k, v] of Object.entries(flags)) {
+      this[k as keyof typeof flags] = v
+    }
   }
 
   async getComponentTestingMigrationStatus () {
@@ -261,7 +284,13 @@ export class MigrationDataSource {
       )
     }
 
-    if (getPluginsFile(config) === false) {
+    const pluginsFileMissing = (
+      (config.e2e?.pluginsFile ?? undefined) === undefined &&
+      config.pluginsFile === undefined &&
+      !await tryGetDefaultLegacyPluginsFile(this.ctx.currentProject)
+    )
+
+    if (getPluginsFile(config) === false || pluginsFileMissing) {
       this.hasPluginsFile = false
     }
   }

@@ -1,6 +1,6 @@
 import globby from 'globby'
 import { MIGRATION_STEPS } from '@packages/types'
-import type { OldCypressConfig } from '../../util'
+import { OldCypressConfig, tryGetDefaultLegacySupportFile } from '../../util'
 import path from 'path'
 import { getSpecs } from '.'
 
@@ -93,6 +93,16 @@ async function anyIntegrationSpecsExist (projectRoot: string, config: OldCypress
 // when they set CT up.
 export async function shouldShowRenameSupport (projectRoot: string, config: OldCypressConfig) {
   if (!await anyIntegrationSpecsExist(projectRoot, config)) {
+    return false
+  }
+
+  // if they do not have a supportFile specified in cypress.json AND
+  // no default is present, skip this step.
+  if (
+    (config.e2e?.supportFile ?? undefined) === undefined &&
+    config.supportFile === undefined &&
+    !await tryGetDefaultLegacySupportFile(projectRoot)
+  ) {
     return false
   }
 

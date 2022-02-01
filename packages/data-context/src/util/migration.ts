@@ -153,7 +153,7 @@ function defineConfigAvailable (projectRoot: string) {
 function createCypressConfig (config: ConfigOptions, pluginPath: string, options: CreateConfigOptions): string {
   const globalString = Object.keys(config.global).length > 0 ? `${formatObjectForConfig(config.global)},` : ''
   const componentString = options.hasComponentTesting ? createComponentTemplate(config.component) : ''
-  const e2eString = (options.hasE2ESpec && options.hasPluginsFile)
+  const e2eString = options.hasE2ESpec
     ? createE2eTemplate(pluginPath, options.hasPluginsFile, config.e2e)
     : ''
 
@@ -185,11 +185,11 @@ function formatObjectForConfig (obj: Record<string, unknown>) {
 }
 
 function createE2eTemplate (pluginPath: string, hasPluginsFile: boolean, options: Record<string, unknown>) {
-  const setupNodeEvents = hasPluginsFile
-    ? `setupNodeEvents(on, config) {
-      return require('.${path.sep}${pluginPath}')(on, config)
-    }`
-    : ``
+  const requirePlugins = `return require('.${path.sep}${pluginPath}')(on, config)`
+
+  const setupNodeEvents = `setupNodeEvents(on, config) {
+    ${hasPluginsFile ? requirePlugins : ''}
+  }`
 
   return `e2e: {
     ${setupNodeEvents},${formatObjectForConfig(options)}
@@ -216,6 +216,13 @@ export async function hasSpecFile (projectRoot: string, folder: string, glob: st
     cwd: path.join(projectRoot, folder),
     onlyFiles: true,
   })).length > 0
+}
+
+export async function tryGetDefaultLegacyPluginsFile (projectRoot: string) {
+  const glob = path.join(projectRoot, 'cypress', 'plugins', 'index.*')
+  const files = await globby(glob)
+
+  return files[0]
 }
 
 export async function tryGetDefaultLegacySupportFile (projectRoot: string) {
