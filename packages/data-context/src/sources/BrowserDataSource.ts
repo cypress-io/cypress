@@ -1,4 +1,4 @@
-import type { FoundBrowser } from '@packages/types'
+import type { FoundBrowser, BrowserStatus } from '@packages/types'
 import os from 'os'
 import { execSync } from 'child_process'
 import type { DataContext } from '..'
@@ -74,5 +74,10 @@ export class BrowserDataSource {
     }
 
     return false
+  }
+
+  setBrowserStatus (browserStatus: BrowserStatus) {
+    this.ctx.coreData.app.browserStatus = browserStatus
+    this.ctx.emitter.toLaunchpad()
   }
 }

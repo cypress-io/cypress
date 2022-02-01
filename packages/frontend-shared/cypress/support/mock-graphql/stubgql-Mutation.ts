@@ -102,4 +102,7 @@ export const stubMutation: MaybeResolver<Mutation> = {
   closeBrowser (src, args, ctx) {
     return true
   },
+  switchTestingTypeAndRelaunch (src, args, ctx) {
+    return true
+  },
 }
