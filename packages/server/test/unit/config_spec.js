@@ -64,7 +64,7 @@ describe('lib/config', () => {
       sinon.stub(ctx.lifecycleManager, 'verifyProjectRoot').returns(undefined)
 
       this.setup = (cypressJson = {}, cypressEnvJson = {}) => {
-        sinon.stub(ctx.lifecycleManager, 'getConfigFileContents').resolves({ ...cypressJson, e2e: { supportFile: false, ...cypressJson.e2e } })
+        sinon.stub(ctx.lifecycleManager, 'getConfigFileContents').resolves({ ...cypressJson, e2e: _.isObject(cypressJson.e2e) ? { supportFile: false, ...cypressJson.e2e } : cypressJson.e2e })
         sinon.stub(ctx.lifecycleManager, 'loadCypressEnvFile').resolves(cypressEnvJson)
       }
     })
@@ -252,7 +252,6 @@ describe('lib/config', () => {
         it('passes if an object with valid properties', function () {
           this.setup({
             component: {
-              baseUrl: 'https://cypress.com',
               execTimeout: 10000,
             },
           })

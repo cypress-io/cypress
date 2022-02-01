@@ -125,6 +125,8 @@ describe('findSpecs', () => {
   const temporary = 'tmp'
 
   const fixture = [
+    'node_modules/test/App.spec.js',
+    'packages/node_modules/folder/App.spec.js',
     'component/App.spec.ts',
     'component/App.cy.ts',
     'component/App.cy.js',
@@ -173,6 +175,18 @@ describe('findSpecs', () => {
 
   it('find all the e2e specs', async () => {
     const specs = await ctx.project.findSpecs(temporary, 'e2e', ['e2e/*.{cy,spec}.{ts,js}'], [], [])
+
+    expect(specs).to.have.length(3)
+  })
+
+  it('ignores node_modules if specExcludePattern is empty array', async () => {
+    const specs = await ctx.project.findSpecs(temporary, 'component', ['**/*.{cy,spec}.{ts,js}'], [], [])
+
+    expect(specs).to.have.length(6)
+  })
+
+  it('ignores e2e tests if globToRemove is set', async () => {
+    const specs = await ctx.project.findSpecs(temporary, 'component', ['**/*.{cy,spec}.{ts,js}'], [], ['e2e/*.{spec,cy}.{ts,js}'])
 
     expect(specs).to.have.length(3)
   })
