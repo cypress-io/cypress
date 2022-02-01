@@ -29,6 +29,7 @@
           <TempTooltip
             v-if="!browser.isVersionSupported"
             class="top-0 right-0 absolute"
+            placement="top"
           >
             <i-cy-circle-bg-question-mark_x16 class="mt-4px mr-8px relative inline-block icon-dark-gray-700 icon-light-gray-200" />
             <template #popper>
@@ -44,7 +45,8 @@
             <img
               :src="allBrowsersIcons[browser.displayName] || allBrowsersIcons.generic"
               alt=""
-              class="h-40px w-40px filter grayscale inline"
+              class="h-40px w-40px inline"
+              :class="{ 'filter grayscale': browser.disabled }"
             >
           </div>
           <div

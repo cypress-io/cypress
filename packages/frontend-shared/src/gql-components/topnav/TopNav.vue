@@ -168,7 +168,7 @@
         v-else-if="!browser.isVersionSupported"
         #suffix
       >
-        <div class="relative">
+        <div class="h-16px relative">
           <TempTooltip class="top-0 right-0 absolute">
             <i-cy-circle-bg-question-mark_x16 class="icon-dark-gray-700 icon-light-gray-200" />
             <template #popper>

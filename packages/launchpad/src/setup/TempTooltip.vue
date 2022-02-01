@@ -1,7 +1,7 @@
 <template>
   <div
     ref="wrapper"
-    @mouseenter="showTooltip();"
+    @mouseenter="showTooltip()"
     @mouseleave="hideTooltip()"
     @click="emit('click')"
   >
@@ -15,14 +15,16 @@
         v-if="scaleUp"
         class="rounded flex h-fit
                   bg-gray-900
-                  text-center py-16px px-24px bottom-7
+                  text-center py-16px px-24px
                   text-gray-300 text-size-14px leading-20px
                   absolute content
-                  need-content before:border-solid before:border-transparent before:border-width-8px before:border-t-gray-900
-                  before:border-b-0 before:top-full
-                  before:-mr-8px before:right-1/2 before:block before:absolute
+                  need-content before:border-solid before:border-transparent before:border-width-8px
+                  before:right-1/2 before:block before:absolute
                   "
-        :class="popperClass"
+        :class="{
+          'bottom-7 before:top-full before:-mr-8px before:border-b-0 before:border-t-gray-900': placement === 'top',
+          'top-7 before:bottom-full before:-mr-8px before:border-t-0 before:border-b-gray-900': placement === 'bottom'
+        }"
         :style="`left: ${tooltipLeft}px; width: ${tooltipWidth}px`"
         role="tooltip"
       >
@@ -38,11 +40,11 @@ import { ref, nextTick, onMounted } from 'vue'
 
 const props = withDefaults(defineProps<{
   disabled?:boolean,
-  popperClass?:string,
+  placement?:string,
   tooltipWidth?:number
 }>(), {
   disabled: false,
-  popperClass: '',
+  placement: 'bottom',
   tooltipWidth: 350,
 })
 
