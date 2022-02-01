@@ -15,10 +15,9 @@
         v-if="scaleUp"
         class="rounded flex h-fit
                   bg-gray-900
-                  py-16px px-24px bottom-7 text-gray-300
-                  text-size-14px leading-20px absolute
-                  items-center justify-center
-                  content
+                  text-center py-16px px-24px bottom-7
+                  text-gray-300 text-size-14px leading-20px
+                  absolute content
                   need-content before:border-solid before:border-transparent before:border-width-8px before:border-t-gray-900
                   before:border-b-0 before:top-full
                   before:-mr-8px before:right-1/2 before:block before:absolute

@@ -122,10 +122,10 @@
       class="min-w-240px py-12px px-16px group"
       :class="{
         'bg-jade-50': browser.isSelected,
-        'filter grayscale bg-gray-50 cursor-not-allowed': browser.disabled,
+        'bg-gray-50 cursor-not-allowed': browser.disabled,
         'cursor-pointer': !browser.disabled
       }"
-      :selectable="!browser.isSelected"
+      :selectable="!browser.isSelected && !browser.disabled"
       data-cy="top-nav-browser-list-item"
       :data-browser-id="browser.id"
       @click="!browser.disabled && handleBrowserChoice(browser)"
@@ -135,13 +135,18 @@
         but makes all possible browser icons happy about what size to be-->
         <img
           class="mr-16px min-w-32px w-32px"
+          :class="{ 'filter grayscale': browser.disabled }"
           :src="allBrowsersIcons[browser.displayName] || allBrowsersIcons.generic"
         >
       </template>
       <div>
         <button
           class="font-medium box-border"
-          :class="browser.isSelected ? 'text-jade-700' : 'text-indigo-500 group-hover:text-indigo-700'"
+          :class="{
+            'text-indigo-500 group-hover:text-indigo-700': !browser.isSelected && !browser.disabled,
+            'text-jade-700': browser.isSelected,
+            'text-gray-500': browser.disabled
+          }"
         >
           {{ browser.displayName }}
         </button>
@@ -162,9 +167,20 @@
       <template
         v-else-if="!browser.isVersionSupported"
         #suffix
-        class="top-0 right-0 absolute"
       >
-        <i-cy-circle-bg-question-mark_x16 class="icon-dark-gray-700 icon-light-gray-200" />
+        <div class="relative">
+          <TempTooltip class="top-0 right-0 absolute">
+            <i-cy-circle-bg-question-mark_x16 class="icon-dark-gray-700 icon-light-gray-200" />
+            <template #popper>
+              <div>
+                <div class="font-medium text-white mb-2">
+                  Unsupported browser
+                </div>
+                {{ browser.warning }}
+              </div>
+            </template>
+          </TempTooltip>
+        </div>
       </template>
     </TopNavListItem>
   </TopNavList>
@@ -241,6 +257,7 @@
 import TopNavListItem from './TopNavListItem.vue'
 import TopNavList from './TopNavList.vue'
 import PromptContent from './PromptContent.vue'
+import TempTooltip from '@packages/launchpad/src/setup/TempTooltip.vue'
 import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
 import { gql, useMutation } from '@urql/vue'
 import { TopNavFragment, TopNav_LaunchOpenProjectDocument, TopNav_SetBrowserDocument, TopNav_SetPromptShownDocument } from '../../generated/graphql'
