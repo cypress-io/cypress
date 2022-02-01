@@ -253,5 +253,12 @@ export const Migration = objectType({
         return ctx.migration.hasComponentTesting
       },
     })
+
+    t.boolean('hasTypescript', {
+      description: 'Whether the project has Typescript',
+      resolve (source, args, ctx) {
+        return ctx.lifecycleManager.metaState.hasTypescript
+      },
+    })
   },
 })

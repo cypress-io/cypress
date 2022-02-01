@@ -1,8 +1,5 @@
 <template>
-  <div
-    v-if="migration"
-    class="text-16px leading-24px"
-  >
+  <div class="text-16px leading-24px">
     <MigrationTitle :title="t('migration.configFile.title')" />
     <MigrationList>
       <MigrationListItem>
@@ -15,7 +12,7 @@
           {{ fileName }}
         </CodeTag>
       </MigrationListItem>
-      <MigrationListItem v-if="migration.hasCustomIntegrationFolder || migration.hasCustomIntegrationTestFiles">
+      <MigrationListItem v-if="props.gql.hasCustomIntegrationFolder || props.gql.hasCustomIntegrationTestFiles">
         <i18n-t
           scope="global"
           keypath="migration.configFile.customOptions"
@@ -26,19 +23,19 @@
             </CodeTag>
           </template>
           <template #options>
-            <template v-if="migration.hasCustomIntegrationFolder && migration.hasCustomIntegrationTestFiles">
+            <template v-if="props.gql.hasCustomIntegrationFolder && props.gql.hasCustomIntegrationTestFiles">
               <CodeTag class="text-red-500">
                 integrationFolder
               </CodeTag> and <CodeTag class="text-red-500">
                 testFiles
               </CodeTag> options
             </template>
-            <template v-else-if="migration.hasCustomIntegrationFolder">
+            <template v-else-if="props.gql.hasCustomIntegrationFolder">
               <CodeTag class="text-red-500">
                 integrationFolder
               </CodeTag> option
             </template>
-            <template v-else-if="migration.hasCustomIntegrationTestFiles">
+            <template v-else-if="props.gql.hasCustomIntegrationTestFiles">
               <CodeTag class="text-red-500">
                 testFiles
               </CodeTag> option
@@ -46,7 +43,7 @@
           </template>
         </i18n-t>
       </MigrationListItem>
-      <MigrationListItem v-if="migration.hasCustomComponentFolder || migration.hasCustomComponentTestFiles">
+      <MigrationListItem v-if="props.gql.hasCustomComponentFolder || props.gql.hasCustomComponentTestFiles">
         <i18n-t
           scope="global"
           keypath="migration.configFile.customOptions"
@@ -57,19 +54,19 @@
             </CodeTag>
           </template>
           <template #options>
-            <template v-if="migration.hasCustomComponentFolder && migration.hasCustomComponentTestFiles">
+            <template v-if="props.gql.hasCustomComponentFolder && props.gql.hasCustomComponentTestFiles">
               <CodeTag class="text-red-500">
                 componentFolder
               </CodeTag> and <CodeTag class="text-red-500">
                 testFiles
               </CodeTag> options
             </template>
-            <template v-else-if="migration.hasCustomComponentFolder">
+            <template v-else-if="props.gql.hasCustomComponentFolder">
               <CodeTag class="text-red-500">
                 componentFolder
               </CodeTag> option
             </template>
-            <template v-else-if="migration.hasCustomComponentTestFiles">
+            <template v-else-if="props.gql.hasCustomComponentTestFiles">
               <CodeTag class="text-red-500">
                 testFiles
               </CodeTag> option
@@ -149,40 +146,33 @@ import MigrationListItem from './fragments/MigrationListItem.vue'
 const { t } = useI18n()
 
 gql`
-fragment ConvertConfigFile on Query {
-  migration {
-    configBeforeCode
-    configAfterCode
-    hasCustomIntegrationFolder
-    hasCustomIntegrationTestFiles
-    hasCustomComponentFolder
-    hasCustomComponentTestFiles
-  }
-  currentProject {
-    id
-    hasTypescript
-  }
+fragment ConvertConfigFile on Migration {
+  configBeforeCode
+  configAfterCode
+  hasCustomIntegrationFolder
+  hasCustomIntegrationTestFiles
+  hasCustomComponentFolder
+  hasCustomComponentTestFiles
+  hasTypescript
 }`
 
 const props = defineProps<{
-  gql?: ConvertConfigFileFragment
+  gql: ConvertConfigFileFragment
 }>()
 
-const migration = computed(() => props.gql?.migration)
-
-const gqlCodeBeforeLines = computed(() => props.gql?.migration?.configBeforeCode.split('\n').length ?? 0)
-const gqlCodeAfterLines = computed(() => props.gql?.migration?.configAfterCode.split('\n').length ?? 0)
+const gqlCodeBeforeLines = computed(() => props.gql.configBeforeCode.split('\n').length)
+const gqlCodeAfterLines = computed(() => props.gql.configAfterCode.split('\n').length)
 const gqlCodeMaxLines = computed(() => Math.max(gqlCodeBeforeLines.value, gqlCodeAfterLines.value))
 
 const codeBefore = computed(() => {
-  return props.gql?.migration?.configBeforeCode + Array(gqlCodeMaxLines.value - gqlCodeBeforeLines.value).fill('\n').join('')
+  return props.gql.configBeforeCode + Array(gqlCodeMaxLines.value - gqlCodeBeforeLines.value).fill('\n').join('')
 })
 
 const codeAfter = computed(() => {
-  return props.gql?.migration?.configAfterCode + Array(gqlCodeMaxLines.value - gqlCodeAfterLines.value).fill('\n').join('')
+  return props.gql.configAfterCode + Array(gqlCodeMaxLines.value - gqlCodeAfterLines.value).fill('\n').join('')
 })
 
-const fileName = computed(() => props.gql?.currentProject?.hasTypescript ? 'cypress.config.ts' : 'cypress.config.js')
+const fileName = computed(() => props.gql.hasTypescript ? 'cypress.config.ts' : 'cypress.config.js')
 </script>
 
 <style lang="scss" scoped>

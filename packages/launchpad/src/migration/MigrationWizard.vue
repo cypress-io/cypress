@@ -93,9 +93,7 @@
         :title="t('migration.wizard.step4.title')"
         :description="t('migration.wizard.step4.description')"
       >
-        <ConvertConfigFile
-          :gql="query.data.value"
-        />
+        <ConvertConfigFile :gql="migration" />
         <template #footer>
           <Button
             :suffix-icon="ArrowRightIcon"
@@ -157,7 +155,6 @@ const { t } = useI18n()
 
 gql`
 fragment MigrationWizardData on Query {
-  ...ConvertConfigFile
   migration {
     filteredSteps {
       id
@@ -167,6 +164,7 @@ fragment MigrationWizardData on Query {
     ...RenameSpecsAuto
     ...RenameSpecsManual
     ...RenameSupport
+    ...ConvertConfigFile
   }
 }`
 
