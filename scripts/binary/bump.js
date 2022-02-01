@@ -268,15 +268,7 @@ Testing new Cypress version ${version}
       }
 
       // first try to commit to branch for next upcoming version
-      const specificBranchOptions = {
-        owner,
-        repo,
-        token: creds.githubToken,
-        message,
-        branch: version,
-      }
-
-      return makeEmptyGithubCommit(specificBranchOptions)
+      return makeEmptyGithubCommit({ ...defaultOptions, branch: version })
       .catch(() => {
         // maybe there is no branch for next version
         // try default branch
