@@ -60,11 +60,14 @@ export interface AppDataShape {
 }
 
 export interface WizardDataShape {
-  chosenBundler: NexusGenEnums['SupportedBundlers'] | null
   allBundlers: typeof BUNDLERS
+  chosenBundler: NexusGenEnums['SupportedBundlers'] | null
   chosenFramework: NexusGenEnums['FrontendFrameworkEnum'] | null
   chosenLanguage: NexusGenEnums['CodeLanguageEnum']
   chosenManualInstall: boolean
+  detectedLanguage: NexusGenEnums['CodeLanguageEnum'] | undefined
+  detectedBundler: NexusGenEnums['SupportedBundlers'] | undefined
+  detectedFramework: NexusGenEnums['FrontendFrameworkEnum'] | undefined
 }
 
 export interface MigrationDataShape{
