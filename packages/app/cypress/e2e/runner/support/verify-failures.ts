@@ -27,7 +27,6 @@ export const verifyFailure = (options) => {
     verifyOpenInIde = true,
     hasPreferredIde,
     column,
-    codeFrameText,
     originalMessage,
     message = [],
     notInMessage = [],
@@ -37,7 +36,11 @@ export const verifyFailure = (options) => {
     uncaught = false,
     uncaughtMessage,
   } = options
-  let { regex, line } = options
+  let { regex, line, codeFrameText } = options
+
+  if (!codeFrameText) {
+    codeFrameText = specTitle
+  }
 
   regex = regex || new RegExp(`${file}:${line || '\\d+'}:${column}`)
 
@@ -174,7 +177,7 @@ const createVerifyTest = (modifier?: string) => {
 
     props.specTitle ||= title
 
-    const verifyFn = props.verifyFn || verifyFailure.bind(null, props)
+    const verifyFn = (props.verifyFn || verifyFailure).bind(null, props)
 
     return (modifier ? it[modifier] : it)(title, verifyFn)
   }
@@ -188,18 +191,20 @@ verify.it['only'] = createVerifyTest('only')
 verify.it['skip'] = createVerifyTest('skip')
 
 export const verifyInternalFailure = (props) => {
-  const { method, stackMethod } = props
+  const { specTitle, method, stackMethod } = props
 
-  cy.get('.runnable-err-message')
-  .should('include.text', `thrown in ${method.replace(/\./g, '-')}`)
+  cy.contains('.runnable-title', specTitle).closest('.runnable').within(() => {
+    cy.get('.runnable-err-message')
+    .should('include.text', `thrown in ${method.replace(/\./g, '-')}`)
 
-  cy.get('.runnable-err-stack-expander > .collapsible-header').click()
+    cy.get('.runnable-err-stack-expander > .collapsible-header').click()
 
-  cy.get('.runnable-err-stack-trace')
-  .should('include.text', stackMethod || method)
+    cy.get('.runnable-err-stack-trace')
+    .should('include.text', stackMethod || method)
 
-  // this is an internal cypress error and we can only show code frames
-  // from specs, so it should not show the code frame
-  cy.get('.test-err-code-frame')
-  .should('not.exist')
+    // this is an internal cypress error and we can only show code frames
+    // from specs, so it should not show the code frame
+    cy.get('.test-err-code-frame')
+    .should('not.exist')
+  })
 }
