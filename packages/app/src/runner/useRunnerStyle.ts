@@ -1,7 +1,7 @@
 import { useWindowSize } from '@vueuse/core'
 import { computed, ref } from 'vue'
 import { usePreferences } from '../composables/usePreferences'
-import { useAutStore } from '../store'
+import { useAutStore, useRunnerUiStore } from '../store'
 import { useScreenshotStore } from '../store/screenshot-store'
 import { runnerConstants } from './runner-constants'
 
@@ -15,6 +15,7 @@ const collapsedNavBarWidth = 64
 const reporterWidth = ref<number>(0)
 const specListWidth = ref<number>(0)
 const autScale = ref<number>(1)
+const { isSpecsListOpen } = useRunnerUiStore()
 
 interface UseRunnerUI {
   initialSpecsListWidth: number
@@ -29,7 +30,7 @@ export const useRunnerStyle = ({
   initialSpecsListWidth: runnerConstants.defaultSpecListWidth,
 }) => {
   reporterWidth.value = initialReporterWidth
-  specListWidth.value = initialSpecsListWidth
+  specListWidth.value = isSpecsListOpen ? initialSpecsListWidth : 0
 
   const { width: windowWidth, height: windowHeight } = useWindowSize()
 
