@@ -13,14 +13,6 @@
       :gql="props.gql.currentProject"
       @close="showSpecPatternModal = false"
     />
-    <!--
-      The markup around the virtualized list is pretty delicate. We might be tempted to
-      combine the `v-if="specs.length"` and the `:class="specs.length ? 'grid': 'hidden'"` below
-      into a single v-if on a `<template>` that would wrap both. This creates a problem
-      recovering from the empty results state as the `.spec-list-container` element is needed
-      in order to render the virtual dom. Virtualized lists require stable containers and it
-      can be tricky to debug after this has happened.
-    -->
     <div
       v-if="specs.length"
       class="grid grid-cols-2 children:font-medium children:text-gray-800 "
@@ -36,6 +28,14 @@
         <div>{{ t('specPage.gitStatusHeader') }}</div>
       </div>
     </div>
+    <!--
+      The markup around the virtualized list is pretty delicate. We might be tempted to
+      combine the `v-if="specs.length"` above and the `:class="specs.length ? 'grid': 'hidden'"` below
+      into a single v-if on a `<template>` that would wrap both, but we are deliberately using
+      `hidden` here to ensure that the `.spec-list-container` element stays in the DOM when
+      the empty state is shown, fixing a bug that meant recovering from the empty state with the
+      "Clear Search" button didn't work as expected.
+    -->
     <div
       class="pb-32px spec-list-container"
       :class="specs.length ? 'grid': 'hidden'"
