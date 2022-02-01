@@ -40,6 +40,8 @@
 </template>
 
 <script lang="ts" setup>
+import TransitionQuickFade from '@cy/components/transitions/TransitionQuickFade.vue'
+
 import { Popover, PopoverButton, PopoverPanel } from '@headlessui/vue'
 
 const props = defineProps<{

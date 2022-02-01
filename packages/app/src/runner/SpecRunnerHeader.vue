@@ -65,27 +65,29 @@
           Viewport
         </template>
         <template #default>
-          <p>
-            The
-            <strong>viewport</strong> determines the width and height of your application. By default the viewport will be
-            <strong>{` ${defaults.width}`}px</strong> by
-            <strong>{` ${defaults.height}`}px</strong>
-            unless specified by a
-            {' '}
-            <code>cy.viewport</code> command.
-          </p>
-          <p>Additionally you can override the default viewport dimensions by specifying these values in your {configFileFormatted(config.configFile)}.</p>
-          <pre>
+          <div class="max-w-400px p-16px">
+            <p>
+              The
+              <strong>viewport</strong> determines the width and height of your application. By default the viewport will be
+              <strong>{` ${defaults.width}`}px</strong> by
+              <strong>{` ${defaults.height}`}px</strong>
+              unless specified by a
+              {' '}
+              <code>cy.viewport</code> command.
+            </p>
+            <p>Additionally you can override the default viewport dimensions by specifying these values in your {configFileFormatted(config.configFile)}.</p>
+            <pre>
             {
   "viewportWidth": ${defaults.width},
   "viewportHeight": ${defaults.height}
 }
           </pre>
-          <p>
-            <ExternalLink href="https://on.cypress.io/viewport">
-              Read more about viewport here.
-            </ExternalLink>
-          </p>
+            <p>
+              <ExternalLink href="https://on.cypress.io/viewport">
+                Read more about viewport here.
+              </ExternalLink>
+            </p>
+          </div>
         </template>
       </SpecRunnerDropdown>
     </div>
