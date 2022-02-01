@@ -52,10 +52,11 @@ export interface CreateConfigOptions {
   hasPluginsFile: boolean
   hasComponentTesting: boolean
   projectRoot: string
+  hasTypescript: boolean
 }
 
 export async function createConfigString (cfg: OldCypressConfig, options: CreateConfigOptions) {
-  return createCypressConfigJs(reduceConfig(cfg), getPluginRelativePath(cfg), options)
+  return createCypressConfig(reduceConfig(cfg), getPluginRelativePath(cfg), options)
 }
 
 interface FileToBeMigratedManually {
@@ -149,7 +150,7 @@ function defineConfigAvailable (projectRoot: string) {
   }
 }
 
-function createCypressConfigJs (config: ConfigOptions, pluginPath: string, options: CreateConfigOptions): string {
+function createCypressConfig (config: ConfigOptions, pluginPath: string, options: CreateConfigOptions): string {
   const globalString = Object.keys(config.global).length > 0 ? `${formatObjectForConfig(config.global)},` : ''
   const componentString = options.hasComponentTesting ? createComponentTemplate(config.component) : ''
   const e2eString = (options.hasE2ESpec && options.hasPluginsFile)
@@ -157,11 +158,23 @@ function createCypressConfigJs (config: ConfigOptions, pluginPath: string, optio
     : ''
 
   if (defineConfigAvailable(options.projectRoot)) {
+    if (options.hasTypescript) {
+      return formatConfig(
+        `import { defineConfig } from 'cypress'
+  
+        export default defineConfig({${globalString}${e2eString}${componentString}})`,
+      )
+    }
+
     return formatConfig(
       `const { defineConfig } = require('cypress')
 
       module.exports = defineConfig({${globalString}${e2eString}${componentString}})`,
     )
+  }
+
+  if (options.hasTypescript) {
+    return formatConfig(`export default {${globalString}${e2eString}${componentString}}`)
   }
 
   return formatConfig(`module.exports = {${globalString}${e2eString}${componentString}}`)
@@ -403,5 +416,6 @@ export function formatConfig (config: string) {
     semi: false,
     singleQuote: true,
     endOfLine: 'auto',
+    parser: 'babel',
   })
 }

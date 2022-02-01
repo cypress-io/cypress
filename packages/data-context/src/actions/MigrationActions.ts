@@ -14,7 +14,7 @@ export class MigrationActions {
   async createConfigFile () {
     const config = await this.ctx.migration.createConfigString()
 
-    await this.ctx.actions.file.writeFileInProject('cypress.config.js', config).catch((error) => {
+    await this.ctx.fs.writeFile(this.ctx.lifecycleManager.configFilePath, config).catch((error) => {
       throw error
     })
 
@@ -97,9 +97,9 @@ export class MigrationActions {
     }
   }
 
-  async assertSuccessfulConfigMigration () {
-    const actual = formatConfig(await this.ctx.actions.file.readFileInProject('cypress.config.js'))
-    const expected = formatConfig(await this.ctx.actions.file.readFileInProject('expected-cypress.config.js'))
+  async assertSuccessfulConfigMigration (configExtension: 'js' | 'ts' = 'js') {
+    const actual = formatConfig(await this.ctx.actions.file.readFileInProject(`cypress.config.${configExtension}`))
+    const expected = formatConfig(await this.ctx.actions.file.readFileInProject(`expected-cypress.config.${configExtension}`))
 
     if (actual !== expected) {
       throw Error(`Expected ${actual} to equal ${expected}`)

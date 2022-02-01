@@ -359,6 +359,9 @@ type CurrentProject implements Node & ProjectLike {
   """
   errorLoadingNodeEvents: BaseError
 
+  """Whether the project has Typescript"""
+  hasTypescript: Boolean
+
   """Whether the project has a valid config file"""
   hasValidConfigFile: Boolean
 

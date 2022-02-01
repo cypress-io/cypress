@@ -30,11 +30,11 @@ function skipCTMigration () {
   cy.contains(`I'll do this later`).click()
 }
 
-function migrateAndVerifyConfig () {
+function migrateAndVerifyConfig (configExtension: 'js' | 'ts' = 'js') {
   cy.contains('Migrate the configuration for me').click()
 
-  cy.withCtx(async (ctx) => {
-    const configStats = await ctx.actions.file.checkIfFileExists('cypress.config.js')
+  cy.withCtx(async (ctx, o) => {
+    const configStats = await ctx.actions.file.checkIfFileExists(`cypress.config.${o.configExtension}`)
 
     expect(configStats).to.not.be.null.and.not.be.undefined
 
@@ -42,8 +42,8 @@ function migrateAndVerifyConfig () {
 
     expect(oldConfigStats).to.be.null
 
-    await ctx.actions.migration.assertSuccessfulConfigMigration()
-  })
+    await ctx.actions.migration.assertSuccessfulConfigMigration(o.configExtension)
+  }, { configExtension })
 }
 
 function finishMigrationAndContinue () {
@@ -209,6 +209,7 @@ describe('Full migration flow for each project', () => {
     // default testFiles but custom integration - can rename automatically
     cy.get(renameAutoStep).should('exist')
     // no CT
+    cy.pause()
     cy.get(renameManualStep).should('not.exist')
     // supportFile is false - cannot migrate
     cy.get(renameSupportStep).should('exist')
@@ -370,6 +371,49 @@ describe('Full migration flow for each project', () => {
     skipCTMigration()
     migrateAndVerifyConfig()
     finishMigrationAndContinue()
+  })
+
+  it('completes journey for migration-typescript-project', () => {
+    startMigrationFor('migration-typescript-project')
+    // defaults, rename all the things
+    // can rename integration->e2e
+    cy.get(renameAutoStep).should('exist')
+    // no CT
+    cy.get(renameManualStep).should('not.exist')
+    // supportFile is false - cannot migrate
+    cy.get(renameSupportStep).should('exist')
+    cy.get(setupComponentStep).should('not.exist')
+    cy.get(configFileStep).should('exist')
+
+    // default testFiles but custom integration - can rename automatically
+    cy.get(renameAutoStep).should('exist')
+    // no CT
+    cy.get(renameManualStep).should('not.exist')
+    // supportFile is false - cannot migrate
+    cy.get(renameSupportStep).should('exist')
+    cy.get(setupComponentStep).should('not.exist')
+    cy.get(configFileStep).should('exist')
+
+    // Migration workflow
+    // before auto migration
+    cy.contains('cypress/integration/foo.spec.js')
+
+    // after auto migration
+    cy.contains('cypress/e2e/foo.cy.js')
+
+    runAutoRename()
+
+    cy.wait(100)
+    cy.withCtx((ctx) => {
+      ['cypress/e2e/foo.cy.js'].forEach(async (spec) => {
+        const stats = await ctx.actions.file.checkIfFileExists(ctx.path.join(spec))
+
+        expect(stats).to.not.be.null
+      })
+    })
+
+    renameSupport()
+    migrateAndVerifyConfig('ts')
   })
 })
 
