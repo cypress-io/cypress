@@ -47,6 +47,6 @@ describe('<RecordKey />', () => {
     .should('be.visible')
     .and('not.be.disabled')
 
-    cy.percySnapshot('RecordKey appearance')
+    cy.percySnapshot()
   })
 })
