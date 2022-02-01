@@ -134,6 +134,10 @@ export class ProjectDataSource {
     this._specs = specs
   }
 
+  setRelaunchBrowser (relaunchBrowser: boolean) {
+    this.ctx.coreData.app.relaunchBrowser = relaunchBrowser
+  }
+
   async specPatternsForTestingType (projectRoot: string, testingType: Cypress.TestingType): Promise<{
     specPattern?: string[]
     specExcludePattern?: string[]
@@ -339,9 +343,5 @@ export class ProjectDataSource {
     }
 
     return isEqual(specPattern, [component])
-  }
-
-  setIsBrowserOpen (isBrowserOpen: boolean) {
-    this.ctx.coreData.app.isBrowserOpen = isBrowserOpen
   }
 }
