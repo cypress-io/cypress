@@ -452,7 +452,7 @@ export = {
   async connectToNewSpec (browser: Browser, options: CypressConfiguration = {}, automation) {
     const port = browser.debuggingPort
 
-    const criClient = await this._connectToNewTab(port, options)
+    const criClient = await this._connectToNewTab(port, options.onError)
 
     this._setAutomation(criClient, automation)
 
@@ -463,7 +463,7 @@ export = {
 
   async connectToExisting (browser: Browser, options: CypressConfiguration = {}, automation) {
     const port = await protocol.getRemoteDebuggingPort()
-    const criClient = await this._connectToChromeRemoteInterface(port, options, browser.displayName, options.url)
+    const criClient = await this._connectToChromeRemoteInterface(port, options.onError, browser.displayName, options.url)
 
     this._setAutomation(criClient, automation)
   },

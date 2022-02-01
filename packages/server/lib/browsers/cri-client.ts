@@ -139,9 +139,10 @@ export { chromeRemoteInterface }
 type DeferredPromise = { resolve: Function, reject: Function }
 
 export const newTab = async (host, port, onAsynchronousError) => {
-  return chromeRemoteInterface.New({ host, port }).then((target) => {
-    return create(target.webSocketDebuggerUrl, onAsynchronousError)
-  })
+  await chromeRemoteInterface.Version({ host, port })
+  const target = await chromeRemoteInterface.New({ host, port })
+
+  return create(target.webSocketDebuggerUrl, onAsynchronousError)
 }
 
 export const create = Bluebird.method((target: websocketUrl, onAsynchronousError: Function): Bluebird<CRIWrapper> => {
@@ -229,10 +230,16 @@ export const create = Bluebird.method((target: websocketUrl, onAsynchronousError
     client = {
       ensureMinimumProtocolVersion,
       getProtocolVersion,
-      closeTarget: Bluebird.method(async (targetId) => {
-        const { port } = new URL(target)
+      closeTarget: Bluebird.method((targetId) => {
+        return new Promise(async (resolve) => {
+          const { port } = new URL(target)
 
-        return chromeRemoteInterface.Close({ host: '127.0.0.1', port, id: targetId })
+          await chromeRemoteInterface.Close({ host: '127.0.0.1', port, id: targetId })
+
+          cri.on('Inspector.detached', () => {
+            cri.close().then(resolve)
+          })
+        })
       }),
       send: Bluebird.method((command: CRI.Command, params?: object) => {
         const enqueue = () => {

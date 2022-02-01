@@ -1298,16 +1298,19 @@ module.exports = {
       }
 
       // TODO: Figure out how to handle no video and no-exit
-      await openProject.stopScreencast()
-      await openProject.resetBrowserState()
+      if (!results.error) {
+        await openProject.stopScreencast()
+        await openProject.resetBrowserState()
+      }
 
-      if (browser.name === 'electron') {
+      if (browser.name === 'electron' || results.error) {
         // always close the browser now as opposed to letting
         // it exit naturally with the parent process due to
         // electron bug in windows
         debug('attempting to close the browser')
         await openProject.closeBrowser()
       } else {
+        debug('attempting to close the browser tab')
         await openProject.closeBrowserTab()
       }
 
