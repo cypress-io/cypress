@@ -272,6 +272,11 @@ export default function (Commands, Cypress, cy, state, config) {
       const isContentEditable = $elements.isContentEditable(options.$el.get(0))
       const isTextarea = $elements.isTextarea(options.$el.get(0))
 
+      // click event is only fired on button, image, submit, reset elements.
+      // That's why we cannot use $elements.isButtonLike() here.
+      const type = (type) => $elements.isInputType(options.$el.get(0), type)
+      const sendClickEvent = type('button') || type('image') || type('submit') || type('reset')
+
       return keyboard.type({
         $el: options.$el,
         chars,
@@ -347,13 +352,24 @@ export default function (Commands, Cypress, cy, state, config) {
           })
         },
 
-        onEnterPressed (id) {
+        onEnterPressed (el) {
           // dont dispatch change events or handle
           // submit event if we've pressed enter into
           // a textarea or contenteditable
-
           if (isTextarea || isContentEditable) {
             return
+          }
+
+          // https://github.com/cypress-io/cypress/issues/19541
+          // Send click event on type('{enter}')
+          if (sendClickEvent) {
+            // Firefox sends a click event automatically.
+            if (!Cypress.isBrowser('firefox')) {
+              const ctor = $dom.getDocumentFromElement(el).defaultView?.PointerEvent
+              const event = new ctor('click')
+
+              el.dispatchEvent(event)
+            }
           }
 
           // if our value has changed since our
@@ -362,7 +378,7 @@ export default function (Commands, Cypress, cy, state, config) {
           const changeEvent = state('changeEvent')
 
           if (changeEvent) {
-            changeEvent(id)
+            changeEvent()
           }
 
           // handle submit event handler here
