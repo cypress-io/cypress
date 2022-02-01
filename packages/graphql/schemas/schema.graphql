@@ -658,7 +658,7 @@ type MigrationRegexp {
   """regexp to use to rename existing specs in e2e"""
   afterE2E: String!
 
-  """regexp to identiey existing specs in component"""
+  """regexp to identify existing specs in component"""
   beforeComponent: String!
 
   """regexp to identify existing specs in e2e"""

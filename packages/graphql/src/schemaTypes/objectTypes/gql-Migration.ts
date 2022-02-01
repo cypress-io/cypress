@@ -131,7 +131,7 @@ export const MigrationRegexp = objectType({
     })
 
     t.nonNull.string('beforeComponent', {
-      description: 'regexp to identiey existing specs in component',
+      description: 'regexp to identify existing specs in component',
     })
 
     t.nonNull.string('afterComponent', {
