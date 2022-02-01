@@ -14,7 +14,7 @@ const resolve = require('../../util/resolve')
 const browserLaunch = require('./browser_launch')
 const util = require('../util')
 const validateEvent = require('./validate_event')
-const errors = require('../../errors')
+const errors = require('../../errors-child')
 
 const UNDEFINED_SERIALIZED = '__cypress_undefined__'
 
