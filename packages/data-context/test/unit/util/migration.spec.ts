@@ -10,7 +10,7 @@ import {
   reduceConfig,
   renameSupportFilePath,
   OldCypressConfig,
-} from '../../../src/util/migration'
+} from '../../../src/sources/migration'
 import { expect } from 'chai'
 import tempDir from 'temp-dir'
 import type { e2eProjectDirs } from '@packages/frontend-shared/cypress/e2e/support/e2eProjectDirs'
@@ -46,6 +46,7 @@ describe('cypress.config.js generation', () => {
       hasComponentTesting: false,
       hasPluginsFile: true,
       projectRoot,
+      hasTypescript: false,
     })
 
     snapshot(generatedConfig)
@@ -63,6 +64,7 @@ describe('cypress.config.js generation', () => {
       hasComponentTesting: false,
       hasPluginsFile: true,
       projectRoot,
+      hasTypescript: false,
     })
 
     snapshot(generatedConfig)
