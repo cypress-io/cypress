@@ -416,5 +416,6 @@ export function formatConfig (config: string) {
     semi: false,
     singleQuote: true,
     endOfLine: 'auto',
+    parser: 'babel',
   })
 }

@@ -30,11 +30,11 @@ function skipCTMigration () {
   cy.contains(`I'll do this later`).click()
 }
 
-function migrateAndVerifyConfig (configExtension = 'js') {
+function migrateAndVerifyConfig (configExtension: 'js' | 'ts' = 'js') {
   cy.contains('Migrate the configuration for me').click()
 
-  cy.withCtx(async (ctx) => {
-    const configStats = await ctx.actions.file.checkIfFileExists(`cypress.config.${configExtension}`)
+  cy.withCtx(async (ctx, o) => {
+    const configStats = await ctx.actions.file.checkIfFileExists(`cypress.config.${o.configExtension}`)
 
     expect(configStats).to.not.be.null.and.not.be.undefined
 
@@ -42,8 +42,8 @@ function migrateAndVerifyConfig (configExtension = 'js') {
 
     expect(oldConfigStats).to.be.null
 
-    await ctx.actions.migration.assertSuccessfulConfigMigration()
-  })
+    await ctx.actions.migration.assertSuccessfulConfigMigration(o.configExtension)
+  }, { configExtension })
 }
 
 function finishMigrationAndContinue () {
