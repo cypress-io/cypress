@@ -203,3 +203,17 @@ The \`specExcludePattern\` configuration option was removed from the root in Cyp
 https://on.cypress.io/migration-guide
 
 `
+
+exports['e2e config throws an error if baseUrl is set on the root level 1'] = `
+The \`baseUrl\` configuration option was removed from the root in Cypress version \`10.0.0\`. Please update this option under e2e testing type property.
+
+https://on.cypress.io/migration-guide
+
+`
+
+exports['e2e config throws an error if baseUrl is set on the component level 1'] = `
+The \`baseUrl\` configuration option is not valid in Component testing. Please update this option under e2e testing type property.
+
+https://on.cypress.io/migration-guide
+
+`

@@ -242,7 +242,9 @@ describe('e2e network error handling', function () {
       },
     ],
     settings: {
-      baseUrl: `http://localhost:${PORT}/`,
+      e2e: {
+        baseUrl: `http://localhost:${PORT}/`,
+      },
     },
   })
 
@@ -367,7 +369,9 @@ describe('e2e network error handling', function () {
     it('baseurl check tries 5 times in run mode', function () {
       return systemTests.exec(this, {
         config: {
-          baseUrl: 'http://never-gonna-exist.invalid',
+          e2e: {
+            baseUrl: 'http://never-gonna-exist.invalid',
+          },
         },
         snapshot: true,
         expectedExitCode: 1,
@@ -429,7 +433,9 @@ describe('e2e network error handling', function () {
           spec: 'https_passthru.cy.js',
           snapshot: true,
           config: {
-            baseUrl: `https://localhost:${HTTPS_PORT}`,
+            e2e: {
+              baseUrl: `https://localhost:${HTTPS_PORT}`,
+            },
           },
         })
         .then(() => {
@@ -457,8 +463,10 @@ describe('e2e network error handling', function () {
           spec: 'network_error_304_handling.cy.js',
           video: false,
           config: {
-            baseUrl: `http://localhost:${PORT}`,
             pageLoadTimeout: 4000,
+            e2e: {
+              baseUrl: `http://localhost:${PORT}`,
+            },
           },
           snapshot: true,
         })
@@ -477,8 +485,10 @@ describe('e2e network error handling', function () {
             spec: 'network_error_304_handling.cy.js',
             video: false,
             config: {
-              baseUrl: `http://localhost:${PORT}`,
               pageLoadTimeout: 4000,
+              e2e: {
+                baseUrl: `http://localhost:${PORT}`,
+              },
             },
             snapshot: true,
           })
@@ -509,8 +519,10 @@ describe('e2e network error handling', function () {
           spec: 'network_error_304_handling.cy.js',
           video: false,
           config: {
-            baseUrl: `http://localhost:${PORT}`,
             pageLoadTimeout: 4000,
+            e2e: {
+              baseUrl: `http://localhost:${PORT}`,
+            },
           },
           snapshot: true,
         })

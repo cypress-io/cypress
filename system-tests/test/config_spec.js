@@ -148,4 +148,29 @@ describe('e2e config', () => {
       snapshot: true,
     })
   })
+
+  it('throws an error if baseUrl is set on the root level', function () {
+    Fixtures.scaffoldProject('invalid-root-level-config')
+    Fixtures.projectPath('invalid-root-level-config')
+
+    return systemTests.exec(this, {
+      project: 'invalid-root-level-config',
+      configFile: 'invalid-baseUrl-config.js',
+      expectedExitCode: 1,
+      snapshot: true,
+    })
+  })
+
+  it('throws an error if baseUrl is set on the component level', function () {
+    Fixtures.scaffoldProject('invalid-root-level-config')
+    Fixtures.projectPath('invalid-root-level-config')
+
+    return systemTests.exec(this, {
+      project: 'invalid-root-level-config',
+      configFile: 'invalid-component-baseUrl-config.js',
+      testingType: 'component',
+      expectedExitCode: 1,
+      snapshot: true,
+    })
+  })
 })
