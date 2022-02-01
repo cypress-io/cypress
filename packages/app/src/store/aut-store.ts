@@ -7,6 +7,8 @@ interface AutStoreState {
   highlightUrl: boolean
   viewportWidth: number
   viewportHeight: number
+  defaultViewportHeight: 660
+  defaultViewportWidth: 1000
   isLoadingUrl: boolean
   isLoading: boolean
   isRunning: boolean
@@ -24,6 +26,8 @@ export const useAutStore = defineStore({
       url: undefined,
       viewportHeight: 660,
       viewportWidth: 1000,
+      defaultViewportHeight: 660,
+      defaultViewportWidth: 1000,
       isLoading: false,
       isRunning: false,
       viewportUpdateCallback: null,

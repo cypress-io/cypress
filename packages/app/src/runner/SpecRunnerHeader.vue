@@ -70,25 +70,29 @@
         <template #heading>
           <i-cy-ruler_x16 class="icon-dark-gray-500 icon-light-gray-400" />
           <span class="text-14px whitespace-nowrap">{{ autStore.viewportWidth }}x{{ autStore.viewportHeight }}</span>
+          <span
+            v-if="displayScale"
+            class="-mr-6px text-gray-300 text-14px"
+          > ({{ displayScale }})</span>
         </template>
         <template #default>
-          <div class="max-h-50vw p-16px text-gray-700 w-400px overflow-auto">
+          <div class="max-h-50vw p-16px text-gray-600 leading-3 w-400px overflow-auto">
             <p class="mb-16px">
               The
               <strong>viewport</strong> determines the width and height of your application. By default the viewport will be
-              <strong>{{ autStore.viewportWidth }}px</strong> by
-              <strong>{{ autStore.viewportHeight }}px</strong>
+              <strong>{{ autStore.defaultViewportWidth }}px</strong> by
+              <strong>{{ autStore.defaultViewportHeight }}px</strong>
               unless specified by a <InlineCodeFragment>cy.viewport</InlineCodeFragment> command.
             </p>
             <p class="mb-16px">
-              Additionally you can override the default viewport dimensions by specifying these values in your config file.
+              Additionally you can override the default viewport dimensions by specifying these values in your config file:
             </p>
-            <pre>
-{
-  "viewportWidth": {{ autStore.viewportWidth }},
-  "viewportHeight": {{ autStore.viewportHeight }}
-}
-          </pre>
+
+            <ShikiHighlight
+              class="rounded border-1 border-gray-200 mb-16px"
+              lang="javascript"
+              :code="code"
+            />
             <p>
               <ExternalLink href="https://on.cypress.io/viewport">
                 Read more about viewport here.
@@ -114,19 +118,21 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
 import { useAutStore, useSpecStore } from '../store'
-import { gql, useMutation } from '@urql/vue'
-import { SpecRunnerHeaderFragment, SpecRunnerHeader_SetBrowserDocument, SpecRunnerHeader_BrowserFragment } from '../generated/graphql'
+import { gql } from '@urql/vue'
+import { SpecRunnerHeaderFragment } from '../generated/graphql'
 import SelectorPlayground from './selector-playground/SelectorPlayground.vue'
 import { useSelectorPlaygroundStore } from '../store/selector-playground-store'
 import type { EventManager } from './event-manager'
 import type { AutIframe } from './aut-iframe'
 import { togglePlayground as _togglePlayground } from './utils'
-import ExternalLink from '@cy/gql-components/ExternalLink.vue'
+import ExternalLink from '@packages/frontend-shared/src/gql-components/ExternalLink.vue'
 import Button from '@packages/frontend-shared/src/components/Button.vue'
+import ShikiHighlight from '@packages/frontend-shared/src/components/ShikiHighlight.vue'
 import VerticalBrowserListItems from '@packages/frontend-shared/src/gql-components/topnav/VerticalBrowserListItems.vue'
 import InlineCodeFragment from '@packages/frontend-shared/src/components/InlineCodeFragment.vue'
 import SpecRunnerDropdown from './SpecRunnerDropdown.vue'
 import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
+import { useRunnerStyle } from './useRunnerStyle'
 
 gql`
 fragment SpecRunnerHeader on CurrentProject {
@@ -170,8 +176,6 @@ mutation SpecRunnerHeader_SetBrowser($browserId: ID!, $specPath: String!) {
 }
 `
 
-const setBrowser = useMutation(SpecRunnerHeader_SetBrowserDocument)
-
 const props = defineProps<{
   gql: SpecRunnerHeaderFragment
   eventManager: EventManager
@@ -180,6 +184,12 @@ const props = defineProps<{
 }>()
 
 const autIframe = props.getAutIframe()
+
+const { autScale } = useRunnerStyle()
+
+const displayScale = computed(() => {
+  return autScale.value < 1 ? `${Math.round(autScale.value * 100) }%` : 0
+})
 
 const selectorPlaygroundStore = useSelectorPlaygroundStore()
 
@@ -194,4 +204,8 @@ const autStore = useAutStore()
 
 const isDisabled = computed(() => autStore.isRunning || autStore.isLoading)
 
+const code = `{
+  "viewportWidth": ${autStore.defaultViewportWidth},
+  "viewportHeight": ${autStore.defaultViewportHeight}
+}`
 </script>
