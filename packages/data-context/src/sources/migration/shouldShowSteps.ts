@@ -96,10 +96,18 @@ export async function shouldShowRenameSupport (projectRoot: string, config: OldC
     return false
   }
 
-  const defaultSupportFile = 'cypress/support/index.js'
-  const supportFile = config.e2e?.supportFile ?? config.supportFile ?? defaultSupportFile
+  const defaultSupportFile = 'cypress/support/index.'
+  let supportFile = config.e2e?.supportFile ?? config.supportFile
 
-  return supportFile === defaultSupportFile
+  if (supportFile === undefined) {
+    const foundDefaultSupportFiles = await globby(`${defaultSupportFile}{ts,js}`, { cwd: projectRoot })
+
+    if (foundDefaultSupportFiles.length > 0) {
+      supportFile = foundDefaultSupportFiles[0]
+    }
+  }
+
+  return supportFile && supportFile.startsWith(defaultSupportFile)
 }
 
 // if they have component testing configured, they will need to
