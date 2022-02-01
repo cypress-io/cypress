@@ -20,7 +20,7 @@ const installCustomPercyCommand = ({ before, elementOverrides } = {}) => {
 
     const titlePath = test.titlePath()
 
-    const screenshotName = [name].concat(titlePath).filter(Boolean).join(' > ')
+    const screenshotName = titlePath.concat(name).filter(Boolean).join(' > ')
 
     _.each(opts.elementOverrides, (v, k) => {
       // eslint-disable-next-line cypress/no-assigning-return-values
