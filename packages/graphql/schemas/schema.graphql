@@ -20,10 +20,12 @@ type Browser implements Node {
   id: ID!
   isFocusSupported: Boolean!
   isSelected: Boolean!
+  isVersionSupported: Boolean!
   majorVersion: String
   name: String!
   path: String!
   version: String!
+  warning: String
 }
 
 enum BrowserFamily {

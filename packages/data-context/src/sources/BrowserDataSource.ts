@@ -75,4 +75,12 @@ export class BrowserDataSource {
 
     return false
   }
+
+  isVersionSupported (obj: FoundBrowser) {
+    return Boolean(!obj.unsupportedVersion)
+  }
+
+  warning (obj: FoundBrowser) {
+    return obj.warning
+  }
 }

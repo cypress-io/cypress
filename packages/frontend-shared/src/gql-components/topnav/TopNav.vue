@@ -155,6 +155,13 @@
           <i-cy-circle-check_x24 class="h-24px w-24px icon-dark-jade-100 icon-light-jade-500" />
         </div>
       </template>
+      <template
+        v-else-if="!browser.isVersionSupported"
+        #suffix
+        class="top-0 right-0 absolute"
+      >
+        <i-cy-circle-bg-question-mark_x16 class="icon-dark-gray-700 icon-light-gray-200" />
+      </template>
     </TopNavListItem>
   </TopNavList>
 
@@ -258,6 +265,8 @@ fragment TopNav_Browsers on CurrentProject {
     displayName
     version
     majorVersion
+    isVersionSupported
+    warning
   }
 }
 

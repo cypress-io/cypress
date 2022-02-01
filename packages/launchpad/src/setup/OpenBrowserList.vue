@@ -27,6 +27,12 @@
             'hover:border-indigo-300 hover:ring-2 hover:ring-indigo-100': !browser.disabled && !checked && !(isBrowserOpening || isBrowserOpen)
           }"
         >
+          <div
+            v-if="!browser.isVersionSupported"
+            class="top-0 right-0 absolute"
+          >
+            <i-cy-circle-bg-question-mark_x16 class="ml-8px -top-2px relative inline-block icon-dark-gray-700 icon-light-gray-200" />
+          </div>
           <div class="text-center">
             <img
               :src="allBrowsersIcons[browser.displayName] || allBrowsersIcons.generic"
@@ -171,10 +177,12 @@ fragment OpenBrowserList on CurrentProject {
     family
     disabled
     isSelected
+    isVersionSupported
     channel
     displayName
     path
     version
+    warning
     majorVersion
   }
   currentTestingType
