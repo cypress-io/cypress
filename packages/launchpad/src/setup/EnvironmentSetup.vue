@@ -59,16 +59,19 @@ fragment EnvironmentSetup on Wizard {
     name
     type
     isSelected
+    isDetected
   }
   framework {
     type
     id
     name
     isSelected
+    isDetected
     supportedBundlers {
       id
       type
       name
+      isDetected
     }
     category
   }
@@ -96,7 +99,6 @@ fragment EnvironmentSetup on Wizard {
     id
     name
     type
-    isDetected
   }
 }
 `

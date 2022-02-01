@@ -238,7 +238,8 @@
       "bundlerLabel": "Bundler",
       "bundlerPlaceholder": "Pick a bundler",
       "languageLabel": "Language",
-      "configFileLanguageLabel": "Cypress Config File"
+      "configFileLanguageLabel": "Cypress Config File",
+      "detected": "(detected)"
     },
     "install": {
       "startButton": "Install",
