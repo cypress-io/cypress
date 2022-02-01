@@ -10,7 +10,7 @@ module.exports = {
   },
   'experimentalFetchPolyfill': true,
   'component': {
-    'ignoreSpecPattern': [
+    'specExcludePattern': [
       '**/__snapshots__/*',
       '**/__image_snapshots__/*',
       'examples/**/*',

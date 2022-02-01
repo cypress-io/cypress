@@ -25,6 +25,7 @@ export const e2eProjectDirs = [
   'hooks-after-rerun',
   'ids',
   'integration-outside-project-root',
+  'invalid-root-level-config',
   'issue-8111-iframe-input',
   'kill-child-process',
   'launchpad',

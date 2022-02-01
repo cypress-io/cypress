@@ -137,13 +137,13 @@ describe('e2e config', () => {
     })
   })
 
-  it('throws an error if ignoreSpecPattern is set on the root level', function () {
+  it('throws an error if specExcludePattern is set on the root level', function () {
     Fixtures.scaffoldProject('invalid-root-level-config')
     Fixtures.projectPath('invalid-root-level-config')
 
     return systemTests.exec(this, {
       project: 'invalid-root-level-config',
-      configFile: 'invalid-ignoreSpecPattern.config.js',
+      configFile: 'invalid-specExcludePattern.config.js',
       expectedExitCode: 1,
       snapshot: true,
     })

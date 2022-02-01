@@ -197,8 +197,8 @@ https://on.cypress.io/migration-guide
 
 `
 
-exports['e2e config throws an error if ignoreSpecPattern is set on the root level 1'] = `
-The \`ignoreSpecPattern\` configuration option was removed from the root in Cypress version \`10.0.0\`. Please update this option under each testing type property.
+exports['e2e config throws an error if specExcludePattern is set on the root level 1'] = `
+The \`specExcludePattern\` configuration option was removed from the root in Cypress version \`10.0.0\`. Please update this option under each testing type property.
 
 https://on.cypress.io/migration-guide
 

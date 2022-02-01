@@ -393,27 +393,27 @@ describe('lib/config', () => {
         })
       })
 
-      context('ignoreSpecPattern', () => {
+      context('specExcludePattern', () => {
         it('passes if a string', function () {
-          this.setup({ e2e: { ignoreSpecPattern: '*.jsx', supportFile: false } })
+          this.setup({ e2e: { specExcludePattern: '*.jsx', supportFile: false } })
 
           return this.expectValidationPasses()
         })
 
         it('passes if an array of strings', function () {
-          this.setup({ e2e: { ignoreSpecPattern: ['*.jsx'], supportFile: false } })
+          this.setup({ e2e: { specExcludePattern: ['*.jsx'], supportFile: false } })
 
           return this.expectValidationPasses()
         })
 
         it('fails if not a string or array', function () {
-          this.setup({ e2e: { ignoreSpecPattern: 5 } })
+          this.setup({ e2e: { specExcludePattern: 5 } })
 
           return this.expectValidationFails('be a string or an array of strings')
         })
 
         it('fails if not an array of strings', function () {
-          this.setup({ e2e: { ignoreSpecPattern: [5] } })
+          this.setup({ e2e: { specExcludePattern: [5] } })
           this.expectValidationFails('be a string or an array of strings')
 
           return this.expectValidationFails('the value was: `[5]`')
@@ -1439,7 +1439,7 @@ describe('lib/config', () => {
             fileServerFolder: { value: '', from: 'default' },
             fixturesFolder: { value: 'cypress/fixtures', from: 'default' },
             hosts: { value: null, from: 'default' },
-            ignoreSpecPattern: { value: '*.hot-update.js', from: 'default' },
+            specExcludePattern: { value: '*.hot-update.js', from: 'default' },
             includeShadowDom: { value: false, from: 'default' },
             isInteractive: { value: true, from: 'default' },
             keystrokeDelay: { value: 0, from: 'default' },
@@ -1550,7 +1550,7 @@ describe('lib/config', () => {
             fileServerFolder: { value: '', from: 'default' },
             fixturesFolder: { value: 'cypress/fixtures', from: 'default' },
             hosts: { value: null, from: 'default' },
-            ignoreSpecPattern: { value: '*.hot-update.js', from: 'default' },
+            specExcludePattern: { value: '*.hot-update.js', from: 'default' },
             includeShadowDom: { value: false, from: 'default' },
             isInteractive: { value: true, from: 'default' },
             keystrokeDelay: { value: 0, from: 'default' },

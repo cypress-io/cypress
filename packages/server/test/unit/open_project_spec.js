@@ -19,7 +19,7 @@ describe('lib/open_project', () => {
     }
 
     this.config = {
-      ignoreSpecPattern: '**/*.nope',
+      specExcludePattern: '**/*.nope',
       projectRoot: todosPath,
     }
 
