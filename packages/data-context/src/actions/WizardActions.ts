@@ -140,7 +140,9 @@ export class WizardActions {
   }
 
   private detectLanguage () {
-    if (/.ts$/.test(this.ctx.lifecycleManager.configFilePath) || this.ctx.fs.existsSync('tsconfig.json')) {
+    if (
+      this.ctx.fs.existsSync('tsconfig.json')
+      || (this.ctx.lifecycleManager.configFile && /.ts$/.test(this.ctx.lifecycleManager.configFile))) {
       this.ctx.wizardData.detectedLanguage = 'ts'
     } else {
       this.ctx.wizardData.detectedLanguage = 'js'
