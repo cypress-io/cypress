@@ -29,7 +29,7 @@ mainBuildFilters: &mainBuildFilters
       only:
         - develop
         - 10.0-release
-        - node-17-maybe
+        - fix-ci-artifact-uploads
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -879,21 +879,6 @@ commands:
           paths:
             - cypress/cypress.zip
 
-  upload-binary:
-    steps:
-      - run:
-          name: upload unique binary
-          command: |
-            node scripts/binary.js upload-unique-binary \
-              --file cypress.zip \
-              --version $(node -p "require('./package.json').version")
-      - run: cat binary-url.json
-      - store-npm-logs
-      - persist_to_workspace:
-          root: ~/
-          paths:
-            - cypress/binary-url.json
-
   build-cypress-npm-package:
     parameters:
       executor:
@@ -931,21 +916,31 @@ commands:
           paths:
             - cypress/cypress.tgz
 
-  upload-npm-package:
+  upload-build-artifacts:
     steps:
       - run: ls -l
       - run:
-          name: upload NPM package
+          name: upload unique binary to S3
           command: |
-            node scripts/binary.js upload-npm-package \
+            node scripts/binary.js upload-build-artifact \
+              --type binary \
+              --file cypress.zip \
+              --version $(node -p "require('./package.json').version")
+      - run:
+          name: upload NPM package to S3
+          command: |
+            node scripts/binary.js upload-build-artifact \
+              --type npm-package \
               --file cypress.tgz \
               --version $(node -p "require('./package.json').version")
       - store-npm-logs
       - run: ls -l
+      - run: cat binary-url.json
       - run: cat npm-package-url.json
       - persist_to_workspace:
           root: ~/
           paths:
+            - cypress/binary-url.json
             - cypress/npm-package-url.json
 
 jobs:
@@ -1587,12 +1582,11 @@ jobs:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "node-17-maybe" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "fix-ci-artifact-uploads" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
-      - upload-binary
-      - upload-npm-package
+      - upload-build-artifacts
       - post-install-comment
 
   test-kitchensink:

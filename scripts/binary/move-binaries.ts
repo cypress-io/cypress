@@ -20,7 +20,7 @@ import uploadUtils from './util/upload'
 // @ts-ignore
 import { getUploadDirForPlatform } from './upload-unique-binary'
 // @ts-ignore
-import { zipName, getFullUploadName } from './upload'
+import { zipName, getFullUploadPath } from './upload'
 
 /**
  * 40 character full sha commit string
@@ -216,7 +216,7 @@ export const moveBinaries = async (args = []) => {
       platformArch: lastBuild.platformArch,
       name: zipName,
     }
-    const destinationPath = getFullUploadName(options)
+    const destinationPath = getFullUploadPath(options)
 
     console.log('copying test runner %s to %s', lastBuild.platformArch, destinationPath)
 
