@@ -160,7 +160,7 @@ export const moveBinaries = async (args = []) => {
 
     const uploadDir = getUploadDirForPlatform({
       version: releaseOptions.version,
-      type: 'binary',
+      uploadFolder: 'binary',
       platformArch,
     })
 

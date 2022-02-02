@@ -63,7 +63,7 @@ module.exports = {
     la(check.url(url), 'could not get upload url', url)
 
     return {
-      url: [url, folder, version, uploadOsName, this.zipName].join('/'),
+      url: [url, folder, version, uploadOsName, zipName].join('/'),
     }
   },
 
@@ -136,13 +136,13 @@ module.exports = {
   },
 
   toS3 ({ file, uploadPath }) {
+    console.log('#uploadToS3 ⏳')
+    console.log('uploading', file, 'to', uploadPath)
+
     la(check.unemptyString(file), 'missing file to upload', file)
     la(fs.existsSync(file), 'cannot find file', file)
     la(check.extension(path.extname(uploadPath))(file),
       'invalid file to upload extension', file)
-
-    console.log('#uploadToS3 ⏳')
-    console.log('uploading', file, 'to', uploadPath)
 
     return new Promise((resolve, reject) => {
       const publisher = this.getPublisher()

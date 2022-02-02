@@ -3,6 +3,7 @@ const la = require('lazy-ass')
 const check = require('check-more-types')
 const fs = require('fs')
 const hasha = require('hasha')
+const _ = require('lodash')
 
 const upload = require('./upload')
 const uploadUtils = require('./util/upload')
@@ -11,15 +12,15 @@ const { s3helpers } = require('./s3-api')
 const uploadTypes = {
   binary: {
     uploadFolder: 'binary',
-    uploadFileName: 'cypress.tgz',
+    uploadFileName: 'cypress.zip',
   },
   'npm-package': {
     uploadFolder: 'npm',
-    uploadFileName: 'cypress.zip',
+    uploadFileName: 'cypress.tgz',
   },
 }
 
-const getArtifactUrl = function (uploadPath) {
+const getCDN = function (uploadPath) {
   return [uploadUtils.getUploadUrl(), uploadPath].join('/')
 }
 
@@ -73,15 +74,15 @@ const validateOptions = (options) => {
   const { type, version, platform } = options
   const supportedUploadTypes = Object.keys(uploadTypes)
 
-  la(check.unemptyString(type) || !supportedUploadTypes.includes(type),
-    `specify which upload type you\d like to upload. One of ${supportedUploadTypes.join(',')}`, type)
+  la(check.defined(type) && supportedUploadTypes.includes(type),
+    `specify which upload type you\'d like to upload. One of ${supportedUploadTypes.join(',')}`, type)
 
   const { uploadFolder, uploadFileName } = uploadTypes[type]
 
   options.uploadFolder = uploadFolder
   options.uploadFileName = uploadFileName
 
-  la(check.unemptyString(version) || check.semver(version), 'invalid version', version)
+  la(check.unemptyString(version) && check.semver(version), 'invalid version', version)
 
   if (!options.hash) {
     options.hash = uploadUtils.formHashFromEnvironment()
@@ -89,28 +90,30 @@ const validateOptions = (options) => {
 
   la(check.unemptyString(options.hash), 'missing hash to give', options)
 
-  options.platformArch = uploadUtils.getUploadNameByOsAndArch(platform != null ? platform : process.platform)
+  options.platformArch = uploadUtils.getUploadNameByOsAndArch(platform || process.platform)
+
+  return options
 }
 
 const uploadArtifactToS3 = function (args = []) {
-  console.log(args)
-  const options = minimist(args, {
-    string: ['type', 'version', 'file', 'hash', 'platform'],
+  const supportedOptions = ['type', 'version', 'file', 'hash', 'platform']
+  let options = minimist(args, {
+    string: supportedOptions,
   })
 
   console.log('Upload options')
-  console.log(options)
+  console.log(_.pick(options, supportedOptions))
 
   validateOptions(options)
 
   const uploadPath = getUploadPath(options)
 
   return upload.toS3({ file: options.file, uploadPath })
-  .then(async (key) => {
-    await setChecksum(options.file, key)
+  .then(() => {
+    return setChecksum(options.file, uploadPath)
   })
   .then(() => {
-    const cdnUrl = getArtifactUrl(uploadPath)
+    const cdnUrl = getCDN(uploadPath)
 
     if (options.type === 'binary') {
       console.log('Binary can be downloaded using URL')
@@ -123,12 +126,18 @@ const uploadArtifactToS3 = function (args = []) {
     return cdnUrl
   })
   .then(uploadUtils.saveUrl(`${options.type}-url.json`))
+  .catch((e) => {
+    console.error('There was an issue uploading the artifact.')
+    console.error(e)
+  })
 }
 
 module.exports = {
-  uploadArtifactToS3,
+  getCDN,
   getUploadDirForPlatform,
-  getArtifactUrl,
+  getUploadPath,
+  setChecksum,
+  uploadArtifactToS3,
 }
 
 if (!module.parent) {
