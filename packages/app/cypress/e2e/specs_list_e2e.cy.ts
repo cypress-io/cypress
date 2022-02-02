@@ -60,15 +60,20 @@ describe('App: Spec List (E2E)', () => {
     cy.get('[data-cy="standard-modal"]').should('not.exist')
   })
 
-  it('has an <a> tag in the Spec File Row that links to the spec runner for that spec', () => {
-    cy.get('[data-cy="specs-list-row"]').get('a').contains('#/specs/runner?file=cypress/e2e/dom-content.spec.js')
+  it('has an <a> tag in the Spec File Row that runs the selected spec when clicked', () => {
+    cy.get('[data-selected-spec="true"]').should('not.exist')
+    cy.get('[data-cy="spec-item-link"]').should('have.attr', 'href')
+    cy.get('[data-cy="spec-item-link"]').click()
+    cy.get('[data-selected-spec="true"]').contains('dom-content.spec.js')
+    cy.get('[data-cy="runnable-header"]').should('be.visible')
   })
 
-  it('cannot open the Spec File Row link in a neew tab with "cmd + click"', () => {
+  it('cannot open the Spec File Row link in a new tab with "cmd + click"', () => {
+    cy.get('[data-cy="spec-item-link"]').click({ metaKey: true })
+    cy.window().then((win) => {
+      cy.spy(win, 'open').as('newtab')
+    })
 
-  })
-
-  it('opens the Runner and immediately runs the selected spec when clicking on a Spec File Row', () => {
-
+    cy.get('@newtab').should('not.be.called')
   })
 })

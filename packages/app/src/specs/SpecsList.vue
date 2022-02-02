@@ -56,6 +56,7 @@
               :key="row.data.data?.absolute"
               class="focus:outline-transparent"
               :to="{ path: '/specs/runner', query: { file: row.data.data?.relative } }"
+              data-cy="spec-item-link"
               @click.meta.prevent="handleCtrlClick"
               @click.ctrl.prevent="handleCtrlClick"
             >
