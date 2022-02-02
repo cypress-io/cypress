@@ -1,6 +1,6 @@
 const _ = require('lodash')
 const util = require('../util')
-const errorsChild = require('../../../../errors/src/errors-child')
+const errors = require('@packages/errors')
 
 const getBody = (ipc, events, ids, [event]) => {
   const taskEvent = _.find(events, { event: 'task' }).handler
@@ -24,7 +24,7 @@ const merge = (prevEvents, events) => {
   const duplicates = _.intersection(_.keys(prevEvents), _.keys(events))
 
   if (duplicates.length) {
-    errorsChild.warning('DUPLICATE_TASK_KEY', duplicates.join(', '))
+    errors.warning('DUPLICATE_TASK_KEY', duplicates.join(', '))
   }
 
   return _.extend(prevEvents, events)
