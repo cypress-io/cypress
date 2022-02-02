@@ -55,7 +55,7 @@ describe('util', () => {
     const { stdoutLineMatches } = util
 
     it('is a function', () => {
-      expect(stdoutLineMatches).to.be.instanceof('Function')
+      expect(stdoutLineMatches).to.be.instanceof(Function)
     })
 
     it('matches entire output', () => {
@@ -197,7 +197,7 @@ describe('util', () => {
       sinon.stub(supportsColor, 'stdout').value({})
       sinon.stub(supportsColor, 'stderr').value({})
 
-      expect(util.supportsColor()).to.be.FALSE
+      expect(util.supportsColor()).to.be.false
     })
   })
 
