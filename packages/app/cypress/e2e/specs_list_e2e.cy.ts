@@ -68,12 +68,21 @@ describe('App: Spec List (E2E)', () => {
     cy.get('[data-cy="runnable-header"]').should('be.visible')
   })
 
-  it('cannot open the Spec File Row link in a new tab with "cmd + click"', () => {
-    cy.get('[data-cy="spec-item-link"]').click({ metaKey: true })
-    cy.window().then((win) => {
-      cy.spy(win, 'open').as('newtab')
+  // TODO: this test does not work in Firefox currently because remote:debugger:protocol isn't wired up to Firefox's CDP
+  it('cannot open the Spec File Row link in a new tab with "cmd + click"', async () => {
+    let numTargets
+    let newNumTargets
+
+    await Cypress.automation('remote:debugger:protocol', { command: 'Target.getTargets' }).then((res) => {
+      numTargets = res.targetInfos.length
     })
 
-    cy.get('@newtab').should('not.be.called')
+    cy.get('[data-cy="spec-item-link"]').click({ metaKey: true }).then(async () => {
+      await Cypress.automation('remote:debugger:protocol', { command: 'Target.getTargets' }).then((res) => {
+        newNumTargets = res.targetInfos.length
+      })
+
+      expect(numTargets).to.eq(newNumTargets)
+    })
   })
 })
