@@ -172,8 +172,7 @@ describe('multi-domain Cypress API', { experimentalSessionSupport: true, experim
       })
     })
 
-    // TODO: support current test
-    it.skip('has currentTest property synced from primary', () => {
+    it('has currentTest property synced from primary', () => {
       cy.switchToDomain('foobar.com', [Cypress.currentTest], ([theCurrentTest]) => {
         expect(Cypress.currentTest).to.deep.equal(theCurrentTest)
       })

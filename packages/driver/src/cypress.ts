@@ -676,7 +676,7 @@ class $Cypress {
 
     return {
       title: currentTestRunnable.title,
-      titlePath: currentTestRunnable.titlePath(),
+      titlePath: _.isFunction(currentTestRunnable.titlePath) ? currentTestRunnable.titlePath() : currentTestRunnable.titlePath,
     }
   }
 
