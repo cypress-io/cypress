@@ -1,4 +1,4 @@
-import { BUNDLERS, FoundBrowser, Editor, Warning, AllowedState, AllModeOptions, TestingType } from '@packages/types'
+import { BUNDLERS, FoundBrowser, Editor, Warning, AllowedState, AllModeOptions, TestingType, PACKAGE_MANAGERS, BrowserStatus } from '@packages/types'
 import type { NexusGenEnums, NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
 import type { App, BrowserWindow } from 'electron'
 import type { ChildProcess } from 'child_process'
@@ -56,7 +56,8 @@ export interface AppDataShape {
   refreshingBrowsers: Promise<FoundBrowser[]> | null
   refreshingNodePath: Promise<string> | null
   nodePath: Maybe<string>
-  isBrowserOpen: boolean
+  browserStatus: BrowserStatus
+  relaunchBrowser: boolean
 }
 
 export interface WizardDataShape {
@@ -110,6 +111,7 @@ export interface CoreDataShape {
   isAuthBrowserOpened: boolean
   scaffoldedFiles: NexusGenObjects['ScaffoldedFile'][] | null
   warnings: Warning[]
+  packageManager: typeof PACKAGE_MANAGERS[number]
 }
 
 /**
@@ -133,7 +135,8 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
       projects: [],
       refreshingNodePath: null,
       nodePath: modeOptions.userNodePath,
-      isBrowserOpen: false,
+      browserStatus: 'closed',
+      relaunchBrowser: false,
     },
     localSettings: {
       availableEditors: [],
@@ -161,5 +164,6 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
       browserWindow: null,
     },
     scaffoldedFiles: null,
+    packageManager: 'npm',
   }
 }

@@ -12,22 +12,22 @@ describe('App: Index', () => {
         // With no specs present, the page renders two cards, one for scaffolding example specs,
         // another for creating a new blank spec.
         cy.findAllByTestId('card').eq(0).as('ScaffoldCard')
-        .should('have.attr', 'tabindex', '0')
         .within(() => {
-          cy.findByRole('heading', {
-            level: 2, name: defaultMessages.createSpec.e2e.importFromScaffold.header,
+          cy.findByRole('button', {
+            name: defaultMessages.createSpec.e2e.importFromScaffold.header,
           }).should('be.visible')
+          .and('not.be.disabled')
 
           cy.contains(defaultMessages.createSpec.e2e.importFromScaffold.description)
           .should('be.visible')
         })
 
         cy.findAllByTestId('card').eq(1).as('EmptySpecCard')
-        .should('have.attr', 'tabindex', '0')
         .within(() => {
-          cy.findByRole('heading', {
-            level: 2, name: defaultMessages.createSpec.e2e.importEmptySpec.header,
+          cy.findByRole('button', {
+            name: defaultMessages.createSpec.e2e.importEmptySpec.header,
           }).should('be.visible')
+          .and('not.be.disabled')
 
           cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.description)
           .should('be.visible')
@@ -259,11 +259,9 @@ describe('App: Index', () => {
 
         cy.findByRole('dialog', { name: defaultMessages.createSpec.newSpecModalTitle }).within(() => {
           cy.findAllByTestId('card').eq(0)
-          .should('have.attr', 'tabindex', '0')
           .and('contain', defaultMessages.createSpec.e2e.importFromScaffold.header)
 
           cy.findAllByTestId('card').eq(1)
-          .should('have.attr', 'tabindex', '0')
           .and('contain', defaultMessages.createSpec.e2e.importEmptySpec.header)
         })
       })
@@ -305,24 +303,22 @@ describe('App: Index', () => {
         // With no specs present, the page renders two cards, one for creating from found components,
         // another for creating from found stories.
         cy.findAllByTestId('card').eq(0).as('ComponentCard')
-        .should('have.attr', 'tabindex', '0')
         .within(() => {
-          cy.findByRole('heading', {
-            level: 2,
+          cy.findByRole('button', {
             name: defaultMessages.createSpec.component.importFromComponent.header,
           }).should('be.visible')
+          .and('not.be.disabled')
 
           cy.contains(defaultMessages.createSpec.component.importFromComponent.description)
           .should('be.visible')
         })
 
         cy.findAllByTestId('card').eq(1).as('StoryCard')
-        .should('have.attr', 'tabindex', '0')
         .within(() => {
-          cy.findByRole('heading', {
-            level: 2,
+          cy.findByRole('button', {
             name: defaultMessages.createSpec.component.importFromStory.header,
           }).should('be.visible')
+          .and('not.be.disabled')
 
           cy.contains(defaultMessages.createSpec.component.importFromStory.description)
           .should('be.visible')
@@ -458,11 +454,10 @@ describe('App: Index', () => {
             name: defaultMessages.createSpec.newSpecModalTitle,
           }).within(() => {
             cy.findAllByTestId('card').eq(0)
-            .should('have.attr', 'tabindex', '0')
 
             // the storybook card remains enabled here
-            cy.findAllByTestId('card').eq(1)
-            .should('have.attr', 'tabindex', '0')
+            cy.contains('button', defaultMessages.createSpec.component.importFromStory.header)
+            .should('not.be.disabled')
           })
         })
       })
@@ -479,22 +474,22 @@ describe('App: Index', () => {
         // another for creating from found stories. The story card is disabled due to storybook not
         // being configured for the scaffolded project.
         cy.findAllByTestId('card').eq(0).as('ComponentCard')
-        .should('have.attr', 'tabindex', '0')
         .within(() => {
-          cy.findByRole('heading', {
-            level: 2, name: defaultMessages.createSpec.component.importFromComponent.header,
+          cy.findByRole('button', {
+            name: defaultMessages.createSpec.component.importFromComponent.header,
           }).should('be.visible')
+          .and('not.be.disabled')
 
           cy.contains(defaultMessages.createSpec.component.importFromComponent.description)
           .should('be.visible')
         })
 
         cy.findAllByTestId('card').eq(1).as('StoryCard')
-        .should('have.attr', 'tabindex', '-1')
         .within(() => {
-          cy.findByRole('heading', {
-            level: 2, name: defaultMessages.createSpec.component.importFromStory.header,
+          cy.findByRole('button', {
+            name: defaultMessages.createSpec.component.importFromStory.header,
           }).should('be.visible')
+          .and('be.disabled')
 
           cy.contains(defaultMessages.createSpec.component.importFromStory.notSetupDescription)
           .should('be.visible')
@@ -614,11 +609,10 @@ describe('App: Index', () => {
           // another spec.
           cy.findByRole('dialog', { name: defaultMessages.createSpec.newSpecModalTitle }).within(() => {
             cy.findAllByTestId('card').eq(0)
-            .should('have.attr', 'tabindex', '0')
 
             // the storybook card remains disabled here
-            cy.findAllByTestId('card').eq(1)
-            .should('have.attr', 'tabindex', '-1')
+            cy.contains('button', defaultMessages.createSpec.component.importFromStory.header)
+            .should('be.disabled')
           })
         })
 
@@ -702,11 +696,9 @@ describe('App: Index', () => {
 
         cy.findByRole('dialog', { name: defaultMessages.createSpec.newSpecModalTitle }).within(() => {
           cy.findAllByTestId('card').eq(0)
-          .should('have.attr', 'tabindex', '0')
           .and('contain', defaultMessages.createSpec.component.importFromComponent.description)
 
           cy.findAllByTestId('card').eq(1)
-          .should('have.attr', 'tabindex', '0')
           .and('contain', defaultMessages.createSpec.component.importFromStory.description)
         })
       })
@@ -716,7 +708,6 @@ describe('App: Index', () => {
 
         cy.findByRole('dialog', { name: defaultMessages.createSpec.newSpecModalTitle }).within(() => {
           cy.findAllByTestId('card').eq(0)
-          .should('have.attr', 'tabindex', '0')
           .and('contain', defaultMessages.createSpec.component.importFromComponent.description).click()
         })
 
@@ -735,7 +726,6 @@ describe('App: Index', () => {
 
         cy.findByRole('dialog', { name: defaultMessages.createSpec.newSpecModalTitle }).within(() => {
           cy.findAllByTestId('card').eq(0)
-          .should('have.attr', 'tabindex', '0')
           .and('contain', defaultMessages.createSpec.component.importFromComponent.description).click()
         })
 
@@ -766,7 +756,6 @@ describe('App: Index', () => {
 
         cy.findByRole('dialog', { name: defaultMessages.createSpec.newSpecModalTitle }).within(() => {
           cy.findAllByTestId('card').eq(1)
-          .should('have.attr', 'tabindex', '0')
           .and('contain', defaultMessages.createSpec.component.importFromStory.description).click()
         })
 
