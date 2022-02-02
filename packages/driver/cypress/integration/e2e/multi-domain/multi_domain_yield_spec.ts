@@ -87,7 +87,7 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
     cy.on('fail', (err) => {
       assertLogLength(logs, 6)
       expect(logs[5].get('error')).to.eq(err)
-      expect(err.message).to.include('`cy.switchToDomain()` could not serialize the subject due to one of it\'s properties not being supported by the structured clone algorithm.')
+      expect(err.message).to.include('`cy.switchToDomain()` could not serialize the subject due to one of its properties not being supported by the structured clone algorithm.')
 
       done()
     })
@@ -116,7 +116,7 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
     cy.on('fail', (err) => {
       assertLogLength(logs, 7)
       expect(logs[6].get('error')).to.eq(err)
-      expect(err.message).to.include('`cy.switchToDomain()` could not serialize the subject due to one of it\'s properties not being supported by the structured clone algorithm.')
+      expect(err.message).to.include('`cy.switchToDomain()` could not serialize the subject due to one of its properties not being supported by the structured clone algorithm.')
 
       done()
     })
@@ -124,14 +124,15 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
     cy.switchToDomain('foobar.com', () => {
       cy
       .get('[data-cy="dom-check"]')
-    }).should('equal', 'object')
+    }).invoke('text')
+    .should('equal', 'From a secondary domain')
   })
 
   it('throws if an object contains a function', (done) => {
     cy.on('fail', (err) => {
       assertLogLength(logs, 7)
       expect(logs[6].get('error')).to.eq(err)
-      expect(err.message).to.include('`cy.switchToDomain()` could not serialize the subject due to one of it\'s properties not being supported by the structured clone algorithm.')
+      expect(err.message).to.include('`cy.switchToDomain()` could not serialize the subject due to one of its properties not being supported by the structured clone algorithm.')
 
       done()
     })
@@ -149,7 +150,7 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
     cy.on('fail', (err) => {
       assertLogLength(logs, 7)
       expect(logs[6].get('error')).to.eq(err)
-      expect(err.message).to.include('`cy.switchToDomain()` could not serialize the subject due to one of it\'s properties not being supported by the structured clone algorithm.')
+      expect(err.message).to.include('`cy.switchToDomain()` could not serialize the subject due to one of its properties not being supported by the structured clone algorithm.')
 
       done()
     })
@@ -165,7 +166,7 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
     cy.on('fail', (err) => {
       assertLogLength(logs, 7)
       expect(logs[6].get('error')).to.eq(err)
-      expect(err.message).to.include('`cy.switchToDomain()` could not serialize the subject due functions not being supported by the structured clone algorithm.')
+      expect(err.message).to.include('`cy.switchToDomain()` could not serialize the subject due to functions not being supported by the structured clone algorithm.')
 
       done()
     })
@@ -184,7 +185,7 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
     cy.on('fail', (err) => {
       assertLogLength(logs, 7)
       expect(logs[6].get('error')).to.eq(err)
-      expect(err.message).to.include('`cy.switchToDomain()` could not serialize the subject due symbols not being supported by the structured clone algorithm.')
+      expect(err.message).to.include('`cy.switchToDomain()` could not serialize the subject due to symbols not being supported by the structured clone algorithm.')
 
       done()
     })
@@ -202,7 +203,7 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
       if (!isChromium) {
         assertLogLength(logs, 7)
         expect(logs[6].get('error')).to.eq(err)
-        expect(err.message).to.include('`cy.switchToDomain()` could not serialize the subject due to one of it\'s properties not being supported by the structured clone algorithm.')
+        expect(err.message).to.include('`cy.switchToDomain()` could not serialize the subject due to one of its properties not being supported by the structured clone algorithm.')
       }
 
       done()
