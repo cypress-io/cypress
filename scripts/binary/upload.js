@@ -155,10 +155,11 @@ module.exports = {
       .pipe(rename((p) => {
         // rename to standard filename for upload
         p.basename = path.basename(uploadPath, path.extname(uploadPath))
-        p.dirname = path.dirName(uploadPath)
+        p.dirname = path.dirname(uploadPath)
 
         return p
-      })).pipe(gulpDebug())
+      }))
+      .pipe(gulpDebug())
       .pipe(publisher.publish(headers))
       .pipe(awspublish.reporter())
       .on('error', reject)
