@@ -525,10 +525,6 @@ commands:
   post-install-comment:
     description: Post GitHub comment with a blurb on how to install pre-release version
     steps:
-      - run: ls -la
-      - run: ls -la binary-url.json npm-package-url.json
-      - run: cat binary-url.json
-      - run: cat npm-package-url.json
       - run:
           name: Post pre-release install comment
           command: |
@@ -918,14 +914,14 @@ commands:
     steps:
       - run: ls -l
       - run:
-          name: upload unique binary to S3
+          name: Upload unique binary to S3
           command: |
             node scripts/binary.js upload-build-artifact \
               --type binary \
               --file cypress.zip \
               --version $(node -p "require('./package.json').version")
       - run:
-          name: upload NPM package to S3
+          name: Upload NPM package to S3
           command: |
             node scripts/binary.js upload-build-artifact \
               --type npm-package \
@@ -2181,7 +2177,6 @@ linux-workflow: &linux-workflow
           - npm-react
           - npm-mount-utils
           - npm-vue
-          - npm-design-system
           - npm-webpack-batteries-included-preprocessor
           - npm-webpack-preprocessor
           - npm-vite-dev-server
