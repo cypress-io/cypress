@@ -285,11 +285,11 @@ describe('App: Index', () => {
         it('should create example files on an empty project', () => {
           cy.contains('[data-cy="card"]', defaultMessages.createSpec.e2e.importFromScaffold.header).click()
           // TODO: Check that the popup stays open
-          cy.withCtx(async (ctx) => {
-            const stats = await ctx.actions.file.checkIfFileExists('cypress/e2e/1-getting-started/todo.cy.js')
+          cy.withCtx(async (ctx, o) => {
+            const stats = await ctx.actions.file.checkIfFileExists(o.path)
 
             expect(stats?.isFile()).to.be.true
-          })
+          }, { path: getPathForPlatform('cypress/e2e/1-getting-started/todo.cy.js') })
         })
       })
     })
@@ -829,13 +829,13 @@ describe('App: Index', () => {
         cy.contains('Button.jsx').click()
         cy.findByTestId('file-row').contains(getPathForPlatform('src/stories/Button.cy.js')).click()
 
-        cy.withCtx(async (ctx) => {
+        cy.withCtx(async (ctx, o) => {
           const spec = (
             await ctx.project.findSpecs(ctx.currentProject ?? '', 'component', ['**/*.cy.jsx'], [], [])
-          ).find((spec) => spec.relative === getPathForPlatform('src/stories/Button.cy.jsx'))
+          ).find((spec) => spec.relative === o.path)
 
           expect(spec).to.exist
-        })
+        }, { path: getPathForPlatform('src/stories/Button.cy.jsx') })
       })
 
       it('should generate spec from story', () => {
@@ -851,12 +851,12 @@ describe('App: Index', () => {
         cy.findByTestId('file-row').contains(getPathForPlatform('src/stories/Button.stories.cy.js')).click()
         cy.contains('composeStories')
 
-        cy.withCtx(async (ctx) => {
+        cy.withCtx(async (ctx, o) => {
           const spec = (await ctx.project.findSpecs(ctx.currentProject ?? '', 'component', ['**/*.cy.jsx'], [], []))
-          .find((spec) => spec.relative === getPathForPlatform('src/stories/Button.stories.cy.jsx'))
+          .find((spec) => spec.relative === o.path)
 
           expect(spec).to.exist
-        })
+        }, { path: getPathForPlatform('src/stories/Button.stories.cy.jsx') })
       })
     })
   })
