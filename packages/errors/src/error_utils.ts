@@ -73,17 +73,3 @@ export const logError = function (err: CypressError | ErrorLike, color: AllowedC
 
   return err
 }
-
-export const warnIfExplicitCiBuildId = function (ciBuildId?: string | null) {
-  if (!ciBuildId) {
-    return ''
-  }
-
-  return `\
-It also looks like you also passed in an explicit --ci-build-id flag.
-
-This is only necessary if you are NOT running in one of our supported CI providers.
-
-This flag must be unique for each new run, but must also be identical for each machine you are trying to --group or run in --parallel.\
-`
-}

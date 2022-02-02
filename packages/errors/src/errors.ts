@@ -6,7 +6,7 @@ import AU from 'ansi_up'
 
 import { backtick, details, errTemplate, guard } from './err_template'
 import { stripIndent } from './strip_indent'
-import { displayFlags, listItems, logError, warnIfExplicitCiBuildId } from './error_utils'
+import { displayFlags, listItems, logError } from './error_utils'
 import type { ClonedError, CypressError, ErrTemplateResult } from './errorTypes'
 import { stackWithoutMessage } from './stack_utils'
 
@@ -22,6 +22,20 @@ const displayRetriesRemaining = function (tries: number) {
   return chalk.gray(
     `We will try connecting to it ${tries} more ${times}...${lastTryNewLine}`,
   )
+}
+
+export const warnIfExplicitCiBuildId = function (ciBuildId?: string | null) {
+  if (!ciBuildId) {
+    return ''
+  }
+
+  return `\
+It also looks like you also passed in an explicit --ci-build-id flag.
+
+This is only necessary if you are NOT running in one of our supported CI providers.
+
+This flag must be unique for each new run, but must also be identical for each machine you are trying to --group or run in --parallel.\
+`
 }
 
 /**
