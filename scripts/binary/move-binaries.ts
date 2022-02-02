@@ -18,7 +18,7 @@ import confirm from 'inquirer-confirm'
 import uploadUtils from './util/upload'
 
 // @ts-ignore
-import { getUploadDirForPlatform } from './upload-build-artifacts'
+import { getUploadDirForPlatform } from './upload-build-artifact'
 // @ts-ignore
 import { zipName, getFullUploadPath } from './upload'
 

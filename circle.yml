@@ -2122,7 +2122,6 @@ linux-workflow: &linux-workflow
     - runner-ct-integration-tests-chrome:
         requires:
           - build
-
     - desktop-gui-integration-tests-7x:
         requires:
           - build
