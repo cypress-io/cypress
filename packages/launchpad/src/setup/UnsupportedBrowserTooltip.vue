@@ -11,9 +11,9 @@
   >
     <slot />
     <transition
-      name="enter-from-bottom"
-      enter-from-class="transition-all transform origin-bottom scale-y-0"
-      enter-to-class="transition-all transform origin-bottom scale-y-100"
+      :name="`unsupported-browser-enter-to-${placement}`"
+      :enter-from-class="`transition-all transform ${placement === 'top' ? 'origin-bottom' : 'origin-top'} scale-y-0`"
+      :enter-to-class="`transition-all transform ${placement === 'top' ? 'origin-bottom' : 'origin-top'} scale-y-100`"
     >
       <div
         v-if="scaleUp"
