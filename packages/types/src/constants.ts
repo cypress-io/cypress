@@ -28,7 +28,19 @@ export const STORYBOOK_DEPS = [
   '@storybook/testing-vue3',
 ] as const
 
-export const FRONTEND_FRAMEWORKS = [
+interface FrontEndFramework{
+  type: string
+  name: string
+  supportedBundlers: readonly Bundler['type'][]
+  package: string
+  glob: string
+  deps: readonly string[]
+  category: typeof FRONTEND_FRAMEWORK_CATEGORIES[number]
+  codeGenFramework: typeof CODE_GEN_FRAMEWORKS[number]
+  storybookDep: typeof STORYBOOK_DEPS[number]
+}
+
+export const FRONTEND_FRAMEWORKS: readonly FrontEndFramework[] = [
   {
     type: 'cra',
     name: 'Create React App',

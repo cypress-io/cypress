@@ -35,7 +35,16 @@ export class WizardActions {
       return this.setBundler('webpack')
     }
 
-    return this.setBundler(null)
+    const { chosenBundler } = this.ctx.coreData.wizard
+
+    // if the previous bundler was incompatible with the
+    // new framework, we need to reset it
+    if (chosenBundler
+      && !this.ctx.wizard.chosenFramework?.supportedBundlers.includes(chosenBundler)) {
+      return this.setBundler(null)
+    }
+
+    return
   }
 
   setBundler (bundler: NexusGenEnums['SupportedBundlers'] | null) {
@@ -131,7 +140,7 @@ export class WizardActions {
     const detectedFrameworkObject = FRONTEND_FRAMEWORKS.find((f) => f.type === this.ctx.wizardData.detectedFramework)
 
     if (detectedFrameworkObject && detectedFrameworkObject.supportedBundlers.length === 1) {
-      this.ctx.wizardData.detectedBundler = detectedFrameworkObject.supportedBundlers[0]
+      this.ctx.wizardData.detectedBundler = detectedFrameworkObject.supportedBundlers[0] ?? null
 
       return
     }
@@ -254,7 +263,7 @@ export class WizardActions {
   }
 
   private async scaffoldConfig (testingType: 'e2e' | 'component'): Promise<NexusGenObjects['ScaffoldedFile']> {
-    if (!fs.existsSync(this.ctx.lifecycleManager.configFilePath)) {
+    if (!this.ctx.fs.existsSync(this.ctx.lifecycleManager.configFilePath)) {
       this.ctx.lifecycleManager.setConfigFilePath(this.ctx.coreData.wizard.chosenLanguage)
 
       const configCode = this.configCode(testingType, this.ctx.coreData.wizard.chosenLanguage)
@@ -398,7 +407,7 @@ export class WizardActions {
   }
 
   private async scaffoldFile (filePath: string, contents: string, description: string): Promise<NexusGenObjects['ScaffoldedFile']> {
-    if (fs.existsSync(filePath)) {
+    if (this.ctx.fs.existsSync(filePath)) {
       return {
         status: 'skipped',
         description: 'File already exists',
