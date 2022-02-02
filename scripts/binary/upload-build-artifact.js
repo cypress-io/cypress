@@ -103,7 +103,7 @@ const uploadArtifactToS3 = function (args = []) {
 
   validateOptions(options)
 
-  const uploadPath = getUploadPath()
+  const uploadPath = getUploadPath(options)
 
   return upload.toS3({ file: options.file, uploadPath })
   .then(async (key) => {

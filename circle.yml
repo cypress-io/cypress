@@ -862,6 +862,7 @@ commands:
               echo "Not code signing for this platform"
             fi
       - run:
+          name: Build the Cypress binary
           environment:
             DEBUG: electron-builder,electron-osx-sign*
           # notarization on Mac can take a while
@@ -871,8 +872,7 @@ commands:
             yarn binary-build --platform $PLATFORM --version $(node ./scripts/get-next-version.js)
       - run:
           name: Zip the binary
-          command: |
-            yarn binary-zip --platform $PLATFORM
+          command: yarn binary-zip --platform $PLATFORM
       - store-npm-logs
       - persist_to_workspace:
           root: ~/
@@ -886,12 +886,11 @@ commands:
         default: cy-doc
     steps:
       - run:
-          name: bump NPM version
+          name: Bump NPM version
           command: yarn get-next-version --npm
       - run:
-          name: build NPM package
-          command: |
-            yarn build --scope cypress
+          name: Build NPM package
+          command: yarn build --scope cypress
       - run:
           command: ls -la types
           working_directory: cli/build
@@ -910,7 +909,6 @@ commands:
           name: list created NPM package
           command: ls -l
       - store-npm-logs
-      - run: pwd
       - persist_to_workspace:
           root: ~/
           paths:
