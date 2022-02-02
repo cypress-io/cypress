@@ -144,7 +144,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
             cleanup()
 
             // This handles when a subject is returned synchronously
-            resolve(failedToSerializeSubjectOfType ? failedToSerializeSubjectOfType : subject)
+            resolve(failedToSerializeSubjectOfType ? failedToSerializeSubject(failedToSerializeSubjectOfType) : subject)
           } else {
             resolve()
           }
