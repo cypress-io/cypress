@@ -9,7 +9,7 @@
       class="cursor-pointer left-full top-0 bottom-0 w-16px z-1 absolute group hocus:outline-transparent"
       role="button"
       aria-label="toggle navigation"
-      @click="updatePreferences"
+      @click="toggleNavbarIfAllowed"
     >
       <div class="flex h-full transform origin-left transition-transform w-16px scale-x-0 duration-300 items-center group-hocus:scale-x-100">
         <div class="h-full bg-indigo-400 w-3px" />
@@ -147,14 +147,12 @@ watchEffect(() => {
   }
 })
 
-const updatePreferences = async () => {
+const toggleNavbarIfAllowed = () => {
   if (route.meta?.navBarExpandedAllowed === false) {
     return
   }
 
-  const resp = await setPreferences.executeMutation({ value: JSON.stringify({ isSideNavigationOpen: !isNavBarExpanded.value }) })
-
-  isNavBarExpanded.value = resp.data?.setPreferences?.localSettings.preferences.isSideNavigationOpen ?? true
+  setPreferences.executeMutation({ value: JSON.stringify({ isSideNavigationOpen: !isNavBarExpanded.value }) })
 }
 
 </script>
