@@ -40,7 +40,7 @@ const failedToSerializeSubject = (type: string) => {
         || prop === Symbol.isConcatSpreadable
         || prop === 'jquery'
         || prop === 'nodeType'
-        // || prop === Symbol.toStringTag // If this is passed through to the target we will not property fail the 'cy.invoke' command.
+        // || prop === Symbol.toStringTag // If this is passed through to the target we will not properly fail the 'cy.invoke' command.
         || prop === 'window'
         || prop === 'document'
         || prop === 'inspect'
