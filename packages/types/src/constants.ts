@@ -21,30 +21,18 @@ export const CODE_GEN_FRAMEWORKS = ['react', 'vue'] as const
 
 export type CodeGenFramework = typeof CODE_GEN_FRAMEWORKS[number]
 
-export const FRONTEND_FRAMEWORK_CATEGORIES = ['react', 'vue', 'other'] as const
+export const FRONTEND_FRAMEWORK_CATEGORIES = ['react', 'vue'] as const
 
 export const STORYBOOK_DEPS = [
   '@storybook/testing-react',
   '@storybook/testing-vue3',
 ] as const
 
-interface FrontEndFramework{
-  type: string
-  name: string
-  supportedBundlers: readonly Bundler['type'][]
-  package: string
-  glob: string
-  deps: readonly string[]
-  category: typeof FRONTEND_FRAMEWORK_CATEGORIES[number]
-  codeGenFramework: typeof CODE_GEN_FRAMEWORKS[number]
-  storybookDep: typeof STORYBOOK_DEPS[number]
-}
-
-export const FRONTEND_FRAMEWORKS: readonly FrontEndFramework[] = [
+export const FRONTEND_FRAMEWORKS = [
   {
     type: 'cra',
     name: 'Create React App',
-    supportedBundlers: ['webpack'],
+    supportedBundlers: ['webpack'] as readonly Bundler['type'][],
     package: '@cypress/react',
     glob: '*.{jsx,tsx}',
     deps: ['react-scripts', 'react', 'react-dom'],
@@ -55,7 +43,7 @@ export const FRONTEND_FRAMEWORKS: readonly FrontEndFramework[] = [
   {
     type: 'vuecli',
     name: 'Vue CLI',
-    supportedBundlers: ['webpack'],
+    supportedBundlers: ['webpack'] as readonly Bundler['type'][],
     package: '@cypress/vue',
     glob: '*.vue',
     deps: ['@vue/cli-service', 'vue'],
@@ -66,7 +54,7 @@ export const FRONTEND_FRAMEWORKS: readonly FrontEndFramework[] = [
   {
     type: 'react',
     name: 'React.js',
-    supportedBundlers: ['webpack', 'vite'],
+    supportedBundlers: ['webpack', 'vite'] as readonly Bundler['type'][],
     package: '@cypress/react',
     glob: '*.{jsx,tsx}',
     deps: ['react', 'react-dom'],
@@ -77,7 +65,7 @@ export const FRONTEND_FRAMEWORKS: readonly FrontEndFramework[] = [
   {
     type: 'vue',
     name: 'Vue.js',
-    supportedBundlers: ['webpack', 'vite'],
+    supportedBundlers: ['webpack', 'vite'] as readonly Bundler['type'][],
     package: '@cypress/vue',
     glob: '*.vue',
     deps: ['vue'],
@@ -88,7 +76,7 @@ export const FRONTEND_FRAMEWORKS: readonly FrontEndFramework[] = [
   {
     type: 'nextjs',
     name: 'Next.js',
-    supportedBundlers: ['webpack'],
+    supportedBundlers: ['webpack'] as readonly Bundler['type'][],
     package: '@cypress/react',
     glob: '*.{jsx,tsx}',
     deps: ['next', 'react', 'react-dom'],
@@ -99,7 +87,7 @@ export const FRONTEND_FRAMEWORKS: readonly FrontEndFramework[] = [
   {
     type: 'nuxtjs',
     name: 'Nuxt.js',
-    supportedBundlers: ['webpack'],
+    supportedBundlers: ['webpack'] as readonly Bundler['type'][],
     package: '@cypress/vue',
     glob: '*.vue',
     deps: ['nuxt'],
