@@ -136,7 +136,11 @@ export const mutation = mutationType({
         // if necessary init the wizard for configuration
         if (ctx.coreData.currentTestingType
           && !ctx.lifecycleManager.isTestingTypeConfigured(ctx.coreData.currentTestingType)) {
-          await ctx.actions.wizard.initialize()
+          try {
+            await ctx.actions.wizard.initialize()
+          } catch (e) {
+            ctx.coreData.baseError = e as Error
+          }
         }
 
         return {}
