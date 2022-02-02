@@ -212,7 +212,10 @@ const automation = {
   },
 
   resetBrowserState (fn) {
-    return browser.browsingData.remove({}, { cache: true, cookies: true, downloads: true, formData: true, history: true, indexedDB: true, localStorage: true, passwords: true, pluginData: true, serverBoundCertificates: true, serviceWorkers: true }).then(fn)
+    // We remove browser data. This is how we remove browser state for firefox
+    // (https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/browsingData/DataTypeSet).
+    // Note that firefox does not support fileSystems or serverBoundCertificates
+    return browser.browsingData.remove({}, { cache: true, cookies: true, downloads: true, formData: true, history: true, indexedDB: true, localStorage: true, passwords: true, pluginData: true, serviceWorkers: true }).then(fn)
   },
 
   closeBrowserTabs (fn) {
@@ -222,6 +225,7 @@ const automation = {
   },
 
   stopScreencast (fn) {
+    // For now, we are returning true as this is only used for firefox. Firefox will disconnect video when the tab/window is removed
     return Promise.resolve(true).then(fn)
   },
 

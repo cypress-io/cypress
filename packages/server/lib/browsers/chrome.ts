@@ -443,12 +443,10 @@ export = {
     return args
   },
 
-  async _connectToNewTab (port: number, onError) {
-    return CriClient.newTab('127.0.0.1', port, onError)
-  },
-
   async connectToNewSpec (browser: Browser, debuggingPort: number, options: CypressConfiguration = {}, automation) {
-    const criClient = await this._connectToNewTab(debuggingPort, options.onError)
+    debug('connecting to new chrome tab in existing instance with url and debugging port', { url: options.url, debuggingPort })
+
+    const criClient = await CriClient.newTab('127.0.0.1', debuggingPort, options.onError)
 
     this._setAutomation(criClient, automation)
 
@@ -459,6 +457,8 @@ export = {
 
   async connectToExisting (browser: Browser, options: CypressConfiguration = {}, automation) {
     const port = await protocol.getRemoteDebuggingPort()
+
+    debug('connecting to existing chrome instance with url and debugging port', { url: options.url, port })
     const criClient = await this._connectToChromeRemoteInterface(port, options.onError, browser.displayName, options.url)
 
     this._setAutomation(criClient, automation)
@@ -545,8 +545,6 @@ export = {
     /* @ts-expect-error */
     launchedBrowser.kill = (...args) => {
       debug('closing remote interface client')
-
-      browser.debuggingPort = undefined
 
       criClient.close()
       debug('closing chrome')

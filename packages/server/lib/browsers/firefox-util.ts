@@ -102,6 +102,8 @@ const attachToTabMemory = Bluebird.method((tab) => {
 })
 
 async function connectMarionetteToNewTab () {
+  // When firefox closes its last tab, it keeps a blank tab open. This will be the only handle
+  // So we will connect to it and navigate it to about:blank to set it up for CDP connection
   const handles = await sendMarionette({
     name: 'WebDriver:GetWindowHandles',
   })
@@ -115,12 +117,17 @@ async function connectMarionetteToNewTab () {
 }
 
 async function connectToNewSpec (browser, debuggingPort, options, automation) {
+  debug('firefox: reconnecting to blank tab')
+
   await connectMarionetteToNewTab()
+
+  debug('firefox: reconnecting CDP')
 
   const criClient = await setupRemote(debuggingPort, automation, options.onError)
 
   new CdpAutomation(criClient.send, criClient.on, criClient.closeTarget, automation)
 
+  debug('firefox: navigating to about:blank')
   await navigateToUrl(options.url)
 }
 
@@ -134,7 +141,7 @@ async function setupRemote (remotePort, automation, onError) {
 }
 
 async function navigateToUrl (url) {
-  sendMarionette({
+  await sendMarionette({
     name: 'WebDriver:Navigate',
     parameters: { url },
   })

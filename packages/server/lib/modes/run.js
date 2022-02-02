@@ -1297,7 +1297,7 @@ module.exports = {
         }
       }
 
-      // If there is an error, close the browser as we potentially can't communicate with the browser anymore
+      // Close the browser if the environment variable is set to do so
       if (process.env.CYPRESS_INTERNAL_FORCE_BROWSER_RELAUNCH) {
         debug('attempting to close the browser')
         await openProject.closeBrowser()

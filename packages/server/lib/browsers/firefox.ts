@@ -384,7 +384,6 @@ export async function open (browser: Browser, url, options: any = {}, automation
 
   if (hasCdp) {
     remotePort = await getRemoteDebuggingPort()
-    browser.debuggingPort = remotePort
 
     defaultLaunchOptions.args.push(`--remote-debugging-port=${remotePort}`)
   }

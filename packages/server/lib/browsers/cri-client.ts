@@ -64,6 +64,10 @@ interface CRIWrapper {
    * @see https://github.com/cyrus-and/chrome-remote-interface#class-cdp
    */
   on (eventName: CRI.EventName, cb: Function): void
+  /**
+   * Closes a target given the id via the Chrome remote interface.
+   * @param targetId the target id to close
+   */
   closeTarget (targetId: string): Promise<any>
   /**
    * Calls underlying remote interface client close
@@ -142,7 +146,9 @@ export const newTab = async (host, port, onAsynchronousError) => {
   // TODO: Currently, there's an issue where when you issue a new tab the timing is off and you can't connect to it immediately.
   // This additional version call seems to help. Still investigating this
   await chromeRemoteInterface.Version({ host, port })
-  const target = await chromeRemoteInterface.New({ host, port })
+
+  debug('starting new tab %o', { host, port })
+  const target = await chromeRemoteInterface.New({ host, port, url: 'about:blank' })
 
   return create(target.webSocketDebuggerUrl, onAsynchronousError)
 }
@@ -183,6 +189,7 @@ export const create = Bluebird.method((target: websocketUrl, onAsynchronousError
     .catch((err) => {
       const cdpError = errors.get('CDP_COULD_NOT_RECONNECT', err)
 
+      // If we cannot reconnect to CDP, we will be unable to move to the next set of specs since we use CDP to clean up and close tabs. Marking this as fatal
       cdpError.isFatalApiErr = true
       onAsynchronousError(cdpError)
     })
@@ -240,9 +247,11 @@ export const create = Bluebird.method((target: websocketUrl, onAsynchronousError
           const { port } = new URL(target)
 
           cri.once('disconnect', () => {
+            // Wait here for the removal of the target
             cri.close().then(resolve)
           })
 
+          // This call queues the target for removal but does not actually remove it immediately
           chromeRemoteInterface.Close({ host: '127.0.0.1', port, id: targetId }).catch(reject)
         })
       },

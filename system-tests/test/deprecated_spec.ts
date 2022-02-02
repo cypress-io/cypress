@@ -50,7 +50,7 @@ describe('deprecated before:browser:launch args', () => {
     psInclude: ['--foo', '--bar'],
   })
 
-  systemTests.it('concat return returns once per test run', {
+  systemTests.it('concat return returns once per spec - [electron]', {
     // TODO: implement webPreferences.additionalArgs here
     // once we decide if/what we're going to make the implemenation
     // SUGGESTION: add this to Cypress.browser.args which will capture
@@ -64,6 +64,25 @@ describe('deprecated before:browser:launch args', () => {
     project: beforeBrowserLaunchProject,
     spec: 'app.cy.js,app_spec2.js',
     snapshot: true,
+    browser: ['electron'],
+    stdoutInclude: 'Deprecation Warning:',
+  })
+
+  systemTests.it('concat return returns once per test run - [firefox,chrome]', {
+    // TODO: implement webPreferences.additionalArgs here
+    // once we decide if/what we're going to make the implemenation
+    // SUGGESTION: add this to Cypress.browser.args which will capture
+    // whatever args we use to launch the browser
+    config: {
+      video: false,
+      env: {
+        BEFORE_BROWSER_LAUNCH_HANDLER: 'return-array-mutation',
+      },
+    },
+    project: beforeBrowserLaunchProject,
+    spec: 'app.cy.js,app_spec2.js',
+    snapshot: true,
+    browser: ['firefox', 'chrome'],
     stdoutInclude: 'Deprecation Warning:',
   })
 
