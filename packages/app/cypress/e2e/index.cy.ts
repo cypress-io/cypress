@@ -95,7 +95,7 @@ describe('App: Index', () => {
             'waiting',
             'window',
           ].map((file) => `cypress/e2e/2-advanced-examples/${file}.cy.js`)),
-        ]
+        ].map(getPathForPlatform)
 
         it('scaffolds example files when card is clicked', () => {
           cy.get('@ScaffoldCard').click()
