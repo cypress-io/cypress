@@ -169,7 +169,7 @@
         #suffix
       >
         <div class="h-16px relative">
-          <TempTooltip class="top-0 right-0 absolute">
+          <UnsupportedBrowserTooltip class="top-0 right-0 absolute">
             <i-cy-circle-bg-question-mark_x16 class="icon-dark-gray-700 icon-light-gray-200" />
             <template #popper>
               <div>
@@ -179,7 +179,7 @@
                 {{ browser.warning }}
               </div>
             </template>
-          </TempTooltip>
+          </UnsupportedBrowserTooltip>
         </div>
       </template>
     </TopNavListItem>
@@ -257,7 +257,7 @@
 import TopNavListItem from './TopNavListItem.vue'
 import TopNavList from './TopNavList.vue'
 import PromptContent from './PromptContent.vue'
-import TempTooltip from '@packages/launchpad/src/setup/TempTooltip.vue'
+import UnsupportedBrowserTooltip from '@packages/launchpad/src/setup/UnsupportedBrowserTooltip.vue'
 import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
 import { gql, useMutation } from '@urql/vue'
 import { TopNavFragment, TopNav_LaunchOpenProjectDocument, TopNav_SetBrowserDocument, TopNav_SetPromptShownDocument } from '../../generated/graphql'

@@ -26,7 +26,7 @@
             'border-gray-200 before:hocus:cursor-pointer hover:border-indigo-300 hover:ring-2 hover:ring-indigo-100': !browser.disabled && !checked && !(isBrowserOpening || isBrowserOpen)
           }"
         >
-          <TempTooltip
+          <UnsupportedBrowserTooltip
             v-if="!browser.isVersionSupported"
             class="top-0 right-0 absolute"
             placement="top"
@@ -40,7 +40,7 @@
                 {{ browser.warning }}
               </div>
             </template>
-          </TempTooltip>
+          </UnsupportedBrowserTooltip>
           <div class="text-center">
             <img
               :src="allBrowsersIcons[browser.displayName] || allBrowsersIcons.generic"
@@ -159,7 +159,7 @@ import ArrowLeftIcon from '~icons/cy/arrow-left_x16'
 import StatusRunningIcon from '~icons/cy/status-running_x16'
 import TestingTypeE2E from '~icons/cy/testing-type-e2e_x24'
 import { RadioGroup, RadioGroupOption, RadioGroupLabel } from '@headlessui/vue'
-import TempTooltip from './TempTooltip.vue'
+import UnsupportedBrowserTooltip from './UnsupportedBrowserTooltip.vue'
 
 import { OpenBrowserListFragment, OpenBrowserList_SetBrowserDocument } from '../generated/graphql'
 
