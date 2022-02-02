@@ -691,7 +691,7 @@ describe('Launchpad: Setup Project', () => {
         // cy.findByRole('button', { name: 'Continue' }).click()
         // cy.contains(/(Initializing Config|Choose a Browser)/)
         cy.findByRole('button', { name: 'Continue' }).click()
-        cy.contains(/(Initializing Config|Choose a Browser)/)
+        cy.contains(/(Initializing Config|Choose a Browser)/, { timeout: 10000 })
       })
 
       it('opens to the "choose framework" page when opened via cli with --component flag', () => {
