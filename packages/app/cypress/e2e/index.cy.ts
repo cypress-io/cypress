@@ -1,5 +1,11 @@
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 
+function getPathForPlatform (posixPath: string) {
+  if (Cypress.platform === 'win32') return posixPath.replaceAll('/', '\\')
+
+  return posixPath
+}
+
 describe('App: Index', () => {
   describe('Testing Type: E2E', () => {
     context('project with default spec pattern', () => {
@@ -156,20 +162,20 @@ describe('App: Index', () => {
           cy.findAllByLabelText(defaultMessages.createSpec.e2e.importEmptySpec.inputPlaceholder)
           .as('enterSpecInput')
 
-          cy.get('@enterSpecInput').invoke('val').should('eq', 'cypress/e2e/filename.cy.js')
+          cy.get('@enterSpecInput').invoke('val').should('eq', getPathForPlatform('cypress/e2e/filename.cy.js'))
           cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.invalidSpecWarning).should('not.exist')
           cy.get('@enterSpecInput').clear()
           cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.invalidSpecWarning).should('not.exist')
 
           // Shows entered file does not match spec pattern
-          cy.get('@enterSpecInput').type('cypress/e2e/no-match')
+          cy.get('@enterSpecInput').type(getPathForPlatform('cypress/e2e/no-match'))
           cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.invalidSpecWarning)
           cy.contains('button', defaultMessages.createSpec.createSpec).should('be.disabled')
 
           //Shows extension warning
-          cy.get('@enterSpecInput').clear().type('cypress/e2e/MyTest.spec.j')
+          cy.get('@enterSpecInput').clear().type(getPathForPlatform('cypress/e2e/MyTest.spec.j'))
           cy.intercept('mutation-EmptyGenerator_MatchSpecFile', (req) => {
-            if (req.body.variables.specFile === 'cypress/e2e/MyTest.spec.jx') {
+            if (req.body.variables.specFile === getPathForPlatform('cypress/e2e/MyTest.spec.jx')) {
               req.on('before:response', (res) => {
                 res.body.data.matchesSpecPattern = true
               })
@@ -181,11 +187,11 @@ describe('App: Index', () => {
           cy.contains('span', '{filename}.cy.jx')
 
           // Create spec
-          cy.get('@enterSpecInput').clear().type('cypress/e2e/MyTest.cy.js')
+          cy.get('@enterSpecInput').clear().type(getPathForPlatform('cypress/e2e/MyTest.cy.js'))
           cy.contains('button', defaultMessages.createSpec.createSpec).should('not.be.disabled').click()
           cy.contains('h2', defaultMessages.createSpec.successPage.header)
 
-          cy.get('[data-cy="file-row"]').contains('cypress/e2e/MyTest.cy.js').click()
+          cy.get('[data-cy="file-row"]').contains(getPathForPlatform('cypress/e2e/MyTest.cy.js')).click()
 
           // TODO: code rendering is flaky in CI
           // cy.get('code').should('contain', 'describe(\'MyTest.cy.js\'')
@@ -440,10 +446,10 @@ describe('App: Index', () => {
           }).as('SuccessDialog').within(() => {
             cy.validateExternalLink({ name: 'Need help', href: 'https://on.cypress.io' })
             cy.findByRole('button', { name: 'Close' }).should('be.visible')
-            cy.contains('src/stories/Button.stories.cy.jsx').should('be.visible')
+            cy.contains(getPathForPlatform('src/stories/Button.stories.cy.jsx')).should('be.visible')
 
             cy.findByRole('link', { name: 'Okay, run the spec' })
-            .should('have.attr', 'href', '#/specs/runner?file=src/stories/Button.stories.cy.jsx')
+            .should('have.attr', 'href', `#/specs/runner?file=${getPathForPlatform('src/stories/Button.stories.cy.jsx')}`)
 
             cy.findByRole('button', { name: 'Create another spec' }).click()
           })
@@ -596,11 +602,11 @@ describe('App: Index', () => {
             name: defaultMessages.createSpec.successPage.header,
           }).as('SuccessDialog').within(() => {
             cy.validateExternalLink({ name: 'Need help', href: 'https://on.cypress.io' })
-            cy.contains('src/App.cy.jsx').should('be.visible')
+            cy.contains(getPathForPlatform('src/App.cy.jsx')).should('be.visible')
             cy.findByRole('button', { name: 'Close' }).should('be.visible')
 
             cy.findByRole('link', { name: 'Okay, run the spec' })
-            .should('have.attr', 'href', '#/specs/runner?file=src/App.cy.jsx')
+            .should('have.attr', 'href', `#/specs/runner?file=${getPathForPlatform('src/App.cy.jsx')}`)
 
             cy.findByRole('button', { name: 'Create another spec' }).click()
           })
@@ -626,7 +632,7 @@ describe('App: Index', () => {
           cy.findByRole('dialog', { name: defaultMessages.createSpec.successPage.header }).as('SuccessDialog').within(() => {
             cy.findByRole('link', {
               name: 'Okay, run the spec',
-            }).should('have.attr', 'href', '#/specs/runner?file=src/App.cy.jsx').click()
+            }).should('have.attr', 'href', `#/specs/runner?file=${getPathForPlatform('src/App.cy.jsx')}`).click()
           })
 
           cy.findByTestId('spec-gen-component-app', { timeout: 5000 }).should('be.visible')
@@ -713,7 +719,7 @@ describe('App: Index', () => {
 
         cy.get('[data-cy=file-list-row]').first().click()
 
-        cy.get('input').invoke('val').should('eq', 'src/App.cy.jsx')
+        cy.get('input').invoke('val').should('eq', getPathForPlatform('src/App.cy.jsx'))
         cy.contains(defaultMessages.createSpec.component.importEmptySpec.header)
 
         cy.contains(defaultMessages.components.button.cancel).click()
@@ -731,23 +737,23 @@ describe('App: Index', () => {
 
         cy.get('[data-cy=file-list-row]').first().click()
 
-        cy.get('input').invoke('val').should('eq', 'src/App.cy.jsx')
+        cy.get('input').invoke('val').should('eq', getPathForPlatform('src/App.cy.jsx'))
         cy.contains(defaultMessages.createSpec.component.importEmptySpec.header)
         cy.contains(defaultMessages.createSpec.component.importEmptySpec.invalidComponentWarning)
         cy.get('input').clear()
         cy.contains(defaultMessages.createSpec.component.importEmptySpec.invalidComponentWarning).should('not.exist')
         cy.contains('button', defaultMessages.createSpec.createSpec).should('be.disabled')
 
-        cy.get('input').clear().type('src/specs-folder/MyTest.cy.jsx')
+        cy.get('input').clear().type(getPathForPlatform('src/specs-folder/MyTest.cy.jsx'))
         cy.contains('button', defaultMessages.createSpec.createSpec).should('not.be.disabled').click()
         cy.contains('h2', defaultMessages.createSpec.successPage.header)
 
-        cy.get('[data-cy="file-row"]').contains('src/specs-folder/MyTest.cy.jsx').click()
+        cy.get('[data-cy="file-row"]').contains(getPathForPlatform('src/specs-folder/MyTest.cy.jsx')).click()
 
         cy.findByRole('dialog', { name: defaultMessages.createSpec.successPage.header }).as('SuccessDialog').within(() => {
           cy.findByRole('link', {
             name: 'Okay, run the spec',
-          }).should('have.attr', 'href', '#/specs/runner?file=src/specs-folder/MyTest.cy.jsx')
+          }).should('have.attr', 'href', `#/specs/runner?file=${getPathForPlatform('src/specs-folder/MyTest.cy.jsx')}`)
         })
       })
 
@@ -761,23 +767,23 @@ describe('App: Index', () => {
 
         cy.get('[data-cy=file-list-row]').first().click()
 
-        cy.get('input').invoke('val').should('eq', 'src/stories/Button.stories.cy.jsx')
+        cy.get('input').invoke('val').should('eq', getPathForPlatform('src/stories/Button.stories.cy.jsx'))
         cy.contains(defaultMessages.createSpec.component.importEmptySpec.header)
         cy.contains(defaultMessages.createSpec.component.importEmptySpec.invalidComponentWarning)
         cy.get('input').clear()
         cy.contains(defaultMessages.createSpec.component.importEmptySpec.invalidComponentWarning).should('not.exist')
         cy.contains('button', defaultMessages.createSpec.createSpec).should('be.disabled')
 
-        cy.get('input').clear().type('src/specs-folder/Button.stories.cy.jsx')
+        cy.get('input').clear().type(getPathForPlatform('src/specs-folder/Button.stories.cy.jsx'))
         cy.contains('button', defaultMessages.createSpec.createSpec).should('not.be.disabled').click()
         cy.contains('h2', defaultMessages.createSpec.successPage.header)
 
-        cy.get('[data-cy="file-row"]').contains('src/specs-folder/Button.stories.cy.jsx').click()
+        cy.get('[data-cy="file-row"]').contains(getPathForPlatform('src/specs-folder/Button.stories.cy.jsx')).click()
 
         cy.findByRole('dialog', { name: defaultMessages.createSpec.successPage.header }).as('SuccessDialog').within(() => {
           cy.findByRole('link', {
             name: 'Okay, run the spec',
-          }).should('have.attr', 'href', '#/specs/runner?file=src/specs-folder/Button.stories.cy.jsx')
+          }).should('have.attr', 'href', `#/specs/runner?file=${getPathForPlatform('src/specs-folder/Button.stories.cy.jsx')}`)
         })
       })
     })
@@ -821,12 +827,12 @@ describe('App: Index', () => {
         .clear().type(componentGlob, { parseSpecialCharSequences: false })
 
         cy.contains('Button.jsx').click()
-        cy.findByTestId('file-row').contains('src/stories/Button.cy.js').click()
+        cy.findByTestId('file-row').contains(getPathForPlatform('src/stories/Button.cy.js')).click()
 
         cy.withCtx(async (ctx) => {
           const spec = (
             await ctx.project.findSpecs(ctx.currentProject ?? '', 'component', ['**/*.cy.jsx'], [], [])
-          ).find((spec) => spec.relative === 'src/stories/Button.cy.jsx')
+          ).find((spec) => spec.relative === getPathForPlatform('src/stories/Button.cy.jsx'))
 
           expect(spec).to.exist
         })
@@ -842,12 +848,12 @@ describe('App: Index', () => {
         checkCodeGenCandidates(['Button.stories.jsx'])
 
         cy.contains('Button.stories.jsx').click()
-        cy.findByTestId('file-row').contains('src/stories/Button.stories.cy.js').click()
+        cy.findByTestId('file-row').contains(getPathForPlatform('src/stories/Button.stories.cy.js')).click()
         cy.contains('composeStories')
 
         cy.withCtx(async (ctx) => {
           const spec = (await ctx.project.findSpecs(ctx.currentProject ?? '', 'component', ['**/*.cy.jsx'], [], []))
-          .find((spec) => spec.relative === 'src/stories/Button.stories.cy.jsx')
+          .find((spec) => spec.relative === getPathForPlatform('src/stories/Button.stories.cy.jsx'))
 
           expect(spec).to.exist
         })
