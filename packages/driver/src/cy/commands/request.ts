@@ -51,6 +51,12 @@ const whichAreOptional = (val, key) => {
   return (val === null) && OPTIONAL_OPTS.includes(key)
 }
 
+const stripOrigin = (url) => {
+  const location = $Location.create(url)
+
+  return url.replace(location.origin, '')
+}
+
 const needsFormSpecified = (options: any = {}) => {
   const { body, json, headers } = options
 
@@ -273,7 +279,7 @@ export default (Commands, Cypress, cy, state, config) => {
             }
 
             return {
-              message: `${options.method} ${status} ${options.url}`,
+              message: `${options.method} ${status} ${stripOrigin(options.url)}`,
               indicator,
             }
           },

@@ -754,7 +754,7 @@ describe('src/cy/commands/request', () => {
             .resolves({ isOkStatusCode: true, status: 201 })
 
             cy.request('http://localhost:8080/foo').then(function () {
-              expect(this.lastLog.invoke('renderProps').message).to.equal('GET 201 http://localhost:8080/foo')
+              expect(this.lastLog.invoke('renderProps').message).to.equal('GET 201 /foo')
             })
           })
         })
