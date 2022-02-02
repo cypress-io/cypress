@@ -10,8 +10,6 @@
     <OpenBrowserList
       variant=""
       :gql="query.data.value.currentProject"
-      :is-browser-open="isBrowserOpen"
-      :is-browser-opening="isBrowserOpening"
       @navigated-back="backFn"
       @launch="launch"
       @close-browser="closeBrowserFn"
@@ -38,7 +36,6 @@ query OpenBrowser {
     currentTestingType
     isLoadingConfigFile
     isLoadingNodeEvents
-    isBrowserOpen
     ...OpenBrowserList
   }
   ...WarningList
@@ -113,10 +110,6 @@ const backFn = () => {
 const closeBrowserFn = () => {
   closeBrowser.executeMutation({})
 }
-
-const isBrowserOpen = computed(() => !!query.data.value?.currentProject?.isBrowserOpen)
-
-const isBrowserOpening = computed(() => !!launchOpenProject.fetching.value || launching.value)
 
 const headingDescription = computed(() => {
   return t('setupWizard.chooseBrowser.description', { testingType: query.data.value?.currentProject?.currentTestingType === 'component' ? 'component' : 'E2E' })

@@ -89,7 +89,7 @@
   <ExternalLink
     v-else-if="versions"
     :href="`${releasesUrl}/tag/v${versions.latest.version}`"
-    class="flex outline-transparent text-gray-600 gap-8px items-center group hocus:text-indigo-500 hocus:outline-0"
+    class="flex font-semibold outline-transparent text-gray-600 gap-8px items-center group hocus:text-indigo-500 hocus:outline-0"
     :use-default-hocus="false"
     data-cy="top-nav-cypress-version-current-link"
   >

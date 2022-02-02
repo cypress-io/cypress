@@ -14,7 +14,7 @@
         :key="browser.id"
         :data-cy-browser="browser.name"
         :value="browser.id"
-        :disabled="browser.disabled || (isBrowserOpening || isBrowserOpen)"
+        :disabled="browser.disabled || browserStatus.chosen"
       >
         <RadioGroupLabel
           :for="browser.id"
@@ -22,8 +22,8 @@
           :class="{
             'border-jade-300 ring-2 ring-jade-100 focus:border-jade-400 focus:border-1 focus:outline-none': checked,
             'bg-gray-50 before:hocus:cursor-not-allowed': browser.disabled,
-            'filter grayscale border-gray-200': (isBrowserOpening || isBrowserOpen) && !checked,
-            'border-gray-200 before:hocus:cursor-pointer hover:border-indigo-300 hover:ring-2 hover:ring-indigo-100': !browser.disabled && !checked && !(isBrowserOpening || isBrowserOpen)
+            'filter grayscale border-gray-200': browserStatusChosen && !checked,
+            'border-gray-200 before:hocus:cursor-pointer hover:border-indigo-300 hover:ring-2 hover:ring-indigo-100': !browser.disabled && !checked && !browserStatus.chosen
           }"
         >
           <UnsupportedBrowserTooltip
@@ -66,12 +66,12 @@
       class="mb-14"
     >
       <div class="flex mb-4 gap-16px items-center justify-center">
-        <template v-if="!isBrowserOpen">
+        <template v-if="browserStatus.closed || browserStatus.opening">
           <Button
-            v-if="!isBrowserOpening"
+            v-if="browserStatus.closed"
             size="lg"
             type="submit"
-            :prefix-icon="props.gql.currentTestingType === 'component' ? TestingTypeComponentIcon : TestingTypeE2E"
+            :prefix-icon="testingTypeIcon"
             prefix-icon-class="icon-dark-white"
             variant="secondary"
             data-cy="launch-button"
@@ -99,7 +99,7 @@
             type="button"
             disabled
             variant="pending"
-            :prefix-icon="TestingTypeComponentIcon"
+            :prefix-icon="testingTypeIcon"
             prefix-icon-class="icon-dark-white"
             class="font-medium disabled:cursor-default"
           >
@@ -113,7 +113,7 @@
             :prefix-icon="ExportIcon"
             prefix-icon-class="icon-dark-gray-500"
             class="font-medium"
-            @click="emit('focus-browser')"
+            @click="emit('focusBrowser')"
           >
             {{ browserText.focus }}
           </Button>
@@ -124,7 +124,7 @@
             :prefix-icon="PowerStandbyIcon"
             prefix-icon-class="icon-dark-gray-500"
             class="font-medium"
-            @click="emit('close-browser')"
+            @click="emit('closeBrowser')"
           >
             {{ browserText.close }}
           </Button>
@@ -137,7 +137,7 @@
         :prefix-icon="ArrowLeftIcon"
         prefix-icon-class="icon-dark-gray-500"
         class="font-medium mx-auto text-gray-600 hover:text-indigo-500"
-        @click="emit('navigated-back')"
+        @click="emit('navigatedBack')"
       >
         {{ browserText.switchTestingType }}
       </Button>
@@ -152,12 +152,12 @@ import { computed } from 'vue'
 import _clone from 'lodash/clone'
 import { useMutation, gql } from '@urql/vue'
 import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
-import TestingTypeComponentIcon from '~icons/cy/testing-type-component_x24'
+import TestingTypeComponentIcon from '~icons/cy/testing-type-component_x16'
+import TestingTypeE2EIcon from '~icons/cy/testing-type-e2e_x16'
 import ExportIcon from '~icons/cy/export_x16'
 import PowerStandbyIcon from '~icons/cy/power-standby'
 import ArrowLeftIcon from '~icons/cy/arrow-left_x16'
 import StatusRunningIcon from '~icons/cy/status-running_x16'
-import TestingTypeE2E from '~icons/cy/testing-type-e2e_x24'
 import { RadioGroup, RadioGroupOption, RadioGroupLabel } from '@headlessui/vue'
 import UnsupportedBrowserTooltip from './UnsupportedBrowserTooltip.vue'
 
@@ -196,20 +196,19 @@ fragment OpenBrowserList on CurrentProject {
     majorVersion
   }
   currentTestingType
+  browserStatus
 }
 `
 
 const props = defineProps<{
   gql: OpenBrowserListFragment,
-  isBrowserOpening: boolean,
-  isBrowserOpen: boolean
 }>()
 
 const emit = defineEmits<{
-  (e: 'navigated-back'): void
+  (e: 'navigatedBack'): void
   (e: 'launch'): void
-  (e: 'close-browser'): void
-  (e: 'focus-browser'): void
+  (e: 'closeBrowser'): void
+  (e: 'focusBrowser'): void
 }>()
 
 const { t } = useI18n()
@@ -257,5 +256,20 @@ const browserText = computed(() => {
     switchTestingType: t('openBrowser.switchTestingType'),
   }
 })
+
+const browserStatus = computed(() => {
+  const status = {
+    open: props.gql.browserStatus === 'open',
+    opening: props.gql.browserStatus === 'opening',
+    closed: props.gql.browserStatus === 'closed',
+  }
+
+  return {
+    ...status,
+    chosen: status.opening || status.open,
+  }
+})
+
+const testingTypeIcon = computed(() => props.gql.currentTestingType === 'component' ? TestingTypeComponentIcon : TestingTypeE2EIcon)
 
 </script>
