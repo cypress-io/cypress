@@ -18,7 +18,7 @@ export const handleCommands = (Cypress: Cypress.Cypress, cy: $Cy, specBridgeComm
     let subject: string | undefined = undefined
 
     // Prevent serialization if this isn't the last command in the queue.
-    if (cy.queue.last().get('id') === id) {
+    if (cy.queue.last()?.get('id') === id) {
       subject = cy.state('subject')
     }
 
