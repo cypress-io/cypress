@@ -131,7 +131,7 @@
   {
     "value": "*.hot-update.js",
     "from": "default",
-    "field": "specExcludePattern"
+    "field": "excludeSpecPattern"
   },
   {
     "value": false,

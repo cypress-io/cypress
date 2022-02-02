@@ -8,7 +8,7 @@ module.exports = {
   },
   fixturesFolder: false,
   component: {
-    specExcludePattern: [
+    excludeSpecPattern: [
       '**/__snapshots__/*',
       '**/__image_snapshots__/*',
     ],

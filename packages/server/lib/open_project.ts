@@ -263,15 +263,15 @@ export class OpenProject {
     try {
       const cfg = await this.projectBase.initializeConfig()
 
-      const { specPattern, specExcludePattern, additionalIgnorePattern } = await this._ctx.actions.project.setSpecsFoundBySpecPattern({
+      const { specPattern, excludeSpecPattern, additionalIgnorePattern } = await this._ctx.actions.project.setSpecsFoundBySpecPattern({
         path,
         testingType,
         specPattern: options.spec || cfg[testingType].specPattern,
-        specExcludePattern: cfg[testingType].specExcludePattern,
+        excludeSpecPattern: cfg[testingType].excludeSpecPattern,
         additionalIgnorePattern: testingType === 'component' ? cfg?.e2e?.specPattern : undefined,
       })
 
-      this._ctx.project.startSpecWatcher(path, testingType, specPattern, specExcludePattern, additionalIgnorePattern)
+      this._ctx.project.startSpecWatcher(path, testingType, specPattern, excludeSpecPattern, additionalIgnorePattern)
 
       await this.projectBase.open()
     } catch (err: any) {

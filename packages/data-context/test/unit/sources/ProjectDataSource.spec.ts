@@ -179,7 +179,7 @@ describe('findSpecs', () => {
     expect(specs).to.have.length(3)
   })
 
-  it('ignores node_modules if specExcludePattern is empty array', async () => {
+  it('ignores node_modules if excludeSpecPattern is empty array', async () => {
     const specs = await ctx.project.findSpecs(temporary, 'component', ['**/*.{cy,spec}.{ts,js}'], [], [])
 
     expect(specs).to.have.length(6)

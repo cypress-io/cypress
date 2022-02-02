@@ -195,7 +195,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     isFolder: true,
     canUpdateDuringTestTime: false,
   }, {
-    name: 'specExcludePattern',
+    name: 'excludeSpecPattern',
     defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? ['**/__snapshots__/*', '**/__image_snapshots__/*'] : '*.hot-update.js',
     validation: validate.isStringOrArrayOfStrings,
     canUpdateDuringTestTime: true,
@@ -547,7 +547,7 @@ export const breakingRootOptions: Array<BreakingOption> = [
     isWarning: false,
   },
   {
-    name: 'specExcludePattern',
+    name: 'excludeSpecPattern',
     errorKey: 'SPEC_EXCLUDE_PATTERN_ROOT_NOT_SUPPORTED',
     isWarning: false,
   },

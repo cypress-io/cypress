@@ -9,7 +9,7 @@ module.exports = {
     },
   },
   'component': {
-    'specExcludePattern': [
+    'excludeSpecPattern': [
       '**/__snapshots__/*',
       '**/__image_snapshots__/*',
     ],
