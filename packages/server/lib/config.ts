@@ -523,7 +523,7 @@ export const setPluginsFile = Promise.method((obj, defaults) => {
     obj.pluginsFile = utils.resolveModule(pluginsFile)
 
     return debug(`set pluginsFile to ${obj.pluginsFile}`)
-  }).catch({ code: 'MODULE_NOT_FOUND' }, () => {
+  }).catch({ code: 'MODULE_NOT_FOUND' }, (e) => {
     debug('plugins module does not exist %o', { pluginsFile })
 
     const isLoadingDefaultPluginsFile = pluginsFile === path.resolve(obj.projectRoot, defaults.pluginsFile)
@@ -535,7 +535,7 @@ export const setPluginsFile = Promise.method((obj, defaults) => {
     })
     .then((result) => {
       if (result === null) {
-        return errors.throw('PLUGINS_FILE_ERROR', path.resolve(obj.projectRoot, pluginsFile), new Error().stack ?? '')
+        return errors.throw('PLUGINS_FILE_ERROR', path.resolve(obj.projectRoot, pluginsFile), e as unknown as Error)
       }
 
       debug('setting plugins file to %o', { result })

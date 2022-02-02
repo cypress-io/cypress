@@ -4,11 +4,11 @@ import _ from 'lodash'
 import stripAnsi from 'strip-ansi'
 import AU from 'ansi_up'
 
-import { backtick, details, errTemplate, guard } from './err_template'
-import { stripIndent } from './strip_indent'
-import { displayFlags, listItems, logError } from './error_utils'
-import type { ClonedError, CypressError, ErrTemplateResult } from './errorTypes'
-import { stackWithoutMessage } from './stack_utils'
+import { backtick, details, errTemplate, guard } from './errTemplate'
+import { stripIndent } from './stripIndent'
+import { displayFlags, listItems, logError } from './errorUtils'
+import type { ClonedError, CypressError, ErrorLike, ErrTemplateResult } from './errorTypes'
+import { stackWithoutMessage } from './stackUtils'
 
 const ansi_up = new AU()
 
@@ -579,7 +579,7 @@ export const AllCypressErrors = {
 
         Learn more at https://on.cypress.io/support-file-missing-or-invalid`
   },
-  PLUGINS_FILE_ERROR: (arg1: string, arg2: string) => {
+  PLUGINS_FILE_ERROR: (arg1: string, arg2: Error) => {
     return errTemplate`\
         The plugins file is missing or invalid.
 
@@ -611,7 +611,7 @@ export const AllCypressErrors = {
       ${details(arg2)}
     `
   },
-  PLUGINS_FUNCTION_ERROR: (arg1: string, arg2: string) => {
+  PLUGINS_FUNCTION_ERROR: (arg1: string, arg2: string | Error) => {
     return errTemplate`\
       The function exported by the plugins file threw an error.
 
@@ -620,14 +620,14 @@ export const AllCypressErrors = {
       ${details(arg2)}
     `
   },
-  PLUGINS_UNEXPECTED_ERROR: (arg1: string, arg2: string) => {
+  PLUGINS_UNEXPECTED_ERROR: (arg1: string, arg2: string | Error) => {
     return errTemplate`
       The following error was thrown by a plugin. We stopped running your tests because a plugin crashed. Please check your plugins file (${arg1})
 
       ${details(arg2)}
     `
   },
-  PLUGINS_VALIDATION_ERROR: (arg1: string, arg2: string) => {
+  PLUGINS_VALIDATION_ERROR: (arg1: string, arg2: string | Error) => {
     return errTemplate`
       The following validation error was thrown by your plugins file (${arg1}).
 
@@ -1114,6 +1114,15 @@ export function getMsgByType<Type extends keyof AllCypressErrorObj> (type: Type,
  * @returns
  */
 export const getError = function <Type extends keyof AllCypressErrorObj> (type: Type, ...args: Parameters<AllCypressErrorObj[Type]>) {
+  // If we don't know this "type" of error, return as a non-cypress error
+  if (!AllCypressErrors[type]) {
+    const err = new Error(args[1] || type) as ErrorLike
+
+    err.type = type
+
+    return err
+  }
+
   // @ts-expect-error
   const result = AllCypressErrors[type](...args) as ErrTemplateResult
 
@@ -1215,4 +1224,4 @@ export {
 export {
   logError as log,
   isCypressErr,
-} from './error_utils'
+} from './errorUtils'

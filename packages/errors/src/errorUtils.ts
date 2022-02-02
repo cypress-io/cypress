@@ -3,8 +3,8 @@ import chalk from 'chalk'
 import _ from 'lodash'
 
 import type { CypressError, ErrorLike } from './errorTypes'
-import { guard } from './err_template'
-import { stripIndent } from './strip_indent'
+import { guard } from './errTemplate'
+import { stripIndent } from './stripIndent'
 
 export const isCypressErr = (err: ErrorLike): err is CypressError => {
   return Boolean(err.isCypressErr)

@@ -1,13 +1,13 @@
 import assert from 'assert'
-import { stripIndent } from './strip_indent'
+import { stripIndent } from './stripIndent'
 
 /**
  * Guarding the value, involves
  */
 import chalk from 'chalk'
 import stripAnsi from 'strip-ansi'
-import { trimMultipleNewLines } from './error_utils'
-import type { ErrTemplateResult } from './errorTypes'
+import { trimMultipleNewLines } from './errorUtils'
+import type { ErrTemplateResult, SerializedError } from './errorTypes'
 
 export class Guard {
   constructor (readonly val: string | number) {}
@@ -44,6 +44,10 @@ export function details (val: string | Error | object) {
   return new Details(val)
 }
 
+export function isErrorLike (err: any): err is SerializedError | Error {
+  return err && typeof err === 'object' && Boolean('name' in err && 'message' in err)
+}
+
 /**
  * Creates a consistently formatted object to return from the error call.
  *
@@ -57,7 +61,7 @@ export function details (val: string | Error | object) {
  */
 export const errTemplate = (strings: TemplateStringsArray, ...args: Array<string | number | Error | Details | Guard | object>): ErrTemplateResult => {
   let originalError: Error | undefined = undefined
-  let messageDetails
+  let messageDetails: string | undefined
 
   function prepMessage (forTerminal = true) {
     function isScalar (val: any): val is string | number | null | boolean {
@@ -65,7 +69,7 @@ export const errTemplate = (strings: TemplateStringsArray, ...args: Array<string
     }
 
     function formatVal (val: string | number | Error | object | null) {
-      if (val instanceof Error) {
+      if (isErrorLike(val)) {
         return `${val.name}: ${val.message}`
       }
 
@@ -87,8 +91,15 @@ export const errTemplate = (strings: TemplateStringsArray, ...args: Array<string
       }
     }
 
-    function formatMsgDetails (val: any) {
-      return isScalar(val) ? val : val instanceof Error ? val.stack || val.message : JSON.stringify(val, null, 2)
+    /**
+     * Formats the value passed in via details(), but does not color the value here, since it
+     * is printed separately in the console.
+     *
+     * @param val
+     * @returns
+     */
+    function formatMsgDetails (val: any): string {
+      return isScalar(val) ? `${val}` : isErrorLike(val) ? val.stack || val.message || val.name : JSON.stringify(val, null, 2)
     }
 
     let templateArgs: Array<string | number> = []
@@ -105,12 +116,12 @@ export const errTemplate = (strings: TemplateStringsArray, ...args: Array<string
         const { val } = arg
 
         messageDetails = formatMsgDetails(val)
-        if (val instanceof Error) {
+        if (isErrorLike(val)) {
           originalError = val
         }
 
         templateArgs.push('')
-      } else if (arg instanceof Error) {
+      } else if (isErrorLike(arg)) {
         templateArgs.push(chalk.red(`${arg.name}: ${arg.message}`))
       } else {
         templateArgs.push(formatVal(arg))

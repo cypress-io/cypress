@@ -19,7 +19,7 @@ export interface ErrorLike {
  */
 export interface CypressError extends ErrorLike {
   type: keyof typeof AllCypressErrors
-  isCypressErr: true
+  isCypressErr: boolean
   originalError?: CypressError | ErrorLike
   details?: string
   code?: string | number
@@ -47,4 +47,15 @@ export interface ClonedError {
   stack?: string
   message?: string
   [key: string]: any
+}
+
+export interface SerializedError {
+  code?: string | number
+  type?: string | number
+  errorType?: string
+  stack?: string
+  annotated?: string
+  message?: string
+  name: string
+  isCypressErr?: boolean
 }

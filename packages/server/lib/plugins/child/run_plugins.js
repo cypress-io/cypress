@@ -49,7 +49,7 @@ const load = (ipc, config, pluginsFile) => {
     const { isValid, error } = validateEvent(event, handler, config)
 
     if (!isValid) {
-      ipc.send('load:error', 'PLUGINS_VALIDATION_ERROR', pluginsFile, error.stack)
+      ipc.send('load:error', 'PLUGINS_VALIDATION_ERROR', pluginsFile, util.serializeError(error))
 
       return
     }
@@ -101,7 +101,7 @@ const load = (ipc, config, pluginsFile) => {
   })
   .catch((err) => {
     debug('plugins file errored:', err && err.stack)
-    ipc.send('load:error', 'PLUGINS_FUNCTION_ERROR', pluginsFile, err.stack)
+    ipc.send('load:error', 'PLUGINS_FUNCTION_ERROR', pluginsFile, util.serializeError(err))
   })
 }
 
@@ -187,7 +187,7 @@ const runPlugins = (ipc, pluginsFile, projectRoot) => {
     }
   } catch (err) {
     debug('failed to require pluginsFile:\n%s', err.stack)
-    ipc.send('load:error', 'PLUGINS_FILE_ERROR', pluginsFile, err.stack)
+    ipc.send('load:error', 'PLUGINS_FILE_ERROR', pluginsFile, util.serializeError(err))
 
     return
   }

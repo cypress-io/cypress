@@ -31,6 +31,10 @@ export const getStackLines = (stack: string) => {
   return stackLines
 }
 
+/**
+ * Takes the stack and returns only the lines that contain stack-frame like entries,
+ * matching the `stackLineRegex` above
+ */
 export const stackWithoutMessage = (stack: string) => {
   return getStackLines(stack).join('\n')
 }

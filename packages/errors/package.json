@@ -5,8 +5,8 @@
   "main": "index.js",
   "browser": "src/index.ts",
   "scripts": {
-    "build": "tsc",
-    "build-prod": "tsc || echo 'built, with errors'",
+    "test": "yarn test-unit",
+    "build-prod": "tsc",
     "check-ts": "tsc --noEmit",
     "clean-deps": "rm -rf node_modules",
     "clean": "rm -f ./src/*.js ./src/**/*.js ./src/**/**/*.js ./test/**/*.js || echo 'cleaned'",
