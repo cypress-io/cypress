@@ -12,10 +12,10 @@ const preprocessErrorForPostMessage = (value) => {
   const { isDom } = $dom
 
   if (_.isError(value)) {
-    const serializedError = _.mapValues(clone(value), preprocessErrorForPostMessage)
+    const serializableError = _.mapValues(clone(value), preprocessErrorForPostMessage)
 
     return {
-      ... serializedError,
+      ... serializableError,
       // Native Error types currently cannot be cloned in Firefox when using 'postMessage'.
       // Please see https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm for more details
       name: value.name,

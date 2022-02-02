@@ -66,13 +66,7 @@ export class CommandsManager {
     delete this.commands[id]
 
     if (!err) {
-      if (failedToSerializeSubjectOfType) {
-        return command.deferred.resolve(
-          failedToSerializeSubject(failedToSerializeSubjectOfType),
-        )
-      }
-
-      return command.deferred.resolve(subject)
+      return command.deferred.resolve(failedToSerializeSubjectOfType ? failedToSerializeSubjectOfType : subject)
     }
 
     // If the command has failed, cast the error back to a proper Error object

@@ -142,14 +142,9 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
           // is common if there are only assertions enqueued in the SD.
           if (!commandsManager.hasCommands && !done) {
             cleanup()
-            // This handles when a subject is returned synchronously
-            if (failedToSerializeSubjectOfType) {
-              return resolve(
-                failedToSerializeSubject(failedToSerializeSubjectOfType),
-              )
-            }
 
-            resolve(subject)
+            // This handles when a subject is returned synchronously
+            resolve(failedToSerializeSubjectOfType ? failedToSerializeSubjectOfType : subject)
           } else {
             resolve()
           }

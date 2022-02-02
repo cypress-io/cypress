@@ -1,5 +1,20 @@
 import $errUtils from '../../cypress/error_utils'
 
+// These properties are required to avoid failing prior to attempting to use the subject.
+// If Symbol.toStringTag is passed through to the target we will not properly fail the 'cy.invoke' command.
+const passThroughProps = [
+  'then',
+  Symbol.isConcatSpreadable,
+  'jquery',
+  'nodeType',
+  'window',
+  'document',
+  'inspect',
+  'isSinonProxy',
+  '_spreadArray',
+  'selector',
+]
+
 /**
  * Create a proxy object to fail when accessed or called.
  * @param type The type of operand that failed to serialize
@@ -34,20 +49,7 @@ const failedToSerializeSubject = (type: string) => {
      * @returns either an error or the result of the allowed get on the target.
      */
     get (target, prop, receiver) {
-      // These properties are required to avoid failing prior to attempting to use the subject.
-      if (
-        prop === 'then'
-        || prop === Symbol.isConcatSpreadable
-        || prop === 'jquery'
-        || prop === 'nodeType'
-        // || prop === Symbol.toStringTag // If this is passed through to the target we will not properly fail the 'cy.invoke' command.
-        || prop === 'window'
-        || prop === 'document'
-        || prop === 'inspect'
-        || prop === 'isSinonProxy'
-        || prop === '_spreadArray'
-        || prop === 'selector'
-      ) {
+      if (passThroughProps.includes(prop)) {
         return target[prop]
       }
 

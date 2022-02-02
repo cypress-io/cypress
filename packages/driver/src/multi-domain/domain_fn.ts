@@ -90,7 +90,7 @@ export const handleDomainFn = (cy: $Cy, specBridgeCommunicator: SpecBridgeDomain
       // see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function for more details
       const value = window.eval(fnWrapper)(data)
 
-      // If we detect a non promise value returned
+      // If we detect a non promise value with commands in queue, throw an error
       if (value && cy.queue.length > 0 && !value.then) {
         $errUtils.throwErrByPath('switchToDomain.callback_mixes_sync_and_async', {
           args: { value: $utils.stringify(value) },
