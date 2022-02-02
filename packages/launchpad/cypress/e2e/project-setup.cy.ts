@@ -448,6 +448,26 @@ describe('Launchpad: Setup Project', () => {
     })
 
     describe('project that has not been configured for component testing', () => {
+      beforeEach(() => {
+        // simulate installation of modules
+        cy.intercept('query-Wizard_InstalledPackages', (req) => {
+          req.reply({ data: {
+            wizard: {
+              __typename: 'Wizard',
+              installedPackages: [
+                '@cypress/react',
+                '@cypress/vue',
+                '@cypress/webpack-dev-server',
+                '@cypress/vite-dev-server',
+                '@storybook/testing-react',
+                '@storybook/testing-vue',
+                '@storybook/testing-vue3',
+              ],
+            },
+          } })
+        }).as('InstalledPackages')
+      })
+
       it('shows the first setup page for configuration when selecting component tests', () => {
         cy.openProject('pristine-with-e2e-testing')
         cy.visitLaunchpad()

@@ -92,7 +92,9 @@ const intervalQueryTrigger = useIntervalFn(async () => {
     intervalQueryTrigger.pause()
     canNavigateForward.value = true
   }
-}, 1000)
+}, 1000, {
+  immediate: true,
+})
 
 useTimeoutFn(() => {
   intervalQueryTrigger.pause()
