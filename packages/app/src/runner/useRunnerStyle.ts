@@ -14,7 +14,6 @@ const collapsedNavBarWidth = 64
 
 const reporterWidth = ref<number>(0)
 const specListWidth = ref<number>(0)
-const autScale = ref<number>(1)
 
 interface UseRunnerUI {
   initialSpecsListWidth: number
@@ -66,7 +65,7 @@ export const useRunnerStyle = ({
       scale = Math.min(containerWidth.value / autStore.viewportDimensions.width, containerHeight.value / autStore.viewportDimensions.height, 1)
     }
 
-    autScale.value = scale
+    autStore.setScale(scale)
 
     return `
       width: ${autStore.viewportDimensions.width}px;
@@ -76,7 +75,6 @@ export const useRunnerStyle = ({
 
   return {
     viewportStyle,
-    autScale,
     reporterWidth,
     specListWidth,
     containerHeight,
