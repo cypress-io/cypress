@@ -95,10 +95,10 @@ export class ProjectActions {
   }
 
   // Temporary: remove after other refactor lands
-  async setCurrentProjectAndTestingTypeForTestSetup (projectRoot: string) {
+  setCurrentProjectAndTestingTypeForTestSetup (projectRoot: string) {
     this.ctx.lifecycleManager.clearCurrentProject()
     this.ctx.lifecycleManager.setCurrentProject(projectRoot)
-    await this.ctx.lifecycleManager.setCurrentTestingType('e2e')
+    this.ctx.lifecycleManager.setCurrentTestingType('e2e')
     // @ts-expect-error - we are setting this as a convenience for our integration tests
     this.ctx._modeOptions = {}
   }
