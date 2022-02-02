@@ -36,6 +36,7 @@ const setup = ({ fileName, mockPreferredEditor, onLoadStatsMessage }) => {
 describe('errors ui', {
   viewportHeight: 768,
   viewportWidth: 1024,
+  numTestsKeptInMemory: 1,
 }, () => {
   describe('assertion failures', () => {
     before(() => {
@@ -415,7 +416,7 @@ describe('errors ui', {
       column: 6,
       // this fails the active test because it's an asynchronous
       // response failure from the network
-      codeFrameText: '83|.then(()=>{',
+      codeFrameText: '81|.then(()=>{',
       message: [
         'A callback was provided to intercept the upstream response, but a network error occurred while making the request',
       ],
@@ -920,6 +921,7 @@ describe('errors ui', {
       file,
       column: 8,
       message: 'Timed out retrying after 0ms: Expected to find element: #does-not-exist, but never found it',
+      codeFrameText: `.get('#does-not-exist')`,
     })
   })
 
