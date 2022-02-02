@@ -3,7 +3,7 @@
     :title="t('setupWizard.configFiles.title')"
     :description="t('setupWizard.configFiles.description')"
   />
-  <div class="py-8 mx-auto max-w-220">
+  <div class="mx-auto max-w-220 py-8">
     <FileRow
       v-for="file in files"
       :key="file.file.id"
@@ -34,10 +34,6 @@ import FileRow from '../components/code/FileRow.vue'
 import LaunchpadHeader from './LaunchpadHeader.vue'
 import { ScaffoldedFilesFragment, ScaffoldedFiles_CompleteSetupDocument } from '../generated/graphql'
 import { useMutation } from '@urql/vue'
-
-const emit = defineEmits<{
-  (event: 'completeSetup')
-}>()
 
 const { t } = useI18n()
 
