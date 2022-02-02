@@ -18,7 +18,7 @@ import confirm from 'inquirer-confirm'
 import uploadUtils from './util/upload'
 
 // @ts-ignore
-import { getUploadDirForPlatform } from './upload-unique-binary'
+import { getUploadDirForPlatform } from './upload-build-artifacts'
 // @ts-ignore
 import { zipName, getFullUploadPath } from './upload'
 
@@ -160,7 +160,9 @@ export const moveBinaries = async (args = []) => {
 
     const uploadDir = getUploadDirForPlatform({
       version: releaseOptions.version,
-    }, platformArch)
+      type: 'binary',
+      platformArch,
+    })
 
     console.log('finding binary for %s in %s', platformArch, uploadDir)
 
