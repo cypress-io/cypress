@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import { stripIndent } from '../../src/stripIndent'
 
-describe('lib/util/strip_indent', () => {
+describe('src/stripIndent', () => {
   it('does not trip right end', () => {
     const str = stripIndent`\
       There was an error reconnecting to the Chrome DevTools protocol. Please restart the browser.

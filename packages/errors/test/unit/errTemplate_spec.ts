@@ -2,7 +2,7 @@ import { expect } from 'chai'
 import chalk from 'chalk'
 
 import { details, errTemplate, guard } from '../../src/errTemplate'
-import { stripIndent } from '../../src/strip_indent'
+import { stripIndent } from '../../src/stripIndent'
 
 describe('errTemplate', () => {
   it('returns an object w/ basic props & forBrowser', () => {
