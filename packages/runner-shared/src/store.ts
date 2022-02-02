@@ -1,22 +1,54 @@
 import { action, observable } from 'mobx'
 import { nanoid } from 'nanoid'
+import { automation, automationStatus } from './automation'
 
-export type RunMode = 'single' | 'multi'
+export type RunMode = 'single'
 
-export abstract class BaseStore {
-  @observable spec: Cypress.Cypress['spec'] | undefined
-  @observable specs: Cypress.Cypress['spec'][] = []
+const defaults = {
+  url: '',
+  component: {
+    height: 500,
+    width: 500,
+  },
+  e2e: {
+    height: 660,
+    width: 1000,
+  },
+} as const
+
+type Callback = (...args: unknown[]) => void
+
+export class BaseStore {
+  @observable spec: Cypress.Spec | undefined
+  @observable specs: Cypress.Spec[] = []
   @observable specRunId: string | undefined
-  /** @type {"single" | "multi"} */
   @observable runMode: RunMode = 'single'
-  @observable multiSpecs: Cypress.Cypress['spec'][] = [];
+  @observable automation: typeof automationStatus[number] = automation.CONNECTING
+  @observable isLoading = true
+  @observable width: number
+  @observable height: number
+  @observable url = ''
+  @observable highlightUrl = false
+  @observable isLoadingUrl = false
+  @observable isRunning = false
+  @observable useInlineSpecList = false
 
-  @action setSingleSpec (spec: Cypress.Cypress['spec'] | undefined) {
-    if (this.runMode === 'multi') {
-      this.runMode = 'single'
-      this.multiSpecs = []
-    }
+  @observable messageTitle?: string
+  @observable messageDescription?: 'info' | 'warning' | 'pinned'
+  @observable messageType?: string
+  @observable viewportUpdateCallback?: Callback
+  @observable messageControls?: any
+  @observable snapshot?: {
+    showingHighlights: boolean
+    stateIndex: number
+  }
 
+  constructor (testingType: Cypress.TestingType) {
+    this.width = defaults[testingType].width
+    this.height = defaults[testingType].height
+  }
+
+  @action setSingleSpec (spec: Cypress.Spec | undefined) {
     this.setSpec(spec)
   }
 
@@ -25,7 +57,7 @@ export abstract class BaseStore {
     this.specRunId = nanoid()
   }
 
-  @action checkCurrentSpecStillExists (specs: Cypress.Cypress['spec'][]) {
+  @action checkCurrentSpecStillExists (specs: Cypress.Spec[]) {
     const newSpecsAbsolutes = new Set(specs.map((spec) => spec.absolute))
 
     this.specs.forEach((oldSpec) => {
@@ -34,10 +66,8 @@ export abstract class BaseStore {
       }
     })
   }
-
-  @action setSpecs (specs: Cypress.Cypress['spec'][]) {
+  @action setSpecs (specs: Cypress.Spec[]) {
     this.checkCurrentSpecStillExists(specs)
-
     this.specs = specs
   }
 
@@ -46,6 +76,39 @@ export abstract class BaseStore {
 
     if (foundSpec) {
       this.spec = foundSpec
+    }
+  }
+
+  @action setIsLoading (isLoading) {
+    this.isLoading = isLoading
+  }
+
+  @action updateDimensions (width: number, height: number) {
+    this.height = height
+    this.width = width
+  }
+
+  @action resetUrl () {
+    this.url = ''
+    this.highlightUrl = false
+    this.isLoadingUrl = false
+  }
+
+  @action clearMessage () {
+    this.messageTitle = undefined
+    this.messageDescription = undefined
+    this.messageType = undefined
+  }
+
+  @action setViewportUpdatedCallbackToNull () {
+    this.viewportUpdateCallback = undefined
+  }
+
+  setViewportUpdatedCallback (cb: Callback) {
+    this.viewportUpdateCallback = () => {
+      this.setViewportUpdatedCallbackToNull()
+
+      cb()
     }
   }
 }

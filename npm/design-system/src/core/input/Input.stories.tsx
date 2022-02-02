@@ -1,13 +1,17 @@
 import * as React from 'react'
-import { action } from '@storybook/addon-actions'
+// TODO: This is causing a "module not defined error"
+// Find out why and fix it
+// import { action } from '@storybook/addon-actions'
 
-import { createStory, createStorybookConfig } from 'stories/util'
+import { createStory, createStorybookConfig } from '../../stories/util'
 
 import { Input as InputComponent } from './Input'
 import { IconInput as IconInputComponent } from './IconInput'
 
-import typography from 'css/derived/jsTypography.scss'
 import { TextSize } from 'css'
+
+// stub it for now
+const action = (action: string) => undefined
 
 export default createStorybookConfig({
   title: 'Core/Input',
@@ -38,12 +42,12 @@ export const Icon = createStory(() => (
         label={{ type: 'aria', contents: 'full width input' }}
         prefixIcon={{
           icon: 'home',
-          onPress: action('onPrefixClick'),
+          // onPress: action('onPrefixClick'),
           'aria-label': 'onPrefixClick',
         }}
         suffixIcon={{
           icon: 'times',
-          onPress: action('onSuffixClick'),
+          // onPress: action('onSuffixClick'),
           'aria-label': 'onSuffixClick',
         }}
       />
@@ -53,7 +57,7 @@ export const Icon = createStory(() => (
         label={{ type: 'aria', contents: '500px width input' }}
         suffixIcon={{
           icon: 'times',
-          onPress: action('onSuffixClick'),
+          // onPress: action('onSuffixClick'),
           'aria-label': 'onSuffixClick',
         }}
         value="This is a very long string in an IconInput. This displays the padding on the input section"
@@ -62,7 +66,7 @@ export const Icon = createStory(() => (
         label={{ type: 'aria', contents: '500px width input' }}
         prefixIcon={{
           icon: 'home',
-          onPress: action('onPrefixClick'),
+          // onPress: action('onPrefixClick'),
           'aria-label': 'onPrefixClick',
         }}
         value="This is a very long string in an IconInput. This displays the padding on the input section"
@@ -74,12 +78,12 @@ export const Icon = createStory(() => (
         }}
         prefixIcon={{
           icon: 'home',
-          onPress: action('onPrefixClick'),
+          // onPress: action('onPrefixClick'),
           'aria-label': 'onPrefixClick',
         }}
         suffixIcon={{
           icon: 'times',
-          onPress: action('onSuffixClick'),
+          // onPress: action('onSuffixClick'),
           'aria-label': 'onSuffixClick',
         }}
       />
@@ -90,7 +94,7 @@ export const Icon = createStory(() => (
         }}
         suffixIcon={{
           icon: 'times',
-          onPress: action('onSuffixClick'),
+          // onPress: action('onSuffixClick'),
           'aria-label': 'onSuffixClick',
         }}
         placeholder="The leading icon isn't a button"
@@ -99,7 +103,7 @@ export const Icon = createStory(() => (
         label={{ type: 'aria', contents: 'leading button only' }}
         prefixIcon={{
           icon: 'home',
-          onPress: action('onPrefixClick'),
+          // onPress: action('onPrefixClick'),
           'aria-label': 'onPrefixClick',
         }}
         suffixIcon={{
@@ -133,10 +137,10 @@ export const iconSizesWithSizes = (sizes: string[]) => sizes.map((key) => {
   )
 })
 
-export const IconSizes = createStory(() => (
-  <div>
-    <div style={{ width: 500 }}>
-      {iconSizesWithSizes(Object.keys(typography).filter((key) => key !== 'type' && !key.startsWith('line-height') && !key.startsWith('text-mono') && key !== 'text-3xl' && key !== 'text-4xl'))}
-    </div>
-  </div>
-))
+// export const IconSizes = createStory(() => (
+//   <div>
+//     <div style={{ width: 500 }}>
+//       {iconSizesWithSizes(Object.keys(typography).filter((key) => key !== 'type' && !key.startsWith('line-height') && !key.startsWith('text-mono') && key !== 'text-3xl' && key !== 'text-4xl'))}
+//     </div>
+//   </div>
+// ))

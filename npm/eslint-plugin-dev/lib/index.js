@@ -116,7 +116,7 @@ const baseRules = {
   'no-unneeded-ternary': 'error',
   'no-unreachable': 'error',
   'no-unused-labels': 'error',
-  'no-unused-vars': ['error', { args: 'none' }],
+  'no-unused-vars': ['error', { args: 'none', ignoreRestSiblings: true }],
   'no-useless-concat': 'error',
   'no-useless-constructor': 'error',
   'no-var': 'error',
@@ -270,10 +270,13 @@ module.exports = {
             'no-undef': 'off',
             'no-unused-vars': 'off',
             'indent': 'off',
+            'no-useless-constructor': 'off',
             '@typescript-eslint/no-unused-vars': [
               'error',
               {
                 'args': 'none',
+                'ignoreRestSiblings': true,
+                'argsIgnorePattern': '^_',
               },
             ],
             '@typescript-eslint/type-annotation-spacing': 'error',

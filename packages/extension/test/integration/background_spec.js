@@ -314,7 +314,7 @@ describe('app/background', () => {
       .resolves(['1234'])
 
       return background.query({
-        string: '1234',
+        randomString: '1234',
         element: '__cypress-string',
       })
     })
@@ -331,7 +331,7 @@ describe('app/background', () => {
       .resolves(['1234'])
 
       return background.query({
-        string: '1234',
+        randomString: '1234',
         element: '__cypress-string',
       })
     })

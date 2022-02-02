@@ -1,8 +1,8 @@
 import Debug from 'debug'
 import { Request, Response, Router } from 'express'
+import type { InitializeRoutes } from './routes'
 import send from 'send'
 import { getPathToDist } from '@packages/resolve-dist'
-import type { InitializeRoutes } from './routes'
 
 const debug = Debug('cypress:server:routes-ct')
 
@@ -17,6 +17,13 @@ export const createRoutesCT = ({
   nodeProxy,
 }: InitializeRoutes) => {
   const routesCt = Router()
+
+  routesCt.get(`/${config.namespace}/static/*`, (req, res) => {
+    const pathToFile = getPathToDist('static', req.params[0])
+
+    return send(req, pathToFile)
+    .pipe(res)
+  })
 
   // user app code + spec code
   // default mounted to /__cypress/src/*

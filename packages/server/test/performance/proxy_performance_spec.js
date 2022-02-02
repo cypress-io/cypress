@@ -1,5 +1,9 @@
 require('../spec_helper')
 
+const { makeDataContext, setCtx } = require('../../lib/makeDataContext')
+
+setCtx(makeDataContext({}))
+
 const cp = require('child_process')
 const fse = require('fs-extra')
 const os = require('os')
@@ -12,8 +16,7 @@ const HarCapturer = require('chrome-har-capturer')
 const performance = require('@tooling/system-tests/lib/performance')
 const Promise = require('bluebird')
 const sanitizeFilename = require('sanitize-filename')
-const { createRoutes } = require(`${root}lib/routes`)
-const { SpecsStore } = require(`${root}/lib/specs-store`)
+const { createRoutes } = require(`../../lib/routes`)
 
 process.env.CYPRESS_INTERNAL_ENV = 'development'
 
@@ -343,8 +346,11 @@ describe('Proxy Performance', function () {
           https: { cert, key },
         }).start(HTTPS_PROXY_PORT),
 
-        Config.set({
+        Config.setupFullConfigWithDefaults({
           projectRoot: '/tmp/a',
+          config: {
+            supportFile: false,
+          },
         }).then((config) => {
           config.port = CY_PROXY_PORT
 
@@ -356,7 +362,6 @@ describe('Proxy Performance', function () {
           return cyServer.open(config, {
             SocketCtor: SocketE2E,
             createRoutes,
-            specsStore: new SpecsStore({}, 'e2e'),
             testingType: 'e2e',
           })
         }),

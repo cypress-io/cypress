@@ -20,9 +20,6 @@ const allowList = [
   'browser',
   'ci',
   'ciBuildId',
-  'clearLogs',
-  'userNodePath',
-  'userNodeVersion',
   'config',
   'configFile',
   'cwd',
@@ -30,11 +27,11 @@ const allowList = [
   'execPath',
   'exit',
   'exitWithCode',
+  'global',
   'group',
   'headed',
   'inspectBrk',
   'key',
-  'logs',
   'mode',
   'outputPath',
   'parallel',
@@ -54,8 +51,11 @@ const allowList = [
   'tag',
   'testingType',
   'updating',
+  'userNodePath',
+  'userNodeVersion',
   'version',
 ]
+
 // returns true if the given string has double quote character "
 // only at the last position.
 const hasStrayEndQuote = (s) => {
@@ -200,7 +200,7 @@ const sanitizeAndConvertNestedArgs = (str, argname) => {
     debug('could not pass config %s value %s', argname, str)
     debug('error %o', err)
 
-    return errors.throw('COULD_NOT_PARSE_ARGUMENTS', argname, str, err.message)
+    return errors.throw('COULD_NOT_PARSE_ARGUMENTS', argname, str, 'Cannot parse as valid JSON')
   }
 }
 
@@ -326,7 +326,6 @@ module.exports = {
       'api-key': 'apiKey',
       'app-path': 'appPath',
       'ci-build-id': 'ciBuildId',
-      'clear-logs': 'clearLogs',
       'config-file': 'configFile',
       'exec-path': 'execPath',
       'exit-with-code': 'exitWithCode',
@@ -365,7 +364,6 @@ module.exports = {
       // set in case we
       // bypassed the cli
       cwd: process.cwd(),
-      testingType: 'e2e',
     })
     .mapValues(coerceUtil.coerce)
     .value()

@@ -1,7 +1,7 @@
 import cs from 'classnames'
 import * as React from 'react'
 import SplitPane from 'react-split-pane'
-import { Message, namedObserver, eventManager as EventManager, Header } from '@packages/runner-shared'
+import { Message, namedObserver, EventManager, Header } from '@packages/runner-shared'
 
 import { Iframes } from '../iframe/iframes'
 import { animationFrameDebounce } from '../lib/debounce'
@@ -17,7 +17,7 @@ import styles from './RunnerCt.module.scss'
 
 interface SpecContentProps {
   state: State
-  eventManager: typeof EventManager
+  eventManager: EventManager
   config: {
     configFile: string
     [key: string]: unknown
@@ -26,6 +26,7 @@ interface SpecContentProps {
 
 interface SpecContentWrapperProps {
   state: State
+  eventManager: EventManager
   onSplitPaneChange: (newSize: number) => void
 }
 
@@ -35,7 +36,7 @@ export const SpecContent = namedObserver('SpecContent', (props: SpecContentProps
   }
 
   return (
-    <SpecContentWrapper state={props.state} onSplitPaneChange={props.state.updateReporterWidth}>
+    <SpecContentWrapper state={props.state} eventManager={props.eventManager} onSplitPaneChange={props.state.updateReporterWidth}>
       <ReporterContainer
         state={props.state}
         config={props.config}

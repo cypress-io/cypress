@@ -3,7 +3,6 @@ const _ = require('lodash')
 const strip = require('strip-ansi')
 const chalk = require('chalk')
 const AU = require('ansi_up')
-const Promise = require('bluebird')
 const { stripIndent } = require('./util/strip_indent')
 
 const ansi_up = new AU.default
@@ -78,7 +77,9 @@ const isCypressErr = (err) => {
   return Boolean(err.isCypressErr)
 }
 
-const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
+const getMsgByType = function (type, ...args) {
+  const [arg1 = {}, arg2, arg3] = args
+
   // NOTE: declarations in case blocks are forbidden so we declare them up front
   let filePath; let err; let msg; let str
 
@@ -118,9 +119,7 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         This option will not have an effect in ${_.capitalize(arg1)}. Tests that rely on web security being disabled will not run as expected.`
     case 'BROWSER_NOT_FOUND_BY_NAME':
       str = stripIndent`\
-        Can't run because you've entered an invalid browser name.
-
-        Browser: '${arg1}' was not found on your system or is not supported by Cypress.
+        The specified browser was not found on your system or is not supported by Cypress: \`${arg1}\`
 
         Cypress supports the following browsers:
         - chrome
@@ -129,10 +128,12 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         - electron
         - firefox
 
-        You can also use a custom browser: https://on.cypress.io/customize-browsers
+        You can also [use a custom browser](https://on.cypress.io/customize-browsers).
 
         Available browsers found on your system are:
-        ${arg2}`
+        ${arg2}
+
+        Read more about [how to troubleshoot launching browsers](https://on.cypress.io/troubleshooting-launching-browsers).`
 
       if (arg1 === 'canary') {
         str += '\n\n'
@@ -145,7 +146,9 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
       return str
     case 'BROWSER_NOT_FOUND_BY_PATH':
       msg = stripIndent`\
-        We could not identify a known browser at the path you provided: \`${arg1}\`
+        We could not identify a known browser at the path you specified: \`${arg1}\`
+
+        Read more about [how to troubleshoot launching browsers](https://on.cypress.io/troubleshooting-launching-browsers).
 
         The output from the command we ran was:`
 
@@ -506,16 +509,6 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         ${chalk.yellow(err)}`
 
     case 'NO_SPECS_FOUND':
-      // no glob provided, searched all specs
-      if (!arg2) {
-        return stripIndent`\
-          Can't run because no spec files were found.
-
-          We searched for any files inside of this folder:
-
-          ${chalk.blue(arg1)}`
-      }
-
       return stripIndent`\
         Can't run because no spec files were found.
 
@@ -548,6 +541,15 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         https://on.cypress.io/renderer-process-crashed`
     case 'AUTOMATION_SERVER_DISCONNECTED':
       return 'The automation client disconnected. Cannot continue running tests.'
+
+    case 'MULTIPLE_SUPPORT_FILES_FOUND':
+      return stripIndent`\
+        There are multiple support files.
+
+        Your \`supportFile\` is set to \`${arg1}\`, and we found \`${arg2}\`.
+
+        Correct your supportFile config or merge the files into one.`
+
     case 'SUPPORT_FILE_NOT_FOUND':
       return stripIndent`\
         The support file is missing or invalid.
@@ -559,38 +561,52 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         Or you might have renamed the extension of your \`supportFile\` to \`.ts\`. If that's the case, restart the test runner.
 
         Learn more at https://on.cypress.io/support-file-missing-or-invalid`
-    case 'PLUGINS_FILE_ERROR':
+    case 'SETUP_NODE_EVENTS_IS_NOT_FUNCTION':
       msg = stripIndent`\
-        The plugins file is missing or invalid.
-
-        Your \`pluginsFile\` is set to \`${arg1}\`, but either the file is missing, it contains a syntax error, or threw an error when required. The \`pluginsFile\` must be a \`.js\`, \`.ts\`, or \`.coffee\` file.
-
-        Or you might have renamed the extension of your \`pluginsFile\`. If that's the case, restart the test runner.
-
-        Please fix this, or set \`pluginsFile\` to \`false\` if a plugins file is not necessary for your project.`.trim()
-
-      if (arg2) {
-        return { msg, details: arg2 }
-      }
-
-      return msg
-    case 'PLUGINS_DIDNT_EXPORT_FUNCTION':
-      msg = stripIndent`\
-        The \`pluginsFile\` must export a function with the following signature:
+        The \`setupNodeEvents\` method must BE a function with the following signature:
 
         \`\`\`
-        module.exports = function (on, config) {
+        setupNodeEvents (on, config) {
           // configure plugins here
         }
         \`\`\`
 
         Learn more: https://on.cypress.io/plugins-api
 
-        We loaded the \`pluginsFile\` from: \`${arg1}\`
+        We loaded the \`setupNodeEvents\` from: \`${arg1}\`
 
         It exported:`
 
       return { msg, details: JSON.stringify(arg2) }
+    case 'COMPONENT_DEV_SERVER_IS_NOT_A_FUNCTION':
+      msg = stripIndent`\
+          The \`component\`.\`devServer\` method must be a function with the following signature:
+
+          \`\`\`
+          devServer: (cypressConfig: DevServerConfig, devServerConfig: ComponentDevServerOpts) {
+
+          }
+          \`\`\`
+
+          Learn more: https://on.cypress.io/plugins-api
+
+          We loaded the \`devServer\` from: \`${arg1}\`
+  
+          It exported:`
+
+      return { msg, details: JSON.stringify(arg2) }
+    case 'SETUP_NODE_EVENTS_DO_NOT_SUPPORT_DEV_SERVER':
+      return stripIndent`\
+        The \`setupNodeEvents\` method does not support \`dev-server:start\`, use \`devServer\` instead:
+
+        \`\`\`
+        devServer (cypressConfig, devServerConfig) {
+          // configure plugins here
+        }
+        \`\`\`
+
+        Learn more: https://on.cypress.io/plugins-api
+      `
     case 'PLUGINS_FUNCTION_ERROR':
       msg = stripIndent`\
         The function exported by the plugins file threw an error.
@@ -598,10 +614,10 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         We invoked the function exported by \`${arg1}\`, but it threw an error.`
 
       return { msg, details: arg2 }
-    case 'PLUGINS_UNEXPECTED_ERROR':
-      msg = `The following error was thrown by a plugin. We stopped running your tests because a plugin crashed. Please check your plugins file (\`${arg1}\`)`
+    case 'CHILD_PROCESS_UNEXPECTED_ERROR':
+      msg = `\nThe following error was thrown by a plugin. We stopped running your tests because a plugin crashed. Please check your ${arg1}.setupNodeEvents method in \`${arg2}\``
 
-      return { msg, details: arg2 }
+      return { msg, details: arg3 }
     case 'PLUGINS_VALIDATION_ERROR':
       msg = `The following validation error was thrown by your plugins file (\`${arg1}\`).`
 
@@ -625,7 +641,7 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
 
         Fix the error in your code and re-run your tests.`
 
-    // happens when there is an error in configuration file like "cypress.json"
+    // happens when there is an error in configuration file like "cypress.config.{ts|js}"
     case 'SETTINGS_VALIDATION_ERROR':
       filePath = `\`${arg1}\``
 
@@ -639,7 +655,7 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
       filePath = `\`${arg1}\``
 
       return stripIndent`\
-        An invalid configuration value returned from the plugins file: ${chalk.blue(filePath)}
+        An invalid configuration value returned from the setupNodeEvents on config file: ${chalk.blue(filePath)}
 
         ${chalk.yellow(arg2)}`
     // general configuration error not-specific to configuration or plugins files
@@ -695,18 +711,41 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
 
         Learn more at https://on.cypress.io/reporters`
       // TODO: update with vetted cypress language
+    case 'TESTING_TYPE_NEEDED_FOR_RUN':
+      return stripIndent`
+        You need to specify the testing type for cypress run:
+          cypress run --e2e 
+
+          cypress run --component
+      `
     case 'NO_DEFAULT_CONFIG_FILE_FOUND':
       return stripIndent`\
         Could not find a Cypress configuration file, exiting.
 
         We looked but did not find a default config file in this folder: ${chalk.blue(arg1)}`
+    case 'CONFIG_FILE_MIGRATION_NEEDED':
+      return stripIndent`
+          There is a cypress.json file at the location below:
+          ${arg1}
+
+          Cypress no longer supports 'cypress.json', please migrate to 'cypress.config.{ts|js}'.
+          `
+    case 'LEGACY_CONFIG_FILE':
+      return stripIndent`
+          There is both a \`${arg2}\` and a cypress.json file at the location below:
+          ${arg1}
+
+          Cypress no longer supports 'cypress.json' config, please remove it from your project.
+          `
       // TODO: update with vetted cypress language
     case 'CONFIG_FILES_LANGUAGE_CONFLICT':
       return stripIndent`
-          There is both a \`${arg2}\` and a \`${arg3}\` at the location below:
+          There is both a \`cypress.config.js\` and a \`cypress.config.ts\` at the location below:
           ${arg1}
 
-          Cypress does not know which one to read for config. Please remove one of the two and try again.
+          This sometimes happens if you do not have cypress.config.ts excluded in your tsconfig.json.
+
+          Please add it to your "excludes" option, and remove from your project.
           `
     case 'CONFIG_FILE_NOT_FOUND':
       return stripIndent`\
@@ -936,7 +975,7 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
 
         Cypress Component Testing is now a standalone command. You can now run your component tests with:
 
-        ${chalk.yellow(`\`cypress open-ct\``)}
+        ${chalk.yellow(`\`cypress open --component\``)}
 
         https://on.cypress.io/migration-guide`
     case 'EXPERIMENTAL_SHADOW_DOM_REMOVED':
@@ -1020,10 +1059,22 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
       Deprecation Warning: ${chalk.yellow(`\`${arg1.name}\``)} is currently set to ${chalk.yellow(`\`${arg1.value}\``)} in the ${chalk.yellow(`\`${arg1.configFile}\``)} configuration file. As of Cypress version \`9.0.0\` the default behavior of ${chalk.yellow(`\`${arg1.name}\``)} has changed to always use the version of Node used to start cypress via the cli. When ${chalk.yellow(`\`${arg1.name}\``)} is set to ${chalk.yellow(`\`${arg1.value}\``)}, Cypress will use the version of Node bundled with electron. This can cause problems running certain plugins or integrations. 
       As the ${chalk.yellow(`\`${arg1.name}\``)} configuration option will be removed in a future release, it is recommended to remove the ${chalk.yellow(`\`${arg1.name}\``)} configuration option from ${chalk.yellow(`\`${arg1.configFile}\``)}.
       `
+    case 'SUPPORT_FILE_ROOT_NOT_SUPPORTED':
+      return stripIndent`\
+        The ${chalk.yellow(`\`supportFile\``)} configuration option was removed from the root in Cypress version \`10.0.0\`. Please update this option under each testing type property.
+
+        https://on.cypress.io/migration-guide`
     default:
   }
 }
 
+/**
+ * @param {string} type
+ * @param {any} arg1
+ * @param {any} arg2
+ * @param {any} arg3
+ * @returns {Error & { isCypressErr: true, type: string, details: string }}
+ */
 const get = function (type, arg1, arg2, arg3) {
   let details
   let msg = getMsgByType(type, arg1, arg2, arg3)
@@ -1091,8 +1142,23 @@ const clone = function (err, options = {}) {
   return obj
 }
 
+const markdownLinkRegex = /\[(.*)\]\((.*)\)(.*)\.?[^\S\r\n]*/gm
+const dotColonRegex = /\.\:/g
+
+/**
+ * Changes markdown links to a more stdout-friendly format. Given the following:
+ *   A line with [a link](https://on.cypress.io) in it.
+ * it will convert it to:
+ *   A line with a link in it: https://on.cypress.io
+ */
+const delinkify = (text) => {
+  return text
+  .replace(markdownLinkRegex, '$1$3: $2')
+  .replace(dotColonRegex, ':')
+}
+
 const log = function (err, color = 'red') {
-  console.log(chalk[color](err.message))
+  console.log(chalk[color](delinkify(err.message)))
 
   if (err.details) {
     console.log('\n', chalk['yellow'](err.details))
@@ -1109,16 +1175,13 @@ const log = function (err, color = 'red') {
   return err
 }
 
-const logException = Promise.method(function (err) {
+const logException = async function (err) {
   // TODO: remove context here
   if (this.log(err) && isProduction()) {
-    // log this exception since
-    // its not a known error
-    return require('./logger')
-    .createException(err)
-    .catch(() => {})
+    // log this exception since its not a known error
+    await require('./exception').create(err)
   }
-})
+}
 
 module.exports = {
   get,

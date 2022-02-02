@@ -8,6 +8,7 @@ import * as SelectFile from './selectFile'
 import * as Submit from './submit'
 import * as Type from './type'
 import * as Trigger from './trigger'
+import * as Mount from './mount'
 
 export {
   Check,
@@ -20,4 +21,5 @@ export {
   Submit,
   Type,
   Trigger,
+  Mount,
 }

@@ -353,6 +353,6 @@ describe('cross-origin cookies, set:cookies', () => {
         HTTPS: httpsPort,
       },
     },
-    spec: 'multi_cookies_spec.js',
+    spec: 'multi_cookies.cy.js',
   })
 })

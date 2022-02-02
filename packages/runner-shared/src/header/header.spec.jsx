@@ -4,32 +4,36 @@ import { mount, shallow } from 'enzyme'
 import sinon from 'sinon'
 import Tooltip from '@cypress/react-tooltip'
 
-import { eventManager } from '../event-manager'
-import { Studio, studioRecorder } from '../studio'
+import { Studio } from '../studio'
 import { selectorPlaygroundModel } from '../selector-playground'
 import { Header } from '.'
+import { createEventManager } from '../../test/utils'
 
 const getState = (props) => _.extend({
   defaults: {},
   updateWindowDimensions: sinon.spy(),
 }, props)
 
-const propsWithState = (stateProps, configProps = {}) =>
-  ({
-    state: getState(stateProps),
-    config: configProps,
-    runner: 'e2e',
-  })
-
 describe('<Header />', () => {
+  let eventManager
+
+  const propsWithState = (stateProps, configProps = {}) =>
+    ({
+      state: getState(stateProps),
+      config: configProps,
+      runner: 'e2e',
+      eventManager,
+    })
+
   beforeEach(() => {
+    eventManager = createEventManager()
     sinon.stub(eventManager, 'emit')
-    sinon.stub(studioRecorder, 'removeListeners')
-    sinon.stub(studioRecorder, 'visitUrl')
+    sinon.stub(eventManager.studioRecorder, 'removeListeners')
+    sinon.stub(eventManager.studioRecorder, 'visitUrl')
   })
 
   afterEach(() => {
-    studioRecorder.cancel()
+    eventManager.studioRecorder.cancel()
 
     sinon.restore()
   })
@@ -58,14 +62,14 @@ describe('<Header />', () => {
     })
 
     it('is disabled if studio is loading', () => {
-      studioRecorder.isLoading = true
+      eventManager.studioRecorder.isLoading = true
       const component = shallow(<Header {...propsWithState()} />)
 
       expect(component.find('.selector-playground-toggle')).to.have.prop('disabled', true)
     })
 
     it('is disabled if studio is active', () => {
-      studioRecorder.isActive = true
+      eventManager.studioRecorder.isActive = true
       const component = shallow(<Header {...propsWithState()} />)
 
       expect(component.find('.selector-playground-toggle')).to.have.prop('disabled', true)
@@ -96,14 +100,14 @@ describe('<Header />', () => {
     })
 
     it('does not show tooltip if studio is loading', () => {
-      studioRecorder.isLoading = true
+      eventManager.studioRecorder.isLoading = true
       const component = shallow(<Header {...propsWithState()} />)
 
       expect(component.find(Tooltip)).to.have.prop('visible', false)
     })
 
     it('does not show tooltip if studio is active', () => {
-      studioRecorder.isActive = true
+      eventManager.studioRecorder.isActive = true
       const component = shallow(<Header {...propsWithState()} />)
 
       expect(component.find(Tooltip)).to.have.prop('visible', false)
@@ -125,14 +129,14 @@ describe('<Header />', () => {
     })
 
     it('is visible when studio is loading', () => {
-      studioRecorder.isLoading = true
+      eventManager.studioRecorder.isLoading = true
       const component = shallow(<Header {...propsWithState()} />)
 
       expect(component.find('header')).to.have.className('showing-studio')
     })
 
     it('is visible when studio is active', () => {
-      studioRecorder.isActive = true
+      eventManager.studioRecorder.isActive = true
       const component = shallow(<Header {...propsWithState()} />)
 
       expect(component.find('header')).to.have.className('showing-studio')
@@ -198,7 +202,7 @@ describe('<Header />', () => {
 
     context('studio input', () => {
       beforeEach(() => {
-        studioRecorder.isActive = true
+        eventManager.studioRecorder.isActive = true
       })
 
       it('input is active when studio is active and has no url', () => {
@@ -267,7 +271,7 @@ describe('<Header />', () => {
         component.find('.url').simulate('change', { target: { value: 'http://cypress.io' } })
         component.find('.url-container').simulate('submit')
 
-        expect(studioRecorder.visitUrl).to.be.calledWith('http://cypress.io')
+        expect(eventManager.studioRecorder.visitUrl).to.be.calledWith('http://cypress.io')
       })
 
       it('visits fully formed https url on submit', () => {
@@ -276,7 +280,7 @@ describe('<Header />', () => {
         component.find('.url').simulate('change', { target: { value: 'https://cypress.io' } })
         component.find('.url-container').simulate('submit')
 
-        expect(studioRecorder.visitUrl).to.be.calledWith('https://cypress.io')
+        expect(eventManager.studioRecorder.visitUrl).to.be.calledWith('https://cypress.io')
       })
 
       it('resets url input after submit', () => {

@@ -5,11 +5,11 @@ const debug = require('debug')('test')
 const commitInfo = require('@cypress/commit-info')
 const mockedEnv = require('mocked-env')
 
-const errors = require(`${root}../lib/errors`)
-const api = require(`${root}../lib/api`)
-const logger = require(`${root}../lib/logger`)
-const recordMode = require(`${root}../lib/modes/record`)
-const ciProvider = require(`${root}../lib/util/ci_provider`)
+const errors = require(`../../../lib/errors`)
+const api = require(`../../../lib/api`)
+const exception = require(`../../../lib/exception`)
+const recordMode = require(`../../../lib/modes/record`)
+const ciProvider = require(`../../../lib/util/ci_provider`)
 
 const initialEnv = _.clone(process.env)
 
@@ -359,13 +359,13 @@ describe('lib/modes/record', () => {
       })
     })
 
-    it('does not createException when statusCode is 503', () => {
+    it('does not create exception when statusCode is 503', () => {
       const err = new Error('foo')
 
       err.statusCode = 503
 
       api.updateInstanceStdout.rejects(err)
-      sinon.spy(logger, 'createException')
+      sinon.spy(exception, 'create')
 
       const options = {
         instanceId: 'id-123',
@@ -376,7 +376,7 @@ describe('lib/modes/record', () => {
 
       return recordMode.updateInstanceStdout(options)
       .then(() => {
-        expect(logger.createException).not.to.be.called
+        expect(exception.create).not.to.be.called
       })
     })
   })

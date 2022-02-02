@@ -8,7 +8,7 @@ exports['e2e plugins fails when spec does not exist 1'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (spec.js)                                                                  │
-  │ Searched:   cypress/integration/spec.js                                                        │
+  │ Searched:   cypress/e2e/spec.js                                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -18,7 +18,7 @@ exports['e2e plugins fails when spec does not exist 1'] = `
 
 Oops...we found an error preparing this test file:
 
-  cypress/integration/spec.js
+  cypress/e2e/spec.js
 
 The error was:
 
@@ -62,6 +62,65 @@ Fix the error in your code and re-run your tests.
   │ ✖  spec.js                                  XX:XX        -        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✖  1 of 1 failed (100%)                     XX:XX        -        -        1        -        -  
+
+
+`
+
+exports['e2e plugins handles specs with $, &, and + in file name 1'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (s%p+ec&.js)                                                               │
+  │ Searched:   cypress/e2e/dir&1%/%dir2&/s%p+ec&.js                                               │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  s%p+ec&.js                                                                      (1 of 1)
+
+
+  ✓ passes
+
+  1 passing
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     s%p+ec&.js                                                                       │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/s%p+ec&.js.mp4                      (X second)
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔  s%p+ec&.js                               XX:XX        1        1        -        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
 
 `

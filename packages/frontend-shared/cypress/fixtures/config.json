@@ -1,0 +1,323 @@
+[
+  {
+    "value": 5,
+    "from": "default",
+    "field": "animationDistanceThreshold"
+  },
+  {
+    "value": null,
+    "from": "default",
+    "field": "baseUrl"
+  },
+  {
+    "value": null,
+    "from": "default",
+    "field": "blockHosts"
+  },
+  {
+    "value": [
+      {
+        "name": "chrome",
+        "family": "chromium",
+        "channel": "stable",
+        "displayName": "Chrome",
+        "version": "97.0.4692.71",
+        "path": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+        "minSupportedVersion": 64,
+        "majorVersion": 97
+      },
+      {
+        "name": "firefox",
+        "family": "firefox",
+        "channel": "stable",
+        "displayName": "Firefox",
+        "version": "95.0.2",
+        "path": "/Applications/Firefox.app/Contents/MacOS/firefox-bin",
+        "minSupportedVersion": 86,
+        "majorVersion": 95
+      },
+      {
+        "name": "electron",
+        "channel": "stable",
+        "family": "chromium",
+        "displayName": "Electron",
+        "version": "94.0.4606.81",
+        "path": "",
+        "majorVersion": 94,
+        "info": "Electron is the default browser that comes with Cypress. This is the default browser that runs in headless mode. Selecting this browser is useful when debugging. The version number indicates the underlying Chromium version that Electron uses."
+      }
+    ],
+    "from": "default",
+    "field": "browsers"
+  },
+  {
+    "value": true,
+    "from": "default",
+    "field": "chromeWebSecurity"
+  },
+  {
+    "value": [],
+    "from": "default",
+    "field": "clientCertificates"
+  },
+  {
+    "value": "src",
+    "from": "config",
+    "field": "componentFolder"
+  },
+  {
+    "value": 4000,
+    "from": "default",
+    "field": "defaultCommandTimeout"
+  },
+  {
+    "value": "cypress/downloads",
+    "from": "default",
+    "field": "downloadsFolder"
+  },
+  {
+    "value": {
+      "INTERNAL_CLOUD_ENV": "staging",
+      "KONFIG_ENV": "staging"
+    },
+    "field": "env",
+    "from": "env"
+  },
+  {
+    "value": 60000,
+    "from": "default",
+    "field": "execTimeout"
+  },
+  {
+    "value": false,
+    "from": "default",
+    "field": "experimentalFetchPolyfill"
+  },
+  {
+    "value": true,
+    "from": "default",
+    "field": "experimentalInteractiveRunEvents"
+  },
+  {
+    "value": false,
+    "from": "default",
+    "field": "experimentalSourceRewriting"
+  },
+  {
+    "value": false,
+    "from": "default",
+    "field": "experimentalStudio"
+  },
+  {
+    "value": false,
+    "from": "default",
+    "field": "experimentalSessionSupport"
+  },
+  {
+    "value": "",
+    "from": "default",
+    "field": "fileServerFolder"
+  },
+  {
+    "value": "cypress/fixtures",
+    "from": "default",
+    "field": "fixturesFolder"
+  },
+  {
+    "value": null,
+    "from": "default",
+    "field": "hosts"
+  },
+  {
+    "value": "*.hot-update.js",
+    "from": "default",
+    "field": "ignoreSpecPattern"
+  },
+  {
+    "value": false,
+    "from": "default",
+    "field": "includeShadowDom"
+  },
+  {
+    "value": "cypress/e2e/integration",
+    "from": "config",
+    "field": "integrationFolder"
+  },
+  {
+    "value": true,
+    "from": "default",
+    "field": "modifyObstructiveCode"
+  },
+  {
+    "value": "system",
+    "from": "config",
+    "field": "nodeVersion"
+  },
+  {
+    "value": 50,
+    "from": "default",
+    "field": "numTestsKeptInMemory"
+  },
+  {
+    "value": 60000,
+    "from": "default",
+    "field": "pageLoadTimeout"
+  },
+  {
+    "value": "cypress/e2e/plugins/index.ts",
+    "from": "config",
+    "field": "pluginsFile"
+  },
+  {
+    "value": null,
+    "from": "default",
+    "field": "port"
+  },
+  {
+    "value": "sehy69",
+    "from": "config",
+    "field": "projectId"
+  },
+  {
+    "value": 20,
+    "from": "default",
+    "field": "redirectionLimit"
+  },
+  {
+    "value": "../../node_modules/cypress-multi-reporters/index.js",
+    "from": "config",
+    "field": "reporter"
+  },
+  {
+    "value": {
+      "configFile": "../../mocha-reporter-config.json"
+    },
+    "from": "config",
+    "field": "reporterOptions"
+  },
+  {
+    "value": 5000,
+    "from": "default",
+    "field": "requestTimeout"
+  },
+  {
+    "value": 30000,
+    "from": "default",
+    "field": "responseTimeout"
+  },
+  {
+    "value": {
+      "runMode": 2,
+      "openMode": 0
+    },
+    "from": "config",
+    "field": "retries"
+  },
+  {
+    "value": true,
+    "from": "default",
+    "field": "screenshotOnRunFailure"
+  },
+  {
+    "value": "cypress/screenshots",
+    "from": "default",
+    "field": "screenshotsFolder"
+  },
+  {
+    "value": "top",
+    "from": "default",
+    "field": "scrollBehavior"
+  },
+  {
+    "value": "cypress/e2e/support/e2eSupport.ts",
+    "from": "config",
+    "field": "supportFile"
+  },
+  {
+    "value": 60000,
+    "from": "default",
+    "field": "taskTimeout"
+  },
+  {
+    "value": true,
+    "from": "default",
+    "field": "trashAssetsBeforeRuns"
+  },
+  {
+    "value": null,
+    "from": "default",
+    "field": "userAgent"
+  },
+  {
+    "value": true,
+    "from": "default",
+    "field": "video"
+  },
+  {
+    "value": 32,
+    "from": "default",
+    "field": "videoCompression"
+  },
+  {
+    "value": "cypress/videos",
+    "from": "default",
+    "field": "videosFolder"
+  },
+  {
+    "value": true,
+    "from": "default",
+    "field": "videoUploadOnPasses"
+  },
+  {
+    "value": 850,
+    "from": "config",
+    "field": "viewportHeight"
+  },
+  {
+    "value": 800,
+    "from": "config",
+    "field": "viewportWidth"
+  },
+  {
+    "value": true,
+    "from": "default",
+    "field": "waitForAnimations"
+  },
+  {
+    "value": true,
+    "from": "default",
+    "field": "watchForFileChanges"
+  },
+  {
+    "value": {
+      "specPattern": "cypress/e2e/**/*.cy.{js,jsx,ts,tsx}",
+      "supportFile": "cypress/e2e/support/e2eSupport.ts",
+      "pluginsFile": "cypress/e2e/plugins/index.ts"
+    },
+    "from": "config",
+    "field": "e2e"
+  },
+  {
+    "value": {
+      "specPattern": "**/*.cy.{js,jsx,ts,tsx}",
+      "supportFile": "cypress/component/support/index.ts",
+      "pluginsFile": "cypress/component/plugins/index.js",
+      "devServerConfig": {
+        "viteConfig": {
+          "optimizeDeps": {
+            "include": [
+              "@headlessui/vue",
+              "vue3-file-selector",
+              "just-my-luck",
+              "combine-properties",
+              "faker",
+              "@packages/ui-components/cypress/support/customPercyCommand"
+            ]
+          }
+        }
+      }
+    },
+    "from": "config",
+    "field": "component"
+  }
+]

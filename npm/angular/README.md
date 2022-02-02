@@ -14,7 +14,7 @@ Ensure you have a version of Cypress > 7.
 Add the following to your support file:
 
 ```js
-// cypress/support/index.js
+// cypress/support/component.js
 // core-js 3.*
 require('core-js/es/reflect');
 // core-js 2.*
@@ -22,10 +22,10 @@ require('core-js/es7/reflect');
 require('@cypress/angular/support');
 ```
 
-Enable component testing in `cypress.json`.
+Enable component testing in `cypress.config.js`.
 
-```json
-{
+```js
+module.exports = {
   "component": {
     "componentFolder": "src/app",
     "testFiles": "**/*cy-spec.ts"
@@ -159,7 +159,7 @@ module.exports = {
 - Then add the code below to your supportFile and pluginsFile
 
 ```javascript
-// cypress/support/index.js
+// cypress/support/component.js
 import '@cypress/code-coverage/support';
 // cypress/plugins/index.js
 module.exports = (on, config) => {

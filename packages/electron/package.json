@@ -6,7 +6,7 @@
   "scripts": {
     "build": "node ./bin/cypress-electron --install",
     "build-prod": "yarn build",
-    "clean-deps": "rm -rf node_modules",
+    "clean-deps": "rimraf node_modules",
     "postinstall": "echo '@packages/electron needs: yarn build'",
     "start": "./bin/cypress-electron",
     "test": "yarn test-unit",
@@ -26,7 +26,8 @@
     "electron": "15.3.4",
     "electron-packager": "15.4.0",
     "execa": "4.1.0",
-    "mocha": "3.5.3"
+    "mocha": "3.5.3",
+    "rimraf": "3.0.2"
   },
   "files": [
     "dist",

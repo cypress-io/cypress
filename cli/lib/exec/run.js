@@ -137,7 +137,15 @@ const processRunOptions = (options = {}) => {
     args.push('--tag', options.tag)
   }
 
-  args.push(...processTestingType(options.testingType))
+  if (options.inspect) {
+    args.push('--inspect')
+  }
+
+  if (options.inspectBrk) {
+    args.push('--inspectBrk')
+  }
+
+  args.push(...processTestingType(options))
 
   return args
 }

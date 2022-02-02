@@ -8,7 +8,7 @@ const debug = Debug('cypress:server:socket-ct')
 
 export class SocketCt extends SocketBase {
   constructor (config: Record<string, any>) {
-    super(config)
+    super()
 
     devServer.emitter.on('dev-server:compile:error', (error: string | undefined) => {
       this.toRunner('dev-server:hmr:error', error)
@@ -23,10 +23,6 @@ export class SocketCt extends SocketBase {
   }
 
   startListening (server: DestroyableHttpServer, automation, config, options) {
-    const { componentFolder } = config
-
-    this.testsDir = componentFolder
-
     return super.startListening(server, automation, config, options, {
       onSocketConnection (socket: socketIo.SocketIOServer) {
         debug('do onSocketConnection')

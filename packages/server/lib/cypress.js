@@ -173,10 +173,6 @@ module.exports = {
         mode = 'smokeTest'
       } else if (options.returnPkg) {
         mode = 'returnPkg'
-      } else if (options.logs) {
-        mode = 'logs'
-      } else if (options.clearLogs) {
-        mode = 'clearLogs'
       } else if (!(options.exitWithCode == null)) {
         mode = 'exitWithCode'
       } else if (options.runProject) {
@@ -228,18 +224,6 @@ module.exports = {
         }).then(exit0)
         .catch(exitErr)
 
-      case 'logs':
-        // print the logs + exit
-        return require('./gui/logs').print()
-        .then(exit0)
-        .catch(exitErr)
-
-      case 'clearLogs':
-        // clear the logs + exit
-        return require('./gui/logs').clear()
-        .then(exit0)
-        .catch(exitErr)
-
       case 'exitWithCode':
         return require('./modes/exit')(options)
         .then(exit)
@@ -270,8 +254,7 @@ module.exports = {
         return this.runElectron(mode, options)
 
       case 'openProject':
-        // open + start the project
-        return this.openProject(options)
+        throw new Error('Unused')
 
       default:
         throw new Error(`Cannot start. Invalid mode: '${mode}'`)

@@ -69,7 +69,7 @@
 
     // Name: Toggle Quotes
 		// Description: Toggle cycle " -> ' -> `
-    "britesnow.vscode-toggle-quotes",
+		"britesnow.vscode-toggle-quotes",
 
     // Name: Gremlins tracker for Visual Studio Code
     // Description: When you paste from Slack, Figma, or Google Docs, you'll get stylized quotes.

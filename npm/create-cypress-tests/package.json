@@ -3,7 +3,7 @@
   "version": "0.0.0-development",
   "description": "Cypress smart installation wizard",
   "private": false,
-  "main": "index.js",
+  "main": "dist/src/main.js",
   "scripts": {
     "build": "yarn prepare-example && tsc -p ./tsconfig.json && node scripts/example copy-to ./dist/initial-template && yarn prepare-copy-templates",
     "build-prod": "yarn build",
@@ -26,7 +26,8 @@
     "fs-extra": "^9.0.1",
     "glob": "^7.1.6",
     "inquirer": "7.3.3",
-    "ora": "^5.1.0"
+    "ora": "^5.1.0",
+    "recast": "0.20.4"
   },
   "devDependencies": {
     "@types/babel__core": "^7.1.2",
@@ -41,6 +42,10 @@
     "snap-shot-it": "7.9.3",
     "typescript": "^4.2.3"
   },
+  "files": [
+    "dist",
+    "bin"
+  ],
   "bin": {
     "create-cypress-tests": "dist/src/index.js"
   },

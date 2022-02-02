@@ -1,12 +1,13 @@
 {
   "compilerOptions": {
     /* Basic Options */
-    "target": "es6",                          /* Specify ECMAScript target version: 'ES3' (default), 'ES5', 'ES2015', 'ES2016', 'ES2017', or 'ESNEXT'. */
+    "target": "ES2018",                          /* Specify ECMAScript target version: 'ES3' (default), 'ES5', 'ES2015', 'ES2016', 'ES2017', or 'ESNEXT'. */
     "module": "commonjs",                     /* Specify module code generation: 'commonjs', 'amd', 'system', 'umd' or 'es2015'. */
-    // "lib": [],                             /* Specify library files to be included in the compilation:  */
+    "lib": ["es2018", "ES2020.Promise"],                             /* Specify library files to be included in the compilation:  */
     // "allowJs": true,                       /* Allow javascript files to be compiled. */
     // "checkJs": true,                       /* Report errors in .js files. */
     "jsx": "react",                     /* Specify JSX code generation: 'preserve', 'react-native', or 'react'. */
+    "skipLibCheck": true,
     // "declaration": true,                   /* Generates corresponding '.d.ts' file. */
     // "sourceMap": true,                     /* Generates corresponding '.map' file. */
     // "outFile": "./",                       /* Concatenate and emit output to single file. */
@@ -14,7 +15,7 @@
     // "rootDir": "./",                       /* Specify the root directory of input files. Use to control the output directory structure with --outDir. */
     // "removeComments": true,                /* Do not emit comments to output. */
     // "noEmit": true,                        /* Do not emit outputs. */
-    // "importHelpers": true,                 /* Import emit helpers from 'tslib'. */
+    "importHelpers": true,                 /* Import emit helpers from 'tslib'. */
     // "downlevelIteration": true,            /* Provide full support for iterables in 'for-of', spread, and destructuring when targeting 'ES5' or 'ES3'. */
     // "isolatedModules": true,               /* Transpile each file as a separate module (similar to 'ts.transpileModule'). */
 
@@ -26,7 +27,7 @@
     // "alwaysStrict": true,                  /* Parse in strict mode and emit "use strict" for each source file. */
 
     /* Additional Checks */
-    "noUnusedLocals": true,                /* Report errors on unused locals. */
+    "noUnusedLocals": false,                /* Report errors on unused locals. */
     "noUnusedParameters": false,            /* Report errors on unused parameters. */
     "noImplicitReturns": true,             /* Report error when not all code paths in function return a value. */
     "noFallthroughCasesInSwitch": true,    /* Report errors for fallthrough cases in switch statement. */

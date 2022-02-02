@@ -1,5 +1,5 @@
 {
-  "include": ["integration/*.ts"],
+  "include": ["e2e/*.ts"],
   "compilerOptions": {
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,

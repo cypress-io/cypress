@@ -140,17 +140,21 @@ export const replaceLocalNpmVersions = async function (basePath: string) {
       let shouldWriteFile = false
 
       for (const [depName, version] of Object.entries(dependencies)) {
-        if (!depName.startsWith('@cypress/') || version !== '0.0.0-development') {
+        const matchedPkg = Boolean(depName.startsWith('@cypress/') || depName === 'create-cypress-tests')
+
+        if (!matchedPkg || version !== '0.0.0-development') {
           continue
         }
 
-        const [, localPkg] = depName.split('/')
+        const pkgName = depName.startsWith('@cypress/') ? depName.split('/')[1] : depName
 
-        const localPkgPath = path.join(basePath, 'npm', localPkg)
+        const localPkgPath = path.join(basePath, 'npm', pkgName)
 
-        dependencies[`@cypress/${localPkg}`] = `file:${localPkgPath}`
+        json.dependencies[depName] = `file:${localPkgPath}`
+        shouldWriteFile = true
+
         if (!visited.has(localPkgPath)) {
-          await updatePackageJson(`./npm/${localPkg}`)
+          await updatePackageJson(`./npm/${pkgName}`)
         }
 
         shouldWriteFile = true

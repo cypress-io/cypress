@@ -1,28 +1,131 @@
-$pass: #08c18d;
-$fail: #e94f5f;
-$pending: #428BCA;
-$pinned: #9442ca;
-$yellow-dark: #FFB61C;
-$yellow-medium: lighten($yellow-dark, 25%);
-$yellow-lightest: #ffffee;
-$retried: #f0ec98;
+// NOTE: All the colors in this file are also stored in packages/frontend-shared/.windicss/colors.ts, for use in windi. If you change any here, please also change them there.
 
-$link-text: #3380FF;
+$gray-50: #f3f4fa;
+$gray-100: #e1e3ed;
+$gray-200: #d0d2e0;
+$gray-300: #bfc2d4;
+$gray-400: #afb3c7;
+$gray-500: #9095ad;
+$gray-600: #747994;
+$gray-700: #5a5f7a;
+$gray-800: #434861;
+$gray-900: #2e3247;
+$gray-1000: #1b1e2e;
 
-$err-background: #fff3f4;
-$err-code-background: #fee4e7;
-$err-text: #cd0a17;
-$err-header-background: #fee0e3;
-$err-header-text: #cc3943;
+$red-50: #fbeff1;
+$red-100: #fad9df;
+$red-200: #f8c4cd;
+$red-300: #f59aa9;
+$red-400: #e45770;
+$red-500: #c62b49;
+$red-600: #9f1331;
+$red-700: #7a0723;
+$red-800: #5e021b;
+$red-900: #4f0018;
+$red-1000: #490018;
 
-$warn-background: hsl(42, 100%, 98%);
-$warn-header-background: hsl(42, 94%, 94%);
-$warn-header-text: hsl(42, 59%, 51%);
-$warn-text: hsl(42, 91%, 35%);
+$orange-50: #f5f4d7;
+$orange-100: #f3ecb3;
+$orange-200: #f1e08f;
+$orange-300: #edbb4a;
+$orange-400: #db7903;
+$orange-500: #bd5800;
+$orange-600: #963f00;
+$orange-700: #702c00;
+$orange-800: #521f00;
+$orange-900: #411800;
+$orange-1000: #391500;
 
-$header-height: 46px;
+$jade-50: #e4fbf2;
+$jade-100: #c2f1de;
+$jade-200: #a3e7cb;
+$jade-300: #69d3a7;
+$jade-400: #1fa971;
+$jade-500: #00814d;
+$jade-600: #005f39;
+$jade-700: #00442a;
+$jade-800: #003220;
+$jade-900: #00291b;
+$jade-1000: #00261a;
+
+$indigo-50: #f0f1ff;
+$indigo-100: #daddfe;
+$indigo-200: #c5c9fd;
+$indigo-300: #9aa2fc;
+$indigo-400: #6470f3;
+$indigo-500: #4956e3;
+$indigo-600: #3a46cc;
+$indigo-700: #2f3ab0;
+$indigo-800: #252e8f;
+$indigo-900: #1c236d;
+$indigo-1000: #151a50;
+
+$purple-50: #f5f0fb;
+$purple-100: #e9ddfa;
+$purple-200: #decbf8;
+$purple-300: #c8a7f5;
+$purple-400: #a06ce4;
+$purple-500: #7f43c9;
+$purple-600: #632aa6;
+$purple-700: #4b1a83;
+$purple-800: #3b1268;
+$purple-900: #320e58;
+$purple-1000: #2f0c52;
+
+$teal-50: #e0f6fa;
+$teal-100: #b7e7f0;
+$teal-200: #90d9e6;
+$teal-300: #4bbfd2;
+$teal-400: #0097a8;
+$teal-500: #007780;
+$teal-600: #00595d;
+$teal-700: #004143;
+$teal-800: #003131;
+$teal-900: #002828;
+$teal-1000: #002525;
+
+$fuchsia-50: #faeffb;
+$fuchsia-100: #f7daf9;
+$fuchsia-200: #f3c6f8;
+$fuchsia-300: #ed9ff4;
+$fuchsia-400: #d65fe3;
+$fuchsia-500: #b735c7;
+$fuchsia-600: #901ca2;
+$fuchsia-700: #6c0f7e;
+$fuchsia-800: #510862;
+$fuchsia-900: #400651;
+$fuchsia-1000: #39054a;
+
+$black: black;
+$white: white;
+
+$pass: $jade-400;
+$fail: $red-400;
+$pending: $indigo-400;
+$pinned: $purple-400;
+$retried: $orange-400;
+$yellow-medium: $orange-800;
+
+$link-text: $indigo-600;
+
+$err-background: rgba($red-400, 0.1);
+$err-code-background: rgba($red-400, 0.18);
+$err-code-text: $red-300;
+$err-header-background: rgba($red-400, 0.15);
+$err-header-text: $red-300;
+$err-text: $red-400;
+
+$reporter-section-background: #171926; // not a brand color
+
+$warn-background: $red-1000;
+$warn-header-background: $orange-1000;
+$warn-header-text: $orange-700;
+$warn-text: $orange-600;
+
+$header-height: 64px;
 $reporter-contents-min-width: 170px;
 
 $font-sans: 'Mulish', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 $open-sans: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 $monospace: Consolas, Monaco, 'Andale Mono', monospace;
+$font-system: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;

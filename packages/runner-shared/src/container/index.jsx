@@ -4,7 +4,7 @@ import React, { Component } from 'react'
 import { AutomationDisconnected } from '../automation-disconnected'
 import { automation } from '../automation'
 import { NoAutomation } from '../no-automation'
-import { automationElementId, AutomationElement } from '../automation-element'
+import { AutomationElement } from '../automation-element'
 
 @observer
 export class Container extends Component {
@@ -18,8 +18,8 @@ export class Container extends Component {
 
   componentDidMount () {
     this.props.eventManager.addGlobalListeners(this.props.state, {
-      element: automationElementId,
-      string: this.randomString,
+      randomString: this.randomString,
+      element: `${this.props.config.namespace}-string`,
     })
   }
 
@@ -49,7 +49,7 @@ export class Container extends Component {
 
   _automationElement () {
     return (
-      <AutomationElement randomString={this.randomString} />
+      <AutomationElement namespace={this.props.config.namespace} randomString={this.randomString} />
     )
   }
 
@@ -86,7 +86,7 @@ export class Container extends Component {
     const { NoSpec } = this.props
 
     return (
-      <NoSpec config={this.props.config} onHashChange={this._checkSpecFile}>
+      <NoSpec config={this.props.config} eventManager={this.props.eventManager} onHashChange={this._checkSpecFile}>
         {this._automationElement()}
       </NoSpec>
     )

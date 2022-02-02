@@ -7,14 +7,14 @@ exports['e2e typescript in spec and support file spec passes 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (typescript_passing_spec.ts)                                               │
-  │ Searched:   cypress/integration/typescript_passing_spec.ts                                     │
+  │ Specs:      1 found (typescript_passing.cy.ts)                                                 │
+  │ Searched:   cypress/e2e/typescript_passing.cy.ts                                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  typescript_passing_spec.ts                                                      (1 of 1)
+  Running:  typescript_passing.cy.ts                                                        (1 of 1)
 
 
   imports work
@@ -38,14 +38,14 @@ exports['e2e typescript in spec and support file spec passes 1'] = `
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     typescript_passing_spec.ts                                                       │
+  │ Spec Ran:     typescript_passing.cy.ts                                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/typescript_passing_spec.ts.mp4      (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/typescript_passing.cy.ts.mp4        (X second)
 
 
 ====================================================================================================
@@ -55,7 +55,7 @@ exports['e2e typescript in spec and support file spec passes 1'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  typescript_passing_spec.ts               XX:XX        4        4        -        -        - │
+  │ ✔  typescript_passing.cy.ts                 XX:XX        4        4        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        4        4        -        -        -  
 
@@ -71,23 +71,23 @@ exports['e2e typescript in spec and support file spec fails with syntax error 1'
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (typescript_syntax_error_spec.ts)                                          │
-  │ Searched:   cypress/integration/typescript_syntax_error_spec.ts                                │
+  │ Specs:      1 found (typescript_syntax_error.cy.ts)                                            │
+  │ Searched:   cypress/e2e/typescript_syntax_error.cy.ts                                          │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  typescript_syntax_error_spec.ts                                                 (1 of 1)
+  Running:  typescript_syntax_error.cy.ts                                                   (1 of 1)
 
 Oops...we found an error preparing this test file:
 
-  cypress/integration/typescript_syntax_error_spec.ts
+  cypress/e2e/typescript_syntax_error.cy.ts
 
 The error was:
 
 Error: Webpack Compilation Error
-./cypress/integration/typescript_syntax_error_spec.tsXX:XX
+./cypress/e2e/typescript_syntax_error.cy.tsXX:XX
 Module parse failed: Unexpected token (3:19)
 File was processed with these loaders:
  * relative/path/to/webpack-batteries-included-preprocessor/node_modules/ts-loader/index.js
@@ -116,15 +116,15 @@ Fix the error in your code and re-run your tests.
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     typescript_syntax_error_spec.ts                                                  │
+  │ Spec Ran:     typescript_syntax_error.cy.ts                                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/typescript_syntax_error_spec.ts     (X second)
-                          .mp4                                                                      
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/typescript_syntax_error.cy.ts.m     (X second)
+                          p4                                                                        
 
 
 ====================================================================================================
@@ -134,7 +134,7 @@ Fix the error in your code and re-run your tests.
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  typescript_syntax_error_spec.ts          XX:XX        -        -        1        -        - │
+  │ ✖  typescript_syntax_error.cy.ts            XX:XX        -        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✖  1 of 1 failed (100%)                     XX:XX        -        -        1        -        -  
 
@@ -150,13 +150,14 @@ exports['e2e typescript in spec and support file project passes 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      2 found (app_spec.ts, math.ts)                                                     │
+  │ Specs:      1 found (app.cy.ts)                                                                │
+  │ Searched:   cypress/e2e/**/*.cy.{js,jsx,ts,tsx}                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  app_spec.ts                                                                     (1 of 2)
+  Running:  app.cy.ts                                                                       (1 of 1)
 
 
   ✓ is true
@@ -175,43 +176,14 @@ exports['e2e typescript in spec and support file project passes 1'] = `
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     app_spec.ts                                                                      │
+  │ Spec Ran:     app.cy.ts                                                                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/app_spec.ts.mp4                     (X second)
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  math.ts                                                                         (2 of 2)
-
-
-  0 passing
-
-
-  (Results)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        0                                                                                │
-  │ Passing:      0                                                                                │
-  │ Failing:      0                                                                                │
-  │ Pending:      0                                                                                │
-  │ Skipped:      0                                                                                │
-  │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
-  │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     math.ts                                                                          │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/math.ts.mp4                         (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/app.cy.ts.mp4                       (X second)
 
 
 ====================================================================================================
@@ -221,9 +193,7 @@ exports['e2e typescript in spec and support file project passes 1'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  app_spec.ts                              XX:XX        1        1        -        -        - │
-  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✔  math.ts                                  XX:XX        -        -        -        -        - │
+  │ ✔  app.cy.ts                                XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
