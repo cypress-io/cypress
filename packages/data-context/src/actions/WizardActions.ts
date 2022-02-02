@@ -73,11 +73,11 @@ export class WizardActions {
         devDependencies: { [key: string]: string }
       }
 
-      this.data.detectedFramework = undefined
-      this.data.detectedBundler = undefined
-      this.data.detectedLanguage = undefined
+      this.data.detectedFramework = null
+      this.data.detectedBundler = null
+      this.data.detectedLanguage = null
 
-      this.detectLanguage()
+      await this.detectLanguage()
       debug('detectedLanguage %s', this.data.detectedLanguage)
       this.data.chosenLanguage = this.data.detectedLanguage || 'js'
 
