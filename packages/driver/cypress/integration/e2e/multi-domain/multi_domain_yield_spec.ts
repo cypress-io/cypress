@@ -194,14 +194,28 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
     }).should('equal', 'symbol')
   })
 
-  // NOTE: This test will only work on chrome.
-  it.skip('yields an error if an object contains an error', () => {
+  // NOTE: Errors can only be serialized on chromium browsers.
+  it('yields an error if an object contains an error', (done) => {
+    const isChromium = Cypress.isBrowser({ family: 'chromium' })
+
+    cy.on('fail', (err) => {
+      if (!isChromium) {
+        assertLogLength(logs, 7)
+        expect(logs[6].get('error')).to.eq(err)
+        expect(err.message).to.include('`cy.switchToDomain()` could not serialize the subject due to one of it\'s properties not being supported by the structured clone algorithm.')
+      }
+
+      done()
+    })
+
     cy.switchToDomain('foobar.com', () => {
       cy.wrap({
         key: new Error('Boom goes the dynamite'),
       })
     }).its('key.message')
-    .should('equal', 'Boom goes the dynamite')
+    .should('equal', 'Boom goes the dynamite').then(() => {
+      done()
+    })
   })
 
   it('yields an object containing valid types', () => {
