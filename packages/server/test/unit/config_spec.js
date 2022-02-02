@@ -64,7 +64,7 @@ describe('lib/config', () => {
       sinon.stub(ctx.lifecycleManager, 'verifyProjectRoot').returns(undefined)
 
       this.setup = (cypressJson = {}, cypressEnvJson = {}) => {
-        sinon.stub(ctx.lifecycleManager, 'getConfigFileContents').resolves({ ...cypressJson, e2e: _.isObject(cypressJson.e2e) ? { supportFile: false, ...cypressJson.e2e } : cypressJson.e2e })
+        sinon.stub(ctx.lifecycleManager, 'getConfigFileContents').resolves({ ...cypressJson, e2e: cypressJson.e2e ?? { supportFile: false } })
         sinon.stub(ctx.lifecycleManager, 'loadCypressEnvFile').resolves(cypressEnvJson)
       }
     })
@@ -188,13 +188,13 @@ describe('lib/config', () => {
 
       context('baseUrl', () => {
         it('passes if begins with http://', function () {
-          this.setup({ e2e: { baseUrl: 'http://example.com' } })
+          this.setup({ e2e: { baseUrl: 'http://example.com', supportFile: false } })
 
           return this.expectValidationPasses()
         })
 
         it('passes if begins with https://', function () {
-          this.setup({ e2e: { baseUrl: 'https://example.com' } })
+          this.setup({ e2e: { baseUrl: 'https://example.com', supportFile: false } })
 
           return this.expectValidationPasses()
         })
