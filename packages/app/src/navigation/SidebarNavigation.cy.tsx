@@ -16,9 +16,6 @@ function mountComponent (initialNavExpandedVal = true) {
 describe('SidebarNavigation', () => {
   it('expands the bar when clicking the expand button', () => {
     mountComponent()
-    cy.findByLabelText('toggle navigation', {
-      selector: 'button',
-    }).click()
 
     cy.get('[aria-expanded]').should('have.attr', 'aria-expanded', 'false')
     cy.findByText('test-project').should('not.be.visible')
