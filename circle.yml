@@ -1002,6 +1002,7 @@ jobs:
           name: Linting 🧹
           command: |
             git clean -df
+            yarn clean
             yarn lint
       - run:
           name: cypress info (dev)
