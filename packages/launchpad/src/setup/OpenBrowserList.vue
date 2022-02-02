@@ -22,7 +22,7 @@
           :class="{
             'border-jade-300 ring-2 ring-jade-100 focus:border-jade-400 focus:border-1 focus:outline-none': checked,
             'bg-gray-50 before:hocus:cursor-not-allowed': browser.disabled,
-            'filter grayscale border-gray-200': browserStatusChosen && !checked,
+            'filter grayscale border-gray-200': browserStatus.chosen && !checked,
             'border-gray-200 before:hocus:cursor-pointer hover:border-indigo-300 hover:ring-2 hover:ring-indigo-100': !browser.disabled && !checked && !browserStatus.chosen
           }"
         >
@@ -163,7 +163,7 @@ import PowerStandbyIcon from '~icons/cy/power-standby'
 import ArrowLeftIcon from '~icons/cy/arrow-left_x16'
 import StatusRunningIcon from '~icons/cy/status-running_x16'
 import { RadioGroup, RadioGroupOption, RadioGroupLabel } from '@headlessui/vue'
-import UnsupportedBrowserTooltip from './UnsupportedBrowserTooltip.vue'
+import UnsupportedBrowserTooltip from '@packages/frontend-shared/src/gql-components/topnav/UnsupportedBrowserTooltip.vue'
 
 import { OpenBrowserListFragment, OpenBrowserList_SetBrowserDocument } from '../generated/graphql'
 
