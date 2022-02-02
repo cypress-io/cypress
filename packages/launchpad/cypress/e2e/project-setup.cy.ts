@@ -500,7 +500,7 @@ describe('Launchpad: Setup Project', () => {
 
                 if (framework.supportedBundlers.length > 1) {
                   cy.findByRole('button', {
-                    name: 'Bundler(Dev Server)Pick a bundler',
+                    name: 'Bundler(Dev Server) Pick a bundler',
                     expanded: false,
                   })
                   .should('have.attr', 'aria-haspopup', 'true')
