@@ -55,7 +55,7 @@ describe('util', () => {
     const { stdoutLineMatches } = util
 
     it('is a function', () => {
-      expect(stdoutLineMatches).to.be.a.function
+      expect(stdoutLineMatches).to.be.instanceof('Function')
     })
 
     it('matches entire output', () => {

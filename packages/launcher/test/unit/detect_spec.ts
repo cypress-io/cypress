@@ -2,8 +2,8 @@ require('../spec_helper')
 import _ from 'lodash'
 import { detect, detectByPath, setMajorVersion } from '../../lib/detect'
 import { goalBrowsers } from '../fixtures'
-import { expect } from 'chai'
 import { utils } from '../../lib/utils'
+import { expect } from 'chai'
 import sinon, { SinonStub } from 'sinon'
 import os from 'os'
 import { log } from '../log'
@@ -179,14 +179,13 @@ describe('browser detection', () => {
       sinon.stub(os, 'release').returns('20.0.0')
 
       browsers = []
-
       sinon.stub(darwinUtil, 'darwinDetectionWorkaround').resolves(browsers)
     })
 
     it('uses workaround when on darwin 20.0.0+', async () => {
       const result = await detect()
 
-      expect(darwinUtil.darwinDetectionWorkaround).to.be.called
+      expect(darwinUtil.darwinDetectionWorkaround).to.have.been.called
       expect(result).to.equal(browsers)
     })
   })

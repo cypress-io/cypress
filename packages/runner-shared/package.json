@@ -16,7 +16,7 @@
     "@packages/web-config": "0.0.0-development",
     "@popperjs/core": "2.9.2",
     "ansi-to-html": "0.6.14",
-    "chai": "4.2.0",
+    "chai": "^4.2.0",
     "chai-enzyme": "1.0.0-beta.1",
     "classnames": "2.3.1",
     "enzyme": "3.11.0",

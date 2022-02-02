@@ -99,7 +99,7 @@ describe('lib/project-base', () => {
       expect(projectCt._cfg.viewportHeight).to.eq(500)
       expect(projectCt._cfg.viewportWidth).to.eq(500)
       expect(projectCt._cfg.baseUrl).to.eq('http://localhost:9999')
-      expect(projectCt.startCtDevServer).to.have.beenCalled
+      expect(projectCt.startCtDevServer).to.have.been.called
     })
   })
 

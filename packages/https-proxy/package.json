@@ -27,7 +27,7 @@
     "@cypress/request-promise": "4.2.6",
     "@packages/network": "0.0.0-development",
     "@packages/ts": "0.0.0-development",
-    "chai": "3.5.0",
+    "chai": "^4.2.0",
     "cross-env": "6.0.3",
     "mocha": "3.5.3",
     "sinon": "1.17.7",

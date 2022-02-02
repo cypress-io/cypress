@@ -2,6 +2,7 @@ require('../../spec_helper')
 
 const browsers = require(`${root}../lib/browsers`)
 const utils = require(`${root}../lib/browsers/utils`)
+const errors = require(`${root}../lib/errors`)
 const snapshot = require('snap-shot-it')
 
 const normalizeBrowsers = (message) => {
@@ -109,8 +110,10 @@ describe('lib/browsers/index', () => {
         return utils.extendLaunchOptionsFromPlugins({}, { foo: 'bar' })
       }
 
+      const errorMsg = errors.getMsgByType('UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES').split('\n')[0]
+
       // this error is snapshotted in an e2e test, no need to do it here
-      expect(fn).to.throw({ type: 'UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES' })
+      expect(fn).to.throw(new RegExp(errorMsg))
     })
 
     it('warns if array passed and changes it to args', () => {
