@@ -4,6 +4,7 @@
   "private": true,
   "main": "index.js",
   "scripts": {
+    "build-ci": "tsc --project .",
     "build-prod": "tsc --project .",
     "clean": "rm lib/*.js",
     "clean-deps": "rm -rf node_modules",

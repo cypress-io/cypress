@@ -4,6 +4,7 @@
   "private": true,
   "main": "index.js",
   "scripts": {
+    "build-ci": "tsc",
     "build-prod": "tsc",
     "clean-deps": "rm -rf node_modules",
     "codecov": "codecov",

@@ -12,6 +12,7 @@
     "binary-release": "node ./scripts/binary.js release",
     "binary-upload": "node ./scripts/binary.js upload",
     "binary-zip": "node ./scripts/binary.js zip",
+    "build-ci": "lerna run build-ci --stream --no-bail || echo 'Type errors encountered, these will be handled in the type-check job'",
     "build": "lerna run build --stream --ignore create-cypress-tests && lerna run build --stream --scope create-cypress-tests",
     "build-prod": "lerna run build-prod --stream --ignore create-cypress-tests && lerna run build-prod --stream --scope create-cypress-tests",
     "bump": "node ./scripts/binary.js bump",

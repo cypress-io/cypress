@@ -4,6 +4,7 @@
   "private": true,
   "browser": "lib/browser.ts",
   "scripts": {
+    "build-ci": "tsc",
     "build-prod": "tsc",
     "clean-deps": "rm -rf node_modules",
     "postinstall": "patch-package",

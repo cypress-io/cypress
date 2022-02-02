@@ -5,6 +5,7 @@
   "private": true,
   "main": "lib/index.js",
   "scripts": {
+    "build-ci": "tsc --project .",
     "build-prod": "tsc --project .",
     "clean": "rm lib/options.js",
     "test": "yarn test-unit",
