@@ -124,7 +124,7 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
     cy.switchToDomain('foobar.com', () => {
       cy
       .get('[data-cy="dom-check"]')
-    }).should('equal')
+    }).should('equal', 'object')
   })
 
   it('throws if an object contains a function', (done) => {
