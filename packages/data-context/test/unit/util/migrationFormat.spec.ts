@@ -2,7 +2,7 @@ import { expect } from 'chai'
 import {
   formatMigrationFile,
   supportFileRegexps,
-} from '../../../src/util/migrationFormat'
+} from '../../../src/sources/migration/format'
 import { regexps } from '../../../src/sources/migration/regexps'
 
 describe('formatMigrationFile', () => {

@@ -17,6 +17,14 @@ describe('shouldShowAutoRenameStep', () => {
     expect(actual).to.be.true
   })
 
+  it('true when testFiles is custom, but default integration folder', async () => {
+    const cwd = scaffoldMigrationProject('migration-e2e-component-default-test-files')
+    const config = fs.readJsonSync(path.join(cwd, 'cypress.json'))
+    const actual = await shouldShowAutoRenameStep(cwd, config)
+
+    expect(actual).to.be.true
+  })
+
   it('false when integrationFolder and testFiles are custom', async () => {
     const cwd = scaffoldMigrationProject('migration-e2e-fully-custom')
     const config = fs.readJsonSync(path.join(cwd, 'cypress.json'))
