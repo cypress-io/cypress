@@ -15,7 +15,6 @@ const collapsedNavBarWidth = 64
 const reporterWidth = ref<number>(0)
 const specListWidth = ref<number>(0)
 const autScale = ref<number>(1)
-const { isSpecsListOpen } = useRunnerUiStore()
 
 interface UseRunnerUI {
   initialSpecsListWidth: number
@@ -30,13 +29,15 @@ export const useRunnerStyle = ({
   initialSpecsListWidth: runnerConstants.defaultSpecListWidth,
 }) => {
   reporterWidth.value = initialReporterWidth
-  specListWidth.value = isSpecsListOpen ? initialSpecsListWidth : 0
+  specListWidth.value = initialSpecsListWidth
 
   const { width: windowWidth, height: windowHeight } = useWindowSize()
 
   const containerWidth = computed(() => {
+    const { isSpecsListOpen } = useRunnerUiStore()
+
     const miscBorders = 4
-    let nonAutWidth = reporterWidth.value + specListWidth.value + (autMargin * 2) + miscBorders
+    let nonAutWidth = reporterWidth.value + (isSpecsListOpen ? specListWidth.value : 0) + (autMargin * 2) + miscBorders
 
     if (window.__CYPRESS_MODE__ !== 'run') {
       nonAutWidth += collapsedNavBarWidth
