@@ -159,6 +159,8 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
 
         // fired once the spec bridge is set up and ready to receive messages
         communicator.once('bridge:ready', () => {
+          // now that the spec bridge is ready, instantiate Cypress with the current app config
+          communicator.toSpecBridge('initialize:cypress', Cypress.config())
           state('readyForMultiDomain', true)
 
           // once the secondary domain page loads, send along the

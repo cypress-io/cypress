@@ -19,27 +19,21 @@ import { handleErrorEvent } from './errors'
 
 const specBridgeCommunicator = new SpecBridgeDomainCommunicator()
 
-const setup = () => {
+specBridgeCommunicator.initialize(window)
+
+specBridgeCommunicator.once('initialize:cypress', (config) => {
+  // eventually, setup will get called again on rerun and cy will
+  // get re-created
+  setup(config)
+})
+
+const setup = (cypressConfig: Cypress.Config) => {
   // @ts-ignore
   const Cypress = window.Cypress = $Cypress.create({
-    browser: {
-      channel: 'stable',
-      displayName: 'Chrome',
-      family: 'chromium',
-      isChosen: true,
-      isHeaded: true,
-      isHeadless: false,
-      majorVersion: 90,
-      name: 'chrome',
-      path: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
-      version: '90.0.4430.212',
-    },
-    defaultCommandTimeout: 4000,
-    execTimeout: 60000,
-    taskTimeout: 60000,
-    pageLoadTimeout: 60000,
-    requestTimeout: 5000,
-    responseTimeout: 30000,
+    ...cypressConfig,
+    // multi-domain cannot be used in component testing and is only valid for e2e.
+    // This value is not synced with the config because it is omitted on big Cypress creation, as well as a few other key properties
+    testingType: 'e2e',
   }) as Cypress.Cypress
 
   // @ts-ignore
@@ -68,8 +62,6 @@ const setup = () => {
   handleSpecWindowEvents(cy)
 
   cy.onBeforeAppWindowLoad = onBeforeAppWindowLoad(Cypress, cy)
-
-  specBridgeCommunicator.initialize(window)
 
   return cy
 }
@@ -129,9 +121,5 @@ const onBeforeAppWindowLoad = (Cypress: Cypress.Cypress, cy: $Cy) => (autWindow:
     },
   })
 }
-
-// eventually, setup will get called again on rerun and cy will
-// get re-created
-setup()
 
 specBridgeCommunicator.toPrimary('bridge:ready')
