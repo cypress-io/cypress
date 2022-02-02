@@ -1,0 +1,30 @@
+{
+  "name": "@packages/errors",
+  "version": "0.0.0-development",
+  "description": "Error definitions and utilities for Cypress",
+  "main": "index.js",
+  "browser": "src/index.ts",
+  "scripts": {
+    "build-prod": "tsc || echo 'built, with errors'",
+    "check-ts": "tsc --noEmit",
+    "clean-deps": "rm -rf node_modules",
+    "clean": "rm -f ./src/*.js ./src/**/*.js ./src/**/**/*.js ./test/**/*.js || echo 'cleaned'",
+    "test-unit": "mocha -r @packages/ts/register test/unit/**/*spec.ts --config ./test/.mocharc.js --exit"
+  },
+  "dependencies": {
+    "ansi_up": "5.0.0",
+    "strip-ansi": "6.0.0"
+  },
+  "devDependencies": {
+    "@packages/ts": "0.0.0-development",
+    "@types/node": "14.14.31",
+    "@types/strip-ansi": "^5.2.1",
+    "chai": "4.2.0",
+    "mocha": "7.0.1",
+    "sinon": "7.5.0"
+  },
+  "files": [
+    "src"
+  ],
+  "types": "src/index.ts"
+}

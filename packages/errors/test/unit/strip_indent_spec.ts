@@ -1,7 +1,5 @@
-import '../../spec_helper'
-
 import { expect } from 'chai'
-import { stripIndent } from '../../../lib/util/strip_indent'
+import { stripIndent } from '../../src/strip_indent'
 
 describe('lib/util/strip_indent', () => {
   it('does not trip right end', () => {

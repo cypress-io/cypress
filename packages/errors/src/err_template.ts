@@ -1,12 +1,13 @@
 import assert from 'assert'
+import { stripIndent } from './strip_indent'
+
 /**
  * Guarding the value, involves
  */
 import chalk from 'chalk'
 import stripAnsi from 'strip-ansi'
-import { trimMultipleNewLines } from '../errors-child'
-
-const { stripIndent } = require('./strip_indent')
+import { trimMultipleNewLines } from './error_utils'
+import type { ErrTemplateResult } from './errorTypes'
 
 export class Guard {
   constructor (readonly val: string | number) {}
@@ -24,7 +25,7 @@ export class Backtick {
   constructor (readonly val: string | number) {}
 }
 
-export function backtick (val) {
+export function backtick (val: string) {
   return new Backtick(val)
 }
 
@@ -41,16 +42,6 @@ export class Details {
 
 export function details (val: string | Error | object) {
   return new Details(val)
-}
-
-export interface ErrTemplateResult {
-  message: string
-  details?: string
-  originalError?: Error
-  forBrowser(): {
-    message: string
-    details?: string
-  }
 }
 
 /**
@@ -79,7 +70,8 @@ export const errTemplate = (strings: TemplateStringsArray, ...args: Array<string
       }
 
       if (isScalar(val)) {
-        return forTerminal ? chalk.blue(`${val}`) : `\`${val}\``
+        // If it's for the terminal, wrap in blue, otherwise wrap in backticks if we don't see any backticks
+        return forTerminal ? chalk.blue(`${val}`) : String(val).includes('`') ? String(val) : `\`${val}\``
       }
 
       try {
@@ -133,13 +125,12 @@ export const errTemplate = (strings: TemplateStringsArray, ...args: Array<string
   return {
     message: msg,
     details: messageDetails,
+    originalError,
     forBrowser () {
       const msg = trimMultipleNewLines(prepMessage(false))
 
       return {
-        originalError,
         message: stripAnsi(msg),
-        details: messageDetails,
       }
     },
   }

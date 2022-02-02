@@ -1,6 +1,6 @@
 const _ = require('lodash')
 const util = require('../util')
-const errorsChild = require('../../errors-child')
+const errorsChild = require('../../../../errors/src/errors-child')
 
 const getBody = (ipc, events, ids, [event]) => {
   const taskEvent = _.find(events, { event: 'task' }).handler

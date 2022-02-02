@@ -1,9 +1,8 @@
-/// <reference types="cypress" />
 import { expect } from 'chai'
 import chalk from 'chalk'
 
-import { details, errTemplate, guard } from '../../../lib/util/err_template'
-import { stripIndent } from '../../../lib/util/strip_indent'
+import { details, errTemplate, guard } from '../../src/err_template'
+import { stripIndent } from '../../src/strip_indent'
 
 describe('err_template', () => {
   it('returns an object w/ basic props & forBrowser', () => {
@@ -35,7 +34,6 @@ describe('err_template', () => {
       ${details(errStack)}
     `
 
-    expect(obj.forBrowser()).to.include({ message: `This was an error`, details: errStack })
     expect(obj).to.include({ message: `This was an error`, details: errStack })
   })
 
@@ -73,7 +71,7 @@ describe('err_template', () => {
       ${details(someObj)}
     `
 
-    expect(obj.forBrowser()).to.include({ message: `This was returned from the app:`, details: JSON.stringify(someObj, null, 2) })
+    expect(obj.forBrowser()).to.include({ message: `This was returned from the app:` })
     expect(obj).to.include({ message: `This was returned from the app:`, details: JSON.stringify(someObj, null, 2) })
   })
 
@@ -86,7 +84,7 @@ describe('err_template', () => {
       ${details(err)}
     `
 
-    expect(obj.forBrowser()).to.include({ message: `This was an error in \`specFile.js\``, details: err.stack })
+    expect(obj.forBrowser()).to.include({ message: `This was an error in \`specFile.js\`` })
     expect(obj).to.include({ message: `This was an error in ${chalk.blue(specFile)}`, details: err.stack })
   })
 
