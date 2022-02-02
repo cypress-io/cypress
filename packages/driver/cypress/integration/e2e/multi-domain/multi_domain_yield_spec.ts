@@ -24,7 +24,7 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
   })
 
   it('yields the cy value even if a return is present', () => {
-    cy.switchToDomain('foobar.com', async () => {
+    cy.switchToDomain('foobar.com', () => {
       cy
       .get('[data-cy="dom-check"]')
       .invoke('text')
@@ -64,11 +64,11 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
   })
 
   it('yields asynchronously', () => {
-    cy.switchToDomain('foobar.com', async () => {
+    cy.switchToDomain('foobar.com', () => {
       return new Promise((resolve: (val: string) => any, reject) => {
         setTimeout(() => {
           resolve('From a secondary domain')
-        }, 1000)
+        }, 50)
       })
     }).should('equal', 'From a secondary domain')
   })

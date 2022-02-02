@@ -13,7 +13,7 @@ const failedToSerializeSubject = (type: string) => {
     target = () => {}
   }
 
-  // Symbol note: I don't think the target can be a symbol, but we can just use an object until the symbols is accessed, then provide a different error.
+  // Symbol note: I don't think the target can be a symbol, but we can just use an object until the symbol is accessed, then provide a different error.
 
   return new Proxy(target, {
     /**
