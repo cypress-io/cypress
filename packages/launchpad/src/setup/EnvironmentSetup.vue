@@ -22,6 +22,7 @@
         :value="props.gql.bundler?.type ?? undefined"
         :placeholder="t('setupPage.projectSetup.bundlerPlaceholder')"
         :label="t('setupPage.projectSetup.bundlerLabel')"
+        :description="t('setupPage.projectSetup.bundlerLabelDescription')"
         selector-type="bundler"
         data-testid="select-bundler"
         @select-bundler="val => onWizardSetup('bundler', val)"

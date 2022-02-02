@@ -6,8 +6,16 @@
     @update:model-value="selectOption"
   >
     <template #label>
-      <div class="my-8px text-16px leading-24px">
-        {{ props.label }}
+      <div class="mt-16px mb-8px">
+        <span class="text-16px leading-24px">
+          {{ props.label }}
+        </span>
+        <span
+          v-if="props.description"
+          class="ml-4px text-gray-500"
+        >
+          {{ props.description }}
+        </span>
       </div>
     </template>
     <template
@@ -92,11 +100,13 @@ const props = withDefaults(defineProps<{
   placeholder?: string
   options: readonly Option[]
   label?: string
+  description?: string
   selectorType: 'framework' | 'bundler'
 }>(), {
   value: undefined,
   placeholder: undefined,
   label: undefined,
+  description: undefined,
 })
 
 const emit = defineEmits<{

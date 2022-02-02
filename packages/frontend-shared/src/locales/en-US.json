@@ -236,6 +236,7 @@
       "frameworkLabel": "Front-end Framework",
       "frameworkPlaceholder": "Pick a framework",
       "bundlerLabel": "Bundler",
+      "bundlerLabelDescription": "(Dev Server)",
       "bundlerPlaceholder": "Pick a bundler",
       "languageLabel": "Language",
       "configFileLanguageLabel": "Cypress Config File",

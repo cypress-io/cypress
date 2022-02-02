@@ -49,7 +49,7 @@ describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
     .should('have.disabled')
   })
 
-  it('detected flag', () => {
+  it('renders the detected flag', () => {
     cy.mountFragment(EnvironmentSetupFragmentDoc, {
       onResult: (res) => {
         res.frameworks[0].isDetected = true
@@ -70,5 +70,26 @@ describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
     }).click()
 
     cy.findByRole('option', { name: 'Create React App (detected)' }).should('be.visible')
+  })
+
+  it('shows the description of bundler as Dev Server', () => {
+    cy.mountFragment(EnvironmentSetupFragmentDoc, {
+      onResult: (res) => {
+        res.framework = {
+          ...res.frameworks[3],
+          supportedBundlers: res.allBundlers,
+        }
+      },
+      render: (gqlVal) => (
+        <div class="m-10">
+          <EnvironmentSetup
+            gql={gqlVal}
+            nextFn={cy.stub()}
+          />
+        </div>
+      ),
+    })
+
+    cy.findByLabelText('Bundler(Dev Server)').should('be.visible')
   })
 })
