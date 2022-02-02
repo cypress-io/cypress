@@ -592,7 +592,7 @@ describe('Launchpad: Setup Project', () => {
                   validatePackage(framework.storybookDep)
                 }
 
-                cy.findByRole('button', { name: 'I\'ve installed them' }).click()
+                cy.findByRole('button', { name: 'Continue' }).click()
 
                 // FIXME: remove if-check once this is fixed. https://cypress-io.atlassian.net/browse/UNIFY-980
                 if (lang.type !== 'ts') {
