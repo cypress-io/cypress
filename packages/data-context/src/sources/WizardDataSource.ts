@@ -3,6 +3,7 @@ import { BUNDLERS, CODE_LANGUAGES, FRONTEND_FRAMEWORKS, PACKAGES_DESCRIPTIONS } 
 import type { NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
 import type { DataContext } from '..'
 import path from 'path'
+import resolve from 'resolve-from'
 
 const debug = Debug('cypress:data-context:wizard-data-source')
 
@@ -62,7 +63,7 @@ export class WizardDataSource {
         const packageJsonPath = path.join(p.package, 'package.json')
 
         try {
-          require.resolve(packageJsonPath, { paths: [this.ctx.currentProject] })
+          resolve(this.ctx.currentProject, packageJsonPath)
 
           return p.package
         } catch (e) {
