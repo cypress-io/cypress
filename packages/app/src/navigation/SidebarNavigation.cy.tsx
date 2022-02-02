@@ -1,15 +1,10 @@
-import { useMainStore } from '../store'
 import SidebarNavigation from './SidebarNavigation.vue'
 
 function mountComponent (initialNavExpandedVal = true) {
-  const mainStore = useMainStore()
-
-  mainStore.setNavBarExpandedByUser(initialNavExpandedVal)
-
   cy.mount(() => {
     return (
       <div>
-        <div class={[mainStore.navBarExpanded ? 'w-248px' : 'w-64px', 'transition-all', 'h-screen', 'grid', 'grid-rows-1']}>
+        <div class={[initialNavExpandedVal ? 'w-248px' : 'w-64px', 'transition-all', 'h-screen', 'grid', 'grid-rows-1']}>
           <SidebarNavigation />
         </div>
         <div id="tooltip-target"/>
