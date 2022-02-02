@@ -718,4 +718,160 @@ describe('Launchpad: Setup Project', () => {
       cy.get('code').should('contain.text', 'npm install -D ')
     })
   })
+
+  describe('detect framework, bundler and language', () => {
+    beforeEach(() => {
+      cy.openProject('pristine')
+    })
+
+    context('meta frameworks', () => {
+      it('detects CRA framework', () => {
+        cy.withCtx(async (ctx) => {
+          await ctx.actions.file.writeFileInProject('package.json', `
+          {
+            "dependencies": {
+              "react": "^1.0.0",
+              "react-dom": "^1.0.1",
+              "react-scripts": "1.0.0"
+            }
+          }
+        `)
+        })
+
+        cy.visitLaunchpad()
+
+        cy.get('[data-cy-testingtype="component"]').click()
+        cy.get('[data-testid="select-framework"]').findByText('Create React App').should('be.visible')
+      })
+
+      it('detects Next framework', () => {
+        cy.withCtx(async (ctx) => {
+          await ctx.actions.file.writeFileInProject('package.json', `
+          {
+            "dependencies": {
+              "react": "^1.0.0",
+              "react-dom": "^1.0.1",
+              "next": "1.0.0"
+            }
+          }
+        `)
+        })
+
+        cy.visitLaunchpad()
+
+        cy.get('[data-cy-testingtype="component"]').click()
+        cy.get('[data-testid="select-framework"]').findByText('Next.js').should('be.visible')
+      })
+
+      it('detects vue-cli framework', () => {
+        cy.withCtx(async (ctx) => {
+          await ctx.actions.file.writeFileInProject('package.json', `
+          {
+            "dependencies": {
+              "vue": "^1.0.0",
+              "@vue/cli-service": "^1.0.1"
+            }
+          }
+        `)
+        })
+
+        cy.visitLaunchpad()
+
+        cy.get('[data-cy-testingtype="component"]').click()
+        cy.get('[data-testid="select-framework"]').findByText('Vue CLI').should('be.visible')
+      })
+
+      it('detects nuxtjs framework', () => {
+        cy.withCtx(async (ctx) => {
+          await ctx.actions.file.writeFileInProject('package.json', `
+          {
+            "dependencies": {
+              "vue": "^1.0.0",
+              "nuxt": "^1.0.1"
+            }
+          }
+        `)
+        })
+
+        cy.visitLaunchpad()
+
+        cy.get('[data-cy-testingtype="component"]').click()
+        cy.get('[data-testid="select-framework"]').findByText('Nuxt.js').should('be.visible')
+      })
+    })
+
+    context('pure frameworks', () => {
+      it('detects react framework', () => {
+        cy.withCtx(async (ctx) => {
+          await ctx.actions.file.writeFileInProject('package.json', `
+          {
+            "dependencies": {
+              "react": "^1.0.0"
+            }
+          }
+        `)
+        })
+
+        cy.visitLaunchpad()
+
+        cy.get('[data-cy-testingtype="component"]').click()
+        cy.get('[data-testid="select-framework"]').findByText('React.js').should('be.visible')
+      })
+
+      it('detects vue framework', () => {
+        cy.withCtx(async (ctx) => {
+          await ctx.actions.file.writeFileInProject('package.json', `
+          {
+            "dependencies": {
+              "vue": "^1.0.0"
+            }
+          }
+        `)
+        })
+
+        cy.visitLaunchpad()
+
+        cy.get('[data-cy-testingtype="component"]').click()
+        cy.get('[data-testid="select-framework"]').findByText('Vue.js').should('be.visible')
+      })
+    })
+
+    describe('bundlers', () => {
+      it('detects webpack framework', () => {
+        cy.withCtx(async (ctx) => {
+          await ctx.actions.file.writeFileInProject('package.json', `
+          {
+            "dependencies": {
+              "react": "^1.0.0",
+              "webpack": "^1.0.0"
+            }
+          }
+        `)
+        })
+
+        cy.visitLaunchpad()
+
+        cy.get('[data-cy-testingtype="component"]').click()
+        cy.get('[data-testid="select-bundler"]').findByText('Webpack').should('be.visible')
+      })
+
+      it('detects vite framework', () => {
+        cy.withCtx(async (ctx) => {
+          await ctx.actions.file.writeFileInProject('package.json', `
+          {
+            "dependencies": {
+              "react": "^1.0.0",
+              "vite": "^1.0.0"
+            }
+          }
+        `)
+        })
+
+        cy.visitLaunchpad()
+
+        cy.get('[data-cy-testingtype="component"]').click()
+        cy.get('[data-testid="select-bundler"]').findByText('Vite').should('be.visible')
+      })
+    })
+  })
 })

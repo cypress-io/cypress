@@ -84,6 +84,7 @@ export class WizardActions {
       try {
         packageJson = await this.ctx.fs.readJson(join(this.ctx.currentProject, 'package.json'))
       } catch (e) {
+        debug('Could not read or find package json: %O', e)
         packageJson = {
           dependencies: { },
           devDependencies: { },
@@ -92,8 +93,8 @@ export class WizardActions {
 
       debug('packageJson %O', packageJson)
       const dependencies = [
-        ...Object.keys(packageJson.dependencies),
-        ...Object.keys(packageJson.devDependencies),
+        ...Object.keys(packageJson.dependencies || {}),
+        ...Object.keys(packageJson.devDependencies || {}),
       ]
 
       this.detectFramework(dependencies)
