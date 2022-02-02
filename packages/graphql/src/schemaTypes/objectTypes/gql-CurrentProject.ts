@@ -113,6 +113,13 @@ export const CurrentProject = objectType({
       },
     })
 
+    t.boolean('hasTypescript', {
+      description: 'Whether the project has Typescript',
+      resolve (source, args, ctx) {
+        return ctx.lifecycleManager.metaState.hasTypescript
+      },
+    })
+
     t.nonNull.list.nonNull.field('specs', {
       description: 'A list of specs for the currently open testing type of a project',
       type: Spec,
