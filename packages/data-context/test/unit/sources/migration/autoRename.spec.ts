@@ -463,12 +463,6 @@ describe('applyMigrationTransform', () => {
 
       const result = applyMigrationTransform(input)
 
-      // console.log({ result: JSON.stringify(result, null, 2) })
-      // console.log('before: ', _.isEqual(result.before, expected.before))
-      // console.log('after: ', _.isEqual(result.after, expected.after))
-
-      // expect(result.before).to.eq(expected.before)
-
       expect(result.before).to.eql(expected.before)
       expect(result.after).to.eql(expected.after)
     })
