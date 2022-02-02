@@ -44,6 +44,7 @@ mutation ScaffoldedFiles_completeSetup {
       id
       isLoadingConfigFile
       isLoadingNodeEvents
+      isCTConfigured
     }
     scaffoldedFiles {
       status

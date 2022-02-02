@@ -687,9 +687,8 @@ describe('Launchpad: Setup Project', () => {
           cy.contains('cypress/fixtures/example.json')
         })
 
-        // FIXME: https://cypress-io.atlassian.net/browse/UNIFY-981
-        // cy.findByRole('button', { name: 'Continue' }).click()
-        // cy.contains(/(Initializing Config|Choose a Browser)/)
+        cy.findByRole('button', { name: 'Continue' }).click()
+        cy.contains(/(Initializing Config|Choose a Browser)/)
       })
 
       it('opens to the "choose framework" page when opened via cli with --component flag', () => {
@@ -717,9 +716,8 @@ describe('Launchpad: Setup Project', () => {
           cy.contains('cypress/fixtures/example.json')
         })
 
-        // FIXME: https://cypress-io.atlassian.net/browse/UNIFY-981
-        // cy.findByRole('button', { name: 'Continue' }).click()
-        // cy.contains(/(Initializing Config|Choose a Browser)/)
+        cy.findByRole('button', { name: 'Continue' }).click()
+        cy.contains(/(Initializing Config|Choose a Browser)/)
       })
     })
   })
