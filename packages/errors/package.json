@@ -6,6 +6,7 @@
   "browser": "src/index.ts",
   "scripts": {
     "test": "yarn test-unit",
+    "build": "tsc",
     "build-prod": "tsc",
     "check-ts": "tsc --noEmit",
     "clean-deps": "rm -rf node_modules",
