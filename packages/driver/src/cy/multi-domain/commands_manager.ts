@@ -27,6 +27,7 @@ export class CommandsManager {
   }
 
   listen () {
+    this.communicator.on('reject', this.reject)
     this.communicator.on('command:enqueued', this.addCommand)
     this.communicator.on('command:end', this.endCommand)
   }
@@ -69,7 +70,7 @@ export class CommandsManager {
     }
 
     // If the command has failed, cast the error back to a proper Error object
-    let parsedError = correctStackForCrossDomainError(err, this.userInvocationStack)
+    const parsedError = correctStackForCrossDomainError(err, this.userInvocationStack)
 
     if (logId) {
       // Then, look up the logId associated with the failed command and stub out the onFail handler
@@ -85,7 +86,24 @@ export class CommandsManager {
     this.cleanup()
   }
 
+  reject = ({ err }) => {
+    // parse the error back to a proper Error object
+    const parsedError = correctStackForCrossDomainError(err, this.userInvocationStack)
+
+    delete parsedError.onFail
+
+    const r = cy.state('reject')
+
+    if (r) {
+      r(parsedError)
+    }
+
+    // finally, free up any memory and unbind any handlers now that the test has failed
+    this.cleanup()
+  }
+
   async cleanup () {
+    this.communicator.off('reject', this.reject)
     this.communicator.off('command:enqueued', this.addCommand)
 
     // don't allow for new commands to be enqueued, but wait for commands

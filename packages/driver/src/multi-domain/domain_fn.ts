@@ -75,6 +75,12 @@ export const handleDomainFn = (cy: $Cy, specBridgeCommunicator: SpecBridgeDomain
 
     cy.state('onFail', (err) => {
       const command = cy.state('current')
+
+      // If there isn't a current command, just reject to fail the test
+      if (!command) {
+        return specBridgeCommunicator.toPrimary('reject', { err })
+      }
+
       const id = command.get('id')
       const name = command.get('name')
       const logId = command.getLastLog()?.get('id')
