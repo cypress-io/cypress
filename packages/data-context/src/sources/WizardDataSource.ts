@@ -56,7 +56,7 @@ export class WizardDataSource {
         debug('package checked: %s', p.package)
 
         // At startup, node will only resolve the main files of packages it knows of.
-        // Adding a package after the app started will not be resolved in the same way
+        // Adding a package after the app started will not be resolved in the same way.
         // It will only be resolved as a package whose main is `index.js`, ignoring the "main" field
         // to avoid this bug, we resolve a file we know has to be in a node module:
         // `package.json`
