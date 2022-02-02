@@ -1,5 +1,7 @@
 import type { $Cy } from '../cypress/cy'
 import type { SpecBridgeDomainCommunicator } from './communicator'
+import $errUtils from '../cypress/error_utils'
+import $utils from '../cypress/utils'
 
 export const handleDomainFn = (cy: $Cy, specBridgeCommunicator: SpecBridgeDomainCommunicator) => {
   const doneEarly = () => {
@@ -86,11 +88,20 @@ export const handleDomainFn = (cy: $Cy, specBridgeCommunicator: SpecBridgeDomain
       // await the eval func, whether it is a promise or not
       // we should not need to transpile this as our target browsers support async/await
       // see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function for more details
-      const subject = await window.eval(fnWrapper)(data)
+      const value = window.eval(fnWrapper)(data)
 
-      specBridgeCommunicator.toPrimary('ran:domain:fn', { subject })
+      // If we detect a non promise value returned
+      if (value && cy.queue.length > 0 && !value.then) {
+        $errUtils.throwErrByPath('switchToDomain.callback_mixes_sync_and_async', {
+          args: { value: $utils.stringify(value) },
+        })
+      } else {
+        const subject = await value
+
+        specBridgeCommunicator.toPrimaryRanDomainFn({ subject })
+      }
     } catch (err) {
-      specBridgeCommunicator.toPrimary('ran:domain:fn', { err })
+      specBridgeCommunicator.toPrimaryRanDomainFn({ err })
     } finally {
       cy.state('done', undefined)
     }

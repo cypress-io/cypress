@@ -3,6 +3,7 @@ import $errUtils from '../../cypress/error_utils'
 import { CommandsManager } from './commands_manager'
 import { LogsManager } from './logs_manager'
 import { Validator } from './validator'
+import { failedToSerializeSubject } from './failedSerializeSubjectProxy'
 
 export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: Cypress.State, config: Cypress.InternalConfig) {
   let timeoutId
@@ -118,7 +119,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
       logsManager.listen()
 
       return new Bluebird((resolve, reject) => {
-        communicator.once('ran:domain:fn', ({ subject, err }) => {
+        communicator.once('ran:domain:fn', ({ subject, failedToSerializeSubjectOfType, err }) => {
           sendReadyForDomain()
           if (err) {
             if (done) {
@@ -142,6 +143,12 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
           if (!commandsManager.hasCommands && !done) {
             cleanup()
             // This handles when a subject is returned synchronously
+            if (failedToSerializeSubjectOfType) {
+              return resolve(
+                failedToSerializeSubject(failedToSerializeSubjectOfType),
+              )
+            }
+
             resolve(subject)
           } else {
             resolve()

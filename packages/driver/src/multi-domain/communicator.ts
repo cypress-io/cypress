@@ -128,15 +128,18 @@ export class SpecBridgeDomainCommunicator extends EventEmitter {
   private handleSubjectAndErr = (event, data) => {
     const { subject, err, ...other } = data
 
-    // We always want to make sure errors are posted, so clean it up to send.
-    const preProcessedError = preprocessErrorForPostMessage(err)
-
     try {
+      // We always want to make sure errors are posted, so clean it up to send.
+      const preProcessedError = preprocessErrorForPostMessage(err)
+
       this.toPrimary(event, { subject, err: preProcessedError, ...other })
     } catch (error: any) {
       if (subject && error.name === 'DataCloneError') {
+        // Send the type of object that failed to serialize.
+        const failedToSerializeSubjectOfType = typeof subject
+
         // If the subject threw the 'DataCloneError', the subject cannot be serialized at which point try again with an undefined subject.
-        this.handleSubjectAndErr(event, { subject: undefined, ...other })
+        this.handleSubjectAndErr(event, { failedToSerializeSubjectOfType, ...other })
       } else {
         // Try to send the message again, with the new error.
         this.handleSubjectAndErr(event, { err: error, ...other })

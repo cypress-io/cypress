@@ -1,8 +1,17 @@
 import _ from 'lodash'
+const { assertLogLength } = require('../../../support/utils')
 
 // @ts-ignore / session support is needed for visiting about:blank between tests
 describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDomain: true }, () => {
+  let logs: any = []
+
   beforeEach(() => {
+    logs = []
+
+    cy.on('log:added', (attrs, log) => {
+      logs.push(log)
+    })
+
     cy.visit('/fixtures/multi-domain.html')
     cy.get('a[data-cy="multi-domain-secondary-link"]').click()
   })
@@ -289,13 +298,37 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
     })
 
     it('yields the cy value even if a return is present', () => {
+      cy.switchToDomain('foobar.com', async () => {
+        cy
+        .get('[data-cy="dom-check"]')
+        .invoke('text')
+
+        const p = new Promise((resolve, reject) => {
+          setTimeout(() => {
+            resolve('text')
+          }, 1000)
+        })
+
+        return p
+      }).should('equal', 'From a secondary domain')
+    })
+
+    it('errors if a cy command is present and it returns a sync value', (done) => {
+      cy.on('fail', (err) => {
+        assertLogLength(logs, 6)
+        expect(logs[5].get('error')).to.eq(err)
+        expect(err.message).to.include('`cy.switchToDomain()` failed because you are mixing up async and sync code.')
+
+        done()
+      })
+
       cy.switchToDomain('foobar.com', () => {
         cy
         .get('[data-cy="dom-check"]')
         .invoke('text')
 
         return 'text'
-      }).should('equal', 'From a secondary domain')
+      })
     })
 
     it('yields synchronously', () => {
@@ -314,29 +347,121 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
       }).should('equal', 'From a secondary domain')
     })
 
-    it('yields undefined if subject cannot be serialized', () => {
+    it('succeeds if subject cannot be serialized and is not accessed synchronously', () => {
+      cy.switchToDomain('foobar.com', () => {
+        return {
+          symbol: Symbol(''),
+        }
+      }).then((obj) => {
+        return 'object not accessed'
+      }).should('equal', 'object not accessed')
+    })
+
+    it('throws if subject cannot be serialized and is accessed synchronously', (done) => {
+      cy.on('fail', (err) => {
+        assertLogLength(logs, 6)
+        expect(logs[5].get('error')).to.eq(err)
+        expect(err.message).to.include('`cy.switchToDomain()` could not serialize the subject due to one of it\'s properties not being supported by the structured clone algorithm.')
+
+        done()
+      })
+
+      cy.switchToDomain('foobar.com', () => {
+        return {
+          symbol: Symbol(''),
+        }
+      }).should('equal', '')
+    })
+
+    it('succeeds if subject cannot be serialized and is not accessed', () => {
       cy.switchToDomain('foobar.com', () => {
         cy
         .get('[data-cy="dom-check"]')
-      }).should('equal', undefined)
+      }).then((obj) => {
+        return 'object not accessed'
+      }).should('equal', 'object not accessed')
     })
 
-    it('yields undefined if an object contains a function', () => {
+    it('throws if subject cannot be serialized and is accessed', (done) => {
+      cy.on('fail', (err) => {
+        assertLogLength(logs, 7)
+        expect(logs[6].get('error')).to.eq(err)
+        expect(err.message).to.include('`cy.switchToDomain()` could not serialize the subject due to one of it\'s properties not being supported by the structured clone algorithm.')
+
+        done()
+      })
+
+      cy.switchToDomain('foobar.com', () => {
+        cy
+        .get('[data-cy="dom-check"]')
+      }).should('equal')
+    })
+
+    it('throws if an object contains a function', (done) => {
+      cy.on('fail', (err) => {
+        assertLogLength(logs, 7)
+        expect(logs[6].get('error')).to.eq(err)
+        expect(err.message).to.include('`cy.switchToDomain()` could not serialize the subject due to one of it\'s properties not being supported by the structured clone algorithm.')
+
+        done()
+      })
+
       cy.switchToDomain('foobar.com', () => {
         cy.wrap({
           key: () => {
             return 'whoops'
           },
         })
-      }).should('equal', undefined)
+      }).invoke('key').should('equal', 'whoops')
     })
 
-    it('yields undefined if an object contains a symbol', () => {
+    it('throws if an object contains a symbol', (done) => {
+      cy.on('fail', (err) => {
+        assertLogLength(logs, 7)
+        expect(logs[6].get('error')).to.eq(err)
+        expect(err.message).to.include('`cy.switchToDomain()` could not serialize the subject due to one of it\'s properties not being supported by the structured clone algorithm.')
+
+        done()
+      })
+
       cy.switchToDomain('foobar.com', () => {
         cy.wrap({
           key: Symbol('whoops'),
         })
       }).should('equal', undefined)
+    })
+
+    it('throws if an object is a function', (done) => {
+      cy.on('fail', (err) => {
+        assertLogLength(logs, 7)
+        expect(logs[6].get('error')).to.eq(err)
+        expect(err.message).to.include('`cy.switchToDomain()` could not serialize the subject due functions not being supported by the structured clone algorithm.')
+
+        done()
+      })
+
+      cy.switchToDomain('foobar.com', () => {
+        cy.wrap(() => {
+          return 'text'
+        })
+      }).then((obj) => {
+        // @ts-ignore
+        obj()
+      })
+    })
+
+    it('throws if an object is a symbol', (done) => {
+      cy.on('fail', (err) => {
+        assertLogLength(logs, 7)
+        expect(logs[6].get('error')).to.eq(err)
+        expect(err.message).to.include('`cy.switchToDomain()` could not serialize the subject due symbols not being supported by the structured clone algorithm.')
+
+        done()
+      })
+
+      cy.switchToDomain('foobar.com', () => {
+        cy.wrap(Symbol('symbol'))
+      }).should('equal', 'symbol')
     })
 
     // NOTE: This test will only work on chrome.

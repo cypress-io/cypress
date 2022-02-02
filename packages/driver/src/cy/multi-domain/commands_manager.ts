@@ -1,6 +1,7 @@
 import type { PrimaryDomainCommunicator } from '../../multi-domain/communicator'
 import { createDeferred, Deferred } from '../../util/deferred'
 import { correctStackForCrossDomainError } from './util'
+import { failedToSerializeSubject } from './failedSerializeSubjectProxy'
 
 export class CommandsManager {
   // these are proxy commands that represent real commands in a
@@ -57,7 +58,7 @@ export class CommandsManager {
     Cypress.action('cy:enqueue:command', attrs)
   }
 
-  endCommand = ({ id, subject, name, err, logId }) => {
+  endCommand = ({ id, subject, failedToSerializeSubjectOfType, name, err, logId }) => {
     const command = this.commands[id]
 
     if (!command) return
@@ -65,6 +66,12 @@ export class CommandsManager {
     delete this.commands[id]
 
     if (!err) {
+      if (failedToSerializeSubjectOfType) {
+        return command.deferred.resolve(
+          failedToSerializeSubject(failedToSerializeSubjectOfType),
+        )
+      }
+
       return command.deferred.resolve(subject)
     }
 
