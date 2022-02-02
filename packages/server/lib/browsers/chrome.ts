@@ -245,10 +245,6 @@ const _disableRestorePagesPrompt = function (userDir) {
   .catch(() => { })
 }
 
-const _connectToNewTab = async function (port, onError) {
-  return CriClient.newTab('127.0.0.1', port, onError)
-}
-
 // After the browser has been opened, we can connect to
 // its remote interface via a websocket.
 const _connectToChromeRemoteInterface = function (port, onError, browserDisplayName, url?) {
@@ -335,7 +331,7 @@ const _handleDownloads = async function (client, dir, automation) {
 
 const _setAutomation = (client, automation) => {
   return automation.use(
-    new CdpAutomation(client.send, client.on, automation, client.closeTarget),
+    new CdpAutomation(client.send, client.on, client.closeTarget, automation),
   )
 }
 
@@ -447,12 +443,12 @@ export = {
     return args
   },
 
-  _connectToNewTab,
+  async _connectToNewTab (port: number, onError) {
+    return CriClient.newTab('127.0.0.1', port, onError)
+  },
 
-  async connectToNewSpec (browser: Browser, options: CypressConfiguration = {}, automation) {
-    const port = browser.debuggingPort
-
-    const criClient = await this._connectToNewTab(port, options.onError)
+  async connectToNewSpec (browser: Browser, debuggingPort: number, options: CypressConfiguration = {}, automation) {
+    const criClient = await this._connectToNewTab(debuggingPort, options.onError)
 
     this._setAutomation(criClient, automation)
 
@@ -468,17 +464,15 @@ export = {
     this._setAutomation(criClient, automation)
   },
 
-  async open (browser: Browser, url, options: CypressConfiguration = {}, automation, shouldLaunchBrowser) {
+  async open (browser: Browser, url, options: CypressConfiguration = {}, automation) {
     const { isTextTerminal } = options
 
     const userDir = utils.getProfileDir(browser, isTextTerminal)
 
     const [port, preferences] = await Bluebird.all([
-      browser.debuggingPort || protocol.getRemoteDebuggingPort(),
+      protocol.getRemoteDebuggingPort(),
       _getChromePreferences(userDir),
     ])
-
-    browser.debuggingPort = port
 
     const defaultArgs = this._getArgs(browser, options, port)
 
@@ -522,7 +516,9 @@ export = {
     // first allows us to connect the remote interface,
     // start video recording and then
     // we will load the actual page
-    const launchedBrowser = await launch(browser, 'about:blank', args)
+    const launchedBrowser = await launch(browser, 'about:blank', port, args)
+
+    launchedBrowser.debuggingPort = port
 
     la(launchedBrowser, 'did not get launched browser instance')
 
@@ -549,6 +545,8 @@ export = {
     /* @ts-expect-error */
     launchedBrowser.kill = (...args) => {
       debug('closing remote interface client')
+
+      browser.debuggingPort = undefined
 
       criClient.close()
       debug('closing chrome')

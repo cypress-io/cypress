@@ -90,10 +90,8 @@ const connect = function (host, path, extraOpts) {
         return invoke('takeScreenshot', id)
       case 'reset:browser:state':
         return invoke('resetBrowserState', id)
-      case 'close:browser:tab':
-        return invoke('closeBrowserTab', id, data)
-      case 'start:browser:tab':
-        return invoke('startBrowserTab', id, data)
+      case 'close:browser:tabs':
+        return invoke('closeBrowserTabs', id)
       case 'stop:screencast':
         return invoke('stopScreencast', id)
       default:
@@ -217,14 +215,10 @@ const automation = {
     return browser.browsingData.remove({}, { cache: true, cookies: true, downloads: true, formData: true, history: true, indexedDB: true, localStorage: true, passwords: true, pluginData: true, serverBoundCertificates: true, serviceWorkers: true }).then(fn)
   },
 
-  closeBrowserTab ({ urlToExclude }, fn) {
+  closeBrowserTabs (fn) {
     return Promise.try(() => {
-      return browser.tabs.query({ windowType: 'normal' })
-    }).then((tabs) => browser.tabs.remove(tabs.map((tab) => tab.id))).then(fn)
-  },
-
-  startBrowserTab ({ url }, fn) {
-    return browser.tabs.create({ url }).then(fn)
+      return browser.windows.getCurrent({ populate: true })
+    }).then((windowInfo) => browser.tabs.remove(windowInfo.tabs.map((tab) => tab.id)).then(fn))
   },
 
   stopScreencast (fn) {

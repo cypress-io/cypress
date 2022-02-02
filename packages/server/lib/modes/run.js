@@ -1221,7 +1221,7 @@ module.exports = {
   },
 
   waitForTestsToFinishRunning (options = {}) {
-    const { project, screenshots, startedVideoCapture, endVideoCapture, videoName, compressedVideoName, videoCompression, videoUploadOnPasses, exit, spec, estimated, quiet, config, browser } = options
+    const { project, screenshots, startedVideoCapture, endVideoCapture, videoName, compressedVideoName, videoCompression, videoUploadOnPasses, exit, spec, estimated, quiet, config } = options
 
     // https://github.com/cypress-io/cypress/issues/2370
     // delay 1 second if we're recording a video to give
@@ -1297,23 +1297,20 @@ module.exports = {
         }
       }
 
-      // TODO: Figure out how to handle no video and no-exit
-      if (!results.error) {
-        await openProject.stopScreencast()
-        await openProject.resetBrowserState()
-      }
-
-      if (browser.name === 'electron' || results.error) {
-        // always close the browser now as opposed to letting
-        // it exit naturally with the parent process due to
-        // electron bug in windows
+      // If there is an error, close the browser as we potentially can't communicate with the browser anymore
+      if (process.env.CYPRESS_INTERNAL_FORCE_BROWSER_RELAUNCH) {
         debug('attempting to close the browser')
         await openProject.closeBrowser()
       } else {
+        // Otherwise, reset the browser and close the browser tabs
+        debug('stopping screencast and resetting browser state')
+        await Promise.all([openProject.stopScreencast(), openProject.resetBrowserState()])
+
         debug('attempting to close the browser tab')
-        await openProject.closeBrowserTab()
+        await openProject.closeBrowserTabs()
       }
 
+      debug('resetting server state')
       openProject.projectBase.server.reset()
 
       if (videoExists && !skippedSpec && endVideoCapture && !videoCaptureFailed) {
@@ -1554,7 +1551,7 @@ module.exports = {
           socketId: options.socketId,
           webSecurity: options.webSecurity,
           projectRoot: options.projectRoot,
-          shouldLaunchBrowser: process.env.CYPRESS_INTERNAL_FORCE_BROWSER_RELAUNCH || firstSpec || browser.name === 'electron',
+          shouldLaunchBrowser: process.env.CYPRESS_INTERNAL_FORCE_BROWSER_RELAUNCH || firstSpec,
           // TODO(tim): investigate the socket disconnect
         }),
       })

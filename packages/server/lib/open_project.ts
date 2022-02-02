@@ -188,16 +188,12 @@ export class OpenProject {
     return browsers.close()
   }
 
-  async closeBrowserTab () {
-    return this.projectBase?.closeBrowserTab()
+  async closeBrowserTabs () {
+    return this.projectBase?.closeBrowserTabs()
   }
 
   async resetBrowserState () {
     return this.projectBase?.resetBrowserState()
-  }
-
-  async startNewBrowserTab (url) {
-    return this.projectBase?.startNewBrowserTab(url)
   }
 
   async stopScreencast () {

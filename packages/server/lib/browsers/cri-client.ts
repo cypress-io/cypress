@@ -64,7 +64,7 @@ interface CRIWrapper {
    * @see https://github.com/cyrus-and/chrome-remote-interface#class-cdp
    */
   on (eventName: CRI.EventName, cb: Function): void
-  closeTarget (targetId: string): Bluebird<any>
+  closeTarget (targetId: string): Promise<any>
   /**
    * Calls underlying remote interface client close
   */
@@ -139,6 +139,8 @@ export { chromeRemoteInterface }
 type DeferredPromise = { resolve: Function, reject: Function }
 
 export const newTab = async (host, port, onAsynchronousError) => {
+  // TODO: Currently, there's an issue where when you issue a new tab the timing is off and you can't connect to it immediately.
+  // This additional version call seems to help. Still investigating this
   await chromeRemoteInterface.Version({ host, port })
   const target = await chromeRemoteInterface.New({ host, port })
 
@@ -179,7 +181,10 @@ export const create = Bluebird.method((target: websocketUrl, onAsynchronousError
       enqueuedCommands = []
     })
     .catch((err) => {
-      onAsynchronousError(errors.get('CDP_COULD_NOT_RECONNECT', err))
+      const cdpError = errors.get('CDP_COULD_NOT_RECONNECT', err)
+
+      cdpError.isFatalApiErr = true
+      onAsynchronousError(cdpError)
     })
   }
 
@@ -230,17 +235,17 @@ export const create = Bluebird.method((target: websocketUrl, onAsynchronousError
     client = {
       ensureMinimumProtocolVersion,
       getProtocolVersion,
-      closeTarget: Bluebird.method((targetId) => {
-        return new Promise(async (resolve) => {
+      closeTarget: (targetId) => {
+        return new Promise((resolve, reject) => {
           const { port } = new URL(target)
 
-          await chromeRemoteInterface.Close({ host: '127.0.0.1', port, id: targetId })
-
-          cri.on('Inspector.detached', () => {
+          cri.once('disconnect', () => {
             cri.close().then(resolve)
           })
+
+          chromeRemoteInterface.Close({ host: '127.0.0.1', port, id: targetId }).catch(reject)
         })
-      }),
+      },
       send: Bluebird.method((command: CRI.Command, params?: object) => {
         const enqueue = () => {
           return new Bluebird((resolve, reject) => {

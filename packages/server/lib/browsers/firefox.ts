@@ -357,15 +357,12 @@ export function _createDetachedInstance (browserInstance: BrowserInstance): Brow
   return detachedInstance
 }
 
-export async function closeBrowserTab () {
-  await firefoxUtil.closeBrowserTab()
-}
-
-export async function connectToNewSpec (browser: Browser, options: any = {}, automation) {
-  await firefoxUtil.connectToNewSpec(browser, options, automation)
+export async function connectToNewSpec (browser: Browser, debuggingPort: number, options: any = {}, automation) {
+  await firefoxUtil.connectToNewSpec(browser, debuggingPort, options, automation)
 }
 
 export function connectToExisting () {
+  throw new Error('Attempting to connect to existing browser for Cypress in Cypress which is not yet implemented for firefox')
 }
 
 export async function open (browser: Browser, url, options: any = {}, automation): Promise<BrowserInstance> {
@@ -514,7 +511,7 @@ export async function open (browser: Browser, url, options: any = {}, automation
 
   debug('launch in firefox', { url, args: launchOptions.args })
 
-  const browserInstance = await launch(browser, 'about:blank', launchOptions.args, {
+  const browserInstance = await launch(browser, 'about:blank', remotePort, launchOptions.args, {
     // sets headless resolution to 1280x720 by default
     // user can overwrite this default with these env vars or --height, --width arguments
     MOZ_HEADLESS_WIDTH: '1280',

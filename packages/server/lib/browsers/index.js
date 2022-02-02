@@ -114,16 +114,6 @@ module.exports = {
     return utils.getBrowsers()
   },
 
-  async closeBrowserTab (browser, options) {
-    const browserLauncher = getBrowserLauncher(browser)
-
-    if (!browserLauncher) {
-      utils.throwBrowserNotFound(browser.name, options.browsers)
-    }
-
-    await browserLauncher.closeBrowserTab()
-  },
-
   async connectToExisting (browser, options = {}, automation) {
     const browserLauncher = getBrowserLauncher(browser)
 
@@ -141,7 +131,7 @@ module.exports = {
       utils.throwBrowserNotFound(browser.name, options.browsers)
     }
 
-    return browserLauncher.connectToNewSpec(browser, options, automation)
+    return browserLauncher.connectToNewSpec(browser, instance ? instance.debuggingPort : 0, options, automation)
   },
 
   open (browser, options = {}, automation, ctx) {

@@ -70,8 +70,9 @@ context('lib/browsers/cdp_automation', () => {
     beforeEach(function () {
       this.sendDebuggerCommand = sinon.stub()
       this.onFn = sinon.stub()
+      this.sendCloseTargetCommand = sinon.stub()
 
-      this.automation = new CdpAutomation(this.sendDebuggerCommand, this.onFn)
+      this.automation = new CdpAutomation(this.sendDebuggerCommand, this.onFn, this.sendCloseTargetCommand, null)
 
       this.sendDebuggerCommand
       .throws(new Error('not stubbed'))
@@ -216,6 +217,42 @@ context('lib/browsers/cdp_automation', () => {
 
         return expect(this.onRequest('take:screenshot'))
         .to.be.rejectedWith('The browser responded with an error when Cypress attempted to take a screenshot.')
+      })
+    })
+
+    describe('reset:browser:state', function () {
+      it('sends Storage.clearDataForOrigin and Network.clearBrowserCache', async function () {
+        this.sendDebuggerCommand.withArgs('Storage.clearDataForOrigin', { origin: '*', storageTypes: 'all' }).resolves()
+        this.sendDebuggerCommand.withArgs('Network.clearBrowserCache').resolves()
+
+        await this.onRequest('reset:browser:state')
+
+        expect(this.sendDebuggerCommand).to.be.calledWith('Storage.clearDataForOrigin', { origin: '*', storageTypes: 'all' })
+        expect(this.sendDebuggerCommand).to.be.calledWith('Network.clearBrowserCache')
+      })
+    })
+
+    describe('close:browser:tabs', function () {
+      it('sends the close target message for the attached target tabs', async function () {
+        this.sendDebuggerCommand.withArgs('Target.getTargets').resolves({ targetInfos: [{ targetId: '1', attached: false }, { targetId: '2', attached: true }, { targetId: '3', attached: false }, { targetId: '4', attached: true }] })
+        this.sendCloseTargetCommand.withArgs('2').resolves(1)
+        this.sendCloseTargetCommand.withArgs('4').resolves(2)
+
+        await this.onRequest('close:browser:tabs')
+
+        expect(this.sendDebuggerCommand).to.be.calledWith('Target.getTargets')
+        expect(this.sendCloseTargetCommand).to.be.calledWith('2')
+        expect(this.sendCloseTargetCommand).to.be.calledWith('4')
+      })
+    })
+
+    describe('stop:screencast', function () {
+      it('sends the stop screencast message', async function () {
+        this.sendDebuggerCommand.withArgs('Page.stopScreencast').resolves()
+
+        await this.onRequest('stop:screencast')
+
+        expect(this.sendDebuggerCommand).to.be.calledWith('Page.stopScreencast')
       })
     })
 

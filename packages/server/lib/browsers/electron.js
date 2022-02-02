@@ -52,7 +52,11 @@ const _getAutomation = function (win, options, parent) {
     })
   }
 
-  const automation = new CdpAutomation(sendCommand, on, parent)
+  const closeTarget = () => {
+    win.destroy()
+  }
+
+  const automation = new CdpAutomation(sendCommand, on, closeTarget, parent)
 
   automation.onRequest = _.wrap(automation.onRequest, async (fn, message, data) => {
     switch (message) {
@@ -389,12 +393,12 @@ module.exports = {
     })
   },
 
-  async connectToNewSpec (browser, options, automation) {
+  async connectToNewSpec (browser, debuggingPort, options, automation) {
     this.open(browser, options.url, options, automation)
   },
 
   async connectToExisting () {
-
+    throw new Error('Attempting to connect to existing browser for Cypress in Cypress which is not yet implemented for electron')
   },
 
   open (browser, url, options = {}, automation) {

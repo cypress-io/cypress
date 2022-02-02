@@ -162,6 +162,7 @@ const normalizeResourceType = (resourceType: string | undefined): ResourceType =
 }
 
 type SendDebuggerCommand = (message: string, data?: any) => Bluebird<any>
+type SendCloseTargetCommand = (targetId) => Promise<any>
 type OnFn = (eventName: string, cb: Function) => void
 
 // the intersection of what's valid in CDP and what's valid in FFCDP
@@ -175,7 +176,7 @@ const ffToStandardResourceTypeMap: { [ff: string]: ResourceType } = {
 }
 
 export class CdpAutomation {
-  constructor (private sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn, private automation: Automation, private sendCloseTargetCommandFn?) {
+  constructor (private sendDebuggerCommandFn: SendDebuggerCommand, private onFn: OnFn, private sendCloseTargetCommandFn: SendCloseTargetCommand, private automation: Automation) {
     onFn('Network.requestWillBeSent', this.onNetworkRequestWillBeSent)
     onFn('Network.responseReceived', this.onResponseReceived)
     sendDebuggerCommandFn('Network.enable', {
@@ -323,17 +324,18 @@ export class CdpAutomation {
           return `data:image/png;base64,${data}`
         })
       case 'reset:browser:state':
-        return this.sendDebuggerCommandFn('Storage.clearDataForOrigin', { origin: '*', storageTypes: 'all' }).then(() => {
-          return this.sendDebuggerCommandFn('Network.clearBrowserCache')
-        })
-      case 'close:browser:tab':
-        return this.sendDebuggerCommandFn('Target.getTargets').then((targets) => {
-          const targetIdToClose = targets.targetInfos.find((target) => target.attached).targetId
+        return Promise.all([
+          this.sendDebuggerCommandFn('Storage.clearDataForOrigin', { origin: '*', storageTypes: 'all' }),
+          this.sendDebuggerCommandFn('Network.clearBrowserCache'),
+        ])
+      case 'close:browser:tabs':
+        return this.sendDebuggerCommandFn('Target.getTargets').then(async (targets) => {
+          const targetIdsToClose = targets.targetInfos.filter((target) => target.attached).map((target) => target.targetId)
 
-          return this.sendCloseTargetCommandFn(targetIdToClose)
+          await Bluebird.map(targetIdsToClose, (targetIdToClose) => this.sendCloseTargetCommandFn(targetIdToClose))
+
+          return true
         })
-      case 'start:browser:tab':
-        return this.sendDebuggerCommandFn('Target.createTarget', { url: data.url })
       case 'stop:screencast':
         return this.sendDebuggerCommandFn('Page.stopScreencast')
       case 'focus:browser:window':

@@ -74,9 +74,8 @@ const retry = (fn: (res: any) => void) => {
 }
 
 export class SocketBase {
-  private _sendCloseBrowserTabMessage
+  private _sendCloseBrowserTabsMessage
   private _sendResetBrowserStateMessage
-  private _sendStartNewBrowserTabMessage
   private _sendStopScreencastMessage
   private _sendFocusBrowserMessage
 
@@ -279,16 +278,12 @@ export class SocketBase {
         })
       })
 
-      this._sendCloseBrowserTabMessage = async () => {
-        await automationRequest('close:browser:tab', {})
+      this._sendCloseBrowserTabsMessage = async () => {
+        await automationRequest('close:browser:tabs', {})
       }
 
       this._sendResetBrowserStateMessage = async () => {
         await automationRequest('reset:browser:state', {})
-      }
-
-      this._sendStartNewBrowserTabMessage = async (url) => {
-        await automationRequest('start:browser:tab', { url })
       }
 
       this._sendStopScreencastMessage = async () => {
@@ -564,21 +559,15 @@ export class SocketBase {
     return this.toRunner('change:to:url', url)
   }
 
-  async closeBrowserTab () {
-    if (this._sendCloseBrowserTabMessage) {
-      await this._sendCloseBrowserTabMessage()
+  async closeBrowserTabs () {
+    if (this._sendCloseBrowserTabsMessage) {
+      await this._sendCloseBrowserTabsMessage()
     }
   }
 
   async resetBrowserState () {
     if (this._sendResetBrowserStateMessage) {
       await this._sendResetBrowserStateMessage()
-    }
-  }
-
-  async startNewBrowserTab (url) {
-    if (this._sendStartNewBrowserTabMessage) {
-      await this._sendStartNewBrowserTabMessage(url)
     }
   }
 

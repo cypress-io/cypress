@@ -101,14 +101,7 @@ const attachToTabMemory = Bluebird.method((tab) => {
   })
 })
 
-async function closeBrowserTab () {
-  await sendMarionette({
-    name: 'WebDriver:CloseWindow',
-  })
-}
-
 async function connectMarionetteToNewTab () {
-  // TODO: Probably need to validate that the tab is 'about:blank'.
   const handles = await sendMarionette({
     name: 'WebDriver:GetWindowHandles',
   })
@@ -121,12 +114,12 @@ async function connectMarionetteToNewTab () {
   await navigateToUrl('about:blank')
 }
 
-async function connectToNewSpec (browser, options, automation) {
+async function connectToNewSpec (browser, debuggingPort, options, automation) {
   await connectMarionetteToNewTab()
 
-  const criClient = await setupRemote(browser.debuggingPort, automation, options.onError)
+  const criClient = await setupRemote(debuggingPort, automation, options.onError)
 
-  new CdpAutomation(criClient.send, criClient.on, automation)
+  new CdpAutomation(criClient.send, criClient.on, criClient.closeTarget, automation)
 
   await navigateToUrl(options.url)
 }
@@ -135,7 +128,7 @@ async function setupRemote (remotePort, automation, onError) {
   const wsUrl = await protocol.getWsTargetFor(remotePort, 'Firefox')
   const criClient = await CriClient.create(wsUrl, onError)
 
-  new CdpAutomation(criClient.send, criClient.on, automation)
+  new CdpAutomation(criClient.send, criClient.on, criClient.closeTarget, automation)
 
   return criClient
 }
@@ -226,8 +219,6 @@ export default {
       remotePort && setupRemote(remotePort, automation, onError),
     ])
   },
-
-  closeBrowserTab,
 
   connectToNewSpec,
 

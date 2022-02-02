@@ -1,18 +1,23 @@
 import { log } from './log'
 import * as cp from 'child_process'
 import { browsers, FoundBrowser } from '@packages/types'
+import type { Readable } from 'stream'
 
 export { browsers }
 
 /** list of the browsers we can detect and use by default */
 
 /** starts a found browser and opens URL if given one */
+
+export type LaunchedBrowser = cp.ChildProcessByStdio<null, Readable, Readable> & { debuggingPort: number }
+
 export function launch (
   browser: FoundBrowser,
   url: string,
+  debuggingPort: number,
   args: string[] = [],
   defaultBrowserEnv = {},
-) {
+): LaunchedBrowser {
   log('launching browser %o', { browser, url })
 
   if (!browser.path) {
@@ -29,7 +34,7 @@ export function launch (
   // but only if it's not already set by the environment
   const env = Object.assign({}, defaultBrowserEnv, process.env)
 
-  const proc = cp.spawn(browser.path, args, { stdio: ['ignore', 'pipe', 'pipe'], env })
+  const proc = cp.spawn(browser.path, args, { stdio: ['ignore', 'pipe', 'pipe'], env }) as LaunchedBrowser
 
   proc.stdout.on('data', (buf) => {
     log('%s stdout: %s', browser.name, String(buf).trim())
@@ -42,6 +47,8 @@ export function launch (
   proc.on('exit', (code, signal) => {
     log('%s exited: %o', browser.name, { code, signal })
   })
+
+  proc.debuggingPort = debuggingPort
 
   return proc
 }
