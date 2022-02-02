@@ -2,7 +2,6 @@ import type { CodeLanguageEnum, NexusGenEnums, NexusGenObjects } from '@packages
 import { Bundler, CodeLanguage, CODE_LANGUAGES, FrontendFramework, FRONTEND_FRAMEWORKS } from '@packages/types'
 import assert from 'assert'
 import dedent from 'dedent'
-import fs from 'fs'
 import path, { join } from 'path'
 import Debug from 'debug'
 
@@ -68,11 +67,6 @@ export class WizardActions {
 
   async initialize () {
     if (this.ctx.currentProject) {
-      let packageJson: {
-        dependencies: { [key: string]: string }
-        devDependencies: { [key: string]: string }
-      }
-
       this.data.detectedFramework = null
       this.data.detectedBundler = null
       this.data.detectedLanguage = null
@@ -81,15 +75,18 @@ export class WizardActions {
       debug('detectedLanguage %s', this.data.detectedLanguage)
       this.data.chosenLanguage = this.data.detectedLanguage || 'js'
 
+      let hasPackageJson = true
+
       try {
-        packageJson = await this.ctx.fs.readJson(join(this.ctx.currentProject, 'package.json'))
+        await this.ctx.fs.access(join(this.ctx.currentProject, 'package.json'), this.ctx.fs.constants.R_OK)
       } catch (e) {
-        debug('Could not read or find package json: %O', e)
-        packageJson = {
-          dependencies: { },
-          devDependencies: { },
-        }
+        debug('Could not read or find package.json: %O', e)
+        hasPackageJson = false
       }
+      const packageJson: {
+        dependencies?: { [key: string]: string }
+        devDependencies?: { [key: string]: string }
+      } = hasPackageJson ? await this.ctx.fs.readJson(join(this.ctx.currentProject, 'package.json')) : {}
 
       debug('packageJson %O', packageJson)
       const dependencies = [
