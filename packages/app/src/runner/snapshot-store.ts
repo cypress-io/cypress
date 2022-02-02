@@ -1,13 +1,10 @@
 import { defineStore } from 'pinia'
 import type { AutSnapshot } from './iframe-model'
 import type { AutIframe } from './aut-iframe'
-
-export type SnapshotMessageType = 'info' | 'warning' | 'pinned'
+import { defaultMessages } from '@cy/i18n'
 
 interface SnapshotStoreState {
   messageTitle?: string
-  messageDescription?: 'pinned' | string
-  messageType?: SnapshotMessageType
   snapshotProps?: AutSnapshot
   isSnapshotPinned: boolean
   snapshot?: {
@@ -21,7 +18,6 @@ export const useSnapshotStore = defineStore({
   state: (): SnapshotStoreState => {
     return {
       messageTitle: undefined,
-      messageDescription: undefined,
       isSnapshotPinned: false,
       snapshot: undefined,
       snapshotProps: undefined,
@@ -33,9 +29,7 @@ export const useSnapshotStore = defineStore({
     },
 
     pinSnapshot (snapshotProps: AutSnapshot) {
-      this.messageTitle = 'DOM Snapshot'
-      this.messageDescription = 'pinned'
-      this.messageType = 'info'
+      this.messageTitle = defaultMessages.runner.snapshot.pinnedTitle
       this.isSnapshotPinned = true
       this.snapshotProps = snapshotProps
       this.snapshot = {
@@ -46,20 +40,14 @@ export const useSnapshotStore = defineStore({
 
     clearMessage () {
       this.messageTitle = undefined
-      this.messageDescription = undefined
-      this.messageType = undefined
     },
 
     unpinSnapshot () {
-      this.isSnapshotPinned = false
-      this.messageTitle = 'DOM Snapshot'
-      this.messageDescription = undefined
+      this.$reset()
     },
 
-    showSnapshot (messageDescription?: string) {
-      this.messageTitle = 'DOM Snapshot'
-      this.messageDescription = messageDescription
-      this.messageType = undefined
+    showSnapshot (messageDescription: string = defaultMessages.runner.snapshot.defaultTitle) {
+      this.messageTitle = messageDescription
     },
 
     toggleHighlights (autIframe: AutIframe) {
@@ -104,19 +92,15 @@ export const useSnapshotStore = defineStore({
     },
 
     setTestsRunningError () {
-      this.messageTitle = 'Cannot show Snapshot while tests are running'
-      this.messageType = 'warning'
+      this.messageTitle = defaultMessages.runner.snapshot.testsRunningError
     },
 
-    setMessage (messageTitle: string, messageType: SnapshotMessageType) {
+    setMessage (messageTitle: string) {
       this.messageTitle = messageTitle
-      this.messageType = messageType
     },
 
     setMissingSnapshotMessage () {
-      this.messageTitle = 'The snapshot is missing. Displaying current state of the DOM.'
-      this.messageDescription = undefined
-      this.messageType = 'warning'
+      this.messageTitle = defaultMessages.runner.snapshot.snapshotMissingError
     },
   },
 })
