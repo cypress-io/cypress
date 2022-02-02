@@ -107,7 +107,7 @@ export class Queue<T> {
 
   /**
    * Helper function to return the last item in the queue.
-   * @returns The last object or undefined if the queue is empty.
+   * @returns The last item or undefined if the queue is empty.
    */
   last (): T | undefined {
     if (this.length < 1) {
