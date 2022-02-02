@@ -368,6 +368,9 @@ type CurrentProject implements Node & ProjectLike {
   """
   errorLoadingNodeEvents: BaseError
 
+  """Whether the project has Typescript"""
+  hasTypescript: Boolean
+
   """Whether the project has a valid config file"""
   hasValidConfigFile: Boolean
 
@@ -611,6 +614,9 @@ type Migration {
   """whether the testFiles member is custom or not in integration"""
   hasCustomIntegrationTestFiles: Boolean!
 
+  """Whether the project has Typescript"""
+  hasTypescript: Boolean
+
   """the integration folder path used to store e2e tests"""
   integrationFolder: String!
 
@@ -658,7 +664,7 @@ type MigrationRegexp {
   """regexp to use to rename existing specs in e2e"""
   afterE2E: String!
 
-  """regexp to identiey existing specs in component"""
+  """regexp to identify existing specs in component"""
   beforeComponent: String!
 
   """regexp to identify existing specs in e2e"""
