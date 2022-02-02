@@ -7,7 +7,6 @@ export const stubBrowsers = longBrowsersList.map((browser, i): Browser => {
   return {
     ...testNodeId('Browser'),
     ...browser,
-    disabled: false,
     isSelected: i === 0,
   }
 })

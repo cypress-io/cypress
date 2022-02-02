@@ -27,6 +27,15 @@ describe('<OpenBrowserList />', () => {
       cy.contains('label', browser.displayName).should('be.visible')
     })
 
+    // Firefox early version should be disabled
+    cy.get('[data-cy-browser="firefox"]').should('have.attr', 'aria-disabled', 'true')
+    cy.get('[data-cy-browser="firefox"] [data-cy="unsupported-browser-tooltip-trigger"]').should('exist')
+    cy.get('[data-cy-browser="electron"] [data-cy="unsupported-browser-tooltip-trigger"]').should('not.exist')
+
+    // Renders a default logo if we don't provide one
+    cy.get('[data-cy-browser="fake"]').should('have.attr', 'aria-disabled', 'true')
+    cy.get('[data-cy-browser="fake"] img').should('have.attr', 'src').should('include', 'generic-browser')
+
     // If no default value, should choose electron
     cy.get('[data-cy-browser="electron"]').should('have.attr', 'aria-checked', 'true')
     cy.get('[data-cy="launch-button"]').contains(defaultMessages.openBrowser.startE2E.replace('{browser}', 'Electron'))

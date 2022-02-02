@@ -31,7 +31,11 @@
             class="top-0 right-0 absolute"
             placement="top"
           >
-            <i-cy-circle-bg-question-mark_x16 class="mt-4px mr-8px relative inline-block icon-dark-gray-700 icon-light-gray-200" />
+            <i-cy-circle-bg-question-mark_x16
+              data-cy="unsupported-browser-tooltip-trigger"
+              class="mt-4px mr-8px relative inline-block icon-dark-gray-700 icon-light-gray-200"
+              alt="unsupported browser"
+            />
             <template #popper>
               <div>
                 <div class="font-medium text-white mb-2">

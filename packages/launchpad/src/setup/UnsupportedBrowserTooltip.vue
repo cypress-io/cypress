@@ -1,8 +1,4 @@
 <template>
-  <!--
-    NOTE: This is not currently meant to be a widely-reusable tooltip, but it's probably most of the way there
-    It would need to be able to pop open on left & right and might also need a variable-width option instead of just fixed-width
-  -->
   <div
     ref="wrapper"
     @mouseenter="showTooltip()"
@@ -39,6 +35,8 @@
 </template>
 
 <script lang="ts" setup>
+// NOTE: This is not currently meant to be a widely-reusable tooltip, but it's probably most of the way there
+// It would need to be able to pop open on left & right and might also need a variable-width option instead of just fixed-width
 import { ref, nextTick, onMounted } from 'vue'
 
 const props = withDefaults(defineProps<{
@@ -48,7 +46,7 @@ const props = withDefaults(defineProps<{
 }>(), {
   disabled: false,
   placement: 'bottom',
-  tooltipWidth: 350,
+  tooltipWidth: 400,
 })
 
 const emit = defineEmits(['click'])
