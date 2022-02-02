@@ -1714,7 +1714,7 @@ export default {
       message: stripIndent`\
         ${cmd('switchToDomain')} failed because you are mixing up async and sync code.
 
-        In your callback function you invoked 1 or more cy commands but then returned a synchronous value.
+        In your callback function you invoked one or more cy commands but then returned a synchronous value.
 
         Cypress commands are asynchronous and it doesn't make sense to queue cy commands and yet return a synchronous value.
 
@@ -1724,17 +1724,17 @@ export default {
     },
     failed_to_serialize_object: {
       message: stripIndent`\
-      ${cmd('switchToDomain')} could not serialize the subject due to one of it's properties not being supported by the structured clone algorithm.
+      ${cmd('switchToDomain')} could not serialize the subject due to one of its properties not being supported by the structured clone algorithm.
 
       To properly serialize this subject, remove or serialize any unsupported properties.`,
     },
     failed_to_serialize_function: {
       message: stripIndent`\
-      ${cmd('switchToDomain')} could not serialize the subject due functions not being supported by the structured clone algorithm.`,
+      ${cmd('switchToDomain')} could not serialize the subject due to functions not being supported by the structured clone algorithm.`,
     },
     failed_to_serialize_symbol: {
       message: stripIndent`\
-      ${cmd('switchToDomain')} could not serialize the subject due symbols not being supported by the structured clone algorithm.`,
+      ${cmd('switchToDomain')} could not serialize the subject due to symbols not being supported by the structured clone algorithm.`,
     },
   },
 
