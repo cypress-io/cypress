@@ -6,8 +6,8 @@
     @update:model-value="selectOption"
   >
     <template #label>
-      <div class="mt-16px mb-8px">
-        <span class="text-16px leading-24px">
+      <div class="mt-16px mb-8px text-16px leading-24px">
+        <span>
           {{ props.label }}
         </span>
         <span
@@ -29,24 +29,24 @@
     </template>
 
     <template #selected>
-      <span class="inline-block">
+      <span class="text-gray-800 inline-block">
         {{ selectedOptionName }}
       </span>
       <span
         v-if="isDetected"
-        class="ml-4px text-gray-500 inline-block"
+        class="ml-4px text-gray-400 inline-block"
       >
         {{ t('setupPage.projectSetup.detected') }}
       </span>
     </template>
 
     <template #item-body="{ value: itemValue }">
-      <span class="inline-block">
+      <span class="text-gray-800 inline-block">
         {{ itemValue.name }}
       </span>
       <span
         v-if="itemValue.isDetected"
-        class="ml-4px text-gray-500 inline-block"
+        class="ml-4px text-gray-400 inline-block"
       >
         {{ t('setupPage.projectSetup.detected') }}
       </span>
