@@ -25,7 +25,8 @@
     "sinon": "7.5.0"
   },
   "files": [
-    "src"
+    "src",
+    "dist"
   ],
   "types": "src/index.ts"
 }

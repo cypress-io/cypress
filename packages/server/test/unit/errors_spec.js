@@ -3,6 +3,10 @@ const chalk = require('chalk')
 const errors = require('../../lib/errors')
 
 context('.logException', () => {
+  beforeEach(() => {
+    sinon.stub(console, 'log')
+  })
+
   it('calls logger.createException with unknown error', () => {
     sinon.stub(logger, 'createException').resolves()
     sinon.stub(process.env, 'CYPRESS_INTERNAL_ENV').value('production')
