@@ -162,7 +162,6 @@ const normalizeResourceType = (resourceType: string | undefined): ResourceType =
 }
 
 type SendDebuggerCommand = (message: string, data?: any) => Bluebird<any>
-type SendCloseTargetCommand = (targetId) => Promise<any>
 type OnFn = (eventName: string, cb: Function) => void
 
 // the intersection of what's valid in CDP and what's valid in FFCDP
@@ -176,7 +175,7 @@ const ffToStandardResourceTypeMap: { [ff: string]: ResourceType } = {
 }
 
 export class CdpAutomation {
-  constructor (private sendDebuggerCommandFn: SendDebuggerCommand, private onFn: OnFn, private sendCloseTargetCommandFn: SendCloseTargetCommand, private automation: Automation) {
+  constructor (private sendDebuggerCommandFn: SendDebuggerCommand, private onFn: OnFn, private automation: Automation) {
     onFn('Network.requestWillBeSent', this.onNetworkRequestWillBeSent)
     onFn('Network.responseReceived', this.onResponseReceived)
     sendDebuggerCommandFn('Network.enable', {
@@ -330,11 +329,7 @@ export class CdpAutomation {
         ])
       case 'close:browser:tabs':
         return this.sendDebuggerCommandFn('Target.getTargets').then(async (targets) => {
-          const targetIdsToClose = targets.targetInfos.filter((target) => target.attached).map((target) => target.targetId)
-
-          await Bluebird.map(targetIdsToClose, (targetIdToClose) => this.sendCloseTargetCommandFn(targetIdToClose))
-
-          return true
+          return this.sendDebuggerCommandFn('Page.close')
         })
       case 'stop:screencast':
         return this.sendDebuggerCommandFn('Page.stopScreencast')

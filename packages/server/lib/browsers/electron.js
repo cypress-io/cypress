@@ -52,11 +52,7 @@ const _getAutomation = function (win, options, parent) {
     })
   }
 
-  const closeTarget = () => {
-    win.destroy()
-  }
-
-  const automation = new CdpAutomation(sendCommand, on, closeTarget, parent)
+  const automation = new CdpAutomation(sendCommand, on, parent)
 
   automation.onRequest = _.wrap(automation.onRequest, async (fn, message, data) => {
     switch (message) {
@@ -77,6 +73,11 @@ const _getAutomation = function (win, options, parent) {
       }
       case 'focus:browser:window': {
         win.show()
+
+        return
+      }
+      case 'close:browser:tabs': {
+        win.destroy()
 
         return
       }

@@ -125,7 +125,7 @@ async function connectToNewSpec (browser, debuggingPort, options, automation) {
 
   const criClient = await setupRemote(debuggingPort, automation, options.onError)
 
-  new CdpAutomation(criClient.send, criClient.on, criClient.closeTarget, automation)
+  new CdpAutomation(criClient.send, criClient.on, automation)
 
   debug('firefox: navigating to about:blank')
   await navigateToUrl(options.url)
@@ -135,7 +135,7 @@ async function setupRemote (remotePort, automation, onError) {
   const wsUrl = await protocol.getWsTargetFor(remotePort, 'Firefox')
   const criClient = await CriClient.create(wsUrl, onError)
 
-  new CdpAutomation(criClient.send, criClient.on, criClient.closeTarget, automation)
+  new CdpAutomation(criClient.send, criClient.on, automation)
 
   return criClient
 }

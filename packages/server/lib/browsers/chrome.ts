@@ -331,7 +331,7 @@ const _handleDownloads = async function (client, dir, automation) {
 
 const _setAutomation = (client, automation) => {
   return automation.use(
-    new CdpAutomation(client.send, client.on, client.closeTarget, automation),
+    new CdpAutomation(client.send, client.on, automation),
   )
 }
 
