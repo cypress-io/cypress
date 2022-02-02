@@ -678,7 +678,7 @@ describe('Launchpad: Setup Project', () => {
         cy.findByRole('button', { name: 'Next Step' }).should('not.have.disabled')
 
         cy.findByRole('button', { name: 'Next Step' }).click()
-        cy.findByRole('button', { name: 'I\'ve installed them' }).click()
+        cy.findByRole('button', { name: 'Continue' }).click()
 
         cy.get('[data-cy=valid]').within(() => {
           cy.contains('cypress.config.js')
@@ -710,7 +710,7 @@ describe('Launchpad: Setup Project', () => {
         cy.findByRole('option', { name: 'Create React App' }).click()
         cy.findByRole('button', { name: 'TypeScript' }).click()
         cy.findByRole('button', { name: 'Next Step' }).click()
-        cy.findByRole('button', { name: 'I\'ve installed them' }).click()
+        cy.findByRole('button', { name: 'Continue' }).click()
 
         cy.get('[data-cy=valid]').within(() => {
           cy.contains('cypress.config.ts')
