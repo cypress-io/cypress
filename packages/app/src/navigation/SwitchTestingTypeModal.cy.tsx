@@ -26,6 +26,7 @@ describe('SwitchTestingTypeModal', () => {
     cy.percySnapshot()
 
     cy.findByLabelText('Close')
+    .focus()
     .type('{enter}')
 
     cy.get('@closeSpy').should('have.been.calledOnce')

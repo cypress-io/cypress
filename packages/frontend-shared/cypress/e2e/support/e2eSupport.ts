@@ -421,6 +421,8 @@ function validateExternalLink (subject, options: ValidateExternalLinkOptions | s
   })
 }
 
+Cypress.on('uncaught:exception', (err) => !err.message.includes('ResizeObserver loop limit exceeded'))
+
 Cypress.Commands.add('scaffoldProject', scaffoldProject)
 Cypress.Commands.add('addProject', addProject)
 Cypress.Commands.add('openGlobalMode', openGlobalMode)

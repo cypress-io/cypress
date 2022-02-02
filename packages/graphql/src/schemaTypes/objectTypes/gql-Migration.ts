@@ -131,7 +131,7 @@ export const MigrationRegexp = objectType({
     })
 
     t.nonNull.string('beforeComponent', {
-      description: 'regexp to identiey existing specs in component',
+      description: 'regexp to identify existing specs in component',
     })
 
     t.nonNull.string('afterComponent', {
@@ -251,6 +251,13 @@ export const Migration = objectType({
       description: 'whether component testing is set up in the migrated config or not',
       resolve: (source, args, ctx) => {
         return ctx.migration.hasComponentTesting
+      },
+    })
+
+    t.boolean('hasTypescript', {
+      description: 'Whether the project has Typescript',
+      resolve (source, args, ctx) {
+        return ctx.lifecycleManager.metaState.hasTypescript
       },
     })
   },
