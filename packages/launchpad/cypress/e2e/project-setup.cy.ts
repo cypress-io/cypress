@@ -356,13 +356,13 @@ describe('Launchpad: Setup Project', () => {
 
         cy.findByRole('button', { name: 'Next Step' }).should('have.disabled')
 
-        cy.findByRole('button', { name: 'Bundler Pick a bundler' }).click()
+        cy.findByRole('button', { name: 'Bundler(Dev Server) Pick a bundler' }).click()
         cy.findByRole('option', { name: 'Webpack' }).click()
         cy.findByRole('button', { name: 'Next Step' }).should('not.have.disabled')
 
         cy.findByRole('button', { name: 'Front-end Framework React.js' }).click()
         cy.findByRole('option', { name: 'Create React App' }).click()
-        cy.findByRole('button', { name: 'Bundler Webpack' }).should('not.exist')
+        cy.findByRole('button', { name: 'Bundler(Dev Server) Webpack' }).should('not.exist')
         cy.findByRole('button', { name: 'Next Step' }).should('not.have.disabled')
 
         cy.findByRole('button', { name: 'TypeScript' }).click()
@@ -500,7 +500,7 @@ describe('Launchpad: Setup Project', () => {
 
                 if (framework.supportedBundlers.length > 1) {
                   cy.findByRole('button', {
-                    name: 'Bundler Pick a bundler',
+                    name: 'Bundler(Dev Server)Pick a bundler',
                     expanded: false,
                   })
                   .should('have.attr', 'aria-haspopup', 'true')
@@ -518,7 +518,7 @@ describe('Launchpad: Setup Project', () => {
                   .should('have.attr', 'data-cy', `${Cypress._.lowerCase(bundler.name)}-logo`)
                   .click()
 
-                  cy.findByRole('button', { name: `Bundler ${bundler.name}` }) // ensure selected option updates
+                  cy.findByRole('button', { name: `Bundler(Dev Server) ${bundler.name}` }) // ensure selected option updates
                 }
 
                 cy.findByRole('button', { name: lang.name }).click()
@@ -535,7 +535,7 @@ describe('Launchpad: Setup Project', () => {
 
                 cy.findByRole('button', { name: `Front-end Framework ${framework.name}` })
                 if (framework.supportedBundlers.length > 1) {
-                  cy.findByRole('button', { name: `Bundler ${bundler.name}` })
+                  cy.findByRole('button', { name: `Bundler(Dev Server) ${bundler.name}` })
                 }
 
                 cy.findByRole('button', { name: lang.name })
@@ -623,13 +623,13 @@ describe('Launchpad: Setup Project', () => {
 
         cy.findByRole('button', { name: 'Next Step' }).should('have.disabled')
 
-        cy.findByRole('button', { name: 'Bundler Pick a bundler' }).click()
+        cy.findByRole('button', { name: 'Bundler(Dev Server) Pick a bundler' }).click()
         cy.findByRole('option', { name: 'Webpack' }).click()
         cy.findByRole('button', { name: 'Next Step' }).should('not.have.disabled')
 
         cy.findByRole('button', { name: 'Front-end Framework React.js' }).click()
         cy.findByRole('option', { name: 'Create React App' }).click()
-        cy.findByRole('button', { name: 'Bundler Webpack' }).should('not.exist')
+        cy.findByRole('button', { name: 'Bundler(Dev Server) Webpack' }).should('not.exist')
         cy.findByRole('button', { name: 'Next Step' }).should('not.have.disabled')
 
         cy.findByRole('button', { name: 'Next Step' }).click()
