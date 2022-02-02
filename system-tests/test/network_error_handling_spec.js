@@ -369,9 +369,7 @@ describe('e2e network error handling', function () {
     it('baseurl check tries 5 times in run mode', function () {
       return systemTests.exec(this, {
         config: {
-          e2e: {
-            baseUrl: 'http://never-gonna-exist.invalid',
-          },
+          baseUrl: 'http://never-gonna-exist.invalid',
         },
         snapshot: true,
         expectedExitCode: 1,
@@ -433,9 +431,7 @@ describe('e2e network error handling', function () {
           spec: 'https_passthru.cy.js',
           snapshot: true,
           config: {
-            e2e: {
-              baseUrl: `https://localhost:${HTTPS_PORT}`,
-            },
+            baseUrl: `https://localhost:${HTTPS_PORT}`,
           },
         })
         .then(() => {
@@ -464,9 +460,7 @@ describe('e2e network error handling', function () {
           video: false,
           config: {
             pageLoadTimeout: 4000,
-            e2e: {
-              baseUrl: `http://localhost:${PORT}`,
-            },
+            baseUrl: `http://localhost:${PORT}`,
           },
           snapshot: true,
         })
@@ -486,9 +480,7 @@ describe('e2e network error handling', function () {
             video: false,
             config: {
               pageLoadTimeout: 4000,
-              e2e: {
-                baseUrl: `http://localhost:${PORT}`,
-              },
+              baseUrl: `http://localhost:${PORT}`,
             },
             snapshot: true,
           })
@@ -520,9 +512,7 @@ describe('e2e network error handling', function () {
           video: false,
           config: {
             pageLoadTimeout: 4000,
-            e2e: {
-              baseUrl: `http://localhost:${PORT}`,
-            },
+            baseUrl: `http://localhost:${PORT}`,
           },
           snapshot: true,
         })
