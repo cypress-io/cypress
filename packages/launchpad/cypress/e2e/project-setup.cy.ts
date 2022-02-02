@@ -618,7 +618,7 @@ describe('Launchpad: Setup Project', () => {
         cy.findByRole('button', { name: 'Back' }).click()
         cy.get('[data-cy-testingtype="component"]').click()
 
-        cy.findByRole('button', { name: 'Front-end Framework Create React App' }).click()
+        cy.findByRole('button', { name: 'Front-end Framework Pick a framework' }).click()
         cy.findByRole('option', { name: 'React.js' }).click()
 
         cy.findByRole('button', { name: 'Next Step' }).should('have.disabled')
@@ -636,9 +636,9 @@ describe('Launchpad: Setup Project', () => {
         cy.findByRole('button', { name: 'I\'ve installed them' }).click()
 
         cy.get('[data-cy=valid]').within(() => {
-          cy.contains('cypress.config.js')
+          cy.contains('cypress.config.ts')
           cy.contains('cypress/component/index.html')
-          cy.contains(`cypress/support/component.js`)
+          cy.contains(`cypress/support/component.ts`)
           cy.contains('cypress/fixtures/example.json')
         })
 
