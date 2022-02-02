@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core'
-import '@angular/material/prebuilt-themes/indigo-pink.css'
 
 @Component({
   selector: 'app-material-button',

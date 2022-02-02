@@ -6,14 +6,11 @@
   },
   "files": [
     "src/main.ts",
-    "src/polyfills.ts",
-    "node_modules/cypress/types/cypress-global-vars.d.ts"
-  ],
-  "include": [
-    "src/**/*.ts"
+    "src/polyfills.ts"
   ],
   "exclude": [
     "src/test.ts",
-    "src/**/*.spec.ts"
+    "src/**/*.spec.ts",
+    "src/**/*.cy-spec.ts"
   ]
 }
