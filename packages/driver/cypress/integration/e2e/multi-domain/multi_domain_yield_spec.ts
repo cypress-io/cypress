@@ -96,7 +96,11 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
       return {
         symbol: Symbol(''),
       }
-    }).should('equal', '')
+    }).then((obj) => {
+      // This will fail accessing the symbol
+      // @ts-ignore
+      return obj.symbol
+    })
   })
 
   it('succeeds if subject cannot be serialized and is not accessed', () => {
