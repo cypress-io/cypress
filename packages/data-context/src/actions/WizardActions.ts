@@ -63,16 +63,31 @@ export class WizardActions {
     this.data.chosenFramework = null
     this.data.chosenLanguage = 'js'
 
-    this.init()
-
     return this.data
   }
 
-  init () {
+  async initialize () {
     if (this.ctx.currentProject) {
-      const packageJson = this.ctx.fs.readJsonSync(join(this.ctx.currentProject, 'package.json')) as {
+      let packageJson: {
         dependencies: { [key: string]: string }
         devDependencies: { [key: string]: string }
+      }
+
+      this.data.detectedFramework = undefined
+      this.data.detectedBundler = undefined
+      this.data.detectedLanguage = undefined
+
+      this.detectLanguage()
+      debug('detectedLanguage %s', this.data.detectedLanguage)
+      this.data.chosenLanguage = this.data.detectedLanguage || 'js'
+
+      try {
+        packageJson = await this.ctx.fs.readJson(join(this.ctx.currentProject, 'package.json'))
+      } catch (e) {
+        packageJson = {
+          dependencies: { },
+          devDependencies: { },
+        }
       }
 
       debug('packageJson %O', packageJson)
@@ -81,20 +96,13 @@ export class WizardActions {
         ...Object.keys(packageJson.devDependencies),
       ]
 
-      this.data.detectedFramework = undefined
-      this.data.detectedBundler = undefined
-      this.data.detectedLanguage = undefined
-
       this.detectFramework(dependencies)
       debug('detectedFramework %s', this.data.detectedFramework)
       this.detectBundler(dependencies)
       debug('detectedBundler %s', this.data.detectedBundler)
-      this.detectLanguage()
-      debug('detectedLanguage %s', this.data.detectedLanguage)
 
       this.data.chosenFramework = this.data.detectedFramework || null
       this.data.chosenBundler = this.data.detectedBundler || null
-      this.data.chosenLanguage = this.data.detectedLanguage || 'js'
     }
   }
 
@@ -139,10 +147,17 @@ export class WizardActions {
     }
   }
 
-  private detectLanguage () {
+  private async detectLanguage () {
+    let hasTsConfig: boolean = false
+
+    try {
+      hasTsConfig = !!await this.ctx.fs.stat('tsconfig.json')
+    } catch (e) {
+      hasTsConfig = false
+    }
     if (
-      this.ctx.fs.existsSync('tsconfig.json')
-      || (this.ctx.lifecycleManager.configFile && /.ts$/.test(this.ctx.lifecycleManager.configFile))) {
+      hasTsConfig ||
+      (this.ctx.lifecycleManager.configFile && /.ts$/.test(this.ctx.lifecycleManager.configFile))) {
       this.ctx.wizardData.detectedLanguage = 'ts'
     } else {
       this.ctx.wizardData.detectedLanguage = 'js'

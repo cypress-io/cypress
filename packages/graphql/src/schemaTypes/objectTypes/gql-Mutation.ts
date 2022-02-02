@@ -130,8 +130,14 @@ export const mutation = mutationType({
       args: {
         testingType: nonNull(arg({ type: TestingTypeEnum })),
       },
-      resolve: (source, args, ctx) => {
+      resolve: async (source, args, ctx) => {
         ctx.actions.project.setCurrentTestingType(args.testingType)
+
+        // if necessary init the wizard for configuration
+        if (ctx.coreData.currentTestingType
+          && !ctx.lifecycleManager.isTestingTypeConfigured(ctx.coreData.currentTestingType)) {
+          await ctx.actions.wizard.initialize()
+        }
 
         return {}
       },

@@ -351,7 +351,7 @@ describe('Launchpad: Setup Project', () => {
         cy.findByRole('button', { name: 'Back' }).click()
         cy.get('[data-cy-testingtype="component"]').click()
 
-        cy.findByRole('button', { name: 'Front-end Framework Create React App' }).click()
+        cy.findByRole('button', { name: 'Front-end Framework Pick a framework' }).click()
         cy.findByRole('option', { name: 'React.js' }).click()
 
         cy.findByRole('button', { name: 'Next Step' }).should('have.disabled')
