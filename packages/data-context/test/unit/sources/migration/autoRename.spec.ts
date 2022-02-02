@@ -138,6 +138,12 @@ describe('getSpecs', () => {
         usesDefaultTestFiles: true,
         testingType: 'e2e',
       },
+      {
+        relative: 'cypress/integration/spec.ts',
+        usesDefaultFolder: true,
+        usesDefaultTestFiles: true,
+        testingType: 'e2e',
+      },
     ])
 
     expect(actual.component).to.eql([
@@ -332,6 +338,78 @@ describe('applyMigrationTransform', () => {
       expect(result.before).to.eql(expected.before)
       expect(result.after).to.eql(expected.after)
     })
+
+    it('handles a spec named spec', () => {
+      const input: MigrationSpec = {
+        relative: 'cypress/integration/spec.js',
+        usesDefaultFolder: true,
+        usesDefaultTestFiles: true,
+        testingType: 'e2e',
+      }
+
+      const expected: MigrationFile = {
+        testingType: 'e2e',
+        before: {
+          relative: 'cypress/integration/spec.js',
+          parts: [
+            {
+              'highlight': false,
+              'text': 'cypress/',
+            },
+            {
+              'highlight': true,
+              group: 'folder',
+              'text': 'integration',
+            },
+            {
+              'highlight': false,
+              'text': '/spec',
+            },
+            {
+              'highlight': true,
+              group: 'extension',
+              'text': '.',
+            },
+            {
+              'highlight': false,
+              'text': 'js',
+            },
+          ],
+        },
+        after: {
+          relative: 'cypress/e2e/spec.cy.js',
+          parts: [
+            {
+              'highlight': false,
+              'text': 'cypress/',
+            },
+            {
+              'highlight': true,
+              group: 'folder',
+              'text': 'e2e',
+            },
+            {
+              'highlight': false,
+              'text': '/spec',
+            },
+            {
+              'highlight': true,
+              group: 'extension',
+              'text': '.cy.',
+            },
+            {
+              'highlight': false,
+              'text': 'js',
+            },
+          ],
+        },
+      }
+
+      const result = applyMigrationTransform(input)
+
+      expect(result.before).to.eql(expected.before)
+      expect(result.after).to.eql(expected.after)
+    })
   })
 
   describe('component spec', () => {
@@ -384,6 +462,12 @@ describe('applyMigrationTransform', () => {
       }
 
       const result = applyMigrationTransform(input)
+
+      // console.log({ result: JSON.stringify(result, null, 2) })
+      // console.log('before: ', _.isEqual(result.before, expected.before))
+      // console.log('after: ', _.isEqual(result.after, expected.after))
+
+      // expect(result.before).to.eq(expected.before)
 
       expect(result.before).to.eql(expected.before)
       expect(result.after).to.eql(expected.after)
