@@ -6,6 +6,14 @@ function getPathForPlatform (posixPath: string) {
   return posixPath
 }
 
+function getRunnerHref (specPath: string) {
+  specPath = getPathForPlatform(specPath)
+
+  if (Cypress.platform === 'win32') specPath = specPath.replaceAll('\\', '%5C')
+
+  return `#/specs/runner?file=${specPath}`
+}
+
 describe('App: Index', () => {
   describe('Testing Type: E2E', () => {
     context('project with default spec pattern', () => {
@@ -449,7 +457,7 @@ describe('App: Index', () => {
             cy.contains(getPathForPlatform('src/stories/Button.stories.cy.jsx')).should('be.visible')
 
             cy.findByRole('link', { name: 'Okay, run the spec' })
-            .should('have.attr', 'href', `#/specs/runner?file=${getPathForPlatform('src/stories/Button.stories.cy.jsx')}`)
+            .should('have.attr', 'href', getRunnerHref('src/stories/Button.stories.cy.jsx'))
 
             cy.findByRole('button', { name: 'Create another spec' }).click()
           })
@@ -606,7 +614,7 @@ describe('App: Index', () => {
             cy.findByRole('button', { name: 'Close' }).should('be.visible')
 
             cy.findByRole('link', { name: 'Okay, run the spec' })
-            .should('have.attr', 'href', `#/specs/runner?file=${getPathForPlatform('src/App.cy.jsx')}`)
+            .should('have.attr', 'href', getRunnerHref('src/App.cy.jsx'))
 
             cy.findByRole('button', { name: 'Create another spec' }).click()
           })
@@ -632,7 +640,7 @@ describe('App: Index', () => {
           cy.findByRole('dialog', { name: defaultMessages.createSpec.successPage.header }).as('SuccessDialog').within(() => {
             cy.findByRole('link', {
               name: 'Okay, run the spec',
-            }).should('have.attr', 'href', `#/specs/runner?file=${getPathForPlatform('src/App.cy.jsx')}`).click()
+            }).should('have.attr', 'href', getRunnerHref('src/App.cy.jsx')).click()
           })
 
           cy.findByTestId('spec-gen-component-app', { timeout: 5000 }).should('be.visible')
@@ -753,7 +761,7 @@ describe('App: Index', () => {
         cy.findByRole('dialog', { name: defaultMessages.createSpec.successPage.header }).as('SuccessDialog').within(() => {
           cy.findByRole('link', {
             name: 'Okay, run the spec',
-          }).should('have.attr', 'href', `#/specs/runner?file=${getPathForPlatform('src/specs-folder/MyTest.cy.jsx')}`)
+          }).should('have.attr', 'href', getRunnerHref('src/specs-folder/MyTest.cy.jsx'))
         })
       })
 
@@ -783,7 +791,7 @@ describe('App: Index', () => {
         cy.findByRole('dialog', { name: defaultMessages.createSpec.successPage.header }).as('SuccessDialog').within(() => {
           cy.findByRole('link', {
             name: 'Okay, run the spec',
-          }).should('have.attr', 'href', `#/specs/runner?file=${getPathForPlatform('src/specs-folder/Button.stories.cy.jsx')}`)
+          }).should('have.attr', 'href', getRunnerHref('src/specs-folder/Button.stories.cy.jsx'))
         })
       })
     })
