@@ -1,4 +1,4 @@
-if (process.env.CYPRESS_ENV !== 'production') {
+if (process.env.CYPRESS_INTERNAL_TS_DEV) {
   require('@packages/ts/register')
 }
 

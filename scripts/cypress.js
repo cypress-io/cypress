@@ -2,6 +2,11 @@ const path = require('path')
 const execa = require('execa')
 const debug = require('debug')('cypress:scripts')
 
+// We don't want to run the TS_DEV in any CI scripts
+if (!process.env.CI) {
+  process.env.CYPRESS_INTERNAL_TS_DEV = `true`
+}
+
 const args = process.argv.slice(2)
 
 const pathToCli = path.resolve(__dirname, '..', 'cli', 'bin', 'cypress')
