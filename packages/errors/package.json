@@ -5,6 +5,7 @@
   "main": "index.js",
   "browser": "src/index.ts",
   "scripts": {
+    "build": "tsc",
     "build-prod": "tsc || echo 'built, with errors'",
     "check-ts": "tsc --noEmit",
     "clean-deps": "rm -rf node_modules",

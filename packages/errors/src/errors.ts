@@ -10,10 +10,6 @@ import { displayFlags, listItems, logError, warnIfExplicitCiBuildId } from './er
 import type { ClonedError, CypressError, ErrTemplateResult } from './errorTypes'
 import { stackWithoutMessage } from './stack_utils'
 
-export {
-  stripAnsi,
-}
-
 const ansi_up = new AU()
 
 ansi_up.use_classes = true
@@ -308,8 +304,7 @@ export const AllCypressErrors = {
   },
   DUPLICATE_TASK_KEY: (arg1: string) => {
     return errTemplate`\
-      Warning: Multiple attempts to register the following task(s): ${arg1}. Only the last attempt will be registered.
-    `
+      Warning: Multiple attempts to register the following task(s): ${arg1}. Only the last attempt will be registered.`
   },
   INDETERMINATE_CI_BUILD_ID: (arg1: Record<string, string>, arg2: string[]) => {
     return errTemplate`\
@@ -1195,6 +1190,7 @@ export const cloneError = function (err: CypressError | GenericError, options: {
 }
 
 export {
+  stripAnsi,
   cloneError as clone,
   throwErr as throw,
   getError as get,

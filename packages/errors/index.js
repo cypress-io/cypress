@@ -1,6 +1,7 @@
-if (process.env.CYPRESS_INTERNAL_ENV !== 'production') {
+try {
+  require.resolve('./dist')
+  module.exports = require('./dist')
+} catch (e) {
   require('@packages/ts/register')
   module.exports = require('./src')
-} else {
-  module.exports = require('./dist')
 }
