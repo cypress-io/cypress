@@ -26,6 +26,7 @@ describe('lib/open_project', () => {
     this.onError = sinon.stub()
     sinon.stub(browsers, 'get').resolves()
     sinon.stub(browsers, 'open')
+    sinon.stub(browsers, 'connectToNewSpec')
     sinon.stub(ProjectBase.prototype, 'initializeConfig').resolves({
       e2e: {
         specPattern: 'cypress/integration/**/*',
@@ -228,6 +229,11 @@ describe('lib/open_project', () => {
             }, 100)
           })
         })
+      })
+
+      it('calls connectToNewSpec when shouldNavigateBrowser is set', async function () {
+        await openProject.launch(this.browser, this.spec, { shouldNavigateBrowser: true })
+        expect(browsers.connectToNewSpec.lastCall.args[0]).to.be.equal(this.browser)
       })
     })
   })
