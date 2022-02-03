@@ -2,10 +2,10 @@
   "extends": "../ts/tsconfig.json",
   "include": [
     "src",
+    "test",
   ],
   "exclude": [
     "script",
-    "test",
   ],
   "compilerOptions": {
     "strict": true,

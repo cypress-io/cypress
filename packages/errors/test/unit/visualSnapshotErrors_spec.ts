@@ -111,10 +111,10 @@ const convertHtmlToImage = async (htmlfile: string) => {
             await copyImageToBase(imagePath, baseImagePath)
           }
         } catch (err: any) {
-          if (err.code === 'ENOENT' && !isCi) {
+          if (err.code === 'ENOENT') {
             await copyImageToBase(imagePath, baseImagePath)
           } else {
-            throw err
+            reject(err)
           }
         } finally {
           resolve({})
