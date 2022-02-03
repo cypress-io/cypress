@@ -1,4 +1,4 @@
-import SpecRunnerHeader from './SpecRunnerHeader.vue'
+import SpecRunnerHeaderOpenMode from './SpecRunnerHeaderOpenMode.vue'
 import { useAutStore } from '../store'
 import { SpecRunnerHeaderFragment, SpecRunnerHeaderFragmentDoc } from '../generated/graphql-test'
 import { createEventManager, createTestAutIframe } from '../../cypress/component/support/ctSupport'
@@ -7,13 +7,13 @@ function renderWithGql (gqlVal: SpecRunnerHeaderFragment) {
   const eventManager = createEventManager()
   const autIframe = createTestAutIframe()
 
-  return (<SpecRunnerHeader
+  return (<SpecRunnerHeaderOpenMode
     gql={gqlVal}
     eventManager={eventManager}
     getAutIframe={() => autIframe}/>)
 }
 
-describe('SpecRunnerHeader', { viewportHeight: 500 }, () => {
+describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
   it('renders', () => {
     const autStore = useAutStore()
 

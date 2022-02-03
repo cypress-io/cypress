@@ -32,7 +32,12 @@
           />
         </HideDuringScreenshot>
       </template>
-      <template #panel3>
+      <template #panel3="{width}">
+        <SpecRunnerHeaderRunMode
+          :event-manager="eventManager"
+          :get-aut-iframe="getAutIframeModel"
+          :width="width"
+        />
         <RemoveClassesDuringScreenshotting
           class="h-full bg-gray-100 p-16px"
         >
@@ -94,7 +99,6 @@ const {
   viewportStyle,
   windowWidth,
   reporterWidth,
-  specListWidth,
 } = useRunnerStyle()
 
 const {
