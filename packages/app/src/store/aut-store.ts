@@ -20,8 +20,8 @@ interface AutStoreState {
 export const useAutStore = defineStore({
   id: 'aut-store',
   state: (): AutStoreState => {
-    const defaultViewportHeight = window.__CYPRESS_MODE__ === 'run' ? 660 : 500
-    const defaultViewportWidth = window.__CYPRESS_MODE__ === 'run' ? 1000 : 500
+    const defaultViewportHeight = window.__CYPRESS_TESTING_TYPE__ === 'e2e' ? 660 : 500
+    const defaultViewportWidth = window.__CYPRESS_TESTING_TYPE__ === 'e2e' ? 1000 : 500
 
     // TODO(lachlan): depends on CT or E2E, should seed accordingly using `config`
     return {

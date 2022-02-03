@@ -15,6 +15,19 @@ describe('Cypress In Cypress', { viewportWidth: 1200 }, () => {
     })
 
     cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
+    cy.findByTestId('aut-url').should('be.visible')
+    cy.findByTestId('header-selector').should('be.visible')
+    cy.findByTestId('select-browser').click()
+
+    cy.contains('Firefox').should('be.visible')
+    cy.findByTestId('viewport').click()
+
+    cy.percySnapshot('browsers open')
+    cy.contains('Firefox').should('be.hidden')
+    cy.contains('The viewport determines the width and height of your application. By default the viewport will be 1000px by 660px for End-to-end Testing unless specified by a cy.viewport command.')
+    .should('be.visible')
+
+    cy.percySnapshot('viewport info open')
   })
 
   it('navigation between specs and other parts of the app works', () => {
