@@ -38,7 +38,7 @@ describe('SpecRunnerHeader', { viewportHeight: 500 }, () => {
       },
     })
 
-    cy.get('[data-cy="header-selector"]').should('be.disabled')
+    cy.get('[data-cy="playground-activator"]').should('be.disabled')
 
     cy.percySnapshot()
   })
@@ -54,7 +54,7 @@ describe('SpecRunnerHeader', { viewportHeight: 500 }, () => {
       },
     })
 
-    cy.get('[data-cy="header-selector"]').should('be.disabled')
+    cy.get('[data-cy="playground-activator"]').should('be.disabled')
     cy.percySnapshot()
   })
 
@@ -65,7 +65,7 @@ describe('SpecRunnerHeader', { viewportHeight: 500 }, () => {
       },
     })
 
-    cy.get('[data-cy="header-selector"]').should('not.be.disabled')
+    cy.get('[data-cy="playground-activator"]').should('not.be.disabled')
   })
 
   it('shows url section if currentTestingType is e2e', () => {
@@ -119,6 +119,7 @@ describe('SpecRunnerHeader', { viewportHeight: 500 }, () => {
       },
     })
 
+    cy.get('[data-cy="playground-activator"]').should('be.visible')
     cy.get('[data-cy="aut-url"]').should('not.exist')
   })
 

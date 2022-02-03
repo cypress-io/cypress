@@ -26,7 +26,7 @@
         }"
       >
         <Button
-          data-cy="header-selector"
+          data-cy="playground-activator"
           :disabled="isDisabled"
           class="rounded-none border-r-1px border-gray-100 mr-12px"
           variant="text"
@@ -42,7 +42,15 @@
         v-else
         class="flex-grow"
       >
-        <!-- spacer -->
+        <Button
+          data-cy="playground-activator"
+          :disabled="isDisabled"
+          class=" border-gray-100 mr-12px"
+          variant="outline"
+          @click="togglePlayground"
+        >
+          <i-cy-crosshairs_x16 class="icon-dark-gray-600" />
+        </Button>
       </div>
       <SpecRunnerDropdown
         v-if="selectedBrowser?.displayName"
