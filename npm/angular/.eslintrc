@@ -1,8 +1,7 @@
 {
   "plugins": [
     "cypress",
-    "@cypress/dev",
-    "@angular-eslint/eslint-plugin"
+    "@cypress/dev"
   ],
   "extends": [
     "plugin:@cypress/dev/general",
