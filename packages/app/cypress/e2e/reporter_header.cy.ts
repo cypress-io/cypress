@@ -43,7 +43,11 @@ describe('Reporter Header', () => {
       cy.get('[data-testid="spec-file-item"]').should('have.length', 1)
       .should('contain', 'dom-content.spec')
 
-      cy.get('input').clear().type('asdf', { force: true })
+      cy.get('input').clear()
+
+      cy.get('[data-testid="spec-file-item"]').should('have.length', '1')
+
+      cy.get('input').type('asdf', { force: true })
 
       cy.get('[data-testid="spec-file-item"]').should('have.length', 0)
     })
