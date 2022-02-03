@@ -13,7 +13,7 @@
     "test-unit": "cross-env NODE_ENV=test mocha",
     "test-watch": "yarn test-unit --watch",
     "build": "node ./bin/build.js && gulp build",
-    "build-prod": "yarn build",
+    "build-prodr": "yarn build",
     "predeploy": "yarn build",
     "deploy": "gulp deploy"
   },
