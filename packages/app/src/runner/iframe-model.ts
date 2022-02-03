@@ -1,6 +1,7 @@
 import { useSnapshotStore } from './snapshot-store'
 import { useAutStore } from '../store'
 import type { EventManager } from './event-manager'
+import { defaultMessages } from '@cy/i18n'
 
 export interface AutSnapshot {
   id?: number
@@ -73,7 +74,6 @@ export class IframeModel {
   }
 
   _beforeRun = () => {
-    const snapshotStore = useSnapshotStore()
     const autStore = useAutStore()
 
     autStore.setIsLoading(false)
@@ -82,7 +82,6 @@ export class IframeModel {
 
     this.studio.selectorPlaygroundModel.setEnabled(false)
     this._reset()
-    snapshotStore.clearMessage()
   }
 
   _afterRun = () => {
@@ -236,17 +235,14 @@ export class IframeModel {
   }
 
   _unpinSnapshot = () => {
-    const snapshotStore = useSnapshotStore()
-
-    snapshotStore.unpinSnapshot()
+    useSnapshotStore().$reset()
   }
 
   _studioOpenError () {
     const snapshotStore = useSnapshotStore()
 
     snapshotStore.setMessage(
-      'Cannot show Snapshot while creating commands in Studio',
-      'warning',
+      defaultMessages.runner.snapshot.studioActiveError,
     )
   }
 
@@ -278,8 +274,6 @@ export class IframeModel {
     this.intervalId = undefined
     this.originalState = undefined
 
-    const snapshotStore = useSnapshotStore()
-
-    snapshotStore.setSnapshotPinned(false)
+    useSnapshotStore().$reset()
   }
 }

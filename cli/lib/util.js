@@ -18,10 +18,12 @@ const executable = require('executable')
 const { stripIndent } = require('common-tags')
 const supportsColor = require('supports-color')
 const isInstalledGlobally = require('is-installed-globally')
-const pkg = require(path.join(__dirname, '..', 'package.json'))
 const logger = require('./logger')
 const debug = require('debug')('cypress:cli')
 const fs = require('./fs')
+const semver = require('semver')
+
+const pkg = require(path.join(__dirname, '..', 'package.json'))
 
 const issuesUrl = 'https://github.com/cypress-io/cypress/issues'
 
@@ -291,18 +293,33 @@ const util = {
     .mapValues((value) => { // stringify to 1 or 0
       return value ? '1' : '0'
     })
-    .extend(util.getOriginalNodeOptions(options))
+    .extend(util.getOriginalNodeOptions())
     .value()
   },
 
-  getOriginalNodeOptions (options) {
+  getOriginalNodeOptions () {
+    const opts = {}
+
     if (process.env.NODE_OPTIONS) {
-      return {
-        ORIGINAL_NODE_OPTIONS: process.env.NODE_OPTIONS,
-      }
+      opts.ORIGINAL_NODE_OPTIONS = process.env.NODE_OPTIONS
     }
 
-    return {}
+    // https://github.com/cypress-io/cypress/issues/18914
+    // Node 17+ ships with OpenSSL 3 by default, so we may need the option
+    // --openssl-legacy-provider so that webpack@4 can use the legacy MD4 hash
+    // function. This option doesn't exist on Node <17 or when it is built
+    // against OpenSSL 1, so we have to detect Node's major version and check
+    // which version of OpenSSL it was built against before spawning the plugins
+    // process.
+
+    // To be removed when the Cypress binary pulls in the @cypress/webpack-batteries-included-preprocessor
+    // version that has been updated to webpack >= 5.61, which no longer relies on
+    // Node's builtin crypto.hash function.
+    if (process.versions && semver.satisfies(process.versions.node, '>=17.0.0') && process.versions.openssl.startsWith('3.')) {
+      opts.ORIGINAL_NODE_OPTIONS = `${opts.ORIGINAL_NODE_OPTIONS || ''} --openssl-legacy-provider`
+    }
+
+    return opts
   },
 
   getForceTty () {

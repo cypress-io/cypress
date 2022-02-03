@@ -1,14 +1,16 @@
 <template>
   <button
     :id="name"
-    class="rounded-50px relative hocus-default border-transparent border-1"
-    :class="[value ? 'bg-jade-400' : 'bg-gray-300', sizeClasses[size].container]"
+    class="border-transparent border-1 rounded-50px relative hocus-default"
+    :class="[value ? 'bg-jade-400' : 'bg-gray-300', sizeClasses[size].container, {
+      '!hocus:ring-0': size === 'sm'
+    }]"
     role="switch"
     :aria-checked="value"
     @click="$emit('update', !value)"
   >
     <span
-      class="block toggle transform rounded-50px bg-white transition-transform duration-200 ease-out"
+      class="bg-white rounded-50px transform transition-transform ease-out duration-200 block toggle"
       :class="[{ [sizeClasses[size].translate]: value }, sizeClasses[size].indicator]"
     />
   </button>
@@ -51,4 +53,5 @@ const sizeClasses = {
 defineEmits<{
   (e: 'update', value: boolean): void
 }>()
+
 </script>

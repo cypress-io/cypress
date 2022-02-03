@@ -92,6 +92,19 @@ generates:
       - 'typescript'
 
   ###
+  # Generates types for us to infer the correct keys for graphcache
+  ###
+  './packages/data-context/src/gen/graphcache-config.gen.ts':
+    config:
+      useTypeImports: true
+    schema: 'packages/graphql/schemas/schema.graphql'
+    plugins:
+      - add:
+          content: '/* eslint-disable */'
+      - typescript
+      - typescript-urql-graphcache
+
+  ###
   # All of the GraphQL Query/Mutation documents we import for use in the .{vue,ts,tsx,js,jsx}
   # files for useQuery / useMutation, as well as types associated with the fragments
   ###
