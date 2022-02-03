@@ -14,33 +14,6 @@ const { fs } = require(`../../../lib/util/fs`)
 const CriClient = require('../../../lib/browsers/cri-client')
 
 describe('lib/browsers/chrome', () => {
-  context('#connectToNewSpec', () => {
-    it('launches a new tab, connects a cri client to it, starts video, navigates to the spec url, and handles downloads', async function () {
-      const criClient = {
-        send: sinon.stub().resolves(),
-        on: sinon.stub(),
-      }
-      const automation = {
-        use: sinon.stub().returns(),
-      }
-
-      const options = { onError: () => {}, url: 'https://www.google.com', downloadsFolder: '/tmp/folder' }
-
-      sinon.stub(CriClient, 'newTab').withArgs('127.0.0.1', 100, options.onError).resolves(criClient)
-      sinon.stub(chrome, '_maybeRecordVideo').withArgs(criClient, options, 354).resolves()
-      sinon.stub(chrome, '_navigateUsingCRI').withArgs(criClient, options.url, 354).resolves()
-      sinon.stub(chrome, '_handleDownloads').withArgs(criClient, options.downloadFolder, automation).resolves()
-
-      await chrome.connectToNewSpec({ majorVersion: 354 }, 100, options, automation)
-
-      expect(CriClient.newTab).to.be.called
-      expect(automation.use).to.be.called
-      expect(chrome._maybeRecordVideo).to.be.called
-      expect(chrome._navigateUsingCRI).to.be.called
-      expect(chrome._handleDownloads).to.be.called
-    })
-  })
-
   context('#open', () => {
     beforeEach(function () {
       // mock CRI client during testing
@@ -389,6 +362,33 @@ describe('lib/browsers/chrome', () => {
           })
         })
       })
+    })
+  })
+
+  context('#connectToNewSpec', () => {
+    it('launches a new tab, connects a cri client to it, starts video, navigates to the spec url, and handles downloads', async function () {
+      const criClient = {
+        send: sinon.stub().resolves(),
+        on: sinon.stub(),
+      }
+      const automation = {
+        use: sinon.stub().returns(),
+      }
+
+      const options = { onError: () => {}, url: 'https://www.google.com', downloadsFolder: '/tmp/folder' }
+
+      sinon.stub(CriClient, 'newTab').withArgs('127.0.0.1', 100, options.onError).resolves(criClient)
+      sinon.stub(chrome, '_maybeRecordVideo').withArgs(criClient, options, 354).resolves()
+      sinon.stub(chrome, '_navigateUsingCRI').withArgs(criClient, options.url, 354).resolves()
+      sinon.stub(chrome, '_handleDownloads').withArgs(criClient, options.downloadFolder, automation).resolves()
+
+      await chrome.connectToNewSpec({ majorVersion: 354 }, 100, options, automation)
+
+      expect(CriClient.newTab).to.be.called
+      expect(automation.use).to.be.called
+      expect(chrome._maybeRecordVideo).to.be.called
+      expect(chrome._navigateUsingCRI).to.be.called
+      expect(chrome._handleDownloads).to.be.called
     })
   })
 

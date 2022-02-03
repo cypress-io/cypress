@@ -290,6 +290,7 @@ describe('lib/browsers/electron', () => {
         maximize: sinon.stub(),
         setSize: sinon.stub(),
         show: sinon.stub(),
+        destroy: sinon.stub(),
         webContents: this.win.webContents,
       }
 
@@ -353,6 +354,22 @@ describe('lib/browsers/electron', () => {
         this.automation.use.lastCall.args[0].onRequest('focus:browser:window')
 
         expect(this.newWin.show).to.be.called
+      })
+    })
+
+    it('registers onRequest automation middleware and calls destroy when requesting to close the browser tabs', function () {
+      sinon.spy(this.automation, 'use')
+
+      electron._render(this.url, this.automation, this.preferences, this.options)
+      .then(() => {
+        expect(Windows.create).to.be.calledWith(this.options.projectRoot, this.options)
+
+        expect(this.automation.use).to.be.called
+        expect(this.automation.use.lastCall.args[0].onRequest).to.be.a('function')
+
+        this.automation.use.lastCall.args[0].onRequest('close:browser:tabs')
+
+        expect(this.newWin.destroy).to.be.called
       })
     })
   })
