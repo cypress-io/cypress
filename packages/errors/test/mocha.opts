@@ -1,0 +1,4 @@
+test/unit
+-r @packages/ts/register
+--recursive
+--extension=js,ts
