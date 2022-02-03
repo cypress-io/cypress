@@ -24,7 +24,7 @@ export const verifyFailure = (options) => {
   const {
     specTitle,
     hasCodeFrame = true,
-    verifyOpenInIde = true,
+    verifyOpenInIde,
     hasPreferredIde,
     column,
     originalMessage,

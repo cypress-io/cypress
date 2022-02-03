@@ -10,7 +10,7 @@ describe('cy.intercept', () => {
     })
   }
 
-  it('assertion failure in req callback', () => {
+  it('assertion failure in request callback', () => {
     cy.intercept('/json-content-type', () => {
       expect('a').to.eq('b')
     })
@@ -32,7 +32,7 @@ describe('cy.intercept', () => {
     .wait(1000) // ensure the failure happens before test ends
   })
 
-  it('assertion failure in res callback', () => {
+  it('assertion failure in response callback', () => {
     cy.intercept('/json-content-type', (req) => {
       req.reply(() => {
         expect('b').to.eq('c')
