@@ -23,7 +23,7 @@
     "@angular-devkit/build-angular": "12.2.16",
     "@angular-eslint/eslint-plugin": "4.2.0",
     "@angular/animations": "12.2.16",
-    "@angular/cdk": "11.2.12",
+    "@angular/cdk": "12.2.13",
     "@angular/cli": "12.2.16",
     "@angular/common": "12.2.16",
     "@angular/compiler": "12.2.16",
