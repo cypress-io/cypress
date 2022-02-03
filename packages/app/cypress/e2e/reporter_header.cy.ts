@@ -22,15 +22,7 @@ describe('Reporter Header', () => {
         expect(location.hash).to.contain('dom-content.spec')
       })
 
-      cy.get('[data-testid=spec-file-item]').get('.text-gray-700')
-      .should('contain', '.')
-      .should('contain', 's')
-      .should('contain', 'p')
-      .should('contain', 'e')
-      .should('contain', 'c')
-      .should('contain', '.')
-      .should('contain', 'j')
-      .should('contain', 's')
+      cy.get('[data-testid=spec-file-item]').get('.text-gray-700').eq(1).should('contain', '.spec.js')
     })
 
     it('filters the list of specs when searching for specs', () => {
