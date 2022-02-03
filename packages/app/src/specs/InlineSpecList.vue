@@ -29,6 +29,7 @@ import InlineSpecListHeader from './InlineSpecListHeader.vue'
 import InlineSpecListTree from './InlineSpecListTree.vue'
 import CreateSpecModal from './CreateSpecModal.vue'
 import { FuzzyFoundSpec, fuzzySortSpecs, makeFuzzyFoundSpec, useCachedSpecs } from '@packages/frontend-shared/src/utils/spec-utils'
+import { debounce } from 'lodash'
 
 gql`
 fragment SpecNode_InlineSpecList on Spec {
@@ -64,7 +65,16 @@ const props = defineProps<{
 }>()
 
 const showModal = ref(false)
-const search = ref('')
+
+const cachedSearchString = ref('')
+const search = computed({
+  get () {
+    return cachedSearchString.value
+  },
+  set: debounce((newValue) => {
+    cachedSearchString.value = newValue
+  }, 200),
+})
 const cachedSpecs = useCachedSpecs(computed(() => (props.gql.currentProject?.specs) || []))
 
 const specs = computed<FuzzyFoundSpec[]>(() => {

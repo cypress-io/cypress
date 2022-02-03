@@ -113,6 +113,7 @@ import SpecItem from './SpecItem.vue'
 import { useVirtualList } from '@packages/frontend-shared/src/composables/useVirtualList'
 import NoResults from '@cy/components/NoResults.vue'
 import SpecPatternModal from '../components/SpecPatternModal.vue'
+import { debounce } from 'lodash'
 
 const { t } = useI18n()
 
@@ -159,13 +160,21 @@ const emit = defineEmits<{
 
 const showSpecPatternModal = ref(false)
 
-const search = ref('')
+const cachedSpecs = useCachedSpecs(computed(() => props.gql.currentProject?.specs || []))
+
+const cachedSearchString = ref('')
+const search = computed({
+  get () {
+    return cachedSearchString.value
+  },
+  set: debounce((newValue) => {
+    cachedSearchString.value = newValue
+  }, 200),
+})
 
 function handleClear () {
   search.value = ''
 }
-
-const cachedSpecs = useCachedSpecs(computed(() => props.gql.currentProject?.specs || []))
 
 const specs = computed(() => {
   const specs = cachedSpecs.value.map((x) => makeFuzzyFoundSpec(x))
