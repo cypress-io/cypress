@@ -930,32 +930,45 @@ describe('errors ui', {
     const docsUrl = 'https://on.cypress.io/viewport'
 
     before(() => {
+      // @ts-ignore
+      window.top.__cySkipValidateConfig = true
+
       setup({
         fileName: file,
         mockPreferredEditor: false,
-        onLoadStatsMessage: 'Failed:1',
+        onLoadStatsMessage: 'Failed:2',
       })
     })
 
-    verify.it('displays doc url', { retries: 1 }, {
+    after(() => {
+      // @ts-ignore
+      window.top.__cySkipValidateConfig = false
+    })
+
+    verify.it('displays as link in interactive mode', { retries: 1 }, {
       file,
       verifyFn () {
-        cy
-        .contains('.runnable-title', 'displays doc url')
+        cy.contains('.runnable-title', 'displays as link in interactive mode')
         .closest('.runnable').within(() => {
-          if (Cypress.config('isInteractive')) {
-            // renders href in open mode
-            cy.get('.runnable-err-message')
-            .should('not.contain', docsUrl)
-            .contains('Learn more')
-            .should('have.attr', 'href', docsUrl)
-          } else {
-            // renders link as text in run mode
-            cy.get('.runnable-err-message')
-            .should('contain', docsUrl)
-            .contains('Learn more')
-            .should('not.exist')
-          }
+          cy
+          .get('.runnable-err-message')
+          .should('not.contain', docsUrl)
+          .contains('Learn more')
+          .should('have.attr', 'href', docsUrl)
+        })
+      },
+    })
+
+    verify.it('is text in error message in run mode', {
+      file,
+      verifyFn () {
+        cy.contains('.runnable-title', 'is text in error message in run mode')
+        .closest('.runnable').within(() => {
+          cy
+          .get('.runnable-err-message')
+          .should('contain', docsUrl)
+          .contains('Learn more')
+          .should('not.exist')
         })
       },
     })
