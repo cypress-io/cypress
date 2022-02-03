@@ -17,6 +17,7 @@ Unless the user skips this step, after this step, the filesystem will be:
 | Before | After|
 |---|---|
 | `integration/foo.spec.ts` | `e2e/foo.cy.ts` |
+| `integration/spec.ts` | `e2e/spec.cy.ts` |
 | `component/button.spec.js` | `component/button.cy.js` |
 
 ## Manual Files
