@@ -37,7 +37,7 @@
               alt="unsupported browser"
             />
             <template #popper>
-              <div>
+              <div class="w-full">
                 <div class="font-medium text-white mb-2">
                   Unsupported browser
                 </div>

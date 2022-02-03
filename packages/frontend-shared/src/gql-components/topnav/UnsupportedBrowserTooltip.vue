@@ -16,11 +16,10 @@
         class="rounded flex h-fit
                   bg-gray-900
                   text-center py-16px px-24px
-                  text-gray-300 text-size-14px leading-20px
-                  absolute content
-                  need-content before:border-solid before:border-transparent before:border-width-8px
-                  before:right-1/2 before:block before:absolute
-                  "
+                  text-gray-300 text-size-14px leading-20px absolute
+                  content need-content
+                  before:border-solid before:border-transparent before:border-width-8px before:right-1/2
+                  before:block before:absolute "
         :class="{
           'bottom-7 before:top-full before:-mr-8px before:border-b-0 before:border-t-gray-900': placement === 'top',
           'top-7 before:bottom-full before:-mr-8px before:border-t-0 before:border-b-gray-900': placement === 'bottom'
