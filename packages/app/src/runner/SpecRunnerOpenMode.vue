@@ -120,6 +120,7 @@ gql`
 fragment SpecRunner_Preferences on Query {
   localSettings {
     preferences {
+      isSideNavigationOpen
       isSpecsListOpen
       autoScrollingEnabled
       reporterWidth
