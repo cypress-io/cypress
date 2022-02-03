@@ -151,7 +151,6 @@ describe('App: Settings without cloud', () => {
 
       expect(browsers).to.have.length.greaterThan(1)
 
-      // TODO: is this really how this is supposed to look?
       cy.contains(`browsers: ${browsers.filter((b) => b.name !== 'electron').map((b) => b.name).join(', ')}`)
     })
   })
