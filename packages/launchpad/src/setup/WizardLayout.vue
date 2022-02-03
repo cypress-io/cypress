@@ -18,6 +18,7 @@
       :show-next="showNext"
       :back="backLabel"
       :alt="alt"
+      :main-variant="mainButtonVariant"
     >
       <slot name="button-bar" />
     </ButtonBar>
@@ -28,6 +29,7 @@
 import ButtonBar from './ButtonBar.vue'
 import { computed } from 'vue'
 import { useI18n } from '@cy/i18n'
+import type { ButtonVariants } from '@cy/components/Button.vue'
 
 const { t } = useI18n()
 
@@ -42,6 +44,7 @@ const props = withDefaults(
     altFn?: (val: boolean) => void
     nextFn?: (...args: unknown[]) => any,
     backFn?: (...args: unknown[]) => any,
+    mainButtonVariant?: ButtonVariants
   }>(), {
     next: undefined,
     showNext: true,
@@ -52,6 +55,7 @@ const props = withDefaults(
     altFn: undefined,
     nextFn: undefined,
     backFn: undefined,
+    mainButtonVariant: 'primary',
   },
 )
 

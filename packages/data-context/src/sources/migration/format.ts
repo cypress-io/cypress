@@ -31,8 +31,11 @@ export function formatMigrationFile (file: string, regexp: RegExp): FilePart[] {
 
   // sometimes `.` gets in here as the <ext> group
   // filter it out
-  const higlights = Object.values(match.groups).filter((x) => x.length > 1)
-  const delimiters = higlights.join('|')
+  const highlights = Object.values(match.groups)
+  .filter((x) => x.length > 0)
+  .map((d) => d === '.' ? `[${d}]` : d) // period is wildcard so surround with [] to use character
+
+  const delimiters = highlights.join('|')
   const re = new RegExp(`(${delimiters})`)
   const split = file.split(re)
 
@@ -45,7 +48,7 @@ export function formatMigrationFile (file: string, regexp: RegExp): FilePart[] {
           ? 'name'
           : undefined
 
-    const hasHighlight = higlights.includes(text)
+    const hasHighlight = text === '.' || highlights.includes(text)
 
     if (hasHighlight && group) {
       return {

@@ -40,6 +40,8 @@ export const e2eProjectDirs = [
   'migration-e2e-defaults',
   'migration-e2e-defaults-no-specs',
   'migration-e2e-fully-custom',
+  'migration-e2e-no-plugins-support-file',
+  'migration-typescript-project',
   'multiple-config-files-with-json',
   'multiple-support-files',
   'multiple-task-registrations',
