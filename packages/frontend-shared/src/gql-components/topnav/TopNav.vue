@@ -122,20 +122,20 @@
       class="min-w-240px py-12px px-16px group"
       :class="{
         'bg-jade-50': browser.isSelected,
-        'bg-gray-50 cursor-not-allowed': browser.disabled,
-        'cursor-pointer': !browser.disabled
+        'bg-gray-50 cursor-not-allowed': browser.disabled || !browser.isVersionSupported,
+        'cursor-pointer': !browser.disabled && browser.isVersionSupported
       }"
-      :selectable="!browser.isSelected && !browser.disabled"
+      :selectable="!browser.isSelected && !browser.disabled && browser.isVersionSupported"
       data-cy="top-nav-browser-list-item"
       :data-browser-id="browser.id"
-      @click="!browser.disabled && handleBrowserChoice(browser)"
+      @click="!browser.disabled && browser.isVersionSupported && handleBrowserChoice(browser)"
     >
       <template #prefix>
         <!-- setting both width and min-width on these icons looks odd,
         but makes all possible browser icons happy about what size to be-->
         <img
           class="mr-16px min-w-32px w-32px"
-          :class="{ 'filter grayscale': browser.disabled }"
+          :class="{ 'filter grayscale': browser.disabled || !browser.isVersionSupported }"
           :src="allBrowsersIcons[browser.displayName] || allBrowsersIcons.generic"
         >
       </template>
@@ -143,9 +143,9 @@
         <button
           class="font-medium box-border"
           :class="{
-            'text-indigo-500 group-hover:text-indigo-700': !browser.isSelected && !browser.disabled,
+            'text-indigo-500 group-hover:text-indigo-700': !browser.isSelected && !browser.disabled && browser.isVersionSupported,
             'text-jade-700': browser.isSelected,
-            'text-gray-500': browser.disabled
+            'text-gray-500': browser.disabled || !browser.isVersionSupported
           }"
         >
           {{ browser.displayName }}

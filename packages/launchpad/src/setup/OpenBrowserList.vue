@@ -14,16 +14,16 @@
         :key="browser.id"
         :data-cy-browser="browser.name"
         :value="browser.id"
-        :disabled="browser.disabled || browserStatus.chosen"
+        :disabled="browser.disabled || !browser.isVersionSupported || browserStatus.chosen"
       >
         <RadioGroupLabel
           :for="browser.id"
           class="rounded border-1 text-center min-h-144px pt-6 pb-4 w-160px relative block radio-label"
           :class="{
             'border-jade-300 ring-2 ring-jade-100 focus:border-jade-400 focus:border-1 focus:outline-none': checked,
-            'bg-gray-50 before:hocus:cursor-not-allowed': browser.disabled,
+            'bg-gray-50 before:hocus:cursor-not-allowed': browser.disabled || !browser.isVersionSupported,
             'filter grayscale border-gray-200': browserStatus.chosen && !checked,
-            'border-gray-200 before:hocus:cursor-pointer hover:border-indigo-300 hover:ring-2 hover:ring-indigo-100': !browser.disabled && !checked && !browserStatus.chosen
+            'border-gray-200 before:hocus:cursor-pointer hover:border-indigo-300 hover:ring-2 hover:ring-indigo-100': !browser.disabled && browser.isVersionSupported && !checked && !browserStatus.chosen
           }"
         >
           <UnsupportedBrowserTooltip
@@ -50,12 +50,12 @@
               :src="allBrowsersIcons[browser.displayName] || allBrowsersIcons.generic"
               alt=""
               class="h-40px w-40px inline"
-              :class="{ 'filter grayscale': browser.disabled }"
+              :class="{ 'filter grayscale': browser.disabled || !browser.isVersionSupported }"
             >
           </div>
           <div
             class="pt-2 text-indigo-600 text-18px leading-28px"
-            :class="{ 'text-jade-600': browser.isSelected, 'text-gray-500': browser.disabled }"
+            :class="{ 'text-jade-600': browser.isSelected, 'text-gray-500': browser.disabled || browser.isVersionSupported }"
           >
             {{ browser.displayName }}
           </div>
