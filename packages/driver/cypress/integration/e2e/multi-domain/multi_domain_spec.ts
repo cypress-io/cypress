@@ -1,7 +1,7 @@
 import _ from 'lodash'
 
 // @ts-ignore / session support is needed for visiting about:blank between tests
-describe('multi-domain yields', { experimentalSessionSupport: true, experimentalMultiDomain: true }, () => {
+describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDomain: true }, () => {
   beforeEach(() => {
     cy.visit('/fixtures/multi-domain.html')
     cy.get('a[data-cy="multi-domain-secondary-link"]').click()
