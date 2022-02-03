@@ -225,8 +225,8 @@ const automation = {
   },
 
   stopScreencast (fn) {
-    // For now, we are returning true as this is only used for firefox. Firefox will disconnect video when the tab/window is removed
-    return Promise.resolve(true).then(fn)
+    // For now, we are now just returning as this path is only used for firefox and firefox will disconnect video when the tab/window is removed
+    return fn()
   },
 
   query (data) {
