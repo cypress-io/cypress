@@ -13,8 +13,8 @@ describe('Reporter Header', () => {
         expect(location.hash).to.contain('dom-content.spec')
       })
 
-      cy.get('[data-selected-spec="true"').should('contain', 'dom-content')
-      cy.get('[data-selected-spec="false"').should('have.length', '1')
+      cy.get('[data-selected-spec="true"]').should('contain', 'dom-content').should('have.length', '1')
+      cy.get('[data-selected-spec="false"]').should('have.length', '1')
     })
 
     it('will display the extension in the list as a different highlighted color than the filename', () => {
