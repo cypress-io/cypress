@@ -8,7 +8,6 @@ const inspector = require('inspector')
 const errors = require('../errors')
 const util = require('./util')
 const pkg = require('@packages/root')
-const semver = require('semver')
 
 let pluginsProcess = null
 let registeredEvents = {}
@@ -50,21 +49,6 @@ const getChildOptions = (config) => {
   if (config.resolvedNodePath) {
     debug('launching using custom node version %o', _.pick(config, ['resolvedNodePath', 'resolvedNodeVersion']))
     childOptions.execPath = config.resolvedNodePath
-  }
-
-  // https://github.com/cypress-io/cypress/issues/18914
-  // Node 17+ ships with OpenSSL 3 by default, so we may need the option
-  // --openssl-legacy-provider so that webpack@4 can use the legacy MD4 hash
-  // function. This option doesn't exist on Node <17 or when it is built
-  // against OpenSSL 1, so we have to detect Node's major version and check
-  // which version of OpenSSL it was built against before spawning the plugins
-  // process.
-
-  // To be removed on update to webpack >= 5.61, which no longer relies on
-  // Node's builtin crypto.hash function.
-  if (semver.satisfies(config.resolvedNodeVersion, '>=17.0.0') &&
-      !process.versions.openssl.startsWith('1.')) {
-    childOptions.env.NODE_OPTIONS += ' --openssl-legacy-provider'
   }
 
   if (inspector.url()) {
