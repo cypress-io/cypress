@@ -127,12 +127,27 @@ describe('Sidebar Navigation', () => {
       cy.get('[data-cy="sidebar-header"]').within(() => {
         cy.get('[data-cy="testing-type-e2e"]').should('be.visible')
         cy.findByText('todos').should('be.visible')
-      }).click()
+      }).as('switchTestingType').click()
 
-      cy.findByText('Choose a testing type').should('be.visible')
+      cy.findByRole('dialog', {
+        name: 'Choose a testing type',
+      }).should('be.visible')
 
       cy.get('[data-cy-testingtype=e2e]').within(() => {
-        cy.contains('Configured')
+        cy.contains('Running')
+      }).click()
+
+      cy.findByRole('dialog', {
+        name: 'Choose a testing type',
+      }).should('not.exist')
+
+      cy.get('@switchTestingType').click()
+      cy.findByRole('dialog', {
+        name: 'Choose a testing type',
+      }).should('be.visible')
+
+      cy.get('[data-cy-testingtype=e2e]').within(() => {
+        cy.contains('Running')
       })
 
       cy.intercept('mutation-SwitchTestingTypeAndRelaunch').as('SwitchTestingTypeAndRelaunch')
@@ -218,10 +233,23 @@ describe('Sidebar Navigation', () => {
       cy.startAppServer('component')
       cy.visitApp()
 
-      cy.get('[data-cy="sidebar-header"]').within(() => cy.get('[data-cy="testing-type-component"]')).click()
+      cy.get('[data-cy="sidebar-header"]').as('switchTestingType').click()
+      cy.findByRole('dialog', {
+        name: 'Choose a testing type',
+      }).should('be.visible')
+
       cy.get('[data-cy-testingtype=component]').within(() => {
-        cy.contains('Configured')
-      })
+        cy.contains('Running')
+      }).click()
+
+      cy.findByRole('dialog', {
+        name: 'Choose a testing type',
+      }).should('not.exist')
+
+      cy.get('@switchTestingType').click()
+      cy.findByRole('dialog', {
+        name: 'Choose a testing type',
+      }).should('be.visible')
 
       cy.intercept('mutation-SwitchTestingTypeAndRelaunch').as('SwitchTestingTypeAndRelaunch')
       cy.withCtx((ctx) => {
