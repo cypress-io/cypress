@@ -2,10 +2,10 @@
   "extends": "../ts/tsconfig.json",
   "include": [
     "src",
-    "test",
   ],
   "exclude": [
-    "script"
+    "script",
+    "test",
   ],
   "compilerOptions": {
     "strict": true,
@@ -18,7 +18,7 @@
     "importsNotUsedAsValues": "error",
     "types": [
       "node",
-      "@types/mocha"
+      "mocha"
     ]
   }
 }
