@@ -242,7 +242,10 @@
     },
     "install": {
       "startButton": "Install",
-      "confirmManualInstall": "I've installed them"
+      "waitForInstall": "Waiting for you to install the dependencies...",
+      "checkForUpdates": "Refresh",
+      "installed": "installed",
+      "pendingInstall": "pending installation"
     },
     "step": {
       "continue": "Continue",
@@ -440,7 +443,7 @@
         },
         "connectManually": {
           "title": "Connect Project Manually",
-          "warning": "We couldn’t add the projectId to your cypress.config.js file automatically.",
+          "warning": "We couldn't add the projectId to your cypress.config.js file automatically.",
           "mainMessage": "Manually add the {projectId} to the root of the config object in your {configFile} file.",
           "waitingButton": "Waiting for you to add the projectId..."
         }
