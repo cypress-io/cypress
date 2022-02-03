@@ -72,7 +72,7 @@
           <span class="whitespace-nowrap">{{ autStore.viewportWidth }}x{{ autStore.viewportHeight }}</span>
           <span
             v-if="displayScale"
-            class="-mr-6px text-gray-300"
+            class="-mr-6px text-gray-500"
           > ({{ displayScale }})</span>
         </template>
         <template #default>
@@ -180,7 +180,7 @@ const props = defineProps<{
   gql: SpecRunnerHeaderFragment
   eventManager: EventManager
   getAutIframe: () => AutIframe
-  width: number
+  width?: number
 }>()
 
 const autIframe = props.getAutIframe()
