@@ -146,7 +146,7 @@ const snapshotErrorConsoleLogs = function (errorFileName: string) {
   .split('color:#00A').join('color:#2472c7') // replace blue colors
   .split('color:#00A').join('color:#e05561') // replace red colors
   .split('color:#A50').join('color:#e5e510') // replace yellow colors
-  .split('Courier New').join('MesloLGS NF') // replace font
+  .split('"Courier New", ').join('') // replace font
   .split('</style>').join(`
     body {
       margin: 5px;
