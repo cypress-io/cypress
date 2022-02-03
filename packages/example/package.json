@@ -12,9 +12,9 @@
     "test-debug": "yarn test-unit --inspect-brk=5566",
     "test-unit": "cross-env NODE_ENV=test mocha",
     "test-watch": "yarn test-unit --watch",
-    "buildr": "node ./bin/build.js && gulp buildr",
-    "build-prodr": "yarn buildr",
-    "predeploy": "yarn buildr",
+    "build": "node ./bin/build.js && gulp build",
+    "build-prod": "yarn build",
+    "predeploy": "yarn build",
     "deploy": "gulp deploy"
   },
   "files": [

@@ -94,7 +94,13 @@ export const resolveServerConfig = async ({ viteConfig, options, indexHtml }: St
       ...finalConfig.build.commonjsOptions || {},
     },
     ...finalConfig.build,
-  },
+  }
+
+  if (isTextTerminal) {
+    finalConfig.define = {
+      'process.env.__PERCY_BROWSERIFIED__': 'globalThis.process_env___PERCY_BROWSERIFIED__',
+    }
+  }
 
   debug(`the resolved server config is ${JSON.stringify(finalConfig, null, 2)}`)
 
