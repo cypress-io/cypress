@@ -20,7 +20,7 @@
                   block absolute) "
         :class="{
           'bottom-7 before:(top-full -mr-8px border-b-0 border-t-gray-900)': placement === 'top',
-          'top-7 (bottom-full -mr-8px border-t-0 border-b-gray-900)': placement === 'bottom'
+          'top-7 before:(bottom-full -mr-8px border-t-0 border-b-gray-900)': placement === 'bottom'
         }"
         :style="`left: ${tooltipLeft}px; width: ${tooltipWidth}px`"
         role="tooltip"
