@@ -69,7 +69,7 @@ const isChaiValidationErr = (err: Error) => {
   return _.startsWith(err.message, 'Invalid Chai property')
 }
 
-const isCypressErr = (err: Error) => {
+const isCypressErr = (err: Error): boolean => {
   return err.name === 'CypressError'
 }
 
@@ -195,7 +195,7 @@ const makeErrFromObj = (obj) => {
   return err2
 }
 
-const throwErr = (err, options: any = {}) => {
+const makeErrFromErr = (err, options: any = {}) => {
   if (_.isString(err)) {
     err = cypressErr({ message: err })
   }
@@ -222,10 +222,14 @@ const throwErr = (err, options: any = {}) => {
     _.extend(err, errProps)
   }
 
-  throw err
+  return err
 }
 
-const throwErrByPath = (errPath, options: any = {}) => {
+const throwErr = (err, options: any = {}): never => {
+  throw makeErrFromErr(err, options)
+}
+
+const throwErrByPath = (errPath, options: any = {}): never => {
   const err = errByPath(errPath, options.args)
 
   if (options.stack) {
@@ -235,7 +239,7 @@ const throwErrByPath = (errPath, options: any = {}) => {
     Error.captureStackTrace(err, throwErrByPath)
   }
 
-  throwErr(err, options)
+  throw makeErrFromErr(err, options)
 }
 
 const warnByPath = (errPath, options: any = {}) => {

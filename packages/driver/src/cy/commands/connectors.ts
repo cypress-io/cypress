@@ -5,7 +5,7 @@ import $dom from '../../dom'
 import $utils from '../../cypress/utils'
 import $errUtils, { CypressError } from '../../cypress/error_utils'
 
-const returnFalseIfThenable = (key, ...args) => {
+const returnFalseIfThenable = (key, ...args): boolean => {
   if ((key === 'then') && _.isFunction(args[0]) && _.isFunction(args[1])) {
     // https://github.com/cypress-io/cypress/issues/111
     // if we're inside of a promise then the promise lib will naturally

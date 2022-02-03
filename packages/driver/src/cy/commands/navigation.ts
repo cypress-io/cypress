@@ -13,10 +13,10 @@ import debugFn from 'debug'
 const debug = debugFn('cypress:driver:navigation')
 
 let id = null
-let previousDomainVisited: boolean | null = null
-let hasVisitedAboutBlank: boolean | null = null
-let currentlyVisitingAboutBlank: boolean | null = null
-let knownCommandCausedInstability: boolean | null = null
+let previousDomainVisited: boolean = false
+let hasVisitedAboutBlank: boolean = false
+let currentlyVisitingAboutBlank: boolean = false
+let knownCommandCausedInstability: boolean = false
 
 const REQUEST_URL_OPTS = 'auth failOnStatusCode retryOnNetworkFailure retryOnStatusCodeFailure retryIntervals method body headers'
 .split(' ')
@@ -675,12 +675,10 @@ export default (Commands, Cypress, cy, state, config) => {
           case 'forward': return goNumber(1)
           case 'back': return goNumber(-1)
           default:
-            $errUtils.throwErrByPath('go.invalid_direction', {
+            return $errUtils.throwErrByPath('go.invalid_direction', {
               onFail: options._log,
               args: { str },
             })
-
-            return // Error is thrown above, it exists to satisfy typescript
         }
       }
 
@@ -692,9 +690,7 @@ export default (Commands, Cypress, cy, state, config) => {
         return goString(numberOrString)
       }
 
-      $errUtils.throwErrByPath('go.invalid_argument', { onFail: options._log })
-
-      return // Error is thrown above, it exists to satisfy typescript
+      return $errUtils.throwErrByPath('go.invalid_argument', { onFail: options._log })
     },
 
     // TODO: Change the type of `any` to `Partial<Cypress.VisitOptions>`.

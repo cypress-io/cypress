@@ -36,12 +36,15 @@ const _isBrowser = (browser, matcher, errPrefix) => {
 }
 
 // TODO: change the type of `any` to `IsBrowserMatcher`
-const isBrowser = (config, obj: any = '', errPrefix = '`Cypress.isBrowser()`') => {
+const isBrowser = (config, obj: any = '', errPrefix: string = '`Cypress.isBrowser()`') => {
   return _
   .chain(obj)
   .concat([])
   .map((matcher) => _isBrowser(config.browser, matcher, errPrefix))
-  .reduce((a: null | { isMatch: boolean, exclusive: boolean }, b) => {
+  .reduce((
+    a: null | { isMatch: boolean, exclusive: boolean },
+    b: { isMatch: boolean, exclusive: boolean },
+  ) => {
     if (!a) return b
 
     if (a.exclusive && b.exclusive) {

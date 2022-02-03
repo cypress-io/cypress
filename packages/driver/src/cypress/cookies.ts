@@ -14,7 +14,7 @@ const defaults: any = {
 
 const warnOnWhitelistRenamed = (obj, type) => {
   if (obj.whitelist) {
-    return $errUtils.throwErrByPath('cookies.whitelist_renamed', { args: { type } })
+    $errUtils.throwErrByPath('cookies.whitelist_renamed', { args: { type } })
   }
 }
 
