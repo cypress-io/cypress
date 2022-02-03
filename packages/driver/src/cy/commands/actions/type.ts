@@ -366,7 +366,7 @@ export default function (Commands, Cypress, cy, state, config) {
             // Firefox sends a click event automatically.
             if (!Cypress.isBrowser('firefox')) {
               const ctor = $dom.getDocumentFromElement(el).defaultView?.PointerEvent
-              const event = new ctor('click')
+              const event = new ctor!('click')
 
               el.dispatchEvent(event)
             }
