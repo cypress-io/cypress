@@ -44,6 +44,25 @@ describe('<OpenBrowserList />', () => {
     cy.percySnapshot()
   })
 
+  it('displays a tooltip for an unsupported browser', () => {
+    cy.mountFragment(OpenBrowserListFragmentDoc, {
+      onResult: (result) => {
+        result.currentBrowser = null
+      },
+      render: (gqlVal) =>
+        (<div class="border-current border-1 resize overflow-auto">
+          <div class="h-40" />
+          <OpenBrowserList gql={gqlVal}/>
+        </div>),
+    })
+
+    cy.get('[data-cy-browser="firefox"]:nth(1) [data-cy="unsupported-browser-tooltip"]')
+    .trigger('mouseenter')
+    .contains('Cypress does not support running Firefox Developer Edition version 69.')
+
+    cy.percySnapshot()
+  })
+
   it('emits navigates back', () => {
     cy.mountFragment(OpenBrowserListFragmentDoc, {
       render: (gqlVal) => (

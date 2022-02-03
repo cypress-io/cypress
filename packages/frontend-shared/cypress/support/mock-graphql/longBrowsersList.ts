@@ -157,6 +157,7 @@ export const longBrowsersList = [
     isFocusSupported: true,
     isVersionSupported: false,
     disabled: true,
+    warning: 'Cypress does not support running Firefox Developer Edition version 69. To use Firefox Developer Edition with Cypress, install a version of Firefox Developer Edition newer than or equal to 78.',
   },
   {
     id: '13',

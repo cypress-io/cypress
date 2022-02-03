@@ -1,5 +1,6 @@
 <template>
   <div
+    data-cy="unsupported-browser-tooltip"
     @mouseenter="showTooltip()"
     @mouseleave="hideTooltip()"
   >
@@ -11,10 +12,10 @@
     >
       <div
         v-if="scaleUp"
-        class="rounded flex h-fit
-                  bg-gray-900
-                  text-center py-16px px-24px
-                  text-gray-300 text-size-14px leading-20px absolute
+        class="rounded flex h-fit bg-gray-900
+                  text-center
+                  py-16px px-24px text-gray-300
+                  text-size-14px leading-20px z-40 absolute
                   content need-content
                   before:(border-solid border-transparent border-width-8px right-1/2
                   block absolute) "
@@ -41,7 +42,7 @@ const props = withDefaults(defineProps<{
   tooltipWidth?:number
 }>(), {
   placement: 'bottom',
-  tooltipWidth: 400,
+  tooltipWidth: 340,
 })
 
 const hover = ref(false)
