@@ -12,7 +12,6 @@ shell.cp('-r', join(resolvePkg('cypress-example-kitchensink'), 'app'), '.')
 
 shell.rm('-rf', 'cypress')
 shell.cp('-r', join(resolvePkg('cypress-example-kitchensink'), 'cypress'), '.')
-shell.mv(join('cypress', 'integration'), join('cypress', 'e2e'))
 shell.exec(`
   for f in cypress/e2e/**/*.spec.js; do
   mv -- "$f" "\${f%.spec.js}.cy.js"
