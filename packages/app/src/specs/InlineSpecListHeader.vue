@@ -42,7 +42,7 @@
         for="inline-spec-list-header-search"
         class="cursor-text font-light bottom-6px left-24px text-gray-700 select-none absolute"
         :class="{
-          'hidden': props.search.length
+          'sr-only': inputFocused
         }"
       >
         {{ t('specPage.searchPlaceholder') }}
