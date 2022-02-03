@@ -1,4 +1,4 @@
-import JustMyLuck from 'just-my-luck'
+import * as JustMyLuck from 'just-my-luck'
 import faker from 'faker'
 import { template, keys, reduce, templateSettings, TemplateExecutor } from 'lodash'
 import combineProperties from 'combine-properties'

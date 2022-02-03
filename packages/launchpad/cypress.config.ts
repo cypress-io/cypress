@@ -26,13 +26,12 @@ export default defineConfig({
       })
     },
     devServerConfig: {
-      optimizeDeps: {
-        include: [
-          '@packages/ui-components/cypress/support/customPercyCommand',
-        ],
-      },
-      build: {
-        sourcemap: false,
+      viteConfig: {
+        optimizeDeps: {
+          include: [
+            '@packages/ui-components/cypress/support/customPercyCommand',
+          ],
+        },
       },
     },
   },

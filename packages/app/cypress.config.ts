@@ -1,4 +1,5 @@
 import { defineConfig } from 'cypress'
+import { devServer } from '@cypress/vite-dev-server'
 import getenv from 'getenv'
 
 const CYPRESS_INTERNAL_CLOUD_ENV = getenv('CYPRESS_INTERNAL_CLOUD_ENV', process.env.CYPRESS_INTERNAL_ENV || 'development')
@@ -18,15 +19,8 @@ export default defineConfig({
     viewportWidth: 800,
     viewportHeight: 850,
     supportFile: 'cypress/component/support/index.ts',
-    devServer (cypressConfig, devServerConfig) {
-      const { startDevServer } = require('@cypress/vite-dev-server')
-
-      return startDevServer({
-        options: cypressConfig,
-        ...devServerConfig,
-      })
-    },
     specPattern: 'src/**/*.{spec,cy}.{js,ts,tsx,jsx}',
+    devServer,
     devServerConfig: {
       optimizeDeps: {
         include: [
