@@ -32,7 +32,7 @@
     "@angular/forms": "12.2.16",
     "@angular/language-service": "12.2.16",
     "@angular/localize": "12.2.16",
-    "@angular/material": "11.2.12",
+    "@angular/material": "12.2.13",
     "@angular/platform-browser": "12.2.16",
     "@angular/platform-browser-dynamic": "12.2.16",
     "@angular/router": "12.2.16",
