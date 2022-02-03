@@ -440,6 +440,11 @@ export = {
     args.push(`--remote-debugging-port=${port}`)
     args.push('--remote-debugging-address=127.0.0.1')
 
+    // If we're in run mode, use incognito mode to ensure we are clearing browser cache/state in between runs
+    if (options.isTextTerminal) {
+      args.push('--incognito')
+    }
+
     return args
   },
 
