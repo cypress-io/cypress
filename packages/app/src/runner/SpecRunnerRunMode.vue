@@ -88,6 +88,7 @@ import AutomationMissing from './automation/AutomationMissing.vue'
 import AutomationElement from './automation/AutomationElement.vue'
 import { useResizablePanels, useRunnerStyle } from './useRunnerStyle'
 import { useEventManager } from './useEventManager'
+import SpecRunnerHeaderRunMode from './SpecRunnerHeaderRunMode.vue'
 
 const eventManager = getEventManager()
 

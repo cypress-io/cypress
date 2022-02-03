@@ -113,7 +113,7 @@ export class HtmlDataSource {
           window.__CYPRESS_MODE__ = ${JSON.stringify(this.ctx.isRunMode ? 'run' : 'open')}
           window.__CYPRESS_CONFIG__ = ${JSON.stringify(serveConfig)}
           window.__CYPRESS_TESTING_TYPE__ = '${this.ctx.coreData.currentTestingType}'
-          window.__CYPRESS_BROWSER__ = '${this.ctx.coreData.chosenBrowser?.displayName}'
+          window.__CYPRESS_BROWSER__ = ${JSON.stringify(this.ctx.coreData.chosenBrowser)}
         </script>
     `)
   }

@@ -18,7 +18,7 @@
       </Button>
       -->
       <div
-        v-if="props.gql.currentTestingType === 'e2e'"
+        v-if="testingType === 'e2e'"
         data-cy="aut-url"
         class="border rounded flex flex-grow border-1px border-gray-100 h-32px align-middle overflow-hidden"
         :class="{
@@ -45,22 +45,13 @@
         <!-- spacer -->
       </div>
       <SpecRunnerDropdown
-        v-if="selectedBrowser?.displayName"
         data-cy="select-browser"
       >
         <template #heading>
           <img
             class="min-w-16px w-16px"
             :src="allBrowsersIcons[selectedBrowser.displayName]"
-          > {{ selectedBrowser.displayName }}
-        </template>
-
-        <template #default>
-          <div class="max-h-50vh overflow-auto">
-            <VerticalBrowserListItems
-              :gql="props.gql"
-            />
-          </div>
+          > {{ selectedBrowser.displayName }} {{ selectedBrowser.majorVersion }}
         </template>
       </SpecRunnerDropdown>
       <SpecRunnerDropdown
@@ -127,7 +118,6 @@ import { togglePlayground as _togglePlayground } from './utils'
 import ExternalLink from '@packages/frontend-shared/src/gql-components/ExternalLink.vue'
 import Button from '@packages/frontend-shared/src/components/Button.vue'
 import ShikiHighlight from '@packages/frontend-shared/src/components/ShikiHighlight.vue'
-import VerticalBrowserListItems from '@packages/frontend-shared/src/gql-components/topnav/VerticalBrowserListItems.vue'
 import InlineCodeFragment from '@packages/frontend-shared/src/components/InlineCodeFragment.vue'
 import SpecRunnerDropdown from './SpecRunnerDropdown.vue'
 import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
@@ -149,6 +139,9 @@ const selectorPlaygroundStore = useSelectorPlaygroundStore()
 const togglePlayground = () => _togglePlayground(autIframe)
 
 const autStore = useAutStore()
+
+const selectedBrowser = window.__CYPRESS_BROWSER__
+const testingType = window.__CYPRESS_TESTING_TYPE__
 
 const isDisabled = computed(() => autStore.isRunning || autStore.isLoading)
 
