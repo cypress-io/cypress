@@ -17164,7 +17164,7 @@ cyclist@^1.0.1:
 
 cypress-example-kitchensink@cypress-io/cypress-example-kitchensink#release-10/integration-to-e2e:
   version "0.0.0-development"
-  resolved "https://codeload.github.com/cypress-io/cypress-example-kitchensink/tar.gz/8389bb6b09c59c2720ceeaadecc8eaa2d4d6551d"
+  resolved "https://codeload.github.com/cypress-io/cypress-example-kitchensink/tar.gz/d4b6c4a898f87fa391fabef6dbbff8cd7bd11d2a"
   dependencies:
     npm-run-all "^4.1.2"
     serve "11.3.0"
