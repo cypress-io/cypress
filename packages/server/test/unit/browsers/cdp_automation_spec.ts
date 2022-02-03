@@ -72,7 +72,7 @@ context('lib/browsers/cdp_automation', () => {
       this.onFn = sinon.stub()
       this.sendCloseTargetCommand = sinon.stub()
 
-      this.automation = new CdpAutomation(this.sendDebuggerCommand, this.onFn, this.sendCloseTargetCommand, null)
+      this.automation = new CdpAutomation(this.sendDebuggerCommand, this.onFn, null)
 
       this.sendDebuggerCommand
       .throws(new Error('not stubbed'))
@@ -234,15 +234,11 @@ context('lib/browsers/cdp_automation', () => {
 
     describe('close:browser:tabs', function () {
       it('sends the close target message for the attached target tabs', async function () {
-        this.sendDebuggerCommand.withArgs('Target.getTargets').resolves({ targetInfos: [{ targetId: '1', attached: false }, { targetId: '2', attached: true }, { targetId: '3', attached: false }, { targetId: '4', attached: true }] })
-        this.sendCloseTargetCommand.withArgs('2').resolves(1)
-        this.sendCloseTargetCommand.withArgs('4').resolves(2)
+        this.sendDebuggerCommand.withArgs('Page.close').resolves()
 
         await this.onRequest('close:browser:tabs')
 
-        expect(this.sendDebuggerCommand).to.be.calledWith('Target.getTargets')
-        expect(this.sendCloseTargetCommand).to.be.calledWith('2')
-        expect(this.sendCloseTargetCommand).to.be.calledWith('4')
+        expect(this.sendDebuggerCommand).to.be.calledWith('Page.close')
       })
     })
 

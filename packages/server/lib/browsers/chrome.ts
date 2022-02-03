@@ -518,8 +518,6 @@ export = {
     // we will load the actual page
     const launchedBrowser = await launch(browser, 'about:blank', port, args)
 
-    launchedBrowser.debuggingPort = port
-
     la(launchedBrowser, 'did not get launched browser instance')
 
     // SECOND connect to the Chrome remote interface

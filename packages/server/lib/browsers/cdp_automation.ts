@@ -328,9 +328,7 @@ export class CdpAutomation {
           this.sendDebuggerCommandFn('Network.clearBrowserCache'),
         ])
       case 'close:browser:tabs':
-        return this.sendDebuggerCommandFn('Target.getTargets').then(async (targets) => {
-          return this.sendDebuggerCommandFn('Page.close')
-        })
+        return this.sendDebuggerCommandFn('Page.close')
       case 'stop:screencast':
         return this.sendDebuggerCommandFn('Page.stopScreencast')
       case 'focus:browser:window':

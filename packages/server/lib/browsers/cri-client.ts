@@ -137,7 +137,7 @@ export { chromeRemoteInterface }
 
 type DeferredPromise = { resolve: Function, reject: Function }
 
-export const newTab = async (host, port, onAsynchronousError) => {
+export const newTab = async (host: string, port: number, onAsynchronousError: Function) => {
   // TODO: Currently, there's an issue where when you issue a new tab the timing is off and you can't connect to it immediately.
   // This additional version call seems to help. Still investigating this
   // await chromeRemoteInterface.Version({ host, port })
