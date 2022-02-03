@@ -233,11 +233,10 @@ describe('multi-domain Cypress API', { experimentalSessionSupport: true, experim
         const multiDomainConfig = Cypress.config()
 
         // video is always turned off in switchToDomain
-        const primaryConfigWithOmittedProps = _.omit(theConfig, 'video')
-        const secondaryConfigWithOmittedProps = _.omit(multiDomainConfig, 'video')
+        const primaryConfigWithOmittedProps = _.omit(theConfig, 'video', 'isInteractive', 'env')
+        const secondaryConfigWithOmittedProps = _.omit(multiDomainConfig, 'video', 'isInteractive', 'env')
 
-        // this assertion takes a while to run... There is also some properties in the serialized config that differ, such as env: undefined
-        expect(primaryConfigWithOmittedProps).to.deep.include(secondaryConfigWithOmittedProps)
+        expect(primaryConfigWithOmittedProps).to.deep.equal(secondaryConfigWithOmittedProps)
       })
     })
 
