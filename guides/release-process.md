@@ -88,7 +88,7 @@ In the following instructions, "X.Y.Z" is used to denote the [next version of Cy
         1. In GitHub, go to the latest commit (the one whose sha you used in the last step).
             ![commit-link](https://user-images.githubusercontent.com/1157043/80608728-33fe6100-8a05-11ea-8b53-375303757b67.png)
         2. Scroll down past the changes to the comments. The first comment should be a `cypress-bot` comment that includes a line beginning `npm install ...`. Grab the `https://cdn.../npm/X.Y.Z/<platform>/<long sha>/cypress.tgz` link.
-            ![cdn-tgz-link](https://user-images.githubusercontent.com/1157043/80608736-3791e800-8a05-11ea-8d75-e4f80128e857.png)
+            ![commit-bot-comment](../assets/cypress-bot-pre-release-comment.png)
     - Make sure the `linux-x64` binary and npm package are present at the commented locations. See [Before Publishing a New Version](#before-publishing-a-new-version).
     - Publish the `linux-x64` distribution to the npm registry straight from the URL:
 
