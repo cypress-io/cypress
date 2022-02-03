@@ -18,7 +18,7 @@
     "importsNotUsedAsValues": "error",
     "types": [
       "node",
-      "mocha"
+      "@types/mocha"
     ]
   }
 }

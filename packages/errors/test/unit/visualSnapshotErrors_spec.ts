@@ -105,7 +105,7 @@ const convertHtmlToImage = async (htmlfile: string) => {
           if (changed) {
             console.log({ changed })
             if (isCi) {
-              return reject(new Error(`Image difference detected. Base error image no longer matches for file: ${baseImagePath}`))
+              return reject(new Error(`Image difference detected. Base error image no longer matches for file: ${baseImagePath}, off by ${changed} pixels`))
             }
 
             await copyImageToBase(imagePath, baseImagePath)
@@ -183,7 +183,7 @@ afterEach(() => {
 })
 
 const testVisualError = <K extends CypressErrorType> (errorGeneratorFn: () => ErrorGenerator<K>, errorType: K) => {
-  it(errorType, () => {
+  it(errorType, async () => {
     const variants = errorGeneratorFn()
 
     expect(variants).to.be.an('object')
@@ -192,7 +192,7 @@ const testVisualError = <K extends CypressErrorType> (errorGeneratorFn: () => Er
       return
     }
 
-    const snapshots = _.mapValues(variants, async (arr, key: string) => {
+    for (const [key, arr] of Object.entries(variants)) {
       const filename = key === 'default' ? errorType : `${errorType} - ${key}`
 
       terminalBanner(filename)
@@ -208,19 +208,19 @@ const testVisualError = <K extends CypressErrorType> (errorGeneratorFn: () => Er
       await snapshotErrorConsoleLogs(htmlFilename)
 
       if (process.env.SKIP_IMAGE_CONVERSION !== '1') {
-        return convertHtmlToImage(htmlFilename)
+        await convertHtmlToImage(htmlFilename)
       }
-    })
-
-    return Promise.all(Object.values(snapshots))
+    }
   })
 }
 
-const testVisualErrors = (whichError: CypressErrorType | '*', errorsToTest: {[K in CypressErrorType]: () => ErrorGenerator<K>}) => {
+const testVisualErrors = (whichError: CypressErrorType[] | '*', errorsToTest: {[K in CypressErrorType]: () => ErrorGenerator<K>}) => {
   // if we aren't testing all the errors
   if (whichError !== '*') {
-    // then just test this individual error
-    return testVisualError(errorsToTest[whichError], whichError)
+    for (const errorToTest of whichError) {
+      // then just test this individual error
+      return testVisualError(errorsToTest[errorToTest], errorToTest)
+    }
   }
 
   // otherwise test all the errors
