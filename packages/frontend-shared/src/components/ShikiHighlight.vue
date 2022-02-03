@@ -63,7 +63,7 @@ shikiWrapperClasses computed property.
       v-if="copyButton && isSupported"
       variant="outline"
       tabindex="-1"
-      class="absolute"
+      class="bg-white absolute"
       :class="numberOfLines === 1 ? 'bottom-5px right-5px' : 'bottom-8px right-8px'"
       :text="code"
       no-icon
