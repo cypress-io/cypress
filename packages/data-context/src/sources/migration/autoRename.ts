@@ -27,7 +27,7 @@ interface GetSpecs {
 }
 
 export function substitute (part: FilePart): FilePart {
-  // nothing to substitite, just a regular
+  // nothing to substitute, just a regular
   // part of the file
   if (!('group' in part)) {
     return part
