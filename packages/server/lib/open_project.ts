@@ -26,6 +26,7 @@ export class OpenProject {
   }
 
   resetOpenProject () {
+    this.projectBase?.__reset()
     this.projectBase = null
     this.relaunchBrowser = null
   }
@@ -61,17 +62,7 @@ export class OpenProject {
   }) {
     this._ctx = getCtx()
 
-    if (!this.projectBase && this._ctx.currentProject) {
-      await this.create(this._ctx.currentProject, {
-        ...this._ctx.modeOptions,
-        projectRoot: this._ctx.currentProject,
-        testingType: this._ctx.coreData.currentTestingType!,
-      }, options)
-    }
-
-    if (!this.projectBase) {
-      throw Error('Cannot launch runner if projectBase is undefined!')
-    }
+    assert(this.projectBase, 'Cannot launch runner if projectBase is undefined!')
 
     debug('resetting project state, preparing to launch browser %s for spec %o options %o',
       browser.name, spec, options)
@@ -115,7 +106,10 @@ export class OpenProject {
     // set the current browser object on options
     // so we can pass it down
     options.browser = browser
-    options.url = url
+
+    if (!process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF) {
+      options.url = url
+    }
 
     this.projectBase.setCurrentSpecAndBrowser(spec, browser)
 
@@ -186,10 +180,10 @@ export class OpenProject {
       .then(() => {
         // TODO: Stub this so we can detect it being called
         if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF) {
-          return
+          return browsers.connectToExisting(browser, options, automation)
         }
 
-        return browsers.open(browser, options, automation)
+        return browsers.open(browser, options, automation, this._ctx)
       })
     }
 
@@ -254,6 +248,8 @@ export class OpenProject {
 
     const testingType = args.testingType === 'component' ? 'component' : 'e2e'
 
+    this._ctx.lifecycleManager.setRunModeExitEarly(options.onError ?? undefined)
+
     // store the currently open project
     this.projectBase = new ProjectBase({
       testingType,
@@ -267,15 +263,15 @@ export class OpenProject {
     try {
       const cfg = await this.projectBase.initializeConfig()
 
-      const specPattern = options.spec || cfg[testingType].specPattern
+      const { specPattern, ignoreSpecPattern, additionalIgnorePattern } = await this._ctx.actions.project.setSpecsFoundBySpecPattern({
+        path,
+        testingType,
+        specPattern: options.spec || cfg[testingType].specPattern,
+        ignoreSpecPattern: cfg[testingType].ignoreSpecPattern,
+        additionalIgnorePattern: testingType === 'component' ? cfg?.e2e?.specPattern : undefined,
+      })
 
-      if (!specPattern) {
-        throw Error('could not find pattern to load specs')
-      }
-
-      const specs = await this._ctx.project.findSpecs(path, testingType, specPattern)
-
-      this._ctx.actions.project.setSpecs(specs)
+      this._ctx.project.startSpecWatcher(path, testingType, specPattern, ignoreSpecPattern, additionalIgnorePattern)
 
       await this.projectBase.open()
     } catch (err: any) {

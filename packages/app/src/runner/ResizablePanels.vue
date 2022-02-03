@@ -37,13 +37,16 @@
     </div>
 
     <div
-      class="flex-grow h-full"
+      class="flex-grow h-full relative"
       :class="{'pointer-events-none':panel2IsDragging}"
       :style="{
-        width: `${maxTotalWidth - panel1Width - panel2Width}px`
+        width: `${panel3width}px`
       }"
     >
-      <slot name="panel3" />
+      <slot
+        name="panel3"
+        :width="panel3width"
+      />
     </div>
   </div>
 </template>
@@ -57,10 +60,7 @@ export default {
 <script lang="ts" setup>
 import { computed, ref, watchEffect } from 'vue'
 import { runnerConstants } from './runner-constants'
-
-export type ResizablePanelName = 'panel1' | 'panel2' | 'panel3'
-
-export type DraggablePanel = Exclude<ResizablePanelName, 'panel3'>
+import type { DraggablePanel } from './useRunnerStyle'
 
 const props = withDefaults(defineProps<{
   showPanel1?: boolean // specsList in runner
@@ -145,6 +145,10 @@ const maxPanel2Width = computed(() => {
   const unavailableWidth = panel1Width.value + props.minPanel3Width + props.offsetLeft
 
   return props.maxTotalWidth - unavailableWidth
+})
+
+const panel3width = computed(() => {
+  return props.maxTotalWidth - panel1Width.value - panel2Width.value
 })
 
 function handleResizeEnd (panel: DraggablePanel) {

@@ -8,7 +8,7 @@ describe('e2e config', () => {
 
   it('provides various environment details', function () {
     return systemTests.exec(this, {
-      spec: 'config_passing_spec.js',
+      spec: 'config_passing.cy.js',
       snapshot: true,
       config: {
         env: {
@@ -77,12 +77,12 @@ describe('e2e config', () => {
   })
 
   it('throws error when multiple default config file are found in project', function () {
-    Fixtures.scaffoldProject('pristine-with-config-file')
-    const projectRoot = Fixtures.projectPath('pristine-with-config-file')
+    Fixtures.scaffoldProject('pristine-with-e2e-testing')
+    const projectRoot = Fixtures.projectPath('pristine-with-e2e-testing')
 
     return fs.writeFile(path.join(projectRoot, 'cypress.config.ts'), 'export default {}').then(() => {
       return systemTests.exec(this, {
-        project: 'pristine-with-config-file',
+        project: 'pristine-with-e2e-testing',
         expectedExitCode: 1,
         snapshot: true,
       })
@@ -103,11 +103,11 @@ describe('e2e config', () => {
   })
 
   it('throws error when cypress.json is found in project and cypress.config.{ts|js} exists as well', function () {
-    Fixtures.scaffoldProject('multiples-config-files-with-json')
-    Fixtures.projectPath('multiples-config-files-with-json')
+    Fixtures.scaffoldProject('multiple-config-files-with-json')
+    Fixtures.projectPath('multiple-config-files-with-json')
 
     return systemTests.exec(this, {
-      project: 'multiples-config-files-with-json',
+      project: 'multiple-config-files-with-json',
       expectedExitCode: 1,
       snapshot: true,
     })

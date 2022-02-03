@@ -96,19 +96,11 @@ async function spawnCypressWithMode (
   const finalEnv: Record<string, string | undefined> = {
     ...process.env,
     ...env,
-    LAUNCHPAD: '1',
     TS_NODE_COMPILER: 'typescript-cached-transpile',
   }
 
-  // If we are running in CircleCI, we want to run the tests using the
-  // existing E2E runner, so we need to remove process.env.LAUNCHPAD,
-  // or it will serve the new runner.
-  if (process.env.CIRCLECI) {
-    delete finalEnv.LAUNCHPAD
-  }
-
   return await forked(`cy:${mode}:${type}`, pathToCli, [mode, ...argv], {
-    cwd: monorepoPaths.root,
+    cwd: process.env.INIT_CWD,
     env: finalEnv,
     waitForData: false,
     execArgv: [],

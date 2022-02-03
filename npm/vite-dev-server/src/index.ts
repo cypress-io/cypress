@@ -1,7 +1,7 @@
 import { debug as debugFn } from 'debug'
 import { build, createServer, InlineConfig } from 'vite'
 import httpServer from './http-server'
-import { default as resolveServerConfig, StartDevServerOptions } from './resolveServerConfig'
+import { resolveServerConfig, StartDevServerOptions } from './resolveServerConfig'
 const debug = debugFn('cypress:vite-dev-server:vite')
 
 export { StartDevServerOptions }
@@ -22,9 +22,10 @@ export async function startDevServer (startDevServerArgs: StartDevServerOptions)
 
     const server = await httpServer(port, root, resolvedConfig.base!)
 
-    return { port, close: () => {
-      server.close()
-    } }
+    return {
+      close: server.close,
+      port,
+    }
   }
 
   const viteDevServer = await createServer(resolvedConfig)

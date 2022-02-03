@@ -18,6 +18,7 @@ type Browser implements Node {
 
   """Relay style Node ID field for the Browser field"""
   id: ID!
+  isFocusSupported: Boolean!
   isSelected: Boolean!
   majorVersion: String
   name: String!
@@ -28,6 +29,12 @@ type Browser implements Node {
 enum BrowserFamily {
   chromium
   firefox
+}
+
+enum BrowserStatus {
+  closed
+  open
+  opening
 }
 
 """
@@ -297,11 +304,6 @@ type CloudUser implements Node {
   userIsViewer: Boolean!
 }
 
-enum CodeGenGenResultType {
-  binary
-  text
-}
-
 """Glob patterns for detecting files for code gen."""
 type CodeGenGlobs implements Node {
   component: String!
@@ -311,35 +313,9 @@ type CodeGenGlobs implements Node {
   story: String!
 }
 
-"""Represents a spec on the file system"""
-type CodeGenResult implements Node {
-  """Content of generated file."""
-  content: String!
-
-  """Absolute path of generated file."""
-  file: String!
-
-  """Relay style Node ID field for the CodeGenResult field"""
-  id: ID!
-  status: CodeGenStatus!
-  type: CodeGenGenResultType!
-}
-
-"""Result of generated file with file parts"""
-type CodeGenResultWithFileParts {
-  codeGenResult: CodeGenResult!
-  fileParts: FileParts!
-}
-
-enum CodeGenStatus {
-  add
-  overwrite
-  skipped
-}
-
 enum CodeGenType {
   component
-  integration
+  e2e
   scaffoldIntegration
   story
 }
@@ -355,6 +331,9 @@ The currently opened Cypress project, represented by a cypress.config.{ts|js} fi
 type CurrentProject implements Node & ProjectLike {
   """The current branch of the project"""
   branch: String
+
+  """If the browser is open or not"""
+  browserStatus: BrowserStatus!
 
   """Browsers found that are compatible with Cypress"""
   browsers: [Browser!]
@@ -389,11 +368,20 @@ type CurrentProject implements Node & ProjectLike {
   """
   errorLoadingNodeEvents: BaseError
 
+  """Whether the project has Typescript"""
+  hasTypescript: Boolean
+
+  """Whether the project has a valid config file"""
+  hasValidConfigFile: Boolean
+
   """Relay style Node ID field for the CurrentProject field"""
   id: ID!
 
   """Whether the user configured this project to use Component Testing"""
   isCTConfigured: Boolean
+
+  """True if the project is using the default spec pattern"""
+  isDefaultSpecPattern: Boolean!
 
   """Whether the user configured this project to use e2e Testing"""
   isE2EConfigured: Boolean
@@ -406,6 +394,7 @@ type CurrentProject implements Node & ProjectLike {
 
   """Whether the project needs to be migrated before proceeding"""
   needsLegacyConfigMigration: Boolean
+  packageManager: PackageManagerEnum!
 
   """Cached preferences for this project"""
   preferences: ProjectPreferences
@@ -416,20 +405,11 @@ type CurrentProject implements Node & ProjectLike {
   """Absolute path to the project on the filesystem"""
   projectRoot: String!
 
-  """Specs for a project conforming to Relay Connection specification"""
-  specs(
-    """Returns the elements in the list that come after the specified cursor"""
-    after: String
+  """Project saved state"""
+  savedState: JSON
 
-    """Returns the elements in the list that come before the specified cursor"""
-    before: String
-
-    """Returns the first n elements from the list."""
-    first: Int
-
-    """Returns the last n elements from the list."""
-    last: Int
-  ): SpecConnection
+  """A list of specs for the currently open testing type of a project"""
+  specs: [Spec!]!
   storybook: Storybook
   title: String!
 }
@@ -476,24 +456,20 @@ input FileDetailsInput {
   line: Int
 }
 
-"""Represents a spec on the file system"""
+"""Represents a file on the file system"""
 type FileParts implements Node {
   """
-  Absolute path to spec (e.g. /Users/jess/my-project/src/component/MySpec.test.tsx)
+  Absolute path to file (e.g. /Users/jess/my-project/src/component/MySpec.test.tsx)
   """
   absolute: String!
 
-  """
-  Full name of spec file (e.g. MySpec.test.tsx) without the spec extension
-  """
+  """Full name of the file (e.g. MySpec.test.tsx)"""
   baseName: String!
 
   """The contents of the file"""
   contents: String!
 
-  """
-  The spec file's extension, including "spec" pattern (e.g. .spec.tsx, -spec.tsx, -test.tsx)
-  """
+  """The file's extension"""
   fileExtension: String!
 
   """The first part of the file, without extensions (e.g. MySpec)"""
@@ -505,7 +481,7 @@ type FileParts implements Node {
   """Full name of spec file (e.g. MySpec.test.tsx)"""
   name: String!
 
-  """Relative path to spec (e.g. src/component/MySpec.test.tsx)"""
+  """Relative path to file (e.g. src/component/MySpec.test.tsx)"""
   relative: String!
 }
 
@@ -523,12 +499,22 @@ enum FrontendFrameworkEnum {
   vuecli
 }
 
-type GeneratedSpec {
-  """File content of most recently generated spec."""
-  content: String!
-  id: ID!
-  spec: FileParts!
+"""Error from generated spec"""
+type GenerateSpecResponse {
+  """The currently opened project"""
+  currentProject: CurrentProject
+
+  """The file that have just been scaffolded or the fileName that errored"""
+  generatedSpecResult: GeneratedSpecResult
 }
+
+"""Error from generated spec"""
+type GeneratedSpecError {
+  erroredCodegenCandidate: String!
+  fileName: String!
+}
+
+union GeneratedSpecResult = GeneratedSpecError | ScaffoldedFile
 
 """Git information about a spec file"""
 type GitInfo {
@@ -577,31 +563,138 @@ type LocalSettingsPreferences {
   specListWidth: Int
 }
 
+type ManualMigration implements Node {
+  """is the manual migration completed (all files are moved)"""
+  completed: Boolean!
+
+  """files needing manual migration"""
+  files: [ManualMigrationFile!]!
+
+  """Relay style Node ID field for the ManualMigration field"""
+  id: ID!
+}
+
+type ManualMigrationFile implements Node {
+  """Relay style Node ID field for the ManualMigrationFile field"""
+  id: ID!
+
+  """has the file been moved since opening the migration helper"""
+  moved: Boolean!
+
+  """name of file to migrate"""
+  relative: String!
+}
+
 """Contains all data related to the 9.X to 10.0 migration UI"""
 type Migration {
+  """the component folder path used to store components tests"""
+  componentFolder: String!
+
   """contents of the cypress.json file after conversion"""
   configAfterCode: String!
 
   """contents of the cypress.json file before conversion"""
   configBeforeCode: String!
 
+  """Steps filtered with the current context"""
+  filteredSteps: [MigrationStep!]!
+
+  """whether component testing is set up in the migrated config or not"""
+  hasComponentTesting: Boolean!
+
+  """whether the component folder is custom or not"""
+  hasCustomComponentFolder: Boolean!
+
+  """whether the testFiles member is custom or not in component testing"""
+  hasCustomComponentTestFiles: Boolean!
+
+  """whether the integration folder is custom or not"""
+  hasCustomIntegrationFolder: Boolean!
+
+  """whether the testFiles member is custom or not in integration"""
+  hasCustomIntegrationTestFiles: Boolean!
+
+  """Whether the project has Typescript"""
+  hasTypescript: Boolean
+
+  """the integration folder path used to store e2e tests"""
+  integrationFolder: String!
+
   """List of files needing manual conversion"""
-  manualFiles: [String!]!
+  manualFiles: ManualMigration
 
   """All spec files after conversion"""
-  specFilesAfter: [String!]!
+  specFiles: [MigrationFile!]!
 
-  """All spec files before being converted"""
-  specFilesBefore: [String!]!
+  """Support files needing automated rename"""
+  supportFiles: MigrationFile
+}
 
-  """Step where the migration is right now"""
-  step: MigrationStepEnum!
+type MigrationFile {
+  after: MigrationFileData!
+  before: MigrationFileData!
+  testingType: TestingTypeEnum!
+}
+
+type MigrationFileData implements Node {
+  """Relay style Node ID field for the MigrationFileData field"""
+  id: ID!
+  parts: [MigrationFilePart!]!
+  relative: String!
+}
+
+type MigrationFilePart implements Node {
+  """is this part a folder or extension that needs migration"""
+  group: String
+
+  """should highlight in migration UI"""
+  highlight: Boolean!
+
+  """Relay style Node ID field for the MigrationFilePart field"""
+  id: ID!
+
+  """part of filename"""
+  text: String!
+}
+
+type MigrationRegexp {
+  """regexp to use to rename existing specs in component"""
+  afterComponent: String!
+
+  """regexp to use to rename existing specs in e2e"""
+  afterE2E: String!
+
+  """regexp to identify existing specs in component"""
+  beforeComponent: String!
+
+  """regexp to identify existing specs in e2e"""
+  beforeE2E: String!
+}
+
+"""Contains all data related to the 9.X to 10.0 migration UI"""
+type MigrationStep implements Node {
+  """Relay style Node ID field for the MigrationStep field"""
+  id: ID!
+
+  """Index of the step in the list"""
+  index: Int!
+
+  """Has the current step been completed"""
+  isCompleted: Boolean!
+
+  """This is the current step"""
+  isCurrentStep: Boolean!
+
+  """Identifier of the step"""
+  name: MigrationStepEnum!
 }
 
 enum MigrationStepEnum {
   configFile
   renameAuto
   renameManual
+  renameSupport
+  setupComponent
 }
 
 type Mutation {
@@ -609,12 +702,15 @@ type Mutation {
   addProject(
     """Whether to open the project when added"""
     open: Boolean
-    path: String!
+    path: String
   ): Query
 
   """Clears the currently active project"""
   clearCurrentProject: Query
   clearCurrentTestingType: Query
+
+  """Close active browser"""
+  closeBrowser: Boolean
 
   """Create a project in the dashboard and return its object"""
   cloudProjectCreate(ciProviders: [String!], name: String!, orgId: ID!, public: Boolean!): CloudProject
@@ -628,8 +724,14 @@ type Mutation {
   """
   devRelaunch(action: DevRelaunchAction!): Boolean
 
+  """user has finished migration component specs - move to next step"""
+  finishedRenamingComponentSpecs: Query
+
+  """Sets focus to the active browser window"""
+  focusActiveBrowserWindow: Boolean!
+
   """Generate spec from source"""
-  generateSpecFromSource(codeGenCandidate: String!, type: CodeGenType!): GeneratedSpec
+  generateSpecFromSource(codeGenCandidate: String!, erroredCodegenCandidate: String, type: CodeGenType!): GenerateSpecResponse
 
   """Hides the launchpad windows"""
   hideBrowserWindow: Boolean!
@@ -652,6 +754,34 @@ type Mutation {
   """Log out of Cypress Cloud"""
   logout: Query
 
+  """Check if a give spec file will match the project spec pattern"""
+  matchesSpecPattern(specFile: String!): Boolean!
+
+  """Merges the component testing config in cypress.config.{js,ts}"""
+  migrateComponentTesting: Query
+
+  """Transforms cypress.json file into cypress.config.js file"""
+  migrateConfigFile: Query
+
+  """While migrating to 10+ renames files to match the new .cy pattern"""
+  migrateRenameSpecs(
+    """specs to move - current name"""
+    after: [String!]
+
+    """specs to move - current name"""
+    before: [String!]
+    skip: Boolean
+  ): Query
+
+  """While migrating to 10+ launch renaming of support file"""
+  migrateRenameSupport: Query
+
+  """While migrating to 10+ skip manual rename step"""
+  migrateSkipManualRename: Query
+
+  """Initialize the migration wizard to the first step"""
+  migrateStart: Query
+
   """Open a path in preferred IDE"""
   openDirectoryInIDE(path: String!): Boolean
   openExternal(url: String!): Boolean
@@ -670,7 +800,7 @@ type Mutation {
 
   """Reset the Wizard to the starting position"""
   resetWizard: Boolean!
-  scaffoldIntegration: [CodeGenResultWithFileParts!]!
+  scaffoldIntegration: [ScaffoldedFile!]!
   scaffoldTestingType: Query
 
   """Set active project to run tests on"""
@@ -682,8 +812,17 @@ type Mutation {
   """
   setPreferences(value: String!): Query
 
+  """Set the projectId field in the config file of the current project"""
+  setProjectIdInConfigFile(projectId: String!): Query
+
   """Save the projects preferences to cache"""
-  setProjectPreferences(browserPath: String!, testingType: TestingTypeEnum!): Query!
+  setProjectPreferences(testingType: TestingTypeEnum!): Query!
+
+  """Save the prompt-shown state for this project"""
+  setPromptShown(slug: String!): Boolean
+
+  """Switch Testing type and relaunch browser"""
+  switchTestingTypeAndRelaunch(testingType: TestingTypeEnum!): Boolean
 
   """Updates the different fields of the wizard data store"""
   wizardUpdate(input: WizardUpdateInput!): Wizard
@@ -693,6 +832,12 @@ type Mutation {
 interface Node {
   """Globally unique identifier representing a concrete GraphQL ObjectType"""
   id: ID!
+}
+
+enum PackageManagerEnum {
+  npm
+  pnpm
+  yarn
 }
 
 """
@@ -824,9 +969,7 @@ type Spec implements Node {
   """
   absolute: String!
 
-  """
-  Full name of spec file (e.g. MySpec.test.tsx) without the spec extension
-  """
+  """Full name of spec file (e.g. MySpec.test.tsx)"""
   baseName: String!
 
   """The file extension (e.g. tsx, jsx)"""
@@ -848,32 +991,12 @@ type Spec implements Node {
   relative: String!
 
   """
-  The spec file's extension, including "spec" patterm (e.g. .spec.tsx, -spec.tsx, -test.tsx)
+  The spec file's extension, including "spec" pattern (e.g. .spec.tsx, -spec.tsx, -test.tsx)
   """
   specFileExtension: String!
 
   """Type of spec (e.g. component | integration)"""
   specType: SpecType!
-}
-
-type SpecConnection {
-  """
-  https://facebook.github.io/relay/graphql/connections.htm#sec-Edge-Types
-  """
-  edges: [SpecEdge!]!
-
-  """
-  https://facebook.github.io/relay/graphql/connections.htm#sec-undefined.PageInfo
-  """
-  pageInfo: PageInfo!
-}
-
-type SpecEdge {
-  """https://facebook.github.io/relay/graphql/connections.htm#sec-Cursor"""
-  cursor: String!
-
-  """https://facebook.github.io/relay/graphql/connections.htm#sec-Node"""
-  node: Spec!
 }
 
 enum SpecType {
@@ -952,6 +1075,9 @@ type Wizard {
 
   """All of the component testing frameworks to choose from"""
   frameworks: [WizardFrontendFramework!]!
+
+  """The list of packages to install that are currently installed"""
+  installedPackages: [String!]
   language: WizardCodeLanguage
 
   """
@@ -1033,25 +1159,6 @@ type WizardNpmPackage implements Node {
   """The package name that you would npm install"""
   name: String!
   package: String!
-}
-
-"""Each config file suggestion given by the wizard"""
-type WizardSampleConfigFile implements Node {
-  content: String!
-  description: String
-  filePath: String!
-
-  """Relay style Node ID field for the WizardSampleConfigFile field"""
-  id: ID!
-  status: WizardConfigFileStatusEnum!
-}
-
-enum WizardStep {
-  configFiles
-  installDependencies
-  selectFramework
-  setupComplete
-  welcome
 }
 
 input WizardUpdateInput {

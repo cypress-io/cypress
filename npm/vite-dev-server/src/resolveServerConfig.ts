@@ -25,17 +25,25 @@ export interface StartDevServerOptions {
   indexHtml?: string
 }
 
-export default async ({ viteConfig, options, indexHtml }: StartDevServerOptions): Promise<InlineConfig> => {
-  const { projectRoot, supportFile, isTextTerminal } = options.config
+export const resolveServerConfig = async ({ viteConfig, options, indexHtml }: StartDevServerOptions): Promise<InlineConfig> => {
+  const { projectRoot, supportFile, namespace, isTextTerminal } = options.config
 
   const requiredOptions: InlineConfig = {
-    base: '/__cypress/src/',
+    base: `/${namespace}/src/`,
     root: projectRoot,
   }
 
   const finalConfig: InlineConfig = { ...viteConfig, ...requiredOptions }
 
-  finalConfig.plugins = [...(finalConfig.plugins || []), makeCypressPlugin(projectRoot, supportFile, options.devServerEvents, options.specs, isTextTerminal, indexHtml)]
+  finalConfig.plugins = [...(finalConfig.plugins || []), makeCypressPlugin(
+    projectRoot,
+    supportFile,
+    options.devServerEvents,
+    options.specs,
+    isTextTerminal,
+    options.config.namespace,
+    indexHtml,
+  )]
 
   // This alias is necessary to avoid a "prefixIdentifiers" issue from slots mounting
   // only cjs compiler-core accepts using prefixIdentifiers in slots which vue test utils use.
@@ -83,7 +91,7 @@ export default async ({ viteConfig, options, indexHtml }: StartDevServerOptions)
     minify: false,
     commonjsOptions: {
       transformMixedEsModules: true,
-      ...finalConfig.build.commonjsOptions,
+      ...finalConfig.build.commonjsOptions || {},
     },
     ...finalConfig.build,
   },

@@ -11,6 +11,21 @@ const serverRoot = _path.join(__dirname, '../../packages/server/')
 const projects = _path.join(root, 'projects')
 const cyTmpDir = _path.join(tempDir, 'cy-projects')
 
+const safeRemove = (path) => {
+  try {
+    fs.removeSync(path)
+  } catch (err) {
+    // Windows does not like the en masse deleting of files, since the AV will hold
+    // a lock on files when they are written. This skips deleting if the lock is
+    // encountered.
+    if (err.code === 'EBUSY' && process.platform === 'win32') {
+      return console.error(`Remove failed for ${ path } due to EBUSY. Skipping on Windows.`)
+    }
+
+    throw err
+  }
+}
+
 // copy contents instead of deleting+creating new file, which can cause
 // filewatchers to lose track of toFile.
 const copyContents = (fromFile, toFile) => {
@@ -101,18 +116,16 @@ async function makeWorkspacePackagesAbsolute (pathToPkgJson: string): Promise<st
 }
 
 function getYarnCommand (opts: {
-  yarnV2: boolean
+  yarnV311: boolean
   updateYarnLock: boolean
   isCI: boolean
   runScripts: boolean
 }): string {
   let cmd = `yarn install`
 
-  if (opts.yarnV2) {
-    // yarn v2's docs are no longer available on their site now that yarn v3 is out,
-    // Internet Archive has them here:
-    // @see https://web.archive.org/web/20210102223647/https://yarnpkg.com/cli/install
-    if (!opts.runScripts) cmd += ' --skip-builds'
+  if (opts.yarnV311) {
+    // @see https://yarnpkg.com/cli/install
+    if (!opts.runScripts) cmd += ' --mode=skip-build'
 
     if (!opts.updateYarnLock) cmd += ' --immutable'
 
@@ -150,7 +163,7 @@ type SystemTestPkgJson = {
   /**
    * Run the yarn v2-style install command instead of yarn v1-style.
    */
-  _cyYarnV2?: boolean
+  _cyYarnV311?: boolean
   /**
    * By default, the automatic `yarn install` will not run postinstall scripts. This
    * option, if set, will cause postinstall scripts to run for this project.
@@ -184,7 +197,7 @@ export async function scaffoldProjectNodeModules (project: string, updateYarnLoc
     for (const dep of packages) {
       const depDir = _path.join(cacheDir, dep)
 
-      await fs.remove(depDir)
+      safeRemove(depDir)
     }
   }
 
@@ -230,7 +243,7 @@ export async function scaffoldProjectNodeModules (project: string, updateYarnLoc
     // 4. Run `yarn install`.
     const cmd = getYarnCommand({
       updateYarnLock,
-      yarnV2: pkgJson._cyYarnV2,
+      yarnV311: pkgJson._cyYarnV311,
       isCI: !!process.env.CI,
       runScripts: pkgJson._cyRunScripts,
     })
@@ -266,7 +279,13 @@ export async function scaffoldProjectNodeModules (project: string, updateYarnLoc
 
 export async function scaffoldCommonNodeModules () {
   await Promise.all([
+    '@babel/preset-env',
+    '@babel/preset-react',
+    'babel-loader',
+    // Used for import { defineConfig } from 'cypress'
+    'cypress',
     '@cypress/code-coverage',
+    '@cypress/react',
     '@cypress/webpack-dev-server',
     '@packages/socket',
     '@packages/ts',
@@ -322,11 +341,11 @@ export function scaffoldWatch () {
 // removes all of the project fixtures
 // from the cyTmpDir .projects in the root
 export function remove () {
-  return fs.removeSync(cyTmpDir)
+  safeRemove(cyTmpDir)
 }
 
 export function removeProject (name) {
-  return fs.removeSync(projectPath(name))
+  safeRemove(projectPath(name))
 }
 
 // returns the path to project fixture

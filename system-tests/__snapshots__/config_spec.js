@@ -7,14 +7,14 @@ exports['e2e config provides various environment details 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (config_passing_spec.js)                                                   │
-  │ Searched:   cypress/integration/config_passing_spec.js                                         │
+  │ Specs:      1 found (config_passing.cy.js)                                                     │
+  │ Searched:   cypress/e2e/config_passing.cy.js                                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  config_passing_spec.js                                                          (1 of 1)
+  Running:  config_passing.cy.js                                                            (1 of 1)
 
 
   Cypress static methods + props
@@ -41,14 +41,14 @@ exports['e2e config provides various environment details 1'] = `
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     config_passing_spec.js                                                           │
+  │ Spec Ran:     config_passing.cy.js                                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/config_passing_spec.js.mp4          (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/config_passing.cy.js.mp4            (X second)
 
 
 ====================================================================================================
@@ -58,7 +58,7 @@ exports['e2e config provides various environment details 1'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  config_passing_spec.js                   XX:XX        6        6        -        -        - │
+  │ ✔  config_passing.cy.js                     XX:XX        6        6        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        6        6        -        -        -  
 
@@ -74,14 +74,14 @@ exports['e2e config applies defaultCommandTimeout globally 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (dom_times_out_spec.js)                                                    │
-  │ Searched:   cypress/integration/**/*                                                           │
+  │ Specs:      1 found (dom_times_out.cy.js)                                                      │
+  │ Searched:   cypress/e2e/**/*.cy.{js,jsx,ts,tsx}                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  dom_times_out_spec.js                                                           (1 of 1)
+  Running:  dom_times_out.cy.js                                                             (1 of 1)
 
 
   short defaultCommandTimeout
@@ -110,20 +110,20 @@ exports['e2e config applies defaultCommandTimeout globally 1'] = `
   │ Screenshots:  1                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     dom_times_out_spec.js                                                            │
+  │ Spec Ran:     dom_times_out.cy.js                                                              │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/dom_times_out_spec.js/short defaultCommandTimeo     (1280x720)
-     ut -- times out looking for a missing element (failed).png                                     
+  -  /XXX/XXX/XXX/cypress/screenshots/dom_times_out.cy.js/short defaultCommandTimeout     (1280x720)
+      -- times out looking for a missing element (failed).png                                       
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/dom_times_out_spec.js.mp4           (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/dom_times_out.cy.js.mp4             (X second)
 
 
 ====================================================================================================
@@ -133,7 +133,7 @@ exports['e2e config applies defaultCommandTimeout globally 1'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  dom_times_out_spec.js                    XX:XX        1        -        1        -        - │
+  │ ✖  dom_times_out.cy.js                      XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
 
@@ -156,7 +156,7 @@ Found an error while validating the \`browsers\` list. Expected \`family\` to be
 
 exports['e2e config throws error when multiple default config file are found in project 1'] = `
 There is both a \`cypress.config.js\` and a \`cypress.config.ts\` at the location below:
-/foo/bar/.projects/pristine-with-config-file
+/foo/bar/.projects/pristine-with-e2e-testing
 
 This sometimes happens if you do not have cypress.config.ts excluded in your tsconfig.json.
 
@@ -176,7 +176,7 @@ Cypress no longer supports 'cypress.json', please migrate to 'cypress.config.{ts
 
 exports['e2e config throws error when cypress.json is found in project and cypress.config.{ts|js} exists as well 1'] = `
 There is both a \`cypress.config.js\` and a cypress.json file at the location below:
-/foo/bar/.projects/multiples-config-files-with-json
+/foo/bar/.projects/multiple-config-files-with-json
 
 Cypress no longer supports 'cypress.json' config, please remove it from your project.
 

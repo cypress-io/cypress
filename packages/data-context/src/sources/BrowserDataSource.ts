@@ -1,10 +1,24 @@
-import type { FoundBrowser } from '@packages/types'
+import type { FoundBrowser, BrowserStatus } from '@packages/types'
+import os from 'os'
+import { execSync } from 'child_process'
 import type { DataContext } from '..'
+
+let isPowerShellAvailable = false
+
+try {
+  execSync(`[void] ''`, { shell: 'powershell' })
+  isPowerShellAvailable = true
+} catch {
+  // Powershell is unavailable
+}
+
+const platform = os.platform()
 
 export interface BrowserApiShape {
   close(): Promise<any>
   ensureAndGetByNameOrPath(nameOrPath: string): Promise<FoundBrowser | undefined>
   getBrowsers(): Promise<FoundBrowser[]>
+  focusActiveBrowserWindow(): Promise<any>
 }
 
 export class BrowserDataSource {
@@ -47,5 +61,23 @@ export class BrowserDataSource {
     }
 
     return this.idForBrowser(this.ctx.coreData.chosenBrowser) === this.idForBrowser(obj)
+  }
+
+  isFocusSupported (obj: FoundBrowser) {
+    if (platform === 'darwin' || obj.family !== 'firefox') {
+      return true
+    }
+
+    // Only allow focusing if PowerShell is available on Windows, since that's what we use to do it
+    if (obj.family === 'firefox' && platform === 'win32') {
+      return isPowerShellAvailable
+    }
+
+    return false
+  }
+
+  setBrowserStatus (browserStatus: BrowserStatus) {
+    this.ctx.coreData.app.browserStatus = browserStatus
+    this.ctx.emitter.toLaunchpad()
   }
 }

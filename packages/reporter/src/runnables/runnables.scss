@@ -156,7 +156,9 @@
 
     &.suite .collapsible-indicator {
       margin-left: 2px;
-      color: $gray-800;
+      .icon-dark {
+        stroke: $gray-800;
+      }
     }
 
     &.runnable-failed > div > .runnable-wrapper,

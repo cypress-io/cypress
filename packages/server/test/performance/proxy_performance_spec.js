@@ -2,7 +2,7 @@ require('../spec_helper')
 
 const { makeDataContext, setCtx } = require('../../lib/makeDataContext')
 
-const ctx = setCtx(makeDataContext({}))
+setCtx(makeDataContext({}))
 
 const cp = require('child_process')
 const fse = require('fs-extra')
@@ -17,7 +17,6 @@ const performance = require('@tooling/system-tests/lib/performance')
 const Promise = require('bluebird')
 const sanitizeFilename = require('sanitize-filename')
 const { createRoutes } = require(`../../lib/routes`)
-const { SpecsStore } = require(`../../lib/specs-store`)
 
 process.env.CYPRESS_INTERNAL_ENV = 'development'
 
@@ -358,12 +357,11 @@ describe('Proxy Performance', function () {
           // turn off morgan
           config.morgan = false
 
-          cyServer = new ServerE2E(ctx)
+          cyServer = new ServerE2E()
 
           return cyServer.open(config, {
             SocketCtor: SocketE2E,
             createRoutes,
-            specsStore: new SpecsStore({}, 'e2e'),
             testingType: 'e2e',
           })
         }),

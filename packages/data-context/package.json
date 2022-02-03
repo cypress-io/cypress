@@ -8,10 +8,10 @@
     "build-prod": "tsc || echo 'built, with errors'",
     "check-ts": "tsc --noEmit && yarn -s tslint",
     "clean-deps": "rimraf node_modules",
-    "tslint": "tslint --project tslint.json 'src/**/*.{ts,js}'",
+    "tslint": "tslint --config ../ts/tslint.json --project .",
     "clean": "rimraf './{src,test}/**/*.js'",
-    "test-unit": "mocha -r @packages/ts/register test/unit/**/*.spec.ts --config ./test/.mocharc.js --exit",
-    "test-integration": "mocha -r @packages/ts/register test/integration/**/*.spec.ts --config ./test/.mocharc.js --exit"
+    "test": "yarn test-unit",
+    "test-unit": "mocha -r @packages/ts/register {test/unit/**/*.spec.ts,test/unit/*.spec.ts} --config ./test/.mocharc.js --exit"
   },
   "dependencies": {
     "@storybook/csf-tools": "^6.4.0-alpha.38",
@@ -37,11 +37,15 @@
     "launch-editor": "2.2.1",
     "lodash": "4.17.21",
     "p-defer": "^3.0.0",
+    "prettier": "2.5.1",
     "randomstring": "1.1.5",
+    "resolve-from": "^5.0.0",
+    "stringify-object": "^3.0.0",
     "underscore.string": "^3.3.5",
     "wonka": "^4.0.15"
   },
   "devDependencies": {
+    "@packages/config": "0.0.0-development",
     "@packages/example": "0.0.0-development",
     "@packages/resolve-dist": "0.0.0-development",
     "@packages/root": "0.0.0-development",
@@ -49,6 +53,10 @@
     "@packages/types": "0.0.0-development",
     "@types/dedent": "^0.7.0",
     "@types/ejs": "^3.1.0",
+    "@types/fs-extra": "^8.0.1",
+    "@types/mocha": "^8.0.3",
+    "@types/prettier": "2.4.3",
+    "@types/stringify-object": "^3.0.0",
     "mocha": "7.0.1",
     "rimraf": "3.0.2",
     "tslint": "^6.1.3"

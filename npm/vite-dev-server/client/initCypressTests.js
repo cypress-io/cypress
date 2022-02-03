@@ -1,14 +1,14 @@
 // This file is merged in a <script type=module> into index.html
 // it will be used to load and kick start the selected spec
 import specLoaders from 'cypress:spec-loaders'
-import { supportPath, originAutUrl } from 'cypress:config'
+import { hasSupportPath, originAutUrl } from 'cypress:config'
 
 const specPath = window.location.pathname.replace(originAutUrl, '')
 
 const specLoader = specLoaders[specPath]
 const importsToLoad = [specLoader || (() => import(/* @vite-ignore */ specPath))]
 
-if (supportPath) {
+if (hasSupportPath) {
   importsToLoad.unshift(() => import('cypress:support-path'))
 }
 

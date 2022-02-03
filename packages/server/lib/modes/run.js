@@ -148,8 +148,10 @@ const formatPath = (name, n, colour = 'reset', caller) => {
     const cwdPath = process.cwd()
 
     name = name
-    .split(macOSRemovePrivate(cwdPath))
+    .split(cwdPath)
     .join(fakeCwdPath)
+
+    name = macOSRemovePrivate(name)
   }
 
   // add newLines at each n char and colorize the path
@@ -1453,7 +1455,6 @@ module.exports = {
     })
 
     if (browser.family !== 'chromium' && !options.config.chromeWebSecurity) {
-      console.log()
       errors.warning('CHROME_WEB_SECURITY_NOT_SUPPORTED', browser.family)
     }
 
@@ -1485,7 +1486,7 @@ module.exports = {
           compressedVideoName: videoRecordProps.compressedVideoName,
           endVideoCapture: videoRecordProps.endVideoCapture,
           startedVideoCapture: videoRecordProps.startedVideoCapture,
-          exit: options.exit,
+          exit: config.exit,
           videoCompression: options.videoCompression,
           videoUploadOnPasses: options.videoUploadOnPasses,
           quiet: options.quiet,
@@ -1604,7 +1605,6 @@ module.exports = {
               video: config.video,
               videoCompression: config.videoCompression,
               videoUploadOnPasses: config.videoUploadOnPasses,
-              exit: options.exit,
               headed: options.headed,
               quiet: options.quiet,
               outputPath: options.outputPath,

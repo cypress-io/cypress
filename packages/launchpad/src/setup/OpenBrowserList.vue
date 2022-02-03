@@ -1,48 +1,37 @@
 <template>
   <form
-    v-if="props.gql.browsers"
-    @submit.prevent="emit('launch', props.gql?.currentBrowser?.path)"
+    v-if="browsers"
+    @submit.prevent="emit('launch')"
   >
-    <div
-      class="flex flex-wrap py-40px gap-24px justify-center"
+    <RadioGroup
+      v-model="selectedBrowserId"
+      class="flex flex-wrap justify-center py-40px gap-24px"
       data-cy="open-browser-list"
     >
-      <div
-        v-for="browser of props.gql.browsers"
+      <RadioGroupOption
+        v-for="browser of browsers"
+        v-slot="{ checked }"
         :key="browser.id"
         :data-cy-browser="browser.name"
-        class="rounded border-1 text-center min-h-144px pt-6 pb-4 w-160px relative block"
-        :class="{
-          'border-jade-300 ring-2 ring-jade-100 focus:border-jade-400 focus:border-1 focus:outline-none': browser.isSelected,
-          'border-gray-200': !browser.isSelected,
-          'filter grayscale bg-gray-100': browser.disabled,
-          'hover:border-indigo-300 hover:ring-2 hover:ring-indigo-100': !browser.disabled && !browser.isSelected
-        }"
+        :value="browser.id"
+        :disabled="browser.disabled || browserStatus.chosen"
       >
-        <input
-          :id="browser.id"
-          :key="browser.id"
-          v-model="selectedBrowserId"
-          type="radio"
-          :value="browser.id"
-          :disabled="browser.disabled"
-          class="opacity-0 absolute"
-          :class="{
-            'filter grayscale': browser.disabled
-          }"
-        >
-        <label
+        <RadioGroupLabel
           :for="browser.id"
-          class="radio-label"
+          class="relative block pt-6 pb-4 text-center rounded border-1 min-h-144px w-160px radio-label"
           :class="{
-            'before:hocus:cursor-pointer': !browser.isSelected
+            'border-jade-300 ring-2 ring-jade-100 focus:border-jade-400 focus:border-1 focus:outline-none': checked,
+            'border-gray-200 before:hocus:cursor-pointer': !checked && !browserStatus.chosen ,
+            'filter grayscale bg-gray-100': browser.disabled,
+            'filter grayscale border-gray-200': browserStatus.chosen && !checked,
+            'hover:border-indigo-300 hover:ring-2 hover:ring-indigo-100': !browser.disabled && !checked && !browserStatus.chosen
           }"
         >
           <div class="text-center">
             <img
               :src="allBrowsersIcons[browser.displayName]"
               alt=""
-              class="h-40px w-40px inline"
+              class="inline h-40px w-40px"
             >
           </div>
           <div
@@ -51,32 +40,92 @@
           >
             {{ browser.displayName }}
           </div>
-          <div class="text-14px text-gray-500 leading-20px">v{{ browser.majorVersion }}</div>
-        </label>
+          <div class="text-gray-500 text-14px leading-20px">
+            v{{ browser.majorVersion }}
+          </div>
+        </RadioGroupLabel>
+      </RadioGroupOption>
+    </RadioGroup>
+    <div
+      v-if="props.gql.currentTestingType"
+      class="mb-14"
+    >
+      <div class="flex items-center justify-center mb-4 gap-16px">
+        <template v-if="browserStatus.closed || browserStatus.opening">
+          <Button
+            v-if="browserStatus.closed"
+            size="lg"
+            type="submit"
+            :prefix-icon="testingTypeIcon"
+            prefix-icon-class="icon-dark-white"
+            variant="secondary"
+            data-cy="launch-button"
+            class="font-medium"
+          >
+            {{ browserText[props.gql.currentTestingType].start }}
+          </Button>
+          <Button
+            v-else
+            size="lg"
+            type="button"
+            disabled
+            variant="pending"
+            class="font-medium disabled:cursor-default"
+            :prefix-icon="StatusRunningIcon"
+            prefix-icon-class="icon-light-gray-300 icon-dark-white animate-spin"
+          >
+            {{ browserText[props.gql.currentTestingType].opening }}
+          </Button>
+        </template>
+
+        <template v-else>
+          <Button
+            size="lg"
+            type="button"
+            disabled
+            variant="pending"
+            :prefix-icon="testingTypeIcon"
+            prefix-icon-class="icon-dark-white"
+            class="font-medium disabled:cursor-default"
+          >
+            {{ browserText.running }}
+          </Button>
+          <Button
+            v-if="props.gql.currentBrowser?.isFocusSupported"
+            size="lg"
+            type="button"
+            variant="outline"
+            :prefix-icon="ExportIcon"
+            prefix-icon-class="icon-dark-gray-500"
+            class="font-medium"
+            @click="emit('focusBrowser')"
+          >
+            {{ browserText.focus }}
+          </Button>
+          <Button
+            size="lg"
+            type="button"
+            variant="outline"
+            :prefix-icon="PowerStandbyIcon"
+            prefix-icon-class="icon-dark-gray-500"
+            class="font-medium"
+            @click="emit('closeBrowser')"
+          >
+            {{ browserText.close }}
+          </Button>
+        </template>
       </div>
-    </div>
-    <div class="mb-14">
-      <div class="flex mb-4 items-center justify-center">
-        <Button
-          v-if="launchText"
-          type="submit"
-          class="mr-2 inline"
-          :suffix-icon="openInNew"
-          data-cy="launch-button"
-          size="lg-wide"
-        >
-          {{ launchText }}
-        </Button>
-        <Button
-          type="button"
-          size="lg"
-          class="ml-2 inline"
-          variant="outline"
-          @click="emit('navigated-back')"
-        >
-          {{ t('setupPage.step.back') }}
-        </Button>
-      </div>
+
+      <Button
+        size="sm"
+        variant="text"
+        :prefix-icon="ArrowLeftIcon"
+        prefix-icon-class="icon-dark-gray-500"
+        class="mx-auto font-medium text-gray-600 hover:text-indigo-500"
+        @click="emit('navigatedBack')"
+      >
+        {{ browserText.switchTestingType }}
+      </Button>
     </div>
   </form>
 </template>
@@ -84,11 +133,17 @@
 <script lang="ts" setup>
 import { useI18n } from '@cy/i18n'
 import Button from '@packages/frontend-shared/src/components/Button.vue'
-import { computed, watch } from 'vue'
+import { computed } from 'vue'
 import _clone from 'lodash/clone'
-import openInNew from '~icons/mdi/open-in-new'
 import { useMutation, gql } from '@urql/vue'
 import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
+import TestingTypeComponentIcon from '~icons/cy/testing-type-component_x16'
+import TestingTypeE2EIcon from '~icons/cy/testing-type-e2e_x16'
+import ExportIcon from '~icons/cy/export_x16'
+import PowerStandbyIcon from '~icons/cy/power-standby'
+import ArrowLeftIcon from '~icons/cy/arrow-left_x16'
+import StatusRunningIcon from '~icons/cy/status-running_x16'
+import { RadioGroup, RadioGroupOption, RadioGroupLabel } from '@headlessui/vue'
 
 import { OpenBrowserListFragment, OpenBrowserList_SetBrowserDocument } from '../generated/graphql'
 
@@ -108,6 +163,7 @@ fragment OpenBrowserList on CurrentProject {
     id
     displayName
     path
+    isFocusSupported
   }
   browsers {
     id
@@ -121,6 +177,8 @@ fragment OpenBrowserList on CurrentProject {
     version
     majorVersion
   }
+  currentTestingType
+  browserStatus
 }
 `
 
@@ -129,39 +187,71 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  (e: 'navigated-back'): void
-  (e: 'launch', value: string | undefined): void
+  (e: 'navigatedBack'): void
+  (e: 'launch'): void
+  (e: 'closeBrowser'): void
+  (e: 'focusBrowser'): void
 }>()
 
 const { t } = useI18n()
 
+const browsers = computed(() => {
+  if (!props.gql.browsers) {
+    return undefined
+  }
+
+  return [...props.gql.browsers].sort((a, b) => a.name === 'Electron' ? 1 : -1)
+})
+
 const setBrowser = useMutation(OpenBrowserList_SetBrowserDocument)
 
-const setSelected = (browserId: string) => {
-  setBrowser.executeMutation({ id: browserId })
-}
-
-const launchText = computed(() => props.gql.currentBrowser ? `${t('setupPage.openBrowser.launch')} ${props.gql.currentBrowser.displayName}` : '')
-
 const selectedBrowserId = computed({
-  get: () => props.gql.currentBrowser ? props.gql.currentBrowser.id : null,
-  set: (newVal) => {
-    if (newVal) {
-      setSelected(newVal)
+  get: () => props.gql.currentBrowser?.id || props.gql.browsers?.find((browser) => browser.displayName === 'Electron')?.id,
+  set (browserId) {
+    if (browserId) {
+      setBrowser.executeMutation({ id: browserId })
     }
   },
 })
 
-</script>
+const selectedBrowserName = computed(() => {
+  return browsers.value?.find(
+    (browser) => browser.id === selectedBrowserId.value,
+  )?.displayName
+})
 
-<style scoped>
-/* Make whole card clickable */
-.radio-label::before {
-  position: absolute;
-  top: 0;
-  left: 0;
-  content: "";
-  height: 100%;
-  width: 100%;
-}
-</style>
+const browserText = computed(() => {
+  const tArgs = { browser: selectedBrowserName.value }
+
+  return {
+    e2e: {
+      start: t('openBrowser.startE2E', tArgs),
+      opening: t('openBrowser.openingE2E', tArgs),
+    },
+    component: {
+      start: t('openBrowser.startComponent', tArgs),
+      opening: t('openBrowser.openingComponent', tArgs),
+    },
+    running: t('openBrowser.running', tArgs),
+    focus: t('openBrowser.focus'),
+    close: t('openBrowser.close'),
+    switchTestingType: t('openBrowser.switchTestingType'),
+  }
+})
+
+const browserStatus = computed(() => {
+  const status = {
+    open: props.gql.browserStatus === 'open',
+    opening: props.gql.browserStatus === 'opening',
+    closed: props.gql.browserStatus === 'closed',
+  }
+
+  return {
+    ...status,
+    chosen: status.opening || status.open,
+  }
+})
+
+const testingTypeIcon = computed(() => props.gql.currentTestingType === 'component' ? TestingTypeComponentIcon : TestingTypeE2EIcon)
+
+</script>

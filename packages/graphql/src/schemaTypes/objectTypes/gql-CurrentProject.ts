@@ -1,13 +1,21 @@
-import { nonNull, objectType, stringArg } from 'nexus'
+import { PACKAGE_MANAGERS } from '@packages/types'
+import { enumType, nonNull, objectType, stringArg } from 'nexus'
 import path from 'path'
 import { BaseError } from '.'
+import { BrowserStatusEnum } from '..'
 import { cloudProjectBySlug } from '../../stitching/remoteGraphQLCalls'
 import { TestingTypeEnum } from '../enumTypes/gql-WizardEnums'
 import { Browser } from './gql-Browser'
 import { CodeGenGlobs } from './gql-CodeGenGlobs'
 import { FileParts } from './gql-FileParts'
 import { ProjectPreferences } from './gql-ProjectPreferences'
+import { Spec } from './gql-Spec'
 import { Storybook } from './gql-Storybook'
+
+export const PackageManagerEnum = enumType({
+  name: 'PackageManagerEnum',
+  members: PACKAGE_MANAGERS,
+})
 
 export const CurrentProject = objectType({
   name: 'CurrentProject',
@@ -15,6 +23,11 @@ export const CurrentProject = objectType({
   node: 'projectRoot',
   definition (t) {
     t.implements('ProjectLike')
+
+    t.nonNull.field('packageManager', {
+      type: PackageManagerEnum,
+      resolve: (source, args, ctx) => ctx.coreData.packageManager,
+    })
 
     t.field('errorLoadingConfigFile', {
       type: BaseError,
@@ -93,14 +106,24 @@ export const CurrentProject = objectType({
       },
     })
 
-    // t.list.field('testingTypes', {
-    //   type: TestingTypeInfo,
-    // })
+    t.boolean('hasValidConfigFile', {
+      description: 'Whether the project has a valid config file',
+      resolve (source, args, ctx) {
+        return ctx.lifecycleManager.metaState.hasValidConfigFile
+      },
+    })
 
-    t.connectionField('specs', {
-      description: 'Specs for a project conforming to Relay Connection specification',
-      type: 'Spec',
-      nodes: (source, args, ctx) => {
+    t.boolean('hasTypescript', {
+      description: 'Whether the project has Typescript',
+      resolve (source, args, ctx) {
+        return ctx.lifecycleManager.metaState.hasTypescript
+      },
+    })
+
+    t.nonNull.list.nonNull.field('specs', {
+      description: 'A list of specs for the currently open testing type of a project',
+      type: Spec,
+      resolve: (source, args, ctx) => {
         return ctx.project.specs
       },
     })
@@ -109,6 +132,13 @@ export const CurrentProject = objectType({
       description: 'Project configuration',
       resolve: (source, args, ctx) => {
         return ctx.project.getResolvedConfigFields()
+      },
+    })
+
+    t.json('savedState', {
+      description: 'Project saved state',
+      resolve: (source, args, ctx) => {
+        return ctx.project.getCurrentProjectSavedState()
       },
     })
 
@@ -162,6 +192,17 @@ export const CurrentProject = objectType({
 
         return branchName
       },
+    })
+
+    t.nonNull.boolean('isDefaultSpecPattern', {
+      description: 'True if the project is using the default spec pattern',
+      resolve: async (source, args, ctx) => ctx.project.getIsDefaultSpecPattern(),
+    })
+
+    t.nonNull.field('browserStatus', {
+      type: BrowserStatusEnum,
+      description: 'If the browser is open or not',
+      resolve: (source, args, ctx) => ctx.coreData.app.browserStatus,
     })
   },
   sourceType: {

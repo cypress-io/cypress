@@ -6,7 +6,6 @@
     :disable="!canCollapse"
     class="rounded-t rounded-b outline-none overflow-hidden group"
     :class="[
-      classes.alertClass,
       classes.headerClass,
       {[`hocus-default border-1 border-transparent rounded ${classes.ring}`]: canCollapse}]"
     height="300"
@@ -49,19 +48,13 @@
             />
           </template>
         </AlertHeader>
-        <div
-          v-if="divider && open"
-          data-cy="alert-body-divider"
-          class="mx-auto h-1px transform w-[calc(100%-32px)] translate-y-1px"
-          :class="[classes.dividerClass]"
-        />
       </div>
     </template>
     <div
       v-if="$slots.default"
       class="text-left p-16px"
       data-cy="alert-body"
-      :class="bodyClass"
+      :class="computedBodyClass"
     >
       <slot />
     </div>
@@ -75,9 +68,7 @@ export type AlertClasses = {
   headerClass: string,
   suffixIconClass: string
   suffixButtonClass: string
-  alertClass: string
-  bodyClass?: string
-  dividerClass: string
+  bodyClass: string
   ring: string
 }
 </script>
@@ -103,8 +94,6 @@ const props = withDefaults(defineProps<{
   icon?: FunctionalComponent<SVGAttributes, {}>,
   headerClass?: string,
   bodyClass?: string,
-  divider?: boolean,
-  alertClass?: string,
   dismissible?: boolean,
   collapsible?: boolean,
   modelValue?: boolean,
@@ -112,12 +101,10 @@ const props = withDefaults(defineProps<{
 }>(), {
   title: undefined,
   modelValue: true,
-  alertClass: undefined,
   status: 'info',
   icon: undefined,
   headerClass: undefined,
-  divider: true,
-  bodyClass: '',
+  bodyClass: undefined,
   iconClasses: '',
 })
 
@@ -125,43 +112,38 @@ const title = computed(() => props.title ?? 'Alert')
 
 const alertStyles: Record<AlertStatus, AlertClasses> = {
   default: {
-    headerClass: 'text-gray-800',
+    headerClass: 'text-gray-800 bg-gray-100',
     suffixIconClass: 'icon-dark-gray-600',
     suffixButtonClass: 'text-gray-600',
-    alertClass: 'bg-gray-100',
-    dividerClass: 'bg-gray-300',
+    bodyClass: 'bg-gray-50',
     ring: 'hocus:(ring-gray-200 border-gray-300)',
   },
   info: {
-    headerClass: 'text-info-700',
+    headerClass: 'text-info-700 bg-info-100',
     suffixIconClass: 'icon-dark-info-500',
     suffixButtonClass: 'text-info-500',
-    alertClass: 'bg-info-100',
-    dividerClass: 'bg-info-300',
+    bodyClass: 'bg-info-50',
     ring: 'hocus:(ring-info-200 border-info-300)',
   },
   warning: {
-    headerClass: 'text-warning-500',
+    headerClass: 'text-warning-500 bg-warning-100',
     suffixIconClass: 'icon-dark-warning-500',
     suffixButtonClass: 'text-warning-500',
-    alertClass: 'bg-warning-100',
-    dividerClass: 'bg-warning-300',
+    bodyClass: 'bg-warning-50',
     ring: 'hocus:(ring-warning-200 border-warning-300)',
   },
   error: {
-    headerClass: 'text-error-600',
+    headerClass: 'text-error-600 bg-error-100',
     suffixIconClass: 'icon-dark-error-500',
     suffixButtonClass: 'text-error-500',
-    alertClass: 'bg-error-100',
-    dividerClass: 'bg-error-300',
+    bodyClass: 'bg-error-50',
     ring: 'hocus:(ring-error-200 border-error-300)',
   },
   success: {
-    headerClass: 'text-success-600',
+    headerClass: 'text-success-600 bg-success-100',
     suffixIconClass: 'icon-dark-success-500',
     suffixButtonClass: 'text-success-500',
-    alertClass: 'bg-success-100',
-    dividerClass: 'bg-success-300',
+    bodyClass: 'bg-success-50',
     ring: 'hocus:(ring-success-200 border-success-300)',
   },
 }
@@ -169,8 +151,8 @@ const alertStyles: Record<AlertStatus, AlertClasses> = {
 const classes = computed(() => {
   return {
     ...alertStyles[props.status],
-    headerClass: alertStyles[props.status].headerClass,
-    alertClass: props.alertClass ?? alertStyles[props.status].alertClass,
+    bodyClass: props.bodyClass ?? alertStyles[props.status].bodyClass,
+    headerClass: props.headerClass ?? alertStyles[props.status].headerClass,
   }
 })
 const canCollapse = computed(() => slots.default && props.collapsible)
@@ -187,5 +169,9 @@ const prefix = computed(() => {
   }
 
   return {}
+})
+
+const computedBodyClass = computed(() => {
+  return `${classes.value.bodyClass} ${props.bodyClass}`
 })
 </script>

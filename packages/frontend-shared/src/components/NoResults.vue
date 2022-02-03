@@ -8,15 +8,15 @@
       class="mx-auto"
       alt
     />
-    <p class="text-gray-500 text-18px leading-normal">
+    <p class="leading-normal text-gray-500 text-18px">
       {{ message || t('noResults.defaultMessage') }}
       <span
         v-if="search"
-        class="block truncate text-purple-500"
+        class="text-purple-500 truncate"
       >{{ search }}</span>
     </p>
     <Button
-      data-testid="no-results-clear"
+      data-cy="no-results-clear"
       class="mx-auto mt-20px"
       size="lg"
       variant="outline"

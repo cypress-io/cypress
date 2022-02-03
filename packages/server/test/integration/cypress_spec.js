@@ -116,7 +116,7 @@ describe('lib/cypress', () => {
     Fixtures.scaffold()
     this.todosPath = Fixtures.projectPath('todos')
     this.pristinePath = Fixtures.projectPath('pristine')
-    this.pristineWithConfigPath = Fixtures.projectPath('pristine-with-config-file')
+    this.pristineWithConfigPath = Fixtures.projectPath('pristine-with-e2e-testing')
     this.noScaffolding = Fixtures.projectPath('no-scaffolding')
     this.recordPath = Fixtures.projectPath('record')
     this.pluginConfig = Fixtures.projectPath('plugin-config')
@@ -384,7 +384,7 @@ describe('lib/cypress', () => {
       ])
       .then(() => {
         expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, {
-          url: 'http://localhost:8888/__/#/tests/tests/test2.coffee',
+          url: 'http://localhost:8888/__/#/specs/runner?file=tests/test2.coffee',
         })
 
         this.expectExitWith(0)
@@ -392,9 +392,9 @@ describe('lib/cypress', () => {
     })
 
     it('runs project by specific spec with default configuration', function () {
-      return cypress.start([`--run-project=${this.idsPath}`, `--spec=${this.idsPath}/cypress/integration/bar.js`, '--config', 'port=2020'])
+      return cypress.start([`--run-project=${this.idsPath}`, `--spec=${this.idsPath}/cypress/e2e/bar.js`, '--config', 'port=2020'])
       .then(() => {
-        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, { url: 'http://localhost:2020/__/#/tests/cypress/integration/bar.js' })
+        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, { url: 'http://localhost:2020/__/#/specs/runner?file=cypress/e2e/bar.js' })
         this.expectExitWith(0)
       })
     })
@@ -402,7 +402,7 @@ describe('lib/cypress', () => {
     it('runs project by specific absolute spec and exits with status 0', function () {
       return cypress.start([`--run-project=${this.todosPath}`, `--spec=${this.todosPath}/tests/test2.coffee`])
       .then(() => {
-        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, { url: 'http://localhost:8888/__/#/tests/tests/test2.coffee' })
+        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, { url: 'http://localhost:8888/__/#/specs/runner?file=tests/test2.coffee' })
         this.expectExitWith(0)
       })
     })
@@ -410,7 +410,7 @@ describe('lib/cypress', () => {
     it('runs project by limiting spec files via config.testFiles string glob pattern', function () {
       return cypress.start([`--run-project=${this.todosPath}`, `--config=testFiles=${this.todosPath}/tests/test2.coffee`])
       .then(() => {
-        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, { url: 'http://localhost:8888/__/#/tests/tests/test2.coffee' })
+        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, { url: 'http://localhost:8888/__/#/specs/runner?file=tests/test2.coffee' })
         this.expectExitWith(0)
       })
     })
@@ -418,9 +418,9 @@ describe('lib/cypress', () => {
     it('runs project by limiting spec files via config.testFiles as a JSON array of string glob patterns', function () {
       return cypress.start([`--run-project=${this.todosPath}`, '--config=testFiles=["**/test2.coffee","**/test1.js"]'])
       .then(() => {
-        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, { url: 'http://localhost:8888/__/#/tests/tests/test2.coffee' })
+        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, { url: 'http://localhost:8888/__/#/specs/runner?file=tests/test2.coffee' })
       }).then(() => {
-        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, { url: 'http://localhost:8888/__/#/tests/tests/test1.js' })
+        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, { url: 'http://localhost:8888/__/#/specs/runner?file=tests/test1.js' })
         this.expectExitWith(0)
       })
     })
@@ -470,13 +470,9 @@ describe('lib/cypress', () => {
           fs.statAsync(path.join(this.pristinePath, 'cypress.config.js')).reflect(),
         ])
       })
-      .each(ensureDoesNotExist).then(() => {
-        this.expectExitWithErr('NO_DEFAULT_CONFIG_FILE_FOUND', this.pristinePath)
-      })
     })
 
-    // NOTE: The scaffolding of files behavior has changed
-    it.skip('scaffolds out support + files if they do not exist', function () {
+    it('scaffolds out support + files if they do not exist', function () {
       const supportFolder = path.join(this.pristineWithConfigPath, 'cypress/support')
 
       ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.pristineWithConfigPath)
@@ -1663,9 +1659,6 @@ describe('lib/cypress', () => {
 
         return settings.writeForTesting(this.todosPath, rest)
       }).then(() => {
-        // TODO(tim): this shouldn't be needed when we refactor the ctx setup
-        process.env.LAUNCHPAD = '0'
-
         return cypress.start([
           '--port=2121',
           '--config',
@@ -1674,7 +1667,6 @@ describe('lib/cypress', () => {
           '--env=baz=baz',
         ])
       }).then(() => {
-        delete process.env.LAUNCHPAD
         const options = Events.start.firstCall.args[0]
 
         return openProject.create(this.todosPath, { ...options, testingType: 'e2e' }, [])
@@ -1748,12 +1740,8 @@ describe('lib/cypress', () => {
 
       sinon.stub(ServerE2E.prototype, 'open').resolves([2121, warning])
 
-      // TODO(tim): this shouldn't be needed when we refactor the ctx setup
-      process.env.LAUNCHPAD = '0'
-
       return cypress.start(['--port=2121', '--config', 'pageLoadTimeout=1000', '--foo=bar', '--env=baz=baz'])
       .then(() => {
-        delete process.env.LAUNCHPAD
         const options = Events.start.firstCall.args[0]
 
         Events.handleEvent(options, bus, event, 123, 'on:project:warning')

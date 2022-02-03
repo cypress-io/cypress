@@ -1,32 +1,44 @@
 <template>
   <div class="p-24px spec-container">
-    <CreateSpecModal
-      v-if="props.gql.currentProject?.currentTestingType"
-      :show="showModal"
-      :gql="props.gql"
-      @close="showModal = false"
-    />
     <SpecsListHeader
       v-model="search"
       class="pb-32px"
-      :result-count="specs?.length"
-      @newSpec="showModal = true"
+      :result-count="specs.length"
+      @show-create-spec-modal="emit('showCreateSpecModal')"
+      @show-spec-pattern-modal="showSpecPatternModal = true"
     />
-
-    <div class="grid grid-cols-2 children:font-medium children:text-gray-800">
+    <SpecPatternModal
+      v-if="props.gql.currentProject"
+      :show="showSpecPatternModal"
+      :gql="props.gql.currentProject"
+      @close="showSpecPatternModal = false"
+    />
+    <div
+      v-if="specs.length"
+      class="grid grid-cols-2 children:font-medium children:text-gray-800 "
+    >
       <div
-        class="flex justify-between items-center"
+        class="flex items-center justify-between"
         data-cy="specs-testing-type-header"
       >
         {{ props.gql.currentProject?.currentTestingType === 'component' ?
           t('specPage.componentSpecsHeader') : t('specPage.e2eSpecsHeader') }}
       </div>
-      <div class="flex justify-between items-center">
+      <div class="flex items-center justify-between">
         <div>{{ t('specPage.gitStatusHeader') }}</div>
       </div>
     </div>
+    <!--
+      The markup around the virtualized list is pretty delicate. We might be tempted to
+      combine the `v-if="specs.length"` above and the `:class="specs.length ? 'grid': 'hidden'"` below
+      into a single v-if on a `<template>` that would wrap both, but we are deliberately using
+      `hidden` here to ensure that the `.spec-list-container` element stays in the DOM when
+      the empty state is shown, fixing a bug that meant recovering from the empty state with the
+      "Clear Search" button didn't work as expected.
+    -->
     <div
-      class="grid pb-32px spec-list-container"
+      class="pb-32px spec-list-container"
+      :class="specs.length ? 'grid': 'hidden'"
       v-bind="containerProps"
     >
       <div
@@ -35,13 +47,17 @@
       >
         <SpecsListRowItem
           v-for="row in list"
+          :id="getIdIfDirectory(row)"
           :key="row.index"
         >
           <template #file>
             <RouterLink
               v-if="row.data.isLeaf && row.data"
               :key="row.data.data?.absolute"
+              class="focus:outline-transparent"
               :to="{ path: '/specs/runner', query: { file: row.data.data?.relative } }"
+              @click.meta.prevent="handleCtrlClick"
+              @click.ctrl.prevent="handleCtrlClick"
             >
               <SpecItem
                 :file-name="row.data.data?.fileName || row.data.name"
@@ -58,6 +74,7 @@
               :depth="row.data.depth - 2"
               :style="{ paddingLeft: `${((row.data.depth - 2) * 10) + 16}px` }"
               :indexes="getDirIndexes(row.data)"
+              :aria-controls="getIdIfDirectory(row)"
               @click="row.data.toggle"
             />
           </template>
@@ -71,6 +88,13 @@
         </SpecsListRowItem>
       </div>
     </div>
+    <NoResults
+      v-show="!specs.length"
+      :search="search"
+      :message="t('specPage.noResultsMessage')"
+      class="mt-56px"
+      @clear="handleClear"
+    />
   </div>
 </template>
 
@@ -80,7 +104,6 @@ import SpecListGitInfo from './SpecListGitInfo.vue'
 import SpecsListRowItem from './SpecsListRowItem.vue'
 import { gql } from '@urql/vue'
 import { computed, ref, watch } from 'vue'
-import CreateSpecModal from './CreateSpecModal.vue'
 import type { Specs_SpecsListFragment, SpecListRowFragment } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
 import { buildSpecTree, FuzzyFoundSpec, fuzzySortSpecs, getDirIndexes, makeFuzzyFoundSpec, useCachedSpecs } from '@packages/frontend-shared/src/utils/spec-utils'
@@ -88,40 +111,40 @@ import { useCollapsibleTree } from '@packages/frontend-shared/src/composables/us
 import RowDirectory from './RowDirectory.vue'
 import SpecItem from './SpecItem.vue'
 import { useVirtualList } from '@packages/frontend-shared/src/composables/useVirtualList'
+import NoResults from '@cy/components/NoResults.vue'
+import SpecPatternModal from '../components/SpecPatternModal.vue'
 
 const { t } = useI18n()
 
 gql`
-fragment SpecNode_SpecsList on SpecEdge {
-  node {
-    id
-    name
-    specType
-    absolute
-    baseName
-    fileName
-    specFileExtension
-    fileExtension
-    relative
-    gitInfo {
-      ...SpecListRow
-    }
+fragment SpecsList on Spec {
+  id
+  name
+  specType
+  absolute
+  baseName
+  fileName
+  specFileExtension
+  fileExtension
+  relative
+  gitInfo {
+    ...SpecListRow
   }
 }
 `
 
 gql`
 fragment Specs_SpecsList on Query {
-  ...CreateSpecModal
   currentProject {
     id
     projectRoot
     currentTestingType
-    specs: specs(first: 100) {
-      edges {
-        ...SpecNode_SpecsList
-      }
+    specs {
+      id
+      ...SpecsList
     }
+    config
+    ...SpecPatternModal
   }
 }
 `
@@ -130,12 +153,22 @@ const props = defineProps<{
   gql: Specs_SpecsListFragment
 }>()
 
-const showModal = ref(false)
+const emit = defineEmits<{
+  (e: 'showCreateSpecModal'): void
+}>()
+
+const showSpecPatternModal = ref(false)
+
 const search = ref('')
-const cachedSpecs = useCachedSpecs(computed(() => props.gql.currentProject?.specs?.edges || []))
+
+function handleClear () {
+  search.value = ''
+}
+
+const cachedSpecs = useCachedSpecs(computed(() => props.gql.currentProject?.specs || []))
 
 const specs = computed(() => {
-  const specs = cachedSpecs.value.map((x) => makeFuzzyFoundSpec(x.node))
+  const specs = cachedSpecs.value.map((x) => makeFuzzyFoundSpec(x))
 
   if (!search.value) {
     return specs
@@ -152,6 +185,19 @@ const { containerProps, list, wrapperProps, scrollTo } = useVirtualList(treeSpec
 // If you are scrolled down the virtual list and list changes,
 // reset scroll position to top of list
 watch(() => treeSpecList.value, () => scrollTo(0))
+
+function handleCtrlClick () {
+  // noop intended to reduce the chances of opening tests multiple tabs
+  // which is not a supported state in Cypress
+}
+
+function getIdIfDirectory (row) {
+  if (row.data.isLeaf && row.data) {
+    return undefined
+  }
+
+  return `speclist-${row.data.data.relative.replace(row.data.data.baseName, '')}`
+}
 </script>
 
 <style scoped>

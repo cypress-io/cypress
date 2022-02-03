@@ -1,12 +1,16 @@
 <template>
   <div class="h-screen min-w-728px grid grid-rows-[64px,1fr] grid-cols-[auto,1fr]">
-    <SidebarNavigation class="row-span-full" />
+    <SidebarNavigation
+      v-if="renderSidebar"
+      class="row-span-full"
+    />
 
     <HeaderBar
       v-if="showHeader"
       :show-browsers="true"
       :page-name="currentRoute.name?.toString()"
       data-cy="app-header-bar"
+      :allow-automatic-prompt-open="true"
     />
 
     <main
@@ -43,4 +47,6 @@ const currentRoute = useRoute()
 const showHeader = computed(() => {
   return currentRoute.meta.header !== false
 })
+
+const renderSidebar = window.__CYPRESS_MODE__ !== 'run'
 </script>

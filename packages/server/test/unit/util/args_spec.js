@@ -164,6 +164,31 @@ describe('lib/util/args', () => {
         return snapshot('invalid spec error', stripAnsi(err.message))
       }
     })
+
+    it('should be correctly parsing globs with lists & ranges', function () {
+      const options = this.setup('--spec', 'cypress/integration/{[!a]*.spec.js,sub1,{sub2,sub3/sub4}}/*.js')
+
+      expect(options.spec[0]).to.eq(`${cwd}/cypress/integration/{[!a]*.spec.js,sub1,{sub2,sub3/sub4}}/*.js`)
+    })
+
+    it('should be correctly parsing globs with a mix of lists, ranges & regular paths', function () {
+      const options = this.setup('--spec', 'cypress/integration/{[!a]*.spec.js,sub1,{sub2,sub3/sub4}}/*.js,cypress/integration/foo.spec.js')
+
+      expect(options.spec[0]).to.eq(`${cwd}/cypress/integration/{[!a]*.spec.js,sub1,{sub2,sub3/sub4}}/*.js`)
+      expect(options.spec[1]).to.eq(`${cwd}/cypress/integration/foo.spec.js`)
+    })
+
+    it('should be correctly parsing single glob with range', function () {
+      const options = this.setup('--spec', 'cypress/integration/[a-c]*/**')
+
+      expect(options.spec[0]).to.eq(`${cwd}/cypress/integration/[a-c]*/**`)
+    })
+
+    it('should be correctly parsing single glob with list', function () {
+      const options = this.setup('--spec', 'cypress/integration/{a,b,c}/*.js')
+
+      expect(options.spec[0]).to.eq(`${cwd}/cypress/integration/{a,b,c}/*.js`)
+    })
   })
 
   context('--tag', () => {
@@ -397,7 +422,6 @@ describe('lib/util/args', () => {
         browser: 'browser',
         ci: 'ci',
         ciBuildId: 'ciBuildId',
-        clearLogs: 'clearLogs',
         userNodePath: 'userNodePath',
         userNodeVersion: 'userNodeVersion',
         config: 'config',
@@ -411,7 +435,6 @@ describe('lib/util/args', () => {
         headed: 'headed',
         inspectBrk: 'inspectBrk',
         key: 'key',
-        logs: 'logs',
         mode: 'mode',
         outputPath: 'outputPath',
         parallel: 'parallel',
@@ -440,7 +463,6 @@ describe('lib/util/args', () => {
         '--browser=browser',
         '--ci=ci',
         '--ciBuildId=ciBuildId',
-        '--clearLogs=clearLogs',
         '--config=config',
         '--configFile=configFile',
         '--cwd=cwd',
@@ -452,7 +474,6 @@ describe('lib/util/args', () => {
         '--headed=headed',
         '--inspectBrk=inspectBrk',
         '--key=key',
-        '--logs=logs',
         '--mode=mode',
         '--outputPath=outputPath',
         '--parallel=parallel',

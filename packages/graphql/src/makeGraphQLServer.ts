@@ -7,6 +7,9 @@ import { SocketIOServer } from '@packages/socket'
 import type { Server } from 'http'
 import { graphqlHTTP, GraphQLParams } from 'express-graphql'
 import serverDestroy from 'server-destroy'
+import send from 'send'
+import { getPathToDist } from '@packages/resolve-dist'
+import httpProxy from 'http-proxy'
 
 import { graphqlSchema } from './schema'
 import { parse } from 'graphql'
@@ -27,11 +30,7 @@ export async function makeGraphQLServer () {
 
   app.use(cors())
 
-  app.get('/__cypress/shiki-themes', (req, res) => {
-    res.json([{}, {}])
-  })
-
-  app.get('/__cypress/launchpad-preload', (req, res) => {
+  app.get('/__launchpad/preload', (req, res) => {
     const ctx = getCtx()
 
     ctx.html.fetchLaunchpadInitialData().then((data) => {
@@ -42,7 +41,27 @@ export async function makeGraphQLServer () {
     })
   })
 
-  addGraphQLHTTP(app)
+  app.use('/__launchpad/graphql/:operationName?', graphQLHTTP)
+
+  function makeProxy (): express.Handler {
+    if (process.env.CYPRESS_INTERNAL_VITE_DEV) {
+      const viteProxy = httpProxy.createProxyServer({
+        target: `http://localhost:${process.env.CYPRESS_INTERNAL_VITE_LAUNCHPAD_PORT}/`,
+      })
+
+      return (req, res) => {
+        viteProxy.web(req, res, {}, (e) => {})
+      }
+    }
+
+    return (req, res) => {
+      send(req, req.params[0] ?? '', {
+        root: getPathToDist('launchpad'),
+      }).pipe(res)
+    }
+  }
+
+  app.get('/__launchpad/*', makeProxy())
 
   const graphqlPort = process.env.CYPRESS_INTERNAL_GRAPHQL_PORT
 
@@ -52,7 +71,7 @@ export async function makeGraphQLServer () {
     const ctx = getCtx()
     const port = (srv.address() as AddressInfo).port
 
-    const endpoint = `http://localhost:${port}/graphql`
+    const endpoint = `http://localhost:${port}/__launchpad/graphql`
 
     if (process.env.NODE_ENV === 'development') {
       /* eslint-disable-next-line no-console */
@@ -82,20 +101,16 @@ export async function makeGraphQLServer () {
   return dfd.promise
 }
 
-function addGraphQLHTTP (app: ReturnType<typeof express>) {
-  app.use('/graphql/:operationName?', graphqlHTTP((req, res, params) => {
-    const context = getCtx()
-    const ctx = SHOW_GRAPHIQL ? maybeProxyContext(params, context) : context
+export const graphQLHTTP = graphqlHTTP((req, res, params) => {
+  const context = getCtx()
+  const ctx = SHOW_GRAPHIQL ? maybeProxyContext(params, context) : context
 
-    return {
-      schema: graphqlSchema,
-      graphiql: SHOW_GRAPHIQL,
-      context: ctx,
-    }
-  }))
-
-  return app
-}
+  return {
+    schema: graphqlSchema,
+    graphiql: SHOW_GRAPHIQL,
+    context: ctx,
+  }
+})
 
 /**
  * Adds runtime validations during development to ensure patterns of access are enforced

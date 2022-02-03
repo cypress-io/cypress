@@ -1,7 +1,6 @@
 <template>
   <SettingsSection
     data-cy="settings-recordKey"
-    anchor-id="recordKey"
   >
     <template #title>
       {{ t('settingsPage.recordKey.title') }}
@@ -20,7 +19,7 @@
     </template>
     <div
       v-if="recordKey"
-      class="inline-flex justify-start gap-10px"
+      class="gap-10px inline-flex justify-start"
     >
       <CodeBox
         :code="recordKey"
@@ -45,16 +44,19 @@
 
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
-import { useI18n } from '@cy/i18n'
-import type { RecordKeyFragment } from '../../generated/graphql'
-import SettingsSection from '../SettingsSection.vue'
+import { gql } from '@urql/core'
 import Button from '@cy/components/Button.vue'
+import CopyButton from '@cy/components/CopyButton.vue'
+import ExternalLink from '@cy/gql-components/ExternalLink.vue'
+import { useExternalLink } from '@cy/gql-components/useExternalLink'
 import IconKey from '~icons/cy/placeholder_x16.svg'
 import IconExport from '~icons/cy/export_x16.svg'
-import { gql } from '@urql/core'
-import CopyButton from '@cy/components/CopyButton.vue'
+import type { RecordKeyFragment } from '../../generated/graphql'
+import SettingsSection from '../SettingsSection.vue'
 import CodeBox from './CodeBox.vue'
-import ExternalLink from '@packages/frontend-shared/src/gql-components/ExternalLink.vue'
+import { useI18n } from '@cy/i18n'
+
+const { t } = useI18n()
 
 gql`
 fragment RecordKey on CloudRecordKey {
@@ -65,11 +67,10 @@ fragment RecordKey on CloudRecordKey {
 
 const props = defineProps<{
   gql: RecordKeyFragment
+  manageKeysUrl: string
 }>()
 
-const openManageKeys = () => { }
-const showRecordKey = ref(false)
-const { t } = useI18n()
+const openManageKeys = useExternalLink(props.manageKeysUrl)
 
 const recordKey = computed(() => props.gql.key)
 </script>

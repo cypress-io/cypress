@@ -1,15 +1,18 @@
-// @ts-nocheck
 import _ from 'lodash'
 import utils from './utils'
 
 export class $Command {
+  // `attributes` is initiated at reset(), but ts cannot detect it.
+  // @ts-ignore
+  attributes: Record<string, any>
+
   constructor (obj = {}) {
     this.reset()
 
     this.set(obj)
   }
 
-  set (key, val) {
+  set (key, val?) {
     let obj
 
     if (_.isString(key)) {
@@ -100,7 +103,7 @@ export class $Command {
   stringify () {
     let { name, args } = this.attributes
 
-    args = _.reduce(args, (memo, arg) => {
+    args = _.reduce(args, (memo: string[], arg) => {
       arg = _.isString(arg) ? _.truncate(arg, { length: 20 }) : '...'
       memo.push(arg)
 

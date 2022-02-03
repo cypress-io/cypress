@@ -13,6 +13,7 @@ import { Response } from 'cross-fetch'
 
 import { CloudRunQuery } from '../support/mock-graphql/stubgql-CloudTypes'
 import { getOperationName } from '@urql/core'
+import pDefer from 'p-defer'
 
 interface InternalOpenProjectArgs {
   argv: string[]
@@ -62,6 +63,7 @@ export type E2ETaskMap = ReturnType<typeof makeE2ETasks> extends Promise<infer U
 interface FixturesShape {
   scaffold (): void
   scaffoldProject (project: string): void
+  scaffoldCommonNodeModules(): Promise<void>
   scaffoldWatch (): void
   remove (): void
   removeProject (name): void
@@ -102,11 +104,25 @@ async function makeE2ETasks () {
   clearCtx()
   ctx = setCtx(makeDataContext({ mode: 'open', modeOptions: { cwd: process.cwd() } }))
 
-  const gqlPort = await makeGraphQLServer()
+  const launchpadPort = await makeGraphQLServer()
+
+  const __internal_scaffoldProject = async (projectName: string) => {
+    if (fs.existsSync(Fixtures.projectPath(projectName))) {
+      Fixtures.removeProject(projectName)
+    }
+
+    Fixtures.scaffoldProject(projectName)
+
+    await Fixtures.scaffoldCommonNodeModules()
+
+    scaffoldedProjects.add(projectName)
+
+    return Fixtures.projectPath(projectName)
+  }
 
   return {
     /**
-     * Called before all tests, cleans up any scaffolded projects and returns the global "gqlPort".
+     * Called before all tests, cleans up any scaffolded projects and returns the global "launchpadPort".
      * The same GraphQL server is used for all integration tests, so we can
      * go to http://localhost:5555/graphql and debug the internal state of the application
      */
@@ -114,7 +130,7 @@ async function makeE2ETasks () {
       Fixtures.remove()
       scaffoldedProjects = new Set()
 
-      return { gqlPort }
+      return { launchpadPort }
     },
 
     /**
@@ -183,24 +199,14 @@ async function makeE2ETasks () {
     },
     async __internal_addProject (opts: InternalAddProjectOpts) {
       if (!scaffoldedProjects.has(opts.projectName)) {
-        this.__internal_scaffoldProject(opts.projectName)
+        await __internal_scaffoldProject(opts.projectName)
       }
 
       await ctx.actions.project.addProject({ path: Fixtures.projectPath(opts.projectName), open: opts.open })
 
       return Fixtures.projectPath(opts.projectName)
     },
-    __internal_scaffoldProject (projectName: string) {
-      if (fs.existsSync(Fixtures.projectPath(projectName))) {
-        Fixtures.removeProject(projectName)
-      }
-
-      Fixtures.scaffoldProject(projectName)
-
-      scaffoldedProjects.add(projectName)
-
-      return Fixtures.projectPath(projectName)
-    },
+    __internal_scaffoldProject,
     async __internal_openGlobal (argv: string[] = []): Promise<ResetOptionsResult> {
       const openArgv = ['--global', ...argv]
 
@@ -226,7 +232,7 @@ async function makeE2ETasks () {
         throw new Error(`${projectName} has not been scaffolded. Be sure to call cy.scaffoldProject('${projectName}') in the test, a before, or beforeEach hook`)
       }
 
-      const openArgv = [...argv, '--project', Fixtures.projectPath(projectName)]
+      const openArgv = [...argv, '--project', Fixtures.projectPath(projectName), '--port', '4455']
 
       // Runs the launchArgs through the whole pipeline for the CLI open process,
       // which probably needs a bit of refactoring / consolidating
@@ -252,6 +258,7 @@ async function makeE2ETasks () {
         require,
         process,
         sinon,
+        pDefer,
         projectDir (projectName) {
           if (!e2eProjectDirs.includes(projectName)) {
             throw new Error(`${projectName} is not a fixture project`)

@@ -1,7 +1,8 @@
 import type { DataContext } from '..'
 import type { AuthenticatedUserShape } from '../data'
 
-interface AuthMessage {type: string, browserOpened: boolean, name: string, message: string}
+export interface AuthMessage {type: string, browserOpened: boolean, name: string, message: string}
+
 export interface AuthApiShape {
   getUser(): Promise<Partial<AuthenticatedUserShape>>
   logIn(onMessage: (message: AuthMessage) => void): Promise<AuthenticatedUserShape>
@@ -31,6 +32,7 @@ export class AuthActions {
 
   async checkAuth () {
     const result = await this.ctx.cloud.executeRemoteGraphQL({
+      operationType: 'query',
       query: `query Cypress_CheckAuth { cloudViewer { id } }`,
       variables: {},
       requestPolicy: 'network-only',

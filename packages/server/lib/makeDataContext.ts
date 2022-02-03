@@ -1,5 +1,5 @@
 import { DataContext, getCtx, clearCtx, setCtx } from '@packages/data-context'
-import electron from 'electron'
+import electron, { OpenDialogOptions, SaveDialogOptions, BrowserWindow } from 'electron'
 import pkg from '@packages/root'
 import configUtils from '@packages/config'
 
@@ -28,6 +28,7 @@ import * as savedState from './saved_state'
 import appData from './util/app_data'
 import plugins from './plugins'
 import browsers from './browsers'
+import devServer from './plugins/dev-server'
 
 const { getBrowsers, ensureAndGetByNameOrPath } = browserUtils
 
@@ -49,6 +50,9 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
         const browsers = await ctx.browser.machineBrowsers()
 
         return await ensureAndGetByNameOrPath(nameOrPath, false, browsers)
+      },
+      async focusActiveBrowserWindow () {
+        return openProject.projectBase?.sendFocusBrowserMessage()
       },
     },
     errorApi: {
@@ -76,7 +80,17 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
         return user.get()
       },
       logIn (onMessage) {
-        return auth.start(onMessage, 'launchpad')
+        const windows = require('./gui/windows')
+        const originalIsMainWindowFocused = windows.isMainWindowFocused()
+        const onLogin = async () => {
+          if (originalIsMainWindowFocused || !ctx.browser.isFocusSupported(ctx.coreData.chosenBrowser)) {
+            windows.focusMainWindow()
+          } else {
+            await ctx.actions.browser.focusActiveBrowserWindow()
+          }
+        }
+
+        return auth.start(onMessage, 'launchpad', onLogin)
       },
       logOut () {
         return user.logOut()
@@ -90,7 +104,7 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
         return openProject.create(args.projectRoot, args, options)
       },
       insertProjectToCache (projectRoot: string) {
-        cache.insertProject(projectRoot)
+        return cache.insertProject(projectRoot)
       },
       getProjectRootsFromCache () {
         return cache.getProjectRoots()
@@ -116,6 +130,30 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       closeActiveProject () {
         return openProject.closeActiveProject()
       },
+      getConfig () {
+        return openProject.getConfig()
+      },
+      getCurrentProjectSavedState () {
+        // TODO: See if this is the best way we should be getting this config,
+        // shouldn't we have this already in the DataContext?
+        try {
+          return openProject.getConfig()?.state
+        } catch {
+          return {}
+        }
+      },
+      setPromptShown (slug) {
+        return openProject.getProject()
+        ?.saveState({
+          promptsShown: {
+            ...(openProject.getProject()?.state?.promptsShown ?? {}),
+            [slug]: Date.now(),
+          },
+        })
+      },
+      getDevServer () {
+        return devServer
+      },
     },
     electronApi: {
       openExternal (url: string) {
@@ -125,6 +163,12 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       },
       showItemInFolder (folder: string) {
         electron.shell.showItemInFolder(folder)
+      },
+      showOpenDialog (props: OpenDialogOptions) {
+        return electron.dialog.showOpenDialog(props)
+      },
+      showSaveDialog (window: BrowserWindow, props: SaveDialogOptions) {
+        return electron.dialog.showSaveDialog(window, props)
       },
     },
     localSettingsApi: {

@@ -7,13 +7,6 @@ module.exports = {
     'coverage': true,
   },
   'component': {
-    'specPattern': 'cypress/components/**/*.spec.{js,jsx}',
-    setupNodeEvents (on, config) {
-      const devServer = require('@cypress/react/plugins/next')
-
-      devServer(on, config)
-
-      return config
-    },
+    devServer: require('@cypress/react/plugins/next'),
   },
 }

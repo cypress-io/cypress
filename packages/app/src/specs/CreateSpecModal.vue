@@ -20,6 +20,9 @@
         :key="generator.id"
         v-model:title="title"
         :code-gen-glob="codeGenGlob"
+        :gql="props.gql.currentProject"
+        type="e2e"
+        spec-file-name="cypress/e2e/filename.cy.js"
         @restart="currentGeneratorId = undefined"
         @close="close"
       />
@@ -62,6 +65,7 @@ fragment CreateSpecModal on Query {
   ...CreateSpecCards
   currentProject {
     id
+    ...EmptyGenerator
     ...ComponentGeneratorStepOne_codeGenGlob
     ...StoryGeneratorStepOne_codeGenGlob
   }

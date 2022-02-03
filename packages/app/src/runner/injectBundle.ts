@@ -1,5 +1,5 @@
-export async function injectBundle () {
-  const src = '/__cypress/runner/cypress_runner.js'
+export async function injectBundle (namespace: string) {
+  const src = `/${namespace}/runner/cypress_runner.js`
 
   const alreadyInjected = document.querySelector(`script[src="${src}"]`)
 
@@ -15,7 +15,7 @@ export async function injectBundle () {
   const link = document.createElement('link')
 
   link.rel = 'stylesheet'
-  link.href = '/__cypress/runner/cypress_runner.css'
+  link.href = `/${namespace}/runner/cypress_runner.css`
 
   document.head.appendChild(script)
   document.head.appendChild(link)

@@ -3,7 +3,6 @@ const _ = require('lodash')
 const strip = require('strip-ansi')
 const chalk = require('chalk')
 const AU = require('ansi_up')
-const Promise = require('bluebird')
 const { stripIndent } = require('./util/strip_indent')
 
 const ansi_up = new AU.default
@@ -542,6 +541,15 @@ const getMsgByType = function (type, ...args) {
         https://on.cypress.io/renderer-process-crashed`
     case 'AUTOMATION_SERVER_DISCONNECTED':
       return 'The automation client disconnected. Cannot continue running tests.'
+
+    case 'MULTIPLE_SUPPORT_FILES_FOUND':
+      return stripIndent`\
+        There are multiple support files.
+
+        Your \`supportFile\` is set to \`${arg1}\`, and we found \`${arg2}\`.
+
+        Correct your supportFile config or merge the files into one.`
+
     case 'SUPPORT_FILE_NOT_FOUND':
       return stripIndent`\
         The support file is missing or invalid.
@@ -570,9 +578,26 @@ const getMsgByType = function (type, ...args) {
         It exported:`
 
       return { msg, details: JSON.stringify(arg2) }
-    case 'SETUP_NODE_EVENTS_DO_NOT_SUPPORT_DEV_SERVER':
+    case 'COMPONENT_DEV_SERVER_IS_NOT_A_FUNCTION':
       msg = stripIndent`\
-        The \`setupNodeEvents\` method do not support \`dev-server:start\`, use \`devServer\` instead:
+          The \`component\`.\`devServer\` method must be a function with the following signature:
+
+          \`\`\`
+          devServer: (cypressConfig: DevServerConfig, devServerConfig: ComponentDevServerOpts) {
+
+          }
+          \`\`\`
+
+          Learn more: https://on.cypress.io/plugins-api
+
+          We loaded the \`devServer\` from: \`${arg1}\`
+  
+          It exported:`
+
+      return { msg, details: JSON.stringify(arg2) }
+    case 'SETUP_NODE_EVENTS_DO_NOT_SUPPORT_DEV_SERVER':
+      return stripIndent`\
+        The \`setupNodeEvents\` method does not support \`dev-server:start\`, use \`devServer\` instead:
 
         \`\`\`
         devServer (cypressConfig, devServerConfig) {
@@ -581,12 +606,7 @@ const getMsgByType = function (type, ...args) {
         \`\`\`
 
         Learn more: https://on.cypress.io/plugins-api
-
-        We loaded the \`setupNodeEvents\` from: \`${arg1}\`
-
-        It exported:`
-
-      return { msg, details: JSON.stringify(arg2) }
+      `
     case 'PLUGINS_FUNCTION_ERROR':
       msg = stripIndent`\
         The function exported by the plugins file threw an error.
@@ -1155,16 +1175,13 @@ const log = function (err, color = 'red') {
   return err
 }
 
-const logException = Promise.method(function (err) {
+const logException = async function (err) {
   // TODO: remove context here
   if (this.log(err) && isProduction()) {
-    // log this exception since
-    // its not a known error
-    return require('./logger')
-    .createException(err)
-    .catch(() => {})
+    // log this exception since its not a known error
+    await require('./exception').create(err)
   }
-})
+}
 
 module.exports = {
   get,

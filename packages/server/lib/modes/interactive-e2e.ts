@@ -14,8 +14,7 @@ import { EventEmitter } from 'events'
 import Events from '../gui/events'
 
 const isDev = () => {
-  // TODO: (tim) ensure the process.env.LAUNCHPAD gets removed before release
-  return Boolean(process.env['CYPRESS_INTERNAL_ENV'] === 'development' || process.env.LAUNCHPAD)
+  return Boolean(process.env['CYPRESS_INTERNAL_ENV'] === 'development')
 }
 
 export = {

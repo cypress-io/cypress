@@ -15,27 +15,28 @@
  *
  */
 import { watchEffect } from 'vue'
-import { getMobxRunnerStore, initializeMobxStore, useAutStore } from '../store'
+import { getMobxRunnerStore, initializeMobxStore, useAutStore, useRunnerUiStore } from '../store'
 import { injectBundle } from './injectBundle'
-import type { BaseSpec } from '@packages/types/src/spec'
+import type { SpecFile } from '@packages/types/src/spec'
 import { UnifiedReporterAPI } from './reporter'
 import { getRunnerElement, empty } from './utils'
 import { IframeModel } from './iframe-model'
 import { AutIframe } from './aut-iframe'
 import { EventManager } from './event-manager'
 import { client } from '@packages/socket/lib/browser'
+import { decodeBase64Unicode } from '@packages/frontend-shared/src/utils/base64'
+import type { AutomationElementId } from '@packages/types/src'
+import { useSnapshotStore } from './snapshot-store'
 
 let _eventManager: EventManager | undefined
 
-export function createWebsocket () {
-  const PORT_MATCH = /serverPort=(\d+)/.exec(window.location.search)
-
+export function createWebsocket (socketIoRoute) {
   const socketConfig = {
-    path: '/__socket.io',
+    path: socketIoRoute,
     transports: ['websocket'],
   }
 
-  const ws = PORT_MATCH ? client(`http://localhost:${PORT_MATCH[1]}`, socketConfig) : client(socketConfig)
+  const ws = client(socketConfig)
 
   ws.on('connect', () => {
     ws.emit('runner:connected')
@@ -62,8 +63,6 @@ export function getEventManager () {
 
   return _eventManager
 }
-
-const randomString = `${Math.random()}`
 
 let _autIframeModel: AutIframe
 
@@ -116,12 +115,13 @@ function createIframeModel () {
  * for communication between driver, runner, reporter via event bus,
  * and server (via web socket).
  */
-function setupRunner () {
+function setupRunner (namespace: AutomationElementId) {
   const mobxRunnerStore = getMobxRunnerStore()
+  const runnerUiStore = useRunnerUiStore()
 
   getEventManager().addGlobalListeners(mobxRunnerStore, {
-    automationElement: '__cypress-string',
-    randomString,
+    randomString: runnerUiStore.randomString,
+    element: `${namespace}-string`,
   })
 
   getEventManager().start(window.UnifiedRunner.config)
@@ -163,6 +163,8 @@ function getSpecUrl (namespace: string, specSrc: string) {
  * or re-running the current spec.
  */
 function teardownSpec () {
+  useSnapshotStore().$reset()
+
   return getEventManager().teardown(getMobxRunnerStore())
 }
 
@@ -187,12 +189,12 @@ export async function teardown () {
  * Cypress on it.
  *
  */
-function runSpecCT (spec: BaseSpec) {
+function runSpecCT (spec: SpecFile) {
   // TODO: figure out how to manage window.config.
   const config = window.UnifiedRunner.config
 
   // this is how the Cypress driver knows which spec to run.
-  config.spec = spec
+  config.spec = setSpecForDriver(spec)
 
   // creates a new instance of the Cypress driver for this spec,
   // initializes a bunch of listeners
@@ -204,9 +206,16 @@ function runSpecCT (spec: BaseSpec) {
   // clear AUT, if there is one.
   empty($runnerRoot)
 
+  // create root for new AUT
+  const $container = document.createElement('div')
+
+  $container.classList.add('screenshot-height-container')
+
+  $runnerRoot.append($container)
+
   // create new AUT
   const autIframe = getAutIframeModel()
-  const $autIframe: JQuery<HTMLIFrameElement> = autIframe.create().appendTo($runnerRoot)
+  const $autIframe: JQuery<HTMLIFrameElement> = autIframe.create().appendTo($container)
 
   const specSrc = getSpecUrl(config.namespace, spec.absolute)
 
@@ -229,17 +238,26 @@ function createSpecIFrame (specSrc: string) {
   return el
 }
 
+// this is how the Cypress driver knows which spec to run.
+// we change name internally to be the relative path, and
+// the `spec.name` property is now `spec.baseName`.
+// but for backwards compatibility with the Cypress.spec API
+// just assign `name` to be `baseName`.
+function setSpecForDriver (spec: SpecFile) {
+  return { ...spec, name: spec.baseName }
+}
+
 /**
  * Set up an E2E spec by creating a fresh AUT for the spec to evaluate under,
  * a Spec IFrame to load the spec's source code, and
  * initialize Cypress on the AUT.
  */
-function runSpecE2E (spec: BaseSpec) {
+function runSpecE2E (spec: SpecFile) {
   // TODO: manage config with GraphQL, don't put it on window.
   const config = window.UnifiedRunner.config
 
   // this is how the Cypress driver knows which spec to run.
-  config.spec = spec
+  config.spec = setSpecForDriver(spec)
 
   // creates a new instance of the Cypress driver for this spec,
   // initializes a bunch of listeners
@@ -254,16 +272,20 @@ function runSpecE2E (spec: BaseSpec) {
   // create root for new AUT
   const $container = document.createElement('div')
 
+  $container.classList.add('screenshot-height-container')
+
   $runnerRoot.append($container)
 
   // create new AUT
   const autIframe = getAutIframeModel()
 
-  autIframe.showInitialBlankContents()
   const $autIframe: JQuery<HTMLIFrameElement> = autIframe.create().appendTo($container)
 
+  autIframe.showInitialBlankContents()
+
   // create Spec IFrame
-  const specSrc = getSpecUrl(config.namespace, spec.relative)
+  const specSrc = getSpecUrl(config.namespace, encodeURIComponent(spec.relative))
+
   const $specIframe = createSpecIFrame(specSrc)
 
   // append to document, so the iframe will execute the spec
@@ -285,16 +307,14 @@ function runSpecE2E (spec: BaseSpec) {
 async function initialize () {
   isTorndown = false
 
-  await injectBundle()
+  const config = JSON.parse(decodeBase64Unicode(window.__CYPRESS_CONFIG__.base64Config))
+
+  await injectBundle(config.namespace)
 
   if (isTorndown) {
     return
   }
 
-  const response = await window.fetch('/api')
-  const data = await response.json()
-
-  const config = window.UnifiedRunner.decodeBase64(data.base64Config) as any
   const autStore = useAutStore()
 
   // TODO(lachlan): use GraphQL to get the viewport dimensions
@@ -316,7 +336,7 @@ async function initialize () {
     store.updateDimensions(config.viewportWidth, config.viewportHeight)
   })
 
-  window.UnifiedRunner.MobX.runInAction(() => setupRunner())
+  window.UnifiedRunner.MobX.runInAction(() => setupRunner(config.namespace))
 }
 
 /**
@@ -338,7 +358,7 @@ async function initialize () {
  * 5. Setup the spec. This involves a few things, see the `runSpecCT` function's
  *    description for more information.
  */
-async function executeSpec (spec: BaseSpec) {
+async function executeSpec (spec: SpecFile) {
   await teardownSpec()
 
   const mobxRunnerStore = getMobxRunnerStore()

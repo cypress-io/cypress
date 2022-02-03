@@ -2,7 +2,7 @@
   <Dialog
     :open="modelValue"
     class="inset-0 z-10 fixed overflow-y-auto"
-    @close="clickOutside && setIsOpen(false)"
+    @close="clickOutside && closeModal()"
   >
     <div class="flex min-h-screen items-center justify-center">
       <slot
@@ -12,13 +12,14 @@
         <DialogOverlay class="bg-gray-800 opacity-90 inset-0 fixed" />
       </slot>
       <div
+        data-cy="standard-modal"
         class="bg-white rounded mx-auto ring-[#9095AD40] ring-4 relative"
         :class="props.class || ''"
       >
         <StandardModalHeader
           :help-link="helpLink"
           :help-text="helpText"
-          @close="setIsOpen(false)"
+          @close="closeModal"
         >
           <slot name="title">
             {{ title }}
@@ -57,6 +58,8 @@ import {
   DialogDescription,
 } from '@headlessui/vue'
 
+import { defaultMessages } from '@cy/i18n'
+
 const emit = defineEmits<{
   (event: 'update:modelValue', value: boolean): void
 }>()
@@ -67,12 +70,12 @@ const props = withDefaults(defineProps<{
   helpText?: string
   clickOutside?: boolean
   variant?: 'bare'
-  title?: string,
+  title?: string
   class?: string | string[] | Record<string, any>
 }>(), {
   clickOutside: true,
   modelValue: false,
-  helpText: 'Need help?',
+  helpText: `${defaultMessages.links.needHelp}`,
   helpLink: 'https://on.cypress.io',
   class: undefined,
   variant: undefined,
@@ -83,4 +86,7 @@ const setIsOpen = (val: boolean) => {
   emit('update:modelValue', val)
 }
 
+const closeModal = () => {
+  setIsOpen(false)
+}
 </script>

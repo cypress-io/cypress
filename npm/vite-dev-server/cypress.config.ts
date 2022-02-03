@@ -1,12 +1,11 @@
 import { defineConfig } from 'cypress'
 
 export default defineConfig({
-  pluginsFile: 'cypress/plugins.js',
-  video: false,
-  fixturesFolder: false,
-  component: {
-    supportFile: 'cypress/support.js',
-    specPattern: 'cypress/components/**/*.spec.*',
+  'pluginsFile': 'cypress/plugins.js',
+  'video': false,
+  'fixturesFolder': false,
+  'component': {
+    'supportFile': 'cypress/support.js',
     devServer (cypressConfig) {
       const path = require('path')
       const { startDevServer } = require('./dist')

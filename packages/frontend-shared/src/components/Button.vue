@@ -1,8 +1,8 @@
 <template>
   <button
-    v-if="!href"
+    v-if="!props.href && !props.to"
     style="width: fit-content"
-    class="flex items-center leading-tight border rounded gap-8px outline-none"
+    class="border rounded flex outline-none leading-tight gap-8px items-center"
     :class="classes"
     :disabled="disabled"
   >
@@ -34,12 +34,17 @@
       </template>
     </ButtonInternals>
   </button>
+
+  <!-- context for use of aria role and disabled here: https://www.scottohara.me/blog/2021/05/28/disabled-links.html -->
   <component
-    :is="internalLink ? BaseLink : ExternalLink"
+    :is="linkVersion"
     v-else
-    :href="href"
+    :href="props.disabled ? null : props.href"
+    :to="props.disabled ? null : props.to"
+    :role="props.disabled ? 'link' : null"
+    :aria-disabled="props.disabled ? 'disabled' : null "
     style="width: fit-content"
-    class="flex select-none items-center border rounded gap-8px outline-none"
+    class="border rounded flex outline-none gap-8px items-center select-none"
     :class="classes"
   >
     <ButtonInternals>
@@ -81,23 +86,15 @@ import BaseLink from '../components/BaseLink.vue'
 export default defineComponent({
   inheritAttrs: true,
 })
-</script>
-
-<script lang="ts" setup>
-
-// eslint-disable-next-line no-duplicate-imports
-import { computed, useAttrs } from 'vue'
-
-// eslint-disable-next-line no-duplicate-imports
-import type { ButtonHTMLAttributes, FunctionalComponent, SVGAttributes } from 'vue'
 
 const VariantClassesTable = {
-  primary: 'border-indigo-500 bg-indigo-500 text-white',
-  outline: 'border-gray-100 text-indigo-600',
-  tertiary: 'text-indigo-500 bg-indigo-50 border-transparent',
+  primary: 'border-indigo-500 bg-indigo-500 text-white hocus-default',
+  outline: 'border-gray-100 text-indigo-600 hocus-default',
+  tertiary: 'text-indigo-500 bg-indigo-50 border-transparent hocus-default',
   pending: 'bg-gray-500 text-white',
-  link: 'border-transparent text-indigo-600',
+  link: 'border-transparent text-indigo-600 hocus-default',
   text: 'border-0',
+  secondary: 'bg-jade-500 text-white hocus-secondary',
 } as const
 
 export type ButtonVariants = keyof(typeof VariantClassesTable)
@@ -111,6 +108,17 @@ const SizeClassesTable = {
 
 export type ButtonSizes = keyof(typeof SizeClassesTable)
 
+</script>
+
+<script lang="ts" setup>
+
+// eslint-disable-next-line no-duplicate-imports
+import { computed, useAttrs } from 'vue'
+import { RouterLink } from 'vue-router'
+
+// eslint-disable-next-line no-duplicate-imports
+import type { ButtonHTMLAttributes, FunctionalComponent, SVGAttributes } from 'vue'
+
 const props = defineProps<{
   prefixIcon?: FunctionalComponent<SVGAttributes>
   suffixIcon?: FunctionalComponent<SVGAttributes>
@@ -119,6 +127,7 @@ const props = defineProps<{
   prefixIconClass?: string
   suffixIconClass?: string
   href?: string // will cause the button to render as link element with button styles
+  to?: object | string // will render as a router-link with button styles
   internalLink?: boolean
   disabled?: boolean
 }>()
@@ -131,11 +140,19 @@ const sizeClasses = computed(() => (SizeClassesTable[props.size || 'md']))
 
 const classes = computed(() => {
   return [
-    { 'hocus-default': props.variant !== 'pending' },
     variantClasses.value,
     sizeClasses.value,
     attrs.class,
     (props.disabled && props.variant !== 'pending') ? 'opacity-50' : '',
+    props.disabled ? 'cursor-default' : '',
   ]
+})
+
+const linkVersion = computed(() => {
+  if (!props.to) {
+    return props.internalLink ? BaseLink : ExternalLink
+  }
+
+  return RouterLink
 })
 </script>

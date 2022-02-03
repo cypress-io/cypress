@@ -1,7 +1,9 @@
 <template>
   <template v-if="query.data.value">
-    <HeaderBar />
-    <div class="p-24px">
+    <HeaderBar
+      class="w-full z-30 fixed"
+    />
+    <div class="px-24px pt-86px">
       <BaseError
         v-if="query.data.value.baseError"
         :gql="query.data.value.baseError"
@@ -11,8 +13,7 @@
         :gql="query.data.value"
       />
       <MigrationWizard
-        v-else-if="currentProject?.needsLegacyConfigMigration && query.data.value.migration"
-        :gql="query.data.value.migration"
+        v-else-if="currentProject?.needsLegacyConfigMigration"
       />
       <template v-else>
         <ScaffoldedFiles
@@ -30,8 +31,8 @@
         <Spinner v-else-if="currentProject?.isLoadingConfigFile" />
         <template v-else-if="currentProject?.isLoadingNodeEvents">
           <LaunchpadHeader
-            title="Initializing Config..."
-            description="Please wait while we load your project and find browsers installed on your system"
+            :title="t('components.loading.config.title')"
+            :description="t('components.loading.config.description')"
           />
           <Spinner />
         </template>
@@ -65,6 +66,10 @@
           v-else-if="currentProject.currentTestingType === 'component' && !currentProject.isCTConfigured"
           :gql="query.data.value"
         />
+        <ScaffoldLanguageSelect
+          v-else-if="currentProject.currentTestingType === 'e2e' && !currentProject.isE2EConfigured"
+          :gql="query.data.value"
+        />
         <OpenBrowser v-else />
       </template>
     </div>
@@ -77,6 +82,7 @@ import { gql, useQuery } from '@urql/vue'
 import { MainLaunchpadQueryDocument } from './generated/graphql'
 import TestingTypeCards from './setup/TestingTypeCards.vue'
 import Wizard from './setup/Wizard.vue'
+import ScaffoldLanguageSelect from './setup/ScaffoldLanguageSelect.vue'
 import GlobalPage from './global/GlobalPage.vue'
 import BaseError from './error/BaseError.vue'
 import StandardModal from '@cy/components/StandardModal.vue'
@@ -98,6 +104,7 @@ gql`
 fragment MainLaunchpadQueryData on Query {
   ...TestingTypeCards
   ...Wizard
+  ...ScaffoldLanguageSelect
   baseError {
     ...BaseError_Data
   }
@@ -105,6 +112,7 @@ fragment MainLaunchpadQueryData on Query {
   currentProject {
     id
     isCTConfigured
+    isE2EConfigured
     isLoadingConfigFile
     isLoadingNodeEvents
     needsLegacyConfigMigration
@@ -119,9 +127,6 @@ fragment MainLaunchpadQueryData on Query {
   isInGlobalMode
   ...GlobalPage
   ...ScaffoldedFiles
-  migration {
-    ...MigrationWizard
-  }
 }
 `
 

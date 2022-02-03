@@ -12,8 +12,8 @@ const { isDefault } = require('./util/config')
 const getExampleSpecsFullPaths = cypressEx.getPathToExamples()
 const getExampleFolderFullPaths = cypressEx.getPathToExampleFolders()
 
-const getPathFromIntegrationFolder = (file) => {
-  return file.substring(file.indexOf('integration/') + 'integration/'.length)
+const getPathFromE2EFolder = (file) => {
+  return file.substring(file.indexOf('e2e/') + 'e2e/'.length)
 }
 
 const getExampleSpecs = (foldersOnly = false) => {
@@ -21,9 +21,9 @@ const getExampleSpecs = (foldersOnly = false) => {
 
   return paths
   .then((fullPaths) => {
-    // short paths relative to integration folder (i.e. examples/actions.spec.js)
+    // short paths relative to e2e folder (i.e. examples/actions.spec.js)
     const shortPaths = _.map(fullPaths, (file) => {
-      return getPathFromIntegrationFolder(file)
+      return getPathFromE2EFolder(file)
     })
 
     // index for quick lookup and for getting full path from short path
@@ -41,7 +41,7 @@ const getIndexedExample = (file, index) => {
     file = file.split(path.sep).join(path.posix.sep)
   }
 
-  return index[getPathFromIntegrationFolder(file)]
+  return index[getPathFromE2EFolder(file)]
 }
 
 const getFileSize = (file) => {
@@ -73,12 +73,12 @@ const isNewProject = (config) => {
 module.exports = {
   isNewProject,
 
-  integration (folder, config) {
-    debug(`integration folder ${folder}`)
+  e2e (folder, config) {
+    debug(`e2e folder ${folder}`)
 
-    // skip if user has explicitly set integrationFolder
+    // skip if user has explicitly set e2eFolder
     // or if user has set up component testing
-    if (!isDefault(config, 'integrationFolder') || componentTestingEnabled(config)) {
+    if (!isDefault(config, 'e2eFolder') || componentTestingEnabled(config)) {
       return Promise.resolve()
     }
 
@@ -183,91 +183,5 @@ module.exports = {
 
       return fn.call(this)
     })
-  },
-
-  fileTree (config = {}) {
-    // returns a tree-like structure of what files are scaffolded.
-    // this should be updated any time we add, remove, or update the name
-    // of a scaffolded file
-
-    const getFilePath = (dir, name) => {
-      return path.relative(config.projectRoot, path.join(dir, name))
-    }
-
-    return getExampleSpecs()
-    .then((specs) => {
-      let files = []
-
-      if (!componentTestingEnabled(config)) {
-        files = _.map(specs.shortPaths, (file) => {
-          return getFilePath(config.integrationFolder, file)
-        })
-      }
-
-      if (config.fixturesFolder) {
-        files = files.concat([
-          getFilePath(config.fixturesFolder, 'example.json'),
-        ])
-      }
-
-      if (config.pluginsFile) {
-        files = files.concat([
-          getFilePath(path.dirname(config.pluginsFile), 'index.js'),
-        ])
-      }
-
-      debug('scaffolded files %j', files)
-
-      return this._fileListToTree(files)
-    })
-  },
-
-  _fileListToTree (files) {
-    // turns a list of file paths into a tree-like structure where
-    // each entry has a name and children if it's a directory
-
-    return _.reduce(files, (tree, file) => {
-      let placeholder = tree
-      const parts = file.split('/')
-
-      _.each(parts, (part, index) => {
-        let entry = _.find(placeholder, { name: part })
-
-        if (!entry) {
-          entry = { name: part }
-          if (index < (parts.length - 1)) {
-            // if it's not the last, it's a directory
-            entry.children = []
-          }
-
-          placeholder.push(entry)
-        }
-
-        placeholder = entry.children
-      })
-
-      return tree
-    }, [])
-  },
-
-  _assertInFileTree (filePath, config) {
-    return true
-  },
-
-  _inFileTree (fileTree, filePath) {
-    let branch = fileTree
-    const parts = filePath.split('/')
-
-    for (let part of parts) {
-      let found = _.find(branch, { name: part })
-
-      if (found) {
-        branch = found.children
-      } else {
-        return false
-      }
-    }
-
-    return true
   },
 }

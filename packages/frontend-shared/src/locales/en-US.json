@@ -18,16 +18,28 @@
     "button": {
       "cancel": "Cancel"
     },
+    "loading": {
+      "config": {
+        "title": "Initializing Config...",
+        "description": "Please wait while we load your project and find browsers installed on your system"
+      }
+    },
     "select": {
       "placeholder": "Choose an option..."
     },
     "alert": {
       "dismissAriaLabel": "Dismiss"
+    },
+    "specPattern": {
+      "matches": "{0} Matches"
+    },
+    "specPatternModal": {
+      "title": "Spec pattern settings"
     }
   },
   "clipboard": {
     "copy": "Copy",
-    "copied": "Copied"
+    "copied": "Copied!"
   },
   "actions": {
     "close": "Close"
@@ -48,6 +60,8 @@
   },
   "createSpec": {
     "newSpec": "New Spec",
+    "createSpec": "Create Spec",
+    "done": "Done!",
     "updateSpecPattern": "Update Spec Pattern",
     "newSpecModalTitle": "Create a new spec",
     "successPage": {
@@ -83,7 +97,10 @@
       "importEmptySpec": {
         "header": "Create new empty spec",
         "description": "We'll generate an empty spec file which can be used to start testing your application.",
-        "chooseFilenameHeader": "Choose a filename for this spec"
+        "chooseFilenameHeader": "Choose a filename for this spec",
+        "inputPlaceholder": "Enter spec file...",
+        "invalidSpecWarning": "Your filename is invalid because it doesn't match the following ",
+        "specExtensionWarning": "We recommend naming your spec with the pattern: "
       }
     },
     "component": {
@@ -97,6 +114,10 @@
         "header": "Create from component",
         "description": "We'll generate an empty spec file which can be used to import and test any component in this project.",
         "chooseAComponentHeader": "Choose a component"
+      },
+      "importEmptySpec": {
+        "header": "Create a new spec",
+        "invalidComponentWarning": "We couldn't generate a valid filename matching your custom "
       }
     }
   },
@@ -112,10 +133,11 @@
     "rows": {
       "gitInfoWithAuthor": "{fileState} {timeAgo} by {author}",
       "gitInfo": "{fileState} {timeAgo}"
-    }
+    },
+    "noResultsMessage": "No specs matched your search:"
   },
   "noResults": {
-    "defaultMessage": "No results matched your search",
+    "defaultMessage": "No results matched your search:",
     "clearSearch": "Clear Search"
   },
   "sideBar": {
@@ -146,16 +168,15 @@
       "ciTitle": "Run in CI/CD",
       "ciSetup": "Set up CI",
       "fasterTests": "Run tests faster",
-      "smartOrchestration": "Smart Orchestration",
       "prompts": {
-        "ci": {
+        "ci1": {
           "title": "Configure CI",
           "description": "Optimize your tests in CI by following these guides.",
           "seeOtherGuides": "See Other Guides",
           "intro": "Introduction to CI",
           "learnTheBasics": "Learn the basics of running Cypress in CI."
         },
-        "orchestration": {
+        "orchestration1": {
           "title": "Run tests faster in CI",
           "parallelTime": "5 mins",
           "noParallelTime": "12 mins",
@@ -180,6 +201,7 @@
       "titleFailed": "Login Failed",
       "titleBrowserError": "Browser Error",
       "actionLogin": "Log In",
+      "profileMenuLabel": "Profile and Log Out",
       "actionLogout": "Log Out",
       "actionContinue": "Continue",
       "actionOpening": "Opening Browser",
@@ -203,6 +225,10 @@
       "readTheDocsButton": "Read the docs",
       "retryButton": "Try again",
       "stackTraceLabel": "Stack Trace"
+    },
+    "noInternet": {
+      "header": "You have no internet connection",
+      "message": "Check your internet connection to pull the latest data from the dashboard."
     }
   },
   "setupPage": {
@@ -211,19 +237,20 @@
       "frameworkPlaceholder": "Pick a framework",
       "bundlerLabel": "Bundler",
       "bundlerPlaceholder": "Pick a bundler",
-      "languageLabel": "Language"
+      "languageLabel": "Language",
+      "configFileLanguageLabel": "Cypress Config File"
     },
     "install": {
       "startButton": "Install",
-      "confirmManualInstall": "I've installed them"
+      "waitForInstall": "Waiting for you to install the dependencies...",
+      "checkForUpdates": "Refresh",
+      "installed": "installed",
+      "pendingInstall": "pending installation"
     },
     "step": {
       "continue": "Continue",
       "next": "Next Step",
       "back": "Back"
-    },
-    "openBrowser": {
-      "launch": "Launch"
     },
     "configFile": {
       "createManually": "Create file manually",
@@ -253,16 +280,16 @@
     "removeProject": "Remove Project",
     "openInIDE": "Open In IDE",
     "openInFinder": "Open In Finder",
-    "noResultsMessage": "No projects matched your search"
+    "noResultsMessage": "No projects matched your search:"
   },
   "welcomePage": {
     "review": "Review the differences between each testing type",
     "codeExample": "Code Example",
     "compareTypes": {
       "e2eTitle": "End-to-end Tests",
-      "e2ebullet1": "Visit URLs via",
-      "e2ebullet2": "Test flows and functionality across multiple pages.",
-      "e2ebullet3": "Ideal for testing integrated flows in CD workflows.",
+      "e2eBullet1": "Visit URLs via",
+      "e2eBullet2": "Test flows and functionality across multiple pages.",
+      "e2eBullet3": "Ideal for testing integrated flows in CD workflows.",
       "componentTitle": "Component Tests",
       "ctBullet1": "Import components via",
       "ctBullet2": "Test individual components of a design system in isolation",
@@ -305,7 +332,10 @@
     "editor": {
       "title": "External Editor",
       "description": "External editor to use for editing code opened when using Cypress.",
-      "noEditorSelectedPlaceholder": "Choose your editor..."
+      "noEditorSelectedPlaceholder": "Choose your editor...",
+      "editorRadioLabel": "Choose editor",
+      "customEditorRadioLabel": "Add custom editor by path",
+      "customPathPlaceholder": "Custom path..."
     },
     "projectId": {
       "title": "Project ID",
@@ -313,14 +343,21 @@
     },
     "specPattern": {
       "title": "Spec Patterns",
-      "description": "The globs pointing Cypress App to your spec files configured for this project. {0}",
-      "defaultIndicator": "Default Values",
-      "matches": "{0} Matches"
+      "description": "The globs pointing Cypress App to your spec files configured for this project. {0}"
     },
     "recordKey": {
       "title": "Record Key",
       "description": "The Record Key configured for this project inside of Cypress Cloud. {0}",
-      "manageKeys": "Manage Keys"
+      "manageKeys": "Manage Keys",
+      "errorEmpty": "You do not have permission to record on this project",
+      "errorEmptyButton": "Request record rights",
+      "errorAccess": "You do not have permission to view this project",
+      "errorAccessPending": "Your request for access to this project is pending approval",
+      "errorAccessButton": "Request access",
+      "errorNotFound": "Project not found",
+      "errorNotFoundButton": "Connect it again",
+      "errorNotLoggedIn": "You are not connected to the Cypress Dashboard",
+      "errorNotLoggedInButton": "Log in to Cypress Dashboard"
     },
     "project": {
       "title": "Project Settings",
@@ -374,19 +411,75 @@
       "debugText": "Debug tests that fail in CI with visual feedback.",
       "chartText": "Keep your tests in tip-top shape with powerful analytics.",
       "buttonUser": "Log in to the Cypress Dashboard",
-      "buttonProject": "Connect your project to the Cypress Dashboard"
+      "buttonProject": "Connect your project to the Cypress Dashboard",
+      "modal": {
+        "title": "Connect Project",
+        "cancel": "Cancel",
+        "createOrg": {
+          "description": "You need to create an organization in the Cypress Dashboard to continue.",
+          "button": "Create Organization",
+          "waitingButton": "Waiting for you to create an organization...",
+          "refreshButton": "Refresh Organizations List"
+        },
+        "selectProject": {
+          "organization": "Organization",
+          "noOrganizationSelectedError": "required when creating a new project",
+          "manageOrgs": "Manage organizations",
+          "project": "Project",
+          "projectName": "Project Name",
+          "projectNameDisclaimer": "(You can change this later)",
+          "createNewProject": "Create new",
+          "chooseExistsingProject": "Choose an existing project",
+          "newProjectAccess": "Project Access",
+          "privateLabel": "Private",
+          "privateDescription": "Only invited users can view recorded test results.",
+          "publicLabel": "Public",
+          "publicDescription": "Anyone can view recorded test results.",
+          "connectProject": "Connect project",
+          "createProject": "Create project",
+          "placeholderOrganizations": "Pick an organization",
+          "placeholderProjects": "Pick an project",
+          "placeholderProjectsPending": "Pick an organization first"
+        },
+        "connectManually": {
+          "title": "Connect Project Manually",
+          "warning": "We couldn't add the projectId to your cypress.config.js file automatically.",
+          "mainMessage": "Manually add the {projectId} to the root of the config object in your {configFile} file.",
+          "waitingButton": "Waiting for you to add the projectId..."
+        }
+      }
+    },
+    "connectSuccessAlert": {
+      "title": "This project is now connected to the Cypress Dashboard!",
+      "item1": "We automatically added the {projectId} to your {configFile} file.",
+      "item2": "Please ensure that your {0} file is checked into source control."
     },
     "empty": {
-      "title": "Follow the steps below to record your first run to the Cypress Dashboard",
-      "step1": "Ensure that your {0} file contains the following code:",
-      "step2": "Ensure that your {0} file is checked into source control:",
-      "step3": "Run this command in your local development terminal or in CI:"
+      "title": "Record your first run to the Cypress Dashboard",
+      "description": "Run the command below in your local development terminal or in CI."
     },
     "results": {
       "skipped": "skipped",
       "pending": "pending",
       "passed": "passed",
       "failed": "failed"
+    },
+    "errors": {
+      "notfound": {
+        "title": "Couldn't find your project",
+        "description": "We were unable to find an existing project matching the {0} set in your Cypress config file. You can reconnect with an existing project or create a new project.",
+        "button": "Reconnect your project"
+      },
+      "unauthorized": {
+        "title": "Request access to view the recorded runs",
+        "description": "This is a private project that you do not current have access to. Please request access from the project owner in order to view the list of runs.",
+        "button": "Request Access"
+      },
+      "unauthorizedRequested": {
+        "title": "Your access request for this project has been sent.",
+        "description": "The owner of this project has been notified of your request. We'll notify you via email when your access request has been granted.",
+        "button": "Request Sent"
+      }
     }
   },
   "testingType": {
@@ -406,9 +499,32 @@
     "heresWhy": "here's why",
     "renameAuto": {
       "title": "We'll automatically rename your specs in this step",
+      "changeButton": "change",
       "changedSpecFolder": "We've changed the default spec folder from:",
       "changedSpecExt": "We've changed the default spec file extension from:",
-      "changedE2EFolder": "Since you're currently using a custom directory for the {0}, we'll temporarily be moving your specs back to the default directory."
+      "changedSpecPatternExplain": "We've made the default spec file extension to {0} in order to avoid conflicts with any existing testing frameworks.",
+      "optedOutMessage": "You've opted not to rename your spec file extension",
+      "modals": {
+        "title": "Change the existing spec file extension",
+        "step1": {
+          "warning": "We recommend using the default extension to avoid inconsistencies, framework conflicts, and confusion with your team.",
+          "line1": "Cypress now supports the ability to create new spec files from within the UI for both E2E and component specs.",
+          "line2": "All new spec files created within Cypress will use the default pattern of: ",
+          "line3": "We want to rename your existing specs so that they have a consistent filename pattern for both E2E and component testing.",
+          "line4": "We've changed the placement of component specs to be next to their source files (e.g. src/Button.jsx and src/Button.cy.jsx)",
+          "line5": "The new default pattern of {0} prevents targeting conflicts with other testing frameworks. (e.g. Jest)",
+          "buttonProceed": "I still want to change the spec file extension",
+          "buttonCancel": "Cancel, keep the default extension"
+        },
+        "step2": {
+          "warning": "You may need to change your specPattern later if you don't use the recommended filename extension.",
+          "label": "Choose from the following filename patterns:",
+          "option1": "{0} (Recommended)",
+          "option2": "Don't rename anything — keep what I have.",
+          "buttonSave": "Save Changes",
+          "buttonCancel": "Cancel"
+        }
+      }
     },
     "renameManual": {
       "title": "We need you to move your component specs manually",
@@ -417,11 +533,23 @@
       "cannotAuto": "We can't automatically migrate your existing component spec files. We recommend that you move the following component spec files next to your source component files (e.g. {0})",
       "ifSkipNote": "If you skip this step, Cypress will still be able to find them, but any new specs that you create will automatically be created next to your component files."
     },
+    "renameSupport": {
+      "title": "We'll automatically rename your existing E2E support file in this step",
+      "serveDifferentTypes": "We now serve different support files for E2E and component testing.",
+      "changedSupportFile": "We've renamed the E2E support file from:"
+    },
     "configFile": {
       "title": "We need to move the Cypress configuration file",
-      "changedTheFile": "We've removed {jsonFile} in favor of a {jsFile} file.",
-      "willConvert": "We'll automatically create a new {jsFile} file and seed it with your options from your existing {jsonFile}.",
-      "removeJson": "We'll remove your existing {0} as part of this step."
+      "changedDefault": "We've changed the default Cypress config file from:",
+      "customOptions": "We've set a custom {specPattern} option based on your {options}.",
+      "willConvert": "We'll automatically create a new {jsFile} file and seed it with your options from your existing {jsonFile}."
+    },
+    "setupComponent": {
+      "title": "You need to reconfigure Cypress for component testing",
+      "line1": "We've detected that you are currently using the experimental version of component testing.",
+      "line2": "Your existing configuration is no longer compatible with new component testing configuration options.",
+      "line3": "In a previous step, we renamed your component specs, but can't automatically migrate your existing component testing configuration.",
+      "line4": "In the next screen, you'll be able to reconfigure component testing in a new guided configuration wizard."
     },
     "wizard": {
       "title": "Migration Helper",
@@ -429,18 +557,30 @@
       "step1": {
         "title": "Automatically rename existing specs",
         "description": "In this step, we'll automatically rename and move your existing spec files.",
-        "button": "Rename these specs for me"
+        "button": "Rename these specs for me",
+        "buttonSkip": "Skip renaming specs"
       },
       "step2": {
         "title": "Manually move your existing component specs",
         "description": "In this step, you'll manually move your existing component specs to their new default location.",
         "buttonWait": "Waiting for you to move your component specs...",
+        "buttonDone": "I have moved my component specs",
         "button": "I'll do this later"
       },
       "step3": {
+        "title": "Rename the Cypress support file",
+        "description": "In this step, we'll automatically rename your existing support file.",
+        "button": "Rename the support file for me"
+      },
+      "step4": {
         "title": "Automatically migrate the Cypress configuration file",
         "description": "In this step, we'll automatically migrate your existing cypress configuration to the new Cypress configuration file.",
-        "button": "Migrate and continue"
+        "button": "Migrate the configuration for me"
+      },
+      "step5": {
+        "title": "Reconfigure component testing",
+        "description": "In this step, we'll explain how you will reconfigure Cypress for component testing.",
+        "button": "Finish migration and continue"
       }
     }
   },
@@ -459,7 +599,28 @@
     },
     "chooseBrowser": {
       "title": "Choose a Browser",
-      "description": "Choose your preferred browser for testing your components."
+      "description": "Choose your preferred browser for {testingType} testing."
+    }
+  },
+  "openBrowser": {
+    "startComponent": "Start Component Testing in {browser}",
+    "startE2E": "Start E2E Testing in {browser}",
+    "openingComponent": "Opening Component Testing in {browser}",
+    "openingE2E": "Opening E2E Testing in {browser}",
+    "running": "Running {browser}",
+    "focus": "Focus",
+    "close": "Close",
+    "switchTestingType": "Switch testing type"
+  },
+  "runner": {
+    "snapshot": {
+      "toggleHighlights": "Toggle highlights",
+      "highlightsLabel": "Highlights",
+      "testsRunningError": "Cannot show Snapshot while tests are running",
+      "snapshotMissingError": "The snapshot is missing. Displaying current state of the DOM.",
+      "defaultTitle": "DOM Snapshot",
+      "pinnedTitle": "Pinned",
+      "studioActiveError": "Cannot show Snapshot while creating commands in Studio"
     }
   }
 }

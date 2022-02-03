@@ -28,6 +28,7 @@ export const makeCypressPlugin = (
   devServerEvents: NodeJS.EventEmitter,
   specs: Spec[],
   buildMode: boolean,
+  namespace: string,
   indexHtml?: string,
 ): Plugin => {
   let base = '/'
@@ -107,8 +108,8 @@ export const makeCypressPlugin = (
 
       if (id === 'cypress:config') {
         return `
-export const supportPath = ${JSON.stringify(normalizedSupportFilePath)}
-export const originAutUrl = ${JSON.stringify(`/__cypress/iframes/${normalizePath(projectRoot)}/`)}`
+export const hasSupportPath = ${JSON.stringify(Boolean(normalizedSupportFilePath))}
+export const originAutUrl = ${JSON.stringify(`${buildMode ? '/' : ''}${namespace}/iframes/${normalizePath(projectRoot)}/`)}`
       }
     },
     configureServer: async (server: ViteDevServer) => {

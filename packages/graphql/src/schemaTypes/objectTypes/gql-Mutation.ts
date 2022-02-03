@@ -1,13 +1,13 @@
-import { arg, booleanArg, enumType, idArg, mutationType, nonNull, stringArg } from 'nexus'
+import { arg, booleanArg, enumType, idArg, mutationType, nonNull, stringArg, list } from 'nexus'
 import { Wizard } from './gql-Wizard'
 import { CodeGenTypeEnum } from '../enumTypes/gql-CodeGenTypeEnum'
 import { TestingTypeEnum } from '../enumTypes/gql-WizardEnums'
 import { FileDetailsInput } from '../inputTypes/gql-FileDetailsInput'
 import { WizardUpdateInput } from '../inputTypes/gql-WizardUpdateInput'
-import { CodeGenResultWithFileParts } from './gql-CodeGenResult'
 import { CurrentProject } from './gql-CurrentProject'
-import { GeneratedSpec } from './gql-GeneratedSpec'
-import { Query } from '.'
+import { GenerateSpecResponse } from './gql-GenerateSpecResponse'
+import { Query } from './gql-Query'
+import { ScaffoldedFile } from './gql-ScaffoldedFile'
 
 export const mutation = mutationType({
   definition (t) {
@@ -28,6 +28,20 @@ export const mutation = mutationType({
         }
 
         return true
+      },
+    })
+
+    t.nonNull.boolean('matchesSpecPattern', {
+      description: 'Check if a give spec file will match the project spec pattern',
+      args: {
+        specFile: nonNull(stringArg()),
+      },
+      resolve: (source, args, ctx) => {
+        if (!ctx.currentProject) {
+          return false
+        }
+
+        return ctx.project.matchesSpecPattern(args.specFile)
       },
     })
 
@@ -123,6 +137,17 @@ export const mutation = mutationType({
       },
     })
 
+    t.field('setPromptShown', {
+      type: 'Boolean',
+      description: 'Save the prompt-shown state for this project',
+      args: { slug: nonNull('String') },
+      resolve: (_, args, ctx) => {
+        ctx.actions.project.setPromptShown(args.slug)
+
+        return true
+      },
+    })
+
     t.field('wizardUpdate', {
       type: Wizard,
       description: 'Updates the different fields of the wizard data store',
@@ -130,17 +155,21 @@ export const mutation = mutationType({
         input: nonNull(arg({ type: WizardUpdateInput })),
       },
       resolve: async (source, args, ctx) => {
-        if (args.input.bundler !== undefined) {
-          ctx.actions.wizard.setBundler(args.input.bundler)
+        if (args.input.framework) {
+          ctx.actions.wizard.setFramework(args.input.framework)
         }
 
-        if (args.input.framework !== undefined) {
-          ctx.actions.wizard.setFramework(args.input.framework)
+        if (args.input.bundler) {
+          ctx.actions.wizard.setBundler(args.input.bundler)
         }
 
         if (args.input.codeLanguage) {
           ctx.actions.wizard.setCodeLanguage(args.input.codeLanguage)
         }
+
+        // TODO: remove when live-mutations are implements
+        // signal to launchpad to reload the data context
+        ctx.emitter.toLaunchpad()
 
         return ctx.wizardData
       },
@@ -162,19 +191,20 @@ export const mutation = mutationType({
     })
 
     t.field('generateSpecFromSource', {
-      type: GeneratedSpec,
+      type: GenerateSpecResponse,
       description: 'Generate spec from source',
       args: {
         codeGenCandidate: nonNull(stringArg()),
         type: nonNull(CodeGenTypeEnum),
+        erroredCodegenCandidate: stringArg(),
       },
-      resolve: async (_, args, ctx) => {
-        return ctx.actions.project.codeGenSpec(args.codeGenCandidate, args.type)
+      resolve: (_, args, ctx) => {
+        return ctx.actions.project.codeGenSpec(args.codeGenCandidate, args.type, args.erroredCodegenCandidate)
       },
     })
 
     t.nonNull.list.nonNull.field('scaffoldIntegration', {
-      type: CodeGenResultWithFileParts,
+      type: ScaffoldedFile,
       resolve: (src, args, ctx) => {
         return ctx.actions.project.scaffoldIntegration()
       },
@@ -186,6 +216,9 @@ export const mutation = mutationType({
       resolve: async (_, args, ctx) => {
         await ctx.actions.auth.login()
 
+        ctx.emitter.toApp()
+        ctx.emitter.toLaunchpad()
+
         return {}
       },
     })
@@ -195,6 +228,9 @@ export const mutation = mutationType({
       description: 'Log out of Cypress Cloud',
       resolve: async (_, args, ctx) => {
         await ctx.actions.auth.logout()
+
+        ctx.emitter.toApp()
+        ctx.emitter.toLaunchpad()
 
         return {}
       },
@@ -221,12 +257,23 @@ export const mutation = mutationType({
       type: Query,
       description: 'Add project to projects array and cache it',
       args: {
-        path: nonNull(stringArg()),
+        path: stringArg(),
         open: booleanArg({ description: 'Whether to open the project when added' }),
       },
       resolve: async (_, args, ctx) => {
         ctx.actions.wizard.resetWizard()
-        await ctx.actions.project.addProject(args)
+        let path = args.path
+
+        if (!path) {
+          await ctx.actions.project.addProjectFromElectronNativeFolderSelect()
+
+          return {}
+        }
+
+        await ctx.actions.project.addProject({
+          ...args,
+          path,
+        })
 
         return {}
       },
@@ -270,11 +317,10 @@ export const mutation = mutationType({
     })
 
     t.nonNull.field('setProjectPreferences', {
-      type: 'Query',
+      type: Query,
       description: 'Save the projects preferences to cache',
       args: {
         testingType: nonNull(TestingTypeEnum),
-        browserPath: nonNull(stringArg()),
       },
       async resolve (_, args, ctx) {
         await ctx.actions.project.setProjectPreferences(args)
@@ -299,6 +345,16 @@ export const mutation = mutationType({
       description: 'Hides the launchpad windows',
       resolve: (_, args, ctx) => {
         ctx.actions.electron.hideBrowserWindow()
+
+        return true
+      },
+    })
+
+    t.nonNull.field('focusActiveBrowserWindow', {
+      type: 'Boolean',
+      description: 'Sets focus to the active browser window',
+      resolve: async (_, args, ctx) => {
+        await ctx.actions.browser.focusActiveBrowserWindow()
 
         return true
       },
@@ -372,6 +428,167 @@ export const mutation = mutationType({
           args.input.line || 1,
           args.input.column || 1,
         )
+
+        return true
+      },
+    })
+
+    t.field('migrateStart', {
+      description: 'Initialize the migration wizard to the first step',
+      type: Query,
+      resolve: async (_, args, ctx) => {
+        await ctx.actions.migration.initialize()
+
+        return {}
+      },
+    })
+
+    t.field('migrateRenameSpecs', {
+      description: 'While migrating to 10+ renames files to match the new .cy pattern',
+      type: Query,
+      args: {
+        skip: booleanArg(),
+        before: list(nonNull(stringArg({
+          description: 'specs to move - current name',
+        }))),
+        after: list(nonNull(stringArg({
+          description: 'specs to move - current name',
+        }))),
+      },
+      resolve: async (_, { skip, before, after }, ctx) => {
+        if (!skip && before && after) {
+          try {
+            await ctx.actions.migration.renameSpecFiles(before, after)
+          } catch (error) {
+            const e = error as Error
+
+            ctx.coreData.baseError = {
+              title: 'Spec Files Migration Error',
+              message: e.message,
+              stack: e.stack,
+            }
+          }
+        }
+
+        await ctx.actions.migration.nextStep()
+
+        return {}
+      },
+    })
+
+    t.field('migrateSkipManualRename', {
+      description: 'While migrating to 10+ skip manual rename step',
+      type: Query,
+      resolve: async (_, args, ctx) => {
+        await ctx.actions.migration.nextStep()
+
+        return {}
+      },
+    })
+
+    t.field('finishedRenamingComponentSpecs', {
+      description: 'user has finished migration component specs - move to next step',
+      type: Query,
+      resolve: async (_, args, ctx) => {
+        await ctx.actions.migration.nextStep()
+
+        return {}
+      },
+    })
+
+    t.field('migrateRenameSupport', {
+      description: 'While migrating to 10+ launch renaming of support file',
+      type: Query,
+      resolve: async (_, args, ctx) => {
+        try {
+          await ctx.actions.migration.renameSupportFile()
+        } catch (error) {
+          const e = error as Error
+
+          ctx.coreData.baseError = {
+            title: 'Support File Migration Error',
+            message: e.message,
+            stack: e.stack,
+          }
+        }
+        await ctx.actions.migration.nextStep()
+
+        return {}
+      },
+    })
+
+    t.field('migrateConfigFile', {
+      description: 'Transforms cypress.json file into cypress.config.js file',
+      type: Query,
+      resolve: async (_, args, ctx) => {
+        try {
+          await ctx.actions.migration.createConfigFile()
+        } catch (error) {
+          const e = error as Error
+
+          ctx.coreData.baseError = {
+            title: 'Config File Migration Error',
+            message: e.message,
+            stack: e.stack,
+          }
+        }
+
+        await ctx.actions.migration.nextStep()
+
+        return {}
+      },
+    })
+
+    t.field('migrateComponentTesting', {
+      description: 'Merges the component testing config in cypress.config.{js,ts}',
+      type: Query,
+      resolve: async (_, args, ctx) => {
+        await ctx.actions.migration.nextStep()
+
+        return {}
+      },
+    })
+
+    t.field('setProjectIdInConfigFile', {
+      description: 'Set the projectId field in the config file of the current project',
+      type: Query,
+      args: {
+        projectId: nonNull(stringArg()),
+      },
+      resolve: async (_, args, ctx) => {
+        try {
+          await ctx.actions.project.setProjectIdInConfigFile(args.projectId)
+        } catch {
+          // ignore error as not useful for end user to see
+        }
+
+        // Wait for the project config to be reloaded
+        await ctx.lifecycleManager.reloadConfig()
+
+        return {}
+      },
+    })
+
+    t.field('closeBrowser', {
+      description: 'Close active browser',
+      type: 'Boolean',
+      resolve: async (source, args, ctx) => {
+        await ctx.actions.browser.closeBrowser()
+
+        return true
+      },
+    })
+
+    t.field('switchTestingTypeAndRelaunch', {
+      description: 'Switch Testing type and relaunch browser',
+      type: 'Boolean',
+      args: {
+        testingType: nonNull(arg({ type: TestingTypeEnum })),
+      },
+      resolve: async (source, args, ctx) => {
+        ctx.project.setRelaunchBrowser(true)
+        ctx.actions.project.setCurrentTestingType(args.testingType)
+        await ctx.actions.project.reconfigureProject()
 
         return true
       },

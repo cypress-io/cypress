@@ -1,7 +1,6 @@
 <template>
   <SettingsSection
     data-cy="settings-config"
-    anchor-id="config"
   >
     <template #title>
       {{ t('settingsPage.config.title') }}
@@ -16,11 +15,12 @@
     </template>
     <div class="flex w-full">
       <ConfigCode
-        data-testid="config-code"
+        data-cy="config-code"
         :config="configObject"
       />
       <ConfigLegend
-        class="rounded-tr-md px-22px py-28px border-1 border-l-0 rounded-br-md min-w-280px"
+        data-cy="config-legend"
+        class="rounded-tr-md rounded-br-md border-1 border-l-0 min-w-280px py-28px px-22px"
       />
     </div>
   </SettingsSection>

@@ -1,7 +1,7 @@
 module.exports = {
   'projectId': 'abc123',
   e2e: {
-    specPattern: 'cypress/integration/**/*',
+    specPattern: 'cypress/e2e/**/*',
   },
   component: {
     specPattern: 'cypress/component-tests/**/*',

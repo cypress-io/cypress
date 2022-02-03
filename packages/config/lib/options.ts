@@ -1,4 +1,7 @@
+import os from 'os'
 import validate from './validation'
+// @ts-ignore
+import pkg from '@packages/root'
 
 interface ResolvedConfigOption {
   name: string
@@ -46,7 +49,7 @@ interface BreakingOption {
   isWarning?: boolean
 }
 
-const isValidConfig = (key, config) => {
+const isValidConfig = (key: string, config: any) => {
   const status = validate.isPlainObject(key, config)
 
   if (status !== true) {
@@ -82,6 +85,11 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     validation: validate.isNumber,
     canUpdateDuringTestTime: true,
   }, {
+    name: 'arch',
+    defaultValue: () => os.arch(),
+    validation: validate.isString,
+    canUpdateDuringTestTime: false,
+  }, {
     name: 'baseUrl',
     defaultValue: null,
     validation: validate.isFullyQualifiedUrl,
@@ -104,7 +112,9 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
   }, {
     name: 'component',
     // runner-ct overrides
-    defaultValue: {},
+    defaultValue: {
+      specPattern: '**/*.cy.{js,jsx,ts,tsx}',
+    },
     validation: isValidConfig,
     canUpdateDuringTestTime: false,
   }, {
@@ -122,7 +132,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     name: 'e2e',
     // e2e runner overrides
     defaultValue: {
-      specPattern: 'cypress/integration/**/*',
+      specPattern: 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
     },
     validation: isValidConfig,
     canUpdateDuringTestTime: false,
@@ -213,6 +223,11 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     validation: validate.isNumber,
     canUpdateDuringTestTime: true,
   }, {
+    name: 'platform',
+    defaultValue: () => os.platform(),
+    validation: validate.isString,
+    canUpdateDuringTestTime: false,
+  }, {
     name: 'pageLoadTimeout',
     defaultValue: 60000,
     validation: validate.isNumber,
@@ -299,7 +314,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     canUpdateDuringTestTime: true,
   }, {
     name: 'supportFile',
-    defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? 'cypress/support/component.js' : 'cypress/support/e2e.js',
+    defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? 'cypress/support/component.{js,jsx,ts,tsx}' : 'cypress/support/e2e.{js,jsx,ts,tsx}',
     validation: validate.isStringOrFalse,
     isFolder: true,
     canUpdateDuringTestTime: false,
@@ -454,6 +469,12 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
   }, {
     name: 'socketIoRoute',
     defaultValue: '/__socket.io',
+    validation: validate.isString,
+    isInternal: true,
+    canUpdateDuringTestTime: false,
+  }, {
+    name: 'version',
+    defaultValue: pkg.version,
     validation: validate.isString,
     isInternal: true,
     canUpdateDuringTestTime: false,

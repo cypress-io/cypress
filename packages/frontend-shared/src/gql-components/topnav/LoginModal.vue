@@ -1,7 +1,7 @@
 <template>
   <Dialog
     :open="modelValue"
-    class="inset-0 z-10 fixed overflow-y-auto"
+    class="inset-0 z-50 fixed overflow-y-auto"
     @close="setIsOpen"
   >
     <div class="flex min-h-screen items-center justify-center">
@@ -21,7 +21,14 @@
           </button>
         </div>
 
-        <DialogDescription class="font-normal p-24px text-gray-700">
+        <NoInternetConnection
+          v-if="!isOnline"
+          class="mt-24px"
+        />
+        <DialogDescription
+          v-else-if="isOnline"
+          class="font-normal p-24px text-gray-700"
+        >
           <i18n-t
             v-if="!viewer"
             scope="global"
@@ -42,7 +49,7 @@
               href="https://on.cypress.io/dashboard/profile"
               class="font-medium text-indigo-500"
             >
-              {{ viewer.fullName }}
+              {{ viewer.fullName || viewer.email }}
             </ExternalLink>
           </i18n-t>
         </DialogDescription>
@@ -63,6 +70,8 @@ import { gql } from '@urql/core'
 import { computed } from 'vue'
 import Auth from '../Auth.vue'
 import ExternalLink from '../ExternalLink.vue'
+import { useOnline } from '@vueuse/core'
+import NoInternetConnection from '../../components/NoInternetConnection.vue'
 
 import {
   Dialog,
@@ -72,6 +81,8 @@ import {
 } from '@headlessui/vue'
 
 import type { LoginModalFragment } from '../../generated/graphql'
+
+const online = useOnline()
 
 const emit = defineEmits<{
   (event: 'update:modelValue', value: boolean): void
@@ -86,10 +97,9 @@ gql`
 fragment LoginModal on Query {
   cloudViewer {
     id
-    email
     fullName
   }
-  isAuthBrowserOpened
+  ...Auth
 }
 `
 
@@ -107,6 +117,8 @@ const title = computed(() => {
 
   return t('topNav.login.titleInitial')
 })
+
+const isOnline = computed(() => online.value)
 
 export type { LoginModalFragment }
 

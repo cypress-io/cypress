@@ -21,7 +21,7 @@ export const Spec = objectType({
     })
 
     t.nonNull.string('baseName', {
-      description: 'Full name of spec file (e.g. MySpec.test.tsx) without the spec extension',
+      description: 'Full name of spec file (e.g. MySpec.test.tsx)',
     })
 
     t.nonNull.string('name', {
@@ -33,7 +33,7 @@ export const Spec = objectType({
     })
 
     t.nonNull.string('specFileExtension', {
-      description: `The spec file's extension, including "spec" patterm (e.g. .spec.tsx, -spec.tsx, -test.tsx)`,
+      description: `The spec file's extension, including "spec" pattern (e.g. .spec.tsx, -spec.tsx, -test.tsx)`,
     })
 
     t.nonNull.string('fileName', {

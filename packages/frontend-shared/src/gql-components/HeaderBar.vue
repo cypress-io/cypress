@@ -1,11 +1,13 @@
 <template>
-  <HeaderBarContent
-    v-if="query.data.value"
-    :gql="query.data.value"
-    :show-browsers="props.showBrowsers"
-    :page-name="pageName"
-  />
-  <div v-else />
+  <div>
+    <HeaderBarContent
+      v-if="query.data.value"
+      :gql="query.data.value"
+      :show-browsers="props.showBrowsers"
+      :page-name="props.pageName"
+      :allow-automatic-prompt-open="props.allowAutomaticPromptOpen"
+    />
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -19,10 +21,16 @@ query HeaderBar_HeaderBarQuery {
 }
 `
 
-const props = defineProps<{
-    showBrowsers?: boolean,
-    pageName?: string
-}>()
+const props = withDefaults(
+  defineProps<{
+  showBrowsers?: boolean,
+  pageName?: string,
+  allowAutomaticPromptOpen?: boolean
+}>(), {
+    allowAutomaticPromptOpen: false,
+    pageName: undefined,
+  },
+)
 
 const query = useQuery({ query: HeaderBar_HeaderBarQueryDocument })
 

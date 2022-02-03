@@ -16,11 +16,13 @@ exports['src/index .getDefaultValues returns list of public config keys 1'] = {
   "blockHosts": null,
   "chromeWebSecurity": true,
   "clientCertificates": [],
-  "component": {},
+  "component": {
+    "specPattern": "**/*.cy.{js,jsx,ts,tsx}"
+  },
   "defaultCommandTimeout": 4000,
   "downloadsFolder": "cypress/downloads",
   "e2e": {
-    "specPattern": "cypress/integration/**/*"
+    "specPattern": "cypress/e2e/**/*.cy.{js,jsx,ts,tsx}"
   },
   "env": {},
   "execTimeout": 60000,
@@ -34,7 +36,6 @@ exports['src/index .getDefaultValues returns list of public config keys 1'] = {
   "fixturesFolder": "cypress/fixtures",
   "ignoreSpecPattern": "*.hot-update.js",
   "includeShadowDom": false,
-  "isInteractive": true,
   "keystrokeDelay": 0,
   "modifyObstructiveCode": true,
   "numTestsKeptInMemory": 50,
@@ -57,7 +58,7 @@ exports['src/index .getDefaultValues returns list of public config keys 1'] = {
   "screenshotsFolder": "cypress/screenshots",
   "slowTestThreshold": 10000,
   "scrollBehavior": "top",
-  "supportFile": "cypress/support/e2e.js",
+  "supportFile": "cypress/support/e2e.{js,jsx,ts,tsx}",
   "supportFolder": false,
   "taskTimeout": 60000,
   "trashAssetsBeforeRuns": true,
@@ -76,6 +77,7 @@ exports['src/index .getDefaultValues returns list of public config keys 1'] = {
   "configFile": "cypress.config.js",
   "devServerPublicPathRoute": "/__cypress/src",
   "hosts": null,
+  "isInteractive": true,
   "isTextTerminal": false,
   "morgan": true,
   "namespace": "__cypress",
@@ -88,6 +90,7 @@ exports['src/index .getDefaultValues returns list of public config keys 1'] = {
 
 exports['src/index .getPublicConfigKeys returns list of public config keys 1'] = [
   "animationDistanceThreshold",
+  "arch",
   "baseUrl",
   "blockHosts",
   "chromeWebSecurity",
@@ -112,6 +115,7 @@ exports['src/index .getPublicConfigKeys returns list of public config keys 1'] =
   "modifyObstructiveCode",
   "nodeVersion",
   "numTestsKeptInMemory",
+  "platform",
   "pageLoadTimeout",
   "pluginsFile",
   "port",

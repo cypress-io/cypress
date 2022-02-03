@@ -23,30 +23,24 @@ import system from './util/system'
 import { ensureProp } from './util/class-helpers'
 
 import { fs } from './util/fs'
-
-import devServer from './plugins/dev-server'
 import preprocessor from './plugins/preprocessor'
-import { SpecsStore } from './specs-store'
 import { checkSupportFile } from './project_utils'
-import type { FoundBrowser, OpenProjectLaunchOptions, FoundSpec } from '@packages/types'
+import type { FoundBrowser, OpenProjectLaunchOptions, FoundSpec, TestingType, ReceivedCypressOptions } from '@packages/types'
+import devServer from './plugins/dev-server'
 import { DataContext, getCtx } from '@packages/data-context'
-
-// Cannot just use RuntimeConfigOptions as is because some types are not complete.
-// Instead, this is an interface of values that have been manually validated to exist
-// and are required when creating a project.
-type ReceivedCypressOptions =
-  Pick<Cypress.RuntimeConfigOptions, 'hosts' | 'projectName' | 'clientRoute' | 'devServerPublicPathRoute' | 'namespace' | 'report' | 'socketIoCookie' | 'configFile' | 'isTextTerminal' | 'isNewProject' | 'proxyUrl' | 'browsers' | 'browserUrl' | 'socketIoRoute' | 'arch' | 'platform' | 'spec' | 'specs' | 'browser' | 'version' | 'remote'>
-  & Pick<Cypress.ResolvedConfigOptions, 'chromeWebSecurity' | 'supportFolder' | 'experimentalSourceRewriting' | 'fixturesFolder' | 'reporter' | 'reporterOptions' | 'screenshotsFolder' | 'pluginsFile' | 'supportFile' | 'baseUrl' | 'viewportHeight' | 'viewportWidth' | 'port' | 'experimentalInteractiveRunEvents' | 'userAgent' | 'downloadsFolder' | 'env' | 'testFiles' | 'ignoreSpecPattern'> // TODO: Figure out how to type this better.
 
 export interface Cfg extends ReceivedCypressOptions {
   projectRoot: string
   proxyServer?: Cypress.RuntimeConfigOptions['proxyUrl']
+  testingType: TestingType
   exit?: boolean
   state?: {
     firstOpened?: number | null
     lastOpened?: number | null
     promptsShown?: object | null
   }
+  e2e: Partial<Cfg>
+  component: Partial<Cfg>
 }
 
 const localCwd = cwd()
@@ -159,8 +153,8 @@ export class ProjectBase<TServer extends Server> extends EE {
 
   createServer (testingType: Cypress.TestingType) {
     return testingType === 'e2e'
-      ? new ServerE2E(this.ctx) as TServer
-      : new ServerCt(this.ctx) as TServer
+      ? new ServerE2E() as TServer
+      : new ServerCt() as TServer
   }
 
   async open () {
@@ -173,11 +167,7 @@ export class ProjectBase<TServer extends Server> extends EE {
 
     this._server = this.createServer(this.testingType)
 
-    const {
-      specsStore,
-      startSpecWatcher,
-      ctDevServerPort,
-    } = await this.initializeSpecStore(cfg)
+    const { ctDevServerPort } = await this.initializeSpecsAndDevServer(cfg)
 
     if (this.testingType === 'component') {
       cfg.baseUrl = `http://localhost:${ctDevServerPort}`
@@ -192,7 +182,6 @@ export class ProjectBase<TServer extends Server> extends EE {
       shouldCorrelatePreRequests: this.shouldCorrelatePreRequests,
       testingType: this.testingType,
       SocketCtor: this.testingType === 'e2e' ? SocketE2E : SocketCt,
-      specsStore,
     })
 
     this.ctx.setAppServerPort(port)
@@ -255,13 +244,6 @@ export class ProjectBase<TServer extends Server> extends EE {
       return
     }
 
-    // start watching specs
-    // whenever a spec file is added or removed, we notify the
-    // <SpecList>
-    // This is only used for CT right now by general users.
-    // It is is used with E2E if the CypressInternal_UseInlineSpecList flag is true.
-    startSpecWatcher()
-
     if (!cfg.experimentalInteractiveRunEvents) {
       return
     }
@@ -295,6 +277,13 @@ export class ProjectBase<TServer extends Server> extends EE {
     return
   }
 
+  __reset () {
+    preprocessor.close()
+    devServer.close()
+
+    process.chdir(localCwd)
+  }
+
   async close () {
     debug('closing project instance %s', this.projectRoot)
 
@@ -305,19 +294,16 @@ export class ProjectBase<TServer extends Server> extends EE {
       return
     }
 
-    const closePreprocessor = this.testingType === 'e2e' ? preprocessor.close : undefined
+    this.__reset()
 
     this.ctx.setAppServerPort(undefined)
     this.ctx.setAppSocketServer(undefined)
 
     await Promise.all([
       this.server?.close(),
-      closePreprocessor?.(),
     ])
 
     this._isServerOpen = false
-
-    process.chdir(localCwd)
     this.isOpen = false
 
     const config = this.getConfig()
@@ -335,12 +321,28 @@ export class ProjectBase<TServer extends Server> extends EE {
     options.onError(err)
   }
 
-  async initializeSpecStore (updatedConfig: Cfg): Promise<{
-    specsStore: SpecsStore
+  async initializeSpecsAndDevServer (updatedConfig: Cfg): Promise<{
     ctDevServerPort: number | undefined
-    startSpecWatcher: () => void
   }> {
-    return this.initSpecStore({ specs: this.ctx.project.specs, config: updatedConfig })
+    const specs = this.ctx.project.specs || []
+
+    let ctDevServerPort: number | undefined
+
+    if (!this.ctx.currentProject) {
+      throw new Error('Cannot set specs without current project')
+    }
+
+    updatedConfig.specs = specs
+
+    if (this.testingType === 'component' && !this.options.skipPluginInitializeForTesting) {
+      const { port } = await this.startCtDevServer(specs, updatedConfig)
+
+      ctDevServerPort = port
+    }
+
+    return {
+      ctDevServerPort,
+    }
   }
 
   async startCtDevServer (specs: Cypress.Cypress['spec'][], config: any) {
@@ -357,40 +359,6 @@ export class ProjectBase<TServer extends Server> extends EE {
     }
 
     return { port: devServerOptions.port }
-  }
-
-  async initSpecStore ({
-    specs,
-    config,
-  }: {
-    specs: FoundSpec[]
-    config: Cfg
-  }) {
-    const specsStore = new SpecsStore()
-
-    const startSpecWatcher = () => {
-      if (this.testingType === 'component') {
-      // ct uses the dev-server to build and bundle the speces.
-      // send new files to dev server
-        devServer.updateSpecs(specs)
-      }
-    }
-
-    let ctDevServerPort: number | undefined
-
-    if (this.testingType === 'component' && !this.options.skipPluginInitializeForTesting) {
-      const { port } = await this.startCtDevServer(specs, config)
-
-      ctDevServerPort = port
-    }
-
-    specsStore.storeSpecFiles(specs)
-
-    return {
-      specsStore,
-      ctDevServerPort,
-      startSpecWatcher,
-    }
   }
 
   initializeReporter ({
@@ -506,6 +474,14 @@ export class ProjectBase<TServer extends Server> extends EE {
     this.server.changeToUrl(url)
   }
 
+  async sendFocusBrowserMessage () {
+    if (this.browser.family === 'firefox') {
+      await browsers.setFocus()
+    } else {
+      await this.server.sendFocusBrowserMessage()
+    }
+  }
+
   shouldCorrelatePreRequests = () => {
     if (!this.browser) {
       return false
@@ -527,7 +503,10 @@ export class ProjectBase<TServer extends Server> extends EE {
 
   async initializeConfig (): Promise<Cfg> {
     this.ctx.lifecycleManager.setCurrentTestingType(this.testingType)
-    let theCfg: Cfg = await this.ctx.lifecycleManager.getFullInitialConfig() as Cfg // ?? types are definitely wrong here I think
+    let theCfg: Cfg = {
+      ...(await this.ctx.lifecycleManager.getFullInitialConfig()),
+      testingType: this.testingType,
+    } as Cfg // ?? types are definitely wrong here I think
 
     theCfg = this.testingType === 'e2e'
       ? theCfg
@@ -556,7 +535,13 @@ export class ProjectBase<TServer extends Server> extends EE {
 
     debug('project has config %o', this._cfg)
 
-    return this._cfg
+    return {
+      ...this._cfg,
+      remote: this._server?._getRemoteState() ?? {} as Cypress.RemoteState,
+      browser: this.browser,
+      testingType: this.ctx.coreData.currentTestingType ?? 'e2e',
+      specs: [],
+    }
   }
 
   // Saved state

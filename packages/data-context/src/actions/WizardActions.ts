@@ -1,5 +1,5 @@
 import type { CodeLanguageEnum, NexusGenEnums, NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
-import type { Bundler, CodeLanguage, FrontendFramework } from '@packages/types'
+import { Bundler, CodeLanguage, CODE_LANGUAGES, FrontendFramework } from '@packages/types'
 import assert from 'assert'
 import dedent from 'dedent'
 import fs from 'fs'
@@ -30,10 +30,10 @@ export class WizardActions {
     this.ctx.coreData.wizard.chosenFramework = framework
 
     if (framework !== 'react' && framework !== 'vue') {
-      this.setBundler('webpack')
+      return this.setBundler('webpack')
     }
 
-    return this.data
+    return this.setBundler(null)
   }
 
   setBundler (bundler: NexusGenEnums['SupportedBundlers'] | null) {
@@ -91,9 +91,8 @@ export class WizardActions {
   }
 
   private async scaffoldE2E () {
-    const configCode = this.wizardGetConfigCodeE2E(this.ctx.coreData.wizard.chosenLanguage)
     const scaffolded = await Promise.all([
-      this.scaffoldConfig(configCode),
+      this.scaffoldConfig('e2e'),
       this.scaffoldSupport('e2e', this.ctx.coreData.wizard.chosenLanguage),
       this.scaffoldFixtures(),
     ])
@@ -105,14 +104,9 @@ export class WizardActions {
     const { chosenBundler, chosenFramework, chosenLanguage } = this.ctx.wizard
 
     assert(chosenFramework && chosenLanguage && chosenBundler)
-    const configCode = this.wizardGetConfigCodeComponent({
-      chosenLanguage,
-      chosenFramework,
-      chosenBundler,
-    })
 
     return await Promise.all([
-      this.scaffoldConfig(configCode),
+      this.scaffoldConfig('component'),
       this.scaffoldFixtures(),
       this.scaffoldSupport('component', chosenLanguage.type),
       this.getComponentIndexHtml({
@@ -142,8 +136,30 @@ export class WizardActions {
     }
   }
 
-  private async scaffoldConfig (configCode: string): Promise<NexusGenObjects['ScaffoldedFile']> {
+  private configCode (testingType: 'e2e' | 'component', language: CodeLanguageEnum) {
+    if (testingType === 'component') {
+      const chosenLanguage = CODE_LANGUAGES.find((f) => f.type === language)
+
+      const { chosenBundler, chosenFramework } = this.ctx.wizard
+
+      assert(chosenFramework && chosenLanguage && chosenBundler)
+
+      return this.wizardGetConfigCodeComponent({
+        chosenLanguage,
+        chosenFramework,
+        chosenBundler,
+      })
+    }
+
+    return this.wizardGetConfigCodeE2E(language)
+  }
+
+  private async scaffoldConfig (testingType: 'e2e' | 'component'): Promise<NexusGenObjects['ScaffoldedFile']> {
     if (!fs.existsSync(this.ctx.lifecycleManager.configFilePath)) {
+      this.ctx.lifecycleManager.setConfigFilePath(this.ctx.coreData.wizard.chosenLanguage)
+
+      const configCode = this.configCode(testingType, this.ctx.coreData.wizard.chosenLanguage)
+
       return this.scaffoldFile(
         this.ctx.lifecycleManager.configFilePath,
         configCode,
@@ -151,9 +167,13 @@ export class WizardActions {
       )
     }
 
+    const { ext } = path.parse(this.ctx.lifecycleManager.configFilePath)
+
+    const configCode = this.configCode(testingType, ext === '.ts' ? 'ts' : 'js')
+
     return {
       status: 'changes',
-      description: 'Merge this code with your existing config file (add the ',
+      description: 'Merge this code with your existing config file',
       file: {
         absolute: this.ctx.lifecycleManager.configFilePath,
         contents: configCode,
@@ -192,11 +212,10 @@ export class WizardActions {
   private wizardGetConfigCodeE2E (lang: CodeLanguageEnum): string {
     const codeBlocks: string[] = []
 
-    codeBlocks.push(lang === 'ts' ? 'import { defineConfig } from "cypress"' : `const { defineConfig } = require("cypress")`)
+    codeBlocks.push(lang === 'ts' ? `import { defineConfig } from 'cypress'` : `const { defineConfig } = require('cypress')`)
+    codeBlocks.push('')
     codeBlocks.push(lang === 'ts' ? `export default defineConfig({` : `module.exports = defineConfig({`)
-    codeBlocks.push(E2E_SCAFFOLD_BODY({
-      lang,
-    }))
+    codeBlocks.push(`  ${E2E_SCAFFOLD_BODY.replace(/\n/g, '\n  ')}`)
 
     codeBlocks.push('})\n')
 
@@ -207,15 +226,16 @@ export class WizardActions {
     const codeBlocks: string[] = []
     const { chosenBundler, chosenFramework, chosenLanguage } = opts
 
-    codeBlocks.push(chosenLanguage.type === 'ts' ? 'import { defineConfig } from "cypress"' : `const { defineConfig } = require("cypress")`)
+    codeBlocks.push(chosenLanguage.type === 'ts' ? `import { defineConfig } from 'cypress'` : `const { defineConfig } = require('cypress')`)
+    codeBlocks.push('')
     codeBlocks.push(chosenLanguage.type === 'ts' ? `export default defineConfig({` : `module.exports = defineConfig({`)
-    codeBlocks.push(`// Component testing, ${chosenLanguage.name}, ${chosenFramework.name}, ${chosenBundler.name}`)
+    codeBlocks.push(`  // Component testing, ${chosenLanguage.name}, ${chosenFramework.name}, ${chosenBundler.name}`)
 
-    codeBlocks.push(COMPONENT_SCAFFOLD_BODY({
+    codeBlocks.push(`  ${COMPONENT_SCAFFOLD_BODY({
       lang: chosenLanguage.type,
       requirePath: chosenBundler.package,
       configOptionsString: '{}',
-    }))
+    }).replace(/\n/g, '\n  ')}`)
 
     codeBlocks.push(`})\n`)
 
@@ -316,23 +336,13 @@ export class WizardActions {
   }
 }
 
-interface E2eScaffoldOpts {
-  lang: CodeLanguageEnum
-}
-
-const E2E_SCAFFOLD_BODY = (opts: E2eScaffoldOpts) => {
-  return `
-    e2e: {
-      supportFile: 'cypress/support/e2e.${opts.lang}',
-      specPattern: 'cypress/e2e/**/*.cy.{js,ts}',
-      viewportHeight: 660,
-      viewportWidth: 1000,
-      setupNodeEvents(on, config) {
-        //
-      },
-    }
-  `
-}
+const E2E_SCAFFOLD_BODY = dedent`
+  e2e: {
+    setupNodeEvents(on, config) {
+      // implement node event listeners here
+    },
+  },
+`
 
 interface ComponentScaffoldOpts {
   lang: CodeLanguageEnum
@@ -342,14 +352,12 @@ interface ComponentScaffoldOpts {
 }
 
 const COMPONENT_SCAFFOLD_BODY = (opts: ComponentScaffoldOpts) => {
-  return `
-  component: {
-    supportFile: 'cypress/support/component.${opts.lang}',
-    specPattern: 'cypress/**/*.cy.{js,jsx,ts,tsx}',
-    devServer: import('${opts.requirePath}'),
-    devServerConfig: ${opts.configOptionsString}
-  }
-`
+  return dedent`
+    component: {
+      devServer: import('${opts.requirePath}'),
+      devServerConfig: ${opts.configOptionsString}
+    },
+  `
 }
 
 const FIXTURE_DATA = {

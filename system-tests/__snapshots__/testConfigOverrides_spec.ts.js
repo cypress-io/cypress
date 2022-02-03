@@ -8,7 +8,7 @@ exports['testConfigOverrides / fails when passing invalid config value browser']
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (testConfigOverrides-invalid-browser.js)                                   │
-  │ Searched:   cypress/integration/testConfigOverrides-invalid-browser.js                         │
+  │ Searched:   cypress/e2e/testConfigOverrides-invalid-browser.js                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -83,7 +83,7 @@ exports['testConfigOverrides / has originalTitle when skip due to browser config
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (testConfigOverrides-skip-browser.js)                                      │
-  │ Searched:   cypress/integration/testConfigOverrides-skip-browser.js                            │
+  │ Searched:   cypress/e2e/testConfigOverrides-skip-browser.js                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -146,7 +146,7 @@ exports['testConfigOverrides / fails when passing invalid config values - [chrom
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (testConfigOverrides-invalid.js)                                           │
-  │ Searched:   cypress/integration/testConfigOverrides-invalid.js                                 │
+  │ Searched:   cypress/e2e/testConfigOverrides-invalid.js                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -300,7 +300,7 @@ exports['testConfigOverrides / fails when passing invalid config values with bef
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (testConfigOverrides-before-invalid.js)                                    │
-  │ Searched:   cypress/integration/testConfigOverrides-before-invalid.js                          │
+  │ Searched:   cypress/e2e/testConfigOverrides-before-invalid.js                                  │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -461,7 +461,7 @@ exports['testConfigOverrides / correctly fails when invalid config values for it
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (testConfigOverrides-only-invalid.js)                                      │
-  │ Searched:   cypress/integration/testConfigOverrides-only-invalid.js                            │
+  │ Searched:   cypress/e2e/testConfigOverrides-only-invalid.js                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -531,7 +531,7 @@ exports['testConfigOverrides / fails when passing invalid config values - [firef
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (testConfigOverrides-invalid.js)                                           │
-  │ Searched:   cypress/integration/testConfigOverrides-invalid.js                                 │
+  │ Searched:   cypress/e2e/testConfigOverrides-invalid.js                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -679,7 +679,7 @@ exports['testConfigOverrides / fails when passing invalid config values with bef
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (testConfigOverrides-before-invalid.js)                                    │
-  │ Searched:   cypress/integration/testConfigOverrides-before-invalid.js                          │
+  │ Searched:   cypress/e2e/testConfigOverrides-before-invalid.js                                  │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -834,7 +834,7 @@ exports['testConfigOverrides / correctly fails when invalid config values for it
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (testConfigOverrides-only-invalid.js)                                      │
-  │ Searched:   cypress/integration/testConfigOverrides-only-invalid.js                            │
+  │ Searched:   cypress/e2e/testConfigOverrides-only-invalid.js                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

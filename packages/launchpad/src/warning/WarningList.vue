@@ -14,7 +14,7 @@
 import { computed, ref } from 'vue'
 import { gql } from '@urql/core'
 import type { WarningListFragment } from '../generated/graphql'
-import Warning from '../warning/Warning.vue'
+import Warning from '@packages/frontend-shared/src/warning/Warning.vue'
 
 gql`
 fragment WarningList on Query {

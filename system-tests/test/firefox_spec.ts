@@ -55,7 +55,7 @@ describe('e2e firefox', function () {
   systemTests.it('launches maximized by default', {
     browser: 'firefox',
     project: 'screen-size',
-    spec: 'maximized.spec.js',
+    spec: 'maximized.cy.js',
     onRun: async (exec) => {
       const { stderr } = await exec({
         processEnv: {
@@ -74,6 +74,6 @@ describe('e2e firefox', function () {
   systemTests.it.skip('can run multiple specs', {
     browser: 'firefox',
     project: 'e2e',
-    spec: 'simple_spec.js,simple_passing_spec.js',
+    spec: 'simple.cy.js,simple_passing.cy.js',
   })
 })

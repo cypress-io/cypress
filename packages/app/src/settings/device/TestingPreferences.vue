@@ -1,5 +1,5 @@
 <template>
-  <SettingsSection anchor-id="testingPreferences">
+  <SettingsSection>
     <template #title>
       {{ t('settingsPage.testingPreferences.title') }}
     </template>
@@ -7,19 +7,19 @@
       {{ t('settingsPage.testingPreferences.description') }}
     </template>
     <div
-      class="rounded border border-gray-100 px-16px divide-y divide-gray-200"
+      class="divide-y border rounded divide-gray-200 border-gray-100 px-16px"
     >
       <div class="py-16px">
-        <h4 class="text-gray-800 text-size-16px leading-24px flex items-center">
-          {{ autoScrollingPreference.title }}
+        <h4 class="flex text-gray-800 text-size-16px leading-24px items-center">
+          <label :for="autoScrollingPreference.id">{{ autoScrollingPreference.title }}</label>
           <Switch
             class="mx-8px"
             :value="props.gql.localSettings.preferences[autoScrollingPreference.id] ?? false"
-            :name="autoScrollingPreference.title"
+            :name="autoScrollingPreference.id"
             @update="(value) => updatePref(value)"
           />
         </h4>
-        <p class="text-size-14px leading-24px text-gray-600">
+        <p class="text-size-14px text-gray-600 leading-24px">
           {{ autoScrollingPreference.description }}
         </p>
       </div>

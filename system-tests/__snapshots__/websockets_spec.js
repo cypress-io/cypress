@@ -7,14 +7,14 @@ exports['e2e websockets / passes'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (websockets_spec.js)                                                       │
-  │ Searched:   cypress/integration/websockets_spec.js                                             │
+  │ Specs:      1 found (websockets.cy.js)                                                         │
+  │ Searched:   cypress/e2e/websockets.cy.js                                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  websockets_spec.js                                                              (1 of 1)
+  Running:  websockets.cy.js                                                                (1 of 1)
 
 
   websockets
@@ -35,14 +35,14 @@ exports['e2e websockets / passes'] = `
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     websockets_spec.js                                                               │
+  │ Spec Ran:     websockets.cy.js                                                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/websockets_spec.js.mp4              (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/websockets.cy.js.mp4                (X second)
 
 
 ====================================================================================================
@@ -52,7 +52,7 @@ exports['e2e websockets / passes'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  websockets_spec.js                       XX:XX        1        1        -        -        - │
+  │ ✔  websockets.cy.js                         XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 

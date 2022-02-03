@@ -1,15 +1,15 @@
 require('graceful-fs').gracefulify(require('fs'))
 const stripAnsi = require('strip-ansi')
 const debug = require('debug')(`cypress:lifecycle:child:run_require_async_child:${process.pid}`)
-const tsNodeUtil = require('../../util/ts_node')
+const tsNodeUtil = require('./ts_node')
 const util = require('../util')
-const { RunPlugins } = require('./RunPlugins')
+const { RunPlugins } = require('./run_plugins')
 
 let tsRegistered = false
 
 /**
  * Executes and returns the passed `configFile` file in the ipc `loadConfig` event
- * @param {*} ipc Inter Process Comunication protocol
+ * @param {*} ipc Inter Process Communication protocol
  * @param {*} configFile the file we are trying to load
  * @param {*} projectRoot the root of the typescript project (useful mainly for tsnode)
  * @returns
@@ -39,9 +39,16 @@ function run (ipc, configFile, projectRoot) {
   })
 
   process.on('unhandledRejection', (event) => {
-    const err = (event && event.reason) || event
+    let err = event
 
-    debug('unhandled rejection:', util.serializeError(err))
+    debug('unhandled rejection:', event)
+
+    // Rejected Bluebird promises will return a reason object.
+    // OpenSSL error returns a reason as user-friendly string.
+    if (event && event.reason && typeof event.reason === 'object') {
+      err = event.reason
+    }
+
     ipc.send('childProcess:unhandledError', util.serializeError(err))
 
     return false
@@ -55,6 +62,18 @@ function run (ipc, configFile, projectRoot) {
     }
 
     return true
+  }
+
+  const isValidDevServer = (config) => {
+    const { devServer } = config
+
+    if (devServer && (typeof devServer.devServer === 'function' || typeof devServer === 'function' || typeof devServer.then === 'function')) {
+      return true
+    }
+
+    ipc.send('setupTestingType:error', 'COMPONENT_DEV_SERVER_IS_NOT_A_FUNCTION', configFile, config)
+
+    return false
   }
 
   ipc.on('loadConfig', () => {
@@ -85,25 +104,46 @@ function run (ipc, configFile, projectRoot) {
 
         areSetupNodeEventsLoaded = true
         if (testingType === 'component') {
-          if (!isValidSetupNodeEvents(result.component?.setupNodeEvents)) {
+          if (!isValidSetupNodeEvents(result.setupNodeEvents) || !isValidDevServer((result.component || {}))) {
             return
           }
 
           runPlugins.runSetupNodeEvents(options, (on, config) => {
-            if (result.component?.devServer) {
-              on('dev-server:start', (options) => result.component.devServer(options, result.component?.devServerConfig))
+            const setupNodeEvents = result.component && result.component.setupNodeEvents || ((on, config) => {})
+
+            const { devServer } = result.component
+
+            // Accounts for `devServer: require('@cypress/webpack-dev-server')
+            if (typeof devServer.devServer === 'function') {
+              on('dev-server:start', (options) => devServer.devServer(options, result.component && result.component.devServerConfig))
+
+              return setupNodeEvents(on, config)
             }
 
-            const setupNodeEvents = result.component?.setupNodeEvents ?? ((on, config) => {})
+            // Accounts for `devServer() {}`
+            if (typeof devServer === 'function') {
+              on('dev-server:start', (options) => devServer(options, result.component && result.component.devServerConfig))
 
-            return setupNodeEvents(on, config)
+              return setupNodeEvents(on, config)
+            }
+
+            // Accounts for `devServer: import('@cypress/webpack-dev-server')`
+            if (result.component && typeof result.component.devServer.then === 'function') {
+              return Promise.resolve(result.component.devServer).then(({ devServer }) => {
+                if (typeof devServer === 'function') {
+                  on('dev-server:start', (options) => devServer(options, result.component && result.component.devServerConfig))
+                }
+
+                return setupNodeEvents(on, config)
+              })
+            }
           })
         } else if (testingType === 'e2e') {
-          if (!isValidSetupNodeEvents(result.e2e?.setupNodeEvents)) {
+          if (!isValidSetupNodeEvents(result.e2e && result.e2e.setupNodeEvents)) {
             return
           }
 
-          const setupNodeEvents = result.e2e?.setupNodeEvents ?? ((on, config) => {})
+          const setupNodeEvents = result.e2e && result.e2e.setupNodeEvents || ((on, config) => {})
 
           runPlugins.runSetupNodeEvents(options, setupNodeEvents)
         } else {
@@ -117,7 +157,7 @@ function run (ipc, configFile, projectRoot) {
       debug('loaded config from %s %o', configFile, result)
     } catch (err) {
       if (err.name === 'TSError') {
-        // beause of this https://github.com/TypeStrong/ts-node/issues/1418
+        // because of this https://github.com/TypeStrong/ts-node/issues/1418
         // we have to do this https://stackoverflow.com/questions/25245716/remove-all-ansi-colors-styles-from-strings/29497680
         const cleanMessage = stripAnsi(err.message)
         // replace the first line with better text (remove potentially misleading word TypeScript for example)
