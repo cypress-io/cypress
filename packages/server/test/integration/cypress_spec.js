@@ -290,6 +290,7 @@ describe('lib/cypress', () => {
       sinon.stub(runMode, 'waitForSocketConnection').resolves()
       sinon.stub(runMode, 'listenForProjectEnd').resolves({ stats: { failures: 0 } })
       sinon.stub(browsers, 'open')
+      sinon.stub(browsers, 'connectToNewSpec')
       sinon.stub(commitInfo, 'getRemoteOrigin').resolves('remoteOrigin')
     })
 
@@ -408,7 +409,7 @@ describe('lib/cypress', () => {
     })
 
     it('runs project by limiting spec files via config.testFiles string glob pattern', function () {
-      return cypress.start([`--run-project=${this.todosPath}`, `--config=testFiles=${this.todosPath}/tests/test2.coffee`])
+      return cypress.start([`--run-project=${this.todosPath}`, `--config={"e2e":{"specPattern":"${this.todosPath}/tests/test2.coffee"}}`])
       .then(() => {
         expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, { url: 'http://localhost:8888/__/#/specs/runner?file=tests/test2.coffee' })
         this.expectExitWith(0)
@@ -416,11 +417,11 @@ describe('lib/cypress', () => {
     })
 
     it('runs project by limiting spec files via config.testFiles as a JSON array of string glob patterns', function () {
-      return cypress.start([`--run-project=${this.todosPath}`, '--config=testFiles=["**/test2.coffee","**/test1.js"]'])
+      return cypress.start([`--run-project=${this.todosPath}`, '--config={"e2e":{"specPattern":["**/test2.coffee","**/test1.js"]}}'])
       .then(() => {
         expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, { url: 'http://localhost:8888/__/#/specs/runner?file=tests/test2.coffee' })
       }).then(() => {
-        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, { url: 'http://localhost:8888/__/#/specs/runner?file=tests/test1.js' })
+        expect(browsers.connectToNewSpec).to.be.calledWithMatch(ELECTRON_BROWSER, { url: 'http://localhost:8888/__/#/specs/runner?file=tests/test1.js' })
         this.expectExitWith(0)
       })
     })
@@ -1008,7 +1009,7 @@ describe('lib/cypress', () => {
 
             expect(args[0], 'found and used Chrome').to.deep.eq(launchedChrome)
 
-            const browserArgs = args[2]
+            const browserArgs = args[3]
 
             expect(browserArgs.slice(0, 4), 'first 4 custom launch arguments to Chrome').to.deep.eq([
               'chrome', 'foo', 'bar', 'baz',
