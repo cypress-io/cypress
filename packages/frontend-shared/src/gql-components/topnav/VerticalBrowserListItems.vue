@@ -3,8 +3,8 @@
     <li
       v-for="browser in props.gql.browsers"
       :key="browser.id"
-      class="border-b cursor-pointer flex border-b-gray-50 min-w-240px py-12px px-16px transition-colors duration-300 group"
-      :class="browser.isSelected ? 'bg-jade-50' : 'hover:bg-indigo-50'"
+      class="border-b border-transparent cursor-pointer flex border-b-gray-50 border-1px min-w-240px py-12px px-16px transition-colors duration-300 group focus-within-default"
+      :class="browser.isSelected ? 'bg-jade-50' : 'hover:bg-indigo-50 focus-within:bg-indigo-50'"
       data-cy="top-nav-browser-list-item"
       :data-browser-id="browser.id"
       @click="handleBrowserChoice(browser)"
@@ -16,13 +16,15 @@
       <div class="flex-grow">
         <div>
           <button
-            class="font-medium box-border"
-            :class="browser.isSelected ? 'text-jade-700' : 'text-indigo-500 group-hover:text-indigo-700'"
+            class="font-medium box-border focus:outline-none"
+            :class="browser.isSelected ? 'text-jade-700' : 'text-indigo-500 group-hover:text-indigo-700 group-focus-within:text-indigo-700'"
           >
             {{ browser.displayName }}
           </button>
           <div
-            class="font-normal mr-20px text-gray-500 text-14px filter whitespace-nowrap group-hover:mix-blend-luminosity"
+            class="font-normal mr-20px text-gray-500 text-14px filter whitespace-nowrap group-focus-within:mix-blend-luminosity
+            group-hover:mix-blend-luminosity
+            "
           >
             {{ t('topNav.version') }} {{ browser.version }}
           </div>
