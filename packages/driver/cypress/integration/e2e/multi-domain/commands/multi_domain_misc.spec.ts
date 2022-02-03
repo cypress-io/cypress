@@ -71,11 +71,15 @@ context('multi-domain misc', { experimentalSessionSupport: true, experimentalMul
   it('.pause()', (done) => {
     cy.switchToDomain('foobar.com', done, () => {
       Cypress.once('paused', () => {
+        // if running in open mode, pause will take effect
         Cypress.emit('resume:all')
         done()
       })
 
-      cy.pause()
+      // Otherwise, the subject of pause is returned in run mode and pause does NOT take effect
+      cy.pause().wrap({}).should('deep.eq', {}).then(function () {
+        done()
+      })
     })
   })
 
