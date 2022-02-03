@@ -47,6 +47,11 @@ export const Wizard = objectType({
       description: 'A list of packages to install, null if we have not chosen both a framework and bundler',
       resolve: (source, args, ctx) => ctx.wizard.packagesToInstall(),
     })
+
+    t.list.nonNull.string('installedPackages', {
+      description: 'The list of packages to install that are currently installed',
+      resolve: (source, args, ctx) => ctx.wizard.resolvePackagesToInstall(),
+    })
   },
   sourceType: {
     module: '@packages/data-context/src/data/coreDataShape',
