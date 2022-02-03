@@ -99,6 +99,10 @@ export const resolveServerConfig = async ({ viteConfig, options, indexHtml }: St
   if (isTextTerminal) {
     finalConfig.define = {
       'process.env.__PERCY_BROWSERIFIED__': 'globalThis.process_env___PERCY_BROWSERIFIED__',
+    },
+    finalConfig.build.rollupOptions = {
+      perf: true,
+      ...finalConfig.build.rollupOptions || {},
     }
   }
 
