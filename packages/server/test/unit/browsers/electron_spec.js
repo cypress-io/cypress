@@ -70,6 +70,14 @@ describe('lib/browsers/electron', () => {
     }
   })
 
+  context('.connectToNewSpec', () => {
+    it('calls open with the browser, url, options, and automation', async function () {
+      sinon.stub(electron, 'open').withArgs({ isHeaded: true }, 'http://www.example.com', { url: 'http://www.example.com' }, this.automation)
+      await electron.connectToNewSpec({ isHeaded: true }, 50505, { url: 'http://www.example.com' }, this.automation)
+      expect(electron.open).to.be.called
+    })
+  })
+
   context('.open', () => {
     beforeEach(function () {
       return this.stubForOpen()

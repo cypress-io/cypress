@@ -292,7 +292,7 @@ describe('lib/browsers/firefox', () => {
 
     it('launches with the url and args', function () {
       return firefox.open(this.browser, 'http://', this.options).then(() => {
-        expect(launch.launch).to.be.calledWith(this.browser, 'about:blank', [
+        expect(launch.launch).to.be.calledWith(this.browser, 'about:blank', undefined, [
           '-marionette',
           '-new-instance',
           '-foreground',
