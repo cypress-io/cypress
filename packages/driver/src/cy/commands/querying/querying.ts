@@ -2,12 +2,75 @@ import _ from 'lodash'
 import Promise from 'bluebird'
 
 import $dom from '../../../dom'
+import $elements from '../../../dom/elements'
 import $errUtils from '../../../cypress/error_utils'
 import { resolveShadowDomInclusion } from '../../../cypress/shadow_dom_utils'
 import { getAliasedRequests, isDynamicAliasingPossible } from '../../net-stubbing/aliasing'
 
 export default (Commands, Cypress, cy, state) => {
   Commands.addAll({
+    // TODO: any -> Partial<Cypress.Loggable & Cypress.Timeoutable>
+    focused (options: any = {}) {
+      const userOptions = options
+
+      options = _.defaults({}, userOptions, {
+        verify: true,
+        log: true,
+      })
+
+      if (options.log) {
+        options._log = Cypress.log({ timeout: options.timeout })
+      }
+
+      const log = ($el) => {
+        if (options.log === false) {
+          return
+        }
+
+        options._log.set({
+          $el,
+          consoleProps () {
+            const ret = $el ? $dom.getElements($el) : '--nothing--'
+
+            return {
+              Yielded: ret,
+              Elements: $el != null ? $el.length : 0,
+            }
+          },
+        })
+      }
+
+      const getFocused = () => {
+        const focused = cy.getFocused()
+
+        log(focused)
+
+        return focused
+      }
+
+      const resolveFocused = () => {
+        return Promise
+        .try(getFocused)
+        .then(($el) => {
+          if (options.verify === false) {
+            return $el
+          }
+
+          if (!$el) {
+            $el = $dom.wrap(null)
+            $el.selector = 'focused'
+          }
+
+          // pass in a null jquery object for assertions
+          return cy.verifyUpcomingAssertions($el, options, {
+            onRetry: resolveFocused,
+          })
+        })
+      }
+
+      return resolveFocused()
+    },
+
     // TODO: any -> Partial<Cypress.Loggable & Cypress.Timeoutable & Cypress.Withinable & Cypress.Shadow>
     get (selector, options: any = {}) {
       const userOptions = options
@@ -346,5 +409,251 @@ export default (Commands, Cypress, cy, state) => {
 
       return resolveElements()
     },
+
+    // TODO: any -> Partial<Cypress.Loggable & Cypress.Timeoutable>
+    root (options: any = {}) {
+      const userOptions = options
+
+      options = _.defaults({}, userOptions, { log: true })
+
+      if (options.log !== false) {
+        options._log = Cypress.log({
+          message: '',
+          timeout: options.timeout,
+        })
+      }
+
+      const log = ($el) => {
+        if (options.log) {
+          options._log.set({ $el })
+        }
+
+        return $el
+      }
+
+      const withinSubject = state('withinSubject')
+
+      if (withinSubject) {
+        return log(withinSubject)
+      }
+
+      return cy.now('get', 'html', { log: false }).then(log)
+    },
+  })
+
+  Commands.addAll({ prevSubject: ['optional', 'window', 'document', 'element'] }, {
+    // TODO: any -> Partial<Cypress.Loggable & Cypress.Timeoutable & Cypress.CaseMatchable & Cypress.Shadow>
+    contains (subject, filter, text, options: any = {}) {
+      let userOptions = options
+
+      // nuke our subject if its present but not an element.
+      // in these cases its either window or document but
+      // we dont care.
+      // we'll null out the subject so it will show up as a parent
+      // command since its behavior is identical to using it
+      // as a parent command: cy.contains()
+      // don't nuke if subject is a shadow root, is a document not an element
+      if (subject && !$dom.isElement(subject) && !$elements.isShadowRoot(subject[0])) {
+        subject = null
+      }
+
+      if (_.isRegExp(text)) {
+        // .contains(filter, text)
+        // Do nothing
+      } else if (_.isObject(text)) {
+        // .contains(text, userOptions)
+        userOptions = text
+        text = filter
+        filter = ''
+      } else if (_.isUndefined(text)) {
+        // .contains(text)
+        text = filter
+        filter = ''
+      }
+
+      // https://github.com/cypress-io/cypress/issues/1119
+      if (text === 0) {
+        // text can be 0 but should not be falsy
+        text = '0'
+      }
+
+      if (userOptions.matchCase === true && _.isRegExp(text) && text.flags.includes('i')) {
+        $errUtils.throwErrByPath('contains.regex_conflict')
+      }
+
+      options = _.defaults({}, userOptions, { log: true, matchCase: true })
+
+      if (!(_.isString(text) || _.isFinite(text) || _.isRegExp(text))) {
+        $errUtils.throwErrByPath('contains.invalid_argument')
+      }
+
+      if (_.isBlank(text)) {
+        $errUtils.throwErrByPath('contains.empty_string')
+      }
+
+      const getPhrase = () => {
+        if (filter && subject) {
+          const node = $dom.stringify(subject, 'short')
+
+          return `within the element: ${node} and with the selector: '${filter}' `
+        }
+
+        if (filter) {
+          return `within the selector: '${filter}' `
+        }
+
+        if (subject) {
+          const node = $dom.stringify(subject, 'short')
+
+          return `within the element: ${node} `
+        }
+
+        return ''
+      }
+
+      const getErr = (err) => {
+        const { type, negated } = err
+
+        if (type === 'existence') {
+          if (negated) {
+            return `Expected not to find content: '${text}' ${getPhrase()}but continuously found it.`
+          }
+
+          return `Expected to find content: '${text}' ${getPhrase()}but never did.`
+        }
+
+        return null
+      }
+
+      let consoleProps
+
+      if (options.log !== false) {
+        consoleProps = {
+          Content: text,
+          'Applied To': $dom.getElements(subject || state('withinSubject')),
+        }
+
+        options._log = Cypress.log({
+          message: _.compact([filter, text]),
+          type: subject ? 'child' : 'parent',
+          timeout: options.timeout,
+          consoleProps: () => {
+            return consoleProps
+          },
+        })
+      }
+
+      const setEl = ($el) => {
+        if (options.log === false) {
+          return
+        }
+
+        consoleProps.Yielded = $dom.getElements($el)
+        consoleProps.Elements = $el != null ? $el.length : undefined
+
+        options._log.set({ $el })
+      }
+
+      // find elements by the :cy-contains psuedo selector
+      // and any submit inputs with the attributeContainsWord selector
+      const selector = $dom.getContainsSelector(text, filter, options)
+
+      const resolveElements = () => {
+        const getOptions = _.extend({}, options, {
+          // error: getErr(text, phrase)
+          withinSubject: subject || state('withinSubject') || cy.$$('body'),
+          filter: true,
+          log: false,
+          // retry: false ## dont retry because we perform our own element validation
+          verify: false, // dont verify upcoming assertions, we do that ourselves
+        })
+
+        return cy.now('get', selector, getOptions).then(($el) => {
+          if ($el && $el.length) {
+            $el = $dom.getFirstDeepestElement($el)
+          }
+
+          setEl($el)
+
+          return cy.verifyUpcomingAssertions($el, options, {
+            onRetry: resolveElements,
+            onFail (err) {
+              switch (err.type) {
+                case 'length':
+                  if (err.expected > 1) {
+                    return $errUtils.throwErrByPath('contains.length_option', { onFail: options._log })
+                  }
+
+                  break
+                case 'existence':
+                  return err.message = getErr(err)
+                default:
+                  break
+              }
+
+              return null
+            },
+          })
+        })
+      }
+
+      return Promise
+      .try(resolveElements)
+    },
+  })
+
+  Commands.add('shadow', { prevSubject: 'element' }, (subject, options) => {
+    const userOptions = options || {}
+
+    options = _.defaults({}, userOptions, { log: true })
+
+    const consoleProps: Record<string, any> = {
+      'Applied To': $dom.getElements(subject),
+    }
+
+    if (options.log !== false) {
+      options._log = Cypress.log({
+        timeout: options.timeout,
+        consoleProps () {
+          return consoleProps
+        },
+      })
+    }
+
+    const setEl = ($el) => {
+      if (options.log === false) {
+        return
+      }
+
+      consoleProps.Yielded = $dom.getElements($el)
+      consoleProps.Elements = $el?.length
+
+      return options._log.set({ $el })
+    }
+
+    const getShadowRoots = () => {
+      // find all shadow roots of the subject(s), if any exist
+      const $el = subject
+      .map((i, node) => node.shadowRoot)
+      .filter((i, node) => node !== undefined && node !== null)
+
+      setEl($el)
+
+      return cy.verifyUpcomingAssertions($el, options, {
+        onRetry: getShadowRoots,
+        onFail (err) {
+          if (err.type !== 'existence') {
+            return
+          }
+
+          const { message, docsUrl } = $errUtils.cypressErrByPath('shadow.no_shadow_root')
+
+          err.message = message
+          err.docsUrl = docsUrl
+        },
+      })
+    }
+
+    return getShadowRoots()
   })
 }
