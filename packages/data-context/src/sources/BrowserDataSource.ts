@@ -80,10 +80,6 @@ export class BrowserDataSource {
     return Boolean(!obj.unsupportedVersion)
   }
 
-  warning (obj: FoundBrowser) {
-    return obj.warning
-  }
-
   setBrowserStatus (browserStatus: BrowserStatus) {
     this.ctx.coreData.app.browserStatus = browserStatus
     this.ctx.emitter.toLaunchpad()

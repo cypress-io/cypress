@@ -1,9 +1,7 @@
 <template>
   <div
-    ref="wrapper"
     @mouseenter="showTooltip()"
     @mouseleave="hideTooltip()"
-    @click="emit('click')"
   >
     <slot />
     <transition
@@ -18,11 +16,11 @@
                   text-center py-16px px-24px
                   text-gray-300 text-size-14px leading-20px absolute
                   content need-content
-                  before:border-solid before:border-transparent before:border-width-8px before:right-1/2
-                  before:block before:absolute "
+                  before:(border-solid border-transparent border-width-8px right-1/2
+                  block absolute) "
         :class="{
-          'bottom-7 before:top-full before:-mr-8px before:border-b-0 before:border-t-gray-900': placement === 'top',
-          'top-7 before:bottom-full before:-mr-8px before:border-t-0 before:border-b-gray-900': placement === 'bottom'
+          'bottom-7 before:(top-full -mr-8px border-b-0 border-t-gray-900)': placement === 'top',
+          'top-7 (bottom-full -mr-8px border-t-0 border-b-gray-900)': placement === 'bottom'
         }"
         :style="`left: ${tooltipLeft}px; width: ${tooltipWidth}px`"
         role="tooltip"
@@ -39,22 +37,16 @@
 import { ref, nextTick, onMounted } from 'vue'
 
 const props = withDefaults(defineProps<{
-  disabled?:boolean,
   placement?:string,
   tooltipWidth?:number
 }>(), {
-  disabled: false,
   placement: 'bottom',
   tooltipWidth: 400,
 })
 
-const emit = defineEmits(['click'])
-
 const hover = ref(false)
 const scaleUp = ref(false)
 const tooltipLeft = ref(0)
-
-const wrapper = ref<HTMLDivElement | null>(null)
 
 function placeTooltip () {
   tooltipLeft.value = -1 * props.tooltipWidth / 2 + 8
