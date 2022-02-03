@@ -1,11 +1,14 @@
 import Bluebird from 'bluebird'
 import chai, { expect } from 'chai'
+import { app, BrowserWindow } from 'electron'
 /* eslint-disable no-console */
 import fse from 'fs-extra'
 import globby from 'globby'
 import isCi from 'is-ci'
 import _ from 'lodash'
 import path from 'path'
+import pixelmatch from 'pixelmatch'
+import { PNG } from 'pngjs'
 import sinon, { SinonSpy } from 'sinon'
 import termToHtml from 'term-to-html'
 import { terminalBanner } from 'terminal-banner'
@@ -23,13 +26,17 @@ chai.use(require('@cypress/sinon-chai'))
 
 termToHtml.themes.dark.bg = '#111'
 
-let win
+let win: BrowserWindow
 
 const lineAndColNumsRe = /:\d+:\d+/
 
-const convertHtmlToImage = (htmlfile) => {
-  const { app, BrowserWindow } = require('electron')
+const EXT = '.png'
 
+const copyImageToBase = (from, to) => {
+  return fse.copy(from, to, { overwrite: true })
+}
+
+const convertHtmlToImage = (htmlfile) => {
   const HEIGHT = 550
   const WIDTH = 1200
 
@@ -45,18 +52,8 @@ const convertHtmlToImage = (htmlfile) => {
       win.webContents.debugger.attach()
     }
 
-    // win.once('ready-to-show', () => {
-    //   win.webContents.openDevTools({ mode: 'bottom' })
-    // })
-
     return new Bluebird((resolve, reject) => {
       win.webContents.once('did-finish-load', (evt) => {
-        // win.webContents.enableDeviceEmulation({
-        //   screenPosition: 'desktop',
-        //   deviceScaleFactor: 1,
-        //   viewSize: { width: 1200, height: 600 },
-        // })
-
         return win.webContents.debugger.sendCommand('Emulation.setDeviceMetricsOverride', {
           width: WIDTH,
           height: HEIGHT,
@@ -69,15 +66,45 @@ const convertHtmlToImage = (htmlfile) => {
             quality: 100,
           })
         })
-        // win.capturePage()
-        // .then((nativeImage) => {
         .then(({ data }) => {
-          const imagefile = htmlfile.replace('.html', '.png')
+          const imagePath = htmlfile.replace('.html', EXT)
+          const baseImagePath = path.join(baseImageFolder, path.basename(imagePath))
+
+          const receivedImageBuffer = Buffer.from(data, 'base64')
+          const receivedPng = PNG.sync.read(receivedImageBuffer)
+          const receivedPngBuffer = PNG.sync.write(receivedPng)
 
           return Promise.all([
-            fse.outputFile(imagefile, Buffer.from(data, 'base64')),
+            fse.outputFile(imagePath, receivedPngBuffer),
             fse.remove(htmlfile),
           ])
+          .then(() => {
+            // - if image does not exist in __snapshot-bases__
+            //   then copy into __snapshot-bases__
+            // - if image does exist then diff if, and if its
+            //   greater than >.01 diff, then copy it in
+            // - unless we're in CI, then fail if there's a diff
+            return fse.readFile(baseImagePath)
+            .then((buf) => {
+              const existingPng = PNG.sync.read(buf)
+              const diffPng = new PNG({ width: WIDTH, height: HEIGHT })
+
+              const changed = pixelmatch(existingPng.data, receivedPng.data, diffPng.data, WIDTH, HEIGHT, { threshold: 0.1 })
+
+              if (changed) {
+                if (isCi) {
+                  throw new Error(`Image difference detected. Base error image no longer matches for file: ${baseImagePath}`)
+                }
+
+                return copyImageToBase(imagePath, baseImagePath)
+              }
+            })
+            .catch((err) => {
+              if (err.code === 'ENOENT') {
+                return copyImageToBase(imagePath, baseImagePath)
+              }
+            })
+          })
           .then(resolve)
         })
         .catch(reject)
@@ -90,6 +117,7 @@ const convertHtmlToImage = (htmlfile) => {
 }
 
 const outputHtmlFolder = path.join(__dirname, '..', '..', '__snapshot-images__')
+const baseImageFolder = path.join(__dirname, '..', '..', '__snapshot-bases__')
 
 const saveHtml = async (filename, html) => {
   await fse.outputFile(filename, html, 'utf8')
@@ -150,10 +178,6 @@ const testVisualError = <K extends CypressErrorType> (errorGeneratorFn: () => Er
 
     expect(variants).to.be.an('object')
 
-    if (isCi) {
-      return
-    }
-
     const snapshots = _.mapValues(variants, (arr, key: string) => {
       const filename = key === 'default' ? errorType : `${errorType} - ${key}`
 
@@ -169,7 +193,9 @@ const testVisualError = <K extends CypressErrorType> (errorGeneratorFn: () => Er
 
       return snapshotErrorConsoleLogs(htmlFilename)
       .then(() => {
-        return convertHtmlToImage(htmlFilename)
+        if (process.env.SKIP_IMAGE_CONVERSION !== '1') {
+          return convertHtmlToImage(htmlFilename)
+        }
       })
     })
 
@@ -200,7 +226,7 @@ const testVisualErrors = (whichError: CypressErrorType | '*', errorsToTest: {[K 
         return globby(`${outputHtmlFolder}/*`)
       })
       .map((file) => {
-        return path.basename(file, '.png').split(' ')[0]
+        return path.basename(file, EXT).split(' ')[0]
       })
       .then((errorImageNames) => {
         const uniqErrors = _.uniq(errorImageNames)
@@ -208,6 +234,29 @@ const testVisualErrors = (whichError: CypressErrorType | '*', errorsToTest: {[K 
         expect(uniqErrors).to.deep.eq(_.keys(errors.AllCypressErrors))
       })
     }
+
+    // otherwise if we're local, then prune out anything from
+    // __snapshot-bases__ that's stale
+    return Bluebird.resolve()
+    .then(() => {
+      return globby(`${baseImageFolder}/*`)
+    })
+    .map((file) => {
+      return path.basename(file, EXT).split(' ')[0]
+    })
+    .then((errorImageNames) => {
+      const excessImages = _
+      .chain(errorImageNames)
+      .uniq()
+      .difference(_.keys(errors.AllCypressErrors))
+      .value()
+
+      return Bluebird.map(excessImages, (img) => {
+        const pathToImage = path.join(baseImageFolder, img + EXT)
+
+        return fse.remove(pathToImage)
+      })
+    })
   })
 
   // test each error visually

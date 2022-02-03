@@ -11,7 +11,7 @@
     "check-ts": "tsc --noEmit",
     "clean-deps": "rm -rf node_modules",
     "clean": "rm -f ./src/*.js ./src/**/*.js ./src/**/**/*.js ./test/**/*.js || echo 'cleaned'",
-    "test-unit": "electron ./node_modules/.bin/_mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json --exit"
+    "test-unit": "xvfb-maybe electron ./node_modules/.bin/_mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json --exit"
   },
   "dependencies": {
     "ansi_up": "5.0.0",
@@ -23,9 +23,11 @@
     "@types/strip-ansi": "^5.2.1",
     "chai": "4.2.0",
     "electron-mocha": "^11.0.2",
-    "globby": "^13.1.1",
+    "globby": "^11.0.1",
     "is-ci": "^3.0.1",
     "mocha": "7.0.1",
+    "pixelmatch": "^5.2.1",
+    "pngjs": "^6.0.0",
     "sinon": "7.5.0",
     "terminal-banner": "^1.1.0",
     "xvfb-maybe": "^0.2.1"

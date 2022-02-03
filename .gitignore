@@ -83,6 +83,9 @@ system-tests/fixtures/large-img
 # from runner-ct
 /packages/runner-ct/cypress/screenshots
 
+# from errors
+/packages/errors/__snapshot-images__
+
 # graphql, auto-generated
 /packages/launchpad/src/generated
 /packages/app/src/generated
