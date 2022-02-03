@@ -104,4 +104,16 @@ export class Queue<T> {
   get stopped () {
     return this._stopped
   }
+
+  /**
+   * Helper function to return the last item in the queue.
+   * @returns The last item or undefined if the queue is empty.
+   */
+  last (): T | undefined {
+    if (this.length < 1) {
+      return undefined
+    }
+
+    return this.at(this.length - 1)
+  }
 }

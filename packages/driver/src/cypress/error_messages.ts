@@ -1710,6 +1710,32 @@ export default {
 
       This is likely because the data argument specified is not serializable. Note that functions and DOM objects cannot be serialized.`,
     },
+    callback_mixes_sync_and_async: {
+      message: stripIndent`\
+        ${cmd('switchToDomain')} failed because you are mixing up async and sync code.
+
+        In your callback function you invoked one or more cy commands but then returned a synchronous value.
+
+        Cypress commands are asynchronous and it doesn't make sense to queue cy commands and yet return a synchronous value.
+
+        You likely forgot to properly chain the cy commands using another \`cy.then()\`.
+
+        The value you synchronously returned was: \`{{value}}\``,
+    },
+    failed_to_serialize_object: {
+      message: stripIndent`\
+      ${cmd('switchToDomain')} could not serialize the subject due to one of its properties not being supported by the structured clone algorithm.
+
+      To properly serialize this subject, remove or serialize any unsupported properties.`,
+    },
+    failed_to_serialize_function: {
+      message: stripIndent`\
+      ${cmd('switchToDomain')} could not serialize the subject due to functions not being supported by the structured clone algorithm.`,
+    },
+    failed_to_serialize_symbol: {
+      message: stripIndent`\
+      ${cmd('switchToDomain')} could not serialize the subject due to symbols not being supported by the structured clone algorithm.`,
+    },
   },
 
   task: {

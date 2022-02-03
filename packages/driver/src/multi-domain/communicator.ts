@@ -8,14 +8,14 @@ const debug = debugFn('cypress:driver:multi-domain')
 
 const CROSS_DOMAIN_PREFIX = 'cross:domain:'
 
-const serializeForPostMessage = (value) => {
+const preprocessErrorForPostMessage = (value) => {
   const { isDom } = $dom
 
   if (_.isError(value)) {
-    const serializedError = _.mapValues(clone(value), serializeForPostMessage)
+    const serializableError = _.mapValues(clone(value), preprocessErrorForPostMessage)
 
     return {
-      ... serializedError,
+      ... serializableError,
       // Native Error types currently cannot be cloned in Firefox when using 'postMessage'.
       // Please see https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm for more details
       name: value.name,
@@ -25,7 +25,7 @@ const serializeForPostMessage = (value) => {
   }
 
   if (_.isArray(value)) {
-    return _.map(value, serializeForPostMessage)
+    return _.map(value, preprocessErrorForPostMessage)
   }
 
   if (isDom(value)) {
@@ -40,7 +40,7 @@ const serializeForPostMessage = (value) => {
     // clone to nuke circular references
     // and blow away anything that throws
     try {
-      return _.mapValues(clone(value), serializeForPostMessage)
+      return _.mapValues(clone(value), preprocessErrorForPostMessage)
     } catch (err) {
       return null
     }
@@ -125,6 +125,29 @@ export class PrimaryDomainCommunicator extends EventEmitter {
 export class SpecBridgeDomainCommunicator extends EventEmitter {
   private windowReference
 
+  private handleSubjectAndErr = (event, data) => {
+    const { subject, err, ...other } = data
+
+    try {
+      // We always want to make sure errors are posted, so clean it up to send.
+      const preProcessedError = preprocessErrorForPostMessage(err)
+
+      this.toPrimary(event, { subject, err: preProcessedError, ...other })
+    } catch (error: any) {
+      if (subject && error.name === 'DataCloneError') {
+        // Send the type of object that failed to serialize.
+        const failedToSerializeSubjectOfType = typeof subject
+
+        // If the subject threw the 'DataCloneError', the subject cannot be serialized at which point try again with an undefined subject.
+        this.handleSubjectAndErr(event, { failedToSerializeSubjectOfType, ...other })
+      } else {
+        // Try to send the message again, with the new error.
+        this.handleSubjectAndErr(event, { err: error, ...other })
+        throw error
+      }
+    }
+  }
+
   /**
    * Initializes the event handler to receive messages from the primary domain.
    * @param {Window} win - a reference to the window object in the spec bridge/iframe.
@@ -147,10 +170,17 @@ export class SpecBridgeDomainCommunicator extends EventEmitter {
    * @param {string} event - the name of the event to be sent.
    * @param {any} data - any meta data to be sent with the event.
    */
-  toPrimary (event: string, data?: any, serializer?: (data: any) => any) {
+  toPrimary (event: string, data?: any) {
     let prefixedEvent = `${CROSS_DOMAIN_PREFIX}${event}`
 
-    data = serializer ? serializer(data) : serializeForPostMessage(data)
     this.windowReference.top.postMessage({ event: prefixedEvent, data }, '*')
+  }
+
+  toPrimaryCommandEnd (data: {id: string, subject?: any, name: string, err?: any, logId: string }) {
+    this.handleSubjectAndErr('command:end', data)
+  }
+
+  toPrimaryRanDomainFn (data: { subject?: any, err?: any }) {
+    this.handleSubjectAndErr('ran:domain:fn', data)
   }
 }

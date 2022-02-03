@@ -50,7 +50,7 @@ const toSerializedJSON = function (attrs) {
       return value()
     }
 
-    if (_.isFunction(value)) {
+    if (_.isFunction(value) || _.isSymbol(value)) {
       return value.toString()
     }
 
