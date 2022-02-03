@@ -25,6 +25,8 @@ termToHtml.themes.dark.bg = '#111'
 
 let win
 
+const lineAndColNumsRe = /:\d+:\d+/
+
 const convertHtmlToImage = (htmlfile) => {
   const { app, BrowserWindow } = require('electron')
 
@@ -93,11 +95,19 @@ const saveHtml = async (filename, html) => {
   await fse.outputFile(filename, html, 'utf8')
 }
 
+const cypressRootPath = path.join(__dirname, '..', '..', '..', '..')
+
+const sanitize = (str: string) => {
+  return str
+  .split(lineAndColNumsRe).join('')
+  .split(cypressRootPath).join('cypress')
+}
+
 const snapshotErrorConsoleLogs = function (errorFileName: string) {
   const logs = _
   .chain(consoleLog.args)
   .map((args) => {
-    return args.join(' ')
+    return args.map(sanitize).join(' ')
   })
   .join('\n')
   .value()
@@ -228,7 +238,7 @@ const testVisualErrors = (whichError: CypressErrorType | '*', errorsToTest: {[K 
 const makeErr = () => {
   const err = new Error('fail whale')
 
-  err.stack = err.stack.split('\n').slice(0, 5).join('\n')
+  err.stack = err.stack.split('\n').slice(0, 4).join('\n')
 
   return err
 }
