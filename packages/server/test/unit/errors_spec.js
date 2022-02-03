@@ -15,7 +15,7 @@ context('.logException', () => {
 
     return errors.logException(err)
     .then(() => {
-      expect(console.log).to.be.calledWith(chalk.red(err.stack))
+      expect(console.log).to.be.calledWith(chalk.red(err.stack ?? ''))
 
       expect(logger.createException).to.be.calledWith(err)
     })

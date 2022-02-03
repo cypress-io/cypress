@@ -45,7 +45,7 @@ describe('lib/plugins/run_events', () => {
 
       return runEvents.execute('before:spec', {}, 'arg1', 'arg2')
       .then(() => {
-        expect(errors.throw).to.be.calledWith('PLUGINS_RUN_EVENT_ERROR', 'before:spec', 'The event threw an error')
+        expect(errors.throw).to.be.calledWith('PLUGINS_RUN_EVENT_ERROR', 'before:spec', { name: 'Error', message: 'The event threw an error' })
       })
     })
   })

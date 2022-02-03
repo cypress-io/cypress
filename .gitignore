@@ -18,6 +18,8 @@ packages/config/lib/*.js
 
 # from data-context, compiled .js files
 packages/data-context/src/**/*.js
+packages/errors/src/**/*.js
+packages/errors/test/**/*.js
 
 # from desktop-gui
 packages/desktop-gui/cypress/videos

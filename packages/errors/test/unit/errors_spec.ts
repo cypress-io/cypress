@@ -3,18 +3,16 @@ import chalk from 'chalk'
 import style from 'ansi-styles'
 import snapshot from 'snap-shot-it'
 import sinon from 'sinon'
+import 'sinon-chai'
 
 import * as errors from '../../src'
 import chai, { expect } from 'chai'
 
 chai.use(require('@cypress/sinon-chai'))
 
-afterEach(() => {
-  sinon.restore()
-})
-
 describe('lib/errors', () => {
   beforeEach(() => {
+    sinon.restore()
     sinon.stub(console, 'log')
   })
 
@@ -82,7 +80,7 @@ describe('lib/errors', () => {
 
       expect(ret).to.eq(err)
 
-      expect(console.log).to.be.calledWith(chalk.red(err.stack))
+      expect(console.log).to.be.calledWith(chalk.red(err.stack ?? ''))
     })
   })
 

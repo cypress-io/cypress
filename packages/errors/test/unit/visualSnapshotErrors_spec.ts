@@ -1,18 +1,26 @@
-import Bluebird from 'bluebird'
 import chai, { expect } from 'chai'
 import { app, BrowserWindow } from 'electron'
 /* eslint-disable no-console */
 import fse from 'fs-extra'
 import globby from 'globby'
-import isCi from 'is-ci'
 import _ from 'lodash'
 import path from 'path'
 import pixelmatch from 'pixelmatch'
-import { PNG } from 'pngjs'
 import sinon, { SinonSpy } from 'sinon'
-import termToHtml from 'term-to-html'
-import { terminalBanner } from 'terminal-banner'
+import { PNG } from 'pngjs'
+
 import * as errors from '../../src'
+
+// For importing the files below
+process.env.CYPRESS_INTERNAL_ENV = 'test'
+
+// require'd so the unsafe types from the server / missing types don't mix in here
+const termToHtml = require('term-to-html')
+const isCi = require('is-ci')
+const { terminalBanner } = require('terminal-banner')
+const ciProvider = require('@packages/server/lib/util/ci_provider')
+const browsers = require('@packages/server/lib/browsers')
+const launcherBrowsers = require('@packages/launcher/lib/browsers')
 
 interface ErrorGenerator<T extends CypressErrorType> {
   default: Parameters<typeof errors.AllCypressErrors[T]>
@@ -32,94 +40,96 @@ const lineAndColNumsRe = /:\d+:\d+/
 
 const EXT = '.png'
 
-const copyImageToBase = (from, to) => {
+const copyImageToBase = (from: string, to: string) => {
   return fse.copy(from, to, { overwrite: true })
 }
 
-const convertHtmlToImage = (htmlfile) => {
+const convertHtmlToImage = async (htmlfile: string) => {
   const HEIGHT = 550
   const WIDTH = 1200
 
-  return app.whenReady()
-  .then(() => {
-    if (!win) {
-      win = new BrowserWindow({
-        show: false,
-        width: WIDTH,
-        height: HEIGHT,
-      })
+  await app.whenReady()
 
-      win.webContents.debugger.attach()
-    }
+  if (!win) {
+    win = new BrowserWindow({
+      show: false,
+      width: WIDTH,
+      height: HEIGHT,
+    })
 
-    return new Bluebird((resolve, reject) => {
-      win.webContents.once('did-finish-load', (evt) => {
-        return win.webContents.debugger.sendCommand('Emulation.setDeviceMetricsOverride', {
+    win.webContents.debugger.attach()
+  }
+
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      reject(new Error('Timed out creating Snapshot'))
+    }, 2000)
+
+    win.webContents.once('did-finish-load', async () => {
+      try {
+        await win.webContents.debugger.sendCommand('Emulation.setDeviceMetricsOverride', {
           width: WIDTH,
           height: HEIGHT,
           deviceScaleFactor: 1,
           mobile: false,
         })
-        .then(() => {
-          return win.webContents.debugger.sendCommand('Page.captureScreenshot', {
-            format: 'png',
-            quality: 100,
-          })
+
+        const { data } = await win.webContents.debugger.sendCommand('Page.captureScreenshot', {
+          format: 'png',
+          quality: 100,
         })
-        .then(({ data }) => {
-          const imagePath = htmlfile.replace('.html', EXT)
-          const baseImagePath = path.join(baseImageFolder, path.basename(imagePath))
 
-          const receivedImageBuffer = Buffer.from(data, 'base64')
-          const receivedPng = PNG.sync.read(receivedImageBuffer)
-          const receivedPngBuffer = PNG.sync.write(receivedPng)
+        const imagePath = htmlfile.replace('.html', EXT)
+        const baseImagePath = path.join(baseImageFolder, path.basename(imagePath))
 
-          return Promise.all([
-            fse.outputFile(imagePath, receivedPngBuffer),
-            fse.remove(htmlfile),
-          ])
-          .then(() => {
-            // - if image does not exist in __snapshot-bases__
-            //   then copy into __snapshot-bases__
-            // - if image does exist then diff if, and if its
-            //   greater than >.01 diff, then copy it in
-            // - unless we're in CI, then fail if there's a diff
-            return fse.readFile(baseImagePath)
-            .then((buf) => {
-              const existingPng = PNG.sync.read(buf)
-              const diffPng = new PNG({ width: WIDTH, height: HEIGHT })
+        const receivedImageBuffer = Buffer.from(data, 'base64')
+        const receivedPng = PNG.sync.read(receivedImageBuffer)
+        const receivedPngBuffer = PNG.sync.write(receivedPng)
 
-              const changed = pixelmatch(existingPng.data, receivedPng.data, diffPng.data, WIDTH, HEIGHT, { threshold: 0.1 })
+        await Promise.all([
+          fse.outputFile(imagePath, receivedPngBuffer),
+          fse.remove(htmlfile),
+        ])
 
-              if (changed) {
-                if (isCi) {
-                  throw new Error(`Image difference detected. Base error image no longer matches for file: ${baseImagePath}`)
-                }
+        // - if image does not exist in __snapshot-bases__
+        //   then copy into __snapshot-bases__
+        // - if image does exist then diff if, and if its
+        //   greater than >.01 diff, then copy it in
+        // - unless we're in CI, then fail if there's a diff
+        try {
+          const buf = await fse.readFile(baseImagePath)
+          const existingPng = PNG.sync.read(buf)
+          const diffPng = new PNG({ width: WIDTH, height: HEIGHT })
+          const changed = pixelmatch(existingPng.data, receivedPng.data, diffPng.data, WIDTH, HEIGHT, { threshold: 0.1 })
 
-                return copyImageToBase(imagePath, baseImagePath)
-              }
-            })
-            .catch((err) => {
-              if (err.code === 'ENOENT') {
-                return copyImageToBase(imagePath, baseImagePath)
-              }
-            })
-          })
-          .then(resolve)
-        })
-        .catch(reject)
-      })
+          if (changed) {
+            console.log({ changed })
+            if (isCi) {
+              return reject(new Error(`Image difference detected. Base error image no longer matches for file: ${baseImagePath}`))
+            }
 
-      win.loadFile(htmlfile)
+            await copyImageToBase(imagePath, baseImagePath)
+          }
+        } catch (err: any) {
+          if (err.code === 'ENOENT') {
+            await copyImageToBase(imagePath, baseImagePath)
+          }
+        } finally {
+          resolve({})
+        }
+      } catch (e) {
+        reject(e)
+      }
     })
-    .timeout(2000)
+
+    win.loadFile(htmlfile).catch(reject)
   })
 }
 
 const outputHtmlFolder = path.join(__dirname, '..', '..', '__snapshot-images__')
 const baseImageFolder = path.join(__dirname, '..', '..', '__snapshot-bases__')
 
-const saveHtml = async (filename, html) => {
+const saveHtml = async (filename: string, html: string) => {
   await fse.outputFile(filename, html, 'utf8')
 }
 
@@ -178,7 +188,11 @@ const testVisualError = <K extends CypressErrorType> (errorGeneratorFn: () => Er
 
     expect(variants).to.be.an('object')
 
-    const snapshots = _.mapValues(variants, (arr, key: string) => {
+    if (isCi) {
+      return
+    }
+
+    const snapshots = _.mapValues(variants, async (arr, key: string) => {
       const filename = key === 'default' ? errorType : `${errorType} - ${key}`
 
       terminalBanner(filename)
@@ -191,15 +205,14 @@ const testVisualError = <K extends CypressErrorType> (errorGeneratorFn: () => Er
 
       const htmlFilename = path.join(outputHtmlFolder, `${filename }.html`)
 
-      return snapshotErrorConsoleLogs(htmlFilename)
-      .then(() => {
-        if (process.env.SKIP_IMAGE_CONVERSION !== '1') {
-          return convertHtmlToImage(htmlFilename)
-        }
-      })
+      await snapshotErrorConsoleLogs(htmlFilename)
+
+      if (process.env.SKIP_IMAGE_CONVERSION !== '1') {
+        return convertHtmlToImage(htmlFilename)
+      }
     })
 
-    return Bluebird.props(snapshots)
+    return Promise.all(Object.values(snapshots))
   })
 }
 
@@ -217,49 +230,29 @@ const testVisualErrors = (whichError: CypressErrorType | '*', errorsToTest: {[K 
     return fse.remove(outputHtmlFolder)
   })
 
-  after(() => {
+  after(async () => {
     // if we're in CI, make sure there's all the files
     // we expect there to be in __snapshot-images__
     if (isCi) {
-      return Bluebird.resolve()
-      .then(() => {
-        return globby(`${outputHtmlFolder}/*`)
+      const files = await globby(`${outputHtmlFolder}/*`)
+      const errorImageNames = files.map((file) => {
+        return path.basename(file, '.png').split(' ')[0]
       })
-      .map((file) => {
-        return path.basename(file, EXT).split(' ')[0]
-      })
-      .then((errorImageNames) => {
-        const uniqErrors = _.uniq(errorImageNames)
+      const uniqErrors = _.uniq(errorImageNames)
+      const excessImages = _.difference(uniqErrors, _.keys(errors.AllCypressErrors))
 
-        expect(uniqErrors).to.deep.eq(_.keys(errors.AllCypressErrors))
-      })
-    }
-
-    // otherwise if we're local, then prune out anything from
-    // __snapshot-bases__ that's stale
-    return Bluebird.resolve()
-    .then(() => {
-      return globby(`${baseImageFolder}/*`)
-    })
-    .map((file) => {
-      return path.basename(file, EXT).split(' ')[0]
-    })
-    .then((errorImageNames) => {
-      const excessImages = _
-      .chain(errorImageNames)
-      .uniq()
-      .difference(_.keys(errors.AllCypressErrors))
-      .value()
-
-      return Bluebird.map(excessImages, (img) => {
+      await Promise.all(excessImages.map((img) => {
         const pathToImage = path.join(baseImageFolder, img + EXT)
 
         return fse.remove(pathToImage)
-      })
-    })
+      }))
+
+      expect(uniqErrors).to.deep.eq(_.keys(errors.AllCypressErrors))
+    }
   })
 
   // test each error visually
+  // @ts-expect-error
   _.forEach(errorsToTest, testVisualError)
 
   // if we are testing all the errors then make sure we
@@ -287,9 +280,9 @@ const testVisualErrors = (whichError: CypressErrorType | '*', errorsToTest: {[K 
 const makeErr = () => {
   const err = new Error('fail whale')
 
-  err.stack = err.stack.split('\n').slice(0, 4).join('\n')
+  err.stack = err.stack?.split('\n').slice(0, 4).join('\n') ?? ''
 
-  return err
+  return err as Error & {stack: string}
 }
 
 testVisualErrors('*', {
@@ -323,14 +316,15 @@ testVisualErrors('*', {
     }
   },
   CHROME_WEB_SECURITY_NOT_SUPPORTED: () => {
-    // const err = makeErr()
-
-    // return {
-    //   default: [err.stack],
-    // }
+    return {
+      default: ['electron'],
+    }
   },
   BROWSER_NOT_FOUND_BY_NAME: () => {
-
+    return {
+      default: ['invalid-browser', browsers.formatBrowsersToOptions(launcherBrowsers.browsers)],
+      canary: ['canary', browsers.formatBrowsersToOptions(launcherBrowsers.browsers)],
+    }
   },
   BROWSER_NOT_FOUND_BY_PATH: () => {
     const err = makeErr()
@@ -361,37 +355,74 @@ testVisualErrors('*', {
     }
   },
   DASHBOARD_API_RESPONSE_FAILED_RETRYING: () => {
-
+    return {
+      default: [{ tries: 3, delay: 5000, response: '500 server down' }],
+    }
   },
   DASHBOARD_CANNOT_PROCEED_IN_PARALLEL: () => {
-
+    return {
+      default: [{ flags: { ciBuildId: 'invalid', group: 'foo' }, response: 'Invalid CI Build ID' }],
+    }
   },
   DASHBOARD_CANNOT_PROCEED_IN_SERIAL: () => {
-
+    return {
+      default: [{ flags: { ciBuildId: 'invalid', group: 'foo' }, response: 'Invalid CI Build ID' }],
+    }
   },
   DASHBOARD_UNKNOWN_INVALID_REQUEST: () => {
-
+    return {
+      default: [{ flags: { ciBuildId: 'invalid', group: 'foo' }, response: 'Unexpected 500 Error' }],
+    }
   },
   DASHBOARD_UNKNOWN_CREATE_RUN_WARNING: () => {
-
+    return {
+      default: [{ props: { ciBuildId: 'invalid', group: 'foo' }, message: 'You have been warned' }],
+    }
   },
   DASHBOARD_STALE_RUN: () => {
-
+    return {
+      default: [{ runUrl: 'https://dashboard.cypress.io/project/abcd/runs/1', tag: '123', group: 'foo', parallel: true }],
+    }
   },
   DASHBOARD_ALREADY_COMPLETE: () => {
-
+    return {
+      default: [{ runUrl: 'https://dashboard.cypress.io/project/abcd/runs/1', tag: '123', group: 'foo', parallel: true }],
+    }
   },
   DASHBOARD_PARALLEL_REQUIRED: () => {
-
+    return {
+      default: [{ runUrl: 'https://dashboard.cypress.io/project/abcd/runs/1', tag: '123', group: 'foo', parallel: true }],
+    }
   },
   DASHBOARD_PARALLEL_DISALLOWED: () => {
-
+    return {
+      default: [{ runUrl: 'https://dashboard.cypress.io/project/abcd/runs/1', tag: '123', group: 'foo', parallel: true }],
+    }
   },
   DASHBOARD_PARALLEL_GROUP_PARAMS_MISMATCH: () => {
-
+    return {
+      default: [
+        {
+          group: 'foo',
+          runUrl: 'https://dashboard.cypress.io/project/abcd/runs/1',
+          ciBuildId: 'test-ciBuildId-123',
+          parameters: {
+            osName: 'darwin',
+            osVersion: 'v1',
+            browserName: 'Electron',
+            browserVersion: '59.1.2.3',
+            specs: [
+              'cypress/integration/app_spec.js',
+            ],
+          },
+        },
+      ],
+    }
   },
   DASHBOARD_RUN_GROUP_NAME_NOT_UNIQUE: () => {
-
+    return {
+      default: [{ runUrl: 'https://dashboard.cypress.io/project/abcd/runs/1', tag: '123', group: 'foo', parallel: true }],
+    }
   },
   DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS: () => {
     return {
@@ -404,13 +435,22 @@ testVisualErrors('*', {
     }
   },
   INDETERMINATE_CI_BUILD_ID: () => {
-
+    return {
+      default: [
+        { group: 'foo', parallel: 'false' },
+        ciProvider.detectableCiBuildIdProviders(),
+      ],
+    }
   },
   RECORD_PARAMS_WITHOUT_RECORDING: () => {
-
+    return {
+      default: [{ parallel: 'true' }],
+    }
   },
   INCORRECT_CI_BUILD_ID_USAGE: () => {
-
+    return {
+      default: [{ ciBuildId: 'ciBuildId123' }],
+    }
   },
   RECORD_KEY_MISSING: () => {
     return {
@@ -428,7 +468,9 @@ testVisualErrors('*', {
     }
   },
   DASHBOARD_INVALID_RUN_REQUEST: () => {
-
+    return {
+      default: [{ message: 'Error on Run Request', errors: [], object: {} }],
+    }
   },
   RECORDING_FROM_FORK_PR: () => {
     return {
@@ -450,7 +492,9 @@ testVisualErrors('*', {
     }
   },
   DASHBOARD_RECORD_KEY_NOT_VALID: () => {
-
+    return {
+      default: ['record-key-1234', 'projectId'],
+    }
   },
   DASHBOARD_PROJECT_NOT_FOUND: () => {
     return {
@@ -488,13 +532,20 @@ testVisualErrors('*', {
     }
   },
   ERROR_READING_FILE: () => {
-
+    return {
+      default: ['/path/to/read/file.ts', makeErr()],
+    }
   },
   ERROR_WRITING_FILE: () => {
-
+    return {
+      default: ['path/to/write/file.ts', makeErr()],
+    }
   },
   NO_SPECS_FOUND: () => {
-
+    return {
+      default: ['/path/to/project/root', '**_spec.js'],
+      noPattern: ['/path/to/project/root'],
+    }
   },
   RENDERER_CRASHED: () => {
     return {
@@ -573,7 +624,9 @@ testVisualErrors('*', {
     }
   },
   RENAMED_CONFIG_OPTION: () => {
-
+    return {
+      default: [{ name: 'oldName', newName: 'newName' }],
+    }
   },
   CANNOT_CONNECT_BASE_URL: () => {
     return {
@@ -586,10 +639,18 @@ testVisualErrors('*', {
     }
   },
   CANNOT_CONNECT_BASE_URL_RETRYING: () => {
-
+    return {
+      default: [{ attempt: 0, baseUrl: 'http://localhost:3000', remaining: 60, delay: 500 }],
+    }
   },
   INVALID_REPORTER_NAME: () => {
-
+    return {
+      default: [{
+        name: 'missing-reporter-name',
+        paths: ['/path/to/reporter', '/path/reporter'],
+        error: `stack-trace`,
+      }],
+    }
   },
   NO_DEFAULT_CONFIG_FILE_FOUND: () => {
     return {
@@ -597,7 +658,13 @@ testVisualErrors('*', {
     }
   },
   CONFIG_FILES_LANGUAGE_CONFLICT: () => {
-
+    return {
+      default: [
+        'cypress.config.js',
+        'cypress.config.ts',
+        '/path/to/project/root',
+      ],
+    }
   },
   CONFIG_FILE_NOT_FOUND: () => {
     return {
@@ -610,34 +677,63 @@ testVisualErrors('*', {
     }
   },
   FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS: () => {
-
+    return {
+      default: [{
+        link: 'https://dashboard.cypress.io/project/abcd',
+        planType: 'Test Plan',
+        usedTestsMessage: 'The limit is 500 free results',
+      }],
+    }
   },
   FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS: () => {
-
+    return {
+      default: [{
+        link: 'https://dashboard.cypress.io/project/abcd',
+        planType: 'Grace Period Plan',
+        usedTestsMessage: 'The limit is 500 free results',
+        gracePeriodMessage: 'You are on a grace period for 20 days',
+      }],
+    }
   },
   PAID_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS: () => {
-
+    return {
+      default: [{ link: 'https://on.cypress.io/set-up-billing', planType: 'Test Plan', usedTestsMessage: 'The limit is 500 free results' }],
+    }
   },
   FREE_PLAN_EXCEEDS_MONTHLY_TESTS: () => {
-
+    return {
+      default: [{ link: 'https://on.cypress.io/set-up-billing', planType: 'Test Plan', usedTestsMessage: 'The limit is 500 free results' }],
+    }
   },
   FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_TESTS: () => {
-
+    return {
+      default: [{ link: 'https://on.cypress.io/set-up-billing', planType: 'Test Plan', usedTestsMessage: 'The limit is 500 free results', gracePeriodMessage: 'Feb 1, 2022' }],
+    }
   },
   PLAN_EXCEEDS_MONTHLY_TESTS: () => {
-
+    return {
+      default: [{ link: 'https://on.cypress.io/set-up-billing', planType: 'Test Plan', usedTestsMessage: 'The limit is 500 free results' }],
+    }
   },
   FREE_PLAN_IN_GRACE_PERIOD_PARALLEL_FEATURE: () => {
-
+    return {
+      default: [{ link: 'https://on.cypress.io/set-up-billing', gracePeriodMessage: 'Feb 1, 2022' }],
+    }
   },
   PARALLEL_FEATURE_NOT_AVAILABLE_IN_PLAN: () => {
-
+    return {
+      default: [{ link: 'https://on.cypress.io/set-up-billing' }],
+    }
   },
   PLAN_IN_GRACE_PERIOD_RUN_GROUPING_FEATURE_USED: () => {
-
+    return {
+      default: [{ link: 'https://on.cypress.io/set-up-billing', gracePeriodMessage: 'Feb 1, 2022' }],
+    }
   },
   RUN_GROUPING_FEATURE_NOT_AVAILABLE_IN_PLAN: () => {
-
+    return {
+      default: [{ link: 'https://on.cypress.io/set-up-billing' }],
+    }
   },
   FIXTURE_NOT_FOUND: () => {
     return {
@@ -655,7 +751,12 @@ testVisualErrors('*', {
     }
   },
   BAD_POLICY_WARNING: () => {
-
+    return {
+      default: [[
+        'HKEY_LOCAL_MACHINE\\Software\\Policies\\Google\\Chrome\\ProxyServer',
+        'HKEY_CURRENT_USER\\Software\\Policies\\Google\\Chromium\\ExtensionSettings',
+      ]],
+    }
   },
   BAD_POLICY_WARNING_TOOLTIP: () => {
     return {
@@ -663,10 +764,14 @@ testVisualErrors('*', {
     }
   },
   EXTENSION_NOT_LOADED: () => {
-
+    return {
+      default: ['Electron', '/path/to/extension'],
+    }
   },
   COULD_NOT_FIND_SYSTEM_NODE: () => {
-
+    return {
+      default: ['16.2.1'],
+    }
   },
   INVALID_CYPRESS_INTERNAL_ENV: () => {
     return {
@@ -674,10 +779,14 @@ testVisualErrors('*', {
     }
   },
   CDP_VERSION_TOO_OLD: () => {
-
+    return {
+      default: ['89', { major: 90, minor: 2 }],
+    }
   },
   CDP_COULD_NOT_CONNECT: () => {
-
+    return {
+      default: ['chrome', '2345', makeErr()],
+    }
   },
   FIREFOX_COULD_NOT_CONNECT: () => {
     const err = makeErr()
@@ -694,13 +803,21 @@ testVisualErrors('*', {
     }
   },
   CDP_RETRYING_CONNECTION: () => {
-
+    return {
+      default: [1, 'chrome'],
+    }
   },
   UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES: () => {
-
+    return {
+      default: [
+        ['baz'], ['preferences', 'extensions', 'args'],
+      ],
+    }
   },
   COULD_NOT_PARSE_ARGUMENTS: () => {
-
+    return {
+      default: ['spec', '1', 'spec must be a string or comma-separated list'],
+    }
   },
   FIREFOX_MARIONETTE_FAILURE: () => {
     const err = makeErr()
@@ -720,7 +837,9 @@ testVisualErrors('*', {
     }
   },
   EXPERIMENTAL_COMPONENT_TESTING_REMOVED: () => {
-
+    return {
+      default: [{ configFile: '/path/to/configFile.json' }],
+    }
   },
   EXPERIMENTAL_SHADOW_DOM_REMOVED: () => {
     return {
@@ -745,6 +864,36 @@ testVisualErrors('*', {
   INCOMPATIBLE_PLUGIN_RETRIES: () => {
     return {
       default: ['./path/to/cypress-plugin-retries'],
+    }
+  },
+  NODE_VERSION_DEPRECATION_BUNDLED: () => {
+    return {
+      default: [{ name: 'nodeVersion', value: 'bundled', 'configFile': 'cypress.json' }],
+    }
+  },
+  NODE_VERSION_DEPRECATION_SYSTEM: () => {
+    return {
+      default: [{ name: 'nodeVersion', value: 'system', 'configFile': 'cypress.json' }],
+    }
+  },
+  CT_NO_DEV_START_EVENT: () => {
+    return {
+      default: ['/path/to/plugins/file.js'],
+    }
+  },
+  PLUGINS_RUN_EVENT_ERROR: () => {
+    return {
+      default: ['before:spec', makeErr()],
+    }
+  },
+  INVALID_CONFIG_OPTION: () => {
+    return {
+      default: [['test', 'foo']],
+    }
+  },
+  UNSUPPORTED_BROWSER_VERSION: () => {
+    return {
+      default: [`Cypress does not support running chrome version 64. To use chrome with Cypress, install a version of chrome newer than or equal to 64.`],
     }
   },
 })

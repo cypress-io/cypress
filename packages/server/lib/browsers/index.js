@@ -155,6 +155,8 @@ module.exports = {
 
   close: kill,
 
+  formatBrowsersToOptions,
+
   _setInstance (_instance) {
     // for testing
     instance = _instance

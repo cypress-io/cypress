@@ -27,7 +27,7 @@ describe('errTemplate', () => {
   })
 
   it('provides as details for toErrorProps', () => {
-    const errStack = new Error().stack
+    const errStack = new Error().stack ?? ''
     const obj = errTemplate`
       This was an error
       
@@ -93,9 +93,9 @@ describe('errTemplate', () => {
       errTemplate`
         Hello world 
         
-        ${details(new Error().stack)}
+        ${details(new Error())}
 
-        ${details(new Error().stack)}
+        ${details(new Error())}
       `
     }).to.throw(/Cannot use details\(\) multiple times in the same errTemplate/)
   })

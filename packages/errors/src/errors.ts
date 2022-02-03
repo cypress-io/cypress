@@ -82,10 +82,10 @@ export const AllCypressErrors = {
 
         This option will not have an effect in ${guard(_.capitalize(browser))}. Tests that rely on web security being disabled will not run as expected.`
   },
-  BROWSER_NOT_FOUND_BY_NAME: (arg1: string, arg2: string) => {
+  BROWSER_NOT_FOUND_BY_NAME: (browser: string, foundBrowsersStr: string) => {
     let canarySuffix = ''
 
-    if (arg1 === 'canary') {
+    if (browser === 'canary') {
       canarySuffix += '\n\n'
       canarySuffix += stripIndent`\
           Note: In Cypress version 4.0.0, Canary must be launched as \`chrome:canary\`, not \`canary\`.
@@ -96,7 +96,7 @@ export const AllCypressErrors = {
     return errTemplate`\
         Can't run because you've entered an invalid browser name.
 
-        Browser: ${arg1} was not found on your system or is not supported by Cypress.
+        Browser: ${browser} was not found on your system or is not supported by Cypress.
 
         Cypress supports the following browsers:
         - chrome
@@ -108,7 +108,7 @@ export const AllCypressErrors = {
         You can also use a custom browser: https://on.cypress.io/customize-browsers
 
         Available browsers found on your system are:
-        ${guard(arg2)}${guard(canarySuffix)}`
+        ${guard(foundBrowsersStr)}${guard(canarySuffix)}`
   },
   BROWSER_NOT_FOUND_BY_PATH: (arg1: string, arg2: string) => {
     return errTemplate`\
@@ -197,7 +197,7 @@ export const AllCypressErrors = {
         Details:
         ${JSON.stringify(arg1.props, null, 2)}`
   },
-  DASHBOARD_STALE_RUN: (arg1: {runUrl: string}) => {
+  DASHBOARD_STALE_RUN: (arg1: {runUrl: string, [key: string]: any}) => {
     return errTemplate`\
         You are attempting to pass the --parallel flag to a run that was completed over 24 hours ago.
 
@@ -437,7 +437,7 @@ export const AllCypressErrors = {
 
         This error will not alter the exit code.`
   },
-  DASHBOARD_CANNOT_UPLOAD_RESULTS: (arg1: string) => {
+  DASHBOARD_CANNOT_UPLOAD_RESULTS: (arg1: string | Error) => {
     return errTemplate`\
         Warning: We encountered an error while uploading results from your run.
 
@@ -447,7 +447,7 @@ export const AllCypressErrors = {
 
         ${arg1}`
   },
-  DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE: (arg1: string) => {
+  DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE: (arg1: string | Error) => {
     return errTemplate`\
         Warning: We encountered an error talking to our servers.
 
@@ -457,15 +457,15 @@ export const AllCypressErrors = {
 
         ${arg1}`
   },
-  DASHBOARD_RECORD_KEY_NOT_VALID: (arg1: string, arg2: string) => {
+  DASHBOARD_RECORD_KEY_NOT_VALID: (recordKey: string, projectId: string) => {
     return errTemplate`\
-        Your Record Key ${chalk.yellow(arg1)} is not valid with this project: ${chalk.blue(arg2)}
+        Your Record Key ${chalk.yellow(recordKey)} is not valid with this project: ${chalk.blue(projectId)}
 
         It may have been recently revoked by you or another user.
 
         Please log into the Dashboard to see the valid record keys.
 
-        https://on.cypress.io/dashboard/projects/${arg2}`
+        https://on.cypress.io/dashboard/projects/${guard(projectId)}`
   },
   DASHBOARD_PROJECT_NOT_FOUND: (arg1: string, arg2: string) => {
     return errTemplate`\
@@ -493,34 +493,26 @@ export const AllCypressErrors = {
   CANNOT_CREATE_PROJECT_TOKEN: () => {
     return errTemplate`Can't create project's secret key.`
   },
-  PORT_IN_USE_SHORT: (arg1: string) => {
+  PORT_IN_USE_SHORT: (arg1: string | number) => {
     return errTemplate`Port ${arg1} is already in use.`
   },
-  PORT_IN_USE_LONG: (arg1: string) => {
+  PORT_IN_USE_LONG: (arg1: string | number) => {
     return errTemplate`\
-        Can't run project because port is currently in use: ${chalk.blue(arg1)}
+      Can't run project because port is currently in use: ${arg1}
 
-        ${chalk.yellow('Assign a different port with the \'--port <port>\' argument or shut down the other running process.')}`
+      ${chalk.yellow('Assign a different port with the \'--port <port>\' argument or shut down the other running process.')}`
   },
-  ERROR_READING_FILE: (arg1: string, arg2: Record<string, string>) => {
-    let filePath = `${arg1}`
-
-    let err = `\`${arg2.type || arg2.code || arg2.name}: ${arg2.message}\``
-
+  ERROR_READING_FILE: (filePath: string, err: Error) => {
     return errTemplate`\
-        Error reading from: ${chalk.blue(filePath)}
+        Error reading from: ${filePath}
 
-        ${chalk.yellow(err)}`
+        ${details(err)}`
   },
-  ERROR_WRITING_FILE: (arg1: string, arg2: string) => {
-    let filePath = `${arg1}`
-
-    let err = `\`${arg2}\``
-
+  ERROR_WRITING_FILE: (filePath: string, err: Error) => {
     return errTemplate`\
-        Error writing to: ${chalk.blue(filePath)}
+        Error writing to: ${filePath}
 
-        ${chalk.yellow(err)}`
+        ${details(err)}`
   },
   NO_SPECS_FOUND: (arg1: string, arg2?: string | null) => {
     // no glob provided, searched all specs
@@ -858,11 +850,9 @@ export const AllCypressErrors = {
   },
   AUTH_COULD_NOT_LAUNCH_BROWSER: (arg1: string) => {
     return errTemplate`\
-        Cypress was unable to open your installed browser. To continue logging in, please open this URL in your web browser:
+      Cypress was unable to open your installed browser. To continue logging in, please open this URL in your web browser:
 
-        \`\`\`
-        ${arg1}
-        \`\`\``
+      ${arg1}`
   },
   AUTH_BROWSER_LAUNCHED: () => {
     return errTemplate`Check your browser to continue logging in.`
@@ -909,17 +899,17 @@ export const AllCypressErrors = {
   CDP_VERSION_TOO_OLD: (arg1: string, arg2: {major: number, minor: string | number}) => {
     return errTemplate`A minimum CDP version of v${guard(arg1)} is required, but the current browser has ${guard(arg2.major !== 0 ? `v${arg2.major}.${arg2.minor}` : 'an older version')}.`
   },
-  CDP_COULD_NOT_CONNECT: (arg1: string, arg2: Error, arg3: string) => {
+  CDP_COULD_NOT_CONNECT: (arg1: string, arg2: string, arg3: Error) => {
     return errTemplate`\
         Cypress failed to make a connection to the Chrome DevTools Protocol after retrying for 50 seconds.
 
-        This usually indicates there was a problem opening the ${guard(arg3)} browser.
+        This usually indicates there was a problem opening the ${guard(arg1)} browser.
 
-        The CDP port requested was ${guard(chalk.yellow(arg1))}.
+        The CDP port requested was ${guard(chalk.yellow(arg2))}.
 
         Error details:
 
-        ${details(arg2)}`
+        ${details(arg3)}`
   },
   FIREFOX_COULD_NOT_CONNECT: (arg1: Error) => {
     return errTemplate`\
@@ -960,15 +950,15 @@ export const AllCypressErrors = {
 
         The error was: ${arg3}`
   },
-  FIREFOX_MARIONETTE_FAILURE: (arg1: string, arg2: string) => {
+  FIREFOX_MARIONETTE_FAILURE: (arg1: string, arg2: Error) => {
     return errTemplate`\
         Cypress could not connect to Firefox.
 
-        An unexpected error was received from Marionette ${guard(arg1)}:
+        An unexpected error was received from Marionette ${guard(arg1)}
 
-        ${guard(arg2)}
+        To avoid this error, ensure that there are no other instances of Firefox launched by Cypress running.
 
-        To avoid this error, ensure that there are no other instances of Firefox launched by Cypress running.`
+        ${details(arg2)}`
   },
   FOLDER_NOT_WRITABLE: (arg1: string) => {
     return errTemplate`\
@@ -1041,13 +1031,13 @@ export const AllCypressErrors = {
         https://on.cypress.io/configuration
         `
   },
-  PLUGINS_RUN_EVENT_ERROR: (arg1: string, arg2: string) => {
+  PLUGINS_RUN_EVENT_ERROR: (arg1: string, arg2: Error) => {
     return errTemplate`\
         An error was thrown in your plugins file while executing the handler for the '${chalk.blue(arg1)}' event.
 
         The error we received was:
 
-        ${chalk.yellow(arg2)}
+        ${details(arg2)}
       `
   },
   CT_NO_DEV_START_EVENT: (arg1: string) => {

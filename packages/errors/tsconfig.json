@@ -1,24 +1,24 @@
 {
   "extends": "../ts/tsconfig.json",
   "include": [
-    "src"
+    "src",
+    "test",
   ],
   "exclude": [
-    "test",
     "script"
   ],
   "compilerOptions": {
     "strict": true,
     "allowJs": false,
-    "rootDir": "src",
-    "outDir": "dist",
     "noImplicitAny": true,
     "resolveJsonModule": true,
     "experimentalDecorators": true,
+    "noImplicitReturns": false,
     "noUncheckedIndexedAccess": true,
     "importsNotUsedAsValues": "error",
     "types": [
-      "node"
+      "node",
+      "mocha"
     ]
   }
 }
