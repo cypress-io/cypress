@@ -266,14 +266,15 @@ describe('multi-domain Cypress API', { experimentalSessionSupport: true, experim
       })
     })
 
-    it('throws an error when a user attempts to configure Cypress.Cookies.defaults() inside of multi-domain', (done) => {
+    it('throws an error when a user attempts to configure Cypress.Cookies.preserveOnce() inside of multi-domain', (done) => {
       cy.on('fail', (err) => {
-        expect(err.message).to.equal('`Cypress.Cookies.*` use is forbidden in `cy.switchToDomain()`. Consider using `cy.session()` instead.')
+        expect(err.message).to.equal('`Cypress.Cookies.preserveOnce` use is forbidden in `cy.switchToDomain()`. Consider using `cy.session()` instead.')
         done()
       })
 
       cy.switchToDomain('foobar.com', () => {
-        Cypress.Cookies.defaults({})
+        // @ts-ignore
+        Cypress.Cookies.preserveOnce({})
       })
     })
   })

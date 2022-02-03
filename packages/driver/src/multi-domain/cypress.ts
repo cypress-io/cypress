@@ -105,11 +105,7 @@ const setup = (cypressConfig: Cypress.Config, env: Cypress.ObjectLike) => {
 
   // outlaw the use of Cypress.Cookies.* configurations, but allow other cy cookies methods to be used
   // @ts-ignore
-  Cypress.Cookies = new Proxy(Cypress.Server, {
-    get: () => $errUtils.throwErrByPath('switchToDomain.Cookies.forbidden'),
-    // @ts-ignore
-    set: () => $errUtils.throwErrByPath('switchToDomain.Cookies.forbidden'),
-  })
+  Cypress.Cookies.preserveOnce = () => $errUtils.throwErrByPath('switchToDomain.Cookies.forbidden')
 
   return cy
 }

@@ -1757,7 +1757,7 @@ export default {
     },
     Cookies: {
       forbidden: {
-        message: `\`Cypress.Cookies.*\` use is forbidden in ${cmd('switchToDomain')}. Consider using ${cmd('session')} instead.`,
+        message: `\`Cypress.Cookies.preserveOnce\` use is forbidden in ${cmd('switchToDomain')}. Consider using ${cmd('session')} instead.`,
         docsUrl: 'https://on.cypress.io/session',
       },
     },
