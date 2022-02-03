@@ -1,18 +1,20 @@
-// eslint-disable-next-line
-export const sendXhr = (route) => (win) => {
-  const xhr = new win.XMLHttpRequest()
+const sendXhr = (route) => {
+  return (win) => {
+    const xhr = new win.XMLHttpRequest()
 
-  xhr.open('GET', route)
-  xhr.send()
+    xhr.open('GET', route)
+    xhr.send()
 
-  return xhr
+    return xhr
+  }
 }
 
-// eslint-disable-next-line
-export const abortXhr = (route) => (win) => {
-  const xhr = sendXhr(route)(win)
+const abortXhr = (route) => {
+  return (win) => {
+    const xhr = sendXhr(route)(win)
 
-  xhr.abort()
+    xhr.abort()
+  }
 }
 
 describe('cy.route', { defaultCommandTimeout: 0 }, () => {
