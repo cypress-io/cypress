@@ -2,6 +2,7 @@
   <div
     id="spec-runner-header"
     class="min-h-64px px-16px text-14px"
+    :style="{ width: `${props.width}px` }"
   >
     <div class="flex flex-grow flex-wrap py-16px gap-12px justify-end">
       <!--
@@ -179,6 +180,7 @@ const props = defineProps<{
   gql: SpecRunnerHeaderFragment
   eventManager: EventManager
   getAutIframe: () => AutIframe
+  width: number
 }>()
 
 const autIframe = props.getAutIframe()
