@@ -957,7 +957,7 @@ module.exports = {
   },
 
   launchBrowser (options = {}) {
-    const { browser, spec, writeVideoFrame, setScreenshotMetadata, project, screenshots, projectRoot, shouldLaunchBrowser, onError } = options
+    const { browser, spec, writeVideoFrame, setScreenshotMetadata, project, screenshots, projectRoot, shouldNavigateBrowser, onError } = options
 
     const browserOpts = getDefaultBrowserOptsByFamily(browser, project, writeVideoFrame, onError)
 
@@ -988,7 +988,7 @@ module.exports = {
     const warnings = {}
 
     browserOpts.projectRoot = projectRoot
-    browserOpts.shouldLaunchBrowser = shouldLaunchBrowser
+    browserOpts.shouldNavigateBrowser = shouldNavigateBrowser
 
     browserOpts.onWarning = (err) => {
       const { message } = err
@@ -1551,7 +1551,7 @@ module.exports = {
           socketId: options.socketId,
           webSecurity: options.webSecurity,
           projectRoot: options.projectRoot,
-          shouldLaunchBrowser: process.env.CYPRESS_INTERNAL_FORCE_BROWSER_RELAUNCH || firstSpec,
+          shouldNavigateBrowser: !process.env.CYPRESS_INTERNAL_FORCE_BROWSER_RELAUNCH && !firstSpec,
           // TODO(tim): investigate the socket disconnect
         }),
       })
