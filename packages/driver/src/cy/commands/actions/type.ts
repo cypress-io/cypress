@@ -14,6 +14,9 @@ const debug = debugFn('cypress:driver:command:type')
 export default function (Commands, Cypress, cy, state, config) {
   const { keyboard } = cy.devices
 
+  // Note: These "change type of `any` to X" comments are written instead of changing them directly
+  //       because Cypress extends user-given options with Cypress internal options.
+  //       These comments will be removed after removing `// @ts-nocheck` comments in `packages/driver`.
   // TODO: change the type of `any` to `Partial<Cypress.TypeOptions>`
   function type (subject, chars, options: any = {}) {
     const userOptions = options
