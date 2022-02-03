@@ -1,7 +1,6 @@
 import { verify, verifyInternalFailure } from './support/verify-failures'
 
-const setup = ({ fileName, mockPreferredEditor, onLoadStatsMessage }) => {
-  cy.scaffoldProject('runner-e2e-specs')
+const setup = ({ fileName, onLoadStatsMessage, mockPreferredEditor }) => {
   cy.openProject('runner-e2e-specs')
 
   if (mockPreferredEditor) {
@@ -38,6 +37,10 @@ describe('errors ui', {
   viewportWidth: 1024,
   numTestsKeptInMemory: 1,
 }, () => {
+  before(() => {
+    cy.scaffoldProject('runner-e2e-specs')
+  })
+
   describe('assertion failures', () => {
     before(() => {
       setup({
@@ -461,149 +464,149 @@ describe('errors ui', {
     })
   })
 
-  // describe('cy.route', () => {
-  //   const file = 'route.cy.js'
+  describe('cy.route', () => {
+    const file = 'route.cy.js'
 
-  //   before(() => {
-  //     setup({
-  //       fileName: file,
-  //       mockPreferredEditor: false,
-  //       onLoadStatsMessage: 'Failed:9',
-  //     })
-  //   })
+    before(() => {
+      setup({
+        fileName: file,
+        mockPreferredEditor: false,
+        onLoadStatsMessage: 'Failed:9',
+      })
+    })
 
-  //   verify.it('callback assertion failure', {
-  //     file,
-  //     column: 27,
-  //     message: `expected 'actual' to equal 'expected'`,
-  //   })
+    verify.it('callback assertion failure', {
+      file,
+      column: 27,
+      message: `expected 'actual' to equal 'expected'`,
+    })
 
-  //   verify.it('callback exception', {
-  //     file,
-  //     column: 12,
-  //     message: 'bar is not a function',
-  //   })
+    verify.it('callback exception', {
+      file,
+      column: 12,
+      message: 'bar is not a function',
+    })
 
-  //   verify.it('command failure', {
-  //     file,
-  //     column: 10,
-  //     message: 'Expected to find element: #does-not-exist, but never found it',
-  //   })
+    verify.it('command failure', {
+      file,
+      column: 10,
+      message: 'Expected to find element: #does-not-exist, but never found it',
+    })
 
-  //   verify.it('onAbort assertion failure', {
-  //     file,
-  //     column: 29,
-  //     codeFrameText: 'onAbort',
-  //     message: `expected 'actual' to equal 'expected'`,
-  //   })
+    verify.it('onAbort assertion failure', {
+      file,
+      column: 29,
+      codeFrameText: 'onAbort',
+      message: `expected 'actual' to equal 'expected'`,
+    })
 
-  //   verify.it('onAbort exception', {
-  //     file,
-  //     column: 14,
-  //     codeFrameText: 'onAbort',
-  //     message: 'bar is not a function',
-  //   })
+    verify.it('onAbort exception', {
+      file,
+      column: 14,
+      codeFrameText: 'onAbort',
+      message: 'bar is not a function',
+    })
 
-  //   verify.it('onRequest assertion failure', {
-  //     file,
-  //     column: 29,
-  //     codeFrameText: 'onRequest',
-  //     message: `expected 'actual' to equal 'expected'`,
-  //   })
+    verify.it('onRequest assertion failure', {
+      file,
+      column: 29,
+      codeFrameText: 'onRequest',
+      message: `expected 'actual' to equal 'expected'`,
+    })
 
-  //   verify.it('onRequest exception', {
-  //     file,
-  //     column: 14,
-  //     codeFrameText: 'onRequest',
-  //     message: 'bar is not a function',
-  //   })
+    verify.it('onRequest exception', {
+      file,
+      column: 14,
+      codeFrameText: 'onRequest',
+      message: 'bar is not a function',
+    })
 
-  //   verify.it('onResponse assertion failure', {
-  //     file,
-  //     column: 29,
-  //     codeFrameText: 'onResponse',
-  //     message: `expected 'actual' to equal 'expected'`,
-  //   })
+    verify.it('onResponse assertion failure', {
+      file,
+      column: 29,
+      codeFrameText: 'onResponse',
+      message: `expected 'actual' to equal 'expected'`,
+    })
 
-  //   verify.it('onResponse exception', {
-  //     file,
-  //     column: 14,
-  //     codeFrameText: 'onResponse',
-  //     message: 'bar is not a function',
-  //   })
-  // })
+    verify.it('onResponse exception', {
+      file,
+      column: 14,
+      codeFrameText: 'onResponse',
+      message: 'bar is not a function',
+    })
+  })
 
-  // describe('cy.server', () => {
-  //   const file = 'server.cy.js'
+  describe('cy.server', () => {
+    const file = 'server.cy.js'
 
-  //   before(() => {
-  //     setup({
-  //       fileName: file,
-  //       mockPreferredEditor: false,
-  //       onLoadStatsMessage: 'Failed:6',
-  //     })
-  //   })
+    before(() => {
+      setup({
+        fileName: file,
+        mockPreferredEditor: false,
+        onLoadStatsMessage: 'Failed:6',
+      })
+    })
 
-  //   verify.it('onAbort assertion failure', {
-  //     file,
-  //     column: 29,
-  //     codeFrameText: 'onAbort',
-  //     message: `expected 'actual' to equal 'expected'`,
-  //   })
+    verify.it('onAbort assertion failure', {
+      file,
+      column: 29,
+      codeFrameText: 'onAbort',
+      message: `expected 'actual' to equal 'expected'`,
+    })
 
-  //   verify.it('onAbort exception', {
-  //     file,
-  //     column: 14,
-  //     codeFrameText: 'onAbort',
-  //     message: 'bar is not a function',
-  //   })
+    verify.it('onAbort exception', {
+      file,
+      column: 14,
+      codeFrameText: 'onAbort',
+      message: 'bar is not a function',
+    })
 
-  //   verify.it('onRequest assertion failure', {
-  //     file,
-  //     column: 29,
-  //     codeFrameText: 'onRequest',
-  //     message: `expected 'actual' to equal 'expected'`,
-  //   })
+    verify.it('onRequest assertion failure', {
+      file,
+      column: 29,
+      codeFrameText: 'onRequest',
+      message: `expected 'actual' to equal 'expected'`,
+    })
 
-  //   verify.it('onRequest exception', {
-  //     file,
-  //     column: 14,
-  //     codeFrameText: 'onRequest',
-  //     message: 'bar is not a function',
-  //   })
+    verify.it('onRequest exception', {
+      file,
+      column: 14,
+      codeFrameText: 'onRequest',
+      message: 'bar is not a function',
+    })
 
-  //   verify.it('onResponse assertion failure', {
-  //     file,
-  //     column: 29,
-  //     codeFrameText: 'onResponse',
-  //     message: `expected 'actual' to equal 'expected'`,
-  //   })
+    verify.it('onResponse assertion failure', {
+      file,
+      column: 29,
+      codeFrameText: 'onResponse',
+      message: `expected 'actual' to equal 'expected'`,
+    })
 
-  //   verify.it('onResponse exception', {
-  //     file,
-  //     column: 14,
-  //     codeFrameText: 'onResponse',
-  //     message: 'bar is not a function',
-  //   })
-  // })
+    verify.it('onResponse exception', {
+      file,
+      column: 14,
+      codeFrameText: 'onResponse',
+      message: 'bar is not a function',
+    })
+  })
 
-  // describe('cy.readFile', () => {
-  //   const file = 'readfile.cy.js'
+  describe('cy.readFile', () => {
+    const file = 'readfile.cy.js'
 
-  //   before(() => {
-  //     setup({
-  //       fileName: file,
-  //       mockPreferredEditor: false,
-  //       onLoadStatsMessage: 'Failed:1',
-  //     })
-  //   })
+    before(() => {
+      setup({
+        fileName: file,
+        mockPreferredEditor: false,
+        onLoadStatsMessage: 'Failed:1',
+      })
+    })
 
-  //   verify.it('existence failure', {
-  //     file,
-  //     column: 8,
-  //     message: 'failed because the file does not exist',
-  //   })
-  // })
+    verify.it('existence failure', {
+      file,
+      column: 8,
+      message: 'failed because the file does not exist',
+    })
+  })
 
   describe('validation errors', () => {
     const file = 'validation.cy.js'
