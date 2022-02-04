@@ -172,7 +172,7 @@ const testVisualErrors = (whichError: CypressErrorType[] | '*', errorsToTest: {[
       //   return fse.remove(pathToHtml)
       // }))
 
-      expect(uniqErrors).to.deep.eq(_.keys(errors.AllCypressErrors))
+      expect(uniqErrors).to.have.all.members(_.keys(errors.AllCypressErrors))
     }
   })
 
