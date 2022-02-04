@@ -88,8 +88,8 @@ describe('App Top Nav Workflows', () => {
       it('performs mutations to update and relaunch browser', () => {
         cy.findByTestId('top-nav-active-browser').click()
 
-        cy.intercept('mutation-TopNav_SetBrowser').as('setBrowser')
-        cy.intercept('mutation-TopNav_LaunchOpenProject').as('launchOpenProject')
+        cy.intercept('mutation-VerticalBrowserListItems_SetBrowser').as('setBrowser')
+        cy.intercept('mutation-VerticalBrowserListItems_LaunchOpenProject').as('launchOpenProject')
 
         cy.findAllByTestId('top-nav-browser-list-item').eq(1).click().then(($element) => {
           cy.wait('@setBrowser').then(({ request }) => {
