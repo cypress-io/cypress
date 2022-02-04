@@ -89,14 +89,11 @@ describe('App Top Nav Workflows', () => {
         cy.findByTestId('top-nav-active-browser').click()
 
         cy.intercept('mutation-VerticalBrowserListItems_SetBrowser').as('setBrowser')
-        cy.intercept('mutation-VerticalBrowserListItems_LaunchOpenProject').as('launchOpenProject')
 
         cy.findAllByTestId('top-nav-browser-list-item').eq(1).click().then(($element) => {
           cy.wait('@setBrowser').then(({ request }) => {
             expect(request.body.variables.id).to.eq($element.attr('data-browser-id'))
           })
-
-          cy.wait('@launchOpenProject')
         })
       })
     })
