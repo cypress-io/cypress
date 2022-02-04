@@ -190,10 +190,6 @@ const testVisualError = <K extends CypressErrorType> (errorGeneratorFn: () => Er
 
     expect(variants).to.be.an('object')
 
-    if (isCi) {
-      return
-    }
-
     for (const [key, arr] of Object.entries(variants)) {
       const filename = key === 'default' ? errorType : `${errorType} - ${key}`
 

@@ -41,7 +41,7 @@ describe('lib/plugins/run_events', () => {
 
     it('throws custom error if plugins.execute errors', () => {
       plugins.has.returns(true)
-      plugins.execute.rejects({ stack: 'The event threw an error' })
+      plugins.execute.rejects({ name: 'Error', message: 'The event threw an error', stack: 'The event threw an error' })
 
       return runEvents.execute('before:spec', {}, 'arg1', 'arg2')
       .then(() => {
