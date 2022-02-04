@@ -6,9 +6,8 @@
   "browser": "src/index.ts",
   "scripts": {
     "test": "yarn test-unit",
-    "build": "tsc || echo 'type errors'",
+    "build": "../../scripts/run-if-ci.sh tsc || echo 'type errors'",
     "build-prod": "tsc",
-    "postinstall": "rm -rf test/**/*.js",
     "check-ts": "tsc --noEmit",
     "clean-deps": "rm -rf node_modules",
     "clean": "rm -f ./src/*.js ./src/**/*.js ./src/**/**/*.js ./test/**/*.js || echo 'cleaned'",

@@ -1,5 +1,4 @@
 const util = require('../util')
-const { getError } = require('@packages/errors')
 
 const ARRAY_METHODS = ['concat', 'push', 'unshift', 'slice', 'pop', 'shift', 'slice', 'splice', 'filter', 'map', 'forEach', 'reduce', 'reverse', 'splice', 'includes']
 
@@ -21,7 +20,7 @@ module.exports = {
 
         hasEmittedWarning = true
 
-        const warning = getError(
+        const warning = require('@packages/errors').getError(
           'DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS',
         )
 
