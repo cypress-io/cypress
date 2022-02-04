@@ -99,11 +99,11 @@ const convertHtmlToImage = async (htmlfile: string) => {
           const buf = await fse.readFile(baseImagePath)
           const existingPng = PNG.sync.read(buf)
           const diffPng = new PNG({ width: WIDTH, height: HEIGHT })
-          const changed = pixelmatch(existingPng.data, receivedPng.data, diffPng.data, WIDTH, HEIGHT, { threshold: 0.1 })
+          const changed = pixelmatch(existingPng.data, receivedPng.data, diffPng.data, WIDTH, HEIGHT, { threshold: 0.3 })
 
-          if (changed) {
-            console.log({ changed })
+          console.log('num pixels different:', changed)
 
+          if (changed > 100) {
             if (isCi) {
               return reject(new Error(`Image difference detected. Base error image no longer matches for file: ${baseImagePath}, off by ${changed} pixels`))
             }
