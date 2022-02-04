@@ -74,7 +74,7 @@
 </template>
 <script setup lang="ts">
 import { useI18n } from '@cy/i18n'
-import { VerticalBrowserListItemsFragment, VerticalBrowserListItems_LaunchOpenProjectDocument, VerticalBrowserListItems_SetBrowserDocument } from '../../generated/graphql'
+import { VerticalBrowserListItemsFragment, VerticalBrowserListItems_SetBrowserDocument } from '../../generated/graphql'
 import { gql, useMutation } from '@urql/vue'
 import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
 import UnsupportedBrowserTooltip from './UnsupportedBrowserTooltip.vue'
@@ -98,14 +98,6 @@ fragment VerticalBrowserListItems on CurrentProject {
 `
 
 gql`
-mutation VerticalBrowserListItems_LaunchOpenProject {
-  launchOpenProject {
-    id
-  }
-}
-`
-
-gql`
 mutation VerticalBrowserListItems_SetBrowser($id: ID!, $specPath: String) {
   launchpadSetBrowser(id: $id) {
     id
@@ -117,17 +109,15 @@ mutation VerticalBrowserListItems_SetBrowser($id: ID!, $specPath: String) {
 }
 `
 
-const props = withDefaults(
-  defineProps<{
-  selectable?: Boolean,
-  gql: VerticalBrowserListItemsFragment,
-  specPath?: string | null
+const props = withDefaults(defineProps <{
+  selectable?: boolean
+  gql: VerticalBrowserListItemsFragment
+  specPath?: string
 }>(), {
-    specPath: null,
-  },
-)
+  selectable: false,
+  specPath: undefined,
+})
 
-const launchOpenProject = useMutation(VerticalBrowserListItems_LaunchOpenProjectDocument)
 const setBrowser = useMutation(VerticalBrowserListItems_SetBrowserDocument)
 
 const handleBrowserChoice = async (browser) => {
