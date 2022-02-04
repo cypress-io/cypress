@@ -37,8 +37,6 @@ chai.use(require('@cypress/sinon-chai'))
 
 termToHtml.themes.dark.bg = '#111'
 
-let win: BrowserWindow
-
 const lineAndColNumsRe = /:\d+:\d+/
 
 const EXT = '.png'
@@ -53,71 +51,79 @@ const convertHtmlToImage = async (htmlfile: string) => {
 
   await app.whenReady()
 
-  if (!win) {
-    win = new BrowserWindow({
-      show: false,
-      width: WIDTH,
-      height: HEIGHT,
-    })
+  app.on('window-all-closed', () => {
+    //
+  })
 
-    win.webContents.debugger.attach()
-  }
-
-  debug(`Loading ${htmlfile}`)
-
-  await win.loadFile(htmlfile)
-
-  await win.webContents.debugger.sendCommand('Emulation.setDeviceMetricsOverride', {
+  const win = new BrowserWindow({
+    show: false,
     width: WIDTH,
     height: HEIGHT,
-    deviceScaleFactor: 1,
-    mobile: false,
   })
 
-  const { data } = await win.webContents.debugger.sendCommand('Page.captureScreenshot', {
-    format: 'png',
-    quality: 100,
-  })
-
-  const imagePath = htmlfile.replace('.html', EXT)
-  const baseImagePath = path.join(baseImageFolder, path.basename(imagePath))
-
-  const receivedImageBuffer = Buffer.from(data, 'base64')
-  const receivedPng = PNG.sync.read(receivedImageBuffer)
-  const receivedPngBuffer = PNG.sync.write(receivedPng)
-
-  await Promise.all([
-    fse.outputFile(imagePath, receivedPngBuffer),
-    fse.remove(htmlfile),
-  ])
-
-  // - if image does not exist in __snapshot-bases__
-  //   then copy into __snapshot-bases__
-  // - if image does exist then diff if, and if its
-  //   greater than >.01 diff, then copy it in
-  // - unless we're in CI, then fail if there's a diff
   try {
-    const buf = await fse.readFile(baseImagePath)
-    const existingPng = PNG.sync.read(buf)
-    const diffPng = new PNG({ width: WIDTH, height: HEIGHT })
-    const changed = pixelmatch(existingPng.data, receivedPng.data, diffPng.data, WIDTH, HEIGHT, { threshold: 0.3 })
+    win.webContents.debugger.attach()
 
-    console.log('num pixels different:', changed)
+    debug(`Loading %s`, htmlfile)
 
-    if (changed > 100) {
-      if (isCi) {
-        throw new Error(`Image difference detected. Base error image no longer matches for file: ${baseImagePath}, off by ${changed} pixels`)
+    await win.loadFile(htmlfile)
+
+    await win.webContents.debugger.sendCommand('Emulation.setDeviceMetricsOverride', {
+      width: WIDTH,
+      height: HEIGHT,
+      deviceScaleFactor: 1,
+      mobile: false,
+    })
+
+    const { data } = await win.webContents.debugger.sendCommand('Page.captureScreenshot', {
+      format: 'png',
+      quality: 100,
+    })
+
+    const imagePath = htmlfile.replace('.html', EXT)
+    const baseImagePath = path.join(baseImageFolder, path.basename(imagePath))
+
+    debug('baseImagePath %s', baseImagePath)
+
+    const receivedImageBuffer = Buffer.from(data, 'base64')
+    const receivedPng = PNG.sync.read(receivedImageBuffer)
+    const receivedPngBuffer = PNG.sync.write(receivedPng)
+
+    await Promise.all([
+      fse.outputFile(imagePath, receivedPngBuffer),
+      fse.remove(htmlfile),
+    ])
+
+    // - if image does not exist in __snapshot-bases__
+    //   then copy into __snapshot-bases__
+    // - if image does exist then diff if, and if its
+    //   greater than >.01 diff, then copy it in
+    // - unless we're in CI, then fail if there's a diff
+    try {
+      const buf = await fse.readFile(baseImagePath)
+      const existingPng = PNG.sync.read(buf)
+      const diffPng = new PNG({ width: WIDTH, height: HEIGHT })
+      const changed = pixelmatch(existingPng.data, receivedPng.data, diffPng.data, WIDTH, HEIGHT, { threshold: 0.3 })
+
+      console.log('num pixels different:', changed)
+
+      if (changed > 100) {
+        if (isCi) {
+          throw new Error(`Image difference detected. Base error image no longer matches for file: ${baseImagePath}, off by ${changed} pixels`)
+        }
+
+        await copyImageToBase(imagePath, baseImagePath)
       }
-
-      await copyImageToBase(imagePath, baseImagePath)
+    } catch (e: any) {
+      if (e.code === 'ENOENT') {
+        debug(`Adding new image: ${imagePath}`)
+        await copyImageToBase(imagePath, baseImagePath)
+      } else {
+        throw e
+      }
     }
-  } catch (e: any) {
-    if (e.code === 'ENOENT') {
-      debug(`Adding new image: ${imagePath}`)
-      await copyImageToBase(imagePath, baseImagePath)
-    } else {
-      throw e
-    }
+  } finally {
+    win.destroy()
   }
 }
 
