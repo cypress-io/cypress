@@ -257,7 +257,7 @@ const _connectToChromeRemoteInterface = function (port, onError, browserDisplayN
   .then((wsUrl) => {
     debug('received wsUrl %s for port %d', wsUrl, port)
 
-    return CriClient.create(wsUrl, onError)
+    return CriClient.create(wsUrl, onError, '127.0.0.1', port)
   })
 }
 
@@ -331,7 +331,7 @@ const _handleDownloads = async function (client, dir, automation) {
 
 const _setAutomation = (client, automation) => {
   return automation.use(
-    new CdpAutomation(client.send, client.on, automation),
+    new CdpAutomation(client.send, client.on, automation, client.closeTarget),
   )
 }
 

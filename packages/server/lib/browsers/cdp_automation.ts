@@ -162,6 +162,7 @@ const normalizeResourceType = (resourceType: string | undefined): ResourceType =
 }
 
 type SendDebuggerCommand = (message: string, data?: any) => Bluebird<any>
+type SendCloseCommand = () => Bluebird<any>
 type OnFn = (eventName: string, cb: Function) => void
 
 // the intersection of what's valid in CDP and what's valid in FFCDP
@@ -175,7 +176,7 @@ const ffToStandardResourceTypeMap: { [ff: string]: ResourceType } = {
 }
 
 export class CdpAutomation {
-  constructor (private sendDebuggerCommandFn: SendDebuggerCommand, private onFn: OnFn, private automation: Automation) {
+  constructor (private sendDebuggerCommandFn: SendDebuggerCommand, private onFn: OnFn, private automation: Automation, private sendCloseCommandFn: SendCloseCommand) {
     onFn('Network.requestWillBeSent', this.onNetworkRequestWillBeSent)
     onFn('Network.responseReceived', this.onResponseReceived)
     sendDebuggerCommandFn('Network.enable', {
@@ -328,9 +329,7 @@ export class CdpAutomation {
           this.sendDebuggerCommandFn('Network.clearBrowserCache'),
         ])
       case 'close:browser:tabs':
-        // If we do not stop the screen cast first, there's a chance that we could get frames after the browser is closed.
-        // If it does, we will try to send an ack back to the browser and if things time just right, the websocket will have already been closed and we will crash
-        return this.sendDebuggerCommandFn('Target.getTargetInfo').then(({ targetInfo }) => this.sendDebuggerCommandFn('Target.closeTarget', { targetId: targetInfo.targetId }))
+        return this.sendCloseCommandFn()
       case 'focus:browser:window':
         return this.sendDebuggerCommandFn('Page.bringToFront')
       default:

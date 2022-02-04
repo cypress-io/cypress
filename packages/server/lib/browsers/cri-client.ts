@@ -58,6 +58,7 @@ interface CRIWrapper {
    * Sends a command to the Chrome remote interface.
    * @example client.send('Page.navigate', { url })
   */
+  closeTarget (): Bluebird<any>
   send (command: CRI.Command, params?: object): Bluebird<any>
   /**
    * Registers callback for particular event.
@@ -243,6 +244,18 @@ export const create = Bluebird.method((target: websocketUrl, onAsynchronousError
     client = {
       ensureMinimumProtocolVersion,
       getProtocolVersion,
+      closeTarget: Bluebird.method(async () => {
+        let targetToClose = target
+
+        if (!versionInfo) {
+          versionInfo = await chromeRemoteInterface.Version({ host, port })
+          targetToClose = target.split('/')[target.split('/').length - 1]
+        }
+
+        const browserClient = await chromeRemoteInterface({ host, port, target: versionInfo.webSocketDebuggerUrl })
+
+        return browserClient.send('Target.closeTarget', { targetId: targetToClose })
+      }),
       send: Bluebird.method((command: CRI.Command, params?: object) => {
         const enqueue = () => {
           return new Bluebird((resolve, reject) => {
