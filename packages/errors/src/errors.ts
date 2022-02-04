@@ -82,7 +82,7 @@ export const AllCypressErrors = {
 
         This option will not have an effect in ${guard(_.capitalize(browser))}. Tests that rely on web security being disabled will not run as expected.`
   },
-  BROWSER_NOT_FOUND_BY_NAME: (browser: string, foundBrowsersStr: string) => {
+  BROWSER_NOT_FOUND_BY_NAME: (browser: string, foundBrowsersStr: string[]) => {
     let canarySuffix = ''
 
     if (browser === 'canary') {
@@ -108,7 +108,7 @@ export const AllCypressErrors = {
         You can also use a custom browser: https://on.cypress.io/customize-browsers
 
         Available browsers found on your system are:
-        ${guard(foundBrowsersStr)}${guard(canarySuffix)}`
+        ${listItems(foundBrowsersStr)}${guard(canarySuffix)}`
   },
   BROWSER_NOT_FOUND_BY_PATH: (arg1: string, arg2: string) => {
     return errTemplate`\
