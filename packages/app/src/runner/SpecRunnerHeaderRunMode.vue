@@ -4,19 +4,8 @@
     class="min-h-64px px-16px text-14px"
     :style="{ width: `${props.width}px` }"
   >
+    <!-- this is similar to the Open Mode header but it's not interactive, so can be a lot smaller-->
     <div class="flex flex-grow flex-wrap py-16px gap-12px justify-end">
-      <!--
-        TODO: Studio. Out of scope for GA.
-      <Button
-        data-cy="header-studio"
-        :disabled="isDisabled"
-        class="m-16px mr-12px"
-        variant="outline"
-        @click="togglePlayground"
-      >
-        <i-cy-action-record_x16 class="h-32px w-32px" />
-      </Button>
-      -->
       <div
         v-if="testingType === 'e2e'"
         data-cy="aut-url"
@@ -55,89 +44,33 @@
           <span
             v-if="displayScale"
             class="-mr-6px text-gray-500"
-          > ({{ displayScale }})</span>
-        </template>
-        <template #default>
-          <div class="max-h-50vw p-16px text-gray-600 leading-24px w-400px overflow-auto">
-            <p class="mb-16px">
-              The
-              <strong>viewport</strong> determines the width and height of your application.
-              By default the viewport will be
-              <strong>{{ autStore.defaultViewportWidth }}px</strong> by
-              <strong>{{ autStore.defaultViewportHeight }}px</strong> for {{ testingType === "e2e" ? 'End-to-end' : 'Component' }}
-              Testing unless specified by a <InlineCodeFragment>cy.viewport</InlineCodeFragment> command.
-            </p>
-            <p class="mb-16px">
-              Additionally you can override the default viewport dimensions by specifying these values in your config file:
-            </p>
-
-            <ShikiHighlight
-              class="rounded border-1 border-gray-200 mb-16px"
-              lang="javascript"
-              :code="code"
-            />
-            <p>
-              <ExternalLink href="https://on.cypress.io/viewport">
-                Read more about viewport here.
-              </ExternalLink>
-            </p>
-          </div>
+          >({{ displayScale }})</span>
         </template>
       </SpecRunnerDropdown>
-    </div>
-
-    <div
-      v-if="selectorPlaygroundStore.show"
-      class="mt-8px"
-    >
-      <SelectorPlayground
-        :get-aut-iframe="getAutIframe"
-        :event-manager="eventManager"
-      />
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import { useAutStore } from '../store'
-import SelectorPlayground from './selector-playground/SelectorPlayground.vue'
-import { useSelectorPlaygroundStore } from '../store/selector-playground-store'
 import type { EventManager } from './event-manager'
-import type { AutIframe } from './aut-iframe'
 import { togglePlayground as _togglePlayground } from './utils'
-import ExternalLink from '@packages/frontend-shared/src/gql-components/ExternalLink.vue'
-import Button from '@packages/frontend-shared/src/components/Button.vue'
-import ShikiHighlight from '@packages/frontend-shared/src/components/ShikiHighlight.vue'
-import InlineCodeFragment from '@packages/frontend-shared/src/components/InlineCodeFragment.vue'
 import SpecRunnerDropdown from './SpecRunnerDropdown.vue'
 import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
 
 const props = defineProps<{
   eventManager: EventManager
-  getAutIframe: () => AutIframe
   width?: number
 }>()
-
-const autIframe = props.getAutIframe()
 
 const displayScale = computed(() => {
   return autStore.scale < 1 ? `${Math.round(autStore.scale * 100) }%` : 0
 })
-
-const selectorPlaygroundStore = useSelectorPlaygroundStore()
-
-const togglePlayground = () => _togglePlayground(autIframe)
 
 const autStore = useAutStore()
 
 const selectedBrowser = window.__CYPRESS_BROWSER__
 const testingType = window.__CYPRESS_TESTING_TYPE__
 
-const isDisabled = computed(() => autStore.isRunning || autStore.isLoading)
-
-const code = `{
-  "viewportWidth": ${autStore.defaultViewportWidth},
-  "viewportHeight": ${autStore.defaultViewportHeight}
-}`
 </script>
