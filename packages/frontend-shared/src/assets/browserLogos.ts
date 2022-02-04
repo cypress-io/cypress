@@ -10,6 +10,7 @@ import edgeCanaryIcon from '../../../../node_modules/browser-logos/src/edge-cana
 import edgeDevIcon from '../../../../node_modules/browser-logos/src/edge-dev/edge-dev.png'
 import firefoxNightlyIcon from '../../../../node_modules/browser-logos/src/firefox-nightly/firefox-nightly.svg?url'
 import firefoxDeveloperEditionIcon from '../../../../node_modules/browser-logos/src/firefox-developer-edition/firefox-developer-edition.svg?url'
+import genericBrowserLogo from '@packages/frontend-shared/src/assets/logos/generic-browser.svg?url'
 
 export const allBrowsersIcons = {
   'Electron': electronIcon,
@@ -24,4 +25,5 @@ export const allBrowsersIcons = {
   'Edge Canary': edgeCanaryIcon,
   'Edge Beta': edgeBetaIcon,
   'Edge Dev': edgeDevIcon,
+  'generic': genericBrowserLogo,
 }

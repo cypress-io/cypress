@@ -109,7 +109,7 @@
         class="w-16px filter group-hocus:grayscale-0"
         data-cy="top-nav-active-browser-icon"
         :class="open ? 'grayscale-0' : 'grayscale'"
-        :src="allBrowsersIcons[props.gql?.currentProject?.currentBrowser?.displayName || '']"
+        :src="allBrowsersIcons[props.gql?.currentProject?.currentBrowser?.displayName] || allBrowsersIcons.generic"
       >
       <span
         data-cy="top-nav-active-browser"
@@ -193,6 +193,7 @@
 import TopNavListItem from './TopNavListItem.vue'
 import TopNavList from './TopNavList.vue'
 import PromptContent from './PromptContent.vue'
+import UnsupportedBrowserTooltip from './UnsupportedBrowserTooltip.vue'
 import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
 import { gql, useMutation } from '@urql/vue'
 import { TopNavFragment, TopNav_SetPromptShownDocument } from '../../generated/graphql'
