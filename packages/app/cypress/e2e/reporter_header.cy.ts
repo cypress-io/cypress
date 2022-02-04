@@ -8,23 +8,6 @@ describe('Reporter Header', () => {
   })
 
   context('Specs Shortcut', () => {
-    it('displays the currently running spec as highlighted in the Specs List', () => {
-      cy.location().should((location) => {
-        expect(location.hash).to.contain('dom-content.spec')
-      })
-
-      cy.get('[data-selected-spec="true"]').should('contain', 'dom-content').should('have.length', '1')
-      cy.get('[data-selected-spec="false"]').should('have.length', '1')
-    })
-
-    it('will display the extension in the list as a different highlighted color than the filename', () => {
-      cy.location().should((location) => {
-        expect(location.hash).to.contain('dom-content.spec')
-      })
-
-      cy.get('[data-testid=spec-file-item]').get('.text-gray-700').eq(1).should('contain', '.spec.js')
-    })
-
     it('filters the list of specs when searching for specs', () => {
       cy.location().should((location) => {
         expect(location.hash).to.contain('dom-content.spec')
