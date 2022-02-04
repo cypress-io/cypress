@@ -127,6 +127,8 @@ async function connectToNewSpec (browser, debuggingPort, options, automation) {
 
   new CdpAutomation(criClient.send, criClient.on, automation)
 
+  await options.onInitializeNewBrowserTab()
+
   debug('firefox: navigating to about:blank')
   await navigateToUrl(options.url)
 }

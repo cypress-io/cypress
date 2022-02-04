@@ -440,11 +440,6 @@ export = {
     args.push(`--remote-debugging-port=${port}`)
     args.push('--remote-debugging-address=127.0.0.1')
 
-    // If we're in run mode, use incognito mode to ensure we are clearing browser cache/state in between runs
-    if (options.isTextTerminal) {
-      args.push('--incognito')
-    }
-
     return args
   },
 
@@ -455,7 +450,10 @@ export = {
 
     this._setAutomation(criClient, automation)
 
+    await options.onInitializeNewBrowserTab()
+
     await this._maybeRecordVideo(criClient, options, browser.majorVersion)
+
     await this._navigateUsingCRI(criClient, options.url)
     await this._handleDownloads(criClient, options.downloadsFolder, automation)
   },

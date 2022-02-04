@@ -170,10 +170,14 @@ export class OpenProject {
         }
 
         if (options.shouldNavigateBrowser) {
+          const onInitializeNewBrowserTab = async () => {
+            await this.resetBrowserState()
+          }
+
           // If we do not launch the browser,
           // we tell it that we are ready
           // to receive the next spec
-          return browsers.connectToNewSpec(browser, options, automation)
+          return browsers.connectToNewSpec(browser, { onInitializeNewBrowserTab, ...options }, automation)
         }
 
         return browsers.open(browser, options, automation, this._ctx)

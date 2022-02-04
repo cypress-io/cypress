@@ -1302,9 +1302,9 @@ module.exports = {
         debug('attempting to close the browser')
         await openProject.closeBrowser()
       } else {
-        // Otherwise, reset the browser and close the browser tabs
-        debug('stopping screencast and resetting browser state')
-        // await Promise.all([openProject.stopScreencast(), openProject.resetBrowserState()])
+        // Otherwise, stop screencast and close the browser tabs
+        debug('stopping screencast')
+        await openProject.stopScreencast()
 
         debug('attempting to close the browser tab')
         await openProject.closeBrowserTabs()
