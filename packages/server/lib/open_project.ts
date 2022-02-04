@@ -199,10 +199,6 @@ export class OpenProject {
     return this.projectBase?.resetBrowserState()
   }
 
-  async stopScreencast () {
-    return this.projectBase?.stopScreencast()
-  }
-
   closeOpenProjectAndBrowsers () {
     this.projectBase?.close().catch((e) => {
       this._ctx?.logTraceError(e)

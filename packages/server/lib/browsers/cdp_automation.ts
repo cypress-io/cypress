@@ -329,8 +329,6 @@ export class CdpAutomation {
         ])
       case 'close:browser:tabs':
         return this.sendDebuggerCommandFn('Page.close')
-      case 'stop:screencast':
-        return this.sendDebuggerCommandFn('Page.stopScreencast')
       case 'focus:browser:window':
         return this.sendDebuggerCommandFn('Page.bringToFront')
       default:

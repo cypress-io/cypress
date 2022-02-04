@@ -76,7 +76,6 @@ const retry = (fn: (res: any) => void) => {
 export class SocketBase {
   private _sendCloseBrowserTabsMessage
   private _sendResetBrowserStateMessage
-  private _sendStopScreencastMessage
   private _sendFocusBrowserMessage
 
   protected ended: boolean
@@ -284,10 +283,6 @@ export class SocketBase {
 
       this._sendResetBrowserStateMessage = async () => {
         await automationRequest('reset:browser:state', {})
-      }
-
-      this._sendStopScreencastMessage = async () => {
-        await automationRequest('stop:screencast', {})
       }
 
       this._sendFocusBrowserMessage = async () => {
@@ -568,12 +563,6 @@ export class SocketBase {
   async resetBrowserState () {
     if (this._sendResetBrowserStateMessage) {
       await this._sendResetBrowserStateMessage()
-    }
-  }
-
-  async stopScreencast () {
-    if (this._sendStopScreencastMessage) {
-      await this._sendStopScreencastMessage()
     }
   }
 

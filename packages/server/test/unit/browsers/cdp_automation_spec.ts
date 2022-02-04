@@ -242,16 +242,6 @@ context('lib/browsers/cdp_automation', () => {
       })
     })
 
-    describe('stop:screencast', function () {
-      it('sends the stop screencast message', async function () {
-        this.sendDebuggerCommand.withArgs('Page.stopScreencast').resolves()
-
-        await this.onRequest('stop:screencast')
-
-        expect(this.sendDebuggerCommand).to.be.calledWith('Page.stopScreencast')
-      })
-    })
-
     describe('focus:browser:window', function () {
       it('sends Page.bringToFront when focus is requested', function () {
         this.sendDebuggerCommand.withArgs('Page.bringToFront').resolves()

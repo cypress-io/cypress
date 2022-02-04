@@ -92,8 +92,6 @@ const connect = function (host, path, extraOpts) {
         return invoke('resetBrowserState', id)
       case 'close:browser:tabs':
         return invoke('closeBrowserTabs', id)
-      case 'stop:screencast':
-        return invoke('stopScreencast', id)
       default:
         return fail(id, { message: `No handler registered for: '${msg}'` })
     }
@@ -222,11 +220,6 @@ const automation = {
     return Promise.try(() => {
       return browser.windows.getCurrent({ populate: true })
     }).then((windowInfo) => browser.tabs.remove(windowInfo.tabs.map((tab) => tab.id)).then(fn))
-  },
-
-  stopScreencast (fn) {
-    // For now, we are now just returning as this path is only used for firefox and firefox will disconnect video when the tab/window is removed
-    return fn()
   },
 
   query (data) {
