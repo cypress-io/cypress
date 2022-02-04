@@ -139,8 +139,8 @@ type DeferredPromise = { resolve: Function, reject: Function }
 
 let versionInfo
 
-export const newTab = async (webSocketDebuggerUrl, host, port, onAsynchronousError: Function) => {
-  debug('starting new tab %o', { webSocketDebuggerUrl, host, port })
+export const newTab = async (host, port, onAsynchronousError: Function) => {
+  debug('starting new tab %o', { host, port })
 
   if (!versionInfo) {
     versionInfo = await chromeRemoteInterface.Version({ host, port })
@@ -228,8 +228,6 @@ export const create = Bluebird.method((target: websocketUrl, onAsynchronousError
         if (!isVersionGte(actual, minimum)) {
           errors.throw('CDP_VERSION_TOO_OLD', protocolVersion, actual)
         }
-
-        return actual
       })
     }
 
