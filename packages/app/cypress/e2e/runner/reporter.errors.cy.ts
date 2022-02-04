@@ -1,11 +1,13 @@
-import { verify, verifyInternalFailure } from './support/verify-failures'
+import { createVerify, verifyInternalFailure } from './support/verify-failures'
 
-const setup = ({ fileName, onLoadStatsMessage, mockPreferredEditor }) => {
-  cy.openProject('runner-e2e-specs')
-
-  if (mockPreferredEditor) {
-    // set preferred editor to bypass IDE selection dialog
-    cy.withCtx((ctx) => {
+const loadSpec = ({
+  fileName,
+  onLoadStatsMessage,
+  hasPreferredIde = false,
+}) => {
+  cy.withCtx((ctx, options) => {
+    if (options.hasPreferredIde) {
+      // set preferred editor to bypass IDE selection dialog
       ctx.coreData.localSettings.availableEditors = [
         ...ctx.coreData.localSettings.availableEditors,
         {
@@ -16,12 +18,16 @@ const setup = ({ fileName, onLoadStatsMessage, mockPreferredEditor }) => {
       ]
 
       ctx.coreData.localSettings.preferences.preferredEditorBinary = 'test-editor'
-    })
-  }
+    }
+
+    ctx.coreData.localSettings.preferences.isSpecsListOpen = false
+  }, { hasPreferredIde })
 
   cy.startAppServer()
   cy.visitApp()
 
+  // directly visiting the spec will sometimes hang, going through
+  // specs page first to mitigate
   cy.contains('[data-cy=spec-item]', fileName).click()
 
   cy.location().should((location) => {
@@ -29,7 +35,10 @@ const setup = ({ fileName, onLoadStatsMessage, mockPreferredEditor }) => {
   })
 
   // Wait for specs to complete
-  cy.findByLabelText('Stats').get('.failed', { timeout: 10000 }).should('have.text', onLoadStatsMessage)
+  cy.findByLabelText('Stats', { timeout: 30000 })
+  .get('.failed', { timeout: 10000 }).should('have.text', onLoadStatsMessage)
+
+  return createVerify({ fileName, hasPreferredIde })
 }
 
 describe('errors ui', {
@@ -37,54 +46,44 @@ describe('errors ui', {
   viewportWidth: 1024,
   numTestsKeptInMemory: 1,
 }, () => {
-  before(() => {
+  beforeEach(() => {
     cy.scaffoldProject('runner-e2e-specs')
+    cy.openProject('runner-e2e-specs')
   })
 
-  describe('assertion failures', () => {
-    before(() => {
-      setup({
-        fileName: 'assertions.cy.js',
-        mockPreferredEditor: true,
-        onLoadStatsMessage: 'Failed:3',
-      })
+  it('assertion failures', () => {
+    const verify = loadSpec({
+      fileName: 'assertions.cy.js',
+      hasPreferredIde: true,
+      onLoadStatsMessage: 'Failed:3',
     })
 
-    verify.it('with expect().<foo>', {
-      file: 'assertions.cy.js',
-      hasPreferredIde: true,
+    verify('with expect().<foo>', {
       column: 25,
       message: `expected 'actual' to equal 'expected'`,
       verifyOpenInIde: true,
     })
 
-    verify.it('with assert()', {
-      file: 'assertions.cy.js',
-      hasPreferredIde: true,
+    verify('with assert()', {
       column: '(5|12)', // (chrome|firefox)
       message: `should be true`,
       verifyOpenInIde: true,
     })
 
-    verify.it('with assert.<foo>()', {
-      file: 'assertions.cy.js',
-      hasPreferredIde: true,
+    verify('with assert.<foo>()', {
       column: 12,
       message: `expected 'actual' to equal 'expected'`,
       verifyOpenInIde: true,
     })
   })
 
-  describe('assertion failures - no preferred IDE', () => {
-    before(() => {
-      setup({
-        fileName: 'assertions.cy.js',
-        mockPreferredEditor: false,
-        onLoadStatsMessage: 'Failed:3',
-      })
+  it('assertion failures - no preferred IDE', () => {
+    const verify = loadSpec({
+      fileName: 'assertions.cy.js',
+      onLoadStatsMessage: 'Failed:3',
     })
 
-    verify.it('with expect().<foo>', {
+    verify('with expect().<foo>', {
       file: 'assertions.cy.js',
       hasPreferredIde: false,
       column: 25,
@@ -94,338 +93,255 @@ describe('errors ui', {
     })
   })
 
-  describe('exception failures', () => {
-    before(() => {
-      setup({
-        fileName: 'exceptions.cy.js',
-        mockPreferredEditor: false,
-        onLoadStatsMessage: 'Failed:2',
-      })
+  it('exception failures', () => {
+    const verify = loadSpec({
+      fileName: 'exceptions.cy.js',
+      onLoadStatsMessage: 'Failed:2',
     })
 
-    verify.it('in spec file', {
-      file: 'exceptions.cy.js',
+    verify('in spec file', {
       column: 10,
       message: 'bar is not a function',
     })
 
-    verify.it('in file outside project', {
-      file: 'exceptions.cy.js',
+    verify('in file outside project', {
       message: 'An outside error',
       regex: /\/throws\-error\.js:5:9/,
       codeFrameText: `thrownewError('An outside error')`,
     })
   })
 
-  describe('hooks', { viewportHeight: 900 }, () => {
-    before(() => {
-      setup({
-        fileName: 'hooks.cy.js',
-        mockPreferredEditor: false,
-        onLoadStatsMessage: 'Failed:1',
-      })
+  it('hooks', { viewportHeight: 900 }, () => {
+    const verify = loadSpec({
+      fileName: 'hooks.cy.js',
+      onLoadStatsMessage: 'Failed:1',
     })
 
     // https://github.com/cypress-io/cypress/issues/8214
     // https://github.com/cypress-io/cypress/issues/8288
     // https://github.com/cypress-io/cypress/issues/8350
-    verify.it('errors when a hook is nested in another hook', {
-      file: 'hooks.cy.js',
-      specTitle: 'test',
+    verify('test', {
       column: '(7|18)', // (chrome|firefox)
       codeFrameText: 'beforeEach(()=>',
       message: `Cypress detected you registered a(n) beforeEach hook while a test was running`,
     })
   })
 
-  describe('commands', () => {
-    before(() => {
-      setup({
-        fileName: 'commands.cy.js',
-        mockPreferredEditor: false,
-        onLoadStatsMessage: 'Failed:2',
-      })
+  it('commands', () => {
+    const verify = loadSpec({
+      fileName: 'commands.cy.js',
+      onLoadStatsMessage: 'Failed:2',
     })
 
-    verify.it('failure', {
-      file: 'commands.cy.js',
+    verify('failure', {
       column: 8,
       message: 'Timed out retrying after 0ms: Expected to find element: #does-not-exist, but never found it',
     })
 
-    verify.it('chained failure', {
-      file: 'commands.cy.js',
+    verify('chained failure', {
       column: 20,
       message: 'Timed out retrying after 0ms: Expected to find element: #does-not-exist, but never found it',
     })
   })
 
-  describe('cy.then', () => {
-    const file = 'then.cy.js'
-
-    before(() => {
-      setup({
-        fileName: file,
-        mockPreferredEditor: false,
-        onLoadStatsMessage: 'Failed:3',
-      })
+  it('cy.then', () => {
+    const verify = loadSpec({
+      fileName: 'then.cy.js',
+      onLoadStatsMessage: 'Failed:3',
     })
 
-    verify.it('assertion failure', {
-      file,
+    verify('assertion failure', {
       column: 27,
       message: `expected 'actual' to equal 'expected'`,
     })
 
-    verify.it('exception', {
-      file,
+    verify('exception', {
       column: 12,
       message: 'bar is not a function',
     })
 
-    verify.it('command failure', {
-      file,
+    verify('command failure', {
       column: 10,
       message: 'Timed out retrying after 0ms: Expected to find element: #does-not-exist, but never found it',
     })
   })
 
-  describe('cy.should', () => {
-    const file = 'should.cy.js'
-
-    before(() => {
-      setup({
-        fileName: file,
-        mockPreferredEditor: false,
-        onLoadStatsMessage: 'Failed:8',
-      })
+  it('cy.should', () => {
+    const verify = loadSpec({
+      fileName: 'should.cy.js',
+      onLoadStatsMessage: 'Failed:8',
     })
 
-    verify.it('callback assertion failure', {
-      file,
+    verify('callback assertion failure', {
       column: 27,
       message: `expected 'actual' to equal 'expected'`,
     })
 
-    verify.it('callback exception', {
-      file,
+    verify('callback exception', {
       column: 12,
       message: 'bar is not a function',
     })
 
-    verify.it('standard assertion failure', {
-      file,
+    verify('standard assertion failure', {
       column: 6,
       message: 'Timed out retrying after 0ms: expected {} to have property \'foo\'',
     })
 
-    verify.it('after multiple', {
-      file,
+    verify('after multiple', {
       column: 6,
       message: 'Timed out retrying after 0ms: expected \'foo\' to equal \'bar\'',
     })
 
-    verify.it('after multiple callbacks exception', {
-      file,
+    verify('after multiple callbacks exception', {
       column: 12,
       codeFrameText: '({}).bar()',
       message: 'bar is not a function',
     })
 
-    verify.it('after multiple callbacks assertion failure', {
-      file,
+    verify('after multiple callbacks assertion failure', {
       column: 27,
       codeFrameText: '.should(()=>',
       message: `expected 'actual' to equal 'expected'`,
     })
 
-    verify.it('after callback success assertion failure', {
-      file,
+    verify('after callback success assertion failure', {
       column: 6,
       codeFrameText: '.should(\'have.property',
       message: `expected {} to have property 'foo'`,
     })
 
-    verify.it('command failure after success', {
-      file,
+    verify('command failure after success', {
       column: 8,
       message: 'Timed out retrying after 0ms: Expected to find element: #does-not-exist, but never found it',
     })
   })
 
-  describe('cy.each', () => {
-    const file = 'each.cy.js'
-
-    before(() => {
-      setup({
-        fileName: file,
-        mockPreferredEditor: false,
-        onLoadStatsMessage: 'Failed:3',
-      })
+  it('cy.each', () => {
+    const verify = loadSpec({
+      fileName: 'each.cy.js',
+      onLoadStatsMessage: 'Failed:3',
     })
 
-    verify.it('assertion failure', {
-      file,
+    verify('assertion failure', {
       column: 27,
       message: `expected 'actual' to equal 'expected'`,
     })
 
-    verify.it('exception', {
-      file,
+    verify('exception', {
       column: 12,
       message: 'bar is not a function',
     })
 
-    verify.it('command failure', {
-      file,
+    verify('command failure', {
       column: 10,
       message: 'Expected to find element: #does-not-exist, but never found it',
     })
   })
 
-  describe('cy.spread', () => {
-    const file = 'spread.cy.js'
-
-    before(() => {
-      setup({
-        fileName: file,
-        mockPreferredEditor: false,
-        onLoadStatsMessage: 'Failed:3',
-      })
+  it('cy.spread', () => {
+    const verify = loadSpec({
+      fileName: 'spread.cy.js',
+      onLoadStatsMessage: 'Failed:3',
     })
 
-    verify.it('assertion failure', {
-      file,
+    verify('assertion failure', {
       column: 27,
       message: `expected 'actual' to equal 'expected'`,
     })
 
-    verify.it('exception', {
-      file,
+    verify('exception', {
       column: 12,
       message: 'bar is not a function',
     })
 
-    verify.it('command failure', {
-      file,
+    verify('command failure', {
       column: 10,
       message: 'Expected to find element: #does-not-exist, but never found it',
     })
   })
 
-  describe('cy.within', () => {
-    const file = 'within.cy.js'
-
-    before(() => {
-      setup({
-        fileName: file,
-        mockPreferredEditor: false,
-        onLoadStatsMessage: 'Failed:3',
-      })
+  it('cy.within', () => {
+    const verify = loadSpec({
+      fileName: 'within.cy.js',
+      onLoadStatsMessage: 'Failed:3',
     })
 
-    verify.it('assertion failure', {
-      file,
+    verify('assertion failure', {
       column: 27,
       message: `expected 'actual' to equal 'expected'`,
     })
 
-    verify.it('exception', {
-      file,
+    verify('exception', {
       column: 12,
       message: 'bar is not a function',
     })
 
-    verify.it('command failure', {
-      file,
+    verify('command failure', {
       column: 10,
       message: 'Expected to find element: #does-not-exist, but never found it',
     })
   })
 
-  describe('cy.wrap', () => {
-    const file = 'wrap.cy.js'
-
-    before(() => {
-      setup({
-        fileName: file,
-        mockPreferredEditor: false,
-        onLoadStatsMessage: 'Failed:3',
-      })
+  it('cy.wrap', () => {
+    const verify = loadSpec({
+      fileName: 'wrap.cy.js',
+      onLoadStatsMessage: 'Failed:3',
     })
 
-    verify.it('assertion failure', {
-      file,
+    verify('assertion failure', {
       column: 27,
       message: `expected 'actual' to equal 'expected'`,
     })
 
-    verify.it('exception', {
-      file,
+    verify('exception', {
       column: 12,
       message: 'bar is not a function',
     })
 
-    verify.it('command failure', {
-      file,
+    verify('command failure', {
       column: 10,
       message: 'Expected to find element: #does-not-exist, but never found it',
     })
   })
 
-  describe('cy.visit', () => {
-    const file = 'visit.cy.js'
-
-    before(() => {
-      setup({
-        fileName: file,
-        mockPreferredEditor: false,
-        onLoadStatsMessage: 'Failed:4',
-      })
+  it('cy.visit', () => {
+    const verify = loadSpec({
+      fileName: 'visit.cy.js',
+      onLoadStatsMessage: 'Failed:3',
     })
 
-    verify.it('onBeforeLoad assertion failure', {
-      file,
+    verify('onBeforeLoad assertion failure', {
       column: 29,
       codeFrameText: 'onBeforeLoad',
       message: `expected 'actual' to equal 'expected'`,
     })
 
-    verify.it('onBeforeLoad exception', {
-      file,
+    verify('onBeforeLoad exception', {
       column: 14,
       codeFrameText: 'onBeforeLoad',
       message: 'bar is not a function',
     })
 
-    verify.it('onLoad assertion failure', {
-      file,
+    verify('onLoad assertion failure', {
       column: 29,
       codeFrameText: 'onLoad',
       message: `expected 'actual' to equal 'expected'`,
     })
 
-    verify.it('onLoad exception', {
-      file,
+    verify('onLoad exception', {
       column: 14,
       codeFrameText: 'onLoad',
       message: 'bar is not a function',
     })
   })
 
-  describe('cy.intercept', () => {
-    const file = 'intercept.cy.ts'
-
-    before(() => {
-      setup({
-        fileName: file,
-        mockPreferredEditor: false,
-        onLoadStatsMessage: 'Failed:3',
-      })
+  it('cy.intercept', () => {
+    const verify = loadSpec({
+      fileName: 'intercept.cy.ts',
+      onLoadStatsMessage: 'Failed:3',
     })
 
-    verify.it('assertion failure in request callback', {
-      file,
+    verify('assertion failure in request callback', {
       column: 22,
       message: [
         `expected 'a' to equal 'b'`,
@@ -435,8 +351,7 @@ describe('errors ui', {
       ],
     })
 
-    verify.it('assertion failure in response callback', {
-      file,
+    verify('assertion failure in response callback', {
       column: 24,
       codeFrameText: '.reply(()=>{',
       message: [
@@ -447,8 +362,7 @@ describe('errors ui', {
       ],
     })
 
-    verify.it('fails when erroneous response is received while awaiting response', {
-      file,
+    verify('fails when erroneous response is received while awaiting response', {
       column: 6,
       // TODO: determine why code frame output is different in run/open mode
       // this fails the active test because it's an asynchronous
@@ -464,407 +378,331 @@ describe('errors ui', {
     })
   })
 
-  describe('cy.route', () => {
-    const file = 'route.cy.js'
-
-    before(() => {
-      setup({
-        fileName: file,
-        mockPreferredEditor: false,
-        onLoadStatsMessage: 'Failed:9',
-      })
+  it('cy.route', () => {
+    const verify = loadSpec({
+      fileName: 'route.cy.js',
+      onLoadStatsMessage: 'Failed:9',
     })
 
-    verify.it('callback assertion failure', {
-      file,
+    verify('callback assertion failure', {
       column: 27,
       message: `expected 'actual' to equal 'expected'`,
     })
 
-    verify.it('callback exception', {
-      file,
+    verify('callback exception', {
       column: 12,
       message: 'bar is not a function',
     })
 
-    verify.it('command failure', {
-      file,
+    verify('command failure', {
       column: 10,
       message: 'Expected to find element: #does-not-exist, but never found it',
     })
 
-    verify.it('onAbort assertion failure', {
-      file,
+    verify('onAbort assertion failure', {
       column: 29,
       codeFrameText: 'onAbort',
       message: `expected 'actual' to equal 'expected'`,
     })
 
-    verify.it('onAbort exception', {
-      file,
+    verify('onAbort exception', {
       column: 14,
       codeFrameText: 'onAbort',
       message: 'bar is not a function',
     })
 
-    verify.it('onRequest assertion failure', {
-      file,
+    verify('onRequest assertion failure', {
       column: 29,
       codeFrameText: 'onRequest',
       message: `expected 'actual' to equal 'expected'`,
     })
 
-    verify.it('onRequest exception', {
-      file,
+    verify('onRequest exception', {
       column: 14,
       codeFrameText: 'onRequest',
       message: 'bar is not a function',
     })
 
-    verify.it('onResponse assertion failure', {
-      file,
+    verify('onResponse assertion failure', {
       column: 29,
       codeFrameText: 'onResponse',
       message: `expected 'actual' to equal 'expected'`,
     })
 
-    verify.it('onResponse exception', {
-      file,
+    verify('onResponse exception', {
       column: 14,
       codeFrameText: 'onResponse',
       message: 'bar is not a function',
     })
   })
 
-  describe('cy.server', () => {
-    const file = 'server.cy.js'
-
-    before(() => {
-      setup({
-        fileName: file,
-        mockPreferredEditor: false,
-        onLoadStatsMessage: 'Failed:6',
-      })
+  it('cy.server', () => {
+    const verify = loadSpec({
+      fileName: 'server.cy.js',
+      onLoadStatsMessage: 'Failed:6',
     })
 
-    verify.it('onAbort assertion failure', {
-      file,
+    verify('onAbort assertion failure', {
       column: 29,
       codeFrameText: 'onAbort',
       message: `expected 'actual' to equal 'expected'`,
     })
 
-    verify.it('onAbort exception', {
-      file,
+    verify('onAbort exception', {
       column: 14,
       codeFrameText: 'onAbort',
       message: 'bar is not a function',
     })
 
-    verify.it('onRequest assertion failure', {
-      file,
+    verify('onRequest assertion failure', {
       column: 29,
       codeFrameText: 'onRequest',
       message: `expected 'actual' to equal 'expected'`,
     })
 
-    verify.it('onRequest exception', {
-      file,
+    verify('onRequest exception', {
       column: 14,
       codeFrameText: 'onRequest',
       message: 'bar is not a function',
     })
 
-    verify.it('onResponse assertion failure', {
-      file,
+    verify('onResponse assertion failure', {
       column: 29,
       codeFrameText: 'onResponse',
       message: `expected 'actual' to equal 'expected'`,
     })
 
-    verify.it('onResponse exception', {
-      file,
+    verify('onResponse exception', {
       column: 14,
       codeFrameText: 'onResponse',
       message: 'bar is not a function',
     })
   })
 
-  describe('cy.readFile', () => {
-    const file = 'readfile.cy.js'
-
-    before(() => {
-      setup({
-        fileName: file,
-        mockPreferredEditor: false,
-        onLoadStatsMessage: 'Failed:1',
-      })
+  it('cy.readFile', () => {
+    const verify = loadSpec({
+      fileName: 'readfile.cy.js',
+      onLoadStatsMessage: 'Failed:1',
     })
 
-    verify.it('existence failure', {
-      file,
+    verify('existence failure', {
       column: 8,
       message: 'failed because the file does not exist',
     })
   })
 
-  describe('validation errors', () => {
-    const file = 'validation.cy.js'
-
-    before(() => {
-      setup({
-        fileName: file,
-        mockPreferredEditor: false,
-        onLoadStatsMessage: 'Failed:3',
-      })
+  it('validation errors', () => {
+    const verify = loadSpec({
+      fileName: 'validation.cy.js',
+      onLoadStatsMessage: 'Failed:3',
     })
 
-    verify.it('from cypress', {
-      file,
+    verify('from cypress', {
       column: 8,
       message: 'can only accept a string preset or',
       stack: ['throwErrBadArgs', 'From Your Spec Code:'],
     })
 
-    verify.it('from chai expect', {
-      file,
+    verify('from chai expect', {
       column: '(5|12)', // (chrome|firefox)
       message: 'Invalid Chai property: nope',
       stack: ['proxyGetter', 'From Your Spec Code:'],
     })
 
-    verify.it('from chai assert', {
-      file,
+    verify('from chai assert', {
       column: 12,
       message: 'object tested must be an array',
     })
   })
 
-  describe('event handlers', () => {
-    const file = 'events.cy.js'
-
-    before(() => {
-      setup({
-        fileName: file,
-        mockPreferredEditor: false,
-        onLoadStatsMessage: 'Failed:3',
-      })
+  it('event handlers', () => {
+    const verify = loadSpec({
+      fileName: 'events.cy.js',
+      onLoadStatsMessage: 'Failed:4',
     })
 
-    verify.it('event assertion failure', {
-      file,
+    verify('event assertion failure', {
       column: 27,
       message: `expected 'actual' to equal 'expected'`,
     })
 
-    verify.it('event exception', {
-      file,
+    verify('event exception', {
       column: 12,
       message: 'bar is not a function',
     })
 
-    verify.it('fail handler assertion failure', {
-      file,
+    verify('fail handler assertion failure', {
       column: 27,
       message: `expected 'actual' to equal 'expected'`,
     })
 
-    verify.it('fail handler exception', {
-      file,
+    verify('fail handler exception', {
       column: 12,
       message: 'bar is not a function',
     })
   })
 
-  describe('uncaught errors', () => {
-    const file = 'uncaught.cy.js'
-
-    before(() => {
-      setup({
-        fileName: file,
-        mockPreferredEditor: false,
-        onLoadStatsMessage: 'Failed:11',
-      })
+  it('uncaught errors', () => {
+    const verify = loadSpec({
+      fileName: 'uncaught.cy.js',
+      onLoadStatsMessage: 'Failed:11',
     })
 
-    context('sync', () => {
-      verify.it('sync app visit exception', {
-        file,
-        uncaught: true,
-        command: 'visit',
-        originalMessage: 'visit error',
-        message: [
-          'The following error originated from your application code',
-        ],
-        notInMessage: [
-          'It was caused by an unhandled promise rejection',
-        ],
-        regex: /localhost\:\d+\/cypress\/fixtures\/errors.html\?error-on-visit:\d+:\d+/,
-        hasCodeFrame: false,
-      })
-
-      verify.it('sync app navigates to visit exception', {
-        file,
-        uncaught: true,
-        originalMessage: 'visit error',
-        message: [
-          'The following error originated from your application code',
-        ],
-        notInMessage: [
-          'It was caused by an unhandled promise rejection',
-        ],
-        regex: /localhost\:\d+\/cypress\/fixtures\/errors.html\?error-on-visit:\d+:\d+/,
-        hasCodeFrame: false,
-      })
-
-      verify.it('sync app exception', {
-        file,
-        uncaught: true,
-        command: 'click',
-        originalMessage: 'sync error',
-        message: [
-          'The following error originated from your application code',
-        ],
-        notInMessage: [
-          'It was caused by an unhandled promise rejection',
-        ],
-        regex: /localhost\:\d+\/cypress\/fixtures\/errors.html:\d+:\d+/,
-        hasCodeFrame: false,
-      })
-
-      verify.it('exception inside uncaught:exception', {
-        file,
-        uncaught: true,
-        uncaughtMessage: 'sync error',
-        column: 12,
-        originalMessage: 'bar is not a function',
-        message: [
-          'The following error originated from your test code',
-        ],
-        notInMessage: [
-          'It was caused by an unhandled promise rejection',
-        ],
-      })
+    verify('sync app visit exception', {
+      uncaught: true,
+      command: 'visit',
+      originalMessage: 'visit error',
+      message: [
+        'The following error originated from your application code',
+      ],
+      notInMessage: [
+        'It was caused by an unhandled promise rejection',
+      ],
+      regex: /localhost\:\d+\/cypress\/fixtures\/errors.html\?error-on-visit:\d+:\d+/,
+      hasCodeFrame: false,
     })
 
-    context('async', () => {
-      verify.it('async app exception', {
-        file,
-        uncaught: true,
-        originalMessage: 'async error',
-        message: [
-          'The following error originated from your application code',
-        ],
-        notInMessage: [
-          'It was caused by an unhandled promise rejection',
-        ],
-        regex: /localhost\:\d+\/cypress\/fixtures\/errors.html:\d+:\d+/,
-        hasCodeFrame: false,
-      })
+    verify('sync app navigates to visit exception', {
+      uncaught: true,
+      originalMessage: 'visit error',
+      message: [
+        'The following error originated from your application code',
+      ],
+      notInMessage: [
+        'It was caused by an unhandled promise rejection',
+      ],
+      regex: /localhost\:\d+\/cypress\/fixtures\/errors.html\?error-on-visit:\d+:\d+/,
+      hasCodeFrame: false,
+    })
 
-      verify.it('app unhandled rejection', {
-        file,
-        uncaught: true,
-        originalMessage: 'promise rejection',
-        message: [
-          'The following error originated from your application code',
-          'It was caused by an unhandled promise rejection',
-        ],
-        regex: /localhost\:\d+\/cypress\/fixtures\/errors.html:\d+:\d+/,
-        hasCodeFrame: false,
-      })
+    verify('sync app exception', {
+      uncaught: true,
+      command: 'click',
+      originalMessage: 'sync error',
+      message: [
+        'The following error originated from your application code',
+      ],
+      notInMessage: [
+        'It was caused by an unhandled promise rejection',
+      ],
+      regex: /localhost\:\d+\/cypress\/fixtures\/errors.html:\d+:\d+/,
+      hasCodeFrame: false,
+    })
 
-      verify.it('async spec exception', {
-        file,
-        uncaught: true,
-        column: 12,
-        originalMessage: 'bar is not a function',
-        message: [
-          'The following error originated from your test code',
-        ],
-        notInMessage: [
-          'It was caused by an unhandled promise rejection',
-        ],
-      })
+    verify('exception inside uncaught:exception', {
+      uncaught: true,
+      uncaughtMessage: 'sync error',
+      column: 12,
+      originalMessage: 'bar is not a function',
+      message: [
+        'The following error originated from your test code',
+      ],
+      notInMessage: [
+        'It was caused by an unhandled promise rejection',
+      ],
+    })
 
-      verify.it('async spec exception with done', {
-        file,
-        uncaught: true,
-        column: 12,
-        originalMessage: 'bar is not a function',
-        message: [
-          'The following error originated from your test code',
-        ],
-        notInMessage: [
-          'It was caused by an unhandled promise rejection',
-        ],
-      })
+    verify('async app exception', {
+      uncaught: true,
+      originalMessage: 'async error',
+      message: [
+        'The following error originated from your application code',
+      ],
+      notInMessage: [
+        'It was caused by an unhandled promise rejection',
+      ],
+      regex: /localhost\:\d+\/cypress\/fixtures\/errors.html:\d+:\d+/,
+      hasCodeFrame: false,
+    })
 
-      verify.it('spec unhandled rejection', {
-        file,
-        uncaught: true,
-        column: 20,
-        originalMessage: 'Unhandled promise rejection from the spec',
-        message: [
-          'The following error originated from your test code',
-          'It was caused by an unhandled promise rejection',
-        ],
-      })
+    verify('app unhandled rejection', {
+      uncaught: true,
+      originalMessage: 'promise rejection',
+      message: [
+        'The following error originated from your application code',
+        'It was caused by an unhandled promise rejection',
+      ],
+      regex: /localhost\:\d+\/cypress\/fixtures\/errors.html:\d+:\d+/,
+      hasCodeFrame: false,
+    })
 
-      verify.it('spec unhandled rejection with done', {
-        file,
-        uncaught: true,
-        column: 20,
-        originalMessage: 'Unhandled promise rejection from the spec',
-        message: [
-          'The following error originated from your test code',
-          'It was caused by an unhandled promise rejection',
-        ],
-      })
+    verify('async spec exception', {
+      uncaught: true,
+      column: 12,
+      originalMessage: 'bar is not a function',
+      message: [
+        'The following error originated from your test code',
+      ],
+      notInMessage: [
+        'It was caused by an unhandled promise rejection',
+      ],
+    })
 
-      verify.it('spec Bluebird unhandled rejection', {
-        file,
-        uncaught: true,
-        column: 21,
-        originalMessage: 'Unhandled promise rejection from the spec',
-        message: [
-          'The following error originated from your test code',
-          'It was caused by an unhandled promise rejection',
-        ],
-      })
+    verify('async spec exception with done', {
+      uncaught: true,
+      column: 12,
+      originalMessage: 'bar is not a function',
+      message: [
+        'The following error originated from your test code',
+      ],
+      notInMessage: [
+        'It was caused by an unhandled promise rejection',
+      ],
+    })
 
-      verify.it('spec Bluebird unhandled rejection with done', {
-        file,
-        uncaught: true,
-        column: 21,
-        originalMessage: 'Unhandled promise rejection from the spec',
-        message: [
-          'The following error originated from your test code',
-          'It was caused by an unhandled promise rejection',
-        ],
-      })
+    verify('spec unhandled rejection', {
+      uncaught: true,
+      column: 20,
+      originalMessage: 'Unhandled promise rejection from the spec',
+      message: [
+        'The following error originated from your test code',
+        'It was caused by an unhandled promise rejection',
+      ],
+    })
+
+    verify('spec unhandled rejection with done', {
+      uncaught: true,
+      column: 20,
+      originalMessage: 'Unhandled promise rejection from the spec',
+      message: [
+        'The following error originated from your test code',
+        'It was caused by an unhandled promise rejection',
+      ],
+    })
+
+    verify('spec Bluebird unhandled rejection', {
+      uncaught: true,
+      column: 21,
+      originalMessage: 'Unhandled promise rejection from the spec',
+      message: [
+        'The following error originated from your test code',
+        'It was caused by an unhandled promise rejection',
+      ],
+    })
+
+    verify('spec Bluebird unhandled rejection with done', {
+      uncaught: true,
+      column: 21,
+      originalMessage: 'Unhandled promise rejection from the spec',
+      message: [
+        'The following error originated from your test code',
+        'It was caused by an unhandled promise rejection',
+      ],
     })
   })
 
-  describe('uncaught errors: outside test', () => {
-    const file = 'uncaught_outside_test.cy.js'
-
-    before(() => {
-      setup({
-        fileName: file,
-        mockPreferredEditor: false,
-        onLoadStatsMessage: 'Failed:1',
-      })
+  it('uncaught errors: outside test', () => {
+    const verify = loadSpec({
+      fileName: 'uncaught_outside_test.cy.js',
+      onLoadStatsMessage: 'Failed:1',
     })
 
     // NOTE: the following 2 test don't have uncaught: true because we don't
     // display command logs if there are only events and not true commands
     // and uncaught: true causes the verification to look for the error
     // event command log
-    verify.it('spec exception outside test', {
-      file,
+    verify('An uncaught error was detected outside of a test', {
       column: 7,
-      specTitle: 'An uncaught error was detected outside of a test',
       message: [
         'The following error originated from your test code',
         'error from outside test',
@@ -874,21 +712,14 @@ describe('errors ui', {
     })
   })
 
-  describe('uncaught errors: outside test only suite', () => {
-    const file = 'uncaught_outside_test_only_suite.cy.js'
-
-    before(() => {
-      setup({
-        fileName: file,
-        mockPreferredEditor: false,
-        onLoadStatsMessage: 'Failed:1',
-      })
+  it('uncaught errors: outside test only suite', () => {
+    const verify = loadSpec({
+      fileName: 'uncaught_outside_test_only_suite.cy.js',
+      onLoadStatsMessage: 'Failed:1',
     })
 
-    verify.it('spec exception outside test with only suite', {
-      file,
+    verify('An uncaught error was detected outside of a test', {
       column: 7,
-      specTitle: 'An uncaught error was detected outside of a test',
       message: [
         'error from outside test with only suite',
         'The following error originated from your test code',
@@ -898,83 +729,58 @@ describe('errors ui', {
     })
   })
 
-  describe('custom commands', () => {
-    const file = 'custom_commands.cy.js'
-
-    before(() => {
-      setup({
-        fileName: file,
-        mockPreferredEditor: false,
-        onLoadStatsMessage: 'Failed:2',
-      })
+  it('custom commands', () => {
+    const verify = loadSpec({
+      fileName: 'custom_commands.cy.js',
+      onLoadStatsMessage: 'Failed:3',
     })
 
-    verify.it('assertion failure', {
-      file,
+    verify('assertion failure', {
       column: 23,
       message: `expected 'actual' to equal 'expected'`,
       codeFrameText: `add('failAssertion'`,
     })
 
-    verify.it('exception', {
-      file,
+    verify('exception', {
       column: 8,
       message: 'bar is not a function',
       codeFrameText: `add('failException'`,
     })
 
-    verify.it('command failure', {
-      file,
+    verify('command failure', {
       column: 6,
       message: 'Timed out retrying after 0ms: Expected to find element: #does-not-exist, but never found it',
       codeFrameText: `add('failCommand'`,
     })
   })
 
-  describe('typescript', () => {
-    const file = 'typescript.cy.ts'
-
-    before(() => {
-      setup({
-        fileName: file,
-        mockPreferredEditor: false,
-        onLoadStatsMessage: 'Failed:3',
-      })
+  it('typescript', () => {
+    const verify = loadSpec({
+      fileName: 'typescript.cy.ts',
+      onLoadStatsMessage: 'Failed:3',
     })
 
-    verify.it('assertion failure', {
-      file,
+    verify('assertion failure', {
       column: 25,
       message: `expected 'actual' to equal 'expected'`,
     })
 
-    verify.it('exception', {
-      file,
+    verify('exception', {
       column: 10,
       message: 'bar is not a function',
     })
 
-    verify.it('command failure', {
-      file,
+    verify('command failure', {
       column: 8,
       message: 'Timed out retrying after 0ms: Expected to find element: #does-not-exist, but never found it',
       codeFrameText: `.get('#does-not-exist')`,
     })
   })
 
-  describe('docs url', () => {
-    const file = 'docs_url.cy.js'
-    const docsUrl = 'https://on.cypress.io/viewport'
-
+  context('docs url', () => {
     before(() => {
       // @ts-ignore
       window.top.__cySkipValidateConfig = true
-
-      setup({
-        fileName: file,
-        mockPreferredEditor: false,
-        onLoadStatsMessage: 'Failed:2',
-      })
     })
 
     after(() => {
@@ -982,60 +788,59 @@ describe('errors ui', {
       window.top.__cySkipValidateConfig = false
     })
 
-    verify.it('displays as link in interactive mode', { retries: 1 }, {
-      file,
-      verifyFn () {
-        cy.contains('.runnable-title', 'displays as link in interactive mode')
-        .closest('.runnable').within(() => {
-          cy
-          .get('.runnable-err-message')
-          .should('not.contain', docsUrl)
-          .contains('Learn more')
-          .should('have.attr', 'href', docsUrl)
-        })
-      },
-    })
+    it('docs url validation', { retries: 1 }, () => {
+      const docsUrl = 'https://on.cypress.io/viewport'
 
-    verify.it('is text in error message in run mode', {
-      file,
-      verifyFn () {
-        cy.contains('.runnable-title', 'is text in error message in run mode')
-        .closest('.runnable').within(() => {
-          cy
-          .get('.runnable-err-message')
-          .should('contain', docsUrl)
-          .contains('Learn more')
-          .should('not.exist')
-        })
-      },
+      const verify = loadSpec({
+        fileName: 'docs_url.cy.js',
+        onLoadStatsMessage: 'Failed:2',
+      })
+
+      verify('displays as link in interactive mode', {
+        verifyFn () {
+          cy.contains('.runnable-title', 'displays as link in interactive mode')
+          .closest('.runnable').within(() => {
+            cy
+            .get('.runnable-err-message')
+            .should('not.contain', docsUrl)
+            .contains('Learn more')
+            .should('have.attr', 'href', docsUrl)
+          })
+        },
+      })
+
+      verify('is text in error message in run mode', {
+        verifyFn () {
+          cy.contains('.runnable-title', 'is text in error message in run mode')
+          .closest('.runnable').within(() => {
+            cy
+            .get('.runnable-err-message')
+            .should('contain', docsUrl)
+            .contains('Learn more')
+            .should('not.exist')
+          })
+        },
+      })
     })
   })
 
   // cases where there is a bug in Cypress and we should show cypress internals
   // instead of the invocation stack. we test this by monkey-patching internal
   // methods to make them throw an error
-  describe('unexpected errors', () => {
-    const file = 'unexpected.cy.js'
-
-    before(() => {
-      setup({
-        fileName: file,
-        mockPreferredEditor: false,
-        onLoadStatsMessage: 'Failed:1',
-      })
+  it('unexpected errors', () => {
+    const verify = loadSpec({
+      fileName: 'unexpected.cy.js',
+      onLoadStatsMessage: 'Failed:1',
     })
 
     // FIXME: the eval doesn't seem to take effect and overwrite the method
     // so it ends up not failing properly
-    // @ts-ignore
-    verify.it.skip('Cypress method error', {
-      file,
-      verifyFn: verifyInternalFailure,
-      method: 'Cypress.LocalStorage._isSpecialKeyword',
-    })
+    // verify('Cypress method error', {
+    //   verifyFn: verifyInternalFailure,
+    //   method: 'Cypress.LocalStorage._isSpecialKeyword',
+    // })
 
-    verify.it('internal cy error', {
-      file,
+    verify('internal cy error', {
       verifyFn: verifyInternalFailure,
       method: 'cy.expect',
     })

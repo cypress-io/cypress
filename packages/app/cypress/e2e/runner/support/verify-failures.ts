@@ -168,27 +168,16 @@ export const verifyFailure = (options) => {
   }
 }
 
-const createVerifyTest = (modifier?: string) => {
-  return (title: string, opts: any, props?: any) => {
-    if (!props) {
-      props = opts
-      opts = null
-    }
-
+export const createVerify = ({ fileName, hasPreferredIde }) => {
+  return (title: string, props?: any) => {
     props.specTitle ||= title
+    props.file ||= fileName
 
-    const verifyFn = (props.verifyFn || verifyFailure).bind(null, props)
+    props.hasPreferredIde = hasPreferredIde
 
-    return (modifier ? it[modifier] : it)(title, verifyFn)
+    return (props.verifyFn || verifyFailure).call(null, props)
   }
 }
-
-export const verify = {
-  it: createVerifyTest(),
-}
-
-verify.it['only'] = createVerifyTest('only')
-verify.it['skip'] = createVerifyTest('skip')
 
 export const verifyInternalFailure = (props) => {
   const { specTitle, method, stackMethod } = props

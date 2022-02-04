@@ -1265,7 +1265,8 @@ jobs:
 
   run-app-integration-tests-chrome:
     <<: *defaults
-    parallelism: 5
+    resource_class: medium
+    parallelism: 4
     steps:
       - run-new-ui-tests:
           browser: chrome
