@@ -89,7 +89,7 @@ executors:
   # https://github.com/CircleCI-Public/windows-orb/blob/master/src/executors/default.yml
   # https://circleci.com/docs/2.0/hello-world-windows/#software-pre-installed-in-the-windows-image
   windows: &windows-executor
-    machine:  
+    machine:
       image: windows-server-2019-vs2019:stable
       shell: bash.exe -eo pipefail
     resource_class: windows.medium
@@ -151,7 +151,7 @@ commands:
             - cypress
             - .ssh
             - node_modules # contains the npm i -g modules
-  
+
   install_cache_helpers_dependencies:
     steps:
       - run:
@@ -1092,6 +1092,9 @@ jobs:
       # CLI tests generate HTML files with sample CLI command output
       - store_artifacts:
           path: cli/test/html
+      - store_artifacts:
+          path: packages/errors/__snapshot-images__
+          destination: error-snapshot
       - store-npm-logs
 
   unit-tests-release:
@@ -2413,14 +2416,14 @@ windows-workflow: &windows-workflow
         executor: windows
         requires:
           - windows-build
-      
+
     - unit-tests:
         name: windows-unit-tests
         executor: windows
         resource_class: windows.medium
         requires:
           - windows-build
-    
+
     - create-build-artifacts:
         name: windows-create-build-artifacts
         executor: windows

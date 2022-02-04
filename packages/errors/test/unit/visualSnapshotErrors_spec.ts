@@ -6,9 +6,8 @@ import globby from 'globby'
 import _ from 'lodash'
 import path from 'path'
 import pixelmatch from 'pixelmatch'
-import sinon, { SinonSpy } from 'sinon'
 import { PNG } from 'pngjs'
-
+import sinon, { SinonSpy } from 'sinon'
 import * as errors from '../../src'
 
 // For importing the files below
@@ -104,6 +103,7 @@ const convertHtmlToImage = async (htmlfile: string) => {
 
           if (changed) {
             console.log({ changed })
+
             if (isCi) {
               return reject(new Error(`Image difference detected. Base error image no longer matches for file: ${baseImagePath}, off by ${changed} pixels`))
             }
