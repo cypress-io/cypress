@@ -8,13 +8,13 @@ module.exports = {
   'env': {
     'reactDevtools': true,
   },
-  'ignoreSpecPattern': [
-    '**/__snapshots__/*',
-    '**/__image_snapshots__/*',
-  ],
   'experimentalFetchPolyfill': true,
   'component': {
-    ignoreSpecPattern: 'examples/**/*',
+    'excludeSpecPattern': [
+      '**/__snapshots__/*',
+      '**/__image_snapshots__/*',
+      'examples/**/*',
+    ],
     devServer (cypressConfig, devServerConfig) {
       const { startDevServer } = require('@cypress/webpack-dev-server')
       const path = require('path')
