@@ -2993,7 +2993,7 @@ declare namespace Cypress {
 
   type DevServerFn<ComponentDevServerOpts = any> = (cypressConfig: DevServerConfig, devServerConfig: ComponentDevServerOpts) => ResolvedDevServerConfig | Promise<ResolvedDevServerConfig>
   interface ComponentConfigOptions<ComponentDevServerOpts = any> extends CoreConfigOptions {
-    devServer: Promise<{ devServer: DevServerFn<ComponentDevServerOpts>}> | { devServer: DevServerFn<ComponentDevServerOpts> } | DevServerFn<ComponentDevServerOpts>
+    devServer: DevServerFn<ComponentDevServerOpts>
     devServerConfig?: ComponentDevServerOpts | AwaitedLike<Promise<ComponentDevServerOpts>>
   }
 
