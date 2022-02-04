@@ -25,16 +25,7 @@
           'bg-gray-50': autStore.isLoadingUrl
         }"
       >
-        <Button
-          data-cy="header-selector"
-          :disabled="isDisabled"
-          class="rounded-none border-r-1px border-gray-100 mr-12px"
-          variant="text"
-          @click="togglePlayground"
-        >
-          <i-cy-crosshairs_x16 class="icon-dark-gray-600" />
-        </Button>
-        <div class="mr-12px max-w-100% grid text-gray-600 items-center truncate">
+        <div class="mx-12px max-w-100% grid text-gray-600 items-center truncate">
           {{ autStore.url }}
         </div>
       </div>
@@ -73,7 +64,7 @@
               <strong>viewport</strong> determines the width and height of your application.
               By default the viewport will be
               <strong>{{ autStore.defaultViewportWidth }}px</strong> by
-              <strong>{{ autStore.defaultViewportHeight }}px</strong> for {{ props.gql.currentTestingType === "e2e" ? 'End-to-end' : 'Component' }}
+              <strong>{{ autStore.defaultViewportHeight }}px</strong> for {{ testingType === "e2e" ? 'End-to-end' : 'Component' }}
               Testing unless specified by a <InlineCodeFragment>cy.viewport</InlineCodeFragment> command.
             </p>
             <p class="mb-16px">
