@@ -3,6 +3,7 @@ import type { Editor } from '.'
 export const defaultPreferences: AllowedState = {
   autoScrollingEnabled: true,
   isSpecsListOpen: true,
+  isSideNavigationOpen: true,
 }
 
 export const allowedKeys: Readonly<Array<keyof AllowedState>> = [
@@ -31,6 +32,7 @@ export const allowedKeys: Readonly<Array<keyof AllowedState>> = [
   'lastOpened',
   'promptsShown',
   'preferredEditorBinary',
+  'isSideNavigationOpen',
 ] as const
 
 type Maybe<T> = T | null | undefined
@@ -61,4 +63,5 @@ export type AllowedState = Partial<{
   lastOpened: Maybe<number>
   promptsShown: Maybe<object>
   preferredEditorBinary: Maybe<string>
+  isSideNavigationOpen: Maybe<boolean>
 }>

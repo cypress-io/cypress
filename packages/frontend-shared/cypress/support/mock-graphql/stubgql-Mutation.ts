@@ -105,4 +105,9 @@ export const stubMutation: MaybeResolver<Mutation> = {
   switchTestingTypeAndRelaunch (src, args, ctx) {
     return true
   },
+  setPreferences (src, args, ctx) {
+    ctx.localSettings.preferences.isSideNavigationOpen = true
+
+    return {}
+  },
 }
