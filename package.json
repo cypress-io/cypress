@@ -17,7 +17,7 @@
     "bump": "node ./scripts/binary.js bump",
     "check-node-version": "node scripts/check-node-version.js",
     "check-terminal": "node scripts/check-terminal.js",
-    "clean": "lerna run clean --parallel --no-bail",
+    "clean": "lerna run clean --parallel --no-bail || echo 'ok, errors while cleaning'",
     "clean-deps": "find . -depth -name node_modules -type d -exec rm -rf {} \\;",
     "clean-untracked-files": "git clean -d -f",
     "precypress:open": "yarn ensure-deps",
