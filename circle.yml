@@ -1094,7 +1094,6 @@ jobs:
           path: cli/test/html
       - store_artifacts:
           path: packages/errors/__snapshot-images__
-          destination: error-snapshot
       - store-npm-logs
 
   unit-tests-release:
