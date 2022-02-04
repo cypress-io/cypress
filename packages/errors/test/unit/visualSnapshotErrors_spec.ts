@@ -1,16 +1,12 @@
 import chai, { expect } from 'chai'
-import debugLib from 'debug'
-import { app, BrowserWindow } from 'electron'
-/* eslint-disable no-console */
+import Debug from 'debug'
 import fse from 'fs-extra'
 import globby from 'globby'
 import _ from 'lodash'
-import os from 'os'
 import path from 'path'
-import pixelmatch from 'pixelmatch'
-import { PNG } from 'pngjs'
 import sinon, { SinonSpy } from 'sinon'
 import * as errors from '../../src'
+import { convertHtmlToImage } from '../support/utils'
 
 // For importing the files below
 process.env.CYPRESS_INTERNAL_ENV = 'test'
@@ -23,15 +19,7 @@ const ciProvider = require('@packages/server/lib/util/ci_provider')
 const browsers = require('@packages/server/lib/browsers')
 const launcherBrowsers = require('@packages/launcher/lib/browsers')
 
-const debug = debugLib(isCi ? '*' : 'visualSnapshotErrors')
-
-if (os.platform() === 'linux') {
-  app.disableHardwareAcceleration()
-
-  // app.commandLine.appendSwitch('no-sandbox')
-  app.commandLine.appendSwitch('in-process-gpu')
-  app.commandLine.appendSwitch('single-process')
-}
+const debug = Debug(isCi ? '*' : 'visualSnapshotErrors')
 
 interface ErrorGenerator<T extends CypressErrorType> {
   default: Parameters<typeof errors.AllCypressErrors[T]>
@@ -47,96 +35,8 @@ termToHtml.themes.dark.bg = '#111'
 
 const lineAndColNumsRe = /:\d+:\d+/
 
-const EXT = '.png'
-
-const copyImageToBase = (from: string, to: string) => {
-  return fse.copy(from, to, { overwrite: true })
-}
-
-const convertHtmlToImage = async (htmlfile: string) => {
-  const HEIGHT = 550
-  const WIDTH = 1200
-
-  await app.whenReady()
-
-  app.on('window-all-closed', () => {
-    //
-  })
-
-  const win = new BrowserWindow({
-    show: false,
-    width: WIDTH,
-    height: HEIGHT,
-  })
-
-  try {
-    win.webContents.debugger.attach()
-
-    debug(`Loading %s`, htmlfile)
-
-    await win.loadFile(htmlfile)
-
-    await win.webContents.debugger.sendCommand('Emulation.setDeviceMetricsOverride', {
-      width: WIDTH,
-      height: HEIGHT,
-      deviceScaleFactor: 1,
-      mobile: false,
-    })
-
-    const { data } = await win.webContents.debugger.sendCommand('Page.captureScreenshot', {
-      format: 'png',
-      quality: 100,
-    })
-
-    const imagePath = htmlfile.replace('.html', EXT)
-    const baseImagePath = path.join(baseImageFolder, path.basename(imagePath))
-
-    debug('baseImagePath %s', baseImagePath)
-
-    const receivedImageBuffer = Buffer.from(data, 'base64')
-    const receivedPng = PNG.sync.read(receivedImageBuffer)
-    const receivedPngBuffer = PNG.sync.write(receivedPng)
-
-    await Promise.all([
-      fse.outputFile(imagePath, receivedPngBuffer),
-      fse.remove(htmlfile),
-    ])
-
-    // - if image does not exist in __snapshot-bases__
-    //   then copy into __snapshot-bases__
-    // - if image does exist then diff if, and if its
-    //   greater than >.01 diff, then copy it in
-    // - unless we're in CI, then fail if there's a diff
-    try {
-      const buf = await fse.readFile(baseImagePath)
-      const existingPng = PNG.sync.read(buf)
-      const diffPng = new PNG({ width: WIDTH, height: HEIGHT })
-      const changed = pixelmatch(existingPng.data, receivedPng.data, diffPng.data, WIDTH, HEIGHT, { threshold: 0.3 })
-
-      console.log('num pixels different:', changed)
-
-      if (changed > 100) {
-        if (isCi) {
-          throw new Error(`Image difference detected. Base error image no longer matches for file: ${baseImagePath}, off by ${changed} pixels`)
-        }
-
-        await copyImageToBase(imagePath, baseImagePath)
-      }
-    } catch (e: any) {
-      if (e.code === 'ENOENT') {
-        debug(`Adding new image: ${imagePath}`)
-        await copyImageToBase(imagePath, baseImagePath)
-      } else {
-        throw e
-      }
-    }
-  } finally {
-    win.destroy()
-  }
-}
-
-const outputHtmlFolder = path.join(__dirname, '..', '..', '__snapshot-images__')
-const baseImageFolder = path.join(__dirname, '..', '..', '__snapshot-bases__')
+const snapshotHtmlFolder = path.join(__dirname, '..', '..', '__snapshot-html__')
+const snapshotImagesFolder = path.join(__dirname, '..', '..', '__snapshot-images__')
 
 const saveHtml = async (filename: string, html: string) => {
   await fse.outputFile(filename, html, 'utf8')
@@ -218,19 +118,22 @@ const testVisualError = <K extends CypressErrorType> (errorGeneratorFn: () => Er
 
       errors.log(err)
 
-      const htmlFilename = path.join(outputHtmlFolder, `${filename}.html`)
+      const htmlFilename = path.join(snapshotHtmlFolder, `${filename}.html`)
 
       await snapshotErrorConsoleLogs(htmlFilename)
 
       debug(`Snapshotted ${htmlFilename}`)
 
-      if (process.env.SKIP_IMAGE_CONVERSION !== '1') {
+      // dont run html -> image conversion if we're in CI
+      if (!isCi && process.env.SKIP_HTML_IMAGE_CONVERSION !== '1') {
         debug(`Converting ${errorType} to image`)
-        await convertHtmlToImage(htmlFilename)
+
+        await convertHtmlToImage(htmlFilename, snapshotImagesFolder)
+
         debug(`Conversion complete for ${errorType}`)
       }
     }
-  }).timeout(10000)
+  }).timeout(5000)
 }
 
 const testVisualErrors = (whichError: CypressErrorType[] | '*', errorsToTest: {[K in CypressErrorType]: () => ErrorGenerator<K>}) => {
@@ -244,27 +147,30 @@ const testVisualErrors = (whichError: CypressErrorType[] | '*', errorsToTest: {[
 
   // otherwise test all the errors
   before(() => {
-    // prune out all existing snapshot images in case
+    // prune out all existing snapshot html in case
     // errors were removed and we have stale snapshots
-    return fse.remove(outputHtmlFolder)
+    return Promise.all([
+      fse.remove(snapshotHtmlFolder),
+      fse.remove(snapshotImagesFolder),
+    ])
   })
 
   after(async () => {
     // if we're in CI, make sure there's all the files
-    // we expect there to be in __snapshot-images__
+    // we expect there to be in __snapshot-html__
     if (isCi) {
-      const files = await globby(`${outputHtmlFolder}/*`)
-      const errorImageNames = files.map((file) => {
-        return path.basename(file, '.png').split(' ')[0]
+      const files = await globby(`${snapshotHtmlFolder}/*`)
+      const errorNames = files.map((file) => {
+        return path.basename(file, '.html').split(' ')[0]
       })
-      const uniqErrors = _.uniq(errorImageNames)
-      const excessImages = _.difference(uniqErrors, _.keys(errors.AllCypressErrors))
+      const uniqErrors = _.uniq(errorNames)
+      // const excessErrors = _.difference(uniqErrors, _.keys(errors.AllCypressErrors))
 
-      await Promise.all(excessImages.map((img) => {
-        const pathToImage = path.join(baseImageFolder, img + EXT)
+      // await Promise.all(excessErrors.map((file) => {
+      //   const pathToHtml = path.join(baseImageFolder, file + EXT)
 
-        return fse.remove(pathToImage)
-      }))
+      //   return fse.remove(pathToHtml)
+      // }))
 
       expect(uniqErrors).to.deep.eq(_.keys(errors.AllCypressErrors))
     }
