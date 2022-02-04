@@ -126,15 +126,16 @@ export function initComponentTestingMigration (
   })
 }
 
-async function getPluginRelativePath (cfg: OldCypressConfig, root: string): string {
-  let DEFAULT_PLUGIN_PATH = path.normalize('cypress/plugins/index.ts')
-  const tsFileExists = await fs.stat(path.join(root, DEFAULT_PLUGIN_PATH))
+async function getPluginRelativePath (cfg: OldCypressConfig, root: string): Promise<string> {
+  try {
+    let pluginPath = path.normalize('cypress/plugins/index.ts')
 
-  if (!tsFileExists) {
-    DEFAULT_PLUGIN_PATH = path.normalize('cypress/plugins/index.js')
+    await fs.stat(path.join(root, pluginPath))
+
+    return cfg.pluginsFile ? cfg.pluginsFile : pluginPath
+  } catch {
+    return cfg.pluginsFile ? cfg.pluginsFile : path.normalize('cypress/plugins/index.js')
   }
-
-  return cfg.pluginsFile ? cfg.pluginsFile : DEFAULT_PLUGIN_PATH
 }
 
 // If they are running an old version of Cypress
