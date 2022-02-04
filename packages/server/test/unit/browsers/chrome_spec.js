@@ -375,7 +375,10 @@ describe('lib/browsers/chrome', () => {
         use: sinon.stub().returns(),
       }
 
-      const options = { onError: () => {}, url: 'https://www.google.com', downloadsFolder: '/tmp/folder' }
+      let onInitializeNewBrowserTabCalled = false
+      const options = { onError: () => {}, url: 'https://www.google.com', downloadsFolder: '/tmp/folder', onInitializeNewBrowserTab: () => {
+        onInitializeNewBrowserTabCalled = true
+      } }
 
       sinon.stub(CriClient, 'newTab').withArgs('127.0.0.1', 100, options.onError).resolves(criClient)
       sinon.stub(chrome, '_maybeRecordVideo').withArgs(criClient, options, 354).resolves()
@@ -389,6 +392,7 @@ describe('lib/browsers/chrome', () => {
       expect(chrome._maybeRecordVideo).to.be.called
       expect(chrome._navigateUsingCRI).to.be.called
       expect(chrome._handleDownloads).to.be.called
+      expect(onInitializeNewBrowserTabCalled).to.be.true
     })
   })
 
