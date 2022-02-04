@@ -158,7 +158,13 @@ const snapshotErrorConsoleLogs = function (errorFileName: string) {
   .split('color:#00A').join('color:#2472c7') // replace blue colors
   .split('color:#00A').join('color:#e05561') // replace red colors
   .split('color:#A50').join('color:#e5e510') // replace yellow colors
-  .split('"Courier New", ').join('') // replace font
+  .split('"Courier New", ').join('"Courier Prime", ') // replace font
+  .split('<style>').join(`
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime&display=swap" rel="stylesheet">
+    <style>
+  `)
   .split('</style>').join(`
     body {
       margin: 5px;
