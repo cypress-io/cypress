@@ -4,12 +4,6 @@ module.exports = {
   'viewportHeight': 800,
   'pluginsFile': 'cypress/plugins.js',
   'component': {
-    setupNodeEvents (on, config) {
-      const devServer = require('@cypress/react/plugins/next')
-
-      devServer(on, config)
-
-      return config
-    },
+    devServer: require('@cypress/react/plugins/next'),
   },
 }

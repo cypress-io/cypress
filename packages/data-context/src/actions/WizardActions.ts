@@ -233,7 +233,7 @@ export class WizardActions {
 
     codeBlocks.push(`  ${COMPONENT_SCAFFOLD_BODY({
       lang: chosenLanguage.type,
-      requirePath: chosenBundler.package,
+      requirePath: chosenFramework.defaultPackagePath ?? chosenBundler.package,
       configOptionsString: '{}',
     }).replace(/\n/g, '\n  ')}`)
 
@@ -354,7 +354,7 @@ interface ComponentScaffoldOpts {
 const COMPONENT_SCAFFOLD_BODY = (opts: ComponentScaffoldOpts) => {
   return dedent`
     component: {
-      devServer: import('${opts.requirePath}'),
+      devServer: require('${opts.requirePath}'),
       devServerConfig: ${opts.configOptionsString}
     },
   `
