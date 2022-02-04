@@ -1298,13 +1298,13 @@ module.exports = {
       }
 
       // Close the browser if the environment variable is set to do so
-      if (process.env.CYPRESS_INTERNAL_FORCE_BROWSER_RELAUNCH) {
-        debug('attempting to close the browser')
-        await openProject.closeBrowser()
-      } else {
-        debug('attempting to close the browser tab')
-        await openProject.closeBrowserTabs()
-      }
+      // if (process.env.CYPRESS_INTERNAL_FORCE_BROWSER_RELAUNCH) {
+      //   debug('attempting to close the browser')
+      //   await openProject.closeBrowser()
+      // } else {
+      debug('attempting to close the browser tab')
+      await openProject.closeBrowserTabs()
+      // }
 
       debug('resetting server state')
       openProject.projectBase.server.reset()
@@ -1547,7 +1547,7 @@ module.exports = {
           socketId: options.socketId,
           webSecurity: options.webSecurity,
           projectRoot: options.projectRoot,
-          shouldNavigateBrowser: !process.env.CYPRESS_INTERNAL_FORCE_BROWSER_RELAUNCH && !firstSpec,
+          shouldNavigateBrowser: !firstSpec, // !process.env.CYPRESS_INTERNAL_FORCE_BROWSER_RELAUNCH && !firstSpec,
           // TODO(tim): investigate the socket disconnect
         }),
       })
