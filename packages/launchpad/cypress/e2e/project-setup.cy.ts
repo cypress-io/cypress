@@ -6,6 +6,9 @@ describe('Launchpad: Setup Project', () => {
     cy.scaffoldProject('pristine-with-ct-testing') // component configured
     cy.scaffoldProject('pristine-with-e2e-testing') // e2e configured
     cy.scaffoldProject('pristine-with-e2e-testing-and-storybook') // e2e configured
+    cy.scaffoldProject('pristine-npm')
+    cy.scaffoldProject('pristine-yarn')
+    cy.scaffoldProject('pristine-pnpm')
   })
 
   const verifyWelcomePage = ({ e2eIsConfigured, ctIsConfigured }) => {
@@ -227,9 +230,9 @@ describe('Launchpad: Setup Project', () => {
         // @ts-ignore
         cy.get('body').tab().tab()
 
-        cy.get('[data-cy-testingtype="e2e"]')
+        cy.contains('button', 'E2E Testing')
         .should('have.focus')
-        .type('{enter}')
+        .realPress('Enter')
 
         cy.contains('h1', 'Project Setup')
         cy.findByRole('button', { name: 'Back' }).click()
@@ -246,9 +249,9 @@ describe('Launchpad: Setup Project', () => {
         // @ts-ignore
         cy.get('body').tab().tab()
 
-        cy.get('[data-cy-testingtype="e2e"]')
+        cy.contains('button', 'E2E Testing')
         .should('have.focus')
-        .type('{enter}')
+        .realPress('Enter')
 
         cy.contains('h1', 'Project Setup')
         cy.findByRole('button', { name: 'JavaScript' }).click()
@@ -279,9 +282,9 @@ describe('Launchpad: Setup Project', () => {
         // @ts-ignore
         cy.get('body').tab().tab()
 
-        cy.get('[data-cy-testingtype="e2e"]')
+        cy.contains('button', 'E2E Testing')
         .should('have.focus')
-        .type('{enter}')
+        .realPress('Enter')
 
         cy.contains('h1', 'Project Setup')
         cy.findByRole('button', { name: 'TypeScript' }).click()
@@ -306,9 +309,9 @@ describe('Launchpad: Setup Project', () => {
         // @ts-ignore
         cy.get('body').tab().tab()
 
-        cy.get('[data-cy-testingtype="e2e"]')
+        cy.contains('button', 'E2E Testing')
         .should('have.focus')
-        .type('{enter}')
+        .realPress('Enter')
 
         cy.contains('h1', 'Project Setup')
         cy.findByRole('button', { name: 'TypeScript' }).click()
@@ -333,10 +336,9 @@ describe('Launchpad: Setup Project', () => {
 
         verifyWelcomePage({ e2eIsConfigured: true, ctIsConfigured: false })
 
-        cy.get('[data-cy-testingtype="component"]')
+        cy.contains('button', 'Component Testing')
         .focus()
-        .should('have.focus')
-        .type('{enter}')
+        .realPress('Enter')
 
         cy.findByText('Confirm the front-end framework and bundler used in your project.')
 
@@ -365,8 +367,33 @@ describe('Launchpad: Setup Project', () => {
 
         cy.findByRole('button', { name: 'TypeScript' }).click()
 
+        let calls = 0
+
+        // simulate progressive installation of modules
+        cy.intercept('query-Wizard_InstalledPackages', (req) => {
+          req.reply({ data: {
+            wizard: {
+              __typename: 'Wizard',
+              installedPackages: ++calls <= 2 ? [] :
+                calls <= 3 ? ['@cypress/react'] :
+                  ['@cypress/react', '@cypress/webpack-dev-server'],
+            },
+          } })
+        }).as('InstalledPackages')
+
         cy.findByRole('button', { name: 'Next Step' }).click()
-        cy.findByRole('button', { name: 'I\'ve installed them' }).click()
+        cy.findByRole('button', { name: 'Waiting for you to install the dependencies...' })
+
+        cy.wait('@InstalledPackages')
+
+        cy.contains('li', '@cypress/react').findByLabelText('installed').should('be.visible')
+
+        cy.wait('@InstalledPackages')
+        cy.contains('li', '@cypress/webpack-dev-server').findByLabelText('installed').should('be.visible').then(() => {
+          expect(calls).to.eq(4)
+        })
+
+        cy.findByRole('button', { name: 'Continue' }).click()
 
         cy.get('[data-cy=changes]').within(() => {
           cy.contains('cypress.config.js')
@@ -421,6 +448,26 @@ describe('Launchpad: Setup Project', () => {
     })
 
     describe('project that has not been configured for component testing', () => {
+      beforeEach(() => {
+        // simulate installation of modules
+        cy.intercept('query-Wizard_InstalledPackages', (req) => {
+          req.reply({ data: {
+            wizard: {
+              __typename: 'Wizard',
+              installedPackages: [
+                '@cypress/react',
+                '@cypress/vue',
+                '@cypress/webpack-dev-server',
+                '@cypress/vite-dev-server',
+                '@storybook/testing-react',
+                '@storybook/testing-vue',
+                '@storybook/testing-vue3',
+              ],
+            },
+          } })
+        }).as('InstalledPackages')
+      })
+
       it('shows the first setup page for configuration when selecting component tests', () => {
         cy.openProject('pristine-with-e2e-testing')
         cy.visitLaunchpad()
@@ -469,6 +516,10 @@ describe('Launchpad: Setup Project', () => {
 
               it(testTitle, () => {
                 cy.openProject(hasStorybookDep ? 'pristine-with-e2e-testing-and-storybook' : 'pristine-with-e2e-testing')
+                cy.withCtx((ctx) => {
+                  ctx.actions.file.writeFileInProject('yarn.lock', '# THIS IS AN AUTOGENERATED FILE. DO NOT EDIT THIS FILE DIRECTLY.')
+                })
+
                 cy.visitLaunchpad()
 
                 verifyWelcomePage({ e2eIsConfigured: true, ctIsConfigured: false })
@@ -538,7 +589,7 @@ describe('Launchpad: Setup Project', () => {
                 cy.log('Go to next step and verify Install Dev Dependencies page')
                 cy.contains('h1', 'Install Dev Dependencies')
 
-                let installCommand = `yarn add -D ${framework.package} ${bundler.package}`
+                let installCommand = `npm install -D ${framework.package} ${bundler.package}`
 
                 if (hasStorybookDep) {
                   installCommand += ` ${framework.storybookDep}`
@@ -561,7 +612,7 @@ describe('Launchpad: Setup Project', () => {
                   validatePackage(framework.storybookDep)
                 }
 
-                cy.findByRole('button', { name: 'I\'ve installed them' }).click()
+                cy.findByRole('button', { name: 'Continue' }).click()
 
                 // FIXME: remove if-check once this is fixed. https://cypress-io.atlassian.net/browse/UNIFY-980
                 if (lang.type !== 'ts') {
@@ -597,10 +648,9 @@ describe('Launchpad: Setup Project', () => {
 
         verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: false })
 
-        cy.get('[data-cy-testingtype="component"]')
+        cy.contains('button', 'Component Testing')
         .focus()
-        .should('have.focus')
-        .type('{enter}')
+        .realPress('Enter')
 
         cy.findByText('Confirm the front-end framework and bundler used in your project.')
 
@@ -628,7 +678,7 @@ describe('Launchpad: Setup Project', () => {
         cy.findByRole('button', { name: 'Next Step' }).should('not.have.disabled')
 
         cy.findByRole('button', { name: 'Next Step' }).click()
-        cy.findByRole('button', { name: 'I\'ve installed them' }).click()
+        cy.findByRole('button', { name: 'Continue' }).click()
 
         cy.get('[data-cy=valid]').within(() => {
           cy.contains('cypress.config.js')
@@ -650,10 +700,9 @@ describe('Launchpad: Setup Project', () => {
 
         verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: false })
 
-        cy.get('[data-cy-testingtype="component"]')
+        cy.contains('button', 'Component Testing')
         .focus()
-        .should('have.focus')
-        .type('{enter}')
+        .realPress('Enter')
 
         cy.findByText('Confirm the front-end framework and bundler used in your project.')
 
@@ -661,7 +710,7 @@ describe('Launchpad: Setup Project', () => {
         cy.findByRole('option', { name: 'Create React App' }).click()
         cy.findByRole('button', { name: 'TypeScript' }).click()
         cy.findByRole('button', { name: 'Next Step' }).click()
-        cy.findByRole('button', { name: 'I\'ve installed them' }).click()
+        cy.findByRole('button', { name: 'Continue' }).click()
 
         cy.get('[data-cy=valid]').within(() => {
           cy.contains('cypress.config.ts')
@@ -674,6 +723,44 @@ describe('Launchpad: Setup Project', () => {
         // cy.findByRole('button', { name: 'Continue' }).click()
         // cy.contains(/(Initializing Config|Choose a Browser)/)
       })
+    })
+  })
+
+  describe('Command for package managers', () => {
+    it('makes the right command for yarn', () => {
+      cy.openProject('pristine-yarn')
+
+      cy.visitLaunchpad()
+
+      cy.get('[data-cy-testingtype="component"]').click()
+      cy.get('[data-testid="select-framework"]').click()
+      cy.findByText('Create React App').click()
+      cy.findByText('Next Step').click()
+      cy.get('code').should('contain.text', 'yarn add -D ')
+    })
+
+    it('makes the right command for pnpm', () => {
+      cy.openProject('pristine-pnpm')
+
+      cy.visitLaunchpad()
+
+      cy.get('[data-cy-testingtype="component"]').click()
+      cy.get('[data-testid="select-framework"]').click()
+      cy.findByText('Create React App').click()
+      cy.findByText('Next Step').click()
+      cy.get('code').should('contain.text', 'pnpm install -D ')
+    })
+
+    it('makes the right command for npm', () => {
+      cy.openProject('pristine-npm')
+
+      cy.visitLaunchpad()
+
+      cy.get('[data-cy-testingtype="component"]').click()
+      cy.get('[data-testid="select-framework"]').click()
+      cy.findByText('Create React App').click()
+      cy.findByText('Next Step').click()
+      cy.get('code').should('contain.text', 'npm install -D ')
     })
   })
 })

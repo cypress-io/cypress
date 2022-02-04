@@ -20,7 +20,7 @@ import type { DataContext } from '..'
 import { LoadConfigReply, SetupNodeEventsReply, ProjectConfigIpc, IpcHandler } from './ProjectConfigIpc'
 import assert from 'assert'
 import type { AllModeOptions, FoundBrowser, FullConfig, TestingType } from '@packages/types'
-import type { BaseErrorDataShape, CoreDataShape, WarningError } from '.'
+import type { BaseErrorDataShape, WarningError } from '.'
 import { autoBindDebug } from '../util/autoBindDebug'
 
 const debug = debugLib(`cypress:lifecycle:ProjectLifecycleManager`)
@@ -236,6 +236,22 @@ export class ProjectLifecycleManager {
     this._projectRoot = undefined
   }
 
+  getPackageManagerUsed (projectRoot: string) {
+    if (fs.existsSync(path.join(projectRoot, 'package-lock.json'))) {
+      return 'npm'
+    }
+
+    if (fs.existsSync(path.join(projectRoot, 'yarn.lock'))) {
+      return 'yarn'
+    }
+
+    if (fs.existsSync(path.join(projectRoot, 'pnpm-lock.yaml'))) {
+      return 'pnpm'
+    }
+
+    return 'npm'
+  }
+
   /**
    * When we set the current project, we need to cleanup the
    * previous project that might have existed. We use this as the
@@ -253,9 +269,12 @@ export class ProjectLifecycleManager {
     this.legacyPluginGuard()
     Promise.resolve(this.ctx.browser.machineBrowsers()).catch(this.onLoadError)
     this.verifyProjectRoot(projectRoot)
+    const packageManagerUsed = this.getPackageManagerUsed(projectRoot)
+
     this.resetInternalState()
     this.ctx.update((s) => {
       s.currentProject = projectRoot
+      s.packageManager = packageManagerUsed
     })
 
     const { needsCypressJsonMigration } = this.refreshMetaState()
@@ -300,7 +319,7 @@ export class ProjectLifecycleManager {
    * with the chosen testing type.
    */
   setCurrentTestingType (testingType: TestingType | null) {
-    this.ctx.update((d: CoreDataShape) => {
+    this.ctx.update((d) => {
       d.currentTestingType = testingType
     })
 
