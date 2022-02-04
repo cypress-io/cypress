@@ -328,7 +328,9 @@ export class CdpAutomation {
           this.sendDebuggerCommandFn('Network.clearBrowserCache'),
         ])
       case 'close:browser:tabs':
-        return this.sendDebuggerCommandFn('Page.close')
+        // If we do not stop the screen cast first, there's a chance that we could get frames after the browser is closed.
+        // If it does, we will try to send an ack back to the browser and if things time just right, the websocket will have already been closed and we will crash
+        return this.sendDebuggerCommandFn('Page.stopScreencast').then(() => this.sendDebuggerCommandFn('Page.close'))
       case 'focus:browser:window':
         return this.sendDebuggerCommandFn('Page.bringToFront')
       default:

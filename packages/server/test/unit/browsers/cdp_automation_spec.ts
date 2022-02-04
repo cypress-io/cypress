@@ -234,10 +234,12 @@ context('lib/browsers/cdp_automation', () => {
 
     describe('close:browser:tabs', function () {
       it('sends the close target message for the attached target tabs', async function () {
+        this.sendDebuggerCommand.withArgs('Page.stopScreencast').resolves()
         this.sendDebuggerCommand.withArgs('Page.close').resolves()
 
         await this.onRequest('close:browser:tabs')
 
+        expect(this.sendDebuggerCommand).to.be.calledWith('Page.stopScreencast')
         expect(this.sendDebuggerCommand).to.be.calledWith('Page.close')
       })
     })
