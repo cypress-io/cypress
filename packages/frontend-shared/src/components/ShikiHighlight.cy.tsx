@@ -79,4 +79,16 @@ describe('<ShikiHighlight/>', { viewportWidth: 800, viewportHeight: 500 }, () =>
     cy.get('.shiki').should('be.visible')
     cy.percySnapshot()
   })
+
+  it('show copy button when the prop is passed', () => {
+    cy.mount(() => (<div class="border border-gray-200 m-12">
+      <ShikiHighlight code={code} lang="ts" copyButton/>
+    </div>))
+
+    cy.contains('button', 'Copy')
+    .should('be.visible')
+    .scrollIntoView()
+
+    cy.percySnapshot()
+  })
 })
