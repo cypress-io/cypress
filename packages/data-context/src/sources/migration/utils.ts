@@ -379,30 +379,12 @@ export function reduceConfig (cfg: OldCypressConfig): ConfigOptions {
   }, { global: {}, e2e: {}, component: {} })
 }
 
-// function getSpecPattern (cfg: OldCypressConfig, testingType: TestingType) {
-//   // `componentFolder` is no longer a thing, we are forcing the user to co-locate
-//   // component specs.
-//   if (testingType === 'component') {
-//     return '**/*.cy.{js,jsx,ts,tsx}'
-//   }
-
-//   const specPattern = cfg.e2e?.testFiles ?? cfg.testFiles ?? '**/*.cy.{js,jsx,ts,tsx}'
-
-//   const customIntegrationFolder = cfg.e2e?.integrationFolder ?? cfg.integrationFolder ?? 'cypress/e2e'
-
-//   if (customIntegrationFolder) {
-//     return `${customIntegrationFolder}/${specPattern}`
-//   }
-
-//   return specPattern
-// }
-
 function getSpecPattern (cfg: OldCypressConfig, testType: TestingType) {
   const specPattern = cfg[testType]?.testFiles ?? cfg.testFiles ?? '**/*.cy.{js,jsx,ts,tsx}'
   const customComponentFolder = cfg.component?.componentFolder ?? cfg.componentFolder ?? null
 
   if (testType === 'component' && customComponentFolder) {
-    return specPattern
+    return `${customComponentFolder}/${specPattern}`
   }
 
   if (testType === 'e2e') {
