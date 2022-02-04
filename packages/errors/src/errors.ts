@@ -1037,8 +1037,7 @@ export const AllCypressErrors = {
 
         The error we received was:
 
-        ${details(arg2)}
-      `
+        ${details(arg2)}`
   },
   CT_NO_DEV_START_EVENT: (arg1: string) => {
     const pluginsFilePath = arg1 ?
