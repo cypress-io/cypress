@@ -1224,6 +1224,7 @@ jobs:
 
   run-frontend-shared-component-tests-chrome:
     <<: *defaults
+    resource_class: medium
     parallelism: 1
     steps:
       - run-new-ui-tests:
@@ -1234,6 +1235,7 @@ jobs:
 
   run-launchpad-component-tests-chrome:
     <<: *defaults
+    resource_class: medium
     parallelism: 7
     steps:
       - run-new-ui-tests:
@@ -1245,6 +1247,7 @@ jobs:
 
   run-launchpad-integration-tests-chrome:
     <<: *defaults
+    resource_class: medium
     parallelism: 2
     steps:
       - run-new-ui-tests:
@@ -1255,6 +1258,7 @@ jobs:
 
   run-app-component-tests-chrome:
     <<: *defaults
+    resource_class: medium
     parallelism: 7
     steps:
       - run-new-ui-tests:
@@ -1265,6 +1269,7 @@ jobs:
 
   run-app-integration-tests-chrome:
     <<: *defaults
+    resource_class: medium
     parallelism: 2
     steps:
       - run-new-ui-tests:
