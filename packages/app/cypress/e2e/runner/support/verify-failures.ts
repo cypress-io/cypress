@@ -3,14 +3,14 @@ import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 
 // Assert that either the the dialog is presented or the mutation is emitted, depending on
 // whether the test has a preferred IDE defined.
-const verifyIdeOpen = ({ file, action, hasPreferredIde }) => {
+const verifyIdeOpen = ({ fileName, action, hasPreferredIde }) => {
   if (hasPreferredIde) {
     cy.intercept('mutation-OpenFileInIDE', { data: { 'openFileInIDE': true } }).as('OpenIDE')
 
     action()
 
     cy.wait('@OpenIDE').then(({ request }) => {
-      expect(request.body.variables.input.absolute).to.include(file)
+      expect(request.body.variables.input.absolute).to.include(fileName)
     })
   } else {
     action()
@@ -20,7 +20,7 @@ const verifyIdeOpen = ({ file, action, hasPreferredIde }) => {
   }
 }
 
-export const verifyFailure = (options) => {
+const verifyFailure = (options) => {
   const {
     specTitle,
     hasCodeFrame = true,
@@ -32,7 +32,7 @@ export const verifyFailure = (options) => {
     notInMessage = [],
     command,
     stack,
-    file,
+    fileName,
     uncaught = false,
     uncaughtMessage,
   } = options
@@ -42,7 +42,7 @@ export const verifyFailure = (options) => {
     codeFrameText = specTitle
   }
 
-  regex = regex || new RegExp(`${file}:${line || '\\d+'}:${column}`)
+  regex = regex || new RegExp(`${fileName}:${line || '\\d+'}:${column}`)
 
   cy.contains('.runnable-title', specTitle).closest('.runnable').as('Root')
 
@@ -113,10 +113,10 @@ export const verifyFailure = (options) => {
 
   if (verifyOpenInIde) {
     verifyIdeOpen({
-      file,
+      fileName,
       hasPreferredIde,
       action: () => {
-        cy.get('@Root').contains('.runnable-err-stack-trace .runnable-err-file-path a', file)
+        cy.get('@Root').contains('.runnable-err-stack-trace .runnable-err-file-path a', fileName)
         .click('left')
       },
     })
@@ -158,10 +158,10 @@ export const verifyFailure = (options) => {
 
   if (verifyOpenInIde) {
     verifyIdeOpen({
-      file,
+      fileName,
       hasPreferredIde,
       action: () => {
-        cy.get('@Root').contains('.test-err-code-frame .runnable-err-file-path a', file)
+        cy.get('@Root').contains('.test-err-code-frame .runnable-err-file-path a', fileName)
         .click()
       },
     })
@@ -169,13 +169,12 @@ export const verifyFailure = (options) => {
 }
 
 export const createVerify = ({ fileName, hasPreferredIde }) => {
-  return (title: string, props?: any) => {
-    props.specTitle ||= title
-    props.file ||= fileName
-
+  return (specTitle: string, props?: any) => {
+    props.specTitle ||= specTitle
+    props.fileName ||= fileName
     props.hasPreferredIde = hasPreferredIde
 
-    return (props.verifyFn || verifyFailure).call(null, props)
+    ;(props.verifyFn || verifyFailure).call(null, props)
   }
 }
 

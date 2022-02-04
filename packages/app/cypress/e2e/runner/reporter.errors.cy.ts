@@ -1,10 +1,28 @@
 import { createVerify, verifyInternalFailure } from './support/verify-failures'
 
-const loadSpec = ({
-  fileName,
-  onLoadStatsMessage,
-  hasPreferredIde = false,
-}) => {
+type LoadSpecOptions = {
+  fileName: string
+  onLoadStatsMessage: string
+  hasPreferredIde?: boolean
+}
+
+type VerifyFunc = (specTitle: string, verifyOptions: any) => void
+
+/**
+ * Navigates to desired spec file within Cypress app and waits for completion.
+ * Returns scoped verify function to aid inner spec validation.
+ */
+function loadSpec (options: LoadSpecOptions): VerifyFunc {
+  const {
+    fileName,
+    onLoadStatsMessage,
+    hasPreferredIde = false,
+  } = options
+
+  cy.scaffoldProject('runner-e2e-specs')
+  cy.openProject('runner-e2e-specs')
+  cy.startAppServer()
+
   cy.withCtx((ctx, options) => {
     if (options.hasPreferredIde) {
       // set preferred editor to bypass IDE selection dialog
@@ -23,11 +41,11 @@ const loadSpec = ({
     ctx.coreData.localSettings.preferences.isSpecsListOpen = false
   }, { hasPreferredIde })
 
-  cy.startAppServer()
-  cy.visitApp()
-
   // directly visiting the spec will sometimes hang, going through
   // specs page first to mitigate
+  // cy.visitApp(`specs/runner?file=cypress/e2e/errors/${fileName}`)
+
+  cy.visitApp()
   cy.contains('[data-cy=spec-item]', fileName).click()
 
   cy.location().should((location) => {
@@ -35,22 +53,20 @@ const loadSpec = ({
   })
 
   // Wait for specs to complete
-  cy.findByLabelText('Stats', { timeout: 30000 })
+  cy.findByLabelText('Stats', { timeout: 10000 })
   .get('.failed', { timeout: 10000 }).should('have.text', onLoadStatsMessage)
 
+  // Return scoped verify function with spec options baked in
   return createVerify({ fileName, hasPreferredIde })
 }
 
 describe('errors ui', {
   viewportHeight: 768,
   viewportWidth: 1024,
+  // Limiting tests kept in memory due to large memory cost
+  // of nested spec snapshots
   numTestsKeptInMemory: 1,
 }, () => {
-  beforeEach(() => {
-    cy.scaffoldProject('runner-e2e-specs')
-    cy.openProject('runner-e2e-specs')
-  })
-
   it('assertion failures', () => {
     const verify = loadSpec({
       fileName: 'assertions.cy.js',
@@ -779,6 +795,9 @@ describe('errors ui', {
 
   context('docs url', () => {
     before(() => {
+      // docs_url.cy.js manually sets the 'isInteractive' config property in order
+      // to test both run and open mode behavior. We need to skip the config validation
+      // here in order for this to be possible.
       // @ts-ignore
       window.top.__cySkipValidateConfig = true
     })
