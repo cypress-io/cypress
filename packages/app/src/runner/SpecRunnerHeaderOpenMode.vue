@@ -26,7 +26,7 @@
         }"
       >
         <Button
-          data-cy="header-selector"
+          data-cy="playground-activator"
           :disabled="isDisabled"
           class="rounded-none border-r-1px border-gray-100 mr-12px"
           variant="text"
@@ -42,7 +42,15 @@
         v-else
         class="flex-grow"
       >
-        <!-- spacer -->
+        <Button
+          data-cy="playground-activator"
+          :disabled="isDisabled"
+          class=" border-gray-100 mr-12px"
+          variant="outline"
+          @click="togglePlayground"
+        >
+          <i-cy-crosshairs_x16 class="icon-dark-gray-600" />
+        </Button>
       </div>
       <SpecRunnerDropdown
         v-if="selectedBrowser?.displayName"
@@ -59,6 +67,7 @@
           <div class="max-h-50vh overflow-auto">
             <VerticalBrowserListItems
               :gql="props.gql"
+              :spec-path="activeSpecPath"
             />
           </div>
         </template>
@@ -77,6 +86,7 @@
         </template>
         <template #default>
           <div class="max-h-50vw p-16px text-gray-600 leading-24px w-400px overflow-auto">
+            <!-- TODO: This copy is a placeholder based on the old message for this, we should confirm the exact copy and then move to i18n -->
             <p class="mb-16px">
               The
               <strong>viewport</strong> determines the width and height of your application.
@@ -86,7 +96,7 @@
               Testing unless specified by a <InlineCodeFragment>cy.viewport</InlineCodeFragment> command.
             </p>
             <p class="mb-16px">
-              Additionally you can override the default viewport dimensions by specifying these values in your config file:
+              Additionally, you can override the default viewport dimensions by specifying these values in your config file:
             </p>
 
             <ShikiHighlight
@@ -118,7 +128,7 @@
 
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
-import { useAutStore } from '../store'
+import { useAutStore, useSpecStore } from '../store'
 import { gql } from '@urql/vue'
 import type { SpecRunnerHeaderFragment } from '../generated/graphql'
 import SelectorPlayground from './selector-playground/SelectorPlayground.vue'
@@ -142,6 +152,7 @@ fragment SpecRunnerHeader on CurrentProject {
   currentBrowser {
     id
     displayName
+    majorVersion
   }
   config
   ...VerticalBrowserListItems
@@ -197,6 +208,10 @@ const togglePlayground = () => _togglePlayground(autIframe)
 const selectedBrowser = ref({ ...props.gql.currentBrowser })
 
 const autStore = useAutStore()
+
+const specStore = useSpecStore()
+
+const activeSpecPath = specStore.activeSpec?.absolute
 
 const isDisabled = computed(() => autStore.isRunning || autStore.isLoading)
 

@@ -16,7 +16,7 @@ describe('Cypress In Cypress', { viewportWidth: 1200 }, () => {
 
     cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
     cy.findByTestId('aut-url').should('be.visible')
-    cy.findByTestId('header-selector').should('be.visible')
+    cy.findByTestId('playground-activator').should('be.visible')
     cy.findByTestId('select-browser').click()
 
     cy.contains('Firefox').should('be.visible')

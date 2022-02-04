@@ -48,4 +48,21 @@ describe('Cypress In Cypress', { viewportWidth: 1200 }, () => {
     cy.contains('TestComponent.spec').click()
     cy.get('[data-model-state="passed"]').should('contain', 'renders the test component')
   })
+
+  it('browser picker in runner calls mutation with current spec path', () => {
+    cy.contains('TestComponent.spec').click()
+    cy.get('[data-model-state="passed"]').should('contain', 'renders the test component')
+
+    cy.intercept('mutation-VerticalBrowserListItems_SetBrowser').as('setBrowser')
+
+    cy.get('[data-cy="select-browser"]')
+    .click()
+
+    cy.contains('Firefox')
+    .click()
+
+    cy.wait('@setBrowser').then(({ request }) => {
+      expect(request.body.variables.specPath).to.contain('/cypress-in-cypress/src/TestComponent.spec.jsx')
+    })
+  })
 })

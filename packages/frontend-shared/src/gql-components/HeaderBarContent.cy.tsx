@@ -18,6 +18,19 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
 
     cy.contains('Edge Canary')
     .should('be.visible')
+    .closest('[data-cy="top-nav-browser-list-item"]')
+    .within(() => {
+      cy.get('[data-cy="unsupported-browser-tooltip"]')
+      .should('not.exist')
+    })
+
+    cy.contains('Version unsupported')
+    .should('be.visible')
+    .closest('[data-cy="top-nav-browser-list-item"]')
+    .within(() => {
+      cy.get('[data-cy="unsupported-browser-tooltip"]')
+      .should('exist')
+    })
 
     cy.percySnapshot('after browsers open')
   }),

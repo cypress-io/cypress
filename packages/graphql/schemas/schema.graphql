@@ -20,10 +20,12 @@ type Browser implements Node {
   id: ID!
   isFocusSupported: Boolean!
   isSelected: Boolean!
+  isVersionSupported: Boolean!
   majorVersion: String
   name: String!
   path: String!
   version: String!
+  warning: String
 }
 
 enum BrowserFamily {
@@ -555,6 +557,7 @@ type LocalSettings {
 """local setting preferences"""
 type LocalSettingsPreferences {
   autoScrollingEnabled: Boolean
+  isSideNavigationOpen: Boolean
   isSpecsListOpen: Boolean
   preferredEditorBinary: String
   proxyBypass: String

@@ -1,4 +1,12 @@
 import type { CacheExchangeOpts } from '@urql/exchange-graphcache'
+import type { GraphCacheConfig } from '../gen/graphcache-config.gen'
+
+/**
+ * Create a new type that overrides the keys, instead of using GraphCacheConfig
+ * directly; if we try to use it, creates a TS error on the cacheExchange
+ * related with "Types of property 'updates' are incompatible.""
+ */
+type UrqlCacheKeys = Omit<CacheExchangeOpts, 'keys'> & { keys: GraphCacheConfig['keys'] }
 
 /**
  * These are located in data-context, because we use them in the
@@ -8,7 +16,7 @@ import type { CacheExchangeOpts } from '@urql/exchange-graphcache'
  * We want to to keep the key definitions in sync between the
  * server & client so we only define them once
  */
-export const urqlCacheKeys: Partial<CacheExchangeOpts> = {
+export const urqlCacheKeys: Partial<UrqlCacheKeys> = {
   keys: {
     DevState: (data) => data.__typename,
     Wizard: (data) => data.__typename,
@@ -17,7 +25,6 @@ export const urqlCacheKeys: Partial<CacheExchangeOpts> = {
     CloudRunCommitInfo: () => null,
     GitInfo: () => null,
     MigrationFilePart: () => null,
-    MigrationFiles: () => null,
     BaseError: () => null,
     ProjectPreferences: (data) => data.__typename,
     VersionData: () => null,
