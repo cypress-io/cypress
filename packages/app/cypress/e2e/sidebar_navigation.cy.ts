@@ -39,6 +39,26 @@ describe('Sidebar Navigation', () => {
       cy.percySnapshot()
     })
 
+    it('closes the left nav bar when clicking the expand button and persist the state if browser is refreshed', () => {
+      cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'true')
+      cy.findAllByText('todos').eq(1).as('title')
+      cy.get('@title').should('be.visible')
+
+      cy.findByLabelText('toggle navigation', {
+        selector: 'button',
+      }).click()
+
+      cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'false')
+      cy.get('@title').should('not.be.visible')
+
+      cy.reload()
+
+      cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'false')
+      cy.findAllByText('todos').should('not.be.visible')
+
+      cy.percySnapshot()
+    })
+
     it('has unlabeled menu item that shows the keyboard shortcuts modal (unexpanded state)', () => {
       cy.findByLabelText('toggle navigation', {
         selector: 'button',
@@ -115,7 +135,7 @@ describe('Sidebar Navigation', () => {
         cy.contains('Configured')
       })
 
-      cy.intercept('mutation-SwitchTestingType_ReconfigureProject').as('SwitchTestingType')
+      cy.intercept('mutation-SwitchTestingTypeAndRelaunch').as('SwitchTestingTypeAndRelaunch')
       cy.withCtx((ctx) => {
         ctx.actions.project.reconfigureProject = sinon.stub()
       })
@@ -124,8 +144,12 @@ describe('Sidebar Navigation', () => {
         cy.contains('Not Configured')
       }).click()
 
-      cy.wait('@SwitchTestingType').then((interception) => {
+      cy.wait('@SwitchTestingTypeAndRelaunch').then((interception) => {
         expect(interception.request.body.variables.testingType).eq('component')
+      })
+
+      cy.withCtx((ctx) => {
+        expect(ctx.coreData.app.relaunchBrowser).eq(true)
       })
 
       cy.get('[aria-label="Close"]').click()
@@ -199,7 +223,7 @@ describe('Sidebar Navigation', () => {
         cy.contains('Configured')
       })
 
-      cy.intercept('mutation-SwitchTestingType_ReconfigureProject').as('SwitchTestingType')
+      cy.intercept('mutation-SwitchTestingTypeAndRelaunch').as('SwitchTestingTypeAndRelaunch')
       cy.withCtx((ctx) => {
         ctx.actions.project.reconfigureProject = sinon.stub()
       })
@@ -208,7 +232,7 @@ describe('Sidebar Navigation', () => {
         cy.contains('Not Configured')
       }).click()
 
-      cy.wait('@SwitchTestingType').then((interception) => {
+      cy.wait('@SwitchTestingTypeAndRelaunch').then((interception) => {
         expect(interception.request.body.variables.testingType).eq('e2e')
       })
     })

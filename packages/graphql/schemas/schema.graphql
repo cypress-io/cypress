@@ -13,15 +13,23 @@ type Browser implements Node {
   id: ID!
   isFocusSupported: Boolean!
   isSelected: Boolean!
+  isVersionSupported: Boolean!
   majorVersion: String
   name: String!
   path: String!
   version: String!
+  warning: String
 }
 
 enum BrowserFamily {
   chromium
   firefox
+}
+
+enum BrowserStatus {
+  closed
+  open
+  opening
 }
 
 """
@@ -319,6 +327,9 @@ type CurrentProject implements Node & ProjectLike {
   """The current branch of the project"""
   branch: String
 
+  """If the browser is open or not"""
+  browserStatus: BrowserStatus!
+
   """Browsers found that are compatible with Cypress"""
   browsers: [Browser!]
 
@@ -352,14 +363,14 @@ type CurrentProject implements Node & ProjectLike {
   """
   errorLoadingNodeEvents: ErrorWrapper
 
+  """Whether the project has Typescript"""
+  hasTypescript: Boolean
+
   """Whether the project has a valid config file"""
   hasValidConfigFile: Boolean
 
   """Relay style Node ID field for the CurrentProject field"""
   id: ID!
-
-  """If the browser is open or not"""
-  isBrowserOpen: Boolean!
 
   """Whether the user configured this project to use Component Testing"""
   isCTConfigured: Boolean
@@ -700,6 +711,7 @@ type LocalSettings {
 """local setting preferences"""
 type LocalSettingsPreferences {
   autoScrollingEnabled: Boolean
+  isSideNavigationOpen: Boolean
   isSpecsListOpen: Boolean
   preferredEditorBinary: String
   proxyBypass: String
@@ -759,6 +771,9 @@ type Migration {
   """whether the testFiles member is custom or not in integration"""
   hasCustomIntegrationTestFiles: Boolean!
 
+  """Whether the project has Typescript"""
+  hasTypescript: Boolean
+
   """the integration folder path used to store e2e tests"""
   integrationFolder: String!
 
@@ -806,7 +821,7 @@ type MigrationRegexp {
   """regexp to use to rename existing specs in e2e"""
   afterE2E: String!
 
-  """regexp to identiey existing specs in component"""
+  """regexp to identify existing specs in component"""
   beforeComponent: String!
 
   """regexp to identify existing specs in e2e"""
@@ -962,6 +977,9 @@ type Mutation {
 
   """Save the prompt-shown state for this project"""
   setPromptShown(slug: String!): Boolean
+
+  """Switch Testing type and relaunch browser"""
+  switchTestingTypeAndRelaunch(testingType: TestingTypeEnum!): Boolean
 
   """Updates the different fields of the wizard data store"""
   wizardUpdate(input: WizardUpdateInput!): Wizard
@@ -1223,6 +1241,9 @@ type Wizard {
 
   """All of the component testing frameworks to choose from"""
   frameworks: [WizardFrontendFramework!]!
+
+  """The list of packages to install that are currently installed"""
+  installedPackages: [String!]
   language: WizardCodeLanguage
 
   """

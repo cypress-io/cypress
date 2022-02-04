@@ -13,73 +13,83 @@
       :gql="props.gql.currentProject"
       @close="showSpecPatternModal = false"
     />
-
-    <template
+    <div
       v-if="specs.length"
+      class="grid grid-cols-2 children:font-medium children:text-gray-800 "
     >
       <div
-        class="grid grid-cols-2 children:font-medium children:text-gray-800"
+        class="flex items-center justify-between"
+        data-cy="specs-testing-type-header"
       >
-        <div
-          class="flex items-center justify-between"
-          data-cy="specs-testing-type-header"
-        >
-          {{ props.gql.currentProject?.currentTestingType === 'component' ?
-            t('specPage.componentSpecsHeader') : t('specPage.e2eSpecsHeader') }}
-        </div>
-        <div class="flex items-center justify-between">
-          <div>{{ t('specPage.gitStatusHeader') }}</div>
-        </div>
+        {{ props.gql.currentProject?.currentTestingType === 'component' ?
+          t('specPage.componentSpecsHeader') : t('specPage.e2eSpecsHeader') }}
       </div>
+      <div class="flex items-center justify-between">
+        <div>{{ t('specPage.gitStatusHeader') }}</div>
+      </div>
+    </div>
+    <!--
+      The markup around the virtualized list is pretty delicate. We might be tempted to
+      combine the `v-if="specs.length"` above and the `:class="specs.length ? 'grid': 'hidden'"` below
+      into a single v-if on a `<template>` that would wrap both, but we are deliberately using
+      `hidden` here to ensure that the `.spec-list-container` element stays in the DOM when
+      the empty state is shown, fixing a bug that meant recovering from the empty state with the
+      "Clear Search" button didn't work as expected.
+    -->
+    <div
+      class="pb-32px spec-list-container"
+      :class="specs.length ? 'grid': 'hidden'"
+      v-bind="containerProps"
+    >
       <div
-        class="grid pb-32px spec-list-container"
-        v-bind="containerProps"
+        v-bind="wrapperProps"
+        class="divide-y-1 children:h-40px"
       >
-        <div
-          v-bind="wrapperProps"
-          class="divide-y-1 children:h-40px"
+        <SpecsListRowItem
+          v-for="row in list"
+          :id="getIdIfDirectory(row)"
+          :key="row.index"
         >
-          <SpecsListRowItem
-            v-for="row in list"
-            :key="row.index"
-          >
-            <template #file>
-              <RouterLink
-                v-if="row.data.isLeaf && row.data"
-                :key="row.data.data?.absolute"
-                :to="{ path: '/specs/runner', query: { file: row.data.data?.relative } }"
-              >
-                <SpecItem
-                  :file-name="row.data.data?.fileName || row.data.name"
-                  :extension="row.data.data?.specFileExtension || ''"
-                  :indexes="row.data.data?.fileIndexes"
-                  :style="{ paddingLeft: `${((row.data.depth - 2) * 10) + 16 + 22}px` }"
-                />
-              </RouterLink>
-
-              <RowDirectory
-                v-else
-                :name="row.data.name"
-                :expanded="treeSpecList[row.index].expanded.value"
-                :depth="row.data.depth - 2"
-                :style="{ paddingLeft: `${((row.data.depth - 2) * 10) + 16}px` }"
-                :indexes="getDirIndexes(row.data)"
-                @click="row.data.toggle"
+          <template #file>
+            <RouterLink
+              v-if="row.data.isLeaf && row.data"
+              :key="row.data.data?.absolute"
+              class="focus:outline-transparent"
+              :to="{ path: '/specs/runner', query: { file: row.data.data?.relative } }"
+              @click.meta.prevent="handleCtrlClick"
+              @click.ctrl.prevent="handleCtrlClick"
+            >
+              <SpecItem
+                :file-name="row.data.data?.fileName || row.data.name"
+                :extension="row.data.data?.specFileExtension || ''"
+                :indexes="row.data.data?.fileIndexes"
+                :style="{ paddingLeft: `${((row.data.depth - 2) * 10) + 16 + 22}px` }"
               />
-            </template>
+            </RouterLink>
 
-            <template #git-info>
-              <SpecListGitInfo
-                v-if="row.data.data?.gitInfo"
-                :gql="row.data.data.gitInfo"
-              />
-            </template>
-          </SpecsListRowItem>
-        </div>
+            <RowDirectory
+              v-else
+              :name="row.data.name"
+              :expanded="treeSpecList[row.index].expanded.value"
+              :depth="row.data.depth - 2"
+              :style="{ paddingLeft: `${((row.data.depth - 2) * 10) + 16}px` }"
+              :indexes="getDirIndexes(row.data)"
+              :aria-controls="getIdIfDirectory(row)"
+              @click="row.data.toggle"
+            />
+          </template>
+
+          <template #git-info>
+            <SpecListGitInfo
+              v-if="row.data.data?.gitInfo"
+              :gql="row.data.data.gitInfo"
+            />
+          </template>
+        </SpecsListRowItem>
       </div>
-    </template>
+    </div>
     <NoResults
-      v-else
+      v-show="!specs.length"
       :search="search"
       :message="t('specPage.noResultsMessage')"
       class="mt-56px"
@@ -175,6 +185,19 @@ const { containerProps, list, wrapperProps, scrollTo } = useVirtualList(treeSpec
 // If you are scrolled down the virtual list and list changes,
 // reset scroll position to top of list
 watch(() => treeSpecList.value, () => scrollTo(0))
+
+function handleCtrlClick () {
+  // noop intended to reduce the chances of opening tests multiple tabs
+  // which is not a supported state in Cypress
+}
+
+function getIdIfDirectory (row) {
+  if (row.data.isLeaf && row.data) {
+    return undefined
+  }
+
+  return `speclist-${row.data.data.relative.replace(row.data.data.baseName, '')}`
+}
 </script>
 
 <style scoped>

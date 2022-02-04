@@ -18,7 +18,7 @@ export interface ProjectApiShape {
    *   order for CT to startup
    */
   openProjectCreate(args: InitializeProjectOptions, options: OpenProjectLaunchOptions): Promise<unknown>
-  launchProject(browser: FoundBrowser, spec: Cypress.Spec, options: LaunchOpts): void
+  launchProject(browser: FoundBrowser, spec: Cypress.Spec, options: LaunchOpts): Promise<void>
   insertProjectToCache(projectRoot: string): Promise<void>
   removeProjectFromCache(projectRoot: string): Promise<void>
   getProjectRootsFromCache(): Promise<string[]>
@@ -40,7 +40,7 @@ type SetSpecsFoundBySpecPattern = {
   path: string
   testingType: Cypress.TestingType
   specPattern?: Cypress.Config['specPattern']
-  ignoreSpecPattern?: Cypress.Config['ignoreSpecPattern']
+  excludeSpecPattern?: Cypress.Config['excludeSpecPattern']
   additionalIgnorePattern?: string | string[]
 }
 
@@ -130,6 +130,12 @@ export class ProjectActions {
       return await this.api.openProjectCreate(allModeOptionsWithLatest, {
         ...options,
         ctx: this.ctx,
+      }).finally(async () => {
+        // When switching testing type, the project should be relaunched in the previously selected browser
+        if (this.ctx.coreData.app.relaunchBrowser) {
+          this.ctx.project.setRelaunchBrowser(false)
+          await this.ctx.actions.project.launchProject(this.ctx.coreData.currentTestingType, {})
+        }
       })
     } catch (e) {
       // TODO(tim): remove / replace with ctx.log.error
@@ -225,7 +231,11 @@ export class ProjectActions {
 
     this.ctx.coreData.currentTestingType = testingType
 
-    return this.api.launchProject(browser, activeSpec ?? emptySpec, options)
+    this.ctx.browser.setBrowserStatus('opening')
+    await this.api.launchProject(browser, activeSpec ?? emptySpec, options)
+    this.ctx.browser.setBrowserStatus('open')
+
+    return
   }
 
   removeProject (projectRoot: string) {
@@ -412,7 +422,7 @@ export class ProjectActions {
         path: this.ctx.currentProject,
         testingType,
         specPattern: cfg[testingType]?.specPattern,
-        ignoreSpecPattern: cfg[testingType]?.ignoreSpecPattern,
+        excludeSpecPattern: cfg[testingType]?.excludeSpecPattern,
         additionalIgnorePattern: testingType === 'component' ? cfg?.e2e?.specPattern : undefined,
       })
 
@@ -430,12 +440,12 @@ export class ProjectActions {
     }
   }
 
-  async setSpecsFoundBySpecPattern ({ path, testingType, specPattern, ignoreSpecPattern, additionalIgnorePattern }: SetSpecsFoundBySpecPattern) {
+  async setSpecsFoundBySpecPattern ({ path, testingType, specPattern, excludeSpecPattern, additionalIgnorePattern }: SetSpecsFoundBySpecPattern) {
     const toArray = (val?: string | string[]) => val ? typeof val === 'string' ? [val] : val : undefined
 
     specPattern = toArray(specPattern)
 
-    ignoreSpecPattern = toArray(ignoreSpecPattern) || []
+    excludeSpecPattern = toArray(excludeSpecPattern) || []
 
     // exclude all specs matching e2e if in component testing
     additionalIgnorePattern = toArray(additionalIgnorePattern) || []
@@ -448,18 +458,18 @@ export class ProjectActions {
       path,
       testingType,
       specPattern,
-      ignoreSpecPattern,
+      excludeSpecPattern,
       additionalIgnorePattern,
     )
 
     this.ctx.actions.project.setSpecs(specs)
 
-    return { specs, specPattern, ignoreSpecPattern, additionalIgnorePattern }
+    return { specs, specPattern, excludeSpecPattern, additionalIgnorePattern }
   }
 
   async reconfigureProject () {
     // Initialize active project close first the current project
-    await this.initializeActiveProject()
+    await this.ctx.actions.browser.closeBrowser()
     this.ctx.actions.wizard.resetWizard()
     this.ctx.actions.electron.refreshBrowserWindow()
     this.ctx.actions.electron.showBrowserWindow()

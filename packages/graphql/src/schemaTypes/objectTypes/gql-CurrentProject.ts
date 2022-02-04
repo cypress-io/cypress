@@ -2,6 +2,7 @@ import { PACKAGE_MANAGERS } from '@packages/types'
 import { enumType, nonNull, objectType, stringArg } from 'nexus'
 import path from 'path'
 import { ErrorWrapper } from '.'
+import { BrowserStatusEnum } from '..'
 import { cloudProjectBySlug } from '../../stitching/remoteGraphQLCalls'
 import { TestingTypeEnum } from '../enumTypes/gql-WizardEnums'
 import { Browser } from './gql-Browser'
@@ -112,6 +113,13 @@ export const CurrentProject = objectType({
       },
     })
 
+    t.boolean('hasTypescript', {
+      description: 'Whether the project has Typescript',
+      resolve (source, args, ctx) {
+        return ctx.lifecycleManager.metaState.hasTypescript
+      },
+    })
+
     t.nonNull.list.nonNull.field('specs', {
       description: 'A list of specs for the currently open testing type of a project',
       type: Spec,
@@ -191,9 +199,10 @@ export const CurrentProject = objectType({
       resolve: async (source, args, ctx) => ctx.project.getIsDefaultSpecPattern(),
     })
 
-    t.nonNull.boolean('isBrowserOpen', {
+    t.nonNull.field('browserStatus', {
+      type: BrowserStatusEnum,
       description: 'If the browser is open or not',
-      resolve: (source, args, ctx) => ctx.coreData.app.isBrowserOpen,
+      resolve: (source, args, ctx) => ctx.coreData.app.browserStatus,
     })
   },
   sourceType: {

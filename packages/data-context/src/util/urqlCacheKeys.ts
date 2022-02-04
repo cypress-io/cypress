@@ -13,7 +13,7 @@ type CacheKeys = {
  * We want to to keep the key definitions in sync between the
  * server & client so we only define them once
  */
-export const urqlCacheKeys: Partial<CacheExchangeOpts> & CacheKeys = {
+export const urqlCacheKeys: Partial<UrqlCacheKeys> = {
   keys: {
     DevState: (data) => data.__typename,
     Wizard: (data) => data.__typename,

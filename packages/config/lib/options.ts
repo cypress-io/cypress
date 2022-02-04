@@ -13,6 +13,7 @@ interface ResolvedConfigOption {
    * Can be mutated with Cypress.config() or test-specific configuration overrides
    */
   canUpdateDuringTestTime?: boolean
+  specificTestingType?: 'e2e' | 'component'
 }
 
 interface RuntimeConfigOption {
@@ -194,8 +195,8 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     isFolder: true,
     canUpdateDuringTestTime: false,
   }, {
-    name: 'ignoreSpecPattern',
-    defaultValue: '*.hot-update.js',
+    name: 'excludeSpecPattern',
+    defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? ['**/__snapshots__/*', '**/__image_snapshots__/*'] : '*.hot-update.js',
     validation: validate.isStringOrArrayOfStrings,
     canUpdateDuringTestTime: true,
   }, {
@@ -540,4 +541,30 @@ export const breakingRootOptions: Array<BreakingOption> = [
     errorKey: 'SUPPORT_FILE_ROOT_NOT_SUPPORTED',
     isWarning: false,
   },
+  {
+    name: 'specPattern',
+    errorKey: 'SPEC_PATTERN_ROOT_NOT_SUPPORTED',
+    isWarning: false,
+  },
+  {
+    name: 'excludeSpecPattern',
+    errorKey: 'SPEC_EXCLUDE_PATTERN_ROOT_NOT_SUPPORTED',
+    isWarning: false,
+  },
+  {
+    name: 'baseUrl',
+    errorKey: 'BASE_URL_ROOT_NOT_SUPPORTED',
+    isWarning: false,
+  },
 ]
+
+export const testingTypeBreakingOptions: { e2e: Array<BreakingOption>, component: Array<BreakingOption> } = {
+  e2e: [],
+  component: [
+    {
+      name: 'baseUrl',
+      errorKey: 'BASE_URL_CT_NOT_SUPPORTED',
+      isWarning: false,
+    },
+  ],
+}
