@@ -1,15 +1,15 @@
 import chai, { expect } from 'chai'
+import debugLib from 'debug'
 import { app, BrowserWindow } from 'electron'
 /* eslint-disable no-console */
 import fse from 'fs-extra'
 import globby from 'globby'
 import _ from 'lodash'
+import os from 'os'
 import path from 'path'
 import pixelmatch from 'pixelmatch'
 import { PNG } from 'pngjs'
 import sinon, { SinonSpy } from 'sinon'
-import debugLib from 'debug'
-
 import * as errors from '../../src'
 
 // For importing the files below
@@ -24,6 +24,14 @@ const browsers = require('@packages/server/lib/browsers')
 const launcherBrowsers = require('@packages/launcher/lib/browsers')
 
 const debug = debugLib(isCi ? '*' : 'visualSnapshotErrors')
+
+if (os.platform() === 'linux') {
+  app.disableHardwareAcceleration()
+
+  // app.commandLine.appendSwitch('no-sandbox')
+  app.commandLine.appendSwitch('in-process-gpu')
+  app.commandLine.appendSwitch('single-process')
+}
 
 interface ErrorGenerator<T extends CypressErrorType> {
   default: Parameters<typeof errors.AllCypressErrors[T]>
