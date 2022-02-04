@@ -5,7 +5,7 @@
   >
     <RadioGroup
       v-model="selectedBrowserId"
-      class="flex flex-wrap justify-center py-40px gap-24px"
+      class="flex flex-wrap py-40px gap-24px justify-center"
       data-cy="open-browser-list"
     >
       <RadioGroupOption
@@ -14,29 +14,48 @@
         :key="browser.id"
         :data-cy-browser="browser.name"
         :value="browser.id"
-        :disabled="browser.disabled || browserStatus.chosen"
+        :disabled="browser.disabled || !browser.isVersionSupported || browserStatus.chosen"
       >
         <RadioGroupLabel
           :for="browser.id"
-          class="relative block pt-6 pb-4 text-center rounded border-1 min-h-144px w-160px radio-label"
+          class="rounded border-1 text-center min-h-144px pt-6 pb-4 w-160px relative block radio-label"
           :class="{
             'border-jade-300 ring-2 ring-jade-100 focus:border-jade-400 focus:border-1 focus:outline-none': checked,
-            'border-gray-200 before:hocus:cursor-pointer': !checked && !browserStatus.chosen ,
-            'filter grayscale bg-gray-100': browser.disabled,
+            'bg-gray-50 before:hocus:cursor-not-allowed': browser.disabled || !browser.isVersionSupported,
             'filter grayscale border-gray-200': browserStatus.chosen && !checked,
-            'hover:border-indigo-300 hover:ring-2 hover:ring-indigo-100': !browser.disabled && !checked && !browserStatus.chosen
+            'border-gray-200 before:hocus:cursor-pointer hover:border-indigo-300 hover:ring-2 hover:ring-indigo-100': !browser.disabled && browser.isVersionSupported && !checked && !browserStatus.chosen
           }"
         >
+          <UnsupportedBrowserTooltip
+            v-if="!browser.isVersionSupported"
+            class="top-0 right-0 absolute"
+            placement="top"
+          >
+            <i-cy-circle-bg-question-mark_x16
+              data-cy="unsupported-browser-tooltip-trigger"
+              class="mt-4px mr-8px relative inline-block icon-dark-gray-700 icon-light-gray-200"
+              alt="unsupported browser"
+            />
+            <template #popper>
+              <div class="w-full">
+                <div class="font-medium text-white mb-2">
+                  Unsupported browser
+                </div>
+                {{ browser.warning }}
+              </div>
+            </template>
+          </UnsupportedBrowserTooltip>
           <div class="text-center">
             <img
-              :src="allBrowsersIcons[browser.displayName]"
+              :src="allBrowsersIcons[browser.displayName] || allBrowsersIcons.generic"
               alt=""
-              class="inline h-40px w-40px"
+              class="h-40px w-40px inline"
+              :class="{ 'filter grayscale': browser.disabled || !browser.isVersionSupported }"
             >
           </div>
           <div
             class="pt-2 text-indigo-600 text-18px leading-28px"
-            :class="{ 'text-jade-600': browser.isSelected }"
+            :class="{ 'text-jade-600': browser.isSelected, 'text-gray-500': browser.disabled || browser.isVersionSupported }"
           >
             {{ browser.displayName }}
           </div>
@@ -50,7 +69,7 @@
       v-if="props.gql.currentTestingType"
       class="mb-14"
     >
-      <div class="flex items-center justify-center mb-4 gap-16px">
+      <div class="flex mb-4 gap-16px items-center justify-center">
         <template v-if="browserStatus.closed || browserStatus.opening">
           <Button
             v-if="browserStatus.closed"
@@ -121,7 +140,7 @@
         variant="text"
         :prefix-icon="ArrowLeftIcon"
         prefix-icon-class="icon-dark-gray-500"
-        class="mx-auto font-medium text-gray-600 hover:text-indigo-500"
+        class="font-medium mx-auto text-gray-600 hover:text-indigo-500"
         @click="emit('navigatedBack')"
       >
         {{ browserText.switchTestingType }}
@@ -144,6 +163,7 @@ import PowerStandbyIcon from '~icons/cy/power-standby'
 import ArrowLeftIcon from '~icons/cy/arrow-left_x16'
 import StatusRunningIcon from '~icons/cy/status-running_x16'
 import { RadioGroup, RadioGroupOption, RadioGroupLabel } from '@headlessui/vue'
+import UnsupportedBrowserTooltip from '@packages/frontend-shared/src/gql-components/topnav/UnsupportedBrowserTooltip.vue'
 
 import { OpenBrowserListFragment, OpenBrowserList_SetBrowserDocument } from '../generated/graphql'
 
@@ -171,10 +191,12 @@ fragment OpenBrowserList on CurrentProject {
     family
     disabled
     isSelected
+    isVersionSupported
     channel
     displayName
     path
     version
+    warning
     majorVersion
   }
   currentTestingType
