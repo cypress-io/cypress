@@ -127,14 +127,18 @@ export function initComponentTestingMigration (
 }
 
 async function getPluginRelativePath (cfg: OldCypressConfig, root: string): Promise<string> {
+  if (cfg.pluginsFile) {
+    return cfg.pluginsFile
+  }
+
   try {
     let pluginPath = path.normalize('cypress/plugins/index.ts')
 
     await fs.stat(path.join(root, pluginPath))
 
-    return cfg.pluginsFile ? cfg.pluginsFile : pluginPath
+    return pluginPath
   } catch {
-    return cfg.pluginsFile ? cfg.pluginsFile : path.normalize('cypress/plugins/index.js')
+    return path.normalize('cypress/plugins/index.js')
   }
 }
 
