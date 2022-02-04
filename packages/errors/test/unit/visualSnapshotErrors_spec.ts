@@ -173,6 +173,7 @@ const snapshotErrorConsoleLogs = function (errorFileName: string) {
     pre {
       white-space: pre-wrap;
       word-break: break-word;
+      -webkit-font-smoothing: antialiased;
     }
     </style>
   `) // remove margin/padding and force text overflow like a terminal
