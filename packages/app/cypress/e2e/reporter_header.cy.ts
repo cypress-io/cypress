@@ -8,10 +8,21 @@ describe('Reporter Header', () => {
   })
 
   context('Specs Shortcut', () => {
+    it('selects the correct spec in the Specs List', () => {
+      cy.location().should((location) => {
+        expect(location.hash).to.contain('dom-content.spec')
+      })
+
+      cy.get('[data-selected-spec="true"]').should('contain', 'dom-content').should('have.length', '1')
+      cy.get('[data-selected-spec="false"]').should('have.length', '1')
+    })
+
     it('filters the list of specs when searching for specs', () => {
       cy.location().should((location) => {
         expect(location.hash).to.contain('dom-content.spec')
       })
+
+      cy.wait(5000)
 
       cy.get('input').type('dom', { force: true })
 
