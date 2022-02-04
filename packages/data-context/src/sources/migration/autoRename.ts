@@ -73,7 +73,7 @@ export function applyMigrationTransform (
     regexp = new RegExp(regexps.component.before.customFolderDefaultTestFiles)
   } else {
     // custom folder AND test files pattern
-    // should be impossble, we should not calling this function in the first place.
+    // should be impossible, we should not call this function in the first place.
     throw Error(`Cannot use applyMigrationTransform on a project with a custom folder and custom testFiles.`)
   }
 
