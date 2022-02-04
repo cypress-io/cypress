@@ -169,7 +169,7 @@ fragment SpecRunnerHeader_Browser on Browser {
 
 gql`
 mutation SpecRunnerHeader_SetBrowser($browserId: ID!, $specPath: String!) {
-  launchpadSetBrowser(id: $browserId, ) {
+  launchpadSetBrowser(id: $browserId) {
     id
     currentBrowser {
       id
