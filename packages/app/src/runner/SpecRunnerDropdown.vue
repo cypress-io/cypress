@@ -4,7 +4,7 @@
     #="{ open, close }"
   >
     <PopoverButton
-      class="border-transparent flex-grow h-full border-1px px-12px group hocus-default"
+      class="border-transparent rounded flex-grow h-full border-1px px-12px group hocus-default"
     >
       <div
         class="flex text-gray-600 gap-8px items-center group-hocus:text-indigo-600"
