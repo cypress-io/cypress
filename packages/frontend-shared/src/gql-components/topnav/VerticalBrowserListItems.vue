@@ -84,11 +84,6 @@ const { t } = useI18n()
 gql`
 fragment VerticalBrowserListItems on CurrentProject {
   id
-  currentBrowser {
-    id
-    displayName
-    majorVersion
-  }
   browsers {
     id
     isSelected
@@ -111,33 +106,38 @@ mutation VerticalBrowserListItems_LaunchOpenProject {
 `
 
 gql`
-mutation VerticalBrowserListItems_SetBrowser($id: ID!) {
+mutation VerticalBrowserListItems_SetBrowser($id: ID!, $specPath: String) {
   launchpadSetBrowser(id: $id) {
     id
     ...VerticalBrowserListItems
   }
+  launchOpenProject(specPath: $specPath) {
+    id
+  }
 }
 `
 
-const props = defineProps<{
+const props = withDefaults(
+  defineProps<{
   selectable?: Boolean,
   gql: VerticalBrowserListItemsFragment,
-}>()
+  specPath?: string | null
+}>(), {
+    specPath: null,
+  },
+)
 
 const launchOpenProject = useMutation(VerticalBrowserListItems_LaunchOpenProjectDocument)
 const setBrowser = useMutation(VerticalBrowserListItems_SetBrowserDocument)
 
-const launch = () => {
-  launchOpenProject.executeMutation({})
-}
-
 const handleBrowserChoice = async (browser) => {
-  if (browser.disabled || !browser.isVersionSupported) {
+  if (browser.disabled || !browser.isVersionSupported || browser.isSelected) {
     return
   }
 
-  await setBrowser.executeMutation({ id: browser.id })
-  launch()
+  const mutation = { id: browser.id, specPath: props.specPath }
+
+  await setBrowser.executeMutation(mutation)
 }
 
 </script>

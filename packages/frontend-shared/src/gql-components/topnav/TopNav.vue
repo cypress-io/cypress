@@ -228,6 +228,12 @@ fragment TopNav on Query {
   currentProject {
     id
     title
+    
+    currentBrowser {
+    id
+    displayName
+    majorVersion
+    }
     ...VerticalBrowserListItems
   }
 }
