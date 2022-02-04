@@ -60,10 +60,6 @@ const convertHtmlToImage = async (htmlfile: string) => {
   }
 
   return await new Promise((resolve, reject) => {
-    setTimeout(() => {
-      reject(new Error('Timed out creating Snapshot'))
-    }, 2000)
-
     win.webContents.once('did-finish-load', async () => {
       try {
         await win.webContents.debugger.sendCommand('Emulation.setDeviceMetricsOverride', {
@@ -216,7 +212,7 @@ const testVisualError = <K extends CypressErrorType> (errorGeneratorFn: () => Er
         await convertHtmlToImage(htmlFilename)
       }
     }
-  })
+  }).timeout(10000)
 }
 
 const testVisualErrors = (whichError: CypressErrorType[] | '*', errorsToTest: {[K in CypressErrorType]: () => ErrorGenerator<K>}) => {
