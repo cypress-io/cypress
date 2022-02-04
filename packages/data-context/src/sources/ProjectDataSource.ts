@@ -140,7 +140,7 @@ export class ProjectDataSource {
 
   async specPatternsForTestingType (projectRoot: string, testingType: Cypress.TestingType): Promise<{
     specPattern?: string[]
-    ignoreSpecPattern?: string[]
+    excludeSpecPattern?: string[]
   }> {
     const toArray = (val?: string | string[]) => val ? typeof val === 'string' ? [val] : val : undefined
 
@@ -152,7 +152,7 @@ export class ProjectDataSource {
 
     return {
       specPattern: toArray(config[testingType]?.specPattern),
-      ignoreSpecPattern: toArray(config[testingType]?.ignoreSpecPattern),
+      excludeSpecPattern: toArray(config[testingType]?.excludeSpecPattern),
     }
   }
 
@@ -160,14 +160,14 @@ export class ProjectDataSource {
     projectRoot: string,
     testingType: Cypress.TestingType,
     specPattern: string[],
-    ignoreSpecPattern: string[],
+    excludeSpecPattern: string[],
     globToRemove: string[],
   ): Promise<FoundSpec[]> {
     const specAbsolutePaths = await this.ctx.file.getFilesByGlob(
       projectRoot,
       specPattern, {
         absolute: true,
-        ignore: [...ignoreSpecPattern, ...globToRemove],
+        ignore: [...excludeSpecPattern, ...globToRemove],
       },
     )
 
@@ -185,7 +185,7 @@ export class ProjectDataSource {
     projectRoot: string,
     testingType: Cypress.TestingType,
     specPattern: string[],
-    ignoreSpecPattern: string[],
+    excludeSpecPattern: string[],
     additionalIgnore: string[],
   ) {
     this.stopSpecWatcher()
@@ -197,7 +197,7 @@ export class ProjectDataSource {
     }
 
     const onSpecsChanged = debounce(async () => {
-      const specs = await this.findSpecs(projectRoot, testingType, specPattern, ignoreSpecPattern, additionalIgnore)
+      const specs = await this.findSpecs(projectRoot, testingType, specPattern, excludeSpecPattern, additionalIgnore)
 
       this.setSpecs(specs)
 
@@ -220,9 +220,9 @@ export class ProjectDataSource {
 
     const MINIMATCH_OPTIONS = { dot: true, matchBase: true }
 
-    const { specPattern = [], ignoreSpecPattern = [] } = await this.ctx.project.specPatternsForTestingType(this.ctx.currentProject, this.ctx.coreData.currentTestingType)
+    const { specPattern = [], excludeSpecPattern = [] } = await this.ctx.project.specPatternsForTestingType(this.ctx.currentProject, this.ctx.coreData.currentTestingType)
 
-    for (const pattern of ignoreSpecPattern) {
+    for (const pattern of excludeSpecPattern) {
       if (minimatch(specFile, pattern, MINIMATCH_OPTIONS)) {
         return false
       }
