@@ -60,7 +60,7 @@ const convertHtmlToImage = async (htmlfile: string) => {
     win.webContents.debugger.attach()
   }
 
-  return new Promise((resolve, reject) => {
+  return await new Promise((resolve, reject) => {
     setTimeout(() => {
       reject(new Error('Timed out creating Snapshot'))
     }, 2000)
