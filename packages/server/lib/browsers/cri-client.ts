@@ -137,14 +137,22 @@ export { chromeRemoteInterface }
 
 type DeferredPromise = { resolve: Function, reject: Function }
 
-export const newTab = async (host: string, port: number, onAsynchronousError: Function) => {
-  debug('starting new tab %o', { host, port })
-  const target = await chromeRemoteInterface.New({ host, port, url: 'about:blank' })
+let versionInfo
 
-  return create(target.webSocketDebuggerUrl, onAsynchronousError)
+export const newTab = async (webSocketDebuggerUrl, host, port, onAsynchronousError: Function) => {
+  debug('starting new tab %o', { webSocketDebuggerUrl, host, port })
+
+  if (!versionInfo) {
+    versionInfo = await chromeRemoteInterface.Version({ host, port })
+  }
+
+  const browserClient = await chromeRemoteInterface({ host, port, target: versionInfo.webSocketDebuggerUrl })
+  const createdTarget = await browserClient.send('Target.createTarget', { url: 'about:blank' })
+
+  return create(createdTarget.targetId, onAsynchronousError, host, port)
 }
 
-export const create = Bluebird.method((target: websocketUrl, onAsynchronousError: Function): Bluebird<CRIWrapper> => {
+export const create = Bluebird.method((target: websocketUrl, onAsynchronousError: Function, host: string, port: string): Bluebird<CRIWrapper> => {
   const subscriptions: {eventName: CRI.EventName, cb: Function}[] = []
   let enqueuedCommands: {command: CRI.Command, params: any, p: DeferredPromise }[] = []
 
@@ -192,6 +200,8 @@ export const create = Bluebird.method((target: websocketUrl, onAsynchronousError
     debug('connecting %o', { target })
 
     return chromeRemoteInterface({
+      host,
+      port,
       target,
       local: true,
     })
@@ -218,6 +228,8 @@ export const create = Bluebird.method((target: websocketUrl, onAsynchronousError
         if (!isVersionGte(actual, minimum)) {
           errors.throw('CDP_VERSION_TOO_OLD', protocolVersion, actual)
         }
+
+        return actual
       })
     }
 

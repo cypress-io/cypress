@@ -39,6 +39,8 @@ type ChromePreferences = {
   localState: object
 }
 
+let versionInfo
+
 const pathToExtension = extension.getPathToExtension()
 const pathToTheme = extension.getPathToTheme()
 
@@ -446,7 +448,7 @@ export = {
   async connectToNewSpec (browser: Browser, debuggingPort: number, options: CypressConfiguration = {}, automation) {
     debug('connecting to new chrome tab in existing instance with url and debugging port', { url: options.url, debuggingPort })
 
-    const criClient = await CriClient.newTab('127.0.0.1', debuggingPort, options.onError)
+    const criClient = await CriClient.newTab(versionInfo, '127.0.0.1', debuggingPort, options.onError)
 
     this._setAutomation(criClient, automation)
 
@@ -530,7 +532,7 @@ export = {
 
     la(criClient, 'expected Chrome remote interface reference', criClient)
 
-    await criClient.ensureMinimumProtocolVersion('1.3')
+    versionInfo = await criClient.ensureMinimumProtocolVersion('1.3')
     .catch((err) => {
       // if this minumum chrome version changes, sync it with
       // packages/web-config/webpack.config.base.ts and
