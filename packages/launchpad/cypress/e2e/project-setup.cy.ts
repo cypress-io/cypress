@@ -716,6 +716,8 @@ describe('Launchpad: Setup Project', () => {
           cy.contains('cypress/fixtures/example.json')
         })
 
+        cy.wait(50)
+
         cy.findByRole('button', { name: 'Continue' }).click()
         cy.contains(/(Initializing Config|Choose a Browser)/)
       })
