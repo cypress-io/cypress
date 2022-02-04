@@ -67,7 +67,7 @@ function run (ipc, configFile, projectRoot) {
   const isValidDevServer = (config) => {
     const { devServer } = config
 
-    if (devServer && (typeof devServer.devServer === 'function' || typeof devServer === 'function')) {
+    if (devServer && typeof devServer === 'function') {
       return true
     }
 
@@ -112,13 +112,6 @@ function run (ipc, configFile, projectRoot) {
             const setupNodeEvents = result.component && result.component.setupNodeEvents || ((on, config) => {})
 
             const { devServer } = result.component
-
-            // Accounts for `devServer: require('@cypress/webpack-dev-server')
-            if (typeof devServer.devServer === 'function') {
-              on('dev-server:start', (options) => devServer.devServer(options, result.component && result.component.devServerConfig))
-
-              return setupNodeEvents(on, config)
-            }
 
             // Accounts for `devServer() {}`
             if (typeof devServer === 'function') {
