@@ -29,7 +29,7 @@ mainBuildFilters: &mainBuildFilters
       only:
         - develop
         - 10.0-release
-        - node-17-maybe
+        - fix-ci-artifact-uploads
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -525,10 +525,6 @@ commands:
   post-install-comment:
     description: Post GitHub comment with a blurb on how to install pre-release version
     steps:
-      - run: ls -la
-      - run: ls -la binary-url.json npm-package-url.json
-      - run: cat binary-url.json
-      - run: cat npm-package-url.json
       - run:
           name: Post pre-release install comment
           command: |
@@ -862,6 +858,7 @@ commands:
               echo "Not code signing for this platform"
             fi
       - run:
+          name: Build the Cypress binary
           environment:
             DEBUG: electron-builder,electron-osx-sign*
           # notarization on Mac can take a while
@@ -871,28 +868,12 @@ commands:
             yarn binary-build --platform $PLATFORM --version $(node ./scripts/get-next-version.js)
       - run:
           name: Zip the binary
-          command: |
-            yarn binary-zip --platform $PLATFORM
+          command: yarn binary-zip --platform $PLATFORM
       - store-npm-logs
       - persist_to_workspace:
           root: ~/
           paths:
             - cypress/cypress.zip
-
-  upload-binary:
-    steps:
-      - run:
-          name: upload unique binary
-          command: |
-            node scripts/binary.js upload-unique-binary \
-              --file cypress.zip \
-              --version $(node -p "require('./package.json').version")
-      - run: cat binary-url.json
-      - store-npm-logs
-      - persist_to_workspace:
-          root: ~/
-          paths:
-            - cypress/binary-url.json
 
   build-cypress-npm-package:
     parameters:
@@ -901,12 +882,11 @@ commands:
         default: cy-doc
     steps:
       - run:
-          name: bump NPM version
+          name: Bump NPM version
           command: yarn get-next-version --npm
       - run:
-          name: build NPM package
-          command: |
-            yarn build --scope cypress
+          name: Build NPM package
+          command: yarn build --scope cypress
       - run:
           command: ls -la types
           working_directory: cli/build
@@ -925,27 +905,36 @@ commands:
           name: list created NPM package
           command: ls -l
       - store-npm-logs
-      - run: pwd
       - persist_to_workspace:
           root: ~/
           paths:
             - cypress/cypress.tgz
 
-  upload-npm-package:
+  upload-build-artifacts:
     steps:
       - run: ls -l
       - run:
-          name: upload NPM package
+          name: Upload unique binary to S3
           command: |
-            node scripts/binary.js upload-npm-package \
+            node scripts/binary.js upload-build-artifact \
+              --type binary \
+              --file cypress.zip \
+              --version $(node -p "require('./package.json').version")
+      - run:
+          name: Upload NPM package to S3
+          command: |
+            node scripts/binary.js upload-build-artifact \
+              --type npm-package \
               --file cypress.tgz \
               --version $(node -p "require('./package.json').version")
       - store-npm-logs
       - run: ls -l
+      - run: cat binary-url.json
       - run: cat npm-package-url.json
       - persist_to_workspace:
           root: ~/
           paths:
+            - cypress/binary-url.json
             - cypress/npm-package-url.json
 
 jobs:
@@ -1590,12 +1579,11 @@ jobs:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "node-17-maybe" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "fix-ci-artifact-uploads" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
-      - upload-binary
-      - upload-npm-package
+      - upload-build-artifacts
       - post-install-comment
 
   test-kitchensink:
@@ -2131,7 +2119,6 @@ linux-workflow: &linux-workflow
     - runner-ct-integration-tests-chrome:
         requires:
           - build
-
     - desktop-gui-integration-tests-7x:
         requires:
           - build
@@ -2193,7 +2180,6 @@ linux-workflow: &linux-workflow
           - npm-react
           - npm-mount-utils
           - npm-vue
-          - npm-design-system
           - npm-webpack-batteries-included-preprocessor
           - npm-webpack-preprocessor
           - npm-vite-dev-server

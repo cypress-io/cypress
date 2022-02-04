@@ -67,13 +67,7 @@ of Cypress. You can see the progress of the test projects by opening the status 
 
 ![Screenshot of status checks](https://i.imgur.com/AsQwzgO.png)
 
-#### :bangbang: Important :bangbang:
-
-The `linux x64`, `win32 x64`, and `darwin x64` artifacts produced by CI are all placed in the same directory on the CDN. The version that was built last will overwrite the other versions in the directory. Until work is done to complete [#19771](https://github.com/cypress-io/cypress/issues/19771), you must ensure that the `linux` workflow publishes its artifacts **after** the `windows`/`mac` workflows. To guarantee this, you can re-run the `create-build-artifacts` job for the `linux` workflow within CircleCI after the initial builds have completed.
-      
-<img src="https://user-images.githubusercontent.com/1711637/150612076-ac1d233b-519a-443b-9fd4-950a8f0439ef.png" width="250" height="auto">
-
-Once the `develop` branch for all test projects are reliably passing with the new changes and the `linux` binary is present at `https://cdn.cypress.io/beta/npm/X.Y.Z/<sha>/cypress.tgz`, publishing can proceed.
+Once the `develop` branch for all test projects are reliably passing with the new changes and the `linux-x64` binary is present at `https://cdn.cypress.io/beta/binary/X.Y.Z/linux-x64/<sha>/cypress.zip`, and the `linux-x64` cypress npm package is present at `https://cdn.cypress.io/beta/binary/X.Y.Z/linux-x64/<sha>/cypress.tgz`, publishing can proceed.
 
 ### Steps to Publish a New Version
 
@@ -93,14 +87,15 @@ In the following instructions, "X.Y.Z" is used to denote the [next version of Cy
     - To find the link to the package file `cypress.tgz`:
         1. In GitHub, go to the latest commit (the one whose sha you used in the last step).
             ![commit-link](https://user-images.githubusercontent.com/1157043/80608728-33fe6100-8a05-11ea-8b53-375303757b67.png)
-        2. Scroll down past the changes to the comments. The first comment should be a `cypress-bot` comment that includes a line beginning `npm install ...`. Grab the `https://cdn.../npm/X.Y.Z/<long sha>/cypress.tgz` link.
-            ![cdn-tgz-link](https://user-images.githubusercontent.com/1157043/80608736-3791e800-8a05-11ea-8d75-e4f80128e857.png)
-    - Make sure the linux binaries are present at that location. See [Before Publishing a New Version](#before-publishing-a-new-version).
-    - Publish to the npm registry straight from the URL:
+        2. Scroll down past the changes to the comments. The first comment should be a `cypress-bot` comment that includes a line beginning `npm install ...`. Grab the `https://cdn.../npm/X.Y.Z/<platform>/<long sha>/cypress.tgz` link.
+            ![commit-bot-comment](../assets/cypress-bot-pre-release-comment.png)
+    - Make sure the `linux-x64` binary and npm package are present at the commented locations. See [Before Publishing a New Version](#before-publishing-a-new-version).
+    - Publish the `linux-x64` distribution to the npm registry straight from the URL:
 
         ```shell
         npm publish https://cdn.cypress.io/beta/npm/X.Y.Z/<long sha>/cypress.tgz --tag dev
         ```
+      :bangbang: Important :bangbang: Be sure to release the `linux-x64` distribution.
 
 5. Double-check that the new version has been published under the `dev` tag using `npm info cypress` or [available-versions](https://github.com/bahmutov/available-versions). `latest` should still point to the previous version. Example output:
 
