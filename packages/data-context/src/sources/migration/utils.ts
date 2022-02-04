@@ -56,7 +56,7 @@ export interface CreateConfigOptions {
 }
 
 export async function createConfigString (cfg: OldCypressConfig, options: CreateConfigOptions) {
-  return createCypressConfig(reduceConfig(cfg), getPluginRelativePath(cfg), options)
+  return createCypressConfig(reduceConfig(cfg), await getPluginRelativePath(cfg, options.projectRoot), options)
 }
 
 interface FileToBeMigratedManually {
@@ -126,8 +126,13 @@ export function initComponentTestingMigration (
   })
 }
 
-function getPluginRelativePath (cfg: OldCypressConfig): string {
-  const DEFAULT_PLUGIN_PATH = path.normalize('cypress/plugins/index.js')
+async function getPluginRelativePath (cfg: OldCypressConfig, root: string): string {
+  let DEFAULT_PLUGIN_PATH = path.normalize('cypress/plugins/index.ts')
+  const tsFileExists = await fs.stat(path.join(root, DEFAULT_PLUGIN_PATH))
+
+  if (!tsFileExists) {
+    DEFAULT_PLUGIN_PATH = path.normalize('cypress/plugins/index.js')
+  }
 
   return cfg.pluginsFile ? cfg.pluginsFile : DEFAULT_PLUGIN_PATH
 }
