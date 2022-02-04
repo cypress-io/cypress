@@ -1655,9 +1655,9 @@ describe('lib/cypress', () => {
         // this should be overriden by the env argument
         json.baseUrl = 'http://localhost:8080'
 
-        const { supportFile, ...rest } = json
+        const { supportFile, specPattern, excludeSpecPattern, baseUrl, ...rest } = json
 
-        return settings.writeForTesting(this.todosPath, rest)
+        return settings.writeForTesting(this.todosPath, { ...rest, e2e: { baseUrl, supportFile, specPattern, excludeSpecPattern } })
       }).then(() => {
         return cypress.start([
           '--port=2121',

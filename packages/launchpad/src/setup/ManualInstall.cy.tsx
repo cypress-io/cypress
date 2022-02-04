@@ -3,6 +3,16 @@ import ManualInstall from './ManualInstall.vue'
 import { PACKAGES_DESCRIPTIONS } from '../../../types/src/constants'
 
 describe('<ManualInstall />', () => {
+  it('playground', () => {
+    cy.mountFragment(ManualInstallFragmentDoc, {
+      render: (gqlVal) => (
+        <div class="rounded border-1 border-gray-400 m-10">
+          <ManualInstall gql={gqlVal} packagesInstalled={[]}/>
+        </div>
+      ),
+    })
+  })
+
   it('lists packages and can copy install command to clipboard', { viewportWidth: 800, viewportHeight: 600 }, () => {
     const framework = '@cypress/react'
     const bundler = '@cypress/webpack-dev-server'
@@ -10,7 +20,7 @@ describe('<ManualInstall />', () => {
     cy.mountFragment(ManualInstallFragmentDoc, {
       render: (gqlVal) => (
         <div class="rounded border-1 border-gray-400 m-10">
-          <ManualInstall gql={gqlVal} />
+          <ManualInstall gql={gqlVal} packagesInstalled={[]} />
         </div>
       ),
     })
@@ -49,5 +59,17 @@ describe('<ManualInstall />', () => {
 
     validatePackage(framework)
     validatePackage(bundler)
+  })
+
+  it('flags packages already installed', () => {
+    cy.mountFragment(ManualInstallFragmentDoc, {
+      render: (gqlVal) => (
+        <div class="rounded border-1 border-gray-400 m-10">
+          <ManualInstall gql={gqlVal} packagesInstalled={['@cypress/react']} />
+        </div>
+      ),
+    })
+
+    cy.findByLabelText('installed').should('be.visible')
   })
 })
