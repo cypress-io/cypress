@@ -240,7 +240,7 @@ testVisualErrors('*', {
   },
   CHROME_WEB_SECURITY_NOT_SUPPORTED: () => {
     return {
-      default: ['electron'],
+      default: ['firefox'],
     }
   },
   BROWSER_NOT_FOUND_BY_NAME: () => {
