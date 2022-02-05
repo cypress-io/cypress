@@ -244,7 +244,7 @@ export const create = Bluebird.method((target: websocketUrl, onAsynchronousError
     client = {
       ensureMinimumProtocolVersion,
       getProtocolVersion,
-      closeTarget: Bluebird.method(async () => {
+      closeTarget: async () => {
         let targetToClose = target
 
         if (!versionInfo) {
@@ -255,7 +255,7 @@ export const create = Bluebird.method((target: websocketUrl, onAsynchronousError
         const browserClient = await chromeRemoteInterface({ host, port, target: versionInfo.webSocketDebuggerUrl })
 
         return browserClient.send('Target.closeTarget', { targetId: targetToClose })
-      }),
+      },
       send: Bluebird.method((command: CRI.Command, params?: object) => {
         const enqueue = () => {
           return new Bluebird((resolve, reject) => {
