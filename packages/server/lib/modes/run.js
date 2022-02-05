@@ -1010,58 +1010,6 @@ module.exports = {
     return openProject.launch(browser, spec, browserOpts)
   },
 
-  async navigateToNextSpec (options) {
-    debug('navigating to next spec')
-    const { browser, spec, writeVideoFrame, setScreenshotMetadata, project, screenshots, projectRoot, onError } = options
-
-    const browserOpts = getDefaultBrowserOptsByFamily(browser, project, writeVideoFrame, onError)
-
-    browserOpts.automationMiddleware = {
-      onBeforeRequest (message, data) {
-        if (message === 'take:screenshot') {
-          return setScreenshotMetadata(data)
-        }
-      },
-      onAfterResponse: (message, data, resp) => {
-        if (message === 'take:screenshot' && resp) {
-          const existingScreenshot = _.findIndex(screenshots, { path: resp.path })
-
-          if (existingScreenshot !== -1) {
-            // NOTE: saving screenshots to the same path will overwrite the previous one
-            // so we shouldn't report more screenshots than exist on disk.
-            // this happens when cy.screenshot is used in a retried test
-            screenshots.splice(existingScreenshot, 1, this.screenshotMetadata(data, resp))
-          } else {
-            screenshots.push(this.screenshotMetadata(data, resp))
-          }
-        }
-
-        return resp
-      },
-    }
-
-    const warnings = {}
-
-    browserOpts.projectRoot = projectRoot
-
-    browserOpts.onWarning = (err) => {
-      const { message } = err
-
-      // if this warning has already been
-      // seen for this browser launch then
-      // suppress it
-      if (warnings[message]) {
-        return
-      }
-
-      warnings[message] = err
-
-      return project.onWarning
-    }
-
-    return openProject.changeUrlToSpec(browser, spec, browserOpts)
-  },
-
   listenForProjectEnd (project, exit) {
     return new Promise((resolve, reject) => {
       if (exit === false) {
