@@ -6,8 +6,6 @@ import { PNG } from 'pngjs'
 
 const isCi = require('is-ci')
 
-// const outputHtmlFolder = path.join(__dirname, '..', '..', '__snapshot-images__')
-// const baseImageFolder = path.join(__dirname, '..', '..', '__snapshot-bases__')
 app.on('window-all-closed', () => {
 
 })
