@@ -39,10 +39,6 @@ export interface OldCypressConfig {
   ignoreTestFiles?: string
 }
 
-export const defaultSupportFiles = {
-  before: path.join('cypress', 'support', 'index.js'),
-}
-
 export class NonStandardMigrationError extends Error {
   constructor (fileType: 'support' | 'config') {
     super()
