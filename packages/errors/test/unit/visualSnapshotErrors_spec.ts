@@ -8,6 +8,8 @@ import path from 'path'
 import pixelmatch from 'pixelmatch'
 import { PNG } from 'pngjs'
 import sinon, { SinonSpy } from 'sinon'
+import debugLib from 'debug'
+
 import * as errors from '../../src'
 
 // For importing the files below
@@ -20,6 +22,8 @@ const { terminalBanner } = require('terminal-banner')
 const ciProvider = require('@packages/server/lib/util/ci_provider')
 const browsers = require('@packages/server/lib/browsers')
 const launcherBrowsers = require('@packages/launcher/lib/browsers')
+
+const debug = debugLib(isCi ? '*' : 'visualSnapshotErrors')
 
 interface ErrorGenerator<T extends CypressErrorType> {
   default: Parameters<typeof errors.AllCypressErrors[T]>
@@ -59,69 +63,62 @@ const convertHtmlToImage = async (htmlfile: string) => {
     win.webContents.debugger.attach()
   }
 
-  return await new Promise((resolve, reject) => {
-    win.webContents.once('did-finish-load', async () => {
-      try {
-        await win.webContents.debugger.sendCommand('Emulation.setDeviceMetricsOverride', {
-          width: WIDTH,
-          height: HEIGHT,
-          deviceScaleFactor: 1,
-          mobile: false,
-        })
+  debug(`Loading ${htmlfile}`)
 
-        const { data } = await win.webContents.debugger.sendCommand('Page.captureScreenshot', {
-          format: 'png',
-          quality: 100,
-        })
+  await win.loadFile(htmlfile)
 
-        const imagePath = htmlfile.replace('.html', EXT)
-        const baseImagePath = path.join(baseImageFolder, path.basename(imagePath))
-
-        const receivedImageBuffer = Buffer.from(data, 'base64')
-        const receivedPng = PNG.sync.read(receivedImageBuffer)
-        const receivedPngBuffer = PNG.sync.write(receivedPng)
-
-        await Promise.all([
-          fse.outputFile(imagePath, receivedPngBuffer),
-          fse.remove(htmlfile),
-        ])
-
-        // - if image does not exist in __snapshot-bases__
-        //   then copy into __snapshot-bases__
-        // - if image does exist then diff if, and if its
-        //   greater than >.01 diff, then copy it in
-        // - unless we're in CI, then fail if there's a diff
-        try {
-          const buf = await fse.readFile(baseImagePath)
-          const existingPng = PNG.sync.read(buf)
-          const diffPng = new PNG({ width: WIDTH, height: HEIGHT })
-          const changed = pixelmatch(existingPng.data, receivedPng.data, diffPng.data, WIDTH, HEIGHT, { threshold: 0.3 })
-
-          console.log('num pixels different:', changed)
-
-          if (changed > 100) {
-            if (isCi) {
-              return reject(new Error(`Image difference detected. Base error image no longer matches for file: ${baseImagePath}, off by ${changed} pixels`))
-            }
-
-            await copyImageToBase(imagePath, baseImagePath)
-          }
-        } catch (err: any) {
-          if (err.code === 'ENOENT') {
-            await copyImageToBase(imagePath, baseImagePath)
-          } else {
-            reject(err)
-          }
-        } finally {
-          resolve({})
-        }
-      } catch (e) {
-        reject(e)
-      }
-    })
-
-    win.loadFile(htmlfile).catch(reject)
+  await win.webContents.debugger.sendCommand('Emulation.setDeviceMetricsOverride', {
+    width: WIDTH,
+    height: HEIGHT,
+    deviceScaleFactor: 1,
+    mobile: false,
   })
+
+  const { data } = await win.webContents.debugger.sendCommand('Page.captureScreenshot', {
+    format: 'png',
+    quality: 100,
+  })
+
+  const imagePath = htmlfile.replace('.html', EXT)
+  const baseImagePath = path.join(baseImageFolder, path.basename(imagePath))
+
+  const receivedImageBuffer = Buffer.from(data, 'base64')
+  const receivedPng = PNG.sync.read(receivedImageBuffer)
+  const receivedPngBuffer = PNG.sync.write(receivedPng)
+
+  await Promise.all([
+    fse.outputFile(imagePath, receivedPngBuffer),
+    fse.remove(htmlfile),
+  ])
+
+  // - if image does not exist in __snapshot-bases__
+  //   then copy into __snapshot-bases__
+  // - if image does exist then diff if, and if its
+  //   greater than >.01 diff, then copy it in
+  // - unless we're in CI, then fail if there's a diff
+  try {
+    const buf = await fse.readFile(baseImagePath)
+    const existingPng = PNG.sync.read(buf)
+    const diffPng = new PNG({ width: WIDTH, height: HEIGHT })
+    const changed = pixelmatch(existingPng.data, receivedPng.data, diffPng.data, WIDTH, HEIGHT, { threshold: 0.3 })
+
+    console.log('num pixels different:', changed)
+
+    if (changed > 100) {
+      if (isCi) {
+        throw new Error(`Image difference detected. Base error image no longer matches for file: ${baseImagePath}, off by ${changed} pixels`)
+      }
+
+      await copyImageToBase(imagePath, baseImagePath)
+    }
+  } catch (e: any) {
+    if (e.code === 'ENOENT') {
+      debug(`Adding new image: ${imagePath}`)
+      await copyImageToBase(imagePath, baseImagePath)
+    } else {
+      throw e
+    }
+  }
 }
 
 const outputHtmlFolder = path.join(__dirname, '..', '..', '__snapshot-images__')
@@ -165,6 +162,7 @@ const snapshotErrorConsoleLogs = function (errorFileName: string) {
     body {
       margin: 5px;
       padding: 0;
+      overflow: hidden;
     }
     pre {
       white-space: pre-wrap;
@@ -196,6 +194,8 @@ const testVisualError = <K extends CypressErrorType> (errorGeneratorFn: () => Er
     for (const [key, arr] of Object.entries(variants)) {
       const filename = key === 'default' ? errorType : `${errorType} - ${key}`
 
+      debug(`Converting ${filename}`)
+
       terminalBanner(filename)
 
       consoleLog.resetHistory()
@@ -204,12 +204,16 @@ const testVisualError = <K extends CypressErrorType> (errorGeneratorFn: () => Er
 
       errors.log(err)
 
-      const htmlFilename = path.join(outputHtmlFolder, `${filename }.html`)
+      const htmlFilename = path.join(outputHtmlFolder, `${filename}.html`)
 
       await snapshotErrorConsoleLogs(htmlFilename)
 
+      debug(`Snapshotted ${htmlFilename}`)
+
       if (process.env.SKIP_IMAGE_CONVERSION !== '1') {
+        debug(`Converting ${errorType} to image`)
         await convertHtmlToImage(htmlFilename)
+        debug(`Conversion complete for ${errorType}`)
       }
     }
   }).timeout(10000)
