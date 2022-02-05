@@ -56,7 +56,7 @@ export interface CreateConfigOptions {
 }
 
 export async function createConfigString (cfg: OldCypressConfig, options: CreateConfigOptions) {
-  return createCypressConfig(reduceConfig(cfg), getPluginRelativePath(cfg), options)
+  return createCypressConfig(reduceConfig(cfg), await getPluginRelativePath(cfg, options.projectRoot), options)
 }
 
 interface FileToBeMigratedManually {
@@ -126,10 +126,20 @@ export function initComponentTestingMigration (
   })
 }
 
-function getPluginRelativePath (cfg: OldCypressConfig): string {
-  const DEFAULT_PLUGIN_PATH = path.normalize('cypress/plugins/index.js')
+async function getPluginRelativePath (cfg: OldCypressConfig, root: string): Promise<string> {
+  if (cfg.pluginsFile) {
+    return cfg.pluginsFile
+  }
 
-  return cfg.pluginsFile ? cfg.pluginsFile : DEFAULT_PLUGIN_PATH
+  try {
+    let pluginPath = path.normalize('cypress/plugins/index.ts')
+
+    await fs.stat(path.join(root, pluginPath))
+
+    return pluginPath
+  } catch {
+    return path.normalize('cypress/plugins/index.js')
+  }
 }
 
 // If they are running an old version of Cypress
