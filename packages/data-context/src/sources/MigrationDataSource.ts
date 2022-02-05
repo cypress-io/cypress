@@ -20,8 +20,10 @@ import {
   getComponentTestFilesGlobs,
   getComponentFolder,
 } from './migration'
-
 import type { FilePart } from './migration/format'
+import Debug from 'debug'
+
+const debug = Debug('cypress:data-content:migration:source')
 
 export interface MigrationFile {
   testingType: TestingType
@@ -151,6 +153,7 @@ export class MigrationDataSource {
 
     const config = await this.parseCypressConfig()
 
+    debug('supportFilesForMigrationGuide: config %O', config)
     if (!await shouldShowRenameSupport(this.ctx.currentProject, config)) {
       return null
     }
@@ -162,8 +165,12 @@ export class MigrationDataSource {
     try {
       const supportFiles = await supportFilesForMigration(this.ctx.currentProject)
 
+      debug('supportFilesForMigrationGuide: supportFiles %O', supportFiles)
+
       return supportFiles
     } catch (err) {
+      debug('supportFilesForMigrationGuide: err %O', err)
+
       return null
     }
   }

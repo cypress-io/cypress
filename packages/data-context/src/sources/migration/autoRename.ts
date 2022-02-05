@@ -1,5 +1,4 @@
 import globby from 'globby'
-import path from 'path'
 import type { TestingType } from '@packages/types'
 import {
   FilePart,
@@ -107,7 +106,7 @@ export async function getSpecs (projectRoot: string, config: OldCypressConfig): 
     ? []
     : integrationFolder === 'cypress/integration'
       ? ['**/*'].map((glob) => `${integrationFolder}/${glob}`)
-      : integrationTestFiles.map((glob) => path.join(integrationFolder, glob))
+      : integrationTestFiles.map((glob) => `${integrationFolder}/${glob}`)
 
   let specs = integrationFolder === false
     ? []

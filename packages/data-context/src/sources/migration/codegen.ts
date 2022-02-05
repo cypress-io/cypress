@@ -10,6 +10,9 @@ import { substitute } from './autoRename'
 import type { TestingType } from '@packages/types'
 import prettier from 'prettier'
 import type { MigrationFile } from '..'
+import Debug from 'debug'
+
+const debug = Debug('cypress:data-content:migration:utils')
 
 type ConfigOptions = {
   global: Record<string, unknown>
@@ -56,7 +59,7 @@ export interface CreateConfigOptions {
 }
 
 export async function createConfigString (cfg: OldCypressConfig, options: CreateConfigOptions) {
-  return createCypressConfig(reduceConfig(cfg), getPluginRelativePath(cfg), options)
+  return createCypressConfig(reduceConfig(cfg), await getPluginRelativePath(cfg, options.projectRoot), options)
 }
 
 interface FileToBeMigratedManually {
@@ -126,10 +129,8 @@ export async function initComponentTestingMigration (
   })
 }
 
-function getPluginRelativePath (cfg: OldCypressConfig): string {
-  const DEFAULT_PLUGIN_PATH = path.normalize('cypress/plugins/index.js')
-
-  return cfg.pluginsFile ? cfg.pluginsFile : DEFAULT_PLUGIN_PATH
+async function getPluginRelativePath (cfg: OldCypressConfig, projectRoot: string): Promise<string> {
+  return cfg.pluginsFile ? cfg.pluginsFile : await tryGetDefaultLegacyPluginsFile(projectRoot) || ''
 }
 
 // If they are running an old version of Cypress
@@ -185,7 +186,7 @@ function formatObjectForConfig (obj: Record<string, unknown>) {
 }
 
 function createE2eTemplate (pluginPath: string, hasPluginsFile: boolean, options: Record<string, unknown>) {
-  const requirePlugins = `return require('.${path.sep}${pluginPath}')(on, config)`
+  const requirePlugins = `return require('./${pluginPath}')(on, config)`
 
   const setupNodeEvents = `setupNodeEvents(on, config) {
     ${hasPluginsFile ? requirePlugins : ''}
@@ -219,14 +220,15 @@ export async function hasSpecFile (projectRoot: string, folder: string, glob: st
 }
 
 export async function tryGetDefaultLegacyPluginsFile (projectRoot: string) {
-  const glob = path.join(projectRoot, 'cypress', 'plugins', 'index.*')
-  const files = await globby(glob)
+  const files = await globby('cypress/plugins/index.*', { cwd: projectRoot })
 
   return files[0]
 }
 
 export async function tryGetDefaultLegacySupportFile (projectRoot: string) {
   const files = await globby('cypress/support/index.*', { cwd: projectRoot })
+
+  debug('tryGetDefaultLegacySupportFile: files %O', files)
 
   return files[0]
 }
@@ -242,9 +244,8 @@ export async function getDefaultLegacySupportFile (projectRoot: string) {
 }
 
 export async function supportFilesForMigration (projectRoot: string): Promise<MigrationFile> {
-  const defaultSupportFile = await getDefaultLegacySupportFile(projectRoot)
-
-  const defaultOldSupportFile = path.relative(projectRoot, defaultSupportFile)
+  debug('Checking for support files in %s', projectRoot)
+  const defaultOldSupportFile = await getDefaultLegacySupportFile(projectRoot)
   const defaultNewSupportFile = renameSupportFilePath(defaultOldSupportFile)
 
   const afterParts = formatMigrationFile(
@@ -280,8 +281,7 @@ export function moveSpecFiles (projectRoot: string, specs: SpecToMove[]) {
 }
 
 export function renameSupportFilePath (relative: string) {
-  const re = /cypress[\\\/]support[\\\/](?<name>index)\.[j|t|s[x]?/
-  const res = new RegExp(re).exec(relative)
+  const res = new RegExp(supportFileRegexps.e2e.beforeRegexp).exec(relative)
 
   if (!res?.groups?.name) {
     throw new NonStandardMigrationError('support')
