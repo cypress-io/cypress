@@ -17425,18 +17425,6 @@ electron-is-dev@^2.0.0:
   resolved "https://registry.npmjs.org/electron-is-dev/-/electron-is-dev-2.0.0.tgz#833487a069b8dad21425c67a19847d9064ab19bd"
   integrity sha512-3X99K852Yoqu9AcW50qz3ibYBWY79/pBhlMCab8ToEWS48R0T9tyxRiQhwylE7zQdXrMnx2JKqUJyMPmt5FBqA==
 
-electron-mocha@^11.0.2:
-  version "11.0.2"
-  resolved "https://registry.yarnpkg.com/electron-mocha/-/electron-mocha-11.0.2.tgz#f8fd6c3af539f3c7a9aed4aba29cf12c3f408810"
-  integrity sha512-fOk+zUgSIsmL2cuIrd7IlK4eRhGVi1PYIB3QvqiBO+6f6AP8XLkYkT9eORlL2xwaS3yAAk02Y+4OTuhtqHPkEQ==
-  dependencies:
-    ansi-colors "^4.1.1"
-    electron-window "^0.8.0"
-    fs-extra "^10.0.0"
-    mocha "^9.1.1"
-    which "^2.0.2"
-    yargs "^16.2.0"
-
 electron-notarize@^1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/electron-notarize/-/electron-notarize-1.1.1.tgz#3ed274b36158c1beb1dbef14e7faf5927e028629"
