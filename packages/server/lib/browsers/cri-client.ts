@@ -254,6 +254,10 @@ export const create = Bluebird.method((target: websocketUrl, onAsynchronousError
 
         const browserClient = await chromeRemoteInterface({ host, port, target: versionInfo.webSocketDebuggerUrl })
 
+        closed = true
+
+        await cri.close()
+
         return browserClient.send('Target.closeTarget', { targetId: targetToClose })
       },
       send: Bluebird.method((command: CRI.Command, params?: object) => {
