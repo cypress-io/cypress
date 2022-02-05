@@ -1,6 +1,5 @@
 import globby from 'globby'
 import { MIGRATION_STEPS } from '@packages/types'
-import path from 'path'
 import { getSpecs, OldCypressConfig, tryGetDefaultLegacySupportFile } from '.'
 
 function getTestFilesGlobs (config: OldCypressConfig, type: 'component' | 'integration'): string[] {
@@ -62,7 +61,7 @@ export function getComponentFolder (config: OldCypressConfig) {
 }
 
 async function hasSpecFiles (projectRoot: string, dir: string, testFilesGlob: string[]): Promise<boolean> {
-  const f = await globby(testFilesGlob.map((x) => path.join(projectRoot, dir, x)))
+  const f = await globby(testFilesGlob, { cwd: `${projectRoot}/${dir}` })
 
   return f.length > 0
 }

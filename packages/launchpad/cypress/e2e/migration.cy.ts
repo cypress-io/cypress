@@ -78,10 +78,8 @@ describe('Full migration flow for each project', () => {
     cy.get(setupComponentStep).should('exist')
     cy.get(configFileStep).should('exist')
 
-    // needs some time for the CT migration tool to kick in
-    cy.wait(1000)
     // Migration workflow
-    cy.contains('src/button.spec.js')
+    cy.contains('src/button.spec.js', { timeout: 10000 })
     cy.contains('src/input-spec.tsx')
 
     skipCTMigration()

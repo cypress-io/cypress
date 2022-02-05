@@ -106,7 +106,7 @@ export async function getSpecs (projectRoot: string, config: OldCypressConfig): 
   const globs = integrationFolder === false
     ? []
     : integrationFolder === 'cypress/integration'
-      ? ['**/*'].map((glob) => path.join(integrationFolder, glob))
+      ? ['**/*'].map((glob) => `${integrationFolder}/${glob}`)
       : integrationTestFiles.map((glob) => path.join(integrationFolder, glob))
 
   let specs = integrationFolder === false
@@ -134,7 +134,7 @@ export async function getSpecs (projectRoot: string, config: OldCypressConfig): 
     componentSpecs = []
   } else {
     const globs = componentTestFiles.map((glob) => {
-      return path.join(componentFolder, glob)
+      return `${componentFolder}/${glob}`
     })
 
     componentSpecs = (await globby(globs, { onlyFiles: true, cwd: projectRoot })).map((relative) => {

@@ -69,7 +69,7 @@ export interface ComponentTestingMigrationStatus {
   completed: boolean
 }
 
-export function initComponentTestingMigration (
+export async function initComponentTestingMigration (
   projectRoot: string,
   componentFolder: string,
   testFiles: string[],
@@ -79,7 +79,7 @@ export function initComponentTestingMigration (
   watcher: chokidar.FSWatcher
 }> {
   const watchPaths = testFiles.map((glob) => {
-    return path.join(componentFolder, glob)
+    return `${componentFolder}/${glob}`
   })
 
   const watcher = chokidar.watch(
@@ -88,9 +88,9 @@ export function initComponentTestingMigration (
     },
   )
 
-  let filesToBeMoved: Map<string, FileToBeMigratedManually> = globby.sync(watchPaths, {
+  let filesToBeMoved: Map<string, FileToBeMigratedManually> = (await globby(watchPaths, {
     cwd: projectRoot,
-  }).reduce<Map<string, FileToBeMigratedManually>>((acc, relative) => {
+  })).reduce<Map<string, FileToBeMigratedManually>>((acc, relative) => {
     acc.set(relative, { relative, moved: false })
 
     return acc
@@ -226,7 +226,7 @@ export async function tryGetDefaultLegacyPluginsFile (projectRoot: string) {
 }
 
 export async function tryGetDefaultLegacySupportFile (projectRoot: string) {
-  const files = await globby(path.join(projectRoot, 'cypress', 'support', 'index.*'))
+  const files = await globby('cypress/support/index.*', { cwd: projectRoot })
 
   return files[0]
 }
@@ -280,7 +280,7 @@ export function moveSpecFiles (projectRoot: string, specs: SpecToMove[]) {
 }
 
 export function renameSupportFilePath (relative: string) {
-  const re = /cypress\/support\/(?<name>index)\.[j|t|s[x]?/
+  const re = /cypress[\\\/]support[\\\/](?<name>index)\.[j|t|s[x]?/
   const res = new RegExp(re).exec(relative)
 
   if (!res?.groups?.name) {
@@ -384,7 +384,7 @@ function getSpecPattern (cfg: OldCypressConfig, testType: TestingType) {
   const customComponentFolder = cfg.component?.componentFolder ?? cfg.componentFolder ?? null
 
   if (testType === 'component' && customComponentFolder) {
-    return `${customComponentFolder}/${specPattern}`
+    return specPattern
   }
 
   if (testType === 'e2e') {
@@ -404,7 +404,7 @@ export function formatConfig (config: string) {
   return prettier.format(config, {
     semi: false,
     singleQuote: true,
-    endOfLine: 'auto',
+    endOfLine: 'lf',
     parser: 'babel',
   })
 }

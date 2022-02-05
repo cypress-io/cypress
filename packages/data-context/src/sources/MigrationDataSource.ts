@@ -163,7 +163,7 @@ export class MigrationDataSource {
       const supportFiles = await supportFilesForMigration(this.ctx.currentProject)
 
       return supportFiles
-    } catch {
+    } catch (err) {
       return null
     }
   }
