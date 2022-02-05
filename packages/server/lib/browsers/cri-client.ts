@@ -169,6 +169,8 @@ export const create = Bluebird.method((target: websocketUrl, onAsynchronousError
     connected = false
 
     if (closed) {
+      enqueuedCommands = []
+
       return
     }
 
