@@ -136,13 +136,11 @@ const testVisualError = <K extends CypressErrorType> (errorGeneratorFn: () => Er
   }).timeout(5000)
 }
 
-const testVisualErrors = (whichError: CypressErrorType[] | '*', errorsToTest: {[K in CypressErrorType]: () => ErrorGenerator<K>}) => {
+const testVisualErrors = (whichError: CypressErrorType | '*', errorsToTest: {[K in CypressErrorType]: () => ErrorGenerator<K>}) => {
   // if we aren't testing all the errors
   if (whichError !== '*') {
-    for (const errorToTest of whichError) {
-      // then just test this individual error
-      return testVisualError(errorsToTest[errorToTest], errorToTest)
-    }
+    // then just test this individual error
+    return testVisualError(errorsToTest[whichError], whichError)
   }
 
   // otherwise test all the errors
@@ -205,7 +203,7 @@ const testVisualErrors = (whichError: CypressErrorType[] | '*', errorsToTest: {[
 const makeErr = () => {
   const err = new Error('fail whale')
 
-  err.stack = err.stack?.split('\n').slice(0, 4).join('\n') ?? ''
+  err.stack = err.stack?.split('\n').slice(0, 3).join('\n') ?? ''
 
   return err as Error & {stack: string}
 }
