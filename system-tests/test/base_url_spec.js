@@ -10,7 +10,9 @@ describe('e2e baseUrl', () => {
   context('https', () => {
     systemTests.setup({
       settings: {
-        baseUrl: 'https://httpbin.org',
+        e2e: {
+          baseUrl: 'https://httpbin.org',
+        },
       },
     })
 
@@ -27,7 +29,9 @@ describe('e2e baseUrl', () => {
         onServer,
       },
       settings: {
-        baseUrl: 'http://localhost:9999/app',
+        e2e: {
+          baseUrl: 'http://localhost:9999/app',
+        },
       },
     })
 
