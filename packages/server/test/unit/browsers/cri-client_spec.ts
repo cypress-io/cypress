@@ -1,5 +1,5 @@
 import Bluebird from 'bluebird'
-import { create, newTab } from '../../../lib/browsers/cri-client'
+import { create } from '../../../lib/browsers/cri-client'
 import EventEmitter from 'events'
 
 const { expect, proxyquire, sinon } = require('../../spec_helper')
@@ -11,7 +11,6 @@ const PORT = 50505
 describe('lib/browsers/cri-client', function () {
   let criClient: {
     create: typeof create
-    newTab: typeof newTab
   }
   let send: sinon.SinonStub
   let criImport: sinon.SinonStub & {
@@ -19,7 +18,6 @@ describe('lib/browsers/cri-client', function () {
   }
   let onError: sinon.SinonStub
   let getClient: () => ReturnType<typeof create>
-  let getNewTab: () => ReturnType<typeof newTab>
 
   beforeEach(function () {
     sinon.stub(Bluebird, 'promisify').returnsArg(0)
@@ -45,7 +43,6 @@ describe('lib/browsers/cri-client', function () {
     })
 
     getClient = () => criClient.create(DEBUGGER_URL, onError)
-    getNewTab = () => criClient.newTab(HOST, PORT, onError)
   })
 
   context('.create', function () {
@@ -94,55 +91,6 @@ describe('lib/browsers/cri-client', function () {
           })
         })
       })
-    })
-
-    context('#ensureMinimumProtocolVersion', function () {
-      function withProtocolVersion (actual, test) {
-        if (actual) {
-          send.withArgs('Browser.getVersion')
-          .resolves({ protocolVersion: actual })
-        }
-
-        return getClient()
-        .then((client) => {
-          return client.ensureMinimumProtocolVersion(test)
-        })
-      }
-
-      it('resolves if protocolVersion = current', function () {
-        return expect(withProtocolVersion('1.3', '1.3')).to.be.fulfilled
-      })
-
-      it('resolves if protocolVersion > current', function () {
-        return expect(withProtocolVersion('1.4', '1.3')).to.be.fulfilled
-      })
-
-      it('rejects if Browser.getVersion not supported yet', function () {
-        send.withArgs('Browser.getVersion')
-        .rejects()
-
-        return expect(withProtocolVersion(null, '1.3')).to.be
-        .rejectedWith('A minimum CDP version of v1.3 is required, but the current browser has an older version.')
-      })
-
-      it('rejects if protocolVersion < current', function () {
-        return expect(withProtocolVersion('1.2', '1.3')).to.be
-        .rejectedWith('A minimum CDP version of v1.3 is required, but the current browser has v1.2.')
-      })
-    })
-  })
-
-  context('.newTab', function () {
-    it('returns a new cri client connected to a new tab', async function () {
-      const mockClient = {}
-
-      sinon.stub(criClient, 'create').withArgs('http://web/socket/url', onError).resolves(mockClient)
-
-      const client = await getNewTab()
-
-      expect(criImport.New).to.be.called
-      expect(criClient.create).to.be.called
-      expect(client).to.equal(mockClient)
     })
   })
 })

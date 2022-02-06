@@ -1,4 +1,3 @@
-import Bluebird from 'bluebird'
 import debugModule from 'debug'
 import _ from 'lodash'
 import CRI from 'chrome-remote-interface'
@@ -13,25 +12,50 @@ const debugVerboseReceive = debugModule('cypress-verbose:server:browsers:cri-cli
 const WEBSOCKET_NOT_OPEN_RE = /^WebSocket is (?:not open|already in CLOSING or CLOSED state)/
 
 /**
- * Wrapper for Chrome Remote Interface client. Only allows "send" method.
- * @see https://github.com/cyrus-and/chrome-remote-interface#clientsendmethod-params-callback
-*/
-interface CRIWrapper {
-  targetId: string
+ * Enumerations to make programming CDP slightly simpler - provides
+ * IntelliSense whenever you use named types.
+ */
+namespace CRIWrapper {
+  export type Command =
+    'Browser.getVersion' |
+    'Page.bringToFront' |
+    'Page.captureScreenshot' |
+    'Page.navigate' |
+    'Page.startScreencast' |
+    'Page.screencastFrameAck' |
+    'Page.setDownloadBehavior' |
+    string
+
+  export type EventName =
+    'Page.screencastFrame' |
+    'Page.downloadWillBegin' |
+    'Page.downloadProgress' |
+    string
+
   /**
-   * Sends a command to the Chrome remote interface.
-   * @example client.send('Page.navigate', { url })
-  */
-  send (command: CRI.Command, params?: object): Bluebird<any>
-  /**
-   * Registers callback for particular event.
-   * @see https://github.com/cyrus-and/chrome-remote-interface#class-cdp
+   * Wrapper for Chrome Remote Interface client. Only allows "send" method.
+   * @see https://github.com/cyrus-and/chrome-remote-interface#clientsendmethod-params-callback
    */
-  on (eventName: CRI.Event, cb: Function): void
-  /**
-   * Calls underlying remote interface client close
-  */
-  close (): Bluebird<void>
+  export interface Client {
+    /**
+     * The target id attached to by this client
+     */
+    targetId: string
+    /**
+     * Sends a command to the Chrome remote interface.
+     * @example client.send('Page.navigate', { url })
+     */
+    send (command: Command, params?: object): Promise<any>
+    /**
+     * Registers callback for particular event.
+     * @see https://github.com/cyrus-and/chrome-remote-interface#class-cdp
+     */
+    on (eventName: EventName, cb: Function): void
+    /**
+     * Calls underlying remote interface client close
+     */
+    close (): Promise<void>
+  }
 }
 
 const maybeDebugCdpMessages = (cri) => {
@@ -77,15 +101,15 @@ const maybeDebugCdpMessages = (cri) => {
 
 type DeferredPromise = { resolve: Function, reject: Function }
 
-export const create = (target: string, host: string, port: number, onAsynchronousError: Function): Promise<CRIWrapper> => {
-  const subscriptions: {eventName: CRI.Event, cb: Function}[] = []
-  let enqueuedCommands: {command: CRI.Command, params: any, p: DeferredPromise }[] = []
+export const create = (target: string, onAsynchronousError: Function, host?: string, port?: number): Promise<CRIWrapper.Client> => {
+  const subscriptions: {eventName: CRIWrapper.EventName, cb: Function}[] = []
+  let enqueuedCommands: {command: CRIWrapper.Command, params: any, p: DeferredPromise }[] = []
 
   let closed = false // has the user called .close on this?
   let connected = false // is this currently connected to CDP?
 
   let cri
-  let client: CRIWrapper
+  let client: CRIWrapper.Client
 
   const reconnect = () => {
     debug('disconnected, attempting to reconnect... %o', { closed })
@@ -138,8 +162,6 @@ export const create = (target: string, host: string, port: number, onAsynchronou
 
       maybeDebugCdpMessages(cri)
 
-      cri.send = Bluebird.promisify(cri.send, { context: cri })
-
       // @see https://github.com/cyrus-and/chrome-remote-interface/issues/72
       cri._notifier.on('disconnect', reconnect)
     })
@@ -149,9 +171,9 @@ export const create = (target: string, host: string, port: number, onAsynchronou
   .then(() => {
     client = {
       targetId: target,
-      send: Bluebird.method((command: CRI.Command, params?: object) => {
+      send: async (command, params?) => {
         const enqueue = () => {
-          return new Bluebird((resolve, reject) => {
+          return new Promise((resolve, reject) => {
             enqueuedCommands.push({ command, params, p: { resolve, reject } })
           })
         }
@@ -174,8 +196,8 @@ export const create = (target: string, host: string, port: number, onAsynchronou
         }
 
         return enqueue()
-      }),
-      on (eventName: CRI.Event, cb: Function) {
+      },
+      on (eventName, cb) {
         subscriptions.push({ eventName, cb })
         debug('registering CDP on event %o', { eventName })
 

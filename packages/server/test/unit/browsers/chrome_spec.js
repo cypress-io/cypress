@@ -11,20 +11,25 @@ const plugins = require(`../../../lib/plugins`)
 const utils = require(`../../../lib/browsers/utils`)
 const chrome = require(`../../../lib/browsers/chrome`)
 const { fs } = require(`../../../lib/util/fs`)
-const CriClient = require('../../../lib/browsers/cri-client')
+const { BrowserCriClient } = require('../../../lib/browsers/browser-cri-client')
 
 describe('lib/browsers/chrome', () => {
   context('#open', () => {
     beforeEach(function () {
       // mock CRI client during testing
       this.criClient = {
-        ensureMinimumProtocolVersion: sinon.stub().resolves(),
         send: sinon.stub().resolves(),
         Page: {
           screencastFrame: sinon.stub().returns(),
         },
         close: sinon.stub().resolves(),
         on: sinon.stub(),
+      }
+
+      this.browserCriClient = {
+        attachToTargetUrl: sinon.stub().resolves(this.criClient),
+        close: sinon.stub().resolves(),
+        ensureMinimumProtocolVersion: sinon.stub().withArgs('1.3').resolves(),
       }
 
       this.automation = {
@@ -47,7 +52,7 @@ describe('lib/browsers/chrome', () => {
       }
 
       sinon.stub(chrome, '_writeExtension').resolves('/path/to/ext')
-      sinon.stub(chrome, '_connectToChromeRemoteInterface').resolves(this.criClient)
+      sinon.stub(BrowserCriClient, 'create').resolves(this.browserCriClient)
       sinon.stub(plugins, 'execute').callThrough()
       sinon.stub(launch, 'launch').resolves(this.launchedBrowser)
       sinon.stub(utils, 'getProfileDir').returns('/profile/dir')
@@ -64,7 +69,7 @@ describe('lib/browsers/chrome', () => {
 
     afterEach(function () {
       mockfs.restore()
-      expect(this.criClient.ensureMinimumProtocolVersion).to.be.calledOnce
+      expect(this.browserCriClient.ensureMinimumProtocolVersion).to.be.calledOnce
     })
 
     it('focuses on the page, calls CRI Page.visit, enables Page events, and sets download behavior', function () {
@@ -303,13 +308,13 @@ describe('lib/browsers/chrome', () => {
 
         this.launchedBrowser.kill()
 
-        expect(this.criClient.close).to.be.calledOnce
+        expect(this.browserCriClient.close).to.be.calledOnce
         expect(kill).to.be.calledOnce
       })
     })
 
     it('rejects if CDP version check fails', function () {
-      this.criClient.ensureMinimumProtocolVersion.rejects()
+      this.browserCriClient.ensureMinimumProtocolVersion.rejects()
 
       return expect(chrome.open({ isHeadless: true, isHeaded: false }, 'http://', {}, this.automation)).to.be.rejectedWith('Cypress requires at least Chrome 64.')
     })
@@ -371,6 +376,11 @@ describe('lib/browsers/chrome', () => {
         send: sinon.stub().resolves(),
         on: sinon.stub(),
       }
+
+      const browserCriClient = {
+        attachToNewUrl: sinon.stub().withArgs('about:blank').resolves(criClient),
+      }
+
       const automation = {
         use: sinon.stub().returns(),
       }
@@ -380,14 +390,13 @@ describe('lib/browsers/chrome', () => {
         onInitializeNewBrowserTabCalled = true
       } }
 
-      sinon.stub(CriClient, 'newTab').withArgs('127.0.0.1', 100, options.onError).resolves(criClient)
       sinon.stub(chrome, '_maybeRecordVideo').withArgs(criClient, options, 354).resolves()
       sinon.stub(chrome, '_navigateUsingCRI').withArgs(criClient, options.url, 354).resolves()
       sinon.stub(chrome, '_handleDownloads').withArgs(criClient, options.downloadFolder, automation).resolves()
 
-      await chrome.connectToNewSpec({ majorVersion: 354 }, 100, options, automation)
+      await chrome.connectToNewSpec(browserCriClient, { majorVersion: 354 }, options, automation)
 
-      expect(CriClient.newTab).to.be.called
+      expect(browserCriClient.attachToNewUrl).to.be.called
       expect(automation.use).to.be.called
       expect(chrome._maybeRecordVideo).to.be.called
       expect(chrome._navigateUsingCRI).to.be.called
