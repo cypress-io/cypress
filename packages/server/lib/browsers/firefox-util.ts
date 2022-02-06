@@ -116,21 +116,20 @@ async function connectMarionetteToNewTab () {
   await navigateToUrl('about:blank')
 }
 
-async function connectToNewSpec (browser, debuggingPort, options, automation) {
+async function connectToNewSpec (browserCriClient, browser, options, automation) {
   debug('firefox: reconnecting to blank tab')
 
   await connectMarionetteToNewTab()
 
   debug('firefox: reconnecting CDP')
 
-  const browserCriClient = await createBrowserClient(debuggingPort, browser.displayName, options.onError)
-  const criClient = await browserCriClient.attachToTargetUrl(options.url)
+  const criClient = await browserCriClient.attachToTargetUrl('about:blank')
 
   new CdpAutomation(criClient.send, criClient.on, browserCriClient.closeCurrentTarget, automation)
 
   await options.onInitializeNewBrowserTab()
 
-  debug('firefox: navigating to about:blank')
+  debug(`firefox: navigating to ${options.url}`)
   await navigateToUrl(options.url)
 }
 
@@ -140,7 +139,7 @@ async function setupRemote (remotePort, automation, onError) {
 
   new CdpAutomation(criClient.send, criClient.on, browserCriClient.closeCurrentTarget, automation)
 
-  return criClient
+  return browserCriClient
 }
 
 async function navigateToUrl (url) {

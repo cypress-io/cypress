@@ -5,7 +5,7 @@ import Debug from 'debug'
 import getPort from 'get-port'
 import path from 'path'
 import urlUtil from 'url'
-import { launch } from '@packages/launcher/lib/browsers'
+import { launch, LaunchedBrowser } from '@packages/launcher/lib/browsers'
 import FirefoxProfile from 'firefox-profile'
 import firefoxUtil from './firefox-util'
 import utils from './utils'
@@ -16,6 +16,7 @@ import os from 'os'
 import treeKill from 'tree-kill'
 import mimeDb from 'mime-db'
 import { getRemoteDebuggingPort } from './protocol'
+import type CRI from 'chrome-remote-interface'
 
 const errors = require('../errors')
 
@@ -357,8 +358,8 @@ export function _createDetachedInstance (browserInstance: BrowserInstance): Brow
   return detachedInstance
 }
 
-export async function connectToNewSpec (browser: Browser, debuggingPort: number, options: any = {}, automation) {
-  await firefoxUtil.connectToNewSpec(browser, debuggingPort, options, automation)
+export async function connectToNewSpec (browserCriClient, browser: Browser, options: any = {}, automation) {
+  await firefoxUtil.connectToNewSpec(browserCriClient, browser, options, automation)
 }
 
 export function connectToExisting () {
@@ -515,10 +516,12 @@ export async function open (browser: Browser, url, options: any = {}, automation
     // user can overwrite this default with these env vars or --height, --width arguments
     MOZ_HEADLESS_WIDTH: '1280',
     MOZ_HEADLESS_HEIGHT: '721',
-  })
+  }) as LaunchedBrowser & { browserCriClient: CRI.Client}
 
   try {
-    await firefoxUtil.setup({ automation, extensions: launchOptions.extensions, url, foxdriverPort, marionettePort, remotePort, onError: options.onError })
+    const [,, browserCriClient] = await firefoxUtil.setup({ automation, extensions: launchOptions.extensions, url, foxdriverPort, marionettePort, remotePort, onError: options.onError })
+
+    browserInstance.browserCriClient = browserCriClient
   } catch (err) {
     errors.throw('FIREFOX_COULD_NOT_CONNECT', err)
   }

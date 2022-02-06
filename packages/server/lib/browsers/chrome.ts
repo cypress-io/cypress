@@ -430,7 +430,7 @@ export = {
   async connectToNewSpec (browserCriClient, browser: Browser, options: CypressConfiguration = {}, automation) {
     debug('connecting to new chrome tab in existing instance with url and debugging port', { url: options.url })
 
-    const criClient = await browserCriClient.attachToNewUrl(options.url)
+    const criClient = await browserCriClient.attachToNewUrl('about:blank')
 
     this._setAutomation(browserCriClient, criClient, automation)
 

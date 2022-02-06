@@ -219,7 +219,9 @@ const automation = {
   closeBrowserTabs (fn) {
     return Promise.try(() => {
       return browser.windows.getCurrent({ populate: true })
-    }).then((windowInfo) => browser.tabs.remove(windowInfo.tabs.map((tab) => tab.id)).then(fn))
+    }).then((windowInfo) => {
+      return browser.tabs.remove(windowInfo.tabs.map((tab) => tab.id))
+    }).then(fn)
   },
 
   query (data) {
