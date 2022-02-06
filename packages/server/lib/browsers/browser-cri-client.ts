@@ -105,12 +105,18 @@ export async function createBrowserClient (port: number, browserName: string, on
         return browserClient.send('Target.closeTarget', { targetId: currentlyAttachedTarget.targetId })
       }
 
+      const close = async () => {
+        await currentlyAttachedTarget.close()
+        await browserClient.close()
+      }
+
       return {
         ensureMinimumProtocolVersion,
         getProtocolVersion,
         attachToTargetUrl,
         attachToNewUrl,
         closeCurrentTarget,
+        close,
       }
     } catch (err) {
       const delay = _getDelayMsForRetry(retryIndex, browserName)
