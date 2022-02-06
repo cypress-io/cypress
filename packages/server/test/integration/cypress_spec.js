@@ -46,6 +46,7 @@ const appData = require(`../../lib/util/app_data`)
 const electronApp = require('../../lib/util/electron-app')
 const savedState = require(`../../lib/saved_state`)
 const { getCtx } = require(`../../lib/makeDataContext`)
+const { BrowserCriClient } = require(`../../lib/browsers/browser-cri-client`)
 
 const TYPICAL_BROWSERS = [
   {
@@ -976,15 +977,18 @@ describe('lib/cypress', () => {
           // during testing, do not try to connect to the remote interface or
           // use the Chrome remote interface client
           const criClient = {
-            ensureMinimumProtocolVersion: sinon.stub().resolves(),
-            close: sinon.stub().resolves(),
             on: sinon.stub(),
             send: sinon.stub(),
+          }
+          const browserCriClient = {
+            ensureMinimumProtocolVersion: sinon.stub().resolves(),
+            attachToTargetUrl: sinon.stub().resolves(criClient),
+            close: sinon.stub().resolves(),
           }
 
           sinon.stub(chromeBrowser, '_writeExtension').resolves()
 
-          sinon.stub(chromeBrowser, '_connectToChromeRemoteInterface').resolves(criClient)
+          sinon.stub(BrowserCriClient, 'create').resolves(browserCriClient)
           // the "returns(resolves)" stub is due to curried method
           // it accepts URL to visit and then waits for actual CRI client reference
           // and only then navigates to that URL
@@ -1020,7 +1024,8 @@ describe('lib/cypress', () => {
             expect(chromeBrowser._navigateUsingCRI).to.have.been.calledOnce
             expect(chromeBrowser._setAutomation).to.have.been.calledOnce
 
-            expect(chromeBrowser._connectToChromeRemoteInterface).to.have.been.calledOnce
+            expect(BrowserCriClient.create).to.have.been.calledOnce
+            expect(browserCriClient.attachToTargetUrl).to.have.been.calledOnce
           })
         })
 

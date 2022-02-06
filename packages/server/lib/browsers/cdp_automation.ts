@@ -286,7 +286,7 @@ export class CdpAutomation {
 
       case 'clear:cookie':
         return this.getCookie(data)
-        // tap, so we can resolve with the value of the removed cookie
+        // resolve with the value of the removed cookie
         // also, getting the cookie via CDP first will ensure that we send a cookie `domain` to CDP
         // that matches the cookie domain that is really stored
         .then(async (cookieToBeCleared) => {
