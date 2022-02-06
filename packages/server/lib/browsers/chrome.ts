@@ -12,10 +12,12 @@ import { launch } from '@packages/launcher'
 import appData from '../util/app_data'
 import { fs } from '../util/fs'
 import { CdpAutomation, screencastOpts } from './cdp_automation'
-import * as CriClient from './cri-client'
 import * as protocol from './protocol'
 import utils from './utils'
 import type { Browser } from './types'
+import { createBrowserClient } from './browser-cri-client'
+import type CRI from 'chrome-remote-interface'
+import type { LaunchedBrowser } from '@packages/launcher/lib/browsers'
 
 // TODO: this is defined in `cypress-npm-api` but there is currently no way to get there
 type CypressConfiguration = any
@@ -245,22 +247,6 @@ const _disableRestorePagesPrompt = function (userDir) {
   .catch(() => { })
 }
 
-// After the browser has been opened, we can connect to
-// its remote interface via a websocket.
-const _connectToChromeRemoteInterface = function (port, onError, browserDisplayName, url?) {
-  // @ts-ignore
-  la(check.userPort(port), 'expected port number to connect CRI to', port)
-
-  debug('connecting to Chrome remote interface at random port %d', port)
-
-  return protocol.getWsTargetFor(port, browserDisplayName, url)
-  .then((wsUrl) => {
-    debug('received wsUrl %s for port %d', wsUrl, port)
-
-    return CriClient.create(wsUrl, onError, '127.0.0.1', port)
-  })
-}
-
 const _maybeRecordVideo = async function (client, options, browserMajorVersion) {
   if (!options.onScreencastFrame) {
     debug('options.onScreencastFrame is false')
@@ -329,9 +315,9 @@ const _handleDownloads = async function (client, dir, automation) {
   })
 }
 
-const _setAutomation = (client, automation) => {
+const _setAutomation = (browserCriClient, client, automation) => {
   return automation.use(
-    new CdpAutomation(client.send, client.on, automation, client.closeTarget),
+    new CdpAutomation(client.send, client.on, browserCriClient.closeCurrentTarget, automation),
   )
 }
 
@@ -345,8 +331,6 @@ export = {
   _normalizeArgExtensions,
 
   _removeRootExtension,
-
-  _connectToChromeRemoteInterface,
 
   _maybeRecordVideo,
 
@@ -443,12 +427,12 @@ export = {
     return args
   },
 
-  async connectToNewSpec (browser: Browser, debuggingPort: number, options: CypressConfiguration = {}, automation) {
-    debug('connecting to new chrome tab in existing instance with url and debugging port', { url: options.url, debuggingPort })
+  async connectToNewSpec (browserCriClient, browser: Browser, options: CypressConfiguration = {}, automation) {
+    debug('connecting to new chrome tab in existing instance with url and debugging port', { url: options.url })
 
-    const criClient = await CriClient.newTab('127.0.0.1', debuggingPort, options.onError)
+    const criClient = await browserCriClient.attachToNewUrl(options.url)
 
-    this._setAutomation(criClient, automation)
+    this._setAutomation(browserCriClient, criClient, automation)
 
     await options.onInitializeNewBrowserTab()
 
@@ -462,12 +446,13 @@ export = {
     const port = await protocol.getRemoteDebuggingPort()
 
     debug('connecting to existing chrome instance with url and debugging port', { url: options.url, port })
-    const criClient = await this._connectToChromeRemoteInterface(port, options.onError, browser.displayName, options.url)
+    const browserCriClient = await createBrowserClient(port, browser.displayName, options.onError)
+    const criClient = await browserCriClient.attachToTargetUrl(options.url)
 
-    this._setAutomation(criClient, automation)
+    this._setAutomation(browserCriClient, criClient, automation)
   },
 
-  async open (browser: Browser, url, options: CypressConfiguration = {}, automation) {
+  async open (browser: Browser, url, options: CypressConfiguration = {}, automation): Promise<LaunchedBrowser & { browserCriClient: CRI.Client }> {
     const { isTextTerminal } = options
 
     const userDir = utils.getProfileDir(browser, isTextTerminal)
@@ -519,26 +504,24 @@ export = {
     // first allows us to connect the remote interface,
     // start video recording and then
     // we will load the actual page
-    const launchedBrowser = await launch(browser, 'about:blank', port, args)
+    const launchedBrowser = await launch(browser, 'about:blank', port, args) as LaunchedBrowser & { browserCriClient: CRI.Client}
 
     la(launchedBrowser, 'did not get launched browser instance')
 
     // SECOND connect to the Chrome remote interface
     // and when the connection is ready
     // navigate to the actual url
-    const criClient = await this._connectToChromeRemoteInterface(port, options.onError, browser.displayName)
+    const browserCriClient = await createBrowserClient(port, browser.displayName, options.onError)
 
-    la(criClient, 'expected Chrome remote interface reference', criClient)
+    la(browserCriClient, 'expected Chrome remote interface reference', browserCriClient)
 
-    await criClient.ensureMinimumProtocolVersion('1.3')
+    await browserCriClient.ensureMinimumProtocolVersion('1.3')
     .catch((err) => {
       // if this minumum chrome version changes, sync it with
       // packages/web-config/webpack.config.base.ts and
       // npm/webpack-batteries-included-preprocessor/index.js
       throw new Error(`Cypress requires at least Chrome 64.\n\nDetails:\n${err.message}`)
     })
-
-    this._setAutomation(criClient, automation)
 
     // monkey-patch the .kill method to that the CDP connection is closed
     const originalBrowserKill = launchedBrowser.kill
@@ -547,11 +530,17 @@ export = {
     launchedBrowser.kill = (...args) => {
       debug('closing remote interface client')
 
-      criClient.close()
+      browserCriClient.close()
       debug('closing chrome')
 
       originalBrowserKill.apply(launchedBrowser, args)
     }
+
+    launchedBrowser.browserCriClient = browserCriClient
+
+    const criClient = await browserCriClient.attachToTargetUrl('about:blank')
+
+    this._setAutomation(browserCriClient, criClient, automation)
 
     await this._maybeRecordVideo(criClient, options, browser.majorVersion)
     await this._navigateUsingCRI(criClient, url)

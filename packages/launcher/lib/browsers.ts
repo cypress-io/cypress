@@ -9,7 +9,7 @@ export { browsers }
 
 /** starts a found browser and opens URL if given one */
 
-export type LaunchedBrowser = cp.ChildProcessByStdio<null, Readable, Readable> & { debuggingPort: number }
+export type LaunchedBrowser = cp.ChildProcessByStdio<null, Readable, Readable>
 
 export function launch (
   browser: FoundBrowser,
@@ -47,8 +47,6 @@ export function launch (
   proc.on('exit', (code, signal) => {
     log('%s exited: %o', browser.name, { code, signal })
   })
-
-  proc.debuggingPort = debuggingPort
 
   return proc
 }

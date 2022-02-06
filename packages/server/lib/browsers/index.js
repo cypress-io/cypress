@@ -131,7 +131,7 @@ module.exports = {
       utils.throwBrowserNotFound(browser.name, options.browsers)
     }
 
-    return browserLauncher.connectToNewSpec(browser, instance ? instance.debuggingPort : 0, options, automation)
+    return browserLauncher.connectToNewSpec(instance.browserCriClient, browser, options, automation)
   },
 
   open (browser, options = {}, automation, ctx) {
