@@ -72,7 +72,7 @@ context('lib/browsers/cdp_automation', () => {
       this.onFn = sinon.stub()
       this.sendCloseTargetCommand = sinon.stub()
 
-      this.automation = new CdpAutomation(this.sendDebuggerCommand, this.onFn, null)
+      this.automation = new CdpAutomation(this.sendDebuggerCommand, this.onFn, this.sendCloseTargetCommand, null)
 
       this.sendDebuggerCommand
       .throws(new Error('not stubbed'))
@@ -234,13 +234,11 @@ context('lib/browsers/cdp_automation', () => {
 
     describe('close:browser:tabs', function () {
       it('sends the close target message for the attached target tabs', async function () {
-        this.sendDebuggerCommand.withArgs('Page.stopScreencast').resolves()
-        this.sendDebuggerCommand.withArgs('Page.close').resolves()
+        this.sendCloseTargetCommand.resolves()
 
         await this.onRequest('close:browser:tabs')
 
-        expect(this.sendDebuggerCommand).to.be.calledWith('Page.stopScreencast')
-        expect(this.sendDebuggerCommand).to.be.calledWith('Page.close')
+        expect(this.sendCloseTargetCommand).to.be.called
       })
     })
 

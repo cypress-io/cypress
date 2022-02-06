@@ -7,7 +7,7 @@ import util from 'util'
 import Foxdriver from '@benmalka/foxdriver'
 import * as protocol from './protocol'
 import { CdpAutomation } from './cdp_automation'
-import { createBrowserClient } from './browser-cri-client'
+import { BrowserCriClient } from './browser-cri-client'
 
 const errors = require('../errors')
 
@@ -134,7 +134,7 @@ async function connectToNewSpec (browserCriClient, browser, options, automation)
 }
 
 async function setupRemote (remotePort, automation, onError) {
-  const browserCriClient = await createBrowserClient(remotePort, 'Firefox', onError)
+  const browserCriClient = await BrowserCriClient.create(remotePort, 'Firefox', onError)
   const criClient = await browserCriClient.attachToTargetUrl('about:blank')
 
   new CdpAutomation(criClient.send, criClient.on, browserCriClient.closeCurrentTarget, automation)

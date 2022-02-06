@@ -161,8 +161,8 @@ const normalizeResourceType = (resourceType: string | undefined): ResourceType =
   return ffToStandardResourceTypeMap[resourceType] || 'other'
 }
 
-type SendDebuggerCommand = (message: string, data?: any) => Bluebird<any>
-type SendCloseCommand = () => Bluebird<any>
+type SendDebuggerCommand = (message: string, data?: any) => Promise<any>
+type SendCloseCommand = () => Promise<any>
 type OnFn = (eventName: string, cb: Function) => void
 
 // the intersection of what's valid in CDP and what's valid in FFCDP
@@ -231,7 +231,7 @@ export class CdpAutomation {
     })
   }
 
-  private getCookiesByUrl = (url): Bluebird<CyCookie[]> => {
+  private getCookiesByUrl = (url): Promise<CyCookie[]> => {
     return this.sendDebuggerCommandFn('Network.getCookies', {
       urls: [url],
     })
@@ -243,7 +243,7 @@ export class CdpAutomation {
     })
   }
 
-  private getCookie = (filter: CyCookieFilter): Bluebird<CyCookie | null> => {
+  private getCookie = (filter: CyCookieFilter): Promise<CyCookie | null> => {
     return this.getAllCookies(filter)
     .then((cookies) => {
       return _.get(cookies, 0, null)
@@ -289,12 +289,14 @@ export class CdpAutomation {
         // tap, so we can resolve with the value of the removed cookie
         // also, getting the cookie via CDP first will ensure that we send a cookie `domain` to CDP
         // that matches the cookie domain that is really stored
-        .tap((cookieToBeCleared) => {
+        .then(async (cookieToBeCleared) => {
           if (!cookieToBeCleared) {
-            return
+            return cookieToBeCleared
           }
 
-          return this.sendDebuggerCommandFn('Network.deleteCookies', _.pick(cookieToBeCleared, 'name', 'domain'))
+          await this.sendDebuggerCommandFn('Network.deleteCookies', _.pick(cookieToBeCleared, 'name', 'domain'))
+
+          return cookieToBeCleared
         })
 
       case 'clear:cookies':

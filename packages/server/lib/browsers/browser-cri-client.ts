@@ -4,8 +4,6 @@ import { _connectAsync, _getDelayMsForRetry } from './protocol'
 import errors from '../errors'
 import { create } from './cri-client'
 
-// TODO: Handle reconnects and debugging. Maybe DRY up between cri-client and browser-cri-client
-
 const HOST = '127.0.0.1'
 
 const debug = Debug('cypress:server:browsers:browser-cri-client')
@@ -41,6 +39,7 @@ export class BrowserCriClient {
   }
 
   attachToTargetUrl = async (url: string) => {
+    debug('Attaching to target url %s', url)
     const { targetInfos: targets } = await this.browserClient.send('Target.getTargets')
 
     const target = targets.find((target) => target.url === url)
@@ -56,6 +55,7 @@ export class BrowserCriClient {
   }
 
   attachToNewUrl = async (url: string) => {
+    debug('Attaching to new url %s', url)
     const target = await this.browserClient.send('Target.createTarget', { url })
 
     this.currentlyAttachedTarget = await create(target.targetId, this.onAsynchronousError, HOST, this.port)
@@ -64,6 +64,8 @@ export class BrowserCriClient {
   }
 
   closeCurrentTarget = async () => {
+    debug('Closing current target %s', this.currentlyAttachedTarget.targetId)
+
     await this.currentlyAttachedTarget.close()
     await this.browserClient.send('Target.closeTarget', { targetId: this.currentlyAttachedTarget.targetId })
 
