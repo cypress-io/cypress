@@ -7,7 +7,7 @@ import util from 'util'
 import Foxdriver from '@benmalka/foxdriver'
 import * as protocol from './protocol'
 import { CdpAutomation } from './cdp_automation'
-import * as CriClient from './cri-client'
+import { createBrowserClient } from './browser-cri-client'
 
 const errors = require('../errors')
 
@@ -123,9 +123,10 @@ async function connectToNewSpec (browser, debuggingPort, options, automation) {
 
   debug('firefox: reconnecting CDP')
 
-  const criClient = await setupRemote(debuggingPort, automation, options.onError)
+  const browserCriClient = await createBrowserClient(debuggingPort, browser.displayName, options.onError)
+  const criClient = await browserCriClient.attachToTargetUrl(options.url)
 
-  new CdpAutomation(criClient.send, criClient.on, automation)
+  new CdpAutomation(criClient.send, criClient.on, browserCriClient.closeCurrentTarget, automation)
 
   await options.onInitializeNewBrowserTab()
 
@@ -134,10 +135,10 @@ async function connectToNewSpec (browser, debuggingPort, options, automation) {
 }
 
 async function setupRemote (remotePort, automation, onError) {
-  const wsUrl = await protocol.getWsTargetFor(remotePort, 'Firefox')
-  const criClient = await CriClient.create(wsUrl, onError)
+  const browserCriClient = await createBrowserClient(remotePort, 'Firefox', onError)
+  const criClient = await browserCriClient.attachToTargetUrl('about:blank')
 
-  new CdpAutomation(criClient.send, criClient.on, automation)
+  new CdpAutomation(criClient.send, criClient.on, browserCriClient.closeCurrentTarget, automation)
 
   return criClient
 }

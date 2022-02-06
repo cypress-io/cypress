@@ -29,25 +29,25 @@ const getMajorMinorVersion = (version: string): Version => {
 
 export async function createBrowserClient (port: number, browserName: string, onAsynchronousError: Function) {
   let retryIndex = 0
+  const connectOpts = {
+    host: HOST,
+    port,
+    getDelayMsForRetry: (i) => {
+      retryIndex = i
+
+      return _getDelayMsForRetry(i, browserName)
+    },
+  }
+
+  try {
+    await _connectAsync(connectOpts)
+  } catch (err) {
+    debug('failed to connect to CDP %o', { connectOpts, err })
+    errors.throw('CDP_COULD_NOT_CONNECT', port, err, browserName)
+  }
+
   const retry = async () => {
     debug('attempting to find CRI target... %o', { retryIndex })
-
-    const connectOpts = {
-      host: HOST,
-      port,
-      getDelayMsForRetry: (i) => {
-        retryIndex = i
-
-        return _getDelayMsForRetry(i, browserName)
-      },
-    }
-
-    try {
-      await _connectAsync(connectOpts)
-    } catch (err) {
-      debug('failed to connect to CDP %o', { connectOpts, err })
-      errors.throw('CDP_COULD_NOT_CONNECT', port, err, browserName)
-    }
 
     try {
       let currentlyAttachedTarget
