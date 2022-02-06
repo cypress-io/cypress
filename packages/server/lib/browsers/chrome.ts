@@ -314,9 +314,9 @@ const _handleDownloads = async function (client, dir, automation) {
   })
 }
 
-const _setAutomation = (browserCriClient, client, automation) => {
+const _setAutomation = async (browserCriClient, client, automation) => {
   return automation.use(
-    new CdpAutomation(client.send, client.on, browserCriClient.closeCurrentTarget, automation),
+    await CdpAutomation.create(client.send, client.on, browserCriClient.closeCurrentTarget, automation),
   )
 }
 
@@ -431,7 +431,7 @@ export = {
 
     const criClient = await browserCriClient.attachToNewUrl('about:blank')
 
-    this._setAutomation(browserCriClient, criClient, automation)
+    await this._setAutomation(browserCriClient, criClient, automation)
 
     await options.onInitializeNewBrowserTab()
 
@@ -447,7 +447,7 @@ export = {
     const browserCriClient = await BrowserCriClient.create(port, browser.displayName, options.onError)
     const criClient = await browserCriClient.attachToTargetUrl(options.url)
 
-    this._setAutomation(browserCriClient, criClient, automation)
+    await this._setAutomation(browserCriClient, criClient, automation)
   },
 
   async open (browser: Browser, url, options: CypressConfiguration = {}, automation): Promise<LaunchedBrowser & { browserCriClient: BrowserCriClient }> {
@@ -529,7 +529,9 @@ export = {
     /* @ts-expect-error */
     launchedBrowser.kill = (...args) => {
       debug('closing remote interface client')
-      launchedBrowser.browserCriClient.close()
+
+      // Do nothing on failure here since we're shutting down anyway
+      launchedBrowser.browserCriClient.close().catch()
 
       debug('closing chrome')
 
@@ -538,7 +540,7 @@ export = {
 
     const criClient = await browserCriClient.attachToTargetUrl('about:blank')
 
-    this._setAutomation(browserCriClient, criClient, automation)
+    await this._setAutomation(browserCriClient, criClient, automation)
 
     await this._maybeRecordVideo(criClient, options, browser.majorVersion)
     await this._navigateUsingCRI(criClient, url)

@@ -176,14 +176,21 @@ const ffToStandardResourceTypeMap: { [ff: string]: ResourceType } = {
 }
 
 export class CdpAutomation {
-  constructor (private sendDebuggerCommandFn: SendDebuggerCommand, private onFn: OnFn, private sendCloseCommandFn: SendCloseCommand, private automation: Automation) {
+  private constructor (private sendDebuggerCommandFn: SendDebuggerCommand, private onFn: OnFn, private sendCloseCommandFn: SendCloseCommand, private automation: Automation) {
     onFn('Network.requestWillBeSent', this.onNetworkRequestWillBeSent)
     onFn('Network.responseReceived', this.onResponseReceived)
-    sendDebuggerCommandFn('Network.enable', {
+  }
+
+  static async create (sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn, sendCloseCommandFn: SendCloseCommand, automation: Automation): Promise<CdpAutomation> {
+    const cdpAutomation = new CdpAutomation(sendDebuggerCommandFn, onFn, sendCloseCommandFn, automation)
+
+    await sendDebuggerCommandFn('Network.enable', {
       maxTotalBufferSize: 0,
       maxResourceBufferSize: 0,
       maxPostDataSize: 0,
     })
+
+    return cdpAutomation
   }
 
   private onNetworkRequestWillBeSent = (params: Protocol.Network.RequestWillBeSentEvent) => {

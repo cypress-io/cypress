@@ -67,12 +67,12 @@ context('lib/browsers/cdp_automation', () => {
   })
 
   context('.CdpAutomation', () => {
-    beforeEach(function () {
+    beforeEach(async function () {
       this.sendDebuggerCommand = sinon.stub()
       this.onFn = sinon.stub()
       this.sendCloseTargetCommand = sinon.stub()
 
-      this.automation = new CdpAutomation(this.sendDebuggerCommand, this.onFn, this.sendCloseTargetCommand, null)
+      this.automation = await CdpAutomation.create(this.sendDebuggerCommand, this.onFn, this.sendCloseTargetCommand, null)
 
       this.sendDebuggerCommand
       .throws(new Error('not stubbed'))

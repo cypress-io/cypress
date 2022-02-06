@@ -36,7 +36,7 @@ const tryToCall = function (win, method) {
   }
 }
 
-const _getAutomation = function (win, options, parent) {
+const _getAutomation = async function (win, options, parent) {
   const sendCommand = Bluebird.method((...args) => {
     return tryToCall(win, () => {
       return win.webContents.debugger.sendCommand
@@ -56,7 +56,7 @@ const _getAutomation = function (win, options, parent) {
     win.destroy()
   }
 
-  const automation = new CdpAutomation(sendCommand, on, sendClose, parent)
+  const automation = await CdpAutomation.create(sendCommand, on, sendClose, parent)
 
   automation.onRequest = _.wrap(automation.onRequest, async (fn, message, data) => {
     switch (message) {
@@ -199,7 +199,7 @@ module.exports = {
 
     return this._launch(win, url, automation, preferences)
     .tap(_maybeRecordVideo(win.webContents, preferences))
-    .tap(() => automation.use(_getAutomation(win, preferences, automation)))
+    .tap(async () => automation.use(await _getAutomation(win, preferences, automation)))
   },
 
   _launchChild (e, url, parent, projectRoot, state, options, automation) {
