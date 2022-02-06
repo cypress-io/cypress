@@ -200,6 +200,14 @@ const testVisualErrors = (whichError: CypressErrorType | '*', errorsToTest: {[K 
   })
 }
 
+const makeApiErr = () => {
+  const err = new Error('500 - "Internal Server Error"')
+
+  err.name = 'StatusCodeError'
+
+  return err
+}
+
 const makeErr = () => {
   const err = new Error('fail whale')
 
@@ -209,8 +217,10 @@ const makeErr = () => {
 }
 
 describe('visual error templates', () => {
-  // testVisualErrors('CANNOT_TRASH_ASSETS', {
-  testVisualErrors('*', {
+  const errorType = (process.env.ERROR_TYPE || '*') as CypressErrorType
+
+  // testVisualErrors('CANNOT_RECORD_NO_PROJECT_ID', {
+  testVisualErrors(errorType, {
     CANNOT_TRASH_ASSETS: () => {
       const err = makeErr()
 
@@ -280,47 +290,100 @@ describe('visual error templates', () => {
     },
     DASHBOARD_API_RESPONSE_FAILED_RETRYING: () => {
       return {
-        default: [{ tries: 3, delay: 5000, response: '500 server down' }],
+        default: [{
+          tries: 3,
+          delay: 5000,
+          response: makeApiErr(),
+        }],
+        lastTry: [{
+          tries: 1,
+          delay: 5000,
+          response: makeApiErr(),
+        }],
       }
     },
     DASHBOARD_CANNOT_PROCEED_IN_PARALLEL: () => {
       return {
-        default: [{ flags: { ciBuildId: 'invalid', group: 'foo' }, response: 'Invalid CI Build ID' }],
+        default: [{
+          flags: {
+            ciBuildId: 'invalid',
+            group: 'foo',
+          },
+          response: makeApiErr(),
+        }],
       }
     },
     DASHBOARD_CANNOT_PROCEED_IN_SERIAL: () => {
       return {
-        default: [{ flags: { ciBuildId: 'invalid', group: 'foo' }, response: 'Invalid CI Build ID' }],
+        default: [{
+          flags: {
+            ciBuildId: 'invalid',
+            group: 'foo',
+          },
+          response: makeApiErr(),
+        }],
       }
     },
     DASHBOARD_UNKNOWN_INVALID_REQUEST: () => {
       return {
-        default: [{ flags: { ciBuildId: 'invalid', group: 'foo' }, response: 'Unexpected 500 Error' }],
+        default: [{
+          flags: {
+            ciBuildId: 'invalid',
+            group: 'foo',
+          },
+          response: makeApiErr(),
+        }],
       }
     },
     DASHBOARD_UNKNOWN_CREATE_RUN_WARNING: () => {
       return {
-        default: [{ props: { ciBuildId: 'invalid', group: 'foo' }, message: 'You have been warned' }],
+        default: [{
+          props: {
+            ciBuildId: 'invalid',
+            group: 'foo',
+          },
+          message: 'You have been warned',
+        }],
       }
     },
     DASHBOARD_STALE_RUN: () => {
       return {
-        default: [{ runUrl: 'https://dashboard.cypress.io/project/abcd/runs/1', tag: '123', group: 'foo', parallel: true }],
+        default: [{
+          runUrl: 'https://dashboard.cypress.io/project/abcd/runs/1',
+          tag: '123',
+          group: 'foo',
+          parallel: true,
+        }],
       }
     },
     DASHBOARD_ALREADY_COMPLETE: () => {
       return {
-        default: [{ runUrl: 'https://dashboard.cypress.io/project/abcd/runs/1', tag: '123', group: 'foo', parallel: true }],
+        default: [{
+          runUrl: 'https://dashboard.cypress.io/project/abcd/runs/1',
+          tag: '123',
+          group: 'foo',
+          parallel: true,
+        }],
       }
     },
     DASHBOARD_PARALLEL_REQUIRED: () => {
       return {
-        default: [{ runUrl: 'https://dashboard.cypress.io/project/abcd/runs/1', tag: '123', group: 'foo', parallel: true }],
+        default: [{
+          runUrl: 'https://dashboard.cypress.io/project/abcd/runs/1',
+          tag: '123',
+          group: 'foo',
+          parallel: true,
+        }],
       }
     },
     DASHBOARD_PARALLEL_DISALLOWED: () => {
       return {
-        default: [{ runUrl: 'https://dashboard.cypress.io/project/abcd/runs/1', tag: '123', group: 'foo', parallel: true }],
+        default: [{
+          runUrl: 'https://dashboard.cypress.io/project/abcd/runs/1',
+          tag: '123',
+          group: 'foo',
+          parallel: true,
+        }],
       }
     },
     DASHBOARD_PARALLEL_GROUP_PARAMS_MISMATCH: () => {
@@ -345,7 +408,12 @@ describe('visual error templates', () => {
     },
     DASHBOARD_RUN_GROUP_NAME_NOT_UNIQUE: () => {
       return {
-        default: [{ runUrl: 'https://dashboard.cypress.io/project/abcd/runs/1', tag: '123', group: 'foo', parallel: true }],
+        default: [{
+          runUrl: 'https://dashboard.cypress.io/project/abcd/runs/1',
+          tag: '123',
+          group: 'foo',
+          parallel: true,
+        }],
       }
     },
     DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS: () => {
@@ -354,16 +422,19 @@ describe('visual error templates', () => {
       }
     },
     DUPLICATE_TASK_KEY: () => {
+      const tasks = ['foo', 'bar', 'baz']
+
       return {
-        default: ['foo, bar, baz'],
+        default: [tasks],
       }
     },
     INDETERMINATE_CI_BUILD_ID: () => {
       return {
-        default: [
-          { group: 'foo', parallel: 'false' },
-          ciProvider.detectableCiBuildIdProviders(),
-        ],
+        default: [{
+          group: 'foo',
+          parallel: 'false',
+        },
+        ciProvider.detectableCiBuildIdProviders()],
       }
     },
     RECORD_PARAMS_WITHOUT_RECORDING: () => {
@@ -388,12 +459,16 @@ describe('visual error templates', () => {
     },
     PROJECT_ID_AND_KEY_BUT_MISSING_RECORD_OPTION: () => {
       return {
-        default: ['abc123'],
+        default: ['project-id-123'],
       }
     },
     DASHBOARD_INVALID_RUN_REQUEST: () => {
       return {
-        default: [{ message: 'Error on Run Request', errors: [], object: {} }],
+        default: [{
+          message: 'Error on Run Request',
+          errors: [],
+          object: {},
+        }],
       }
     },
     RECORDING_FROM_FORK_PR: () => {
@@ -402,14 +477,14 @@ describe('visual error templates', () => {
       }
     },
     DASHBOARD_CANNOT_UPLOAD_RESULTS: () => {
-      const err = makeErr()
+      const err = makeApiErr()
 
       return {
         default: [err],
       }
     },
     DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE: () => {
-      const err = makeErr()
+      const err = makeApiErr()
 
       return {
         default: [err],
@@ -417,17 +492,17 @@ describe('visual error templates', () => {
     },
     DASHBOARD_RECORD_KEY_NOT_VALID: () => {
       return {
-        default: ['record-key-1234', 'projectId'],
+        default: ['record-key-123', 'project-id-123'],
       }
     },
     DASHBOARD_PROJECT_NOT_FOUND: () => {
       return {
-        default: ['abc123', '/path/to/cypress.json'],
+        default: ['project-id-123', '/path/to/cypress.json'],
       }
     },
     NO_PROJECT_ID: () => {
       return {
-        default: ['cypress.json', '/path/to/project'],
+        default: ['/path/to/project/cypress.json'],
       }
     },
     NO_PROJECT_FOUND_AT_PROJECT_ROOT: () => {
@@ -462,7 +537,7 @@ describe('visual error templates', () => {
     },
     ERROR_WRITING_FILE: () => {
       return {
-        default: ['path/to/write/file.ts', makeErr()],
+        default: ['/path/to/write/file.ts', makeErr()],
       }
     },
     NO_SPECS_FOUND: () => {
@@ -483,7 +558,7 @@ describe('visual error templates', () => {
     },
     SUPPORT_FILE_NOT_FOUND: () => {
       return {
-        default: ['/path/to/supportFile', '/path/to/cypress.json'],
+        default: ['/path/to/supportFile'],
       }
     },
     PLUGINS_FILE_ERROR: () => {
@@ -530,7 +605,7 @@ describe('visual error templates', () => {
       const err = makeErr()
 
       return {
-        default: ['/path/to/file', err.message],
+        default: ['cypress.json', err.message],
       }
     },
     PLUGINS_CONFIG_VALIDATION_ERROR: () => {
@@ -564,7 +639,12 @@ describe('visual error templates', () => {
     },
     CANNOT_CONNECT_BASE_URL_RETRYING: () => {
       return {
-        default: [{ attempt: 0, baseUrl: 'http://localhost:3000', remaining: 60, delay: 500 }],
+        default: [{
+          attempt: 0,
+          baseUrl: 'http://localhost:3000',
+          remaining: 60,
+          delay: 500,
+        }],
       }
     },
     INVALID_REPORTER_NAME: () => {
@@ -584,9 +664,9 @@ describe('visual error templates', () => {
     CONFIG_FILES_LANGUAGE_CONFLICT: () => {
       return {
         default: [
+          '/path/to/project/root',
           'cypress.config.js',
           'cypress.config.ts',
-          '/path/to/project/root',
         ],
       }
     },
@@ -621,27 +701,47 @@ describe('visual error templates', () => {
     },
     PAID_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS: () => {
       return {
-        default: [{ link: 'https://on.cypress.io/set-up-billing', planType: 'Test Plan', usedTestsMessage: 'The limit is 500 free results' }],
+        default: [{
+          link: 'https://on.cypress.io/set-up-billing',
+          planType: 'Test Plan',
+          usedTestsMessage: 'The limit is 500 free results',
+        }],
       }
     },
     FREE_PLAN_EXCEEDS_MONTHLY_TESTS: () => {
       return {
-        default: [{ link: 'https://on.cypress.io/set-up-billing', planType: 'Test Plan', usedTestsMessage: 'The limit is 500 free results' }],
+        default: [{
+          link: 'https://on.cypress.io/set-up-billing',
+          planType: 'Test Plan',
+          usedTestsMessage: 'The limit is 500 free results',
+        }],
       }
     },
     FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_TESTS: () => {
       return {
-        default: [{ link: 'https://on.cypress.io/set-up-billing', planType: 'Test Plan', usedTestsMessage: 'The limit is 500 free results', gracePeriodMessage: 'Feb 1, 2022' }],
+        default: [{
+          link: 'https://on.cypress.io/set-up-billing',
+          planType: 'Test Plan',
+          usedTestsMessage: 'The limit is 500 free results',
+          gracePeriodMessage: 'Feb 1, 2022',
+        }],
       }
     },
     PLAN_EXCEEDS_MONTHLY_TESTS: () => {
       return {
-        default: [{ link: 'https://on.cypress.io/set-up-billing', planType: 'Test Plan', usedTestsMessage: 'The limit is 500 free results' }],
+        default: [{
+          link: 'https://on.cypress.io/set-up-billing',
+          planType: 'Test Plan',
+          usedTestsMessage: 'The limit is 500 free results',
+        }],
       }
     },
     FREE_PLAN_IN_GRACE_PERIOD_PARALLEL_FEATURE: () => {
       return {
-        default: [{ link: 'https://on.cypress.io/set-up-billing', gracePeriodMessage: 'Feb 1, 2022' }],
+        default: [{
+          link: 'https://on.cypress.io/set-up-billing',
+          gracePeriodMessage: 'Feb 1, 2022',
+        }],
       }
     },
     PARALLEL_FEATURE_NOT_AVAILABLE_IN_PLAN: () => {
@@ -651,7 +751,10 @@ describe('visual error templates', () => {
     },
     PLAN_IN_GRACE_PERIOD_RUN_GROUPING_FEATURE_USED: () => {
       return {
-        default: [{ link: 'https://on.cypress.io/set-up-billing', gracePeriodMessage: 'Feb 1, 2022' }],
+        default: [{
+          link: 'https://on.cypress.io/set-up-billing',
+          gracePeriodMessage: 'Feb 1, 2022',
+        }],
       }
     },
     RUN_GROUPING_FEATURE_NOT_AVAILABLE_IN_PLAN: () => {
@@ -666,7 +769,7 @@ describe('visual error templates', () => {
     },
     AUTH_COULD_NOT_LAUNCH_BROWSER: () => {
       return {
-        default: ['http://dashboard.cypress.io/login'],
+        default: ['https://dashboard.cypress.io/login'],
       }
     },
     AUTH_BROWSER_LAUNCHED: () => {
@@ -812,7 +915,8 @@ describe('visual error templates', () => {
     },
     INVALID_CONFIG_OPTION: () => {
       return {
-        default: [['test', 'foo']],
+        default: [['foo']],
+        plural: [['foo', 'bar']],
       }
     },
     UNSUPPORTED_BROWSER_VERSION: () => {

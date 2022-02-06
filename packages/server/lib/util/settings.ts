@@ -1,11 +1,10 @@
-import _ from 'lodash'
 import Promise from 'bluebird'
+import Debug from 'debug'
+import _ from 'lodash'
 import path from 'path'
-
 import errors from '../errors'
 import { fs } from '../util/fs'
 import { requireAsync } from './require_async'
-import Debug from 'debug'
 
 const debug = Debug('cypress:server:settings')
 
@@ -72,7 +71,8 @@ const renameSupportFolder = (obj) => {
 }
 
 function _pathToFile (projectRoot, file) {
-  return path.isAbsolute(file) ? file : path.join(projectRoot, file)
+  return path.resolve(projectRoot, file)
+  // return path.isAbsolute(file) ? file : path.join(projectRoot, file)
 }
 
 function _err (type, file, err) {

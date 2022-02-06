@@ -1,13 +1,86 @@
 import assert from 'assert'
-import { stripIndent } from './stripIndent'
-
-/**
- * Guarding the value, involves
- */
 import chalk from 'chalk'
+import _ from 'lodash'
 import stripAnsi from 'strip-ansi'
 import { trimMultipleNewLines } from './errorUtils'
+import { stripIndent } from './stripIndent'
+
 import type { ErrTemplateResult, SerializedError } from './errorTypes'
+
+interface ListOptions {
+  prefix?: string
+  color?: Function
+}
+
+const theme = {
+  blue: chalk.blueBright,
+  gray: chalk.gray,
+  yellow: chalk.yellow,
+  magenta: chalk.magenta,
+}
+
+export const fmt = {
+  meta: theme.gray,
+  path: theme.blue,
+  url: theme.blue,
+  flag: theme.magenta,
+  prop: theme.yellow,
+  value: theme.blue,
+  highlight: theme.yellow,
+  highlightSecondary: theme.magenta,
+  terminal,
+  listItem,
+  listItems,
+  listFlags,
+  cypressVersion,
+}
+
+function terminal (str: string) {
+  return guard(`${theme.gray('$')} ${theme.blue(str)}`)
+}
+
+function cypressVersion (version: string) {
+  const parts = version.split('.')
+
+  if (parts.length !== 3) {
+    throw new Error('Cypress version provided must be in x.x.x format')
+  }
+
+  // TODO: come back to this to work on formatting
+  return guard(`Cypress version ${version}`)
+}
+
+function _item (item: string, { prefix = ' - ', color = theme.blue }: ListOptions) {
+  return stripIndent`${theme.gray(prefix)}${color(item)}`
+}
+
+function listItem (item: string, options: ListOptions = {}) {
+  return guard(_item(item, options))
+}
+
+function listItems (items: string[], options: ListOptions = {}) {
+  return guard(items
+  .map((item) => _item(item, options))
+  .join('\n'))
+}
+
+function listFlags (
+  obj: Record<string, string | undefined | null>,
+  mapper: Record<string, string>,
+) {
+  return guard(_
+  .chain(mapper)
+  .map((flag, key) => {
+    const v = obj[key]
+
+    if (v) {
+      return `The ${flag} flag you passed was: ${theme.yellow(v)}`
+    }
+  })
+  .compact()
+  .join('\n')
+  .value())
+}
 
 export class Guard {
   constructor (readonly val: string | number) {}
@@ -29,19 +102,27 @@ export function backtick (val: string) {
   return new Backtick(val)
 }
 
+export class Secondary {
+  constructor (readonly val: string | number) {}
+}
+
+export function secondary (val: string) {
+  return new Secondary(val)
+}
+
 /**
  * Marks the value as "details". This is when we print out the stack trace to the console
  * (if it's an error), or use the stack trace as the originalError
  */
-export class Details {
+export class StackTrace {
   /**
-   * @param {string | Error | object} details
+   * @param {string | Error | object} stackTrace
    */
   constructor (readonly val: string | Error | object) {}
 }
 
-export function details (val: string | Error | object) {
-  return new Details(val)
+export function stackTrace (val: string | Error | object) {
+  return new StackTrace(val)
 }
 
 export function isErrorLike (err: any): err is SerializedError | Error {
@@ -52,14 +133,14 @@ export function isErrorLike (err: any): err is SerializedError | Error {
  * Creates a consistently formatted object to return from the error call.
  *
  * For the console:
- *   - By default, wrap every arg in chalk.blue, unless it's "guarded" or is a "details"
- *   - Details stack gets logged at the end of the message in yellow
+ *   - By default, wrap every arg in yellow, unless it's "guarded" or is a "details"
+ *   - Details stack gets logged at the end of the message in gray | magenta
  *
  * For the browser:
  *   - Wrap every arg in backticks, for better rendering in markdown
  *   - If details is an error, it gets provided as originalError
  */
-export const errTemplate = (strings: TemplateStringsArray, ...args: Array<string | number | Error | Details | Guard | object>): ErrTemplateResult => {
+export const errTemplate = (strings: TemplateStringsArray, ...args: Array<string | number | Error | StackTrace | Guard | object>): ErrTemplateResult => {
   let originalError: Error | undefined = undefined
   let messageDetails: string | undefined
 
@@ -69,13 +150,17 @@ export const errTemplate = (strings: TemplateStringsArray, ...args: Array<string
     }
 
     function formatVal (val: string | number | Error | object | null) {
-      if (isErrorLike(val)) {
-        return `${val.name}: ${val.message}`
-      }
+      // if (isErrorLike(val)) {
+      //   return `${val.name}: ${val.message}`
+      // }
 
       if (isScalar(val)) {
         // If it's for the terminal, wrap in blue, otherwise wrap in backticks if we don't see any backticks
-        return forTerminal ? chalk.blue(`${val}`) : String(val).includes('`') ? String(val) : `\`${val}\``
+        if (forTerminal) {
+          return theme.yellow(`${val}`)
+        }
+
+        return String(val).includes('`') ? String(val) : `\`${val}\``
       }
 
       try {
@@ -99,7 +184,9 @@ export const errTemplate = (strings: TemplateStringsArray, ...args: Array<string
      * @returns
      */
     function formatMsgDetails (val: any): string {
-      return isScalar(val) ? `${val}` : isErrorLike(val) ? val.stack || val.message || val.name : JSON.stringify(val, null, 2)
+      return isScalar(val)
+        ? `${val}`
+        : isErrorLike(val) ? val.stack || val.message || val.name : JSON.stringify(val, null, 2)
     }
 
     let templateArgs: Array<string | number> = []
@@ -110,19 +197,19 @@ export const errTemplate = (strings: TemplateStringsArray, ...args: Array<string
         templateArgs.push(`\`${arg.val}\``)
       } else if (arg instanceof Guard) {
         templateArgs.push(arg.val)
-      } else if (arg instanceof Details) {
+      } else if (arg instanceof StackTrace) {
         assert(!detailsSeen, `Cannot use details() multiple times in the same errTemplate`)
         detailsSeen = true
         const { val } = arg
 
-        messageDetails = formatMsgDetails(val)
+        messageDetails = chalk.magenta(formatMsgDetails(val))
         if (isErrorLike(val)) {
           originalError = val
         }
 
         templateArgs.push('')
       } else if (isErrorLike(arg)) {
-        templateArgs.push(chalk.red(`${arg.name}: ${arg.message}`))
+        templateArgs.push(chalk.magenta(`${arg.name}: ${arg.message}`))
       } else {
         templateArgs.push(formatVal(arg))
       }

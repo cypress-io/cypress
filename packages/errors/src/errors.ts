@@ -1,14 +1,15 @@
+import AU from 'ansi_up'
 /* eslint-disable no-console */
 import chalk from 'chalk'
 import _ from 'lodash'
+import path from 'path'
 import stripAnsi from 'strip-ansi'
-import AU from 'ansi_up'
-
-import { backtick, details, errTemplate, guard } from './errTemplate'
-import { stripIndent } from './stripIndent'
-import { displayFlags, listItems, logError } from './errorUtils'
-import type { ClonedError, CypressError, ErrorLike, ErrTemplateResult } from './errorTypes'
+import { humanTime, logError, pluralize } from './errorUtils'
+import { backtick, errTemplate, fmt, guard, stackTrace } from './errTemplate'
 import { stackWithoutMessage } from './stackUtils'
+import { stripIndent } from './stripIndent'
+
+import type { ClonedError, CypressError, ErrorLike, ErrTemplateResult } from './errorTypes'
 
 const ansi_up = new AU()
 
@@ -50,7 +51,7 @@ export const AllCypressErrors = {
 
         This error will not alter the exit code.
 
-        ${details(arg1)}`
+        ${stackTrace(arg1)}`
   },
   CANNOT_REMOVE_OLD_BROWSER_PROFILES: (arg1: string) => {
     return errTemplate`\
@@ -58,7 +59,7 @@ export const AllCypressErrors = {
 
         This error will not alter the exit code.
 
-        ${details(arg1)}`
+        ${stackTrace(arg1)}`
   },
   VIDEO_RECORDING_FAILED: (arg1: string) => {
     return errTemplate`\
@@ -66,7 +67,7 @@ export const AllCypressErrors = {
 
         This error will not alter the exit code.
 
-        ${details(arg1)}`
+        ${stackTrace(arg1)}`
   },
   VIDEO_POST_PROCESSING_FAILED: (arg1: string) => {
     return errTemplate`\
@@ -74,11 +75,11 @@ export const AllCypressErrors = {
 
         This error will not alter the exit code.
 
-        ${details(arg1)}`
+        ${stackTrace(arg1)}`
   },
   CHROME_WEB_SECURITY_NOT_SUPPORTED: (browser: string) => {
     return errTemplate`\
-        Your project has set the configuration option: \`chromeWebSecurity: false\`
+        Your project has set the configuration option: ${fmt.prop(`chromeWebSecurity`)} to ${fmt.value(`false`)}
 
         This option will not have an effect in ${guard(_.capitalize(browser))}. Tests that rely on web security being disabled will not run as expected.`
   },
@@ -88,8 +89,8 @@ export const AllCypressErrors = {
     if (browser === 'canary') {
       canarySuffix += '\n\n'
       canarySuffix += stripIndent`\
-          Note: In Cypress version 4.0.0, Canary must be launched as \`chrome:canary\`, not \`canary\`.
-
+          Note: In ${fmt.cypressVersion(`4.0.0`)}, Canary must be launched as ${chalk.magentaBright(`chrome:canary`)}, not ${chalk.magentaBright(`canary`)}.
+_
           See https://on.cypress.io/migration-guide for more information on breaking changes in 4.0.0.`
     }
 
@@ -99,30 +100,26 @@ export const AllCypressErrors = {
         Browser: ${browser} was not found on your system or is not supported by Cypress.
 
         Cypress supports the following browsers:
-        - chrome
-        - chromium
-        - edge
-        - electron
-        - firefox
+        ${fmt.listItems(['electron', 'chrome', 'chromium', 'edge', 'firefox'])}
 
         You can also use a custom browser: https://on.cypress.io/customize-browsers
 
         Available browsers found on your system are:
-        ${listItems(foundBrowsersStr)}${guard(canarySuffix)}`
+        ${fmt.listItems(foundBrowsersStr)}${guard(canarySuffix)}`
   },
   BROWSER_NOT_FOUND_BY_PATH: (arg1: string, arg2: string) => {
     return errTemplate`\
-        We could not identify a known browser at the path you provided: ${arg1}
+        We could not identify a known browser at the path you provided: ${fmt.path(arg1)}
 
         The output from the command we ran was:
 
-        ${details(arg2)}`
+        ${stackTrace(arg2)}`
   },
   NOT_LOGGED_IN: () => {
     return errTemplate`\
         You're not logged in.
 
-        Run \`cypress open\` to open the Desktop App and log in.`
+        Run ${`cypress open`} to open the Desktop App and log in.`
   },
   TESTS_DID_NOT_START_RETRYING: (arg1: string) => {
     return errTemplate`Timed out waiting for the browser to connect. ${guard(arg1)}`
@@ -133,25 +130,28 @@ export const AllCypressErrors = {
   DASHBOARD_CANCEL_SKIPPED_SPEC: () => {
     return errTemplate`${guard(`\n  `)}This spec and its tests were skipped because the run has been canceled.`
   },
-  DASHBOARD_API_RESPONSE_FAILED_RETRYING: (arg1: {tries: number, delay: number, response: string}) => {
+  DASHBOARD_API_RESPONSE_FAILED_RETRYING: (arg1: {tries: number, delay: number, response: Error}) => {
+    const time = pluralize('time', arg1.tries)
+    const delay = humanTime.long(arg1.delay, false)
+
     return errTemplate`\
         We encountered an unexpected error talking to our servers.
 
-        We will retry ${arg1.tries} more ${guard(arg1.tries === 1 ? 'time' : 'times')} in ${guard(arg1.delay)}...
+        We will retry ${guard(arg1.tries)} more ${guard(time)} in ${guard(delay)}...
 
         The server's response was:
 
         ${arg1.response}`
-    /* Because of displayFlags() and listItems() */
+    /* Because of fmt.listFlags() and fmt.listItems() */
     /* eslint-disable indent */
   },
-  DASHBOARD_CANNOT_PROCEED_IN_PARALLEL: (arg1: {flags: any, response: string}) => {
+  DASHBOARD_CANNOT_PROCEED_IN_PARALLEL: (arg1: {flags: any, response: Error}) => {
     return errTemplate`\
         We encountered an unexpected error talking to our servers.
 
-        Because you passed the --parallel flag, this run cannot proceed because it requires a valid response from our servers.
+        Because you passed the ${fmt.highlightSecondary(`--parallel`)} flag, this run cannot proceed because it requires a valid response from our servers.
 
-        ${displayFlags(arg1.flags, {
+        ${fmt.listFlags(arg1.flags, {
       group: '--group',
       ciBuildId: '--ciBuildId',
     })}
@@ -160,11 +160,11 @@ export const AllCypressErrors = {
 
         ${arg1.response}`
   },
-  DASHBOARD_CANNOT_PROCEED_IN_SERIAL: (arg1: {flags: any, response: string}) => {
+  DASHBOARD_CANNOT_PROCEED_IN_SERIAL: (arg1: {flags: any, response: Error}) => {
     return errTemplate`\
         We encountered an unexpected error talking to our servers.
 
-        ${displayFlags(arg1.flags, {
+        ${fmt.listFlags(arg1.flags, {
       group: '--group',
       ciBuildId: '--ciBuildId',
     })}
@@ -173,13 +173,13 @@ export const AllCypressErrors = {
 
         ${arg1.response}`
   },
-  DASHBOARD_UNKNOWN_INVALID_REQUEST: (arg1: {flags: any, response: string}) => {
+  DASHBOARD_UNKNOWN_INVALID_REQUEST: (arg1: {flags: any, response: Error}) => {
     return errTemplate`\
         We encountered an unexpected error talking to our servers.
 
         There is likely something wrong with the request.
 
-        ${displayFlags(arg1.flags, {
+        ${fmt.listFlags(arg1.flags, {
       tags: '--tag',
       group: '--group',
       parallel: '--parallel',
@@ -190,6 +190,7 @@ export const AllCypressErrors = {
 
         ${arg1.response}`
   },
+  // TODO: fix
   DASHBOARD_UNKNOWN_CREATE_RUN_WARNING: (arg1: {props: any, message: string}) => {
     return errTemplate`\
         Warning from Cypress Dashboard: ${arg1.message}
@@ -199,13 +200,13 @@ export const AllCypressErrors = {
   },
   DASHBOARD_STALE_RUN: (arg1: {runUrl: string, [key: string]: any}) => {
     return errTemplate`\
-        You are attempting to pass the --parallel flag to a run that was completed over 24 hours ago.
+        You are attempting to pass the ${fmt.highlightSecondary(`--parallel`)} flag to a run that was completed over 24 hours ago.
 
-        The existing run is: ${arg1.runUrl}
+        The existing run is: ${fmt.url(arg1.runUrl)}
 
         You cannot parallelize a run that has been complete for that long.
 
-        ${displayFlags(arg1, {
+        ${fmt.listFlags(arg1, {
       tags: '--tag',
       group: '--group',
       parallel: '--parallel',
@@ -214,15 +215,15 @@ export const AllCypressErrors = {
 
         https://on.cypress.io/stale-run`
   },
-  DASHBOARD_ALREADY_COMPLETE: (arg1: {runUrl: string}) => {
+  DASHBOARD_ALREADY_COMPLETE: (props: {runUrl: string}) => {
     return errTemplate`\
         The run you are attempting to access is already complete and will not accept new groups.
 
-        The existing run is: ${arg1.runUrl}
+        The existing run is: ${fmt.url(props.runUrl)}
 
         When a run finishes all of its groups, it waits for a configurable set of time before finally completing. You must add more groups during that time period.
 
-        ${displayFlags(arg1, {
+        ${fmt.listFlags(props, {
       tags: '--tag',
       group: '--group',
       parallel: '--parallel',
@@ -233,11 +234,11 @@ export const AllCypressErrors = {
   },
   DASHBOARD_PARALLEL_REQUIRED: (arg1: {runUrl: string}) => {
     return errTemplate`\
-        You did not pass the --parallel flag, but this run's group was originally created with the --parallel flag.
+        You did not pass the ${fmt.highlightSecondary(`--parallel`)} flag, but this run's group was originally created with the --parallel flag.
 
-        The existing run is: ${arg1.runUrl}
+        The existing run is: ${fmt.url(arg1.runUrl)}
 
-        ${displayFlags(arg1, {
+        ${fmt.listFlags(arg1, {
       tags: '--tag',
       group: '--group',
       parallel: '--parallel',
@@ -250,11 +251,11 @@ export const AllCypressErrors = {
   },
   DASHBOARD_PARALLEL_DISALLOWED: (arg1: {runUrl: string}) => {
     return errTemplate`\
-        You passed the --parallel flag, but this run group was originally created without the --parallel flag.
+        You passed the ${fmt.highlightSecondary(`--parallel`)} flag, but this run group was originally created without the --parallel flag.
 
-        The existing run is: ${arg1.runUrl}
+        The existing run is: ${fmt.url(arg1.runUrl)}
 
-        ${displayFlags(arg1, {
+        ${fmt.listFlags(arg1, {
       group: '--group',
       parallel: '--parallel',
       ciBuildId: '--ciBuildId',
@@ -266,15 +267,15 @@ export const AllCypressErrors = {
   },
   DASHBOARD_PARALLEL_GROUP_PARAMS_MISMATCH: (arg1: {runUrl: string, parameters: any}) => {
     return errTemplate`\
-        You passed the --parallel flag, but we do not parallelize tests across different environments.
+        You passed the ${fmt.highlightSecondary(`--parallel`)} flag, but we do not parallelize tests across different environments.
 
         This machine is sending different environment parameters than the first machine that started this parallel run.
 
-        The existing run is: ${arg1.runUrl}
+        The existing run is: ${fmt.url(arg1.runUrl)}
 
         In order to run in parallel mode each machine must send identical environment parameters such as:
 
-        ${listItems([
+        ${fmt.listItems([
       'specs',
       'osName',
       'osVersion',
@@ -290,41 +291,45 @@ export const AllCypressErrors = {
   },
   DASHBOARD_RUN_GROUP_NAME_NOT_UNIQUE: (arg1: {runUrl: string, ciBuildId?: string | null}) => {
     return errTemplate`\
-        You passed the --group flag, but this group name has already been used for this run.
+        You passed the ${fmt.flag(`--group`)} flag, but this group name has already been used for this run.
 
-        The existing run is: ${arg1.runUrl}
+        The existing run is: ${fmt.url(arg1.runUrl)}
 
-        ${displayFlags(arg1, {
+        ${fmt.listFlags(arg1, {
       group: '--group',
       parallel: '--parallel',
       ciBuildId: '--ciBuildId',
     })}
 
-        If you are trying to parallelize this run, then also pass the --parallel flag, else pass a different group name.
+        If you are trying to parallelize this run, then also pass the ${fmt.highlightSecondary(`--parallel`)} flag, else pass a different group name.
 
         ${warnIfExplicitCiBuildId(arg1.ciBuildId)}
 
         https://on.cypress.io/run-group-name-not-unique`
   },
+  // TODO: fix
   DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS: () => {
     return errTemplate`\
       Deprecation Warning: The \`before:browser:launch\` plugin event changed its signature in version \`4.0.0\`
-      
+
       The \`before:browser:launch\` plugin event switched from yielding the second argument as an \`array\` of browser arguments to an options \`object\` with an \`args\` property.
-      
+
       We've detected that your code is still using the previous, deprecated interface signature.
-      
-      This code will not work in a future version of Cypress. Please see the upgrade guide: ${chalk.yellow('https://on.cypress.io/deprecated-before-browser-launch-args')}`
+
+      This code will not work in a future version of Cypress. Please see the upgrade guide: https://on.cypress.io/deprecated-before-browser-launch-args`
   },
-  DUPLICATE_TASK_KEY: (arg1: string) => {
+  DUPLICATE_TASK_KEY: (arg1: string[]) => {
     return errTemplate`\
-      Warning: Multiple attempts to register the following task(s): ${arg1}. Only the last attempt will be registered.`
+      Warning: Multiple attempts to register the following task(s):
+      ${fmt.listItems(arg1, { color: fmt.highlight })}
+
+      Only the last attempt will be registered.`
   },
   INDETERMINATE_CI_BUILD_ID: (arg1: Record<string, string>, arg2: string[]) => {
     return errTemplate`\
-        You passed the --group or --parallel flag but we could not automatically determine or generate a ciBuildId.
+        You passed the ${fmt.flag(`--group`)} or ${fmt.flag(`--parallel`)} flag but we could not automatically determine or generate a ciBuildId.
 
-        ${displayFlags(arg1, {
+        ${fmt.listFlags(arg1, {
       group: '--group',
       parallel: '--parallel',
     })}
@@ -333,7 +338,7 @@ export const AllCypressErrors = {
 
         The ciBuildId is automatically detected if you are running Cypress in any of the these CI providers:
 
-        ${listItems(arg2)}
+        ${fmt.listItems(arg2)}
 
         Because the ciBuildId could not be auto-detected you must pass the --ci-build-id flag manually.
 
@@ -341,9 +346,9 @@ export const AllCypressErrors = {
   },
   RECORD_PARAMS_WITHOUT_RECORDING: (arg1: Record<string, string>) => {
     return errTemplate`\
-        You passed the --ci-build-id, --group, --tag, or --parallel flag without also passing the --record flag.
+        You passed the ${fmt.flag(`--ci-build-id`)}, ${fmt.flag(`--group`)}, ${fmt.flag(`--tag`)}, or ${fmt.flag(`--parallel`)} flag without also passing the ${fmt.flag(`--record`)} flag.
 
-        ${displayFlags(arg1, {
+        ${fmt.listFlags(arg1, {
       ciBuildId: '--ci-build-id',
       tags: '--tag',
       group: '--group',
@@ -356,9 +361,9 @@ export const AllCypressErrors = {
   },
   INCORRECT_CI_BUILD_ID_USAGE: (arg1: Record<string, string>) => {
     return errTemplate`\
-        You passed the --ci-build-id flag but did not provide either a --group or --parallel flag.
+        You passed the ${fmt.flag(`--ci-build-id`)} flag but did not provide either a ${fmt.flag(`--group`)} or ${fmt.flag(`--parallel`)} flag.
 
-        ${displayFlags(arg1, {
+        ${fmt.listFlags(arg1, {
       ciBuildId: '--ci-build-id',
     })}
 
@@ -369,27 +374,27 @@ export const AllCypressErrors = {
   },
   RECORD_KEY_MISSING: () => {
     return errTemplate`\
-        You passed the --record flag but did not provide us your Record Key.
+        You passed the ${fmt.flag(`--record`)} flag but did not provide us your Record Key.
 
         You can pass us your Record Key like this:
 
-          ${chalk.blue('cypress run --record --key <record_key>')}
+          ${fmt.terminal(`cypress run --record --key <record_key>`)}
 
         You can also set the key as an environment variable with the name CYPRESS_RECORD_KEY.
 
         https://on.cypress.io/how-do-i-record-runs`
   },
-  CANNOT_RECORD_NO_PROJECT_ID: (arg1: string) => {
+  CANNOT_RECORD_NO_PROJECT_ID: (configFilePath: string) => {
     return errTemplate`\
-        You passed the --record flag but this project has not been setup to record.
+        You passed the ${fmt.flag(`--record`)} flag but this project has not been setup to record.
 
-        This project is missing the 'projectId' inside of '${arg1}'.
+        This project is missing the ${`projectId`} inside of: ${fmt.path(configFilePath)}
 
         We cannot uniquely identify this project without this id.
 
-        You need to setup this project to record. This will generate a unique 'projectId'.
+        You need to setup this project to record. This will generate a unique projectId.
 
-        Alternatively if you omit the --record flag this project will run without recording.
+        Alternatively if you omit the ${fmt.flag(`--record`)} flag this project will run without recording.
 
         https://on.cypress.io/recording-project-runs`
   },
@@ -397,22 +402,23 @@ export const AllCypressErrors = {
     return errTemplate`\
         This project has been configured to record runs on our Dashboard.
 
-        It currently has the projectId: ${chalk.green(arg1)}
+        It currently has the projectId: ${arg1}
 
-        You also provided your Record Key, but you did not pass the --record flag.
+        You also provided your Record Key, but you did not pass the ${fmt.flag(`--record`)} flag.
 
         This run will not be recorded.
 
-        If you meant to have this run recorded please additionally pass this flag.
+        If you meant to have this run recorded please additionally pass this flag:
 
-          ${'cypress run --record'}
+          ${fmt.terminal('cypress run --record')}
 
         If you don't want to record these runs, you can silence this warning:
 
-          ${chalk.yellow('cypress run --record false')}
+          ${fmt.terminal('cypress run --record false')}
 
         https://on.cypress.io/recording-project-runs`
   },
+  // TODO: fix
   DASHBOARD_INVALID_RUN_REQUEST: (arg1: {message: string, errors: any, object: any}) => {
     return errTemplate`\
         Recording this run failed because the request was invalid.
@@ -427,6 +433,7 @@ export const AllCypressErrors = {
 
         ${JSON.stringify(arg1.object, null, 2)}`
   },
+  // TODO: fix
   RECORDING_FROM_FORK_PR: () => {
     return errTemplate`\
         Warning: It looks like you are trying to record this run from a forked PR.
@@ -437,7 +444,7 @@ export const AllCypressErrors = {
 
         This error will not alter the exit code.`
   },
-  DASHBOARD_CANNOT_UPLOAD_RESULTS: (arg1: string | Error) => {
+  DASHBOARD_CANNOT_UPLOAD_RESULTS: (apiErr: Error) => {
     return errTemplate`\
         Warning: We encountered an error while uploading results from your run.
 
@@ -445,9 +452,9 @@ export const AllCypressErrors = {
 
         This error will not alter the exit code.
 
-        ${arg1}`
+        ${apiErr}`
   },
-  DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE: (arg1: string | Error) => {
+  DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE: (apiErr: Error) => {
     return errTemplate`\
         Warning: We encountered an error talking to our servers.
 
@@ -455,11 +462,11 @@ export const AllCypressErrors = {
 
         This error will not alter the exit code.
 
-        ${arg1}`
+        ${apiErr}`
   },
   DASHBOARD_RECORD_KEY_NOT_VALID: (recordKey: string, projectId: string) => {
     return errTemplate`\
-        Your Record Key ${chalk.yellow(recordKey)} is not valid with this project: ${chalk.blue(projectId)}
+        Your Record Key ${recordKey} is not valid with this projectId: ${fmt.highlightSecondary(projectId)}
 
         It may have been recently revoked by you or another user.
 
@@ -467,11 +474,11 @@ export const AllCypressErrors = {
 
         https://on.cypress.io/dashboard/projects/${guard(projectId)}`
   },
-  DASHBOARD_PROJECT_NOT_FOUND: (arg1: string, arg2: string) => {
+  DASHBOARD_PROJECT_NOT_FOUND: (projectId: string, configFileBaseName: string) => {
     return errTemplate`\
-        We could not find a project with the ID: ${chalk.yellow(arg1)}
+        We could not find a Dashboard project with the projectId: ${projectId}
 
-        This projectId came from your '${arg2}' file or an environment variable.
+        This projectId came from your ${fmt.path(configFileBaseName)} file or an environment variable.
 
         Please log into the Dashboard and find your project.
 
@@ -481,11 +488,11 @@ export const AllCypressErrors = {
 
         https://on.cypress.io/dashboard`
   },
-  NO_PROJECT_ID: (arg1: string, arg2: string) => {
-    return errTemplate`Can't find 'projectId' in the '${arg1}' file for this project: ${chalk.blue(arg2)}`
+  NO_PROJECT_ID: (configFilePath: string) => {
+    return errTemplate`Can't find ${`projectId`} in the config file: ${fmt.path(configFilePath)}`
   },
-  NO_PROJECT_FOUND_AT_PROJECT_ROOT: (arg1: string) => {
-    return errTemplate`Can't find project at the path: ${chalk.blue(arg1)}`
+  NO_PROJECT_FOUND_AT_PROJECT_ROOT: (projectRoot: string) => {
+    return errTemplate`Can't find a project at the path: ${fmt.path(projectRoot)}`
   },
   CANNOT_FETCH_PROJECT_TOKEN: () => {
     return errTemplate`Can't find project's secret key.`
@@ -500,29 +507,29 @@ export const AllCypressErrors = {
     return errTemplate`\
       Can't run project because port is currently in use: ${arg1}
 
-      ${chalk.yellow('Assign a different port with the \'--port <port>\' argument or shut down the other running process.')}`
+      Assign a different port with the ${fmt.flag(`--port <port>`)} argument or shut down the other running process.')}`
   },
   ERROR_READING_FILE: (filePath: string, err: Error) => {
     return errTemplate`\
-        Error reading from: ${filePath}
+        Error reading from: ${fmt.path(filePath)}
 
-        ${details(err)}`
+        ${stackTrace(err)}`
   },
   ERROR_WRITING_FILE: (filePath: string, err: Error) => {
     return errTemplate`\
-        Error writing to: ${filePath}
+        Error writing to: ${fmt.path(filePath)}
 
-        ${details(err)}`
+        ${stackTrace(err)}`
   },
-  NO_SPECS_FOUND: (arg1: string, arg2?: string | null) => {
+  NO_SPECS_FOUND: (folderPath: string, globPattern?: string | null) => {
     // no glob provided, searched all specs
-    if (!arg2) {
+    if (!globPattern) {
       return errTemplate`\
           Can't run because no spec files were found.
 
           We searched for any files inside of this folder:
 
-          ${chalk.blue(arg1)}`
+          ${fmt.path(folderPath)}`
     }
 
     return errTemplate`\
@@ -530,11 +537,7 @@ export const AllCypressErrors = {
 
         We searched for any files matching this glob pattern:
 
-        ${chalk.blue(arg2)}
-
-        Relative to the project root folder:
-
-        ${chalk.blue(arg1)}`
+        ${path.join(fmt.path(folderPath), globPattern)}`
   },
   RENDERER_CRASHED: () => {
     return errTemplate`\
@@ -559,31 +562,32 @@ export const AllCypressErrors = {
   AUTOMATION_SERVER_DISCONNECTED: () => {
     return errTemplate`The automation client disconnected. Cannot continue running tests.`
   },
-  SUPPORT_FILE_NOT_FOUND: (arg1: string, arg2: string) => {
+  SUPPORT_FILE_NOT_FOUND: (supportFilePath: string) => {
     return errTemplate`\
-        The support file is missing or invalid.
+        Your ${`supportFile`} file is missing or invalid: ${fmt.path(supportFilePath)}
 
-        Your ${'supportFile'} is set to ${arg1}, but either the file is missing or it's invalid. The \`supportFile\` must be a \`.js\`, \`.ts\`, \`.coffee\` file or be supported by your preprocessor plugin (if configured).
+        The supportFile must be a .js, .ts, .coffee file or be supported by your preprocessor plugin (if configured).
 
-        Correct your ${backtick(arg2)}, create the appropriate file, or set \`supportFile\` to \`false\` if a support file is not necessary for your project.
+        Fix your support file, or set supportFile to ${fmt.highlightSecondary(`false`)} if a support file is not necessary for your project.
 
-        Or you might have renamed the extension of your \`supportFile\` to \`.ts\`. If that's the case, restart the test runner.
+        If you have just renamed the extension of your supportFile, restart Cypress.
 
         Learn more at https://on.cypress.io/support-file-missing-or-invalid`
   },
-  PLUGINS_FILE_ERROR: (arg1: string, arg2: Error) => {
+  PLUGINS_FILE_ERROR: (pluginsFilePath: string, err: Error) => {
     return errTemplate`\
-        The plugins file is missing or invalid.
+        Your ${`pluginsFile`} file is missing or invalid: ${fmt.path(pluginsFilePath)}
 
-        Your \`pluginsFile\` is set to ${arg1}, but either the file is missing, it contains a syntax error, or threw an error when required. The \`pluginsFile\` must be a \`.js\`, \`.ts\`, or \`.coffee\` file.
+        It may have thrown an error when required, check the stack trace below.
 
-        Or you might have renamed the extension of your \`pluginsFile\`. If that's the case, restart the test runner.
+        Fix your plugins file, or set pluginsFile to ${fmt.highlightSecondary(`false`)} if a plugins file is not necessary for your project.
 
-        Please fix this, or set \`pluginsFile\` to \`false\` if a plugins file is not necessary for your project.
+        If you have just renamed the extension of your pluginsFile, restart Cypress.
 
-        ${details(arg2)}
+        ${stackTrace(err)}
       `
   },
+  // TODO: fix
   PLUGINS_DIDNT_EXPORT_FUNCTION: (arg1: string, arg2: any) => {
     return errTemplate`\
       The \`pluginsFile\` must export a function with the following signature:
@@ -600,39 +604,40 @@ export const AllCypressErrors = {
 
       It exported:
 
-      ${details(arg2)}
+      ${stackTrace(arg2)}
     `
   },
   PLUGINS_FUNCTION_ERROR: (arg1: string, arg2: string | Error) => {
     return errTemplate`\
-      The function exported by the plugins file threw an error.
+      The function exported by the plugins file threw an error: ${fmt.path(arg1)}
 
-      We invoked the function exported by ${arg1}, but it threw an error.
-
-      ${details(arg2)}
+      ${stackTrace(arg2)}
     `
   },
   PLUGINS_UNEXPECTED_ERROR: (arg1: string, arg2: string | Error) => {
     return errTemplate`
-      The following error was thrown by a plugin. We stopped running your tests because a plugin crashed. Please check your plugins file (${arg1})
+      The following error was thrown by your plugins file: ${fmt.path(arg1)}
 
-      ${details(arg2)}
+      We stopped running your tests because a plugin crashed.
+
+      ${stackTrace(arg2)}
     `
   },
   PLUGINS_VALIDATION_ERROR: (arg1: string, arg2: string | Error) => {
     return errTemplate`
-      The following validation error was thrown by your plugins file (${arg1}).
+      The following validation error was thrown by your plugins file: ${fmt.path(arg1)}
 
-      ${details(arg2)}
+      ${stackTrace(arg2)}
     `
   },
-  BUNDLE_ERROR: (arg1: string, arg2: string) => {
+  // TODO: look at the listItem prefix
+  BUNDLE_ERROR: (filePath: string, arg2: string) => {
     // IF YOU MODIFY THIS MAKE SURE TO UPDATE
     // THE ERROR MESSAGE IN THE RUNNER TOO
     return errTemplate`\
       Oops...we found an error preparing this test file:
 
-        ${chalk.blue(arg1)}
+        ${fmt.listItem(filePath, { prefix: '> ' })}
 
       The error was:
 
@@ -646,19 +651,22 @@ export const AllCypressErrors = {
       Fix the error in your code and re-run your tests.`
     // happens when there is an error in configuration file like "cypress.json"
   },
-  SETTINGS_VALIDATION_ERROR: (arg1: string, arg2: string) => {
+  // TODO: should this be basename or absolute path?
+  // TODO: what should details be here? isn't it an error?
+  SETTINGS_VALIDATION_ERROR: (configFileBaseName: string, errMessage: string) => {
     return errTemplate`\
-        We found an invalid value in the file: ${arg1}
+        We found an invalid value in the file: ${fmt.path(configFileBaseName)}
 
-        ${chalk.yellow(arg2)}`
+        ${errMessage}`
     // happens when there is an invalid config value is returned from the
     // project's plugins file like "cypress/plugins.index.js"
   },
+  // TODO: should this be relative or absolute?
   PLUGINS_CONFIG_VALIDATION_ERROR: (arg1: string, arg2: string) => {
     let filePath = `${arg1}`
 
     return errTemplate`\
-        An invalid configuration value returned from the plugins file: ${chalk.blue(filePath)}
+        An invalid configuration value returned from the plugins file: ${fmt.path(filePath)}
 
         ${chalk.yellow(arg2)}`
     // general configuration error not-specific to configuration or plugins files
@@ -671,9 +679,9 @@ export const AllCypressErrors = {
   },
   RENAMED_CONFIG_OPTION: (arg1: {name: string, newName: string}) => {
     return errTemplate`\
-        The ${chalk.yellow(arg1.name)} configuration option you have supplied has been renamed.
+        The ${arg1.name} configuration option you have supplied has been renamed.
 
-        Please rename ${chalk.yellow(arg1.name)} to ${chalk.blue(arg1.newName)}`
+        Please rename ${arg1.name} to ${fmt.highlightSecondary(arg1.newName)}`
   },
   CANNOT_CONNECT_BASE_URL: () => {
     return errTemplate`\
@@ -685,7 +693,7 @@ export const AllCypressErrors = {
     return errTemplate`\
         Cypress could not verify that this server is running:
 
-          > ${chalk.blue(arg1)}
+          ${fmt.listItem(arg1, { prefix: '> ' })}
 
         This server has been configured as your \`baseUrl\`, and tests will likely fail if it is not running.`
   },
@@ -712,7 +720,7 @@ export const AllCypressErrors = {
 
         We searched for the reporter in these paths:
 
-        ${listItems(arg1.paths)}
+        ${fmt.listItems(arg1.paths)}
 
         The error we received was:
 
@@ -725,23 +733,24 @@ export const AllCypressErrors = {
     return errTemplate`\
         Could not find a Cypress configuration file, exiting.
 
-        We looked but did not find a default config file in this folder: ${chalk.blue(arg1)}`
+        We looked but did not find a default config file in this folder: ${fmt.path(arg1)}`
     // TODO: update with vetted cypress language
   },
-  CONFIG_FILES_LANGUAGE_CONFLICT: (arg1: string, arg2: string, arg3: string) => {
+  // TODO: verify these are configBaseName and not configPath
+  CONFIG_FILES_LANGUAGE_CONFLICT: (projectRoot: string, configFileBaseName1: string, configFileBaseName2: string) => {
     return errTemplate`
-          There is both a ${backtick(arg2)} and a ${backtick(arg3)} at the location below:
+          There is both a ${configFileBaseName1} and a ${configFileBaseName2} at the location below:
 
-          ${arg1}
+            ${fmt.listItem(projectRoot, { prefix: '> ' })}
 
           Cypress does not know which one to read for config. Please remove one of the two and try again.
           `
   },
-  CONFIG_FILE_NOT_FOUND: (arg1: string, arg2: string) => {
+  CONFIG_FILE_NOT_FOUND: (configFileBaseName: string, projectRoot: string) => {
     return errTemplate`\
         Could not find a Cypress configuration file, exiting.
 
-        We looked but did not find a ${chalk.blue(arg1)} file in this folder: ${chalk.blue(arg2)}`
+        We looked but did not find a ${fmt.path(configFileBaseName)} file in this folder: ${fmt.path(projectRoot)}`
   },
   INVOKED_BINARY_OUTSIDE_NPM_MODULE: () => {
     return errTemplate`\
@@ -749,7 +758,7 @@ export const AllCypressErrors = {
 
         This is not the recommended approach, and Cypress may not work correctly.
 
-        Please install the 'cypress' NPM package and follow the instructions here:
+        Please install the ${`cypress`} NPM package and follow the instructions here:
 
         https://on.cypress.io/installing-cypress`
   },
@@ -840,7 +849,7 @@ export const AllCypressErrors = {
         A fixture file could not be found at any of the following paths:
 
         > ${arg1}
-        > ${arg1}{{extension}}
+        > ${arg1}.[ext]
 
         Cypress looked for these file extensions at the provided path:
 
@@ -848,49 +857,47 @@ export const AllCypressErrors = {
 
         Provide a path to an existing fixture file.`
   },
-  AUTH_COULD_NOT_LAUNCH_BROWSER: (arg1: string) => {
+  AUTH_COULD_NOT_LAUNCH_BROWSER: (loginUrl: string) => {
     return errTemplate`\
       Cypress was unable to open your installed browser. To continue logging in, please open this URL in your web browser:
 
-      ${arg1}`
+      ${fmt.url(loginUrl)}`
   },
   AUTH_BROWSER_LAUNCHED: () => {
     return errTemplate`Check your browser to continue logging in.`
   },
-  BAD_POLICY_WARNING: (arg1: string[]) => {
+  BAD_POLICY_WARNING: (policyKeys: string[]) => {
     return errTemplate`\
         Cypress detected policy settings on your computer that may cause issues.
 
         The following policies were detected that may prevent Cypress from automating Chrome:
 
-        ${guard(arg1.map((line) => ` > ${line}`).join('\n'))}
+        ${fmt.listItems(policyKeys)}
 
         For more information, see https://on.cypress.io/bad-browser-policy`
   },
   BAD_POLICY_WARNING_TOOLTIP: () => {
     return errTemplate`Cypress detected policy settings on your computer that may cause issues with using this browser. For more information, see https://on.cypress.io/bad-browser-policy`
   },
-  EXTENSION_NOT_LOADED: (arg1: string, arg2: string) => {
+  EXTENSION_NOT_LOADED: (browserName: string, extensionPath: string) => {
     return errTemplate`\
-        ${guard(arg1)} could not install the extension at path:
-
-        > ${arg2}
+        ${guard(browserName)} could not install the extension at path: ${fmt.path(extensionPath)}
 
         Please verify that this is the path to a valid, unpacked WebExtension.`
   },
-  COULD_NOT_FIND_SYSTEM_NODE: (arg1: string) => {
+  COULD_NOT_FIND_SYSTEM_NODE: (nodeVersion: string) => {
     return errTemplate`\
-        \`nodeVersion\` is set to \`system\`, but Cypress could not find a usable Node executable on your PATH.
+        ${fmt.prop(`nodeVersion`)} is set to ${fmt.value(`system`)}, but Cypress could not find a usable Node executable on your PATH.
 
         Make sure that your Node executable exists and can be run by the current user.
 
-        Cypress will use the built-in Node version (v${arg1}) instead.`
+        Cypress will use the built-in Node version ${fmt.highlightSecondary(nodeVersion)} instead.`
   },
-  INVALID_CYPRESS_INTERNAL_ENV: (arg1: string) => {
+  INVALID_CYPRESS_INTERNAL_ENV: (val: string) => {
     return errTemplate`\
         We have detected an unknown or unsupported "CYPRESS_INTERNAL_ENV" value
 
-          ${chalk.yellow(arg1)}
+          ${fmt.listItem(val, { prefix: '> ' })}
 
         "CYPRESS_INTERNAL_ENV" is reserved and should only be used internally.
 
@@ -907,9 +914,9 @@ export const AllCypressErrors = {
 
         The CDP port requested was ${guard(chalk.yellow(arg2))}.
 
-        Error details:
+        Error stackTrace:
 
-        ${details(arg3)}`
+        ${stackTrace(arg3)}`
   },
   FIREFOX_COULD_NOT_CONNECT: (arg1: Error) => {
     return errTemplate`\
@@ -917,28 +924,28 @@ export const AllCypressErrors = {
 
         This usually indicates there was a problem opening the Firefox browser.
 
-        Error details:
+        Error stackTrace:
 
-        ${details(arg1)}`
+        ${stackTrace(arg1)}`
   },
   CDP_COULD_NOT_RECONNECT: (arg1: Error) => {
     return errTemplate`\
         There was an error reconnecting to the Chrome DevTools protocol. Please restart the browser.
 
-        ${details(arg1)}`
+        ${stackTrace(arg1)}`
   },
   CDP_RETRYING_CONNECTION: (attempt: string | number, browserType: string) => {
     return errTemplate`Still waiting to connect to ${guard(browserType)}, retrying in 1 second (attempt ${chalk.yellow(`${attempt}`)}/62)`
   },
   UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES: (arg1: string[], arg2: string[]) => {
     return errTemplate`\
-        The \`launchOptions\` object returned by your plugin's \`before:browser:launch\` handler contained unexpected properties:
+        The ${`launchOptions`} object returned by your plugin's ${fmt.highlightSecondary(`before:browser:launch`)} handler contained unexpected properties:
 
-        ${listItems(arg1)}
+        ${fmt.listItems(arg1)}
 
-        \`launchOptions\` may only contain the properties:
+        launchOptions may only contain the properties:
 
-        ${listItems(arg2)}
+        ${fmt.listItems(arg2)}
 
         https://on.cypress.io/browser-launch-api`
   },
@@ -958,11 +965,11 @@ export const AllCypressErrors = {
 
         To avoid this error, ensure that there are no other instances of Firefox launched by Cypress running.
 
-        ${details(arg2)}`
+        ${stackTrace(arg2)}`
   },
   FOLDER_NOT_WRITABLE: (arg1: string) => {
     return errTemplate`\
-        Folder ${arg1} is not writable.
+        Folder ${fmt.path(arg1)} is not writable.
 
         Writing to this directory is required by Cypress in order to store screenshots and videos.
 
@@ -972,42 +979,44 @@ export const AllCypressErrors = {
   },
   EXPERIMENTAL_SAMESITE_REMOVED: () => {
     return errTemplate`\
-        The \`experimentalGetCookiesSameSite\` configuration option was removed in Cypress version \`5.0.0\`. Yielding the \`sameSite\` property is now the default behavior of the \`cy.cookie\` commands.
+        The ${`experimentalGetCookiesSameSite`} configuration option was removed in ${fmt.cypressVersion(`5.0.0`)}. Yielding the ${fmt.highlightSecondary(`sameSite`)} property is now the default behavior of the ${fmt.highlightSecondary(`cy.cookie`)} commands.
 
         You can safely remove this option from your config.`
   },
+  // TODO: verify configFile is absolute path
   EXPERIMENTAL_COMPONENT_TESTING_REMOVED: (arg1: {configFile: string}) => {
     return errTemplate`\
-        The ${'experimentalComponentTesting'} configuration option was removed in Cypress version \`7.0.0\`. Please remove this flag from ${arg1.configFile}.
+        The ${'experimentalComponentTesting'} configuration option was removed in ${fmt.cypressVersion(`7.0.0`)}.
+
+        Please remove this flag from: ${fmt.path(arg1.configFile)}
 
         Cypress Component Testing is now a standalone command. You can now run your component tests with:
 
-        ${chalk.yellow(`\`cypress open-ct\``)}
+          ${fmt.terminal(`cypress open-ct`)}
 
         https://on.cypress.io/migration-guide`
   },
   EXPERIMENTAL_SHADOW_DOM_REMOVED: () => {
     return errTemplate`\
-        The \`experimentalShadowDomSupport\` configuration option was removed in Cypress version \`5.2.0\`. It is no longer necessary when utilizing the \`includeShadowDom\` option.
+        The ${`experimentalShadowDomSupport`} configuration option was removed in ${fmt.cypressVersion(`5.2.0`)}. It is no longer necessary when utilizing the ${fmt.highlightSecondary(`includeShadowDom`)} option.
 
         You can safely remove this option from your config.`
   },
   EXPERIMENTAL_NETWORK_STUBBING_REMOVED: () => {
     return errTemplate`\
-        The \`experimentalNetworkStubbing\` configuration option was removed in Cypress version \`6.0.0\`.
-        It is no longer necessary for using \`cy.intercept()\` (formerly \`cy.route2()\`).
+        The ${`experimentalNetworkStubbing`} configuration option was removed in ${fmt.cypressVersion(`6.0.0`)}.
 
-        You can safely remove this option from your config.`
+        It is no longer necessary for using ${fmt.highlightSecondary(`cy.intercept()`)}. You can safely remove this option from your config.`
   },
   EXPERIMENTAL_RUN_EVENTS_REMOVED: () => {
     return errTemplate`\
-        The \`experimentalRunEvents\` configuration option was removed in Cypress version \`6.7.0\`. It is no longer necessary when listening to run events in the plugins file.
+        The ${`experimentalRunEvents`} configuration option was removed in ${fmt.cypressVersion(`6.7.0`)}. It is no longer necessary when listening to run events in the plugins file.
 
         You can safely remove this option from your config.`
   },
   FIREFOX_GC_INTERVAL_REMOVED: () => {
     return errTemplate`\
-        The \`firefoxGcInterval\` configuration option was removed in Cypress version \`8.0.0\`. It was introduced to work around a bug in Firefox 79 and below.
+        The ${`firefoxGcInterval`} configuration option was removed in ${fmt.cypressVersion(`8.0.0`)}. It was introduced to work around a bug in Firefox 79 and below.
 
         Since Cypress no longer supports Firefox 85 and below in Cypress 8, this option was removed.
 
@@ -1015,9 +1024,9 @@ export const AllCypressErrors = {
   },
   INCOMPATIBLE_PLUGIN_RETRIES: (arg1: string) => {
     return errTemplate`\
-      We've detected that the incompatible plugin \`cypress-plugin-retries\` is installed at ${arg1}.
+      We've detected that the incompatible plugin ${`cypress-plugin-retries`} is installed at ${fmt.path(arg1)}.
 
-      Test retries is now supported in Cypress version \`5.0.0\`.
+      Test retries is now supported in ${fmt.cypressVersion(`5.0.0`)}.
 
       Remove the plugin from your dependencies to silence this warning.
 
@@ -1025,19 +1034,22 @@ export const AllCypressErrors = {
       `
   },
   INVALID_CONFIG_OPTION: (arg1: string[]) => {
+    const phrase = arg1.length > 1 ? 'options are' : 'option is'
+
     return errTemplate`\
-        ${arg1.map((arg) => `\`${arg}\` is not a valid configuration option`).join('\n')}
+        The following configuration ${guard(phrase)} invalid:
+        ${fmt.listItems(arg1)}
 
         https://on.cypress.io/configuration
         `
   },
   PLUGINS_RUN_EVENT_ERROR: (arg1: string, arg2: Error) => {
     return errTemplate`\
-        An error was thrown in your plugins file while executing the handler for the '${chalk.blue(arg1)}' event.
+        An error was thrown in your plugins file while executing the handler for the ${arg1} event.
 
         The error we received was:
 
-        ${details(arg2)}`
+        ${stackTrace(arg2)}`
   },
   CT_NO_DEV_START_EVENT: (arg1: string) => {
     const pluginsFilePath = arg1 ?
@@ -1064,7 +1076,7 @@ export const AllCypressErrors = {
     return errTemplate`\
       Deprecation Warning: ${backtick(arg1.name)} is currently set to ${backtick(arg1.value)} in the ${backtick(arg1.configFile)} configuration file.
 
-      As of Cypress version \`9.0.0\` the default behavior of ${backtick(arg1.name)} has changed to always use the version of Node used to start cypress via the cli.
+      As of ${fmt.cypressVersion(`9.0.0`)} the default behavior of ${backtick(arg1.name)} has changed to always use the version of Node used to start cypress via the cli.
 
       Please remove the ${backtick(arg1.name)} configuration option from ${backtick(arg1.configFile)}.
       `
@@ -1073,7 +1085,7 @@ export const AllCypressErrors = {
     return errTemplate`\
       Deprecation Warning: ${backtick(arg1.name)} is currently set to ${backtick(arg1.value)} in the ${backtick(arg1.configFile)} configuration file.
 
-      As of Cypress version \`9.0.0\` the default behavior of ${backtick(arg1.name)} has changed to always use the version of Node used to start cypress via the cli.
+      As of ${fmt.cypressVersion(`9.0.0`)} the default behavior of ${backtick(arg1.name)} has changed to always use the version of Node used to start cypress via the cli.
 
       When ${backtick(arg1.name)} is set to ${backtick(arg1.value)}, Cypress will use the version of Node bundled with electron. This can cause problems running certain plugins or integrations.
 

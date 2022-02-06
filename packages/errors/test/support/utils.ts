@@ -10,7 +10,7 @@ app.on('window-all-closed', () => {
 
 })
 
-const HEIGHT = 550
+const HEIGHT = 600
 const WIDTH = 1200
 const EXT = '.png'
 const debug = Debug(isCi ? '*' : 'visualSnapshotErrors')

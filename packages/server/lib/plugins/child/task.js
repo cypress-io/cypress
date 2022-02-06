@@ -23,7 +23,7 @@ const merge = (prevEvents, events) => {
   const duplicates = _.intersection(_.keys(prevEvents), _.keys(events))
 
   if (duplicates.length) {
-    require('@packages/errors').warning('DUPLICATE_TASK_KEY', duplicates.join(', '))
+    require('@packages/errors').warning('DUPLICATE_TASK_KEY', duplicates)
   }
 
   return _.extend(prevEvents, events)

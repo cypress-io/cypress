@@ -1,12 +1,11 @@
+import 'sinon-chai'
+import style from 'ansi-styles'
+import chai, { expect } from 'chai'
 /* eslint-disable no-console */
 import chalk from 'chalk'
-import style from 'ansi-styles'
-import snapshot from 'snap-shot-it'
 import sinon from 'sinon'
-import 'sinon-chai'
-
+import snapshot from 'snap-shot-it'
 import * as errors from '../../src'
-import chai, { expect } from 'chai'
 
 chai.use(require('@cypress/sinon-chai'))
 
@@ -50,7 +49,7 @@ describe('lib/errors', () => {
     })
 
     it('logs err.message', () => {
-      const err = errors.getError('NO_PROJECT_ID', 'cypress.json', 'foo/bar/baz')
+      const err = errors.getError('NO_PROJECT_ID', '/path/to/project/cypress.json')
 
       const ret = errors.log(err)
 

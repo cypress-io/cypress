@@ -3,35 +3,35 @@ import Debug from 'debug'
 import EE from 'events'
 import _ from 'lodash'
 import path from 'path'
-
-import browsers from './browsers'
-import pkg from '@packages/root'
 import { allowed } from '@packages/config'
-import { ServerCt } from './server-ct'
-import { SocketCt } from './socket-ct'
-import { SocketE2E } from './socket-e2e'
+import pkg from '@packages/root'
 import api from './api'
 import { Automation } from './automation'
+import browsers from './browsers'
 import * as config from './config'
 import cwd from './cwd'
 import errors from './errors'
-import Reporter from './reporter'
+import plugins from './plugins'
+import devServer from './plugins/dev-server'
+import preprocessor from './plugins/preprocessor'
 import runEvents from './plugins/run_events'
+import { checkSupportFile, getDefaultConfigFilePath } from './project_utils'
+import Reporter from './reporter'
 import savedState from './saved_state'
 import scaffold from './scaffold'
+import { ServerCt } from './server-ct'
 import { ServerE2E } from './server-e2e'
-import system from './util/system'
+import { SocketCt } from './socket-ct'
+import { SocketE2E } from './socket-e2e'
+import { SpecsStore } from './specs-store'
 import user from './user'
 import { ensureProp } from './util/class-helpers'
 import { fs } from './util/fs'
 import * as settings from './util/settings'
-import plugins from './plugins'
 import specsUtil from './util/specs'
+import system from './util/system'
 import Watchers from './watchers'
-import devServer from './plugins/dev-server'
-import preprocessor from './plugins/preprocessor'
-import { SpecsStore } from './specs-store'
-import { checkSupportFile, getDefaultConfigFilePath } from './project_utils'
+
 import type { LaunchArgs } from './open_project'
 
 // Cannot just use RuntimeConfigOptions as is because some types are not complete.
@@ -849,7 +849,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       return readSettings.projectId
     }
 
-    errors.throw('NO_PROJECT_ID', settings.configFile(this.options) || '', this.projectRoot)
+    errors.throw('NO_PROJECT_ID', settings.pathToConfigFile(this.projectRoot, this.options))
   }
 
   async verifyExistence () {
