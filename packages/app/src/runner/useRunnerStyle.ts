@@ -1,5 +1,5 @@
 import { useWindowSize } from '@vueuse/core'
-import { computed, ref } from 'vue'
+import { computed, ref, watchEffect } from 'vue'
 import { usePreferences } from '../composables/usePreferences'
 import { useAutStore, useRunnerUiStore } from '../store'
 import { useScreenshotStore } from '../store/screenshot-store'
@@ -58,19 +58,25 @@ export const useRunnerStyle = ({
   const screenshotStore = useScreenshotStore()
   const autStore = useAutStore()
 
-  const viewportStyle = computed(() => {
+  const scale = computed(() => {
     let scale = 1
 
     if (!screenshotStore.isScreenshotting) {
       scale = Math.min(containerWidth.value / autStore.viewportDimensions.width, containerHeight.value / autStore.viewportDimensions.height, 1)
     }
 
-    autStore.setScale(scale)
+    return scale
+  })
 
+  const viewportStyle = computed(() => {
     return `
       width: ${autStore.viewportDimensions.width}px;
       height: ${autStore.viewportDimensions.height}px;
-      transform: scale(${scale});`
+      transform: scale(${scale.value});`
+  })
+
+  watchEffect(() => {
+    autStore.setScale(scale.value)
   })
 
   return {
