@@ -3,10 +3,11 @@ require('../../spec_helper')
 import 'chai-as-promised'
 import { expect } from 'chai'
 import { EventEmitter } from 'events'
-import Foxdriver from '@benmalka/foxdriver'
 import Marionette from 'marionette-client'
 import os from 'os'
 import sinon from 'sinon'
+import stripAnsi from 'strip-ansi'
+import Foxdriver from '@benmalka/foxdriver'
 import * as firefox from '../../../lib/browsers/firefox'
 import firefoxUtil from '../../../lib/browsers/firefox-util'
 
@@ -413,7 +414,7 @@ describe('lib/browsers/firefox', () => {
 
         await expect(firefoxUtil.setupMarionette([], '', port))
         .to.be.rejected.then((err) => {
-          expect(err.message).to.include('An unexpected error was received from Marionette Socket')
+          expect(stripAnsi(err.message)).to.include(`An unexpected error was received from Marionette: Socket`)
           expect(err.details).to.include('Error: foo error')
           expect(err.originalError.message).to.eq('foo error')
         })
@@ -426,7 +427,7 @@ describe('lib/browsers/firefox', () => {
 
         await expect(firefoxUtil.setupMarionette([], '', port))
         .to.be.rejected.then((err) => {
-          expect(err.message).to.include('An unexpected error was received from Marionette commands')
+          expect(stripAnsi(err.message)).to.include('An unexpected error was received from Marionette: commands')
           expect(err.details).to.include('Error: foo error')
         })
       })
@@ -436,7 +437,7 @@ describe('lib/browsers/firefox', () => {
 
         await expect(firefoxUtil.setupMarionette([], '', port))
         .to.be.rejected.then((err) => {
-          expect(err.message).to.include('An unexpected error was received from Marionette connection')
+          expect(stripAnsi(err.message)).to.include('An unexpected error was received from Marionette: connection')
           expect(err.details).to.include('Error: not connectable')
         })
       })

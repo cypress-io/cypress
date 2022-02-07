@@ -2,6 +2,7 @@ require('../spec_helper')
 
 const _ = require('lodash')
 const debug = require('debug')('test')
+const stripAnsi = require('strip-ansi')
 const Fixtures = require('@tooling/system-tests/lib/fixtures')
 
 const config = require(`${root}lib/config`)
@@ -2095,7 +2096,7 @@ describe('lib/config', () => {
 
       return config.setSupportFileAndFolder(obj, mockSupportDefaults)
       .catch((err) => {
-        expect(err.message).to.include('The support file is missing or invalid.')
+        expect(stripAnsi(err.message)).to.include('Your supportFile is missing or invalid:')
       })
     })
 
@@ -2256,7 +2257,7 @@ describe('lib/config', () => {
 
       return config.setPluginsFile(obj, mockPluginDefaults)
       .catch((err) => {
-        expect(err.message).to.include('The plugins file is missing or invalid.')
+        expect(stripAnsi(err.message)).to.include('Your pluginsFile was not found at path:')
       })
     })
 

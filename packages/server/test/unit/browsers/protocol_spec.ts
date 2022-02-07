@@ -1,17 +1,16 @@
 import '../../spec_helper'
-import _ from 'lodash'
-import Bluebird from 'bluebird'
 import 'chai-as-promised' // for the types!
-import chalk from 'chalk'
-import { connect } from '@packages/network'
-import CRI from 'chrome-remote-interface'
+import Bluebird from 'bluebird'
 import { expect } from 'chai'
+import CRI from 'chrome-remote-interface'
+import { stripIndents } from 'common-tags'
 import humanInterval from 'human-interval'
-import * as protocol from '../../../lib/browsers/protocol'
+import _ from 'lodash'
 import sinon from 'sinon'
 import snapshot from 'snap-shot-it'
 import stripAnsi from 'strip-ansi'
-import { stripIndents } from 'common-tags'
+import { connect } from '@packages/network'
+import * as protocol from '../../../lib/browsers/protocol'
 
 describe('lib/browsers/protocol', () => {
   // protocol connects explicitly to this host
@@ -25,7 +24,7 @@ describe('lib/browsers/protocol', () => {
       let delay: number
       let i = 0
 
-      while ((delay = protocol._getDelayMsForRetry(i, 'FooBrowser'))) {
+      while ((delay = protocol._getDelayMsForRetry(i, 'foobrowser'))) {
         delays.push(delay)
         i++
       }
@@ -35,7 +34,7 @@ describe('lib/browsers/protocol', () => {
       log.getCalls().forEach((log, i) => {
         const line = stripAnsi(log.args[0])
 
-        expect(line).to.include(`Still waiting to connect to FooBrowser, retrying in 1 second (attempt ${i + 18}/62)`)
+        expect(line).to.include(`Still waiting to connect to Foobrowser, retrying in 1 second (attempt ${i + 18}/62)`)
       })
 
       snapshot(delays)
@@ -46,22 +45,20 @@ describe('lib/browsers/protocol', () => {
     const expectedCdpFailedError = stripIndents`
       Cypress failed to make a connection to the Chrome DevTools Protocol after retrying for 50 seconds.
 
-      This usually indicates there was a problem opening the FooBrowser browser.
+      This usually indicates there was a problem opening the Foobrowser browser.
 
-      The CDP port requested was ${chalk.yellow('12345')}.
-
-      Error details:
+      The CDP port requested was 12345.
     `
 
     it('rejects if CDP connection fails', () => {
       const innerErr = new Error('cdp connection failure')
 
       sinon.stub(connect, 'createRetryingSocket').callsArgWith(1, innerErr)
-      const p = protocol.getWsTargetFor(12345, 'FooBrowser')
+      const p = protocol.getWsTargetFor(12345, 'foobrowser')
 
       return expect(p).to.eventually.be.rejected.then((val) => {
-        expect(val).property('message').include(expectedCdpFailedError)
-        expect(val).property('details').include(innerErr.message)
+        expect(stripAnsi(val.message)).include(expectedCdpFailedError)
+        expect(stripAnsi(val.details)).include(innerErr.message)
       })
     })
 
@@ -81,8 +78,8 @@ describe('lib/browsers/protocol', () => {
       const p = protocol.getWsTargetFor(12345, 'FooBrowser')
 
       return expect(p).to.eventually.be.rejected.then((val) => {
-        expect(val).property('message').include(expectedCdpFailedError)
-        expect(val).property('details').include(innerErr.message)
+        expect(stripAnsi(val.message)).include(expectedCdpFailedError)
+        expect(stripAnsi(val.details)).include(innerErr.message)
       })
     })
 
@@ -182,7 +179,7 @@ describe('lib/browsers/protocol', () => {
       log.getCalls().forEach((log, i) => {
         const line = stripAnsi(log.args[0])
 
-        expect(line).to.include(`Still waiting to connect to FooBrowser, retrying in 1 second (attempt ${i + 18}/62)`)
+        expect(line).to.include(`Still waiting to connect to Foobrowser, retrying in 1 second (attempt ${i + 18}/62)`)
       })
     })
   })

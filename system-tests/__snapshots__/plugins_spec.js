@@ -534,7 +534,7 @@ Learn more: https://on.cypress.io/plugins-api
 `
 
 exports['e2e plugins fails when its set from config but does not exist 1'] = `
-Your pluginsFile file was not found at path: /foo/bar/.projects/plugin-missing/cypress/plugins/does-not-exist.js
+Your pluginsFile was not found at path: /foo/bar/.projects/plugin-missing/cypress/plugins/does-not-exist.js
 
 Create this file, or set pluginsFile to false if a plugins file is not necessary for your project.
 
@@ -544,7 +544,7 @@ If you have just renamed the extension of your pluginsFile, restart Cypress.
 `
 
 exports['e2e plugins fails when require throws synchronously 1'] = `
-Your pluginsFile file is invalid: /foo/bar/.projects/plugins-root-sync-error/cypress/plugins/index.js
+Your pluginsFile is invalid: /foo/bar/.projects/plugins-root-sync-error/cypress/plugins/index.js
 
 It threw an error when required, check the stack trace below:
 

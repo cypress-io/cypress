@@ -569,7 +569,7 @@ export const AllCypressErrors = {
   },
   SUPPORT_FILE_NOT_FOUND: (supportFilePath: string) => {
     return errTemplate`\
-        Your ${`supportFile`} file is missing or invalid: ${fmt.path(supportFilePath)}
+        Your ${`supportFile`} is missing or invalid: ${fmt.path(supportFilePath)}
 
         The supportFile must be a .js, .ts, .coffee file or be supported by your preprocessor plugin (if configured).
 
@@ -581,7 +581,7 @@ export const AllCypressErrors = {
   },
   PLUGINS_FILE_ERROR: (pluginsFilePath: string, err: Error) => {
     return errTemplate`\
-        Your ${`pluginsFile`} file is invalid: ${fmt.path(pluginsFilePath)}
+        Your ${`pluginsFile`} is invalid: ${fmt.path(pluginsFilePath)}
 
         It threw an error when required, check the stack trace below:
 
@@ -590,7 +590,7 @@ export const AllCypressErrors = {
   },
   PLUGINS_FILE_NOT_FOUND: (pluginsFilePath: string) => {
     return errTemplate`\
-        Your ${`pluginsFile`} file was not found at path: ${fmt.path(pluginsFilePath)}
+        Your ${`pluginsFile`} was not found at path: ${fmt.path(pluginsFilePath)}
 
         Create this file, or set pluginsFile to ${fmt.highlightSecondary(`false`)} if a plugins file is not necessary for your project.
 
