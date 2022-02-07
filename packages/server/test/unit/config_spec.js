@@ -188,27 +188,33 @@ describe('lib/config', () => {
 
       context('baseUrl', () => {
         it('passes if begins with http://', function () {
-          this.setup({ baseUrl: 'http://example.com' })
+          this.setup({ e2e: { baseUrl: 'http://example.com', supportFile: false } })
 
           return this.expectValidationPasses()
         })
 
         it('passes if begins with https://', function () {
-          this.setup({ baseUrl: 'https://example.com' })
+          this.setup({ e2e: { baseUrl: 'https://example.com', supportFile: false } })
 
           return this.expectValidationPasses()
         })
 
         it('fails if not a string', function () {
-          this.setup({ baseUrl: false })
+          this.setup({ e2e: { baseUrl: false } })
 
           return this.expectValidationFails('be a fully qualified URL')
         })
 
         it('fails if not a fully qualified url', function () {
-          this.setup({ baseUrl: 'localhost' })
+          this.setup({ e2e: { baseUrl: 'localhost' } })
 
           return this.expectValidationFails('be a fully qualified URL')
+        })
+
+        it('fails if it is set on root level', function () {
+          this.setup({ baseUrl: 'localhost' })
+
+          return this.expectValidationFails('Please update this option under e2e testing type property')
         })
       })
 
@@ -246,7 +252,6 @@ describe('lib/config', () => {
         it('passes if an object with valid properties', function () {
           this.setup({
             component: {
-              baseUrl: 'https://cypress.com',
               execTimeout: 10000,
             },
           })
@@ -393,27 +398,27 @@ describe('lib/config', () => {
         })
       })
 
-      context('ignoreSpecPattern', () => {
+      context('excludeSpecPattern', () => {
         it('passes if a string', function () {
-          this.setup({ ignoreSpecPattern: '*.jsx' })
+          this.setup({ e2e: { excludeSpecPattern: '*.jsx', supportFile: false } })
 
           return this.expectValidationPasses()
         })
 
         it('passes if an array of strings', function () {
-          this.setup({ ignoreSpecPattern: ['*.jsx'] })
+          this.setup({ e2e: { excludeSpecPattern: ['*.jsx'], supportFile: false } })
 
           return this.expectValidationPasses()
         })
 
         it('fails if not a string or array', function () {
-          this.setup({ ignoreSpecPattern: 5 })
+          this.setup({ e2e: { excludeSpecPattern: 5 } })
 
           return this.expectValidationFails('be a string or an array of strings')
         })
 
         it('fails if not an array of strings', function () {
-          this.setup({ ignoreSpecPattern: [5] })
+          this.setup({ e2e: { excludeSpecPattern: [5] } })
           this.expectValidationFails('be a string or an array of strings')
 
           return this.expectValidationFails('the value was: `[5]`')
@@ -1439,7 +1444,7 @@ describe('lib/config', () => {
             fileServerFolder: { value: '', from: 'default' },
             fixturesFolder: { value: 'cypress/fixtures', from: 'default' },
             hosts: { value: null, from: 'default' },
-            ignoreSpecPattern: { value: '*.hot-update.js', from: 'default' },
+            excludeSpecPattern: { value: '*.hot-update.js', from: 'default' },
             includeShadowDom: { value: false, from: 'default' },
             isInteractive: { value: true, from: 'default' },
             keystrokeDelay: { value: 0, from: 'default' },
@@ -1550,7 +1555,7 @@ describe('lib/config', () => {
             fileServerFolder: { value: '', from: 'default' },
             fixturesFolder: { value: 'cypress/fixtures', from: 'default' },
             hosts: { value: null, from: 'default' },
-            ignoreSpecPattern: { value: '*.hot-update.js', from: 'default' },
+            excludeSpecPattern: { value: '*.hot-update.js', from: 'default' },
             includeShadowDom: { value: false, from: 'default' },
             isInteractive: { value: true, from: 'default' },
             keystrokeDelay: { value: 0, from: 'default' },
