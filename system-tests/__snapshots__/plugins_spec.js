@@ -133,19 +133,21 @@ Found an error while validating the \`browsers\` list. Expected \`displayName\` 
 `
 
 exports['e2e plugins can filter browsers from config 1'] = `
-The specified browser was not found on your system or is not supported by Cypress: chrome
+Can't run because you've entered an invalid browser name.
+
+Browser: chrome was not found on your system or is not supported by Cypress.
 
 Cypress supports the following browsers:
-- chrome
-- chromium
-- edge
-- electron
-- firefox
+ - electron
+ - chrome
+ - chromium
+ - edge
+ - firefox
 
 You can also use a custom browser: https://on.cypress.io/customize-browsers
 
 Available browsers found on your system are:
-- electron
+ - electron
 
 Read more about how to troubleshoot launching browsers: https://on.cypress.io/troubleshooting-launching-browsers
 
@@ -371,7 +373,9 @@ exports['e2e plugins fails when there is an async error inside an event handler 
   Running:  app.cy.js                                                                       (1 of 1)
 
 
-The following error was thrown by a plugin. We stopped running your tests because a plugin crashed. Please check your e2e.setupNodeEvents method in cypress.config.js
+We stopped running your tests because a plugin crashed.
+
+The following error was thrown by your e2e.setupNodeEvents method in: /foo/bar/.projects/plugins-async-error/cypress/plugins/index.js
 
 Error: Async error from plugins file
       [stack trace lines]
@@ -418,30 +422,32 @@ Learn more: https://on.cypress.io/plugins-api
 
 We loaded the \`setupNodeEvents\` from: /foo/bar/.projects/plugin-empty/cypress.config.js
 
-It exported:
+Learn more: https://on.cypress.io/plugins-api
 
  "foo"
 
 `
 
 exports['e2e plugins fails when invalid event is registered 1'] = `
-The following validation error was thrown by your plugins file (/foo/bar/.projects/plugin-validation-error/cypress.config.js).
+Your pluginsFile threw a validation error: /foo/bar/.projects/plugin-validation-error/cypress/plugins/index.js
 
-Error: You must pass a valid event name when registering a plugin.
+You must pass a valid event name when registering a plugin.
 
-You passed: \`invalid:event\`
+You passed: invalid:event
 
 The following are valid events:
-- after:run
-- after:screenshot
-- after:spec
-- before:browser:launch
-- before:run
-- before:spec
-- dev-server:start
-- file:preprocessor
-- task
 
+ - after:run
+ - after:screenshot
+ - after:spec
+ - before:browser:launch
+ - before:run
+ - before:spec
+ - dev-server:start
+ - file:preprocessor
+ - task
+
+ValidationError: invalid event name
       [stack trace lines]
 `
 
@@ -510,4 +516,37 @@ exports['e2e plugins does not report more screenshots than exist if user overwri
     ✔  All specs passed!                        XX:XX        3        3        -        -        -  
 
 
+`
+
+exports['e2e plugins fails when there is nothing exported 1'] = `
+The pluginsFile must export a function with the following signature:
+
+// /foo/bar/.projects/plugin-empty/cypress/plugins/index.js
+module.exports = (on, config) => {
+  // configure plugins here
+}
+
+Instead it exported:
+
+{}
+
+Learn more: https://on.cypress.io/plugins-api
+
+
+`
+
+exports['e2e plugins fails when require throws synchronously 1'] = `
+Your pluginsFile file is invalid: /foo/bar/.projects/plugins-root-sync-error/cypress/plugins/index.js
+
+It threw an error when required, check the stack trace below:
+
+RootSyncError: Root sync error from plugins file
+      [stack trace lines]
+`
+
+exports['e2e plugins fails when function throws synchronously 1'] = `
+The function exported by the pluginsFile threw an error: /foo/bar/.projects/plugins-function-sync-error/cypress/plugins/index.js
+
+FunctionSyncError: Function sync error from plugins file
+      [stack trace lines]
 `

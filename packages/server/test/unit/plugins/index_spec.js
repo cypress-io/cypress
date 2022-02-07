@@ -210,7 +210,10 @@ describe.skip('lib/plugins/index', () => {
     describe('load:error message', () => {
       context('PLUGINS_FILE_ERROR', () => {
         beforeEach(() => {
-          ipc.on.withArgs('load:error').yields('PLUGINS_FILE_ERROR', 'path/to/pluginsFile.js', 'error message stack')
+          const e = new Error('some error')
+
+          e.stack = 'error message stack'
+          ipc.on.withArgs('load:error').yields('PLUGINS_FILE_ERROR', 'path/to/pluginsFile.js', e)
         })
 
         it('rejects plugins.init', () => {
@@ -273,7 +276,7 @@ describe.skip('lib/plugins/index', () => {
         pluginsProcess.on.withArgs('error').yield(err)
         expect(onError).to.be.called
         expect(onError.lastCall.args[0].title).to.equal('Error running plugin')
-        expect(onError.lastCall.args[0].stack).to.include('The following error was thrown by a plugin')
+        expect(onError.lastCall.args[0].message).to.include('The following error was thrown by a plugin')
 
         expect(onError.lastCall.args[0].details).to.include(err.message)
       })
@@ -282,7 +285,7 @@ describe.skip('lib/plugins/index', () => {
         ipc.on.withArgs('error').yield(err)
         expect(onError).to.be.called
         expect(onError.lastCall.args[0].title).to.equal('Error running plugin')
-        expect(onError.lastCall.args[0].stack).to.include('The following error was thrown by a plugin')
+        expect(onError.lastCall.args[0].message).to.include('The following error was thrown by a plugin')
 
         expect(onError.lastCall.args[0].details).to.include(err.message)
       })
@@ -295,6 +298,7 @@ describe.skip('lib/plugins/index', () => {
         err = {
           name: 'error name',
           message: 'error message',
+          stack: 'error stack',
         }
 
         pluginsProcess.on.withArgs('error').yields(err)
@@ -307,8 +311,8 @@ describe.skip('lib/plugins/index', () => {
         })
         .catch((_err) => {
           expect(_err.title).to.equal('Error running plugin')
-          expect(_err.stack).to.include('The following error was thrown by a plugin')
-          expect(_err.details).to.include(err.message)
+          expect(_err.message).to.include('The following error was thrown by a plugin')
+          expect(_err.details).to.include(err.stack)
         })
       })
 
@@ -319,8 +323,8 @@ describe.skip('lib/plugins/index', () => {
         })
         .catch((_err) => {
           expect(_err.title).to.equal('Error running plugin')
-          expect(_err.stack).to.include('The following error was thrown by a plugin')
-          expect(_err.details).to.include(err.message)
+          expect(_err.message).to.include('The following error was thrown by a plugin')
+          expect(_err.details).to.include(err.stack)
         })
       })
     })

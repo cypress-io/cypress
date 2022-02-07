@@ -2639,7 +2639,9 @@ exports['e2e record empty specs succeeds when empty spec file 1'] = `
 `
 
 exports['e2e record misconfiguration errors and exits when no browser found 1'] = `
-The specified browser was not found on your system or is not supported by Cypress: browserDoesNotExist
+Can't run because you've entered an invalid browser name.
+
+Browser: browserDoesNotExist was not found on your system or is not supported by Cypress.
 
 Cypress supports the following browsers:
 - chrome
@@ -2739,5 +2741,44 @@ exports['e2e record quiet mode respects quiet mode 1'] = `
   1 passing
   1 pending
 
+
+`
+
+exports['e2e record api interaction errors create run 412 errors and exits when request schema is invalid 1'] = `
+Recording this run failed because the request was invalid.
+
+request should follow postRunRequest@2.0.0 schema
+
+Errors:
+
+[
+  "data has additional properties: group, parallel, ciBuildId, tags, testingType, runnerCapabilities",
+  "data.platform is the wrong type"
+]
+
+Request Sent:
+
+{
+  "ci": null,
+  "specs": [
+    "cypress/integration/record_pass_spec.js"
+  ],
+  "commit": null,
+  "group": null,
+  "platform": null,
+  "parallel": null,
+  "ciBuildId": null,
+  "projectId": "pid123",
+  "recordKey": "f858a2bc-b469-4e48-be67-0876339ee7e1",
+  "specPattern": "cypress/integration/record_pass*",
+  "tags": [
+    ""
+  ],
+  "testingType": "e2e",
+  "runnerCapabilities": {
+    "dynamicSpecsInSerialMode": true,
+    "skipSpecAction": true
+  }
+}
 
 `

@@ -167,7 +167,6 @@ Please add it to your "excludes" option, and remove from your project.
 
 exports['e2e config throws error when cypress.json is found in project and need migration 1'] = `
 There is a cypress.json file at the location below:
-
 /foo/bar/.projects/pristine
 
 Cypress 10 no longer supports 'cypress.json'. Please run \`cypress open\` to launch the migration tool to migrate to 'cypress.config.{ts|js}'.

@@ -14,7 +14,6 @@ const resolve = require('../../util/resolve')
 const browserLaunch = require('./browser_launch')
 const util = require('../util')
 const validateEvent = require('./validate_event')
-const errors = require('../../errors-child')
 
 const UNDEFINED_SERIALIZED = '__cypress_undefined__'
 
@@ -60,7 +59,7 @@ class RunPlugins {
       const { isValid, error } = validateEvent(event, handler, initialConfig)
 
       if (!isValid) {
-        this.ipc.send('setupTestingType:error', 'PLUGINS_VALIDATION_ERROR', util.serializeError(error))
+        this.ipc.send('setupTestingType:error', 'PLUGINS_VALIDATION_ERROR', this.requiredFile, util.serializeError(error))
 
         return
       }
@@ -195,7 +194,7 @@ class RunPlugins {
     const duplicates = _.intersection(_.keys(target), _.keys(events))
 
     if (duplicates.length) {
-      errors.warning('DUPLICATE_TASK_KEY', duplicates.join(', '))
+      require('@packages/errors').warning('DUPLICATE_TASK_KEY', duplicates.join(', '))
     }
 
     return _.extend(target, events)

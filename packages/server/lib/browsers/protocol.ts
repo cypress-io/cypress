@@ -128,6 +128,6 @@ export const getWsTargetFor = (port: number, browserName: string, url?: string |
   })
   .catch((err) => {
     debug('failed to connect to CDP %o', { connectOpts, err })
-    errors.throw('CDP_COULD_NOT_CONNECT', port, err, browserName)
+    errors.throw('CDP_COULD_NOT_CONNECT', browserName, port, err)
   })
 }
