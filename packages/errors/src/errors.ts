@@ -634,9 +634,9 @@ export const AllCypressErrors = {
     `
   },
   // TODO: test this
-  PLUGINS_VALIDATION_ERROR: (arg1: string, arg2: string | Error) => {
+  PLUGINS_VALIDATION_ERROR: (arg1: string, arg2: Error) => {
     return errTemplate`
-      Your ${`pluginsFile`} threw a validation error: ${fmt.path(arg1)}
+      The following validation error was thrown by your config file ${fmt.path(arg1)}.
 
       ${fmt.stackTrace(arg2)}
     `
@@ -761,10 +761,9 @@ export const AllCypressErrors = {
     return errTemplate`\
         Could not find a Cypress configuration file in this folder: ${fmt.path(arg1)}`
   },
-  // TODO: verify these are configBaseName and not configPath
-  CONFIG_FILES_LANGUAGE_CONFLICT: (projectRoot: string, configFileBaseName1: string, configFileBaseName2: string) => {
+  CONFIG_FILES_LANGUAGE_CONFLICT: (projectRoot: string) => {
     return errTemplate`
-          There is both a ${configFileBaseName1} and a ${configFileBaseName2} at the location below:
+          There is both a ${'cypress.config.js'} and a ${'cypress.config.ts'} at the location below:
 
           ${fmt.listItem(projectRoot)}
 
@@ -1125,6 +1124,41 @@ export const AllCypressErrors = {
       As the ${backtick(arg1.name)} configuration option will be removed in a future release, it is recommended to remove the ${backtick(arg1.name)} configuration option from ${backtick(arg1.configFile)}.
       `
   },
+  CONFIG_FILE_MIGRATION_NEEDED: (projectDir: string) => {
+    return errTemplate`\
+      There is a cypress.json file at the location below:
+      ${projectDir}
+
+      Cypress no longer supports 'cypress.json', please migrate to 'cypress.config.{ts|js}'.`
+  },
+  LEGACY_CONFIG_FILE: (configFile: string, projectDir: string) => {
+    return errTemplate`
+      There is both a \`${configFile}\` and a cypress.json file at the location below:
+      ${projectDir}
+
+      Cypress no longer supports 'cypress.json' config, please remove it from your project.
+    `
+  },
+  LEGACY_DEV_SERVER_START: (configFile: string) => {
+    return errTemplate`\
+      The \`setupNodeEvents\` method defined in ${configFile} does not support \`dev-server:start\`, use \`devServer\` instead:
+
+      \`\`\`
+      devServer (cypressConfig, devServerConfig) {
+        // configure plugins here
+      }
+      \`\`\`
+
+      Learn more: https://on.cypress.io/plugins-api
+    `
+  },
+  UNEXPECTED_ERROR_LOADING_CONFIG: (arg1: string, arg2: ErrorLike) => {
+    return errTemplate`
+      The following error was thrown while loading. Please check your plugins file (${arg1})
+
+      ${details(arg2)}
+    `
+  },
 } as const
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -1132,7 +1166,11 @@ const _typeCheck: Record<keyof AllCypressErrorObj, (...args: any[]) => ErrTempla
 
 type AllCypressErrorObj = typeof AllCypressErrors
 
-export function getMsgByType<Type extends keyof AllCypressErrorObj> (type: Type, ...args: Parameters<AllCypressErrorObj[Type]>): string {
+export type AllCypressErrorNames = keyof AllCypressErrorObj
+
+export type CypressErrorArgs<Name extends AllCypressErrorNames> = Parameters<AllCypressErrorObj[Name]>
+
+export function getMsgByType<Type extends keyof AllCypressErrorObj> (type: Type, ...args: CypressErrorArgs<Type>): string {
   const err = getError(type, ...args)
 
   return err.message

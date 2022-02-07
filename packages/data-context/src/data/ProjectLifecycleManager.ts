@@ -15,6 +15,7 @@ import resolve from 'resolve'
 import debugLib from 'debug'
 import pDefer from 'p-defer'
 import fs from 'fs'
+import { AllCypressErrorNames, CypressErrorArgs, getError } from '@packages/errors'
 
 import type { DataContext } from '..'
 import { LoadConfigReply, SetupNodeEventsReply, ProjectConfigIpc, IpcHandler } from './ProjectConfigIpc'
@@ -50,8 +51,8 @@ export interface InjectedConfigApi {
   allowedConfig(config: Cypress.ConfigOptions): Cypress.ConfigOptions
   updateWithPluginValues(config: FullConfig, modifiedConfig: Partial<Cypress.ConfigOptions>): FullConfig
   setupFullConfigWithDefaults(config: SetupFullConfigOptions): Promise<FullConfig>
-  validateRootConfigBreakingChanges<T extends Cypress.ConfigOptions>(config: Partial<T>, onWarning: (warningMsg: string) => void, onErr: (errMsg: string) => never): T
-  validateTestingTypeConfigBreakingChanges<T extends Cypress.ConfigOptions>(config: Partial<T>, testingType: Cypress.TestingType, onWarning: (warningMsg: string) => void, onErr: (errMsg: string) => never): T
+  validateTestingTypeConfigBreakingChanges<T extends Cypress.ConfigOptions>(config: Partial<T>, testingType: Cypress.TestingType, onWarning: <T extends AllCypressErrorNames>(warningMsg: T, ...args: CypressErrorArgs<T>) => void, onErr: <T extends AllCypressErrorNames>(errMsg: T, ...args: CypressErrorArgs<T>) => never): T
+  validateRootConfigBreakingChanges<T extends Cypress.ConfigOptions>(config: Partial<T>, onWarning: <T extends AllCypressErrorNames>(warningMsg: T, ...args: CypressErrorArgs<T>) => void, onErr: <T extends AllCypressErrorNames>(errMsg: T, ...args: CypressErrorArgs<T>) => never): T
 }
 
 type State<S, V = undefined> = V extends undefined ? {state: S, value?: V } : {state: S, value: V}
@@ -488,7 +489,7 @@ export class ProjectLifecycleManager {
 
         return {
           ...browser,
-          warning: browser.warning || this.ctx._apis.errorApi.message('CHROME_WEB_SECURITY_NOT_SUPPORTED', browser.name),
+          warning: browser.warning || getError('CHROME_WEB_SECURITY_NOT_SUPPORTED', browser.name).message,
         }
       })
 
@@ -582,10 +583,10 @@ export class ProjectLifecycleManager {
       config,
       this._currentTestingType,
       (warning, ...args) => {
-        return this.ctx.warning(warning, ...args)
+        return getError(warning, ...args)
       },
       (err, ...args) => {
-        throw this.ctx.error(err, ...args)
+        throw getError(err, ...args)
       },
     )
   }
@@ -594,10 +595,10 @@ export class ProjectLifecycleManager {
     return this.ctx._apis.configApi.validateRootConfigBreakingChanges(
       config,
       (warning, ...args) => {
-        return this.ctx.warning(warning, ...args)
+        return getError(warning, ...args)
       },
       (err, ...args) => {
-        throw this.ctx.error(err, ...args)
+        throw getError(err, ...args)
       },
     )
   }
@@ -607,12 +608,12 @@ export class ProjectLifecycleManager {
       if (!file) {
         // This should never happen, b/c if the config file is false, the config
         // should be the default one
-        throw this.ctx.error('CONFIG_VALIDATION_ERROR', errMsg)
+        throw getError('CONFIG_VALIDATION_ERROR', errMsg)
       }
 
       const base = path.basename(file)
 
-      throw this.ctx.error('SETTINGS_VALIDATION_ERROR', base, errMsg)
+      throw getError('SETTINGS_VALIDATION_ERROR', base, errMsg)
     })
   }
 
@@ -751,7 +752,7 @@ export class ProjectLifecycleManager {
         throw err
       }
 
-      throw this.ctx.error('ERROR_READING_FILE', this.envFilePath, err)
+      throw getError('ERROR_READING_FILE', this.envFilePath, err)
     }
   }
 
@@ -1042,21 +1043,12 @@ export class ProjectLifecycleManager {
       dfd.resolve({ ...val, initialConfig: JSON.parse(val.initialConfig) })
     })
 
-    ipc.once('loadConfig:error', (type, ...args) => {
-      debug('loadConfig:error %s, rejecting', type)
-      this.killChildProcess(child)
-
-      const err = this.ctx.error(type, ...args)
-
-      // if it's a non-cypress error, restore the initial error
-      if (!(err.message?.length)) {
-        err.isCypressErr = false
-        err.message = args[1]
-        err.code = type
-        err.name = type
+    ipc.once('loadConfig:error', (err) => {
+      if (err.isCypressErr) {
+        dfd.reject(err)
+      } else {
+        dfd.reject(getError('UNEXPECTED_ERROR_LOADING_CONFIG', this.configFilePath, err))
       }
-
-      dfd.reject(err)
     })
 
     debug('trigger the load of the file')
@@ -1070,7 +1062,7 @@ export class ProjectLifecycleManager {
 
     this._cleanupIpc(ipc)
 
-    err = this.ctx._apis.errorApi.error('CHILD_PROCESS_UNEXPECTED_ERROR', this._currentTestingType, this.configFile, err.annotated || err.stack || err.message)
+    err = getError('PLUGINS_UNEXPECTED_ERROR', this._currentTestingType, this.configFile, err)
     err.title = 'Error running plugin'
 
     // this can sometimes trigger before the promise is fulfilled and
@@ -1089,7 +1081,7 @@ export class ProjectLifecycleManager {
         basedir: this.projectRoot,
       }))
 
-      this.ctx.onWarning(this.ctx.error('INCOMPATIBLE_PLUGIN_RETRIES', path.relative(this.projectRoot, retriesPluginPath)))
+      this.ctx.onWarning(getError('INCOMPATIBLE_PLUGIN_RETRIES', path.relative(this.projectRoot, retriesPluginPath)))
     } catch (e) {
       // noop, incompatible plugin not installed
     }
@@ -1196,7 +1188,7 @@ export class ProjectLifecycleManager {
         throw new Error('NOT DIRECTORY')
       }
     } catch (err) {
-      throw this.ctx.error('NO_PROJECT_FOUND_AT_PROJECT_ROOT', this.projectRoot)
+      throw getError('NO_PROJECT_FOUND_AT_PROJECT_ROOT', this.projectRoot)
     }
   }
 
@@ -1292,8 +1284,8 @@ export class ProjectLifecycleManager {
 
     // For every registration event, we want to turn into an RPC with the child process
     ipc.once('setupTestingType:reply', dfd.resolve)
-    ipc.once('setupTestingType:error', ({ type, serializedError }) => {
-      dfd.reject(this.ctx.error(type, ...args))
+    ipc.once('setupTestingType:error', (type, ...args) => {
+      dfd.reject(getError(type, ...args))
     })
 
     const handleWarning = (warningErr: WarningError) => {
@@ -1339,11 +1331,11 @@ export class ProjectLifecycleManager {
     if (!this._currentTestingType) {
       this.setCurrentTestingType('e2e')
       // TODO: Warn on this
-      // this.ctx.onWarning(this.ctx.error('TESTING_TYPE_NEEDED_FOR_RUN'))
+      // this.ctx.onWarning(getError('TESTING_TYPE_NEEDED_FOR_RUN'))
     }
 
     if (!this.metaState.hasValidConfigFile) {
-      return this.ctx.onError(this.ctx.error('NO_DEFAULT_CONFIG_FILE_FOUND', this.projectRoot))
+      return this.ctx.onError(getError('NO_DEFAULT_CONFIG_FILE_FOUND', this.projectRoot))
     }
 
     return this._pendingInitialize.promise.finally(() => {
@@ -1354,19 +1346,19 @@ export class ProjectLifecycleManager {
   private configFileWarningCheck () {
     // Only if they've explicitly specified a config file path do we error, otherwise they'll go through onboarding
     if (!this.metaState.hasValidConfigFile && this.metaState.hasSpecifiedConfigViaCLI !== false && this.ctx.isRunMode) {
-      this.ctx.onError(this.ctx.error('CONFIG_FILE_NOT_FOUND', path.basename(this.metaState.hasSpecifiedConfigViaCLI), path.dirname(this.metaState.hasSpecifiedConfigViaCLI)))
+      this.ctx.onError(getError('CONFIG_FILE_NOT_FOUND', path.basename(this.metaState.hasSpecifiedConfigViaCLI), path.dirname(this.metaState.hasSpecifiedConfigViaCLI)))
     }
 
     if (this.metaState.hasLegacyCypressJson && !this.metaState.hasValidConfigFile && this.ctx.isRunMode) {
-      this.ctx.onError(this.ctx.error('CONFIG_FILE_MIGRATION_NEEDED', this.projectRoot))
+      this.ctx.onError(getError('CONFIG_FILE_MIGRATION_NEEDED', this.projectRoot))
     }
 
     if (this.metaState.hasMultipleConfigPaths) {
-      this.ctx.onError(this.ctx.error('CONFIG_FILES_LANGUAGE_CONFLICT', this.projectRoot))
+      this.ctx.onError(getError('CONFIG_FILES_LANGUAGE_CONFLICT', this.projectRoot))
     }
 
     if (this.metaState.hasValidConfigFile && this.metaState.hasLegacyCypressJson) {
-      this.ctx.onError(this.ctx.error('LEGACY_CONFIG_FILE', this.projectRoot, path.basename(this.configFilePath)))
+      this.ctx.onError(getError('LEGACY_CONFIG_FILE', this.projectRoot, path.basename(this.configFilePath)))
     }
   }
 

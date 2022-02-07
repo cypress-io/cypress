@@ -59,15 +59,11 @@ class RunPlugins {
       const { isValid, error } = validateEvent(event, handler, initialConfig)
 
       if (!isValid) {
-        this.ipc.send('setupTestingType:error', 'PLUGINS_VALIDATION_ERROR', this.requiredFile, util.serializeError(error))
-
-        return
+        throw require('@packages/errors').getError('PLUGINS_VALIDATION_ERROR', this.requiredFile, util.serializeError(error))
       }
 
       if (event === 'dev-server:start' && this.registeredEventsByName[event]) {
-        this.ipc.send('setupTestingType:error', 'SETUP_NODE_EVENTS_DO_NOT_SUPPORT_DEV_SERVER')
-
-        return
+        throw require('@packages/errors').getError('LEGACY_DEV_SERVER_START', this.requiredFile)
       }
 
       if (event === 'task') {

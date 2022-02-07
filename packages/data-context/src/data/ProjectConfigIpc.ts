@@ -1,18 +1,9 @@
 /* eslint-disable no-dupe-class-members */
+import type { AllCypressErrorNames, SerializedError } from '@packages/errors'
 import type { TestingType } from '@packages/types'
 import type { ChildProcess } from 'child_process'
 import EventEmitter from 'events'
 import { autoBindDebug } from '../util'
-
-export interface SerializedError {
-  code?: string | number
-  type?: string | number
-  stack?: string
-  annotated?: string
-  message?: string
-  name: string
-  isCypressErr?: boolean
-}
 
 export type SetupTestingTypeError = {
   type: 'PLUGINS_FUNCTION_ERROR' | 'PLUGINS_VALIDATION_ERROR' | 'SETUP_NODE_EVENTS_DO_NOT_SUPPORT_DEV_SERVER'
@@ -94,13 +85,13 @@ export class ProjectConfigIpc extends EventEmitter {
    * sourcing the config (script error, etc.)
    */
   once(evt: 'loadConfig:reply', listener: (payload: SerializedLoadConfigReply) => void): this
-  once(evt: 'loadConfig:error', listener: (realErrorCode: string, requiredFile: string, message: string) => void): this
+  once(evt: 'loadConfig:error', listener: (err: SerializedError) => void): this
 
   /**
    * When
    */
   once(evt: 'setupTestingType:reply', listener: (payload: SetupNodeEventsReply) => void): this
-  once(evt: 'setupTestingType:error', listener: (payload: SetupTestingTypeError) => void): this
+  once(evt: 'setupTestingType:error', listener: (errorType: AllCypressErrorNames, requiredFile: string, serializedError: SerializedError) => void): this
   once (evt: string, listener: (...args: any[]) => void) {
     return super.once(evt, listener)
   }
