@@ -20,10 +20,12 @@ type Browser implements Node {
   id: ID!
   isFocusSupported: Boolean!
   isSelected: Boolean!
+  isVersionSupported: Boolean!
   majorVersion: String
   name: String!
   path: String!
   version: String!
+  warning: String
 }
 
 enum BrowserFamily {
@@ -555,6 +557,7 @@ type LocalSettings {
 """local setting preferences"""
 type LocalSettingsPreferences {
   autoScrollingEnabled: Boolean
+  isSideNavigationOpen: Boolean
   isSpecsListOpen: Boolean
   preferredEditorBinary: String
   proxyBypass: String
@@ -1075,6 +1078,9 @@ type Wizard {
 
   """All of the component testing frameworks to choose from"""
   frameworks: [WizardFrontendFramework!]!
+
+  """The list of packages to install that are currently installed"""
+  installedPackages: [String!]
   language: WizardCodeLanguage
 
   """

@@ -85,7 +85,7 @@ const getVersionSpecifier = (startDir = path.resolve(__dirname, '../..')) => {
   })
 }
 
-const betaNpmUrlRe = /^\/beta\/npm\/(?<version>[0-9.]+)\/(?<artifactSlug>.+?)\/cypress\.tgz$/
+const betaNpmUrlRe = /^\/beta\/npm\/(?<version>[0-9.]+)\/(?<platformSlug>.+?)\/(?<artifactSlug>.+?)\/cypress\.tgz$/
 
 // convert a prerelease NPM package .tgz URL to the corresponding binary .zip URL
 const getBinaryUrlFromPrereleaseNpmUrl = (npmUrl) => {

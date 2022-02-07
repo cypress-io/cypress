@@ -1,7 +1,7 @@
 const _ = require('lodash')
 const debug = require('debug')('cypress:config:validator')
 
-const { options, breakingOptions, breakingRootOptions } = require('./options')
+const { options, breakingOptions, breakingRootOptions, testingTypeBreakingOptions } = require('./options')
 
 const dashesOrUnderscoresRe = /^(_-)+/
 
@@ -118,6 +118,12 @@ module.exports = {
 
   validateNoBreakingConfig: (cfg, onWarning, onErr) => {
     return validateNoBreakingOptions(breakingOptions, cfg, onWarning, onErr)
+  },
+
+  validateNoBreakingTestingTypeConfig: (cfg, testingType, onWarning, onErr) => {
+    const options = testingTypeBreakingOptions[testingType]
+
+    return validateNoBreakingOptions(options, cfg, onWarning, onErr)
   },
 
   validateNoReadOnlyConfig: (config, onErr) => {
