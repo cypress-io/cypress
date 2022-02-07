@@ -2124,7 +2124,7 @@ jobs:
   test-binary-against-cy-ct-examples-vue-cli-2:
     <<: *defaults
     steps:
-      - test-binary-against-repo:
+      - test-binary-against-repo-folder:
           repo: cypress-component-testing-examples
           browser: chrome
           folder: "vue-cli-2"
@@ -2133,7 +2133,7 @@ jobs:
   test-binary-against-cy-ct-examples-vue-cli-2-firefox:
     <<: *defaults
     steps:
-      - test-binary-against-repo:
+      - test-binary-against-repo-folder:
           repo: cypress-component-testing-examples
           browser: firefox
           folder: "vue-cli-2"
@@ -2142,7 +2142,7 @@ jobs:
   test-binary-against-cy-ct-examples-quasar-ui:
     <<: *defaults
     steps:
-      - test-binary-against-repo:
+      - test-binary-against-repo-folder:
           repo: cypress-component-testing-examples
           browser: chrome
           folder: "vue-cli-2-quasar-ui"
@@ -2152,7 +2152,7 @@ jobs:
   test-binary-against-cy-ct-examples-cra-ant-design:
     <<: *defaults
     steps:
-      - test-binary-against-repo:
+      - test-binary-against-repo-folder:
           repo: cypress-component-testing-examples
           browser: chrome
           folder: "create-react-app-ant-design"
@@ -2162,7 +2162,7 @@ jobs:
   test-binary-against-cy-ct-examples-cra-react-bootstrap:
     <<: *defaults
     steps:
-      - test-binary-against-repo:
+      - test-binary-against-repo-folder:
           repo: cypress-component-testing-examples
           browser: chrome
           folder: "create-react-app-react-bootstrap"
@@ -2172,7 +2172,7 @@ jobs:
   test-binary-against-cy-ct-examples-cra-chakra-ui:
     <<: *defaults
     steps:
-      - test-binary-against-repo:
+      - test-binary-against-repo-folder:
           repo: cypress-component-testing-examples
           browser: chrome
           folder: "create-react-app-chakra-ui"
@@ -2182,7 +2182,7 @@ jobs:
   test-binary-against-cy-ct-examples-cra-tailwind:
     <<: *defaults
     steps:
-      - test-binary-against-repo:
+      - test-binary-against-repo-folder:
           repo: cypress-component-testing-examples
           browser: chrome
           folder: "create-react-app-tailwind"
