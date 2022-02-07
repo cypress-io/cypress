@@ -1,4 +1,5 @@
 // simple example of typescript types
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 type Foo = {
   something: string
 }
@@ -14,9 +15,6 @@ describe('typescript', { defaultCommandTimeout: 0 }, () => {
   })
 
   it('command failure', () => {
-    const myVar = { something: 'foo' } as Foo
-
-    cy.log(`Printing TS: ${ myVar}`)
     cy.get('#does-not-exist')
   })
 })
