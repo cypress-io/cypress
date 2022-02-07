@@ -34,7 +34,7 @@ export function launch (
   // but only if it's not already set by the environment
   const env = Object.assign({}, defaultBrowserEnv, process.env)
 
-  const proc = cp.spawn(browser.path, args, { stdio: ['ignore', 'pipe', 'pipe'], env }) as LaunchedBrowser
+  const proc = cp.spawn(browser.path, args, { stdio: ['ignore', 'pipe', 'pipe'], env })
 
   proc.stdout.on('data', (buf) => {
     log('%s stdout: %s', browser.name, String(buf).trim())

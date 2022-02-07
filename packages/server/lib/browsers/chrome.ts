@@ -17,6 +17,7 @@ import utils from './utils'
 import type { Browser } from './types'
 import { BrowserCriClient } from './browser-cri-client'
 import type { LaunchedBrowser } from '@packages/launcher/lib/browsers'
+import type { CRIWrapper } from './cri-client'
 
 // TODO: this is defined in `cypress-npm-api` but there is currently no way to get there
 type CypressConfiguration = any
@@ -314,7 +315,7 @@ const _handleDownloads = async function (client, dir, automation) {
   })
 }
 
-const _setAutomation = async (browserCriClient, client, automation) => {
+const _setAutomation = async (browserCriClient: BrowserCriClient, client: CRIWrapper.Client, automation) => {
   return automation.use(
     await CdpAutomation.create(client.send, client.on, browserCriClient.closeCurrentTarget, automation),
   )
@@ -426,7 +427,7 @@ export = {
     return args
   },
 
-  async connectToNewSpec (browserCriClient, browser: Browser, options: CypressConfiguration = {}, automation) {
+  async connectToNewSpec (browserCriClient: BrowserCriClient, browser: Browser, options: CypressConfiguration = {}, automation) {
     debug('connecting to new chrome tab in existing instance with url and debugging port', { url: options.url })
 
     const criClient = await browserCriClient.attachToNewUrl('about:blank')

@@ -184,7 +184,7 @@ module.exports = {
 
   _getAutomation,
 
-  _render (url, automation, preferences = {}, options = {}) {
+  async _render (url, automation, preferences = {}, options = {}) {
     const win = Windows.create(options.projectRoot, preferences)
 
     if (preferences.browser.isHeadless) {
@@ -197,9 +197,12 @@ module.exports = {
       win.maximize()
     }
 
-    return this._launch(win, url, automation, preferences)
-    .tap(_maybeRecordVideo(win.webContents, preferences))
-    .tap(async () => automation.use(await _getAutomation(win, preferences, automation)))
+    const launchedBrowser = await this._launch(win, url, automation, preferences)
+
+    await _maybeRecordVideo(win.webContents, preferences)
+    automation.use(await _getAutomation(win, preferences, automation))
+
+    return launchedBrowser
   },
 
   _launchChild (e, url, parent, projectRoot, state, options, automation) {

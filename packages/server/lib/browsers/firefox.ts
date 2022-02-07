@@ -16,7 +16,7 @@ import os from 'os'
 import treeKill from 'tree-kill'
 import mimeDb from 'mime-db'
 import { getRemoteDebuggingPort } from './protocol'
-import type CRI from 'chrome-remote-interface'
+import type { BrowserCriClient } from './browser-cri-client'
 
 const errors = require('../errors')
 
@@ -516,7 +516,7 @@ export async function open (browser: Browser, url, options: any = {}, automation
     // user can overwrite this default with these env vars or --height, --width arguments
     MOZ_HEADLESS_WIDTH: '1280',
     MOZ_HEADLESS_HEIGHT: '721',
-  }) as LaunchedBrowser & { browserCriClient: CRI.Client}
+  }) as LaunchedBrowser & { browserCriClient: BrowserCriClient}
 
   try {
     const [,, browserCriClient] = await firefoxUtil.setup({ automation, extensions: launchOptions.extensions, url, foxdriverPort, marionettePort, remotePort, onError: options.onError })

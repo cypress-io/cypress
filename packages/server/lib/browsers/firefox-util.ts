@@ -133,7 +133,7 @@ async function connectToNewSpec (browserCriClient, browser, options, automation)
   await navigateToUrl(options.url)
 }
 
-async function setupRemote (remotePort, automation, onError) {
+async function setupRemote (remotePort, automation, onError): Promise<BrowserCriClient> {
   const browserCriClient = await BrowserCriClient.create(remotePort, 'Firefox', onError)
   const criClient = await browserCriClient.attachToTargetUrl('about:blank')
 
@@ -221,7 +221,7 @@ export default {
     marionettePort,
     foxdriverPort,
     remotePort,
-  }) {
+  }): Bluebird<[void, void, BrowserCriClient]> {
     return Bluebird.all([
       this.setupFoxdriver(foxdriverPort),
       this.setupMarionette(extensions, url, marionettePort),

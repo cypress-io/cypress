@@ -15,7 +15,7 @@ const WEBSOCKET_NOT_OPEN_RE = /^WebSocket is (?:not open|already in CLOSING or C
  * Enumerations to make programming CDP slightly simpler - provides
  * IntelliSense whenever you use named types.
  */
-namespace CRIWrapper {
+export namespace CRIWrapper {
   export type Command =
     'Browser.getVersion' |
     'Page.bringToFront' |
