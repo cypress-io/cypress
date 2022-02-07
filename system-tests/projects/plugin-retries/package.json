@@ -1,0 +1,7 @@
+{
+  "name": "@test-project/plugin-retries",
+  "version": "0.0.0-test",
+  "devDependencies": {
+    "cypress-plugin-retries": "1.5.2"
+  }
+}

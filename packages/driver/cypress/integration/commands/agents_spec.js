@@ -1,3 +1,5 @@
+const { assertLogLength } = require('../../support/utils')
+
 const { _ } = Cypress
 
 describe('src/cy/commands/agents', () => {
@@ -176,10 +178,10 @@ describe('src/cy/commands/agents', () => {
 
       describe('logging', () => {
         it('creates new log instrument with sub-count', function () {
-          expect(this.agentLogs.length).to.eq(2)
+          assertLogLength(this.agentLogs, 2)
           expect(this.agentLogs[1].get('name')).to.eq('stub-1.1')
           this.stub.withArgs('bar')
-          expect(this.agentLogs.length).to.eq(3)
+          assertLogLength(this.agentLogs, 3)
           expect(this.agentLogs[2].get('name')).to.eq('stub-1.2')
         })
 
@@ -187,7 +189,7 @@ describe('src/cy/commands/agents', () => {
           it('only logs once', function () {
             this.obj.foo('foo')
 
-            expect(this.logs.length).to.eq(3)
+            assertLogLength(this.logs, 3)
           })
 
           it('includes count in name', function () {

@@ -2,7 +2,7 @@ import { NetworkProxy } from '../../'
 import {
   netStubbingState as _netStubbingState,
   NetStubbingState,
-  onNetEvent,
+  onNetStubbingEvent,
 } from '@packages/net-stubbing'
 import { defaultMiddleware } from '../../lib/http'
 import express from 'express'
@@ -166,7 +166,7 @@ context('network stubbing', () => {
 
     socket.toDriver.callsFake((_, event, data) => {
       if (event === 'before:request') {
-        onNetEvent({
+        onNetStubbingEvent({
           eventName: 'send:static:response',
           // @ts-ignore
           frame: {
@@ -234,7 +234,7 @@ context('network stubbing', () => {
     socket.toDriver.callsFake((_, event, data) => {
       if (event === 'before:request') {
         sendContentLength = data.data.headers['content-length']
-        onNetEvent({
+        onNetStubbingEvent({
           eventName: 'send:static:response',
           // @ts-ignore
           frame: {

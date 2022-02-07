@@ -1,5 +1,5 @@
-const { _, $ } = Cypress
-const { Promise } = Cypress
+const { assertLogLength } = require('../../../support/utils')
+const { _, $, Promise } = Cypress
 
 describe('src/cy/commands/actions/submit', () => {
   before(() => {
@@ -242,7 +242,7 @@ describe('src/cy/commands/actions/submit', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(2)
+          assertLogLength(this.logs, 2)
           expect(lastLog.get('error')).to.eq(err)
           expect(err.message).to.include('`cy.submit()` can only be called on a `<form>`. Your subject contains a: `<input id="input">`')
           expect(err.docsUrl).to.eq('https://on.cypress.io/submit')
@@ -293,7 +293,7 @@ describe('src/cy/commands/actions/submit', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
 
           done()
@@ -328,7 +328,7 @@ describe('src/cy/commands/actions/submit', () => {
         })
 
         cy.on('fail', () => {
-          expect(this.logs.length).to.eq(3)
+          assertLogLength(this.logs, 3)
 
           done()
         })

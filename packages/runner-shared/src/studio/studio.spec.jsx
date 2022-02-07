@@ -99,7 +99,8 @@ describe('<Studio />', () => {
 
       expect(component.find(Tooltip).at(0)).to.have.prop('title', 'Close Studio')
       expect(component.find(Tooltip).at(1)).to.have.prop('title', 'Restart')
-      expect(component.find(Tooltip).at(2)).to.have.prop('title', 'Save Test')
+      expect(component.find(Tooltip).at(2)).to.have.prop('title', 'Copy Commands to Clipboard')
+      expect(component.find(Tooltip).at(3)).to.have.prop('title', 'Save Commands')
     })
 
     it('hides all tooltips while studio is loading', () => {
@@ -108,6 +109,7 @@ describe('<Studio />', () => {
       expect(component.find(Tooltip).at(0)).to.have.prop('visible', false)
       expect(component.find(Tooltip).at(1)).to.have.prop('visible', false)
       expect(component.find(Tooltip).at(2)).to.have.prop('visible', false)
+      expect(component.find(Tooltip).at(3)).to.have.prop('visible', false)
     })
 
     it('emits studio:cancel when close button is clicked', () => {
@@ -126,6 +128,14 @@ describe('<Studio />', () => {
 
       expect(model.reset).to.be.called
       expect(eventManager.emit).to.be.calledWith('restart')
+    })
+
+    it('starts copy to clipboard process when copy button is clicked', () => {
+      const component = shallow(<Studio model={createModel({ isActive: true })} />)
+
+      component.find('.button-studio-copy').simulate('click')
+
+      expect(eventManager.emit).to.be.calledWith('studio:copy:to:clipboard')
     })
 
     it('starts studio recorder saving when save button is clicked', () => {

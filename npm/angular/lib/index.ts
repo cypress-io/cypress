@@ -25,8 +25,8 @@ export function setConfig (c: CypressAngularConfig): void {
 
 function init<T> (
   component:
-    | Type<T>
-    | (Partial<TestModuleMetadata> & Partial<CypressAngularConfig>),
+  | Type<T>
+  | (Partial<TestModuleMetadata> & Partial<CypressAngularConfig>),
   options?: Partial<TestModuleMetadata> & Partial<CypressAngularConfig>,
 ): void {
   Cypress.log({ displayName: 'Unit Test', message: ['Init Environment'] })
@@ -111,8 +111,8 @@ function init<T> (
 
 export function initEnv<T> (
   component:
-    | Type<T>
-    | (Partial<TestModuleMetadata> & Partial<CypressAngularConfig>),
+  | Type<T>
+  | (Partial<TestModuleMetadata> & Partial<CypressAngularConfig>),
   options?: Partial<TestModuleMetadata> & Partial<CypressAngularConfig>,
 ): void {
   init(component, options)
@@ -143,8 +143,8 @@ export function mount<T> (
 
 export function initEnvHtml<T> (
   component:
-    | Type<T>
-    | (Partial<TestModuleMetadata> & Partial<CypressAngularConfig>),
+  | Type<T>
+  | (Partial<TestModuleMetadata> & Partial<CypressAngularConfig>),
   options?: Partial<TestModuleMetadata> & Partial<CypressAngularConfig>,
 ): void {
   init(component, options)

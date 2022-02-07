@@ -38,6 +38,9 @@ module.exports = (on) => {
     'return:arg' (arg) {
       return arg
     },
+    'cypress:env' () {
+      return process.env['CYPRESS']
+    },
     'arg:is:undefined' (arg) {
       if (arg === undefined) {
         return 'arg was undefined'

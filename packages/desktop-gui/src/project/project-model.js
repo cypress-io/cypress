@@ -23,11 +23,11 @@ const validProps = cacheProps.concat([
   'isNew',
   'configFile',
   'browsers',
-  'onBoardingModalOpen',
+  'newProjectBannerOpen',
+  'newUserBannerOpen',
   'browserState',
   'resolvedConfig',
   'parentTestsFolderDisplay',
-  'integrationExampleName',
   'scaffoldedFiles',
   'resolvedNodePath',
   'resolvedNodeVersion',
@@ -55,7 +55,8 @@ export default class Project {
   @observable isLoading = false
   @observable isNew = false
   @observable browsers = []
-  @observable onBoardingModalOpen = false
+  @observable newProjectBannerOpen = false
+  @observable newUserBannerOpen = false
   @observable browserState = 'closed'
   @observable resolvedConfig
   @observable error
@@ -63,7 +64,6 @@ export default class Project {
   @observable _warnings = {}
   @observable apiError
   @observable parentTestsFolderDisplay
-  @observable integrationExampleName
   @observable scaffoldedFiles = []
   @observable resolvedNodePath
   @observable resolvedNodeVersion
@@ -119,12 +119,16 @@ export default class Project {
     return _.filter(this.browsers, { isChosen: false })
   }
 
+  @computed get supportedBrowsers () {
+    return _.filter(this.browsers, (browser) => !browser.unsupportedVersion)
+  }
+
   @computed get chosenBrowser () {
     return _.find(this.browsers, { isChosen: true })
   }
 
   @computed get defaultBrowser () {
-    return this.browsers[0]
+    return this.supportedBrowsers[0]
   }
 
   @computed get warnings () {
@@ -147,12 +151,9 @@ export default class Project {
     this.isLoading = isLoading
   }
 
-  @action openModal () {
-    this.onBoardingModalOpen = true
-  }
-
-  @action closeModal () {
-    this.onBoardingModalOpen = false
+  @action closeBanners () {
+    this.newProjectBannerOpen = false
+    this.newUserBannerOpen = false
   }
 
   @action browserOpening () {
@@ -176,7 +177,7 @@ export default class Project {
       // use a custom browser if one is supplied. or, if they already have
       // a browser chosen that's been saved in localStorage, then select that
       // otherwise just do the default.
-      const customBrowser = _.find(this.browsers, { custom: true })
+      const customBrowser = _.find(this.supportedBrowsers, { custom: true })
 
       if (customBrowser) {
         return this.setChosenBrowser(customBrowser, { save: false })
@@ -206,11 +207,10 @@ export default class Project {
 
   @action setOnBoardingConfig (config) {
     this.isNew = config.isNewProject
+    this.newProjectBannerOpen = config.isNewProject
     this.integrationFolder = config.integrationFolder
     this.parentTestsFolderDisplay = config.parentTestsFolderDisplay
     this.fileServerFolder = config.fileServerFolder
-    this.integrationExampleName = config.integrationExampleName
-    this.integrationExamplePath = config.integrationExamplePath
     this.scaffoldedFiles = config.scaffoldedFiles
   }
 
@@ -264,7 +264,7 @@ export default class Project {
       filter.name = ls
     }
 
-    const browser = _.find(this.browsers, filter) || this.defaultBrowser
+    const browser = _.find(this.supportedBrowsers, filter) || this.defaultBrowser
 
     this.setChosenBrowser(browser)
   }
@@ -281,5 +281,11 @@ export default class Project {
 
   serialize () {
     return _.pick(this, cacheProps)
+  }
+
+  getTestGroup (numGroups) {
+    const numKey = this.orgId && this.orgId.length ? this.orgId.charCodeAt(0) : 0
+
+    return numKey % numGroups
   }
 }

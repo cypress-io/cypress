@@ -1,6 +1,13 @@
 import { log } from './log'
 import * as cp from 'child_process'
-import { Browser, FoundBrowser } from './types'
+import type { Browser, FoundBrowser } from './types'
+
+// Chrome started exposing CDP 1.3 in 64
+const MIN_CHROME_VERSION = 64
+// Firefox started exposing CDP in 86
+const MIN_FIREFOX_VERSION = 86
+// Edge switched to Blink in 79
+const MIN_EDGE_VERSION = 79
 
 /** list of the browsers we can detect and use by default */
 export const browsers: Browser[] = [
@@ -11,6 +18,7 @@ export const browsers: Browser[] = [
     displayName: 'Chrome',
     versionRegex: /Google Chrome (\S+)/m,
     binary: ['google-chrome', 'chrome', 'google-chrome-stable'],
+    minSupportedVersion: MIN_CHROME_VERSION,
   },
   {
     name: 'chromium',
@@ -20,6 +28,7 @@ export const browsers: Browser[] = [
     displayName: 'Chromium',
     versionRegex: /Chromium (\S+)/m,
     binary: ['chromium-browser', 'chromium'],
+    minSupportedVersion: MIN_CHROME_VERSION,
   },
   {
     name: 'chrome',
@@ -28,6 +37,7 @@ export const browsers: Browser[] = [
     displayName: 'Chrome Beta',
     versionRegex: /Google Chrome (\S+) beta/m,
     binary: 'google-chrome-beta',
+    minSupportedVersion: MIN_CHROME_VERSION,
   },
   {
     name: 'chrome',
@@ -36,6 +46,7 @@ export const browsers: Browser[] = [
     displayName: 'Canary',
     versionRegex: /Google Chrome Canary (\S+)/m,
     binary: 'google-chrome-canary',
+    minSupportedVersion: MIN_CHROME_VERSION,
   },
   {
     name: 'firefox',
@@ -45,6 +56,7 @@ export const browsers: Browser[] = [
     // Mozilla Firefox 70.0.1
     versionRegex: /^Mozilla Firefox ([^\sab]+)$/m,
     binary: 'firefox',
+    minSupportedVersion: MIN_FIREFOX_VERSION,
   },
   {
     name: 'firefox',
@@ -55,6 +67,7 @@ export const browsers: Browser[] = [
     versionRegex: /^Mozilla Firefox (\S+b\S*)$/m,
     // ubuntu PPAs install it as firefox
     binary: ['firefox-developer-edition', 'firefox'],
+    minSupportedVersion: MIN_FIREFOX_VERSION,
   },
   {
     name: 'firefox',
@@ -65,6 +78,7 @@ export const browsers: Browser[] = [
     versionRegex: /^Mozilla Firefox (\S+a\S*)$/m,
     // ubuntu PPAs install it as firefox-trunk
     binary: ['firefox-nightly', 'firefox-trunk'],
+    minSupportedVersion: MIN_FIREFOX_VERSION,
   },
   {
     name: 'edge',
@@ -73,6 +87,7 @@ export const browsers: Browser[] = [
     displayName: 'Edge',
     versionRegex: /Microsoft Edge (\S+)/m,
     binary: ['edge', 'microsoft-edge'],
+    minSupportedVersion: MIN_EDGE_VERSION,
   },
   {
     name: 'edge',
@@ -81,6 +96,7 @@ export const browsers: Browser[] = [
     displayName: 'Edge Canary',
     versionRegex: /Microsoft Edge Canary (\S+)/m,
     binary: 'edge-canary',
+    minSupportedVersion: MIN_EDGE_VERSION,
   },
   {
     name: 'edge',
@@ -89,6 +105,7 @@ export const browsers: Browser[] = [
     displayName: 'Edge Beta',
     versionRegex: /Microsoft Edge Beta (\S+)/m,
     binary: 'edge-beta',
+    minSupportedVersion: MIN_EDGE_VERSION,
   },
   {
     name: 'edge',
@@ -97,6 +114,7 @@ export const browsers: Browser[] = [
     displayName: 'Edge Dev',
     versionRegex: /Microsoft Edge Dev (\S+)/m,
     binary: ['edge-dev', 'microsoft-edge-dev'],
+    minSupportedVersion: MIN_EDGE_VERSION,
   },
 ]
 

@@ -9,17 +9,7 @@
     "hardenedRuntime": true,
     "entitlements": "./scripts/entitlements.mac.inherit.plist",
     "entitlementsInherit": "./scripts/entitlements.mac.inherit.plist",
-    "type": "distribution",
-    "binaries": [
-      "./build/mac/Cypress.app/Contents/Resources/app/packages/server/node_modules/@ffmpeg-installer/darwin-x64/ffmpeg",
-      "./build/mac/Cypress.app/Contents/Resources/app/packages/server/node_modules/watchpack-chokidar2/node_modules/fsevents/build/Release/.node",
-      "./build/mac/Cypress.app/Contents/Resources/app/packages/server/node_modules/watchpack-chokidar2/node_modules/fsevents/build/Release/fse.node",
-      "./build/mac/Cypress.app/Contents/Resources/app/packages/server/node_modules/registry-js/build/Release/registry.node",
-      "./build/mac/Cypress.app/Contents/Resources/app/packages/server/node_modules/term-size/vendor/macos/term-size",
-      "./build/mac/Cypress.app/Contents/Resources/app/packages/server/node_modules/trash/lib/macos-trash",
-      "./build/mac/Cypress.app/Contents/Resources/app/packages/server/node_modules/fsevents/fsevents.node",
-      "./build/mac/Cypress.app/Contents/Frameworks/Electron Framework.framework/Versions/A/Helpers/chrome_crashpad_handler"
-    ]
+    "type": "distribution"
   },
   "linux": {
     "target": "dir",

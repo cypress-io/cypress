@@ -1,18 +1,25 @@
 const Promise = require('bluebird')
 const execa = require('execa')
-const R = require('ramda')
 const shellEnv = require('shell-env')
+const _ = require('lodash')
 const log = require('./log')
 const utils = require('./util/shell')
 
-const pickMainProps = R.pick(['stdout', 'stderr', 'code'])
+const pickMainProps = (val) => _.pick(val, ['stdout', 'stderr', 'code'])
 
-const trimStdio = R.evolve({
-  stdout: R.trim,
-  stderr: R.trim,
-})
+const trimStdio = (val) => {
+  const result = { ...val }
 
-const loadShellVars = R.memoizeWith(R.toString, shellEnv)
+  if (_.isString(val.stdout)) {
+    result.stdout = val.stdout.trim()
+  }
+
+  if (_.isString(val.stderr)) {
+    result.stderr = val.stderr.trim()
+  }
+
+  return result
+}
 
 module.exports = {
   run (projectRoot, options) {
@@ -38,9 +45,9 @@ module.exports = {
     }
 
     const run = () => {
-      return loadShellVars()
+      return shellEnv()
       .then((shellVariables) => {
-        const env = R.mergeAll([{}, shellVariables, process.env, options.env])
+        const env = _.merge({}, shellVariables, process.env, options.env)
 
         return utils.getShell(env.SHELL)
         .then((shell) => {

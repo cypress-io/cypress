@@ -35,7 +35,7 @@ describe('lib/browsers/protocol', () => {
       log.getCalls().forEach((log, i) => {
         const line = stripAnsi(log.args[0])
 
-        expect(line).to.include(`Failed to connect to FooBrowser, retrying in 1 second (attempt ${i + 18}/62)`)
+        expect(line).to.include(`Still waiting to connect to FooBrowser, retrying in 1 second (attempt ${i + 18}/62)`)
       })
 
       snapshot(delays)
@@ -180,7 +180,7 @@ describe('lib/browsers/protocol', () => {
       log.getCalls().forEach((log, i) => {
         const line = stripAnsi(log.args[0])
 
-        expect(line).to.include(`Failed to connect to FooBrowser, retrying in 1 second (attempt ${i + 18}/62)`)
+        expect(line).to.include(`Still waiting to connect to FooBrowser, retrying in 1 second (attempt ${i + 18}/62)`)
       })
     })
   })

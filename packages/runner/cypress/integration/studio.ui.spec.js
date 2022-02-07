@@ -4,10 +4,27 @@ const { createCypress } = helpers
 const { runIsolatedCypress } = createCypress({ config: { experimentalStudio: true } })
 
 describe('studio ui', () => {
+  it('displays modal when launching studio for the first time', () => {
+    runIsolatedCypress('cypress/fixtures/studio/basic_spec.js', {
+      state: {
+        showedStudioModal: false,
+      },
+    })
+    .then(() => {
+      cy.get('.reporter').find('.test').first().find('.runnable-controls-studio').click()
+
+      cy.get('.studio-init-modal').should('be.visible')
+
+      cy.percySnapshot()
+    })
+  })
+
   it('launches studio ui when extending test', () => {
     runIsolatedCypress('cypress/fixtures/studio/basic_spec.js', {
       state: {
-        studioTestId: 'r3',
+        studio: {
+          testId: 'r3',
+        },
       },
     })
     .then(() => {
@@ -30,7 +47,9 @@ describe('studio ui', () => {
         baseUrl: null,
       },
       state: {
-        studioTestId: 'r5',
+        studio: {
+          testId: 'r5',
+        },
       },
     })
     .then(() => {
@@ -44,6 +63,7 @@ describe('studio ui', () => {
       cy.get('.runner').find('.url-menu').should('be.visible')
       cy.get('.runner').find('.url-menu').find('.btn-submit').should('be.disabled')
 
+      cy.get('.studio-save').should('be.visible')
       cy.percySnapshot()
     })
   })
@@ -54,7 +74,9 @@ describe('studio ui', () => {
         baseUrl: 'the://url',
       },
       state: {
-        studioTestId: 'r5',
+        studio: {
+          testId: 'r5',
+        },
       },
     })
     .then(() => {
@@ -71,7 +93,9 @@ describe('studio ui', () => {
         baseUrl: null,
       },
       state: {
-        studioTestId: 'r5',
+        studio: {
+          testId: 'r5',
+        },
       },
     })
     .then(() => {
@@ -86,7 +110,9 @@ describe('studio ui', () => {
   it('displays modal when available commands is clicked', () => {
     runIsolatedCypress('cypress/fixtures/studio/basic_spec.js', {
       state: {
-        studioTestId: 'r3',
+        studio: {
+          testId: 'r3',
+        },
       },
     })
     .then(() => {
@@ -101,7 +127,9 @@ describe('studio ui', () => {
     it('displays error state when extending a failed test', () => {
       runIsolatedCypress('cypress/fixtures/studio/error_test_spec.js', {
         state: {
-          studioTestId: 'r3',
+          studio: {
+            testId: 'r3',
+          },
         },
       })
       .then(() => {
@@ -117,7 +145,9 @@ describe('studio ui', () => {
     it('displays error state when a before hook fails', () => {
       runIsolatedCypress('cypress/fixtures/studio/error_hooks_spec.js', {
         state: {
-          studioTestId: 'r3',
+          studio: {
+            testId: 'r3',
+          },
         },
       })
       .then(() => {
@@ -139,7 +169,9 @@ describe('studio ui', () => {
           baseUrl: null,
         },
         state: {
-          studioTestId: 'r5',
+          studio: {
+            testId: 'r5',
+          },
         },
         visitUrl: 'http://localhost:3500/foo',
         visitSuccess: false,

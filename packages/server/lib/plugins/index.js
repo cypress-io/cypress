@@ -37,12 +37,36 @@ const registerHandler = (handler) => {
   handlers.push(handler)
 }
 
+const getChildOptions = (config) => {
+  const childOptions = {
+    stdio: 'pipe',
+    env: {
+      ...process.env,
+      NODE_OPTIONS: process.env.ORIGINAL_NODE_OPTIONS || '',
+    },
+  }
+
+  if (config.resolvedNodePath) {
+    debug('launching using custom node version %o', _.pick(config, ['resolvedNodePath', 'resolvedNodeVersion']))
+    childOptions.execPath = config.resolvedNodePath
+  }
+
+  if (inspector.url()) {
+    childOptions.execArgv = _.chain(process.execArgv.slice(0))
+    .remove('--inspect-brk')
+    .push(`--inspect=${process.debugPort + 1}`)
+    .value()
+  }
+
+  return childOptions
+}
+
 const init = (config, options) => {
   debug('plugins.init', config.pluginsFile)
 
   // test and warn for incompatible plugin
   try {
-    const retriesPluginPath = path.dirname(resolve.sync('cypress-plugin-retries', {
+    const retriesPluginPath = path.dirname(resolve.sync('cypress-plugin-retries/package.json', {
       basedir: options.projectRoot,
     }))
 
@@ -82,25 +106,20 @@ const init = (config, options) => {
     const pluginsFile = config.pluginsFile || path.join(__dirname, 'child', 'default_plugins_file.js')
     const childIndexFilename = path.join(__dirname, 'child', 'index.js')
     const childArguments = ['--file', pluginsFile, '--projectRoot', options.projectRoot]
-    const childOptions = {
-      stdio: 'inherit',
-    }
-
-    if (config.resolvedNodePath) {
-      debug('launching using custom node version %o', _.pick(config, ['resolvedNodePath', 'resolvedNodeVersion']))
-      childOptions.execPath = config.resolvedNodePath
-    }
+    const childOptions = getChildOptions(config)
 
     debug('forking to run %s', childIndexFilename)
+    pluginsProcess = cp.fork(childIndexFilename, childArguments, childOptions)
 
-    if (inspector.url()) {
-      childOptions.execArgv = _.chain(process.execArgv.slice(0))
-      .remove('--inspect-brk')
-      .push(`--inspect=${process.debugPort + 1}`)
-      .value()
+    if (pluginsProcess.stdout && pluginsProcess.stderr) {
+      // manually pipe plugin stdout and stderr for dashboard capture
+      // @see https://github.com/cypress-io/cypress/issues/7434
+      pluginsProcess.stdout.on('data', (data) => process.stdout.write(data))
+      pluginsProcess.stderr.on('data', (data) => process.stderr.write(data))
+    } else {
+      debug('stdout and stderr not available on subprocess, the plugin launch should error')
     }
 
-    pluginsProcess = cp.fork(childIndexFilename, childArguments, childOptions)
     const ipc = util.wrapIpc(pluginsProcess)
 
     for (let handler of handlers) {
@@ -227,6 +246,7 @@ const _setPluginsProcess = (_pluginsProcess) => {
 }
 
 module.exports = {
+  getChildOptions,
   getPluginPid,
   execute,
   has,

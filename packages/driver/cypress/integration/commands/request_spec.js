@@ -1,4 +1,5 @@
 const { stripIndent } = require('common-tags')
+const { assertLogLength } = require('../../support/utils')
 const { _, Promise } = Cypress
 
 const RESPONSE_TIMEOUT = 22222
@@ -27,6 +28,7 @@ describe('src/cy/commands/request', () => {
             followRedirect: true,
             timeout: RESPONSE_TIMEOUT,
             method: 'GET',
+            retryIntervals: [0, 100, 200, 200],
           })
 
           const options = backend.firstCall.args[1]
@@ -807,7 +809,7 @@ describe('src/cy/commands/request', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
           expect(err.message).to.eq('`cy.request()` requires a `url`. You did not provide a `url`.')
@@ -820,14 +822,14 @@ describe('src/cy/commands/request', () => {
       })
 
       it('throws when url is not FQDN', {
-        baseUrl: '',
+        baseUrl: null,
       }, function (done) {
         cy.stub(cy, 'getRemoteLocation').withArgs('origin').returns('')
 
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
           expect(err.message).to.eq('`cy.request()` must be provided a fully qualified `url` - one that begins with `http`. By default `cy.request()` will use either the current window\'s origin or the `baseUrl` in `cypress.json`. Neither of those values were present.')
@@ -840,7 +842,7 @@ describe('src/cy/commands/request', () => {
       })
 
       it('throws when url is not FQDN, notes that configFile is disabled', {
-        baseUrl: '',
+        baseUrl: null,
         configFile: false,
       }, function (done) {
         cy.stub(cy, 'getRemoteLocation').withArgs('origin').returns('')
@@ -848,7 +850,7 @@ describe('src/cy/commands/request', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
           expect(err.message).to.eq('`cy.request()` must be provided a fully qualified `url` - one that begins with `http`. By default `cy.request()` will use either the current window\'s origin or the `baseUrl` in `cypress.json` (currently disabled by --config-file=false). Neither of those values were present.')
@@ -860,7 +862,7 @@ describe('src/cy/commands/request', () => {
       })
 
       it('throws when url is not FQDN, notes that configFile is non-default', {
-        baseUrl: '',
+        baseUrl: null,
         configFile: 'foo.json',
       }, function (done) {
         cy.stub(cy, 'getRemoteLocation').withArgs('origin').returns('')
@@ -868,7 +870,7 @@ describe('src/cy/commands/request', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
           expect(err.message).to.eq('`cy.request()` must be provided a fully qualified `url` - one that begins with `http`. By default `cy.request()` will use either the current window\'s origin or the `baseUrl` in `foo.json`. Neither of those values were present.')
@@ -883,7 +885,7 @@ describe('src/cy/commands/request', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
           expect(err.message).to.eq('`cy.request()` requires the `url` to be a string.')
@@ -901,7 +903,7 @@ describe('src/cy/commands/request', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
           expect(err.message).to.eq('`cy.request()` must be passed an object literal for the `auth` option.')
@@ -920,7 +922,7 @@ describe('src/cy/commands/request', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
           expect(err.message).to.eq('`cy.request()` requires the `headers` option to be an object literal.')
@@ -939,7 +941,7 @@ describe('src/cy/commands/request', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
           expect(err.message).to.eq('`cy.request()` was called with an invalid method: `FOO`. Method can be: `GET`, `POST`, `PUT`, `DELETE`, `PATCH`, `HEAD`, `OPTIONS`, or any other method supported by Node\'s HTTP parser.')
@@ -958,7 +960,7 @@ describe('src/cy/commands/request', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
           expect(err.message).to.eq('`cy.request()` requires the `gzip` option to be a boolean.')
@@ -977,7 +979,7 @@ describe('src/cy/commands/request', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
           expect(err.message).to.eq('`cy.request()` was called with invalid encoding: `binaryX`. Encoding can be: `utf8`, `utf16le`, `latin1`, `base64`, `hex`, `ascii`, `binary`, `latin1`, `ucs2`, `utf16le`, or any other encoding supported by Node\'s Buffer encoding.')
@@ -996,7 +998,7 @@ describe('src/cy/commands/request', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
           expect(err.message).to.eq('`cy.request()` requires the `form` option to be a boolean.\n\nIf you\'re trying to send a `x-www-form-urlencoded` request then pass either a string or object literal to the `body` property.')
@@ -1049,7 +1051,7 @@ describe('src/cy/commands/request', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
           expect(err.docsUrl).to.eq('https://on.cypress.io/request')
@@ -1134,7 +1136,7 @@ describe('src/cy/commands/request', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
           expect(err.message).to.eq(stripIndent`\
@@ -1168,7 +1170,7 @@ describe('src/cy/commands/request', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
           expect(err.docsUrl).to.eq('https://on.cypress.io/request')
@@ -1230,7 +1232,7 @@ describe('src/cy/commands/request', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
 
@@ -1351,7 +1353,7 @@ describe('src/cy/commands/request', () => {
               lastLog,
             } = this
 
-            expect(this.logs.length).to.eq(1)
+            assertLogLength(this.logs, 1)
             expect(lastLog.get('error')).to.eq(err)
             expect(lastLog.get('state')).to.eq('failed')
             expect(err.docsUrl).to.eq('https://on.cypress.io/request')

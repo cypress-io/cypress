@@ -27,7 +27,8 @@
         "chrome",
         "chromium",
         "canary",
-        "firefox"
+        "firefox",
+        "edge"
       ]
     },
     "devServerTarget": {
@@ -61,6 +62,14 @@
       "type": "boolean",
       "description": "Whether or not Cypress should record the results of the tests",
       "default": false
+    },
+    "reporter": {
+      "type": "string",
+      "description": "A built-in, custom, or third-party Mocha reporter"
+    },
+    "reporter-options": {
+      "type": "object",
+      "description": "A key-value pair of options that will be passed to the specified Mocha reporter"
     },
     "spec": {
       "type": "string",

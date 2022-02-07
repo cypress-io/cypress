@@ -1,3 +1,4 @@
+const { assertLogLength } = require('../../support/utils')
 const { _, $ } = Cypress
 
 describe('src/cy/commands/window', () => {
@@ -70,7 +71,7 @@ describe('src/cy/commands/window', () => {
 
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(err.message).to.include(lastLog.get('error').message)
           expect(lastLog.get('name')).to.eq('window')
           expect(lastLog.get('state')).to.eq('failed')
@@ -85,7 +86,7 @@ describe('src/cy/commands/window', () => {
         this.remoteWindow.foo = 'foo'
 
         cy.on('fail', () => {
-          expect(this.logs.length).to.eq(2)
+          assertLogLength(this.logs, 2)
 
           done()
         })
@@ -140,7 +141,7 @@ describe('src/cy/commands/window', () => {
         .get('body')
         .get('@win').then(function (win) {
         // window + get + get
-          expect(this.logs.length).to.eq(3)
+          assertLogLength(this.logs, 3)
 
           expect(win).to.eq(this.win)
 
@@ -247,7 +248,7 @@ describe('src/cy/commands/window', () => {
 
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(err.message).to.include(lastLog.get('error').message)
           expect(lastLog.get('name')).to.eq('document')
           expect(lastLog.get('state')).to.eq('failed')
@@ -262,7 +263,7 @@ describe('src/cy/commands/window', () => {
         this.remoteDocument.foo = 'foo'
 
         cy.on('fail', () => {
-          expect(this.logs.length).to.eq(2)
+          assertLogLength(this.logs, 2)
 
           done()
         })
@@ -324,7 +325,7 @@ describe('src/cy/commands/window', () => {
         .get('body')
         .get('@doc').then(function (doc) {
           // docdow + get + get
-          expect(this.logs.length).to.eq(3)
+          assertLogLength(this.logs, 3)
 
           expect(doc).to.eq(this.doc)
 
@@ -474,7 +475,7 @@ describe('src/cy/commands/window', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(2)
+          assertLogLength(this.logs, 2)
           expect(err.message).to.include(lastLog.get('error').message)
 
           done()
@@ -846,7 +847,7 @@ describe('src/cy/commands/window', () => {
 
       it('throws when passed invalid preset', function (done) {
         cy.on('fail', (err) => {
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(err.message).to.match(/^`cy.viewport\(\)` could not find a preset for: `foo`. Available presets are: /)
           expect(err.docsUrl).to.eq('https://on.cypress.io/viewport')
 
@@ -858,7 +859,7 @@ describe('src/cy/commands/window', () => {
 
       it('throws when passed a string as height', function (done) {
         cy.on('fail', (err) => {
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(err.message).to.eq('`cy.viewport()` can only accept a string preset or a `width` and `height` as numbers.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/viewport')
 
@@ -870,7 +871,7 @@ describe('src/cy/commands/window', () => {
 
       it('throws when passed negative numbers', function (done) {
         cy.on('fail', (err) => {
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(err.message).to.eq('`cy.viewport()` `width` and `height` must be at least 0px.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/viewport')
 
@@ -890,7 +891,7 @@ describe('src/cy/commands/window', () => {
 
       it('throws when passed an empty string as width', function (done) {
         cy.on('fail', (err) => {
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(err.message).to.eq('`cy.viewport()` cannot be passed an empty string.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/viewport')
 
@@ -902,7 +903,7 @@ describe('src/cy/commands/window', () => {
 
       it('throws when passed an invalid orientation on a preset', function (done) {
         cy.on('fail', (err) => {
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(err.message).to.eq('`cy.viewport()` can only accept `landscape` or `portrait` as valid orientations. Your orientation was: `foobar`')
           expect(err.docsUrl).to.eq('https://on.cypress.io/viewport')
 
@@ -921,7 +922,7 @@ describe('src/cy/commands/window', () => {
           })
 
           cy.on('fail', (err) => {
-            expect(this.logs.length).to.eq(1)
+            assertLogLength(this.logs, 1)
             expect(err.message).to.eq('`cy.viewport()` can only accept a string preset or a `width` and `height` as numbers.')
             expect(err.docsUrl).to.eq('https://on.cypress.io/viewport')
 

@@ -5,7 +5,7 @@ import { library } from '@fortawesome/fontawesome-svg-core'
 import { fab } from '@fortawesome/free-brands-svg-icons'
 import { fas } from '@fortawesome/free-solid-svg-icons'
 
-import { SpecList } from '../../src/app/SpecList/SpecList'
+import { SpecList } from '@packages/runner-shared'
 
 // Need to register these here.
 // They are registered once per app, in this case in RunnerCt.

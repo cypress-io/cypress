@@ -122,3 +122,17 @@
     right: 10px;
   }
 }
+
+.info-box {
+  border-left: 4px solid #2a98b9;
+  background-color: #f2fafd;
+  padding: 10px 14px;
+  position: relative;
+
+  &.info-box-dismissible .close {
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    cursor: pointer;
+  }
+}

@@ -1,4 +1,4 @@
-import { Transform } from 'stream'
+import type { Transform } from 'stream'
 
 const through = require('through')
 

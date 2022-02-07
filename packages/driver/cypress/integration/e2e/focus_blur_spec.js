@@ -676,7 +676,7 @@ describe('intercept blur methods correctly', () => {
       href="#"
       target="_blank" alt="area" />
       </map>
-      <img usemap="#map" src="/__cypress/static/favicon.ico" alt="image" />
+      <img usemap="#map" src="/fixtures/media/cypress.png" alt="image" />
       `).appendTo(cy.$$('body'))
 
       cy.get('area')

@@ -12,7 +12,6 @@ const la = require('lazy-ass')
 const check = require('check-more-types')
 const debug = require('debug')('cypress:binary')
 const questionsRemain = require('@cypress/questions-remain')
-const R = require('ramda')
 const rp = require('@cypress/request-promise')
 
 const zip = require('./zip')
@@ -22,8 +21,7 @@ const meta = require('./meta')
 const build = require('./build')
 const upload = require('./upload')
 const uploadUtils = require('./util/upload')
-const { uploadNpmPackage } = require('./upload-npm-package')
-const { uploadUniqueBinary } = require('./upload-unique-binary')
+const { uploadArtifactToS3 } = require('./upload-build-artifact')
 const { moveBinaries } = require('./move-binaries')
 
 // initialize on existing repo
@@ -37,7 +35,7 @@ const fail = (str) => {
   return console.log(chalk.bgRed(` ${chalk.black(str)} `))
 }
 
-const zippedFilename = R.always(upload.zipName)
+const zippedFilename = () => upload.zipName
 
 // goes through the list of properties and asks relevant question
 // resolves with all relevant options set
@@ -71,12 +69,7 @@ const deploy = {
 
   parseOptions (argv) {
     const opts = minimist(argv, {
-      boolean: ['skip-clean'],
-      default: {
-        'skip-clean': false,
-      },
       alias: {
-        skipClean: 'skip-clean',
         zip: ['zipFile', 'zip-file', 'filename'],
       },
     })
@@ -157,7 +150,6 @@ const deploy = {
     const systems = [
       { platform: 'linux', arch: 'x64' },
       { platform: 'darwin', arch: 'x64' },
-      { platform: 'win32', arch: 'ia32' },
       { platform: 'win32', arch: 'x64' },
     ]
 
@@ -238,7 +230,7 @@ const deploy = {
     .then(() => {
       debug('building binary: platform %s version %s', options.platform, options.version)
 
-      return build(options.platform, options.version, options)
+      return build.buildCypressApp(options)
     })
   },
 
@@ -259,18 +251,11 @@ const deploy = {
     })
   },
 
-  // upload Cypress NPM package file
-  'upload-npm-package' (args = process.argv) {
-    console.log('#packageUpload')
+  // upload Cypress binary or NPM Package zip file under unique hash
+  'upload-build-artifact' (args = process.argv) {
+    console.log('#uploadBuildArtifact')
 
-    return uploadNpmPackage(args)
-  },
-
-  // upload Cypress binary zip file under unique hash
-  'upload-unique-binary' (args = process.argv) {
-    console.log('#uniqueBinaryUpload')
-
-    return uploadUniqueBinary(args)
+    return uploadArtifactToS3(args)
   },
 
   // uploads a single built Cypress binary ZIP file
@@ -295,10 +280,21 @@ const deploy = {
       console.log('for platform %s version %s',
         options.platform, options.version)
 
-      return upload.toS3({
-        zipFile: options.zip,
+      const uploadPath = upload.getFullUploadPath({
         version: options.version,
         platform: options.platform,
+        name: upload.zipName,
+      })
+
+      return upload.toS3({
+        file: options.zip,
+        uploadPath,
+      }).then(() => {
+        return uploadUtils.purgeDesktopAppFromCache({
+          version: options.version,
+          platform: options.platform,
+          zipName: options.zip,
+        })
       })
     })
   },

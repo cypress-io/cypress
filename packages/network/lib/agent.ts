@@ -7,10 +7,13 @@ import { getProxyForUrl } from 'proxy-from-env'
 import url from 'url'
 import { createRetryingSocket, getAddress } from './connect'
 import { lenientOptions } from './http-utils'
+import { ClientCertificateStore } from './client-certificates'
 
 const debug = debugModule('cypress:network:agent')
 const CRLF = '\r\n'
 const statusCodeRe = /^HTTP\/1.[01] (\d*)/
+
+export const clientCertificateStore = new ClientCertificateStore()
 
 type WithProxyOpts<RequestOptions> = RequestOptions & {
   proxy: string
@@ -190,6 +193,8 @@ export class CombinedAgent {
       debug('got family %o', _.pick(options, 'family', 'href'))
 
       if (isHttps) {
+        _.assign(options, clientCertificateStore.getClientCertificateAgentOptionsForUrl(options.uri))
+
         return this.httpsAgent.addRequest(req, options)
       }
 

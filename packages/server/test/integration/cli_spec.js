@@ -1,7 +1,6 @@
 require('../spec_helper')
 
 const _ = require('lodash')
-const R = require('ramda')
 const cp = require('child_process')
 const pkg = require('../../package.json')
 const execa = require('execa')
@@ -102,7 +101,7 @@ describe('CLI Interface', () => {
 
       beforeEach(() => {
         return execa('npm', ['-version'])
-        .then(R.prop('stdout'))
+        .then((val) => val.stdout)
         .then((version) => {
           npmVersion = version
 

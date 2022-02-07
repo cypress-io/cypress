@@ -1,6 +1,5 @@
 const chalk = require('chalk')
 const { stripIndent, stripIndents } = require('common-tags')
-const { merge } = require('ramda')
 const la = require('lazy-ass')
 const is = require('check-more-types')
 
@@ -37,6 +36,13 @@ const invalidRunProjectPath = {
 
       ${chalk.blue(runDocumentationUrl)}
   `,
+}
+
+const invalidOS = {
+  description: 'The Cypress App could not be installed. Your machine does not meet the operating system requirements.',
+  solution: stripIndent`
+
+  ${chalk.blue('https://on.cypress.io/guides/getting-started/installing-cypress#system-requirements')}`,
 }
 
 const failedDownload = {
@@ -149,13 +155,9 @@ const invalidSmokeTestDisplayError = {
 
       ${hr}
 
-      This is usually caused by a missing library or dependency.
+      This may be due to a missing library or dependency. ${chalk.blue(requiredDependenciesUrl)}
 
-      The error above should indicate which dependency is missing.
-
-        ${chalk.blue(requiredDependenciesUrl)}
-
-      If you are using Docker, we provide containers with all required dependencies installed.
+      Please refer to the error above for more detail.
     `
   },
 }
@@ -164,13 +166,9 @@ const missingDependency = {
   description: 'Cypress failed to start.',
   // this message is too Linux specific
   solution: stripIndent`
-    This is usually caused by a missing library or dependency.
+    This may be due to a missing library or dependency. ${chalk.blue(requiredDependenciesUrl)}
 
-    The error below should indicate which dependency is missing.
-
-      ${chalk.blue(requiredDependenciesUrl)}
-
-    If you are using Docker, we provide containers with all required dependencies installed.
+    Please refer to the error below for more details.
   `,
 }
 
@@ -249,7 +247,7 @@ const CYPRESS_RUN_BINARY = {
 
 function addPlatformInformation (info) {
   return util.getPlatformInfo().then((platform) => {
-    return merge(info, { platform })
+    return { ...info, platform }
   })
 }
 
@@ -399,6 +397,7 @@ module.exports = {
     missingApp,
     notInstalledCI,
     missingDependency,
+    invalidOS,
     invalidSmokeTestDisplayError,
     versionMismatch,
     binaryNotExecutable,

@@ -39,11 +39,11 @@ export class Container extends Component {
             : this._noSpec()
         }
 
-        if (this.props.runner === 'ct') {
+        if (this.props.runner === 'component') {
           return this._app()
         }
 
-        throw Error(`runner prop is required and must be 'e2e' or 'ct'. You passed: ${this.props.runner}.`)
+        throw Error(`runner prop is required and must be 'e2e' or 'component'. You passed: ${this.props.runner}.`)
     }
   }
 

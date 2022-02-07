@@ -402,8 +402,18 @@
       margin-left: auto;
 
       .button-studio {
-        border-left: solid 1px #e3e3e3;
+        border-left: 1px solid #e3e3e3;
         font-size: 1.25em;
+      }
+
+      .button-success {
+        color: $success;
+      }
+
+      .button-studio-copy {
+        i {
+          width: 15px;
+        }
       }
     }
   }

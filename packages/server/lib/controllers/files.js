@@ -1,5 +1,4 @@
 const _ = require('lodash')
-const R = require('ramda')
 const path = require('path')
 const Promise = require('bluebird')
 const cwd = require('../cwd')
@@ -15,7 +14,7 @@ module.exports = {
   handleFiles (req, res, config) {
     debug('handle files')
 
-    return specsUtil.find(config)
+    return specsUtil.default.findSpecs(config)
     .then((files) => {
       return res.json({
         integration: files,
@@ -32,7 +31,7 @@ module.exports = {
 
     return this.getSpecs(test, config, extraOptions)
     .then((specs) => {
-      return this.getJavascripts(config)
+      return this.getSupportFile(config)
       .then((js) => {
         const allFilesToSend = js.concat(specs)
 
@@ -67,7 +66,6 @@ module.exports = {
     }
 
     const specFilter = _.get(extraOptions, 'specFilter')
-    const specTypeFilter = _.get(extraOptions, 'specType', 'integration')
 
     debug('specFilter %o', { specFilter })
     const specFilterContains = (spec) => {
@@ -76,7 +74,7 @@ module.exports = {
       // desktop-gui/src/specs/specs-store.js
       return spec.relative.toLowerCase().includes(specFilter.toLowerCase())
     }
-    const specFilterFn = specFilter ? specFilterContains : R.T
+    const specFilterFn = specFilter ? specFilterContains : () => true
 
     const getSpecsHelper = () => {
       // grab all of the specs if this is ci
@@ -85,20 +83,22 @@ module.exports = {
       if (spec === '__all') {
         debug('returning all specs')
 
-        return specsUtil.find(config)
-        .then(R.tap((specs) => {
-          return debug('found __all specs %o', specs)
-        }))
+        return specsUtil.default.findSpecs(config)
+        .then((specs) => {
+          debug('found __all specs %o', specs)
+
+          return specs
+        })
         .filter(specFilterFn)
         .filter((foundSpec) => {
-          if (componentTestingEnabled) {
-            return foundSpec.specType === specTypeFilter
-          }
+          return componentTestingEnabled
+            ? foundSpec.specType === 'component'
+            : foundSpec.specType === 'integration'
+        }).then((specs) => {
+          debug('filtered __all specs %o', specs)
 
-          return true
-        }).then(R.tap((specs) => {
-          return debug('filtered __all specs %o', specs)
-        })).map((spec) => {
+          return specs
+        }).map((spec) => {
           // grab the name of each
           return spec.absolute
         }).map(convertSpecPath)
@@ -142,14 +142,13 @@ module.exports = {
     return test
   },
 
-  getJavascripts (config) {
-    const { projectRoot, supportFile, javascripts } = config
+  getSupportFile (config) {
+    const { projectRoot, supportFile } = config
 
-    // automatically add in support scripts and any javascripts
-    let files = [].concat(javascripts)
+    let files = []
 
     if (supportFile !== false) {
-      files = [supportFile].concat(files)
+      files = [supportFile]
     }
 
     // TODO: there shouldn't be any reason

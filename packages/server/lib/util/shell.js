@@ -1,7 +1,6 @@
 const _ = require('lodash')
 const Promise = require('bluebird')
 const execa = require('execa')
-const R = require('ramda')
 const os = require('os')
 const commandExistsModule = require('command-exists')
 const log = require('../log')
@@ -71,7 +70,7 @@ const sourceShellCommand = function (cmd, shell) {
 
 const findBash = () => {
   return execa.shell('which bash')
-  .then(R.prop('stdout'))
+  .then((val) => val.stdout)
 }
 
 const getShell = function (shell) {

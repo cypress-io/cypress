@@ -3,6 +3,7 @@ const { Screenshot } = Cypress
 const DEFAULTS = {
   capture: 'fullPage',
   scale: false,
+  overwrite: false,
   disableTimersAndAnimations: true,
   screenshotOnRunFailure: true,
   blackout: [],
@@ -62,6 +63,14 @@ describe('src/cypress/screenshot', () => {
       })
 
       expect(Screenshot.getConfig().scale).to.equal(true)
+    })
+
+    it('sets overwrite if specified', () => {
+      Screenshot.defaults({
+        overwrite: true,
+      })
+
+      expect(Screenshot.getConfig().overwrite).to.equal(true)
     })
 
     it('sets disableTimersAndAnimations if specified', () => {
@@ -181,6 +190,20 @@ describe('src/cypress/screenshot', () => {
         expect(fn).to.throw()
         .with.property('message')
         .and.include('`Cypress.Screenshot.defaults()` `scale` option must be a boolean. You passed: `foo`')
+
+        expect(fn).to.throw()
+        .with.property('docsUrl')
+        .and.eq('https://on.cypress.io/screenshot-api')
+      })
+
+      it('throws if overwrite is not a boolean', () => {
+        const fn = () => {
+          Screenshot.defaults({ overwrite: 'foo' })
+        }
+
+        expect(fn).to.throw()
+        .with.property('message')
+        .and.include('`Cypress.Screenshot.defaults()` `overwrite` option must be a boolean. You passed: `foo`')
 
         expect(fn).to.throw()
         .with.property('docsUrl')

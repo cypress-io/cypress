@@ -5,7 +5,7 @@ $font-sans: "Helvetica Neue", Helvetica, Arial, sans-serif !default;
 
 .editor-picker {
   label {
-    align-items: start;
+    align-items: flex-start;
     display: flex;
     flex-wrap: wrap;
   }

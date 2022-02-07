@@ -2,7 +2,6 @@ const _ = require('lodash')
 const os = require('os')
 const path = require('path')
 const untildify = require('untildify')
-const R = require('ramda')
 const debug = require('debug')('cypress:cli')
 
 const fs = require('../fs')
@@ -179,9 +178,9 @@ const getBinaryPkgAsync = (binaryDir) => {
   })
 }
 
-const getBinaryPkgVersion = R.propOr(null, 'version')
-const getBinaryElectronVersion = R.propOr(null, 'electronVersion')
-const getBinaryElectronNodeVersion = R.propOr(null, 'electronNodeVersion')
+const getBinaryPkgVersion = (o) => _.get(o, 'version', null)
+const getBinaryElectronVersion = (o) => _.get(o, 'electronVersion', null)
+const getBinaryElectronNodeVersion = (o) => _.get(o, 'electronNodeVersion', null)
 
 module.exports = {
   getPathToExecutable,

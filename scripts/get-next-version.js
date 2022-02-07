@@ -1,8 +1,11 @@
 /* eslint-disable no-console */
 
+// See ../guides/next-version.md for documentation.
+
 const semver = require('semver')
 const Bluebird = require('bluebird')
 const bumpCb = require('conventional-recommended-bump')
+
 const currentVersion = require('../package.json').version
 
 const bump = Bluebird.promisify(bumpCb)

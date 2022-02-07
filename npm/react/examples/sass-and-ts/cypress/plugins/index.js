@@ -1,9 +1,14 @@
-// load Webpack file preprocessor that comes with this plugin
-// https://github.com/bahmutov/cypress-react-unit-test#install
-const injectWebpackDevServer = require('@cypress/react/plugins/load-webpack')
+// @ts-check
 
+// load Webpack file devServer that comes with this plugin
+// https://github.com/bahmutov/cypress-react-unit-test#install
+const devServer = require('@cypress/react/plugins/load-webpack')
+
+/**
+ * @type {Cypress.PluginConfig}
+ */
 module.exports = (on, config) => {
-  injectWebpackDevServer(on, config, {
+  devServer(on, config, {
     webpackFilename: 'webpack.config.js',
   })
 

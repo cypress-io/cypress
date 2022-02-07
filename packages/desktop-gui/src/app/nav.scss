@@ -236,6 +236,13 @@
   li {
     padding: 9px 15px;
     white-space: nowrap;
+
+    .unsupported-version {
+      color: #888;
+      img {
+        filter: opacity(0.5);
+      }
+    }
   }
 
   .dropdown-chosen {
