@@ -583,9 +583,7 @@ export const AllCypressErrors = {
     return errTemplate`\
         Your ${`pluginsFile`} file is invalid: ${fmt.path(pluginsFilePath)}
 
-        It threw an error when required, check the stack trace below.
-
-        Fix your plugins file, or set pluginsFile to ${fmt.highlightSecondary(`false`)} if a plugins file is not necessary for your project.
+        It threw an error when required, check the stack trace below:
 
         ${fmt.stackTrace(err)}
       `

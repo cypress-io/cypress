@@ -544,9 +544,7 @@ If you have just renamed the extension of your pluginsFile, restart Cypress.
 exports['e2e plugins fails when require throws synchronously 1'] = `
 Your pluginsFile file is invalid: /foo/bar/.projects/plugins-root-sync-error/cypress/plugins/index.js
 
-It threw an error when required, check the stack trace below.
-
-Fix your plugins file, or set pluginsFile to false if a plugins file is not necessary for your project.
+It threw an error when required, check the stack trace below:
 
 RootSyncError: Root sync error from plugins file
       [stack trace lines]
