@@ -196,7 +196,6 @@ export const AllCypressErrors = {
 
         ${arg1.response}`
   },
-  // TODO: fix
   DASHBOARD_UNKNOWN_CREATE_RUN_WARNING: (arg1: {props: any, message: string}) => {
     return errTemplate`\
         Warning from Cypress Dashboard: ${arg1.message}
@@ -313,7 +312,6 @@ export const AllCypressErrors = {
 
         https://on.cypress.io/run-group-name-not-unique`
   },
-  // TODO: fix
   DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS: () => {
     return errTemplate`\
       Deprecation Warning: The ${`before:browser:launch`} plugin event changed its signature in ${fmt.cypressVersion(`4.0.0`)}
@@ -426,7 +424,7 @@ export const AllCypressErrors = {
         https://on.cypress.io/recording-project-runs`
   },
   // TODO: fix
-  DASHBOARD_INVALID_RUN_REQUEST: (arg1: {message: string, errors: any, object: any}) => {
+  DASHBOARD_INVALID_RUN_REQUEST: (arg1: {message: string, errors: string[], object: object}) => {
     return errTemplate`\
         Recording this run failed because the request was invalid.
 

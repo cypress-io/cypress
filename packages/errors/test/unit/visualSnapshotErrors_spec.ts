@@ -471,9 +471,16 @@ describe('visual error templates', () => {
     DASHBOARD_INVALID_RUN_REQUEST: () => {
       return {
         default: [{
-          message: 'Error on Run Request',
-          errors: [],
-          object: {},
+          message: 'request should follow postRunRequest@2.0.0 schema',
+          errors: [
+            'data.commit has additional properties',
+            'data.ci.buildNumber is required',
+          ],
+          object: {
+            foo: 'foo',
+            bar: 'bar',
+            baz: 'baz',
+          },
         }],
       }
     },

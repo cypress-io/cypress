@@ -50,7 +50,6 @@ function cypressVersion (version: string) {
     throw new Error('Cypress version provided must be in x.x.x format')
   }
 
-  // TODO: come back to this to work on formatting
   return `Cypress version ${version}`
 }
 
