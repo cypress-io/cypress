@@ -35,8 +35,10 @@ const tryMockWebkit = (item) => {
   return item
 }
 
-const createDataTransfer = (files: Cypress.FileReferenceObject[]): DataTransfer => {
-  const dataTransfer = new DataTransfer()
+const createDataTransfer = (files: Cypress.FileReferenceObject[], eventTarget: JQuery<any>): DataTransfer => {
+  // obtain a reference to the `targetWindow` so we can use the right instances of the `File` and `DataTransfer` classes
+  const targetWindow = (eventTarget[0] as HTMLElement).ownerDocument.defaultView || window
+  const dataTransfer = new targetWindow.DataTransfer()
 
   files.forEach(({
     contents,
@@ -44,7 +46,7 @@ const createDataTransfer = (files: Cypress.FileReferenceObject[]): DataTransfer 
     mimeType = mime.lookup(fileName) || '',
     lastModified = Date.now(),
   }) => {
-    const file = new File([contents], fileName, { lastModified, type: mimeType })
+    const file = new targetWindow.File([contents], fileName, { lastModified, type: mimeType })
 
     dataTransfer.items.add(file)
   })
@@ -302,7 +304,7 @@ export default (Commands, Cypress, cy, state, config) => {
             })
           }
 
-          const dataTransfer = createDataTransfer(filesArray)
+          const dataTransfer = createDataTransfer(filesArray, eventTarget)
 
           ACTIONS[options.action as string](eventTarget.get(0), dataTransfer, coords, state)
 
