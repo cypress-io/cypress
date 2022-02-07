@@ -112,6 +112,7 @@ export interface CoreDataShape {
   scaffoldedFiles: NexusGenObjects['ScaffoldedFile'][] | null
   warnings: Warning[]
   packageManager: typeof PACKAGE_MANAGERS[number]
+  forceReconfigureProject: boolean
 }
 
 /**
@@ -165,5 +166,6 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
     },
     scaffoldedFiles: null,
     packageManager: 'npm',
+    forceReconfigureProject: false,
   }
 }

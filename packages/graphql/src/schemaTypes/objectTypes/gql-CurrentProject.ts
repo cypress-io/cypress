@@ -99,6 +99,13 @@ export const CurrentProject = objectType({
       },
     })
 
+    t.boolean('forceReconfigureProject', {
+      description: 'When a user wants to reconfigure the current project',
+      resolve: (source, args, ctx) => {
+        return ctx.coreData.forceReconfigureProject
+      },
+    })
+
     t.boolean('needsLegacyConfigMigration', {
       description: 'Whether the project needs to be migrated before proceeding',
       resolve (source, args, ctx) {

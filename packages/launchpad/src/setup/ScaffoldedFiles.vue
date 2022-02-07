@@ -45,6 +45,7 @@ mutation ScaffoldedFiles_completeSetup {
       isLoadingConfigFile
       isLoadingNodeEvents
       isCTConfigured
+      forceReconfigureProject
     }
     scaffoldedFiles {
       status

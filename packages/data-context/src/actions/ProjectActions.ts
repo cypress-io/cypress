@@ -469,6 +469,7 @@ export class ProjectActions {
 
   async reconfigureProject () {
     // Initialize active project close first the current project
+    this.ctx.coreData.forceReconfigureProject = true
     await this.ctx.actions.browser.closeBrowser()
     this.ctx.actions.wizard.resetWizard()
     this.ctx.actions.electron.refreshBrowserWindow()

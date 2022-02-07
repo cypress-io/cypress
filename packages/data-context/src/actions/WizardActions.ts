@@ -71,17 +71,19 @@ export class WizardActions {
 
     assert(currentTestingType)
     assert(chosenLanguage)
-    assert(!this.ctx.lifecycleManager.isTestingTypeConfigured(currentTestingType), `Cannot call this if the testing type (${currentTestingType}) has not been configured`)
+
     switch (currentTestingType) {
       case 'e2e': {
         this.ctx.coreData.scaffoldedFiles = await this.scaffoldE2E()
         this.ctx.lifecycleManager.refreshMetaState()
+        this.ctx.coreData.forceReconfigureProject = false
 
         return chosenLanguage
       }
       case 'component': {
         this.ctx.coreData.scaffoldedFiles = await this.scaffoldComponent()
         this.ctx.lifecycleManager.refreshMetaState()
+        this.ctx.coreData.forceReconfigureProject = false
 
         return chosenLanguage
       }
@@ -91,8 +93,10 @@ export class WizardActions {
   }
 
   private async scaffoldE2E () {
+    const configAlreadyConfigured = this.ctx.lifecycleManager.isTestingTypeConfigured('e2e')
+
     const scaffolded = await Promise.all([
-      this.scaffoldConfig('e2e'),
+      this.scaffoldConfig('e2e', configAlreadyConfigured),
       this.scaffoldSupport('e2e', this.ctx.coreData.wizard.chosenLanguage),
       this.scaffoldFixtures(),
     ])
@@ -104,9 +108,10 @@ export class WizardActions {
     const { chosenBundler, chosenFramework, chosenLanguage } = this.ctx.wizard
 
     assert(chosenFramework && chosenLanguage && chosenBundler)
+    const configAlreadyConfigured = this.ctx.lifecycleManager.isTestingTypeConfigured('e2e')
 
     return await Promise.all([
-      this.scaffoldConfig('component'),
+      this.scaffoldConfig('component', configAlreadyConfigured),
       this.scaffoldFixtures(),
       this.scaffoldSupport('component', chosenLanguage.type),
       this.getComponentIndexHtml({
@@ -154,7 +159,17 @@ export class WizardActions {
     return this.wizardGetConfigCodeE2E(language)
   }
 
-  private async scaffoldConfig (testingType: 'e2e' | 'component'): Promise<NexusGenObjects['ScaffoldedFile']> {
+  private async scaffoldConfig (testingType: 'e2e' | 'component', isAlreadyConfigured: boolean): Promise<NexusGenObjects['ScaffoldedFile']> {
+    if (isAlreadyConfigured) {
+      return {
+        status: 'skipped',
+        description: 'Config file already configured, skipping',
+        file: {
+          absolute: this.ctx.lifecycleManager.configFilePath,
+        },
+      }
+    }
+
     if (!fs.existsSync(this.ctx.lifecycleManager.configFilePath)) {
       this.ctx.lifecycleManager.setConfigFilePath(this.ctx.coreData.wizard.chosenLanguage)
 
@@ -192,6 +207,7 @@ export class WizardActions {
         status: 'skipped',
         file: {
           absolute: exampleScaffoldPath,
+          contents: '// Skipped',
         },
         description: 'Fixtures directory already exists, skipping',
       }
