@@ -1064,6 +1064,26 @@ const getMsgByType = function (type, ...args) {
         The ${chalk.yellow(`\`supportFile\``)} configuration option was removed from the root in Cypress version \`10.0.0\`. Please update this option under each testing type property.
 
         https://on.cypress.io/migration-guide`
+    case 'SPEC_PATTERN_ROOT_NOT_SUPPORTED':
+      return stripIndent`\
+        The ${chalk.yellow(`\`specPattern\``)} configuration option was removed from the root in Cypress version \`10.0.0\`. Please update this option under each testing type property.
+
+        https://on.cypress.io/migration-guide`
+    case 'SPEC_EXCLUDE_PATTERN_ROOT_NOT_SUPPORTED':
+      return stripIndent`\
+        The ${chalk.yellow(`\`excludeSpecPattern\``)} configuration option was removed from the root in Cypress version \`10.0.0\`. Please update this option under each testing type property.
+
+        https://on.cypress.io/migration-guide`
+    case 'BASE_URL_ROOT_NOT_SUPPORTED':
+      return stripIndent`\
+        The ${chalk.yellow(`\`baseUrl\``)} configuration option was removed from the root in Cypress version \`10.0.0\`. Please update this option under e2e testing type property.
+
+        https://on.cypress.io/migration-guide`
+    case 'BASE_URL_CT_NOT_SUPPORTED':
+      return stripIndent`\
+        The ${chalk.yellow(`\`baseUrl\``)} configuration option is not valid in Component testing. Please update this option under e2e testing type property.
+
+        https://on.cypress.io/migration-guide`
     default:
   }
 }
