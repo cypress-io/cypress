@@ -343,13 +343,21 @@ toolbar {
 
 `
 
-export function _createDetachedInstance (browserInstance: BrowserInstance): BrowserInstance {
+const launchedBrowserToCriClientMapping: { [key: number]: BrowserCriClient } = {}
+
+export function _createDetachedInstance (browserInstance: BrowserInstance, browserCriClient?: BrowserCriClient): BrowserInstance {
   const detachedInstance: BrowserInstance = new EventEmitter() as BrowserInstance
 
   detachedInstance.pid = browserInstance.pid
 
   // kill the entire process tree, from the spawned instance up
   detachedInstance.kill = (): void => {
+    // Close browser cri client socket. Do nothing on failure here since we're shutting down anyway
+    if (browserCriClient) {
+      browserCriClient.close().catch()
+      delete launchedBrowserToCriClientMapping[browserInstance.pid]
+    }
+
     treeKill(browserInstance.pid, (err?, result?) => {
       debug('force-exit of process tree complete %o', { err, result })
       detachedInstance.emit('exit')
@@ -359,8 +367,8 @@ export function _createDetachedInstance (browserInstance: BrowserInstance): Brow
   return detachedInstance
 }
 
-export async function connectToNewSpec (browser: Browser, options: any = {}, automation: Automation, browserCriClient: BrowserCriClient) {
-  await firefoxUtil.connectToNewSpec(options, automation, browserCriClient)
+export async function connectToNewSpec (browser: Browser, options: any = {}, automation: Automation, instance: LaunchedBrowser) {
+  await firefoxUtil.connectToNewSpec(options, automation, launchedBrowserToCriClientMapping[instance.pid])
 }
 
 export function connectToExisting () {
@@ -522,15 +530,35 @@ export async function open (browser: Browser, url, options: any = {}, automation
   try {
     const browserCriClient = await firefoxUtil.setup({ automation, extensions: launchOptions.extensions, url, foxdriverPort, marionettePort, remotePort, onError: options.onError })
 
-    browserInstance.browserCriClient = browserCriClient
+    if (browserCriClient) {
+      launchedBrowserToCriClientMapping[browserInstance.pid] = browserCriClient
+    }
+
+    if (os.platform() === 'win32') {
+      // override the .kill method for Windows so that the detached Firefox process closes between specs
+      // @see https://github.com/cypress-io/cypress/issues/6392
+      return _createDetachedInstance(browserInstance, browserCriClient)
+    }
+
+    // monkey-patch the .kill method to that the CDP connection is closed
+    const originalBrowserKill = browserInstance.kill
+
+    /* @ts-expect-error */
+    browserInstance.kill = (...args) => {
+      debug('closing remote interface client')
+
+      // Do nothing on failure here since we're shutting down anyway
+      if (browserCriClient) {
+        browserCriClient.close().catch()
+        delete launchedBrowserToCriClientMapping[browserInstance.pid]
+      }
+
+      debug('closing firefox')
+
+      originalBrowserKill.apply(browserInstance, args)
+    }
   } catch (err) {
     errors.throw('FIREFOX_COULD_NOT_CONNECT', err)
-  }
-
-  if (os.platform() === 'win32') {
-    // override the .kill method for Windows so that the detached Firefox process closes between specs
-    // @see https://github.com/cypress-io/cypress/issues/6392
-    return _createDetachedInstance(browserInstance)
   }
 
   return browserInstance

@@ -122,6 +122,8 @@ const DEFAULT_ARGS = [
   '--disable-dev-shm-usage',
 ]
 
+const launchedBrowserToCriClientMapping: { [key: number]: BrowserCriClient } = {}
+
 /**
  * Reads all known preference files (CHROME_PREFERENCE_PATHS) from disk and retur
  * @param userDir
@@ -347,6 +349,10 @@ export = {
 
   _writeChromePreferences,
 
+  _getBrowserCriClientForLaunchedBrowser (launchedBrowser: LaunchedBrowser) {
+    return launchedBrowserToCriClientMapping[launchedBrowser.pid]
+  },
+
   async _writeExtension (browser: Browser, options) {
     if (browser.isHeadless) {
       debug('chrome is running headlessly, not installing extension')
@@ -428,9 +434,10 @@ export = {
     return args
   },
 
-  async connectToNewSpec (browser: Browser, options: CypressConfiguration = {}, automation: Automation, browserCriClient: BrowserCriClient) {
+  async connectToNewSpec (browser: Browser, options: CypressConfiguration = {}, automation: Automation, instance: LaunchedBrowser) {
     debug('connecting to new chrome tab in existing instance with url and debugging port', { url: options.url })
 
+    const browserCriClient = this._getBrowserCriClientForLaunchedBrowser(instance)
     const pageCriClient = await browserCriClient.attachToNewUrl('about:blank')
 
     await this._setAutomation(browserCriClient, pageCriClient, automation)
@@ -513,11 +520,13 @@ export = {
     // navigate to the actual url
     const browserCriClient = await BrowserCriClient.create(port, browser.displayName, options.onError)
 
+    launchedBrowserToCriClientMapping[launchedBrowser.pid] = browserCriClient
+
     la(browserCriClient, 'expected Chrome remote interface reference', browserCriClient)
 
     await browserCriClient.ensureMinimumProtocolVersion('1.3')
     .catch((err) => {
-      // if this minumum chrome version changes, sync it with
+      // if this minimum chrome version changes, sync it with
       // packages/web-config/webpack.config.base.ts and
       // npm/webpack-batteries-included-preprocessor/index.js
       throw new Error(`Cypress requires at least Chrome 64.\n\nDetails:\n${err.message}`)
@@ -533,7 +542,8 @@ export = {
       debug('closing remote interface client')
 
       // Do nothing on failure here since we're shutting down anyway
-      launchedBrowser.browserCriClient.close().catch()
+      browserCriClient.close().catch()
+      delete launchedBrowserToCriClientMapping[launchedBrowser.pid]
 
       debug('closing chrome')
 

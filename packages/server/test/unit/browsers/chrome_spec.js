@@ -385,19 +385,25 @@ describe('lib/browsers/chrome', () => {
         use: sinon.stub().returns(),
       }
 
+      const launchedBrowser = {
+        kill: sinon.stub().returns(),
+      }
+
       let onInitializeNewBrowserTabCalled = false
       const options = { onError: () => {}, url: 'https://www.google.com', downloadsFolder: '/tmp/folder', onInitializeNewBrowserTab: () => {
         onInitializeNewBrowserTabCalled = true
       } }
 
+      sinon.stub(chrome, '_getBrowserCriClientForLaunchedBrowser').withArgs(launchedBrowser).returns(browserCriClient)
       sinon.stub(chrome, '_maybeRecordVideo').withArgs(pageCriClient, options, 354).resolves()
       sinon.stub(chrome, '_navigateUsingCRI').withArgs(pageCriClient, options.url, 354).resolves()
       sinon.stub(chrome, '_handleDownloads').withArgs(pageCriClient, options.downloadFolder, automation).resolves()
 
-      await chrome.connectToNewSpec({ majorVersion: 354 }, options, automation, browserCriClient)
+      await chrome.connectToNewSpec({ majorVersion: 354 }, options, automation, launchedBrowser)
 
       expect(browserCriClient.attachToNewUrl).to.be.called
       expect(automation.use).to.be.called
+      expect(chrome._getBrowserCriClientForLaunchedBrowser).to.be.called
       expect(chrome._maybeRecordVideo).to.be.called
       expect(chrome._navigateUsingCRI).to.be.called
       expect(chrome._handleDownloads).to.be.called
