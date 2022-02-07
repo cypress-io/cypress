@@ -1,6 +1,6 @@
 import { AutIframe } from '../../../src/runner/aut-iframe'
 import { EventManager } from '../../../src/runner/event-manager'
-import { logger } from '@packages/runner-shared/src/logger'
+import { logger } from '../../../src/runner/logger'
 import { blankContents } from '@packages/runner-shared/src/blank-contents'
 import _ from 'lodash'
 import { visitFailure } from '@packages/runner-shared/src/visit-failure'
