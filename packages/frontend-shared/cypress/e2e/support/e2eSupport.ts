@@ -436,5 +436,11 @@ Cypress.Commands.add('remoteGraphQLIntercept', remoteGraphQLIntercept)
 Cypress.Commands.add('findBrowsers', findBrowsers)
 Cypress.Commands.add('validateExternalLink', { prevSubject: ['optional', 'element'] }, validateExternalLink)
 
-installCustomPercyCommand()
+installCustomPercyCommand({
+  elementOverrides: {
+    '.runnable-header .duration': ($el) => $el.text('XX:XX'),
+    '.cy-tooltip': true,
+  },
+})
+
 addNetworkCommands()

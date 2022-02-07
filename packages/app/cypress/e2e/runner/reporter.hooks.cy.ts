@@ -1,15 +1,19 @@
 import * as specLoader from './support/spec-loader'
 
-describe('hooks', function () {
-  describe('displays hooks', function () {
-    beforeEach(function () {
+describe('hooks', {
+  // Limiting tests kept in memory due to large memory cost
+  // of nested spec snapshots
+  numTestsKeptInMemory: 1,
+}, () => {
+  describe('displays hooks', () => {
+    beforeEach(() => {
       specLoader.loadSpec({
         fileName: 'basic.cy.js',
         passCount: 2,
       })
     })
 
-    it('displays commands under correct hook', function () {
+    it('displays commands under correct hook', () => {
       cy.contains('tests 1').click()
 
       cy.contains('before all').closest('.collapsible').should('contain', 'beforeHook 1')
@@ -38,8 +42,8 @@ describe('hooks', function () {
     })
   })
 
-  describe('open in IDE', function () {
-    beforeEach(function () {
+  describe('open in IDE', () => {
+    beforeEach(() => {
       specLoader.loadSpec({
         fileName: 'basic.cy.js',
         passCount: 2,
@@ -47,7 +51,7 @@ describe('hooks', function () {
       })
     })
 
-    it('creates open in IDE button', function () {
+    it('creates open in IDE button', () => {
       cy.contains('tests 1').click()
 
       cy.get('.hook-open-in-ide').should('have.length', 4)
@@ -64,15 +68,15 @@ describe('hooks', function () {
     })
   })
 
-  describe('skipped tests', function () {
-    beforeEach(function () {
+  describe('skipped tests', () => {
+    beforeEach(() => {
       specLoader.loadSpec({
         fileName: 'skip.cy.js',
         passCount: 1,
       })
     })
 
-    it('does not display commands from skipped tests', function () {
+    it('does not display commands from skipped tests', () => {
       // does not display commands from skipped tests
       cy.contains('test 1').click()
       cy.contains('test 1').parents('.collapsible').first().should('not.contain', 'testBody 1')
@@ -86,15 +90,15 @@ describe('hooks', function () {
     })
   })
 
-  describe('only tests', function () {
-    beforeEach(function () {
+  describe('only tests', () => {
+    beforeEach(() => {
       specLoader.loadSpec({
         fileName: 'only.cy.js',
         passCount: 1,
       })
     })
 
-    it('only displays tests with .only', function () {
+    it('only displays tests with .only', () => {
       cy.contains('test wrapper').parents('.collapsible').first().should(($suite) => {
         expect($suite).not.to.contain('test 1')
         expect($suite).to.contain('nested suite 1')
