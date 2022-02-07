@@ -170,7 +170,7 @@ There is a cypress.json file at the location below:
 
 /foo/bar/.projects/pristine
 
-Cypress no longer supports 'cypress.json', please migrate to 'cypress.config.{ts|js}'.
+Cypress 10 no longer supports 'cypress.json'. Please run \`cypress open\` to launch the migration tool to migrate to 'cypress.config.{ts|js}'.
 
 
 `
