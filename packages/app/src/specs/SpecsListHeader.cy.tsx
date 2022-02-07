@@ -61,22 +61,47 @@ describe('<SpecsListHeader />', { keystrokeDelay: 0 }, () => {
     .should('have.been.called')
   })
 
-  it('shows the result count correctly', () => {
-    const mountWithResultCount = (count = 0) => {
+  it('shows the count correctly when not searching', () => {
+    const mountWithSpecsCount = (count = 0) => {
       cy.mount(() => (<div class="max-w-800px p-12 resize overflow-auto"><SpecsListHeader
         modelValue={''}
-        resultCount={count}
+        specsCount={count}
       /></div>))
     }
 
-    mountWithResultCount(0)
-    cy.contains(`0 ${ defaultMessages.specPage.matchPlural}`)
+    mountWithSpecsCount(0)
+    cy.contains('0 Matches')
     .should('be.visible')
     .and('have.attr', 'aria-live', 'polite')
 
-    mountWithResultCount(1)
-    cy.contains(`1 ${ defaultMessages.specPage.matchSingular}`).should('be.visible')
-    mountWithResultCount(100)
-    cy.contains(`100 ${ defaultMessages.specPage.matchPlural}`).should('be.visible')
+    mountWithSpecsCount(1)
+    cy.contains(`1 Match`).should('be.visible')
+    mountWithSpecsCount(100)
+    cy.contains(`100 Matches`).should('be.visible')
+  })
+
+  it('shows the count correctly while searching', () => {
+    const mountWithCounts = (resultsCount = 0, specsCount = 0) => {
+      cy.mount(() => (<div class="max-w-800px p-12 resize overflow-auto"><SpecsListHeader
+        modelValue={'foo'}
+        resultsCount={resultsCount}
+        specsCount={specsCount}
+      /></div>))
+    }
+
+    mountWithCounts(0, 0)
+    cy.contains('0 of 0 Matches')
+
+    mountWithCounts(0, 22)
+    cy.contains('0 of 22 Matches')
+
+    mountWithCounts(0, 1)
+    cy.contains(`0 of 1 Match`).should('be.visible')
+
+    mountWithCounts(1, 1)
+    cy.contains(`1 of 1 Match`).should('be.visible')
+
+    mountWithCounts(5, 22)
+    cy.contains(`5 of 22 Matches`).should('be.visible')
   })
 })

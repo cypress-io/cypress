@@ -3,7 +3,7 @@
     <SpecsListHeader
       v-model="search"
       class="pb-32px"
-      :result-count="specs.length"
+      :results-count="specs.length"
       :specs-count="cachedSpecs.length"
       @show-create-spec-modal="emit('showCreateSpecModal')"
       @show-spec-pattern-modal="showSpecPatternModal = true"

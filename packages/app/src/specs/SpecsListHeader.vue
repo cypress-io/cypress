@@ -20,7 +20,7 @@
             class="block border-l h-24px px-16px border-l-gray-100 group-hover:border-none"
           >
             <span v-if="props.modelValue">
-              {{ t('specPage.searchResultsNumerator', resultCount) }}
+              {{ t('specPage.searchResultsNumerator', resultsCount) }}
             </span>
             {{ t('specPage.searchResultsDenominator', specsCount ) }}
             <span class="sr-only">{{ t(`createSpec.viewSpecPatternButton`) }} </span>
@@ -55,10 +55,10 @@ const { t } = useI18n()
 
 const props = withDefaults(defineProps<{
   modelValue: string
-  resultCount?: number
+  resultsCount?: number
   specsCount?: number
 }>(), {
-  resultCount: 0,
+  resultsCount: 0,
   specsCount: 0,
 })
 
