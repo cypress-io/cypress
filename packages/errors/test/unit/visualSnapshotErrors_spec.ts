@@ -345,10 +345,12 @@ describe('visual error templates', () => {
       return {
         default: [{
           props: {
-            ciBuildId: 'invalid',
-            group: 'foo',
+            code: 'OUT_OF_TIME',
+            name: 'OutOfTime',
+            hadTime: 1000,
+            spentTime: 999,
           },
-          message: 'You have been warned',
+          message: 'You are almost out of time',
         }],
       }
     },
