@@ -50,6 +50,7 @@ export interface InjectedConfigApi {
   updateWithPluginValues(config: FullConfig, modifiedConfig: Partial<Cypress.ConfigOptions>): FullConfig
   setupFullConfigWithDefaults(config: SetupFullConfigOptions): Promise<FullConfig>
   validateRootConfigBreakingChanges<T extends Cypress.ConfigOptions>(config: Partial<T>, onWarning: (warningMsg: string) => void, onErr: (errMsg: string) => never): T
+  validateTestingTypeConfigBreakingChanges<T extends Cypress.ConfigOptions>(config: Partial<T>, testingType: Cypress.TestingType, onWarning: (warningMsg: string) => void, onErr: (errMsg: string) => never): T
 }
 
 type State<S, V = undefined> = V extends undefined ? {state: S, value?: V } : {state: S, value: V}
@@ -442,6 +443,8 @@ export class ProjectLifecycleManager {
     if (this._currentTestingType) {
       const testingTypeOverrides = configFileContents[this._currentTestingType] ?? {}
 
+      this.validateTestingTypeConfig(testingTypeOverrides)
+
       // TODO: pass in options.config overrides separately, so they are reflected in the UI
       configFileContents = { ...configFileContents, ...testingTypeOverrides }
     }
@@ -561,6 +564,21 @@ export class ProjectLifecycleManager {
     })
 
     return promise.then((v) => v.initialConfig)
+  }
+
+  private validateTestingTypeConfig (config: Cypress.ConfigOptions) {
+    assert(this._currentTestingType)
+
+    return this.ctx._apis.configApi.validateTestingTypeConfigBreakingChanges(
+      config,
+      this._currentTestingType,
+      (warning, ...args) => {
+        return this.ctx.warning(warning, ...args)
+      },
+      (err, ...args) => {
+        throw this.ctx.error(err, ...args)
+      },
+    )
   }
 
   private validateConfigRoot (config: Cypress.ConfigOptions) {

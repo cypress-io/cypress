@@ -6,12 +6,12 @@ module.exports = {
   env: {
     reactDevtools: true,
   },
-  ignoreSpecPattern: [
-    '**/__snapshots__/*',
-    '**/__image_snapshots__/*',
-  ],
   fixturesFolder: false,
   component: {
+    excludeSpecPattern: [
+      '**/__snapshots__/*',
+      '**/__image_snapshots__/*',
+    ],
     devServer (cypressConfig) {
       const { startDevServer } = require('@cypress/vite-dev-server')
 

@@ -27,10 +27,38 @@ describe('<OpenBrowserList />', () => {
       cy.contains('label', browser.displayName).should('be.visible')
     })
 
+    // Firefox early version should be disabled
+    cy.get('[data-cy-browser="firefox"]').should('have.attr', 'aria-disabled', 'true')
+    cy.get('[data-cy-browser="firefox"] [data-cy="unsupported-browser-tooltip-trigger"]').should('exist')
+    cy.get('[data-cy-browser="electron"] [data-cy="unsupported-browser-tooltip-trigger"]').should('not.exist')
+
+    // Renders a default logo if we don't provide one
+    cy.get('[data-cy-browser="fake"]').should('have.attr', 'aria-disabled', 'true')
+    cy.get('[data-cy-browser="fake"] img').should('have.attr', 'src').should('include', 'generic-browser')
+
     // If no default value, should choose electron
     cy.get('[data-cy-browser="electron"]').should('have.attr', 'aria-checked', 'true')
     cy.get('[data-cy="launch-button"]').contains(defaultMessages.openBrowser.startE2E.replace('{browser}', 'Electron'))
     cy.get('[data-cy="launch-button"]').get('[data-cy="icon-testing-type-e2e"]')
+
+    cy.percySnapshot()
+  })
+
+  it('displays a tooltip for an unsupported browser', () => {
+    cy.mountFragment(OpenBrowserListFragmentDoc, {
+      onResult: (result) => {
+        result.currentBrowser = null
+      },
+      render: (gqlVal) =>
+        (<div class="border-current border-1 resize overflow-auto">
+          <div class="h-40" />
+          <OpenBrowserList gql={gqlVal}/>
+        </div>),
+    })
+
+    cy.get('[data-cy-browser="firefox"]:nth(1) [data-cy="unsupported-browser-tooltip"]')
+    .trigger('mouseenter')
+    .contains('Cypress does not support running Firefox Developer Edition version 69.')
 
     cy.percySnapshot()
   })

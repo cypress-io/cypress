@@ -1,4 +1,4 @@
-const specExtRe = '[._-]?[s|S]pec.|[.])(?=[j|t]s[x]?'
+const specExtRe = '(?<!\/)[._-]?[s|S]pec.|[.])(?=[j|t]s[x]?'
 
 export const regexps = {
   e2e: {
