@@ -62,30 +62,30 @@ describe('<SpecsListHeader />', { keystrokeDelay: 0 }, () => {
   })
 
   it('shows the count correctly when not searching', () => {
-    const mountWithSpecsCount = (count = 0) => {
+    const mountWithSpecCount = (count = 0) => {
       cy.mount(() => (<div class="max-w-800px p-12 resize overflow-auto"><SpecsListHeader
         modelValue={''}
-        specsCount={count}
+        specCount={count}
       /></div>))
     }
 
-    mountWithSpecsCount(0)
+    mountWithSpecCount(0)
     cy.contains('0 Matches')
     .should('be.visible')
     .and('have.attr', 'aria-live', 'polite')
 
-    mountWithSpecsCount(1)
+    mountWithSpecCount(1)
     cy.contains(`1 Match`).should('be.visible')
-    mountWithSpecsCount(100)
+    mountWithSpecCount(100)
     cy.contains(`100 Matches`).should('be.visible')
   })
 
   it('shows the count correctly while searching', () => {
-    const mountWithCounts = (resultsCount = 0, specsCount = 0) => {
+    const mountWithCounts = (resultCount = 0, specCount = 0) => {
       cy.mount(() => (<div class="max-w-800px p-12 resize overflow-auto"><SpecsListHeader
         modelValue={'foo'}
-        resultsCount={resultsCount}
-        specsCount={specsCount}
+        resultCount={resultCount}
+        specCount={specCount}
       /></div>))
     }
 
