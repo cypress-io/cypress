@@ -183,4 +183,8 @@ export class SpecBridgeDomainCommunicator extends EventEmitter {
   toPrimaryRanDomainFn (data: { subject?: any, err?: any }) {
     this.handleSubjectAndErr('ran:domain:fn', data)
   }
+
+  toPrimaryError (event, data: { subject?: any, err?: any }) {
+    this.handleSubjectAndErr(event, data)
+  }
 }
