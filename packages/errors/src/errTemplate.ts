@@ -92,6 +92,8 @@ function listFlags (
     if (v) {
       return `The ${flag} flag you passed was: ${theme.yellow(v)}`
     }
+
+    return undefined
   })
   .compact()
   .join('\n')

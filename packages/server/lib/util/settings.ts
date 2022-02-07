@@ -130,8 +130,12 @@ export function configFile (options: SettingsOptions = {}) {
   return options.configFile === false ? false : (options.configFile || 'cypress.json')
 }
 
-export function id (projectRoot, options = {}) {
+export function id (projectRoot, options: SettingsOptions = {}) {
   const file = pathToConfigFile(projectRoot, options)
+
+  if (!file) {
+    return Promise.resolve(null)
+  }
 
   return fs.readJson(file)
   .then((config) => config.projectId)
@@ -141,11 +145,11 @@ export function id (projectRoot, options = {}) {
 }
 
 export function read (projectRoot, options: SettingsOptions = {}) {
-  if (options.configFile === false) {
+  const file = pathToConfigFile(projectRoot, options)
+
+  if (!file) {
     return Promise.resolve({})
   }
-
-  const file = pathToConfigFile(projectRoot, options)
 
   const readPromise = /\.json$/.test(file) ? fs.readJSON(path.resolve(projectRoot, file)) : requireAsync(file, {
     projectRoot,

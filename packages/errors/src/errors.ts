@@ -491,8 +491,8 @@ export const AllCypressErrors = {
 
         https://on.cypress.io/dashboard`
   },
-  NO_PROJECT_ID: (configFilePath: string) => {
-    return errTemplate`Can't find ${`projectId`} in the config file: ${fmt.path(configFilePath)}`
+  NO_PROJECT_ID: (configFilePath: string | false) => {
+    return errTemplate`Can't find ${`projectId`} in the config file: ${fmt.path(configFilePath || '')}`
   },
   NO_PROJECT_FOUND_AT_PROJECT_ROOT: (projectRoot: string) => {
     return errTemplate`Can't find a project at the path: ${fmt.path(projectRoot)}`
