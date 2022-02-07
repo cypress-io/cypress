@@ -296,14 +296,12 @@ export class CdpAutomation {
         // resolve with the value of the removed cookie
         // also, getting the cookie via CDP first will ensure that we send a cookie `domain` to CDP
         // that matches the cookie domain that is really stored
-        .then(async (cookieToBeCleared) => {
+        .then((cookieToBeCleared) => {
           if (!cookieToBeCleared) {
             return cookieToBeCleared
           }
 
-          await this.sendDebuggerCommandFn('Network.deleteCookies', _.pick(cookieToBeCleared, 'name', 'domain'))
-
-          return cookieToBeCleared
+          return this.sendDebuggerCommandFn('Network.deleteCookies', _.pick(cookieToBeCleared, 'name', 'domain')).then(() => cookieToBeCleared)
         })
 
       case 'clear:cookies':
