@@ -1,38 +1,10 @@
-const helpers = require('../../support/helpers')
+const helpers = require('../../../support/helpers')
 
 const { _ } = Cypress
 
 describe('src/cy/commands/querying - shadow dom', () => {
   beforeEach(() => {
     cy.visit('/fixtures/shadow-dom.html')
-  })
-
-  context('#within', () => {
-    it('finds element within shadow dom with includeShadowDom option', () => {
-      cy.get('#parent-of-shadow-container-0').within(() => {
-        cy
-        .get('p', { includeShadowDom: true })
-        .should('have.length', 1)
-        .should('have.text', 'Shadow Content 3')
-      })
-    })
-
-    it('when within subject is shadow root, finds element without needing includeShadowDom option', () => {
-      cy.get('#shadow-element-1').shadow().within(() => {
-        cy
-        .get('p')
-        .should('have.length', 1)
-        .should('have.text', 'Shadow Content 1')
-      })
-    })
-
-    it('when within subject is already in shadow dom, finds element without needing includeShadowDom option', () => {
-      cy.get('.shadow-8-nested-1', { includeShadowDom: true }).within(() => {
-        cy
-        .get('.shadow-8-nested-5')
-        .should('have.text', '8')
-      })
-    })
   })
 
   context('#get', () => {
