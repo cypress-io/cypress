@@ -18,6 +18,7 @@ import type { Browser } from './types'
 import { BrowserCriClient } from './browser-cri-client'
 import type { LaunchedBrowser } from '@packages/launcher/lib/browsers'
 import type { CRIWrapper } from './cri-client'
+import type { Automation } from '../automation'
 
 // TODO: this is defined in `cypress-npm-api` but there is currently no way to get there
 type CypressConfiguration = any
@@ -427,7 +428,7 @@ export = {
     return args
   },
 
-  async connectToNewSpec (browserCriClient: BrowserCriClient, browser: Browser, options: CypressConfiguration = {}, automation) {
+  async connectToNewSpec (browser: Browser, options: CypressConfiguration = {}, automation: Automation, browserCriClient: BrowserCriClient) {
     debug('connecting to new chrome tab in existing instance with url and debugging port', { url: options.url })
 
     const pageCriClient = await browserCriClient.attachToNewUrl('about:blank')
@@ -451,7 +452,7 @@ export = {
     await this._setAutomation(browserCriClient, pageCriClient, automation)
   },
 
-  async open (browser: Browser, url, options: CypressConfiguration = {}, automation): Promise<LaunchedBrowser & { browserCriClient: BrowserCriClient }> {
+  async open (browser: Browser, url, options: CypressConfiguration = {}, automation: Automation): Promise<LaunchedBrowser & { browserCriClient: BrowserCriClient }> {
     const { isTextTerminal } = options
 
     const userDir = utils.getProfileDir(browser, isTextTerminal)

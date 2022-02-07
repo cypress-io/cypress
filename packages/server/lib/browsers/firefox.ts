@@ -17,6 +17,7 @@ import treeKill from 'tree-kill'
 import mimeDb from 'mime-db'
 import { getRemoteDebuggingPort } from './protocol'
 import type { BrowserCriClient } from './browser-cri-client'
+import type { Automation } from '../automation'
 
 const errors = require('../errors')
 
@@ -358,8 +359,8 @@ export function _createDetachedInstance (browserInstance: BrowserInstance): Brow
   return detachedInstance
 }
 
-export async function connectToNewSpec (browserCriClient, browser: Browser, options: any = {}, automation) {
-  await firefoxUtil.connectToNewSpec(browserCriClient, browser, options, automation)
+export async function connectToNewSpec (browser: Browser, options: any = {}, automation: Automation, browserCriClient: BrowserCriClient) {
+  await firefoxUtil.connectToNewSpec(options, automation, browserCriClient)
 }
 
 export function connectToExisting () {
@@ -519,7 +520,7 @@ export async function open (browser: Browser, url, options: any = {}, automation
   }) as LaunchedBrowser & { browserCriClient: BrowserCriClient}
 
   try {
-    const [,, browserCriClient] = await firefoxUtil.setup({ automation, extensions: launchOptions.extensions, url, foxdriverPort, marionettePort, remotePort, onError: options.onError })
+    const browserCriClient = await firefoxUtil.setup({ automation, extensions: launchOptions.extensions, url, foxdriverPort, marionettePort, remotePort, onError: options.onError })
 
     browserInstance.browserCriClient = browserCriClient
   } catch (err) {

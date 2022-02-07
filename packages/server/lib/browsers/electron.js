@@ -393,7 +393,7 @@ module.exports = {
     })
   },
 
-  async connectToNewSpec (browserCriClient, browser, options, automation) {
+  async connectToNewSpec (browser, options, automation) {
     this.open(browser, options.url, options, automation)
   },
 

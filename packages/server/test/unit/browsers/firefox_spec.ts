@@ -112,7 +112,7 @@ describe('lib/browsers/firefox', () => {
     })
 
     it('calls connectToNewSpec in firefoxUtil', function () {
-      sinon.stub(firefoxUtil, 'connectToNewSpec').withArgs(this.browser, 50505, this.options, this.automation).resolves()
+      sinon.stub(firefoxUtil, 'connectToNewSpec').withArgs(50505, this.options, this.automation).resolves()
 
       firefox.connectToNewSpec(this.browser, 50505, this.options, this.automation)
 

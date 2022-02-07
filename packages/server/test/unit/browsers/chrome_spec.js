@@ -394,7 +394,7 @@ describe('lib/browsers/chrome', () => {
       sinon.stub(chrome, '_navigateUsingCRI').withArgs(pageCriClient, options.url, 354).resolves()
       sinon.stub(chrome, '_handleDownloads').withArgs(pageCriClient, options.downloadFolder, automation).resolves()
 
-      await chrome.connectToNewSpec(browserCriClient, { majorVersion: 354 }, options, automation)
+      await chrome.connectToNewSpec({ majorVersion: 354 }, options, automation, browserCriClient)
 
       expect(browserCriClient.attachToNewUrl).to.be.called
       expect(automation.use).to.be.called

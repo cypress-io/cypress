@@ -169,7 +169,7 @@ export class OpenProject {
           return browsers.connectToExisting(browser, options, automation)
         }
 
-        if (options.shouldNavigateBrowser) {
+        if (options.shouldLaunchNewTab) {
           const onInitializeNewBrowserTab = async () => {
             await this.resetBrowserState()
           }

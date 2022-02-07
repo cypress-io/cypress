@@ -768,18 +768,5 @@ describe('app/background', () => {
         return this.server.emit('automation:request', 123, 'close:browser:tabs')
       })
     })
-
-    describe('stop:screencast', () => {
-      it('returns with a noop', function (done) {
-        this.socket.on('automation:response', (id, obj) => {
-          expect(id).to.eq(123)
-          expect(obj.response).to.be.undefined
-
-          done()
-        })
-
-        return this.server.emit('automation:request', 123, 'stop:screencast')
-      })
-    })
   })
 })

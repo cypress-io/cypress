@@ -132,7 +132,7 @@ module.exports = {
     }
 
     // Instance will be null when we're dealing with electron. In that case we don't need a browserCriClient
-    return browserLauncher.connectToNewSpec(instance ? instance.browserCriClient : null, browser, options, automation)
+    return browserLauncher.connectToNewSpec(browser, options, automation, instance ? instance.browserCriClient : null)
   },
 
   open (browser, options = {}, automation, ctx) {

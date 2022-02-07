@@ -231,8 +231,8 @@ describe('lib/open_project', () => {
         })
       })
 
-      it('calls connectToNewSpec when shouldNavigateBrowser is set', async function () {
-        await openProject.launch(this.browser, this.spec, { shouldNavigateBrowser: true })
+      it('calls connectToNewSpec when shouldLaunchNewTab is set', async function () {
+        await openProject.launch(this.browser, this.spec, { shouldLaunchNewTab: true })
         expect(browsers.connectToNewSpec.lastCall.args[0]).to.be.equal(this.browser)
       })
     })

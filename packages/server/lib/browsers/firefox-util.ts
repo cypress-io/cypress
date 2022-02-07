@@ -8,6 +8,7 @@ import Foxdriver from '@benmalka/foxdriver'
 import * as protocol from './protocol'
 import { CdpAutomation } from './cdp_automation'
 import { BrowserCriClient } from './browser-cri-client'
+import type { Automation } from '../automation'
 
 const errors = require('../errors')
 
@@ -116,7 +117,7 @@ async function connectMarionetteToNewTab () {
   await navigateToUrl('about:blank')
 }
 
-async function connectToNewSpec (browserCriClient, browser, options, automation) {
+async function connectToNewSpec (options, automation: Automation, browserCriClient: BrowserCriClient) {
   debug('firefox: reconnecting to blank tab')
 
   await connectMarionetteToNewTab()
@@ -221,12 +222,12 @@ export default {
     marionettePort,
     foxdriverPort,
     remotePort,
-  }): Bluebird<[void, void, BrowserCriClient]> {
+  }): Bluebird<BrowserCriClient> {
     return Bluebird.all([
       this.setupFoxdriver(foxdriverPort),
       this.setupMarionette(extensions, url, marionettePort),
       remotePort && setupRemote(remotePort, automation, onError),
-    ])
+    ]).then(([,, browserCriClient]) => browserCriClient)
   },
 
   connectToNewSpec,
