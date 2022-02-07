@@ -71,7 +71,7 @@ export const allCommands = {
   Misc,
   Popups,
   Navigation,
-  Querying,
+  ...Querying,
   Request,
   Sessions,
   Screenshot,
