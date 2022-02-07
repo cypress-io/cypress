@@ -44,7 +44,6 @@ const browser = {
 mockRequire('webextension-polyfill', browser)
 
 const background = require('../../app/background')
-const { expect } = require('chai')
 
 const PORT = 12345
 

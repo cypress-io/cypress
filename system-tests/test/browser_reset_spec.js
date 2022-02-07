@@ -32,9 +32,9 @@ describe('e2e browser reset', () => {
   systemTests.it('executes two specs with a cached call', {
     project: 'e2e',
     spec: 'browser_reset_first_spec.cy.js,browser_reset_second_spec.cy.js',
-  })
-
-  it('should have called the server twice', function () {
-    expect(requestsForCache).to.eq(2)
+    onRun: async (exec) => {
+      await exec()
+      expect(requestsForCache).to.eq(2)
+    },
   })
 })

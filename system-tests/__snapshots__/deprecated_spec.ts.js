@@ -241,7 +241,7 @@ Error: Promise rejected from plugins handler
       [stack trace lines]
 `
 
-exports['deprecated before:browser:launch args / concat return returns once per test run - [firefox,chrome]'] = `
+exports['deprecated before:browser:launch args / concat return returns once per test run - [firefox,chromium]'] = `
 
 ====================================================================================================
 
