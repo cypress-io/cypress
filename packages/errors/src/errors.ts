@@ -196,7 +196,7 @@ _
         Warning from Cypress Dashboard: ${arg1.message}
 
         Details:
-        ${JSON.stringify(arg1.props, null, 2)}`
+        ${fmt.object(arg1.props)}`
   },
   DASHBOARD_STALE_RUN: (arg1: {runUrl: string, [key: string]: any}) => {
     return errTemplate`\
@@ -285,7 +285,7 @@ _
 
         This machine sent the following parameters:
 
-        ${JSON.stringify(arg1.parameters, null, 2)}
+        ${fmt.object(arg1.parameters)}
 
         https://on.cypress.io/parallel-group-params-mismatch`
   },
@@ -310,9 +310,9 @@ _
   // TODO: fix
   DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS: () => {
     return errTemplate`\
-      Deprecation Warning: The \`before:browser:launch\` plugin event changed its signature in version \`4.0.0\`
+      Deprecation Warning: The ${`before:browser:launch`} plugin event changed its signature in ${fmt.cypressVersion(`4.0.0`)}
 
-      The \`before:browser:launch\` plugin event switched from yielding the second argument as an \`array\` of browser arguments to an options \`object\` with an \`args\` property.
+      The event switched from yielding the second argument as an ${fmt.highlightSecondary(`array`)} of browser arguments to an options ${fmt.highlightSecondary(`object`)} with an ${fmt.highlightSecondary(`args`)} property.
 
       We've detected that your code is still using the previous, deprecated interface signature.
 
@@ -438,7 +438,7 @@ _
     return errTemplate`\
         Warning: It looks like you are trying to record this run from a forked PR.
 
-        The 'Record Key' is missing. Your CI provider is likely not passing private environment variables to builds from forks.
+        The ${`Record Key`} is missing. Your CI provider is likely not passing private environment variables to builds from forks.
 
         These results will not be recorded.
 
@@ -588,23 +588,23 @@ _
       `
   },
   // TODO: fix
-  PLUGINS_DIDNT_EXPORT_FUNCTION: (arg1: string, arg2: any) => {
-    return errTemplate`\
-      The \`pluginsFile\` must export a function with the following signature:
-
-      \`\`\`
-      module.exports = function (on, config) {
+  PLUGINS_DIDNT_EXPORT_FUNCTION: (pluginsFilePath: string, exported: any) => {
+    const code = stripIndent`
+      module.exports = (on, config) => {
         // configure plugins here
-      }
-      \`\`\`
+      }`
+
+    return errTemplate`\
+      The ${fmt.highlightSecondary(`pluginsFile`)} must export a function with the following signature:
+
+      ${fmt.meta(`// ${pluginsFilePath}`)}
+      ${fmt.code(code)}
+
+      Instead it exported:
+
+      ${exported}
 
       Learn more: https://on.cypress.io/plugins-api
-
-      We loaded the \`pluginsFile\` from: ${arg1}
-
-      It exported:
-
-      ${stackTrace(arg2)}
     `
   },
   PLUGINS_FUNCTION_ERROR: (arg1: string, arg2: string | Error) => {
@@ -614,11 +614,12 @@ _
       ${stackTrace(arg2)}
     `
   },
+  // TODO: use this for whimsical example
   PLUGINS_UNEXPECTED_ERROR: (arg1: string, arg2: string | Error) => {
     return errTemplate`
-      The following error was thrown by your plugins file: ${fmt.path(arg1)}
-
       We stopped running your tests because a plugin crashed.
+
+      The following error was thrown by your plugins file: ${fmt.path(arg1)}
 
       ${stackTrace(arg2)}
     `
@@ -631,6 +632,7 @@ _
     `
   },
   // TODO: look at the listItem prefix
+  // TODO: update the error message in the runner too
   BUNDLE_ERROR: (filePath: string, arg2: string) => {
     // IF YOU MODIFY THIS MAKE SURE TO UPDATE
     // THE ERROR MESSAGE IN THE RUNNER TOO
@@ -671,11 +673,12 @@ _
         ${chalk.yellow(arg2)}`
     // general configuration error not-specific to configuration or plugins files
   },
-  CONFIG_VALIDATION_ERROR: (arg1: string) => {
+  // TODO: test this
+  CONFIG_VALIDATION_ERROR: (errMsg: string) => {
     return errTemplate`\
         We found an invalid configuration value:
 
-        ${chalk.yellow(arg1)}`
+        ${errMsg}`
   },
   RENAMED_CONFIG_OPTION: (arg1: {name: string, newName: string}) => {
     return errTemplate`\
@@ -695,8 +698,9 @@ _
 
           ${fmt.listItem(arg1, { prefix: '> ' })}
 
-        This server has been configured as your \`baseUrl\`, and tests will likely fail if it is not running.`
+        This server has been configured as your ${fmt.highlightSecondary(`baseUrl`)}, and tests will likely fail if it is not running.`
   },
+  // TODO: test this
   CANNOT_CONNECT_BASE_URL_RETRYING: (arg1: {attempt: number, baseUrl: string, remaining: number, delay: number}) => {
     switch (arg1.attempt) {
       case 1:
@@ -705,7 +709,7 @@ _
 
               > ${chalk.blue(arg1.baseUrl)}
 
-            We are verifying this server because it has been configured as your \`baseUrl\`.
+            We are verifying this server because it has been configured as your ${`baseUrl`}.
 
             Cypress automatically waits until your server is accessible before running tests.
 
@@ -714,26 +718,26 @@ _
         return errTemplate`${guard(displayRetriesRemaining(arg1.remaining))}`
     }
   },
+  // TODO: test this
   INVALID_REPORTER_NAME: (arg1: {name: string, paths: string[], error: string}) => {
     return errTemplate`\
-        Could not load reporter by name: ${chalk.yellow(arg1.name)}
+        Error loading the reporter: ${chalk.yellow(arg1.name)}
 
         We searched for the reporter in these paths:
 
         ${fmt.listItems(arg1.paths)}
 
-        The error we received was:
+        The error was:
 
         ${chalk.yellow(arg1.error)}
 
         Learn more at https://on.cypress.io/reporters`
     // TODO: update with vetted cypress language
   },
+  // TODO: test this out
   NO_DEFAULT_CONFIG_FILE_FOUND: (arg1: string) => {
     return errTemplate`\
-        Could not find a Cypress configuration file, exiting.
-
-        We looked but did not find a default config file in this folder: ${fmt.path(arg1)}`
+        Could not find a Cypress configuration file in this folder: ${fmt.path(arg1)}`
     // TODO: update with vetted cypress language
   },
   // TODO: verify these are configBaseName and not configPath
@@ -748,7 +752,7 @@ _
   },
   CONFIG_FILE_NOT_FOUND: (configFileBaseName: string, projectRoot: string) => {
     return errTemplate`\
-        Could not find a Cypress configuration file, exiting.
+        Could not find a Cypress configuration file.
 
         We looked but did not find a ${fmt.path(configFileBaseName)} file in this folder: ${fmt.path(projectRoot)}`
   },
@@ -887,7 +891,7 @@ _
   },
   COULD_NOT_FIND_SYSTEM_NODE: (nodeVersion: string) => {
     return errTemplate`\
-        ${fmt.prop(`nodeVersion`)} is set to ${fmt.value(`system`)}, but Cypress could not find a usable Node executable on your PATH.
+        ${fmt.prop(`nodeVersion`)} is set to ${fmt.value(`system`)} but Cypress could not find a usable Node executable on your PATH.
 
         Make sure that your Node executable exists and can be run by the current user.
 
@@ -895,36 +899,40 @@ _
   },
   INVALID_CYPRESS_INTERNAL_ENV: (val: string) => {
     return errTemplate`\
-        We have detected an unknown or unsupported "CYPRESS_INTERNAL_ENV" value
+        We have detected an unknown or unsupported ${fmt.highlightSecondary(`CYPRESS_INTERNAL_ENV`)} value:
 
-          ${fmt.listItem(val, { prefix: '> ' })}
+          ${fmt.listItem(val, { prefix: '> ', color: fmt.highlight })}
 
-        "CYPRESS_INTERNAL_ENV" is reserved and should only be used internally.
-
-        Do not modify the "CYPRESS_INTERNAL_ENV" value.`
+        CYPRESS_INTERNAL_ENV is reserved for internal use and cannot be modified.`
   },
-  CDP_VERSION_TOO_OLD: (arg1: string, arg2: {major: number, minor: string | number}) => {
-    return errTemplate`A minimum CDP version of v${guard(arg1)} is required, but the current browser has ${guard(arg2.major !== 0 ? `v${arg2.major}.${arg2.minor}` : 'an older version')}.`
+  CDP_VERSION_TOO_OLD: (minimumVersion: string, currentVersion: {major: number, minor: string | number}) => {
+    const phrase = currentVersion.major !== 0
+      ? fmt.highlightSecondary(`${currentVersion.major}.${currentVersion.minor}`)
+      : 'an older version'
+
+    return errTemplate`A minimum CDP version of ${minimumVersion} is required, but the current browser has ${fmt.off(phrase)}.`
   },
-  CDP_COULD_NOT_CONNECT: (arg1: string, arg2: string, arg3: Error) => {
+  CDP_COULD_NOT_CONNECT: (browserName: string, port: number, err: Error) => {
+    // we include a stack trace here because it may contain useful information
+    // to debug since this is an "uncontrolled" error even though it doesn't
+    // come from a user
     return errTemplate`\
         Cypress failed to make a connection to the Chrome DevTools Protocol after retrying for 50 seconds.
 
-        This usually indicates there was a problem opening the ${guard(arg1)} browser.
+        This usually indicates there was a problem opening the ${guard(_.capitalize(browserName))} browser.
 
-        The CDP port requested was ${guard(chalk.yellow(arg2))}.
+        The CDP port requested was ${`${port}`}.
 
-        Error stackTrace:
-
-        ${stackTrace(arg3)}`
+        ${stackTrace(err)}`
   },
   FIREFOX_COULD_NOT_CONNECT: (arg1: Error) => {
+    // we include a stack trace here because it may contain useful information
+    // to debug since this is an "uncontrolled" error even though it doesn't
+    // come from a user
     return errTemplate`\
         Cypress failed to make a connection to Firefox.
 
         This usually indicates there was a problem opening the Firefox browser.
-
-        Error stackTrace:
 
         ${stackTrace(arg1)}`
   },
@@ -934,8 +942,8 @@ _
 
         ${stackTrace(arg1)}`
   },
-  CDP_RETRYING_CONNECTION: (attempt: string | number, browserType: string) => {
-    return errTemplate`Still waiting to connect to ${guard(browserType)}, retrying in 1 second (attempt ${chalk.yellow(`${attempt}`)}/62)`
+  CDP_RETRYING_CONNECTION: (attempt: string | number, browserName: string) => {
+    return errTemplate`Still waiting to connect to ${fmt.off(_.capitalize(browserName))}, retrying in 1 second ${fmt.meta(`(attempt ${attempt}/62)`)}`
   },
   UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES: (arg1: string[], arg2: string[]) => {
     return errTemplate`\
@@ -957,19 +965,19 @@ _
 
         The error was: ${arg3}`
   },
-  FIREFOX_MARIONETTE_FAILURE: (arg1: string, arg2: Error) => {
+  FIREFOX_MARIONETTE_FAILURE: (origin: string, err: Error) => {
     return errTemplate`\
         Cypress could not connect to Firefox.
 
-        An unexpected error was received from Marionette ${guard(arg1)}
+        An unexpected error was received from Marionette: ${fmt.highlightSecondary(origin)}
 
         To avoid this error, ensure that there are no other instances of Firefox launched by Cypress running.
 
-        ${stackTrace(arg2)}`
+        ${stackTrace(err)}`
   },
   FOLDER_NOT_WRITABLE: (arg1: string) => {
     return errTemplate`\
-        Folder ${fmt.path(arg1)} is not writable.
+        This folder is not writable: ${fmt.path(arg1)}
 
         Writing to this directory is required by Cypress in order to store screenshots and videos.
 
@@ -979,7 +987,9 @@ _
   },
   EXPERIMENTAL_SAMESITE_REMOVED: () => {
     return errTemplate`\
-        The ${`experimentalGetCookiesSameSite`} configuration option was removed in ${fmt.cypressVersion(`5.0.0`)}. Yielding the ${fmt.highlightSecondary(`sameSite`)} property is now the default behavior of the ${fmt.highlightSecondary(`cy.cookie`)} commands.
+        The ${`experimentalGetCookiesSameSite`} configuration option was removed in ${fmt.cypressVersion(`5.0.0`)}.
+
+        Returning the ${fmt.highlightSecondary(`sameSite`)} property is now the default behavior of the ${fmt.highlightSecondary(`cy.cookie`)} commands.
 
         You can safely remove this option from your config.`
   },
@@ -990,7 +1000,7 @@ _
 
         Please remove this flag from: ${fmt.path(arg1.configFile)}
 
-        Cypress Component Testing is now a standalone command. You can now run your component tests with:
+        Component Testing is now a standalone command. You can now run your component tests with:
 
           ${fmt.terminal(`cypress open-ct`)}
 
@@ -1018,27 +1028,28 @@ _
     return errTemplate`\
         The ${`firefoxGcInterval`} configuration option was removed in ${fmt.cypressVersion(`8.0.0`)}. It was introduced to work around a bug in Firefox 79 and below.
 
-        Since Cypress no longer supports Firefox 85 and below in Cypress 8, this option was removed.
+        Since Cypress no longer supports Firefox 85 and below in Cypress ${fmt.cypressVersion(`8.0.0`)}, this option was removed.
 
         You can safely remove this option from your config.`
   },
   INCOMPATIBLE_PLUGIN_RETRIES: (arg1: string) => {
     return errTemplate`\
-      We've detected that the incompatible plugin ${`cypress-plugin-retries`} is installed at ${fmt.path(arg1)}.
+      We've detected that the incompatible plugin ${`cypress-plugin-retries`} is installed at: ${fmt.path(arg1)}
 
-      Test retries is now supported in ${fmt.cypressVersion(`5.0.0`)}.
+      Test retries is now natively supported in ${fmt.cypressVersion(`5.0.0`)}.
 
       Remove the plugin from your dependencies to silence this warning.
 
       https://on.cypress.io/test-retries
       `
   },
+  // TODO: test this
   INVALID_CONFIG_OPTION: (arg1: string[]) => {
     const phrase = arg1.length > 1 ? 'options are' : 'option is'
 
     return errTemplate`\
         The following configuration ${guard(phrase)} invalid:
-        ${fmt.listItems(arg1)}
+        ${fmt.listItems(arg1, { color: fmt.highlight })}
 
         https://on.cypress.io/configuration
         `
@@ -1051,23 +1062,21 @@ _
 
         ${stackTrace(arg2)}`
   },
-  CT_NO_DEV_START_EVENT: (arg1: string) => {
-    const pluginsFilePath = arg1 ?
-      stripIndent`\
-      You can find the \'pluginsFile\' at the following path:
-
-      ${arg1}
-      ` : ''
+  CT_NO_DEV_START_EVENT: (pluginsFilePath: string) => {
+    const code = stripIndent`
+      module.exports = (on, config) => {
+        on('dev-server:start', () => startDevServer(...)
+      }`
 
     return errTemplate`\
-        To run component-testing, cypress needs the \`dev-server:start\` event.
+        To run component-testing, cypress needs the ${`dev-server:start`} event.
 
-        Implement it by adding a \`on('dev-server:start', () => startDevServer())\` call in your pluginsFile.
-        ${pluginsFilePath}
-        Learn how to set up component testing:
+        Please implement it by adding this code to your ${fmt.highlightSecondary(`pluginsFile`)}.
 
-        https://on.cypress.io/component-testing
-        `
+        ${fmt.meta(`// ${pluginsFilePath}`)}
+        ${fmt.code(code)}
+
+        See https://on.cypress.io/component-testing for help on setting up component testing.`
   },
   UNSUPPORTED_BROWSER_VERSION: (errorMsg: string) => {
     return errTemplate`${guard(errorMsg)}`
@@ -1081,6 +1090,7 @@ _
       Please remove the ${backtick(arg1.name)} configuration option from ${backtick(arg1.configFile)}.
       `
   },
+  // TODO: does this need to change since its a warning?
   NODE_VERSION_DEPRECATION_BUNDLED: (arg1: {name: string, value: any, configFile: string}) => {
     return errTemplate`\
       Deprecation Warning: ${backtick(arg1.name)} is currently set to ${backtick(arg1.value)} in the ${backtick(arg1.configFile)} configuration file.

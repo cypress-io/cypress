@@ -570,7 +570,9 @@ describe('visual error templates', () => {
     },
     PLUGINS_DIDNT_EXPORT_FUNCTION: () => {
       return {
-        default: ['/path/to/pluginsFile', () => 'some function'],
+        default: ['/path/to/pluginsFile', { some: 'object' }],
+        string: ['/path/to/pluginsFile', 'some string'],
+        array: ['/path/to/pluginsFile', ['some', 'array']],
       }
     },
     PLUGINS_FUNCTION_ERROR: () => {
@@ -807,7 +809,8 @@ describe('visual error templates', () => {
     },
     CDP_VERSION_TOO_OLD: () => {
       return {
-        default: ['89', { major: 90, minor: 2 }],
+        default: ['1.3', { major: 1, minor: 2 }],
+        older: ['1.3', { major: 0, minor: 0 }],
       }
     },
     CDP_COULD_NOT_CONNECT: () => {

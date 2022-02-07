@@ -15,6 +15,7 @@ interface ListOptions {
 const theme = {
   blue: chalk.blueBright,
   gray: chalk.gray,
+  white: chalk.white,
   yellow: chalk.yellow,
   magenta: chalk.magenta,
 }
@@ -22,17 +23,24 @@ const theme = {
 export const fmt = {
   meta: theme.gray,
   path: theme.blue,
+  code: theme.blue,
   url: theme.blue,
   flag: theme.magenta,
   prop: theme.yellow,
   value: theme.blue,
   highlight: theme.yellow,
   highlightSecondary: theme.magenta,
+  off: guard,
+  object,
   terminal,
   listItem,
   listItems,
   listFlags,
   cypressVersion,
+}
+
+function object (obj: object) {
+  return theme.white(obj as any)
 }
 
 function terminal (str: string) {
