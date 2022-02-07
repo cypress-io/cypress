@@ -583,6 +583,11 @@ describe('visual error templates', () => {
         default: ['/path/to/pluginsFile', err],
       }
     },
+    PLUGINS_FILE_NOT_FOUND: () => {
+      return {
+        default: ['/path/to/pluginsFile'],
+      }
+    },
     PLUGINS_DIDNT_EXPORT_FUNCTION: () => {
       return {
         default: ['/path/to/pluginsFile', { some: 'object' }],

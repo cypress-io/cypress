@@ -423,7 +423,6 @@ export const AllCypressErrors = {
 
         https://on.cypress.io/recording-project-runs`
   },
-  // TODO: fix
   DASHBOARD_INVALID_RUN_REQUEST: (arg1: {message: string, errors: string[], object: object}) => {
     return errTemplate`\
         Recording this run failed because the request was invalid.
@@ -582,18 +581,24 @@ export const AllCypressErrors = {
   },
   PLUGINS_FILE_ERROR: (pluginsFilePath: string, err: Error) => {
     return errTemplate`\
-        Your ${`pluginsFile`} file is missing or invalid: ${fmt.path(pluginsFilePath)}
+        Your ${`pluginsFile`} file is invalid: ${fmt.path(pluginsFilePath)}
 
-        It may have thrown an error when required, check the stack trace below.
+        It threw an error when required, check the stack trace below.
 
         Fix your plugins file, or set pluginsFile to ${fmt.highlightSecondary(`false`)} if a plugins file is not necessary for your project.
-
-        If you have just renamed the extension of your pluginsFile, restart Cypress.
 
         ${fmt.stackTrace(err)}
       `
   },
-  // TODO: test
+  PLUGINS_FILE_NOT_FOUND: (pluginsFilePath: string) => {
+    return errTemplate`\
+        Your ${`pluginsFile`} file was not found at path: ${fmt.path(pluginsFilePath)}
+
+        Create this file, or set pluginsFile to ${fmt.highlightSecondary(`false`)} if a plugins file is not necessary for your project.
+
+        If you have just renamed the extension of your pluginsFile, restart Cypress.
+      `
+  },
   PLUGINS_DIDNT_EXPORT_FUNCTION: (pluginsFilePath: string, exported: any) => {
     const code = stripIndent`
       module.exports = (on, config) => {

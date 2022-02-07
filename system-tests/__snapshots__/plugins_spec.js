@@ -138,16 +138,16 @@ Can't run because you've entered an invalid browser name.
 Browser: chrome was not found on your system or is not supported by Cypress.
 
 Cypress supports the following browsers:
-- chrome
-- chromium
-- edge
-- electron
-- firefox
+ - electron
+ - chrome
+ - chromium
+ - edge
+ - firefox
 
 You can also use a custom browser: https://on.cypress.io/customize-browsers
 
 Available browsers found on your system are:
-- electron
+ - electron
 
 `
 
@@ -370,7 +370,9 @@ exports['e2e plugins fails when there is an async error inside an event handler 
                                                                                                     
   Running:  app_spec.js                                                                     (1 of 1)
 
-The following error was thrown by a plugin. We stopped running your tests because a plugin crashed. Please check your plugins file (/foo/bar/.projects/plugins-async-error/cypress/plugins/index.js)
+We stopped running your tests because a plugin crashed.
+
+The following error was thrown by your plugins file: /foo/bar/.projects/plugins-async-error/cypress/plugins/index.js
 
 Error: Async error from plugins file
       [stack trace lines]
@@ -405,26 +407,27 @@ Error: Async error from plugins file
 `
 
 exports['e2e plugins fails when there is no function exported 1'] = `
-The \`pluginsFile\` must export a function with the following signature:
+The pluginsFile must export a function with the following signature:
 
-\`\`\`
-module.exports = function (on, config) {
+// /foo/bar/.projects/plugin-no-function-return/cypress/plugins/index.js
+module.exports = (on, config) => {
   // configure plugins here
 }
-\`\`\`
+
+Instead it exported:
+
+{
+  "foo": "foo",
+  "bar": "bar"
+}
 
 Learn more: https://on.cypress.io/plugins-api
 
-We loaded the \`pluginsFile\` from: /foo/bar/.projects/plugin-empty/cypress/plugins/index.js
-
-It exported:
-
-{}
 
 `
 
 exports['e2e plugins fails when invalid event is registered 1'] = `
-The following validation error was thrown by your plugins file (/foo/bar/.projects/plugin-validation-error/cypress/plugins/index.js).
+Your pluginsFile threw a validation error: /foo/bar/.projects/plugin-validation-error/cypress/plugins/index.js
 
 Error: You must pass a valid event name when registering a plugin.
 
@@ -507,6 +510,33 @@ exports['e2e plugins does not report more screenshots than exist if user overwri
   │ ✔  after_screenshot_overwrite_spec.js       XX:XX        3        3        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        3        3        -        -        -  
+
+
+`
+
+exports['e2e plugins fails when there is nothing exported 1'] = `
+The pluginsFile must export a function with the following signature:
+
+// /foo/bar/.projects/plugin-empty/cypress/plugins/index.js
+module.exports = (on, config) => {
+  // configure plugins here
+}
+
+Instead it exported:
+
+{}
+
+Learn more: https://on.cypress.io/plugins-api
+
+
+`
+
+exports['e2e plugins fails when its set from config but does not exist 1'] = `
+Your pluginsFile file was not found at path: /foo/bar/.projects/plugin-missing/cypress/plugins/does-not-exist.js
+
+Create this file, or set pluginsFile to false if a plugins file is not necessary for your project.
+
+If you have just renamed the extension of your pluginsFile, restart Cypress.
 
 
 `

@@ -1,21 +1,19 @@
+import Promise from 'bluebird'
+import Debug from 'debug'
 import _ from 'lodash'
 import path from 'path'
-import Promise from 'bluebird'
 import deepDiff from 'return-deep-diff'
 import configUtils from '@packages/config'
-
 import errors from './errors'
 import scaffold from './scaffold'
+import { getProcessEnvVars, CYPRESS_SPECIAL_ENV_VARS } from './util/config'
 import { fs } from './util/fs'
 import keys from './util/keys'
 import origin from './util/origin'
-import * as settings from './util/settings'
-import Debug from 'debug'
 import pathHelpers from './util/path_helpers'
+import * as settings from './util/settings'
 
 const debug = Debug('cypress:server:config')
-
-import { getProcessEnvVars, CYPRESS_SPECIAL_ENV_VARS } from './util/config'
 
 export const RESOLVED_FROM = ['plugin', 'env', 'default', 'runtime', 'config'] as const
 
@@ -98,13 +96,13 @@ export const utils = {
     return fs.pathExists(filename)
     .then((found) => {
       if (found) {
-        debug('is there index.ts in the support or plugins folder %s?', filename)
+        debug('is there index.ts in the support or plugins folder %o?', { filename })
         const tsFilename = path.join(filename, 'index.ts')
 
         return fs.pathExists(tsFilename)
         .then((foundTsFile) => {
           if (foundTsFile) {
-            debug('found index TS file %s', tsFilename)
+            debug('found index TS file %o', { tsFilename })
 
             return tsFilename
           }
@@ -522,8 +520,9 @@ export const setPluginsFile = Promise.method((obj, defaults) => {
     // resolve full path with extension
     obj.pluginsFile = utils.resolveModule(pluginsFile)
 
-    return debug(`set pluginsFile to ${obj.pluginsFile}`)
-  }).catch({ code: 'MODULE_NOT_FOUND' }, (e) => {
+    debug(`set pluginsFile to ${obj.pluginsFile}`)
+  })
+  .catch({ code: 'MODULE_NOT_FOUND' }, (err) => {
     debug('plugins module does not exist %o', { pluginsFile })
 
     const isLoadingDefaultPluginsFile = pluginsFile === path.resolve(obj.projectRoot, defaults.pluginsFile)
@@ -535,7 +534,7 @@ export const setPluginsFile = Promise.method((obj, defaults) => {
     })
     .then((result) => {
       if (result === null) {
-        return errors.throw('PLUGINS_FILE_ERROR', path.resolve(obj.projectRoot, pluginsFile), e as unknown as Error)
+        return errors.throw('PLUGINS_FILE_NOT_FOUND', pluginsFile, err)
       }
 
       debug('setting plugins file to %o', { result })
