@@ -21,8 +21,7 @@ const meta = require('./meta')
 const build = require('./build')
 const upload = require('./upload')
 const uploadUtils = require('./util/upload')
-const { uploadNpmPackage } = require('./upload-npm-package')
-const { uploadUniqueBinary } = require('./upload-unique-binary')
+const { uploadArtifactToS3 } = require('./upload-build-artifact')
 const { moveBinaries } = require('./move-binaries')
 
 // initialize on existing repo
@@ -252,18 +251,11 @@ const deploy = {
     })
   },
 
-  // upload Cypress NPM package file
-  'upload-npm-package' (args = process.argv) {
-    console.log('#packageUpload')
+  // upload Cypress binary or NPM Package zip file under unique hash
+  'upload-build-artifact' (args = process.argv) {
+    console.log('#uploadBuildArtifact')
 
-    return uploadNpmPackage(args)
-  },
-
-  // upload Cypress binary zip file under unique hash
-  'upload-unique-binary' (args = process.argv) {
-    console.log('#uniqueBinaryUpload')
-
-    return uploadUniqueBinary(args)
+    return uploadArtifactToS3(args)
   },
 
   // uploads a single built Cypress binary ZIP file
@@ -288,10 +280,21 @@ const deploy = {
       console.log('for platform %s version %s',
         options.platform, options.version)
 
-      return upload.toS3({
-        zipFile: options.zip,
+      const uploadPath = upload.getFullUploadPath({
         version: options.version,
         platform: options.platform,
+        name: upload.zipName,
+      })
+
+      return upload.toS3({
+        file: options.zip,
+        uploadPath,
+      }).then(() => {
+        return uploadUtils.purgeDesktopAppFromCache({
+          version: options.version,
+          platform: options.platform,
+          zipName: options.zip,
+        })
       })
     })
   },
