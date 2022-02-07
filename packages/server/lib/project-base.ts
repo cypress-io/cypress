@@ -13,20 +13,19 @@ import { SocketCt } from './socket-ct'
 import { SocketE2E } from './socket-e2e'
 import { Automation } from './automation'
 import * as config from './config'
-import cwd from './cwd'
 import errors from './errors'
-import Reporter from './reporter'
+import devServer from './plugins/dev-server'
 import runEvents from './plugins/run_events'
 import * as savedState from './saved_state'
 import { ServerE2E } from './server-e2e'
 import system from './util/system'
+import { checkSupportFile } from './project_utils'
+import Reporter from './reporter'
 import { ensureProp } from './util/class-helpers'
 
 import { fs } from './util/fs'
 import preprocessor from './plugins/preprocessor'
-import { checkSupportFile } from './project_utils'
 import type { FoundBrowser, OpenProjectLaunchOptions, FoundSpec, TestingType, ReceivedCypressOptions } from '@packages/types'
-import devServer from './plugins/dev-server'
 import { DataContext, getCtx } from '@packages/data-context'
 
 export interface Cfg extends ReceivedCypressOptions {
@@ -43,7 +42,7 @@ export interface Cfg extends ReceivedCypressOptions {
   component: Partial<Cfg>
 }
 
-const localCwd = cwd()
+const localCwd = process.cwd()
 
 const debug = Debug('cypress:server:project')
 

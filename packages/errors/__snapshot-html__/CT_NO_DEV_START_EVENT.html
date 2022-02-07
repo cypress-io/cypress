@@ -34,15 +34,14 @@
     </style>
   
     </head>
-    <body><pre><span style="color:#A00">To run component-testing, cypress needs the `dev-server:start` event.<span style="color:#eee">
-<span style="color:#A00"><span style="color:#eee">
-<span style="color:#A00">Implement it by adding a `on(&#39;dev-server:start&#39;, () =&gt; startDevServer())` call in your pluginsFile.<span style="color:#eee">
-<span style="color:#A00"><span style="color:#2472c7">You can find the &#39;pluginsFile&#39; at the following path:<span style="color:#A00"><span style="color:#eee">
-<span style="color:#A00"><span style="color:#2472c7"><span style="color:#A00"><span style="color:#eee">
-<span style="color:#A00"><span style="color:#2472c7">/path/to/plugins/file.js<span style="color:#A00"><span style="color:#eee">
-<span style="color:#A00"><span style="color:#2472c7"><span style="color:#A00"><span style="color:#eee">
-<span style="color:#A00">Learn how to set up component testing:<span style="color:#eee">
-<span style="color:#A00"><span style="color:#eee">
-<span style="color:#A00">https://on.cypress.io/component-testing<span style="color:#eee">
-<span style="color:#A00"><span style="color:#eee"></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>
+    <body><pre><span style="color:#e05561">To run component-testing, cypress needs the <span style="color:#e5e510">dev-server:start<span style="color:#e05561"> event.<span style="color:#e6e6e6">
+<span style="color:#e05561"><span style="color:#e6e6e6">
+<span style="color:#e05561">Please implement it by adding this code to your <span style="color:#e5e510"><span style="color:#de73ff">pluginsFile<span style="color:#e5e510"><span style="color:#e05561">.<span style="color:#e6e6e6">
+<span style="color:#e05561"><span style="color:#e6e6e6">
+<span style="color:#e05561"><span style="color:#e5e510"><span style="color:#4f5666">// /path/to/plugins/file.js<span style="color:#e5e510"><span style="color:#e05561"><span style="color:#e6e6e6">
+<span style="color:#e05561"><span style="color:#e5e510"><span style="color:#4ec4ff">module.exports = (on, config) =&gt; {<span style="color:#e5e510"><span style="color:#e05561"><span style="color:#e6e6e6">
+<span style="color:#e05561"><span style="color:#e5e510"><span style="color:#4ec4ff">  on(&#39;dev-server:start&#39;, () =&gt; startDevServer(...)<span style="color:#e5e510"><span style="color:#e05561"><span style="color:#e6e6e6">
+<span style="color:#e05561"><span style="color:#e5e510"><span style="color:#4ec4ff">}<span style="color:#e5e510"><span style="color:#e05561"><span style="color:#e6e6e6">
+<span style="color:#e05561"><span style="color:#e6e6e6">
+<span style="color:#e05561">See https://on.cypress.io/component-testing for help on setting up component testing.<span style="color:#e6e6e6"></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>
 </pre></body></html>

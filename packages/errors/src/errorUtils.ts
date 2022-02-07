@@ -2,39 +2,18 @@
 import chalk from 'chalk'
 import _ from 'lodash'
 
+const pluralize = require('pluralize')
+const humanTime = require('@packages/server/lib/util/human_time')
+
 import type { CypressError, ErrorLike } from './errorTypes'
-import { guard } from './errTemplate'
-import { stripIndent } from './stripIndent'
+
+export {
+  pluralize,
+  humanTime,
+}
 
 export const isCypressErr = (err: ErrorLike): err is CypressError => {
   return Boolean(err.isCypressErr)
-}
-
-export const listItems = (paths: string[]) => {
-  return guard(_
-  .chain(paths)
-  .map((p) => {
-    return stripIndent`- ${chalk.blue(p)}`
-  }).join('\n')
-  .value())
-}
-
-export const displayFlags = (obj: Record<string, string | undefined | null>, mapper: Record<string, string>) => {
-  return guard(_
-  .chain(mapper)
-  .map((flag, key) => {
-    let v
-
-    v = obj[key]
-
-    if (v) {
-      return `The ${flag} flag you passed was: ${chalk.blue(v)}`
-    }
-
-    return undefined
-  }).compact()
-  .join('\n')
-  .value())
 }
 
 const twoOrMoreNewLinesRe = /\n{2,}/
@@ -60,7 +39,7 @@ export const logError = function (err: CypressError | ErrorLike, color: AllowedC
   console.log(chalk[color](err.message))
 
   if (err.details) {
-    console.log(`\n${chalk['yellow'](err.details)}`)
+    console.log(`\n${err.details}`)
   }
 
   // bail if this error came from known

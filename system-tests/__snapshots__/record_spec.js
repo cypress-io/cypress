@@ -2743,3 +2743,42 @@ exports['e2e record quiet mode respects quiet mode 1'] = `
 
 
 `
+
+exports['e2e record api interaction errors create run 412 errors and exits when request schema is invalid 1'] = `
+Recording this run failed because the request was invalid.
+
+request should follow postRunRequest@2.0.0 schema
+
+Errors:
+
+[
+  "data has additional properties: group, parallel, ciBuildId, tags, testingType, runnerCapabilities",
+  "data.platform is the wrong type"
+]
+
+Request Sent:
+
+{
+  "ci": null,
+  "specs": [
+    "cypress/integration/record_pass_spec.js"
+  ],
+  "commit": null,
+  "group": null,
+  "platform": null,
+  "parallel": null,
+  "ciBuildId": null,
+  "projectId": "pid123",
+  "recordKey": "f858a2bc-b469-4e48-be67-0876339ee7e1",
+  "specPattern": "cypress/integration/record_pass*",
+  "tags": [
+    ""
+  ],
+  "testingType": "e2e",
+  "runnerCapabilities": {
+    "dynamicSpecsInSerialMode": true,
+    "skipSpecAction": true
+  }
+}
+
+`

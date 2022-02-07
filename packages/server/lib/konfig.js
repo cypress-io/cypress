@@ -1,6 +1,10 @@
+const path = require('path')
+
 require('./environment')
 
 const konfig = require('konfig')
+
+const pathToConfigDir = path.resolve(__dirname, '..', 'config')
 
 const getConfig = function () {
   const { env } = process
@@ -14,7 +18,7 @@ const getConfig = function () {
   env.NODE_ENV = env.CYPRESS_KONFIG_ENV || env.CYPRESS_INTERNAL_ENV
 
   // get the config values
-  const config = konfig().app
+  const config = konfig({ path: pathToConfigDir }).app
 
   // restore NODE_ENV to previous state
   if (previousNodeEnvExisted) {

@@ -4,7 +4,6 @@ import Bluebird from 'bluebird'
 import deepDiff from 'return-deep-diff'
 import type { ResolvedFromConfig, ResolvedConfigurationOptionSource, AllModeOptions, FullConfig } from '@packages/types'
 import configUtils from '@packages/config'
-
 import errors from './errors'
 import { fs } from './util/fs'
 import keys from './util/keys'
