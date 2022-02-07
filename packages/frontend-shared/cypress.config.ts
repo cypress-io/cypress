@@ -5,7 +5,6 @@ const CYPRESS_INTERNAL_CLOUD_ENV = getenv('CYPRESS_INTERNAL_CLOUD_ENV', process.
 
 export default defineConfig({
   projectId: CYPRESS_INTERNAL_CLOUD_ENV === 'staging' ? 'ypt4pf' : 'sehy69',
-  baseUrl: 'http://localhost:5555',
   viewportWidth: 800,
   viewportHeight: 850,
   retries: {
@@ -36,6 +35,7 @@ export default defineConfig({
     },
   },
   'e2e': {
+    baseUrl: 'http://localhost:5555',
     'supportFile': 'cypress/e2e/support/e2eSupport.ts',
   },
 })
