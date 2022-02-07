@@ -46,10 +46,12 @@ describe('App: Spec List (E2E)', () => {
 
   })
 
-  it('collapses folders that are clicked, hiding the specs within it', () => {
+  it('collapses or expands folders when clicked, hiding or revealing the specs within it', () => {
     cy.get('[data-cy="spec-item"]').should('contain', 'dom-content.spec.js')
     cy.get('[data-cy="row-directory-depth-0"]').click()
     cy.get('[data-cy="spec-item"]').should('not.exist')
+    cy.get('[data-cy="row-directory-depth-0"]').click()
+    cy.get('[data-cy="spec-item"]').should('contain', 'dom-content.spec.js')
   })
 
   it('opens the "Create a new spec" modal after clicking the "New Specs" button', () => {
