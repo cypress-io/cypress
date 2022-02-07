@@ -11,7 +11,7 @@ export default defineConfig({
     'supportFile': false,
   },
   'component': {
-    ignoreSpecPattern: 'examples/**/*',
+    excludeSpecPattern: 'examples/**/*',
     devServer (cypressConfig) {
       const { startDevServer } = require('@cypress/webpack-dev-server')
       const webpackConfig = require('./webpack.config')
