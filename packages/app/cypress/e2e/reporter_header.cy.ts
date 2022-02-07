@@ -49,7 +49,8 @@ describe('Reporter Header', () => {
       cy.get('.cy-tooltip').should('have.text', 'Open Testing Preferences')
 
       cy.get('.testing-preferences').should('not.exist')
-      cy.get('.testing-preferences-toggle').should('not.have.class', 'open').click()
+      cy.get('.testing-preferences-toggle').should('not.have.class', 'open')
+      cy.get('.testing-preferences-toggle').click()
       cy.get('.testing-preferences-toggle').should('have.class', 'open')
       cy.get('.testing-preferences').should('be.visible')
       cy.get('.testing-preferences-toggle').click()
