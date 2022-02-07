@@ -11,7 +11,7 @@ chai.use(require('@cypress/sinon-chai'))
 describe('lib/errors', () => {
   beforeEach(() => {
     sinon.restore()
-    sinon.stub(console, 'log')
+    sinon.spy(console, 'log')
   })
 
   context('.log', () => {
@@ -54,11 +54,13 @@ describe('lib/errors', () => {
 
       expect(ret).to.be.undefined
 
-      expect(console.log).to.be.calledWithMatch('foo/bar/baz')
+      expect(console.log).to.be.calledWithMatch('/path/to/project/cypress.json')
     })
 
     it('logs err.details', () => {
-      const err = errors.get('PLUGINS_FUNCTION_ERROR', 'foo/bar/baz', new Error('asdf'))
+      const userError = new Error('asdf')
+
+      const err = errors.get('PLUGINS_FUNCTION_ERROR', 'foo/bar/baz', userError)
 
       const ret = errors.log(err)
 
@@ -66,7 +68,7 @@ describe('lib/errors', () => {
 
       expect(console.log).to.be.calledWithMatch('foo/bar/baz')
 
-      expect(console.log).to.be.calledWithMatch(`\n${ chalk.yellow('details huh')}`)
+      expect(console.log).to.be.calledWithMatch(chalk.magenta(userError.stack ?? ''))
     })
 
     it('logs err.stack in development', () => {

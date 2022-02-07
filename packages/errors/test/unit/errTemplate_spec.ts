@@ -1,7 +1,6 @@
 import { expect } from 'chai'
 import chalk from 'chalk'
-
-import { details, errTemplate, guard } from '../../src/errTemplate'
+import { errTemplate, fmt } from '../../src/errTemplate'
 import { stripIndent } from '../../src/stripIndent'
 
 describe('errTemplate', () => {
@@ -12,15 +11,15 @@ describe('errTemplate', () => {
     expect(obj.forBrowser()).to.include({ message: 'Hello world' })
   })
 
-  it('colors blue by default for the console, backticks passed arguments for the browser,', () => {
+  it('colors yellow by default for the console, backticks passed arguments for the browser,', () => {
     const obj = errTemplate`Hello world ${'special'}`
 
-    expect(obj).to.include({ message: `Hello world ${chalk.blue('special')}` })
+    expect(obj).to.include({ message: `Hello world ${chalk.yellow('special')}` })
     expect(obj.forBrowser()).to.include({ message: 'Hello world `special`' })
   })
 
-  it('uses guard to guard passed values', () => {
-    const obj = errTemplate`Hello world ${guard('special')}`
+  it('uses fmt.off to guard passed values', () => {
+    const obj = errTemplate`Hello world ${fmt.off('special')}`
 
     expect(obj).to.include({ message: `Hello world special` })
     expect(obj.forBrowser()).to.include({ message: `Hello world special` })
@@ -30,18 +29,21 @@ describe('errTemplate', () => {
     const errStack = new Error().stack ?? ''
     const obj = errTemplate`
       This was an error
-      
-      ${details(errStack)}
+
+      ${fmt.stackTrace(errStack)}
     `
 
-    expect(obj).to.include({ message: `This was an error`, details: errStack })
+    expect(obj).to.include({
+      message: `This was an error`,
+      details: chalk.magenta(errStack),
+    })
   })
 
   it('will stringify non scalar values', () => {
     const someObj = { a: 1, b: 2, c: 3 }
     const obj = errTemplate`
       This was returned from the app:
-      
+
       ${someObj}
     `
 
@@ -67,12 +69,15 @@ describe('errTemplate', () => {
     const someObj = { a: 1, b: 2, c: 3 }
     const obj = errTemplate`
       This was returned from the app:
-      
-      ${details(someObj)}
+
+      ${fmt.stackTrace(someObj)}
     `
 
     expect(obj.forBrowser()).to.include({ message: `This was returned from the app:` })
-    expect(obj).to.include({ message: `This was returned from the app:`, details: JSON.stringify(someObj, null, 2) })
+    expect(obj).to.include({
+      message: `This was returned from the app:`,
+      details: chalk.magenta(JSON.stringify(someObj, null, 2)),
+    })
   })
 
   it('uses details to set originalError, for toErrorProps, highlight stack for console', () => {
@@ -80,22 +85,25 @@ describe('errTemplate', () => {
     const err = new Error()
     const obj = errTemplate`
       This was an error in ${specFile}
-      
-      ${details(err)}
+
+      ${fmt.stackTrace(err)}
     `
 
     expect(obj.forBrowser()).to.include({ message: `This was an error in \`specFile.js\`` })
-    expect(obj).to.include({ message: `This was an error in ${chalk.blue(specFile)}`, details: err.stack })
+    expect(obj).to.include({
+      message: `This was an error in ${chalk.yellow(specFile)}`,
+      details: chalk.magenta(err.stack ?? ''),
+    })
   })
 
   it('throws if multiple details are used in the same template', () => {
     expect(() => {
       errTemplate`
-        Hello world 
-        
-        ${details(new Error())}
+        Hello world
 
-        ${details(new Error())}
+        ${fmt.stackTrace(new Error())}
+
+        ${fmt.stackTrace(new Error())}
       `
     }).to.throw(/Cannot use details\(\) multiple times in the same errTemplate/)
   })
