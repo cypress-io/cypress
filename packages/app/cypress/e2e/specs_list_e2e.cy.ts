@@ -25,9 +25,9 @@ describe('App: Spec List (E2E)', () => {
   })
 
   it('allows you to search and filter the list of specs in the list', () => {
-    cy.get('button').contains('1 Match')
+    cy.get('button').contains('3 Matches')
 
-    cy.get('input').type('dom', { force: true })
+    cy.get('input').type('content', { force: true })
 
     cy.get('[data-cy="spec-item"]').should('have.length', 1)
     .should('contain', 'dom-content.spec.js')
@@ -65,7 +65,7 @@ describe('App: Spec List (E2E)', () => {
   it('has an <a> tag in the Spec File Row that runs the selected spec when clicked', () => {
     cy.get('[data-selected-spec="true"]').should('not.exist')
     cy.get('[data-cy="spec-item-link"]').should('have.attr', 'href')
-    cy.get('[data-cy="spec-item-link"]').click()
+    cy.get('[data-cy="spec-item-link"]').contains('dom-content.spec.js').click()
     cy.get('[data-selected-spec="true"]').contains('dom-content.spec.js')
     cy.get('[data-cy="runnable-header"]').should('be.visible')
   })
