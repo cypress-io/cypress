@@ -423,6 +423,36 @@ describe('Launchpad: Setup Project', () => {
           cy.contains('cypress/fixtures/example.json')
         })
       })
+
+      it('can re-configure config after CT has been set up', () => {
+        cy.openProject('pristine-with-ct-testing')
+        cy.withCtx((ctx) => {
+          ctx.coreData.forceReconfigureProject = true
+        })
+
+        cy.visitLaunchpad()
+
+        verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: true })
+
+        cy.get('[data-cy-testingtype="component"]').click()
+
+        cy.contains('Project Setup')
+      })
+
+      it('can re-configure config after e2e has been set up', () => {
+        cy.openProject('pristine-with-e2e-testing')
+        cy.withCtx((ctx) => {
+          ctx.coreData.forceReconfigureProject = true
+        })
+
+        cy.visitLaunchpad()
+
+        verifyWelcomePage({ e2eIsConfigured: true, ctIsConfigured: false })
+
+        cy.get('[data-cy-testingtype="e2e"]').click()
+
+        cy.contains('Project Setup')
+      })
     })
   })
 
