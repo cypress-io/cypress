@@ -429,21 +429,23 @@ Learn more: https://on.cypress.io/plugins-api
 exports['e2e plugins fails when invalid event is registered 1'] = `
 Your pluginsFile threw a validation error: /foo/bar/.projects/plugin-validation-error/cypress/plugins/index.js
 
-Error: You must pass a valid event name when registering a plugin.
+You must pass a valid event name when registering a plugin.
 
-You passed: \`invalid:event\`
+You passed: invalid:event
 
 The following are valid events:
-- after:run
-- after:screenshot
-- after:spec
-- before:browser:launch
-- before:run
-- before:spec
-- dev-server:start
-- file:preprocessor
-- task
 
+ - after:run
+ - after:screenshot
+ - after:spec
+ - before:browser:launch
+ - before:run
+ - before:spec
+ - dev-server:start
+ - file:preprocessor
+ - task
+
+ValidationError: invalid event name
       [stack trace lines]
 `
 

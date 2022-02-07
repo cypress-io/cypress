@@ -46,10 +46,10 @@ const load = (ipc, config, pluginsFile) => {
   // we track the register calls and then send them all at once
   // to the parent process
   const register = (event, handler) => {
-    const { isValid, error } = validateEvent(event, handler, config)
+    const { isValid, userEvents, error } = validateEvent(event, handler, config, register)
 
     if (!isValid) {
-      ipc.send('load:error', 'PLUGINS_VALIDATION_ERROR', pluginsFile, util.serializeError(error))
+      ipc.send('load:error', 'PLUGINS_INVALID_EVENT_ERROR', pluginsFile, event, userEvents, util.serializeError(error))
 
       return
     }

@@ -641,6 +641,22 @@ export const AllCypressErrors = {
       ${fmt.stackTrace(arg2)}
     `
   },
+  // NOTE: mention this update in the PR, use in whimsical
+  PLUGINS_INVALID_EVENT_ERROR: (pluginsFilePath: string, invalidEventName: string, validEventNames: string[], err: Error) => {
+    return errTemplate`
+      Your ${fmt.highlightSecondary(`pluginsFile`)} threw a validation error: ${fmt.path(pluginsFilePath)}
+
+      You must pass a valid event name when registering a plugin.
+
+      You passed: ${invalidEventName}
+
+      The following are valid events:
+
+      ${fmt.listItems(validEventNames)}
+
+      ${fmt.stackTrace(err)}
+    `
+  },
   // TODO: update the error message in the runner too
   BUNDLE_ERROR: (filePath: string, arg2: string) => {
     // IF YOU MODIFY THIS MAKE SURE TO UPDATE

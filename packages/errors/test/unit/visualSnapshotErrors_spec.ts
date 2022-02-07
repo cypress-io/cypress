@@ -616,6 +616,18 @@ describe('visual error templates', () => {
         default: ['/path/to/pluginsFile', err],
       }
     },
+    PLUGINS_INVALID_EVENT_ERROR: () => {
+      const err = makeErr()
+
+      return {
+        default: [
+          '/path/to/pluginsFile',
+          'invalid:event',
+          ['foo', 'bar', 'baz'],
+          err,
+        ],
+      }
+    },
     BUNDLE_ERROR: () => {
       const err = makeErr()
 
