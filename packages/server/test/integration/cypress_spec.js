@@ -1,7 +1,6 @@
 /* eslint-disable no-restricted-properties */
 require('../spec_helper')
 
-const chalk = require('chalk')
 const _ = require('lodash')
 const path = require('path')
 const EE = require('events')
@@ -159,11 +158,11 @@ describe('lib/cypress', () => {
       const err = errors.log.getCall(0).args[0]
 
       if (msg1) {
-        expect(err.message, 'error text').to.include(msg1)
+        expect(stripAnsi(err.message), 'error text').to.include(msg1)
       }
 
       if (msg2) {
-        expect(err.message, 'second error text').to.include(msg2)
+        expect(stripAnsi(err.message), 'second error text').to.include(msg2)
       }
 
       return err
@@ -680,12 +679,13 @@ describe('lib/cypress', () => {
       })
     })
 
-    it('logs error when supportFile doesn\'t exist', function () {
+    it(`logs error when supportFile doesn't exist`, function () {
       return settings.write(this.idsPath, { supportFile: '/does/not/exist' })
       .then(() => {
         return cypress.start([`--run-project=${this.idsPath}`])
-      }).then(() => {
-        this.expectExitWithErr('SUPPORT_FILE_NOT_FOUND', `Your ${chalk.blue('supportFile')} is set to ${chalk.blue('/does/not/exist')}`)
+      })
+      .then(() => {
+        this.expectExitWithErr('SUPPORT_FILE_NOT_FOUND', `Your supportFile is missing or invalid: /does/not/exist`)
       })
     })
 
@@ -702,7 +702,7 @@ describe('lib/cypress', () => {
         const found1 = _.find(argsSet, (args) => {
           return _.find(args, (arg) => {
             return arg.message && arg.message.includes(
-              `Browser: ${chalk.blue('foo')} was not found on your system or is not supported by Cypress.`,
+              `Browser: foo was not found on your system or is not supported by Cypress.`,
             )
           })
         })
@@ -737,9 +737,9 @@ describe('lib/cypress', () => {
         .then(() => {
           // includes the search spec
           this.expectExitWithErr('NO_SPECS_FOUND', 'path/to/spec')
-          this.expectExitWithErr('NO_SPECS_FOUND', 'We searched for any files matching this glob pattern:')
+          this.expectExitWithErr('NO_SPECS_FOUND', 'We searched for specs matching this glob pattern:')
           // includes the project path
-          this.expectExitWithErr('NO_SPECS_FOUND', this.todosPath)
+          this.expectExitWithErr('NO_SPECS_FOUND', path.join(this.todosPath, 'path/to/spec'))
         })
       })
 
@@ -762,8 +762,8 @@ describe('lib/cypress', () => {
           '--config=integrationFolder=cypress/specs',
         ])
         .then(() => {
-          this.expectExitWithErr('NO_SPECS_FOUND', 'We searched for any files inside of this folder:')
-          this.expectExitWithErr('NO_SPECS_FOUND', 'cypress/specs')
+          this.expectExitWithErr('NO_SPECS_FOUND', 'We searched for specs inside of this folder:')
+          this.expectExitWithErr('NO_SPECS_FOUND', path.join(this.todosPath, 'cypress/specs'))
         })
       })
     })
