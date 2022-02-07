@@ -1738,27 +1738,27 @@ export default {
     },
     // TODO: These deprecation warnings and forbidden use errors need to be audited before releasing multi-domain
     route: {
-      forbidden: {
-        message: `${cmd('route')} has been deprecated and use is forbidden in ${cmd('switchToDomain')}. Consider migrating to using ${cmd('intercept')} instead.`,
+      unsupported: {
+        message: `${cmd('route')} has been deprecated and use is not supported in ${cmd('switchToDomain')}. Consider using ${cmd('intercept')} instead.`,
         docsUrl: 'https://on.cypress.io/intercept',
       },
     },
     server: {
-      forbidden: {
-        message: `${cmd('server')} has been deprecated and use is forbidden in ${cmd('switchToDomain')}. Consider migrating to using ${cmd('intercept')} instead.`,
+      unsupported: {
+        message: `${cmd('server')} has been deprecated and use is not supported in ${cmd('switchToDomain')}. Consider using ${cmd('intercept')} instead.`,
         docsUrl: 'https://on.cypress.io/intercept',
       },
     },
     Server: {
-      forbidden: {
-        message: `\`Cypress.Server.*\` has been deprecated and use is forbidden in ${cmd('switchToDomain')}. Consider migrating to using ${cmd('intercept')} instead.`,
+      unsupported: {
+        message: `\`Cypress.Server.*\` has been deprecated and use is not supported in ${cmd('switchToDomain')}. Consider using ${cmd('intercept')} instead.`,
         docsUrl: 'https://on.cypress.io/intercept',
       },
     },
     Cookies: {
       preserveOnce: {
-        forbidden: {
-          message: `\`Cypress.Cookies.preserveOnce\` use is forbidden in ${cmd('switchToDomain')}. Consider using ${cmd('session')} instead.`,
+        unsupported: {
+          message: `\`Cypress.Cookies.preserveOnce\` use is not supported in ${cmd('switchToDomain')}. Consider using ${cmd('session')} instead.`,
           docsUrl: 'https://on.cypress.io/session',
         },
       },

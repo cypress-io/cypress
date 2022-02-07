@@ -257,7 +257,7 @@ describe('multi-domain Cypress API', { experimentalSessionSupport: true, experim
   context('not supported', () => {
     it('throws an error when a user attempts to configure Cypress.Server.defaults() inside of multi-domain', (done) => {
       cy.on('fail', (err) => {
-        expect(err.message).to.equal('`Cypress.Server.*` has been deprecated and use is forbidden in `cy.switchToDomain()`. Consider migrating to using `cy.intercept()` instead.')
+        expect(err.message).to.equal('`Cypress.Server.*` has been deprecated and use is not supported in `cy.switchToDomain()`. Consider using `cy.intercept()` instead.')
         done()
       })
 
@@ -268,7 +268,7 @@ describe('multi-domain Cypress API', { experimentalSessionSupport: true, experim
 
     it('throws an error when a user attempts to configure Cypress.Cookies.preserveOnce() inside of multi-domain', (done) => {
       cy.on('fail', (err) => {
-        expect(err.message).to.equal('`Cypress.Cookies.preserveOnce` use is forbidden in `cy.switchToDomain()`. Consider using `cy.session()` instead.')
+        expect(err.message).to.equal('`Cypress.Cookies.preserveOnce` use is not supported in `cy.switchToDomain()`. Consider using `cy.session()` instead.')
         done()
       })
 
