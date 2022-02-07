@@ -197,12 +197,9 @@ module.exports = {
       win.maximize()
     }
 
-    const launchedBrowser = await this._launch(win, url, automation, preferences)
-
-    await _maybeRecordVideo(win.webContents, preferences)
-    automation.use(await _getAutomation(win, preferences, automation))
-
-    return launchedBrowser
+    return this._launch(win, url, automation, preferences)
+    .tap(_maybeRecordVideo(win.webContents, preferences))
+    .tap(() => _getAutomation(win, preferences, automation).then((cdpAutomation) => automation.use(cdpAutomation)))
   },
 
   _launchChild (e, url, parent, projectRoot, state, options, automation) {
