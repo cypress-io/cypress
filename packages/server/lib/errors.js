@@ -583,7 +583,7 @@ const getMsgByType = function (type, ...args) {
           The \`component\`.\`devServer\` method must be a function with the following signature:
 
           \`\`\`
-          devServer: (cypressConfig: DevServerConfig, devServerConfig: ComponentDevServerOpts) {
+          devServer: (cypressConfig, devServerConfig) {
 
           }
           \`\`\`
