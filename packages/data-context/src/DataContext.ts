@@ -30,7 +30,6 @@ import {
   BrowserApiShape,
   MigrationDataSource,
 } from './sources/'
-import { cached } from './util/cached'
 import type { GraphQLSchema } from 'graphql'
 import type { Server } from 'http'
 import type { AddressInfo } from 'net'
@@ -143,47 +142,29 @@ export class DataContext {
     }
   }
 
-  @cached
-  get file () {
-    return new FileDataSource(this)
-  }
+  readonly file = new FileDataSource(this)
 
-  @cached
-  get git () {
-    return new GitDataSource(this)
-  }
+  readonly git = new GitDataSource(this)
 
   async versions () {
     return new VersionsDataSource().versions()
   }
 
-  @cached
-  get browser () {
-    return new BrowserDataSource(this)
-  }
+  readonly browser = new BrowserDataSource(this)
 
   /**
    * All mutations (update / delete / create), fs writes, etc.
    * should run through this namespace. Everything else should be a "getter"
    */
-  @cached
-  get actions () {
-    return new DataActions(this)
-  }
+  readonly actions = new DataActions(this)
 
   get appData () {
     return this.coreData.app
   }
 
-  @cached
-  get wizard () {
-    return new WizardDataSource(this)
-  }
+  readonly wizard = new WizardDataSource(this)
 
-  @cached
-  get storybook () {
-    return new StorybookDataSource(this)
-  }
+  readonly storybook = new StorybookDataSource(this)
 
   get wizardData () {
     return this.coreData.wizard
@@ -193,20 +174,11 @@ export class DataContext {
     return this.coreData.currentProject
   }
 
-  @cached
-  get project () {
-    return new ProjectDataSource(this)
-  }
+  readonly project = new ProjectDataSource(this)
 
-  @cached
-  get cloud () {
-    return new CloudDataSource(this)
-  }
+  readonly cloud = new CloudDataSource(this)
 
-  @cached
-  get env () {
-    return new EnvDataSource(this)
-  }
+  readonly env = new EnvDataSource(this)
 
   get emitter () {
     return new DataEmitterActions(this)
@@ -216,20 +188,11 @@ export class DataContext {
     return new GraphQLDataSource(this, this._config.schema)
   }
 
-  @cached
-  get html () {
-    return new HtmlDataSource(this)
-  }
+  readonly html = new HtmlDataSource(this)
 
-  @cached
-  get util () {
-    return new UtilDataSource(this)
-  }
+  readonly util = new UtilDataSource(this)
 
-  @cached
-  get migration () {
-    return new MigrationDataSource(this)
-  }
+  readonly migration = new MigrationDataSource(this)
 
   get projectsList () {
     return this.coreData.app.projects
@@ -297,15 +260,9 @@ export class DataContext {
 
   // Utilities
 
-  @cached
-  get fs () {
-    return fsExtra
-  }
+  readonly fs = fsExtra
 
-  @cached
-  get path () {
-    return path
-  }
+  readonly path = path
 
   get _apis () {
     return {

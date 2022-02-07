@@ -11,58 +11,27 @@ import {
   DevActions,
   AuthActions,
 } from './actions'
-import { cached } from './util'
 
 export class DataActions {
   constructor (private ctx: DataContext) {}
 
-  @cached
-  get file () {
-    return new FileActions(this.ctx)
-  }
+  readonly file = new FileActions(this.ctx)
 
-  @cached
-  get dev () {
-    return new DevActions(this.ctx)
-  }
+  readonly dev = new DevActions(this.ctx)
 
-  @cached
-  get app () {
-    return new AppActions(this.ctx)
-  }
+  readonly app = new AppActions(this.ctx)
 
-  @cached
-  get auth () {
-    return new AuthActions(this.ctx)
-  }
+  readonly auth = new AuthActions(this.ctx)
 
-  @cached
-  get localSettings () {
-    return new LocalSettingsActions(this.ctx)
-  }
+  readonly localSettings = new LocalSettingsActions(this.ctx)
 
-  @cached
-  get wizard () {
-    return new WizardActions(this.ctx)
-  }
+  readonly wizard = new WizardActions(this.ctx)
 
-  @cached
-  get project () {
-    return new ProjectActions(this.ctx)
-  }
+  readonly project = new ProjectActions(this.ctx)
 
-  @cached
-  get electron () {
-    return new ElectronActions(this.ctx)
-  }
+  readonly electron = new ElectronActions(this.ctx)
 
-  @cached
-  get migration () {
-    return new MigrationActions(this.ctx)
-  }
+  readonly migration = new MigrationActions(this.ctx)
 
-  @cached
-  get browser () {
-    return new BrowserActions(this.ctx)
-  }
+  readonly browser = new BrowserActions(this.ctx)
 }
