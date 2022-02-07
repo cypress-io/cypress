@@ -60,7 +60,7 @@ class RunPlugins {
       const { isValid, error } = validateEvent(event, handler, initialConfig)
 
       if (!isValid) {
-        this.ipc.send('setupTestingType:error', 'PLUGINS_VALIDATION_ERROR', this.requiredFile, error.stack)
+        this.ipc.send('setupTestingType:error', 'PLUGINS_VALIDATION_ERROR', this.requiredFile, util.serializeError(error))
 
         return
       }
@@ -122,7 +122,7 @@ class RunPlugins {
     })
     .catch((err) => {
       debug('plugins file errored:', err && err.stack)
-      this.ipc.send('setupTestingType:error', 'PLUGINS_FUNCTION_ERROR', err.stack)
+      this.ipc.send('setupTestingType:error', 'PLUGINS_FUNCTION_ERROR', util.serializeError(err))
     })
   }
 

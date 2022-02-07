@@ -1,5 +1,7 @@
 exports['lib/browsers/index .ensureAndGetByNameOrPath throws when no browser can be found 1'] = `
-The specified browser was not found on your system or is not supported by Cypress: \`browserNotGonnaBeFound\`
+Can't run because you've entered an invalid browser name.
+
+Browser: browserNotGonnaBeFound was not found on your system or is not supported by Cypress.
 
 Cypress supports the following browsers:
 - chrome
@@ -19,7 +21,9 @@ Read more about [how to troubleshoot launching browsers](https://on.cypress.io/t
 `
 
 exports['lib/browsers/index .ensureAndGetByNameOrPath throws a special error when canary is passed 1'] = `
-The specified browser was not found on your system or is not supported by Cypress: \`canary\`
+Can't run because you've entered an invalid browser name.
+
+Browser: canary was not found on your system or is not supported by Cypress.
 
 Cypress supports the following browsers:
 - chrome

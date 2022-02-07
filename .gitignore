@@ -15,6 +15,8 @@ Cached Theme Material Design.pak
 
 # from data-context, compiled .js files
 packages/data-context/src/**/*.js
+packages/errors/src/**/*.js
+packages/errors/test/**/*.js
 
 # from driver
 packages/driver/cypress/videos
@@ -75,6 +77,9 @@ system-tests/fixtures/large-img
 
 # from runner-ct
 /packages/runner-ct/cypress/screenshots
+
+# from errors
+/packages/errors/__snapshot-images__
 
 # graphql, auto-generated
 /packages/launchpad/src/generated

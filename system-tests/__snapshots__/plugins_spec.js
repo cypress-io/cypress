@@ -119,21 +119,23 @@ exports['e2e plugins can modify config from plugins 1'] = `
 `
 
 exports['e2e plugins catches invalid browsers list returned from plugins 1'] = `
-An invalid configuration value returned from the setupNodeEvents on config file: \`cypress.config.js\`
+An invalid configuration value returned from the plugins file: cypress/plugins/index.js
 
 Expected at least one browser
 
 `
 
 exports['e2e plugins catches invalid browser returned from plugins 1'] = `
-An invalid configuration value returned from the setupNodeEvents on config file: \`cypress.config.js\`
+An invalid configuration value returned from the plugins file: cypress/plugins/index.js
 
 Found an error while validating the \`browsers\` list. Expected \`displayName\` to be a non-empty string. Instead the value was: \`{"name":"browser name","family":"chromium"}\`
 
 `
 
 exports['e2e plugins can filter browsers from config 1'] = `
-The specified browser was not found on your system or is not supported by Cypress: \`chrome\`
+Can't run because you've entered an invalid browser name.
+
+Browser: chrome was not found on your system or is not supported by Cypress.
 
 Cypress supports the following browsers:
 - chrome
@@ -346,7 +348,7 @@ exports['e2e plugins calls after:screenshot for cy.screenshot() and failure scre
 `
 
 exports['e2e plugins catches invalid viewportWidth returned from plugins 1'] = `
-An invalid configuration value returned from the setupNodeEvents on config file: \`cypress.config.js\`
+An invalid configuration value returned from the setupNodeEvents on config file: cypress/plugins/index.js
 
 Expected \`viewportWidth\` to be a number. Instead the value was: \`"foo"\`
 
@@ -373,7 +375,7 @@ exports['e2e plugins fails when there is an async error inside an event handler 
 
 The following error was thrown by a plugin. We stopped running your tests because a plugin crashed. Please check your e2e.setupNodeEvents method in \`cypress.config.js\`
 
- Error: Async error from plugins file
+Error: Async error from plugins file
       [stack trace lines]
 
   (Results)
@@ -416,7 +418,7 @@ setupNodeEvents (on, config) {
 
 Learn more: https://on.cypress.io/plugins-api
 
-We loaded the \`setupNodeEvents\` from: \`/foo/bar/.projects/plugin-empty/cypress.config.js\`
+We loaded the \`setupNodeEvents\` from: /foo/bar/.projects/plugin-empty/cypress.config.js
 
 It exported:
 
@@ -425,9 +427,9 @@ It exported:
 `
 
 exports['e2e plugins fails when invalid event is registered 1'] = `
-The following validation error was thrown by your plugins file (\`/foo/bar/.projects/plugin-validation-error/cypress.config.js\`).
+The following validation error was thrown by your plugins file (/foo/bar/.projects/plugin-validation-error/cypress/plugins/index.js).
 
- Error: You must pass a valid event name when registering a plugin.
+Error: You must pass a valid event name when registering a plugin.
 
 You passed: \`invalid:event\`
 

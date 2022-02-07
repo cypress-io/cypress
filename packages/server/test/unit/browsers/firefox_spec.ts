@@ -417,7 +417,11 @@ describe('lib/browsers/firefox', () => {
         }
 
         await expect(firefoxUtil.setupMarionette([], '', port))
-        .to.be.rejectedWith('An unexpected error was received from Marionette Socket:\n\nError: foo error')
+        .to.be.rejected.then((err) => {
+          expect(err.message).to.include('An unexpected error was received from Marionette Socket')
+          expect(err.details).to.include('Error: foo error')
+          expect(err.originalError.message).to.eq('foo error')
+        })
       })
 
       it('rejects on errors from marionette commands', async () => {
@@ -426,14 +430,20 @@ describe('lib/browsers/firefox', () => {
         }
 
         await expect(firefoxUtil.setupMarionette([], '', port))
-        .to.be.rejectedWith('An unexpected error was received from Marionette commands:\n\nError: foo error')
+        .to.be.rejected.then((err) => {
+          expect(err.message).to.include('An unexpected error was received from Marionette commands')
+          expect(err.details).to.include('Error: foo error')
+        })
       })
 
       it('rejects on errors during initial Marionette connection', async () => {
         marionetteDriver.connect.rejects(new Error('not connectable'))
 
         await expect(firefoxUtil.setupMarionette([], '', port))
-        .to.be.rejectedWith('An unexpected error was received from Marionette connection:\n\nError: not connectable')
+        .to.be.rejected.then((err) => {
+          expect(err.message).to.include('An unexpected error was received from Marionette connection')
+          expect(err.details).to.include('Error: not connectable')
+        })
       })
     })
 

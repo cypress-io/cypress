@@ -25,7 +25,7 @@ The error was: Cannot parse as valid JSON
 exports['invalid spec error'] = `
 Cypress encountered an error while parsing the argument spec
 
-You passed: [object Object]
+You passed: {}
 
 The error was: spec must be a string or comma-separated list
 `

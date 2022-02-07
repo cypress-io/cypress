@@ -8,6 +8,11 @@ const { EventEmitter } = require('events')
 const { sinon } = require('../../spec_helper')
 const { exec } = require('child_process')
 const util = require('util')
+const stripAnsi = require('strip-ansi')
+
+const normalizeSnapshot = (str) => {
+  return snapshot(stripAnsi(str))
+}
 
 const normalizeBrowsers = (message) => {
   return message.replace(/(found on your system are:)(?:\n- .*)*/, '$1\n- chrome\n- firefox\n- electron')
@@ -82,7 +87,7 @@ describe('lib/browsers/index', () => {
       return expect(browsers.ensureAndGetByNameOrPath('browserNotGonnaBeFound', false, foundBrowsers))
       .to.be.rejectedWith({ type: 'BROWSER_NOT_FOUND_BY_NAME' })
       .then((err) => {
-        return snapshot(normalizeBrowsers(err.message))
+        return normalizeSnapshot(normalizeBrowsers(err.message))
       })
     })
 
@@ -96,13 +101,13 @@ describe('lib/browsers/index', () => {
       return expect(browsers.ensureAndGetByNameOrPath('canary', false, foundBrowsers))
       .to.be.rejectedWith({ type: 'BROWSER_NOT_FOUND_BY_NAME' })
       .then((err) => {
-        return snapshot(err.message)
+        return normalizeSnapshot(err.message)
       })
     })
   })
 
   context('.open', () => {
-    it('throws an error if browser family doesn\'t exist', () => {
+    it(`throws an error if browser family doesn't exist`, () => {
       return browsers.open({
         name: 'foo-bad-bang',
         family: 'foo-bad',
