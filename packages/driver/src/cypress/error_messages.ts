@@ -1735,8 +1735,8 @@ export default {
     failed_to_serialize_symbol: {
       message: stripIndent`\
       ${cmd('switchToDomain')} could not serialize the subject due to symbols not being supported by the structured clone algorithm.`,
-    // TODO: These deprecation warnings and forbidden use errors need to be audited before releasing multi-domain
     },
+    // TODO: These deprecation warnings and forbidden use errors need to be audited before releasing multi-domain
     route: {
       forbidden: {
         message: `${cmd('route')} has been deprecated and use is forbidden in ${cmd('switchToDomain')}. Consider migrating to using ${cmd('intercept')} instead.`,
@@ -1756,9 +1756,11 @@ export default {
       },
     },
     Cookies: {
-      forbidden: {
-        message: `\`Cypress.Cookies.preserveOnce\` use is forbidden in ${cmd('switchToDomain')}. Consider using ${cmd('session')} instead.`,
-        docsUrl: 'https://on.cypress.io/session',
+      preserveOnce: {
+        forbidden: {
+          message: `\`Cypress.Cookies.preserveOnce\` use is forbidden in ${cmd('switchToDomain')}. Consider using ${cmd('session')} instead.`,
+          docsUrl: 'https://on.cypress.io/session',
+        },
       },
     },
   },
