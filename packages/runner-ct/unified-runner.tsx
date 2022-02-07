@@ -6,8 +6,6 @@ import {
   selectorPlaygroundModel,
   StudioRecorder,
   dom,
-  blankContents,
-  visitFailure,
 } from '@packages/runner-shared'
 import { Reporter } from '@packages/reporter/src/main'
 import shortcuts from '@packages/reporter/src/lib/shortcuts'
@@ -22,15 +20,11 @@ export const UnifiedRunner = {
 
   dom,
 
-  blankContents,
-
   StudioRecorder,
 
   selectorPlaygroundModel,
 
   shortcuts,
-
-  visitFailure,
 
   React,
 

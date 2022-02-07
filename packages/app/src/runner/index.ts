@@ -137,11 +137,8 @@ function setupRunner (namespace: AutomationElementId) {
     getEventManager(),
     window.UnifiedRunner._,
     window.UnifiedRunner.CypressJQuery,
-    window.UnifiedRunner.logger,
     window.UnifiedRunner.dom,
-    window.UnifiedRunner.visitFailure,
     getEventManager().studioRecorder,
-    window.UnifiedRunner.blankContents,
   )
 
   createIframeModel()

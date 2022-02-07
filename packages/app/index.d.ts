@@ -41,10 +41,7 @@ declare global {
        */
       React: any
       ReactDOM: any
-      logger: any
       dom: any
-      visitFailure: any
-      blankContents: any
       _: any // lodash
       CypressJQuery: any
 

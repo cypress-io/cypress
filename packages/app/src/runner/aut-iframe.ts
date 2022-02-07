@@ -1,6 +1,9 @@
 import type { DebouncedFunc } from 'lodash'
 import { useSelectorPlaygroundStore } from '../store/selector-playground-store'
 import type JQuery from 'jquery'
+import { blankContents } from './blank-contents'
+import { visitFailure } from './visit-failure'
+import { logger } from './logger'
 
 // JQuery bundled w/ Cypress
 type $CypressJQuery = any
@@ -8,7 +11,6 @@ type $CypressJQuery = any
 export class AutIframe {
   debouncedToggleSelectorPlayground: DebouncedFunc<(isEnabled: any) => void>
   $iframe?: JQuery<HTMLIFrameElement>
-  logger: any
   _highlightedEl?: Element
 
   constructor (
@@ -16,17 +18,9 @@ export class AutIframe {
     private eventManager: any,
     private _: any,
     private $: $CypressJQuery,
-    logger: any,
     private dom: any,
-    private visitFailure: (props: any) => string,
     private studioRecorder: any,
-    private blankContents: {
-      initial: () => string
-      session: () => string
-      sessionLifecycle: () => string
-    },
   ) {
-    this.logger = logger
     this.debouncedToggleSelectorPlayground = this._.debounce(this.toggleSelectorPlayground, 300)
   }
 
@@ -42,19 +36,19 @@ export class AutIframe {
   }
 
   showInitialBlankContents () {
-    this._showContents(this.blankContents.initial())
+    this._showContents(blankContents.initial())
   }
 
   showSessionBlankContents () {
-    this._showContents(this.blankContents.session())
+    this._showContents(blankContents.session())
   }
 
   showSessionLifecycleBlankContents () {
-    this._showContents(this.blankContents.sessionLifecycle())
+    this._showContents(blankContents.sessionLifecycle())
   }
 
   showVisitFailure = (props) => {
-    this._showContents(this.visitFailure(props))
+    this._showContents(visitFailure(props))
   }
 
   _showContents (contents) {
@@ -405,7 +399,7 @@ export class AutIframe {
   }
 
   printSelectorElementsToConsole () {
-    this.logger.clearLog()
+    logger.clearLog()
 
     const Cypress = this.eventManager.getCypress()
 
@@ -415,13 +409,13 @@ export class AutIframe {
     const command = `cy.${selectorPlaygroundStore.method}('${selectorPlaygroundStore.selector}')`
 
     if (!$el) {
-      return this.logger.logFormatted({
+      return logger.logFormatted({
         Command: command,
         Yielded: 'Nothing',
       })
     }
 
-    this.logger.logFormatted({
+    logger.logFormatted({
       Command: command,
       Elements: $el.length,
       Yielded: Cypress.dom.getElements($el),
