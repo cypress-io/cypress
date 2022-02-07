@@ -184,6 +184,16 @@ describe('e2e plugins', function () {
     })
   })
 
+  it('fails when require throws synchronously', function () {
+    return systemTests.exec(this, {
+      spec: 'app_spec.js',
+      project: 'plugins-root-sync-error',
+      sanitizeScreenshotDimensions: true,
+      snapshot: true,
+      expectedExitCode: 1,
+    })
+  })
+
   describe('preprocessor', function () {
     it('passes with working preprocessor', function () {
       return systemTests.exec(this, {
