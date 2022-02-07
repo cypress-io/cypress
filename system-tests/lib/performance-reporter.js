@@ -29,13 +29,15 @@ class HoneycombReporter {
       suite.honeycombEvent = this.honey.newEvent()
       suite.honeycombEvent.timestamp = Date.now()
       suite.honeycombEvent.add({
+        ...suite.parent.honeycombEvent.data,
         suite: suite.title,
         specFile: path.basename(suite.file),
 
         spanId: uuidv4(),
         parentId: suite.parent.honeycombEvent.data.spanId,
-        traceId: suite.parent.honeycombEvent.data.traceId,
       })
+
+      this.addAsyncInfo(suite.honeycombEvent)
     })
 
     runner.on('test', (test) => {
@@ -50,13 +52,15 @@ class HoneycombReporter {
       test.honeycombEvent = this.honey.newEvent()
       test.honeycombEvent.timestamp = Date.now()
       test.honeycombEvent.add({
+        ...test.parent.honeycombEvent.data,
         test: testTitle,
         browser,
 
         spanId: uuidv4(),
         parentId: test.parent.honeycombEvent.data.spanId,
-        traceId: test.parent.honeycombEvent.data.traceId,
       })
+
+      this.addAsyncInfo(test.honeycombEvent)
     })
 
     runner.on('test end', (test) => {
@@ -72,7 +76,8 @@ class HoneycombReporter {
         durationMs: Date.now() - test.honeycombEvent.timestamp,
       })
 
-      test.honeycombEvent.send()
+      console.log(test.honeycombEvent.data)
+      //       test.honeycombEvent.send()
     })
 
     runner.on('suite end', (suite) => {
@@ -104,20 +109,31 @@ class HoneycombReporter {
       traceId: uuidv4(),
     })
 
-    commitInfo().then((commitInformation) => {
-      const ciInformation = ciProvider.commitParams() || {}
-
-      honeycombEvent.add({
-        branch: commitInformation.branch || ciInformation.branch,
-        commitSha: commitInformation.sha || ciInformation.sha,
-      })
-    })
-
-    getNextVersionForPath('../../packages').then((next) => {
-      honeycombEvent.add({ nextVersion: next })
-    })
+    this.addAsyncInfo(honeycombEvent)
 
     return honeycombEvent
+  }
+
+  // Because mocha has no way to wait on async functions inside hooks,
+  // and we need to call various async functions to gather data about
+  // the testing environment, we create a promise that can be used by each
+  // honeycomb event to add async data that won't be initialized by the
+  // time mocha starts running tests.
+  addAsyncInfo (honeycombEvent) {
+    if (!this.asyncInfo) {
+      this.asyncInfo = Promise.all([getNextVersionForPath('../../packages'), commitInfo()])
+      .then(([nextVersion, commitInformation]) => {
+        const ciInformation = ciProvider.commitParams() || {}
+
+        return {
+          nextVersion,
+          branch: commitInformation.branch || ciInformation.branch,
+          commitSha: commitInformation.sha || ciInformation.sha,
+        }
+      })
+    }
+
+    this.asyncInfo.then((info) => honeycombEvent.add(info))
   }
 }
 
