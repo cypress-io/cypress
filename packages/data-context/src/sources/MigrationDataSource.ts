@@ -23,7 +23,7 @@ import {
 import type { FilePart } from './migration/format'
 import Debug from 'debug'
 
-const debug = Debug('cypress:data-content:migration:source')
+const debug = Debug('cypress:data-context:sources:MigrationDataSource')
 
 export interface MigrationFile {
   testingType: TestingType
