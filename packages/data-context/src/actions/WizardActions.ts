@@ -158,7 +158,9 @@ export class WizardActions {
     let hasTsConfig: boolean = false
 
     try {
-      hasTsConfig = !!await this.ctx.fs.stat(join(this.ctx.currentProject, 'tsconfig.json'))
+      if (this.ctx.currentProject) {
+        hasTsConfig = !!await this.ctx.fs.stat(join(this.ctx.currentProject, 'tsconfig.json'))
+      }
     } catch (e) {
       hasTsConfig = false
     }
