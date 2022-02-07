@@ -8,14 +8,14 @@ Warning: Multiple attempts to register the following task(s): two. Only the last
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (multiple_task_registrations_spec.js)                                      │
-  │ Searched:   cypress/integration/multiple_task_registrations_spec.js                            │
+  │ Specs:      1 found (multiple_task_registrations.cy.js)                                        │
+  │ Searched:   cypress/e2e/multiple_task_registrations.cy.js                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  multiple_task_registrations_spec.js                                             (1 of 1)
+  Running:  multiple_task_registrations.cy.js                                               (1 of 1)
 
 
   ✓ merges task events
@@ -34,15 +34,15 @@ Warning: Multiple attempts to register the following task(s): two. Only the last
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     multiple_task_registrations_spec.js                                              │
+  │ Spec Ran:     multiple_task_registrations.cy.js                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/multiple_task_registrations_spe     (X second)
-                          c.js.mp4                                                                  
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/multiple_task_registrations.cy.     (X second)
+                          js.mp4                                                                    
 
 
 ====================================================================================================
@@ -52,7 +52,7 @@ Warning: Multiple attempts to register the following task(s): two. Only the last
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  multiple_task_registrations_spec.js      XX:XX        1        1        -        -        - │
+  │ ✔  multiple_task_registrations.cy.js        XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
@@ -68,14 +68,14 @@ exports['e2e task handles undefined return and includes stack trace in error 1']
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (task_spec.js)                                                             │
-  │ Searched:   cypress/integration/task_spec.js                                                   │
+  │ Specs:      1 found (task.cy.js)                                                               │
+  │ Searched:   cypress/e2e/task.cy.js                                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  task_spec.js                                                                    (1 of 1)
+  Running:  task.cy.js                                                                      (1 of 1)
 
 
   1) throws when task returns undefined
@@ -93,8 +93,8 @@ The task handler was:
 
 'returns:undefined' () {}
 
-Fix this in your plugins file here:
-/foo/bar/.projects/e2e/cypress/plugins/index.js
+Fix this in your setupNodeEvents method here:
+/foo/bar/.projects/e2e/cypress.config.js
 
 https://on.cypress.io/api/task
       [stack trace lines]
@@ -125,22 +125,22 @@ https://on.cypress.io/api/task
   │ Screenshots:  2                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     task_spec.js                                                                     │
+  │ Spec Ran:     task.cy.js                                                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/task_spec.js/throws when task returns undefined     (1280x720)
-      (failed).png                                                                                  
-  -  /XXX/XXX/XXX/cypress/screenshots/task_spec.js/includes stack trace in error (fai     (1280x720)
-     led).png                                                                                       
+  -  /XXX/XXX/XXX/cypress/screenshots/task.cy.js/throws when task returns undefined (     (1280x720)
+     failed).png                                                                                    
+  -  /XXX/XXX/XXX/cypress/screenshots/task.cy.js/includes stack trace in error (faile     (1280x720)
+     d).png                                                                                         
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/task_spec.js.mp4                    (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/task.cy.js.mp4                      (X second)
 
 
 ====================================================================================================
@@ -150,7 +150,7 @@ https://on.cypress.io/api/task
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  task_spec.js                             XX:XX        2        -        2        -        - │
+  │ ✖  task.cy.js                               XX:XX        2        -        2        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✖  1 of 1 failed (100%)                     XX:XX        2        -        2        -        -  
 

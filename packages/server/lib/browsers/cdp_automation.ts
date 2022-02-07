@@ -322,6 +322,8 @@ export class CdpAutomation {
         .then(({ data }) => {
           return `data:image/png;base64,${data}`
         })
+      case 'focus:browser:window':
+        return this.sendDebuggerCommandFn('Page.bringToFront')
       default:
         throw new Error(`No automation handler registered for: '${message}'`)
     }

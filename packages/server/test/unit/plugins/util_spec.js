@@ -2,7 +2,7 @@ require('../../spec_helper')
 
 const Promise = require('bluebird')
 
-const util = require(`${root}../lib/plugins/util`)
+const util = require(`../../../lib/plugins/util`)
 
 describe('lib/plugins/util', () => {
   context('#wrapIpc', () => {
@@ -120,90 +120,6 @@ describe('lib/plugins/util', () => {
 
         expect(actualError.annotated).to.equal(err.annotated)
       })
-    })
-  })
-
-  context('#wrapParentPromise', () => {
-    beforeEach(function () {
-      this.ipc = {
-        send: sinon.spy(),
-        on: sinon.stub(),
-        removeListener: sinon.spy(),
-      }
-
-      this.callback = sinon.spy()
-    })
-
-    it('returns a promise', function () {
-      expect(util.wrapParentPromise(this.ipc, 0, this.callback)).to.be.an.instanceOf(Promise)
-    })
-
-    it('resolves the promise when "promise:fulfilled:{invocationId}" event is received without error', function () {
-      const promise = util.wrapParentPromise(this.ipc, 0, this.callback)
-      const invocationId = this.callback.lastCall.args[0]
-
-      this.ipc.on.withArgs(`promise:fulfilled:${invocationId}`).yield(null, 'value')
-
-      return promise.then((value) => {
-        expect(value).to.equal('value')
-      })
-    })
-
-    it('deserializes undefined', function () {
-      const promise = util.wrapParentPromise(this.ipc, 0, this.callback)
-      const invocationId = this.callback.lastCall.args[0]
-
-      this.ipc.on.withArgs(`promise:fulfilled:${invocationId}`).yield(null, '__cypress_undefined__')
-
-      return promise.then((value) => {
-        expect(value).to.equal(undefined)
-      })
-    })
-
-    it('rejects the promise when "promise:fulfilled:{invocationId}" event is received with error', function () {
-      const promise = util.wrapParentPromise(this.ipc, 0, this.callback)
-      const invocationId = this.callback.lastCall.args[0]
-      const err = {
-        name: 'the name',
-        message: 'the message',
-        stack: 'the stack',
-      }
-
-      this.ipc.on.withArgs(`promise:fulfilled:${invocationId}`).yield(err)
-
-      return promise.catch((actualErr) => {
-        expect(actualErr).to.be.an.instanceOf(Error)
-        expect(actualErr.name).to.equal(err.name)
-        expect(actualErr.message).to.equal(err.message)
-
-        expect(actualErr.stack).to.equal(err.stack)
-      })
-    })
-
-    it('invokes callback with unique invocation id', function () {
-      const firstCall = util.wrapParentPromise(this.ipc, 0, this.callback)
-      const invocationId = this.callback.lastCall.args[0]
-
-      this.ipc.on.withArgs(`promise:fulfilled:${invocationId}`).yield()
-
-      return firstCall.then(() => {
-        expect(this.callback).to.be.called
-        const firstId = this.callback.lastCall.args[0]
-
-        util.wrapParentPromise(this.ipc, 0, this.callback)
-        const secondId = this.callback.lastCall.args[0]
-
-        expect(firstId).not.to.equal(secondId)
-      })
-    })
-
-    it('removes event listener once promise is fulfilled', function () {
-      util.wrapParentPromise(this.ipc, 0, this.callback)
-      const invocationId = this.callback.lastCall.args[0]
-
-      this.ipc.on.withArgs(`promise:fulfilled:${invocationId}`).yield(null, 'value')
-
-      expect(this.ipc.removeListener).to.be.calledWith(`promise:fulfilled:${invocationId}`)
     })
   })
 

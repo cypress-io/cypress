@@ -357,6 +357,10 @@ export function _createDetachedInstance (browserInstance: BrowserInstance): Brow
   return detachedInstance
 }
 
+export function connectToExisting () {
+  throw new Error('Attempting to connect to existing browser for Cypress in Cypress which is not yet implemented for browser')
+}
+
 export async function open (browser: Browser, url, options: any = {}, automation): Promise<BrowserInstance> {
   // see revision comment here https://wiki.mozilla.org/index.php?title=WebDriver/RemoteProtocol&oldid=1234946
   const hasCdp = browser.majorVersion >= 86

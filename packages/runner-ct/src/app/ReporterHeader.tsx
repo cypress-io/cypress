@@ -18,8 +18,8 @@ export const ReporterHeader: React.FC<ReporterHeaderProps> = namedObserver('Repo
   ({ statsStore, appState }) => {
     return (
       <header className={styles.ctReporterHeader}>
-        <Stats stats={statsStore} />
         <div className='spacer' />
+        <Stats stats={statsStore} />
         <Controls appState={appState} />
       </header>
     )

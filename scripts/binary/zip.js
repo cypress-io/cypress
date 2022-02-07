@@ -72,7 +72,7 @@ const checkZipSize = function (zipPath) {
   const zipSize = filesize(stats.size, { round: 0 })
 
   console.log(`zip file size ${zipSize}`)
-  const MAX_ALLOWED_SIZE_MB = os.platform() === 'win32' ? 265 : 230
+  const MAX_ALLOWED_SIZE_MB = os.platform() === 'win32' ? 295 : 300
   const MAX_ZIP_FILE_SIZE = megaBytes(MAX_ALLOWED_SIZE_MB)
 
   if (stats.size > MAX_ZIP_FILE_SIZE) {

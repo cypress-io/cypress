@@ -7,14 +7,14 @@ exports['e2e iframes / passes'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (iframe_spec.js)                                                           │
-  │ Searched:   cypress/integration/iframe_spec.js                                                 │
+  │ Specs:      1 found (iframe.cy.js)                                                             │
+  │ Searched:   cypress/e2e/iframe.cy.js                                                           │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  iframe_spec.js                                                                  (1 of 1)
+  Running:  iframe.cy.js                                                                    (1 of 1)
 
 
   iframes
@@ -41,14 +41,14 @@ exports['e2e iframes / passes'] = `
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     iframe_spec.js                                                                   │
+  │ Spec Ran:     iframe.cy.js                                                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/iframe_spec.js.mp4                  (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/iframe.cy.js.mp4                    (X second)
 
 
 ====================================================================================================
@@ -58,7 +58,7 @@ exports['e2e iframes / passes'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  iframe_spec.js                           XX:XX        7        7        -        -        - │
+  │ ✔  iframe.cy.js                             XX:XX        7        7        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        7        7        -        -        -  
 

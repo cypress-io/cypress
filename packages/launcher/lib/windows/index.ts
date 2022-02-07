@@ -1,11 +1,13 @@
 import * as fse from 'fs-extra'
+import winVersionInfo from 'win-version-info'
 import os from 'os'
 import { join, normalize, win32 } from 'path'
 import { get } from 'lodash'
 import { notInstalledErr } from '../errors'
 import { log } from '../log'
-import type { Browser, FoundBrowser, PathData } from '../types'
-import { utils } from '../utils'
+import type { PathData } from '../types'
+import type { Browser, FoundBrowser } from '@packages/types'
+import Bluebird from 'bluebird'
 
 function formFullAppPath (name: string) {
   return [
@@ -110,20 +112,6 @@ const formPaths: WindowsBrowserPaths = {
 }
 
 function getWindowsBrowser (browser: Browser): Promise<FoundBrowser> {
-  const getVersion = (stdout: string): string => {
-    // result from wmic datafile
-    // "Version=61.0.3163.100"
-    const wmicVersion = /^Version=(\S+)$/
-    const m = wmicVersion.exec(stdout)
-
-    if (m) {
-      return m[1]
-    }
-
-    log('Could not extract version from %s using regex %s', stdout, wmicVersion)
-    throw notInstalledErr(browser.name)
-  }
-
   const formFullAppPathFn: NameToPath = get(formPaths, [browser.name, browser.channel], formFullAppPath)
 
   const exePaths = formFullAppPathFn(browser.name)
@@ -149,14 +137,9 @@ function getWindowsBrowser (browser: Browser): Promise<FoundBrowser> {
         return tryNextExePath()
       }
 
-      return getVersionString(path)
-      .then((val) => {
-        log(val)
-
-        return val
-      })
-      .then(getVersion)
-      .then((version: string) => {
+      // Use exports.getVersionString here, rather than our local reference
+      // to that variable so that the tests can easily mock it
+      return exports.getVersionString(path).then((version) => {
         log('browser %s at \'%s\' version %s', browser.name, exePath, version)
 
         return {
@@ -186,23 +169,16 @@ export function getVersionString (path: string) {
   // on Windows using "--version" seems to always start the full
   // browser, no matter what one does.
 
-  const args = [
-    'datafile',
-    'where',
-    `name="${path}"`,
-    'get',
-    'Version',
-    '/value',
-  ]
-
-  return utils.execa('wmic', args)
-  .then((val) => val.stdout)
-  .then((val) => val.trim())
+  return Bluebird.resolve(winVersionInfo(path).FileVersion)
 }
 
 export function getVersionNumber (version: string) {
   if (version.indexOf('Version=') > -1) {
-    return version.split('=')[1]
+    const split = version.split('=')
+
+    if (split[1]) {
+      return split[1]
+    }
   }
 
   return version

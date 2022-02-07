@@ -1,0 +1,22 @@
+{
+  "extends": "../frontend-shared/tsconfig.json",
+  "include": [
+    "src/**/*.vue", 
+    "src/**/*.tsx", 
+    "*.d.ts", 
+    "cypress/**/*.ts", 
+    "cypress/**/*.tsx",
+    "../frontend-shared/src/**/*.vue", 
+    "../frontend-shared/src/**/*.tsx", 
+    "../frontend-shared/cypress/**/*.ts"
+  ],
+  "compilerOptions": {
+    "types": ["cypress", "cypress-real-events", "@intlify/vite-plugin-vue-i18n/client"],
+    "paths": {
+      "@cy/i18n": ["../frontend-shared/src/locales/i18n"],
+      "@cy/components/*": ["../frontend-shared/src/components/*"],
+      "@cy/gql-components/*": ["../frontend-shared/src/gql-components/*"],
+      "@packages/*": ["../*"]
+    }
+  }
+}

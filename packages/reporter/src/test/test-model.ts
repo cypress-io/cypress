@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import { action, computed, observable } from 'mobx'
-import { FileDetails } from '@packages/ui-components'
+import { FileDetails } from '@packages/types'
 
 import Attempt from '../attempts/attempt-model'
 import Err, { ErrProps } from '../errors/err-model'

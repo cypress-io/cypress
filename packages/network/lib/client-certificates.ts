@@ -1,4 +1,4 @@
-import type { Url } from 'url'
+import { URL, Url } from 'url'
 import debugModule from 'debug'
 import minimatch from 'minimatch'
 import Forge from 'node-forge'

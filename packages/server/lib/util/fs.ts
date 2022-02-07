@@ -10,6 +10,7 @@ interface PromisifiedFsExtra {
   statAsync: (path: string | Buffer) => Bluebird<ReturnType<typeof fsExtra.statSync>>
   removeAsync: Promisified<typeof fsExtra.removeSync>
   writeFileAsync: Promisified<typeof fsExtra.writeFileSync>
+  pathExistsAsync: Promisified<typeof fsExtra.pathExistsSync>
 }
 
 // warn users if somehow synchronous file methods are invoked

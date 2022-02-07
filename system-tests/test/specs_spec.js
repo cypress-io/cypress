@@ -5,15 +5,8 @@ describe('e2e specs', () => {
 
   it('failing when no specs found', function () {
     return systemTests.exec(this, {
-      config: { integrationFolder: 'cypress/specs' },
-      snapshot: true,
-      expectedExitCode: 1,
-    })
-  })
-
-  it('failing when no spec pattern found', function () {
-    return systemTests.exec(this, {
-      spec: 'cypress/integration/**notfound**',
+      project: 'no-specs-found',
+      testingType: 'e2e',
       snapshot: true,
       expectedExitCode: 1,
     })
@@ -22,6 +15,7 @@ describe('e2e specs', () => {
   // @see https://github.com/cypress-io/cypress/issues/14226
   it('handles the same integration and fixtures folders', function () {
     return systemTests.exec(this, {
+      testingType: 'e2e',
       project: 'same-fixtures-integration-folders',
       snapshot: false,
       expectedExitCode: 0,
@@ -30,6 +24,7 @@ describe('e2e specs', () => {
 
   it('handles the fixtures folder being the subfolder of integration', function () {
     return systemTests.exec(this, {
+      testingType: 'e2e',
       project: 'fixture-subfolder-of-integration',
       snapshot: false,
       expectedExitCode: 0,

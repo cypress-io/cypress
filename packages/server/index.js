@@ -1,3 +1,4 @@
+//
 // override tty if we're being forced to
 require('./lib/util/tty').override()
 
@@ -11,6 +12,16 @@ if (process.env.CY_NET_PROFILE && isRunningElectron) {
 
   process.stdout.write(`Network profiler writing to ${netProfiler.logPath}\n`)
 }
+
+const globalExceptionHandler = async (err) => {
+  await require('./lib/errors').logException(err)
+  process.exit(1)
+}
+
+process.removeAllListeners('unhandledRejection')
+process.on('unhandledRejection', globalExceptionHandler)
+process.removeAllListeners('uncaughtException')
+process.on('uncaughtException', globalExceptionHandler)
 
 process.env.UV_THREADPOOL_SIZE = 128
 

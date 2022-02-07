@@ -1,12 +1,15 @@
 require('../../spec_helper')
-const root = global.root
 
-const auth = require(`${root}../lib/gui/auth`)
+const auth = require(`../../../lib/gui/auth`)
+const windows = require(`../../../lib/gui/windows`)
+const user = require(`../../../lib/user`)
+
 const electron = require('electron')
-const machineId = require(`${root}../lib/util/machine_id`)
+const machineId = require(`../../../lib/util/machine_id`)
 const os = require('os')
 const pkg = require('@packages/root')
-const random = require(`${root}../lib/util/random`)
+const Promise = require('bluebird')
+const random = require(`../../../lib/util/random`)
 
 const BASE_URL = 'https://foo.invalid/login.html'
 const RANDOM_STRING = 'a'.repeat(32)
@@ -22,24 +25,24 @@ describe('lib/gui/auth', function () {
   })
 
   afterEach(function () {
-    auth._stopServer()
+    auth._internal.stopServer()
   })
 
-  context('._getOriginFromUrl', function () {
+  context('_internal.getOriginFromUrl', function () {
     it('given an https URL, returns the origin', function () {
-      const origin = auth._getOriginFromUrl(FULL_LOGIN_URL)
+      const origin = auth._internal.getOriginFromUrl(FULL_LOGIN_URL)
 
       expect(origin).to.eq('https://foo.invalid')
     })
 
     it('given an http URL, returns the origin', function () {
-      const origin = auth._getOriginFromUrl('http://foo.invalid/login.html?abc=123&foo=bar')
+      const origin = auth._internal.getOriginFromUrl('http://foo.invalid/login.html?abc=123&foo=bar')
 
       expect(origin).to.eq('http://foo.invalid')
     })
   })
 
-  context('._buildFullLoginUrl', function () {
+  context('_internal.buildFullLoginUrl', function () {
     beforeEach(function () {
       sinon.stub(random, 'id').returns(RANDOM_STRING)
       this.server = {
@@ -50,7 +53,7 @@ describe('lib/gui/auth', function () {
     })
 
     it('uses random and server.port to form a URL along with environment info', function () {
-      return auth._buildFullLoginUrl(BASE_URL, this.server)
+      return auth._internal.buildFullLoginUrl(BASE_URL, this.server)
       .then((url) => {
         expect(url).to.eq(FULL_LOGIN_URL)
         expect(random.id).to.be.calledWith(32)
@@ -59,9 +62,9 @@ describe('lib/gui/auth', function () {
     })
 
     it('does not regenerate the state code', function () {
-      return auth._buildFullLoginUrl(BASE_URL, this.server)
+      return auth._internal.buildFullLoginUrl(BASE_URL, this.server)
       .then(() => {
-        return auth._buildFullLoginUrl(BASE_URL, this.server)
+        return auth._internal.buildFullLoginUrl(BASE_URL, this.server)
       })
       .then(() => {
         expect(random.id).to.be.calledOnce
@@ -69,16 +72,16 @@ describe('lib/gui/auth', function () {
     })
 
     it('uses utm code to form a trackable URL', function () {
-      return auth._buildFullLoginUrl(BASE_URL, this.server, 'GUI Tab')
+      return auth._internal.buildFullLoginUrl(BASE_URL, this.server, 'GUI Tab')
       .then((url) => {
         expect(url).to.eq(FULL_LOGIN_URL_UTM)
       })
     })
   })
 
-  context('._launchNativeAuth', function () {
+  context('_internal.launchNativeAuth', function () {
     it('is catchable if `shell` does not exist', function () {
-      return auth._launchNativeAuth(REDIRECT_URL)
+      return auth._internal.launchNativeAuth(REDIRECT_URL)
       .then(() => {
         throw new Error('This should not succeed')
       })
@@ -99,7 +102,7 @@ describe('lib/gui/auth', function () {
         sinon.stub(electron.shell, 'openExternal').resolves()
         const sendWarning = sinon.stub()
 
-        return auth._launchNativeAuth(REDIRECT_URL, sendWarning)
+        return auth._internal.launchNativeAuth(REDIRECT_URL, sendWarning)
         .then(() => {
           expect(electron.shell.openExternal).to.be.calledWithMatch(REDIRECT_URL)
           expect(sendWarning).to.not.be.called
@@ -110,12 +113,48 @@ describe('lib/gui/auth', function () {
         sinon.stub(electron.shell, 'openExternal').rejects()
         const sendWarning = sinon.stub()
 
-        return auth._launchNativeAuth(REDIRECT_URL, sendWarning)
+        return auth._internal.launchNativeAuth(REDIRECT_URL, sendWarning)
         .then(() => {
           expect(electron.shell.openExternal).to.be.calledWithMatch(REDIRECT_URL)
           expect(sendWarning).to.be.calledWithMatch('warning', 'AUTH_COULD_NOT_LAUNCH_BROWSER', REDIRECT_URL)
         })
       })
+    })
+  })
+
+  context('.start', () => {
+    it('focuses main window upon successful auth', async () => {
+      sinon.stub(user, 'getBaseLoginUrl').resolves('www.foo.bar')
+      sinon.stub(Promise, 'fromCallback').resolves()
+      sinon.stub(auth._internal, 'launchServer').resolves()
+      sinon.stub(auth._internal, 'buildLoginRedirectUrl').resolves('www.redirect.url')
+      sinon.stub(auth._internal, 'launchNativeAuth').resolves()
+      sinon.stub(auth._internal, 'stopServer')
+      sinon.stub(windows, 'focusMainWindow').callsFake(() => {})
+
+      await auth.start(() => {}, 'code', () => {
+        windows.focusMainWindow()
+      })
+
+      expect(auth._internal.stopServer).to.be.calledOnce
+      expect(windows.focusMainWindow).to.be.calledOnce
+    })
+
+    it('focuses main window when auth fails', async () => {
+      sinon.stub(user, 'getBaseLoginUrl').rejects(new Error('test error'))
+      sinon.stub(auth._internal, 'stopServer')
+      sinon.stub(windows, 'focusMainWindow').callsFake(() => {})
+
+      try {
+        await auth.start(() => {}, 'code', () => {
+          windows.focusMainWindow()
+        })
+      } catch (e) {
+        expect(e.message).to.eql('test error')
+      }
+
+      expect(auth._internal.stopServer).to.be.calledOnce
+      expect(windows.focusMainWindow).to.be.calledOnce
     })
   })
 })

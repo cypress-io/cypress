@@ -119,8 +119,9 @@ module.exports = {
       // we have an active debugger session
       if (inspector.url()) {
         const dp = process.debugPort + 1
+        const inspectFlag = process.execArgv.some((f) => f === '--inspect' || f.startsWith('--inspect=')) ? '--inspect' : '--inspect-brk'
 
-        argv.unshift(`--inspect-brk=${dp}`)
+        argv.unshift(`${inspectFlag}=${dp}`)
       } else {
         const opts = minimist(argv)
 
@@ -136,7 +137,7 @@ module.exports = {
         argv.push('--enable-logging')
       }
 
-      return cp.spawn(execPath, argv, { stdio: 'inherit' })
+      const spawned = cp.spawn(execPath, argv, { stdio: 'inherit' })
       .on('close', (code, signal) => {
         debug('electron closing %o', { code, signal })
 
@@ -155,6 +156,8 @@ module.exports = {
 
         return process.exit(code)
       })
+
+      return spawned
     }).catch((err) => {
       // eslint-disable-next-line no-console
       console.debug(err.stack)

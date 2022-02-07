@@ -1,12 +1,17 @@
 const _ = require('lodash')
 const Promise = require('bluebird')
+const { globalPubSub } = require('@packages/data-context')
+
 const { fs } = require('./util/fs')
 const appData = require('./util/app_data')
 const FileUtil = require('./util/file')
-const logger = require('./logger')
 
 const fileUtil = new FileUtil({
   path: appData.path('cache'),
+})
+
+globalPubSub.on('test:cleanup', () => {
+  fileUtil.__resetForTest()
 })
 
 const convertProjectsToArray = function (obj) {
@@ -38,6 +43,8 @@ module.exports = {
     return {
       USER: {},
       PROJECTS: [],
+      PROJECT_PREFERENCES: {},
+      PROJECTS_CONFIG: {},
     }
   },
 
@@ -63,8 +70,6 @@ module.exports = {
   },
 
   write (obj = {}) {
-    logger.info('writing to .cy cache', { cache: obj })
-
     return fileUtil.set(obj).return(obj)
   },
 
@@ -128,19 +133,52 @@ module.exports = {
   },
 
   getUser () {
-    logger.info('getting user')
-
     return fileUtil.get('USER', {})
   },
 
   setUser (user) {
-    logger.info('setting user', { user })
-
     return fileUtil.set({ USER: user })
   },
 
   removeUser () {
     return fileUtil.set({ USER: {} })
+  },
+
+  removeLatestProjects () {
+    return fileUtil.set({ PROJECTS: [] })
+  },
+
+  getProjectPreferences () {
+    return fileUtil.get('PROJECT_PREFERENCES', {})
+  },
+
+  insertProjectPreferences (projectTitle, projectPreferences) {
+    return fileUtil.transaction((tx) => {
+      return tx.get('PROJECT_PREFERENCES', {}).then((preferences) => {
+        return tx.set('PROJECT_PREFERENCES', {
+          ...preferences,
+          [projectTitle]: {
+            ...preferences[projectTitle],
+            ...projectPreferences,
+          },
+        })
+      })
+    })
+  },
+
+  removeAllProjectPreferences () {
+    return fileUtil.set({ PROJECT_PREFERENCES: {} })
+  },
+
+  removeProjectPreferences (projectTitle) {
+    const preferences = fileUtil.get('PROJECT_PREFERENCES', {})
+
+    const updatedPreferences = {
+      ...preferences.PROJECT_PREFERENCES,
+      [projectTitle]: null,
+    }
+
+    return fileUtil.set({ PROJECT_PREFERENCES: updatedPreferences })
   },
 
   remove () {

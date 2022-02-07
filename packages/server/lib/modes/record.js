@@ -1,4 +1,5 @@
 const _ = require('lodash')
+const path = require('path')
 const la = require('lazy-ass')
 const chalk = require('chalk')
 const check = require('check-more-types')
@@ -9,7 +10,7 @@ const isForkPr = require('is-fork-pr')
 const commitInfo = require('@cypress/commit-info')
 
 const api = require('../api')
-const logger = require('../logger')
+const exception = require('../exception')
 const errors = require('../errors')
 const capture = require('../capture')
 const upload = require('../upload')
@@ -18,17 +19,8 @@ const env = require('../util/env')
 const keys = require('../util/keys')
 const terminal = require('../util/terminal')
 const ciProvider = require('../util/ci_provider')
-const settings = require('../util/settings')
 const testsUtils = require('../util/tests_utils')
 const specWriter = require('../util/spec_writer')
-
-const logException = (err) => {
-  // give us up to 1 second to
-  // create this exception report
-  return logger.createException(err)
-  .timeout(1000)
-  .catch(() => {})
-}
 
 // dont yell about any errors either
 
@@ -174,7 +166,7 @@ const uploadArtifacts = (options = {}) => {
   .catch((err) => {
     errors.warning('DASHBOARD_CANNOT_UPLOAD_RESULTS', err)
 
-    return logException(err)
+    return exception.create(err)
   })
 }
 
@@ -196,7 +188,7 @@ const updateInstanceStdout = (options = {}) => {
 
     // dont log exceptions if we have a 503 status code
     if (err.statusCode !== 503) {
-      return logException(err)
+      return exception.create(err)
     }
   }).finally(capture.restore)
 }
@@ -301,7 +293,7 @@ const createRun = Promise.method((options = {}) => {
   }
 
   // go back to being a string
-  if (specPattern) {
+  if (Array.isArray(specPattern)) {
     specPattern = specPattern.join(',')
   }
 
@@ -445,7 +437,7 @@ const createRun = Promise.method((options = {}) => {
         }
       }
       case 404:
-        return errors.throw('DASHBOARD_PROJECT_NOT_FOUND', projectId, settings.configFile(options))
+        return errors.throw('DASHBOARD_PROJECT_NOT_FOUND', projectId, path.basename(options.configFile))
       case 412:
         return errors.throw('DASHBOARD_INVALID_RUN_REQUEST', err.error)
       case 422: {
@@ -621,6 +613,7 @@ const createRunAndRecordSpecs = (options = {}) => {
       projectId,
       specPattern,
       testingType,
+      configFile: config ? config.configFile : null,
     })
     .then((resp) => {
       if (!resp) {

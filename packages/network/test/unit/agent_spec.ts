@@ -9,7 +9,7 @@ import tls from 'tls'
 import url from 'url'
 import DebuggingProxy from '@cypress/debugging-proxy'
 import request from '@cypress/request-promise'
-import * as socketIo from '@packages/socket'
+import * as socketIo from '@packages/socket/lib/browser'
 import {
   buildConnectReqHead,
   createProxySock,
@@ -83,7 +83,7 @@ describe('lib/agent', function () {
   })
 
   afterEach(function () {
-    process.env.NO_PROXY = process.env.HTTP_PROXY = process.env.HTTPS_PROXY = ''
+    process.env.NO_PROXY = process.env.HTTP_PROXY = process.env.HTTPS_PROXY = process.env.HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS = ''
     sinon.restore()
   })
 
@@ -411,6 +411,20 @@ describe('lib/agent', function () {
           .catch({ message: 'Error: connect ECONNREFUSED 0.0.0.0' }, () => {
             expect(spy).to.be.calledOnce
           })
+        })
+      })
+
+      it('HTTP pages can be loaded with the Upstream target URL', function (done) {
+        process.env.HTTP_PROXY = process.env.HTTPS_PROXY = ''
+        process.env.NO_PROXY = ''
+        process.env.HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS = `http://localhost:${HTTP_PORT}`
+
+        this.request({
+          url: `http://localhost:${HTTP_PORT}/get`,
+        }).on('response', (response) => {
+          expect(response.req.path).to.equal('http://localhost:31080/get')
+
+          done()
         })
       })
     })

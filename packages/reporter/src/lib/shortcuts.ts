@@ -23,7 +23,11 @@ class Shortcuts {
         break
       case 's': !appState.isPaused && !appState.studioActive && events.emit('stop')
         break
-      case 'f': events.emit('focus:tests')
+      case 'f': action('toggle:spec:list', () => {
+        appState.toggleSpecList()
+        events.emit('save:state')
+      })()
+
         break
       case 'c': events.emit('resume')
         break
@@ -31,6 +35,7 @@ class Shortcuts {
         break
       case 'a': action('set:scrolling', () => {
         appState.setAutoScrolling(!appState.autoScrollingEnabled)
+        events.emit('save:state')
       })()
 
         break

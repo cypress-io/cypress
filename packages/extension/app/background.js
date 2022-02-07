@@ -212,7 +212,7 @@ const automation = {
       return Promise.try(() => {
         return browser.tabs.executeScript(tab.id, { code })
       }).then((results) => {
-        if (!results || (results[0] !== data.string)) {
+        if (!results || (results[0] !== data.randomString)) {
           throw new Error('Executed script did not return result')
         }
       })

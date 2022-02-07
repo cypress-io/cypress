@@ -6,7 +6,7 @@ const pathToExamples = path.join(
   __dirname,
   '..',
   'cypress',
-  'integration',
+  'e2e',
   '**',
   '*'
 )
@@ -16,25 +16,16 @@ module.exports = {
     return glob(pathToExamples, { nodir: true })
   },
 
+  getPathToE2E() {
+    return path.join(__dirname, '..', 'cypress', 'e2e')
+  },
+
   getPathToExampleFolders () {
     return glob(`${pathToExamples}${path.sep}`)
   },
 
   getPathToPlugins() {
     return path.resolve(__dirname, '..', 'cypress', 'plugins', 'index.js')
-  },
-
-  getPathToSupportFiles() {
-    return glob(
-      path.join(
-        __dirname,
-        '..',
-        'cypress',
-        'support',
-        '**',
-        '*'
-      )
-    )
   },
 
   getPathToTsConfig() {

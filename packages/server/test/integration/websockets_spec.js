@@ -5,28 +5,33 @@ const ws = require('ws')
 const httpsProxyAgent = require('https-proxy-agent')
 const evilDns = require('evil-dns')
 const Promise = require('bluebird')
-const socketIo = require(`${root}../socket`)
-const httpsServer = require(`${root}../https-proxy/test/helpers/https_server`)
-const config = require(`${root}lib/config`)
-const { ServerE2E } = require(`${root}lib/server-e2e`)
-const { SocketE2E } = require(`${root}lib/socket-e2e`)
-const { SpecsStore } = require(`${root}/lib/specs-store`)
-const { Automation } = require(`${root}lib/automation`)
+const socketIo = require(`@packages/socket/lib/browser`)
+const httpsServer = require(`@packages/https-proxy/test/helpers/https_server`)
+const config = require(`../../lib/config`)
+const { ServerE2E } = require(`../../lib/server-e2e`)
+const { SocketE2E } = require(`../../lib/socket-e2e`)
+const { Automation } = require(`../../lib/automation`)
 const Fixtures = require('@tooling/system-tests/lib/fixtures')
-const { createRoutes } = require(`${root}lib/routes`)
+const { createRoutes } = require(`../../lib/routes`)
+const { getCtx } = require(`../../lib/makeDataContext`)
 
 const cyPort = 12345
 const otherPort = 55551
 const wsPort = 20000
 const wssPort = 8443
 
+let ctx
+
 describe('Web Sockets', () => {
   require('mocha-banner').register()
 
   beforeEach(function () {
+    ctx = getCtx()
     Fixtures.scaffold()
 
     this.idsPath = Fixtures.projectPath('ids')
+
+    ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.idsPath)
 
     return config.get(this.idsPath, { port: cyPort })
     .then((cfg) => {
@@ -38,7 +43,6 @@ describe('Web Sockets', () => {
       return this.server.open(this.cfg, {
         SocketCtor: SocketE2E,
         createRoutes,
-        specsStore: new SpecsStore({}, 'e2e'),
         testingType: 'e2e',
       })
       .then(async () => {

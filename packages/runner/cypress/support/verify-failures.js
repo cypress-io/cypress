@@ -37,7 +37,7 @@ const verifyFailure = (options) => {
     preferredOpener: {
       id: 'foo-editor',
       name: 'Foo',
-      openerId: 'foo-editor',
+      binary: 'foo-editor',
       isOther: false,
     },
   })

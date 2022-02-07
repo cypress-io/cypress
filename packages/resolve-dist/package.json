@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "build-prod": "tsc --project .",
-    "clean": "rm lib/*.js",
-    "clean-deps": "rm -rf node_modules",
+    "clean": "rimraf 'lib/**/*.js'",
+    "clean-deps": "rimraf node_modules",
     "test": "yarn test-unit",
     "test-debug": "yarn test-unit --inspect-brk=5566",
     "test-unit": "mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
@@ -16,7 +16,8 @@
     "fs-extra": "8.1.0"
   },
   "devDependencies": {
-    "@packages/ts": "0.0.0-development"
+    "@packages/ts": "0.0.0-development",
+    "rimraf": "3.0.2"
   },
   "files": [
     "lib"

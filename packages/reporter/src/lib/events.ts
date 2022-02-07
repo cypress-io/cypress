@@ -188,10 +188,6 @@ const events: Events = {
       runner.emit('runner:unpin:snapshot', commandId)
     })
 
-    localBus.on('focus:tests', () => {
-      runner.emit('focus:tests')
-    })
-
     localBus.on('get:user:editor', (cb) => {
       runner.emit('get:user:editor', cb)
     })
@@ -207,6 +203,7 @@ const events: Events = {
     localBus.on('save:state', () => {
       runner.emit('save:state', {
         autoScrollingEnabled: appState.autoScrollingEnabled,
+        isSpecsListOpen: appState.isSpecsListOpen,
       })
     })
 
@@ -216,6 +213,10 @@ const events: Events = {
 
     localBus.on('open:file', (fileDetails) => {
       runner.emit('open:file', fileDetails)
+    })
+
+    localBus.on('open:file:unified', (fileDetails) => {
+      runner.emit('open:file:unified', fileDetails)
     })
 
     localBus.on('studio:init:test', (testId) => {

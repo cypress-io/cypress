@@ -104,6 +104,14 @@ describe('exec run', function () {
     it('throws if testingType is invalid', () => {
       expect(() => run.processRunOptions({ testingType: 'randomTestingType' })).to.throw()
     })
+
+    it('throws if both e2e and component are set', () => {
+      expect(() => run.processRunOptions({ e2e: true, component: true })).to.throw()
+    })
+
+    it('throws if both testingType and component are set', () => {
+      expect(() => run.processRunOptions({ testingType: 'component', component: true })).to.throw()
+    })
   })
 
   context('.start', function () {
@@ -150,10 +158,10 @@ describe('exec run', function () {
     })
 
     it('spawns with --config-file set', function () {
-      return run.start({ configFile: 'special-cypress.json' })
+      return run.start({ configFile: 'special-cypress.config.js' })
       .then(() => {
         expect(spawn.start).to.be.calledWith(
-          ['--run-project', process.cwd(), '--config-file', 'special-cypress.json'],
+          ['--run-project', process.cwd(), '--config-file', 'special-cypress.config.js'],
         )
       })
     })
@@ -187,6 +195,20 @@ describe('exec run', function () {
       return run.start({ outputPath: '/path/to/output' })
       .then(() => {
         expect(spawn.start).to.be.calledWith(['--run-project', process.cwd(), '--output-path', '/path/to/output'])
+      })
+    })
+
+    it('spawns with --testing-type e2e when given --e2e', function () {
+      return run.start({ e2e: true })
+      .then(() => {
+        expect(spawn.start).to.be.calledWith(['--run-project', process.cwd(), '--testing-type', 'e2e'])
+      })
+    })
+
+    it('spawns with --testing-type component when given --component', function () {
+      return run.start({ component: true })
+      .then(() => {
+        expect(spawn.start).to.be.calledWith(['--run-project', process.cwd(), '--testing-type', 'component'])
       })
     })
 

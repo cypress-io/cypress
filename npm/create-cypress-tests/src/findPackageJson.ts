@@ -104,7 +104,7 @@ export function scanFSForAvailableDependency (cwd: string, lookingForDeps: Recor
       .some(([dependency, version]) => {
         return (
           Boolean(lookingForDeps[dependency])
-          && validateSemverVersion(version, lookingForDeps[dependency], dependency)
+          && validateSemverVersion(version, lookingForDeps[dependency] as string, dependency)
         )
       }),
     }

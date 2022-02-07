@@ -29,12 +29,12 @@ describe('e2e xhr', () => {
   })
 
   systemTests.it('passes in global mode', {
-    spec: 'xhr_spec.js',
+    spec: 'xhr.cy.js',
     snapshot: true,
   })
 
   systemTests.it('passes through CLI', {
-    spec: 'xhr_spec.js',
+    spec: 'xhr.cy.js',
     snapshot: true,
     useCli: true,
   })

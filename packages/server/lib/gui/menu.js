@@ -6,19 +6,14 @@ const { shell } = require('electron')
 const appData = require('../util/app_data')
 const open = require('../util/open')
 
-let onLogOutClicked = function () {}
+// hoist up options and allow calling menu.set({})
+// to override existing options or be called multiple
+// times to preserve existing options
+let options = {}
 
 module.exports = {
-  set (options = {}) {
-    _.defaults(options, {
-      withDevTools: false,
-    })
-
-    // this set by modes/interactive and needs to be preserved if the menu
-    // is set again by launcher when the Electron browser is run
-    if (options.onLogOutClicked) {
-      ({ onLogOutClicked } = options)
-    }
+  set (opts = {}) {
+    _.extend(options, opts)
 
     const template = [
       {
@@ -41,7 +36,7 @@ module.exports = {
           },
           {
             label: 'Log Out',
-            click: onLogOutClicked,
+            click: options.onLogOutClicked,
           },
           {
             type: 'separator',
@@ -199,6 +194,18 @@ module.exports = {
                 if (focusedWindow) {
                   return focusedWindow.toggleDevTools()
                 }
+              },
+            },
+            {
+              label: 'GraphiQL',
+              click () {
+                return shell.openExternal(`http://localhost:${options.getGraphQLPort()}/__launchpad/graphql`)
+              },
+            },
+            {
+              label: 'View App Data',
+              click () {
+                return open.opn(appData.path())
               },
             },
           ],

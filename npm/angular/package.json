@@ -7,13 +7,14 @@
   "scripts": {
     "build": "tsc --project tsconfig.lib.json",
     "watch": "tsc --project tsconfig.lib.json -w",
-    "cy:open": "node ../../scripts/cypress.js open-ct",
-    "cy:run": "node ../../scripts/cypress.js run-ct",
+    "cy:open": "node ../../scripts/cypress.js open --component",
+    "cy:run": "node ../../scripts/cypress.js run --component",
     "ng": "ng",
     "app-start": "ng serve",
     "app-build": "ng build",
     "test": "yarn cy:run",
-    "test-ci": "yarn cy:run"
+    "test-ci": "yarn cy:run",
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "@cypress/mount-utils": "0.0.0-development",
@@ -59,7 +60,7 @@
     "semantic-release": "17.4.2",
     "to-string-loader": "1.1.6",
     "ts-loader": "8.1.0",
-    "ts-node": "9.1.1",
+    "ts-node": "^10.2.1",
     "tslib": "^2.2.0",
     "tslint": "5.20.1",
     "typescript": "4.2.4",
