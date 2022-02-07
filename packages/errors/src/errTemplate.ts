@@ -31,16 +31,12 @@ export const fmt = {
   highlight: theme.yellow,
   highlightSecondary: theme.magenta,
   off: guard,
-  object,
+  stringify,
   terminal,
   listItem,
   listItems,
   listFlags,
   cypressVersion,
-}
-
-function object (obj: object) {
-  return theme.white(obj as any)
 }
 
 function terminal (str: string) {
@@ -110,12 +106,12 @@ export function backtick (val: string) {
   return new Backtick(val)
 }
 
-export class Secondary {
-  constructor (readonly val: string | number) {}
+export class Stringify {
+  constructor (readonly val: any) {}
 }
 
-export function secondary (val: string) {
-  return new Secondary(val)
+export function stringify (val: object) {
+  return new Stringify(val)
 }
 
 /**
@@ -137,6 +133,32 @@ export function isErrorLike (err: any): err is SerializedError | Error {
   return err && typeof err === 'object' && Boolean('name' in err && 'message' in err)
 }
 
+function jsonStringify (obj: object) {
+  return JSON.stringify(obj, null, 2)
+}
+
+function isScalar (val: any): val is string | number | null | boolean {
+  return typeof val === 'string' ||
+    typeof val === 'number' ||
+    typeof val === 'boolean' ||
+    val == null
+}
+
+/**
+ * Formats the value passed in via details(), but does not color the value here, since it
+ * is printed separately in the console.
+ *
+ * @param val
+ * @returns
+ */
+function formatMsgDetails (val: any): string {
+  return isScalar(val)
+    ? `${val}`
+    : isErrorLike(val)
+      ? val.stack || val.message || val.name
+      : jsonStringify(val)
+}
+
 /**
  * Creates a consistently formatted object to return from the error call.
  *
@@ -153,10 +175,6 @@ export const errTemplate = (strings: TemplateStringsArray, ...args: Array<string
   let messageDetails: string | undefined
 
   function prepMessage (forTerminal = true) {
-    function isScalar (val: any): val is string | number | null | boolean {
-      return typeof val === 'string' || typeof val === 'number' || typeof val === 'boolean' || val == null
-    }
-
     function formatVal (val: string | number | Error | object | null) {
       // if (isErrorLike(val)) {
       //   return `${val.name}: ${val.message}`
@@ -172,7 +190,7 @@ export const errTemplate = (strings: TemplateStringsArray, ...args: Array<string
       }
 
       try {
-        const objJson = JSON.stringify(val, null, 2)
+        const objJson = jsonStringify(val)
 
         return forTerminal ? objJson : stripIndent`
         \`\`\`
@@ -184,19 +202,6 @@ export const errTemplate = (strings: TemplateStringsArray, ...args: Array<string
       }
     }
 
-    /**
-     * Formats the value passed in via details(), but does not color the value here, since it
-     * is printed separately in the console.
-     *
-     * @param val
-     * @returns
-     */
-    function formatMsgDetails (val: any): string {
-      return isScalar(val)
-        ? `${val}`
-        : isErrorLike(val) ? val.stack || val.message || val.name : JSON.stringify(val, null, 2)
-    }
-
     let templateArgs: Array<string | number> = []
     let detailsSeen = false
 
@@ -205,6 +210,8 @@ export const errTemplate = (strings: TemplateStringsArray, ...args: Array<string
         templateArgs.push(`\`${arg.val}\``)
       } else if (arg instanceof Guard) {
         templateArgs.push(arg.val)
+      } else if (arg instanceof Stringify) {
+        templateArgs.push(theme.white(jsonStringify(arg.val)))
       } else if (arg instanceof StackTrace) {
         assert(!detailsSeen, `Cannot use details() multiple times in the same errTemplate`)
         detailsSeen = true

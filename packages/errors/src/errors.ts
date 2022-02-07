@@ -25,6 +25,12 @@ const displayRetriesRemaining = function (tries: number) {
   )
 }
 
+const getUsedTestsMessage = (limit: number, usedTestsMessage: string) => {
+  return _.isFinite(limit)
+    ? fmt.off(`The limit is ${fmt.highlight(`${limit}`)} ${usedTestsMessage} results.`)
+    : ''
+}
+
 export const warnIfExplicitCiBuildId = function (ciBuildId?: string | null) {
   if (!ciBuildId) {
     return ''
@@ -79,7 +85,7 @@ export const AllCypressErrors = {
   },
   CHROME_WEB_SECURITY_NOT_SUPPORTED: (browser: string) => {
     return errTemplate`\
-        Your project has set the configuration option: ${fmt.prop(`chromeWebSecurity`)} to ${fmt.value(`false`)}
+        Your project has set the configuration option: ${fmt.prop(`chromeWebSecurity`)} to ${`false`}
 
         This option will not have an effect in ${guard(_.capitalize(browser))}. Tests that rely on web security being disabled will not run as expected.`
   },
@@ -196,7 +202,7 @@ _
         Warning from Cypress Dashboard: ${arg1.message}
 
         Details:
-        ${fmt.object(arg1.props)}`
+        ${fmt.stringify(arg1.props)}`
   },
   DASHBOARD_STALE_RUN: (arg1: {runUrl: string, [key: string]: any}) => {
     return errTemplate`\
@@ -285,7 +291,7 @@ _
 
         This machine sent the following parameters:
 
-        ${fmt.object(arg1.parameters)}
+        ${fmt.stringify(arg1.parameters)}
 
         https://on.cypress.io/parallel-group-params-mismatch`
   },
@@ -380,7 +386,7 @@ _
 
           ${fmt.terminal(`cypress run --record --key <record_key>`)}
 
-        You can also set the key as an environment variable with the name CYPRESS_RECORD_KEY.
+        You can also set the key as an environment variable with the name: ${fmt.highlightSecondary(`CYPRESS_RECORD_KEY`)}
 
         https://on.cypress.io/how-do-i-record-runs`
   },
@@ -431,7 +437,7 @@ _
 
         Request Sent:
 
-        ${JSON.stringify(arg1.object, null, 2)}`
+        ${JSON.stringify(arg1.stringify, null, 2)}`
   },
   // TODO: fix
   RECORDING_FROM_FORK_PR: () => {
@@ -478,7 +484,7 @@ _
     return errTemplate`\
         We could not find a Dashboard project with the projectId: ${projectId}
 
-        This projectId came from your ${fmt.path(configFileBaseName)} file or an environment variable.
+        This ${fmt.highlightSecondary(`projectId`)} came from your ${fmt.path(configFileBaseName)} file or an environment variable.
 
         Please log into the Dashboard and find your project.
 
@@ -507,7 +513,7 @@ _
     return errTemplate`\
       Can't run project because port is currently in use: ${arg1}
 
-      Assign a different port with the ${fmt.flag(`--port <port>`)} argument or shut down the other running process.')}`
+      Assign a different port with the ${fmt.flag(`--port <port>`)} argument or shut down the other running process.`
   },
   ERROR_READING_FILE: (filePath: string, err: Error) => {
     return errTemplate`\
@@ -591,25 +597,25 @@ _
   PLUGINS_DIDNT_EXPORT_FUNCTION: (pluginsFilePath: string, exported: any) => {
     const code = stripIndent`
       module.exports = (on, config) => {
-        // configure plugins here
+        ${fmt.meta(`// configure plugins here`)}
       }`
 
     return errTemplate`\
-      The ${fmt.highlightSecondary(`pluginsFile`)} must export a function with the following signature:
+      The ${`pluginsFile`} must export a function with the following signature:
 
       ${fmt.meta(`// ${pluginsFilePath}`)}
       ${fmt.code(code)}
 
       Instead it exported:
 
-      ${exported}
+      ${fmt.stringify(exported)}
 
       Learn more: https://on.cypress.io/plugins-api
     `
   },
   PLUGINS_FUNCTION_ERROR: (arg1: string, arg2: string | Error) => {
     return errTemplate`\
-      The function exported by the plugins file threw an error: ${fmt.path(arg1)}
+      The function exported by the ${`pluginsFile`} threw an error: ${fmt.path(arg1)}
 
       ${stackTrace(arg2)}
     `
@@ -624,9 +630,10 @@ _
       ${stackTrace(arg2)}
     `
   },
+  // TODO: test this
   PLUGINS_VALIDATION_ERROR: (arg1: string, arg2: string | Error) => {
     return errTemplate`
-      The following validation error was thrown by your plugins file: ${fmt.path(arg1)}
+      Your ${`pluginsFile`} threw a validation error: ${fmt.path(arg1)}
 
       ${stackTrace(arg2)}
     `
@@ -698,7 +705,7 @@ _
 
           ${fmt.listItem(arg1, { prefix: '> ' })}
 
-        This server has been configured as your ${fmt.highlightSecondary(`baseUrl`)}, and tests will likely fail if it is not running.`
+        This server has been configured as your ${`baseUrl`}, and tests will likely fail if it is not running.`
   },
   // TODO: test this
   CANNOT_CONNECT_BASE_URL_RETRYING: (arg1: {attempt: number, baseUrl: string, remaining: number, delay: number}) => {
@@ -766,87 +773,87 @@ _
 
         https://on.cypress.io/installing-cypress`
   },
-  FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS: (arg1: {link: string, planType: string, usedTestsMessage: string}) => {
+  FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS: (arg1: {link: string, usedTestsMessage: string, limit: number}) => {
     return errTemplate`\
-        You've exceeded the limit of private test results under your free plan this month. ${arg1.usedTestsMessage}
+        You've exceeded the limit of private test results under your free plan this month. ${getUsedTestsMessage(arg1.limit, arg1.usedTestsMessage)}
 
         To continue recording tests this month you must upgrade your account. Please visit your billing to upgrade to another billing plan.
 
-        ${guard(arg1.link)}`
+        ${fmt.off(arg1.link)}`
   },
-  FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS: (arg1: {link: string, planType: string, usedTestsMessage: string, gracePeriodMessage: string}) => {
+  FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS: (arg1: {link: string, usedTestsMessage: string, gracePeriodMessage: string, limit: number}) => {
     return errTemplate`\
-        You've exceeded the limit of private test results under your free plan this month. ${arg1.usedTestsMessage}
+        You've exceeded the limit of private test results under your free plan this month. ${getUsedTestsMessage(arg1.limit, arg1.usedTestsMessage)}
 
-        Your plan is now in a grace period, which means your tests will still be recorded until ${arg1.gracePeriodMessage}. Please upgrade your plan to continue recording tests on the Cypress Dashboard in the future.
+        Your plan is now in a grace period, which means your tests will still be recorded until ${fmt.off(arg1.gracePeriodMessage)}. Please upgrade your plan to continue recording tests on the Cypress Dashboard in the future.
 
-        ${guard(arg1.link)}`
+        ${fmt.off(arg1.link)}`
   },
-  PAID_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS: (arg1: {link: string, planType: string, usedTestsMessage: string}) => {
+  PAID_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS: (arg1: {link: string, usedTestsMessage: string, limit: number}) => {
     return errTemplate`\
-        You've exceeded the limit of private test results under your current billing plan this month. ${arg1.usedTestsMessage}
+        You've exceeded the limit of private test results under your current billing plan this month. ${getUsedTestsMessage(arg1.limit, arg1.usedTestsMessage)}
 
         To upgrade your account, please visit your billing to upgrade to another billing plan.
 
-        ${guard(arg1.link)}`
+        ${fmt.off(arg1.link)}`
   },
-  FREE_PLAN_EXCEEDS_MONTHLY_TESTS: (arg1: {link: string, planType: string, usedTestsMessage: string}) => {
+  FREE_PLAN_EXCEEDS_MONTHLY_TESTS: (arg1: {link: string, usedTestsMessage: string, limit: number}) => {
     return errTemplate`\
-        You've exceeded the limit of test results under your free plan this month. ${arg1.usedTestsMessage}
+        You've exceeded the limit of test results under your free plan this month. ${getUsedTestsMessage(arg1.limit, arg1.usedTestsMessage)}
 
         To continue recording tests this month you must upgrade your account. Please visit your billing to upgrade to another billing plan.
 
-        ${guard(arg1.link)}`
+        ${fmt.off(arg1.link)}`
   },
-  FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_TESTS: (arg1: {link: string, planType: string, usedTestsMessage: string, gracePeriodMessage: string}) => {
+  FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_TESTS: (arg1: {link: string, usedTestsMessage: string, gracePeriodMessage: string, limit: number}) => {
     return errTemplate`\
-        You've exceeded the limit of test results under your free plan this month. ${arg1.usedTestsMessage}
+        You've exceeded the limit of test results under your free plan this month. ${getUsedTestsMessage(arg1.limit, arg1.usedTestsMessage)}
 
         Your plan is now in a grace period, which means you will have the full benefits of your current plan until ${arg1.gracePeriodMessage}.
 
         Please visit your billing to upgrade your plan.
 
-        ${guard(arg1.link)}`
+        ${fmt.off(arg1.link)}`
   },
-  PLAN_EXCEEDS_MONTHLY_TESTS: (arg1: {link: string, planType: string, usedTestsMessage: string}) => {
+  PLAN_EXCEEDS_MONTHLY_TESTS: (arg1: {link: string, planType: string, usedTestsMessage: string, limit: number}) => {
     return errTemplate`\
-        You've exceeded the limit of test results under your ${arg1.planType} billing plan this month. ${arg1.usedTestsMessage}
+        You've exceeded the limit of test results under your ${arg1.planType} billing plan this month. ${getUsedTestsMessage(arg1.limit, arg1.usedTestsMessage)}
 
         To continue getting the full benefits of your current plan, please visit your billing to upgrade.
 
-        ${guard(arg1.link)}`
+        ${fmt.off(arg1.link)}`
   },
   FREE_PLAN_IN_GRACE_PERIOD_PARALLEL_FEATURE: (arg1: {link: string, gracePeriodMessage: string}) => {
     return errTemplate`\
-        Parallelization is not included under your free plan.
+        ${fmt.highlightSecondary(`Parallelization`)} is not included under your free plan.
 
         Your plan is now in a grace period, which means your tests will still run in parallel until ${arg1.gracePeriodMessage}. Please upgrade your plan to continue running your tests in parallel in the future.
 
-        ${guard(arg1.link)}`
+        ${fmt.off(arg1.link)}`
   },
   PARALLEL_FEATURE_NOT_AVAILABLE_IN_PLAN: (arg1: {link: string}) => {
     return errTemplate`\
-        Parallelization is not included under your current billing plan.
+        ${fmt.highlightSecondary(`Parallelization`)} is not included under your current billing plan.
 
         To run your tests in parallel, please visit your billing and upgrade to another plan with parallelization.
 
-        ${guard(arg1.link)}`
+        ${fmt.off(arg1.link)}`
   },
   PLAN_IN_GRACE_PERIOD_RUN_GROUPING_FEATURE_USED: (arg1: {link: string, gracePeriodMessage: string}) => {
     return errTemplate`\
-        Grouping is not included under your free plan.
+        ${fmt.highlightSecondary(`Grouping`)} is not included under your free plan.
 
         Your plan is now in a grace period, which means your tests will still run with groups until ${arg1.gracePeriodMessage}. Please upgrade your plan to continue running your tests with groups in the future.
 
-        ${guard(arg1.link)}`
+        ${fmt.off(arg1.link)}`
   },
   RUN_GROUPING_FEATURE_NOT_AVAILABLE_IN_PLAN: (arg1: {link: string}) => {
     return errTemplate`\
-        Grouping is not included under your current billing plan.
+        ${fmt.highlightSecondary(`Grouping`)} is not included under your current billing plan.
 
         To run your tests with groups, please visit your billing and upgrade to another plan with grouping.
 
-        ${guard(arg1.link)}`
+        ${fmt.off(arg1.link)}`
   },
   FIXTURE_NOT_FOUND: (arg1: string, arg2: string[]) => {
     return errTemplate`\
@@ -891,7 +898,7 @@ _
   },
   COULD_NOT_FIND_SYSTEM_NODE: (nodeVersion: string) => {
     return errTemplate`\
-        ${fmt.prop(`nodeVersion`)} is set to ${fmt.value(`system`)} but Cypress could not find a usable Node executable on your PATH.
+        ${fmt.prop(`nodeVersion`)} is set to ${`system`} but Cypress could not find a usable Node executable on your ${fmt.highlightSecondary(`PATH`)}.
 
         Make sure that your Node executable exists and can be run by the current user.
 
@@ -899,15 +906,13 @@ _
   },
   INVALID_CYPRESS_INTERNAL_ENV: (val: string) => {
     return errTemplate`\
-        We have detected an unknown or unsupported ${fmt.highlightSecondary(`CYPRESS_INTERNAL_ENV`)} value:
-
-          ${fmt.listItem(val, { prefix: '> ', color: fmt.highlight })}
+        We have detected an unknown or unsupported ${fmt.highlightSecondary(`CYPRESS_INTERNAL_ENV`)} value: ${val}
 
         CYPRESS_INTERNAL_ENV is reserved for internal use and cannot be modified.`
   },
   CDP_VERSION_TOO_OLD: (minimumVersion: string, currentVersion: {major: number, minor: string | number}) => {
     const phrase = currentVersion.major !== 0
-      ? fmt.highlightSecondary(`${currentVersion.major}.${currentVersion.minor}`)
+      ? fmt.highlight(`${currentVersion.major}.${currentVersion.minor}`)
       : 'an older version'
 
     return errTemplate`A minimum CDP version of ${minimumVersion} is required, but the current browser has ${fmt.off(phrase)}.`
@@ -957,13 +962,14 @@ _
 
         https://on.cypress.io/browser-launch-api`
   },
-  COULD_NOT_PARSE_ARGUMENTS: (arg1: string, arg2: string, arg3: string) => {
+  // TODO: test this
+  COULD_NOT_PARSE_ARGUMENTS: (argName: string, argValue: string, errMsg: string) => {
     return errTemplate`\
-        Cypress encountered an error while parsing the argument ${chalk.gray(arg1)}
+        Cypress encountered an error while parsing the argument: ${`--${argName}`}
 
-        You passed: ${arg2}
+        You passed: ${fmt.value(argValue)}
 
-        The error was: ${arg3}`
+        The error was: ${fmt.highlightSecondary(errMsg)}`
   },
   FIREFOX_MARIONETTE_FAILURE: (origin: string, err: Error) => {
     return errTemplate`\

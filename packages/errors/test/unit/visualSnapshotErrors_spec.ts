@@ -686,8 +686,8 @@ describe('visual error templates', () => {
       return {
         default: [{
           link: 'https://dashboard.cypress.io/project/abcd',
-          planType: 'Test Plan',
-          usedTestsMessage: 'The limit is 500 free results',
+          limit: 500,
+          usedTestsMessage: 'test',
         }],
       }
     },
@@ -695,9 +695,9 @@ describe('visual error templates', () => {
       return {
         default: [{
           link: 'https://dashboard.cypress.io/project/abcd',
-          planType: 'Grace Period Plan',
-          usedTestsMessage: 'The limit is 500 free results',
-          gracePeriodMessage: 'You are on a grace period for 20 days',
+          limit: 500,
+          usedTestsMessage: 'test',
+          gracePeriodMessage: 'the grace period ends',
         }],
       }
     },
@@ -705,8 +705,8 @@ describe('visual error templates', () => {
       return {
         default: [{
           link: 'https://on.cypress.io/set-up-billing',
-          planType: 'Test Plan',
-          usedTestsMessage: 'The limit is 500 free results',
+          limit: 25000,
+          usedTestsMessage: 'private test',
         }],
       }
     },
@@ -714,8 +714,8 @@ describe('visual error templates', () => {
       return {
         default: [{
           link: 'https://on.cypress.io/set-up-billing',
-          planType: 'Test Plan',
-          usedTestsMessage: 'The limit is 500 free results',
+          limit: 500,
+          usedTestsMessage: 'test',
         }],
       }
     },
@@ -723,8 +723,8 @@ describe('visual error templates', () => {
       return {
         default: [{
           link: 'https://on.cypress.io/set-up-billing',
-          planType: 'Test Plan',
-          usedTestsMessage: 'The limit is 500 free results',
+          limit: 500,
+          usedTestsMessage: 'test',
           gracePeriodMessage: 'Feb 1, 2022',
         }],
       }
@@ -733,8 +733,9 @@ describe('visual error templates', () => {
       return {
         default: [{
           link: 'https://on.cypress.io/set-up-billing',
-          planType: 'Test Plan',
-          usedTestsMessage: 'The limit is 500 free results',
+          planType: 'Sprout',
+          limit: 25000,
+          usedTestsMessage: 'test',
         }],
       }
     },
