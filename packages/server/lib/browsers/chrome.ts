@@ -318,8 +318,8 @@ const _handleDownloads = async function (client, dir, automation) {
   })
 }
 
-const _setAutomation = async (browserCriClient: BrowserCriClient, client: CRIWrapper.Client, automation) => {
-  const cdpAutomation = await CdpAutomation.create(client.send, client.on, browserCriClient.closeCurrentTarget, automation)
+const _setAutomation = async (client: CRIWrapper.Client, automation: Automation, closeCurrentTarget: () => Promise<void>) => {
+  const cdpAutomation = await CdpAutomation.create(client.send, client.on, closeCurrentTarget, automation)
 
   return automation.use(cdpAutomation)
 }
@@ -440,7 +440,7 @@ export = {
     const browserCriClient = this._getBrowserCriClientForLaunchedBrowser(instance)
     const pageCriClient = await browserCriClient.attachToNewUrl('about:blank')
 
-    await this._setAutomation(browserCriClient, pageCriClient, automation)
+    await this._setAutomation(pageCriClient, automation, browserCriClient.closeCurrentTarget)
 
     await options.onInitializeNewBrowserTab()
 
@@ -456,7 +456,7 @@ export = {
     const browserCriClient = await BrowserCriClient.create(port, browser.displayName, options.onError)
     const pageCriClient = await browserCriClient.attachToTargetUrl(options.url)
 
-    await this._setAutomation(browserCriClient, pageCriClient, automation)
+    await this._setAutomation(pageCriClient, automation, browserCriClient.closeCurrentTarget)
   },
 
   async open (browser: Browser, url, options: CypressConfiguration = {}, automation: Automation): Promise<LaunchedBrowser & { browserCriClient: BrowserCriClient }> {
@@ -552,7 +552,7 @@ export = {
 
     const pageCriClient = await browserCriClient.attachToTargetUrl('about:blank')
 
-    await this._setAutomation(browserCriClient, pageCriClient, automation)
+    await this._setAutomation(pageCriClient, automation, browserCriClient.closeCurrentTarget)
 
     await this._maybeRecordVideo(pageCriClient, options, browser.majorVersion)
     await this._navigateUsingCRI(pageCriClient, url)
