@@ -123,9 +123,9 @@ async function connectToNewSpec (browserCriClient, browser, options, automation)
 
   debug('firefox: reconnecting CDP')
 
-  const criClient = await browserCriClient.attachToTargetUrl('about:blank')
+  const pageCriClient = await browserCriClient.attachToTargetUrl('about:blank')
 
-  await CdpAutomation.create(criClient.send, criClient.on, browserCriClient.closeCurrentTarget, automation)
+  await CdpAutomation.create(pageCriClient.send, pageCriClient.on, browserCriClient.closeCurrentTarget, automation)
 
   await options.onInitializeNewBrowserTab()
 
@@ -135,9 +135,9 @@ async function connectToNewSpec (browserCriClient, browser, options, automation)
 
 async function setupRemote (remotePort, automation, onError): Promise<BrowserCriClient> {
   const browserCriClient = await BrowserCriClient.create(remotePort, 'Firefox', onError)
-  const criClient = await browserCriClient.attachToTargetUrl('about:blank')
+  const pageCriClient = await browserCriClient.attachToTargetUrl('about:blank')
 
-  await CdpAutomation.create(criClient.send, criClient.on, browserCriClient.closeCurrentTarget, automation)
+  await CdpAutomation.create(pageCriClient.send, pageCriClient.on, browserCriClient.closeCurrentTarget, automation)
 
   return browserCriClient
 }

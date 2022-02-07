@@ -17,7 +17,7 @@ describe('lib/browsers/chrome', () => {
   context('#open', () => {
     beforeEach(function () {
       // mock CRI client during testing
-      this.criClient = {
+      this.pageCriClient = {
         send: sinon.stub().resolves(),
         Page: {
           screencastFrame: sinon.stub().returns(),
@@ -27,7 +27,7 @@ describe('lib/browsers/chrome', () => {
       }
 
       this.browserCriClient = {
-        attachToTargetUrl: sinon.stub().resolves(this.criClient),
+        attachToTargetUrl: sinon.stub().resolves(this.pageCriClient),
         close: sinon.stub().resolves(),
         ensureMinimumProtocolVersion: sinon.stub().withArgs('1.3').resolves(),
       }
@@ -43,11 +43,11 @@ describe('lib/browsers/chrome', () => {
       }
 
       this.onCriEvent = (event, data, options) => {
-        this.criClient.on.withArgs(event).yieldsAsync(data)
+        this.pageCriClient.on.withArgs(event).yieldsAsync(data)
 
         return chrome.open({ isHeadless: true }, 'http://', options, this.automation)
         .then(() => {
-          this.criClient.on = undefined
+          this.pageCriClient.on = undefined
         })
       }
 
@@ -76,13 +76,13 @@ describe('lib/browsers/chrome', () => {
       return chrome.open({ isHeadless: true }, 'http://', {}, this.automation)
       .then(() => {
         expect(utils.getPort).to.have.been.calledOnce // to get remote interface port
-        expect(this.criClient.send.callCount).to.equal(5)
-        expect(this.criClient.send).to.have.been.calledWith('Page.bringToFront')
+        expect(this.pageCriClient.send.callCount).to.equal(5)
+        expect(this.pageCriClient.send).to.have.been.calledWith('Page.bringToFront')
 
-        expect(this.criClient.send).to.have.been.calledWith('Page.navigate')
-        expect(this.criClient.send).to.have.been.calledWith('Page.enable')
-        expect(this.criClient.send).to.have.been.calledWith('Page.setDownloadBehavior')
-        expect(this.criClient.send).to.have.been.calledWith('Network.enable')
+        expect(this.pageCriClient.send).to.have.been.calledWith('Page.navigate')
+        expect(this.pageCriClient.send).to.have.been.calledWith('Page.enable')
+        expect(this.pageCriClient.send).to.have.been.calledWith('Page.setDownloadBehavior')
+        expect(this.pageCriClient.send).to.have.been.calledWith('Network.enable')
       })
     })
 
@@ -327,9 +327,9 @@ describe('lib/browsers/chrome', () => {
 
       return this.onCriEvent('Page.screencastFrame', frameMeta, options)
       .then(() => {
-        expect(this.criClient.send).to.have.been.calledWith('Page.startScreencast')
+        expect(this.pageCriClient.send).to.have.been.calledWith('Page.startScreencast')
         expect(write).to.have.been.calledWith(frameMeta)
-        expect(this.criClient.send).to.have.been.calledWith('Page.screencastFrameAck', { sessionId: frameMeta.sessionId })
+        expect(this.pageCriClient.send).to.have.been.calledWith('Page.screencastFrameAck', { sessionId: frameMeta.sessionId })
       })
     })
 
@@ -372,13 +372,13 @@ describe('lib/browsers/chrome', () => {
 
   context('#connectToNewSpec', () => {
     it('launches a new tab, connects a cri client to it, starts video, navigates to the spec url, and handles downloads', async function () {
-      const criClient = {
+      const pageCriClient = {
         send: sinon.stub().resolves(),
         on: sinon.stub(),
       }
 
       const browserCriClient = {
-        attachToNewUrl: sinon.stub().withArgs('about:blank').resolves(criClient),
+        attachToNewUrl: sinon.stub().withArgs('about:blank').resolves(pageCriClient),
       }
 
       const automation = {
@@ -390,9 +390,9 @@ describe('lib/browsers/chrome', () => {
         onInitializeNewBrowserTabCalled = true
       } }
 
-      sinon.stub(chrome, '_maybeRecordVideo').withArgs(criClient, options, 354).resolves()
-      sinon.stub(chrome, '_navigateUsingCRI').withArgs(criClient, options.url, 354).resolves()
-      sinon.stub(chrome, '_handleDownloads').withArgs(criClient, options.downloadFolder, automation).resolves()
+      sinon.stub(chrome, '_maybeRecordVideo').withArgs(pageCriClient, options, 354).resolves()
+      sinon.stub(chrome, '_navigateUsingCRI').withArgs(pageCriClient, options.url, 354).resolves()
+      sinon.stub(chrome, '_handleDownloads').withArgs(pageCriClient, options.downloadFolder, automation).resolves()
 
       await chrome.connectToNewSpec(browserCriClient, { majorVersion: 354 }, options, automation)
 

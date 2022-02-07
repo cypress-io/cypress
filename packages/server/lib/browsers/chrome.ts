@@ -316,9 +316,9 @@ const _handleDownloads = async function (client, dir, automation) {
 }
 
 const _setAutomation = async (browserCriClient: BrowserCriClient, client: CRIWrapper.Client, automation) => {
-  return automation.use(
-    await CdpAutomation.create(client.send, client.on, browserCriClient.closeCurrentTarget, automation),
-  )
+  const cdpAutomation = await CdpAutomation.create(client.send, client.on, browserCriClient.closeCurrentTarget, automation)
+
+  return automation.use(cdpAutomation)
 }
 
 export = {
@@ -430,15 +430,15 @@ export = {
   async connectToNewSpec (browserCriClient: BrowserCriClient, browser: Browser, options: CypressConfiguration = {}, automation) {
     debug('connecting to new chrome tab in existing instance with url and debugging port', { url: options.url })
 
-    const criClient = await browserCriClient.attachToNewUrl('about:blank')
+    const pageCriClient = await browserCriClient.attachToNewUrl('about:blank')
 
-    await this._setAutomation(browserCriClient, criClient, automation)
+    await this._setAutomation(browserCriClient, pageCriClient, automation)
 
     await options.onInitializeNewBrowserTab()
 
-    await this._maybeRecordVideo(criClient, options, browser.majorVersion)
-    await this._navigateUsingCRI(criClient, options.url)
-    await this._handleDownloads(criClient, options.downloadsFolder, automation)
+    await this._maybeRecordVideo(pageCriClient, options, browser.majorVersion)
+    await this._navigateUsingCRI(pageCriClient, options.url)
+    await this._handleDownloads(pageCriClient, options.downloadsFolder, automation)
   },
 
   async connectToExisting (browser: Browser, options: CypressConfiguration = {}, automation) {
@@ -446,9 +446,9 @@ export = {
 
     debug('connecting to existing chrome instance with url and debugging port', { url: options.url, port })
     const browserCriClient = await BrowserCriClient.create(port, browser.displayName, options.onError)
-    const criClient = await browserCriClient.attachToTargetUrl(options.url)
+    const pageCriClient = await browserCriClient.attachToTargetUrl(options.url)
 
-    await this._setAutomation(browserCriClient, criClient, automation)
+    await this._setAutomation(browserCriClient, pageCriClient, automation)
   },
 
   async open (browser: Browser, url, options: CypressConfiguration = {}, automation): Promise<LaunchedBrowser & { browserCriClient: BrowserCriClient }> {
@@ -539,13 +539,13 @@ export = {
       originalBrowserKill.apply(launchedBrowser, args)
     }
 
-    const criClient = await browserCriClient.attachToTargetUrl('about:blank')
+    const pageCriClient = await browserCriClient.attachToTargetUrl('about:blank')
 
-    await this._setAutomation(browserCriClient, criClient, automation)
+    await this._setAutomation(browserCriClient, pageCriClient, automation)
 
-    await this._maybeRecordVideo(criClient, options, browser.majorVersion)
-    await this._navigateUsingCRI(criClient, url)
-    await this._handleDownloads(criClient, options.downloadsFolder, automation)
+    await this._maybeRecordVideo(pageCriClient, options, browser.majorVersion)
+    await this._navigateUsingCRI(pageCriClient, url)
+    await this._handleDownloads(pageCriClient, options.downloadsFolder, automation)
 
     // return the launched browser process
     // with additional method to close the remote connection
