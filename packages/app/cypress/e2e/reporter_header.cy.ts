@@ -22,8 +22,6 @@ describe('Reporter Header', () => {
         expect(location.hash).to.contain('dom-content.spec')
       })
 
-      cy.wait(5000)
-
       cy.get('input').type('dom', { force: true })
 
       cy.get('[data-testid="spec-file-item"]').should('have.length', 1)
@@ -49,8 +47,7 @@ describe('Reporter Header', () => {
       cy.get('.cy-tooltip').should('have.text', 'Open Testing Preferences')
 
       cy.get('.testing-preferences').should('not.exist')
-      cy.get('.testing-preferences-toggle').should('not.have.class', 'open')
-      cy.get('.testing-preferences-toggle').click()
+      cy.get('.testing-preferences-toggle').should('not.have.class', 'open').click()
       cy.get('.testing-preferences-toggle').should('have.class', 'open')
       cy.get('.testing-preferences').should('be.visible')
       cy.get('.testing-preferences-toggle').click()
