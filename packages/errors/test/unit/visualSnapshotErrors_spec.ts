@@ -826,7 +826,7 @@ describe('visual error templates', () => {
     },
     CDP_COULD_NOT_CONNECT: () => {
       return {
-        default: ['chrome', '2345', makeErr()],
+        default: ['chrome', 2345, makeErr()],
       }
     },
     FIREFOX_COULD_NOT_CONNECT: () => {
