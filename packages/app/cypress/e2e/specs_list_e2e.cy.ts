@@ -12,7 +12,7 @@ describe('App: Spec List (E2E)', () => {
       cy.findByText('Specs').click()
     })
 
-    cy.get('.router-link-active').findByText('Specs').should('be.visible')
+    cy.get('[data-selected="true"]').contains('Specs').should('be.visible')
   })
 
   it('displays the App Top Nav', () => {
