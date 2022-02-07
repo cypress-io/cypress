@@ -11,7 +11,8 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+          # the default `GITHUB_TOKEN` cannot push to protected branches, so use `cypress-app-bot`'s token instead
+          token: ${{ secrets.BOT_GITHUB_TOKEN }}
       - name: Set committer info
         run: |
           git config --local user.email "$(git log --format='%ae' HEAD^!)"
