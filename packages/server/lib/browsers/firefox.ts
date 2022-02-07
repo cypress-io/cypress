@@ -367,7 +367,7 @@ export function _createDetachedInstance (browserInstance: BrowserInstance, brows
   return detachedInstance
 }
 
-export async function connectToNewSpec (browser: Browser, options: any = {}, automation: Automation, instance: LaunchedBrowser) {
+export async function connectToNewSpec (browser: Browser, options: any = {}, automation: Automation) {
   await firefoxUtil.connectToNewSpec(options, automation, browserCriClient)
 }
 
