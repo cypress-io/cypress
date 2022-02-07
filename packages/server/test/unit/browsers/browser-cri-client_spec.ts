@@ -175,6 +175,12 @@ describe('lib/browsers/cri-client', function () {
 
         expect(mockCurrentlyAttachedTarget.close).to.be.called
       })
+
+      it('throws when there is no currently attached target', async function () {
+        const browserClient = await getClient() as any
+
+        expect(browserClient.closeCurrentTarget()).to.be.rejected
+      })
     })
 
     context('#close', function () {

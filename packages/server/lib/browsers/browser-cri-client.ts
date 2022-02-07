@@ -41,7 +41,7 @@ const ensureLiveBrowser = async (port: number, browserName: string) => {
 }
 
 export class BrowserCriClient {
-  private currentlyAttachedTarget: any
+  private currentlyAttachedTarget: CRIWrapper.Client | undefined
   private constructor (private browserClient: CRIWrapper.Client, private port: number, private onAsynchronousError: Function) {}
 
   /**
@@ -139,6 +139,10 @@ export class BrowserCriClient {
    * Closes the currently attached page target
    */
   closeCurrentTarget = async (): Promise<void> => {
+    if (!this.currentlyAttachedTarget) {
+      throw new Error('Cannot close target because no target is currently attached')
+    }
+
     debug('Closing current target %s', this.currentlyAttachedTarget.targetId)
 
     await this.currentlyAttachedTarget.close()
