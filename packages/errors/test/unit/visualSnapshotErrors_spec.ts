@@ -62,9 +62,13 @@ const snapshotErrorConsoleLogs = function (errorFileName: string) {
   // if the sanitized snapshot matches, let's save the ANSI colors converted into HTML
   const html = termToHtml
   .strings(logs, termToHtml.themes.dark.name)
-  .split('color:#00A').join('color:#2472c7') // replace blue colors
-  .split('color:#00A').join('color:#e05561') // replace red colors
+  .split('color:#55F').join('color:#4ec4ff') // replace blueBright colors
+  .split('color:#A00').join('color:#e05561') // replace red colors
   .split('color:#A50').join('color:#e5e510') // replace yellow colors
+  .split('color:#555').join('color:#4f5666') // replace gray colors
+  .split('color:#eee').join('color:#e6e6e6') // replace white colors
+  .split('color:#A0A').join('color:#c062de') // replace magenta colors
+  .split('color:#F5F').join('color:#de73ff') // replace magentaBright colors
   .split('"Courier New", ').join('"Courier Prime", ') // replace font
   .split('<style>').join(`
     <link rel="preconnect" href="https://fonts.googleapis.com">
