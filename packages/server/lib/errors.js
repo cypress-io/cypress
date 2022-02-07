@@ -588,7 +588,7 @@ const getMsgByType = function (type, ...args) {
           }
           \`\`\`
 
-          Learn more: https://on.cypress.io/plugins-api
+          Learn more: https://on.cypress.io/dev-server
 
           We loaded the \`devServer\` from: \`${arg1}\`
   
@@ -605,7 +605,7 @@ const getMsgByType = function (type, ...args) {
         }
         \`\`\`
 
-        Learn more: https://on.cypress.io/plugins-api
+        Learn more: https://on.cypress.io/dev-server
       `
     case 'PLUGINS_FUNCTION_ERROR':
       msg = stripIndent`\

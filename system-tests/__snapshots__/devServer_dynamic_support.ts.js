@@ -7,7 +7,7 @@ devServer: (cypressDevServerConfig, devServerConfig) {
 }
 \`\`\`
 
-Learn more: https://on.cypress.io/plugins-api
+Learn more: https://on.cypress.io/dev-server
 
 We loaded the \`devServer\` from: \`/foo/bar/.projects/devServer-dynamic-import/cypress.config.js\`
 
