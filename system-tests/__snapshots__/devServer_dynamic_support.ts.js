@@ -3,7 +3,7 @@ The \`component\`.\`devServer\` method must be a function with the following sig
 
 \`\`\`
 devServer: (cypressDevServerConfig, devServerConfig) {
-
+  // start dev server here
 }
 \`\`\`
 

@@ -584,7 +584,7 @@ const getMsgByType = function (type, ...args) {
 
           \`\`\`
           devServer: (cypressDevServerConfig, devServerConfig) {
-
+            // start dev server here
           }
           \`\`\`
 
@@ -601,7 +601,7 @@ const getMsgByType = function (type, ...args) {
 
         \`\`\`
         devServer (cypressDevServerConfig, devServerConfig) {
-          // configure plugins here
+          // start dev server here
         }
         \`\`\`
 
