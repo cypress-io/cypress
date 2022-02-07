@@ -25,12 +25,13 @@ Return Value of `errTemplate` (`ErrTemplateResult`):
 
 ```ts
 {
-  message: string, // Will always exist, this is the terminal-formatted error message
+  // Will always exist, this is the terminal-formatted error message
+  message: string, 
+  // Will always exist, this is the browser-formatted error message
+  messageMarkdown: string, 
   details?: string, // Exists if there is `details()` call in the errTemplate
   originalError?: ErrorLike // Exists if an error was passed into the `details()`
-  forBrowser(): {
-    message: string // Ansi stripped message for rendering in the browser, with the variables wrapped in backticks
-  }
+
 }
 ```
 

@@ -36,6 +36,8 @@ termToHtml.themes.dark.bg = '#111'
 const lineAndColNumsRe = /:\d+:\d+/
 
 const snapshotHtmlFolder = path.join(__dirname, '..', '..', '__snapshot-html__')
+const snapshotHtmlLocalFolder = path.join(__dirname, '..', '..', '__snapshot-html-local__')
+const snapshotMarkdownFolder = path.join(__dirname, '..', '..', '__snapshot-md__')
 const snapshotImagesFolder = path.join(__dirname, '..', '..', '__snapshot-images__')
 
 const saveHtml = async (filename: string, html: string) => {
@@ -50,7 +52,7 @@ const sanitize = (str: string) => {
   .split(cypressRootPath).join('cypress')
 }
 
-const snapshotErrorConsoleLogs = function (errorFileName: string) {
+const snapshotAndTestErrorConsole = async function (errorFileName: string) {
   const logs = _
   .chain(consoleLog.args)
   .map((args) => {
@@ -58,8 +60,6 @@ const snapshotErrorConsoleLogs = function (errorFileName: string) {
   })
   .join('\n')
   .value()
-
-  expect(logs).not.to.contain('[object Object]')
 
   // if the sanitized snapshot matches, let's save the ANSI colors converted into HTML
   const html = termToHtml
@@ -92,12 +92,26 @@ const snapshotErrorConsoleLogs = function (errorFileName: string) {
     </style>
   `) // remove margin/padding and force text overflow like a terminal
 
-  return saveHtml(errorFileName, html)
+  try {
+    fse.accessSync(errorFileName)
+  } catch (e) {
+    await saveHtml(errorFileName, html)
+  }
+
+  const contents = await fse.readFile(errorFileName, 'utf8')
+
+  try {
+    expect(contents).to.eq(html)
+  } catch (e) {
+    await saveHtml(errorFileName.replace('__snapshot-html__', '__snapshot-html-local__'), html)
+    throw e
+  }
 }
 
 let consoleLog: SinonSpy
 
 beforeEach(() => {
+  sinon.restore()
   consoleLog = sinon.spy(console, 'log')
 })
 
@@ -122,11 +136,18 @@ const testVisualError = <K extends CypressErrorType> (errorGeneratorFn: () => Er
 
       const err = errors.get(errorType, ...arr)
 
+      if (!errors.isCypressErr(err)) {
+        throw new Error(`Expected Cypress Error`)
+      }
+
       errors.log(err)
 
       const htmlFilename = path.join(snapshotHtmlFolder, `${filename}.html`)
+      const mdFilename = path.join(snapshotMarkdownFolder, `${filename}.md`)
 
-      await snapshotErrorConsoleLogs(htmlFilename)
+      await snapshotAndTestErrorConsole(htmlFilename)
+
+      await fse.outputFile(mdFilename, err.messageMarkdown, 'utf8')
 
       debug(`Snapshotted ${htmlFilename}`)
 
@@ -154,7 +175,8 @@ const testVisualErrors = (whichError: CypressErrorType | '*', errorsToTest: {[K 
     // prune out all existing snapshot html in case
     // errors were removed and we have stale snapshots
     return Promise.all([
-      fse.remove(snapshotHtmlFolder),
+      isCi ? fse.remove(snapshotHtmlFolder) : null,
+      fse.remove(snapshotHtmlLocalFolder),
       fse.remove(snapshotImagesFolder),
     ])
   })

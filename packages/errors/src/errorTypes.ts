@@ -18,6 +18,7 @@ export interface ErrorLike {
  * if one exists, and an isCypressError for duck-type checking
  */
 export interface CypressError extends ErrorLike {
+  messageMarkdown: string
   type: keyof typeof AllCypressErrors
   isCypressErr: boolean
   originalError?: CypressError | ErrorLike
@@ -25,17 +26,13 @@ export interface CypressError extends ErrorLike {
   code?: string | number
   errno?: string | number
   stackWithoutMessage?: string
-  forBrowser: ErrTemplateResult['forBrowser']
 }
 
 export interface ErrTemplateResult {
   message: string
+  messageMarkdown: string
   details?: string
   originalError?: Error
-  forBrowser(): {
-    message: string
-    details?: string
-  }
 }
 
 export interface ClonedError {

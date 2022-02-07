@@ -5,9 +5,8 @@ import _ from 'lodash'
 import path from 'path'
 import stripAnsi from 'strip-ansi'
 import { humanTime, logError, pluralize } from './errorUtils'
-import { backtick, errTemplate, fmt } from './errTemplate'
+import { errPartial, errTemplate, fmt } from './errTemplate'
 import { stackWithoutMessage } from './stackUtils'
-import { stripIndent } from './stripIndent'
 
 import type { ClonedError, CypressError, ErrorLike, ErrTemplateResult } from './errorTypes'
 
@@ -20,7 +19,7 @@ const displayRetriesRemaining = function (tries: number) {
 
   const lastTryNewLine = tries === 1 ? '\n' : ''
 
-  return chalk.gray(
+  return fmt.meta(
     `We will try connecting to it ${tries} more ${times}...${lastTryNewLine}`,
   )
 }
@@ -28,16 +27,16 @@ const displayRetriesRemaining = function (tries: number) {
 const getUsedTestsMessage = (limit: number, usedTestsMessage: string) => {
   return _.isFinite(limit)
     ? fmt.off(`The limit is ${fmt.highlight(`${limit}`)} ${usedTestsMessage} results.`)
-    : ''
+    : fmt.off('')
 }
 
 export const warnIfExplicitCiBuildId = function (ciBuildId?: string | null) {
   if (!ciBuildId) {
-    return ''
+    return null
   }
 
-  return `\
-It also looks like you also passed in an explicit --ci-build-id flag.
+  return errPartial`\
+It also looks like you also passed in an explicit ${fmt.flag('--ci-build-id')} flag.
 
 This is only necessary if you are NOT running in one of our supported CI providers.
 
@@ -57,7 +56,7 @@ export const AllCypressErrors = {
 
         This error will not alter the exit code.
 
-        ${fmt.stackTrace(arg1)}`
+        ${fmt.highlightSecondary(arg1)}`
   },
   CANNOT_REMOVE_OLD_BROWSER_PROFILES: (arg1: string) => {
     return errTemplate`\
@@ -65,7 +64,7 @@ export const AllCypressErrors = {
 
         This error will not alter the exit code.
 
-        ${fmt.stackTrace(arg1)}`
+        ${fmt.highlightSecondary(arg1)}`
   },
   VIDEO_RECORDING_FAILED: (arg1: string) => {
     return errTemplate`\
@@ -73,7 +72,7 @@ export const AllCypressErrors = {
 
         This error will not alter the exit code.
 
-        ${fmt.stackTrace(arg1)}`
+        ${fmt.highlightSecondary(arg1)}`
   },
   VIDEO_POST_PROCESSING_FAILED: (arg1: string) => {
     return errTemplate`\
@@ -81,20 +80,20 @@ export const AllCypressErrors = {
 
         This error will not alter the exit code.
 
-        ${fmt.stackTrace(arg1)}`
+        ${fmt.highlightSecondary(arg1)}`
   },
   CHROME_WEB_SECURITY_NOT_SUPPORTED: (browser: string) => {
     return errTemplate`\
-        Your project has set the configuration option: ${`chromeWebSecurity`} to ${fmt.highlightTertiary(`false`)}
+        Your project has set the configuration option: ${fmt.highlight(`chromeWebSecurity`)} to ${fmt.highlightTertiary(`false`)}
 
         This option will not have an effect in ${fmt.off(_.capitalize(browser))}. Tests that rely on web security being disabled will not run as expected.`
   },
   BROWSER_NOT_FOUND_BY_NAME: (browser: string, foundBrowsersStr: string[]) => {
-    let canarySuffix = ''
+    let canarySuffix = null
 
     if (browser === 'canary') {
-      canarySuffix += '\n\n'
-      canarySuffix += stripIndent`\
+      canarySuffix = errPartial`\
+          ${fmt.off('\n\n')}
           Note: In ${fmt.cypressVersion(`4.0.0`)}, Canary must be launched as ${fmt.highlightSecondary(`chrome:canary`)}, not ${fmt.highlightSecondary(`canary`)}.
 
           See https://on.cypress.io/migration-guide for more information on breaking changes in 4.0.0.`
@@ -103,7 +102,7 @@ export const AllCypressErrors = {
     return errTemplate`\
         Can't run because you've entered an invalid browser name.
 
-        Browser: ${browser} was not found on your system or is not supported by Cypress.
+        Browser: ${fmt.highlight(browser)} was not found on your system or is not supported by Cypress.
 
         Cypress supports the following browsers:
         ${fmt.listItems(['electron', 'chrome', 'chromium', 'edge', 'firefox'])}
@@ -111,7 +110,7 @@ export const AllCypressErrors = {
         You can also use a custom browser: https://on.cypress.io/customize-browsers
 
         Available browsers found on your system are:
-        ${fmt.listItems(foundBrowsersStr)}${fmt.off(canarySuffix)}`
+        ${fmt.listItems(foundBrowsersStr)}${canarySuffix}`
   },
   BROWSER_NOT_FOUND_BY_PATH: (arg1: string, arg2: string) => {
     return errTemplate`\
@@ -119,13 +118,13 @@ export const AllCypressErrors = {
 
         The output from the command we ran was:
 
-        ${fmt.stackTrace(arg2)}`
+        ${fmt.highlightSecondary(arg2)}`
   },
   NOT_LOGGED_IN: () => {
     return errTemplate`\
         You're not logged in.
 
-        Run ${`cypress open`} to open the Desktop App and log in.`
+        Run ${fmt.highlight(`cypress open`)} to open the Desktop App and log in.`
   },
   TESTS_DID_NOT_START_RETRYING: (arg1: string) => {
     return errTemplate`Timed out waiting for the browser to connect. ${fmt.off(arg1)}`
@@ -147,7 +146,7 @@ export const AllCypressErrors = {
 
         The server's response was:
 
-        ${arg1.response}`
+        ${fmt.highlightSecondary(arg1.response)}`
     /* Because of fmt.listFlags() and fmt.listItems() */
     /* eslint-disable indent */
   },
@@ -164,7 +163,7 @@ export const AllCypressErrors = {
 
         The server's response was:
 
-        ${arg1.response}`
+        ${fmt.highlightSecondary(arg1.response)}`
   },
   DASHBOARD_CANNOT_PROCEED_IN_SERIAL: (arg1: {flags: any, response: Error}) => {
     return errTemplate`\
@@ -177,7 +176,7 @@ export const AllCypressErrors = {
 
         The server's response was:
 
-        ${arg1.response}`
+        ${fmt.highlightSecondary(arg1.response)}`
   },
   DASHBOARD_UNKNOWN_INVALID_REQUEST: (arg1: {flags: any, response: Error}) => {
     return errTemplate`\
@@ -194,14 +193,14 @@ export const AllCypressErrors = {
 
         The server's response was:
 
-        ${arg1.response}`
+        ${fmt.highlightSecondary(arg1.response)}`
   },
   DASHBOARD_UNKNOWN_CREATE_RUN_WARNING: (arg1: {props: any, message: string}) => {
     return errTemplate`\
-        Warning from Cypress Dashboard: ${arg1.message}
+        Warning from Cypress Dashboard: ${fmt.highlight(arg1.message)}
 
         Details:
-        ${fmt.stringify(arg1.props)}`
+        ${fmt.highlightSecondary(arg1.props)}`
   },
   DASHBOARD_STALE_RUN: (arg1: {runUrl: string, [key: string]: any}) => {
     return errTemplate`\
@@ -290,7 +289,7 @@ export const AllCypressErrors = {
 
         This machine sent the following parameters:
 
-        ${fmt.stringify(arg1.parameters)}
+        ${fmt.highlightSecondary(arg1.parameters)}
 
         https://on.cypress.io/parallel-group-params-mismatch`
   },
@@ -314,7 +313,7 @@ export const AllCypressErrors = {
   },
   DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS: () => {
     return errTemplate`\
-      Deprecation Warning: The ${`before:browser:launch`} plugin event changed its signature in ${fmt.cypressVersion(`4.0.0`)}
+      Deprecation Warning: The ${fmt.highlight(`before:browser:launch`)} plugin event changed its signature in ${fmt.cypressVersion(`4.0.0`)}
 
       The event switched from yielding the second argument as an ${fmt.highlightSecondary(`array`)} of browser arguments to an options ${fmt.highlightSecondary(`object`)} with an ${fmt.highlightSecondary(`args`)} property.
 
@@ -393,7 +392,7 @@ export const AllCypressErrors = {
     return errTemplate`\
         You passed the ${fmt.flag(`--record`)} flag but this project has not been setup to record.
 
-        This project is missing the ${`projectId`} inside of: ${fmt.path(configFilePath)}
+        This project is missing the ${fmt.highlight(`projectId`)} inside of: ${fmt.path(configFilePath)}
 
         We cannot uniquely identify this project without this id.
 
@@ -407,7 +406,7 @@ export const AllCypressErrors = {
     return errTemplate`\
         This project has been configured to record runs on our Dashboard.
 
-        It currently has the projectId: ${arg1}
+        It currently has the projectId: ${fmt.highlight(arg1)}
 
         You also provided your Record Key, but you did not pass the ${fmt.flag(`--record`)} flag.
 
@@ -427,21 +426,21 @@ export const AllCypressErrors = {
     return errTemplate`\
         Recording this run failed because the request was invalid.
 
-        ${arg1.message}
+        ${fmt.highlight(arg1.message)}
 
         Errors:
 
-        ${fmt.stringify(arg1.errors)}
+        ${fmt.highlightSecondary(arg1.errors)}
 
         Request Sent:
 
-        ${fmt.stringify(arg1.object)}`
+        ${fmt.highlightTertiary(arg1.object)}`
   },
   RECORDING_FROM_FORK_PR: () => {
     return errTemplate`\
         Warning: It looks like you are trying to record this run from a forked PR.
 
-        The ${`Record Key`} is missing. Your CI provider is likely not passing private environment variables to builds from forks.
+        The ${fmt.highlight(`Record Key`)} is missing. Your CI provider is likely not passing private environment variables to builds from forks.
 
         These results will not be recorded.
 
@@ -455,7 +454,7 @@ export const AllCypressErrors = {
 
         This error will not alter the exit code.
 
-        ${apiErr}`
+        ${fmt.highlightSecondary(apiErr)}`
   },
   DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE: (apiErr: Error) => {
     return errTemplate`\
@@ -465,11 +464,11 @@ export const AllCypressErrors = {
 
         This error will not alter the exit code.
 
-        ${apiErr}`
+        ${fmt.highlightSecondary(apiErr)}`
   },
   DASHBOARD_RECORD_KEY_NOT_VALID: (recordKey: string, projectId: string) => {
     return errTemplate`\
-        Your Record Key ${recordKey} is not valid with this projectId: ${fmt.highlightSecondary(projectId)}
+        Your Record Key ${fmt.highlight(recordKey)} is not valid with this projectId: ${fmt.highlightSecondary(projectId)}
 
         It may have been recently revoked by you or another user.
 
@@ -479,7 +478,7 @@ export const AllCypressErrors = {
   },
   DASHBOARD_PROJECT_NOT_FOUND: (projectId: string, configFileBaseName: string) => {
     return errTemplate`\
-        We could not find a Dashboard project with the projectId: ${projectId}
+        We could not find a Dashboard project with the projectId: ${fmt.highlight(projectId)}
 
         This ${fmt.highlightSecondary(`projectId`)} came from your ${fmt.path(configFileBaseName)} file or an environment variable.
 
@@ -492,7 +491,7 @@ export const AllCypressErrors = {
         https://on.cypress.io/dashboard`
   },
   NO_PROJECT_ID: (configFilePath: string | false) => {
-    return errTemplate`Can't find ${`projectId`} in the config file: ${fmt.path(configFilePath || '')}`
+    return errTemplate`Can't find ${fmt.highlight(`projectId`)} in the config file: ${fmt.path(configFilePath || '')}`
   },
   NO_PROJECT_FOUND_AT_PROJECT_ROOT: (projectRoot: string) => {
     return errTemplate`Can't find a project at the path: ${fmt.path(projectRoot)}`
@@ -504,11 +503,11 @@ export const AllCypressErrors = {
     return errTemplate`Can't create project's secret key.`
   },
   PORT_IN_USE_SHORT: (arg1: string | number) => {
-    return errTemplate`Port ${arg1} is already in use.`
+    return errTemplate`Port ${fmt.highlight(arg1)} is already in use.`
   },
   PORT_IN_USE_LONG: (arg1: string | number) => {
     return errTemplate`\
-      Can't run project because port is currently in use: ${arg1}
+      Can't run project because port is currently in use: ${fmt.highlight(arg1)}
 
       Assign a different port with the ${fmt.flag(`--port <port>`)} argument or shut down the other running process.`
   },
@@ -535,7 +534,7 @@ export const AllCypressErrors = {
           ${fmt.listItem(folderPath)}`
     }
 
-    const globPath = path.join(fmt.path(folderPath), globPattern)
+    const globPath = path.join(chalk.blue(folderPath), globPattern)
 
     return errTemplate`\
         Can't run because ${fmt.highlightSecondary(`no spec files`)} were found.
@@ -569,7 +568,7 @@ export const AllCypressErrors = {
   },
   SUPPORT_FILE_NOT_FOUND: (supportFilePath: string) => {
     return errTemplate`\
-        Your ${`supportFile`} is missing or invalid: ${fmt.path(supportFilePath)}
+        Your ${fmt.highlight(`supportFile`)} is missing or invalid: ${fmt.path(supportFilePath)}
 
         The supportFile must be a .js, .ts, .coffee file or be supported by your preprocessor plugin (if configured).
 
@@ -581,7 +580,7 @@ export const AllCypressErrors = {
   },
   PLUGINS_FILE_ERROR: (pluginsFilePath: string, err: Error) => {
     return errTemplate`\
-        Your ${`pluginsFile`} is invalid: ${fmt.path(pluginsFilePath)}
+        Your ${fmt.highlight(`pluginsFile`)} is invalid: ${fmt.path(pluginsFilePath)}
 
         It threw an error when required, check the stack trace below:
 
@@ -590,7 +589,7 @@ export const AllCypressErrors = {
   },
   PLUGINS_FILE_NOT_FOUND: (pluginsFilePath: string) => {
     return errTemplate`\
-        Your ${`pluginsFile`} was not found at path: ${fmt.path(pluginsFilePath)}
+        Your ${fmt.highlight(`pluginsFile`)} was not found at path: ${fmt.path(pluginsFilePath)}
 
         Create this file, or set pluginsFile to ${fmt.highlightSecondary(`false`)} if a plugins file is not necessary for your project.
 
@@ -598,27 +597,27 @@ export const AllCypressErrors = {
       `
   },
   PLUGINS_DIDNT_EXPORT_FUNCTION: (pluginsFilePath: string, exported: any) => {
-    const code = stripIndent`
+    const code = errPartial`
       module.exports = (on, config) => {
-        ${fmt.meta(`// configure plugins here`)}
+        ${fmt.comment(`// configure plugins here`)}
       }`
 
     return errTemplate`\
-      The ${`pluginsFile`} must export a function with the following signature:
+      The ${fmt.highlight(`pluginsFile`)} must export a function with the following signature:
 
-      ${fmt.meta(`// ${pluginsFilePath}`)}
+      ${fmt.comment(`// ${pluginsFilePath}`)}
       ${fmt.code(code)}
 
       Instead it exported:
 
-      ${fmt.stringify(exported)}
+      ${fmt.highlightSecondary(exported)}
 
       Learn more: https://on.cypress.io/plugins-api
     `
   },
   PLUGINS_FUNCTION_ERROR: (pluginsFilePath: string, err: Error) => {
     return errTemplate`\
-      The function exported by the ${`pluginsFile`} threw an error: ${fmt.path(pluginsFilePath)}
+      The function exported by the ${fmt.highlight(`pluginsFile`)} threw an error: ${fmt.path(pluginsFilePath)}
 
       ${fmt.stackTrace(err)}
     `
@@ -636,7 +635,7 @@ export const AllCypressErrors = {
   // TODO: test this
   PLUGINS_VALIDATION_ERROR: (arg1: string, arg2: string | Error) => {
     return errTemplate`
-      Your ${`pluginsFile`} threw a validation error: ${fmt.path(arg1)}
+      Your ${fmt.highlight(`pluginsFile`)} threw a validation error: ${fmt.path(arg1)}
 
       ${fmt.stackTrace(arg2)}
     `
@@ -648,7 +647,7 @@ export const AllCypressErrors = {
 
       You must pass a valid event name when registering a plugin.
 
-      You passed: ${invalidEventName}
+      You passed: ${fmt.highlight(invalidEventName)}
 
       The following are valid events:
 
@@ -668,7 +667,7 @@ export const AllCypressErrors = {
 
       The error was:
 
-      ${arg2}
+      ${fmt.highlight(arg2)}
 
       This occurred while Cypress was compiling and bundling your test code. This is usually caused by:
 
@@ -684,7 +683,7 @@ export const AllCypressErrors = {
     return errTemplate`\
         We found an invalid value in the file: ${fmt.path(configFileBaseName)}
 
-        ${errMessage}`
+        ${fmt.highlight(errMessage)}`
     // happens when there is an invalid config value is returned from the
     // project's plugins file like "cypress/plugins.index.js"
   },
@@ -693,7 +692,7 @@ export const AllCypressErrors = {
     return errTemplate`\
         An invalid configuration value returned from the plugins file: ${fmt.path(relativePluginsPath)}
 
-        ${errMsg}`
+        ${fmt.highlight(errMsg)}`
     // general configuration error not-specific to configuration or plugins files
   },
   // TODO: test this
@@ -701,13 +700,13 @@ export const AllCypressErrors = {
     return errTemplate`\
         We found an invalid configuration value:
 
-        ${errMsg}`
+        ${fmt.highlight(errMsg)}`
   },
   RENAMED_CONFIG_OPTION: (arg1: {name: string, newName: string}) => {
     return errTemplate`\
-        The ${arg1.name} configuration option you have supplied has been renamed.
+        The ${fmt.highlight(arg1.name)} configuration option you have supplied has been renamed.
 
-        Please rename ${arg1.name} to ${fmt.highlightSecondary(arg1.newName)}`
+        Please rename ${fmt.highlight(arg1.name)} to ${fmt.highlightSecondary(arg1.newName)}`
   },
   CANNOT_CONNECT_BASE_URL: () => {
     return errTemplate`\
@@ -721,7 +720,7 @@ export const AllCypressErrors = {
 
         ${fmt.listItem(arg1)}
 
-        This server has been configured as your ${`baseUrl`}, and tests will likely fail if it is not running.`
+        This server has been configured as your ${fmt.highlight(`baseUrl`)}, and tests will likely fail if it is not running.`
   },
   // TODO: test this
   CANNOT_CONNECT_BASE_URL_RETRYING: (arg1: {attempt: number, baseUrl: string, remaining: number, delay: number}) => {
@@ -732,19 +731,19 @@ export const AllCypressErrors = {
 
             ${fmt.listItem(arg1.baseUrl)}
 
-            We are verifying this server because it has been configured as your ${`baseUrl`}.
+            We are verifying this server because it has been configured as your ${fmt.highlight(`baseUrl`)}.
 
             Cypress automatically waits until your server is accessible before running tests.
 
             ${displayRetriesRemaining(arg1.remaining)}`
       default:
-        return errTemplate`${fmt.off(displayRetriesRemaining(arg1.remaining))}`
+        return errTemplate`${displayRetriesRemaining(arg1.remaining)}`
     }
   },
   // TODO: test this
   INVALID_REPORTER_NAME: (arg1: {name: string, paths: string[], error: string}) => {
     return errTemplate`\
-        Error loading the reporter: ${arg1.name}
+        Error loading the reporter: ${fmt.highlight(arg1.name)}
 
         We searched for the reporter in these paths:
 
@@ -752,7 +751,7 @@ export const AllCypressErrors = {
 
         The error was:
 
-        ${chalk.yellow(arg1.error)}
+        ${fmt.stackTrace(arg1.error)}
 
         Learn more at https://on.cypress.io/reporters`
   },
@@ -764,7 +763,7 @@ export const AllCypressErrors = {
   // TODO: verify these are configBaseName and not configPath
   CONFIG_FILES_LANGUAGE_CONFLICT: (projectRoot: string, configFileBaseName1: string, configFileBaseName2: string) => {
     return errTemplate`
-          There is both a ${configFileBaseName1} and a ${configFileBaseName2} at the location below:
+          There is both a ${fmt.highlight(configFileBaseName1)} and a ${fmt.highlight(configFileBaseName2)} at the location below:
 
           ${fmt.listItem(projectRoot)}
 
@@ -775,7 +774,7 @@ export const AllCypressErrors = {
     return errTemplate`\
         Could not find a Cypress configuration file.
 
-        We looked but did not find a ${configFileBaseName} file in this folder: ${fmt.path(projectRoot)}`
+        We looked but did not find a ${fmt.highlight(configFileBaseName)} file in this folder: ${fmt.path(projectRoot)}`
   },
   INVOKED_BINARY_OUTSIDE_NPM_MODULE: () => {
     return errTemplate`\
@@ -783,7 +782,7 @@ export const AllCypressErrors = {
 
         This is not the recommended approach, and Cypress may not work correctly.
 
-        Please install the ${`cypress`} NPM package and follow the instructions here:
+        Please install the ${fmt.highlight(`cypress`)} NPM package and follow the instructions here:
 
         https://on.cypress.io/installing-cypress`
   },
@@ -823,7 +822,7 @@ export const AllCypressErrors = {
     return errTemplate`\
         You've exceeded the limit of test results under your free plan this month. ${getUsedTestsMessage(arg1.limit, arg1.usedTestsMessage)}
 
-        Your plan is now in a grace period, which means you will have the full benefits of your current plan until ${arg1.gracePeriodMessage}.
+        Your plan is now in a grace period, which means you will have the full benefits of your current plan until ${fmt.highlight(arg1.gracePeriodMessage)}.
 
         Please visit your billing to upgrade your plan.
 
@@ -831,7 +830,7 @@ export const AllCypressErrors = {
   },
   PLAN_EXCEEDS_MONTHLY_TESTS: (arg1: {link: string, planType: string, usedTestsMessage: string, limit: number}) => {
     return errTemplate`\
-        You've exceeded the limit of test results under your ${arg1.planType} billing plan this month. ${getUsedTestsMessage(arg1.limit, arg1.usedTestsMessage)}
+        You've exceeded the limit of test results under your ${fmt.highlight(arg1.planType)} billing plan this month. ${getUsedTestsMessage(arg1.limit, arg1.usedTestsMessage)}
 
         To continue getting the full benefits of your current plan, please visit your billing to upgrade.
 
@@ -841,7 +840,7 @@ export const AllCypressErrors = {
     return errTemplate`\
         ${fmt.highlightSecondary(`Parallelization`)} is not included under your free plan.
 
-        Your plan is now in a grace period, which means your tests will still run in parallel until ${arg1.gracePeriodMessage}. Please upgrade your plan to continue running your tests in parallel in the future.
+        Your plan is now in a grace period, which means your tests will still run in parallel until ${fmt.highlight(arg1.gracePeriodMessage)}. Please upgrade your plan to continue running your tests in parallel in the future.
 
         ${fmt.off(arg1.link)}`
   },
@@ -857,7 +856,7 @@ export const AllCypressErrors = {
     return errTemplate`\
         ${fmt.highlightSecondary(`Grouping`)} is not included under your free plan.
 
-        Your plan is now in a grace period, which means your tests will still run with groups until ${arg1.gracePeriodMessage}. Please upgrade your plan to continue running your tests with groups in the future.
+        Your plan is now in a grace period, which means your tests will still run with groups until ${fmt.highlight(arg1.gracePeriodMessage)}. Please upgrade your plan to continue running your tests with groups in the future.
 
         ${fmt.off(arg1.link)}`
   },
@@ -874,12 +873,12 @@ export const AllCypressErrors = {
     return errTemplate`\
         A fixture file could not be found at any of the following paths:
 
-          > ${arg1}
-          > ${arg1}.[ext]
+          ${fmt.listItem(arg1)}
+          ${fmt.listItem(arg1)}.[ext]
 
         Cypress looked for these file extensions at the provided path:
 
-          > ${arg2.join(', ')}
+          ${fmt.listItem(arg2.join(', '))}
 
         Provide a path to an existing fixture file.`
   },
@@ -914,7 +913,7 @@ export const AllCypressErrors = {
   },
   COULD_NOT_FIND_SYSTEM_NODE: (nodeVersion: string) => {
     return errTemplate`\
-        ${`nodeVersion`} is set to ${fmt.highlightTertiary(`system`)} but Cypress could not find a usable Node executable on your ${fmt.highlightSecondary(`PATH`)}.
+        ${fmt.highlight(`nodeVersion`)} is set to ${fmt.highlightTertiary(`system`)} but Cypress could not find a usable Node executable on your ${fmt.highlightSecondary(`PATH`)}.
 
         Make sure that your Node executable exists and can be run by the current user.
 
@@ -922,16 +921,16 @@ export const AllCypressErrors = {
   },
   INVALID_CYPRESS_INTERNAL_ENV: (val: string) => {
     return errTemplate`\
-        We have detected an unknown or unsupported ${fmt.highlightSecondary(`CYPRESS_INTERNAL_ENV`)} value: ${val}
+        We have detected an unknown or unsupported ${fmt.highlightSecondary(`CYPRESS_INTERNAL_ENV`)} value: ${fmt.highlight(val)}
 
         CYPRESS_INTERNAL_ENV is reserved for internal use and cannot be modified.`
   },
   CDP_VERSION_TOO_OLD: (minimumVersion: string, currentVersion: {major: number, minor: string | number}) => {
     const phrase = currentVersion.major !== 0
       ? fmt.highlight(`${currentVersion.major}.${currentVersion.minor}`)
-      : 'an older version'
+      : fmt.off('an older version')
 
-    return errTemplate`A minimum CDP version of ${minimumVersion} is required, but the current browser has ${fmt.off(phrase)}.`
+    return errTemplate`A minimum CDP version of ${fmt.highlight(minimumVersion)} is required, but the current browser has ${phrase}.`
   },
   CDP_COULD_NOT_CONNECT: (browserName: string, port: number, err: Error) => {
     // we include a stack trace here because it may contain useful information
@@ -942,7 +941,7 @@ export const AllCypressErrors = {
 
         This usually indicates there was a problem opening the ${fmt.off(_.capitalize(browserName))} browser.
 
-        The CDP port requested was ${`${port}`}.
+        The CDP port requested was ${fmt.highlight(port)}.
 
         ${fmt.stackTrace(err)}`
   },
@@ -968,7 +967,7 @@ export const AllCypressErrors = {
   },
   UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES: (arg1: string[], arg2: string[]) => {
     return errTemplate`\
-        The ${`launchOptions`} object returned by your plugin's ${fmt.highlightSecondary(`before:browser:launch`)} handler contained unexpected properties:
+        The ${fmt.highlight('launchOptions')} object returned by your plugin's ${fmt.highlightSecondary(`before:browser:launch`)} handler contained unexpected properties:
 
         ${fmt.listItems(arg1)}
 
@@ -981,7 +980,7 @@ export const AllCypressErrors = {
   // TODO: test this
   COULD_NOT_PARSE_ARGUMENTS: (argName: string, argValue: string, errMsg: string) => {
     return errTemplate`\
-        Cypress encountered an error while parsing the argument: ${`--${argName}`}
+        Cypress encountered an error while parsing the argument: ${fmt.flag(`--${argName}`)}
 
         You passed: ${fmt.highlightTertiary(argValue)}
 
@@ -1009,7 +1008,7 @@ export const AllCypressErrors = {
   },
   EXPERIMENTAL_SAMESITE_REMOVED: () => {
     return errTemplate`\
-        The ${`experimentalGetCookiesSameSite`} configuration option was removed in ${fmt.cypressVersion(`5.0.0`)}.
+        The ${fmt.highlight(`experimentalGetCookiesSameSite`)} configuration option was removed in ${fmt.cypressVersion(`5.0.0`)}.
 
         Returning the ${fmt.highlightSecondary(`sameSite`)} property is now the default behavior of the ${fmt.highlightSecondary(`cy.cookie`)} commands.
 
@@ -1018,7 +1017,7 @@ export const AllCypressErrors = {
   // TODO: verify configFile is absolute path
   EXPERIMENTAL_COMPONENT_TESTING_REMOVED: (arg1: {configFile: string}) => {
     return errTemplate`\
-        The ${'experimentalComponentTesting'} configuration option was removed in ${fmt.cypressVersion(`7.0.0`)}.
+        The ${fmt.highlight('experimentalComponentTesting')} configuration option was removed in ${fmt.cypressVersion(`7.0.0`)}.
 
         Please remove this flag from: ${fmt.path(arg1.configFile)}
 
@@ -1030,25 +1029,25 @@ export const AllCypressErrors = {
   },
   EXPERIMENTAL_SHADOW_DOM_REMOVED: () => {
     return errTemplate`\
-        The ${`experimentalShadowDomSupport`} configuration option was removed in ${fmt.cypressVersion(`5.2.0`)}. It is no longer necessary when utilizing the ${fmt.highlightSecondary(`includeShadowDom`)} option.
+        The ${fmt.highlight(`experimentalShadowDomSupport`)} configuration option was removed in ${fmt.cypressVersion(`5.2.0`)}. It is no longer necessary when utilizing the ${fmt.highlightSecondary(`includeShadowDom`)} option.
 
         You can safely remove this option from your config.`
   },
   EXPERIMENTAL_NETWORK_STUBBING_REMOVED: () => {
     return errTemplate`\
-        The ${`experimentalNetworkStubbing`} configuration option was removed in ${fmt.cypressVersion(`6.0.0`)}.
+        The ${fmt.highlight(`experimentalNetworkStubbing`)} configuration option was removed in ${fmt.cypressVersion(`6.0.0`)}.
 
         It is no longer necessary for using ${fmt.highlightSecondary(`cy.intercept()`)}. You can safely remove this option from your config.`
   },
   EXPERIMENTAL_RUN_EVENTS_REMOVED: () => {
     return errTemplate`\
-        The ${`experimentalRunEvents`} configuration option was removed in ${fmt.cypressVersion(`6.7.0`)}. It is no longer necessary when listening to run events in the plugins file.
+        The ${fmt.highlight(`experimentalRunEvents`)} configuration option was removed in ${fmt.cypressVersion(`6.7.0`)}. It is no longer necessary when listening to run events in the plugins file.
 
         You can safely remove this option from your config.`
   },
   FIREFOX_GC_INTERVAL_REMOVED: () => {
     return errTemplate`\
-        The ${`firefoxGcInterval`} configuration option was removed in ${fmt.cypressVersion(`8.0.0`)}. It was introduced to work around a bug in Firefox 79 and below.
+        The ${fmt.highlight(`firefoxGcInterval`)} configuration option was removed in ${fmt.cypressVersion(`8.0.0`)}. It was introduced to work around a bug in Firefox 79 and below.
 
         Since Cypress no longer supports Firefox 85 and below in Cypress ${fmt.cypressVersion(`8.0.0`)}, this option was removed.
 
@@ -1056,7 +1055,7 @@ export const AllCypressErrors = {
   },
   INCOMPATIBLE_PLUGIN_RETRIES: (arg1: string) => {
     return errTemplate`\
-      We've detected that the incompatible plugin ${`cypress-plugin-retries`} is installed at: ${fmt.path(arg1)}
+      We've detected that the incompatible plugin ${fmt.highlight(`cypress-plugin-retries`)} is installed at: ${fmt.path(arg1)}
 
       Test retries is now natively supported in ${fmt.cypressVersion(`5.0.0`)}.
 
@@ -1079,24 +1078,24 @@ export const AllCypressErrors = {
   },
   PLUGINS_RUN_EVENT_ERROR: (arg1: string, arg2: Error) => {
     return errTemplate`\
-        An error was thrown in your plugins file while executing the handler for the ${arg1} event.
+        An error was thrown in your plugins file while executing the handler for the ${fmt.highlight(arg1)} event.
 
         The error we received was:
 
         ${fmt.stackTrace(arg2)}`
   },
   CT_NO_DEV_START_EVENT: (pluginsFilePath: string) => {
-    const code = stripIndent`
+    const code = errPartial`
+      ${fmt.comment(`// ${pluginsFilePath}`)}
       module.exports = (on, config) => {
         on('dev-server:start', () => startDevServer(...)
       }`
 
     return errTemplate`\
-        To run component-testing, cypress needs the ${`dev-server:start`} event.
+        To run component-testing, cypress needs the ${fmt.highlight(`dev-server:start`)} event.
 
         Please implement it by adding this code to your ${fmt.highlightSecondary(`pluginsFile`)}.
 
-        ${fmt.meta(`// ${pluginsFilePath}`)}
         ${fmt.code(code)}
 
         See https://on.cypress.io/component-testing for help on setting up component testing.`
@@ -1106,23 +1105,23 @@ export const AllCypressErrors = {
   },
   NODE_VERSION_DEPRECATION_SYSTEM: (arg1: {name: string, value: any, configFile: string}) => {
     return errTemplate`\
-      Deprecation Warning: ${backtick(arg1.name)} is currently set to ${backtick(arg1.value)} in the ${backtick(arg1.configFile)} configuration file.
+      Deprecation Warning: ${fmt.highlight(arg1.name)} is currently set to ${fmt.highlightSecondary(arg1.value)} in the ${fmt.highlightTertiary(arg1.configFile)} configuration file.
 
-      As of ${fmt.cypressVersion(`9.0.0`)} the default behavior of ${backtick(arg1.name)} has changed to always use the version of Node used to start cypress via the cli.
+      As of ${fmt.cypressVersion(`9.0.0`)} the default behavior of ${fmt.highlight(arg1.name)} has changed to always use the version of Node used to start cypress via the cli.
 
-      Please remove the ${backtick(arg1.name)} configuration option from ${backtick(arg1.configFile)}.
+      Please remove the ${fmt.highlight(arg1.name)} configuration option from ${fmt.highlightTertiary(arg1.configFile)}.
       `
   },
   // TODO: does this need to change since its a warning?
   NODE_VERSION_DEPRECATION_BUNDLED: (arg1: {name: string, value: any, configFile: string}) => {
     return errTemplate`\
-      Deprecation Warning: ${backtick(arg1.name)} is currently set to ${backtick(arg1.value)} in the ${backtick(arg1.configFile)} configuration file.
+      Deprecation Warning: ${fmt.highlight(arg1.name)} is currently set to ${fmt.highlightSecondary(arg1.value)} in the ${fmt.highlightTertiary(arg1.configFile)} configuration file.
 
-      As of ${fmt.cypressVersion(`9.0.0`)} the default behavior of ${backtick(arg1.name)} has changed to always use the version of Node used to start cypress via the cli.
+      As of ${fmt.cypressVersion(`9.0.0`)} the default behavior of ${fmt.highlight(arg1.name)} has changed to always use the version of Node used to start cypress via the cli.
 
-      When ${backtick(arg1.name)} is set to ${backtick(arg1.value)}, Cypress will use the version of Node bundled with electron. This can cause problems running certain plugins or integrations.
+      When ${fmt.highlight(arg1.name)} is set to ${fmt.highlightSecondary(arg1.value)}, Cypress will use the version of Node bundled with electron. This can cause problems running certain plugins or integrations.
 
-      As the ${backtick(arg1.name)} configuration option will be removed in a future release, it is recommended to remove the ${backtick(arg1.name)} configuration option from ${backtick(arg1.configFile)}.
+      As the ${fmt.highlight(arg1.name)} configuration option will be removed in a future release, it is recommended to remove the ${fmt.highlight(arg1.name)} configuration option from ${fmt.highlightTertiary(arg1.configFile)}.
       `
   },
 } as const
@@ -1160,14 +1159,14 @@ export const getError = function <Type extends keyof AllCypressErrorObj> (type: 
   // @ts-expect-error
   const result = AllCypressErrors[type](...args) as ErrTemplateResult
 
-  const { message, details, originalError, forBrowser } = result
+  const { message, details, originalError, messageMarkdown } = result
 
   const err = new Error(message) as CypressError
 
   err.isCypressErr = true
   err.type = type
   err.details = details
-  err.forBrowser = forBrowser
+  err.messageMarkdown = messageMarkdown
   err.originalError = originalError
 
   if (originalError) {
@@ -1215,20 +1214,16 @@ export const cloneError = function (err: CypressError | GenericError, options: {
     html: false,
   })
 
-  const message = _.isFunction(err.forBrowser) ? err.forBrowser().message : err.message
-
   // pull off these properties
-  const obj = _.pick(err, 'type', 'name', 'stack', 'fileName', 'lineNumber', 'columnNumber') as ClonedError
+  const obj = _.pick(err, 'message', 'messageMarkdown', 'type', 'name', 'stack', 'fileName', 'lineNumber', 'columnNumber') as ClonedError
 
   if (options.html) {
-    obj.message = ansi_up.ansi_to_html(message)
+    obj.message = ansi_up.ansi_to_html(err.message)
     // revert back the distorted characters
     // in case there is an error in a child_process
     // that contains quotes
     .replace(/\&\#x27;/g, '\'')
     .replace(/\&quot\;/g, '"')
-  } else {
-    obj.message = message
   }
 
   // and any own (custom) properties

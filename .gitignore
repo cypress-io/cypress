@@ -87,6 +87,8 @@ system-tests/fixtures/large-img
 
 # from errors
 /packages/errors/__snapshot-images__
+/packages/errors/__snapshot-md__
+/packages/errors/__snapshot-html-local__
 
 # graphql, auto-generated
 /packages/launchpad/src/generated

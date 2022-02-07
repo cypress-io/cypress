@@ -1,11 +1,10 @@
-import assert from 'assert'
 import chalk from 'chalk'
 import _ from 'lodash'
-import stripAnsi from 'strip-ansi'
 import { trimMultipleNewLines } from './errorUtils'
 import { stripIndent } from './stripIndent'
 
 import type { ErrTemplateResult, SerializedError } from './errorTypes'
+import assert from 'assert'
 
 interface ListOptions {
   prefix?: string
@@ -20,8 +19,83 @@ const theme = {
   magenta: chalk.magentaBright,
 }
 
-export const fmt = {
+type AllowedPartialArg = Guard | Format | PartialErr | null
+
+type AllowedTemplateArg = StackTrace | AllowedPartialArg
+
+class PartialErr {
+  constructor (readonly strArr: TemplateStringsArray, readonly args: AllowedTemplateArg[]) {}
+}
+
+interface FormatConfig {
+  block: true
+}
+
+type ToFormat = string | number | Error | object | null | Guard | AllowedTemplateArg
+
+class Format {
+  constructor (readonly type: keyof typeof fmtHighlight, readonly val: ToFormat, readonly config?: FormatConfig) {}
+
+  formatVal (target: 'ansi' | 'markdown') {
+    if (this.val instanceof Guard) {
+      return this.val.val
+    }
+
+    return target === 'ansi' ? this.formatAnsi() : this.formatMarkdown()
+  }
+
+  private formatAnsi () {
+    const val = this.prepVal('ansi')
+
+    return fmtHighlight[this.type](val)
+  }
+
+  private formatMarkdown () {
+    if (this.type === 'code') {
+      return this.prepVal('markdown')
+    }
+
+    return mdFence(this.prepVal('markdown'))
+  }
+
+  private prepVal (target: 'ansi' | 'markdown'): string {
+    if (this.val instanceof PartialErr) {
+      return prepMessage(this.val.strArr, this.val.args, target)
+    }
+
+    if (isErrorLike(this.val)) {
+      return `\n${this.val.name}: ${this.val.message}`
+    }
+
+    if (this.val && (typeof this.val === 'object' || Array.isArray(this.val))) {
+      return JSON.stringify(this.val, null, 2)
+    }
+
+    return `${this.val}`
+  }
+}
+
+function mdFence (val: string) {
+  if (isMultiLine(val)) {
+    return `\`\`\`${val}\`\`\``
+  }
+
+  return `\`${val}\``
+}
+
+function isMultiLine (val: string) {
+  return Boolean(val.split('\n').length > 1)
+}
+
+function makeFormat (type: keyof typeof fmtHighlight, config?: FormatConfig) {
+  return (val: ToFormat) => {
+    return new Format(type, val, config)
+  }
+}
+
+const fmtHighlight = {
   meta: theme.gray,
+  comment: theme.gray,
   path: theme.blue,
   code: theme.blue,
   url: theme.blue,
@@ -29,8 +103,19 @@ export const fmt = {
   highlight: theme.yellow,
   highlightSecondary: theme.magenta,
   highlightTertiary: theme.blue,
+} as const
+
+export const fmt = {
+  meta: makeFormat('meta'),
+  comment: makeFormat('comment'),
+  path: makeFormat('path'),
+  code: makeFormat('code', { block: true }),
+  url: makeFormat('url'),
+  flag: makeFormat('flag'),
+  highlight: makeFormat('highlight'),
+  highlightSecondary: makeFormat('highlightSecondary'),
+  highlightTertiary: makeFormat('highlightTertiary'),
   off: guard,
-  stringify,
   terminal,
   listItem,
   listItems,
@@ -50,7 +135,7 @@ function cypressVersion (version: string) {
     throw new Error('Cypress version provided must be in x.x.x format')
   }
 
-  return `Cypress version ${version}`
+  return guard(`Cypress version ${version}`)
 }
 
 function _item (item: string, options: ListOptions = {}) {
@@ -112,22 +197,6 @@ export function guard (val: string | number) {
   return new Guard(val)
 }
 
-export class Backtick {
-  constructor (readonly val: string | number) {}
-}
-
-export function backtick (val: string) {
-  return new Backtick(val)
-}
-
-export class Stringify {
-  constructor (readonly val: any) {}
-}
-
-export function stringify (val: object) {
-  return new Stringify(val)
-}
-
 /**
  * Marks the value as "details". This is when we print out the stack trace to the console
  * (if it's an error), or use the stack trace as the originalError
@@ -147,30 +216,12 @@ export function isErrorLike (err: any): err is SerializedError | Error {
   return err && typeof err === 'object' && Boolean('name' in err && 'message' in err)
 }
 
-function jsonStringify (obj: object) {
-  return JSON.stringify(obj, null, 2)
-}
-
-function isScalar (val: any): val is string | number | null | boolean {
-  return typeof val === 'string' ||
-    typeof val === 'number' ||
-    typeof val === 'boolean' ||
-    val == null
-}
-
 /**
- * Formats the value passed in via details(), but does not color the value here, since it
- * is printed separately in the console.
- *
- * @param val
- * @returns
+ * Creates a "partial" that can be interpolated into the full Error template. The partial runs through
+ * stripIndent prior to being added into the template
  */
-function formatMsgDetails (val: any): string {
-  return isScalar(val)
-    ? `${val}`
-    : isErrorLike(val)
-      ? val.stack || val.message || val.name
-      : jsonStringify(val)
+export const errPartial = (templateStr: TemplateStringsArray, ...args: AllowedPartialArg[]) => {
+  return new PartialErr(templateStr, args)
 }
 
 /**
@@ -184,81 +235,53 @@ function formatMsgDetails (val: any): string {
  *   - Wrap every arg in backticks, for better rendering in markdown
  *   - If details is an error, it gets provided as originalError
  */
-export const errTemplate = (strings: TemplateStringsArray, ...args: Array<string | number | Error | StackTrace | Guard | object>): ErrTemplateResult => {
+export const errTemplate = (strings: TemplateStringsArray, ...args: AllowedTemplateArg[]): ErrTemplateResult => {
   let originalError: Error | undefined = undefined
-  let messageDetails: string | undefined
 
-  function prepMessage (forTerminal = true) {
-    function formatVal (val: string | number | Error | object | null) {
-      // if (isErrorLike(val)) {
-      //   return `${val.name}: ${val.message}`
-      // }
-
-      if (isScalar(val)) {
-        // If it's for the terminal, wrap in blue, otherwise wrap in backticks if we don't see any backticks
-        if (forTerminal) {
-          return theme.yellow(`${val}`)
-        }
-
-        return String(val).includes('`') ? String(val) : `\`${val}\``
-      }
-
-      try {
-        const objJson = jsonStringify(val)
-
-        return forTerminal ? objJson : stripIndent`
-        \`\`\`
-        ${objJson}
-        \`\`\`
-        `
-      } catch {
-        return String(val)
-      }
-    }
-
-    let templateArgs: Array<string | number> = []
-    let detailsSeen = false
-
-    for (const arg of args) {
-      if (arg instanceof Backtick) {
-        templateArgs.push(`\`${arg.val}\``)
-      } else if (arg instanceof Guard) {
-        templateArgs.push(arg.val)
-      } else if (arg instanceof Stringify) {
-        templateArgs.push(theme.white(jsonStringify(arg.val)))
-      } else if (arg instanceof StackTrace) {
-        assert(!detailsSeen, `Cannot use details() multiple times in the same errTemplate`)
-        detailsSeen = true
-        const { val } = arg
-
-        messageDetails = chalk.magenta(formatMsgDetails(val))
-        if (isErrorLike(val)) {
-          originalError = val
-        }
-
-        templateArgs.push('')
-      } else if (isErrorLike(arg)) {
-        templateArgs.push(chalk.magenta(`${arg.name}: ${arg.message}`))
-      } else {
-        templateArgs.push(formatVal(arg))
-      }
-    }
-
-    return stripIndent(strings, ...templateArgs)
-  }
-
-  const msg = trimMultipleNewLines(prepMessage())
+  const msg = trimMultipleNewLines(prepMessage(strings, args, 'ansi'))
 
   return {
     message: msg,
-    details: messageDetails,
     originalError,
-    forBrowser () {
-      const msg = trimMultipleNewLines(prepMessage(false))
-
-      return {
-        message: stripAnsi(msg),
-      }
-    },
+    messageMarkdown: trimMultipleNewLines(prepMessage(strings, args, 'markdown')),
   }
+}
+
+function prepMessage (templateStrings: TemplateStringsArray, args: AllowedTemplateArg[], target: 'ansi' | 'markdown'): string {
+  let originalError: Error | undefined = undefined
+  const templateArgs = []
+
+  for (const arg of args) {
+    // We assume null/undefined values are skipped when rendering, for conditional templating
+    if (arg == null) {
+      templateArgs.push('')
+    } else if (arg instanceof Guard) {
+      // Guard prevents any formatting
+      templateArgs.push(arg.val)
+    } else if (arg instanceof Format) {
+      // Format = stringify & color ANSI, or make a markdown block
+      templateArgs.push(arg.formatVal(target))
+    } else if (arg instanceof StackTrace) {
+      if (isErrorLike(arg.val)) {
+        assert(!originalError, `Cannot use fmt.stackTrace() multiple times in the same errTemplate`)
+        originalError = arg.val
+      } else {
+        if (process.env.CYPRESS_INTERNAL_ENV !== 'production') {
+          throw new Error(`Cannot use arg.stackTrace with a non error-like value, saw ${JSON.stringify(arg.val)}`)
+        }
+
+        const err = new Error()
+
+        err.stack = typeof arg.val === 'string' ? arg.val : JSON.stringify(arg.val)
+        originalError = err
+      }
+    } else if (arg instanceof PartialErr) {
+      // Partial error = prepMessage + interpolate
+      templateArgs.push(prepMessage(arg.strArr, arg.args, target))
+    } else {
+      throw new Error(`Invalid value passed to prepMessage, saw ${arg}`)
+    }
+  }
+
+  return stripIndent(templateStrings, ...templateArgs)
 }

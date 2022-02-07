@@ -8,21 +8,21 @@ describe('errTemplate', () => {
     const obj = errTemplate`Hello world`
 
     expect(obj).to.include({ message: 'Hello world' })
-    expect(obj.forBrowser()).to.include({ message: 'Hello world' })
+    expect(obj).to.include({ messageMarkdown: 'Hello world' })
   })
 
   it('colors yellow by default for the console, backticks passed arguments for the browser,', () => {
-    const obj = errTemplate`Hello world ${'special'}`
+    const obj = errTemplate`Hello world ${fmt.highlight('special')}`
 
     expect(obj).to.include({ message: `Hello world ${chalk.yellow('special')}` })
-    expect(obj.forBrowser()).to.include({ message: 'Hello world `special`' })
+    expect(obj).to.include({ messageMarkdown: 'Hello world `special`' })
   })
 
   it('uses fmt.off to guard passed values', () => {
     const obj = errTemplate`Hello world ${fmt.off('special')}`
 
     expect(obj).to.include({ message: `Hello world special` })
-    expect(obj.forBrowser()).to.include({ message: `Hello world special` })
+    expect(obj).to.include({ messageMarkdown: `Hello world special` })
   })
 
   it('provides as details for toErrorProps', () => {
@@ -44,11 +44,11 @@ describe('errTemplate', () => {
     const obj = errTemplate`
       This was returned from the app:
 
-      ${someObj}
+      ${fmt.highlightTertiary(someObj)}
     `
 
-    expect(obj.forBrowser()).to.include({
-      message: stripIndent`
+    expect(obj).to.include({
+      messageMarkdown: stripIndent`
         This was returned from the app:
 
         \`\`\`
@@ -73,7 +73,7 @@ describe('errTemplate', () => {
       ${fmt.stackTrace(someObj)}
     `
 
-    expect(obj.forBrowser()).to.include({ message: `This was returned from the app:` })
+    expect(obj).to.include({ messageMarkdown: `This was returned from the app:` })
     expect(obj).to.include({
       message: `This was returned from the app:`,
       details: chalk.magenta(JSON.stringify(someObj, null, 2)),
@@ -84,12 +84,12 @@ describe('errTemplate', () => {
     const specFile = 'specFile.js'
     const err = new Error()
     const obj = errTemplate`
-      This was an error in ${specFile}
+      This was an error in ${fmt.highlight(specFile)}
 
       ${fmt.stackTrace(err)}
     `
 
-    expect(obj.forBrowser()).to.include({ message: `This was an error in \`specFile.js\`` })
+    expect(obj).to.include({ messageMarkdown: `This was an error in \`specFile.js\`` })
     expect(obj).to.include({
       message: `This was an error in ${chalk.yellow(specFile)}`,
       details: chalk.magenta(err.stack ?? ''),
