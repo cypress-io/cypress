@@ -51,7 +51,7 @@ function cypressVersion (version: string) {
   }
 
   // TODO: come back to this to work on formatting
-  return guard(`Cypress version ${version}`)
+  return `Cypress version ${version}`
 }
 
 function _item (item: string, options: ListOptions = {}) {

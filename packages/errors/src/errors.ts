@@ -85,7 +85,7 @@ export const AllCypressErrors = {
   },
   CHROME_WEB_SECURITY_NOT_SUPPORTED: (browser: string) => {
     return errTemplate`\
-        Your project has set the configuration option: ${`chromeWebSecurity`} to ${fmt.highlightSecondary(`false`)}
+        Your project has set the configuration option: ${`chromeWebSecurity`} to ${fmt.highlightTertiary(`false`)}
 
         This option will not have an effect in ${fmt.off(_.capitalize(browser))}. Tests that rely on web security being disabled will not run as expected.`
   },
@@ -96,7 +96,7 @@ export const AllCypressErrors = {
       canarySuffix += '\n\n'
       canarySuffix += stripIndent`\
           Note: In ${fmt.cypressVersion(`4.0.0`)}, Canary must be launched as ${fmt.highlightSecondary(`chrome:canary`)}, not ${fmt.highlightSecondary(`canary`)}.
-_
+
           See https://on.cypress.io/migration-guide for more information on breaking changes in 4.0.0.`
     }
 
@@ -327,6 +327,7 @@ _
   DUPLICATE_TASK_KEY: (arg1: string[]) => {
     return errTemplate`\
       Warning: Multiple attempts to register the following task(s):
+
       ${fmt.listItems(arg1, { color: fmt.highlight })}
 
       Only the last attempt will be registered.`
@@ -439,7 +440,6 @@ _
 
         ${fmt.stringify(arg1.object)}`
   },
-  // TODO: fix
   RECORDING_FROM_FORK_PR: () => {
     return errTemplate`\
         Warning: It looks like you are trying to record this run from a forked PR.
@@ -595,7 +595,7 @@ _
         ${fmt.stackTrace(err)}
       `
   },
-  // TODO: fix
+  // TODO: test
   PLUGINS_DIDNT_EXPORT_FUNCTION: (pluginsFilePath: string, exported: any) => {
     const code = stripIndent`
       module.exports = (on, config) => {
@@ -640,7 +640,6 @@ _
       ${fmt.stackTrace(arg2)}
     `
   },
-  // TODO: look at the listItem prefix
   // TODO: update the error message in the runner too
   BUNDLE_ERROR: (filePath: string, arg2: string) => {
     // IF YOU MODIFY THIS MAKE SURE TO UPDATE
@@ -739,13 +738,11 @@ _
         ${chalk.yellow(arg1.error)}
 
         Learn more at https://on.cypress.io/reporters`
-    // TODO: update with vetted cypress language
   },
   // TODO: test this out
   NO_DEFAULT_CONFIG_FILE_FOUND: (arg1: string) => {
     return errTemplate`\
         Could not find a Cypress configuration file in this folder: ${fmt.path(arg1)}`
-    // TODO: update with vetted cypress language
   },
   // TODO: verify these are configBaseName and not configPath
   CONFIG_FILES_LANGUAGE_CONFLICT: (projectRoot: string, configFileBaseName1: string, configFileBaseName2: string) => {
@@ -869,6 +866,7 @@ _
 
         Provide a path to an existing fixture file.`
   },
+  // TODO: test this
   AUTH_COULD_NOT_LAUNCH_BROWSER: (loginUrl: string) => {
     return errTemplate`\
       Cypress was unable to open your installed browser. To continue logging in, please open this URL in your web browser:
@@ -899,7 +897,7 @@ _
   },
   COULD_NOT_FIND_SYSTEM_NODE: (nodeVersion: string) => {
     return errTemplate`\
-        ${`nodeVersion`} is set to ${`system`} but Cypress could not find a usable Node executable on your ${fmt.highlightSecondary(`PATH`)}.
+        ${`nodeVersion`} is set to ${fmt.highlightTertiary(`system`)} but Cypress could not find a usable Node executable on your ${fmt.highlightSecondary(`PATH`)}.
 
         Make sure that your Node executable exists and can be run by the current user.
 
@@ -1056,6 +1054,7 @@ _
 
     return errTemplate`\
         The following configuration ${fmt.off(phrase)} invalid:
+
         ${fmt.listItems(arg1, { color: fmt.highlight })}
 
         https://on.cypress.io/configuration

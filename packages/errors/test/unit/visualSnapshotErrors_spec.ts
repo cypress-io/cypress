@@ -59,6 +59,8 @@ const snapshotErrorConsoleLogs = function (errorFileName: string) {
   .join('\n')
   .value()
 
+  expect(logs).not.to.contain('[object Object]')
+
   // if the sanitized snapshot matches, let's save the ANSI colors converted into HTML
   const html = termToHtml
   .strings(logs, termToHtml.themes.dark.name)
