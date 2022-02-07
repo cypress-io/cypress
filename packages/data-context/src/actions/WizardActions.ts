@@ -2,7 +2,7 @@ import type { CodeLanguageEnum, NexusGenEnums, NexusGenObjects } from '@packages
 import { Bundler, CodeLanguage, CODE_LANGUAGES, FrontendFramework, FRONTEND_FRAMEWORKS } from '@packages/types'
 import assert from 'assert'
 import dedent from 'dedent'
-import path, { join } from 'path'
+import path from 'path'
 import Debug from 'debug'
 
 const debug = Debug('cypress:data-context:wizard-actions')
@@ -87,7 +87,7 @@ export class WizardActions {
       let hasPackageJson = true
 
       try {
-        await this.ctx.fs.access(join(this.ctx.currentProject, 'package.json'), this.ctx.fs.constants.R_OK)
+        await this.ctx.fs.access(path.join(this.ctx.currentProject, 'package.json'), this.ctx.fs.constants.R_OK)
       } catch (e) {
         debug('Could not read or find package.json: %O', e)
         hasPackageJson = false
@@ -95,7 +95,7 @@ export class WizardActions {
       const packageJson: {
         dependencies?: { [key: string]: string }
         devDependencies?: { [key: string]: string }
-      } = hasPackageJson ? await this.ctx.fs.readJson(join(this.ctx.currentProject, 'package.json')) : {}
+      } = hasPackageJson ? await this.ctx.fs.readJson(path.join(this.ctx.currentProject, 'package.json')) : {}
 
       debug('packageJson %O', packageJson)
       const dependencies = [
@@ -159,7 +159,7 @@ export class WizardActions {
 
     try {
       if (this.ctx.currentProject) {
-        hasTsConfig = !!await this.ctx.fs.stat(join(this.ctx.currentProject, 'tsconfig.json'))
+        hasTsConfig = !!await this.ctx.fs.stat(path.join(this.ctx.currentProject, 'tsconfig.json'))
       }
     } catch (e) {
       hasTsConfig = false
