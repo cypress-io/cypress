@@ -19,7 +19,7 @@
           v-if="props.gql.currentProject"
           v-show="runnerUiStore.isSpecsListOpen"
           id="inline-spec-list"
-          class="h-full bg-gray-1000 border-r-1 border-gray-900"
+          class="h-full border-gray-900 bg-gray-1000 border-r-1"
           :class="{'pointer-events-none': isDragging}"
         >
           <InlineSpecList
@@ -48,13 +48,13 @@
       <template
         #panel3="{width}"
       >
-        <HideDuringScreenshotOrRunMode class="bg-white p-16px">
+        <HideDuringScreenshotOrRunMode class="bg-white">
           <SpecRunnerHeader
             v-if="props.gql.currentProject"
             :gql="props.gql.currentProject"
             :event-manager="eventManager"
             :get-aut-iframe="getAutIframeModel"
-            :width="width - 32"
+            :width="width"
           />
         </HideDuringScreenshotOrRunMode>
 
