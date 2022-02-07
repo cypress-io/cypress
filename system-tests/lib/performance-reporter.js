@@ -2,9 +2,9 @@ const path = require('path')
 const chalk = require('chalk')
 const Libhoney = require('libhoney')
 
-const pkg = require('@packages/root')
 const ciProvider = require('@packages/server/lib/util/ci_provider')
 const { commitInfo } = require('@cypress/commit-info')
+const { getNextVersionForPath } = require('../../scripts/get-next-version')
 
 class StatsdReporter {
   constructor (runner) {
@@ -16,6 +16,7 @@ class StatsdReporter {
 
     let branch
     let commitSha
+    let nextVersion
 
     this.honey = new Libhoney({
       dataset: 'systemtest-performance',
@@ -28,6 +29,8 @@ class StatsdReporter {
       branch = commitInformation.branch || ciInformation.branch
       commitSha = commitInformation.sha || ciInformation.sha
     })
+
+    getNextVersionForPath('../../packages').then((next) => nextVersion = next)
 
     runner.on('test', (test) => {
       test.wallclockStart = Date.now()
@@ -64,7 +67,7 @@ class StatsdReporter {
         buildUrl: process.env.CIRCLE_BUILD_URL,
         platform: process.platform,
         arch: process.arch,
-        version: pkg.version,
+        version: nextVersion,
       })
 
       honeycombEvent.send()
