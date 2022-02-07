@@ -4,7 +4,6 @@ import chai, { expect } from 'chai'
 /* eslint-disable no-console */
 import chalk from 'chalk'
 import sinon from 'sinon'
-import snapshot from 'snap-shot-it'
 import * as errors from '../../src'
 
 chai.use(require('@cypress/sinon-chai'))
@@ -59,7 +58,7 @@ describe('lib/errors', () => {
     })
 
     it('logs err.details', () => {
-      const err = errors.get('PLUGINS_FUNCTION_ERROR', 'foo/bar/baz', 'details huh')
+      const err = errors.get('PLUGINS_FUNCTION_ERROR', 'foo/bar/baz', new Error('asdf'))
 
       const ret = errors.log(err)
 
@@ -96,25 +95,6 @@ describe('lib/errors', () => {
       const obj = errors.clone(err)
 
       expect(obj.message).to.eq('foo\u001b[34mbar\u001b[39m\u001b[33mbaz\u001b[39m')
-    })
-  })
-
-  context('.displayFlags', () => {
-    it('returns string formatted from selected keys', () => {
-      const options = {
-        tags: 'nightly,staging',
-        name: 'my tests',
-        unused: 'some other value',
-      }
-      // we are only interested in showig tags and name values
-      // and prepending them with custom prefixes
-      const mapping = {
-        tags: '--tag',
-        name: '--name',
-      }
-      const text = errors.errorUtils.displayFlags(options, mapping)
-
-      return snapshot('tags and name only', text.val)
     })
   })
 })
