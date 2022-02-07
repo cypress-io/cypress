@@ -139,12 +139,6 @@ const captureUserInvocationStack = (ErrorConstructor, userInvocationStack?) => {
   if (!userInvocationStack) {
     const newErr = new ErrorConstructor('userInvocationStack')
 
-    // if browser natively supports Error.captureStackTrace, use it (chrome) (must be bound)
-    // otherwise use our polyfill on top.Error
-    const captureStackTrace = ErrorConstructor.captureStackTrace ? ErrorConstructor.captureStackTrace.bind(ErrorConstructor) : Error.captureStackTrace
-
-    captureStackTrace(newErr, captureUserInvocationStack)
-
     userInvocationStack = newErr.stack
   }
 
