@@ -3,6 +3,7 @@ import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 describe('Cypress In Cypress', { viewportWidth: 1200 }, () => {
   beforeEach(() => {
     cy.scaffoldProject('cypress-in-cypress')
+    cy.findBrowsers()
     cy.openProject('cypress-in-cypress')
     cy.startAppServer()
     cy.visitApp()
