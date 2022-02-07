@@ -19,7 +19,10 @@
           <span
             class="block border-l h-24px px-16px border-l-gray-100 group-hover:border-none"
           >
-            {{ resultCount }} {{ resultCount === 1 ? t('specPage.matchSingular') : t('specPage.matchPlural') }}
+            <span v-if="props.modelValue">
+              {{ t('specPage.searchResultsNumerator', resultCount) }}
+            </span>
+            {{ t('specPage.searchResultsDenominator', specsCount ) }}
             <span class="sr-only">{{ t(`createSpec.viewSpecPatternButton`) }} </span>
           </span>
         </button>
@@ -53,8 +56,10 @@ const { t } = useI18n()
 const props = withDefaults(defineProps<{
   modelValue: string
   resultCount?: number
+  specsCount?: number
 }>(), {
   resultCount: 0,
+  specsCount: 0,
 })
 
 const emit = defineEmits<{
