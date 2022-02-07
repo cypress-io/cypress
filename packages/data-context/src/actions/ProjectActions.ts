@@ -55,6 +55,8 @@ export class ProjectActions {
     this.ctx.update((d) => {
       d.currentProject = null
       d.currentTestingType = null
+      d.forceReconfigureProject = false
+      d.scaffoldedFiles = null
       d.baseError = null
       d.warnings = []
     })
@@ -467,9 +469,12 @@ export class ProjectActions {
     return { specs, specPattern, excludeSpecPattern, additionalIgnorePattern }
   }
 
-  async reconfigureProject () {
+  async reconfigureProject (forceReconfigureProject?: boolean) {
     // Initialize active project close first the current project
-    this.ctx.coreData.forceReconfigureProject = true
+    if (forceReconfigureProject) {
+      this.ctx.coreData.forceReconfigureProject = true
+    }
+
     await this.ctx.actions.browser.closeBrowser()
     this.ctx.actions.wizard.resetWizard()
     this.ctx.actions.electron.refreshBrowserWindow()
