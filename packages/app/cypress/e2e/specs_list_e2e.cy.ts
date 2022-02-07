@@ -68,7 +68,6 @@ describe('App: Spec List (E2E)', () => {
     cy.get('[data-cy="runnable-header"]').should('be.visible')
   })
 
-  // TODO: this test does not work in Firefox currently because remote:debugger:protocol isn't wired up to Firefox's CDP
   it('cannot open the Spec File Row link in a new tab with "cmd + click"', async () => {
     let numTargets
     let newNumTargets
