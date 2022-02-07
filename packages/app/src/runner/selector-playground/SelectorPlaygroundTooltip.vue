@@ -16,7 +16,7 @@
 </template>
 
 <script lang="ts" setup>
-import { useTimeoutFn } from '@vueuse/shared'
+import { useTimeoutFn } from '@vueuse/core'
 import { computed, ref } from 'vue'
 
 const tooltip = ref<HTMLDivElement>()
