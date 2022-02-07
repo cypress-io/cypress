@@ -9,7 +9,6 @@ import api from './api'
 import { Automation } from './automation'
 import browsers from './browsers'
 import * as config from './config'
-import cwd from './cwd'
 import errors from './errors'
 import plugins from './plugins'
 import devServer from './plugins/dev-server'
@@ -72,7 +71,7 @@ export interface OpenProjectLaunchOptions {
   [key: string]: any
 }
 
-const localCwd = cwd()
+const localCwd = process.cwd()
 
 const debug = Debug('cypress:server:project')
 const debugScaffold = Debug('cypress:server:scaffold')

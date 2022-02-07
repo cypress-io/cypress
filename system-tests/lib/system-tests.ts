@@ -442,8 +442,8 @@ const normalizeStdout = function (str, options: any = {}) {
   .replace(/^(\- )(\/.*\/packages\/server\/)(.*)$/gm, '$1$3')
   // Different browsers have different cross-origin error messages
   .replace(crossOriginErrorRe, '[Cross origin error message]')
-  // Replaces connection warning since Firefox sometimes takes longer to connect
-  .replace(/Still waiting to connect to Firefox, retrying in 1 second \(attempt .+\/.+\)/g, '')
+  // Replaces connection warning since Chrome or Firefox sometimes take longer to connect
+  .replace(/Still waiting to connect to .+, retrying in 1 second \(attempt .+\/.+\)/g, '')
 
   if (options.sanitizeScreenshotDimensions) {
     // screenshot dimensions
@@ -918,7 +918,9 @@ const systemTests = {
       await settings.write(e2ePath, ctx.settings)
     }
 
-    args = options.args || ['index.js'].concat(args)
+    const serverEntryFile = require.resolve('@packages/server')
+
+    args = options.args || [serverEntryFile].concat(args)
 
     let stdout = ''
     let stderr = ''

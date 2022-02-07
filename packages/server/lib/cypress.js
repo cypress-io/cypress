@@ -108,7 +108,10 @@ module.exports = {
 
         debug('electron open arguments %o', args)
 
-        return cypressElectron.open('.', args, fn)
+        // const mainEntryFile = require.main.filename
+        const serverMain = require('./cwd')()
+
+        return cypressElectron.open(serverMain, args, fn)
       })
     })
   },
