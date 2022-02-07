@@ -17,7 +17,7 @@ const theme = {
   gray: chalk.gray,
   white: chalk.white,
   yellow: chalk.yellow,
-  magenta: chalk.magenta,
+  magenta: chalk.magentaBright,
 }
 
 export const fmt = {
@@ -26,16 +26,16 @@ export const fmt = {
   code: theme.blue,
   url: theme.blue,
   flag: theme.magenta,
-  prop: theme.yellow,
-  value: theme.blue,
   highlight: theme.yellow,
   highlightSecondary: theme.magenta,
+  highlightTertiary: theme.blue,
   off: guard,
   stringify,
   terminal,
   listItem,
   listItems,
   listFlags,
+  stackTrace,
   cypressVersion,
 }
 
@@ -54,15 +54,28 @@ function cypressVersion (version: string) {
   return guard(`Cypress version ${version}`)
 }
 
-function _item (item: string, { prefix = ' - ', color = theme.blue }: ListOptions) {
+function _item (item: string, options: ListOptions = {}) {
+  const { prefix, color } = _.defaults(options, {
+    prefix: '',
+    color: theme.blue,
+  })
+
   return stripIndent`${theme.gray(prefix)}${color(item)}`
 }
 
 function listItem (item: string, options: ListOptions = {}) {
+  _.defaults(options, {
+    prefix: '  > ',
+  })
+
   return guard(_item(item, options))
 }
 
 function listItems (items: string[], options: ListOptions = {}) {
+  _.defaults(options, {
+    prefix: ' - ',
+  })
+
   return guard(items
   .map((item) => _item(item, options))
   .join('\n'))

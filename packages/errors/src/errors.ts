@@ -5,7 +5,7 @@ import _ from 'lodash'
 import path from 'path'
 import stripAnsi from 'strip-ansi'
 import { humanTime, logError, pluralize } from './errorUtils'
-import { backtick, errTemplate, fmt, guard, stackTrace } from './errTemplate'
+import { backtick, errTemplate, fmt } from './errTemplate'
 import { stackWithoutMessage } from './stackUtils'
 import { stripIndent } from './stripIndent'
 
@@ -57,7 +57,7 @@ export const AllCypressErrors = {
 
         This error will not alter the exit code.
 
-        ${stackTrace(arg1)}`
+        ${fmt.stackTrace(arg1)}`
   },
   CANNOT_REMOVE_OLD_BROWSER_PROFILES: (arg1: string) => {
     return errTemplate`\
@@ -65,7 +65,7 @@ export const AllCypressErrors = {
 
         This error will not alter the exit code.
 
-        ${stackTrace(arg1)}`
+        ${fmt.stackTrace(arg1)}`
   },
   VIDEO_RECORDING_FAILED: (arg1: string) => {
     return errTemplate`\
@@ -73,7 +73,7 @@ export const AllCypressErrors = {
 
         This error will not alter the exit code.
 
-        ${stackTrace(arg1)}`
+        ${fmt.stackTrace(arg1)}`
   },
   VIDEO_POST_PROCESSING_FAILED: (arg1: string) => {
     return errTemplate`\
@@ -81,13 +81,13 @@ export const AllCypressErrors = {
 
         This error will not alter the exit code.
 
-        ${stackTrace(arg1)}`
+        ${fmt.stackTrace(arg1)}`
   },
   CHROME_WEB_SECURITY_NOT_SUPPORTED: (browser: string) => {
     return errTemplate`\
-        Your project has set the configuration option: ${fmt.prop(`chromeWebSecurity`)} to ${`false`}
+        Your project has set the configuration option: ${`chromeWebSecurity`} to ${fmt.highlightSecondary(`false`)}
 
-        This option will not have an effect in ${guard(_.capitalize(browser))}. Tests that rely on web security being disabled will not run as expected.`
+        This option will not have an effect in ${fmt.off(_.capitalize(browser))}. Tests that rely on web security being disabled will not run as expected.`
   },
   BROWSER_NOT_FOUND_BY_NAME: (browser: string, foundBrowsersStr: string[]) => {
     let canarySuffix = ''
@@ -95,7 +95,7 @@ export const AllCypressErrors = {
     if (browser === 'canary') {
       canarySuffix += '\n\n'
       canarySuffix += stripIndent`\
-          Note: In ${fmt.cypressVersion(`4.0.0`)}, Canary must be launched as ${chalk.magentaBright(`chrome:canary`)}, not ${chalk.magentaBright(`canary`)}.
+          Note: In ${fmt.cypressVersion(`4.0.0`)}, Canary must be launched as ${fmt.highlightSecondary(`chrome:canary`)}, not ${fmt.highlightSecondary(`canary`)}.
 _
           See https://on.cypress.io/migration-guide for more information on breaking changes in 4.0.0.`
     }
@@ -111,7 +111,7 @@ _
         You can also use a custom browser: https://on.cypress.io/customize-browsers
 
         Available browsers found on your system are:
-        ${fmt.listItems(foundBrowsersStr)}${guard(canarySuffix)}`
+        ${fmt.listItems(foundBrowsersStr)}${fmt.off(canarySuffix)}`
   },
   BROWSER_NOT_FOUND_BY_PATH: (arg1: string, arg2: string) => {
     return errTemplate`\
@@ -119,7 +119,7 @@ _
 
         The output from the command we ran was:
 
-        ${stackTrace(arg2)}`
+        ${fmt.stackTrace(arg2)}`
   },
   NOT_LOGGED_IN: () => {
     return errTemplate`\
@@ -128,13 +128,13 @@ _
         Run ${`cypress open`} to open the Desktop App and log in.`
   },
   TESTS_DID_NOT_START_RETRYING: (arg1: string) => {
-    return errTemplate`Timed out waiting for the browser to connect. ${guard(arg1)}`
+    return errTemplate`Timed out waiting for the browser to connect. ${fmt.off(arg1)}`
   },
   TESTS_DID_NOT_START_FAILED: () => {
     return errTemplate`The browser never connected. Something is wrong. The tests cannot run. Aborting...`
   },
   DASHBOARD_CANCEL_SKIPPED_SPEC: () => {
-    return errTemplate`${guard(`\n  `)}This spec and its tests were skipped because the run has been canceled.`
+    return errTemplate`${fmt.off(`\n  `)}This spec and its tests were skipped because the run has been canceled.`
   },
   DASHBOARD_API_RESPONSE_FAILED_RETRYING: (arg1: {tries: number, delay: number, response: Error}) => {
     const time = pluralize('time', arg1.tries)
@@ -143,7 +143,7 @@ _
     return errTemplate`\
         We encountered an unexpected error talking to our servers.
 
-        We will retry ${guard(arg1.tries)} more ${guard(time)} in ${guard(delay)}...
+        We will retry ${fmt.off(arg1.tries)} more ${fmt.off(time)} in ${fmt.off(delay)}...
 
         The server's response was:
 
@@ -155,7 +155,7 @@ _
     return errTemplate`\
         We encountered an unexpected error talking to our servers.
 
-        Because you passed the ${fmt.highlightSecondary(`--parallel`)} flag, this run cannot proceed because it requires a valid response from our servers.
+        Because you passed the ${fmt.flag(`--parallel`)} flag, this run cannot proceed because it requires a valid response from our servers.
 
         ${fmt.listFlags(arg1.flags, {
       group: '--group',
@@ -206,7 +206,7 @@ _
   },
   DASHBOARD_STALE_RUN: (arg1: {runUrl: string, [key: string]: any}) => {
     return errTemplate`\
-        You are attempting to pass the ${fmt.highlightSecondary(`--parallel`)} flag to a run that was completed over 24 hours ago.
+        You are attempting to pass the ${fmt.flag(`--parallel`)} flag to a run that was completed over 24 hours ago.
 
         The existing run is: ${fmt.url(arg1.runUrl)}
 
@@ -240,7 +240,7 @@ _
   },
   DASHBOARD_PARALLEL_REQUIRED: (arg1: {runUrl: string}) => {
     return errTemplate`\
-        You did not pass the ${fmt.highlightSecondary(`--parallel`)} flag, but this run's group was originally created with the --parallel flag.
+        You did not pass the ${fmt.flag(`--parallel`)} flag, but this run's group was originally created with the --parallel flag.
 
         The existing run is: ${fmt.url(arg1.runUrl)}
 
@@ -257,7 +257,7 @@ _
   },
   DASHBOARD_PARALLEL_DISALLOWED: (arg1: {runUrl: string}) => {
     return errTemplate`\
-        You passed the ${fmt.highlightSecondary(`--parallel`)} flag, but this run group was originally created without the --parallel flag.
+        You passed the ${fmt.flag(`--parallel`)} flag, but this run group was originally created without the --parallel flag.
 
         The existing run is: ${fmt.url(arg1.runUrl)}
 
@@ -273,7 +273,7 @@ _
   },
   DASHBOARD_PARALLEL_GROUP_PARAMS_MISMATCH: (arg1: {runUrl: string, parameters: any}) => {
     return errTemplate`\
-        You passed the ${fmt.highlightSecondary(`--parallel`)} flag, but we do not parallelize tests across different environments.
+        You passed the ${fmt.flag(`--parallel`)} flag, but we do not parallelize tests across different environments.
 
         This machine is sending different environment parameters than the first machine that started this parallel run.
 
@@ -307,7 +307,7 @@ _
       ciBuildId: '--ciBuildId',
     })}
 
-        If you are trying to parallelize this run, then also pass the ${fmt.highlightSecondary(`--parallel`)} flag, else pass a different group name.
+        If you are trying to parallelize this run, then also pass the ${fmt.flag(`--parallel`)} flag, else pass a different group name.
 
         ${warnIfExplicitCiBuildId(arg1.ciBuildId)}
 
@@ -433,11 +433,11 @@ _
 
         Errors:
 
-        ${JSON.stringify(arg1.errors, null, 2)}
+        ${fmt.stringify(arg1.errors)}
 
         Request Sent:
 
-        ${JSON.stringify(arg1.stringify, null, 2)}`
+        ${fmt.stringify(arg1.object)}`
   },
   // TODO: fix
   RECORDING_FROM_FORK_PR: () => {
@@ -478,7 +478,7 @@ _
 
         Please log into the Dashboard to see the valid record keys.
 
-        https://on.cypress.io/dashboard/projects/${guard(projectId)}`
+        https://on.cypress.io/dashboard/projects/${fmt.off(projectId)}`
   },
   DASHBOARD_PROJECT_NOT_FOUND: (projectId: string, configFileBaseName: string) => {
     return errTemplate`\
@@ -519,31 +519,33 @@ _
     return errTemplate`\
         Error reading from: ${fmt.path(filePath)}
 
-        ${stackTrace(err)}`
+        ${fmt.stackTrace(err)}`
   },
   ERROR_WRITING_FILE: (filePath: string, err: Error) => {
     return errTemplate`\
         Error writing to: ${fmt.path(filePath)}
 
-        ${stackTrace(err)}`
+        ${fmt.stackTrace(err)}`
   },
   NO_SPECS_FOUND: (folderPath: string, globPattern?: string | null) => {
     // no glob provided, searched all specs
     if (!globPattern) {
       return errTemplate`\
-          Can't run because no spec files were found.
+          Can't run because ${fmt.highlightSecondary(`no spec files`)} were found.
 
-          We searched for any files inside of this folder:
+          We searched for specs inside of this folder:
 
-          ${fmt.path(folderPath)}`
+          ${fmt.listItem(folderPath)}`
     }
 
+    const globPath = path.join(fmt.path(folderPath), globPattern)
+
     return errTemplate`\
-        Can't run because no spec files were found.
+        Can't run because ${fmt.highlightSecondary(`no spec files`)} were found.
 
-        We searched for any files matching this glob pattern:
+        We searched for specs matching this glob pattern:
 
-        ${path.join(fmt.path(folderPath), globPattern)}`
+        ${fmt.listItem(globPath, { color: fmt.highlight })}`
   },
   RENDERER_CRASHED: () => {
     return errTemplate`\
@@ -590,7 +592,7 @@ _
 
         If you have just renamed the extension of your pluginsFile, restart Cypress.
 
-        ${stackTrace(err)}
+        ${fmt.stackTrace(err)}
       `
   },
   // TODO: fix
@@ -617,7 +619,7 @@ _
     return errTemplate`\
       The function exported by the ${`pluginsFile`} threw an error: ${fmt.path(arg1)}
 
-      ${stackTrace(arg2)}
+      ${fmt.stackTrace(arg2)}
     `
   },
   // TODO: use this for whimsical example
@@ -627,7 +629,7 @@ _
 
       The following error was thrown by your plugins file: ${fmt.path(arg1)}
 
-      ${stackTrace(arg2)}
+      ${fmt.stackTrace(arg2)}
     `
   },
   // TODO: test this
@@ -635,7 +637,7 @@ _
     return errTemplate`
       Your ${`pluginsFile`} threw a validation error: ${fmt.path(arg1)}
 
-      ${stackTrace(arg2)}
+      ${fmt.stackTrace(arg2)}
     `
   },
   // TODO: look at the listItem prefix
@@ -646,11 +648,11 @@ _
     return errTemplate`\
       Oops...we found an error preparing this test file:
 
-        ${fmt.listItem(filePath, { prefix: '> ' })}
+      ${fmt.listItem(filePath)}
 
       The error was:
 
-      ${chalk.yellow(arg2)}
+      ${arg2}
 
       This occurred while Cypress was compiling and bundling your test code. This is usually caused by:
 
@@ -671,13 +673,11 @@ _
     // project's plugins file like "cypress/plugins.index.js"
   },
   // TODO: should this be relative or absolute?
-  PLUGINS_CONFIG_VALIDATION_ERROR: (arg1: string, arg2: string) => {
-    let filePath = `${arg1}`
-
+  PLUGINS_CONFIG_VALIDATION_ERROR: (relativePluginsPath: string, errMsg: string) => {
     return errTemplate`\
-        An invalid configuration value returned from the plugins file: ${fmt.path(filePath)}
+        An invalid configuration value returned from the plugins file: ${fmt.path(relativePluginsPath)}
 
-        ${chalk.yellow(arg2)}`
+        ${errMsg}`
     // general configuration error not-specific to configuration or plugins files
   },
   // TODO: test this
@@ -703,7 +703,7 @@ _
     return errTemplate`\
         Cypress could not verify that this server is running:
 
-          ${fmt.listItem(arg1, { prefix: '> ' })}
+        ${fmt.listItem(arg1)}
 
         This server has been configured as your ${`baseUrl`}, and tests will likely fail if it is not running.`
   },
@@ -714,7 +714,7 @@ _
         return errTemplate`\
             Cypress could not verify that this server is running:
 
-              > ${chalk.blue(arg1.baseUrl)}
+            ${fmt.listItem(arg1.baseUrl)}
 
             We are verifying this server because it has been configured as your ${`baseUrl`}.
 
@@ -722,13 +722,13 @@ _
 
             ${displayRetriesRemaining(arg1.remaining)}`
       default:
-        return errTemplate`${guard(displayRetriesRemaining(arg1.remaining))}`
+        return errTemplate`${fmt.off(displayRetriesRemaining(arg1.remaining))}`
     }
   },
   // TODO: test this
   INVALID_REPORTER_NAME: (arg1: {name: string, paths: string[], error: string}) => {
     return errTemplate`\
-        Error loading the reporter: ${chalk.yellow(arg1.name)}
+        Error loading the reporter: ${arg1.name}
 
         We searched for the reporter in these paths:
 
@@ -752,7 +752,7 @@ _
     return errTemplate`
           There is both a ${configFileBaseName1} and a ${configFileBaseName2} at the location below:
 
-            ${fmt.listItem(projectRoot, { prefix: '> ' })}
+          ${fmt.listItem(projectRoot)}
 
           Cypress does not know which one to read for config. Please remove one of the two and try again.
           `
@@ -761,7 +761,7 @@ _
     return errTemplate`\
         Could not find a Cypress configuration file.
 
-        We looked but did not find a ${fmt.path(configFileBaseName)} file in this folder: ${fmt.path(projectRoot)}`
+        We looked but did not find a ${configFileBaseName} file in this folder: ${fmt.path(projectRoot)}`
   },
   INVOKED_BINARY_OUTSIDE_NPM_MODULE: () => {
     return errTemplate`\
@@ -855,16 +855,17 @@ _
 
         ${fmt.off(arg1.link)}`
   },
+  // TODO: fix
   FIXTURE_NOT_FOUND: (arg1: string, arg2: string[]) => {
     return errTemplate`\
         A fixture file could not be found at any of the following paths:
 
-        > ${arg1}
-        > ${arg1}.[ext]
+          > ${arg1}
+          > ${arg1}.[ext]
 
         Cypress looked for these file extensions at the provided path:
 
-        > ${arg2.join(', ')}
+          > ${arg2.join(', ')}
 
         Provide a path to an existing fixture file.`
   },
@@ -892,13 +893,13 @@ _
   },
   EXTENSION_NOT_LOADED: (browserName: string, extensionPath: string) => {
     return errTemplate`\
-        ${guard(browserName)} could not install the extension at path: ${fmt.path(extensionPath)}
+        ${fmt.off(browserName)} could not install the extension at path: ${fmt.path(extensionPath)}
 
         Please verify that this is the path to a valid, unpacked WebExtension.`
   },
   COULD_NOT_FIND_SYSTEM_NODE: (nodeVersion: string) => {
     return errTemplate`\
-        ${fmt.prop(`nodeVersion`)} is set to ${`system`} but Cypress could not find a usable Node executable on your ${fmt.highlightSecondary(`PATH`)}.
+        ${`nodeVersion`} is set to ${`system`} but Cypress could not find a usable Node executable on your ${fmt.highlightSecondary(`PATH`)}.
 
         Make sure that your Node executable exists and can be run by the current user.
 
@@ -924,11 +925,11 @@ _
     return errTemplate`\
         Cypress failed to make a connection to the Chrome DevTools Protocol after retrying for 50 seconds.
 
-        This usually indicates there was a problem opening the ${guard(_.capitalize(browserName))} browser.
+        This usually indicates there was a problem opening the ${fmt.off(_.capitalize(browserName))} browser.
 
         The CDP port requested was ${`${port}`}.
 
-        ${stackTrace(err)}`
+        ${fmt.stackTrace(err)}`
   },
   FIREFOX_COULD_NOT_CONNECT: (arg1: Error) => {
     // we include a stack trace here because it may contain useful information
@@ -939,13 +940,13 @@ _
 
         This usually indicates there was a problem opening the Firefox browser.
 
-        ${stackTrace(arg1)}`
+        ${fmt.stackTrace(arg1)}`
   },
   CDP_COULD_NOT_RECONNECT: (arg1: Error) => {
     return errTemplate`\
         There was an error reconnecting to the Chrome DevTools protocol. Please restart the browser.
 
-        ${stackTrace(arg1)}`
+        ${fmt.stackTrace(arg1)}`
   },
   CDP_RETRYING_CONNECTION: (attempt: string | number, browserName: string) => {
     return errTemplate`Still waiting to connect to ${fmt.off(_.capitalize(browserName))}, retrying in 1 second ${fmt.meta(`(attempt ${attempt}/62)`)}`
@@ -967,7 +968,7 @@ _
     return errTemplate`\
         Cypress encountered an error while parsing the argument: ${`--${argName}`}
 
-        You passed: ${fmt.value(argValue)}
+        You passed: ${fmt.highlightTertiary(argValue)}
 
         The error was: ${fmt.highlightSecondary(errMsg)}`
   },
@@ -979,7 +980,7 @@ _
 
         To avoid this error, ensure that there are no other instances of Firefox launched by Cypress running.
 
-        ${stackTrace(err)}`
+        ${fmt.stackTrace(err)}`
   },
   FOLDER_NOT_WRITABLE: (arg1: string) => {
     return errTemplate`\
@@ -1054,7 +1055,7 @@ _
     const phrase = arg1.length > 1 ? 'options are' : 'option is'
 
     return errTemplate`\
-        The following configuration ${guard(phrase)} invalid:
+        The following configuration ${fmt.off(phrase)} invalid:
         ${fmt.listItems(arg1, { color: fmt.highlight })}
 
         https://on.cypress.io/configuration
@@ -1066,7 +1067,7 @@ _
 
         The error we received was:
 
-        ${stackTrace(arg2)}`
+        ${fmt.stackTrace(arg2)}`
   },
   CT_NO_DEV_START_EVENT: (pluginsFilePath: string) => {
     const code = stripIndent`
@@ -1085,7 +1086,7 @@ _
         See https://on.cypress.io/component-testing for help on setting up component testing.`
   },
   UNSUPPORTED_BROWSER_VERSION: (errorMsg: string) => {
-    return errTemplate`${guard(errorMsg)}`
+    return errTemplate`${fmt.off(errorMsg)}`
   },
   NODE_VERSION_DEPRECATION_SYSTEM: (arg1: {name: string, value: any, configFile: string}) => {
     return errTemplate`\

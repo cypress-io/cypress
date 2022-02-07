@@ -646,7 +646,13 @@ describe('visual error templates', () => {
     CANNOT_CONNECT_BASE_URL_RETRYING: () => {
       return {
         default: [{
-          attempt: 0,
+          attempt: 1,
+          baseUrl: 'http://localhost:3000',
+          remaining: 60,
+          delay: 500,
+        }],
+        retrying: [{
+          attempt: 2,
           baseUrl: 'http://localhost:3000',
           remaining: 60,
           delay: 500,
