@@ -616,11 +616,11 @@ export const AllCypressErrors = {
       Learn more: https://on.cypress.io/plugins-api
     `
   },
-  PLUGINS_FUNCTION_ERROR: (arg1: string, arg2: string | Error) => {
+  PLUGINS_FUNCTION_ERROR: (pluginsFilePath: string, err: Error) => {
     return errTemplate`\
-      The function exported by the ${`pluginsFile`} threw an error: ${fmt.path(arg1)}
+      The function exported by the ${`pluginsFile`} threw an error: ${fmt.path(pluginsFilePath)}
 
-      ${fmt.stackTrace(arg2)}
+      ${fmt.stackTrace(err)}
     `
   },
   // TODO: use this for whimsical example

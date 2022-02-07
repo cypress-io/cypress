@@ -549,3 +549,10 @@ It threw an error when required, check the stack trace below:
 RootSyncError: Root sync error from plugins file
       [stack trace lines]
 `
+
+exports['e2e plugins fails when function throws synchronously 1'] = `
+The function exported by the pluginsFile threw an error: /foo/bar/.projects/plugins-function-sync-error/cypress/plugins/index.js
+
+FunctionSyncError: Function sync error from plugins file
+      [stack trace lines]
+`
