@@ -24,7 +24,7 @@ It uses [Vue Test Utils](https://github.com/vuejs/vue-test-utils) under the hood
 
 - Requires Cypress v7.0.0 or later
 - Requires [Node](https://nodejs.org/en/) version 12 or above
-- Supports webpack-based projects, vite in alpha, if you would like us to support another, please [create an issue](https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm:%20@cypress/vue&template=3-feature.md) or, if an issue already exists subscribe to it.
+- Supports webpack-based and vie-based projects, if you would like us to support another, please [create an issue](https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm:%20@cypress/vue&template=3-feature.md) or, if an issue already exists subscribe to it.
 
 Now you are ready to install.
 
@@ -61,7 +61,7 @@ module.exports = (on) => {
 Install dev dependencies
 
 ```shell
-npm i -D @cypress/webpack-dev-server \
+npm i -D @cypress/webpack-dev-server @cypress/vue \
   vue-loader vue-template-compiler css-loader
 ```
 
@@ -616,20 +616,6 @@ yarn workspace @cypress/vue cy:open
 ```
 
 Larger tests that use full application and run on CI (see [circle.yml](circle.yml)) are located in the folder [examples](examples).
-
-### Debugging
-
-Run Cypress with environment variable
-
-```
-DEBUG=@cypress/vue
-``` 
-
-If some deeply nested objects are abbreviated and do not print fully, set the maximum logging depth
-
-```
-DEBUG=@cypress/vue DEBUG_DEPTH=10
-```
 
 ## Related info
 
