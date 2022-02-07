@@ -1,8 +1,23 @@
+export const shouldHaveTestResults = ({ passCount, failCount, pendingCount }) => {
+  passCount = passCount || '--'
+  failCount = failCount || '--'
+
+  cy.findByLabelText('Stats', { timeout: 10000 }).within(() => {
+    cy.get('.passed .num', { timeout: 10000 }).should('have.text', `${passCount}`)
+    cy.get('.failed .num', { timeout: 10000 }).should('have.text', `${failCount}`)
+
+    if (pendingCount) {
+      cy.get('.pending .num', { timeout: 10000 }).should('have.text', `${pendingCount}`)
+    }
+  })
+}
+
 export type LoadSpecOptions = {
   fileName: string
   setup?: () => void
   passCount?: number | string
   failCount?: number | string
+  pendingCount?: number | string
   hasPreferredIde?: boolean
 }
 
@@ -13,6 +28,7 @@ export function loadSpec (options: LoadSpecOptions): void {
     passCount = '--',
     failCount = '--',
     hasPreferredIde = false,
+    pendingCount,
   } = options
 
   cy.scaffoldProject('runner-e2e-specs')
@@ -55,8 +71,5 @@ export function loadSpec (options: LoadSpecOptions): void {
   })
 
   // Wait for specs to complete
-  cy.findByLabelText('Stats', { timeout: 10000 }).within(() => {
-    cy.get('.passed', { timeout: 10000 }).should('have.text', `Passed:${passCount}`)
-    cy.get('.failed', { timeout: 10000 }).should('have.text', `Failed:${failCount}`)
-  })
+  shouldHaveTestResults({ passCount, failCount, pendingCount })
 }
