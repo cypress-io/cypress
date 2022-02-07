@@ -33,7 +33,7 @@ const md = new Markdown({
 })
 
 const ErrorDetails = observer(({ err }) => {
-  let details = _.clone(err.details).split('\n')
+  let details = _.clone(err.stack).split('\n')
   const detailsTitle = details.shift()
   const detailsBody = details.join('\n')
 
@@ -87,8 +87,8 @@ class ErrorMessage extends Component {
             <div ref={(node) => this.errorMessageNode = node} dangerouslySetInnerHTML={{
               __html: md.render(err.message),
             }}></div>
-            {err.details && (
-              <ErrorDetails err={err} />
+            {err.originalError && (
+              <ErrorDetails err={err.originalError} />
             )}
             {err.portInUse && (
               <div>
@@ -96,7 +96,7 @@ class ErrorMessage extends Component {
                 <p>To fix, stop the other running process or change the port in {configFileFormatted(this.props.project.configFile)}</p>
               </div>
             )}
-            {err.stack2 && (
+            {!err.originalError && err.stack2 && (
               <details className='stacktrace'>
                 <summary>Stack trace</summary>
                 <pre>{err.stack2}</pre>
