@@ -12,7 +12,7 @@ import prettier from 'prettier'
 import type { MigrationFile } from '..'
 import Debug from 'debug'
 
-const debug = Debug('cypress:data-content:migration:utils')
+const debug = Debug('cypress:data-context:sources:migration:codegen')
 
 type ConfigOptions = {
   global: Record<string, unknown>
