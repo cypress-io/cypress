@@ -8,7 +8,7 @@ import $elements from '../../../dom/elements'
 
 const newLineRe = /\n/g
 
-export default (Commands, Cypress, cy, state) => {
+export default (Commands, Cypress, cy) => {
   Commands.addAll({ prevSubject: 'element' }, {
     // TODO: any -> Partial<Cypress.SelectOptions>
     select (subject, valueOrTextOrIndex, options: any = {}) {
@@ -201,24 +201,6 @@ export default (Commands, Cypress, cy, state) => {
         })
       }
 
-      const getOldValue = ($el) => {
-        const obj = state('select-old-value')
-
-        if (!obj) {
-          return null
-        }
-
-        return obj[$el]
-      }
-
-      const setOldValue = ($el, value) => {
-        const obj = state('select-old-value') || {}
-
-        obj[$el] = value
-
-        state('select-old-value', obj)
-      }
-
       return Promise
       .try(retryOptions)
       .then((obj = {}) => {
@@ -270,7 +252,7 @@ export default (Commands, Cypress, cy, state) => {
               interval: options.interval,
             })
           }).then(() => {
-            const oldValue = getOldValue(options.$el)
+            const oldValue = options.$el[0].selectedIndex
 
             // reset the selects value after we've
             // fired all the proper click events
@@ -301,12 +283,9 @@ export default (Commands, Cypress, cy, state) => {
 
             // https://github.com/cypress-io/cypress/issues/19494
             // When user selects the same option again, `input`, `change` events should not be fired.
-            // We're ignoring multiple select because it's physically impossible to select the same options again.
-            if (!options.$el.prop('multiple') && oldValue === values[0]) {
+            if (options.$el[0].selectedIndex === oldValue) {
               return
             }
-
-            setOldValue(options.$el, values[0])
 
             const input = new Event('input', {
               bubbles: true,
