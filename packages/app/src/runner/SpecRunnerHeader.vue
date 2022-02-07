@@ -82,7 +82,9 @@
           <span
             v-if="displayScale"
             class="-mr-6px text-gray-500"
-          > ({{ displayScale }})</span>
+          > 
+            {{ displayScale }})
+         </span>
         </template>
         <template #default>
           <div class="max-h-50vw p-16px text-gray-600 leading-24px w-400px overflow-auto">
