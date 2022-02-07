@@ -40,7 +40,7 @@ type SetSpecsFoundBySpecPattern = {
   path: string
   testingType: Cypress.TestingType
   specPattern?: Cypress.Config['specPattern']
-  ignoreSpecPattern?: Cypress.Config['ignoreSpecPattern']
+  excludeSpecPattern?: Cypress.Config['excludeSpecPattern']
   additionalIgnorePattern?: string | string[]
 }
 
@@ -422,7 +422,7 @@ export class ProjectActions {
         path: this.ctx.currentProject,
         testingType,
         specPattern: cfg[testingType]?.specPattern,
-        ignoreSpecPattern: cfg[testingType]?.ignoreSpecPattern,
+        excludeSpecPattern: cfg[testingType]?.excludeSpecPattern,
         additionalIgnorePattern: testingType === 'component' ? cfg?.e2e?.specPattern : undefined,
       })
 
@@ -440,12 +440,12 @@ export class ProjectActions {
     }
   }
 
-  async setSpecsFoundBySpecPattern ({ path, testingType, specPattern, ignoreSpecPattern, additionalIgnorePattern }: SetSpecsFoundBySpecPattern) {
+  async setSpecsFoundBySpecPattern ({ path, testingType, specPattern, excludeSpecPattern, additionalIgnorePattern }: SetSpecsFoundBySpecPattern) {
     const toArray = (val?: string | string[]) => val ? typeof val === 'string' ? [val] : val : undefined
 
     specPattern = toArray(specPattern)
 
-    ignoreSpecPattern = toArray(ignoreSpecPattern) || []
+    excludeSpecPattern = toArray(excludeSpecPattern) || []
 
     // exclude all specs matching e2e if in component testing
     additionalIgnorePattern = toArray(additionalIgnorePattern) || []
@@ -458,13 +458,13 @@ export class ProjectActions {
       path,
       testingType,
       specPattern,
-      ignoreSpecPattern,
+      excludeSpecPattern,
       additionalIgnorePattern,
     )
 
     this.ctx.actions.project.setSpecs(specs)
 
-    return { specs, specPattern, ignoreSpecPattern, additionalIgnorePattern }
+    return { specs, specPattern, excludeSpecPattern, additionalIgnorePattern }
   }
 
   async reconfigureProject () {
