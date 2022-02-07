@@ -122,7 +122,7 @@ const DEFAULT_ARGS = [
   '--disable-dev-shm-usage',
 ]
 
-const launchedBrowserToCriClientMapping: { [key: number]: BrowserCriClient } = {}
+let browserCriClient
 
 /**
  * Reads all known preference files (CHROME_PREFERENCE_PATHS) from disk and retur
@@ -349,8 +349,8 @@ export = {
 
   _writeChromePreferences,
 
-  _getBrowserCriClientForLaunchedBrowser (launchedBrowser: LaunchedBrowser) {
-    return launchedBrowserToCriClientMapping[launchedBrowser.pid]
+  _getBrowserCriClient () {
+    return browserCriClient
   },
 
   async _writeExtension (browser: Browser, options) {
@@ -434,10 +434,10 @@ export = {
     return args
   },
 
-  async connectToNewSpec (browser: Browser, options: CypressConfiguration = {}, automation: Automation, instance: LaunchedBrowser) {
+  async connectToNewSpec (browser: Browser, options: CypressConfiguration = {}, automation: Automation) {
     debug('connecting to new chrome tab in existing instance with url and debugging port', { url: options.url })
 
-    const browserCriClient = this._getBrowserCriClientForLaunchedBrowser(instance)
+    const browserCriClient = this._getBrowserCriClient()
     const pageCriClient = await browserCriClient.attachToNewUrl('about:blank')
 
     await this._setAutomation(pageCriClient, automation, browserCriClient.closeCurrentTarget)
@@ -459,7 +459,7 @@ export = {
     await this._setAutomation(pageCriClient, automation, browserCriClient.closeCurrentTarget)
   },
 
-  async open (browser: Browser, url, options: CypressConfiguration = {}, automation: Automation): Promise<LaunchedBrowser & { browserCriClient: BrowserCriClient }> {
+  async open (browser: Browser, url, options: CypressConfiguration = {}, automation: Automation): Promise<LaunchedBrowser> {
     const { isTextTerminal } = options
 
     const userDir = utils.getProfileDir(browser, isTextTerminal)
@@ -518,19 +518,18 @@ export = {
     // SECOND connect to the Chrome remote interface
     // and when the connection is ready
     // navigate to the actual url
-    const browserCriClient = await BrowserCriClient.create(port, browser.displayName, options.onError)
-
-    launchedBrowserToCriClientMapping[launchedBrowser.pid] = browserCriClient
+    browserCriClient = await BrowserCriClient.create(port, browser.displayName, options.onError)
 
     la(browserCriClient, 'expected Chrome remote interface reference', browserCriClient)
 
-    await browserCriClient.ensureMinimumProtocolVersion('1.3')
-    .catch((err) => {
+    try {
+      browserCriClient.ensureMinimumProtocolVersion('1.3')
+    } catch (err: any) {
       // if this minimum chrome version changes, sync it with
       // packages/web-config/webpack.config.base.ts and
       // npm/webpack-batteries-included-preprocessor/index.js
       throw new Error(`Cypress requires at least Chrome 64.\n\nDetails:\n${err.message}`)
-    })
+    }
 
     // monkey-patch the .kill method to that the CDP connection is closed
     const originalBrowserKill = launchedBrowser.kill
@@ -543,7 +542,7 @@ export = {
 
       // Do nothing on failure here since we're shutting down anyway
       browserCriClient.close().catch()
-      delete launchedBrowserToCriClientMapping[launchedBrowser.pid]
+      browserCriClient = undefined
 
       debug('closing chrome')
 

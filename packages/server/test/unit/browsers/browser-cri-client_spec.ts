@@ -84,13 +84,10 @@ describe('lib/browsers/cri-client', function () {
 
     context('#ensureMinimumProtocolVersion', function () {
       function withProtocolVersion (actual, test) {
-        if (actual) {
-          send.withArgs('Browser.getVersion')
-          .resolves({ protocolVersion: actual })
-        }
-
         return getClient()
-        .then((client) => {
+        .then((client: any) => {
+          client.versionInfo = { 'Protocol-Version': actual }
+
           return client.ensureMinimumProtocolVersion(test)
         })
       }
@@ -101,14 +98,6 @@ describe('lib/browsers/cri-client', function () {
 
       it('resolves if protocolVersion > current', function () {
         return expect(withProtocolVersion('1.4', '1.3')).to.be.fulfilled
-      })
-
-      it('rejects if Browser.getVersion not supported yet', function () {
-        send.withArgs('Browser.getVersion')
-        .rejects()
-
-        return expect(withProtocolVersion(null, '1.3')).to.be
-        .rejectedWith('A minimum CDP version of v1.3 is required, but the current browser has an older version.')
       })
 
       it('rejects if protocolVersion < current', function () {
@@ -162,7 +151,7 @@ describe('lib/browsers/cri-client', function () {
       it('closes the currently attached target', async function () {
         const mockCurrentlyAttachedTarget = {
           targetId: '100',
-          close: sinon.stub(),
+          close: sinon.stub().resolves(sinon.stub().resolves()),
         }
 
         send.withArgs('Target.closeTarget', { targetId: '100' }).resolves()
@@ -186,7 +175,7 @@ describe('lib/browsers/cri-client', function () {
     context('#close', function () {
       it('closes the currently attached target if it exists and the browser client', async function () {
         const mockCurrentlyAttachedTarget = {
-          close: sinon.stub(),
+          close: sinon.stub().resolves(),
         }
 
         const browserClient = await getClient() as any

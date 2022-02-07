@@ -314,7 +314,7 @@ describe('lib/browsers/chrome', () => {
     })
 
     it('rejects if CDP version check fails', function () {
-      this.browserCriClient.ensureMinimumProtocolVersion.rejects()
+      this.browserCriClient.ensureMinimumProtocolVersion.throws()
 
       return expect(chrome.open({ isHeadless: true }, 'http://', {}, this.automation)).to.be.rejectedWith('Cypress requires at least Chrome 64.')
     })
@@ -394,7 +394,7 @@ describe('lib/browsers/chrome', () => {
         onInitializeNewBrowserTabCalled = true
       } }
 
-      sinon.stub(chrome, '_getBrowserCriClientForLaunchedBrowser').withArgs(launchedBrowser).returns(browserCriClient)
+      sinon.stub(chrome, '_getBrowserCriClient').returns(browserCriClient)
       sinon.stub(chrome, '_maybeRecordVideo').withArgs(pageCriClient, options, 354).resolves()
       sinon.stub(chrome, '_navigateUsingCRI').withArgs(pageCriClient, options.url, 354).resolves()
       sinon.stub(chrome, '_handleDownloads').withArgs(pageCriClient, options.downloadFolder, automation).resolves()
@@ -403,7 +403,7 @@ describe('lib/browsers/chrome', () => {
 
       expect(browserCriClient.attachToNewUrl).to.be.called
       expect(automation.use).to.be.called
-      expect(chrome._getBrowserCriClientForLaunchedBrowser).to.be.called
+      expect(chrome._getBrowserCriClient).to.be.called
       expect(chrome._maybeRecordVideo).to.be.called
       expect(chrome._navigateUsingCRI).to.be.called
       expect(chrome._handleDownloads).to.be.called

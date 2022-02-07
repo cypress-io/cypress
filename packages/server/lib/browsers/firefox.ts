@@ -343,7 +343,7 @@ toolbar {
 
 `
 
-const launchedBrowserToCriClientMapping: { [key: number]: BrowserCriClient } = {}
+let browserCriClient
 
 export function _createDetachedInstance (browserInstance: BrowserInstance, browserCriClient?: BrowserCriClient): BrowserInstance {
   const detachedInstance: BrowserInstance = new EventEmitter() as BrowserInstance
@@ -355,7 +355,7 @@ export function _createDetachedInstance (browserInstance: BrowserInstance, brows
     // Close browser cri client socket. Do nothing on failure here since we're shutting down anyway
     if (browserCriClient) {
       browserCriClient.close().catch()
-      delete launchedBrowserToCriClientMapping[browserInstance.pid]
+      browserCriClient = undefined
     }
 
     treeKill(browserInstance.pid, (err?, result?) => {
@@ -368,7 +368,7 @@ export function _createDetachedInstance (browserInstance: BrowserInstance, brows
 }
 
 export async function connectToNewSpec (browser: Browser, options: any = {}, automation: Automation, instance: LaunchedBrowser) {
-  await firefoxUtil.connectToNewSpec(options, automation, launchedBrowserToCriClientMapping[instance.pid])
+  await firefoxUtil.connectToNewSpec(options, automation, browserCriClient)
 }
 
 export function connectToExisting () {
@@ -528,11 +528,7 @@ export async function open (browser: Browser, url, options: any = {}, automation
   }) as LaunchedBrowser & { browserCriClient: BrowserCriClient}
 
   try {
-    const browserCriClient = await firefoxUtil.setup({ automation, extensions: launchOptions.extensions, url, foxdriverPort, marionettePort, remotePort, onError: options.onError })
-
-    if (browserCriClient) {
-      launchedBrowserToCriClientMapping[browserInstance.pid] = browserCriClient
-    }
+    browserCriClient = await firefoxUtil.setup({ automation, extensions: launchOptions.extensions, url, foxdriverPort, marionettePort, remotePort, onError: options.onError })
 
     if (os.platform() === 'win32') {
       // override the .kill method for Windows so that the detached Firefox process closes between specs
@@ -550,7 +546,7 @@ export async function open (browser: Browser, url, options: any = {}, automation
       // Do nothing on failure here since we're shutting down anyway
       if (browserCriClient) {
         browserCriClient.close().catch()
-        delete launchedBrowserToCriClientMapping[browserInstance.pid]
+        browserCriClient = undefined
       }
 
       debug('closing firefox')

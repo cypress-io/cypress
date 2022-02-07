@@ -42,7 +42,7 @@ const ensureLiveBrowser = async (port: number, browserName: string) => {
 
 export class BrowserCriClient {
   private currentlyAttachedTarget: CRIWrapper.Client | undefined
-  private constructor (private browserClient: CRIWrapper.Client, private port: number, private onAsynchronousError: Function) {}
+  private constructor (private browserClient: CRIWrapper.Client, private versionInfo, private port: number, private onAsynchronousError: Function) {}
 
   /**
    * Factory method for the browser cri client. Connects to the browser and then returns a chrome remote interface wrapper around the
@@ -61,10 +61,10 @@ export class BrowserCriClient {
       debug('attempting to find CRI target... %o', { retryIndex })
 
       try {
-        const version = await CRI.Version({ host: HOST, port })
-        const browserClient = await create(version.webSocketDebuggerUrl, onAsynchronousError)
+        const versionInfo = await CRI.Version({ host: HOST, port })
+        const browserClient = await create(versionInfo.webSocketDebuggerUrl, onAsynchronousError)
 
-        return new BrowserCriClient(browserClient, port, onAsynchronousError)
+        return new BrowserCriClient(browserClient, versionInfo, port, onAsynchronousError)
       } catch (err) {
         retryIndex++
         const delay = _getDelayMsForRetry(retryIndex, browserName)
@@ -89,9 +89,8 @@ export class BrowserCriClient {
    *
    * @param protocolVersion the minimum version to ensure
    */
-  ensureMinimumProtocolVersion = async (protocolVersion: string): Promise<void> => {
-    const actualVersion = await this.getProtocolVersion()
-
+  ensureMinimumProtocolVersion = (protocolVersion: string): void => {
+    const actualVersion = getMajorMinorVersion(this.versionInfo['Protocol-Version'])
     const minimum = getMajorMinorVersion(protocolVersion)
 
     if (!isVersionGte(actualVersion, minimum)) {
@@ -111,6 +110,7 @@ export class BrowserCriClient {
 
     const target = targets.find((target) => target.url === url)
 
+    // TODO: Move this into packages/error post merge: https://github.com/cypress-io/cypress/pull/20072
     if (!target) {
       throw new Error(`Could not find url target in browser ${url}. Targets were ${JSON.stringify(targets)}`)
     }
@@ -139,14 +139,18 @@ export class BrowserCriClient {
    * Closes the currently attached page target
    */
   closeCurrentTarget = async (): Promise<void> => {
+    // TODO: Move this into packages/error post merge: https://github.com/cypress-io/cypress/pull/20072
     if (!this.currentlyAttachedTarget) {
       throw new Error('Cannot close target because no target is currently attached')
     }
 
     debug('Closing current target %s', this.currentlyAttachedTarget.targetId)
 
-    await this.currentlyAttachedTarget.close()
-    await this.browserClient.send('Target.closeTarget', { targetId: this.currentlyAttachedTarget.targetId })
+    await Promise.all([
+      // If this fails, it shouldn't prevent us from continuing
+      this.currentlyAttachedTarget.close().catch(),
+      this.browserClient.send('Target.closeTarget', { targetId: this.currentlyAttachedTarget.targetId }),
+    ])
 
     this.currentlyAttachedTarget = undefined
   }
@@ -160,17 +164,5 @@ export class BrowserCriClient {
     }
 
     await this.browserClient.close()
-  }
-
-  private getProtocolVersion = async () => {
-    let protocolVersion
-
-    try {
-      protocolVersion = (await this.browserClient.send('Browser.getVersion')).protocolVersion
-    } catch {
-      protocolVersion = '0.0'
-    }
-
-    return getMajorMinorVersion(protocolVersion)
   }
 }
