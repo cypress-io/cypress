@@ -12,10 +12,10 @@ module.exports = {
       '**/__snapshots__/*',
       '**/__image_snapshots__/*',
     ],
-    devServer (cypressConfig) {
+    devServer (cypressDevServerConfig) {
       const { startDevServer } = require('@cypress/vite-dev-server')
 
-      return startDevServer({ options: cypressConfig })
+      return startDevServer({ options: cypressDevServerConfig })
     },
   },
 }

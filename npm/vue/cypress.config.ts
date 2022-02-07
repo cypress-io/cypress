@@ -12,7 +12,7 @@ export default defineConfig({
   },
   'component': {
     excludeSpecPattern: 'examples/**/*',
-    devServer (cypressConfig) {
+    devServer (cypressDevServerConfig) {
       const { startDevServer } = require('@cypress/webpack-dev-server')
       const webpackConfig = require('./webpack.config')
 
@@ -25,7 +25,7 @@ export default defineConfig({
         '@vue/compiler-core$': '@vue/compiler-core/dist/compiler-core.cjs.js',
       }
 
-      return startDevServer({ options: cypressConfig, webpackConfig })
+      return startDevServer({ options: cypressDevServerConfig, webpackConfig })
     },
     setupNodeEvents (on, config) {
       require('@cypress/code-coverage/task')(on, config)

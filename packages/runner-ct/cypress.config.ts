@@ -10,7 +10,7 @@ export default defineConfig({
     configFile: '../../mocha-reporter-config.json',
   },
   component: {
-    devServer (cypressConfig) {
+    devServer (cypressDevServerConfig) {
       const { startDevServer } = require('@cypress/webpack-dev-server')
 
       function injectStylesInlineForPercyInPlace (webpackConfig) {
@@ -34,7 +34,7 @@ export default defineConfig({
 
       return startDevServer({
         webpackConfig,
-        options: cypressConfig,
+        options: cypressDevServerConfig,
       })
     },
   },
