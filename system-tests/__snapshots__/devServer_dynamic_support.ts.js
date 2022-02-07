@@ -2,7 +2,7 @@ exports['devServer dynamic import throws error when devServer use dynamic import
 The \`component\`.\`devServer\` method must be a function with the following signature:
 
 \`\`\`
-devServer: (cypressConfig, devServerConfig) {
+devServer: (cypressDevServerConfig, devServerConfig) {
 
 }
 \`\`\`

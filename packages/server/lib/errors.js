@@ -583,7 +583,7 @@ const getMsgByType = function (type, ...args) {
           The \`component\`.\`devServer\` method must be a function with the following signature:
 
           \`\`\`
-          devServer: (cypressConfig, devServerConfig) {
+          devServer: (cypressDevServerConfig, devServerConfig) {
 
           }
           \`\`\`
@@ -600,7 +600,7 @@ const getMsgByType = function (type, ...args) {
         The \`setupNodeEvents\` method does not support \`dev-server:start\`, use \`devServer\` instead:
 
         \`\`\`
-        devServer (cypressConfig, devServerConfig) {
+        devServer (cypressDevServerConfig, devServerConfig) {
           // configure plugins here
         }
         \`\`\`
