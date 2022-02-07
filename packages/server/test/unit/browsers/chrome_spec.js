@@ -45,7 +45,7 @@ describe('lib/browsers/chrome', () => {
       this.onCriEvent = (event, data, options) => {
         this.criClient.on.withArgs(event).yieldsAsync(data)
 
-        return chrome.open({ isHeadless: true, isHeaded: false }, 'http://', options, this.automation)
+        return chrome.open({ isHeadless: true }, 'http://', options, this.automation)
         .then(() => {
           this.criClient.on = undefined
         })
@@ -73,7 +73,7 @@ describe('lib/browsers/chrome', () => {
     })
 
     it('focuses on the page, calls CRI Page.visit, enables Page events, and sets download behavior', function () {
-      return chrome.open({ isHeadless: true, isHeaded: false }, 'http://', {}, this.automation)
+      return chrome.open({ isHeadless: true }, 'http://', {}, this.automation)
       .then(() => {
         expect(utils.getPort).to.have.been.calledOnce // to get remote interface port
         expect(this.criClient.send.callCount).to.equal(5)
@@ -87,7 +87,7 @@ describe('lib/browsers/chrome', () => {
     })
 
     it('is noop without before:browser:launch', function () {
-      return chrome.open({ isHeadless: true, isHeaded: false }, 'http://', {}, this.automation)
+      return chrome.open({ isHeadless: true }, 'http://', {}, this.automation)
       .then(() => {
         expect(plugins.execute).not.to.be.called
       })
@@ -101,18 +101,18 @@ describe('lib/browsers/chrome', () => {
 
       plugins.execute.resolves(null)
 
-      return chrome.open({ isHeadless: true, isHeaded: false }, 'http://', {}, this.automation)
+      return chrome.open({ isHeadless: true }, 'http://', {}, this.automation)
       .then(() => {
         // to initialize remote interface client and prepare for true tests
         // we load the browser with blank page first
-        expect(launch.launch).to.be.calledWith({ isHeadless: true, isHeaded: false }, 'about:blank', 50505, args)
+        expect(launch.launch).to.be.calledWith({ isHeadless: true }, 'about:blank', 50505, args)
       })
     })
 
     it('sets default window size and DPR in headless mode', function () {
       chrome._writeExtension.restore()
 
-      return chrome.open({ isHeadless: true, isHeaded: false }, 'http://', {}, this.automation)
+      return chrome.open({ isHeadless: true }, 'http://', {}, this.automation)
       .then(() => {
         const args = launch.launch.firstCall.args[3]
 
@@ -127,7 +127,7 @@ describe('lib/browsers/chrome', () => {
     it('does not load extension in headless mode', function () {
       chrome._writeExtension.restore()
 
-      return chrome.open({ isHeadless: true, isHeaded: false }, 'http://', {}, this.automation)
+      return chrome.open({ isHeadless: true }, 'http://', {}, this.automation)
       .then(() => {
         const args = launch.launch.firstCall.args[3]
 
@@ -177,7 +177,7 @@ describe('lib/browsers/chrome', () => {
 
       const onWarning = sinon.stub()
 
-      return chrome.open({ isHeadless: false, isHeaded: true }, 'http://', { onWarning }, this.automation)
+      return chrome.open({ isHeaded: true }, 'http://', { onWarning }, this.automation)
       .then(() => {
         const args = launch.launch.firstCall.args[3]
 
@@ -201,7 +201,7 @@ describe('lib/browsers/chrome', () => {
 
       const pathToTheme = extension.getPathToTheme()
 
-      return chrome.open({ isHeadless: false, isHeaded: true }, 'http://', {}, this.automation)
+      return chrome.open({ isHeaded: true }, 'http://', {}, this.automation)
       .then(() => {
         const args = launch.launch.firstCall.args[3]
 
@@ -223,7 +223,7 @@ describe('lib/browsers/chrome', () => {
 
       const onWarning = sinon.stub()
 
-      return chrome.open({ isHeadless: false, isHeaded: true }, 'http://', { onWarning }, this.automation)
+      return chrome.open({ isHeaded: true }, 'http://', { onWarning }, this.automation)
       .then(() => {
         const args = launch.launch.firstCall.args[3]
 
@@ -285,7 +285,7 @@ describe('lib/browsers/chrome', () => {
 
       sinon.stub(fs, 'outputJson').resolves()
 
-      return chrome.open({ isHeadless: true, isHeaded: false }, 'http://', {}, this.automation)
+      return chrome.open({ isHeadless: true }, 'http://', {}, this.automation)
       .then(() => {
         expect(fs.outputJson).to.be.calledWith('/profile/dir/Default/Preferences', {
           profile: {
@@ -302,7 +302,7 @@ describe('lib/browsers/chrome', () => {
         kill,
       } = this.launchedBrowser
 
-      return chrome.open({ isHeadless: true, isHeaded: false }, 'http://', {}, this.automation)
+      return chrome.open({ isHeadless: true }, 'http://', {}, this.automation)
       .then(() => {
         expect(typeof this.launchedBrowser.kill).to.eq('function')
 
@@ -316,7 +316,7 @@ describe('lib/browsers/chrome', () => {
     it('rejects if CDP version check fails', function () {
       this.browserCriClient.ensureMinimumProtocolVersion.rejects()
 
-      return expect(chrome.open({ isHeadless: true, isHeaded: false }, 'http://', {}, this.automation)).to.be.rejectedWith('Cypress requires at least Chrome 64.')
+      return expect(chrome.open({ isHeadless: true }, 'http://', {}, this.automation)).to.be.rejectedWith('Cypress requires at least Chrome 64.')
     })
 
     // https://github.com/cypress-io/cypress/issues/9265
