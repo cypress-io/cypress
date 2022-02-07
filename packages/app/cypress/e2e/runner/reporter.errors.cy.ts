@@ -59,8 +59,6 @@ describe('errors ui', {
     })
 
     verify('with expect().<foo>', {
-      file: 'assertions.cy.js',
-      hasPreferredIde: false,
       column: 25,
       message: `expected 'actual' to equal 'expected'`,
       codeFrameText: 'with expect().<foo>',

@@ -139,10 +139,12 @@ describe('Full migration flow for each project', () => {
     // Migration workflow
     // before auto migration
     cy.contains('cypress/integration/foo.spec.ts')
+    cy.contains('cypress/integration/spec.ts')
     cy.contains('cypress/component/button.spec.js')
 
     // after auto migration
     cy.contains('cypress/e2e/foo.cy.ts')
+    cy.contains('cypress/e2e/spec.cy.ts')
     cy.contains('cypress/component/button.cy.js')
 
     runAutoRename()
