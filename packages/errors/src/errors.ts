@@ -5,7 +5,7 @@ import _ from 'lodash'
 import path from 'path'
 import stripAnsi from 'strip-ansi'
 import { humanTime, logError, pluralize } from './errorUtils'
-import { errPartial, errTemplate, fmt, theme } from './errTemplate'
+import { errPartial, errTemplate, fmt, PartialErr, theme } from './errTemplate'
 import { stackWithoutMessage } from './stackUtils'
 
 import type { ClonedError, CypressError, ErrorLike, ErrTemplateResult } from './errorTypes'
@@ -89,7 +89,7 @@ export const AllCypressErrors = {
         This option will not have an effect in ${fmt.off(_.capitalize(browser))}. Tests that rely on web security being disabled will not run as expected.`
   },
   BROWSER_NOT_FOUND_BY_NAME: (browser: string, foundBrowsersStr: string[]) => {
-    let canarySuffix = null
+    let canarySuffix: PartialErr | null = null
 
     if (browser === 'canary') {
       canarySuffix = errPartial`\

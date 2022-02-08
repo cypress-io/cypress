@@ -24,7 +24,7 @@ type AllowedPartialArg = Guard | Format | PartialErr | null
 
 type AllowedTemplateArg = StackTrace | AllowedPartialArg
 
-class PartialErr {
+export class PartialErr {
   constructor (readonly strArr: TemplateStringsArray, readonly args: AllowedTemplateArg[]) {}
 }
 
@@ -37,9 +37,9 @@ type ToFormat = string | number | Error | object | null | Guard | AllowedTemplat
 class Format {
   constructor (readonly type: keyof typeof fmtHighlight, readonly val: ToFormat, readonly config?: FormatConfig) {}
 
-  formatVal (target: 'ansi' | 'markdown') {
+  formatVal (target: 'ansi' | 'markdown'): string {
     if (this.val instanceof Guard) {
-      return this.val.val
+      return `${this.val.val}`
     }
 
     return target === 'ansi' ? this.formatAnsi() : this.formatMarkdown()
@@ -58,7 +58,7 @@ class Format {
 
   private formatMarkdown () {
     if (this.type === 'comment') {
-      return this.val
+      return `${this.val}`
     }
 
     const val = this.prepVal('markdown')
@@ -283,7 +283,7 @@ function prepMessage (templateStrings: TemplateStringsArray, args: AllowedTempla
     details = undefined
   }
 
-  const templateArgs = []
+  const templateArgs: string[] = []
 
   for (const arg of args) {
     // We assume null/undefined values are skipped when rendering, for conditional templating
@@ -291,7 +291,7 @@ function prepMessage (templateStrings: TemplateStringsArray, args: AllowedTempla
       templateArgs.push('')
     } else if (arg instanceof Guard) {
       // Guard prevents any formatting
-      templateArgs.push(arg.val)
+      templateArgs.push(`${arg.val}`)
     } else if (arg instanceof Format) {
       // Format = stringify & color ANSI, or make a markdown block
       templateArgs.push(arg.formatVal(target))
