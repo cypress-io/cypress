@@ -175,8 +175,8 @@ describe('Launchpad: Setup Project', () => {
         })
 
         cy.get('[data-cy=valid]').within(() => {
-          cy.contains('cypress/support/e2e.js')
-          cy.contains('cypress/fixtures/example.json')
+          cy.containsPath('cypress/support/e2e.js')
+          cy.containsPath('cypress/fixtures/example.json')
         })
       })
 
@@ -197,8 +197,8 @@ describe('Launchpad: Setup Project', () => {
         })
 
         cy.get('[data-cy=valid]').within(() => {
-          cy.contains('cypress/support/e2e.js')
-          cy.contains('cypress/fixtures/example.json')
+          cy.containsPath('cypress/support/e2e.js')
+          cy.containsPath('cypress/fixtures/example.json')
         })
       })
 
@@ -214,8 +214,8 @@ describe('Launchpad: Setup Project', () => {
         })
 
         cy.get('[data-cy=valid]').within(() => {
-          cy.contains('cypress/support/e2e.js')
-          cy.contains('cypress/fixtures/example.json')
+          cy.containsPath('cypress/support/e2e.js')
+          cy.containsPath('cypress/fixtures/example.json')
         })
       })
     })
@@ -262,8 +262,8 @@ describe('Launchpad: Setup Project', () => {
 
         cy.get('[data-cy=valid]').within(() => {
           cy.contains('cypress.config.js')
-          cy.contains('cypress/support/e2e.js')
-          cy.contains('cypress/fixtures/example.json')
+          cy.containsPath('cypress/support/e2e.js')
+          cy.containsPath('cypress/fixtures/example.json')
         })
 
         cy.findByRole('button', { name: 'Continue' })
@@ -295,8 +295,8 @@ describe('Launchpad: Setup Project', () => {
 
         cy.get('[data-cy=valid]').within(() => {
           cy.contains('cypress.config.ts')
-          cy.contains('cypress/support/e2e.ts')
-          cy.contains('cypress/fixtures/example.json')
+          cy.containsPath('cypress/support/e2e.ts')
+          cy.containsPath('cypress/fixtures/example.json')
         })
       })
 
@@ -325,8 +325,8 @@ describe('Launchpad: Setup Project', () => {
         })
 
         cy.get('[data-cy=valid]').within(() => {
-          cy.contains('cypress/support/e2e.ts')
-          cy.contains('cypress/fixtures/example.json')
+          cy.containsPath('cypress/support/e2e.ts')
+          cy.containsPath('cypress/fixtures/example.json')
         })
       })
 
@@ -400,8 +400,8 @@ describe('Launchpad: Setup Project', () => {
         })
 
         cy.get('[data-cy=valid]').within(() => {
-          cy.contains('cypress/component/index.html')
-          cy.contains(`cypress/support/component.ts`)
+          cy.containsPath('cypress/component/index.html')
+          cy.containsPath('cypress/support/component.ts')
         })
 
         cy.findByRole('button', { name: 'Continue' }).should('have.disabled')
@@ -419,8 +419,8 @@ describe('Launchpad: Setup Project', () => {
         })
 
         cy.get('[data-cy=valid]').within(() => {
-          cy.contains('cypress/support/e2e.js')
-          cy.contains('cypress/fixtures/example.json')
+          cy.containsPath('cypress/support/e2e.js')
+          cy.containsPath('cypress/fixtures/example.json')
         })
       })
     })
@@ -622,9 +622,9 @@ describe('Launchpad: Setup Project', () => {
                 }
 
                 cy.get('[data-cy=valid]').within(() => {
-                  cy.contains('cypress/component/index.html')
-                  cy.contains(`cypress/support/component.${lang.type}`)
-                  cy.contains('cypress/fixtures/example.json')
+                  cy.containsPath('cypress/component/index.html')
+                  cy.containsPath(`cypress/support/component.${lang.type}`)
+                  cy.containsPath('cypress/fixtures/example.json')
                 })
               })
             })
@@ -682,9 +682,9 @@ describe('Launchpad: Setup Project', () => {
 
         cy.get('[data-cy=valid]').within(() => {
           cy.contains('cypress.config.js')
-          cy.contains('cypress/component/index.html')
+          cy.containsPath('cypress/component/index.html')
           cy.contains(`cypress/support/component.js`)
-          cy.contains('cypress/fixtures/example.json')
+          cy.containsPath('cypress/fixtures/example.json')
         })
 
         cy.findByRole('button', { name: 'Continue' }).click()
@@ -711,9 +711,9 @@ describe('Launchpad: Setup Project', () => {
 
         cy.get('[data-cy=valid]').within(() => {
           cy.contains('cypress.config.ts')
-          cy.contains('cypress/component/index.html')
+          cy.containsPath('cypress/component/index.html')
           cy.contains(`cypress/support/component.ts`)
-          cy.contains('cypress/fixtures/example.json')
+          cy.containsPath('cypress/fixtures/example.json')
         })
 
         // FIXME: remove if-check once this is fixed. https://cypress-io.atlassian.net/browse/UNIFY-980
