@@ -233,6 +233,13 @@ commands:
           paths:
             - system_tests_node_modules_installed
 
+  send_system_test_honecomb_event:
+    description: 'Send a root event to honeycomb for this build'
+    steps:
+      - run:
+        name: Send honeycomb event
+        command: node ./system-tests/lib/performance-reporter.js
+
   caching-dependency-installer:
     description: 'Installs & caches the dependencies based on yarn lock & package json dependencies'
     parameters:
@@ -1155,6 +1162,7 @@ jobs:
     steps:
       - restore_cached_workspace
       - update_cached_system_tests_deps
+      - send_system_test_honecomb_event
 
   system-tests-chrome:
     <<: *defaults

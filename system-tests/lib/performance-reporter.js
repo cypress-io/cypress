@@ -7,6 +7,33 @@ const ciProvider = require('@packages/server/lib/util/ci_provider')
 const { commitInfo } = require('@cypress/commit-info')
 const { getNextVersionForPath } = require('../../scripts/get-next-version')
 
+const honey = new Libhoney({
+  dataset: 'systemtest-performance',
+  writeKey: process.env.HONEYCOMB_API_KEY,
+})
+
+const spanId = process.env.CIRCLE_WORKFLOW_ID || uuidv4()
+const circleCiRootEvent = honey.newEvent()
+
+circleCiRootEvent.timestamp = Date.now()
+circleCiRootEvent.add({
+  buildUrl: process.env.CIRCLE_BUILD_URL,
+  platform: process.platform,
+  arch: process.arch,
+
+  spanId,
+  traceId: spanId,
+})
+
+// This file is executed once as a script at the beginning of the circleci build,
+// so that we can send the root event exactly once and associate all the various
+// system test tasks and build steps into a single span.
+if (require.main === module) {
+  console.log(circleCiRootEvent.data)
+  circleCiRootEvent.send()
+  honey.flush()
+}
+
 class HoneycombReporter {
   constructor (runner) {
     if (!process.env.HONEYCOMB_API_KEY) {
@@ -14,27 +41,19 @@ class HoneycombReporter {
     }
 
     console.log(chalk.green('Reporting to honeycomb'))
-    this.honey = new Libhoney({
-      dataset: 'systemtest-performance',
-      writeKey: process.env.HONEYCOMB_API_KEY,
-    })
 
     runner.on('suite', (suite) => {
-      if (suite.root) {
-        suite.honeycombEvent = this.rootEvent()
+      const parent = suite.root ? circleCiRootEvent : suite.parent.honeycombEvent
 
-        return
-      }
-
-      suite.honeycombEvent = this.honey.newEvent()
+      suite.honeycombEvent = honey.newEvent()
       suite.honeycombEvent.timestamp = Date.now()
       suite.honeycombEvent.add({
-        ...suite.parent.honeycombEvent.data,
+        ...parent.data,
         suite: suite.title,
         specFile: path.basename(suite.file),
 
         spanId: uuidv4(),
-        parentId: suite.parent.honeycombEvent.data.spanId,
+        parentId: parent.data.spanId,
       })
 
       this.addAsyncInfo(suite.honeycombEvent)
@@ -49,7 +68,7 @@ class HoneycombReporter {
       // in which case it will be undefined and not passed as a field to honeycomb.
       const [, testTitle, browser] = path[path.length - 1].match(/(.+?)(?: \[([a-z]+)\])?$/)
 
-      test.honeycombEvent = this.honey.newEvent()
+      test.honeycombEvent = honey.newEvent()
       test.honeycombEvent.timestamp = Date.now()
       test.honeycombEvent.add({
         ...test.parent.honeycombEvent.data,
@@ -90,27 +109,7 @@ class HoneycombReporter {
 
   // If there is no done callback, then mocha-multi-reporter will kill the process without waiting for our honeycomb post to complete.
   done (failures, callback) {
-    if (this.honey) {
-      this.honey.flush().then(callback)
-    }
-  }
-
-  rootEvent () {
-    const honeycombEvent = this.honey.newEvent()
-
-    honeycombEvent.timestamp = Date.now()
-    honeycombEvent.add({
-      buildUrl: process.env.CIRCLE_BUILD_URL,
-      platform: process.platform,
-      arch: process.arch,
-
-      spanId: uuidv4(),
-      traceId: process.env.CIRCLE_WORKFLOW_ID || uuidv4(),
-    })
-
-    this.addAsyncInfo(honeycombEvent)
-
-    return honeycombEvent
+    honey.flush().then(callback)
   }
 
   // Because mocha has no way to wait on async functions inside hooks,
