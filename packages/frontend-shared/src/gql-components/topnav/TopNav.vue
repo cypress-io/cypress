@@ -116,73 +116,9 @@
         class="font-semibold whitespace-nowrap"
       >{{ props.gql.currentProject?.currentBrowser?.displayName }} {{ props.gql.currentProject?.currentBrowser?.majorVersion }}</span>
     </template>
-    <TopNavListItem
-      v-for="browser in props.gql.currentProject.browsers"
-      :key="browser.id"
-      class="min-w-240px py-12px px-16px group"
-      :class="{
-        'bg-jade-50': browser.isSelected,
-        'bg-gray-50 cursor-not-allowed': browser.disabled || !browser.isVersionSupported,
-        'cursor-pointer': !browser.disabled && browser.isVersionSupported
-      }"
-      :selectable="!browser.isSelected && !browser.disabled && browser.isVersionSupported"
-      data-cy="top-nav-browser-list-item"
-      :data-browser-id="browser.id"
-      @click="!browser.disabled && browser.isVersionSupported && handleBrowserChoice(browser)"
-    >
-      <template #prefix>
-        <!-- setting both width and min-width on these icons looks odd,
-        but makes all possible browser icons happy about what size to be-->
-        <img
-          class="mr-16px min-w-32px w-32px"
-          :class="{ 'filter grayscale': browser.disabled || !browser.isVersionSupported }"
-          :src="allBrowsersIcons[browser.displayName] || allBrowsersIcons.generic"
-        >
-      </template>
-      <div>
-        <button
-          class="font-medium box-border"
-          :class="{
-            'text-indigo-500 group-hover:text-indigo-700': !browser.isSelected && !browser.disabled && browser.isVersionSupported,
-            'text-jade-700': browser.isSelected,
-            'text-gray-500': browser.disabled || !browser.isVersionSupported
-          }"
-        >
-          {{ browser.displayName }}
-        </button>
-        <div
-          class="font-normal mr-20px text-gray-500 text-14px filter whitespace-nowrap group-hover:mix-blend-luminosity"
-        >
-          {{ t('topNav.version') }} {{ browser.version }}
-        </div>
-      </div>
-      <template
-        v-if="browser.isSelected"
-        #suffix
-      >
-        <div data-cy="top-nav-browser-list-selected-item">
-          <i-cy-circle-check_x24 class="h-24px w-24px icon-dark-jade-100 icon-light-jade-500" />
-        </div>
-      </template>
-      <template
-        v-else-if="!browser.isVersionSupported"
-        #suffix
-      >
-        <div class="h-16px relative">
-          <UnsupportedBrowserTooltip class="top-0 right-0 absolute">
-            <i-cy-circle-bg-question-mark_x16 class="icon-dark-gray-700 icon-light-gray-200" />
-            <template #popper>
-              <div class="w-full">
-                <div class="font-medium text-white mb-2">
-                  Unsupported browser
-                </div>
-                {{ browser.warning }}
-              </div>
-            </template>
-          </UnsupportedBrowserTooltip>
-        </div>
-      </template>
-    </TopNavListItem>
+    <VerticalBrowserListItems
+      :gql="props.gql.currentProject"
+    />
   </TopNavList>
 
   <TopNavList
@@ -260,42 +196,22 @@ import PromptContent from './PromptContent.vue'
 import UnsupportedBrowserTooltip from './UnsupportedBrowserTooltip.vue'
 import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
 import { gql, useMutation } from '@urql/vue'
-import type { TopNavFragment } from '../../generated/graphql'
-import { TopNav_LaunchOpenProjectDocument, TopNav_SetBrowserDocument, TopNav_SetPromptShownDocument } from '../../generated/graphql'
+import { TopNavFragment, TopNav_SetPromptShownDocument } from '../../generated/graphql'
 import { useI18n } from '@cy/i18n'
-import type { ComponentPublicInstance } from 'vue'
-import { computed, ref, watch, watchEffect } from 'vue'
+import { computed, ref, Ref, ComponentPublicInstance, watch, watchEffect } from 'vue'
 import { onClickOutside, onKeyStroke, useTimeAgo } from '@vueuse/core'
 import type { DocsMenuVariant } from './DocsMenuContent.vue'
 import DocsMenuContent from './DocsMenuContent.vue'
 import ExternalLink from '../ExternalLink.vue'
 import Button from '../../components/Button.vue'
 import UpdateCypressModal from './UpdateCypressModal.vue'
+import VerticalBrowserListItems from './VerticalBrowserListItems.vue'
 
 const { t } = useI18n()
 
 const releasesUrl = 'https://github.com/cypress-io/cypress/releases'
 
 gql`
-fragment TopNav_Browsers on CurrentProject {
-  id
-  currentBrowser {
-    id
-    displayName
-    majorVersion
-  }
-  browsers {
-    id
-    isSelected
-    displayName
-    version
-    majorVersion
-    isVersionSupported
-    warning
-    disabled
-  }
-}
-
 fragment TopNav on Query {
   versions {
     current {
@@ -313,24 +229,13 @@ fragment TopNav on Query {
   currentProject {
     id
     title
-    ...TopNav_Browsers
-  }
-}
-`
-
-gql`
-mutation TopNav_LaunchOpenProject {
-  launchOpenProject {
+    
+    currentBrowser {
     id
-  }
-}
-`
-
-gql`
-mutation TopNav_SetBrowser($id: ID!) {
-  launchpadSetBrowser(id: $id) {
-    id
-    ...TopNav_Browsers
+    displayName
+    majorVersion
+    }
+    ...VerticalBrowserListItems
   }
 }
 `
@@ -341,18 +246,7 @@ mutation TopNav_SetPromptShown($slug: String!) {
 }
 `
 
-const launchOpenProject = useMutation(TopNav_LaunchOpenProjectDocument)
-const setBrowser = useMutation(TopNav_SetBrowserDocument)
 const setPromptShown = useMutation(TopNav_SetPromptShownDocument)
-
-const launch = () => {
-  launchOpenProject.executeMutation({})
-}
-
-const handleBrowserChoice = async (browser) => {
-  await setBrowser.executeMutation({ id: browser.id })
-  launch()
-}
 
 const props = defineProps<{
   gql: TopNavFragment,

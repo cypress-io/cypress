@@ -113,6 +113,7 @@ import SpecItem from './SpecItem.vue'
 import { useVirtualList } from '@packages/frontend-shared/src/composables/useVirtualList'
 import NoResults from '@cy/components/NoResults.vue'
 import SpecPatternModal from '../components/SpecPatternModal.vue'
+import { useDebounce } from '@vueuse/core'
 
 const { t } = useI18n()
 
@@ -159,22 +160,23 @@ const emit = defineEmits<{
 
 const showSpecPatternModal = ref(false)
 
+const cachedSpecs = useCachedSpecs(computed(() => props.gql.currentProject?.specs || []))
+
 const search = ref('')
+const debouncedSearchString = useDebounce(search, 200)
 
 function handleClear () {
   search.value = ''
 }
 
-const cachedSpecs = useCachedSpecs(computed(() => props.gql.currentProject?.specs || []))
-
 const specs = computed(() => {
   const specs = cachedSpecs.value.map((x) => makeFuzzyFoundSpec(x))
 
-  if (!search.value) {
+  if (!debouncedSearchString.value) {
     return specs
   }
 
-  return fuzzySortSpecs(specs, search.value)
+  return fuzzySortSpecs(specs, debouncedSearchString.value)
 })
 
 const collapsible = computed(() => useCollapsibleTree(buildSpecTree<FuzzyFoundSpec & { gitInfo: SpecListRowFragment }>(specs.value), { dropRoot: true }))
