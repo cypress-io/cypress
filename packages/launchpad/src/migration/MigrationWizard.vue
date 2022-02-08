@@ -4,7 +4,7 @@
       {{ t('migration.wizard.title') }}
     </h1>
     <p
-      class="text-center mx-42px mt-12px mb-32px text-body-gray-600 text-18px"
+      class="mx-42px mt-12px text-center mb-32px text-body-gray-600 text-18px"
     >
       {{ t('migration.wizard.description') }}
     </p>
