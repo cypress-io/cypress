@@ -1,5 +1,6 @@
 import { defineConfig } from 'cypress'
 import { devServer } from '@cypress/webpack-dev-server'
+import * as webpackConfig from './cypress/plugins/webpack.config'
 
 export default defineConfig({
   'experimentalFetchPolyfill': true,
@@ -11,10 +12,7 @@ export default defineConfig({
     setupNodeEvents (on, config) {
       return require('./cypress/plugins')(on, config)
     },
-    devServer (cypressDevServerConfig) {
-      const webpackConfig = require('./cypress/plugins/webpack.config')
-
-      return devServer(cypressDevServerConfig, { webpackConfig })
-    },
+    devServer,
+    devServerConfig: { webpackConfig },
   },
 })

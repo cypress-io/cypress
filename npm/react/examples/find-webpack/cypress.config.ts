@@ -19,7 +19,7 @@ export default defineConfig({
 
       typeof babelRule.options !== 'string' && babelRule.options.plugins.push(require.resolve('babel-plugin-istanbul'))
 
-      return devServer(cypressDevServerConfig, webpackConfig)
+      return devServer(cypressDevServerConfig, { webpackConfig })
     },
     setupNodeEvents (on, config) {
       require('@cypress/code-coverage/task')(on, config)

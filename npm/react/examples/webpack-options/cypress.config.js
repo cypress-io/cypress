@@ -35,7 +35,7 @@ module.exports = {
 
       process.env.BABEL_ENV = 'test' // this is required to load commonjs babel plugin
 
-      return devServer(cypressDevServerConfig, webpackConfig)
+      return devServer(cypressDevServerConfig, { webpackConfig })
     },
   },
 }

@@ -31,7 +31,7 @@ export default defineConfig({
 
       injectStylesInlineForPercyInPlace(webpackConfig)
 
-      return devServer(cypressDevServerConfig, webpackConfig)
+      return devServer(cypressDevServerConfig, { webpackConfig })
     },
   },
 })

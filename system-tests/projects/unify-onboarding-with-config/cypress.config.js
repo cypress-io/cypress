@@ -5,12 +5,11 @@ module.exports = {
     supportFile: false,
     testFiles: '**/*cy-spec.{js,jsx,ts,tsx}',
     componentFolder: 'src',
-    devServer (cypressDevServerConfig) {
-      return devServer(cypressDevServerConfig, {
-        output: {
-          publicPath: '/',
-        },
-      })
+    devServer,
+    devServerConfig: {
+      output: {
+        publicPath: '/',
+      },
     },
   },
   e2e: {
