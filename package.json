@@ -152,6 +152,7 @@
     "eslint": "7.22.0",
     "eslint-plugin-cypress": "2.11.2",
     "eslint-plugin-graphql": "4.0.0",
+    "eslint-plugin-import": "2.25.4",
     "eslint-plugin-json-format": "2.0.1",
     "eslint-plugin-mocha": "8.1.0",
     "eslint-plugin-react": "7.22.0",

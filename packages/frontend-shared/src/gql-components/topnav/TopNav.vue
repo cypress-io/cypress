@@ -260,15 +260,19 @@ import PromptContent from './PromptContent.vue'
 import UnsupportedBrowserTooltip from './UnsupportedBrowserTooltip.vue'
 import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
 import { gql, useMutation } from '@urql/vue'
-import { TopNavFragment, TopNav_LaunchOpenProjectDocument, TopNav_SetBrowserDocument, TopNav_SetPromptShownDocument } from '../../generated/graphql'
+import type { TopNavFragment } from '../../generated/graphql'
+import { TopNav_LaunchOpenProjectDocument, TopNav_SetBrowserDocument, TopNav_SetPromptShownDocument } from '../../generated/graphql'
 import { useI18n } from '@cy/i18n'
-import { computed, ref, Ref, ComponentPublicInstance, watch, watchEffect } from 'vue'
-const { t } = useI18n()
+import type { ComponentPublicInstance } from 'vue'
+import { computed, ref, watch, watchEffect } from 'vue'
 import { onClickOutside, onKeyStroke, useTimeAgo } from '@vueuse/core'
-import DocsMenuContent, { DocsMenuVariant } from './DocsMenuContent.vue'
+import type { DocsMenuVariant } from './DocsMenuContent.vue'
+import DocsMenuContent from './DocsMenuContent.vue'
 import ExternalLink from '../ExternalLink.vue'
 import Button from '../../components/Button.vue'
 import UpdateCypressModal from './UpdateCypressModal.vue'
+
+const { t } = useI18n()
 
 const releasesUrl = 'https://github.com/cypress-io/cypress/releases'
 
