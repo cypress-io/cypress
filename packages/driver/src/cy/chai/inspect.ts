@@ -56,13 +56,13 @@ export function create (chai) {
 
   // We can't just check if object instanceof ShadowRoot, because it might be the document of an iframe,
   // which in Chrome 99+ is a separate class, and instanceof ShadowRoot returns false.
-  let isShadowRoot = function (object) {
+  const isShadowRoot = function (object) {
     return isDOMElement(object.host) && object.host.shadowRoot === object
   }
 
   // We can't just check if object instanceof Document, because it might be the document of an iframe,
   // which in Chrome 99+ is a separate class, and instanceof Document returns false.
-  let isDocument = function (object) {
+  const isDocument = function (object) {
     return object.defaultView && object.defaultView === object.defaultView.window
   }
 
