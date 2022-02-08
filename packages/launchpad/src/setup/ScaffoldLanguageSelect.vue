@@ -15,7 +15,7 @@
         <SelectLanguage
           :name="t('setupPage.projectSetup.configFileLanguageLabel')"
           :options="languages || []"
-          :value="props.gql.wizard.language?.id ?? 'js'"
+          :value="props.gql.wizard.language?.type ?? 'js'"
           @select="val => onLanguageSelect(val)"
         />
       </div>
