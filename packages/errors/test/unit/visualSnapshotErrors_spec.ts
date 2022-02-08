@@ -28,11 +28,11 @@ after(() => {
   if (snapshotFailures > 0) {
     console.log(`
       =================================
-  
+
       Snapshot failures see for visualSnapshotErrors.
-  
+
       Run "yarn comparison" locally from the @packages/error package to resolve
-  
+
       =================================
     `)
   }
@@ -600,6 +600,9 @@ describe('visual error templates', () => {
     NO_SPECS_FOUND: () => {
       return {
         default: ['/path/to/project/root', '**_spec.js'],
+        pathCommonPattern: ['/path/to/project/root', ['../**_spec.js', '../**/*.cy.*']],
+        pathNoCommonPattern: ['/path/to/project/root', ['/foo/*_spec.js']],
+        arrPattern: ['/path/to/project/root', ['**_spec.js', '**/*.cy.*']],
         noPattern: ['/path/to/project/root'],
       }
     },

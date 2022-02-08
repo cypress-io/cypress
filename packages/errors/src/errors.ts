@@ -4,8 +4,8 @@ import chalk from 'chalk'
 import _ from 'lodash'
 import path from 'path'
 import stripAnsi from 'strip-ansi'
-import { humanTime, logError, pluralize } from './errorUtils'
-import { errPartial, errTemplate, fmt, PartialErr, theme } from './errTemplate'
+import { humanTime, logError, parseResolvedPattern, pluralize } from './errorUtils'
+import { errPartial, errTemplate, fmt, theme, PartialErr } from './errTemplate'
 import { stackWithoutMessage } from './stackUtils'
 
 import type { ClonedError, CypressError, ErrorLike, ErrTemplateResult } from './errorTypes'
@@ -523,7 +523,7 @@ export const AllCypressErrors = {
 
         ${fmt.stackTrace(err)}`
   },
-  NO_SPECS_FOUND: (folderPath: string, globPattern?: string | null) => {
+  NO_SPECS_FOUND: (folderPath: string, globPattern?: string[] | string | null) => {
     // no glob provided, searched all specs
     if (!globPattern) {
       return errTemplate`\
@@ -534,14 +534,20 @@ export const AllCypressErrors = {
           ${fmt.listItem(folderPath)}`
     }
 
-    const globPath = path.join(theme.blue(folderPath), globPattern)
+    const globPaths = _.castArray(globPattern).map((pattern) => {
+      const [resolvedBasePath, resolvedPattern] = parseResolvedPattern(folderPath, pattern)
+
+      return path.join(resolvedBasePath!, theme.yellow(resolvedPattern!))
+    })
+
+    const phrase = globPaths.length > 1 ? 'these glob patterns' : 'this glob pattern'
 
     return errTemplate`\
         Can't run because ${fmt.highlightSecondary(`no spec files`)} were found.
 
-        We searched for specs matching this glob pattern:
+        We searched for specs matching ${fmt.off(phrase)}:
 
-        ${fmt.listItem(globPath, { color: 'yellow' })}`
+        ${fmt.listItems(globPaths, { color: 'blue', prefix: '  > ' })}`
   },
   RENDERER_CRASHED: () => {
     return errTemplate`\
@@ -749,7 +755,7 @@ export const AllCypressErrors = {
         ${fmt.listItems(arg1.paths)}
 
         Learn more at https://on.cypress.io/reporters
-        
+
         ${fmt.stackTrace(arg1.error)}
         `
   },

@@ -1559,7 +1559,7 @@ module.exports = {
         .spread((sys = {}, browser = {}, specs = []) => {
           // return only what is return to the specPattern
           if (specPattern) {
-            specPattern = specsUtil.default.getPatternRelativeToProjectRoot(specPattern, projectRoot)
+            specPattern = specsUtil.default.getPatternRelativeToCwd(specPattern, options.cwd)
           }
 
           specs = specs.filter((spec) => {
@@ -1571,7 +1571,7 @@ module.exports = {
           if (!specs.length) {
             // did we use the spec pattern?
             if (specPattern) {
-              errors.throw('NO_SPECS_FOUND', projectRoot, specPattern)
+              errors.throw('NO_SPECS_FOUND', options.cwd, specPattern)
             } else {
               // else we looked in the integration folder
               errors.throw('NO_SPECS_FOUND', config.integrationFolder, specPattern)
