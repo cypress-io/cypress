@@ -1,4 +1,5 @@
-import { onMounted, ref, watch, onBeforeUnmount, readonly, Ref } from 'vue'
+import type { Ref } from 'vue'
+import { onMounted, ref, watch, onBeforeUnmount, readonly } from 'vue'
 import { useRoute } from 'vue-router'
 import { getAutIframeModel, UnifiedRunnerAPI } from '../runner'
 import { useSpecStore } from '../store'

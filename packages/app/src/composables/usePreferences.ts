@@ -1,4 +1,5 @@
-import { useRunnerUiStore, RunnerUiState } from '../store'
+import type { RunnerUiState } from '../store'
+import { useRunnerUiStore } from '../store'
 import { useMutation, gql } from '@urql/vue'
 import { Preferences_SetPreferencesDocument } from '@packages/app/src/generated/graphql'
 

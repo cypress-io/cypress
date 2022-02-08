@@ -1,6 +1,7 @@
 import type { CodegenTypeMap, Wizard } from '../generated/test-graphql-types.gen'
 import { BUNDLERS, CODE_LANGUAGES, FRONTEND_FRAMEWORKS, PACKAGES_DESCRIPTIONS } from '@packages/types/src/constants'
-import { MaybeResolver, testNodeId } from './clientTestUtils'
+import type { MaybeResolver } from './clientTestUtils'
+import { testNodeId } from './clientTestUtils'
 
 export const allBundlers = BUNDLERS.map((bundler, idx) => {
   return {
