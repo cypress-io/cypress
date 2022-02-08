@@ -102,7 +102,9 @@ export class MigrationDataSource {
   }
 
   async getComponentTestingMigrationStatus () {
+    debug('getComponentTestingMigrationStatus: start')
     const config = await this.parseCypressConfig()
+
     const componentFolder = getComponentFolder(config)
 
     if (!config || !this.ctx.currentProject) {
@@ -116,6 +118,15 @@ export class MigrationDataSource {
       return null
     }
 
+    debug('getComponentTestingMigrationStatus: componentFolder', componentFolder)
+
+    const specs = await getSpecs(this.ctx.currentProject, config)
+
+    // if there is no component files, no point in manually moving them
+    if (specs.component.length === 0) {
+      return null
+    }
+
     if (!this.componentTestingMigrationWatcher) {
       const onFileMoved = (status: ComponentTestingMigrationStatus) => {
         this.componentTestingMigrationStatus = status
@@ -124,7 +135,7 @@ export class MigrationDataSource {
           this.componentTestingMigrationWatcher?.close()
         }
 
-        // TODO(lachlan): is this the right plcae to use the emitter?
+        // TODO(lachlan): is this the right place to use the emitter?
         this.ctx.deref.emitter.toLaunchpad()
       }
 
