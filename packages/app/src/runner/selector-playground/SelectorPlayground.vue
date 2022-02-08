@@ -1,33 +1,33 @@
 <template>
   <div
     id="selector-playground"
-    class="border-t border-b bg-gray-50 border-gray-200 h-56px grid p-12px gap-12px grid-cols-[40px,1fr,auto] items-center "
+    class="border-t border-b bg-gray-50 border-gray-200 h-56px grid py-12px px-16px gap-12px grid-cols-[40px,1fr,auto] items-center "
   >
     <button
-      class="border rounded-md flex h-full outline-none text-white transition w-40px duration-150 items-center justify-center"
-      :class="{'default-ring': selectorPlaygroundStore.isEnabled, 'border-gray-200': !selectorPlaygroundStore.isEnabled}"
+      class="flex items-center justify-center h-full text-white transition duration-150 border rounded-md outline-none w-40px"
+      :class="[ selectorPlaygroundStore.isEnabled ? 'default-ring' : 'border-gray-200']"
       data-cy="playground-toggle"
       @click="toggleEnabled"
     >
       <i-cy-selector_x16 :class="{ 'icon-dark-indigo-500': selectorPlaygroundStore.isEnabled, 'icon-dark-gray-500': !selectorPlaygroundStore.isEnabled }" />
     </button>
     <div
-      class="flex h-full flex-1 w-full relative items-center"
+      class="relative flex items-center flex-1 w-full h-full"
       @mouseover="setShowingHighlight"
     >
       <Menu #="{ open }">
         <MenuButton
-          aria-label="Playground Methods"
-          class="border-l border-t border-b rounded-l-md flex h-full outline-none border-gray-200 text-white w-40px items-center justify-center"
+          aria-label="Selector Methods"
+          class="flex items-center justify-center h-full text-white border-t border-b border-l border-gray-200 outline-none rounded-l-md w-40px"
           @click.stop
         >
           <i-cy-chevron-down-small_x16
-            class="transition transition-color duration-300"
+            class="transition duration-300 transition-color"
             :class="open ? 'icon-dark-indigo-500' : 'icon-dark-gray-500'"
           />
         </MenuButton>
         <MenuItems
-          class="rounded flex flex-col outline-transparent bg-gray-900 text-white top-34px z-40 absolute overflow-scroll"
+          class="absolute z-40 flex flex-col overflow-scroll text-white bg-gray-900 rounded outline-transparent top-34px"
         >
           <MenuItem
             v-for="method in methods"
@@ -36,7 +36,7 @@
           >
             <button
               :class="{ 'bg-gray-700': active }"
-              class="border-b border-b-gray-800 text-left py-8px px-16px"
+              class="text-left border-b border-b-gray-800 py-8px px-16px"
               @click="selectorPlaygroundStore.setMethod(method.value)"
             >
               {{ method.display }}
@@ -44,10 +44,10 @@
           </MenuItem>
         </MenuItems>
       </Menu>
-      <code class="h-full flex-1 relative">
+      <code class="relative flex-1 h-full">
         <span
           ref="ghostLeft"
-          class="flex pl-12px inset-y-0 text-gray-600 absolute items-center pointer-events-none"
+          class="absolute inset-y-0 flex items-center text-gray-600 pointer-events-none pl-12px"
           data-cy="selected-playground-method"
         >
           <span class="text-gray-800">cy</span>.<span class="text-purple-500">{{ selectorPlaygroundStore.method }}</span>(‘
@@ -55,9 +55,9 @@
         <span
           ref="ghostRight"
           class="font-medium left-[-9999px] absolute inline-block"
-        >{{ selector }}</span>
+        >{{ selector.replace(/\s/g, '&nbsp;') }}</span>
         <span
-          class="flex inset-y-0 text-gray-600 absolute items-center pointer-events-none"
+          class="absolute inset-y-0 flex items-center text-gray-600 pointer-events-none"
           :style="{left: inputRightOffset + 'px'}"
         >‘)</span>
         <input
@@ -65,25 +65,19 @@
           v-model="selector"
           data-cy="playground-selector"
           :style="{paddingLeft: inputLeftOffset + 'px', paddingRight: matcherWidth + 32 + 24 + 'px'}"
-          class="border rounded-r-md font-medium h-full outline-none border-gray-200 w-full text-indigo-500 hocus-default overflow-ellipsis"
+          class="w-full h-full font-medium text-indigo-500 border border-gray-200 outline-none rounded-r-md hocus-default overflow-ellipsis"
           :class="{'hocus-default': selectorPlaygroundStore.isValid, 'hocus-error': !selectorPlaygroundStore.isValid}"
         >
         <div
           ref="match"
-          class="border-l flex font-sans border-l-gray-200 my-6px px-16px inset-y-0 right-0 text-gray-600 absolute items-center"
+          class="absolute inset-y-0 right-0 flex items-center font-sans text-gray-600 border-l border-l-gray-200 my-6px px-16px"
           data-cy="playground-num-elements"
         >
           <template v-if="!selectorPlaygroundStore.isValid">
-            <span class="text-error-400">Invalid</span>
-          </template>
-          <template v-else-if="selectorPlaygroundStore.numElements === 0">
-            No Matches
-          </template>
-          <template v-else-if="selectorPlaygroundStore.numElements === 1">
-            {{ selectorPlaygroundStore.numElements }} Match
+            <span class="text-error-400">{{ t('runner.selectorPlayground.invalidSelector') }}</span>
           </template>
           <template v-else>
-            {{ selectorPlaygroundStore.numElements }} Matches
+            {{ t('runner.selectorPlayground.matches', selectorPlaygroundStore.numElements) }}
           </template>
         </div>
       </code>
@@ -105,7 +99,7 @@
             class="whitespace-nowrap"
             data-cy="playground-copy-tooltip"
           >
-            Copied to clipboard
+            {{ t('runner.selectorPlayground.copyTooltip') }}
           </div>
         </template>
       </SelectorPlaygroundTooltip>
@@ -125,7 +119,7 @@
             class="whitespace-nowrap"
             data-cy="playground-print-tooltip"
           >
-            Printed to console
+            {{ t('runner.selectorPlayground.printTooltip') }}
           </div>
         </template>
       </SelectorPlaygroundTooltip>
@@ -142,6 +136,9 @@ import Button from '@packages/frontend-shared/src/components/Button.vue'
 import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
 import { useClipboard, useElementSize } from '@vueuse/core'
 import SelectorPlaygroundTooltip from './SelectorPlaygroundTooltip.vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const props = defineProps<{
   eventManager: EventManager
