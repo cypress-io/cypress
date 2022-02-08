@@ -154,9 +154,9 @@ Found an error while validating the \`browsers\` list. Expected \`family\` to be
 `
 
 exports['e2e config throws error when multiple default config file are found in project 1'] = `
-There is both a \`cypress.config.js\` and a \`cypress.config.ts\` at the location below:
+There is both a cypress.config.js and a cypress.config.ts at the location below:
 
-/foo/bar/.projects/pristine
+  > /foo/bar/.projects/pristine
 
 Cypress does not know which one to read for config. Please remove one of the two and try again.
 

@@ -275,17 +275,17 @@ exports['deprecated before:browser:launch args / fails when adding unknown prope
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  app_spec.js                                                                     (1 of 1)
-The \`launchOptions\` object returned by your plugin's \`before:browser:launch\` handler contained unexpected properties:
+The launchOptions object returned by your plugin's before:browser:launch handler contained unexpected properties:
 
-- foo
-- width
-- height
+ - foo
+ - width
+ - height
 
-\`launchOptions\` may only contain the properties:
+launchOptions may only contain the properties:
 
-- preferences
-- extensions
-- args
+ - preferences
+ - extensions
+ - args
 
 https://on.cypress.io/browser-launch-api
 
