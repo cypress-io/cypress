@@ -459,7 +459,6 @@ commands:
           command: |
             cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --parallel -- --') || true
             DEBUG=<<parameters.debug>> \
-            CYPRESS_INTERNAL_FORCE_BROWSER_RELAUNCH='true' \
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$TEST_LAUNCHPAD_RECORD_KEY \
             PERCY_PARALLEL_NONCE=$PLATFORM-$CIRCLE_SHA1 \
@@ -1218,6 +1217,7 @@ jobs:
 
   run-frontend-shared-component-tests-chrome:
     <<: *defaults
+    resource_class: medium
     parallelism: 1
     steps:
       - run-new-ui-tests:
@@ -1228,6 +1228,7 @@ jobs:
 
   run-launchpad-component-tests-chrome:
     <<: *defaults
+    resource_class: medium
     parallelism: 7
     steps:
       - run-new-ui-tests:
@@ -1239,6 +1240,7 @@ jobs:
 
   run-launchpad-integration-tests-chrome:
     <<: *defaults
+    resource_class: medium
     parallelism: 2
     steps:
       - run-new-ui-tests:
@@ -1249,6 +1251,7 @@ jobs:
 
   run-app-component-tests-chrome:
     <<: *defaults
+    resource_class: medium
     parallelism: 7
     steps:
       - run-new-ui-tests:
@@ -1259,6 +1262,7 @@ jobs:
 
   run-app-integration-tests-chrome:
     <<: *defaults
+    resource_class: medium
     parallelism: 2
     steps:
       - run-new-ui-tests:
