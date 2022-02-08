@@ -56,7 +56,15 @@ const validateEvent = (event, handler, config, errConstructorFn) => {
     }
   }
 
-  return validator(event, handler, config)
+  const result = validator(event, handler, config)
+
+  if (!result.isValid) {
+    result.error.name = 'ValidationError'
+
+    Error.captureStackTrace(result.error, errConstructorFn)
+  }
+
+  return result
 }
 
 module.exports = validateEvent

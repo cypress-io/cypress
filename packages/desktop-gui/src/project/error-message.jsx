@@ -40,7 +40,7 @@ const ErrorDetails = observer(({ err }) => {
   if (detailsBody) {
     return (
       <pre>
-        <details className='details-body'>
+        <details className='details-body' open>
           <summary>{detailsTitle}</summary>
           {detailsBody}
         </details>

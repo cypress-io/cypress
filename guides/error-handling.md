@@ -31,7 +31,6 @@ Return Value of `errTemplate` (`ErrTemplateResult`):
   messageMarkdown: string, 
   details?: string, // Exists if there is `details()` call in the errTemplate
   originalError?: ErrorLike // Exists if an error was passed into the `details()`
-
 }
 ```
 

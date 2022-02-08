@@ -49,7 +49,11 @@ const load = (ipc, config, pluginsFile) => {
     const { isValid, userEvents, error } = validateEvent(event, handler, config, register)
 
     if (!isValid) {
-      ipc.send('load:error', 'PLUGINS_INVALID_EVENT_ERROR', pluginsFile, event, userEvents, util.serializeError(error))
+      if (userEvents) {
+        ipc.send('load:error', 'PLUGINS_INVALID_EVENT_ERROR', pluginsFile, event, userEvents, util.serializeError(error))
+      } else {
+        ipc.send('load:error', 'PLUGINS_VALIDATION_ERROR', pluginsFile, util.serializeError(error))
+      }
 
       return
     }

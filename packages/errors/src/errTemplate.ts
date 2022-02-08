@@ -64,7 +64,7 @@ class Format {
     const val = this.prepVal('markdown')
 
     if (this.type === 'terminal') {
-      return `${'```'}\n$ ${val}${'```'}`
+      return `${'```'}\n$ ${val}\n${'```'}`
     }
 
     if (this.type === 'code') {

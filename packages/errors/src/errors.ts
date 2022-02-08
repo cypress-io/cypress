@@ -632,7 +632,6 @@ export const AllCypressErrors = {
       ${fmt.stackTrace(arg2)}
     `
   },
-  // TODO: test this
   PLUGINS_VALIDATION_ERROR: (arg1: string, arg2: string | Error) => {
     return errTemplate`
       Your ${fmt.highlight(`pluginsFile`)} threw a validation error: ${fmt.path(arg1)}
