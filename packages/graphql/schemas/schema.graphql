@@ -5,7 +5,7 @@
 """Represents state of auth based on most recent message from login flow"""
 type AuthState {
   """Whether the browser was successfully opened for login"""
-  browserOpened: String!
+  browserOpened: Boolean!
 
   """Content of the auth message"""
   message: String!
@@ -912,7 +912,7 @@ type ProjectPreferences {
 """The root "Query" type containing all entry fields for our querying"""
 type Query {
   """The latest state of the auth process"""
-  authState: AuthState
+  authState: AuthState!
   baseError: BaseError
 
   """Returns an object conforming to the Relay spec"""

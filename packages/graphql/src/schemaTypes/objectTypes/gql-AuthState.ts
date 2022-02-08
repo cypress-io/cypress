@@ -16,7 +16,7 @@ export const AuthState = objectType({
       description: 'Content of the auth message',
     })
 
-    t.nonNull.string('browserOpened', {
+    t.nonNull.boolean('browserOpened', {
       description: 'Whether the browser was successfully opened for login',
     })
   },
