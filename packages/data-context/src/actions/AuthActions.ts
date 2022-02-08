@@ -45,14 +45,14 @@ export class AuthActions {
   }
 
   async login () {
-    this.setAuthenticatedUser(await this.authApi.logIn(({ browserOpened }) => {
-      this.ctx.coreData.isAuthBrowserOpened = browserOpened
+    this.setAuthenticatedUser(await this.authApi.logIn((message) => {
+      this.ctx.coreData.authState = message
     }))
   }
 
   async logout () {
     try {
-      this.ctx.coreData.isAuthBrowserOpened = false
+      this.ctx.coreData.authState.browserOpened = false
       await this.authApi.logOut()
     } catch (e) {
       this.ctx.logTraceError(e)

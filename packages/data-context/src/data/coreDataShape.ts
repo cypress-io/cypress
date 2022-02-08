@@ -84,6 +84,13 @@ export interface BaseErrorDataShape {
   stack?: string
 }
 
+export interface AuthStateShape {
+  type?: string
+  name?: string
+  message?: string
+  browserOpened: boolean
+}
+
 export interface CoreDataShape {
   cliBrowser: string | null
   cliTestingType: string | null
@@ -108,7 +115,7 @@ export interface CoreDataShape {
   migration: MigrationDataShape | null
   user: AuthenticatedUserShape | null
   electron: ElectronShape
-  isAuthBrowserOpened: boolean
+  authState: AuthStateShape
   scaffoldedFiles: NexusGenObjects['ScaffoldedFile'][] | null
   warnings: Warning[]
   packageManager: typeof PACKAGE_MANAGERS[number]
@@ -143,7 +150,9 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
       preferences: {},
       refreshing: null,
     },
-    isAuthBrowserOpened: false,
+    authState: {
+      browserOpened: false,
+    },
     currentProject: modeOptions.projectRoot ?? null,
     currentTestingType: modeOptions.testingType ?? null,
     wizard: {

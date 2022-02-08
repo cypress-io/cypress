@@ -27,7 +27,7 @@ const mountSuccess = (viewer: TestCloudViewer = cloudViewer) => {
   cy.mountFragment(LoginModalFragmentDoc, {
     onResult: (result) => {
       result.__typename = 'Query'
-      result.isAuthBrowserOpened = true
+      result.authState.browserOpened = true
       result.cloudViewer = viewer
       result.cloudViewer.__typename = 'CloudUser'
     },
@@ -56,7 +56,7 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
     cy.mountFragment(LoginModalFragmentDoc, {
       onResult: (result) => {
         result.__typename = 'Query'
-        result.isAuthBrowserOpened = true
+        result.authState.browserOpened = true
       },
       render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><LoginModal gql={gqlVal} modelValue={true} /></div>,
     })
