@@ -554,7 +554,6 @@ export = {
     await this._setAutomation(pageCriClient, automation, browserCriClient.closeCurrentTarget)
 
     await Promise.all([
-
       this._maybeRecordVideo(pageCriClient, options, browser.majorVersion),
       this._handleDownloads(pageCriClient, options.downloadsFolder, automation),
     ])
