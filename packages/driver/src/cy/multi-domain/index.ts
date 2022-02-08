@@ -3,6 +3,7 @@ import $errUtils from '../../cypress/error_utils'
 import { CommandsManager } from './commands_manager'
 import { LogsManager } from './logs_manager'
 import { Validator } from './validator'
+import { correctStackForCrossDomainError } from './util'
 import { failedToSerializeSubject } from './failedSerializeSubjectProxy'
 
 export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: Cypress.State, config: Cypress.InternalConfig) {
@@ -101,14 +102,14 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
         logsManager.cleanup()
       }
 
-      const doneAndCleanup = async (err) => {
+      const doneAndCleanup = async ({ err }) => {
         communicator.off('done:called', doneAndCleanup)
         // If done is called, immediately unbind command listeners to prevent
         // any commands from being enqueued, but wait for log updates to
         // trickle in before invoking done
         commandsManager.cleanup()
         await logsManager.cleanup()
-        done(err)
+        done(err ? correctStackForCrossDomainError(err, userInvocationStack) : err)
       }
 
       if (done) {

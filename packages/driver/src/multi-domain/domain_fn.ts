@@ -58,7 +58,7 @@ export const handleDomainFn = (cy: $Cy, specBridgeCommunicator: SpecBridgeDomain
         doneEarly()
 
         // signal to the primary domain that done has been called and to signal that the command queue is finished in the secondary domain
-        specBridgeCommunicator.toPrimary('done:called', err)
+        specBridgeCommunicator.toPrimaryError('done:called', { err })
         specBridgeCommunicator.toPrimary('queue:finished')
 
         return null
@@ -80,7 +80,7 @@ export const handleDomainFn = (cy: $Cy, specBridgeCommunicator: SpecBridgeDomain
 
       // If there isn't a current command, just reject to fail the test
       if (!command) {
-        return specBridgeCommunicator.toPrimary('reject', { err })
+        return specBridgeCommunicator.toPrimaryError('reject', { err })
       }
 
       const id = command.get('id')
