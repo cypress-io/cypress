@@ -2,12 +2,12 @@ module.exports = {
   'fixturesFolder': false,
   'video': false,
   'component': {
-    devServer (cypressConfig) {
+    devServer (cypressDevServerConfig) {
       const { startDevServer } = require('@cypress/webpack-dev-server')
       const webpackConfig = require('./webpack.config')
 
       return startDevServer({
-        options: cypressConfig,
+        options: cypressDevServerConfig,
         webpackConfig,
       })
     },
