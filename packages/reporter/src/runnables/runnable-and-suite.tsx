@@ -1,5 +1,4 @@
 import cs from 'classnames'
-import _ from 'lodash'
 import { observer } from 'mobx-react'
 import React, { Component, MouseEvent } from 'react'
 // @ts-ignore
@@ -22,7 +21,7 @@ interface SuiteProps {
   model: SuiteModel
 }
 
-const Suite = observer(({ eventManager = events, model }: SuiteProps) => {
+const Suite = observer(({ appState, eventManager = events, model }: SuiteProps) => {
   const _launchStudio = (e: MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
@@ -52,7 +51,7 @@ const Suite = observer(({ eventManager = events, model }: SuiteProps) => {
       isOpen={true}
     >
       <ul className='runnables'>
-        {_.map(model.children, (runnable) => <Runnable key={runnable.id} model={runnable} />)}
+        {model.children.map((runnable) => <Runnable appState={appState} key={runnable.id} model={runnable} />)}
       </ul>
     </Collapsible>
   )
@@ -84,7 +83,10 @@ class Runnable extends Component<RunnableProps> {
         })}
         data-model-state={model.state}
       >
-        {model.type === 'test' ? <Test model={model as TestModel} /> : <Suite model={model as SuiteModel} />}
+        {model.type === 'test' ?
+          <Test appState={appState} model={model as TestModel} />
+          :
+          <Suite appState={appState} model={model as SuiteModel} />}
       </li>
     )
   }

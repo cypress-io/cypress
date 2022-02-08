@@ -5,7 +5,7 @@ import { FileDetails } from '@packages/types'
 
 import { Alias } from '../instruments/instrument-model'
 import Err from '../errors/err-model'
-import CommandModel from '../commands/command-model'
+import CommandModel from '../command-logs/command-model'
 
 export type HookName = 'before all' | 'before each' | 'after all' | 'after each' | 'test body' | 'studio commands'
 

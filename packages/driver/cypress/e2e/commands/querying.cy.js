@@ -226,7 +226,7 @@ describe('src/cy/commands/querying', () => {
   })
 
   context('#within', () => {
-    it('invokes callback function with runnable.ctx', function () {
+    it.only('invokes callback function with runnable.ctx', function () {
       const ctx = this
 
       cy.get('div:first').within(function () {

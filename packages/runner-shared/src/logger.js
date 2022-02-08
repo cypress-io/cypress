@@ -12,7 +12,7 @@ export const logger = {
   },
 
   clearLog () {
-    if (console.clear) console.clear()
+    // if (console.clear) console.clear()
   },
 
   logFormatted (consoleProps) {

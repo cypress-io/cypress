@@ -60,7 +60,7 @@ export default class Command extends Instrument {
   private _pendingTimeout?: TimeoutID = undefined
 
   @computed get displayMessage () {
-    return this.renderProps.message || this.message
+    return this.renderProps.message || this.message || ''
   }
 
   @computed get numChildren () {
@@ -83,6 +83,9 @@ export default class Command extends Instrument {
   }
 
   @action toggleOpen () {
+    console.log('this', this)
+    if (!this.hasChildren) return
+
     this._isOpen = !this.isOpen
   }
 

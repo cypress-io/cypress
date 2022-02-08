@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import { action, observable } from 'mobx'
 import AgentModel, { AgentProps } from '../agents/agent-model'
-import CommandModel, { CommandProps } from '../commands/command-model'
+import CommandModel, { CommandProps } from '../command-logs/command-model'
 import { HookProps } from '../hooks/hook-model'
 import appState, { AppState } from '../lib/app-state'
 import scroller, { Scroller } from '../lib/scroller'
@@ -44,11 +44,11 @@ export class RunnablesStore {
   @observable isReady = defaults.isReady
   @observable runnables: RunnableArray = []
   /**
-   * Stores a list of all the runables files where the reporter
+   * Stores a list of all the runnables files where the reporter
    * has passed without any specific order.
    *
    * key: spec FilePath
-   * content: RunableArray
+   * content: RunnableArray
    */
   @observable runnablesHistory: Record<string, RunnableArray> = {}
 

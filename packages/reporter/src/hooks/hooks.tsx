@@ -1,11 +1,12 @@
 import cs from 'classnames'
-import _ from 'lodash'
 import { observer } from 'mobx-react'
 import React from 'react'
 import { FileDetails } from '@packages/types'
 
 import appState, { AppState } from '../lib/app-state'
-import Command from '../commands/command'
+import Command from '../command-logs/command'
+// import Command from '../commands/command'
+import NoCommands from '../command-logs/NoCommands'
 import Collapsible from '../collapsible/collapsible'
 import HookModel, { HookName } from './hook-model'
 
@@ -69,7 +70,7 @@ export interface HookProps {
   showNumber: boolean
 }
 
-const Hook = observer(({ model, showNumber }: HookProps) => (
+const Hook = observer(({ appState, model, showNumber }: HookProps) => (
   <li className={cs('hook-item', { 'hook-failed': model.failed, 'hook-studio': model.isStudio })}>
     <Collapsible
       header={<HookHeader model={model} number={showNumber ? model.hookNumber : undefined} />}
@@ -78,7 +79,8 @@ const Hook = observer(({ model, showNumber }: HookProps) => (
       isOpen={true}
     >
       <ul className='commands-container'>
-        {_.map(model.commands, (command) => <Command key={command.id} model={command} aliasesWithDuplicates={model.aliasesWithDuplicates} />)}
+        {/* {model.commands.map((command) => <Command key={command.id} model={command} aliasesWithDuplicates={model.aliasesWithDuplicates} />)} */}
+        {_.map(model.commands, (command) => <Command appState={appState} key={command.id} model={command} aliasesWithDuplicates={model.aliasesWithDuplicates} />)}
         {model.showStudioPrompt && <StudioNoCommands />}
       </ul>
     </Collapsible>
@@ -96,17 +98,28 @@ export interface HooksProps {
   model: HooksModel
 }
 
-const Hooks = observer(({ state = appState, model }: HooksProps) => (
-  <ul className='hooks-container'>
-    {_.map(model.hooks, (hook) => {
-      if (hook.commands.length || (hook.isStudio && state.studioActive && model.state === 'passed')) {
-        return <Hook key={hook.hookId} model={hook} showNumber={model.hookCount[hook.hookName] > 1} />
-      }
+const Hooks = observer(({ state = appState, model }: HooksProps) => {
+  if (!model.hooks.length) {
+    return (
+      <ul className='hooks-container'>
+        <NoCommands />
+      </ul>
+    )
+  }
 
-      return null
-    })}
-  </ul>
-))
+
+  return (
+    <ul className='hooks-container'>
+      {model.hooks.map((hook) => {
+        if (hook.hasCommands || (hook.isStudio && state.studioActive && model.state === 'passed')) {
+          return <Hook appState={appState} key={hook.hookId} model={hook} showNumber={model.hookCount[hook.hookName] > 1} />
+        }
+
+        return null
+      })}
+    </ul>
+  )
+})
 
 export { Hook, HookHeader }
 

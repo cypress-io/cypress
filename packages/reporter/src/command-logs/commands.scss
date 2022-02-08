@@ -1,0 +1,50 @@
+.cmd-wrapper {
+  display: flex;
+}
+
+.cmd-column {
+  display: flex;
+  margin-right: 10px;
+  width: 50px;
+
+  .cmd-number {
+    display: 'inline-block';
+    width: 25px;
+  }
+
+  .cmd-expander {
+    text-align: right;
+    padding-right: 2px;
+    width: 25px;
+
+    svg {
+      transform: rotate(-90deg);
+      transition: transform 150ms ease-out;
+    }
+  }
+
+  .cmd-expander-is-open {
+    transform: rotate(0deg);
+  }
+}
+
+.cmd-method {
+  padding: 1px 2px 0;
+  display: inline-block;
+  font-size: 11px;
+  min-width: 80px;
+  font-weight: 600;
+  // color: $gray-200;
+}
+
+.cmd-message {
+  // flex-grow: 2;
+  margin-left: 0;
+  overflow: hidden;
+  // white-space: nowrap;
+
+  // > span {
+  //   align-items: center;
+  //   display: flex;
+  // }
+}
