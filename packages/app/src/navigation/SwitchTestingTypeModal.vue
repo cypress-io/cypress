@@ -17,7 +17,8 @@
 
 <script lang="ts" setup>
 import { gql, useMutation } from '@urql/vue'
-import { SwitchTestingTypeAndRelaunchDocument, SwitchTestingTypeModalFragment } from '../generated/graphql'
+import { SwitchTestingTypeAndRelaunchDocument } from '../generated/graphql'
+import type { SwitchTestingTypeModalFragment } from '../generated/graphql'
 import StandardModal from '@cy/components/StandardModal.vue'
 import TestingTypePicker from '@cy/gql-components/TestingTypePicker.vue'
 import { useI18n } from '@cy/i18n'
