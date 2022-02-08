@@ -34,15 +34,18 @@
   </div>
 </template>
 
+<script lang="ts">
+export type DocsMenuVariant = 'ci1' | 'orchestration1' | 'main'
+</script>
+
 <script setup lang="ts">
 import Button from '@cy/components/Button.vue'
 import { useI18n } from '@cy/i18n'
-import { getUrlWithParams, LinkWithParams } from '../../utils/getUrlWithParams'
+import type { LinkWithParams } from '../../utils/getUrlWithParams'
+import { getUrlWithParams } from '../../utils/getUrlWithParams'
 import ExternalLink from '../ExternalLink.vue'
 
 const { t } = useI18n()
-
-export type DocsMenuVariant = 'ci1' | 'orchestration1' | 'main'
 
 const emit = defineEmits<{
   (e: 'setDocsContent', value:DocsMenuVariant): void,

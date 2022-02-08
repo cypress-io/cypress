@@ -60,7 +60,8 @@ import StandardModal from '@cy/components/StandardModal.vue'
 import Button from '@cy/components/Button.vue'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import OrganizationIcon from '~icons/cy/office-building_x16.svg'
-import { CheckCloudOrganizationsDocument, CreateCloudOrgModalFragment } from '../../generated/graphql'
+import type { CreateCloudOrgModalFragment } from '../../generated/graphql'
+import { CheckCloudOrganizationsDocument } from '../../generated/graphql'
 import { useI18n } from '@cy/i18n'
 
 const { t } = useI18n()

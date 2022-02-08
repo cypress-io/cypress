@@ -78,6 +78,7 @@
 </template>
 
 <script lang="ts">
+// eslint-disable-next-line import/no-duplicates
 import { defineComponent } from 'vue'
 import ButtonInternals from './ButtonInternals.vue'
 import ExternalLink from '../gql-components/ExternalLink.vue'
@@ -112,7 +113,7 @@ export type ButtonSizes = keyof(typeof SizeClassesTable)
 
 <script lang="ts" setup>
 
-// eslint-disable-next-line no-duplicate-imports
+// eslint-disable-next-line import/no-duplicates
 import { computed, useAttrs } from 'vue'
 import { RouterLink } from 'vue-router'
 
