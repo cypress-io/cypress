@@ -2076,6 +2076,7 @@ linux-workflow: &linux-workflow
         requires:
           - build
     - system-tests-node-modules-install:
+        context: test-runner:performance-tracking
         requires:
           - build
     - system-tests-chrome:
