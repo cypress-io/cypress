@@ -17188,9 +17188,9 @@ cyclist@^1.0.1:
   resolved "https://registry.yarnpkg.com/cyclist/-/cyclist-1.0.1.tgz#596e9698fd0c80e12038c2b82d6eb1b35b6224d9"
   integrity sha1-WW6WmP0MgOEgOMK4LW6xs1tiJNk=
 
-cypress-example-kitchensink@cypress-io/cypress-example-kitchensink#8389bb6b09c59c2720ceeaadecc8eaa2d4d6551d:
+cypress-example-kitchensink@cypress-io/cypress-example-kitchensink#d4b6c4a898f87fa391fabef6dbbff8cd7bd11d2a:
   version "0.0.0-development"
-  resolved "https://codeload.github.com/cypress-io/cypress-example-kitchensink/tar.gz/8389bb6b09c59c2720ceeaadecc8eaa2d4d6551d"
+  resolved "https://codeload.github.com/cypress-io/cypress-example-kitchensink/tar.gz/d4b6c4a898f87fa391fabef6dbbff8cd7bd11d2a"
   dependencies:
     npm-run-all "^4.1.2"
     serve "11.3.0"
