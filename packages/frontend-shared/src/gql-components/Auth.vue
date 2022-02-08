@@ -1,8 +1,22 @@
 <template>
-  <div v-if="error">
-    An error occurred while authenticating: {{ error }}
+  <div
+    v-if="props.error"
+    class="flex gap-16px"
+  >
+    <Button>
+      <template
+        #prefix
+      >
+        <i-cy-action-restart_x16
+          class=" icon-light-white"
+        />
+      </template>
+      {{ t('topNav.login.actionTryAgain') }}
+    </Button>
+    <Button variant="outline">
+      {{ t('topNav.login.actionCancel') }}
+    </Button>
   </div>
-
   <div v-else-if="showLogout">
     <button
       class="bg-white border-rounded outline-transparent border-gray-100 border-1 w-full py-8px text-14px text-indigo-500 block whitespace-nowrap hocus:border-gray-200 hover:no-underline"
@@ -54,6 +68,7 @@ const isOnline = useOnline()
 
 const props = defineProps<{
   gql: AuthFragment,
+  error?: boolean,
   showLogout?: boolean
 }>()
 
@@ -66,6 +81,7 @@ fragment Auth on Query {
   }
   authState {
     browserOpened
+    name
   }
 }
 `
@@ -90,6 +106,7 @@ gql`
 query BrowserOpened {
   authState {
     browserOpened
+    name
   }
 }
 `
@@ -102,7 +119,6 @@ onMounted(() => {
   loginButtonRef?.value?.$el?.focus()
 })
 
-const error = ref<string>()
 const clickedOnce = ref(false)
 
 const emit = defineEmits<{
@@ -133,14 +149,10 @@ const handleAuth = async () => {
     }
   }, 1500)
 
-  const result = await login.executeMutation({})
-
-  error.value = result.error?.message ?? undefined
+  await login.executeMutation({})
 }
 
 const handleLogout = async () => {
-  // clear this for good measure
-  error.value = undefined
   await logout.executeMutation({})
 }
 

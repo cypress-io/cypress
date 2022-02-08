@@ -9,7 +9,7 @@ export const AuthState = objectType({
     })
 
     t.string('name', {
-      description: 'Tame of auth message, e.g. AUTH_BROWSER_LAUNCHED',
+      description: 'Name of auth message, e.g. AUTH_BROWSER_LAUNCHED',
     })
 
     t.string('message', {

@@ -30,7 +30,7 @@
           class="font-normal p-24px text-gray-700"
         >
           <i18n-t
-            v-if="!viewer"
+            v-if="!viewer && !browserError"
             scope="global"
             keypath="topNav.login.bodyInitial"
           >
@@ -52,11 +52,15 @@
               {{ viewer.fullName || viewer.email }}
             </ExternalLink>
           </i18n-t>
+          <div v-else-if="browserError">
+            {{ t('topNav.login.bodyError') }}
+          </div>
         </DialogDescription>
 
         <div class="bg-gray-50 border-t-1px py-16px px-24px">
           <Auth
             :gql="props.gql"
+            :error="browserError"
             @continue="$emit('update:modelValue', false)"
           />
         </div>
@@ -109,6 +113,7 @@ const setIsOpen = (value: boolean) => {
 const { t } = useI18n()
 
 const viewer = computed(() => props.gql?.cloudViewer)
+const browserError = computed(() => props.gql.authState.name === 'AUTH_COULD_NOT_LAUNCH_BROWSER')
 
 const title = computed(() => {
   if (viewer.value) {

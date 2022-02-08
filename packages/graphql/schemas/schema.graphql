@@ -10,7 +10,7 @@ type AuthState {
   """Content of the auth message"""
   message: String
 
-  """Tame of auth message, e.g. AUTH_BROWSER_LAUNCHED"""
+  """Name of auth message, e.g. AUTH_BROWSER_LAUNCHED"""
   name: String
 
   """The type of the auth message, e.g. info, warning"""

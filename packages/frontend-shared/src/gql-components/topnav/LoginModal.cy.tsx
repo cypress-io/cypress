@@ -75,6 +75,21 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
     cy.contains('a', cloudViewer.fullName).should('have.attr', 'href', 'https://on.cypress.io/dashboard/profile')
   })
 
+  it('shows an error state when browser cannot be launched', () => {
+    cy.mountFragment(LoginModalFragmentDoc, {
+      onResult: (result) => {
+        result.__typename = 'Query'
+        result.authState.name = 'AUTH_COULD_NOT_LAUNCH_BROWSER'
+      },
+      render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><LoginModal gql={gqlVal} modelValue={true} /></div>,
+    })
+
+    cy.findByRole('button', { name: text.login.actionTryAgain }).should('be.visible')
+    cy.findByRole('button', { name: text.login.actionCancel }).should('be.visible')
+    cy.contains(text.login.bodyError)
+    // cy.contains('Cypress was unable to open your installed browser').should('be.visible')
+  })
+
   it('shows successful login status with email if name not provided', () => {
     mountSuccess(cloudViewerNoName)
     cy.contains('h2', text.login.titleSuccess).should('be.visible')
