@@ -20,6 +20,7 @@ export async function startDevServer (startDevServerArgs: StartDevServer, exitPr
 
   return new Promise<ResolvedDevServerConfig>(async (resolve, reject) => {
     if (webpackDevServerFacts.isV3()) {
+      // @ts-ignore
       const server: Server = webpackDevServer.listen(0, '127.0.0.1', () => {
         // FIXME: handle address returning a string
         const port = (server.address() as AddressInfo).port
