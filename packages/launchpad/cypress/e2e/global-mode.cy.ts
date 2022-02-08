@@ -54,8 +54,8 @@ describe('Launchpad: Global Mode', () => {
       cy.get('[data-cy="project-card"]')
       .should('have.length', 1)
 
-      cy.get('[data-cy="project-card"]').should('contain', 'todos')
-      cy.get('[data-cy="project-card"]').should('contain', path.join('cy-projects', 'todos'))
+      cy.contains('[data-cy="project-card"]', 'todos').should('be.visible')
+      cy.containsPath('[data-cy="project-card"]', path.join('cy-projects', 'todos')).should('be.visible')
     })
   })
 
