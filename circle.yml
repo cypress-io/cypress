@@ -221,6 +221,9 @@ commands:
       - run:
           name: Update system-tests node_modules cache
           command: yarn workspace @tooling/system-tests projects:yarn:install
+      - run:
+          name: Send root honeycomb event
+          command: node ./system-tests/lib/performance-reporter.js
       - save_cache:
           name: Save system tests node_modules cache
           key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-system-tests-projects-node-modules-cache-{{ checksum "system_tests_cache_key" }}
@@ -232,13 +235,6 @@ commands:
           key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-system-tests-projects-node-modules-cache-state-{{ checksum "system_tests_cache_key" }}
           paths:
             - system_tests_node_modules_installed
-
-  send_system_test_honecomb_event:
-    description: 'Send a root event to honeycomb for this build'
-    steps:
-      - run:
-          name: Send honeycomb event
-          command: node ./system-tests/lib/performance-reporter.js
 
   caching-dependency-installer:
     description: 'Installs & caches the dependencies based on yarn lock & package json dependencies'
@@ -1162,7 +1158,6 @@ jobs:
     steps:
       - restore_cached_workspace
       - update_cached_system_tests_deps
-      - send_system_test_honecomb_event
 
   system-tests-chrome:
     <<: *defaults

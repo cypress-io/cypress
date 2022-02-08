@@ -50,7 +50,7 @@ class HoneycombReporter {
       suite.honeycombEvent.add({
         ...parent.data,
         suite: suite.title,
-        specFile: path.basename(suite.file),
+        specFile: suite.file && path.basename(suite.file),
 
         spanId: uuidv4(),
         parentId: parent.data.spanId,
