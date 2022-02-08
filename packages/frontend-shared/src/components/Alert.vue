@@ -8,7 +8,7 @@
     :class="[
       classes.headerClass,
       {[`hocus-default border-1 border-transparent rounded ${classes.ring}`]: canCollapse}]"
-    height="300"
+    :max-height="maxHeight"
   >
     <template #target="{ open }">
       <div
@@ -98,7 +98,8 @@ const props = withDefaults(defineProps<{
   dismissible?: boolean,
   collapsible?: boolean,
   modelValue?: boolean,
-  iconClasses?: string
+  iconClasses?: string,
+  maxHeight: string | undefined,
 }>(), {
   title: undefined,
   modelValue: true,
