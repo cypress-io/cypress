@@ -79,19 +79,6 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
       })
     })
 
-    it('navigation:changed', (done) => {
-      cy.switchToDomain('foobar.com', done, () => {
-        Cypress.once('navigation:changed', () => {
-          expect(location.host).to.equal('foobar.com')
-          done()
-        })
-
-        cy.window().then((window) => {
-          window.location.hash = '#hashbrowns'
-        })
-      })
-    })
-
     it('window:alert', (done) => {
       cy.switchToDomain('foobar.com', done, () => {
         Cypress.once('window:alert', (text) => {

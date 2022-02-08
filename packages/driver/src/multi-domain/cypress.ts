@@ -40,6 +40,9 @@ const setup = () => {
     pageLoadTimeout: 60000,
     requestTimeout: 5000,
     responseTimeout: 30000,
+    // Set defaults to avoid warnings
+    waitForAnimations: true,
+    animationDistanceThreshold: 5,
   }) as Cypress.Cypress
 
   // @ts-ignore
@@ -81,6 +84,16 @@ const onBeforeAppWindowLoad = (Cypress: Cypress.Cypress, cy: $Cy) => (autWindow:
   Cypress.state('window', autWindow)
   Cypress.state('document', autWindow.document)
 
+  // Can we assume this is always true within the switchToDomain command? I'm not sure thats always true. Should we always defer to the primary domain for this value?
+  // This is needed to be able to continue through the 'stabilityChanged' function to log the loading state for the page.
+  cy.state('duringUserTestExecution', true)
+  // Should we start this count fresh on each window load? Should we sync this from the primary domain? Normally this is set/reset on the 'test:before:run:async' event
+  // This is needs to be valued for the 'stabilityChanged' function to not error.
+  cy.state('redirectionCount', {})
+
+  // This is typically called by the cy function `urlNavigationEvent` but it is private. For the primary domain this is called in 'onBeforeAppWindowLoad'.
+  Cypress.action('app:navigation:changed', 'page navigation event (\'before:load\')')
+
   cy.overrides.wrapNativeMethods(autWindow)
   // TODO: DRY this up with the mostly-the-same code in src/cypress/cy.js
   bindToListeners(autWindow, {
@@ -90,9 +103,9 @@ const onBeforeAppWindowLoad = (Cypress: Cypress.Cypress, cy: $Cy) => (autWindow:
       return Cypress.action('app:form:submitted', e)
     },
     onBeforeUnload (e) {
-      // TODO: implement these commented out bits
-      // stability.isStable(false, 'beforeunload')
+      cy.isStable(false, 'beforeunload')
 
+      // TODO: implement these commented out bits
       // Cookies.setInitial()
 
       // timers.reset()
@@ -104,7 +117,18 @@ const onBeforeAppWindowLoad = (Cypress: Cypress.Cypress, cy: $Cy) => (autWindow:
       return undefined
     },
     onLoad () {
+      // This is also call on the on 'load' event in cy. In cy the call a function to call it. I'm not sure if that is intentional, but i've replicated it here.
+      const signalStable = () => {
+        cy.isStable(true, 'load')
+      }
+
+      // This is typically called by the cy function `urlNavigationEvent` but it is private. For the primary domain this is called on 'load'.
+      Cypress.action('app:navigation:changed', 'page navigation event (\'load\')')
+      // This is also call on the on 'load' event in cy
+      Cypress.action('app:window:load', autWindow)
+
       specBridgeCommunicator.toPrimary('window:load')
+      signalStable()
     },
     onUnload (e) {
       return Cypress.action('app:window:unload', e)
