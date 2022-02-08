@@ -28,7 +28,8 @@ import { computed, ref } from 'vue'
 import WizardLayout from './WizardLayout.vue'
 import ManualInstall from './ManualInstall.vue'
 import { gql } from '@urql/core'
-import { InstallDependenciesFragment,
+import type { InstallDependenciesFragment } from '../generated/graphql'
+import {
   InstallDependencies_ScaffoldFilesDocument,
   Wizard_InstalledPackagesDocument,
 } from '../generated/graphql'
