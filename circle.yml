@@ -2137,7 +2137,7 @@ jobs:
           repo: cypress-component-testing-examples
           browser: chrome
           folder: "vue-cli-2"
-          command: "yarn cypress run-ct"
+          command: "npx cypress run --component"
 
   test-binary-against-cy-ct-examples-vue-cli-2-firefox:
     <<: *defaults
@@ -2146,7 +2146,7 @@ jobs:
           repo: cypress-component-testing-examples
           browser: firefox
           folder: "vue-cli-2"
-          command: "yarn cypress run-ct"
+          command: "npx cypress run --component"
 
   test-binary-against-cy-ct-examples-quasar-ui:
     <<: *defaults
@@ -2156,7 +2156,7 @@ jobs:
           browser: chrome
           folder: "vue-cli-2-quasar-ui"
           pull_request_id: 87
-          command: "yarn cypress run-ct"
+          command: "npx cypress run --component"
 
   test-binary-against-cy-ct-examples-cra-ant-design:
     <<: *defaults
@@ -2166,7 +2166,7 @@ jobs:
           browser: chrome
           folder: "create-react-app-ant-design"
           pull_request_id: 85
-          command: "npx cypress run-ct"
+          command: "npx cypress run --component"
 
   test-binary-against-cy-ct-examples-cra-react-bootstrap:
     <<: *defaults
@@ -2176,7 +2176,7 @@ jobs:
           browser: chrome
           folder: "create-react-app-react-bootstrap"
           pull_request_id: 84
-          command: "npx cypress run-ct"
+          command: "npx cypress run --component"
 
   test-binary-against-cy-ct-examples-cra-chakra-ui:
     <<: *defaults
@@ -2186,7 +2186,7 @@ jobs:
           browser: chrome
           folder: "create-react-app-chakra-ui"
           pull_request_id: 83
-          command: "npx cypress run-ct"
+          command: "npx cypress run --component"
 
   test-binary-against-cy-ct-examples-cra-tailwind:
     <<: *defaults
@@ -2196,7 +2196,7 @@ jobs:
           browser: chrome
           folder: "create-react-app-tailwind"
           pull_request_id: 79
-          command: "yarn cypress run-ct"
+          command: "npx cypress run --component"
 
   test-binary-as-specific-user:
     <<: *defaults
