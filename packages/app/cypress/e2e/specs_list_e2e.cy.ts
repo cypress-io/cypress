@@ -58,6 +58,8 @@ describe('App: Spec List (E2E)', () => {
     cy.get('[data-cy="standard-modal"]').should('not.exist')
     cy.get('[data-cy="new-spec-button"]').click()
     cy.get('[data-cy="standard-modal"]').get('h2').contains('Create a new spec')
+    cy.get('button').contains('Scaffold example specs').should('be.visible')
+    cy.get('button').contains('Create new empty spec').should('be.visible')
     cy.get('button').get('[aria-label="Close"]').click()
     cy.get('[data-cy="standard-modal"]').should('not.exist')
   })
