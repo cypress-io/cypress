@@ -124,6 +124,10 @@
         </template>
       </MigrationStep>
     </template>
+    <Spinner
+      v-else
+      class="mx-auto mt-100px"
+    />
   </div>
 </template>
 
@@ -131,6 +135,7 @@
 import type { MIGRATION_STEPS } from '@packages/types'
 import { computed, onBeforeMount, ref } from 'vue'
 import { gql, useMutation, useQuery } from '@urql/vue'
+import Spinner from '@cy/components/Spinner.vue'
 import Button from '@cy/components/Button.vue'
 import ArrowRightIcon from '~icons/cy/arrow-right_x16.svg'
 import MigrationStep from './fragments/MigrationStep.vue'
