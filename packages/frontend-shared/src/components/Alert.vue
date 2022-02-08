@@ -76,7 +76,8 @@ export type AlertClasses = {
 <script lang="ts" setup>
 import AlertHeader from './AlertHeader.vue'
 import DeleteIcon from '~icons/cy/delete_x16.svg'
-import { computed, useSlots, FunctionalComponent, SVGAttributes } from 'vue'
+import type { FunctionalComponent, SVGAttributes } from 'vue'
+import { computed, useSlots } from 'vue'
 import ChevronDown from '~icons/cy/chevron-down-small_x16.svg'
 import { useI18n } from '@cy/i18n'
 import Collapsible from './Collapsible.vue'
