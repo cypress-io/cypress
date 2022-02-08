@@ -207,6 +207,9 @@ commands:
           keys:
             - v{{ .Environment.CACHE_VERSION }}-{{ arch }}-system-tests-projects-node-modules-cache-state-{{ checksum "system_tests_cache_key" }}
       - run:
+          name: Send root honeycomb event for this CI build
+          command: node ./system-tests/lib/performance-reporter.js
+      - run:
           name: Bail if specific cache exists
           command: |
             if [[ -f "system_tests_node_modules_installed" ]]; then
@@ -221,9 +224,6 @@ commands:
       - run:
           name: Update system-tests node_modules cache
           command: yarn workspace @tooling/system-tests projects:yarn:install
-      - run:
-          name: Send root honeycomb event
-          command: node ./system-tests/lib/performance-reporter.js
       - save_cache:
           name: Save system tests node_modules cache
           key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-system-tests-projects-node-modules-cache-{{ checksum "system_tests_cache_key" }}
