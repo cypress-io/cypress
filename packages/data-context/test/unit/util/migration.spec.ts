@@ -16,9 +16,11 @@ import tempDir from 'temp-dir'
 import type { e2eProjectDirs } from '@packages/frontend-shared/cypress/e2e/support/e2eProjectDirs'
 import { MigrationFile } from '../../../src/sources'
 
+const root = path.join(__dirname, '..', '..', '..', '..', '..')
+
 function scaffoldMigrationProject (project: typeof e2eProjectDirs[number]) {
   const tmpDir = path.join(tempDir, 'cy-projects')
-  const testProject = path.join(__dirname, '..', '..', '..', '..', '..', 'system-tests', 'projects', project)
+  const testProject = path.join(root, 'system-tests', 'projects', project)
   const cwd = path.join(tmpDir, project)
 
   try {
@@ -33,7 +35,7 @@ function scaffoldMigrationProject (project: typeof e2eProjectDirs[number]) {
   return cwd
 }
 
-const projectRoot = path.join(__dirname, '..', '..', '..', '..', '..')
+const projectRoot = path.join(root, 'system-tests', 'projects', 'migration-e2e-defaults')
 
 describe('cypress.config.js generation', () => {
   it('should create a string when passed only a global option', async () => {
