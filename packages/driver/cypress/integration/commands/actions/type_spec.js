@@ -560,7 +560,7 @@ describe('src/cy/commands/actions/type - #type', () => {
   // https://github.com/cypress-io/cypress/issues/19541
   describe(`type('{enter}') and click event on button-like elements`, () => {
     beforeEach(() => {
-      cy.visit('fixtures/type-enter.html')
+      cy.visit('fixtures/click-event-by-type.html')
     })
 
     describe('triggers', () => {
@@ -600,6 +600,94 @@ describe('src/cy/commands/actions/type - #type', () => {
           cy.get('li').eq(1).should('have.text', 'keypress')
           cy.get('li').eq(2).should('have.text', 'keyup')
         })
+      })
+    })
+  })
+
+  describe(`type(' ') fires click event on button-like elements`, () => {
+    beforeEach(() => {
+      cy.visit('fixtures/click-event-by-type.html')
+    })
+
+    const targets = [
+      'button-tag',
+      'input-button',
+      'input-image',
+      'input-reset',
+      'input-submit',
+    ]
+
+    describe(`triggers with single ' '`, () => {
+      targets.forEach((targetId) => {
+        it(`${targetId}`, () => {
+          cy.get(`#target-${targetId}`).focus()
+          cy.get(`#target-${targetId}`).type(' ')
+
+          cy.get('li').eq(0).should('have.text', 'keydown')
+          cy.get('li').eq(1).should('have.text', 'keypress')
+          cy.get('li').eq(2).should('have.text', 'keyup')
+          cy.get('li').eq(3).should('have.text', 'click')
+        })
+      })
+    })
+
+    describe('triggers after other characters', () => {
+      targets.forEach((targetId) => {
+        it(`${targetId}`, () => {
+          cy.get(`#target-${targetId}`).focus()
+          cy.get(`#target-${targetId}`).type('asd ')
+
+          cy.get('li').eq(12).should('have.text', 'click')
+        })
+      })
+    })
+
+    describe('checkbox', () => {
+      it('checkbox is checked/unchecked', () => {
+        cy.get(`#target-input-checkbox`).focus()
+        cy.get(`#target-input-checkbox`).type(' ')
+
+        cy.get('li').eq(0).should('have.text', 'keydown')
+        cy.get('li').eq(1).should('have.text', 'keypress')
+        cy.get('li').eq(2).should('have.text', 'keyup')
+        cy.get('li').eq(3).should('have.text', 'click')
+
+        cy.get('#target-input-checkbox').should('be.checked')
+
+        cy.get(`#target-input-checkbox`).type(' ')
+
+        cy.get('li').eq(4).should('have.text', 'keydown')
+        cy.get('li').eq(5).should('have.text', 'keypress')
+        cy.get('li').eq(6).should('have.text', 'keyup')
+        cy.get('li').eq(7).should('have.text', 'click')
+
+        cy.get('#target-input-checkbox').should('not.be.checked')
+      })
+    })
+
+    describe('radio', () => {
+      it('radio fires click event when it is not checked', () => {
+        cy.get(`#target-input-radio`).focus()
+        cy.get(`#target-input-radio`).type(' ')
+
+        cy.get('li').eq(0).should('have.text', 'keydown')
+        cy.get('li').eq(1).should('have.text', 'keypress')
+        cy.get('li').eq(2).should('have.text', 'keyup')
+        cy.get('li').eq(3).should('have.text', 'click')
+
+        cy.get('#target-input-radio').should('be.checked')
+      })
+
+      it('radio does not fire click event when it is checked', () => {
+        cy.get(`#target-input-radio`).click()
+        cy.get(`#target-input-radio`).type(' ')
+
+        cy.get('li').eq(0).should('have.text', 'click')
+        cy.get('li').eq(1).should('have.text', 'keydown')
+        cy.get('li').eq(2).should('have.text', 'keypress')
+        cy.get('li').eq(3).should('have.text', 'keyup')
+
+        cy.get('#target-input-radio').should('be.checked')
       })
     })
   })
