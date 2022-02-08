@@ -43,7 +43,11 @@ class HoneycombReporter {
     console.log(chalk.green('Reporting to honeycomb'))
 
     runner.on('suite', (suite) => {
-      const parent = suite.root ? circleCiRootEvent : suite.parent.honeycombEvent
+      if (!suite.title) {
+        return
+      }
+
+      const parent = suite.parent && suite.parent.honeycombEvent ? suite.parent.honeycombEvent : circleCiRootEvent
 
       suite.honeycombEvent = honey.newEvent()
       suite.honeycombEvent.timestamp = Date.now()
@@ -99,6 +103,10 @@ class HoneycombReporter {
     })
 
     runner.on('suite end', (suite) => {
+      if (!suite.honeycombEvent) {
+        return
+      }
+
       suite.honeycombEvent.add({
         durationMs: Date.now() - suite.honeycombEvent.timestamp,
       })
