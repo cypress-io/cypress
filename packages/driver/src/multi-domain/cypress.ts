@@ -21,16 +21,18 @@ const specBridgeCommunicator = new SpecBridgeDomainCommunicator()
 
 specBridgeCommunicator.initialize(window)
 
-specBridgeCommunicator.once('initialize:cypress', (config) => {
+specBridgeCommunicator.once('initialize:cypress', ({ config, env }) => {
   // eventually, setup will get called again on rerun and cy will
   // get re-created
-  setup(config)
+  setup(config, env)
 })
 
-const setup = (cypressConfig: Cypress.Config) => {
+const setup = (cypressConfig: Cypress.Config, env: Cypress.ObjectLike) => {
   // @ts-ignore
   const Cypress = window.Cypress = $Cypress.create({
     ...cypressConfig,
+    env,
+    __isMultiDomain: true,
     // multi-domain cannot be used in component testing and is only valid for e2e.
     // This value is not synced with the config because it is omitted on big Cypress creation, as well as a few other key properties
     testingType: 'e2e',

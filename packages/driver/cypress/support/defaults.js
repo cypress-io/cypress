@@ -11,6 +11,12 @@ if (!isActuallyInteractive) {
   Cypress.config('retries', 2)
 }
 
+// set an example serializable and unserializable value to validate multi-domain config/env syncing on initial spec bridge creation
+Cypress.config('foo', 'bar')
+Cypress.env('foo', 'bar')
+Cypress.config('unserializable', () => {})
+Cypress.env('unserializable', () => {})
+
 beforeEach(() => {
   // always set that we're interactive so we
   // get consistent passes and failures when running

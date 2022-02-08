@@ -3,7 +3,7 @@ import $errUtils from '../../cypress/error_utils'
 import { CommandsManager } from './commands_manager'
 import { LogsManager } from './logs_manager'
 import { Validator } from './validator'
-import { correctStackForCrossDomainError } from './util'
+import { correctStackForCrossDomainError, omitUnserializableValues } from './util'
 import { failedToSerializeSubject } from './failedSerializeSubjectProxy'
 
 export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: Cypress.State, config: Cypress.InternalConfig) {
@@ -159,8 +159,13 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
 
         // fired once the spec bridge is set up and ready to receive messages
         communicator.once('bridge:ready', () => {
-          // now that the spec bridge is ready, instantiate Cypress with the current app config
-          communicator.toSpecBridge('initialize:cypress', Cypress.config())
+          // now that the spec bridge is ready, instantiate Cypress with the current app config and environment variables
+
+          communicator.toSpecBridge('initialize:cypress', {
+            config: omitUnserializableValues(Cypress.config()),
+            env: omitUnserializableValues(Cypress.env()),
+          })
+
           state('readyForMultiDomain', true)
 
           // once the secondary domain page loads, send along the
