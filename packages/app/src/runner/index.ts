@@ -2,11 +2,10 @@
 
 /**
  * This is the seam between the new "unified app", built with
- * Vite and Vue, and the existing code, including:
+ * Vite and Vue.
+ * It consumes some older code, including:
  * - driver
  * - reporter
- * - event manager
- * - anything in runner-shared, such as AutIframe, etc.
  * which are built with React and bundle with webpack.
  *
  * The entry point for the webpack bundle is `runner-ct/main.tsx`.
@@ -16,7 +15,7 @@
  */
 import { watchEffect } from 'vue'
 import { getMobxRunnerStore, initializeMobxStore, useAutStore, useRunnerUiStore } from '../store'
-import { injectBundle } from './injectBundle'
+import { dfd } from './injectBundle'
 import type { SpecFile } from '@packages/types/src/spec'
 import { UnifiedReporterAPI } from './reporter'
 import { getRunnerElement, empty } from './utils'
@@ -305,11 +304,11 @@ function runSpecE2E (spec: SpecFile) {
  * This only needs to happen once, prior to running the first spec.
  */
 async function initialize () {
+  await dfd.promise
+
   isTorndown = false
 
   const config = JSON.parse(decodeBase64Unicode(window.__CYPRESS_CONFIG__.base64Config))
-
-  await injectBundle(config.namespace)
 
   if (isTorndown) {
     return
