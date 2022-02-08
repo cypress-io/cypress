@@ -14,7 +14,7 @@ export default defineConfig({
     devServer (cypressDevServerConfig) {
       const webpackConfig = require('./cypress/plugins/webpack.config')
 
-      return devServer(cypressDevServerConfig, webpackConfig)
+      return devServer(cypressDevServerConfig, { webpackConfig })
     },
   },
 })

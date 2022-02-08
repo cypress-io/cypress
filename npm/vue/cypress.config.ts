@@ -25,7 +25,7 @@ export default defineConfig({
         '@vue/compiler-core$': '@vue/compiler-core/dist/compiler-core.cjs.js',
       }
 
-      return devServer(cypressDevServerConfig, webpackConfig)
+      return devServer(cypressDevServerConfig, { webpackConfig })
     },
     setupNodeEvents (on, config) {
       require('@cypress/code-coverage/task')(on, config)
