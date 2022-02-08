@@ -1,0 +1,19 @@
+name: "Semantic PR"
+
+on:
+  pull_request_target:
+    types:
+      - opened
+      - edited
+      - synchronize
+
+jobs:
+  main:
+    name: Lint Title
+    runs-on: ubuntu-latest
+    steps:
+      - uses: cypress-io/action-semantic-pull-request@v4
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          validateSingleCommit: true
