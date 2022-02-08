@@ -11,8 +11,10 @@ if (app) {
   })
 }
 
-const HEIGHT = 600
-const WIDTH = 1200
+export const HEIGHT = 600
+
+export const WIDTH = 1200
+
 const EXT = '.png'
 const debug = Debug(isCi ? '*' : 'visualSnapshotErrors')
 

@@ -4,6 +4,7 @@ import fs from 'fs-extra'
 import globby from 'globby'
 import Markdown from 'markdown-it'
 import path from 'path'
+import { WIDTH } from './utils'
 
 const ERRORS_DIR = path.join(__dirname, '..', '..')
 const SNAPSHOT_HTML = path.join(ERRORS_DIR, '__snapshot-html__')
@@ -23,12 +24,16 @@ async function getRows (offset = 0, baseList: boolean = false) {
   const toCompare = await getFiles(pattern)
 
   const rows = toCompare.slice(offset, offset + 10).map((f) => path.basename(f).split('.')[0]).map((name) => {
+    const width = baseList ? WIDTH : 550
+    // const height = baseList ? HEIGHT : 600
+    const height = 400
+
     return `
     <tr id="${name}">
       <td>${name}</td>
-      <td colspan="2"><iframe src="/html/${name}/__snapshot-html__" width="550" height="400"></iframe></td>
+      <td colspan="2"><iframe src="/html/${name}/__snapshot-html__" width="${width}" height="${height}"></iframe></td>
       ${baseList ? '' : `
-        <td colspan="2"><iframe src="/html/${name}/__snapshot-html-local__" width="550" height="400"></iframe></td>
+        <td colspan="2"><iframe src="/html/${name}/__snapshot-html-local__" width="${width}" height="${height}"></iframe></td>
         <td><button data-looks-good="${name}">Looks Good</button></td>
       `}
     </tr>`
