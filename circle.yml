@@ -1249,6 +1249,7 @@ jobs:
 
   run-app-component-tests-chrome:
     <<: *defaults
+    resource_class: medium
     parallelism: 7
     steps:
       - run-new-ui-tests:
