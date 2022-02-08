@@ -1265,7 +1265,11 @@ jobs:
 
   run-app-integration-tests-chrome:
     <<: *defaults
-    resource_class: medium
+    parameters:
+      <<: *defaultsParameters
+      resource_class:
+        type: string
+        default: medium
     parallelism: 2
     steps:
       - run-new-ui-tests:
