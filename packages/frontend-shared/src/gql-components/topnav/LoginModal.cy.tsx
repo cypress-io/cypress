@@ -76,18 +76,32 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
   })
 
   it('shows an error state when browser cannot be launched', () => {
+    const authMessage = 'Cypress was unable to open your installed browser. To continue logging in, please open this URL in your web browser:'
+    const authUrl = 'http://127.0.0.1:0000/redirect-to-auth'
+
     cy.mountFragment(LoginModalFragmentDoc, {
       onResult: (result) => {
         result.__typename = 'Query'
         result.authState.name = 'AUTH_COULD_NOT_LAUNCH_BROWSER'
+        result.authState.message = 'Cypress was unable to open your installed browser. To continue logging in, please open this URL in your web browser:\n\n```\nhttp://127.0.0.1:0000/redirect-to-auth\n```'
       },
-      render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><LoginModal gql={gqlVal} modelValue={true} /></div>,
+      render: (gqlVal) =>
+        (<div class="border-current border-1 h-700px resize overflow-auto">
+          <LoginModal gql={gqlVal} modelValue={true}/>
+        </div>),
     })
 
     cy.findByRole('button', { name: text.login.actionTryAgain }).should('be.visible')
-    cy.findByRole('button', { name: text.login.actionCancel }).should('be.visible')
     cy.contains(text.login.bodyError)
-    // cy.contains('Cypress was unable to open your installed browser').should('be.visible')
+    cy.contains(authMessage).should('be.visible')
+    cy.contains(authUrl).should('be.visible')
+
+    // cancel button works
+    cy.findByRole('button', { name: text.login.actionCancel })
+    .click().then(() => {
+      cy.wrap(Cypress.vueWrapper.findComponent(LoginModal).emitted('update:modelValue')?.[0])
+      .should('deep.equal', [false])
+    })
   })
 
   it('shows successful login status with email if name not provided', () => {

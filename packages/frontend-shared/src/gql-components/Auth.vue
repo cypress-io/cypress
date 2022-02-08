@@ -3,7 +3,10 @@
     v-if="props.error"
     class="flex gap-16px"
   >
-    <Button>
+    <Button
+      size="lg"
+      @click="handleTryAgain"
+    >
       <template
         #prefix
       >
@@ -13,7 +16,11 @@
       </template>
       {{ t('topNav.login.actionTryAgain') }}
     </Button>
-    <Button variant="outline">
+    <Button
+      variant="outline"
+      size="lg"
+      @click="handleCancel"
+    >
       {{ t('topNav.login.actionCancel') }}
     </Button>
   </div>
@@ -82,6 +89,7 @@ fragment Auth on Query {
   authState {
     browserOpened
     name
+    message
   }
 }
 `
@@ -107,6 +115,7 @@ query BrowserOpened {
   authState {
     browserOpened
     name
+    message
   }
 }
 `
@@ -184,6 +193,14 @@ const buttonVariant = computed(() => {
 
   return 'primary'
 })
+
+const handleTryAgain = () => {
+  clickedOnce.value = false
+}
+
+const handleCancel = () => {
+  emit('continue', true)
+}
 
 const { t } = useI18n()
 

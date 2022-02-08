@@ -54,6 +54,15 @@
           </i18n-t>
           <div v-else-if="browserError">
             {{ t('topNav.login.bodyError') }}
+            <div
+              class="rounded flex bg-red-100 mt-8px p-16px text-red-600 gap-8px items-center"
+            >
+              <i-cy-errored-outline_x16 class="h-16px min-w-16px w-16px icon-dark-red-400" />
+              <div
+                ref="errorRef"
+                v-html="markdown"
+              />
+            </div>
           </div>
         </DialogDescription>
 
@@ -71,11 +80,13 @@
 <script setup lang="ts">
 import { useI18n } from '@cy/i18n'
 import { gql } from '@urql/core'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import Auth from '../Auth.vue'
 import ExternalLink from '../ExternalLink.vue'
 import { useOnline } from '@vueuse/core'
 import NoInternetConnection from '../../components/NoInternetConnection.vue'
+import Alert from '@cy/components/Alert.vue'
+import { useMarkdown } from '@packages/frontend-shared/src/composables/useMarkdown'
 
 import {
   Dialog,
@@ -106,6 +117,9 @@ fragment LoginModal on Query {
   ...Auth
 }
 `
+
+const errorRef = ref()
+const { markdown } = useMarkdown(errorRef, props.gql.authState.message)
 
 const setIsOpen = (value: boolean) => {
   emit('update:modelValue', value)
