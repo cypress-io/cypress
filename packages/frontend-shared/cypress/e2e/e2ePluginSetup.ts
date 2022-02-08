@@ -189,7 +189,11 @@ async function makeE2ETasks () {
             } catch (e) {
               const err = e as Error
 
-              result = { data: null, extensions: [], errors: [new GraphQLError(err.message, undefined, undefined, undefined, undefined, err)] }
+              const gqlErr = new GraphQLError(err.message, undefined, undefined, undefined, undefined, err)
+
+              errors.push(gqlErr)
+
+              result = { data: null, extensions: [], errors: [gqlErr] }
             }
           }
 

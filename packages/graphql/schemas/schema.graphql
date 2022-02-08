@@ -942,6 +942,7 @@ type Query {
 
   """The files that have just been scaffolded"""
   scaffoldedFiles: [ScaffoldedFile!]
+  testError: String
 
   """Previous versions of cypress and their release date"""
   versions: VersionData

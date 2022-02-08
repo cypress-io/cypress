@@ -18,6 +18,12 @@ export const Query = objectType({
       resolve: (root, args, ctx) => ctx.baseError,
     })
 
+    t.string('testError', {
+      resolve: () => {
+        throw Error('This is an intentional error for testing purposes')
+      },
+    })
+
     t.nonNull.list.nonNull.field('warnings', {
       type: Warning,
       description: 'A list of warnings',

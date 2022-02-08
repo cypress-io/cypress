@@ -31,6 +31,7 @@
       >
         <RouterLink
           v-for="item in navigation"
+          v-show="!item.hidden"
           v-slot="{ isActive }"
           :key="item.name"
           :to="item.href"
@@ -84,6 +85,7 @@ import CodeIcon from '~icons/cy/code-editor_x24'
 import RunsIcon from '~icons/cy/runs_x24'
 import SettingsIcon from '~icons/cy/settings_x24'
 import SidebarTooltip from './SidebarTooltip.vue'
+import ErroredIcon from '~icons/cy/status-errored-solid_x24.svg'
 import HideDuringScreenshot from '../runner/screenshot/HideDuringScreenshot.vue'
 import { SideBarNavigationDocument, SideBarNavigation_SetPreferencesDocument } from '../generated/graphql'
 import CypressLogo from '@packages/frontend-shared/src/assets/logos/cypress_s.png'
@@ -94,10 +96,13 @@ import SidebarNavigationHeader from './SidebarNavigationHeader.vue'
 const { t } = useI18n()
 
 const navigation = [
-  { name: 'Specs', icon: CodeIcon, href: '/specs' },
-  { name: 'Runs', icon: RunsIcon, href: '/runs' },
-  { name: 'Settings', icon: SettingsIcon, href: '/settings' },
-]
+  { name: 'Specs', icon: CodeIcon, href: '/specs', hidden: false },
+  { name: 'Runs', icon: RunsIcon, href: '/runs', hidden: false },
+  { name: 'Settings', icon: SettingsIcon, href: '/settings', hidden: false },
+  // This is used for testing purposes to ensure GraphQL errors are correctly
+  // propagated. See cypress/e2e/graphql.cy.ts.
+  { name: 'TestError', icon: ErroredIcon, href: '/testerror', hidden: true },
+] as const
 
 gql`
 fragment SidebarNavigation on Query {
