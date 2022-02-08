@@ -140,6 +140,20 @@ const captureUserInvocationStack = (ErrorConstructor, userInvocationStack?) => {
     const newErr = new ErrorConstructor('userInvocationStack')
 
     userInvocationStack = newErr.stack
+
+    // if browser natively supports Error.captureStackTrace, use it (chrome) (must be bound)
+    // otherwise use our polyfill on top.Error
+    const captureStackTrace = ErrorConstructor.captureStackTrace ? ErrorConstructor.captureStackTrace.bind(ErrorConstructor) : Error.captureStackTrace
+
+    captureStackTrace(newErr, captureUserInvocationStack)
+
+    // On Chrome 99+, captureStackTrace strips away the whole stack,
+    // leaving nothing beyond the error message. If we get back a single line
+    // (just the error message with no stack trace), then use the original value
+    // instead of the trimmed one.
+    if (newErr.stack.match('\n')) {
+      userInvocationStack = newErr.stack
+    }
   }
 
   userInvocationStack = normalizedUserInvocationStack(userInvocationStack)
