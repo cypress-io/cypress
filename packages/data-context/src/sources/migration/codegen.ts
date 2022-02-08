@@ -112,7 +112,7 @@ export async function initComponentTestingMigration (
     })
   })
 
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     watcher.on('ready', () => {
       resolve({
         status: {
@@ -121,6 +121,8 @@ export async function initComponentTestingMigration (
         },
         watcher,
       })
+    }).on('error', (err) => {
+      reject(err)
     })
   })
 }
