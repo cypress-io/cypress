@@ -10,7 +10,7 @@
   >
     <TestingTypePicker
       :gql="props.gql"
-      @pick="switchAndRelaunchFn"
+      @pick="handleTestingType"
     />
   </StandardModal>
 </template>
@@ -21,6 +21,7 @@ import { SwitchTestingTypeAndRelaunchDocument, SwitchTestingTypeModalFragment } 
 import StandardModal from '@cy/components/StandardModal.vue'
 import TestingTypePicker from '@cy/gql-components/TestingTypePicker.vue'
 import { useI18n } from '@cy/i18n'
+import type { TestingTypeEnum } from '@packages/frontend-shared/src/generated/graphql'
 
 const { t } = useI18n()
 
@@ -47,7 +48,13 @@ const emits = defineEmits<{
 
 const switchAndRelaunch = useMutation(SwitchTestingTypeAndRelaunchDocument)
 
-function switchAndRelaunchFn (testingType: 'component' | 'e2e') {
+function handleTestingType (testingType: TestingTypeEnum, currentTestingType: TestingTypeEnum) {
+  if (testingType === currentTestingType) {
+    emits('close')
+
+    return
+  }
+
   switchAndRelaunch.executeMutation({ testingType })
 }
 </script>

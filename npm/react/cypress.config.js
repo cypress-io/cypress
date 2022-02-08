@@ -15,7 +15,7 @@ module.exports = {
       '**/__image_snapshots__/*',
       'examples/**/*',
     ],
-    devServer (cypressConfig, devServerConfig) {
+    devServer (cypressDevServerConfig, devServerConfig) {
       const { startDevServer } = require('@cypress/webpack-dev-server')
       const path = require('path')
       const babelConfig = require('./babel.config.js')
@@ -73,7 +73,7 @@ module.exports = {
         },
       }
 
-      return startDevServer({ options: cypressConfig, disableLazyCompilation: false, webpackConfig })
+      return startDevServer({ options: cypressDevServerConfig, disableLazyCompilation: false, webpackConfig })
     },
   },
 }
