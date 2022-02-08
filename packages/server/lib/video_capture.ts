@@ -274,30 +274,53 @@ export function start (name, options: StartOptions = {}) {
 type OnProgress = (p: number) => void
 
 export async function process (name, cname, videoCompression, ffmpegchaptersConfig, onProgress: OnProgress = function () {}) {
-  const metaFileName = `${name}.meta`
-
-  const maybeGenerateMetaFile = Bluebird.method(() => {
-    if (!ffmpegchaptersConfig) {
-      return false
-    }
-
-    // Writing the metadata to filesystem is necessary because fluent-ffmpeg is just a wrapper of ffmpeg command.
-    return fs.writeFile(metaFileName, ffmpegchaptersConfig).then(() => true)
-  })
-
-  const addChaptersMeta = await maybeGenerateMetaFile()
-
   let total = null
+
+  const metaFileName = `${name}.meta`
+  const addChaptersMeta = ffmpegchaptersConfig && await fs.writeFile(metaFileName, ffmpegchaptersConfig).then(() => true)
 
   return new Bluebird((resolve, reject) => {
     debug('processing video from %s to %s video compression %o',
       name, cname, videoCompression)
 
     const command = ffmpeg()
+    .addOptions([
+      // These flags all serve to reduce initial buffering, especially important
+      // when dealing with very short videos (such as during component tests).
+      // See https://ffmpeg.org/ffmpeg-formats.html#Format-Options for details.
+      '-avioflags direct',
+
+      // Because we're passing in a slideshow of still frames, there's no
+      // fps metadata to be found in the video stream. This ensures that ffmpeg
+      // isn't buffering a lot of data waiting for information that's not coming.
+      '-fpsprobesize 0',
+
+      // Tells ffmpeg to read only the first 32 bytes of the stream for information
+      // (resolution, stream format, etc).
+      // Some videos can have long metadata (eg, lots of chapters) or spread out,
+      // but our streams are always predictable; No need to wait / buffer data before
+      // starting encoding
+      '-probesize 32',
+
+      // By default ffmpeg buffers the first 5 seconds of video to analyze it before
+      // it starts encoding. We're basically telling it "there is no metadata coming,
+      // start encoding as soon as we give you frames."
+      '-analyzeduration 0',
+    ])
+
+    // See https://trac.ffmpeg.org/wiki/Encode/H.264 for details about h264 options.
     const outputOptions = [
+      // Preset is a tradeoff between encoding speed and filesize. It does not determine video
+      // quality; It's just a tradeoff between CPU vs size.
       '-preset fast',
-        `-crf ${videoCompression}`,
-        '-pix_fmt yuv420p',
+      // Compression Rate Factor is essentially the quality dial; 0 would be lossless
+      // (big files), while 51 (the maximum) would lead to low quality (and small files).
+      `-crf ${videoCompression}`,
+
+      // Discussion of pixel formats is beyond the scope of these comments. See
+      // https://en.wikipedia.org/wiki/Chroma_subsampling if you want the gritty details.
+      // Short version: yuv420p is a standard video format supported everywhere.
+      '-pix_fmt yuv420p',
     ]
 
     if (addChaptersMeta) {

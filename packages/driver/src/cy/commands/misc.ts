@@ -1,4 +1,3 @@
-// @ts-nocheck
 import _ from 'lodash'
 import Promise from 'bluebird'
 
@@ -50,7 +49,8 @@ export default (Commands, Cypress, cy, state) => {
       return null
     },
 
-    wrap (arg, options = {}) {
+    // TODO: change the type of `any` to `Partial<Cypress.Loggable & Cypress.Timeoutable>`
+    wrap (arg, options: any = {}) {
       const userOptions = options
 
       options = _.defaults({}, userOptions, {
