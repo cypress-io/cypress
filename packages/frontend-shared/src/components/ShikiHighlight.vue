@@ -72,7 +72,8 @@ shikiWrapperClasses computed property.
 </template>
 
 <script lang="ts">
-import { Highlighter, getHighlighter, setOnigasmWASM, setCDN } from 'shiki'
+import type { Highlighter } from 'shiki'
+import { getHighlighter, setOnigasmWASM, setCDN } from 'shiki'
 import onigasm from 'onigasm/lib/onigasm.wasm?url'
 
 setOnigasmWASM(onigasm)
@@ -103,7 +104,8 @@ export { highlighter, inheritAttrs }
 </script>
 
 <script lang="ts" setup>
-import { computed, onBeforeMount, Ref, ref } from 'vue'
+import type { Ref } from 'vue'
+import { computed, onBeforeMount, ref } from 'vue'
 import { useClipboard } from '@vueuse/core'
 import CopyButton from './CopyButton.vue'
 

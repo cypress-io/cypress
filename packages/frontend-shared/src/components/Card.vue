@@ -48,7 +48,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, FunctionalComponent, SVGAttributes } from 'vue'
+import type { FunctionalComponent, SVGAttributes } from 'vue'
+import { computed } from 'vue'
 
 const props = withDefaults(defineProps<{
   title: string

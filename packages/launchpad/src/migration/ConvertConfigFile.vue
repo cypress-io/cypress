@@ -7,7 +7,7 @@
         <CodeTag class="text-red-500">
           cypress.json
         </CodeTag>
-        <i-cy-arrow-right_x16 class="h-16px w-16px inline-block icon-dark-gray-300" />
+        <i-cy-arrow-right_x16 class="inline-block h-16px w-16px icon-dark-gray-300" />
         <CodeTag class="text-jade-500">
           {{ fileName }}
         </CodeTag>
@@ -19,7 +19,7 @@
         >
           <template #specPattern>
             <CodeTag class="text-jade-500">
-              e2e/specPattern
+              e2e.specPattern
             </CodeTag>
           </template>
           <template #options>
@@ -50,7 +50,7 @@
         >
           <template #specPattern>
             <CodeTag class="text-jade-500">
-              component/specPattern
+              component.specPattern
             </CodeTag>
           </template>
           <template #options>
@@ -97,7 +97,7 @@
         <span class="mr-8px">{{ t('migration.before') }}</span>
         <CodeTag
           bg
-          class="bg-red-100 text-red-600"
+          class="text-red-600 bg-red-100"
         >
           cypress.json
         </CodeTag>

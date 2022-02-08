@@ -51,6 +51,14 @@ const whichAreOptional = (val, key) => {
   return (val === null) && OPTIONAL_OPTS.includes(key)
 }
 
+const getDisplayUrl = (url: string) => {
+  if (url.startsWith(window.location.origin)) {
+    return url.slice(window.location.origin.length)
+  }
+
+  return url
+}
+
 const needsFormSpecified = (options: any = {}) => {
   const { body, json, headers } = options
 
@@ -275,7 +283,7 @@ export default (Commands, Cypress, cy, state, config) => {
             }
 
             return {
-              message: `${options.method} ${status} ${options.url}`,
+              message: `${options.method} ${status} ${getDisplayUrl(options.url)}`,
               indicator,
             }
           },
