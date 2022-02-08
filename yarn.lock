@@ -8560,6 +8560,13 @@
   dependencies:
     "@types/node" "*"
 
+"@types/chrome-remote-interface@0.31.4":
+  version "0.31.4"
+  resolved "https://registry.yarnpkg.com/@types/chrome-remote-interface/-/chrome-remote-interface-0.31.4.tgz#d07b34f4af0c7294c5b0164780b3d7bfce078155"
+  integrity sha512-DJHDwimNqCgAyG5gFmr6Y265pe967u3mnkeMVc0iHuf04PHzTgFypA2AjxSvtkM/pogqWxvfRYXy9Wa5Dj0U1g==
+  dependencies:
+    devtools-protocol "0.0.927104"
+
 "@types/chrome@0.0.101":
   version "0.0.101"
   resolved "https://registry.yarnpkg.com/@types/chrome/-/chrome-0.0.101.tgz#8b6f7d4f1d4890ba7d950f8492725fa7ba9ab910"
@@ -15063,10 +15070,10 @@ chrome-har-capturer@0.13.4:
     chrome-remote-interface "^0.25.7"
     commander "2.x.x"
 
-chrome-remote-interface@0.28.2:
-  version "0.28.2"
-  resolved "https://registry.yarnpkg.com/chrome-remote-interface/-/chrome-remote-interface-0.28.2.tgz#6be3554d2c227ff07eb74baa7e5d4911da12a5a6"
-  integrity sha512-F7mjof7rWvRNsJqhVXuiFU/HWySCxTA9tzpLxUJxVfdLkljwFJ1aMp08AnwXRmmP7r12/doTDOMwaNhFCJsacw==
+chrome-remote-interface@0.31.1:
+  version "0.31.1"
+  resolved "https://registry.yarnpkg.com/chrome-remote-interface/-/chrome-remote-interface-0.31.1.tgz#87c37c81f10d9f0832b6d6a42e52ac2c7ebb4008"
+  integrity sha512-cvNTnXfx4kYCaeh2sEKrdlqZsYRleACPL47O8LrrjihVfBQbfPmf03vVqSSm7SIeqyo2P77ZXovrBAs4D/nopQ==
   dependencies:
     commander "2.11.x"
     ws "^7.2.0"
@@ -18072,6 +18079,11 @@ devtools-protocol@0.0.839267:
   version "0.0.839267"
   resolved "https://registry.yarnpkg.com/devtools-protocol/-/devtools-protocol-0.0.839267.tgz#6f437369e4664dbd9849723b886f8cedf28607ac"
   integrity sha512-1DcPo/3PGJVw3INnq2NXO4onJiNFhWJW4YmSRQIiuDK/sW5OD1/LfXCcetrPvMvOBnz5c22DlpnpbYkJRE8MZw==
+
+devtools-protocol@0.0.927104:
+  version "0.0.927104"
+  resolved "https://registry.yarnpkg.com/devtools-protocol/-/devtools-protocol-0.0.927104.tgz#3bba0fca644bcdce1bcebb10ae392ab13428a7a0"
+  integrity sha512-5jfffjSuTOv0Lz53wTNNTcCUV8rv7d82AhYcapj28bC2B5tDxEZzVb7k51cNxZP2KHw24QE+sW7ZuSeD9NfMpA==
 
 dezalgo@^1.0.0, dezalgo@~1.0.3:
   version "1.0.3"
