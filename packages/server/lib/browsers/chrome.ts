@@ -553,9 +553,13 @@ export = {
 
     await this._setAutomation(pageCriClient, automation, browserCriClient.closeCurrentTarget)
 
-    await this._maybeRecordVideo(pageCriClient, options, browser.majorVersion)
+    await Promise.all([
+
+      this._maybeRecordVideo(pageCriClient, options, browser.majorVersion),
+      this._handleDownloads(pageCriClient, options.downloadsFolder, automation),
+    ])
+
     await this._navigateUsingCRI(pageCriClient, url)
-    await this._handleDownloads(pageCriClient, options.downloadsFolder, automation)
 
     // return the launched browser process
     // with additional method to close the remote connection
