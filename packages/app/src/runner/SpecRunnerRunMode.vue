@@ -32,7 +32,12 @@
           />
         </HideDuringScreenshot>
       </template>
-      <template #panel3>
+      <template #panel3="{width}">
+        <SpecRunnerHeaderRunMode
+          :event-manager="eventManager"
+          :get-aut-iframe="getAutIframeModel"
+          :width="width"
+        />
         <RemoveClassesDuringScreenshotting
           class="h-full bg-gray-100 p-16px"
         >
@@ -83,6 +88,7 @@ import AutomationMissing from './automation/AutomationMissing.vue'
 import AutomationElement from './automation/AutomationElement.vue'
 import { useResizablePanels, useRunnerStyle } from './useRunnerStyle'
 import { useEventManager } from './useEventManager'
+import SpecRunnerHeaderRunMode from './SpecRunnerHeaderRunMode.vue'
 
 const eventManager = getEventManager()
 
@@ -94,7 +100,6 @@ const {
   viewportStyle,
   windowWidth,
   reporterWidth,
-  specListWidth,
 } = useRunnerStyle()
 
 const {

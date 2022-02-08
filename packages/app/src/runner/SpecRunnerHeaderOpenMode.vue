@@ -60,7 +60,8 @@
           <img
             class="min-w-16px w-16px"
             :src="allBrowsersIcons[selectedBrowser.displayName]"
-          > {{ selectedBrowser.displayName }} {{ selectedBrowser.majorVersion }}
+          >
+          {{ selectedBrowser.displayName }} {{ selectedBrowser.majorVersion }}
         </template>
 
         <template #default>
@@ -81,8 +82,10 @@
           <span class="whitespace-nowrap">{{ autStore.viewportWidth }}x{{ autStore.viewportHeight }}</span>
           <span
             v-if="displayScale"
-            class="-mr-6px text-gray-500"
-          > ({{ displayScale }})</span>
+            class="-ml-6px text-gray-500"
+          >
+            ({{ displayScale }})
+          </span>
         </template>
         <template #default>
           <div class="max-h-50vw p-16px text-gray-600 leading-24px w-400px overflow-auto">
