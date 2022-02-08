@@ -99,12 +99,5 @@ export const Query = objectType({
       type: ScaffoldedFile,
       resolve: (_, args, ctx) => ctx.coreData.scaffoldedFiles,
     })
-
-    // t.int('slowQuery', {
-    //   resolve: async () => {
-    //     await new Promise(resolve => setTimeout(resolve, 4000))
-    //     return 42
-    //   }
-    // })
   },
 })
