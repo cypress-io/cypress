@@ -25,7 +25,12 @@
 
 <script lang="ts" setup>
 import { gql } from '@urql/core'
-import { CodeLanguageEnum, EnvironmentSetup_ClearTestingTypeDocument, ScaffoldLanguageSelectFragment, ScaffoldLanguageSelect_ScaffoldTestingTypeDocument, ScaffoldLanguageSelect_WizardUpdateDocument } from '../generated/graphql'
+import type { CodeLanguageEnum, ScaffoldLanguageSelectFragment } from '../generated/graphql'
+import {
+  EnvironmentSetup_ClearTestingTypeDocument,
+  ScaffoldLanguageSelect_ScaffoldTestingTypeDocument,
+  ScaffoldLanguageSelect_WizardUpdateDocument,
+} from '../generated/graphql'
 import WarningList from '../warning/WarningList.vue'
 import { computed } from 'vue'
 import type { FrontendFramework, Bundler } from '@packages/types/src/constants'

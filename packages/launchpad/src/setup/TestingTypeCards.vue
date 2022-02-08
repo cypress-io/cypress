@@ -9,10 +9,8 @@
 import { gql } from '@urql/core'
 import { useMutation } from '@urql/vue'
 import TestingTypePicker from '@cy/gql-components/TestingTypePicker.vue'
-import {
-  TestingTypeSelectionDocument,
-  TestingTypeCardsFragment,
-} from '../generated/graphql'
+import type { TestingTypeCardsFragment } from '../generated/graphql'
+import { TestingTypeSelectionDocument } from '../generated/graphql'
 
 gql`
 fragment TestingTypeCards on Query {

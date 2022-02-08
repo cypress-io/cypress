@@ -28,7 +28,7 @@
   "devDependencies": {
     "chai": "3.5.0",
     "cross-env": "6.0.3",
-    "cypress-example-kitchensink": "cypress-io/cypress-example-kitchensink#8389bb6b09c59c2720ceeaadecc8eaa2d4d6551d",
+    "cypress-example-kitchensink": "cypress-io/cypress-example-kitchensink#d4b6c4a898f87fa391fabef6dbbff8cd7bd11d2a",
     "gulp": "4.0.2",
     "gulp-clean": "0.4.0",
     "gulp-gh-pages": "0.6.0-6",
@@ -36,6 +36,6 @@
     "mocha": "2.5.3",
     "resolve-pkg": "2.0.0",
     "rimraf": "3.0.2",
-    "shelljs": "0.8.4"
+    "shelljs": "0.8.5"
   }
 }
