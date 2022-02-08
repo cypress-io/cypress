@@ -105,7 +105,7 @@ class HoneycombReporter {
       arch: process.arch,
 
       spanId: uuidv4(),
-      traceId: uuidv4(),
+      traceId: process.env.CIRCLE_WORKFLOW_ID || uuidv4(),
     })
 
     this.addAsyncInfo(honeycombEvent)
