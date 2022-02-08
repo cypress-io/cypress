@@ -86,7 +86,7 @@ describe('navigation', { experimentalSessionSupport: true, experimentalMultiDoma
       })
     })
 
-    // TODO this test should work but there seems to be a problem where the command queue ends prematurely
+    // TODO: this test should work but there seems to be a problem where the command queue ends prematurely
     it.skip('navigates forward and back using history', () => {
       cy.switchToDomain('foobar.com', () => {
         cy.get('a[data-cy="multi-domain-page"]').click()
