@@ -1,19 +1,5 @@
 /* eslint-disable no-console */
-
-import each from 'lodash/each'
-import isEmpty from 'lodash/isEmpty'
-import capitalize from 'lodash/capitalize'
-import omit from 'lodash/omit'
-import some from 'lodash/some'
-import trim from 'lodash/trim'
-import isString from 'lodash/isString'
-import isArray from 'lodash/isArray'
-import reduce from 'lodash/reduce'
-import result from 'lodash/result'
-import map from 'lodash/map'
-import sortBy from 'lodash/sortBy'
-import keys from 'lodash/keys'
-import isFunction from 'lodash/isFunction'
+import _ from 'lodash'
 
 interface Table {
   name: string
@@ -41,7 +27,7 @@ export const logger = {
   },
 
   logFormatted (consoleProps: any) {
-    if (isEmpty(consoleProps)) return
+    if (_.isEmpty(consoleProps)) return
 
     this._logValues(consoleProps)
     this._logArgs(consoleProps)
@@ -50,15 +36,15 @@ export const logger = {
   },
 
   _logValues (consoleProps: any) {
-    const formattedLog = this._formatted(omit(consoleProps, 'args', 'groups', 'table'))
+    const formattedLog = this._formatted(_.omit(consoleProps, 'args', 'groups', 'table'))
 
-    each(formattedLog, (value, key) => {
+    _.each(formattedLog, (value, key) => {
       // don't log empty strings
       // trim([]) returns '' but we want to log empty arrays, so account for that
-      if (isString(value) && trim(value) === '') return
+      if (_.isString(value) && _.trim(value) === '') return
 
       // Skip trim if we know value is an object
-      if (typeof value !== 'object' && trim(value) === '' && !isArray(value)) return
+      if (typeof value !== 'object' && _.trim(value) === '' && !_.isArray(value)) return
 
       this.log(`%c${key}`, 'font-weight: bold', value)
     })
@@ -67,10 +53,10 @@ export const logger = {
   _formatted (consoleProps: any) {
     const maxKeyLength = this._getMaxKeyLength(consoleProps)
 
-    return reduce(consoleProps, (memo, value, key) => {
+    return _.reduce(consoleProps, (memo, value, key) => {
       const append = ': '
 
-      key = capitalize(key + append).padEnd(maxKeyLength + append.length, ' ')
+      key = _.capitalize(key + append).padEnd(maxKeyLength + append.length, ' ')
       memo[key] = value
 
       return memo
@@ -96,7 +82,7 @@ export const logger = {
   },
 
   _getArgs (consoleProps: any) {
-    const args = result<unknown[]>(consoleProps, 'args')
+    const args = _.result<unknown[]>(consoleProps, 'args')
 
     if (!args) return
 
@@ -106,9 +92,9 @@ export const logger = {
   _logGroups (consoleProps: any) {
     const groups = this._getGroups(consoleProps)
 
-    each(groups, (group) => {
+    _.each(groups, (group) => {
       console.groupCollapsed(group.name)
-      each(group.items, (value, key) => {
+      _.each(group.items, (value, key) => {
         if (group.label === false) {
           this.log(value)
         } else {
@@ -121,11 +107,11 @@ export const logger = {
   },
 
   _getGroups (consoleProps: any): Group[] | undefined {
-    const groups = result<Group[]>(consoleProps, 'groups')
+    const groups = _.result<Group[]>(consoleProps, 'groups')
 
     if (!groups) return
 
-    return map(groups, (group) => {
+    return _.map(groups, (group) => {
       group.items = this._formatted(group.items)
 
       return group
@@ -134,8 +120,8 @@ export const logger = {
 
   _logTable (consoleProps: any) {
     if (isMultiEntryTable(consoleProps.table)) {
-      each(
-        sortBy(consoleProps.table, (val, key) => key),
+      _.each(
+        _.sortBy(consoleProps.table, (val, key) => key),
         (table) => {
           return this._logTable({ table })
         },
@@ -148,7 +134,7 @@ export const logger = {
 
     if (!table) return
 
-    if (isArray(table)) {
+    if (_.isArray(table)) {
       console.table(table)
     } else {
       console.group(table.name)
@@ -158,7 +144,7 @@ export const logger = {
   },
 
   _getTable (consoleProps: any): Table | Table[] | undefined {
-    const table = result<Table | Table[]>(consoleProps, 'table')
+    const table = _.result<Table | Table[]>(consoleProps, 'table')
 
     if (!table) return
 
@@ -167,8 +153,8 @@ export const logger = {
 }
 
 const isMultiEntryTable = (table: Table) => {
-  return !isFunction(table) &&
-  !some(keys(table)
+  return !_.isFunction(table) &&
+  !_.some(_.keys(table)
   .map((x) => isNaN(parseInt(x, 10)))
   .filter(Boolean), true)
 }
