@@ -7,6 +7,7 @@
 </template>
 
 <script lang="ts">
+// eslint-disable-next-line import/no-duplicates
 import { defineComponent } from 'vue'
 
 export default defineComponent({
@@ -15,10 +16,8 @@ export default defineComponent({
 </script>
 
 <script setup lang="ts">
-/* eslint-disable no-duplicate-imports */
-
+// eslint-disable-next-line import/no-duplicates
 import { computed, useAttrs } from 'vue'
-
 import type { AnchorHTMLAttributes } from 'vue'
 
 const attrs = useAttrs() as AnchorHTMLAttributes

@@ -165,7 +165,8 @@ import StatusRunningIcon from '~icons/cy/status-running_x16'
 import { RadioGroup, RadioGroupOption, RadioGroupLabel } from '@headlessui/vue'
 import UnsupportedBrowserTooltip from '@packages/frontend-shared/src/gql-components/topnav/UnsupportedBrowserTooltip.vue'
 
-import { OpenBrowserListFragment, OpenBrowserList_SetBrowserDocument } from '../generated/graphql'
+import type { OpenBrowserListFragment } from '../generated/graphql'
+import { OpenBrowserList_SetBrowserDocument } from '../generated/graphql'
 
 gql`
 mutation OpenBrowserList_SetBrowser($id: ID!) {

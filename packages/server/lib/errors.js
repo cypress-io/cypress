@@ -583,12 +583,12 @@ const getMsgByType = function (type, ...args) {
           The \`component\`.\`devServer\` method must be a function with the following signature:
 
           \`\`\`
-          devServer: (cypressConfig: DevServerConfig, devServerConfig: ComponentDevServerOpts) {
-
+          devServer: (cypressDevServerConfig, devServerConfig) {
+            // start dev server here
           }
           \`\`\`
 
-          Learn more: https://on.cypress.io/plugins-api
+          Learn more: https://on.cypress.io/dev-server
 
           We loaded the \`devServer\` from: \`${arg1}\`
   
@@ -600,12 +600,12 @@ const getMsgByType = function (type, ...args) {
         The \`setupNodeEvents\` method does not support \`dev-server:start\`, use \`devServer\` instead:
 
         \`\`\`
-        devServer (cypressConfig, devServerConfig) {
-          // configure plugins here
+        devServer (cypressDevServerConfig, devServerConfig) {
+          // start dev server here
         }
         \`\`\`
 
-        Learn more: https://on.cypress.io/plugins-api
+        Learn more: https://on.cypress.io/dev-server
       `
     case 'PLUGINS_FUNCTION_ERROR':
       msg = stripIndent`\
@@ -728,7 +728,7 @@ const getMsgByType = function (type, ...args) {
           There is a cypress.json file at the location below:
           ${arg1}
 
-          Cypress no longer supports 'cypress.json', please migrate to 'cypress.config.{ts|js}'.
+          Cypress 10 no longer supports 'cypress.json'. Please run \`cypress open\` to launch the migration tool to migrate to 'cypress.config.{ts|js}'.
           `
     case 'LEGACY_CONFIG_FILE':
       return stripIndent`
