@@ -13,11 +13,7 @@ Cypress supports the following browsers:
 You can also use a custom browser: https://on.cypress.io/customize-browsers
 
 Available browsers found on your system are:
-- chrome
-- firefox
-- electron
  - chrome
- - chromium
  - firefox
  - electron
 `

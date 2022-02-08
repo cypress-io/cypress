@@ -11,7 +11,7 @@ const normalizeSnapshot = (str) => {
 }
 
 const normalizeBrowsers = (message) => {
-  return message.replace(/(found on your system are:)(?:\n- .*)*/, '$1\n- chrome\n- firefox\n- electron')
+  return message.replace(/(found on your system are:)(?:\n - .*)*/, '$1\n - chrome\n - firefox\n - electron')
 }
 
 // When we added component testing mode, we added the option for electron to be omitted
@@ -70,7 +70,7 @@ describe('lib/browsers/index', () => {
       return expect(browsers.ensureAndGetByNameOrPath('browserNotGonnaBeFound'))
       .to.be.rejectedWith({ type: 'BROWSER_NOT_FOUND_BY_NAME' })
       .then((err) => {
-        return normalizeSnapshot(normalizeBrowsers(err.message))
+        return normalizeSnapshot(normalizeBrowsers(stripAnsi(err.message)))
       })
     })
 

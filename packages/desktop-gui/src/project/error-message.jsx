@@ -9,7 +9,7 @@ import Markdown from 'markdown-it'
 
 const _copyErrorDetails = (err) => {
   let details = [
-    `**Message:** ${err.messageMarkdown}`,
+    `**Message:** ${err.messageMarkdown || err.message}`,
   ]
 
   if (err.details) {
@@ -85,7 +85,7 @@ class ErrorMessage extends Component {
           </p>
           <span className='alert-content'>
             <div ref={(node) => this.errorMessageNode = node} dangerouslySetInnerHTML={{
-              __html: md.render(err.messageMarkdown),
+              __html: md.render(err.messageMarkdown || err.message),
             }}></div>
             {err.originalError && (
               <ErrorDetails err={err.originalError} />
