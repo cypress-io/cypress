@@ -237,8 +237,8 @@ commands:
     description: 'Send a root event to honeycomb for this build'
     steps:
       - run:
-        name: Send honeycomb event
-        command: node ./system-tests/lib/performance-reporter.js
+          name: Send honeycomb event
+          command: node ./system-tests/lib/performance-reporter.js
 
   caching-dependency-installer:
     description: 'Installs & caches the dependencies based on yarn lock & package json dependencies'
