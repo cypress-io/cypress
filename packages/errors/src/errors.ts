@@ -5,7 +5,7 @@ import _ from 'lodash'
 import path from 'path'
 import stripAnsi from 'strip-ansi'
 import { humanTime, logError, pluralize } from './errorUtils'
-import { errPartial, errTemplate, fmt } from './errTemplate'
+import { errPartial, errTemplate, fmt, theme } from './errTemplate'
 import { stackWithoutMessage } from './stackUtils'
 
 import type { ClonedError, CypressError, ErrorLike, ErrTemplateResult } from './errorTypes'
@@ -26,7 +26,7 @@ const displayRetriesRemaining = function (tries: number) {
 
 const getUsedTestsMessage = (limit: number, usedTestsMessage: string) => {
   return _.isFinite(limit)
-    ? fmt.off(`The limit is ${fmt.highlight(`${limit}`)} ${usedTestsMessage} results.`)
+    ? fmt.off(`The limit is ${chalk.yellow(`${limit}`)} ${usedTestsMessage} results.`)
     : fmt.off('')
 }
 
@@ -50,37 +50,37 @@ This flag must be unique for each new run, but must also be identical for each m
  * The errors must return an "errTemplate", this is processed by the
  */
 export const AllCypressErrors = {
-  CANNOT_TRASH_ASSETS: (arg1: string) => {
+  CANNOT_TRASH_ASSETS: (arg1: Error) => {
     return errTemplate`\
         Warning: We failed to trash the existing run results.
 
         This error will not alter the exit code.
 
-        ${fmt.highlightSecondary(arg1)}`
+        ${fmt.stackTrace(arg1)}`
   },
-  CANNOT_REMOVE_OLD_BROWSER_PROFILES: (arg1: string) => {
+  CANNOT_REMOVE_OLD_BROWSER_PROFILES: (arg1: Error) => {
     return errTemplate`\
         Warning: We failed to remove old browser profiles from previous runs.
 
         This error will not alter the exit code.
 
-        ${fmt.highlightSecondary(arg1)}`
+        ${fmt.stackTrace(arg1)}`
   },
-  VIDEO_RECORDING_FAILED: (arg1: string) => {
+  VIDEO_RECORDING_FAILED: (arg1: Error) => {
     return errTemplate`\
         Warning: We failed to record the video.
 
         This error will not alter the exit code.
 
-        ${fmt.highlightSecondary(arg1)}`
+        ${fmt.stackTrace(arg1)}`
   },
-  VIDEO_POST_PROCESSING_FAILED: (arg1: string) => {
+  VIDEO_POST_PROCESSING_FAILED: (arg1: Error) => {
     return errTemplate`\
         Warning: We failed processing this video.
 
         This error will not alter the exit code.
 
-        ${fmt.highlightSecondary(arg1)}`
+        ${fmt.stackTrace(arg1)}`
   },
   CHROME_WEB_SECURITY_NOT_SUPPORTED: (browser: string) => {
     return errTemplate`\
@@ -200,7 +200,7 @@ export const AllCypressErrors = {
         Warning from Cypress Dashboard: ${fmt.highlight(arg1.message)}
 
         Details:
-        ${fmt.highlightSecondary(arg1.props)}`
+        ${fmt.meta(arg1.props)}`
   },
   DASHBOARD_STALE_RUN: (arg1: {runUrl: string, [key: string]: any}) => {
     return errTemplate`\
@@ -289,7 +289,7 @@ export const AllCypressErrors = {
 
         This machine sent the following parameters:
 
-        ${fmt.highlightSecondary(arg1.parameters)}
+        ${fmt.meta(arg1.parameters)}
 
         https://on.cypress.io/parallel-group-params-mismatch`
   },
@@ -325,7 +325,7 @@ export const AllCypressErrors = {
     return errTemplate`\
       Warning: Multiple attempts to register the following task(s):
 
-      ${fmt.listItems(arg1, { color: fmt.highlight })}
+      ${fmt.listItems(arg1, { color: 'yellow' })}
 
       Only the last attempt will be registered.`
   },
@@ -430,11 +430,11 @@ export const AllCypressErrors = {
 
         Errors:
 
-        ${fmt.highlightSecondary(arg1.errors)}
+        ${fmt.meta(arg1.errors)}
 
         Request Sent:
 
-        ${fmt.highlightTertiary(arg1.object)}`
+        ${fmt.meta(arg1.object)}`
   },
   RECORDING_FROM_FORK_PR: () => {
     return errTemplate`\
@@ -534,14 +534,14 @@ export const AllCypressErrors = {
           ${fmt.listItem(folderPath)}`
     }
 
-    const globPath = path.join(chalk.blue(folderPath), globPattern)
+    const globPath = path.join(theme.blue(folderPath), globPattern)
 
     return errTemplate`\
         Can't run because ${fmt.highlightSecondary(`no spec files`)} were found.
 
         We searched for specs matching this glob pattern:
 
-        ${fmt.listItem(globPath, { color: fmt.highlight })}`
+        ${fmt.listItem(globPath, { color: 'yellow' })}`
   },
   RENDERER_CRASHED: () => {
     return errTemplate`\
@@ -610,7 +610,7 @@ export const AllCypressErrors = {
 
       Instead it exported:
 
-      ${fmt.highlightSecondary(exported)}
+      ${fmt.meta(JSON.stringify(exported, null, 2))}
 
       Learn more: https://on.cypress.io/plugins-api
     `
@@ -741,7 +741,7 @@ export const AllCypressErrors = {
     }
   },
   // TODO: test this
-  INVALID_REPORTER_NAME: (arg1: {name: string, paths: string[], error: string}) => {
+  INVALID_REPORTER_NAME: (arg1: {name: string, paths: string[], error: Error}) => {
     return errTemplate`\
         Error loading the reporter: ${fmt.highlight(arg1.name)}
 
@@ -749,11 +749,10 @@ export const AllCypressErrors = {
 
         ${fmt.listItems(arg1.paths)}
 
-        The error was:
-
+        Learn more at https://on.cypress.io/reporters
+        
         ${fmt.stackTrace(arg1.error)}
-
-        Learn more at https://on.cypress.io/reporters`
+        `
   },
   // TODO: test this out
   NO_DEFAULT_CONFIG_FILE_FOUND: (arg1: string) => {
@@ -980,7 +979,7 @@ export const AllCypressErrors = {
   // TODO: test this
   COULD_NOT_PARSE_ARGUMENTS: (argName: string, argValue: string, errMsg: string) => {
     return errTemplate`\
-        Cypress encountered an error while parsing the argument: ${fmt.flag(`--${argName}`)}
+        Cypress encountered an error while parsing the argument: ${fmt.highlight(`--${argName}`)}
 
         You passed: ${fmt.highlightTertiary(argValue)}
 
@@ -1071,7 +1070,7 @@ export const AllCypressErrors = {
     return errTemplate`\
         The following configuration ${fmt.off(phrase)} invalid:
 
-        ${fmt.listItems(arg1, { color: fmt.highlight })}
+        ${fmt.listItems(arg1, { color: 'yellow' })}
 
         https://on.cypress.io/configuration
         `

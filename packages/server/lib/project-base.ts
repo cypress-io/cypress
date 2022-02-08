@@ -563,16 +563,12 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
     try {
       Reporter.loadReporter(reporter, projectRoot)
-    } catch (err: any) {
+    } catch (error: any) {
       const paths = Reporter.getSearchPathsForReporter(reporter, projectRoot)
-
-      // only include the message if this is the standard MODULE_NOT_FOUND
-      // else include the whole stack
-      const errorMsg = err.code === 'MODULE_NOT_FOUND' ? err.message : err.stack
 
       errors.throw('INVALID_REPORTER_NAME', {
         paths,
-        error: errorMsg,
+        error,
         name: reporter,
       })
     }

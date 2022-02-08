@@ -5,13 +5,14 @@ import { stripIndent } from './stripIndent'
 
 import type { ErrTemplateResult, SerializedError } from './errorTypes'
 import assert from 'assert'
+import stripAnsi from 'strip-ansi'
 
 interface ListOptions {
   prefix?: string
-  color?: Function
+  color?: keyof typeof theme
 }
 
-const theme = {
+export const theme = {
   blue: chalk.blueBright,
   gray: chalk.gray,
   white: chalk.white,
@@ -46,13 +47,28 @@ class Format {
 
   private formatAnsi () {
     const val = this.prepVal('ansi')
+    const color = fmtHighlight[this.type]
+
+    if (this.type === 'terminal') {
+      return `${theme.gray('$')} ${color(val)}`
+    }
 
     return fmtHighlight[this.type](val)
   }
 
   private formatMarkdown () {
+    if (this.type === 'comment') {
+      return this.val
+    }
+
+    const val = this.prepVal('markdown')
+
+    if (this.type === 'terminal') {
+      return `${'```'}\n$ ${val}${'```'}`
+    }
+
     if (this.type === 'code') {
-      return this.prepVal('markdown')
+      return `${'```'}\n${val}${'```'}`
     }
 
     return mdFence(this.prepVal('markdown'))
@@ -60,11 +76,11 @@ class Format {
 
   private prepVal (target: 'ansi' | 'markdown'): string {
     if (this.val instanceof PartialErr) {
-      return prepMessage(this.val.strArr, this.val.args, target)
+      return prepMessage(this.val.strArr, this.val.args, target, true)
     }
 
     if (isErrorLike(this.val)) {
-      return `\n${this.val.name}: ${this.val.message}`
+      return `${this.val.name}: ${this.val.message}`
     }
 
     if (this.val && (typeof this.val === 'object' || Array.isArray(this.val))) {
@@ -103,6 +119,7 @@ const fmtHighlight = {
   highlight: theme.yellow,
   highlightSecondary: theme.magenta,
   highlightTertiary: theme.blue,
+  terminal: theme.blue,
 } as const
 
 export const fmt = {
@@ -115,17 +132,13 @@ export const fmt = {
   highlight: makeFormat('highlight'),
   highlightSecondary: makeFormat('highlightSecondary'),
   highlightTertiary: makeFormat('highlightTertiary'),
+  terminal: makeFormat('terminal'),
   off: guard,
-  terminal,
   listItem,
   listItems,
   listFlags,
   stackTrace,
   cypressVersion,
-}
-
-function terminal (str: string) {
-  return guard(`${theme.gray('$')} ${theme.blue(str)}`)
 }
 
 function cypressVersion (version: string) {
@@ -141,10 +154,10 @@ function cypressVersion (version: string) {
 function _item (item: string, options: ListOptions = {}) {
   const { prefix, color } = _.defaults(options, {
     prefix: '',
-    color: theme.blue,
+    color: 'blue',
   })
 
-  return stripIndent`${theme.gray(prefix)}${color(item)}`
+  return stripIndent`${theme.gray(prefix)}${theme[color](item)}`
 }
 
 function listItem (item: string, options: ListOptions = {}) {
@@ -224,6 +237,8 @@ export const errPartial = (templateStr: TemplateStringsArray, ...args: AllowedPa
   return new PartialErr(templateStr, args)
 }
 
+let originalError: Error | undefined = undefined
+
 /**
  * Creates a consistently formatted object to return from the error call.
  *
@@ -236,19 +251,30 @@ export const errPartial = (templateStr: TemplateStringsArray, ...args: AllowedPa
  *   - If details is an error, it gets provided as originalError
  */
 export const errTemplate = (strings: TemplateStringsArray, ...args: AllowedTemplateArg[]): ErrTemplateResult => {
-  let originalError: Error | undefined = undefined
-
   const msg = trimMultipleNewLines(prepMessage(strings, args, 'ansi'))
 
   return {
     message: msg,
     originalError,
-    messageMarkdown: trimMultipleNewLines(prepMessage(strings, args, 'markdown')),
+    messageMarkdown: trimMultipleNewLines(stripAnsi(prepMessage(strings, args, 'markdown'))),
   }
 }
 
-function prepMessage (templateStrings: TemplateStringsArray, args: AllowedTemplateArg[], target: 'ansi' | 'markdown'): string {
-  let originalError: Error | undefined = undefined
+/**
+ * Takes an `errTemplate` / `errPartial` and converts it into a string, formatted conditionally
+ * depending on the target environment
+ *
+ * @param templateStrings
+ * @param args
+ * @param target
+ * @returns
+ */
+function prepMessage (templateStrings: TemplateStringsArray, args: AllowedTemplateArg[], target: 'ansi' | 'markdown', isPartial: boolean = false): string {
+  // Reset the originalError to undefined on each new template string pass, we only need it to guard
+  if (!isPartial) {
+    originalError = undefined
+  }
+
   const templateArgs = []
 
   for (const arg of args) {
@@ -262,8 +288,10 @@ function prepMessage (templateStrings: TemplateStringsArray, args: AllowedTempla
       // Format = stringify & color ANSI, or make a markdown block
       templateArgs.push(arg.formatVal(target))
     } else if (arg instanceof StackTrace) {
+      assert(!originalError, `Cannot use fmt.stackTrace() multiple times in the same errTemplate`)
+      assert(!isPartial, `Cannot use fmt.stackTrace() in errPartial template string`)
+
       if (isErrorLike(arg.val)) {
-        assert(!originalError, `Cannot use fmt.stackTrace() multiple times in the same errTemplate`)
         originalError = arg.val
       } else {
         if (process.env.CYPRESS_INTERNAL_ENV !== 'production') {
@@ -275,9 +303,15 @@ function prepMessage (templateStrings: TemplateStringsArray, args: AllowedTempla
         err.stack = typeof arg.val === 'string' ? arg.val : JSON.stringify(arg.val)
         originalError = err
       }
+
+      if (target === 'ansi') {
+        templateArgs.push(chalk.magenta(originalError.stack ?? originalError.message))
+      } else {
+        templateArgs.push('')
+      }
     } else if (arg instanceof PartialErr) {
       // Partial error = prepMessage + interpolate
-      templateArgs.push(prepMessage(arg.strArr, arg.args, target))
+      templateArgs.push(prepMessage(arg.strArr, arg.args, target, true))
     } else {
       throw new Error(`Invalid value passed to prepMessage, saw ${arg}`)
     }

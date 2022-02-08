@@ -25,20 +25,6 @@ describe('errTemplate', () => {
     expect(obj).to.include({ messageMarkdown: `Hello world special` })
   })
 
-  it('provides as details for toErrorProps', () => {
-    const errStack = new Error().stack ?? ''
-    const obj = errTemplate`
-      This was an error
-
-      ${fmt.stackTrace(errStack)}
-    `
-
-    expect(obj).to.include({
-      message: `This was an error`,
-      details: chalk.magenta(errStack),
-    })
-  })
-
   it('will stringify non scalar values', () => {
     const someObj = { a: 1, b: 2, c: 3 }
     const obj = errTemplate`
@@ -51,9 +37,7 @@ describe('errTemplate', () => {
       messageMarkdown: stripIndent`
         This was returned from the app:
 
-        \`\`\`
-        ${JSON.stringify(someObj, null, 2)}
-        \`\`\``,
+        \`\`\`\n${JSON.stringify(someObj, null, 2)}\n\`\`\``,
     })
 
     expect(obj).to.include({
@@ -62,21 +46,6 @@ describe('errTemplate', () => {
 
         ${JSON.stringify(someObj, null, 2)}
       `,
-    })
-  })
-
-  it('will stringify details values', () => {
-    const someObj = { a: 1, b: 2, c: 3 }
-    const obj = errTemplate`
-      This was returned from the app:
-
-      ${fmt.stackTrace(someObj)}
-    `
-
-    expect(obj).to.include({ messageMarkdown: `This was returned from the app:` })
-    expect(obj).to.include({
-      message: `This was returned from the app:`,
-      details: chalk.magenta(JSON.stringify(someObj, null, 2)),
     })
   })
 

@@ -92,6 +92,10 @@ const snapshotAndTestErrorConsole = async function (errorFileName: string) {
     </style>
   `) // remove margin/padding and force text overflow like a terminal
 
+  if (isCi) {
+    expect(logs).not.to.contain('[object Object]')
+  }
+
   try {
     fse.accessSync(errorFileName)
   } catch (e) {
@@ -176,6 +180,7 @@ const testVisualErrors = (whichError: CypressErrorType | '*', errorsToTest: {[K 
     // errors were removed and we have stale snapshots
     return Promise.all([
       isCi ? fse.remove(snapshotHtmlFolder) : null,
+      fse.remove(snapshotMarkdownFolder),
       fse.remove(snapshotHtmlLocalFolder),
       fse.remove(snapshotImagesFolder),
     ])
@@ -253,28 +258,28 @@ describe('visual error templates', () => {
       const err = makeErr()
 
       return {
-        default: [err.stack],
+        default: [err],
       }
     },
     CANNOT_REMOVE_OLD_BROWSER_PROFILES: () => {
       const err = makeErr()
 
       return {
-        default: [err.stack],
+        default: [err],
       }
     },
     VIDEO_RECORDING_FAILED: () => {
       const err = makeErr()
 
       return {
-        default: [err.stack],
+        default: [err],
       }
     },
     VIDEO_POST_PROCESSING_FAILED: () => {
       const err = makeErr()
 
       return {
-        default: [err.stack],
+        default: [err],
       }
     },
     CHROME_WEB_SECURITY_NOT_SUPPORTED: () => {
@@ -714,7 +719,7 @@ describe('visual error templates', () => {
         default: [{
           name: 'missing-reporter-name',
           paths: ['/path/to/reporter', '/path/reporter'],
-          error: `stack-trace`,
+          error: makeErr(),
         }],
       }
     },

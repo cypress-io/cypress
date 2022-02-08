@@ -6,6 +6,7 @@
   "browser": "src/index.ts",
   "scripts": {
     "test": "yarn test-unit",
+    "comparison": "node -r @packages/ts/register test/support/error-comparison-tool.ts",
     "build": "../../scripts/run-if-ci.sh tsc || echo 'type errors'",
     "build-prod": "tsc",
     "check-ts": "tsc --noEmit",
