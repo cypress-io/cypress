@@ -16,11 +16,11 @@ export default defineConfig({
     'configFile': '../../mocha-reporter-config.json',
   },
   'component': {
-    devServer (cypressConfig, devServerConfig) {
+    devServer (cypressDevServerConfig, devServerConfig) {
       const { startDevServer } = require('@cypress/vite-dev-server')
 
       return startDevServer({
-        options: cypressConfig,
+        options: cypressDevServerConfig,
         ...devServerConfig,
       })
     },
