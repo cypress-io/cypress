@@ -80,7 +80,8 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, watch, FunctionalComponent, SVGAttributes } from 'vue'
+import type { FunctionalComponent, SVGAttributes } from 'vue'
+import { ref, computed, watch } from 'vue'
 import Icon from '@cy/components/Icon.vue'
 import { useI18n } from '@cy/i18n'
 import Select from '@cy/components/Select.vue'

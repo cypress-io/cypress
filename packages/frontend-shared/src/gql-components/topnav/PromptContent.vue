@@ -136,7 +136,8 @@
 import Button from '@cy/components/Button.vue'
 import { useI18n } from '@cy/i18n'
 const { t } = useI18n()
-import { getUrlWithParams, LinkWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
+import type { LinkWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
+import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 import { useTimeout } from '@vueuse/core'
 import { computed } from 'vue'
 import type { DocsMenuVariant } from './DocsMenuContent.vue'

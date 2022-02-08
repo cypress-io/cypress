@@ -64,7 +64,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, Ref, ComputedRef } from 'vue'
+import type { Ref, ComputedRef } from 'vue'
+import { computed, ref } from 'vue'
 import { debouncedWatch, useDebounce, useElementSize } from '@vueuse/core'
 import { useI18n } from '@cy/i18n'
 

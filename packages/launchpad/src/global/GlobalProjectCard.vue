@@ -70,7 +70,8 @@
 
 <script setup lang="ts">
 import { gql, useMutation } from '@urql/vue'
-import { GlobalProjectCardFragment, GlobalProjectCard_SetCurrentProjectDocument } from '../generated/graphql'
+import type { GlobalProjectCardFragment } from '../generated/graphql'
+import { GlobalProjectCard_SetCurrentProjectDocument } from '../generated/graphql'
 import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
 import { useI18n } from '@cy/i18n'
 
