@@ -1,6 +1,8 @@
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 import path from 'path'
 
+const sep = navigator.platform.includes('Win') ? '\\' : '/'
+
 describe('Launchpad: Global Mode', () => {
   describe('when no projects have been added', () => {
     it('shows "Add Project" view', () => {
@@ -76,7 +78,7 @@ describe('Launchpad: Global Mode', () => {
       .should('have.length', projectList.length)
       .each((card, index) => {
         expect(card).to.contain(projectList[index])
-        expect(card).to.contain(path.join('cy-projects', projectList[index]))
+        expect(card).to.contain(`cy-projects\\${sep}${projectList[index]}`)
       })
     }
 
@@ -190,7 +192,7 @@ describe('Launchpad: Global Mode', () => {
         cy.get('[data-cy="project-card"]')
         .should('have.length', 1)
         .contains('todos')
-        .contains(path.join('cy-projects', 'todos'))
+        .containsPath('cy-projects/todos')
 
         cy.log('Deleting the search pattern restores the project list')
         cy.get('#project-search').type('{backspace}{backspace}{backspace}')
