@@ -598,6 +598,7 @@ export const AllCypressErrors = {
   },
   PLUGINS_DIDNT_EXPORT_FUNCTION: (pluginsFilePath: string, exported: any) => {
     const code = errPartial`
+      ${fmt.comment(`// ${pluginsFilePath}`)}
       module.exports = (on, config) => {
         ${fmt.comment(`// configure plugins here`)}
       }`
@@ -605,7 +606,6 @@ export const AllCypressErrors = {
     return errTemplate`\
       The ${fmt.highlight(`pluginsFile`)} must export a function with the following signature:
 
-      ${fmt.comment(`// ${pluginsFilePath}`)}
       ${fmt.code(code)}
 
       Instead it exported:

@@ -54,21 +54,7 @@ describe('lib/errors', () => {
 
       expect(ret).to.be.undefined
 
-      expect(console.log).to.be.calledWithMatch('/path/to/project/cypress.json')
-    })
-
-    it('logs err.details', () => {
-      const userError = new Error('asdf')
-
-      const err = errors.get('PLUGINS_FUNCTION_ERROR', 'foo/bar/baz', userError)
-
-      const ret = errors.log(err)
-
-      expect(ret).to.be.undefined
-
-      expect(console.log).to.be.calledWithMatch('foo/bar/baz')
-
-      expect(console.log).to.be.calledWithMatch(chalk.magenta(userError.stack ?? ''))
+      expect(console.log).to.be.calledWithMatch(chalk.red(err.message))
     })
 
     it('logs err.stack in development', () => {

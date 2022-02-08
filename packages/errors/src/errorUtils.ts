@@ -38,9 +38,9 @@ type AllowedChalkColors = 'red' | 'blue' | 'green' | 'magenta' | 'yellow'
 export const logError = function (err: CypressError | ErrorLike, color: AllowedChalkColors = 'red') {
   console.log(chalk[color](err.message))
 
-  // if (err.originalError) {
-  //   console.log(`\n${err.originalError.stack}`)
-  // }
+  if (err.details) {
+    console.log(chalk.magenta(`\n${err.details}`))
+  }
 
   // bail if this error came from known
   // list of Cypress errors

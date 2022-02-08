@@ -12,7 +12,9 @@
     "check-ts": "tsc --noEmit",
     "clean-deps": "rm -rf node_modules",
     "clean": "rm -f ./src/*.js ./src/**/*.js ./src/**/**/*.js ./test/**/*.js || echo 'cleaned'",
-    "test-unit": "yarn clean && xvfb-maybe electron --no-sandbox ./node_modules/.bin/_mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json --exit"
+    "pretest-unit": "yarn clean",
+    "test-unit": "mocha",
+    "test-electron": "HTML_IMAGE_CONVERSION=1 xvfb-maybe electron --no-sandbox ./node_modules/.bin/_mocha"
   },
   "dependencies": {
     "ansi_up": "5.0.0",

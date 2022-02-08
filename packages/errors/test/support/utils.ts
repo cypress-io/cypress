@@ -6,9 +6,10 @@ import { PNG } from 'pngjs'
 
 const isCi = require('is-ci')
 
-app.on('window-all-closed', () => {
-
-})
+if (app) {
+  app.on('window-all-closed', () => {
+  })
+}
 
 const HEIGHT = 600
 const WIDTH = 1200

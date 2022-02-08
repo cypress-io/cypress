@@ -68,7 +68,7 @@ class Format {
     }
 
     if (this.type === 'code') {
-      return `${'```'}\n${val}${'```'}`
+      return `${'```'}\n${val}\n${'```'}`
     }
 
     return mdFence(this.prepVal('markdown'))
@@ -92,8 +92,13 @@ class Format {
 }
 
 function mdFence (val: string) {
+  // Don't double fence values
+  if (val.includes('`')) {
+    return val
+  }
+
   if (isMultiLine(val)) {
-    return `\`\`\`${val}\`\`\``
+    return `\`\`\`\n${val}\n\`\`\``
   }
 
   return `\`${val}\``
@@ -238,6 +243,7 @@ export const errPartial = (templateStr: TemplateStringsArray, ...args: AllowedPa
 }
 
 let originalError: Error | undefined = undefined
+let details: string | undefined
 
 /**
  * Creates a consistently formatted object to return from the error call.
@@ -255,6 +261,7 @@ export const errTemplate = (strings: TemplateStringsArray, ...args: AllowedTempl
 
   return {
     message: msg,
+    details,
     originalError,
     messageMarkdown: trimMultipleNewLines(stripAnsi(prepMessage(strings, args, 'markdown'))),
   }
@@ -273,6 +280,7 @@ function prepMessage (templateStrings: TemplateStringsArray, args: AllowedTempla
   // Reset the originalError to undefined on each new template string pass, we only need it to guard
   if (!isPartial) {
     originalError = undefined
+    details = undefined
   }
 
   const templateArgs = []
@@ -293,6 +301,7 @@ function prepMessage (templateStrings: TemplateStringsArray, args: AllowedTempla
 
       if (isErrorLike(arg.val)) {
         originalError = arg.val
+        details = originalError.stack
       } else {
         if (process.env.CYPRESS_INTERNAL_ENV !== 'production') {
           throw new Error(`Cannot use arg.stackTrace with a non error-like value, saw ${JSON.stringify(arg.val)}`)
@@ -302,13 +311,10 @@ function prepMessage (templateStrings: TemplateStringsArray, args: AllowedTempla
 
         err.stack = typeof arg.val === 'string' ? arg.val : JSON.stringify(arg.val)
         originalError = err
+        details = err.stack
       }
 
-      if (target === 'ansi') {
-        templateArgs.push(chalk.magenta(originalError.stack ?? originalError.message))
-      } else {
-        templateArgs.push('')
-      }
+      templateArgs.push('')
     } else if (arg instanceof PartialErr) {
       // Partial error = prepMessage + interpolate
       templateArgs.push(prepMessage(arg.strArr, arg.args, target, true))

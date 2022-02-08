@@ -2,3 +2,6 @@ test/unit
 -r @packages/ts/register
 --recursive
 --extension=js,ts
+--reporter mocha-multi-reporters 
+--reporter-options configFile=../../mocha-reporter-config.json 
+--exit

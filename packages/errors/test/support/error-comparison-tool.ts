@@ -49,7 +49,6 @@ app.get('/', async (req, res) => {
             $('#' + id).remove()
           })
           .catch(e => {
-            debugger
             alert(e.stack)
           })
       })
@@ -59,7 +58,6 @@ app.get('/', async (req, res) => {
         fetch('/load-more/' + offset)
           .then(res => res.text())
           .then((val) => {
-            debugger
             $(val).appendTo('tbody')
           })
       })

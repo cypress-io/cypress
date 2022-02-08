@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import chalk from 'chalk'
-import { errTemplate, fmt } from '../../src/errTemplate'
+import { errTemplate, fmt, theme } from '../../src/errTemplate'
 import { stripIndent } from '../../src/stripIndent'
 
 describe('errTemplate', () => {
@@ -30,38 +30,37 @@ describe('errTemplate', () => {
     const obj = errTemplate`
       This was returned from the app:
 
-      ${fmt.highlightTertiary(someObj)}
-    `
+      ${fmt.highlightTertiary(someObj)}`
 
     expect(obj).to.include({
       messageMarkdown: stripIndent`
         This was returned from the app:
 
-        \`\`\`\n${JSON.stringify(someObj, null, 2)}\n\`\`\``,
+        \`\`\`
+        ${JSON.stringify(someObj, null, 2)}
+        \`\`\``,
     })
 
     expect(obj).to.include({
       message: stripIndent`
         This was returned from the app:
 
-        ${JSON.stringify(someObj, null, 2)}
-      `,
+        ${theme.blue(JSON.stringify(someObj, null, 2))}`,
     })
   })
 
-  it('uses details to set originalError, for toErrorProps, highlight stack for console', () => {
+  it('sets originalError, for toErrorProps, highlight stack for console', () => {
     const specFile = 'specFile.js'
     const err = new Error()
     const obj = errTemplate`
       This was an error in ${fmt.highlight(specFile)}
 
-      ${fmt.stackTrace(err)}
-    `
+      ${fmt.stackTrace(err)}`
 
     expect(obj).to.include({ messageMarkdown: `This was an error in \`specFile.js\`` })
     expect(obj).to.include({
       message: `This was an error in ${chalk.yellow(specFile)}`,
-      details: chalk.magenta(err.stack ?? ''),
+      details: err.stack ?? '',
     })
   })
 
@@ -74,6 +73,6 @@ describe('errTemplate', () => {
 
         ${fmt.stackTrace(new Error())}
       `
-    }).to.throw(/Cannot use details\(\) multiple times in the same errTemplate/)
+    }).to.throw(/Cannot use fmt.stackTrace\(\) multiple times in the same errTemplate/)
   })
 })

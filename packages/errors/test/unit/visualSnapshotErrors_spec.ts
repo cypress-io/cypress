@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import chai, { expect } from 'chai'
 import Debug from 'debug'
 import fse from 'fs-extra'
@@ -20,6 +21,22 @@ const browsers = require('@packages/server/lib/browsers')
 const launcherBrowsers = require('@packages/launcher/lib/browsers')
 
 const debug = Debug(isCi ? '*' : 'visualSnapshotErrors')
+
+let snapshotFailures = 0
+
+after(() => {
+  if (snapshotFailures > 0) {
+    console.log(`
+      =================================
+  
+      Snapshot failures see for visualSnapshotErrors.
+  
+      Run "yarn comparison" locally from the @packages/error package to resolve
+  
+      =================================
+    `)
+  }
+})
 
 interface ErrorGenerator<T extends CypressErrorType> {
   default: Parameters<typeof errors.AllCypressErrors[T]>
@@ -55,9 +72,7 @@ const sanitize = (str: string) => {
 const snapshotAndTestErrorConsole = async function (errorFileName: string) {
   const logs = _
   .chain(consoleLog.args)
-  .map((args) => {
-    return args.map(sanitize).join(' ')
-  })
+  .map((args) => args.map(sanitize).join(' '))
   .join('\n')
   .value()
 
@@ -107,6 +122,7 @@ const snapshotAndTestErrorConsole = async function (errorFileName: string) {
   try {
     expect(contents).to.eq(html)
   } catch (e) {
+    snapshotFailures++
     await saveHtml(errorFileName.replace('__snapshot-html__', '__snapshot-html-local__'), html)
     throw e
   }
@@ -155,8 +171,8 @@ const testVisualError = <K extends CypressErrorType> (errorGeneratorFn: () => Er
 
       debug(`Snapshotted ${htmlFilename}`)
 
-      // dont run html -> image conversion if we're in CI
-      if (!isCi && process.env.SKIP_HTML_IMAGE_CONVERSION !== '1') {
+      // dont run html -> image conversion if we're in CI / if not enabled
+      if (!isCi && process.env.HTML_IMAGE_CONVERSION) {
         debug(`Converting ${errorType} to image`)
 
         await convertHtmlToImage(htmlFilename, snapshotImagesFolder)
@@ -199,7 +215,6 @@ const testVisualErrors = (whichError: CypressErrorType | '*', errorsToTest: {[K 
 
       // await Promise.all(excessErrors.map((file) => {
       //   const pathToHtml = path.join(baseImageFolder, file + EXT)
-
       //   return fse.remove(pathToHtml)
       // }))
 

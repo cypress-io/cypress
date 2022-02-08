@@ -3,6 +3,7 @@
 // and executing any tasks that the plugin registers
 const debug = require('debug')('cypress:server:plugins:child')
 const Promise = require('bluebird')
+const path = require('path')
 
 const preprocessor = require('./preprocessor')
 const devServer = require('./dev-server')
@@ -194,7 +195,7 @@ const runPlugins = (ipc, pluginsFile, projectRoot) => {
 
   if (typeof plugins !== 'function') {
     debug('not a function')
-    ipc.send('load:error', 'PLUGINS_DIDNT_EXPORT_FUNCTION', pluginsFile, plugins)
+    ipc.send('load:error', 'PLUGINS_DIDNT_EXPORT_FUNCTION', path.relative(projectRoot, pluginsFile), plugins)
 
     return
   }
