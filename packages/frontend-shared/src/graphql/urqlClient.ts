@@ -99,7 +99,7 @@ export function makeUrqlClient (config: UrqlClientConfig): Client {
           })
         }
 
-        if (process.env.NODE_ENV === 'production') {
+        if (['test', 'production'].includes(process.env.NODE_ENV as string)) {
           // In production, we want to complain loudly if there is
           // ever a unhandled GraphQL error, since that's a bug in Cypress.
           throw error

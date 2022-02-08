@@ -1,16 +1,27 @@
+const errorMessage = 'This is an intentional error for testing purposes'
+
 describe('GraphQL', () => {
-  it('fatally errors if GraphQL query errors', () => {
+  it('fatally errors if GraphQL query errors', (done) => {
+    cy.on('uncaught:exception', (error, runnable, p) => {
+      // We expect the uncaught exception, since we are intentionally
+      // querying a bad endpoint and expect a specific message.
+      // in another other scenario, the test would fail and the run would
+      // end (we want GraphQL errors to be treated as bugs; they should not
+      // happen).
+      expect(error.message).to.contain(errorMessage)
+      done()
+
+      return false
+    })
+
     cy.on('fail', (error, runnable) => {
-      // This test would normally fail, since we have an
-      // unhandled GraphQL error. We don't actually want it
-      // to fail though, just to prove there is an unhandled fail
-      // that WOULD cause CI to fail, so we catch it here and verify
-      // the fail is due to the expected reason.
-      if (error.message.includes('This is an intentional error for testing purposes')) {
-        return
+      // Actually fail if the error is anything other
+      // than what we expected!
+      if (!error.message.includes(errorMessage)) {
+        throw error
       }
 
-      throw error
+      return false
     })
 
     cy.scaffoldProject('todos')
