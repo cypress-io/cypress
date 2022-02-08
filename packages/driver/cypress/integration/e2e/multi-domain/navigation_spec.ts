@@ -1,4 +1,4 @@
-const { assertLogLength } = require('../../../support/utils')
+import { assertLogLength } from '../../../support/utils'
 
 // @ts-ignore / session support is needed for visiting about:blank between tests
 describe('navigation', { experimentalSessionSupport: true, experimentalMultiDomain: true }, () => {
