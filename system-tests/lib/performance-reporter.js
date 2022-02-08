@@ -41,13 +41,13 @@ class HoneycombReporter {
     })
 
     runner.on('test', (test) => {
-      const title = test.titlePath().join(' / ')
-      // This regex pulls apart a string like `e2e async timeouts / failing1 [electron]`
-      // into `e2e async timeouts / failing1` and `electron`, letting us use the same
+      const path = test.titlePath()
+      // This regex pulls apart a string like `failing1 [electron]`
+      // into `failing1` and `electron`, letting us use the same
       // test name for all browsers, with the browser as a separate field.
       // The browser capture group is optional because some tests aren't browser specific,
       // in which case it will be undefined and not passed as a field to honeycomb.
-      const [, testTitle, browser] = title.match(/(.+?)(?: \[([a-z]+)\])?$/)
+      const [, testTitle, browser] = path[path.length - 1].match(/(.+?)(?: \[([a-z]+)\])?$/)
 
       test.honeycombEvent = this.honey.newEvent()
       test.honeycombEvent.timestamp = Date.now()
@@ -76,8 +76,7 @@ class HoneycombReporter {
         durationMs: Date.now() - test.honeycombEvent.timestamp,
       })
 
-      console.log(test.honeycombEvent.data)
-      //       test.honeycombEvent.send()
+      test.honeycombEvent.send()
     })
 
     runner.on('suite end', (suite) => {
