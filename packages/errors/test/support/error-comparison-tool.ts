@@ -13,17 +13,33 @@ const SNAPSHOT_MARKDOWN = path.join(ERRORS_DIR, '__snapshot-md__')
 
 const app = express()
 
-const LINKS = `<h5><a href="/">Ansi Compare</a> | <a href="/base-list">Ansi Base List</a> | <a href="/md">Markdown</a></h5>`
+const LINKS = `<h5><a href="/">Ansi Compare</a> | <a href="/base-list">Ansi Base List</a> | <a href="/md">Markdown</a> | <input id="search" placeholder="search error by name"><button id="go">go</button></h5>`
 
-const getFiles = async (baseDir: string) => {
-  return (await globby(`${baseDir}/**/*`)).filter((f) => f.endsWith('.html')).sort()
+const SEARCH_HANDLER = `
+<script type="text/javascript">
+$(document).on('click', '#go', (ev) => {
+  const val = $('#search').val()
+  window.location.search = 'spec=' + val
+})
+$(document).ready(() => {
+  const u = new URL(window.location.href)
+  const spec = u.searchParams.get('spec')
+  $('#search').val(spec)
+})
+</script>
+`
+
+const getFiles = async (baseDir: string, spec?: string) => {
+  const pattern = spec ? `${spec}*` : '**/*'
+
+  return (await globby(`${baseDir}/${pattern}`))
 }
 
-async function getRows (offset = 0, baseList: boolean = false) {
-  const pattern = baseList ? SNAPSHOT_HTML : SNAPSHOT_HTML_LOCAL
-  const toCompare = await getFiles(pattern)
+async function getRows (offset = 0, baseList: boolean = false, spec?: string) {
+  const baseDir = baseList ? SNAPSHOT_HTML : SNAPSHOT_HTML_LOCAL
+  const toCompare = await getFiles(baseDir, spec)
 
-  const rows = toCompare.slice(offset, offset + 10).map((f) => path.basename(f).split('.')[0]).map((name) => {
+  const rows = toCompare.filter((f) => f.endsWith('.html')).sort().slice(offset, offset + 10).map((f) => path.basename(f).split('.')[0]).map((name) => {
     const width = baseList ? WIDTH : 550
     // const height = baseList ? HEIGHT : 600
     const height = 400
@@ -90,8 +106,10 @@ app.get('/', async (req, res) => {
 })
 
 app.get('/base-list', async (req, res) => {
+  const spec = req.query.spec as string
+
   try {
-    const rows = await getRows(0, true)
+    const rows = await getRows(0, true, spec)
 
     res.type('html').send(`
       <script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
@@ -102,12 +120,12 @@ app.get('/base-list', async (req, res) => {
         fetch('/load-more-base/' + offset)
           .then(res => res.text())
           .then((val) => {
-            debugger
             $(val).appendTo('tbody')
           })
       })
       </script>
       ${LINKS}
+      ${SEARCH_HANDLER}
       <table>
         <thead>
           <tr><th>Table</th><th colspan="2">Original</th></tr>
@@ -161,16 +179,20 @@ app.get<{name: string, type: string}>('/html/:name/:type', async (req, res) => {
 })
 
 app.get('/md', async (req, res) => {
+  const spec = req.query.spec as string
+
   try {
-    const toRender = (await fs.readdir(SNAPSHOT_MARKDOWN)).filter((f) => f.endsWith('.md')).sort()
-    const markdownContents = await Promise.all(toRender.map((f) => fs.readFile(path.join(SNAPSHOT_MARKDOWN, f), 'utf8')))
+    const toRender = (await getFiles(SNAPSHOT_MARKDOWN, spec)).filter((f) => f.endsWith('.md')).sort()
+    const markdownContents = await Promise.all(toRender.map((f) => fs.readFile(f, 'utf8')))
     const md = new Markdown({
       html: true,
       linkify: true,
     })
 
     res.type('html').send(`
+      <script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
       ${LINKS}
+      ${SEARCH_HANDLER}
       <style>
       tr {
         outline: 1px solid black;
