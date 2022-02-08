@@ -10,12 +10,104 @@ import $dom from '../dom'
 import $utils from './utils'
 import $errUtils from './error_utils'
 
+// interface Log {
+//   name: string
+//   defaultValue: any
+//   validation: Function
+//   isInternal?: boolean
+//   /**
+//    * Can be mutated with Cypress.config() or test-specific configuration overrides
+//    */
+//   canUpdateDuringTestTime?: boolean
+// }
+
+// Missing ConsoleProps definition / expectations. Hidden in code.
+
+interface SharedLogAttributes {
+  id: string
+  url?: boolean
+}
+
+interface SnapshotProps {
+  // id: string
+  snapshots: any
+  $el: Function
+  // url?: boolean
+  coords?: boolean
+  highlightAttr?: boolean
+  scrollBy?: boolean
+  viewportWidth?: boolean
+  viewportHeight?: boolean
+}
+
+interface DisplayProps {
+  // id: string
+  alias: any
+  aliasType: Function
+  callCount?: boolean
+  displayName?: boolean
+  end?: boolean
+  err?: boolean
+  event?: boolean
+  functionName?: boolean
+  hookId?: boolean
+  instrument?: boolean
+  isStubbed?: boolean
+  group?: boolean
+  message?: boolean
+  method?: boolean
+  name?: boolean
+  numElements?: boolean
+  showError?: boolean
+  numResponses?: boolean
+  referencesAlias?: boolean
+  renderProps?: boolean
+  state?: boolean
+  testId?: boolean
+  timeout?: boolean
+  type?: boolean
+  // url?: boolean
+  visible?: boolean
+  wallClockStartedAt?: boolean
+  testCurrentRetry?: boolean
+}
+
 // adds class methods for command, route, and agent logging
 // including the intermediate $Log interface
 const groupsOrTableRe = /^(groups|table)$/
 const parentOrChildRe = /parent|child|system/
 const SNAPSHOT_PROPS = 'id snapshots $el url coords highlightAttr scrollBy viewportWidth viewportHeight'.split(' ')
-const DISPLAY_PROPS = 'id alias aliasType callCount displayName end err event functionName hookId instrument isStubbed group message method name numElements showError numResponses referencesAlias renderProps state testId timeout type url visible wallClockStartedAt testCurrentRetry'.split(' ')
+const DISPLAY_PROPS = [
+  'id',
+  'alias',
+  'aliasType',
+  'callCount',
+  'displayName',
+  'end',
+  'err',
+  'event',
+  'functionName',
+  'hookId',
+  'instrument',
+  'isStubbed',
+  'group',
+  'message',
+  'method',
+  'name',
+  'numElements',
+  'showError',
+  'numResponses',
+  'referencesAlias',
+  'renderProps',
+  'state',
+  'testId',
+  'timeout',
+  'type',
+  'url',
+  'visible',
+  'wallClockStartedAt',
+  'testCurrentRetry',
+]
 const BLACKLIST_PROPS = 'snapshots'.split(' ')
 
 let counter = 0
@@ -86,6 +178,9 @@ const getSnapshotProps = (attrs) => {
   return _.pick(attrs, SNAPSHOT_PROPS)
 }
 
+// used by driver/src/cy/commands/navigation.ts before changing URLs.
+// little odd this needs maintained here. Seems like something the runner
+// can be tracking?
 const countLogsByTests = function (tests = {}) {
   if (_.isEmpty(tests)) {
     return 0
@@ -122,7 +217,7 @@ const defaults = function (state, config, obj) {
     // we are logging a command instrument by default
     _.defaults(obj, current != null ? current.pick('name', 'type') : undefined)
 
-    // force duals to become either parents or childs
+    // force duals to become either parents or children
     // normally this would be handled by the command itself
     // but in cases where the command purposely does not log
     // then it could still be logged during a failure, which
@@ -203,8 +298,11 @@ const defaults = function (state, config, obj) {
   })
 
   const logGroup = _.last(state('logGroup'))
+  // console.log('cmd', obj.name, 'in logGroup', logGroup)
 
   if (logGroup) {
+    // obj.group = logGroup.name
+    // console.log(logGroup)
     obj.group = logGroup
   }
 
@@ -213,7 +311,14 @@ const defaults = function (state, config, obj) {
   }
 
   if (obj.groupStart) {
-    state('logGroup', (state('logGroup') || []).concat(obj.id))
+    // console.log(obj.name)
+    // console.log(obj)
+    const group = { id: obj.id, label: `${obj.name} ${obj.message}` }
+
+    obj.group = group
+
+    // state('logGroup', (state('logGroup') || []).concat(obj.id))
+    state('logGroup', (state('logGroup') || []).concat(group))
   }
 
   return obj
@@ -465,9 +570,15 @@ const Log = function (cy, state, config, obj) {
       const { consoleProps } = attributes
 
       attributes.consoleProps = function (...args) {
-        const key = _this.get('event') ? 'Event' : 'Command'
-
         const consoleObj = {}
+
+        const group = _this.get('group')
+
+        if (group) {
+          consoleObj['Group'] = group.label
+        }
+
+        const key = _this.get('event') ? 'Event' : 'Command'
 
         consoleObj[key] = _this.get('name')
 
@@ -535,7 +646,6 @@ export default {
         log._emittedAttrs = attrs
 
         log.emit(event, attrs)
-
         return Cypress.action(event, attrs, log)
       }
     }
@@ -557,6 +667,10 @@ export default {
         $errUtils.throwErrByPath('log.invalid_argument', { args: { arg: options } })
       }
 
+      // const opts = _.clone(options)
+
+      // console.log('options', opts)
+      // console.log('options', options/)
       const log = Log(cy, state, config, options)
 
       // add event emitter interface

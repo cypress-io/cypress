@@ -348,7 +348,7 @@ export const eventManager = {
     return Cypress.initialize({
       $autIframe,
       onSpecReady: () => {
-        // get the current runnable in case we reran mid-test due to a visit
+        // get the current runnable from the server in case we reran mid-test due to a visit
         // to a new domain
         ws.emit('get:existing:run:state', (state = {}) => {
           if (!Cypress.runner) {
