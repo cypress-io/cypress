@@ -1,5 +1,4 @@
 import React from 'react'
-import _ from 'lodash'
 import ReactDOM from 'react-dom'
 import $Cypress from '@packages/driver'
 import {
@@ -12,8 +11,6 @@ import shortcuts from '@packages/reporter/src/lib/shortcuts'
 import * as MobX from 'mobx'
 
 export const UnifiedRunner = {
-  _,
-
   CypressJQuery: $Cypress.$,
 
   CypressDriver: $Cypress,

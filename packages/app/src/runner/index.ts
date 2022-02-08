@@ -135,7 +135,6 @@ function setupRunner (namespace: AutomationElementId) {
   _autIframeModel = new AutIframe(
     'Test Project',
     getEventManager(),
-    window.UnifiedRunner._,
     window.UnifiedRunner.CypressJQuery,
     window.UnifiedRunner.dom,
     getEventManager().studioRecorder,

@@ -42,7 +42,6 @@ declare global {
       React: any
       ReactDOM: any
       dom: any
-      _: any // lodash
       CypressJQuery: any
 
       MobX: typeof MobX

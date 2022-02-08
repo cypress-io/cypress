@@ -1,9 +1,11 @@
-import type { DebouncedFunc } from 'lodash'
 import { useSelectorPlaygroundStore } from '../store/selector-playground-store'
 import type JQuery from 'jquery'
 import { blankContents } from './blank-contents'
 import { visitFailure } from './visit-failure'
 import { logger } from './logger'
+import _ from 'lodash'
+/* eslint-disable no-duplicate-imports */
+import type { DebouncedFunc } from 'lodash'
 
 // JQuery bundled w/ Cypress
 type $CypressJQuery = any
@@ -16,12 +18,11 @@ export class AutIframe {
   constructor (
     private projectName: string,
     private eventManager: any,
-    private _: any,
     private $: $CypressJQuery,
     private dom: any,
     private studioRecorder: any,
   ) {
-    this.debouncedToggleSelectorPlayground = this._.debounce(this.toggleSelectorPlayground, 300)
+    this.debouncedToggleSelectorPlayground = _.debounce(this.toggleSelectorPlayground, 300)
   }
 
   create (): JQuery<HTMLIFrameElement> {
@@ -135,17 +136,17 @@ export class AutIframe {
 
     // remove all attributes
     if ($html[0]) {
-      oldAttrs = this._.map($html[0].attributes, (attr) => {
+      oldAttrs = _.map($html[0].attributes, (attr) => {
         return attr.name
       })
     }
 
-    this._.each(oldAttrs, (attr) => {
+    _.each(oldAttrs, (attr) => {
       $html.removeAttr(attr)
     })
 
     // set the ones specified
-    this._.each(htmlAttrs, (value, key) => {
+    _.each(htmlAttrs, (value, key) => {
       $html.attr(key, value)
     })
   }
@@ -154,7 +155,7 @@ export class AutIframe {
     const $head = this._contents()?.find('head')
     const existingStyles = $head?.find('link[rel="stylesheet"],style')
 
-    this._.each(styles, (style, index) => {
+    _.each(styles, (style, index) => {
       if (style.href) {
         // make a best effort at not disturbing <link> stylesheets
         // if possible by checking to see if the existing head has a
@@ -203,7 +204,7 @@ export class AutIframe {
   }
 
   _insertBodyStyles ($body, styles: Record<string, any> = {}) {
-    this._.each(styles, (style) => {
+    _.each(styles, (style) => {
       $body.append(style.href ? this._linkTag(style) : this._styleTag(style))
     })
   }
@@ -429,7 +430,7 @@ export class AutIframe {
         this.dom.addCssAnimationDisabler(this._body())
       }
 
-      this._.each(config.blackout, (selector) => {
+      _.each(config.blackout, (selector) => {
         this.dom.addBlackout(this._body(), selector)
       })
     } catch (err) {
