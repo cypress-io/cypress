@@ -76,7 +76,7 @@ export const Query = objectType({
       resolve: (source, args, ctx) => !ctx.currentProject,
     })
 
-    t.field('authState', {
+    t.nonNull.field('authState', {
       type: AuthState,
       description: 'The latest state of the auth process',
       resolve: (source, args, ctx) => ctx.coreData.authState,
