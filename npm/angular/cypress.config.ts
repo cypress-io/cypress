@@ -10,12 +10,12 @@ export default defineConfig({
     setupNodeEvents (on, config) {
       return require('./cypress/plugins')(on, config)
     },
-    devServer (cypressConfig) {
+    devServer (cypressDevServerConfig) {
       const { startDevServer } = require('@cypress/webpack-dev-server')
       const webpackConfig = require('./cypress/plugins/webpack.config')
 
       return startDevServer({
-        options: cypressConfig,
+        options: cypressDevServerConfig,
         webpackConfig,
       })
     },

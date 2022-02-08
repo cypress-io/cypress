@@ -4,7 +4,7 @@
       {{ t('migration.wizard.title') }}
     </h1>
     <p
-      class="mx-42px mt-12px text-center mb-32px text-body-gray-600 text-18px"
+      class="text-center mx-42px mt-12px mb-32px text-body-gray-600 text-18px"
     >
       {{ t('migration.wizard.description') }}
     </p>
@@ -22,6 +22,7 @@
         />
         <template #footer>
           <Button
+            size="lg"
             :suffix-icon="ArrowRightIcon"
             suffix-icon-class="w-16px h-16px icon-dark-white"
             @click="renameSpecs"
@@ -41,6 +42,9 @@
           <div class="flex gap-16px">
             <Button
               v-if="migration.manualFiles?.completed"
+              size="lg"
+              :suffix-icon="ArrowRightIcon"
+              suffix-icon-class="w-16px h-16px icon-dark-white"
               @click="finishedRenamingComponentSpecs"
             >
               {{ t('migration.wizard.step2.buttonDone') }}
@@ -48,6 +52,7 @@
 
             <Button
               v-else
+              size="lg"
               disabled
               variant="pending"
             >
@@ -61,6 +66,8 @@
             </Button>
 
             <Button
+              v-if="!migration.manualFiles?.completed"
+              size="lg"
               variant="outline"
               @click="skipStep2"
             >
@@ -78,6 +85,7 @@
         <RenameSupport :gql="migration" />
         <template #footer>
           <Button
+            size="lg"
             :suffix-icon="ArrowRightIcon"
             suffix-icon-class="w-16px h-16px icon-dark-white"
             data-cy="renameSupportButton"
@@ -96,6 +104,7 @@
         <ConvertConfigFile :gql="migration" />
         <template #footer>
           <Button
+            size="lg"
             :suffix-icon="ArrowRightIcon"
             suffix-icon-class="w-16px h-16px icon-dark-white"
             data-cy="convertConfigButton"
@@ -114,6 +123,7 @@
         <SetupComponentTesting />
         <template #footer>
           <Button
+            size="lg"
             :suffix-icon="ArrowRightIcon"
             suffix-icon-class="w-16px h-16px icon-dark-white"
             data-cy="launchReconfigureButton"
@@ -128,7 +138,6 @@
 </template>
 
 <script setup lang="ts">
-import type { MIGRATION_STEPS } from '@packages/types'
 import { computed, onBeforeMount, ref } from 'vue'
 import { gql, useMutation, useQuery } from '@urql/vue'
 import Button from '@cy/components/Button.vue'

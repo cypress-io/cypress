@@ -1,12 +1,6 @@
 /// <reference path="./cypress-npm-api.d.ts" />
 /// <reference path="./cypress-eventemitter.d.ts" />
 
-// The new Awaited type added in 4.5 would work here, but we seem to need to
-// support older versions of Typescript
-type AwaitedLike<T> = T extends PromiseLike<infer U>
-  ? { 0: AwaitedLike<U>; 1: U }[U extends PromiseLike<any> ? 0 : 1]
-  : T
-
 declare namespace Cypress {
   type FileContents = string | any[] | object
   type HistoryDirection = 'back' | 'forward'
@@ -2991,10 +2985,10 @@ declare namespace Cypress {
    */
   type CoreConfigOptions = Partial<Omit<ResolvedConfigOptions, TestingType>>
 
-  type DevServerFn<ComponentDevServerOpts = any> = (cypressConfig: DevServerConfig, devServerConfig: ComponentDevServerOpts) => ResolvedDevServerConfig | Promise<ResolvedDevServerConfig>
+  type DevServerFn<ComponentDevServerOpts = any> = (cypressDevServerConfig: DevServerConfig, devServerConfig: ComponentDevServerOpts) => ResolvedDevServerConfig | Promise<ResolvedDevServerConfig>
   interface ComponentConfigOptions<ComponentDevServerOpts = any> extends CoreConfigOptions {
-    devServer: Promise<{ devServer: DevServerFn<ComponentDevServerOpts>}> | { devServer: DevServerFn<ComponentDevServerOpts> } | DevServerFn<ComponentDevServerOpts>
-    devServerConfig?: ComponentDevServerOpts | AwaitedLike<Promise<ComponentDevServerOpts>>
+    devServer: DevServerFn<ComponentDevServerOpts>
+    devServerConfig?: ComponentDevServerOpts
   }
 
   /**
