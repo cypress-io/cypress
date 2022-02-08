@@ -1,4 +1,5 @@
 import { defineConfig } from 'cypress'
+import { devServer } from '@cypress/webpack-dev-server'
 
 export default defineConfig({
   'video': true,
@@ -6,7 +7,6 @@ export default defineConfig({
   'component': {
     devServer (cypressDevServerConfig) {
       const findReactScriptsWebpackConfig = require('@cypress/react/plugins/react-scripts/findReactScriptsWebpackConfig')
-      const { startDevServer } = require('@cypress/webpack-dev-server')
       const _ = require('lodash')
 
       const map = _.map([4, 8], (n) => n * 2)
@@ -19,7 +19,7 @@ export default defineConfig({
 
       typeof babelRule.options !== 'string' && babelRule.options.plugins.push(require.resolve('babel-plugin-istanbul'))
 
-      return startDevServer({ options: cypressDevServerConfig, webpackConfig })
+      return devServer(cypressDevServerConfig, webpackConfig)
     },
     setupNodeEvents (on, config) {
       require('@cypress/code-coverage/task')(on, config)

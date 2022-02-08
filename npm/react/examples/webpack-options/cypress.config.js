@@ -1,3 +1,5 @@
+const { devServer } = require('@cypress/webpack-dev-server')
+
 module.exports = {
   'video': false,
   'fixturesFolder': false,
@@ -6,7 +8,6 @@ module.exports = {
   'component': {
     devServer (cypressDevServerConfig) {
       const path = require('path')
-      const { startDevServer } = require('@cypress/webpack-dev-server')
       const babelConfig = require('./babel.config')
 
       /** @type import("webpack").Configuration */
@@ -34,7 +35,7 @@ module.exports = {
 
       process.env.BABEL_ENV = 'test' // this is required to load commonjs babel plugin
 
-      return startDevServer({ options: cypressDevServerConfig, webpackConfig })
+      return devServer(cypressDevServerConfig, webpackConfig)
     },
   },
 }

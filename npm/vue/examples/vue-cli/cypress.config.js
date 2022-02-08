@@ -1,9 +1,10 @@
+const { devServer } = require('@cypress/webpack-dev-server')
+
 module.exports = {
   'video': false,
   'fixturesFolder': false,
   'component': {
     devServer (cypressDevServerConfig) {
-      const { startDevServer } = require('@cypress/webpack-dev-server')
       const webpackConfig = require('@vue/cli-service/webpack.config')
 
       // HtmlPwaPlugin is coupled to a hook in HtmlWebpackPlugin
@@ -18,10 +19,7 @@ module.exports = {
         }),
       }
 
-      return startDevServer({
-        options: cypressDevServerConfig,
-        webpackConfig: modifiedWebpackConfig,
-      })
+      return devServer(cypressDevServerConfig, modifiedWebpackConfig)
     },
     setupNodeEvents (on, config) {
       require('@cypress/code-coverage/task')(on, config)
