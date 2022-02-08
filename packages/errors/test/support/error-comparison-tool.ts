@@ -1,8 +1,9 @@
 /* eslint-disable no-console */
 import express from 'express'
 import fs from 'fs-extra'
-import path from 'path'
+import globby from 'globby'
 import Markdown from 'markdown-it'
+import path from 'path'
 
 const ERRORS_DIR = path.join(__dirname, '..', '..')
 const SNAPSHOT_HTML = path.join(ERRORS_DIR, '__snapshot-html__')
@@ -13,8 +14,14 @@ const app = express()
 
 const LINKS = `<h5><a href="/">Ansi Compare</a> | <a href="/base-list">Ansi Base List</a> | <a href="/md">Markdown</a></h5>`
 
+const getFiles = async (baseDir: string) => {
+  return (await globby(`${baseDir}/**/*`)).filter((f) => f.endsWith('.html')).sort()
+}
+
 async function getRows (offset = 0, baseList: boolean = false) {
-  const toCompare = (await fs.readdir(baseList ? SNAPSHOT_HTML : SNAPSHOT_HTML_LOCAL)).filter((f) => f.endsWith('.html')).sort()
+  const pattern = baseList ? SNAPSHOT_HTML : SNAPSHOT_HTML_LOCAL
+  const toCompare = await getFiles(pattern)
+
   const rows = toCompare.slice(offset, offset + 10).map((f) => path.basename(f).split('.')[0]).map((name) => {
     return `
     <tr id="${name}">
@@ -185,5 +192,5 @@ app.get('/md', async (req, res) => {
 })
 
 app.listen(5555, () => {
-  console.log(`Comparison server listening on 5555`)
+  console.log(`Comparison server listening on: http://localhost:5555`)
 })
