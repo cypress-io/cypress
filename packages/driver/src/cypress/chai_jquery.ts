@@ -1,4 +1,3 @@
-// @ts-nocheck
 import _ from 'lodash'
 import $ from 'jquery'
 import $dom from '../dom'
@@ -33,7 +32,12 @@ const maybeCastNumberToString = (num) => {
   return _.isFinite(num) ? `${num}` : num
 }
 
-export const $chaiJquery = (chai, chaiUtils, callbacks = {}) => {
+interface Callbacks {
+  onInvalid: (method, obj) => void
+  onError: (err, method, obj, negated) => void
+}
+
+export const $chaiJquery = (chai, chaiUtils, callbacks: Callbacks) => {
   const { inspect, flag } = chaiUtils
 
   const assertDom = (ctx, method, ...args) => {
