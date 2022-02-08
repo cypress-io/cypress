@@ -117,7 +117,7 @@ export const graphQLHTTP = graphqlHTTP((req, res, params) => {
       const prefix = `${args.operationName ?? '(anonymous)'}`
 
       return Promise.resolve(execute(args)).then((val) => {
-        debugOperation(`${prefix} completed in ${new Date().valueOf() - date.valueOf()} with ${val.errors?.length ?? 0} errors`)
+        debugOperation(`${prefix} completed in ${new Date().valueOf() - date.valueOf()}ms with ${val.errors?.length ?? 0} errors`)
 
         return val
       })
