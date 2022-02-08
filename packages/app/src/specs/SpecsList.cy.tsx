@@ -85,33 +85,33 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
 
       // test interactions
 
-      const directories: string[] = Array.from(new Set(specs.map((spec) => spec.relative.split('/')[0]))).sort()
+      // const directories: string[] = Array.from(new Set(specs.map((spec) => spec.relative.split('/')[0]))).sort()
 
       cy.get('@specsListInput').clear()
 
-      directories.forEach((dir) => {
-        cy.contains('button[data-cy="row-directory-depth-0"]', dir)
-        .should('have.attr', 'aria-expanded', 'true')
-        .click()
-        .should('have.attr', 'aria-expanded', 'false')
-      })
+      // directories.forEach((dir) => {
+      //   cy.contains('button[data-cy="row-directory-depth-0"]', dir)
+      //   .should('have.attr', 'aria-expanded', 'true')
+      //   .click()
+      //   .should('have.attr', 'aria-expanded', 'false')
+      // })
 
-      cy.get('[data-cy="spec-item"]').should('not.exist')
+      // cy.get('[data-cy="spec-item"]').should('not.exist')
 
-      cy.contains('button[data-cy="row-directory-depth-0"]', directories[0])
-      .should('have.attr', 'aria-expanded', 'false')
-      .focus()
-      .type('{enter}')
+      // cy.contains('button[data-cy="row-directory-depth-0"]', directories[0])
+      // .should('have.attr', 'aria-expanded', 'false')
+      // .focus()
+      // .type('{enter}')
 
-      cy.contains('button[data-cy="row-directory-depth-0"]', directories[0])
-      .should('have.attr', 'aria-expanded', 'true')
-      .focus()
-      .realPress('Space')
+      // cy.contains('button[data-cy="row-directory-depth-0"]', directories[0])
+      // .should('have.attr', 'aria-expanded', 'true')
+      // .focus()
+      // .realPress('Space')
 
-      cy.contains('button[data-cy="row-directory-depth-0"]', directories[0])
-      .should('have.attr', 'aria-expanded', 'false')
+      // cy.contains('button[data-cy="row-directory-depth-0"]', directories[0])
+      // .should('have.attr', 'aria-expanded', 'false')
 
-      cy.get('[data-cy="spec-item"]').should('not.exist')
+      // cy.get('[data-cy="spec-item"]').should('not.exist')
 
       cy.contains(defaultMessages.createSpec.newSpec).click()
       cy.get('@showCreateSpecModalSpy').should('have.been.calledOnce')
