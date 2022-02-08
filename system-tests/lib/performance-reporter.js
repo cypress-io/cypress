@@ -15,6 +15,30 @@ const honey = new Libhoney({
 const spanId = process.env.CIRCLE_WORKFLOW_ID || uuidv4()
 const circleCiRootEvent = honey.newEvent()
 
+// Mocha events ('test', 'test end', etc) have no way to wait
+// for async callbacks, so we can't guarantee we have this
+// data ready by the time any of the reporter's events are emitted.
+
+// Therefore, we have each honeycomb event await this promise
+// before sending itself.
+let asyncInfo = Promise.all([getNextVersionForPath('../../packages'), commitInfo()])
+.then(([nextVersion, commitInformation]) => {
+  const ciInformation = ciProvider.commitParams() || {}
+
+  return {
+    nextVersion,
+    branch: commitInformation.branch || ciInformation.branch,
+    commitSha: commitInformation.sha || ciInformation.sha,
+  }
+})
+
+function addAsyncInfoAndSend (honeycombEvent) {
+  return asyncInfo.then((info) => {
+    honeycombEvent.add(info)
+    honeycombEvent.send()
+  })
+}
+
 circleCiRootEvent.timestamp = Date.now()
 circleCiRootEvent.add({
   buildUrl: process.env.CIRCLE_BUILD_URL,
@@ -29,9 +53,10 @@ circleCiRootEvent.add({
 // so that we can send the root event exactly once and associate all the various
 // system test tasks and build steps into a single span.
 if (require.main === module) {
-  console.log(circleCiRootEvent.data)
-  circleCiRootEvent.send()
-  honey.flush()
+  addAsyncInfoAndSend(circleCiRootEvent).then(() => {
+    console.log(circleCiRootEvent.data)
+    honey.flush()
+  })
 }
 
 class HoneycombReporter {
@@ -59,8 +84,6 @@ class HoneycombReporter {
         spanId: uuidv4(),
         parentId: parent.data.spanId,
       })
-
-      this.addAsyncInfo(suite.honeycombEvent)
     })
 
     runner.on('test', (test) => {
@@ -82,8 +105,6 @@ class HoneycombReporter {
         spanId: uuidv4(),
         parentId: test.parent.honeycombEvent.data.spanId,
       })
-
-      this.addAsyncInfo(test.honeycombEvent)
     })
 
     runner.on('test end', (test) => {
@@ -99,7 +120,7 @@ class HoneycombReporter {
         durationMs: Date.now() - test.honeycombEvent.timestamp,
       })
 
-      test.honeycombEvent.send()
+      addAsyncInfoAndSend(test.honeycombEvent)
     })
 
     runner.on('suite end', (suite) => {
@@ -111,35 +132,18 @@ class HoneycombReporter {
         durationMs: Date.now() - suite.honeycombEvent.timestamp,
       })
 
-      suite.honeycombEvent.send()
+      addAsyncInfoAndSend(suite.honeycombEvent)
     })
   }
 
-  // If there is no done callback, then mocha-multi-reporter will kill the process without waiting for our honeycomb post to complete.
+  // If there is no done method, then mocha-multi-reporter will kill the process
+  // without waiting for our honeycomb posts to complete.
   done (failures, callback) {
-    honey.flush().then(callback)
-  }
-
-  // Because mocha has no way to wait on async functions inside hooks,
-  // and we need to call various async functions to gather data about
-  // the testing environment, we create a promise that can be used by each
-  // honeycomb event to add async data that won't be initialized by the
-  // time mocha starts running tests.
-  addAsyncInfo (honeycombEvent) {
-    if (!this.asyncInfo) {
-      this.asyncInfo = Promise.all([getNextVersionForPath('../../packages'), commitInfo()])
-      .then(([nextVersion, commitInformation]) => {
-        const ciInformation = ciProvider.commitParams() || {}
-
-        return {
-          nextVersion,
-          branch: commitInformation.branch || ciInformation.branch,
-          commitSha: commitInformation.sha || ciInformation.sha,
-        }
-      })
-    }
-
-    this.asyncInfo.then((info) => honeycombEvent.add(info))
+    // Await the asyncInfo promise one last time, to ensure all events have
+    // added the data and sent themselves before we flush honeycomb's queue and exit.
+    asyncInfo
+    .then(() => honey.flush())
+    .then(callback)
   }
 }
 
