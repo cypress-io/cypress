@@ -32,6 +32,9 @@
     },
     "specPattern": {
       "matches": "{0} Matches"
+    },
+    "specPatternModal": {
+      "title": "Spec pattern settings"
     }
   },
   "clipboard": {
@@ -111,6 +114,10 @@
         "header": "Create from component",
         "description": "We'll generate an empty spec file which can be used to import and test any component in this project.",
         "chooseAComponentHeader": "Choose a component"
+      },
+      "importEmptySpec": {
+        "header": "Create a new spec",
+        "invalidComponentWarning": "We couldn't generate a valid filename matching your custom "
       }
     }
   },
@@ -235,7 +242,10 @@
     },
     "install": {
       "startButton": "Install",
-      "confirmManualInstall": "I've installed them"
+      "waitForInstall": "Waiting for you to install the dependencies...",
+      "checkForUpdates": "Refresh",
+      "installed": "installed",
+      "pendingInstall": "pending installation"
     },
     "step": {
       "continue": "Continue",
@@ -251,7 +261,8 @@
     },
     "testingCard": {
       "configured": "Configured",
-      "notConfigured": "Not Configured"
+      "notConfigured": "Not Configured",
+      "running": "Running"
     }
   },
   "globalPage": {
@@ -433,7 +444,7 @@
         },
         "connectManually": {
           "title": "Connect Project Manually",
-          "warning": "We couldn’t add the projectId to your cypress.config.js file automatically.",
+          "warning": "We couldn't add the projectId to your cypress.config.js file automatically.",
           "mainMessage": "Manually add the {projectId} to the root of the config object in your {configFile} file.",
           "waitingButton": "Waiting for you to add the projectId..."
         }
@@ -554,7 +565,7 @@
         "title": "Manually move your existing component specs",
         "description": "In this step, you'll manually move your existing component specs to their new default location.",
         "buttonWait": "Waiting for you to move your component specs...",
-        "buttonDone": "I have moved my component specs",
+        "buttonDone": "Continue to next step",
         "button": "I'll do this later"
       },
       "step3": {
@@ -601,5 +612,16 @@
     "focus": "Focus",
     "close": "Close",
     "switchTestingType": "Switch testing type"
+  },
+  "runner": {
+    "snapshot": {
+      "toggleHighlights": "Toggle highlights",
+      "highlightsLabel": "Highlights",
+      "testsRunningError": "Cannot show Snapshot while tests are running",
+      "snapshotMissingError": "The snapshot is missing. Displaying current state of the DOM.",
+      "defaultTitle": "DOM Snapshot",
+      "pinnedTitle": "Pinned",
+      "studioActiveError": "Cannot show Snapshot while creating commands in Studio"
+    }
   }
 }

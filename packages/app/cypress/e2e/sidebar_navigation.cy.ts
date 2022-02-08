@@ -1,5 +1,3 @@
-import type { Interception } from '@packages/net-stubbing/lib/external-types'
-
 describe('Sidebar Navigation', () => {
   context('as e2e testing type', () => {
     beforeEach(() => {
@@ -41,6 +39,26 @@ describe('Sidebar Navigation', () => {
       cy.percySnapshot()
     })
 
+    it('closes the left nav bar when clicking the expand button and persist the state if browser is refreshed', () => {
+      cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'true')
+      cy.findAllByText('todos').eq(1).as('title')
+      cy.get('@title').should('be.visible')
+
+      cy.findByLabelText('toggle navigation', {
+        selector: 'button',
+      }).click()
+
+      cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'false')
+      cy.get('@title').should('not.be.visible')
+
+      cy.reload()
+
+      cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'false')
+      cy.findAllByText('todos').should('not.be.visible')
+
+      cy.percySnapshot()
+    })
+
     it('has unlabeled menu item that shows the keyboard shortcuts modal (unexpanded state)', () => {
       cy.findByLabelText('toggle navigation', {
         selector: 'button',
@@ -70,24 +88,20 @@ describe('Sidebar Navigation', () => {
 
       cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'false')
 
-      cy.get('[data-cy="sidebar-header"').realHover()
+      cy.get('[data-cy="sidebar-header"').trigger('mouseenter')
       cy.contains('#tooltip-target > div', 'todos')
       cy.percySnapshot()
       cy.get('[data-cy="sidebar-header"]').trigger('mouseout')
 
-      cy.get('[data-cy="switch-testing-type"]').realHover()
-      cy.contains('#tooltip-target > div', 'E2E Testing')
-      cy.get('[data-cy="switch-testing-type"]').trigger('mouseout')
-
-      cy.get('[data-e2e-href="/runs"]').realHover()
+      cy.get('[data-e2e-href="/runs"]').trigger('mouseenter')
       cy.contains('#tooltip-target > div', 'Runs')
       cy.get('[data-e2e-href="/runs"]').trigger('mouseout')
 
-      cy.get('[data-e2e-href="/specs"]').realHover()
+      cy.get('[data-e2e-href="/specs"]').trigger('mouseenter')
       cy.contains('#tooltip-target > div', 'Specs')
       cy.get('[data-e2e-href="/specs"]').trigger('mouseout')
 
-      cy.get('[data-e2e-href="/settings"]').realHover()
+      cy.get('[data-e2e-href="/settings"]').trigger('mouseenter')
       cy.contains('#tooltip-target > div', 'Settings')
       cy.get('[data-e2e-href="/settings"]').trigger('mouseout')
     })
@@ -107,26 +121,61 @@ describe('Sidebar Navigation', () => {
       cy.findAllByText('todos').eq(1).should('be.visible')
     })
 
-    it('displays the project name (expanded state)', () => {
+    it('displays the project name and opens a modal to switch testing type', () => {
       cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'true')
 
-      cy.findAllByText('todos').eq(1).should('be.visible')
-    })
+      cy.get('[data-cy="sidebar-header"]').within(() => {
+        cy.get('[data-cy="testing-type-e2e"]').should('be.visible')
+        cy.findByText('todos').should('be.visible')
+      }).as('switchTestingType').click()
 
-    it('has menu item labeled by current active testing type that opens a modal to switch testing type (expanded state)', () => {
-      cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'true')
+      cy.findByRole('dialog', {
+        name: 'Choose a testing type',
+      }).should('be.visible')
 
-      cy.findByText('E2E Testing').should('be.visible')
-      cy.get('[data-cy="switch-testing-type"]').click()
-      cy.findByText('Choose a testing type').should('be.visible')
-      cy.intercept('mutation-SwitchTestingType_ReconfigureProject').as('SwitchTestingType')
-      cy.get('[data-cy-testingtype="component"]').click()
-      cy.wait('@SwitchTestingType').then((interception: Interception) => {
-        expect(interception.request.url).to.include('graphql/mutation-SwitchTestingType_ReconfigureProject')
+      cy.get('[data-cy-testingtype=e2e]').within(() => {
+        cy.contains('Running')
+      }).click()
+
+      cy.findByRole('dialog', {
+        name: 'Choose a testing type',
+      }).should('not.exist')
+
+      cy.get('@switchTestingType').click()
+      cy.findByRole('dialog', {
+        name: 'Choose a testing type',
+      }).should('be.visible')
+
+      cy.get('[data-cy-testingtype=e2e]').within(() => {
+        cy.contains('Running')
+      })
+
+      cy.intercept('mutation-SwitchTestingTypeAndRelaunch').as('SwitchTestingTypeAndRelaunch')
+      cy.withCtx((ctx) => {
+        ctx.actions.project.reconfigureProject = sinon.stub()
+      })
+
+      cy.get('[data-cy-testingtype="component"]').within(() => {
+        cy.contains('Not Configured')
+      }).click()
+
+      cy.wait('@SwitchTestingTypeAndRelaunch').then((interception) => {
+        expect(interception.request.body.variables.testingType).eq('component')
+      })
+
+      cy.withCtx((ctx) => {
+        expect(ctx.coreData.app.relaunchBrowser).eq(true)
       })
 
       cy.get('[aria-label="Close"]').click()
       cy.findByText('Choose a testing type').should('not.exist')
+
+      cy.findByLabelText('toggle navigation', {
+        selector: 'button',
+      }).click()
+
+      cy.get('[data-cy="sidebar-header"]').click()
+      cy.findByText('Choose a testing type').should('be.visible')
     })
 
     it('has unlabeled menu item that shows the keyboard shortcuts modal (expanded state)', () => {
@@ -175,20 +224,6 @@ describe('Sidebar Navigation', () => {
       cy.get('[data-cy="app-header-bar"]').findByText('Settings').should('be.visible')
       cy.get('.router-link-active').findByText('Settings').should('be.visible')
     })
-
-    it('shows if testing type is configured when clicking switch testing type', () => {
-      cy.openProject('pristine-with-e2e-testing')
-
-      cy.findByText('E2E Testing').should('be.visible')
-      cy.get('[data-cy="switch-testing-type"]').click()
-      cy.get('[data-cy-testingtype=e2e]').within(() => {
-        cy.contains('Configured')
-      })
-
-      cy.get('[data-cy-testingtype=component]').within(() => {
-        cy.contains('Not Configured')
-      })
-    })
   })
 
   context('as component testing type', () => {
@@ -198,14 +233,35 @@ describe('Sidebar Navigation', () => {
       cy.startAppServer('component')
       cy.visitApp()
 
-      cy.findByText('Component Testing').should('be.visible')
-      cy.get('[data-cy="switch-testing-type"]').click()
-      cy.get('[data-cy-testingtype=e2e]').within(() => {
-        cy.contains('Not Configured')
-      })
+      cy.get('[data-cy="sidebar-header"]').as('switchTestingType').click()
+      cy.findByRole('dialog', {
+        name: 'Choose a testing type',
+      }).should('be.visible')
 
       cy.get('[data-cy-testingtype=component]').within(() => {
-        cy.contains('Configured')
+        cy.contains('Running')
+      }).click()
+
+      cy.findByRole('dialog', {
+        name: 'Choose a testing type',
+      }).should('not.exist')
+
+      cy.get('@switchTestingType').click()
+      cy.findByRole('dialog', {
+        name: 'Choose a testing type',
+      }).should('be.visible')
+
+      cy.intercept('mutation-SwitchTestingTypeAndRelaunch').as('SwitchTestingTypeAndRelaunch')
+      cy.withCtx((ctx) => {
+        ctx.actions.project.reconfigureProject = sinon.stub()
+      })
+
+      cy.get('[data-cy-testingtype="e2e"]').within(() => {
+        cy.contains('Not Configured')
+      }).click()
+
+      cy.wait('@SwitchTestingTypeAndRelaunch').then((interception) => {
+        expect(interception.request.body.variables.testingType).eq('e2e')
       })
     })
   })

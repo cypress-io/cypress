@@ -1,4 +1,4 @@
-declare namespace legacyDevServer {
+declare namespace CypressCRADevServer {
   interface CypressCRADevServerConfig {
     /**
      * Location of the weppack.config Cypress should use
@@ -27,6 +27,6 @@ declare namespace legacyDevServer {
  * @param config comes from the argument of the `pluginsFile` function
  * @param devServerConfig additional config object (create an empty object to see how to use it)
  */
-declare function legacyDevServer(on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions, devServerConfig?: legacyDevServer.CypressCRADevServerConfig): void
+declare function CypressCRADevServer(on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions, devServerConfig?: CypressCRADevServer.CypressCRADevServerConfig): void
 
-export = legacyDevServer;
+export = CypressCRADevServer;

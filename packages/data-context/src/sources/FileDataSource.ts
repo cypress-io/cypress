@@ -2,26 +2,12 @@ import assert from 'assert'
 import type { DataContext } from '..'
 import * as path from 'path'
 import globby, { GlobbyOptions } from 'globby'
-import type { FoundSpec, SpecFile } from '@packages/types'
 import Debug from 'debug'
 import { toPosix } from '../util/file'
 
 const debug = Debug('cypress:data-context:sources:FileDataSource')
 
-interface CreateFileParts {
-  absolute: string
-  projectRoot: string
-  searchFolder: string
-}
-
-interface CreateFoundSpec extends CreateFileParts {
-  specFileExtension: string
-  specType: FoundSpec['specType']
-}
-
 export class FileDataSource {
-  private watchedFilePaths = new Set<string>()
-
   constructor (private ctx: DataContext) {}
 
   readFile (absoluteFilePath: string) {
@@ -44,30 +30,10 @@ export class FileDataSource {
     }) as Promise<Result>
   }
 
-  normalizeFileToFileParts (options: CreateFileParts): SpecFile & { fileExtension: string } {
-    const parsed = path.parse(options.absolute)
-
-    return {
-      absolute: options.absolute,
-      name: path.relative(options.searchFolder, options.absolute),
-      relative: path.relative(options.projectRoot, options.absolute),
-      baseName: parsed.base,
-      fileName: parsed.base.split('.')[0] || '',
-      fileExtension: parsed.ext,
-    }
-  }
-
-  normalizeFileToSpec (options: CreateFoundSpec): FoundSpec {
-    return {
-      ...this.normalizeFileToFileParts(options),
-      specFileExtension: options.specFileExtension,
-      specType: options.specType,
-      fileExtension: this.ctx.path.parse(options.absolute).ext,
-    }
-  }
-
   async getFilesByGlob (cwd: string, glob: string | string[], globOptions?: GlobbyOptions) {
-    const globs = (Array.isArray(glob) ? glob : [glob]).concat('!**/node_modules/**')
+    const globs = Array.isArray(glob) ? glob : [glob]
+
+    const ignoreGlob = globOptions && Array.isArray(globOptions?.ignore) ? globOptions.ignore.concat('**/node_modules/**') : ['**/node_modules/**']
 
     if (process.platform === 'win32') {
       // globby can't work with backwards slashes
@@ -82,7 +48,7 @@ export class FileDataSource {
     }
 
     try {
-      const files = await globby(globs, { onlyFiles: true, absolute: true, cwd, ...globOptions })
+      const files = await globby(globs, { onlyFiles: true, absolute: true, cwd, ...globOptions, ignore: ignoreGlob })
 
       return files
     } catch (e) {
@@ -100,12 +66,6 @@ export class FileDataSource {
     } catch {
       return false
     }
-  }
-
-  private trackFile () {
-    // this.watchedFilePaths.clear()
-    // this.fileLoader.clear()
-    // this.jsonFileLoader.clear()
   }
 
   private fileLoader = this.ctx.loader<string, string>((files) => {

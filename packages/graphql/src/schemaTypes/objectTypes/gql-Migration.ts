@@ -1,9 +1,6 @@
 import { enumType, objectType } from 'nexus'
 import { TestingTypeEnum } from '..'
-import Debug from 'debug'
 import { MIGRATION_STEPS } from '@packages/types'
-
-const debug = Debug('cypress:graphql:gql-Migration')
 
 export const MigrationStepEnum = enumType({
   name: 'MigrationStepEnum',
@@ -57,18 +54,9 @@ export const MigrationFilePart = objectType({
     t.nonNull.boolean('highlight', {
       description: 'should highlight in migration UI',
     })
-  },
-})
 
-export const MigrationFiles = objectType({
-  name: 'MigrationFiles',
-  definition (t) {
-    t.nonNull.list.nonNull.field('before', {
-      type: MigrationFile,
-    })
-
-    t.nonNull.list.nonNull.field('after', {
-      type: MigrationFile,
+    t.string('group', {
+      description: 'is this part a folder or extension that needs migration',
     })
   },
 })
@@ -102,16 +90,31 @@ export const ManualMigration = objectType({
   },
 })
 
-export const MigrationFile = objectType({
-  name: 'MigrationFile',
+export const MigrationFileData = objectType({
+  name: 'MigrationFileData',
   node: (obj) => obj.parts.map((file) => file.text).join(''),
   definition (t) {
+    t.nonNull.string('relative')
+
     t.nonNull.list.nonNull.field('parts', {
       type: MigrationFilePart,
     })
+  },
+})
 
+export const MigrationFile = objectType({
+  name: 'MigrationFile',
+  definition (t) {
     t.nonNull.field('testingType', {
       type: TestingTypeEnum,
+    })
+
+    t.nonNull.field('before', {
+      type: MigrationFileData,
+    })
+
+    t.nonNull.field('after', {
+      type: MigrationFileData,
     })
   },
 })
@@ -128,7 +131,7 @@ export const MigrationRegexp = objectType({
     })
 
     t.nonNull.string('beforeComponent', {
-      description: 'regexp to identiey existing specs in component',
+      description: 'regexp to identify existing specs in component',
     })
 
     t.nonNull.string('afterComponent', {
@@ -153,13 +156,11 @@ export const Migration = objectType({
       },
     })
 
-    t.nonNull.field('specFiles', {
+    t.nonNull.list.nonNull.field('specFiles', {
       description: 'All spec files after conversion',
-      type: MigrationFiles,
+      type: MigrationFile,
       resolve: async (source, args, ctx) => {
         const result = await ctx.migration.getSpecsForMigrationGuide()
-
-        debug('got migration specs %o', result)
 
         return result
       },
@@ -187,7 +188,7 @@ export const Migration = objectType({
 
     t.field('supportFiles', {
       description: 'Support files needing automated rename',
-      type: MigrationFiles,
+      type: MigrationFile,
       resolve: (source, args, ctx) => {
         return ctx.migration.supportFilesForMigrationGuide()
       },
@@ -250,6 +251,13 @@ export const Migration = objectType({
       description: 'whether component testing is set up in the migrated config or not',
       resolve: (source, args, ctx) => {
         return ctx.migration.hasComponentTesting
+      },
+    })
+
+    t.boolean('hasTypescript', {
+      description: 'Whether the project has Typescript',
+      resolve (source, args, ctx) {
+        return ctx.lifecycleManager.metaState.hasTypescript
       },
     })
   },

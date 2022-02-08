@@ -6,14 +6,17 @@ import {
   initComponentTestingMigration,
   ComponentTestingMigrationStatus,
   NonStandardMigrationError,
-  getSpecs,
   supportFilesForMigration,
+  reduceConfig,
   renameSupportFilePath,
-} from '../../../src/util/migration'
+  OldCypressConfig,
+} from '../../../src/sources/migration'
 import { expect } from 'chai'
 import tempDir from 'temp-dir'
+import type { e2eProjectDirs } from '@packages/frontend-shared/cypress/e2e/support/e2eProjectDirs'
+import { MigrationFile } from '../../../src/sources'
 
-function scaffoldMigrationProject (project: string) {
+function scaffoldMigrationProject (project: typeof e2eProjectDirs[number]) {
   const tmpDir = path.join(tempDir, 'cy-projects')
   const testProject = path.join(__dirname, '..', '..', '..', '..', '..', 'system-tests', 'projects', project)
   const cwd = path.join(tmpDir, project)
@@ -30,44 +33,64 @@ function scaffoldMigrationProject (project: string) {
   return cwd
 }
 
+const projectRoot = path.join(__dirname, '..', '..', '..', '..', '..')
+
 describe('cypress.config.js generation', () => {
   it('should create a string when passed only a global option', async () => {
-    const config = {
-      visualViewport: 300,
+    const config: OldCypressConfig = {
+      viewportWidth: 300,
     }
 
-    const generatedConfig = await createConfigString(config)
+    const generatedConfig = await createConfigString(config, {
+      hasE2ESpec: true,
+      hasComponentTesting: false,
+      hasPluginsFile: true,
+      projectRoot,
+      hasTypescript: false,
+    })
 
     snapshot(generatedConfig)
   })
 
   it('should create a string when passed only a e2e options', async () => {
-    const config = {
+    const config: OldCypressConfig = {
       e2e: {
         baseUrl: 'localhost:3000',
       },
     }
 
-    const generatedConfig = await createConfigString(config)
+    const generatedConfig = await createConfigString(config, {
+      hasE2ESpec: true,
+      hasComponentTesting: false,
+      hasPluginsFile: true,
+      projectRoot,
+      hasTypescript: false,
+    })
 
     snapshot(generatedConfig)
   })
 
   it('should create a string when passed only a component options', async () => {
-    const config = {
+    const config: OldCypressConfig = {
       component: {
         retries: 2,
       },
     }
 
-    const generatedConfig = await createConfigString(config)
+    const generatedConfig = await createConfigString(config, {
+      hasE2ESpec: true,
+      hasComponentTesting: false,
+      hasPluginsFile: true,
+      projectRoot,
+      hasTypescript: false,
+    })
 
     snapshot(generatedConfig)
   })
 
   it('should create a string for a config with global, component, and e2e options', async () => {
     const config = {
-      visualViewport: 300,
+      viewportWidth: 300,
       baseUrl: 'localhost:300',
       e2e: {
         retries: 2,
@@ -77,7 +100,13 @@ describe('cypress.config.js generation', () => {
       },
     }
 
-    const generatedConfig = await createConfigString(config)
+    const generatedConfig = await createConfigString(config, {
+      hasE2ESpec: true,
+      hasComponentTesting: false,
+      hasPluginsFile: true,
+      projectRoot,
+      hasTypescript: false,
+    })
 
     snapshot(generatedConfig)
   })
@@ -85,7 +114,13 @@ describe('cypress.config.js generation', () => {
   it('should create a string when passed an empty object', async () => {
     const config = {}
 
-    const generatedConfig = await createConfigString(config)
+    const generatedConfig = await createConfigString(config, {
+      hasE2ESpec: true,
+      hasComponentTesting: false,
+      hasPluginsFile: true,
+      projectRoot,
+      hasTypescript: false,
+    })
 
     snapshot(generatedConfig)
   })
@@ -97,43 +132,15 @@ describe('cypress.config.js generation', () => {
       componentFolder: 'path/to/component/folder',
     }
 
-    const generatedConfig = await createConfigString(config)
+    const generatedConfig = await createConfigString(config, {
+      hasE2ESpec: true,
+      hasComponentTesting: false,
+      hasPluginsFile: true,
+      projectRoot,
+      hasTypescript: false,
+    })
 
     snapshot(generatedConfig)
-  })
-})
-
-describe('spec renaming', () => {
-  it('should rename all specs', async () => {
-    const cwd = scaffoldMigrationProject('migration')
-    const specs = await getSpecs(cwd, 'cypress/component', 'cypress/integration')
-
-    expect(specs.before[0].relative).to.eql('cypress/component/button.spec.js')
-    expect(specs.after[0].relative).to.eql('cypress/component/button.cy.js')
-
-    expect(specs.before[1].relative).to.eql('cypress/component/input-spec.tsx')
-    expect(specs.after[1].relative).to.eql('cypress/component/input.cy.tsx')
-
-    expect(specs.before[2].relative).to.eql('cypress/integration/app_spec.js')
-    expect(specs.after[2].relative).to.eql('cypress/e2e/app.cy.js')
-
-    expect(specs.before[3].relative).to.eql('cypress/integration/blog-post-spec.ts')
-    expect(specs.after[3].relative).to.eql('cypress/e2e/blog-post.cy.ts')
-
-    expect(specs.before[4].relative).to.eql('cypress/integration/company.js')
-    expect(specs.after[4].relative).to.eql('cypress/e2e/company.cy.js')
-
-    expect(specs.before[5].relative).to.eql('cypress/integration/homeSpec.js')
-    expect(specs.after[5].relative).to.eql('cypress/e2e/home.cy.js')
-
-    expect(specs.before[6].relative).to.eql('cypress/integration/sign-up.js')
-    expect(specs.after[6].relative).to.eql('cypress/e2e/sign-up.cy.js')
-
-    expect(specs.before[7].relative).to.eql('cypress/integration/spectacleBrowser.ts')
-    expect(specs.after[7].relative).to.eql('cypress/e2e/spectacleBrowser.cy.ts')
-
-    expect(specs.before[8].relative).to.eql('cypress/integration/someDir/someFile.js')
-    expect(specs.after[8].relative).to.eql('cypress/e2e/someDir/someFile.cy.js')
   })
 })
 
@@ -142,43 +149,48 @@ describe('supportFilesForMigrationGuide', () => {
     const cwd = scaffoldMigrationProject('migration')
     const actual = await supportFilesForMigration(cwd)
 
-    expect(actual.before[0]).to.eql({
-      relative: 'cypress/support/index.js',
-      parts: [
-        {
-          'text': 'cypress/support/',
-          'highlight': false,
-        },
-        {
-          'text': 'index',
-          'highlight': true,
-        },
-        {
-          'text': '.js',
-          'highlight': false,
-        },
-      ],
-      'testingType': 'e2e',
-    })
+    const expected: MigrationFile = {
+      testingType: 'e2e',
+      before: {
+        relative: 'cypress/support/index.js',
+        parts: [
+          {
+            'text': 'cypress/support/',
+            'highlight': false,
+          },
+          {
+            'text': 'index',
+            'highlight': true,
+            group: 'name',
+          },
+          {
+            'text': '.js',
+            'highlight': false,
+          },
+        ],
+      },
+      after: {
+        relative: 'cypress/support/e2e.js',
+        parts: [
+          {
+            'text': 'cypress/support/',
+            'highlight': false,
+          },
+          {
+            'text': 'e2e',
+            'highlight': true,
+            group: 'name',
+          },
+          {
+            'text': '.js',
+            'highlight': false,
+          },
+        ],
+      },
+    }
 
-    expect(actual.after[0]).to.eql({
-      relative: 'cypress/support/e2e.js',
-      parts: [
-        {
-          'text': 'cypress/support/',
-          'highlight': false,
-        },
-        {
-          'text': 'e2e',
-          'highlight': true,
-        },
-        {
-          'text': '.js',
-          'highlight': false,
-        },
-      ],
-      'testingType': 'e2e',
-    })
+    // expect(actual.before).to.eql(expected.before)
+    expect(actual.after).to.eql(expected.after)
   })
 })
 
@@ -206,7 +218,7 @@ describe('renameSupportFilePath', () => {
 
 describe('initComponentTestingMigration', () => {
   it('calls callback with status each time file is removed', async () => {
-    const cwd = scaffoldMigrationProject('migration-component-testing')
+    const cwd = scaffoldMigrationProject('migration-component-testing-customized')
 
     const delay = () => new Promise((res) => setTimeout(res, 250))
 
@@ -267,5 +279,101 @@ describe('initComponentTestingMigration', () => {
     })
 
     await watcher.close()
+  })
+})
+
+describe('reduceConfig', () => {
+  it('should move the testFiles field to e2e and component', () => {
+    const config = { testFiles: '**/**.cy.js' }
+    const newConfig = reduceConfig(config)
+
+    expect(newConfig.e2e.specPattern).to.eq('cypress/e2e/**/**.cy.js')
+    expect(newConfig.component.specPattern).to.eq('**/**.cy.js')
+  })
+
+  it('should combine componentFolder and integrationFolder with testFiles field in component', () => {
+    const config = { testFiles: '**/**.cy.js', componentFolder: 'src', integrationFolder: 'cypress/integration' }
+    const newConfig = reduceConfig(config)
+
+    expect(newConfig.component.specPattern).to.eq(config.testFiles)
+    expect(newConfig.e2e.specPattern).to.eq(`${config.integrationFolder}/${config.testFiles}`)
+  })
+
+  it('should combine nested componentFolder and integrationFolder with testFiles field in component', () => {
+    const config = {
+      testFiles: '**/**.cy.js',
+      component: {
+        componentFolder: 'src',
+      },
+      e2e: {
+        integrationFolder: 'cypress/integration',
+      },
+    }
+    const newConfig = reduceConfig(config)
+
+    expect(newConfig.component.specPattern).to.eq(config.testFiles)
+    expect(newConfig.e2e.specPattern).to.eq(`${config.e2e.integrationFolder}/${config.testFiles}`)
+  })
+
+  it('should add custom integrationFolder to default testFiles if testFiles is not present', () => {
+    const config = { integrationFolder: 'cypress/custom-integration' }
+    const newConfig = reduceConfig(config)
+
+    expect(newConfig.e2e.specPattern).to.eq(`${config.integrationFolder}/**/*.cy.{js,jsx,ts,tsx}`)
+  })
+
+  it('should combine testFiles with highest specificity', () => {
+    const config = {
+      testFiles: '**/**.cy.js',
+      componentFolder: 'lower/specificity',
+      integrationFolder: 'lower/specificity',
+      component: {
+        componentFolder: 'higher/specificity',
+      },
+      e2e: {
+        integrationFolder: 'higher/specificity',
+      },
+    }
+    const newConfig = reduceConfig(config)
+
+    expect(newConfig.component.specPattern).to.eq(config.testFiles)
+    expect(newConfig.e2e.specPattern).to.eq(`${config.e2e.integrationFolder}/${config.testFiles}`)
+  })
+
+  it('should exclude integrationFolder and componentFolder', () => {
+    const config = {
+      componentFolder: 'src',
+      integrationFolder: 'cypress/integration',
+    }
+
+    const newConfig = reduceConfig(config)
+
+    // @ts-ignore field not on ConfigOptions type
+    expect(newConfig.global.componentFolder).to.not.exist
+    // @ts-ignore field not on ConfigOptions type
+    expect(newConfig.global.integrationFolder).to.not.exist
+  })
+
+  it('should rename ignoreTestFiles to specExcludePattern', () => {
+    const config = { ignoreTestFiles: 'path/to/**/*.js' }
+    const newConfig = reduceConfig(config)
+
+    expect(newConfig.e2e.specExcludePattern).to.eq(config.ignoreTestFiles)
+    expect(newConfig.component.specExcludePattern).to.eq(config.ignoreTestFiles)
+  })
+
+  it('should nest supportFile under component and e2e', () => {
+    const config = { supportFile: 'cypress/support/index.js' }
+    const newConfig = reduceConfig(config)
+
+    expect(newConfig.e2e.supportFile).to.eq(config.supportFile)
+  })
+
+  it('should exclude the pluginsFile', () => {
+    const config = { pluginsFile: 'cypress/plugins/index.js' }
+    const newConfig = reduceConfig(config)
+
+    // @ts-ignore field not on ConfigOptions type
+    expect(newConfig.global.pluginsFile).to.not.exist
   })
 })

@@ -3,6 +3,8 @@ import type { FoundSpec } from '@packages/types'
 import { ref, watch } from 'vue'
 import type { UseCollapsibleTreeNode } from '../composables/useCollapsibleTree'
 
+const PATH_SEP = /[\/\\]/
+
 export type FuzzyFoundSpec = FoundSpec & {
   fileIndexes: number[]
   dirIndexes: number[]
@@ -25,7 +27,7 @@ export function buildSpecTree<T extends FoundSpec> (specs: FoundSpec[], root: Sp
 }
 
 export function buildSpecTreeRecursive<T extends FoundSpec> (path: string, tree: SpecTreeNode<T>, data?: T) {
-  const [firstFile, ...rest] = path.split('/')
+  const [firstFile, ...rest] = path.split(PATH_SEP)
   const id = tree.id ? [tree.id, firstFile].join('/') : firstFile
 
   if (rest.length < 1) {
@@ -105,7 +107,7 @@ function addDirectoryToSpecs (specs: Partial<FuzzyFoundSpec>[]) {
 }
 
 function getDirectoryPath (path: string) {
-  return path.slice(0, path.lastIndexOf('/'))
+  return path.slice(0, path.lastIndexOf('/') ?? path.lastIndexOf('\\'))
 }
 
 export function makeFuzzyFoundSpec (spec: FoundSpec): FuzzyFoundSpec {

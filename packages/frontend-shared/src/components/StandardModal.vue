@@ -12,6 +12,7 @@
         <DialogOverlay class="bg-gray-800 opacity-90 inset-0 fixed" />
       </slot>
       <div
+        data-cy="standard-modal"
         class="bg-white rounded mx-auto ring-[#9095AD40] ring-4 relative"
         :class="props.class || ''"
       >
@@ -57,6 +58,8 @@ import {
   DialogDescription,
 } from '@headlessui/vue'
 
+import { defaultMessages } from '@cy/i18n'
+
 const emit = defineEmits<{
   (event: 'update:modelValue', value: boolean): void
 }>()
@@ -72,7 +75,7 @@ const props = withDefaults(defineProps<{
 }>(), {
   clickOutside: true,
   modelValue: false,
-  helpText: 'Need help?',
+  helpText: `${defaultMessages.links.needHelp}`,
   helpLink: 'https://on.cypress.io',
   class: undefined,
   variant: undefined,

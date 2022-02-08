@@ -1,11 +1,13 @@
-import { arg, booleanArg, enumType, idArg, mutationType, nonNull, stringArg } from 'nexus'
+import { arg, booleanArg, enumType, idArg, mutationType, nonNull, stringArg, list } from 'nexus'
 import { Wizard } from './gql-Wizard'
 import { CodeGenTypeEnum } from '../enumTypes/gql-CodeGenTypeEnum'
 import { TestingTypeEnum } from '../enumTypes/gql-WizardEnums'
 import { FileDetailsInput } from '../inputTypes/gql-FileDetailsInput'
 import { WizardUpdateInput } from '../inputTypes/gql-WizardUpdateInput'
 import { CurrentProject } from './gql-CurrentProject'
-import { Query, ScaffoldedFile } from '.'
+import { GenerateSpecResponse } from './gql-GenerateSpecResponse'
+import { Query } from './gql-Query'
+import { ScaffoldedFile } from './gql-ScaffoldedFile'
 
 export const mutation = mutationType({
   definition (t) {
@@ -189,14 +191,15 @@ export const mutation = mutationType({
     })
 
     t.field('generateSpecFromSource', {
-      type: ScaffoldedFile,
+      type: GenerateSpecResponse,
       description: 'Generate spec from source',
       args: {
         codeGenCandidate: nonNull(stringArg()),
         type: nonNull(CodeGenTypeEnum),
+        erroredCodegenCandidate: stringArg(),
       },
-      resolve: async (_, args, ctx) => {
-        return ctx.actions.project.codeGenSpec(args.codeGenCandidate, args.type)
+      resolve: (_, args, ctx) => {
+        return ctx.actions.project.codeGenSpec(args.codeGenCandidate, args.type, args.erroredCodegenCandidate)
       },
     })
 
@@ -445,11 +448,17 @@ export const mutation = mutationType({
       type: Query,
       args: {
         skip: booleanArg(),
+        before: list(nonNull(stringArg({
+          description: 'specs to move - current name',
+        }))),
+        after: list(nonNull(stringArg({
+          description: 'specs to move - current name',
+        }))),
       },
-      resolve: async (_, { skip }, ctx) => {
-        if (!skip) {
+      resolve: async (_, { skip, before, after }, ctx) => {
+        if (!skip && before && after) {
           try {
-            await ctx.actions.migration.renameSpecFiles()
+            await ctx.actions.migration.renameSpecFiles(before, after)
           } catch (error) {
             const e = error as Error
 
@@ -565,6 +574,21 @@ export const mutation = mutationType({
       type: 'Boolean',
       resolve: async (source, args, ctx) => {
         await ctx.actions.browser.closeBrowser()
+
+        return true
+      },
+    })
+
+    t.field('switchTestingTypeAndRelaunch', {
+      description: 'Switch Testing type and relaunch browser',
+      type: 'Boolean',
+      args: {
+        testingType: nonNull(arg({ type: TestingTypeEnum })),
+      },
+      resolve: async (source, args, ctx) => {
+        ctx.project.setRelaunchBrowser(true)
+        ctx.actions.project.setCurrentTestingType(args.testingType)
+        await ctx.actions.project.reconfigureProject()
 
         return true
       },

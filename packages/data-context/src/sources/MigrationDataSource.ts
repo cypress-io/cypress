@@ -1,5 +1,4 @@
 import { TestingType, MIGRATION_STEPS } from '@packages/types'
-import Debug from 'debug'
 import type chokidar from 'chokidar'
 import path from 'path'
 import type { DataContext } from '..'
@@ -7,56 +6,65 @@ import {
   createConfigString,
   initComponentTestingMigration,
   ComponentTestingMigrationStatus,
-  getSpecs,
-  getDefaultLegacySupportFile,
-  RelativeSpecWithTestingType,
+  tryGetDefaultLegacyPluginsFile,
   supportFilesForMigration,
   OldCypressConfig,
-  hasComponentSpecFile,
-} from '../util/migration'
-import {
-  formatMigrationFile,
-  FilePart,
-  regexps,
-  NonSpecFileError,
-} from '../util/migrationFormat'
-import {
+  hasSpecFile,
+  getSpecs,
+  applyMigrationTransform,
   getStepsForMigration,
   shouldShowRenameSupport,
   getIntegrationFolder,
+  getPluginsFile,
   isDefaultTestFiles,
-  getComponentTestFiles,
+  getComponentTestFilesGlobs,
   getComponentFolder,
-} from './migration/shouldShowSteps'
+} from './migration'
 
-const debug = Debug('cypress:data-context:MigrationDataSource')
+import type { FilePart } from './migration/format'
 
-interface MigrationFile {
+export interface MigrationFile {
   testingType: TestingType
-  relative: string
-  parts: FilePart[]
-}
-
-export interface FilesForMigrationUI {
-  before: MigrationFile[]
-  after: MigrationFile[]
+  before: {
+    relative: string
+    parts: FilePart[]
+  }
+  after: {
+    relative: string
+    parts: FilePart[]
+  }
 }
 
 type MIGRATION_STEP = typeof MIGRATION_STEPS[number]
+
+const flags = {
+  hasCustomIntegrationFolder: false,
+  hasCustomIntegrationTestFiles: false,
+
+  hasCustomComponentFolder: false,
+  hasCustomComponentTestFiles: false,
+
+  hasCustomSupportFile: false,
+  hasComponentTesting: true,
+  hasE2ESpec: true,
+  hasPluginsFile: true,
+} as const
 
 export class MigrationDataSource {
   private _config: OldCypressConfig | null = null
   private _step: MIGRATION_STEP = 'renameAuto'
   filteredSteps: MIGRATION_STEP[] = MIGRATION_STEPS.filter(() => true)
 
-  hasCustomIntegrationFolder: boolean = false
-  hasCustomIntegrationTestFiles: boolean = false
+  hasCustomIntegrationFolder: boolean = flags.hasCustomIntegrationFolder
+  hasCustomIntegrationTestFiles: boolean = flags.hasCustomIntegrationTestFiles
 
-  hasCustomComponentFolder: boolean = false
-  hasCustomComponentTestFiles: boolean = false
+  hasCustomComponentFolder: boolean = flags.hasCustomComponentFolder
+  hasCustomComponentTestFiles: boolean = flags.hasCustomComponentTestFiles
 
-  hasCustomSupportFile = false
-  hasComponentTesting: boolean = true
+  hasCustomSupportFile: boolean = flags.hasCustomSupportFile
+  hasComponentTesting: boolean = flags.hasComponentTesting
+  hasE2ESpec: boolean = flags.hasE2ESpec
+  hasPluginsFile: boolean = flags.hasPluginsFile
 
   private componentTestingMigrationWatcher?: chokidar.FSWatcher
   componentTestingMigrationStatus?: ComponentTestingMigrationStatus
@@ -64,6 +72,9 @@ export class MigrationDataSource {
   constructor (private ctx: DataContext) { }
 
   async initialize () {
+    // for testing mainly, we want to ensure the flags are reset each test
+    this.resetFlags()
+
     if (!this.ctx.currentProject) {
       throw Error('cannot do migration without currentProject!')
     }
@@ -82,27 +93,10 @@ export class MigrationDataSource {
     this.setStep(this.filteredSteps[0])
   }
 
-  async getSpecsRelativeToFolder () {
-    if (!this.ctx.currentProject) {
-      throw Error('cannot get specs without a project path')
+  private resetFlags () {
+    for (const [k, v] of Object.entries(flags)) {
+      this[k as keyof typeof flags] = v
     }
-
-    const compFolder = await this.componentFolder()
-    const intFolder = await this.integrationFolder()
-
-    const specs = await getSpecs(this.ctx.currentProject, compFolder || null, intFolder || null)
-
-    debug('looked in %s and %s and found %o', compFolder, intFolder, specs)
-
-    return specs
-  }
-
-  async getDefaultLegacySupportFile (): Promise<string> {
-    if (!this.ctx.currentProject) {
-      throw Error(`Need this.ctx.projectRoot!`)
-    }
-
-    return getDefaultLegacySupportFile(this.ctx.currentProject)
   }
 
   async getComponentTestingMigrationStatus () {
@@ -135,7 +129,7 @@ export class MigrationDataSource {
       const { status, watcher } = await initComponentTestingMigration(
         this.ctx.currentProject,
         componentFolder,
-        getComponentTestFiles(config),
+        getComponentTestFilesGlobs(config),
         onFileMoved,
       )
 
@@ -144,16 +138,20 @@ export class MigrationDataSource {
     }
 
     if (!this.componentTestingMigrationStatus) {
-      throw Error(`Status should have been assigned by the watcher. Somethign is wrong`)
+      throw Error(`Status should have been assigned by the watcher. Something is wrong`)
     }
 
     return this.componentTestingMigrationStatus
   }
 
-  async supportFilesForMigrationGuide (): Promise<FilesForMigrationUI | null> {
+  async supportFilesForMigrationGuide (): Promise<MigrationFile | null> {
+    if (!this.ctx.currentProject) {
+      throw Error('Need this.ctx.currentProject')
+    }
+
     const config = await this.parseCypressConfig()
 
-    if (!shouldShowRenameSupport(config)) {
+    if (!await shouldShowRenameSupport(this.ctx.currentProject, config)) {
       return null
     }
 
@@ -161,42 +159,34 @@ export class MigrationDataSource {
       throw Error(`Need this.ctx.projectRoot!`)
     }
 
-    return supportFilesForMigration(this.ctx.currentProject)
+    try {
+      const supportFiles = await supportFilesForMigration(this.ctx.currentProject)
+
+      return supportFiles
+    } catch {
+      return null
+    }
   }
 
-  async getSpecsForMigrationGuide (): Promise<FilesForMigrationUI> {
-    const specs = await this.getSpecsRelativeToFolder()
-
-    const processSpecs = (regexp: 'beforeRegexp' | 'afterRegexp') => {
-      return (acc: MigrationFile[], x: RelativeSpecWithTestingType) => {
-        try {
-          return acc.concat({
-            testingType: x.testingType,
-            relative: x.relative,
-            parts: formatMigrationFile(x.relative, new RegExp(regexps[x.testingType][regexp])),
-          })
-        } catch (e) {
-          if (e instanceof NonSpecFileError) {
-            // it's possible they have a non spec file in their cypress/integration directory,
-            // if that happens, we just skip that file and carry on.
-            return acc
-          }
-
-          throw e
-        }
-      }
+  async getSpecsForMigrationGuide (): Promise<MigrationFile[]> {
+    if (!this.ctx.currentProject) {
+      throw Error(`Need this.ctx.projectRoot!`)
     }
 
-    const result: FilesForMigrationUI = {
-      before: specs.before.reduce(processSpecs('beforeRegexp'), []),
-      after: specs.after.reduce(processSpecs('afterRegexp'), []),
+    const config = await this.parseCypressConfig()
+
+    const specs = await getSpecs(this.ctx.currentProject, config)
+
+    const canBeAutomaticallyMigrated: MigrationFile[] = specs.integration.map(applyMigrationTransform)
+
+    const defaultComponentPattern = isDefaultTestFiles(await this.parseCypressConfig(), 'component')
+
+    // Can only migration component specs if they use the default testFiles pattern.
+    if (defaultComponentPattern) {
+      canBeAutomaticallyMigrated.push(...specs.component.map(applyMigrationTransform))
     }
 
-    if (result.before.length !== result.after.length) {
-      throw Error(`Before and after should have same lengths, got ${result.before.length} and ${result.after.length}`)
-    }
-
-    return result
+    return canBeAutomaticallyMigrated
   }
 
   async getConfig () {
@@ -206,9 +196,21 @@ export class MigrationDataSource {
   }
 
   async createConfigString () {
+    if (!this.ctx.currentProject) {
+      throw Error('Need currentProject!')
+    }
+
+    const { hasTypescript } = this.ctx.lifecycleManager.metaState
+
     const config = await this.parseCypressConfig()
 
-    return createConfigString(config)
+    return createConfigString(config, {
+      hasComponentTesting: this.hasComponentTesting,
+      hasE2ESpec: this.hasE2ESpec,
+      hasPluginsFile: this.hasPluginsFile,
+      projectRoot: this.ctx.currentProject,
+      hasTypescript,
+    })
   }
 
   async integrationFolder () {
@@ -253,18 +255,40 @@ export class MigrationDataSource {
 
     this.hasCustomComponentFolder = componentFolder !== 'cypress/component'
 
-    const componentTestFiles = getComponentTestFiles(config)
+    const componentTestFiles = getComponentTestFilesGlobs(config)
 
     this.hasCustomComponentTestFiles = !isDefaultTestFiles(config, 'component')
 
     if (componentFolder === false) {
       this.hasComponentTesting = false
     } else {
-      this.hasComponentTesting = await hasComponentSpecFile(
+      this.hasComponentTesting = await hasSpecFile(
         this.ctx.currentProject,
         componentFolder,
         componentTestFiles,
       )
+    }
+
+    const integrationFolder = getIntegrationFolder(config)
+
+    if (integrationFolder === false) {
+      this.hasE2ESpec = false
+    } else {
+      this.hasE2ESpec = await hasSpecFile(
+        this.ctx.currentProject,
+        integrationFolder,
+        componentTestFiles,
+      )
+    }
+
+    const pluginsFileMissing = (
+      (config.e2e?.pluginsFile ?? undefined) === undefined &&
+      config.pluginsFile === undefined &&
+      !await tryGetDefaultLegacyPluginsFile(this.ctx.currentProject)
+    )
+
+    if (getPluginsFile(config) === false || pluginsFileMissing) {
+      this.hasPluginsFile = false
     }
   }
 

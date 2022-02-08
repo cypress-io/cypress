@@ -34,6 +34,7 @@ export const FRONTEND_FRAMEWORKS = [
     name: 'Create React App',
     supportedBundlers: ['webpack'],
     package: '@cypress/react',
+    defaultPackagePath: '@cypress/react/plugins/react-scripts',
     glob: '*.{jsx,tsx}',
     deps: ['react-scripts', 'react', 'react-dom'],
     category: FRONTEND_FRAMEWORK_CATEGORIES[0],
@@ -45,6 +46,7 @@ export const FRONTEND_FRAMEWORKS = [
     name: 'Vue CLI',
     supportedBundlers: ['webpack'],
     package: '@cypress/vue',
+    defaultPackagePath: null,
     glob: '*.vue',
     deps: ['@vue/cli-service', 'vue'],
     category: FRONTEND_FRAMEWORK_CATEGORIES[1],
@@ -56,6 +58,7 @@ export const FRONTEND_FRAMEWORKS = [
     name: 'React.js',
     supportedBundlers: ['webpack', 'vite'],
     package: '@cypress/react',
+    defaultPackagePath: null,
     glob: '*.{jsx,tsx}',
     deps: ['react', 'react-dom'],
     category: FRONTEND_FRAMEWORK_CATEGORIES[0],
@@ -67,6 +70,7 @@ export const FRONTEND_FRAMEWORKS = [
     name: 'Vue.js',
     supportedBundlers: ['webpack', 'vite'],
     package: '@cypress/vue',
+    defaultPackagePath: null,
     glob: '*.vue',
     deps: ['vue'],
     category: FRONTEND_FRAMEWORK_CATEGORIES[1],
@@ -78,6 +82,7 @@ export const FRONTEND_FRAMEWORKS = [
     name: 'Next.js',
     supportedBundlers: ['webpack'],
     package: '@cypress/react',
+    defaultPackagePath: '@cypress/react/plugins/next',
     glob: '*.{jsx,tsx}',
     deps: ['next', 'react', 'react-dom'],
     category: FRONTEND_FRAMEWORK_CATEGORIES[0],
@@ -89,6 +94,7 @@ export const FRONTEND_FRAMEWORKS = [
     name: 'Nuxt.js',
     supportedBundlers: ['webpack'],
     package: '@cypress/vue',
+    defaultPackagePath: null,
     glob: '*.vue',
     deps: ['nuxt'],
     category: FRONTEND_FRAMEWORK_CATEGORIES[1],
@@ -126,3 +132,5 @@ export const PACKAGES_DESCRIPTIONS: Record<AllPackages, string> = {
   '@storybook/testing-react': 'Testing utilities that allow you to reuse your stories in your unit tests',
   '@storybook/testing-vue3': 'Testing utilities that allow you to reuse your stories in your unit tests',
 } as const
+
+export const PACKAGE_MANAGERS = ['npm', 'yarn', 'pnpm'] as const
