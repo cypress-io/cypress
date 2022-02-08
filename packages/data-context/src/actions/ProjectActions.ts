@@ -55,7 +55,7 @@ export class ProjectActions {
     this.ctx.update((d) => {
       d.currentProject = null
       d.currentTestingType = null
-      d.forceReconfigureProject = false
+      d.forceReconfigureProject = null
       d.scaffoldedFiles = null
       d.baseError = null
       d.warnings = []
@@ -471,8 +471,14 @@ export class ProjectActions {
 
   async reconfigureProject (forceReconfigureProject?: boolean) {
     // Initialize active project close first the current project
-    if (forceReconfigureProject) {
-      this.ctx.coreData.forceReconfigureProject = true
+    if (this.ctx.coreData.currentTestingType) {
+      const currentTestingType = this.ctx.coreData.currentTestingType
+
+      this.ctx.update((coreData) => {
+        coreData.forceReconfigureProject = {
+          [currentTestingType]: Boolean(forceReconfigureProject),
+        }
+      })
     }
 
     await this.ctx.actions.browser.closeBrowser()

@@ -370,9 +370,6 @@ type CurrentProject implements Node & ProjectLike {
   """
   errorLoadingNodeEvents: BaseError
 
-  """When a user wants to reconfigure the current project"""
-  forceReconfigureProject: Boolean
-
   """Whether the project has Typescript"""
   hasTypescript: Boolean
 

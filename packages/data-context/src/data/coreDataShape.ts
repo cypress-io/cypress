@@ -84,6 +84,11 @@ export interface BaseErrorDataShape {
   stack?: string
 }
 
+export interface ForceReconfigureProjectDataShape {
+  e2e?: boolean | null
+  component?: boolean | null
+}
+
 export interface CoreDataShape {
   cliBrowser: string | null
   cliTestingType: string | null
@@ -112,7 +117,7 @@ export interface CoreDataShape {
   scaffoldedFiles: NexusGenObjects['ScaffoldedFile'][] | null
   warnings: Warning[]
   packageManager: typeof PACKAGE_MANAGERS[number]
-  forceReconfigureProject: boolean
+  forceReconfigureProject: ForceReconfigureProjectDataShape | null
 }
 
 /**
@@ -166,6 +171,6 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
     },
     scaffoldedFiles: null,
     packageManager: 'npm',
-    forceReconfigureProject: false,
+    forceReconfigureProject: null,
   }
 }

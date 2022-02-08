@@ -427,7 +427,9 @@ describe('Launchpad: Setup Project', () => {
       it('can re-configure config after CT has been set up', () => {
         cy.openProject('pristine-with-ct-testing')
         cy.withCtx((ctx) => {
-          ctx.coreData.forceReconfigureProject = true
+          ctx.coreData.forceReconfigureProject = {
+            component: true,
+          }
         })
 
         cy.visitLaunchpad()
@@ -442,7 +444,9 @@ describe('Launchpad: Setup Project', () => {
       it('can re-configure config after e2e has been set up', () => {
         cy.openProject('pristine-with-e2e-testing')
         cy.withCtx((ctx) => {
-          ctx.coreData.forceReconfigureProject = true
+          ctx.coreData.forceReconfigureProject = {
+            e2e: true,
+          }
         })
 
         cy.visitLaunchpad()

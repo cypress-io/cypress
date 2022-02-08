@@ -63,11 +63,11 @@
           />
         </template>
         <Wizard
-          v-else-if="currentProject.currentTestingType === 'component' && (!currentProject.isCTConfigured || currentProject.forceReconfigureProject)"
+          v-else-if="currentProject.currentTestingType === 'component' && !currentProject.isCTConfigured"
           :gql="query.data.value"
         />
         <ScaffoldLanguageSelect
-          v-else-if="currentProject.currentTestingType === 'e2e' && (!currentProject.isE2EConfigured || currentProject.forceReconfigureProject)"
+          v-else-if="currentProject.currentTestingType === 'e2e' && !currentProject.isE2EConfigured"
           :gql="query.data.value"
         />
         <OpenBrowser v-else />
@@ -113,7 +113,6 @@ fragment MainLaunchpadQueryData on Query {
     id
     isCTConfigured
     isE2EConfigured
-    forceReconfigureProject
     isLoadingConfigFile
     isLoadingNodeEvents
     needsLegacyConfigMigration

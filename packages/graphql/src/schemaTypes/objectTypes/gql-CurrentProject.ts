@@ -88,6 +88,12 @@ export const CurrentProject = objectType({
     t.boolean('isCTConfigured', {
       description: 'Whether the user configured this project to use Component Testing',
       resolve: (source, args, ctx) => {
+        // If the forceReconfigureProject for component is set, we want to notify
+        // the client side that the wizard has to start from the beginning
+        if (ctx.coreData.forceReconfigureProject?.component) {
+          return false
+        }
+
         return ctx.lifecycleManager.isTestingTypeConfigured('component')
       },
     })
@@ -95,14 +101,13 @@ export const CurrentProject = objectType({
     t.boolean('isE2EConfigured', {
       description: 'Whether the user configured this project to use e2e Testing',
       resolve: (source, args, ctx) => {
-        return ctx.lifecycleManager.isTestingTypeConfigured('e2e')
-      },
-    })
+        // If the forceReconfigureProject for e2e is set, we want to notify
+        // the client side that the wizard has to start from the beginning
+        if (ctx.coreData.forceReconfigureProject?.e2e) {
+          return false
+        }
 
-    t.boolean('forceReconfigureProject', {
-      description: 'When a user wants to reconfigure the current project',
-      resolve: (source, args, ctx) => {
-        return ctx.coreData.forceReconfigureProject
+        return ctx.lifecycleManager.isTestingTypeConfigured('e2e')
       },
     })
 
