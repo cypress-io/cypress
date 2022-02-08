@@ -670,6 +670,8 @@ describe('Launchpad: Setup Project', () => {
 
         cy.findByRole('button', { name: 'Bundler(Dev Server) Pick a bundler' }).click()
         cy.findByRole('option', { name: 'Webpack' }).click()
+
+        cy.findByRole('button', { name: 'TypeScript' }).click()
         cy.findByRole('button', { name: 'Next Step' }).should('not.have.disabled')
 
         cy.findByRole('button', { name: 'Front-end Framework React.js' }).click()
