@@ -14,7 +14,6 @@ import debugLib from 'debug'
 
 import { graphqlSchema } from './schema'
 import { execute, parse } from 'graphql'
-import { plugin } from 'nexus'
 
 const debugOperation = debugLib(`cypress-verbose:graphql:operation`)
 
@@ -117,7 +116,7 @@ export const graphQLHTTP = graphqlHTTP((req, res, params) => {
       const date = new Date()
       const prefix = `${args.operationName ?? '(anonymous)'}`
 
-      return plugin.completeValue(execute(args), (val) => {
+      return Promise.resolve(execute(args)).then((val) => {
         debugOperation(`${prefix} completed in ${new Date().valueOf() - date.valueOf()} with ${val.errors?.length ?? 0} errors`)
 
         return val
