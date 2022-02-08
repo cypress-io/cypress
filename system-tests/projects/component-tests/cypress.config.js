@@ -5,10 +5,10 @@ module.exports = {
   },
   component: {
     specPattern: 'cypress/component-tests/**/*',
-    devServer (cypressConfig, devServerConfig) {
+    devServer (cypressDevServerConfig, devServerConfig) {
       const { startDevServer } = require('@cypress/webpack-dev-server')
 
-      return startDevServer({ options: cypressConfig, ...devServerConfig })
+      return startDevServer({ options: cypressDevServerConfig, ...devServerConfig })
     },
     devServerConfig: {
       webpackConfig: {

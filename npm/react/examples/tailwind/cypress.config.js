@@ -1,3 +1,5 @@
+const { devServer } = require('@cypress/react/plugins/react-scripts')
+
 module.exports = {
   'video': false,
   'fixturesFolder': false,
@@ -9,6 +11,6 @@ module.exports = {
   component: {
     // load file devServer that comes with this plugin
     // https://github.com/bahmutov/cypress-react-unit-test#install
-    devServer: require('@cypress/react/plugins/react-scripts'),
+    devServer,
   },
 }
