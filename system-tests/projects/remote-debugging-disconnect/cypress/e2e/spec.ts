@@ -3,8 +3,8 @@ describe('e2e remote debugging disconnect', () => {
     // 1 probing connection and 1 real connection should have been made during startup
     cy.task('get:stats')
     .should('include', {
-      totalConnectionCount: 2,
-      currentConnectionCount: 1,
+      totalConnectionCount: 4,
+      currentConnectionCount: 2,
     })
 
     // now, kill all CDP sockets
@@ -19,10 +19,11 @@ describe('e2e remote debugging disconnect', () => {
     })
     .should('have.keys', ['protocolVersion', 'product', 'revision', 'userAgent', 'jsVersion'])
 
+    // TODO: We're only reconnecting the page client. See if we can find a way to reconnect the browser client
     // evidence of a reconnection:
     cy.task('get:stats')
     .should('include', {
-      totalConnectionCount: 3,
+      totalConnectionCount: 6,
       currentConnectionCount: 1,
     })
   })

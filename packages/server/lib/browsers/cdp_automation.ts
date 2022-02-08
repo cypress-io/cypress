@@ -161,7 +161,8 @@ const normalizeResourceType = (resourceType: string | undefined): ResourceType =
   return ffToStandardResourceTypeMap[resourceType] || 'other'
 }
 
-type SendDebuggerCommand = (message: string, data?: any) => Bluebird<any>
+type SendDebuggerCommand = (message: string, data?: any) => Promise<any>
+type SendCloseCommand = () => Promise<any>
 type OnFn = (eventName: string, cb: Function) => void
 
 // the intersection of what's valid in CDP and what's valid in FFCDP
@@ -175,14 +176,21 @@ const ffToStandardResourceTypeMap: { [ff: string]: ResourceType } = {
 }
 
 export class CdpAutomation {
-  constructor (private sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn, private automation: Automation) {
+  private constructor (private sendDebuggerCommandFn: SendDebuggerCommand, private onFn: OnFn, private sendCloseCommandFn: SendCloseCommand, private automation: Automation) {
     onFn('Network.requestWillBeSent', this.onNetworkRequestWillBeSent)
     onFn('Network.responseReceived', this.onResponseReceived)
-    sendDebuggerCommandFn('Network.enable', {
+  }
+
+  static async create (sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn, sendCloseCommandFn: SendCloseCommand, automation: Automation): Promise<CdpAutomation> {
+    const cdpAutomation = new CdpAutomation(sendDebuggerCommandFn, onFn, sendCloseCommandFn, automation)
+
+    await sendDebuggerCommandFn('Network.enable', {
       maxTotalBufferSize: 0,
       maxResourceBufferSize: 0,
       maxPostDataSize: 0,
     })
+
+    return cdpAutomation
   }
 
   private onNetworkRequestWillBeSent = (params: Protocol.Network.RequestWillBeSentEvent) => {
@@ -230,7 +238,7 @@ export class CdpAutomation {
     })
   }
 
-  private getCookiesByUrl = (url): Bluebird<CyCookie[]> => {
+  private getCookiesByUrl = (url): Promise<CyCookie[]> => {
     return this.sendDebuggerCommandFn('Network.getCookies', {
       urls: [url],
     })
@@ -242,7 +250,7 @@ export class CdpAutomation {
     })
   }
 
-  private getCookie = (filter: CyCookieFilter): Bluebird<CyCookie | null> => {
+  private getCookie = (filter: CyCookieFilter): Promise<CyCookie | null> => {
     return this.getAllCookies(filter)
     .then((cookies) => {
       return _.get(cookies, 0, null)
@@ -285,15 +293,15 @@ export class CdpAutomation {
 
       case 'clear:cookie':
         return this.getCookie(data)
-        // tap, so we can resolve with the value of the removed cookie
+        // resolve with the value of the removed cookie
         // also, getting the cookie via CDP first will ensure that we send a cookie `domain` to CDP
         // that matches the cookie domain that is really stored
-        .tap((cookieToBeCleared) => {
+        .then((cookieToBeCleared) => {
           if (!cookieToBeCleared) {
-            return
+            return cookieToBeCleared
           }
 
-          return this.sendDebuggerCommandFn('Network.deleteCookies', _.pick(cookieToBeCleared, 'name', 'domain'))
+          return this.sendDebuggerCommandFn('Network.deleteCookies', _.pick(cookieToBeCleared, 'name', 'domain')).then(() => cookieToBeCleared)
         })
 
       case 'clear:cookies':
@@ -322,6 +330,13 @@ export class CdpAutomation {
         .then(({ data }) => {
           return `data:image/png;base64,${data}`
         })
+      case 'reset:browser:state':
+        return Promise.all([
+          this.sendDebuggerCommandFn('Storage.clearDataForOrigin', { origin: '*', storageTypes: 'all' }),
+          this.sendDebuggerCommandFn('Network.clearBrowserCache'),
+        ])
+      case 'close:browser:tabs':
+        return this.sendCloseCommandFn()
       case 'focus:browser:window':
         return this.sendDebuggerCommandFn('Page.bringToFront')
       default:
