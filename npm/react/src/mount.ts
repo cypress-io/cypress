@@ -102,6 +102,7 @@ const _mount = (type: 'mount' | 'rerender', jsx: React.ReactNode, options: Mount
         name: type,
         type: 'parent',
         message: [message],
+        // @ts-ignore
         $el: (el.children.item(0) as unknown) as JQuery<HTMLElement>,
         consoleProps: () => {
           return {
@@ -150,6 +151,7 @@ const _mount = (type: 'mount' | 'rerender', jsx: React.ReactNode, options: Mount
   })
   ```
  */
+// @ts-ignore
 export const unmount = (options = { log: true }): globalThis.Cypress.Chainable<JQuery<HTMLElement>> => _unmount(options)
 
 const _unmount = (options: { boundComponentMessage?: string, log: boolean }) => {
@@ -264,6 +266,7 @@ export interface MountReturn {
    * Removes the mounted component.
    * @see `unmount`
    */
+  // @ts-ignore
   unmount: () => globalThis.Cypress.Chainable<JQuery<HTMLElement>>
 }
 

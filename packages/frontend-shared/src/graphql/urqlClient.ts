@@ -1,10 +1,9 @@
+import type { Exchange, Client } from '@urql/core'
 import {
-  Client,
   createClient,
   dedupExchange,
   errorExchange,
   fetchExchange,
-  Exchange,
   ssrExchange,
 } from '@urql/core'
 import { devtoolsExchange } from '@urql/devtools'
