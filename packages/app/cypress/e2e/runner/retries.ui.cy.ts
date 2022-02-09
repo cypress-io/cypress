@@ -1,28 +1,9 @@
 import { loadSpec } from './support/spec-loader'
 
-const getAttemptTag = (sel) => {
+// Returns wrapped attempt tag found within runnable containing selector
+const getAttemptTag = (sel: string) => {
   return cy.get(`.test.runnable:contains(${sel}) .attempt-tag`)
 }
-
-const shouldBeOpen = ($el) => cy.wrap($el).parentsUntil('.collapsible').last().parent().should('have.class', 'is-open')
-
-const attemptTag = (sel) => `.attempt-tag:contains(Attempt ${sel})`
-
-const containText = (text) => {
-  return (($el) => {
-    expect($el[0]).property('innerText').contain(text)
-  })
-}
-
-// const cyReject = (fn) => {
-//   return () => {
-//     try {
-//       fn()
-//     } catch (e) {
-//       cy.state('reject')(e)
-//     }
-//   }
-// }
 
 describe('retries ui', {
   viewportWidth: 1024,
@@ -73,37 +54,48 @@ describe('retries ui', {
     cy.percySnapshot()
   })
 
-  // TODO: fix this one
-  // it.only('opens attempt on each attempt failure for the screenshot, and closes after test passes', () => {
-  //   let stub
+  // TODO: determine another way to cover this
+  it.skip('opens attempt on each attempt failure for the screenshot, and closes after test passes', () => {
+    let stub
+    const cyReject = (fn) => {
+      return () => {
+        try {
+          fn()
+        } catch (e) {
+          // @ts-ignore
+          cy.state('reject')(e)
+        }
+      }
+    }
 
-  //   loadSpec({
-  //     fileName: 'opens-attempt-for-screenshot.retries.cy.js',
-  //     passCount: 3,
-  //     failCount: 0,
-  //     setup: () => {
-  //       let attempt = 0
+    loadSpec({
+      fileName: 'opens-attempt-for-screenshot.retries.cy.js',
+      passCount: 3,
+      failCount: 0,
+      setup: () => {
+        let attempt = 0
 
-  //       stub = cy.stub().callsFake(cyReject(() => {
-  //         attempt++
-  //         expect(cy.$$('.attempt-item > .is-open').length).to.equal(attempt)
-  //       }))
+        stub = cy.stub().callsFake(cyReject(() => {
+          attempt++
+          expect(cy.$$('.attempt-item > .is-open').length).to.equal(attempt)
+        }))
 
-  //       debugger
-  //       cy.window().then((win) => {
-  //         debugger
-  //         win.Cypress.Screenshot.onAfterScreenshot = stub
-  //       })
-  //     },
-  //   })
+        cy.window().then((win) => {
+          // @ts-ignore
+          win.Cypress.Screenshot.onAfterScreenshot = stub
+        })
+      },
+    })
 
-  //   cy.get('.test.runnable:contains(t2)').then(($el) => {
-  //     expect($el).not.class('is-open')
-  //     expect(stub).callCount(3)
-  //   })
-  // })
+    cy.get('.test.runnable:contains(t2)').then(($el) => {
+      expect($el).not.class('is-open')
+      expect(stub).callCount(3)
+    })
+  })
 
   it('includes routes, spies, hooks, and commands in attempt', () => {
+    const attemptTag = (sel) => `.attempt-tag:contains(Attempt ${sel})`
+
     loadSpec({
       fileName: 'includes-all-in-attempt.retries.cy.js',
       passCount: 1,
@@ -228,6 +220,8 @@ describe('retries ui', {
 
   describe('afterEach', () => {
     it('afterEach hooks retry on failure, but only run higher-level afterEach hooks', () => {
+      const shouldBeOpen = ($el) => cy.wrap($el).parentsUntil('.collapsible').last().parent().should('have.class', 'is-open')
+
       loadSpec({
         fileName: 'after-each-failure.retries.cy.js',
         passCount: 1,
@@ -307,11 +301,24 @@ describe('retries ui', {
 
   describe('can configure retries', () => {
     after(() => {
+      // @ts-ignore
       window.top.__cySkipValidateConfig = false
     })
 
-    const haveCorrectError = ($el) => cy.wrap($el).last().parentsUntil('.collapsible').last().parent().find('.runnable-err').should('contain', 'Unspecified AssertionError')
+    const haveCorrectError = ($el) => {
+      return (
+        cy.wrap($el).last().parentsUntil('.collapsible').last().parent()
+        .find('.runnable-err').should('contain', 'Unspecified AssertionError')
+      )
+    }
 
+    const containText = (text) => {
+      return (($el) => {
+        expect($el[0]).property('innerText').contain(text)
+      })
+    }
+
+    // @ts-ignore
     window.top.__cySkipValidateConfig = true
 
     it('via config value', () => {
@@ -337,7 +344,8 @@ describe('retries ui', {
         failCount: 1,
       })
 
-      cy.get('.runnable-err').should(containText(`it('tries to set mocha retries', { retries: 2 }, () => `))
+      cy.get('.runnable-err')
+      .should(containText(`it('tries to set mocha retries', { retries: 2 }, () => `))
 
       cy.percySnapshot()
     })
@@ -349,7 +357,8 @@ describe('retries ui', {
         failCount: 1,
       })
 
-      cy.get('.runnable-err').should(containText(`describe('suite 1', { retries: 0 }, () => `))
+      cy.get('.runnable-err')
+      .should(containText(`describe('suite 1', { retries: 0 }, () => `))
 
       cy.percySnapshot()
     })
