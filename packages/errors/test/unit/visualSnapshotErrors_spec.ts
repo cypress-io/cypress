@@ -192,10 +192,8 @@ const testVisualErrors = (whichError: CypressErrorType | '*', errorsToTest: {[K 
 
   // otherwise test all the errors
   before(() => {
-    // prune out all existing snapshot html in case
-    // errors were removed and we have stale snapshots
+    // prune out all existing local staging folders
     return Promise.all([
-      isCi ? fse.remove(snapshotHtmlFolder) : null,
       fse.remove(snapshotMarkdownFolder),
       fse.remove(snapshotHtmlLocalFolder),
       fse.remove(snapshotImagesFolder),
@@ -218,7 +216,10 @@ const testVisualErrors = (whichError: CypressErrorType | '*', errorsToTest: {[K 
       //   return fse.remove(pathToHtml)
       // }))
 
-      expect(uniqErrors).to.have.all.members(_.keys(errors.AllCypressErrors))
+      const errorKeys = _.keys(errors.AllCypressErrors)
+
+      expect(uniqErrors).to.have.all.members(errorKeys)
+      expect(errorKeys).to.have.all.members(uniqErrors)
     }
   })
 
