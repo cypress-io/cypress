@@ -185,6 +185,18 @@ describe('src/cy/commands/actions/selectFile', () => {
       })
     })
 
+    it('uses the AUT\'s File constructor', () => {
+      cy.window().then(($autWindow) => {
+        cy.get('#basic').selectFile('@foo', { action: 'select' }).then((input) => {
+          expect(input[0].files[0]).to.be.instanceOf($autWindow.File)
+        })
+
+        cy.get('#basic').selectFile('@foo', { action: 'drag-drop' }).then((input) => {
+          expect(input[0].files[0]).to.be.instanceOf($autWindow.File)
+        })
+      })
+    })
+
     describe('shorthands', () => {
       const validJsonString = `{
   "foo": 1,
