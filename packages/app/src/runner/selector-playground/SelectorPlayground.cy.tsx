@@ -54,7 +54,7 @@ describe('SelectorPlayground', () => {
     cy.spy(autIframe, 'toggleSelectorHighlight')
     expect(selectorPlaygroundStore.method).to.eq('get')
 
-    cy.get('[aria-label="Selector Methods"]').as('method').click()
+    cy.get('[aria-label="Selector Methods"]').click()
     cy.findByRole('menuitem', { name: 'cy.contains' }).click().then(() => {
       expect(selectorPlaygroundStore.method).to.eq('contains')
       expect(autIframe.toggleSelectorHighlight).to.have.been.called

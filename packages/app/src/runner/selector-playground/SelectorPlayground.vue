@@ -17,7 +17,7 @@
     >
       <Menu #="{ open }">
         <MenuButton
-          aria-label="Selector Methods"
+          :aria-label="t('runner.selectorPlayground.selectorMethodsLabel')"
           class="flex items-center justify-center h-full text-white border border-gray-200 outline-none rounded-l-md w-40px hocus-default border-r-transparent"
           @click.stop
         >

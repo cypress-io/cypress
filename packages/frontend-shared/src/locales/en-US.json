@@ -633,7 +633,8 @@
       "matches": "No Matches | {n} Match | {n} Matches",
       "copyTooltip": "Copied to clipboard",
       "printTooltip": "Printed to console",
-      "invalidSelector": "Invalid"
+      "invalidSelector": "Invalid",
+      "selectorMethodsLabel": "Selector Methods"
     }
   }
 }
