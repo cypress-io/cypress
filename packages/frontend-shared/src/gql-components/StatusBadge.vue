@@ -53,6 +53,7 @@ import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
 import { useI18n } from '@cy/i18n'
 import { gql, useMutation } from '@urql/vue'
 import { TestingTypeSelectionAndReconfigureDocument, TestingTypeEnum } from '../generated/graphql'
+import { computed } from 'vue'
 
 const props = defineProps<{
   status: boolean,
@@ -86,26 +87,20 @@ mutation TestingTypeSelectionAndReconfigure($testingType: TestingTypeEnum!) {
 
 const mutation = useMutation(TestingTypeSelectionAndReconfigureDocument)
 
-type eventName = 'launchBrowser' | 'reconfigure'
+type EventName = 'launchBrowser' | 'reconfigure'
 
-const menuItems: { name: string, event: eventName }[] = [
-  { name: t('setupPage.testingCard.reconfigure'), event: 'reconfigure' },
-]
+const menuItems = computed(() => {
+  const reconfigure = { name: t('setupPage.testingCard.reconfigure'), event: 'reconfigure' }
+  const launchBrowser = { name: t('setupPage.testingCard.launchBrowser'), event: 'launchBrowser' }
 
-if (!props.isRunning) {
-  menuItems.unshift({ name: t('setupPage.testingCard.launchBrowser'), event: 'launchBrowser' })
-}
+  return props.isRunning ? [reconfigure] : [reconfigure, launchBrowser]
+})
 
-const handleMenuClick = (eventName: eventName) => {
-  switch (eventName) {
-    case 'launchBrowser':
-      emit(eventName)
-      break
-    case 'reconfigure':
-      mutation.executeMutation({ testingType: props.testingType })
-      break
-    default:
-      return
+const handleMenuClick = (eventName: EventName) => {
+  if (eventName === 'launchBrowser') {
+    emit(eventName)
+  } else if (eventName === 'reconfigure') {
+    mutation.executeMutation({ testingType: props.testingType })
   }
 }
 
