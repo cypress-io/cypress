@@ -1,5 +1,3 @@
-import './setup'
-
 describe('unexpected errors', { defaultCommandTimeout: 0 }, () => {
   let originalIsSpecialKeyword
   let orignalCyExpect
@@ -15,15 +13,13 @@ describe('unexpected errors', { defaultCommandTimeout: 0 }, () => {
   })
 
   it('Cypress method error', () => {
-    cy.window().then((win) => {
-      win.localStorage.foo = 'foo'
-      window.autWindow.eval(`Cypress.LocalStorage._isSpecialKeyword = () => { debugger; throw new Error('thrown in Cypress-LocalStorage-_isSpecialKeyword') }`)
-      Cypress.LocalStorage.clear()
-    })
+    window.eval('Cypress.LocalStorage._isSpecialKeyword = () => { throw new Error("thrown in Cypress-LocalStorage-_isSpecialKeyword") }')
+
+    Cypress.LocalStorage.clear()
   })
 
   it('internal cy error', () => {
-    window.autWindow.eval(`cy.expect = () => { throw new Error('thrown in cy-expect') }`)
+    window.eval('cy.expect = () => { throw new Error("thrown in cy-expect")}')
 
     cy.wrap({ foo: 'foo' }).should('have.property', 'foo')
   })

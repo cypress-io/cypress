@@ -125,8 +125,6 @@
     "pageTitle": "Specs",
     "newSpecButton": "New Spec",
     "searchPlaceholder": "Search Specs",
-    "matchPlural": "Matches",
-    "matchSingular": "Match",
     "componentSpecsHeader": "Component Specs",
     "e2eSpecsHeader": "E2E Specs",
     "gitStatusHeader": "Git Status",
@@ -216,7 +214,10 @@
       "pasteToUpgradeGlobal": "To upgrade to the latest version, first {0}, then paste the command below into your terminal:",
       "rememberToCloseInsert": "close this app"
     },
-    "upgradeText": "Upgrade"
+    "upgradeText": "Upgrade",
+    "global": {
+      "projects": "Projects"
+    }
   },
   "launchpadErrors": {
     "generic": {
@@ -287,15 +288,19 @@
     "review": "Review the differences between each testing type",
     "codeExample": "Code Example",
     "compareTypes": {
-      "e2eTitle": "End-to-end Tests",
-      "e2eBullet1": "Visit URLs via",
-      "e2eBullet2": "Test flows and functionality across multiple pages.",
-      "e2eBullet3": "Ideal for testing integrated flows in CD workflows.",
-      "componentTitle": "Component Tests",
-      "ctBullet1": "Import components via",
-      "ctBullet2": "Test individual components of a design system in isolation",
-      "ctBullet3": "Ideal for testing isolated flows and components in CI"
-    }
+      "content": {
+        "e2eTitle": "End-to-end Tests",
+        "e2eBullet1": "Visit URLs via",
+        "e2eBullet2": "Test flows and functionality across multiple pages.",
+        "e2eBullet3": "Ideal for testing integrated flows in CD workflows.",
+        "componentTitle": "Component Tests",
+        "ctBullet1": "Import components via",
+        "ctBullet2": "Test individual components of a design system in isolation",
+        "ctBullet3": "Ideal for testing isolated flows and components in CI"
+      },
+      "modalTitle": "Key Differences"
+    },
+    "title": "Welcome to Cypress!"
   },
   "settingsPage": {
     "config": {
