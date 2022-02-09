@@ -231,7 +231,7 @@ describe('App: Index', () => {
         })
 
         cy.startAppServer('e2e')
-        cy.visitApp()
+        cy.__incorrectlyVisitAppWithIntercept()
       })
 
       it('shows No Specs page with specPattern from config', () => {

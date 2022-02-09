@@ -24,7 +24,7 @@ describe('errors ui', {
       })
 
       cy.startAppServer()
-      cy.visitApp()
+      cy.__incorrectlyVisitAppWithIntercept()
 
       cy.contains('[data-cy=spec-item]', 'assertions.cy.js').click()
 

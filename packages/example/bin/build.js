@@ -21,6 +21,13 @@ async function build() {
     fs.copy(join(resolvePkg('cypress-example-kitchensink'), 'cypress'), path.join(EXAMPLE_DIR, 'cypress')),
   ])
   try {
+    await fs.move(path.join(EXAMPLE_DIR, 'cypress', 'integration'), path.join(EXAMPLE_DIR, 'cypress', 'e2e'))
+  } catch (e) {
+    if (e.code !== 'ENOENT') {
+      throw e
+    }
+  }
+  try {
     await fs.move(path.join(EXAMPLE_DIR, 'cypress', 'support', 'index.js'), path.join(EXAMPLE_DIR, 'cypress', 'support', 'e2e.js'))
   } catch (e) {
     if (e.code !== 'ENOENT') {
