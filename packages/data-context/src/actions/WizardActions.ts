@@ -224,6 +224,7 @@ export class WizardActions {
   }
 
   private async scaffoldComponent () {
+    debug('scaffoldComponent')
     const { chosenBundler, chosenFramework, chosenLanguage } = this.ctx.wizard
 
     assert(chosenFramework && chosenLanguage && chosenBundler)
@@ -278,6 +279,7 @@ export class WizardActions {
   }
 
   private async scaffoldConfig (testingType: 'e2e' | 'component'): Promise<NexusGenObjects['ScaffoldedFile']> {
+    debug('scaffoldConfig')
     try {
       await this.ctx.fs.stat(this.ctx.lifecycleManager.configFilePath)
     } catch (e) {
@@ -430,6 +432,7 @@ export class WizardActions {
   private async scaffoldFile (filePath: string, contents: string, description: string): Promise<NexusGenObjects['ScaffoldedFile']> {
     try {
       await this.ctx.fs.stat(filePath)
+      debug('scaffoldFile: file already exists, skipping', filePath)
 
       return {
         status: 'skipped',
@@ -444,7 +447,10 @@ export class WizardActions {
     }
 
     try {
+      debug('scaffoldFile: start %s', filePath)
+      debug('scaffoldFile: with content %S', contents)
       await this.ctx.fs.writeFile(filePath, contents)
+      debug('scaffoldFile: done %s', filePath)
 
       return {
         status: 'valid',
