@@ -12,7 +12,7 @@ describe('s1', {
   it('foo', () => {
     cy.once('test:after:run', () => {
       if (!top.count) {
-        top._getEventManager().reporterBus.emit('runner:restart')
+        top.getEventManager().reporterBus.emit('runner:restart')
       }
 
       top.count++

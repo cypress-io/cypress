@@ -1,5 +1,6 @@
 import type { Socket } from '@packages/socket/lib/browser'
 import type MobX from 'mobx'
+import type { EventManager } from './src/runner/event-manager'
 
 export {}
 
@@ -19,7 +20,7 @@ export {}
 declare global {
   interface Window {
     ws: Socket
-
+    getEventManager: () => EventManager
     UnifiedRunner: {
       /**
        * decode config, which we receive as a base64 string
