@@ -140,14 +140,14 @@ afterEach(() => {
 })
 
 const testVisualError = <K extends CypressErrorType> (errorGeneratorFn: () => ErrorGenerator<K>, errorType: K) => {
-  it(errorType, async () => {
-    const variants = errorGeneratorFn()
+  const variants = errorGeneratorFn()
 
-    expect(variants).to.be.an('object')
+  expect(variants).to.be.an('object')
 
-    for (const [key, arr] of Object.entries(variants)) {
-      const filename = key === 'default' ? errorType : `${errorType} - ${key}`
+  for (const [key, arr] of Object.entries(variants)) {
+    const filename = key === 'default' ? errorType : `${errorType} - ${key}`
 
+    it(`${errorType} - ${key}`, async () => {
       debug(`Converting ${filename}`)
 
       terminalBanner(filename)
@@ -179,8 +179,8 @@ const testVisualError = <K extends CypressErrorType> (errorGeneratorFn: () => Er
 
         debug(`Conversion complete for ${errorType}`)
       }
-    }
-  }).timeout(5000)
+    }).timeout(5000)
+  }
 }
 
 const testVisualErrors = (whichError: CypressErrorType | '*', errorsToTest: {[K in CypressErrorType]: () => ErrorGenerator<K>}) => {
