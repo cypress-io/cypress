@@ -4,7 +4,7 @@
     lazy
     :initially-open="initiallyOpen"
     :disable="!canCollapse"
-    class="rounded-t rounded-b outline-none overflow-hidden group"
+    class="overflow-hidden rounded-t rounded-b outline-none group"
     :class="[
       classes.headerClass,
       {[`hocus-default border-1 border-transparent rounded ${classes.ring}`]: canCollapse}]"
@@ -99,7 +99,7 @@ const props = withDefaults(defineProps<{
   collapsible?: boolean,
   modelValue?: boolean,
   iconClasses?: string,
-  maxHeight: string | undefined,
+  maxHeight?: string,
 }>(), {
   title: undefined,
   modelValue: true,
@@ -108,6 +108,7 @@ const props = withDefaults(defineProps<{
   headerClass: undefined,
   bodyClass: undefined,
   iconClasses: '',
+  maxHeight: undefined,
 })
 
 const title = computed(() => props.title ?? 'Alert')
