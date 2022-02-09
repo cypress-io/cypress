@@ -1,18 +1,16 @@
-import './setup'
-
 describe('cy.intercept', () => {
-  const { $ } = Cypress
+  const emitProxyLog = () => {
+    return Cypress.emit('request:event', 'incoming:request', {
+      requestId: 1,
+      method: 'GET',
+      url: '',
+      headers: {},
+      resourceType: 'other',
+      originalResourceType: 'other',
+    })
+  }
 
-  const emitProxyLog = () => Cypress.emit('request:event', 'incoming:request', {
-    requestId: 1,
-    method: 'GET',
-    url: '',
-    headers: {},
-    resourceType: 'other',
-    originalResourceType: 'other',
-  })
-
-  it('assertion failure in req callback', () => {
+  it('assertion failure in request callback', () => {
     cy.intercept('/json-content-type', () => {
       expect('a').to.eq('b')
     })
@@ -34,7 +32,7 @@ describe('cy.intercept', () => {
     .wait(1000) // ensure the failure happens before test ends
   })
 
-  it('assertion failure in res callback', () => {
+  it('assertion failure in response callback', () => {
     cy.intercept('/json-content-type', (req) => {
       req.reply(() => {
         expect('b').to.eq('c')
@@ -92,7 +90,7 @@ describe('cy.intercept', () => {
           await: true,
         },
         data: {
-          url: ''
+          url: '',
         },
       })
 
