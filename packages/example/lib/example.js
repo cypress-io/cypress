@@ -2,23 +2,22 @@ const path = require('path')
 const Promise = require('bluebird')
 const glob = Promise.promisify(require('glob'))
 
+const pathToExamples = path.join(
+  __dirname,
+  '..',
+  'cypress',
+  'integration',
+  '**',
+  '*'
+)
+
 module.exports = {
   getPathToExamples () {
-    return glob(
-      path.join(
-        __dirname,
-        '..',
-        'cypress',
-        'integration',
-        'examples',
-        '**',
-        '*'
-      )
-    )
+    return glob(pathToExamples, { nodir: true })
   },
-  
-  getFolderName () {
-    return 'examples'
+
+  getPathToExampleFolders () {
+    return glob(`${pathToExamples}${path.sep}`)
   },
 
   getPathToPlugins() {

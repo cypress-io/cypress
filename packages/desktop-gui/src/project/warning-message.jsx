@@ -12,7 +12,7 @@ class WarningMessage extends Component {
     return (
       <div className='alert alert-warning'>
         <p className='header'>
-          <i className='fas fa-exclamation-triangle'></i>{' '}
+          <i className='fas fa-exclamation-triangle' />{' '}
           <strong>Warning</strong>
         </p>
         <div>

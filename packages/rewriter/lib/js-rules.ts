@@ -3,7 +3,7 @@ import {
   namedTypes as n,
   builders as b,
 } from 'ast-types'
-import { ExpressionKind } from 'ast-types/gen/kinds'
+import type { ExpressionKind } from 'ast-types/gen/kinds'
 
 // use `globalThis` instead of `window`, `self`... to lower chances of scope conflict
 // users can technically override even this, but it would be very rude

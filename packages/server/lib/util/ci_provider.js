@@ -500,11 +500,12 @@ const _providerCommitParams = () => {
     },
     drone: {
       sha: env.DRONE_COMMIT_SHA,
-      branch: env.DRONE_COMMIT_BRANCH,
+      // https://docs.drone.io/pipeline/environment/reference/drone-source-branch/
+      branch: env.DRONE_SOURCE_BRANCH,
       message: env.DRONE_COMMIT_MESSAGE,
       authorName: env.DRONE_COMMIT_AUTHOR,
       authorEmail: env.DRONE_COMMIT_AUTHOR_EMAIL,
-      // remoteOrigin: ???
+      remoteOrigin: env.DRONE_GIT_HTTP_URL,
       defaultBranch: env.DRONE_REPO_BRANCH,
     },
     githubActions: {

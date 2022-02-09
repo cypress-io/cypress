@@ -3,6 +3,7 @@ const path = require('path')
 const server = require('socket.io')
 const client = require('socket.io-client')
 const parser = require('socket.io-parser')
+const { hasBinary } = require('socket.io-parser/dist/is-binary')
 const expect = require('chai').expect
 const pkg = require('../package.json')
 const lib = require('../index')
@@ -215,6 +216,20 @@ describe('Socket', function () {
       for (let i = 0; i < encodedPackets.length; i++) {
         decoder.add(encodedPackets[i])
       }
+    })
+  })
+
+  context('hasBinary', () => {
+    it('hasBinary handles binary data in toJSON()', () => {
+      const x = {
+        toJSON () {
+          return Buffer.from('123', 'utf8')
+        },
+      }
+
+      const data = ['a', x]
+
+      expect(hasBinary(data)).to.be.true
     })
   })
 })

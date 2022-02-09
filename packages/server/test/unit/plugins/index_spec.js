@@ -1,5 +1,6 @@
 require('../../spec_helper')
 
+const mockedEnv = require('mocked-env')
 const cp = require('child_process')
 
 const util = require(`${root}../lib/plugins/util`)
@@ -45,6 +46,26 @@ describe('lib/plugins/index', () => {
     sinon.stub(util, 'wrapIpc').returns(ipc)
   })
 
+  context('#getChildOptions', () => {
+    it('uses system Node when available', () => {
+      const config = {
+        resolvedNodePath: '/my/path/to/system/node',
+      }
+
+      const childOptions = plugins.getChildOptions(config)
+
+      expect(childOptions.execPath).to.eq(config.resolvedNodePath)
+    })
+
+    it('uses bundled Node when cannot find system Node', () => {
+      const config = {}
+
+      const childOptions = plugins.getChildOptions(config)
+
+      expect(childOptions.execPath).to.eq(undefined)
+    })
+  })
+
   context('#init', () => {
     it('uses noop plugins file if no pluginsFile', () => {
       // have to fire "loaded" message, otherwise plugins.init promise never resolves
@@ -74,45 +95,6 @@ describe('lib/plugins/index', () => {
         expect(cp.fork.lastCall.args[0]).to.contain('plugins/child/index.js')
 
         expect(cp.fork.lastCall.args[1]).to.eql(['--file', 'cypress-plugin', '--projectRoot', '/path/to/project/root'])
-      })
-    })
-
-    it('uses system Node when available', () => {
-      ipc.on.withArgs('loaded').yields([])
-      const systemNode = '/my/path/to/system/node'
-      const config = {
-        pluginsFile: 'cypress-plugin',
-        nodeVersion: 'system',
-        resolvedNodeVersion: 'v1.2.3',
-        resolvedNodePath: systemNode,
-      }
-
-      return plugins.init(config, getOptions())
-      .then(() => {
-        const options = {
-          stdio: 'inherit',
-          execPath: systemNode,
-        }
-
-        expect(cp.fork.lastCall.args[2]).to.eql(options)
-      })
-    })
-
-    it('uses bundled Node when cannot find system Node', () => {
-      ipc.on.withArgs('loaded').yields([])
-      const config = {
-        pluginsFile: 'cypress-plugin',
-        nodeVersion: 'system',
-        resolvedNodeVersion: 'v1.2.3',
-      }
-
-      return plugins.init(config, getOptions())
-      .then(() => {
-        const options = {
-          stdio: 'inherit',
-        }
-
-        expect(cp.fork.lastCall.args[2]).to.eql(options)
       })
     })
 
@@ -306,6 +288,30 @@ describe('lib/plugins/index', () => {
           expect(_err.title).to.equal('Error running plugin')
           expect(_err.stack).to.include('The following error was thrown by a plugin')
           expect(_err.details).to.include(err.message)
+        })
+      })
+    })
+
+    describe('restore node options', () => {
+      let restoreEnv
+
+      afterEach(() => {
+        if (restoreEnv) {
+          restoreEnv()
+          restoreEnv = null
+        }
+      })
+
+      it('restore NODE_OPTIONS', () => {
+        restoreEnv = mockedEnv({
+          ORIGINAL_NODE_OPTIONS: '--require foo.js',
+        })
+
+        ipc.on.withArgs('loaded').yields([])
+
+        return plugins.init({ pluginsFile: 'cypress-plugin' }, getOptions())
+        .then(() => {
+          expect(cp.fork.lastCall.args[2].env.NODE_OPTIONS).to.eql('--require foo.js')
         })
       })
     })

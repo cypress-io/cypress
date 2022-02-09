@@ -1,12 +1,12 @@
-import webpack from 'webpack'
 import path from 'path'
 import sinon from 'sinon'
 import { expect } from 'chai'
 import { EventEmitter } from 'events'
 import http from 'http'
 import fs from 'fs'
+import { webpackDevServerFacts } from '../src/webpackDevServerFacts'
 
-import { startDevServer } from '../'
+import { defineDevServerConfig, devServer, startDevServer } from '../'
 
 const requestSpecFile = (port: number) => {
   return new Promise((res) => {
@@ -34,11 +34,11 @@ const requestSpecFile = (port: number) => {
 
 const root = path.join(__dirname, '..')
 
-const webpackConfig: webpack.Configuration = {
-  output: {
-    path: root,
-    publicPath: root,
-  },
+const webpackConfig = {
+  devServer: webpackDevServerFacts.isV3()
+    ? { contentBase: root }
+    : { static: { directory: root } },
+
 }
 
 const specs: Cypress.Cypress['spec'][] = [
@@ -152,6 +152,26 @@ describe('#startDevServer', () => {
       const updatedmtime = fs.statSync('./dist/browser.js').mtimeMs
 
       expect(oldmtime).to.not.equal(updatedmtime)
+      close(() => res())
+    })
+  })
+
+  it('accepts the devServer signature', async function () {
+    const devServerEvents = new EventEmitter()
+    const { port, close } = await devServer(
+      {
+        config,
+        specs,
+        devServerEvents,
+      },
+      defineDevServerConfig({ webpackConfig }),
+    )
+
+    const response = await requestSpecFile(port as number)
+
+    expect(response).to.eq('const foo = () => {}\n')
+
+    return new Promise((res) => {
       close(() => res())
     })
   })

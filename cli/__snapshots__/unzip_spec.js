@@ -11,7 +11,7 @@ Error: end of central directory record signature not found
 
 ----------
 
-Platform: darwin (Foo-OsVersion)
+Platform: darwin-x64 (Foo-OsVersion)
 Cypress Version: 1.2.3
 
 `

@@ -1,5 +1,5 @@
 const { expect, sinon } = require('../spec_helper')
-import videoCapture from '../../lib/video_capture'
+import * as videoCapture from '../../lib/video_capture'
 import path from 'path'
 import fse from 'fs-extra'
 import os from 'os'

@@ -1,6 +1,7 @@
 const la = require('lazy-ass')
 const snapshot = require('snap-shot-it')
-const R = require('ramda')
+const _ = require('lodash')
+
 const bump = require('../../binary/bump')
 
 /* eslint-env mocha */
@@ -19,10 +20,10 @@ describe('bump', () => {
       const projects = bump.remapProjects(bump._PROVIDERS)
       const filter = bump.getFilterByProvider()
       // should return ALL projects
-      const filtered = R.filter(filter, projects)
+      const filtered = projects.filter(filter)
 
       la(
-        R.equals(filtered, projects),
+        _.isEqual(filtered, projects),
         'should have kept all projects',
         filtered,
       )
@@ -38,7 +39,7 @@ describe('bump', () => {
       )
 
       const filter = bump.getFilterByProvider('circle', 'darwin')
-      const filtered = R.filter(filter, projects)
+      const filtered = projects.filter(filter)
 
       la(filtered.length, 'there should be at least a few projects', filtered)
       snapshot('should have just circle and darwin projects', filtered)

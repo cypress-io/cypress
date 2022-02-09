@@ -131,9 +131,9 @@ if (Cypress.isBrowser('chrome')) {
 
         expect(stub).not.to.be.called
         expect(secondLog.get('state')).to.eq('failed')
-        expect(secondLog.invoke('renderProps')).to.deep.eq({
-          message: 'GET (canceled) /timeout?ms=2000',
-          indicator: 'aborted',
+        expect(secondLog.invoke('renderProps')).to.include({
+          message: 'GET /timeout?ms=2000',
+          indicator: 'pending',
         })
       })
     })

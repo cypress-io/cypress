@@ -1,7 +1,7 @@
 import { autorun, action, configure } from 'mobx'
 import React from 'react'
 import { render } from 'react-dom'
-import { utils as driverUtils } from '@packages/driver'
+import $Cypress from '@packages/driver'
 import defaultEvents from '@packages/reporter/src/lib/events'
 
 import App from './app/RunnerCt'
@@ -11,6 +11,8 @@ import util from './lib/util'
 
 // to support async/await
 import 'regenerator-runtime/runtime'
+
+const driverUtils = $Cypress.utils
 
 configure({ enforceActions: 'always' })
 
@@ -68,7 +70,7 @@ const Runner = {
       const container = (
         <Container
           config={config}
-          runner='ct'
+          runner='component'
           state={state}
           App={App}
           hasSpecFile={util.hasSpecFile}

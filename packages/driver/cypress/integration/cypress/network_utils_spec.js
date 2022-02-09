@@ -1,4 +1,4 @@
-const $networkUtils = require('@packages/driver/src/cypress/network_utils')
+const $networkUtils = require('@packages/driver/src/cypress/network_utils').default
 
 describe('src/cypress/network_utils', () => {
   context('#fetch', () => {

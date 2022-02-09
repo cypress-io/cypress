@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import Debug from 'debug'
-import net from 'net'
-import { Request } from 'express'
+import type net from 'net'
+import type { Request } from 'express'
 
 const debug = Debug('cypress:server:util:socket_allowed')
 

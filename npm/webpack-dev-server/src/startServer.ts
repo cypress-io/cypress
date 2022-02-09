@@ -1,16 +1,20 @@
 import Debug from 'debug'
 import webpack from 'webpack'
 import WebpackDevServer from 'webpack-dev-server'
-import webpackDevServerPkg from 'webpack-dev-server/package.json'
 import { makeWebpackConfig, UserWebpackDevServerOptions } from './makeWebpackConfig'
+import { webpackDevServerFacts } from './webpackDevServerFacts'
 
 export interface StartDevServer extends UserWebpackDevServerOptions {
-  /* this is the Cypress options object */
-  options: Cypress.DevServerOptions
-  /* support passing a path to the user's webpack config */
-  webpackConfig?: Record<string, any>
+  /* this is the Cypress dev server configuration object */
+  options: Cypress.DevServerConfig
+  /* Base webpack config object used for loading component testing */
+  webpackConfig?: WebpackConfigurationWithDevServer
   /* base html template to render in AUT */
   template?: string
+}
+
+export interface WebpackConfigurationWithDevServer extends webpack.Configuration {
+  devServer?: WebpackDevServer.Configuration
 }
 
 const debug = Debug('cypress:webpack-dev-server:start')
@@ -20,7 +24,6 @@ export async function start ({ webpackConfig: userWebpackConfig, template, optio
     debug('User did not pass in any webpack configuration')
   }
 
-  // @ts-expect-error ?? devServerPublicPathRoute is not a valid option of Cypress.Config
   const { projectRoot, devServerPublicPathRoute, isTextTerminal } = options.config
 
   const webpackConfig = await makeWebpackConfig(userWebpackConfig || {}, {
@@ -50,29 +53,39 @@ export async function start ({ webpackConfig: userWebpackConfig, template, optio
 
   debug('starting webpack dev server')
   let webpackDevServerConfig: WebpackDevServer.Configuration = {
-    ...userWebpackConfig?.devServer,
+    ...(userWebpackConfig?.devServer || {}),
     hot: false,
   }
 
-  if (webpackDevServerPkg.version.match(/3\./)) {
+  if (webpackDevServerFacts.isV3()) {
+    debug('using webpack-dev-server v3')
     webpackDevServerConfig = {
       ...webpackDevServerConfig,
+      // @ts-ignore ignore webpack-dev-server v3 type errors
       inline: false,
       publicPath: devServerPublicPathRoute,
       noInfo: false,
     }
-  } else if (webpackDevServerPkg.version.match(/4\./)) {
+
+    // @ts-ignore ignore webpack-dev-server v3 type errors
+    return new WebpackDevServer(compiler, webpackDevServerConfig)
+  }
+
+  if (webpackDevServerFacts.isV4()) {
+    debug('using webpack-dev-server v4')
     webpackDevServerConfig = {
+      host: 'localhost',
+      port: 'auto',
       ...userWebpackConfig?.devServer,
       devMiddleware: {
         publicPath: devServerPublicPathRoute,
       },
       hot: false,
     }
-  } else {
-    throw Error(`@cypress/webpack-dev-server only supports webpack-dev-server v3 and v4. Found: ${webpackDevServerPkg.version}.`)
+
+    // @ts-expect-error Webpack types are clashing between Webpack and WebpackDevServer
+    return new WebpackDevServer(webpackDevServerConfig, compiler)
   }
 
-  // @ts-ignore types for webpack v5 are incorrect?
-  return new WebpackDevServer(compiler, webpackDevServerConfig)
+  throw webpackDevServerFacts.unsupported()
 }

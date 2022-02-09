@@ -46,7 +46,7 @@ by calling an event `devServerEvents.emit('dev-server:compile:success')`
 
 ## Webpack
 
-Webpack-dev-server fulfills his reponsibilities by
+Webpack-dev-server fulfills his responsibilities by
 
 - Making a `webpack.config` from the users setup by changing the entrypoint to `browser.ts`
 - Launches the webpack dev server with `devServer.publicPath = "__cypress/src/"` and `devServer.hot = false`

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script type="text/javascript" src="/node_modules/jquery/dist/jquery.js"></script>
+  </head>
+  <body>
+    <button id="request">request</button>
+    <div id="result"></div>
+    <script type="text/javascript">
+      $(function(){
+        $("button#request").click(function(){
+          $.ajax({
+            method: "POST",
+            url: "/post-only",
+            data: JSON.stringify({client: 'data'})
+          })
+          .then((data) => {
+            $('#result').text(data)
+          })
+        })
+      })
+    </script>
+  </body>
+</html>

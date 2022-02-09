@@ -1,0 +1,27 @@
+{
+  "name": "e2e ext",
+  "version": "0",
+  "description": "tests adding user extension into Cypress",
+  "permissions": [
+    "tabs",
+    "webNavigation",
+    "<all_urls>"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "exclude_matches": [
+        "*://*/__cypress/*",
+        "*://*/__/*"
+      ],
+      "js": [
+        "background.js"
+      ],
+      "run_at": "document_end",
+      "all_frames": true
+    }
+  ],
+  "manifest_version": 2
+}

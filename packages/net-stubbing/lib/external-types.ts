@@ -132,6 +132,10 @@ export namespace CyHttpMessages {
      */
     url: string
     /**
+     * URL query string as object.
+     */
+    query: Record<string, string|number>
+    /**
      * The HTTP version used in the request. Read only.
      */
     httpVersion: string
@@ -263,9 +267,11 @@ interface RequestEvents {
  */
 export interface Interception {
   id: string
+  /* @internal */
+  browserRequestId?: string
   routeId: string
   /* @internal */
-  log?: any
+  setLogFlag: (flag: 'spied' | 'stubbed' | 'reqModified' | 'resModified') => void
   request: CyHttpMessages.IncomingRequest
   /**
    * Was `cy.wait()` used to wait on this request?

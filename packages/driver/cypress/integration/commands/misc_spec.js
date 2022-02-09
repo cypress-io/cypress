@@ -1,3 +1,4 @@
+const { assertLogLength } = require('../../support/utils')
 const { _, $, dom } = Cypress
 
 describe('src/cy/commands/misc', () => {
@@ -268,7 +269,7 @@ describe('src/cy/commands/misc', () => {
         Cypress.config('defaultCommandTimeout', 100)
 
         cy.on('fail', (err) => {
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(err.message).to.include('`cy.wrap()` timed out waiting `100ms` to complete.')
           expect(err.message).to.include('You called `cy.wrap()` with a promise that never resolved.')
           expect(err.message).to.include('To increase the timeout, use `{ timeout: number }`')
@@ -287,7 +288,7 @@ describe('src/cy/commands/misc', () => {
 
       it('throws when exceeding custom timeout', function (done) {
         cy.on('fail', (err) => {
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(err.message).to.include('`cy.wrap()` timed out waiting `100ms` to complete.')
           expect(err.message).to.include('You called `cy.wrap()` with a promise that never resolved.')
           expect(err.message).to.include('To increase the timeout, use `{ timeout: number }`')
@@ -306,7 +307,7 @@ describe('src/cy/commands/misc', () => {
 
       it('logs once when promise parameter is rejected', function (done) {
         cy.on('fail', (err) => {
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(err.message).to.include('custom error')
           expect(this.lastLog.get('error')).to.eq(err)
           done()

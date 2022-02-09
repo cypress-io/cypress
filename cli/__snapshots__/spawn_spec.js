@@ -30,6 +30,6 @@ Consider opening a new issue.
 
 ----------
 
-Platform: darwin (Foo-OsVersion)
+Platform: darwin-x64 (Foo-OsVersion)
 Cypress Version: 0.0.0-development
 `

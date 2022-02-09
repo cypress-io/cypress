@@ -10,10 +10,6 @@ exports['upload util isValidPlatformArch checks given strings second 1'] = {
       "expect": true
     },
     {
-      "given": "win32-ia32",
-      "expect": true
-    },
-    {
       "given": "win32-x64",
       "expect": true
     },

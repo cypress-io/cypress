@@ -2,10 +2,9 @@ const debug = require('debug')('cypress:binary')
 import la from 'lazy-ass'
 import is from 'check-more-types'
 import S3 from 'aws-sdk/clients/s3'
-import { prop, values, all } from 'ramda'
 
 export const hasOnlyStringValues = (o) => {
-  return all(is.unemptyString, values(o))
+  return Object.values(o).every((v) => is.unemptyString(v))
 }
 
 /**
@@ -67,7 +66,7 @@ export const s3helpers = {
         debug('AWS result in %s %s', bucket, prefix)
         debug('%o', result)
 
-        resolve(result.CommonPrefixes.map(prop('Prefix')))
+        resolve(result.CommonPrefixes.map((val) => val.Prefix))
       })
     })
   },

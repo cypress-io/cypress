@@ -102,10 +102,10 @@ describe('Hook model', () => {
     })
 
     it('adds command as duplicate if it matches the last command', () => {
-      const addDuplicate = sinon.spy()
+      const addChild = sinon.spy()
       const command1: Partial<CommandModel> = { event: true, isMatchingEvent: () => {
         return true
-      }, addDuplicate }
+      }, addChild }
 
       hook.addCommand(command1 as CommandModel)
 
@@ -113,7 +113,7 @@ describe('Hook model', () => {
 
       hook.addCommand(command2 as CommandModel)
 
-      expect(addDuplicate).to.be.calledWith(command2)
+      expect(addChild).to.be.calledWith(command2)
     })
   })
 
@@ -171,13 +171,13 @@ describe('Hook model', () => {
   })
 
   context('#aliasesWithDuplicates', () => {
-    const addCommand = (alias: string, hasDuplicates = false) => {
+    const addCommand = (alias: string, hasChildren = false) => {
       const command: Partial<CommandModel> = {
         isMatchingEvent: () => {
           return false
         },
         alias,
-        hasDuplicates,
+        hasChildren,
       }
 
       return hook.addCommand(command as CommandModel)

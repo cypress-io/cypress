@@ -15,7 +15,6 @@ const { expect } = chai
 const packages = require('../../../binary/util/packages')
 const { transformRequires, rewritePackageNames } = require('../../../binary/util/transform-requires')
 const { testPackageStaticAssets } = require('../../../binary/util/testStaticAssets')
-const externalUtils = require('../../../binary/util/3rd-party')
 
 global.beforeEach(() => {
   mockfs.restore()
@@ -41,24 +40,9 @@ describe('packages', () => {
       },
     })
 
-    const globbyStub = sinon.stub(externalUtils, 'globby')
-
-    globbyStub
-    .withArgs(['./packages/*', './npm/*'])
-    .resolves(['./packages/coffee'])
-
-    globbyStub
-    .withArgs(['package.json', 'lib', 'src/main.js'])
-    .resolves([
-      'package.json',
-      'lib/foo.js',
-      'src/main.js',
-    ])
-
     const destinationFolder = os.tmpdir()
 
     debug('destination folder %s', destinationFolder)
-
     await packages.copyAllToDist(destinationFolder)
 
     const files = getFs()
@@ -71,7 +55,6 @@ describe('rewritePackageNames', () => {
   it('renames requires', () => {
     const fileStr = `
       const a = require('@packages/server')
-      const b = require('@packages/server-ct')
       const b = require('@packages/runner-ct/')
       const c = require("@packages/runner-ct/lib/quux.js")
     `
@@ -82,27 +65,21 @@ describe('rewritePackageNames', () => {
 
     expect(newStr).to.eq(`
       const a = require('../../build/packages/server')
-      const b = require('../../build/packages/server-ct')
       const b = require('../../build/packages/runner-ct/')
       const c = require("../../build/packages/runner-ct/lib/quux.js")
     `)
 
     expect(stub.getCall(0).args[0]).to.eq(`require('../../build/packages/server'`)
-    expect(stub.getCall(1).args[0]).to.eq(`require('../../build/packages/server-ct'`)
-    expect(stub.getCall(2).args[0]).to.eq(`require('../../build/packages/runner-ct/`)
-    expect(stub.getCall(3).args[0]).to.eq(`require("../../build/packages/runner-ct/`)
+    expect(stub.getCall(1).args[0]).to.eq(`require('../../build/packages/runner-ct/`)
+    expect(stub.getCall(2).args[0]).to.eq(`require("../../build/packages/runner-ct/`)
   })
 })
 
 describe('transformRequires', () => {
   it('can find and replace symlink requires', async function () {
-    // these tests really refuse to work on Mac, so for now run it only on Linux
-    if (os.platform() !== 'linux') {
-      return this.skip()
-    }
-
     const buildRoot = 'build/linux/Cypress/resources/app'
 
+    sinon.stub(os, 'tmpdir').returns('/tmp')
     mockfs({
       [buildRoot]: { 'packages': {
         'foo': {
@@ -120,18 +97,6 @@ describe('transformRequires', () => {
       },
       },
     })
-
-    sinon.stub(externalUtils, 'globby')
-    .withArgs([
-      'build/linux/Cypress/resources/app/packages/**/*.js',
-      'build/linux/Cypress/resources/app/npm/**/*.js',
-    ])
-    .resolves([
-      'build/linux/Cypress/resources/app/packages/foo/src/main.js',
-      'build/linux/Cypress/resources/app/packages/foo/lib/foo.js',
-      'build/linux/Cypress/resources/app/packages/bar/src/main.js',
-      'build/linux/Cypress/resources/app/packages/bar/lib/foo.js',
-    ])
 
     // should return number of transformed requires
     await expect(transformRequires(buildRoot)).to.eventually.eq(2)
@@ -148,13 +113,10 @@ describe('transformRequires', () => {
   })
 
   it('can find and replace symlink requires on win32', async function () {
-    if (os.platform() !== 'linux') {
-      return this.skip()
-    }
-
     const { transformRequires } = proxyquire('../../../binary/util/transform-requires', { path: path.win32 })
     const buildRoot = 'build/linux/Cypress/resources/app'
 
+    sinon.stub(os, 'tmpdir').returns('/tmp')
     mockfs({
       [buildRoot]: { 'packages': {
         'foo': {
@@ -172,18 +134,6 @@ describe('transformRequires', () => {
       },
       },
     })
-
-    sinon.stub(externalUtils, 'globby')
-    .withArgs([
-      'build/linux/Cypress/resources/app/packages/**/*.js',
-      'build/linux/Cypress/resources/app/npm/**/*.js',
-    ])
-    .resolves([
-      'build/linux/Cypress/resources/app/packages/foo/src/main.js',
-      'build/linux/Cypress/resources/app/packages/foo/lib/foo.js',
-      'build/linux/Cypress/resources/app/packages/bar/src/main.js',
-      'build/linux/Cypress/resources/app/packages/bar/lib/foo.js',
-    ])
 
     await transformRequires(buildRoot)
 
@@ -210,8 +160,6 @@ describe('testStaticAssets', () => {
         },
       },
     })
-
-    // logFs()
 
     await expect(testPackageStaticAssets({
       assetGlob: `${buildDir}/packages/runner/dist/*.js`,
@@ -325,12 +273,6 @@ afterEach(() => {
   mockfs.restore()
 })
 
-// eslint-disable-next-line
-const logFs = () => {
-  // eslint-disable-next-line no-console
-  console.dir(getFs(), { depth: null })
-}
-
 const getFs = () => {
   const cwd = process.cwd().split(path.sep).slice(1)
 
@@ -343,7 +285,7 @@ const getFs = () => {
       let nextDepth = null
 
       if (d !== null) {
-        if (d === -1) {
+        if (d < 0) {
           nextDepth = d + 1
         } else if (!(d > cwd.length) && key === cwd[d]) {
           key = 'foo'
@@ -365,5 +307,8 @@ const getFs = () => {
     }))
   }
 
-  return recurse({ root: mockfs.getMockRoot() }, -1).root
+  // ignore C:// when on windows
+  const depth = process.env.PLATFORM === 'windows' ? -2 : -1
+
+  return recurse({ root: mockfs.getMockRoot() }, depth).root
 }

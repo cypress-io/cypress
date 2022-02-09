@@ -237,7 +237,7 @@
       .studio-controls {
         display: flex;
 
-        .studio-save {
+        .studio-save, .studio-copy {
           display: block;
         }
       }
@@ -397,7 +397,7 @@
         outline: none;
       }
 
-      &:active {
+      &:not(.studio-copy):active {
         box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
       }
     }
@@ -411,11 +411,41 @@
       }
     }
 
+    .studio-copy-wrapper {
+      margin-left: auto;
+
+      .studio-copy {
+        color: #3386d4;
+        display: none;
+        font-size: 16px;
+        padding: 3px 10px;
+
+        i {
+          width: 15px;
+        }
+
+        &:hover, &:focus {
+          color: darken(#3386d4, 5%);
+        }
+
+        &.studio-copy-success {
+          color: $pass;
+        }
+
+        &[disabled],
+        &[disabled]:hover,
+        &[disabled]:active {
+          color: #3386d4;
+          opacity: 0.5;
+        }
+      }
+    }
+
     .studio-save {
       background-color: #3386d4;
       color: #fff;
       display: none;
-      margin-left: auto;
+      margin-left: 4px;
 
       &:hover {
         background-color: darken(#3386d4, 10%);

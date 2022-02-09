@@ -12,19 +12,19 @@ export default class ProjectNav extends Component {
         <ul className='nav left-nav'>
           <li>
             <Link to={routes.specs(project)}>
-              <i className='fas fa-code'></i>{' '}
+              <i className='fas fa-code' />{' '}
               Tests
             </Link>
           </li>
           <li>
             <Link to={routes.runs(project)}>
-              <i className='fas fa-database'></i>{' '}
+              <i className='fas fa-database' />{' '}
               Runs
             </Link>
           </li>
           <li>
             <Link to={routes.settings(project)}>
-              <i className='fas fa-cog'></i>{' '}
+              <i className='fas fa-cog' />{' '}
               Settings
             </Link>
           </li>

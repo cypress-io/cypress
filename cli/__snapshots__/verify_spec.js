@@ -14,7 +14,7 @@ You can also try clearing the cache with 'cypress cache clear' and reinstalling.
 
 ----------
 
-Platform: darwin (Foo-OsVersion)
+Platform: darwin-x64 (Foo-OsVersion)
 Cypress Version: 1.2.3
 
 `
@@ -48,7 +48,7 @@ ENOENT: no such file or directory, stat '/custom/'
 
 ----------
 
-Platform: darwin (Foo-OsVersion)
+Platform: darwin-x64 (Foo-OsVersion)
 Cypress Version: 1.2.3
 
 `
@@ -89,7 +89,7 @@ https://on.cypress.io/not-installed-ci-error
 
 ----------
 
-Platform: darwin (Foo-OsVersion)
+Platform: darwin-x64 (Foo-OsVersion)
 Cypress Version: 1.2.3
 
 `
@@ -105,7 +105,7 @@ Cypress executable not found at: /cache/Cypress/1.2.3/Cypress.app/Contents/MacOS
 
 ----------
 
-Platform: darwin (Foo-OsVersion)
+Platform: darwin-x64 (Foo-OsVersion)
 Cypress Version: 1.2.3
 
 `
@@ -116,13 +116,9 @@ STRIPPED
 
 Error: Cypress failed to start.
 
-This is usually caused by a missing library or dependency.
+This may be due to a missing library or dependency. https://on.cypress.io/required-dependencies
 
-The error below should indicate which dependency is missing.
-
-https://on.cypress.io/required-dependencies
-
-If you are using Docker, we provide containers with all required dependencies installed.
+Please refer to the error below for more details.
 
 ----------
 
@@ -130,7 +126,7 @@ an error about dependencies
 
 ----------
 
-Platform: darwin (Foo-OsVersion)
+Platform: darwin-x64 (Foo-OsVersion)
 Cypress Version: 1.2.3
 
 `
@@ -138,13 +134,9 @@ Cypress Version: 1.2.3
 exports['fails with no stderr 1'] = `
 Error: Cypress failed to start.
 
-This is usually caused by a missing library or dependency.
+This may be due to a missing library or dependency. https://on.cypress.io/required-dependencies
 
-The error below should indicate which dependency is missing.
-
-https://on.cypress.io/required-dependencies
-
-If you are using Docker, we provide containers with all required dependencies installed.
+Please refer to the error below for more details.
 
 ----------
 
@@ -152,7 +144,7 @@ Error: EPERM NOT PERMITTED
 
 ----------
 
-Platform: darwin (Foo-OsVersion)
+Platform: darwin-x64 (Foo-OsVersion)
 Cypress Version: 1.2.3
 
 `
@@ -174,7 +166,7 @@ some stderr
 
 ----------
 
-Platform: darwin (Foo-OsVersion)
+Platform: darwin-x64 (Foo-OsVersion)
 Cypress Version: 1.2.3
 
 `
@@ -196,7 +188,7 @@ some stderr
 
 ----------
 
-Platform: darwin (Foo-OsVersion)
+Platform: darwin-x64 (Foo-OsVersion)
 Cypress Version: 1.2.3
 
 `
@@ -218,7 +210,7 @@ some stdout
 
 ----------
 
-Platform: darwin (Foo-OsVersion)
+Platform: darwin-x64 (Foo-OsVersion)
 Cypress Version: 1.2.3
 
 `
@@ -240,7 +232,7 @@ ENOENT: no such file or directory, stat '/custom/'
 
 ----------
 
-Platform: linux (Foo-OsVersion)
+Platform: linux-x64 (Foo-OsVersion)
 Cypress Version: 1.2.3
 
 `
@@ -256,7 +248,7 @@ Cypress executable not found at: /cache/Cypress/1.2.3/Cypress.app/Contents/MacOS
 
 ----------
 
-Platform: darwin (Foo-OsVersion)
+Platform: darwin-x64 (Foo-OsVersion)
 Cypress Version: 1.2.3
 
 `
@@ -272,7 +264,7 @@ Cypress executable not found at: /cache/Cypress/1.2.3/Cypress.app/Contents/MacOS
 
 ----------
 
-Platform: darwin (Foo-OsVersion)
+Platform: darwin-x64 (Foo-OsVersion)
 Cypress Version: 1.2.3
 
 `
@@ -371,7 +363,7 @@ ENOENT: no such file or directory, stat '/custom/'
 
 ----------
 
-Platform: win32 (Foo-OsVersion)
+Platform: win32-x64 (Foo-OsVersion)
 Cypress Version: 1.2.3
 
 `
@@ -393,7 +385,7 @@ Error: test without xvfb
 
 ----------
 
-Platform: darwin (Foo-OsVersion)
+Platform: darwin-x64 (Foo-OsVersion)
 Cypress Version: 1.2.3
 
 `
@@ -414,16 +406,12 @@ some weird indent
 
 ----------
 
-This is usually caused by a missing library or dependency.
+This may be due to a missing library or dependency. [34mhttps://on.cypress.io/required-dependencies[39m
 
-The error above should indicate which dependency is missing.
-
-[34mhttps://on.cypress.io/required-dependencies[39m
-
-If you are using Docker, we provide containers with all required dependencies installed.
+Please refer to the error above for more detail.
 
 ----------
 
-Platform: linux (Foo-OsVersion)
+Platform: linux-x64 (Foo-OsVersion)
 Cypress Version: 1.2.3
 `

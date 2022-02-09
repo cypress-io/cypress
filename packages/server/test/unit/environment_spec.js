@@ -134,4 +134,10 @@ describe('lib/environment', () => {
       return expectedEnv('development')
     })
   })
+
+  context('it sets process.env.CYPRESS', () => {
+    it('sets CYPRESS=true when Cypress runs', () => {
+      expect(process.env['CYPRESS']).to.eq('true')
+    })
+  })
 })

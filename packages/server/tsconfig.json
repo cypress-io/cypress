@@ -8,6 +8,7 @@
     "./../ts/index.d.ts"
   ],
   "compilerOptions": {
-    "types": ["mocha", "node"]
+    "types": ["mocha", "node"],
+    "importHelpers": true
   }
 }

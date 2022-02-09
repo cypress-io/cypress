@@ -18,7 +18,7 @@ module.exports = {
     return os.platform() === 'darwin'
   },
 
-  getWindowArgs (state, options = {}) {
+  getWindowArgs (state) {
     const common = {
       backgroundColor: '#dfe2e4',
       width: state.appWidth || 800,
@@ -51,7 +51,7 @@ module.exports = {
         return Windows.showAll()
       },
       onClose () {
-        return process.exit()
+        app.quit()
       },
     }
 

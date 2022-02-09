@@ -8,23 +8,23 @@
  */
 
 import { Tree } from '@angular-devkit/schematics'
-import { JSONFile } from './json-file'
+import { JSONFile } from './jsonFile'
 
 const PKG_JSON_PATH = '/package.json'
 
 export enum NodeDependencyType {
-   Default = 'dependencies',
-   Dev = 'devDependencies',
-   Peer = 'peerDependencies',
-   Optional = 'optionalDependencies',
- }
+  Default = 'dependencies',
+  Dev = 'devDependencies',
+  Peer = 'peerDependencies',
+  Optional = 'optionalDependencies',
+}
 
 export interface NodeDependency {
-   type: NodeDependencyType
-   name: string
-   version: string
-   overwrite?: boolean
- }
+  type: NodeDependencyType
+  name: string
+  version: string
+  overwrite?: boolean
+}
 
 const ALL_DEPENDENCY_TYPE = [
   NodeDependencyType.Default,

@@ -9,8 +9,8 @@ const task = require(`${root}../../lib/plugins/child/task`)
 const util = require(`${root}../../lib/plugins/util`)
 const resolve = require(`${root}../../lib/util/resolve`)
 const browserUtils = require(`${root}../../lib/browsers/utils`)
-const Fixtures = require(`${root}../../test/support/helpers/fixtures`)
-const tsNodeUtil = require(`${root}../../lib/plugins/child/ts_node`)
+const Fixtures = require('@tooling/system-tests/lib/fixtures')
+const tsNodeUtil = require(`${root}../../lib/util/ts_node`)
 
 const runPlugins = require(`${root}../../lib/plugins/child/run_plugins`)
 
@@ -408,8 +408,14 @@ describe('lib/plugins/child/run_plugins', () => {
       expect(this.ipc.send).to.be.calledWith('error', this.err)
     })
 
-    it('sends the serialized reason via ipc on process unhandledRejection', function () {
+    it('sends the serialized Bluebird error via ipc on process unhandledRejection', function () {
       process.on.withArgs('unhandledRejection').yield({ reason: this.err })
+
+      expect(this.ipc.send).to.be.calledWith('error', this.err)
+    })
+
+    it('sends the serialized OpenSSL error via ipc on process unhandledRejection', function () {
+      process.on.withArgs('unhandledRejection').yield({ ...this.err, reason: 'reason' })
 
       expect(this.ipc.send).to.be.calledWith('error', this.err)
     })

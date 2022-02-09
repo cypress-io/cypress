@@ -10,7 +10,7 @@ import {
   STATIC_RESPONSE_KEYS,
 } from '../static-response-utils'
 import $errUtils from '../../../cypress/error_utils'
-import { HandlerFn, HandlerResult } from '.'
+import type { HandlerFn, HandlerResult } from '.'
 import Bluebird from 'bluebird'
 import { parseJsonBody, stringifyJsonBody } from './utils'
 
@@ -20,6 +20,7 @@ export const onResponse: HandlerFn<CyHttpMessages.IncomingResponse> = async (Cyp
   const { data: res, requestId, subscription } = frame
   const { routeId } = subscription
   const request = getRequest(routeId, frame.requestId)
+  const resClone = _.cloneDeep(res)
 
   const bodyParsed = parseJsonBody(res)
 
@@ -28,8 +29,6 @@ export const onResponse: HandlerFn<CyHttpMessages.IncomingResponse> = async (Cyp
 
   if (request) {
     request.state = 'ResponseReceived'
-
-    request.log.fireChangeEvent()
 
     if (!userHandler) {
       // this is notification-only, update the request with the response attributes and end
@@ -41,9 +40,12 @@ export const onResponse: HandlerFn<CyHttpMessages.IncomingResponse> = async (Cyp
 
   const finishResponseStage = (res) => {
     if (request) {
+      if (!_.isEqual(resClone, res)) {
+        request.setLogFlag('resModified')
+      }
+
       request.response = _.cloneDeep(res)
       request.state = 'ResponseIntercepted'
-      request.log.fireChangeEvent()
     }
   }
 
@@ -75,7 +77,17 @@ export const onResponse: HandlerFn<CyHttpMessages.IncomingResponse> = async (Cyp
         // arguments to res.send() are merged with the existing response
         const _staticResponse = _.defaults({}, staticResponse, _.pick(res, STATIC_RESPONSE_KEYS))
 
-        _.defaults(_staticResponse.headers, res.headers)
+        _staticResponse.headers = _.defaults({}, _staticResponse.headers, res.headers)
+
+        // https://github.com/cypress-io/cypress/issues/17084
+        // When a user didn't provide content-type,
+        // and they provided body as an object,
+        // we remove the content-type provided by the server
+        if (!staticResponse.headers || !staticResponse.headers['content-type']) {
+          if (typeof _staticResponse.body === 'object') {
+            delete _staticResponse.headers['content-type']
+          }
+        }
 
         sendStaticResponse(requestId, _staticResponse)
 

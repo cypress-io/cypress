@@ -5,6 +5,7 @@ const { allowModuleSourceInPlace } = require('../utils/webpack-helpers')
 const { addCypressToWebpackEslintRulesInPlace } = require('../utils/eslint-helpers')
 const { getTranspileFolders } = require('../utils/get-transpile-folders')
 const { addFolderToBabelLoaderTranspileInPlace } = require('../utils/babel-helpers')
+const { reactScriptsFiveModifications, isReactScripts5 } = require('../../dist/react-scripts/reactScriptsFive')
 
 module.exports = function findReactScriptsWebpackConfig (config, {
   webpackConfigPath,
@@ -20,13 +21,19 @@ module.exports = function findReactScriptsWebpackConfig (config, {
   }
 
   // because for react-scripts user doesn't have direct access to webpack webpackConfig
-  // we must implicitly inject everything required to run tests
+  // we must implicitly setup everything required to run tests
   addCypressToWebpackEslintRulesInPlace(webpackConfig)
 
   getTranspileFolders(config).forEach((cypressFolder) => {
     allowModuleSourceInPlace(cypressFolder, webpackConfig)
     addFolderToBabelLoaderTranspileInPlace(cypressFolder, webpackConfig)
   })
+
+  if (isReactScripts5) {
+    debug('Modifying configuration for react-scripts@5')
+
+    reactScriptsFiveModifications(webpackConfig)
+  }
 
   debug('resolved webpack config: %o', webpackConfig)
 

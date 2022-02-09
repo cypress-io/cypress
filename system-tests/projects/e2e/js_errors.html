@@ -1,0 +1,45 @@
+<!doctype html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+    <title>App Errors</title>
+    <link rel="icon" href="data:;base64,=">
+    <script type="text/javascript" src="static/jquery.js"></script>
+    <script type="text/javascript">
+      $(function(){
+        $("button.ref").click(function(e){
+          e.preventDefault()
+
+          // generate ReferenceError
+          foo.bar()
+        })
+
+        $("button.xhr").click(function(e){
+          e.preventDefault()
+
+          $.get("/foo", function(data){
+            $("#results").html("data is " + data)
+            bar.baz()
+          })
+        })
+
+        $("button.sync-error").click(function () {
+          qux.bar()
+        })
+
+        $("button.async-error").click(function () {
+          setTimeout(function () {
+            qax.bar()
+          })
+        })
+      })
+    </script>
+  </head>
+  <body>
+    <button type="button" class="ref">reference err</button>
+    <button type="button" class="xhr">xhr err</button>
+    <button type="button" class="sync-error">sync err</button>
+    <button type="button" class="async-error">async err</button>
+    <div id="results"></div>
+  </body>
+</html>

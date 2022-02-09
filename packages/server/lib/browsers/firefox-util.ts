@@ -21,6 +21,12 @@ let timings = {
   collections: [] as any[],
 }
 
+let driver
+
+const sendMarionette = (data) => {
+  return driver.send(new Command(data))
+}
+
 const getTabId = (tab) => {
   return _.get(tab, 'browsingContextID')
 }
@@ -254,14 +260,10 @@ export default {
       getDelayMsForRetry,
     })
 
-    const driver = new Marionette.Drivers.Promises({
+    driver = new Marionette.Drivers.Promises({
       port,
       tries: 1, // marionette-client has its own retry logic which we want to avoid
     })
-
-    const sendMarionette = (data) => {
-      return driver.send(new Command(data))
-    }
 
     debug('firefox: navigating page with webdriver')
 
@@ -314,5 +316,20 @@ export default {
 
     // even though Marionette is not used past this point, we have to keep the session open
     // or else `acceptInsecureCerts` will cease to apply and SSL validation prompts will appear.
+  },
+
+  async windowFocus () {
+  // in order to utilize focusmanager.testingmode and trick browser into being in focus even when not focused
+  // this is critical for headless mode since otherwise the browser never gains focus
+    return sendMarionette({
+      name: 'WebDriver:ExecuteScript',
+      parameters: {
+        'args': [],
+        'script': `return (() => {
+        top.focus()
+      }).apply(null, arguments)\
+      `,
+      },
+    })
   },
 }

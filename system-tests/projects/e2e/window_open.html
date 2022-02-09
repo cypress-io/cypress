@@ -1,0 +1,17 @@
+<html>
+  <head>
+
+  </head>
+  <body>
+    <h1>window.open</h1>
+    <script type="text/javascript">
+      var o = window.opener
+
+      o.foo()
+
+      window.bar = function(){
+        o.foo()
+      }
+    </script>
+  </body>
+</html>
