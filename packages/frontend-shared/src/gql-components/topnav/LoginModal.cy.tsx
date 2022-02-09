@@ -76,14 +76,13 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
   })
 
   it('shows an error state when browser cannot be launched', () => {
-    const authMessage = 'Cypress was unable to open your installed browser. To continue logging in, please open this URL in your web browser:'
     const authUrl = 'http://127.0.0.1:0000/redirect-to-auth'
 
     cy.mountFragment(LoginModalFragmentDoc, {
       onResult: (result) => {
         result.__typename = 'Query'
         result.authState.name = 'AUTH_COULD_NOT_LAUNCH_BROWSER'
-        result.authState.message = 'Cypress was unable to open your installed browser. To continue logging in, please open this URL in your web browser:\n\n```\nhttp://127.0.0.1:0000/redirect-to-auth\n```'
+        result.authState.message = 'http://127.0.0.1:0000/redirect-to-auth'
       },
       render: (gqlVal) =>
         (<div class="border-current border-1 h-700px resize overflow-auto">
@@ -92,8 +91,8 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
     })
 
     cy.findByRole('button', { name: text.login.actionTryAgain }).should('be.visible')
-    cy.contains(text.login.bodyError)
-    cy.contains(authMessage).should('be.visible')
+    cy.contains(text.login.bodyBrowserError)
+    cy.contains(text.login.bodyBrowserErrorDetails).should('be.visible')
     cy.contains(authUrl).should('be.visible')
 
     // cancel button works

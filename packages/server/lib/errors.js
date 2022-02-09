@@ -848,12 +848,7 @@ const getMsgByType = function (type, ...args) {
 
         Provide a path to an existing fixture file.`
     case 'AUTH_COULD_NOT_LAUNCH_BROWSER':
-      return stripIndent`\
-        Cypress was unable to open your installed browser. To continue logging in, please open this URL in your web browser:
-
-        \`\`\`
-        ${arg1}
-        \`\`\``
+      return arg1
     case 'AUTH_BROWSER_LAUNCHED':
       return `Check your browser to continue logging in.`
     case 'BAD_POLICY_WARNING':

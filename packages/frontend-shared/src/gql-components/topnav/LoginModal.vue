@@ -7,7 +7,7 @@
     <div class="flex min-h-screen items-center justify-center">
       <DialogOverlay class="bg-gray-800 opacity-90 inset-0 fixed" />
 
-      <div class="bg-white rounded mx-auto w-480px relative">
+      <div class="bg-white rounded m-auto m-w-480px max-w-600px relative">
         <div class="flex border-b-1px min-h-64px px-24px justify-between items-center">
           <DialogTitle class="text-gray-900 text-18px">
             {{ title }}
@@ -53,16 +53,19 @@
             </ExternalLink>
           </i18n-t>
           <div v-else-if="browserError">
-            {{ t('topNav.login.bodyError') }}
             <div
-              class="rounded flex bg-red-100 mt-8px p-16px text-red-600 gap-8px items-center"
+              class="rounded flex bg-red-100 mb-16px p-16px text-red-600 gap-8px items-center"
             >
               <i-cy-errored-outline_x16 class="h-16px min-w-16px w-16px icon-dark-red-400" />
-              <div
-                ref="errorRef"
-                v-html="markdown"
-              />
+              {{ t('topNav.login.bodyBrowserError') }}
             </div>
+            {{ t('topNav.login.bodyBrowserErrorDetails') }}
+
+            <TerminalPrompt
+              class="mt-16px"
+              :project-folder-name="''"
+              :command="props.gql.authState.message"
+            />
           </div>
         </DialogDescription>
 
@@ -85,7 +88,7 @@ import Auth from '../Auth.vue'
 import ExternalLink from '../ExternalLink.vue'
 import { useOnline } from '@vueuse/core'
 import NoInternetConnection from '../../components/NoInternetConnection.vue'
-import Alert from '@cy/components/Alert.vue'
+import TerminalPrompt from '@cy/components/TerminalPrompt.vue'
 import { useMarkdown } from '@packages/frontend-shared/src/composables/useMarkdown'
 
 import {
@@ -132,6 +135,10 @@ const browserError = computed(() => props.gql.authState.name === 'AUTH_COULD_NOT
 const title = computed(() => {
   if (viewer.value) {
     return t('topNav.login.titleSuccess')
+  }
+
+  if (browserError.value) {
+    return t('topNav.login.titleBrowserError')
   }
 
   return t('topNav.login.titleInitial')
