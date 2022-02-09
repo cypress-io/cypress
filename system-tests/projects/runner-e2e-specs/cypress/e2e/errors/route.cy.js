@@ -1,4 +1,21 @@
-import { abortXhr, sendXhr } from './setup'
+const sendXhr = (route) => {
+  return (win) => {
+    const xhr = new win.XMLHttpRequest()
+
+    xhr.open('GET', route)
+    xhr.send()
+
+    return xhr
+  }
+}
+
+const abortXhr = (route) => {
+  return (win) => {
+    const xhr = sendXhr(route)(win)
+
+    xhr.abort()
+  }
+}
 
 describe('cy.route', { defaultCommandTimeout: 0 }, () => {
   it('callback assertion failure', () => {
