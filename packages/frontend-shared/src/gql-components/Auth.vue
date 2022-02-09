@@ -1,6 +1,6 @@
 <template>
   <div
-    v-if="props.errorType !== 'browserError'"
+    v-if="props.errorType && props.errorType !== 'browserError'"
     class="flex gap-16px"
   >
     <Button
