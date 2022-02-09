@@ -1,5 +1,5 @@
 <template>
-  <div class="sm:grid md:w-full grid-cols-2 pt-24px">
+  <div class="grid-cols-2 sm:grid md:w-full">
     <CompareTestingCard
       data-cy="end-to-end-comparison"
       class="border-r border-r-gray-100"

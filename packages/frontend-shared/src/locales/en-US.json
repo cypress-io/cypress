@@ -216,7 +216,10 @@
       "pasteToUpgradeGlobal": "To upgrade to the latest version, first {0}, then paste the command below into your terminal:",
       "rememberToCloseInsert": "close this app"
     },
-    "upgradeText": "Upgrade"
+    "upgradeText": "Upgrade",
+    "global": {
+      "projects": "Projects"
+    }
   },
   "launchpadErrors": {
     "generic": {
@@ -294,8 +297,10 @@
       "componentTitle": "Component Tests",
       "ctBullet1": "Import components via",
       "ctBullet2": "Test individual components of a design system in isolation",
-      "ctBullet3": "Ideal for testing isolated flows and components in CI"
-    }
+      "ctBullet3": "Ideal for testing isolated flows and components in CI",
+      "modalTitle": "Key Differences"
+    },
+    "title": "Welcome to Cypress!"
   },
   "settingsPage": {
     "config": {
