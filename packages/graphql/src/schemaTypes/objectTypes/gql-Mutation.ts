@@ -133,6 +133,10 @@ export const mutation = mutationType({
       resolve: (source, args, ctx) => {
         ctx.actions.project.setCurrentTestingType(args.testingType)
 
+        // Trigger a versions call to collect data on cypress usage when switching current testing types
+        // Kick it off but don't want for it or worry about failures for it
+        ctx.versions().catch()
+
         return {}
       },
     })
