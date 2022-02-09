@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import cs from 'classnames'
 import MarkdownIt from 'markdown-it'
-// import Markdown from 'react-markdown'
+import Markdown from 'react-markdown'
 import { action, observable } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { useState, Component, MouseEvent, useEffect } from 'react'
@@ -19,7 +19,7 @@ import { Alias, AliasObject } from '../instruments/instrument-model'
 import CommandModel from './command-model'
 import TestError from '../errors/test-error'
 
-import ChevronIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/chevron-down-small_x16.svg'
+import ChevronIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/chevron-down-small_x8.svg'
 import DeleteIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/action-delete-circle_x16.svg'
 import HiddenIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/general-eye-closed_x16.svg'
 import PinIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/object-pin_x16.svg'
@@ -48,12 +48,17 @@ const CommandColumn = observer(({ model, isPinned }) => {
           <PinIcon /> : (
             <>
               {model._isPending() && <RunningIcon className='fa-spin' />}
-              {!model._isPending() && <span>{model.number + 100 || ''}</span>}
+              {!model._isPending() && <span>{model.number || ''}</span>}
             </>
           )}
       </div>
-      <span className='cmd-expander'>
-        {model.hasChildren && <ChevronIcon className={cs({ 'cmd-expander-is-open': model.isOpen })} onClick={toggleGroup} />}
+      <span className='cmd-expander-container'>
+        {model.hasChildren && (
+          <ChevronIcon
+            className={cs('cmd-expander', { 'cmd-expander-is-open': model.isOpen })}
+            onClick={toggleGroup}
+          />
+        )}
       </span>
     </div>
   )
@@ -65,7 +70,7 @@ const AliasReference = observer(({ aliasObj, model, aliasesWithDuplicates }) => 
   const message = `Found ${showCount ? aliasObj.ordinal : 'an'} alias for: '${aliasObj.name}'`
 
   return (
-    <span className="command-alias-container" key={aliasObj.name + aliasObj.cardinal}>
+    <span className="cmd-alias-container" key={aliasObj.name + aliasObj.cardinal}>
       <Tooltip placement='top' title={message} className='cy-tooltip'>
         <span>
           <span className={cs('command-alias', model.aliasType, { 'show-count': showCount })}>@{aliasObj.name}</span>
@@ -92,8 +97,10 @@ const Message = observer(({ model }) => (
       model.renderProps.indicator,
     )} />
     }
-    {/* <Markdown>{model.displayMessage}</Markdown> */}
-    {md.renderInline()}
+    <Markdown style={{ display: 'inline-block' }}>
+      {model.displayMessage}
+    </Markdown>
+    {/* {md.renderInline(model.displayMessage)} */}
   </>
 ))
 
@@ -222,50 +229,52 @@ const Command = (props) => {
     }
 
     if (model.type === 'child') {
-      return `- ${displayName}`
+      return `.${displayName}`
     }
 
     return displayName
   }
 
   return (
-    <li className={classNames}>
-      <div
-        className="cmd-wrapper"
-        onMouseEnter={() => snapshot(true)}
-        onMouseLeave={() => snapshot(false)}
-      >
-        <CommandColumn model={model} isPinned={isPinned} />
-        <FlashOnClick
-          message='Printed output to your console'
-          onClick={onClick}
-          shouldShowMessage={shouldShowClickMessage}
+    <>
+      <li className={classNames}>
+        <div
+          className="cmd-wrapper"
+          onMouseEnter={() => snapshot(true)}
+          onMouseLeave={() => snapshot(false)}
         >
-          <div
-            className={
-              cs('cmd-details',
+          <CommandColumn model={model} isPinned={isPinned} />
+          <FlashOnClick
+            message='Printed output to your console'
+            onClick={onClick}
+            shouldShowMessage={shouldShowClickMessage}
+          >
+            <div
+              className={
+                cs('cmd-details',
               `cmd-name-${modelName}`,
               `cmd-state-${model.state}`,
               {
                 'cmd-child-group': model.group !== undefined,
               })
-            }
-          >
-            <span className='cmd-method'>
-              <span>
-                {getCommandMethodName()}
-              </span>
-            </span>
-            <span className='cmd-message'>
-              {model.referencesAlias ?
-                <AliasesReferences model={model} aliasesWithDuplicates={aliasesWithDuplicates} />
-                :
-                <Message model={model} />
               }
-            </span>
-          </div>
-        </FlashOnClick>
-      </div>
+            >
+              <span className='cmd-method'>
+                <span>
+                  {getCommandMethodName()}
+                </span>
+              </span>
+              <span className='cmd-message'>
+                {model.referencesAlias ?
+                  <AliasesReferences model={model} aliasesWithDuplicates={aliasesWithDuplicates} />
+                  :
+                  <Message model={model} />
+                }
+              </span>
+            </div>
+          </FlashOnClick>
+        </div>
+      </li>
       {model.hasChildren && isOpen && (
         <ul>
           {model.children.map((child) => (
@@ -281,7 +290,7 @@ const Command = (props) => {
           ))}
         </ul>
       )}
-    </li>
+    </>
   )
 }
 

@@ -35,6 +35,8 @@ describe('src/cy/commands/querying/within', () => {
         // expect($input.get(0)).to.eq(input.get(0))
         // })
       })
+
+      cy.contains('foo')
     })
 
     it('scopes additional CONTAINS finders to the subject', () => {

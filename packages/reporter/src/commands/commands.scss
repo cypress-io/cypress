@@ -392,6 +392,7 @@
 
     .command-message {
       color: $gray-200;
+      display: inline-flex;
 
       strong {
         font-weight: 600;

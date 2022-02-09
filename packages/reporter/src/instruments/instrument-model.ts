@@ -15,7 +15,7 @@ export interface InstrumentProps {
   displayName?: string
   name?: string
   message?: string
-  type?: string
+  type?: string // 'event' | 'parent' | 'child' | 'system' | 'studio' ----> add? | 'nested'
   testCurrentRetry?: number
   state?: string | null
   referencesAlias?: Alias

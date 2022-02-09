@@ -73,7 +73,8 @@ export default class Command extends Instrument {
 
     return this._isOpen || (this._isOpen === null
       && (
-        (this.group && this.type === 'system' && this.hasChildren) ||
+        (this.hasChildren) ||
+        // (this.group && this.type === 'system' && this.hasChildren) ||
         _.some(this.children, (v) => v.hasChildren) ||
         _.last(this.children)?.isOpen ||
         (_.some(this.children, (v) => v.isLongRunning) && _.last(this.children)?.state === 'pending') ||
@@ -83,7 +84,6 @@ export default class Command extends Instrument {
   }
 
   @action toggleOpen () {
-    console.log('this', this)
     if (!this.hasChildren) return
 
     this._isOpen = !this.isOpen
