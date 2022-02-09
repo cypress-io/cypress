@@ -9,7 +9,17 @@
       "version": "16.12"
     }
   },
+  "plugins": [
+    "import"
+  ],
   "rules": {
+    "no-duplicate-imports": "off",
+    "import/no-duplicates": [
+      "error",
+      {
+        "considerQueryString": true
+      }
+    ],
     "arrow-body-style": "off",
     "no-unused-vars": "off",
     "react/jsx-filename-extension": [

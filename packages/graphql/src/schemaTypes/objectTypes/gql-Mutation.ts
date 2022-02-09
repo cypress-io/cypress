@@ -377,7 +377,7 @@ export const mutation = mutationType({
       type: 'Boolean',
       description: 'show the launchpad windows',
       resolve: async (_, args, ctx) => {
-        await ctx.actions.project.reconfigureProject()
+        await ctx.actions.project.reconfigureProject(true)
 
         return true
       },

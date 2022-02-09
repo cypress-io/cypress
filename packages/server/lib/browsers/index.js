@@ -116,7 +116,7 @@ module.exports = {
     return utils.getBrowsers()
   },
 
-  connectToExisting (browser, options = {}, automation) {
+  async connectToExisting (browser, options = {}, automation) {
     const browserLauncher = getBrowserLauncher(browser)
 
     if (!browserLauncher) {
@@ -124,6 +124,17 @@ module.exports = {
     }
 
     return browserLauncher.connectToExisting(browser, options, automation)
+  },
+
+  async connectToNewSpec (browser, options = {}, automation) {
+    const browserLauncher = getBrowserLauncher(browser)
+
+    if (!browserLauncher) {
+      utils.throwBrowserNotFound(browser.name, options.browsers)
+    }
+
+    // Instance will be null when we're dealing with electron. In that case we don't need a browserCriClient
+    return browserLauncher.connectToNewSpec(browser, options, automation)
   },
 
   open (browser, options = {}, automation, ctx) {

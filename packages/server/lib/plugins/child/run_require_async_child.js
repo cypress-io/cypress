@@ -67,7 +67,7 @@ function run (ipc, configFile, projectRoot) {
   const isValidDevServer = (config) => {
     const { devServer } = config
 
-    if (devServer && (typeof devServer.devServer === 'function' || typeof devServer === 'function' || typeof devServer.then === 'function')) {
+    if (devServer && typeof devServer === 'function') {
       return true
     }
 
@@ -113,30 +113,9 @@ function run (ipc, configFile, projectRoot) {
 
             const { devServer } = result.component
 
-            // Accounts for `devServer: require('@cypress/webpack-dev-server')
-            if (typeof devServer.devServer === 'function') {
-              on('dev-server:start', (options) => devServer.devServer(options, result.component && result.component.devServerConfig))
+            on('dev-server:start', (options) => devServer(options, result.component && result.component.devServerConfig))
 
-              return setupNodeEvents(on, config)
-            }
-
-            // Accounts for `devServer() {}`
-            if (typeof devServer === 'function') {
-              on('dev-server:start', (options) => devServer(options, result.component && result.component.devServerConfig))
-
-              return setupNodeEvents(on, config)
-            }
-
-            // Accounts for `devServer: import('@cypress/webpack-dev-server')`
-            if (result.component && typeof result.component.devServer.then === 'function') {
-              return Promise.resolve(result.component.devServer).then(({ devServer }) => {
-                if (typeof devServer === 'function') {
-                  on('dev-server:start', (options) => devServer(options, result.component && result.component.devServerConfig))
-                }
-
-                return setupNodeEvents(on, config)
-              })
-            }
+            return setupNodeEvents(on, config)
           })
         } else if (testingType === 'e2e') {
           if (!isValidSetupNodeEvents(result.e2e && result.e2e.setupNodeEvents)) {

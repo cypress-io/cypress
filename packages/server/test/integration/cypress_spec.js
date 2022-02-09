@@ -48,6 +48,7 @@ const appData = require(`../../lib/util/app_data`)
 const electronApp = require('../../lib/util/electron-app')
 const savedState = require(`../../lib/saved_state`)
 const { getCtx } = require(`../../lib/makeDataContext`)
+const { BrowserCriClient } = require(`../../lib/browsers/browser-cri-client`)
 
 const TYPICAL_BROWSERS = [
   {
@@ -292,6 +293,7 @@ describe('lib/cypress', () => {
       sinon.stub(runMode, 'waitForSocketConnection').resolves()
       sinon.stub(runMode, 'listenForProjectEnd').resolves({ stats: { failures: 0 } })
       sinon.stub(browsers, 'open')
+      sinon.stub(browsers, 'connectToNewSpec')
       sinon.stub(commitInfo, 'getRemoteOrigin').resolves('remoteOrigin')
     })
 
@@ -410,7 +412,7 @@ describe('lib/cypress', () => {
     })
 
     it('runs project by limiting spec files via config.testFiles string glob pattern', function () {
-      return cypress.start([`--run-project=${this.todosPath}`, `--config=testFiles=${this.todosPath}/tests/test2.coffee`])
+      return cypress.start([`--run-project=${this.todosPath}`, `--config={"e2e":{"specPattern":"${this.todosPath}/tests/test2.coffee"}}`])
       .then(() => {
         expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, { url: 'http://localhost:8888/__/#/specs/runner?file=tests/test2.coffee' })
         this.expectExitWith(0)
@@ -418,11 +420,11 @@ describe('lib/cypress', () => {
     })
 
     it('runs project by limiting spec files via config.testFiles as a JSON array of string glob patterns', function () {
-      return cypress.start([`--run-project=${this.todosPath}`, '--config=testFiles=["**/test2.coffee","**/test1.js"]'])
+      return cypress.start([`--run-project=${this.todosPath}`, '--config={"e2e":{"specPattern":["**/test2.coffee","**/test1.js"]}}'])
       .then(() => {
         expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, { url: 'http://localhost:8888/__/#/specs/runner?file=tests/test2.coffee' })
       }).then(() => {
-        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, { url: 'http://localhost:8888/__/#/specs/runner?file=tests/test1.js' })
+        expect(browsers.connectToNewSpec).to.be.calledWithMatch(ELECTRON_BROWSER, { url: 'http://localhost:8888/__/#/specs/runner?file=tests/test1.js' })
         this.expectExitWith(0)
       })
     })
@@ -977,15 +979,18 @@ describe('lib/cypress', () => {
           // during testing, do not try to connect to the remote interface or
           // use the Chrome remote interface client
           const criClient = {
-            ensureMinimumProtocolVersion: sinon.stub().resolves(),
-            close: sinon.stub().resolves(),
             on: sinon.stub(),
             send: sinon.stub(),
+          }
+          const browserCriClient = {
+            ensureMinimumProtocolVersion: sinon.stub().resolves(),
+            attachToTargetUrl: sinon.stub().resolves(criClient),
+            close: sinon.stub().resolves(),
           }
 
           sinon.stub(chromeBrowser, '_writeExtension').resolves()
 
-          sinon.stub(chromeBrowser, '_connectToChromeRemoteInterface').resolves(criClient)
+          sinon.stub(BrowserCriClient, 'create').resolves(browserCriClient)
           // the "returns(resolves)" stub is due to curried method
           // it accepts URL to visit and then waits for actual CRI client reference
           // and only then navigates to that URL
@@ -1010,7 +1015,7 @@ describe('lib/cypress', () => {
 
             expect(args[0], 'found and used Chrome').to.deep.eq(launchedChrome)
 
-            const browserArgs = args[2]
+            const browserArgs = args[3]
 
             expect(browserArgs.slice(0, 4), 'first 4 custom launch arguments to Chrome').to.deep.eq([
               'chrome', 'foo', 'bar', 'baz',
@@ -1021,7 +1026,8 @@ describe('lib/cypress', () => {
             expect(chromeBrowser._navigateUsingCRI).to.have.been.calledOnce
             expect(chromeBrowser._setAutomation).to.have.been.calledOnce
 
-            expect(chromeBrowser._connectToChromeRemoteInterface).to.have.been.calledOnce
+            expect(BrowserCriClient.create).to.have.been.calledOnce
+            expect(browserCriClient.attachToTargetUrl).to.have.been.calledOnce
           })
         })
 

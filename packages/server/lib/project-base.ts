@@ -473,6 +473,14 @@ export class ProjectBase<TServer extends Server> extends EE {
     this.server.changeToUrl(url)
   }
 
+  async closeBrowserTabs () {
+    return this.server.socket.closeBrowserTabs()
+  }
+
+  async resetBrowserState () {
+    return this.server.socket.resetBrowserState()
+  }
+
   async sendFocusBrowserMessage () {
     if (this.browser.family === 'firefox') {
       await browsers.setFocus()

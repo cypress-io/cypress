@@ -36,7 +36,7 @@ const tryToCall = function (win, method) {
   }
 }
 
-const _getAutomation = function (win, options, parent) {
+const _getAutomation = async function (win, options, parent) {
   const sendCommand = Bluebird.method((...args) => {
     return tryToCall(win, () => {
       return win.webContents.debugger.sendCommand
@@ -52,7 +52,11 @@ const _getAutomation = function (win, options, parent) {
     })
   }
 
-  const automation = new CdpAutomation(sendCommand, on, parent)
+  const sendClose = () => {
+    win.destroy()
+  }
+
+  const automation = await CdpAutomation.create(sendCommand, on, sendClose, parent)
 
   automation.onRequest = _.wrap(automation.onRequest, async (fn, message, data) => {
     switch (message) {
@@ -180,7 +184,7 @@ module.exports = {
 
   _getAutomation,
 
-  _render (url, automation, preferences = {}, options = {}) {
+  async _render (url, automation, preferences = {}, options = {}) {
     const win = Windows.create(options.projectRoot, preferences)
 
     if (preferences.browser.isHeadless) {
@@ -195,7 +199,7 @@ module.exports = {
 
     return this._launch(win, url, automation, preferences)
     .tap(_maybeRecordVideo(win.webContents, preferences))
-    .tap(() => automation.use(_getAutomation(win, preferences, automation)))
+    .tap(() => _getAutomation(win, preferences, automation).then((cdpAutomation) => automation.use(cdpAutomation)))
   },
 
   _launchChild (e, url, parent, projectRoot, state, options, automation) {
@@ -387,6 +391,10 @@ module.exports = {
       // https://github.com/cypress-io/cypress/issues/1872
       proxyBypassRules: '<-loopback>',
     })
+  },
+
+  async connectToNewSpec (browser, options, automation) {
+    this.open(browser, options.url, options, automation)
   },
 
   async connectToExisting () {

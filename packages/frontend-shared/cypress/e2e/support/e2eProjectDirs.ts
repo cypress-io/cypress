@@ -18,6 +18,7 @@ export const e2eProjectDirs = [
   'cookies',
   'cypress-in-cypress',
   'default-layout',
+  'devServer-dynamic-import',
   'downloads',
   'e2e',
   'empty-folders',

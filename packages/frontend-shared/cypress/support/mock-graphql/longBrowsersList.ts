@@ -84,11 +84,11 @@ export const longBrowsersList = [
     displayName: 'Edge Beta',
     family: 'chromium',
     channel: 'beta',
-    version: '79.0.309.71',
+    version: 'unsupported',
     path: '/Applications/Microsoft Edge Beta.app/Contents/MacOS/Microsoft Edge Beta',
     majorVersion: '79',
     isFocusSupported: true,
-    isVersionSupported: true,
+    isVersionSupported: false,
     disabled: false,
   },
   {
