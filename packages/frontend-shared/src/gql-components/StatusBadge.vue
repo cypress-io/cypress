@@ -38,7 +38,7 @@
   </template>
   <template v-else>
     <span
-      class="border rounded-full font-medium p-5px pr-16px text-size-14px leading-20px inline-flex items-center"
+      class="border rounded-full font-medium p-5px pr-16px text-size-14px leading-20px inline-flex items-center text-gray-600"
     >
       <i-cy-grommet_x16
         class="mx-4px h-16px w-16px icon-dark-gray-200 icon-dark-gray-50"
