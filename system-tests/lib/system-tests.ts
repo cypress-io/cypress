@@ -443,7 +443,7 @@ const normalizeStdout = function (str, options: any = {}) {
   // Different browsers have different cross-origin error messages
   .replace(crossOriginErrorRe, '[Cross origin error message]')
   // Replaces connection warning since Chrome or Firefox sometimes take longer to connect
-  .replace(/Still waiting to connect to .+, retrying in 1 second \(attempt .+\/.+\)/g, '')
+  .replace(/Still waiting to connect to .+, retrying in 1 second \(attempt .+\/.+\)\n/g, '')
 
   if (options.sanitizeScreenshotDimensions) {
     // screenshot dimensions
