@@ -1557,9 +1557,12 @@ module.exports = {
           trashAssets(config),
         ])
         .spread((sys = {}, browser = {}, specs = []) => {
-          // return only what is return to the specPattern
+          const originalSpecPattern = specPattern
+
           if (specPattern) {
-            specPattern = specsUtil.default.getPatternRelativeToCwd(specPattern, options.cwd)
+            // remap the spec pattern for terminal display purposes
+            // relative to the projectRoot
+            specPattern = specsUtil.default.getPatternRelativeToPath(specPattern, projectRoot)
           }
 
           specs = specs.filter((spec) => {
@@ -1569,12 +1572,16 @@ module.exports = {
           })
 
           if (!specs.length) {
+            // for error purposes: display the specPattern relative to the
+            // current working directly, not the project root as done above
+            const relativeCwdSpecPattern = specsUtil.default.getPatternRelativeToPath(originalSpecPattern, options.cwd)
+
             // did we use the spec pattern?
             if (specPattern) {
-              errors.throw('NO_SPECS_FOUND', options.cwd, specPattern)
+              errors.throw('NO_SPECS_FOUND', options.cwd, relativeCwdSpecPattern)
             } else {
               // else we looked in the integration folder
-              errors.throw('NO_SPECS_FOUND', config.integrationFolder, specPattern)
+              errors.throw('NO_SPECS_FOUND', config.integrationFolder, relativeCwdSpecPattern)
             }
           }
 
@@ -1591,7 +1598,6 @@ module.exports = {
               beforeSpecRun,
               afterSpecRun,
               projectRoot,
-              specPattern,
               socketId,
               parallel,
               onError,
@@ -1603,6 +1609,7 @@ module.exports = {
               specs,
               sys,
               tag,
+              specPattern,
               videosFolder: config.videosFolder,
               video: config.video,
               videoCompression: config.videoCompression,
