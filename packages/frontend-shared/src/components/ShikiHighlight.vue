@@ -26,7 +26,7 @@ shikiWrapperClasses computed property.
         'shiki-wrapper',
 
         // All styles contain these utility classes
-        'hover:border-indigo-200 relative text-14px leading-24px font-light',
+        'overflow-scroll hover:border-indigo-200 relative text-14px leading-24px font-light',
 
         /**
          * 1. Single line is forced onto one line without any borders. It loses
