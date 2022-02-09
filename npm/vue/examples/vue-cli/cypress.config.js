@@ -2,7 +2,7 @@ module.exports = {
   'video': false,
   'fixturesFolder': false,
   'component': {
-    devServer (cypressConfig) {
+    devServer (cypressDevServerConfig) {
       const { startDevServer } = require('@cypress/webpack-dev-server')
       const webpackConfig = require('@vue/cli-service/webpack.config')
 
@@ -19,7 +19,7 @@ module.exports = {
       }
 
       return startDevServer({
-        options: cypressConfig,
+        options: cypressDevServerConfig,
         webpackConfig: modifiedWebpackConfig,
       })
     },

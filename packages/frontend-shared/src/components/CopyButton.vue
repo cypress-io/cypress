@@ -28,7 +28,8 @@
 <script setup lang="ts">
 import { useClipboard } from '@vueuse/core'
 import { useI18n } from '@cy/i18n'
-import Button, { ButtonSizes, ButtonVariants } from '../components/Button.vue'
+import type { ButtonSizes, ButtonVariants } from '../components/Button.vue'
+import Button from '../components/Button.vue'
 import TransitionQuickFade from '../components/transitions/TransitionQuickFade.vue'
 
 const props = withDefaults(defineProps<{

@@ -169,7 +169,7 @@ const verifyFailure = (options) => {
 }
 
 export const createVerify = ({ fileName, hasPreferredIde }) => {
-  return (specTitle: string, props?: any) => {
+  return (specTitle: string, props: any) => {
     props.specTitle ||= specTitle
     props.fileName ||= fileName
     props.hasPreferredIde = hasPreferredIde

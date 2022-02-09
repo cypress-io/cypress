@@ -1,5 +1,9 @@
 @use '@packages/frontend-shared/src/styles/shared.scss';
 
+html {
+  @apply h-screen overflow-hidden;
+}
+
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.15s ease;
