@@ -1,6 +1,15 @@
 import type { AllCypressErrors } from './errors'
 
 /**
+ * A config validation result
+*/
+export interface ConfigValidationError {
+  key: string
+  type: string
+  value: any
+}
+
+/**
  * An "error like" is an object which may or may-not be an error,
  * but contains at least a name & message, and probably a stack
  */

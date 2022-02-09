@@ -8,7 +8,7 @@ import { humanTime, logError, parseResolvedPattern, pluralize } from './errorUti
 import { errPartial, errTemplate, fmt, theme, PartialErr } from './errTemplate'
 import { stackWithoutMessage } from './stackUtils'
 
-import type { ClonedError, CypressError, ErrorLike, ErrTemplateResult } from './errorTypes'
+import type { ClonedError, ConfigValidationError, CypressError, ErrorLike, ErrTemplateResult } from './errorTypes'
 
 const ansi_up = new AU()
 
@@ -680,13 +680,15 @@ export const AllCypressErrors = {
       Fix the error in your code and re-run your tests.`
     // happens when there is an error in configuration file like "cypress.json"
   },
-  // TODO: should this be basename or absolute path?
-  // TODO: what should details be here? isn't it an error?
-  SETTINGS_VALIDATION_ERROR: (configFileBaseName: string, errMessage: string) => {
+  SETTINGS_VALIDATION_ERROR: (configFileBaseName: string, validationResult: ConfigValidationError) => {
+    const { key, type, value } = validationResult
+
     return errTemplate`\
         We found an invalid value in the file: ${fmt.path(configFileBaseName)}
 
-        ${fmt.highlight(errMessage)}`
+        Expected ${fmt.highlight(key)} to be ${fmt.off(type)}.
+
+        Instead the value was: ${fmt.stringify(value)}`
     // happens when there is an invalid config value is returned from the
     // project's plugins file like "cypress/plugins.index.js"
   },

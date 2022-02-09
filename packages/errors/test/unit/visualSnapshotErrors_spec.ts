@@ -682,10 +682,27 @@ describe('visual error templates', () => {
       }
     },
     SETTINGS_VALIDATION_ERROR: () => {
-      const err = makeErr()
-
       return {
-        default: ['cypress.json', err.message],
+        default: ['cypress.json', {
+          key: 'defaultCommandTimeout',
+          type: 'a number',
+          value: false,
+        }],
+        invalidString: ['cypress.json', {
+          key: 'defaultCommandTimeout',
+          type: 'a number',
+          value: '1234',
+        }],
+        invalidObject: ['cypress.json', {
+          key: 'defaultCommandTimeout',
+          type: 'a number',
+          value: { foo: 'bar' },
+        }],
+        invalidArray: ['cypress.json', {
+          key: 'defaultCommandTimeout',
+          type: 'a number',
+          value: [1, 2, 3],
+        }],
       }
     },
     PLUGINS_CONFIG_VALIDATION_ERROR: () => {

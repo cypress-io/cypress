@@ -13,6 +13,8 @@ import origin from './util/origin'
 import pathHelpers from './util/path_helpers'
 import * as settings from './util/settings'
 
+import type { ConfigValidationError } from '@packages/errors'
+
 const debug = Debug('cypress:server:config')
 
 export const RESOLVED_FROM = ['plugin', 'env', 'default', 'runtime', 'config'] as const
@@ -45,8 +47,8 @@ const convertRelativeToAbsolutePaths = (projectRoot, obj) => {
 
 const validateFile = (file) => {
   return (settings) => {
-    return configUtils.validate(settings, (errMsg) => {
-      return errors.throw('SETTINGS_VALIDATION_ERROR', file, errMsg)
+    return configUtils.validate(settings, (validationResult: ConfigValidationError) => {
+      return errors.throw('SETTINGS_VALIDATION_ERROR', file, validationResult)
     })
   }
 }
