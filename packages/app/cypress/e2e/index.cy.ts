@@ -21,7 +21,7 @@ describe('App: Index', () => {
         cy.scaffoldProject('no-specs-no-storybook')
         cy.openProject('no-specs-no-storybook')
         cy.startAppServer('e2e')
-        cy.visitApp()
+        cy.__incorrectlyVisitAppWithIntercept()
 
         // With no specs present, the page renders two cards, one for scaffolding example specs,
         // another for creating a new blank spec.
@@ -801,7 +801,7 @@ describe('App: Index', () => {
         cy.scaffoldProject('react-code-gen')
         cy.openProject('react-code-gen')
         cy.startAppServer('component')
-        cy.visitApp()
+        cy.__incorrectlyVisitAppWithIntercept()
       })
 
       const checkCodeGenCandidates = (specs: string[]) => {

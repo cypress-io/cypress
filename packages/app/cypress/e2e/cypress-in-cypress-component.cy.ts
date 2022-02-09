@@ -51,6 +51,7 @@ describe('Cypress In Cypress', { viewportWidth: 1200 }, () => {
   })
 
   it('browser picker in runner calls mutation with current spec path', () => {
+    cy.__incorrectlyVisitAppWithIntercept()
     cy.contains('TestComponent.spec').click()
     cy.get('[data-model-state="passed"]').should('contain', 'renders the test component')
 

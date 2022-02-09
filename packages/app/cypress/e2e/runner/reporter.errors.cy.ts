@@ -80,7 +80,6 @@ describe('errors ui', {
       verifyOpenInIde: true,
     })
 
-
     verify('with assert()', {
       column: '(5|12)', // (chrome|firefox)
       message: `should be true`,
