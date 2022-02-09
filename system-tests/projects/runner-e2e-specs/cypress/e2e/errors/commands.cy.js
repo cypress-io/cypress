@@ -1,5 +1,3 @@
-import './setup'
-
 describe('commands', { defaultCommandTimeout: 0 }, () => {
   it('failure', () => {
     cy.get('#does-not-exist')

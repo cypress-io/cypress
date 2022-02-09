@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Page Title</title>
+</head>
+<body>
+  <div>
+    <p><a class="go-to-visit-error" href="errors.html?error-on-visit">Go to Visit Error</a></p>
+    <button class="trigger-sync-error">Trigger Sync Error</button>
+    <button class="trigger-async-error">Trigger Async Error</button>
+    <button class="trigger-unhandled-rejection">Trigger Unhandled Rejection</button>
+    <button class="define-window-onerror">Define window.onerror</button>
+  </div>
+  <p class="error-one"></p>
+  <p class="error-two"></p>
+
+  <script>
+    window.addEventListener('error', (event) => {
+      document.querySelector('.error-one').innerText = event.error.message
+    })
+
+    window.addEventListener('error', (event) => {
+      document.querySelector('.error-two').innerText = event.error.message
+    })
+
+    window.addEventListener('unhandledrejection', (event) => {
+      document.querySelector('.error-one').innerText = event.reason.message
+    })
+
+    window.addEventListener('unhandledrejection', (event) => {
+      document.querySelector('.error-two').innerText = event.reason.message
+    })
+
+    function one(message) {
+      two(message)
+    }
+
+    function two(message) {
+      three(message)
+    }
+
+    function three(message) {
+      throw new Error(message)
+    }
+
+    if (window.location.search.includes('error-on-visit')) {
+      one('visit error')
+    }
+
+    document.querySelector(".trigger-sync-error").addEventListener('click', function () {
+      one('sync error')
+    })
+
+    document.querySelector(".trigger-async-error").addEventListener('click', function () {
+      setTimeout(function () {
+        one('async error')
+      }, 100)
+    })
+
+    document.querySelector(".trigger-unhandled-rejection").addEventListener('click', function () {
+      (async () => one('promise rejection'))()
+    })
+
+    document.querySelector(".define-window-onerror").addEventListener('click', function () {
+      window.onerror = function() {}
+    })
+  </script>
+</body>
+</html>
