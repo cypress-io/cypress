@@ -7,8 +7,8 @@
     <div class="flex min-h-screen items-center justify-center">
       <DialogOverlay class="bg-gray-800 opacity-90 inset-0 fixed" />
 
-      <div class="bg-white rounded m-auto m-w-480px max-w-600px relative">
-        <div class="flex border-b-1px min-h-64px px-24px justify-between items-center">
+      <div class="bg-white rounded mx-auto min-w-480px max-w-600px relative">
+        <div class="flex border-b-1px min-h-55px px-24px justify-between items-center">
           <DialogTitle class="text-gray-900 text-18px">
             {{ title }}
           </DialogTitle>
@@ -30,7 +30,7 @@
           class="font-normal p-24px text-gray-700"
         >
           <i18n-t
-            v-if="!viewer && !browserError"
+            v-if="!viewer && !errorType"
             scope="global"
             keypath="topNav.login.bodyInitial"
           >
@@ -52,7 +52,7 @@
               {{ viewer.fullName || viewer.email }}
             </ExternalLink>
           </i18n-t>
-          <div v-else-if="browserError">
+          <div v-else-if="errorType === 'browserError'">
             <div
               class="rounded flex bg-red-100 mb-16px p-16px text-red-600 gap-8px items-center"
             >
@@ -69,10 +69,13 @@
           </div>
         </DialogDescription>
 
-        <div class="bg-gray-50 border-t-1px py-16px px-24px">
+        <div
+          v-if="errorType !== 'browserError'"
+          class="bg-gray-50 border-t-1px py-16px px-24px"
+        >
           <Auth
             :gql="props.gql"
-            :error="browserError"
+            :error-type="errorType"
             @continue="$emit('update:modelValue', false)"
           />
         </div>
@@ -130,14 +133,20 @@ const setIsOpen = (value: boolean) => {
 const { t } = useI18n()
 
 const viewer = computed(() => props.gql?.cloudViewer)
-const browserError = computed(() => props.gql.authState.name === 'AUTH_COULD_NOT_LAUNCH_BROWSER')
+const errorType = computed(() => {
+  if (props.gql.authState.name === 'AUTH_COULD_NOT_LAUNCH_BROWSER') {
+    return 'browserError'
+  }
+
+  return null
+})
 
 const title = computed(() => {
   if (viewer.value) {
     return t('topNav.login.titleSuccess')
   }
 
-  if (browserError.value) {
+  if (errorType.value === 'browserError') {
     return t('topNav.login.titleBrowserError')
   }
 

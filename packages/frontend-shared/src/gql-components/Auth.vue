@@ -1,6 +1,6 @@
 <template>
   <div
-    v-if="props.error"
+    v-if="props.errorType !== 'browserError'"
     class="flex gap-16px"
   >
     <Button
@@ -47,7 +47,6 @@
         #prefix
       >
         <i-cy-loading_x16
-          v-if="isLoggingIn"
           class="animate-spin icon-dark-white icon-light-gray-400"
         />
       </template>
@@ -75,7 +74,7 @@ const isOnline = useOnline()
 
 const props = defineProps<{
   gql: AuthFragment,
-  error?: boolean,
+  errorType?: 'browserError' | 'loginError' | null,
   showLogout?: boolean
 }>()
 
