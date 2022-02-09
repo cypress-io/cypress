@@ -1,8 +1,6 @@
-import './setup'
-
 describe('cy.visit', () => {
   it('onBeforeLoad assertion failure', () => {
-    cy.visit('/index.html', {
+    cy.visit('cypress/fixtures/index.html', {
       onBeforeLoad () {
         expect('actual').to.equal('expected')
       },
@@ -10,7 +8,7 @@ describe('cy.visit', () => {
   })
 
   it('onBeforeLoad exception', () => {
-    cy.visit('/index.html', {
+    cy.visit('cypress/fixtures/index.html', {
       onBeforeLoad () {
         ({}).bar()
       },
@@ -18,7 +16,7 @@ describe('cy.visit', () => {
   })
 
   it('onLoad assertion failure', () => {
-    cy.visit('/index.html', {
+    cy.visit('cypress/fixtures/index.html', {
       onLoad () {
         expect('actual').to.equal('expected')
       },
@@ -26,7 +24,7 @@ describe('cy.visit', () => {
   })
 
   it('onLoad exception', () => {
-    cy.visit('/index.html', {
+    cy.visit('cypress/fixtures/index.html', {
       onLoad () {
         ({}).bar()
       },
