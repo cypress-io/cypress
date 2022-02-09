@@ -4,6 +4,13 @@ import fetch from 'cross-fetch'
 import { agent } from '@packages/network'
 import type { DataContext } from '../DataContext'
 
+const proxiedFetch = function (this: any, input: RequestInfo, init?: RequestInit) {
+  return fetch.call(this, input, {
+    agent,
+    ...init,
+  })
+}
+
 /**
  * this.ctx.util....
  *
@@ -50,13 +57,6 @@ export class UtilDataSource {
   }
 
   get fetch () {
-    const proxiedFetch = (input: RequestInfo, init?: RequestInit) => {
-      return fetch.call(this, input, {
-        agent,
-        ...init,
-      })
-    }
-
     return proxiedFetch
   }
 }
