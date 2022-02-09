@@ -18,7 +18,7 @@
         <MenuItems
           class="rounded flex flex-col outline-transparent bg-gray-900 text-white
       right-0 z-40 absolute overflow-scroll"
-          :class="props.isRunning ? '-bottom-66px' : '-bottom-104px'"
+          :class="props.isRunning ? '-bottom-42px' : '-bottom-80px'"
         >
           <MenuItem
             v-for="item in menuItems"
