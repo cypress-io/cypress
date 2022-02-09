@@ -42,13 +42,13 @@ describe('InlineSpecListHeader', () => {
 
   it('exposes the result count correctly to assistive tech', () => {
     mountWithResultCount(0)
-    cy.contains(`0 ${ defaultMessages.specPage.matchPlural}`)
+    cy.contains('No Matches')
     .should('have.class', 'sr-only')
     .and('have.attr', 'aria-live', 'polite')
 
     mountWithResultCount(1)
-    cy.contains(`1 ${ defaultMessages.specPage.matchSingular}`).should('have.class', 'sr-only')
+    cy.contains('1 Match').should('have.class', 'sr-only')
     mountWithResultCount(100)
-    cy.contains(`100 ${ defaultMessages.specPage.matchPlural}`).should('have.class', 'sr-only')
+    cy.contains('100 Matches').should('have.class', 'sr-only')
   })
 })

@@ -9,7 +9,7 @@
         name="overlay"
         :classes="'fixed inset-0'"
       >
-        <DialogOverlay class="bg-gray-800 opacity-90 inset-0 fixed" />
+        <DialogOverlay class="bg-gray-800 opacity-90 fixed sm:inset-0" />
       </slot>
       <div
         data-cy="standard-modal"

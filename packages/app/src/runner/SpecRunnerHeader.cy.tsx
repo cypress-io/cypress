@@ -1,5 +1,5 @@
 import SpecRunnerHeader from './SpecRunnerHeader.vue'
-import { useAutStore, useSpecStore } from '../store'
+import { useAutStore } from '../store'
 import { SpecRunnerHeaderFragment, SpecRunnerHeaderFragmentDoc } from '../generated/graphql-test'
 import { createEventManager, createTestAutIframe } from '../../cypress/component/support/ctSupport'
 
@@ -7,12 +7,13 @@ function renderWithGql (gqlVal: SpecRunnerHeaderFragment) {
   const eventManager = createEventManager()
   const autIframe = createTestAutIframe()
 
-  return (<SpecRunnerHeader gql={gqlVal}
+  return (<SpecRunnerHeader
+    gql={gqlVal}
     eventManager={eventManager}
-    getAutIframe={() => autIframe} />)
+    getAutIframe={() => autIframe}/>)
 }
 
-describe('SpecRunnerHeader', () => {
+describe('SpecRunnerHeader', { viewportHeight: 500 }, () => {
   it('renders', () => {
     const autStore = useAutStore()
 
@@ -37,7 +38,7 @@ describe('SpecRunnerHeader', () => {
       },
     })
 
-    cy.get('[data-cy="header-selector"]').should('be.disabled')
+    cy.get('[data-cy="playground-activator"]').should('be.disabled')
 
     cy.percySnapshot()
   })
@@ -53,7 +54,8 @@ describe('SpecRunnerHeader', () => {
       },
     })
 
-    cy.get('[data-cy="header-selector"]').should('be.disabled')
+    cy.get('[data-cy="playground-activator"]').should('be.disabled')
+    cy.percySnapshot()
   })
 
   it('enables selector playground button by default', () => {
@@ -63,7 +65,7 @@ describe('SpecRunnerHeader', () => {
       },
     })
 
-    cy.get('[data-cy="header-selector"]').should('not.be.disabled')
+    cy.get('[data-cy="playground-activator"]').should('not.be.disabled')
   })
 
   it('shows url section if currentTestingType is e2e', () => {
@@ -83,6 +85,26 @@ describe('SpecRunnerHeader', () => {
     cy.get('[data-cy="aut-url"]').should('exist')
   })
 
+  it('url section handles long url/small viewport', {
+    viewportWidth: 500,
+  }, () => {
+    const autStore = useAutStore()
+
+    autStore.updateUrl('http://localhost:3000/pretty/long/url.spec.jsx')
+
+    cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
+      onResult: (gql) => {
+        gql.currentTestingType = 'e2e'
+      },
+      render: (gqlVal) => {
+        return renderWithGql(gqlVal)
+      },
+    })
+
+    cy.get('[data-cy="aut-url"]').should('exist')
+    cy.percySnapshot()
+  })
+
   it('does not show url section if currentTestingType is component', () => {
     const autStore = useAutStore()
 
@@ -97,20 +119,11 @@ describe('SpecRunnerHeader', () => {
       },
     })
 
+    cy.get('[data-cy="playground-activator"]').should('be.visible')
     cy.get('[data-cy="aut-url"]').should('not.exist')
   })
 
   it('shows current browser and possible browsers', () => {
-    const specStore = useSpecStore()
-
-    specStore.setActiveSpec({
-      relative: 'packages/app/src/runner/SpecRunnerHeader.spec.tsx',
-      name: 'packages/app/src/runner/SpecRunnerHeader.spec.tsx',
-      fileName: 'packages/app/src/runner/SpecRunnerHeader.spec.tsx',
-      absolute: '/Users/zachjw/work/cypress/packages/app/src/runner/SpecRunnerHeader.spec.tsx',
-      baseName: 'SpecRunnerHeader.spec.tsx',
-    })
-
     cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
       onResult: (ctx) => {
         ctx.currentBrowser = ctx.browsers?.find((x) => x.displayName === 'Chrome') ?? null
@@ -121,7 +134,27 @@ describe('SpecRunnerHeader', () => {
     })
 
     cy.get('[data-cy="select-browser"]').click()
-    cy.findByRole('listbox').within(() =>
+    cy.findByRole('list').within(() =>
       ['Chrome', 'Electron', 'Firefox'].forEach((browser) => cy.findAllByText(browser)))
+
+    cy.get('[data-cy="select-browser"] button[aria-controls]').focus().type(' ')
+    cy.contains('Firefox').should('be.hidden')
+  })
+
+  it('shows current viewport info', () => {
+    cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
+      render: (gqlVal) => {
+        return renderWithGql(gqlVal)
+      },
+    })
+
+    cy.get('[data-cy="viewport"]').click()
+    cy.contains('The viewport determines').should('be.visible')
+    cy.get('[data-cy="viewport"]').click()
+    cy.contains('The viewport determines').should('be.hidden')
+    cy.get('[data-cy="viewport"] button').focus().type(' ')
+    cy.contains('The viewport determines').should('be.visible')
+    cy.get('[data-cy="viewport"] button').focus().type('{enter}')
+    cy.contains('The viewport determines').should('be.hidden')
   })
 })
