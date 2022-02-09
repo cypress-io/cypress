@@ -1,5 +1,3 @@
-import './setup'
-
 describe('cy.should', { defaultCommandTimeout: 0 }, () => {
   it('callback assertion failure', () => {
     cy.wrap({}).should(() => {
