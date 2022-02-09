@@ -290,14 +290,16 @@
     "review": "Review the differences between each testing type",
     "codeExample": "Code Example",
     "compareTypes": {
-      "e2eTitle": "End-to-end Tests",
-      "e2eBullet1": "Visit URLs via",
-      "e2eBullet2": "Test flows and functionality across multiple pages.",
-      "e2eBullet3": "Ideal for testing integrated flows in CD workflows.",
-      "componentTitle": "Component Tests",
-      "ctBullet1": "Import components via",
-      "ctBullet2": "Test individual components of a design system in isolation",
-      "ctBullet3": "Ideal for testing isolated flows and components in CI",
+      "content": {
+        "e2eTitle": "End-to-end Tests",
+        "e2eBullet1": "Visit URLs via",
+        "e2eBullet2": "Test flows and functionality across multiple pages.",
+        "e2eBullet3": "Ideal for testing integrated flows in CD workflows.",
+        "componentTitle": "Component Tests",
+        "ctBullet1": "Import components via",
+        "ctBullet2": "Test individual components of a design system in isolation",
+        "ctBullet3": "Ideal for testing isolated flows and components in CI"
+      },
       "modalTitle": "Key Differences"
     },
     "title": "Welcome to Cypress!"
