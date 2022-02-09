@@ -1270,7 +1270,7 @@ jobs:
       resource_class:
         type: string
         default: medium
-    parallelism: 2
+    parallelism: 4
     steps:
       - run-new-ui-tests:
           browser: chrome

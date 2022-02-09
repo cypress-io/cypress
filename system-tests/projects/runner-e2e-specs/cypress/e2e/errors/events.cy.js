@@ -1,5 +1,3 @@
-import './setup'
-
 describe('event handlers', { defaultCommandTimeout: 0 }, () => {
   it('event assertion failure', () => {
     cy.on('window:load', () => {

@@ -3,14 +3,14 @@ import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 
 // Assert that either the the dialog is presented or the mutation is emitted, depending on
 // whether the test has a preferred IDE defined.
-const verifyIdeOpen = ({ file, action, hasPreferredIde }) => {
+const verifyIdeOpen = ({ fileName, action, hasPreferredIde }) => {
   if (hasPreferredIde) {
     cy.intercept('mutation-OpenFileInIDE', { data: { 'openFileInIDE': true } }).as('OpenIDE')
 
     action()
 
     cy.wait('@OpenIDE').then(({ request }) => {
-      expect(request.body.variables.input.absolute).to.include(file)
+      expect(request.body.variables.input.absolute).to.include(fileName)
     })
   } else {
     action()
@@ -20,26 +20,29 @@ const verifyIdeOpen = ({ file, action, hasPreferredIde }) => {
   }
 }
 
-export const verifyFailure = (options) => {
+const verifyFailure = (options) => {
   const {
     specTitle,
     hasCodeFrame = true,
-    verifyOpenInIde = true,
+    verifyOpenInIde,
     hasPreferredIde,
     column,
-    codeFrameText,
     originalMessage,
     message = [],
     notInMessage = [],
     command,
     stack,
-    file,
+    fileName,
     uncaught = false,
     uncaughtMessage,
   } = options
-  let { regex, line } = options
+  let { regex, line, codeFrameText } = options
 
-  regex = regex || new RegExp(`${file}:${line || '\\d+'}:${column}`)
+  if (!codeFrameText) {
+    codeFrameText = specTitle
+  }
+
+  regex = regex || new RegExp(`${fileName}:${line || '\\d+'}:${column}`)
 
   cy.contains('.runnable-title', specTitle).closest('.runnable').as('Root')
 
@@ -110,10 +113,10 @@ export const verifyFailure = (options) => {
 
   if (verifyOpenInIde) {
     verifyIdeOpen({
-      file,
+      fileName,
       hasPreferredIde,
       action: () => {
-        cy.get('@Root').contains('.runnable-err-stack-trace .runnable-err-file-path a', file)
+        cy.get('@Root').contains('.runnable-err-stack-trace .runnable-err-file-path a', fileName)
         .click('left')
       },
     })
@@ -155,51 +158,41 @@ export const verifyFailure = (options) => {
 
   if (verifyOpenInIde) {
     verifyIdeOpen({
-      file,
+      fileName,
       hasPreferredIde,
       action: () => {
-        cy.get('@Root').contains('.test-err-code-frame .runnable-err-file-path a', file)
+        cy.get('@Root').contains('.test-err-code-frame .runnable-err-file-path a', fileName)
         .click()
       },
     })
   }
 }
 
-const createVerifyTest = (modifier?: string) => {
-  return (title: string, opts: any, props?: any) => {
-    if (!props) {
-      props = opts
-      opts = null
-    }
+export const createVerify = ({ fileName, hasPreferredIde }) => {
+  return (specTitle: string, props: any) => {
+    props.specTitle ||= specTitle
+    props.fileName ||= fileName
+    props.hasPreferredIde = hasPreferredIde
 
-    props.specTitle ||= title
-
-    const verifyFn = props.verifyFn || verifyFailure.bind(null, props)
-
-    return (modifier ? it[modifier] : it)(title, verifyFn)
+    ;(props.verifyFn || verifyFailure).call(null, props)
   }
 }
 
-export const verify = {
-  it: createVerifyTest(),
-}
-
-verify.it['only'] = createVerifyTest('only')
-verify.it['skip'] = createVerifyTest('skip')
-
 export const verifyInternalFailure = (props) => {
-  const { method, stackMethod } = props
+  const { specTitle, method, stackMethod } = props
 
-  cy.get('.runnable-err-message')
-  .should('include.text', `thrown in ${method.replace(/\./g, '-')}`)
+  cy.contains('.runnable-title', specTitle).closest('.runnable').within(() => {
+    cy.get('.runnable-err-message')
+    .should('include.text', `thrown in ${method.replace(/\./g, '-')}`)
 
-  cy.get('.runnable-err-stack-expander > .collapsible-header').click()
+    cy.get('.runnable-err-stack-expander > .collapsible-header').click()
 
-  cy.get('.runnable-err-stack-trace')
-  .should('include.text', stackMethod || method)
+    cy.get('.runnable-err-stack-trace')
+    .should('include.text', stackMethod || method)
 
-  // this is an internal cypress error and we can only show code frames
-  // from specs, so it should not show the code frame
-  cy.get('.test-err-code-frame')
-  .should('not.exist')
+    // this is an internal cypress error and we can only show code frames
+    // from specs, so it should not show the code frame
+    cy.get('.test-err-code-frame')
+    .should('not.exist')
+  })
 }
