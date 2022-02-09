@@ -70,14 +70,14 @@ describe('<SpecsListHeader />', { keystrokeDelay: 0 }, () => {
     }
 
     mountWithSpecCount(0)
-    cy.contains('0 Matches')
+    cy.contains('No Matches')
     .should('be.visible')
     .and('have.attr', 'aria-live', 'polite')
 
     mountWithSpecCount(1)
-    cy.contains(`1 Match`).should('be.visible')
+    cy.contains('1 Match').should('be.visible')
     mountWithSpecCount(100)
-    cy.contains(`100 Matches`).should('be.visible')
+    cy.contains('100 Matches').should('be.visible')
   })
 
   it('shows the count correctly while searching', () => {
@@ -96,12 +96,12 @@ describe('<SpecsListHeader />', { keystrokeDelay: 0 }, () => {
     cy.contains('0 of 22 Matches')
 
     mountWithCounts(0, 1)
-    cy.contains(`0 of 1 Match`).should('be.visible')
+    cy.contains('0 of 1 Match').should('be.visible')
 
     mountWithCounts(1, 1)
-    cy.contains(`1 of 1 Match`).should('be.visible')
+    cy.contains('1 of 1 Match').should('be.visible')
 
     mountWithCounts(5, 22)
-    cy.contains(`5 of 22 Matches`).should('be.visible')
+    cy.contains('5 of 22 Matches').should('be.visible')
   })
 })
