@@ -1,5 +1,3 @@
-import './setup'
-
 describe('suite', () => {
   it('t1', () => {})
 })

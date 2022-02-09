@@ -1,7 +1,5 @@
-import './setup'
-
 describe('docs url', () => {
-  it('displays as button in interactive mode', () => {
+  it('displays as link in interactive mode', () => {
     Cypress.config('isInteractive', true)
     cy.viewport()
   })

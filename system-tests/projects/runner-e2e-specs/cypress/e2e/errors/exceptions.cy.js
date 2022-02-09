@@ -1,6 +1,4 @@
-import './setup'
-
-const outsideError = require('@tooling/system-tests/projects/todos/throws-error')
+const outsideError = require('../../../src/throws-error')
 
 describe('exception failures', () => {
   it('in spec file', () => {
