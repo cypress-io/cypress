@@ -4,7 +4,7 @@
     :key="list.title"
     class="min-w-164px"
   >
-    <h2 class="font-semibold text-gray-800">
+    <h2 class="font-medium text-gray-800">
       {{ list.title }}
     </h2>
     <hr class="border-gray-50 my-10px">
