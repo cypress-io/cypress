@@ -17,6 +17,13 @@ describe('App: Settings', () => {
     cy.findByText('Project Settings').should('be.visible')
   })
 
+  it('shows a button to log in if user is not connected', () => {
+    cy.visitApp()
+    cy.findByText('Settings').click()
+    cy.findByText('Project Settings').click()
+    cy.get('button').contains('Log In')
+  })
+
   it('shows the projectId section when there is a projectId', () => {
     cy.visitApp()
     cy.findByText('Settings').click()
@@ -31,6 +38,9 @@ describe('App: Settings', () => {
     cy.findByText('Settings').click()
     cy.findByText('Project Settings').click()
     cy.findByText('Record Key').should('be.visible')
+    cy.get('[data-cy="record-key"]').should('contain', '***')
+    cy.get('[aria-label="Record Key Visibility Toggle"]').click()
+    cy.get('[data-cy="record-key"]').should('contain', '2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa')
   })
 
   it('opens cloud settings when clicking on "Manage Keys"', () => {
