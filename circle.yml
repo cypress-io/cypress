@@ -457,7 +457,7 @@ commands:
           # TODO: How can we have preinstalled browsers on CircleCI?
           name: 'Install Chrome on Windows' 
           command: |
-            [[ $PLATFORM == 'windows' && '<<parameters.browser>>' == 'chrome' ]] && choco install googlechrome || true
+            [[ $PLATFORM == 'windows' && '<<parameters.browser>>' == 'chrome' ]] && choco install googlechrome
       - run:
           command: |
             cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --parallel -- --') || true
