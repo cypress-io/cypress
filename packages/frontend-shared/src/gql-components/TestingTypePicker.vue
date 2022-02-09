@@ -24,6 +24,8 @@
           :title-on="tt.key === currentTestingType ? t('setupPage.testingCard.running') : t('setupPage.testingCard.configured')"
           :title-off="t('setupPage.testingCard.notConfigured')"
           :status="tt.configured || false"
+          :testing-type="tt.key"
+          @launch-browser="emits('pick', tt.key, currentTestingType)"
         />
       </template>
     </Card>
@@ -34,7 +36,7 @@
 import { gql } from '@urql/vue'
 import type { TestingTypeEnum, TestingTypePickerFragment } from '../generated/graphql'
 import Card from '@cy/components/Card.vue'
-import StatusBadge from '@cy/components/StatusBadge.vue'
+import StatusBadge from '@cy/gql-components/StatusBadge.vue'
 import IconE2E from '~icons/cy/testing-type-e2e_x64.svg'
 import IconE2ESolid from '~icons/cy/testing-type-e2e-solid_x64.svg'
 import IconComponent from '~icons/cy/testing-type-component_x64.svg'

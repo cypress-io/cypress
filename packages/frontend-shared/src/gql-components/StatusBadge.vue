@@ -1,0 +1,107 @@
+<template>
+  <template v-if="status">
+    <div class="inline-flex items-center border rounded-full p-5px pr-16px text-size-14px leading-20px group relative text-jade-500">
+      <Menu>
+        <MenuButton
+          data-cy="status-badge-menu"
+          class="flex items-center justify-center focus:outline-transparent"
+          @click.stop
+        >
+          <i-cy-grommet_x16
+            class="mx-4px h-16px w-16px icon-light-jade-500 icon-dark-jade-500"
+          />
+          {{ titleOn }}
+          <i-cy-chevron-down-small_x8
+            class="ml-8px h-8px w-8px icon-dark-gray-500"
+          />
+        </MenuButton>
+        <MenuItems
+          class="rounded flex flex-col outline-transparent bg-gray-900 text-white
+      right-0 right-18px -bottom-104px z-40 absolute overflow-scroll"
+        >
+          <MenuItem
+            v-for="item in menuItems"
+            :key="item.name"
+          >
+            <button
+              :data-cy="item.name"
+              class="border-b border-b-gray-800 text-left py-8px px-16px bg-gray-700 min-w-max"
+              @click.stop="handleMenuClick(item.event)"
+            >
+              {{ item.name }}
+            </button>
+          </MenuItem>
+        </MenuItems>
+      </Menu>
+    </div>
+  </template>
+  <template v-else>
+    <span
+      class="inline-flex items-center border rounded-full p-5px pr-16px text-size-14px leading-20px text-gray-600"
+    >
+      <i-cy-grommet_x16
+        class="mx-4px h-16px w-16px icon-dark-gray-200 icon-dark-gray-50"
+      />
+      {{ titleOff }}
+    </span>
+  </template>
+</template>
+
+<script lang="ts" setup>
+import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
+import { useI18n } from '@cy/i18n'
+import { gql, useMutation } from '@urql/vue'
+import { TestingTypeSelectionAndReconfigureDocument, TestingTypeEnum } from '../generated/graphql'
+
+const props = defineProps<{
+  status: boolean,
+  titleOn: string,
+  titleOff: string,
+  testingType: TestingTypeEnum
+}>()
+
+const { t } = useI18n()
+
+const emit = defineEmits<{
+  (event: 'launchBrowser'): void
+}>()
+
+gql`
+mutation TestingTypeSelectionAndReconfigure($testingType: TestingTypeEnum!) {
+  setTestingTypeAndReconfigureProject(testingType: $testingType) {
+    currentTestingType
+    currentProject {
+      id
+      currentTestingType
+      isCTConfigured
+      isE2EConfigured
+      isLoadingConfigFile
+      isLoadingNodeEvents
+    }
+  }
+}
+`
+
+const mutation = useMutation(TestingTypeSelectionAndReconfigureDocument)
+
+type eventName = 'launchBrowser' | 'reconfigure'
+
+const menuItems: { name: string, event: eventName }[] = [
+  { name: t('setupPage.testingCard.launchBrowser'), event: 'launchBrowser' },
+  { name: t('setupPage.testingCard.reconfigure'), event: 'reconfigure' },
+]
+
+const handleMenuClick = (eventName: eventName) => {
+  switch (eventName) {
+    case 'launchBrowser':
+      emit(eventName)
+      break
+    case 'reconfigure':
+      mutation.executeMutation({ testingType: props.testingType })
+      break
+    default:
+      return
+  }
+}
+
+</script>

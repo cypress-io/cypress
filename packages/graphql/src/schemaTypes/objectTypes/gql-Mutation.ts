@@ -593,5 +593,19 @@ export const mutation = mutationType({
         return true
       },
     })
+
+    t.field('setTestingTypeAndReconfigureProject', {
+      description: 'Set the selected testing type, and reconfigure the project',
+      type: Query,
+      args: {
+        testingType: nonNull(arg({ type: TestingTypeEnum })),
+      },
+      resolve: async (source, args, ctx) => {
+        ctx.actions.project.setCurrentTestingType(args.testingType)
+        await ctx.actions.project.reconfigureProject(true)
+
+        return true
+      },
+    })
   },
 })
