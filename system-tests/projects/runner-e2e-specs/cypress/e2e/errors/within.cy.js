@@ -1,5 +1,3 @@
-import './setup'
-
 describe('cy.within', { defaultCommandTimeout: 0 }, () => {
   it('assertion failure', () => {
     cy.get('body').within(() => {
