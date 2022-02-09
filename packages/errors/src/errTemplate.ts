@@ -40,7 +40,7 @@ class Format {
   constructor (
     readonly type: keyof typeof fmtHighlight,
     readonly val: ToFormat,
-    readonly config?: FormatConfig,
+    readonly config: FormatConfig,
   ) {
     this.color = config.color || fmtHighlight[this.type]
   }
