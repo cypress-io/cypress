@@ -149,7 +149,7 @@ const formatNodeVersion = ({ resolvedNodeVersion, resolvedNodePath }, width) => 
   debug('formatting Node version. %o', { version: resolvedNodeVersion, path: resolvedNodePath })
 
   if (resolvedNodePath) {
-    return formatPath(`v${resolvedNodeVersion} (${resolvedNodePath})`, width)
+    return formatPath(`v${resolvedNodeVersion} ${gray(`(${resolvedNodePath})`)}`, width)
   }
 }
 
