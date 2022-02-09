@@ -4,7 +4,7 @@ const is = require('check-more-types')
 const path = require('path')
 const debug = require('debug')('cypress:server:args')
 const minimist = require('minimist')
-const { getPublicConfigKeys } = require('@packages/config')
+const { getBreakingRootKeys, getPublicConfigKeys } = require('@packages/config')
 
 const coerceUtil = require('./coerce')
 const proxyUtil = require('./proxy')
@@ -316,6 +316,29 @@ const parseSpecArgv = (pattern) => {
   return [...partial, sanitizeFinalPath(carry)]
 }
 
+/*
+ * Certain config options (such as specPattern) are invalid at the root,
+ * and can only be used inside a testing type. We want to be convenient
+ * for the user though, so when they pass them in as CLI args, we
+ * assume they're for the current testing type. This function moves
+ * them from the root into the current testing type, eg:
+ * { specPattern: 'foo.js' }
+ * ->
+ * { e2e: { specPattern: 'foo.js' } }
+ */
+const hoistInvalidRootOptions = (config, testingType) => {
+  if (!config[testingType]) {
+    config[testingType] = {}
+  }
+
+  getBreakingRootKeys().forEach(({ name }) => {
+    if (config[name]) {
+      config[testingType][name] = config[name]
+      delete config[name]
+    }
+  })
+}
+
 module.exports = {
   normalizeBackslashes,
 
@@ -384,7 +407,7 @@ module.exports = {
     }
 
     let { spec } = options
-    const { env, config, reporterOptions, outputPath, tag } = options
+    const { env, config, reporterOptions, outputPath, tag, testingType } = options
     let project = options.project || options.runProject
 
     // only accept project if it is a string
@@ -452,6 +475,16 @@ module.exports = {
       // convert config to an object
       // and store the config
       options.config = sanitizeAndConvertNestedArgs(config, 'config')
+    } else {
+      options.config = {}
+    }
+
+    // A user may pass in config options that are valid for
+    // a specific testing type, but invalid at the root level.
+    // We nest these automatically, making the assumption that
+    // we know what they meant.
+    if (testingType) {
+      hoistInvalidRootOptions(options.config, testingType)
     }
 
     // get a list of the available config keys
@@ -464,10 +497,6 @@ module.exports = {
     // this solves situations where we accept
     // root level arguments which also can
     // be set in configuration
-    if (options.config == null) {
-      options.config = {}
-    }
-
     _.extend(options.config, configValues)
 
     // remove them from the root options object

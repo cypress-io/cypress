@@ -595,6 +595,20 @@ describe('lib/util/args', () => {
         config: {},
       })
     })
+
+    it('moves testing-type specific config options', function () {
+      const result = argsUtil.toObject(['--testingType', 'component', '--config', 'specPattern=**/*.test.js'])
+
+      expect(result).to.deep.equal({
+        cwd,
+        _: [],
+        invokedFromCli: false,
+        config: {
+          component: { specPattern: '**/*.test.js' },
+        },
+        testingType: 'component',
+      })
+    })
   })
 
   context('--updating', () => {
