@@ -37,7 +37,7 @@
 import { gql } from '@urql/vue'
 import type { TestingTypeEnum, TestingTypePickerFragment } from '../generated/graphql'
 import Card from '@cy/components/Card.vue'
-import StatusBadge from '@cy/gql-components/StatusBadge.vue'
+import StatusBadge from './StatusBadge.vue'
 import IconE2E from '~icons/cy/testing-type-e2e_x64.svg'
 import IconE2ESolid from '~icons/cy/testing-type-e2e-solid_x64.svg'
 import IconComponent from '~icons/cy/testing-type-component_x64.svg'
