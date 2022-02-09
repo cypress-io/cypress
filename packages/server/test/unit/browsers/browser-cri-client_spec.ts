@@ -29,7 +29,8 @@ describe('lib/browsers/cri-client', function () {
 
     criImport.Version = sinon.stub()
     criImport.Version.withArgs({ host: HOST, port: PORT }).resolves({ webSocketDebuggerUrl: 'http://web/socket/url' })
-    criImport.Version.withArgs({ host: HOST, port: THROWS_PORT }).throws()
+    criImport.Version.withArgs({ host: HOST, port: THROWS_PORT })
+    .onFirstCall().throws()
     .onSecondCall().throws()
     .onThirdCall().resolves({ webSocketDebuggerUrl: 'http://web/socket/url' })
 
@@ -54,11 +55,11 @@ describe('lib/browsers/cri-client', function () {
       expect(client.attachToNewUrl).to.be.instanceOf(Function)
     })
 
-    it('throws an error when _connectAsync fails', function () {
+    it('throws an error when _connectAsync fails', async function () {
       (protocol._connectAsync as any).restore()
       sinon.stub(protocol, '_connectAsync').throws()
 
-      expect(getClient()).to.be.rejected
+      await expect(getClient()).to.be.rejected
     })
 
     it('retries when Version fails', async function () {
@@ -76,10 +77,12 @@ describe('lib/browsers/cri-client', function () {
 
     it('throws when Version fails more than allowed', async function () {
       sinon.stub(protocol, '_getDelayMsForRetry')
-      .onFirstCall().returns(500)
+      .onFirstCall().returns(100)
       .onSecondCall().returns(undefined)
 
-      expect(browserCriClient.BrowserCriClient.create(THROWS_PORT, 'Chrome', onError)).to.be.rejected
+      await expect(browserCriClient.BrowserCriClient.create(THROWS_PORT, 'Chrome', onError)).to.be.rejected
+
+      expect(criImport.Version).to.be.calledTwice
     })
 
     context('#ensureMinimumProtocolVersion', function () {
@@ -128,7 +131,7 @@ describe('lib/browsers/cri-client', function () {
 
         const browserClient = await getClient()
 
-        expect(browserClient.attachToTargetUrl('http://baz.com')).to.be.rejected
+        await expect(browserClient.attachToTargetUrl('http://baz.com')).to.be.rejected
       })
     })
 
@@ -168,7 +171,7 @@ describe('lib/browsers/cri-client', function () {
       it('throws when there is no currently attached target', async function () {
         const browserClient = await getClient() as any
 
-        expect(browserClient.closeCurrentTarget()).to.be.rejected
+        await expect(browserClient.closeCurrentTarget()).to.be.rejected
       })
     })
 
