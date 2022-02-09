@@ -3,7 +3,7 @@ import $errUtils from '../../cypress/error_utils'
 import { CommandsManager } from './commands_manager'
 import { LogsManager } from './logs_manager'
 import { Validator } from './validator'
-import { nullifyUnserializableValues, correctStackForCrossDomainError } from './util'
+import { correctStackForCrossDomainError, serializeRunnable } from './util'
 import { failedToSerializeSubject } from './failedSerializeSubjectProxy'
 
 export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: Cypress.State, config: Cypress.InternalConfig) {
@@ -171,7 +171,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
               state: {
                 viewportWidth: Cypress.state('viewportWidth'),
                 viewportHeight: Cypress.state('viewportHeight'),
-                runnable: nullifyUnserializableValues(Cypress.state('runnable')),
+                runnable: serializeRunnable(Cypress.state('runnable')),
               },
             })
           } catch (err: any) {

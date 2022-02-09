@@ -1,5 +1,4 @@
 import _ from 'lodash'
-import { nullifyUnserializableValues } from '../../../../src/cy/multi-domain/util'
 
 // @ts-ignore / session support is needed for visiting about:blank between tests
 describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDomain: true }, () => {
@@ -20,13 +19,41 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
   })
 
   it('passes runnable state to the secondary domain', () => {
-    const expectedRunnable = nullifyUnserializableValues(cy.state('runnable'))
+    const runnable = cy.state('runnable')
+    const expectedRunnable = {
+      clearTimeout: null,
+      isPending: null,
+      resetTimeout: null,
+      timeout: null,
+      id: runnable.id,
+      _currentRetry: runnable._currentRetry,
+      type: 'test',
+      title: 'passes runnable state to the secondary domain',
+      parent: {
+        id: runnable.parent.id,
+        type: 'suite',
+        title: 'multi-domain',
+        parent: {
+          id: runnable.parent.parent.id,
+          type: 'suite',
+          title: '',
+          ctx: {},
+        },
+        ctx: {},
+      },
+      ctx: {},
+    }
 
     cy.switchToDomain('foobar.com', [expectedRunnable], ([expectedRunnable]) => {
       const actualRunnable = cy.state('runnable')
 
-      expect(actualRunnable.id).to.equal(expectedRunnable.id)
-      expect(actualRunnable.title).to.equal(expectedRunnable.title)
+      // these functions are set in the secondary domain so just set them on the expectedRunnable
+      expectedRunnable.clearTimeout = actualRunnable.clearTimeout
+      expectedRunnable.isPending = actualRunnable.isPending
+      expectedRunnable.resetTimeout = actualRunnable.resetTimeout
+      expectedRunnable.timeout = actualRunnable.timeout
+
+      expect(actualRunnable).to.deep.equal(expectedRunnable)
     })
   })
 
