@@ -13,17 +13,17 @@ export {
   humanTime,
 }
 
-export const parseResolvedPattern = (baseFolder: string, globPattern: string) => {
-  // folderPath: /Users/bmann/Dev/playground/cypress/server/integration/nested.spec.js
-  // resolved: /Users/bmann/Dev/playground/cypress/integration/nested.spec.js
+const whileMatching = (othArr: string[]) => {
+  return (val: string, index: number) => {
+    return val === othArr[index]
+  }
+}
 
-  // folderPath: /Users/bmann/Dev/cypress/packages/server
-  // pattern: ../path/to/spec.js
-  // resolvedPath: /Users/bmann/Dev/cypress/packages/path/to/spec.js
+export const parseResolvedPattern = (baseFolder: string, globPattern: string) => {
   const resolvedPath = path.resolve(baseFolder, globPattern)
   const resolvedPathParts = resolvedPath.split(path.sep)
   const folderPathPaths = baseFolder.split(path.sep)
-  const commonPath = _.intersection(folderPathPaths, resolvedPathParts).join(path.sep)
+  const commonPath = _.takeWhile(folderPathPaths, whileMatching(resolvedPathParts)).join(path.sep)
   const remainingPattern = !commonPath ? resolvedPath : resolvedPath.replace(commonPath.concat(path.sep), '')
 
   return [commonPath, remainingPattern]

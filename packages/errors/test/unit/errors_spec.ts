@@ -5,6 +5,7 @@ import chai, { expect } from 'chai'
 import chalk from 'chalk'
 import sinon from 'sinon'
 import * as errors from '../../src'
+import { parseResolvedPattern } from '../../src/errorUtils'
 
 chai.use(require('@cypress/sinon-chai'))
 
@@ -97,6 +98,46 @@ describe('lib/errors', () => {
       const obj = errors.clone(err)
 
       expect(obj.message).to.eq('foo\u001b[34mbar\u001b[39m\u001b[33mbaz\u001b[39m')
+    })
+  })
+
+  describe('.parseResolvedPattern', () => {
+    const folderPath = '/dev/cypress/packages/server'
+
+    it('splits common paths', () => {
+      const pattern = '/dev/cypress/packages/server/cypress/integration/**notfound**'
+
+      const [resolvedBasePath, resolvedPattern] = parseResolvedPattern(folderPath, pattern)
+
+      expect(resolvedBasePath).to.eq('/dev/cypress/packages/server')
+      expect(resolvedPattern).to.eq('cypress/integration/**notfound**')
+    })
+
+    it('splits common paths factoring in ../', () => {
+      const pattern = '/dev/cypress/packages/server/../../integration/**notfound**'
+
+      const [resolvedBasePath, resolvedPattern] = parseResolvedPattern(folderPath, pattern)
+
+      expect(resolvedBasePath).to.eq('/dev/cypress')
+      expect(resolvedPattern).to.eq('integration/**notfound**')
+    })
+
+    it('splits common paths until falsy instead of doing an intersection', () => {
+      const pattern = '/private/var/cypress/integration/cypress/integration/**notfound**'
+
+      const [resolvedBasePath, resolvedPattern] = parseResolvedPattern(folderPath, pattern)
+
+      expect(resolvedBasePath).to.eq('')
+      expect(resolvedPattern).to.eq('/private/var/cypress/integration/cypress/integration/**notfound**')
+    })
+
+    it('splits common paths up directories until root is reached', () => {
+      const pattern = '/../../../../../../../cypress/integration/**notfound**'
+
+      const [resolvedBasePath, resolvedPattern] = parseResolvedPattern(folderPath, pattern)
+
+      expect(resolvedBasePath).to.eq('')
+      expect(resolvedPattern).to.eq('/cypress/integration/**notfound**')
     })
   })
 })
