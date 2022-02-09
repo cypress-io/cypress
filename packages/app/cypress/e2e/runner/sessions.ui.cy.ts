@@ -25,7 +25,11 @@ describe('sessions ui', {
       passCount: 3,
     })
 
-    cy.get('.test').each(($el) => cy.wrap($el).click())
+    const clickEl = ($el) => cy.wrap($el).click()
+
+    cy.get('.test').eq(0).then(clickEl)
+    cy.get('.test').eq(1).then(clickEl)
+    cy.get('.test').eq(2).then(clickEl)
 
     cy.get('.sessions-container').eq(0).click()
     .should('contain', '1')
