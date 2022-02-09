@@ -90,7 +90,7 @@ describe('<SpecsListHeader />', { keystrokeDelay: 0 }, () => {
     }
 
     mountWithCounts(0, 0)
-    cy.contains('0 of 0 Matches')
+    cy.contains('No Matches')
 
     mountWithCounts(0, 22)
     cy.contains('0 of 22 Matches')

@@ -23,7 +23,7 @@
               {{ t('components.fileSearch.matchesIndicator', { count: specCount, denominator: specCount, numerator: resultCount}) }}
             </span>
             <span v-else>
-              {{ t('components.fileSearch.matchesIndicatorEmptyFileSearch', { count: resultCount, denominator: resultCount}) }}
+              {{ t('components.fileSearch.matchesIndicatorEmptyFileSearch', { count: specCount, denominator: specCount}) }}
             </span>
             <span class="sr-only">{{ t(`createSpec.viewSpecPatternButton`) }} </span>
           </span>
