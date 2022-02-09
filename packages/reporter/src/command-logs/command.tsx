@@ -1,6 +1,7 @@
 import _ from 'lodash'
 import cs from 'classnames'
-import Markdown from 'markdown-it'
+import MarkdownIt from 'markdown-it'
+// import Markdown from 'react-markdown'
 import { action, observable } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { useState, Component, MouseEvent, useEffect } from 'react'
@@ -25,15 +26,15 @@ import PinIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/ico
 import RunningIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/status-running_x16.svg'
 import StateIcon from '../lib/state-icon'
 
-const md = new Markdown()
+const md = new MarkdownIt()
 
-const WrapWithTooltip = () => (
-  <Tooltip placement='top' title={visibleMessage(model)} className='cy-tooltip'>
-    <span>
-      <HiddenIcon className="command-invisible" />
-    </span>
-  </Tooltip>
-)
+// const WrapWithTooltip = () => (
+//   <Tooltip placement='top' title={visibleMessage(model)} className='cy-tooltip'>
+//     <span>
+//       <HiddenIcon className="command-invisible" />
+//     </span>
+//   </Tooltip>
+// )
 
 const CommandColumn = observer(({ model, isPinned }) => {
   const toggleGroup = () => {
@@ -52,8 +53,7 @@ const CommandColumn = observer(({ model, isPinned }) => {
           )}
       </div>
       <span className='cmd-expander'>
-        <ChevronIcon className={cs({ 'cmd-expander-is-open': model.isOpen })} onClick={toggleGroup} />
-        {model.hasChildren && <ChevronIcon className={cs({ 'is-open': model.isOpen })} onClick={toggleGroup} />}
+        {model.hasChildren && <ChevronIcon className={cs({ 'cmd-expander-is-open': model.isOpen })} onClick={toggleGroup} />}
       </span>
     </div>
   )
@@ -92,7 +92,8 @@ const Message = observer(({ model }) => (
       model.renderProps.indicator,
     )} />
     }
-    {model.displayMessage}
+    {/* <Markdown>{model.displayMessage}</Markdown> */}
+    {md.renderInline()}
   </>
 ))
 
@@ -110,9 +111,8 @@ const Command = (props) => {
     model,
     aliasesWithDuplicates,
     appState,
-    runnablesStore,
+    // runnablesStore,
     groupId,
-    children,
   } = props
 
   const displayName = model.displayName || model.name
@@ -125,8 +125,6 @@ const Command = (props) => {
 
   useEffect(() => {
     const shouldBePinned = appState.pinnedSnapshotId === model.id
-
-    console.log('appStateUpdate.pinnedSnapshotId update', appState.pinnedSnapshotId, model.id, shouldBePinned)
 
     if (shouldBePinned && !isPinned) {
       setIsPinned(true)
@@ -148,13 +146,39 @@ const Command = (props) => {
     isOpen,
   } = model
 
+  const showSnapshotTimeout = () => setTimeout(() => {
+    runnablesStore.showingSnapshot = true
+    events.emit('show:snapshot', model.id)
+  }, 50)
+
+  const snapshot = (show: boolean) => {
+    if (show) {
+      runnablesStore.attemptingShowSnapshot = true
+      showSnapshotTimeout()
+    } else {
+      runnablesStore.attemptingShowSnapshot = false
+      clearTimeout(showSnapshotTimeout() as TimeoutID)
+
+      setTimeout(() => {
+        // if we are currently showing a snapshot but
+        // we aren't trying to show a different snapshot
+        if (runnablesStore.showingSnapshot && !runnablesStore.attemptingShowSnapshot) {
+          runnablesStore.showingSnapshot = false
+          events.emit('hide:snapshot', model.id)
+        }
+      }, 50)
+    }
+  }
+
   const onClick = () => {
+    if (isDisabled) return
+
     const shouldBePinned = appState.pinnedSnapshotId === model.id
 
     if (shouldBePinned) {
       appState.pinnedSnapshotId = null
       events.emit('unpin:snapshot', id)
-      // this._snapshot(true)
+      snapshot(true)
     } else {
       appState.pinnedSnapshotId = model.id as number
       events.emit('pin:snapshot', id)
@@ -173,39 +197,64 @@ const Command = (props) => {
 
   const classNames = cs(
     'cmd',
-      `cmd-name-${modelName}`,
-      // `command-state-${model.state}`,
-      // `command-type-${model.type}`,
-      {
-        //   'command-is-studio': model.isStudio,
-        //   'command-is-event': !!model.event,
-        //   'command-is-invisible': model.visible != null && !model.visible,
-        //   'command-has-num-elements': model.state !== 'pending' && model.numElements != null,
-        'command-is-pinned': isPinned,
-        //   'command-with-indicator': !!model.renderProps.indicator,
-        //   'command-scaled': model.displayMessage && model.displayMessage.length > 100,
-        //   'no-elements': !model.numElements,
-        //   'command-has-snapshot': model.hasSnapshot,
-        //   'command-has-console-props': model.hasConsoleProps,
-        //   'multiple-elements': model.numElements > 1,
-        //   'command-has-children': model.hasChildren,
-        //   'command-is-child': model.isChild,
-        //   'command-is-open': isOpen,
-      },
+    // `command-state-${model.state}`,
+    // `command-type-${model.type}`,
+    {
+      //   'command-is-studio': model.isStudio,
+      //   'command-is-event': !!model.event,
+      //   'command-is-invisible': model.visible != null && !model.visible,
+      //   'command-has-num-elements': model.state !== 'pending' && model.numElements != null,
+      'command-is-pinned': isPinned,
+      //   'command-with-indicator': !!model.renderProps.indicator,
+      //   'command-scaled': model.displayMessage && model.displayMessage.length > 100,
+      //   'no-elements': !model.numElements,
+      //   'command-has-snapshot': model.hasSnapshot,
+      //   'command-has-console-props': model.hasConsoleProps,
+      //   'multiple-elements': model.numElements > 1,
+      //   'command-has-children': model.hasChildren,
+      //   'command-is-child': model.isChild,
+      //   'command-is-open': isOpen,
+    },
   )
+  const getCommandMethodName = () => {
+    if (model.event && model.type !== 'system') {
+      return `(${displayName})`
+    }
+
+    if (model.type === 'child') {
+      return `- ${displayName}`
+    }
+
+    return displayName
+  }
 
   return (
     <li className={classNames}>
-      <div className='cmd-wrapper'>
+      <div
+        className="cmd-wrapper"
+        onMouseEnter={() => snapshot(true)}
+        onMouseLeave={() => snapshot(false)}
+      >
         <CommandColumn model={model} isPinned={isPinned} />
         <FlashOnClick
           message='Printed output to your console'
           onClick={onClick}
           shouldShowMessage={shouldShowClickMessage}
         >
-          <div className="cmd-details">
+          <div
+            className={
+              cs('cmd-details',
+              `cmd-name-${modelName}`,
+              `cmd-state-${model.state}`,
+              {
+                'cmd-child-group': model.group !== undefined,
+              })
+            }
+          >
             <span className='cmd-method'>
-              <span>{model.event && model.type !== 'system' ? `(${displayName})` : displayName}</span>
+              <span>
+                {getCommandMethodName()}
+              </span>
             </span>
             <span className='cmd-message'>
               {model.referencesAlias ?
@@ -217,7 +266,21 @@ const Command = (props) => {
           </div>
         </FlashOnClick>
       </div>
-      {isOpen && children}
+      {model.hasChildren && isOpen && (
+        <ul>
+          {model.children.map((child) => (
+            <Command
+              key={child.id}
+              model={child}
+              appState={appState}
+              events={events}
+              runnablesStore={runnablesStore}
+              aliasesWithDuplicates={null}
+              groupId={model.id}
+            />
+          ))}
+        </ul>
+      )}
     </li>
   )
 }

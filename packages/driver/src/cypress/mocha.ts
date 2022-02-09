@@ -166,11 +166,14 @@ const createMocha = (specWindow) => {
 }
 
 const getRunner = function (_mocha) {
+  console.log('getRunner')
   Runner.prototype.run = function () {
     // reset our runner#run function
     // so the next time we call it
     // its normal again!
     restoreRunnerRun()
+
+    console.log('return this')
 
     // return the runner instance
     return this

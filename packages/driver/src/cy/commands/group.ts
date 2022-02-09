@@ -16,6 +16,7 @@ export default function (Commands, Cypress, cy) {
         throw new Error('missing first arg')
         // return $errUtils.throwErrByPath('group.missingLabel')
       }
+
       console.log('group', opts || opts.label, typeof opts)
 
       let options: GroupOptions
@@ -44,7 +45,8 @@ export default function (Commands, Cypress, cy) {
           // event: true, // don't include log in log count
           // type: 'parent',
           // message,
-          type: 'system',
+          // type: 'system',
+          type: options.type || 'system',
           groupStart: true,
           emitOnly: options.emitOnly !== undefined ? options.emitOnly : false,
           snapshot: options.snapshotStart || false,

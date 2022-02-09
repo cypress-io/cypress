@@ -225,6 +225,7 @@ export default (Commands, Cypress, cy, state) => {
       // }
       return cy.group({
         label: 'within',
+        type: 'child',
         $el: subject,
         message: subject,
         timeout: options.timeout,

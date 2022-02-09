@@ -88,18 +88,24 @@ export default class Hook implements HookProps {
     }
 
     if (command.group) {
-      // console.log(command.name, command.group.id)
+      console.log('GROUP!', command.name, command.group.id)
       // console.log(command)
-      // console.log('this.commands', this.commands)
+      console.log('this.commands', this.commands)
+      this.commands.forEach((cmd) => {
+        console.log('GROUP!', command.name, command.group.id)
+      })
+
       const groupCommand = _.find(this.commands, { id: command.group.id }) as CommandModel
-      // console.log(groupCommand)
+
+      console.log(groupCommand)
 
       if (groupCommand && groupCommand.addChild) {
-        groupCommand.addChild(command)
-      } else {
-        // if we cant find a command to attach to, treat this like an ordinary log
-        command.group = undefined
+        return groupCommand.addChild(command)
       }
+
+      console.log('treat this like an ordinary log')
+      // if we cant find a command to attach to, treat this like an ordinary log
+      command.group = undefined
     }
 
     const lastCommand = _.last(this.commands)

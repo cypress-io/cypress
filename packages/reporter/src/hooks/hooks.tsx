@@ -99,6 +99,7 @@ export interface HooksProps {
 }
 
 const Hooks = observer(({ state = appState, model }: HooksProps) => {
+  console.log('hooks', model.hooks)
   if (!model.hooks.length) {
     return (
       <ul className='hooks-container'>
@@ -107,11 +108,12 @@ const Hooks = observer(({ state = appState, model }: HooksProps) => {
     )
   }
 
-
   return (
     <ul className='hooks-container'>
       {model.hooks.map((hook) => {
-        if (hook.hasCommands || (hook.isStudio && state.studioActive && model.state === 'passed')) {
+        console.log(hook.hookName)
+        console.log(hook.commands)
+        if (hook.commands.length || (hook.isStudio && state.studioActive && model.state === 'passed')) {
           return <Hook appState={appState} key={hook.hookId} model={hook} showNumber={model.hookCount[hook.hookName] > 1} />
         }
 

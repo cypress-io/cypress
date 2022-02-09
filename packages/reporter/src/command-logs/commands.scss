@@ -28,23 +28,146 @@
   }
 }
 
-.cmd-method {
-  padding: 1px 2px 0;
-  display: inline-block;
-  font-size: 11px;
-  min-width: 80px;
-  font-weight: 600;
-  // color: $gray-200;
+.cmd-details {
+  .cmd-method {
+    padding: 1px 2px 0;
+    display: inline-block;
+    font-size: 11px;
+    min-width: 80px;
+    font-weight: 600;
+    // color: $gray-200;
+  }
+
+  .cmd-message {
+    // flex-grow: 2;
+    margin-left: 0;
+    overflow: hidden;
+    // white-space: nowrap;
+
+    // > span {
+    //   align-items: center;
+    //   display: flex;
+    // }
+  }
 }
 
-.cmd-message {
-  // flex-grow: 2;
-  margin-left: 0;
-  overflow: hidden;
-  // white-space: nowrap;
+.cmd-child-group {
+  margin-left: 15px;
+}
 
-  // > span {
-  //   align-items: center;
-  //   display: flex;
+
+// States
+
+.cmd-state-pending {
+
+}
+
+.cmd-state-failed {
+  
+}
+
+
+.command-is-pinned {
+  background: $indigo-1000;
+  border-left: 2px solid $pinned;
+
+  &,
+  &:hover {
+    box-shadow: 0 1px 2px rgba($black, 0.2) inset;
+  }
+
+  &:hover {
+    background: $indigo-900;
+  }
+
+  .cmd-wrapper-text {
+    padding-left: 3px;
+
+    .cmd-pin {
+      color: $pinned;
+
+      .icon-light {
+        fill: $purple-700;
+      }
+    }
+  }
+}
+
+
+// specific commands
+
+
+.cmd-name-assert {
+  .cmd-method {
+    span {
+      border-radius: 2px;
+      padding: 0 3px;
+      font-size: 11px;
+      display: inline-block;
+      line-height: 14px;
+    }
+  }
+
+  .cmd-message {
+    color: $gray-200;
+
+    strong {
+      font-weight: 600;
+      margin: 0 3px;
+    }
+  }
+
+  // .cmd-message-text {
+  //   white-space: normal;
   // }
+
+  &.cmd-state-pending {
+    .cmd-method {
+      span {
+        background-color: $pending;
+        color: $black;
+      }
+    }
+    .cmd-message {
+      color: $pending;
+
+      strong {
+        color: $indigo-300;
+      }
+    }
+  }
+
+  &.cmd-state-failed {
+    .cmd-method {
+      span {
+        background-color: $fail;
+        color: $black;
+      }
+    }
+    .cmd-message {
+      color: $fail;
+
+      strong {
+        color: $red-300;
+      }
+    }
+  }
+
+  &.cmd-state-passed {
+    .cmd-method {
+      color: $pass;
+
+      span {
+        background-color: $pass;
+        color: $black;
+      }
+    }
+    .cmd-message {
+      color: $jade-300;
+
+      strong {
+        color: $jade-200;
+      }
+    }
+  }
 }

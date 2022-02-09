@@ -71,7 +71,8 @@ class Attempt extends Component<AttemptProps> {
     const { model, appState } = this.props
 
     // HACK: causes component update when command log is added
-    model.commands.length
+    // model.commands.length
+    // console.log(model.isOpen)
 
     return (
       <li
@@ -114,6 +115,7 @@ interface AttemptsProps {
 }
 
 const Attempts = observer(({ appState, test, scrollIntoView }: AttemptsProps) => {
+  // console.log('Attempts', test.attempts[0])
 
   return (
     <ul className={cs('attempts', { 'has-multiple-attempts': test.hasMultipleAttempts })}>
