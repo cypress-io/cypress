@@ -6,6 +6,7 @@ Browser: browserNotGonnaBeFound was not found on your system or is not supported
 Cypress supports the following browsers:
 - chrome
 - chromium
+- chrome:canary
 - edge
 - electron
 - firefox

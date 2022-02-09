@@ -2648,6 +2648,7 @@ Browser: browserDoesNotExist was not found on your system or is not supported by
 Cypress supports the following browsers:
  - chrome
  - chromium
+ - chrome:canary
  - edge
  - electron
  - firefox
