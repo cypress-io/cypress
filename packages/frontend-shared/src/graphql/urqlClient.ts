@@ -8,7 +8,8 @@ import {
 } from '@urql/core'
 import { devtoolsExchange } from '@urql/devtools'
 import { useToast } from 'vue-toastification'
-import { client, Socket } from '@packages/socket/lib/browser'
+import type { Socket } from '@packages/socket/lib/browser'
+import { client } from '@packages/socket/lib/browser'
 
 import { cacheExchange as graphcacheExchange } from '@urql/exchange-graphcache'
 import { urqlCacheKeys } from '@packages/data-context/src/util/urqlCacheKeys'
