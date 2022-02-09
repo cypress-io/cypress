@@ -70,6 +70,7 @@ packages/socket/lib/*.js
 
 # from system-tests
 system-tests/.projects
+system-tests/.http-mitm-proxy
 system-tests/fixtures/large-img
 
 # from npm/react
