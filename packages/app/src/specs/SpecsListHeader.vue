@@ -17,7 +17,7 @@
           @click="emit('showSpecPatternModal')"
         >
           <span
-            class="rounded-r flex mr-1px px-16px items-center matches-button  group-hocus:text-indigo-500"
+            class="border-transparent rounded-r flex h-full border-t-1 border-b-1 border-r-1 mr-1px px-16px items-center matches-button group-hocus:bg-indigo-50 group-hocus:border-indigo-300  group-hocus:text-indigo-500"
           >
             {{ t('components.fileSearch.matchesIndicatorEmptyFileSearch', { count: resultCount, denominator: resultCount}) }}
             <span class="sr-only">{{ t(`createSpec.viewSpecPatternButton`) }} </span>
@@ -71,9 +71,7 @@ const onInput = (e: Event) => {
 </script>
 
 <style scoped>
-.matches-button {
-  @apply border-transparent h-full border-t-1 border-b-1 border-r-1 group-hocus:bg-indigo-50 group-hocus:border-indigo-300;
-}
+
 .matches-button:before {
   @apply h-full bg-gray-100 transform transition ease-in w-1px
   scale-y-50 duration-150 group-hocus:bg-indigo-300 group-hocus:scale-y-100;
