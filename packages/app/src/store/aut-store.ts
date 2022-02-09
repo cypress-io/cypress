@@ -7,27 +7,36 @@ interface AutStoreState {
   highlightUrl: boolean
   viewportWidth: number
   viewportHeight: number
+  defaultViewportHeight: number
+  defaultViewportWidth: number
   isLoadingUrl: boolean
   isLoading: boolean
   isRunning: boolean
   scriptError: ScriptError
   viewportUpdateCallback: (() => void) | null
+  scale: number
 }
 
 export const useAutStore = defineStore({
   id: 'aut-store',
   state: (): AutStoreState => {
+    const defaultViewportHeight = window.__CYPRESS_TESTING_TYPE__ === 'e2e' ? 660 : 500
+    const defaultViewportWidth = window.__CYPRESS_TESTING_TYPE__ === 'e2e' ? 1000 : 500
+
     // TODO(lachlan): depends on CT or E2E, should seed accordingly using `config`
     return {
       isLoadingUrl: false,
       highlightUrl: false,
       url: undefined,
-      viewportHeight: 660,
-      viewportWidth: 1000,
+      viewportHeight: defaultViewportHeight,
+      viewportWidth: defaultViewportWidth,
+      defaultViewportHeight,
+      defaultViewportWidth,
       isLoading: false,
       isRunning: false,
       viewportUpdateCallback: null,
       scriptError: null,
+      scale: 1,
     }
   },
 
@@ -68,6 +77,9 @@ export const useAutStore = defineStore({
     },
     setScriptError (err: ScriptError) {
       this.scriptError = err
+    },
+    setScale (scale) {
+      this.scale = scale
     },
   },
 

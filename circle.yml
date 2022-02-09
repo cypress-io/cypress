@@ -30,6 +30,7 @@ mainBuildFilters: &mainBuildFilters
         - develop
         - 10.0-release
         - unify-1001-windows-app-e2e-tests
+        - ryanm/fix/windows-builds
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -40,6 +41,7 @@ macWorkflowFilters: &mac-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ '10.0-release', << pipeline.git.branch >> ]
     - equal: [ unify-1001-windows-app-e2e-tests, << pipeline.git.branch >> ]
+    - equal: [ ryanm/fix/windows-builds, << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -50,6 +52,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ '10.0-release', << pipeline.git.branch >> ]
     - equal: [ unify-1001-windows-app-e2e-tests, << pipeline.git.branch >> ]
+    - equal: [ ryanm/fix/windows-builds, << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -454,7 +457,7 @@ commands:
           # TODO: How can we have preinstalled browsers on CircleCI?
           name: 'Install Chrome on Windows' 
           command: |
-            [[ $PLATFORM == 'windows' && '<<parameters.browser>>' == 'chrome' ]] && choco install googlechrome || true
+            [[ $PLATFORM == 'windows' && '<<parameters.browser>>' == 'chrome' ]] && choco install googlechrome || [[ $PLATFORM != 'windows' ]]
       - run:
           command: |
             cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --parallel -- --') || true
@@ -1262,8 +1265,12 @@ jobs:
 
   run-app-integration-tests-chrome:
     <<: *defaults
-    resource_class: medium
-    parallelism: 2
+    parameters:
+      <<: *defaultsParameters
+      resource_class:
+        type: string
+        default: medium
+    parallelism: 4
     steps:
       - run-new-ui-tests:
           browser: chrome
@@ -1577,7 +1584,7 @@ jobs:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "unify-1001-windows-app-e2e-tests" && "$CIRCLE_BRANCH" != "10.0-release" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "unify-1001-windows-app-e2e-tests" && "$CIRCLE_BRANCH" != "10.0-release" && "$CIRCLE_BRANCH" != "ryanm/fix/windows-builds" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -2446,6 +2453,7 @@ windows-workflow: &windows-workflow
     - run-app-integration-tests-chrome:
         name: windows-run-app-integration-tests-chrome
         executor: windows
+        resource_class: windows.medium
         context: test-runner:launchpad-tests
         requires:
           - windows-build
