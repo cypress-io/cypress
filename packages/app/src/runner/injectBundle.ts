@@ -3,11 +3,9 @@ import pDefer from 'p-defer'
 export const dfd = pDefer()
 
 export function injectBundle (namespace: string) {
-  const src = `/${namespace}/runner/cypress_runner.js`
-
   const script = document.createElement('script')
 
-  script.src = src
+  script.src = `/${namespace}/runner/cypress_runner.js`
   script.type = 'text/javascript'
 
   const link = document.createElement('link')
