@@ -105,7 +105,7 @@ export const AllCypressErrors = {
         Browser: ${fmt.highlight(browser)} was not found on your system or is not supported by Cypress.
 
         Cypress supports the following browsers:
-        ${fmt.listItems(['electron', 'chrome', 'chromium', 'edge', 'firefox'])}
+        ${fmt.listItems(['electron', 'chrome', 'chromium', 'chrome:canary', 'edge', 'firefox'])}
 
         You can also use a custom browser: https://on.cypress.io/customize-browsers
 

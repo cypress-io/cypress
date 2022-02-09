@@ -302,8 +302,10 @@ The error was: Cannot read property 'split' of undefined
 `
 
 exports['INVALID_CONFIG_OPTION'] = `
-\`test\` is not a valid configuration option
-\`foo\` is not a valid configuration option
+The following configuration options are invalid:
+
+ - test
+ - foo
 
 https://on.cypress.io/configuration
 

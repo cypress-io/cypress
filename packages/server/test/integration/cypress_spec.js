@@ -258,7 +258,8 @@ describe('lib/cypress', () => {
       return cypress.start(['--config=test=false', '--cwd=/foo/bar'])
       .then(() => {
         expect(errors.warning).to.be.calledWith('INVALID_CONFIG_OPTION')
-        expect(console.log).to.be.calledWithMatch('`test` is not a valid configuration option')
+        expect(console.log).to.be.calledWithMatch('The following configuration option is invalid:')
+        expect(console.log).to.be.calledWithMatch(`test`)
         expect(console.log).to.be.calledWithMatch('https://on.cypress.io/configuration')
       })
     })
@@ -267,8 +268,9 @@ describe('lib/cypress', () => {
       return cypress.start(['--config=test=false,foo=bar', '--cwd=/foo/bar'])
       .then(() => {
         expect(errors.warning).to.be.calledWith('INVALID_CONFIG_OPTION')
-        expect(console.log).to.be.calledWithMatch('`test` is not a valid configuration option')
-        expect(console.log).to.be.calledWithMatch('`foo` is not a valid configuration option')
+        expect(console.log).to.be.calledWithMatch('The following configuration options are invalid:')
+        expect(console.log).to.be.calledWithMatch('test')
+        expect(console.log).to.be.calledWithMatch('foo')
         expect(console.log).to.be.calledWithMatch('https://on.cypress.io/configuration')
 
         snapshotConsoleLogs('INVALID_CONFIG_OPTION')
@@ -644,7 +646,7 @@ describe('lib/cypress', () => {
       return cypress.start([`--run-project=${this.todosPath}`, '--key=asdf'])
       .then(() => {
         expect(errors.warning).to.be.calledWith('PROJECT_ID_AND_KEY_BUT_MISSING_RECORD_OPTION', 'abc123')
-        expect(console.log).to.be.calledWithMatch('You also provided your Record Key, but you did not pass the --record flag.')
+        expect(console.log).to.be.calledWithMatch('You also provided your Record Key, but you did not pass the')
         expect(console.log).to.be.calledWithMatch('cypress run --record')
         expect(console.log).to.be.calledWithMatch('https://on.cypress.io/recording-project-runs')
       })
@@ -657,7 +659,7 @@ describe('lib/cypress', () => {
 
       return cypress.start([`--run-project=${this.todosPath}`])
       .then(() => {
-        expect(errors.warning).to.be.calledWith('CANNOT_REMOVE_OLD_BROWSER_PROFILES', err.stack)
+        expect(errors.warning).to.be.calledWith('CANNOT_REMOVE_OLD_BROWSER_PROFILES', err)
         expect(console.log).to.be.calledWithMatch('Warning: We failed to remove old browser profiles from previous runs.')
         expect(console.log).to.be.calledWithMatch(err.message)
       })
@@ -701,7 +703,7 @@ describe('lib/cypress', () => {
 
         const found1 = _.find(argsSet, (args) => {
           return _.find(args, (arg) => {
-            return arg.message && arg.message.includes(
+            return arg.message && stripAnsi(arg.message).includes(
               `Browser: foo was not found on your system or is not supported by Cypress.`,
             )
           })
@@ -711,7 +713,7 @@ describe('lib/cypress', () => {
 
         const found2 = _.find(argsSet, (args) => {
           return _.find(args, (arg) => {
-            return arg.message && arg.message.includes(
+            return arg.message && stripAnsi(arg.message).includes(
               'Cypress supports the following browsers:',
             )
           })
@@ -722,7 +724,7 @@ describe('lib/cypress', () => {
         const found3 = _.find(argsSet, (args) => {
           return _.find(args, (arg) => {
             return arg.message && stripAnsi(arg.message).includes(
-              'Available browsers found on your system are:\n- chrome\n- chromium\n- chrome:canary\n- electron',
+              'Available browsers found on your system are:\n - chrome\n - chromium\n - chrome:canary\n - electron',
             )
           })
         })
@@ -1838,18 +1840,21 @@ describe('lib/cypress', () => {
       })
 
       it('reads config from a custom config file', function () {
+        const bus = new EE()
+
         return fs.writeJson(path.join(this.pristinePath, this.filename), {
           env: { foo: 'bar' },
           port: 2020,
         }).then(() => {
-          cypress.start([
+          return cypress.start([
           `--config-file=${this.filename}`,
           ])
           .then(() => {
             const options = Events.start.firstCall.args[0]
 
-            return Events.handleEvent(options, {}, {}, 123, 'open:project', this.pristinePath)
-          }).then(() => {
+            return Events.handleEvent(options, bus, {}, 123, 'open:project', this.pristinePath)
+          })
+          .then(() => {
             expect(this.open).to.be.called
 
             const cfg = this.open.getCall(0).args[0]
@@ -1862,6 +1867,8 @@ describe('lib/cypress', () => {
       })
 
       it('creates custom config file if it does not exist', function () {
+        const bus = new EE()
+
         return cypress.start([
           `--config-file=${this.filename}`,
         ])
@@ -1871,7 +1878,7 @@ describe('lib/cypress', () => {
 
           debug('first call arguments %o', Events.start.firstCall.args)
 
-          return Events.handleEvent(options, {}, {}, 123, 'open:project', this.pristinePath)
+          return Events.handleEvent(options, bus, {}, 123, 'open:project', this.pristinePath)
         }).then(() => {
           expect(this.open, 'open was called').to.be.called
 
