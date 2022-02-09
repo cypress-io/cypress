@@ -1,6 +1,5 @@
-import './setup'
-
 // simple example of typescript types
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 type Foo = {
   something: string
 }

@@ -1,5 +1,3 @@
-import './setup'
-
 // eslint-disable-next-line mocha/no-exclusive-tests
 describe.only('suite', () => {
   it('t1', () => {

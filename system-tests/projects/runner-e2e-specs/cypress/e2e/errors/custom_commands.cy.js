@@ -1,5 +1,3 @@
-import './setup'
-
 Cypress.Commands.add('failAssertion', () => {
   expect('actual').to.equal('expected')
 })
