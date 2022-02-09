@@ -1,4 +1,9 @@
+import os from 'os'
 import execa from 'execa'
+import getenv from 'getenv'
+import nmi from 'node-machine-id'
+import type { DataContext } from '..'
+import type { TestingType } from '@packages/types'
 
 interface Version {
   id: string
@@ -11,8 +16,29 @@ interface VersionData {
   latest: Version
 }
 
+const cloudEnv = getenv('CYPRESS_INTERNAL_CLOUD_ENV', process.env.CYPRESS_INTERNAL_ENV || 'development') as keyof typeof REMOTE_MANIFEST_URLS
+
+// TODO: Is this what we want or are we still using konfig for this?
+const REMOTE_MANIFEST_URLS = {
+  staging: 'https://download.cypress.io/desktop.json',
+  development: 'https://download.cypress.io/desktop.json',
+  production: 'https://download.cypress.io/desktop.json',
+}
+
+const machineId = async (): Promise<string | undefined> => {
+  try {
+    return nmi.machineId()
+  } catch (error) {
+    return undefined
+  }
+}
+
+type GetLatestVersionOptions = { initialLaunch: boolean, testingType: TestingType | null, currentCypressVersion: string }
+
 export class VersionsDataSource {
-  static result: undefined | Promise<string>
+  constructor (private ctx: DataContext) {}
+
+  static npmMetadata: undefined | Promise<string>
 
   /**
    * Returns most recent and current version of Cypress
@@ -30,34 +56,59 @@ export class VersionsDataSource {
   async versions (): Promise<VersionData> {
     const currentCypressVersion = require('@packages/root')
 
-    VersionsDataSource.result ??= execa(`npm`, [`view`, `cypress`, `time`, `--json`]).then((result) => result.stdout)
+    const latestVersion = await this.getLatestVersion({ initialLaunch: true, testingType: this.ctx.coreData.currentTestingType, currentCypressVersion })
 
-    const result = await VersionsDataSource.result
+    VersionsDataSource.npmMetadata ??= execa(`npm`, [`view`, `cypress`, `time`, `--json`]).then((result) => result.stdout)
 
-    const json = JSON.parse(result)
+    const npmMetadata = await VersionsDataSource.npmMetadata
+
+    const json = JSON.parse(npmMetadata)
 
     delete json['modified']
     delete json['created']
 
-    const latest = Object.keys(json).sort().reverse()?.[0]
-
-    if (!latest) {
-      throw Error('Could not get npm info for Cypress')
-    }
-
-    const latestVersion: Version = {
-      id: latest,
-      version: latest,
-      released: json[latest],
+    const latestVersionMetadata: Version = {
+      id: latestVersion,
+      version: latestVersion,
+      released: json[latestVersion],
     }
 
     return {
-      latest: latestVersion,
+      latest: latestVersionMetadata,
       current: {
         version: currentCypressVersion.version,
         released: json[currentCypressVersion.version] ?? new Date().toISOString(),
         id: currentCypressVersion.version,
       },
     }
+  }
+
+  private async getLatestVersion ({ initialLaunch, testingType, currentCypressVersion }: GetLatestVersionOptions): Promise<string> {
+    const url = REMOTE_MANIFEST_URLS[cloudEnv]
+    const id = await machineId()
+
+    const manifestHeaders: HeadersInit = {
+      'Content-Type': 'application/json',
+      'x-cypress-version': currentCypressVersion,
+      'x-os-name': os.platform(),
+      'x-arch': os.arch(),
+      'x-initial-launch': String(initialLaunch),
+    }
+
+    if (testingType) {
+      manifestHeaders['x-testing-type'] = testingType
+    }
+
+    if (id) {
+      manifestHeaders['x-machine-id'] = id
+    }
+
+    const manifestResponse = await this.ctx.util.fetch(url, {
+      headers: manifestHeaders,
+    })
+
+    const manifest = await manifestResponse.json()
+
+    return manifest.version
   }
 }

@@ -1,6 +1,7 @@
 import DataLoader from 'dataloader'
 import crypto from 'crypto'
 import fetch from 'cross-fetch'
+import { agent } from '@packages/network'
 import type { DataContext } from '../DataContext'
 
 /**
@@ -49,6 +50,13 @@ export class UtilDataSource {
   }
 
   get fetch () {
-    return fetch
+    const proxiedFetch = (input: RequestInfo, init?: RequestInit) => {
+      return fetch.call(this, input, {
+        agent,
+        ...init,
+      })
+    }
+
+    return proxiedFetch
   }
 }

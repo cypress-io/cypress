@@ -154,7 +154,7 @@ export class DataContext {
   }
 
   async versions () {
-    return new VersionsDataSource().versions()
+    return new VersionsDataSource(this).versions()
   }
 
   @cached

@@ -179,10 +179,10 @@ export class CombinedAgent {
         hostname: options.host,
         port: options.port,
       }) + options.path
+    }
 
-      if (!options.uri) {
-        options.uri = url.parse(options.href)
-      }
+    if (!options.uri) {
+      options.uri = url.parse(options.href)
     }
 
     debug('addRequest called %o', { isHttps, ..._.pick(options, 'href') })
