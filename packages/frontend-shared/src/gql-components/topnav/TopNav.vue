@@ -337,13 +337,13 @@ const resetPrompt = (event) => {
 const installCommand = computed(() => {
   switch (props.gql.currentProject?.packageManager) {
     case 'npm':
-      return 'npm install --save-dev'
+      return 'npm install --save-dev '
     case 'yarn':
-      return 'yarn add --dev'
+      return 'yarn add --dev '
     case 'pnpm':
-      return 'pnpm add --save-dev'
+      return 'pnpm add --save-dev '
     default:
-      return 'npm install --save-dev'
+      return 'npm install --save-dev '
   }
 })
 
