@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import { AutIframe } from '../../../src/runner/aut-iframe'
 import { EventManager } from '../../../src/runner/event-manager'
 import type { Socket } from '@packages/socket/lib/browser'
@@ -39,7 +38,6 @@ export const createTestAutIframe = (eventManager = createEventManager()) => {
   return new AutIframe(
     'Test Project',
     eventManager,
-    _,
     null, // CypressJQuery, shouldn't be using driver in component tests anyway
     // dom - imports driver which causes problems
     // so just stubbing it out for now
