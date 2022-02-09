@@ -40,7 +40,7 @@ const ErrorDetails = observer(({ err }) => {
   if (detailsBody) {
     return (
       <pre>
-        <details className='details-body' open>
+        <details className='details-body' open={!err.isCypressErr}>
           <summary>{detailsTitle}</summary>
           {detailsBody}
         </details>
