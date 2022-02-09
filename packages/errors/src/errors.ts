@@ -680,6 +680,12 @@ export const AllCypressErrors = {
       Fix the error in your code and re-run your tests.`
     // happens when there is an error in configuration file like "cypress.json"
   },
+  SETTINGS_VALIDATION_MSG_ERROR: (configFileBaseName: string, validationMsg: string) => {
+    return errTemplate`\
+      We found an invalid value in the file: ${fmt.path(configFileBaseName)}
+
+      ${fmt.highlight(validationMsg)}`
+  },
   SETTINGS_VALIDATION_ERROR: (configFileBaseName: string, validationResult: ConfigValidationError) => {
     const { key, type, value } = validationResult
 
@@ -689,9 +695,9 @@ export const AllCypressErrors = {
         Expected ${fmt.highlight(key)} to be ${fmt.off(type)}.
 
         Instead the value was: ${fmt.stringify(value)}`
-    // happens when there is an invalid config value is returned from the
-    // project's plugins file like "cypress/plugins.index.js"
   },
+  // happens when there is an invalid config value is returned from the
+  // project's plugins file like "cypress/plugins.index.js"
   // TODO: should this be relative or absolute?
   PLUGINS_CONFIG_VALIDATION_ERROR: (relativePluginsPath: string, errMsg: string) => {
     return errTemplate`\

@@ -47,7 +47,11 @@ const convertRelativeToAbsolutePaths = (projectRoot, obj) => {
 
 const validateFile = (file) => {
   return (settings) => {
-    return configUtils.validate(settings, (validationResult: ConfigValidationError) => {
+    return configUtils.validate(settings, (validationResult: ConfigValidationError | string) => {
+      if (_.isString(validationResult)) {
+        return errors.throw('SETTINGS_VALIDATION_MSG_ERROR', file, validationResult)
+      }
+
       return errors.throw('SETTINGS_VALIDATION_ERROR', file, validationResult)
     })
   }

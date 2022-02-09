@@ -705,6 +705,11 @@ describe('visual error templates', () => {
         }],
       }
     },
+    SETTINGS_VALIDATION_MSG_ERROR: () => {
+      return {
+        default: ['cypress.json', '`something` was not right'],
+      }
+    },
     PLUGINS_CONFIG_VALIDATION_ERROR: () => {
       const err = makeErr()
 
