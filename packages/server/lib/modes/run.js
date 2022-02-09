@@ -1572,16 +1572,16 @@ module.exports = {
           })
 
           if (!specs.length) {
-            // for error purposes: display the specPattern relative to the
-            // current working directly, not the project root as done above
-            const relativeCwdSpecPattern = specsUtil.default.getPatternRelativeToPath(originalSpecPattern, options.cwd)
-
             // did we use the spec pattern?
             if (specPattern) {
+              // for error purposes: display the specPattern relative to the
+              // current working directly, not the project root as done above
+              const relativeCwdSpecPattern = specsUtil.default.getPatternRelativeToPath(originalSpecPattern, options.cwd)
+
               errors.throw('NO_SPECS_FOUND', options.cwd, relativeCwdSpecPattern)
             } else {
               // else we looked in the integration folder
-              errors.throw('NO_SPECS_FOUND', config.integrationFolder, relativeCwdSpecPattern)
+              errors.throw('NO_SPECS_FOUND', config.integrationFolder)
             }
           }
 
