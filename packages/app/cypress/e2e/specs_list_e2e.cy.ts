@@ -72,20 +72,22 @@ describe('App: Spec List (E2E)', () => {
     cy.get('[data-cy="runnable-header"]').should('be.visible')
   })
 
-  it('cannot open the Spec File Row link in a new tab with "cmd + click"', async () => {
+  it('cannot open the Spec File Row link in a new tab with "cmd + click"', (done) => {
     let numTargets
     let newNumTargets
 
-    await Cypress.automation('remote:debugger:protocol', { command: 'Target.getTargets' }).then((res) => {
+    Cypress.automation('remote:debugger:protocol', { command: 'Target.getTargets' }).then((res) => {
       numTargets = res.targetInfos.length
-    })
 
-    cy.get('[data-cy="spec-item-link"]').click({ metaKey: true }).then(async () => {
-      await Cypress.automation('remote:debugger:protocol', { command: 'Target.getTargets' }).then((res) => {
-        newNumTargets = res.targetInfos.length
+      cy.get('[data-cy="spec-item-link"]').first().click({ metaKey: true }).then(async () => {
+        await Cypress.automation('remote:debugger:protocol', { command: 'Target.getTargets' }).then((res) => {
+          newNumTargets = res.targetInfos.length
+        })
+
+        expect(numTargets).to.eq(newNumTargets)
+
+        done()
       })
-
-      expect(numTargets).to.eq(newNumTargets)
     })
   })
 })
