@@ -1,5 +1,4 @@
 import os from 'os'
-import execa from 'execa'
 import nmi from 'node-machine-id'
 import type { DataContext } from '..'
 import type { TestingType } from '@packages/types'
@@ -22,7 +21,7 @@ type GetLatestVersionOptions = { initialLaunch: boolean, testingType: TestingTyp
 export class VersionsDataSource {
   constructor (private ctx: DataContext) {}
 
-  static npmMetadata: undefined | Promise<string>
+  static npmMetadata: undefined | Record<string, string>
 
   /**
    * Returns most recent and current version of Cypress
@@ -42,29 +41,29 @@ export class VersionsDataSource {
 
     const latestVersion = await this.getLatestVersion({ initialLaunch: true, testingType: this.ctx.coreData.currentTestingType, currentCypressVersion })
 
-    VersionsDataSource.npmMetadata ??= execa(`npm`, [`view`, `cypress`, `time`, `--json`]).then((result) => result.stdout)
-
-    const npmMetadata = await VersionsDataSource.npmMetadata
-
-    const json = JSON.parse(npmMetadata)
-
-    delete json['modified']
-    delete json['created']
+    VersionsDataSource.npmMetadata ??= await this.getVersionMetadata()
 
     const latestVersionMetadata: Version = {
       id: latestVersion,
       version: latestVersion,
-      released: json[latestVersion],
+      released: VersionsDataSource.npmMetadata[latestVersion] ?? new Date().toISOString(),
     }
 
     return {
       latest: latestVersionMetadata,
       current: {
-        version: currentCypressVersion.version,
-        released: json[currentCypressVersion.version] ?? new Date().toISOString(),
         id: currentCypressVersion.version,
+        version: currentCypressVersion.version,
+        released: VersionsDataSource.npmMetadata[currentCypressVersion.version] ?? new Date().toISOString(),
       },
     }
+  }
+
+  private async getVersionMetadata (): Promise<Record<string, string>> {
+    const response = await this.ctx.util.fetch('https://registry.npmjs.org/cypress')
+    const responseJson = await response.json()
+
+    return responseJson.time
   }
 
   private async getLatestVersion ({ initialLaunch, testingType, currentCypressVersion }: GetLatestVersionOptions): Promise<string> {
