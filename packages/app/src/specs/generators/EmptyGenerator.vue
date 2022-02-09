@@ -9,18 +9,24 @@
           :has-error="hasError"
         >
           <template #prefix>
-            <i-cy-document-blank_x16 class="icon-light-gray-50 icon-dark-gray-300" />
+            <i-cy-document-blank_x16
+              class="icon-light-gray-50 icon-dark-gray-300"
+              :class="{
+                'icon-light-error-50 icon-dark-error-400': hasError,
+              }"
+            />
           </template>
         </Input>
 
         <div
-          v-if="hasError && props.gql"
+          v-if="props.gql"
         >
           <div
-            class="rounded flex font-medium bg-error-100 p-16px text-error-600 gap-8px items-center"
+            v-if="hasError"
+            class="rounded flex font-medium bg-error-100 mt-16px p-14px ring-2 ring-error-100 text-error-600 gap-8px items-center"
           >
             <i-cy-errored-outline_x16 class="icon-dark-error-600" />
-            <span>{{ invalidSpecWarning }}<b>specPattern</b>.</span>
+            <span>{{ invalidSpecWarning }}<em class="font-medium">specPattern</em>:</span>
           </div>
 
           <div class="mt-16px">
@@ -53,7 +59,7 @@
           variant="outline"
           @click="emits('restart')"
         >
-          {{ t('components.button.cancel') }}
+          {{ t('components.button.back') }}
         </Button>
       </StandardModalFooter>
     </template>
@@ -174,7 +180,7 @@ watch(specFile, async (value) => {
   isValidSpecFile.value = result.data?.matchesSpecPattern ?? false
 }, { immediate: true })
 
-title.value = t('createSpec.e2e.importEmptySpec.header')
+title.value = t('createSpec.e2e.importEmptySpec.chooseFilenameHeader')
 
 const showExtensionWarning = computed(() => isValidSpecFile.value && !specFile.value.includes('.cy'))
 const recommendedFileName = computed(() => {
