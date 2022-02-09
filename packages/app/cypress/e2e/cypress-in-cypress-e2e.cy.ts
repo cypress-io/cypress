@@ -29,6 +29,29 @@ describe('Cypress In Cypress', { viewportWidth: 1200 }, () => {
     .should('be.visible')
 
     cy.percySnapshot('viewport info open')
+
+    cy.get('body').click()
+
+    cy.findByTestId('playground-activator').click()
+    cy.findByTestId('playground-selector').clear().type('li')
+
+    cy.percySnapshot('cy.get selector')
+
+    cy.findByTestId('playground-num-elements').contains('3 Matches')
+
+    cy.findByLabelText('Selector Methods').click()
+    cy.findByRole('menuitem', { name: 'cy.contains' }).click()
+
+    cy.findByTestId('playground-selector').clear().type('Item 1')
+
+    cy.percySnapshot('cy.contains selector')
+
+    cy.findByTestId('playground-num-elements').contains('1 Match')
+
+    cy.window().then((win) => cy.spy(win.console, 'log'))
+    cy.findByTestId('playground-print').click().window().then((win) => {
+      expect(win.console.log).to.have.been.calledWith('%cCommand:  ', 'font-weight: bold', 'cy.contains(\'Item 1\')')
+    })
   })
 
   it('navigation between specs and other parts of the app works', () => {

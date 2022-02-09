@@ -4,7 +4,7 @@
     class="border-t border-b bg-gray-50 border-gray-200 h-56px grid py-12px px-16px gap-12px grid-cols-[40px,1fr,auto] items-center "
   >
     <button
-      class="flex items-center justify-center h-full text-white transition duration-150 border rounded-md outline-none w-40px"
+      class="flex items-center justify-center h-full text-white transition duration-150 border rounded-md outline-none w-40px hover:default-ring"
       :class="[ selectorPlaygroundStore.isEnabled ? 'default-ring' : 'border-gray-200']"
       data-cy="playground-toggle"
       @click="toggleEnabled"
@@ -18,7 +18,7 @@
       <Menu #="{ open }">
         <MenuButton
           aria-label="Selector Methods"
-          class="flex items-center justify-center h-full text-white border-t border-b border-l border-gray-200 outline-none rounded-l-md w-40px"
+          class="flex items-center justify-center h-full text-white border border-gray-200 outline-none rounded-l-md w-40px hocus-default border-r-transparent"
           @click.stop
         >
           <i-cy-chevron-down-small_x16
@@ -220,7 +220,6 @@ function printSelected () {
 
 const { copy, isSupported } = useClipboard({ copiedDuring: 2000 })
 const copyToClipboard = () => {
-  copyText.value?.select()
   copy(selector.value)
 }
 </script>
@@ -231,5 +230,11 @@ const copyToClipboard = () => {
 }
 button.override-border {
   @apply border-gray-200
+}
+button.override-border:hover {
+  @apply border-indigo-300
+}
+button.override-border:focus {
+  @apply border-indigo-300
 }
 </style>
