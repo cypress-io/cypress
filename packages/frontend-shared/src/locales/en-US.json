@@ -125,8 +125,6 @@
     "pageTitle": "Specs",
     "newSpecButton": "New Spec",
     "searchPlaceholder": "Search Specs",
-    "matchPlural": "Matches",
-    "matchSingular": "Match",
     "componentSpecsHeader": "Component Specs",
     "e2eSpecsHeader": "E2E Specs",
     "gitStatusHeader": "Git Status",

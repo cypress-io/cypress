@@ -70,13 +70,13 @@ describe('<SpecsListHeader />', { keystrokeDelay: 0 }, () => {
     }
 
     mountWithResultCount(0)
-    cy.contains(`0 ${ defaultMessages.specPage.matchPlural}`)
+    cy.contains('No Matches')
     .should('be.visible')
     .and('have.attr', 'aria-live', 'polite')
 
     mountWithResultCount(1)
-    cy.contains(`1 ${ defaultMessages.specPage.matchSingular}`).should('be.visible')
+    cy.contains('1 Match').should('be.visible')
     mountWithResultCount(100)
-    cy.contains(`100 ${ defaultMessages.specPage.matchPlural}`).should('be.visible')
+    cy.contains('100 Matches').should('be.visible')
   })
 })
