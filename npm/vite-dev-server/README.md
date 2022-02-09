@@ -56,8 +56,8 @@ Install `@cypress/vue` or `@cypress/react` to get this package working properly
 - The HTML page calls a script that loads support file and the specs using a native `import()` function
 - Then triggers the loaded tests
 
-Vite is reponsible for compiling and bundling all the files. We use its error overlay to display any transpiling error.
-Omly runtime errors have to be handled through cypress
+Vite is responsible for compiling and bundling all the files. We use its error overlay to display any transpiling error.
+Only runtime errors have to be handled through cypress
 
 ## Changelog
 
