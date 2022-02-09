@@ -67,6 +67,22 @@ const setup = () => {
   handleSocketEvents(Cypress)
   handleSpecWindowEvents(cy)
 
+  let beforeScreenshotCallback
+
+  Cypress.on('before:screenshot', (config, cb) => {
+    beforeScreenshotCallback = cb
+
+    specBridgeCommunicator.toPrimary('before:screenshot', config)
+  })
+
+  specBridgeCommunicator.on('before:screenshot:end', () => {
+    beforeScreenshotCallback()
+  })
+
+  Cypress.on('after:screenshot', (config) => {
+    specBridgeCommunicator.toPrimary('after:screenshot', config)
+  })
+
   cy.onBeforeAppWindowLoad = onBeforeAppWindowLoad(Cypress, cy)
 
   specBridgeCommunicator.initialize(window)

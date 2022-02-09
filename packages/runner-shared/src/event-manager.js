@@ -442,12 +442,13 @@ export const eventManager = {
       reporterBus.emit('reporter:log:state:changed', displayProps)
     })
 
-    Cypress.on('before:screenshot', (config, cb) => {
+    const handleBeforeScreenshot = (config, cb) => {
       const beforeThenCb = () => {
         localBus.emit('before:screenshot', config)
         cb()
       }
 
+      // TODO: Should this come from primary or secondary?
       if (Cypress.env('NO_COMMAND_LOG')) {
         return beforeThenCb()
       }
@@ -459,11 +460,15 @@ export const eventManager = {
       }
 
       if (!wait) beforeThenCb()
-    })
+    }
 
-    Cypress.on('after:screenshot', (config) => {
+    Cypress.on('before:screenshot', handleBeforeScreenshot)
+
+    const handleAfterScreenshot = (config) => {
       localBus.emit('after:screenshot', config)
-    })
+    }
+
+    Cypress.on('after:screenshot', handleAfterScreenshot)
 
     _.each(driverToReporterEvents, (event) => {
       Cypress.on(event, (...args) => {
@@ -514,6 +519,16 @@ export const eventManager = {
     Cypress.multiDomainCommunicator.on('expect:domain', (domain) => {
       localBus.emit('expect:domain', domain)
     })
+
+    Cypress.multiDomainCommunicator.on('before:screenshot', (config) => {
+      const callback = () => {
+        Cypress.multiDomainCommunicator.toSpecBridge('before:screenshot:end')
+      }
+
+      handleBeforeScreenshot(config, callback)
+    })
+
+    Cypress.multiDomainCommunicator.on('after:screenshot', handleAfterScreenshot)
   },
 
   _runDriver (state) {

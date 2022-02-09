@@ -1,6 +1,7 @@
 import _ from 'lodash'
 import { AssertionError } from 'chai'
 import $stackUtils from '../../cypress/stack_utils'
+import $dom from '../../dom'
 
 export const correctStackForCrossDomainError = (serializedError: any, userInvocationStack: string) => {
   //  Since Errors sent over postMessage need to be serialized to Objects, we need to serialize them back into Error instances
@@ -16,4 +17,15 @@ export const correctStackForCrossDomainError = (serializedError: any, userInvoca
   reifiedError.stack = $stackUtils.replacedStack(reifiedError, userInvocationStack)
 
   return reifiedError
+}
+
+export const nullifyUnserializableValues = (obj) => {
+  // nullify values that cannot be cloned
+  return _.cloneDeepWith(obj, (val, key) => {
+    if (_.isFunction(val) || $dom.isDom(val)) {
+      return null
+    }
+
+    return undefined
+  })
 }

@@ -39,13 +39,6 @@ context('multi-domain misc', { experimentalSessionSupport: true, experimentalMul
     })
   })
 
-  // FIXME: hanging, nothing in console
-  it.skip('.screenshot()', () => {
-    cy.switchToDomain('foobar.com', () => {
-      cy.screenshot('multi-domain-screenshot-command')
-    })
-  })
-
   it('.wrap()', () => {
     cy.switchToDomain('foobar.com', () => {
       cy.wrap({ foo: 'bar' }).should('deep.equal', { foo: 'bar' })

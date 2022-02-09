@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import { nullifyUnserializableValues } from '../../../../src/cy/multi-domain/util'
 
 // @ts-ignore / session support is needed for visiting about:blank between tests
 describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDomain: true }, () => {
@@ -16,6 +17,33 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
     })
 
     cy.log('after switchToDomain')
+  })
+
+  it('passes runnable state to the secondary domain', () => {
+    const expectedRunnable = nullifyUnserializableValues(cy.state('runnable'))
+
+    cy.switchToDomain('foobar.com', [expectedRunnable], ([expectedRunnable]) => {
+      const actualRunnable = cy.state('runnable')
+
+      expect(actualRunnable.id).to.equal(expectedRunnable.id)
+      expect(actualRunnable.title).to.equal(expectedRunnable.title)
+    })
+  })
+
+  it('passes viewportWidth/Height state to the secondary domain', () => {
+    const expectedViewport = [320, 480]
+
+    cy.viewport(320, 480).then(() => {
+      const primaryViewport = [cy.state('viewportWidth'), cy.state('viewportHeight')]
+
+      expect(primaryViewport).to.deep.equal(expectedViewport)
+    })
+
+    cy.switchToDomain('foobar.com', [expectedViewport], ([expectedViewport]) => {
+      const secondaryViewport = [cy.state('viewportWidth'), cy.state('viewportHeight')]
+
+      expect(secondaryViewport).to.deep.equal(expectedViewport)
+    })
   })
 
   it('handles querying nested elements', () => {
