@@ -88,7 +88,8 @@ describe('SelectorPlayground', () => {
     cy.percySnapshot('Invalid playground selector')
   })
 
-  it('focuses and copies selector text', () => {
+  // TODO: UNIFY-999 Solve "write permission denied" error to test this in run mode
+  it.skip('focuses and copies selector text', () => {
     const { autIframe } = mountSelectorPlayground()
 
     cy.spy(autIframe, 'toggleSelectorHighlight')
@@ -98,11 +99,10 @@ describe('SelectorPlayground', () => {
     cy.get('@copy').click()
     cy.get('@copy').should('be.focused')
 
-    // TODO: UNIFY-999 Solve "write permission denied" error to test this in run mode
-    // cy.spy(navigator.clipboard, 'writeText').as('clipboardSpy')
+    cy.spy(navigator.clipboard, 'writeText').as('clipboardSpy')
     cy.get('[data-cy="playground-copy"]').click()
     cy.get('[data-cy="playground-copy-tooltip"]').should('be.visible').contains('Copied to clipboard')
-    // cy.get('@clipboardSpy').should('have.been.called')
+    cy.get('@clipboardSpy').should('have.been.called')
   })
 
   it('prints nothing to console when no selected elements found', () => {
