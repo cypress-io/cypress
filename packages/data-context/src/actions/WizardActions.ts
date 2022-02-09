@@ -71,17 +71,27 @@ export class WizardActions {
 
     assert(currentTestingType)
     assert(chosenLanguage)
-    assert(!this.ctx.lifecycleManager.isTestingTypeConfigured(currentTestingType), `Cannot call this if the testing type (${currentTestingType}) has not been configured`)
+
     switch (currentTestingType) {
       case 'e2e': {
         this.ctx.coreData.scaffoldedFiles = await this.scaffoldE2E()
         this.ctx.lifecycleManager.refreshMetaState()
+        this.ctx.update((coreData) => {
+          coreData.forceReconfigureProject = {
+            e2e: false,
+          }
+        })
 
         return chosenLanguage
       }
       case 'component': {
         this.ctx.coreData.scaffoldedFiles = await this.scaffoldComponent()
         this.ctx.lifecycleManager.refreshMetaState()
+        this.ctx.update((coreData) => {
+          coreData.forceReconfigureProject = {
+            component: false,
+          }
+        })
 
         return chosenLanguage
       }
@@ -192,6 +202,7 @@ export class WizardActions {
         status: 'skipped',
         file: {
           absolute: exampleScaffoldPath,
+          contents: '// Skipped',
         },
         description: 'Fixtures directory already exists, skipping',
       }
