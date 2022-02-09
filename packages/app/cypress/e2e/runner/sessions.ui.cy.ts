@@ -1,4 +1,4 @@
-import * as specLoader from './support/spec-loader'
+import { loadSpec } from './support/spec-loader'
 
 describe('sessions ui', {
   viewportWidth: 1000,
@@ -8,7 +8,7 @@ describe('sessions ui', {
   numTestsKeptInMemory: 1,
 }, () => {
   it('empty session with no data', () => {
-    specLoader.loadSpec({
+    loadSpec({
       fileName: 'blank_session.cy.js',
       passCount: 1,
     })
@@ -20,7 +20,7 @@ describe('sessions ui', {
   })
 
   it('shows message for new, saved, and recreated session', () => {
-    specLoader.loadSpec({
+    loadSpec({
       fileName: 'recreated_session.cy.js',
       passCount: 3,
     })
@@ -52,7 +52,7 @@ describe('sessions ui', {
   })
 
   it('multiple sessions in a test', () => {
-    specLoader.loadSpec({
+    loadSpec({
       fileName: 'multiple_sessions.cy.js',
       passCount: 1,
     })

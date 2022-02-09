@@ -152,13 +152,13 @@ export const createSuites = (win, suites = {}) => {
       fn = evalFn(win, obj)
     }
 
-    win.describe(suiteName, fn)
+    win.describe(suiteName, obj.options || {}, fn)
   })
 }
 
 export const generateMochaTestsForWin = (win, obj) => {
   if (typeof obj === 'function') {
-    win.eval(`( ${obj.toString()})()`)
+    win.eval(`(${obj.toString()})()`)
 
     return
   }

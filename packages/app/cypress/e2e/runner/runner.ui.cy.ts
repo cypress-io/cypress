@@ -1,9 +1,9 @@
-import * as specLoader from './support/spec-loader'
+import { loadSpec } from './support/spec-loader'
 
-describe('src/cypress/runner', () => {
+describe('runner ui', () => {
   describe('tests finish with correct state', () => {
     it('simple 1 test', () => {
-      specLoader.loadSpec({
+      loadSpec({
         fileName: 'simple-single-test.runner.cy.js',
         passCount: 1,
         failCount: 0,
@@ -11,7 +11,7 @@ describe('src/cypress/runner', () => {
     })
 
     it('simple 1 global test', () => {
-      specLoader.loadSpec({
+      loadSpec({
         fileName: 'simple-single-global-test.runner.cy.js',
         passCount: 1,
         failCount: 0,
@@ -19,7 +19,7 @@ describe('src/cypress/runner', () => {
     })
 
     it('simple 3 tests', () => {
-      specLoader.loadSpec({
+      loadSpec({
         fileName: 'three-simple-tests.runner.cy.js',
         passCount: 3,
         failCount: 0,
@@ -27,7 +27,7 @@ describe('src/cypress/runner', () => {
     })
 
     it('simple fail', () => {
-      specLoader.loadSpec({
+      loadSpec({
         fileName: 'simple-fail.runner.cy.js',
         passCount: 0,
         failCount: 1,
@@ -38,7 +38,7 @@ describe('src/cypress/runner', () => {
     })
 
     it('pass fail pass fail', () => {
-      specLoader.loadSpec({
+      loadSpec({
         fileName: 'pass-fail-pass-fail.runner.cy.js',
         passCount: 2,
         failCount: 2,
@@ -46,7 +46,7 @@ describe('src/cypress/runner', () => {
     })
 
     it('fail pass', () => {
-      specLoader.loadSpec({
+      loadSpec({
         fileName: 'fail-pass.runner.cy.js',
         passCount: 1,
         failCount: 1,
@@ -54,7 +54,7 @@ describe('src/cypress/runner', () => {
     })
 
     it('no tests', () => {
-      specLoader.loadSpec({
+      loadSpec({
         fileName: 'no-tests.runner.cy.js',
         passCount: 0,
         failCount: 0,
@@ -65,7 +65,7 @@ describe('src/cypress/runner', () => {
     })
 
     it('executes nested suite', () => {
-      specLoader.loadSpec({
+      loadSpec({
         fileName: 'nested-suite.runner.cy.js',
         passCount: 3,
         failCount: 0,
@@ -73,7 +73,7 @@ describe('src/cypress/runner', () => {
     })
 
     it('simple fail, catch cy.on(fail)', () => {
-      specLoader.loadSpec({
+      loadSpec({
         fileName: 'catch-fail.runner.cy.js',
         passCount: 1,
         failCount: 0,
@@ -83,7 +83,7 @@ describe('src/cypress/runner', () => {
     describe('hook failures', () => {
       describe('test failures w/ hooks', () => {
         it('test [only]', () => {
-          specLoader.loadSpec({
+          loadSpec({
             fileName: 'test-only.runner.cy.js',
             passCount: 1,
             failCount: 0,
@@ -91,7 +91,7 @@ describe('src/cypress/runner', () => {
         })
 
         it('test [pending]', () => {
-          specLoader.loadSpec({
+          loadSpec({
             fileName: 'test-pending.runner.cy.js',
             passCount: 0,
             failCount: 0,
@@ -100,7 +100,7 @@ describe('src/cypress/runner', () => {
         })
 
         it('fail with [before]', () => {
-          specLoader.loadSpec({
+          loadSpec({
             fileName: 'fail-with-before.runner.cy.js',
             passCount: 1,
             failCount: 1,
@@ -108,7 +108,7 @@ describe('src/cypress/runner', () => {
         })
 
         it('fail with [after]', () => {
-          specLoader.loadSpec({
+          loadSpec({
             fileName: 'fail-with-after.runner.cy.js',
             passCount: 1,
             failCount: 1,
@@ -116,7 +116,7 @@ describe('src/cypress/runner', () => {
         })
 
         it('fail with all hooks', () => {
-          specLoader.loadSpec({
+          loadSpec({
             fileName: 'fail-with-all-hooks.runner.cy.js',
             passCount: 0,
             failCount: 1,
@@ -128,7 +128,7 @@ describe('src/cypress/runner', () => {
 
   describe('other specs', () => {
     it('simple failing hook spec', () => {
-      specLoader.loadSpec({
+      loadSpec({
         fileName: 'failing-hooks.runner.cy.js',
         passCount: 1,
         failCount: 3,
@@ -155,7 +155,7 @@ describe('src/cypress/runner', () => {
     })
 
     it('async timeout spec', () => {
-      specLoader.loadSpec({
+      loadSpec({
         fileName: 'async-timeout.runner.cy.js',
         passCount: 0,
         failCount: 1,
@@ -163,7 +163,7 @@ describe('src/cypress/runner', () => {
     })
 
     it('scrolls each command into view', () => {
-      specLoader.loadSpec({
+      loadSpec({
         fileName: 'scrolls-command-log.runner.cy.js',
         passCount: 0,
         failCount: 1,
@@ -173,7 +173,7 @@ describe('src/cypress/runner', () => {
     })
 
     it('file with empty suites only displays no tests found', () => {
-      specLoader.loadSpec({
+      loadSpec({
         fileName: 'empty-suites.runner.cy.js',
         passCount: 0,
         failCount: 0,
@@ -222,7 +222,7 @@ describe('src/cypress/runner', () => {
   describe('reporter interaction', () => {
     // https://github.com/cypress-io/cypress/issues/8621
     it('user can stop test execution', () => {
-      specLoader.loadSpec({
+      loadSpec({
         fileName: 'stop-execution.runner.cy.js',
         passCount: 0,
         failCount: 1,
@@ -233,7 +233,7 @@ describe('src/cypress/runner', () => {
 
     // TODO: determine intended function in new runner
     // it('supports disabling command log reporter with env var NO_COMMAND_LOG', () => {
-    //   specLoader.loadSpec({
+    //   loadSpec({
     //     fileName: 'disabled-command-log.runner.cy.js',
     //     passCount: 0,
     //     failCount: 0,

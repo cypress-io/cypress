@@ -1,4 +1,4 @@
-import * as specLoader from './support/spec-loader'
+import { loadSpec } from './support/spec-loader'
 
 describe('hooks', {
   // Limiting tests kept in memory due to large memory cost
@@ -7,7 +7,7 @@ describe('hooks', {
 }, () => {
   describe('displays hooks', () => {
     beforeEach(() => {
-      specLoader.loadSpec({
+      loadSpec({
         fileName: 'basic.cy.js',
         passCount: 2,
       })
@@ -44,7 +44,7 @@ describe('hooks', {
 
   describe('open in IDE', () => {
     beforeEach(() => {
-      specLoader.loadSpec({
+      loadSpec({
         fileName: 'basic.cy.js',
         passCount: 2,
         hasPreferredIde: true,
@@ -70,7 +70,7 @@ describe('hooks', {
 
   describe('skipped tests', () => {
     beforeEach(() => {
-      specLoader.loadSpec({
+      loadSpec({
         fileName: 'skip.cy.js',
         passCount: 1,
       })
@@ -92,7 +92,7 @@ describe('hooks', {
 
   describe('only tests', () => {
     beforeEach(() => {
-      specLoader.loadSpec({
+      loadSpec({
         fileName: 'only.cy.js',
         passCount: 1,
       })
@@ -121,7 +121,7 @@ describe('hooks', {
   // https://github.com/cypress-io/cypress/issues/8189
   describe('rerun', () => {
     it('can rerun without timeout error leaking into next run (due to run restart)', () => {
-      specLoader.loadSpec({
+      loadSpec({
         fileName: 'rerun.cy.js',
         passCount: 1,
       })
