@@ -36,7 +36,7 @@ const tryToCall = function (win, method) {
   }
 }
 
-const _getAutomation = function (win, options, parent) {
+const _getAutomation = async function (win, options, parent) {
   const sendCommand = Bluebird.method((...args) => {
     return tryToCall(win, () => {
       return win.webContents.debugger.sendCommand
@@ -52,26 +52,39 @@ const _getAutomation = function (win, options, parent) {
     })
   }
 
-  const automation = new CdpAutomation(sendCommand, on, parent)
+  const sendClose = () => {
+    win.destroy()
+  }
 
-  if (!options.onScreencastFrame) {
-    // after upgrading to Electron 8, CDP screenshots can hang if a screencast is not also running
-    // workaround: start and stop screencasts between screenshots
-    // @see https://github.com/cypress-io/cypress/pull/6555#issuecomment-596747134
-    automation.onRequest = _.wrap(automation.onRequest, async (fn, message, data) => {
-      if (message !== 'take:screenshot') {
+  const automation = await CdpAutomation.create(sendCommand, on, sendClose, parent)
+
+  automation.onRequest = _.wrap(automation.onRequest, async (fn, message, data) => {
+    switch (message) {
+      case 'take:screenshot': {
+        // after upgrading to Electron 8, CDP screenshots can hang if a screencast is not also running
+        // workaround: start and stop screencasts between screenshots
+        // @see https://github.com/cypress-io/cypress/pull/6555#issuecomment-596747134
+        if (!options.onScreencastFrame) {
+          await sendCommand('Page.startScreencast', screencastOpts)
+          const ret = await fn(message, data)
+
+          await sendCommand('Page.stopScreencast')
+
+          return ret
+        }
+
         return fn(message, data)
       }
+      case 'focus:browser:window': {
+        win.show()
 
-      await sendCommand('Page.startScreencast', screencastOpts)
-
-      const ret = await fn(message, data)
-
-      await sendCommand('Page.stopScreencast')
-
-      return ret
-    })
-  }
+        return
+      }
+      default: {
+        return fn(message, data)
+      }
+    }
+  })
 
   return automation
 }
@@ -171,7 +184,7 @@ module.exports = {
 
   _getAutomation,
 
-  _render (url, automation, preferences = {}, options = {}) {
+  async _render (url, automation, preferences = {}, options = {}) {
     const win = Windows.create(options.projectRoot, preferences)
 
     if (preferences.browser.isHeadless) {
@@ -186,7 +199,7 @@ module.exports = {
 
     return this._launch(win, url, automation, preferences)
     .tap(_maybeRecordVideo(win.webContents, preferences))
-    .tap(() => automation.use(_getAutomation(win, preferences, automation)))
+    .tap(() => _getAutomation(win, preferences, automation).then((cdpAutomation) => automation.use(cdpAutomation)))
   },
 
   _launchChild (e, url, parent, projectRoot, state, options, automation) {
@@ -378,6 +391,10 @@ module.exports = {
       // https://github.com/cypress-io/cypress/issues/1872
       proxyBypassRules: '<-loopback>',
     })
+  },
+
+  async connectToNewSpec (browser, options, automation) {
+    this.open(browser, options.url, options, automation)
   },
 
   async connectToExisting () {

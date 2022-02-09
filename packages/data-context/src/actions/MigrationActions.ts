@@ -1,11 +1,12 @@
 import path from 'path'
-import fs from 'fs-extra'
 import type { DataContext } from '..'
 import {
+  formatConfig,
   moveSpecFiles,
   NonStandardMigrationError,
+  SpecToMove,
   supportFilesForMigration,
-} from '../util'
+} from '../sources'
 
 export class MigrationActions {
   constructor (private ctx: DataContext) { }
@@ -13,7 +14,7 @@ export class MigrationActions {
   async createConfigFile () {
     const config = await this.ctx.migration.createConfigString()
 
-    await this.ctx.actions.file.writeFileInProject('cypress.config.js', config).catch((error) => {
+    await this.ctx.fs.writeFile(this.ctx.lifecycleManager.configFilePath, config).catch((error) => {
       throw error
     })
 
@@ -26,14 +27,27 @@ export class MigrationActions {
     return this.ctx.migration.initialize()
   }
 
-  async renameSpecFiles () {
+  async renameSpecFiles (beforeSpecs: string[], afterSpecs: string[]) {
     if (!this.ctx.currentProject) {
       throw Error('Need to set currentProject before you can rename files')
     }
 
-    const e2eDirPath = this.ctx.path.join(this.ctx.currentProject, 'cypress', 'integration')
+    const specsToMove: SpecToMove[] = []
 
-    moveSpecFiles(e2eDirPath)
+    for (let i = 0; i < beforeSpecs.length; i++) {
+      const from = beforeSpecs[i]
+      const to = afterSpecs[i]
+
+      if (!from || !to) {
+        throw Error(`Must have matching to and from. Got from: ${from} and to: ${to}`)
+      }
+
+      specsToMove.push({ from, to })
+    }
+
+    const projectRoot = this.ctx.path.join(this.ctx.currentProject)
+
+    moveSpecFiles(projectRoot, specsToMove)
   }
 
   async renameSupportFile () {
@@ -43,26 +57,52 @@ export class MigrationActions {
 
     const result = await supportFilesForMigration(this.ctx.currentProject)
 
-    const beforeRelative = result.before[0]?.relative
-    const afterRelative = result.after[0]?.relative
+    const beforeRelative = result.before.relative
+    const afterRelative = result.after.relative
 
     if (!beforeRelative || !afterRelative) {
       throw new NonStandardMigrationError('support')
     }
 
-    fs.renameSync(
+    this.ctx.fs.renameSync(
       path.join(this.ctx.currentProject, beforeRelative),
       path.join(this.ctx.currentProject, afterRelative),
     )
   }
 
-  async startWizardReconfiguration () {
+  async finishReconfigurationWizard () {
     this.ctx.lifecycleManager.initializeConfigWatchers()
     this.ctx.lifecycleManager.refreshMetaState()
-    this.ctx.lifecycleManager.setCurrentTestingType('component')
+    await this.ctx.lifecycleManager.reloadConfig()
   }
 
-  nextStep () {
-    this.ctx.migration.nextStep()
+  async nextStep () {
+    const filteredSteps = this.ctx.migration.filteredSteps
+    const index = filteredSteps.indexOf(this.ctx.migration.step)
+
+    if (index === -1) {
+      throw new Error('Invalid step')
+    }
+
+    const nextIndex = index + 1
+
+    if (nextIndex < filteredSteps.length) {
+      const nextStep = filteredSteps[nextIndex]
+
+      if (nextStep) {
+        this.ctx.migration.setStep(nextStep)
+      }
+    } else {
+      await this.finishReconfigurationWizard()
+    }
+  }
+
+  async assertSuccessfulConfigMigration (configExtension: 'js' | 'ts' = 'js') {
+    const actual = formatConfig(await this.ctx.actions.file.readFileInProject(`cypress.config.${configExtension}`))
+    const expected = formatConfig(await this.ctx.actions.file.readFileInProject(`expected-cypress.config.${configExtension}`))
+
+    if (actual !== expected) {
+      throw Error(`Expected ${actual} to equal ${expected}`)
+    }
   }
 }

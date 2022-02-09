@@ -10,11 +10,10 @@
     <OpenBrowserList
       variant=""
       :gql="query.data.value.currentProject"
-      :is-browser-open="isBrowserOpen"
-      :is-browser-opening="isBrowserOpening"
       @navigated-back="backFn"
       @launch="launch"
       @close-browser="closeBrowserFn"
+      @focus-browser="setFocusToActiveBrowserWindow"
     />
   </template>
 </template>
@@ -23,7 +22,7 @@
 import { useMutation, gql, useQuery } from '@urql/vue'
 import OpenBrowserList from './OpenBrowserList.vue'
 import WarningList from '../warning/WarningList.vue'
-import { OpenBrowserDocument, OpenBrowser_CloseBrowserDocument, OpenBrowser_ClearTestingTypeDocument, OpenBrowser_LaunchProjectDocument } from '../generated/graphql'
+import { OpenBrowserDocument, OpenBrowser_CloseBrowserDocument, OpenBrowser_ClearTestingTypeDocument, OpenBrowser_LaunchProjectDocument, OpenBrowser_FocusActiveBrowserWindowDocument } from '../generated/graphql'
 import LaunchpadHeader from './LaunchpadHeader.vue'
 import { useI18n } from '@cy/i18n'
 import { computed, ref } from 'vue'
@@ -37,7 +36,6 @@ query OpenBrowser {
     currentTestingType
     isLoadingConfigFile
     isLoadingNodeEvents
-    isBrowserOpen
     ...OpenBrowserList
   }
   ...WarningList
@@ -81,6 +79,12 @@ mutation OpenBrowser_CloseBrowser {
 }
 `
 
+gql`
+mutation OpenBrowser_FocusActiveBrowserWindow {
+  focusActiveBrowserWindow
+}
+`
+
 const launchOpenProject = useMutation(OpenBrowser_LaunchProjectDocument)
 const clearCurrentTestingType = useMutation(OpenBrowser_ClearTestingTypeDocument)
 const closeBrowser = useMutation(OpenBrowser_CloseBrowserDocument)
@@ -107,11 +111,14 @@ const closeBrowserFn = () => {
   closeBrowser.executeMutation({})
 }
 
-const isBrowserOpen = computed(() => !!query.data.value?.currentProject?.isBrowserOpen)
-
-const isBrowserOpening = computed(() => !!launchOpenProject.fetching.value || launching.value)
-
 const headingDescription = computed(() => {
   return t('setupWizard.chooseBrowser.description', { testingType: query.data.value?.currentProject?.currentTestingType === 'component' ? 'component' : 'E2E' })
 })
+
+const focusActiveBrowserWindow = useMutation(OpenBrowser_FocusActiveBrowserWindowDocument)
+
+const setFocusToActiveBrowserWindow = () => {
+  focusActiveBrowserWindow.executeMutation({})
+}
+
 </script>

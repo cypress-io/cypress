@@ -1,5 +1,6 @@
 import { RecordKeyFragmentDoc } from '../../generated/graphql-test'
 import RecordKey from './RecordKey.vue'
+import { defaultMessages } from '@cy/i18n'
 
 describe('<RecordKey />', () => {
   const key = '1234-bbbb-5678-dddd'
@@ -36,8 +37,16 @@ describe('<RecordKey />', () => {
     cy.contains('code', key).should('not.exist')
   })
 
-  it('has a managed keys button', () => {
-    // Validate that a link is opened, or at least that the a href attribute is present
-    cy.findByText('Manage Keys').should('be.visible').click()
+  it('has a managed keys button and copy button', () => {
+    // the functionality of this button triggers a mutation so is tested in the settings page e2e tests
+    cy.contains('button', defaultMessages.settingsPage.recordKey.manageKeys)
+    .should('be.visible')
+    .and('not.be.disabled')
+
+    cy.contains('button', defaultMessages.clipboard.copy)
+    .should('be.visible')
+    .and('not.be.disabled')
+
+    cy.percySnapshot()
   })
 })

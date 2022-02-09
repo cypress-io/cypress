@@ -1,9 +1,7 @@
 <template>
   <div
-    class="grid grid-cols-2 outline-none children:cursor-pointer group h-full"
+    class="h-full outline-none ring-inset grid grid-cols-2 group focus-within:ring-indigo-300 focus-within:ring-1 children:cursor-pointer"
     data-cy="specs-list-row"
-    role="link"
-    tabindex="0"
   >
     <div>
       <slot name="file" />

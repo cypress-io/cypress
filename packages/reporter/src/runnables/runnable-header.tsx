@@ -3,11 +3,9 @@ import React, { Component, ReactElement } from 'react'
 
 import { StatsStore } from '../header/stats-store'
 import { formatDuration, getFilenameParts } from '../lib/util'
-import OpenFileInIDE from '../lib/open-file-in-ide'
 import FileNameOpener from '../lib/file-name-opener'
-import TextIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/document-text_x16.svg'
 
-const renderRunnableHeader = (children: ReactElement) => <div className="runnable-header">{children}</div>
+const renderRunnableHeader = (children: ReactElement) => <div className="runnable-header" data-cy="runnable-header">{children}</div>
 
 interface RunnableHeaderProps {
   spec: Cypress.Cypress['spec']
@@ -52,22 +50,11 @@ class RunnableHeader extends Component<RunnableHeaderProps> {
       relativeFile: relativeSpecPath,
     }
 
-    const openInIde = '__vite__' in window
-      ? (
-        <OpenFileInIDE fileDetails={fileDetails}>
-          <a href="#" onClick={(e) => e.preventDefault()}>
-            <TextIcon />
-            {fileDetails.displayFile || fileDetails.originalFile}
-          </a>
-        </OpenFileInIDE>
-      )
-      : <FileNameOpener fileDetails={fileDetails} hasIcon />
-
     return renderRunnableHeader(
       <>
-        {openInIde}
+        <FileNameOpener fileDetails={fileDetails} hasIcon />
         {Boolean(statsStore.duration) && (
-          <span className='duration'>{formatDuration(statsStore.duration)}</span>
+          <span className='duration' data-cy="spec-duration">{formatDuration(statsStore.duration)}</span>
         )}
       </>,
     )

@@ -8,14 +8,14 @@ module.exports = {
   'env': {
     'reactDevtools': true,
   },
-  'ignoreSpecPattern': [
-    '**/__snapshots__/*',
-    '**/__image_snapshots__/*',
-  ],
   'experimentalFetchPolyfill': true,
   'component': {
-    ignoreSpecPattern: 'examples/**/*',
-    devServer (cypressConfig, devServerConfig) {
+    'excludeSpecPattern': [
+      '**/__snapshots__/*',
+      '**/__image_snapshots__/*',
+      'examples/**/*',
+    ],
+    devServer (cypressDevServerConfig, devServerConfig) {
       const { startDevServer } = require('@cypress/webpack-dev-server')
       const path = require('path')
       const babelConfig = require('./babel.config.js')
@@ -73,7 +73,7 @@ module.exports = {
         },
       }
 
-      return startDevServer({ options: cypressConfig, disableLazyCompilation: false, webpackConfig })
+      return startDevServer({ options: cypressDevServerConfig, disableLazyCompilation: false, webpackConfig })
     },
   },
 }

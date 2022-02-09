@@ -1,7 +1,7 @@
 <template>
   <WizardLayout
     :back-fn="onBack"
-    :next-fn="onNext"
+    :next-fn="props.nextFn"
     :can-navigate-forward="canNavigateForward"
     class="max-w-640px"
   >
@@ -13,10 +13,10 @@
         :label="t('setupPage.projectSetup.frameworkLabel')"
         selector-type="framework"
         data-testid="select-framework"
-        @select-framework="val => emit('wizardSetup', 'framework', val)"
+        @select-framework="val => onWizardSetup('framework', val)"
       />
       <SelectFwOrBundler
-        v-if="props.gql.framework?.type && (!props.gql.bundler || bundlers.length > 1)"
+        v-if="props.gql.framework?.type && bundlers.length > 1"
         class="pt-3px"
         :options="bundlers || []"
         :value="props.gql.bundler?.type ?? undefined"
@@ -24,13 +24,13 @@
         :label="t('setupPage.projectSetup.bundlerLabel')"
         selector-type="bundler"
         data-testid="select-bundler"
-        @select-bundler="val => emit('wizardSetup', 'bundler', val)"
+        @select-bundler="val => onWizardSetup('bundler', val)"
       />
       <SelectLanguage
         :name="t('setupPage.projectSetup.languageLabel')"
         :options="languages || []"
-        :value="props.gql.language?.id ?? 'js'"
-        @select="val => emit('wizardSetup', 'codeLanguage', val)"
+        :value="props.gql.language?.type ?? 'js'"
+        @select="val => onWizardSetup('codeLanguage', val)"
       />
     </div>
   </WizardLayout>
@@ -42,16 +42,15 @@ import WizardLayout from './WizardLayout.vue'
 import SelectFwOrBundler from './SelectFwOrBundler.vue'
 import SelectLanguage from './SelectLanguage.vue'
 import { gql } from '@urql/core'
-import { EnvironmentSetupFragment, EnvironmentSetup_ClearTestingTypeDocument } from '../generated/graphql'
+import type { WizardUpdateInput, EnvironmentSetupFragment } from '../generated/graphql'
+import {
+  EnvironmentSetup_ClearTestingTypeDocument,
+  EnvironmentSetup_WizardUpdateDocument,
+} from '../generated/graphql'
+
 import { useI18n } from '@cy/i18n'
 import { sortBy } from 'lodash'
-import type { CurrentStep, WizardSetupData } from './Wizard.vue'
 import { useMutation } from '@urql/vue'
-
-const emit = defineEmits<{
-  (event: 'navigate', toPage: CurrentStep): void
-  <K extends keyof WizardSetupData>(event: 'wizardSetup', key: K, val: WizardSetupData[K]): void
-}>()
 
 gql`
 fragment EnvironmentSetup on Wizard {
@@ -101,13 +100,13 @@ fragment EnvironmentSetup on Wizard {
 
 const props = defineProps<{
   gql: EnvironmentSetupFragment
-  data: WizardSetupData
+  nextFn: () => void,
 }>()
 
 const { t } = useI18n()
 
 const bundlers = computed(() => {
-  const _bundlers = props.gql.framework?.supportedBundlers ?? props.gql.allBundlers
+  const _bundlers = props.gql.framework?.supportedBundlers || []
 
   return _bundlers.map((b) => {
     return {
@@ -120,8 +119,32 @@ const frameworks = computed(() => {
   return sortBy((props.gql.frameworks ?? []).map((f) => ({ ...f })), 'category')
 })
 
-const onNext = () => {
-  emit('navigate', 'installDependencies')
+gql`
+mutation EnvironmentSetup_wizardUpdate($input: WizardUpdateInput!) {
+  wizardUpdate(input: $input) {
+    ...EnvironmentSetup
+    bundler {
+      id
+      type
+    }
+    framework {
+      id
+      type
+    }
+  }
+}
+`
+
+const wizardUpdateMutation = useMutation(EnvironmentSetup_WizardUpdateDocument)
+
+const onWizardSetup = <K extends keyof WizardUpdateInput>(key: K, val: WizardUpdateInput[K]) => {
+  const input = {} as unknown as WizardUpdateInput
+
+  input[key] = val
+
+  wizardUpdateMutation.executeMutation({
+    input,
+  })
 }
 
 gql`
@@ -136,13 +159,18 @@ mutation EnvironmentSetup_ClearTestingType {
 }
 `
 
-const mutation = useMutation(EnvironmentSetup_ClearTestingTypeDocument)
+const clearTestingTypeMutation = useMutation(EnvironmentSetup_ClearTestingTypeDocument)
 
 const onBack = () => {
-  mutation.executeMutation({})
+  clearTestingTypeMutation.executeMutation({})
 }
 
 const languages = computed(() => props.gql.allLanguages ?? [])
 
-const canNavigateForward = computed(() => Object.values(props.data).filter((f) => f).length === 3)
+const canNavigateForward = computed(() => {
+  const { bundler, framework, language } = props.gql
+
+  return bundler !== null && framework !== null && language !== null
+})
+
 </script>

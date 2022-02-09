@@ -147,7 +147,11 @@ describe('App: Settings without cloud', () => {
     cy.findByText('Project Settings').click()
 
     cy.get('[data-cy=config-code]').within(() => {
-      cy.contains('browsers: chrome, firefox')
+      const { browsers } = Cypress.config()
+
+      expect(browsers).to.have.length.greaterThan(1)
+
+      cy.contains(`browsers: ${browsers.filter((b) => b.name !== 'electron').map((b) => b.name).join(', ')}`)
     })
   })
 })

@@ -1,7 +1,5 @@
 const _ = require('lodash')
 const express = require('express')
-const http = require('http')
-const https = require('https')
 const path = require('path')
 const debug = require('debug')('cypress:server:network-error-handling-spec')
 const Promise = require('bluebird')
@@ -12,7 +10,6 @@ const chrome = require('@packages/server/lib/browsers/chrome')
 const systemTests = require('../lib/system-tests').default
 const random = require('@packages/server/lib/util/random')
 const Fixtures = require('../lib/fixtures')
-let mitmProxy = require('http-mitm-proxy')
 
 const PORT = 13370
 const PROXY_PORT = 13371
@@ -242,7 +239,9 @@ describe('e2e network error handling', function () {
       },
     ],
     settings: {
-      baseUrl: `http://localhost:${PORT}/`,
+      e2e: {
+        baseUrl: `http://localhost:${PORT}/`,
+      },
     },
   })
 
@@ -348,19 +347,19 @@ describe('e2e network error handling', function () {
   })
 
   context('Cypress', () => {
+    let debugProxy
+
     beforeEach(() => {
       delete process.env.HTTP_PROXY
       delete process.env.HTTPS_PROXY
 
-      return delete process.env.NO_PROXY
+      delete process.env.NO_PROXY
     })
 
-    afterEach(function () {
-      if (this.debugProxy) {
-        return this.debugProxy.stop()
-        .then(() => {
-          this.debugProxy = null
-        })
+    afterEach(async function () {
+      if (debugProxy) {
+        await debugProxy.stop()
+        debugProxy = null
       }
     })
 
@@ -415,11 +414,11 @@ describe('e2e network error handling', function () {
         return true
       })
 
-      this.debugProxy = new DebugProxy({
+      debugProxy = new DebugProxy({
         onConnect,
       })
 
-      return this.debugProxy
+      return debugProxy
       .start(PROXY_PORT)
       .then(() => {
         process.env.HTTP_PROXY = `http://localhost:${PROXY_PORT}`
@@ -457,17 +456,17 @@ describe('e2e network error handling', function () {
           spec: 'network_error_304_handling.cy.js',
           video: false,
           config: {
-            baseUrl: `http://localhost:${PORT}`,
             pageLoadTimeout: 4000,
+            baseUrl: `http://localhost:${PORT}`,
           },
           snapshot: true,
         })
       })
 
       it('behind a proxy', function () {
-        this.debugProxy = new DebugProxy()
+        debugProxy = new DebugProxy()
 
-        return this.debugProxy
+        return debugProxy
         .start(PROXY_PORT)
         .then(() => {
           process.env.HTTP_PROXY = `http://localhost:${PROXY_PORT}`
@@ -477,40 +476,35 @@ describe('e2e network error handling', function () {
             spec: 'network_error_304_handling.cy.js',
             video: false,
             config: {
-              baseUrl: `http://localhost:${PORT}`,
               pageLoadTimeout: 4000,
+              baseUrl: `http://localhost:${PORT}`,
             },
             snapshot: true,
           })
         })
       })
 
-      it('behind a proxy with transfer-encoding: chunked', function () {
-        mitmProxy = mitmProxy()
-
-        mitmProxy.onRequest((ctx, callback) => {
-          return callback()
-        })
-
-        mitmProxy.listen({
-          host: '127.0.0.1',
-          port: PROXY_PORT,
-          keepAlive: true,
-          httpAgent: http.globalAgent,
-          httpsAgent: https.globalAgent,
-          forceSNI: false,
-          forceChunkedRequest: true,
+      it('behind a proxy with transfer-encoding: chunked', async function () {
+        debugProxy = new DebugProxy({
+          onRequest: (reqUrl, req, res) => {
+            expect(req.headers).to.have.property('content-length')
+            // delete content-length to force te: chunked
+            delete req.headers['content-length']
+            debugProxy._onRequest(reqUrl, req, res)
+          },
         })
 
         process.env.HTTP_PROXY = `http://localhost:${PROXY_PORT}`
         process.env.NO_PROXY = ''
 
-        return systemTests.exec(this, {
+        await debugProxy.start(PROXY_PORT)
+
+        await systemTests.exec(this, {
           spec: 'network_error_304_handling.cy.js',
           video: false,
           config: {
-            baseUrl: `http://localhost:${PORT}`,
             pageLoadTimeout: 4000,
+            baseUrl: `http://localhost:${PORT}`,
           },
           snapshot: true,
         })

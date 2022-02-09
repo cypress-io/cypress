@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-white border-b border-b-gray-100 py-15px px-6">
+  <div class="bg-white border-b border-b-gray-100 h-64px py-15px px-6">
     <div class="flex h-full gap-12px items-center justify-between">
       <div
         v-if="pageName"
@@ -107,7 +107,8 @@
 <script setup lang="ts">
 import { gql, useMutation } from '@urql/vue'
 import { ref, computed } from 'vue'
-import { GlobalPageHeader_ClearCurrentProjectDocument, HeaderBar_HeaderBarContentFragment } from '../generated/graphql'
+import type { HeaderBar_HeaderBarContentFragment } from '../generated/graphql'
+import { GlobalPageHeader_ClearCurrentProjectDocument } from '../generated/graphql'
 import TopNav from './topnav/TopNav.vue'
 import LoginModal from './topnav/LoginModal.vue'
 import UserAvatar from './topnav/UserAvatar.vue'

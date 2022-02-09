@@ -1,15 +1,10 @@
-import { useMainStore } from '../store'
 import SidebarNavigation from './SidebarNavigation.vue'
 
 function mountComponent (initialNavExpandedVal = true) {
-  const mainStore = useMainStore()
-
-  mainStore.setNavBarExpandedByUser(initialNavExpandedVal)
-
   cy.mount(() => {
     return (
       <div>
-        <div class={[mainStore.navBarExpanded ? 'w-248px' : 'w-64px', 'transition-all', 'h-screen', 'grid', 'grid-rows-1']}>
+        <div class={[initialNavExpandedVal ? 'w-248px' : 'w-64px', 'transition-all', 'h-screen', 'grid', 'grid-rows-1']}>
           <SidebarNavigation />
         </div>
         <div id="tooltip-target"/>
@@ -21,9 +16,6 @@ function mountComponent (initialNavExpandedVal = true) {
 describe('SidebarNavigation', () => {
   it('expands the bar when clicking the expand button', () => {
     mountComponent()
-    cy.findByLabelText('toggle navigation', {
-      selector: 'button',
-    }).click()
 
     cy.get('[aria-expanded]').should('have.attr', 'aria-expanded', 'false')
     cy.findByText('test-project').should('not.be.visible')
@@ -41,10 +33,6 @@ describe('SidebarNavigation', () => {
     cy.contains('#tooltip-target > div', 'test-project').should('be.visible')
     cy.get('[data-cy="sidebar-header"]').trigger('mouseout')
 
-    cy.get('[data-cy="switch-testing-type"]').realHover()
-    cy.contains('#tooltip-target > div', 'E2E Testing').should('be.visible')
-    cy.get('[data-cy="switch-testing-type"]').trigger('mouseout')
-
     cy.get('[data-e2e-href="/runs"]').realHover()
     cy.contains('#tooltip-target > div', 'Runs').should('be.visible')
     cy.get('[data-e2e-href="/runs"]').trigger('mouseout')
@@ -52,6 +40,6 @@ describe('SidebarNavigation', () => {
 
   it('opens a modal to switch testing type', { viewportWidth: 1280 }, () => {
     mountComponent()
-    cy.get('[data-cy="switch-testing-type"]').click()
+    cy.get('[data-cy="sidebar-header"]').click()
   })
 })

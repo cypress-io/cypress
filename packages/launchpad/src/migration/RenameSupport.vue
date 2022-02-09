@@ -18,13 +18,13 @@
   <BeforeAfter>
     <template #before>
       <HighlightedFilesList
-        :files="props.gql.supportFiles.before"
+        :files="props.gql.supportFiles?.before ? [props.gql.supportFiles.before] : []"
         highlight-class="text-red-500"
       />
     </template>
     <template #after>
       <HighlightedFilesList
-        :files="props.gql.supportFiles.after"
+        :files="props.gql.supportFiles?.after ? [props.gql.supportFiles.after] : []"
         highlight-class="text-jade-500"
       />
     </template>
@@ -48,13 +48,17 @@ gql`
 fragment RenameSupport on Migration {
   supportFiles {
     before {
+      id
       parts {
+        id
         text
         highlight
       }
     }
     after {
+      id
       parts {
+        id
         text
         highlight
       }

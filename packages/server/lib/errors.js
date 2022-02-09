@@ -3,7 +3,6 @@ const _ = require('lodash')
 const strip = require('strip-ansi')
 const chalk = require('chalk')
 const AU = require('ansi_up')
-const Promise = require('bluebird')
 const { stripIndent } = require('./util/strip_indent')
 
 const ansi_up = new AU.default
@@ -584,12 +583,12 @@ const getMsgByType = function (type, ...args) {
           The \`component\`.\`devServer\` method must be a function with the following signature:
 
           \`\`\`
-          devServer: (cypressConfig: DevServerConfig, devServerConfig: ComponentDevServerOpts) {
-
+          devServer: (cypressDevServerConfig, devServerConfig) {
+            // start dev server here
           }
           \`\`\`
 
-          Learn more: https://on.cypress.io/plugins-api
+          Learn more: https://on.cypress.io/dev-server
 
           We loaded the \`devServer\` from: \`${arg1}\`
   
@@ -601,12 +600,12 @@ const getMsgByType = function (type, ...args) {
         The \`setupNodeEvents\` method does not support \`dev-server:start\`, use \`devServer\` instead:
 
         \`\`\`
-        devServer (cypressConfig, devServerConfig) {
-          // configure plugins here
+        devServer (cypressDevServerConfig, devServerConfig) {
+          // start dev server here
         }
         \`\`\`
 
-        Learn more: https://on.cypress.io/plugins-api
+        Learn more: https://on.cypress.io/dev-server
       `
     case 'PLUGINS_FUNCTION_ERROR':
       msg = stripIndent`\
@@ -729,7 +728,7 @@ const getMsgByType = function (type, ...args) {
           There is a cypress.json file at the location below:
           ${arg1}
 
-          Cypress no longer supports 'cypress.json', please migrate to 'cypress.config.{ts|js}'.
+          Cypress 10 no longer supports 'cypress.json'. Please run \`cypress open\` to launch the migration tool to migrate to 'cypress.config.{ts|js}'.
           `
     case 'LEGACY_CONFIG_FILE':
       return stripIndent`
@@ -1065,6 +1064,26 @@ const getMsgByType = function (type, ...args) {
         The ${chalk.yellow(`\`supportFile\``)} configuration option was removed from the root in Cypress version \`10.0.0\`. Please update this option under each testing type property.
 
         https://on.cypress.io/migration-guide`
+    case 'SPEC_PATTERN_ROOT_NOT_SUPPORTED':
+      return stripIndent`\
+        The ${chalk.yellow(`\`specPattern\``)} configuration option was removed from the root in Cypress version \`10.0.0\`. Please update this option under each testing type property.
+
+        https://on.cypress.io/migration-guide`
+    case 'SPEC_EXCLUDE_PATTERN_ROOT_NOT_SUPPORTED':
+      return stripIndent`\
+        The ${chalk.yellow(`\`excludeSpecPattern\``)} configuration option was removed from the root in Cypress version \`10.0.0\`. Please update this option under each testing type property.
+
+        https://on.cypress.io/migration-guide`
+    case 'BASE_URL_ROOT_NOT_SUPPORTED':
+      return stripIndent`\
+        The ${chalk.yellow(`\`baseUrl\``)} configuration option was removed from the root in Cypress version \`10.0.0\`. Please update this option under e2e testing type property.
+
+        https://on.cypress.io/migration-guide`
+    case 'BASE_URL_CT_NOT_SUPPORTED':
+      return stripIndent`\
+        The ${chalk.yellow(`\`baseUrl\``)} configuration option is not valid in Component testing. Please update this option under e2e testing type property.
+
+        https://on.cypress.io/migration-guide`
     default:
   }
 }
@@ -1176,16 +1195,13 @@ const log = function (err, color = 'red') {
   return err
 }
 
-const logException = Promise.method(function (err) {
+const logException = async function (err) {
   // TODO: remove context here
   if (this.log(err) && isProduction()) {
-    // log this exception since
-    // its not a known error
-    return require('./logger')
-    .createException(err)
-    .catch(() => {})
+    // log this exception since its not a known error
+    await require('./exception').create(err)
   }
-})
+}
 
 module.exports = {
   get,

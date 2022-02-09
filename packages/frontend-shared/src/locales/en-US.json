@@ -32,6 +32,9 @@
     },
     "specPattern": {
       "matches": "{0} Matches"
+    },
+    "specPatternModal": {
+      "title": "Spec pattern settings"
     }
   },
   "clipboard": {
@@ -111,6 +114,10 @@
         "header": "Create from component",
         "description": "We'll generate an empty spec file which can be used to import and test any component in this project.",
         "chooseAComponentHeader": "Choose a component"
+      },
+      "importEmptySpec": {
+        "header": "Create a new spec",
+        "invalidComponentWarning": "We couldn't generate a valid filename matching your custom "
       }
     }
   },
@@ -230,11 +237,15 @@
       "frameworkPlaceholder": "Pick a framework",
       "bundlerLabel": "Bundler",
       "bundlerPlaceholder": "Pick a bundler",
-      "languageLabel": "Language"
+      "languageLabel": "Language",
+      "configFileLanguageLabel": "Cypress Config File"
     },
     "install": {
       "startButton": "Install",
-      "confirmManualInstall": "I've installed them"
+      "waitForInstall": "Waiting for you to install the dependencies...",
+      "checkForUpdates": "Refresh",
+      "installed": "installed",
+      "pendingInstall": "pending installation"
     },
     "step": {
       "continue": "Continue",
@@ -250,7 +261,8 @@
     },
     "testingCard": {
       "configured": "Configured",
-      "notConfigured": "Not Configured"
+      "notConfigured": "Not Configured",
+      "running": "Running"
     }
   },
   "globalPage": {
@@ -432,7 +444,7 @@
         },
         "connectManually": {
           "title": "Connect Project Manually",
-          "warning": "We couldn’t add the projectId to your cypress.config.js file automatically.",
+          "warning": "We couldn't add the projectId to your cypress.config.js file automatically.",
           "mainMessage": "Manually add the {projectId} to the root of the config object in your {configFile} file.",
           "waitingButton": "Waiting for you to add the projectId..."
         }
@@ -529,9 +541,9 @@
     },
     "configFile": {
       "title": "We need to move the Cypress configuration file",
-      "changedTheFile": "We've removed {jsonFile} in favor of a {jsFile} file.",
-      "willConvert": "We'll automatically create a new {jsFile} file and seed it with your options from your existing {jsonFile}.",
-      "removeJson": "We'll remove your existing {0} as part of this step."
+      "changedDefault": "We've changed the default Cypress config file from:",
+      "customOptions": "We've set a custom {specPattern} option based on your {options}.",
+      "willConvert": "We'll automatically create a new {jsFile} file and seed it with your options from your existing {jsonFile}."
     },
     "setupComponent": {
       "title": "You need to reconfigure Cypress for component testing",
@@ -553,7 +565,7 @@
         "title": "Manually move your existing component specs",
         "description": "In this step, you'll manually move your existing component specs to their new default location.",
         "buttonWait": "Waiting for you to move your component specs...",
-        "buttonDone": "I have moved my component specs",
+        "buttonDone": "Continue to next step",
         "button": "I'll do this later"
       },
       "step3": {
@@ -600,5 +612,16 @@
     "focus": "Focus",
     "close": "Close",
     "switchTestingType": "Switch testing type"
+  },
+  "runner": {
+    "snapshot": {
+      "toggleHighlights": "Toggle highlights",
+      "highlightsLabel": "Highlights",
+      "testsRunningError": "Cannot show Snapshot while tests are running",
+      "snapshotMissingError": "The snapshot is missing. Displaying current state of the DOM.",
+      "defaultTitle": "DOM Snapshot",
+      "pinnedTitle": "Pinned",
+      "studioActiveError": "Cannot show Snapshot while creating commands in Studio"
+    }
   }
 }

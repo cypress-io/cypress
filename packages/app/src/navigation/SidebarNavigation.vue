@@ -1,64 +1,34 @@
 <template>
   <HideDuringScreenshot
-    :aria-expanded="mainStore.navBarExpanded"
+    :aria-expanded="isNavBarExpanded"
     class="flex flex-col bg-gray-1000 transition-all duration-300 relative"
-    :class="mainStore.navBarExpanded ? 'w-248px' : 'w-64px'"
+    :class="isNavBarExpanded ? 'w-248px' : 'w-64px'"
   >
     <button
       v-if="navIsAlwaysCollapsed"
       class="cursor-pointer left-full top-0 bottom-0 w-16px z-1 absolute group hocus:outline-transparent"
       role="button"
       aria-label="toggle navigation"
-      @click="mainStore.toggleNavBar"
+      @click="toggleNavbarIfAllowed"
     >
       <div class="flex h-full transform origin-left transition-transform w-16px scale-x-0 duration-300 items-center group-hocus:scale-x-100">
         <div class="h-full bg-indigo-400 w-3px" />
         <i-cy-chevron-right_x16
           class="h-16px w-16px icon-dark-indigo-400"
-          :class="mainStore.navBarExpanded ? 'transform rotate-180': ''"
+          :class="isNavBarExpanded ? 'transform rotate-180': ''"
         />
       </div>
     </button>
     <div class="flex flex-col flex-1 overflow-y-auto ">
-      <SidebarTooltip
-        class="border-b flex border-gray-900 flex-shrink-0 h-64px items-center"
-        :disabled="mainStore.navBarExpanded"
-        :popper-top-offset="4"
-        popper-class="h-56px"
-        data-cy="sidebar-header"
-      >
-        <i-cy-bookmark_x24
-          class="flex-shrink-0
-          h-24px
-          mx-20px
-          w-24px
-          icon-dark-gray-200 icon-light-gray-900"
-        />
-        <div class="text-gray-50 text-size-16px leading-24px truncate">
-          {{ currentProject?.title ?? 'Cypress' }}
-          <p class="text-gray-600 text-size-14px leading-20px truncate">
-            {{ currentProject?.branch }}
-          </p>
-        </div>
-
-        <template #popper>
-          <div class="text-left text-gray-50 text-size-16px leading-16px truncate">
-            {{ currentProject?.title ?? 'Cypress' }}
-            <p class="text-gray-600 text-size-14px leading-20px truncate">
-              {{ currentProject?.branch }}
-            </p>
-          </div>
-        </template>
-      </SidebarTooltip>
-
+      <SidebarNavigationHeader
+        v-if="query.data.value"
+        :gql="query.data.value"
+        :is-nav-bar-expanded="isNavBarExpanded"
+      />
       <nav
         class="space-y-1 bg-gray-1000 flex-1"
         aria-label="Sidebar"
       >
-        <SwitchTestingTypeButton
-          v-if="query.data.value"
-          :gql="query.data.value"
-        />
         <RouterLink
           v-for="item in navigation"
           v-slot="{ isActive }"
@@ -70,6 +40,7 @@
             :active="isActive"
             :icon="item.icon"
             :name="item.name"
+            :is-nav-bar-expanded="isNavBarExpanded"
           />
         </RouterLink>
       </nav>
@@ -79,8 +50,8 @@
               transform transition-all right-0
               bottom-0 w-32px duration-300
               inline-block absolute hover:border-gray-500"
-        :class="{ '-translate-y-48px': !mainStore.navBarExpanded }"
-        :disabled="mainStore.navBarExpanded"
+        :class="{ '-translate-y-48px': !isNavBarExpanded }"
+        :disabled="isNavBarExpanded"
         :popper-top-offset="-4"
         @click="bindingsOpen = true"
       >
@@ -105,21 +76,20 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
-import { gql, useQuery } from '@urql/vue'
+import { computed, ref, watchEffect } from 'vue'
+import { gql, useMutation, useQuery } from '@urql/vue'
 import SidebarNavigationRow from './SidebarNavigationRow.vue'
-import SwitchTestingTypeButton from './SwitchTestingTypeButton.vue'
 import KeyboardBindingsModal from './KeyboardBindingsModal.vue'
 import CodeIcon from '~icons/cy/code-editor_x24'
 import RunsIcon from '~icons/cy/runs_x24'
 import SettingsIcon from '~icons/cy/settings_x24'
 import SidebarTooltip from './SidebarTooltip.vue'
 import HideDuringScreenshot from '../runner/screenshot/HideDuringScreenshot.vue'
-import { useMainStore } from '../store'
-import { SideBarNavigationDocument } from '../generated/graphql'
+import { SideBarNavigationDocument, SideBarNavigation_SetPreferencesDocument } from '../generated/graphql'
 import CypressLogo from '@packages/frontend-shared/src/assets/logos/cypress_s.png'
 import { useI18n } from '@cy/i18n'
 import { useRoute } from 'vue-router'
+import SidebarNavigationHeader from './SidebarNavigationHeader.vue'
 
 const { t } = useI18n()
 
@@ -130,26 +100,59 @@ const navigation = [
 ]
 
 gql`
-query SideBarNavigation {
-  ...SwitchTestingTypeButton
-  currentProject {
-    id
-    title
-    branch
+fragment SidebarNavigation on Query {
+  localSettings {
+    preferences {
+      isSideNavigationOpen
+      isSpecsListOpen
+      autoScrollingEnabled
+      reporterWidth
+      specListWidth
+    }
   }
+}
+`
+
+gql`
+mutation SideBarNavigation_SetPreferences ($value: String!) {
+  setPreferences (value: $value) {
+    ...SidebarNavigation
+  }
+}`
+
+gql`
+query SideBarNavigation {
+  ...SidebarNavigationHeader
+  ...SidebarNavigation
 }
 `
 
 const query = useQuery({ query: SideBarNavigationDocument, requestPolicy: 'network-only' })
 
-const currentProject = computed(() => query.data.value?.currentProject)
+const setPreferences = useMutation(SideBarNavigation_SetPreferencesDocument)
 
 const bindingsOpen = ref(false)
-
-const mainStore = useMainStore()
 
 const route = useRoute()
 
 const navIsAlwaysCollapsed = computed(() => route.meta?.navBarExpandedAllowed !== false)
+
+const isNavBarExpanded = ref(true)
+
+watchEffect(() => {
+  if (route.meta?.navBarExpandedAllowed === false) {
+    isNavBarExpanded.value = false
+  } else {
+    isNavBarExpanded.value = query.data?.value?.localSettings.preferences.isSideNavigationOpen ?? true
+  }
+})
+
+const toggleNavbarIfAllowed = () => {
+  if (route.meta?.navBarExpandedAllowed === false) {
+    return
+  }
+
+  setPreferences.executeMutation({ value: JSON.stringify({ isSideNavigationOpen: !isNavBarExpanded.value }) })
+}
 
 </script>

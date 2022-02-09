@@ -3,6 +3,9 @@ const Promise = require('bluebird')
 const debug = require('debug')('cypress:server:browsers')
 const utils = require('./utils')
 const check = require('check-more-types')
+const { exec } = require('child_process')
+const util = require('util')
+const os = require('os')
 
 // returns true if the passed string is a known browser family name
 const isBrowserFamily = check.oneOf(['chromium', 'firefox'])
@@ -38,6 +41,25 @@ const kill = function (unbind, isProcessExit) {
 
     _instance.kill()
   })
+}
+
+const setFocus = async function () {
+  const platform = os.platform()
+  const execAsync = util.promisify(exec)
+
+  try {
+    switch (platform) {
+      case 'darwin':
+        return execAsync(`open -a "$(ps -p ${instance.pid} -o comm=)"`)
+      case 'win32': {
+        return execAsync(`(New-Object -ComObject WScript.Shell).AppActivate(((Get-WmiObject -Class win32_process -Filter "ParentProcessID = '${instance.pid}'") | Select -ExpandProperty ProcessId))`, { shell: 'powershell.exe' })
+      }
+      default:
+        debug(`Unexpected os platform ${platform}. Set focus is only functional on Windows and MacOS`)
+    }
+  } catch (error) {
+    debug(`Failure to set focus. ${error}`)
+  }
 }
 
 const getBrowserLauncher = function (browser) {
@@ -92,7 +114,7 @@ module.exports = {
     return utils.getBrowsers()
   },
 
-  connectToExisting (browser, options = {}, automation) {
+  async connectToExisting (browser, options = {}, automation) {
     const browserLauncher = getBrowserLauncher(browser)
 
     if (!browserLauncher) {
@@ -100,6 +122,17 @@ module.exports = {
     }
 
     return browserLauncher.connectToExisting(browser, options, automation)
+  },
+
+  async connectToNewSpec (browser, options = {}, automation) {
+    const browserLauncher = getBrowserLauncher(browser)
+
+    if (!browserLauncher) {
+      utils.throwBrowserNotFound(browser.name, options.browsers)
+    }
+
+    // Instance will be null when we're dealing with electron. In that case we don't need a browserCriClient
+    return browserLauncher.connectToNewSpec(browser, options, automation)
   },
 
   open (browser, options = {}, automation, ctx) {
@@ -127,8 +160,6 @@ module.exports = {
       return browserLauncher.open(browser, url, options, automation)
       .then((i) => {
         debug('browser opened')
-        ctx.project.setIsBrowserOpen(true)
-        ctx.emitter.toLaunchpad()
         // TODO: bind to process.exit here
         // or move this functionality into cypress-core-launder
 
@@ -140,8 +171,7 @@ module.exports = {
         // so that there is a default for each browser but
         // enable the browser to configure the interface
         instance.once('exit', () => {
-          ctx.project.setIsBrowserOpen(false)
-          ctx.emitter.toLaunchpad()
+          ctx.browser.setBrowserStatus('closed')
           options.onBrowserClose()
           instance = null
         })
@@ -166,4 +196,5 @@ module.exports = {
       })
     })
   },
+  setFocus,
 }

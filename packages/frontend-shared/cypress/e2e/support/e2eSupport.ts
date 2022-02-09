@@ -186,7 +186,7 @@ function openProject (projectName: ProjectFixture, argv: string[] = []) {
   }
 
   return logInternal({ name: 'openProject', message: argv.join(' ') }, () => {
-    return taskInternal('__internal_openProject', { projectName, argv, browser: Cypress.browser.name })
+    return taskInternal('__internal_openProject', { projectName, argv })
   }).then((obj) => {
     Cypress.env('e2e_serverPort', obj.e2eServerPort)
 
@@ -195,6 +195,12 @@ function openProject (projectName: ProjectFixture, argv: string[] = []) {
 }
 
 function startAppServer (mode: 'component' | 'e2e' = 'e2e') {
+  const browser = Cypress.browser.name
+
+  if (browser !== 'chrome') {
+    throw new Error(`Cypress in cypress does not support running in the ${browser} browser`)
+  }
+
   return logInternal('startAppServer', (log) => {
     return cy.window({ log: false }).then((win) => {
       return cy.withCtx(async (ctx, o) => {
@@ -414,6 +420,8 @@ function validateExternalLink (subject, options: ValidateExternalLinkOptions | s
     return cy.get('@Link')
   })
 }
+
+Cypress.on('uncaught:exception', (err) => !err.message.includes('ResizeObserver loop limit exceeded'))
 
 Cypress.Commands.add('scaffoldProject', scaffoldProject)
 Cypress.Commands.add('addProject', addProject)

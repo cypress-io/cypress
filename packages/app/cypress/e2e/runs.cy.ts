@@ -321,7 +321,11 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.get('@firstRun').get('[data-cy="run-card-author"]').contains('John Appleseed')
       cy.get('@firstRun').get('[data-cy="run-card-avatar')
       cy.get('@firstRun').get('[data-cy="run-card-branch"]').contains('main')
-      cy.get('@firstRun').contains(`3:17`)
+
+      // the exact timestamp string will depend on the user's browser's locale settings
+      const localeTimeString = (new Date('2022-02-02T08:17:00.005Z')).toLocaleTimeString()
+
+      cy.get('@firstRun').contains(localeTimeString)
       cy.get('@firstRun').contains('span', 'skipped')
       cy.get('@firstRun').get('span').contains('pending')
       cy.get('@firstRun').get('span').contains('passed')

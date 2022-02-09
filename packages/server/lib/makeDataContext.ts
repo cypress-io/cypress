@@ -51,6 +51,9 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
 
         return await ensureAndGetByNameOrPath(nameOrPath, false, browsers)
       },
+      async focusActiveBrowserWindow () {
+        return openProject.projectBase?.sendFocusBrowserMessage()
+      },
     },
     errorApi: {
       error: errors.get,
@@ -65,6 +68,7 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       updateWithPluginValues: config.updateWithPluginValues,
       setupFullConfigWithDefaults: config.setupFullConfigWithDefaults,
       validateRootConfigBreakingChanges: configUtils.validateNoBreakingConfigRoot,
+      validateTestingTypeConfigBreakingChanges: configUtils.validateNoBreakingTestingTypeConfig,
     },
     appApi: {
       appData,
@@ -77,7 +81,17 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
         return user.get()
       },
       logIn (onMessage) {
-        return auth.start(onMessage, 'launchpad')
+        const windows = require('./gui/windows')
+        const originalIsMainWindowFocused = windows.isMainWindowFocused()
+        const onLogin = async () => {
+          if (originalIsMainWindowFocused || !ctx.browser.isFocusSupported(ctx.coreData.chosenBrowser)) {
+            windows.focusMainWindow()
+          } else {
+            await ctx.actions.browser.focusActiveBrowserWindow()
+          }
+        }
+
+        return auth.start(onMessage, 'launchpad', onLogin)
       },
       logOut () {
         return user.logOut()

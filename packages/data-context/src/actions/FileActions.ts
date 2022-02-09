@@ -32,6 +32,26 @@ export class FileActions {
     this.ctx.fs.removeSync(path.join(this.ctx.currentProject, relativePath))
   }
 
+  async moveFileInProject (relativePath: string, toRelativePath: string) {
+    if (!this.ctx.currentProject) {
+      throw new Error(`Cannot remove file in project without active project`)
+    }
+
+    // Typically used in e2e tests, simpler than forcing async
+    this.ctx.fs.moveSync(
+      path.join(this.ctx.currentProject, relativePath),
+      path.join(this.ctx.currentProject, toRelativePath),
+    )
+  }
+
+  async readFileInProject (relative: string) {
+    if (!this.ctx.currentProject) {
+      throw new Error(`Cannot check file in project exists without active project`)
+    }
+
+    return this.ctx.fs.readFileSync(path.join(this.ctx.currentProject, relative), 'utf-8')
+  }
+
   async checkIfFileExists (relativePath: string) {
     if (!this.ctx.currentProject) {
       throw new Error(`Cannot check file in project exists without active project`)

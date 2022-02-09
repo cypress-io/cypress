@@ -24,6 +24,8 @@ const browser = {
   },
   windows: {
     getLastFocused () {},
+    getCurrent () {},
+    update () {},
   },
   runtime: {
 
@@ -32,6 +34,10 @@ const browser = {
     query () {},
     executeScript () {},
     captureVisibleTab () {},
+    remove () {},
+  },
+  browsingData: {
+    remove () {},
   },
 }
 
@@ -663,6 +669,27 @@ describe('app/background', () => {
       })
     })
 
+    describe('focus:browser:window', () => {
+      beforeEach(() => {
+        sinon.stub(browser.windows, 'getCurrent').resolves({ id: '10' })
+        sinon.stub(browser.windows, 'update').withArgs('10', { focused: true }).resolves()
+      })
+
+      it('focuses the current window', function (done) {
+        this.socket.on('automation:response', (id, obj = {}) => {
+          expect(id).to.eq(123)
+          expect(obj.response).to.be.undefined
+
+          expect(browser.windows.getCurrent).to.be.called
+          expect(browser.windows.update).to.be.called
+
+          done()
+        })
+
+        return this.server.emit('automation:request', 123, 'focus:browser:window')
+      })
+    })
+
     describe('take:screenshot', () => {
       beforeEach(() => {
         return sinon.stub(browser.windows, 'getLastFocused').resolves({ id: 1 })
@@ -698,6 +725,46 @@ describe('app/background', () => {
         })
 
         return this.server.emit('automation:request', 123, 'take:screenshot')
+      })
+    })
+
+    describe('reset:browser:state', () => {
+      beforeEach(() => {
+        sinon.stub(browser.browsingData, 'remove').withArgs({}, { cache: true, cookies: true, downloads: true, formData: true, history: true, indexedDB: true, localStorage: true, passwords: true, pluginData: true, serviceWorkers: true }).resolves()
+      })
+
+      it('resets the browser state', function (done) {
+        this.socket.on('automation:response', (id, obj) => {
+          expect(id).to.eq(123)
+          expect(obj.response).to.be.undefined
+
+          expect(browser.browsingData.remove).to.be.called
+
+          done()
+        })
+
+        return this.server.emit('automation:request', 123, 'reset:browser:state')
+      })
+    })
+
+    describe('close:browser:tabs', () => {
+      beforeEach(() => {
+        sinon.stub(browser.windows, 'getCurrent').withArgs({ populate: true }).resolves({ id: '10', tabs: [{ id: '1' }, { id: '2' }, { id: '3' }] })
+        sinon.stub(browser.tabs, 'remove').withArgs(['1', '2', '3']).resolves()
+      })
+
+      it('closes the tabs in the current browser window', function (done) {
+        this.socket.on('automation:response', (id, obj) => {
+          expect(id).to.eq(123)
+          expect(obj.response).to.be.undefined
+
+          expect(browser.windows.getCurrent).to.be.called
+          expect(browser.tabs.remove).to.be.called
+
+          done()
+        })
+
+        return this.server.emit('automation:request', 123, 'close:browser:tabs')
       })
     })
   })
