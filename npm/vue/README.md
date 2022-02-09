@@ -61,8 +61,7 @@ module.exports = (on) => {
 Install dev dependencies
 
 ```shell
-npm i -D @cypress/webpack-dev-server @cypress/vue \
-  vue-loader vue-template-compiler css-loader
+npm i -D @cypress/webpack-dev-server @cypress/vue
 ```
 
 And write a test
