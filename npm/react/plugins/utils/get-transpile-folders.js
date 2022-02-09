@@ -2,7 +2,7 @@
 const path = require('path')
 
 function getTranspileFolders (config) {
-  const rawFolders = config.addTranspiledFolders ?? []
+  const rawFolders = config.addTranspiledFolders || []
   const folders = rawFolders.map((folder) => path.resolve(config.projectRoot, folder))
 
   // user can disable folders, so check first
