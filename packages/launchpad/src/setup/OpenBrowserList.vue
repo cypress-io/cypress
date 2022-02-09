@@ -54,8 +54,8 @@
             >
           </div>
           <div
-            class="pt-2 text-indigo-600 text-18px leading-28px"
-            :class="{ 'text-jade-600': browser.isSelected, 'text-gray-500': browser.disabled || browser.isVersionSupported }"
+            class="font-medium pt-2 text-indigo-600 text-18px leading-28px"
+            :class="{ 'text-jade-600': browser.isSelected, 'text-gray-500': browser.disabled || !browser.isVersionSupported }"
           >
             {{ browser.displayName }}
           </div>
@@ -138,9 +138,9 @@
       <Button
         size="sm"
         variant="text"
-        :prefix-icon="ArrowLeftIcon"
-        prefix-icon-class="icon-dark-gray-500"
-        class="font-medium mx-auto text-gray-600 hover:text-indigo-500"
+        :prefix-icon="ArrowRightIcon"
+        prefix-icon-class="icon-dark-gray-500 transform transition-transform ease-in -translate-y-1px duration-200 inline-block group-hocus:icon-dark-indigo-500 rotate-180 group-hocus:translate-x-2px"
+        class="font-medium mx-auto text-gray-600 hocus-link-default group hocus:text-indigo-500"
         @click="emit('navigatedBack')"
       >
         {{ browserText.switchTestingType }}
@@ -160,12 +160,13 @@ import TestingTypeComponentIcon from '~icons/cy/testing-type-component_x16'
 import TestingTypeE2EIcon from '~icons/cy/testing-type-e2e_x16'
 import ExportIcon from '~icons/cy/export_x16'
 import PowerStandbyIcon from '~icons/cy/power-standby'
-import ArrowLeftIcon from '~icons/cy/arrow-left_x16'
+import ArrowRightIcon from '~icons/cy/arrow-right_x16'
 import StatusRunningIcon from '~icons/cy/status-running_x16'
 import { RadioGroup, RadioGroupOption, RadioGroupLabel } from '@headlessui/vue'
 import UnsupportedBrowserTooltip from '@packages/frontend-shared/src/gql-components/topnav/UnsupportedBrowserTooltip.vue'
 
-import { OpenBrowserListFragment, OpenBrowserList_SetBrowserDocument } from '../generated/graphql'
+import type { OpenBrowserListFragment } from '../generated/graphql'
+import { OpenBrowserList_SetBrowserDocument } from '../generated/graphql'
 
 gql`
 mutation OpenBrowserList_SetBrowser($id: ID!) {

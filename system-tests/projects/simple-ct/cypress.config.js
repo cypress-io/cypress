@@ -1,11 +1,11 @@
 module.exports = {
   'component': {
     supportFile: false,
-    devServer (cypressConfig) {
+    devServer (cypressDevServerConfig) {
       const { startDevServer } = require('@cypress/webpack-dev-server')
 
       return startDevServer({
-        options: cypressConfig,
+        options: cypressDevServerConfig,
         webpackConfig: {
           output: {
             publicPath: '/',

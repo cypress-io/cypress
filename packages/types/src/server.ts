@@ -6,6 +6,7 @@ export interface LaunchOpts {
   url?: string
   automationMiddleware?: AutomationMiddleware
   projectRoot?: string
+  shouldLaunchNewTab?: boolean
   onBrowserClose?: (...args: unknown[]) => void
   onBrowserOpen?: (...args: unknown[]) => void
   onError?: (err: Error) => void

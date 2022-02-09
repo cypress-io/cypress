@@ -34,7 +34,8 @@
 </template>
 
 <script lang="ts" setup>
-import { FunctionalComponent, SVGAttributes, useSlots } from 'vue'
+import type { FunctionalComponent, SVGAttributes } from 'vue'
+import { useSlots } from 'vue'
 
 const props = withDefaults(defineProps<{
   description?: string

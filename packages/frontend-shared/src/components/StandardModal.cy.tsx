@@ -5,7 +5,7 @@ import { ref } from 'vue'
 const title = 'Test Title'
 const body = 'Test body text'
 
-describe('<StandardModal />', { viewportWidth: 500, viewportHeight: 400 }, () => {
+describe('<StandardModal />', { viewportWidth: 800, viewportHeight: 400 }, () => {
   describe('default render and variations', () => {
     it('renders expected content in open state', () => {
       const isOpen = ref(true)
@@ -138,6 +138,11 @@ describe('<StandardModal />', { viewportWidth: 500, viewportHeight: 400 }, () =>
     it('closes with click-outside by default', () => {
       cy.get('body').click()
       cy.get('@updateSpy').should('have.been.calledOnceWith', false)
+    })
+
+    it('does not close w/ click-outside when viewport is xs', { viewportWidth: 400 }, () => {
+      cy.get('body').click()
+      cy.get('@updateSpy').should('not.have.been.called')
     })
 
     it('doesn\'t close with click inside', () => {
