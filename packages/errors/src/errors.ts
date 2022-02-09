@@ -582,7 +582,7 @@ export const AllCypressErrors = {
 
         If you have just renamed the extension of your supportFile, restart Cypress.
 
-        Learn more at https://on.cypress.io/support-file-missing-or-invalid`
+        https://on.cypress.io/support-file-missing-or-invalid`
   },
   PLUGINS_FILE_ERROR: (pluginsFilePath: string, err: Error) => {
     return errTemplate`\
@@ -616,9 +616,9 @@ export const AllCypressErrors = {
 
       Instead it exported:
 
-      ${fmt.meta(JSON.stringify(exported, null, 2))}
+      ${fmt.stringify(exported)}
 
-      Learn more: https://on.cypress.io/plugins-api
+      https://on.cypress.io/plugins-api
     `
   },
   PLUGINS_FUNCTION_ERROR: (pluginsFilePath: string, err: Error) => {
@@ -628,7 +628,6 @@ export const AllCypressErrors = {
       ${fmt.stackTrace(err)}
     `
   },
-  // TODO: use this for whimsical example
   PLUGINS_UNEXPECTED_ERROR: (arg1: string, arg2: string | Error) => {
     return errTemplate`
       We stopped running your tests because a plugin crashed.
@@ -661,7 +660,6 @@ export const AllCypressErrors = {
       ${fmt.stackTrace(err)}
     `
   },
-  // TODO: update the error message in the runner too
   BUNDLE_ERROR: (filePath: string, arg2: string) => {
     // IF YOU MODIFY THIS MAKE SURE TO UPDATE
     // THE ERROR MESSAGE IN THE RUNNER TOO
