@@ -54,7 +54,7 @@ export default class Command extends Instrument {
   @observable group?: number
   @observable hasSnapshot?: boolean
   @observable hasConsoleProps?: boolean
-  @observable _isOpen: boolean|null = null
+  @observable _isOpen: boolean|null = true
 
   private _prevState: string | null | undefined = null
   private _pendingTimeout?: TimeoutID = undefined
@@ -70,10 +70,11 @@ export default class Command extends Instrument {
 
   @computed get isOpen () {
     if (!this.hasChildren) return null
-
+    // console.log(this.group, this.hasChildren)
+    // console.log(_.some(this.children, (v) => v.hasChildren))
     return this._isOpen || (this._isOpen === null
       && (
-        (this.group && this.type === 'system' && this.hasChildren) ||
+        (this.group && this.hasChildren) ||
         _.some(this.children, (v) => v.hasChildren) ||
         _.last(this.children)?.isOpen ||
         (_.some(this.children, (v) => v.isLongRunning) && _.last(this.children)?.state === 'pending') ||

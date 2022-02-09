@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>type('{enter}') </title>
+    <meta charset="UTF-8" />
+  </head>
+
+  <body>
+    <button id="reset">clear log</button>
+    <button id="target-button-tag">click me then press enter</button>
+    <input id="target-input-button" type="button" value="click me then press enter" />
+    <input id="target-input-image" type="image" value="click me then press enter" />
+    <input id="target-input-reset" type="reset" value="click me then press enter" />
+    <input id="target-input-submit" type="submit" value="click me then press enter" />
+    <input id="target-input-checkbox" type="checkbox" value="click me then press enter" />
+    <input id="target-input-radio" type="radio" value="click me then press enter" />
+
+    <div id="log"></div>
+
+    <script>
+      const reset = document.getElementById("reset");
+
+      let log = [];
+
+      reset.addEventListener("click", () => {
+        log = [];
+        updateLog();
+      });
+
+      const updateLog = (msg) => {
+        if (msg) {
+          log.push(msg);
+        }
+
+        const ol = document.createElement("ol");
+
+        log.forEach((text) => {
+          const node = document.createTextNode(text);
+          const li = document.createElement("li");
+          li.appendChild(node);
+          ol.appendChild(li);
+        });
+
+        document.getElementById("log").replaceChildren(ol);
+      };
+
+      const targets = [
+        'target-button-tag',
+        'target-input-button',
+        'target-input-image',
+        'target-input-reset',
+        'target-input-submit',
+        'target-input-checkbox',
+        'target-input-radio',
+      ]
+
+      targets.forEach((targetId) => {
+        const target = document.getElementById(targetId);
+
+        target.addEventListener("keydown", () => {
+          updateLog("keydown");
+        });
+        target.addEventListener("keypress", () => {
+          updateLog("keypress");
+        });
+        target.addEventListener("click", () => {
+          updateLog("click");
+        });
+        target.addEventListener("keyup", () => {
+          updateLog("keyup");
+        });
+      });
+    </script>
+  </body>
+</html>

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import _ from 'lodash'
 import Promise from 'bluebird'
 
@@ -15,7 +14,11 @@ const debug = debugFn('cypress:driver:command:type')
 export default function (Commands, Cypress, cy, state, config) {
   const { keyboard } = cy.devices
 
-  function type (subject, chars, options = {}) {
+  // Note: These "change type of `any` to X" comments are written instead of changing them directly
+  //       because Cypress extends user-given options with Cypress internal options.
+  //       These comments will be removed after removing `// @ts-nocheck` comments in `packages/driver`.
+  // TODO: change the type of `any` to `Partial<Cypress.TypeOptions>`
+  function type (subject, chars, options: any = {}) {
     const userOptions = options
     let updateTable
 
@@ -272,6 +275,11 @@ export default function (Commands, Cypress, cy, state, config) {
       const isContentEditable = $elements.isContentEditable(options.$el.get(0))
       const isTextarea = $elements.isTextarea(options.$el.get(0))
 
+      // click event is only fired on button, image, submit, reset elements.
+      // That's why we cannot use $elements.isButtonLike() here.
+      const type = (type) => $elements.isInputType(options.$el.get(0), type)
+      const sendClickEvent = type('button') || type('image') || type('submit') || type('reset')
+
       return keyboard.type({
         $el: options.$el,
         chars,
@@ -347,13 +355,24 @@ export default function (Commands, Cypress, cy, state, config) {
           })
         },
 
-        onEnterPressed (id) {
+        onEnterPressed (el) {
           // dont dispatch change events or handle
           // submit event if we've pressed enter into
           // a textarea or contenteditable
-
           if (isTextarea || isContentEditable) {
             return
+          }
+
+          // https://github.com/cypress-io/cypress/issues/19541
+          // Send click event on type('{enter}')
+          if (sendClickEvent) {
+            // Firefox sends a click event automatically.
+            if (!Cypress.isBrowser('firefox')) {
+              const ctor = $dom.getDocumentFromElement(el).defaultView?.PointerEvent
+              const event = new ctor!('click')
+
+              el.dispatchEvent(event)
+            }
           }
 
           // if our value has changed since our
@@ -362,7 +381,7 @@ export default function (Commands, Cypress, cy, state, config) {
           const changeEvent = state('changeEvent')
 
           if (changeEvent) {
-            changeEvent(id)
+            changeEvent()
           }
 
           // handle submit event handler here
@@ -494,7 +513,8 @@ export default function (Commands, Cypress, cy, state, config) {
     })
   }
 
-  function clear (subject, options = {}) {
+  // TODO: change the type of `any` to `Partial<ClearOptions>`
+  function clear (subject, options: any = {}) {
     const userOptions = options
 
     options = _.defaults({}, userOptions, {

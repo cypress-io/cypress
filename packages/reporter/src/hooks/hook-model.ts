@@ -88,7 +88,11 @@ export default class Hook implements HookProps {
     }
 
     if (command.group) {
-      const groupCommand = _.find(this.commands, { id: command.group }) as CommandModel
+      // console.log(command.name, command.group.id)
+      // console.log(command)
+      // console.log('this.commands', this.commands)
+      const groupCommand = _.find(this.commands, { id: command.group.id }) as CommandModel
+      // console.log(groupCommand)
 
       if (groupCommand && groupCommand.addChild) {
         groupCommand.addChild(command)
