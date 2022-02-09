@@ -33,6 +33,7 @@ const setup = (cypressConfig: Cypress.Config, env: Cypress.ObjectLike) => {
     ...cypressConfig,
     env,
     __isMultiDomain: true,
+    video: false, // never turn on video for multi-domain when syncing the config. This is handled in the primary.
     // multi-domain cannot be used in component testing and is only valid for e2e.
     // This value is not synced with the config because it is omitted on big Cypress creation, as well as a few other key properties
     testingType: 'e2e',
