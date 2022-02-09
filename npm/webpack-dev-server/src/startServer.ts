@@ -86,7 +86,7 @@ export async function start ({ webpackConfig: userWebpackConfig, indexHtml, opti
       hot: false,
     }
 
-    // @ts-expect-error Webpack types are clashing between Webpack and WebpackDevServer
+    // @ts-ignore
     return new WebpackDevServer(webpackDevServerConfig, compiler)
   }
 
