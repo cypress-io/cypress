@@ -1,11 +1,11 @@
+import assert from 'assert'
 import chalk from 'chalk'
 import _ from 'lodash'
+import stripAnsi from 'strip-ansi'
 import { trimMultipleNewLines } from './errorUtils'
 import { stripIndent } from './stripIndent'
 
 import type { ErrTemplateResult, SerializedError } from './errorTypes'
-import assert from 'assert'
-import stripAnsi from 'strip-ansi'
 
 interface ListOptions {
   prefix?: string
@@ -29,31 +29,43 @@ export class PartialErr {
 }
 
 interface FormatConfig {
-  block: true
+  block?: true
+  color?: typeof theme[keyof typeof theme]
+  stringify?: boolean
 }
 
 type ToFormat = string | number | Error | object | null | Guard | AllowedTemplateArg
 
 class Format {
-  constructor (readonly type: keyof typeof fmtHighlight, readonly val: ToFormat, readonly config?: FormatConfig) {}
+  constructor (
+    readonly type: keyof typeof fmtHighlight,
+    readonly val: ToFormat,
+    readonly config?: FormatConfig,
+  ) {
+    this.color = config.color || fmtHighlight[this.type]
+  }
+
+  private color: typeof theme[keyof typeof theme]
 
   formatVal (target: 'ansi' | 'markdown'): string {
     if (this.val instanceof Guard) {
       return `${this.val.val}`
     }
 
-    return target === 'ansi' ? this.formatAnsi() : this.formatMarkdown()
+    const str = target === 'ansi' ? this.formatAnsi() : this.formatMarkdown()
+
+    // add a newline to ensure this is on its own line
+    return isMultiLine(str) ? `\n\n${str}` : str
   }
 
   private formatAnsi () {
     const val = this.prepVal('ansi')
-    const color = fmtHighlight[this.type]
 
     if (this.type === 'terminal') {
-      return `${theme.gray('$')} ${color(val)}`
+      return `${theme.gray('$')} ${this.color(val)}`
     }
 
-    return fmtHighlight[this.type](val)
+    return this.color(val)
   }
 
   private formatMarkdown () {
@@ -83,7 +95,7 @@ class Format {
       return `${this.val.name}: ${this.val.message}`
     }
 
-    if (this.val && (typeof this.val === 'object' || Array.isArray(this.val))) {
+    if (this.val && (this.config?.stringify || typeof this.val === 'object' || Array.isArray(this.val))) {
       return JSON.stringify(this.val, null, 2)
     }
 
@@ -109,8 +121,11 @@ function isMultiLine (val: string) {
 }
 
 function makeFormat (type: keyof typeof fmtHighlight, config?: FormatConfig) {
-  return (val: ToFormat) => {
-    return new Format(type, val, config)
+  return (val: ToFormat, overrides?: FormatConfig) => {
+    return new Format(type, val, {
+      ...config,
+      ...overrides,
+    })
   }
 }
 
@@ -121,6 +136,7 @@ const fmtHighlight = {
   code: theme.blue,
   url: theme.blue,
   flag: theme.magenta,
+  stringify: theme.magenta,
   highlight: theme.yellow,
   highlightSecondary: theme.magenta,
   highlightTertiary: theme.blue,
@@ -134,6 +150,7 @@ export const fmt = {
   code: makeFormat('code', { block: true }),
   url: makeFormat('url'),
   flag: makeFormat('flag'),
+  stringify: makeFormat('stringify', { stringify: true }),
   highlight: makeFormat('highlight'),
   highlightSecondary: makeFormat('highlightSecondary'),
   highlightTertiary: makeFormat('highlightTertiary'),
