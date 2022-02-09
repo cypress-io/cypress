@@ -1305,8 +1305,10 @@ export class ProjectLifecycleManager {
   }
 
   isTestingTypeConfigured (testingType: TestingType): boolean {
+    debug('isTestingTypeConfigured %s', testingType)
     const config = this.loadedConfigFile
 
+    debug('config: %O', config)
     if (!config) {
       return false
     }

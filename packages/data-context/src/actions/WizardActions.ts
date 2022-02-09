@@ -62,6 +62,7 @@ export class WizardActions {
   }
 
   completeSetup () {
+    debug('completeSetup')
     this.ctx.update((d) => {
       d.scaffoldedFiles = null
     })
