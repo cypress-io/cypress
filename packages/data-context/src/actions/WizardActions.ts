@@ -278,7 +278,10 @@ export class WizardActions {
   }
 
   private async scaffoldConfig (testingType: 'e2e' | 'component'): Promise<NexusGenObjects['ScaffoldedFile']> {
-    if (!this.ctx.fs.existsSync(this.ctx.lifecycleManager.configFilePath)) {
+    try {
+      await this.ctx.fs.stat(this.ctx.lifecycleManager.configFilePath)
+    } catch (e) {
+      // only do this if config file doesn't exist
       this.ctx.lifecycleManager.setConfigFilePath(this.ctx.coreData.wizard.chosenLanguage)
 
       const configCode = this.configCode(testingType, this.ctx.coreData.wizard.chosenLanguage)
@@ -425,7 +428,9 @@ export class WizardActions {
   }
 
   private async scaffoldFile (filePath: string, contents: string, description: string): Promise<NexusGenObjects['ScaffoldedFile']> {
-    if (this.ctx.fs.existsSync(filePath)) {
+    try {
+      await this.ctx.fs.stat(filePath)
+
       return {
         status: 'skipped',
         description: 'File already exists',
@@ -433,6 +438,9 @@ export class WizardActions {
           absolute: filePath,
         },
       }
+    } catch (e) {
+      // ignore the file not found error
+      // it's what we want
     }
 
     try {
