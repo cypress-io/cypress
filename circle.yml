@@ -453,7 +453,7 @@ commands:
           # TODO: How can we have preinstalled browsers on CircleCI?
           name: 'Install Chrome on Windows' 
           command: |
-            [[ $PLATFORM == 'windows' && '<<parameters.browser>>' == 'chrome' ]] && choco install googlechrome || true
+            [[ $PLATFORM == 'windows' && '<<parameters.browser>>' == 'chrome' ]] && choco install googlechrome || [[ $PLATFORM != 'windows' ]]
       - run:
           command: |
             cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --parallel -- --') || true
@@ -1261,7 +1261,11 @@ jobs:
 
   run-app-integration-tests-chrome:
     <<: *defaults
-    resource_class: medium
+    parameters:
+      <<: *defaultsParameters
+      resource_class:
+        type: string
+        default: medium
     parallelism: 4
     steps:
       - run-new-ui-tests:
@@ -2445,6 +2449,7 @@ windows-workflow: &windows-workflow
     - run-app-integration-tests-chrome:
         name: windows-run-app-integration-tests-chrome
         executor: windows
+        resource_class: windows.medium
         context: test-runner:launchpad-tests
         requires:
           - windows-build
