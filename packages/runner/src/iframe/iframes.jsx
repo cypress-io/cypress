@@ -157,6 +157,9 @@ export default class Iframes extends Component {
     const $container = $(this.refs.container).empty()
     const $autIframe = this.autIframe.create(this.props.config).appendTo($container)
 
+    // Remove the spec bridge iframe
+    $('iframe.spec-bridge-iframe').remove()
+
     this.autIframe.showInitialBlankContents()
 
     this._addIframe({
