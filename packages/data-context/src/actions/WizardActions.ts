@@ -29,6 +29,8 @@ export class WizardActions {
   }
 
   setFramework (framework: NexusGenEnums['FrontendFrameworkEnum'] | null) {
+    const prevFramework = this.ctx.coreData.wizard.chosenFramework || ''
+
     this.ctx.coreData.wizard.chosenFramework = framework
 
     if (framework !== 'react' && framework !== 'vue') {
@@ -39,8 +41,8 @@ export class WizardActions {
 
     // if the previous bundler was incompatible with the
     // new framework, we need to reset it
-    if (chosenBundler
-      && !this.ctx.wizard.chosenFramework?.supportedBundlers.includes(chosenBundler)) {
+    if ((chosenBundler && !this.ctx.wizard.chosenFramework?.supportedBundlers.includes(chosenBundler))
+    || !['react', 'vue'].includes(prevFramework)) {
       return this.setBundler(null)
     }
 

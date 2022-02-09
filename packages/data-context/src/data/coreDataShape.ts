@@ -61,8 +61,8 @@ export interface AppDataShape {
 }
 
 export interface WizardDataShape {
-  allBundlers: typeof BUNDLERS
   chosenBundler: NexusGenEnums['SupportedBundlers'] | null
+  allBundlers: typeof BUNDLERS
   chosenFramework: NexusGenEnums['FrontendFrameworkEnum'] | null
   chosenLanguage: NexusGenEnums['CodeLanguageEnum']
   chosenManualInstall: boolean
