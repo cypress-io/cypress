@@ -93,7 +93,7 @@ const menuItems = computed(() => {
   const reconfigure = { name: t('setupPage.testingCard.reconfigure'), event: 'reconfigure' }
   const launchBrowser = { name: t('setupPage.testingCard.launchBrowser'), event: 'launchBrowser' }
 
-  return props.isRunning ? [reconfigure] : [reconfigure, launchBrowser]
+  return props.isRunning ? [reconfigure] : [launchBrowser, reconfigure]
 })
 
 const handleMenuClick = (eventName: EventName) => {

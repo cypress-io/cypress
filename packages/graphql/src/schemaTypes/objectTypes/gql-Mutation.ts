@@ -601,8 +601,9 @@ export const mutation = mutationType({
         testingType: nonNull(arg({ type: TestingTypeEnum })),
       },
       resolve: async (source, args, ctx) => {
+        ctx.actions.project.setForceReconfigureProjectByTestingType(args.testingType)
         ctx.actions.project.setCurrentTestingType(args.testingType)
-        await ctx.actions.project.reconfigureProject(true)
+        await ctx.actions.project.reconfigureProject()
 
         return true
       },

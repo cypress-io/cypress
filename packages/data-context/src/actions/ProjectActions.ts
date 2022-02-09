@@ -469,16 +469,20 @@ export class ProjectActions {
     return { specs, specPattern, excludeSpecPattern, additionalIgnorePattern }
   }
 
+  setForceReconfigureProjectByTestingType (testingType: TestingType) {
+    this.ctx.update((coreData) => {
+      coreData.forceReconfigureProject = {
+        [testingType]: true,
+      }
+    })
+  }
+
   async reconfigureProject (forceReconfigureProject?: boolean) {
     // Initialize active project close first the current project
-    if (this.ctx.coreData.currentTestingType) {
+    if (this.ctx.coreData.currentTestingType && forceReconfigureProject) {
       const currentTestingType = this.ctx.coreData.currentTestingType
 
-      this.ctx.update((coreData) => {
-        coreData.forceReconfigureProject = {
-          [currentTestingType]: Boolean(forceReconfigureProject),
-        }
-      })
+      this.setForceReconfigureProjectByTestingType(currentTestingType)
     }
 
     await this.ctx.actions.browser.closeBrowser()
