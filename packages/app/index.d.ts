@@ -18,7 +18,7 @@ export {}
  */
 declare global {
   interface Window {
-    ws: Socket
+    ws?: Socket
 
     UnifiedRunner: {
       /**

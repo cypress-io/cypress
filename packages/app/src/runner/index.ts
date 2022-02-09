@@ -46,6 +46,10 @@ export function createWebsocket (socketIoRoute: string) {
 }
 
 export function initializeEventManager (UnifiedRunner: any) {
+  if (!window.ws) {
+    throw Error('Need window.ws to exist before initializing event manager')
+  }
+
   _eventManager = new EventManager(
     UnifiedRunner.CypressDriver,
     UnifiedRunner.MobX,
