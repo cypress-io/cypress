@@ -185,6 +185,7 @@
     :installed-version="versions.current.version"
     :latest-version="versions.latest.version"
     :project-name="props.gql?.currentProject?.title"
+    :install-command="installCommand"
     @close="showUpdateModal = false"
   />
 </template>
@@ -229,11 +230,11 @@ fragment TopNav on Query {
   currentProject {
     id
     title
-    
+    packageManager
     currentBrowser {
-    id
-    displayName
-    majorVersion
+      id
+      displayName
+      majorVersion
     }
     ...VerticalBrowserListItems
   }
@@ -332,6 +333,19 @@ const resetPrompt = (event) => {
     docsMenuVariant.value = 'main'
   }
 }
+
+const installCommand = computed(() => {
+  switch (props.gql.currentProject?.packageManager) {
+    case 'npm':
+      return 'npm install --save-dev'
+    case 'yarn':
+      return 'yarn add --dev'
+    case 'pnpm':
+      return 'pnpm add --save-dev'
+    default:
+      return 'npm install --save-dev'
+  }
+})
 
 onKeyStroke(['Enter', ' ', 'Escape'], (event) => {
   resetPrompt(event)
