@@ -24,43 +24,143 @@ describe('App: Settings', () => {
     cy.get('button').contains('Log In')
   })
 
-  it('shows the projectId section when there is a projectId', () => {
-    cy.visitApp()
-    cy.findByText('Settings').click()
-    cy.findByText('Project Settings').click()
-    cy.findByText('Project ID').should('be.visible')
-  })
-
-  it('shows the recordKeys section', () => {
-    cy.loginUser()
-
-    cy.visitApp()
-    cy.findByText('Settings').click()
-    cy.findByText('Project Settings').click()
-    cy.findByText('Record Key').should('be.visible')
-    cy.get('[data-cy="record-key"]').should('contain', '***')
-    cy.get('[aria-label="Record Key Visibility Toggle"]').click()
-    cy.get('[data-cy="record-key"]').should('contain', '2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa')
-  })
-
-  it('opens cloud settings when clicking on "Manage Keys"', () => {
-    cy.loginUser()
-    cy.intercept('mutation-ExternalLink_OpenExternal', { 'data': { 'openExternal': true } }).as('OpenExternal')
-    cy.visitApp()
-    cy.findByText('Settings').click()
-    cy.findByText('Project Settings').click()
-    cy.findByText('Manage Keys').click()
-    cy.wait('@OpenExternal')
-    .its('request.body.variables.url')
-    .should('equal', 'http:/test.cloud/cloud-project/settings')
-  })
-
   it('can reconfigure a project', () => {
     cy.visitApp('settings')
 
     cy.intercept('mutation-SettingsContainer_ReconfigureProject', { 'data': { 'reconfigureProject': true } }).as('ReconfigureProject')
     cy.findByText('Reconfigure Project').click()
     cy.wait('@ReconfigureProject')
+  })
+
+  describe('Project Settings', () => {
+    it('shows the projectId section when there is a projectId', () => {
+      cy.visitApp()
+      cy.findByText('Settings').click()
+      cy.findByText('Project Settings').click()
+      cy.findByText('Project ID').should('be.visible')
+    })
+
+    it('shows the Record Keys section', () => {
+      cy.loginUser()
+
+      cy.visitApp()
+      cy.findByText('Settings').click()
+      cy.findByText('Project Settings').click()
+      cy.findByText('Record Key').should('be.visible')
+    })
+
+    it('obfuscates each record key and has a button to reveal the key', () => {
+      cy.loginUser()
+
+      cy.visitApp()
+      cy.findByText('Settings').click()
+      cy.findByText('Project Settings').click()
+      cy.get('[data-cy="record-key"]').should('contain', '***')
+      cy.get('[aria-label="Record Key Visibility Toggle"]').click()
+      cy.get('[data-cy="record-key"]').should('contain', '2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa')
+    })
+
+    // TODO: Check that 'Default values' are indicated when the specPattern is not edited
+    it('shows the Spec Patterns section (default specPattern value)', () => {
+      cy.scaffoldProject('simple-ct')
+      cy.openProject('simple-ct')
+      cy.startAppServer('component')
+      cy.loginUser()
+
+      cy.visitApp()
+      cy.findByText('Settings').click()
+      cy.findByText('Project Settings').click()
+      cy.get('[data-cy="file-match-indicator"]').contains('2 Matches')
+      cy.get('[data-cy="spec-pattern"]').contains('**/*.cy.{js,jsx,ts,tsx}')
+    })
+
+    it('shows the Spec Patterns section (edited specPattern value)', () => {
+      cy.loginUser()
+
+      cy.visitApp()
+      cy.findByText('Settings').click()
+      cy.findByText('Project Settings').click()
+      cy.get('[data-cy="file-match-indicator"]').contains('41 Matches')
+      cy.get('[data-cy="spec-pattern"]').contains('tests/**/*')
+    })
+
+    it('shows the Experiments section', () => {
+      cy.loginUser()
+
+      cy.visitApp()
+      cy.findByText('Settings').click()
+      cy.findByText('Project Settings').click()
+      cy.get('[data-cy="settings-experiments"]').within(() => {
+        cy.get('[data-cy="experiment-experimentalFetchPolyfill"]')
+        cy.get('[data-cy="experiment-experimentalInteractiveRunEvents"]')
+        cy.get('[data-cy="experiment-experimentalSessionSupport"]')
+        cy.get('[data-cy="experiment-experimentalSourceRewriting"]')
+        cy.get('[data-cy="experiment-experimentalStudio"]')
+      })
+    })
+
+    it('shows the Resolved Configuration section', () => {
+      cy.loginUser()
+
+      cy.visitApp()
+      cy.findByText('Settings').click()
+      cy.findByText('Project Settings').click()
+      cy.get('[data-cy="config-code"]').contains('{')
+    })
+
+    it('highlights values set via config file, envFile, env, or CLI in the appropriate color', () => {
+      cy.loginUser()
+
+      cy.visitApp()
+      cy.findByText('Settings').click()
+      cy.findByText('Project Settings').click()
+      cy.get('[data-cy="config-legend"]').within(() => {
+        cy.get('.bg-gray-50').contains('default')
+        cy.get('.bg-teal-100').contains('config')
+        cy.get('.bg-yellow-100').contains('env')
+        cy.get('.bg-red-50').contains('cli')
+      })
+
+      cy.get('[data-cy="config-code"]').within(() => {
+        cy.get('.bg-teal-100').contains('tests/_fixtures')
+        cy.get('.bg-teal-100').contains('abc123')
+        cy.get('.bg-teal-100').contains('specFilePattern')
+        cy.get('.bg-teal-100').contains('supportFile')
+        cy.get('.bg-yellow-100').contains('INTERNAL_CLOUD_ENV')
+        cy.get('.bg-yellow-100').contains('REMOTE_DEBUGGING_PORT')
+        cy.get('.bg-yellow-100').contains('KONFIG_ENV')
+        cy.get('.bg-yellow-100').contains('INTERNAL_E2E_TESTING_SELF')
+        cy.get('.bg-yellow-100').contains('INTERNAL_GRAPHQL_PORT')
+        cy.get('.bg-red-50').contains('4455')
+      })
+    })
+
+    it('opens cypress.config.js file after clicking "Edit" button', () => {
+      cy.loginUser()
+      cy.intercept('query-OpenConfigFileInIDE', { 'data': { 'openExternal': true } }).as('OpenExternal')
+
+      cy.visitApp()
+      cy.findByText('Settings').click()
+      cy.findByText('Project Settings').click()
+      cy.get('[data-cy="config-code"]').within(() => {
+        cy.get('button').contains('Edit').click()
+        cy.wait('@OpenExternal')
+        .its('response.body.data.openExternal')
+        .should('equal', true)
+      })
+    })
+
+    it('opens cloud settings when clicking on "Manage Keys"', () => {
+      cy.loginUser()
+      cy.intercept('mutation-ExternalLink_OpenExternal', { 'data': { 'openExternal': true } }).as('OpenExternal')
+      cy.visitApp()
+      cy.findByText('Settings').click()
+      cy.findByText('Project Settings').click()
+      cy.findByText('Manage Keys').click()
+      cy.wait('@OpenExternal')
+      .its('request.body.variables.url')
+      .should('equal', 'http:/test.cloud/cloud-project/settings')
+    })
   })
 
   describe('external editor', () => {

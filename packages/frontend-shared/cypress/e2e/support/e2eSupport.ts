@@ -195,12 +195,6 @@ function openProject (projectName: ProjectFixture, argv: string[] = []) {
 }
 
 function startAppServer (mode: 'component' | 'e2e' = 'e2e') {
-  const browser = Cypress.browser.name
-
-  if (browser !== 'chrome') {
-    throw new Error(`Cypress in cypress does not support running in the ${browser} browser`)
-  }
-
   return logInternal('startAppServer', (log) => {
     return cy.window({ log: false }).then((win) => {
       return cy.withCtx(async (ctx, o) => {
