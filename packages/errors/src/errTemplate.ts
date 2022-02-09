@@ -6,6 +6,7 @@ import { trimMultipleNewLines } from './errorUtils'
 import { stripIndent } from './stripIndent'
 
 import type { ErrTemplateResult, SerializedError } from './errorTypes'
+import type { ErrorLike } from '.'
 
 interface ListOptions {
   prefix?: string
@@ -89,9 +90,7 @@ function listFlags (
   .map((flag, key) => {
     const v = obj[key]
 
-    if (v) {
-      return `The ${flag} flag you passed was: ${theme.yellow(v)}`
-    }
+    return v ? `The ${flag} flag you passed was: ${theme.yellow(v)}` : ``
   })
   .compact()
   .join('\n')
@@ -124,6 +123,11 @@ export class Stringify {
 
 export function stringify (val: object) {
   return new Stringify(val)
+}
+
+export function details (err: ErrorLike) {
+  // TODO: What is this supposed to do, some formatting etc I guess?
+  return err.stack ?? ''
 }
 
 /**

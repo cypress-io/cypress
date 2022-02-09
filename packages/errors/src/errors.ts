@@ -5,7 +5,7 @@ import _ from 'lodash'
 import path from 'path'
 import stripAnsi from 'strip-ansi'
 import { humanTime, logError, pluralize } from './errorUtils'
-import { backtick, errTemplate, fmt } from './errTemplate'
+import { backtick, details, errTemplate, fmt } from './errTemplate'
 import { stackWithoutMessage } from './stackUtils'
 import { stripIndent } from './stripIndent'
 
@@ -1152,11 +1152,28 @@ export const AllCypressErrors = {
       Learn more: https://on.cypress.io/plugins-api
     `
   },
+  // @ts-ignore
   UNEXPECTED_ERROR_LOADING_CONFIG: (arg1: string, arg2: ErrorLike) => {
     return errTemplate`
       The following error was thrown while loading. Please check your plugins file (${arg1})
 
       ${details(arg2)}
+    `
+  },
+
+  MULTIPLE_SUPPORT_FILES_FOUND: (arg1: string, arg2: string) => {
+    return errTemplate`
+      There are multiple support files.
+
+      Your \`supportFile\` is set to \`${arg1}\`, and we found \`${arg2}\`.
+
+      Correct your supportFile config or merge the files into one.
+    `
+  },
+
+  UNKNOWN_ERROR: () => {
+    return errTemplate`
+      An unknown error occurred. 
     `
   },
 } as const

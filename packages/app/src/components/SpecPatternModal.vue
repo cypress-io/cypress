@@ -19,7 +19,7 @@
     <StandardModalFooter
       class="flex h-72px gap-16px items-center"
     >
-      <OpenConfigFileInIDE>
+      <OpenConfigFileInIDE :gql="props.gql">
         <Button size="lg">
           <template #prefix>
             <i-cy-code-editor_x16 class="icon-dark-white" />

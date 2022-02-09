@@ -128,12 +128,7 @@ export class DataContext {
       return null
     }
 
-    // TODO: Standardize approach to serializing errors
-    return {
-      title: this.coreData.baseError.title,
-      message: this.coreData.baseError.message,
-      stack: this.coreData.baseError.stack,
-    }
+    return this.coreData.baseError
   }
 
   @cached
@@ -353,7 +348,9 @@ export class DataContext {
         throw err
       }
     } else {
-      this.coreData.baseError = err
+      if (this.coreData.baseError) {
+        this.coreData.baseError.originalError = err
+      }
     }
   }
 

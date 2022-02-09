@@ -9,7 +9,7 @@
         data-testid="error-header"
       >
         <slot name="header">
-          {{ baseError.title }}
+          {{ baseError.originalError?.name ?? 'Error' }}
         </slot>
       </h1>
       <!-- eslint-disable vue/multiline-html-element-content-newline  -->
@@ -33,7 +33,7 @@
               v-html="markdown"
             />
             <ErrorCodeFrame
-              v-if="baseError.fileToOpen"
+              v-if="props.gql.fileToOpen"
               :gql="props.gql.fileToOpen"
             />
           </div>

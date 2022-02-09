@@ -1,4 +1,4 @@
-import type { SerializedError } from '@packages/data-context/src/data'
+import type { SerializedError } from '@packages/errors/src/errorTypes'
 import { objectType } from 'nexus'
 import str from 'underscore.string'
 

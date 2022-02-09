@@ -48,7 +48,7 @@ export const checkSupportFile = async ({
     const found = await fs.pathExists(supportFile)
 
     if (!found) {
-      errors.throw('SUPPORT_FILE_NOT_FOUND', supportFile, configFile)
+      errors.throw('SUPPORT_FILE_NOT_FOUND', supportFile)
     }
   }
 

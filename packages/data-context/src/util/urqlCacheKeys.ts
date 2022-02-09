@@ -1,5 +1,5 @@
 import type { NexusGenObjectNames } from '@packages/graphql/src/gen/nxs.gen'
-import type { CacheExchangeOpts, KeyGenerator } from '@urql/exchange-graphcache'
+import type { KeyGenerator } from '@urql/exchange-graphcache'
 
 type CacheKeys = {
   keys: Partial<Record<NexusGenObjectNames, KeyGenerator>>
@@ -13,7 +13,7 @@ type CacheKeys = {
  * We want to to keep the key definitions in sync between the
  * server & client so we only define them once
  */
-export const urqlCacheKeys: Partial<UrqlCacheKeys> = {
+export const urqlCacheKeys: Partial<CacheKeys> = {
   keys: {
     DevState: (data) => data.__typename,
     Wizard: (data) => data.__typename,

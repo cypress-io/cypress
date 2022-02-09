@@ -16,6 +16,8 @@ describe('<CreateSpecModal />', () => {
       <CreateSpecModal
         gql={{
           currentProject: {
+            configFile: 'cypress.config.js',
+            configFileAbsolutePath: '/usr/project/cypress.config.js',
             id: 'id',
             codeGenGlobs: {
               id: 'super-unique-id',
@@ -82,6 +84,8 @@ describe('playground', () => {
       <CreateSpecModal
         gql={{
           currentProject: {
+            configFile: 'cypress.config.js',
+            configFileAbsolutePath: '/usr/project/cypress.config.js',
             id: 'id',
             codeGenGlobs: {
               id: 'super-unique-id',

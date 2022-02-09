@@ -36,7 +36,7 @@ const ensureLiveBrowser = async (port: number, browserName: string) => {
     await _connectAsync(connectOpts)
   } catch (err) {
     debug('failed to connect to CDP %o', { connectOpts, err })
-    errors.throw('CDP_COULD_NOT_CONNECT', port, err, browserName)
+    errors.throw('CDP_COULD_NOT_CONNECT', browserName, port, err as Error)
   }
 }
 

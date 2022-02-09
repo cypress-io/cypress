@@ -363,9 +363,7 @@ export async function setSupportFileAndFolder (obj, defaults) {
   }
 
   if (supportFilesByGlob.length === 0) {
-    const configFile = obj.configFile || defaults.configFile
-
-    return errors.throw('SUPPORT_FILE_NOT_FOUND', path.resolve(obj.projectRoot, obj.supportFile), configFile)
+    return errors.throw('SUPPORT_FILE_NOT_FOUND', path.resolve(obj.projectRoot, obj.supportFile))
   }
 
   // TODO move this logic to find support file into util/path_helpers
@@ -398,7 +396,7 @@ export async function setSupportFileAndFolder (obj, defaults) {
     return fs.pathExists(obj.supportFile)
     .then((found) => {
       if (!found) {
-        errors.throw('SUPPORT_FILE_NOT_FOUND', obj.supportFile, obj.configFile || defaults.configFile)
+        errors.throw('SUPPORT_FILE_NOT_FOUND', obj.supportFile)
       }
 
       return debug('switching to found file %s', obj.supportFile)
@@ -412,9 +410,7 @@ export async function setSupportFileAndFolder (obj, defaults) {
     })
     .then((result) => {
       if (result === null) {
-        const configFile = obj.configFile || defaults.configFile
-
-        return errors.throw('SUPPORT_FILE_NOT_FOUND', path.resolve(obj.projectRoot, sf), configFile)
+        return errors.throw('SUPPORT_FILE_NOT_FOUND', path.resolve(obj.projectRoot, sf))
       }
 
       debug('setting support file to %o', { result })

@@ -9,6 +9,20 @@ import { GenerateSpecResponse } from './gql-GenerateSpecResponse'
 import { Query } from './gql-Query'
 import { ScaffoldedFile } from './gql-ScaffoldedFile'
 
+export function createBaseError (error: unknown) {
+  const e = error as Error
+
+  return {
+    description: e.message,
+    errorType: 'UNKNOWN_ERROR',
+    originalError: {
+      name: e.name,
+      message: e.message,
+      stack: e.stack,
+    },
+  } as const
+}
+
 export const mutation = mutationType({
   definition (t) {
     t.field('devRelaunch', {
@@ -246,15 +260,7 @@ export const mutation = mutationType({
         try {
           await ctx.actions.project.launchProject(ctx.coreData.currentTestingType, {}, args.specPath)
         } catch (e) {
-          ctx.coreData.baseError = {
-            description: e.message,
-            errorType: 'UNKNOWN_ERROR',
-            originalError: {
-              name: e.name,
-              message: e.message,
-              stack: e.stack,
-            },
-          }
+          ctx.coreData.baseError = createBaseError(e)
         }
 
         return ctx.lifecycleManager
@@ -475,11 +481,7 @@ export const mutation = mutationType({
           } catch (error) {
             const e = error as Error
 
-            ctx.coreData.baseError = {
-              title: 'Spec Files Migration Error',
-              message: e.message,
-              stack: e.stack,
-            }
+            ctx.coreData.baseError = createBaseError(e)
           }
         }
 
@@ -518,11 +520,7 @@ export const mutation = mutationType({
         } catch (error) {
           const e = error as Error
 
-          ctx.coreData.baseError = {
-            title: 'Support File Migration Error',
-            message: e.message,
-            stack: e.stack,
-          }
+          ctx.coreData.baseError = createBaseError(e)
         }
         await ctx.actions.migration.nextStep()
 
@@ -540,9 +538,13 @@ export const mutation = mutationType({
           const e = error as Error
 
           ctx.coreData.baseError = {
-            title: 'Config File Migration Error',
-            message: e.message,
-            stack: e.stack,
+            description: e.message,
+            errorType: 'UNKNOWN_ERROR',
+            originalError: {
+              name: e.name,
+              message: e.message,
+              stack: e.stack,
+            },
           }
         }
 

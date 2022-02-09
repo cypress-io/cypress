@@ -1,5 +1,6 @@
 import { expect } from 'chai'
 import chalk from 'chalk'
+import type { ErrorLike } from '../../src'
 
 import { details, errTemplate, guard } from '../../src/errTemplate'
 import { stripIndent } from '../../src/stripIndent'
@@ -27,7 +28,9 @@ describe('errTemplate', () => {
   })
 
   it('provides as details for toErrorProps', () => {
-    const errStack = new Error().stack ?? ''
+    const errStack = new Error()
+
+    errStack.stack = 'This is the stack trace.'
     const obj = errTemplate`
       This was an error
       
@@ -64,7 +67,7 @@ describe('errTemplate', () => {
   })
 
   it('will stringify details values', () => {
-    const someObj = { a: 1, b: 2, c: 3 }
+    const someObj: ErrorLike = { a: 1, b: 2, c: 3, name: 'Some Error', message: 'This is a test error' }
     const obj = errTemplate`
       This was returned from the app:
       

@@ -17,6 +17,7 @@ import {
   RequestPolicy,
 } from '@urql/core'
 import _ from 'lodash'
+import { createBaseError } from '@packages/graphql/src/schemaTypes'
 
 const cloudEnv = getenv('CYPRESS_INTERNAL_CLOUD_ENV', process.env.CYPRESS_INTERNAL_ENV || 'development') as keyof typeof REMOTE_SCHEMA_URLS
 
@@ -104,11 +105,10 @@ export class CloudDataSource {
             }
           } else if ((!_.isEqual(resolvedData.data, res.data) || !_.isEqual(resolvedData.error, res.error)) && !res.error?.networkError) {
             if (res.error) {
-              this.ctx.coreData.baseError = {
-                title: res.error.graphQLErrors?.[0]?.originalError?.name,
-                message: res.error.message,
-                stack: res.error.stack,
-              }
+              this.ctx.coreData.baseError = createBaseError(res.error)
+              // title: res.error.graphQLErrors?.[0]?.originalError?.name,
+              // message: res.error.message,
+              // stack: res.error.stack,
             } else {
               this.ctx.coreData.baseError = null
             }

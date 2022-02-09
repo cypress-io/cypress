@@ -191,6 +191,7 @@ export class ProjectLifecycleManager {
         errorType: 'ERROR_READING_FILE',
         originalError: {
           name: 'Error',
+          message: 'Error Loading Config',
           stack: this._configResult.value?.stack,
         },
       }
@@ -207,6 +208,7 @@ export class ProjectLifecycleManager {
         errorType: 'PLUGINS_FUNCTION_ERROR',
         originalError: {
           name: 'Error',
+          message: 'Error loading plugins',
           stack: this._eventsIpcResult.value?.stack,
         },
       }
@@ -1062,7 +1064,7 @@ export class ProjectLifecycleManager {
 
     this._cleanupIpc(ipc)
 
-    err = getError('PLUGINS_UNEXPECTED_ERROR', this._currentTestingType, this.configFile, err)
+    err = getError('PLUGINS_UNEXPECTED_ERROR', this.configFile || '', err)
     err.title = 'Error running plugin'
 
     // this can sometimes trigger before the promise is fulfilled and
