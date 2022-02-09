@@ -1,6 +1,6 @@
 <template>
   <template v-if="status">
-    <div class="inline-flex items-center border rounded-full p-5px pr-16px text-size-14px leading-20px group relative text-jade-500">
+    <div class="border rounded-full font-medium p-5px pr-16px text-size-14px leading-20px inline-flex items-center group relative text-jade-500">
       <Menu>
         <MenuButton
           data-cy="status-badge-menu"
@@ -8,7 +8,7 @@
           @click.stop
         >
           <i-cy-grommet_x16
-            class="mx-4px h-16px w-16px icon-light-jade-500 icon-dark-jade-500"
+            class="h-16px mr-4px ml-4px w-16px icon-light-jade-400 icon-dark-jade-400"
           />
           {{ titleOn }}
           <i-cy-chevron-down-small_x8
@@ -38,7 +38,7 @@
   </template>
   <template v-else>
     <span
-      class="inline-flex items-center border rounded-full p-5px pr-16px text-size-14px leading-20px text-gray-600"
+      class="border rounded-full font-medium p-5px pr-16px text-size-14px leading-20px inline-flex items-center"
     >
       <i-cy-grommet_x16
         class="mx-4px h-16px w-16px icon-dark-gray-200 icon-dark-gray-50"

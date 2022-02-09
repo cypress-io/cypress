@@ -73,7 +73,7 @@
       class="sr-only"
       aria-live="polite"
     >
-      {{ resultCount }} {{ resultCount === 1 ? t('specPage.matchSingular') : t('specPage.matchPlural') }}
+      {{ t('components.fileSearch.matchesIndicatorEmptyFileSearch', { count: resultCount, denominator: resultCount}) }}
     </div>
   </div>
 </template>
