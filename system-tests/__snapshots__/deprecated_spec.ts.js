@@ -15,9 +15,9 @@ exports['deprecated before:browser:launch args / push and no return - warns user
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  app_spec.js                                                                     (1 of 1)
-Deprecation Warning: The \`before:browser:launch\` plugin event changed its signature in version \`4.0.0\`
+Deprecation Warning: The before:browser:launch plugin event changed its signature in Cypress version 4.0.0
 
-The \`before:browser:launch\` plugin event switched from yielding the second argument as an \`array\` of browser arguments to an options \`object\` with an \`args\` property.
+The event switched from yielding the second argument as an array of browser arguments to an options object with an args property.
 
 We've detected that your code is still using the previous, deprecated interface signature.
 
@@ -181,9 +181,9 @@ exports['deprecated before:browser:launch args / concat return returns once per 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  app_spec.js                                                                     (1 of 2)
-Deprecation Warning: The \`before:browser:launch\` plugin event changed its signature in version \`4.0.0\`
+Deprecation Warning: The before:browser:launch plugin event changed its signature in Cypress version 4.0.0
 
-The \`before:browser:launch\` plugin event switched from yielding the second argument as an \`array\` of browser arguments to an options \`object\` with an \`args\` property.
+The event switched from yielding the second argument as an array of browser arguments to an options object with an args property.
 
 We've detected that your code is still using the previous, deprecated interface signature.
 
@@ -213,9 +213,9 @@ This code will not work in a future version of Cypress. Please see the upgrade g
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  app_spec2.js                                                                    (2 of 2)
-Deprecation Warning: The \`before:browser:launch\` plugin event changed its signature in version \`4.0.0\`
+Deprecation Warning: The before:browser:launch plugin event changed its signature in Cypress version 4.0.0
 
-The \`before:browser:launch\` plugin event switched from yielding the second argument as an \`array\` of browser arguments to an options \`object\` with an \`args\` property.
+The event switched from yielding the second argument as an array of browser arguments to an options object with an args property.
 
 We've detected that your code is still using the previous, deprecated interface signature.
 
