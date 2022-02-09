@@ -17,7 +17,8 @@
         </MenuButton>
         <MenuItems
           class="rounded flex flex-col outline-transparent bg-gray-900 text-white
-      right-0 right-18px -bottom-104px z-40 absolute overflow-scroll"
+      right-0 z-40 absolute overflow-scroll"
+          :class="props.isRunning ? '-bottom-66px' : '-bottom-104px'"
         >
           <MenuItem
             v-for="item in menuItems"
@@ -58,6 +59,7 @@ const props = defineProps<{
   titleOn: string,
   titleOff: string,
   testingType: TestingTypeEnum
+  isRunning: boolean
 }>()
 
 const { t } = useI18n()
@@ -87,9 +89,12 @@ const mutation = useMutation(TestingTypeSelectionAndReconfigureDocument)
 type eventName = 'launchBrowser' | 'reconfigure'
 
 const menuItems: { name: string, event: eventName }[] = [
-  { name: t('setupPage.testingCard.launchBrowser'), event: 'launchBrowser' },
   { name: t('setupPage.testingCard.reconfigure'), event: 'reconfigure' },
 ]
+
+if (!props.isRunning) {
+  menuItems.unshift({ name: t('setupPage.testingCard.launchBrowser'), event: 'launchBrowser' })
+}
 
 const handleMenuClick = (eventName: eventName) => {
   switch (eventName) {

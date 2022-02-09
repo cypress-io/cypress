@@ -25,6 +25,7 @@
           :title-off="t('setupPage.testingCard.notConfigured')"
           :status="tt.configured || false"
           :testing-type="tt.key"
+          :is-running="tt.key === currentTestingType"
           @launch-browser="emits('pick', tt.key, currentTestingType)"
         />
       </template>
