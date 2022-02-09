@@ -32,7 +32,7 @@
     <!-- this button can be focused via tab key and allows card hocus styles to appear
     as well as allows a keyboard user to "activate" the card with spacebar or enter keys -->
     <button
-      class="m-8px text-indigo-500 text-18px leading-24px focus:outline-transparent"
+      class="font-medium mx-8px mb-8px text-indigo-500 text-18px leading-24px focus:outline-transparent"
       :class="{
         'text-gray-700': disabled
       }"
