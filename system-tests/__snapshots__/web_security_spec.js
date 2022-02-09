@@ -103,6 +103,13 @@ https://on.cypress.io/cross-origin-violation
 
 
 
+Warning: We failed processing this video.
+
+This error will not alter the exit code.
+
+TimeoutError: operation timed out
+      [stack trace lines]
+
 
   (Results)
 
@@ -113,7 +120,7 @@ https://on.cypress.io/cross-origin-violation
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  4                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     web_security_spec.js                                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -131,12 +138,6 @@ https://on.cypress.io/cross-origin-violation
       doing a CORS request cross-origin (failed).png                                                
 
 
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/web_security_spec.js.mp4            (X second)
-
-
 ====================================================================================================
 
   (Run Finished)
@@ -147,70 +148,6 @@ https://on.cypress.io/cross-origin-violation
   │ ✖  web_security_spec.js                     XX:XX        4        -        4        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✖  1 of 1 failed (100%)                     XX:XX        4        -        4        -        -  
-
-
-`
-
-exports['e2e web security / when disabled / passes'] = `
-
-====================================================================================================
-
-  (Run Starting)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (web_security_spec.js)                                                     │
-  │ Searched:   cypress/integration/web_security_spec.js                                           │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  web_security_spec.js                                                            (1 of 1)
-
-
-  web security
-    ✓ fails when clicking <a> to another origin
-    ✓ fails when submitted a form and being redirected to another origin
-    ✓ fails when using a javascript redirect to another origin
-    ✓ fails when doing a CORS request cross-origin
-
-
-  4 passing
-
-
-  (Results)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        4                                                                                │
-  │ Passing:      4                                                                                │
-  │ Failing:      0                                                                                │
-  │ Pending:      0                                                                                │
-  │ Skipped:      0                                                                                │
-  │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
-  │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     web_security_spec.js                                                             │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/web_security_spec.js.mp4            (X second)
-
-
-====================================================================================================
-
-  (Run Finished)
-
-
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  web_security_spec.js                     XX:XX        4        4        -        -        - │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        4        4        -        -        -  
 
 
 `
@@ -232,8 +169,7 @@ exports['e2e web security / firefox / displays warning when firefox and chromeWe
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  simple_passing_spec.js                                                          (1 of 1)
-
-Your project has set the configuration option: \`chromeWebSecurity: false\`
+Your project has set the configuration option: chromeWebSecurity to false
 
 This option will not have an effect in Firefox. Tests that rely on web security being disabled will not run as expected.
 
@@ -243,6 +179,13 @@ This option will not have an effect in Firefox. Tests that rely on web security 
 
 
   1 passing
+
+Warning: We failed processing this video.
+
+This error will not alter the exit code.
+
+TimeoutError: operation timed out
+      [stack trace lines]
 
 
   (Results)
@@ -254,16 +197,10 @@ This option will not have an effect in Firefox. Tests that rely on web security 
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     simple_passing_spec.js                                                           │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/simple_passing_spec.js.mp4          (X second)
 
 
 ====================================================================================================
