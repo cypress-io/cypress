@@ -90,8 +90,8 @@ const mutation = useMutation(TestingTypeSelectionAndReconfigureDocument)
 type EventName = 'launchBrowser' | 'reconfigure'
 
 const menuItems = computed(() => {
-  const reconfigure = { name: t('setupPage.testingCard.reconfigure'), event: 'reconfigure' }
-  const launchBrowser = { name: t('setupPage.testingCard.launchBrowser'), event: 'launchBrowser' }
+  const launchBrowser: { name: string, event: EventName } = { name: t('setupPage.testingCard.launchBrowser'), event: 'launchBrowser' }
+  const reconfigure: { name: string, event: EventName } = { name: t('setupPage.testingCard.reconfigure'), event: 'reconfigure' }
 
   return props.isRunning ? [reconfigure] : [launchBrowser, reconfigure]
 })
