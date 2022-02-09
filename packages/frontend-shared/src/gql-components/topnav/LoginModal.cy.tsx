@@ -90,17 +90,19 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
         </div>),
     })
 
-    cy.findByRole('button', { name: text.login.actionTryAgain }).should('be.visible')
+    cy.findByRole('button', { name: text.login.actionTryAgain }).should('not.exist')
+    cy.findByRole('button', { name: text.login.actionCancel }).should('not.exist')
     cy.contains(text.login.bodyBrowserError)
     cy.contains(text.login.bodyBrowserErrorDetails).should('be.visible')
     cy.contains(authUrl).should('be.visible')
+    cy.contains('button', 'Copy').should('be.visible')
 
     // cancel button works
-    cy.findByRole('button', { name: text.login.actionCancel })
-    .click().then(() => {
-      cy.wrap(Cypress.vueWrapper.findComponent(LoginModal).emitted('update:modelValue')?.[0])
-      .should('deep.equal', [false])
-    })
+    // cy.findByRole('button', { name: text.login.actionCancel })
+    // .click().then(() => {
+    //   cy.wrap(Cypress.vueWrapper.findComponent(LoginModal).emitted('update:modelValue')?.[0])
+    //   .should('deep.equal', [false])
+    // })
   })
 
   it('shows successful login status with email if name not provided', () => {
