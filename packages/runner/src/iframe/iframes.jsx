@@ -157,11 +157,15 @@ export default class Iframes extends Component {
     const $container = $(this.refs.container).empty()
     const $autIframe = this.autIframe.create(this.props.config).appendTo($container)
 
+    // Remove the spec bridge iframe
+    $('iframe.spec-bridge-iframe').remove()
+
     this.autIframe.showInitialBlankContents()
 
     this._addIframe({
       $container,
       id: `Your Spec: ${specSrc}`,
+      className: 'spec-iframe',
       src: specSrc,
     })
 
@@ -169,7 +173,7 @@ export default class Iframes extends Component {
   }
 
   _addCrossDomainIframe = (domain) => {
-    const id = `Cypress (${domain})`
+    const id = `Spec Bridge: ${domain}`
 
     // if it already exists, don't add another one
     if (document.getElementById(id)) {
@@ -180,15 +184,18 @@ export default class Iframes extends Component {
 
     this._addIframe({
       id,
-      $container: $(this.refs.container),
+      // the cross domain iframe is added to the document body instead of the
+      // container since it needs to match the size of the top window for screenshots
+      $container: $(document.body),
+      className: 'spec-bridge-iframe',
       src: `//${domain}/${this.props.config.namespace}/multi-domain-iframes/${encodeURIComponent(domain)}`,
     })
   }
 
-  _addIframe ({ $container, id, src }) {
+  _addIframe ({ $container, id, src, className }) {
     const $specIframe = $('<iframe />', {
       id,
-      class: 'spec-iframe',
+      class: className,
     }).appendTo($container)
 
     $specIframe.prop('src', src)

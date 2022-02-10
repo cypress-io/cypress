@@ -45,3 +45,18 @@ export const omitUnserializableValues = (value) => {
 
   return value
 }
+
+export const serializeRunnable = (runnable) => {
+  if (!runnable) return undefined
+
+  const fields = _.pick(runnable, ['id', '_currentRetry', 'type', 'title', 'parent', 'ctx'])
+
+  fields.ctx = _.pick(runnable.ctx, ['currentTest.id', 'currentTest._currentRetry', 'currentTest.type', 'currentTest.title'])
+
+  // recursively call serializeRunnable for the parent field
+  if (fields.parent) {
+    fields.parent = serializeRunnable(fields.parent)
+  }
+
+  return fields
+}

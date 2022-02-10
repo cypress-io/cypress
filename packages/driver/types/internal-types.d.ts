@@ -14,6 +14,8 @@ declare namespace Cypress {
     (action: 'request:event', data: any)
     (action: 'backend:request', fn: (...any) => void)
     (action: 'automation:request', fn: (...any) => void)
+    (action: 'before:screenshot', fn: (config: {}, fn: () => void) => void)
+    (action: 'after:screenshot', config: {})
   }
 
   interface cy {

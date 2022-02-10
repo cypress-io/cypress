@@ -78,7 +78,7 @@ describe('multi-domain - uncaught errors', { experimentalSessionSupport: true, e
     })
   })
 
-  // TODO: skip async tests until refactoring changes are released
+  // FIXME: skip for now until refactor and stability are in
   describe.skip('async errors', () => {
     it('fails the current test/command if async errors are thrown from the test code in switchToDomain while the callback window is still open', (done) => {
       cy.on('fail', (err) => {
