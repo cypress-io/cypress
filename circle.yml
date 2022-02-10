@@ -1944,33 +1944,6 @@ jobs:
           repo: cypress-example-todomvc
           browser: firefox
 
-  test-binary-against-conduit-chrome:
-    <<: *defaults
-    resource_class: medium
-    steps:
-      - test-binary-against-repo:
-          repo: cypress-example-conduit-app
-          browser: chrome
-          command: "npm run cypress:run"
-          wait-on: http://localhost:3000
-
-  test-binary-against-api-testing-firefox:
-    <<: *defaults
-    steps:
-      - test-binary-against-repo:
-          repo: cypress-example-api-testing
-          browser: firefox
-          command: "npm run cy:run"
-
-  test-binary-against-piechopper-firefox:
-    <<: *defaults
-    resource_class: medium
-    steps:
-      - test-binary-against-repo:
-          repo: cypress-example-piechopper
-          browser: firefox
-          command: "npm run cypress:run"
-
   test-binary-against-cypress-realworld-app:
     <<: *defaults
     resource_class: medium+
@@ -2278,12 +2251,7 @@ linux-workflow: &linux-workflow
         <<: *mainBuildFilters
         requires:
           - create-build-artifacts
-    # Re-enable when the cypress-example-conduit-app project is fixed.
-    # https://github.com/cypress-io/cypress-example-conduit-app/issues/346
-    # - test-binary-against-conduit-chrome:
-    #     <<: *mainBuildFilters
-    #     requires:
-    #       - create-build-artifacts
+
     - test-binary-against-recipes-firefox:
         <<: *mainBuildFilters
         requires:
@@ -2293,14 +2261,6 @@ linux-workflow: &linux-workflow
         requires:
           - create-build-artifacts
     - test-binary-against-todomvc-firefox:
-        <<: *mainBuildFilters
-        requires:
-          - create-build-artifacts
-    - test-binary-against-api-testing-firefox:
-        <<: *mainBuildFilters
-        requires:
-          - create-build-artifacts
-    - test-binary-against-piechopper-firefox:
         <<: *mainBuildFilters
         requires:
           - create-build-artifacts
@@ -2358,19 +2318,6 @@ mac-workflow: &mac-workflow
         executor: mac
         requires:
           - darwin-build
-
-    - test-binary-against-kitchensink:
-        name: darwin-test-binary-against-kitchensink
-        executor: mac
-        requires:
-          - darwin-create-build-artifacts
-
-    - test-binary-against-staging:
-        context: test-runner:record-tests
-        name: darwin-test-binary-against-staging
-        executor: mac
-        requires:
-          - darwin-create-build-artifacts
 
     - test-binary-and-npm-against-other-projects:
         context: test-runner:trigger-test-jobs
