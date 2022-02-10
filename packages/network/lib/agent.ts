@@ -185,6 +185,16 @@ export class CombinedAgent {
       options.uri = url.parse(options.href)
     }
 
+    if (!options.uri.port) {
+      if (options.uri.protocol === 'http:') {
+        options.uri.port = String(80)
+        options.port = 80
+      } else if (options.uri.protocol === 'https:') {
+        options.uri.port = String(443)
+        options.port = 443
+      }
+    }
+
     debug('addRequest called %o', { isHttps, ..._.pick(options, 'href') })
 
     return getFirstWorkingFamily(options, this.familyCache, (family: net.family) => {
