@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col flex-grow justify-between">
+  <div class="flex flex-col justify-between flex-grow">
     <template v-if="!result">
       <div class="p-24px w-720px">
         <Input
@@ -23,10 +23,17 @@
         >
           <div
             v-if="hasError"
-            class="rounded flex font-medium bg-error-100 mt-16px p-14px ring-2 ring-error-100 text-error-600 gap-8px items-center"
+            class="flex items-center font-medium rounded bg-error-100 mt-16px p-14px ring-2 ring-error-100 text-error-600 gap-8px"
           >
             <i-cy-errored-outline_x16 class="icon-dark-error-600" />
             <span>{{ invalidSpecWarning }}<em class="font-medium">specPattern</em>:</span>
+          </div>
+          <div
+            v-else-if="showExtensionWarning && props.type === 'e2e'"
+            class="flex items-center font-medium rounded bg-warning-100 mt-16px p-16px text-warning-600 gap-8px"
+          >
+            <i-cy-errored-outline_x16 class="icon-dark-warning-600" />
+            {{ t('createSpec.e2e.importEmptySpec.specExtensionWarning') }}<span class="rounded bg-warning-200 py-2px px-8px text-warning-700">{{ recommendedFileName }}</span>
           </div>
 
           <div class="mt-16px">
@@ -34,13 +41,6 @@
               :gql="props.gql"
             />
           </div>
-        </div>
-        <div
-          v-else-if="showExtensionWarning && props.type === 'e2e'"
-          class="rounded flex font-medium bg-warning-100 mt-16px p-16px text-warning-600 gap-8px items-center"
-        >
-          <i-cy-errored-outline_x16 class="icon-dark-warning-600" />
-          {{ t('createSpec.e2e.importEmptySpec.specExtensionWarning') }}<span class="rounded bg-warning-200 py-2px px-8px text-warning-700">{{ recommendedFileName }}</span>
         </div>
       </div>
       <StandardModalFooter
@@ -69,7 +69,7 @@
         :file="result.file"
       />
       <StandardModalFooter
-        class="flex h-72px gap-16px items-center"
+        class="flex items-center h-72px gap-16px"
       >
         <router-link
           class="outline-none"
