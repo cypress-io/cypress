@@ -1,6 +1,9 @@
 import os from 'os'
 import type { DataContext } from '..'
 import type { TestingType } from '@packages/types'
+import Debug from 'debug'
+
+const debug = Debug('cypress:data-context:versions-data-source')
 
 const pkg = require('@packages/root')
 const nmi = require('node-machine-id')
@@ -69,6 +72,8 @@ export class VersionsDataSource {
     const response = await this.ctx.util.fetch(NPM_CYPRESS_REGISTRY)
     const responseJson = await response.json()
 
+    debug('NPM release dates %o', responseJson.time)
+
     return responseJson.time
   }
 
@@ -96,7 +101,11 @@ export class VersionsDataSource {
       headers: manifestHeaders,
     })
 
+    debug('retrieving latest version information with headers: %o', manifestHeaders)
+
     const manifest = await manifestResponse.json()
+
+    debug('latest version information: %o', manifest)
 
     return manifest.version
   }
