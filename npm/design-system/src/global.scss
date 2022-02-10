@@ -4,8 +4,6 @@
 @use 'derived/export.scss';
 @use 'typography';
 
-@use 'normalize.css/normalize.css';
-
 // probably should leave this for the consumer to set?
 body, html {
   font-size: typography.text(m);
