@@ -5,6 +5,8 @@ const debug = require('debug')('cypress:server:plugins')
 const resolve = require('resolve')
 const Promise = require('bluebird')
 const inspector = require('inspector')
+const fs = require('fs')
+
 const errors = require('../errors')
 const util = require('./util')
 const pkg = require('@packages/root')
@@ -173,13 +175,38 @@ const init = (config, options) => {
       resolve(newCfg)
     })
 
+    const esmGuard = options.__esmGuard
+
     ipc.on('load:error', (type, ...args) => {
       debug('load:error %s, rejecting', type)
+      killPluginsProcess()
+      // eslint-disable-next-line no-unused-vars
+      const [_requiredFile, stack] = args
+
+      if (!esmGuard && _.isString(stack) && stack.includes('Must use import to load ES Module')) {
+        const fakePackageJson = path.resolve(options.projectRoot, 'cypress', 'package.json')
+
+        if (!fs.existsSync(fakePackageJson)) {
+          fs.writeFileSync(fakePackageJson, JSON.stringify({
+            'NOTE': 'Added by Cypress to guard against the type: "module" in your project root package.json. Will be removed on process exit',
+          }))
+
+          return init(config, { ...options, __esmGuard: fakePackageJson }).then(resolve, reject)
+        }
+      }
 
       reject(errors.get(type, ...args))
     })
 
     const killPluginsProcess = () => {
+      if (esmGuard) {
+        try {
+          fs.rmSync(esmGuard)
+        } catch (e) {
+          // Shouldn't ever happen, but if it does it's not an issue
+        }
+      }
+
       pluginsProcess && pluginsProcess.kill()
       pluginsProcess = null
     }
