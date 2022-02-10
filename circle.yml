@@ -845,6 +845,11 @@ commands:
       repo:
         description: "Name of the github repo to clone like: cypress-example-kitchensink"
         type: string
+      testingType:
+        description: Type of tests to run "e2e" or "component"
+        type: enum
+        enum: ["e2e", "component"]
+        default: "e2e"
       browser:
         description: Name of the browser to use, like "electron", "chrome", "firefox"
         type: enum
@@ -945,11 +950,24 @@ commands:
             - when:
                 condition: <<parameters.browser>>
                 steps:
-                  - run:
-                      name: Run tests using browser "<<parameters.browser>>"
-                      working_directory: /tmp/<<parameters.repo>>/<<parameters.folder>>
-                      command: |
-                        <<parameters.command>> -- --browser <<parameters.browser>>
+                  - when:
+                      condition:
+                        equal: [ "e2e", << parameters.testingType >> ]
+                      steps:
+                        - run:
+                            name: Run << parameters.testingType >> tests using browser "<<parameters.browser>>"
+                            working_directory: /tmp/<<parameters.repo>>/<<parameters.folder>>
+                            command: |
+                              <<parameters.command>> -- --browser <<parameters.browser>>
+                  - when:
+                      condition:
+                        equal: [ "component", << parameters.testingType >> ]
+                      steps:
+                        - run:
+                            name: Run << parameters.testingType >> tests using browser "<<parameters.browser>>"
+                            working_directory: /tmp/<<parameters.repo>>/<<parameters.folder>>
+                            command: |
+                              <<parameters.command>> --browser <<parameters.browser>>
             - unless:
                 condition: <<parameters.browser>>
                 steps:
@@ -2189,6 +2207,7 @@ jobs:
     steps:
       - test-binary-against-repo-folder:
           repo: cypress-component-testing-examples
+          testingType: component
           browser: chrome
           folder: "create-react-app-chakra-ui"
           pull_request_id: 83
