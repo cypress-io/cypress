@@ -154,6 +154,16 @@ describe('e2e plugins', function () {
     })
   })
 
+  it('fails when invalid event handler is registered', function () {
+    return systemTests.exec(this, {
+      spec: 'app_spec.js',
+      project: 'plugin-invalid-event-handler-error',
+      sanitizeScreenshotDimensions: true,
+      snapshot: true,
+      expectedExitCode: 1,
+    })
+  })
+
   it('fails when there is nothing exported', function () {
     return systemTests.exec(this, {
       spec: 'app_spec.js',

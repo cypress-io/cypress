@@ -570,3 +570,10 @@ The function exported by your pluginsFile threw an error: /foo/bar/.projects/plu
 FunctionSyncError: Function sync error from plugins file
       [stack trace lines]
 `
+
+exports['e2e plugins fails when invalid event handler is registered 1'] = `
+Your pluginsFile threw a validation error from: /foo/bar/.projects/plugin-invalid-event-handler-error/cypress/plugins/index.js
+
+ValidationError: The handler for the event \`task\` must be an object
+      [stack trace lines]
+`
