@@ -162,7 +162,7 @@ describe('App: Index', () => {
           cy.get('[aria-label="Close"]').click()
           cy.get('[data-cy="create-spec-modal"]').should('not.exist')
           cy.get('@EmptySpecCard').click()
-          cy.contains('button', defaultMessages.components.button.cancel).click()
+          cy.contains('button', defaultMessages.components.button.back).click()
           cy.get('[data-cy="create-spec-modal"]').within(() => {
             cy.get('[data-cy="card"]').contains(defaultMessages.createSpec.e2e.importEmptySpec.header).click()
           })
@@ -730,7 +730,7 @@ describe('App: Index', () => {
         cy.get('input').invoke('val').should('eq', getPathForPlatform('src/App.cy.jsx'))
         cy.contains(defaultMessages.createSpec.component.importEmptySpec.header)
 
-        cy.contains(defaultMessages.components.button.cancel).click()
+        cy.contains(defaultMessages.components.button.back).click()
 
         cy.contains(defaultMessages.createSpec.newSpecModalTitle)
       })

@@ -10,6 +10,7 @@ export default makeConfig({
       '@urql/core',
       'vue-i18n',
       '@cypress/vue',
+      'p-defer',
       '@vue/test-utils',
       'vue-router',
       '@urql/devtools',
