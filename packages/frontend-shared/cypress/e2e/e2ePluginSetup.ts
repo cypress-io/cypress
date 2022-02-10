@@ -15,6 +15,8 @@ import { CloudRunQuery } from '../support/mock-graphql/stubgql-CloudTypes'
 import { getOperationName } from '@urql/core'
 import pDefer from 'p-defer'
 
+const pkg = require('@packages/root')
+
 interface InternalOpenProjectArgs {
   argv: string[]
   projectName: string
@@ -150,42 +152,53 @@ async function makeE2ETasks () {
 
       sinon.stub(ctx.util, 'fetch').get(() => {
         return async (url: RequestInfo, init?: RequestInit) => {
-          if (!String(url).endsWith('/test-runner-graphql')) {
-            return fetchApi(url, init)
-          }
+          if (String(url).endsWith('/test-runner-graphql')) {
+            const { query, variables } = JSON.parse(String(init?.body))
+            const document = parse(query)
+            const operationName = getOperationName(document)
 
-          const { query, variables } = JSON.parse(String(init?.body))
-          const document = parse(query)
-          const operationName = getOperationName(document)
+            let result = await execute({
+              operationName,
+              document,
+              variableValues: variables,
+              schema: cloudSchema,
+              rootValue: CloudRunQuery,
+              contextValue: {
+                __server__: ctx,
+              },
+            })
 
-          let result = await execute({
-            operationName,
-            document,
-            variableValues: variables,
-            schema: cloudSchema,
-            rootValue: CloudRunQuery,
-            contextValue: {
-              __server__: ctx,
-            },
-          })
+            if (remoteGraphQLIntercept) {
+              try {
+                result = await remoteGraphQLIntercept({
+                  operationName,
+                  variables,
+                  document,
+                  query,
+                  result,
+                })
+              } catch (e) {
+                const err = e as Error
 
-          if (remoteGraphQLIntercept) {
-            try {
-              result = await remoteGraphQLIntercept({
-                operationName,
-                variables,
-                document,
-                query,
-                result,
-              })
-            } catch (e) {
-              const err = e as Error
-
-              result = { data: null, extensions: [], errors: [new GraphQLError(err.message, undefined, undefined, undefined, undefined, err)] }
+                result = { data: null, extensions: [], errors: [new GraphQLError(err.message, undefined, undefined, undefined, undefined, err)] }
+              }
+            } else {
+              return new Response(JSON.stringify(result), { status: 200 })
             }
+          } else if (String(url) === 'https://download.cypress.io/desktop.json') {
+            return new Response(JSON.stringify({
+              name: 'Cypress',
+              version: pkg.version,
+            }), { status: 200 })
+          } else if (String(url) === 'https://registry.npmjs.org/cypress') {
+            return new Response(JSON.stringify({
+              'time': {
+                [pkg.version]: '2022-02-10T01:07:37.369Z',
+              },
+            }), { status: 200 })
           }
 
-          return new Response(JSON.stringify(result), { status: 200 })
+          return fetchApi(url, init)
         }
       })
 

@@ -46,6 +46,7 @@ describe('VersionsDataSource', () => {
 
     afterEach(() => {
       sinon.restore()
+      sinon.reset()
     })
 
     it('loads the manifest for the latest version with all headers and queries npm for release dates', async () => {
