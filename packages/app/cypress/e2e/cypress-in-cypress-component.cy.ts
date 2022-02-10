@@ -6,7 +6,7 @@ describe('Cypress In Cypress', { viewportWidth: 1200 }, () => {
     cy.findBrowsers()
     cy.openProject('cypress-in-cypress')
     cy.startAppServer('component')
-    cy.visitApp()
+    cy.__incorrectlyVisitAppWithIntercept()
   })
 
   it('test component', () => {
@@ -29,6 +29,29 @@ describe('Cypress In Cypress', { viewportWidth: 1200 }, () => {
     .should('be.visible')
 
     cy.percySnapshot('viewport info open')
+
+    cy.get('body').click()
+
+    cy.findByTestId('playground-activator').click()
+    cy.findByTestId('playground-selector').clear().type('#__cy_root')
+
+    cy.percySnapshot('cy.get selector')
+
+    cy.findByTestId('playground-num-elements').contains('1 Match')
+
+    cy.window().then((win) => cy.spy(win.console, 'log'))
+    cy.findByTestId('playground-print').click().window().then((win) => {
+      expect(win.console.log).to.have.been.calledWith('%cCommand:  ', 'font-weight: bold', 'cy.get(\'#__cy_root\')')
+    })
+
+    cy.findByLabelText('Selector Methods').click()
+    cy.findByRole('menuitem', { name: 'cy.contains' }).click()
+
+    cy.findByTestId('playground-selector').clear().type('Component Test')
+
+    cy.percySnapshot('cy.contains selector')
+
+    cy.findByTestId('playground-num-elements').contains('1 Match')
   })
 
   it('navigation between specs and other parts of the app works', () => {

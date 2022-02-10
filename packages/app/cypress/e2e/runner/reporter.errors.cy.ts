@@ -45,7 +45,7 @@ function loadSpec (options: LoadSpecOptions): VerifyFunc {
   // specs page first to mitigate
   // cy.visitApp(`specs/runner?file=cypress/e2e/errors/${fileName}`)
 
-  cy.visitApp()
+  cy.__incorrectlyVisitAppWithIntercept()
   cy.contains('[data-cy=spec-item]', fileName).click()
 
   cy.location().should((location) => {

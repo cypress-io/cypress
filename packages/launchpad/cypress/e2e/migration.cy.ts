@@ -66,7 +66,7 @@ function renameSupport (lang: 'js' | 'ts' = 'js') {
   }, { lang })
 }
 
-describe('Full migration flow for each project', () => {
+describe('Full migration flow for each project', { retries: { openMode: 2, runMode: 2 } }, () => {
   it('completes journey for migration-component-testing', () => {
     startMigrationFor('migration-component-testing')
     // custom testFiles - cannot auto

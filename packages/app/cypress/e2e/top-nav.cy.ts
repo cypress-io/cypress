@@ -44,7 +44,7 @@ describe('App Top Nav Workflows', () => {
 
         cy.openProject('launchpad')
         cy.startAppServer()
-        cy.visitApp()
+        cy.__incorrectlyVisitAppWithIntercept()
       })
 
       it('shows the current browser in the top nav browser list button', () => {
@@ -121,7 +121,7 @@ describe('App Top Nav Workflows', () => {
 
         cy.openProject('launchpad')
         cy.startAppServer()
-        cy.visitApp()
+        cy.__incorrectlyVisitAppWithIntercept()
 
         cy.findByTestId('app-header-bar').validateExternalLink({
           name: 'v10.0.0',
@@ -210,7 +210,7 @@ describe('App Top Nav Workflows', () => {
       cy.findBrowsers()
       cy.openProject('launchpad')
       cy.startAppServer()
-      cy.visitApp()
+      cy.__incorrectlyVisitAppWithIntercept()
 
       cy.findByTestId('app-header-bar').findByRole('button', { name: 'Docs', expanded: false }).as('docsButton')
     })
@@ -283,7 +283,7 @@ describe('App Top Nav Workflows', () => {
         cy.openProject('launchpad')
         cy.startAppServer()
         cy.loginUser()
-        cy.visitApp()
+        cy.__incorrectlyVisitAppWithIntercept()
 
         cy.findByTestId('app-header-bar').findByRole('button', { name: 'Profile and Log Out', expanded: false }).as('logInButton')
       })
