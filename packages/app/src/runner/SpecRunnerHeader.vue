@@ -1,10 +1,10 @@
 <template>
   <div
     id="spec-runner-header"
-    class="min-h-64px px-16px text-14px"
+    class="min-h-64px text-14px"
     :style="{ width: `${props.width}px` }"
   >
-    <div class="flex flex-grow flex-wrap py-16px gap-12px justify-end">
+    <div class="flex flex-wrap justify-end flex-grow p-16px gap-12px">
       <!--
         TODO: Studio. Out of scope for GA.
       <Button
@@ -20,7 +20,7 @@
       <div
         v-if="props.gql.currentTestingType === 'e2e'"
         data-cy="aut-url"
-        class="border rounded flex flex-grow border-1px border-gray-100 h-32px align-middle overflow-hidden"
+        class="flex flex-grow overflow-hidden align-middle border border-gray-100 rounded border-1px h-32px"
         :class="{
           'bg-gray-50': autStore.isLoadingUrl
         }"
@@ -28,7 +28,7 @@
         <Button
           data-cy="playground-activator"
           :disabled="isDisabled"
-          class="rounded-none border-r-1px border-gray-100 mr-12px"
+          class="border-gray-100 rounded-none border-r-1px mr-12px"
           variant="text"
           @click="togglePlayground"
         >
@@ -45,7 +45,7 @@
         <Button
           data-cy="playground-activator"
           :disabled="isDisabled"
-          class=" border-gray-100 mr-12px"
+          class="border-gray-100  mr-12px"
           variant="outline"
           @click="togglePlayground"
         >
@@ -65,7 +65,7 @@
         </template>
 
         <template #default>
-          <div class="max-h-50vh overflow-auto">
+          <div class="overflow-auto max-h-50vh">
             <VerticalBrowserListItems
               :gql="props.gql"
               :spec-path="activeSpecPath"
@@ -82,13 +82,13 @@
           <span class="whitespace-nowrap">{{ autStore.viewportWidth }}x{{ autStore.viewportHeight }}</span>
           <span
             v-if="displayScale"
-            class="-ml-6px text-gray-500"
+            class="text-gray-500 -ml-6px"
           >
             ({{ displayScale }})
           </span>
         </template>
         <template #default>
-          <div class="max-h-50vw p-16px text-gray-600 leading-24px w-400px overflow-auto">
+          <div class="overflow-auto text-gray-600 max-h-50vw p-16px leading-24px w-400px">
             <!-- TODO: This copy is a placeholder based on the old message for this, we should confirm the exact copy and then move to i18n -->
             <p class="mb-16px">
               The
@@ -103,7 +103,7 @@
             </p>
 
             <ShikiHighlight
-              class="rounded border-1 border-gray-200 mb-16px"
+              class="border-gray-200 rounded border-1 mb-16px"
               lang="javascript"
               :code="code"
             />
@@ -117,15 +117,11 @@
       </SpecRunnerDropdown>
     </div>
 
-    <div
+    <SelectorPlayground
       v-if="selectorPlaygroundStore.show"
-      class="mt-8px"
-    >
-      <SelectorPlayground
-        :get-aut-iframe="getAutIframe"
-        :event-manager="eventManager"
-      />
-    </div>
+      :get-aut-iframe="getAutIframe"
+      :event-manager="eventManager"
+    />
   </div>
 </template>
 

@@ -631,6 +631,13 @@
       "defaultTitle": "DOM Snapshot",
       "pinnedTitle": "Pinned",
       "studioActiveError": "Cannot show Snapshot while creating commands in Studio"
+    },
+    "selectorPlayground": {
+      "matches": "No Matches | {n} Match | {n} Matches",
+      "copyTooltip": "Copied to clipboard",
+      "printTooltip": "Printed to console",
+      "invalidSelector": "Invalid",
+      "selectorMethodsLabel": "Selector Methods"
     }
   }
 }
