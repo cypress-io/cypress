@@ -222,6 +222,7 @@ export const mutation = mutationType({
 
     t.field('login', {
       type: Query,
+      slowLogThreshold: false,
       description: 'Auth with Cypress Cloud',
       resolve: async (_, args, ctx) => {
         await ctx.actions.auth.login()
@@ -530,6 +531,7 @@ export const mutation = mutationType({
     t.field('migrateConfigFile', {
       description: 'Transforms cypress.json file into cypress.config.js file',
       type: Query,
+      slowLogThreshold: 5000, // This mutation takes a little time
       resolve: async (_, args, ctx) => {
         try {
           await ctx.actions.migration.createConfigFile()

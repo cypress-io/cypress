@@ -19,6 +19,7 @@ import * as session from './session'
 import type { Socket } from '@packages/socket'
 import path from 'path'
 import { getCtx } from '@packages/data-context'
+import { handleGraphQLSocketRequest } from '@packages/graphql/src/makeGraphQLServer'
 
 type StartListeningCallbacks = {
   onSocketConnection: (socket: any) => void
@@ -310,6 +311,8 @@ export class SocketBase {
 
         return socket.join('runner')
       })
+
+      socket.on('graphql:request', handleGraphQLSocketRequest)
 
       // TODO: what to do about runner disconnections?
 

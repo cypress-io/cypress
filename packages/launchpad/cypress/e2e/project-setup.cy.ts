@@ -103,8 +103,7 @@ describe('Launchpad: Setup Project', () => {
       .within(() => {
         cy.get('h2').contains('Key Differences').should('be.visible')
 
-        // @ts-ignore
-        cy.get('body').tab().tab()
+        cy.tabUntil((el) => el.text().includes('Close'))
 
         cy.findByRole('button', { name: 'Close' })
         .should('have.focus')
@@ -222,8 +221,9 @@ describe('Launchpad: Setup Project', () => {
 
         verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: false })
 
-        // @ts-ignore
-        cy.get('body').tab().tab()
+        cy.tabUntil((el) => {
+          return el.text().includes('E2E Testing')
+        })
 
         cy.contains('button', 'E2E Testing')
         .should('have.focus')
@@ -241,8 +241,7 @@ describe('Launchpad: Setup Project', () => {
 
         verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: false })
 
-        // @ts-ignore
-        cy.get('body').tab().tab()
+        cy.tabUntil((el) => el.text().includes('E2E Testing'))
 
         cy.contains('button', 'E2E Testing')
         .should('have.focus')
@@ -274,8 +273,7 @@ describe('Launchpad: Setup Project', () => {
 
         verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: false })
 
-        // @ts-ignore
-        cy.get('body').tab().tab()
+        cy.tabUntil((el) => el.text().includes('E2E Testing'))
 
         cy.contains('button', 'E2E Testing')
         .should('have.focus')
@@ -301,8 +299,7 @@ describe('Launchpad: Setup Project', () => {
 
         verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: true })
 
-        // @ts-ignore
-        cy.get('body').tab().tab()
+        cy.tabUntil((el) => el.text().includes('E2E Testing'))
 
         cy.contains('button', 'E2E Testing')
         .should('have.focus')
