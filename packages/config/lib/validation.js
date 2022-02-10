@@ -86,10 +86,12 @@ const isValidBrowserList = (key, browsers) => {
   }
 
   for (let k = 0; k < browsers.length; k += 1) {
-    const err = isValidBrowser(browsers[k])
+    const validationResult = isValidBrowser(browsers[k])
 
-    if (err !== true) {
-      return `Found an error while validating the \`browsers\` list. ${err}`
+    if (validationResult !== true) {
+      validationResult.list = 'browsers'
+
+      return validationResult
     }
   }
 

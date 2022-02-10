@@ -687,14 +687,25 @@ export const AllCypressErrors = {
       ${fmt.highlight(validationMsg)}`
   },
   SETTINGS_VALIDATION_ERROR: (configFileBaseName: string, validationResult: ConfigValidationError) => {
-    const { key, type, value } = validationResult
+    const { key, type, value, list } = validationResult
 
-    return errTemplate`\
+    if (list) {
+      return errTemplate`\
         We found an invalid value in the file: ${fmt.path(configFileBaseName)}
+
+        Found an error while validating the ${fmt.highlightSecondary(list)} list.
 
         Expected ${fmt.highlight(key)} to be ${fmt.off(type)}.
 
         Instead the value was: ${fmt.stringify(value)}`
+    }
+
+    return errTemplate`\
+      We found an invalid value in the file: ${fmt.path(configFileBaseName)}
+
+      Expected ${fmt.highlight(key)} to be ${fmt.off(type)}.
+
+      Instead the value was: ${fmt.stringify(value)}`
   },
   // happens when there is an invalid config value is returned from the
   // project's plugins file like "cypress/plugins.index.js"

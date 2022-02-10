@@ -688,6 +688,12 @@ describe('visual error templates', () => {
           type: 'a number',
           value: false,
         }],
+        list: ['cypress.json', {
+          key: 'displayName',
+          type: 'a non-empty string',
+          value: { name: 'chrome', version: '1.2.3', displayName: null },
+          list: 'browsers',
+        }],
         invalidString: ['cypress.json', {
           key: 'defaultCommandTimeout',
           type: 'a number',

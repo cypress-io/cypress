@@ -7,6 +7,7 @@ export interface ConfigValidationError {
   key: string
   type: string
   value: any
+  list?: string
 }
 
 /**
