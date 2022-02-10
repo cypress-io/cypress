@@ -110,9 +110,13 @@ export class HtmlDataSource {
         <script>
           window.__RUN_MODE_SPECS__ = ${JSON.stringify(this.ctx.project.specs)}
           window.__CYPRESS_INITIAL_DATA_ENCODED__ = "${base64InitialData}";
-          window.__CYPRESS_MODE__ = ${JSON.stringify(this.ctx.isRunMode ? 'run' : 'open')}
-          window.__CYPRESS_CONFIG__ = ${JSON.stringify(serveConfig)}
+          window.__CYPRESS_MODE__ = ${JSON.stringify(this.ctx.isRunMode ? 'run' : 'open')};
+          window.__CYPRESS_CONFIG__ = ${JSON.stringify(serveConfig)};
           window.__CYPRESS_TESTING_TYPE__ = '${this.ctx.coreData.currentTestingType}'
+          ${process.env.CYPRESS_INTERNAL_GQL_NO_SOCKET
+      ? `window.__CYPRESS_GQL_NO_SOCKET__ = 'true';`
+      : ''
+          }
         </script>
     `)
   }
