@@ -917,6 +917,7 @@ export class ProjectLifecycleManager {
     const w = chokidar.watch(file, {
       ignoreInitial: true,
       cwd: this.projectRoot,
+      awaitWriteFinish: true,
     })
 
     this.watchers.add(w)
