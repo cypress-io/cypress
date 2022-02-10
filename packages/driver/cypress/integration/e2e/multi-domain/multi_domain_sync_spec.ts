@@ -1,6 +1,20 @@
 // @ts-ignore / session support is needed for visiting about:blank between tests
 describe('multi-domain - sync', { experimentalSessionSupport: true, experimentalMultiDomain: true }, () => {
+  before(() => {
+    // NOTE: force the spec bridge to be recreated before this test is run to deterministically test config sync
+    // @ts-ignore
+    window.top.document.querySelector('[id="Cypress (foobar.com)"]')?.remove()
+  })
+
   beforeEach(() => {
+    // set an example serializable and unserializable value to validate multi-domain config/env syncing on initial spec bridge creation
+    // @ts-ignore
+    Cypress.config('foo', 'bar')
+    Cypress.env('foo', 'bar')
+    // @ts-ignore
+    Cypress.config('unserializable', () => {})
+    Cypress.env('unserializable', () => {})
+
     cy.visit('/fixtures/multi-domain.html')
     cy.get('a[data-cy="multi-domain-secondary-link"]').click()
   })
