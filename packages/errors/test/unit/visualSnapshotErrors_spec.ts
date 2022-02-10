@@ -218,8 +218,12 @@ const testVisualErrors = (whichError: CypressErrorType | '*', errorsToTest: {[K 
       //   return fse.remove(pathToHtml)
       // }))
 
-      expect(uniqErrors.sort()).to.deep.eq(errorKeys)
-      expect(errorKeys.sort()).to.deep.eq(uniqErrors)
+      const sortedUniqErrors = uniqErrors.sort()
+      const sortedErrorKeys = errorKeys.sort()
+
+      _.each(sortedUniqErrors, (val, index) => {
+        expect(val).to.eq(sortedErrorKeys[index])
+      })
     } else {
       const errorFiles = files.map((file) => {
         return {
