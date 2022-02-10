@@ -637,7 +637,8 @@ export const AllCypressErrors = {
       ${fmt.stackTrace(arg2)}
     `
   },
-  PLUGINS_VALIDATION_ERROR: (arg1: string, arg2: string | Error) => {
+  // TODO: STRING | ERROR?
+  PLUGINS_EVENT_ERROR: (arg1: string, arg2: string | Error) => {
     return errTemplate`
       Your ${fmt.highlight(`pluginsFile`)} threw a validation error: ${fmt.path(arg1)}
 
@@ -680,20 +681,27 @@ export const AllCypressErrors = {
       Fix the error in your code and re-run your tests.`
     // happens when there is an error in configuration file like "cypress.json"
   },
-  SETTINGS_VALIDATION_MSG_ERROR: (configFileBaseName: string, validationMsg: string) => {
-    return errTemplate`\
-      We found an invalid value in the file: ${fmt.path(configFileBaseName)}
+  CONFIG_VALIDATION_MSG_ERROR: (fileType: 'configFile' | 'pluginsFile' | null, fileName: string | null, validationMsg: string) => {
+    if (fileType) {
+      return errTemplate`
+        Your ${fmt.highlight(fileType)} set an invalid value: ${fmt.path(fileName)}
+
+        ${fmt.highlight(validationMsg)}`
+    }
+
+    return errTemplate`
+      An invalid configuration value was set:
 
       ${fmt.highlight(validationMsg)}`
   },
-  SETTINGS_VALIDATION_ERROR: (configFileBaseName: string, validationResult: ConfigValidationError) => {
+  CONFIG_VALIDATION_ERROR: (fileType: 'configFile' | 'pluginsFile' | null, filePath: string | null, validationResult: ConfigValidationError) => {
     const { key, type, value, list } = validationResult
 
     if (list) {
       return errTemplate`\
-        We found an invalid value in the file: ${fmt.path(configFileBaseName)}
+        Your ${fmt.highlight(fileType)} set an invalid value: ${fmt.path(filePath)}
 
-        Found an error while validating the ${fmt.highlightSecondary(list)} list.
+        The error occurred while validating the ${fmt.highlightSecondary(list)} list.
 
         Expected ${fmt.highlight(key)} to be ${fmt.off(type)}.
 
@@ -701,28 +709,11 @@ export const AllCypressErrors = {
     }
 
     return errTemplate`\
-      We found an invalid value in the file: ${fmt.path(configFileBaseName)}
+      Your ${fmt.highlight(fileType)} set an invalid value: ${fmt.path(filePath)}
 
       Expected ${fmt.highlight(key)} to be ${fmt.off(type)}.
 
       Instead the value was: ${fmt.stringify(value)}`
-  },
-  // happens when there is an invalid config value is returned from the
-  // project's plugins file like "cypress/plugins.index.js"
-  // TODO: should this be relative or absolute?
-  PLUGINS_CONFIG_VALIDATION_ERROR: (relativePluginsPath: string, errMsg: string) => {
-    return errTemplate`\
-        An invalid configuration value was returned from the plugins file: ${fmt.path(relativePluginsPath)}
-
-        ${fmt.highlight(errMsg)}`
-    // general configuration error not-specific to configuration or plugins files
-  },
-  // TODO: test this
-  CONFIG_VALIDATION_ERROR: (errMsg: string) => {
-    return errTemplate`\
-        We found an invalid configuration value:
-
-        ${fmt.highlight(errMsg)}`
   },
   RENAMED_CONFIG_OPTION: (arg1: {name: string, newName: string}) => {
     return errTemplate`\

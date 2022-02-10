@@ -49,10 +49,10 @@ const validateFile = (file) => {
   return (settings) => {
     return configUtils.validate(settings, (validationResult: ConfigValidationError | string) => {
       if (_.isString(validationResult)) {
-        return errors.throw('SETTINGS_VALIDATION_MSG_ERROR', file, validationResult)
+        return errors.throw('CONFIG_VALIDATION_MSG_ERROR', 'configFile', file, validationResult)
       }
 
-      return errors.throw('SETTINGS_VALIDATION_ERROR', file, validationResult)
+      return errors.throw('CONFIG_VALIDATION_ERROR', 'configFile', file, validationResult)
     })
   }
 }
@@ -237,8 +237,13 @@ export function mergeDefaults (config: Record<string, any> = {}, options: Record
 
   // validate config again here so that we catch configuration errors coming
   // from the CLI overrides or env var overrides
-  configUtils.validate(_.omit(config, 'browsers'), (errMsg) => {
-    return errors.throw('CONFIG_VALIDATION_ERROR', errMsg)
+  configUtils.validate(_.omit(config, 'browsers'), (validationResult: ConfigValidationError | string) => {
+    // return errors.throw('CONFIG_VALIDATION_ERROR', errMsg)
+    if (_.isString(validationResult)) {
+      return errors.throw('CONFIG_VALIDATION_MSG_ERROR', null, null, validationResult)
+    }
+
+    return errors.throw('CONFIG_VALIDATION_ERROR', null, null, validationResult)
   })
 
   configUtils.validateNoBreakingConfig(config, errors.warning, errors.throw)
@@ -286,14 +291,15 @@ export function updateWithPluginValues (cfg, overrides) {
 
   // make sure every option returned from the plugins file
   // passes our validation functions
-  configUtils.validate(overrides, (errMsg) => {
-    if (cfg.pluginsFile && cfg.projectRoot) {
-      const relativePluginsPath = path.relative(cfg.projectRoot, cfg.pluginsFile)
+  configUtils.validate(overrides, (validationResult: ConfigValidationError | string) => {
+    const relativePluginsPath = path.relative(cfg.projectRoot, cfg.pluginsFile)
 
-      return errors.throw('PLUGINS_CONFIG_VALIDATION_ERROR', relativePluginsPath, errMsg)
+    if (_.isString(validationResult)) {
+      return errors.throw('CONFIG_VALIDATION_MSG_ERROR', 'pluginsFile', relativePluginsPath, validationResult)
     }
 
-    return errors.throw('CONFIG_VALIDATION_ERROR', errMsg)
+    return errors.throw('CONFIG_VALIDATION_ERROR', 'pluginsFile', relativePluginsPath, validationResult)
+    // return errors.throw('CONFIG_VALIDATION_ERROR', 'pluginsFile', relativePluginsPath, errMsg)
   })
 
   let originalResolvedBrowsers = cfg && cfg.resolved && cfg.resolved.browsers && _.cloneDeep(cfg.resolved.browsers)
