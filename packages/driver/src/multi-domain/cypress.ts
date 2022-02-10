@@ -117,18 +117,13 @@ const onBeforeAppWindowLoad = (Cypress: Cypress.Cypress, cy: $Cy) => (autWindow:
       return undefined
     },
     onLoad () {
-      // This is also call on the on 'load' event in cy. In cy the call a function to call it. I'm not sure if that is intentional, but i've replicated it here.
-      const signalStable = () => {
-        cy.isStable(true, 'load')
-      }
-
       // This is typically called by the cy function `urlNavigationEvent` but it is private. For the primary domain this is called on 'load'.
       Cypress.action('app:navigation:changed', 'page navigation event (\'load\')')
       // This is also call on the on 'load' event in cy
       Cypress.action('app:window:load', autWindow)
 
       specBridgeCommunicator.toPrimary('window:load')
-      signalStable()
+      cy.isStable(true, 'load')
     },
     onUnload (e) {
       return Cypress.action('app:window:unload', e)

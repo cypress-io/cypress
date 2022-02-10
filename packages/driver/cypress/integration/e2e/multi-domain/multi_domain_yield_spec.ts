@@ -202,7 +202,7 @@ describe('multi-domain yields', { experimentalSessionSupport: true, experimental
     cy.on('fail', (err) => {
       if (!isChromium) {
         assertLogLength(logs, 8)
-        expect(logs[6].get('error')).to.eq(err)
+        expect(logs[7].get('error')).to.eq(err)
         expect(err.message).to.include('`cy.switchToDomain()` could not serialize the subject due to one of its properties not being supported by the structured clone algorithm.')
       }
 

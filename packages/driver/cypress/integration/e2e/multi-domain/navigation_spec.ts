@@ -43,7 +43,6 @@ describe('navigation', { experimentalSessionSupport: true, experimentalMultiDoma
           }
 
           Cypress.on('window:load', listener)
-          resolve('')
         })
 
         cy.get('button[data-cy="reload"]').click()
