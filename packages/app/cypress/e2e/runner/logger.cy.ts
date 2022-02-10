@@ -1,5 +1,5 @@
 import sinon from 'sinon'
-import { logger } from '@packages/app/src/runner/logger'
+import { logger } from '../../../src/runner/logger'
 import _ from 'lodash'
 
 describe('logger', () => {

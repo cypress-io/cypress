@@ -1,6 +1,7 @@
 import { createEventManager, createTestAutIframe } from '../../../cypress/component/support/ctSupport'
 import { useSelectorPlaygroundStore } from '../../store/selector-playground-store'
 import SelectorPlayground from './SelectorPlayground.vue'
+import { logger } from '../logger'
 
 describe('SelectorPlayground', () => {
   const mountSelectorPlayground = (
@@ -106,14 +107,13 @@ describe('SelectorPlayground', () => {
   })
 
   it('prints nothing to console when no selected elements found', () => {
-    const { autIframe } = mountSelectorPlayground()
-
-    cy.spy(autIframe.logger, 'logFormatted')
+    mountSelectorPlayground()
+    cy.spy(logger, 'logFormatted')
     cy.get('[data-cy="playground-selector"]').clear().type('.foo-bar')
 
     cy.get('[data-cy="playground-print"]').as('print')
     cy.get('@print').click().then(() => {
-      expect(autIframe.logger.logFormatted).to.have.been.calledWith({
+      expect(logger.logFormatted).to.have.been.calledWith({
         Command: `cy.get('.foo-bar')`,
         Yielded: 'Nothing',
       })
@@ -125,13 +125,13 @@ describe('SelectorPlayground', () => {
   it('prints elements when selected elements found', () => {
     const { autIframe } = mountSelectorPlayground()
 
-    cy.spy(autIframe.logger, 'logFormatted')
+    cy.spy(logger, 'logFormatted')
     cy.stub(autIframe, 'getElements').callsFake(() => Array(2))
 
     cy.get('[data-cy="playground-selector"]').clear().type('.foo-bar')
 
     cy.get('[data-cy="playground-print"]').click().then(() => {
-      expect(autIframe.logger.logFormatted).to.have.been.calledWith({
+      expect(logger.logFormatted).to.have.been.calledWith({
         Command: `cy.get('.foo-bar')`,
         Elements: 2,
         Yielded: undefined, // stubbed dom does not actually return anything
