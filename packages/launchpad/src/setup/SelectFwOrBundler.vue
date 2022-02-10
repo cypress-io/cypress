@@ -63,9 +63,9 @@
 <script lang="ts">
 
 interface RootOption {
-  name: string;
-  description?: string;
-  id: string;
+  name: string
+  description?: string
+  id: string
   isSelected?: boolean
   isDetected?: boolean
   disabled?: boolean
