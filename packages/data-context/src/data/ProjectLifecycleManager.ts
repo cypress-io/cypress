@@ -637,6 +637,8 @@ export class ProjectLifecycleManager {
         this.ctx.coreData.baseError = null
         this.reloadConfig().catch(this.onLoadError)
       }
+    }).on('error', (err) => {
+      debug('error watching config files %O', err)
     })
 
     this.initializeConfigFileWatcher()
