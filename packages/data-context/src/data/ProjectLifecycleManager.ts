@@ -1163,14 +1163,7 @@ export class ProjectLifecycleManager {
   }
 
   setConfigFilePath (lang: 'ts' | 'js') {
-    const configFilePath = this._configFilePath
-
     this._configFilePath = this._pathToFile(`cypress.config.${lang}`)
-
-    if (configFilePath !== this._configFilePath && this._configWatcher) {
-      this.closeWatcher(this._configWatcher)
-      this.initializeConfigFileWatcher()
-    }
   }
 
   private _pathToFile (file: string) {
