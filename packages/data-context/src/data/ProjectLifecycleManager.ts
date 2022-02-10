@@ -616,13 +616,18 @@ export class ProjectLifecycleManager {
       return
     }
 
-    const legacyFileWatcher = this.addWatcher(_.without([
+    const watchedConfigFiles = _.without([
       this._pathToFile('cypress.json'),
       this._pathToFile('cypress.config.js'),
       this._pathToFile('cypress.config.ts'),
-    ], this.configFilePath))
+    ], this.configFilePath)
+
+    debug('initializeConfigWatchers %o', watchedConfigFiles)
+
+    const legacyFileWatcher = this.addWatcher(watchedConfigFiles)
 
     legacyFileWatcher.on('all', (change) => {
+      debug('config file changed %O', change)
       const metaState = this._projectMetaState
       const nextMetaState = this.refreshMetaState()
 
@@ -659,11 +664,14 @@ export class ProjectLifecycleManager {
   reloadConfig () {
     if (this._configResult.state === 'errored' || this._configResult.state === 'loaded') {
       this._configResult = { state: 'pending' }
+      debug('reloadConfig refresh')
 
       return this.initializeConfig()
     }
 
     if (this._configResult.state === 'loading' || this._configResult.state === 'pending') {
+      debug('reloadConfig first load')
+
       return this.initializeConfig()
     }
 
