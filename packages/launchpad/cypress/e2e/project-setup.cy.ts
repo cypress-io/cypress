@@ -1,15 +1,10 @@
 import { FRONTEND_FRAMEWORKS, BUNDLERS, CODE_LANGUAGES, PACKAGES_DESCRIPTIONS } from '@packages/types/src/constants'
 
 describe('Launchpad: Setup Project', () => {
-  beforeEach(() => {
-    cy.scaffoldProject('pristine') // not configured
-    cy.scaffoldProject('pristine-with-ct-testing') // component configured
-    cy.scaffoldProject('pristine-with-e2e-testing') // e2e configured
-    cy.scaffoldProject('pristine-with-e2e-testing-and-storybook') // e2e configured
-    cy.scaffoldProject('pristine-npm')
-    cy.scaffoldProject('pristine-yarn')
-    cy.scaffoldProject('pristine-pnpm')
-  })
+  function scaffoldAndOpenProject (name: Parameters<typeof cy.scaffoldProject>[0], args?: Parameters<typeof cy.openProject>[1]) {
+    cy.scaffoldProject(name)
+    cy.openProject(name, args)
+  }
 
   const verifyWelcomePage = ({ e2eIsConfigured, ctIsConfigured }) => {
     cy.contains('Welcome to Cypress!').should('be.visible')
@@ -18,7 +13,7 @@ describe('Launchpad: Setup Project', () => {
   }
 
   it('no initial setup displays welcome page', () => {
-    cy.openProject('pristine')
+    scaffoldAndOpenProject('pristine')
     cy.visitLaunchpad()
     cy.contains('Welcome to Cypress!').should('be.visible')
     verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: false })
@@ -26,7 +21,7 @@ describe('Launchpad: Setup Project', () => {
 
   describe('"learn about testing types" modal', () => {
     beforeEach(() => {
-      cy.openProject('pristine')
+      scaffoldAndOpenProject('pristine')
       cy.visitLaunchpad()
       verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: false })
     })
@@ -138,7 +133,7 @@ describe('Launchpad: Setup Project', () => {
   describe('E2E test setup', () => {
     describe('project has been configured for e2e', () => {
       it('skips the setup page when choosing e2e tests to run', () => {
-        cy.openProject('pristine-with-e2e-testing')
+        scaffoldAndOpenProject('pristine-with-e2e-testing')
         cy.visitLaunchpad()
 
         verifyWelcomePage({ e2eIsConfigured: true, ctIsConfigured: true })
@@ -149,7 +144,7 @@ describe('Launchpad: Setup Project', () => {
       })
 
       it('opens to the browser pages when opened via cli with --e2e flag', () => {
-        cy.openProject('pristine-with-e2e-testing', ['--e2e'])
+        scaffoldAndOpenProject('pristine-with-e2e-testing', ['--e2e'])
         cy.visitLaunchpad()
 
         cy.get('h1').should('contain', 'Choose a Browser')
@@ -160,7 +155,7 @@ describe('Launchpad: Setup Project', () => {
     describe('project that has not been configured for e2e', () => {
       // FIXME: ProjectLifecycleManager is skipping straight to browser pages when it should show setup page.
       it.skip('shows the configuration setup page when selecting e2e tests', () => {
-        cy.openProject('pristine-with-ct-testing')
+        scaffoldAndOpenProject('pristine-with-ct-testing')
         cy.visitLaunchpad()
 
         verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: true })
@@ -182,7 +177,7 @@ describe('Launchpad: Setup Project', () => {
 
       // FIXME: ProjectLifecycleManager is skipping straight to browser pages when it should show setup page.
       it.skip('moves to "Choose a Browser" page after clicking "Continue" button in first step in configuration page', () => {
-        cy.openProject('pristine-with-ct-testing')
+        scaffoldAndOpenProject('pristine-with-ct-testing')
         cy.visitLaunchpad()
 
         verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: true })
@@ -203,7 +198,7 @@ describe('Launchpad: Setup Project', () => {
       })
 
       it('shows the configuration setup page when opened via cli with --e2e flag', () => {
-        cy.openProject('pristine-with-ct-testing', ['--e2e'])
+        scaffoldAndOpenProject('pristine-with-ct-testing', ['--e2e'])
         cy.visitLaunchpad()
 
         cy.contains('h1', 'Configuration Files')
@@ -222,7 +217,7 @@ describe('Launchpad: Setup Project', () => {
 
     describe('project not been configured for cypress', () => {
       it('can go back before selecting e2e scaffold lang', () => {
-        cy.openProject('pristine')
+        scaffoldAndOpenProject('pristine')
         cy.visitLaunchpad()
 
         verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: false })
@@ -241,7 +236,7 @@ describe('Launchpad: Setup Project', () => {
       })
 
       it('can setup e2e testing for a project selecting JS', () => {
-        cy.openProject('pristine')
+        scaffoldAndOpenProject('pristine')
         cy.visitLaunchpad()
 
         verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: false })
@@ -274,7 +269,7 @@ describe('Launchpad: Setup Project', () => {
       })
 
       it('can setup e2e testing for a project selecting TS', () => {
-        cy.openProject('pristine')
+        scaffoldAndOpenProject('pristine')
         cy.visitLaunchpad()
 
         verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: false })
@@ -301,7 +296,7 @@ describe('Launchpad: Setup Project', () => {
       })
 
       it('can setup e2e testing for a project selecting TS when CT is configured and config file is JS', () => {
-        cy.openProject('pristine-with-ct-testing')
+        scaffoldAndOpenProject('pristine-with-ct-testing')
         cy.visitLaunchpad()
 
         verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: true })
@@ -331,7 +326,7 @@ describe('Launchpad: Setup Project', () => {
       })
 
       it('can setup CT testing for a project selecting TS when E2E is configured and config file is JS', () => {
-        cy.openProject('pristine-with-e2e-testing')
+        scaffoldAndOpenProject('pristine-with-e2e-testing')
         cy.visitLaunchpad()
 
         verifyWelcomePage({ e2eIsConfigured: true, ctIsConfigured: false })
@@ -408,7 +403,7 @@ describe('Launchpad: Setup Project', () => {
       })
 
       it('shows the configuration setup page when opened via cli with --e2e flag', () => {
-        cy.openProject('pristine-with-ct-testing', ['--e2e'])
+        scaffoldAndOpenProject('pristine-with-ct-testing', ['--e2e'])
         cy.visitLaunchpad()
 
         cy.contains('h1', 'Configuration Files')
@@ -425,7 +420,7 @@ describe('Launchpad: Setup Project', () => {
       })
 
       it('can re-configure config after CT has been set up', () => {
-        cy.openProject('pristine-with-ct-testing')
+        scaffoldAndOpenProject('pristine-with-ct-testing')
         cy.withCtx((ctx) => {
           ctx.coreData.forceReconfigureProject = {
             component: true,
@@ -442,7 +437,7 @@ describe('Launchpad: Setup Project', () => {
       })
 
       it('can re-configure config after e2e has been set up', () => {
-        cy.openProject('pristine-with-e2e-testing')
+        scaffoldAndOpenProject('pristine-with-e2e-testing')
         cy.withCtx((ctx) => {
           ctx.coreData.forceReconfigureProject = {
             e2e: true,
@@ -463,7 +458,7 @@ describe('Launchpad: Setup Project', () => {
   describe('Component setup', () => {
     describe('project has been configured for component testing', () => {
       it('skips the setup steps when choosing component tests to run', () => {
-        cy.openProject('pristine-with-ct-testing')
+        scaffoldAndOpenProject('pristine-with-ct-testing')
         cy.visitLaunchpad()
 
         verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: true })
@@ -474,7 +469,7 @@ describe('Launchpad: Setup Project', () => {
       })
 
       it('opens to the browser pages when opened via cli with --component flag', () => {
-        cy.openProject('pristine-with-ct-testing', ['--component'])
+        scaffoldAndOpenProject('pristine-with-ct-testing', ['--component'])
         cy.visitLaunchpad()
 
         cy.get('h1').should('contain', 'Choose a Browser')
@@ -503,7 +498,7 @@ describe('Launchpad: Setup Project', () => {
       })
 
       it('shows the first setup page for configuration when selecting component tests', () => {
-        cy.openProject('pristine-with-e2e-testing')
+        scaffoldAndOpenProject('pristine-with-e2e-testing')
         cy.visitLaunchpad()
 
         verifyWelcomePage({ e2eIsConfigured: true, ctIsConfigured: false })
@@ -549,7 +544,7 @@ describe('Launchpad: Setup Project', () => {
               }
 
               it(testTitle, () => {
-                cy.openProject(hasStorybookDep ? 'pristine-with-e2e-testing-and-storybook' : 'pristine-with-e2e-testing')
+                scaffoldAndOpenProject(hasStorybookDep ? 'pristine-with-e2e-testing-and-storybook' : 'pristine-with-e2e-testing')
                 cy.withCtx((ctx) => {
                   ctx.actions.file.writeFileInProject('yarn.lock', '# THIS IS AN AUTOGENERATED FILE. DO NOT EDIT THIS FILE DIRECTLY.')
                 })
@@ -667,7 +662,7 @@ describe('Launchpad: Setup Project', () => {
       })
 
       it('opens to the "choose framework" page when opened via cli with --component flag', () => {
-        cy.openProject('pristine-with-e2e-testing', ['--component'])
+        scaffoldAndOpenProject('pristine-with-e2e-testing', ['--component'])
         cy.visitLaunchpad()
 
         cy.get('h1').should('contain', 'Project Setup')
@@ -677,7 +672,7 @@ describe('Launchpad: Setup Project', () => {
 
     describe('project not been configured for cypress', () => {
       it('can setup component testing', () => {
-        cy.openProject('pristine')
+        scaffoldAndOpenProject('pristine')
         cy.visitLaunchpad()
 
         verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: false })
@@ -729,11 +724,11 @@ describe('Launchpad: Setup Project', () => {
         cy.wait(500)
 
         cy.findByRole('button', { name: 'Continue' }).click()
-        cy.contains(/(Initializing Config|Choose a Browser)/, { timeout: 10000 })
+        cy.contains(/(Initializing Config|Choose a Browser)/)
       })
 
       it('setup component testing with typescript files', () => {
-        cy.openProject('pristine')
+        scaffoldAndOpenProject('pristine')
         cy.visitLaunchpad()
 
         verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: false })
@@ -770,7 +765,7 @@ describe('Launchpad: Setup Project', () => {
 
   describe('Command for package managers', () => {
     it('makes the right command for yarn', () => {
-      cy.openProject('pristine-yarn')
+      scaffoldAndOpenProject('pristine-yarn')
 
       cy.visitLaunchpad()
 
@@ -782,7 +777,7 @@ describe('Launchpad: Setup Project', () => {
     })
 
     it('makes the right command for pnpm', () => {
-      cy.openProject('pristine-pnpm')
+      scaffoldAndOpenProject('pristine-pnpm')
 
       cy.visitLaunchpad()
 
@@ -794,7 +789,7 @@ describe('Launchpad: Setup Project', () => {
     })
 
     it('makes the right command for npm', () => {
-      cy.openProject('pristine-npm')
+      scaffoldAndOpenProject('pristine-npm')
 
       cy.visitLaunchpad()
 
@@ -808,7 +803,7 @@ describe('Launchpad: Setup Project', () => {
 
   describe('detect framework, bundler and language', () => {
     beforeEach(() => {
-      cy.openProject('pristine')
+      scaffoldAndOpenProject('pristine')
     })
 
     context('meta frameworks', () => {
