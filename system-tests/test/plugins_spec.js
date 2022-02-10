@@ -20,7 +20,7 @@ describe('e2e plugins', function () {
     onRun (exec) {
       return exec().then(({ stdout }) => {
         expect(stdout).to.include('We stopped running your tests because a plugin crashed.')
-        expect(stdout).to.include('The following error was thrown by your plugins file:')
+        expect(stdout).to.include('Your pluginsFile threw an error from:')
         expect(stdout).to.include('Error: Root async error from plugins file')
       })
     },

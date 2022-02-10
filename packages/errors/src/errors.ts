@@ -604,13 +604,14 @@ export const AllCypressErrors = {
   },
   PLUGINS_DIDNT_EXPORT_FUNCTION: (pluginsFilePath: string, exported: any) => {
     const code = errPartial`
-      ${fmt.comment(`// ${pluginsFilePath}`)}
       module.exports = (on, config) => {
         ${fmt.comment(`// configure plugins here`)}
       }`
 
     return errTemplate`\
-      Your ${fmt.highlight(`pluginsFile`)} must export a function with the following signature:
+      Your ${fmt.highlight(`pluginsFile`)} did not export a valid function from: ${fmt.path(pluginsFilePath)}
+
+      It must export a function with the following signature:
 
       ${fmt.code(code)}
 
@@ -623,20 +624,18 @@ export const AllCypressErrors = {
   },
   PLUGINS_FUNCTION_ERROR: (pluginsFilePath: string, err: Error) => {
     return errTemplate`\
-      The function exported by your ${fmt.highlight(`pluginsFile`)} threw an error: ${fmt.path(pluginsFilePath)}
+      Your ${fmt.highlight(`pluginsFile`)} function threw an error from: ${fmt.path(pluginsFilePath)}
 
-      ${fmt.stackTrace(err)}
-    `
+      ${fmt.stackTrace(err)}`
   },
   PLUGINS_UNEXPECTED_ERROR: (arg1: string, arg2: string | Error) => {
     return errTemplate`
       We stopped running your tests because a plugin crashed.
 
-      The following error was thrown by your plugins file: ${fmt.path(arg1)}
+      Your ${fmt.highlight(`pluginsFile`)} threw an error from: ${fmt.path(arg1)}
 
       ${fmt.stackTrace(arg2)}
     `
-    // Your ${fmt.highlight(`pluginsFile`)} threw an error from: ${fmt.path(pluginsFilePath)}
   },
   // NOTE: mention this update in the PR, use in whimsical
   PLUGINS_INVALID_EVENT_NAME_ERROR: (pluginsFilePath: string, invalidEventName: string, validEventNames: string[], err: Error) => {
@@ -672,8 +671,8 @@ export const AllCypressErrors = {
       - A syntax error in the file or one of its dependencies
 
       Fix the error in your code and re-run your tests.`
-    // happens when there is an error in configuration file like "cypress.json"
   },
+  // happens when there is an error in configuration file like "cypress.json"
   CONFIG_VALIDATION_MSG_ERROR: (fileType: 'configFile' | 'pluginsFile' | null, fileName: string | null, validationMsg: string) => {
     if (!fileType) {
       return errTemplate`
