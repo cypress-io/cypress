@@ -99,7 +99,7 @@ export const mutation = mutationType({
     t.field('completeSetup', {
       type: 'Query',
       resolve: async (_, args, ctx) => {
-        ctx.actions.wizard.completeSetup()
+        await ctx.actions.wizard.completeSetup()
 
         return {}
       },
