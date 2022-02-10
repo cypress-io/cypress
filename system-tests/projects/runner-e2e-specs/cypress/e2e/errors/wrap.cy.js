@@ -1,21 +1,19 @@
-import './setup'
-
-describe('cy.then', { defaultCommandTimeout: 0 }, () => {
+describe('cy.wrap', { defaultCommandTimeout: 0 }, () => {
   it('assertion failure', () => {
-    cy.wrap({}).then(() => {
+    cy.wrap(() => {
       expect('actual').to.equal('expected')
-    })
+    }).then((fn) => fn())
   })
 
   it('exception', () => {
-    cy.wrap({}).then(() => {
+    cy.wrap(() => {
       ({}).bar()
-    })
+    }).then((fn) => fn())
   })
 
   it('command failure', () => {
-    cy.wrap({}).then(() => {
+    cy.wrap(() => {
       cy.get('#does-not-exist')
-    })
+    }).then((fn) => fn())
   })
 })

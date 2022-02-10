@@ -1,33 +1,43 @@
 import Bluebird from 'bluebird'
 
-import './setup'
-
 describe('uncaught errors', { defaultCommandTimeout: 0 }, () => {
   it('sync app visit exception', () => {
-    cy.visit('/index.html')
+    cy.visit('cypress/fixtures/errors.html?error-on-visit')
     cy.get('.trigger-sync-error').click()
   })
 
   it('sync app navigates to visit exception', () => {
-    cy.visit('/index.html')
+    cy.visit('cypress/fixtures/errors.html')
     cy.get('.go-to-visit-error').click()
   })
 
   it('sync app exception', () => {
-    cy.visit('/index.html')
+    cy.visit('cypress/fixtures/errors.html')
     cy.get('.trigger-sync-error').click()
   })
 
   it('async app exception', () => {
-    cy.visit('/index.html')
+    cy.visit('cypress/fixtures/errors.html')
     cy.get('.trigger-async-error').click()
     cy.wait(10000)
   })
 
   it('app unhandled rejection', () => {
-    cy.visit('/index.html')
+    cy.visit('cypress/fixtures/errors.html')
     cy.get('.trigger-unhandled-rejection').click()
     cy.wait(10000)
+  })
+
+  // TODO: Cypress.Promise.reject() gets caught by AUT. Can/should
+  // we handle that somehow?
+
+  it('exception inside uncaught:exception', () => {
+    cy.on('uncaught:exception', () => {
+      ({}).bar()
+    })
+
+    cy.visit('cypress/fixtures/errors.html')
+    cy.get('.trigger-sync-error').click()
   })
 
   it('async spec exception', () => {
@@ -65,17 +75,5 @@ describe('uncaught errors', { defaultCommandTimeout: 0 }, () => {
   // eslint-disable-next-line mocha/handle-done-callback
   it('spec Bluebird unhandled rejection with done', (done) => {
     Bluebird.reject(new Error('Unhandled promise rejection from the spec'))
-  })
-
-  // TODO: Cypress.Promise.reject() gets caught by AUT. Can/should
-  // we handle that somehow?
-
-  it('exception inside uncaught:exception', () => {
-    cy.on('uncaught:exception', () => {
-      ({}).bar()
-    })
-
-    cy.visit('/index.html')
-    cy.get('.trigger-sync-error').click()
   })
 })

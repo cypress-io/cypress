@@ -1,5 +1,3 @@
-import './setup'
-
 describe('validation errors', { defaultCommandTimeout: 0 }, () => {
   it('from cypress', () => {
     cy.viewport()
