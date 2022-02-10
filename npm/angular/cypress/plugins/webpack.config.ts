@@ -1,4 +1,5 @@
 import * as path from 'path'
+import * as webpack from 'webpack'
 import { AngularWebpackPlugin } from '@ngtools/webpack'
 
 module.exports = {
@@ -11,7 +12,7 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.[jt]sx?$/,
+        test: /\.[jt]s?$/,
         loader: '@ngtools/webpack',
       },
       // {
@@ -107,7 +108,7 @@ module.exports = {
     //   path.join(__dirname, './src'),
     // ),
     new AngularWebpackPlugin({
-      tsconfig: 'tsconfig.json',
+      tsconfig: path.join(__dirname, 'tsconfig.json'),
     }),
   ],
-}
+} as webpack.Configuration
