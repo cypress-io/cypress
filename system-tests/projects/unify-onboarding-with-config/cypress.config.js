@@ -3,11 +3,11 @@ module.exports = {
     supportFile: false,
     testFiles: '**/*cy-spec.{js,jsx,ts,tsx}',
     componentFolder: 'src',
-    devServer (cypressConfig) {
+    devServer (cypressDevServerConfig) {
       const { startDevServer } = require('@cypress/webpack-dev-server')
 
       return startDevServer({
-        options: cypressConfig,
+        options: cypressDevServerConfig,
         webpackConfig: {
           output: {
             publicPath: '/',

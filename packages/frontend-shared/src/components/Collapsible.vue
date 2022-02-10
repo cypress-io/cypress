@@ -24,7 +24,7 @@
       }"
       :aria-hidden="!isOpen"
       :class="{
-        'overflow-auto transition transition-all duration-500 animate-ease-[cubic-bezier(0.25,0.1,0.25,1)]': isOpen,
+        'overflow-auto': isOpen,
       }"
     >
       <slot
