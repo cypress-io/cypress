@@ -646,7 +646,7 @@ export const AllCypressErrors = {
     `
   },
   // NOTE: mention this update in the PR, use in whimsical
-  PLUGINS_INVALID_EVENT_ERROR: (pluginsFilePath: string, invalidEventName: string, validEventNames: string[], err: Error) => {
+  PLUGINS_INVALID_EVENT_NAME_ERROR: (pluginsFilePath: string, invalidEventName: string, validEventNames: string[], err: Error) => {
     return errTemplate`
       Your ${fmt.highlightSecondary(`pluginsFile`)} threw a validation error: ${fmt.path(pluginsFilePath)}
 
@@ -699,7 +699,7 @@ export const AllCypressErrors = {
 
     if (!fileType) {
       return errTemplate`\
-        An invalid configuration value was set:
+        An invalid configuration value was set.
 
         Expected ${fmt.highlight(key)} to be ${fmt.off(type)}.
 

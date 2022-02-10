@@ -689,7 +689,7 @@ describe('visual error templates', () => {
         default: ['/path/to/pluginsFile', err],
       }
     },
-    PLUGINS_INVALID_EVENT_ERROR: () => {
+    PLUGINS_INVALID_EVENT_NAME_ERROR: () => {
       const err = makeErr()
 
       return {

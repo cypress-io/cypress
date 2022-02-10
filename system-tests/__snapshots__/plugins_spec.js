@@ -457,7 +457,7 @@ The following are valid events:
  - file:preprocessor
  - task
 
-ValidationError: invalid event name
+InvalidEventNameError: invalid event name registered: invalid:event
       [stack trace lines]
 `
 
@@ -574,6 +574,6 @@ FunctionSyncError: Function sync error from plugins file
 exports['e2e plugins fails when invalid event handler is registered 1'] = `
 Your pluginsFile threw a validation error from: /foo/bar/.projects/plugin-invalid-event-handler-error/cypress/plugins/index.js
 
-ValidationError: The handler for the event \`task\` must be an object
+InvalidEventHandlerError: The handler for the event \`task\` must be an object
       [stack trace lines]
 `

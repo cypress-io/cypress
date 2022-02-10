@@ -43,9 +43,9 @@ const validateEvent = (event, handler, config, errConstructorFn) => {
   if (!validator) {
     const userEvents = _.reject(_.keys(eventValidators), (event) => event.startsWith('_'))
 
-    const error = new Error('invalid event name')
+    const error = new Error(`invalid event name registered: ${event}`)
 
-    error.name = 'ValidationError'
+    error.name = 'InvalidEventNameError'
 
     Error.captureStackTrace(error, errConstructorFn)
 
@@ -59,7 +59,7 @@ const validateEvent = (event, handler, config, errConstructorFn) => {
   const result = validator(event, handler, config)
 
   if (!result.isValid) {
-    result.error.name = 'ValidationError'
+    result.error.name = 'InvalidEventHandlerError'
 
     Error.captureStackTrace(result.error, errConstructorFn)
   }

@@ -146,23 +146,23 @@ class $Cypress {
     this.config = $SetterGetter.create(config, (config) => {
       if (!window.top.__cySkipValidateConfig) {
         validateNoReadOnlyConfig(config, (errProperty) => {
-          let errMessage
+          const errType = this.state('runnable')
+            ? 'config.invalid_cypress_config_override'
+            : 'invalid_test_config_override'
 
-          if (this.state('runnable')) {
-            errMessage = $errUtils.errByPath('config.invalid_cypress_config_override', {
-              errProperty,
-            })
-          } else {
-            errMessage = $errUtils.errByPath('config.invalid_test_config_override', {
-              errProperty,
-            })
-          }
+          const errMsg = $errUtils.errByPath(errType, {
+            errProperty,
+          })
 
-          throw new this.state('specWindow').Error(errMessage)
+          throw new this.state('specWindow').Error(errMsg)
         })
       }
 
-      validate(config, (errMsg) => {
+      validate(config, (errResult) => {
+        const errMsg = _.isString(errResult)
+          ? errResult
+          : `Expected \`${errResult.key}\` to be ${errResult.type}.\n\nInstead the value was: \`${JSON.stringify(errResult.value)}\``
+
         throw new this.state('specWindow').Error(errMsg)
       })
     })
