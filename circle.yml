@@ -884,13 +884,20 @@ commands:
           repo: <<parameters.repo>>
           pull_request_id: <<parameters.pull_request_id>>
       - run:
-          # Install deps + Cypress binary with yarn if yarn.lock present
+          # Install deps
           command: |
             if [[ -f yarn.lock ]]; then
               yarn --frozen-lockfile
-              CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip yarn add -D ~/cypress/cypress.tgz
             else
               npm install
+            fi
+          working_directory: /tmp/<<parameters.repo>>/<<parameters.folder>>
+      - run:
+          # Install latest Cypress binary
+          command: |
+            if [[ -f yarn.lock ]]; then
+              CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip yarn add -D ~/cypress/cypress.tgz
+            else
               CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm install --legacy-peer-deps ~/cypress/cypress.tgz
             fi
           working_directory: /tmp/<<parameters.repo>>/<<parameters.folder>>
