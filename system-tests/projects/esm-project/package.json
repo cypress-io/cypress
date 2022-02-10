@@ -1,0 +1,5 @@
+{
+  "name": "esm-project",
+  "private": true,
+  "type": "module"
+}
