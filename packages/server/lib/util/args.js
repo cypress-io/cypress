@@ -475,7 +475,9 @@ module.exports = {
       // convert config to an object
       // and store the config
       options.config = sanitizeAndConvertNestedArgs(config, 'config')
-    } else {
+    }
+
+    if (options.config == null) {
       options.config = {}
     }
 
