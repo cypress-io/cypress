@@ -1866,6 +1866,8 @@ describe('lib/config', () => {
       }
 
       const cfg = {
+        projectRoot: '/foo/bar',
+        pluginsFile: '/foo/bar/cypress/plugins/index.js',
         browsers: [browser],
         resolved: {
           browsers: {
@@ -1882,7 +1884,7 @@ describe('lib/config', () => {
       sinon.stub(errors, 'throw')
       config.updateWithPluginValues(cfg, overrides)
 
-      expect(errors.throw).to.have.been.calledWith('CONFIG_VALIDATION_ERROR')
+      expect(errors.throw).to.have.been.calledWith('CONFIG_VALIDATION_MSG_ERROR')
     })
 
     it('allows user to filter browsers', () => {
