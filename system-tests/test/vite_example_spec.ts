@@ -11,7 +11,7 @@ describe('example vite test', function () {
   systemTests.it(`should load the support file`, {
     project: 'vite-ct',
     testingType: 'component',
-    spec: 'support.spec.ts',
+    spec: 'src/support.cy.ts',
     expectedExitCode: 0,
   })
 })
