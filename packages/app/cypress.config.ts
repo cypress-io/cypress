@@ -26,6 +26,7 @@ export default defineConfig({
         include: [
           '@headlessui/vue',
           'vue3-file-selector',
+          'p-defer',
           'just-my-luck',
           'combine-properties',
           'faker',

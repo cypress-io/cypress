@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col flex-grow justify-between">
+  <div class="flex flex-col justify-between flex-grow">
     <template v-if="!result">
       <div class="p-24px w-720px">
         <Input
@@ -9,18 +9,31 @@
           :has-error="hasError"
         >
           <template #prefix>
-            <i-cy-document-blank_x16 class="icon-light-gray-50 icon-dark-gray-300" />
+            <i-cy-document-blank_x16
+              class="icon-light-gray-50 icon-dark-gray-300"
+              :class="{
+                'icon-light-error-50 icon-dark-error-400': hasError,
+              }"
+            />
           </template>
         </Input>
 
         <div
-          v-if="hasError && props.gql"
+          v-if="props.gql"
         >
           <div
-            class="rounded flex font-medium bg-error-100 p-16px text-error-600 gap-8px items-center"
+            v-if="hasError"
+            class="flex items-center font-medium rounded bg-error-100 mt-16px p-14px ring-2 ring-error-100 text-error-600 gap-8px"
           >
             <i-cy-errored-outline_x16 class="icon-dark-error-600" />
-            <span>{{ invalidSpecWarning }}<b>specPattern</b>.</span>
+            <span>{{ invalidSpecWarning }}<em class="font-medium">specPattern</em>:</span>
+          </div>
+          <div
+            v-else-if="showExtensionWarning && props.type === 'e2e'"
+            class="flex items-center font-medium rounded bg-warning-100 mt-16px p-16px text-warning-600 gap-8px"
+          >
+            <i-cy-errored-outline_x16 class="icon-dark-warning-600" />
+            {{ t('createSpec.e2e.importEmptySpec.specExtensionWarning') }}<span class="rounded bg-warning-200 py-2px px-8px text-warning-700">{{ recommendedFileName }}</span>
           </div>
 
           <div class="mt-16px">
@@ -28,13 +41,6 @@
               :gql="props.gql"
             />
           </div>
-        </div>
-        <div
-          v-else-if="showExtensionWarning && props.type === 'e2e'"
-          class="rounded flex font-medium bg-warning-100 mt-16px p-16px text-warning-600 gap-8px items-center"
-        >
-          <i-cy-errored-outline_x16 class="icon-dark-warning-600" />
-          {{ t('createSpec.e2e.importEmptySpec.specExtensionWarning') }}<span class="rounded bg-warning-200 py-2px px-8px text-warning-700">{{ recommendedFileName }}</span>
         </div>
       </div>
       <StandardModalFooter
@@ -53,7 +59,7 @@
           variant="outline"
           @click="emits('restart')"
         >
-          {{ t('components.button.cancel') }}
+          {{ t('components.button.back') }}
         </Button>
       </StandardModalFooter>
     </template>
@@ -63,7 +69,7 @@
         :file="result.file"
       />
       <StandardModalFooter
-        class="flex h-72px gap-16px items-center"
+        class="flex items-center h-72px gap-16px"
       >
         <router-link
           class="outline-none"
@@ -99,7 +105,8 @@ import Button from '@packages/frontend-shared/src/components/Button.vue'
 import { useVModels, whenever } from '@vueuse/core'
 import { gql, useMutation } from '@urql/vue'
 import SpecPatterns from '../../components/SpecPatterns.vue'
-import { EmptyGeneratorFragment, EmptyGenerator_MatchSpecFileDocument, EmptyGenerator_GenerateSpecDocument, GeneratorSuccessFileFragment } from '../../generated/graphql'
+import type { EmptyGeneratorFragment, GeneratorSuccessFileFragment } from '../../generated/graphql'
+import { EmptyGenerator_MatchSpecFileDocument, EmptyGenerator_GenerateSpecDocument } from '../../generated/graphql'
 import StandardModalFooter from '@packages/frontend-shared/src/components/StandardModalFooter.vue'
 import GeneratorSuccess from './GeneratorSuccess.vue'
 import TestResultsIcon from '~icons/cy/test-results_x24.svg'
@@ -173,7 +180,7 @@ watch(specFile, async (value) => {
   isValidSpecFile.value = result.data?.matchesSpecPattern ?? false
 }, { immediate: true })
 
-title.value = t('createSpec.e2e.importEmptySpec.header')
+title.value = t('createSpec.e2e.importEmptySpec.chooseFilenameHeader')
 
 const showExtensionWarning = computed(() => isValidSpecFile.value && !specFile.value.includes('.cy'))
 const recommendedFileName = computed(() => {

@@ -82,11 +82,12 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
       cy.get('@specsListInput').clear().type(directory)
       cy.get(rowSelector).first().should('contain', directory)
       cy.percySnapshot('matching directory search')
-    })
 
-    it('should close directories with click', () => {
-      // close all directories
+      // test interactions
+
       const directories: string[] = Array.from(new Set(specs.map((spec) => spec.relative.split('/')[0]))).sort()
+
+      cy.get('@specsListInput').clear()
 
       directories.forEach((dir) => {
         cy.contains('button[data-cy="row-directory-depth-0"]', dir)
@@ -96,42 +97,22 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
       })
 
       cy.get('[data-cy="spec-item"]').should('not.exist')
-      cy.percySnapshot()
-    })
 
-    it('should close directories with Enter', () => {
-      const directories: string[] = Array.from(new Set(specs.map((spec) => spec.relative.split('/')[0]))).sort()
+      cy.contains('button[data-cy="row-directory-depth-0"]', directories[0])
+      .should('have.attr', 'aria-expanded', 'false')
+      .focus()
+      .type('{enter}')
 
-      directories.forEach((dir) => {
-        cy.contains('button[data-cy="row-directory-depth-0"]', dir)
-        .should('have.attr', 'aria-expanded', 'true')
-        .focus()
-        .realPress('Enter')
+      cy.contains('button[data-cy="row-directory-depth-0"]', directories[0])
+      .should('have.attr', 'aria-expanded', 'true')
+      .focus()
+      .realPress('Space')
 
-        cy.contains('button[data-cy="row-directory-depth-0"]', dir)
-        .should('have.attr', 'aria-expanded', 'false')
-      })
+      cy.contains('button[data-cy="row-directory-depth-0"]', directories[0])
+      .should('have.attr', 'aria-expanded', 'false')
 
       cy.get('[data-cy="spec-item"]').should('not.exist')
-    })
 
-    it('should close directories with Space', () => {
-      const directories: string[] = Array.from(new Set(specs.map((spec) => spec.relative.split('/')[0]))).sort()
-
-      directories.forEach((dir) => {
-        cy.contains('button[data-cy="row-directory-depth-0"]', dir)
-        .should('have.attr', 'aria-expanded', 'true')
-        .focus()
-        .realPress('Space')
-
-        cy.contains('button[data-cy="row-directory-depth-0"]', dir)
-        .should('have.attr', 'aria-expanded', 'false')
-      })
-
-      cy.get('[data-cy="spec-item"]').should('not.exist')
-    })
-
-    it('should emit an event to open new spec modal', () => {
       cy.contains(defaultMessages.createSpec.newSpec).click()
       cy.get('@showCreateSpecModalSpy').should('have.been.calledOnce')
     })

@@ -759,6 +759,18 @@ describe('src/cy/commands/request', () => {
           })
         })
 
+        describe('when request origin equals browsers origin', () => {
+          it('sends correct message', () => {
+            Cypress.backend
+            .withArgs('http:request')
+            .resolves({ isOkStatusCode: true, status: 201 })
+
+            cy.request(`${window.location.origin}/foo`).then(function () {
+              expect(this.lastLog.invoke('renderProps').message).to.equal('GET 201 /foo')
+            })
+          })
+        })
+
         describe('when response is successful', () => {
           it('sends correct indicator', () => {
             Cypress.backend

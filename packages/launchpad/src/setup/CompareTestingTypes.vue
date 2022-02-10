@@ -1,16 +1,16 @@
 <template>
-  <div class="sm:grid md:w-full grid-cols-2 pt-24px">
+  <div class="grid-cols-2 sm:grid md:w-full">
     <CompareTestingCard
       data-cy="end-to-end-comparison"
       class="border-r border-r-gray-100"
-      title="End-to-end Tests:"
+      :title="t('welcomePage.compareTypes.content.e2eTitle') + ':'"
       :code="e2eCode"
       :list-items="e2eItems"
       code-fragment="cy.visit()"
     />
     <CompareTestingCard
       data-cy="component-comparison"
-      title="Component Tests:"
+      :title="t('welcomePage.compareTypes.content.componentTitle') + ':'"
       :code="ctCode"
       :list-items="ctItems"
       code-fragment="cy.mount()"
@@ -54,14 +54,14 @@ it('only shows a promotional modal on first visit', () => {
 `
 
 const e2eItems = [
-  t('welcomePage.compareTypes.e2eBullet1'),
-  t('welcomePage.compareTypes.e2eBullet2'),
-  t('welcomePage.compareTypes.e2eBullet3'),
+  t('welcomePage.compareTypes.content.e2eBullet1'),
+  t('welcomePage.compareTypes.content.e2eBullet2'),
+  t('welcomePage.compareTypes.content.e2eBullet3'),
 ]
 
 const ctItems = [
-  t('welcomePage.compareTypes.ctBullet1'),
-  t('welcomePage.compareTypes.ctBullet2'),
-  t('welcomePage.compareTypes.ctBullet3'),
+  t('welcomePage.compareTypes.content.ctBullet1'),
+  t('welcomePage.compareTypes.content.ctBullet2'),
+  t('welcomePage.compareTypes.content.ctBullet3'),
 ]
 </script>

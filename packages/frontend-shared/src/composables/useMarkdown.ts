@@ -3,7 +3,8 @@
  * NOTICE: For Syntax Highlighting, please use the ShikiHighlight component.
  * We could eventually use Shiki as a Markdown plugin, but I don't want to get into it right now.
  */
-import { computed, Ref } from 'vue'
+import type { Ref } from 'vue'
+import { computed } from 'vue'
 import MarkdownIt from 'markdown-it'
 import MarkdownItClass from '@toycode/markdown-it-class'
 import { useEventListener, whenever } from '@vueuse/core'

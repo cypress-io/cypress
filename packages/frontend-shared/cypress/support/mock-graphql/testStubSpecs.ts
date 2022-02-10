@@ -1,6 +1,7 @@
 import * as JustMyLuck from 'just-my-luck'
 import faker from 'faker'
-import { template, keys, reduce, templateSettings, TemplateExecutor } from 'lodash'
+import { template, keys, reduce, templateSettings } from 'lodash'
+import type { TemplateExecutor } from 'lodash'
 import combineProperties from 'combine-properties'
 
 templateSettings.interpolate = /{{([\s\S]+?)}}/g

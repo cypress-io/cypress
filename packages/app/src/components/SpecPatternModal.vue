@@ -13,11 +13,11 @@
     >
       <SpecPatterns
         :gql="props.gql"
-        class="border-gray-100 rounded border-px"
+        class="border-px rounded border-gray-100"
       />
     </div>
     <StandardModalFooter
-      class="flex items-center h-72px gap-16px"
+      class="flex h-72px gap-16px items-center"
     >
       <OpenConfigFileInIDE>
         <Button size="lg">
