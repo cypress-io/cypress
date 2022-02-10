@@ -98,7 +98,7 @@ export default {
     throw new Error(`The switch/case value: '${value}' did not match any cases: ${keys.join(', ')}.`)
   },
 
-  reduceProps (obj, props = []) {
+  reduceProps (obj, props: string[] = []) {
     if (!obj) {
       return null
     }
@@ -355,7 +355,7 @@ export default {
 
   // normalize more than {maxNewLines} new lines into
   // exactly {replacementNumLines} new lines
-  normalizeNewLines (str, maxNewLines, replacementNumLines) {
+  normalizeNewLines (str, maxNewLines, replacementNumLines?) {
     const moreThanMaxNewLinesRe = new RegExp(`\\n{${maxNewLines},}`)
     const replacementWithNumLines = replacementNumLines ?? maxNewLines
 

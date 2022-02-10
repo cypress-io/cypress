@@ -1,4 +1,3 @@
-// @ts-nocheck
 import _ from 'lodash'
 import Promise from 'bluebird'
 
@@ -15,7 +14,11 @@ const debug = debugFn('cypress:driver:command:type')
 export default function (Commands, Cypress, cy, state, config) {
   const { keyboard } = cy.devices
 
-  function type (subject, chars, options = {}) {
+  // Note: These "change type of `any` to X" comments are written instead of changing them directly
+  //       because Cypress extends user-given options with Cypress internal options.
+  //       These comments will be removed after removing `// @ts-nocheck` comments in `packages/driver`.
+  // TODO: change the type of `any` to `Partial<Cypress.TypeOptions>`
+  function type (subject, chars, options: any = {}) {
     const userOptions = options
     let updateTable
 
@@ -366,7 +369,7 @@ export default function (Commands, Cypress, cy, state, config) {
             // Firefox sends a click event automatically.
             if (!Cypress.isBrowser('firefox')) {
               const ctor = $dom.getDocumentFromElement(el).defaultView?.PointerEvent
-              const event = new ctor('click')
+              const event = new ctor!('click')
 
               el.dispatchEvent(event)
             }
@@ -510,7 +513,8 @@ export default function (Commands, Cypress, cy, state, config) {
     })
   }
 
-  function clear (subject, options = {}) {
+  // TODO: change the type of `any` to `Partial<ClearOptions>`
+  function clear (subject, options: any = {}) {
     const userOptions = options
 
     options = _.defaults({}, userOptions, {

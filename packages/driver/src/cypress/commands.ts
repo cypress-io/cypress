@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import _ from 'lodash'
 
 import $errUtils from './error_utils'
@@ -9,6 +7,8 @@ import { allCommands } from '../cy/commands'
 import { addCommand } from '../cy/net-stubbing'
 
 const builtInCommands = [
+  // `default` is necessary if a file uses `export default` syntax.
+  // @ts-ignore
   ..._.toArray(allCommands).map((c) => c.default || c),
   addCommand,
 ]
@@ -74,7 +74,7 @@ export default {
       const overridden = _.clone(original)
 
       overridden.fn = function (...args) {
-        args = [].concat(originalFn, args)
+        args = ([] as any).concat(originalFn, args)
 
         return fn.apply(this, args)
       }
