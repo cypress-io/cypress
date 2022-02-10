@@ -1270,6 +1270,7 @@ jobs:
       resource_class:
         type: string
         default: medium
+    resource_class: << parameters.resource_class >>
     parallelism: 4
     steps:
       - run-new-ui-tests:
