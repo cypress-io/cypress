@@ -23,6 +23,7 @@ import { allowDestroy } from '../../lib/allow-destroy'
 import { AsyncServer, Servers } from '../support/servers'
 import { UrlClientCertificates, ClientCertificates, PemKey } from '../../lib/client-certificates'
 import Forge from 'node-forge'
+import fetch from 'cross-fetch'
 const { pki } = Forge
 
 const expect = chai.expect
@@ -31,7 +32,7 @@ chai.use(sinonChai)
 
 const PROXY_PORT = 31000
 const HTTP_PORT = 31080
-const HTTPS_PORT = 31443
+const HTTPS_PORT = 443
 
 function createCertAndKey (): [object, object] {
   let keys = pki.rsa.generateKeyPair(2048)
@@ -142,6 +143,13 @@ describe('lib/agent', function () {
             agent: this.agent,
           })
 
+          this.fetch = function (this: any, input: RequestInfo, init?: RequestInit) {
+            return fetch.call(this, input, {
+              agent: this.agent,
+              ...init,
+            })
+          }
+
           if (testCase.proxyUrl) {
             let options: any = {
               keepRequests: true,
@@ -185,10 +193,51 @@ describe('lib/agent', function () {
           })
         })
 
+        it('HTTP pages can be loaded via fetch', function () {
+          return this.fetch(`http://localhost:${HTTP_PORT}/get`)
+          .then((response) => response.text())
+          .then((body) => {
+            expect(body).to.eq('It worked!')
+            if (this.debugProxy) {
+              expect(this.debugProxy.requests[0]).to.include({
+                url: `http://localhost:${HTTP_PORT}/get`,
+              })
+            }
+          })
+        })
+
         it('HTTPS pages can be loaded', function () {
           return this.request({
             url: `https://localhost:${HTTPS_PORT}/get`,
           }).then((body) => {
+            expect(body).to.eq('It worked!')
+            if (this.debugProxy) {
+              expect(this.debugProxy.requests[0]).to.include({
+                https: true,
+                url: `localhost:${HTTPS_PORT}`,
+              })
+            }
+          })
+        })
+
+        it('HTTPS pages can be loaded via fetch', function () {
+          return this.fetch(`https://localhost:${HTTPS_PORT}/get`)
+          .then((response) => response.text())
+          .then((body) => {
+            expect(body).to.eq('It worked!')
+            if (this.debugProxy) {
+              expect(this.debugProxy.requests[0]).to.include({
+                https: true,
+                url: `localhost:${HTTPS_PORT}`,
+              })
+            }
+          })
+        })
+
+        it('HTTPS pages can be loaded via fetch with no explicit port', function () {
+          return this.fetch(`https://localhost/get`)
+          .then((response) => response.text())
+          .then((body) => {
             expect(body).to.eq('It worked!')
             if (this.debugProxy) {
               expect(this.debugProxy.requests[0]).to.include({
@@ -266,7 +315,7 @@ describe('lib/agent', function () {
             expect(msg).to.eq('It worked!')
             if (this.debugProxy) {
               expect(this.debugProxy.requests[0]).to.include({
-                url: 'localhost:31443',
+                url: `localhost:${HTTPS_PORT}`,
               })
             }
 
