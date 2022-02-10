@@ -15,6 +15,16 @@
       <MigrationListItem>
         <i18n-t
           scope="global"
+          keypath="migration.renameManual.addedSpecPattern"
+        >
+          <CodeTag class="text-jade-500">
+            specPattern
+          </CodeTag>
+        </i18n-t>
+      </MigrationListItem>
+      <MigrationListItem>
+        <i18n-t
+          scope="global"
           keypath="migration.renameManual.cannotAuto"
         >
           <CodeTag class="text-jade-500">
@@ -38,9 +48,11 @@
           :class="{'border-t': index > 0}"
         >
           <template v-if="file.moved">
-            <span>✅</span>
+            <i-cy-status-pass-duotone_x24
+              class="h-16px w-16px"
+            />
             <span
-              class="text-gray-400 line-through"
+              class="text-gray-600 line-through pl-8px"
               data-cy="moved"
             >
               {{ file.relative }}
