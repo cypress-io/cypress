@@ -94,7 +94,7 @@ export const makeCypressPlugin = (
       if (id === 'cypress:config') {
         return `
 export const hasSupportPath = ${JSON.stringify(!!supportFilePath)}
-export const originAutUrl = ${JSON.stringify(`/__cypress-app/iframes/${normalizePath(projectRoot)}/`)}`
+export const originAutUrl = ${JSON.stringify(`/${namespace}/iframes/${normalizePath(projectRoot)}/`)}`
       }
     },
     configureServer: async (server: ViteDevServer) => {
