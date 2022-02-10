@@ -640,7 +640,7 @@ export const AllCypressErrors = {
   // TODO: STRING | ERROR?
   PLUGINS_EVENT_ERROR: (arg1: string, arg2: string | Error) => {
     return errTemplate`
-      Your ${fmt.highlight(`pluginsFile`)} threw a validation error: ${fmt.path(arg1)}
+      Your ${fmt.highlight(`pluginsFile`)} threw a validation error from: ${fmt.path(arg1)}
 
       ${fmt.stackTrace(arg2)}
     `
@@ -684,7 +684,7 @@ export const AllCypressErrors = {
   CONFIG_VALIDATION_MSG_ERROR: (fileType: 'configFile' | 'pluginsFile' | null, fileName: string | null, validationMsg: string) => {
     if (fileType) {
       return errTemplate`
-        Your ${fmt.highlight(fileType)} set an invalid value: ${fmt.path(fileName)}
+        Your ${fmt.highlight(fileType)} set an invalid value from: ${fmt.path(fileName)}
 
         ${fmt.highlight(validationMsg)}`
     }
@@ -699,7 +699,7 @@ export const AllCypressErrors = {
 
     if (list) {
       return errTemplate`\
-        Your ${fmt.highlight(fileType)} set an invalid value: ${fmt.path(filePath)}
+        Your ${fmt.highlight(fileType)} set an invalid value from: ${fmt.path(filePath)}
 
         The error occurred while validating the ${fmt.highlightSecondary(list)} list.
 
@@ -709,7 +709,7 @@ export const AllCypressErrors = {
     }
 
     return errTemplate`\
-      Your ${fmt.highlight(fileType)} set an invalid value: ${fmt.path(filePath)}
+      Your ${fmt.highlight(fileType)} set an invalid value from: ${fmt.path(filePath)}
 
       Expected ${fmt.highlight(key)} to be ${fmt.off(type)}.
 

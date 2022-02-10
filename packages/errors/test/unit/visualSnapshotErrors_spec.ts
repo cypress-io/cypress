@@ -655,7 +655,7 @@ describe('visual error templates', () => {
         default: ['/path/to/pluginsFile', err],
       }
     },
-    PLUGINS_VALIDATION_ERROR: () => {
+    PLUGINS_EVENT_ERROR: () => {
       const err = makeErr()
 
       return {
@@ -681,53 +681,44 @@ describe('visual error templates', () => {
         default: ['/path/to/file', err.message],
       }
     },
-    SETTINGS_VALIDATION_ERROR: () => {
+    CONFIG_VALIDATION_ERROR: () => {
       return {
-        default: ['cypress.json', {
+        default: ['configFile', 'cypress.json', {
           key: 'defaultCommandTimeout',
           type: 'a number',
           value: false,
         }],
-        list: ['cypress.json', {
+        list: ['configFile', 'cypress.json', {
           key: 'displayName',
           type: 'a non-empty string',
           value: { name: 'chrome', version: '1.2.3', displayName: null },
           list: 'browsers',
         }],
-        invalidString: ['cypress.json', {
+        invalidString: ['configFile', 'cypress.json', {
           key: 'defaultCommandTimeout',
           type: 'a number',
           value: '1234',
         }],
-        invalidObject: ['cypress.json', {
+        invalidObject: ['configFile', 'cypress.json', {
           key: 'defaultCommandTimeout',
           type: 'a number',
           value: { foo: 'bar' },
         }],
-        invalidArray: ['cypress.json', {
+        invalidArray: ['configFile', 'cypress.json', {
           key: 'defaultCommandTimeout',
           type: 'a number',
           value: [1, 2, 3],
         }],
+        pluginsFile: ['pluginsFile', 'cypress/plugins/index.js', {
+          key: 'defaultCommandTimeout',
+          type: 'a number',
+          value: false,
+        }],
       }
     },
-    SETTINGS_VALIDATION_MSG_ERROR: () => {
+    CONFIG_VALIDATION_MSG_ERROR: () => {
       return {
-        default: ['cypress.json', '`something` was not right'],
-      }
-    },
-    PLUGINS_CONFIG_VALIDATION_ERROR: () => {
-      const err = makeErr()
-
-      return {
-        default: ['/path/to/pluginsFile', err.message],
-      }
-    },
-    CONFIG_VALIDATION_ERROR: () => {
-      const err = makeErr()
-
-      return {
-        default: [err.message],
+        default: ['configFile', 'cypress.json', '`something` was not right'],
       }
     },
     RENAMED_CONFIG_OPTION: () => {
