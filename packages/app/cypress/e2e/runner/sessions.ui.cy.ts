@@ -32,10 +32,10 @@ describe('sessions ui', {
     cy.get('.test').eq(2).then(clickEl)
 
     cy.get('.sessions-container').eq(0).click()
-    .should('contain', '1')
+    cy.get('.sessions-container').eq(0).should('contain', '1')
 
     cy.get('.sessions-container').eq(1).click()
-    .should('contain', '1')
+    cy.get('.sessions-container').eq(1).should('contain', '1')
 
     cy.get('.test').eq(0)
     .should('contain', 'Sessions (1)')
