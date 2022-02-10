@@ -160,7 +160,7 @@ declare global {
       /**
        * Tabs until the result of fn is true
        */
-      tabUntil(fn: ($el: JQuery) => boolean, limit?: number): Chainable<JQuery<HTMLElement>>
+      tabUntil(fn: ($el: JQuery) => boolean, limit?: number): Chainable<any>
     }
   }
 }
