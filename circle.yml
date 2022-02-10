@@ -22,6 +22,9 @@ defaults: &defaults
     COLUMNS: 100
     LINES: 24
 
+    ## hardcoded for 10.0-release branch, TOOD remove this once released
+    NEXT_VERSION: "10.0.0"
+
 # filters and requires for testing binary with Firefox
 mainBuildFilters: &mainBuildFilters
   filters:
