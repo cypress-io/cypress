@@ -20,5 +20,6 @@ module.exports = function makeDefaultConfig (indexHtml) {
     plugins: [new HtmlWebpackPlugin({
       template: indexHtml || path.resolve(__dirname, '..', 'index-template.html'),
     })],
+    devtool: 'inline-source-map',
   }
 }
