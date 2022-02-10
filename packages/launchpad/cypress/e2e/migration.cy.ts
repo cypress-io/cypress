@@ -26,7 +26,7 @@ function startMigrationFor (project: typeof e2eProjectDirs[number]) {
 }
 
 function skipCTMigration () {
-  cy.contains('Continue to next step').click()
+  cy.contains(`I'll do this later`).click()
 }
 
 function migrateAndVerifyConfig (configExtension: 'js' | 'ts' = 'js') {
