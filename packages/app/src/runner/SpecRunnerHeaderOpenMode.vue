@@ -1,10 +1,10 @@
 <template>
   <div
     id="spec-runner-header"
-    class="min-h-64px px-16px text-14px"
+    class="min-h-64px text-14px"
     :style="{ width: `${props.width}px` }"
   >
-    <div class="flex flex-grow flex-wrap py-16px gap-12px justify-end">
+    <div class="flex flex-wrap flex-grow p-16px gap-12px justify-end">
       <!--
         TODO: Studio. Out of scope for GA.
       <Button
@@ -20,7 +20,7 @@
       <div
         v-if="props.gql.currentTestingType === 'e2e'"
         data-cy="aut-url"
-        class="border rounded flex flex-grow border-1px border-gray-100 h-32px align-middle overflow-hidden"
+        class="border rounded flex flex-grow border-gray-100 border-1px h-32px overflow-hidden align-middle"
         :class="{
           'bg-gray-50': autStore.isLoadingUrl
         }"
@@ -28,7 +28,7 @@
         <Button
           data-cy="playground-activator"
           :disabled="isDisabled"
-          class="rounded-none border-r-1px border-gray-100 mr-12px"
+          class="rounded-none border-gray-100 border-r-1px mr-12px"
           variant="text"
           @click="togglePlayground"
         >
@@ -45,7 +45,7 @@
         <Button
           data-cy="playground-activator"
           :disabled="isDisabled"
-          class=" border-gray-100 mr-12px"
+          class="border-gray-100  mr-12px"
           variant="outline"
           @click="togglePlayground"
         >
@@ -103,7 +103,7 @@
             </p>
 
             <ShikiHighlight
-              class="rounded border-1 border-gray-200 mb-16px"
+              class="rounded border-gray-200 border-1 mb-16px"
               lang="javascript"
               :code="code"
             />
@@ -117,15 +117,11 @@
       </SpecRunnerDropdown>
     </div>
 
-    <div
+    <SelectorPlayground
       v-if="selectorPlaygroundStore.show"
-      class="mt-8px"
-    >
-      <SelectorPlayground
-        :get-aut-iframe="getAutIframe"
-        :event-manager="eventManager"
-      />
-    </div>
+      :get-aut-iframe="getAutIframe"
+      :event-manager="eventManager"
+    />
   </div>
 </template>
 
