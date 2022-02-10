@@ -154,17 +154,10 @@ export class WizardActions {
   }
 
   private async detectLanguage () {
-    let hasTsConfig: boolean = false
+    const { hasTypescript } = this.ctx.lifecycleManager.metaState
 
-    try {
-      if (this.ctx.currentProject) {
-        hasTsConfig = !!await this.ctx.fs.stat(path.join(this.ctx.currentProject, 'tsconfig.json'))
-      }
-    } catch (e) {
-      hasTsConfig = false
-    }
     if (
-      hasTsConfig ||
+      hasTypescript ||
       (this.ctx.lifecycleManager.configFile && /.ts$/.test(this.ctx.lifecycleManager.configFile))) {
       this.ctx.wizardData.detectedLanguage = 'ts'
     } else {
