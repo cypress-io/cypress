@@ -184,6 +184,8 @@ export default class Iframes extends Component {
 
     this._addIframe({
       id,
+      // the cross domain iframe is added to the document body instead of the
+      // container since it needs to match the size of the top window for screenshots
       $container: $(document.body),
       className: 'spec-bridge-iframe',
       src: `//${domain}/${this.props.config.namespace}/multi-domain-iframes/${encodeURIComponent(domain)}`,

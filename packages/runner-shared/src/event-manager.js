@@ -448,7 +448,6 @@ export const eventManager = {
         cb()
       }
 
-      // TODO: Should this come from primary or secondary?
       if (Cypress.env('NO_COMMAND_LOG')) {
         return beforeThenCb()
       }

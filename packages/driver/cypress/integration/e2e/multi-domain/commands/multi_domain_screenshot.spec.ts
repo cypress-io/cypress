@@ -1,9 +1,6 @@
 // @ts-ignore / session support is needed for visiting about:blank between tests
 context('screenshot specs', { experimentalSessionSupport: true, experimentalMultiDomain: true }, () => {
   beforeEach(() => {
-    cy.visit('/fixtures/multi-domain.html')
-    cy.get('a[data-cy="screenshots-link"]').click()
-
     this.serverResult = {
       path: '/path/to/screenshot',
       size: 12,
@@ -16,6 +13,9 @@ context('screenshot specs', { experimentalSessionSupport: true, experimentalMult
       testAttemptIndex: 0,
       duration: 100,
     }
+
+    cy.visit('/fixtures/multi-domain.html')
+    cy.get('a[data-cy="screenshots-link"]').click()
   })
 
   afterEach(() => {
@@ -116,68 +116,38 @@ context('screenshot specs', { experimentalSessionSupport: true, experimentalMult
 
   it('calls the onBeforeScreenshot callback', () => {
     cy.switchToDomain('foobar.com', [this.serverResult], ([serverResult]) => {
-      let called
-
       cy.stub(Cypress, 'automation').withArgs('take:screenshot').resolves(serverResult)
+      const onBeforeScreenshot = cy.stub()
 
-      cy.screenshot({
-        onBeforeScreenshot () {
-          called = true
-        },
-      })
-      .then(() => {
-        return called
-      })
-    })
-    .then((called) => {
-      expect(called).to.be.true
+      cy.screenshot({ onBeforeScreenshot })
+      cy.wrap(onBeforeScreenshot).should('be.called')
     })
   })
 
   it('calls the onAfterScreenshot callback', () => {
     cy.switchToDomain('foobar.com', [this.serverResult], ([serverResult]) => {
-      let called
-
       cy.stub(Cypress, 'automation').withArgs('take:screenshot').resolves(serverResult)
+      const onAfterScreenshot = cy.stub()
 
-      cy.screenshot({
-        onAfterScreenshot () {
-          called = true
-        },
-      })
-      .then(() => {
-        return called
-      })
-    })
-    .then((called) => {
-      expect(called).to.be.true
+      cy.screenshot({ onAfterScreenshot })
+      cy.wrap(onAfterScreenshot).should('be.called')
     })
   })
 
   it('supports the Cypress.screenshot callbacks', () => {
     cy.switchToDomain('foobar.com', [this.serverResult], ([serverResult]) => {
       cy.stub(Cypress, 'automation').withArgs('take:screenshot').resolves(serverResult)
-
-      let beforeCalled
-      let afterCalled
+      const onAfterScreenshot = cy.stub()
+      const onBeforeScreenshot = cy.stub()
 
       Cypress.Screenshot.defaults({
-        onBeforeScreenshot () {
-          beforeCalled = true
-        },
-        onAfterScreenshot () {
-          afterCalled = true
-        },
+        onBeforeScreenshot,
+        onAfterScreenshot,
       })
 
       cy.screenshot()
-      .then(() => {
-        return { beforeCalled, afterCalled }
-      })
-    })
-    .then(({ beforeCalled, afterCalled }) => {
-      expect(beforeCalled).to.be.true
-      expect(afterCalled).to.be.true
+      cy.wrap(onBeforeScreenshot).should('be.called')
+      cy.wrap(onAfterScreenshot).should('be.called')
     })
   })
 })

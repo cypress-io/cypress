@@ -16,6 +16,7 @@ import { handleLogs } from './logs'
 import { handleSocketEvents } from './socket'
 import { handleSpecWindowEvents } from './spec_window_events'
 import { handleErrorEvent } from './errors'
+import { handleScreenshots } from './screenshots'
 
 const specBridgeCommunicator = new SpecBridgeDomainCommunicator()
 
@@ -66,22 +67,7 @@ const setup = () => {
   handleLogs(Cypress, specBridgeCommunicator)
   handleSocketEvents(Cypress)
   handleSpecWindowEvents(cy)
-
-  let beforeScreenshotCallback
-
-  Cypress.on('before:screenshot', (config, cb) => {
-    beforeScreenshotCallback = cb
-
-    specBridgeCommunicator.toPrimary('before:screenshot', config)
-  })
-
-  specBridgeCommunicator.on('before:screenshot:end', () => {
-    beforeScreenshotCallback()
-  })
-
-  Cypress.on('after:screenshot', (config) => {
-    specBridgeCommunicator.toPrimary('after:screenshot', config)
-  })
+  handleScreenshots(Cypress, specBridgeCommunicator)
 
   cy.onBeforeAppWindowLoad = onBeforeAppWindowLoad(Cypress, cy)
 
