@@ -421,7 +421,7 @@ export class WizardActions {
   private async scaffoldFile (filePath: string, contents: string, description: string): Promise<NexusGenObjects['ScaffoldedFile']> {
     try {
       debug('scaffoldFile: start %s', filePath)
-      debug('scaffoldFile: with content %S', contents)
+      debug('scaffoldFile: with content', contents)
       await this.ctx.fs.writeFile(filePath, contents, { flag: 'wx' })
       debug('scaffoldFile: done %s', filePath)
 
