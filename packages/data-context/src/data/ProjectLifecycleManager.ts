@@ -545,6 +545,7 @@ export class ProjectLifecycleManager {
 
     promise.then((result) => {
       if (this._configResult.value === promise) {
+        debug(`config is loaded for file`, this.configFilePath)
         this._configResult = { state: 'loaded', value: result }
         this.validateConfigFile(this.configFilePath, result.initialConfig)
         this.onConfigLoaded(child, ipc, result)
@@ -616,6 +617,7 @@ export class ProjectLifecycleManager {
       return
     }
 
+    // avoid watching the current cypress.config twice
     const watchedConfigFiles = _.without([
       this._pathToFile('cypress.json'),
       this._pathToFile('cypress.config.js'),
@@ -627,7 +629,7 @@ export class ProjectLifecycleManager {
     const legacyFileWatcher = this.addWatcher(watchedConfigFiles)
 
     legacyFileWatcher.on('all', (change) => {
-      debug('config file changed %O', change)
+      debug('config file rename %O', change)
       const metaState = this._projectMetaState
       const nextMetaState = this.refreshMetaState()
 
@@ -651,6 +653,7 @@ export class ProjectLifecycleManager {
     this._configWatcher = this.addWatcher(this.configFilePath)
 
     this._configWatcher.on('all', () => {
+      debug('config file change')
       this.ctx.coreData.baseError = null
       this.reloadConfig().catch(this.onLoadError)
     })
