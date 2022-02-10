@@ -7,7 +7,7 @@ import type { LocalBusEmitsMap, LocalBusEventMap, DriverToLocalBus, SocketToDriv
 import type { AutomationElementId, FileDetails } from '@packages/types'
 
 import { automation } from '@packages/runner-shared/src/automation'
-import { logger } from '@packages/runner-shared/src/logger'
+import { logger } from './logger'
 import type { Socket } from '@packages/socket/lib/browser'
 import { useRunnerUiStore } from '../store'
 
