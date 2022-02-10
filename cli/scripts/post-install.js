@@ -85,13 +85,22 @@ const filesToUncomment = [
   'jquery/misc.d.ts',
 ]
 
+// Added to make the execution of the script idempotent,
+// currently if this is run twice, under certain circumstances,
+// it's possible to double un-comment and break the type definitions
+const marker = '// -- Cypress Patched Types --'
+
 filesToUncomment.forEach((file) => {
   const filePath = join(__dirname, '../types', file)
-  const str = fs.readFileSync(filePath).toString()
+  const str = fs.readFileSync(filePath, 'utf8')
+
+  if (str.includes(marker)) {
+    return
+  }
 
   const result = str.split('\n').map((line) => {
     return line.startsWith('// ') ? line.substring(3) : line
   }).join('\n')
 
-  fs.writeFileSync(filePath, result)
+  fs.writeFileSync(filePath, [marker, result].join('\n\n'))
 })

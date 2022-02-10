@@ -13,10 +13,10 @@ import debugFn from 'debug'
 const debug = debugFn('cypress:driver:navigation')
 
 let id = null
-let previousDomainVisited: boolean = false
-let hasVisitedAboutBlank: boolean = false
-let currentlyVisitingAboutBlank: boolean = false
-let knownCommandCausedInstability: boolean = false
+let previousDomainVisited: boolean | null = null
+let hasVisitedAboutBlank: boolean | null = null
+let currentlyVisitingAboutBlank: boolean | null = null
+let knownCommandCausedInstability: boolean | null = null
 
 const REQUEST_URL_OPTS = 'auth failOnStatusCode retryOnNetworkFailure retryOnStatusCodeFailure retryIntervals method body headers'
 .split(' ')
