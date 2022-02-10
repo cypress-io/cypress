@@ -146,11 +146,11 @@ class $Cypress {
     this.config = $SetterGetter.create(config, (config) => {
       if (!window.top.__cySkipValidateConfig) {
         validateNoReadOnlyConfig(config, (errProperty) => {
-          const errType = this.state('runnable')
+          const errPath = this.state('runnable')
             ? 'config.invalid_cypress_config_override'
-            : 'invalid_test_config_override'
+            : 'config.invalid_test_config_override'
 
-          const errMsg = $errUtils.errByPath(errType, {
+          const errMsg = $errUtils.errByPath(errPath, {
             errProperty,
           })
 
