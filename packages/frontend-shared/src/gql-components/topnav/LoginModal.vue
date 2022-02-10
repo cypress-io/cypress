@@ -67,6 +67,15 @@
               :command="props.gql.authState.message"
             />
           </div>
+          <div v-else-if="errorType === 'loginError'">
+            {{ t('topNav.login.bodyError') }}
+            <div
+              class="rounded flex bg-red-100 mt-16px p-16px text-red-600 gap-8px items-center"
+            >
+              <i-cy-errored-outline_x16 class="h-16px min-w-16px w-16px icon-dark-red-400" />
+              {{ props.gql.authState.message }}
+            </div>
+          </div>
         </DialogDescription>
 
         <div
@@ -134,8 +143,14 @@ const { t } = useI18n()
 
 const viewer = computed(() => props.gql?.cloudViewer)
 const errorType = computed(() => {
-  if (props.gql.authState.name === 'AUTH_COULD_NOT_LAUNCH_BROWSER') {
+  const { name } = props.gql.authState
+
+  if (name === 'AUTH_COULD_NOT_LAUNCH_BROWSER') {
     return 'browserError'
+  }
+
+  if (name === 'AUTH_ERROR_DURING_LOGIN') {
+    return 'loginError'
   }
 
   return null

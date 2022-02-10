@@ -92,6 +92,14 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
         }
 
         return auth.start(onMessage, 'launchpad', onLogin)
+        .catch((err) => {
+          ctx.coreData.authState = {
+            type: 'error',
+            name: 'AUTH_ERROR_DURING_LOGIN',
+            message: err.message,
+            browserOpened: true,
+          }
+        })
       },
       logOut () {
         return user.logOut()

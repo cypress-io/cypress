@@ -194,6 +194,8 @@ const buttonVariant = computed(() => {
 })
 
 const handleTryAgain = () => {
+  // TODO: clear auth message
+  // call Login Mutation again
   clickedOnce.value = false
 }
 
