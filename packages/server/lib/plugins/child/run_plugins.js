@@ -52,7 +52,7 @@ const load = (ipc, config, pluginsFile) => {
       if (userEvents) {
         ipc.send('load:error', 'PLUGINS_INVALID_EVENT_NAME_ERROR', pluginsFile, event, userEvents, util.serializeError(error))
       } else {
-        ipc.send('load:error', 'PLUGINS_EVENT_ERROR', pluginsFile, util.serializeError(error))
+        ipc.send('load:error', 'PLUGINS_FUNCTION_ERROR', pluginsFile, util.serializeError(error))
       }
 
       return

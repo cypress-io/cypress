@@ -636,14 +636,7 @@ export const AllCypressErrors = {
 
       ${fmt.stackTrace(arg2)}
     `
-  },
-  // TODO: STRING | ERROR?
-  PLUGINS_EVENT_ERROR: (arg1: string, arg2: string | Error) => {
-    return errTemplate`
-      Your ${fmt.highlight(`pluginsFile`)} threw a validation error from: ${fmt.path(arg1)}
-
-      ${fmt.stackTrace(arg2)}
-    `
+    // Your ${fmt.highlight(`pluginsFile`)} threw an error from: ${fmt.path(pluginsFilePath)}
   },
   // NOTE: mention this update in the PR, use in whimsical
   PLUGINS_INVALID_EVENT_NAME_ERROR: (pluginsFilePath: string, invalidEventName: string, validEventNames: string[], err: Error) => {
