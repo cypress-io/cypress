@@ -274,25 +274,39 @@ export class WizardActions {
 
     const configCode = this.configCode(testingType, this.ctx.coreData.wizard.chosenLanguage)
 
-    return this.scaffoldFile(
+    const scaffoldResult = await this.scaffoldFile(
       this.ctx.lifecycleManager.configFilePath,
       configCode,
       'Created a new config file',
     )
+
+    if (scaffoldResult.status === 'skipped') {
+      return {
+        status: 'changes',
+        description: 'Merge this code with your existing config file',
+        file: {
+          absolute: this.ctx.lifecycleManager.configFilePath,
+          contents: configCode,
+        },
+      }
+    }
+
+    return scaffoldResult
   }
 
   private async scaffoldFixtures (): Promise<NexusGenObjects['ScaffoldedFile']> {
     const exampleScaffoldPath = path.join(this.projectRoot, 'cypress/fixtures/example.json')
 
     // Checking for the directory's presence is odd.
+    // Especially since directories are not tracked in git.
     // but cypress has behaved this way since 3.0 at least.
     // Unless someone complains, no change necessary.
     // Know that accessing the file system twice in a row will
     // result in race conditions.
     // Hopefully it will not come to that
     try {
-      await this.ctx.fs.access(path.dirname(exampleScaffoldPath), this.ctx.fs.constants.R_OK)
-    } catch (e) {
+      await this.ctx.fs.stat(path.dirname(exampleScaffoldPath))
+
       return {
         status: 'skipped',
         file: {
@@ -301,6 +315,8 @@ export class WizardActions {
         },
         description: 'Fixtures directory already exists, skipping',
       }
+    } catch (e) {
+      // if we don't have a fixtures directory, we create example fixtures
     }
 
     await this.ensureDir('fixtures')
