@@ -20,13 +20,11 @@ export const correctStackForCrossDomainError = (serializedError: any, userInvoca
 }
 
 export const omitUnserializableValues = (value) => {
-  const { isDom, isDocument, isWindow, isJquery } = $dom
+  const { isDom, isJquery } = $dom
 
   // There are probably some things we aren't catching here.
   // We probably want to bubble this up to the user over a generic error to get a better idea of what couldn't be serialized
   if (isDom(value)
-  || isDocument(value)
-  || isWindow(value)
   || isJquery(value)
   || _.isError(value)
   || _.isFunction(value)
