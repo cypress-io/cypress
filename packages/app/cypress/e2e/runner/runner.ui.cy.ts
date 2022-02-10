@@ -80,6 +80,41 @@ describe('runner ui', () => {
       })
     })
 
+    it('pins cy assertion when clicked', () => {
+      loadSpec({
+        fileName: 'simple-cy-assert.runner.cy.js',
+        passCount: 1,
+        failCount: 0,
+      })
+
+      cy.contains('li.command-name-assert.command-has-snapshot', 'assert')
+      .should('not.have.class', 'command-is-pinned')
+      .click()
+      .should('have.class', 'command-is-pinned')
+
+      cy.percySnapshot()
+    })
+
+    it('renders spec name and runtime in header', () => {
+      loadSpec({
+        fileName: 'simple-cy-assert.runner.cy.js',
+        passCount: 1,
+        failCount: 0,
+        hasPreferredIde: true,
+      })
+
+      cy.intercept('mutation-OpenFileInIDE', { data: { 'openFileInIDE': true } }).as('OpenIDE')
+
+      cy.contains('a', 'simple-cy-assert.runner')
+      .click()
+
+      cy.wait('@OpenIDE').then(({ request }) => {
+        expect(request.body.variables.input.absolute).to.include('simple-cy-assert.runner.cy.js')
+      })
+
+      cy.get('[data-cy="runnable-header"] [data-cy="spec-duration"]').should('exist')
+    })
+
     describe('hook failures', () => {
       describe('test failures w/ hooks', () => {
         it('test [only]', () => {
