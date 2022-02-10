@@ -119,7 +119,7 @@ exports['e2e plugins can modify config from plugins 1'] = `
 `
 
 exports['e2e plugins catches invalid browsers list returned from plugins 1'] = `
-An invalid configuration value returned from the plugins file: cypress/plugins/index.js
+An invalid configuration value was returned from the plugins file: cypress/plugins/index.js
 
 Expected at least one browser
 
@@ -408,7 +408,7 @@ Error: Async error from plugins file
 `
 
 exports['e2e plugins fails when there is no function exported 1'] = `
-The pluginsFile must export a function with the following signature:
+Your pluginsFile must export a function with the following signature:
 
 // /foo/bar/.projects/plugin-no-function-return/cypress/plugins/index.js
 module.exports = (on, config) => {
@@ -422,7 +422,7 @@ Instead it exported:
   "bar": "bar"
 }
 
-Learn more: https://on.cypress.io/plugins-api
+https://on.cypress.io/plugins-api
 
 
 `
@@ -518,7 +518,7 @@ exports['e2e plugins does not report more screenshots than exist if user overwri
 `
 
 exports['e2e plugins fails when there is nothing exported 1'] = `
-The pluginsFile must export a function with the following signature:
+Your pluginsFile must export a function with the following signature:
 
 // /foo/bar/.projects/plugin-empty/cypress/plugins/index.js
 module.exports = (on, config) => {
@@ -529,7 +529,7 @@ Instead it exported:
 
 {}
 
-Learn more: https://on.cypress.io/plugins-api
+https://on.cypress.io/plugins-api
 
 
 `
@@ -554,7 +554,7 @@ RootSyncError: Root sync error from plugins file
 `
 
 exports['e2e plugins fails when function throws synchronously 1'] = `
-The function exported by the pluginsFile threw an error: /foo/bar/.projects/plugins-function-sync-error/cypress/plugins/index.js
+The function exported by your pluginsFile threw an error: /foo/bar/.projects/plugins-function-sync-error/cypress/plugins/index.js
 
 FunctionSyncError: Function sync error from plugins file
       [stack trace lines]

@@ -610,7 +610,7 @@ export const AllCypressErrors = {
       }`
 
     return errTemplate`\
-      The ${fmt.highlight(`pluginsFile`)} must export a function with the following signature:
+      Your ${fmt.highlight(`pluginsFile`)} must export a function with the following signature:
 
       ${fmt.code(code)}
 
@@ -623,7 +623,7 @@ export const AllCypressErrors = {
   },
   PLUGINS_FUNCTION_ERROR: (pluginsFilePath: string, err: Error) => {
     return errTemplate`\
-      The function exported by the ${fmt.highlight(`pluginsFile`)} threw an error: ${fmt.path(pluginsFilePath)}
+      The function exported by your ${fmt.highlight(`pluginsFile`)} threw an error: ${fmt.path(pluginsFilePath)}
 
       ${fmt.stackTrace(err)}
     `
@@ -712,7 +712,7 @@ export const AllCypressErrors = {
   // TODO: should this be relative or absolute?
   PLUGINS_CONFIG_VALIDATION_ERROR: (relativePluginsPath: string, errMsg: string) => {
     return errTemplate`\
-        An invalid configuration value returned from the plugins file: ${fmt.path(relativePluginsPath)}
+        An invalid configuration value was returned from the plugins file: ${fmt.path(relativePluginsPath)}
 
         ${fmt.highlight(errMsg)}`
     // general configuration error not-specific to configuration or plugins files

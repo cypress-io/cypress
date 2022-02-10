@@ -207,7 +207,7 @@ describe('lib/plugins/index', () => {
         it('rejects plugins.init', () => {
           return plugins.init({ pluginsFile: 'cypress-plugin' }, getOptions())
           .catch((err) => {
-            expect(stripAnsi(err.message)).to.contain('The function exported by the pluginsFile threw an error')
+            expect(stripAnsi(err.message)).to.contain('The function exported by your pluginsFile threw an error')
             expect(err.message).to.contain('path/to/pluginsFile.js')
 
             expect(err.details).to.contain('error message stack')
