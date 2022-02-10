@@ -18,6 +18,11 @@
         >
           {{ t('migration.renameAuto.optedOutMessage') }}
         </template>
+        <template
+          v-if="selectOption === 'renameFolder'"
+        >
+          {{ t('migration.renameAuto.folderRenameMessage') }}
+        </template>
         <template v-else>
           {{ t('migration.renameAuto.changedSpecExt') }}
           <CodeTag

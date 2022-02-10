@@ -43,6 +43,7 @@
     <template #footer>
       <div class="flex gap-16px">
         <Button
+          data-cy="migration-button-proceed"
           :suffix-icon="ArrowRightIcon"
           suffix-icon-class="w-16px h-16px icon-dark-white"
           @click="emit('proceed')"

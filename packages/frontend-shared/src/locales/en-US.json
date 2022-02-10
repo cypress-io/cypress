@@ -511,6 +511,7 @@
       "changedSpecExt": "We've changed the default spec file extension from:",
       "changedSpecPatternExplain": "We've made the default spec file extension to {0} in order to avoid conflicts with any existing testing frameworks.",
       "optedOutMessage": "You've opted not to rename your spec file extension",
+      "folderRenameMessage": "You've opted not to rename your spec file extension, we're going to rename the folder",
       "modals": {
         "title": "Change the existing spec file extension",
         "step1": {
