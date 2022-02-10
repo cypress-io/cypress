@@ -639,6 +639,7 @@ export class ProjectLifecycleManager {
       }
     }).on('error', (err) => {
       debug('error watching config files %O', err)
+      this.ctx.coreData.baseError = err
     })
 
     this.initializeConfigFileWatcher()
