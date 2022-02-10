@@ -88,7 +88,7 @@
             class="cursor-pointer text-indigo-500 hover:underline"
             @click="newProject = false"
           >
-            {{ t('runs.connect.modal.selectProject.chooseExistsingProject') }}
+            {{ t('runs.connect.modal.selectProject.chooseExistingProject') }}
           </a>
         </div>
         <Input
