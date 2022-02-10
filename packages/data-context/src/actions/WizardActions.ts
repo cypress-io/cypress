@@ -269,18 +269,12 @@ export class WizardActions {
 
   private async scaffoldConfig (testingType: 'e2e' | 'component'): Promise<NexusGenObjects['ScaffoldedFile']> {
     debug('scaffoldConfig')
-    // only do this if config file doesn't exist
-    this.ctx.lifecycleManager.setConfigFilePath(this.ctx.coreData.wizard.chosenLanguage)
 
-    const configCode = this.configCode(testingType, this.ctx.coreData.wizard.chosenLanguage)
+    if (this.ctx.lifecycleManager.metaState.hasValidConfigFile) {
+      const { ext } = path.parse(this.ctx.lifecycleManager.configFilePath)
+      const foundLanguage = ext === '.ts' ? 'ts' : 'js'
+      const configCode = this.configCode(testingType, foundLanguage)
 
-    const scaffoldResult = await this.scaffoldFile(
-      this.ctx.lifecycleManager.configFilePath,
-      configCode,
-      'Created a new config file',
-    )
-
-    if (scaffoldResult.status === 'skipped') {
       return {
         status: 'changes',
         description: 'Merge this code with your existing config file',
@@ -291,7 +285,16 @@ export class WizardActions {
       }
     }
 
-    return scaffoldResult
+    const configCode = this.configCode(testingType, this.ctx.coreData.wizard.chosenLanguage)
+
+    // only do this if config file doesn't exist
+    this.ctx.lifecycleManager.setConfigFilePath(this.ctx.coreData.wizard.chosenLanguage)
+
+    return this.scaffoldFile(
+      this.ctx.lifecycleManager.configFilePath,
+      configCode,
+      'Created a new config file',
+    )
   }
 
   private async scaffoldFixtures (): Promise<NexusGenObjects['ScaffoldedFile']> {
