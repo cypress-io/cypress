@@ -420,25 +420,9 @@ export class WizardActions {
 
   private async scaffoldFile (filePath: string, contents: string, description: string): Promise<NexusGenObjects['ScaffoldedFile']> {
     try {
-      await this.ctx.fs.stat(filePath)
-      debug('scaffoldFile: file already exists, skipping', filePath)
-
-      return {
-        status: 'skipped',
-        description: 'File already exists',
-        file: {
-          absolute: filePath,
-        },
-      }
-    } catch (e) {
-      // ignore the file not found error
-      // it's what we want
-    }
-
-    try {
       debug('scaffoldFile: start %s', filePath)
       debug('scaffoldFile: with content %S', contents)
-      await this.ctx.fs.writeFile(filePath, contents)
+      await this.ctx.fs.writeFile(filePath, contents, { flag: 'wx' })
       debug('scaffoldFile: done %s', filePath)
 
       return {
@@ -449,6 +433,16 @@ export class WizardActions {
         },
       }
     } catch (e: any) {
+      if (e.code === 'EEXIST') {
+        return {
+          status: 'skipped',
+          description: 'File already exists',
+          file: {
+            absolute: filePath,
+          },
+        }
+      }
+
       return {
         status: 'error',
         description: e.message || 'Error writing file',
