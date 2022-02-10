@@ -11,10 +11,12 @@ describe('SelectorPlayground', () => {
     return {
       autIframe,
       element: cy.mount(() => (
-        <SelectorPlayground
-          eventManager={eventManager}
-          getAutIframe={() => autIframe}
-        />
+        <div class="py-64px">
+          <SelectorPlayground
+            eventManager={eventManager}
+            getAutIframe={() => autIframe}
+          />
+        </div>
       )),
     }
   }
@@ -23,7 +25,7 @@ describe('SelectorPlayground', () => {
     const { autIframe } = mountSelectorPlayground()
 
     cy.spy(autIframe, 'toggleSelectorHighlight')
-    cy.get('[data-cy="playground-method"]').should('contain', 'cy.get')
+    cy.get('[data-cy="selected-playground-method"]').should('contain', 'cy.get')
     cy.get('[data-cy="playground-selector"]').should('have.value', 'body')
 
     cy.percySnapshot()
@@ -53,27 +55,42 @@ describe('SelectorPlayground', () => {
     cy.spy(autIframe, 'toggleSelectorHighlight')
     expect(selectorPlaygroundStore.method).to.eq('get')
 
-    cy.get('[data-cy="playground-method"]').as('method')
-    cy.get('@method').contains('cy.get').click()
-    cy.get('li').contains('cy.contains').click().then(() => {
+    cy.get('[aria-label="Selector Methods"]').click()
+    cy.findByRole('menuitem', { name: 'cy.contains' }).click().then(() => {
       expect(selectorPlaygroundStore.method).to.eq('contains')
       expect(autIframe.toggleSelectorHighlight).to.have.been.called
-      cy.get('@method').contains('cy.contains')
     })
+
+    cy.get('[data-cy="selected-playground-method"]').should('contain', 'cy.contains')
   })
 
   it('shows query and number of found elements', () => {
     const selectorPlaygroundStore = useSelectorPlaygroundStore()
 
-    selectorPlaygroundStore.setNumElements(10)
+    selectorPlaygroundStore.setNumElements(0)
 
     mountSelectorPlayground()
-    cy.get('[data-cy="playground-num-elements"]').contains('10')
+    cy.get('[data-cy="playground-num-elements"]').contains('No Matches')
+
+    cy.then(() => selectorPlaygroundStore.setNumElements(1))
+
+    cy.get('[data-cy="playground-num-elements"]').contains('1 Match')
+
+    cy.then(() => selectorPlaygroundStore.setNumElements(10))
+
+    cy.get('[data-cy="playground-num-elements"]').contains('10 Matches')
 
     cy.percySnapshot()
+
+    cy.then(() => selectorPlaygroundStore.setValidity(false))
+
+    cy.get('[data-cy="playground-num-elements"]').contains('Invalid')
+
+    cy.percySnapshot('Invalid playground selector')
   })
 
-  it('focuses and copies selector text', () => {
+  // TODO: UNIFY-999 Solve "write permission denied" error to test this in run mode
+  it.skip('focuses and copies selector text', () => {
     const { autIframe } = mountSelectorPlayground()
 
     cy.spy(autIframe, 'toggleSelectorHighlight')
@@ -83,10 +100,10 @@ describe('SelectorPlayground', () => {
     cy.get('@copy').click()
     cy.get('@copy').should('be.focused')
 
-    cy.spy(document, 'execCommand')
-    cy.get('[data-cy="playground-copy"]').click().then(() => {
-      expect(document.execCommand).to.be.calledWith('copy')
-    })
+    cy.spy(navigator.clipboard, 'writeText').as('clipboardSpy')
+    cy.get('[data-cy="playground-copy"]').click()
+    cy.get('[data-cy="playground-copy-tooltip"]').should('be.visible').contains('Copied to clipboard')
+    cy.get('@clipboardSpy').should('have.been.called')
   })
 
   it('prints nothing to console when no selected elements found', () => {
@@ -101,6 +118,8 @@ describe('SelectorPlayground', () => {
         Yielded: 'Nothing',
       })
     })
+
+    cy.get('[data-cy="playground-print-tooltip"]').should('be.visible').contains('Printed to console')
   })
 
   it('prints elements when selected elements found', () => {
