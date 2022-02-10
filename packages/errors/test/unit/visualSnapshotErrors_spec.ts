@@ -216,10 +216,31 @@ const testVisualErrors = (whichError: CypressErrorType | '*', errorsToTest: {[K 
       //   return fse.remove(pathToHtml)
       // }))
 
-      const errorKeys = _.keys(errors.AllCypressErrors)
+      expect(uniqErrors.sort()).to.deep.eq(errorKeys)
+      expect(errorKeys.sort()).to.deep.eq(uniqErrors)
+    } else {
+      const errorFiles = files.map((file) => {
+        return {
+          errorType: path.basename(file, '.html').split(' ')[0],
+          filePath: file,
+        }
+      })
+      const excessErrors = _
+      .chain(errorFiles)
+      .map('errorType')
+      .uniq()
+      .difference(errorKeys)
+      .value()
 
-      expect(uniqErrors).to.have.all.members(errorKeys)
-      expect(errorKeys).to.have.all.members(uniqErrors)
+      return Promise.all(
+        errorFiles
+        .filter((obj) => {
+          return _.includes(excessErrors, obj.errorType)
+        })
+        .map((obj) => {
+          return fse.remove(obj.filePath)
+        }),
+      )
     }
   })
 
