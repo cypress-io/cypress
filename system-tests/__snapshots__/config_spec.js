@@ -140,16 +140,31 @@ exports['e2e config applies defaultCommandTimeout globally 1'] = `
 `
 
 exports['e2e config throws error when invalid viewportWidth in the configuration file 1'] = `
-We found an invalid value in the file: cypress.json
+Your configFile set an invalid value from: cypress.json
 
-Expected \`viewportWidth\` to be a number. Instead the value was: \`"foo"\`
+Expected viewportWidth to be a number.
+
+Instead the value was: "foo"
 
 `
 
 exports['e2e config throws error when invalid browser in the configuration file 1'] = `
-We found an invalid value in the file: cypress.json
+Your configFile set an invalid value from: cypress.json
 
-Found an error while validating the \`browsers\` list. Expected \`family\` to be either chromium or firefox. Instead the value was: \`{"name":"bad browser","family":"unknown family","displayName":"Bad browser","version":"no version","path":"/path/to","majorVersion":123}\`
+The error occurred while validating the browsers list.
+
+Expected family to be either chromium or firefox.
+
+Instead the value was: 
+
+{
+  "name": "bad browser",
+  "family": "unknown family",
+  "displayName": "Bad browser",
+  "version": "no version",
+  "path": "/path/to",
+  "majorVersion": 123
+}
 
 `
 
