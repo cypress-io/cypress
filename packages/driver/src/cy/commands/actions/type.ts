@@ -334,12 +334,13 @@ export default function (Commands, Cypress, cy, state, config) {
 
           if (
             // Firefox sends a click event when the Space key is pressed.
+            // We don't want send it twice.
             !Cypress.isBrowser('firefox') &&
+            // Click event is sent after keyup event with space key.
+            event.type === 'keyup' && event.code === 'Space' &&
             // Click events should be only sent to button-like elements.
             // event.target is null when used with shadow DOM.
             (event.target && $elements.isButtonLike(event.target)) &&
-            // Click event is sent after keyup event with space key.
-            event.type === 'keyup' && event.code === 'Space' &&
             // When a space key is pressed for input radio elements, the click event is only fired when it's not checked.
             !(event.target.tagName === 'INPUT' && event.target.type === 'radio' && event.target.checked === true)
           ) {

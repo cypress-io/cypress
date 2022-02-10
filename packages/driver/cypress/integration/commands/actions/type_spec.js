@@ -617,11 +617,10 @@ describe('src/cy/commands/actions/type - #type', () => {
       'input-submit',
     ]
 
-    describe(`triggers with single ' '`, () => {
+    describe(`triggers with single space`, () => {
       targets.forEach((targetId) => {
-        it(`${targetId}`, () => {
-          cy.get(`#target-${targetId}`).focus()
-          cy.get(`#target-${targetId}`).type(' ')
+        it(targetId, () => {
+          cy.get(`#target-${targetId}`).focus().type(' ')
 
           cy.get('li').eq(0).should('have.text', 'keydown')
           cy.get('li').eq(1).should('have.text', 'keypress')
@@ -633,9 +632,8 @@ describe('src/cy/commands/actions/type - #type', () => {
 
     describe('triggers after other characters', () => {
       targets.forEach((targetId) => {
-        it(`${targetId}`, () => {
-          cy.get(`#target-${targetId}`).focus()
-          cy.get(`#target-${targetId}`).type('asd ')
+        it(targetId, () => {
+          cy.get(`#target-${targetId}`).focus().type('asd ')
 
           cy.get('li').eq(12).should('have.text', 'click')
         })
@@ -644,8 +642,7 @@ describe('src/cy/commands/actions/type - #type', () => {
 
     describe('checkbox', () => {
       it('checkbox is checked/unchecked', () => {
-        cy.get(`#target-input-checkbox`).focus()
-        cy.get(`#target-input-checkbox`).type(' ')
+        cy.get(`#target-input-checkbox`).focus().type(' ')
 
         cy.get('li').eq(0).should('have.text', 'keydown')
         cy.get('li').eq(1).should('have.text', 'keypress')
@@ -667,8 +664,7 @@ describe('src/cy/commands/actions/type - #type', () => {
 
     describe('radio', () => {
       it('radio fires click event when it is not checked', () => {
-        cy.get(`#target-input-radio`).focus()
-        cy.get(`#target-input-radio`).type(' ')
+        cy.get(`#target-input-radio`).focus().type(' ')
 
         cy.get('li').eq(0).should('have.text', 'keydown')
         cy.get('li').eq(1).should('have.text', 'keypress')
@@ -679,10 +675,10 @@ describe('src/cy/commands/actions/type - #type', () => {
       })
 
       it('radio does not fire click event when it is checked', () => {
-        cy.get(`#target-input-radio`).click()
-        cy.get(`#target-input-radio`).type(' ')
+        // We're clicking here first to make the radio element checked.
+        cy.get(`#target-input-radio`).click().type(' ')
 
-        cy.get('li').eq(0).should('have.text', 'click')
+        // item 0 is click event. It's fired because we want to make sure our radio button is checked.
         cy.get('li').eq(1).should('have.text', 'keydown')
         cy.get('li').eq(2).should('have.text', 'keypress')
         cy.get('li').eq(3).should('have.text', 'keyup')
