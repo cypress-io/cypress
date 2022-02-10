@@ -507,8 +507,8 @@ export const eventManager = {
 
     Cypress.multiDomainCommunicator.initialize(window)
 
-    Cypress.multiDomainCommunicator.on('window:load', () => {
-      Cypress.emit('internal:window:load', { type: 'cross:domain' })
+    Cypress.multiDomainCommunicator.on('window:load', ({ url }) => {
+      Cypress.emit('internal:window:load', { type: 'cross:domain', url })
     })
 
     Cypress.multiDomainCommunicator.on('expect:domain', (domain) => {

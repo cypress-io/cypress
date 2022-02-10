@@ -1527,6 +1527,7 @@ export default {
           }
 
           cy.state('duringUserTestExecution', false)
+          Cypress.multiDomainCommunicator.toSpecBridge('sync:state', { 'duringUserTestExecution': false })
 
           // our runnable is about to run, so let cy know. this enables
           // us to always have a correct runnable set even when we are

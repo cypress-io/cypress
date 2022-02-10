@@ -74,6 +74,18 @@ const setup = () => {
 
   specBridgeCommunicator.initialize(window)
 
+  // TODO Should state syncing be built into cy.state instead of being explicitly called?
+  specBridgeCommunicator.on('sync:state', async (state) => {
+    cy.state(state)
+  })
+
+  // Listen for window load events from the primary window to resolve page loads
+  specBridgeCommunicator.on('window:load', ({ url }) => {
+    // @ts-ignore
+    cy.isStable(true, 'load')
+    Cypress.emit('internal:window:load', { type: 'cross:domain', url })
+  })
+
   return cy
 }
 
@@ -84,17 +96,11 @@ const onBeforeAppWindowLoad = (Cypress: Cypress.Cypress, cy: $Cy) => (autWindow:
   Cypress.state('window', autWindow)
   Cypress.state('document', autWindow.document)
 
-  // Can we assume this is always true within the switchToDomain command? I'm not sure thats always true. Should we always defer to the primary domain for this value?
-  // This is needed to be able to continue through the 'stabilityChanged' function to log the loading state for the page.
-  cy.state('duringUserTestExecution', true)
-  // Should we start this count fresh on each window load? Should we sync this from the primary domain? Normally this is set/reset on the 'test:before:run:async' event
-  // This is needs to be valued for the 'stabilityChanged' function to not error.
-  cy.state('redirectionCount', {})
-
   // This is typically called by the cy function `urlNavigationEvent` but it is private. For the primary domain this is called in 'onBeforeAppWindowLoad'.
   Cypress.action('app:navigation:changed', 'page navigation event (\'before:load\')')
 
   cy.overrides.wrapNativeMethods(autWindow)
+
   // TODO: DRY this up with the mostly-the-same code in src/cypress/cy.js
   bindToListeners(autWindow, {
     onError: handleErrorEvent(cy, 'app'),
@@ -122,7 +128,7 @@ const onBeforeAppWindowLoad = (Cypress: Cypress.Cypress, cy: $Cy) => (autWindow:
       // This is also call on the on 'load' event in cy
       Cypress.action('app:window:load', autWindow)
 
-      specBridgeCommunicator.toPrimary('window:load')
+      specBridgeCommunicator.toPrimary('window:load', { type: 'cross:domain', url: cy.getRemoteLocation('href') })
       cy.isStable(true, 'load')
     },
     onUnload (e) {

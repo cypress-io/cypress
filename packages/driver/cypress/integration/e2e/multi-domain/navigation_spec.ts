@@ -16,20 +16,30 @@ describe('navigation', { experimentalSessionSupport: true, experimentalMultiDoma
       cy.get('a[data-cy="multi-domain-secondary-link"]').click()
     })
 
-    it('navigation:changed via hashChange', (done) => {
-      cy.switchToDomain('foobar.com', done, () => {
-        Cypress.once('navigation:changed', () => {
-          expect(location.host).to.equal('foobar.com')
-          done()
+    it('navigation:changed via hashChange', () => {
+      cy.switchToDomain('foobar.com', () => {
+        const p = new Promise<void>((resolve) => {
+          const listener = () => {
+            cy.location().should((loc) => {
+              expect(loc.host).to.equal('www.foobar.com:3500')
+              expect(loc.pathname).to.equal('/fixtures/multi-domain-secondary.html')
+              expect(loc.hash).to.equal('#hashChange')
+            })
+
+            resolve()
+          }
+
+          cy.once('navigation:changed', listener)
         })
 
         cy.get('a[data-cy="hashChange"]').click()
+        cy.wrap(p)
       })
     })
 
     it('reloads', () => {
       cy.switchToDomain('foobar.com', () => {
-        const p = new Promise((resolve) => {
+        const p = new Promise<void>((resolve) => {
           let times = 0
           const listener = (win) => {
             times++
@@ -38,7 +48,7 @@ describe('navigation', { experimentalSessionSupport: true, experimentalMultiDoma
 
             if (times === 2) {
               Cypress.removeListener('window:load', listener)
-              resolve('')
+              resolve()
             }
           }
 
@@ -55,7 +65,7 @@ describe('navigation', { experimentalSessionSupport: true, experimentalMultiDoma
 
     it('navigates to a new page', () => {
       cy.switchToDomain('foobar.com', () => {
-        const p = new Promise((resolve) => {
+        const p = new Promise<void>((resolve) => {
           let times = 0
           const listener = (win) => {
             times++
@@ -68,7 +78,7 @@ describe('navigation', { experimentalSessionSupport: true, experimentalMultiDoma
               Cypress.removeListener('window:load', listener)
               expect(win.location.host).to.equal('www.foobar.com:3500')
               expect(win.location.pathname).to.equal('/fixtures/multi-domain.html')
-              resolve('')
+              resolve()
             }
           }
 

@@ -43,6 +43,11 @@ export const handleDomainFn = (cy: $Cy, specBridgeCommunicator: SpecBridgeDomain
     cy.state('runnable', runnable)
     // Set the state ctx to the runnable ctx to ensure they remain in sync
     cy.state('ctx', runnable.ctx)
+
+    // This should by synced down from the primary domain
+    cy.state('duringUserTestExecution', true)
+    // This is fine to set to an empty object, we want to refresh this count on each switchToDomain command.
+    cy.state('redirectionCount', {})
   }
 
   specBridgeCommunicator.on('run:domain:fn', async ({ data, fn, isDoneFnAvailable = false }: { data: any[], fn: string, isDoneFnAvailable: boolean }) => {
