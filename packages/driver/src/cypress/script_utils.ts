@@ -32,9 +32,18 @@ const evalScripts = (specWindow, scripts = []) => {
 
 const runScriptsFromUrls = (specWindow, scripts) => {
   return Bluebird
-  .map(scripts, (script) => fetchScript(specWindow, script))
-  .map(extractSourceMap)
-  .then((scripts) => evalScripts(specWindow, scripts))
+  .map(scripts, (script) => {
+    console.log(script)
+    return fetchScript(specWindow, script)
+  })
+  .map(([scriptWindow, script]) => {
+    console.log({scriptWindow, script})
+    return extractSourceMap(scriptWindow, script)
+  })
+  .then((scripts) => {
+    consle.log('evaling', {specWindow, scripts})
+    return evalScripts(specWindow, scripts)
+  })
 }
 
 // Supports either scripts as objects or as async import functions
@@ -46,7 +55,10 @@ export default {
       // NOTE: since in evalScripts, scripts are evaluated in order,
       // we chose to respect this constraint here too.
       // indeed _.each goes through the array in order
-      return Bluebird.each(scripts, (script) => script())
+      return Bluebird.each(scripts, (script) => {
+        debugger
+        return script()
+      })
     }
 
     return runScriptsFromUrls(specWindow, scripts)
