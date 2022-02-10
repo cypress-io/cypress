@@ -617,23 +617,19 @@ export class ProjectLifecycleManager {
       return
     }
 
-    // avoid watching the current cypress.config twice
-    const watchedConfigFiles = _.without([
+    const legacyFileWatcher = this.addWatcher([
       this._pathToFile('cypress.json'),
       this._pathToFile('cypress.config.js'),
       this._pathToFile('cypress.config.ts'),
-    ], this.configFilePath)
+    ])
 
-    debug('initializeConfigWatchers %o', watchedConfigFiles)
+    legacyFileWatcher.on('all', (event, file) => {
+      debug('WATCHER: config file event', event, file)
+      const currentMetaState = this._projectMetaState
+      const shouldReloadConfig = file === this.configFilePath
+        || !_.isEqual(currentMetaState, this.refreshMetaState())
 
-    const legacyFileWatcher = this.addWatcher(watchedConfigFiles)
-
-    legacyFileWatcher.on('all', (change) => {
-      debug('config file rename %O', change)
-      const metaState = this._projectMetaState
-      const nextMetaState = this.refreshMetaState()
-
-      if (!_.isEqual(metaState, nextMetaState)) {
+      if (shouldReloadConfig) {
         this.ctx.coreData.baseError = null
         this.reloadConfig().catch(this.onLoadError)
       }
@@ -642,23 +638,11 @@ export class ProjectLifecycleManager {
       this.ctx.coreData.baseError = err
     })
 
-    this.initializeConfigFileWatcher()
-
     const cypressEnvFileWatcher = this.addWatcher(this.envFilePath)
 
     cypressEnvFileWatcher.on('all', () => {
       this.ctx.coreData.baseError = null
       this.reloadCypressEnvFile().catch(this.onLoadError)
-    })
-  }
-
-  initializeConfigFileWatcher () {
-    this._configWatcher = this.addWatcher(this.configFilePath)
-
-    this._configWatcher.on('all', () => {
-      debug('config file change')
-      this.ctx.coreData.baseError = null
-      this.reloadConfig().catch(this.onLoadError)
     })
   }
 
@@ -917,7 +901,6 @@ export class ProjectLifecycleManager {
     const w = chokidar.watch(file, {
       ignoreInitial: true,
       cwd: this.projectRoot,
-      awaitWriteFinish: true,
     })
 
     this.watchers.add(w)
