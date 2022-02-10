@@ -128,13 +128,7 @@ export class WizardActions {
       this.ctx.wizardData.detectedFramework = 'nuxtjs'
     } else if (dependencies.includes('@vue/cli-service')) {
       this.ctx.wizardData.detectedFramework = 'vuecli'
-    }
-
-    if (this.ctx.wizardData.detectedFramework) {
-      return
-    }
-
-    if (dependencies.includes('react')) {
+    } else if (dependencies.includes('react')) {
       this.ctx.wizardData.detectedFramework = 'react'
     } else if (dependencies.includes('vue')) {
       this.ctx.wizardData.detectedFramework = 'vue'
