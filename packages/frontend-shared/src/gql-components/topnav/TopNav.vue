@@ -9,7 +9,7 @@
       />
       <span
         data-cy="top-nav-version-list"
-        class="font-semibold text-indigo-500 whitespace-nowrap"
+        class="font-medium text-indigo-500 whitespace-nowrap"
       >v{{ versions.current.version }} <span
         class="text-indigo-300"
         aria-hidden="true"
@@ -20,7 +20,7 @@
       class="min-w-278px py-8px px-16px"
       data-cy="update-hint"
     >
-      <div class="font-semibold">
+      <div class="font-medium">
         <ExternalLink
           :href="`${releasesUrl}/tag/v${versions.latest.version}`"
           class="text-indigo-500"
@@ -59,7 +59,7 @@
       <div class="whitespace-nowrap">
         <ExternalLink
           :href="`${releasesUrl}/tag/v${versions.current.version}`"
-          class="font-semibold text-amber-800"
+          class="font-medium text-amber-800"
           data-cy="current-version"
         >
           {{ versions.current.version }}
@@ -89,7 +89,7 @@
   <ExternalLink
     v-else-if="versions"
     :href="`${releasesUrl}/tag/v${versions.latest.version}`"
-    class="flex font-semibold outline-transparent text-gray-600 gap-8px items-center group hocus:text-indigo-500 hocus:outline-0"
+    class="flex font-medium outline-transparent text-gray-600 gap-8px items-center group hocus:text-indigo-500 hocus:outline-0"
     :use-default-hocus="false"
     data-cy="top-nav-cypress-version-current-link"
   >
@@ -113,7 +113,7 @@
       >
       <span
         data-cy="top-nav-active-browser"
-        class="font-semibold whitespace-nowrap"
+        class="font-medium whitespace-nowrap"
       >{{ props.gql.currentProject?.currentBrowser?.displayName }} {{ props.gql.currentProject?.currentBrowser?.majorVersion }}</span>
     </template>
     <VerticalBrowserListItems
@@ -135,7 +135,7 @@
         :class="(open || props.forceOpenDocs) ? 'icon-dark-indigo-500 icon-light-indigo-50' : 'icon-dark-gray-500 icon-light-gray-100'"
       />
       <span
-        class="font-semibold"
+        class="font-medium"
         :class="{'text-indigo-600': open}"
       >{{ t('topNav.docsMenu.docsHeading') }}</span>
     </template>
@@ -200,7 +200,8 @@ import { TopNavFragment, TopNav_SetPromptShownDocument } from '../../generated/g
 import { useI18n } from '@cy/i18n'
 import { computed, ref, Ref, ComponentPublicInstance, watch, watchEffect } from 'vue'
 import { onClickOutside, onKeyStroke, useTimeAgo } from '@vueuse/core'
-import DocsMenuContent, { DocsMenuVariant } from './DocsMenuContent.vue'
+import type { DocsMenuVariant } from './DocsMenuContent.vue'
+import DocsMenuContent from './DocsMenuContent.vue'
 import ExternalLink from '../ExternalLink.vue'
 import Button from '../../components/Button.vue'
 import UpdateCypressModal from './UpdateCypressModal.vue'

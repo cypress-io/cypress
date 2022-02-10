@@ -35,6 +35,8 @@ describe('lib/browsers/electron', () => {
       close: sinon.stub(),
       loadURL: sinon.stub(),
       focusOnWebView: sinon.stub(),
+      show: sinon.stub(),
+      destroy: sinon.stub(),
       webContents: {
         session: {
           cookies: {
@@ -68,6 +70,14 @@ describe('lib/browsers/electron', () => {
         return sinon.stub(state, 'get').resolves(this.state)
       })
     }
+  })
+
+  context('.connectToNewSpec', () => {
+    it('calls open with the browser, url, options, and automation', async function () {
+      sinon.stub(electron, 'open').withArgs({ isHeaded: true }, 'http://www.example.com', { url: 'http://www.example.com' }, this.automation)
+      await electron.connectToNewSpec({ isHeaded: true }, 50505, { url: 'http://www.example.com' }, this.automation)
+      expect(electron.open).to.be.called
+    })
   })
 
   context('.open', () => {
@@ -282,6 +292,34 @@ describe('lib/browsers/electron', () => {
         })
       })
     })
+
+    it('registers onRequest automation middleware and calls show when requesting to be focused', function () {
+      sinon.spy(this.automation, 'use')
+
+      return electron._launch(this.win, this.url, this.automation, this.options)
+      .then(() => {
+        expect(this.automation.use).to.be.called
+        expect(this.automation.use.lastCall.args[0].onRequest).to.be.a('function')
+
+        this.automation.use.lastCall.args[0].onRequest('focus:browser:window')
+
+        expect(this.win.show).to.be.called
+      })
+    })
+
+    it('registers onRequest automation middleware and calls destroy when requesting to close the browser tabs', function () {
+      sinon.spy(this.automation, 'use')
+
+      return electron._launch(this.win, this.url, this.automation, this.options)
+      .then(() => {
+        expect(this.automation.use).to.be.called
+        expect(this.automation.use.lastCall.args[0].onRequest).to.be.a('function')
+
+        this.automation.use.lastCall.args[0].onRequest('close:browser:tabs')
+
+        expect(this.win.destroy).to.be.called
+      })
+    })
   })
 
   context('._render', () => {
@@ -290,6 +328,7 @@ describe('lib/browsers/electron', () => {
         maximize: sinon.stub(),
         setSize: sinon.stub(),
         show: sinon.stub(),
+        destroy: sinon.stub(),
         webContents: this.win.webContents,
       }
 
@@ -337,22 +376,6 @@ describe('lib/browsers/electron', () => {
       return electron._render(this.url, this.automation, this.preferences, this.options)
       .then(() => {
         expect(this.newWin.maximize).not.to.be.called
-      })
-    })
-
-    it('registers onRequest automation middleware and calls show when requesting to be focused', function () {
-      sinon.spy(this.automation, 'use')
-
-      electron._render(this.url, this.automation, this.preferences, this.options)
-      .then(() => {
-        expect(Windows.create).to.be.calledWith(this.options.projectRoot, this.options)
-
-        expect(this.automation.use).to.be.called
-        expect(this.automation.use.lastCall.args[0].onRequest).to.be.a('function')
-
-        this.automation.use.lastCall.args[0].onRequest('focus:browser:window')
-
-        expect(this.newWin.show).to.be.called
       })
     })
   })

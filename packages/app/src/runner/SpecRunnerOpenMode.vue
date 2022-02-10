@@ -20,7 +20,7 @@
           v-if="props.gql.currentProject"
           v-show="runnerUiStore.isSpecsListOpen"
           id="inline-spec-list"
-          class="h-full bg-gray-1000 border-r-1 border-gray-900"
+          class="h-full bg-gray-1000 border-gray-900 border-r-1 force-dark"
           :class="{'pointer-events-none': isDragging}"
         >
           <InlineSpecList
@@ -42,7 +42,7 @@
           <div
             v-once
             :id="REPORTER_ID"
-            class="w-full"
+            class="w-full force-dark"
           />
         </HideDuringScreenshot>
       </template>

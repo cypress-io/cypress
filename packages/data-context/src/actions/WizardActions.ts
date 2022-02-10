@@ -71,17 +71,27 @@ export class WizardActions {
 
     assert(currentTestingType)
     assert(chosenLanguage)
-    assert(!this.ctx.lifecycleManager.isTestingTypeConfigured(currentTestingType), `Cannot call this if the testing type (${currentTestingType}) has not been configured`)
+
     switch (currentTestingType) {
       case 'e2e': {
         this.ctx.coreData.scaffoldedFiles = await this.scaffoldE2E()
         this.ctx.lifecycleManager.refreshMetaState()
+        this.ctx.update((coreData) => {
+          coreData.forceReconfigureProject = {
+            e2e: false,
+          }
+        })
 
         return chosenLanguage
       }
       case 'component': {
         this.ctx.coreData.scaffoldedFiles = await this.scaffoldComponent()
         this.ctx.lifecycleManager.refreshMetaState()
+        this.ctx.update((coreData) => {
+          coreData.forceReconfigureProject = {
+            component: false,
+          }
+        })
 
         return chosenLanguage
       }
@@ -192,6 +202,7 @@ export class WizardActions {
         status: 'skipped',
         file: {
           absolute: exampleScaffoldPath,
+          contents: '// Skipped',
         },
         description: 'Fixtures directory already exists, skipping',
       }
@@ -226,14 +237,16 @@ export class WizardActions {
     const codeBlocks: string[] = []
     const { chosenBundler, chosenFramework, chosenLanguage } = opts
 
+    const requirePath = chosenFramework.defaultPackagePath ?? chosenBundler.package
+
     codeBlocks.push(chosenLanguage.type === 'ts' ? `import { defineConfig } from 'cypress'` : `const { defineConfig } = require('cypress')`)
+    codeBlocks.push(chosenLanguage.type === 'ts' ? `import { devServer } from '${requirePath}'` : `const { devServer } = require('${requirePath}')`)
     codeBlocks.push('')
     codeBlocks.push(chosenLanguage.type === 'ts' ? `export default defineConfig({` : `module.exports = defineConfig({`)
     codeBlocks.push(`  // Component testing, ${chosenLanguage.name}, ${chosenFramework.name}, ${chosenBundler.name}`)
 
     codeBlocks.push(`  ${COMPONENT_SCAFFOLD_BODY({
       lang: chosenLanguage.type,
-      requirePath: chosenBundler.package,
       configOptionsString: '{}',
     }).replace(/\n/g, '\n  ')}`)
 
@@ -346,7 +359,6 @@ const E2E_SCAFFOLD_BODY = dedent`
 
 interface ComponentScaffoldOpts {
   lang: CodeLanguageEnum
-  requirePath: string
   configOptionsString: string
   specPattern?: string
 }
@@ -354,7 +366,7 @@ interface ComponentScaffoldOpts {
 const COMPONENT_SCAFFOLD_BODY = (opts: ComponentScaffoldOpts) => {
   return dedent`
     component: {
-      devServer: import('${opts.requirePath}'),
+      devServer,
       devServerConfig: ${opts.configOptionsString}
     },
   `
