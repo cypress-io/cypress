@@ -723,6 +723,11 @@ describe('Launchpad: Setup Project', () => {
           cy.contains('cypress/fixtures/example.json')
         })
 
+        // wait for the new config file to be parsed and evaluated
+        // if we don't wait, the isCTConfigured flag is still false
+        // when we get to the next step
+        cy.wait(500)
+
         cy.findByRole('button', { name: 'Continue' }).click()
         cy.contains(/(Initializing Config|Choose a Browser)/, { timeout: 10000 })
       })
@@ -752,9 +757,13 @@ describe('Launchpad: Setup Project', () => {
           cy.contains('cypress/fixtures/example.json')
         })
 
-        // FIXME: remove if-check once this is fixed. https://cypress-io.atlassian.net/browse/UNIFY-980
-        // cy.findByRole('button', { name: 'Continue' }).click()
-        // cy.contains(/(Initializing Config|Choose a Browser)/)
+        // wait for the new config file to be parsed and evaluated
+        // if we don't wait, the isCTConfigured flag is still false
+        // when we get to the next step
+        cy.wait(500)
+
+        cy.findByRole('button', { name: 'Continue' }).click()
+        cy.contains(/(Initializing Config|Choose a Browser)/)
       })
     })
   })
