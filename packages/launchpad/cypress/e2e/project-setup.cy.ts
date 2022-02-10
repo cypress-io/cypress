@@ -226,7 +226,6 @@ describe('Launchpad: Setup Project', () => {
 
         verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: false })
 
-        // @ts-ignore
         cy.tabUntil((el) => {
           return el.text().includes('E2E Testing')
         })

@@ -59,8 +59,6 @@ describe('Config files error handling', () => {
 
     cy.get('body').should('not.contain.text', 'Cypress no longer supports')
   })
-
-  // NOTE: TODO: (tim) re-enable when we land the error fixes
   it('handles deprecated config fields', () => {
     cy.openProject('pristine')
 
