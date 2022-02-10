@@ -829,7 +829,7 @@ describe('lib/cypress', () => {
       .then(() => {
         return cypress.start([`--run-project=${this.todosPath}`])
       }).then(() => {
-        this.expectExitWithErr('SETTINGS_VALIDATION_ERROR', 'cypress.json')
+        this.expectExitWithErr('CONFIG_VALIDATION_ERROR', 'cypress.json')
       })
     })
 
@@ -840,7 +840,7 @@ describe('lib/cypress', () => {
       ])
       .then(() => {
         this.expectExitWithErr('CONFIG_VALIDATION_ERROR', 'localhost:9999')
-        this.expectExitWithErr('CONFIG_VALIDATION_ERROR', 'We found an invalid configuration value')
+        this.expectExitWithErr('CONFIG_VALIDATION_ERROR', 'An invalid configuration value was set.')
       })
     })
 
@@ -850,7 +850,7 @@ describe('lib/cypress', () => {
       return cypress.start([`--run-project=${this.todosPath}`])
       .then(() => {
         this.expectExitWithErr('CONFIG_VALIDATION_ERROR', 'localhost:9999')
-        this.expectExitWithErr('CONFIG_VALIDATION_ERROR', 'We found an invalid configuration value')
+        this.expectExitWithErr('CONFIG_VALIDATION_ERROR', 'An invalid configuration value was set.')
       })
     })
 
