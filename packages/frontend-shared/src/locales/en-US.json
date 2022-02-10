@@ -16,7 +16,8 @@
       "matchesIndicator": "No Matches | {numerator} of {denominator} Matches | {numerator} of {denominator} Matches"
     },
     "button": {
-      "cancel": "Cancel"
+      "cancel": "Cancel",
+      "back": "Back"
     },
     "loading": {
       "config": {
@@ -97,10 +98,10 @@
       "importEmptySpec": {
         "header": "Create new empty spec",
         "description": "We'll generate an empty spec file which can be used to start testing your application.",
-        "chooseFilenameHeader": "Choose a filename for this spec",
-        "inputPlaceholder": "Enter spec file...",
-        "invalidSpecWarning": "Your filename is invalid because it doesn't match the following ",
-        "specExtensionWarning": "We recommend naming your spec with the pattern: "
+        "chooseFilenameHeader": "Enter the path for your new spec",
+        "inputPlaceholder": "Enter a relative path...",
+        "invalidSpecWarning": "This path is invalid because it doesn't match the following ",
+        "specExtensionWarning": "We recommend naming your spec to match the following pattern: "
       }
     },
     "component": {
@@ -117,7 +118,7 @@
       },
       "importEmptySpec": {
         "header": "Create a new spec",
-        "invalidComponentWarning": "We couldn't generate a valid filename matching your custom "
+        "invalidComponentWarning": "We couldn't generate a valid path matching your custom "
       }
     }
   },
@@ -436,7 +437,7 @@
           "projectName": "Project Name",
           "projectNameDisclaimer": "(You can change this later)",
           "createNewProject": "Create new",
-          "chooseExistsingProject": "Choose an existing project",
+          "chooseExistingProject": "Choose an existing project",
           "newProjectAccess": "Project Access",
           "privateLabel": "Private",
           "privateDescription": "Only invited users can view recorded test results.",
