@@ -203,8 +203,10 @@ const testVisualErrors = (whichError: CypressErrorType | '*', errorsToTest: {[K 
   after(async () => {
     // if we're in CI, make sure there's all the files
     // we expect there to be in __snapshot-html__
+    const files = await globby(`${snapshotHtmlFolder}/*`)
+    const errorKeys = _.keys(errors.AllCypressErrors)
+
     if (isCi) {
-      const files = await globby(`${snapshotHtmlFolder}/*`)
       const errorNames = files.map((file) => {
         return path.basename(file, '.html').split(' ')[0]
       })
@@ -735,11 +737,17 @@ describe('visual error templates', () => {
           type: 'a number',
           value: false,
         }],
+        noFileType: [null, null, {
+          key: 'defaultCommandTimeout',
+          type: 'a number',
+          value: false,
+        }],
       }
     },
     CONFIG_VALIDATION_MSG_ERROR: () => {
       return {
         default: ['configFile', 'cypress.json', '`something` was not right'],
+        noFileType: [null, null, '`something` was not right'],
       }
     },
     RENAMED_CONFIG_OPTION: () => {

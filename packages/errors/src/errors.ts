@@ -682,20 +682,29 @@ export const AllCypressErrors = {
     // happens when there is an error in configuration file like "cypress.json"
   },
   CONFIG_VALIDATION_MSG_ERROR: (fileType: 'configFile' | 'pluginsFile' | null, fileName: string | null, validationMsg: string) => {
-    if (fileType) {
+    if (!fileType) {
       return errTemplate`
-        Your ${fmt.highlight(fileType)} set an invalid value from: ${fmt.path(fileName)}
+        An invalid configuration value was set:
 
         ${fmt.highlight(validationMsg)}`
     }
 
     return errTemplate`
-      An invalid configuration value was set:
+      Your ${fmt.highlight(fileType)} set an invalid value from: ${fmt.path(fileName)}
 
       ${fmt.highlight(validationMsg)}`
   },
   CONFIG_VALIDATION_ERROR: (fileType: 'configFile' | 'pluginsFile' | null, filePath: string | null, validationResult: ConfigValidationError) => {
     const { key, type, value, list } = validationResult
+
+    if (!fileType) {
+      return errTemplate`\
+        An invalid configuration value was set:
+
+        Expected ${fmt.highlight(key)} to be ${fmt.off(type)}.
+
+        Instead the value was: ${fmt.stringify(value)}`
+    }
 
     if (list) {
       return errTemplate`\
