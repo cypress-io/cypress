@@ -101,25 +101,23 @@ const _installExtensions = function (win, extensionPaths = [], options) {
   })
 }
 
-const _maybeRecordVideo = function (webContents, options) {
-  return async () => {
-    const { onScreencastFrame } = options
+const _maybeRecordVideo = async function (webContents, options) {
+  const { onScreencastFrame } = options
 
-    debug('maybe recording video %o', { onScreencastFrame })
+  debug('maybe recording video %o', { onScreencastFrame })
 
-    if (!onScreencastFrame) {
-      return
-    }
-
-    webContents.debugger.on('message', (event, method, params) => {
-      if (method === 'Page.screencastFrame') {
-        onScreencastFrame(params)
-        webContents.debugger.sendCommand('Page.screencastFrameAck', { sessionId: params.sessionId })
-      }
-    })
-
-    await webContents.debugger.sendCommand('Page.startScreencast', screencastOpts)
+  if (!onScreencastFrame) {
+    return
   }
+
+  webContents.debugger.on('message', (event, method, params) => {
+    if (method === 'Page.screencastFrame') {
+      onScreencastFrame(params)
+      webContents.debugger.sendCommand('Page.screencastFrameAck', { sessionId: params.sessionId })
+    }
+  })
+
+  await webContents.debugger.sendCommand('Page.startScreencast', screencastOpts)
 }
 
 module.exports = {
@@ -198,8 +196,6 @@ module.exports = {
     }
 
     return this._launch(win, url, automation, preferences)
-    .tap(_maybeRecordVideo(win.webContents, preferences))
-    .tap(() => _getAutomation(win, preferences, automation).then((cdpAutomation) => automation.use(cdpAutomation)))
   },
 
   _launchChild (e, url, parent, projectRoot, state, options, automation) {
@@ -263,14 +259,16 @@ module.exports = {
       )
     })
     .then(() => {
-      return win.loadURL(url)
+      return win.loadURL('about:blank')
     })
+    .then(() => _getAutomation(win, options, automation).then((cdpAutomation) => automation.use(cdpAutomation)))
+    .then(() => Promise.all([_maybeRecordVideo(win.webContents, options), this._handleDownloads(win, options.downloadsFolder, automation)]))
     .then(() => {
       // enabling can only happen once the window has loaded
       return this._enableDebugger(win.webContents)
     })
     .then(() => {
-      return this._handleDownloads(win, options.downloadsFolder, automation)
+      return win.loadURL(url)
     })
     .return(win)
   },
