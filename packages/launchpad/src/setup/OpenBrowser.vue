@@ -40,6 +40,18 @@ query OpenBrowser {
   }
   ...WarningList
   currentTestingType
+  versions {
+    current {
+      id
+      version
+      released
+    }
+    latest {
+      id
+      version
+      released
+    }
+  }
 }
 `
 

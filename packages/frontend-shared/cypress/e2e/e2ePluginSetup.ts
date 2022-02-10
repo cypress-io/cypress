@@ -182,15 +182,19 @@ async function makeE2ETasks () {
 
                 result = { data: null, extensions: [], errors: [new GraphQLError(err.message, undefined, undefined, undefined, undefined, err)] }
               }
-            } else {
-              return new Response(JSON.stringify(result), { status: 200 })
             }
-          } else if (String(url) === 'https://download.cypress.io/desktop.json') {
+
+            return new Response(JSON.stringify(result), { status: 200 })
+          }
+
+          if (String(url) === 'https://download.cypress.io/desktop.json') {
             return new Response(JSON.stringify({
               name: 'Cypress',
               version: pkg.version,
             }), { status: 200 })
-          } else if (String(url) === 'https://registry.npmjs.org/cypress') {
+          }
+
+          if (String(url) === 'https://registry.npmjs.org/cypress') {
             return new Response(JSON.stringify({
               'time': {
                 [pkg.version]: '2022-02-10T01:07:37.369Z',
