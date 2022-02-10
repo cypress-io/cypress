@@ -36,12 +36,8 @@
         />
       </div>
       <div>
-        <div
-          v-if="!result"
-          class="rounded-b h-24px w-full"
-        />
         <StandardModalFooter
-          v-else
+          v-if="result"
           class="flex h-72px gap-16px items-center"
         >
           <router-link
@@ -66,6 +62,10 @@
             {{ t('createSpec.successPage.createAnotherSpecButton') }}
           </Button>
         </StandardModalFooter>
+        <div
+          v-else
+          class="bg-white rounded-b h-24px bottom-0 left-0 absolute ghost-div"
+        />
       </div>
     </template>
   </div>
@@ -194,3 +194,9 @@ const cancelSpecNameCreation = () => {
 }
 
 </script>
+
+<style scoped>
+.ghost-div {
+  width: calc(100% - 24px);
+}
+</style>
