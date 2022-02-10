@@ -1,8 +1,7 @@
 import { useWindowSize } from '@vueuse/core'
-import { computed, ref, watchEffect } from 'vue'
+import { computed, ref } from 'vue'
 import { usePreferences } from '../composables/usePreferences'
 import { useAutStore, useRunnerUiStore } from '../store'
-import { useScreenshotStore } from '../store/screenshot-store'
 import { runnerConstants } from './runner-constants'
 
 export type ResizablePanelName = 'panel1' | 'panel2' | 'panel3'
@@ -55,28 +54,13 @@ export const useRunnerStyle = ({
     return windowHeight.value - nonAutHeight
   })
 
-  const screenshotStore = useScreenshotStore()
   const autStore = useAutStore()
-
-  const scale = computed(() => {
-    let scale = 1
-
-    if (!screenshotStore.isScreenshotting) {
-      scale = Math.min(containerWidth.value / autStore.viewportDimensions.width, containerHeight.value / autStore.viewportDimensions.height, 1)
-    }
-
-    return scale
-  })
 
   const viewportStyle = computed(() => {
     return `
       width: ${autStore.viewportDimensions.width}px;
       height: ${autStore.viewportDimensions.height}px;
-      transform: scale(${scale.value});`
-  })
-
-  watchEffect(() => {
-    autStore.setScale(scale.value)
+      transform: scale(${autStore.autScale});`
   })
 
   return {

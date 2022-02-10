@@ -1,4 +1,6 @@
 import { defineStore } from 'pinia'
+import { useRunnerStyle } from '../runner/useRunnerStyle'
+import { useScreenshotStore } from './screenshot-store'
 
 export type ScriptError = { type: string, error: string } | null
 
@@ -89,6 +91,21 @@ export const useAutStore = defineStore({
         height: state.viewportHeight,
         width: state.viewportWidth,
       }
+    },
+
+    autScale (state) {
+      const { containerHeight, containerWidth } = useRunnerStyle()
+      const screenshotStore = useScreenshotStore()
+
+      if (screenshotStore.isScreenshotting) {
+        return 1
+      }
+
+      return Math.min(
+        containerWidth.value / state.viewportWidth,
+        containerHeight.value / state.viewportHeight,
+        1,
+      )
     },
   },
 })

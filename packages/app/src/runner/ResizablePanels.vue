@@ -86,7 +86,7 @@ const props = withDefaults(defineProps<{
 
 const emit = defineEmits<{
   (e: 'resizeEnd', value: DraggablePanel): void,
-  (e: 'panelWidthUpdated', value: {panel:string, width: number}): void,
+  (e: 'panelWidthUpdated', value: {panel: DraggablePanel, width: number}): void,
 }>()
 
 const panel1HandleX = ref(props.initialPanel1Width)
