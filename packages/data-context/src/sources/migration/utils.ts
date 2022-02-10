@@ -416,7 +416,7 @@ function getSpecPattern (cfg: OldCypressConfig, testType: TestingType) {
   const customComponentFolder = cfg.component?.componentFolder ?? cfg.componentFolder ?? null
 
   if (testType === 'component' && customComponentFolder) {
-    return specPattern
+    return `${customComponentFolder}/${specPattern}`
   }
 
   if (testType === 'e2e') {

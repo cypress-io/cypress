@@ -244,7 +244,7 @@ describe('code-generator', () => {
     }).not.throw()
   })
 
-  it('should generate from scaffoldIntegration', async () => {
+  xit('should generate from scaffoldIntegration', async () => {
     const target = path.join(tmpPath, 'scaffold-integration')
     const action: Action = {
       templateDir: templates.scaffoldIntegration,
