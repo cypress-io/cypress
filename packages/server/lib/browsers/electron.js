@@ -261,7 +261,7 @@ module.exports = {
     .then(() => {
       return win.loadURL('about:blank')
     })
-    .then(() => _getAutomation(win, options, automation).then((cdpAutomation) => automation.use(cdpAutomation)))
+    .then(() => this._getAutomation(win, options, automation).then((cdpAutomation) => automation.use(cdpAutomation)))
     .then(() => Promise.all([_maybeRecordVideo(win.webContents, options), this._handleDownloads(win, options.downloadsFolder, automation)]))
     .then(() => {
       // enabling can only happen once the window has loaded
