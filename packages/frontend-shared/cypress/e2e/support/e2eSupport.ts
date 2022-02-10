@@ -10,9 +10,9 @@ import { browsers } from '@packages/types/src/browser'
 import type { E2ETaskMap } from '../e2ePluginSetup'
 import installCustomPercyCommand from '@packages/ui-components/cypress/support/customPercyCommand'
 import { addNetworkCommands } from '../../support/onlineNetwork'
+import type { SinonStub } from 'sinon'
 import type sinon from 'sinon'
 import type pDefer from 'p-defer'
-import type { SinonStub } from 'sinon'
 
 configure({ testIdAttribute: 'data-cy' })
 
@@ -157,6 +157,10 @@ declare global {
        * and asserts that it triggers the appropriate mutation when clicked.
        */
       validateExternalLink(options: ValidateExternalLinkOptions | string): Chainable<JQuery<HTMLElement>>
+      /**
+       * Tabs until the result of fn is true
+       */
+      tabUntil(fn: ($el: JQuery) => boolean, limit?: number): Chainable<JQuery<HTMLElement>>
     }
   }
 }
@@ -476,6 +480,31 @@ function validateExternalLink (subject, options: ValidateExternalLinkOptions | s
   })
 }
 
+function tabUntil (fn: (el: JQuery<HTMLElement>) => boolean, limit: number = 10) {
+  function _tabUntil (step: number) {
+    // @ts-expect-error
+    return cy.tab().focused({ log: false }).then((el) => {
+      const pass = fn(el)
+
+      if (pass) {
+        return el
+      }
+
+      if (step > limit) {
+        throw new Error(`Unable to step to element in ${fn.toString()} in ${limit} steps`)
+      }
+
+      return _tabUntil(step + 1)
+    })
+  }
+
+  return logInternal('tabUntil', () => {
+    cy.get('body')
+
+    return _tabUntil(0)
+  })
+}
+
 Cypress.on('uncaught:exception', (err) => !err.message.includes('ResizeObserver loop limit exceeded'))
 
 Cypress.Commands.add('scaffoldProject', scaffoldProject)
@@ -491,6 +520,7 @@ Cypress.Commands.add('withCtx', withCtx)
 Cypress.Commands.add('withRetryableCtx', withRetryableCtx)
 Cypress.Commands.add('remoteGraphQLIntercept', remoteGraphQLIntercept)
 Cypress.Commands.add('findBrowsers', findBrowsers)
+Cypress.Commands.add('tabUntil', tabUntil)
 Cypress.Commands.add('validateExternalLink', { prevSubject: ['optional', 'element'] }, validateExternalLink)
 
 installCustomPercyCommand()

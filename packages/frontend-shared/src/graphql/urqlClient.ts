@@ -36,7 +36,8 @@ declare global {
      * to use cy.intercept in tests that we need it
      */
     __CYPRESS_GQL_NO_SOCKET__?: string
-    __CYPRESS_INITIAL_DATA__: string
+    __CYPRESS_INITIAL_DATA__: object
+    __CYPRESS_INITIAL_DATA_ENCODED__: string
     __CYPRESS_MODE__: 'run' | 'open'
     __RUN_MODE_SPECS__: SpecFile[]
     __CYPRESS_TESTING_TYPE__: 'e2e' | 'component'
@@ -53,8 +54,8 @@ export async function preloadLaunchpadData () {
   try {
     const resp = await fetch('/__launchpad/preload')
 
-    window.__CYPRESS_INITIAL_DATA__ = JSON.parse(decodeBase64Unicode(await resp.json()))
-  } catch {
+    window.__CYPRESS_INITIAL_DATA__ = await resp.json()
+  } catch (e) {
     //
   }
 }
@@ -117,7 +118,9 @@ export function makeUrqlClient (config: UrqlClientConfig): Client {
     ssrExchange({
       isClient: true,
       // @ts-ignore - this seems fine locally, but on CI tsc is failing - bizarre.
-      initialState: (window.__CYPRESS_INITIAL_DATA__ ? JSON.parse(decodeBase64Unicode(window.__CYPRESS_INITIAL_DATA__)) : {}),
+      initialState: (window.__CYPRESS_INITIAL_DATA_ENCODED__
+        ? JSON.parse(decodeBase64Unicode(window.__CYPRESS_INITIAL_DATA_ENCODED__))
+        : window.__CYPRESS_INITIAL_DATA__) || {},
     }),
     namedRouteExchange,
     fetchExchange,

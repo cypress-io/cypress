@@ -109,7 +109,7 @@ export class HtmlDataSource {
       <body>
         <script>
           window.__RUN_MODE_SPECS__ = ${JSON.stringify(this.ctx.project.specs)}
-          window.__CYPRESS_INITIAL_DATA__ = "${base64InitialData}";
+          window.__CYPRESS_INITIAL_DATA_ENCODED__ = "${base64InitialData}";
           window.__CYPRESS_MODE__ = ${JSON.stringify(this.ctx.isRunMode ? 'run' : 'open')}
           window.__CYPRESS_CONFIG__ = ${JSON.stringify(serveConfig)}
           window.__CYPRESS_TESTING_TYPE__ = '${this.ctx.coreData.currentTestingType}'

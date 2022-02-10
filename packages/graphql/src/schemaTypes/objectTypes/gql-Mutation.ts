@@ -520,6 +520,7 @@ export const mutation = mutationType({
     t.field('migrateConfigFile', {
       description: 'Transforms cypress.json file into cypress.config.js file',
       type: Query,
+      slowThreshold: 5000, // This mutation takes a little time
       resolve: async (_, args, ctx) => {
         try {
           await ctx.actions.migration.createConfigFile()
