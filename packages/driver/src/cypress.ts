@@ -159,9 +159,16 @@ class $Cypress {
       }
 
       validate(config, (errResult) => {
+        const stringify = (str) => format(JSON.stringify(str))
+
+        const format = (str) => `\`${str}\``
+
+        // TODO: this does not use the @packages/error rewriting rules
+        // for stdout vs markdown - it always inserts backticks for markdown
+        // and those leak out into the stdout formatting.
         const errMsg = _.isString(errResult)
           ? errResult
-          : `Expected \`${errResult.key}\` to be ${errResult.type}.\n\nInstead the value was: \`${JSON.stringify(errResult.value)}\``
+          : `Expected ${format(errResult.key)} to be ${errResult.type}.\n\nInstead the value was: ${stringify(errResult.value)}\``
 
         throw new this.state('specWindow').Error(errMsg)
       })
