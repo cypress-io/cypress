@@ -14,9 +14,11 @@ const fs = require('fs')
 const main = async () => {
   const originalPkg = JSON.stringify(pkg, null, 2)
 
+  const install = () => execa('yarn', ['install', '--ignore-scripts'], { stdio: 'inherit' })
+
   const resetPkg = async () => {
     fs.writeFileSync('package.json', originalPkg, 'utf8')
-    await execa('yarn', ['install'], { stdio: 'inherit' })
+    await install()
   }
 
   const checkExit = async ({ exitCode, step }) => {
@@ -40,7 +42,7 @@ const main = async () => {
 
   // eslint-disable-next-line no-console
   console.log('[@cypress/webpack-preprocessor]: install dependencies...')
-  await execa('yarn', ['install'], { stdio: 'inherit' })
+  await install()
 
   const unit = await execa('yarn', ['test-unit'], { stdio: 'inherit' })
 

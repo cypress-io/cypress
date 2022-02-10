@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import _ from 'lodash'
 import Promise from 'bluebird'
 
@@ -59,7 +57,7 @@ export default (Commands, Cypress, cy, state, config) => {
 
       ({ options: userOptions, position, x, y } = $actionability.getPositionFromArguments(positionOrX, y, userOptions))
 
-      const options = _.defaults({}, userOptions, {
+      const options: Record<string, any> = _.defaults({}, userOptions, {
         log: true,
         $el: subject,
         bubbles: true,
