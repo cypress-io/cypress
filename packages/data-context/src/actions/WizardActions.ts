@@ -269,42 +269,30 @@ export class WizardActions {
 
   private async scaffoldConfig (testingType: 'e2e' | 'component'): Promise<NexusGenObjects['ScaffoldedFile']> {
     debug('scaffoldConfig')
-    try {
-      await this.ctx.fs.stat(this.ctx.lifecycleManager.configFilePath)
-    } catch (e) {
-      // only do this if config file doesn't exist
-      this.ctx.lifecycleManager.setConfigFilePath(this.ctx.coreData.wizard.chosenLanguage)
+    // only do this if config file doesn't exist
+    this.ctx.lifecycleManager.setConfigFilePath(this.ctx.coreData.wizard.chosenLanguage)
 
-      const configCode = this.configCode(testingType, this.ctx.coreData.wizard.chosenLanguage)
+    const configCode = this.configCode(testingType, this.ctx.coreData.wizard.chosenLanguage)
 
-      return this.scaffoldFile(
-        this.ctx.lifecycleManager.configFilePath,
-        configCode,
-        'Created a new config file',
-      )
-    }
-
-    const { ext } = path.parse(this.ctx.lifecycleManager.configFilePath)
-
-    const configCode = this.configCode(testingType, ext === '.ts' ? 'ts' : 'js')
-
-    return {
-      status: 'changes',
-      description: 'Merge this code with your existing config file',
-      file: {
-        absolute: this.ctx.lifecycleManager.configFilePath,
-        contents: configCode,
-      },
-    }
+    return this.scaffoldFile(
+      this.ctx.lifecycleManager.configFilePath,
+      configCode,
+      'Created a new config file',
+    )
   }
 
   private async scaffoldFixtures (): Promise<NexusGenObjects['ScaffoldedFile']> {
     const exampleScaffoldPath = path.join(this.projectRoot, 'cypress/fixtures/example.json')
-    const fixturesDir = path.dirname(exampleScaffoldPath)
 
+    // Checking for the directory's presence is odd.
+    // but cypress has behaved this way since 3.0 at least.
+    // Unless someone complains, no change necessary.
+    // Know that accessing the file system twice in a row will
+    // result in race conditions.
+    // Hopefully it will not come to that
     try {
-      await this.ctx.fs.stat(fixturesDir)
-
+      await this.ctx.fs.access(path.dirname(exampleScaffoldPath), this.ctx.fs.constants.R_OK)
+    } catch (e) {
       return {
         status: 'skipped',
         file: {
@@ -313,18 +301,13 @@ export class WizardActions {
         },
         description: 'Fixtures directory already exists, skipping',
       }
-    } catch (e) {
-      await this.ensureDir('fixtures')
-      await this.ctx.fs.writeFile(exampleScaffoldPath, `${JSON.stringify(FIXTURE_DATA, null, 2)}\n`)
-
-      return {
-        status: 'valid',
-        description: 'Added an example fixtures file/folder',
-        file: {
-          absolute: exampleScaffoldPath,
-        },
-      }
     }
+
+    await this.ensureDir('fixtures')
+
+    return this.scaffoldFile(exampleScaffoldPath,
+      `${JSON.stringify(FIXTURE_DATA, null, 2)}\n`,
+      'Added an example fixtures file/folder')
   }
 
   private wizardGetConfigCodeE2E (lang: CodeLanguageEnum): string {
