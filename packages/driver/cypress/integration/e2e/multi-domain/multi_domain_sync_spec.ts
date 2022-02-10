@@ -1,9 +1,11 @@
 // @ts-ignore / session support is needed for visiting about:blank between tests
 describe('multi-domain - sync', { experimentalSessionSupport: true, experimentalMultiDomain: true }, () => {
+  const SECONDARY_DOMAIN = 'foobar.com'
+
   before(() => {
     // NOTE: force the spec bridge to be recreated before this test is run to deterministically test config sync
     // @ts-ignore
-    window.top.document.querySelector('[id="Cypress (foobar.com)"]')?.remove()
+    window.top.document.querySelector(`[id="Spec Bridge: ${SECONDARY_DOMAIN}"]`)?.remove()
   })
 
   beforeEach(() => {
@@ -21,7 +23,7 @@ describe('multi-domain - sync', { experimentalSessionSupport: true, experimental
 
   context('Cypress.config()', () => {
     it('syncs config initially, carrying values set in the primary over to the secondary', () => {
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain(SECONDARY_DOMAIN, () => {
         // @ts-ignore
         const bar = Cypress.config('foo')
 
@@ -33,7 +35,7 @@ describe('multi-domain - sync', { experimentalSessionSupport: true, experimental
       // @ts-ignore
       Cypress.config('foo', 'baz')
 
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain(SECONDARY_DOMAIN, () => {
         // @ts-ignore
         const bar = Cypress.config('foo')
 
@@ -42,7 +44,7 @@ describe('multi-domain - sync', { experimentalSessionSupport: true, experimental
     })
 
     it('does not sync config outwards from secondary', () => {
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain(SECONDARY_DOMAIN, () => {
         // @ts-ignore
         Cypress.config('bar', 'baz')
       })
@@ -54,7 +56,7 @@ describe('multi-domain - sync', { experimentalSessionSupport: true, experimental
     })
 
     it('persists configuration changes made in the secondary to other calls to the same domain', () => {
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain(SECONDARY_DOMAIN, () => {
         // @ts-ignore
         const baz = Cypress.config('bar')
 
@@ -63,7 +65,7 @@ describe('multi-domain - sync', { experimentalSessionSupport: true, experimental
     })
 
     it('sets unserializable values in primary to undefined when synced with the secondary', () => {
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain(SECONDARY_DOMAIN, () => {
         // @ts-ignore
         const isUndefined = Cypress.config('unserializable')
 
@@ -74,7 +76,7 @@ describe('multi-domain - sync', { experimentalSessionSupport: true, experimental
 
   context('Cypress.env()', () => {
     it('syncs env initially, carrying values set in the primary over to the secondary', () => {
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain(SECONDARY_DOMAIN, () => {
         // @ts-ignore
         const bar = Cypress.env('foo')
 
@@ -86,7 +88,7 @@ describe('multi-domain - sync', { experimentalSessionSupport: true, experimental
       // @ts-ignore
       Cypress.env('foo', 'baz')
 
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain(SECONDARY_DOMAIN, () => {
         // @ts-ignore
         const bar = Cypress.env('foo')
 
@@ -95,7 +97,7 @@ describe('multi-domain - sync', { experimentalSessionSupport: true, experimental
     })
 
     it('does not sync config outwards from secondary', () => {
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain(SECONDARY_DOMAIN, () => {
         // @ts-ignore
         Cypress.env('bar', 'baz')
       })
@@ -107,7 +109,7 @@ describe('multi-domain - sync', { experimentalSessionSupport: true, experimental
     })
 
     it('persists configuration changes made in the secondary to other calls to the same domain', () => {
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain(SECONDARY_DOMAIN, () => {
         // @ts-ignore
         const baz = Cypress.env('bar')
 
@@ -116,7 +118,7 @@ describe('multi-domain - sync', { experimentalSessionSupport: true, experimental
     })
 
     it('sets unserializable values in primary to undefined when synced with the secondary', () => {
-      cy.switchToDomain('foobar.com', () => {
+      cy.switchToDomain(SECONDARY_DOMAIN, () => {
         // @ts-ignore
         const isUndefined = Cypress.env('unserializable')
 
