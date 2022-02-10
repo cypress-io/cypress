@@ -185,6 +185,10 @@ export class CombinedAgent {
       options.uri = url.parse(options.href)
     }
 
+    // Ensure we have a proper port defined otherwise node has assumed we are port 80
+    // (https://github.com/nodejs/node/blob/master/lib/_http_client.js#L164) since we are a combined agent
+    // rather than an http or https agent. This will cause issues with fetch requests (@cypress/request already handles it:
+    // https://github.com/cypress-io/request/blob/master/request.js#L301-L303)
     if (!options.uri.port) {
       if (options.uri.protocol === 'http:') {
         options.uri.port = String(80)

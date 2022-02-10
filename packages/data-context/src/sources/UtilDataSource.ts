@@ -1,8 +1,10 @@
 import DataLoader from 'dataloader'
 import crypto from 'crypto'
 import fetch from 'cross-fetch'
-import { agent } from '@packages/network'
 import type { DataContext } from '../DataContext'
+
+// Require rather than import since data-context is stricter than network and there are a fair amount of errors in agent.
+const { agent } = require('@packages/network')
 
 const proxiedFetch = function (this: any, input: RequestInfo, init?: RequestInit) {
   return fetch.call(this, input, {
