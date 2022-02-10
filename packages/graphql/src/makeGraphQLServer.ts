@@ -10,9 +10,12 @@ import serverDestroy from 'server-destroy'
 import send from 'send'
 import { getPathToDist } from '@packages/resolve-dist'
 import httpProxy from 'http-proxy'
+import debugLib from 'debug'
 
 import { graphqlSchema } from './schema'
-import { parse } from 'graphql'
+import { execute, parse } from 'graphql'
+
+const debugOperation = debugLib(`cypress-verbose:graphql:operation`)
 
 const SHOW_GRAPHIQL = process.env.CYPRESS_INTERNAL_ENV !== 'production'
 
@@ -109,6 +112,16 @@ export const graphQLHTTP = graphqlHTTP((req, res, params) => {
     schema: graphqlSchema,
     graphiql: SHOW_GRAPHIQL,
     context: ctx,
+    customExecuteFn: (args) => {
+      const date = new Date()
+      const prefix = `${args.operationName ?? '(anonymous)'}`
+
+      return Promise.resolve(execute(args)).then((val) => {
+        debugOperation(`${prefix} completed in ${new Date().valueOf() - date.valueOf()}ms with ${val.errors?.length ?? 0} errors`)
+
+        return val
+      })
+    },
   }
 })
 

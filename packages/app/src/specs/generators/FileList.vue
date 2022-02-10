@@ -5,13 +5,13 @@
       class="h-full relative"
       tabindex="0"
     >
-      <ul class="h-full overflow-auto">
+      <ul class="h-full">
         <!-- TODO(jess): up arrow and down arrow navigation -->
         <li
           v-for="file in files"
           :key="file?.id"
           class="cursor-pointer flex border-b-1 border-b-gray-50 leading-normal text-16px gap-8px
-    group items-center last:border-none last:py-0 children:h-40px children:py-8px"
+    group items-center last last:border-none last:h-64px last:py-0 last:items-start children:h-40px children:py-8px"
           data-cy="file-list-row"
           @click="$emit('selectFile', file)"
         >
@@ -27,10 +27,6 @@
           </div>
         </li>
       </ul>
-
-      <!-- Fading top and bottom of the container. It may make sense for this to exist in a css utility or class. -->
-      <div class="bg-gradient-to-b from-white to-transparent h-12px top-0 left-0 w-[calc(100%-2px)] scroller-fade absolute" />
-      <div class="bg-gradient-to-b from-transparent to-white h-12px w-full right-0 bottom-0 scroller-fade absolute" />
     </div>
     <div
       v-else
