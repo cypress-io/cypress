@@ -27,6 +27,18 @@ export class MigrationActions {
     return this.ctx.migration.initialize()
   }
 
+  async renameSpecsFolder () {
+    if (!this.ctx.currentProject) {
+      throw Error('Need to set currentProject before you can rename specs folder')
+    }
+
+    const projectRoot = this.ctx.path.join(this.ctx.currentProject)
+    const from = path.join(projectRoot, 'cypress/integration')
+    const to = path.join(projectRoot, 'cypress/e2e')
+
+    await this.ctx.fs.move(from, to)
+  }
+
   async renameSpecFiles (beforeSpecs: string[], afterSpecs: string[]) {
     if (!this.ctx.currentProject) {
       throw Error('Need to set currentProject before you can rename files')

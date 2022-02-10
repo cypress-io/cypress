@@ -11,7 +11,7 @@
     />
     <Radio
       v-model:value="value"
-      :options="[{label: '',value: 'rename'},{label: '', value: 'skip'}]"
+      :options="[{label: '',value: 'rename'},{label: '', value: props.hasCustomIntegrationFolder ? 'skip' : 'renameFolder'}]"
       name="skipRename"
       :label="t('migration.renameAuto.modals.step2.label')"
     >
@@ -33,7 +33,7 @@
           v-else
           class="text-gray-800"
         >
-          {{ t('migration.renameAuto.modals.step2.option2') }}
+          {{ props.hasCustomIntegrationFolder ? t('migration.renameAuto.modals.step2.option2') : t('migration.renameAuto.modals.step2.option3') }}
         </span>
       </template>
     </Radio>
@@ -73,5 +73,9 @@ const emit = defineEmits([
 ])
 
 const value = ref('rename')
+
+const props = defineProps<{
+  hasCustomIntegrationFolder: boolean
+}>()
 
 </script>

@@ -14,7 +14,7 @@
       </MigrationListItem>
       <MigrationListItem>
         <template
-          v-if="skipRename"
+          v-if="selectOption === 'skip'"
         >
           {{ t('migration.renameAuto.optedOutMessage') }}
         </template>
@@ -36,7 +36,7 @@
           {{ t('migration.renameAuto.changeButton') }}
         </a>
       </MigrationListItem>
-      <MigrationListItem v-if="!skipRename">
+      <MigrationListItem v-if="!selectOption">
         <i18n-t
           scope="global"
           keypath="migration.renameAuto.changedSpecPatternExplain"
@@ -71,6 +71,7 @@
     />
     <OptOutModalStep2
       v-if="step2Modal"
+      :has-custom-integration-folder="props.gql.hasCustomIntegrationFolder"
       @cancel="step2Modal = false"
       @save="(val) => {
         step2Modal = false;
@@ -98,6 +99,7 @@ const { t } = useI18n()
 
 gql`
 fragment RenameSpecsAuto on Migration {
+  hasCustomIntegrationFolder
   specFiles {
     before {
       id
@@ -123,19 +125,21 @@ const props = defineProps<{
   gql: RenameSpecsAutoFragment
 }>()
 
+type PossibleOption = 'rename' | 'renameFolder' | 'skip'
+
 const emits = defineEmits<{
-  (eventName: 'skipChange', value: boolean): void
+  (eventName: 'selectOption', value: PossibleOption): void
   }>()
 
 const step1Modal = ref(false)
 const step2Modal = ref(false)
 
 // probably to be changed for a GQL field
-const skipRename = ref(false)
+const selectOption = ref<PossibleOption>()
 
-function applySkipResult (val:string) {
+function applySkipResult (val: PossibleOption) {
   // TODO: add a GQL mutation here
-  skipRename.value = val === 'skip'
-  emits('skipChange', skipRename.value)
+  selectOption.value = val
+  emits('selectOption', selectOption.value)
 }
 </script>

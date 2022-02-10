@@ -528,6 +528,7 @@
           "label": "Choose from the following filename patterns:",
           "option1": "{0} (Recommended)",
           "option2": "Don't rename anything — keep what I have.",
+          "option3": "Rename folder name.",
           "buttonSave": "Save Changes",
           "buttonCancel": "Cancel"
         }
@@ -565,7 +566,8 @@
         "title": "Automatically rename existing specs",
         "description": "In this step, we'll automatically rename and move your existing spec files.",
         "button": "Rename these specs for me",
-        "buttonSkip": "Skip renaming specs"
+        "buttonSkip": "Skip renaming specs",
+        "buttonRenameFolder": "Rename the folder for me"
       },
       "step2": {
         "title": "Manually move your existing component specs",
