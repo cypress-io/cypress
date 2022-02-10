@@ -18,6 +18,61 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
     cy.log('after switchToDomain')
   })
 
+  it('passes runnable state to the secondary domain', () => {
+    const runnable = cy.state('runnable')
+    const expectedRunnable = {
+      clearTimeout: null,
+      isPending: null,
+      resetTimeout: null,
+      timeout: null,
+      id: runnable.id,
+      _currentRetry: runnable._currentRetry,
+      type: 'test',
+      title: 'passes runnable state to the secondary domain',
+      parent: {
+        id: runnable.parent.id,
+        type: 'suite',
+        title: 'multi-domain',
+        parent: {
+          id: runnable.parent.parent.id,
+          type: 'suite',
+          title: '',
+          ctx: {},
+        },
+        ctx: {},
+      },
+      ctx: {},
+    }
+
+    cy.switchToDomain('foobar.com', [expectedRunnable], ([expectedRunnable]) => {
+      const actualRunnable = cy.state('runnable')
+
+      // these functions are set in the secondary domain so just set them on the expectedRunnable
+      expectedRunnable.clearTimeout = actualRunnable.clearTimeout
+      expectedRunnable.isPending = actualRunnable.isPending
+      expectedRunnable.resetTimeout = actualRunnable.resetTimeout
+      expectedRunnable.timeout = actualRunnable.timeout
+
+      expect(actualRunnable).to.deep.equal(expectedRunnable)
+    })
+  })
+
+  it('passes viewportWidth/Height state to the secondary domain', () => {
+    const expectedViewport = [320, 480]
+
+    cy.viewport(320, 480).then(() => {
+      const primaryViewport = [cy.state('viewportWidth'), cy.state('viewportHeight')]
+
+      expect(primaryViewport).to.deep.equal(expectedViewport)
+    })
+
+    cy.switchToDomain('foobar.com', [expectedViewport], ([expectedViewport]) => {
+      const secondaryViewport = [cy.state('viewportWidth'), cy.state('viewportHeight')]
+
+      expect(secondaryViewport).to.deep.equal(expectedViewport)
+    })
+  })
+
   it('handles querying nested elements', () => {
     cy.switchToDomain('foobar.com', () => {
       cy
