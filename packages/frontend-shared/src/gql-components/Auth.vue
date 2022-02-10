@@ -62,13 +62,15 @@ import { useMutation, useQuery } from '@urql/vue'
 import { useOnline } from '@vueuse/core'
 
 import {
-  LoginDocument,
-  LogoutDocument,
+  Auth_LoginDocument,
+  Auth_LogoutDocument,
+  Auth_ResetAuthStateDocument,
   AuthFragment,
-  BrowserOpenedDocument,
+  Auth_BrowserOpenedDocument,
 } from '../generated/graphql'
 import Button from '@cy/components/Button.vue'
 import { useI18n } from '@cy/i18n'
+import { rest } from 'lodash'
 
 const isOnline = useOnline()
 
@@ -94,7 +96,7 @@ fragment Auth on Query {
 `
 
 gql`
-mutation Logout {
+mutation Auth_Logout {
   logout {
     ...Auth
   }
@@ -102,7 +104,7 @@ mutation Logout {
 `
 
 gql`
-mutation Login {
+mutation Auth_Login {
   login {
     ...Auth
   }
@@ -110,7 +112,15 @@ mutation Login {
 `
 
 gql`
-query BrowserOpened {
+mutation Auth_ResetAuthState {
+  resetAuthState {
+    ...Auth
+  }
+}
+`
+
+gql`
+query Auth_BrowserOpened {
   authState {
     browserOpened
     name
@@ -119,8 +129,9 @@ query BrowserOpened {
 }
 `
 
-const login = useMutation(LoginDocument)
-const logout = useMutation(LogoutDocument)
+const login = useMutation(Auth_LoginDocument)
+const logout = useMutation(Auth_LogoutDocument)
+const reset = useMutation(Auth_ResetAuthStateDocument)
 const loginButtonRef = ref(Button)
 
 onMounted(() => {
@@ -138,7 +149,7 @@ const isBrowserOpened = computed(() => props.gql.authState.browserOpened)
 const isLoggingIn = computed(() => clickedOnce.value && !viewer.value)
 
 const query = useQuery({
-  query: BrowserOpenedDocument,
+  query: Auth_BrowserOpenedDocument,
 })
 
 const handleAuth = async () => {
@@ -194,12 +205,12 @@ const buttonVariant = computed(() => {
 })
 
 const handleTryAgain = () => {
-  // TODO: clear auth message
-  // call Login Mutation again
-  clickedOnce.value = false
+  reset.executeMutation({})
+  login.executeMutation({})
 }
 
 const handleCancel = () => {
+  reset.executeMutation({})
   emit('continue', true)
 }
 

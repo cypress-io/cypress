@@ -97,7 +97,7 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
             type: 'error',
             name: 'AUTH_ERROR_DURING_LOGIN',
             message: err.message,
-            browserOpened: true,
+            browserOpened: ctx.coreData.authState.browserOpened,
           }
         })
       },

@@ -7,6 +7,7 @@ export interface AuthApiShape {
   getUser(): Promise<Partial<AuthenticatedUserShape>>
   logIn(onMessage: (message: AuthMessage) => void): Promise<AuthenticatedUserShape>
   logOut(): Promise<void>
+  resetAuthState(): Promise<void>
 }
 
 export class AuthActions {
@@ -48,6 +49,10 @@ export class AuthActions {
     this.setAuthenticatedUser(await this.authApi.logIn((message) => {
       this.ctx.coreData.authState = message
     }))
+  }
+
+  resetAuthState () {
+    return this.ctx.coreData.authState = { browserOpened: false }
   }
 
   async logout () {
