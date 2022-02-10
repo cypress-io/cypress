@@ -1,4 +1,4 @@
-describe('App: Spec List', () => {
+describe('App: Spec List (Component)', () => {
   beforeEach(() => {
     cy.scaffoldProject('component-tests')
     cy.openProject('component-tests')
