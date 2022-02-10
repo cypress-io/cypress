@@ -267,7 +267,7 @@ describe('retries ui', {
   })
 
   describe('afterAll', () => {
-    it('only run afterAll hook on last attempt', () => {
+    it('only runs afterAll hook on last attempt', () => {
       loadSpec({
         fileName: 'after-all-once.retries.cy.js',
         passCount: 3,
