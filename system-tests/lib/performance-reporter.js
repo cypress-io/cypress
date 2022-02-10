@@ -12,8 +12,24 @@ const honey = new Libhoney({
   writeKey: process.env.HONEYCOMB_API_KEY,
 })
 
+// This event is created here independently every time the reporter
+// is imported (in each parallel instance of the system-tests
+// in circleci) so that we can use it as the parent,
+// but ../scripts/send-root-honeycomb-event.js
+// is only invoked once at the start of the build,
+// and is responsible for sending it to honeycomb.
 const spanId = process.env.CIRCLE_WORKFLOW_ID || uuidv4()
 const circleCiRootEvent = honey.newEvent()
+
+circleCiRootEvent.timestamp = Date.now()
+circleCiRootEvent.add({
+  buildUrl: process.env.CIRCLE_BUILD_URL,
+  platform: process.platform,
+  arch: process.arch,
+
+  spanId,
+  traceId: spanId,
+})
 
 // Mocha events ('test', 'test end', etc) have no way to wait
 // for async callbacks, so we can't guarantee we have this
@@ -21,7 +37,7 @@ const circleCiRootEvent = honey.newEvent()
 
 // Therefore, we have each honeycomb event await this promise
 // before sending itself.
-let asyncInfo = Promise.all([getNextVersionForPath('../../packages'), commitInfo()])
+let asyncInfo = Promise.all([getNextVersionForPath(path.resolve(__dirname, '../../packages')), commitInfo()])
 .then(([nextVersion, commitInformation]) => {
   const ciInformation = ciProvider.commitParams() || {}
 
@@ -36,26 +52,6 @@ function addAsyncInfoAndSend (honeycombEvent) {
   return asyncInfo.then((info) => {
     honeycombEvent.add(info)
     honeycombEvent.send()
-  })
-}
-
-circleCiRootEvent.timestamp = Date.now()
-circleCiRootEvent.add({
-  buildUrl: process.env.CIRCLE_BUILD_URL,
-  platform: process.platform,
-  arch: process.arch,
-
-  spanId,
-  traceId: spanId,
-})
-
-// This file is executed once as a script at the beginning of the circleci build,
-// so that we can send the root event exactly once and associate all the various
-// system test tasks and build steps into a single span.
-if (require.main === module) {
-  addAsyncInfoAndSend(circleCiRootEvent).then(() => {
-    console.log(circleCiRootEvent.data)
-    honey.flush()
   })
 }
 
@@ -148,3 +144,7 @@ class HoneycombReporter {
 }
 
 module.exports = HoneycombReporter
+
+HoneycombReporter.honey = honey
+HoneycombReporter.circleCiRootEvent = circleCiRootEvent
+HoneycombReporter.addAsyncInfoAndSend = addAsyncInfoAndSend
