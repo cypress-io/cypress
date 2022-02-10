@@ -895,11 +895,7 @@ commands:
       - run:
           # Install latest Cypress binary
           command: |
-            if [[ -f yarn.lock ]]; then
-              CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip yarn add -D ~/cypress/cypress.tgz
-            else
-              CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm install --legacy-peer-deps ~/cypress/cypress.tgz
-            fi
+            CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm install --legacy-peer-deps ~/cypress/cypress.tgz
           working_directory: /tmp/<<parameters.repo>>/<<parameters.folder>>
       - run:
           name: Scaffold new config file
