@@ -36,6 +36,7 @@
     "isbinaryfile": "^4.0.8",
     "launch-editor": "2.2.1",
     "lodash": "4.17.21",
+    "node-machine-id": "1.1.12",
     "p-defer": "^3.0.0",
     "prettier": "2.5.1",
     "randomstring": "1.1.5",
