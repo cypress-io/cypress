@@ -335,7 +335,7 @@ export class ProjectLifecycleManager {
       return
     }
 
-    if (this.isTestingTypeConfigured(testingType)) {
+    if (this.isTestingTypeConfigured(testingType) && !(this.ctx.coreData.forceReconfigureProject && this.ctx.coreData.forceReconfigureProject[testingType])) {
       this.loadTestingType()
     }
   }

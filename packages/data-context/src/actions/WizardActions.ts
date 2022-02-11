@@ -181,22 +181,14 @@ export class WizardActions {
       case 'e2e': {
         this.ctx.coreData.scaffoldedFiles = await this.scaffoldE2E()
         this.ctx.lifecycleManager.refreshMetaState()
-        this.ctx.update((coreData) => {
-          coreData.forceReconfigureProject = {
-            e2e: false,
-          }
-        })
+        this.ctx.actions.project.setForceReconfigureProjectByTestingType({ forceReconfigureProject: false, testingType: 'e2e' })
 
         return chosenLanguage
       }
       case 'component': {
         this.ctx.coreData.scaffoldedFiles = await this.scaffoldComponent()
         this.ctx.lifecycleManager.refreshMetaState()
-        this.ctx.update((coreData) => {
-          coreData.forceReconfigureProject = {
-            component: false,
-          }
-        })
+        this.ctx.actions.project.setForceReconfigureProjectByTestingType({ forceReconfigureProject: false, testingType: 'component' })
 
         return chosenLanguage
       }
