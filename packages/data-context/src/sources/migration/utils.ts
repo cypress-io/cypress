@@ -291,20 +291,14 @@ export function moveSpecFiles (projectRoot: string, specs: SpecToMove[]) {
 
 export async function cleanupIntegrationFolder (projectRoot: string) {
   const integrationPath = path.join(projectRoot, 'cypress', 'integration')
-  let dirContents: string[] = []
 
   try {
-    dirContents = await fs.readdir(integrationPath)
-  } catch (e) {
-    // integration folder already cleaned up
-  }
-
-  try {
-    if (dirContents.length === 0) {
-      await fs.rmdir(integrationPath)
+    await fs.rmdir(integrationPath)
+  } catch (e: any) {
+    // only throw if the folder exists
+    if (e.code !== 'ENOENT') {
+      throw Error(`Failed to remove ${integrationPath}`)
     }
-  } catch {
-    throw Error(`Failed to remove ${integrationPath}`)
   }
 }
 
