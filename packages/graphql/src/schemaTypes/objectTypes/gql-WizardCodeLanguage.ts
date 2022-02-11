@@ -16,6 +16,11 @@ export const WizardCodeLanguage = objectType({
       resolve: (source, args, ctx) => ctx.wizardData.chosenLanguage === source.type,
     })
 
+    t.nonNull.boolean('isDetected', {
+      description: 'Whether this is the detected language',
+      resolve: (source, args, ctx) => ctx.wizardData.detectedLanguage === source.type,
+    })
+
     t.nonNull.string('name', {
       description: 'The name of the language',
     })
