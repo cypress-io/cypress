@@ -355,7 +355,7 @@ export const mutation = mutationType({
       type: 'Boolean',
       description: 'Resets the latest version call to capture additional telemetry for the current user',
       resolve: async (_, args, ctx) => {
-        ctx.versionsDataSource.resetLatestVersionTelemetry()
+        ctx.actions.versions.resetLatestVersionTelemetry()
 
         return true
       },

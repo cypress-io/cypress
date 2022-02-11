@@ -50,7 +50,7 @@ export class VersionsDataSource {
    *   }
    * }
    */
-  async versions (): Promise<VersionData> {
+  async versionData (): Promise<VersionData> {
     this.resetLatestVersionTelemetry()
 
     const latestVersion = await this._latestVersion
