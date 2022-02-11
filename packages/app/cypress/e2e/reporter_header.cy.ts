@@ -14,7 +14,7 @@ describe('Reporter Header', () => {
       })
 
       cy.get('[data-selected-spec="true"]').should('contain', 'dom-content').should('have.length', '1')
-      cy.get('[data-selected-spec="false"]').should('have.length', '1')
+      cy.get('[data-selected-spec="false"]').should('have.length', '3')
     })
 
     it('filters the list of specs when searching for specs', () => {
@@ -24,12 +24,12 @@ describe('Reporter Header', () => {
 
       cy.get('input').type('dom', { force: true })
 
-      cy.get('[data-testid="spec-file-item"]').should('have.length', 1)
+      cy.get('[data-testid="spec-file-item"]').should('have.length', 3)
       .should('contain', 'dom-content.spec')
 
       cy.get('input').clear()
 
-      cy.get('[data-testid="spec-file-item"]').should('have.length', '1')
+      cy.get('[data-testid="spec-file-item"]').should('have.length', '3')
 
       cy.get('input').type('asdf', { force: true })
 
