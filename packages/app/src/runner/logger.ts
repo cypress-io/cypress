@@ -1,21 +1,32 @@
 /* eslint-disable no-console */
-
 import _ from 'lodash'
 
+interface Table {
+  name: string
+  data: object
+  columns: any
+}
+
+interface Group {
+  items: any
+  label: boolean
+  name: string
+}
+
 export const logger = {
-  log (...args) {
+  log (...args: unknown[]) {
     console.log(...args)
   },
 
-  logError (...args) {
+  logError (...args: unknown[]) {
     console.error(...args)
   },
 
   clearLog () {
-    if (console.clear) console.clear()
+    console.clear?.()
   },
 
-  logFormatted (consoleProps) {
+  logFormatted (consoleProps: any) {
     if (_.isEmpty(consoleProps)) return
 
     this._logValues(consoleProps)
@@ -24,12 +35,12 @@ export const logger = {
     this._logTable(consoleProps)
   },
 
-  _logValues (consoleProps) {
+  _logValues (consoleProps: any) {
     const formattedLog = this._formatted(_.omit(consoleProps, 'args', 'groups', 'table'))
 
     _.each(formattedLog, (value, key) => {
       // don't log empty strings
-      // _.trim([]) returns '' but we want to log empty arrays, so account for that
+      // trim([]) returns '' but we want to log empty arrays, so account for that
       if (_.isString(value) && _.trim(value) === '') return
 
       // Skip trim if we know value is an object
@@ -39,26 +50,26 @@ export const logger = {
     })
   },
 
-  _formatted (consoleProps) {
+  _formatted (consoleProps: any) {
     const maxKeyLength = this._getMaxKeyLength(consoleProps)
 
     return _.reduce(consoleProps, (memo, value, key) => {
       const append = ': '
 
-      key = _.chain(key + append).capitalize().padEnd(maxKeyLength + append.length, ' ').value()
+      key = _.capitalize(key + append).padEnd(maxKeyLength + append.length, ' ')
       memo[key] = value
 
       return memo
     }, {})
   },
 
-  _getMaxKeyLength (obj) {
-    const lengths = _(obj).keys().map('length').value()
+  _getMaxKeyLength (obj: object) {
+    const lengths = Object.keys(obj).map((x) => x.length)
 
     return Math.max(...lengths)
   },
 
-  _logArgs (consoleProps) {
+  _logArgs (consoleProps: any) {
     const args = this._getArgs(consoleProps)
 
     if (!args) return
@@ -70,15 +81,15 @@ export const logger = {
     })
   },
 
-  _getArgs (consoleProps) {
-    const args = _.result(consoleProps, 'args')
+  _getArgs (consoleProps: any) {
+    const args = _.result<unknown[]>(consoleProps, 'args')
 
     if (!args) return
 
     return args
   },
 
-  _logGroups (consoleProps) {
+  _logGroups (consoleProps: any) {
     const groups = this._getGroups(consoleProps)
 
     _.each(groups, (group) => {
@@ -95,8 +106,8 @@ export const logger = {
     })
   },
 
-  _getGroups (consoleProps) {
-    const groups = _.result(consoleProps, 'groups')
+  _getGroups (consoleProps: any): Group[] | undefined {
+    const groups = _.result<Group[]>(consoleProps, 'groups')
 
     if (!groups) return
 
@@ -107,7 +118,7 @@ export const logger = {
     })
   },
 
-  _logTable (consoleProps) {
+  _logTable (consoleProps: any) {
     if (isMultiEntryTable(consoleProps.table)) {
       _.each(
         _.sortBy(consoleProps.table, (val, key) => key),
@@ -132,8 +143,8 @@ export const logger = {
     }
   },
 
-  _getTable (consoleProps) {
-    const table = _.result(consoleProps, 'table')
+  _getTable (consoleProps: any): Table | Table[] | undefined {
+    const table = _.result<Table | Table[]>(consoleProps, 'table')
 
     if (!table) return
 
@@ -141,4 +152,9 @@ export const logger = {
   },
 }
 
-const isMultiEntryTable = (table) => !_.isFunction(table) && !_.some(_.keys(table).map(isNaN).filter(Boolean), true)
+const isMultiEntryTable = (table: Table) => {
+  return !_.isFunction(table) &&
+  !_.some(_.keys(table)
+  .map((x) => isNaN(parseInt(x, 10)))
+  .filter(Boolean), true)
+}
