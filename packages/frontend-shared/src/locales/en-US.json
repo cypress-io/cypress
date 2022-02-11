@@ -264,7 +264,9 @@
     "testingCard": {
       "configured": "Configured",
       "notConfigured": "Not Configured",
-      "running": "Running"
+      "running": "Running",
+      "chooseABrowser": "Choose a Browser",
+      "reconfigure": "Reconfigure"
     }
   },
   "globalPage": {
