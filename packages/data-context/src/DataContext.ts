@@ -153,8 +153,13 @@ export class DataContext {
     return new GitDataSource(this)
   }
 
+  @cached
+  get versionsDataSource () {
+    return new VersionsDataSource(this)
+  }
+
   async versions () {
-    return new VersionsDataSource(this).versions()
+    return this.versionsDataSource.versions()
   }
 
   @cached

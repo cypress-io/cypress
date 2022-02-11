@@ -22,13 +22,18 @@ interface VersionData {
 const REMOTE_MANIFEST_URL = 'https://download.cypress.io/desktop.json'
 const NPM_CYPRESS_REGISTRY = 'https://registry.npmjs.org/cypress'
 
-type GetLatestVersionOptions = { initialLaunch: boolean, testingType: TestingType | null, currentCypressVersion: string }
-
 export class VersionsDataSource {
-  constructor (private ctx: DataContext) {}
+  private _initialLaunch: boolean
+  private _currentTestingType: TestingType | null
+  private _latestVersion: Promise<string>
+  private _npmMetadata: Promise<Record<string, string>>
 
-  static npmMetadata: undefined | Record<string, string>
-  static initialLaunch: boolean = true
+  constructor (private ctx: DataContext) {
+    this._initialLaunch = true
+    this._currentTestingType = this.ctx.coreData.currentTestingType
+    this._latestVersion = this.getLatestVersion()
+    this._npmMetadata = this.getVersionMetadata()
+  }
 
   /**
    * Returns most recent and current version of Cypress
@@ -46,25 +51,34 @@ export class VersionsDataSource {
    * }
    */
   async versions (): Promise<VersionData> {
-    const currentCypressVersion = pkg.version
-    const latestVersion = await this.getLatestVersion({ initialLaunch: VersionsDataSource.initialLaunch, testingType: this.ctx.coreData.currentTestingType, currentCypressVersion })
+    this.resetLatestVersionTelemetry()
 
-    VersionsDataSource.initialLaunch = false
-    VersionsDataSource.npmMetadata ??= await this.getVersionMetadata()
+    const latestVersion = await this._latestVersion
+    const npmMetadata = await this._npmMetadata
 
     const latestVersionMetadata: Version = {
       id: latestVersion,
       version: latestVersion,
-      released: VersionsDataSource.npmMetadata[latestVersion] ?? new Date().toISOString(),
+      released: npmMetadata[latestVersion] ?? new Date().toISOString(),
     }
+
+    this._initialLaunch = false
 
     return {
       latest: latestVersionMetadata,
       current: {
-        id: currentCypressVersion,
-        version: currentCypressVersion,
-        released: VersionsDataSource.npmMetadata[currentCypressVersion] ?? new Date().toISOString(),
+        id: pkg.version,
+        version: pkg.version,
+        released: npmMetadata[pkg.version] ?? new Date().toISOString(),
       },
+    }
+  }
+
+  resetLatestVersionTelemetry () {
+    if (this.ctx.coreData.currentTestingType !== this._currentTestingType) {
+      debug('resetting latest version telemetry call due to a different testing type')
+      this._currentTestingType = this.ctx.coreData.currentTestingType
+      this._latestVersion = this.getLatestVersion()
     }
   }
 
@@ -77,20 +91,20 @@ export class VersionsDataSource {
     return responseJson.time
   }
 
-  private async getLatestVersion ({ initialLaunch, testingType, currentCypressVersion }: GetLatestVersionOptions): Promise<string> {
+  private async getLatestVersion (): Promise<string> {
     const url = REMOTE_MANIFEST_URL
     const id = await VersionsDataSource.machineId()
 
     const manifestHeaders: HeadersInit = {
       'Content-Type': 'application/json',
-      'x-cypress-version': currentCypressVersion,
+      'x-cypress-version': pkg.version,
       'x-os-name': os.platform(),
       'x-arch': os.arch(),
-      'x-initial-launch': String(initialLaunch),
+      'x-initial-launch': String(this._initialLaunch),
     }
 
-    if (testingType) {
-      manifestHeaders['x-testing-type'] = testingType
+    if (this._currentTestingType) {
+      manifestHeaders['x-testing-type'] = this._currentTestingType || null
     }
 
     if (id) {

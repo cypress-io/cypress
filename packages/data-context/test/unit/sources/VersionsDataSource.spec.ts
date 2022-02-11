@@ -17,6 +17,7 @@ describe('VersionsDataSource', () => {
     let nmiStub: sinon.SinonStub
     let fetchStub: sinon.SinonStub
     let mockNow: Date = new Date()
+    let versionsDataSource: VersionsDataSource
 
     beforeEach(() => {
       ctx = new DataContext({
@@ -84,7 +85,8 @@ describe('VersionsDataSource', () => {
         }),
       })
 
-      const versionInfo = await new VersionsDataSource(ctx).versions()
+      versionsDataSource = new VersionsDataSource(ctx)
+      const versionInfo = await versionsDataSource.versions()
 
       expect(versionInfo).to.eql({
         current: {
@@ -119,14 +121,14 @@ describe('VersionsDataSource', () => {
           name: 'Cypress',
           version: '15.0.0',
         }),
-      })
+      });
 
-      VersionsDataSource.npmMetadata = {
+      (versionsDataSource as any)._npmMetadata = Promise.resolve({
         modified: '2022-01-31T21:14:41.593Z',
         created: '2014-03-09T01:07:35.219Z',
-      }
+      })
 
-      const versionInfo = await new VersionsDataSource(ctx).versions()
+      const versionInfo = await versionsDataSource.versions()
 
       expect(versionInfo).to.eql({
         current: {
