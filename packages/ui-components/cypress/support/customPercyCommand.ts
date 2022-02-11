@@ -1,7 +1,18 @@
 require('@percy/cypress')
 const _ = require('lodash')
 
-const installCustomPercyCommand = ({ before, elementOverrides } = {}) => {
+declare namespace Cypress {
+  interface Chainable<Subject> {
+    percySnapshot(
+      name?: string,
+      options?: SnapshotOptions & {
+        elementOverrides: any
+      }
+    ): Chainable<Subject>
+  }
+}
+
+export const installCustomPercyCommand = ({ before, elementOverrides } = {}) => {
   const customPercySnapshot = (origFn, name, options = {}) => {
     if (_.isObject(name)) {
       options = name
@@ -9,7 +20,10 @@ const installCustomPercyCommand = ({ before, elementOverrides } = {}) => {
     }
 
     const opts = _.defaults({}, options, {
-      elementOverrides,
+      elementOverrides: {
+        ...elementOverrides,
+        ...options.elementOverrides,
+      },
       widths: [Cypress.config().viewportWidth],
     })
 
@@ -65,5 +79,3 @@ const installCustomPercyCommand = ({ before, elementOverrides } = {}) => {
 
   Cypress.Commands.overwrite('percySnapshot', customPercySnapshot)
 }
-
-module.exports = installCustomPercyCommand
