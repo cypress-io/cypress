@@ -20,6 +20,13 @@ export class UtilDataSource {
     return vals.map((v) => v.status === 'fulfilled' ? v.value : this.ensureError(v.reason))
   }
 
+  /**
+   * Utility for a promise delay, in milliseconds
+   */
+  async delayMs (ms: number) {
+    await new Promise((resolve) => setTimeout(resolve, ms))
+  }
+
   assertAbsolute (val: string) {
     if (!this.ctx.path.isAbsolute(val)) {
       throw new Error(`Expected ${val} to be an absolute path`)
