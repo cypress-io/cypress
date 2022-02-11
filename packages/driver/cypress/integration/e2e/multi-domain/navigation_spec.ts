@@ -108,9 +108,10 @@ describe('navigation events', { experimentalSessionSupport: true, experimentalMu
         })
 
         cy.get('a[data-cy="multi-domain-page"]').click()
+        cy.get('a[data-cy="multi-domain-secondary-link').invoke('text').should('equal', 'http://www.foobar.com:3500/fixtures/multi-domain-secondary.html')
         cy.wrap(p)
       }).then(() => {
-        assertLogLength(logs, 15)
+        assertLogLength(logs, 18)
         expect(logs[10].get('name')).to.eq('page load')
         expect(logs[11].get('name')).to.eq('new url')
         expect(logs[11].get('message')).to.eq('http://www.foobar.com:3500/fixtures/multi-domain.html')
