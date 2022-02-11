@@ -99,7 +99,7 @@ export async function initComponentTestingMigration (
     const file = filesToBeMoved.get(unlinkedPath)
 
     if (!file) {
-      throw Error(`Watcher incorrectly triggered while watching ${file}`)
+      throw Error(`Watcher incorrectly triggered while watching ${unlinkedPath}`)
     }
 
     file.moved = true
