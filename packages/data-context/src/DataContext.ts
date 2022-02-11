@@ -79,7 +79,6 @@ export class DataContext {
   private _config: Omit<DataContextConfig, 'modeOptions'>
   private _modeOptions: Readonly<Partial<AllModeOptions>>
   private _coreData: CoreDataShape
-  private _versionsDataSource: VersionsDataSource | undefined
   readonly lifecycleManager: ProjectLifecycleManager
 
   constructor (_config: DataContextConfig) {
