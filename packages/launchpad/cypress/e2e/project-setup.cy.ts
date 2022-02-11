@@ -717,7 +717,7 @@ describe('Launchpad: Setup Project', () => {
         cy.get('[data-cy=valid]').within(() => {
           cy.contains('cypress.config.js')
           cy.containsPath('cypress/component/index.html')
-          cy.contains(`cypress/support/component.js`)
+          cy.containsPath(`cypress/support/component.js`)
           cy.containsPath('cypress/fixtures/example.json')
         })
 
@@ -746,7 +746,7 @@ describe('Launchpad: Setup Project', () => {
         cy.get('[data-cy=valid]').within(() => {
           cy.contains('cypress.config.ts')
           cy.containsPath('cypress/component/index.html')
-          cy.contains(`cypress/support/component.ts`)
+          cy.containsPath(`cypress/support/component.ts`)
           cy.containsPath('cypress/fixtures/example.json')
         })
 
