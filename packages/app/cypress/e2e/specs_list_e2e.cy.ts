@@ -32,13 +32,13 @@ describe('App: Spec List (E2E)', () => {
     cy.get('[data-cy="spec-item"]').should('have.length', 1)
     .should('contain', 'dom-content.spec.js')
 
-    cy.get('button').contains('1 Match')
+    cy.get('button').contains('1 of 3 Matches')
 
     cy.get('input').clear().type('asdf', { force: true })
 
     cy.get('[data-cy="spec-item"]').should('have.length', 0)
 
-    cy.get('button').contains('No Matches')
+    cy.get('button').contains('0 of 3 Matches')
   })
 
   // TODO: find a test project that shows git statuses
