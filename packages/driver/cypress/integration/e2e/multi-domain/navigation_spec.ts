@@ -1,21 +1,21 @@
 import { assertLogLength } from '../../../support/utils'
 
 // @ts-ignore / session support is needed for visiting about:blank between tests
-describe('navigation', { experimentalSessionSupport: true, experimentalMultiDomain: true }, () => {
+describe('navigation events', { experimentalSessionSupport: true, experimentalMultiDomain: true }, () => {
   let logs: any = []
 
-  describe('navigation events', () => {
-    beforeEach(() => {
-      logs = []
+  beforeEach(() => {
+    logs = []
 
-      cy.on('log:added', (attrs, log) => {
-        logs.push(log)
-      })
-
-      cy.visit('/fixtures/multi-domain.html')
-      cy.get('a[data-cy="multi-domain-secondary-link"]').click()
+    cy.on('log:added', (attrs, log) => {
+      logs.push(log)
     })
 
+    cy.visit('/fixtures/multi-domain.html')
+    cy.get('a[data-cy="multi-domain-secondary-link"]').click()
+  })
+
+  describe('navigation:changed', () => {
     it('navigation:changed via hashChange', () => {
       cy.switchToDomain('foobar.com', () => {
         const p = new Promise<void>((resolve) => {
@@ -37,6 +37,28 @@ describe('navigation', { experimentalSessionSupport: true, experimentalMultiDoma
       })
     })
 
+    // TODO: this test should work but there seems to be a problem where the command queue ends prematurely
+    it.skip('navigates forward and back using history', () => {
+      cy.switchToDomain('foobar.com', () => {
+        cy.get('a[data-cy="multi-domain-page"]').click()
+        .window().then((win) => {
+          return new Promise((resolve) => {
+            cy.once('navigation:changed', resolve)
+
+            win.history.back()
+          }).then(() => {
+            return new Promise((resolve) => {
+              cy.once('navigation:changed', resolve)
+
+              win.history.forward()
+            })
+          })
+        })
+      })
+    })
+  })
+
+  describe('window:load', () => {
     it('reloads', () => {
       cy.switchToDomain('foobar.com', () => {
         const p = new Promise<void>((resolve) => {
@@ -47,12 +69,12 @@ describe('navigation', { experimentalSessionSupport: true, experimentalMultiDoma
             expect(win.location.pathname).to.equal('/fixtures/multi-domain-secondary.html')
 
             if (times === 2) {
-              Cypress.removeListener('window:load', listener)
+              cy.removeListener('window:load', listener)
               resolve()
             }
           }
 
-          Cypress.on('window:load', listener)
+          cy.on('window:load', listener)
         })
 
         cy.get('button[data-cy="reload"]').click()
@@ -75,14 +97,14 @@ describe('navigation', { experimentalSessionSupport: true, experimentalMultiDoma
             }
 
             if (times === 2) {
-              Cypress.removeListener('window:load', listener)
+              cy.removeListener('window:load', listener)
               expect(win.location.host).to.equal('www.foobar.com:3500')
               expect(win.location.pathname).to.equal('/fixtures/multi-domain.html')
               resolve()
             }
           }
 
-          Cypress.on('window:load', listener)
+          cy.on('window:load', listener)
         })
 
         cy.get('a[data-cy="multi-domain-page"]').click()
@@ -94,24 +116,45 @@ describe('navigation', { experimentalSessionSupport: true, experimentalMultiDoma
         expect(logs[11].get('message')).to.eq('http://www.foobar.com:3500/fixtures/multi-domain.html')
       })
     })
+  })
 
-    // TODO: this test should work but there seems to be a problem where the command queue ends prematurely
-    it.skip('navigates forward and back using history', () => {
+  describe('url:changed', () => {
+    it('reloads', () => {
       cy.switchToDomain('foobar.com', () => {
-        cy.get('a[data-cy="multi-domain-page"]').click()
-        .window().then((win) => {
-          return new Promise((resolve) => {
-            cy.once('navigation:changed', resolve)
-
-            win.history.back()
-          }).then(() => {
-            return new Promise((resolve) => {
-              cy.once('navigation:changed', resolve)
-
-              win.history.forward()
-            })
+        const p = new Promise<void>((resolve) => {
+          cy.once('url:changed', (url) => {
+            expect(url).to.equal('http://www.foobar.com:3500/fixtures/multi-domain-secondary.html')
+            resolve()
           })
         })
+
+        cy.get('button[data-cy="reload"]').click()
+        cy.wrap(p)
+      })
+    })
+
+    it('navigates to a new page', () => {
+      cy.switchToDomain('foobar.com', () => {
+        const p = new Promise<void>((resolve) => {
+          let times = 0
+          const listener = (url) => {
+            times++
+            if (times === 1) {
+              expect(url).to.equal('http://www.foobar.com:3500/fixtures/multi-domain-secondary.html')
+            }
+
+            if (times === 2) {
+              cy.removeListener('url:changed', listener)
+              expect(url).to.equal('http://www.foobar.com:3500/fixtures/multi-domain.html')
+              resolve()
+            }
+          }
+
+          cy.on('url:changed', listener)
+        })
+
+        cy.get('a[data-cy="multi-domain-page"]').click()
+        cy.wrap(p)
       })
     })
   })
