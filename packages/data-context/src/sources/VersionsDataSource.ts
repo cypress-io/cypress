@@ -84,8 +84,8 @@ export class VersionsDataSource {
     const manifestHeaders: HeadersInit = {
       'Content-Type': 'application/json',
       'x-cypress-version': currentCypressVersion,
-      'x-os-name': await os.platform(),
-      'x-arch': await os.arch(),
+      'x-os-name': os.platform(),
+      'x-arch': os.arch(),
       'x-initial-launch': String(initialLaunch),
     }
 
