@@ -79,6 +79,7 @@ export class DataContext {
   private _config: Omit<DataContextConfig, 'modeOptions'>
   private _modeOptions: Readonly<Partial<AllModeOptions>>
   private _coreData: CoreDataShape
+  private _versionsDataSource: VersionsDataSource | undefined
   readonly lifecycleManager: ProjectLifecycleManager
 
   constructor (_config: DataContextConfig) {
@@ -153,9 +154,13 @@ export class DataContext {
     return new GitDataSource(this)
   }
 
-  @cached
   get versions () {
-    return new VersionsDataSource(this)
+    // Cache versionsDataSource this way so that we can stub it in tests
+    if (!this._versionsDataSource) {
+      this._versionsDataSource = new VersionsDataSource(this)
+    }
+
+    return this._versionsDataSource
   }
 
   @cached
