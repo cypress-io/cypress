@@ -16,7 +16,7 @@ describe('TestingTypePicker', () => {
         }
       },
       render: (gql) => {
-        return <TestingTypePicker gql={gql} onPick={pick} iApp={false}/>
+        return <TestingTypePicker gql={gql} onPick={pick} isApp={false}/>
       },
     })
 
