@@ -261,7 +261,10 @@
     ],
     "nohoist": [
       "**/webpack-preprocessor/babel-loader",
-      "**/webpack-batteries-included-preprocessor/ts-loader"
+      "**/webpack-batteries-included-preprocessor/ts-loader",
+      "**/jest",
+      "**/jest*",
+      "**/expect"
     ]
   },
   "lint-staged": {
