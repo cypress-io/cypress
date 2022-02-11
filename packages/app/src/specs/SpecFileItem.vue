@@ -1,7 +1,6 @@
 <template>
   <div
-    class="flex text-sm py-4px items-center children:group-focus:text-indigo-300"
-    :class="{'children:text-indigo-300': selected }"
+    class="flex text-sm py-4px items-center"
   >
     <DocumentIconBlank
       class="text-base
@@ -13,7 +12,8 @@
     <HighlightedText
       :text="fileName"
       :indexes="indexes.filter((idx) => idx < fileName.length)"
-      class="font-medium pl-8px text-gray-400 whitespace-nowrap "
+      class="font-medium pl-8px whitespace-nowrap"
+      :class="selected ? 'text-white' : 'group-focus:text-indigo-300 text-gray-400 group-hover:text-indigo-300'"
     />
     <HighlightedText
       :text="extension"
