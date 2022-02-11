@@ -289,7 +289,7 @@ export function moveSpecFiles (projectRoot: string, specs: SpecToMove[]) {
   })
 }
 
-export async function cleanupIntegrationFolder (projectRoot: string) {
+export async function cleanUpIntegrationFolder (projectRoot: string) {
   const integrationPath = path.join(projectRoot, 'cypress', 'integration')
 
   try {
