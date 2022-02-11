@@ -207,7 +207,7 @@ describe('lib/plugins/index', () => {
         it('rejects plugins.init', () => {
           return plugins.init({ pluginsFile: 'cypress-plugin' }, getOptions())
           .catch((err) => {
-            expect(stripAnsi(err.message)).to.contain('The function exported by your pluginsFile threw an error')
+            expect(stripAnsi(err.message)).to.contain('Your pluginsFile threw an error from:')
             expect(err.message).to.contain('path/to/pluginsFile.js')
 
             expect(err.details).to.contain('error message stack')
@@ -249,7 +249,7 @@ describe('lib/plugins/index', () => {
         pluginsProcess.on.withArgs('error').yield(err)
         expect(onError).to.be.called
         expect(onError.lastCall.args[0].title).to.equal('Error running plugin')
-        expect(onError.lastCall.args[0].message).to.include('The following error was thrown by your plugins file')
+        expect(stripAnsi(onError.lastCall.args[0].message)).to.include('Your pluginsFile threw an error from:')
 
         expect(onError.lastCall.args[0].details).to.include(err.stack)
       })
@@ -258,7 +258,7 @@ describe('lib/plugins/index', () => {
         ipc.on.withArgs('error').yield(err)
         expect(onError).to.be.called
         expect(onError.lastCall.args[0].title).to.equal('Error running plugin')
-        expect(onError.lastCall.args[0].message).to.include('The following error was thrown by your plugins file')
+        expect(stripAnsi(onError.lastCall.args[0].message)).to.include('Your pluginsFile threw an error from:')
 
         expect(onError.lastCall.args[0].details).to.include(err.stack)
       })
@@ -284,7 +284,7 @@ describe('lib/plugins/index', () => {
         })
         .catch((_err) => {
           expect(_err.title).to.equal('Error running plugin')
-          expect(_err.message).to.include('The following error was thrown by your plugins file')
+          expect(stripAnsi(_err.message)).to.include('Your pluginsFile threw an error from:')
           expect(_err.details).to.include(err.stack)
         })
       })
@@ -296,7 +296,7 @@ describe('lib/plugins/index', () => {
         })
         .catch((_err) => {
           expect(_err.title).to.equal('Error running plugin')
-          expect(_err.message).to.include('The following error was thrown by your plugins file')
+          expect(stripAnsi(_err.message)).to.include('Your pluginsFile threw an error from:')
           expect(_err.details).to.include(err.stack)
         })
       })

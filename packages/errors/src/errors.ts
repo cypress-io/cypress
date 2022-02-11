@@ -624,7 +624,7 @@ export const AllCypressErrors = {
   },
   PLUGINS_FUNCTION_ERROR: (pluginsFilePath: string, err: Error) => {
     return errTemplate`\
-      Your ${fmt.highlight(`pluginsFile`)} function threw an error from: ${fmt.path(pluginsFilePath)}
+      Your ${fmt.highlight(`pluginsFile`)} threw an error from: ${fmt.path(pluginsFilePath)}
 
       ${fmt.stackTrace(err)}`
   },

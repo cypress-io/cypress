@@ -567,14 +567,14 @@ RootSyncError: Root sync error from plugins file
 `
 
 exports['e2e plugins fails when function throws synchronously 1'] = `
-Your pluginsFile function threw an error from: /foo/bar/.projects/plugins-function-sync-error/cypress/plugins/index.js
+Your pluginsFile threw an error from: /foo/bar/.projects/plugins-function-sync-error/cypress/plugins/index.js
 
 FunctionSyncError: Function sync error from plugins file
       [stack trace lines]
 `
 
 exports['e2e plugins fails when invalid event handler is registered 1'] = `
-Your pluginsFile function threw an error from: /foo/bar/.projects/plugin-invalid-event-handler-error/cypress/plugins/index.js
+Your pluginsFile threw an error from: /foo/bar/.projects/plugin-invalid-event-handler-error/cypress/plugins/index.js
 
 InvalidEventHandlerError: The handler for the event \`task\` must be an object
       [stack trace lines]
