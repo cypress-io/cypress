@@ -16,7 +16,7 @@
       <component
         :is="hoverIcon"
         v-if="hoverIcon"
-        class="opacity-0 absolute group-focus-within:opacity-100 group-hover:opacity-100"
+        class="opacity-0 absolute group-focus:opacity-100 group-hover:opacity-100"
         :class="iconClass"
         data-cy="card-icon"
       />
