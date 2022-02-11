@@ -388,6 +388,7 @@ export const AllCypressErrors = {
 
         https://on.cypress.io/how-do-i-record-runs`
   },
+  // TODO: make this relative path, not absolute
   CANNOT_RECORD_NO_PROJECT_ID: (configFilePath: string) => {
     return errTemplate`\
         You passed the ${fmt.flag(`--record`)} flag but this project has not been setup to record.
@@ -490,6 +491,7 @@ export const AllCypressErrors = {
 
         https://on.cypress.io/dashboard`
   },
+  // TODO: make this relative path, not absolute
   NO_PROJECT_ID: (configFilePath: string | false) => {
     return errTemplate`Can't find ${fmt.highlight(`projectId`)} in the config file: ${fmt.path(configFilePath || '')}`
   },
@@ -572,6 +574,7 @@ export const AllCypressErrors = {
   AUTOMATION_SERVER_DISCONNECTED: () => {
     return errTemplate`The automation client disconnected. Cannot continue running tests.`
   },
+  // TODO: make this relative path, not absolute
   SUPPORT_FILE_NOT_FOUND: (supportFilePath: string) => {
     return errTemplate`\
         Your ${fmt.highlight(`supportFile`)} is missing or invalid: ${fmt.path(supportFilePath)}
@@ -584,6 +587,7 @@ export const AllCypressErrors = {
 
         https://on.cypress.io/support-file-missing-or-invalid`
   },
+  // TODO: make this relative path, not absolute
   PLUGINS_FILE_ERROR: (pluginsFilePath: string, err: Error) => {
     return errTemplate`\
         Your ${fmt.highlight(`pluginsFile`)} is invalid: ${fmt.path(pluginsFilePath)}
@@ -593,6 +597,7 @@ export const AllCypressErrors = {
         ${fmt.stackTrace(err)}
       `
   },
+  // TODO: make this relative path, not absolute
   PLUGINS_FILE_NOT_FOUND: (pluginsFilePath: string) => {
     return errTemplate`\
         Your ${fmt.highlight(`pluginsFile`)} was not found at path: ${fmt.path(pluginsFilePath)}
@@ -602,6 +607,7 @@ export const AllCypressErrors = {
         If you have just renamed the extension of your pluginsFile, restart Cypress.
       `
   },
+  // TODO: make this relative path, not absolute
   PLUGINS_DIDNT_EXPORT_FUNCTION: (pluginsFilePath: string, exported: any) => {
     const code = errPartial`
       module.exports = (on, config) => {
@@ -622,6 +628,7 @@ export const AllCypressErrors = {
       https://on.cypress.io/plugins-api
     `
   },
+  // TODO: make this relative path, not absolute
   PLUGINS_FUNCTION_ERROR: (pluginsFilePath: string, err: Error) => {
     return errTemplate`\
       Your ${fmt.highlight(`pluginsFile`)} threw an error from: ${fmt.path(pluginsFilePath)}
@@ -637,7 +644,7 @@ export const AllCypressErrors = {
       ${fmt.stackTrace(arg2)}
     `
   },
-  // NOTE: mention this update in the PR, use in whimsical
+  // TODO: make this relative path, not absolute
   PLUGINS_INVALID_EVENT_NAME_ERROR: (pluginsFilePath: string, invalidEventName: string, validEventNames: string[], err: Error) => {
     return errTemplate`
       Your ${fmt.highlightSecondary(`pluginsFile`)} threw a validation error: ${fmt.path(pluginsFilePath)}
@@ -673,6 +680,7 @@ export const AllCypressErrors = {
       Fix the error in your code and re-run your tests.`
   },
   // happens when there is an error in configuration file like "cypress.json"
+  // TODO: make this relative path, not absolute
   CONFIG_VALIDATION_MSG_ERROR: (fileType: 'configFile' | 'pluginsFile' | null, fileName: string | null, validationMsg: string) => {
     if (!fileType) {
       return errTemplate`
@@ -686,6 +694,7 @@ export const AllCypressErrors = {
 
       ${fmt.highlight(validationMsg)}`
   },
+  // TODO: make this relative path, not absolute
   CONFIG_VALIDATION_ERROR: (fileType: 'configFile' | 'pluginsFile' | null, filePath: string | null, validationResult: ConfigValidationError) => {
     const { key, type, value, list } = validationResult
 
@@ -768,7 +777,7 @@ export const AllCypressErrors = {
         ${fmt.stackTrace(arg1.error)}
         `
   },
-  // TODO: test this out
+  // TODO: manually test this
   NO_DEFAULT_CONFIG_FILE_FOUND: (arg1: string) => {
     return errTemplate`\
         Could not find a Cypress configuration file in this folder: ${fmt.path(arg1)}`
@@ -1028,6 +1037,7 @@ export const AllCypressErrors = {
         You can safely remove this option from your config.`
   },
   // TODO: verify configFile is absolute path
+  // TODO: make this relative path, not absolute
   EXPERIMENTAL_COMPONENT_TESTING_REMOVED: (arg1: {configFile: string}) => {
     return errTemplate`\
         The ${fmt.highlight('experimentalComponentTesting')} configuration option was removed in ${fmt.cypressVersion(`7.0.0`)}.
@@ -1066,6 +1076,7 @@ export const AllCypressErrors = {
 
         You can safely remove this option from your config.`
   },
+  // TODO: make this relative path, not absolute
   INCOMPATIBLE_PLUGIN_RETRIES: (arg1: string) => {
     return errTemplate`\
       We've detected that the incompatible plugin ${fmt.highlight(`cypress-plugin-retries`)} is installed at: ${fmt.path(arg1)}
