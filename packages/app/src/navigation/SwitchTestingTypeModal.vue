@@ -10,6 +10,7 @@
   >
     <TestingTypePicker
       :gql="props.gql"
+      :is-app="true"
       @pick="handleTestingType"
     />
   </StandardModal>
