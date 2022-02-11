@@ -365,7 +365,8 @@ export const mutation = mutationType({
       type: 'Boolean',
       description: 'show the launchpad windows',
       resolve: async (_, args, ctx) => {
-        await ctx.actions.project.reconfigureProject(true)
+        ctx.actions.project.setForceReconfigureProjectByTestingType({ forceReconfigureProject: true })
+        await ctx.actions.project.reconfigureProject()
 
         return true
       },
@@ -591,6 +592,25 @@ export const mutation = mutationType({
         ctx.project.setRelaunchBrowser(true)
         ctx.actions.project.setCurrentTestingType(args.testingType)
         await ctx.actions.project.reconfigureProject()
+
+        return true
+      },
+    })
+
+    t.field('setTestingTypeAndReconfigureProject', {
+      description: 'Set the selected testing type, and reconfigure the project',
+      type: Query,
+      args: {
+        testingType: nonNull(arg({ type: TestingTypeEnum })),
+        isApp: nonNull(booleanArg()),
+      },
+      resolve: async (source, args, ctx) => {
+        ctx.actions.project.setForceReconfigureProjectByTestingType({ forceReconfigureProject: true, testingType: args.testingType })
+        ctx.actions.project.setCurrentTestingType(args.testingType)
+
+        if (args.isApp) {
+          await ctx.actions.project.reconfigureProject()
+        }
 
         return true
       },

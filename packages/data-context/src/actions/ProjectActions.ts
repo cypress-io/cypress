@@ -44,6 +44,11 @@ type SetSpecsFoundBySpecPattern = {
   additionalIgnorePattern?: string | string[]
 }
 
+type SetForceReconfigureProjectByTestingType = {
+  forceReconfigureProject: boolean
+  testingType?: TestingType
+}
+
 export class ProjectActions {
   constructor (private ctx: DataContext) {}
 
@@ -469,18 +474,22 @@ export class ProjectActions {
     return { specs, specPattern, excludeSpecPattern, additionalIgnorePattern }
   }
 
-  async reconfigureProject (forceReconfigureProject?: boolean) {
-    // Initialize active project close first the current project
-    if (this.ctx.coreData.currentTestingType) {
-      const currentTestingType = this.ctx.coreData.currentTestingType
+  setForceReconfigureProjectByTestingType ({ forceReconfigureProject, testingType }: SetForceReconfigureProjectByTestingType) {
+    const testingTypeToReconfigure = testingType ?? this.ctx.coreData.currentTestingType
 
-      this.ctx.update((coreData) => {
-        coreData.forceReconfigureProject = {
-          [currentTestingType]: Boolean(forceReconfigureProject),
-        }
-      })
+    if (!testingTypeToReconfigure) {
+      return
     }
 
+    this.ctx.update((coreData) => {
+      coreData.forceReconfigureProject = {
+        ...coreData.forceReconfigureProject,
+        [testingTypeToReconfigure]: forceReconfigureProject,
+      }
+    })
+  }
+
+  async reconfigureProject () {
     await this.ctx.actions.browser.closeBrowser()
     this.ctx.actions.wizard.resetWizard()
     this.ctx.actions.electron.refreshBrowserWindow()

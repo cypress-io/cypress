@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import _ from 'lodash'
 import Promise from 'bluebird'
 import { basename } from 'path'
@@ -44,7 +42,7 @@ export default (Commands, Cypress, cy, state, config) => {
         return Promise.resolve(clone(resp))
       }
 
-      let options = {}
+      let options: Record<string, any> = {}
 
       if (_.isObject(args[0])) {
         options = args[0]

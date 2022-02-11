@@ -4,6 +4,7 @@
       v-model="search"
       class="pb-32px"
       :result-count="specs.length"
+      :spec-count="cachedSpecs.length"
       @show-create-spec-modal="emit('showCreateSpecModal')"
       @show-spec-pattern-modal="showSpecPatternModal = true"
     />
@@ -64,7 +65,7 @@
                 :file-name="row.data.data?.fileName || row.data.name"
                 :extension="row.data.data?.specFileExtension || ''"
                 :indexes="row.data.data?.fileIndexes"
-                :style="{ paddingLeft: `${((row.data.depth - 2) * 10) + 16 + 22}px` }"
+                :style="{ paddingLeft: `${((row.data.depth - 2) * 10) + 22}px` }"
               />
             </RouterLink>
 
@@ -73,7 +74,7 @@
               :name="row.data.name"
               :expanded="treeSpecList[row.index].expanded.value"
               :depth="row.data.depth - 2"
-              :style="{ paddingLeft: `${((row.data.depth - 2) * 10) + 16}px` }"
+              :style="{ paddingLeft: `${(row.data.depth - 2) * 10}px` }"
               :indexes="getDirIndexes(row.data)"
               :aria-controls="getIdIfDirectory(row)"
               @click="row.data.toggle"
