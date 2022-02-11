@@ -58,7 +58,8 @@ describe('lib/util/settings', () => {
         return settings.readEnv(projectRoot)
         .catch((err) => {
           expect(err.type).to.eq('ERROR_READING_FILE')
-          expect(err.message).to.include('SyntaxError')
+          expect(err.stack).to.include('SyntaxError')
+          expect(err.originalError.name).to.equal('SyntaxError')
 
           expect(err.message).to.include(projectRoot)
         })

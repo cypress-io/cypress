@@ -13,7 +13,7 @@ describe('e2e specs', () => {
 
   it('failing when no spec pattern found', function () {
     return systemTests.exec(this, {
-      spec: 'cypress/integration/**notfound**',
+      spec: 'does/not/exist/**notfound**',
       snapshot: true,
       expectedExitCode: 1,
     })

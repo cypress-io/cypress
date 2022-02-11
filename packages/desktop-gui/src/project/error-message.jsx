@@ -9,7 +9,7 @@ import Markdown from 'markdown-it'
 
 const _copyErrorDetails = (err) => {
   let details = [
-    `**Message:** ${err.message}`,
+    `**Message:** ${err.messageMarkdown || err.message}`,
   ]
 
   if (err.details) {
@@ -33,14 +33,14 @@ const md = new Markdown({
 })
 
 const ErrorDetails = observer(({ err }) => {
-  let details = _.clone(err.details).split('\n')
+  let details = _.clone(err.stack).split('\n')
   const detailsTitle = details.shift()
   const detailsBody = details.join('\n')
 
   if (detailsBody) {
     return (
       <pre>
-        <details className='details-body'>
+        <details className='details-body' open={!err.isCypressErr}>
           <summary>{detailsTitle}</summary>
           {detailsBody}
         </details>
@@ -85,10 +85,10 @@ class ErrorMessage extends Component {
           </p>
           <span className='alert-content'>
             <div ref={(node) => this.errorMessageNode = node} dangerouslySetInnerHTML={{
-              __html: md.render(err.message),
+              __html: md.render(err.messageMarkdown || err.message),
             }}></div>
-            {err.details && (
-              <ErrorDetails err={err} />
+            {err.originalError && (
+              <ErrorDetails err={err.originalError} />
             )}
             {err.portInUse && (
               <div>
@@ -96,7 +96,7 @@ class ErrorMessage extends Component {
                 <p>To fix, stop the other running process or change the port in {configFileFormatted(this.props.project.configFile)}</p>
               </div>
             )}
-            {err.stack2 && (
+            {!err.originalError && err.stack2 && (
               <details className='stacktrace'>
                 <summary>Stack trace</summary>
                 <pre>{err.stack2}</pre>

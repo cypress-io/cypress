@@ -101,6 +101,8 @@ if (options.fgrep) {
   )
 }
 
+const configFilePath = path.join(__dirname, 'mocha-reporter-config.json')
+
 commandAndArguments.args.push(
   '--timeout',
   options['inspect-brk'] ? '40000000' : '10000',
@@ -109,7 +111,7 @@ commandAndArguments.args.push(
   '--reporter',
   'mocha-multi-reporters',
   '--reporter-options',
-  'configFile=../../system-tests/scripts/mocha-reporter-config.json',
+  `configFile=${configFilePath}`,
   '--extension=js,ts',
   // restore mocha 2.x behavior to force end process after spec run
   '--exit',
@@ -158,6 +160,7 @@ if (options['cypress-inspect-brk']) {
 const cmd = `${commandAndArguments.command} ${
   commandAndArguments.args.join(' ')}`
 
+console.log('cwd:', process.cwd())
 console.log('specfiles:', run)
 console.log('test command:')
 console.log(cmd)

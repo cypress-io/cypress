@@ -18,7 +18,7 @@ exports['e2e plugins fails when spec does not exist 1'] = `
 
 Oops...we found an error preparing this test file:
 
-  cypress/integration/spec.js
+  > cypress/integration/spec.js
 
 The error was:
 

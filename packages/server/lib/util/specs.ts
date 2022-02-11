@@ -22,9 +22,9 @@ const SPEC_TYPES = {
   COMPONENT: 'component',
 } as const
 
-const getPatternRelativeToProjectRoot = (specPattern: string, projectRoot: string) => {
+const getPatternRelativeToPath = (specPattern: string, relativePath: string) => {
   return _.map(specPattern, (p) => {
-    return path.relative(projectRoot, p)
+    return path.relative(relativePath, p)
   })
 }
 
@@ -240,5 +240,5 @@ const findSpecs = (payload: FindSpecs, specPattern?: string) => {
 export default {
   findSpecs,
   findSpecsOfType,
-  getPatternRelativeToProjectRoot,
+  getPatternRelativeToPath,
 }

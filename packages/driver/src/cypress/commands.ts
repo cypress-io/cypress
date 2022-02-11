@@ -1,10 +1,8 @@
 import _ from 'lodash'
-
-import $errUtils from './error_utils'
-import $stackUtils from './stack_utils'
-
 import { allCommands } from '../cy/commands'
 import { addCommand } from '../cy/net-stubbing'
+import $errUtils from './error_utils'
+import $stackUtils from './stack_utils'
 
 const builtInCommands = [
   // `default` is necessary if a file uses `export default` syntax.
@@ -140,7 +138,7 @@ export default {
             errProps: {
               appendToStack: {
                 title: 'From Cypress Internals',
-                content: $stackUtils.stackWithoutMessage((new Error('add command internal stack')).stack),
+                content: $stackUtils.stackWithoutMessage((new Error('add command internal stack')).stack || ''),
               } },
           })
         }
