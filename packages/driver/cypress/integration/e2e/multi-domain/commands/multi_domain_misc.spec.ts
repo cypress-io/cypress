@@ -13,7 +13,7 @@ context('multi-domain misc', { experimentalSessionSupport: true, experimentalMul
         'selectFile', 'submit', 'type', 'clear', 'trigger', 'as', 'ng', 'should', 'and', 'clock', 'tick', 'spread', 'each', 'then',
         'invoke', 'its', 'getCookie', 'getCookies', 'setCookie', 'clearCookie', 'clearCookies', 'pause', 'debug', 'exec', 'readFile',
         'writeFile', 'fixture', 'clearLocalStorage', 'url', 'hash', 'location', 'end', 'noop', 'log', 'wrap', 'reload', 'go', 'visit',
-        'focused', 'get', 'root', 'contains', 'within', 'shadow', 'request', 'session', 'screenshot', 'task', 'find', 'filter', 'not',
+        'focused', 'get', 'root', 'contains', 'shadow', 'within', 'request', 'session', 'screenshot', 'task', 'find', 'filter', 'not',
         'children', 'eq', 'closest', 'first', 'last', 'next', 'nextAll', 'nextUntil', 'parent', 'parents', 'parentsUntil', 'prev',
         'prevAll', 'prevUntil', 'siblings', 'wait', 'title', 'window', 'document', 'viewport', 'server', 'route', 'intercept', 'switchToDomain',
       ],
@@ -36,13 +36,6 @@ context('multi-domain misc', { experimentalSessionSupport: true, experimentalMul
   it('.focused()', () => {
     cy.switchToDomain('foobar.com', () => {
       cy.get('#button').click().focused().should('have.id', 'button')
-    })
-  })
-
-  // FIXME: hanging, nothing in console
-  it.skip('.screenshot()', () => {
-    cy.switchToDomain('foobar.com', () => {
-      cy.screenshot('multi-domain-screenshot-command')
     })
   })
 

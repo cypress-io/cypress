@@ -29,29 +29,27 @@ export const handleDomainFn = (cy: $Cy, specBridgeCommunicator: SpecBridgeDomain
     cy.state('nestedIndex', null)
   }
 
-  const reset = () => {
+  const reset = (state) => {
     cy.reset({})
 
-    const runnable = {
-      ctx: {},
-      clearTimeout () {},
-      resetTimeout () {},
-      timeout () {},
-      isPending () {},
+    const stateUpdates = {
+      ...state,
+      redirectionCount, {}, // This is fine to set to an empty object, we want to refresh this count on each switchToDomain command.
+      runnable: {
+        ...state.runnable,
+        clearTimeout () {},
+        resetTimeout () {},
+        timeout () {},
+        isPending () {},
+      },
     }
 
-    cy.state('runnable', runnable)
     // Set the state ctx to the runnable ctx to ensure they remain in sync
-    cy.state('ctx', runnable.ctx)
-
-    // This should by synced down from the primary domain
-    cy.state('duringUserTestExecution', true)
-    // This is fine to set to an empty object, we want to refresh this count on each switchToDomain command.
-    cy.state('redirectionCount', {})
+    cy.state('ctx', cy.state('runnable').ctx)
   }
 
-  specBridgeCommunicator.on('run:domain:fn', async ({ data, fn, isDoneFnAvailable = false }: { data: any[], fn: string, isDoneFnAvailable: boolean }) => {
-    reset()
+  specBridgeCommunicator.on('run:domain:fn', async ({ data, fn, state, isDoneFnAvailable = false }: { data: any[], fn: string, isDoneFnAvailable: boolean, state: {}}) => {
+    reset(state)
 
     let fnWrapper = `(${fn})`
 
@@ -63,7 +61,7 @@ export const handleDomainFn = (cy: $Cy, specBridgeCommunicator: SpecBridgeDomain
         doneEarly()
 
         // signal to the primary domain that done has been called and to signal that the command queue is finished in the secondary domain
-        specBridgeCommunicator.toPrimary('done:called', err)
+        specBridgeCommunicator.toPrimaryError('done:called', { err })
         specBridgeCommunicator.toPrimary('queue:finished')
 
         return null
@@ -85,7 +83,7 @@ export const handleDomainFn = (cy: $Cy, specBridgeCommunicator: SpecBridgeDomain
 
       // If there isn't a current command, just reject to fail the test
       if (!command) {
-        return specBridgeCommunicator.toPrimary('reject', { err })
+        return specBridgeCommunicator.toPrimaryError('reject', { err })
       }
 
       const id = command.get('id')

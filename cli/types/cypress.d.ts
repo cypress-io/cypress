@@ -1911,7 +1911,7 @@ declare namespace Cypress {
      *      cy.get('h1').should('equal', 'Example Domain')
      *    })
      */
-    switchToDomain(domain: string, fn: () => void): Chainable<undefined>
+    switchToDomain(domain: string, fn: () => void): Chainable
     /**
      * Enables running Cypress commands in a secondary domain
      * @see https://on.cypress.io/switchToDomain
@@ -1921,7 +1921,7 @@ declare namespace Cypress {
      *      expect(foo).to.equal('foo')
      *    })
      */
-    switchToDomain<T>(domain: string, data: T[], fn: (data: T[]) => void): Chainable<undefined>
+    switchToDomain<T>(domain: string, data: T[], fn: (data: T[]) => void): Chainable
     /**
      * Enables running Cypress commands in a secondary domain
      * @see https://on.cypress.io/switchToDomain
@@ -1930,7 +1930,7 @@ declare namespace Cypress {
      *      done()
      *    })
      */
-    switchToDomain(domain: string, done: Mocha.Done, fn: () => void): Chainable<undefined>
+    switchToDomain(domain: string, done: Mocha.Done, fn: () => void): Chainable
     /**
      * Enables running Cypress commands in a secondary domain
      * @see https://on.cypress.io/switchToDomain
@@ -1941,7 +1941,7 @@ declare namespace Cypress {
      *      done()
      *    })
      */
-    switchToDomain<T>(domain: string, done: Mocha.Done, data: T[], fn: (data: T[]) => void): Chainable<undefined>
+    switchToDomain<T>(domain: string, done: Mocha.Done, data: T[], fn: (data: T[]) => void): Chainable
 
     /**
      * Run a task in Node via the plugins file.
