@@ -1,4 +1,3 @@
-// @ts-nocheck
 import _ from 'lodash'
 import Promise from 'bluebird'
 
@@ -7,7 +6,7 @@ import $utils from '../../../cypress/utils'
 import $errUtils from '../../../cypress/error_utils'
 import $elements from '../../../dom/elements'
 
-const checkOrUncheck = (Cypress, cy, type, subject, values = [], userOptions = {}) => {
+const checkOrUncheck = (Cypress, cy, type, subject, values: any[] = [], userOptions = {}) => {
   // we're not handling conversion of values to strings
   // in case we've received numbers
 
@@ -18,15 +17,15 @@ const checkOrUncheck = (Cypress, cy, type, subject, values = [], userOptions = {
     values = []
   } else {
     // make sure we're an array of values
-    values = [].concat(values)
+    values = ([] as any[]).concat(values)
   }
 
   // keep an array of subjects which
   // are potentially reduced down
   // to new filtered subjects
-  const matchingElements = []
+  const matchingElements: HTMLElement[] = []
 
-  const options = _.defaults({}, userOptions, {
+  const options: Record<string, any> = _.defaults({}, userOptions, {
     $el: subject,
     log: true,
     force: false,
@@ -75,7 +74,7 @@ const checkOrUncheck = (Cypress, cy, type, subject, values = [], userOptions = {
       matchingElements.push(el)
     }
 
-    const consoleProps = {
+    const consoleProps: Record<string, any> = {
       'Applied To': $dom.getElements($el),
       'Elements': $el.length,
     }

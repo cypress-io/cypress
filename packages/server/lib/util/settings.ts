@@ -1,11 +1,10 @@
-import _ from 'lodash'
 import Promise from 'bluebird'
+import Debug from 'debug'
+import _ from 'lodash'
 import path from 'path'
-
 import errors from '../errors'
 import { fs } from '../util/fs'
 import { requireAsync } from './require_async'
-import Debug from 'debug'
 
 const debug = Debug('cypress:server:settings')
 
@@ -72,7 +71,8 @@ const renameSupportFolder = (obj) => {
 }
 
 function _pathToFile (projectRoot, file) {
-  return path.isAbsolute(file) ? file : path.join(projectRoot, file)
+  return path.resolve(projectRoot, file)
+  // return path.isAbsolute(file) ? file : path.join(projectRoot, file)
 }
 
 function _err (type, file, err) {
@@ -130,8 +130,12 @@ export function configFile (options: SettingsOptions = {}) {
   return options.configFile === false ? false : (options.configFile || 'cypress.json')
 }
 
-export function id (projectRoot, options = {}) {
+export function id (projectRoot, options: SettingsOptions = {}) {
   const file = pathToConfigFile(projectRoot, options)
+
+  if (!file) {
+    return Promise.resolve(null)
+  }
 
   return fs.readJson(file)
   .then((config) => config.projectId)
@@ -141,11 +145,11 @@ export function id (projectRoot, options = {}) {
 }
 
 export function read (projectRoot, options: SettingsOptions = {}) {
-  if (options.configFile === false) {
+  const file = pathToConfigFile(projectRoot, options)
+
+  if (!file) {
     return Promise.resolve({})
   }
-
-  const file = pathToConfigFile(projectRoot, options)
 
   const readPromise = /\.json$/.test(file) ? fs.readJSON(path.resolve(projectRoot, file)) : requireAsync(file, {
     projectRoot,
@@ -156,7 +160,7 @@ export function read (projectRoot, options: SettingsOptions = {}) {
   .catch((err) => {
     if (err.type === 'MODULE_NOT_FOUND' || err.code === 'ENOENT') {
       if (options.args?.runProject) {
-        return Promise.reject(errors.get('CONFIG_FILE_NOT_FOUND', options.configFile, projectRoot))
+        return Promise.reject(errors.get('CONFIG_FILE_NOT_FOUND', options.configFile || '', projectRoot))
       }
 
       return _write(file, {})

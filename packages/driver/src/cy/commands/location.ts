@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import _ from 'lodash'
 import Promise from 'bluebird'
 
@@ -8,7 +6,8 @@ const { throwErrByPath } = $errUtils
 
 export default (Commands, Cypress, cy) => {
   Commands.addAll({
-    url (options = {}) {
+    // TODO: change the type of `any` to `Partial<Cypress.UrlOptions>`
+    url (options: any = {}) {
       const userOptions = options
 
       options = _.defaults({}, userOptions, { log: true })
@@ -39,7 +38,8 @@ export default (Commands, Cypress, cy) => {
       return resolveHref()
     },
 
-    hash (options = {}) {
+    // TODO: change the type of `any` to `Partial<Cypress.Loggable & Cypress.Timeoutable>`
+    hash (options: any = {}) {
       const userOptions = options
 
       options = _.defaults({}, userOptions, { log: true })

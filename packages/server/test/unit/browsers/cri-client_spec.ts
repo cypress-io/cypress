@@ -1,6 +1,7 @@
 import Bluebird from 'bluebird'
-import { create } from '../../../lib/browsers/cri-client'
+import chalk from 'chalk'
 import EventEmitter from 'events'
+import { create } from '../../../lib/browsers/cri-client'
 
 const { expect, proxyquire, sinon } = require('../../spec_helper')
 
@@ -113,12 +114,12 @@ describe('lib/browsers/cri-client', function () {
         .rejects()
 
         return expect(withProtocolVersion(null, '1.3')).to.be
-        .rejectedWith('A minimum CDP version of v1.3 is required, but the current browser has an older version.')
+        .rejectedWith(`A minimum CDP version of ${chalk.yellow(`1.3`)} is required, but the current browser has an older version.`)
       })
 
       it('rejects if protocolVersion < current', function () {
         return expect(withProtocolVersion('1.2', '1.3')).to.be
-        .rejectedWith('A minimum CDP version of v1.3 is required, but the current browser has v1.2.')
+        .rejectedWith(`A minimum CDP version of ${chalk.yellow(`1.3`)} is required, but the current browser has ${chalk.yellow(`1.2`)}.`)
       })
     })
   })

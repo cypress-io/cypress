@@ -15,7 +15,6 @@ const getUploadUrl = function () {
   const url = konfig('cdn_url')
 
   la(check.url(url), 'could not get CDN url', url)
-  console.log('upload url', url)
 
   return url
 }

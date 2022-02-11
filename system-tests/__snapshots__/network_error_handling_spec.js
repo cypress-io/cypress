@@ -3,7 +3,7 @@ Cypress could not verify that this server is running:
 
   > http://never-gonna-exist.invalid
 
-We are verifying this server because it has been configured as your \`baseUrl\`.
+We are verifying this server because it has been configured as your baseUrl.
 
 Cypress automatically waits until your server is accessible before running tests.
 
