@@ -38,7 +38,7 @@ describe('App: Spec List (E2E)', () => {
 
     cy.get('[data-cy="spec-item"]').should('have.length', 0)
 
-    cy.get('button').contains('0 Matches')
+    cy.get('button').contains('No Matches')
   })
 
   // TODO: find a test project that shows git statuses
