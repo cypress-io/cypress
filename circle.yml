@@ -2159,6 +2159,7 @@ jobs:
     steps:
       - test-binary-against-repo-folder:
           repo: cypress-component-testing-examples
+          testingType: component
           browser: chrome
           folder: "vue-cli-2"
           command: "npx cypress run --component"
@@ -2168,6 +2169,7 @@ jobs:
     steps:
       - test-binary-against-repo-folder:
           repo: cypress-component-testing-examples
+          testingType: component
           browser: firefox
           folder: "vue-cli-2"
           command: "npx cypress run --component"
@@ -2177,6 +2179,7 @@ jobs:
     steps:
       - test-binary-against-repo-folder:
           repo: cypress-component-testing-examples
+          testingType: component
           browser: chrome
           folder: "vue-cli-2-quasar-ui"
           pull_request_id: 87
@@ -2187,6 +2190,7 @@ jobs:
     steps:
       - test-binary-against-repo-folder:
           repo: cypress-component-testing-examples
+          testingType: component
           browser: chrome
           folder: "create-react-app-ant-design"
           pull_request_id: 85
@@ -2197,6 +2201,7 @@ jobs:
     steps:
       - test-binary-against-repo-folder:
           repo: cypress-component-testing-examples
+          testingType: component
           browser: chrome
           folder: "create-react-app-react-bootstrap"
           pull_request_id: 84
@@ -2218,6 +2223,7 @@ jobs:
     steps:
       - test-binary-against-repo-folder:
           repo: cypress-component-testing-examples
+          testingType: component
           browser: chrome
           folder: "create-react-app-tailwind"
           pull_request_id: 79
