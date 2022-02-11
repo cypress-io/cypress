@@ -29,10 +29,16 @@ describe('Error handling', () => {
   it('it handles a configuration file error', () => {
     cy.scaffoldProject('pristine')
 
+    // sets the current project to enable writeFileInProject
     cy.openProject('pristine')
+
+    // write a bad config file
     cy.withCtx(async (ctx) => {
       await ctx.actions.file.writeFileInProject('cypress.config.js', 'throw new Error("Error thrown from Config")')
     })
+
+    // reopens the project with the new config file (CircleCI does not react to the addition of a file)
+    cy.openProject('pristine')
 
     cy.visitLaunchpad()
 
