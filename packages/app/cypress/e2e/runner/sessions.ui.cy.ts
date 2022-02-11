@@ -16,7 +16,15 @@ describe('sessions ui', {
     cy.get('.sessions-container').click()
     .should('contain', 'blank_session')
 
-    cy.percySnapshot()
+    // cy.viewport(600, 600)
+
+    cy.percySnapshot({
+      width: 320,
+      elementOverrides: {
+        '[data-cy=aut-panel]': true,
+        '[data-cy=sidebar]': 'displayNone',
+      },
+    })
   })
 
   it('shows message for new, saved, and recreated session', () => {

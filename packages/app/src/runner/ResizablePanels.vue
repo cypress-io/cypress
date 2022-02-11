@@ -37,6 +37,7 @@
     </div>
 
     <div
+      data-cy="aut-panel"
       class="flex-grow h-full relative"
       :class="{'pointer-events-none':panel2IsDragging}"
       :style="{

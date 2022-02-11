@@ -1,15 +1,18 @@
-import { configure } from '@testing-library/cypress'
 import '@testing-library/cypress/add-commands'
+import { browsers } from '@packages/types/src/browser'
+import {
+  installCustomPercyCommand,
+} from '@packages/ui-components/cypress/support/customPercyCommand'
+import { configure } from '@testing-library/cypress'
 import i18n from '../../../src/locales/en-US.json'
-import type { DataContext } from '@packages/data-context'
+import { addNetworkCommands } from '../../support/onlineNetwork'
 import { e2eProjectDirs } from './e2eProjectDirs'
+
+import type { DataContext } from '@packages/data-context'
 import type { AuthenticatedUserShape } from '@packages/data-context/src/data'
 import type { DocumentNode, ExecutionResult } from 'graphql'
 import type { Browser, FoundBrowser, OpenModeOptions } from '@packages/types'
-import { browsers } from '@packages/types/src/browser'
 import type { E2ETaskMap } from '../e2ePluginSetup'
-import installCustomPercyCommand from '@packages/ui-components/cypress/support/customPercyCommand'
-import { addNetworkCommands } from '../../support/onlineNetwork'
 import type { SinonStub } from 'sinon'
 import type sinon from 'sinon'
 import type pDefer from 'p-defer'
@@ -222,10 +225,10 @@ function openProject (projectName: ProjectFixture, argv: string[] = []) {
 }
 
 function startAppServer (mode: 'component' | 'e2e' = 'e2e') {
-  const browser = Cypress.browser.name
+  const { name, family } = Cypress.browser
 
-  if (browser !== 'chrome') {
-    throw new Error(`Cypress in cypress does not support running in the ${browser} browser`)
+  if (family !== 'chromium' || name === 'electron') {
+    throw new Error(`Cypress in cypress does not support running in the ${name} browser`)
   }
 
   return logInternal('startAppServer', (log) => {

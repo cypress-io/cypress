@@ -1,16 +1,16 @@
 require('@percy/cypress')
 const _ = require('lodash')
 
-declare namespace Cypress {
-  interface Chainable<Subject> {
-    percySnapshot(
-      name?: string,
-      options?: SnapshotOptions & {
-        elementOverrides: any
-      }
-    ): Chainable<Subject>
-  }
-}
+// declare namespace Cypress {
+//   interface Chainable<Subject> {
+//     percySnapshot(
+//       name?: string,
+//       options?: SnapshotOptions & {
+//         elementOverrides: any
+//       }
+//     ): Chainable<Subject>
+//   }
+// }
 
 export const installCustomPercyCommand = ({ before, elementOverrides } = {}) => {
   const customPercySnapshot = (origFn, name, options = {}) => {
@@ -19,13 +19,15 @@ export const installCustomPercyCommand = ({ before, elementOverrides } = {}) => 
       name = null
     }
 
-    const opts = _.defaults({}, options, {
+    const { viewportWidth, viewportHeight } = cy.state()
+
+    const opts = {
+      width: options.width || viewportWidth,
       elementOverrides: {
         ...elementOverrides,
         ...options.elementOverrides,
       },
-      widths: [Cypress.config().viewportWidth],
-    })
+    }
 
     /**
      * @type {Mocha.Test}
@@ -46,13 +48,34 @@ export const installCustomPercyCommand = ({ before, elementOverrides } = {}) => 
         return
       }
 
+      if (v === 'displayNone') {
+        $el.attr('style', 'display: none !important')
+
+        return
+      }
+
       $el.css({ visibility: 'hidden' })
     })
+
+    if (options.width) {
+      cy.viewport(options.width, viewportHeight)
+    }
 
     // if we're in interactive mode via (cypress open)
     // then bail immediately
     if (Cypress.config().isInteractive) {
-      return cy.log('percy: skipping snapshot in interactive mode')
+      // const log = Cypress.log('...')
+
+      // log.snapshot('before', { next: 'after'})
+      cy.log('percy: skipping snapshot in interactive mode')
+    }
+
+    if (options.width) {
+      cy.viewport(viewportWidth, viewportHeight)
+    }
+
+    if (Cypress.config().isInteractive) {
+      return
     }
 
     if (_.isFunction(before)) {
@@ -67,12 +90,15 @@ export const installCustomPercyCommand = ({ before, elementOverrides } = {}) => 
     Cypress.config('defaultCommandTimeout', 10000)
 
     origFn(screenshotName, {
-      widths: opts.widths,
+      widths: [],
     })
 
     cy.then(() => {
       Cypress.config('defaultCommandTimeout', _backupTimeout)
     })
+
+    // restore dom
+    // log.snapshot()
 
     return
   }
