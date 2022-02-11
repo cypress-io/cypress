@@ -20,6 +20,7 @@ import {
   getComponentTestFilesGlobs,
   getComponentFolder,
 } from './migration'
+
 import type { FilePart } from './migration/format'
 import Debug from 'debug'
 

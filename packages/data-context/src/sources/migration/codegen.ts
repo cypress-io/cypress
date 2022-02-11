@@ -11,7 +11,7 @@ import type { TestingType } from '@packages/types'
 import prettier from 'prettier'
 import type { MigrationFile } from '..'
 import Debug from 'debug'
-import { platform } from 'os'
+import { toPosix } from '../../util'
 
 const debug = Debug('cypress:data-context:sources:migration:codegen')
 
@@ -97,11 +97,11 @@ export async function initComponentTestingMigration (
   }, new Map())
 
   watcher.on('unlink', (unlinkedPath) => {
-    const normalizedUnlinkedPath = platform() === 'win32' ? unlinkedPath.replace(/\\/g, '/') : unlinkedPath
-    const file = filesToBeMoved.get(normalizedUnlinkedPath)
+    const posixUnlinkedPath = toPosix(unlinkedPath)
+    const file = filesToBeMoved.get(posixUnlinkedPath)
 
     if (!file) {
-      throw Error(`Watcher incorrectly triggered ${normalizedUnlinkedPath}\nwhile watching ${Array.from(filesToBeMoved.keys()).join(', ')}`)
+      throw Error(`Watcher incorrectly triggered ${posixUnlinkedPath}\nwhile watching ${Array.from(filesToBeMoved.keys()).join(', ')}`)
     }
 
     file.moved = true

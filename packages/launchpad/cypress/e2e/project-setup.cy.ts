@@ -705,12 +705,7 @@ describe('Launchpad: Setup Project', () => {
 
                 cy.findByRole('button', { name: 'Continue' }).click()
 
-                // FIXME: remove if-check once this is fixed. https://cypress-io.atlassian.net/browse/UNIFY-980
-                if (lang.type !== 'ts') {
-                  cy.get('[data-cy=changes]').within(() => {
-                    cy.contains('cypress.config.js')
-                  })
-                }
+                cy.contains('[data-cy=changes]', `cypress.config.${lang.type}`)
 
                 cy.get('[data-cy=valid]').within(() => {
                   cy.containsPath('cypress/component/index.html')
