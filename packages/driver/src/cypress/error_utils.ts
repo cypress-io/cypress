@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 // See: ./errorScenarios.md for details about error messages and stack traces
 
 import _ from 'lodash'
@@ -7,7 +5,7 @@ import chai from 'chai'
 
 import $dom from '../dom'
 import $utils from './utils'
-import $stackUtils from './stack_utils'
+import $stackUtils, { StackAndCodeFrameIndex } from './stack_utils'
 import $errorMessages from './error_messages'
 
 const ERROR_PROPS = 'message type name stack sourceMappedStack parsedStack fileName lineNumber columnNumber host uncaught actual expected showDiff isPending docsUrl codeFrame'.split(' ')
@@ -17,9 +15,9 @@ const crossOriginScriptRe = /^script error/i
 
 if (!Error.captureStackTrace) {
   Error.captureStackTrace = (err, fn) => {
-    const stack = (new Error()).stack
+    const stack = (new Error()).stack;
 
-    err.stack = $stackUtils.stackWithLinesDroppedFromMarker(stack, fn.name)
+    (err as Error).stack = $stackUtils.stackWithLinesDroppedFromMarker(stack, fn?.name)
   }
 }
 
@@ -63,15 +61,15 @@ const wrapErr = (err) => {
   return $utils.reduceProps(err, ERROR_PROPS)
 }
 
-const isAssertionErr = (err = {}) => {
+const isAssertionErr = (err: Error) => {
   return err.name === 'AssertionError'
 }
 
-const isChaiValidationErr = (err = {}) => {
+const isChaiValidationErr = (err: Error) => {
   return _.startsWith(err.message, 'Invalid Chai property')
 }
 
-const isCypressErr = (err = {}) => {
+const isCypressErr = (err: Error): boolean => {
   return err.name === 'CypressError'
 }
 
@@ -79,7 +77,7 @@ const isSpecError = (spec, err) => {
   return _.includes(err.stack, spec.relative)
 }
 
-const mergeErrProps = (origErr: Error, ...newProps) => {
+const mergeErrProps = (origErr: Error, ...newProps): Error => {
   return _.extend(origErr, ...newProps)
 }
 
@@ -197,7 +195,7 @@ const makeErrFromObj = (obj) => {
   return err2
 }
 
-const throwErr = (err, options = {}) => {
+const makeErrFromErr = (err, options: any = {}) => {
   if (_.isString(err)) {
     err = cypressErr({ message: err })
   }
@@ -205,12 +203,12 @@ const throwErr = (err, options = {}) => {
   let { onFail, errProps } = options
 
   // assume onFail is a command if
-  //# onFail is present and isn't a function
+  // onFail is present and isn't a function
   if (onFail && !_.isFunction(onFail)) {
     const command = onFail
 
-    //# redefine onFail and automatically
-    //# hook this into our command
+    // redefine onFail and automatically
+    // hook this into our command
     onFail = (err) => {
       return command.error(err)
     }
@@ -224,10 +222,14 @@ const throwErr = (err, options = {}) => {
     _.extend(err, errProps)
   }
 
-  throw err
+  return err
 }
 
-const throwErrByPath = (errPath, options = {}) => {
+const throwErr = (err, options: any = {}): never => {
+  throw makeErrFromErr(err, options)
+}
+
+const throwErrByPath = (errPath, options: any = {}): never => {
   const err = errByPath(errPath, options.args)
 
   if (options.stack) {
@@ -237,15 +239,16 @@ const throwErrByPath = (errPath, options = {}) => {
     Error.captureStackTrace(err, throwErrByPath)
   }
 
-  throwErr(err, options)
+  throw makeErrFromErr(err, options)
 }
 
-const warnByPath = (errPath, options = {}) => {
+const warnByPath = (errPath, options: any = {}) => {
   const errObj = errByPath(errPath, options.args)
   let err = errObj.message
+  const docsUrl = (errObj as CypressError).docsUrl
 
-  if (errObj.docsUrl) {
-    err += `\n\n${errObj.docsUrl}`
+  if (docsUrl) {
+    err += `\n\n${docsUrl}`
   }
 
   $utils.warning(err)
@@ -266,6 +269,7 @@ export class InternalCypressError extends Error {
 export class CypressError extends Error {
   docsUrl?: string
   retry?: boolean
+  userInvocationStack?: any
 
   constructor (message) {
     super(message)
@@ -297,10 +301,10 @@ const internalErr = (err): InternalCypressError => {
 const cypressErr = (err): CypressError => {
   const newErr = new CypressError(err.message)
 
-  return mergeErrProps(newErr, err)
+  return mergeErrProps(newErr, err) as CypressError
 }
 
-const cypressErrByPath = (errPath, options = {}) => {
+const cypressErrByPath = (errPath, options: any = {}) => {
   const errObj = errByPath(errPath, options.args)
 
   return cypressErr(errObj)
@@ -376,7 +380,7 @@ const createUncaughtException = ({ frameType, handlerType, state, err }) => {
   let uncaughtErr = errByPath(errPath, {
     errMsg: err.message,
     promiseAddendum: handlerType === 'unhandledrejection' ? ' It was caused by an unhandled promise rejection.' : '',
-  })
+  }) as CypressError
 
   modifyErrMsg(err, uncaughtErr.message, () => uncaughtErr.message)
 
@@ -394,7 +398,7 @@ const createUncaughtException = ({ frameType, handlerType, state, err }) => {
 // stacks from command failures and assertion failures have the right message
 // but the stack points to cypress internals. here we replace the internal
 // cypress stack with the invocation stack, which points to the user's code
-const stackAndCodeFrameIndex = (err, userInvocationStack) => {
+const stackAndCodeFrameIndex = (err, userInvocationStack): StackAndCodeFrameIndex => {
   if (!userInvocationStack) return { stack: err.stack }
 
   if (isCypressErr(err) || isChaiValidationErr(err)) {
@@ -427,7 +431,7 @@ const enhanceStack = ({ err, userInvocationStack, projectRoot }) => {
 
 // all errors flow through this function before they're finally thrown
 // or used to reject promises
-const processErr = (errObj = {}, config) => {
+const processErr = (errObj: CypressError, config) => {
   let docsUrl = errObj.docsUrl
 
   if (config('isInteractive') || !docsUrl) {
@@ -482,7 +486,7 @@ const errorFromErrorEvent = (event): ErrorFromErrorEvent => {
   // reset the message on a cross origin script error
   // since no details are accessible
   if (crossOriginScriptRe.test(message)) {
-    const crossOriginErr = errByPath('uncaught.cross_origin_script')
+    const crossOriginErr = errByPath('uncaught.cross_origin_script') as CypressError
 
     message = crossOriginErr.message
     docsUrl = crossOriginErr.docsUrl
@@ -490,9 +494,9 @@ const errorFromErrorEvent = (event): ErrorFromErrorEvent => {
 
   // it's possible the error was thrown as a string (throw 'some error')
   // so create it in the case it's not already an object
-  const err = _.isObject(error) ? error : convertErrorEventPropertiesToObject({
+  const err = (_.isObject(error) ? error : convertErrorEventPropertiesToObject({
     message, filename, lineno, colno,
-  })
+  })) as CypressError
 
   err.docsUrl = docsUrl
 
