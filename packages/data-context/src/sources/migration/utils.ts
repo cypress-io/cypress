@@ -280,13 +280,13 @@ export interface SpecToMove {
   to: string
 }
 
-export function moveSpecFiles (projectRoot: string, specs: SpecToMove[]) {
-  specs.forEach((spec) => {
+export async function moveSpecFiles (projectRoot: string, specs: SpecToMove[]) {
+  await Promise.all(specs.map(async (spec) => {
     const from = path.join(projectRoot, spec.from)
     const to = path.join(projectRoot, spec.to)
 
-    fs.moveSync(from, to)
-  })
+    await fs.move(from, to)
+  }))
 }
 
 export async function cleanUpIntegrationFolder (projectRoot: string) {
