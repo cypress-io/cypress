@@ -1,5 +1,5 @@
 import path from 'path'
-import type { RemoteGraphQLInterceptor, ResetOptionsResult, WithCtxInjected, WithCtxOptions } from './support/e2eSupport'
+import type { CyTaskResult, RemoteGraphQLInterceptor, ResetOptionsResult, WithCtxInjected, WithCtxOptions } from './support/e2eSupport'
 import { e2eProjectDirs } from './support/e2eProjectDirs'
 // import type { CloudExecuteRemote } from '@packages/data-context/src/sources'
 import { makeGraphQLServer } from '@packages/graphql/src/makeGraphQLServer'
@@ -148,6 +148,11 @@ async function makeE2ETasks () {
 
       const fetchApi = ctx.util.fetch
 
+      // Stub all of the things that we can't actually execute (electron/os operations),
+      // so we can verify they were called
+      sinon.stub(ctx.actions.electron, 'openExternal')
+      sinon.stub(ctx.actions.electron, 'showItemInFolder')
+
       sinon.stub(ctx.util, 'fetch').get(() => {
         return async (url: RequestInfo, init?: RequestInit) => {
           if (!String(url).endsWith('/test-runner-graphql')) {
@@ -251,7 +256,7 @@ async function makeE2ETasks () {
         e2eServerPort: ctx.appServerPort,
       }
     },
-    async __internal_withCtx (obj: WithCtxObj) {
+    async __internal_withCtx (obj: WithCtxObj): Promise<CyTaskResult<any>> {
       const options: WithCtxInjected = {
         ...obj.options,
         testState,
@@ -267,12 +272,35 @@ async function makeE2ETasks () {
           return Fixtures.projectPath(projectName)
         },
       }
+      let i = 0
+      let lastErr: Error | undefined
+      const retries = obj.options.retry ? obj.options.retryCount ?? 5 : 0
 
-      const val = await Promise.resolve(new Function('ctx', 'options', 'chai', 'expect', 'sinon', `
-        return (${obj.fn})(ctx, options, chai, expect, sinon)
-      `).call(undefined, ctx, options, chai, expect, sinon))
+      while (i++ <= retries) {
+        try {
+          const value = await Promise.resolve(new Function('ctx', 'options', 'chai', 'expect', 'sinon', `
+            return (${obj.fn})(ctx, options, chai, expect, sinon)
+          `).call(undefined, ctx, options, chai, expect, sinon))
 
-      return val || null
+          return { value }
+        } catch (e: any) {
+          if (i <= retries) {
+            await ctx.util.delayMs(obj.options.retryDelay ?? 1000)
+          }
+
+          lastErr = e
+        }
+      }
+
+      lastErr = lastErr || new Error('Error in withCtx')
+
+      return {
+        error: {
+          stack: lastErr.stack,
+          message: lastErr.message,
+          name: lastErr.name,
+        },
+      }
     },
   }
 }
