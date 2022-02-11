@@ -151,10 +151,11 @@ describe('SpecRunnerHeader', { viewportHeight: 500 }, () => {
     cy.get('[data-cy="viewport"]').click()
     cy.contains('The viewport determines').should('be.visible')
     cy.get('[data-cy="viewport"]').click()
+    cy.contains('The viewport determines').should('be.hidden')
     // TODO: enable/remove with resolution of https://github.com/cypress-io/cypress/pull/20156
-    // cy.contains('The viewport determines').should('be.hidden')
     // cy.get('[data-cy="viewport"] button').focus().type(' ')
-    // cy.contains('The viewport determines').should('be.visible')
+    cy.get('[data-cy="viewport"] button').focus().type('{enter}')
+    cy.contains('The viewport determines').should('be.visible')
     cy.get('[data-cy="viewport"] button').focus().type('{enter}')
     cy.contains('The viewport determines').should('be.hidden')
   })
