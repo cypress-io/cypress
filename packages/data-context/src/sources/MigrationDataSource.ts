@@ -68,6 +68,7 @@ export class MigrationDataSource {
 
   private componentTestingMigrationWatcher?: chokidar.FSWatcher
   componentTestingMigrationStatus?: ComponentTestingMigrationStatus
+  private _oldConfigPromise: Promise<OldCypressConfig> | null = null
 
   constructor (private ctx: DataContext) { }
 
@@ -230,10 +231,17 @@ export class MigrationDataSource {
       return this._config
     }
 
-    if (this.ctx.lifecycleManager.metaState.hasLegacyCypressJson) {
+    // avoid reading the same file over and over again before it was finished reading
+    if (this.ctx.lifecycleManager.metaState.hasLegacyCypressJson && !this._oldConfigPromise) {
       const cfgPath = path.join(this.ctx.lifecycleManager?.projectRoot, 'cypress.json')
 
-      this._config = await this.ctx.file.readJsonFile(cfgPath) as OldCypressConfig
+      this._oldConfigPromise = this.ctx.file.readJsonFile(cfgPath) as Promise<OldCypressConfig>
+    }
+
+    if (this._oldConfigPromise) {
+      this._config = await this._oldConfigPromise
+
+      this._oldConfigPromise = null
 
       return this._config
     }
