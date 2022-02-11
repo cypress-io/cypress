@@ -43,7 +43,7 @@ function addBlackouts ($body, selector) {
     return
   }
 
-  $el.each(function () {
+  $el.each(function (this: HTMLElement) {
     addBlackoutForElement($body, $(this))
   })
 }
