@@ -193,10 +193,9 @@ export class WizardActions {
 
   private async scaffoldFixtures (): Promise<NexusGenObjects['ScaffoldedFile']> {
     const exampleScaffoldPath = path.join(this.projectRoot, 'cypress/fixtures/example.json')
-    const fixturesDir = path.dirname(exampleScaffoldPath)
 
     try {
-      await this.ctx.fs.stat(fixturesDir)
+      await this.ctx.fs.stat(exampleScaffoldPath)
 
       return {
         status: 'skipped',

@@ -15,6 +15,7 @@
       focus-visible:outline-none
       before:(rounded-r-md h-40px mr-4px text-transparent transform origin-left w-4px duration-300 content-open-square) hover:before:scale-x-100 "
     :disabled="isNavBarExpanded"
+    :data-selected="active"
   >
     <component
       :is="

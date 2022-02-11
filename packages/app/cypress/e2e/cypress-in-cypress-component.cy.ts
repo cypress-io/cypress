@@ -6,7 +6,7 @@ describe('Cypress In Cypress', { viewportWidth: 1200 }, () => {
     cy.findBrowsers()
     cy.openProject('cypress-in-cypress')
     cy.startAppServer('component')
-    cy.visitApp()
+    cy.__incorrectlyVisitAppWithIntercept()
   })
 
   it('test component', () => {

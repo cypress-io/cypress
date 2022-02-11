@@ -25,7 +25,7 @@ export interface StartDevServerOptions {
   indexHtml?: string
 }
 
-const resolveServerConfig = async ({ viteConfig, options, indexHtml }: StartDevServerOptions): Promise<InlineConfig> => {
+export const resolveServerConfig = async ({ viteConfig, options, indexHtml }: StartDevServerOptions): Promise<InlineConfig> => {
   const { projectRoot, supportFile, namespace } = options.config
 
   const requiredOptions: InlineConfig = {
@@ -78,16 +78,4 @@ const resolveServerConfig = async ({ viteConfig, options, indexHtml }: StartDevS
   debug(`the resolved server config is ${JSON.stringify(finalConfig, null, 2)}`)
 
   return finalConfig
-}
-
-export async function start (devServerOptions: StartDevServerOptions): Promise<ViteDevServer> {
-  if (!devServerOptions.viteConfig) {
-    debug('User did not pass in any Vite dev server configuration')
-    devServerOptions.viteConfig = {}
-  }
-
-  debug('starting vite dev server')
-  const resolvedConfig = await resolveServerConfig(devServerOptions)
-
-  return createServer(resolvedConfig)
 }
