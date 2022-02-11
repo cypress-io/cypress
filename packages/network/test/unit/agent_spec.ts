@@ -24,6 +24,7 @@ import { AsyncServer, Servers } from '../support/servers'
 import { UrlClientCertificates, ClientCertificates, PemKey } from '../../lib/client-certificates'
 import Forge from 'node-forge'
 import fetch from 'cross-fetch'
+import os from 'os'
 const { pki } = Forge
 
 const expect = chai.expect
@@ -85,7 +86,7 @@ describe('lib/agent', function () {
     try {
       // Disabling the eslint for geteuid since we are explicitly catching if there's a problem with it
       // eslint-disable-next-line
-      if (process.geteuid && process.geteuid() !== 0) {
+      if (os.platform() === 'linux' && process.geteuid && process.geteuid() !== 0) {
         // eslint-disable-next-line no-console
         console.error('You must be a root user to run these tests since we specifically test hosting a server at 443 which requires root access')
       }
