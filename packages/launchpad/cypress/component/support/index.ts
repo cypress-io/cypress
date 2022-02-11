@@ -26,4 +26,11 @@ import './commands'
 import './attachFileWithPath'
 import installCustomPercyCommand from '@packages/ui-components/cypress/support/customPercyCommand'
 
-installCustomPercyCommand()
+installCustomPercyCommand({
+  before: () => {},
+  elementOverrides: {
+    'svg.animate-spin': ($el) => {
+      $el.attr('style', 'animation: none !important')
+    },
+  },
+})
