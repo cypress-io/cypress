@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import _ from 'lodash'
 import Cookies from 'js-cookie'
 
@@ -10,13 +8,13 @@ let isDebuggingVerbose = false
 
 const preserved = {}
 
-const defaults = {
+const defaults: any = {
   preserve: null,
 }
 
 const warnOnWhitelistRenamed = (obj, type) => {
   if (obj.whitelist) {
-    return $errUtils.throwErrByPath('cookies.whitelist_renamed', { args: { type } })
+    $errUtils.throwErrByPath('cookies.whitelist_renamed', { args: { type } })
   }
 }
 
@@ -53,10 +51,12 @@ export const $Cookies = (namespace, domain) => {
     if (preserved[name]) {
       return delete preserved[name]
     }
+
+    return false
   }
 
   const API = {
-    debug (bool = true, options = {}) {
+    debug (bool = true, options: any = {}) {
       _.defaults(options, {
         verbose: true,
       })
@@ -82,7 +82,7 @@ export const $Cookies = (namespace, domain) => {
       return console[m].apply(console, args)
     },
 
-    getClearableCookies (cookies = []) {
+    getClearableCookies (cookies: any[] = []) {
       return _.filter(cookies, (cookie) => {
         return !isAllowed(cookie) && !removePreserved(cookie.name)
       })

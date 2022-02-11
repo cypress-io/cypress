@@ -29,7 +29,7 @@ import { useSnapshotStore } from './snapshot-store'
 
 let _eventManager: EventManager | undefined
 
-export function createWebsocket (socketIoRoute) {
+export function createWebsocket (socketIoRoute: string) {
   const socketConfig = {
     path: socketIoRoute,
     transports: ['websocket'],
@@ -45,6 +45,10 @@ export function createWebsocket (socketIoRoute) {
 }
 
 export function initializeEventManager (UnifiedRunner: any) {
+  if (!window.ws) {
+    throw Error('Need window.ws to exist before initializing event manager')
+  }
+
   _eventManager = new EventManager(
     UnifiedRunner.CypressDriver,
     UnifiedRunner.MobX,

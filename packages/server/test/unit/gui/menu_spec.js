@@ -274,6 +274,7 @@ describe('gui/menu', function () {
         expect(labels).to.eql([
           'Reload',
           'Toggle Developer Tools',
+          'GraphQL requests over Fetch (off)',
           'GraphiQL',
           'View App Data',
         ])

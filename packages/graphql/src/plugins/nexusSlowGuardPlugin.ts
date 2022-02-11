@@ -7,23 +7,26 @@ const HANGING_RESOLVER_THRESHOLD = 2000
 export const nexusSlowGuardPlugin = plugin({
   name: 'NexusSlowGuard',
   description: 'If there is a very slow / hanging execution of a field, we detect/log to the console it in development',
+  fieldDefTypes: 'slowLogThreshold?: number | false',
   // When we create a field resolver, we can wrap it in a field
-  onCreateFieldResolver () {
+  onCreateFieldResolver (field) {
+    const threshold = (field.fieldConfig.extensions?.nexus?.config.slowLogThreshold ?? HANGING_RESOLVER_THRESHOLD) as number | false
+
     // For fields, we only want to log if the field takes longer than SLOW_FIELD_THRESHOLD to execute.
     // Also log if it's hanging for some reason
     return (root, args, ctx, info, next) => {
       const result = next(root, args, ctx, info)
 
-      if (isPromiseLike(result)) {
+      if (isPromiseLike(result) && threshold !== false) {
         const resolvePath = pathToArray(info.path)
         const hanging = setTimeout(() => {
           const operationId = `${info.operation.operation} ${info.operation.name?.value ?? `(anonymous)`}`
 
           if (process.env.CYPRESS_INTERNAL_ENV !== 'production') {
             // eslint-disable-next-line no-console
-            console.error(chalk.red(`\n\nNexusSlowGuard: Taking more than ${HANGING_RESOLVER_THRESHOLD} to execute ${JSON.stringify(resolvePath)} for ${operationId}\n\n`))
+            console.error(chalk.red(`\n\nNexusSlowGuard: Taking more than ${threshold}ms to execute ${JSON.stringify(resolvePath)} for ${operationId}\n\n`))
           }
-        }, HANGING_RESOLVER_THRESHOLD)
+        }, threshold)
 
         return plugin.completeValue(result, (val) => {
           clearTimeout(hanging)
