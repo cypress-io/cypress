@@ -38,7 +38,7 @@ describe('lib/plugins', () => {
     })
     .then(() => {
       expect(onWarning).to.be.calledOnce
-      expect(onWarning.firstCall.args[0].message).to.include('Deprecation Warning: The `before:browser:launch` plugin event changed its signature in version `4.0.0`')
+      expect(onWarning.firstCall.args[0].message).to.include('Deprecation Warning: The before:browser:launch plugin event changed its signature in Cypress version 4.0.0')
     })
   })
 })

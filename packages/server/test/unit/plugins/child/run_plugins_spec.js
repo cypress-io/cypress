@@ -57,7 +57,7 @@ describe('lib/plugins/child/run_plugins', () => {
     runPlugins(this.ipc, 'plugins-file', 'proj-root')
     expect(this.ipc.send).to.be.calledWith('load:error', 'PLUGINS_FILE_ERROR', 'plugins-file')
 
-    return snapshot(this.ipc.send.lastCall.args[3].split('\n')[0])
+    return snapshot(this.ipc.send.lastCall.args[3].stack.split('\n')[0])
   })
 
   it('sends error message if requiring pluginsFile errors', function () {
@@ -70,7 +70,7 @@ describe('lib/plugins/child/run_plugins', () => {
     runPlugins(this.ipc, 'plugins-file', 'proj-root')
     expect(this.ipc.send).to.be.calledWith('load:error', 'PLUGINS_FILE_ERROR', 'plugins-file')
 
-    return snapshot(this.ipc.send.lastCall.args[3].split('\n')[0])
+    return snapshot(this.ipc.send.lastCall.args[3].stack.split('\n')[0])
   })
 
   it('sends error message if pluginsFile has syntax error', function () {
@@ -83,7 +83,7 @@ describe('lib/plugins/child/run_plugins', () => {
     runPlugins(this.ipc, 'plugins-file', 'proj-root')
     expect(this.ipc.send).to.be.calledWith('load:error', 'PLUGINS_FILE_ERROR', 'plugins-file')
 
-    return snapshot(withoutColorCodes(withoutPath(this.ipc.send.lastCall.args[3].replace(/( +at[^$]+$)+/g, '[stack trace]'))))
+    return snapshot(withoutColorCodes(withoutPath(this.ipc.send.lastCall.args[3].stack.replace(/( +at[^$]+$)+/g, '[stack trace]'))))
   })
 
   it('sends error message if pluginsFile does not export a function', function () {
@@ -242,11 +242,11 @@ describe('lib/plugins/child/run_plugins', () => {
       this.ipc.on.withArgs('load').yields({})
       runPlugins(this.ipc, 'plugins-file', 'proj-root')
 
-      this.ipc.send = _.once((event, errorType, pluginsFile, stack) => {
+      this.ipc.send = _.once((event, errorType, pluginsFile, result) => {
         expect(event).to.eq('load:error')
         expect(errorType).to.eq('PLUGINS_FUNCTION_ERROR')
         expect(pluginsFile).to.eq('plugins-file')
-        expect(stack).to.eq(err.stack)
+        expect(result.stack).to.eq(err.stack)
 
         return done()
       })
@@ -276,11 +276,11 @@ describe('lib/plugins/child/run_plugins', () => {
       runPlugins(this.ipc, 'plugins-file', 'proj-root')
       this.ipc.on.withArgs('load').yield({})
 
-      this.ipc.send = _.once((event, errorType, pluginsFile, stack) => {
+      this.ipc.send = _.once((event, errorType, pluginsFile, serializedErr) => {
         expect(event).to.eq('load:error')
         expect(errorType).to.eq('PLUGINS_FUNCTION_ERROR')
         expect(pluginsFile).to.eq('plugins-file')
-        expect(stack).to.eq(err.stack)
+        expect(serializedErr.stack).to.eq(err.stack)
 
         return done()
       })

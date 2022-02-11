@@ -1,21 +1,17 @@
 exports['e2e specs failing when no specs found 1'] = `
 Can't run because no spec files were found.
 
-We searched for any files inside of this folder:
+We searched for specs inside of this folder:
 
-/foo/bar/.projects/e2e/cypress/specs
+  > /foo/bar/.projects/e2e/cypress/specs
 
 `
 
 exports['e2e specs failing when no spec pattern found 1'] = `
 Can't run because no spec files were found.
 
-We searched for any files matching this glob pattern:
+We searched for specs matching this glob pattern:
 
-cypress/integration/cypress/integration/**notfound**
-
-Relative to the project root folder:
-
-/foo/bar/.projects/e2e
+  > /foo/bar/.projects/e2e/cypress/integration/does/not/exist/**notfound**
 
 `
