@@ -1,5 +1,5 @@
 exports['e2e readonly fs / warns when unable to write to disk'] = `
-Folder /foo/bar/.projects/read-only-project-root is not writable.
+This folder is not writable: /foo/bar/.projects/read-only-project-root
 
 Writing to this directory is required by Cypress in order to store screenshots and videos.
 
