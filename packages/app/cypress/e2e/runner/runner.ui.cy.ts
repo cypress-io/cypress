@@ -230,7 +230,7 @@ describe('runner ui', () => {
       cy.get('.runnable-err-message').should('not.contain', 'ran afterEach even though specs were stopped')
     })
 
-    // TODO: determine intended function in new runner
+    // TODO: blocked by UNIFY-1077
     // it('supports disabling command log reporter with env var NO_COMMAND_LOG', () => {
     //   loadSpec({
     //     fileName: 'disabled-command-log.runner.cy.js',

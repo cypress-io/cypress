@@ -6,13 +6,19 @@ describe('s1', {
   defaultCommandTimeout: 50,
 }, () => {
   afterEach(function () {
-    assert(true, `run ${top.count}`)
+    if (!top.count) {
+      assert(false)
+    } else {
+      assert(true, `run ${top.count}`)
+    }
   })
 
   it('foo', () => {
     cy.once('test:after:run', () => {
       if (!top.count) {
-        top.getEventManager().reporterBus.emit('runner:restart')
+        requestAnimationFrame(() => {
+          top.getEventManager().reporterBus.emit('runner:restart')
+        })
       }
 
       top.count++

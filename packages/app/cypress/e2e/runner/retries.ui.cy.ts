@@ -54,7 +54,8 @@ describe('retries ui', {
     cy.percySnapshot()
   })
 
-  // TODO: determine another way to cover this
+  // TODO: Determine how best to access the inner Cypress instance prior to test execution
+  // spy on its actions during the test run.
   it.skip('opens attempt on each attempt failure for the screenshot, and closes after test passes', () => {
     let stub
     const cyReject = (fn) => {
