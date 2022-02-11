@@ -623,9 +623,14 @@ export class ProjectLifecycleManager {
 
     legacyFileWatcher.on('all', (event, file) => {
       debug('WATCHER: config file event', event, file)
-      const currentMetaState = this._projectMetaState
-      const shouldReloadConfig = file === this.configFilePath
-        || !_.isEqual(currentMetaState, this.refreshMetaState())
+      let shouldReloadConfig = this.configFile === file
+
+      if (!shouldReloadConfig) {
+        const metaState = this._projectMetaState
+        const nextMetaState = this.refreshMetaState()
+
+        shouldReloadConfig = !_.isEqual(metaState, nextMetaState)
+      }
 
       if (shouldReloadConfig) {
         this.ctx.coreData.baseError = null
@@ -1294,10 +1299,8 @@ export class ProjectLifecycleManager {
   }
 
   isTestingTypeConfigured (testingType: TestingType): boolean {
-    debug('isTestingTypeConfigured %s', testingType)
     const config = this.loadedConfigFile
 
-    debug('config: %O', config)
     if (!config) {
       return false
     }
