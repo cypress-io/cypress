@@ -1,4 +1,3 @@
-// @ts-nocheck
 import _ from 'lodash'
 import { basename } from 'path'
 
@@ -6,7 +5,8 @@ import $errUtils from '../../cypress/error_utils'
 
 export default (Commands, Cypress, cy, state) => {
   Commands.addAll({
-    readFile (file, encoding, options = {}) {
+    // TODO: change the type of `any` to `Partial<Cypress.Loggable & Cypress.Timeoutable>`
+    readFile (file, encoding, options: any = {}) {
       let userOptions = options
 
       if (_.isObject(encoding)) {
@@ -109,7 +109,8 @@ export default (Commands, Cypress, cy, state) => {
       return verifyAssertions()
     },
 
-    writeFile (fileName, contents, encoding, options = {}) {
+    // TODO: change the type of `any` to `Partial<Cypress.WriteFileOPtions & Cypress.Timeoutable>`
+    writeFile (fileName, contents, encoding, options: any = {}) {
       let userOptions = options
 
       if (_.isObject(encoding)) {
