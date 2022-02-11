@@ -315,6 +315,11 @@ export class MigrationDataSource {
   }
 
   setStep (step: MIGRATION_STEP) {
+    if (this.componentTestingMigrationWatcher) {
+      this.componentTestingMigrationWatcher.close()
+      this.componentTestingMigrationWatcher = undefined
+    }
+
     this._step = step
   }
 }

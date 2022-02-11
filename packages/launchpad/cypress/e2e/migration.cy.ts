@@ -449,9 +449,9 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
   })
 })
 
-describe('component testing migration - defaults', () => {
-  // TODO: toApp emitter not working in Cypress in Cypress.
-  it.skip('live update migration UI as user moves files', () => {
+// TODO: toApp emitter not working in Cypress in Cypress.
+describe.skip('component testing migration - defaults', () => {
+  it('live update migration UI as user moves files', () => {
     cy.scaffoldProject('migration-component-testing-customized')
     cy.openProject('migration-component-testing-customized')
     cy.visitLaunchpad()
@@ -476,8 +476,7 @@ describe('component testing migration - defaults', () => {
     cy.get('button').contains('I have moved my component specs')
   })
 
-  // TODO: toApp emitter not working in Cypress in Cypress.
-  it.skip('live update migration UI as user moves files', () => {
+  it('live update migration UI as user moves files', () => {
     cy.scaffoldProject('migration-component-testing-customized')
     cy.openProject('migration-component-testing-customized')
     cy.visitLaunchpad()
