@@ -28,11 +28,10 @@ describe('Error handling', () => {
 
   it('it handles a configuration file error', () => {
     cy.scaffoldProject('pristine')
-    .then(() => {
-      cy.openProject('pristine')
-      cy.withCtx(async (ctx) => {
-        await ctx.actions.file.writeFileInProject('cypress.config.js', 'throw new Error("Error thrown from Config")')
-      })
+
+    cy.openProject('pristine')
+    cy.withCtx(async (ctx) => {
+      await ctx.actions.file.writeFileInProject('cypress.config.js', 'throw new Error("Error thrown from Config")')
     })
 
     cy.visitLaunchpad()
