@@ -162,7 +162,6 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
     })
 
     skipCTMigration()
-    // cy.findByText('Continue to next step').click()
     renameSupport()
     migrateAndVerifyConfig()
     finishMigrationAndContinue()
