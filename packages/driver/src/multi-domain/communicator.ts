@@ -3,6 +3,7 @@ import debugFn from 'debug'
 import { EventEmitter } from 'events'
 import _ from 'lodash'
 import $dom from '../dom'
+import { preprocessConfig, preprocessEnv } from '../util/config_utilities'
 
 const debug = debugFn('cypress:driver:multi-domain')
 
@@ -148,6 +149,13 @@ export class SpecBridgeDomainCommunicator extends EventEmitter {
     }
   }
 
+  private resyncConfigToPrimary = () => {
+    this.toPrimary('sync:config', {
+      config: preprocessConfig(Cypress.config()),
+      env: preprocessEnv(Cypress.env()),
+    })
+  }
+
   /**
    * Initializes the event handler to receive messages from the primary domain.
    * @param {Window} win - a reference to the window object in the spec bridge/iframe.
@@ -180,11 +188,21 @@ export class SpecBridgeDomainCommunicator extends EventEmitter {
     this.handleSubjectAndErr('command:end', data)
   }
 
-  toPrimaryRanDomainFn (data: { subject?: any, err?: any }) {
+  toPrimaryRanDomainFn (data: { subject?: any, err?: any, resyncConfig: boolean }) {
+    if (data?.resyncConfig) {
+      this.resyncConfigToPrimary()
+    }
+
     this.handleSubjectAndErr('ran:domain:fn', data)
   }
 
-  toPrimaryError (event, data: { subject?: any, err?: any }) {
+  toPrimaryQueueFinished () {
+    this.resyncConfigToPrimary()
+    this.toPrimary('queue:finished')
+  }
+
+  toPrimaryError (event, data: { subject?: any, err?: any}) {
     this.handleSubjectAndErr(event, data)
+    this.resyncConfigToPrimary()
   }
 }

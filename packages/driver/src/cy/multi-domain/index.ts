@@ -3,7 +3,8 @@ import $errUtils from '../../cypress/error_utils'
 import { CommandsManager } from './commands_manager'
 import { LogsManager } from './logs_manager'
 import { Validator } from './validator'
-import { correctStackForCrossDomainError, omitUnserializableValues, serializeRunnable } from './util'
+import { correctStackForCrossDomainError, serializeRunnable } from './util'
+import { preprocessConfig, preprocessEnv, syncConfigToCurrentDomain, syncEnvToCurrentDomain } from '../../util/config_utilities'
 import { failedToSerializeSubject } from './failedSerializeSubjectProxy'
 
 export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: Cypress.State, config: Cypress.InternalConfig) {
@@ -120,6 +121,11 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
       logsManager.listen()
 
       return new Bluebird((resolve, reject) => {
+        communicator.once('sync:config', ({ config, env }) => {
+          syncConfigToCurrentDomain(config)
+          syncEnvToCurrentDomain(env)
+        })
+
         communicator.once('ran:domain:fn', ({ subject, failedToSerializeSubjectOfType, err }) => {
           sendReadyForDomain()
           if (err) {
@@ -130,7 +136,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
             }
 
             cleanup()
-            reject(err)
+            reject(correctStackForCrossDomainError(err, userInvocationStack))
 
             return
           }
@@ -159,11 +165,10 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
 
         // fired once the spec bridge is set up and ready to receive messages
         communicator.once('bridge:ready', () => {
-          // now that the spec bridge is ready, instantiate Cypress with the current app config and environment variables
-
+          // now that the spec bridge is ready, instantiate Cypress with the current app config and environment variables for initial sync when creating the instance
           communicator.toSpecBridge('initialize:cypress', {
-            config: omitUnserializableValues(Cypress.config()),
-            env: omitUnserializableValues(Cypress.env()),
+            config: preprocessConfig(Cypress.config()),
+            env: preprocessEnv(Cypress.env()),
           })
 
           state('readyForMultiDomain', true)
@@ -175,11 +180,17 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
               data,
               fn: callbackFn.toString(),
               isDoneFnAvailable: !!done,
+              // let the spec bridge version of Cypress know if config read-only values can be overwritten since window.top cannot be accessed in cross-origin iframes
+              // this should only be used for internal testing. Cast to boolean to guarantee serialization
+              // @ts-ignore
+              skipConfigValidation: !!window.top.__cySkipValidateConfig,
               state: {
                 viewportWidth: Cypress.state('viewportWidth'),
                 viewportHeight: Cypress.state('viewportHeight'),
                 runnable: serializeRunnable(Cypress.state('runnable')),
               },
+              config: preprocessConfig(Cypress.config()),
+              env: preprocessEnv(Cypress.env()),
             })
           } catch (err: any) {
             const wrappedErr = $errUtils.errByPath('switchToDomain.run_domain_fn_errored', {

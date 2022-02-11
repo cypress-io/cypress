@@ -1,6 +1,5 @@
 import _ from 'lodash'
 import { AssertionError } from 'chai'
-import $dom from '../../dom'
 import $stackUtils from '../../cypress/stack_utils'
 
 export const correctStackForCrossDomainError = (serializedError: any, userInvocationStack: string) => {
@@ -17,31 +16,6 @@ export const correctStackForCrossDomainError = (serializedError: any, userInvoca
   reifiedError.stack = $stackUtils.replacedStack(reifiedError, userInvocationStack)
 
   return reifiedError
-}
-
-export const omitUnserializableValues = (value) => {
-  const { isDom, isJquery } = $dom
-
-  // There are probably some things we aren't catching here.
-  // We probably want to bubble this up to the user over a generic error to get a better idea of what couldn't be serialized
-  if (isDom(value)
-  || isJquery(value)
-  || _.isError(value)
-  || _.isFunction(value)
-  || _.isSymbol(value)
-  || value instanceof Promise) {
-    return undefined
-  }
-
-  if (_.isArray(value)) {
-    return _.map(value, omitUnserializableValues)
-  }
-
-  if (_.isObject(value)) {
-    return _.mapValues(value, omitUnserializableValues)
-  }
-
-  return value
 }
 
 export const serializeRunnable = (runnable) => {

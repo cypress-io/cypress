@@ -148,8 +148,7 @@ class $Cypress {
     this.state = $SetterGetter.create({})
     this.originalConfig = _.cloneDeep(config)
     this.config = $SetterGetter.create(config, (config) => {
-      // multi-domain cannot access window.top due to same origin policy. Allow properties to be rewritten within multi-domain
-      if (!isMultiDomainCypress && !window.top.__cySkipValidateConfig) {
+      if (isMultiDomainCypress ? !window.__cySkipValidateConfig : !window.top.__cySkipValidateConfig) {
         validateNoReadOnlyConfig(config, (errProperty) => {
           let errMessage
 
