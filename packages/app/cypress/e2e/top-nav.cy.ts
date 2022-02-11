@@ -105,7 +105,7 @@ describe('App Top Nav Workflows', () => {
         cy.findBrowsers()
         cy.withCtx(async (ctx) => {
           // @ts-ignore sinon is a global in the node process where this is executed
-          sinon.stub(ctx, 'versions').resolves({
+          sinon.stub(ctx.versions, 'versionData').resolves({
             current: {
               id: '1',
               version: '10.0.0',
@@ -138,7 +138,7 @@ describe('App Top Nav Workflows', () => {
           const prevRelease = new Date(Date.UTC(2021, 9, 29))
 
           // @ts-ignore sinon is a global in the node process where this is executed
-          sinon.stub(ctx, 'versions').resolves({
+          sinon.stub(ctx.versions, 'versionData').resolves({
             current: {
               id: '1',
               version: '10.0.0',
