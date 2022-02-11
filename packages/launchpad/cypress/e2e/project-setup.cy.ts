@@ -466,10 +466,11 @@ describe('Launchpad: Setup Project', () => {
 
         cy.get('[data-cy-testingtype="e2e"]').within(() => {
           cy.get('[data-cy=status-badge-menu]').click()
-          cy.get('[data-cy="Launch Browser"]').click()
+          cy.get('[data-cy="Choose a Browser"]').click()
         })
 
         cy.contains('Choose a Browser')
+        cy.contains('Choose your preferred browser for E2E testing.')
       })
 
       it('can reconfigure config from the testing type card selecting E2E', () => {
@@ -498,7 +499,7 @@ describe('Launchpad: Setup Project', () => {
 
         cy.get('[data-cy-testingtype="component"]').within(() => {
           cy.get('[data-cy=status-badge-menu]').click()
-          cy.get('[data-cy="Launch Browser"]').click()
+          cy.get('[data-cy="Choose a Browser"]').click()
         })
 
         cy.contains('Choose a Browser')

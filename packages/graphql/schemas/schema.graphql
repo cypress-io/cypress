@@ -825,7 +825,7 @@ type Mutation {
   setPromptShown(slug: String!): Boolean
 
   """Set the selected testing type, and reconfigure the project"""
-  setTestingTypeAndReconfigureProject(testingType: TestingTypeEnum!): Query
+  setTestingTypeAndReconfigureProject(isApp: Boolean!, testingType: TestingTypeEnum!): Query
 
   """Switch Testing type and relaunch browser"""
   switchTestingTypeAndRelaunch(testingType: TestingTypeEnum!): Boolean

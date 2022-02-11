@@ -1,6 +1,6 @@
 <template>
   <template v-if="status">
-    <div class="border rounded-full font-medium p-5px pr-16px text-size-14px leading-20px inline-flex items-center group relative text-jade-500">
+    <div class="border rounded-full font-medium p-5px pr-16px text-size-14px leading-20px inline-flex items-center relative text-jade-500">
       <Menu>
         <MenuButton
           data-cy="status-badge-menu"
@@ -23,10 +23,12 @@
           <MenuItem
             v-for="item in menuItems"
             :key="item.name"
+            #="{ active }"
           >
             <button
               :data-cy="item.name"
-              class="border-b border-b-gray-800 text-left py-8px px-16px bg-gray-700 min-w-max"
+              :class="{ 'bg-gray-700': active }"
+              class="border-b border-b-gray-800 text-left py-8px px-16px min-w-max"
               @click.stop="handleMenuClick(item.event)"
             >
               {{ item.name }}
@@ -61,17 +63,18 @@ const props = defineProps<{
   titleOff: string,
   testingType: TestingTypeEnum
   isRunning: boolean
+  isApp: boolean
 }>()
 
 const { t } = useI18n()
 
 const emit = defineEmits<{
-  (event: 'launchBrowser'): void
+  (event: 'chooseABrowser'): void
 }>()
 
 gql`
-mutation TestingTypeSelectionAndReconfigure($testingType: TestingTypeEnum!) {
-  setTestingTypeAndReconfigureProject(testingType: $testingType) {
+mutation TestingTypeSelectionAndReconfigure($testingType: TestingTypeEnum!, $isApp: Boolean!) {
+  setTestingTypeAndReconfigureProject(testingType: $testingType, isApp: $isApp) {
     currentTestingType
     currentProject {
       id
@@ -87,20 +90,20 @@ mutation TestingTypeSelectionAndReconfigure($testingType: TestingTypeEnum!) {
 
 const mutation = useMutation(TestingTypeSelectionAndReconfigureDocument)
 
-type EventName = 'launchBrowser' | 'reconfigure'
+type EventName = 'chooseABrowser' | 'reconfigure'
 
 const menuItems = computed(() => {
-  const launchBrowser: { name: string, event: EventName } = { name: t('setupPage.testingCard.launchBrowser'), event: 'launchBrowser' }
+  const launchBrowser: { name: string, event: EventName } = { name: t('setupPage.testingCard.chooseABrowser'), event: 'chooseABrowser' }
   const reconfigure: { name: string, event: EventName } = { name: t('setupPage.testingCard.reconfigure'), event: 'reconfigure' }
 
   return props.isRunning ? [reconfigure] : [launchBrowser, reconfigure]
 })
 
 const handleMenuClick = (eventName: EventName) => {
-  if (eventName === 'launchBrowser') {
+  if (eventName === 'chooseABrowser') {
     emit(eventName)
   } else if (eventName === 'reconfigure') {
-    mutation.executeMutation({ testingType: props.testingType })
+    mutation.executeMutation({ testingType: props.testingType, isApp: props.isApp })
   }
 }
 

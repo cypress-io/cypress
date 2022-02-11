@@ -17,7 +17,7 @@ describe('SwitchTestingTypeModal', () => {
         }
       },
       render: (gql) => {
-        return <SwitchTestingTypeModal gql={gql} show onClose={closeSpy} />
+        return <SwitchTestingTypeModal gql={gql} show onClose={closeSpy} isApp={false} />
       },
     })
 

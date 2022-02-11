@@ -14,6 +14,7 @@ describe('<StatusBadge />', () => {
           status={status.value}
           testingType='component'
           isRunning={false}
+          isApp={false}
         />
         <br /><br />
         {// @ts-ignore

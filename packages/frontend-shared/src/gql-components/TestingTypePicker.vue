@@ -26,7 +26,8 @@
           :status="tt.configured || false"
           :testing-type="tt.key"
           :is-running="tt.key === currentTestingType"
-          @launch-browser="emits('pick', tt.key, currentTestingType)"
+          :is-app="props.isApp"
+          @choose-a-browser="emits('pick', tt.key, currentTestingType)"
         />
       </template>
     </Card>
@@ -60,6 +61,7 @@ fragment TestingTypePicker on Query {
 
 const props = defineProps<{
   gql: TestingTypePickerFragment
+  isApp: boolean
 }>()
 
 const emits = defineEmits<{

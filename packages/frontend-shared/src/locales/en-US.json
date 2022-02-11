@@ -264,7 +264,7 @@
       "configured": "Configured",
       "notConfigured": "Not Configured",
       "running": "Running",
-      "launchBrowser": "Launch Browser",
+      "chooseABrowser": "Choose a Browser",
       "reconfigure": "Reconfigure"
     }
   },

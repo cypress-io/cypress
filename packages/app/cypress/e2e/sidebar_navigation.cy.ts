@@ -295,7 +295,7 @@ describe('Sidebar Navigation', () => {
 
       cy.get('[data-cy-testingtype="component"]').within(() => {
         cy.get('[data-cy=status-badge-menu]').click()
-        cy.get('[data-cy="Launch Browser"]').should('not.exist')
+        cy.get('[data-cy="Choose a Browser"]').should('not.exist')
         cy.get('[data-cy="Reconfigure"]').should('exist')
       })
     })
