@@ -801,6 +801,11 @@ type Mutation {
   """Remove project from projects array and cache"""
   removeProject(path: String!): Query
 
+  """
+  Resets the latest version call to capture additional telemetry for the current user
+  """
+  resetLatestVersionTelemetry: Boolean!
+
   """Reset the Wizard to the starting position"""
   resetWizard: Boolean!
   scaffoldIntegration: [ScaffoldedFile!]!
