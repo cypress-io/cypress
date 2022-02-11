@@ -17544,9 +17544,9 @@ cyclist@^1.0.1:
   resolved "https://registry.yarnpkg.com/cyclist/-/cyclist-1.0.1.tgz#596e9698fd0c80e12038c2b82d6eb1b35b6224d9"
   integrity sha1-WW6WmP0MgOEgOMK4LW6xs1tiJNk=
 
-cypress-example-kitchensink@cypress-io/cypress-example-kitchensink#8bd82de1729999cc0c1a6cb5dc2c9dd7ec2d2f0b:
+"cypress-example-kitchensink@https://github.com/cypress-io/cypress-example-kitchensink.git#8bd82de1729999cc0c1a6cb5dc2c9dd7ec2d2f0b":
   version "0.0.0-development"
-  resolved "https://codeload.github.com/cypress-io/cypress-example-kitchensink/tar.gz/8bd82de1729999cc0c1a6cb5dc2c9dd7ec2d2f0b"
+  resolved "https://github.com/cypress-io/cypress-example-kitchensink.git#8bd82de1729999cc0c1a6cb5dc2c9dd7ec2d2f0b"
   dependencies:
     npm-run-all "^4.1.2"
     serve "11.3.0"
@@ -23926,9 +23926,9 @@ http-proxy@^1.17.0, http-proxy@^1.18.0, http-proxy@^1.18.1:
     follow-redirects "^1.0.0"
     requires-port "^1.0.0"
 
-http-proxy@cypress-io/node-http-proxy#9322b4b69b34f13a6f3874e660a35df3305179c6:
+"http-proxy@https://github.com/cypress-io/node-http-proxy.git#9322b4b69b34f13a6f3874e660a35df3305179c6":
   version "1.18.0"
-  resolved "https://codeload.github.com/cypress-io/node-http-proxy/tar.gz/9322b4b69b34f13a6f3874e660a35df3305179c6"
+  resolved "https://github.com/cypress-io/node-http-proxy.git#9322b4b69b34f13a6f3874e660a35df3305179c6"
   dependencies:
     eventemitter3 "^4.0.0"
     follow-redirects "^1.0.0"
@@ -26540,9 +26540,9 @@ jsbn@~0.1.0:
   resolved "https://registry.yarnpkg.com/jsbn/-/jsbn-0.1.1.tgz#a5e654c2e5a2deb5f201d96cefbca80c0ef2f513"
   integrity sha1-peZUwuWi3rXyAdls77yoDA7y9RM=
 
-jscodemods@cypress-io/jscodemods#01b546e:
+"jscodemods@https://github.com/cypress-io/jscodemods.git#01b546e":
   version "0.0.0"
-  resolved "https://codeload.github.com/cypress-io/jscodemods/tar.gz/01b546e627b7a6ffccd10579081d023d67394df8"
+  resolved "https://github.com/cypress-io/jscodemods.git#01b546e627b7a6ffccd10579081d023d67394df8"
 
 jscodeshift@0.3.20:
   version "0.3.20"
@@ -28572,9 +28572,9 @@ make-dir@^3.0.0, make-dir@^3.0.2, make-dir@^3.1.0:
   dependencies:
     semver "^6.0.0"
 
-make-empty-github-commit@cypress-io/make-empty-github-commit#4a592aedb776ba2f4cc88979055315a53eec42ee:
+"make-empty-github-commit@https://github.com/cypress-io/make-empty-github-commit.git#4a592aedb776ba2f4cc88979055315a53eec42ee":
   version "0.0.0-development"
-  resolved "https://codeload.github.com/cypress-io/make-empty-github-commit/tar.gz/4a592aedb776ba2f4cc88979055315a53eec42ee"
+  resolved "https://github.com/cypress-io/make-empty-github-commit.git#4a592aedb776ba2f4cc88979055315a53eec42ee"
   dependencies:
     "@octokit/rest" "18.10.0"
     debug "3.1.0"
@@ -28709,9 +28709,9 @@ map-visit@^1.0.0:
   dependencies:
     object-visit "^1.0.0"
 
-marionette-client@cypress-io/marionette-client#2cddf7d791cca7be5191d7fe103d58be7283957d:
+"marionette-client@https://github.com/cypress-io/marionette-client.git#2cddf7d791cca7be5191d7fe103d58be7283957d":
   version "1.9.5"
-  resolved "https://codeload.github.com/cypress-io/marionette-client/tar.gz/2cddf7d791cca7be5191d7fe103d58be7283957d"
+  resolved "https://github.com/cypress-io/marionette-client.git#2cddf7d791cca7be5191d7fe103d58be7283957d"
   dependencies:
     debug "^4.0.1"
     find-port "1.0.1"
@@ -31505,9 +31505,9 @@ opn@^5.1.0, opn@^5.5.0:
   dependencies:
     is-wsl "^1.1.0"
 
-opn@cypress-io/opn#2f4e9a216ca7bdb95dfae9d46d99ddf004b3cbb5:
+"opn@https://github.com/cypress-io/opn.git#2f4e9a216ca7bdb95dfae9d46d99ddf004b3cbb5":
   version "4.0.1"
-  resolved "https://codeload.github.com/cypress-io/opn/tar.gz/2f4e9a216ca7bdb95dfae9d46d99ddf004b3cbb5"
+  resolved "https://github.com/cypress-io/opn.git#2f4e9a216ca7bdb95dfae9d46d99ddf004b3cbb5"
   dependencies:
     object-assign "^4.0.1"
     pinkie-promise "^2.0.0"
@@ -44186,9 +44186,9 @@ xvfb-maybe@0.2.1:
     debug "^2.2.0"
     which "^1.2.4"
 
-xvfb@cypress-io/node-xvfb#22e3783c31d81ebe64d8c0df491ea00cdc74726a:
+"xvfb@https://github.com/cypress-io/node-xvfb.git#22e3783c31d81ebe64d8c0df491ea00cdc74726a":
   version "0.3.0"
-  resolved "https://codeload.github.com/cypress-io/node-xvfb/tar.gz/22e3783c31d81ebe64d8c0df491ea00cdc74726a"
+  resolved "https://github.com/cypress-io/node-xvfb.git#22e3783c31d81ebe64d8c0df491ea00cdc74726a"
 
 y18n@^3.2.0, y18n@^3.2.1:
   version "3.2.2"
