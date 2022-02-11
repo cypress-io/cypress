@@ -5,7 +5,7 @@ describe('Sidebar Navigation', () => {
       cy.scaffoldProject('pristine-with-e2e-testing')
       cy.openProject('todos')
       cy.startAppServer()
-      cy.visitApp()
+      cy.__incorrectlyVisitAppWithIntercept()
     })
 
     it('expands the left nav bar by default', () => {
@@ -122,6 +122,7 @@ describe('Sidebar Navigation', () => {
     })
 
     it('displays the project name and opens a modal to switch testing type', () => {
+      cy.__incorrectlyVisitAppWithIntercept()
       cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'true')
 
       cy.get('[data-cy="sidebar-header"]').within(() => {
@@ -231,7 +232,7 @@ describe('Sidebar Navigation', () => {
       cy.scaffoldProject('pristine-with-ct-testing')
       cy.openProject('pristine-with-ct-testing')
       cy.startAppServer('component')
-      cy.visitApp()
+      cy.__incorrectlyVisitAppWithIntercept()
 
       cy.get('[data-cy="sidebar-header"]').as('switchTestingType').click()
       cy.findByRole('dialog', {

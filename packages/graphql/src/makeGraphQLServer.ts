@@ -99,9 +99,46 @@ export async function makeGraphQLServer () {
     transports: ['websocket'],
   })
 
+  gqlSocketServer.on('connection', (socket) => {
+    socket.on('graphql:request', handleGraphQLSocketRequest)
+  })
+
   getCtx().setGqlSocketServer(gqlSocketServer)
 
   return dfd.promise
+}
+
+interface GraphQLSocketPayload {
+  query: string
+  variables?: Record<string, any>
+  operationName?: string
+}
+
+// TODO: replace this w/ persisted queries
+/**
+ * Handles the GraphQL operation run over WebSockets,
+ * rather than HTTP to clear up the console from extra chatter
+ * that doesn't originate from the users' web app.
+ * @param uid
+ * @param data
+ * @param callback
+ */
+export async function handleGraphQLSocketRequest (uid: string, payload: string, callback: Function) {
+  try {
+    const operation = JSON.parse(payload) as GraphQLSocketPayload
+
+    const result = await execute({
+      operationName: operation.operationName,
+      variableValues: operation.variables,
+      document: parse(operation.query),
+      schema: graphqlSchema,
+      contextValue: getCtx(),
+    })
+
+    callback(result)
+  } catch (e) {
+    callback({ data: null, errors: [e] })
+  }
 }
 
 export const graphQLHTTP = graphqlHTTP((req, res, params) => {

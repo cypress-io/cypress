@@ -36,7 +36,7 @@ describe('App: Settings', () => {
   it('opens cloud settings when clicking on "Manage Keys"', () => {
     cy.loginUser()
     cy.intercept('mutation-ExternalLink_OpenExternal', { 'data': { 'openExternal': true } }).as('OpenExternal')
-    cy.visitApp()
+    cy.__incorrectlyVisitAppWithIntercept()
     cy.findByText('Settings').click()
     cy.findByText('Project Settings').click()
     cy.findByText('Manage Keys').click()
@@ -46,7 +46,7 @@ describe('App: Settings', () => {
   })
 
   it('can reconfigure a project', () => {
-    cy.visitApp('settings')
+    cy.__incorrectlyVisitAppWithIntercept('settings')
 
     cy.intercept('mutation-SettingsContainer_ReconfigureProject', { 'data': { 'reconfigureProject': true } }).as('ReconfigureProject')
     cy.findByText('Reconfigure Project').click()
@@ -70,7 +70,7 @@ describe('App: Settings', () => {
         ctx.coreData.localSettings.preferences.preferredEditorBinary = undefined
       })
 
-      cy.visitApp('settings')
+      cy.__incorrectlyVisitAppWithIntercept('settings')
       cy.contains('Device Settings').click()
     })
 
@@ -83,7 +83,7 @@ describe('App: Settings', () => {
 
       // navigate away and come back
       // preferred editor selected from dropdown should have been persisted
-      cy.visitApp()
+      cy.__incorrectlyVisitAppWithIntercept()
       cy.get('[href="#/settings"]').click()
       cy.wait(100)
       cy.get('[data-cy="Device Settings"]').click()
