@@ -244,10 +244,12 @@ describe('code-generator', () => {
     }).not.throw()
   })
 
-  xit('should generate from scaffoldIntegration', async () => {
+  it('should generate from scaffoldIntegration', async () => {
     const target = path.join(tmpPath, 'scaffold-integration')
     const action: Action = {
-      templateDir: templates.scaffoldIntegration,
+      // TODO(lachlan): once cypress-kitchesink is using e2e instead of integration,  remove
+      // this replace.
+      templateDir: templates.scaffoldIntegration.replace('e2e', 'integration'),
       target,
     }
 
