@@ -81,6 +81,7 @@ export class MigrationDataSource {
     }
 
     this._config = null
+    this._oldConfigPromise = null
     const config = await this.parseCypressConfig()
 
     await this.initializeFlags()
