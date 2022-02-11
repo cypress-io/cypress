@@ -167,7 +167,7 @@ export default function (Commands, Cypress, cy, state) {
     const log = Cypress.log({
       instrument: 'agent',
       name,
-      type: name,
+      type: name, // pretty sure this results in an invalid type.
       functionName: method,
       count,
       callCount: 0,

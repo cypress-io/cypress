@@ -44,6 +44,30 @@ const shouldShowCount = (aliasesWithDuplicates: Array<Alias> | null, aliasName: 
   return _.includes(aliasesWithDuplicates, aliasName)
 }
 
+const CommandColumn = observer(({ model, isPinned }) => {
+  const toggleGroup = () => {
+    model.toggleOpen()
+  }
+
+  return (
+    <>
+      {!model.hasChildren && (
+        <div className='command-number-column'>
+          <PinIcon className={cs('command-pin', { 'command-pin-visible': isPinned })} />
+          {model._isPending() && <RunningIcon className='fa-spin' />}
+          {!model._isPending() && <span className='command-number'>{model.number || ''}</span>}
+        </div>
+      )}
+      {model.hasChildren && (
+        <ChevronIcon
+          className={cs('command-expander', { 'command-expander-is-open': model.isOpen })}
+          onClick={toggleGroup}
+        />
+      )}
+    </>
+  )
+})
+
 interface AliasReferenceProps {
   aliasObj: AliasObject
   model: CommandModel
@@ -256,43 +280,32 @@ class Command extends Component<Props> {
             onMouseEnter={() => this._snapshot(true)}
             onMouseLeave={() => this._snapshot(false)}
           >
-            <div className='command-wrapper-text'>
-              <span className='command-expander' >
-                <ChevronIcon />
-              </span>
-              <span className='command-number'>
-                <RunningIcon className='fa-spin' />
-                <span>{model.number || ''}</span>
-              </span>
-              <span className='command-pin'>
-                <PinIcon />
-              </span>
-              <span className='command-method'>
-                <span>{model.event && model.type !== 'system' ? `(${displayName(model)})` : displayName(model)}</span>
-              </span>
-              <span className='command-message'>
-                {model.referencesAlias ? <AliasesReferences model={model} aliasesWithDuplicates={aliasesWithDuplicates} /> : <Message model={model} />}
-              </span>
-              <span className='command-controls'>
-                <DeleteIcon className="studio-command-remove" onClick={this._removeStudioCommand} />
-                <Tooltip placement='top' title={visibleMessage(model)} className='cy-tooltip'>
-                  <span>
-                    <HiddenIcon className="command-invisible" />
-                  </span>
-                </Tooltip>
-                <Tooltip placement='top' title={`${model.numElements} matched elements`} className='cy-tooltip'>
-                  <span className='num-elements'>{model.numElements}</span>
-                </Tooltip>
-                <span className='alias-container'>
-                  <Interceptions model={model} />
-                  <Aliases model={model} aliasesWithDuplicates={aliasesWithDuplicates} isOpen={this._isOpen()} />
-                  <Tooltip placement='top' title={`This event occurred ${model.numChildren} times`} className='cy-tooltip'>
-                    <span className={cs('num-children', { 'has-alias': model.alias, 'has-children': model.numChildren > 1 })}>{model.numChildren}</span>
-                  </Tooltip>
+            <CommandColumn model={model} isPinned={this._isPinned()} />
+            <span className='command-method'>
+              <span>{model.event && model.type !== 'system' ? `(${displayName(model)})` : displayName(model)}</span>
+            </span>
+            <span className='command-message'>
+              {model.referencesAlias ? <AliasesReferences model={model} aliasesWithDuplicates={aliasesWithDuplicates} /> : <Message model={model} />}
+            </span>
+            <span className='command-controls'>
+              <DeleteIcon className="studio-command-remove" onClick={this._removeStudioCommand} />
+              <Tooltip placement='top' title={visibleMessage(model)} className='cy-tooltip'>
+                <span>
+                  <HiddenIcon className="command-invisible" />
                 </span>
-
+              </Tooltip>
+              <Tooltip placement='top' title={`${model.numElements} matched elements`} className='cy-tooltip'>
+                <span className='num-elements'>{model.numElements}</span>
+              </Tooltip>
+              <span className='alias-container'>
+                <Interceptions model={model} />
+                <Aliases model={model} aliasesWithDuplicates={aliasesWithDuplicates} isOpen={this._isOpen()} />
+                <Tooltip placement='top' title={`This event occurred ${model.numChildren} times`} className='cy-tooltip'>
+                  <span className={cs('num-children', { 'has-alias': model.alias, 'has-children': model.numChildren > 1 })}>{model.numChildren}</span>
+                </Tooltip>
               </span>
-            </div>
+
+            </span>
             <Progress model={model} />
 
           </div>

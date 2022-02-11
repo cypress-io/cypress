@@ -17,7 +17,7 @@ export interface InstrumentProps {
   message?: string
   type?: string
   testCurrentRetry?: number
-  state?: string | null
+  state?: 'active' | 'failed' | 'pending' | 'passed' | 'processing' | null
   referencesAlias?: Alias
   instrument?: 'agent' | 'command' | 'route'
   testId: string

@@ -5,13 +5,126 @@
   "hooks": [],
   "tests": [
     {
+      "id": "r2",
+      "title": "Passed Commands",
+      "state": "passed",
+      "commands": [
+        {
+          "hookId": "r2",
+          "id": 21,
+          "instrument": "command",
+          "message": "",
+          "name": "Clear Page",
+          "state": "passed",
+          "testId": "r2",
+          "timeout": 4000,
+          "numElements": 0,
+          "type": "system"
+        },
+        {
+          "hookId": "r2",
+          "id": 22,
+          "instrument": "command",
+          "message": "#element",
+          "name": "get",
+          "state": "passed",
+          "testId": "r2",
+          "timeout": 4000,
+          "numElements": 1,
+          "type": "parent"
+        },
+        {
+          "hookId": "r2",
+          "id": 23,
+          "instrument": "command",
+          "message": "element-text",
+          "name": "contains",
+          "state": "passed",
+          "testId": "r2",
+          "timeout": 4000,
+          "numElements": 0,
+          "type": "child"
+        },
+        {
+          "hookId": "r2",
+          "id": "group1",
+          "instrument": "command",
+          "name": "within",
+          "state": "passed",
+          "group": "group1",
+          "testId": "r2",
+          "timeout": 4000,
+          "numElements": 0,
+          "type": "child"
+        },
+        {
+          "hookId": "r2",
+          "id": "group1",
+          "instrument": "command",
+          "name": "get",
+          "message": "span within #element",
+          "state": "passed",
+          "group": "group1",
+          "testId": "r2",
+          "timeout": 4000,
+          "numElements": 1,
+          "type": "parent"
+        },
+        {
+          "hookId": "r2",
+          "id": "group1",
+          "instrument": "command",
+          "name": "assert",
+          "message": "span is visible",
+          "state": "passed",
+          "group": "group1",
+          "testId": "r2",
+          "timeout": 4000,
+          "type": "parent"
+        },
+        {
+          "hookId": "r2",
+          "id": 27,
+          "instrument": "route",
+          "event": true,
+          "name": "route",
+          "message": "http://localhost:3000",
+          "method": "*",
+          "state": "passed",
+          "testId": "r2",
+          "timeout": 4000,
+          "numElements": 0,
+          "type": "parent"
+        },
+        {
+          "hookId": "r2",
+          "id": 27,
+          "instrument": "command",
+          "message": "#matches-twice",
+          "name": "get",
+          "state": "passed",
+          "testId": "r2",
+          "timeout": 4000,
+          "numElements": 2,
+          "type": "parent"
+        }
+      ],
+      "invocationDetails": {
+        "absoluteFile": "/absolute/path/to/foo_spec.js",
+        "column": 8,
+        "line": 34,
+        "originalFile": "path/to/foo_spec.js",
+        "relativeFile": "path/to/foo_spec.js"
+      }
+    },
+    {
       "id": "r3",
       "title": "test 1",
       "state": "passed",
       "commands": [
         {
           "hookId": "r3",
-          "id": 1,
+          "id": 31,
           "instrument": "command",
           "message": "http://localhost:3000",
           "name": "visit",
@@ -22,7 +135,7 @@
         },
         {
           "hookId": "r3",
-          "id": 2,
+          "id": 32,
           "instrument": "command",
           "message": "#exists",
           "name": "get",

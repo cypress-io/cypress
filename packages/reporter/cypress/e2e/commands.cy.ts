@@ -2,13 +2,40 @@ import { EventEmitter } from 'events'
 import { RootRunnable } from '../../src/runnables/runnables-store'
 import { addCommand } from '../support/utils'
 
-describe('commands', () => {
+describe('commands', { viewportWidth: 400, viewportHeight: 900 }, () => {
   let runner: EventEmitter
   let runnables: RootRunnable
   const inProgressStartedAt = (new Date(2000, 0, 1)).toISOString()
 
-  beforeEach(() => {
+  const setupCommands = () => {
     cy.fixture('runnables_commands').then((_runnables) => {
+      const test = _runnables.tests[0]
+
+      const states = ['passed', 'failed']
+
+      states.forEach((state, index) => {
+        test.title = `${state} Commands`
+        test.state = state === 'pending' ? 'passed' : state
+
+        const commands = []
+
+        test.commands.forEach((cmd) => {
+          let uniqueID
+          let group = undefined
+
+          if (cmd.group) {
+            uniqueID = `group-${index * 100 * (Math.random() + 1)}`
+            group = uniqueID
+          } else {
+            uniqueID = (cmd.id * (index + 1) * 10)
+          }
+
+          commands.push({ ...cmd, state, id: uniqueID, group })
+        })
+
+        _runnables.tests[index] = { ... test, commands }
+      })
+
       runnables = _runnables
     })
 
@@ -40,7 +67,42 @@ describe('commands', () => {
       })
     })
 
-    cy.contains('http://localhost:3000') // ensure test content has loaded
+    // cy.contains('http://localhost:3000') // ensure test content has loaded
+  }
+
+  describe('all command', () => {
+    beforeEach(() => {
+      setupCommands()
+      // cy.contains('passed Commands').click()
+      // cy.contains('pending Commands').click()
+    })
+
+    it.only('displays all the commands', () => {
+      cy.get('.command')
+      .should('have.length', 5)
+    })
+  })
+
+  describe('failed command', () => {
+    beforeEach(() => {
+      setupCommands('failed')
+      cy.contains('failed Commands') // failed is open by default
+    })
+
+    it('displays all the commands', () => {
+      cy.get('.command').should('have.length', 7)
+    })
+  })
+
+  describe('pending command', () => {
+    beforeEach(() => {
+      setupCommands('pending')
+      cy.contains('pending Commands').click() // failed is open by default
+    })
+
+    it('displays all the commands', () => {
+      cy.get('.command').should('have.length', 5)
+    })
   })
 
   it('displays all the commands', () => {
@@ -74,16 +136,18 @@ describe('commands', () => {
   })
 
   it('displays the number', () => {
-    cy.contains('http://localhost:3000').closest('.command-message').siblings('.command-number')
+    cy.contains('http://localhost:3000')
+    .closest('.command-message')
+    .siblings('.command-number-column')
     .should('have.text', '1')
 
-    cy.contains('#exists').closest('.command-message').siblings('.command-number')
+    cy.contains('#exists').closest('.command-message').siblings('.command-number-column')
     .should('have.text', '2')
 
-    cy.contains('#doesnt-exist').closest('.command-message').siblings('.command-number')
+    cy.contains('#doesnt-exist').closest('.command-message').siblings('.command-number-column')
     .should('have.text', '3')
 
-    cy.contains('.some-els').closest('.command-message').siblings('.command-number')
+    cy.contains('.some-els').closest('.command-message').siblings('.command-number-column')
     .should('have.text', '4')
   })
 
@@ -91,7 +155,7 @@ describe('commands', () => {
     cy.contains('GET ---').closest('.command')
     .should('have.class', 'command-is-event')
 
-    cy.contains('GET ---').closest('.command-message').siblings('.command-number')
+    cy.contains('GET ---').closest('.command-message').siblings('.command-number-column')
     .should('have.text', '')
 
     cy.contains('GET ---').closest('.command-message').siblings('.command-method')
@@ -244,9 +308,21 @@ describe('commands', () => {
 
   context('clicking', () => {
     it('pins the command', () => {
-      cy.contains('#exists').click()
+      cy.get('.command:nth-child(2)')
+      .should('contain', '#exists')
+      // .should('have.css', 'background-color', 'rgba(0, 0, 0, 0)')
+      // .should('have.css', 'background-color', '#171926')
+      .trigger('mouseover')
+      // .should('have.css', 'background-color', '#2e3247')
+      .click()
+
+      // cy.get('.command-pin').should('be.visible')
       .closest('.command')
+      // .should('have.css', 'background-color', '#151a50')
       .should('have.class', 'command-is-pinned')
+      .find('.command-pin')
+      .trigger('mouseover')
+      // .should('have.css', 'background-color', '#1c236d')
     })
 
     it('shows a tooltip', () => {

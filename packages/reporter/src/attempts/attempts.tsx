@@ -80,7 +80,7 @@ class Attempt extends Component<AttemptProps> {
     const { model } = this.props
 
     // HACK: causes component update when command log is added
-    model.commands.length
+    // model.commands.length
 
     return (
       <li
@@ -106,7 +106,7 @@ const Attempts = observer(({ test, scrollIntoView }: {test: TestModel, scrollInt
   return (<ul className={cs('attempts', {
     'has-multiple-attempts': test.hasMultipleAttempts,
   })}>
-    {_.map(test.attempts, (attempt) => {
+    {test.attempts.map((attempt) => {
       return (
         <Attempt
           key={attempt.id}
