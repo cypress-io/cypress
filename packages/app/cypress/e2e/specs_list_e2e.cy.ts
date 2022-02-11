@@ -42,9 +42,7 @@ describe('App: Spec List (E2E)', () => {
   })
 
   // TODO: find a test project that shows git statuses
-  it.skip('shows a git status for each spec', () => {
-
-  })
+  it.skip('shows a git status for each spec', () => {})
 
   it('collapses or expands folders when clicked, hiding or revealing the specs within it', () => {
     cy.get('[data-cy="spec-item"]').should('contain', 'dom-content.spec.js')
