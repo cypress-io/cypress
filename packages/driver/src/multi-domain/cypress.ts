@@ -83,8 +83,8 @@ const setup = () => {
 
   // Listen for window load events from the primary window to resolve page loads
   specBridgeCommunicator.on('window:load', ({ url }) => {
-    // @ts-ignore
     cy.isStable(true, 'load')
+    // @ts-ignore
     Cypress.emit('internal:window:load', { type: 'cross:domain', url })
   })
 

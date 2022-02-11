@@ -34,7 +34,7 @@ export const handleDomainFn = (cy: $Cy, specBridgeCommunicator: SpecBridgeDomain
 
     const stateUpdates = {
       ...state,
-      redirectionCount, {}, // This is fine to set to an empty object, we want to refresh this count on each switchToDomain command.
+      redirectionCount: {}, // This is fine to set to an empty object, we want to refresh this count on each switchToDomain command.
       runnable: {
         ...state.runnable,
         clearTimeout () {},
@@ -43,6 +43,9 @@ export const handleDomainFn = (cy: $Cy, specBridgeCommunicator: SpecBridgeDomain
         isPending () {},
       },
     }
+
+    // Update the state with the necessary values from the primary domain
+    cy.state(stateUpdates)
 
     // Set the state ctx to the runnable ctx to ensure they remain in sync
     cy.state('ctx', cy.state('runnable').ctx)
