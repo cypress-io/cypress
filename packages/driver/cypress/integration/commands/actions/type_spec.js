@@ -630,6 +630,17 @@ describe('src/cy/commands/actions/type - #type', () => {
       })
     })
 
+    describe(`does not trigger if keyup prevented`, () => {
+      it('target-button-key-up-prevented', () => {
+        cy.get(`#target-button-key-up-prevented`).focus().type(' ')
+
+        cy.get('li').should('have.length', 3)
+        cy.get('li').eq(0).should('have.text', 'keydown')
+        cy.get('li').eq(1).should('have.text', 'keypress')
+        cy.get('li').eq(2).should('have.text', 'keyup')
+      })
+    })
+
     describe('triggers after other characters', () => {
       targets.forEach((targetId) => {
         it(targetId, () => {

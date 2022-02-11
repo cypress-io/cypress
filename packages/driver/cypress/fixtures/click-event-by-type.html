@@ -8,6 +8,7 @@
   <body>
     <button id="reset">clear log</button>
     <button id="target-button-tag">button tag</button>
+    <button id="target-button-key-up-prevented">button tag key up prevented</button>
     <input id="target-input-button" type="button" value="input button" />
     <input id="target-input-image" type="image" value="input image" />
     <input id="target-input-reset" type="reset" value="input reset" />
@@ -46,6 +47,7 @@
 
       const targets = [
         'target-button-tag',
+        'target-button-key-up-prevented',
         'target-input-button',
         'target-input-image',
         'target-input-reset',
@@ -66,7 +68,10 @@
         target.addEventListener("click", () => {
           updateLog("click");
         });
-        target.addEventListener("keyup", () => {
+        target.addEventListener("keyup", (event) => {
+          if (targetId === 'target-button-key-up-prevented') {
+            event.preventDefault()
+          }
           updateLog("keyup");
         });
       });
