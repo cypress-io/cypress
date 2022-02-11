@@ -72,7 +72,7 @@ describe('net-stubbing util', () => {
 
     it('returns binary for form-data bodies', () => {
       const formDataRequest = {
-        body: new FormData(),
+        body: Buffer.from('hello world'),
         headers: {
           'content-type': 'multipart/form-data',
         },
