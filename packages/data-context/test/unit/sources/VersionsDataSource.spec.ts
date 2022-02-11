@@ -104,49 +104,6 @@ describe('VersionsDataSource', () => {
       })
     })
 
-    it('loads the manifest for the latest version with minimal headers and queries npm for release dates defaulting to current date', async () => {
-      nmiStub.throws()
-
-      fetchStub
-      .withArgs('https://download.cypress.io/desktop.json', {
-        headers: {
-          'Content-Type': 'application/json',
-          'x-cypress-version': currentCypressVersion,
-          'x-os-name': 'darwin',
-          'x-arch': 'x64',
-          'x-initial-launch': String(false),
-        },
-      }).resolves({
-        json: sinon.stub().resolves({
-          name: 'Cypress',
-          version: '14.0.0',
-        }),
-      })
-
-      const privateVersionsDataSource = versionsDataSource as any
-
-      privateVersionsDataSource.ctx.coreData.currentTestingType = null
-      privateVersionsDataSource._npmMetadata = Promise.resolve({
-        modified: '2022-01-31T21:14:41.593Z',
-        created: '2014-03-09T01:07:35.219Z',
-      })
-
-      const versionInfo = await versionsDataSource.versionData()
-
-      expect(versionInfo).to.eql({
-        current: {
-          id: currentCypressVersion,
-          version: currentCypressVersion,
-          released: mockNow.toISOString(),
-        },
-        latest: {
-          id: '14.0.0',
-          version: '14.0.0',
-          released: mockNow.toISOString(),
-        },
-      })
-    })
-
     it('resets telemetry data triggering a new call to get the latest version', async () => {
       const currentCypressVersion = pkg.version
 
