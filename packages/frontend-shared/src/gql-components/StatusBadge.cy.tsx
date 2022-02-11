@@ -1,6 +1,6 @@
 import { ref } from 'vue'
 import StatusBadge from './StatusBadge.vue'
-import Button from './Button.vue'
+import Button from '../components/Button.vue'
 
 describe('<StatusBadge />', () => {
   it('renders and toggles', { viewportWidth: 500, viewportHeight: 200 }, () => {
@@ -12,6 +12,9 @@ describe('<StatusBadge />', () => {
           titleOn="configured"
           titleOff="not configured"
           status={status.value}
+          testingType='component'
+          isRunning={false}
+          isApp={false}
         />
         <br /><br />
         {// @ts-ignore
