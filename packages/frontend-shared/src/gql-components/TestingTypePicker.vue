@@ -1,5 +1,8 @@
 <template>
-  <div class="flex m-24px justify-center">
+  <div
+    v-if="props.gql.currentProject"
+    class="flex justify-center m-24px"
+  >
     <Card
       v-for="tt in TESTING_TYPES"
       :key="tt.key"
@@ -11,16 +14,20 @@
       :hover-icon="tt.iconSolid"
       :icon-size="64"
       variant="jade"
-      @click="emits('pick', tt.key)"
-      @keyup.enter="emits('pick', tt.key)"
-      @keyup.space="emits('pick', tt.key)"
+      @click="emits('pick', tt.key, currentTestingType)"
+      @keyup.enter="emits('pick', tt.key, currentTestingType)"
+      @keyup.space="emits('pick', tt.key, currentTestingType)"
     >
       <template #footer>
         <StatusBadge
           class="mt-16px"
-          :title-on="t('setupPage.testingCard.configured')"
+          :title-on="tt.key === currentTestingType ? t('setupPage.testingCard.running') : t('setupPage.testingCard.configured')"
           :title-off="t('setupPage.testingCard.notConfigured')"
           :status="tt.configured || false"
+          :testing-type="tt.key"
+          :is-running="tt.key === currentTestingType"
+          :is-app="props.isApp"
+          @choose-a-browser="emits('pick', tt.key, currentTestingType)"
         />
       </template>
     </Card>
@@ -29,14 +36,15 @@
 
 <script lang="ts" setup>
 import { gql } from '@urql/vue'
-import type { TestingTypePickerFragment } from '../generated/graphql'
+import type { TestingTypeEnum, TestingTypePickerFragment } from '../generated/graphql'
 import Card from '@cy/components/Card.vue'
-import StatusBadge from '@cy/components/StatusBadge.vue'
+import StatusBadge from './StatusBadge.vue'
 import IconE2E from '~icons/cy/testing-type-e2e_x64.svg'
 import IconE2ESolid from '~icons/cy/testing-type-e2e-solid_x64.svg'
 import IconComponent from '~icons/cy/testing-type-component_x64.svg'
 import IconComponentSolid from '~icons/cy/testing-type-component-solid_x64.svg'
 import { useI18n } from '@cy/i18n'
+import { computed } from 'vue'
 
 const { t } = useI18n()
 
@@ -53,10 +61,11 @@ fragment TestingTypePicker on Query {
 
 const props = defineProps<{
   gql: TestingTypePickerFragment
+  isApp: boolean
 }>()
 
 const emits = defineEmits<{
-  (eventName: 'pick', testingType: 'component' | 'e2e'): void
+  (eventName: 'pick', testingType: TestingTypeEnum, currentTestingType: TestingTypeEnum): void
 }>()
 
 const TESTING_TYPES = [
@@ -77,5 +86,7 @@ const TESTING_TYPES = [
     configured: props.gql.currentProject?.isCTConfigured,
   },
 ] as const
+
+const currentTestingType = computed(() => props.gql.currentProject?.currentTestingType as TestingTypeEnum)
 
 </script>

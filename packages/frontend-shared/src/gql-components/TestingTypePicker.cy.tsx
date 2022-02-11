@@ -16,7 +16,7 @@ describe('TestingTypePicker', () => {
         }
       },
       render: (gql) => {
-        return <TestingTypePicker gql={gql} onPick={pick} />
+        return <TestingTypePicker gql={gql} onPick={pick} isApp={false}/>
       },
     })
 
@@ -32,14 +32,12 @@ describe('TestingTypePicker', () => {
       cy.contains(defaultMessages.setupPage.testingCard.configured).should('be.visible')
     })
 
-    // one snapshot before any clicks
-    cy.percySnapshot()
+    cy.percySnapshot('before click')
 
     cy.contains(e2e.name).click()
     cy.contains(component.name).click()
     cy.get('@pick').should('have.been.calledTwice')
 
-    // one snapshot after, to capture a focus style
-    cy.percySnapshot()
+    cy.percySnapshot('after click - focus')
   })
 })

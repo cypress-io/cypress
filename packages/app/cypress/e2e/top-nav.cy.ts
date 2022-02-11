@@ -44,7 +44,7 @@ describe('App Top Nav Workflows', () => {
 
         cy.openProject('launchpad')
         cy.startAppServer()
-        cy.visitApp()
+        cy.__incorrectlyVisitAppWithIntercept()
       })
 
       it('shows the current browser in the top nav browser list button', () => {
@@ -88,15 +88,12 @@ describe('App Top Nav Workflows', () => {
       it('performs mutations to update and relaunch browser', () => {
         cy.findByTestId('top-nav-active-browser').click()
 
-        cy.intercept('mutation-TopNav_SetBrowser').as('setBrowser')
-        cy.intercept('mutation-TopNav_LaunchOpenProject').as('launchOpenProject')
+        cy.intercept('mutation-VerticalBrowserListItems_SetBrowser').as('setBrowser')
 
         cy.findAllByTestId('top-nav-browser-list-item').eq(1).click().then(($element) => {
           cy.wait('@setBrowser').then(({ request }) => {
             expect(request.body.variables.id).to.eq($element.attr('data-browser-id'))
           })
-
-          cy.wait('@launchOpenProject')
         })
       })
     })
@@ -124,7 +121,7 @@ describe('App Top Nav Workflows', () => {
 
         cy.openProject('launchpad')
         cy.startAppServer()
-        cy.visitApp()
+        cy.__incorrectlyVisitAppWithIntercept()
 
         cy.findByTestId('app-header-bar').validateExternalLink({
           name: 'v10.0.0',
@@ -199,7 +196,7 @@ describe('App Top Nav Workflows', () => {
         cy.findByRole('dialog', { name: 'Upgrade to Cypress 10.1.0' }).as('upgradeModal').within(() => {
           cy.validateExternalLink({ name: 'Need help', href: 'https://on.cypress.io' })
           cy.contains('You are currently running Version 10.0.0 of Cypress').should('be.visible')
-          cy.contains('npm install --save-dev cypress@10.1.0').should('be.visible')
+          cy.contains('npm install -D cypress@10.1.0').should('be.visible')
           cy.findByRole('button', { name: 'Close' }).click()
         })
 
@@ -213,7 +210,7 @@ describe('App Top Nav Workflows', () => {
       cy.findBrowsers()
       cy.openProject('launchpad')
       cy.startAppServer()
-      cy.visitApp()
+      cy.__incorrectlyVisitAppWithIntercept()
 
       cy.findByTestId('app-header-bar').findByRole('button', { name: 'Docs', expanded: false }).as('docsButton')
     })
@@ -286,7 +283,7 @@ describe('App Top Nav Workflows', () => {
         cy.openProject('launchpad')
         cy.startAppServer()
         cy.loginUser()
-        cy.visitApp()
+        cy.__incorrectlyVisitAppWithIntercept()
 
         cy.findByTestId('app-header-bar').findByRole('button', { name: 'Profile and Log Out', expanded: false }).as('logInButton')
       })

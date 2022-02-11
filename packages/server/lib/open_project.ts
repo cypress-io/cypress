@@ -43,20 +43,6 @@ export class OpenProject {
     return this.projectBase
   }
 
-  changeUrlToSpec (spec: Cypress.Cypress['spec']) {
-    if (!this.projectBase) {
-      return
-    }
-
-    const newSpecUrl = getSpecUrl({
-      spec,
-      browserUrl: this.projectBase.cfg.browserUrl,
-      projectRoot: this.projectBase.projectRoot,
-    })
-
-    this.projectBase.changeToUrl(newSpecUrl)
-  }
-
   async launch (browser, spec: Cypress.Cypress['spec'], options: LaunchOpts = {
     onError: () => undefined,
   }) {
@@ -183,6 +169,17 @@ export class OpenProject {
           return browsers.connectToExisting(browser, options, automation)
         }
 
+        if (options.shouldLaunchNewTab) {
+          const onInitializeNewBrowserTab = async () => {
+            await this.resetBrowserState()
+          }
+
+          // If we do not launch the browser,
+          // we tell it that we are ready
+          // to receive the next spec
+          return browsers.connectToNewSpec(browser, { onInitializeNewBrowserTab, ...options }, automation)
+        }
+
         return browsers.open(browser, options, automation, this._ctx)
       })
     }
@@ -192,6 +189,14 @@ export class OpenProject {
 
   closeBrowser () {
     return browsers.close()
+  }
+
+  async closeBrowserTabs () {
+    return this.projectBase?.closeBrowserTabs()
+  }
+
+  async resetBrowserState () {
+    return this.projectBase?.resetBrowserState()
   }
 
   closeOpenProjectAndBrowsers () {
@@ -263,15 +268,15 @@ export class OpenProject {
     try {
       const cfg = await this.projectBase.initializeConfig()
 
-      const { specPattern, ignoreSpecPattern, additionalIgnorePattern } = await this._ctx.actions.project.setSpecsFoundBySpecPattern({
+      const { specPattern, excludeSpecPattern, additionalIgnorePattern } = await this._ctx.actions.project.setSpecsFoundBySpecPattern({
         path,
         testingType,
         specPattern: options.spec || cfg[testingType].specPattern,
-        ignoreSpecPattern: cfg[testingType].ignoreSpecPattern,
+        excludeSpecPattern: cfg[testingType].excludeSpecPattern,
         additionalIgnorePattern: testingType === 'component' ? cfg?.e2e?.specPattern : undefined,
       })
 
-      this._ctx.project.startSpecWatcher(path, testingType, specPattern, ignoreSpecPattern, additionalIgnorePattern)
+      this._ctx.project.startSpecWatcher(path, testingType, specPattern, excludeSpecPattern, additionalIgnorePattern)
 
       await this.projectBase.open()
     } catch (err: any) {

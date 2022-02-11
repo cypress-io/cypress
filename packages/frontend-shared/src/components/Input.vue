@@ -28,7 +28,7 @@
         :style="style"
         :type="type"
         :spellcheck="false"
-        :class="[_inputClasses, {'hocus-default text-gray-800': !hasError, 'hocus-error text-error-500': hasError}]"
+        :class="[_inputClasses, {'hocus-default text-gray-800': !hasError, 'border-error-300 ring-2 ring-error-100 hocus-error text-error-500': hasError}]"
         class="rounded-md border-gray-100 leading-tight w-full py-9px pl-10 placeholder-gray-400 text-gray-800 block disabled:bg-gray-100 disabled:text-gray-400"
         v-bind="inputAttrs"
       >

@@ -50,6 +50,7 @@ export interface InjectedConfigApi {
   updateWithPluginValues(config: FullConfig, modifiedConfig: Partial<Cypress.ConfigOptions>): FullConfig
   setupFullConfigWithDefaults(config: SetupFullConfigOptions): Promise<FullConfig>
   validateRootConfigBreakingChanges<T extends Cypress.ConfigOptions>(config: Partial<T>, onWarning: (warningMsg: string) => void, onErr: (errMsg: string) => never): T
+  validateTestingTypeConfigBreakingChanges<T extends Cypress.ConfigOptions>(config: Partial<T>, testingType: Cypress.TestingType, onWarning: (warningMsg: string) => void, onErr: (errMsg: string) => never): T
 }
 
 type State<S, V = undefined> = V extends undefined ? {state: S, value?: V } : {state: S, value: V}
@@ -334,7 +335,7 @@ export class ProjectLifecycleManager {
       return
     }
 
-    if (this.isTestingTypeConfigured(testingType)) {
+    if (this.isTestingTypeConfigured(testingType) && !(this.ctx.coreData.forceReconfigureProject && this.ctx.coreData.forceReconfigureProject[testingType])) {
       this.loadTestingType()
     }
   }
@@ -442,6 +443,8 @@ export class ProjectLifecycleManager {
     if (this._currentTestingType) {
       const testingTypeOverrides = configFileContents[this._currentTestingType] ?? {}
 
+      this.validateTestingTypeConfig(testingTypeOverrides)
+
       // TODO: pass in options.config overrides separately, so they are reflected in the UI
       configFileContents = { ...configFileContents, ...testingTypeOverrides }
     }
@@ -542,6 +545,7 @@ export class ProjectLifecycleManager {
 
     promise.then((result) => {
       if (this._configResult.value === promise) {
+        debug(`config is loaded for file`, this.configFilePath)
         this._configResult = { state: 'loaded', value: result }
         this.validateConfigFile(this.configFilePath, result.initialConfig)
         this.onConfigLoaded(child, ipc, result)
@@ -551,16 +555,29 @@ export class ProjectLifecycleManager {
     })
     .catch((err) => {
       debug(`catch %o`, err)
-      // this._cleanupIpc(ipc)
-      if (this._configResult.value === promise) {
-        this._configResult = { state: 'errored', value: err }
-      }
+      this._cleanupIpc(ipc)
+      this._configResult = { state: 'errored', value: err }
 
       this.onLoadError(err)
       this.ctx.emitter.toLaunchpad()
     })
 
     return promise.then((v) => v.initialConfig)
+  }
+
+  private validateTestingTypeConfig (config: Cypress.ConfigOptions) {
+    assert(this._currentTestingType)
+
+    return this.ctx._apis.configApi.validateTestingTypeConfigBreakingChanges(
+      config,
+      this._currentTestingType,
+      (warning, ...args) => {
+        return this.ctx.warning(warning, ...args)
+      },
+      (err, ...args) => {
+        throw this.ctx.error(err, ...args)
+      },
+    )
   }
 
   private validateConfigRoot (config: Cypress.ConfigOptions) {
@@ -598,38 +615,37 @@ export class ProjectLifecycleManager {
       return
     }
 
-    const legacyFileWatcher = this.addWatcher(_.without([
+    const legacyFileWatcher = this.addWatcher([
       this._pathToFile('cypress.json'),
       this._pathToFile('cypress.config.js'),
       this._pathToFile('cypress.config.ts'),
-    ], this.configFilePath))
+    ])
 
-    legacyFileWatcher.on('all', (change) => {
-      const metaState = this._projectMetaState
-      const nextMetaState = this.refreshMetaState()
+    legacyFileWatcher.on('all', (event, file) => {
+      debug('WATCHER: config file event', event, file)
+      let shouldReloadConfig = this.configFile === file
 
-      if (!_.isEqual(metaState, nextMetaState)) {
+      if (!shouldReloadConfig) {
+        const metaState = this._projectMetaState
+        const nextMetaState = this.refreshMetaState()
+
+        shouldReloadConfig = !_.isEqual(metaState, nextMetaState)
+      }
+
+      if (shouldReloadConfig) {
         this.ctx.coreData.baseError = null
         this.reloadConfig().catch(this.onLoadError)
       }
+    }).on('error', (err) => {
+      debug('error watching config files %O', err)
+      this.ctx.coreData.baseError = err
     })
-
-    this.initializeConfigFileWatcher()
 
     const cypressEnvFileWatcher = this.addWatcher(this.envFilePath)
 
     cypressEnvFileWatcher.on('all', () => {
       this.ctx.coreData.baseError = null
       this.reloadCypressEnvFile().catch(this.onLoadError)
-    })
-  }
-
-  initializeConfigFileWatcher () {
-    this._configWatcher = this.addWatcher(this.configFilePath)
-
-    this._configWatcher.on('all', () => {
-      this.ctx.coreData.baseError = null
-      this.reloadConfig().catch(this.onLoadError)
     })
   }
 
@@ -641,11 +657,14 @@ export class ProjectLifecycleManager {
   reloadConfig () {
     if (this._configResult.state === 'errored' || this._configResult.state === 'loaded') {
       this._configResult = { state: 'pending' }
+      debug('reloadConfig refresh')
 
       return this.initializeConfig()
     }
 
     if (this._configResult.state === 'loading' || this._configResult.state === 'pending') {
+      debug('reloadConfig first load')
+
       return this.initializeConfig()
     }
 
@@ -1149,14 +1168,7 @@ export class ProjectLifecycleManager {
   }
 
   setConfigFilePath (lang: 'ts' | 'js') {
-    const configFilePath = this._configFilePath
-
     this._configFilePath = this._pathToFile(`cypress.config.${lang}`)
-
-    if (configFilePath !== this._configFilePath && this._configWatcher) {
-      this.closeWatcher(this._configWatcher)
-      this.initializeConfigFileWatcher()
-    }
   }
 
   private _pathToFile (file: string) {

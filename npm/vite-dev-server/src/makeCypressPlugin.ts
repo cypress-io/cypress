@@ -1,7 +1,7 @@
-import { resolve } from 'path'
+import { resolve, sep } from 'path'
 import { readFile } from 'fs/promises'
 import Debug from 'debug'
-import { ModuleNode, Plugin, ViteDevServer, normalizePath } from 'vite'
+import { ModuleNode, normalizePath, Plugin, ViteDevServer } from 'vite'
 
 const debug = Debug('cypress:vite-dev-server:plugin')
 
@@ -108,8 +108,8 @@ export const makeCypressPlugin = (
 
       if (id === 'cypress:config') {
         return `
-export const hasSupportPath = ${JSON.stringify(Boolean(normalizedSupportFilePath))}
-export const originAutUrl = ${JSON.stringify(`${buildMode ? '/' : ''}${namespace}/iframes/${normalizePath(projectRoot)}/`)}`
+export const hasSupportPath = ${JSON.stringify(!!supportFilePath)}
+export const originAutUrl = ${JSON.stringify(`/${namespace}/iframes/${normalizePath(projectRoot)}/`)}`
       }
     },
     configureServer: async (server: ViteDevServer) => {

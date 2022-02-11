@@ -1,11 +1,13 @@
 import type { CodegenTypeMap, Wizard } from '../generated/test-graphql-types.gen'
 import { BUNDLERS, CODE_LANGUAGES, FRONTEND_FRAMEWORKS, PACKAGES_DESCRIPTIONS } from '@packages/types/src/constants'
-import { MaybeResolver, testNodeId } from './clientTestUtils'
+import type { MaybeResolver } from './clientTestUtils'
+import { testNodeId } from './clientTestUtils'
 
 export const allBundlers = BUNDLERS.map((bundler, idx) => {
   return {
     ...testNodeId('WizardBundler'),
     isSelected: idx === 0,
+    isDetected: false,
     ...bundler,
   }
 })
@@ -36,6 +38,7 @@ export const stubWizard: MaybeResolver<Wizard> = {
       ...framework,
       supportedBundlers,
       isSelected: idx === 0,
+      isDetected: false,
     }
   }),
   language: {
@@ -43,12 +46,14 @@ export const stubWizard: MaybeResolver<Wizard> = {
     type: 'ts',
     name: 'TypeScript',
     isSelected: true,
+    isDetected: false,
   },
   allLanguages: CODE_LANGUAGES.map((language, idx) => {
     return {
       ...testNodeId('WizardCodeLanguage'),
       ...language,
       isSelected: idx === 0,
+      isDetected: false,
     }
   }),
 }

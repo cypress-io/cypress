@@ -54,7 +54,8 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
 
   it('shows correct "waiting for login" status', () => {
     cy.mountFragment(LoginModalFragmentDoc, {
-      onResult: (result) => {
+      onResult: (result, ctx) => {
+        ctx.isAuthBrowserOpened = true
         result.__typename = 'Query'
         result.isAuthBrowserOpened = true
       },
@@ -91,11 +92,6 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
   })
 
   describe('no internet connection', () => {
-    beforeEach(() => {
-      cy.goOnline()
-      cy.goOffline()
-    })
-
     afterEach(() => {
       cy.goOnline()
     })
@@ -104,6 +100,8 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
       cy.mountFragment(LoginModalFragmentDoc, {
         render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><LoginModal gql={gqlVal} modelValue={true} /></div>,
       })
+
+      cy.goOffline()
 
       cy.contains('You have no internet connection')
       cy.findByRole('button', { name: text.login.actionLogin })
@@ -115,6 +113,8 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
       cy.mountFragment(LoginModalFragmentDoc, {
         render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><LoginModal gql={gqlVal} modelValue={true} /></div>,
       })
+
+      cy.goOffline()
 
       cy.contains('You have no internet connection')
       cy.findByRole('button', { name: text.login.actionLogin })

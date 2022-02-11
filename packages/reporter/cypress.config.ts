@@ -2,7 +2,6 @@ import { defineConfig } from 'cypress'
 
 export default defineConfig({
   'projectId': 'ypt4pf',
-  'baseUrl': 'http://localhost:5006',
   'viewportWidth': 400,
   'viewportHeight': 450,
   'reporter': '../../node_modules/cypress-multi-reporters/index.js',
@@ -14,6 +13,7 @@ export default defineConfig({
     'openMode': 0,
   },
   'e2e': {
+    'baseUrl': 'http://localhost:5006',
     setupNodeEvents (on, config) {
       const express = require('express')
 

@@ -19,6 +19,7 @@ import * as session from './session'
 import type { Socket } from '@packages/socket'
 import path from 'path'
 import { getCtx } from '@packages/data-context'
+import { handleGraphQLSocketRequest } from '@packages/graphql/src/makeGraphQLServer'
 
 type StartListeningCallbacks = {
   onSocketConnection: (socket: any) => void
@@ -74,6 +75,8 @@ const retry = (fn: (res: any) => void) => {
 }
 
 export class SocketBase {
+  private _sendCloseBrowserTabsMessage
+  private _sendResetBrowserStateMessage
   private _sendFocusBrowserMessage
 
   protected ended: boolean
@@ -275,6 +278,14 @@ export class SocketBase {
         })
       })
 
+      this._sendCloseBrowserTabsMessage = async () => {
+        await automationRequest('close:browser:tabs', {})
+      }
+
+      this._sendResetBrowserStateMessage = async () => {
+        await automationRequest('reset:browser:state', {})
+      }
+
       this._sendFocusBrowserMessage = async () => {
         await automationRequest('focus:browser:window', {})
       }
@@ -300,6 +311,8 @@ export class SocketBase {
 
         return socket.join('runner')
       })
+
+      socket.on('graphql:request', handleGraphQLSocketRequest)
 
       // TODO: what to do about runner disconnections?
 
@@ -542,6 +555,18 @@ export class SocketBase {
 
   changeToUrl (url) {
     return this.toRunner('change:to:url', url)
+  }
+
+  async closeBrowserTabs () {
+    if (this._sendCloseBrowserTabsMessage) {
+      await this._sendCloseBrowserTabsMessage()
+    }
+  }
+
+  async resetBrowserState () {
+    if (this._sendResetBrowserStateMessage) {
+      await this._sendResetBrowserStateMessage()
+    }
   }
 
   async sendFocusBrowserMessage () {
