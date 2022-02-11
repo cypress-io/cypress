@@ -8,7 +8,7 @@
       v-for="row, idx in filteredTree"
       :key="idx"
       v-bind="rowProps"
-      class="block pt-20px mt-20px"
+      class="mt-20px pt-20px block"
       :class="{
         'bg-gray-50': row.children,
         'border-2 border-red-500': selectedItem === idx
@@ -25,7 +25,8 @@
 <script lang="ts" setup>
 import { useCollapsibleTree } from '../../composables/useCollapsibleTree'
 import faker from 'faker'
-import { Ref, ref, computed } from 'vue'
+import type { Ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useListNavigation } from '../../composables/useListNavigation'
 
 type ExampleNode = {

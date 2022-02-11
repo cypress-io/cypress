@@ -554,10 +554,8 @@ export class ProjectLifecycleManager {
     })
     .catch((err) => {
       debug(`catch %o`, err)
-      // this._cleanupIpc(ipc)
-      if (this._configResult.value === promise) {
-        this._configResult = { state: 'errored', value: err }
-      }
+      this._cleanupIpc(ipc)
+      this._configResult = { state: 'errored', value: err }
 
       this.onLoadError(err)
       this.ctx.emitter.toLaunchpad()

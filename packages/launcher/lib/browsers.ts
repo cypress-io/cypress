@@ -1,18 +1,23 @@
 import { log } from './log'
 import * as cp from 'child_process'
 import { browsers, FoundBrowser } from '@packages/types'
+import type { Readable } from 'stream'
 
 export { browsers }
 
 /** list of the browsers we can detect and use by default */
 
 /** starts a found browser and opens URL if given one */
+
+export type LaunchedBrowser = cp.ChildProcessByStdio<null, Readable, Readable>
+
 export function launch (
   browser: FoundBrowser,
   url: string,
+  debuggingPort: number,
   args: string[] = [],
   defaultBrowserEnv = {},
-) {
+): LaunchedBrowser {
   log('launching browser %o', { browser, url })
 
   if (!browser.path) {

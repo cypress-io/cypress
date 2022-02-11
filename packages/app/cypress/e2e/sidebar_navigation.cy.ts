@@ -5,7 +5,7 @@ describe('Sidebar Navigation', () => {
       cy.scaffoldProject('pristine-with-e2e-testing')
       cy.openProject('todos')
       cy.startAppServer()
-      cy.visitApp()
+      cy.__incorrectlyVisitAppWithIntercept()
     })
 
     it('expands the left nav bar by default', () => {
@@ -122,17 +122,33 @@ describe('Sidebar Navigation', () => {
     })
 
     it('displays the project name and opens a modal to switch testing type', () => {
+      cy.__incorrectlyVisitAppWithIntercept()
       cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'true')
 
       cy.get('[data-cy="sidebar-header"]').within(() => {
         cy.get('[data-cy="testing-type-e2e"]').should('be.visible')
         cy.findByText('todos').should('be.visible')
-      }).click()
+      }).as('switchTestingType').click()
 
-      cy.findByText('Choose a testing type').should('be.visible')
+      cy.findByRole('dialog', {
+        name: 'Choose a testing type',
+      }).should('be.visible')
 
       cy.get('[data-cy-testingtype=e2e]').within(() => {
-        cy.contains('Configured')
+        cy.contains('Running')
+      }).click()
+
+      cy.findByRole('dialog', {
+        name: 'Choose a testing type',
+      }).should('not.exist')
+
+      cy.get('@switchTestingType').click()
+      cy.findByRole('dialog', {
+        name: 'Choose a testing type',
+      }).should('be.visible')
+
+      cy.get('[data-cy-testingtype=e2e]').within(() => {
+        cy.contains('Running')
       })
 
       cy.intercept('mutation-SwitchTestingTypeAndRelaunch').as('SwitchTestingTypeAndRelaunch')
@@ -216,12 +232,25 @@ describe('Sidebar Navigation', () => {
       cy.scaffoldProject('pristine-with-ct-testing')
       cy.openProject('pristine-with-ct-testing')
       cy.startAppServer('component')
-      cy.visitApp()
+      cy.__incorrectlyVisitAppWithIntercept()
 
-      cy.get('[data-cy="sidebar-header"]').within(() => cy.get('[data-cy="testing-type-component"]')).click()
+      cy.get('[data-cy="sidebar-header"]').as('switchTestingType').click()
+      cy.findByRole('dialog', {
+        name: 'Choose a testing type',
+      }).should('be.visible')
+
       cy.get('[data-cy-testingtype=component]').within(() => {
-        cy.contains('Configured')
-      })
+        cy.contains('Running')
+      }).click()
+
+      cy.findByRole('dialog', {
+        name: 'Choose a testing type',
+      }).should('not.exist')
+
+      cy.get('@switchTestingType').click()
+      cy.findByRole('dialog', {
+        name: 'Choose a testing type',
+      }).should('be.visible')
 
       cy.intercept('mutation-SwitchTestingTypeAndRelaunch').as('SwitchTestingTypeAndRelaunch')
       cy.withCtx((ctx) => {

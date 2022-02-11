@@ -108,8 +108,7 @@ describe('Launchpad: Setup Project', () => {
       .within(() => {
         cy.get('h2').contains('Key Differences').should('be.visible')
 
-        // @ts-ignore
-        cy.get('body').tab().tab()
+        cy.tabUntil((el) => el.text().includes('Close'))
 
         cy.findByRole('button', { name: 'Close' })
         .should('have.focus')
@@ -227,8 +226,9 @@ describe('Launchpad: Setup Project', () => {
 
         verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: false })
 
-        // @ts-ignore
-        cy.get('body').tab().tab()
+        cy.tabUntil((el) => {
+          return el.text().includes('E2E Testing')
+        })
 
         cy.contains('button', 'E2E Testing')
         .should('have.focus')
@@ -246,8 +246,7 @@ describe('Launchpad: Setup Project', () => {
 
         verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: false })
 
-        // @ts-ignore
-        cy.get('body').tab().tab()
+        cy.tabUntil((el) => el.text().includes('E2E Testing'))
 
         cy.contains('button', 'E2E Testing')
         .should('have.focus')
@@ -279,8 +278,7 @@ describe('Launchpad: Setup Project', () => {
 
         verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: false })
 
-        // @ts-ignore
-        cy.get('body').tab().tab()
+        cy.tabUntil((el) => el.text().includes('E2E Testing'))
 
         cy.contains('button', 'E2E Testing')
         .should('have.focus')
@@ -306,8 +304,7 @@ describe('Launchpad: Setup Project', () => {
 
         verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: true })
 
-        // @ts-ignore
-        cy.get('body').tab().tab()
+        cy.tabUntil((el) => el.text().includes('E2E Testing'))
 
         cy.contains('button', 'E2E Testing')
         .should('have.focus')
@@ -422,6 +419,40 @@ describe('Launchpad: Setup Project', () => {
           cy.contains('cypress/support/e2e.js')
           cy.contains('cypress/fixtures/example.json')
         })
+      })
+
+      it('can re-configure config after CT has been set up', () => {
+        cy.openProject('pristine-with-ct-testing')
+        cy.withCtx((ctx) => {
+          ctx.coreData.forceReconfigureProject = {
+            component: true,
+          }
+        })
+
+        cy.visitLaunchpad()
+
+        verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: true })
+
+        cy.get('[data-cy-testingtype="component"]').click()
+
+        cy.contains('Project Setup')
+      })
+
+      it('can re-configure config after e2e has been set up', () => {
+        cy.openProject('pristine-with-e2e-testing')
+        cy.withCtx((ctx) => {
+          ctx.coreData.forceReconfigureProject = {
+            e2e: true,
+          }
+        })
+
+        cy.visitLaunchpad()
+
+        verifyWelcomePage({ e2eIsConfigured: true, ctIsConfigured: false })
+
+        cy.get('[data-cy-testingtype="e2e"]').click()
+
+        cy.contains('Project Setup')
       })
     })
   })
