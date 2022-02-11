@@ -83,7 +83,7 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
     cy.get(configFileStep).should('exist')
 
     // Migration workflow
-    cy.contains('src/button.spec.js', { timeout: 10000 })
+    cy.contains('src/button.spec.js')
     cy.contains('src/input-spec.tsx')
 
     skipCTMigration()

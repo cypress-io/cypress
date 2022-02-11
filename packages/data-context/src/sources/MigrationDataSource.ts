@@ -69,7 +69,7 @@ export class MigrationDataSource {
   hasE2ESpec: boolean = flags.hasE2ESpec
   hasPluginsFile: boolean = flags.hasPluginsFile
 
-  private componentTestingMigrationWatcher?: chokidar.FSWatcher
+  private componentTestingMigrationWatcher: chokidar.FSWatcher | null = null
   componentTestingMigrationStatus?: ComponentTestingMigrationStatus
   private _oldConfigPromise: Promise<OldCypressConfig> | null = null
 
@@ -123,19 +123,14 @@ export class MigrationDataSource {
 
     debug('getComponentTestingMigrationStatus: componentFolder', componentFolder)
 
-    const specs = await getSpecs(this.ctx.currentProject, config)
-
-    // if there is no component files, no point in manually moving them
-    if (specs.component.length === 0) {
-      return null
-    }
-
     if (!this.componentTestingMigrationWatcher) {
+      debug('getComponentTestingMigrationStatus: initializing watcher')
       const onFileMoved = (status: ComponentTestingMigrationStatus) => {
         this.componentTestingMigrationStatus = status
 
         if (status.completed) {
           this.componentTestingMigrationWatcher?.close()
+          this.componentTestingMigrationWatcher = null
         }
 
         // TODO(lachlan): is this the right place to use the emitter?
@@ -151,6 +146,7 @@ export class MigrationDataSource {
 
       this.componentTestingMigrationStatus = status
       this.componentTestingMigrationWatcher = watcher
+      debug('getComponentTestingMigrationStatus: watcher initialized. Status: %o', status)
     }
 
     if (!this.componentTestingMigrationStatus) {
@@ -327,7 +323,7 @@ export class MigrationDataSource {
   async setStep (step: MIGRATION_STEP) {
     if (this.componentTestingMigrationWatcher) {
       await this.componentTestingMigrationWatcher.close()
-      this.componentTestingMigrationWatcher = undefined
+      this.componentTestingMigrationWatcher = null
     }
 
     this._step = step
