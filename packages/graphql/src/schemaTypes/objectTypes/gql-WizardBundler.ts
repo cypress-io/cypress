@@ -11,6 +11,11 @@ export const WizardBundler = objectType({
       resolve: (source, args, ctx) => ctx.wizardData.chosenBundler === source.type,
     })
 
+    t.nonNull.boolean('isDetected', {
+      description: 'Whether this is the detected bundler',
+      resolve: (source, args, ctx) => ctx.wizardData.detectedBundler === source.type,
+    })
+
     t.nonNull.field('type', {
       type: SupportedBundlerEnum,
       description: 'The name of the framework',
