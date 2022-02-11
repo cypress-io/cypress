@@ -1252,11 +1252,9 @@ export const cloneError = function (err: CypressError | GenericError, options: {
 
   // and any own (custom) properties
   // of the err object
-  for (let prop of Object.keys(err || {})) {
-    const val = err[prop]
-
+  Object.entries(err || {}).forEach(([prop, val]) => {
     obj[prop] = val
-  }
+  })
 
   if (err.stackWithoutMessage) {
     obj.stack = err.stackWithoutMessage
