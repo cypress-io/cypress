@@ -105,23 +105,17 @@ describe('App Top Nav Workflows', () => {
         cy.findBrowsers()
         cy.withCtx(async (ctx) => {
           // @ts-ignore sinon is a global in the node process where this is executed
-          sinon.stub(ctx, 'versions').get(() => {
-            return {
-              versionData: async () => {
-                return {
-                  current: {
-                    id: '1',
-                    version: '10.0.0',
-                    released: '2021-10-15T21:38:59.983Z',
-                  },
-                  latest: {
-                    id: '1',
-                    version: '10.0.0',
-                    released: '2021-10-25T21:38:59.983Z',
-                  },
-                }
-              },
-            }
+          sinon.stub(ctx.versions, 'versionData').resolves({
+            current: {
+              id: '1',
+              version: '10.0.0',
+              released: '2021-10-15T21:38:59.983Z',
+            },
+            latest: {
+              id: '1',
+              version: '10.0.0',
+              released: '2021-10-25T21:38:59.983Z',
+            },
           })
         })
 
@@ -144,23 +138,17 @@ describe('App Top Nav Workflows', () => {
           const prevRelease = new Date(Date.UTC(2021, 9, 29))
 
           // @ts-ignore sinon is a global in the node process where this is executed
-          sinon.stub(ctx, 'versions').get(() => {
-            return {
-              versionData: async () => {
-                return {
-                  current: {
-                    id: '1',
-                    version: '10.0.0',
-                    released: prevRelease.toISOString(),
-                  },
-                  latest: {
-                    id: '2',
-                    version: '10.1.0',
-                    released: currRelease.toISOString(),
-                  },
-                }
-              },
-            }
+          sinon.stub(ctx.versions, 'versionData').resolves({
+            current: {
+              id: '1',
+              version: '10.0.0',
+              released: prevRelease.toISOString(),
+            },
+            latest: {
+              id: '2',
+              version: '10.1.0',
+              released: currRelease.toISOString(),
+            },
           })
         })
 

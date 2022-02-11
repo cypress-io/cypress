@@ -154,13 +154,9 @@ export class DataContext {
     return new GitDataSource(this)
   }
 
+  @cached
   get versions () {
-    // Cache versionsDataSource this way so that we can stub it in tests
-    if (!this._versionsDataSource) {
-      this._versionsDataSource = new VersionsDataSource(this)
-    }
-
-    return this._versionsDataSource
+    return new VersionsDataSource(this)
   }
 
   @cached
