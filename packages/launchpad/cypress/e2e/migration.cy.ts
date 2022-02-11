@@ -195,6 +195,8 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
 
     cy.get('[data-cy=migration-button-proceed]').click()
 
+    // this project has a default integration folder and default testFiles.
+    // We rename the integration folder, even if the user skips the spec rename
     cy.findByText('Rename folder name.').click()
 
     cy.findByText('Save Changes').click()
@@ -554,6 +556,10 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
           expect(stats).to.not.be.null
         }
       })
+
+      skipCTMigration()
+      renameSupport()
+      migrateAndVerifyConfig()
     })
   })
 })

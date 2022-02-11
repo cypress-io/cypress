@@ -9,6 +9,6 @@ module.exports = defineConfig({
   },
   component: {
     setupNodeEvents (on, config) {},
-    specPattern: '**/*.cy.{js,jsx,ts,tsx}',
+    specPattern: 'cypress/custom-component/**/*.cy.{js,jsx,ts,tsx}',
   },
 })
