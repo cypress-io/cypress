@@ -158,5 +158,26 @@ describe('navigation events', { experimentalSessionSupport: true, experimentalMu
         cy.wrap(p)
       })
     })
+
+    it('propagates the event to the primary domain', (done) => {
+      let times = 0
+      const listener = (url) => {
+        times++
+        if (times === 1) {
+          expect(url).to.equal('http://www.foobar.com:3500/fixtures/multi-domain-secondary.html')
+        }
+
+        if (times === 2) {
+          cy.removeListener('url:changed', listener)
+          expect(url).to.equal('http://www.foobar.com:3500/fixtures/multi-domain.html')
+          done()
+        }
+      }
+
+      cy.on('url:changed', listener)
+      cy.switchToDomain('foobar.com', () => {
+        cy.get('a[data-cy="multi-domain-page"]').click()
+      })
+    })
   })
 })

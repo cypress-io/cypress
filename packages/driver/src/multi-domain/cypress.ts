@@ -88,6 +88,12 @@ const setup = () => {
     Cypress.emit('internal:window:load', { type: 'cross:domain', url })
   })
 
+  // Forward url:changed Message to the primary domain to enable changing the url displayed in the AUT
+  // @ts-ignore
+  Cypress.on('url:changed', (url) => {
+    specBridgeCommunicator.toPrimary('url:changed', url)
+  })
+
   return cy
 }
 
@@ -130,7 +136,7 @@ const onBeforeAppWindowLoad = (Cypress: Cypress.Cypress, cy: $Cy) => (autWindow:
       // This is also call on the on 'load' event in cy
       Cypress.action('app:window:load', autWindow)
 
-      specBridgeCommunicator.toPrimary('window:load', { type: 'cross:domain', url: cy.getRemoteLocation('href') })
+      specBridgeCommunicator.toPrimary('window:load', { url: cy.getRemoteLocation('href') })
       cy.isStable(true, 'load')
     },
     onUnload (e) {

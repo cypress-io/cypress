@@ -1,6 +1,20 @@
 // @ts-ignore / session support is needed for visiting about:blank between tests
 describe('basic login', { experimentalSessionSupport: true, experimentalMultiDomain: true }, () => {
-  // Diagram A
+  // Custom login command that establishes a session
+  const login = (name) => {
+    cy.session(name, () => {
+      cy.window().then((win) => {
+        win.location.href = 'http://www.foobar.com:3500/fixtures/auth/idp.html'
+      })
+
+      cy.switchToDomain('foobar.com', [name], ([name]) => {
+        cy.get('[data-cy="username"]').type(name)
+        cy.get('[data-cy="login"]').click()
+      })
+    })
+  }
+
+  // Scenario, Token based auth. Visit site, redirect to IDP hosted on secondary domain, login and redirect back to site.
   describe('visit primary first', () => {
     it('logs in with idp redirect', () => {
       cy.visit('/fixtures/auth/index.html') // Establishes Primary Domain
@@ -14,11 +28,9 @@ describe('basic login', { experimentalSessionSupport: true, experimentalMultiDom
       cy.get('[data-cy="welcome"]')
       .invoke('text')
       .should('equal', 'Welcome BJohnson')
-
-      cy.get('[data-cy="logout"]').click()
     })
 
-    // Diagram A Prime
+    // Scenario, Token based auth. Visit site, manually redirect to IDP hosted on secondary domain, login and redirect back to site.
     it('does not redirect', () => {
       cy.visit('/fixtures/auth/index.html') // Establishes Primary Domain
       // Missing the call to go to idp.com
@@ -35,14 +47,12 @@ describe('basic login', { experimentalSessionSupport: true, experimentalMultiDom
       cy.get('[data-cy="welcome"]')
       .invoke('text')
       .should('equal', 'Welcome FJohnson')
-
-      cy.get('[data-cy="logout"]').click()
     })
   })
 
-  // Diagram B
+  // Scenario, Token based auth. Visit IDP hosted on secondary domain, login and redirect back to site.
   describe('visit secondary first', () => {
-    // Problem: Where does
+    // Problem: where does the primary domain get established
     it('logs in with idp redirect', () => {
       cy.window().then((win) => {
         win.location.href = 'http://www.foobar.com:3500/fixtures/auth/idp.html'
@@ -56,8 +66,25 @@ describe('basic login', { experimentalSessionSupport: true, experimentalMultiDom
       cy.get('[data-cy="welcome"]')
       .invoke('text')
       .should('equal', 'Welcome FJohnson')
+    })
 
-      cy.get('[data-cy="logout"]').click()
+    // Scenario, Token based auth. Establish session using custom login command (login through IDP hosted on secondary domain), and verify to site.
+    it('establishes a session', () => {
+      login('BJohnson')
+      cy.visit('/fixtures/auth/index.html')
+      // Verify that the user has logged in on /siteA
+      cy.get('[data-cy="welcome"]')
+      .invoke('text')
+      .should('equal', 'Welcome BJohnson')
+    })
+
+    // Scenario, Token based auth. use previously established session, and verify to site.
+    it('uses established session', () => {
+      login('BJohnson')
+      cy.visit('/fixtures/auth/index.html')
+      cy.get('[data-cy="welcome"]')
+      .invoke('text')
+      .should('equal', 'Welcome BJohnson')
     })
 
     //     // Can we accomplish this with switchToDomain?
