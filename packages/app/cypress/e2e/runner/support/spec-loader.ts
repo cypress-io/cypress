@@ -53,11 +53,10 @@ export function loadSpec (options: LoadSpecOptions): void {
     ctx.coreData.localSettings.preferences.isSpecsListOpen = false
   }, { hasPreferredIde })
 
-  // directly visiting the spec will sometimes hang, going through
-  // specs page first to mitigate
-  // cy.visitApp(`specs/runner?file=cypress/e2e/errors/${fileName}`)
+  // TODO: investigate why directly visiting the spec will sometimes hang
+  // cy.__incorrectlyVisitAppWithIntercept(`specs/runner?file=cypress/e2e/errors/${fileName}`)
 
-  cy.visitApp()
+  cy.__incorrectlyVisitAppWithIntercept()
 
   if (setup) {
     setup()

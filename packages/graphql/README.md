@@ -21,3 +21,9 @@ You can also develop in a test-driven manner using the tests.
 
 - `yarn test-unit` for the unit tests
 - `yarn test-integration` for the integration tests
+
+## Debugging
+
+Logs available at `cypress-verbose:graphql:*` namespaces `{fields,operation}`
+
+
