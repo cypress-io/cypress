@@ -51,18 +51,13 @@ export class VersionsDataSource {
    * }
    */
   async versionData (): Promise<VersionData> {
-    this.resetLatestVersionTelemetry()
-
-    const latestVersion = await this._latestVersion
-    const npmMetadata = await this._npmMetadata
+    const [latestVersion, npmMetadata] = await Promise.all([this._latestVersion, this._npmMetadata])
 
     const latestVersionMetadata: Version = {
       id: latestVersion,
       version: latestVersion,
       released: npmMetadata[latestVersion] ?? new Date().toISOString(),
     }
-
-    this._initialLaunch = false
 
     return {
       latest: latestVersionMetadata,
@@ -83,8 +78,14 @@ export class VersionsDataSource {
   }
 
   private async getVersionMetadata (): Promise<Record<string, string>> {
+    if (this.ctx.isRunMode) {
+      return {
+        [pkg.version]: new Date().toISOString(),
+      }
+    }
+
     const response = await this.ctx.util.fetch(NPM_CYPRESS_REGISTRY)
-    const responseJson = await response.json()
+    const responseJson = await response.json() as { time: Record<string, string>}
 
     debug('NPM release dates %o', responseJson.time)
 
@@ -92,6 +93,10 @@ export class VersionsDataSource {
   }
 
   private async getLatestVersion (): Promise<string> {
+    if (this.ctx.isRunMode) {
+      return pkg.version
+    }
+
     const url = REMOTE_MANIFEST_URL
     const id = await VersionsDataSource.machineId()
 
@@ -104,7 +109,7 @@ export class VersionsDataSource {
     }
 
     if (this._currentTestingType) {
-      manifestHeaders['x-testing-type'] = this._currentTestingType || null
+      manifestHeaders['x-testing-type'] = this._currentTestingType
     }
 
     if (id) {
@@ -117,9 +122,11 @@ export class VersionsDataSource {
 
     debug('retrieving latest version information with headers: %o', manifestHeaders)
 
-    const manifest = await manifestResponse.json()
+    const manifest = await manifestResponse.json() as { version: string }
 
     debug('latest version information: %o', manifest)
+
+    this._initialLaunch = false
 
     return manifest.version
   }

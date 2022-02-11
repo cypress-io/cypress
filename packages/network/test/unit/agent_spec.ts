@@ -81,6 +81,17 @@ function createCertAndKey (): [object, object] {
 describe('lib/agent', function () {
   beforeEach(function () {
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
+
+    try {
+      // Disabling the eslint for geteuid since we are explicitly catching if there's a problem with it
+      // eslint-disable-next-line
+      if (process.geteuid && process.geteuid() !== 0) {
+        // eslint-disable-next-line no-console
+        console.error('You must be a root user to run these tests since we specifically test hosting a server at 443 which requires root access')
+      }
+    } catch (error) {
+      // OK to do nothing here since geteuid is only a problem on windows
+    }
   })
 
   afterEach(function () {
