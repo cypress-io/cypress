@@ -1,6 +1,7 @@
 import path from 'path'
 import type { DataContext } from '..'
 import {
+  cleanUpIntegrationFolder,
   formatConfig,
   moveSpecFiles,
   NonStandardMigrationError,
@@ -48,6 +49,9 @@ export class MigrationActions {
     const projectRoot = this.ctx.path.join(this.ctx.currentProject)
 
     moveSpecFiles(projectRoot, specsToMove)
+    cleanUpIntegrationFolder(this.ctx.currentProject).catch((error) => {
+      throw error
+    })
   }
 
   async renameSupportFile () {

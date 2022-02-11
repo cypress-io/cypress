@@ -162,9 +162,16 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
     })
 
     skipCTMigration()
+    // cy.findByText('Continue to next step').click()
     renameSupport()
     migrateAndVerifyConfig()
     finishMigrationAndContinue()
+
+    cy.withCtx(async (ctx) => {
+      const integrationFolderStats = await ctx.actions.file.checkIfFileExists(ctx.path.join('cypress', 'integration'))
+
+      expect(integrationFolderStats).to.be.null
+    })
   })
 
   it('completes journey for migration-e2e-component-default-test-files', () => {
