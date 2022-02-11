@@ -24,7 +24,7 @@
           :key="row.data.data?.absolute"
           :tabindex="isTabbable(row, row.index) ? '0' : '-1'"
           :style="{ paddingLeft: `${(row.data.depth - 2) * 10 + 16}px` }"
-          class="border-transparent outline-none border-1 w-full group focus-visible:border-indigo-300 before:(border-r-4 border-transparent h-27px rounded-r-4px absolute left-[-4px] w-8px) "
+          class="border-transparent outline-none border-1 w-full group focus-visible:border-indigo-300 before:(border-r-4 border-transparent h-28px rounded-r-4px absolute left-[-4px] w-8px) "
           :class="{
             'before:border-r-indigo-300': isCurrentSpec(row.data),
             'before:focus:border-r-indigo-300 before:focus-visible:border-r-transparent before:hover:border-r-indigo-300': !isCurrentSpec(row.data)
