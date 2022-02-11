@@ -80,11 +80,6 @@ const needsChanges = computed(() => props.gql.scaffoldedFiles?.some((f) => f.sta
 const mutation = useMutation(ScaffoldedFiles_CompleteSetupDocument)
 
 const completeSetup = async () => {
-  const { data } = await mutation.executeMutation({})
-
-  if (!data?.completeSetup?.currentProject?.isCTConfigured) {
-    // if config did not have time to load, we need to reload the page
-    window.location.reload()
-  }
+  await mutation.executeMutation({})
 }
 </script>
