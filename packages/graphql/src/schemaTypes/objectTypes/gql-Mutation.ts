@@ -361,6 +361,16 @@ export const mutation = mutationType({
       },
     })
 
+    t.nonNull.field('resetLatestVersionTelemetry', {
+      type: 'Boolean',
+      description: 'Resets the latest version call to capture additional telemetry for the current user',
+      resolve: async (_, args, ctx) => {
+        ctx.actions.versions.resetLatestVersionTelemetry()
+
+        return true
+      },
+    })
+
     t.nonNull.field('focusActiveBrowserWindow', {
       type: 'Boolean',
       description: 'Sets focus to the active browser window',

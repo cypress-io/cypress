@@ -7,7 +7,7 @@
     >
       <slot>
         <span
-          class="text-purple-500 cursor-pointer"
+          class="cursor-pointer text-purple-500"
         >
           {{ configFile }}
         </span>
@@ -28,8 +28,7 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
 import { gql, useMutation, useQuery } from '@urql/vue'
-import { OpenConfigFileDocument } from '@packages/data-context/src/gen/all-operations.gen'
-import { OpenConfigFileInIdeDocument } from '../generated/graphql'
+import { OpenConfigFileDocument, OpenConfigFileInIdeDocument } from '../generated/graphql'
 import ChooseExternalEditorModal from './ChooseExternalEditorModal.vue'
 
 gql`
