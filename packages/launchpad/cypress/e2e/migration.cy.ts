@@ -27,7 +27,7 @@ function startMigrationFor (project: typeof e2eProjectDirs[number]) {
 }
 
 function skipCTMigration () {
-  cy.contains(/(I'll do this later|Continue to next step)/).click()
+  cy.contains(`I'll do this later`).click()
 }
 
 function migrateAndVerifyConfig (configExtension: 'js' | 'ts' = 'js') {
@@ -48,6 +48,9 @@ function migrateAndVerifyConfig (configExtension: 'js' | 'ts' = 'js') {
 
 function finishMigrationAndContinue () {
   cy.contains('Finish migration and continue').click()
+}
+
+function checkOutcome () {
   cy.contains('Welcome to Cypress!').should('be.visible')
 }
 
@@ -68,7 +71,7 @@ function renameSupport (lang: 'js' | 'ts' = 'js') {
   }, { lang })
 }
 
-describe('Full migration flow for each project', { retries: { openMode: 2, runMode: 0 } }, () => {
+describe('Full migration flow for each project', { retries: { openMode: 2, runMode: 2 } }, () => {
   it('completes journey for migration-component-testing', () => {
     startMigrationFor('migration-component-testing')
     // custom testFiles - cannot auto
@@ -88,6 +91,7 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
     skipCTMigration()
     migrateAndVerifyConfig()
     finishMigrationAndContinue()
+    checkOutcome()
   })
 
   it('completes journey for migration-component-testing-defaults', () => {
@@ -126,6 +130,7 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
     skipCTMigration()
     migrateAndVerifyConfig()
     finishMigrationAndContinue()
+    checkOutcome()
   })
 
   it('completes journey for migration-e2e-component-default-everything', () => {
@@ -166,6 +171,7 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
     renameSupport()
     migrateAndVerifyConfig()
     finishMigrationAndContinue()
+    checkOutcome()
   })
 
   it('completes journey for migration-e2e-component-default-test-files', () => {
@@ -205,6 +211,7 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
     renameSupport()
     migrateAndVerifyConfig()
     finishMigrationAndContinue()
+    checkOutcome()
   })
 
   it('completes journey for migration-e2e-custom-integration', () => {
@@ -238,7 +245,7 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
 
     renameSupport()
     migrateAndVerifyConfig()
-    cy.contains('Welcome to Cypress!').should('be.visible')
+    checkOutcome()
   })
 
   it('completes journey for migration-e2e-custom-test-files', () => {
@@ -283,7 +290,7 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
 
     renameSupport()
     migrateAndVerifyConfig()
-    cy.contains('Welcome to Cypress!').should('be.visible')
+    checkOutcome()
   })
 
   it('completes journey for migration-e2e-defaults', () => {
@@ -327,7 +334,7 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
 
     renameSupport('ts')
     migrateAndVerifyConfig()
-    cy.contains('Welcome to Cypress!').should('be.visible')
+    checkOutcome()
   })
 
   it('completes journey for migration-e2e-no-plugins-support-file', () => {
@@ -361,7 +368,7 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
     runAutoRename()
 
     migrateAndVerifyConfig()
-    cy.contains('Welcome to Cypress!').should('be.visible')
+    checkOutcome()
   })
 
   // TODO: Do we need to consider this case?
@@ -378,7 +385,7 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
 
     renameSupport()
     migrateAndVerifyConfig()
-    cy.contains('Welcome to Cypress!').should('be.visible')
+    checkOutcome()
   })
 
   it('completes journey for migration-e2e-fully-custom', () => {
@@ -393,7 +400,7 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
     cy.get(configFileStep).should('exist')
 
     migrateAndVerifyConfig()
-    cy.contains('Welcome to Cypress!').should('be.visible')
+    checkOutcome()
   })
 
   it('completes journey for migration-component-testing-customized', () => {
@@ -412,6 +419,7 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
     skipCTMigration()
     migrateAndVerifyConfig()
     finishMigrationAndContinue()
+    checkOutcome()
   })
 
   it('completes journey for migration-typescript-project', () => {
@@ -455,7 +463,7 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
 
     renameSupport()
     migrateAndVerifyConfig('ts')
-    cy.contains('Welcome to Cypress!').should('be.visible')
+    checkOutcome()
   })
 })
 
