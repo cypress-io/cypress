@@ -7,17 +7,17 @@
       class="icon-light-gray-50 icon-dark-gray-200"
     />
 
-    <div class="text-gray-400 text-indigo-500 group-hocus:text-indigo-500">
+    <div class="text-gray-400 text-indigo-500 group-hocus:text-indigo-600">
       <HighlightedText
         :text="fileName"
         :indexes="indexes.filter((idx) => idx < fileName.length)"
-        class="font-medium text-indigo-500 group-hocus:text-indigo-500"
+        class="font-medium text-indigo-500 group-hocus:text-indigo-600"
         highlight-classes="text-gray-1000"
       />
       <HighlightedText
         :text="extension"
         :indexes="indexes.filter((idx) => idx >= fileName.length).map(idx => idx - fileName.length)"
-        class="font-light group-hocus:text-indigo-500"
+        class="font-light group-hocus:text-gray-400"
         highlight-classes="text-gray-1000"
       />
     </div>
