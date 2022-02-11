@@ -72,7 +72,7 @@ PLUGINS_FILE_ERROR: (arg1: string, arg2: Error) => {
 
 Any time we know about an edge case that is an error, we should define an error in `errors.ts`. This error should be retrieved by `getError`, which converts it to a `CypressError`. 
 
-The `CypressError` is an `Error` containing the message returned from the `errTemplate`. The `stack` is set to that of the `originalError` if it exists (error object passed into `details`), otherwise it's the `stack` from where the `getError` / `throwError` is called.
+The `CypressError` is an `Error` containing the message returned from the `errTemplate`. The `stack` is set to that of the `originalError` if it exists (i.e. the error object passed into `details`), otherwise it's the `stack` from where the `getError` / `throwError` is called.
 
 
 The `CypressError` has an `isCypressErr` prop which we use as a duck-type guard against exiting the process when logging exceptions. It also maintains a reference to the `originalError` if it exists.
