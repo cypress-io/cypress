@@ -1,5 +1,5 @@
 import { DataContext, getCtx, clearCtx, setCtx } from '@packages/data-context'
-import electron, { OpenDialogOptions, SaveDialogOptions, BrowserWindow } from 'electron'
+import electron from 'electron'
 import pkg from '@packages/root'
 import configUtils from '@packages/config'
 
@@ -22,7 +22,6 @@ import cache from './cache'
 import errors from './errors'
 import findSystemNode from './util/find_system_node'
 import { graphqlSchema } from '@packages/graphql/src/schema'
-import { openExternal } from '@packages/server/lib/gui/links'
 import { getUserEditor } from './util/editors'
 import * as savedState from './saved_state'
 import appData from './util/app_data'
@@ -156,22 +155,7 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
         return devServer
       },
     },
-    electronApi: {
-      openExternal (url: string) {
-        openExternal(url).catch((e) => {
-          ctx.logTraceError(e)
-        })
-      },
-      showItemInFolder (folder: string) {
-        electron.shell.showItemInFolder(folder)
-      },
-      showOpenDialog (props: OpenDialogOptions) {
-        return electron.dialog.showOpenDialog(props)
-      },
-      showSaveDialog (window: BrowserWindow, props: SaveDialogOptions) {
-        return electron.dialog.showSaveDialog(window, props)
-      },
-    },
+    electronApi: electron,
     localSettingsApi: {
       async setPreferences (object: AllowedState) {
         const state = await savedState.create()

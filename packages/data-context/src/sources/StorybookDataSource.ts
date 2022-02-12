@@ -40,7 +40,7 @@ export class StorybookDataSource {
       return null
     }
 
-    for (const fileName of STORYBOOK_FILES) {
+    await Promise.all(STORYBOOK_FILES.map(async (fileName) => {
       try {
         const absolute = path.join(storybookRoot, fileName)
         const file = {
@@ -54,7 +54,7 @@ export class StorybookDataSource {
       } catch (e) {
         // eslint-disable-line no-empty
       }
-    }
+    }))
 
     return storybookInfo
   }

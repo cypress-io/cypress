@@ -8,18 +8,33 @@
     <div class="font-sans absolute top-0 right-0 bottom-0 opacity-gradient p-4px pl-32px">
       <CopyButton
         :text="command"
+        :copy-fn="onCopy"
       />
     </div>
   </code>
 </template>
 
 <script lang="ts" setup>
-import CopyButton from './CopyButton.vue'
+import CopyButton from '../components/CopyButton.vue'
+import { gql, useMutation } from '@urql/vue'
+import { TerminalPrompt_CopyTextDocument } from '../generated/graphql'
+
+gql`
+mutation TerminalPrompt_copyText($text: String!) {
+  copyText(text: $text)
+}
+`
 
 defineProps<{
   projectFolderName: string,
   command: string
 }>()
+
+const onCopyMutation = useMutation(TerminalPrompt_CopyTextDocument)
+const onCopy = (text: string) => {
+  onCopyMutation.executeMutation({ text })
+}
+
 </script>
 
 <style lang="scss" scoped>

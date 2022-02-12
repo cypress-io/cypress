@@ -722,6 +722,9 @@ type Mutation {
   cloudProjectRequestAccess(projectSlug: String!): Boolean
   completeSetup: Query
 
+  """Copies text to the clipboard"""
+  copyText(text: String!): Boolean
+
   """
   Development only: Triggers or dismisses a prompted refresh by touching the file watched by our development scripts
   """

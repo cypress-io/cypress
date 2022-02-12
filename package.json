@@ -109,6 +109,7 @@
     "@types/getenv": "^1.0.0",
     "@types/glob": "7.1.1",
     "@types/gulp": "^4.0.9",
+    "@types/human-interval": "^1.0.0",
     "@types/lodash": "^4.14.168",
     "@types/markdown-it": "0.0.9",
     "@types/mini-css-extract-plugin": "1.2.3",

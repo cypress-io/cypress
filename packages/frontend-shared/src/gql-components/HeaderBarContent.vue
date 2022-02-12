@@ -210,7 +210,7 @@ function shouldShowPrompt (prompt: { slug: string; noProjectId: boolean; interva
   }
 
   // any other prompt has been shown in the last 24 hours
-  if (allPromptShownTimes?.find((time) => (now - time) < interval('24 hours'))) {
+  if (allPromptShownTimes?.find((time) => (now - time) < (interval('24 hours') as number))) {
     return false
   }
 

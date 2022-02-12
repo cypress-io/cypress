@@ -21,7 +21,7 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 import { gql } from '@urql/vue'
-import TerminalPrompt from '@cy/components/TerminalPrompt.vue'
+import TerminalPrompt from '@cy/gql-components/TerminalPrompt.vue'
 import type { RunsEmptyFragment } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
 

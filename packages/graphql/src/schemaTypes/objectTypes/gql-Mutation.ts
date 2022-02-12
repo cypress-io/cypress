@@ -247,6 +247,21 @@ export const mutation = mutationType({
       },
     })
 
+    t.field('copyText', {
+      type: 'Boolean',
+      description: 'Copies text to the clipboard',
+      args: { text: nonNull(stringArg()) },
+      resolve: (_, args, ctx) => {
+        try {
+          ctx.actions.electron.copyToClipboard(args.text)
+
+          return true
+        } catch {
+          return false
+        }
+      },
+    })
+
     t.field('launchOpenProject', {
       type: CurrentProject,
       description: 'Launches project from open_project global singleton',

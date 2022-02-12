@@ -7,17 +7,21 @@ import type { AuthenticatedUserShape } from '@packages/data-context/src/data'
 import type { DocumentNode, ExecutionResult } from 'graphql'
 import type { Browser, FoundBrowser, OpenModeOptions } from '@packages/types'
 import { browsers } from '@packages/types/src/browser'
-import type { E2ETaskMap } from '../e2ePluginSetup'
+import type { E2ETaskMap, InstallNodeModulesInProjectOpts } from '../e2ePluginSetup'
 import installCustomPercyCommand from '@packages/ui-components/cypress/support/customPercyCommand'
 import { addNetworkCommands } from '../../support/onlineNetwork'
 import type { SinonStub } from 'sinon'
 import type sinon from 'sinon'
 import type pDefer from 'p-defer'
+import 'cypress-plugin-tab'
+import 'cypress-real-events/support'
 
 configure({ testIdAttribute: 'data-cy' })
 
 const NO_TIMEOUT = 1000 * 1000
 const TEN_SECONDS = 10 * 1000
+const ONE_MINUTE = 60 * 1000
+const TEN_MINUTES = ONE_MINUTE * 10
 
 export type ProjectFixture = typeof e2eProjectDirs[number]
 
@@ -97,7 +101,21 @@ declare global {
       /**
        * Scaffolds a project for use in tests
        */
-      scaffoldProject: typeof scaffoldProject
+      scaffoldProject(projectName: ProjectFixture): Cypress.Chainable<string>
+      /**
+       * Scaffolds node modules in a project
+       */
+      scaffoldProjectNodeModules(projectName: ProjectFixture): Cypress.Chainable<null>
+      /**
+       * Installing project modules
+       */
+      installNodeModulesInProject(opts: InstallNodeModulesInProjectOpts): Cypress.Chainable<null>
+      /**
+       * If we call this, it allows us to run multiple tests in sequence which depend on the
+       * same project state. Useful if we want to visit the launchpad for setup, and then
+       * the app in a following test
+       */
+      preserveProjectDirectoriesBetweenTests(): Cypress.Chainable<null>
       /**
        * Takes the name of a "system" test directory, and mounts the project
        * within open mode. Assumes the project has already been scaffolded with `scaffoldProject`
@@ -180,6 +198,24 @@ beforeEach(() => {
   taskInternal('__internal__beforeEach', undefined)
 })
 
+function preserveProjectDirectoriesBetweenTests (): Cypress.Chainable<null> {
+  return logInternal('preserveProjectDirectoriesBetweenTests', () => {
+    return taskInternal('__internal_preserveProjectDirectoriesBetweenTests', undefined)
+  })
+}
+
+function scaffoldProjectNodeModules (projectName: ProjectFixture): Cypress.Chainable<null> {
+  return logInternal({ name: 'scaffoldProjectNodeModules', message: projectName }, () => {
+    return taskInternal('__internal_scaffoldProjectNodeModules', projectName, { timeout: TEN_MINUTES })
+  })
+}
+
+function installNodeModulesInProject (opts: InstallNodeModulesInProjectOpts): Cypress.Chainable<null> {
+  return logInternal({ name: 'installNodeModulesInProject', message: opts.toInstall.join(',') }, () => {
+    return taskInternal('__internal_installNodeModulesInProject', opts, { timeout: TEN_MINUTES })
+  })
+}
+
 function scaffoldProject (projectName: ProjectFixture) {
   return logInternal({ name: 'scaffoldProject', message: projectName }, () => {
     return taskInternal('__internal_scaffoldProject', projectName)
@@ -217,7 +253,7 @@ function openProject (projectName: ProjectFixture, argv: string[] = []) {
   }).then((obj) => {
     Cypress.env('e2e_serverPort', obj.e2eServerPort)
 
-    return obj.modeOptions
+    return obj
   })
 }
 
@@ -344,7 +380,7 @@ function withCtx<T extends Partial<WithCtxOptions>, R> (fn: (ctx: DataContext, o
   const { log, timeout, ...rest } = opts
 
   const _log = log === false ? { end () {}, set (key: string, val: any) {} } : Cypress.log({
-    name: opts.retry ? 'withCtx' : 'withRetryableCtx',
+    name: opts.retry ? 'withRetryableCtx' : 'withCtx',
     message: '(view in console)',
     consoleProps () {
       return {
@@ -435,10 +471,10 @@ type Resolved<V> = V extends Promise<infer U> ? U : V
  * Run an internal task, as defined by e2ePluginSetup. Automatically tracks the types
  *
  */
-function taskInternal<T extends keyof E2ETaskMap> (name: T, arg: Parameters<E2ETaskMap[T]>[0]) {
+function taskInternal<T extends keyof E2ETaskMap> (name: T, arg: Parameters<E2ETaskMap[T]>[0], opts?: Partial<Cypress.Loggable & Cypress.Timeoutable>) {
   const isDebugging = Boolean(Cypress.env('e2e_isDebugging'))
 
-  return cy.task<Resolved<ReturnType<E2ETaskMap[T]>>>(name, arg, { log: isDebugging, timeout: isDebugging ? NO_TIMEOUT : TEN_SECONDS })
+  return cy.task<Resolved<ReturnType<E2ETaskMap[T]>>>(name, arg, { log: isDebugging, timeout: isDebugging ? NO_TIMEOUT : TEN_SECONDS, ...opts })
 }
 
 function logInternal<T> (name: string | Partial<Cypress.LogConfig>, cb: (log: Cypress.Log) => Cypress.Chainable<T>, opts: Partial<Cypress.Loggable> = {}): Cypress.Chainable<T> {
@@ -447,7 +483,7 @@ function logInternal<T> (name: string | Partial<Cypress.LogConfig>, cb: (log: Cy
     : Cypress.log(name)
 
   return cb(_log).then<T>((val) => {
-    _log.end()
+    _log.set('consoleProps', () => val).end()
 
     return val
   })
@@ -482,7 +518,6 @@ function validateExternalLink (subject, options: ValidateExternalLinkOptions | s
 
 function tabUntil (fn: (el: JQuery<HTMLElement>) => boolean, limit: number = 10) {
   function _tabUntil (step: number) {
-    // @ts-expect-error
     return cy.tab().focused({ log: false }).then((el) => {
       const pass = fn(el)
 
@@ -508,6 +543,9 @@ function tabUntil (fn: (el: JQuery<HTMLElement>) => boolean, limit: number = 10)
 Cypress.on('uncaught:exception', (err) => !err.message.includes('ResizeObserver loop limit exceeded'))
 
 Cypress.Commands.add('scaffoldProject', scaffoldProject)
+Cypress.Commands.add('preserveProjectDirectoriesBetweenTests', preserveProjectDirectoriesBetweenTests)
+Cypress.Commands.add('scaffoldProjectNodeModules', scaffoldProjectNodeModules)
+Cypress.Commands.add('installNodeModulesInProject', installNodeModulesInProject)
 Cypress.Commands.add('addProject', addProject)
 Cypress.Commands.add('openGlobalMode', openGlobalMode)
 Cypress.Commands.add('visitApp', visitApp)

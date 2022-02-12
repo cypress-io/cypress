@@ -9085,6 +9085,11 @@
   dependencies:
     "@types/node" "*"
 
+"@types/human-interval@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@types/human-interval/-/human-interval-1.0.0.tgz#beab44537d9de829a87642855ac71f3bc244abc1"
+  integrity sha512-ud7H6R7y58RpOFcJPhmuCacUAaE5Tpkhhm1gwx3vaaAiVEvqalvG/yaG6K0+yPaSEorkI/HGKp0/H3xirxJ4Tg==
+
 "@types/inquirer@7.3.1":
   version "7.3.1"
   resolved "https://registry.yarnpkg.com/@types/inquirer/-/inquirer-7.3.1.tgz#1f231224e7df11ccfaf4cf9acbcc3b935fea292d"

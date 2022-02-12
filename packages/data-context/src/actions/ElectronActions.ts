@@ -1,34 +1,45 @@
-import type { App, BrowserWindow, OpenDialogOptions, OpenDialogReturnValue, SaveDialogOptions, SaveDialogReturnValue } from 'electron'
 import os from 'os'
 import type { DataContext } from '..'
 import _ from 'lodash'
 import path from 'path'
 import assert from 'assert'
+import type electron from 'electron'
+import type { BrowserWindow, OpenDialogOptions, SaveDialogOptions } from 'electron'
 
-export interface ElectronApiShape {
-  openExternal(url: string): void
-  showItemInFolder(folder: string): void
-  showOpenDialog(props: OpenDialogOptions): Promise<OpenDialogReturnValue>
-  showSaveDialog(window: BrowserWindow, props: SaveDialogOptions): Promise<SaveDialogReturnValue>
+export type ElectronApiShape = typeof electron | undefined
+
+export interface OpenExternalOptions {
+  url: string
+  params: { [key: string]: string }
 }
 
 export class ElectronActions {
   constructor (private ctx: DataContext) { }
 
-  private get electron () {
-    return this.ctx.coreData.electron
+  private get browserWindow () {
+    return this.ctx.coreData.electronWindow
+  }
+
+  private get shell () {
+    return this.electron?.shell
+  }
+
+  get electron () {
+    return this.ctx._apis.electronApi
   }
 
   private get isMac () {
     return os.platform() === 'darwin'
   }
 
-  setElectronApp (app: App) {
-    this.electron.app = app
+  copyToClipboard (text: string) {
+    this.electron?.clipboard?.writeText(text)
   }
 
   setBrowserWindow (window: BrowserWindow) {
-    this.electron.browserWindow = window
+    this.ctx.update((o) => {
+      o.electronWindow = window
+    })
   }
 
   hideBrowserWindow () {
@@ -41,14 +52,14 @@ export class ElectronActions {
   }
 
   showBrowserWindow () {
-    this.electron.browserWindow?.show()
+    this.browserWindow?.show()
 
     if (this.isMac) {
       this.ctx.electronApp?.dock.show().catch((e) => {
         this.ctx.logTraceError(e)
       })
     } else {
-      this.electron.browserWindow?.setSkipTaskbar(false)
+      this.browserWindow?.setSkipTaskbar(false)
     }
   }
 
@@ -58,15 +69,30 @@ export class ElectronActions {
   }
 
   refreshBrowserWindow () {
-    this.electron.browserWindow?.reload()
+    this.browserWindow?.reload()
   }
 
-  openExternal (url: string) {
-    this.ctx.electronApi.openExternal(url)
+  openExternal (opts: OpenExternalOptions | string) {
+    if (_.isString(opts)) {
+      return this.shell?.openExternal(opts)
+    }
+
+    const url = new URL(opts.url)
+
+    if (opts.params) {
+      // just add the utm_source here so we don't have to duplicate it on every link
+      if (_.find(opts.params, (_val, key) => _.includes(key, 'utm_'))) {
+        opts.params.utm_source = 'Test Runner'
+      }
+
+      url.search = new URLSearchParams(opts.params).toString()
+    }
+
+    return this.shell?.openExternal(url.href)
   }
 
   showItemInFolder (url: string) {
-    this.ctx.electronApi.showItemInFolder(url)
+    this.shell?.showItemInFolder(url)
   }
 
   showOpenDialog () {
@@ -76,7 +102,7 @@ export class ElectronActions {
       properties: ['openDirectory'],
     }
 
-    return this.ctx.electronApi.showOpenDialog(props)
+    return this.ctx.electronApi?.dialog.showOpenDialog(props)
     .then((obj) => {
       // return the first path since there can only ever
       // be a single directory selection
@@ -86,7 +112,7 @@ export class ElectronActions {
 
   showSaveDialog (integrationFolder: string) {
     // Do we want to attach browserWindow (?)
-    assert(this.electron.browserWindow, 'Browser window is not set')
+    assert(this.browserWindow, 'Browser window is not set')
 
     const props: SaveDialogOptions = {
       defaultPath: path.join(integrationFolder, 'untitled.spec.js'),
@@ -106,7 +132,7 @@ export class ElectronActions {
     }
 
     // attach to window so it displays as a modal rather than a standalone window
-    return this.ctx.electronApi.showSaveDialog(this.electron.browserWindow, props).then((obj) => {
+    return this.ctx.electronApi?.dialog.showSaveDialog(this.browserWindow, props).then((obj) => {
       return obj.filePath || null
     })
   }

@@ -1,5 +1,7 @@
 import path from 'path'
-import type { CyTaskResult, RemoteGraphQLInterceptor, ResetOptionsResult, WithCtxInjected, WithCtxOptions } from './support/e2eSupport'
+import childProcess, { ChildProcess } from 'child_process'
+
+import type { CyTaskResult, ProjectFixture, RemoteGraphQLInterceptor, ResetOptionsResult, WithCtxInjected, WithCtxOptions } from './support/e2eSupport'
 import { e2eProjectDirs } from './support/e2eProjectDirs'
 // import type { CloudExecuteRemote } from '@packages/data-context/src/sources'
 import { makeGraphQLServer } from '@packages/graphql/src/makeGraphQLServer'
@@ -27,6 +29,12 @@ interface InternalAddProjectOpts {
   open?: boolean
 }
 
+export interface InstallNodeModulesInProjectOpts {
+  projectName: ProjectFixture
+  toInstall: string[]
+  target: 'dependencies' | 'devDependencies'
+}
+
 const cloudSchema = buildSchema(fs.readFileSync(path.join(__dirname, '../../../graphql/schemas/cloud.graphql'), 'utf8'))
 
 // require'd so we don't conflict with globals loaded in @packages/types
@@ -50,7 +58,7 @@ export async function e2ePluginSetup (on: Cypress.PluginEvents, config: Cypress.
   // Set this to a dedicate port so we can debug the state of the tests
   process.env.CYPRESS_INTERNAL_GRAPHQL_PORT = '5555'
 
-  on('task', await makeE2ETasks())
+  on('task', await makeE2ETasks(on))
 
   return {
     ...config,
@@ -66,6 +74,7 @@ interface FixturesShape {
   scaffold (): void
   scaffoldProject (project: string): void
   scaffoldCommonNodeModules(): Promise<void>
+  scaffoldProjectNodeModules(project: string, updateYarnLock?: boolean): Promise<void>
   scaffoldWatch (): void
   remove (): void
   removeProject (name): void
@@ -74,7 +83,7 @@ interface FixturesShape {
   path (fixture): string
 }
 
-async function makeE2ETasks () {
+async function makeE2ETasks (on: Cypress.PluginEvents) {
   // require'd from @packages/server & @tooling/system-tests so we don't import
   // types which would pollute strict type checking
   const argUtils = require('@packages/server/lib/util/args')
@@ -84,13 +93,28 @@ async function makeE2ETasks () {
   const cli = require('../../../../cli/lib/cli')
   const cliOpen = require('../../../../cli/lib/exec/open')
 
-  // Remove all the fixtures when the plugin starts
-  Fixtures.remove()
+  // We typically want to clear the state of the app after each test.
+  // Occasionally we have tests where we want to preserve this state across loads,
+  // such as when we're going through the initial flow in the launchpad, and then.
+  let preserveProjectDirectoriesBetweenTests = false
+
+  let running: Set<ChildProcess> = new Set()
+
+  on('before:run', () => {
+    running.forEach((c) => c.kill())
+    running = new Set()
+    preserveProjectDirectoriesBetweenTests = false
+    // Remove all the fixtures before each run
+    Fixtures.remove()
+  })
+
+  on('after:run', () => {
+    preserveProjectDirectoriesBetweenTests = false
+  })
 
   // const tmpDir = path.join(__dirname, '.projects')
   // await util.promisify(rimraf)(tmpDir)
   // Fixtures.setTmpDir(tmpDir)
-
   interface WithCtxObj {
     fn: string
     options: WithCtxOptions
@@ -129,10 +153,18 @@ async function makeE2ETasks () {
      * go to http://localhost:5555/graphql and debug the internal state of the application
      */
     async __internal__before () {
-      Fixtures.remove()
-      scaffoldedProjects = new Set()
+      if (!preserveProjectDirectoriesBetweenTests) {
+        Fixtures.remove()
+        scaffoldedProjects = new Set()
+      }
 
       return { launchpadPort }
+    },
+
+    __internal_preserveProjectDirectoriesBetweenTests () {
+      preserveProjectDirectoriesBetweenTests = true
+
+      return null
     },
 
     /**
@@ -229,6 +261,33 @@ async function makeE2ETasks () {
       return Fixtures.projectPath(opts.projectName)
     },
     __internal_scaffoldProject,
+    async __internal_scaffoldProjectNodeModules (projectName: string) {
+      await Fixtures.scaffoldProjectNodeModules(projectName)
+
+      return null
+    },
+    async __internal_installNodeModulesInProject (opts: InstallNodeModulesInProjectOpts) {
+      fs.existsSync(Fixtures.projectPath(opts.projectName))
+
+      return new Promise<null>((resolve, reject) => {
+        const cp = childProcess.spawn(`yarn`, ['add', '--dev', ...opts.toInstall], {
+          stdio: 'inherit',
+          cwd: Fixtures.projectPath(opts.projectName),
+        })
+
+        running.add(cp)
+        cp.on('exit', (code) => {
+          running.delete(cp)
+          if (code && code > 0) {
+            reject(new Error(`Exited with ${code}`))
+          }
+
+          resolve(null)
+        })
+
+        cp.on('error', reject)
+      })
+    },
     async __internal_openGlobal (argv: string[] = []): Promise<ResetOptionsResult> {
       const openArgv = ['--global', ...argv]
 

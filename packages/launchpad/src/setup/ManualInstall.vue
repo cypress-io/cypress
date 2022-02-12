@@ -39,7 +39,7 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
 import { gql } from '@urql/core'
-import TerminalPrompt from '@cy/components/TerminalPrompt.vue'
+import TerminalPrompt from '@cy/gql-components/TerminalPrompt.vue'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import type { ManualInstallFragment } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'

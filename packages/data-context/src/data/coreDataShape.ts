@@ -1,6 +1,6 @@
 import { BUNDLERS, FoundBrowser, Editor, Warning, AllowedState, AllModeOptions, TestingType, PACKAGE_MANAGERS, BrowserStatus } from '@packages/types'
 import type { NexusGenEnums, NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
-import type { App, BrowserWindow } from 'electron'
+import type { BrowserWindow } from 'electron'
 import type { ChildProcess } from 'child_process'
 import type { SocketIOServer } from '@packages/socket'
 import type { Server } from 'http'
@@ -76,11 +76,6 @@ export interface MigrationDataShape{
   step: NexusGenEnums['MigrationStepEnum']
 }
 
-export interface ElectronShape {
-  app: App | null
-  browserWindow: BrowserWindow | null
-}
-
 export interface BaseErrorDataShape {
   title?: string
   message: string
@@ -115,7 +110,7 @@ export interface CoreDataShape {
   wizard: WizardDataShape
   migration: MigrationDataShape | null
   user: AuthenticatedUserShape | null
-  electron: ElectronShape
+  electronWindow: BrowserWindow | null
   isAuthBrowserOpened: boolean
   scaffoldedFiles: NexusGenObjects['ScaffoldedFile'][] | null
   warnings: Warning[]
@@ -171,10 +166,7 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
     warnings: [],
     chosenBrowser: null,
     user: null,
-    electron: {
-      app: null,
-      browserWindow: null,
-    },
+    electronWindow: null,
     scaffoldedFiles: null,
     packageManager: 'npm',
     forceReconfigureProject: null,

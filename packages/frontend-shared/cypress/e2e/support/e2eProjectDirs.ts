@@ -84,6 +84,7 @@ export const e2eProjectDirs = [
   'pristine-with-e2e-testing-and-storybook',
   'pristine-yarn',
   'react-code-gen',
+  'react-with-storybook',
   'read-only-project-root',
   'record',
   'remote-debugging-disconnect',

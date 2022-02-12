@@ -279,6 +279,8 @@ module.exports = {
                 'argsIgnorePattern': '^_',
               },
             ],
+            'no-duplicate-imports': 'off',
+            '@typescript-eslint/no-duplicate-imports': ['error'],
             '@typescript-eslint/type-annotation-spacing': 'error',
             '@typescript-eslint/no-useless-constructor': [
               'error',

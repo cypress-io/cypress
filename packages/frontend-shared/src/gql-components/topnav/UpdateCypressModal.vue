@@ -32,7 +32,7 @@
 
 <script setup lang="ts">
 import StandardModal from '../../components/StandardModal.vue'
-import TerminalPrompt from '../../components/TerminalPrompt.vue'
+import TerminalPrompt from '../../gql-components/TerminalPrompt.vue'
 import { useI18n } from '@cy/i18n'
 
 const { t } = useI18n()
