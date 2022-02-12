@@ -156,5 +156,23 @@ describe('lib/gui/auth', function () {
       expect(auth._internal.stopServer).to.be.calledOnce
       expect(windows.focusMainWindow).to.be.calledOnce
     })
+
+    it('sends an AUTH_ERROR_DURING_LOGIN message on unhandled errors', async () => {
+      sinon.stub(user, 'getBaseLoginUrl').resolves('www.foo.bar')
+      sinon.stub(auth._internal, 'launchServer').rejects(new Error('unexpected error'))
+
+      const onMessageSpy = sinon.spy()
+
+      try {
+        await auth.start(onMessageSpy, 'code')
+      } catch (e) {
+        expect(onMessageSpy).to.be.calledWith({
+          type: 'error',
+          name: 'AUTH_ERROR_DURING_LOGIN',
+          message: 'unexpected error',
+          browserOpened: false,
+        })
+      }
+    })
   })
 })

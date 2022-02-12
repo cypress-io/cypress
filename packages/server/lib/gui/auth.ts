@@ -197,7 +197,6 @@ const start = (onMessage, utmCode, onLogin) => {
       browserOpened: authRedirectReached,
     })
   }
-
   authRedirectReached = false
 
   return user.getBaseLoginUrl()
@@ -218,6 +217,14 @@ const start = (onMessage, utmCode, onLogin) => {
   .then(() => {
     return Promise.fromCallback((cb) => {
       authCallback = cb
+    })
+  })
+  .catch((err: Error) => {
+    onMessage({
+      type: 'error',
+      name: 'AUTH_ERROR_DURING_LOGIN',
+      message: err.message,
+      browserOpened: authRedirectReached,
     })
   })
   .finally(() => {
