@@ -7,7 +7,7 @@ installCustomPercyCommand({
   elementOverrides: {
     '.runnable-header .duration': ($el) => $el.text('XX:XX'),
     '.cy-tooltip': true,
-    'iframe.aut-iframe': true,
-    '#spec-runner-header': true,
+    // 'iframe.aut-iframe': true,
+    // '#spec-runner-header': true,
   },
 })

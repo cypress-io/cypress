@@ -66,7 +66,6 @@ export const e2eProjectDirs = [
   'plugin-event-deprecated',
   'plugin-extension',
   'plugin-filter-browsers',
-  'plugin-missing',
   'plugin-retries',
   'plugin-returns-bad-config',
   'plugin-returns-empty-browsers-list',
