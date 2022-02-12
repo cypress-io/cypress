@@ -705,7 +705,10 @@ describe('Launchpad: Setup Project', () => {
 
                 cy.findByRole('button', { name: 'Continue' }).click()
 
-                cy.contains('[data-cy=changes]', `cypress.config.${lang.type}`)
+                // Even if user chooses typescript in the previous
+                // step, they already have a config file in js.
+                // We cannot rename this file for them.
+                cy.contains('[data-cy=changes]', `cypress.config.js`)
 
                 cy.get('[data-cy=valid]').within(() => {
                   cy.containsPath('cypress/component/index.html')
