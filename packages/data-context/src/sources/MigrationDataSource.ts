@@ -323,6 +323,7 @@ export class MigrationDataSource {
 
   async setStep (step: MIGRATION_STEP) {
     if (this.componentTestingMigrationWatcher) {
+      debug('setStep: stopping watcher')
       await this.componentTestingMigrationWatcher.close()
       this.componentTestingMigrationWatcher = null
     }

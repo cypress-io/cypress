@@ -222,6 +222,7 @@ gql`
 mutation MigrationWizard_RenameSpecs($skip: Boolean, $before: [String!], $after: [String!]) {
   migrateRenameSpecs(skip: $skip, before: $before, after: $after) {
     migration {
+      ...RenameSpecsManual
       filteredSteps {
         id
         isCurrentStep

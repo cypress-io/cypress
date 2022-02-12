@@ -170,6 +170,10 @@ export const Migration = objectType({
       description: 'List of files needing manual conversion',
       type: ManualMigration,
       resolve: async (source, args, ctx) => {
+        if (ctx.migration.step !== 'renameManual') {
+          return null
+        }
+
         const status = await ctx.migration.getComponentTestingMigrationStatus()
 
         if (!status) {
