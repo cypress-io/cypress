@@ -12,8 +12,8 @@ const verifyPassedAndFailedAreSame = (expectedFailures) => {
 describe('e2e error ui', function () {
   systemTests.setup()
 
-  beforeEach(() => {
-    Fixtures.scaffoldProject('e2e')
+  beforeEach(async () => {
+    await Fixtures.scaffoldProject('e2e')
   })
 
   ;[
@@ -40,8 +40,8 @@ describe('e2e error ui', function () {
     project: 'integration-outside-project-root/project-root',
     spec: '../../../e2e/failing.cy.js',
     expectedExitCode: 1,
-    onRun (exec) {
-      Fixtures.scaffoldProject('integration-outside-project-root')
+    onRun: async (exec) => {
+      await Fixtures.scaffoldProject('integration-outside-project-root')
 
       return exec().then(verifyPassedAndFailedAreSame(1))
     },
