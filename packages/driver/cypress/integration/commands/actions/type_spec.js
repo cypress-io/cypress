@@ -574,8 +574,7 @@ describe('src/cy/commands/actions/type - #type', () => {
 
       targets.forEach((targetId) => {
         it(`${targetId}`, () => {
-          cy.get(`#target-${targetId}`).focus()
-          cy.get(`#target-${targetId}`).type('{enter}')
+          cy.get(`#target-${targetId}`).focus().type('{enter}')
 
           cy.get('li').eq(0).should('have.text', 'keydown')
           cy.get('li').eq(1).should('have.text', 'keypress')
@@ -593,8 +592,7 @@ describe('src/cy/commands/actions/type - #type', () => {
 
       targets.forEach((targetId) => {
         it(`${targetId}`, () => {
-          cy.get(`#target-${targetId}`).focus()
-          cy.get(`#target-${targetId}`).type('{enter}')
+          cy.get(`#target-${targetId}`).focus().type('{enter}')
 
           cy.get('li').eq(0).should('have.text', 'keydown')
           cy.get('li').eq(1).should('have.text', 'keypress')
@@ -610,17 +608,30 @@ describe('src/cy/commands/actions/type - #type', () => {
     })
 
     const targets = [
-      'button-tag',
-      'input-button',
-      'input-image',
-      'input-reset',
-      'input-submit',
+      '#target-button-tag',
+      '#target-input-button',
+      '#target-input-image',
+      '#target-input-reset',
+      '#target-input-submit',
     ]
 
     describe(`triggers with single space`, () => {
-      targets.forEach((targetId) => {
-        it(targetId, () => {
-          cy.get(`#target-${targetId}`).focus().type(' ')
+      targets.forEach((target) => {
+        it(target, () => {
+          const events = []
+
+          $(target).on('keydown keypress keyup click', (evt) => {
+            events.push(evt.type)
+          })
+
+          cy.get(target).focus().type(' ').then(() => {
+            expect(events).to.deep.eq([
+              'keydown',
+              'keypress',
+              'keyup',
+              'click',
+            ])
+          })
 
           cy.get('li').eq(0).should('have.text', 'keydown')
           cy.get('li').eq(1).should('have.text', 'keypress')
@@ -631,20 +642,60 @@ describe('src/cy/commands/actions/type - #type', () => {
     })
 
     describe(`does not trigger if keyup prevented`, () => {
-      it('target-button-key-up-prevented', () => {
-        cy.get(`#target-button-key-up-prevented`).focus().type(' ')
+      targets.forEach((target) => {
+        it(`${target} does not fire click event`, () => {
+          const events = []
 
-        cy.get('li').should('have.length', 3)
-        cy.get('li').eq(0).should('have.text', 'keydown')
-        cy.get('li').eq(1).should('have.text', 'keypress')
-        cy.get('li').eq(2).should('have.text', 'keyup')
+          $(target)
+          .on('keydown keypress keyup click', (evt) => {
+            events.push(evt.type)
+          })
+          .on('keyup', (evt) => {
+            evt.preventDefault()
+          })
+
+          cy.get(target).focus().type(' ').then(() => {
+            expect(events).to.deep.eq([
+              'keydown',
+              'keypress',
+              'keyup',
+            ])
+          })
+
+          cy.get('li').should('have.length', 3)
+          cy.get('li').eq(0).should('have.text', 'keydown')
+          cy.get('li').eq(1).should('have.text', 'keypress')
+          cy.get('li').eq(2).should('have.text', 'keyup')
+        })
       })
     })
 
     describe('triggers after other characters', () => {
-      targets.forEach((targetId) => {
-        it(targetId, () => {
-          cy.get(`#target-${targetId}`).focus().type('asd ')
+      targets.forEach((target) => {
+        it(target, () => {
+          const events = []
+
+          $(target).on('keydown keypress keyup click', (evt) => {
+            events.push(evt.type)
+          })
+
+          cy.get(target).focus().type('asd ').then(() => {
+            expect(events).to.deep.eq([
+              'keydown',
+              'keypress',
+              'keyup',
+              'keydown',
+              'keypress',
+              'keyup',
+              'keydown',
+              'keypress',
+              'keyup',
+              'keydown',
+              'keypress',
+              'keyup',
+              'click',
+            ])
+          })
 
           cy.get('li').eq(12).should('have.text', 'click')
         })
