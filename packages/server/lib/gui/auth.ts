@@ -220,12 +220,7 @@ const start = (onMessage, utmCode, onLogin) => {
     })
   })
   .catch((err: Error) => {
-    onMessage({
-      type: 'error',
-      name: 'AUTH_ERROR_DURING_LOGIN',
-      message: err.message,
-      browserOpened: authRedirectReached,
-    })
+    sendMessage('error', 'AUTH_ERROR_DURING_LOGIN', err.message)
   })
   .finally(() => {
     _internal.stopServer()

@@ -849,6 +849,8 @@ const getMsgByType = function (type, ...args) {
         Provide a path to an existing fixture file.`
     case 'AUTH_COULD_NOT_LAUNCH_BROWSER':
       return arg1
+    case 'AUTH_ERROR_DURING_LOGIN':
+      return arg1
     case 'AUTH_BROWSER_LAUNCHED':
       return `Check your browser to continue logging in.`
     case 'BAD_POLICY_WARNING':
