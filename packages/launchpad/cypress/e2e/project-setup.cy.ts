@@ -139,7 +139,7 @@ describe('Launchpad: Setup Project', () => {
 
         cy.get('[data-cy-testingtype="e2e"]').click()
 
-        cy.contains(/(Initializing Config|Choose a Browser)/)
+        cy.contains(/(Initializing Config|Choose a Browser)/, { timeout: 10000 })
       })
 
       it('opens to the browser pages when opened via cli with --e2e flag', () => {
@@ -264,7 +264,7 @@ describe('Launchpad: Setup Project', () => {
         .should('not.have.disabled')
         .click()
 
-        cy.contains(/(Initializing Config|Choose a Browser)/)
+        cy.contains(/(Initializing Config|Choose a Browser)/, { timeout: 10000 })
       })
 
       it('can setup e2e testing for a project selecting TS', () => {
@@ -527,7 +527,7 @@ describe('Launchpad: Setup Project', () => {
 
         cy.get('[data-cy-testingtype="component"]').click()
 
-        cy.contains(/(Initializing Config|Choose a Browser)/)
+        cy.contains(/(Initializing Config|Choose a Browser)/, { timeout: 10000 })
       })
 
       it('opens to the browser pages when opened via cli with --component flag', () => {
@@ -779,7 +779,7 @@ describe('Launchpad: Setup Project', () => {
         })
 
         cy.findByRole('button', { name: 'Continue' }).click()
-        cy.contains(/(Initializing Config|Choose a Browser)/)
+        cy.contains(/(Initializing Config|Choose a Browser)/, { timeout: 10000 })
       })
 
       it('setup component testing with typescript files', () => {
@@ -808,7 +808,7 @@ describe('Launchpad: Setup Project', () => {
         })
 
         cy.findByRole('button', { name: 'Continue' }).click()
-        cy.contains(/(Initializing Config|Choose a Browser)/)
+        cy.contains(/(Initializing Config|Choose a Browser)/, { timeout: 10000 })
       })
     })
   })
