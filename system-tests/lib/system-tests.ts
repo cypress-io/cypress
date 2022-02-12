@@ -909,7 +909,7 @@ const systemTests = {
 
     if (!options.skipScaffold) {
       await Fixtures.scaffoldCommonNodeModules()
-      await Fixtures.scaffoldProject(options.project)
+      Fixtures.scaffoldProject(options.project)
       await Fixtures.scaffoldProjectNodeModules(options.project)
     }
 

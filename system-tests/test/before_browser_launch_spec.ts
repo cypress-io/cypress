@@ -35,7 +35,7 @@ describe('e2e before:browser:launch', () => {
     sanitizeScreenshotDimensions: true,
     snapshot: true,
     onRun: async (exec) => {
-      await Fixtures.scaffoldProject('plugin-extension')
+      Fixtures.scaffoldProject('plugin-extension')
       await exec()
     },
   })

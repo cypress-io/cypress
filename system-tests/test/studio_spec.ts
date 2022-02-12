@@ -59,8 +59,8 @@ describe.skip('e2e studio', function () {
     spec: 'extend.spec.js',
     snapshot: true,
     browser: 'electron',
-    onRun: async (exec) => {
-      await Fixtures.scaffoldProject('studio')
+    onRun (exec) {
+      Fixtures.scaffoldProject('studio')
 
       return exec().then(() => snapshotFile('studio-no-source-maps', 'extend.spec.js'))
     },
@@ -71,8 +71,8 @@ describe.skip('e2e studio', function () {
     spec: 'new.spec.js',
     browser: 'electron',
     snapshot: true,
-    onRun: async (exec) => {
-      await Fixtures.scaffoldProject('studio')
+    onRun (exec) {
+      Fixtures.scaffoldProject('studio')
 
       return exec().then(() => snapshotFile('studio-no-source-maps', 'new.spec.js'))
     },

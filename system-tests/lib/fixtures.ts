@@ -54,7 +54,7 @@ export async function scaffoldProject (project: string): Promise<void> {
   const to = _path.join(cyTmpDir, project)
   const from = _path.join(projects, project)
 
-  await fs.copy(from, to)
+  fs.copySync(from, to)
 }
 
 /**

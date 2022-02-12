@@ -23,7 +23,7 @@ describe('e2e readonly fs', function () {
   }
 
   const onRun = async (exec) => {
-    await Fixtures.scaffoldProject('read-only-project-root')
+    Fixtures.scaffoldProject('read-only-project-root')
     await Fixtures.scaffoldCommonNodeModules()
     chmodr(projectPath, 0o500)
 

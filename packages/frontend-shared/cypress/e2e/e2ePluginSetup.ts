@@ -113,7 +113,7 @@ async function makeE2ETasks () {
       Fixtures.removeProject(projectName)
     }
 
-    await Fixtures.scaffoldProject(projectName)
+    Fixtures.scaffoldProject(projectName)
 
     await Fixtures.scaffoldCommonNodeModules()
 
