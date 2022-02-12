@@ -117,7 +117,9 @@ export async function initComponentTestingMigration (
     const file = filesToBeMoved.get(posixUnlinkedPath)
 
     if (!file) {
-      throw Error(`Watcher incorrectly triggered ${posixUnlinkedPath}\nwhile watching ${Array.from(filesToBeMoved.keys()).join(', ')}`)
+      throw Error(`Watcher incorrectly triggered ${posixUnlinkedPath}
+      while watching ${Array.from(filesToBeMoved.keys()).join(', ')}
+      projectRoot: ${projectRoot}`)
     }
 
     file.moved = true

@@ -125,11 +125,11 @@ export class MigrationDataSource {
 
     if (!this.componentTestingMigrationWatcher) {
       debug('getComponentTestingMigrationStatus: initializing watcher')
-      const onFileMoved = (status: ComponentTestingMigrationStatus) => {
+      const onFileMoved = async (status: ComponentTestingMigrationStatus) => {
         this.componentTestingMigrationStatus = status
 
         if (status.completed) {
-          this.componentTestingMigrationWatcher?.close()
+          await this.componentTestingMigrationWatcher?.close()
           this.componentTestingMigrationWatcher = null
         }
 
