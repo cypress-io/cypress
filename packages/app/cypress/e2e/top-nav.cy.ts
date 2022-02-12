@@ -1,4 +1,7 @@
 import type { AuthMessage } from '../../../data-context/src/actions/AuthActions'
+import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
+
+const loginText = defaultMessages.topNav.login
 
 describe('App Top Nav Workflows', () => {
   beforeEach(() => {
@@ -312,7 +315,7 @@ describe('App Top Nav Workflows', () => {
           })
         })
 
-        cy.intercept('mutation-Logout').as('logout')
+        cy.intercept('mutation-Auth_Logout').as('logout')
 
         cy.findByRole('button', { name: 'Log Out' }).click()
 
@@ -414,6 +417,92 @@ describe('App Top Nav Workflows', () => {
 
         cy.get('@logInModal').should('not.exist')
         cy.findByTestId('app-header-bar').findByTestId('user-avatar-title').should('be.visible')
+      })
+
+      it('shows correct error when browser cannot launch', () => {
+        cy.withCtx((ctx) => {
+          ctx.coreData.authState = {
+            type: 'warning',
+            name: 'AUTH_COULD_NOT_LAUNCH_BROWSER',
+            message: 'http://127.0.0.1:0000/redirect-to-auth',
+            browserOpened: false,
+          }
+        })
+
+        cy.findByTestId('app-header-bar').within(() => {
+          cy.findByTestId('user-avatar-title').should('not.exist')
+          cy.findByRole('button', { name: 'Log In' }).click()
+        })
+
+        cy.contains('http://127.0.0.1:0000/redirect-to-auth').should('be.visible')
+        cy.contains(loginText.titleBrowserError).should('be.visible')
+        cy.contains(loginText.bodyBrowserError).should('be.visible')
+        cy.contains(loginText.bodyBrowserErrorDetails).should('be.visible')
+
+        // in this state, there is no retry UI, we as the user to visit the auth url on their own
+        cy.contains('button', loginText.actionTryAgain).should('not.exist')
+        cy.contains('button', loginText.actionCancel).should('not.exist')
+      })
+
+      it('shows correct error when error other than browser-launch happens', () => {
+        cy.withCtx((ctx) => {
+          ctx.coreData.authState = {
+            type: 'error',
+            name: 'AUTH_ERROR_DURING_LOGIN',
+            message: 'An unexpected error occurred',
+            browserOpened: false,
+          }
+        })
+
+        cy.findByTestId('app-header-bar').within(() => {
+          cy.findByTestId('user-avatar-title').should('not.exist')
+          cy.findByRole('button', { name: 'Log In' }).click()
+        })
+
+        cy.contains(loginText.titleFailed).should('be.visible')
+        cy.contains(loginText.bodyError).should('be.visible')
+        cy.contains('An unexpected error occurred').should('be.visible')
+
+        cy.contains('button', loginText.actionTryAgain).should('be.visible').as('tryAgain')
+        cy.contains('button', loginText.actionCancel).should('be.visible')
+
+        cy.withCtx((ctx) => {
+          ctx.coreData.authState = {
+            type: 'info',
+            name: 'AUTH_BROWSER_LAUNCH',
+            message: '',
+            browserOpened: true,
+          }
+        })
+
+        cy.get('@tryAgain').click()
+        cy.contains(loginText.titleInitial).should('be.visible')
+      })
+
+      it('cancel button correctly clears error state', () => {
+        cy.withCtx((ctx) => {
+          ctx.coreData.authState = {
+            type: 'error',
+            name: 'AUTH_ERROR_DURING_LOGIN',
+            message: 'An unexpected error occurred',
+            browserOpened: false,
+          }
+        })
+
+        cy.findByTestId('app-header-bar').within(() => {
+          cy.findByTestId('user-avatar-title').should('not.exist')
+          cy.findByRole('button', { name: 'Log In' }).as('loginButton').click()
+        })
+
+        cy.contains(loginText.titleFailed).should('be.visible')
+        cy.contains(loginText.bodyError).should('be.visible')
+        cy.contains('An unexpected error occurred').should('be.visible')
+
+        cy.contains('button', loginText.actionTryAgain).should('be.visible')
+        cy.contains('button', loginText.actionCancel).click()
+
+        cy.get('@loginButton').click()
+        cy.contains(loginText.titleInitial).should('be.visible')
       })
     })
   })

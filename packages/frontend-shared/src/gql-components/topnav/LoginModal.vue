@@ -165,6 +165,10 @@ const title = computed(() => {
     return t('topNav.login.titleBrowserError')
   }
 
+  if (errorType.value === 'loginError') {
+    return t('topNav.login.titleFailed')
+  }
+
   return t('topNav.login.titleInitial')
 })
 
