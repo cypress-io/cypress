@@ -1,21 +1,22 @@
+import Bluebird from 'bluebird'
+import Debug from 'debug'
 import _ from 'lodash'
 import path from 'path'
-import Bluebird from 'bluebird'
 import deepDiff from 'return-deep-diff'
+import errors from './errors'
 import type { ResolvedFromConfig, ResolvedConfigurationOptionSource, AllModeOptions, FullConfig } from '@packages/types'
 import configUtils from '@packages/config'
-
-import errors from './errors'
+import { getProcessEnvVars, CYPRESS_SPECIAL_ENV_VARS } from './util/config'
 import { fs } from './util/fs'
 import keys from './util/keys'
 import origin from './util/origin'
-import Debug from 'debug'
 import pathHelpers from './util/path_helpers'
 
-const debug = Debug('cypress:server:config')
+import type { ConfigValidationError } from '@packages/errors'
 
-import { getProcessEnvVars, CYPRESS_SPECIAL_ENV_VARS } from './util/config'
 import { getCtx } from './makeDataContext'
+
+const debug = Debug('cypress:server:config')
 
 const folders = _(configUtils.options).filter({ isFolder: true }).map('name').value()
 
@@ -175,8 +176,13 @@ export function mergeDefaults (
 
   // validate config again here so that we catch configuration errors coming
   // from the CLI overrides or env var overrides
-  configUtils.validate(_.omit(config, 'browsers'), (errMsg) => {
-    throw errors.throw('CONFIG_VALIDATION_ERROR', errMsg)
+  configUtils.validate(_.omit(config, 'browsers'), (validationResult: ConfigValidationError | string) => {
+    // return errors.throw('CONFIG_VALIDATION_ERROR', errMsg)
+    if (_.isString(validationResult)) {
+      return errors.throw('CONFIG_VALIDATION_MSG_ERROR', null, null, validationResult)
+    }
+
+    return errors.throw('CONFIG_VALIDATION_ERROR', null, null, validationResult)
   })
 
   config = setAbsolutePaths(config)
@@ -228,14 +234,15 @@ export function updateWithPluginValues (cfg, overrides) {
 
   // make sure every option returned from the plugins file
   // passes our validation functions
-  configUtils.validate(overrides, (errMsg) => {
+  configUtils.validate(overrides, (validationResult: ConfigValidationError | string) => {
     const configFile = getCtx().lifecycleManager.configFile
 
-    if (configFile) {
-      return errors.throw('PLUGINS_CONFIG_VALIDATION_ERROR', configFile, errMsg)
+    if (_.isString(validationResult)) {
+      return errors.throw('CONFIG_VALIDATION_MSG_ERROR', 'pluginsFile', configFile, validationResult)
     }
 
-    return errors.throw('CONFIG_VALIDATION_ERROR', errMsg)
+    return errors.throw('CONFIG_VALIDATION_ERROR', 'pluginsFile', configFile, validationResult)
+    // return errors.throw('CONFIG_VALIDATION_ERROR', 'pluginsFile', relativePluginsPath, errMsg)
   })
 
   let originalResolvedBrowsers = cfg && cfg.resolved && cfg.resolved.browsers && _.cloneDeep(cfg.resolved.browsers)
@@ -364,9 +371,7 @@ export async function setSupportFileAndFolder (obj, defaults) {
   }
 
   if (supportFilesByGlob.length === 0) {
-    const configFile = obj.configFile || defaults.configFile
-
-    return errors.throw('SUPPORT_FILE_NOT_FOUND', path.resolve(obj.projectRoot, obj.supportFile), configFile)
+    return errors.throw('SUPPORT_FILE_NOT_FOUND', path.resolve(obj.projectRoot, obj.supportFile))
   }
 
   // TODO move this logic to find support file into util/path_helpers
@@ -399,7 +404,7 @@ export async function setSupportFileAndFolder (obj, defaults) {
     return fs.pathExists(obj.supportFile)
     .then((found) => {
       if (!found) {
-        errors.throw('SUPPORT_FILE_NOT_FOUND', obj.supportFile, obj.configFile || defaults.configFile)
+        errors.throw('SUPPORT_FILE_NOT_FOUND', obj.supportFile)
       }
 
       return debug('switching to found file %s', obj.supportFile)
@@ -413,9 +418,7 @@ export async function setSupportFileAndFolder (obj, defaults) {
     })
     .then((result) => {
       if (result === null) {
-        const configFile = obj.configFile || defaults.configFile
-
-        return errors.throw('SUPPORT_FILE_NOT_FOUND', path.resolve(obj.projectRoot, sf), configFile)
+        return errors.throw('SUPPORT_FILE_NOT_FOUND', path.resolve(obj.projectRoot, sf))
       }
 
       debug('setting support file to %o', { result })

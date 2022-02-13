@@ -2,10 +2,10 @@
 import Bluebird from 'bluebird'
 import _ from 'lodash'
 import type { FoundBrowser } from '@packages/types'
-// @ts-ignore
 import errors from '../errors'
 // @ts-ignore
 import plugins from '../plugins'
+import { getError } from '@packages/errors'
 
 const path = require('path')
 const debug = require('debug')('cypress:server:browsers:utils')
@@ -139,7 +139,7 @@ function extendLaunchOptionsFromPlugins (launchOptions, pluginConfigResult, opti
   // interface and we need to warn them
   // TODO: remove this logic in >= v5.0.0
   if (pluginConfigResult[0]) {
-    options.onWarning(errors.get(
+    options.onWarning(getError(
       'DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS',
     ))
 
@@ -301,13 +301,12 @@ const formatBrowsersToOptions = (browsers) => {
   })
 }
 
-const throwBrowserNotFound = (browserName, browsers: FoundBrowser[] = []) => {
-  const names = `- ${formatBrowsersToOptions(browsers).join('\n- ')}`
-
-  return errors.throw('BROWSER_NOT_FOUND_BY_NAME', browserName, names)
+const throwBrowserNotFound = function (browserName, browsers: FoundBrowser[] = []) {
+  return errors.throw('BROWSER_NOT_FOUND_BY_NAME', browserName, formatBrowsersToOptions(browsers))
 }
 
 export = {
+
   extendLaunchOptionsFromPlugins,
 
   executeBeforeBrowserLaunch,
@@ -335,6 +334,8 @@ export = {
   ensureAndGetByNameOrPath,
 
   getBrowsers,
+
+  formatBrowsersToOptions,
 
   throwBrowserNotFound,
 

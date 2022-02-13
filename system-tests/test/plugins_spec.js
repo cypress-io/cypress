@@ -19,8 +19,9 @@ describe('e2e plugins', function () {
     expectedExitCode: 1,
     onRun (exec) {
       return exec().then(({ stdout }) => {
-        expect(stdout).to.include('The following error was thrown by a plugin. We stopped running your tests because a plugin crashed. Please check your e2e.setupNodeEvents method in `cypress.config.js`')
-        expect(stdout).to.include('Error: Root async error from config file')
+        expect(stdout).to.include('We stopped running your tests because your config process crashed.')
+        expect(stdout).to.include('Your configFile threw an error from:')
+        expect(stdout).to.include('Error: Root async error from plugins file')
       })
     },
   })
@@ -153,10 +154,60 @@ describe('e2e plugins', function () {
     })
   })
 
+  it('fails when invalid event handler is registered', function () {
+    return systemTests.exec(this, {
+      spec: 'app.cy.js',
+      project: 'plugin-invalid-event-handler-error',
+      sanitizeScreenshotDimensions: true,
+      snapshot: true,
+      expectedExitCode: 1,
+    })
+  })
+
   it('fails when setupNodeEvents is not a function', function () {
     return systemTests.exec(this, {
       spec: 'app.cy.js',
       project: 'plugin-empty',
+      sanitizeScreenshotDimensions: true,
+      snapshot: true,
+      expectedExitCode: 1,
+    })
+  })
+
+  it('fails when its set from config but does not exist', function () {
+    return systemTests.exec(this, {
+      spec: 'app_spec.js',
+      project: 'plugin-missing',
+      sanitizeScreenshotDimensions: true,
+      snapshot: true,
+      expectedExitCode: 1,
+    })
+  })
+
+  it('fails when there is no function exported', function () {
+    return systemTests.exec(this, {
+      spec: 'app_spec.js',
+      project: 'plugin-no-function-return',
+      sanitizeScreenshotDimensions: true,
+      snapshot: true,
+      expectedExitCode: 1,
+    })
+  })
+
+  it('fails when require throws synchronously', function () {
+    return systemTests.exec(this, {
+      spec: 'app_spec.js',
+      project: 'plugins-root-sync-error',
+      sanitizeScreenshotDimensions: true,
+      snapshot: true,
+      expectedExitCode: 1,
+    })
+  })
+
+  it('fails when function throws synchronously', function () {
+    return systemTests.exec(this, {
+      spec: 'app_spec.js',
+      project: 'plugins-function-sync-error',
       sanitizeScreenshotDimensions: true,
       snapshot: true,
       expectedExitCode: 1,

@@ -25,7 +25,7 @@ export interface StartDevServerOptions {
   indexHtml?: string
 }
 
-export const resolveServerConfig = async ({ viteConfig, options, indexHtml }: StartDevServerOptions): Promise<InlineConfig> => {
+export const resolveServerConfig = async ({ viteConfig, options }: StartDevServerOptions): Promise<InlineConfig> => {
   const { projectRoot, supportFile, namespace } = options.config
 
   const requiredOptions: InlineConfig = {

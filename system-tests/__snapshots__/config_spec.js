@@ -141,26 +141,38 @@ exports['e2e config applies defaultCommandTimeout globally 1'] = `
 `
 
 exports['e2e config throws error when invalid viewportWidth in the configuration file 1'] = `
-We found an invalid value in the file: \`cypress.config.js\`
+Your configFile set an invalid value from: cypress.config.js
 
-Expected \`viewportWidth\` to be a number. Instead the value was: \`"foo"\`
+Expected viewportWidth to be a number.
+
+Instead the value was: "foo"
 
 `
 
 exports['e2e config throws error when invalid browser in the configuration file 1'] = `
-We found an invalid value in the file: \`cypress.config.js\`
+Your configFile set an invalid value from: cypress.config.js
 
-Found an error while validating the \`browsers\` list. Expected \`family\` to be either chromium or firefox. Instead the value was: \`{"name":"bad browser","family":"unknown family","displayName":"Bad browser","version":"no version","path":"/path/to","majorVersion":123}\`
+The error occurred while validating the browsers list.
+
+Expected family to be either chromium or firefox.
+
+Instead the value was: 
+
+{
+  "name": "bad browser",
+  "family": "unknown family",
+  "displayName": "Bad browser",
+  "version": "no version",
+  "path": "/path/to",
+  "majorVersion": 123
+}
 
 `
 
 exports['e2e config throws error when multiple default config file are found in project 1'] = `
-There is both a \`cypress.config.js\` and a \`cypress.config.ts\` at the location below:
-/foo/bar/.projects/pristine-with-e2e-testing
+There is both a cypress.config.js and a cypress.config.ts at the location below:
 
-This sometimes happens if you do not have cypress.config.ts excluded in your tsconfig.json.
-
-Please add it to your "excludes" option, and remove from your project.
+  > /foo/bar/.projects/pristine
 
 
 `
@@ -168,6 +180,9 @@ Please add it to your "excludes" option, and remove from your project.
 exports['e2e config throws error when cypress.json is found in project and need migration 1'] = `
 There is a cypress.json file at the location below:
 /foo/bar/.projects/pristine
+There is both a cypress.config.js and a cypress.config.ts at the location below:
+
+  > /foo/bar/.projects/pristine
 
 Cypress 10 no longer supports 'cypress.json'. Please run \`cypress open\` to launch the migration tool to migrate to 'cypress.config.{ts|js}'.
 

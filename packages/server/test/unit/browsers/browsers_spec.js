@@ -1,6 +1,8 @@
 require('../../spec_helper')
 
+const stripAnsi = require('strip-ansi')
 const os = require('os')
+const chalk = require('chalk')
 const browsers = require(`../../../lib/browsers`)
 const utils = require(`../../../lib/browsers/utils`)
 const snapshot = require('snap-shot-it')
@@ -9,8 +11,12 @@ const { sinon } = require('../../spec_helper')
 const { exec } = require('child_process')
 const util = require('util')
 
+const normalizeSnapshot = (str) => {
+  return snapshot(stripAnsi(str))
+}
+
 const normalizeBrowsers = (message) => {
-  return message.replace(/(found on your system are:)(?:\n- .*)*/, '$1\n- chrome\n- firefox\n- electron')
+  return message.replace(/(found on your system are:)(?:\n - .*)*/, '$1\n - chrome\n - firefox\n - electron')
 }
 
 // When we added component testing mode, we added the option for electron to be omitted
@@ -82,7 +88,7 @@ describe('lib/browsers/index', () => {
       return expect(browsers.ensureAndGetByNameOrPath('browserNotGonnaBeFound', false, foundBrowsers))
       .to.be.rejectedWith({ type: 'BROWSER_NOT_FOUND_BY_NAME' })
       .then((err) => {
-        return snapshot(normalizeBrowsers(err.message))
+        return normalizeSnapshot(normalizeBrowsers(stripAnsi(err.message)))
       })
     })
 
@@ -96,7 +102,7 @@ describe('lib/browsers/index', () => {
       return expect(browsers.ensureAndGetByNameOrPath('canary', false, foundBrowsers))
       .to.be.rejectedWith({ type: 'BROWSER_NOT_FOUND_BY_NAME' })
       .then((err) => {
-        return snapshot(err.message)
+        return normalizeSnapshot(err.message)
       })
     })
   })
@@ -122,7 +128,7 @@ describe('lib/browsers/index', () => {
   })
 
   context('.open', () => {
-    it('throws an error if browser family doesn\'t exist', () => {
+    it(`throws an error if browser family doesn't exist`, () => {
       return browsers.open({
         name: 'foo-bad-bang',
         family: 'foo-bad',
@@ -136,7 +142,7 @@ describe('lib/browsers/index', () => {
         // we will get good error message that includes the "err" object
         expect(err).to.have.property('type').to.eq('BROWSER_NOT_FOUND_BY_NAME')
 
-        expect(err).to.have.property('message').to.contain('The specified browser was not found on your system or is not supported by Cypress: `foo-bad-bang`')
+        expect(err).to.have.property('message').to.contain(`Browser: ${chalk.yellow('foo-bad-bang')} was not found on your system`)
       })
     })
   })
