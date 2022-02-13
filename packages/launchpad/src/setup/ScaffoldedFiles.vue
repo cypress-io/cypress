@@ -79,7 +79,7 @@ const needsChanges = computed(() => props.gql.scaffoldedFiles?.some((f) => f.sta
 
 const mutation = useMutation(ScaffoldedFiles_CompleteSetupDocument)
 
-const completeSetup = () => {
-  mutation.executeMutation({})
+const completeSetup = async () => {
+  await mutation.executeMutation({})
 }
 </script>
