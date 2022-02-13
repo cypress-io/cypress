@@ -1,8 +1,6 @@
 import '@testing-library/cypress/add-commands'
 import { browsers } from '@packages/types/src/browser'
-import {
-  installCustomPercyCommand,
-} from '@packages/ui-components/cypress/support/customPercyCommand'
+import { installCustomPercyCommand } from '@packages/ui-components/cypress/support/customPercyCommand'
 import { configure } from '@testing-library/cypress'
 import i18n from '../../../src/locales/en-US.json'
 import { addNetworkCommands } from '../../support/onlineNetwork'

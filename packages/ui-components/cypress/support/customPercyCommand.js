@@ -1,17 +1,16 @@
 require('@percy/cypress')
 const _ = require('lodash')
 
-class MutationManager {
-  mutationStack = []
-
-  constructor () {
-    this.observer = new MutationObserver((mutationsList) => {
-      this.mutationStack.push(...mutationsList)
-    })
-  }
+class ElementOverrideManager {
+  mutationStack = undefined
 
   performOverrides (cy, overrides) {
-    this.observer.observe(cy.$$('html')[0], { childList: true, subtree: true, attributes: true, attributeOldValue: true })
+    const observer = new MutationObserver((mutations) => {
+      this.mutationStack ??= []
+      this.mutationStack.push(...mutations)
+    })
+
+    observer.observe(cy.$$('html')[0], { childList: true, subtree: true, attributes: true, attributeOldValue: true })
 
     _.each(overrides, (v, k) => {
       // eslint-disable-next-line cypress/no-assigning-return-values
@@ -32,21 +31,99 @@ class MutationManager {
       $el.css({ visibility: 'hidden' })
     })
 
-    this.mutationStack.push(...(this.observer.takeRecords() || []))
+    // Use takeRecords to flush all pending mutations that have not yet
+    // been processed by the observer's handler prior to disconnecting.
+    this.mutationStack = [...(observer.takeRecords() || [])]
 
-    this.observer.disconnect()
+    observer.disconnect()
   }
 
-  reset () {
-    while (this.mutationStack.length) {
-      const { type, target, attributeName, oldValue } = this.mutationStack.pop()
-
-      // TODO: handle more types (child updates)
+  resetOverrides () {
+    _.forEachRight(this.mutationStack, ({
+      type,
+      target,
+      attributeName,
+      oldValue,
+      addedNodes,
+      removedNodes,
+    }) => {
       if (type === 'attributes') {
         target.setAttribute(attributeName, oldValue)
+
+        return
       }
-    }
+
+      if (type === 'childList') {
+        if (addedNodes.length) {
+          addedNodes.forEach((addedNode) => {
+            target.removeChild(addedNode)
+          })
+        }
+
+        if (removedNodes.length) {
+          removedNodes.forEach((removedNode) => {
+            target.insertBefore(removedNode, removedNode.previousSibling)
+          })
+        }
+
+        return
+      }
+
+      // TODO: support more mutations
+    })
+
+    this.mutationStack = undefined
   }
+}
+
+const applySnapshotMutations = ({
+  log,
+  snapshotWidth,
+  snapshotElementOverrides,
+  defaultWidth,
+  defaultHeight,
+}) => {
+  let cyLog
+  let elementOverrideManager
+
+  if (log) {
+    cyLog = Cypress.log({
+      message: log,
+      snapshot: false,
+    })
+  }
+
+  if (Object.keys(snapshotElementOverrides).length) {
+    elementOverrideManager = new ElementOverrideManager()
+  }
+
+  return cy.viewport(snapshotWidth, defaultHeight, { log: false })
+  .then(() => {
+    if (elementOverrideManager) {
+      elementOverrideManager.performOverrides(cy, snapshotElementOverrides)
+    }
+
+    if (cyLog) {
+      // Take first snapshot after viewport and mutations have been applied
+      cyLog.snapshot('percy', { next: 'after percy' })
+    }
+
+    return () => {
+      cy.viewport(defaultWidth, defaultHeight, { log: false })
+      .then(() => {
+        if (elementOverrideManager) {
+          elementOverrideManager.resetOverrides()
+        }
+
+        if (cyLog) {
+          // FIXME: the logged snapshots do not maintain two separate viewport widths. even
+          // though the first snapshot was taken with the snapshotWidth, viewing the
+          // log before/after will show both snapshots with the defaultWidth applied.
+          cyLog.snapshot().end()
+        }
+      })
+    }
+  })
 }
 
 export const installCustomPercyCommand = ({ before, elementOverrides } = {}) => {
@@ -66,70 +143,25 @@ export const installCustomPercyCommand = ({ before, elementOverrides } = {}) => 
     const screenshotName = titlePath.concat(name).filter(Boolean).join(' > ')
 
     const { viewportWidth, viewportHeight } = cy.state()
+    const snapshotWidth = !_.isNil(options.width) ? options.width : viewportWidth
 
-    const hasCustomWidth = !_.isNil(options.width)
-    const snapshotWidth = hasCustomWidth ? options.width : viewportWidth
-
-    const customOptions = {
-      width: options.width || viewportWidth,
-      elementOverrides: {
+    const snapshotMutationOptions = {
+      defaultWidth: viewportWidth,
+      defaultHeight: viewportHeight,
+      snapshotWidth,
+      snapshotElementOverrides: {
         ...elementOverrides,
         ...options.elementOverrides,
       },
     }
 
-    const performMutations = ({ afterMutation, log }) => {
-      let mutationManager
-      let cyLog
-
-      if (log) {
-        cyLog = Cypress.log({
-          message: log,
-          snapshot: false,
-        })
-      }
-
-      cy.viewport(snapshotWidth, viewportHeight, { log: false })
-      .then(() => {
-        if (Object.keys(customOptions.elementOverrides).length) {
-          mutationManager = new MutationManager()
-          mutationManager.performOverrides(cy, customOptions.elementOverrides)
-        }
-      })
-      .then(() => {
-        if (cyLog) {
-          // Take first snapshot after viewport and mutations have been applied
-          cyLog.snapshot('before', { next: 'after' })
-        }
-
-        if (afterMutation) {
-          afterMutation()
-        }
-      })
-
-      cy.viewport(viewportWidth, viewportHeight, { log: false })
-      .then(() => {
-        // If an mutationManager was created, we have to reset tracked mutations
-        if (mutationManager) {
-          mutationManager.reset()
-        }
-      })
-      .then(() => {
-        if (cyLog) {
-          // FIXME: the snapshots do not maintain two separate viewport widths. even
-          // though the first snapshot was taken at the provided width, viewing the
-          // log before/after will show both snapshots at this final reapplied width.
-          cyLog.snapshot().end()
-        }
-      })
-
-      return
-    }
-
-    // if we're in interactive mode via 'cypress open', apply overrides, create log,
-    // and then abort
+    // If we're in interactive mode via 'cypress open', apply overrides,
+    // create log, reset overrides, and abort.
     if (Cypress.config().isInteractive) {
-      performMutations({ log: 'percy: skipping snapshot in interactive mode' })
+      applySnapshotMutations({
+        ...snapshotMutationOptions,
+        log: 'percy: skipping snapshot in interactive mode',
+      }).then((reset) => reset())
 
       return
     }
@@ -145,16 +177,16 @@ export const installCustomPercyCommand = ({ before, elementOverrides } = {}) => 
 
     Cypress.config('defaultCommandTimeout', 10000)
 
-    // Call original function after preparing AUT for presentation
-    performMutations({
-      afterMutation: () => {
-        origFn(screenshotName, {
-          widths: [snapshotWidth],
-        })
-      },
-    })
+    // If we're not in interactive mode, apply mutations, call original
+    // percy snapshot function, and then reset overrides
+    applySnapshotMutations(snapshotMutationOptions)
+    .then((reset) => {
+      origFn(screenshotName, {
+        widths: [snapshotWidth],
+      })
 
-    cy.then(() => {
+      return reset()
+    }).then(() => {
       Cypress.config('defaultCommandTimeout', _backupTimeout)
     })
 

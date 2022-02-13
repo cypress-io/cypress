@@ -1,4 +1,5 @@
 import { loadSpec } from './support/spec-loader'
+import { reporterSnapshot } from './support/reporter-snapshot'
 
 describe('sessions ui', {
   viewportWidth: 1000,
@@ -16,15 +17,7 @@ describe('sessions ui', {
     cy.get('.sessions-container').click()
     .should('contain', 'blank_session')
 
-    // cy.viewport(600, 600)
-
-    cy.percySnapshot({
-      width: 320,
-      elementOverrides: {
-        '[data-cy=aut-panel]': true,
-        '[data-cy=sidebar]': 'displayNone',
-      },
-    })
+    reporterSnapshot()
   })
 
   it('shows message for new, saved, and recreated session', () => {
@@ -60,7 +53,7 @@ describe('sessions ui', {
     .should('contain', 'user1')
     .should('contain', '(recreated)')
 
-    cy.percySnapshot()
+    reporterSnapshot()
   })
 
   it('multiple sessions in a test', () => {
@@ -74,6 +67,6 @@ describe('sessions ui', {
     .should('contain', 'user1')
     .should('contain', 'user2')
 
-    cy.percySnapshot()
+    reporterSnapshot()
   })
 })

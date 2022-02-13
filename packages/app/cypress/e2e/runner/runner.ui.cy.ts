@@ -1,4 +1,5 @@
 import { loadSpec } from './support/spec-loader'
+import { reporterSnapshot } from './support/reporter-snapshot'
 
 describe('runner ui', () => {
   describe('tests finish with correct state', () => {
@@ -92,7 +93,7 @@ describe('runner ui', () => {
       .click()
       .should('have.class', 'command-is-pinned')
 
-      cy.percySnapshot()
+      reporterSnapshot()
     })
 
     it('renders spec name and runtime in header', () => {

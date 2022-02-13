@@ -1,4 +1,5 @@
 import { loadSpec } from './support/spec-loader'
+import { reporterSnapshot } from './support/reporter-snapshot'
 
 // Returns wrapped attempt tag found within runnable containing selector
 const getAttemptTag = (sel: string) => {
@@ -18,7 +19,7 @@ describe('retries ui', {
     })
 
     cy.get('.test').should('have.length', 2)
-    cy.percySnapshot()
+    reporterSnapshot()
   })
 
   it('collapses prev attempts and keeps final one open on failure', () => {
@@ -29,7 +30,7 @@ describe('retries ui', {
     })
 
     cy.get('.runnable-err-print').should('be.visible')
-    cy.percySnapshot()
+    reporterSnapshot()
   })
 
   it('can toggle failed prev attempt open and log its error', () => {
@@ -51,7 +52,7 @@ describe('retries ui', {
 
     cy.get('@console_error').should('be.calledWithMatch', 'AssertionError: test 2')
 
-    cy.percySnapshot()
+    reporterSnapshot()
   })
 
   // TODO: Determine how best to access the inner Cypress instance prior to test execution
@@ -121,7 +122,7 @@ describe('retries ui', {
       cy.get('.runnable-err').should('not.be.visible')
     })
 
-    cy.percySnapshot()
+    reporterSnapshot()
   })
 
   describe('only', () => {
@@ -136,7 +137,7 @@ describe('retries ui', {
       cy.contains('test 1').should('not.exist')
       cy.contains('test 3').should('not.exist')
 
-      cy.percySnapshot()
+      reporterSnapshot()
     })
   })
 
@@ -151,7 +152,7 @@ describe('retries ui', {
 
       cy.contains('Although you have test retries')
 
-      cy.percySnapshot()
+      reporterSnapshot()
     })
 
     // TODO: future versions should run all hooks associated with test on retry
@@ -166,7 +167,7 @@ describe('retries ui', {
       cy.contains('after all')
       cy.contains('before all').should('not.exist')
 
-      cy.percySnapshot()
+      reporterSnapshot()
     })
   })
 
@@ -201,7 +202,7 @@ describe('retries ui', {
       cy.get('.attempt-3 .hook-item .collapsible:contains(after each)')
       cy.get('.attempt-3 .hook-item .collapsible:contains(after all)')
 
-      cy.percySnapshot()
+      reporterSnapshot()
     })
 
     it('beforeEach retried tests skip remaining tests in suite', () => {
@@ -215,7 +216,7 @@ describe('retries ui', {
       // ensure the page is loaded before taking snapshot
       cy.contains('skips this')
 
-      cy.percySnapshot()
+      reporterSnapshot()
     })
   })
 
@@ -252,7 +253,7 @@ describe('retries ui', {
       cy.get('.attempt-2 .hook-item .collapsible:contains(after each (3))')
       cy.get('.attempt-3 .hook-item .collapsible:contains(after all)')
 
-      cy.percySnapshot()
+      reporterSnapshot()
     })
 
     it('afterEach retried tests skip remaining tests in suite', () => {
@@ -263,7 +264,7 @@ describe('retries ui', {
         pendingCount: 0,
       })
 
-      cy.percySnapshot()
+      reporterSnapshot()
     })
   })
 
@@ -296,7 +297,7 @@ describe('retries ui', {
       cy.get('.runnable-err-print').click()
       cy.get('@console_error').its('lastCall').should('be.calledWithMatch', 'Error')
 
-      cy.percySnapshot()
+      reporterSnapshot()
     })
   })
 
@@ -348,7 +349,7 @@ describe('retries ui', {
       cy.get('.runnable-err')
       .should(containText(`it('tries to set mocha retries', { retries: 2 }, () => `))
 
-      cy.percySnapshot()
+      reporterSnapshot()
     })
 
     it('throws when set via this.retries in hook', () => {
@@ -361,7 +362,7 @@ describe('retries ui', {
       cy.get('.runnable-err')
       .should(containText(`describe('suite 1', { retries: 0 }, () => `))
 
-      cy.percySnapshot()
+      reporterSnapshot()
     })
 
     it('throws when set via this.retries in suite', () => {
@@ -374,7 +375,7 @@ describe('retries ui', {
       cy.get('.runnable-err')
       .should(containText(`describe('suite 1', { retries: 3 }, () => `))
 
-      cy.percySnapshot()
+      reporterSnapshot()
     })
   })
 })
