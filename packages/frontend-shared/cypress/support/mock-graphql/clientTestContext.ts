@@ -36,6 +36,9 @@ export interface ClientTestContext {
   user: AuthenticatedUserShape | null
   cloudTypes: typeof cloudTypes
   __mockPartial: any
+  mutationData: {
+    copyText?: string
+  }
 }
 
 /**
@@ -104,5 +107,6 @@ export function makeClientTestContext (): ClientTestContext {
     },
     migration: {},
     __mockPartial: {},
+    mutationData: {},
   }
 }

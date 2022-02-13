@@ -14,17 +14,6 @@ import { computed, watch, defineComponent, h, toRaw } from 'vue'
 import { each } from 'lodash'
 import { createI18n } from '@cy/i18n'
 
-/**
- * This variable is mimicing ipc provided by electron.
- * It has to be loaded run before initializing GraphQL
- * because graphql uses it.
- */
-
-(window as any).ipc = {
-  on: () => {},
-  send: () => {},
-}
-
 export interface MountFnOptions {
   plugins?: (() => any)[]
 }
@@ -180,6 +169,10 @@ declare global {
         fragment: T,
         config: MountFragmentListConfig<T>
       ): Cypress.Chainable<ClientTestContext>
+      /**
+       * The "test context" for component tests
+       */
+      componentCtx: ClientTestContext
     }
   }
 }

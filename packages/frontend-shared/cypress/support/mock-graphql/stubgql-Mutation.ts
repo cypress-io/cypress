@@ -113,4 +113,9 @@ export const stubMutation: MaybeResolver<Mutation> = {
 
     return {}
   },
+  copyText (src, args, ctx) {
+    ctx.mutationData.copyText = args.text
+
+    return true
+  },
 }

@@ -14,6 +14,8 @@ import dedent from 'dedent'
 import { GQLStubRegistry } from './stubgql-Registry'
 
 export function testUrqlClient (context: ClientTestContext, onResult?: (result: any, context: ClientTestContext) => any): Client {
+  cy.componentCtx = context
+
   return createClient({
     url: '/__cypress/graphql',
     exchanges: [

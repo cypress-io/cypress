@@ -2,18 +2,20 @@ import CopyButton from './CopyButton.vue'
 
 describe('<CopyButton />', { viewportHeight: 80, viewportWidth: 120 }, () => {
   it('copies text to clipboard', () => {
+    const copyFn = cy.stub()
+
     cy.mount(() => (<>
-      <CopyButton text="Foobar" />
+      <CopyButton text="Foobar" copyFn={copyFn} />
     </>))
     .get('button')
     .should('contain.text', 'Copy')
-
     .get('svg')
     .should('exist')
 
-    // TODO: UNIFY-999 Solve "write permission denied" error to test this in run mode
-    // cy.findByRole('button', { name: 'Copy' }).realClick()
-    // cy.findByRole('button', { name: 'Copied!' }).should('be.visible')
+    cy.findByRole('button', { name: 'Copy' }).realClick()
+    cy.findByRole('button', { name: 'Copied!' }).should('be.visible').then(() => {
+      expect(copyFn).to.have.been.calledOnceWith('Foobar')
+    })
   })
 
   it('noIcon hides the icon', () => {

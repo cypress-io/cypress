@@ -39,10 +39,10 @@ describe('react-storybook-ct', () => {
     })
   })
 
-  it('visits the app, creating & executing a story created from the app', () => {
+  it('visits the app, creating & executing a story created from the app', { retries: 0 }, () => {
     cy.openProject('react-with-storybook')
     cy.startAppServer('component')
-    cy.__incorrectlyVisitAppWithIntercept()
+    cy.visitApp()
     cy.contains('Create from story').click()
     cy.contains('MyCoolComponent.stories.js').click()
     cy.contains('Okay, run the spec').click()
