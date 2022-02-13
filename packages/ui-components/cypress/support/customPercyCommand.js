@@ -22,12 +22,6 @@ class ElementOverrideManager {
         return
       }
 
-      if (v === 'displayNone') {
-        $el.attr('style', 'display: none !important')
-
-        return
-      }
-
       $el.css({ visibility: 'hidden' })
     })
 

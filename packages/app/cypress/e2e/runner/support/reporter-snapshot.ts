@@ -6,7 +6,9 @@ export const reporterSnapshot = () => {
     elementOverrides: {
       '[data-cy=aut-panel]': true,
       '.cy-tooltip': true,
-      '[data-cy=sidebar]': 'displayNone',
+      '[data-cy=sidebar]': ($el) => {
+        $el.attr('style', 'display: none !important')
+      },
       '.runnable-header .duration': ($el) => {
         $el.text('XX:XX')
       },

@@ -1,10 +1,15 @@
 import { loadSpec } from './support/spec-loader'
+import { reporterSnapshot } from './support/reporter-snapshot'
 
 describe('hooks', {
   // Limiting tests kept in memory due to large memory cost
   // of nested spec snapshots
   numTestsKeptInMemory: 1,
 }, () => {
+  afterEach(() => {
+    reporterSnapshot()
+  })
+
   it('displays commands under correct hook', () => {
     loadSpec({
       fileName: 'basic.cy.js',
