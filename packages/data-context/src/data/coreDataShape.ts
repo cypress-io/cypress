@@ -66,6 +66,9 @@ export interface WizardDataShape {
   chosenFramework: NexusGenEnums['FrontendFrameworkEnum'] | null
   chosenLanguage: NexusGenEnums['CodeLanguageEnum']
   chosenManualInstall: boolean
+  detectedLanguage: NexusGenEnums['CodeLanguageEnum'] | null
+  detectedBundler: NexusGenEnums['SupportedBundlers'] | null
+  detectedFramework: NexusGenEnums['FrontendFrameworkEnum'] | null
 }
 
 export interface MigrationDataShape{
@@ -167,6 +170,9 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
       chosenLanguage: 'js',
       chosenManualInstall: false,
       allBundlers: BUNDLERS,
+      detectedBundler: null,
+      detectedFramework: null,
+      detectedLanguage: null,
     },
     migration: {
       step: 'renameAuto',

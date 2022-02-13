@@ -1,5 +1,5 @@
 <template>
-  <div class="mx-auto space-y-32px text-center min-w-476px max-w-848px pt-16px children:text-center">
+  <div class="mx-auto space-y-32px text-center min-w-476px max-w-848px py-16px children:text-center">
     <div>
       <h1
         class="font-medium leading-snug text-32px text-gray-900"
@@ -30,6 +30,7 @@
           header-class="bg-red-100 text-red-600 rounded-b-none"
           :icon="ErrorOutlineIcon"
           icon-classes="icon-dark-red-400"
+          max-height="none"
         >
           <p
             v-if="errorMessage"
@@ -43,7 +44,7 @@
           >
             <Collapsible
               disable
-              max-height="400px"
+              max-height="none"
               initially-open
             >
               <template #target="{open, toggle}">

@@ -54,7 +54,8 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
 
   it('shows correct "waiting for login" status', () => {
     cy.mountFragment(LoginModalFragmentDoc, {
-      onResult: (result) => {
+      onResult: (result, ctx) => {
+        ctx.isAuthBrowserOpened = true
         result.__typename = 'Query'
         result.authState.browserOpened = true
       },

@@ -239,9 +239,11 @@
       "frameworkLabel": "Front-end Framework",
       "frameworkPlaceholder": "Pick a framework",
       "bundlerLabel": "Bundler",
+      "bundlerLabelDescription": "(Dev Server)",
       "bundlerPlaceholder": "Pick a bundler",
       "languageLabel": "Language",
-      "configFileLanguageLabel": "Cypress Config File"
+      "configFileLanguageLabel": "Cypress Config File",
+      "detected": "(detected)"
     },
     "install": {
       "startButton": "Install",
@@ -265,7 +267,9 @@
     "testingCard": {
       "configured": "Configured",
       "notConfigured": "Not Configured",
-      "running": "Running"
+      "running": "Running",
+      "chooseABrowser": "Choose a Browser",
+      "reconfigure": "Reconfigure"
     }
   },
   "globalPage": {
@@ -629,6 +633,13 @@
       "defaultTitle": "DOM Snapshot",
       "pinnedTitle": "Pinned",
       "studioActiveError": "Cannot show Snapshot while creating commands in Studio"
+    },
+    "selectorPlayground": {
+      "matches": "No Matches | {n} Match | {n} Matches",
+      "copyTooltip": "Copied to clipboard",
+      "printTooltip": "Printed to console",
+      "invalidSelector": "Invalid",
+      "selectorMethodsLabel": "Selector Methods"
     }
   }
 }

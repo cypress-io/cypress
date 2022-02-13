@@ -66,7 +66,12 @@ const stackWithReplacementMarkerLineRemoved = (stack) => {
   })
 }
 
-const stackWithUserInvocationStackSpliced = (err, userInvocationStack) => {
+export type StackAndCodeFrameIndex = {
+  stack: string
+  index?: number
+}
+
+const stackWithUserInvocationStackSpliced = (err, userInvocationStack): StackAndCodeFrameIndex => {
   const stack = _.trim(err.stack, '\n') // trim newlines from end
   const [messageLines, stackLines] = splitStack(stack)
   const userInvocationStackWithoutMessage = stackWithoutMessage(userInvocationStack)

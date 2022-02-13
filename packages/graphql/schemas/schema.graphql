@@ -819,6 +819,11 @@ type Mutation {
   """Reset the Auth State"""
   resetAuthState: Query!
 
+  """
+  Resets the latest version call to capture additional telemetry for the current user
+  """
+  resetLatestVersionTelemetry: Boolean!
+
   """Reset the Wizard to the starting position"""
   resetWizard: Boolean!
   scaffoldIntegration: [ScaffoldedFile!]!
@@ -841,6 +846,9 @@ type Mutation {
 
   """Save the prompt-shown state for this project"""
   setPromptShown(slug: String!): Boolean
+
+  """Set the selected testing type, and reconfigure the project"""
+  setTestingTypeAndReconfigureProject(isApp: Boolean!, testingType: TestingTypeEnum!): Query
 
   """Switch Testing type and relaunch browser"""
   switchTestingTypeAndRelaunch(testingType: TestingTypeEnum!): Boolean
@@ -1111,6 +1119,9 @@ type WizardBundler implements Node {
   """Relay style Node ID field for the WizardBundler field"""
   id: ID!
 
+  """Whether this is the detected bundler"""
+  isDetected: Boolean!
+
   """Whether this is the selected framework bundler"""
   isSelected: Boolean
 
@@ -1130,6 +1141,9 @@ A code language that the user can choose from to create their cypress.config
 type WizardCodeLanguage implements Node {
   """Relay style Node ID field for the WizardCodeLanguage field"""
   id: ID!
+
+  """Whether this is the detected language"""
+  isDetected: Boolean!
 
   """Whether this is the selected language in the wizard"""
   isSelected: Boolean!
@@ -1155,6 +1169,9 @@ type WizardFrontendFramework implements Node {
 
   """Relay style Node ID field for the WizardFrontendFramework field"""
   id: ID!
+
+  """Whether this is the detected framework"""
+  isDetected: Boolean!
 
   """Whether this is the selected framework in the wizard"""
   isSelected: Boolean!

@@ -49,7 +49,7 @@ export const Query = objectType({
       type: VersionData,
       description: 'Previous versions of cypress and their release date',
       resolve: (root, args, ctx) => {
-        return ctx.versions()
+        return ctx.versions.versionData()
       },
     })
 

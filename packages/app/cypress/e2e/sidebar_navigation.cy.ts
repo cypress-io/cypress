@@ -5,7 +5,7 @@ describe('Sidebar Navigation', () => {
       cy.scaffoldProject('pristine-with-e2e-testing')
       cy.openProject('todos')
       cy.startAppServer()
-      cy.visitApp()
+      cy.__incorrectlyVisitAppWithIntercept()
     })
 
     it('expands the left nav bar by default', () => {
@@ -122,6 +122,7 @@ describe('Sidebar Navigation', () => {
     })
 
     it('displays the project name and opens a modal to switch testing type', () => {
+      cy.__incorrectlyVisitAppWithIntercept()
       cy.findByLabelText('Sidebar').closest('[aria-expanded]').should('have.attr', 'aria-expanded', 'true')
 
       cy.get('[data-cy="sidebar-header"]').within(() => {
@@ -231,7 +232,7 @@ describe('Sidebar Navigation', () => {
       cy.scaffoldProject('pristine-with-ct-testing')
       cy.openProject('pristine-with-ct-testing')
       cy.startAppServer('component')
-      cy.visitApp()
+      cy.__incorrectlyVisitAppWithIntercept()
 
       cy.get('[data-cy="sidebar-header"]').as('switchTestingType').click()
       cy.findByRole('dialog', {
@@ -262,6 +263,41 @@ describe('Sidebar Navigation', () => {
 
       cy.wait('@SwitchTestingTypeAndRelaunch').then((interception) => {
         expect(interception.request.body.variables.testingType).eq('e2e')
+      })
+    })
+
+    it('shows dropdown to reconfigure project when clicking switch testing type', () => {
+      cy.scaffoldProject('pristine-with-ct-testing')
+      cy.openProject('pristine-with-ct-testing')
+      cy.startAppServer('component')
+      cy.visitApp()
+
+      cy.get('[data-cy="sidebar-header"]').as('switchTestingType').click()
+      cy.findByRole('dialog', {
+        name: 'Choose a testing type',
+      }).should('be.visible')
+
+      cy.get('[data-cy-testingtype=component]').within(() => {
+        cy.contains('Running')
+      }).click()
+
+      cy.findByRole('dialog', {
+        name: 'Choose a testing type',
+      }).should('not.exist')
+
+      cy.get('@switchTestingType').click()
+      cy.findByRole('dialog', {
+        name: 'Choose a testing type',
+      }).should('be.visible')
+
+      cy.get('[data-cy-testingtype="e2e"]').within(() => {
+        cy.contains('Not Configured')
+      })
+
+      cy.get('[data-cy-testingtype="component"]').within(() => {
+        cy.get('[data-cy=status-badge-menu]').click()
+        cy.get('[data-cy="Choose a Browser"]').should('not.exist')
+        cy.get('[data-cy="Reconfigure"]').should('exist')
       })
     })
   })

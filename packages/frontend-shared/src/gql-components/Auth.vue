@@ -150,6 +150,7 @@ const isLoggingIn = computed(() => clickedOnce.value && !viewer.value)
 
 const query = useQuery({
   query: Auth_BrowserOpenedDocument,
+  requestPolicy: 'cache-and-network',
 })
 
 const handleAuth = async () => {
