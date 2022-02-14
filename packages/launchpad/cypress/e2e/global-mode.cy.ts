@@ -1,7 +1,7 @@
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 import path from 'path'
 
-const sep = navigator.platform.includes('Win') ? '\\' : '/'
+const sep = Cypress.platform === 'win32' ? '\\\\' : '/'
 
 describe('Launchpad: Global Mode', () => {
   describe('when no projects have been added', () => {
@@ -78,7 +78,7 @@ describe('Launchpad: Global Mode', () => {
       .should('have.length', projectList.length)
       .each((card, index) => {
         expect(card).to.contain(projectList[index])
-        expect(card).to.contain(`cy-projects\\${sep}${projectList[index]}`)
+        expect(card).to.contain(`cy-projects${sep}${projectList[index]}`)
       })
     }
 
