@@ -61,6 +61,8 @@ describe.skip('lib/project-base', () => {
     if (this.project) {
       this.project.close()
     }
+
+    return ctx.actions.project.clearCurrentProject()
   })
 
   it('requires a projectRoot', function () {

@@ -24,7 +24,9 @@ describe('lib/files', () => {
   })
 
   afterEach(() => {
-    return FixturesHelper.remove()
+    FixturesHelper.remove()
+
+    return ctx.actions.project.clearCurrentProject()
   })
 
   context('#readFile', () => {

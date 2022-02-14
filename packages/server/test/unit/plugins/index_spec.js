@@ -59,6 +59,10 @@ describe.skip('lib/plugins/index', () => {
     sinon.stub(util, 'wrapIpc').returns(ipc)
   })
 
+  afterEach(() => {
+    return ctx.actions.project.clearCurrentProject()
+  })
+
   context('#init', () => {
     it('uses noop plugins file if no pluginsFile', () => {
       // have to fire "loaded" message, otherwise plugins.init promise never resolves
