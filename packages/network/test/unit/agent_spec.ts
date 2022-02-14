@@ -23,7 +23,7 @@ import { allowDestroy } from '../../lib/allow-destroy'
 import { AsyncServer, Servers } from '../support/servers'
 import { UrlClientCertificates, ClientCertificates, PemKey } from '../../lib/client-certificates'
 import Forge from 'node-forge'
-import fetch from 'cross-fetch'
+import fetch from 'node-fetch'
 import os from 'os'
 const { pki } = Forge
 

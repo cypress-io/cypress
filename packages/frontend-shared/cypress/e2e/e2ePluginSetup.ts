@@ -9,7 +9,7 @@ import sinonChai from '@cypress/sinon-chai'
 import sinon from 'sinon'
 import fs from 'fs'
 import { buildSchema, execute, GraphQLError, parse } from 'graphql'
-import { Response } from 'cross-fetch'
+import { Response } from 'node-fetch'
 
 import { CloudRunQuery } from '../support/mock-graphql/stubgql-CloudTypes'
 import { getOperationName } from '@urql/core'
