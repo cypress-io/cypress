@@ -25,7 +25,10 @@ describe.skip('lib/util/settings', () => {
     })
 
     afterEach(() => {
-      return fs.removeAsync('cypress.config.js')
+      return Promise.join(
+        fs.removeAsync('cypress.config.js'),
+        ctx.actions.project.clearCurrentProject(),
+      )
     })
 
     context('.read', () => {
@@ -111,6 +114,9 @@ describe.skip('lib/util/settings', () => {
         }).then(() => {
           return fs.remove(path.join(this.projectRoot, 'cypress.custom.js'))
         })
+      })
+      .then(() => {
+        return ctx.actions.project.clearCurrentProject()
       })
     })
   })

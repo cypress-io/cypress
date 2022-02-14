@@ -70,6 +70,7 @@ describe('Web Sockets', () => {
     return Promise.join(
       this.server.close(),
       httpsServer.stop(),
+      ctx.actions.project.clearCurrentProject(),
     )
   })
 

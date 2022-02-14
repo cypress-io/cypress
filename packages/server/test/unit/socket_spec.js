@@ -47,7 +47,10 @@ describe('lib/socket', () => {
   afterEach(function () {
     Fixtures.remove()
 
-    return this.server.close()
+    return Promise.join(
+      this.server.close(),
+      ctx.actions.project.clearCurrentProject(),
+    )
   })
 
   context('integration', () => {

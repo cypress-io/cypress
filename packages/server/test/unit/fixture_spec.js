@@ -35,7 +35,9 @@ describe('lib/fixture', () => {
   })
 
   afterEach(() => {
-    return FixturesHelper.remove()
+    FixturesHelper.remove()
+
+    return ctx.actions.project.clearCurrentProject()
   })
 
   context('file not found', () => {
@@ -159,7 +161,7 @@ Expecting 'EOF', '}', ':', ',', ']', got 'STRING'\
         return fixture.get(this.fixturesFolder, 'empty_objects')
       }
 
-      return Promise.map(Array(500), fn, { concurrency: 5 }).then(() => {
+      return Promise.map(Array(350), fn, { concurrency: 5 }).then(() => {
         return fs.readFileAsync(`${this.fixturesFolder}/empty_objects.json`, 'utf8').then((str) => {
           expect(str).to.eq(`\
 {
@@ -187,6 +189,9 @@ Expecting 'EOF', '}', ':', ',', ']', got 'STRING'\
         .then((result) => {
           expect(result).to.deep.eq({ 'bar': 'baz' })
         })
+      })
+      .then(() => {
+        return ctx.actions.project.clearCurrentProject()
       })
     })
   })
