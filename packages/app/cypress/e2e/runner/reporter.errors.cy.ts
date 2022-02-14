@@ -27,10 +27,6 @@ describe('errors ui', {
   // of nested spec snapshots
   numTestsKeptInMemory: 1,
 }, () => {
-  afterEach(() => {
-    reporterSnapshot()
-  })
-
   it('assertion failures', () => {
     const verify = loadErrorSpec({
       fileName: 'assertions.cy.js',
@@ -55,6 +51,8 @@ describe('errors ui', {
       message: `expected 'actual' to equal 'expected'`,
       verifyOpenInIde: true,
     })
+
+    reporterSnapshot()
   })
 
   it('assertion failures - no preferred IDE', () => {
@@ -69,6 +67,8 @@ describe('errors ui', {
       codeFrameText: 'with expect().<foo>',
       verifyOpenInIde: true,
     })
+
+    reporterSnapshot()
   })
 
   it('exception failures', () => {
@@ -87,6 +87,8 @@ describe('errors ui', {
       regex: /\/throws\-error\.js:5:9/,
       codeFrameText: `thrownewError('An outside error')`,
     })
+
+    reporterSnapshot()
   })
 
   it('hooks', { viewportHeight: 900 }, () => {
@@ -103,6 +105,8 @@ describe('errors ui', {
       codeFrameText: 'beforeEach(()=>',
       message: `Cypress detected you registered a(n) beforeEach hook while a test was running`,
     })
+
+    reporterSnapshot()
   })
 
   it('commands', () => {
@@ -120,6 +124,8 @@ describe('errors ui', {
       column: 20,
       message: 'Timed out retrying after 0ms: Expected to find element: #does-not-exist, but never found it',
     })
+
+    reporterSnapshot()
   })
 
   it('cy.then', () => {
@@ -142,6 +148,8 @@ describe('errors ui', {
       column: 10,
       message: 'Timed out retrying after 0ms: Expected to find element: #does-not-exist, but never found it',
     })
+
+    reporterSnapshot()
   })
 
   it('cy.should', () => {
@@ -192,6 +200,8 @@ describe('errors ui', {
       column: 8,
       message: 'Timed out retrying after 0ms: Expected to find element: #does-not-exist, but never found it',
     })
+
+    reporterSnapshot()
   })
 
   it('cy.each', () => {
@@ -214,6 +224,8 @@ describe('errors ui', {
       column: 10,
       message: 'Expected to find element: #does-not-exist, but never found it',
     })
+
+    reporterSnapshot()
   })
 
   it('cy.spread', () => {
@@ -236,6 +248,8 @@ describe('errors ui', {
       column: 10,
       message: 'Expected to find element: #does-not-exist, but never found it',
     })
+
+    reporterSnapshot()
   })
 
   it('cy.within', () => {
@@ -258,6 +272,8 @@ describe('errors ui', {
       column: 10,
       message: 'Expected to find element: #does-not-exist, but never found it',
     })
+
+    reporterSnapshot()
   })
 
   it('cy.wrap', () => {
@@ -280,6 +296,8 @@ describe('errors ui', {
       column: 10,
       message: 'Expected to find element: #does-not-exist, but never found it',
     })
+
+    reporterSnapshot()
   })
 
   it('cy.visit', () => {
@@ -311,6 +329,8 @@ describe('errors ui', {
       codeFrameText: 'onLoad',
       message: 'bar is not a function',
     })
+
+    reporterSnapshot()
   })
 
   it('cy.intercept', () => {
@@ -354,6 +374,8 @@ describe('errors ui', {
         'The following error originated from your spec code',
       ],
     })
+
+    reporterSnapshot()
   })
 
   it('cy.route', () => {
@@ -412,6 +434,8 @@ describe('errors ui', {
       codeFrameText: 'onResponse',
       message: 'bar is not a function',
     })
+
+    reporterSnapshot()
   })
 
   it('cy.server', () => {
@@ -455,6 +479,8 @@ describe('errors ui', {
       codeFrameText: 'onResponse',
       message: 'bar is not a function',
     })
+
+    reporterSnapshot()
   })
 
   it('cy.readFile', () => {
@@ -467,6 +493,8 @@ describe('errors ui', {
       column: 8,
       message: 'failed because the file does not exist',
     })
+
+    reporterSnapshot()
   })
 
   it('validation errors', () => {
@@ -491,6 +519,8 @@ describe('errors ui', {
       column: 12,
       message: 'object tested must be an array',
     })
+
+    reporterSnapshot()
   })
 
   it('event handlers', () => {
@@ -518,6 +548,8 @@ describe('errors ui', {
       column: 12,
       message: 'bar is not a function',
     })
+
+    reporterSnapshot()
   })
 
   it('uncaught errors', () => {
@@ -667,6 +699,8 @@ describe('errors ui', {
         'It was caused by an unhandled promise rejection',
       ],
     })
+
+    reporterSnapshot()
   })
 
   it('uncaught errors: outside test', () => {
@@ -688,6 +722,8 @@ describe('errors ui', {
       ],
       codeFrameText: `thrownewError('error from outside test')`,
     })
+
+    reporterSnapshot()
   })
 
   it('uncaught errors: outside test only suite', () => {
@@ -705,6 +741,8 @@ describe('errors ui', {
       ],
       codeFrameText: `thrownewError('error from outside test with only suite')`,
     })
+
+    reporterSnapshot()
   })
 
   it('custom commands', () => {
@@ -730,6 +768,8 @@ describe('errors ui', {
       message: 'Timed out retrying after 0ms: Expected to find element: #does-not-exist, but never found it',
       codeFrameText: `add('failCommand'`,
     })
+
+    reporterSnapshot()
   })
 
   it('typescript', () => {
@@ -753,6 +793,8 @@ describe('errors ui', {
       message: 'Timed out retrying after 0ms: Expected to find element: #does-not-exist, but never found it',
       codeFrameText: `.get('#does-not-exist')`,
     })
+
+    reporterSnapshot()
   })
 
   context('docs url', () => {
@@ -802,6 +844,8 @@ describe('errors ui', {
           })
         },
       })
+
+      reporterSnapshot()
     })
   })
 
@@ -825,5 +869,7 @@ describe('errors ui', {
       verifyFn: verifyInternalFailure,
       method: 'cy.expect',
     })
+
+    reporterSnapshot()
   })
 })
