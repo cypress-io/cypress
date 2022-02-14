@@ -161,7 +161,7 @@ Expecting 'EOF', '}', ':', ',', ']', got 'STRING'\
         return fixture.get(this.fixturesFolder, 'empty_objects')
       }
 
-      return Promise.map(Array(350), fn, { concurrency: 5 }).then(() => {
+      return Promise.map(Array(500), fn, { concurrency: 5 }).then(() => {
         return fs.readFileAsync(`${this.fixturesFolder}/empty_objects.json`, 'utf8').then((str) => {
           expect(str).to.eq(`\
 {
