@@ -6,13 +6,7 @@ describe('Cypress In Cypress - run mode', { viewportWidth: 1200 }, () => {
     cy.startAppServer()
     cy.visitApp()
 
-    // this simulates run mode enough for this test
-    cy.window().then((win) => {
-      win.__CYPRESS_MODE__ = 'run'
-      cy.get('[data-cy="navbar-wrapper"]').then(($el) => {
-        $el.remove()
-      })
-    })
+    simulateRunModeInUI()
 
     cy.contains('dom-content.spec').click()
     cy.location().should((location) => {
@@ -43,15 +37,7 @@ describe('Cypress In Cypress - run mode', { viewportWidth: 1200 }, () => {
     cy.openProject('cypress-in-cypress')
     cy.startAppServer('component')
     cy.visitApp()
-
-    // this simulates run mode enough for this test
-    cy.window().then((win) => {
-      win.__CYPRESS_MODE__ = 'run'
-      cy.get('[data-cy="navbar-wrapper"]').then(($el) => {
-        $el?.remove()
-      })
-    })
-
+    simulateRunModeInUI()
     cy.contains('TestComponent.spec').click()
     cy.location().should((location) => {
       expect(location.hash).to.contain('TestComponent.spec')
@@ -73,3 +59,13 @@ describe('Cypress In Cypress - run mode', { viewportWidth: 1200 }, () => {
     cy.contains('Firefox').should('not.exist')
   })
 })
+
+function simulateRunModeInUI () {
+  // this simulates run mode enough for this test
+  cy.window().then((win) => {
+    win.__CYPRESS_MODE__ = 'run'
+    cy.get('body').then(($el) => {
+      $el.find('[data-cy="navbar-wrapper"]')?.remove()
+    })
+  })
+}
