@@ -102,7 +102,7 @@ describe('getStepsForMigration', () => {
     const config = fs.readJsonSync(path.join(cwd, 'cypress.json'))
 
     const actual = await getStepsForMigration(cwd, config)
-    const expected: Step[] = ['renameAuto', 'renameManual', 'renameSupport', 'configFile', 'setupComponent']
+    const expected: Step[] = ['renameAuto', 'renameSupport', 'configFile', 'setupComponent']
 
     expect(actual).to.eql(expected)
   })
@@ -122,7 +122,7 @@ describe('getStepsForMigration', () => {
     const config = fs.readJsonSync(path.join(cwd, 'cypress.json'))
 
     const actual = await getStepsForMigration(cwd, config)
-    const expected: Step[] = ['renameManual', 'configFile', 'setupComponent']
+    const expected: Step[] = ['configFile', 'setupComponent']
 
     expect(actual).to.eql(expected)
   })
