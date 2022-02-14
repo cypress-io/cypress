@@ -63,7 +63,7 @@ export function loadSpec (options: LoadSpecOptions): void {
   }
 
   cy.findByLabelText('Search Specs').type(fileName)
-  cy.contains('[data-cy=spec-item]', fileName).click()
+  cy.contains('[data-cy=spec-item-link]', fileName).click()
 
   cy.location().should((location) => {
     expect(location.hash).to.contain(fileName)
