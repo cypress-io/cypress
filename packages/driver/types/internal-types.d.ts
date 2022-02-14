@@ -48,6 +48,7 @@ declare namespace Cypress {
     utils: CypressUtils
     state: State
     events: Events
+    emit: ((event: string, payload?: any) => void)
   }
 
   interface CypressUtils {

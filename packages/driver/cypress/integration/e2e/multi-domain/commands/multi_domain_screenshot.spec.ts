@@ -81,11 +81,21 @@ context('screenshot specs', { experimentalSessionSupport: true, experimentalMult
     })
   })
 
-  // FIXME: Add support for blackout option. Has cross-domain issue due to the blackout logic
-  // being called from top instead of the spec bridge
-  it.skip('supports the blackout option', () => {
-    cy.switchToDomain('foobar.com', () => {
-      cy.screenshot({ blackout: ['a'] })
+  it('supports the blackout option', () => {
+    cy.switchToDomain('foobar.com', [this.serverResult], ([serverResult]) => {
+      cy.stub(Cypress, 'automation').withArgs('take:screenshot').resolves(serverResult)
+
+      cy.screenshot({
+        blackout: ['.short-element'],
+        onBeforeScreenshot: ($el) => {
+          const $blackoutElement = $el.find('.__cypress-blackout')
+          const $shortElement = $el.find('.short-element')
+
+          expect($blackoutElement.outerHeight()).to.equal($shortElement.outerHeight())
+          expect($blackoutElement.outerWidth()).to.equal($shortElement.outerWidth())
+          expect($blackoutElement.offset()).to.deep.equal($shortElement.offset())
+        },
+      })
     })
   })
 

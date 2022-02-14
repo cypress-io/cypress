@@ -359,8 +359,23 @@ const stabilityChanged = (Cypress, state, config, stable) => {
         resolve()
       }
 
-      const onCrossDomainWindowLoad = () => {
+      const onCrossDomainWindowLoad = ({ url }) => {
         options._log.set('message', '--page loaded--').snapshot().end()
+
+        //Updating the URL state, This is done to display the new url event when we return to the primary domain
+        let urls = state('urls') || []
+        let urlPosition = state('urlPosition')
+
+        if (urlPosition === undefined) {
+          urlPosition = -1
+        }
+
+        urls.push(url)
+        urlPosition = urlPosition + 1
+
+        state('urls', urls)
+        state('url', url)
+        state('urlPosition', urlPosition)
 
         resolve()
       }
@@ -378,7 +393,7 @@ const stabilityChanged = (Cypress, state, config, stable) => {
           case 'same:domain':
             return onWindowLoad(details.window)
           case 'cross:domain':
-            return onCrossDomainWindowLoad()
+            return onCrossDomainWindowLoad(details)
           case 'cross:domain:failure':
             return onCrossDomainFailure(details.error)
           default:

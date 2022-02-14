@@ -105,7 +105,8 @@ export class PrimaryDomainCommunicator extends EventEmitter {
    * @param {any} data - any meta data to be sent with the event.
    */
   toSpecBridge (event: string, data?: any) {
-    this.crossDomainDriverWindow.postMessage({
+    // If there is no crossDomainDriverWindow, there is no need to send the message.
+    this.crossDomainDriverWindow?.postMessage({
       event,
       data,
     }, '*')

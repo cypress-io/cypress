@@ -511,8 +511,8 @@ export const eventManager = {
 
     Cypress.multiDomainCommunicator.initialize(window)
 
-    Cypress.multiDomainCommunicator.on('window:load', () => {
-      Cypress.emit('internal:window:load', { type: 'cross:domain' })
+    Cypress.multiDomainCommunicator.on('window:load', ({ url }) => {
+      Cypress.emit('internal:window:load', { type: 'cross:domain', url })
     })
 
     Cypress.multiDomainCommunicator.on('expect:domain', (domain) => {
@@ -525,6 +525,10 @@ export const eventManager = {
       }
 
       handleBeforeScreenshot(config, callback)
+    })
+
+    Cypress.multiDomainCommunicator.on('url:changed', (url) => {
+      localBus.emit('url:changed', url)
     })
 
     Cypress.multiDomainCommunicator.on('after:screenshot', handleAfterScreenshot)

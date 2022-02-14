@@ -34,6 +34,7 @@ export const handleDomainFn = (cy: $Cy, specBridgeCommunicator: SpecBridgeDomain
 
     const stateUpdates = {
       ...state,
+      redirectionCount: {}, // This is fine to set to an empty object, we want to refresh this count on each switchToDomain command.
       runnable: {
         ...state.runnable,
         clearTimeout () {},
