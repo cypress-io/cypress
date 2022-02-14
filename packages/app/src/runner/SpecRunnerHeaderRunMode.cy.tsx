@@ -19,8 +19,8 @@ describe('SpecRunnerHeaderRunMode', { viewportHeight: 500 }, () => {
       autStore.updateUrl('http://localhost:4000')
 
       cy.mount(<SpecRunnerHeaderRunMode
-        eventManager={eventManager}
-        getAutIframe={autIframe} />)
+        eventManager={() => eventManager}
+        getAutIframe={() => autIframe} />)
 
       cy.get('[data-cy="aut-url"]').should('be.visible')
       cy.get('[data-cy="playground-activator"]').should('not.exist')
@@ -50,8 +50,8 @@ describe('SpecRunnerHeaderRunMode', { viewportHeight: 500 }, () => {
       autStore.updateUrl('http://localhost:4000')
 
       cy.mount(<SpecRunnerHeaderRunMode
-        eventManager={eventManager}
-        getAutIframe={autIframe} />)
+        eventManager={() => eventManager}
+        getAutIframe={() => autIframe} />)
 
       cy.get('[data-cy="aut-url"]').should('not.exist')
       cy.get('[data-cy="playground-activator"]').should('not.exist')
