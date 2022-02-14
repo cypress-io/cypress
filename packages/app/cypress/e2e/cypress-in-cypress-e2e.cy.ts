@@ -20,11 +20,17 @@ describe('Cypress In Cypress', { viewportWidth: 1200 }, () => {
     cy.findByTestId('playground-activator').should('be.visible')
     cy.findByTestId('select-browser').click()
 
-    cy.contains('Firefox').should('be.visible')
-    cy.findByTestId('viewport').click()
+    cy.contains('Firefox').click()
 
     cy.percySnapshot('browsers open')
+
+    cy.contains('Chrome 1')
+    .focus()
+    .type('{esc}')
+
     cy.contains('Firefox').should('be.hidden')
+
+    cy.findByTestId('viewport').click()
     cy.contains('The viewport determines the width and height of your application. By default the viewport will be 1000px by 660px for End-to-end Testing unless specified by a cy.viewport command.')
     .should('be.visible')
 
