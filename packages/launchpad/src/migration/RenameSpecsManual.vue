@@ -73,13 +73,14 @@
 </template>
 
 <script lang="ts" setup>
+import { onUnmounted } from 'vue'
 import CodeTag from '@cy/components/CodeTag.vue'
 import { useI18n } from '@cy/i18n'
 import MigrationTitle from './fragments/MigrationTitle.vue'
 import MigrationList from './fragments/MigrationList.vue'
 import MigrationListItem from './fragments/MigrationListItem.vue'
-import { gql } from '@urql/vue'
-import type { RenameSpecsManualFragment } from '../generated/graphql'
+import { gql, useMutation } from '@urql/vue'
+import { RenameSpecsManualFragment, RenameSpecsManual_CloseWatcherDocument } from '../generated/graphql'
 
 gql`
 fragment RenameSpecsManual on Migration {
@@ -94,9 +95,21 @@ fragment RenameSpecsManual on Migration {
   }
 }`
 
+gql`
+mutation RenameSpecsManual_CloseWatcher {
+  migrateCloseManualRenameWatcher
+}
+`
+
 const props = defineProps<{
   gql: RenameSpecsManualFragment
 }>()
+
+const closeWatcherMutation = useMutation(RenameSpecsManual_CloseWatcherDocument)
+
+onUnmounted(() => {
+  closeWatcherMutation.executeMutation({})
+})
 
 const { t } = useI18n()
 </script>
