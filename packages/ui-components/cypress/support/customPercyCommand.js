@@ -77,15 +77,7 @@ const applySnapshotMutations = ({
   defaultWidth,
   defaultHeight,
 }) => {
-  let cyLog
   let elementOverrideManager
-
-  if (log) {
-    cyLog = Cypress.log({
-      message: log,
-      snapshot: false,
-    })
-  }
 
   if (Object.keys(snapshotElementOverrides).length) {
     elementOverrideManager = new ElementOverrideManager()
@@ -93,13 +85,14 @@ const applySnapshotMutations = ({
 
   return cy.viewport(snapshotWidth, defaultHeight, { log: false })
   .then(() => {
-    if (elementOverrideManager) {
-      elementOverrideManager.performOverrides(cy, snapshotElementOverrides)
+    if (log) {
+      Cypress.log({
+        message: log,
+      })
     }
 
-    if (cyLog) {
-      // Take first snapshot after viewport and mutations have been applied
-      cyLog.snapshot('percy', { next: 'after percy' })
+    if (elementOverrideManager) {
+      elementOverrideManager.performOverrides(cy, snapshotElementOverrides)
     }
 
     return () => {
@@ -107,13 +100,6 @@ const applySnapshotMutations = ({
       .then(() => {
         if (elementOverrideManager) {
           elementOverrideManager.resetOverrides()
-        }
-
-        if (cyLog) {
-          // FIXME: the logged snapshots do not maintain two separate viewport widths. even
-          // though the first snapshot was taken with the snapshotWidth, viewing the
-          // log before/after will show both snapshots with the defaultWidth applied.
-          cyLog.snapshot().end()
         }
       })
     }
