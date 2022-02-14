@@ -69,7 +69,9 @@ describe('lib/screenshots', () => {
   })
 
   afterEach(() => {
-    return Fixtures.remove()
+    Fixtures.remove()
+
+    return ctx.actions.project.clearCurrentProject()
   })
 
   context('.capture', () => {
