@@ -32,6 +32,9 @@ export const stubMutation: MaybeResolver<Mutation> = {
 
     return {}
   },
+  resetLatestVersionTelemetry () {
+    return true
+  },
   focusActiveBrowserWindow (sourc, args, ctx) {
     return true
   },
