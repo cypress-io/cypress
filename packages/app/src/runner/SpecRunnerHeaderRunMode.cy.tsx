@@ -1,6 +1,6 @@
 import SpecRunnerHeaderRunMode from './SpecRunnerHeaderRunMode.vue'
 import { useAutStore } from '../store'
-import { createEventManager, createTestAutIframe } from '../../cypress/component/support/ctSupport'
+import { createEventManager } from '../../cypress/component/support/ctSupport'
 
 const browser = {
   displayName: 'Chrome',
@@ -14,13 +14,10 @@ describe('SpecRunnerHeaderRunMode', { viewportHeight: 500 }, () => {
       win.__CYPRESS_TESTING_TYPE__ = 'e2e'
       const autStore = useAutStore()
       const eventManager = createEventManager()
-      const autIframe = createTestAutIframe()
 
       autStore.updateUrl('http://localhost:4000')
 
-      cy.mount(<SpecRunnerHeaderRunMode
-        eventManager={() => eventManager}
-        getAutIframe={() => autIframe} />)
+      cy.mount(<SpecRunnerHeaderRunMode eventManager={eventManager}/>)
 
       cy.get('[data-cy="aut-url"]').should('be.visible')
       cy.get('[data-cy="playground-activator"]').should('not.exist')
@@ -45,13 +42,10 @@ describe('SpecRunnerHeaderRunMode', { viewportHeight: 500 }, () => {
       win.__CYPRESS_TESTING_TYPE__ = 'component'
       const autStore = useAutStore()
       const eventManager = createEventManager()
-      const autIframe = createTestAutIframe()
 
       autStore.updateUrl('http://localhost:4000')
 
-      cy.mount(<SpecRunnerHeaderRunMode
-        eventManager={() => eventManager}
-        getAutIframe={() => autIframe} />)
+      cy.mount(<SpecRunnerHeaderRunMode eventManager={eventManager} />)
 
       cy.get('[data-cy="aut-url"]').should('not.exist')
       cy.get('[data-cy="playground-activator"]').should('not.exist')
