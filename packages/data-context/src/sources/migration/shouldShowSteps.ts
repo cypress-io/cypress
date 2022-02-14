@@ -73,6 +73,18 @@ export async function shouldShowAutoRenameStep (projectRoot: string, config: Old
   return specsToAutoMigrate.integration.length > 0 || specsToAutoMigrate.component.length > 0
 }
 
+async function anyComponentSpecsExist (projectRoot: string, config: OldCypressConfig) {
+  const componentFolder = getComponentFolder(config)
+
+  if (componentFolder === false) {
+    return false
+  }
+
+  const componentTestFiles = getComponentTestFilesGlobs(config)
+
+  return hasSpecFiles(projectRoot, componentFolder, componentTestFiles)
+}
+
 async function anyIntegrationSpecsExist (projectRoot: string, config: OldCypressConfig) {
   const integrationFolder = getIntegrationFolder(config)
 
@@ -117,18 +129,18 @@ export async function shouldShowRenameSupport (projectRoot: string, config: OldC
   return supportFile.includes(defaultSupportFile)
 }
 
-// if they have component testing configured, they will need to
+// if they have component testing configured using the defaults, they will need to
 // rename/move their specs.
-function shouldShowRenameManual (projectRoot: string, config: OldCypressConfig) {
+async function shouldShowRenameManual (projectRoot: string, config: OldCypressConfig) {
   const componentFolder = getComponentFolder(config)
 
-  if (componentFolder === false) {
+  const usingAllDefaults = componentFolder === 'cypress/component' && isDefaultTestFiles(config, 'component')
+
+  if (componentFolder === false || !usingAllDefaults) {
     return false
   }
 
-  const componentTestFiles = getComponentTestFilesGlobs(config)
-
-  return hasSpecFiles(projectRoot, componentFolder, componentTestFiles)
+  return anyComponentSpecsExist(projectRoot, config)
 }
 
 // All projects must move from cypress.json to cypress.config.js!
@@ -163,7 +175,7 @@ export async function getStepsForMigration (
 
     // if we are showing rename manual, this implies
     // component testing is configured.
-    if (step === 'setupComponent' && steps.includes('renameManual')) {
+    if (step === 'setupComponent' && await anyComponentSpecsExist(projectRoot, config)) {
       steps.push(step)
     }
   }
