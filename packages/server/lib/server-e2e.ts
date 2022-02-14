@@ -107,7 +107,7 @@ export class ServerE2E extends ServerBase<SocketE2E> {
               .catch((e) => {
                 debug(e)
 
-                return reject(errors.get('CANNOT_CONNECT_BASE_URL', baseUrl))
+                return reject(errors.get('CANNOT_CONNECT_BASE_URL'))
               })
             }
 

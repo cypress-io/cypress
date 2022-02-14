@@ -1,15 +1,13 @@
-// @ts-nocheck
-
 import _ from 'lodash'
-
-import $errUtils from './error_utils'
-import $stackUtils from './stack_utils'
-
 import { allCommands } from '../cy/commands'
 import { addCommand as addNetstubbingCommand } from '../cy/net-stubbing'
 import { addCommands as addMultiDomainCommands } from '../cy/multi-domain'
+import $errUtils from './error_utils'
+import $stackUtils from './stack_utils'
 
 const builtInCommands = [
+  // `default` is necessary if a file uses `export default` syntax.
+  // @ts-ignore
   ..._.toArray(allCommands).map((c) => c.default || c),
   addNetstubbingCommand,
   addMultiDomainCommands,
@@ -76,7 +74,7 @@ export default {
       const overridden = _.clone(original)
 
       overridden.fn = function (...args) {
-        args = [].concat(originalFn, args)
+        args = ([] as any).concat(originalFn, args)
 
         return fn.apply(this, args)
       }
@@ -142,7 +140,7 @@ export default {
             errProps: {
               appendToStack: {
                 title: 'From Cypress Internals',
-                content: $stackUtils.stackWithoutMessage((new Error('add command internal stack')).stack),
+                content: $stackUtils.stackWithoutMessage((new Error('add command internal stack')).stack || ''),
               } },
           })
         }

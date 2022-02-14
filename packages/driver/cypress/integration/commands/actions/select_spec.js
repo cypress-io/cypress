@@ -325,6 +325,25 @@ describe('src/cy/commands/actions/select', () => {
           expect(fired).to.deep.eq(events)
         })
       })
+
+      // https://github.com/cypress-io/cypress/issues/19494
+      it('does not fire `change`, `input` events when selecting the same option again', () => {
+        cy.visit('fixtures/select-event-counter.html')
+
+        // Nothing happens when selecting the option with `selected` attribute
+        cy.get('.ice-cream').select('Chocolate')
+        cy.get('#change-result').should('not.have.text', 'Number of times onChange event fired: 1')
+        cy.get('#input-result').should('not.have.text', 'Number of times input event fired: 1')
+
+        cy.get('.ice-cream').select('Sardine')
+        cy.get('#change-result').should('have.text', 'Number of times onChange event fired: 1')
+        cy.get('#input-result').should('have.text', 'Number of times input event fired: 1')
+
+        // Select the option that is already selected - `change`, `input` events should not fire.
+        cy.get('.ice-cream').select('Sardine')
+        cy.get('#change-result').should('have.text', 'Number of times onChange event fired: 1')
+        cy.get('#input-result').should('have.text', 'Number of times input event fired: 1')
+      })
     })
 
     describe('errors', {
@@ -365,7 +384,7 @@ describe('src/cy/commands/actions/select', () => {
           done()
         })
 
-        cy.get('#select-maps').select('de_dust2').select('de_aztec')
+        cy.get('#select-maps').select('de_aztec').select('de_dust2')
       })
 
       it('throws when more than 1 element in the collection', (done) => {
@@ -647,7 +666,7 @@ describe('src/cy/commands/actions/select', () => {
           done()
         })
 
-        cy.get('#select-maps').select('de_dust2').then(($select) => { })
+        cy.get('#select-maps').select('de_aztec').then(($select) => { })
       })
 
       it('snapshots after clicking', () => {
