@@ -62,6 +62,7 @@
             {{ t('topNav.login.bodyBrowserErrorDetails') }}
 
             <TerminalPrompt
+              v-if="props.gql.authState.message"
               class="mt-16px"
               :project-folder-name="''"
               :command="props.gql.authState.message"
@@ -95,13 +96,12 @@
 <script setup lang="ts">
 import { useI18n } from '@cy/i18n'
 import { gql } from '@urql/core'
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import Auth from '../Auth.vue'
 import ExternalLink from '../ExternalLink.vue'
 import { useOnline } from '@vueuse/core'
 import NoInternetConnection from '../../components/NoInternetConnection.vue'
 import TerminalPrompt from '@cy/components/TerminalPrompt.vue'
-import { useMarkdown } from '@packages/frontend-shared/src/composables/useMarkdown'
 
 import {
   Dialog,
@@ -132,9 +132,6 @@ fragment LoginModal on Query {
   ...Auth
 }
 `
-
-const errorRef = ref()
-const { markdown } = useMarkdown(errorRef, props.gql.authState.message)
 
 const setIsOpen = (value: boolean) => {
   emit('update:modelValue', value)
