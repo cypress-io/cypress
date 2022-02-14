@@ -22,6 +22,11 @@ export const WizardFrontendFramework = objectType({
       resolve: (source, args, ctx) => ctx.wizardData.chosenFramework === source.type,
     })
 
+    t.nonNull.boolean('isDetected', {
+      description: 'Whether this is the detected framework',
+      resolve: (source, args, ctx) => ctx.wizardData.detectedFramework === source.type,
+    })
+
     t.nonNull.string('name', {
       description: 'The name of the framework',
     })

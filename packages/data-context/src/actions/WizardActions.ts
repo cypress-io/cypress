@@ -1,9 +1,11 @@
 import type { CodeLanguageEnum, NexusGenEnums, NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
-import { Bundler, CodeLanguage, CODE_LANGUAGES, FrontendFramework } from '@packages/types'
+import { Bundler, CodeLanguage, CODE_LANGUAGES, FrontendFramework, FRONTEND_FRAMEWORKS } from '@packages/types'
 import assert from 'assert'
 import dedent from 'dedent'
-import fs from 'fs'
 import path from 'path'
+import Debug from 'debug'
+
+const debug = Debug('cypress:data-context:wizard-actions')
 
 import type { DataContext } from '..'
 
@@ -27,13 +29,24 @@ export class WizardActions {
   }
 
   setFramework (framework: NexusGenEnums['FrontendFrameworkEnum'] | null) {
+    const prevFramework = this.ctx.coreData.wizard.chosenFramework || ''
+
     this.ctx.coreData.wizard.chosenFramework = framework
 
     if (framework !== 'react' && framework !== 'vue') {
       return this.setBundler('webpack')
     }
 
-    return this.setBundler(null)
+    const { chosenBundler } = this.ctx.coreData.wizard
+
+    // if the previous bundler was incompatible with the
+    // new framework, we need to reset it
+    if ((chosenBundler && !this.ctx.wizard.chosenFramework?.supportedBundlers.includes(chosenBundler))
+    || !['react', 'vue'].includes(prevFramework)) {
+      return this.setBundler(null)
+    }
+
+    return
   }
 
   setBundler (bundler: NexusGenEnums['SupportedBundlers'] | null) {
@@ -48,7 +61,13 @@ export class WizardActions {
     return this.data
   }
 
-  completeSetup () {
+  async completeSetup () {
+    debug('completeSetup')
+    // wait for the config to be initialized if it is not yet
+    // before returning. This should not penalize users but
+    // allow for tests, too fast for this last step to pass.
+    // NOTE: if the config is already initialized, this will be instant
+    await this.ctx.lifecycleManager.initializeConfig()
     this.ctx.update((d) => {
       d.scaffoldedFiles = null
     })
@@ -61,6 +80,92 @@ export class WizardActions {
     this.data.chosenLanguage = 'js'
 
     return this.data
+  }
+
+  async initialize () {
+    if (this.ctx.currentProject) {
+      this.data.detectedFramework = null
+      this.data.detectedBundler = null
+      this.data.detectedLanguage = null
+
+      await this.detectLanguage()
+      debug('detectedLanguage %s', this.data.detectedLanguage)
+      this.data.chosenLanguage = this.data.detectedLanguage || 'js'
+
+      let hasPackageJson = true
+
+      try {
+        await this.ctx.fs.access(path.join(this.ctx.currentProject, 'package.json'), this.ctx.fs.constants.R_OK)
+      } catch (e) {
+        debug('Could not read or find package.json: %O', e)
+        hasPackageJson = false
+      }
+      const packageJson: {
+        dependencies?: { [key: string]: string }
+        devDependencies?: { [key: string]: string }
+      } = hasPackageJson ? await this.ctx.fs.readJson(path.join(this.ctx.currentProject, 'package.json')) : {}
+
+      debug('packageJson %O', packageJson)
+      const dependencies = [
+        ...Object.keys(packageJson.dependencies || {}),
+        ...Object.keys(packageJson.devDependencies || {}),
+      ]
+
+      this.detectFramework(dependencies)
+      debug('detectedFramework %s', this.data.detectedFramework)
+      this.detectBundler(dependencies)
+      debug('detectedBundler %s', this.data.detectedBundler)
+
+      this.data.chosenFramework = this.data.detectedFramework || null
+      this.data.chosenBundler = this.data.detectedBundler || null
+    }
+  }
+
+  private detectFramework (dependencies: string[]) {
+    // Detect full featured frameworks
+    if (dependencies.includes('next')) {
+      this.ctx.wizardData.detectedFramework = 'nextjs'
+    } else if (dependencies.includes('react-scripts')) {
+      this.ctx.wizardData.detectedFramework = 'cra'
+    } else if (dependencies.includes('nuxt')) {
+      this.ctx.wizardData.detectedFramework = 'nuxtjs'
+    } else if (dependencies.includes('@vue/cli-service')) {
+      this.ctx.wizardData.detectedFramework = 'vuecli'
+    } else if (dependencies.includes('react')) {
+      this.ctx.wizardData.detectedFramework = 'react'
+    } else if (dependencies.includes('vue')) {
+      this.ctx.wizardData.detectedFramework = 'vue'
+    }
+  }
+
+  private detectBundler (dependencies: string[]) {
+    const detectedFrameworkObject = FRONTEND_FRAMEWORKS.find((f) => f.type === this.ctx.wizardData.detectedFramework)
+
+    if (detectedFrameworkObject && detectedFrameworkObject.supportedBundlers.length === 1) {
+      this.ctx.wizardData.detectedBundler = detectedFrameworkObject.supportedBundlers[0] ?? null
+
+      return
+    }
+
+    if (dependencies.includes('webpack')) {
+      this.ctx.wizardData.detectedBundler = 'webpack'
+    }
+
+    if (dependencies.includes('vite')) {
+      this.ctx.wizardData.detectedBundler = 'vite'
+    }
+  }
+
+  private async detectLanguage () {
+    const { hasTypescript } = this.ctx.lifecycleManager.metaState
+
+    if (
+      hasTypescript ||
+      (this.ctx.lifecycleManager.configFile && /.ts$/.test(this.ctx.lifecycleManager.configFile))) {
+      this.ctx.wizardData.detectedLanguage = 'ts'
+    } else {
+      this.ctx.wizardData.detectedLanguage = 'js'
+    }
   }
 
   /**
@@ -76,22 +181,14 @@ export class WizardActions {
       case 'e2e': {
         this.ctx.coreData.scaffoldedFiles = await this.scaffoldE2E()
         this.ctx.lifecycleManager.refreshMetaState()
-        this.ctx.update((coreData) => {
-          coreData.forceReconfigureProject = {
-            e2e: false,
-          }
-        })
+        this.ctx.actions.project.setForceReconfigureProjectByTestingType({ forceReconfigureProject: false, testingType: 'e2e' })
 
         return chosenLanguage
       }
       case 'component': {
         this.ctx.coreData.scaffoldedFiles = await this.scaffoldComponent()
         this.ctx.lifecycleManager.refreshMetaState()
-        this.ctx.update((coreData) => {
-          coreData.forceReconfigureProject = {
-            component: false,
-          }
-        })
+        this.ctx.actions.project.setForceReconfigureProjectByTestingType({ forceReconfigureProject: false, testingType: 'component' })
 
         return chosenLanguage
       }
@@ -111,6 +208,7 @@ export class WizardActions {
   }
 
   private async scaffoldComponent () {
+    debug('scaffoldComponent')
     const { chosenBundler, chosenFramework, chosenLanguage } = this.ctx.wizard
 
     assert(chosenFramework && chosenLanguage && chosenBundler)
@@ -165,58 +263,43 @@ export class WizardActions {
   }
 
   private async scaffoldConfig (testingType: 'e2e' | 'component'): Promise<NexusGenObjects['ScaffoldedFile']> {
-    if (!fs.existsSync(this.ctx.lifecycleManager.configFilePath)) {
-      this.ctx.lifecycleManager.setConfigFilePath(this.ctx.coreData.wizard.chosenLanguage)
+    debug('scaffoldConfig')
 
-      const configCode = this.configCode(testingType, this.ctx.coreData.wizard.chosenLanguage)
+    if (this.ctx.lifecycleManager.metaState.hasValidConfigFile) {
+      const { ext } = path.parse(this.ctx.lifecycleManager.configFilePath)
+      const foundLanguage = ext === '.ts' ? 'ts' : 'js'
+      const configCode = this.configCode(testingType, foundLanguage)
 
-      return this.scaffoldFile(
-        this.ctx.lifecycleManager.configFilePath,
-        configCode,
-        'Created a new config file',
-      )
+      return {
+        status: 'changes',
+        description: 'Merge this code with your existing config file',
+        file: {
+          absolute: this.ctx.lifecycleManager.configFilePath,
+          contents: configCode,
+        },
+      }
     }
 
-    const { ext } = path.parse(this.ctx.lifecycleManager.configFilePath)
+    const configCode = this.configCode(testingType, this.ctx.coreData.wizard.chosenLanguage)
 
-    const configCode = this.configCode(testingType, ext === '.ts' ? 'ts' : 'js')
+    // only do this if config file doesn't exist
+    this.ctx.lifecycleManager.setConfigFilePath(this.ctx.coreData.wizard.chosenLanguage)
 
-    return {
-      status: 'changes',
-      description: 'Merge this code with your existing config file',
-      file: {
-        absolute: this.ctx.lifecycleManager.configFilePath,
-        contents: configCode,
-      },
-    }
+    return this.scaffoldFile(
+      this.ctx.lifecycleManager.configFilePath,
+      configCode,
+      'Created a new config file',
+    )
   }
 
   private async scaffoldFixtures (): Promise<NexusGenObjects['ScaffoldedFile']> {
     const exampleScaffoldPath = path.join(this.projectRoot, 'cypress/fixtures/example.json')
 
-    try {
-      await this.ctx.fs.stat(exampleScaffoldPath)
+    await this.ensureDir('fixtures')
 
-      return {
-        status: 'skipped',
-        file: {
-          absolute: exampleScaffoldPath,
-          contents: '// Skipped',
-        },
-        description: 'Fixtures directory already exists, skipping',
-      }
-    } catch (e) {
-      await this.ensureDir('fixtures')
-      await this.ctx.fs.writeFile(exampleScaffoldPath, `${JSON.stringify(FIXTURE_DATA, null, 2)}\n`)
-
-      return {
-        status: 'valid',
-        description: 'Added an example fixtures file/folder',
-        file: {
-          absolute: exampleScaffoldPath,
-        },
-      }
-    }
+    return this.scaffoldFile(exampleScaffoldPath,
+      `${JSON.stringify(FIXTURE_DATA, null, 2)}\n`,
+      'Added an example fixtures file/folder')
   }
 
   private wizardGetConfigCodeE2E (lang: CodeLanguageEnum): string {
@@ -311,18 +394,11 @@ export class WizardActions {
   }
 
   private async scaffoldFile (filePath: string, contents: string, description: string): Promise<NexusGenObjects['ScaffoldedFile']> {
-    if (fs.existsSync(filePath)) {
-      return {
-        status: 'skipped',
-        description: 'File already exists',
-        file: {
-          absolute: filePath,
-        },
-      }
-    }
-
     try {
-      await this.ctx.fs.writeFile(filePath, contents)
+      debug('scaffoldFile: start %s', filePath)
+      debug('scaffoldFile: with content', contents)
+      await this.ctx.fs.writeFile(filePath, contents, { flag: 'wx' })
+      debug('scaffoldFile: done %s', filePath)
 
       return {
         status: 'valid',
@@ -332,6 +408,16 @@ export class WizardActions {
         },
       }
     } catch (e: any) {
+      if (e.code === 'EEXIST') {
+        return {
+          status: 'skipped',
+          description: 'File already exists',
+          file: {
+            absolute: filePath,
+          },
+        }
+      }
+
       return {
         status: 'error',
         description: e.message || 'Error writing file',

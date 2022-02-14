@@ -22,6 +22,7 @@
         :value="props.gql.bundler?.type ?? undefined"
         :placeholder="t('setupPage.projectSetup.bundlerPlaceholder')"
         :label="t('setupPage.projectSetup.bundlerLabel')"
+        :description="t('setupPage.projectSetup.bundlerLabelDescription')"
         selector-type="bundler"
         data-testid="select-bundler"
         @select-bundler="val => onWizardSetup('bundler', val)"
@@ -59,16 +60,19 @@ fragment EnvironmentSetup on Wizard {
     name
     type
     isSelected
+    isDetected
   }
   framework {
     type
     id
     name
     isSelected
+    isDetected
     supportedBundlers {
       id
       type
       name
+      isDetected
     }
     category
   }
@@ -76,6 +80,7 @@ fragment EnvironmentSetup on Wizard {
     id
     name
     isSelected
+    isDetected
     type
     category
   }
@@ -83,6 +88,7 @@ fragment EnvironmentSetup on Wizard {
     id
     name
     type
+    isDetected
   }
   language {
     id
