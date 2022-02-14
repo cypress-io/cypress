@@ -172,6 +172,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
                 viewportWidth: Cypress.state('viewportWidth'),
                 viewportHeight: Cypress.state('viewportHeight'),
                 runnable: serializeRunnable(Cypress.state('runnable')),
+                duringUserTestExecution: Cypress.state('duringUserTestExecution'),
               },
             })
           } catch (err: any) {
