@@ -63,7 +63,10 @@ export function loadSpec (options: LoadSpecOptions): void {
   }
 
   cy.findByLabelText('Search Specs').type(fileName)
-  cy.contains('[data-cy=spec-item-link]', fileName).click()
+  // wait for virtualized spec list to update, there is a chance
+  // of disconnection otherwise
+  cy.wait(500)
+  cy.contains('[data-cy=spec-item]', fileName).click()
 
   cy.location().should((location) => {
     expect(location.hash).to.contain(fileName)
