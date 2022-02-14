@@ -96,7 +96,7 @@ export class MigrationActions {
       const nextStep = filteredSteps[nextIndex]
 
       if (nextStep) {
-        await this.ctx.migration.setStep(nextStep)
+        this.ctx.migration.setStep(nextStep)
       }
     } else {
       await this.finishReconfigurationWizard()

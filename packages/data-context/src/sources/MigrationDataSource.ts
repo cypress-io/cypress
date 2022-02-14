@@ -22,9 +22,6 @@ import {
 } from './migration'
 
 import type { FilePart } from './migration/format'
-import Debug from 'debug'
-
-const debug = Debug('cypress:data-context:sources:MigrationDataSource')
 
 export interface MigrationFile {
   testingType: TestingType
@@ -69,7 +66,7 @@ export class MigrationDataSource {
   hasE2ESpec: boolean = flags.hasE2ESpec
   hasPluginsFile: boolean = flags.hasPluginsFile
 
-  private componentTestingMigrationWatcher: chokidar.FSWatcher | null = null
+  private componentTestingMigrationWatcher?: chokidar.FSWatcher
   componentTestingMigrationStatus?: ComponentTestingMigrationStatus
   private _oldConfigPromise: Promise<OldCypressConfig> | null = null
 
@@ -95,7 +92,7 @@ export class MigrationDataSource {
       throw Error(`Impossible to initialize a migration. No steps fit the configuration of this project.`)
     }
 
-    await this.setStep(this.filteredSteps[0])
+    this.setStep(this.filteredSteps[0])
   }
 
   private resetFlags () {
@@ -105,9 +102,7 @@ export class MigrationDataSource {
   }
 
   async getComponentTestingMigrationStatus () {
-    debug('getComponentTestingMigrationStatus: start')
     const config = await this.parseCypressConfig()
-
     const componentFolder = getComponentFolder(config)
 
     if (!config || !this.ctx.currentProject) {
@@ -121,20 +116,15 @@ export class MigrationDataSource {
       return null
     }
 
-    debug('getComponentTestingMigrationStatus: componentFolder', componentFolder)
-
     if (!this.componentTestingMigrationWatcher) {
-      debug('getComponentTestingMigrationStatus: initializing watcher')
-      const onFileMoved = async (status: ComponentTestingMigrationStatus) => {
+      const onFileMoved = (status: ComponentTestingMigrationStatus) => {
         this.componentTestingMigrationStatus = status
-        debug('getComponentTestingMigrationStatus: file moved %O', status)
 
         if (status.completed) {
-          await this.componentTestingMigrationWatcher?.close()
-          this.componentTestingMigrationWatcher = null
+          this.componentTestingMigrationWatcher?.close()
         }
 
-        // TODO(lachlan): is this the right place to use the emitter?
+        // TODO(lachlan): is this the right plcae to use the emitter?
         this.ctx.deref.emitter.toLaunchpad()
       }
 
@@ -147,7 +137,6 @@ export class MigrationDataSource {
 
       this.componentTestingMigrationStatus = status
       this.componentTestingMigrationWatcher = watcher
-      debug('getComponentTestingMigrationStatus: watcher initialized. Status: %o', status)
     }
 
     if (!this.componentTestingMigrationStatus) {
@@ -164,7 +153,6 @@ export class MigrationDataSource {
 
     const config = await this.parseCypressConfig()
 
-    debug('supportFilesForMigrationGuide: config %O', config)
     if (!await shouldShowRenameSupport(this.ctx.currentProject, config)) {
       return null
     }
@@ -176,12 +164,8 @@ export class MigrationDataSource {
     try {
       const supportFiles = await supportFilesForMigration(this.ctx.currentProject)
 
-      debug('supportFilesForMigrationGuide: supportFiles %O', supportFiles)
-
       return supportFiles
-    } catch (err) {
-      debug('supportFilesForMigrationGuide: err %O', err)
-
+    } catch {
       return null
     }
   }
@@ -321,13 +305,7 @@ export class MigrationDataSource {
     return this._step
   }
 
-  async setStep (step: MIGRATION_STEP) {
-    if (this.componentTestingMigrationWatcher) {
-      debug('setStep: stopping watcher')
-      await this.componentTestingMigrationWatcher.close()
-      this.componentTestingMigrationWatcher = null
-    }
-
+  setStep (step: MIGRATION_STEP) {
     this._step = step
   }
 }

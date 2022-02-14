@@ -4,7 +4,7 @@
       {{ t('migration.wizard.title') }}
     </h1>
     <p
-      class="mx-42px mt-12px text-center mb-32px text-body-gray-600 text-18px"
+      class="text-center mx-42px mt-12px mb-32px text-body-gray-600 text-18px"
     >
       {{ t('migration.wizard.description') }}
     </p>
@@ -134,17 +134,12 @@
         </template>
       </MigrationStep>
     </template>
-    <Spinner
-      v-else
-      class="mx-auto mt-100px"
-    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, onBeforeMount, ref } from 'vue'
 import { gql, useMutation, useQuery } from '@urql/vue'
-import Spinner from '@cy/components/Spinner.vue'
 import Button from '@cy/components/Button.vue'
 import ArrowRightIcon from '~icons/cy/arrow-right_x16.svg'
 import MigrationStep from './fragments/MigrationStep.vue'
@@ -222,7 +217,6 @@ gql`
 mutation MigrationWizard_RenameSpecs($skip: Boolean, $before: [String!], $after: [String!]) {
   migrateRenameSpecs(skip: $skip, before: $before, after: $after) {
     migration {
-      ...RenameSpecsManual
       filteredSteps {
         id
         isCurrentStep
