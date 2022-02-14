@@ -235,7 +235,11 @@ export function updateWithPluginValues (cfg, overrides) {
   // make sure every option returned from the plugins file
   // passes our validation functions
   configUtils.validate(overrides, (validationResult: ConfigValidationError | string) => {
-    const configFile = getCtx().lifecycleManager.configFile
+    let configFile = getCtx().lifecycleManager.configFile
+
+    if (configFile === false) {
+      configFile = '--config file set to "false" via CLI--'
+    }
 
     if (_.isString(validationResult)) {
       return errors.throw('CONFIG_VALIDATION_MSG_ERROR', 'pluginsFile', configFile, validationResult)

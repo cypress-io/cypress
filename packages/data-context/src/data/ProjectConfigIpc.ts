@@ -1,4 +1,5 @@
 /* eslint-disable no-dupe-class-members */
+import type { SerializedError } from '@packages/errors'
 import type { TestingType } from '@packages/types'
 import type { ChildProcess } from 'child_process'
 import EventEmitter from 'events'
@@ -85,7 +86,7 @@ export class ProjectConfigIpc extends EventEmitter {
    * When
    */
   once(evt: 'setupTestingType:reply', listener: (payload: SetupNodeEventsReply) => void): this
-  once(evt: 'setupTestingType:error', listener: (error: string, requiredFile: string, stack: string) => void): this
+  once(evt: 'setupTestingType:error', listener: (error: SerializedError) => void): this
   once (evt: string, listener: (...args: any[]) => void) {
     return super.once(evt, listener)
   }

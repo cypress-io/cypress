@@ -1,5 +1,5 @@
 import Debug from 'debug'
-import { createServer, ViteDevServer, InlineConfig } from 'vite'
+import { InlineConfig } from 'vite'
 import { dirname, resolve } from 'path'
 import getPort from 'get-port'
 import { makeCypressPlugin } from './makeCypressPlugin'
@@ -25,7 +25,7 @@ export interface StartDevServerOptions {
   indexHtml?: string
 }
 
-export const resolveServerConfig = async ({ viteConfig, options }: StartDevServerOptions): Promise<InlineConfig> => {
+export const resolveServerConfig = async ({ viteConfig, options, indexHtml }: StartDevServerOptions): Promise<InlineConfig> => {
   const { projectRoot, supportFile, namespace } = options.config
 
   const requiredOptions: InlineConfig = {

@@ -1057,5 +1057,10 @@ describe('visual error templates', () => {
         default: [`Cypress does not support running chrome version 64. To use chrome with Cypress, install a version of chrome newer than or equal to 64.`],
       }
     },
+    MULTIPLE_SUPPORT_FILES_FOUND: () => {
+      return {
+        default: ['spec.{ts,js}', 'spec.ts,spec.js'],
+      }
+    },
   })
 })

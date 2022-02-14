@@ -635,19 +635,20 @@ export const AllCypressErrors = {
 
       ${fmt.stackTrace(err)}`
   },
-  PLUGINS_UNEXPECTED_ERROR: (arg1: string, arg2: string | Error) => {
+
+  CHILD_PROCESS_UNEXPECTED_ERROR: (configFilePath: string, err: Error) => {
     return errTemplate`
-      We stopped running your tests because a plugin crashed.
+      We stopped running your tests because the config child process crashed.
 
-      Your ${fmt.highlight(`pluginsFile`)} threw an error from: ${fmt.path(arg1)}
+      Your ${fmt.highlight(`configFile`)} threw an error from: ${fmt.path(configFilePath)}
 
-      ${fmt.stackTrace(arg2)}
+      ${fmt.stackTrace(err)}
     `
   },
   // TODO: make this relative path, not absolute
   PLUGINS_INVALID_EVENT_NAME_ERROR: (pluginsFilePath: string, invalidEventName: string, validEventNames: string[], err: Error) => {
     return errTemplate`
-      Your ${fmt.highlightSecondary(`pluginsFile`)} threw a validation error: ${fmt.path(pluginsFilePath)}
+      Your ${fmt.highlightSecondary(`configFile`)} threw a validation error: ${fmt.path(pluginsFilePath)}
 
       You must pass a valid event name when registering a plugin.
 
@@ -1136,6 +1137,7 @@ export const AllCypressErrors = {
       Please remove the ${fmt.highlight(arg1.name)} configuration option from ${fmt.highlightTertiary(arg1.configFile)}.
       `
   },
+
   // TODO: does this need to change since its a warning?
   NODE_VERSION_DEPRECATION_BUNDLED: (arg1: {name: string, value: any, configFile: string}) => {
     return errTemplate`\
@@ -1151,7 +1153,7 @@ export const AllCypressErrors = {
 
   // V10 Added:
 
-  'MULTIPLE_SUPPORT_FILES_FOUND': (arg1: string, arg2: string) => {
+  MULTIPLE_SUPPORT_FILES_FOUND: (arg1: string, arg2: string) => {
     return errTemplate`\
       There are multiple support files.
 
@@ -1160,12 +1162,52 @@ export const AllCypressErrors = {
       Correct your supportFile config or merge the files into one.`
   },
 
+  CONFIG_FILE_MIGRATION_NEEDED: (projectRoot: string) => {
+    return errTemplate`
+        There is a cypress.json file at the location below:
+
+        ${fmt.path(projectRoot)}
+
+        Cypress 10 no longer supports 'cypress.json'. 
+        
+        Please run ${fmt.highlightTertiary('cypress open')} to launch the migration tool to migrate to ${fmt.highlightSecondary('cypress.config.{ts|js}')}.
+      `
+  },
+
+  LEGACY_CONFIG_FILE: (fileName: string, projectRoot: string) => {
+    return errTemplate`
+      There is both a ${fmt.highlight(fileName)} and a cypress.json file at the location below:
+      
+      ${fmt.path(projectRoot)}
+
+      Cypress no longer supports ${fmt.highlightSecondary('cypress.json')} config, please remove it from your project.
+    `
+  },
+
+  SETUP_NODE_EVENTS_DO_NOT_SUPPORT_DEV_SERVER: (configPath: string) => {
+    return errTemplate`\
+      The ${fmt.highlight('setupNodeEvents')} method does not support ${fmt.highlightSecondary('dev-server:start')}, use ${fmt.highlight('devServer')} instead:
+
+      ${fmt.path(configPath)}
+
+      ${fmt.code(`
+        devServer (cypressDevServerConfig, devServerConfig) {
+          // start dev server here
+        }
+      `)}
+
+      Learn more: https://on.cypress.io/dev-server
+    `
+  },
+
 } as const
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const _typeCheck: Record<keyof AllCypressErrorObj, (...args: any[]) => ErrTemplateResult> = AllCypressErrors
 
 type AllCypressErrorObj = typeof AllCypressErrors
+
+export type AllCypressErrorNames = keyof typeof AllCypressErrors
 
 export function getMsgByType<Type extends keyof AllCypressErrorObj> (type: Type, ...args: Parameters<AllCypressErrorObj[Type]>): string {
   const err = getError(type, ...args)
