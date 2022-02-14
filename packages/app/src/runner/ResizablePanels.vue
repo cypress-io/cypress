@@ -7,6 +7,7 @@
   >
     <div
       v-show="showPanel1"
+      data-cy="specs-list-panel"
       class="h-full flex-shrink-0 relative"
       :style="{width: `${panel1Width}px`}"
     >
@@ -24,6 +25,7 @@
 
     <div
       v-show="showPanel2"
+      data-cy="reporter-panel"
       class="h-full flex-shrink-0 relative"
       :style="{width: `${panel2Width}px`}"
     >
