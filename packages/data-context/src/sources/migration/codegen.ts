@@ -76,7 +76,7 @@ export async function initComponentTestingMigration (
   onFileMoved: (status: ComponentTestingMigrationStatus) => void,
 ): Promise<{
   status: ComponentTestingMigrationStatus
-  watcher: chokidar.FSWatcher
+  watcher: chokidar.FSWatcher | null
 }> {
   debug('initComponentTestingMigration %O', { projectRoot, componentFolder, testFiles })
   const watchPaths = testFiles.map((glob) => {
@@ -100,6 +100,17 @@ export async function initComponentTestingMigration (
   }, new Map())
 
   debug('files to be moved manually %o', filesToBeMoved)
+  if (filesToBeMoved.size === 0) {
+    // this should not happen as the step should be hidden in this case
+    // but files can have been moved manually before clicking next
+    return {
+      status: {
+        files: filesToBeMoved,
+        completed: true,
+      },
+      watcher: null,
+    }
+  }
 
   watcher.on('unlink', (unlinkedPath) => {
     const posixUnlinkedPath = toPosix(unlinkedPath)
