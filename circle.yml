@@ -89,7 +89,7 @@ executors:
   # https://github.com/CircleCI-Public/windows-orb/blob/master/src/executors/default.yml
   # https://circleci.com/docs/2.0/hello-world-windows/#software-pre-installed-in-the-windows-image
   windows: &windows-executor
-    machine:  
+    machine:
       image: windows-server-2019-vs2019:stable
       shell: bash.exe -eo pipefail
     resource_class: windows.medium
@@ -151,7 +151,7 @@ commands:
             - cypress
             - .ssh
             - node_modules # contains the npm i -g modules
-  
+
   install_cache_helpers_dependencies:
     steps:
       - run:
@@ -990,6 +990,7 @@ jobs:
       - run:
           name: Linting 🧹
           command: |
+            yarn clean
             git clean -df
             yarn lint
       - run:
@@ -1078,12 +1079,14 @@ jobs:
             # run unit tests from each individual package
             - run: yarn test
             - verify-mocha-results:
-                expectedResultCount: 9
+                expectedResultCount: 10
       - store_test_results:
           path: /tmp/cypress
       # CLI tests generate HTML files with sample CLI command output
       - store_artifacts:
           path: cli/test/html
+      - store_artifacts:
+          path: packages/errors/__snapshot-images__
       - store-npm-logs
 
   unit-tests-release:
@@ -1916,13 +1919,6 @@ jobs:
           repo: cypress-example-kitchensink
           browser: "electron"
 
-  test-binary-against-awesome-typescript-loader:
-    <<: *defaults
-    steps:
-      - test-binary-against-repo:
-          repo: cypress-test-awesome-typescript-loader
-          browser: "electron"
-
   test-binary-against-kitchensink-firefox:
     <<: *defaults
     resource_class: medium
@@ -1946,33 +1942,6 @@ jobs:
       - test-binary-against-repo:
           repo: cypress-example-todomvc
           browser: firefox
-
-  test-binary-against-conduit-chrome:
-    <<: *defaults
-    resource_class: medium
-    steps:
-      - test-binary-against-repo:
-          repo: cypress-example-conduit-app
-          browser: chrome
-          command: "npm run cypress:run"
-          wait-on: http://localhost:3000
-
-  test-binary-against-api-testing-firefox:
-    <<: *defaults
-    steps:
-      - test-binary-against-repo:
-          repo: cypress-example-api-testing
-          browser: firefox
-          command: "npm run cy:run"
-
-  test-binary-against-piechopper-firefox:
-    <<: *defaults
-    resource_class: medium
-    steps:
-      - test-binary-against-repo:
-          repo: cypress-example-piechopper
-          browser: firefox
-          command: "npm run cypress:run"
 
   test-binary-against-cypress-realworld-app:
     <<: *defaults
@@ -2243,26 +2212,6 @@ linux-workflow: &linux-workflow
     - test-binary-against-kitchensink:
         requires:
           - create-build-artifacts
-    # when working on a feature or a fix,
-    # you are probably working in a branch
-    # and you want to run a specific PR in the cypress-example-recipes
-    # against this branch. This workflow job includes
-    # the job but only when it runs on specific branch
-    # DO NOT DELETE THIS JOB BEFORE MERGING TO DEVELOP
-    # on "develop" this branch will be ignored anyway
-    # and someone else might use this job definition for another
-    # feature branch and would just update the branch filter
-    # - test-binary-against-recipe-pull-request:
-    #     name: Test cypress run parsing
-    #     filters:
-    #       branches:
-    #         only:
-    #           - cli-to-module-api-7760
-        # requires:
-        #   - create-build-artifacts
-    - test-binary-against-awesome-typescript-loader:
-        requires:
-          - create-build-artifacts
     - test-binary-and-npm-against-other-projects:
         context: test-runner:trigger-test-jobs
         <<: *mainBuildFilters
@@ -2282,12 +2231,7 @@ linux-workflow: &linux-workflow
         <<: *mainBuildFilters
         requires:
           - create-build-artifacts
-    # Re-enable when the cypress-example-conduit-app project is fixed.
-    # https://github.com/cypress-io/cypress-example-conduit-app/issues/346
-    # - test-binary-against-conduit-chrome:
-    #     <<: *mainBuildFilters
-    #     requires:
-    #       - create-build-artifacts
+
     - test-binary-against-recipes-firefox:
         <<: *mainBuildFilters
         requires:
@@ -2297,14 +2241,6 @@ linux-workflow: &linux-workflow
         requires:
           - create-build-artifacts
     - test-binary-against-todomvc-firefox:
-        <<: *mainBuildFilters
-        requires:
-          - create-build-artifacts
-    - test-binary-against-api-testing-firefox:
-        <<: *mainBuildFilters
-        requires:
-          - create-build-artifacts
-    - test-binary-against-piechopper-firefox:
         <<: *mainBuildFilters
         requires:
           - create-build-artifacts
@@ -2363,19 +2299,6 @@ mac-workflow: &mac-workflow
         requires:
           - darwin-build
 
-    - test-binary-against-kitchensink:
-        name: darwin-test-binary-against-kitchensink
-        executor: mac
-        requires:
-          - darwin-create-build-artifacts
-
-    - test-binary-against-staging:
-        context: test-runner:record-tests
-        name: darwin-test-binary-against-staging
-        executor: mac
-        requires:
-          - darwin-create-build-artifacts
-
     - test-binary-and-npm-against-other-projects:
         context: test-runner:trigger-test-jobs
         name: darwin-test-binary-and-npm-against-other-projects
@@ -2403,14 +2326,14 @@ windows-workflow: &windows-workflow
         executor: windows
         requires:
           - windows-build
-      
+
     - unit-tests:
         name: windows-unit-tests
         executor: windows
         resource_class: windows.medium
         requires:
           - windows-build
-    
+
     - create-build-artifacts:
         name: windows-create-build-artifacts
         executor: windows

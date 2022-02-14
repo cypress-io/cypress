@@ -560,7 +560,7 @@ describe('src/cy/commands/actions/type - #type', () => {
   // https://github.com/cypress-io/cypress/issues/19541
   describe(`type('{enter}') and click event on button-like elements`, () => {
     beforeEach(() => {
-      cy.visit('fixtures/type-enter.html')
+      cy.visit('fixtures/click-event-by-type.html')
     })
 
     describe('triggers', () => {
@@ -574,8 +574,7 @@ describe('src/cy/commands/actions/type - #type', () => {
 
       targets.forEach((targetId) => {
         it(`${targetId}`, () => {
-          cy.get(`#target-${targetId}`).focus()
-          cy.get(`#target-${targetId}`).type('{enter}')
+          cy.get(`#target-${targetId}`).focus().type('{enter}')
 
           cy.get('li').eq(0).should('have.text', 'keydown')
           cy.get('li').eq(1).should('have.text', 'keypress')
@@ -593,13 +592,160 @@ describe('src/cy/commands/actions/type - #type', () => {
 
       targets.forEach((targetId) => {
         it(`${targetId}`, () => {
-          cy.get(`#target-${targetId}`).focus()
-          cy.get(`#target-${targetId}`).type('{enter}')
+          cy.get(`#target-${targetId}`).focus().type('{enter}')
 
           cy.get('li').eq(0).should('have.text', 'keydown')
           cy.get('li').eq(1).should('have.text', 'keypress')
           cy.get('li').eq(2).should('have.text', 'keyup')
         })
+      })
+    })
+  })
+
+  describe(`type(' ') fires click event on button-like elements`, () => {
+    beforeEach(() => {
+      cy.visit('fixtures/click-event-by-type.html')
+    })
+
+    const targets = [
+      '#target-button-tag',
+      '#target-input-button',
+      '#target-input-image',
+      '#target-input-reset',
+      '#target-input-submit',
+    ]
+
+    describe(`triggers with single space`, () => {
+      targets.forEach((target) => {
+        it(target, () => {
+          const events = []
+
+          $(target).on('keydown keypress keyup click', (evt) => {
+            events.push(evt.type)
+          })
+
+          cy.get(target).focus().type(' ').then(() => {
+            expect(events).to.deep.eq([
+              'keydown',
+              'keypress',
+              'keyup',
+              'click',
+            ])
+          })
+
+          cy.get('li').eq(0).should('have.text', 'keydown')
+          cy.get('li').eq(1).should('have.text', 'keypress')
+          cy.get('li').eq(2).should('have.text', 'keyup')
+          cy.get('li').eq(3).should('have.text', 'click')
+        })
+      })
+    })
+
+    describe(`does not trigger if keyup prevented`, () => {
+      targets.forEach((target) => {
+        it(`${target} does not fire click event`, () => {
+          const events = []
+
+          $(target)
+          .on('keydown keypress keyup click', (evt) => {
+            events.push(evt.type)
+          })
+          .on('keyup', (evt) => {
+            evt.preventDefault()
+          })
+
+          cy.get(target).focus().type(' ').then(() => {
+            expect(events).to.deep.eq([
+              'keydown',
+              'keypress',
+              'keyup',
+            ])
+          })
+
+          cy.get('li').should('have.length', 3)
+          cy.get('li').eq(0).should('have.text', 'keydown')
+          cy.get('li').eq(1).should('have.text', 'keypress')
+          cy.get('li').eq(2).should('have.text', 'keyup')
+        })
+      })
+    })
+
+    describe('triggers after other characters', () => {
+      targets.forEach((target) => {
+        it(target, () => {
+          const events = []
+
+          $(target).on('keydown keypress keyup click', (evt) => {
+            events.push(evt.type)
+          })
+
+          cy.get(target).focus().type('asd ').then(() => {
+            expect(events).to.deep.eq([
+              'keydown',
+              'keypress',
+              'keyup',
+              'keydown',
+              'keypress',
+              'keyup',
+              'keydown',
+              'keypress',
+              'keyup',
+              'keydown',
+              'keypress',
+              'keyup',
+              'click',
+            ])
+          })
+
+          cy.get('li').eq(12).should('have.text', 'click')
+        })
+      })
+    })
+
+    describe('checkbox', () => {
+      it('checkbox is checked/unchecked', () => {
+        cy.get(`#target-input-checkbox`).focus().type(' ')
+
+        cy.get('li').eq(0).should('have.text', 'keydown')
+        cy.get('li').eq(1).should('have.text', 'keypress')
+        cy.get('li').eq(2).should('have.text', 'keyup')
+        cy.get('li').eq(3).should('have.text', 'click')
+
+        cy.get('#target-input-checkbox').should('be.checked')
+
+        cy.get(`#target-input-checkbox`).type(' ')
+
+        cy.get('li').eq(4).should('have.text', 'keydown')
+        cy.get('li').eq(5).should('have.text', 'keypress')
+        cy.get('li').eq(6).should('have.text', 'keyup')
+        cy.get('li').eq(7).should('have.text', 'click')
+
+        cy.get('#target-input-checkbox').should('not.be.checked')
+      })
+    })
+
+    describe('radio', () => {
+      it('radio fires click event when it is not checked', () => {
+        cy.get(`#target-input-radio`).focus().type(' ')
+
+        cy.get('li').eq(0).should('have.text', 'keydown')
+        cy.get('li').eq(1).should('have.text', 'keypress')
+        cy.get('li').eq(2).should('have.text', 'keyup')
+        cy.get('li').eq(3).should('have.text', 'click')
+
+        cy.get('#target-input-radio').should('be.checked')
+      })
+
+      it('radio does not fire click event when it is checked', () => {
+        // We're clicking here first to make the radio element checked.
+        cy.get(`#target-input-radio`).click().type(' ')
+
+        // item 0 is click event. It's fired because we want to make sure our radio button is checked.
+        cy.get('li').eq(1).should('have.text', 'keydown')
+        cy.get('li').eq(2).should('have.text', 'keypress')
+        cy.get('li').eq(3).should('have.text', 'keyup')
+
+        cy.get('#target-input-radio').should('be.checked')
       })
     })
   })

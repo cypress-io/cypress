@@ -6,3 +6,7 @@
   width: 100%;
   overflow: auto;
 }
+
+details.stacktrace summary {
+  display: list-item;
+}

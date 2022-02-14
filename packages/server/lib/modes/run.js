@@ -149,7 +149,7 @@ const formatNodeVersion = ({ resolvedNodeVersion, resolvedNodePath }, width) => 
   debug('formatting Node version. %o', { version: resolvedNodeVersion, path: resolvedNodePath })
 
   if (resolvedNodePath) {
-    return formatPath(`v${resolvedNodeVersion} (${resolvedNodePath})`, width)
+    return formatPath(`v${resolvedNodeVersion} ${gray(`(${resolvedNodePath})`)}`, width)
   }
 }
 
@@ -643,7 +643,7 @@ const removeOldProfiles = (browser) => {
   return browserUtils.removeOldProfiles(browser)
   .catch((err) => {
     // dont make removing old browsers profiles break the build
-    return errors.warning('CANNOT_REMOVE_OLD_BROWSER_PROFILES', err.stack)
+    return errors.warning('CANNOT_REMOVE_OLD_BROWSER_PROFILES', err)
   })
 }
 
@@ -659,7 +659,7 @@ const trashAssets = Promise.method((config = {}) => {
   ])
   .catch((err) => {
     // dont make trashing assets fail the build
-    return errors.warning('CANNOT_TRASH_ASSETS', err.stack)
+    return errors.warning('CANNOT_TRASH_ASSETS', err)
   })
 })
 
@@ -669,7 +669,7 @@ const createVideoRecording = function (videoName, options = {}) {
   const onError = _.once((err) => {
     // catch video recording failures and log them out
     // but don't let this affect the run at all
-    return errors.warning('VIDEO_RECORDING_FAILED', err.stack)
+    return errors.warning('VIDEO_RECORDING_FAILED', err)
   })
 
   return fs
@@ -726,7 +726,7 @@ const maybeStartVideoRecording = Promise.method(function (options = {}) {
 const warnVideoRecordingFailed = (err) => {
   // log that post processing was attempted
   // but failed and dont let this change the run exit code
-  errors.warning('VIDEO_POST_PROCESSING_FAILED', err.stack)
+  errors.warning('VIDEO_POST_PROCESSING_FAILED', err)
 }
 
 module.exports = {
@@ -1557,9 +1557,12 @@ module.exports = {
           trashAssets(config),
         ])
         .spread((sys = {}, browser = {}, specs = []) => {
-          // return only what is return to the specPattern
+          const originalSpecPattern = specPattern
+
           if (specPattern) {
-            specPattern = specsUtil.default.getPatternRelativeToProjectRoot(specPattern, projectRoot)
+            // remap the spec pattern for terminal display purposes
+            // relative to the projectRoot
+            specPattern = specsUtil.default.getPatternRelativeToPath(specPattern, projectRoot)
           }
 
           specs = specs.filter((spec) => {
@@ -1571,10 +1574,14 @@ module.exports = {
           if (!specs.length) {
             // did we use the spec pattern?
             if (specPattern) {
-              errors.throw('NO_SPECS_FOUND', projectRoot, specPattern)
+              // for error purposes: display the specPattern relative to the
+              // current working directly, not the project root as done above
+              const relativeCwdSpecPattern = specsUtil.default.getPatternRelativeToPath(originalSpecPattern, options.cwd)
+
+              errors.throw('NO_SPECS_FOUND', options.cwd, relativeCwdSpecPattern)
             } else {
               // else we looked in the integration folder
-              errors.throw('NO_SPECS_FOUND', config.integrationFolder, specPattern)
+              errors.throw('NO_SPECS_FOUND', config.integrationFolder)
             }
           }
 
@@ -1591,7 +1598,6 @@ module.exports = {
               beforeSpecRun,
               afterSpecRun,
               projectRoot,
-              specPattern,
               socketId,
               parallel,
               onError,
@@ -1603,6 +1609,7 @@ module.exports = {
               specs,
               sys,
               tag,
+              specPattern,
               videosFolder: config.videosFolder,
               video: config.video,
               videoCompression: config.videoCompression,
