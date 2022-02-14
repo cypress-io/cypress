@@ -638,7 +638,7 @@ export const AllCypressErrors = {
 
   CHILD_PROCESS_UNEXPECTED_ERROR: (configFilePath: string, err: Error) => {
     return errTemplate`
-      We stopped running your tests because the config child process crashed.
+      We stopped running your tests because a plugin.
 
       Your ${fmt.highlight(`configFile`)} threw an error from: ${fmt.path(configFilePath)}
 
@@ -1164,23 +1164,21 @@ export const AllCypressErrors = {
 
   CONFIG_FILE_MIGRATION_NEEDED: (projectRoot: string) => {
     return errTemplate`
-        There is a cypress.json file at the location below:
+        There is a ${fmt.highlight(`cypress.json`)} file at the path: ${fmt.path(projectRoot)}
 
-        ${fmt.path(projectRoot)}
+        ${fmt.cypressVersion('10.0.0')} no longer supports cypress.json.
 
-        Cypress 10 no longer supports 'cypress.json'. 
-        
         Please run ${fmt.highlightTertiary('cypress open')} to launch the migration tool to migrate to ${fmt.highlightSecondary('cypress.config.{ts|js}')}.
       `
   },
 
-  LEGACY_CONFIG_FILE: (fileName: string, projectRoot: string) => {
+  LEGACY_CONFIG_FILE: (baseFileName: string, projectRoot: string) => {
     return errTemplate`
-      There is both a ${fmt.highlight(fileName)} and a cypress.json file at the location below:
-      
+      There is both a ${fmt.highlight(baseFileName)} and a ${fmt.highlight(`cypress.json`)} file at the location below:
+
       ${fmt.path(projectRoot)}
 
-      Cypress no longer supports ${fmt.highlightSecondary('cypress.json')} config, please remove it from your project.
+      Cypress no longer supports cypress.json, please remove it from your project.
     `
   },
 
@@ -1188,7 +1186,7 @@ export const AllCypressErrors = {
     return errTemplate`\
       The ${fmt.highlight('setupNodeEvents')} method does not support ${fmt.highlightSecondary('dev-server:start')}, use ${fmt.highlight('devServer')} instead:
 
-      ${fmt.path(configPath)}
+      Please update this file: ${fmt.path(configPath)}
 
       ${fmt.code(`
         devServer (cypressDevServerConfig, devServerConfig) {
