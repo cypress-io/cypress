@@ -201,6 +201,7 @@ mutation MigrationWizard_Start {
     migration {
       filteredSteps {
         id
+        ...MigrationStep
       }
     }
   }
