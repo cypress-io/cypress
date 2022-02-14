@@ -159,22 +159,8 @@ describe('navigation events', { experimentalSessionSupport: true, experimentalMu
       })
     })
 
-    it('propagates the event to the primary domain', (done) => {
-      let times = 0
-      const listener = (url) => {
-        times++
-        if (times === 1) {
-          expect(url).to.equal('http://www.foobar.com:3500/fixtures/multi-domain-secondary.html')
-        }
-
-        if (times === 2) {
-          cy.removeListener('url:changed', listener)
-          expect(url).to.equal('http://www.foobar.com:3500/fixtures/multi-domain.html')
-          done()
-        }
-      }
-
-      cy.on('url:changed', listener)
+    // TODO: this test should re revisited with the cypress in cypress tests available in 10.0
+    it.skip('the runner url updates appropriately', () => {
       cy.switchToDomain('foobar.com', () => {
         cy.get('a[data-cy="multi-domain-page"]').click()
       })

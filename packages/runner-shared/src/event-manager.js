@@ -528,7 +528,7 @@ export const eventManager = {
     })
 
     Cypress.multiDomainCommunicator.on('url:changed', (url) => {
-      Cypress.emit('url:changed', url)
+      localBus.emit('url:changed', url)
     })
 
     Cypress.multiDomainCommunicator.on('after:screenshot', handleAfterScreenshot)
