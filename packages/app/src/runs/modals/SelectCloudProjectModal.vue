@@ -36,7 +36,7 @@
         </template>
       </Select>
       <Select
-        v-if="!newProject"
+        v-if="!newProject && projects.length > 0"
         v-model="pickedProject"
         class="mt-16px transition-all"
         :class="pickedOrganization ? undefined : 'opacity-50'"
@@ -231,6 +231,7 @@ const emit = defineEmits<{
   (event: 'update-projectId-failed', projectId: string): void
 }>()
 
+const newProject = ref(false)
 const projectName = ref(props.gql.currentProject?.title || '')
 const projectAccess = ref<'private' | 'public'>('private')
 const organizations = computed(() => {
@@ -244,9 +245,6 @@ const organizations = computed(() => {
 const pickedOrganization = ref(organizations.value.length >= 1 ? organizations.value[0] : undefined)
 
 const projects = computed(() => pickedOrganization.value?.projects?.nodes || [])
-const newProject = computed(() => {
-  return projects.value.length === 0
-})
 const pickedProject = ref()
 
 const orgPlaceholder = t('runs.connect.modal.selectProject.placeholderOrganizations')
