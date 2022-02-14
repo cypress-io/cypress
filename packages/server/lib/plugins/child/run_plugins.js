@@ -14,7 +14,6 @@ const resolve = require('../../util/resolve')
 const browserLaunch = require('./browser_launch')
 const util = require('../util')
 const validateEvent = require('./validate_event')
-const errors = require('../../errors')
 
 const UNDEFINED_SERIALIZED = '__cypress_undefined__'
 
@@ -57,10 +56,14 @@ class RunPlugins {
     // we track the register calls and then send them all at once
     // to the parent process
     const registerChildEvent = (event, handler) => {
-      const { isValid, error } = validateEvent(event, handler, initialConfig)
+      const { isValid, userEvents, error } = validateEvent(event, handler, initialConfig)
 
       if (!isValid) {
-        this.ipc.send('setupTestingType:error', 'PLUGINS_VALIDATION_ERROR', this.requiredFile, error.stack)
+        const err = userEvents
+          ? require('@packages/errors').getError('PLUGINS_INVALID_EVENT_NAME_ERROR', this.requiredFile, event, userEvents, error)
+          : require('@packages/errors').getError('CONFIG_FILE_SETUP_NODE_EVENTS_ERROR', this.requiredFile, initialConfig.testingType, error)
+
+        this.ipc.send('setupTestingType:error', util.serializeError(err))
 
         return
       }
@@ -122,7 +125,12 @@ class RunPlugins {
     })
     .catch((err) => {
       debug('plugins file errored:', err && err.stack)
-      this.ipc.send('setupTestingType:error', 'PLUGINS_FUNCTION_ERROR', err.stack)
+      this.ipc.send('setupTestingType:error', util.serializeError(require('@packages/errors').getError(
+        'CONFIG_FILE_SETUP_NODE_EVENTS_ERROR',
+        this.requiredFile,
+        initialConfig.testingType,
+        err,
+      )))
     })
   }
 
@@ -168,7 +176,7 @@ class RunPlugins {
 
       return this.ipc.send(`promise:fulfilled:${ids.invocationId}`, null, value)
     }).catch((err) => {
-      return this.ipc.send(`promise:fulfilled:${ids.invocationId}`, serializeError(err))
+      return this.ipc.send(`promise:fulfilled:${ids.invocationId}`, util.serializeError(err))
     })
   }
 
@@ -195,7 +203,7 @@ class RunPlugins {
     const duplicates = _.intersection(_.keys(target), _.keys(events))
 
     if (duplicates.length) {
-      errors.warning('DUPLICATE_TASK_KEY', duplicates.join(', '))
+      require('@packages/errors').warning('DUPLICATE_TASK_KEY', duplicates)
     }
 
     return _.extend(target, events)
@@ -241,10 +249,6 @@ class RunPlugins {
       this.execute(event, ids, args)
     })
   }
-}
-
-const serializeError = (err) => {
-  return _.pick(err, 'name', 'message', 'stack', 'code', 'annotated', 'type')
 }
 
 exports.RunPlugins = RunPlugins

@@ -66,7 +66,7 @@ describe.skip('lib/plugins/child/run_plugins', () => {
   it('sends error message if setupNodeEvents does not export a function', function () {
     mockery.registerMock('plugins-file', null)
     runPlugins(this.ipc, 'plugins-file', 'proj-root')
-    expect(this.ipc.send).to.be.calledWith('load:error', 'PLUGINS_DIDNT_EXPORT_FUNCTION', 'plugins-file')
+    expect(this.ipc.send).to.be.calledWith('load:error', 'SETUP_NODE_EVENTS_IS_NOT_FUNCTION', 'plugins-file')
   })
 
   it('sends error message if setupNodeEvents is not a function', function () {
@@ -225,7 +225,7 @@ describe.skip('lib/plugins/child/run_plugins', () => {
 
       this.ipc.send = _.once((event, errorType, pluginsFile, result) => {
         expect(event).to.eq('setupTestingType:error')
-        expect(errorType).to.eq('PLUGINS_FUNCTION_ERROR')
+        expect(errorType).to.eq('CHILD_PROCESS_UNEXPECTED_ERROR')
         expect(pluginsFile).to.eq('plugins-file')
         expect(result.stack).to.eq(err.stack)
 
@@ -260,7 +260,7 @@ describe.skip('lib/plugins/child/run_plugins', () => {
 
       this.ipc.send = _.once((event, errorType, pluginsFile, serializedErr) => {
         expect(event).to.eq('setupTestingType:error')
-        expect(errorType).to.eq('PLUGINS_FUNCTION_ERROR')
+        expect(errorType).to.eq('CHILD_PROCESS_UNEXPECTED_ERROR')
         expect(pluginsFile).to.eq('plugins-file')
         expect(serializedErr.stack).to.eq(err.stack)
 
@@ -435,7 +435,7 @@ describe.skip('lib/plugins/child/run_plugins', () => {
         expect(result).to.equal('result')
       })
 
-      it('returns __cypress_unhandled__ if the task doesn\'t exist', function () {
+      it(`returns __cypress_unhandled__ if the task doesn't exist`, function () {
         runPlugins.taskExecute(this.ids, ['nope'])
 
         expect(util.wrapChildPromise.lastCall.args[1]('1')).to.equal('__cypress_unhandled__')

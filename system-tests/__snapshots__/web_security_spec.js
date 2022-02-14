@@ -231,7 +231,7 @@ exports['e2e web security / firefox / displays warning when firefox and chromeWe
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  simple_passing_spec.js                                                          (1 of 1)
+  Running:  simple_passing.cy.js                                                            (1 of 1)
 
 Your project has set the configuration option: chromeWebSecurity to false
 

@@ -8,9 +8,9 @@ All error related logic for the server should be added to `@packages/errors`. Th
 
 Summary of the Errors package:
 
-- `errors.ts`: A key/value mapping of known errors to functions returning "ErrorTemplates", described below, also includes/re-exports several helper utilities: 
+- `errors.ts`: A key/value mapping of known errors to functions returning "ErrorTemplates", described below, also includes/re-exports several helper utilities:
   - `get` / `getError`: builds & retrieves the error as a `CypressError`, should be the main way we retrieve errors throughout Cypress. Aliased as `errors.get` for existing use in the server package
-  - `throw` / `throwErr`: Get & throw the error, so we can spy/stub it in a test. Aliased as `errors.throw` for existing use in the server package
+  - `throw` / `throwErr`: Get & throw the error, so we can spy/stub it in a test. Aliased as `errors.throwErr` for existing use in the server package
   - `logWarning`: Logs the error as a warning to the console, aliased as `errors.log` for existing use in the server package
 - `errTemplate.ts`: Tagged template literal formatting the error as described below
 - `stackUtils.ts`: Utilities for working with a stack trace, extended by the driver package
@@ -26,9 +26,9 @@ Return Value of `errTemplate` (`ErrTemplateResult`):
 ```ts
 {
   // Will always exist, this is the terminal-formatted error message
-  message: string, 
+  message: string,
   // Will always exist, this is the browser-formatted error message
-  messageMarkdown: string, 
+  messageMarkdown: string,
   details?: string, // Exists if there is `details()` call in the errTemplate
   originalError?: ErrorLike // Exists if an error was passed into the `details()`
 }
@@ -44,7 +44,7 @@ CANNOT_TRASH_ASSETS: (arg1: string) => {
       This error will not alter the exit code.
 
       ${details(arg1)}`
-},  
+},
 ```
 
 In this case, `arg1` will be highlighted in yellow when printed to the terminal.
@@ -70,7 +70,7 @@ PLUGINS_FILE_ERROR: (arg1: string, arg2: Error) => {
 
 ### Error Wrapping
 
-Any time we know about an edge case that is an error, we should define an error in `errors.ts`. This error should be retrieved by `getError`, which converts it to a `CypressError`. 
+Any time we know about an edge case that is an error, we should define an error in `errors.ts`. This error should be retrieved by `getError`, which converts it to a `CypressError`.
 
 The `CypressError` is an `Error` containing the message returned from the `errTemplate`. The `stack` is set to that of the `originalError` if it exists (i.e. the error object passed into `details`), otherwise it's the `stack` from where the `getError` / `throwError` is called.
 
@@ -79,7 +79,6 @@ The `CypressError` has an `isCypressErr` prop which we use as a duck-type guard 
 
 ### Child-Process Errors
 
-All errors that occur in a child process spawned by Cypress should be sent over the `ipc` bridge using `util.serializeError`. 
+All errors that occur in a child process spawned by Cypress should be sent over the `ipc` bridge using `util.serializeError`.
 
 This ensures the `name`, `message`, `stack`, and any other relevant details are preserved and can be handled by the standard process of Cypress' error standardization / wrapping.
-

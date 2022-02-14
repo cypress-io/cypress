@@ -1,4 +1,5 @@
 import { getDisplayUrlMatcher } from '@packages/driver/src/cy/net-stubbing/route-matcher-log'
+
 import type { RouteMatcherOptions } from '@packages/net-stubbing/lib/external-types'
 
 const testFail = (cb, expectedDocsUrl = 'https://on.cypress.io/intercept') => {
@@ -2016,7 +2017,7 @@ describe('network stubbing', function () {
         })
       })
 
-      it('doesn\'t automatically parse JSON request bodies if content-type is wrong', function () {
+      it(`doesn't automatically parse JSON request bodies if content-type is wrong`, function () {
         const p = Promise.defer()
 
         cy.intercept('/post-only', (req) => {
@@ -2786,7 +2787,7 @@ describe('network stubbing', function () {
         })
       })
 
-      it('doesn\'t automatically parse JSON response bodies if content-type is wrong', function () {
+      it(`doesn't automatically parse JSON response bodies if content-type is wrong`, function () {
         const p = Promise.defer()
 
         cy.intercept('/fixtures/json.txt*', (req) => {
@@ -2806,7 +2807,7 @@ describe('network stubbing', function () {
       })
 
       // @see https://github.com/cypress-io/cypress/issues/16722
-      it('doesn\'t automatically parse response bodies if content is binary', function () {
+      it(`doesn't automatically parse response bodies if content is binary`, function () {
         const expectedBody = [120, 42, 7]
         const assertBody = (body: ArrayBuffer) => {
           const uint8 = new Uint8Array(body)
@@ -3120,7 +3121,7 @@ describe('network stubbing', function () {
         })
       })
 
-      it('doesn\'t fail test if network error occurs retrieving response and response is not intercepted', {
+      it(`doesn't fail test if network error occurs retrieving response and response is not intercepted`, {
         // TODO: for some reason, this test is busted in FF
         browser: '!firefox',
       }, function () {

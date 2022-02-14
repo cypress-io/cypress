@@ -1,6 +1,6 @@
 import Debug from 'debug'
 import path from 'path'
-import errors from './errors'
+import * as errors from './errors'
 import { escapeFilenameInUrl } from './util/escape_filename'
 import { fs } from './util/fs'
 
@@ -47,7 +47,7 @@ export const checkSupportFile = async ({
     const found = await fs.pathExists(supportFile)
 
     if (!found) {
-      errors.throw('SUPPORT_FILE_NOT_FOUND', supportFile)
+      errors.throwErr('SUPPORT_FILE_NOT_FOUND', supportFile)
     }
   }
 

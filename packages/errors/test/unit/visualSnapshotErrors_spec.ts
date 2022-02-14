@@ -649,33 +649,26 @@ describe('visual error templates', () => {
         default: ['/path/to/supportFile'],
       }
     },
-    PLUGINS_FILE_ERROR: () => {
+    CONFIG_FILE_REQUIRE_ERROR: () => {
       const err = makeErr()
 
       return {
         default: ['/path/to/pluginsFile', err],
       }
     },
-    PLUGINS_FILE_NOT_FOUND: () => {
+    SETUP_NODE_EVENTS_IS_NOT_FUNCTION: () => {
       return {
-        default: ['/path/to/pluginsFile'],
+        default: ['/path/to/pluginsFile', 'e2e', { some: 'object' }],
+        string: ['/path/to/pluginsFile', 'e2e', 'some string'],
+        array: ['/path/to/pluginsFile', 'e2e', ['some', 'array']],
       }
     },
-    PLUGINS_DIDNT_EXPORT_FUNCTION: () => {
+    CONFIG_FILE_SETUP_NODE_EVENTS_ERROR: () => {
       return {
-        default: ['/path/to/pluginsFile', { some: 'object' }],
-        string: ['/path/to/pluginsFile', 'some string'],
-        array: ['/path/to/pluginsFile', ['some', 'array']],
+        default: ['/path/to/pluginsFile', 'e2e', makeErr()],
       }
     },
-    PLUGINS_FUNCTION_ERROR: () => {
-      const err = makeErr()
-
-      return {
-        default: ['/path/to/pluginsFile', err],
-      }
-    },
-    CHILD_PROCESS_UNEXPECTED_ERROR: () => {
+    CONFIG_FILE_UNEXPECTED_ERROR: () => {
       const err = makeErr()
 
       return {
@@ -1070,6 +1063,31 @@ describe('visual error templates', () => {
     UNSUPPORTED_BROWSER_VERSION: () => {
       return {
         default: [`Cypress does not support running chrome version 64. To use chrome with Cypress, install a version of chrome newer than or equal to 64.`],
+      }
+    },
+    MULTIPLE_SUPPORT_FILES_FOUND: () => {
+      return {
+        default: ['spec.{ts,js}', 'spec.ts,spec.js'],
+      }
+    },
+    REMOVED_ROOT_CONFIG_OPTION: () => {
+      return {
+        default: [{ name: 'specPattern', configFile: '/path/to/configFile.ts' }],
+      }
+    },
+    REMOVED_ROOT_CONFIG_OPTION_E2E: () => {
+      return {
+        default: [{ name: 'baseUrl', configFile: '/path/to/configFile.ts' }],
+      }
+    },
+    CT_CONFIG_NOT_SUPPORTED: () => {
+      return {
+        default: [{ name: 'baseUrl', configFile: '/path/to/configFile.ts' }],
+      }
+    },
+    COMPONENT_DEV_SERVER_IS_NOT_A_FUNCTION: () => {
+      return {
+        default: ['/path/to/config.ts', {}],
       }
     },
   })

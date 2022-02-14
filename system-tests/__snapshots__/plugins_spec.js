@@ -119,14 +119,14 @@ exports['e2e plugins can modify config from plugins 1'] = `
 `
 
 exports['e2e plugins catches invalid browsers list returned from plugins 1'] = `
-Your pluginsFile set an invalid value from: cypress/plugins/index.js
+Your configFile as cypress.config.js set an invalid value:
 
 Expected at least one browser
 
 `
 
 exports['e2e plugins catches invalid browser returned from plugins 1'] = `
-Your pluginsFile set an invalid value from: cypress/plugins/index.js
+Your configFile at cypress.config.js set an invalid value:
 
 The error occurred while validating the browsers list.
 
@@ -158,8 +158,6 @@ You can also use a custom browser: https://on.cypress.io/customize-browsers
 
 Available browsers found on your system are:
  - electron
-
-Read more about how to troubleshoot launching browsers: https://on.cypress.io/troubleshooting-launching-browsers
 
 `
 
@@ -358,7 +356,7 @@ exports['e2e plugins calls after:screenshot for cy.screenshot() and failure scre
 `
 
 exports['e2e plugins catches invalid viewportWidth returned from plugins 1'] = `
-Your pluginsFile set an invalid value from: cypress/plugins/index.js
+Your configFile at cypress.config.js set an invalid value:
 
 Expected viewportWidth to be a number.
 
@@ -384,10 +382,9 @@ exports['e2e plugins fails when there is an async error inside an event handler 
                                                                                                     
   Running:  app.cy.js                                                                       (1 of 1)
 
+We stopped running your tests because your config file crashed.
 
-We stopped running your tests because a plugin crashed.
-
-Your pluginsFile threw an error from: /foo/bar/.projects/plugins-async-error/cypress/plugins/index.js
+Your configFile threw an error from: cypress.config.js
 
 Error: Async error from plugins file
       [stack trace lines]
@@ -421,9 +418,8 @@ Error: Async error from plugins file
 
 `
 
-
 exports['e2e plugins fails when invalid event is registered 1'] = `
-Your pluginsFile threw a validation error: /foo/bar/.projects/plugin-validation-error/cypress/plugins/index.js
+Your configFile threw a validation error: /foo/bar/.projects/plugin-validation-error/cypress.config.js
 
 You must pass a valid event name when registering a plugin.
 
@@ -541,7 +537,7 @@ If you have just renamed the extension of your pluginsFile, restart Cypress.
 `
 
 exports['e2e plugins fails when require throws synchronously 1'] = `
-Your pluginsFile is invalid: /foo/bar/.projects/plugins-root-sync-error/cypress/plugins/index.js
+Your configFile is invalid: /foo/bar/.projects/plugins-root-sync-error/cypress.config.js
 
 It threw an error when required, check the stack trace below:
 
@@ -550,15 +546,58 @@ RootSyncError: Root sync error from plugins file
 `
 
 exports['e2e plugins fails when function throws synchronously 1'] = `
-Your pluginsFile threw an error from: /foo/bar/.projects/plugins-function-sync-error/cypress/plugins/index.js
+Your configFile threw an error from: /foo/bar/.projects/plugins-function-sync-error/cypress.config.js
+
+The error was thrown while executing your e2e.setupNodeEvents function:
 
 FunctionSyncError: Function sync error from plugins file
       [stack trace lines]
 `
 
 exports['e2e plugins fails when invalid event handler is registered 1'] = `
-Your pluginsFile threw an error from: /foo/bar/.projects/plugin-invalid-event-handler-error/cypress/plugins/index.js
+Your configFile threw an error from: /foo/bar/.projects/plugin-invalid-event-handler-error/cypress.config.js
+
+The error was thrown while executing your e2e.setupNodeEvents function:
 
 InvalidEventHandlerError: The handler for the event \`task\` must be an object
       [stack trace lines]
+`
+
+exports['e2e plugins fails when setupNodeEvents is not a function 1'] = `
+Your configFile is invalid: /foo/bar/.projects/plugin-empty/cypress.config.js
+
+The setupNodeEvents in your e2e config should define a function with the following signature:
+
+setupNodeEvents(on, config) {
+  // configure tasks / plugins here
+}
+
+Instead we saw:
+
+"foo"
+
+https://on.cypress.io/plugins-api
+
+
+`
+
+exports['e2e plugins fails when there is no function exported 1'] = `
+Your configFile is invalid: /foo/bar/.projects/plugin-no-function-return/cypress.config.js
+
+The setupNodeEvents in your e2e config should define a function with the following signature:
+
+setupNodeEvents(on, config) {
+  // configure tasks / plugins here
+}
+
+Instead we saw:
+
+{
+  "foo": "foo",
+  "bar": "bar"
+}
+
+https://on.cypress.io/plugins-api
+
+
 `

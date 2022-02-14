@@ -1014,6 +1014,7 @@ describe('e2e record', () => {
         return systemTests.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
           spec: 'record_pass*',
+          configFile: 'cypress-with-project-id.config.js',
           record: true,
           snapshot: true,
           expectedExitCode: 1,

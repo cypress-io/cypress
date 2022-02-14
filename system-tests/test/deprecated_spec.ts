@@ -50,7 +50,7 @@ describe('deprecated before:browser:launch args', () => {
     psInclude: ['--foo', '--bar'],
   })
 
-  systemTests.it.only('concat return returns once', {
+  systemTests.it('concat return returns once', {
     // TODO: implement webPreferences.additionalArgs here
     // once we decide if/what we're going to make the implemenation
     // SUGGESTION: add this to Cypress.browser.args which will capture

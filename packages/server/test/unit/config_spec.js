@@ -26,7 +26,7 @@ describe('lib/config', () => {
 
   context('environment name check', () => {
     it('throws an error for unknown CYPRESS_INTERNAL_ENV', () => {
-      sinon.stub(errors, 'throw').withArgs('INVALID_CYPRESS_INTERNAL_ENV', 'foo-bar')
+      sinon.stub(errors, 'throwErr').withArgs('INVALID_CYPRESS_INTERNAL_ENV', 'foo-bar')
       process.env.CYPRESS_INTERNAL_ENV = 'foo-bar'
       const cfg = {
         projectRoot: '/foo/bar/',
@@ -39,11 +39,11 @@ describe('lib/config', () => {
         //
       }
 
-      expect(errors.throw).have.been.calledOnce
+      expect(errors.throwErr).have.been.calledOnce
     })
 
     it('allows production CYPRESS_INTERNAL_ENV', () => {
-      sinon.stub(errors, 'throw')
+      sinon.stub(errors, 'throwErr')
       process.env.CYPRESS_INTERNAL_ENV = 'production'
       const cfg = {
         projectRoot: '/foo/bar/',
@@ -52,7 +52,7 @@ describe('lib/config', () => {
 
       config.mergeDefaults(cfg, options)
 
-      expect(errors.throw).not.to.be.called
+      expect(errors.throwErr).not.to.be.called
     })
   })
 
@@ -224,7 +224,7 @@ describe('lib/config', () => {
         it('fails if it is set on root level', function () {
           this.setup({ baseUrl: 'localhost' })
 
-          return this.expectValidationFails('Please update this option under e2e testing type property')
+          return this.expectValidationFails('Please update this option under the e2e testing type property')
         })
       })
 
@@ -593,8 +593,8 @@ describe('lib/config', () => {
         })
       })
 
-      // TODO(lachlan): after mega PR
-      xcontext('specPattern', () => {
+      // TODO:(lachlan): after mega PR
+      context.skip('specPattern', () => {
         it('passes if a string', function () {
           this.setup({ e2e: { specPattern: '**/*.coffee' } })
 
@@ -645,7 +645,7 @@ describe('lib/config', () => {
         it('fails if is set at root level', function () {
           this.setup({ supportFile: false })
 
-          return this.expectValidationFails('was removed from the root in Cypress version `10.0.0`')
+          return this.expectValidationFails('was removed from the root of the Cypress config object in version 10.0.0')
         })
       })
 
@@ -1459,8 +1459,8 @@ describe('lib/config', () => {
       expect(warning).to.be.calledWith('FIREFOX_GC_INTERVAL_REMOVED')
     })
 
-    // todo(lachlan): after mega PR
-    xdescribe('.resolved', () => {
+    // TODO:(lachlan) after mega PR
+    describe.skip('.resolved', () => {
       it('sets reporter and port to cli', () => {
         const obj = {
           projectRoot: '/foo/bar',
@@ -1886,10 +1886,10 @@ describe('lib/config', () => {
         browsers: null,
       }
 
-      sinon.stub(errors, 'throw')
+      sinon.stub(errors, 'throwErr')
       config.updateWithPluginValues(cfg, overrides)
 
-      expect(errors.throw).to.have.been.calledWith('CONFIG_VALIDATION_MSG_ERROR')
+      expect(errors.throwErr).to.have.been.calledWith('CONFIG_VALIDATION_MSG_ERROR')
     })
 
     it('allows user to filter browsers', () => {

@@ -4,11 +4,13 @@ import chalk from 'chalk'
 import _ from 'lodash'
 import path from 'path'
 import stripAnsi from 'strip-ansi'
+import type { BreakingErrResult, TestingType } from '@packages/types'
+
 import { humanTime, logError, parseResolvedPattern, pluralize } from './errorUtils'
 import { errPartial, errTemplate, fmt, theme, PartialErr } from './errTemplate'
 import { stackWithoutMessage } from './stackUtils'
 
-import type { ClonedError, ConfigValidationError, CypressError, ErrorLike, ErrTemplateResult } from './errorTypes'
+import type { ClonedError, ConfigValidationError, CypressError, ErrTemplateResult, ErrorLike } from './errorTypes'
 
 const ansi_up = new AU()
 
@@ -115,6 +117,8 @@ export const AllCypressErrors = {
   BROWSER_NOT_FOUND_BY_PATH: (arg1: string, arg2: string) => {
     return errTemplate`\
         We could not identify a known browser at the path you provided: ${fmt.path(arg1)}
+
+        Read more about how to troubleshoot launching browsers: https://on.cypress.io/troubleshooting-launching-browsers
 
         The output from the command we ran was:
 
@@ -588,9 +592,9 @@ export const AllCypressErrors = {
         https://on.cypress.io/support-file-missing-or-invalid`
   },
   // TODO: make this relative path, not absolute
-  PLUGINS_FILE_ERROR: (pluginsFilePath: string, err: Error) => {
+  CONFIG_FILE_REQUIRE_ERROR: (configFilePath: string, err: Error) => {
     return errTemplate`\
-        Your ${fmt.highlight(`pluginsFile`)} is invalid: ${fmt.path(pluginsFilePath)}
+        Your ${fmt.highlight(`configFile`)} is invalid: ${fmt.path(configFilePath)}
 
         It threw an error when required, check the stack trace below:
 
@@ -598,48 +602,40 @@ export const AllCypressErrors = {
       `
   },
   // TODO: make this relative path, not absolute
-  PLUGINS_FILE_NOT_FOUND: (pluginsFilePath: string) => {
-    return errTemplate`\
-        Your ${fmt.highlight(`pluginsFile`)} was not found at path: ${fmt.path(pluginsFilePath)}
-
-        Create this file, or set pluginsFile to ${fmt.highlightSecondary(`false`)} if a plugins file is not necessary for your project.
-
-        If you have just renamed the extension of your pluginsFile, restart Cypress.
-      `
-  },
-  // TODO: make this relative path, not absolute
-  PLUGINS_DIDNT_EXPORT_FUNCTION: (pluginsFilePath: string, exported: any) => {
+  SETUP_NODE_EVENTS_IS_NOT_FUNCTION: (configFilePath: string, testingType: string, exported: any) => {
     const code = errPartial`
-      module.exports = (on, config) => {
-        ${fmt.comment(`// configure plugins here`)}
+      setupNodeEvents(on, config) {
+        ${fmt.comment(`// configure tasks / plugins here`)}
       }`
 
     return errTemplate`\
-      Your ${fmt.highlight(`pluginsFile`)} did not export a valid function from: ${fmt.path(pluginsFilePath)}
+      Your ${fmt.highlight(`configFile`)} is invalid: ${fmt.path(configFilePath)}
 
-      It must export a function with the following signature:
+      The setupNodeEvents in your ${fmt.highlight(testingType)} config should define a function with the following signature:
 
       ${fmt.code(code)}
 
-      Instead it exported:
+      Instead we saw:
 
       ${fmt.stringify(exported)}
 
       https://on.cypress.io/plugins-api
     `
   },
-  // TODO: make this relative path, not absolute
-  PLUGINS_FUNCTION_ERROR: (pluginsFilePath: string, err: Error) => {
-    return errTemplate`\
-      Your ${fmt.highlight(`pluginsFile`)} threw an error from: ${fmt.path(pluginsFilePath)}
-
-      ${fmt.stackTrace(err)}`
-  },
-  PLUGINS_UNEXPECTED_ERROR: (arg1: string, arg2: string | Error) => {
+  CONFIG_FILE_SETUP_NODE_EVENTS_ERROR: (configFilePath: string, testingType: TestingType, err: ErrorLike) => {
     return errTemplate`
-      We stopped running your tests because a plugin.
+      Your ${fmt.highlight(`configFile`)} threw an error from: ${fmt.path(configFilePath)}
 
-      Your ${fmt.highlight(`pluginsFile`)} threw an error from: ${fmt.path(arg1)}
+      The error was thrown while executing your ${fmt.highlightSecondary(`${testingType}.setupNodeEvents`)} function:
+
+      ${fmt.stackTrace(err)}
+    `
+  },
+  CONFIG_FILE_UNEXPECTED_ERROR: (configFilePath: string, err: ErrorLike) => {
+    return errTemplate`
+      We stopped running your tests because your config file crashed.
+
+      Your ${fmt.highlight(`configFile`)} threw an error from: ${fmt.path(configFilePath)}
 
       ${fmt.stackTrace(arg2)}
     `
@@ -690,7 +686,7 @@ export const AllCypressErrors = {
     }
 
     return errTemplate`
-      Your ${fmt.highlight(fileType)} set an invalid value from: ${fmt.path(fileName)}
+      Your ${fmt.highlight(fileType)} as ${fmt.path(fileName)} set an invalid value:
 
       ${fmt.highlight(validationMsg)}`
   },
@@ -709,7 +705,7 @@ export const AllCypressErrors = {
 
     if (list) {
       return errTemplate`\
-        Your ${fmt.highlight(fileType)} set an invalid value from: ${fmt.path(filePath)}
+        Your ${fmt.highlight(fileType)} at ${fmt.path(filePath)} set an invalid value:
 
         The error occurred while validating the ${fmt.highlightSecondary(list)} list.
 
@@ -719,7 +715,7 @@ export const AllCypressErrors = {
     }
 
     return errTemplate`\
-      Your ${fmt.highlight(fileType)} set an invalid value from: ${fmt.path(filePath)}
+      Your ${fmt.highlight(fileType)} at ${fmt.path(filePath)} set an invalid value:
 
       Expected ${fmt.highlight(key)} to be ${fmt.off(type)}.
 
@@ -1155,7 +1151,7 @@ export const AllCypressErrors = {
     return errTemplate`\
       There are multiple support files.
 
-      Your supportFile is set to ${fmt.highlight(arg1)}, and we found ${fmt.highlightSecondary(arg2)}.
+      Your supportFile is set to ${fmt.highlight(arg1)}, and we found ${fmt.highlightSecondary(arg2)}
 
       Correct your supportFile config or merge the files into one.`
   },
@@ -1196,6 +1192,53 @@ export const AllCypressErrors = {
     `
   },
 
+  REMOVED_ROOT_CONFIG_OPTION: (errShape: BreakingErrResult) => {
+    return errTemplate`\
+      The ${fmt.highlight(errShape.name)} configuration option was removed from the root of the Cypress config object in version 10.0.0.
+      
+      Please update this option under each testing type property.
+
+      https://on.cypress.io/migration-guide`
+  },
+
+  REMOVED_ROOT_CONFIG_OPTION_E2E: (errShape: BreakingErrResult) => {
+    return errTemplate`\
+      The ${fmt.highlight(errShape.name)} configuration option was removed from the root of the Cypress config object in version 10.0.0.
+      
+      Please update this option under the e2e testing type property.
+
+      https://on.cypress.io/migration-guide`
+  },
+
+  CT_CONFIG_NOT_SUPPORTED: (errShape: BreakingErrResult) => {
+    return errTemplate`\
+      The ${fmt.highlight(errShape.name)} configuration option is not valid in Component testing. 
+      
+      Please remove or add this option under e2e testing type property.
+
+      https://on.cypress.io/migration-guide`
+  },
+
+  COMPONENT_DEV_SERVER_IS_NOT_A_FUNCTION: (configFile: string, setupNodeEvents: any) => {
+    return errTemplate`\
+      The ${fmt.highlight(`component.devServer`)} method must be a function with the following signature:
+
+      ${fmt.code(`
+        devServer (cypressDevServerConfig, devServerConfig) {
+          // start dev server here
+        }
+      `)}
+      
+      Instead, we saw: 
+      
+      ${fmt.stringify(setupNodeEvents)}
+      
+      This error is from: ${fmt.highlightSecondary(configFile)}
+
+      Learn more: https://on.cypress.io/dev-server
+    `
+  },
+
 } as const
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -1218,12 +1261,14 @@ export function getMsgByType<Type extends keyof AllCypressErrorObj> (type: Type,
  * @param args
  * @returns
  */
-export const getError = function <Type extends keyof AllCypressErrorObj> (type: Type, ...args: Parameters<AllCypressErrorObj[Type]>) {
+export const getError = function <Type extends keyof AllCypressErrorObj> (type: Type, ...args: Parameters<AllCypressErrorObj[Type]>): CypressError {
   // If we don't know this "type" of error, return as a non-cypress error
   if (!AllCypressErrors[type]) {
-    const err = new Error(args[1] || type) as ErrorLike
+    const err = new Error(`UNKNOWN ERROR ${JSON.stringify(type)}`) as CypressError
 
+    err.isCypressErr = false
     err.type = type
+    err.messageMarkdown = err.message
 
     return err
   }
@@ -1281,7 +1326,7 @@ interface GenericError extends Error {
   [key: string]: any
 }
 
-export const cloneError = function (err: CypressError | GenericError, options: {html?: boolean} = {}) {
+export const cloneErr = function (err: CypressError | GenericError, options: {html?: boolean} = {}) {
   _.defaults(options, {
     html: false,
   })
@@ -1313,8 +1358,6 @@ export const cloneError = function (err: CypressError | GenericError, options: {
 
 export {
   stripAnsi,
-  cloneError as clone,
-  throwErr as throw,
   getError as get,
   logWarning as warning,
 }

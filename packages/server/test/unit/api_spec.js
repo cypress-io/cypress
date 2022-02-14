@@ -919,7 +919,6 @@ describe('lib/api', () => {
 
       return api.retryWithBackoff(fn)
       .then(() => {
-        console.log('gsd')
         expect(fn).to.be.calledTwice
         expect(fn.firstCall.args[0]).eq(0)
         expect(fn.secondCall.args[0]).eq(1)

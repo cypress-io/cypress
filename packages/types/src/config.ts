@@ -44,3 +44,26 @@ export interface SettingsOptions {
   testingType?: 'component' |'e2e'
   args?: AllModeOptions
 }
+
+// Todo, move to @packages/config when it becomes type-safe
+
+export type BreakingOption =
+  | 'RENAMED_CONFIG_OPTION'
+  | 'EXPERIMENTAL_COMPONENT_TESTING_REMOVED'
+  | 'EXPERIMENTAL_SAMESITE_REMOVED'
+  | 'EXPERIMENTAL_NETWORK_STUBBING_REMOVED'
+  | 'EXPERIMENTAL_RUN_EVENTS_REMOVED'
+  | 'EXPERIMENTAL_SHADOW_DOM_REMOVED'
+  | 'FIREFOX_GC_INTERVAL_REMOVED'
+  | 'NODE_VERSION_DEPRECATION_SYSTEM'
+  | 'NODE_VERSION_DEPRECATION_BUNDLED'
+  | 'REMOVED_ROOT_CONFIG_OPTION'
+  | 'REMOVED_ROOT_CONFIG_OPTION_E2E'
+  | 'CT_CONFIG_NOT_SUPPORTED'
+
+export type BreakingErrResult = {
+  name: string
+  newName?: string
+  value?: any
+  configFile: string
+}

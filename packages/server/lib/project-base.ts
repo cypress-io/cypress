@@ -7,7 +7,7 @@ import pkg from '@packages/root'
 import { Automation } from './automation'
 import browsers from './browsers'
 import * as config from './config'
-import errors from './errors'
+import * as errors from './errors'
 import devServer from './plugins/dev-server'
 import preprocessor from './plugins/preprocessor'
 import runEvents from './plugins/run_events'
@@ -373,7 +373,7 @@ export class ProjectBase<TServer extends Server> extends EE {
     } catch (error: any) {
       const paths = Reporter.getSearchPathsForReporter(reporter, projectRoot)
 
-      errors.throw('INVALID_REPORTER_NAME', {
+      errors.throwErr('INVALID_REPORTER_NAME', {
         paths,
         error,
         name: reporter,

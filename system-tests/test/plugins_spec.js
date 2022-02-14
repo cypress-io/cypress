@@ -19,9 +19,9 @@ describe('e2e plugins', function () {
     expectedExitCode: 1,
     onRun (exec) {
       return exec().then(({ stdout }) => {
-        expect(stdout).to.include('We stopped running your tests because your config process crashed.')
-        expect(stdout).to.include('Your configFile threw an error from:')
-        expect(stdout).to.include('Error: Root async error from plugins file')
+        expect(stdout).to.include('We stopped running your tests because your config file crashed.')
+        expect(stdout).to.include('Your configFile threw an error from: cypress.config.js')
+        expect(stdout).to.include('Error: Root async error from config file')
       })
     },
   })
@@ -168,16 +168,6 @@ describe('e2e plugins', function () {
     return systemTests.exec(this, {
       spec: 'app.cy.js',
       project: 'plugin-empty',
-      sanitizeScreenshotDimensions: true,
-      snapshot: true,
-      expectedExitCode: 1,
-    })
-  })
-
-  it('fails when its set from config but does not exist', function () {
-    return systemTests.exec(this, {
-      spec: 'app_spec.js',
-      project: 'plugin-missing',
       sanitizeScreenshotDimensions: true,
       snapshot: true,
       expectedExitCode: 1,

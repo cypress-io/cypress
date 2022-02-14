@@ -538,22 +538,22 @@ export const breakingOptions: Array<BreakingOption> = [
 export const breakingRootOptions: Array<BreakingOption> = [
   {
     name: 'supportFile',
-    errorKey: 'SUPPORT_FILE_ROOT_NOT_SUPPORTED',
+    errorKey: 'REMOVED_ROOT_CONFIG_OPTION',
     isWarning: false,
   },
   {
     name: 'specPattern',
-    errorKey: 'SPEC_PATTERN_ROOT_NOT_SUPPORTED',
+    errorKey: 'REMOVED_ROOT_CONFIG_OPTION',
     isWarning: false,
   },
   {
     name: 'excludeSpecPattern',
-    errorKey: 'SPEC_EXCLUDE_PATTERN_ROOT_NOT_SUPPORTED',
+    errorKey: 'REMOVED_ROOT_CONFIG_OPTION',
     isWarning: false,
   },
   {
     name: 'baseUrl',
-    errorKey: 'BASE_URL_ROOT_NOT_SUPPORTED',
+    errorKey: 'REMOVED_ROOT_CONFIG_OPTION_E2E',
     isWarning: false,
   },
 ]
@@ -563,7 +563,7 @@ export const testingTypeBreakingOptions: { e2e: Array<BreakingOption>, component
   component: [
     {
       name: 'baseUrl',
-      errorKey: 'BASE_URL_CT_NOT_SUPPORTED',
+      errorKey: 'CT_CONFIG_NOT_SUPPORTED',
       isWarning: false,
     },
   ],
