@@ -352,7 +352,7 @@ const takeScreenshot = (Cypress, state, screenshotConfig, options: TakeScreensho
         /* eslint-disable no-console */
         console.error('Failed to modify app dom:')
         console.error(err)
-        /* eslint-disable no-console */
+        /* eslint-enable no-console */
       }
 
       return sendAsync('before:screenshot', getOptions(true))
@@ -371,7 +371,7 @@ const takeScreenshot = (Cypress, state, screenshotConfig, options: TakeScreensho
       /* eslint-disable no-console */
       console.error('Failed to modify app dom:')
       console.error(err)
-      /* eslint-disable no-console */
+      /* eslint-enable no-console */
     }
 
     send('after:screenshot', getOptions(false))
