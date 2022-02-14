@@ -628,7 +628,7 @@ describe('driver/src/cypress/error_utils', () => {
       { value: undefined, label: 'undefined' },
       { value: null, label: 'null' },
       { value: '', label: 'empty string' },
-      { value: 'true', label: 'boolean' },
+      { value: true, label: 'boolean' },
       { value: 1, label: 'number' },
     ].forEach((err) => {
       it(`returns undefined if err is ${err.label}`, () => {
