@@ -69,14 +69,14 @@ export interface ComponentTestingMigrationStatus {
   completed: boolean
 }
 
-export function initComponentTestingMigration (
+export async function initComponentTestingMigration (
   projectRoot: string,
   componentFolder: string,
   testFiles: string[],
   onFileMoved: (status: ComponentTestingMigrationStatus) => void,
 ): Promise<{
   status: ComponentTestingMigrationStatus
-  watcher: chokidar.FSWatcher
+  watcher: chokidar.FSWatcher | null
 }> {
   const watchPaths = testFiles.map((glob) => {
     return path.join(componentFolder, glob)
@@ -88,19 +88,33 @@ export function initComponentTestingMigration (
     },
   )
 
-  let filesToBeMoved: Map<string, FileToBeMigratedManually> = globby.sync(watchPaths, {
+  let filesToBeMoved: Map<string, FileToBeMigratedManually> = (await globby(watchPaths, {
     cwd: projectRoot,
-  }).reduce<Map<string, FileToBeMigratedManually>>((acc, relative) => {
+  })).reduce<Map<string, FileToBeMigratedManually>>((acc, relative) => {
     acc.set(relative, { relative, moved: false })
 
     return acc
   }, new Map())
 
+  if (filesToBeMoved.size === 0) {
+    // this should not happen as the step should be hidden in this case
+    // but files can have been moved manually before clicking next
+    return {
+      status: {
+        files: filesToBeMoved,
+        completed: true,
+      },
+      watcher: null,
+    }
+  }
+
   watcher.on('unlink', (unlinkedPath) => {
     const file = filesToBeMoved.get(unlinkedPath)
 
     if (!file) {
-      throw Error(`Watcher incorrectly triggered while watching ${file}`)
+      throw Error(`Watcher incorrectly triggered ${unlinkedPath}
+      while watching ${Array.from(filesToBeMoved.keys()).join(', ')}
+      projectRoot: ${projectRoot}`)
     }
 
     file.moved = true
@@ -197,7 +211,9 @@ function formatObjectForConfig (obj: Record<string, unknown>) {
 function createE2eTemplate (pluginPath: string, hasPluginsFile: boolean, options: Record<string, unknown>) {
   const requirePlugins = `return require('.${path.sep}${pluginPath}')(on, config)`
 
-  const setupNodeEvents = `setupNodeEvents(on, config) {
+  const setupNodeEvents = `// We've imported your old cypress plugins here.
+  // You may want to clean this up later by importing these.
+  setupNodeEvents(on, config) {
     ${hasPluginsFile ? requirePlugins : ''}
   }`
 
@@ -208,6 +224,8 @@ function createE2eTemplate (pluginPath: string, hasPluginsFile: boolean, options
 
 function createComponentTemplate (options: Record<string, unknown>) {
   return `component: {
+    // We've imported your old cypress plugins here.
+    // You may want to clean this up later by importing these.
     setupNodeEvents(on, config) {},${formatObjectForConfig(options)}
   },`
 }
@@ -425,7 +443,7 @@ function getSpecPattern (cfg: OldCypressConfig, testType: TestingType) {
   const customComponentFolder = cfg.component?.componentFolder ?? cfg.componentFolder ?? null
 
   if (testType === 'component' && customComponentFolder) {
-    return specPattern
+    return `${customComponentFolder}/${specPattern}`
   }
 
   if (testType === 'e2e') {

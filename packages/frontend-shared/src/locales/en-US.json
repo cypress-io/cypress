@@ -392,10 +392,6 @@
       "experimentalSourceRewriting": {
         "name": "Source Rewriting",
         "description": "Enables AST-based JS/HTML rewriting. This may fix issues caused by the existing regex-based JS/HTML replacement algorithm. See [#5273](https://github.com/cypress-io/cypress/issues/5273) for details."
-      },
-      "experimentalStudio": {
-        "name": "Studio",
-        "description": "Generate and save commands directly to your test suite by interacting with your app as an end user would. See [Cypress Studio](https://on.cypress.io/studio) for more details."
       }
     },
     "device": {
@@ -507,7 +503,7 @@
   "migration": {
     "before": "Before",
     "after": "After",
-    "heresWhy": "here's why",
+    "heresWhy": "here's why:",
     "renameAuto": {
       "title": "We'll automatically rename your specs in this step",
       "changeButton": "change",
@@ -522,8 +518,9 @@
           "line1": "Cypress now supports the ability to create new spec files from within the UI for both E2E and component specs.",
           "line2": "All new spec files created within Cypress will use the default pattern of: ",
           "line3": "We want to rename your existing specs so that they have a consistent filename pattern for both E2E and component testing.",
-          "line4": "We've changed the placement of component specs to be next to their source files (e.g. src/Button.jsx and src/Button.cy.jsx)",
-          "line5": "The new default pattern of {0} prevents targeting conflicts with other testing frameworks. (e.g. Jest)",
+          "line4": "All documentation and example code will be using: ",
+          "line5": "We've changed the placement of component specs to be next to their source files (e.g. src/Button.jsx and src/Button.cy.jsx)",
+          "line6": "The new default pattern of {0} prevents targeting conflicts with other testing frameworks. (e.g. Jest)",
           "buttonProceed": "I still want to change the spec file extension",
           "buttonCancel": "Cancel, keep the default extension"
         },
@@ -550,7 +547,7 @@
       "changedSupportFile": "We've renamed the E2E support file from:"
     },
     "configFile": {
-      "title": "We need to move the Cypress configuration file",
+      "title": "We need to migrate to the new Cypress configuration file",
       "changedDefault": "We've changed the default Cypress config file from:",
       "customOptions": "We've set a custom {specPattern} option based on your {options}.",
       "willConvert": "We'll automatically create a new {jsFile} file and seed it with your options from your existing {jsonFile}."
@@ -566,13 +563,13 @@
       "title": "Migration Helper",
       "description": "Complete the steps below to migrate your project to Cypress 10",
       "step1": {
-        "title": "Automatically rename existing specs",
+        "title": "Rename existing specs",
         "description": "In this step, we'll automatically rename and move your existing spec files.",
         "button": "Rename these specs for me",
         "buttonSkip": "Skip renaming specs"
       },
       "step2": {
-        "title": "Manually move your existing component specs",
+        "title": "Move your existing component specs",
         "description": "In this step, you'll manually move your existing component specs to their new default location.",
         "buttonWait": "Waiting for you to move your component specs...",
         "buttonDone": "Continue to next step",
@@ -584,7 +581,7 @@
         "button": "Rename the support file for me"
       },
       "step4": {
-        "title": "Automatically migrate the Cypress configuration file",
+        "title": "Migrate to the new Cypress configuration file",
         "description": "In this step, we'll automatically migrate your existing cypress configuration to the new Cypress configuration file.",
         "button": "Migrate the configuration for me"
       },
