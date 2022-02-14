@@ -1,4 +1,3 @@
-// @ts-nocheck
 import $ from 'jquery'
 import _ from 'lodash'
 
@@ -8,6 +7,7 @@ const wrap = (obj) => {
 }
 
 const query = (selector, context) => {
+  // @ts-ignore
   return new $.fn.init(selector, context)
 }
 
