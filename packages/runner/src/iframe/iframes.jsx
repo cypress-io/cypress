@@ -74,8 +74,6 @@ export default class Iframes extends Component {
     this.autIframe = new AutIframe(this.props.config)
 
     this.props.eventManager.on('visit:failed', this.autIframe.showVisitFailure)
-    this.props.eventManager.on('before:screenshot', this.autIframe.beforeScreenshot)
-    this.props.eventManager.on('after:screenshot', this.autIframe.afterScreenshot)
     this.props.eventManager.on('script:error', this._setScriptError)
     this.props.eventManager.on('visit:blank', this.autIframe.visitBlank)
 

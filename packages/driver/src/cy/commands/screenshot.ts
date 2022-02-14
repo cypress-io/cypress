@@ -330,7 +330,7 @@ const takeScreenshot = (Cypress, state, screenshotConfig, options: TakeScreensho
     }
   }
 
-  const before = () => {
+  const before = ($el) => {
     return Promise.try(() => {
       if (disableTimersAndAnimations) {
         return cy.pauseTimers(true)
@@ -339,11 +339,41 @@ const takeScreenshot = (Cypress, state, screenshotConfig, options: TakeScreensho
       return null
     })
     .then(() => {
+      // could fail if iframe is cross-origin, so fail gracefully
+      try {
+        if (disableTimersAndAnimations) {
+          $dom.addCssAnimationDisabler($el)
+        }
+
+        _.each(getBlackout(screenshotConfig), (selector) => {
+          $dom.addBlackouts($el, selector)
+        })
+      } catch (err) {
+        /* eslint-disable no-console */
+        console.error('Failed to modify app dom:')
+        console.error(err)
+        /* eslint-enable no-console */
+      }
+
       return sendAsync('before:screenshot', getOptions(true))
     })
   }
 
-  const after = () => {
+  const after = ($el) => {
+    // could fail if iframe is cross-origin, so fail gracefully
+    try {
+      if (disableTimersAndAnimations) {
+        $dom.removeCssAnimationDisabler($el)
+      }
+
+      $dom.removeBlackouts($el)
+    } catch (err) {
+      /* eslint-disable no-console */
+      console.error('Failed to modify app dom:')
+      console.error(err)
+      /* eslint-enable no-console */
+    }
+
     send('after:screenshot', getOptions(false))
 
     return Promise.try(() => {
@@ -380,7 +410,7 @@ const takeScreenshot = (Cypress, state, screenshotConfig, options: TakeScreensho
     ? subject
     : $dom.wrap(state('document').documentElement)
 
-  return before()
+  return before($el)
   .then(() => {
     if (onBeforeScreenshot) {
       onBeforeScreenshot.call(state('ctx'), $el)
@@ -407,7 +437,7 @@ const takeScreenshot = (Cypress, state, screenshotConfig, options: TakeScreensho
 
     return props
   })
-  .finally(after)
+  .finally(() => after($el))
 }
 
 export default function (Commands, Cypress, cy, state, config) {
