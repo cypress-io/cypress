@@ -95,7 +95,6 @@ describe('App: Settings', () => {
         cy.get('[data-cy="experiment-experimentalInteractiveRunEvents"]')
         cy.get('[data-cy="experiment-experimentalSessionSupport"]')
         cy.get('[data-cy="experiment-experimentalSourceRewriting"]')
-        cy.get('[data-cy="experiment-experimentalStudio"]')
       })
     })
 
