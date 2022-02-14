@@ -1,0 +1,49 @@
+{
+  "name": "cypress-example-module-api",
+  "version": "1.0.0",
+  "description": "Example running specs using Cypress via its module API",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "pretest": "npm run lint",
+    "test": "mocha --timeout 30000 test/spec.js",
+    "lint": "standard --verbose --fix test/*.js",
+    "cy:verify": "cypress verify"
+  },
+  "devDependencies": {
+    "@bahmutov/all-paths": "1.0.2",
+    "chdir-promise": "0.6.2",
+    "check-more-types": "2.24.0",
+    "debug": "4.3.3",
+    "lazy-ass": "1.6.0",
+    "mocha": "9.2.0",
+    "mocha-banner": "1.1.2",
+    "ramda": "0.28.0",
+    "snap-shot-it": "5.0.1",
+    "standard": "16.0.4",
+    "terminal-banner": "1.1.0"
+  },
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cypress-io/cypress-example-module-api.git"
+  },
+  "homepage": "https://github.com/cypress-io/cypress-example-module-api#readme",
+  "author": "Gleb Bahmutov <gleb@cypress.io>",
+  "bugs": {
+    "url": "https://github.com/cypress-io/cypress-example-module-api/issues"
+  },
+  "keywords": [
+    "cypress",
+    "cypress-io",
+    "cypress-test"
+  ],
+  "standard": {
+    "globals": [
+      "describe",
+      "beforeEach",
+      "it",
+      "afterEach"
+    ]
+  }
+}
