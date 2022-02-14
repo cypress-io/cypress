@@ -41,7 +41,7 @@ declare global {
     __CYPRESS_MODE__: 'run' | 'open'
     __RUN_MODE_SPECS__: SpecFile[]
     __CYPRESS_TESTING_TYPE__: 'e2e' | 'component'
-    __CYPRESS_BROWSER__: Browser & {majorVersion: string | number}
+    __CYPRESS_BROWSER__: Partial<Browser> & {majorVersion: string | number}
     __CYPRESS_CONFIG__: {
       base64Config: string
       namespace: AutomationElementId

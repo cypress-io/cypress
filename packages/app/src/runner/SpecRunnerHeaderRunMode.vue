@@ -29,6 +29,7 @@
       >
         <template #heading>
           <img
+            v-if="selectedBrowser.displayName"
             class="min-w-16px w-16px"
             :src="allBrowsersIcons[selectedBrowser.displayName]"
           > {{ selectedBrowser.displayName }} {{ selectedBrowser.majorVersion }}
