@@ -163,8 +163,6 @@ export class SocketBase {
       onCaptureVideoFrames () {},
     })
 
-    let automationClient
-
     const { socketIoRoute, socketIoCookie } = config
 
     const io = this._io = this.createIo(server, socketIoRoute, socketIoCookie)
@@ -181,17 +179,19 @@ export class SocketBase {
       Object.keys(origins).forEach((key) => delete origins[key])
     }
 
-    const onAutomationClientRequestCallback = (message, data, id) => {
-      return this.onAutomation(automationClient, message, data, id)
-    }
-
-    const automationRequest = (message: string, data: Record<string, unknown>) => {
-      return automation.request(message, data, onAutomationClientRequestCallback)
-    }
-
     const getFixture = (path, opts) => fixture.get(config.fixturesFolder, path, opts)
 
     io.on('connection', (socket: Socket & { inReporterRoom?: boolean, inRunnerRoom?: boolean }) => {
+      let automationClient
+
+      const onAutomationClientRequestCallback = (message, data, id) => {
+        return this.onAutomation(automationClient, message, data, id)
+      }
+
+      const automationRequest = (message: string, data: Record<string, unknown>) => {
+        return socket && socket.connected && automation.request(message, data, onAutomationClientRequestCallback)
+      }
+
       debug('socket connected')
 
       socket.on('disconnecting', (reason) => {
