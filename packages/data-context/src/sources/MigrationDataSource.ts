@@ -95,7 +95,7 @@ export class MigrationDataSource {
       throw Error(`Impossible to initialize a migration. No steps fit the configuration of this project.`)
     }
 
-    await this.setStep(this.filteredSteps[0])
+    this.setStep(this.filteredSteps[0])
   }
 
   private resetFlags () {
@@ -321,13 +321,15 @@ export class MigrationDataSource {
     return this._step
   }
 
-  async setStep (step: MIGRATION_STEP) {
+  async closeManualRenameWatcher () {
     if (this.componentTestingMigrationWatcher) {
       debug('setStep: stopping watcher')
       await this.componentTestingMigrationWatcher.close()
       this.componentTestingMigrationWatcher = null
     }
+  }
 
+  setStep (step: MIGRATION_STEP) {
     this._step = step
   }
 }

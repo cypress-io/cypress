@@ -96,11 +96,15 @@ export class MigrationActions {
       const nextStep = filteredSteps[nextIndex]
 
       if (nextStep) {
-        await this.ctx.migration.setStep(nextStep)
+        this.ctx.migration.setStep(nextStep)
       }
     } else {
       await this.finishReconfigurationWizard()
     }
+  }
+
+  async closeManualRenameWatcher () {
+    await this.ctx.migration.closeManualRenameWatcher()
   }
 
   async assertSuccessfulConfigMigration (configExtension: 'js' | 'ts' = 'js') {
