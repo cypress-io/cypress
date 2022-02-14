@@ -637,7 +637,7 @@ export const AllCypressErrors = {
   },
   PLUGINS_UNEXPECTED_ERROR: (arg1: string, arg2: string | Error) => {
     return errTemplate`
-      We stopped running your tests because a plugin crashed.
+      We stopped running your tests because a plugin.
 
       Your ${fmt.highlight(`pluginsFile`)} threw an error from: ${fmt.path(arg1)}
 
@@ -1158,6 +1158,42 @@ export const AllCypressErrors = {
       Your supportFile is set to ${fmt.highlight(arg1)}, and we found ${fmt.highlightSecondary(arg2)}.
 
       Correct your supportFile config or merge the files into one.`
+  },
+
+  CONFIG_FILE_MIGRATION_NEEDED: (projectRoot: string) => {
+    return errTemplate`
+        There is a ${fmt.highlight(`cypress.json`)} file at the path: ${fmt.path(projectRoot)}
+
+        ${fmt.cypressVersion('10.0.0')} no longer supports cypress.json.
+
+        Please run ${fmt.highlightTertiary('cypress open')} to launch the migration tool to migrate to ${fmt.highlightSecondary('cypress.config.{ts|js}')}.
+      `
+  },
+
+  LEGACY_CONFIG_FILE: (baseFileName: string, projectRoot: string) => {
+    return errTemplate`
+      There is both a ${fmt.highlight(baseFileName)} and a ${fmt.highlight(`cypress.json`)} file at the location below:
+
+      ${fmt.path(projectRoot)}
+
+      Cypress no longer supports cypress.json, please remove it from your project.
+    `
+  },
+
+  SETUP_NODE_EVENTS_DO_NOT_SUPPORT_DEV_SERVER: (configPath: string) => {
+    return errTemplate`\
+      The ${fmt.highlight('setupNodeEvents')} method does not support ${fmt.highlightSecondary('dev-server:start')}, use ${fmt.highlight('devServer')} instead:
+
+      Please update this file: ${fmt.path(configPath)}
+
+      ${fmt.code(`
+        devServer (cypressDevServerConfig, devServerConfig) {
+          // start dev server here
+        }
+      `)}
+
+      Learn more: https://on.cypress.io/dev-server
+    `
   },
 
 } as const

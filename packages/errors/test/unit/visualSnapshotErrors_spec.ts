@@ -675,11 +675,11 @@ describe('visual error templates', () => {
         default: ['/path/to/pluginsFile', err],
       }
     },
-    PLUGINS_UNEXPECTED_ERROR: () => {
+    CHILD_PROCESS_UNEXPECTED_ERROR: () => {
       const err = makeErr()
 
       return {
-        default: ['/path/to/pluginsFile', err],
+        default: ['/path/to/configFile', err],
       }
     },
     PLUGINS_INVALID_EVENT_NAME_ERROR: () => {
@@ -687,7 +687,7 @@ describe('visual error templates', () => {
 
       return {
         default: [
-          '/path/to/pluginsFile',
+          '/path/to/configFile',
           'invalid:event',
           ['foo', 'bar', 'baz'],
           err,
@@ -1034,6 +1034,21 @@ describe('visual error templates', () => {
     NODE_VERSION_DEPRECATION_SYSTEM: () => {
       return {
         default: [{ name: 'nodeVersion', value: 'system', 'configFile': 'cypress.json' }],
+      }
+    },
+    CONFIG_FILE_MIGRATION_NEEDED: () => {
+      return {
+        default: ['/path/to/projectRoot'],
+      }
+    },
+    LEGACY_CONFIG_FILE: () => {
+      return {
+        default: ['cypress.json', '/path/to/projectRoot'],
+      }
+    },
+    SETUP_NODE_EVENTS_DO_NOT_SUPPORT_DEV_SERVER: () => {
+      return {
+        default: ['/path/to/project/cypress.config.js'],
       }
     },
     CT_NO_DEV_START_EVENT: () => {
