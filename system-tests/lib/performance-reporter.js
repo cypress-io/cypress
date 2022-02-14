@@ -26,6 +26,7 @@ circleCiRootEvent.add({
   buildUrl: process.env.CIRCLE_BUILD_URL,
   platform: process.platform,
   arch: process.arch,
+  name: 'ci_run',
 
   spanId,
   traceId: spanId,
@@ -76,6 +77,7 @@ class HoneycombReporter {
         ...parent.data,
         suite: suite.title,
         specFile: suite.file && path.basename(suite.file),
+        name: 'spec_execution',
 
         spanId: uuidv4(),
         parentId: parent.data.spanId,
@@ -97,6 +99,7 @@ class HoneycombReporter {
         ...test.parent.honeycombEvent.data,
         test: testTitle,
         browser,
+        name: 'test_execution',
 
         spanId: uuidv4(),
         parentId: test.parent.honeycombEvent.data.spanId,
