@@ -25,10 +25,10 @@ describe.skip('lib/util/settings', () => {
     })
 
     afterEach(() => {
-      return Promise.join(
+      return Promise.all([
         fs.removeAsync('cypress.config.js'),
         ctx.actions.project.clearCurrentProject(),
-      )
+      ])
     })
 
     context('.read', () => {
