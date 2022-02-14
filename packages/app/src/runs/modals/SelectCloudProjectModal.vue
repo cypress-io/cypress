@@ -88,7 +88,7 @@
             class="cursor-pointer text-indigo-500 hover:underline"
             @click="newProject = false"
           >
-            {{ t('runs.connect.modal.selectProject.chooseExistsingProject') }}
+            {{ t('runs.connect.modal.selectProject.chooseExistingProject') }}
           </a>
         </div>
         <Input
@@ -155,8 +155,7 @@ import ConnectIcon from '~icons/cy/chain-link_x16.svg'
 import CreateIcon from '~icons/cy/add-large_x16.svg'
 import FolderIcon from '~icons/cy/folder-outline_x16.svg'
 import OrganizationIcon from '~icons/cy/office-building_x16.svg'
-import { SelectCloudProjectModalFragment, SelectCloudProjectModal_CreateCloudProjectDocument } from '../../generated/graphql'
-import { SelectCloudProjectModal_SetProjectIdDocument } from '@packages/data-context/src/gen/all-operations.gen'
+import { SelectCloudProjectModalFragment, SelectCloudProjectModal_CreateCloudProjectDocument, SelectCloudProjectModal_SetProjectIdDocument } from '../../generated/graphql'
 import { useI18n } from '@cy/i18n'
 
 const { t } = useI18n()

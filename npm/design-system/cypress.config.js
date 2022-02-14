@@ -1,3 +1,5 @@
+const { devServer } = require('@cypress/vite-dev-server')
+
 module.exports = {
   viewportWidth: 1024,
   viewportHeight: 800,
@@ -12,10 +14,6 @@ module.exports = {
       '**/__snapshots__/*',
       '**/__image_snapshots__/*',
     ],
-    devServer (cypressDevServerConfig) {
-      const { startDevServer } = require('@cypress/vite-dev-server')
-
-      return startDevServer({ options: cypressDevServerConfig })
-    },
+    devServer,
   },
 }

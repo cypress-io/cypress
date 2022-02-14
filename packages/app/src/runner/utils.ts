@@ -38,9 +38,13 @@ export const togglePlayground = (autIframe: AutIframe) => {
     selectorPlaygroundStore.setShow(false)
     autIframe.toggleSelectorPlayground(false)
     selectorPlaygroundStore.setEnabled(false)
+    selectorPlaygroundStore.setShowingHighlight(false)
+    autIframe.toggleSelectorHighlight(false)
   } else {
     selectorPlaygroundStore.setShow(true)
     autIframe.toggleSelectorPlayground(true)
     selectorPlaygroundStore.setEnabled(true)
+    selectorPlaygroundStore.setShowingHighlight(true)
+    autIframe.toggleSelectorHighlight(true)
   }
 }

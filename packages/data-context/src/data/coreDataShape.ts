@@ -66,6 +66,9 @@ export interface WizardDataShape {
   chosenFramework: NexusGenEnums['FrontendFrameworkEnum'] | null
   chosenLanguage: NexusGenEnums['CodeLanguageEnum']
   chosenManualInstall: boolean
+  detectedLanguage: NexusGenEnums['CodeLanguageEnum'] | null
+  detectedBundler: NexusGenEnums['SupportedBundlers'] | null
+  detectedFramework: NexusGenEnums['FrontendFrameworkEnum'] | null
 }
 
 export interface MigrationDataShape{
@@ -82,6 +85,11 @@ export interface BaseErrorDataShape {
   title?: string
   message: string
   stack?: string
+}
+
+export interface ForceReconfigureProjectDataShape {
+  e2e?: boolean | null
+  component?: boolean | null
 }
 
 export interface CoreDataShape {
@@ -112,6 +120,7 @@ export interface CoreDataShape {
   scaffoldedFiles: NexusGenObjects['ScaffoldedFile'][] | null
   warnings: Warning[]
   packageManager: typeof PACKAGE_MANAGERS[number]
+  forceReconfigureProject: ForceReconfigureProjectDataShape | null
 }
 
 /**
@@ -152,6 +161,9 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
       chosenLanguage: 'js',
       chosenManualInstall: false,
       allBundlers: BUNDLERS,
+      detectedBundler: null,
+      detectedFramework: null,
+      detectedLanguage: null,
     },
     migration: {
       step: 'renameAuto',
@@ -165,5 +177,6 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
     },
     scaffoldedFiles: null,
     packageManager: 'npm',
+    forceReconfigureProject: null,
   }
 }

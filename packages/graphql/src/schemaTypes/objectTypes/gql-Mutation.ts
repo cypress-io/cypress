@@ -99,7 +99,7 @@ export const mutation = mutationType({
     t.field('completeSetup', {
       type: 'Query',
       resolve: async (_, args, ctx) => {
-        ctx.actions.wizard.completeSetup()
+        await ctx.actions.wizard.completeSetup()
 
         return {}
       },
@@ -130,8 +130,18 @@ export const mutation = mutationType({
       args: {
         testingType: nonNull(arg({ type: TestingTypeEnum })),
       },
-      resolve: (source, args, ctx) => {
+      resolve: async (source, args, ctx) => {
         ctx.actions.project.setCurrentTestingType(args.testingType)
+
+        // if necessary init the wizard for configuration
+        if (ctx.coreData.currentTestingType
+          && !ctx.lifecycleManager.isTestingTypeConfigured(ctx.coreData.currentTestingType)) {
+          try {
+            await ctx.actions.wizard.initialize()
+          } catch (e) {
+            ctx.coreData.baseError = e as Error
+          }
+        }
 
         return {}
       },
@@ -212,6 +222,7 @@ export const mutation = mutationType({
 
     t.field('login', {
       type: Query,
+      slowLogThreshold: false,
       description: 'Auth with Cypress Cloud',
       resolve: async (_, args, ctx) => {
         await ctx.actions.auth.login()
@@ -350,6 +361,16 @@ export const mutation = mutationType({
       },
     })
 
+    t.nonNull.field('resetLatestVersionTelemetry', {
+      type: 'Boolean',
+      description: 'Resets the latest version call to capture additional telemetry for the current user',
+      resolve: async (_, args, ctx) => {
+        ctx.actions.versions.resetLatestVersionTelemetry()
+
+        return true
+      },
+    })
+
     t.nonNull.field('focusActiveBrowserWindow', {
       type: 'Boolean',
       description: 'Sets focus to the active browser window',
@@ -364,6 +385,7 @@ export const mutation = mutationType({
       type: 'Boolean',
       description: 'show the launchpad windows',
       resolve: async (_, args, ctx) => {
+        ctx.actions.project.setForceReconfigureProjectByTestingType({ forceReconfigureProject: true })
         await ctx.actions.project.reconfigureProject()
 
         return true
@@ -520,6 +542,7 @@ export const mutation = mutationType({
     t.field('migrateConfigFile', {
       description: 'Transforms cypress.json file into cypress.config.js file',
       type: Query,
+      slowLogThreshold: 5000, // This mutation takes a little time
       resolve: async (_, args, ctx) => {
         try {
           await ctx.actions.migration.createConfigFile()
@@ -589,6 +612,25 @@ export const mutation = mutationType({
         ctx.project.setRelaunchBrowser(true)
         ctx.actions.project.setCurrentTestingType(args.testingType)
         await ctx.actions.project.reconfigureProject()
+
+        return true
+      },
+    })
+
+    t.field('setTestingTypeAndReconfigureProject', {
+      description: 'Set the selected testing type, and reconfigure the project',
+      type: Query,
+      args: {
+        testingType: nonNull(arg({ type: TestingTypeEnum })),
+        isApp: nonNull(booleanArg()),
+      },
+      resolve: async (source, args, ctx) => {
+        ctx.actions.project.setForceReconfigureProjectByTestingType({ forceReconfigureProject: true, testingType: args.testingType })
+        ctx.actions.project.setCurrentTestingType(args.testingType)
+
+        if (args.isApp) {
+          await ctx.actions.project.reconfigureProject()
+        }
 
         return true
       },

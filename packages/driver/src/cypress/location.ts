@@ -1,4 +1,3 @@
-// @ts-nocheck
 // TODO:
 // 1. test these method implementations using encoded characters
 // look at the spec to figure out whether we SHOULD be decoding them
@@ -18,6 +17,8 @@ const reLocalHost = /^(localhost|0\.0\.0\.0|127\.0\.0\.1)/
 const reQueryParam = /\?[^/]+/
 
 export class $Location {
+  remote: UrlParse
+
   constructor (remote) {
     this.remote = new UrlParse(remote)
   }
@@ -38,6 +39,8 @@ export class $Location {
         password,
       }
     }
+
+    return
   }
 
   getHash () {

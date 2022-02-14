@@ -4,6 +4,7 @@
       v-model="search"
       class="pb-32px"
       :result-count="specs.length"
+      :spec-count="cachedSpecs.length"
       @show-create-spec-modal="emit('showCreateSpecModal')"
       @show-spec-pattern-modal="showSpecPatternModal = true"
     />
@@ -56,6 +57,7 @@
               :key="row.data.data?.absolute"
               class="focus:outline-transparent"
               :to="{ path: '/specs/runner', query: { file: row.data.data?.relative } }"
+              data-cy="spec-item-link"
               @click.meta.prevent="handleCtrlClick"
               @click.ctrl.prevent="handleCtrlClick"
             >
@@ -63,7 +65,7 @@
                 :file-name="row.data.data?.fileName || row.data.name"
                 :extension="row.data.data?.specFileExtension || ''"
                 :indexes="row.data.data?.fileIndexes"
-                :style="{ paddingLeft: `${((row.data.depth - 2) * 10) + 16 + 22}px` }"
+                :style="{ paddingLeft: `${((row.data.depth - 2) * 10) + 22}px` }"
               />
             </RouterLink>
 
@@ -72,7 +74,7 @@
               :name="row.data.name"
               :expanded="treeSpecList[row.index].expanded.value"
               :depth="row.data.depth - 2"
-              :style="{ paddingLeft: `${((row.data.depth - 2) * 10) + 16}px` }"
+              :style="{ paddingLeft: `${(row.data.depth - 2) * 10}px` }"
               :indexes="getDirIndexes(row.data)"
               :aria-controls="getIdIfDirectory(row)"
               @click="row.data.toggle"
@@ -113,6 +115,7 @@ import SpecItem from './SpecItem.vue'
 import { useVirtualList } from '@packages/frontend-shared/src/composables/useVirtualList'
 import NoResults from '@cy/components/NoResults.vue'
 import SpecPatternModal from '../components/SpecPatternModal.vue'
+import { useDebounce } from '@vueuse/core'
 
 const { t } = useI18n()
 
@@ -159,22 +162,23 @@ const emit = defineEmits<{
 
 const showSpecPatternModal = ref(false)
 
+const cachedSpecs = useCachedSpecs(computed(() => props.gql.currentProject?.specs || []))
+
 const search = ref('')
+const debouncedSearchString = useDebounce(search, 200)
 
 function handleClear () {
   search.value = ''
 }
 
-const cachedSpecs = useCachedSpecs(computed(() => props.gql.currentProject?.specs || []))
-
 const specs = computed(() => {
   const specs = cachedSpecs.value.map((x) => makeFuzzyFoundSpec(x))
 
-  if (!search.value) {
+  if (!debouncedSearchString.value) {
     return specs
   }
 
-  return fuzzySortSpecs(specs, search.value)
+  return fuzzySortSpecs(specs, debouncedSearchString.value)
 })
 
 const collapsible = computed(() => useCollapsibleTree(buildSpecTree<FuzzyFoundSpec & { gitInfo: SpecListRowFragment }>(specs.value), { dropRoot: true }))
