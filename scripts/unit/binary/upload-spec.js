@@ -2,10 +2,8 @@ require('../../spec-helper')
 
 const snapshot = require('snap-shot-it')
 const la = require('lazy-ass')
-const os = require('os')
 
 /* eslint-env mocha */
-/* global sinon */
 describe('upload', () => {
   const upload = require('../../binary/upload')
 
@@ -19,36 +17,14 @@ describe('upload', () => {
     })
   })
 
-  context('getUploadeVersionFolder', () => {
+  context('getUploadVersionFolder', () => {
     it('returns folder', () => {
       const aws = {
         folder: 'desktop',
       }
-      const folder = upload.getUploadeVersionFolder(aws, '3.3.0')
+      const folder = upload.getUploadVersionFolder(aws, '3.3.0')
 
       la(folder === 'desktop/3.3.0', 'wrong desktop folder', folder)
-    })
-  })
-
-  context('getUploadDirName', () => {
-    it('returns folder with platform', () => {
-      const aws = {
-        folder: 'desktop',
-      }
-
-      sinon.stub(upload, 'getAwsObj').returns(aws)
-      sinon.stub(os, 'arch').returns('x64')
-
-      const folder = upload.getUploadDirName({
-        platform: 'darwin',
-        version: '3.3.0',
-      })
-
-      la(
-        folder === 'desktop/3.3.0/darwin-x64/',
-        'wrong upload desktop folder',
-        folder,
-      )
     })
   })
 })

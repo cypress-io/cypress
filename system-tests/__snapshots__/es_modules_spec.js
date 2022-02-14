@@ -82,7 +82,7 @@ exports['e2e es modules fails 1'] = `
 
 Oops...we found an error preparing this test file:
 
-  cypress/integration/es_module_import_failing_spec.js
+  > cypress/integration/es_module_import_failing_spec.js
 
 The error was:
 

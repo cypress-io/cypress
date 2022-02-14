@@ -5,7 +5,7 @@ import human from 'human-interval'
 import browsers from '../browsers'
 import { LaunchArgs, openProject } from '../open_project'
 import * as Updater from '../updater'
-import * as errors from '../errors'
+import errors from '../errors'
 
 const debug = Debug('cypress:server:interactive-ct')
 
