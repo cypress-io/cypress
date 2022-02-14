@@ -14,7 +14,6 @@ const resolve = require('../../util/resolve')
 const browserLaunch = require('./browser_launch')
 const util = require('../util')
 const validateEvent = require('./validate_event')
-const errors = require('../../errors')
 
 const UNDEFINED_SERIALIZED = '__cypress_undefined__'
 
@@ -207,7 +206,7 @@ class RunPlugins {
     const duplicates = _.intersection(_.keys(target), _.keys(events))
 
     if (duplicates.length) {
-      errors.warning('DUPLICATE_TASK_KEY', duplicates.join(', '))
+      require('@packages/errors').warning('DUPLICATE_TASK_KEY', duplicates)
     }
 
     return _.extend(target, events)
