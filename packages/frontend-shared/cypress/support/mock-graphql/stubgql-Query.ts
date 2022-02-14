@@ -25,8 +25,8 @@ export const stubQuery: MaybeResolver<Query> = {
   versions (source, args, ctx) {
     return ctx.versions
   },
-  isAuthBrowserOpened (source, args, ctx) {
-    return ctx.isAuthBrowserOpened
+  authState (source, args, ctx) {
+    return ctx.authState
   },
   isInGlobalMode (source, args, ctx) {
     return !ctx.currentProject

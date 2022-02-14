@@ -200,7 +200,7 @@ const sanitizeAndConvertNestedArgs = (str, argName) => {
     debug('could not pass config %s value %s', argName, str)
     debug('error %o', err)
 
-    return errors.throw('COULD_NOT_PARSE_ARGUMENTS', argName, str, 'Cannot parse as valid JSON')
+    return errors.throwErr('COULD_NOT_PARSE_ARGUMENTS', argName, str, 'Cannot parse as valid JSON')
   }
 }
 
@@ -421,7 +421,7 @@ module.exports = {
         debug('could not parse config spec value %s', spec)
         debug('error %o', err)
 
-        return errors.throw('COULD_NOT_PARSE_ARGUMENTS', 'spec', spec, 'spec must be a string or comma-separated list')
+        return errors.throwErr('COULD_NOT_PARSE_ARGUMENTS', 'spec', spec, 'spec must be a string or comma-separated list')
       }
     }
 

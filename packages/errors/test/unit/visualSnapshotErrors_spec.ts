@@ -649,37 +649,30 @@ describe('visual error templates', () => {
         default: ['/path/to/supportFile'],
       }
     },
-    PLUGINS_FILE_ERROR: () => {
+    CONFIG_FILE_REQUIRE_ERROR: () => {
       const err = makeErr()
 
       return {
         default: ['/path/to/pluginsFile', err],
       }
     },
-    PLUGINS_FILE_NOT_FOUND: () => {
+    SETUP_NODE_EVENTS_IS_NOT_FUNCTION: () => {
       return {
-        default: ['/path/to/pluginsFile'],
+        default: ['/path/to/pluginsFile', 'e2e', { some: 'object' }],
+        string: ['/path/to/pluginsFile', 'e2e', 'some string'],
+        array: ['/path/to/pluginsFile', 'e2e', ['some', 'array']],
       }
     },
-    PLUGINS_DIDNT_EXPORT_FUNCTION: () => {
+    CONFIG_FILE_SETUP_NODE_EVENTS_ERROR: () => {
       return {
-        default: ['/path/to/pluginsFile', { some: 'object' }],
-        string: ['/path/to/pluginsFile', 'some string'],
-        array: ['/path/to/pluginsFile', ['some', 'array']],
+        default: ['/path/to/pluginsFile', 'e2e', makeErr()],
       }
     },
-    PLUGINS_FUNCTION_ERROR: () => {
+    CONFIG_FILE_UNEXPECTED_ERROR: () => {
       const err = makeErr()
 
       return {
-        default: ['/path/to/pluginsFile', err],
-      }
-    },
-    PLUGINS_UNEXPECTED_ERROR: () => {
-      const err = makeErr()
-
-      return {
-        default: ['/path/to/pluginsFile', err],
+        default: ['/path/to/configFile', err],
       }
     },
     PLUGINS_INVALID_EVENT_NAME_ERROR: () => {
@@ -687,7 +680,7 @@ describe('visual error templates', () => {
 
       return {
         default: [
-          '/path/to/pluginsFile',
+          '/path/to/configFile',
           'invalid:event',
           ['foo', 'bar', 'baz'],
           err,
@@ -1036,6 +1029,21 @@ describe('visual error templates', () => {
         default: [{ name: 'nodeVersion', value: 'system', 'configFile': 'cypress.json' }],
       }
     },
+    CONFIG_FILE_MIGRATION_NEEDED: () => {
+      return {
+        default: ['/path/to/projectRoot'],
+      }
+    },
+    LEGACY_CONFIG_FILE: () => {
+      return {
+        default: ['cypress.json', '/path/to/projectRoot'],
+      }
+    },
+    SETUP_NODE_EVENTS_DO_NOT_SUPPORT_DEV_SERVER: () => {
+      return {
+        default: ['/path/to/project/cypress.config.js'],
+      }
+    },
     CT_NO_DEV_START_EVENT: () => {
       return {
         default: ['/path/to/plugins/file.js'],
@@ -1060,6 +1068,26 @@ describe('visual error templates', () => {
     MULTIPLE_SUPPORT_FILES_FOUND: () => {
       return {
         default: ['spec.{ts,js}', 'spec.ts,spec.js'],
+      }
+    },
+    REMOVED_ROOT_CONFIG_OPTION: () => {
+      return {
+        default: [{ name: 'specPattern', configFile: '/path/to/configFile.ts' }],
+      }
+    },
+    REMOVED_ROOT_CONFIG_OPTION_E2E: () => {
+      return {
+        default: [{ name: 'baseUrl', configFile: '/path/to/configFile.ts' }],
+      }
+    },
+    CT_CONFIG_NOT_SUPPORTED: () => {
+      return {
+        default: [{ name: 'baseUrl', configFile: '/path/to/configFile.ts' }],
+      }
+    },
+    COMPONENT_DEV_SERVER_IS_NOT_A_FUNCTION: () => {
+      return {
+        default: ['/path/to/config.ts', {}],
       }
     },
   })

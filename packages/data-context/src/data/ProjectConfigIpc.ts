@@ -1,5 +1,5 @@
 /* eslint-disable no-dupe-class-members */
-import type { SerializedError } from '@packages/errors'
+import type { CypressError, SerializedError } from '@packages/errors'
 import type { TestingType } from '@packages/types'
 import type { ChildProcess } from 'child_process'
 import EventEmitter from 'events'
@@ -21,12 +21,6 @@ export interface LoadConfigReply {
 export interface SerializedLoadConfigReply {
   initialConfig: string // stringified Cypress.ConfigOptions
   requires: string[]
-}
-
-export interface WarningError {
-  name: 'Error'
-  message: string
-  stack: string
 }
 
 /**
@@ -65,10 +59,9 @@ export class ProjectConfigIpc extends EventEmitter {
     return this.childProcess.send({ event, args })
   }
 
-  on(evt: 'childProcess:unhandledError', listener: (err: WarningError) => void): this
+  on(evt: 'childProcess:unhandledError', listener: (err: CypressError) => void): this
 
-  on(evt: 'setupTestingType:uncaughtError', listener: (err: Error) => void): this
-  on(evt: 'warning', listener: (warningErr: WarningError) => void): this
+  on(evt: 'warning', listener: (warningErr: CypressError) => void): this
   on (evt: string, listener: (...args: any[]) => void) {
     return super.on(evt, listener)
   }
@@ -80,7 +73,7 @@ export class ProjectConfigIpc extends EventEmitter {
    * sourcing the config (script error, etc.)
    */
   once(evt: 'loadConfig:reply', listener: (payload: SerializedLoadConfigReply) => void): this
-  once(evt: 'loadConfig:error', listener: (realErrorCode: string, requiredFile: string, message: string) => void): this
+  once(evt: 'loadConfig:error', listener: (err: SerializedError) => void): this
 
   /**
    * When

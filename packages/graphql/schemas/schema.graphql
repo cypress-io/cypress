@@ -2,6 +2,24 @@
 ### Do not make changes to this file directly
 
 
+"""Represents state of auth based on most recent message from login flow"""
+type AuthState {
+  """Whether the browser was successfully opened for login"""
+  browserOpened: Boolean!
+
+  """Message for the auth state"""
+  message: String
+
+  """Name of auth state, e.g. AUTH_BROWSER_LAUNCHED"""
+  name: AuthStateNameEnum
+}
+
+enum AuthStateNameEnum {
+  AUTH_BROWSER_LAUNCHED
+  AUTH_COULD_NOT_LAUNCH_BROWSER
+  AUTH_ERROR_DURING_LOGIN
+}
+
 """Base error"""
 type BaseError {
   message: String
@@ -760,6 +778,9 @@ type Mutation {
   """Check if a give spec file will match the project spec pattern"""
   matchesSpecPattern(specFile: String!): Boolean!
 
+  """While migrating to 10+ skip manual rename step"""
+  migrateCloseManualRenameWatcher: Boolean
+
   """Merges the component testing config in cypress.config.{js,ts}"""
   migrateComponentTesting: Query
 
@@ -775,6 +796,9 @@ type Mutation {
     before: [String!]
     skip: Boolean
   ): Query
+
+  """When the user decides to skip specs rename"""
+  migrateRenameSpecsFolder: Query
 
   """While migrating to 10+ launch renaming of support file"""
   migrateRenameSupport: Query
@@ -801,6 +825,14 @@ type Mutation {
   """Remove project from projects array and cache"""
   removeProject(path: String!): Query
 
+  """Reset the Auth State"""
+  resetAuthState: Query!
+
+  """
+  Resets the latest version call to capture additional telemetry for the current user
+  """
+  resetLatestVersionTelemetry: Boolean!
+
   """Reset the Wizard to the starting position"""
   resetWizard: Boolean!
   scaffoldIntegration: [ScaffoldedFile!]!
@@ -823,6 +855,9 @@ type Mutation {
 
   """Save the prompt-shown state for this project"""
   setPromptShown(slug: String!): Boolean
+
+  """Set the selected testing type, and reconfigure the project"""
+  setTestingTypeAndReconfigureProject(isApp: Boolean!, testingType: TestingTypeEnum!): Query
 
   """Switch Testing type and relaunch browser"""
   switchTestingTypeAndRelaunch(testingType: TestingTypeEnum!): Boolean
@@ -896,6 +931,8 @@ type ProjectPreferences {
 
 """The root "Query" type containing all entry fields for our querying"""
 type Query {
+  """The latest state of the auth process"""
+  authState: AuthState!
   baseError: BaseError
 
   """Returns an object conforming to the Relay spec"""
@@ -924,9 +961,6 @@ type Query {
 
   """The state of any info related to local development of the runner"""
   dev: DevState!
-
-  """Whether the browser has been opened for auth or not"""
-  isAuthBrowserOpened: Boolean!
 
   """Whether the app is in global mode or not"""
   isInGlobalMode: Boolean!
@@ -1094,6 +1128,9 @@ type WizardBundler implements Node {
   """Relay style Node ID field for the WizardBundler field"""
   id: ID!
 
+  """Whether this is the detected bundler"""
+  isDetected: Boolean!
+
   """Whether this is the selected framework bundler"""
   isSelected: Boolean
 
@@ -1113,6 +1150,9 @@ A code language that the user can choose from to create their cypress.config
 type WizardCodeLanguage implements Node {
   """Relay style Node ID field for the WizardCodeLanguage field"""
   id: ID!
+
+  """Whether this is the detected language"""
+  isDetected: Boolean!
 
   """Whether this is the selected language in the wizard"""
   isSelected: Boolean!
@@ -1138,6 +1178,9 @@ type WizardFrontendFramework implements Node {
 
   """Relay style Node ID field for the WizardFrontendFramework field"""
   id: ID!
+
+  """Whether this is the detected framework"""
+  isDetected: Boolean!
 
   """Whether this is the selected framework in the wizard"""
   isSelected: Boolean!

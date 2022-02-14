@@ -36,7 +36,7 @@
         </template>
       </Select>
       <Select
-        v-if="!newProject && projects.length > 0"
+        v-if="!newProject"
         v-model="pickedProject"
         class="mt-16px transition-all"
         :class="pickedOrganization ? undefined : 'opacity-50'"
@@ -85,6 +85,7 @@
             </span>
           </label>
           <a
+            v-if="projects.length > 0"
             class="cursor-pointer text-indigo-500 hover:underline"
             @click="newProject = false"
           >
@@ -155,8 +156,7 @@ import ConnectIcon from '~icons/cy/chain-link_x16.svg'
 import CreateIcon from '~icons/cy/add-large_x16.svg'
 import FolderIcon from '~icons/cy/folder-outline_x16.svg'
 import OrganizationIcon from '~icons/cy/office-building_x16.svg'
-import { SelectCloudProjectModalFragment, SelectCloudProjectModal_CreateCloudProjectDocument } from '../../generated/graphql'
-import { SelectCloudProjectModal_SetProjectIdDocument } from '@packages/data-context/src/gen/all-operations.gen'
+import { SelectCloudProjectModalFragment, SelectCloudProjectModal_CreateCloudProjectDocument, SelectCloudProjectModal_SetProjectIdDocument } from '../../generated/graphql'
 import { useI18n } from '@cy/i18n'
 
 const { t } = useI18n()
@@ -231,7 +231,6 @@ const emit = defineEmits<{
   (event: 'update-projectId-failed', projectId: string): void
 }>()
 
-const newProject = ref(false)
 const projectName = ref(props.gql.currentProject?.title || '')
 const projectAccess = ref<'private' | 'public'>('private')
 const organizations = computed(() => {
@@ -245,6 +244,7 @@ const organizations = computed(() => {
 const pickedOrganization = ref(organizations.value.length >= 1 ? organizations.value[0] : undefined)
 
 const projects = computed(() => pickedOrganization.value?.projects?.nodes || [])
+const newProject = ref(projects.value.length === 0)
 const pickedProject = ref()
 
 const orgPlaceholder = t('runs.connect.modal.selectProject.placeholderOrganizations')

@@ -281,7 +281,7 @@ describe.skip('lib/plugins/index', () => {
       it('calls onError when plugins process errors', () => {
         pluginsProcess.on.withArgs('error').yield(err)
         expect(onError).to.be.called
-        expect(onError.lastCall.args[0].title).to.equal('Error running plugin')
+        expect(onError.lastCall.args[0].title).to.equal('Config process error')
         expect(stripAnsi(onError.lastCall.args[0].message)).to.include('Your pluginsFile threw an error from:')
 
         expect(onError.lastCall.args[0].details).to.include(err.stack)
@@ -290,7 +290,7 @@ describe.skip('lib/plugins/index', () => {
       it('calls onError when ipc sends error', () => {
         ipc.on.withArgs('error').yield(err)
         expect(onError).to.be.called
-        expect(onError.lastCall.args[0].title).to.equal('Error running plugin')
+        expect(onError.lastCall.args[0].title).to.equal('Config process error')
         expect(stripAnsi(onError.lastCall.args[0].message)).to.include('Your pluginsFile threw an error from:')
 
         expect(onError.lastCall.args[0].details).to.include(err.stack)
@@ -316,7 +316,7 @@ describe.skip('lib/plugins/index', () => {
           throw new Error('Should not resolve')
         })
         .catch((_err) => {
-          expect(_err.title).to.equal('Error running plugin')
+          expect(_err.title).to.equal('Config process error')
           expect(stripAnsi(_err.message)).to.include('Your pluginsFile threw an error from:')
           expect(_err.details).to.include(err.stack)
         })
@@ -328,7 +328,7 @@ describe.skip('lib/plugins/index', () => {
           throw new Error('Should not resolve')
         })
         .catch((_err) => {
-          expect(_err.title).to.equal('Error running plugin')
+          expect(_err.title).to.equal('Config process error')
           expect(stripAnsi(_err.message)).to.include('Your pluginsFile threw an error from:')
           expect(_err.details).to.include(err.stack)
         })

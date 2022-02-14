@@ -108,7 +108,7 @@ describe('lib/browsers/index', () => {
   })
 
   context('.connectToNewSpec', () => {
-    it('throws an error if browser family doesn\'t exist', () => {
+    it(`throws an error if browser family doesn't exist`, () => {
       return browsers.connectToNewSpec({
         name: 'foo-bad-bang',
         family: 'foo-bad',
@@ -117,12 +117,13 @@ describe('lib/browsers/index', () => {
       })
       .then((e) => {
         throw new Error('should\'ve failed')
-      }).catch((err) => {
+      })
+      .catch((err) => {
         // by being explicit with assertions, if something is unexpected
         // we will get good error message that includes the "err" object
         expect(err).to.have.property('type').to.eq('BROWSER_NOT_FOUND_BY_NAME')
 
-        expect(err).to.have.property('message').to.contain('The specified browser was not found on your system or is not supported by Cypress: `foo-bad-bang`')
+        expect(err).to.have.property('message').to.contain(`Browser: ${chalk.yellow('foo-bad-bang')} was not found on your system or is not supported by Cypress.`)
       })
     })
   })
@@ -137,7 +138,8 @@ describe('lib/browsers/index', () => {
       })
       .then((e) => {
         throw new Error('should\'ve failed')
-      }).catch((err) => {
+      })
+      .catch((err) => {
         // by being explicit with assertions, if something is unexpected
         // we will get good error message that includes the "err" object
         expect(err).to.have.property('type').to.eq('BROWSER_NOT_FOUND_BY_NAME')

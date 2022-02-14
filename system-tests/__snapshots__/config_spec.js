@@ -141,7 +141,7 @@ exports['e2e config applies defaultCommandTimeout globally 1'] = `
 `
 
 exports['e2e config throws error when invalid viewportWidth in the configuration file 1'] = `
-Your configFile set an invalid value from: cypress.config.js
+Your configFile at /foo/bar/.projects/config-with-invalid-viewport/cypress.config.js set an invalid value:
 
 Expected viewportWidth to be a number.
 
@@ -150,7 +150,7 @@ Instead the value was: "foo"
 `
 
 exports['e2e config throws error when invalid browser in the configuration file 1'] = `
-Your configFile set an invalid value from: cypress.config.js
+Your configFile at /foo/bar/.projects/config-with-invalid-browser/cypress.config.js set an invalid value:
 
 The error occurred while validating the browsers list.
 
@@ -172,62 +172,73 @@ Instead the value was:
 exports['e2e config throws error when multiple default config file are found in project 1'] = `
 There is both a cypress.config.js and a cypress.config.ts at the location below:
 
-  > /foo/bar/.projects/pristine
+  > /foo/bar/.projects/pristine-with-e2e-testing
+
+Cypress does not know which one to read for config. Please remove one of the two and try again.
 
 
 `
 
 exports['e2e config throws error when cypress.json is found in project and need migration 1'] = `
-There is a cypress.json file at the location below:
-/foo/bar/.projects/pristine
-There is both a cypress.config.js and a cypress.config.ts at the location below:
+There is a cypress.json file at the path: /foo/bar/.projects/pristine
 
-  > /foo/bar/.projects/pristine
+Cypress version 10.0.0 no longer supports cypress.json.
 
-Cypress 10 no longer supports 'cypress.json'. Please run \`cypress open\` to launch the migration tool to migrate to 'cypress.config.{ts|js}'.
+Please run cypress open to launch the migration tool to migrate to cypress.config.{ts|js}.
 
 
 `
 
 exports['e2e config throws error when cypress.json is found in project and cypress.config.{ts|js} exists as well 1'] = `
-There is both a \`cypress.config.js\` and a cypress.json file at the location below:
+There is both a cypress.config.js and a cypress.json file at the location below:
+
 /foo/bar/.projects/multiple-config-files-with-json
 
-Cypress no longer supports 'cypress.json' config, please remove it from your project.
+Cypress no longer supports cypress.json, please remove it from your project.
 
 
 `
 
 exports['e2e config throws an error if supportFile is set on the root level 1'] = `
-The \`supportFile\` configuration option was removed from the root in Cypress version \`10.0.0\`. Please update this option under each testing type property.
+The supportFile configuration option was removed from the root of the Cypress config object in version 10.0.0.
+
+Please update this option under each testing type property.
 
 https://on.cypress.io/migration-guide
 
 `
 
 exports['e2e config throws an error if specPattern is set on the root level 1'] = `
-The \`specPattern\` configuration option was removed from the root in Cypress version \`10.0.0\`. Please update this option under each testing type property.
+The specPattern configuration option was removed from the root of the Cypress config object in version 10.0.0.
+
+Please update this option under each testing type property.
 
 https://on.cypress.io/migration-guide
 
 `
 
 exports['e2e config throws an error if excludeSpecPattern is set on the root level 1'] = `
-The \`excludeSpecPattern\` configuration option was removed from the root in Cypress version \`10.0.0\`. Please update this option under each testing type property.
+The excludeSpecPattern configuration option was removed from the root of the Cypress config object in version 10.0.0.
+
+Please update this option under each testing type property.
 
 https://on.cypress.io/migration-guide
 
 `
 
 exports['e2e config throws an error if baseUrl is set on the root level 1'] = `
-The \`baseUrl\` configuration option was removed from the root in Cypress version \`10.0.0\`. Please update this option under e2e testing type property.
+The baseUrl configuration option was removed from the root of the Cypress config object in version 10.0.0.
+
+Please update this option under the e2e testing type property.
 
 https://on.cypress.io/migration-guide
 
 `
 
 exports['e2e config throws an error if baseUrl is set on the component level 1'] = `
-The \`baseUrl\` configuration option is not valid in Component testing. Please update this option under e2e testing type property.
+The baseUrl configuration option is not valid in Component testing. 
+
+Please remove or add this option under e2e testing type property.
 
 https://on.cypress.io/migration-guide
 
