@@ -11,6 +11,13 @@ describe('retries ui', {
   viewportHeight: 900,
   numTestsKeptInMemory: 1,
 }, () => {
+  afterEach(function () {
+    // @ts-ignore
+    if (this.currentTest.state === 'passed') {
+      reporterSnapshot()
+    }
+  })
+
   it('collapses tests that retry and pass', () => {
     loadSpec({
       fileName: 'collapse-after-pass.retries.cy.js',
@@ -19,7 +26,6 @@ describe('retries ui', {
     })
 
     cy.get('.test').should('have.length', 2)
-    reporterSnapshot()
   })
 
   it('collapses prev attempts and keeps final one open on failure', () => {
@@ -30,7 +36,6 @@ describe('retries ui', {
     })
 
     cy.get('.runnable-err-print').should('be.visible')
-    reporterSnapshot()
   })
 
   it('can toggle failed prev attempt open and log its error', () => {
@@ -51,8 +56,6 @@ describe('retries ui', {
     .click()
 
     cy.get('@console_error').should('be.calledWithMatch', 'AssertionError: test 2')
-
-    reporterSnapshot()
   })
 
   // TODO: Determine how best to access the inner Cypress instance prior to test execution
@@ -121,8 +124,6 @@ describe('retries ui', {
       cy.get('.instruments-container').should('contain', 'Routes (2)')
       cy.get('.runnable-err').should('not.be.visible')
     })
-
-    reporterSnapshot()
   })
 
   describe('only', () => {
@@ -136,8 +137,6 @@ describe('retries ui', {
       cy.contains('test 2')
       cy.contains('test 1').should('not.exist')
       cy.contains('test 3').should('not.exist')
-
-      reporterSnapshot()
     })
   })
 
@@ -151,8 +150,6 @@ describe('retries ui', {
       })
 
       cy.contains('Although you have test retries')
-
-      reporterSnapshot()
     })
 
     // TODO: future versions should run all hooks associated with test on retry
@@ -166,8 +163,6 @@ describe('retries ui', {
       cy.contains('test')
       cy.contains('after all')
       cy.contains('before all').should('not.exist')
-
-      reporterSnapshot()
     })
   })
 
@@ -201,8 +196,6 @@ describe('retries ui', {
       cy.get('.attempt-3 .hook-item .collapsible:contains(test body)')
       cy.get('.attempt-3 .hook-item .collapsible:contains(after each)')
       cy.get('.attempt-3 .hook-item .collapsible:contains(after all)')
-
-      reporterSnapshot()
     })
 
     it('beforeEach retried tests skip remaining tests in suite', () => {
@@ -215,8 +208,6 @@ describe('retries ui', {
 
       // ensure the page is loaded before taking snapshot
       cy.contains('skips this')
-
-      reporterSnapshot()
     })
   })
 
@@ -252,8 +243,6 @@ describe('retries ui', {
       cy.get('.attempt-2 .hook-item .collapsible:contains(after each (2))')
       cy.get('.attempt-2 .hook-item .collapsible:contains(after each (3))')
       cy.get('.attempt-3 .hook-item .collapsible:contains(after all)')
-
-      reporterSnapshot()
     })
 
     it('afterEach retried tests skip remaining tests in suite', () => {
@@ -263,8 +252,6 @@ describe('retries ui', {
         failCount: 1,
         pendingCount: 0,
       })
-
-      reporterSnapshot()
     })
   })
 
@@ -296,8 +283,6 @@ describe('retries ui', {
       cy.contains('Although you have test retries')
       cy.get('.runnable-err-print').click()
       cy.get('@console_error').its('lastCall').should('be.calledWithMatch', 'Error')
-
-      reporterSnapshot()
     })
   })
 
@@ -348,8 +333,6 @@ describe('retries ui', {
 
       cy.get('.runnable-err')
       .should(containText(`it('tries to set mocha retries', { retries: 2 }, () => `))
-
-      reporterSnapshot()
     })
 
     it('throws when set via this.retries in hook', () => {
@@ -361,8 +344,6 @@ describe('retries ui', {
 
       cy.get('.runnable-err')
       .should(containText(`describe('suite 1', { retries: 0 }, () => `))
-
-      reporterSnapshot()
     })
 
     it('throws when set via this.retries in suite', () => {
@@ -374,8 +355,6 @@ describe('retries ui', {
 
       cy.get('.runnable-err')
       .should(containText(`describe('suite 1', { retries: 3 }, () => `))
-
-      reporterSnapshot()
     })
   })
 })

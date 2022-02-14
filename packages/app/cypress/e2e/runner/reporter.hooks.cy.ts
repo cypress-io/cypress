@@ -6,6 +6,13 @@ describe('hooks', {
   // of nested spec snapshots
   numTestsKeptInMemory: 1,
 }, () => {
+  afterEach(function () {
+    // @ts-ignore
+    if (this.currentTest.state === 'passed') {
+      reporterSnapshot()
+    }
+  })
+
   it('displays commands under correct hook', () => {
     loadSpec({
       fileName: 'basic.cy.js',
@@ -37,8 +44,6 @@ describe('hooks', {
     cy.contains('after each (2)').closest('.collapsible').should('contain', 'afterEachHook 1')
     cy.contains('after all (1)').closest('.collapsible').should('contain', 'afterHook 2')
     cy.contains('after all (2)').closest('.collapsible').should('contain', 'afterHook 1')
-
-    reporterSnapshot()
   })
 
   it('creates open in IDE button', () => {
@@ -61,8 +66,6 @@ describe('hooks', {
       expect(request.body.variables.input.column).to.eq(Cypress.browser.family === 'firefox' ? 6 : 3)
       expect(request.body.variables.input.line).to.eq(2)
     })
-
-    reporterSnapshot()
   })
 
   it('does not display commands from skipped tests', () => {
@@ -81,8 +84,6 @@ describe('hooks', {
     cy.contains('test 2').click()
 
     cy.contains('test 2').parents('.collapsible').first().should('contain', 'before all')
-
-    reporterSnapshot()
   })
 
   it('only displays tests with .only', () => {
@@ -107,8 +108,6 @@ describe('hooks', {
       expect($test).to.contain('before each')
       expect($test).to.contain('test body')
     })
-
-    reporterSnapshot()
   })
 
   // https://github.com/cypress-io/cypress/issues/8189
@@ -120,7 +119,5 @@ describe('hooks', {
 
     // wait until spec has run twice (due to one reload)
     cy.window().its('count').should('eq', 2)
-
-    reporterSnapshot()
   })
 })

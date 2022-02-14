@@ -2,6 +2,13 @@ import { loadSpec } from './support/spec-loader'
 import { reporterSnapshot } from './support/reporter-snapshot'
 
 describe('runner ui', () => {
+  afterEach(function () {
+    // @ts-ignore
+    if (this.currentTest.state === 'passed') {
+      reporterSnapshot()
+    }
+  })
+
   describe('tests finish with correct state', () => {
     it('simple 1 test', () => {
       loadSpec({
@@ -92,8 +99,6 @@ describe('runner ui', () => {
       .should('not.have.class', 'command-is-pinned')
       .click()
       .should('have.class', 'command-is-pinned')
-
-      reporterSnapshot()
     })
 
     it('renders spec name and runtime in header', () => {
