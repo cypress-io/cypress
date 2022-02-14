@@ -325,7 +325,7 @@ const reconstructStack = (parsedStack) => {
   }).join('\n')
 }
 
-const getSourceStack = (stack, projectRoot) => {
+const getSourceStack = (stack, projectRoot?) => {
   if (!_.isString(stack)) return {}
 
   const getSourceDetailsWithStackUtil = _.partial(getSourceDetailsForLine, projectRoot)
