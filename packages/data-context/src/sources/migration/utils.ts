@@ -69,14 +69,14 @@ export interface ComponentTestingMigrationStatus {
   completed: boolean
 }
 
-export function initComponentTestingMigration (
+export async function initComponentTestingMigration (
   projectRoot: string,
   componentFolder: string,
   testFiles: string[],
   onFileMoved: (status: ComponentTestingMigrationStatus) => void,
 ): Promise<{
   status: ComponentTestingMigrationStatus
-  watcher: chokidar.FSWatcher
+  watcher: chokidar.FSWatcher | null
 }> {
   const watchPaths = testFiles.map((glob) => {
     return path.join(componentFolder, glob)
@@ -88,19 +88,33 @@ export function initComponentTestingMigration (
     },
   )
 
-  let filesToBeMoved: Map<string, FileToBeMigratedManually> = globby.sync(watchPaths, {
+  let filesToBeMoved: Map<string, FileToBeMigratedManually> = (await globby(watchPaths, {
     cwd: projectRoot,
-  }).reduce<Map<string, FileToBeMigratedManually>>((acc, relative) => {
+  })).reduce<Map<string, FileToBeMigratedManually>>((acc, relative) => {
     acc.set(relative, { relative, moved: false })
 
     return acc
   }, new Map())
 
+  if (filesToBeMoved.size === 0) {
+    // this should not happen as the step should be hidden in this case
+    // but files can have been moved manually before clicking next
+    return {
+      status: {
+        files: filesToBeMoved,
+        completed: true,
+      },
+      watcher: null,
+    }
+  }
+
   watcher.on('unlink', (unlinkedPath) => {
     const file = filesToBeMoved.get(unlinkedPath)
 
     if (!file) {
-      throw Error(`Watcher incorrectly triggered while watching ${file}`)
+      throw Error(`Watcher incorrectly triggered ${unlinkedPath}
+      while watching ${Array.from(filesToBeMoved.keys()).join(', ')}
+      projectRoot: ${projectRoot}`)
     }
 
     file.moved = true

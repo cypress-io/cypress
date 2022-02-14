@@ -106,11 +106,6 @@
   {
     "value": false,
     "from": "default",
-    "field": "experimentalStudio"
-  },
-  {
-    "value": false,
-    "from": "default",
     "field": "experimentalSessionSupport"
   },
   {
