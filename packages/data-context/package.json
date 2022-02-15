@@ -53,6 +53,7 @@
     "@packages/root": "0.0.0-development",
     "@packages/ts": "0.0.0-development",
     "@packages/types": "0.0.0-development",
+    "@tooling/system-tests": "0.0.0-development",
     "@types/dedent": "^0.7.0",
     "@types/ejs": "^3.1.0",
     "@types/fs-extra": "^8.0.1",
