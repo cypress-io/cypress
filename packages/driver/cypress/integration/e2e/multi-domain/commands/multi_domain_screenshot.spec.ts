@@ -160,4 +160,124 @@ context('screenshot specs', { experimentalSessionSupport: true, experimentalMult
       cy.wrap(onAfterScreenshot).should('be.called')
     })
   })
+
+  it('supports pausing timers', () => {
+    cy.switchToDomain('foobar.com', [this.serverResult], ([serverResult]) => {
+      cy.stub(Cypress, 'automation').withArgs('take:screenshot').returns(
+        {
+          // TODO: A bluebird promise is expected but we can't require bluebird yet
+          // so mock the timeout function to return a promise that simulates how
+          // long it takes to take a screenshot
+          timeout: () => {
+            return new Promise((resolve) => {
+              setTimeout(() => {
+                resolve(serverResult)
+              }, 500)
+            })
+          },
+        },
+      )
+
+      cy.window().then((win) => {
+        // Hide the element using setTimeout
+        win.setTimeout(() => {
+          (win.document.getElementsByClassName('tall-element')[0] as HTMLElement).style.display = 'none'
+        }, 50)
+      })
+
+      cy.screenshot({
+        onBeforeScreenshot: ($el) => {
+          // Set the timeout to be longer than the element hiding timeout so if the timer was
+          // not paused, it would've hidden the element but since we are pausing the
+          // timers, the style is still 'block'
+          setTimeout(() => {
+            expect($el.find('.tall-element').css('display')).to.equal('block')
+          }, 100)
+        },
+        onAfterScreenshot: ($el) => {
+          // Set the timeout to be longer than the element hiding timeout so when the timers
+          // are unpaused, this will run after the timeout to hide the element
+          setTimeout(() => {
+            expect($el.find('.tall-element').css('display')).to.equal('none')
+          }, 100)
+        },
+      })
+
+      cy.wait(200)
+    })
+  })
+
+  it('does not pause timers when disableTimersAndAnimations is false', () => {
+    cy.switchToDomain('foobar.com', [this.serverResult], ([serverResult]) => {
+      cy.stub(Cypress, 'automation').withArgs('take:screenshot').returns(
+        {
+          // TODO: A bluebird promise is expected but we can't require bluebird yet
+          // so mock the timeout function to return a promise that simulates how
+          // long it takes to take a screenshot
+          timeout: () => {
+            return new Promise((resolve) => {
+              setTimeout(() => {
+                resolve(serverResult)
+              }, 500)
+            })
+          },
+        },
+      )
+
+      cy.window().then((win) => {
+        // Hide the element using setTimeout
+        win.setTimeout(() => {
+          (win.document.getElementsByClassName('tall-element')[0] as HTMLElement).style.display = 'none'
+        }, 50)
+      })
+
+      cy.screenshot({
+        disableTimersAndAnimations: false,
+        onBeforeScreenshot: ($el) => {
+          // Set the timeout to be longer than the element hiding timeout so it has time to run and hide the element
+          setTimeout(() => {
+            expect($el.find('.tall-element').css('display')).to.equal('none')
+          }, 100)
+        },
+      })
+
+      cy.wait(200)
+    })
+  })
+
+  it('handles errors thrown from setTimeout after the timer is paused', () => {
+    cy.on('fail', (err, runnable) => {
+      expect(err.name).to.eq('Error')
+      expect(err.message).to.include('setTimeout error after screenshot')
+    })
+
+    cy.switchToDomain('foobar.com', [this.serverResult], ([serverResult]) => {
+      cy.stub(Cypress, 'automation').withArgs('take:screenshot').returns(
+        {
+          // TODO: A bluebird promise is expected but we can't require bluebird yet
+          // so mock the timeout function to return a promise that simulates how
+          // long it takes to take a screenshot
+          timeout: () => {
+            return new Promise((resolve) => {
+              setTimeout(() => {
+                resolve(serverResult)
+              }, 100)
+            })
+          },
+        },
+      )
+
+      cy.window().then((win) => {
+        // Add a timeout error
+        win.setTimeout(() => {
+          throw new Error('setTimeout error after screenshot')
+        }, 50)
+      })
+
+      cy.screenshot()
+
+      // wait to ensure the timeout error has time to process
+      cy.wait(100)
+    })
+  })
 })
