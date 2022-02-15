@@ -6,7 +6,7 @@ const getAttemptTag = (sel: string) => {
   return cy.get(`.test.runnable:contains(${sel}) .attempt-tag`)
 }
 
-describe('retries ui', {
+describe('runner/cypress retries.ui.spec', {
   viewportWidth: 1024,
   viewportHeight: 900,
   numTestsKeptInMemory: 1,

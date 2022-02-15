@@ -1,7 +1,7 @@
 import { loadSpec } from './support/spec-loader'
 import { reporterSnapshot } from './support/reporter-snapshot'
 
-describe('runner ui', () => {
+describe('src/cypress/runner', () => {
   afterEach(function () {
     // @ts-ignore
     if (this.currentTest.state === 'passed') {
@@ -237,14 +237,14 @@ describe('runner ui', () => {
     })
 
     // TODO: blocked by UNIFY-1077
-    // it('supports disabling command log reporter with env var NO_COMMAND_LOG', () => {
-    //   loadSpec({
-    //     fileName: 'disabled-command-log.runner.cy.js',
-    //     passCount: 0,
-    //     failCount: 0,
-    //   })
+    it.skip('supports disabling command log reporter with env var NO_COMMAND_LOG', () => {
+      loadSpec({
+        fileName: 'disabled-command-log.runner.cy.js',
+        passCount: 0,
+        failCount: 0,
+      })
 
-    //   cy.get('.reporter').should('not.exist')
-    // })
+      cy.get('.reporter').should('not.exist')
+    })
   })
 })

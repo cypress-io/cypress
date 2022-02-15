@@ -1,7 +1,7 @@
 import { loadSpec } from './support/spec-loader'
 import { reporterSnapshot } from './support/reporter-snapshot'
 
-describe('sessions ui', {
+describe('runner/cypress sessions.ui.spec', {
   viewportWidth: 1000,
   viewportHeight: 660,
   // Limiting tests kept in memory due to large memory cost
