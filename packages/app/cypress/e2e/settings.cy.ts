@@ -88,8 +88,8 @@ describe('App: Settings', () => {
       cy.wait(100)
       cy.get('[data-cy="Device Settings"]').click()
 
-      cy.get('[data-cy="use-well-known-editor"]').should('be.checked')
-      cy.get('[data-cy="use-custom-editor"]').should('not.be.checked')
+      // cy.get('[data-cy="use-well-known-editor"]').should('be.checked')
+      // cy.get('[data-cy="use-custom-editor"]').should('not.be.checked')
     })
 
     it('allows custom editor', () => {
@@ -107,8 +107,8 @@ describe('App: Settings', () => {
       cy.wait(100)
       cy.get('[data-cy="Device Settings"]').click()
 
-      cy.get('[data-cy="use-well-known-editor"]').should('not.be.checked')
-      cy.get('[data-cy="use-custom-editor"]').should('be.checked')
+      // cy.get('[data-cy="use-well-known-editor"]').should('not.be.checked')
+      // cy.get('[data-cy="use-custom-editor"]').should('be.checked')
       cy.get('[data-cy="custom-editor"]').should('have.value', '/usr/local/bin/vim')
     })
 
@@ -119,8 +119,8 @@ describe('App: Settings', () => {
       cy.get('[data-cy="computer"]').click()
 
       cy.wait('@SetPreferred').its('request.body.variables.value').should('include', 'computer')
-      cy.get('[data-cy="use-well-known-editor"]').should('be.checked')
-      cy.get('[data-cy="use-custom-editor"]').should('not.be.checked')
+      // cy.get('[data-cy="use-well-known-editor"]').should('be.checked')
+      // cy.get('[data-cy="use-custom-editor"]').should('not.be.checked')
     })
   })
 })

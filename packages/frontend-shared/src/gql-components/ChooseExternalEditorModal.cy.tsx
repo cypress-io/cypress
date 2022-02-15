@@ -39,15 +39,15 @@ describe('ChooseExternalEditor', { viewportHeight: 400, viewportWidth: 300 }, ()
     // selected
     cy.percySnapshot()
 
-    cy.findByLabelText(defaultMessages.settingsPage.editor.editorRadioLabel)
-    .should('be.checked')
-    .as('editorRadio')
+    // cy.findByLabelText(defaultMessages.settingsPage.editor.editorRadioLabel)
+    // .should('be.checked')
+    // .as('editorRadio')
 
-    cy.findByLabelText(defaultMessages.settingsPage.editor.customEditorRadioLabel)
-    .click()
-    .should('be.checked')
+    // cy.findByLabelText(defaultMessages.settingsPage.editor.customEditorRadioLabel)
+    // .click()
+    // .should('be.checked')
 
-    cy.get('@editorRadio').should('not.be.checked')
+    // cy.get('@editorRadio').should('not.be.checked')
 
     cy.findByLabelText(defaultMessages.settingsPage.editor.customPathPlaceholder)
     .type('test/path')
