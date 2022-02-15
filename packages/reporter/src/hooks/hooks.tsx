@@ -48,7 +48,11 @@ const Hook = observer(({ model, showNumber }: HookProps) => (
       headerExtras={model.invocationDetails && <HookOpenInIDE invocationDetails={model.invocationDetails} />}
       isOpen={true}
     >
-      <CommandsContainer commands={model.commands} aliasesWithDuplicates={model.aliasesWithDuplicates} showStudioPrompt={model.showStudioPrompt} />
+      <CommandsContainer
+        commands={model.commands}
+        aliasesWithDuplicates={model.aliasesWithDuplicates}
+        showStudioPrompt={model.showStudioPrompt}
+      />
     </Collapsible>
   </li>
 ))
