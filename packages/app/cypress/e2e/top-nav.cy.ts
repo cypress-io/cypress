@@ -466,6 +466,8 @@ describe('App Top Nav Workflows', () => {
         cy.contains('button', loginText.actionTryAgain).should('be.visible').as('tryAgain')
         cy.contains('button', loginText.actionCancel).should('be.visible')
 
+        cy.percySnapshot()
+
         cy.withCtx((ctx) => {
           ctx.coreData.authState = {
             type: 'info',
@@ -497,6 +499,8 @@ describe('App Top Nav Workflows', () => {
         cy.contains(loginText.titleFailed).should('be.visible')
         cy.contains(loginText.bodyError).should('be.visible')
         cy.contains('An unexpected error occurred').should('be.visible')
+
+        cy.percySnapshot()
 
         cy.contains('button', loginText.actionTryAgain).should('be.visible')
         cy.contains('button', loginText.actionCancel).click()
