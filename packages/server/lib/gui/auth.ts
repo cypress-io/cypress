@@ -153,6 +153,7 @@ const stopServer = () => {
 }
 
 const launchNativeAuth = Promise.method((loginUrl, sendMessage) => {
+  sendMessage('warning', 'AUTH_COULD_NOT_LAUNCH_BROWSER', loginUrl)
   const warnCouldNotLaunch = () => {
     if (openExternalAttempted && !authRedirectReached) {
       sendMessage('warning', 'AUTH_COULD_NOT_LAUNCH_BROWSER', loginUrl)
