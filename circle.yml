@@ -906,23 +906,6 @@ commands:
             CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm install --legacy-peer-deps ~/cypress/cypress.tgz
           working_directory: /tmp/<<parameters.repo>>/<<parameters.folder>>
       - run:
-          name: Scaffold new config file
-          working_directory: /tmp/<<parameters.repo>>/<<parameters.folder>>
-          environment:
-            CYPRESS_INTERNAL_FORCE_SCAFFOLD: "1"
-          command: |
-            if [[ -f cypress.json ]]; then
-              rm -rf cypress.json
-              echo 'module.exports = {}' > cypress.config.js
-            fi
-      - run:
-          name: Rename support file
-          working_directory: /tmp/<<parameters.repo>>/<<parameters.folder>>
-          command: |
-            if [[ -f cypress/support/index.js ]]; then
-              mv cypress/support/index.js cypress/support/e2e.js
-            fi
-      - run:
           name: Print Cypress version
           working_directory: /tmp/<<parameters.repo>>/<<parameters.folder>>
           command: npx cypress version
