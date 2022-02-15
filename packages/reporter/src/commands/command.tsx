@@ -46,7 +46,7 @@ const CommandColumn = observer(({ model }) => {
     <>
       {!model.hasChildren && (
         <div className='command-number-column'>
-          {!!model.hasCommandProps || !!model.hasSnapshot && <PinIcon className="command-pin" />}
+          {<PinIcon className="command-pin" />}
           {model._isPending() && <RunningIcon className='fa-spin' />}
           {!model._isPending() && <span className='command-number'>{model.number || ''}</span>}
         </div>
@@ -256,7 +256,6 @@ class Command extends Component<Props> {
           `command-name-${commandName}`,
           {
             'command-scaled': message && message.length > 100,
-          //   'command-is-open': this._isOpen(),
           },
         )}
       >
@@ -290,7 +289,7 @@ class Command extends Component<Props> {
               {model.referencesAlias ? <AliasesReferences model={model} aliasesWithDuplicates={aliasesWithDuplicates} /> : <Message model={model} />}
             </span>
             <span className='command-controls'>
-              {(model.visible != null && !model.visible) &&
+              {!model.visible &&
                 <Tooltip placement='top' title={invisibleMessage(model)} className='cy-tooltip'>
                   <span>
                     <HiddenIcon className="command-invisible" />
@@ -353,7 +352,7 @@ class Command extends Component<Props> {
   }
 
   @action _onClick = () => {
-    const { id, hasSnapshot, hasConsoleProps } = this.props.model
+    const { id } = this.props.model
 
     if (this.props.appState.isRunning) return
 
@@ -362,8 +361,6 @@ class Command extends Component<Props> {
 
       return
     }
-
-    if (!hasSnapshot || !hasConsoleProps) return
 
     if (this._isPinned()) {
       this.props.appState.pinnedSnapshotId = null
