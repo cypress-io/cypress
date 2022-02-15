@@ -54,11 +54,11 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
 
   it('shows correct "waiting for login" status', () => {
     cy.mountFragment(LoginModalFragmentDoc, {
-      onResult: (result) => {
-        result.__typename = 'Query'
-        result.authState.browserOpened = true
+      render: (gqlVal) => {
+        gqlVal.authState.browserOpened = true
+
+        return <div class="border-current border-1 h-700px resize overflow-auto"><LoginModal gql={gqlVal} modelValue={true} /></div>
       },
-      render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><LoginModal gql={gqlVal} modelValue={true} /></div>,
     })
 
     cy.findByRole('button', { name: text.login.actionLogin }).click()
