@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import { validate, validateNoReadOnlyConfig } from '@packages/config'
 import _ from 'lodash'
 import $ from 'jquery'
@@ -42,6 +40,15 @@ import * as resolvers from './cypress/resolvers'
 
 const debug = debugFn('cypress:driver:cypress')
 
+declare global {
+  interface Window {
+    __cySkipValidateConfig: boolean
+    Cypress: Cypress.Cypress
+    Runner: any
+    cy: Cypress.cy
+  }
+}
+
 const jqueryProxyFn = function (...args) {
   if (!this.cy) {
     $errUtils.throwErrByPath('miscellaneous.no_cy')
@@ -56,8 +63,86 @@ const throwPrivateCommandInterface = (method) => {
   })
 }
 
+interface BackendError extends Error {
+  __stackCleaned__: boolean
+  backend: boolean
+}
+
+interface AutomationError extends Error {
+  automation: boolean
+}
+
 class $Cypress {
+  cy: any
+  chai: any
+  mocha: any
+  runner: any
+  downloads: any
+  Commands: any
+  $autIframe: any
+  onSpecReady: any
+  events: any
+  $: any
+  arch: any
+  spec: any
+  version: any
+  browser: any
+  platform: any
+  testingType: any
+  state: any
+  originalConfig: any
+  config: any
+  env: any
+  getTestRetries: any
+  Cookies: any
+  ProxyLogging: any
+  _onInitialize: any
+  isCy: any
+  log: any
+  isBrowser: any
+  emit: any
+  emitThen: any
+  emitMap: any
+
+  $Cypress: any
+  Cy: any
+  Chainer: any
+  Command: any
+  dom: any
+  // errorMessages: any
+  // Keyboard: any
+  // Location: any
+  // Log: any
+  // LocalStorage: any
+  // Mocha: any
+  // resolveWindowReference: any
+  // resolveLocationReference: any
+  // Mouse: any
+  // Runner: any
+  // Server: any
+  // Screenshot: any
+  // SelectorPlayground: any
+  // utils: any
+  // _: any
+  // Blob: any
+  // Buffer: any
+  // Promise: any
+  // minimatch: any
+  // sinon: any
+  // lolex: any
+
+  // static $: any
+  // static utils: any
+
   constructor (config = {}) {
+    this.$Cypress = $Cypress
+    this.Cy = $Cy
+    this.Chainer = $Chainer
+    this.Cookies = $Cookies
+    this.Command = $Command
+    this.Commands = $Commands
+    this.dom = $dom
+
     this.cy = null
     this.chai = null
     this.mocha = null
@@ -75,7 +160,7 @@ class $Cypress {
     this.setConfig(config)
   }
 
-  setConfig (config = {}) {
+  setConfig (config: any = {}) {
     // config.remote
     // {
     //   origin: "http://localhost:2020"
@@ -144,7 +229,7 @@ class $Cypress {
     this.state = $SetterGetter.create({})
     this.originalConfig = _.cloneDeep(config)
     this.config = $SetterGetter.create(config, (config) => {
-      if (!window.top.__cySkipValidateConfig) {
+      if (!window.top!.__cySkipValidateConfig) {
         validateNoReadOnlyConfig(config, (errProperty) => {
           const errPath = this.state('runnable')
             ? 'config.invalid_cypress_config_override'
@@ -191,6 +276,8 @@ class $Cypress {
 
     this.Cookies = $Cookies.create(config.namespace, d)
 
+    // TODO: Remove this after $Events functions are added to $Cypress.
+    // @ts-ignore
     this.ProxyLogging = new ProxyLogging(this)
 
     return this.action('cypress:config', config)
@@ -216,15 +303,15 @@ class $Cypress {
   // Method to manually re-execute Runner (usually within $autIframe)
   // used mainly by Component Testing
   restartRunner () {
-    if (!window.top.Cypress) {
+    if (!window.top!.Cypress) {
       throw Error('Cannot re-run spec without Cypress')
     }
 
     // MobX state is only available on the Runner instance
     // which is attached to the top level `window`
     // We avoid infinite restart loop by checking if not in a loading state.
-    if (!window.top.Runner.state.isLoading) {
-      window.top.Runner.emit('restart')
+    if (!window.top!.Runner.state.isLoading) {
+      window.top!.Runner.emit('restart')
     }
   }
 
@@ -249,6 +336,8 @@ class $Cypress {
     this.events.proxyTo(this.cy)
 
     $scriptUtils.runScripts(specWindow, scripts)
+    // TODO: remove this after making the type of `runScripts` more specific.
+    // @ts-ignore
     .catch((error) => {
       this.runner.onSpecError('error')({ error })
     })
@@ -275,6 +364,8 @@ class $Cypress {
           return this.backend('firefox:window:focus')
         }
       }
+
+      return
     })
     .then(() => {
       this.cy.initialize(this.$autIframe)
@@ -589,7 +680,7 @@ class $Cypress {
           // attaching long stace traces
           // which otherwise make this err
           // unusably long
-          const err = $errUtils.makeErrFromObj(e)
+          const err = $errUtils.makeErrFromObj(e) as BackendError
 
           err.__stackCleaned__ = true
           err.backend = true
@@ -611,7 +702,7 @@ class $Cypress {
         const e = reply.error
 
         if (e) {
-          const err = $errUtils.makeErrFromObj(e)
+          const err = $errUtils.makeErrFromObj(e) as AutomationError
 
           err.automation = true
 
@@ -673,13 +764,13 @@ class $Cypress {
 // // attach to $Cypress to access
 // // all of the constructors
 // // to enable users to monkeypatch
-$Cypress.prototype.$Cypress = $Cypress
-$Cypress.prototype.Cy = $Cy
-$Cypress.prototype.Chainer = $Chainer
-$Cypress.prototype.Cookies = $Cookies
-$Cypress.prototype.Command = $Command
-$Cypress.prototype.Commands = $Commands
-$Cypress.prototype.dom = $dom
+// $Cypress.prototype.$Cypress = $Cypress
+// $Cypress.prototype.Cy = $Cy
+// $Cypress.prototype.Chainer = $Chainer
+// $Cypress.prototype.Cookies = $Cookies
+// $Cypress.prototype.Command = $Command
+// $Cypress.prototype.Commands = $Commands
+// $Cypress.prototype.dom = $dom
 $Cypress.prototype.errorMessages = $errorMessages
 $Cypress.prototype.Keyboard = $Keyboard
 $Cypress.prototype.Location = $Location
