@@ -1,14 +1,6 @@
 import { loadSpec } from './support/spec-loader'
-import { reporterSnapshot } from './support/reporter-snapshot'
 
 describe('src/cypress/runner', () => {
-  afterEach(function () {
-    // @ts-ignore
-    if (this.currentTest.state === 'passed') {
-      reporterSnapshot()
-    }
-  })
-
   describe('tests finish with correct state', () => {
     it('simple 1 test', () => {
       loadSpec({
