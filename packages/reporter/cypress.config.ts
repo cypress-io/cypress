@@ -12,14 +12,14 @@ export default defineConfig({
   },
   e2e: {
     'baseUrl': 'http://localhost:5006',
-    setupNodeEvents: (_on, config) => {
+    setupNodeEvents (_on, config) {
       const express = require('express')
 
       express().use(express.static('dist')).listen(5006)
 
       return config
     },
-    viewportHeight: 660,
+    viewportHeight: 400,
     viewportWidth: 1000,
   },
 })

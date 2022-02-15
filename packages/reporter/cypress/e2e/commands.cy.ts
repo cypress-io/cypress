@@ -1,4 +1,5 @@
 import { EventEmitter } from 'events'
+import { CommandProps } from '../../src/commands/command-model'
 import { RootRunnable } from '../../src/runnables/runnables-store'
 import { addCommand } from '../support/utils'
 
@@ -11,23 +12,25 @@ describe('commands', { viewportWidth: 400, viewportHeight: 900 }, () => {
     cy.fixture('runnables_commands').then((_runnables) => {
       const test = _runnables.tests[0]
 
-      const states = ['passed', 'failed']
+      // const states = ['pending']
+      const states = ['passed', 'failed', 'pending']
+
+      let uniqueID = 0
 
       states.forEach((state, index) => {
+        uniqueID += 1
         test.title = `${state} Commands`
         test.state = state === 'pending' ? 'passed' : state
 
         const commands = []
 
-        test.commands.forEach((cmd) => {
-          let uniqueID
+        test.commands.forEach((cmd, cmdIndex) => {
+          uniqueID += 1
+
           let group = undefined
 
           if (cmd.group) {
-            uniqueID = `group-${index * 100 * (Math.random() + 1)}`
-            group = uniqueID
-          } else {
-            uniqueID = (cmd.id * (index + 1) * 10)
+            group = commands[cmdIndex - 1].group || commands[cmdIndex - 1].id
           }
 
           commands.push({ ...cmd, state, id: uniqueID, group })
@@ -35,6 +38,8 @@ describe('commands', { viewportWidth: 400, viewportHeight: 900 }, () => {
 
         _runnables.tests[index] = { ... test, commands }
       })
+
+      _runnables.tests
 
       runnables = _runnables
     })
