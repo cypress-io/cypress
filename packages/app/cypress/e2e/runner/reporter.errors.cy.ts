@@ -1,6 +1,5 @@
 import * as specLoader from './support/spec-loader'
 import { createVerify, verifyInternalFailure } from './support/verify-failures'
-import { reporterSnapshot } from './support/reporter-snapshot'
 
 type VerifyFunc = (specTitle: string, verifyOptions: any) => void
 
@@ -27,13 +26,6 @@ describe('errors ui', {
   // of nested spec snapshots
   numTestsKeptInMemory: 1,
 }, () => {
-  afterEach(function () {
-    // @ts-ignore
-    if (this.currentTest.state === 'passed') {
-      reporterSnapshot()
-    }
-  })
-
   it('assertion failures', () => {
     const verify = loadErrorSpec({
       fileName: 'assertions.cy.js',
