@@ -1,5 +1,4 @@
 import { EventEmitter } from 'events'
-import { CommandProps } from '../../src/commands/command-model'
 import { RootRunnable } from '../../src/runnables/runnables-store'
 import { addCommand } from '../support/utils'
 
@@ -9,10 +8,9 @@ describe('commands', { viewportWidth: 400, viewportHeight: 900 }, () => {
   const inProgressStartedAt = (new Date(2000, 0, 1)).toISOString()
 
   const setupCommands = () => {
-    cy.fixture('runnables_commands').then((_runnables) => {
+    cy.fixture('build').then((_runnables) => {
       const test = _runnables.tests[0]
 
-      // const states = ['pending']
       const states = ['passed', 'failed', 'pending']
 
       let uniqueID = 0
@@ -71,44 +69,38 @@ describe('commands', { viewportWidth: 400, viewportHeight: 900 }, () => {
         wallClockStartedAt: inProgressStartedAt,
       })
     })
-
-    // cy.contains('http://localhost:3000') // ensure test content has loaded
   }
 
-  describe('all command', () => {
-    beforeEach(() => {
-      setupCommands()
-      // cy.contains('passed Commands').click()
-      // cy.contains('pending Commands').click()
-    })
-
-    it.only('displays all the commands', () => {
-      cy.get('.command')
-      .should('have.length', 5)
-    })
+  beforeEach(() => {
+    setupCommands()
   })
 
-  describe('failed command', () => {
-    beforeEach(() => {
-      setupCommands('failed')
-      cy.contains('failed Commands') // failed is open by default
-    })
-
-    it('displays all the commands', () => {
-      cy.get('.command').should('have.length', 7)
-    })
+  it('displays all the commands', () => {
+    cy.get('.command')
+    .should('have.length', 2)
   })
+  // })
 
-  describe('pending command', () => {
-    beforeEach(() => {
-      setupCommands('pending')
-      cy.contains('pending Commands').click() // failed is open by default
-    })
+  // describe('failed command', () => {
+  //   beforeEach(() => {
+  //     cy.contains('failed Commands') // failed is open by default
+  //   })
 
-    it('displays all the commands', () => {
-      cy.get('.command').should('have.length', 5)
-    })
-  })
+  //   it('displays all the commands', () => {
+  //     cy.get('.command').should('have.length', 7)
+  //   })
+  // })
+
+  // describe('pending command', () => {
+  //   beforeEach(() => {
+  //     setupCommands('pending')
+  //     cy.contains('pending Commands').click() // failed is open by default
+  //   })
+
+  //   it('displays all the commands', () => {
+  //     cy.get('.command').should('have.length', 5)
+  //   })
+  // })
 
   it('displays all the commands', () => {
     cy.get('.command').should('have.length', 9)

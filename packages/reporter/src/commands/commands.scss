@@ -33,10 +33,9 @@
 
   .command-wrapper {
     background-color: $reporter-section-background;
-    // color: $gray-400;
     display: flex;
     flex-wrap: wrap;
-    // min-height: 20px;
+    min-height: 20px;
     padding: 2px 3px 0 10px;
 
     &:hover {
@@ -51,8 +50,7 @@
       }
 
       .command-expander > path {
-        stroke: red
-          // stroke: $gray-500;
+        stroke: $gray-500;
       }
     }
 
@@ -207,13 +205,12 @@
     text-overflow: ellipsis;
   }
 
-
   .command-progress {
     height: 2px;
   }
 
   // Event Styles
-  .command-is-event > span > .command-wrapper {
+  .command-is-event.command-wrapper {
     color: $gray-500;
     font-style: italic;
   }
@@ -231,15 +228,11 @@
   }
 
   // System Command Styles
-  .command-type-system.command-is-event > span > .command-wrapper {
-    user-select: none;
+  .command-type-system.command-is-event {
+    color: $gray-200;
     font-style: unset;
-
-    .command-method,
-    .command-message {
-      color: $gray-200;
-      font-weight: 700;
-    }
+    font-weight: 700;
+    user-select: none;
   }
 
   .command-child-container {
@@ -254,6 +247,7 @@
     font-weight: 600;
   }
 
+  // Command State Styles
   .command-state-pending.command-wrapper {
     border-left: 2px solid $indigo-800;
     background-color: $gray-900;
@@ -298,8 +292,6 @@
   }
   }
 
-  // .command-state-failed {
-  // .command-state-failed > span > .command-wrapper {
   .command-state-failed.command-wrapper {
     border-left: 2px solid $fail;
     background-color: $err-header-background;
@@ -310,7 +302,6 @@
       background: rgba($red-400, 0.3);
     }
   }
-
 
   .command-state-warn.command-wrapper {
     font-style: unset;
@@ -325,17 +316,12 @@
     }
   }
 
-  .cmd .runnable-err-wrapper {
+  .command .runnable-err-wrapper {
     padding: 0;
     border: 0;
     margin: 0;
     margin-bottom: 5px;
   }
-
-  .command-message {
-
-  }
-
 
   // Custom Styles for Specific Commands
   .command-name-assert {

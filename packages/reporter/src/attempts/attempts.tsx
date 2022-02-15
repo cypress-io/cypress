@@ -77,7 +77,7 @@ class Attempt extends Component<AttemptProps> {
     const { model } = this.props
 
     // HACK: causes component update when command log is added
-    // model.commands.length
+    model.commands.length
 
     return (
       <li

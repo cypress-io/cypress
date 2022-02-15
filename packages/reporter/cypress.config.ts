@@ -19,7 +19,7 @@ export default defineConfig({
 
       return config
     },
-    viewportHeight: 400,
-    viewportWidth: 1000,
+    viewportHeight: 1000,
+    viewportWidth: 400,
   },
 })

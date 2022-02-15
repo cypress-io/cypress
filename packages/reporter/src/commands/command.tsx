@@ -254,9 +254,7 @@ class Command extends Component<Props> {
         className={cs(
           'command',
           `command-name-${commandName}`,
-          `command-type-${model.type}`,
           {
-          //   'command-is-event': !!model.event,
             'command-scaled': message && message.length > 100,
           //   'command-is-open': this._isOpen(),
           },
@@ -272,10 +270,12 @@ class Command extends Component<Props> {
               cs(
                 'command-wrapper',
                 `command-state-${model.state}`,
+                `command-type-${model.type}`,
                 {
+                  'command-is-event': !!model.event,
                   'command-is-pinned': this._isPinned(),
-                  'command-has-snapshot': model.hasSnapshot,
                   'command-has-console-props': model.hasConsoleProps,
+                  'command-has-snapshot': model.hasSnapshot,
                 },
               )
             }
