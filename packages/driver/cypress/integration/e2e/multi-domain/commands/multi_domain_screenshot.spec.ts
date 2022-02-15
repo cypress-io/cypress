@@ -246,7 +246,7 @@ context('screenshot specs', { experimentalSessionSupport: true, experimentalMult
   })
 
   it('handles errors thrown from setTimeout after the timer is paused', () => {
-    cy.on('fail', (err, runnable) => {
+    cy.on('fail', (err) => {
       expect(err.name).to.eq('Error')
       expect(err.message).to.include('setTimeout error after screenshot')
     })
@@ -275,6 +275,45 @@ context('screenshot specs', { experimentalSessionSupport: true, experimentalMult
       })
 
       cy.screenshot()
+
+      // wait to ensure the timeout error has time to process
+      cy.wait(100)
+    })
+  })
+
+  it('handles errors thrown from setTimeout when the timer is NOT paused', () => {
+    cy.on('fail', (err) => {
+      expect(err.name).to.eq('Error')
+      expect(err.message).to.include('setTimeout error during screenshot')
+      expect(err.message).to.include('The following error originated from your application code, not from Cypress.')
+      // @ts-ignore
+      expect(err.docsUrl).to.deep.eq(['https://on.cypress.io/uncaught-exception-from-application'])
+    })
+
+    cy.switchToDomain('foobar.com', [this.serverResult], ([serverResult]) => {
+      cy.stub(Cypress, 'automation').withArgs('take:screenshot').returns(
+        {
+          // TODO: A bluebird promise is expected but we can't require bluebird yet
+          // so mock the timeout function to return a promise that simulates how
+          // long it takes to take a screenshot
+          timeout: () => {
+            return new Promise((resolve) => {
+              setTimeout(() => {
+                resolve(serverResult)
+              }, 100)
+            })
+          },
+        },
+      )
+
+      cy.window().then((win) => {
+        // Add a timeout error
+        win.setTimeout(() => {
+          throw new Error('setTimeout error during screenshot')
+        }, 50)
+      })
+
+      cy.screenshot({ disableTimersAndAnimations: false })
 
       // wait to ensure the timeout error has time to process
       cy.wait(100)
