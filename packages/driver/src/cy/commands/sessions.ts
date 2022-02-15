@@ -35,8 +35,8 @@ const getSessionDetailsForTable = (sessState) => {
 const isSecureContext = (url) => url.startsWith('https:')
 
 const getCurrentOriginStorage = () => {
-  // localStorage.length propery is not always accurate, we must stringify to check for entries
-  // for ex) try setting localStorge.key = 'val' and reading localStorage.length, may be 0.
+  // localStorage.length property is not always accurate, we must stringify to check for entries
+  // for ex) try setting localStorage.key = 'val' and reading localStorage.length, may be 0.
   const _localStorageStr = JSON.stringify(window.localStorage)
   const _localStorage = _localStorageStr.length > 2 && JSON.parse(_localStorageStr)
   const _sessionStorageStr = JSON.stringify(window.sessionStorage)

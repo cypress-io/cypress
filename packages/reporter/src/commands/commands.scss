@@ -104,7 +104,7 @@
       }
     }
 
-    .num-children,
+    .command-num-children,
     .command-alias-count,
     .command-interceptions-count {
       background-color: $orange-700 !important;
@@ -116,7 +116,7 @@
       margin-left: 0;
     }
 
-    .num-children.has-alias {
+    .command-num-children.has-alias {
       border-radius: 10px;
       line-height: 1;
       padding: 3px 5px 3px 5px;
@@ -505,12 +505,12 @@
     }
   }
 
-  .num-children {
+  .command-num-children {
     color: $black;
     background-color: $gray-500;
   }
 
-  .num-elements {
+  .command-num-elements {
     background-color: $gray-600;
     display: inline;
     color: $black;

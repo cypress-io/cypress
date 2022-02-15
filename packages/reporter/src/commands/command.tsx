@@ -4,7 +4,6 @@ import Markdown from 'markdown-it'
 import { action, observable } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
-// @ts-ignore
 import Tooltip from '@cypress/react-tooltip'
 
 import appState, { AppState } from '../lib/app-state'
@@ -298,7 +297,7 @@ class Command extends Component<Props> {
               }
               {(model.state !== 'pending' && model.numElements != null && model.numElements !== 1) &&
                 <Tooltip placement='top' title={`${model.numElements} matched elements`} className='cy-tooltip'>
-                  <span className='num-elements'>{model.numElements}</span>
+                  <span className='command-num-elements'>{model.numElements}</span>
                 </Tooltip>
               }
               <span className='alias-container'>
@@ -306,7 +305,7 @@ class Command extends Component<Props> {
                 <Aliases model={model} aliasesWithDuplicates={aliasesWithDuplicates} />
                 {(!isSystemEvent && !isSessionCommand && model.hasChildren && !model.isOpen) &&
                   <Tooltip placement='top' title={`This event occurred ${model.numChildren} times`} className='cy-tooltip'>
-                    <span className={cs('num-children', { 'has-alias': model.alias })}>{model.numChildren}</span>
+                    <span className={cs('command-num-children', { 'has-alias': model.alias })}>{model.numChildren}</span>
                   </Tooltip>
                 }
               </span>

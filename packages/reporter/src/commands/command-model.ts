@@ -86,7 +86,7 @@ export default class Command extends Instrument {
   }
 
   @computed get hasChildren () {
-    return this.numChildren > 1
+    return this.event ? this.numChildren > 1 : this.numChildren > 0
   }
 
   constructor (props: CommandProps) {

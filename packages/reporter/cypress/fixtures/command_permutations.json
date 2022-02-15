@@ -11,7 +11,7 @@
       "commands": [
         {
           "hookId": "r2",
-          "id": 1,
+          "id": 0,
           "instrument": "command",
           "message": "",
           "name": "Example System Command",
@@ -22,7 +22,30 @@
         },
         {
           "hookId": "r2",
+          "id": 1,
+          "instrument": "command",
+          "message": "",
+          "name": "Example System Grouped",
+          "state": "passed",
+          "testId": "r2",
+          "group": 1,
+          "timeout": 4000,
+          "type": "system"
+        },
+        {
+          "hookId": "r2",
           "id": 2,
+          "instrument": "command",
+          "message": "",
+          "name": "Example Grouped System Command",
+          "state": "passed",
+          "testId": "r2",
+          "timeout": 4000,
+          "type": "system"
+        },
+        {
+          "hookId": "r2",
+          "id": 3,
           "instrument": "command",
           "message": "Example Parent Command",
           "name": "get",
@@ -36,7 +59,7 @@
         },
         {
           "hookId": "r2",
-          "id": 3,
+          "id": 4,
           "instrument": "command",
           "message": "Example Child Command",
           "name": "contains",
@@ -50,7 +73,7 @@
         },
         {
           "hookId": "r2",
-          "id": 7,
+          "id": 5,
           "instrument": "command",
           "name": "assert",
           "message": "Example Assert Command",
@@ -62,7 +85,7 @@
         },
         {
           "hookId": "r2",
-          "id": 4,
+          "id": 6,
           "instrument": "command",
           "name": "within",
           "message": "Example Child Group",
@@ -73,7 +96,18 @@
         },
         {
           "hookId": "r2",
-          "id": 5,
+          "id": 7,
+          "instrument": "command",
+          "name": "Example Grouped System Command",
+          "state": "passed",
+          "testId": "r2",
+          "group": 4,
+          "timeout": 4000,
+          "type": "system"
+        },
+        {
+          "hookId": "r2",
+          "id": 8,
           "instrument": "command",
           "name": "get",
           "message": "Example Grouped Parent Command",
@@ -86,7 +120,7 @@
         },
         {
           "hookId": "r2",
-          "id": 6,
+          "id": 9,
           "instrument": "command",
           "name": "should",
           "message": "Example Grouped Child Command",
@@ -99,7 +133,7 @@
         },
         {
           "hookId": "r2",
-          "id": 9,
+          "id": 10,
           "instrument": "command",
           "message": "Example Parent Group",
           "name": "get",
@@ -111,7 +145,7 @@
         },
         {
           "hookId": "r2",
-          "id": 10,
+          "id": 11,
           "instrument": "command",
           "name": "within",
           "message": "Example Parent Group",
@@ -122,12 +156,12 @@
         },
         {
           "hookId": "r2",
-          "id": 11,
+          "id": 12,
           "instrument": "command",
           "name": "get",
           "message": "Example Grouped Parent Command",
           "state": "passed",
-          "group": 10,
+          "group": 11,
           "testId": "r2",
           "timeout": 4000,
           "numElements": 1,
@@ -135,13 +169,13 @@
         },
         {
           "hookId": "r2",
-          "id": 11,
+          "id": 13,
           "instrument": "command",
           "event": true,
           "name": "xhr",
           "message": "Example Grouped Event",
           "state": "passed",
-          "group": 10,
+          "group": 11,
           "testId": "r2",
           "timeout": 4000,
           "numElements": 1,
@@ -149,7 +183,7 @@
         },
         {
           "hookId": "r2",
-          "id": 11,
+          "id": 14,
           "instrument": "command",
           "event": true,
           "name": "xhr",
@@ -157,6 +191,44 @@
           "state": "passed",
           "testId": "r2",
           "timeout": 4000,
+          "numElements": 1,
+          "type": "parent"
+        },
+        {
+          "hookId": "r2",
+          "id": 15,
+          "instrument": "command",
+          "event": true,
+          "name": "xhr",
+          "state": "passed",
+          "testId": "r2",
+          "timeout": 4000,
+          "numElements": 1,
+          "type": "parent"
+        },
+        {
+          "hookId": "r2",
+          "id": 16,
+          "instrument": "command",
+          "event": true,
+          "name": "xhr",
+          "state": "passed",
+          "testId": "r2",
+          "group": 15,
+          "timeout": 4000,
+          "numElements": 1,
+          "type": "parent"
+        },
+        {
+          "hookId": "r2",
+          "id": 17,
+          "instrument": "command",
+          "event": true,
+          "name": "xhr",
+          "state": "passed",
+          "testId": "r2",
+          "timeout": 4000,
+          "group": 15,
           "numElements": 1,
           "type": "parent"
         }

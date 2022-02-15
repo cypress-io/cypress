@@ -2099,7 +2099,7 @@ linux-workflow: &linux-workflow
           - reporter-integration-tests
           - npm-design-system
           - run-app-component-tests-chrome
-          - run-app-integration-tests-chrome
+          # - run-app-integration-tests-chrome
           - run-frontend-shared-component-tests-chrome
           - run-launchpad-component-tests-chrome
           - run-launchpad-integration-tests-chrome
@@ -2170,10 +2170,10 @@ linux-workflow: &linux-workflow
         context: test-runner:launchpad-tests
         requires:
           - build
-    - run-app-integration-tests-chrome:
-        context: test-runner:launchpad-tests
-        requires:
-          - build
+    # - run-app-integration-tests-chrome:
+    #     context: test-runner:launchpad-tests
+    #     requires:
+    #       - build
     - run-app-component-tests-chrome:
         context: test-runner:launchpad-tests
         requires:
