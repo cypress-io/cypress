@@ -1,12 +1,12 @@
-import errors from '@packages/errors'
 import Bluebird from 'bluebird'
+import errors from '@packages/errors'
 import exception from './exception'
 
 const isProduction = () => {
   return process.env['CYPRESS_INTERNAL_ENV'] === 'production'
 }
 
-const logException = Bluebird.method(function (this: any, err) {
+export const logException = Bluebird.method(function (this: any, err) {
   // TODO: remove context here
   if (this.log(err) && isProduction()) {
     // log this exception since
@@ -17,9 +17,4 @@ const logException = Bluebird.method(function (this: any, err) {
   }
 })
 
-const errorApi = {
-  ...errors,
-  logException,
-}
-
-export = errorApi
+export const warning = errors.warning
