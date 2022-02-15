@@ -109,32 +109,35 @@ class $Cypress {
   Chainer: any
   Command: any
   dom: any
-  // errorMessages: any
-  // Keyboard: any
-  // Location: any
-  // Log: any
-  // LocalStorage: any
-  // Mocha: any
-  // resolveWindowReference: any
-  // resolveLocationReference: any
-  // Mouse: any
-  // Runner: any
-  // Server: any
-  // Screenshot: any
-  // SelectorPlayground: any
-  // utils: any
-  // _: any
-  // Blob: any
-  // Buffer: any
-  // Promise: any
-  // minimatch: any
-  // sinon: any
-  // lolex: any
+  errorMessages: any
+  Keyboard: any
+  Location: any
+  Log: any
+  LocalStorage: any
+  Mocha: any
+  resolveWindowReference: any
+  resolveLocationReference: any
+  Mouse: any
+  Runner: any
+  Server: any
+  Screenshot: any
+  SelectorPlayground: any
+  utils: any
+  _: any
+  Blob: any
+  Buffer: any
+  Promise: any
+  minimatch: any
+  sinon: any
+  lolex: any
 
-  // static $: any
-  // static utils: any
+  static $: any
+  static utils: any
 
   constructor (config = {}) {
+    // attach to $Cypress to access
+    // all of the constructors
+    // to enable users to monkeypatch
     this.$Cypress = $Cypress
     this.Cy = $Cy
     this.Chainer = $Chainer
@@ -142,6 +145,30 @@ class $Cypress {
     this.Command = $Command
     this.Commands = $Commands
     this.dom = $dom
+    this.errorMessages = $errorMessages
+    this.Keyboard = $Keyboard
+    this.Location = $Location
+    this.Log = $Log
+    this.LocalStorage = $LocalStorage
+    this.Mocha = $Mocha
+    this.resolveWindowReference = resolvers.resolveWindowReference
+    this.resolveLocationReference = resolvers.resolveLocationReference
+    this.Mouse = {
+      create: createMouse,
+    }
+
+    this.Runner = $Runner
+    this.Server = $Server
+    this.Screenshot = $Screenshot
+    this.SelectorPlayground = $SelectorPlayground
+    this.utils = $utils
+    this._ = _
+    this.Blob = blobUtil
+    this.Buffer = Buffer
+    this.Promise = Promise
+    this.minimatch = minimatch
+    this.sinon = sinon
+    this.lolex = fakeTimers
 
     this.cy = null
     this.chai = null
@@ -761,43 +788,8 @@ class $Cypress {
   }
 }
 
-// // attach to $Cypress to access
-// // all of the constructors
-// // to enable users to monkeypatch
-// $Cypress.prototype.$Cypress = $Cypress
-// $Cypress.prototype.Cy = $Cy
-// $Cypress.prototype.Chainer = $Chainer
-// $Cypress.prototype.Cookies = $Cookies
-// $Cypress.prototype.Command = $Command
-// $Cypress.prototype.Commands = $Commands
-// $Cypress.prototype.dom = $dom
-$Cypress.prototype.errorMessages = $errorMessages
-$Cypress.prototype.Keyboard = $Keyboard
-$Cypress.prototype.Location = $Location
-$Cypress.prototype.Log = $Log
-$Cypress.prototype.LocalStorage = $LocalStorage
-$Cypress.prototype.Mocha = $Mocha
-$Cypress.prototype.resolveWindowReference = resolvers.resolveWindowReference
-$Cypress.prototype.resolveLocationReference = resolvers.resolveLocationReference
-$Cypress.prototype.Mouse = {
-  create: createMouse,
-}
-
-$Cypress.prototype.Runner = $Runner
-$Cypress.prototype.Server = $Server
-$Cypress.prototype.Screenshot = $Screenshot
-$Cypress.prototype.SelectorPlayground = $SelectorPlayground
-$Cypress.prototype.utils = $utils
-$Cypress.prototype._ = _
-$Cypress.prototype.Blob = blobUtil
-$Cypress.prototype.Buffer = Buffer
-$Cypress.prototype.Promise = Promise
-$Cypress.prototype.minimatch = minimatch
-$Cypress.prototype.sinon = sinon
-$Cypress.prototype.lolex = fakeTimers
-
-// // attaching these so they are accessible
-// // via the runner + integration spec helper
+// attaching these so they are accessible
+// via the runner + integration spec helper
 $Cypress.$ = $
 $Cypress.utils = $utils
 export default $Cypress
