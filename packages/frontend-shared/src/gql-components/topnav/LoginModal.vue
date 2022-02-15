@@ -8,18 +8,13 @@
       <DialogOverlay class="bg-gray-800 opacity-90 inset-0 fixed" />
 
       <div class="bg-white rounded mx-auto min-w-480px max-w-600px relative">
-        <div class="flex border-b-1px min-h-55px px-24px justify-between items-center">
-          <DialogTitle class="text-gray-900 text-18px">
-            {{ title }}
-          </DialogTitle>
-          <button
-            aria-label="Close"
-            class="hocus-default"
-            @click="setIsOpen(false)"
-          >
-            <i-cy-delete_x12 class="h-12px w-12px icon-dark-gray-400" />
-          </button>
-        </div>
+        <StandardModalHeader
+          help-link="https://on.cypress.io"
+          :help-text="t('links.needHelp')"
+          @close="setIsOpen(false)"
+        >
+          {{ title }}
+        </StandardModalHeader>
 
         <NoInternetConnection
           v-if="!isOnline"
@@ -54,18 +49,17 @@
           </i18n-t>
           <div v-else-if="errorType === 'browserError'">
             <div
-              class="rounded flex bg-red-100 mb-16px p-16px text-red-600 gap-8px items-center"
+              class="rounded flex font-medium bg-red-100 mb-20px p-16px text-red-600 gap-8px items-center"
             >
               <i-cy-errored-outline_x16 class="h-16px min-w-16px w-16px icon-dark-red-400" />
               {{ t('topNav.login.bodyBrowserError') }}
             </div>
             {{ t('topNav.login.bodyBrowserErrorDetails') }}
 
-            <TerminalPrompt
+            <CopyText
               v-if="props.gql.authState.message"
-              class="mt-16px"
-              :project-folder-name="''"
-              :command="props.gql.authState.message"
+              class="mt-12px"
+              :text="props.gql.authState.message"
             />
           </div>
           <div v-else-if="errorType === 'loginError'">
@@ -101,12 +95,12 @@ import Auth from '../Auth.vue'
 import ExternalLink from '../ExternalLink.vue'
 import { useOnline } from '@vueuse/core'
 import NoInternetConnection from '../../components/NoInternetConnection.vue'
-import TerminalPrompt from '@cy/components/TerminalPrompt.vue'
+import CopyText from '@cy/components/CopyText.vue'
+import StandardModalHeader from '@cy/components/StandardModalHeader.vue'
 
 import {
   Dialog,
   DialogOverlay,
-  DialogTitle,
   DialogDescription,
 } from '@headlessui/vue'
 
