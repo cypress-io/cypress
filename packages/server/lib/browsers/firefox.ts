@@ -553,7 +553,7 @@ export async function open (browser: Browser, url, options: any = {}, automation
       originalBrowserKill.apply(browserInstance, args)
     }
   } catch (err) {
-    errors.throw('FIREFOX_COULD_NOT_CONNECT', err)
+    errors.throwErr('FIREFOX_COULD_NOT_CONNECT', err)
   }
 
   return browserInstance
