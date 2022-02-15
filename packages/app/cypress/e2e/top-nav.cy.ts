@@ -508,6 +508,31 @@ describe('App Top Nav Workflows', () => {
         cy.get('@loginButton').click()
         cy.contains(loginText.titleInitial).should('be.visible')
       })
+
+      it('closing modal correctly clears error state', () => {
+        cy.withCtx((ctx) => {
+          ctx.coreData.authState = {
+            type: 'error',
+            name: 'AUTH_ERROR_DURING_LOGIN',
+            message: 'An unexpected error occurred',
+            browserOpened: false,
+          }
+        })
+
+        cy.findByTestId('app-header-bar').within(() => {
+          cy.findByTestId('user-avatar-title').should('not.exist')
+          cy.findByRole('button', { name: 'Log In' }).as('loginButton').click()
+        })
+
+        cy.contains(loginText.titleFailed).should('be.visible')
+        cy.contains(loginText.bodyError).should('be.visible')
+        cy.contains('An unexpected error occurred').should('be.visible')
+
+        cy.findByLabelText(defaultMessages.actions.close).click()
+
+        cy.get('@loginButton').click()
+        cy.contains(loginText.titleInitial).should('be.visible')
+      })
     })
   })
 })

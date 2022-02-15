@@ -97,6 +97,8 @@ import { useOnline } from '@vueuse/core'
 import NoInternetConnection from '../../components/NoInternetConnection.vue'
 import CopyText from '@cy/components/CopyText.vue'
 import StandardModalHeader from '@cy/components/StandardModalHeader.vue'
+import { useMutation } from '@urql/vue'
+import { LoginModal_ResetAuthStateDocument } from '../../generated/graphql'
 
 import {
   Dialog,
@@ -127,8 +129,21 @@ fragment LoginModal on Query {
 }
 `
 
+gql`
+mutation LoginModal_ResetAuthState {
+  resetAuthState {
+    ...Auth
+  }
+}
+`
+
+const resetAuth = useMutation(LoginModal_ResetAuthStateDocument)
+
 const setIsOpen = (value: boolean) => {
   emit('update:modelValue', value)
+  if (!value) {
+    resetAuth.executeMutation({})
+  }
 }
 const { t } = useI18n()
 
