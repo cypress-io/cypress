@@ -19,19 +19,19 @@
     padding: 9px;
   }
 
-  .cmd {
+  .command {
     cursor: default;
     color: $gray-400;
     min-height: 20px;
     margin: 0;
   }
 
-  .cmd-scaled {
+  .command-scaled {
     font-size: 85%;
     line-height: 14px;
   }
 
-  .cmd-wrapper {
+  .command-wrapper {
     background-color: $reporter-section-background;
     // color: $gray-400;
     display: flex;
@@ -42,21 +42,21 @@
     &:hover {
       background-color: $gray-900;
 
-      .cmd-pin + .cmd-number {
+      .command-pin + .command-number {
         display: none;
       }
   
-      .cmd-pin {
+      .command-pin {
         display: block;
       }
 
-      .cmd-expander > path {
+      .command-expander > path {
         stroke: red
           // stroke: $gray-500;
       }
     }
 
-    .cmd-interceptions {
+    .command-interceptions {
       font-style: normal;
 
       .status {
@@ -64,8 +64,8 @@
       }
     }
 
-    .cmd-alias,
-    .cmd-interceptions {
+    .command-alias,
+    .command-interceptions {
       border-radius: 10px;
       color: $gray-400;
       padding: 0 5px;
@@ -107,8 +107,8 @@
     }
 
     .num-children,
-    .cmd-alias-count,
-    .cmd-interceptions-count {
+    .command-alias-count,
+    .command-interceptions-count {
       background-color: $orange-700 !important;
       border-radius: 5px;
       color: $gray-400;
@@ -124,8 +124,8 @@
       padding: 3px 5px 3px 5px;
     }
 
-    .cmd-alias-count,
-    .cmd-interceptions-count {
+    .command-alias-count,
+    .command-interceptions-count {
       border-radius: 0 10px 10px 0;
       padding: 2px 5px;
     }
@@ -134,12 +134,12 @@
   // utilizing element size queries: https://github.com/marcj/css-element-queries
   // styles take effect when width is greater than or equal to the specified amount
   &[min-width~="300px"] {
-    .cmd-wrapper {
+    .command-wrapper {
       flex-wrap: nowrap;
     }
   }
 
-  .cmd-number-column {
+  .command-number-column {
     flex-shrink: 0;
     min-height: 1px; // because some numbers are empty
     padding-right: 10px;
@@ -147,11 +147,11 @@
     width: 25px;
   }
 
-  .cmd-expander-column {
+  .command-expander-column {
     padding-right: 10px;
     width: 25px;
     
-    .cmd-expander {
+    .command-expander {
       color: $gray-500;
       transform: rotate(-90deg);
       transition: transform 150ms ease-out;
@@ -161,12 +161,12 @@
       }
     }
 
-    .cmd-expander-is-open {
+    .command-expander-is-open {
       transform: rotate(0deg);
     }
   }
 
-  .cmd-message {
+  .command-message {
     flex-grow: 2;
     margin-left: 0;
     overflow: hidden;
@@ -200,7 +200,7 @@
     }
   }
 
-  .cmd-message-text {
+  .command-message-text {
     display: block;
     flex-grow: 2;
     overflow: hidden;
@@ -208,19 +208,19 @@
   }
 
 
-  .cmd-progress {
+  .command-progress {
     height: 2px;
   }
 
   // Event Styles
-  .cmd-is-event > span > .cmd-wrapper {
+  .command-is-event > span > .command-wrapper {
     color: $gray-500;
     font-style: italic;
   }
 
   // Child Styles
-  .cmd-type-child {
-    .cmd-method {
+  .command-type-child {
+    .command-method {
       &:before {
         float: left;
         content: "-";
@@ -231,22 +231,22 @@
   }
 
   // System Command Styles
-  .cmd-type-system.cmd-is-event > span > .cmd-wrapper {
+  .command-type-system.command-is-event > span > .command-wrapper {
     user-select: none;
     font-style: unset;
 
-    .cmd-method,
-    .cmd-message {
+    .command-method,
+    .command-message {
       color: $gray-200;
       font-weight: 700;
     }
   }
 
-  .cmd-child-container {
+  .command-child-container {
     margin-left: 10px;
   }
 
-  .cmd-method {
+  .command-method {
     padding: 1px 2px 0;
     display: inline-block;
     font-size: 11px;
@@ -254,14 +254,14 @@
     font-weight: 600;
   }
 
-  .cmd-state-pending.cmd-wrapper {
+  .command-state-pending.command-wrapper {
     border-left: 2px solid $indigo-800;
     background-color: $gray-900;
     cursor: default;
     color: $indigo-200;
 
-    .cmd-number-column {
-      .cmd-pin {
+    .command-number-column {
+      .command-pin {
         display: none;
       }
 
@@ -276,7 +276,7 @@
     }
   }
 
-  .cmd-state-pending + .cmd-progress {
+  .command-state-pending + .command-progress {
     height: 2px;
       span {
       animation-fill-mode: forwards;
@@ -298,9 +298,9 @@
   }
   }
 
-  // .cmd-state-failed {
-  // .cmd-state-failed > span > .cmd-wrapper {
-  .cmd-state-failed.cmd-wrapper {
+  // .command-state-failed {
+  // .command-state-failed > span > .command-wrapper {
+  .command-state-failed.command-wrapper {
     border-left: 2px solid $fail;
     background-color: $err-header-background;
     color: $err-header-text;
@@ -312,7 +312,7 @@
   }
 
 
-  .cmd-state-warn.cmd-wrapper {
+  .command-state-warn.command-wrapper {
     font-style: unset;
     background-color: $warn-background;
     border-left: 2px solid $orange-700;
@@ -320,7 +320,7 @@
     &:hover {
       background-color: $warn-header-background;
     }
-     .cmd-method {
+     .command-method {
       color: $warn-text;
     }
   }
@@ -332,14 +332,14 @@
     margin-bottom: 5px;
   }
 
-  .cmd-message {
+  .command-message {
 
   }
 
 
   // Custom Styles for Specific Commands
-  .cmd-name-assert {
-    .cmd-method {
+  .command-name-assert {
+    .command-method {
       span {
         border-radius: 2px;
         padding: 0 3px;
@@ -349,7 +349,7 @@
       }
     }
 
-    .cmd-message {
+    .command-message {
       color: $gray-200;
 
       strong {
@@ -358,19 +358,19 @@
       }
     }
 
-    .cmd-message-text {
+    .command-message-text {
       white-space: normal;
     }
 
-    .cmd-state-pending {
-      .cmd-method {
+    .command-state-pending {
+      .command-method {
         span {
           background-color: $pending;
           color: $black;
         }
       }
 
-      .cmd-message {
+      .command-message {
         color: $pending;
 
         strong {
@@ -379,15 +379,15 @@
       }
     }
 
-    .cmd-state-failed {
-      .cmd-method {
+    .command-state-failed {
+      .command-method {
         span {
           background-color: $fail;
           color: $black;
         }
       }
 
-      .cmd-message {
+      .command-message {
         color: $fail;
 
         strong {
@@ -396,8 +396,8 @@
       }
     }
 
-    .cmd-state-passed {
-      .cmd-method {
+    .command-state-passed {
+      .command-method {
         color: $pass;
 
         span {
@@ -406,7 +406,7 @@
         }
       }
 
-      .cmd-message {
+      .command-message {
         color: $jade-300;
 
         strong {
@@ -416,14 +416,14 @@
     }
   }
 
-  .cmd-name-log,
-  .cmd-name-get,
-  .cmd-name-download {
-    // we're wrapping the text, so override cmd-scaled
+  .command-name-log,
+  .command-name-get,
+  .command-name-download {
+    // we're wrapping the text, so override command-scaled
     font-size: 100%;
     line-height: 18px;
 
-    .cmd-message-text {
+    .command-message-text {
       white-space: initial;
       word-wrap: break-word;
       line-height: 1.5;
@@ -434,22 +434,22 @@
   }
 
   // Styles for Uncaught Exception
-  .cmd-name-uncaught-exception {
+  .command-name-uncaught-exception {
     // need extra spacing between (uncaught exception) and the error message
-    .cmd-message {
+    .command-message {
       margin-left: 5px;
     }
   }
 
-  .cmd-controls {
+  .command-controls {
     svg {
       color: $gray-600;
       cursor: pointer;
       margin: 0px 2px;
     }
 
-    .cmd-alias,
-    .cmd-interceptions {
+    .command-alias,
+    .command-interceptions {
       font-family: $open-sans;
       font-size: 10px;
       line-height: 1.75;
@@ -461,17 +461,17 @@
     }
   }
 
-  .cmd-invisible {
+  .command-invisible {
     display: inline-block;
     margin-left: 5px;
     margin-right: 0;
   }
 
-  .cmd-error {
+  .command-error {
     font-style: normal;
   }
 
-  .cmd-pin {
+  .command-pin {
     display: none;
     flex-shrink: 0;
     font-size: 14px;
@@ -488,18 +488,18 @@
   }
 
   // this guy still
-  .cmd-is-open {
-    .cmd-alias {
+  .command-is-open {
+    .command-alias {
       border-radius: 10px !important;
     }
   }
 
-  .cmd-has-snapshot:hover,
-  .cmd-has-console-props {
+  .command-has-snapshot:hover,
+  .command-has-console-props {
     cursor: pointer;
   }
 
-  .cmd-is-pinned.cmd-wrapper {
+  .command-is-pinned.command-wrapper {
     background: $indigo-1000;
     border-left: 2px solid $pinned;
 
@@ -512,7 +512,7 @@
       background: $indigo-900;
     }
 
-    .cmd-pin {
+    .command-pin {
       color: $pinned;
       display: block;
   
@@ -521,7 +521,7 @@
       }
     }
 
-    .cmd-pin + .cmd-number {
+    .command-pin + .command-number {
       display: none
     }
   }
