@@ -7,6 +7,7 @@ import path from 'path'
 import urlUtil from 'url'
 import { launch, LaunchedBrowser } from '@packages/launcher/lib/browsers'
 import FirefoxProfile from 'firefox-profile'
+import * as errors from '../errors'
 import firefoxUtil from './firefox-util'
 import utils from './utils'
 import * as launcherDebug from '@packages/launcher/lib/log'
@@ -18,8 +19,6 @@ import mimeDb from 'mime-db'
 import { getRemoteDebuggingPort } from './protocol'
 import type { BrowserCriClient } from './browser-cri-client'
 import type { Automation } from '../automation'
-
-const errors = require('../errors')
 
 const debug = Debug('cypress:server:browsers:firefox')
 

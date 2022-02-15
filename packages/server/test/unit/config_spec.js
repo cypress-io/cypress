@@ -26,7 +26,7 @@ describe('lib/config', () => {
 
   context('environment name check', () => {
     it('throws an error for unknown CYPRESS_INTERNAL_ENV', () => {
-      sinon.stub(errors, 'throw').withArgs('INVALID_CYPRESS_INTERNAL_ENV', 'foo-bar')
+      sinon.stub(errors, 'throwErr').withArgs('INVALID_CYPRESS_INTERNAL_ENV', 'foo-bar')
       process.env.CYPRESS_INTERNAL_ENV = 'foo-bar'
       const cfg = {
         projectRoot: '/foo/bar/',
@@ -39,11 +39,11 @@ describe('lib/config', () => {
         //
       }
 
-      expect(errors.throw).have.been.calledOnce
+      expect(errors.throwErr).have.been.calledOnce
     })
 
     it('allows production CYPRESS_INTERNAL_ENV', () => {
-      sinon.stub(errors, 'throw')
+      sinon.stub(errors, 'throwErr')
       process.env.CYPRESS_INTERNAL_ENV = 'production'
       const cfg = {
         projectRoot: '/foo/bar/',
@@ -52,7 +52,7 @@ describe('lib/config', () => {
 
       config.mergeDefaults(cfg, options)
 
-      expect(errors.throw).not.to.be.called
+      expect(errors.throwErr).not.to.be.called
     })
   })
 
@@ -1886,10 +1886,10 @@ describe('lib/config', () => {
         browsers: null,
       }
 
-      sinon.stub(errors, 'throw')
+      sinon.stub(errors, 'throwErr')
       config.updateWithPluginValues(cfg, overrides)
 
-      expect(errors.throw).to.have.been.calledWith('CONFIG_VALIDATION_MSG_ERROR')
+      expect(errors.throwErr).to.have.been.calledWith('CONFIG_VALIDATION_MSG_ERROR')
     })
 
     it('allows user to filter browsers', () => {

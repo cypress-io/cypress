@@ -2,7 +2,7 @@
 import Bluebird from 'bluebird'
 import _ from 'lodash'
 import type { FoundBrowser } from '@packages/types'
-import errors from '../errors'
+import * as errors from '../errors'
 // @ts-ignore
 import plugins from '../plugins'
 import { getError } from '@packages/errors'
@@ -160,7 +160,7 @@ function extendLaunchOptionsFromPlugins (launchOptions, pluginConfigResult, opti
     .value()
 
     if (unexpectedProperties.length) {
-      errors.throw('UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES', unexpectedProperties, KNOWN_LAUNCH_OPTION_PROPERTIES)
+      errors.throwErr('UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES', unexpectedProperties, KNOWN_LAUNCH_OPTION_PROPERTIES)
     }
   }
 
@@ -282,7 +282,7 @@ function ensureAndGetByNameOrPath (nameOrPath: string, returnAll = false, browse
 
         return browser
       }).catch((err) => {
-        errors.throw('BROWSER_NOT_FOUND_BY_PATH', nameOrPath, err.message)
+        errors.throwErr('BROWSER_NOT_FOUND_BY_PATH', nameOrPath, err.message)
       })
     }
 
@@ -302,7 +302,7 @@ const formatBrowsersToOptions = (browsers) => {
 }
 
 const throwBrowserNotFound = function (browserName, browsers: FoundBrowser[] = []) {
-  return errors.throw('BROWSER_NOT_FOUND_BY_NAME', browserName, formatBrowsersToOptions(browsers))
+  return errors.throwErr('BROWSER_NOT_FOUND_BY_NAME', browserName, formatBrowsersToOptions(browsers))
 }
 
 export = {

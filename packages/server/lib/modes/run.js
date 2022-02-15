@@ -1564,13 +1564,13 @@ module.exports = {
         ])
         .spread(async (sys = {}, browser = {}) => {
           if (!project.ctx.project.specs.length) {
-            errors.throw('NO_SPECS_FOUND', projectRoot, specPattern)
+            errors.throwErr('NO_SPECS_FOUND', projectRoot, specPattern)
           }
 
           const specs = project.ctx.project.specs
 
           if (browser.unsupportedVersion && browser.warning) {
-            errors.throw('UNSUPPORTED_BROWSER_VERSION', browser.warning)
+            errors.throwErr('UNSUPPORTED_BROWSER_VERSION', browser.warning)
           }
 
           if (browser.family === 'chromium') {

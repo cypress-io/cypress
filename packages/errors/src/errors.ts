@@ -1318,7 +1318,6 @@ export const cloneError = function (err: CypressError | GenericError, options: {
 export {
   stripAnsi,
   cloneError as clone,
-  throwErr as throw,
   getError as get,
   logWarning as warning,
 }

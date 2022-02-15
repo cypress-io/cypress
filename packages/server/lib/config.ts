@@ -3,9 +3,9 @@ import Debug from 'debug'
 import _ from 'lodash'
 import path from 'path'
 import deepDiff from 'return-deep-diff'
-import errors from './errors'
 import type { ResolvedFromConfig, ResolvedConfigurationOptionSource, AllModeOptions, FullConfig } from '@packages/types'
 import configUtils from '@packages/config'
+import * as errors from './errors'
 import { getProcessEnvVars, CYPRESS_SPECIAL_ENV_VARS } from './util/config'
 import { fs } from './util/fs'
 import keys from './util/keys'
@@ -153,7 +153,7 @@ export function mergeDefaults (
   config.cypressEnv = process.env.CYPRESS_INTERNAL_ENV
   debug('using CYPRESS_INTERNAL_ENV %s', config.cypressEnv)
   if (!isValidCypressInternalEnvValue(config.cypressEnv)) {
-    throw errors.throw('INVALID_CYPRESS_INTERNAL_ENV', config.cypressEnv)
+    throw errors.throwErr('INVALID_CYPRESS_INTERNAL_ENV', config.cypressEnv)
   }
 
   delete config.envFile
@@ -177,12 +177,12 @@ export function mergeDefaults (
   // validate config again here so that we catch configuration errors coming
   // from the CLI overrides or env var overrides
   configUtils.validate(_.omit(config, 'browsers'), (validationResult: ConfigValidationError | string) => {
-    // return errors.throw('CONFIG_VALIDATION_ERROR', errMsg)
+    // return errors.throwErr('CONFIG_VALIDATION_ERROR', errMsg)
     if (_.isString(validationResult)) {
-      return errors.throw('CONFIG_VALIDATION_MSG_ERROR', null, null, validationResult)
+      return errors.throwErr('CONFIG_VALIDATION_MSG_ERROR', null, null, validationResult)
     }
 
-    return errors.throw('CONFIG_VALIDATION_ERROR', null, null, validationResult)
+    return errors.throwErr('CONFIG_VALIDATION_ERROR', null, null, validationResult)
   })
 
   config = setAbsolutePaths(config)
@@ -242,11 +242,11 @@ export function updateWithPluginValues (cfg, overrides) {
     }
 
     if (_.isString(validationResult)) {
-      return errors.throw('CONFIG_VALIDATION_MSG_ERROR', 'pluginsFile', configFile, validationResult)
+      return errors.throwErr('CONFIG_VALIDATION_MSG_ERROR', 'pluginsFile', configFile, validationResult)
     }
 
-    return errors.throw('CONFIG_VALIDATION_ERROR', 'pluginsFile', configFile, validationResult)
-    // return errors.throw('CONFIG_VALIDATION_ERROR', 'pluginsFile', relativePluginsPath, errMsg)
+    return errors.throwErr('CONFIG_VALIDATION_ERROR', 'pluginsFile', configFile, validationResult)
+    // return errors.throwErr('CONFIG_VALIDATION_ERROR', 'pluginsFile', relativePluginsPath, errMsg)
   })
 
   let originalResolvedBrowsers = cfg && cfg.resolved && cfg.resolved.browsers && _.cloneDeep(cfg.resolved.browsers)
@@ -371,11 +371,11 @@ export async function setSupportFileAndFolder (obj, defaults) {
   const supportFilesByGlob = await ctx.file.getFilesByGlob(obj.projectRoot, obj.supportFile, { absolute: false })
 
   if (supportFilesByGlob.length > 1) {
-    return errors.throw('MULTIPLE_SUPPORT_FILES_FOUND', obj.supportFile, supportFilesByGlob.join(', '))
+    return errors.throwErr('MULTIPLE_SUPPORT_FILES_FOUND', obj.supportFile, supportFilesByGlob.join(', '))
   }
 
   if (supportFilesByGlob.length === 0) {
-    return errors.throw('SUPPORT_FILE_NOT_FOUND', path.resolve(obj.projectRoot, obj.supportFile))
+    return errors.throwErr('SUPPORT_FILE_NOT_FOUND', path.resolve(obj.projectRoot, obj.supportFile))
   }
 
   // TODO move this logic to find support file into util/path_helpers
@@ -408,7 +408,7 @@ export async function setSupportFileAndFolder (obj, defaults) {
     return fs.pathExists(obj.supportFile)
     .then((found) => {
       if (!found) {
-        errors.throw('SUPPORT_FILE_NOT_FOUND', obj.supportFile)
+        errors.throwErr('SUPPORT_FILE_NOT_FOUND', obj.supportFile)
       }
 
       return debug('switching to found file %s', obj.supportFile)
@@ -422,7 +422,7 @@ export async function setSupportFileAndFolder (obj, defaults) {
     })
     .then((result) => {
       if (result === null) {
-        return errors.throw('SUPPORT_FILE_NOT_FOUND', path.resolve(obj.projectRoot, sf))
+        return errors.throwErr('SUPPORT_FILE_NOT_FOUND', path.resolve(obj.projectRoot, sf))
       }
 
       debug('setting support file to %o', { result })
