@@ -134,7 +134,8 @@ describe('tests', () => {
     })
   })
 
-  describe('studio', () => {
+  // FIXME: when studio is supported
+  describe.skip('studio', () => {
     describe('button', () => {
       it('displays studio icon with half transparency when hovering over test title', { scrollBehavior: false }, () => {
         cy.contains('test 1')
