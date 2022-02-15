@@ -139,7 +139,7 @@ describe('Launchpad: Setup Project', () => {
 
         cy.get('[data-cy-testingtype="e2e"]').click()
 
-        cy.contains(/(Initializing Config|Choose a Browser)/)
+        cy.contains(/(Initializing Config|Choose a Browser)/, { timeout: 10000 })
       })
 
       it('opens to the browser pages when opened via cli with --e2e flag', () => {
@@ -169,8 +169,8 @@ describe('Launchpad: Setup Project', () => {
         })
 
         cy.get('[data-cy=valid]').within(() => {
-          cy.contains('cypress/support/e2e.js')
-          cy.contains('cypress/fixtures/example.json')
+          cy.containsPath('cypress/support/e2e.js')
+          cy.containsPath('cypress/fixtures/example.json')
         })
       })
 
@@ -191,8 +191,8 @@ describe('Launchpad: Setup Project', () => {
         })
 
         cy.get('[data-cy=valid]').within(() => {
-          cy.contains('cypress/support/e2e.js')
-          cy.contains('cypress/fixtures/example.json')
+          cy.containsPath('cypress/support/e2e.js')
+          cy.containsPath('cypress/fixtures/example.json')
         })
       })
 
@@ -208,8 +208,8 @@ describe('Launchpad: Setup Project', () => {
         })
 
         cy.get('[data-cy=valid]').within(() => {
-          cy.contains('cypress/support/e2e.js')
-          cy.contains('cypress/fixtures/example.json')
+          cy.containsPath('cypress/support/e2e.js')
+          cy.containsPath('cypress/fixtures/example.json')
         })
       })
     })
@@ -256,15 +256,15 @@ describe('Launchpad: Setup Project', () => {
 
         cy.get('[data-cy=valid]').within(() => {
           cy.contains('cypress.config.js')
-          cy.contains('cypress/support/e2e.js')
-          cy.contains('cypress/fixtures/example.json')
+          cy.containsPath('cypress/support/e2e.js')
+          cy.containsPath('cypress/fixtures/example.json')
         })
 
         cy.findByRole('button', { name: 'Continue' })
         .should('not.have.disabled')
         .click()
 
-        cy.contains(/(Initializing Config|Choose a Browser)/)
+        cy.contains(/(Initializing Config|Choose a Browser)/, { timeout: 10000 })
       })
 
       it('can setup e2e testing for a project selecting TS', () => {
@@ -288,8 +288,8 @@ describe('Launchpad: Setup Project', () => {
 
         cy.get('[data-cy=valid]').within(() => {
           cy.contains('cypress.config.ts')
-          cy.contains('cypress/support/e2e.ts')
-          cy.contains('cypress/fixtures/example.json')
+          cy.containsPath('cypress/support/e2e.ts')
+          cy.containsPath('cypress/fixtures/example.json')
         })
       })
 
@@ -317,8 +317,8 @@ describe('Launchpad: Setup Project', () => {
         })
 
         cy.get('[data-cy=valid]').within(() => {
-          cy.contains('cypress/support/e2e.ts')
-          cy.contains('cypress/fixtures/example.json')
+          cy.containsPath('cypress/support/e2e.ts')
+          cy.containsPath('cypress/fixtures/example.json')
         })
       })
 
@@ -392,8 +392,8 @@ describe('Launchpad: Setup Project', () => {
         })
 
         cy.get('[data-cy=valid]').within(() => {
-          cy.contains('cypress/component/index.html')
-          cy.contains(`cypress/support/component.ts`)
+          cy.containsPath('cypress/component/index.html')
+          cy.containsPath('cypress/support/component.ts')
         })
 
         cy.findByRole('button', { name: 'Continue' }).should('have.disabled')
@@ -411,8 +411,8 @@ describe('Launchpad: Setup Project', () => {
         })
 
         cy.get('[data-cy=valid]').within(() => {
-          cy.contains('cypress/support/e2e.js')
-          cy.contains('cypress/fixtures/example.json')
+          cy.containsPath('cypress/support/e2e.js')
+          cy.containsPath('cypress/fixtures/example.json')
         })
       })
 
@@ -527,7 +527,7 @@ describe('Launchpad: Setup Project', () => {
 
         cy.get('[data-cy-testingtype="component"]').click()
 
-        cy.contains(/(Initializing Config|Choose a Browser)/)
+        cy.contains(/(Initializing Config|Choose a Browser)/, { timeout: 10000 })
       })
 
       it('opens to the browser pages when opened via cli with --component flag', () => {
@@ -705,17 +705,15 @@ describe('Launchpad: Setup Project', () => {
 
                 cy.findByRole('button', { name: 'Continue' }).click()
 
-                // FIXME: remove if-check once this is fixed. https://cypress-io.atlassian.net/browse/UNIFY-980
-                if (lang.type !== 'ts') {
-                  cy.get('[data-cy=changes]').within(() => {
-                    cy.contains('cypress.config.js')
-                  })
-                }
+                // Even if user chooses typescript in the previous
+                // step, they already have a config file in js.
+                // We cannot rename this file for them.
+                cy.contains('[data-cy=changes]', `cypress.config.js`)
 
                 cy.get('[data-cy=valid]').within(() => {
-                  cy.contains('cypress/component/index.html')
-                  cy.contains(`cypress/support/component.${lang.type}`)
-                  cy.contains('cypress/fixtures/example.json')
+                  cy.containsPath('cypress/component/index.html')
+                  cy.containsPath(`cypress/support/component.${lang.type}`)
+                  cy.containsPath('cypress/fixtures/example.json')
                 })
               })
             })
@@ -775,13 +773,13 @@ describe('Launchpad: Setup Project', () => {
 
         cy.get('[data-cy=valid]').within(() => {
           cy.contains('cypress.config.ts')
-          cy.contains('cypress/component/index.html')
-          cy.contains(`cypress/support/component.ts`)
-          cy.contains('cypress/fixtures/example.json')
+          cy.containsPath('cypress/component/index.html')
+          cy.containsPath(`cypress/support/component.ts`)
+          cy.containsPath('cypress/fixtures/example.json')
         })
 
         cy.findByRole('button', { name: 'Continue' }).click()
-        cy.contains(/(Initializing Config|Choose a Browser)/)
+        cy.contains(/(Initializing Config|Choose a Browser)/, { timeout: 10000 })
       })
 
       it('setup component testing with typescript files', () => {
@@ -804,13 +802,13 @@ describe('Launchpad: Setup Project', () => {
 
         cy.get('[data-cy=valid]').within(() => {
           cy.contains('cypress.config.ts')
-          cy.contains('cypress/component/index.html')
-          cy.contains(`cypress/support/component.ts`)
-          cy.contains('cypress/fixtures/example.json')
+          cy.containsPath('cypress/component/index.html')
+          cy.containsPath(`cypress/support/component.ts`)
+          cy.containsPath('cypress/fixtures/example.json')
         })
 
         cy.findByRole('button', { name: 'Continue' }).click()
-        cy.contains(/(Initializing Config|Choose a Browser)/)
+        cy.contains(/(Initializing Config|Choose a Browser)/, { timeout: 10000 })
       })
     })
   })

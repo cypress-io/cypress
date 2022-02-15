@@ -1,5 +1,4 @@
 import globby from 'globby'
-import path from 'path'
 import type { TestingType } from '@packages/types'
 import {
   FilePart,
@@ -73,7 +72,7 @@ export function applyMigrationTransform (
     regexp = new RegExp(regexps.component.before.customFolderDefaultTestFiles)
   } else {
     // custom folder AND test files pattern
-    // should be impossble, we should not calling this function in the first place.
+    // should be impossible, we should not call this function in the first place.
     throw Error(`Cannot use applyMigrationTransform on a project with a custom folder and custom testFiles.`)
   }
 
@@ -106,8 +105,8 @@ export async function getSpecs (projectRoot: string, config: OldCypressConfig): 
   const globs = integrationFolder === false
     ? []
     : integrationFolder === 'cypress/integration'
-      ? ['**/*'].map((glob) => path.join(integrationFolder, glob))
-      : integrationTestFiles.map((glob) => path.join(integrationFolder, glob))
+      ? ['**/*'].map((glob) => `${integrationFolder}/${glob}`)
+      : integrationTestFiles.map((glob) => `${integrationFolder}/${glob}`)
 
   let specs = integrationFolder === false
     ? []
@@ -134,7 +133,7 @@ export async function getSpecs (projectRoot: string, config: OldCypressConfig): 
     componentSpecs = []
   } else {
     const globs = componentTestFiles.map((glob) => {
-      return path.join(componentFolder, glob)
+      return `${componentFolder}/${glob}`
     })
 
     componentSpecs = (await globby(globs, { onlyFiles: true, cwd: projectRoot })).map((relative) => {
