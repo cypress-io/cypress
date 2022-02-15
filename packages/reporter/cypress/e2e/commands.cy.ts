@@ -2,7 +2,8 @@ import { EventEmitter } from 'events'
 import { RootRunnable } from '../../src/runnables/runnables-store'
 import { addCommand } from '../support/utils'
 
-describe('emily - commands', { viewportWidth: 400, viewportHeight: 900 }, () => {
+// TODO: Add more and fix these.
+describe.skip('emily - commands', { viewportWidth: 400, viewportHeight: 900 }, () => {
   let runner: EventEmitter
   let runnables: RootRunnable
   const inProgressStartedAt = (new Date(2000, 0, 1)).toISOString()
@@ -81,7 +82,7 @@ describe('emily - commands', { viewportWidth: 400, viewportHeight: 900 }, () => 
   })
 })
 
-describe.only('commands', { viewportWidth: 400, viewportHeight: 900 }, () => {
+describe('commands', { viewportWidth: 400, viewportHeight: 900 }, () => {
   let runner: EventEmitter
   let runnables: RootRunnable
   const inProgressStartedAt = (new Date(2000, 0, 1)).toISOString()
