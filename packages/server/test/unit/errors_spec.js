@@ -1,3 +1,5 @@
+require('../spec_helper')
+
 const exception = require(`../../lib/exception`)
 const chalk = require('chalk')
 const errors = require('../../lib/errors')
@@ -25,7 +27,7 @@ context('.logException', () => {
     sinon.stub(exception, 'create').resolves()
     sinon.stub(process.env, 'CYPRESS_INTERNAL_ENV').value('production')
 
-    const err = errors.getError('NOT_LOGGED_IN')
+    const err = errors.get('NOT_LOGGED_IN')
 
     return errors.logException(err)
     .then(() => {
@@ -53,7 +55,7 @@ context('.logException', () => {
     sinon.stub(exception, 'create').rejects(new Error('foo'))
     sinon.stub(process.env, 'CYPRESS_INTERNAL_ENV').value('production')
 
-    const err = errors.getError('NOT_LOGGED_IN')
+    const err = errors.get('NOT_LOGGED_IN')
 
     return errors.logException(err)
     .then((ret) => {
