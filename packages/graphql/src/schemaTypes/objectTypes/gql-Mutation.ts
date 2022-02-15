@@ -518,6 +518,16 @@ export const mutation = mutationType({
       },
     })
 
+    t.field('migrateCloseManualRenameWatcher', {
+      description: 'While migrating to 10+ skip manual rename step',
+      type: 'Boolean',
+      resolve: async (_, args, ctx) => {
+        await ctx.actions.migration.closeManualRenameWatcher()
+
+        return true
+      },
+    })
+
     t.field('finishedRenamingComponentSpecs', {
       description: 'user has finished migration component specs - move to next step',
       type: Query,

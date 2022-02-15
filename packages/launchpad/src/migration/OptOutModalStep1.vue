@@ -28,11 +28,24 @@
       </MigrationListItem>
       <MigrationListItem>
         {{ t('migration.renameAuto.modals.step1.line4') }}
+        <CodeTag class="text-jade-500">
+          [filename].cy.[ext]
+        </CodeTag>
       </MigrationListItem>
       <MigrationListItem>
         <i18n-t
           scope="global"
           keypath="migration.renameAuto.modals.step1.line5"
+        >
+          <CodeTag class="text-jade-500">
+            [filename].cy.[ext]
+          </CodeTag>
+        </i18n-t>
+      </MigrationListItem>
+      <MigrationListItem>
+        <i18n-t
+          scope="global"
+          keypath="migration.renameAuto.modals.step1.line6"
         >
           <CodeTag class="text-jade-500">
             [filename].cy.[ext]

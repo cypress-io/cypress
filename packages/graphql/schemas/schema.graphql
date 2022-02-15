@@ -775,6 +775,9 @@ type Mutation {
   """Check if a give spec file will match the project spec pattern"""
   matchesSpecPattern(specFile: String!): Boolean!
 
+  """While migrating to 10+ skip manual rename step"""
+  migrateCloseManualRenameWatcher: Boolean
+
   """Merges the component testing config in cypress.config.{js,ts}"""
   migrateComponentTesting: Query
 
