@@ -46,7 +46,7 @@ describe('lib/gui/events', () => {
           expect(this.send).to.be.calledWith('response', { id, data })
         },
         sendErrCalledWith: (err) => {
-          expect(this.send).to.be.calledWith('response', { id, __error: errors.clone(err, { html: true }) })
+          expect(this.send).to.be.calledWith('response', { id, __error: errors.cloneErr(err, { html: true }) })
         },
       })
     }

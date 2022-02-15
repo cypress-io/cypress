@@ -274,7 +274,7 @@ export class SocketBase {
         .then((resp) => {
           return cb({ response: resp })
         }).catch((err) => {
-          return cb({ error: errors.clone(err) })
+          return cb({ error: errors.cloneErr(err) })
         })
       })
 
@@ -459,7 +459,7 @@ export class SocketBase {
         .then((resp) => {
           return cb({ response: resp })
         }).catch((err) => {
-          return cb({ error: errors.clone(err) })
+          return cb({ error: errors.cloneErr(err) })
         })
       })
 

@@ -24,3 +24,5 @@ export const log = errors.log
 export const warning = errors.warning
 
 export const throwErr = errors.throwErr
+
+export const cloneErr = errors.cloneErr

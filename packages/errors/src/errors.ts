@@ -1285,7 +1285,7 @@ interface GenericError extends Error {
   [key: string]: any
 }
 
-export const cloneError = function (err: CypressError | GenericError, options: {html?: boolean} = {}) {
+export const cloneErr = function (err: CypressError | GenericError, options: {html?: boolean} = {}) {
   _.defaults(options, {
     html: false,
   })
@@ -1317,7 +1317,6 @@ export const cloneError = function (err: CypressError | GenericError, options: {
 
 export {
   stripAnsi,
-  cloneError as clone,
   getError as get,
   logWarning as warning,
 }
