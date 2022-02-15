@@ -764,7 +764,6 @@ export default function (Commands, Cypress, cy) {
         errorLog.error(err)
         errorLog.set({
           state: 'warn',
-
         })
 
         _log.set({

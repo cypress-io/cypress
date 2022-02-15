@@ -5,11 +5,10 @@ import React from 'react'
 import { FileDetails } from '@packages/types'
 
 import appState, { AppState } from '../lib/app-state'
-import Command from '../commands/command'
+import CommandsContainer from '../commands/CommandsContainer'
 import Collapsible from '../collapsible/collapsible'
 import HookModel, { HookName } from './hook-model'
 
-import ArrowRightIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/arrow-right_x16.svg'
 import OpenIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/technology-code-editor_x16.svg'
 import OpenFileInIDE from '../lib/open-file-in-ide'
 
@@ -36,25 +35,6 @@ const HookOpenInIDE = ({ invocationDetails }: HookOpenInIDEProps) => {
   )
 }
 
-const StudioNoCommands = () => (
-  <li className='command command-name-get command-state-pending command-type-parent studio-prompt'>
-    <span>
-      <div className='command-wrapper'>
-        <div className='command-wrapper-text'>
-          <span className='command-message'>
-            <span className='command-message-text'>
-              Interact with your site to add test commands. Right click to add assertions.
-            </span>
-          </span>
-          <span className='command-controls'>
-            <ArrowRightIcon />
-          </span>
-        </div>
-      </div>
-    </span>
-  </li>
-)
-
 export interface HookProps {
   model: HookModel
   showNumber: boolean
@@ -68,10 +48,7 @@ const Hook = observer(({ model, showNumber }: HookProps) => (
       headerExtras={model.invocationDetails && <HookOpenInIDE invocationDetails={model.invocationDetails} />}
       isOpen={true}
     >
-      <ul className='commands-container'>
-        {_.map(model.commands, (command) => <Command key={command.id} model={command} aliasesWithDuplicates={model.aliasesWithDuplicates} />)}
-        {model.showStudioPrompt && <StudioNoCommands />}
-      </ul>
+      <CommandsContainer commands={model.commands} aliasesWithDuplicates={model.aliasesWithDuplicates} showStudioPrompt={model.showStudioPrompt} />
     </Collapsible>
   </li>
 ))

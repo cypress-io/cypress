@@ -1,5 +1,4 @@
 import cs from 'classnames'
-import _ from 'lodash'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 
@@ -47,7 +46,6 @@ const StudioError = () => (
 
 function renderAttemptContent (model: AttemptModel) {
   // performance optimization - don't render contents if not open
-
   return (
     <div className={`attempt-${model.id + 1}`}>
       <Sessions model={model.sessions} />
@@ -56,7 +54,6 @@ function renderAttemptContent (model: AttemptModel) {
       <div ref='commands' className='runnable-commands-region'>
         {model.hasCommands ? <Hooks model={model} /> : <NoCommands />}
       </div>
-
       <div className='attempt-error-region'>
         <TestError model={model} />
         <StudioError />

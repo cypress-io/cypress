@@ -34,7 +34,6 @@ export interface CommandProps extends InstrumentProps {
   group?: number
   hasSnapshot?: boolean
   hasConsoleProps?: boolean
-
 }
 
 export default class Command extends Instrument {
@@ -66,7 +65,7 @@ export default class Command extends Instrument {
 
   @computed get numChildren () {
     // and one to include self so it's the total number of same events
-    return this.children.length + 1
+    return this.type === 'event ' ? this.children.length + 1 : this.children.length
   }
 
   @computed get isOpen () {

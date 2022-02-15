@@ -91,11 +91,11 @@ export default class Hook implements HookProps {
       const groupCommand = _.find(this.commands, { id: command.group }) as CommandModel
 
       if (groupCommand && groupCommand.addChild) {
-        groupCommand.addChild(command)
-      } else {
-        // if we cant find a command to attach to, treat this like an ordinary log
-        command.group = undefined
+        return groupCommand.addChild(command)
       }
+
+      // if we cant find a command to attach to, treat this like an ordinary log
+      command.group = undefined
     }
 
     const lastCommand = _.last(this.commands)
