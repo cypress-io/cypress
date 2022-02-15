@@ -90,19 +90,45 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
         </div>),
     })
 
-    cy.findByRole('button', { name: text.login.actionTryAgain }).should('not.exist')
-    cy.findByRole('button', { name: text.login.actionCancel }).should('not.exist')
-    cy.contains(text.login.bodyBrowserError)
+    cy.contains('button', text.login.actionTryAgain).should('not.exist')
+    cy.contains('button', text.login.actionCancel).should('not.exist')
+    cy.contains(text.login.titleBrowserError).should('be.visible')
+    cy.contains(text.login.bodyBrowserError).should('be.visible')
     cy.contains(text.login.bodyBrowserErrorDetails).should('be.visible')
     cy.contains(authUrl).should('be.visible')
     cy.contains('button', 'Copy').should('be.visible')
+  })
 
-    // cancel button works
-    // cy.findByRole('button', { name: text.login.actionCancel })
-    // .click().then(() => {
-    //   cy.wrap(Cypress.vueWrapper.findComponent(LoginModal).emitted('update:modelValue')?.[0])
-    //   .should('deep.equal', [false])
-    // })
+  it('displays other errors from login process', () => {
+    const updateSpy = cy.spy().as('updateSpy')
+    const methods = {
+      'onUpdate:modelValue': (newValue) => {
+        updateSpy(newValue)
+      },
+    }
+    const errorText = 'The flux capacitor ran out of battery'
+
+    cy.mountFragment(LoginModalFragmentDoc, {
+      render: (gqlVal) => {
+        gqlVal.authState.name = 'AUTH_ERROR_DURING_LOGIN'
+        gqlVal.authState.message = errorText
+
+        return (<div class="border-current border-1 h-700px resize overflow-auto">
+          <LoginModal gql={gqlVal} modelValue={true} {...methods}/>
+        </div>)
+      },
+    })
+
+    cy.contains(text.login.titleFailed).should('be.visible')
+    cy.contains(text.login.bodyError).should('be.visible')
+    cy.contains(errorText).should('be.visible')
+
+    // test the qql mutation behavior of these buttons from e2e tests
+    cy.contains('button', text.login.actionTryAgain).should('be.visible')
+
+    // but we can test that cancelling closes the modal:
+    cy.contains('button', text.login.actionCancel).click()
+    cy.get('@updateSpy').should('have.been.calledWith', false)
   })
 
   it('shows successful login status with email if name not provided', () => {
