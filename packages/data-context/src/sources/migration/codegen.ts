@@ -307,7 +307,7 @@ export async function cleanUpIntegrationFolder (projectRoot: string) {
   const integrationPath = path.join(projectRoot, 'cypress', 'integration')
 
   try {
-    await fs.rmdir(integrationPath)
+    fs.rmSync(integrationPath, { recursive: true })
   } catch (e: any) {
     // only throw if the folder exists
     if (e.code !== 'ENOENT') {
