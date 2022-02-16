@@ -463,6 +463,8 @@ commands:
             PERCY_PARALLEL_NONCE=$PLATFORM-$CIRCLE_SHA1 \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
+            PERCY_TARGET_BRANCH="10.0-release" \
+            PERCY_TARGET_COMMIT=$(git log -n 1 origin/10.0-release --pretty="%H") \
             $cmd yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --record --parallel --group <<parameters.package>>-<<parameters.type>>
       - store_test_results:
           path: /tmp/cypress
@@ -1032,7 +1034,12 @@ jobs:
               echo "This is an external PR, cannot access other services"
               circleci-agent step halt
             fi
-      - run: PERCY_PARALLEL_NONCE=$PLATFORM-$CIRCLE_SHA1 yarn percy build:finalize
+      - run:
+          command: |
+            PERCY_PARALLEL_NONCE=$PLATFORM-$CIRCLE_SHA1 \
+            PERCY_TARGET_BRANCH="10.0-release" \
+            PERCY_TARGET_COMMIT=$(git log -n 1 origin/10.0-release --pretty="%H") \
+            yarn percy build:finalize
 
   cli-visual-tests:
     <<: *defaults
@@ -1056,6 +1063,8 @@ jobs:
             PERCY_PARALLEL_NONCE=$PLATFORM-$CIRCLE_SHA1 \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
+            PERCY_TARGET_BRANCH="10.0-release" \
+            PERCY_TARGET_COMMIT=$(git log -n 1 origin/10.0-release --pretty="%H") \
             yarn percy snapshot ./cli/visual-snapshots
 
   unit-tests:
@@ -1329,6 +1338,8 @@ jobs:
             PERCY_PARALLEL_NONCE=$PLATFORM-$CIRCLE_SHA1 \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
+            PERCY_TARGET_BRANCH="10.0-release" \
+            PERCY_TARGET_COMMIT=$(git log -n 1 origin/10.0-release --pretty="%H") \
             yarn percy exec --parallel -- -- \
             yarn cypress:run --record --parallel --group reporter
           working_directory: packages/reporter
@@ -1471,6 +1482,8 @@ jobs:
             PERCY_PARALLEL_NONCE=$PLATFORM-$CIRCLE_SHA1 \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
+            PERCY_TARGET_BRANCH="10.0-release" \
+            PERCY_TARGET_COMMIT=$(git log -n 1 origin/10.0-release --pretty="%H") \
             yarn percy exec --parallel -- -- \
             yarn test --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json
           working_directory: npm/design-system
