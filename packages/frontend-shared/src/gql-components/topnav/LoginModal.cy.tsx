@@ -126,10 +126,10 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
       cy.contains(text.login.bodyError).should('be.visible')
       cy.contains(errorText).should('be.visible')
 
-      // test the qql mutation behavior of these buttons from e2e tests
+      // we test the qql mutation behavior of these buttons from e2e tests
       cy.contains('button', text.login.actionTryAgain).should('be.visible')
 
-      // but we can test that cancelling closes the modal:
+      // but we can test that cancelling closes the modal here:
       cy.contains('button', text.login.actionCancel).click()
       cy.get('@updateSpy').should('have.been.calledWith', false)
     })
