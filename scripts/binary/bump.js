@@ -19,13 +19,6 @@ const _PROVIDERS = {
       'cypress-io/cypress-test-module-api',
       'cypress-io/cypress-test-node-versions',
       'cypress-io/cypress-test-ci-environments',
-      'cypress-io/cypress-test-example-repos',
-    ],
-    darwin: [
-      'cypress-io/cypress-test-example-repos',
-    ],
-    win32: [
-      'cypress-io/cypress-test-example-repos',
     ],
   },
 }

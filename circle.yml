@@ -29,7 +29,7 @@ mainBuildFilters: &mainBuildFilters
       only:
         - develop
         - 10.0-release
-        - fix-ci-artifact-uploads
+        - other-projects-cleanup
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -1582,7 +1582,7 @@ jobs:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "fix-ci-artifact-uploads" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "other-projects-cleanup" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -1889,6 +1889,22 @@ jobs:
       - test-binary-against-repo:
           repo: cypress-example-recipes
           command: npm run test:ci:firefox
+
+  test-binary-against-recipes-chrome:
+    <<: *defaults
+    parallelism: 3
+    steps:
+      - test-binary-against-repo:
+          repo: cypress-example-recipes
+          command: npm run test:ci:chrome
+
+  test-binary-against-recipes:
+    <<: *defaults
+    parallelism: 3
+    steps:
+      - test-binary-against-repo:
+          repo: cypress-example-recipes
+          command: npm run test:ci
 
   # This is a special job. It allows you to test the current
   # built test runner against a pull request in the repo
@@ -2226,13 +2242,19 @@ linux-workflow: &linux-workflow
         <<: *mainBuildFilters
         requires:
           - create-build-artifacts
-
     - test-binary-against-kitchensink-chrome:
         <<: *mainBuildFilters
         requires:
           - create-build-artifacts
-
     - test-binary-against-recipes-firefox:
+        <<: *mainBuildFilters
+        requires:
+          - create-build-artifacts
+    - test-binary-against-recipes-chrome:
+        <<: *mainBuildFilters
+        requires:
+          - create-build-artifacts
+    - test-binary-against-recipes:
         <<: *mainBuildFilters
         requires:
           - create-build-artifacts
@@ -2248,13 +2270,11 @@ linux-workflow: &linux-workflow
         <<: *mainBuildFilters
         requires:
           - create-build-artifacts
-
     - test-binary-as-specific-user:
         name: "test binary as a non-root user"
         executor: non-root-docker-user
         requires:
           - create-build-artifacts
-
     - test-binary-as-specific-user:
         name: "test binary as a root user"
         requires:
