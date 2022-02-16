@@ -22,11 +22,13 @@ describe('Cypress In Cypress', { viewportWidth: 1200 }, () => {
 
       cy.log(url)
 
-      cy.request(url)
-      .then((res) => {
-        styleBuffer += `
-        ${res.body}`
-      })
+      $el.attr('href', url)
+
+      // cy.request(url)
+      // .then((res) => {
+      //   styleBuffer += `
+      //   ${res.body}`
+      // })
     })
     .then(() => {
       cy.get('body').then(($el) => {
