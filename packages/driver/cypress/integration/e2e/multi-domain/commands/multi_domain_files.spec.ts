@@ -42,11 +42,6 @@ context('multi-domain files', { experimentalSessionSupport: true, experimentalMu
             flag: 'w',
           },
         )
-
-        //@ts-ignore
-        // FIXME: the stub is not getting restored on its
-        // own causing other tests to fail
-        Cypress.backend.restore()
       })
     })
   })
