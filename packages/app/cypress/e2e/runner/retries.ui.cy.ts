@@ -38,7 +38,7 @@ describe('runner/cypress retries.ui.spec', {
     cy.get('.runnable-err-print').should('be.visible')
   })
 
-  it('can toggle failed prev attempt open and log its error', () => {
+  it('can toggle failed prev attempt open and log its error', { viewportHeight: 1200 }, () => {
     loadSpec({
       fileName: 'all-retry-one-failure.retries.cy.js',
       passCount: 2,
@@ -165,7 +165,7 @@ describe('runner/cypress retries.ui.spec', {
   })
 
   describe('beforeEach', () => {
-    it('beforeEach hooks retry on failure, but only run same-level afterEach hooks', () => {
+    it('beforeEach hooks retry on failure, but only run same-level afterEach hooks', { viewportHeight: 1500 }, () => {
       loadSpec({
         fileName: 'before-each-failure.retries.cy.js',
         passCount: 1,

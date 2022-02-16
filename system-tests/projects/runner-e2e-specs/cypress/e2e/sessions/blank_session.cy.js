@@ -1,8 +1,6 @@
-describe('session', {
-  experimentalSessionSupport: true,
-}, () => {
-  it('creates blank session', () => {
-    cy.session('blank_session', () => {})
-    assert(true)
-  })
+Cypress.config('experimentalSessionSupport', true)
+
+it('t1', () => {
+  cy.session('blank_session', () => {})
+  assert(true)
 })

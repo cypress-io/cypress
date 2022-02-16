@@ -3,7 +3,7 @@ import { generateMochaTestsForWin } from '../support/generate-mocha-tests'
 generateMochaTestsForWin(window, {
   hooks: [{ type: 'afterEach', fail: 2 }],
   suites: {
-    'suite 1': {
+    's1': {
       options: {
         retries: 2,
       },
