@@ -21,8 +21,8 @@
     "eslint-plugin-json-format": "^2.0.0",
     "eslint-plugin-mocha": "^8.1.0",
     "eslint-plugin-promise": "^4.2.1",
-    "jest": "^24.8.0",
-    "jest-cli": "^24.8.0",
+    "jest": "^24.9.0",
+    "jest-cli": "^24.9.0",
     "sinon": "^7.3.2",
     "sinon-chai": "^3.3.0"
   },

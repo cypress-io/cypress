@@ -12,28 +12,12 @@ import {
   OldCypressConfig,
 } from '../../../src/sources/migration'
 import { expect } from 'chai'
-import tempDir from 'temp-dir'
-import type { e2eProjectDirs } from '@packages/frontend-shared/cypress/e2e/support/e2eProjectDirs'
 import { MigrationFile } from '../../../src/sources'
+import { scaffoldMigrationProject } from '../helper'
 
-function scaffoldMigrationProject (project: typeof e2eProjectDirs[number]) {
-  const tmpDir = path.join(tempDir, 'cy-projects')
-  const testProject = path.join(__dirname, '..', '..', '..', '..', '..', 'system-tests', 'projects', project)
-  const cwd = path.join(tmpDir, project)
+const root = path.join(__dirname, '..', '..', '..', '..', '..')
 
-  try {
-    fs.rmSync(cwd, { recursive: true, force: true })
-  } catch (e) {
-    /* eslint-disable no-console */
-    console.error(`error, could not remove ${cwd}`, e.message)
-  }
-
-  fs.copySync(testProject, cwd, { recursive: true })
-
-  return cwd
-}
-
-const projectRoot = path.join(__dirname, '..', '..', '..', '..', '..')
+const projectRoot = path.join(root, 'system-tests', 'projects', 'migration-e2e-defaults')
 
 describe('cypress.config.js generation', () => {
   it('should create a string when passed only a global option', async () => {
@@ -146,7 +130,7 @@ describe('cypress.config.js generation', () => {
 
 describe('supportFilesForMigrationGuide', () => {
   it('finds and represents correct supportFile migration guide', async () => {
-    const cwd = scaffoldMigrationProject('migration')
+    const cwd = await scaffoldMigrationProject('migration')
     const actual = await supportFilesForMigration(cwd)
 
     const expected: MigrationFile = {
@@ -218,7 +202,7 @@ describe('renameSupportFilePath', () => {
 
 describe('initComponentTestingMigration', () => {
   it('calls callback with status each time file is removed', async () => {
-    const cwd = scaffoldMigrationProject('migration-component-testing-customized')
+    const cwd = await scaffoldMigrationProject('migration-component-testing-customized')
 
     const delay = () => new Promise((res) => setTimeout(res, 250))
 
@@ -295,7 +279,7 @@ describe('reduceConfig', () => {
     const config = { testFiles: '**/**.cy.js', componentFolder: 'src', integrationFolder: 'cypress/integration' }
     const newConfig = reduceConfig(config)
 
-    expect(newConfig.component.specPattern).to.eq(`${config.componentFolder}/${config.testFiles}`)
+    expect(newConfig.component.specPattern).to.eq('src/**/**.cy.js')
     expect(newConfig.e2e.specPattern).to.eq(`${config.integrationFolder}/${config.testFiles}`)
   })
 
@@ -311,7 +295,7 @@ describe('reduceConfig', () => {
     }
     const newConfig = reduceConfig(config)
 
-    expect(newConfig.component.specPattern).to.eq(`${config.component.componentFolder}/${config.testFiles}`)
+    expect(newConfig.component.specPattern).to.eq('src/**/**.cy.js')
     expect(newConfig.e2e.specPattern).to.eq(`${config.e2e.integrationFolder}/${config.testFiles}`)
   })
 
@@ -336,7 +320,7 @@ describe('reduceConfig', () => {
     }
     const newConfig = reduceConfig(config)
 
-    expect(newConfig.component.specPattern).to.eq(`${config.component.componentFolder}/${config.testFiles}`)
+    expect(newConfig.component.specPattern).to.eq(`higher/specificity/**/**.cy.js`)
     expect(newConfig.e2e.specPattern).to.eq(`${config.e2e.integrationFolder}/${config.testFiles}`)
   })
 
