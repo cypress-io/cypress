@@ -163,20 +163,7 @@ context('screenshot specs', { experimentalSessionSupport: true, experimentalMult
 
   it('supports pausing timers', () => {
     cy.switchToDomain('foobar.com', [this.serverResult], ([serverResult]) => {
-      cy.stub(Cypress, 'automation').withArgs('take:screenshot').returns(
-        {
-          // TODO: A bluebird promise is expected but we can't require bluebird yet
-          // so mock the timeout function to return a promise that simulates how
-          // long it takes to take a screenshot
-          timeout: () => {
-            return new Promise((resolve) => {
-              setTimeout(() => {
-                resolve(serverResult)
-              }, 500)
-            })
-          },
-        },
-      )
+      cy.stub(Cypress, 'automation').withArgs('take:screenshot').returns(Cypress.Promise.delay(500, serverResult))
 
       cy.window().then((win) => {
         // Hide the element using setTimeout
@@ -209,20 +196,7 @@ context('screenshot specs', { experimentalSessionSupport: true, experimentalMult
 
   it('does not pause timers when disableTimersAndAnimations is false', () => {
     cy.switchToDomain('foobar.com', [this.serverResult], ([serverResult]) => {
-      cy.stub(Cypress, 'automation').withArgs('take:screenshot').returns(
-        {
-          // TODO: A bluebird promise is expected but we can't require bluebird yet
-          // so mock the timeout function to return a promise that simulates how
-          // long it takes to take a screenshot
-          timeout: () => {
-            return new Promise((resolve) => {
-              setTimeout(() => {
-                resolve(serverResult)
-              }, 500)
-            })
-          },
-        },
-      )
+      cy.stub(Cypress, 'automation').withArgs('take:screenshot').returns(Cypress.Promise.delay(500, serverResult))
 
       cy.window().then((win) => {
         // Hide the element using setTimeout
@@ -252,20 +226,7 @@ context('screenshot specs', { experimentalSessionSupport: true, experimentalMult
     })
 
     cy.switchToDomain('foobar.com', [this.serverResult], ([serverResult]) => {
-      cy.stub(Cypress, 'automation').withArgs('take:screenshot').returns(
-        {
-          // TODO: A bluebird promise is expected but we can't require bluebird yet
-          // so mock the timeout function to return a promise that simulates how
-          // long it takes to take a screenshot
-          timeout: () => {
-            return new Promise((resolve) => {
-              setTimeout(() => {
-                resolve(serverResult)
-              }, 100)
-            })
-          },
-        },
-      )
+      cy.stub(Cypress, 'automation').withArgs('take:screenshot').returns(Cypress.Promise.delay(100, serverResult))
 
       cy.window().then((win) => {
         // Add a timeout error
@@ -291,20 +252,7 @@ context('screenshot specs', { experimentalSessionSupport: true, experimentalMult
     })
 
     cy.switchToDomain('foobar.com', [this.serverResult], ([serverResult]) => {
-      cy.stub(Cypress, 'automation').withArgs('take:screenshot').returns(
-        {
-          // TODO: A bluebird promise is expected but we can't require bluebird yet
-          // so mock the timeout function to return a promise that simulates how
-          // long it takes to take a screenshot
-          timeout: () => {
-            return new Promise((resolve) => {
-              setTimeout(() => {
-                resolve(serverResult)
-              }, 100)
-            })
-          },
-        },
-      )
+      cy.stub(Cypress, 'automation').withArgs('take:screenshot').returns(Cypress.Promise.delay(100, serverResult))
 
       cy.window().then((win) => {
         // Add a timeout error
