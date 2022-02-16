@@ -224,34 +224,6 @@ describe('multi-domain Cypress API', { experimentalSessionSupport: true, experim
         })
       })
     })
-
-    // verifies the config from the primary domain is synced with the secondary (other syncing behavior tested in multi_domain_config_env_spec)
-    it('config()', () => {
-      const conf = Cypress.config()
-
-      cy.switchToDomain('foobar.com', [conf], ([theConfig]) => {
-        const multiDomainConfig = Cypress.config()
-
-        // video is always turned off in switchToDomain
-        const primaryConfigWithOmittedProps = _.omit(theConfig, 'video', 'isInteractive', 'env')
-        const secondaryConfigWithOmittedProps = _.omit(multiDomainConfig, 'video', 'isInteractive', 'env')
-
-        expect(primaryConfigWithOmittedProps).to.deep.equal(secondaryConfigWithOmittedProps)
-      })
-    })
-
-    // verifies the env from the primary domain is synced with the secondary (other syncing behavior tested in multi_domain_config_env_spec)
-    it('env()', () => {
-      Cypress.env('foo', 'bar')
-
-      const env = Cypress.env()
-
-      cy.switchToDomain('foobar.com', [env], ([theEnv]) => {
-        const multiDomainEnv = Cypress.env()
-
-        expect(multiDomainEnv).to.deep.equal(theEnv)
-      })
-    })
   })
 
   context('not supported', () => {
