@@ -17,8 +17,12 @@ describe('Cypress In Cypress', { viewportWidth: 1200 }, () => {
 
     let styleBuffer = ''
 
-    cy.get('link[rel=stylesheet]').each(($el) => {
-      cy.request(`http://localhost:4455${ $el.attr('href')}`)
+    cy.get('link[rel=stylesheet][href]').each(($el) => {
+      const url = `http://localhost:4455${ $el.attr('href')}`
+
+      cy.log(url)
+
+      cy.request(url)
       .then((res) => {
         styleBuffer += `
         ${res.body}`
@@ -79,8 +83,12 @@ describe('Cypress In Cypress', { viewportWidth: 1200 }, () => {
 
     let styleBuffer = ''
 
-    cy.get('link[rel=stylesheet]').each(($el) => {
-      cy.request(`http://localhost:4455${ $el.attr('href')}`)
+    cy.get('link[rel=stylesheet][href]').each(($el) => {
+      const url = `http://localhost:4455${ $el.attr('href')}`
+
+      cy.log(url)
+
+      cy.request(url)
       .then((res) => {
         styleBuffer += `
         ${res.body}`
