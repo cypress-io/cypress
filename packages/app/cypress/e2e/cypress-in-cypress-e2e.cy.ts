@@ -30,76 +30,55 @@ describe('Cypress In Cypress', { viewportWidth: 1200 }, () => {
     })
     .then(() => {
       (document.querySelector('body') as HTMLElement).innerHTML += `<style id="percy-test">${styleBuffer}</style>`
-    })
+      cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
+      cy.findByTestId('aut-url').should('be.visible')
+      cy.findByTestId('playground-activator').should('be.visible')
+      cy.findByTestId('select-browser').click()
 
-    cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
-    cy.findByTestId('aut-url').should('be.visible')
-    cy.findByTestId('playground-activator').should('be.visible')
-    cy.findByTestId('select-browser').click()
+      cy.contains('Firefox').click()
 
-    cy.contains('Firefox').click()
+      cy.percySnapshot('browsers open')
 
-    cy.percySnapshot('browsers open')
+      cy.contains('Chrome 1')
+      .focus()
+      .type('{esc}')
 
-    cy.contains('Chrome 1')
-    .focus()
-    .type('{esc}')
+      cy.contains('Firefox').should('be.hidden')
 
-    cy.contains('Firefox').should('be.hidden')
+      cy.findByTestId('viewport').click()
+      cy.contains('The viewport determines the width and height of your application. By default the viewport will be 1000px by 660px for End-to-end Testing unless specified by a cy.viewport command.')
+      .should('be.visible')
 
-    cy.findByTestId('viewport').click()
-    cy.contains('The viewport determines the width and height of your application. By default the viewport will be 1000px by 660px for End-to-end Testing unless specified by a cy.viewport command.')
-    .should('be.visible')
+      cy.percySnapshot('viewport info open')
 
-    cy.percySnapshot('viewport info open')
+      cy.get('body').click()
 
-    cy.get('body').click()
+      cy.findByTestId('playground-activator').click()
+      cy.findByTestId('playground-selector').clear().type('li')
 
-    cy.findByTestId('playground-activator').click()
-    cy.findByTestId('playground-selector').clear().type('li')
+      cy.percySnapshot('cy.get selector')
 
-    cy.percySnapshot('cy.get selector')
+      cy.findByTestId('playground-num-elements').contains('3 Matches')
 
-    cy.findByTestId('playground-num-elements').contains('3 Matches')
+      cy.findByLabelText('Selector Methods').click()
+      cy.findByRole('menuitem', { name: 'cy.contains' }).click()
 
-    cy.findByLabelText('Selector Methods').click()
-    cy.findByRole('menuitem', { name: 'cy.contains' }).click()
+      cy.findByTestId('playground-selector').clear().type('Item 1')
 
-    cy.findByTestId('playground-selector').clear().type('Item 1')
+      cy.percySnapshot('cy.contains selector')
 
-    cy.percySnapshot('cy.contains selector')
+      cy.findByTestId('playground-num-elements').contains('1 Match')
 
-    cy.findByTestId('playground-num-elements').contains('1 Match')
-
-    cy.window().then((win) => cy.spy(win.console, 'log'))
-    cy.findByTestId('playground-print').click().window().then((win) => {
-      expect(win.console.log).to.have.been.calledWith('%cCommand:  ', 'font-weight: bold', 'cy.contains(\'Item 1\')')
+      cy.window().then((win) => cy.spy(win.console, 'log'))
+      cy.findByTestId('playground-print').click().window().then((win) => {
+        expect(win.console.log).to.have.been.calledWith('%cCommand:  ', 'font-weight: bold', 'cy.contains(\'Item 1\')')
+      })
     })
   })
 
   it('navigation between specs and other parts of the app works', () => {
     cy.contains('dom-content.spec').click()
     cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
-
-    let styleBuffer = ''
-
-    cy.get('link[rel=stylesheet][href]').each(($el) => {
-      const url = `http://localhost:4455${ $el.attr('href')?.replace('./', '/__/')}`
-
-      cy.log(url)
-
-      cy.request(url)
-      .then((res) => {
-        styleBuffer += `
-        ${res.body}`
-      })
-      .debug()
-    })
-    .then(() => {
-      (document.querySelector('body') as HTMLElement).innerHTML += `<style id="percy-test">${styleBuffer}</style>`
-    })
-
-    cy.wait(20000000000000)
 
     // go to Settings page and back to spec runner
     cy.contains('a', 'Settings').click()
