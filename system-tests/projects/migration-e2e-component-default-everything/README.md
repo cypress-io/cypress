@@ -37,3 +37,21 @@ The project has a default support file, `cypress/support/index.js`. We can renam
 We can migrate to the new `cypress.config.js`. The expected output is in `expected-cypress.config.js`. The main points are:
 
 The expected output is in [`expected-cypress.config.js`](./expected-cypress.config.js).
+
+## Second flow
+
+A project with E2E and CT, both using default folders. Everything is default.
+
+The following migration steps will be used during this migration:
+
+- [x] automatic folder rename of cypress/integration to cypress/e2e
+
+## Automatic Migration
+
+User skips tries to skip this step, so, we rename just the folder:
+
+| Before | After|
+|---|---|
+| `integration/foo.spec.ts` | `e2e/foo.spec.ts` |
+| `integration/spec.ts` | `e2e/spec.spec.ts` |
+| `component/button.spec.js` | `component/button.spec.js` |

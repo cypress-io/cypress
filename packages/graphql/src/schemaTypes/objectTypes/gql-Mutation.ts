@@ -508,6 +508,30 @@ export const mutation = mutationType({
       },
     })
 
+    t.field('migrateRenameSpecsFolder', {
+      description: 'When the user decides to skip specs rename',
+      type: Query,
+      resolve: async (_, args, ctx) => {
+        try {
+          await ctx.actions.migration.renameSpecsFolder()
+        } catch (error) {
+          const e = error as Error
+
+          const message = e.message === 'dest already exists.' ? 'e2e folder already exists.' : e.message
+
+          ctx.coreData.baseError = {
+            title: 'Spec Folder Migration Error',
+            message,
+            stack: e.stack,
+          }
+        }
+
+        await ctx.actions.migration.nextStep()
+
+        return {}
+      },
+    })
+
     t.field('migrateSkipManualRename', {
       description: 'While migrating to 10+ skip manual rename step',
       type: Query,

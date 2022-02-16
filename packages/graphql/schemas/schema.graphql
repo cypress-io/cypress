@@ -794,6 +794,9 @@ type Mutation {
     skip: Boolean
   ): Query
 
+  """When the user decides to skip specs rename"""
+  migrateRenameSpecsFolder: Query
+
   """While migrating to 10+ launch renaming of support file"""
   migrateRenameSupport: Query
 

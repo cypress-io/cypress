@@ -512,6 +512,7 @@
       "changedSpecExt": "We've changed the default spec file extension from:",
       "changedSpecPatternExplain": "We've made the default spec file extension to {0} in order to avoid conflicts with any existing testing frameworks.",
       "optedOutMessage": "You've opted not to rename your spec file extension",
+      "folderRenameMessage": "You've opted not to rename your spec file extension, we're going to rename the folder",
       "modals": {
         "title": "Change the existing spec file extension",
         "step1": {
@@ -530,6 +531,7 @@
           "label": "Choose from the following filename patterns:",
           "option1": "{0} (Recommended)",
           "option2": "Don't rename anything — keep what I have.",
+          "option3": "Rename folder only.",
           "buttonSave": "Save Changes",
           "buttonCancel": "Cancel"
         }
@@ -567,7 +569,8 @@
         "title": "Rename existing specs",
         "description": "In this step, we'll automatically rename and move your existing spec files.",
         "button": "Rename these specs for me",
-        "buttonSkip": "Skip renaming specs"
+        "buttonSkip": "Skip renaming specs",
+        "buttonRenameFolder": "Rename the folder for me"
       },
       "step2": {
         "title": "Move your existing component specs",
