@@ -34,8 +34,8 @@ export class MigrationActions {
     }
 
     const projectRoot = this.ctx.path.join(this.ctx.currentProject)
-    const from = path.join(projectRoot, 'cypress/integration')
-    const to = path.join(projectRoot, 'cypress/e2e')
+    const from = path.join(projectRoot, 'cypress', 'integration')
+    const to = path.join(projectRoot, 'cypress', 'e2e')
 
     await this.ctx.fs.move(from, to)
   }
