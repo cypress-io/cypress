@@ -18,7 +18,7 @@ describe('Cypress In Cypress', { viewportWidth: 1200 }, () => {
     let styleBuffer = ''
 
     cy.get('link[rel=stylesheet][href]').each(($el) => {
-      const url = `http://localhost:4455${ $el.attr('href')}`
+      const url = `http://localhost:4455${ $el.attr('href')?.replace('./', '/')}`
 
       cy.log(url)
 
@@ -84,7 +84,7 @@ describe('Cypress In Cypress', { viewportWidth: 1200 }, () => {
     let styleBuffer = ''
 
     cy.get('link[rel=stylesheet][href]').each(($el) => {
-      const url = `http://localhost:4455${ $el.attr('href')}`
+      const url = `http://localhost:4455${ $el.attr('href')?.replace('./', '/')}`
 
       cy.log(url)
 
