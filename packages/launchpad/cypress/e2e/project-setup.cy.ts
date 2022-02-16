@@ -1,15 +1,10 @@
 import { FRONTEND_FRAMEWORKS, BUNDLERS, CODE_LANGUAGES, PACKAGES_DESCRIPTIONS } from '@packages/types/src/constants'
 
 describe('Launchpad: Setup Project', () => {
-  beforeEach(() => {
-    cy.scaffoldProject('pristine') // not configured
-    cy.scaffoldProject('pristine-with-ct-testing') // component configured
-    cy.scaffoldProject('pristine-with-e2e-testing') // e2e configured
-    cy.scaffoldProject('pristine-with-e2e-testing-and-storybook') // e2e configured
-    cy.scaffoldProject('pristine-npm')
-    cy.scaffoldProject('pristine-yarn')
-    cy.scaffoldProject('pristine-pnpm')
-  })
+  function scaffoldAndOpenProject (name: Parameters<typeof cy.scaffoldProject>[0], args?: Parameters<typeof cy.openProject>[1]) {
+    cy.scaffoldProject(name)
+    cy.openProject(name, args)
+  }
 
   const verifyWelcomePage = ({ e2eIsConfigured, ctIsConfigured }) => {
     cy.contains('Welcome to Cypress!').should('be.visible')
@@ -18,7 +13,7 @@ describe('Launchpad: Setup Project', () => {
   }
 
   it('no initial setup displays welcome page', () => {
-    cy.openProject('pristine')
+    scaffoldAndOpenProject('pristine')
     cy.visitLaunchpad()
     cy.contains('Welcome to Cypress!').should('be.visible')
     verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: false })
@@ -26,7 +21,7 @@ describe('Launchpad: Setup Project', () => {
 
   describe('"learn about testing types" modal', () => {
     beforeEach(() => {
-      cy.openProject('pristine')
+      scaffoldAndOpenProject('pristine')
       cy.visitLaunchpad()
       verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: false })
     })
@@ -137,18 +132,18 @@ describe('Launchpad: Setup Project', () => {
   describe('E2E test setup', () => {
     describe('project has been configured for e2e', () => {
       it('skips the setup page when choosing e2e tests to run', () => {
-        cy.openProject('pristine-with-e2e-testing')
+        scaffoldAndOpenProject('pristine-with-e2e-testing')
         cy.visitLaunchpad()
 
         verifyWelcomePage({ e2eIsConfigured: true, ctIsConfigured: true })
 
         cy.get('[data-cy-testingtype="e2e"]').click()
 
-        cy.contains(/(Initializing Config|Choose a Browser)/)
+        cy.contains(/(Initializing Config|Choose a Browser)/, { timeout: 10000 })
       })
 
       it('opens to the browser pages when opened via cli with --e2e flag', () => {
-        cy.openProject('pristine-with-e2e-testing', ['--e2e'])
+        scaffoldAndOpenProject('pristine-with-e2e-testing', ['--e2e'])
         cy.visitLaunchpad()
 
         cy.get('h1').should('contain', 'Choose a Browser')
@@ -159,7 +154,7 @@ describe('Launchpad: Setup Project', () => {
     describe('project that has not been configured for e2e', () => {
       // FIXME: ProjectLifecycleManager is skipping straight to browser pages when it should show setup page.
       it.skip('shows the configuration setup page when selecting e2e tests', () => {
-        cy.openProject('pristine-with-ct-testing')
+        scaffoldAndOpenProject('pristine-with-ct-testing')
         cy.visitLaunchpad()
 
         verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: true })
@@ -174,14 +169,14 @@ describe('Launchpad: Setup Project', () => {
         })
 
         cy.get('[data-cy=valid]').within(() => {
-          cy.contains('cypress/support/e2e.js')
-          cy.contains('cypress/fixtures/example.json')
+          cy.containsPath('cypress/support/e2e.js')
+          cy.containsPath('cypress/fixtures/example.json')
         })
       })
 
       // FIXME: ProjectLifecycleManager is skipping straight to browser pages when it should show setup page.
       it.skip('moves to "Choose a Browser" page after clicking "Continue" button in first step in configuration page', () => {
-        cy.openProject('pristine-with-ct-testing')
+        scaffoldAndOpenProject('pristine-with-ct-testing')
         cy.visitLaunchpad()
 
         verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: true })
@@ -196,13 +191,13 @@ describe('Launchpad: Setup Project', () => {
         })
 
         cy.get('[data-cy=valid]').within(() => {
-          cy.contains('cypress/support/e2e.js')
-          cy.contains('cypress/fixtures/example.json')
+          cy.containsPath('cypress/support/e2e.js')
+          cy.containsPath('cypress/fixtures/example.json')
         })
       })
 
       it('shows the configuration setup page when opened via cli with --e2e flag', () => {
-        cy.openProject('pristine-with-ct-testing', ['--e2e'])
+        scaffoldAndOpenProject('pristine-with-ct-testing', ['--e2e'])
         cy.visitLaunchpad()
 
         cy.contains('h1', 'Configuration Files')
@@ -213,15 +208,15 @@ describe('Launchpad: Setup Project', () => {
         })
 
         cy.get('[data-cy=valid]').within(() => {
-          cy.contains('cypress/support/e2e.js')
-          cy.contains('cypress/fixtures/example.json')
+          cy.containsPath('cypress/support/e2e.js')
+          cy.containsPath('cypress/fixtures/example.json')
         })
       })
     })
 
     describe('project not been configured for cypress', () => {
       it('can go back before selecting e2e scaffold lang', () => {
-        cy.openProject('pristine')
+        scaffoldAndOpenProject('pristine')
         cy.visitLaunchpad()
 
         verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: false })
@@ -241,7 +236,7 @@ describe('Launchpad: Setup Project', () => {
       })
 
       it('can setup e2e testing for a project selecting JS', () => {
-        cy.openProject('pristine')
+        scaffoldAndOpenProject('pristine')
         cy.visitLaunchpad()
 
         verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: false })
@@ -261,19 +256,19 @@ describe('Launchpad: Setup Project', () => {
 
         cy.get('[data-cy=valid]').within(() => {
           cy.contains('cypress.config.js')
-          cy.contains('cypress/support/e2e.js')
-          cy.contains('cypress/fixtures/example.json')
+          cy.containsPath('cypress/support/e2e.js')
+          cy.containsPath('cypress/fixtures/example.json')
         })
 
         cy.findByRole('button', { name: 'Continue' })
         .should('not.have.disabled')
         .click()
 
-        cy.contains(/(Initializing Config|Choose a Browser)/)
+        cy.contains(/(Initializing Config|Choose a Browser)/, { timeout: 10000 })
       })
 
       it('can setup e2e testing for a project selecting TS', () => {
-        cy.openProject('pristine')
+        scaffoldAndOpenProject('pristine')
         cy.visitLaunchpad()
 
         verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: false })
@@ -293,13 +288,13 @@ describe('Launchpad: Setup Project', () => {
 
         cy.get('[data-cy=valid]').within(() => {
           cy.contains('cypress.config.ts')
-          cy.contains('cypress/support/e2e.ts')
-          cy.contains('cypress/fixtures/example.json')
+          cy.containsPath('cypress/support/e2e.ts')
+          cy.containsPath('cypress/fixtures/example.json')
         })
       })
 
       it('can setup e2e testing for a project selecting TS when CT is configured and config file is JS', () => {
-        cy.openProject('pristine-with-ct-testing')
+        scaffoldAndOpenProject('pristine-with-ct-testing')
         cy.visitLaunchpad()
 
         verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: true })
@@ -322,13 +317,13 @@ describe('Launchpad: Setup Project', () => {
         })
 
         cy.get('[data-cy=valid]').within(() => {
-          cy.contains('cypress/support/e2e.ts')
-          cy.contains('cypress/fixtures/example.json')
+          cy.containsPath('cypress/support/e2e.ts')
+          cy.containsPath('cypress/fixtures/example.json')
         })
       })
 
       it('can setup CT testing for a project selecting TS when E2E is configured and config file is JS', () => {
-        cy.openProject('pristine-with-e2e-testing')
+        scaffoldAndOpenProject('pristine-with-e2e-testing')
         cy.visitLaunchpad()
 
         verifyWelcomePage({ e2eIsConfigured: true, ctIsConfigured: false })
@@ -348,18 +343,18 @@ describe('Launchpad: Setup Project', () => {
         cy.findByRole('button', { name: 'Back' }).click()
         cy.get('[data-cy-testingtype="component"]').click()
 
-        cy.findByRole('button', { name: 'Front-end Framework Create React App' }).click()
+        cy.findByRole('button', { name: 'Front-end Framework Pick a framework' }).click()
         cy.findByRole('option', { name: 'React.js' }).click()
 
         cy.findByRole('button', { name: 'Next Step' }).should('have.disabled')
 
-        cy.findByRole('button', { name: 'Bundler Pick a bundler' }).click()
+        cy.findByRole('button', { name: 'Bundler(Dev Server) Pick a bundler' }).click()
         cy.findByRole('option', { name: 'Webpack' }).click()
         cy.findByRole('button', { name: 'Next Step' }).should('not.have.disabled')
 
         cy.findByRole('button', { name: 'Front-end Framework React.js' }).click()
         cy.findByRole('option', { name: 'Create React App' }).click()
-        cy.findByRole('button', { name: 'Bundler Webpack' }).should('not.exist')
+        cy.findByRole('button', { name: 'Bundler(Dev Server) Webpack' }).should('not.exist')
         cy.findByRole('button', { name: 'Next Step' }).should('not.have.disabled')
 
         cy.findByRole('button', { name: 'TypeScript' }).click()
@@ -397,15 +392,15 @@ describe('Launchpad: Setup Project', () => {
         })
 
         cy.get('[data-cy=valid]').within(() => {
-          cy.contains('cypress/component/index.html')
-          cy.contains(`cypress/support/component.ts`)
+          cy.containsPath('cypress/component/index.html')
+          cy.containsPath('cypress/support/component.ts')
         })
 
         cy.findByRole('button', { name: 'Continue' }).should('have.disabled')
       })
 
       it('shows the configuration setup page when opened via cli with --e2e flag', () => {
-        cy.openProject('pristine-with-ct-testing', ['--e2e'])
+        scaffoldAndOpenProject('pristine-with-ct-testing', ['--e2e'])
         cy.visitLaunchpad()
 
         cy.contains('h1', 'Configuration Files')
@@ -416,13 +411,13 @@ describe('Launchpad: Setup Project', () => {
         })
 
         cy.get('[data-cy=valid]').within(() => {
-          cy.contains('cypress/support/e2e.js')
-          cy.contains('cypress/fixtures/example.json')
+          cy.containsPath('cypress/support/e2e.js')
+          cy.containsPath('cypress/fixtures/example.json')
         })
       })
 
       it('can reconfigure config after CT has been set up', () => {
-        cy.openProject('pristine-with-ct-testing')
+        scaffoldAndOpenProject('pristine-with-ct-testing')
         cy.withCtx((ctx) => {
           ctx.coreData.forceReconfigureProject = {
             component: true,
@@ -439,7 +434,7 @@ describe('Launchpad: Setup Project', () => {
       })
 
       it('can reconfigure config after e2e has been set up', () => {
-        cy.openProject('pristine-with-e2e-testing')
+        scaffoldAndOpenProject('pristine-with-e2e-testing')
         cy.withCtx((ctx) => {
           ctx.coreData.forceReconfigureProject = {
             e2e: true,
@@ -525,18 +520,18 @@ describe('Launchpad: Setup Project', () => {
   describe('Component setup', () => {
     describe('project has been configured for component testing', () => {
       it('skips the setup steps when choosing component tests to run', () => {
-        cy.openProject('pristine-with-ct-testing')
+        scaffoldAndOpenProject('pristine-with-ct-testing')
         cy.visitLaunchpad()
 
         verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: true })
 
         cy.get('[data-cy-testingtype="component"]').click()
 
-        cy.contains(/(Initializing Config|Choose a Browser)/)
+        cy.contains(/(Initializing Config|Choose a Browser)/, { timeout: 10000 })
       })
 
       it('opens to the browser pages when opened via cli with --component flag', () => {
-        cy.openProject('pristine-with-ct-testing', ['--component'])
+        scaffoldAndOpenProject('pristine-with-ct-testing', ['--component'])
         cy.visitLaunchpad()
 
         cy.get('h1').should('contain', 'Choose a Browser')
@@ -565,7 +560,7 @@ describe('Launchpad: Setup Project', () => {
       })
 
       it('shows the first setup page for configuration when selecting component tests', () => {
-        cy.openProject('pristine-with-e2e-testing')
+        scaffoldAndOpenProject('pristine-with-e2e-testing')
         cy.visitLaunchpad()
 
         verifyWelcomePage({ e2eIsConfigured: true, ctIsConfigured: false })
@@ -611,7 +606,7 @@ describe('Launchpad: Setup Project', () => {
               }
 
               it(testTitle, () => {
-                cy.openProject(hasStorybookDep ? 'pristine-with-e2e-testing-and-storybook' : 'pristine-with-e2e-testing')
+                scaffoldAndOpenProject(hasStorybookDep ? 'pristine-with-e2e-testing-and-storybook' : 'pristine-with-e2e-testing')
                 cy.withCtx((ctx) => {
                   ctx.actions.file.writeFileInProject('yarn.lock', '# THIS IS AN AUTOGENERATED FILE. DO NOT EDIT THIS FILE DIRECTLY.')
                 })
@@ -641,7 +636,7 @@ describe('Launchpad: Setup Project', () => {
 
                 if (framework.supportedBundlers.length > 1) {
                   cy.findByRole('button', {
-                    name: 'Bundler Pick a bundler',
+                    name: 'Bundler(Dev Server) Pick a bundler',
                     expanded: false,
                   })
                   .should('have.attr', 'aria-haspopup', 'true')
@@ -659,7 +654,7 @@ describe('Launchpad: Setup Project', () => {
                   .should('have.attr', 'data-cy', `${Cypress._.lowerCase(bundler.name)}-logo`)
                   .click()
 
-                  cy.findByRole('button', { name: `Bundler ${bundler.name}` }) // ensure selected option updates
+                  cy.findByRole('button', { name: `Bundler(Dev Server) ${bundler.name}` }) // ensure selected option updates
                 }
 
                 cy.findByRole('button', { name: lang.name }).click()
@@ -676,7 +671,7 @@ describe('Launchpad: Setup Project', () => {
 
                 cy.findByRole('button', { name: `Front-end Framework ${framework.name}` })
                 if (framework.supportedBundlers.length > 1) {
-                  cy.findByRole('button', { name: `Bundler ${bundler.name}` })
+                  cy.findByRole('button', { name: `Bundler(Dev Server) ${bundler.name}` })
                 }
 
                 cy.findByRole('button', { name: lang.name })
@@ -710,17 +705,15 @@ describe('Launchpad: Setup Project', () => {
 
                 cy.findByRole('button', { name: 'Continue' }).click()
 
-                // FIXME: remove if-check once this is fixed. https://cypress-io.atlassian.net/browse/UNIFY-980
-                if (lang.type !== 'ts') {
-                  cy.get('[data-cy=changes]').within(() => {
-                    cy.contains('cypress.config.js')
-                  })
-                }
+                // Even if user chooses typescript in the previous
+                // step, they already have a config file in js.
+                // We cannot rename this file for them.
+                cy.contains('[data-cy=changes]', `cypress.config.js`)
 
                 cy.get('[data-cy=valid]').within(() => {
-                  cy.contains('cypress/component/index.html')
-                  cy.contains(`cypress/support/component.${lang.type}`)
-                  cy.contains('cypress/fixtures/example.json')
+                  cy.containsPath('cypress/component/index.html')
+                  cy.containsPath(`cypress/support/component.${lang.type}`)
+                  cy.containsPath('cypress/fixtures/example.json')
                 })
               })
             })
@@ -729,7 +722,7 @@ describe('Launchpad: Setup Project', () => {
       })
 
       it('opens to the "choose framework" page when opened via cli with --component flag', () => {
-        cy.openProject('pristine-with-e2e-testing', ['--component'])
+        scaffoldAndOpenProject('pristine-with-e2e-testing', ['--component'])
         cy.visitLaunchpad()
 
         cy.get('h1').should('contain', 'Project Setup')
@@ -739,7 +732,7 @@ describe('Launchpad: Setup Project', () => {
 
     describe('project not been configured for cypress', () => {
       it('can setup component testing', () => {
-        cy.openProject('pristine')
+        scaffoldAndOpenProject('pristine')
         cy.visitLaunchpad()
 
         verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: false })
@@ -759,36 +752,38 @@ describe('Launchpad: Setup Project', () => {
         cy.findByRole('button', { name: 'Back' }).click()
         cy.get('[data-cy-testingtype="component"]').click()
 
-        cy.findByRole('button', { name: 'Front-end Framework Create React App' }).click()
+        cy.findByRole('button', { name: 'Front-end Framework Pick a framework' }).click()
         cy.findByRole('option', { name: 'React.js' }).click()
 
         cy.findByRole('button', { name: 'Next Step' }).should('have.disabled')
 
-        cy.findByRole('button', { name: 'Bundler Pick a bundler' }).click()
+        cy.findByRole('button', { name: 'Bundler(Dev Server) Pick a bundler' }).click()
         cy.findByRole('option', { name: 'Webpack' }).click()
+
+        cy.findByRole('button', { name: 'TypeScript' }).click()
         cy.findByRole('button', { name: 'Next Step' }).should('not.have.disabled')
 
         cy.findByRole('button', { name: 'Front-end Framework React.js' }).click()
         cy.findByRole('option', { name: 'Create React App' }).click()
-        cy.findByRole('button', { name: 'Bundler Webpack' }).should('not.exist')
+        cy.findByRole('button', { name: 'Bundler(Dev Server) Webpack' }).should('not.exist')
         cy.findByRole('button', { name: 'Next Step' }).should('not.have.disabled')
 
         cy.findByRole('button', { name: 'Next Step' }).click()
         cy.findByRole('button', { name: 'Continue' }).click()
 
         cy.get('[data-cy=valid]').within(() => {
-          cy.contains('cypress.config.js')
-          cy.contains('cypress/component/index.html')
-          cy.contains(`cypress/support/component.js`)
-          cy.contains('cypress/fixtures/example.json')
+          cy.contains('cypress.config.ts')
+          cy.containsPath('cypress/component/index.html')
+          cy.containsPath(`cypress/support/component.ts`)
+          cy.containsPath('cypress/fixtures/example.json')
         })
 
         cy.findByRole('button', { name: 'Continue' }).click()
-        cy.contains(/(Initializing Config|Choose a Browser)/)
+        cy.contains(/(Initializing Config|Choose a Browser)/, { timeout: 10000 })
       })
 
       it('setup component testing with typescript files', () => {
-        cy.openProject('pristine')
+        scaffoldAndOpenProject('pristine')
         cy.visitLaunchpad()
 
         verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: false })
@@ -807,21 +802,20 @@ describe('Launchpad: Setup Project', () => {
 
         cy.get('[data-cy=valid]').within(() => {
           cy.contains('cypress.config.ts')
-          cy.contains('cypress/component/index.html')
-          cy.contains(`cypress/support/component.ts`)
-          cy.contains('cypress/fixtures/example.json')
+          cy.containsPath('cypress/component/index.html')
+          cy.containsPath(`cypress/support/component.ts`)
+          cy.containsPath('cypress/fixtures/example.json')
         })
 
-        // FIXME: remove if-check once this is fixed. https://cypress-io.atlassian.net/browse/UNIFY-980
-        // cy.findByRole('button', { name: 'Continue' }).click()
-        // cy.contains(/(Initializing Config|Choose a Browser)/)
+        cy.findByRole('button', { name: 'Continue' }).click()
+        cy.contains(/(Initializing Config|Choose a Browser)/, { timeout: 10000 })
       })
     })
   })
 
   describe('Command for package managers', () => {
     it('makes the right command for yarn', () => {
-      cy.openProject('pristine-yarn')
+      scaffoldAndOpenProject('pristine-yarn')
 
       cy.visitLaunchpad()
 
@@ -833,7 +827,7 @@ describe('Launchpad: Setup Project', () => {
     })
 
     it('makes the right command for pnpm', () => {
-      cy.openProject('pristine-pnpm')
+      scaffoldAndOpenProject('pristine-pnpm')
 
       cy.visitLaunchpad()
 
@@ -845,7 +839,7 @@ describe('Launchpad: Setup Project', () => {
     })
 
     it('makes the right command for npm', () => {
-      cy.openProject('pristine-npm')
+      scaffoldAndOpenProject('pristine-npm')
 
       cy.visitLaunchpad()
 
@@ -854,6 +848,162 @@ describe('Launchpad: Setup Project', () => {
       cy.findByText('Create React App').click()
       cy.findByText('Next Step').click()
       cy.get('code').should('contain.text', 'npm install -D ')
+    })
+  })
+
+  describe('detect framework, bundler and language', () => {
+    beforeEach(() => {
+      scaffoldAndOpenProject('pristine')
+    })
+
+    context('meta frameworks', () => {
+      it('detects CRA framework', () => {
+        cy.withCtx(async (ctx) => {
+          await ctx.actions.file.writeFileInProject('package.json', `
+          {
+            "dependencies": {
+              "react": "^1.0.0",
+              "react-dom": "^1.0.1",
+              "react-scripts": "1.0.0"
+            }
+          }
+        `)
+        })
+
+        cy.visitLaunchpad()
+
+        cy.get('[data-cy-testingtype="component"]').click()
+        cy.get('[data-testid="select-framework"]').findByText('Create React App').should('be.visible')
+      })
+
+      it('detects Next framework', () => {
+        cy.withCtx(async (ctx) => {
+          await ctx.actions.file.writeFileInProject('package.json', `
+          {
+            "dependencies": {
+              "react": "^1.0.0",
+              "react-dom": "^1.0.1",
+              "next": "1.0.0"
+            }
+          }
+        `)
+        })
+
+        cy.visitLaunchpad()
+
+        cy.get('[data-cy-testingtype="component"]').click()
+        cy.get('[data-testid="select-framework"]').findByText('Next.js').should('be.visible')
+      })
+
+      it('detects vue-cli framework', () => {
+        cy.withCtx(async (ctx) => {
+          await ctx.actions.file.writeFileInProject('package.json', `
+          {
+            "dependencies": {
+              "vue": "^1.0.0",
+              "@vue/cli-service": "^1.0.1"
+            }
+          }
+        `)
+        })
+
+        cy.visitLaunchpad()
+
+        cy.get('[data-cy-testingtype="component"]').click()
+        cy.get('[data-testid="select-framework"]').findByText('Vue CLI').should('be.visible')
+      })
+
+      it('detects nuxtjs framework', () => {
+        cy.withCtx(async (ctx) => {
+          await ctx.actions.file.writeFileInProject('package.json', `
+          {
+            "dependencies": {
+              "vue": "^1.0.0",
+              "nuxt": "^1.0.1"
+            }
+          }
+        `)
+        })
+
+        cy.visitLaunchpad()
+
+        cy.get('[data-cy-testingtype="component"]').click()
+        cy.get('[data-testid="select-framework"]').findByText('Nuxt.js').should('be.visible')
+      })
+    })
+
+    context('pure frameworks', () => {
+      it('detects react framework', () => {
+        cy.withCtx(async (ctx) => {
+          await ctx.actions.file.writeFileInProject('package.json', `
+          {
+            "dependencies": {
+              "react": "^1.0.0"
+            }
+          }
+        `)
+        })
+
+        cy.visitLaunchpad()
+
+        cy.get('[data-cy-testingtype="component"]').click()
+        cy.get('[data-testid="select-framework"]').findByText('React.js').should('be.visible')
+      })
+
+      it('detects vue framework', () => {
+        cy.withCtx(async (ctx) => {
+          await ctx.actions.file.writeFileInProject('package.json', `
+          {
+            "dependencies": {
+              "vue": "^1.0.0"
+            }
+          }
+        `)
+        })
+
+        cy.visitLaunchpad()
+
+        cy.get('[data-cy-testingtype="component"]').click()
+        cy.get('[data-testid="select-framework"]').findByText('Vue.js').should('be.visible')
+      })
+    })
+
+    describe('bundlers', () => {
+      it('detects webpack framework', () => {
+        cy.withCtx(async (ctx) => {
+          await ctx.actions.file.writeFileInProject('package.json', `
+          {
+            "dependencies": {
+              "react": "^1.0.0",
+              "webpack": "^1.0.0"
+            }
+          }
+        `)
+        })
+
+        cy.visitLaunchpad()
+
+        cy.get('[data-cy-testingtype="component"]').click()
+        cy.get('[data-testid="select-bundler"]').findByText('Webpack').should('be.visible')
+      })
+
+      it('detects vite framework', () => {
+        cy.withCtx(async (ctx) => {
+          await ctx.actions.file.writeFileInProject('package.json', `
+          {
+            "dependencies": {
+              "react": "^1.0.0",
+              "vite": "^1.0.0"
+            }
+          }
+        `)
+        })
+
+        cy.visitLaunchpad()
+
+        cy.get('[data-cy-testingtype="component"]').click()
+        cy.get('[data-testid="select-bundler"]').findByText('Vite').should('be.visible')
+      })
     })
   })
 })

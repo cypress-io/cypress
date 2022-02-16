@@ -1,5 +1,4 @@
 import type { e2eProjectDirs } from '@packages/frontend-shared/cypress/e2e/support/e2eProjectDirs'
-import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 
 const renameAutoStep = `[data-cy="migration-step renameAuto"]`
 const renameManualStep = `[data-cy="migration-step renameManual"]`
@@ -50,6 +49,10 @@ function finishMigrationAndContinue () {
   cy.contains('Finish migration and continue').click()
 }
 
+function checkOutcome () {
+  cy.contains('Welcome to Cypress!').should('be.visible')
+}
+
 function runAutoRename () {
   cy.get('button').contains('Rename these specs for me').click()
 }
@@ -72,21 +75,15 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
     startMigrationFor('migration-component-testing')
     // custom testFiles - cannot auto
     cy.get(renameAutoStep).should('not.exist')
-    cy.get(renameManualStep).should('exist')
+    cy.get(renameManualStep).should('not.exist')
     // supportFile is false - cannot migrate
     cy.get(renameSupportStep).should('not.exist')
     cy.get(setupComponentStep).should('exist')
     cy.get(configFileStep).should('exist')
 
-    // needs some time for the CT migration tool to kick in
-    cy.wait(1000)
-    // Migration workflow
-    cy.contains('src/button.spec.js')
-    cy.contains('src/input-spec.tsx')
-
-    skipCTMigration()
     migrateAndVerifyConfig()
     finishMigrationAndContinue()
+    checkOutcome()
   })
 
   it('completes journey for migration-component-testing-defaults', () => {
@@ -125,6 +122,7 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
     skipCTMigration()
     migrateAndVerifyConfig()
     finishMigrationAndContinue()
+    checkOutcome()
   })
 
   it('completes journey for migration-e2e-component-default-everything', () => {
@@ -165,13 +163,21 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
     renameSupport()
     migrateAndVerifyConfig()
     finishMigrationAndContinue()
+
+    cy.withCtx(async (ctx) => {
+      const integrationFolderStats = await ctx.actions.file.checkIfFileExists(ctx.path.join('cypress', 'integration'))
+
+      expect(integrationFolderStats).to.be.null
+    })
+
+    checkOutcome()
   })
 
   it('completes journey for migration-e2e-component-default-test-files', () => {
     startMigrationFor('migration-e2e-component-default-test-files')
     // default testFiles - auto
     cy.get(renameAutoStep).should('exist')
-    cy.get(renameManualStep).should('exist')
+    cy.get(renameManualStep).should('not.exist')
     // supportFile is false - cannot migrate
     cy.get(renameSupportStep).should('exist')
     cy.get(setupComponentStep).should('exist')
@@ -180,11 +186,9 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
     // Migration workflow
     // before auto migration
     cy.contains('cypress/custom-integration/foo.spec.ts')
-    cy.contains('cypress/custom-component/button.spec.js')
 
     // after auto migration
     cy.contains('cypress/custom-integration/foo.cy.ts')
-    cy.contains('cypress/custom-component/button.cy.js')
 
     runAutoRename()
 
@@ -200,10 +204,10 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
       })
     })
 
-    skipCTMigration()
     renameSupport()
     migrateAndVerifyConfig()
     finishMigrationAndContinue()
+    checkOutcome()
   })
 
   it('completes journey for migration-e2e-custom-integration', () => {
@@ -237,6 +241,7 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
 
     renameSupport()
     migrateAndVerifyConfig()
+    checkOutcome()
   })
 
   it('completes journey for migration-e2e-custom-test-files', () => {
@@ -281,6 +286,7 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
 
     renameSupport()
     migrateAndVerifyConfig()
+    checkOutcome()
   })
 
   it('completes journey for migration-e2e-defaults', () => {
@@ -324,6 +330,7 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
 
     renameSupport('ts')
     migrateAndVerifyConfig()
+    checkOutcome()
   })
 
   it('completes journey for migration-e2e-no-plugins-support-file', () => {
@@ -357,6 +364,7 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
     runAutoRename()
 
     migrateAndVerifyConfig()
+    checkOutcome()
   })
 
   // TODO: Do we need to consider this case?
@@ -373,6 +381,7 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
 
     renameSupport()
     migrateAndVerifyConfig()
+    checkOutcome()
   })
 
   it('completes journey for migration-e2e-fully-custom', () => {
@@ -387,6 +396,7 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
     cy.get(configFileStep).should('exist')
 
     migrateAndVerifyConfig()
+    checkOutcome()
   })
 
   it('completes journey for migration-component-testing-customized', () => {
@@ -394,7 +404,7 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
     // cannot rename anything automatically here, testFiles are customized
     cy.get(renameAutoStep).should('not.exist')
 
-    cy.get(renameManualStep).should('exist')
+    cy.get(renameManualStep).should('not.exist')
 
     // no supportFile rename for CT
     cy.get(renameSupportStep).should('not.exist')
@@ -402,9 +412,9 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
     cy.get(setupComponentStep).should('exist')
     cy.get(configFileStep).should('exist')
 
-    skipCTMigration()
     migrateAndVerifyConfig()
     finishMigrationAndContinue()
+    checkOutcome()
   })
 
   it('completes journey for migration-typescript-project', () => {
@@ -448,12 +458,13 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
 
     renameSupport()
     migrateAndVerifyConfig('ts')
+    checkOutcome()
   })
 })
 
-describe('component testing migration - defaults', () => {
-  // TODO: toApp emitter not working in Cypress in Cypress.
-  it.skip('live update migration UI as user moves files', () => {
+// TODO: toLaunchpad emitter not working in Cypress in Cypress.
+describe.skip('component testing migration - defaults', () => {
+  it('live update migration UI as user moves files', () => {
     cy.scaffoldProject('migration-component-testing-customized')
     cy.openProject('migration-component-testing-customized')
     cy.visitLaunchpad()
@@ -478,8 +489,7 @@ describe('component testing migration - defaults', () => {
     cy.get('button').contains('I have moved my component specs')
   })
 
-  // TODO: toApp emitter not working in Cypress in Cypress.
-  it.skip('live update migration UI as user moves files', () => {
+  it('live update migration UI as user moves files', () => {
     cy.scaffoldProject('migration-component-testing-customized')
     cy.openProject('migration-component-testing-customized')
     cy.visitLaunchpad()
@@ -511,15 +521,14 @@ describe('Migration', { viewportWidth: 1200 }, () => {
 
     // all steps
     cy.get(renameAutoStep).should('exist')
-    cy.get(renameManualStep).should('exist')
+    cy.get(renameManualStep).should('not.exist')
     cy.get(renameSupportStep).should('exist')
     cy.get(setupComponentStep).should('exist')
     cy.get(configFileStep).should('exist')
 
-    runAutoRename()
-    cy.findByText(`I'll do this later`).click()
-    cy.findByText(defaultMessages.migration.wizard.step3.button).click()
-    cy.findByText(defaultMessages.migration.wizard.step4.button).click()
+    cy.get('button').contains('Rename these specs for me').scrollIntoView().click()
+    cy.findByText('Rename the support file for me').click()
+    cy.findByText('Migrate the configuration for me').click()
 
     cy.withCtx(async (ctx) => {
       const configStats = await ctx.actions.file.checkIfFileExists('cypress.config.js')

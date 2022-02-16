@@ -1,6 +1,6 @@
 import globby from 'globby'
-import { MIGRATION_STEPS } from '@packages/types'
 import path from 'path'
+import { MIGRATION_STEPS } from '@packages/types'
 import { getSpecs, OldCypressConfig, tryGetDefaultLegacySupportFile } from '.'
 
 function getTestFilesGlobs (config: OldCypressConfig, type: 'component' | 'integration'): string[] {
@@ -62,7 +62,7 @@ export function getComponentFolder (config: OldCypressConfig) {
 }
 
 async function hasSpecFiles (projectRoot: string, dir: string, testFilesGlob: string[]): Promise<boolean> {
-  const f = await globby(testFilesGlob.map((x) => path.join(projectRoot, dir, x)))
+  const f = await globby(testFilesGlob, { cwd: path.join(projectRoot, dir) })
 
   return f.length > 0
 }
@@ -71,6 +71,18 @@ export async function shouldShowAutoRenameStep (projectRoot: string, config: Old
 
   // if we have at least one spec to auto migrate in either Ct or E2E, we return true.
   return specsToAutoMigrate.integration.length > 0 || specsToAutoMigrate.component.length > 0
+}
+
+async function anyComponentSpecsExist (projectRoot: string, config: OldCypressConfig) {
+  const componentFolder = getComponentFolder(config)
+
+  if (componentFolder === false) {
+    return false
+  }
+
+  const componentTestFiles = getComponentTestFilesGlobs(config)
+
+  return hasSpecFiles(projectRoot, componentFolder, componentTestFiles)
 }
 
 async function anyIntegrationSpecsExist (projectRoot: string, config: OldCypressConfig) {
@@ -117,18 +129,18 @@ export async function shouldShowRenameSupport (projectRoot: string, config: OldC
   return supportFile.includes(defaultSupportFile)
 }
 
-// if they have component testing configured, they will need to
+// if they have component testing configured using the defaults, they will need to
 // rename/move their specs.
-function shouldShowRenameManual (projectRoot: string, config: OldCypressConfig) {
+async function shouldShowRenameManual (projectRoot: string, config: OldCypressConfig) {
   const componentFolder = getComponentFolder(config)
 
-  if (componentFolder === false) {
+  const usingAllDefaults = componentFolder === 'cypress/component' && isDefaultTestFiles(config, 'component')
+
+  if (componentFolder === false || !usingAllDefaults) {
     return false
   }
 
-  const componentTestFiles = getComponentTestFilesGlobs(config)
-
-  return hasSpecFiles(projectRoot, componentFolder, componentTestFiles)
+  return anyComponentSpecsExist(projectRoot, config)
 }
 
 // All projects must move from cypress.json to cypress.config.js!
@@ -163,7 +175,7 @@ export async function getStepsForMigration (
 
     // if we are showing rename manual, this implies
     // component testing is configured.
-    if (step === 'setupComponent' && steps.includes('renameManual')) {
+    if (step === 'setupComponent' && await anyComponentSpecsExist(projectRoot, config)) {
       steps.push(step)
     }
   }

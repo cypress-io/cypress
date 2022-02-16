@@ -99,7 +99,7 @@ export const mutation = mutationType({
     t.field('completeSetup', {
       type: 'Query',
       resolve: async (_, args, ctx) => {
-        ctx.actions.wizard.completeSetup()
+        await ctx.actions.wizard.completeSetup()
 
         return {}
       },
@@ -130,8 +130,18 @@ export const mutation = mutationType({
       args: {
         testingType: nonNull(arg({ type: TestingTypeEnum })),
       },
-      resolve: (source, args, ctx) => {
+      resolve: async (source, args, ctx) => {
         ctx.actions.project.setCurrentTestingType(args.testingType)
+
+        // if necessary init the wizard for configuration
+        if (ctx.coreData.currentTestingType
+          && !ctx.lifecycleManager.isTestingTypeConfigured(ctx.coreData.currentTestingType)) {
+          try {
+            await ctx.actions.wizard.initialize()
+          } catch (e) {
+            ctx.coreData.baseError = e as Error
+          }
+        }
 
         return {}
       },
@@ -351,6 +361,16 @@ export const mutation = mutationType({
       },
     })
 
+    t.nonNull.field('resetLatestVersionTelemetry', {
+      type: 'Boolean',
+      description: 'Resets the latest version call to capture additional telemetry for the current user',
+      resolve: async (_, args, ctx) => {
+        ctx.actions.versions.resetLatestVersionTelemetry()
+
+        return true
+      },
+    })
+
     t.nonNull.field('focusActiveBrowserWindow', {
       type: 'Boolean',
       description: 'Sets focus to the active browser window',
@@ -485,6 +505,16 @@ export const mutation = mutationType({
         await ctx.actions.migration.nextStep()
 
         return {}
+      },
+    })
+
+    t.field('migrateCloseManualRenameWatcher', {
+      description: 'While migrating to 10+ skip manual rename step',
+      type: 'Boolean',
+      resolve: async (_, args, ctx) => {
+        await ctx.actions.migration.closeManualRenameWatcher()
+
+        return true
       },
     })
 

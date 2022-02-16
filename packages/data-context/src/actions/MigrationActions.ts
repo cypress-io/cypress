@@ -1,6 +1,7 @@
 import path from 'path'
 import type { DataContext } from '..'
 import {
+  cleanUpIntegrationFolder,
   formatConfig,
   moveSpecFiles,
   NonStandardMigrationError,
@@ -47,7 +48,12 @@ export class MigrationActions {
 
     const projectRoot = this.ctx.path.join(this.ctx.currentProject)
 
-    moveSpecFiles(projectRoot, specsToMove)
+    try {
+      await moveSpecFiles(projectRoot, specsToMove)
+      await cleanUpIntegrationFolder(this.ctx.currentProject)
+    } catch (err: any) {
+      this.ctx.coreData.baseError = err
+    }
   }
 
   async renameSupportFile () {
@@ -95,6 +101,10 @@ export class MigrationActions {
     } else {
       await this.finishReconfigurationWizard()
     }
+  }
+
+  async closeManualRenameWatcher () {
+    await this.ctx.migration.closeManualRenameWatcher()
   }
 
   async assertSuccessfulConfigMigration (configExtension: 'js' | 'ts' = 'js') {
