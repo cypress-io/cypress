@@ -6,12 +6,12 @@ describe('runner/cypress sessions.ui.spec', {
   // of nested spec snapshots
   numTestsKeptInMemory: 1,
 }, () => {
-  // afterEach(function () {
-  //   // @ts-ignore
-  //   if (cy.state('test').state === 'passed') {
-  //     reporterSnapshot()
-  //   }
-  // })
+  afterEach(function () {
+    // @ts-ignore
+    if (cy.state('test').state === 'passed') {
+      reporterSnapshot()
+    }
+  })
 
   it('empty session with no data', () => {
     loadSpec({
@@ -21,11 +21,9 @@ describe('runner/cypress sessions.ui.spec', {
 
     cy.get('.sessions-container').click()
     .should('contain', 'blank_session')
-
-    reporterSnapshot()
   })
 
-  it('shows message for new, saved, and recreated session', () => {
+  it('shows message for new, saved, and recreated session', { viewportHeight: 1500 }, () => {
     loadSpec({
       fileName: 'recreated_session.cy.js',
       passCount: 3,
@@ -57,8 +55,6 @@ describe('runner/cypress sessions.ui.spec', {
     .should('contain', 'Sessions (1)')
     .should('contain', 'user1')
     .should('contain', '(recreated)')
-
-    reporterSnapshot()
   })
 
   it('multiple sessions in a test', () => {
@@ -71,7 +67,5 @@ describe('runner/cypress sessions.ui.spec', {
     .should('contain', 'Sessions (2)')
     .should('contain', 'user1')
     .should('contain', 'user2')
-
-    reporterSnapshot()
   })
 })
