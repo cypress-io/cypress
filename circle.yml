@@ -451,8 +451,10 @@ commands:
       - restore_cached_workspace
       - run:
           # TODO: How can we have preinstalled browsers on CircleCI?
-          name: 'Install Chrome on Windows' 
+          name: 'Install Chrome on Windows'
           command: |
+            # install with `--ignore-checksums` to avoid checksum error
+            # https://www.gep13.co.uk/blog/chocolatey-error-hashes-do-not-match
             [[ $PLATFORM == 'windows' && '<<parameters.browser>>' == 'chrome' ]] && choco install googlechrome --ignore-checksums || [[ $PLATFORM != 'windows' ]]
       - run:
           command: |
