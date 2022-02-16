@@ -1,11 +1,9 @@
 import Debug from 'debug'
 import path from 'path'
-
-import * as settings from './util/settings'
-import errors from './errors'
-import { fs } from './util/fs'
-import { escapeFilenameInUrl } from './util/escape_filename'
 import { CYPRESS_CONFIG_FILES } from './configFiles'
+import errors from './errors'
+import { escapeFilenameInUrl } from './util/escape_filename'
+import { fs } from './util/fs'
 
 const debug = Debug('cypress:server:project_utils')
 
@@ -126,7 +124,7 @@ export const checkSupportFile = async ({
     const found = await fs.pathExists(supportFile)
 
     if (!found) {
-      errors.throw('SUPPORT_FILE_NOT_FOUND', supportFile, settings.configFile({ configFile }))
+      errors.throw('SUPPORT_FILE_NOT_FOUND', supportFile)
     }
   }
 
@@ -145,7 +143,7 @@ export async function getDefaultConfigFilePath (projectRoot: string, returnDefau
 
   // if we found more than one, throw a language conflict
   if (foundConfigFiles.length > 1) {
-    throw errors.throw('CONFIG_FILES_LANGUAGE_CONFLICT', projectRoot, ...foundConfigFiles)
+    throw errors.throw('CONFIG_FILES_LANGUAGE_CONFLICT', projectRoot, foundConfigFiles[0], foundConfigFiles[1])
   }
 
   if (returnDefaultValueIfNotFound) {

@@ -3,7 +3,7 @@ import * as path from 'path'
 import * as cp from 'child_process'
 import * as inspector from 'inspector'
 import * as util from '../plugins/util'
-import * as errors from '../errors'
+import errors from '../errors'
 import Debug from 'debug'
 
 const debug = Debug('cypress:server:require_async')
@@ -65,12 +65,12 @@ export async function requireAsync (filePath: string, options: RequireAsyncOptio
       debug('load:error %s, rejecting', type)
       killChildProcess()
 
-      const err = errors.get(type, ...args)
+      let err
 
-      // if it's a non-cypress error, restore the initial error
-      if (!(err.message?.length)) {
-        err.isCypressErr = false
-        err.message = args[1]
+      if (errors.AllCypressErrors[type]) {
+        err = errors.get(type, ...args)
+      } else {
+        err = new Error(args[1])
         err.code = type
         err.name = type
       }

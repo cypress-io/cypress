@@ -1,5 +1,3 @@
-// @ts-nocheck
-/* global cy, Cypress */
 import _ from 'lodash'
 import whatIsCircular from '@cypress/what-is-circular'
 import UrlParse from 'url-parse'
@@ -15,10 +13,10 @@ import debugFn from 'debug'
 const debug = debugFn('cypress:driver:navigation')
 
 let id = null
-let previousDomainVisited = null
-let hasVisitedAboutBlank = null
-let currentlyVisitingAboutBlank = null
-let knownCommandCausedInstability = null
+let previousDomainVisited: boolean = false
+let hasVisitedAboutBlank: boolean = false
+let currentlyVisitingAboutBlank: boolean = false
+let knownCommandCausedInstability: boolean = false
 
 const REQUEST_URL_OPTS = 'auth failOnStatusCode retryOnNetworkFailure retryOnStatusCodeFailure retryIntervals method body headers'
 .split(' ')
@@ -27,7 +25,7 @@ const VISIT_OPTS = 'url log onBeforeLoad onLoad timeout requestTimeout'
 .split(' ')
 .concat(REQUEST_URL_OPTS)
 
-const reset = (test = {}) => {
+const reset = (test: any = {}) => {
   knownCommandCausedInstability = false
 
   // continuously reset this
@@ -62,7 +60,7 @@ const timedOutWaitingForPageLoad = (ms, log) => {
 }
 
 const cannotVisitDifferentOrigin = (origin, previousUrlVisited, remoteUrl, existingUrl, log) => {
-  const differences = []
+  const differences: string[] = []
 
   if (remoteUrl.protocol !== existingUrl.protocol) {
     differences.push('protocol')
@@ -171,7 +169,7 @@ const navigationChanged = (Cypress, cy, state, source, arg) => {
     end: true,
     snapshot: true,
     consoleProps () {
-      const obj = {
+      const obj: Record<string, any> = {
         'New Url': url,
       }
 
@@ -265,7 +263,7 @@ const stabilityChanged = (Cypress, state, config, stable) => {
     return
   }
 
-  const options = {}
+  const options: Record<string, any> = {}
 
   _.defaults(options, {
     timeout: config('pageLoadTimeout'),
@@ -361,8 +359,23 @@ const stabilityChanged = (Cypress, state, config, stable) => {
         resolve()
       }
 
-      const onCrossDomainWindowLoad = () => {
+      const onCrossDomainWindowLoad = ({ url }) => {
         options._log.set('message', '--page loaded--').snapshot().end()
+
+        //Updating the URL state, This is done to display the new url event when we return to the primary domain
+        let urls = state('urls') || []
+        let urlPosition = state('urlPosition')
+
+        if (urlPosition === undefined) {
+          urlPosition = -1
+        }
+
+        urls.push(url)
+        urlPosition = urlPosition + 1
+
+        state('urls', urls)
+        state('url', url)
+        state('urlPosition', urlPosition)
 
         resolve()
       }
@@ -380,7 +393,7 @@ const stabilityChanged = (Cypress, state, config, stable) => {
           case 'same:domain':
             return onWindowLoad(details.window)
           case 'cross:domain':
-            return onCrossDomainWindowLoad()
+            return onCrossDomainWindowLoad(details)
           case 'cross:domain:failure':
             return onCrossDomainFailure(details.error)
           default:
@@ -433,6 +446,14 @@ const normalizeTimeoutOptions = (options) => {
   .value()
 }
 
+type NotOkResponseError = Error & {
+  gotResponse: boolean
+}
+
+type InvalidContentTypeError = Error & {
+  invalidContentType: boolean
+}
+
 export default (Commands, Cypress, cy, state, config) => {
   reset()
 
@@ -449,7 +470,7 @@ export default (Commands, Cypress, cy, state, config) => {
   Cypress.on('stability:changed', (bool, event) => {
     // only send up page loading events when we're
     // not stable!
-    stabilityChanged(Cypress, state, config, bool, event)
+    stabilityChanged(Cypress, state, config, bool)
   })
 
   Cypress.on('navigation:changed', (source, arg) => {
@@ -474,11 +495,11 @@ export default (Commands, Cypress, cy, state, config) => {
       url,
       normalizeTimeoutOptions(options),
     )
-    .then((resp = {}) => {
+    .then((resp: any = {}) => {
       if (!resp.isOkStatusCode) {
         // if we didn't even get an OK response
         // then immediately die
-        const err = new Error
+        const err: NotOkResponseError = new Error as any
 
         err.gotResponse = true
         _.extend(err, resp)
@@ -488,7 +509,7 @@ export default (Commands, Cypress, cy, state, config) => {
 
       if (!resp.isHtml) {
         // throw invalid contentType error
-        const err = new Error
+        const err: InvalidContentTypeError = new Error as any
 
         err.invalidContentType = true
         _.extend(err, resp)
@@ -554,7 +575,7 @@ export default (Commands, Cypress, cy, state, config) => {
       // clear the current timeout
       cy.clearTimeout('reload')
 
-      let cleanup = null
+      let cleanup: (() => any) | null = null
       const options = _.defaults({}, userOptions, {
         log: true,
         timeout: config('pageLoadTimeout'),
@@ -608,7 +629,7 @@ export default (Commands, Cypress, cy, state, config) => {
     },
 
     go (numberOrString, userOptions = {}) {
-      const options = _.defaults({}, userOptions, {
+      const options: Record<string, any> = _.defaults({}, userOptions, {
         log: true,
         timeout: config('pageLoadTimeout'),
       })
@@ -624,7 +645,7 @@ export default (Commands, Cypress, cy, state, config) => {
           $errUtils.throwErrByPath('go.invalid_number', { onFail: options._log })
         }
 
-        let cleanup = null
+        let cleanup: (() => any) | null = null
 
         if (options._log) {
           options._log.snapshot('before', { next: 'after' })
@@ -698,7 +719,7 @@ export default (Commands, Cypress, cy, state, config) => {
           case 'forward': return goNumber(1)
           case 'back': return goNumber(-1)
           default:
-            $errUtils.throwErrByPath('go.invalid_direction', {
+            return $errUtils.throwErrByPath('go.invalid_direction', {
               onFail: options._log,
               args: { str },
             })
@@ -713,10 +734,11 @@ export default (Commands, Cypress, cy, state, config) => {
         return goString(numberOrString)
       }
 
-      $errUtils.throwErrByPath('go.invalid_argument', { onFail: options._log })
+      return $errUtils.throwErrByPath('go.invalid_argument', { onFail: options._log })
     },
 
-    visit (url, options = {}) {
+    // TODO: Change the type of `any` to `Partial<Cypress.VisitOptions>`.
+    visit (url, options: any = {}) {
       if (options.url && url) {
         $errUtils.throwErrByPath('visit.no_duplicate_url', { args: { optionsUrl: options.url, url } })
       }
@@ -807,7 +829,7 @@ export default (Commands, Cypress, cy, state, config) => {
         url = $Location.mergeUrlWithParams(url, qs)
       }
 
-      let cleanup = null
+      let cleanup: (() => any) | null = null
 
       // clear the current timeout
       cy.clearTimeout('visit')
@@ -830,7 +852,7 @@ export default (Commands, Cypress, cy, state, config) => {
               })
 
               options.onBeforeLoad?.call(runnable.ctx, contentWindow)
-            } catch (err) {
+            } catch (err: any) {
               err.isCallbackError = true
               onBeforeLoadError = err
             }
@@ -876,7 +898,10 @@ export default (Commands, Cypress, cy, state, config) => {
         })
       }
 
-      const onLoad = ({ runOnLoadCallback, totalTime }) => {
+      const onLoad = ({ runOnLoadCallback, totalTime }: {
+        runOnLoadCallback?: boolean
+        totalTime?: number
+      }) => {
         // reset window on load
         win = state('window')
 
@@ -884,7 +909,7 @@ export default (Commands, Cypress, cy, state, config) => {
         if (runOnLoadCallback !== false) {
           try {
             options.onLoad?.call(runnable.ctx, win)
-          } catch (err) {
+          } catch (err: any) {
             // mark these as user callback errors, so they're treated differently
             // than Node.js errors when caught below
             err.isCallbackError = true
@@ -959,7 +984,9 @@ export default (Commands, Cypress, cy, state, config) => {
           }
 
           return changeIframeSrc(remote.href, 'hashchange')
-          .then(onLoad)
+          .then(() => {
+            return onLoad({})
+          })
         }
 
         if (existingHash) {
@@ -974,7 +1001,7 @@ export default (Commands, Cypress, cy, state, config) => {
         }
 
         return requestUrl(url, options)
-        .then((resp = {}) => {
+        .then((resp: any = {}) => {
           let { url, originalUrl, cookies, redirects, filePath } = resp
 
           // reapply the existing hash
@@ -1029,7 +1056,7 @@ export default (Commands, Cypress, cy, state, config) => {
           // tell our backend we're changing domains
           // TODO: add in other things we want to preserve
           // state for like scrollTop
-          let s = {
+          let s: Record<string, any> = {
             currentId: id,
             tests: Cypress.runner.getTestsState(),
             startTime: Cypress.runner.getStartTime(),

@@ -68,6 +68,23 @@ const setup = (cypressConfig: Cypress.Config, env: Cypress.ObjectLike) => {
 
   cy.onBeforeAppWindowLoad = onBeforeAppWindowLoad(Cypress, cy)
 
+  // TODO Should state syncing be built into cy.state instead of being explicitly called?
+  specBridgeCommunicator.on('sync:state', async (state) => {
+    cy.state(state)
+  })
+
+  // Listen for window load events from the primary window to resolve page loads
+  specBridgeCommunicator.on('window:load', ({ url }) => {
+    cy.isStable(true, 'load')
+    Cypress.emit('internal:window:load', { type: 'cross:domain', url })
+  })
+
+  // Forward url:changed Message to the primary domain to enable changing the url displayed in the AUT
+  // @ts-ignore
+  Cypress.on('url:changed', (url) => {
+    specBridgeCommunicator.toPrimary('url:changed', url)
+  })
+
   return cy
 }
 
@@ -78,7 +95,11 @@ const onBeforeAppWindowLoad = (Cypress: Cypress.Cypress, cy: $Cy) => (autWindow:
   Cypress.state('window', autWindow)
   Cypress.state('document', autWindow.document)
 
+  // This is typically called by the cy function `urlNavigationEvent` but it is private. For the primary domain this is called in 'onBeforeAppWindowLoad'.
+  Cypress.action('app:navigation:changed', 'page navigation event (\'before:load\')')
+
   cy.overrides.wrapNativeMethods(autWindow)
+
   // TODO: DRY this up with the mostly-the-same code in src/cypress/cy.js
   bindToListeners(autWindow, {
     onError: handleErrorEvent(cy, 'app'),
@@ -87,9 +108,9 @@ const onBeforeAppWindowLoad = (Cypress: Cypress.Cypress, cy: $Cy) => (autWindow:
       return Cypress.action('app:form:submitted', e)
     },
     onBeforeUnload (e) {
-      // TODO: implement these commented out bits
-      // stability.isStable(false, 'beforeunload')
+      cy.isStable(false, 'beforeunload')
 
+      // TODO: implement these commented out bits
       // Cookies.setInitial()
 
       // timers.reset()
@@ -101,7 +122,13 @@ const onBeforeAppWindowLoad = (Cypress: Cypress.Cypress, cy: $Cy) => (autWindow:
       return undefined
     },
     onLoad () {
-      specBridgeCommunicator.toPrimary('window:load')
+      // This is typically called by the cy function `urlNavigationEvent` but it is private. For the primary domain this is called on 'load'.
+      Cypress.action('app:navigation:changed', 'page navigation event (\'load\')')
+      // This is also call on the on 'load' event in cy
+      Cypress.action('app:window:load', autWindow)
+
+      specBridgeCommunicator.toPrimary('window:load', { url: cy.getRemoteLocation('href') })
+      cy.isStable(true, 'load')
     },
     onUnload (e) {
       return Cypress.action('app:window:unload', e)

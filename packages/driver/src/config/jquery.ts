@@ -1,10 +1,16 @@
-// @ts-nocheck
-
-import $ from 'jquery'
+import JQuery from 'jquery'
 import _ from 'lodash'
 
 import { scrollTo } from './jquery.scrollto'
 import $dom from '../dom'
+
+// Add missing types.
+interface ExtendedJQueryStatic extends JQueryStatic {
+  find: any
+  expr: JQuery.Selectors & { filters: any }
+}
+
+const $: ExtendedJQueryStatic = JQuery as any
 
 // force jquery to have the same visible
 // and hidden logic as cypress

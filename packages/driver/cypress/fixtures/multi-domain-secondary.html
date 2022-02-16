@@ -11,6 +11,10 @@
   </form>
   <button data-cy="alert">Alert</button>
   <button data-cy="confirm">Confirm</button>
+  <button data-cy="reload">reload</button>
+  <a data-cy="hashChange" href='#hashChange'>hashChange</a>
+  <a data-cy="multi-domain-page"
+        href="/fixtures/multi-domain.html">/fixtures/multi-domain.html</a>
 
   <script>
     if (window.Cypress) {
@@ -27,6 +31,10 @@
 
     document.querySelector('[data-cy="confirm"]').addEventListener('click', () => {
       window.confirm('the confirm text')
+    })
+
+    document.querySelector('[data-cy="reload"]').addEventListener('click', () => {
+      window.location.reload()
     })
   </script>
 </body>

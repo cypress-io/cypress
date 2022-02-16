@@ -1,3 +1,5 @@
+const { theme } = require('@packages/errors/src/errTemplate')
+
 require('../spec_helper')
 
 const mockedEnv = require('mocked-env')
@@ -246,7 +248,7 @@ describe('lib/project-base', () => {
             family: 'some-other-family',
             name: 'some-other-name',
             warning: `\
-Your project has set the configuration option: \`chromeWebSecurity: false\`
+Your project has set the configuration option: ${theme.yellow('chromeWebSecurity')} to ${theme.blue('false')}
 
 This option will not have an effect in Some-other-name. Tests that rely on web security being disabled will not run as expected.\
 `,
