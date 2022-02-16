@@ -18,7 +18,7 @@ describe('Cypress In Cypress', { viewportWidth: 1200 }, () => {
     let styleBuffer = ''
 
     cy.get('link[rel=stylesheet][href]').each(($el) => {
-      const url = `http://localhost:4455${ $el.attr('href')?.replace('./', '/')}`
+      const url = `http://localhost:4455${ $el.attr('href')?.replace('./', '/__/')}`
 
       cy.log(url)
 
@@ -84,7 +84,7 @@ describe('Cypress In Cypress', { viewportWidth: 1200 }, () => {
     let styleBuffer = ''
 
     cy.get('link[rel=stylesheet][href]').each(($el) => {
-      const url = `http://localhost:4455${ $el.attr('href')?.replace('./', '/')}`
+      const url = `http://localhost:4455${ $el.attr('href')?.replace('./', '/__/')}`
 
       cy.log(url)
 
@@ -93,10 +93,13 @@ describe('Cypress In Cypress', { viewportWidth: 1200 }, () => {
         styleBuffer += `
         ${res.body}`
       })
+      .debug()
     })
     .then(() => {
       (document.querySelector('body') as HTMLElement).innerHTML += `<style id="percy-test">${styleBuffer}</style>`
     })
+
+    cy.wait(20000000000000)
 
     // go to Settings page and back to spec runner
     cy.contains('a', 'Settings').click()
