@@ -15,6 +15,19 @@ describe('Cypress In Cypress', { viewportWidth: 1200 }, () => {
       expect(location.hash).to.contain('dom-content.spec')
     })
 
+    let styleBuffer = ''
+
+    cy.get('link[rel=stylesheet]').each(($el) => {
+      cy.request(`http://localhost:4455${ $el.attr('href')}`)
+      .then((res) => {
+        styleBuffer += `
+        ${res.body}`
+      })
+    })
+    .then(() => {
+      (document.querySelector('body') as HTMLElement).innerHTML += `<style id="percy-test">${styleBuffer}</style>`
+    })
+
     cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
     cy.findByTestId('aut-url').should('be.visible')
     cy.findByTestId('playground-activator').should('be.visible')
@@ -63,6 +76,19 @@ describe('Cypress In Cypress', { viewportWidth: 1200 }, () => {
   it('navigation between specs and other parts of the app works', () => {
     cy.contains('dom-content.spec').click()
     cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
+
+    let styleBuffer = ''
+
+    cy.get('link[rel=stylesheet]').each(($el) => {
+      cy.request(`http://localhost:4455${ $el.attr('href')}`)
+      .then((res) => {
+        styleBuffer += `
+        ${res.body}`
+      })
+    })
+    .then(() => {
+      (document.querySelector('body') as HTMLElement).innerHTML += `<style id="percy-test">${styleBuffer}</style>`
+    })
 
     // go to Settings page and back to spec runner
     cy.contains('a', 'Settings').click()
