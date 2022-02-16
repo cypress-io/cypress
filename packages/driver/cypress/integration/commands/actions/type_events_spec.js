@@ -5,7 +5,7 @@ describe('src/cy/commands/actions/type - #type events', () => {
     cy.visit('fixtures/dom.html')
   })
 
-  describe('events', () => {
+  describe('keyboard events', () => {
     it('receives keydown event', (done) => {
       const $txt = cy.$$(':text:first')
 
