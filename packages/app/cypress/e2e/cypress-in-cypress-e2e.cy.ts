@@ -15,70 +15,48 @@ describe('Cypress In Cypress', { viewportWidth: 1200 }, () => {
       expect(location.hash).to.contain('dom-content.spec')
     })
 
-    let styleBuffer = ''
+    cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
+    cy.findByTestId('aut-url').should('be.visible')
+    cy.findByTestId('playground-activator').should('be.visible')
+    cy.findByTestId('select-browser').click()
 
-    cy.get('link[rel=stylesheet][href]').each(($el) => {
-      const url = `http://localhost:4455${ $el.attr('href')?.replace('./', '/__/')}`
+    cy.contains('Firefox').click()
 
-      cy.log(url)
+    cy.percySnapshot('browsers open')
 
-      $el.attr('href', url)
+    cy.contains('Chrome 1')
+    .focus()
+    .type('{esc}')
 
-      // cy.request(url)
-      // .then((res) => {
-      //   styleBuffer += `
-      //   ${res.body}`
-      // })
-    })
-    .then(() => {
-      cy.get('body').then(($el) => {
-        $el.append(`<style id="percy-test">${styleBuffer}</style>`)
-      })
+    cy.contains('Firefox').should('be.hidden')
 
-      cy.get('#percy-test')
-      cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
-      cy.findByTestId('aut-url').should('be.visible')
-      cy.findByTestId('playground-activator').should('be.visible')
-      cy.findByTestId('select-browser').click()
+    cy.findByTestId('viewport').click()
+    cy.contains('The viewport determines the width and height of your application. By default the viewport will be 1000px by 660px for End-to-end Testing unless specified by a cy.viewport command.')
+    .should('be.visible')
 
-      cy.contains('Firefox').click()
+    cy.percySnapshot('viewport info open')
 
-      cy.percySnapshot('browsers open')
+    cy.get('body').click()
 
-      cy.contains('Chrome 1')
-      .focus()
-      .type('{esc}')
+    cy.findByTestId('playground-activator').click()
+    cy.findByTestId('playground-selector').clear().type('li')
 
-      cy.contains('Firefox').should('be.hidden')
+    cy.percySnapshot('cy.get selector')
 
-      cy.findByTestId('viewport').click()
-      cy.contains('The viewport determines the width and height of your application. By default the viewport will be 1000px by 660px for End-to-end Testing unless specified by a cy.viewport command.')
-      .should('be.visible')
+    cy.findByTestId('playground-num-elements').contains('3 Matches')
 
-      cy.percySnapshot('viewport info open')
+    cy.findByLabelText('Selector Methods').click()
+    cy.findByRole('menuitem', { name: 'cy.contains' }).click()
 
-      cy.get('body').click()
+    cy.findByTestId('playground-selector').clear().type('Item 1')
 
-      cy.findByTestId('playground-activator').click()
-      cy.findByTestId('playground-selector').clear().type('li')
+    cy.percySnapshot('cy.contains selector')
 
-      cy.percySnapshot('cy.get selector')
+    cy.findByTestId('playground-num-elements').contains('1 Match')
 
-      cy.findByTestId('playground-num-elements').contains('3 Matches')
-
-      cy.findByLabelText('Selector Methods').click()
-      cy.findByRole('menuitem', { name: 'cy.contains' }).click()
-
-      cy.findByTestId('playground-selector').clear().type('Item 1')
-
-      cy.percySnapshot('cy.contains selector')
-
-      cy.findByTestId('playground-num-elements').contains('1 Match')
-
-      cy.window().then((win) => cy.spy(win.console, 'log'))
-      cy.findByTestId('playground-print').click().window().then((win) => {
-        expect(win.console.log).to.have.been.calledWith('%cCommand:  ', 'font-weight: bold', 'cy.contains(\'Item 1\')')
-      })
+    cy.window().then((win) => cy.spy(win.console, 'log'))
+    cy.findByTestId('playground-print').click().window().then((win) => {
+      expect(win.console.log).to.have.been.calledWith('%cCommand:  ', 'font-weight: bold', 'cy.contains(\'Item 1\')')
     })
   })
 
