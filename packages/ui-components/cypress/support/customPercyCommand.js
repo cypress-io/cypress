@@ -35,6 +35,21 @@ const installCustomPercyCommand = ({ before, elementOverrides } = {}) => {
       $el.css({ visibility: 'hidden' })
     })
 
+    let styleBuffer = ''
+
+    cy.get('link[rel=stylesheet]').each(($el) => {
+      cy.request(`http://localhost:4455${ $el.attr('href')}`)
+      .then((res) => {
+        styleBuffer += `
+        ${res.body}`
+      })
+    })
+    .then(() => {
+      document.querySelector('body').innerHTML += `<style id="percy-test">${styleBuffer}</style>`
+    })
+
+    cy.pause()
+
     // if we're in interactive mode via (cypress open)
     // then bail immediately
     if (Cypress.config().isInteractive) {
