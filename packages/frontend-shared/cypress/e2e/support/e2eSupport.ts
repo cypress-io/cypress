@@ -17,7 +17,7 @@ import type pDefer from 'p-defer'
 configure({ testIdAttribute: 'data-cy' })
 
 const NO_TIMEOUT = 1000 * 1000
-const TEN_SECONDS = 50 * 1000
+const TEN_SECONDS = 10 * 1000
 
 export type ProjectFixture = typeof e2eProjectDirs[number]
 
@@ -180,9 +180,9 @@ beforeEach(() => {
   taskInternal('__internal__beforeEach', undefined)
 })
 
-function scaffoldProject (projectName: ProjectFixture) {
+function scaffoldProject (projectName: ProjectFixture, options: { timeout?: number} = {}) {
   return logInternal({ name: 'scaffoldProject', message: projectName }, () => {
-    return taskInternal('__internal_scaffoldProject', projectName)
+    return taskInternal('__internal_scaffoldProject', projectName, options)
   })
 }
 
@@ -435,10 +435,10 @@ type Resolved<V> = V extends Promise<infer U> ? U : V
  * Run an internal task, as defined by e2ePluginSetup. Automatically tracks the types
  *
  */
-function taskInternal<T extends keyof E2ETaskMap> (name: T, arg: Parameters<E2ETaskMap[T]>[0]) {
+function taskInternal<T extends keyof E2ETaskMap> (name: T, arg: Parameters<E2ETaskMap[T]>[0], options: { timeout?: number } = {}): Cypress.Chainable<Resolved<ReturnType<E2ETaskMap[T]>>> {
   const isDebugging = Boolean(Cypress.env('e2e_isDebugging'))
 
-  return cy.task<Resolved<ReturnType<E2ETaskMap[T]>>>(name, arg, { log: isDebugging, timeout: isDebugging ? NO_TIMEOUT : TEN_SECONDS })
+  return cy.task<Resolved<ReturnType<E2ETaskMap[T]>>>(name, arg, { log: isDebugging, timeout: options.timeout ?? (isDebugging ? NO_TIMEOUT : TEN_SECONDS) })
 }
 
 function logInternal<T> (name: string | Partial<Cypress.LogConfig>, cb: (log: Cypress.Log) => Cypress.Chainable<T>, opts: Partial<Cypress.Loggable> = {}): Cypress.Chainable<T> {
