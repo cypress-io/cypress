@@ -104,7 +104,7 @@
       }
     }
 
-    .command-num-children,
+    .num-children,
     .command-alias-count,
     .command-interceptions-count {
       background-color: $orange-700 !important;
@@ -116,7 +116,7 @@
       margin-left: 0;
     }
 
-    .command-num-children.has-alias {
+    .num-children.has-alias {
       border-radius: 10px;
       line-height: 1;
       padding: 3px 5px 3px 5px;
@@ -505,12 +505,14 @@
     }
   }
 
-  .command-num-children {
+  // additional styles on top of the shared.scss styles
+  .num-children {
     color: $black;
     background-color: $gray-500;
   }
 
-  .command-num-elements {
+  // additional styles on top of the shared.scss styles
+  .num-elements {
     background-color: $gray-600;
     display: inline;
     color: $black;
