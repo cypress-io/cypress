@@ -16,11 +16,11 @@ import debugLib from 'debug'
 import pDefer from 'p-defer'
 import fs from 'fs'
 
-import { getError, AllCypressErrors, AllCypressErrorNames, CypressError } from '@packages/errors'
+import { getError, CypressError, ConfigValidationError } from '@packages/errors'
 import type { DataContext } from '..'
 import { LoadConfigReply, SetupNodeEventsReply, ProjectConfigIpc, IpcHandler } from './ProjectConfigIpc'
 import assert from 'assert'
-import type { AllModeOptions, FoundBrowser, FullConfig, TestingType } from '@packages/types'
+import type { AllModeOptions, BreakingErrResult, BreakingOption, FoundBrowser, FullConfig, TestingType } from '@packages/types'
 import type { BaseErrorDataShape, WarningError } from '.'
 import { autoBindDebug } from '../util/autoBindDebug'
 
@@ -39,7 +39,7 @@ export interface SetupFullConfigOptions {
   options: Partial<AllModeOptions>
 }
 
-type ConifigErrHandler<T> = <Name extends AllCypressErrorNames>(msg: Name, ...params: Parameters<typeof AllCypressErrors[Name]>) => T
+type BreakingValidationFn<T> = (type: BreakingOption, val: BreakingErrResult) => T
 
 /**
  * All of the APIs injected from @packages/server & @packages/config
@@ -48,12 +48,12 @@ type ConifigErrHandler<T> = <Name extends AllCypressErrorNames>(msg: Name, ...pa
 export interface InjectedConfigApi {
   cypressVersion: string
   getServerPluginHandlers: () => IpcHandler[]
-  validateConfig<T extends Cypress.ConfigOptions>(config: Partial<T>, onErr: (errMsg: string) => never): T
+  validateConfig<T extends Cypress.ConfigOptions>(config: Partial<T>, onErr: (errMsg: ConfigValidationError | string) => never): T
   allowedConfig(config: Cypress.ConfigOptions): Cypress.ConfigOptions
   updateWithPluginValues(config: FullConfig, modifiedConfig: Partial<Cypress.ConfigOptions>): FullConfig
   setupFullConfigWithDefaults(config: SetupFullConfigOptions): Promise<FullConfig>
-  validateRootConfigBreakingChanges<T extends Cypress.ConfigOptions>(config: Partial<T>, onWarning: ConifigErrHandler<CypressError>, onErr: ConifigErrHandler<never>): T
-  validateTestingTypeConfigBreakingChanges<T extends Cypress.ConfigOptions>(config: Partial<T>, testingType: Cypress.TestingType, onWarning: ConifigErrHandler<CypressError>, onErr: ConifigErrHandler<never>): T
+  validateRootConfigBreakingChanges<T extends Cypress.ConfigOptions>(config: Partial<T>, onWarning: BreakingValidationFn<CypressError>, onErr: BreakingValidationFn<never>): T
+  validateTestingTypeConfigBreakingChanges<T extends Cypress.ConfigOptions>(config: Partial<T>, testingType: Cypress.TestingType, onWarning: BreakingValidationFn<CypressError>, onErr: BreakingValidationFn<never>): T
 }
 
 type State<S, V = undefined> = V extends undefined ? {state: S, value?: V } : {state: S, value: V}
@@ -573,11 +573,11 @@ export class ProjectLifecycleManager {
     return this.ctx._apis.configApi.validateTestingTypeConfigBreakingChanges(
       config,
       this._currentTestingType,
-      (warning, ...args) => {
-        return getError(warning, ...args)
+      (type, ...args) => {
+        return getError(type, ...args)
       },
-      (err, ...args) => {
-        throw getError(err, ...args)
+      (type, ...args) => {
+        throw getError(type, ...args)
       },
     )
   }
@@ -585,26 +585,22 @@ export class ProjectLifecycleManager {
   private validateConfigRoot (config: Cypress.ConfigOptions) {
     return this.ctx._apis.configApi.validateRootConfigBreakingChanges(
       config,
-      (warning, ...args) => {
-        return getError(warning, ...args)
+      (type, obj) => {
+        return getError(type, obj)
       },
-      (err, ...args) => {
-        throw getError(err, ...args)
+      (type, obj) => {
+        throw getError(type, obj)
       },
     )
   }
 
   private validateConfigFile (file: string | false, config: Cypress.ConfigOptions) {
     this.ctx._apis.configApi.validateConfig(config, (errMsg) => {
-      if (!file) {
-        // This should never happen, b/c if the config file is false, the config
-        // should be the default one
-        throw getError('CONFIG_VALIDATION_ERROR', errMsg)
+      if (_.isString(errMsg)) {
+        throw getError('CONFIG_VALIDATION_MSG_ERROR', 'configFile', file || null, errMsg)
       }
 
-      const base = path.basename(file)
-
-      throw getError('SETTINGS_VALIDATION_ERROR', base, errMsg)
+      throw getError('CONFIG_VALIDATION_ERROR', 'configFile', file || null, errMsg)
     })
   }
 
@@ -1034,21 +1030,13 @@ export class ProjectLifecycleManager {
       dfd.resolve({ ...val, initialConfig: JSON.parse(val.initialConfig) })
     })
 
-    ipc.once('loadConfig:error', (type, ...args) => {
-      debug('loadConfig:error %s, rejecting', type)
+    ipc.once('loadConfig:error', (err) => {
       this.killChildProcess(child)
-
-      const err = getError(type, ...args)
-
-      // if it's a non-cypress error, restore the initial error
-      if (!(err.message?.length)) {
-        err.isCypressErr = false
-        err.message = args[1]
-        err.code = type
-        err.name = type
+      if (err.isCypressErr) {
+        dfd.reject(err)
+      } else {
+        dfd.reject(getError('CHILD_PROCESS_UNEXPECTED_ERROR', this.configFilePath, err))
       }
-
-      dfd.reject(err)
     })
 
     debug('trigger the load of the file')

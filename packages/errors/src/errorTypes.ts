@@ -62,7 +62,7 @@ export interface SerializedError {
   errorType?: string
   stack?: string
   annotated?: string
-  message?: string
+  message: string
   name: string
   isCypressErr?: boolean
 }

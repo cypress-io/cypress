@@ -1077,5 +1077,15 @@ describe('visual error templates', () => {
         default: ['spec.{ts,js}', 'spec.ts,spec.js'],
       }
     },
+    REMOVED_ROOT_CONFIG_OPTION: () => {
+      return {
+        default: [{ name: 'specPattern', configFile: '/path/to/configFile.ts' }],
+      }
+    },
+    CT_CONFIG_NOT_SUPPORTED: () => {
+      return {
+        default: [{ name: 'baseUrl', configFile: '/path/to/configFile.ts' }],
+      }
+    },
   })
 })

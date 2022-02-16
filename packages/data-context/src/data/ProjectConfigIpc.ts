@@ -80,7 +80,7 @@ export class ProjectConfigIpc extends EventEmitter {
    * sourcing the config (script error, etc.)
    */
   once(evt: 'loadConfig:reply', listener: (payload: SerializedLoadConfigReply) => void): this
-  once(evt: 'loadConfig:error', listener: (realErrorCode: string, requiredFile: string, message: string) => void): this
+  once(evt: 'loadConfig:error', listener: (err: SerializedError) => void): this
 
   /**
    * When

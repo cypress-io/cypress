@@ -4,11 +4,13 @@ import chalk from 'chalk'
 import _ from 'lodash'
 import path from 'path'
 import stripAnsi from 'strip-ansi'
+import type { BreakingErrResult } from '@packages/types'
+
 import { humanTime, logError, parseResolvedPattern, pluralize } from './errorUtils'
 import { errPartial, errTemplate, fmt, theme, PartialErr } from './errTemplate'
 import { stackWithoutMessage } from './stackUtils'
 
-import type { ClonedError, ConfigValidationError, CypressError, ErrorLike, ErrTemplateResult } from './errorTypes'
+import type { ClonedError, ConfigValidationError, CypressError, ErrTemplateResult, ErrorLike } from './errorTypes'
 
 const ansi_up = new AU()
 
@@ -636,7 +638,7 @@ export const AllCypressErrors = {
       ${fmt.stackTrace(err)}`
   },
 
-  CHILD_PROCESS_UNEXPECTED_ERROR: (configFilePath: string, err: Error) => {
+  CHILD_PROCESS_UNEXPECTED_ERROR: (configFilePath: string, err: ErrorLike) => {
     return errTemplate`
       We stopped running your tests because a plugin.
 
@@ -1198,6 +1200,24 @@ export const AllCypressErrors = {
     `
   },
 
+  REMOVED_ROOT_CONFIG_OPTION: (errShape: BreakingErrResult) => {
+    return errTemplate`\
+      The ${fmt.highlight(errShape.name)} configuration option was removed from the root of the Cypress config object version 10.0.0.
+      
+      Please update this option under each testing type property.
+
+      https://on.cypress.io/migration-guide`
+  },
+
+  CT_CONFIG_NOT_SUPPORTED: (errShape: BreakingErrResult) => {
+    return errTemplate`\
+      The ${fmt.highlight(errShape.name)} configuration option is not valid in Component testing. 
+      
+      Please remove or add this option under e2e testing type property.
+
+      https://on.cypress.io/migration-guide`
+  },
+
 } as const
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -1222,12 +1242,14 @@ export function getMsgByType<Type extends keyof AllCypressErrorObj> (type: Type,
  * @param args
  * @returns
  */
-export const getError = function <Type extends keyof AllCypressErrorObj> (type: Type, ...args: Parameters<AllCypressErrorObj[Type]>) {
+export const getError = function <Type extends keyof AllCypressErrorObj> (type: Type, ...args: Parameters<AllCypressErrorObj[Type]>): CypressError {
   // If we don't know this "type" of error, return as a non-cypress error
   if (!AllCypressErrors[type]) {
-    const err = new Error(args[1] || type) as ErrorLike
+    const err = new Error(args[1] || type) as CypressError
 
+    err.isCypressErr = false
     err.type = type
+    err.messageMarkdown = err.message
 
     return err
   }
