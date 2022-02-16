@@ -60,7 +60,6 @@ describe('App: Settings', () => {
       cy.get('[data-cy="record-key"]').should('contain', '2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa')
     })
 
-    // TODO: Check that 'Default values' are indicated when the specPattern is not edited
     it('shows the Spec Patterns section (default specPattern value)', () => {
       cy.scaffoldProject('simple-ct')
       cy.openProject('simple-ct')
