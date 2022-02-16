@@ -141,7 +141,7 @@ describe('App: Settings', () => {
       })
     })
 
-    // TODO: The ConfigCode button isn't hooked up to do anything when it should trigger the openFileInIDE mutation
+    // TODO: The Edit button isn't hooked up to do anything when it should trigger the openFileInIDE mutation (https://cypress-io.atlassian.net/browse/UNIFY-1164)
     it.skip('opens cypress.config.js file after clicking "Edit" button', () => {
     })
 
