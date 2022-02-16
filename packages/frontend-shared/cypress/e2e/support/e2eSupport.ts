@@ -17,7 +17,7 @@ import type pDefer from 'p-defer'
 configure({ testIdAttribute: 'data-cy' })
 
 const NO_TIMEOUT = 1000 * 1000
-const TEN_SECONDS = 10 * 1000
+const TEN_SECONDS = 20 * 1000
 
 export type ProjectFixture = typeof e2eProjectDirs[number]
 
