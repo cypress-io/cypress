@@ -2,7 +2,7 @@
 export const reporterSnapshot = () => {
   // @ts-ignore
   cy.percySnapshot({
-    width: 320,
+    width: 450,
     elementOverrides: {
       '[data-cy=aut-panel]': true,
       '.cy-tooltip': true,
@@ -11,6 +11,9 @@ export const reporterSnapshot = () => {
       },
       '.runnable-header .duration': ($el) => {
         $el.text('XX:XX')
+      },
+      '[data-cy=reporter-panel]': ($el) => {
+        $el.attr('style', 'width: 450px !important')
       },
     },
   })
