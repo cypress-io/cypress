@@ -530,7 +530,7 @@
           "label": "Choose from the following filename patterns:",
           "option1": "{0} (Recommended)",
           "option2": "Don't rename anything — keep what I have.",
-          "option3": "Rename folder name.",
+          "option3": "Rename folder only.",
           "buttonSave": "Save Changes",
           "buttonCancel": "Cancel"
         }

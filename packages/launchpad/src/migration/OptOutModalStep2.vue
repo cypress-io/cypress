@@ -11,7 +11,7 @@
     />
     <Radio
       v-model:value="value"
-      :options="[{label: '',value: 'rename'},{label: '', value: props.hasCustomIntegrationFolder ? 'skip' : 'renameFolder'}]"
+      :options="options"
       name="skipRename"
       :label="t('migration.renameAuto.modals.step2.label')"
     >
@@ -64,18 +64,29 @@ import StandardModal from '@cy/components/StandardModal.vue'
 import Radio from '@cy/components/Radio.vue'
 import WarningIcon from '~icons/cy/warning_x16.svg'
 import { useI18n } from '@cy/i18n'
+import type { PossibleOption } from './types'
 
 const { t } = useI18n()
 
-const emit = defineEmits([
-  'save',
-  'cancel',
-])
+const emit = defineEmits<{
+  (event: 'save', option: PossibleOption): void
+  (event: 'cancel'): void
+}>()
 
-const value = ref('rename')
+const value = ref<PossibleOption>('rename')
 
 const props = defineProps<{
   hasCustomIntegrationFolder: boolean
 }>()
 
+const options: Array<{ label: '', value: PossibleOption }> = [
+  {
+    label: '',
+    value: 'rename',
+  },
+  {
+    label: '',
+    value: props.hasCustomIntegrationFolder ? 'skip' : 'renameFolder',
+  },
+]
 </script>

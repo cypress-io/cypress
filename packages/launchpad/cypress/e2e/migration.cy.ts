@@ -127,107 +127,112 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
     checkOutcome()
   })
 
-  it('completes journey for migration-e2e-component-default-everything', () => {
-    startMigrationFor('migration-e2e-component-default-everything')
-    // default testFiles - auto
-    cy.get(renameAutoStep).should('exist')
-    cy.get(renameManualStep).should('exist')
-    cy.get(renameSupportStep).should('exist')
-    cy.get(setupComponentStep).should('exist')
-    cy.get(configFileStep).should('exist')
+  describe('migration-e2e-component-default-everything', () => {
+    it('completes journey for migration-e2e-component-default-everything', () => {
+      startMigrationFor('migration-e2e-component-default-everything')
+      // default testFiles - auto
+      cy.get(renameAutoStep).should('exist')
+      cy.get(renameManualStep).should('exist')
+      cy.get(renameSupportStep).should('exist')
+      cy.get(setupComponentStep).should('exist')
+      cy.get(configFileStep).should('exist')
 
-    // Migration workflow
-    // before auto migration
-    cy.contains('cypress/integration/foo.spec.ts')
-    cy.contains('cypress/integration/spec.ts')
-    cy.contains('cypress/component/button.spec.js')
+      // Migration workflow
+      // before auto migration
+      cy.contains('cypress/integration/foo.spec.ts')
+      cy.contains('cypress/integration/spec.ts')
+      cy.contains('cypress/component/button.spec.js')
 
-    // after auto migration
-    cy.contains('cypress/e2e/foo.cy.ts')
-    cy.contains('cypress/e2e/spec.cy.ts')
-    cy.contains('cypress/component/button.cy.js')
+      // after auto migration
+      cy.contains('cypress/e2e/foo.cy.ts')
+      cy.contains('cypress/e2e/spec.cy.ts')
+      cy.contains('cypress/component/button.cy.js')
 
-    runAutoRename()
+      runAutoRename()
 
-    cy.wait(100)
+      cy.wait(100)
 
-    cy.withCtx(async (ctx) => {
-      const specs = [
-        'cypress/e2e/foo.cy.ts',
-        'cypress/component/button.cy.js',
-      ]
+      cy.withCtx(async (ctx) => {
+        const specs = [
+          'cypress/e2e/foo.cy.ts',
+          'cypress/component/button.cy.js',
+        ]
 
-      for (const spec of specs) {
-        const stats = await ctx.actions.file.checkIfFileExists(ctx.path.join(spec))
+        for (const spec of specs) {
+          const stats = await ctx.actions.file.checkIfFileExists(ctx.path.join(spec))
 
-        expect(stats).to.not.be.null
-      }
+          expect(stats).to.not.be.null
+        }
+      })
+
+      skipCTMigration()
+      renameSupport()
+      migrateAndVerifyConfig()
+      finishMigrationAndContinue()
+
+      cy.withCtx(async (ctx) => {
+        const integrationFolderStats = await ctx.actions.file.checkIfFileExists(ctx.path.join('cypress', 'integration'))
+
+        expect(integrationFolderStats).to.be.null
+      })
+
+      checkOutcome()
     })
 
-    skipCTMigration()
-    renameSupport()
-    migrateAndVerifyConfig()
-    finishMigrationAndContinue()
+    it('renames only the folder renaming migration-e2e-component-default-everything', () => {
+      startMigrationFor('migration-e2e-component-default-everything')
+      // default testFiles - auto
+      cy.get(renameAutoStep).should('exist')
+      cy.get(renameManualStep).should('exist')
+      // supportFile is false - cannot migrate
+      cy.get(renameSupportStep).should('exist')
+      cy.get(setupComponentStep).should('exist')
+      cy.get(configFileStep).should('exist')
 
-    cy.withCtx(async (ctx) => {
-      const integrationFolderStats = await ctx.actions.file.checkIfFileExists(ctx.path.join('cypress', 'integration'))
+      // Migration workflow
+      // before auto migration
+      cy.contains('cypress/integration/foo.spec.ts')
+      cy.contains('cypress/component/button.spec.js')
 
-      expect(integrationFolderStats).to.be.null
+      // after auto migration
+      cy.contains('cypress/e2e/foo.cy.ts')
+      cy.contains('cypress/component/button.cy.js')
+
+      cy.findByText('change').click()
+
+      cy.get('[data-cy=migration-button-proceed]').click()
+
+      // this project has a default integration folder and default testFiles.
+      // We rename the integration folder, even if the user skips the spec rename
+      cy.findByText('Rename folder only.').click()
+
+      cy.findByText('Save Changes').click()
+
+      cy.findByText('Rename the folder for me').click()
+
+      // move component specs later
+      skipCTMigration()
+
+      cy.wait(100)
+
+      cy.withCtx(async (ctx) => {
+        const specs = [
+          'cypress/e2e/foo.spec.ts',
+          'cypress/component/button.spec.js',
+        ]
+
+        for (const spec of specs) {
+          const stats = await ctx.actions.file.checkIfFileExists(ctx.path.join(spec))
+
+          expect(stats).to.not.be.null
+        }
+      })
+
+      renameSupport()
+      migrateAndVerifyConfig()
+      finishMigrationAndContinue()
+      checkOutcome()
     })
-
-    checkOutcome()
-  })
-
-  it('renames only the folder renaming migration-e2e-component-default-everything', () => {
-    startMigrationFor('migration-e2e-component-default-everything')
-    // default testFiles - auto
-    cy.get(renameAutoStep).should('exist')
-    cy.get(renameManualStep).should('not.exist')
-    // supportFile is false - cannot migrate
-    cy.get(renameSupportStep).should('exist')
-    cy.get(setupComponentStep).should('exist')
-    cy.get(configFileStep).should('exist')
-
-    // Migration workflow
-    // before auto migration
-    cy.contains('cypress/integration/foo.spec.ts')
-    cy.contains('cypress/component/button.spec.js')
-
-    // after auto migration
-    cy.contains('cypress/e2e/foo.cy.ts')
-    cy.contains('cypress/component/button.cy.js')
-
-    cy.findByText('change').click()
-
-    cy.get('[data-cy=migration-button-proceed]').click()
-
-    // this project has a default integration folder and default testFiles.
-    // We rename the integration folder, even if the user skips the spec rename
-    cy.findByText('Rename folder name.').click()
-
-    cy.findByText('Save Changes').click()
-
-    cy.findByText('Rename the folder for me').click()
-
-    cy.wait(100)
-
-    cy.withCtx(async (ctx) => {
-      const specs = [
-        'cypress/e2e/foo.spec.ts',
-        'cypress/component/button.spec.js',
-      ]
-
-      for (const spec of specs) {
-        const stats = await ctx.actions.file.checkIfFileExists(ctx.path.join(spec))
-
-        expect(stats).to.not.be.null
-      }
-    })
-
-    renameSupport()
-    migrateAndVerifyConfig()
-    finishMigrationAndContinue()
-    checkOutcome()
   })
 
   it('completes journey for migration-e2e-custom-integration', () => {
@@ -495,7 +500,7 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
       startMigrationFor('migration-e2e-component-default-test-files')
       // default testFiles - auto
       cy.get(renameAutoStep).should('exist')
-      cy.get(renameManualStep).should('exist')
+      cy.get(renameManualStep).should('not.exist')
       // supportFile is false - cannot migrate
       cy.get(renameSupportStep).should('exist')
       cy.get(setupComponentStep).should('exist')
@@ -527,7 +532,6 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
         }
       })
 
-      skipCTMigration()
       renameSupport()
       migrateAndVerifyConfig()
       finishMigrationAndContinue()
@@ -537,7 +541,8 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
       startMigrationFor('migration-e2e-component-default-test-files')
       // default testFiles - auto
       cy.get(renameAutoStep).should('exist')
-      cy.get(renameManualStep).should('exist')
+      // non default component folder - should skip.
+      cy.get(renameManualStep).should('not.exist')
       // supportFile is false - cannot migrate
       cy.get(renameSupportStep).should('exist')
       cy.get(setupComponentStep).should('exist')
@@ -575,7 +580,6 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
         }
       })
 
-      skipCTMigration()
       renameSupport()
       migrateAndVerifyConfig()
     })
@@ -661,5 +665,8 @@ describe('Migration', { viewportWidth: 1200 }, () => {
 
       await ctx.actions.migration.assertSuccessfulConfigMigration()
     })
+
+    finishMigrationAndContinue()
+    checkOutcome()
   })
 })

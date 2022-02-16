@@ -98,6 +98,7 @@ import OptOutModalStep1 from './OptOutModalStep1.vue'
 import OptOutModalStep2 from './OptOutModalStep2.vue'
 import { gql } from '@urql/vue'
 import type { RenameSpecsAutoFragment } from '../generated/graphql'
+import type { PossibleOption } from './types'
 import { useI18n } from '@cy/i18n'
 
 const { t } = useI18n()
@@ -129,8 +130,6 @@ fragment RenameSpecsAuto on Migration {
 const props = defineProps<{
   gql: RenameSpecsAutoFragment
 }>()
-
-type PossibleOption = 'rename' | 'renameFolder' | 'skip'
 
 const emits = defineEmits<{
   (eventName: 'selectOption', value: PossibleOption): void
