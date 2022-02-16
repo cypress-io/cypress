@@ -10,6 +10,10 @@ import { substitute } from './autoRename'
 import type { TestingType } from '@packages/types'
 import prettier from 'prettier'
 import type { MigrationFile } from '..'
+import Debug from 'debug'
+import { toPosix } from '../../util'
+
+const debug = Debug('cypress:data-context:sources:migration:codegen')
 
 type ConfigOptions = {
   global: Record<string, unknown>
@@ -34,10 +38,6 @@ export interface OldCypressConfig {
   integrationFolder?: string | false
   testFiles?: string | string[]
   ignoreTestFiles?: string
-}
-
-export const defaultSupportFiles = {
-  before: path.join('cypress', 'support', 'index.js'),
 }
 
 export class NonStandardMigrationError extends Error {
@@ -78,8 +78,9 @@ export async function initComponentTestingMigration (
   status: ComponentTestingMigrationStatus
   watcher: chokidar.FSWatcher | null
 }> {
+  debug('initComponentTestingMigration %O', { projectRoot, componentFolder, testFiles })
   const watchPaths = testFiles.map((glob) => {
-    return path.join(componentFolder, glob)
+    return `${componentFolder}/${glob}`
   })
 
   const watcher = chokidar.watch(
@@ -87,6 +88,8 @@ export async function initComponentTestingMigration (
       cwd: projectRoot,
     },
   )
+
+  debug('watchPaths %o', watchPaths)
 
   let filesToBeMoved: Map<string, FileToBeMigratedManually> = (await globby(watchPaths, {
     cwd: projectRoot,
@@ -96,6 +99,7 @@ export async function initComponentTestingMigration (
     return acc
   }, new Map())
 
+  debug('files to be moved manually %o', filesToBeMoved)
   if (filesToBeMoved.size === 0) {
     // this should not happen as the step should be hidden in this case
     // but files can have been moved manually before clicking next
@@ -109,10 +113,11 @@ export async function initComponentTestingMigration (
   }
 
   watcher.on('unlink', (unlinkedPath) => {
-    const file = filesToBeMoved.get(unlinkedPath)
+    const posixUnlinkedPath = toPosix(unlinkedPath)
+    const file = filesToBeMoved.get(posixUnlinkedPath)
 
     if (!file) {
-      throw Error(`Watcher incorrectly triggered ${unlinkedPath}
+      throw Error(`Watcher incorrectly triggered ${posixUnlinkedPath}
       while watching ${Array.from(filesToBeMoved.keys()).join(', ')}
       projectRoot: ${projectRoot}`)
     }
@@ -127,8 +132,9 @@ export async function initComponentTestingMigration (
     })
   })
 
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     watcher.on('ready', () => {
+      debug('watcher ready')
       resolve({
         status: {
           files: filesToBeMoved,
@@ -136,24 +142,14 @@ export async function initComponentTestingMigration (
         },
         watcher,
       })
+    }).on('error', (err) => {
+      reject(err)
     })
   })
 }
 
-async function getPluginRelativePath (cfg: OldCypressConfig, root: string): Promise<string> {
-  if (cfg.pluginsFile) {
-    return cfg.pluginsFile
-  }
-
-  try {
-    let pluginPath = path.normalize('cypress/plugins/index.ts')
-
-    await fs.stat(path.join(root, pluginPath))
-
-    return pluginPath
-  } catch {
-    return path.normalize('cypress/plugins/index.js')
-  }
+async function getPluginRelativePath (cfg: OldCypressConfig, projectRoot: string): Promise<string> {
+  return cfg.pluginsFile ? cfg.pluginsFile : await tryGetDefaultLegacyPluginsFile(projectRoot) || ''
 }
 
 // If they are running an old version of Cypress
@@ -209,7 +205,7 @@ function formatObjectForConfig (obj: Record<string, unknown>) {
 }
 
 function createE2eTemplate (pluginPath: string, hasPluginsFile: boolean, options: Record<string, unknown>) {
-  const requirePlugins = `return require('.${path.sep}${pluginPath}')(on, config)`
+  const requirePlugins = `return require('./${pluginPath}')(on, config)`
 
   const setupNodeEvents = `// We've imported your old cypress plugins here.
   // You may want to clean this up later by importing these.
@@ -247,14 +243,15 @@ export async function hasSpecFile (projectRoot: string, folder: string, glob: st
 }
 
 export async function tryGetDefaultLegacyPluginsFile (projectRoot: string) {
-  const glob = path.join(projectRoot, 'cypress', 'plugins', 'index.*')
-  const files = await globby(glob)
+  const files = await globby('cypress/plugins/index.*', { cwd: projectRoot })
 
   return files[0]
 }
 
 export async function tryGetDefaultLegacySupportFile (projectRoot: string) {
-  const files = await globby(path.join(projectRoot, 'cypress', 'support', 'index.*'))
+  const files = await globby('cypress/support/index.*', { cwd: projectRoot })
+
+  debug('tryGetDefaultLegacySupportFile: files %O', files)
 
   return files[0]
 }
@@ -270,9 +267,8 @@ export async function getDefaultLegacySupportFile (projectRoot: string) {
 }
 
 export async function supportFilesForMigration (projectRoot: string): Promise<MigrationFile> {
-  const defaultSupportFile = await getDefaultLegacySupportFile(projectRoot)
-
-  const defaultOldSupportFile = path.relative(projectRoot, defaultSupportFile)
+  debug('Checking for support files in %s', projectRoot)
+  const defaultOldSupportFile = await getDefaultLegacySupportFile(projectRoot)
   const defaultNewSupportFile = renameSupportFilePath(defaultOldSupportFile)
 
   const afterParts = formatMigrationFile(
@@ -311,7 +307,7 @@ export async function cleanUpIntegrationFolder (projectRoot: string) {
   const integrationPath = path.join(projectRoot, 'cypress', 'integration')
 
   try {
-    await fs.rmdir(integrationPath)
+    fs.rmSync(integrationPath, { recursive: true })
   } catch (e: any) {
     // only throw if the folder exists
     if (e.code !== 'ENOENT') {
@@ -321,8 +317,7 @@ export async function cleanUpIntegrationFolder (projectRoot: string) {
 }
 
 export function renameSupportFilePath (relative: string) {
-  const re = /cypress\/support\/(?<name>index)\.[j|t|s[x]?/
-  const res = new RegExp(re).exec(relative)
+  const res = new RegExp(supportFileRegexps.e2e.beforeRegexp).exec(relative)
 
   if (!res?.groups?.name) {
     throw new NonStandardMigrationError('support')
@@ -420,24 +415,6 @@ export function reduceConfig (cfg: OldCypressConfig): ConfigOptions {
   }, { global: {}, e2e: {}, component: {} })
 }
 
-// function getSpecPattern (cfg: OldCypressConfig, testingType: TestingType) {
-//   // `componentFolder` is no longer a thing, we are forcing the user to co-locate
-//   // component specs.
-//   if (testingType === 'component') {
-//     return '**/*.cy.{js,jsx,ts,tsx}'
-//   }
-
-//   const specPattern = cfg.e2e?.testFiles ?? cfg.testFiles ?? '**/*.cy.{js,jsx,ts,tsx}'
-
-//   const customIntegrationFolder = cfg.e2e?.integrationFolder ?? cfg.integrationFolder ?? 'cypress/e2e'
-
-//   if (customIntegrationFolder) {
-//     return `${customIntegrationFolder}/${specPattern}`
-//   }
-
-//   return specPattern
-// }
-
 function getSpecPattern (cfg: OldCypressConfig, testType: TestingType) {
   const specPattern = cfg[testType]?.testFiles ?? cfg.testFiles ?? '**/*.cy.{js,jsx,ts,tsx}'
   const customComponentFolder = cfg.component?.componentFolder ?? cfg.componentFolder ?? null
@@ -463,7 +440,7 @@ export function formatConfig (config: string) {
   return prettier.format(config, {
     semi: false,
     singleQuote: true,
-    endOfLine: 'auto',
+    endOfLine: 'lf',
     parser: 'babel',
   })
 }
