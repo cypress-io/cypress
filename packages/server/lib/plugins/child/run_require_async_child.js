@@ -142,13 +142,12 @@ function run (ipc, configFile, projectRoot) {
         // replace the first line with better text (remove potentially misleading word TypeScript for example)
         .replace(/^.*\n/g, 'Error compiling file\n')
 
-        ipc.send('loadConfig:error', err.name, configFile, cleanMessage)
+        err.originalMessage = err.message
+        err.message = cleanMessage
+
+        ipc.send('loadConfig:error', util.serializeError(err))
       } else {
-        const realErrorCode = err.code || err.name
-
-        debug('failed to load file:%s\n%s: %s', configFile, realErrorCode, err.message)
-
-        ipc.send('loadConfig:error', realErrorCode, configFile, err.message)
+        ipc.send('loadConfig:error', util.serializeError(err))
       }
     }
   })

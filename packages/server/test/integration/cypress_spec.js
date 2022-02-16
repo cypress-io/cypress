@@ -748,7 +748,7 @@ describe('lib/cypress', () => {
           '--spec=/this/does/not/exist/**/*',
         ])
         .then(() => {
-          this.expectExitWithErr('NO_SPECS_FOUND', 'We searched for any files matching this glob pattern')
+          this.expectExitWithErr('NO_SPECS_FOUND', 'We searched for specs matching this glob pattern')
           this.expectExitWithErr('NO_SPECS_FOUND', 'this/does/not/exist/**/*')
         })
       })
@@ -1184,7 +1184,7 @@ describe('lib/cypress', () => {
           ]).then(() => {
             // uses default specPattern which is cypress/integration/**/*
             // exits with 1 since there are not specs for this pristine project.
-            this.expectExitWithErr('NO_SPECS_FOUND', 'We searched for any files matching this glob pattern:')
+            this.expectExitWithErr('NO_SPECS_FOUND', 'We searched for specs matching this glob pattern:')
             this.expectExitWithErr('NO_SPECS_FOUND', 'Can\'t run because no spec files were found')
             this.expectExitWith(1)
           })

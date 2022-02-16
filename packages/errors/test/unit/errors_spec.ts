@@ -48,22 +48,6 @@ describe('lib/errors', () => {
       expect(console.log).to.be.calledWithMatch(yellow.close)
     })
 
-    it('converts markdown links in err.message', () => {
-      const err = errors.get('NO_PROJECT_ID', `
-        This line has [linked text](https://on.cypress.io) in it. There's a period in the middle.
-
-        This line has [linked text at the end](https://on.cypress.io).
-
-        This line has [linked text](https://on.cypress.io) with no period
-      `)
-
-      errors.log(err)
-
-      expect(console.log).to.be.calledWithMatch('This line has linked text in it. There\'s a period in the middle: https://on.cypress.io')
-      expect(console.log).to.be.calledWithMatch('This line has linked text at the end: https://on.cypress.io')
-      expect(console.log).to.be.calledWithMatch('This line has linked text with no period: https://on.cypress.io')
-    })
-
     it('logs err.message', () => {
       const err = errors.getError('NO_PROJECT_ID', '/path/to/project/cypress.json')
 
