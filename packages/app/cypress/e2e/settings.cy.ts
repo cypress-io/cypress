@@ -125,7 +125,6 @@ describe('App: Settings', () => {
         cy.get('.bg-teal-100').contains('abc123')
         cy.get('.bg-teal-100').contains('specFilePattern')
         cy.get('.bg-teal-100').contains('supportFile')
-        cy.get('.bg-yellow-100').contains('INTERNAL_CLOUD_ENV')
         cy.get('.bg-yellow-100').contains('REMOTE_DEBUGGING_PORT')
         cy.get('.bg-yellow-100').contains('KONFIG_ENV')
         cy.get('.bg-yellow-100').contains('INTERNAL_E2E_TESTING_SELF')
