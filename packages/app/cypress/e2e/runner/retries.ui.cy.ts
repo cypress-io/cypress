@@ -11,9 +11,9 @@ describe('runner/cypress retries.ui.spec', {
   viewportHeight: 900,
   numTestsKeptInMemory: 1,
 }, () => {
-  afterEach(function () {
+  afterEach(() => {
     // @ts-ignore
-    if (this.currentTest.state === 'passed') {
+    if (cy.state('test').state === 'passed') {
       reporterSnapshot()
     }
   })
@@ -59,7 +59,7 @@ describe('runner/cypress retries.ui.spec', {
   })
 
   // TODO: Determine how best to access the inner Cypress instance prior to test execution
-  // spy on its actions during the test run.
+  // spy on its actions during the test run (https://cypress-io.atlassian.net/browse/UNIFY-1153)
   it.skip('opens attempt on each attempt failure for the screenshot, and closes after test passes', () => {
     let stub
     const cyReject = (fn) => {
@@ -68,7 +68,7 @@ describe('runner/cypress retries.ui.spec', {
           fn()
         } catch (e) {
           // @ts-ignore
-          cy.state('reject')(e)
+          cy.fail(e)
         }
       }
     }
@@ -141,7 +141,6 @@ describe('runner/cypress retries.ui.spec', {
   })
 
   describe('beforeAll', () => {
-    // TODO: make beforeAll hooks retry
     it('tests do not retry when beforeAll fails', () => {
       loadSpec({
         fileName: 'before-all-failure.retries.cy.js',
@@ -152,7 +151,6 @@ describe('runner/cypress retries.ui.spec', {
       cy.contains('Although you have test retries')
     })
 
-    // TODO: future versions should run all hooks associated with test on retry
     it('before all hooks are not run on the second attempt when fails outside of beforeAll', () => {
       loadSpec({
         fileName: 'before-all-called-once.retries.cy.js',
@@ -256,7 +254,7 @@ describe('runner/cypress retries.ui.spec', {
   })
 
   describe('afterAll', () => {
-    it('only runs afterAll hook on last attempt', () => {
+    it('only run afterAll hook on last attempt', () => {
       loadSpec({
         fileName: 'after-all-once.retries.cy.js',
         passCount: 3,

@@ -10,7 +10,7 @@ describe('runner/cypress sessions.ui.spec', {
 }, () => {
   afterEach(function () {
     // @ts-ignore
-    if (this.currentTest.state === 'passed') {
+    if (cy.state('test').state === 'passed') {
       reporterSnapshot()
     }
   })

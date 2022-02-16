@@ -62,8 +62,6 @@ class ElementOverrideManager {
 
         return
       }
-
-      // TODO: support more mutations
     })
 
     this.mutationStack = undefined
@@ -85,14 +83,16 @@ const applySnapshotMutations = ({
 
   return cy.viewport(snapshotWidth, defaultHeight, { log: false })
   .then(() => {
+    if (elementOverrideManager) {
+      elementOverrideManager.performOverrides(cy, snapshotElementOverrides)
+    }
+
     if (log) {
       Cypress.log({
         message: log,
+        snapshot: true,
+        end: true,
       })
-    }
-
-    if (elementOverrideManager) {
-      elementOverrideManager.performOverrides(cy, snapshotElementOverrides)
     }
 
     return () => {

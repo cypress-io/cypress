@@ -54,6 +54,7 @@ export function loadSpec (options: LoadSpecOptions): void {
   }, { hasPreferredIde })
 
   // TODO: investigate why directly visiting the spec will sometimes hang
+  // https://cypress-io.atlassian.net/browse/UNIFY-1154
   // cy.__incorrectlyVisitAppWithIntercept(`specs/runner?file=cypress/e2e/errors/${fileName}`)
 
   cy.__incorrectlyVisitAppWithIntercept()
