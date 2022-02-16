@@ -464,6 +464,8 @@ commands:
             DEBUG=<<parameters.debug>> \
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$TEST_LAUNCHPAD_RECORD_KEY \
+            PERCY_TARGET_BRANCH="10.0-release" \
+            PERCY_TARGET_COMMIT=$(git log -n 1 origin/10.0-release --pretty="%H") \
             PERCY_PARALLEL_NONCE=$PLATFORM-$CIRCLE_SHA1 \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
@@ -1063,6 +1065,8 @@ jobs:
           name: Upload CLI snapshots for diffing
           command: |
             PERCY_PARALLEL_NONCE=$PLATFORM-$CIRCLE_SHA1 \
+            PERCY_TARGET_BRANCH="10.0-release" \
+            PERCY_TARGET_COMMIT=$(git log -n 1 origin/10.0-release --pretty="%H") \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy snapshot ./cli/visual-snapshots
@@ -1332,6 +1336,8 @@ jobs:
             PERCY_PARALLEL_NONCE=$PLATFORM-$CIRCLE_SHA1 \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
+            PERCY_TARGET_BRANCH="10.0-release" \
+            PERCY_TARGET_COMMIT=$(git log -n 1 origin/10.0-release --pretty="%H") \
             yarn percy exec --parallel -- -- \
             yarn cypress:run --record --parallel --group reporter
           working_directory: packages/reporter
@@ -1474,6 +1480,8 @@ jobs:
             PERCY_PARALLEL_NONCE=$PLATFORM-$CIRCLE_SHA1 \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
+            PERCY_TARGET_BRANCH="10.0-release" \
+            PERCY_TARGET_COMMIT=$(git log -n 1 origin/10.0-release --pretty="%H") \
             yarn percy exec --parallel -- -- \
             yarn test --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json
           working_directory: npm/design-system
