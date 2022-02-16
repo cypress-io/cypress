@@ -161,13 +161,13 @@ export const installCustomPercyCommand = ({ before, elementOverrides } = {}) => 
     // percy snapshot function, and then reset overrides
     applySnapshotMutations(snapshotMutationOptions)
     .then((reset) => {
-      origFn(screenshotName, {
+      return origFn(screenshotName, {
         widths: [snapshotWidth],
+      }).then(() => {
+        return reset()
+      }).then(() => {
+        Cypress.config('defaultCommandTimeout', _backupTimeout)
       })
-
-      return reset()
-    }).then(() => {
-      Cypress.config('defaultCommandTimeout', _backupTimeout)
     })
 
     return
