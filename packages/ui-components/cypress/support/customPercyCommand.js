@@ -68,15 +68,14 @@ class ElementOverrideManager {
   }
 }
 
+let elementOverrideManager
+
 const applySnapshotMutations = ({
   log,
   snapshotWidth,
   snapshotElementOverrides,
-  defaultWidth,
   defaultHeight,
 }) => {
-  let elementOverrideManager
-
   if (Object.keys(snapshotElementOverrides).length) {
     elementOverrideManager = new ElementOverrideManager()
   }
@@ -94,14 +93,14 @@ const applySnapshotMutations = ({
         end: true,
       })
     }
+  })
+}
 
-    return () => {
-      cy.viewport(defaultWidth, defaultHeight, { log: false })
-      .then(() => {
-        if (elementOverrideManager) {
-          elementOverrideManager.resetOverrides()
-        }
-      })
+const resetSnapshotMutations = ({ defaultWidth, defaultHeight }) => {
+  return cy.viewport(defaultWidth, defaultHeight, { log: false })
+  .then(() => {
+    if (elementOverrideManager) {
+      elementOverrideManager.resetOverrides()
     }
   })
 }
@@ -138,10 +137,16 @@ export const installCustomPercyCommand = ({ before, elementOverrides } = {}) => 
     // If we're in interactive mode via 'cypress open', apply overrides,
     // create log, reset overrides, and abort.
     if (Cypress.config().isInteractive) {
-      applySnapshotMutations({
-        ...snapshotMutationOptions,
-        log: 'percy: skipping snapshot in interactive mode',
-      }).then((reset) => reset())
+      cy.then(() => {
+        return applySnapshotMutations({
+          ...snapshotMutationOptions,
+          log: 'percy: skipping snapshot in interactive mode',
+        })
+      })
+
+      cy.then(() => {
+        return resetSnapshotMutations(snapshotMutationOptions)
+      })
 
       return
     }
@@ -159,18 +164,24 @@ export const installCustomPercyCommand = ({ before, elementOverrides } = {}) => 
 
     // If we're not in interactive mode, apply mutations, call original
     // percy snapshot function, and then reset overrides
-    applySnapshotMutations(snapshotMutationOptions)
-    .then((reset) => {
-      cy.then(() => {
-        return origFn(screenshotName, {
-          widths: [snapshotWidth],
-        })
-      }).then(() => {
-        return reset()
+    cy.then(() => {
+      return applySnapshotMutations({
+        ...snapshotMutationOptions,
       })
-      .then(() => {
-        Cypress.config('defaultCommandTimeout', _backupTimeout)
+    })
+
+    cy.then(() => {
+      return origFn(screenshotName, {
+        widths: [snapshotWidth],
       })
+    })
+
+    cy.then(() => {
+      return resetSnapshotMutations(snapshotMutationOptions)
+    })
+
+    cy.then(() => {
+      Cypress.config('defaultCommandTimeout', _backupTimeout)
     })
 
     return

@@ -25,7 +25,7 @@ describe('runner/cypress sessions.ui.spec', {
     .should('contain', 'blank_session')
   })
 
-  it('shows message for new, saved, and recreated session', () => {
+  it('shows message for new, saved, and recreated session', { viewportHeight: 1000 }, () => {
     loadSpec({
       fileName: 'recreated_session.cy.js',
       passCount: 3,
