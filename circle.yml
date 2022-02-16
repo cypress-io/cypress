@@ -1036,7 +1036,12 @@ jobs:
               echo "This is an external PR, cannot access other services"
               circleci-agent step halt
             fi
-      - run: PERCY_PARALLEL_NONCE=$PLATFORM-$CIRCLE_SHA1 yarn percy build:finalize
+      - run:
+          command: |
+            PERCY_PARALLEL_NONCE=$PLATFORM-$CIRCLE_SHA1 \
+            PERCY_TARGET_BRANCH="10.0-release" \
+            PERCY_TARGET_COMMIT=$(git log -n 1 origin/10.0-release --pretty="%H") \
+            yarn percy build:finalize
 
   cli-visual-tests:
     <<: *defaults
