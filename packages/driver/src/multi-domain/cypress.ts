@@ -8,6 +8,7 @@ import $Cypress from '../cypress'
 import { $Cy } from '../cypress/cy'
 import $Commands from '../cypress/commands'
 import $Log from '../cypress/log'
+import $errUtils from '../cypress/error_utils'
 import { bindToListeners } from '../cy/listeners'
 import { SpecBridgeDomainCommunicator } from './communicator'
 import { handleDomainFn } from './domain_fn'
@@ -59,7 +60,10 @@ const setup = (cypressConfig: Cypress.Config, env: Cypress.ObjectLike) => {
 
   const { state, config } = Cypress
 
-  $Commands.create(Cypress, cy, state, config)
+  // @ts-ignore
+  Cypress.Commands = $Commands.create(Cypress, cy, state, config)
+  // @ts-ignore
+  Cypress.isCy = cy.isCy
 
   handleDomainFn(cy, specBridgeCommunicator)
   handleCommands(Cypress, cy, specBridgeCommunicator)
@@ -86,6 +90,25 @@ const setup = (cypressConfig: Cypress.Config, env: Cypress.ObjectLike) => {
   // @ts-ignore
   Cypress.on('url:changed', (url) => {
     specBridgeCommunicator.toPrimary('url:changed', url)
+  })
+
+  // outlaw the use of `route` and `server` within the multi-domain context and Cypress.Server.* configurations
+  // @ts-ignore
+  cy.route = () => $errUtils.throwErrByPath('switchToDomain.route.forbidden')
+  // @ts-ignore
+  cy.server = () => $errUtils.throwErrByPath('switchToDomain.server.forbidden')
+  Cypress.Server = new Proxy(Cypress.Server, {
+    get: () => $errUtils.throwErrByPath('switchToDomain.Server.forbidden'),
+    // @ts-ignore
+    set: () => $errUtils.throwErrByPath('switchToDomain.Server.forbidden'),
+  })
+
+  // outlaw the use of Cypress.Cookies.* configurations, but allow other cy cookies methods to be used
+  // @ts-ignore
+  Cypress.Cookies = new Proxy(Cypress.Server, {
+    get: () => $errUtils.throwErrByPath('switchToDomain.Cookies.forbidden'),
+    // @ts-ignore
+    set: () => $errUtils.throwErrByPath('switchToDomain.Cookies.forbidden'),
   })
 
   return cy

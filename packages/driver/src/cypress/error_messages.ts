@@ -1735,6 +1735,31 @@ export default {
     failed_to_serialize_symbol: {
       message: stripIndent`\
       ${cmd('switchToDomain')} could not serialize the subject due to symbols not being supported by the structured clone algorithm.`,
+    // TODO: These deprecation warnings and forbidden use errors need to be audited before releasing multi-domain
+    },
+    route: {
+      forbidden: {
+        message: `${cmd('route')} has been deprecated and use is forbidden in ${cmd('switchToDomain')}. Consider migrating to using ${cmd('intercept')} instead.`,
+        docsUrl: 'https://on.cypress.io/intercept',
+      },
+    },
+    server: {
+      forbidden: {
+        message: `${cmd('server')} has been deprecated and use is forbidden in ${cmd('switchToDomain')}. Consider migrating to using ${cmd('intercept')} instead.`,
+        docsUrl: 'https://on.cypress.io/intercept',
+      },
+    },
+    Server: {
+      forbidden: {
+        message: `\`Cypress.Server.*\` has been deprecated and use is forbidden in ${cmd('switchToDomain')}. Consider migrating to using ${cmd('intercept')} instead.`,
+        docsUrl: 'https://on.cypress.io/intercept',
+      },
+    },
+    Cookies: {
+      forbidden: {
+        message: `\`Cypress.Cookies.*\` use is forbidden in ${cmd('switchToDomain')}. Consider using ${cmd('session')} instead.`,
+        docsUrl: 'https://on.cypress.io/session',
+      },
     },
   },
 
