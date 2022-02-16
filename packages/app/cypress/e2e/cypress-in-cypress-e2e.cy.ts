@@ -29,7 +29,11 @@ describe('Cypress In Cypress', { viewportWidth: 1200 }, () => {
       })
     })
     .then(() => {
-      (document.querySelector('body') as HTMLElement).innerHTML += `<style id="percy-test">${styleBuffer}</style>`
+      cy.get('body').then(($el) => {
+        $el.append(`<style id="percy-test">${styleBuffer}</style>`)
+      })
+
+      cy.get('#percy-test')
       cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
       cy.findByTestId('aut-url').should('be.visible')
       cy.findByTestId('playground-activator').should('be.visible')
