@@ -95,6 +95,9 @@ describe('App: Settings', () => {
     it('allows custom editor', () => {
       cy.intercept('POST', 'mutation-ExternalEditorSettings_SetPreferredEditorBinary').as('SetPreferred')
 
+      cy.contains('Choose your editor...').click()
+      cy.contains('Custom').click()
+
       // doing invoke instead of `type` since `type` enters keys on-by-one, triggering a mutation
       // for each keystroke, making it hard to intercept **only** the final request, which I want to
       // assert contains `/usr/local/bin/vim'
@@ -107,8 +110,6 @@ describe('App: Settings', () => {
       cy.wait(100)
       cy.get('[data-cy="Device Settings"]').click()
 
-      // cy.get('[data-cy="use-well-known-editor"]').should('not.be.checked')
-      // cy.get('[data-cy="use-custom-editor"]').should('be.checked')
       cy.get('[data-cy="custom-editor"]').should('have.value', '/usr/local/bin/vim')
     })
 
