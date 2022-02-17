@@ -234,19 +234,6 @@
       it('(firefox) uses native structuredClone in firefox and does NOT serialize Error objects in config', {
         browser: 'firefox',
       }, function () {
-        /**
-           * NOTE: structuredClone() was introduced in Firefox 94. Supported versions below 94 need to use the ponyfill
-           * to determine whether or not a value can be serialized through postMessage. Since the ponyfill deems Errors
-           * as clonable, but postMessage does not in Firefox, this test will fail and will fail all subsequent tests since the
-           * config is not serializable.
-           *
-           * The likelihood that a user is going to be placing Error objects in Cypress.config() or Cypress.env() in versions of Firefox 93 and below
-           * is rare. That being said, for Firefox versions below 94, this test will be skipped.
-           */
-        if (Cypress.browser.majorVersion < 94) {
-          this.skip()
-        }
-
         Cypress[fnName]('errorInConfig', new Error('error'))
 
         cy.switchToDomain('foobar.com', [fnName], ([fnName]) => {
