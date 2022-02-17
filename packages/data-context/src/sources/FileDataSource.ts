@@ -31,7 +31,7 @@ export class FileDataSource {
   }
 
   async getFilesByGlob (cwd: string, glob: string | string[], globOptions?: GlobbyOptions) {
-    const globs = Array.isArray(glob) ? glob : [glob]
+    const globs = ([] as string[]).concat(glob)
 
     const ignoreGlob = globOptions && Array.isArray(globOptions?.ignore) ? globOptions.ignore.concat('**/node_modules/**') : ['**/node_modules/**']
 
