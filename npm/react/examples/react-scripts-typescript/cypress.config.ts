@@ -1,8 +1,8 @@
-const { defineConfig } = require('cypress')
+import { defineConfig } from 'cypress'
 
 const devServer = require('@cypress/react/plugins/react-scripts')
 
-module.exports = defineConfig({
+export default defineConfig({
   video: false,
   testFiles: '**/*cy-spec.tsx',
   viewportWidth: 500,

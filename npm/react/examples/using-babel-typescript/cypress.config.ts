@@ -1,4 +1,4 @@
-const { defineConfig } = require('cypress')
+import { defineConfig } from 'cypress'
 
 // @ts-check
 
@@ -7,7 +7,7 @@ const { defineConfig } = require('cypress')
 // https://github.com/bahmutov/cypress-react-unit-test#install
 const devServer = require('@cypress/react/plugins/babel')
 
-module.exports = defineConfig({
+export default defineConfig({
   video: false,
   fixturesFolder: false,
   testFiles: '**/*spec.tsx',
