@@ -15,7 +15,7 @@ export const reporterSnapshot = () => {
         $el.attr('style', 'display: none !important')
       },
       '[data-cy=reporter-panel]': ($el) => {
-        $el.attr('style', 'width: 450px !important')
+        $el.attr('style', 'width: 450px !important; height: 100vh !important')
       },
     },
   })
