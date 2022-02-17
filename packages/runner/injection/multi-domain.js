@@ -21,6 +21,7 @@ if (!Cypress) {
     Cypress in the spec bridge window but it is missing. This should never happen and likely is a bug. Please open an issue.')
 }
 
+// the timers are wrapped in the injection code similar to the primary domain
 const timers = createTimers()
 
 Cypress.removeAllListeners('app:timers:reset')
