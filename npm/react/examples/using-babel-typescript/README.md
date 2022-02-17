@@ -31,7 +31,7 @@ npm test
 
 ## Specs
 
-See spec files [src/\*.spec.js](src). The specs are bundled using [babel.config.js](babel.config.js) settings via the [Cypress configuration](./cypress.config.js) file that includes file devServer.
+See spec files [src/\*.spec.js](src). The specs are bundled using [babel.config.js](babel.config.js) settings via the [Cypress configuration](./cypress.config.ts) file that includes file devServer.
 
 ```ts
 // let's bundle spec files and the components they include using
