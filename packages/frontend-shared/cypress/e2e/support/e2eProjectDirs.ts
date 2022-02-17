@@ -115,6 +115,7 @@ export const e2eProjectDirs = [
   'unify-plugin-errors',
   'various-file-types',
   'vite-ct',
+  'webpack-dev-server-ts-loader',
   'webpack-preprocessor',
   'webpack-preprocessor-awesome-typescript-loader',
   'webpack-preprocessor-ts-loader',
