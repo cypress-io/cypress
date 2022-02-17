@@ -26,5 +26,8 @@
   "author": "Brian Mann",
   "bugs": {
     "url": "https://github.com/cypress-io/cypress-icons/issues"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
