@@ -16,4 +16,4 @@ it('handles nullish operator', () => {
 })
 ```
 
-There is a local [.babelrc](.babelrc) file, and to make Cypress preprocessor use it, the [cypress/plugins/index.js](cypress/plugins/index.js) removes Babel presets from the default options.
+There is a local [.babelrc](.babelrc) file, and to make Cypress preprocessor use it, the [Cypress configuration](./cypress.config.js) removes Babel presets from the default options.
