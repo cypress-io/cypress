@@ -6,7 +6,7 @@ describe('multi-domain - uncaught errors', { experimentalSessionSupport: true, e
   })
 
   describe('sync errors', () => {
-    it('fails the current test/command if sync errors are thrown from the switchToDomain context', () => {
+    it('fails the current test/command if sync errors are thrown from the switchToDomain callback', () => {
       const uncaughtExceptionSpy = cy.spy()
       const r = cy.state('runnable')
 
@@ -78,9 +78,8 @@ describe('multi-domain - uncaught errors', { experimentalSessionSupport: true, e
     })
   })
 
-  // FIXME: skip for now until refactor and stability are in
-  describe.skip('async errors', () => {
-    it('fails the current test/command if async errors are thrown from the test code in switchToDomain while the callback window is still open', (done) => {
+  describe('async errors', () => {
+    it('fails the current test/command if async errors are thrown from the switchToDomain callback', (done) => {
       cy.on('fail', (err) => {
         expect(err.name).to.eq('Error')
         expect(err.message).to.include('setTimeout error')
@@ -100,7 +99,7 @@ describe('multi-domain - uncaught errors', { experimentalSessionSupport: true, e
       })
     })
 
-    it('fails the current test/command if async errors are thrown from the switchToDomain context while the callback window is still open', () => {
+    it('fails the current test/command if async errors are thrown from the secondary domain AUT', () => {
       const uncaughtExceptionSpy = cy.spy()
       const r = cy.state('runnable')
 
@@ -127,7 +126,7 @@ describe('multi-domain - uncaught errors', { experimentalSessionSupport: true, e
       })
     })
 
-    it('passes the current test/command if async errors are thrown from the switchToDomain context, but the callback window is now closed', () => {
+    it('passes the current test/command if async errors are thrown from the secondary domain AUT, but the switchToDomain callback is finished running', () => {
       const uncaughtExceptionSpy = cy.spy()
       const failureSpy = cy.spy()
 
@@ -144,8 +143,7 @@ describe('multi-domain - uncaught errors', { experimentalSessionSupport: true, e
       })
     })
 
-    // FIXME: Remove skip once support is added for handling errors from switchToDomain after the callback windows closes
-    it.skip('fails the current test/command if async errors are thrown from the test code in switchToDomain while the callback window is now closed', (done) => {
+    it('fails the current test/command if async errors are thrown from the switchToDomain callback after it is finished running', (done) => {
       cy.on('fail', (err) => {
         expect(err.name).to.eq('Error')
         expect(err.message).to.include('setTimeout error')
@@ -199,7 +197,7 @@ describe('multi-domain - uncaught errors', { experimentalSessionSupport: true, e
       })
     })
 
-    it('fails the current test/command if a promise is rejected from the test code in switchToDomain while the callback window is still open', (done) => {
+    it('fails the current test/command if a promise is rejected from the test code in switchToDomain', (done) => {
       cy.on('fail', (err) => {
         expect(err.name).to.eq('Error')
         expect(err.message).to.include('rejected promise')
@@ -218,8 +216,7 @@ describe('multi-domain - uncaught errors', { experimentalSessionSupport: true, e
       })
     })
 
-    // FIXME: Remove skip once support is added for handling errors from switchToDomain after the callback windows closes
-    it.skip('fails the current test/command if a promise is rejected from the test code in switchToDomain while the callback window is now closed', (done) => {
+    it('fails the current test/command if a promise is rejected from the switchToDomain callback after it is finished running', (done) => {
       cy.on('fail', (err) => {
         expect(err.name).to.eq('Error')
         expect(err.message).to.include('rejected promise')
@@ -237,7 +234,7 @@ describe('multi-domain - uncaught errors', { experimentalSessionSupport: true, e
     })
   })
 
-  it('does not fail if thrown custom error with readonly name', (done) => {
+  it('does not fail if thrown custom error has a readonly name', (done) => {
     cy.once('fail', (err) => {
       expect(err.name).to.include('CustomError')
       expect(err.message).to.include('custom error')

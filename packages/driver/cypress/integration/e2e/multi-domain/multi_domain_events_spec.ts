@@ -50,11 +50,7 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
       })
     })
 
-    // FIXME: reloading the page is problematic because the proxy delays the
-    // request, but the driver currently waits for a switchToDomain, which
-    // has already been called and won't be called again. need to handle any
-    // sort of page reloading in the AUT when it's cross-domain
-    it.skip('window:before:unload', () => {
+    it('window:before:unload', () => {
       cy.switchToDomain('foobar.com', () => {
         const afterWindowBeforeUnload = new Promise<void>((resolve) => {
           Cypress.once('window:before:unload', () => {
@@ -71,9 +67,7 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
       })
     })
 
-    // FIXME: currently causes tests to hang. need to implement proper
-    // stability-handling on secondary domains
-    it.skip('window:unload', () => {
+    it('window:unload', () => {
       cy.switchToDomain('foobar.com', () => {
         const afterWindowUnload = new Promise<void>((resolve) => {
           Cypress.once('window:unload', () => {

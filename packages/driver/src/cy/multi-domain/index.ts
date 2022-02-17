@@ -109,6 +109,13 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
 
         communicator.once('queue:finished', onQueueFinished)
 
+        // TODO: when we support multiple switchToDomain calls, need to unbind
+        // this one before listening again
+        communicator.on('uncaught:error', ({ err }) => {
+          // @ts-ignore
+          Cypress.runner.onSpecError('error')({ error: err })
+        })
+
         // fired once the spec bridge is set up and ready to receive messages
         communicator.once('bridge:ready', () => {
           state('readyForMultiDomain', true)
