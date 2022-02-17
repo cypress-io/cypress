@@ -519,6 +519,24 @@ commands:
           path: /tmp/artifacts
       - store-npm-logs
 
+  run-binary-system-tests:
+    steps:
+      - restore_cached_workspace
+      - restore_cached_system_tests_deps
+      - run:
+          name: Run system tests
+          command: |
+            ALL_SPECS=`circleci tests glob "/root/cypress/system-tests/test-binary/*spec*"`
+            SPECS=`echo $ALL_SPECS | xargs -n 1 | circleci tests split --split-by=timings`
+            echo SPECS=$SPECS
+            yarn workspace @tooling/system-tests test:ci $SPECS
+      - verify-mocha-results
+      - store_test_results:
+          path: /tmp/cypress
+      - store_artifacts:
+          path: /tmp/artifacts
+      - store-npm-logs
+
   store-npm-logs:
     description: Saves any NPM debug logs as artifacts in case there is a problem
     steps:
@@ -1161,6 +1179,16 @@ jobs:
     steps:
       - restore_cached_workspace
       - update_cached_system_tests_deps
+
+  binary-system-tests:
+    <<: *defaults
+    machine:
+      # using `machine` gives us a Linux VM that can run Docker
+      image: ubuntu-2004:202111-02
+      docker_layer_caching: true
+    resource_class: medium
+    steps:
+      - run-binary-system-tests
 
   system-tests-chrome:
     <<: *defaults
@@ -2279,6 +2307,10 @@ linux-workflow: &linux-workflow
         name: "test binary as a root user"
         requires:
           - create-build-artifacts
+    - binary-system-tests:
+        requires:
+          - create-build-artifacts
+          - system-tests-node-modules-install
 
 mac-workflow: &mac-workflow
   jobs:
