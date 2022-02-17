@@ -15,8 +15,8 @@ export type FilePart = FilePartNoHighlight | FilePartHighlight
 
 export const supportFileRegexps = {
   e2e: {
-    beforeRegexp: 'cypress/\support\/(?<name>index)\.(?=[j|t]s[x]?)',
-    afterRegexp: 'cypress/\support\/(?<name>e2e)\.(?=[j|t]s[x]?)',
+    beforeRegexp: 'cypress[\\\\/]support[\\\\/](?<name>index)\.(?=[j|t]sx?)',
+    afterRegexp: 'cypress[\\\\/]support[\\\\/](?<name>e2e)\.(?=[j|t]sx?)',
   },
 } as const
 

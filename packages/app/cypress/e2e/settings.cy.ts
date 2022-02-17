@@ -1,6 +1,6 @@
 describe('App: Settings', () => {
   before(() => {
-    cy.scaffoldProject('todos')
+    cy.scaffoldProject('todos', { timeout: 50 * 1000 })
   })
 
   beforeEach(() => {
