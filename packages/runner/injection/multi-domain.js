@@ -18,7 +18,7 @@ const Cypress = cyBridgeFrame.Cypress
 
 if (!Cypress) {
   throw new Error('Something went terribly wrong and we cannot proceed. We expected to find the global \
-    Cypress in the spec bridge window but it is missing!. This should never happen and likely is a bug. Please open an issue!')
+    Cypress in the spec bridge window but it is missing. This should never happen and likely is a bug. Please open an issue.')
 }
 
 const timers = createTimers()
