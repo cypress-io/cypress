@@ -11,11 +11,12 @@ import $Log from '../cypress/log'
 import { bindToListeners } from '../cy/listeners'
 import { SpecBridgeDomainCommunicator } from './communicator'
 import { handleDomainFn } from './domain_fn'
-import { handleLogs } from './logs'
-import { handleSocketEvents } from './socket'
-import { handleSpecWindowEvents } from './spec_window_events'
-import { handleErrorEvent } from './errors'
-import { handleScreenshots } from './screenshots'
+import { handleLogs } from './events/logs'
+import { handleSocketEvents } from './events/socket'
+import { handleSpecWindowEvents } from './events/spec_window'
+import { handleErrorEvent } from './events/errors'
+import { handleScreenshots } from './events/screenshots'
+import { handleTestEvents } from './events/test'
 
 const specBridgeCommunicator = new SpecBridgeDomainCommunicator()
 
@@ -69,6 +70,7 @@ const setup = () => {
   handleSocketEvents(Cypress)
   handleSpecWindowEvents(cy)
   handleScreenshots(Cypress, specBridgeCommunicator)
+  handleTestEvents(Cypress, specBridgeCommunicator)
 
   cy.onBeforeAppWindowLoad = onBeforeAppWindowLoad(Cypress, cy)
 

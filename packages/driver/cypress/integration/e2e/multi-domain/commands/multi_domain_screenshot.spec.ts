@@ -18,14 +18,6 @@ context('screenshot specs', { experimentalSessionSupport: true, experimentalMult
     cy.get('a[data-cy="screenshots-link"]').click()
   })
 
-  afterEach(() => {
-    // FIXME: the stub is not getting restored on its own causing other tests to fail
-    cy.switchToDomain('foobar.com', () => {
-      //@ts-ignore
-      Cypress.automation.restore()
-    })
-  })
-
   it('captures the fullPage', () => {
     cy.viewport(600, 200)
 

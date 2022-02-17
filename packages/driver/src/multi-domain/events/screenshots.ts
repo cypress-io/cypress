@@ -1,4 +1,4 @@
-import type { SpecBridgeDomainCommunicator } from './communicator'
+import type { SpecBridgeDomainCommunicator } from '../communicator'
 
 export const handleScreenshots = (Cypress: Cypress.Cypress, specBridgeCommunicator: SpecBridgeDomainCommunicator) => {
   let beforeScreenshotCallback
