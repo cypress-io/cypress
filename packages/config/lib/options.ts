@@ -177,12 +177,6 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     isExperimental: true,
     canUpdateDuringTestTime: false,
   }, {
-    name: 'experimentalStudio',
-    defaultValue: false,
-    validation: validate.isBoolean,
-    isExperimental: true,
-    canUpdateDuringTestTime: false,
-  }, {
     name: 'fileServerFolder',
     defaultValue: '',
     validation: validate.isString,

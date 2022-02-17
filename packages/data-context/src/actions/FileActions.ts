@@ -77,7 +77,7 @@ export class FileActions {
 
     if (binary === 'computer') {
       try {
-        this.ctx.electronApi.showItemInFolder(absolute)
+        this.ctx.actions.electron.showItemInFolder(absolute)
       } catch (err) {
         this.ctx.debug('error opening file: %s', (err as Error).stack)
       }

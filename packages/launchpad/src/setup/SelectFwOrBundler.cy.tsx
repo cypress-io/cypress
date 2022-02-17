@@ -8,6 +8,7 @@ const manyOptions = [
     isSelected: false,
     type: 'vue',
     category: 'vue',
+    isDetected: true,
   },
   {
     name: 'React.js',
@@ -39,6 +40,18 @@ describe('<SelectFwOrBundler />', () => {
     cy.mount(() => <SelectFwOrBundler selectorType="framework" label="Front-end Framework" options={[]} />)
 
     cy.contains('Front-end Framework').should('exist')
+  })
+
+  it('shows detected flag', () => {
+    cy.mount(() => (<SelectFwOrBundler
+      label="Front-end Framework"
+      selectorType="framework"
+      options={manyOptions}
+      value="react"
+    />))
+
+    cy.contains('React.js').click()
+    cy.contains('li', 'Vue.js').contains('(detected)').should('be.visible')
   })
 
   it('shows a placeholder when no value is specified', () => {

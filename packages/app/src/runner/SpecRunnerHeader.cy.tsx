@@ -137,7 +137,7 @@ describe('SpecRunnerHeader', { viewportHeight: 500 }, () => {
     cy.findByRole('list').within(() =>
       ['Chrome', 'Electron', 'Firefox'].forEach((browser) => cy.findAllByText(browser)))
 
-    cy.get('[data-cy="select-browser"] button[aria-controls]').focus().type(' ')
+    cy.get('[data-cy="select-browser"] button[aria-controls]').focus().type('{enter}')
     cy.contains('Firefox').should('be.hidden')
   })
 
@@ -152,7 +152,9 @@ describe('SpecRunnerHeader', { viewportHeight: 500 }, () => {
     cy.contains('The viewport determines').should('be.visible')
     cy.get('[data-cy="viewport"]').click()
     cy.contains('The viewport determines').should('be.hidden')
-    cy.get('[data-cy="viewport"] button').focus().type(' ')
+    // TODO: enable/remove with resolution of https://github.com/cypress-io/cypress/pull/20156
+    // cy.get('[data-cy="viewport"] button').focus().type(' ')
+    cy.get('[data-cy="viewport"] button').focus().type('{enter}')
     cy.contains('The viewport determines').should('be.visible')
     cy.get('[data-cy="viewport"] button').focus().type('{enter}')
     cy.contains('The viewport determines').should('be.hidden')

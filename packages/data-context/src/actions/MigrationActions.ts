@@ -1,6 +1,7 @@
 import path from 'path'
 import type { DataContext } from '..'
 import {
+  cleanUpIntegrationFolder,
   formatConfig,
   moveSpecFiles,
   NonStandardMigrationError,
@@ -27,6 +28,18 @@ export class MigrationActions {
     return this.ctx.migration.initialize()
   }
 
+  async renameSpecsFolder () {
+    if (!this.ctx.currentProject) {
+      throw Error('Need to set currentProject before you can rename specs folder')
+    }
+
+    const projectRoot = this.ctx.path.join(this.ctx.currentProject)
+    const from = path.join(projectRoot, 'cypress', 'integration')
+    const to = path.join(projectRoot, 'cypress', 'e2e')
+
+    await this.ctx.fs.move(from, to)
+  }
+
   async renameSpecFiles (beforeSpecs: string[], afterSpecs: string[]) {
     if (!this.ctx.currentProject) {
       throw Error('Need to set currentProject before you can rename files')
@@ -47,7 +60,12 @@ export class MigrationActions {
 
     const projectRoot = this.ctx.path.join(this.ctx.currentProject)
 
-    moveSpecFiles(projectRoot, specsToMove)
+    try {
+      await moveSpecFiles(projectRoot, specsToMove)
+      await cleanUpIntegrationFolder(this.ctx.currentProject)
+    } catch (err: any) {
+      this.ctx.coreData.baseError = err
+    }
   }
 
   async renameSupportFile () {
@@ -95,6 +113,10 @@ export class MigrationActions {
     } else {
       await this.finishReconfigurationWizard()
     }
+  }
+
+  async closeManualRenameWatcher () {
+    await this.ctx.migration.closeManualRenameWatcher()
   }
 
   async assertSuccessfulConfigMigration (configExtension: 'js' | 'ts' = 'js') {

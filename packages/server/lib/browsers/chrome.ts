@@ -444,9 +444,12 @@ export = {
 
     await options.onInitializeNewBrowserTab()
 
-    await this._maybeRecordVideo(pageCriClient, options, browser.majorVersion)
+    await Promise.all([
+      this._maybeRecordVideo(pageCriClient, options, browser.majorVersion),
+      this._handleDownloads(pageCriClient, options.downloadsFolder, automation),
+    ])
+
     await this._navigateUsingCRI(pageCriClient, options.url)
-    await this._handleDownloads(pageCriClient, options.downloadsFolder, automation)
   },
 
   async connectToExisting (browser: Browser, options: CypressConfiguration = {}, automation) {

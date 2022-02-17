@@ -1,4 +1,5 @@
 // @ts-check
+const { devServer } = require('@cypress/webpack-dev-server')
 
 module.exports = {
   'viewportWidth': 400,
@@ -16,7 +17,6 @@ module.exports = {
       'examples/**/*',
     ],
     devServer (cypressDevServerConfig, devServerConfig) {
-      const { startDevServer } = require('@cypress/webpack-dev-server')
       const path = require('path')
       const babelConfig = require('./babel.config.js')
 
@@ -73,7 +73,7 @@ module.exports = {
         },
       }
 
-      return startDevServer({ options: cypressDevServerConfig, disableLazyCompilation: false, webpackConfig })
+      return devServer(cypressDevServerConfig, { webpackConfig })
     },
   },
 }
