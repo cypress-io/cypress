@@ -133,7 +133,11 @@ class RunPlugins {
     })
     .catch((err) => {
       debug('plugins file errored:', err && err.stack)
-      this.ipc.send('setupTestingType:error', 'PLUGINS_FUNCTION_ERROR', err.stack)
+      this.ipc.send('setupTestingType:error', util.serializeError(require('@packages/errors').getError(
+        'PLUGINS_FUNCTION_ERROR',
+        this.requiredFile,
+        err,
+      )))
     })
   }
 
@@ -179,7 +183,7 @@ class RunPlugins {
 
       return this.ipc.send(`promise:fulfilled:${ids.invocationId}`, null, value)
     }).catch((err) => {
-      return this.ipc.send(`promise:fulfilled:${ids.invocationId}`, serializeError(err))
+      return this.ipc.send(`promise:fulfilled:${ids.invocationId}`, util.serializeError(err))
     })
   }
 
@@ -252,10 +256,6 @@ class RunPlugins {
       this.execute(event, ids, args)
     })
   }
-}
-
-const serializeError = (err) => {
-  return _.pick(err, 'name', 'message', 'stack', 'code', 'annotated', 'type')
 }
 
 exports.RunPlugins = RunPlugins

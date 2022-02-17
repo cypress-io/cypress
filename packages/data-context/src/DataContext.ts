@@ -39,6 +39,7 @@ import { VersionsDataSource } from './sources/VersionsDataSource'
 import type { Socket, SocketIOServer } from '@packages/socket'
 import { globalPubSub } from '.'
 import { InjectedConfigApi, ProjectLifecycleManager } from './data/ProjectLifecycleManager'
+import type { CypressError } from '@packages/errors'
 
 const IS_DEV_ENV = process.env.CYPRESS_INTERNAL_ENV !== 'production'
 
@@ -357,14 +358,14 @@ export class DataContext {
     }
   }
 
-  onWarning = (err: { message: string, type?: string, details?: string }) => {
+  onWarning = (err: CypressError) => {
     if (this.isRunMode) {
       // eslint-disable-next-line
       console.log(chalk.yellow(err.message))
     } else {
       this.coreData.warnings.push({
         title: `Warning: ${s.titleize(s.humanize(err.type ?? ''))}`,
-        message: err.message,
+        message: err.messageMarkdown,
         details: err.details,
       })
 

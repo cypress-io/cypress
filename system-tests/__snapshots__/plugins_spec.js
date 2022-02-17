@@ -385,8 +385,6 @@ exports['e2e plugins fails when there is an async error inside an event handler 
   Running:  app.cy.js                                                                       (1 of 1)
 
 
-We stopped running your tests because a plugin crashed.
-
 Your pluginsFile threw an error from: /foo/bar/.projects/plugins-async-error/cypress/plugins/index.js
 
 Error: Async error from plugins file

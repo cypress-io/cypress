@@ -58,7 +58,7 @@ export interface InjectedConfigApi {
 
 type State<S, V = undefined> = V extends undefined ? {state: S, value?: V } : {state: S, value: V}
 
-type LoadingStateFor<V> = State<'pending'> | State<'loading', Promise<V>> | State<'loaded', V> | State<'errored', Error>
+type LoadingStateFor<V> = State<'pending'> | State<'loading', Promise<V>> | State<'loaded', V> | State<'errored', CypressError>
 
 type ConfigResultState = LoadingStateFor<LoadConfigReply>
 
@@ -188,7 +188,7 @@ export class ProjectLifecycleManager {
     if (this._configResult.state === 'errored') {
       return {
         title: 'Error Loading Config',
-        message: this._configResult.value?.message || '',
+        message: this._configResult.value?.messageMarkdown || '',
         stack: this._configResult.value?.stack,
       }
     }
@@ -200,7 +200,7 @@ export class ProjectLifecycleManager {
     if (this._eventsIpcResult.state === 'errored') {
       return {
         title: 'Error Loading Config',
-        message: this._eventsIpcResult.value?.message || '',
+        message: this._eventsIpcResult.value?.messageMarkdown || '',
         stack: this._eventsIpcResult.value?.stack,
       }
     }
@@ -1051,7 +1051,7 @@ export class ProjectLifecycleManager {
     this._cleanupIpc(ipc)
 
     err = getError('CHILD_PROCESS_UNEXPECTED_ERROR', this.configFile || '(unknown config file)', err)
-    err.title = 'Error running plugin'
+    err.title = 'Config process error'
 
     // this can sometimes trigger before the promise is fulfilled and
     // sometimes after, so we need to handle each case differently

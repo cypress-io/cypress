@@ -56,7 +56,9 @@ function run (ipc, configFile, projectRoot) {
 
   const isValidSetupNodeEvents = (setupNodeEvents) => {
     if (setupNodeEvents && typeof setupNodeEvents !== 'function') {
-      ipc.send('setupTestingType:error', 'SETUP_NODE_EVENTS_IS_NOT_FUNCTION', configFile, setupNodeEvents)
+      ipc.send('setupTestingType:error', util.serializeError(
+        require('@packages/errors').getError('SETUP_NODE_EVENTS_IS_NOT_FUNCTION', configFile, setupNodeEvents),
+      ))
 
       return false
     }
@@ -71,7 +73,9 @@ function run (ipc, configFile, projectRoot) {
       return true
     }
 
-    ipc.send('setupTestingType:error', 'COMPONENT_DEV_SERVER_IS_NOT_A_FUNCTION', configFile, config)
+    ipc.send('setupTestingType:error', util.serializeError(
+      require('@packages/errors').getError('COMPONENT_DEV_SERVER_IS_NOT_A_FUNCTION', configFile, config),
+    ))
 
     return false
   }

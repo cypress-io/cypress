@@ -118,6 +118,8 @@ export const AllCypressErrors = {
     return errTemplate`\
         We could not identify a known browser at the path you provided: ${fmt.path(arg1)}
 
+        Read more about how to troubleshoot launching browsers: https://on.cypress.io/troubleshooting-launching-browsers
+
         The output from the command we ran was:
 
         ${fmt.highlightSecondary(arg2)}`
@@ -640,8 +642,6 @@ export const AllCypressErrors = {
 
   CHILD_PROCESS_UNEXPECTED_ERROR: (configFilePath: string, err: ErrorLike) => {
     return errTemplate`
-      We stopped running your tests because a plugin.
-
       Your ${fmt.highlight(`configFile`)} threw an error from: ${fmt.path(configFilePath)}
 
       ${fmt.stackTrace(err)}
