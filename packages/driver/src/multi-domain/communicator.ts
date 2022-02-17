@@ -1,53 +1,24 @@
-import clone from 'clone'
 import debugFn from 'debug'
 import { EventEmitter } from 'events'
 import _ from 'lodash'
-import $dom from '../dom'
 import { preprocessConfig, preprocessEnv } from '../util/config'
+import { preprocessObjForSerialization } from '../util/serialization'
 
 const debug = debugFn('cypress:driver:multi-domain')
 
 const CROSS_DOMAIN_PREFIX = 'cross:domain:'
 
+// Even if native errors can be serialized through postMessage, many properties are omitted on structuredClone(), including prototypical hierarchy
+// because of this, we preprocess native errors to objects and postprocess them once they come back to the primary domain
 const preprocessErrorForPostMessage = (value) => {
-  const { isDom } = $dom
+  const errorWithoutUnserializableProps = preprocessObjForSerialization<any>(value)
 
-  if (_.isError(value)) {
-    const serializableError = _.mapValues(clone(value), preprocessErrorForPostMessage)
-
-    return {
-      ... serializableError,
-      // Native Error types currently cannot be cloned in Firefox when using 'postMessage'.
-      // Please see https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm for more details
-      name: value.name,
-      message: value.message,
-      stack: value.stack,
-    }
+  return {
+    ... errorWithoutUnserializableProps,
+    name: value.name,
+    message: value.message,
+    stack: value.stack,
   }
-
-  if (_.isArray(value)) {
-    return _.map(value, preprocessErrorForPostMessage)
-  }
-
-  if (isDom(value)) {
-    return $dom.stringify(value, 'short')
-  }
-
-  if (_.isFunction(value)) {
-    return value.toString()
-  }
-
-  if (_.isObject(value)) {
-    // clone to nuke circular references
-    // and blow away anything that throws
-    try {
-      return _.mapValues(clone(value), preprocessErrorForPostMessage)
-    } catch (err) {
-      return null
-    }
-  }
-
-  return value
 }
 
 /**
@@ -132,7 +103,7 @@ export class SpecBridgeDomainCommunicator extends EventEmitter {
 
     try {
       // We always want to make sure errors are posted, so clean it up to send.
-      const preProcessedError = preprocessErrorForPostMessage(err)
+      const preProcessedError = _.isError(err) ? preprocessErrorForPostMessage(err) : err
 
       this.toPrimary(event, { subject, err: preProcessedError, ...other })
     } catch (error: any) {

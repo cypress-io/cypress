@@ -136,7 +136,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
             }
 
             cleanup()
-            reject(err)
+            reject(correctStackForCrossDomainError(err, userInvocationStack))
 
             return
           }

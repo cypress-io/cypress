@@ -6,6 +6,17 @@ describe('multi-domain - uncaught errors', { experimentalSessionSupport: true, e
   })
 
   describe('sync errors', () => {
+    it('appropriately reports negative assertions', () => {
+      cy.on('fail', (err) => {
+        expect(err.name).to.eq('AssertionError')
+        expect(err.message).to.include('expected true to be false')
+      })
+
+      cy.switchToDomain('foobar.com', () => {
+        expect(true).to.be.false
+      })
+    })
+
     it('fails the current test/command if sync errors are thrown from the switchToDomain context', () => {
       const uncaughtExceptionSpy = cy.spy()
       const r = cy.state('runnable')
