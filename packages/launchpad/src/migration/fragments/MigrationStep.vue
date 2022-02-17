@@ -3,14 +3,13 @@
     v-if="step"
     :data-cy="`migration-step ${step?.name}`"
     class="border rounded bg-light-50 border-gray-100 mb-4 w-full block
-  overflow-hidden hocus-default"
+  overflow-hidden"
   >
     <ListRowHeader
       :class="{
         'border-b border-b-gray-100 rounded-b-none': step.isCurrentStep,
         'bg-gray-50': !step.isCurrentStep
       }"
-      class="cursor-pointer"
       :description="description"
       @click="emit('toggle')"
     >
@@ -34,12 +33,6 @@
         >
           {{ title }}
         </span>
-      </template>
-      <template #right>
-        <i-cy-chevron-down
-          :class="{ 'rotate-180': step.isCurrentStep }"
-          class="max-w-16px transform icon-dark-gray-400"
-        />
       </template>
     </ListRowHeader>
     <div
