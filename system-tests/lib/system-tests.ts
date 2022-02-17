@@ -40,7 +40,7 @@ type ExecResult = {
 
 type ExecFn = (options?: ExecOptions) => Promise<ExecResult>
 
-type ItOptions = ExecOptions & {
+export type ItOptions = ExecOptions & {
   /**
    * If a function is supplied, it will be executed instead of running the `systemTests.exec` function immediately.
    */

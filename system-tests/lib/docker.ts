@@ -4,6 +4,7 @@ import stream from 'stream'
 import EventEmitter from 'events'
 import path from 'path'
 import { promises as fs } from 'fs'
+import execa from 'execa'
 import Fixtures from './fixtures'
 import { nock } from './spec_helper'
 
@@ -55,6 +56,7 @@ class DockerProcess extends EventEmitter implements SpawnerResult {
     const containerCreateEnv = []
 
     for (const k in opts.env) {
+      // skip problematic env vars that we don't wanna preserve from `process.env`
       if (['DISPLAY', 'USER', 'HOME', 'USERNAME', 'PATH'].includes(k)) continue
 
       containerCreateEnv.push([k, opts.env[k]].join('='))
@@ -70,17 +72,18 @@ class DockerProcess extends EventEmitter implements SpawnerResult {
       this.dockerImage,
       cmd,
       [this.stdout, this.stderr],
-      // https://docs.docker.com/engine/api/v1.37/#operation/ContainerCreate
+      // option docs: https://docs.docker.com/engine/api/v1.37/#operation/ContainerCreate
       {
         Entrypoint: 'bash',
         Tty: false, // so we can use stdout and stderr
         Env: containerCreateEnv,
         Binds: [
           [path.join(__dirname, '..', '..'), '/cypress'],
+          // map tmpDir to the same absolute path on the container to make it easier to reason about paths in tests
           [Fixtures.cyTmpDir, Fixtures.cyTmpDir],
         ].map((a) => a.join(':')),
       },
-      // https://docs.docker.com/engine/api/v1.37/#operation/ContainerStart
+      // option docs: https://docs.docker.com/engine/api/v1.37/#operation/ContainerStart
       {},
       (err, data) => {
         if (err) {
@@ -113,6 +116,11 @@ const checkBuiltBinary = async () => {
 export const dockerSpawner: Spawner = async (cmd, args, env, options) => {
   await checkBuiltBinary()
 
+  const projectPath = Fixtures.projectPath(options.project)
+
+  log('Running chmod 0777 on', projectPath, 'to avoid Docker permissions issues.')
+  await execa('chmod', `-R 0777 ${projectPath}`.split(' '))
+
   const proc = new DockerProcess(options.dockerImage)
 
   nock.enableNetConnect('localhost')
@@ -128,7 +136,7 @@ export const dockerSpawner: Spawner = async (cmd, args, env, options) => {
 
   env = {
     ...env,
-    TEST_PROJECT_DIR: Fixtures.projectPath(options.project),
+    TEST_PROJECT_DIR: projectPath,
     REPO_DIR: '/cypress',
   }
 
