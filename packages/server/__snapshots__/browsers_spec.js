@@ -11,7 +11,7 @@ Cypress supports the following browsers:
  - edge
  - firefox
 
-You can also use a custom browser: (https://on.cypress.io/customize-browsers).
+You can also use a custom browser: https://on.cypress.io/customize-browsers
 
 Available browsers found on your system are:
  - chrome
@@ -32,7 +32,7 @@ Cypress supports the following browsers:
  - edge
  - firefox
 
-You can also use a custom browser: (https://on.cypress.io/customize-browsers).
+You can also use a custom browser: https://on.cypress.io/customize-browsers
 
 Available browsers found on your system are:
  - chrome

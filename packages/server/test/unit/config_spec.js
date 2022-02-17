@@ -224,7 +224,7 @@ describe('lib/config', () => {
         it('fails if it is set on root level', function () {
           this.setup({ baseUrl: 'localhost' })
 
-          return this.expectValidationFails('Please update this option under e2e testing type property')
+          return this.expectValidationFails('Please update this option under the e2e testing type property')
         })
       })
 
@@ -645,7 +645,7 @@ describe('lib/config', () => {
         it('fails if is set at root level', function () {
           this.setup({ supportFile: false })
 
-          return this.expectValidationFails('was removed from the root in Cypress version `10.0.0`')
+          return this.expectValidationFails('was removed from the root of the Cypress config object in version 10.0.0')
         })
       })
 

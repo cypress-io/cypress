@@ -1082,6 +1082,11 @@ describe('visual error templates', () => {
         default: [{ name: 'specPattern', configFile: '/path/to/configFile.ts' }],
       }
     },
+    REMOVED_ROOT_CONFIG_OPTION_E2E: () => {
+      return {
+        default: [{ name: 'baseUrl', configFile: '/path/to/configFile.ts' }],
+      }
+    },
     CT_CONFIG_NOT_SUPPORTED: () => {
       return {
         default: [{ name: 'baseUrl', configFile: '/path/to/configFile.ts' }],

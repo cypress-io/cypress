@@ -1202,9 +1202,18 @@ export const AllCypressErrors = {
 
   REMOVED_ROOT_CONFIG_OPTION: (errShape: BreakingErrResult) => {
     return errTemplate`\
-      The ${fmt.highlight(errShape.name)} configuration option was removed from the root of the Cypress config object version 10.0.0.
+      The ${fmt.highlight(errShape.name)} configuration option was removed from the root of the Cypress config object in version 10.0.0.
       
       Please update this option under each testing type property.
+
+      https://on.cypress.io/migration-guide`
+  },
+
+  REMOVED_ROOT_CONFIG_OPTION_E2E: (errShape: BreakingErrResult) => {
+    return errTemplate`\
+      The ${fmt.highlight(errShape.name)} configuration option was removed from the root of the Cypress config object in version 10.0.0.
+      
+      Please update this option under the e2e testing type property.
 
       https://on.cypress.io/migration-guide`
   },

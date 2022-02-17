@@ -365,7 +365,7 @@ export class DataContext {
     } else {
       this.coreData.warnings.push({
         title: `Warning: ${s.titleize(s.humanize(err.type ?? ''))}`,
-        message: err.messageMarkdown,
+        message: err.messageMarkdown || err.message,
         details: err.details,
       })
 

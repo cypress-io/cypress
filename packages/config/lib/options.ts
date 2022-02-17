@@ -553,7 +553,7 @@ export const breakingRootOptions: Array<BreakingOption> = [
   },
   {
     name: 'baseUrl',
-    errorKey: 'REMOVED_ROOT_CONFIG_OPTION',
+    errorKey: 'REMOVED_ROOT_CONFIG_OPTION_E2E',
     isWarning: false,
   },
 ]

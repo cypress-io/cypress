@@ -21,7 +21,7 @@ import type { DataContext } from '..'
 import { LoadConfigReply, SetupNodeEventsReply, ProjectConfigIpc, IpcHandler } from './ProjectConfigIpc'
 import assert from 'assert'
 import type { AllModeOptions, BreakingErrResult, BreakingOption, FoundBrowser, FullConfig, TestingType } from '@packages/types'
-import type { BaseErrorDataShape, WarningError } from '.'
+import type { BaseErrorDataShape } from '.'
 import { autoBindDebug } from '../util/autoBindDebug'
 
 const debug = debugLib(`cypress:lifecycle:ProjectLifecycleManager`)
@@ -1259,7 +1259,7 @@ export class ProjectLifecycleManager {
 
       this.ctx.coreData.chosenBrowser = browser ?? null
     } catch (e) {
-      const error = e as Error
+      const error = e as CypressError
 
       this.ctx.onWarning(error)
     }
@@ -1276,7 +1276,7 @@ export class ProjectLifecycleManager {
       dfd.reject(err)
     })
 
-    const handleWarning = (warningErr: WarningError) => {
+    const handleWarning = (warningErr: CypressError) => {
       debug('plugins process warning:', warningErr.stack)
 
       return this.ctx.onWarning(warningErr)
