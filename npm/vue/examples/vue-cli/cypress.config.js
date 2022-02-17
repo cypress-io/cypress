@@ -1,5 +1,5 @@
 const { defineConfig } = require('cypress')
-const { devServer, defineDevServerConfig } = require('@cypress/webpack-dev-server')
+const { devServer }  = require('@cypress/webpack-dev-server')
 
 const webpackConfig = require('@vue/cli-service/webpack.config')
 

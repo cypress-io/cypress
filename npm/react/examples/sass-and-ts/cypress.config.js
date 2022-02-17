@@ -3,7 +3,7 @@ const { defineConfig } = require('cypress')
 
 // load the devServer & defineDevServerConfig functions that come with this plugin
 // https://github.com/cypress-io/cypress/tree/master/npm/react#install
-const { devServer, defineDevServerConfig } = require('@cypress/react/plugins/load-webpack')
+const { devServer }  = require('@cypress/react/plugins/load-webpack')
 
 module.exports = defineConfig({
   video: false,
