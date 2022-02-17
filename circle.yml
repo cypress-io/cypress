@@ -212,7 +212,7 @@ commands:
       - run:
           name: Bail if specific cache exists
           command: |
-            if [[ -f "system_tests_node_modules_installed" ]]; then
+            if [[ -f "/tmp/system_tests_node_modules_installed" ]]; then
               echo "No updates to system tests node modules, exiting"
               circleci-agent step halt
             fi
@@ -229,12 +229,12 @@ commands:
           key: v{{ .Environment.CACHE_VERSION }}-system-tests-projects-node-modules-cache-{{ checksum "system_tests_cache_key" }}
           paths:
             - ~/.cache/cy-system-tests-node-modules
-      - run: touch system_tests_node_modules_installed
+      - run: touch /tmp/system_tests_node_modules_installed
       - save_cache:
           name: Save system tests node_modules cache state key
           key: v{{ .Environment.CACHE_VERSION }}-system-tests-projects-node-modules-cache-state-{{ checksum "system_tests_cache_key" }}
           paths:
-            - system_tests_node_modules_installed
+            - /tmp/system_tests_node_modules_installed
 
   caching-dependency-installer:
     description: 'Installs & caches the dependencies based on yarn lock & package json dependencies'
@@ -253,7 +253,7 @@ commands:
       - run:
           name: Bail if cache exists
           command: |
-            if [[ -f "node_modules_installed" ]]; then
+            if [[ -f "/tmp/node_modules_installed" ]]; then
               echo "Node modules already cached for dependencies, exiting"
               circleci-agent step halt
             fi
@@ -288,12 +288,12 @@ commands:
                 key: v{{ .Environment.CACHE_VERSION }}-test2-node-modules-cache-{{ checksum "circle_cache_key" }}
                 paths:
                   - /tmp/node_modules_cache
-      - run: touch node_modules_installed
+      - run: touch /tmp/node_modules_installed
       - save_cache:
           name: Saving node-modules cache state key
           key: v{{ .Environment.CACHE_VERSION }}-test2-node-modules-cache-state-{{ checksum "circle_cache_key" }}
           paths:
-            - node_modules_installed
+            - /tmp/node_modules_installed
       - save_cache:
           name: Save weekly yarn cache
           key: v{{ .Environment.CACHE_VERSION }}-test2-deps-root-weekly-{{ checksum "cache_date" }}
