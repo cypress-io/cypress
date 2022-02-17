@@ -68,19 +68,21 @@ class ElementOverrideManager {
   }
 }
 
-let elementOverrideManager
-
 const applySnapshotMutations = ({
   log,
   snapshotWidth,
+  snapshotHeight,
   snapshotElementOverrides,
+  defaultWidth,
   defaultHeight,
 }) => {
+  let elementOverrideManager
+
   if (Object.keys(snapshotElementOverrides).length) {
     elementOverrideManager = new ElementOverrideManager()
   }
 
-  return cy.viewport(snapshotWidth, defaultHeight, { log: false })
+  return cy.viewport(snapshotWidth, snapshotHeight, { log: false })
   .then(() => {
     if (elementOverrideManager) {
       elementOverrideManager.performOverrides(cy, snapshotElementOverrides)
@@ -93,14 +95,14 @@ const applySnapshotMutations = ({
         end: true,
       })
     }
-  })
-}
 
-const resetSnapshotMutations = ({ defaultWidth, defaultHeight }) => {
-  return cy.viewport(defaultWidth, defaultHeight, { log: false })
-  .then(() => {
-    if (elementOverrideManager) {
-      elementOverrideManager.resetOverrides()
+    return () => {
+      cy.viewport(defaultWidth, defaultHeight, { log: false })
+      .then(() => {
+        if (elementOverrideManager) {
+          elementOverrideManager.resetOverrides()
+        }
+      })
     }
   })
 }
@@ -123,11 +125,13 @@ export const installCustomPercyCommand = ({ before, elementOverrides } = {}) => 
 
     const { viewportWidth, viewportHeight } = cy.state()
     const snapshotWidth = !_.isNil(options.width) ? options.width : viewportWidth
+    const snapshotHeight = !_.isNil(options.height) ? options.height : viewportHeight
 
     const snapshotMutationOptions = {
       defaultWidth: viewportWidth,
       defaultHeight: viewportHeight,
       snapshotWidth,
+      snapshotHeight,
       snapshotElementOverrides: {
         ...elementOverrides,
         ...options.elementOverrides,
@@ -137,18 +141,10 @@ export const installCustomPercyCommand = ({ before, elementOverrides } = {}) => 
     // If we're in interactive mode via 'cypress open', apply overrides,
     // create log, reset overrides, and abort.
     if (Cypress.config().isInteractive) {
-      cy.then(() => {
-        return applySnapshotMutations({
-          ...snapshotMutationOptions,
-          log: 'percy: skipping snapshot in interactive mode',
-        })
-      })
-
-      cy.then(() => {
-        return resetSnapshotMutations(snapshotMutationOptions)
-      })
-
-      return
+      return applySnapshotMutations({
+        ...snapshotMutationOptions,
+        log: 'percy: skipping snapshot in interactive mode',
+      }).then((reset) => reset())
     }
 
     if (_.isFunction(before)) {
@@ -164,28 +160,19 @@ export const installCustomPercyCommand = ({ before, elementOverrides } = {}) => 
 
     // If we're not in interactive mode, apply mutations, call original
     // percy snapshot function, and then reset overrides
-    cy.then(() => {
-      return applySnapshotMutations({
-        ...snapshotMutationOptions,
+    return applySnapshotMutations(snapshotMutationOptions)
+    .then((reset) => {
+      cy.then(() => {
+        return origFn(screenshotName, {
+          widths: [snapshotWidth],
+        })
+      }).then(() => {
+        return reset()
+      })
+      .then(() => {
+        Cypress.config('defaultCommandTimeout', _backupTimeout)
       })
     })
-
-    cy.then(() => {
-      return origFn(screenshotName, {
-        widths: [snapshotWidth],
-        minHeight: viewportHeight,
-      })
-    })
-
-    cy.then(() => {
-      return resetSnapshotMutations(snapshotMutationOptions)
-    })
-
-    cy.then(() => {
-      Cypress.config('defaultCommandTimeout', _backupTimeout)
-    })
-
-    return
   }
 
   Cypress.Commands.overwrite('percySnapshot', customPercySnapshot)

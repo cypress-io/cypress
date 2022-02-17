@@ -1,5 +1,5 @@
 // Takes percy snapshot with navigation/AUT hidden and run duration mocked
-export const reporterSnapshot = (height?: number) => {
+export const snapshotReporter = () => {
   // @ts-ignore
   cy.percySnapshot({
     width: 450,
@@ -15,13 +15,7 @@ export const reporterSnapshot = (height?: number) => {
         $el.attr('style', 'display: none !important')
       },
       '[data-cy=reporter-panel]': ($el) => {
-        let styleString = 'width: 450px !important'
-
-        if (height) {
-          styleString = `${styleString }; height: ${height}px !important`
-        }
-
-        $el.attr('style', styleString)
+        $el.attr('style', 'width: 450px !important')
       },
     },
   })

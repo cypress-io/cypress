@@ -1,17 +1,17 @@
 import { loadSpec } from './support/spec-loader'
-import { reporterSnapshot } from './support/reporter-snapshot'
+import { snapshotReporter } from './support/snapshot-reporter'
 
 describe('runner/cypress sessions.ui.spec', {
   // Limiting tests kept in memory due to large memory cost
   // of nested spec snapshots
   numTestsKeptInMemory: 1,
 }, () => {
-  // afterEach(function () {
-  //   // @ts-ignore
-  //   if (cy.state('test').state === 'passed') {
-  //     reporterSnapshot()
-  //   }
-  // })
+  afterEach(function () {
+    // @ts-ignore
+    if (cy.state('test').state === 'passed') {
+      snapshotReporter()
+    }
+  })
 
   it('empty session with no data', () => {
     loadSpec({
@@ -21,11 +21,9 @@ describe('runner/cypress sessions.ui.spec', {
 
     cy.get('.sessions-container').click()
     .should('contain', 'blank_session')
-
-    reporterSnapshot()
   })
 
-  it('shows message for new, saved, and recreated session', { viewportHeight: 1500 }, () => {
+  it('shows message for new, saved, and recreated session', () => {
     loadSpec({
       fileName: 'recreated_session.cy.js',
       passCount: 3,
@@ -57,8 +55,6 @@ describe('runner/cypress sessions.ui.spec', {
     .should('contain', 'Sessions (1)')
     .should('contain', 'user1')
     .should('contain', '(recreated)')
-
-    reporterSnapshot(1500)
   })
 
   it('multiple sessions in a test', () => {
@@ -71,7 +67,5 @@ describe('runner/cypress sessions.ui.spec', {
     .should('contain', 'Sessions (2)')
     .should('contain', 'user1')
     .should('contain', 'user2')
-
-    reporterSnapshot()
   })
 })

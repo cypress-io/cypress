@@ -36,21 +36,23 @@ export function loadSpec (options: LoadSpecOptions): void {
   cy.startAppServer()
 
   cy.withCtx((ctx, options) => {
-    if (options.hasPreferredIde) {
-      // set preferred editor to bypass IDE selection dialog
-      ctx.coreData.localSettings.availableEditors = [
-        ...ctx.coreData.localSettings.availableEditors,
-        {
-          id: 'test-editor',
-          binary: '/usr/bin/test-editor',
-          name: 'Test editor',
-        },
-      ]
+    ctx.update((coreData) => {
+      if (options.hasPreferredIde) {
+        // set preferred editor to bypass IDE selection dialog
+        coreData.localSettings.availableEditors = [
+          ...ctx.coreData.localSettings.availableEditors,
+          {
+            id: 'test-editor',
+            binary: '/usr/bin/test-editor',
+            name: 'Test editor',
+          },
+        ]
 
-      ctx.coreData.localSettings.preferences.preferredEditorBinary = 'test-editor'
-    }
+        coreData.localSettings.preferences.preferredEditorBinary = 'test-editor'
+      }
 
-    ctx.coreData.localSettings.preferences.isSpecsListOpen = false
+      coreData.localSettings.preferences.isSpecsListOpen = false
+    })
   }, { hasPreferredIde })
 
   // TODO: investigate why directly visiting the spec will sometimes hang

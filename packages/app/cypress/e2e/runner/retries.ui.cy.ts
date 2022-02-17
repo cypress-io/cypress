@@ -1,5 +1,5 @@
 import { loadSpec } from './support/spec-loader'
-import { reporterSnapshot } from './support/reporter-snapshot'
+import { snapshotReporter } from './support/snapshot-reporter'
 
 // Returns wrapped attempt tag found within runnable containing selector
 const getAttemptTag = (sel: string) => {
@@ -14,7 +14,7 @@ describe('runner/cypress retries.ui.spec', {
   afterEach(() => {
     // @ts-ignore
     if (cy.state('test').state === 'passed') {
-      reporterSnapshot()
+      snapshotReporter()
     }
   })
 
