@@ -32,7 +32,7 @@ You should obtain
 - Install dependencies
   `yarn add -D babel-plugin-istanbul @cypress/code-coverage`
 - Add the istanbul plugin to your `babel.config.js`
-- Install `@cypress/code-coverage/task` in `cypress/plugins/index.js`
+- Install `@cypress/code-coverage/task`
 - Install `@cypress/code-coverage/support` in `cypress/support/index.js`
 - Enjoy
 

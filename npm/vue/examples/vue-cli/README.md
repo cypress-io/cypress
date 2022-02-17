@@ -22,52 +22,51 @@ We need to install:
 
 ### Configure Cypress
 
-To setup any Cypress runner, the standard way is to create a `cypress.json` file at the root of your project. Checkout [the docs](https://docs.cypress.io/guides/references/configuration) to know the extend of your options.
+To setup any Cypress runner, the standard way is to create a `cypress.config.js` file at the root of your project. Checkout [the docs](https://docs.cypress.io/guides/references/configuration) to know the extend of your options.
 
-Here is the `cypress.json` file at work in this project:
+Here is the `cypress.config.js` file at work in this project:
 
 ```js
-// cypress.json
-{
+const { defineConfig } = require('cypress')
+
+module.exports = defineConfig({
   // Set this porperty to false to avoid cypress creating 
   // example `fixture` and `support` folders for fixtures and support files
   // Remove the 2 lines if you are
-  "fixturesFolder": false,
-  "supportFile": false,
-  // Tell Cypress how to recognize spec files  
-  "testFiles": "**/*spec.js",
-  // All the component test files are 
-  // located in this directory and its sub-directory
-  "componentFolder": "src"
-}
+  fixturesFolder: false,
+  supportFile: false,
+  component:{
+    // All the component test files are
+    // located in this directory and its sub-directory
+    componentFolder: 'src'
+    // Tell Cypress how to recognize spec files
+    specPattern: '**/*.cy.{js,jsx,ts,tsx}',
+  }
+})
 ```
 
 ### Setup Cypress plugins
 
-For the last step of the install process, create a `cypress/plugin/index.js` file.
-This file will let Cypress know how to start the testing server with your Nuxt configuration.
+For the last step of the install process, let Cypress know how to start the testing server with your Nuxt configuration.
 
 Since Vue CLI uses webpack under the hood to build your app, it can export a webpack config object.
-Ask Vue CLi to return this config this webpack config using the `@vue/cli-service/webpack.config` import.
+Ask Vue CLI to return this webpack config using the `@vue/cli-service/webpack.config` import.
 
 ```js
-/// <reference types="cypress" />
-const { startDevServer } = require('@cypress/webpack-dev-server')
+const { devServer }  = require('@cypress/webpack-dev-server')
 const webpackConfig = require('@vue/cli-service/webpack.config')
 
-/**
- * @type Cypress.PluginConfig
- */
-module.exports = (on, config) => {
-  on('dev-server:start', (options) => {
-    return startDevServer({
-      options,
-      webpackConfig: modifiedWebpackConfig,
-    })
-  })
+module.exports = defineConfig({
+  component: {
+    devServer,
+    devServerConfig: modifiedWebpackConfig,
+    setupNodeEvents (on, config) {
+      require('@cypress/code-coverage/task')(on, config)
 
-  return config
-}
+      return config
+    },
+  },
+})
 
 ```
 
