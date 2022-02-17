@@ -132,10 +132,12 @@ const customBinary = ref<string>(
     : props.gql.localSettings.preferences.preferredEditorBinary ?? '',
 )
 
-let editorToUse: string = customBinary.value ? 'custom' : 'found'
+const editorToUse = ref<string>(
+  customBinary.value ? 'custom' : 'found',
+)
 
 const selectedEditor = ref<Editor | undefined>(
-  editorToUse === 'custom' ? customEditor : selectedWellKnownEditor,
+  editorToUse.value === 'custom' ? customEditor : selectedWellKnownEditor,
 )
 
 const emit = defineEmits<{
@@ -143,8 +145,8 @@ const emit = defineEmits<{
 }>()
 
 watch(customBinary, (val) => {
-  if (editorToUse !== 'custom') {
-    editorToUse = 'custom'
+  if (editorToUse.value !== 'custom') {
+    editorToUse.value = 'custom'
   }
 
   emit('choseEditor', val)
@@ -154,12 +156,12 @@ const updateEditor = (editor: Editor) => {
   selectedEditor.value = editor
 
   if (editor.id === 'custom') {
-    editorToUse = 'custom'
+    editorToUse.value = 'custom'
     if (customBinary.value) {
       emit('choseEditor', customBinary.value)
     }
   } else {
-    editorToUse = 'found'
+    editorToUse.value = 'found'
     emit('choseEditor', selectedEditor.value.binary)
   }
 }
