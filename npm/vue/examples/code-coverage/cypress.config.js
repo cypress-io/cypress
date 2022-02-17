@@ -8,7 +8,7 @@ module.exports = defineConfig({
   video: false,
   component: {
     devServer,
-    devServerConfig: defineDevServerConfig({ webpackConfig }),
+    devServerConfig: webpackConfig,
     componentFolder: 'src',
     testFiles: '**/*.spec.js',
     setupNodeEvents (on, config) {

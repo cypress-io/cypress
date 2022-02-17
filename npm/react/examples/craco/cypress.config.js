@@ -6,7 +6,7 @@ const cracoConfig = require('./craco.config.js')
 module.exports = defineConfig({
   component: {
     devServer,
-    devServerConfig: defineDevServerConfig({ cracoConfig }),
+    devServerConfig: cracoConfig,
     componentFolder: 'src',
     testFiles: '**/*.test.{js,ts,jsx,tsx}',
   },

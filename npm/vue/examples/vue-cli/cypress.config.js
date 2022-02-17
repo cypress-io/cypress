@@ -1,5 +1,5 @@
 const { defineConfig } = require('cypress')
-const { devServer }  = require('@cypress/webpack-dev-server')
+const { devServer } = require('@cypress/webpack-dev-server')
 
 const webpackConfig = require('@vue/cli-service/webpack.config')
 
@@ -21,7 +21,7 @@ module.exports = defineConfig({
   fixturesFolder: false,
   component: {
     devServer,
-    devServerConfig: defineDevServerConfig({ modifiedWebpackConfig }),
+    devServerConfig: modifiedWebpackConfig,
     componentFolder: 'src',
     testFiles: '**/*spec.js',
     setupNodeEvents (on, config) {

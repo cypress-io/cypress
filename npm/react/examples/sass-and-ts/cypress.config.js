@@ -1,9 +1,11 @@
 // @ts-check
 const { defineConfig } = require('cypress')
 
-// load the devServer & defineDevServerConfig functions that come with this plugin
+// load the devServer function that comes with this plugin
 // https://github.com/cypress-io/cypress/tree/master/npm/react#install
 const { devServer }  = require('@cypress/react/plugins/load-webpack')
+
+const webpackConfig = require('webpack.config.js')
 
 module.exports = defineConfig({
   video: false,
@@ -16,9 +18,7 @@ module.exports = defineConfig({
   },
   component: {
     devServer,
-    devServerConfig: defineDevServerConfig({
-      webpackFilename: 'webpack.config.js',
-    }),
+    devServerConfig: webpackConfig,
     componentFolder: 'src',
     testFiles: '**/*spec.*',
   },
