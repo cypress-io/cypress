@@ -3,7 +3,7 @@ import debugFn from 'debug'
 import { EventEmitter } from 'events'
 import _ from 'lodash'
 import $dom from '../dom'
-import { preprocessConfig, preprocessEnv } from '../util/config_utilities'
+import { preprocessConfig, preprocessEnv } from '../util/config'
 
 const debug = debugFn('cypress:driver:multi-domain')
 

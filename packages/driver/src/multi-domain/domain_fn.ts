@@ -2,7 +2,7 @@ import type { $Cy } from '../cypress/cy'
 import type { SpecBridgeDomainCommunicator } from './communicator'
 import $errUtils from '../cypress/error_utils'
 import $utils from '../cypress/utils'
-import { syncConfigToCurrentDomain, syncEnvToCurrentDomain } from '../util/config_utilities'
+import { syncConfigToCurrentDomain, syncEnvToCurrentDomain } from '../util/config'
 
 export const handleDomainFn = (cy: $Cy, specBridgeCommunicator: SpecBridgeDomainCommunicator) => {
   const doneEarly = () => {
