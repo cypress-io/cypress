@@ -7,18 +7,33 @@ context('multi-domain misc', { experimentalSessionSupport: true, experimentalMul
 
   it('verifies number of cy commands', () => {
     // @ts-ignore
-    expect(Object.keys(cy.commandFns)).to.deep.equal(
-      [
-        'check', 'uncheck', 'click', 'dblclick', 'rightclick', 'focus', 'blur', 'hover', 'scrollIntoView', 'scrollTo', 'select',
-        'selectFile', 'submit', 'type', 'clear', 'trigger', 'as', 'ng', 'should', 'and', 'clock', 'tick', 'spread', 'each', 'then',
-        'invoke', 'its', 'getCookie', 'getCookies', 'setCookie', 'clearCookie', 'clearCookies', 'pause', 'debug', 'exec', 'readFile',
-        'writeFile', 'fixture', 'clearLocalStorage', 'url', 'hash', 'location', 'end', 'noop', 'log', 'wrap', 'reload', 'go', 'visit',
-        'focused', 'get', 'root', 'contains', 'shadow', 'within', 'request', 'session', 'screenshot', 'task', 'find', 'filter', 'not',
-        'children', 'eq', 'closest', 'first', 'last', 'next', 'nextAll', 'nextUntil', 'parent', 'parents', 'parentsUntil', 'prev',
-        'prevAll', 'prevUntil', 'siblings', 'wait', 'title', 'window', 'document', 'viewport', 'server', 'route', 'intercept', 'switchToDomain',
-      ],
-      'The number of cy commands has changed. Please ensure any newly added commands are also tested in multi-domain.',
-    )
+    const actualCommands = Object.keys(cy.commandFns)
+    const expectedCommands = [
+      'check', 'uncheck', 'click', 'dblclick', 'rightclick', 'focus', 'blur', 'hover', 'scrollIntoView', 'scrollTo', 'select',
+      'selectFile', 'submit', 'type', 'clear', 'trigger', 'as', 'ng', 'should', 'and', 'clock', 'tick', 'spread', 'each', 'then',
+      'invoke', 'its', 'getCookie', 'getCookies', 'setCookie', 'clearCookie', 'clearCookies', 'pause', 'debug', 'exec', 'readFile',
+      'writeFile', 'fixture', 'clearLocalStorage', 'url', 'hash', 'location', 'end', 'noop', 'log', 'wrap', 'reload', 'go', 'visit',
+      'focused', 'get', 'contains', 'root', 'shadow', 'within', 'request', 'session', 'screenshot', 'task', 'find', 'filter', 'not',
+      'children', 'eq', 'closest', 'first', 'last', 'next', 'nextAll', 'nextUntil', 'parent', 'parents', 'parentsUntil', 'prev',
+      'prevAll', 'prevUntil', 'siblings', 'wait', 'title', 'window', 'document', 'viewport', 'server', 'route', 'intercept', 'switchToDomain',
+    ]
+    const addedCommands = Cypress._.difference(actualCommands, expectedCommands)
+    const removedCommands = Cypress._.difference(expectedCommands, actualCommands)
+
+    if (actualCommands.length > expectedCommands.length) {
+      throw new Error(`The following command(s) have been added to Cypress: ${addedCommands.join(', ')}. Please add the command(s) to this test.`)
+    }
+
+    if (expectedCommands.length > actualCommands.length) {
+      throw new Error(`The following command(s) have been removed from Cypress: ${removedCommands.join(', ')}. Please remove the command(s) from this test.`)
+    }
+
+    expect(addedCommands).to.deep.equal([], `Commands have been added to and removed from Cypress.
+
+  The following command(s) were added: ${addedCommands.join(', ')}
+  The following command(s) were removed: ${removedCommands.join(', ')}
+
+  Update this test accordingly.`)
   })
 
   it('.end()', () => {
@@ -51,24 +66,30 @@ context('multi-domain misc', { experimentalSessionSupport: true, experimentalMul
     })
   })
 
-  it('.log()', (done) => {
-    cy.switchToDomain('foobar.com', done, () => {
-      Cypress.once('log:added', () => {
-        done()
+  it('.log()', () => {
+    cy.switchToDomain('foobar.com', () => {
+      const afterLogAdded = new Promise<void>((resolve) => {
+        cy.once('log:added', () => {
+          resolve()
+        })
       })
 
       cy.log('test log in multi-domain')
+      cy.wrap(afterLogAdded)
     })
   })
 
-  it('.pause()', (done) => {
-    cy.switchToDomain('foobar.com', done, () => {
-      Cypress.once('paused', () => {
-        Cypress.emit('resume:all')
-        done()
+  it('.pause()', () => {
+    cy.switchToDomain('foobar.com', () => {
+      const afterPaused = new Promise<void>((resolve) => {
+        cy.once('paused', () => {
+          Cypress.emit('resume:all')
+          resolve()
+        })
       })
 
       cy.pause()
+      cy.wrap(afterPaused)
     })
   })
 

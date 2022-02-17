@@ -34,16 +34,19 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
       cy.get('a[data-cy="multi-domain-secondary-link"]').click()
     })
 
-    it('form:submitted', (done) => {
-      cy.switchToDomain('foobar.com', done, () => {
-        Cypress.once('form:submitted', (e) => {
-          const $form = cy.$$('form')
+    it('form:submitted', () => {
+      cy.switchToDomain('foobar.com', () => {
+        const afterFormSubmitted = new Promise<void>((resolve) => {
+          Cypress.once('form:submitted', (e) => {
+            const $form = cy.$$('form')
 
-          expect(e.target).to.eq($form.get(0))
-          done()
+            expect(e.target).to.eq($form.get(0))
+            resolve()
+          })
         })
 
         cy.get('form').submit()
+        cy.wrap(afterFormSubmitted)
       })
     })
 
@@ -51,64 +54,80 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
     // request, but the driver currently waits for a switchToDomain, which
     // has already been called and won't be called again. need to handle any
     // sort of page reloading in the AUT when it's cross-domain
-    it.skip('window:before:unload', (done) => {
-      cy.switchToDomain('foobar.com', done, () => {
-        Cypress.once('window:before:unload', () => {
-          expect(location.host).to.equal('foobar.com')
-          done()
+    it.skip('window:before:unload', () => {
+      cy.switchToDomain('foobar.com', () => {
+        const afterWindowBeforeUnload = new Promise<void>((resolve) => {
+          Cypress.once('window:before:unload', () => {
+            expect(location.host).to.equal('foobar.com')
+            resolve()
+          })
         })
 
         cy.window().then((window) => {
           window.location.href = '/fixtures/multi-domain.html'
         })
+
+        cy.wrap(afterWindowBeforeUnload)
       })
     })
 
     // FIXME: currently causes tests to hang. need to implement proper
     // stability-handling on secondary domains
-    it.skip('window:unload', (done) => {
-      cy.switchToDomain('foobar.com', done, () => {
-        Cypress.once('window:unload', () => {
-          expect(location.host).to.equal('foobar.com')
-          done()
+    it.skip('window:unload', () => {
+      cy.switchToDomain('foobar.com', () => {
+        const afterWindowUnload = new Promise<void>((resolve) => {
+          Cypress.once('window:unload', () => {
+            expect(location.host).to.equal('foobar.com')
+            resolve()
+          })
         })
 
         cy.window().then((window) => {
           window.location.href = '/fixtures/multi-domain.html'
         })
+
+        cy.wrap(afterWindowUnload)
       })
     })
 
-    it('window:alert', (done) => {
-      cy.switchToDomain('foobar.com', done, () => {
-        Cypress.once('window:alert', (text) => {
-          expect(location.host).to.equal('foobar.com')
-          expect(`window:alert ${text}`).to.equal('window:alert the alert text')
-          done()
+    it('window:alert', () => {
+      cy.switchToDomain('foobar.com', () => {
+        const afterWindowAlert = new Promise<void>((resolve) => {
+          Cypress.once('window:alert', (text) => {
+            expect(location.host).to.equal('foobar.com')
+            expect(`window:alert ${text}`).to.equal('window:alert the alert text')
+            resolve()
+          })
         })
 
         cy.get('[data-cy="alert"]').click()
+        cy.wrap(afterWindowAlert)
       })
     })
 
-    it('window:confirm', (done) => {
-      cy.switchToDomain('foobar.com', done, () => {
-        Cypress.once('window:confirm', (text) => {
-          expect(location.host).to.equal('foobar.com')
-          expect(`window:confirm ${text}`).to.equal('window:confirm the confirm text')
-          done()
+    it('window:confirm', () => {
+      cy.switchToDomain('foobar.com', () => {
+        const afterWindowConfirm = new Promise<void>((resolve) => {
+          Cypress.once('window:confirm', (text) => {
+            expect(location.host).to.equal('foobar.com')
+            expect(`window:confirm ${text}`).to.equal('window:confirm the confirm text')
+            resolve()
+          })
         })
 
         cy.get('[data-cy="confirm"]').click()
+        cy.wrap(afterWindowConfirm)
       })
     })
 
-    it('window:confirmed - true when no window:confirm listeners return false', (done) => {
-      cy.switchToDomain('foobar.com', done, () => {
-        Cypress.once('window:confirmed', (text, returnedFalse) => {
-          expect(location.host).to.equal('foobar.com')
-          expect(`window:confirmed ${text} - ${returnedFalse}`).to.equal('window:confirmed the confirm text - true')
-          done()
+    it('window:confirmed - true when no window:confirm listeners return false', () => {
+      cy.switchToDomain('foobar.com', () => {
+        const afterWindowConfirmed = new Promise<void>((resolve) => {
+          Cypress.once('window:confirmed', (text, returnedFalse) => {
+            expect(location.host).to.equal('foobar.com')
+            expect(`window:confirmed ${text} - ${returnedFalse}`).to.equal('window:confirmed the confirm text - true')
+            resolve()
+          })
         })
 
         Cypress.on('window:confirm', () => {})
@@ -117,15 +136,18 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
         })
 
         cy.get('[data-cy="confirm"]').click()
+        cy.wrap(afterWindowConfirmed)
       })
     })
 
-    it('window:confirmed - false when any window:confirm listeners return false', (done) => {
-      cy.switchToDomain('foobar.com', done, () => {
-        Cypress.once('window:confirmed', (text, returnedFalse) => {
-          expect(location.host).to.equal('foobar.com')
-          expect(`window:confirmed ${text} - ${returnedFalse}`).to.equal('window:confirmed the confirm text - false')
-          done()
+    it('window:confirmed - false when any window:confirm listeners return false', () => {
+      cy.switchToDomain('foobar.com', () => {
+        const afterWindowConfirmed = new Promise<void>((resolve) => {
+          Cypress.once('window:confirmed', (text, returnedFalse) => {
+            expect(location.host).to.equal('foobar.com')
+            expect(`window:confirmed ${text} - ${returnedFalse}`).to.equal('window:confirmed the confirm text - false')
+            resolve()
+          })
         })
 
         Cypress.on('window:confirm', () => {
@@ -135,6 +157,7 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
         Cypress.on('window:confirm', () => {})
 
         cy.get('[data-cy="confirm"]').click()
+        cy.wrap(afterWindowConfirmed)
       })
     })
   })

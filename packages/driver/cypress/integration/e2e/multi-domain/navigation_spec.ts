@@ -1,5 +1,16 @@
 import { assertLogLength } from '../../../support/utils'
 
+// makes logs coming from secondary domain work with `assertLogLength`
+const reifyLogs = (logs) => {
+  return logs.map((attrs) => {
+    return {
+      get (name) {
+        return attrs[name]
+      },
+    }
+  })
+}
+
 // @ts-ignore / session support is needed for visiting about:blank between tests
 describe('navigation events', { experimentalSessionSupport: true, experimentalMultiDomain: true }, () => {
   let logs: any = []
@@ -18,7 +29,7 @@ describe('navigation events', { experimentalSessionSupport: true, experimentalMu
   describe('navigation:changed', () => {
     it('navigation:changed via hashChange', () => {
       cy.switchToDomain('foobar.com', () => {
-        const p = new Promise<void>((resolve) => {
+        const afterNavigationChanged = new Promise<void>((resolve) => {
           const listener = () => {
             cy.location().should((loc) => {
               expect(loc.host).to.equal('www.foobar.com:3500')
@@ -33,7 +44,7 @@ describe('navigation events', { experimentalSessionSupport: true, experimentalMu
         })
 
         cy.get('a[data-cy="hashChange"]').click()
-        cy.wrap(p)
+        cy.wrap(afterNavigationChanged)
       })
     })
 
@@ -61,7 +72,13 @@ describe('navigation events', { experimentalSessionSupport: true, experimentalMu
   describe('window:load', () => {
     it('reloads', () => {
       cy.switchToDomain('foobar.com', () => {
-        const p = new Promise<void>((resolve) => {
+        let logs: any[] = []
+
+        cy.on('log:added', (attrs, log) => {
+          logs.push(log)
+        })
+
+        const afterWindowLoad = new Promise<void>((resolve) => {
           let times = 0
           const listener = (win) => {
             times++
@@ -78,16 +95,26 @@ describe('navigation events', { experimentalSessionSupport: true, experimentalMu
         })
 
         cy.get('button[data-cy="reload"]').click()
-        cy.wrap(p)
-      }).then(() => {
-        assertLogLength(logs, 14)
-        expect(logs[10].get('name')).to.eq('page load')
+        cy.wrap(afterWindowLoad).then(() => {
+          return logs.map((log) => ({ name: log.get('name') }))
+        })
+      })
+      .then(reifyLogs)
+      .then((secondaryLogs) => {
+        assertLogLength(secondaryLogs, 9)
+        expect(secondaryLogs[5].get('name')).to.eq('page load')
       })
     })
 
     it('navigates to a new page', () => {
       cy.switchToDomain('foobar.com', () => {
-        const p = new Promise<void>((resolve) => {
+        let logs: any[] = []
+
+        cy.on('log:added', (attrs, log) => {
+          logs.push(log)
+        })
+
+        const afterWindowLoad = new Promise<void>((resolve) => {
           let times = 0
           const listener = (win) => {
             times++
@@ -109,12 +136,16 @@ describe('navigation events', { experimentalSessionSupport: true, experimentalMu
 
         cy.get('a[data-cy="multi-domain-page"]').click()
         cy.get('a[data-cy="multi-domain-secondary-link').invoke('text').should('equal', 'http://www.foobar.com:3500/fixtures/multi-domain-secondary.html')
-        cy.wrap(p)
-      }).then(() => {
-        assertLogLength(logs, 18)
-        expect(logs[10].get('name')).to.eq('page load')
-        expect(logs[11].get('name')).to.eq('new url')
-        expect(logs[11].get('message')).to.eq('http://www.foobar.com:3500/fixtures/multi-domain.html')
+        cy.wrap(afterWindowLoad).then(() => {
+          return logs.map((log) => ({ name: log.get('name'), message: log.get('message') }))
+        })
+      })
+      .then(reifyLogs)
+      .then((secondaryLogs) => {
+        assertLogLength(secondaryLogs, 13)
+        expect(secondaryLogs[5].get('name')).to.eq('page load')
+        expect(secondaryLogs[6].get('name')).to.eq('new url')
+        expect(secondaryLogs[6].get('message')).to.eq('http://www.foobar.com:3500/fixtures/multi-domain.html')
       })
     })
   })
@@ -122,7 +153,7 @@ describe('navigation events', { experimentalSessionSupport: true, experimentalMu
   describe('url:changed', () => {
     it('reloads', () => {
       cy.switchToDomain('foobar.com', () => {
-        const p = new Promise<void>((resolve) => {
+        const afterUrlChanged = new Promise<void>((resolve) => {
           cy.once('url:changed', (url) => {
             expect(url).to.equal('http://www.foobar.com:3500/fixtures/multi-domain-secondary.html')
             resolve()
@@ -130,13 +161,13 @@ describe('navigation events', { experimentalSessionSupport: true, experimentalMu
         })
 
         cy.get('button[data-cy="reload"]').click()
-        cy.wrap(p)
+        cy.wrap(afterUrlChanged)
       })
     })
 
     it('navigates to a new page', () => {
       cy.switchToDomain('foobar.com', () => {
-        const p = new Promise<void>((resolve) => {
+        const afterUrlChanged = new Promise<void>((resolve) => {
           let times = 0
           const listener = (url) => {
             times++
@@ -155,7 +186,7 @@ describe('navigation events', { experimentalSessionSupport: true, experimentalMu
         })
 
         cy.get('a[data-cy="multi-domain-page"]').click()
-        cy.wrap(p)
+        cy.wrap(afterUrlChanged)
       })
     })
 

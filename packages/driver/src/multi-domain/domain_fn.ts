@@ -3,32 +3,13 @@ import type { SpecBridgeDomainCommunicator } from './communicator'
 import $errUtils from '../cypress/error_utils'
 import $utils from '../cypress/utils'
 
+interface RunDomainFnOptions {
+  data: any[]
+  fn: string
+  state: {}
+}
+
 export const handleDomainFn = (cy: $Cy, specBridgeCommunicator: SpecBridgeDomainCommunicator) => {
-  const doneEarly = () => {
-    cy.queue.stop()
-
-    // we only need to worry about doneEarly when
-    // it comes from a manual event such as stopping
-    // Cypress or when we yield a (done) callback
-    // and could arbitrarily call it whenever we want
-    const p = cy.state('promise')
-
-    // if our outer promise is pending
-    // then cancel outer and inner
-    // and set canceled to be true
-    if (p && p.isPending()) {
-      cy.state('canceled', true)
-      cy.state('cancel')()
-    }
-
-    // if a command fails then after each commands
-    // could also fail unless we clear this out
-    cy.state('commandIntermediateValue', undefined)
-
-    // reset the nestedIndex back to null
-    cy.state('nestedIndex', null)
-  }
-
   const reset = (state) => {
     cy.reset({})
 
@@ -49,58 +30,21 @@ export const handleDomainFn = (cy: $Cy, specBridgeCommunicator: SpecBridgeDomain
 
     // Set the state ctx to the runnable ctx to ensure they remain in sync
     cy.state('ctx', cy.state('runnable').ctx)
+
+    // Stability is always false when we start as the page will always be
+    // loading at this point
+    cy.isStable(false, 'multi-domain-start')
   }
 
-  specBridgeCommunicator.on('run:domain:fn', async ({ data, fn, state, isDoneFnAvailable = false }: { data: any[], fn: string, isDoneFnAvailable: boolean, state: {}}) => {
+  specBridgeCommunicator.on('run:domain:fn', async ({ data, fn, state }: RunDomainFnOptions) => {
     reset(state)
 
-    let fnWrapper = `(${fn})`
-
-    if (isDoneFnAvailable) {
-      // stub out the 'done' function if available in the primary domain
-      // to notify the primary domain if the done() callback is invoked
-      // within the spec bridge
-      const done = (err = undefined) => {
-        doneEarly()
-
-        // signal to the primary domain that done has been called and to signal that the command queue is finished in the secondary domain
-        specBridgeCommunicator.toPrimaryError('done:called', { err })
-        specBridgeCommunicator.toPrimary('queue:finished')
-
-        return null
-      }
-
-      // similar to the primary domain, the done() callback will be stored in
-      // state (necessary for error handling). if undefined and a user tries to
-      // call done, the same effect is granted
-      cy.state('done', done)
-
-      fnWrapper = `((data) => {
-        const done = cy.state('done');
-        return ${fnWrapper}(data)
-      })`
-    }
-
     cy.state('onFail', (err) => {
-      const command = cy.state('current')
-
-      // If there isn't a current command, just reject to fail the test
-      if (!command) {
-        return specBridgeCommunicator.toPrimaryError('reject', { err })
-      }
-
-      const id = command.get('id')
-      const name = command.get('name')
-      const logId = command.getLastLog()?.get('id')
-
-      specBridgeCommunicator.toPrimaryCommandEnd({ id, name, err, logId })
+      specBridgeCommunicator.toPrimaryWithError('queue:finished', err)
     })
 
     try {
-      // await the eval func, whether it is a promise or not
-      // we should not need to transpile this as our target browsers support async/await
-      // see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function for more details
-      const value = window.eval(fnWrapper)(data)
+      const value = window.eval(`(${fn})`)(data)
 
       // If we detect a non promise value with commands in queue, throw an error
       if (value && cy.queue.length > 0 && !value.then) {
@@ -108,14 +52,23 @@ export const handleDomainFn = (cy: $Cy, specBridgeCommunicator: SpecBridgeDomain
           args: { value: $utils.stringify(value) },
         })
       } else {
-        const subject = await value
+        // If there are queued commands, their yielded value will be preferred
+        // over the value resolved by a return promise. Don't send the subject
+        // or the primary will think we're done already with a sync-returned
+        // value
+        const subject = cy.queue.length ? undefined : await value
 
-        specBridgeCommunicator.toPrimaryRanDomainFn({ subject })
+        specBridgeCommunicator.toPrimaryWithSubject('ran:domain:fn', subject)
       }
     } catch (err) {
-      specBridgeCommunicator.toPrimaryRanDomainFn({ err })
+      specBridgeCommunicator.toPrimaryWithError('ran:domain:fn', err)
     } finally {
       cy.state('done', undefined)
     }
+
+    cy.queue.run()
+    .then(() => {
+      specBridgeCommunicator.toPrimaryWithSubject('queue:finished', cy.state('subject'))
+    })
   })
 }

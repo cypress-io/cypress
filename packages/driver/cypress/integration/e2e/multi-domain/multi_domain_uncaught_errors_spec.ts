@@ -165,24 +165,27 @@ describe('multi-domain - uncaught errors', { experimentalSessionSupport: true, e
   })
 
   describe('unhandled rejections', () => {
-    it('unhandled rejection triggers uncaught:exception and has promise as third argument', (done) => {
-      cy.switchToDomain('foobar.com', done, () => {
+    it('unhandled rejection triggers uncaught:exception and has promise as third argument', () => {
+      cy.switchToDomain('foobar.com', () => {
         const r = cy.state('runnable')
 
-        cy.once('uncaught:exception', (err, runnable, promise) => {
-          expect(err.stack).to.include('promise rejection')
-          expect(err.stack).to.include('one')
-          expect(err.stack).to.include('two')
-          expect(err.stack).to.include('three')
-          expect(runnable).to.be.equal(r)
-          expect(promise).to.be.a('promise')
+        const afterUncaughtException = new Promise<void>((resolve) => {
+          cy.once('uncaught:exception', (err, runnable, promise) => {
+            expect(err.stack).to.include('promise rejection')
+            expect(err.stack).to.include('one')
+            expect(err.stack).to.include('two')
+            expect(err.stack).to.include('three')
+            expect(runnable).to.be.equal(r)
+            expect(promise).to.be.a('promise')
 
-          done()
+            resolve()
 
-          return false
+            return false
+          })
         })
 
         cy.get('.trigger-unhandled-rejection').click()
+        cy.wrap(afterUncaughtException)
       })
     })
 

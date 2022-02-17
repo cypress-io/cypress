@@ -1,10 +1,8 @@
 import Bluebird from 'bluebird'
 import $errUtils from '../../cypress/error_utils'
-import { CommandsManager } from './commands_manager'
-import { LogsManager } from './logs_manager'
 import { Validator } from './validator'
-import { correctStackForCrossDomainError, serializeRunnable } from './util'
-import { failedToSerializeSubject } from './failedSerializeSubjectProxy'
+import { serializeRunnable } from './util'
+import { createUnserializableSubjectProxy } from './unserializable_subject_proxy'
 
 export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: Cypress.State, config: Cypress.InternalConfig) {
   let timeoutId
@@ -33,37 +31,25 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
   })
 
   Commands.addAll({
-    switchToDomain<T> (domain: string, doneOrDataOrFn: T[] | Mocha.Done | (() => {}), dataOrFn?: T[] | (() => {}), fn?: (data?: T[]) => {}) {
-      // store the invocation stack in the case that `switchToDomain` errors
-      const userInvocationStack = state('current').get('userInvocationStack')
-
+    switchToDomain<T> (domain: string, dataOrFn: T[] | (() => {}), fn?: (data?: T[]) => {}) {
       clearTimeout(timeoutId)
+      // this command runs for as long as the commands in the secondary
+      // domain run, so it can't have its own timeout
+      cy.clearTimeout()
 
       if (!config('experimentalMultiDomain')) {
         $errUtils.throwErrByPath('switchToDomain.experiment_not_enabled')
       }
 
-      let done
       let data
       let callbackFn
 
       if (fn) {
         callbackFn = fn
-        done = doneOrDataOrFn
         data = dataOrFn
-
-        // if done has been provided to the test, allow the user to call done
-        // from the switchToDomain context running in the secondary domain.
-      } else if (dataOrFn) {
-        callbackFn = dataOrFn
-
-        if (typeof doneOrDataOrFn === 'function') {
-          done = doneOrDataOrFn
-        } else {
-          data = doneOrDataOrFn
-        }
       } else {
-        callbackFn = doneOrDataOrFn
+        callbackFn = dataOrFn
+        data = []
       }
 
       const log = Cypress.log({
@@ -82,80 +68,46 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
         callbackFn,
         data,
         domain,
-        done,
-        doneReference: state('done'),
       })
-
-      const commandsManager = new CommandsManager({
-        communicator,
-        isDoneFnAvailable: !!done,
-        userInvocationStack,
-      })
-
-      const logsManager = new LogsManager({
-        communicator,
-        userInvocationStack,
-      })
-
-      const cleanup = () => {
-        commandsManager.cleanup()
-        logsManager.cleanup()
-      }
-
-      const doneAndCleanup = async ({ err }) => {
-        communicator.off('done:called', doneAndCleanup)
-        // If done is called, immediately unbind command listeners to prevent
-        // any commands from being enqueued, but wait for log updates to
-        // trickle in before invoking done
-        commandsManager.cleanup()
-        await logsManager.cleanup()
-        done(err ? correctStackForCrossDomainError(err, userInvocationStack) : err)
-      }
-
-      if (done) {
-        communicator.once('done:called', doneAndCleanup)
-      }
-
-      commandsManager.listen()
-      logsManager.listen()
 
       return new Bluebird((resolve, reject) => {
-        communicator.once('ran:domain:fn', ({ subject, failedToSerializeSubjectOfType, err }) => {
-          sendReadyForDomain()
+        const onError = (err) => {
+          log.error(err)
+          err.onFail = () => {}
+          reject(err)
+        }
+
+        const onQueueFinished = ({ err, subject, unserializableSubjectType }) => {
           if (err) {
-            if (done) {
-              communicator.off('done:called', doneAndCleanup)
-            } else {
-              communicator.off('queue:finished', cleanup)
-            }
-
-            cleanup()
-            reject(err)
-
-            return
+            return onError(err)
           }
 
-          // If done is passed into switchToDomain, wait to unbind any listeners
-          // Otherwise, all commands in the secondary domain (SD) should be
-          // enqueued by now. Go ahead and bind the cleanup method for when
-          // the command queue finishes in the SD. Otherwise, if no commands
-          // are enqueued, clean up the command and log listeners. This case
-          // is common if there are only assertions enqueued in the SD.
-          if (!commandsManager.hasCommands && !done) {
+          resolve(unserializableSubjectType ? createUnserializableSubjectProxy(unserializableSubjectType) : subject)
+        }
+
+        const cleanup = () => {
+          communicator.off('queue:finished', onQueueFinished)
+        }
+
+        communicator.once('ran:domain:fn', ({ err, subject, unserializableSubjectType }) => {
+          sendReadyForDomain()
+
+          if (err) {
             cleanup()
 
-            // This handles when a subject is returned synchronously
-            resolve(failedToSerializeSubjectOfType ? failedToSerializeSubject(failedToSerializeSubjectOfType) : subject)
-          } else {
-            resolve()
+            return onError(err)
+          }
+
+          // if there are not commands and a synchronous return from the callback,
+          // this resolves immediately
+          if (subject || unserializableSubjectType) {
+            cleanup()
+
+            resolve(unserializableSubjectType ? createUnserializableSubjectProxy(unserializableSubjectType) : subject)
           }
         })
 
-        // If done is NOT passed into switchToDomain, wait for the command queue
-        // to finish in the secondary domain before starting any cleanup
-        if (!done) {
-          communicator.once('queue:finished', cleanup)
-        }
+        communicator.once('queue:finished', onQueueFinished)
 
         // fired once the spec bridge is set up and ready to receive messages
         communicator.once('bridge:ready', () => {
@@ -167,12 +119,12 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
             communicator.toSpecBridge('run:domain:fn', {
               data,
               fn: callbackFn.toString(),
-              isDoneFnAvailable: !!done,
               state: {
                 viewportWidth: Cypress.state('viewportWidth'),
                 viewportHeight: Cypress.state('viewportHeight'),
                 runnable: serializeRunnable(Cypress.state('runnable')),
                 duringUserTestExecution: Cypress.state('duringUserTestExecution'),
+                hookId: state('hookId'),
               },
             })
           } catch (err: any) {

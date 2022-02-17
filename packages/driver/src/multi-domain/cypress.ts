@@ -11,7 +11,6 @@ import $Log from '../cypress/log'
 import { bindToListeners } from '../cy/listeners'
 import { SpecBridgeDomainCommunicator } from './communicator'
 import { handleDomainFn } from './domain_fn'
-import { handleCommands } from './commands'
 import { handleLogs } from './logs'
 import { handleSocketEvents } from './socket'
 import { handleSpecWindowEvents } from './spec_window_events'
@@ -66,7 +65,6 @@ const setup = () => {
   $Commands.create(Cypress, cy, state, config)
 
   handleDomainFn(cy, specBridgeCommunicator)
-  handleCommands(Cypress, cy, specBridgeCommunicator)
   handleLogs(Cypress, specBridgeCommunicator)
   handleSocketEvents(Cypress)
   handleSpecWindowEvents(cy)

@@ -8,11 +8,11 @@ const debug = debugFn('cypress:driver:multi-domain')
 
 const CROSS_DOMAIN_PREFIX = 'cross:domain:'
 
-const preprocessErrorForPostMessage = (value) => {
+const serializeErrorForPostMessage = (value) => {
   const { isDom } = $dom
 
   if (_.isError(value)) {
-    const serializableError = _.mapValues(clone(value), preprocessErrorForPostMessage)
+    const serializableError = _.mapValues(clone(value), serializeErrorForPostMessage)
 
     return {
       ... serializableError,
@@ -25,7 +25,7 @@ const preprocessErrorForPostMessage = (value) => {
   }
 
   if (_.isArray(value)) {
-    return _.map(value, preprocessErrorForPostMessage)
+    return _.map(value, serializeErrorForPostMessage)
   }
 
   if (isDom(value)) {
@@ -40,7 +40,7 @@ const preprocessErrorForPostMessage = (value) => {
     // clone to nuke circular references
     // and blow away anything that throws
     try {
-      return _.mapValues(clone(value), preprocessErrorForPostMessage)
+      return _.mapValues(clone(value), serializeErrorForPostMessage)
     } catch (err) {
       return null
     }
@@ -113,6 +113,12 @@ export class PrimaryDomainCommunicator extends EventEmitter {
   }
 }
 
+interface SubjectAndErrData {
+  subject?: any
+  err?: any
+  unserializableSubjectType?: string
+}
+
 /**
  * Spec bridge domain communicator. Responsible for sending/receiving events to/from the
  * primary domain communicator, respectively.
@@ -126,25 +132,22 @@ export class PrimaryDomainCommunicator extends EventEmitter {
 export class SpecBridgeDomainCommunicator extends EventEmitter {
   private windowReference
 
-  private handleSubjectAndErr = (event, data) => {
-    const { subject, err, ...other } = data
-
+  private handleSubjectAndErr = (event, { subject, unserializableSubjectType, err }: SubjectAndErrData) => {
     try {
       // We always want to make sure errors are posted, so clean it up to send.
-      const preProcessedError = preprocessErrorForPostMessage(err)
+      const serializedErr = serializeErrorForPostMessage(err)
 
-      this.toPrimary(event, { subject, err: preProcessedError, ...other })
-    } catch (error: any) {
-      if (subject && error.name === 'DataCloneError') {
+      this.toPrimary(event, { subject, unserializableSubjectType, err: serializedErr })
+    } catch (err: any) {
+      if (subject && err.name === 'DataCloneError') {
         // Send the type of object that failed to serialize.
-        const failedToSerializeSubjectOfType = typeof subject
+        const unserializableSubjectType = typeof subject
 
         // If the subject threw the 'DataCloneError', the subject cannot be serialized at which point try again with an undefined subject.
-        this.handleSubjectAndErr(event, { failedToSerializeSubjectOfType, ...other })
+        this.handleSubjectAndErr(event, { unserializableSubjectType })
       } else {
         // Try to send the message again, with the new error.
-        this.handleSubjectAndErr(event, { err: error, ...other })
-        throw error
+        this.handleSubjectAndErr(event, { err })
       }
     }
   }
@@ -177,15 +180,11 @@ export class SpecBridgeDomainCommunicator extends EventEmitter {
     this.windowReference.top.postMessage({ event: prefixedEvent, data }, '*')
   }
 
-  toPrimaryCommandEnd (data: {id: string, subject?: any, name: string, err?: any, logId: string }) {
-    this.handleSubjectAndErr('command:end', data)
+  toPrimaryWithSubject (event: string, subject?: any) {
+    this.handleSubjectAndErr(event, { subject })
   }
 
-  toPrimaryRanDomainFn (data: { subject?: any, err?: any }) {
-    this.handleSubjectAndErr('ran:domain:fn', data)
-  }
-
-  toPrimaryError (event, data: { subject?: any, err?: any }) {
-    this.handleSubjectAndErr(event, data)
+  toPrimaryWithError (event: string, err?: any) {
+    this.handleSubjectAndErr(event, { err })
   }
 }

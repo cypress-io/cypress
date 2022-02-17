@@ -126,7 +126,7 @@ export const eventManager = {
 
     _.each(socketToDriverEvents, (event) => {
       ws.on(event, (...args) => {
-        Cypress.emit(event, ...args)
+        Cypress?.emit(event, ...args)
       })
     })
 
@@ -532,6 +532,14 @@ export const eventManager = {
     })
 
     Cypress.multiDomainCommunicator.on('after:screenshot', handleAfterScreenshot)
+
+    Cypress.multiDomainCommunicator.on('log:added', (attrs) => {
+      reporterBus.emit('reporter:log:add', attrs)
+    })
+
+    Cypress.multiDomainCommunicator.on('log:changed', (attrs) => {
+      reporterBus.emit('reporter:log:state:changed', attrs)
+    })
   },
 
   _runDriver (state) {
@@ -576,6 +584,7 @@ export const eventManager = {
       // but we want to be aggressive here
       // and force GC early and often
       Cypress.removeAllListeners()
+      Cypress.multiDomainCommunicator.removeAllListeners()
 
       localBus.emit('restart')
     })

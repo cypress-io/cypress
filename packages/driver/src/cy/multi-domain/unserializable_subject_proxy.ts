@@ -20,7 +20,7 @@ const passThroughProps = [
  * @param type The type of operand that failed to serialize
  * @returns A proxy object that will fail when accessed.
  */
-const failedToSerializeSubject = (type: string) => {
+export const createUnserializableSubjectProxy = (type: string) => {
   let target = {}
 
   // If the failed subject is a function, use a function as the target.
@@ -37,7 +37,7 @@ const failedToSerializeSubject = (type: string) => {
      * @param thisArg this
      * @param argumentsList args passed.
      */
-    apply (target, thisArg, argumentsList) {
+    apply () {
       $errUtils.throwErrByPath('switchToDomain.failed_to_serialize_function')
     },
 
@@ -48,7 +48,7 @@ const failedToSerializeSubject = (type: string) => {
      * @param receiver Either the proxy or an object that inherits from the proxy.
      * @returns either an error or the result of the allowed get on the target.
      */
-    get (target, prop, receiver) {
+    get (target, prop) {
       if (passThroughProps.includes(prop)) {
         return target[prop]
       }
@@ -62,5 +62,3 @@ const failedToSerializeSubject = (type: string) => {
     },
   })
 }
-
-export { failedToSerializeSubject }
