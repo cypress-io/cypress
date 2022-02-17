@@ -165,7 +165,7 @@ describe('runner/cypress retries.ui.spec', {
   })
 
   describe('beforeEach', () => {
-    it('beforeEach hooks retry on failure, but only run same-level afterEach hooks', { viewportHeight: 1500 }, () => {
+    it('beforeEach hooks retry on failure, but only run same-level afterEach hooks', { viewportHeight: 1550 }, () => {
       loadSpec({
         fileName: 'before-each-failure.retries.cy.js',
         passCount: 1,
