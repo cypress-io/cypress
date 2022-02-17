@@ -97,7 +97,7 @@
     padding-left: 0;
 
     .runnable-wrapper {
-      border-left: 5px solid transparent;
+      border-left: 4px solid transparent;
       padding: 0 0 0 4px;
 
       .collapsible-header {
@@ -163,28 +163,28 @@
 
     &.runnable-failed > div > .runnable-wrapper,
     &.runnable-failed > div > .runnable-instruments {
-      border-left: 5px solid $fail;
+      border-left: 4px solid $fail;
     }
 
     &.runnable-pending > div > .runnable-wrapper,
     &.runnable-pending > div > .runnable-instruments {
-      border-left: 5px solid $pending;
+      border-left: 4px solid $pending;
       padding-bottom: 0;
     }
 
     &.runnable-passed > div > .runnable-wrapper,
     &.runnable-passed > div > .runnable-instruments {
-      border-left: 5px solid $pass;
+      border-left: 4px solid $pass;
     }
 
     .runnable-retried > div > .runnable-wrapper,
     .runnable-retried > div > .runnable-instruments {
-      border-left: 5px solid $retried;
+      border-left: 4px solid $retried;
     }
 
     &.runnable-studio.runnable-passed > div > .runnable-wrapper,
     &.runnable-studio.runnable-passed > div > .runnable-instruments {
-      border-left: 5px solid $indigo-700;
+      border-left: 4px solid $indigo-700;
     }
 
     &.runnable-skipped > .runnable-wrapper {
@@ -195,7 +195,7 @@
 
     &.runnable-skipped > div > .runnable-wrapper,
     &.runnable-skipped > div > .runnable-instruments {
-      border-left: 5px solid $gray-500;
+      border-left: 4px solid $gray-500;
     }
 
     &.suite > div > .runnable-wrapper {
@@ -255,7 +255,7 @@
   }
 
   .runnable-instruments {
-    border-left: 5px solid transparent;
+    border-left: 4px solid transparent;
     padding-bottom: 5px;
   }
 

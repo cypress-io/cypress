@@ -1,6 +1,6 @@
 <template>
   <div
-    class="bg-white rounded-t flex border-b-1px border-b-gray-100 min-h-56px px-24px top-0 z-1 sticky items-center justify-between"
+    class="bg-white rounded-t flex border-b-1px border-b-gray-100 min-h-56px pr-14px pl-24px top-0 z-1 sticky items-center justify-between"
   >
     <div>
       <DialogTitle class="text-gray-900 text-18px inline-block">
@@ -20,10 +20,10 @@
     </div>
     <button
       :aria-label="t(`actions.close`)"
-      class="border-transparent rounded-full border-1 p-5px hocus-default hover:border-indigo-300"
+      class="border-transparent rounded-full outline-none border-1 p-5px group"
       @click="$emit('close')"
     >
-      <i-cy-delete_x12 class="h-12px m-4px w-12px icon-dark-gray-400" />
+      <i-cy-delete_x12 class="h-12px m-4px w-12px icon-dark-gray-400 group-hocus:icon-dark-indigo-400 children:transition-all" />
     </button>
   </div>
 </template>
