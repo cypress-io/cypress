@@ -2048,7 +2048,8 @@ jobs:
 
 linux-workflow: &linux-workflow
   jobs:
-    - node_modules_install
+    - node_modules_install:
+        only-cache-for-root-user: true
     - build:
         requires:
           - node_modules_install
