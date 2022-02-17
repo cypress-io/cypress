@@ -1,8 +1,7 @@
 const { defineConfig } = require('cypress')
+const { devServer, defineDevServerConfig } = require('@cypress/webpack-dev-server')
 
-/// <reference types="cypress" />
-const { startDevServer } = require('@cypress/webpack-dev-server')
-const webpackConfig = require('../../webpack.config')
+const webpackConfig = require('./webpack.config')
 
 module.exports = defineConfig({
   fixturesFolder: false,
@@ -13,13 +12,6 @@ module.exports = defineConfig({
     componentFolder: 'src',
     testFiles: '**/*.spec.js',
     setupNodeEvents (on, config) {
-      on('dev-server:start', (options) => {
-        return startDevServer({
-          options,
-          webpackConfig,
-        })
-      })
-
       require('@cypress/code-coverage/task')(on, config)
 
       return config
