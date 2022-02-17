@@ -457,6 +457,11 @@ commands:
             # https://www.gep13.co.uk/blog/chocolatey-error-hashes-do-not-match
             [[ $PLATFORM == 'windows' && '<<parameters.browser>>' == 'chrome' ]] && choco install googlechrome --ignore-checksums || [[ $PLATFORM != 'windows' ]]
       - run:
+          # the PERCY_TARGET_BRANCH and PERCY_TARGET_COMMIT env vars
+          # are a temporary hack to workaround percy issues with
+          # PR's not diffing the right base branch due to other problems
+          # upstream with finalizing builds. These will be removed
+          # once we implement a more permanent solution.
           command: |
             cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --parallel -- --') || true
             DEBUG=<<parameters.debug>> \
@@ -1037,6 +1042,11 @@ jobs:
               circleci-agent step halt
             fi
       - run:
+          # the PERCY_TARGET_BRANCH and PERCY_TARGET_COMMIT env vars
+          # are a temporary hack to workaround percy issues with
+          # PR's not diffing the right base branch due to other problems
+          # upstream with finalizing builds. These will be removed
+          # once we implement a more permanent solution.
           command: |
             PERCY_PARALLEL_NONCE=$PLATFORM-$CIRCLE_SHA1 \
             PERCY_TARGET_BRANCH="10.0-release" \
@@ -1061,6 +1071,11 @@ jobs:
           path: cli/visual-snapshots
       - run:
           name: Upload CLI snapshots for diffing
+          # the PERCY_TARGET_BRANCH and PERCY_TARGET_COMMIT env vars
+          # are a temporary hack to workaround percy issues with
+          # PR's not diffing the right base branch due to other problems
+          # upstream with finalizing builds. These will be removed
+          # once we implement a more permanent solution.
           command: |
             PERCY_PARALLEL_NONCE=$PLATFORM-$CIRCLE_SHA1 \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
@@ -1334,6 +1349,11 @@ jobs:
           command: yarn build-for-tests
           working_directory: packages/reporter
       - run:
+          # the PERCY_TARGET_BRANCH and PERCY_TARGET_COMMIT env vars
+          # are a temporary hack to workaround percy issues with
+          # PR's not diffing the right base branch due to other problems
+          # upstream with finalizing builds. These will be removed
+          # once we implement a more permanent solution.
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
@@ -1479,6 +1499,12 @@ jobs:
       - run:
           name: Run tests
           # will use PERCY_TOKEN environment variable if available
+          #
+          # the PERCY_TARGET_BRANCH and PERCY_TARGET_COMMIT env vars
+          # are a temporary hack to workaround percy issues with
+          # PR's not diffing the right base branch due to other problems
+          # upstream with finalizing builds. These will be removed
+          # once we implement a more permanent solution.
           command: |
             CYPRESS_KONFIG_ENV=production \
             PERCY_PARALLEL_NONCE=$PLATFORM-$CIRCLE_SHA1 \
