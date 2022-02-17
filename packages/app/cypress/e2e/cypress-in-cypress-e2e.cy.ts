@@ -1,6 +1,6 @@
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 
-describe('Cypress In Cypress', { viewportWidth: 1200 }, () => {
+describe('Cypress In Cypress', { viewportWidth: 1500 }, () => {
   beforeEach(() => {
     cy.scaffoldProject('cypress-in-cypress')
     cy.findBrowsers()
