@@ -442,7 +442,7 @@ export class ProjectLifecycleManager {
 
     if (this._currentTestingType) {
       const testingTypeOverrides = configFileContents[this._currentTestingType] ?? {}
-      const optionsOverrides = options.config[this._currentTestingType] ?? {}
+      const optionsOverrides = options.config?.[this._currentTestingType] ?? {}
 
       this.validateTestingTypeConfig(testingTypeOverrides)
       this.validateTestingTypeConfig(optionsOverrides)
