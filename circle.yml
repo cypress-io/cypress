@@ -11,7 +11,7 @@ defaults: &defaults
       type: boolean
       default: false
   executor: <<parameters.executor>>
-  environment:
+  environment: &defaultsEnvironment
     ## set specific timezone
     TZ: "/usr/share/zoneinfo/America/New_York"
 
@@ -1181,7 +1181,8 @@ jobs:
       - update_cached_system_tests_deps
 
   binary-system-tests:
-    <<: *defaults
+    environment:
+      <<: *defaultsEnvironment
     machine:
       # using `machine` gives us a Linux VM that can run Docker
       image: ubuntu-2004:202111-02
