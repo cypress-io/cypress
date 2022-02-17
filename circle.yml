@@ -526,7 +526,7 @@ commands:
       - run:
           name: Run system tests
           command: |
-            ALL_SPECS=`circleci tests glob "/root/cypress/system-tests/test-binary/*spec*"`
+            ALL_SPECS=`circleci tests glob "$HOME/cypress/system-tests/test-binary/*spec*"`
             SPECS=`echo $ALL_SPECS | xargs -n 1 | circleci tests split --split-by=timings`
             echo SPECS=$SPECS
             yarn workspace @tooling/system-tests test:ci $SPECS
