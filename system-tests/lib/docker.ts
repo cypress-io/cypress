@@ -74,6 +74,7 @@ class DockerProcess extends EventEmitter implements SpawnerResult {
       [this.stdout, this.stderr],
       // option docs: https://docs.docker.com/engine/api/v1.37/#operation/ContainerCreate
       {
+        AutoRemove: true,
         Entrypoint: 'bash',
         Tty: false, // so we can use stdout and stderr
         Env: containerCreateEnv,
