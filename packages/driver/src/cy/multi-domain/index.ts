@@ -73,7 +73,10 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
       return new Bluebird((resolve, reject) => {
         const onError = (err) => {
           log.error(err)
-          err.onFail = () => {}
+          if (typeof err === 'object') {
+            err.onFail = () => {}
+          }
+
           reject(err)
         }
 
