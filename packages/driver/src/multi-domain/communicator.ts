@@ -150,7 +150,7 @@ export class SpecBridgeDomainCommunicator extends EventEmitter {
     }
   }
 
-  private resyncConfigToPrimary = () => {
+  private resyncConfigEnvToPrimary = () => {
     this.toPrimary('sync:config', {
       config: preprocessConfig(Cypress.config()),
       env: preprocessEnv(Cypress.env()),
@@ -191,19 +191,19 @@ export class SpecBridgeDomainCommunicator extends EventEmitter {
 
   toPrimaryRanDomainFn (data: { subject?: any, err?: any, resyncConfig: boolean }) {
     if (data?.resyncConfig) {
-      this.resyncConfigToPrimary()
+      this.resyncConfigEnvToPrimary()
     }
 
     this.handleSubjectAndErr('ran:domain:fn', data)
   }
 
   toPrimaryQueueFinished () {
-    this.resyncConfigToPrimary()
+    this.resyncConfigEnvToPrimary()
     this.toPrimary('queue:finished')
   }
 
   toPrimaryError (event, data: { subject?: any, err?: any}) {
     this.handleSubjectAndErr(event, data)
-    this.resyncConfigToPrimary()
+    this.resyncConfigEnvToPrimary()
   }
 }

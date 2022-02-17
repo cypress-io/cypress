@@ -1,6 +1,6 @@
 ['config', 'env'].forEach((fnName) => {
   // @ts-ignore
-  describe(`multi-domain - Cypress.Cypress.${fnName}()`, { experimentalSessionSupport: true, experimentalMultiDomain: true }, () => {
+  describe(`multi-domain - Cypress.${fnName}()`, { experimentalSessionSupport: true, experimentalMultiDomain: true }, () => {
     beforeEach(() => {
       cy.visit('/fixtures/multi-domain.html')
       cy.get('a[data-cy="multi-domain-secondary-link"]').click()
@@ -12,12 +12,11 @@
     })
 
     if (fnName === 'config') {
-      it(`throws if mutating read-only config values with Cypress.config()`, (done) => {
+      it(`throws if mutating read-only config values with Cypress.config()`, () => {
         // @ts-ignore
         window.top.__cySkipValidateConfig = false
         cy.on('fail', (err) => {
           expect(err.message).to.include('`Cypress.config()` cannot mutate option `chromeWebSecurity` because it is a read-only property.')
-          done()
         })
 
         cy.switchToDomain('foobar.com', () => {
@@ -31,9 +30,9 @@
       it(`syncs initial Cypress.${fnName}() from the primary domain to the secondary (synchronously)`, () => {
         Cypress[fnName]('foo', 'bar')
         cy.switchToDomain('foobar.com', [fnName], ([fnName]) => {
-          const isBar = Cypress[fnName]('foo')
+          const bar = Cypress[fnName]('foo')
 
-          expect(isBar).to.equal('bar')
+          expect(bar).to.equal('bar')
         })
       })
 
@@ -50,26 +49,30 @@
         () => {
           cy.switchToDomain('foobar.com', [fnName], ([fnName]) => {
             Cypress[fnName]('bar', 'baz')
-          })
-
-          Cypress[fnName]('bar', 'foo')
-
-          cy.wrap({}).then(() => {
+          }).then(() => {
             const baz = Cypress[fnName]('bar')
 
             expect(baz).to.equal('baz')
           })
         })
 
+      it(`syncs serializable Cypress.${fnName}() values outwards from secondary even if the value is undefined`, () => {
+        Cypress[fnName]('foo', 'bar')
+
+        cy.switchToDomain('foobar.com', [fnName], ([fnName]) => {
+          Cypress[fnName]('foo', undefined)
+        }).then(() => {
+          expect(Cypress[fnName]('foo')).to.be.undefined
+        })
+      })
+
       // FIXME: unskip this test once tail-end waiting is implemented
       it.skip(`syncs serializable Cypress.${fnName}() values outwards from secondary (commands/async)`, () => {
         cy.switchToDomain('foobar.com', [fnName], ([fnName]) => {
-          cy.wrap({}).then(() => {
+          cy.then(() => {
             Cypress[fnName]('bar', 'quux')
           })
-        })
-
-        cy.wrap({}).then(() => {
+        }).then(() => {
           const quux = Cypress[fnName]('bar')
 
           expect(quux).to.equal('quux')
@@ -98,16 +101,10 @@
           }, 100)
 
           Cypress[fnName]('baz', 'quux')
-        })
+        }).then(() => {
+          const quux = Cypress[fnName]('baz')
 
-        const isUndefined = Cypress[fnName]('baz')
-
-        expect(isUndefined).to.be.undefined
-
-        cy.wrap({}).then(() => {
-          const isQuux = Cypress[fnName]('baz')
-
-          expect(isQuux).to.equal('quux')
+          expect(quux).to.equal('quux')
           done()
         })
       })
@@ -122,9 +119,9 @@
         cy.switchToDomain('foobar.com', [fnName], ([fnName]) => {
           // in previous test, 'baz' was set to 'qux' after the callback window was closed.
           // this should be overwritten by 'quux' that exists in the primary
-          const isNowQuux = Cypress[fnName]('baz')
+          const quux = Cypress[fnName]('baz')
 
-          expect(isNowQuux).to.equal('quux')
+          expect(quux).to.equal('quux')
         })
       })
 
@@ -168,10 +165,8 @@
         Cypress[fnName]('unserializable', unserializableFunc)
         cy.switchToDomain('foobar.com', [fnName], ([fnName]) => {
           Cypress[fnName]('unserializable', undefined)
-        })
-
-        cy.wrap({}).then(() => {
-          const isNowUndefined = Cypress[fnName]('undefined')
+        }).then(() => {
+          const isNowUndefined = Cypress[fnName]('unserializable')
 
           expect(isNowUndefined).to.be.undefined
         })
@@ -182,9 +177,7 @@
           const unserializableFuncSecondary = () => undefined
 
           Cypress[fnName]('unserializable', unserializableFuncSecondary)
-        })
-
-        cy.wrap({}).then(() => {
+        }).then(() => {
           Cypress[fnName]('unserializable', undefined)
         })
 
@@ -192,9 +185,7 @@
           const isUndefined = Cypress[fnName]('unserializable')
 
           expect(isUndefined).to.be.undefined
-        })
-
-        cy.wrap({}).then(() => {
+        }).then(() => {
           const isUndefined = Cypress[fnName]('unserializable')
 
           expect(isUndefined).to.be.undefined
@@ -207,9 +198,7 @@
           const unserializableFuncSecondary = () => undefined
 
           Cypress[fnName]('unserializable', unserializableFuncSecondary)
-        })
-
-        cy.wrap({}).then(() => {
+        }).then(() => {
           const isFunc = Cypress[fnName]('unserializable')
 
           expect(isFunc).to.equal(unserializableFunc)
@@ -233,9 +222,7 @@
             a: 3,
             c: document.createElement('h1'),
           })
-        })
-
-        cy.wrap({}).then(() => {
+        }).then(() => {
           const isPartiallyUnserializableObject = Cypress[fnName]('unserializable')
 
           expect(isPartiallyUnserializableObject.a).to.equal(1)
