@@ -442,11 +442,13 @@ export class ProjectLifecycleManager {
 
     if (this._currentTestingType) {
       const testingTypeOverrides = configFileContents[this._currentTestingType] ?? {}
+      const optionsOverrides = options.config[this._currentTestingType] ?? {}
 
       this.validateTestingTypeConfig(testingTypeOverrides)
+      this.validateTestingTypeConfig(optionsOverrides)
 
       // TODO: pass in options.config overrides separately, so they are reflected in the UI
-      configFileContents = { ...configFileContents, ...testingTypeOverrides }
+      configFileContents = { ...configFileContents, ...testingTypeOverrides, ...optionsOverrides }
     }
 
     // TODO: Convert this to be synchronous, it's just FS checks
