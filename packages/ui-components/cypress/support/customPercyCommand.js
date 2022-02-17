@@ -173,6 +173,7 @@ export const installCustomPercyCommand = ({ before, elementOverrides } = {}) => 
     cy.then(() => {
       return origFn(screenshotName, {
         widths: [snapshotWidth],
+        minHeight: viewportHeight,
       })
     })
 
