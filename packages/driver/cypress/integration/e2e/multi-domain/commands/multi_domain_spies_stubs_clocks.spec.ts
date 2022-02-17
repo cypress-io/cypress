@@ -25,6 +25,48 @@ context('multi-domain spies, stubs, and clock', { experimentalSessionSupport: tr
     })
   })
 
+  context('resets stubs', () => {
+    it('creates the stub', () => {
+      cy.switchToDomain('foobar.com', () => {
+        const stubEnv = cy.stub(Cypress, 'env').withArgs('foo').returns('bar')
+
+        expect(Cypress.env('foo')).to.equal('bar')
+        expect(stubEnv).to.be.calledOnce
+        // @ts-ignore
+        expect(Cypress.env.isSinonProxy).to.be.true
+      })
+    })
+
+    it('verifies the stub got restored', () => {
+      cy.switchToDomain('foobar.com', () => {
+        expect(Cypress.env('foo')).to.be.undefined
+        // @ts-ignore
+        expect(Cypress.env.isSinonProxy).to.be.undefined
+      })
+    })
+  })
+
+  context('resets spies', () => {
+    it('creates the spy', () => {
+      cy.switchToDomain('foobar.com', () => {
+        const stubEnv = cy.spy(Cypress, 'env')
+
+        expect(Cypress.env()).to.deep.equal({})
+        expect(stubEnv).to.be.calledOnce
+        // @ts-ignore
+        expect(Cypress.env.isSinonProxy).to.be.true
+      })
+    })
+
+    it('verifies the spy got restored', () => {
+      cy.switchToDomain('foobar.com', () => {
+        expect(Cypress.env()).to.deep.equal({})
+        // @ts-ignore
+        expect(Cypress.env.isSinonProxy).to.be.undefined
+      })
+    })
+  })
+
   it('clock() and tick()', () => {
     cy.switchToDomain('foobar.com', () => {
       const now = Date.UTC(2022, 0, 12)

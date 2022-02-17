@@ -1,5 +1,5 @@
-import type { $Cy } from '../cypress/cy'
-import $errUtils, { ErrorFromProjectRejectionEvent } from '../cypress/error_utils'
+import type { $Cy } from '../../cypress/cy'
+import $errUtils, { ErrorFromProjectRejectionEvent } from '../../cypress/error_utils'
 
 export const handleErrorEvent = (cy: $Cy, frameType: 'spec' | 'app') => {
   return (handlerType: string) => {
