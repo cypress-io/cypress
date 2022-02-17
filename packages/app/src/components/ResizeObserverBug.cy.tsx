@@ -9,7 +9,7 @@ describe('reproduction', () => {
     useElementSize(right)
 
     const { width } = useElementSize(left)
-    const inputOffset = computed(() => width.value + 12)
+    const inputOffset = computed(() => width.value)
 
     const d1 = () => h('div', { ref: left })
     const d2 = () => h('div', {
