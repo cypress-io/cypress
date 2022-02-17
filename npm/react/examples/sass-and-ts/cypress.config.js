@@ -20,6 +20,6 @@ module.exports = defineConfig({
     devServer,
     devServerConfig: webpackConfig,
     componentFolder: 'src',
-    specPattern: '**/*spec.*',
+    specPattern: '**/*.cy.{js,jsx,ts,tsx}',
   },
 })

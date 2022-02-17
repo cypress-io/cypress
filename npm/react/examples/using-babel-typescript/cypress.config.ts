@@ -14,6 +14,6 @@ export default defineConfig({
   component: {
     devServer,
     componentFolder: 'src',
-    specPattern: '**/*spec.tsx',
+    specPattern: '**/*.cy.{js,jsx,ts,tsx}',
   },
 })

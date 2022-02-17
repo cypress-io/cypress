@@ -22,7 +22,7 @@ module.exports = defineConfig({
   },
   component: {
     devServer,
-    specPattern: '**/*-spec.js',
+    specPattern: '**/*.cy.{js,jsx,ts,tsx}',
     setupNodeEvents (on, config) {
       // initialize the snapshots plugin following
       // https://github.com/meinaart/cypress-plugin-snapshots

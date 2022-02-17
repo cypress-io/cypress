@@ -8,6 +8,6 @@ module.exports = defineConfig({
     devServer,
     devServerConfig: cracoConfig,
     componentFolder: 'src',
-    specPattern: '**/*.test.{js,ts,jsx,tsx}',
+    specPattern: '**/*.cy.{js,jsx,ts,tsx}',
   },
 })

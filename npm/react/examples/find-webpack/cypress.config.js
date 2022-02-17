@@ -14,7 +14,7 @@ module.exports = defineConfig({
   },
   component: {
     componentFolder: 'src',
-    specPattern: '**/*.spec.{js,ts,jsx,tsx}',
+    specPattern: '**/*.cy.{js,jsx,ts,tsx}',
     devServer(cypressDevServerConfig) {
       const webpackConfig = findReactScriptsWebpackConfig(cypressDevServerConfig)
 

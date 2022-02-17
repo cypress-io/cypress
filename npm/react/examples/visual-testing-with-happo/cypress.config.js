@@ -15,7 +15,7 @@ module.exports = defineConfig({
   component: {
     devServer,
     componentFolder: 'src',
-    specPattern: '**/*cy-spec.js',
+    specPattern: '**/*.cy.{js,jsx,ts,tsx}',
     setupNodeEvents (on, config) {
       on('task', happoTask)
 

@@ -10,7 +10,7 @@ module.exports = defineConfig({
     devServer,
     devServerConfig: webpackConfig,
     componentFolder: 'src',
-    specPattern: '**/*.spec.js',
+    specPattern: '**/*.cy.{js,jsx,ts,tsx}',
     setupNodeEvents (on, config) {
       require('@cypress/code-coverage/task')(on, config)
 

@@ -12,6 +12,6 @@ module.exports = defineConfig({
   viewportHeight: 500,
   component: {
     devServer,
-    specPattern: '**/*spec.js',
+    specPattern: '**/*.cy.{js,jsx,ts,tsx}',
   },
 })
