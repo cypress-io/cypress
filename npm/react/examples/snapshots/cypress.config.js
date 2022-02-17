@@ -4,7 +4,7 @@ const { defineConfig } = require('cypress')
 
 // load file devServer that comes with this plugin
 // https://github.com/bahmutov/cypress-react-unit-test#install
-const devServer = require('@cypress/react/plugins/react-scripts')
+const { devServer } = require('@cypress/react/plugins/react-scripts')
 
 const {
   initPlugin: initSnapshots,
@@ -13,7 +13,6 @@ const {
 module.exports = defineConfig({
   video: false,
   fixturesFolder: false,
-  testFiles: '**/*-spec.js',
   viewportWidth: 500,
   viewportHeight: 500,
   ignoreTestFiles: ['**/__snapshots__/*', '**/__image_snapshots__/*'],
@@ -23,9 +22,9 @@ module.exports = defineConfig({
     },
   },
   component: {
+    devServer,
+    testFiles: '**/*-spec.js',
     setupNodeEvents (on, config) {
-      devServer(on, config)
-
       // initialize the snapshots plugin following
       // https://github.com/meinaart/cypress-plugin-snapshots
       initSnapshots(on, config)

@@ -1,19 +1,13 @@
 const { defineConfig } = require('cypress')
+const { devServer, defineDevServerConfig } = require('@cypress/react/plugins/craco')
 
-// @ts-check
-const cracoConfig = require('../../craco.config.js')
-const devServer = require('@cypress/react/plugins/craco')
+const cracoConfig = require('./craco.config.js')
 
 module.exports = defineConfig({
   component: {
-    testFiles: '**/*.test.{js,ts,jsx,tsx}',
+    devServer,
+    devServerConfig: defineDevServerConfig({ cracoConfig }),
     componentFolder: 'src',
-  },
-  component: {
-    setupNodeEvents (on, config) {
-      devServer(on, config, cracoConfig)
-
-      return config
-    },
+    testFiles: '**/*.test.{js,ts,jsx,tsx}',
   },
 })

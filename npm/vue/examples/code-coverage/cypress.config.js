@@ -5,11 +5,13 @@ const { startDevServer } = require('@cypress/webpack-dev-server')
 const webpackConfig = require('../../webpack.config')
 
 module.exports = defineConfig({
-  componentFolder: 'src',
   fixturesFolder: false,
-  testFiles: '**/*.spec.js',
   video: false,
-  e2e: {
+  component: {
+    devServer,
+    devServerConfig: defineDevServerConfig({ webpackConfig }),
+    componentFolder: 'src',
+    testFiles: '**/*.spec.js',
     setupNodeEvents (on, config) {
       on('dev-server:start', (options) => {
         return startDevServer({

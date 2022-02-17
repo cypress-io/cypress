@@ -5,10 +5,10 @@ const findWebpack = require('find-webpack')
 const webpackPreprocessor = require('../..')
 
 module.exports = defineConfig({
-  "baseUrl": "http://localhost:3000",
-  "fixturesFolder": false,
-  "supportFile": false,
-  "viewportWidth": 600,
+  baseUrl: "http://localhost:3000",
+  fixturesFolder: false,
+  supportFile: false,
+  viewportWidth: 600,
   e2e: {
     setupNodeEvents(on, config) {
       // find the Webpack config used by react-scripts

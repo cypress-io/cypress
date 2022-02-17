@@ -3,7 +3,6 @@ const { defineConfig } = require('cypress')
 module.exports = defineConfig({
   video: false,
   fixturesFolder: false,
-  testFiles: '**/*cy-spec.js',
   viewportWidth: 500,
   viewportHeight: 500,
   component: {

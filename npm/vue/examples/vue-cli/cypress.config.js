@@ -7,9 +7,9 @@ const webpackConfig = require('@vue/cli-service/webpack.config')
 module.exports = defineConfig({
   video: false,
   fixturesFolder: false,
-  testFiles: '**/*spec.js',
-  componentFolder: 'src',
   e2e: {
+    componentFolder: 'src',
+    testFiles: '**/*spec.js',
     setupNodeEvents (on, config) {
       on('dev-server:start', (options) => {
         // HtmlPwaPlugin is coupled to a hook in HtmlWebpackPlugin

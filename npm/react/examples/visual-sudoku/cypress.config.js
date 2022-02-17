@@ -4,7 +4,7 @@ const { defineConfig } = require("cypress");
 
 // load file devServer that comes with this plugin
 // https://github.com/bahmutov/cypress-react-unit-test#install
-const devServer = require("@cypress/react/plugins/react-scripts");
+const { devServer } = require('@cypress/react/plugins/react-scripts');
 
 const {
   addMatchImageSnapshotPlugin
@@ -13,14 +13,14 @@ const {
 module.exports = defineConfig({
   video: false,
   fixturesFolder: false,
-  testFiles: "**/*cy-spec.js",
   viewportWidth: 1000,
   viewportHeight: 1000,
-  componentFolder: "src",
   component: {
+    devServer,
+    componentFolder: "src",
+    testFiles: "**/*cy-spec.js",
     setupNodeEvents(on, config) {
       addMatchImageSnapshotPlugin(on, config);
-      devServer(on, config);
 
       // IMPORTANT to return the config object
       // with the any changed environment variables
