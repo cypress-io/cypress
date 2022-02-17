@@ -3,15 +3,17 @@ This is an example project created using [CRACO](https://github.com/gsoft-inc/cr
 Use the plugin:
 
 ```js
-// cypress/plugins/index.js
+// cypress/cypress.config.js
+const { defineConfig } = require('cypress')
+const { devServer }  = require('@cypress/react/plugins/craco')
 
 // import your craco.config.js
-const cracoConfig = require('../../craco.config.js')
-const devServer = require('@cypress/react/plugins/craco')
+const cracoConfig = require('./craco.config.js')
 
-module.exports = (on, config) => {
-  devServer(on, config, cracoConfig)
-
-  return config
-}
+module.exports = defineConfig({
+  component: {
+    devServer,
+    devServerConfig: cracoConfig,
+  },
+})
 ```

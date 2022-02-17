@@ -6,16 +6,16 @@
 
 ## Configuration
 
-In order to reuse next's webpack configuration and all the custom configuration defined in `next.config.js` connect special plugin in [plugin file](./cypress/plugins/index.js)
+In order to reuse the Next.js webpack configuration and all the custom configuration defined in `next.config.js`, connect the plugin in the [Cypress configuration](./cypress.config.js).
 
 ```js
-const devServer = require('@cypress/react/plugins/next')
+const { devServer } = require('@cypress/react/plugins/next')
 
-module.exports = (on, config) => {
-  devServer(on, config)
-
-  return config
-}
+module.exports = defineConfig({
+  component: {
+    devServer
+  }
+})
 ```
 
 ## Usage

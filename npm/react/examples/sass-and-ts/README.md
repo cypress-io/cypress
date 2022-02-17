@@ -31,12 +31,12 @@ npm test
 
 ## Notes
 
-Notice that Node Sass is a binary dependency, thus we need to run it using the same system version of Node as we installed. See [cypress.json](cypress.json) file.
+Notice that Node Sass is a binary dependency, thus we need to run it using the same system version of Node as we installed. See [cypress.config.js](./cypress.config.js).
 
-```json
+```js
 {
-  "nodeVersion": "system"
+  nodeVersion: "system"
 }
 ```
 
-To bundle code using the same [webpack.config.js](webpack.config.js) file, we point at it from [cypress/plugins/index.js](cypress/plugins/index.js) file.
+To bundle code using the same [webpack.config.js](webpack.config.js) file, we point at it from the [Cypress configuration](./cypress.config.js).

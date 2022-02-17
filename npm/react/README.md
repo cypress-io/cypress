@@ -68,28 +68,35 @@ You can use our command line wizard to give you instructions on configuring this
 npx create-cypress-tests --component-tests
 ```
 
-Or continue with manual installation in the plugin file
+Or continue with manual installation in the Cypress configuration.
 
 1. Tell Cypress how your React application is transpiled or bundled (using Webpack), so Cypress can load your components. For example, if you use `react-scripts` (even after ejecting) do:
 
 ```js
-// cypress/plugins/index.js
-module.exports = (on, config) => {
-  require('@cypress/react/plugins/react-scripts')(on, config)
-  // IMPORTANT to return the config object
-  // with the any changed environment variables
-  return config
-}
+const { defineConfig } = require('cypress')
+const { devServer } = require('@cypress/react/plugins/react-scripts');
+
+module.exports = defineConfig({
+  component: {
+    devServer
+  }
+})
 ```
 
 See [Recipes](./docs/recipes.md) for more examples.
 
-2. You can specify where component spec files are located. For example, to have them located in `src` folder use:
+2. You can specify where component spec files are located. For example, to have them located in the `src` folder use this property in the component runner configuration object:
 
-```json
-{
-  "componentFolder": "src"
-}
+```js
+const { defineConfig } = require('cypress')
+const { devServer } = require('@cypress/react/plugins/react-scripts');
+
+module.exports = defineConfig({
+  component: {
+    devServer,
+    componentFolder: "src", // <- component spec files are here
+  }
+})
 ```
 
 ## API
@@ -279,13 +286,13 @@ mount(<Todo todo={todo} />, {
 
 <details>
 <summary>Additional configuration</summary>
-If your React and React DOM libraries are installed in non-standard paths (think monorepo scenario), you can tell this plugin where to find them. In `cypress.json` specify paths like this:
+If your React and React DOM libraries are installed in non-standard paths (think monorepo scenario), you can tell the Cypress configuration where to find them. Specify paths like this:
 
-```json
+```js
 {
-  "env": {
+  env: {
     "@cypress/react": {
-      "react": "node_modules/react/umd/react.development.js",
+      react: "node_modules/react/umd/react.development.js",
       "react-dom": "node_modules/react-dom/umd/react-dom.development.js"
     }
   }
@@ -318,12 +325,12 @@ npm i @cypress/code-coverage babel-plugin-istanbul
 yarn add @cypress/code-coverage babel-plugin-istanbul
 ```
 
-If you are using [plugins/cra-v3](plugins/cra-v3) it instruments the code on the fly using `babel-plugin-istanbul` and generates report using dependency [cypress-io/code-coverage](https://github.com/cypress-io/code-coverage) (included). If you want to disable code coverage instrumentation and reporting, use `--env coverage=false` or `CYPRESS_coverage=false` or set in your `cypress.json` file
+If you are using [plugins/cra-v3](plugins/cra-v3) it instruments the code on the fly using `babel-plugin-istanbul` and generates report using dependency [cypress-io/code-coverage](https://github.com/cypress-io/code-coverage) (included). If you want to disable code coverage instrumentation and reporting, use `--env coverage=false` or `CYPRESS_coverage=false` or set in your Cypress configuration.
 
-```json
+```js
 {
-  "env": {
-    "coverage": false
+  env: {
+    coverage: false
   }
 }
 ```

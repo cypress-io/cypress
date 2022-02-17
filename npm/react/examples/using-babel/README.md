@@ -31,23 +31,24 @@ npm test
 
 ## Specs
 
-See spec files [src/\*.spec.js](src). The specs are bundled using [.babelrc](.babelrc) settings via [cypress/plugins/index.js](cypress/plugins/index.js) file that includes file devServer
+See spec files [src/\*.spec.js](src). The specs are bundled using [.babelrc](.babelrc) settings via the [Cypress configuration](./cypress.config.js) that includes the imported devServer function.
 
 ```js
 // let's bundle spec files and the components they include using
 // the same bundling settings as the project by loading .babelrc
-const devServer = require('@cypress/react/plugins/babel')
-module.exports = (on, config) => {
-  devServer(on, config)
-  // IMPORTANT to return the config object
-  // with the any changed environment variables
-  return config
+const { devServer } = require('@cypress/react/plugins/babel')
+
+module.exports = defineConfig({
+  component: {
+      devServer
+    }
+  }
 }
 ```
 
 ## Mocking
 
-During test runs, there is a Babel plugin that transforms ES6 imports into plain objects that can be stubbed using [cy.stub](https://on.cypress.io/stub). In essence
+During test runs, there is a Babel plugin that transforms ES6 imports into plain objects that can be stubbed using [cy.stub](https://on.cypress.io/stub). In essence:
 
 ```js
 // component imports named ES6 import from "calc.js

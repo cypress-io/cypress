@@ -22,28 +22,34 @@ Create React App projects are Webpack based; that's why we are installing the re
 yarn add cypress @cypress/react @cypress/webpack-dev-server --dev
 ```
 
-Next, create a `cypress.json` with some basic configuration:
+Next, update the `cypress/cypress.config.js` file with some basic configuration for the component test runner:
 
-```json
-{
-  "component": {
-    "testFiles": "**/*.test.{js,ts,jsx,tsx}",
-    "componentFolder": "src"
+```js
+const { defineConfig } = require('cypress')
+
+module.exports = defineConfig({
+  component: {
+    specPattern: '**/*.cy.{js,jsx,ts,tsx}',
+    componentFolder: 'src',
   }
-}
+})
 ```
 
 Here we are adding some Component Testing specific options, hence the `"component"` key. `"componentFolder"` is where all the components and tests are located, and `"testFiles"` is the pattern to search for test files.
 
-The last thing we need to is tell Cypress to use `@cypress/webpack-dev-server` for component tests. Plugins are explained in detail in the [Cypress documentation](https://docs.cypress.io/guides/tooling/plugins-guide#Installing-plugins). By default plugins are loaded from `cypress/plugins/index.js`. Create that file and add:
+The last thing we need to is tell Cypress to use `@cypress/webpack-dev-server` for component tests. Plugins are explained in detail in the [Cypress documentation](https://docs.cypress.io/guides/tooling/plugins-guide#Installing-plugins). Now add:
 
 ```js
-const devServer = require("@cypress/react/plugins/react-scripts")
+const { defineConfig } = require('cypress')
+const { devServer } = require("@cypress/react/plugins/react-scripts")
 
-module.exports = (on, config) => {
-  devServer(on, config)
-  return config
-}
+module.exports = defineConfig({
+  component: {
+    devServer,
+    specPattern: '**/*.cy.{js,jsx,ts,tsx}',
+    componentFolder: 'src'
+  }
+})
 ```
 
 
