@@ -223,7 +223,7 @@ const browsers = computed(() => {
     return undefined
   }
 
-  return [...props.gql.browsers].sort((a, b) => a.name === 'Electron' ? 1 : -1)
+  return [...props.gql.browsers].sort((a, b) => a.name >= b.name ? 1 : -1)
 })
 
 const setBrowser = useMutation(OpenBrowserList_SetBrowserDocument)
