@@ -5,7 +5,7 @@ const { defineConfig } = require('cypress')
 // https://github.com/cypress-io/cypress/tree/master/npm/react#install
 const { devServer }  = require('@cypress/react/plugins/load-webpack')
 
-const webpackConfig = require('webpack.config.js')
+const webpackConfig = require('./webpack.config.js')
 
 module.exports = defineConfig({
   video: false,
