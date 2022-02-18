@@ -65,7 +65,7 @@ function simulateRunModeInUI () {
   cy.window().then((win) => {
     win.__CYPRESS_MODE__ = 'run'
     cy.get('body').then(($el) => {
-      $el.find('[data-cy="navbar-wrapper"]')?.remove()
+      $el.find('[data-cy="sidebar"]')?.remove()
     })
   })
 }

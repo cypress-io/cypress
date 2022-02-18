@@ -1,9 +1,9 @@
 <template>
   <HideDuringScreenshot
+    data-cy="sidebar"
     :aria-expanded="isNavBarExpanded"
     class="flex flex-col bg-gray-1000 transition-all duration-300 relative"
     :class="isNavBarExpanded ? 'w-248px' : 'w-64px'"
-    data-cy="navbar-wrapper"
   >
     <button
       v-if="navIsAlwaysCollapsed"
