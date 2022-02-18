@@ -1,6 +1,6 @@
 <template>
   <div
-    v-if="props.errorType && props.errorType !== 'browserError'"
+    v-if="props.errorType && props.errorType !== 'AUTH_COULD_NOT_LAUNCH_BROWSER'"
     class="flex gap-16px"
   >
     <Button
@@ -70,12 +70,13 @@ import {
 } from '../generated/graphql'
 import Button from '@cy/components/Button.vue'
 import { useI18n } from '@cy/i18n'
+import type { AuthError } from './shared-types'
 
 const isOnline = useOnline()
 
 const props = defineProps<{
   gql: AuthFragment,
-  errorType?: 'browserError' | 'loginError' | null,
+  errorType?: AuthError | null,
   showLogout?: boolean
 }>()
 

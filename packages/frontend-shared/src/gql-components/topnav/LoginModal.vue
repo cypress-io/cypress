@@ -47,7 +47,7 @@
               {{ viewer.fullName || viewer.email }}
             </ExternalLink>
           </i18n-t>
-          <div v-else-if="errorType === 'browserError'">
+          <div v-else-if="errorType === 'AUTH_COULD_NOT_LAUNCH_BROWSER'">
             <div
               class="rounded flex font-medium bg-red-100 mb-20px p-16px text-red-600 gap-8px items-center"
             >
@@ -62,7 +62,7 @@
               :text="props.gql.authState.message"
             />
           </div>
-          <div v-else-if="errorType === 'loginError'">
+          <div v-else-if="errorType === 'AUTH_ERROR_DURING_LOGIN'">
             {{ t('topNav.login.bodyError') }}
             <div
               class="rounded flex bg-red-100 mt-16px p-16px text-red-600 gap-8px items-center"
@@ -74,7 +74,7 @@
         </DialogDescription>
 
         <div
-          v-if="errorType !== 'browserError'"
+          v-if="errorType !== 'AUTH_COULD_NOT_LAUNCH_BROWSER'"
           class="bg-gray-50 border-t-1px py-16px px-24px"
         >
           <Auth
@@ -149,14 +149,10 @@ const { t } = useI18n()
 
 const viewer = computed(() => props.gql?.cloudViewer)
 const errorType = computed(() => {
-  const { name } = props.gql.authState
+  const { name, type } = props.gql.authState
 
-  if (name === 'AUTH_COULD_NOT_LAUNCH_BROWSER') {
-    return 'browserError'
-  }
-
-  if (name === 'AUTH_ERROR_DURING_LOGIN') {
-    return 'loginError'
+  if (type === 'error') {
+    return name
   }
 
   return null
@@ -167,11 +163,11 @@ const title = computed(() => {
     return t('topNav.login.titleSuccess')
   }
 
-  if (errorType.value === 'browserError') {
+  if (errorType.value === 'AUTH_COULD_NOT_LAUNCH_BROWSER') {
     return t('topNav.login.titleBrowserError')
   }
 
-  if (errorType.value === 'loginError') {
+  if (errorType.value === 'AUTH_ERROR_DURING_LOGIN') {
     return t('topNav.login.titleFailed')
   }
 
