@@ -6,7 +6,7 @@ import { registerFetch } from 'unfetch'
 
 import $dom from '../dom'
 import $utils from './utils'
-import $errUtils, { ErrorFromProjectRejectionEvent } from './error_utils'
+import $errUtils, { ErrorFromProjectRejectionEvent, shouldSuppressException } from './error_utils'
 import $stackUtils from './stack_utils'
 
 import { create as createChai, IChai } from '../cy/chai'
@@ -114,20 +114,6 @@ const setTopOnError = function (Cypress, cy: $Cy) {
 
   top.__alreadySetErrorHandlers__ = true
 }
-
-interface KnownException {
-  message: string
-  warning: string
-}
-
-// https://github.com/cypress-io/cypress/issues/8418
-// https://github.com/quasarframework/quasar/issues/2233#issuecomment-492975745
-const knownExceptions: KnownException[] = [
-  {
-    message: 'ResizeObserver loop limit exceeded',
-    warning: 'Cypress is intentionally supressing and ignoring a unhandled ResizeObserver error. This can safely be ignored.',
-  },
-]
 
 export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILocation, ITimer, IChai, IXhr, IAliases, IEnsures, ISnapshots, IFocused {
   id: string
@@ -811,6 +797,16 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     // AUT frame are the same
     if (frameType === 'app' || this.config('componentTesting')) {
       try {
+        const { suppress, warning } = shouldSuppressException(err)
+
+        if (suppress) {
+          // eslint-disable-next-line no-console
+          console.warn(warning)
+
+          // return undefined to skip logging the error and failing the test
+          return true
+        }
+
         const results = this.Cypress.action('app:uncaught:exception', err, runnable, promise)
 
         // dont do anything if any of our uncaught:exception
@@ -1094,16 +1090,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
       onError: (handlerType) => (event) => {
         const { originalErr, err, promise } = $errUtils.errorFromUncaughtEvent(handlerType, event) as ErrorFromProjectRejectionEvent
-
-        const knownException = knownExceptions.find((x) => x.message === err.message)
-
-        if (knownException) {
-          // eslint-disable-next-line no-console
-          console.warn(knownException.warning)
-
-          // return undefined to skip logging the error and failing the test
-          return undefined
-        }
 
         const handled = cy.onUncaughtException({
           err,

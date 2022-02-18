@@ -1,8 +1,10 @@
 import { useElementSize } from '@vueuse/core'
 import { computed, h, ref } from 'vue'
 
-describe('reproduction', () => {
-  it('uses resize observer', () => {
+describe('does not fail due to unhandle ResizeObserver error', () => {
+  it('uses resize observer successfully', ({ browser: 'chrome' }), (done) => {
+    cy.spy((window.top as unknown as typeof globalThis).console, 'warn')
+
     const left = ref()
     const right = ref()
 
@@ -23,6 +25,13 @@ describe('reproduction', () => {
       render () {
         return [h(d1), h(d2)]
       },
+    })
+    .then(() => {
+      expect((window.top as unknown as typeof globalThis).console.warn).to.be.calledWith(
+        'Cypress is intentionally supressing and ignoring a unhandled ResizeObserver error. This can safely be ignored.',
+      )
+
+      done()
     })
   })
 })
