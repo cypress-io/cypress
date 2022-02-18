@@ -18,14 +18,6 @@ context('screenshot specs', { experimentalSessionSupport: true, experimentalMult
     cy.get('a[data-cy="screenshots-link"]').click()
   })
 
-  afterEach(() => {
-    // FIXME: the stub is not getting restored on its own causing other tests to fail
-    cy.switchToDomain('foobar.com', () => {
-      //@ts-ignore
-      Cypress.automation.restore()
-    })
-  })
-
   it('captures the fullPage', () => {
     cy.viewport(600, 200)
 
@@ -158,6 +150,113 @@ context('screenshot specs', { experimentalSessionSupport: true, experimentalMult
       cy.screenshot()
       cy.wrap(onBeforeScreenshot).should('be.called')
       cy.wrap(onAfterScreenshot).should('be.called')
+    })
+  })
+
+  it('supports pausing timers', () => {
+    cy.switchToDomain('foobar.com', [this.serverResult], ([serverResult]) => {
+      cy.stub(Cypress, 'automation').withArgs('take:screenshot').returns(Cypress.Promise.delay(500, serverResult))
+
+      cy.window().then((win) => {
+        // Hide the element using setTimeout
+        win.setTimeout(() => {
+          (win.document.getElementsByClassName('tall-element')[0] as HTMLElement).style.display = 'none'
+        }, 50)
+      })
+
+      cy.screenshot({
+        onBeforeScreenshot: ($el) => {
+          // Set the timeout to be longer than the element hiding timeout so if the timer was
+          // not paused, it would've hidden the element but since we are pausing the
+          // timers, the style is still 'block'
+          setTimeout(() => {
+            expect($el.find('.tall-element').css('display')).to.equal('block')
+          }, 100)
+        },
+        onAfterScreenshot: ($el) => {
+          // Set the timeout to be longer than the element hiding timeout so when the timers
+          // are unpaused, this will run after the timeout to hide the element
+          setTimeout(() => {
+            expect($el.find('.tall-element').css('display')).to.equal('none')
+          }, 100)
+        },
+      })
+
+      cy.wait(200)
+    })
+  })
+
+  it('does not pause timers when disableTimersAndAnimations is false', () => {
+    cy.switchToDomain('foobar.com', [this.serverResult], ([serverResult]) => {
+      cy.stub(Cypress, 'automation').withArgs('take:screenshot').returns(Cypress.Promise.delay(500, serverResult))
+
+      cy.window().then((win) => {
+        // Hide the element using setTimeout
+        win.setTimeout(() => {
+          (win.document.getElementsByClassName('tall-element')[0] as HTMLElement).style.display = 'none'
+        }, 50)
+      })
+
+      cy.screenshot({
+        disableTimersAndAnimations: false,
+        onBeforeScreenshot: ($el) => {
+          // Set the timeout to be longer than the element hiding timeout so it has time to run and hide the element
+          setTimeout(() => {
+            expect($el.find('.tall-element').css('display')).to.equal('none')
+          }, 100)
+        },
+      })
+
+      cy.wait(200)
+    })
+  })
+
+  it('handles errors thrown from setTimeout after the timer is paused', () => {
+    cy.on('fail', (err) => {
+      expect(err.name).to.eq('Error')
+      expect(err.message).to.include('setTimeout error after screenshot')
+    })
+
+    cy.switchToDomain('foobar.com', [this.serverResult], ([serverResult]) => {
+      cy.stub(Cypress, 'automation').withArgs('take:screenshot').returns(Cypress.Promise.delay(100, serverResult))
+
+      cy.window().then((win) => {
+        // Add a timeout error
+        win.setTimeout(() => {
+          throw new Error('setTimeout error after screenshot')
+        }, 50)
+      })
+
+      cy.screenshot()
+
+      // wait to ensure the timeout error has time to process
+      cy.wait(100)
+    })
+  })
+
+  it('handles errors thrown from setTimeout when the timer is NOT paused', () => {
+    cy.on('fail', (err) => {
+      expect(err.name).to.eq('Error')
+      expect(err.message).to.include('setTimeout error during screenshot')
+      expect(err.message).to.include('The following error originated from your application code, not from Cypress.')
+      // @ts-ignore
+      expect(err.docsUrl).to.deep.eq(['https://on.cypress.io/uncaught-exception-from-application'])
+    })
+
+    cy.switchToDomain('foobar.com', [this.serverResult], ([serverResult]) => {
+      cy.stub(Cypress, 'automation').withArgs('take:screenshot').returns(Cypress.Promise.delay(100, serverResult))
+
+      cy.window().then((win) => {
+        // Add a timeout error
+        win.setTimeout(() => {
+          throw new Error('setTimeout error during screenshot')
+        }, 50)
+      })
+
+      cy.screenshot({ disableTimersAndAnimations: false })
+
+      // wait to ensure the timeout error has time to process
+      cy.wait(100)
     })
   })
 })

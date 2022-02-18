@@ -1,4 +1,4 @@
-import type { $Cy } from '../cypress/cy'
+import type { $Cy } from '../../cypress/cy'
 import { handleErrorEvent } from './errors'
 
 export const handleSpecWindowEvents = (cy: $Cy) => {

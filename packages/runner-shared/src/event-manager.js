@@ -509,6 +509,10 @@ export const eventManager = {
       }
     })
 
+    Cypress.on('test:before:run', (...args) => {
+      Cypress.multiDomainCommunicator.toSpecBridge('test:before:run', ...args)
+    })
+
     Cypress.multiDomainCommunicator.initialize(window)
 
     Cypress.multiDomainCommunicator.on('window:load', ({ url }) => {

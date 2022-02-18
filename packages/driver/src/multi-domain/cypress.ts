@@ -12,11 +12,12 @@ import { bindToListeners } from '../cy/listeners'
 import { SpecBridgeDomainCommunicator } from './communicator'
 import { handleDomainFn } from './domain_fn'
 import { handleCommands } from './commands'
-import { handleLogs } from './logs'
-import { handleSocketEvents } from './socket'
-import { handleSpecWindowEvents } from './spec_window_events'
-import { handleErrorEvent } from './errors'
-import { handleScreenshots } from './screenshots'
+import { handleLogs } from './events/logs'
+import { handleSocketEvents } from './events/socket'
+import { handleSpecWindowEvents } from './events/spec_window_events'
+import { handleErrorEvent } from './events/errors'
+import { handleScreenshots } from './events/screenshots'
+import { handleTestEvents } from './events/test_events'
 
 const specBridgeCommunicator = new SpecBridgeDomainCommunicator()
 
@@ -66,6 +67,7 @@ const setup = (cypressConfig: Cypress.Config, env: Cypress.ObjectLike) => {
   handleSocketEvents(Cypress)
   handleSpecWindowEvents(cy)
   handleScreenshots(Cypress, specBridgeCommunicator)
+  handleTestEvents(Cypress, specBridgeCommunicator)
 
   cy.onBeforeAppWindowLoad = onBeforeAppWindowLoad(Cypress, cy)
 
@@ -114,7 +116,7 @@ const onBeforeAppWindowLoad = (Cypress: Cypress.Cypress, cy: $Cy) => (autWindow:
       // TODO: implement these commented out bits
       // Cookies.setInitial()
 
-      // timers.reset()
+      cy.resetTimer()
 
       Cypress.action('app:window:before:unload', e)
 
