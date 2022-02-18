@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc",
     "build-prod": "tsc",
-    "test": "node ./test-wds-3.js",
+    "test": "node ./test-deps.js",
     "test-all": "tsc && mocha -r @packages/ts/register test/**/*.spec.ts test/*.spec.ts --exit",
     "watch": "tsc -w"
   },

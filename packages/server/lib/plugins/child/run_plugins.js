@@ -46,10 +46,14 @@ const load = (ipc, config, pluginsFile) => {
   // we track the register calls and then send them all at once
   // to the parent process
   const register = (event, handler) => {
-    const { isValid, error } = validateEvent(event, handler, config)
+    const { isValid, userEvents, error } = validateEvent(event, handler, config, register)
 
     if (!isValid) {
-      ipc.send('load:error', 'PLUGINS_VALIDATION_ERROR', pluginsFile, error.stack)
+      if (userEvents) {
+        ipc.send('load:error', 'PLUGINS_INVALID_EVENT_NAME_ERROR', pluginsFile, event, userEvents, util.serializeError(error))
+      } else {
+        ipc.send('load:error', 'PLUGINS_FUNCTION_ERROR', pluginsFile, util.serializeError(error))
+      }
 
       return
     }
@@ -101,7 +105,7 @@ const load = (ipc, config, pluginsFile) => {
   })
   .catch((err) => {
     debug('plugins file errored:', err && err.stack)
-    ipc.send('load:error', 'PLUGINS_FUNCTION_ERROR', pluginsFile, err.stack)
+    ipc.send('load:error', 'PLUGINS_FUNCTION_ERROR', pluginsFile, util.serializeError(err))
   })
 }
 
@@ -187,7 +191,7 @@ const runPlugins = (ipc, pluginsFile, projectRoot) => {
     }
   } catch (err) {
     debug('failed to require pluginsFile:\n%s', err.stack)
-    ipc.send('load:error', 'PLUGINS_FILE_ERROR', pluginsFile, err.stack)
+    ipc.send('load:error', 'PLUGINS_FILE_ERROR', pluginsFile, util.serializeError(err))
 
     return
   }
@@ -208,6 +212,8 @@ const runPlugins = (ipc, pluginsFile, projectRoot) => {
   ipc.on('execute', (event, ids, args) => {
     execute(ipc, event, ids, args)
   })
+
+  ipc.send('ready')
 }
 
 // for testing purposes

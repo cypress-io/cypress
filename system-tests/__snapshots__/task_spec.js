@@ -1,5 +1,9 @@
 exports['e2e task merges task events on subsequent registrations and logs warning for conflicts 1'] = `
-Warning: Multiple attempts to register the following task(s): two. Only the last attempt will be registered.
+Warning: Multiple attempts to register the following task(s):
+
+ - two
+
+Only the last attempt will be registered.
 
 ====================================================================================================
 

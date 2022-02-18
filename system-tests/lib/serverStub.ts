@@ -54,7 +54,7 @@ const routeHandlers = {
   postRun: {
     method: 'post',
     url: '/runs',
-    req: 'postRunRequest@2.4.0',
+    reqSchema: 'postRunRequest@2.4.0',
     resSchema: 'postRunResponse@2.2.0',
     res: (req, res) => {
       if (!req.body.specs) {
@@ -69,7 +69,7 @@ const routeHandlers = {
   postRunInstance: {
     method: 'post',
     url: '/runs/:id/instances',
-    req: 'postRunInstanceRequest@2.1.0',
+    reqSchema: 'postRunInstanceRequest@2.1.0',
     resSchema: 'postRunInstanceResponse@2.1.0',
     res: (req, res) => {
       const response = {
@@ -85,21 +85,21 @@ const routeHandlers = {
   postInstanceTests: {
     method: 'post',
     url: '/instances/:id/tests',
-    req: 'postInstanceTestsRequest@1.0.0',
+    reqSchema: 'postInstanceTestsRequest@1.0.0',
     resSchema: 'postInstanceTestsResponse@1.0.0',
     res: postInstanceTestsResponse,
   },
   postInstanceResults: {
     method: 'post',
     url: '/instances/:id/results',
-    req: 'postInstanceResultsRequest@1.1.0',
+    reqSchema: 'postInstanceResultsRequest@1.1.0',
     resSchema: 'postInstanceResultsResponse@1.0.0',
     res: sendUploadUrls,
   },
   putInstanceStdout: {
     method: 'put',
     url: '/instances/:id/stdout',
-    req: 'putInstanceStdoutRequest@1.0.0',
+    reqSchema: 'putInstanceStdoutRequest@1.0.0',
     res (req, res) {
       return res.sendStatus(200)
     },
@@ -184,7 +184,7 @@ const sendResponse = function (req, res, responseBody) {
   })
 }
 
-const ensureSchema = function (expectedRequestSchema, responseBody, expectedResponseSchema) {
+const ensureSchema = function (onRequestBody, expectedRequestSchema, responseBody, expectedResponseSchema) {
   let reqName; let reqVersion
 
   if (expectedRequestSchema) {
@@ -193,6 +193,10 @@ const ensureSchema = function (expectedRequestSchema, responseBody, expectedResp
 
   return async function (req, res) {
     const { body } = req
+
+    if (_.isFunction(onRequestBody)) {
+      onRequestBody(body)
+    }
 
     try {
       if (expectedRequestSchema) {
@@ -268,7 +272,8 @@ const onServer = (routes) => {
 
     return _.each(routes, (route) => {
       return app[route.method](route.url, ensureSchema(
-        route.req,
+        route.onReqBody,
+        route.reqSchema,
         route.res,
         route.resSchema,
       ))

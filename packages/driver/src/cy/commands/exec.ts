@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import _ from 'lodash'
 import Promise from 'bluebird'
 
@@ -7,7 +5,8 @@ import $errUtils from '../../cypress/error_utils'
 
 export default (Commands, Cypress, cy) => {
   Commands.addAll({
-    exec (cmd, options = {}) {
+    // TODO: change the type of `any` to `Partical<Cypress.ExecOptions>`
+    exec (cmd, options: any = {}) {
       const userOptions = options
 
       options = _.defaults({}, userOptions, {

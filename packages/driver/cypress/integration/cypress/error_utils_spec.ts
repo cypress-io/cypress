@@ -622,4 +622,18 @@ describe('driver/src/cypress/error_utils', () => {
       expect(stack).not.to.include('removeMeAndAbove')
     })
   })
+
+  context('.wrapErr', () => {
+    [
+      { value: undefined, label: 'undefined' },
+      { value: null, label: 'null' },
+      { value: '', label: 'empty string' },
+      { value: true, label: 'boolean' },
+      { value: 1, label: 'number' },
+    ].forEach((err) => {
+      it(`returns undefined if err is ${err.label}`, () => {
+        expect($errUtils.wrapErr(err.value)).to.be.undefined
+      })
+    })
+  })
 })

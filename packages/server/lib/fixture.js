@@ -54,7 +54,8 @@ module.exports = {
       return glob(pattern, {
         nosort: true,
         nodir: true,
-      }).bind(this)
+      })
+      .bind(this)
       .then(function (matches) {
         if (matches.length === 0) {
           const relativePath = path.relative('.', p)

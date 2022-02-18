@@ -139,7 +139,9 @@ const init = (config, options) => {
     Object.keys(config).sort().forEach((key) => orderedConfig[key] = config[key])
     config = orderedConfig
 
-    ipc.send('load', config)
+    ipc.on('ready', () => {
+      ipc.send('load', config)
+    })
 
     ipc.on('loaded', (newCfg, registrations) => {
       _.omit(config, 'projectRoot', 'configFile')
@@ -191,7 +193,7 @@ const init = (config, options) => {
 
       killPluginsProcess()
 
-      err = errors.get('PLUGINS_UNEXPECTED_ERROR', config.pluginsFile, err.annotated || err.stack || err.message)
+      err = errors.get('PLUGINS_UNEXPECTED_ERROR', config.pluginsFile, err)
       err.title = 'Error running plugin'
 
       // this can sometimes trigger before the promise is fulfilled and

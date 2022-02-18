@@ -18,7 +18,7 @@
     "@cypress/icons": "0.7.0",
     "bluebird": "3.5.3",
     "debug": "^4.3.2",
-    "fs-extra": "8.1.0",
+    "fs-extra": "9.1.0",
     "lodash": "^4.17.21",
     "minimist": "1.2.5"
   },
