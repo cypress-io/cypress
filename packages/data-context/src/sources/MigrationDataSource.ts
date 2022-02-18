@@ -19,7 +19,12 @@ import {
   isDefaultTestFiles,
   getComponentTestFilesGlobs,
   getComponentFolder,
+  getIntegrationTestFilesGlobs,
 } from './migration'
+
+import { allowed } from '@packages/config/lib'
+import plugins from '@packages/server/lib/plugins'
+import * as configModule from '@packages/server/lib/config'
 
 import type { FilePart } from './migration/format'
 import Debug from 'debug'
@@ -295,6 +300,7 @@ export class MigrationDataSource {
     }
 
     const integrationFolder = getIntegrationFolder(config)
+    const integrationTestFiles = getIntegrationTestFilesGlobs(config)
 
     if (integrationFolder === false) {
       this.hasE2ESpec = false
@@ -302,7 +308,7 @@ export class MigrationDataSource {
       this.hasE2ESpec = await hasSpecFile(
         this.ctx.currentProject,
         integrationFolder,
-        componentTestFiles,
+        integrationTestFiles,
       )
     }
 
@@ -315,6 +321,30 @@ export class MigrationDataSource {
     if (getPluginsFile(config) === false || pluginsFileMissing) {
       this.hasPluginsFile = false
     }
+  }
+
+  async initializePlugins (cfg: OldCypressConfig): Promise<OldCypressConfig[]> {
+    return Promise.all(['e2e', 'component'].map(async (type) => {
+      // only init plugins with the
+      // allowed config values to
+      // prevent tampering with the
+      // internals and breaking cypress
+      const allowedCfg = allowed(cfg)
+
+      const modifiedCfg = await plugins.init(allowedCfg, {
+        projectRoot: this.ctx.lifecycleManager?.projectRoot,
+        configFile: path.join(this.ctx.lifecycleManager?.projectRoot, 'cypress.json'),
+        testingType: type,
+        onError: (err: Error) => {
+          this.ctx.coreData.baseError = err
+        },
+        onWarning: () => {},
+      })
+
+      debug('plugin config yielded: %o', modifiedCfg)
+
+      return configModule.updateWithPluginValues(cfg, modifiedCfg) as any as OldCypressConfig
+    }))
   }
 
   get step (): MIGRATION_STEP {
