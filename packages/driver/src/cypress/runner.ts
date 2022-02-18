@@ -8,7 +8,7 @@ import Promise from 'bluebird'
 
 import $Log from './log'
 import $utils from './utils'
-import $errUtils from './error_utils'
+import $errUtils, { ErrorHandlerType } from './error_utils'
 import $stackUtils from './stack_utils'
 import { getResolvedTestConfigOverride } from '../cy/testConfigOverrides'
 import debugFn from 'debug'
@@ -1052,7 +1052,7 @@ export default {
     }
 
     // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
-    const onSpecError = (handlerType) => (event) => {
+    const onSpecError = (handlerType: ErrorHandlerType) => (event: Event) => {
       let { originalErr, err } = $errUtils.errorFromUncaughtEvent(handlerType, event)
 
       debugErrors('uncaught spec error: %o', originalErr)

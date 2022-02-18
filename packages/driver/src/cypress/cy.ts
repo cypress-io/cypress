@@ -115,6 +115,20 @@ const setTopOnError = function (Cypress, cy: $Cy) {
   top.__alreadySetErrorHandlers__ = true
 }
 
+interface KnownException {
+  message: string
+  warning: string
+}
+
+// https://github.com/cypress-io/cypress/issues/8418
+// https://github.com/quasarframework/quasar/issues/2233#issuecomment-492975745
+const knownExceptions: KnownException[] = [
+  {
+    message: 'ResizeObserver loop limit exceeded',
+    warning: 'Cypress is intentionally supressing and ignoring a unhandled ResizeObserver error. This can safely be ignored.',
+  },
+]
+
 export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILocation, ITimer, IChai, IXhr, IAliases, IEnsures, ISnapshots, IFocused {
   id: string
   specWindow: any
@@ -1080,6 +1094,17 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
       onError: (handlerType) => (event) => {
         const { originalErr, err, promise } = $errUtils.errorFromUncaughtEvent(handlerType, event) as ErrorFromProjectRejectionEvent
+
+        const knownException = knownExceptions.find((x) => x.message === err.message)
+
+        if (knownException) {
+          // eslint-disable-next-line no-console
+          console.warn(knownException.warning)
+
+          // return undefined to skip logging the error and failing the test
+          return undefined
+        }
+
         const handled = cy.onUncaughtException({
           err,
           promise,

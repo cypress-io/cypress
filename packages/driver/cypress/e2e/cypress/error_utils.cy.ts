@@ -9,6 +9,19 @@ import $errUtils from '@packages/driver/src/cypress/error_utils'
 import $errorMessages from '@packages/driver/src/cypress/error_messages'
 
 describe('driver/src/cypress/error_utils', () => {
+  it('warns in console if ResizeObserver error is captured and suppressed', ({ browser: 'chrome' }), (done) => {
+    cy.spy(window.top.console, 'warn')
+    cy.visit('/fixtures/resize-observer.html')
+
+    window.Cypress.once('resize-observer-triggered', () => {
+      expect(window.top.console.warn).to.be.calledWith(
+        'Cypress is intentionally supressing and ignoring a unhandled ResizeObserver error. This can safely be ignored.',
+      )
+
+      done()
+    })
+  })
+
   context('.modifyErrMsg', () => {
     let originalErr
     let newErrMsg
