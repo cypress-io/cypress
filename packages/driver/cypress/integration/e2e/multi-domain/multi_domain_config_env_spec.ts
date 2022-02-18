@@ -48,16 +48,15 @@
         })
       })
 
-      it(`syncs serializable Cypress.${fnName}() values outwards from secondary (synchronously)`,
-        () => {
-          cy.switchToDomain('foobar.com', [fnName], ([fnName]) => {
-            Cypress[fnName]('bar', 'baz')
-          }).then(() => {
-            const baz = Cypress[fnName]('bar')
+      it(`syncs serializable Cypress.${fnName}() values outwards from secondary (synchronously)`, () => {
+        cy.switchToDomain('foobar.com', [fnName], ([fnName]) => {
+          Cypress[fnName]('bar', 'baz')
+        }).then(() => {
+          const baz = Cypress[fnName]('bar')
 
-            expect(baz).to.equal('baz')
-          })
+          expect(baz).to.equal('baz')
         })
+      })
 
       it(`syncs serializable Cypress.${fnName}() values outwards from secondary even if the value is undefined`, () => {
         Cypress[fnName]('foo', 'bar')
@@ -82,7 +81,7 @@
         })
       })
 
-      it(`persists Cypress.${fnName}() changes made in the secondary, assuming primary has not overwritten with a serializable value`, {}, () => {
+      it(`persists Cypress.${fnName}() changes made in the secondary, assuming primary has not overwritten with a serializable value`, () => {
         cy.switchToDomain('foobar.com', [fnName], ([fnName]) => {
           const baz = Cypress[fnName]('bar')
 
@@ -248,7 +247,7 @@
 
       // NOTE: chrome 98 and above uses a native structuredClone() method, but that method CAN clone Error objects
       it('(chromium) uses ponyfilled or native structuredClone that can serialize Error objects in config', {
-        browser: ['electron', 'chrome', 'chromium', 'edge'],
+        browser: { family: 'chromium' },
       }, () => {
         Cypress[fnName]('errorInConfig', new Error('error'))
 

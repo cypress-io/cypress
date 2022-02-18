@@ -203,7 +203,7 @@ export class SpecBridgeDomainCommunicator extends EventEmitter {
   }
 
   toPrimaryError (event, data: { subject?: any, err?: any}) {
-    this.handleSubjectAndErr(event, data)
     this.resyncConfigEnvToPrimary()
+    this.handleSubjectAndErr(event, data)
   }
 }

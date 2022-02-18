@@ -122,7 +122,7 @@ export const handleDomainFn = (cy: $Cy, specBridgeCommunicator: SpecBridgeDomain
         specBridgeCommunicator.toPrimaryRanDomainFn({
           subject,
           // only sync the config if there are no commands in queue (for instance, only assertions exist in the callback)
-          resyncConfig: !(cy.queue.length > 0),
+          resyncConfig: cy.queue.length === 0,
         })
       }
     } catch (err) {

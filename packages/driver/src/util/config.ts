@@ -25,9 +25,9 @@ const omitConfigReadOnlyDifferences = (objectLikeConfig: Cypress.ObjectLike) => 
  * Takes a full config object from a different domain, finds the differences in the current config, and updates the config for the current domain.
  * @param config The full config object from the other domain, serialized
  * @param env The full env object from the other domain, serialized
- * @returns undefined
+ * @returns Cypress.ObjectLike
  */
-const syncToCurrentDomain = (valuesFromOtherDomain: Cypress.ObjectLike, valuesFromCurrentDomain: Cypress.ObjectLike) => {
+const syncToCurrentDomain = (valuesFromOtherDomain: Cypress.ObjectLike, valuesFromCurrentDomain: Cypress.ObjectLike): Cypress.ObjectLike => {
   // @ts-ignore
   const shallowDifferencesInConfig = _.omitBy(valuesFromOtherDomain, (value: any, key: string) => {
     const valueToSync = value
