@@ -7,7 +7,6 @@ const Promise = require('bluebird')
 const { shell } = require('electron')
 const url = require('url')
 
-const errors = require('../errors')
 const machineId = require('../util/machine_id')
 const random = require('../util/random')
 const user = require('../user')
@@ -189,11 +188,11 @@ const _internal = {
  * @returns a promise that is resolved with a user when auth is complete or rejected when it fails
  */
 const start = (onMessage, utmCode, onLogin) => {
-  function sendMessage (type, name, arg1) {
+  function sendMessage (type, name, message) {
     onMessage({
       type,
       name,
-      message: errors.getMsgByType(name, arg1),
+      message,
       browserOpened: authRedirectReached,
     })
   }
