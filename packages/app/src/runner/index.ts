@@ -67,6 +67,8 @@ export function getEventManager () {
   return _eventManager
 }
 
+window.getEventManager = getEventManager
+
 let _autIframeModel: AutIframe
 
 /**

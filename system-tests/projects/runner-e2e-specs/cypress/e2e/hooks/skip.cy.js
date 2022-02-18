@@ -1,4 +1,5 @@
 describe('outer suite', () => {
+  // NOTE: intentionally skipped for testing
   it.skip('test 1', () => {
     cy.log('testBody 1')
   })

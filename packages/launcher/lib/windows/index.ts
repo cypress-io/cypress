@@ -7,7 +7,6 @@ import { notInstalledErr } from '../errors'
 import { log } from '../log'
 import type { PathData } from '../types'
 import type { Browser, FoundBrowser } from '@packages/types'
-import Bluebird from 'bluebird'
 
 function formFullAppPath (name: string) {
   return [
@@ -169,7 +168,11 @@ export function getVersionString (path: string) {
   // on Windows using "--version" seems to always start the full
   // browser, no matter what one does.
 
-  return Bluebird.resolve(winVersionInfo(path).FileVersion)
+  try {
+    return Promise.resolve(winVersionInfo(path).FileVersion)
+  } catch (err) {
+    return Promise.reject(err)
+  }
 }
 
 export function getVersionNumber (version: string) {
