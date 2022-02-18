@@ -20,20 +20,22 @@ context('multi-domain misc', { experimentalSessionSupport: true, experimentalMul
     const addedCommands = Cypress._.difference(actualCommands, expectedCommands)
     const removedCommands = Cypress._.difference(expectedCommands, actualCommands)
 
-    if (actualCommands.length > expectedCommands.length) {
+    if (addedCommands.length && removedCommands.length) {
+      throw new Error(`Commands have been added to and removed from Cypress.
+
+        The following command(s) were added: ${addedCommands.join(', ')}
+        The following command(s) were removed: ${removedCommands.join(', ')}
+
+        Update this test accordingly.`)
+    }
+
+    if (addedCommands.length) {
       throw new Error(`The following command(s) have been added to Cypress: ${addedCommands.join(', ')}. Please add the command(s) to this test.`)
     }
 
-    if (expectedCommands.length > actualCommands.length) {
+    if (removedCommands.length) {
       throw new Error(`The following command(s) have been removed from Cypress: ${removedCommands.join(', ')}. Please remove the command(s) from this test.`)
     }
-
-    expect(addedCommands).to.deep.equal([], `Commands have been added to and removed from Cypress.
-
-  The following command(s) were added: ${addedCommands.join(', ')}
-  The following command(s) were removed: ${removedCommands.join(', ')}
-
-  Update this test accordingly.`)
   })
 
   it('.end()', () => {
