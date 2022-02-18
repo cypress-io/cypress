@@ -60,7 +60,8 @@ describe('lib/gui/events', () => {
     })
   })
 
-  xcontext('.start', () => {
+  // TODO:(tgriesser) originally skipped this, not sure why
+  context.skip('.start', () => {
     it('ipc attaches callback on request', () => {
       sinon.stub(events, 'handleEvent')
 

@@ -593,8 +593,8 @@ describe('lib/config', () => {
         })
       })
 
-      // TODO(lachlan): after mega PR
-      xcontext('specPattern', () => {
+      // TODO:(lachlan): after mega PR
+      context.skip('specPattern', () => {
         it('passes if a string', function () {
           this.setup({ e2e: { specPattern: '**/*.coffee' } })
 
@@ -1459,8 +1459,8 @@ describe('lib/config', () => {
       expect(warning).to.be.calledWith('FIREFOX_GC_INTERVAL_REMOVED')
     })
 
-    // todo(lachlan): after mega PR
-    xdescribe('.resolved', () => {
+    // TODO:(lachlan) after mega PR
+    describe.skip('.resolved', () => {
       it('sets reporter and port to cli', () => {
         const obj = {
           projectRoot: '/foo/bar',
