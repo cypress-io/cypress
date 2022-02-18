@@ -51,7 +51,7 @@ class DockerProcess extends EventEmitter implements SpawnerResult {
   run (opts: {
     cmd: string
     args: string[]
-    env: any
+    env: Record<string, string>
   }) {
     const containerCreateEnv = []
 
