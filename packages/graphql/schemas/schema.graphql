@@ -7,14 +7,14 @@ type AuthState {
   """Whether the browser was successfully opened for login"""
   browserOpened: Boolean!
 
-  """Content of the auth message"""
+  """Message for the auth state"""
   message: String
 
-  """Name of auth message, e.g. AUTH_BROWSER_LAUNCHED"""
+  """Name of auth state, e.g. AUTH_BROWSER_LAUNCHED"""
   name: String
 
-  """The type of the auth message, e.g. info, warning"""
-  type: String
+  """The type of the auth state, e.g. info, error"""
+  type: String!
 }
 
 """Base error"""

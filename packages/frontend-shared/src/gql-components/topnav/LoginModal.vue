@@ -107,6 +107,7 @@ import {
 } from '@headlessui/vue'
 
 import type { LoginModalFragment } from '../../generated/graphql'
+import type { AuthError } from '../shared-types'
 
 const online = useOnline()
 
@@ -152,7 +153,7 @@ const errorType = computed(() => {
   const { name, type } = props.gql.authState
 
   if (type === 'error') {
-    return name
+    return name as AuthError
   }
 
   return null

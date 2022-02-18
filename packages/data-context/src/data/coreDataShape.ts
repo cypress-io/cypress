@@ -88,7 +88,7 @@ export interface BaseErrorDataShape {
 }
 
 export interface AuthStateShape {
-  type?: string
+  type: string
   name?: string
   message?: string
   browserOpened: boolean
@@ -161,6 +161,7 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
     },
     authState: {
       browserOpened: false,
+      type: 'info',
     },
     currentProject: modeOptions.projectRoot ?? null,
     currentTestingType: modeOptions.testingType ?? null,

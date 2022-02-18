@@ -71,6 +71,7 @@ export function makeClientTestContext (): ClientTestContext {
     },
     authState: {
       browserOpened: false,
+      type: 'info',
     },
     wizard: {
       chosenBundler: null,

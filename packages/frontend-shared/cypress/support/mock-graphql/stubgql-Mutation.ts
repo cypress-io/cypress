@@ -43,7 +43,7 @@ export const stubMutation: MaybeResolver<Mutation> = {
   },
 
   resetAuthState (source, args, ctx) {
-    ctx.authState = { browserOpened: false }
+    ctx.authState = { browserOpened: false, type: 'info' }
 
     return { }
   },

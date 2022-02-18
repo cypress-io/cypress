@@ -55,7 +55,7 @@ export class AuthActions {
 
   resetAuthState () {
     this.ctx.update((coreData) => {
-      coreData.authState = { browserOpened: false }
+      coreData.authState = { browserOpened: false, type: 'info' }
     })
   }
 
