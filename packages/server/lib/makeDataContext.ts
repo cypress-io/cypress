@@ -1,7 +1,7 @@
 import { DataContext, getCtx, clearCtx, setCtx } from '@packages/data-context'
 import electron, { OpenDialogOptions, SaveDialogOptions, BrowserWindow } from 'electron'
 import pkg from '@packages/root'
-import configUtils from '@packages/config'
+import * as configUtils from '@packages/config'
 
 import type {
   AllModeOptions,
