@@ -122,10 +122,6 @@ const props = defineProps<{
 
 gql`
 fragment LoginModal on Query {
-  cloudViewer {
-    id
-    fullName
-  }
   ...Auth
 }
 `
@@ -176,7 +172,5 @@ const title = computed(() => {
 })
 
 const isOnline = computed(() => online.value)
-
-export type { LoginModalFragment }
 
 </script>

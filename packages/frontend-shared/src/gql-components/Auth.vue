@@ -91,6 +91,7 @@ fragment Auth on Query {
     browserOpened
     name
     message
+    type
   }
 }
 `
@@ -125,6 +126,7 @@ query Auth_BrowserOpened {
     browserOpened
     name
     message
+    type
   }
 }
 `
