@@ -167,7 +167,6 @@ describe('lib/gui/auth', function () {
         await auth.start(onMessageSpy, 'code')
       } catch (e) {
         expect(onMessageSpy).to.be.calledWith({
-          type: 'error',
           name: 'AUTH_ERROR_DURING_LOGIN',
           message: 'unexpected error',
           browserOpened: false,
