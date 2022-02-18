@@ -36,31 +36,6 @@ export const handleDomainFn = (cy: $Cy, specBridgeCommunicator: SpecBridgeDomain
     cy.isStable(false, 'multi-domain-start')
   }
 
-  const doneEarly = () => {
-    cy.queue.stop()
-
-    // we only need to worry about doneEarly when
-    // it comes from a manual event such as stopping
-    // Cypress or when we yield a (done) callback
-    // and could arbitrarily call it whenever we want
-    const p = cy.state('promise')
-
-    // if our outer promise is pending
-    // then cancel outer and inner
-    // and set canceled to be true
-    if (p && p.isPending()) {
-      cy.state('canceled', true)
-      cy.state('cancel')()
-    }
-
-    // if a command fails then after each commands
-    // could also fail unless we clear this out
-    cy.state('commandIntermediateValue', undefined)
-
-    // reset the nestedIndex back to null
-    cy.state('nestedIndex', null)
-  }
-
   specBridgeCommunicator.on('run:domain:fn', async ({ data, fn, state }: RunDomainFnOptions) => {
     let queueFinished = false
 
@@ -75,7 +50,7 @@ export const handleDomainFn = (cy: $Cy, specBridgeCommunicator: SpecBridgeDomain
         return
       }
 
-      doneEarly()
+      cy.stop()
       specBridgeCommunicator.toPrimaryWithError('queue:finished', err)
     })
 
