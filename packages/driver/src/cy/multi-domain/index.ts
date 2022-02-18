@@ -112,14 +112,15 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
 
         communicator.once('queue:finished', onQueueFinished)
 
-        // we don't unbind this even after queue:finished, because an async
-        // error could be thrown after the queue is done
-        // TODO: when we support multiple switchToDomain calls, need to unbind
-        // before listening again
-        communicator.once('uncaught:error', ({ err }) => {
-          // @ts-ignore
-          Cypress.runner.onSpecError('error')({ error: err })
-        })
+        // We don't unbind this even after queue:finished, because an async
+        // error could be thrown after the queue is done, but make sure not
+        // to stack up listeners on it after it's originally bound
+        if (!communicator.listeners('uncaught:error').length) {
+          communicator.once('uncaught:error', ({ err }) => {
+            // @ts-ignore
+            Cypress.runner.onSpecError('error')({ error: err })
+          })
+        }
 
         // fired once the spec bridge is set up and ready to receive messages
         communicator.once('bridge:ready', () => {
