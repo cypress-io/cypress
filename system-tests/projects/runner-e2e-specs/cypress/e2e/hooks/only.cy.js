@@ -8,6 +8,8 @@ describe('test wrapper', () => {
       cy.log('beforeEachHook 1')
     })
 
+    // Intentional .only for testing
+    // eslint-disable-next-line mocha/no-exclusive-tests
     it.only('test 2', () => {
       cy.log('testBody 2')
     })
@@ -24,6 +26,8 @@ describe('test wrapper', () => {
   })
 
   describe('nested suite 3', () => {
+    // Intentional .only for testing
+    // eslint-disable-next-line mocha/no-exclusive-tests
     it.only('test 4', () => {
       cy.log('testBody 4')
     })

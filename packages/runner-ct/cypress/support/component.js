@@ -18,6 +18,6 @@ import './commands'
 import 'cypress-real-events/support'
 // Alternatively you can use CommonJS syntax:
 // require('./commands')
-import installCustomPercyCommand from '@packages/ui-components/cypress/support/customPercyCommand'
+import { installCustomPercyCommand } from '@packages/ui-components/cypress/support/customPercyCommand'
 
 installCustomPercyCommand()

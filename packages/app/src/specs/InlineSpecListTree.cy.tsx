@@ -64,8 +64,8 @@ describe('InlineSpecListTree', () => {
       </div>
     ))
 
-    cy.get('[data-selected-spec="true"').should('contain', 'Spec-B').should('have.css', 'border-color', 'rgb(154, 162, 252)')
-    cy.get('[data-selected-spec="false"').should('have.length', '6')
+    cy.get('[data-selected-spec="true"] span').should('contain', 'Spec-B').should('have.css', 'color', 'rgb(255, 255, 255)')
+    cy.get('[data-selected-spec="false"]').should('have.length', '6')
     .should('contain', 'src')
     .should('contain', 'components')
     .should('contain', 'Spec-A')
