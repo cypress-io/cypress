@@ -21,6 +21,7 @@
     <SpecPatterns
       v-if="props.gql"
       :gql="props.gql"
+      data-cy="spec-pattern"
     />
   </SettingsSection>
 </template>

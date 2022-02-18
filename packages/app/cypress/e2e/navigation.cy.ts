@@ -2,7 +2,7 @@ import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 
 describe('Navigation', () => {
   before(() => {
-    cy.scaffoldProject('todos')
+    cy.scaffoldProject('todos', { timeout: 50 * 1000 })
   })
 
   it('External links trigger mutation to open in a new browser', () => {

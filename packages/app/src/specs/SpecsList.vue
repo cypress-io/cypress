@@ -16,7 +16,7 @@
     />
     <div
       v-if="specs.length"
-      class="grid grid-cols-2 children:font-medium children:text-gray-800 "
+      class="mb-4 grid grid-cols-2 children:font-medium children:text-gray-800 "
     >
       <div
         class="flex items-center justify-between"
