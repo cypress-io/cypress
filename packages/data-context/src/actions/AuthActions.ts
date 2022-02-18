@@ -1,11 +1,9 @@
 import type { DataContext } from '..'
-import type { AuthenticatedUserShape } from '../data'
-
-export interface AuthMessage {type: string, browserOpened: boolean, name: string, message: string}
+import type { AuthenticatedUserShape, AuthStateShape } from '../data'
 
 export interface AuthApiShape {
   getUser(): Promise<Partial<AuthenticatedUserShape>>
-  logIn(onMessage: (message: AuthMessage) => void): Promise<AuthenticatedUserShape>
+  logIn(onMessage: (message: AuthStateShape) => void): Promise<AuthenticatedUserShape>
   logOut(): Promise<void>
   resetAuthState(): Promise<void>
 }
@@ -55,7 +53,7 @@ export class AuthActions {
 
   resetAuthState () {
     this.ctx.update((coreData) => {
-      coreData.authState = { browserOpened: false, type: 'info' }
+      coreData.authState = { browserOpened: false }
     })
   }
 

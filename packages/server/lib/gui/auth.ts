@@ -82,7 +82,7 @@ const launchServer = (baseLoginUrl, sendMessage, utmCode) => {
 
         res.redirect(303, fullLoginUrl)
 
-        sendMessage('info', 'AUTH_BROWSER_LAUNCHED')
+        sendMessage('AUTH_BROWSER_LAUNCHED')
       })
     })
 
@@ -154,7 +154,7 @@ const stopServer = () => {
 const launchNativeAuth = Promise.method((loginUrl, sendMessage) => {
   const warnCouldNotLaunch = () => {
     if (openExternalAttempted && !authRedirectReached) {
-      sendMessage('error', 'AUTH_COULD_NOT_LAUNCH_BROWSER', loginUrl)
+      sendMessage('AUTH_COULD_NOT_LAUNCH_BROWSER', loginUrl)
     }
   }
 
@@ -188,9 +188,8 @@ const _internal = {
  * @returns a promise that is resolved with a user when auth is complete or rejected when it fails
  */
 const start = (onMessage, utmCode, onLogin) => {
-  function sendMessage (type, name, message) {
+  function sendMessage (name, message) {
     onMessage({
-      type,
       name,
       message,
       browserOpened: authRedirectReached,
@@ -219,7 +218,7 @@ const start = (onMessage, utmCode, onLogin) => {
     })
   })
   .catch((err: Error) => {
-    sendMessage('error', 'AUTH_ERROR_DURING_LOGIN', err.message)
+    sendMessage('AUTH_ERROR_DURING_LOGIN', err.message)
   })
   .finally(() => {
     _internal.stopServer()

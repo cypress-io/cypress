@@ -69,7 +69,6 @@ import {
 } from '../generated/graphql'
 import Button from '@cy/components/Button.vue'
 import { useI18n } from '@cy/i18n'
-import type { AuthError } from '@packages/types'
 
 const isOnline = useOnline()
 

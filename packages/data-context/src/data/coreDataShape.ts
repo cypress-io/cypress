@@ -1,4 +1,4 @@
-import { BUNDLERS, FoundBrowser, Editor, Warning, AllowedState, AllModeOptions, TestingType, PACKAGE_MANAGERS, BrowserStatus } from '@packages/types'
+import { BUNDLERS, FoundBrowser, Editor, Warning, AllowedState, AllModeOptions, TestingType, PACKAGE_MANAGERS, BrowserStatus, AuthStateName } from '@packages/types'
 import type { NexusGenEnums, NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
 import type { App, BrowserWindow } from 'electron'
 import type { ChildProcess } from 'child_process'
@@ -88,8 +88,7 @@ export interface BaseErrorDataShape {
 }
 
 export interface AuthStateShape {
-  type: string
-  name?: string
+  name?: AuthStateName
   message?: string
   browserOpened: boolean
 }
@@ -161,7 +160,6 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
     },
     authState: {
       browserOpened: false,
-      type: 'info',
     },
     currentProject: modeOptions.projectRoot ?? null,
     currentTestingType: modeOptions.testingType ?? null,

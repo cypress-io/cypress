@@ -1,9 +1,9 @@
 import { enumType, objectType } from 'nexus'
-import { authError } from '@packages/types'
+import { authStateName } from '@packages/types'
 
 export const AuthStateNameEnum = enumType({
   name: 'AuthStateNameEnum',
-  members: authError,
+  members: authStateName,
 })
 
 export const AuthState = objectType({

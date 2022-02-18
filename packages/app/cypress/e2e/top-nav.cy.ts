@@ -1,5 +1,5 @@
-import type { AuthMessage } from '../../../data-context/src/actions/AuthActions'
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
+import type { AuthStateShape } from '@packages/data-context/src/data'
 
 const loginText = defaultMessages.topNav.login
 
@@ -341,7 +341,7 @@ describe('App Top Nav Workflows', () => {
         cy.withCtx((ctx, options) => {
         // @ts-ignore sinon is a global in the node process where this is executed
           sinon.stub(ctx._apis.authApi, 'logIn').callsFake(async (onMessage) => {
-            onMessage({ browserOpened: true } as AuthMessage)
+            onMessage({ browserOpened: true } as AuthStateShape)
 
             return new Promise((resolve) => {
               setTimeout(() => {
@@ -422,7 +422,6 @@ describe('App Top Nav Workflows', () => {
       it('shows correct error when browser cannot launch', () => {
         cy.withCtx((ctx) => {
           ctx.coreData.authState = {
-            type: 'warning',
             name: 'AUTH_COULD_NOT_LAUNCH_BROWSER',
             message: 'http://127.0.0.1:0000/redirect-to-auth',
             browserOpened: false,
@@ -447,7 +446,6 @@ describe('App Top Nav Workflows', () => {
       it('shows correct error when error other than browser-launch happens', () => {
         cy.withCtx((ctx) => {
           ctx.coreData.authState = {
-            type: 'error',
             name: 'AUTH_ERROR_DURING_LOGIN',
             message: 'An unexpected error occurred',
             browserOpened: false,
@@ -470,7 +468,6 @@ describe('App Top Nav Workflows', () => {
 
         cy.withCtx((ctx) => {
           ctx.coreData.authState = {
-            type: 'info',
             name: 'AUTH_BROWSER_LAUNCH',
             message: '',
             browserOpened: true,
@@ -484,7 +481,6 @@ describe('App Top Nav Workflows', () => {
       it('cancel button correctly clears error state', () => {
         cy.withCtx((ctx) => {
           ctx.coreData.authState = {
-            type: 'error',
             name: 'AUTH_ERROR_DURING_LOGIN',
             message: 'An unexpected error occurred',
             browserOpened: false,
@@ -512,7 +508,6 @@ describe('App Top Nav Workflows', () => {
       it('closing modal correctly clears error state', () => {
         cy.withCtx((ctx) => {
           ctx.coreData.authState = {
-            type: 'error',
             name: 'AUTH_ERROR_DURING_LOGIN',
             message: 'An unexpected error occurred',
             browserOpened: false,
