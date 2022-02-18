@@ -46,18 +46,25 @@ export class AuthActions {
   }
 
   async login () {
-    this.setAuthenticatedUser(await this.authApi.logIn((message) => {
-      this.ctx.coreData.authState = message
+    this.setAuthenticatedUser(await this.authApi.logIn((authState) => {
+      this.ctx.update((coreData) => {
+        coreData.authState = authState
+      })
     }))
   }
 
   resetAuthState () {
-    return this.ctx.coreData.authState = { browserOpened: false }
+    this.ctx.update((coreData) => {
+      coreData.authState = { browserOpened: false }
+    })
   }
 
   async logout () {
     try {
-      this.ctx.coreData.authState.browserOpened = false
+      this.ctx.update((coreData) => {
+        coreData.authState.browserOpened = false
+      })
+
       await this.authApi.logOut()
     } catch (e) {
       this.ctx.logTraceError(e)
