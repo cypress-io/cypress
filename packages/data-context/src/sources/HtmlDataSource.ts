@@ -113,6 +113,7 @@ export class HtmlDataSource {
           window.__CYPRESS_MODE__ = ${JSON.stringify(this.ctx.isRunMode ? 'run' : 'open')};
           window.__CYPRESS_CONFIG__ = ${JSON.stringify(serveConfig)};
           window.__CYPRESS_TESTING_TYPE__ = '${this.ctx.coreData.currentTestingType}'
+          window.__CYPRESS_BROWSER__ = ${JSON.stringify(this.ctx.coreData.chosenBrowser)}
           ${process.env.CYPRESS_INTERNAL_GQL_NO_SOCKET
       ? `window.__CYPRESS_GQL_NO_SOCKET__ = 'true';`
       : ''
