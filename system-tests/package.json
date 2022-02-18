@@ -6,7 +6,7 @@
   "main": "index.js",
   "scripts": {
     "projects:yarn:install": "node ./scripts/projects-yarn-install.js",
-    "test": "node ./scripts/run.js --glob-in-dir=test",
+    "test": "node ./scripts/run.js --glob-in-dir='{test,test-binary}'",
     "test:ci": "node ./scripts/run.js"
   },
   "devDependencies": {
