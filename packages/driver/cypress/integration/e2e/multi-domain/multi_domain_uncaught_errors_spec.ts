@@ -144,7 +144,7 @@ describe('multi-domain - uncaught errors', { experimentalSessionSupport: true, e
     })
 
     it('fails the current test/command if async errors are thrown from the switchToDomain callback after it is finished running', (done) => {
-      cy.on('fail', (err) => {
+      cy.once('fail', (err) => {
         expect(err.name).to.eq('Error')
         expect(err.message).to.include('setTimeout error')
         expect(err.message).to.include('The following error originated from your test code, not from Cypress.')
