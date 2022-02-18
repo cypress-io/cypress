@@ -111,12 +111,12 @@ describe('lib/gui/auth', function () {
 
       it('is still fulfilled when openExternal fails, but sendWarning is called', function () {
         sinon.stub(electron.shell, 'openExternal').rejects()
-        const sendWarning = sinon.stub()
+        const sendLaunchError = sinon.stub()
 
-        return auth._internal.launchNativeAuth(REDIRECT_URL, sendWarning)
+        return auth._internal.launchNativeAuth(REDIRECT_URL, sendLaunchError)
         .then(() => {
           expect(electron.shell.openExternal).to.be.calledWithMatch(REDIRECT_URL)
-          expect(sendWarning).to.be.calledWithMatch('warning', 'AUTH_COULD_NOT_LAUNCH_BROWSER', REDIRECT_URL)
+          expect(sendLaunchError).to.be.calledWithMatch('AUTH_COULD_NOT_LAUNCH_BROWSER', REDIRECT_URL)
         })
       })
     })
