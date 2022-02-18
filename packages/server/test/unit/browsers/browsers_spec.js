@@ -108,7 +108,7 @@ describe('lib/browsers/index', () => {
   })
 
   context('.connectToNewSpec', () => {
-    it('throws an error if browser family doesn\'t exist', () => {
+    it(`throws an error if browser family doesn't exist`, () => {
       return browsers.connectToNewSpec({
         name: 'foo-bad-bang',
         family: 'foo-bad',

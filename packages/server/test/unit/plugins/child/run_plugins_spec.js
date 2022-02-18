@@ -435,7 +435,7 @@ describe.skip('lib/plugins/child/run_plugins', () => {
         expect(result).to.equal('result')
       })
 
-      it('returns __cypress_unhandled__ if the task doesn\'t exist', function () {
+      it(`returns __cypress_unhandled__ if the task doesn't exist`, function () {
         runPlugins.taskExecute(this.ids, ['nope'])
 
         expect(util.wrapChildPromise.lastCall.args[1]('1')).to.equal('__cypress_unhandled__')
