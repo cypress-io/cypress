@@ -457,6 +457,11 @@ commands:
             # https://www.gep13.co.uk/blog/chocolatey-error-hashes-do-not-match
             [[ $PLATFORM == 'windows' && '<<parameters.browser>>' == 'chrome' ]] && choco install googlechrome --ignore-checksums || [[ $PLATFORM != 'windows' ]]
       - run:
+          # the PERCY_TARGET_BRANCH and PERCY_TARGET_COMMIT env vars
+          # are a temporary hack to workaround percy issues with
+          # PR's not diffing the right base branch due to other problems
+          # upstream with finalizing builds. These will be removed
+          # once we implement a more permanent solution.
           command: |
             cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --parallel -- --') || true
             DEBUG=<<parameters.debug>> \
@@ -465,6 +470,8 @@ commands:
             PERCY_PARALLEL_NONCE=$PLATFORM-$CIRCLE_SHA1 \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
+            PERCY_TARGET_BRANCH="10.0-release" \
+            PERCY_TARGET_COMMIT=$(git log -n 1 origin/10.0-release --pretty="%H") \
             $cmd yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --record --parallel --group <<parameters.package>>-<<parameters.type>>
       - store_test_results:
           path: /tmp/cypress
@@ -1034,7 +1041,17 @@ jobs:
               echo "This is an external PR, cannot access other services"
               circleci-agent step halt
             fi
-      - run: PERCY_PARALLEL_NONCE=$PLATFORM-$CIRCLE_SHA1 yarn percy build:finalize
+      - run:
+          # the PERCY_TARGET_BRANCH and PERCY_TARGET_COMMIT env vars
+          # are a temporary hack to workaround percy issues with
+          # PR's not diffing the right base branch due to other problems
+          # upstream with finalizing builds. These will be removed
+          # once we implement a more permanent solution.
+          command: |
+            PERCY_PARALLEL_NONCE=$PLATFORM-$CIRCLE_SHA1 \
+            PERCY_TARGET_BRANCH="10.0-release" \
+            PERCY_TARGET_COMMIT=$(git log -n 1 origin/10.0-release --pretty="%H") \
+            yarn percy build:finalize
 
   cli-visual-tests:
     <<: *defaults
@@ -1054,10 +1071,17 @@ jobs:
           path: cli/visual-snapshots
       - run:
           name: Upload CLI snapshots for diffing
+          # the PERCY_TARGET_BRANCH and PERCY_TARGET_COMMIT env vars
+          # are a temporary hack to workaround percy issues with
+          # PR's not diffing the right base branch due to other problems
+          # upstream with finalizing builds. These will be removed
+          # once we implement a more permanent solution.
           command: |
             PERCY_PARALLEL_NONCE=$PLATFORM-$CIRCLE_SHA1 \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
+            PERCY_TARGET_BRANCH="10.0-release" \
+            PERCY_TARGET_COMMIT=$(git log -n 1 origin/10.0-release --pretty="%H") \
             yarn percy snapshot ./cli/visual-snapshots
 
   unit-tests:
@@ -1325,12 +1349,19 @@ jobs:
           command: yarn build-for-tests
           working_directory: packages/reporter
       - run:
+          # the PERCY_TARGET_BRANCH and PERCY_TARGET_COMMIT env vars
+          # are a temporary hack to workaround percy issues with
+          # PR's not diffing the right base branch due to other problems
+          # upstream with finalizing builds. These will be removed
+          # once we implement a more permanent solution.
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
             PERCY_PARALLEL_NONCE=$PLATFORM-$CIRCLE_SHA1 \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
+            PERCY_TARGET_BRANCH="10.0-release" \
+            PERCY_TARGET_COMMIT=$(git log -n 1 origin/10.0-release --pretty="%H") \
             yarn percy exec --parallel -- -- \
             yarn cypress:run --record --parallel --group reporter
           working_directory: packages/reporter
@@ -1468,11 +1499,19 @@ jobs:
       - run:
           name: Run tests
           # will use PERCY_TOKEN environment variable if available
+          #
+          # the PERCY_TARGET_BRANCH and PERCY_TARGET_COMMIT env vars
+          # are a temporary hack to workaround percy issues with
+          # PR's not diffing the right base branch due to other problems
+          # upstream with finalizing builds. These will be removed
+          # once we implement a more permanent solution.
           command: |
             CYPRESS_KONFIG_ENV=production \
             PERCY_PARALLEL_NONCE=$PLATFORM-$CIRCLE_SHA1 \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
+            PERCY_TARGET_BRANCH="10.0-release" \
+            PERCY_TARGET_COMMIT=$(git log -n 1 origin/10.0-release --pretty="%H") \
             yarn percy exec --parallel -- -- \
             yarn test --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json
           working_directory: npm/design-system
