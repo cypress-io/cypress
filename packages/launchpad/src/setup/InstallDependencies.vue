@@ -79,7 +79,7 @@ const queryInstalled = useQuery({
 const packagesInstalled = ref<string[]>([])
 
 const toInstall = computed(() => {
-  return props.gql.wizard.packagesToInstall?.map((p) => p.package)
+  return props.gql.wizard.packagesToInstall?.map((p) => p.name)
 })
 
 const intervalQueryTrigger = useIntervalFn(async () => {

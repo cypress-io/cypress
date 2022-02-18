@@ -1117,9 +1117,6 @@ type WizardBundler implements Node {
   """Display name of the bundler"""
   name: String!
 
-  """Package to install associated with the bundler"""
-  package: String!
-
   """The name of the framework"""
   type: SupportedBundlers!
 }

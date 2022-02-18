@@ -1,8 +1,8 @@
 <template>
   <TerminalPrompt
     class="m-24px"
-    :command="installDependenciesCode"
-    :project-folder-name="projectFolder"
+    :command="packagesLeftToInstall.length ? installDependenciesCode : 'echo \'All packages installed!\''"
+    :project-folder-name="packagesLeftToInstall.length ? projectFolder : ''"
   />
   <div class="border-t border-t-gray-100 px-24px">
     <ul>
@@ -12,7 +12,7 @@
         class="border-b border-b-gray-100 py-16px last-of-type:border-b-0"
       >
         <i-cy-status-download-done_x24
-          v-if="props.packagesInstalled.includes(dep.package)"
+          v-if="props.packagesInstalled.includes(dep.name)"
           class="h-24px my-12px ml-24px w-24px float-right"
           :aria-label="t('setupPage.install.installed')"
         />
@@ -22,7 +22,7 @@
           :aria-label="t('setupPage.install.pendingInstall')"
         />
         <ExternalLink
-          :href="`https://www.npmjs.com/package/${dep.package}`"
+          :href="`https://www.npmjs.com/package/${dep.name}`"
           class="text-indigo-500 text-14px hocus-link-default"
         >
           {{ dep.package }}
@@ -37,7 +37,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import { gql } from '@urql/core'
 import TerminalPrompt from '@cy/components/TerminalPrompt.vue'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
@@ -77,10 +77,12 @@ const commands = {
   'yarn': 'yarn add -D ',
 }
 
+const packagesLeftToInstall = computed(() => (props.gql.wizard.packagesToInstall ?? []).filter((pack) => !props.packagesInstalled.includes(pack.name)))
+
 const installDependenciesCode = computed(
   () => {
     return commands[props.gql.currentProject?.packageManager ?? 'npm'] +
-    (props.gql.wizard.packagesToInstall ?? [])
+    packagesLeftToInstall.value
     .map((pack) => `${pack.package}`)
     .join(' ')
   },

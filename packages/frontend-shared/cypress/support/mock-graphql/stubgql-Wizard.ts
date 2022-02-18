@@ -1,5 +1,5 @@
 import type { CodegenTypeMap, Wizard } from '../generated/test-graphql-types.gen'
-import { BUNDLERS, CODE_LANGUAGES, FRONTEND_FRAMEWORKS, PACKAGES_DESCRIPTIONS } from '@packages/types/src/constants'
+import { BUNDLERS, CODE_LANGUAGES, COMPONENT_DEPS, FRONTEND_FRAMEWORKS } from '@packages/types/src/constants'
 import type { MaybeResolver } from './clientTestUtils'
 import { testNodeId } from './clientTestUtils'
 
@@ -17,15 +17,11 @@ export const stubWizard: MaybeResolver<Wizard> = {
   packagesToInstall: [
     {
       ...testNodeId('WizardNpmPackage'),
-      description: PACKAGES_DESCRIPTIONS['@cypress/react'],
-      name: '@cypress/react',
-      package: '@cypress/react',
+      ...COMPONENT_DEPS.cypressReact,
     },
     {
       ...testNodeId('WizardNpmPackage'),
-      description: PACKAGES_DESCRIPTIONS['@cypress/webpack-dev-server'],
-      name: '@cypress/webpack-dev-server',
-      package: '@cypress/webpack-dev-server',
+      ...COMPONENT_DEPS.cypressWebpackDevServer,
     },
   ],
   allBundlers,

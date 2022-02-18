@@ -319,7 +319,7 @@ export class WizardActions {
     const codeBlocks: string[] = []
     const { chosenBundler, chosenFramework, chosenLanguage } = opts
 
-    const requirePath = chosenFramework.defaultPackagePath ?? chosenBundler.package
+    const requirePath = chosenFramework.defaultPackagePath ?? chosenBundler.dep.package
 
     codeBlocks.push(chosenLanguage.type === 'ts' ? `import { defineConfig } from 'cypress'` : `const { defineConfig } = require('cypress')`)
     codeBlocks.push(chosenLanguage.type === 'ts' ? `import { devServer } from '${requirePath}'` : `const { devServer } = require('${requirePath}')`)

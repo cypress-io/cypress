@@ -24,9 +24,5 @@ export const WizardBundler = objectType({
     t.nonNull.string('name', {
       description: 'Display name of the bundler',
     })
-
-    t.nonNull.string('package', {
-      description: 'Package to install associated with the bundler',
-    })
   },
 })
