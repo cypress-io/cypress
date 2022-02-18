@@ -18,6 +18,7 @@ import { handleSpecWindowEvents } from './events/spec_window_events'
 import { handleErrorEvent } from './events/errors'
 import { handleScreenshots } from './events/screenshots'
 import { handleTestEvents } from './events/test_events'
+import { handleMiscEvents } from './events/misc_events'
 
 const specBridgeCommunicator = new SpecBridgeDomainCommunicator()
 
@@ -66,6 +67,7 @@ const setup = (cypressConfig: Cypress.Config, env: Cypress.ObjectLike) => {
   handleLogs(Cypress, specBridgeCommunicator)
   handleSocketEvents(Cypress)
   handleSpecWindowEvents(cy)
+  handleMiscEvents(Cypress, cy, specBridgeCommunicator)
   handleScreenshots(Cypress, specBridgeCommunicator)
   handleTestEvents(Cypress, specBridgeCommunicator)
 
