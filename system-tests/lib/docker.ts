@@ -108,7 +108,7 @@ const checkBuiltBinary = async () => {
   }
 
   try {
-    await fs.stat(path.join(__dirname, '..', '..', 'cypress.zip'))
+    await fs.stat(path.join(__dirname, '..', '..', 'cli/build/package.json'))
   } catch (err) {
     throw new Error('Expected built CLI in /cli/build. Run `yarn build` in `cli`.')
   }
