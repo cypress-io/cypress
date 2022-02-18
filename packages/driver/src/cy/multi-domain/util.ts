@@ -7,7 +7,11 @@ export const correctStackForCrossDomainError = (serializedError: any, userInvoca
   const ErrorClass = serializedError?.name === 'AssertionError' ? AssertionError : Error
 
   // only assign missing properties on the object to reify the error properly
-  const reifiedError = _.extend(new ErrorClass(serializedError?.message), serializedError)
+  const reifiedError = _.assignWith(new ErrorClass(serializedError?.message), serializedError, (objValue, srcValue) => {
+    return _.isUndefined(objValue) ? srcValue : objValue
+  })
+
+  reifiedError.name = serializedError?.name ?? reifiedError.name
 
   reifiedError.stack = $stackUtils.replacedStack(reifiedError, userInvocationStack)
 
