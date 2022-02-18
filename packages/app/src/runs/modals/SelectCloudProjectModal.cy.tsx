@@ -44,7 +44,7 @@ describe('<SelectCloudProjectModal />', () => {
     cy.contains('a', defaultMessages.runs.connect.modal.selectProject.chooseExistingProject).should('be.visible')
   })
 
-  it('can only create new projects if the organization has no projects', () => {
+  it('can only choose an existing project if the organization has a project', () => {
     mountDialog()
     cy.get('[data-cy="selectOrganization"]').click()
     cy.findByRole('listbox').within(() => cy.findAllByText('Test Org 2').click())
