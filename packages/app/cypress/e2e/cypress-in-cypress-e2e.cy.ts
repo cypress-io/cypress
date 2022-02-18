@@ -20,7 +20,7 @@ describe('Cypress In Cypress', { viewportWidth: 1200 }, () => {
     cy.findByTestId('playground-activator').should('be.visible')
     cy.findByTestId('select-browser').click()
 
-    cy.contains('Firefox').should('be.visible')
+    cy.contains('Canary').should('be.visible')
     cy.findByTestId('viewport').click()
 
     cy.percySnapshot('browsers open')
