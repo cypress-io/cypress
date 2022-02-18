@@ -61,6 +61,9 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
       expectedRunnable.resetTimeout = actualRunnable.resetTimeout
       expectedRunnable.timeout = actualRunnable.timeout
 
+      expect(actualRunnable.titlePath()).to.deep.equal(expectedRunnable.titlePath)
+      expectedRunnable.titlePath = actualRunnable.titlePath
+
       expect(actualRunnable).to.deep.equal(expectedRunnable)
     })
   })
