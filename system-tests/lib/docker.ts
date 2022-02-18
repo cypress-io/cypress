@@ -102,7 +102,7 @@ class DockerProcess extends EventEmitter implements SpawnerResult {
 
 const checkBuiltBinary = async () => {
   try {
-    fs.stat(path.join(__dirname, '..', '..', 'cypress.zip'))
+    await fs.stat(path.join(__dirname, '..', '..', 'cypress.zip'))
   } catch (err) {
     throw new Error('Expected built cypress.zip at project root. Run `yarn binary-build` and `yarn binary-zip`.')
   }
