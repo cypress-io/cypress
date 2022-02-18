@@ -1090,7 +1090,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
       onError: (handlerType) => (event) => {
         const { originalErr, err, promise } = $errUtils.errorFromUncaughtEvent(handlerType, event) as ErrorFromProjectRejectionEvent
-
         const handled = cy.onUncaughtException({
           err,
           promise,
