@@ -5,10 +5,7 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "pretest": "npm run lint",
-    "test": "mocha --timeout 30000 test/spec.js",
-    "lint": "standard --verbose --fix test/*.js",
-    "cy:verify": "cypress verify"
+    "test": "mocha --timeout 30000 test/spec.js"
   },
   "devDependencies": {
     "@bahmutov/all-paths": "1.0.2",
@@ -20,7 +17,6 @@
     "mocha-banner": "1.1.2",
     "ramda": "0.28.0",
     "snap-shot-it": "5.0.1",
-    "standard": "16.0.4",
     "terminal-banner": "1.1.0"
   }
 }

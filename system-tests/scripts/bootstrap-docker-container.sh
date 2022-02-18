@@ -33,10 +33,12 @@ cd $TEST_PROJECT_DIR
 
 export CYPRESS_INSTALL_BINARY=$ZIP_PATH
 export CYPRESS_CACHE_FOLDER=/tmp/CYPRESS_CACHE_FOLDER/
-
-npm install --save-dev --unsafe-perm --allow-root $CLI_PATH
+export npm_config_cache=/tmp/npm_config_cache/
+export npm_config_package_lock=false
 
 PATH=$PATH:./node_modules/.bin
+
+npx npm@latest install --unsafe-perm --allow-root --force file:$CLI_PATH
 
 cypress install
 
@@ -46,8 +48,7 @@ $@
 EXIT_CODE=$?
 set -e
 
-# delete tmp to avoid permissions issues on the host
-cd -
+# open up tmp permissions to avoid permissions issues on the host
 rm -rf $TEST_PROJECT_DIR
 
 exit $EXIT_CODE
