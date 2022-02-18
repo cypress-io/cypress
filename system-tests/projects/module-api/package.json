@@ -1,6 +1,6 @@
 {
-  "name": "cypress-example-module-api",
-  "version": "1.0.0",
+  "name": "@test-project/cypress-example-module-api",
+  "version": "0.0.0-development",
   "description": "Example running specs using Cypress via its module API",
   "private": true,
   "main": "index.js",
@@ -22,28 +22,5 @@
     "snap-shot-it": "5.0.1",
     "standard": "16.0.4",
     "terminal-banner": "1.1.0"
-  },
-  "license": "ISC",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/cypress-io/cypress-example-module-api.git"
-  },
-  "homepage": "https://github.com/cypress-io/cypress-example-module-api#readme",
-  "author": "Gleb Bahmutov <gleb@cypress.io>",
-  "bugs": {
-    "url": "https://github.com/cypress-io/cypress-example-module-api/issues"
-  },
-  "keywords": [
-    "cypress",
-    "cypress-io",
-    "cypress-test"
-  ],
-  "standard": {
-    "globals": [
-      "describe",
-      "beforeEach",
-      "it",
-      "afterEach"
-    ]
   }
 }
