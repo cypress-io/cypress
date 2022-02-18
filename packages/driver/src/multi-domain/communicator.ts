@@ -8,11 +8,11 @@ const debug = debugFn('cypress:driver:multi-domain')
 
 const CROSS_DOMAIN_PREFIX = 'cross:domain:'
 
-const serializeErrorForPostMessage = (value) => {
+const preprocessErrorForPostMessage = (value) => {
   const { isDom } = $dom
 
   if (_.isError(value)) {
-    const serializableError = _.mapValues(clone(value), serializeErrorForPostMessage)
+    const serializableError = _.mapValues(clone(value), preprocessErrorForPostMessage)
 
     return {
       ... serializableError,
@@ -25,7 +25,7 @@ const serializeErrorForPostMessage = (value) => {
   }
 
   if (_.isArray(value)) {
-    return _.map(value, serializeErrorForPostMessage)
+    return _.map(value, preprocessErrorForPostMessage)
   }
 
   if (isDom(value)) {
@@ -40,7 +40,7 @@ const serializeErrorForPostMessage = (value) => {
     // clone to nuke circular references
     // and blow away anything that throws
     try {
-      return _.mapValues(clone(value), serializeErrorForPostMessage)
+      return _.mapValues(clone(value), preprocessErrorForPostMessage)
     } catch (err) {
       return null
     }
@@ -135,7 +135,7 @@ export class SpecBridgeDomainCommunicator extends EventEmitter {
   private handleSubjectAndErr = (event, { subject, unserializableSubjectType, err }: SubjectAndErrData) => {
     try {
       // We always want to make sure errors are posted, so clean it up to send.
-      const serializedErr = serializeErrorForPostMessage(err)
+      const serializedErr = preprocessErrorForPostMessage(err)
 
       this.toPrimary(event, { subject, unserializableSubjectType, err: serializedErr })
     } catch (err: any) {
