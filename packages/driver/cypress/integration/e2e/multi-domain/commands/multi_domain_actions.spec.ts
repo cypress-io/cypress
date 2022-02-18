@@ -46,7 +46,7 @@ context('multi-domain actions', { experimentalSessionSupport: true, experimental
 
     cy.switchToDomain('foobar.com', () => {
       const afterFormSubmitted = new Promise<void>((resolve) => {
-        cy.once('form:submitted', () => resolve())
+        cy.once('form:submitted', resolve)
       })
 
       cy.get('#input-type-submit').submit()
