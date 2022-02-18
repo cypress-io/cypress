@@ -60,6 +60,7 @@ describe('Choose a Browser Page', () => {
       cy.get('[data-cy="alert-header"]').should('contain', 'Warning: Browser Not Found')
       cy.get('[data-cy="alert-body"]')
       .should('contain', 'We could not identify a known browser at the path you specified: /path/does/not/exist')
+      .should('contain', 'spawn /path/does/not/exist ENOENT')
       .validateExternalLink({
         name: 'how to troubleshoot launching browsers',
         href: 'https://on.cypress.io/troubleshooting-launching-browsers',
