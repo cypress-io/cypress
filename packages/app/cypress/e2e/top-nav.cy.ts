@@ -468,7 +468,7 @@ describe('App Top Nav Workflows', () => {
 
         cy.withCtx((ctx) => {
           ctx.coreData.authState = {
-            name: 'AUTH_BROWSER_LAUNCH',
+            name: 'AUTH_BROWSER_LAUNCHED',
             message: '',
             browserOpened: true,
           }
