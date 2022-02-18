@@ -439,7 +439,7 @@ describe('App Top Nav Workflows', () => {
         cy.contains(loginText.bodyBrowserError).should('be.visible')
         cy.contains(loginText.bodyBrowserErrorDetails).should('be.visible')
 
-        // in this state, there is no retry UI, we as the user to visit the auth url on their own
+        // in this state, there is no retry UI, we ask the user to visit the auth url on their own
         cy.contains('button', loginText.actionTryAgain).should('not.exist')
         cy.contains('button', loginText.actionCancel).should('not.exist')
       })
