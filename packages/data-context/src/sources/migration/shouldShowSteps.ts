@@ -10,12 +10,8 @@ function getTestFilesGlobs (config: OldCypressConfig, type: 'component' | 'integ
 
   const glob = config[k]?.testFiles ?? config.testFiles
 
-  if (glob && Array.isArray(glob)) {
-    return glob
-  }
-
-  if (glob && typeof glob === 'string') {
-    return [glob]
+  if (glob) {
+    return ([] as string[]).concat(glob)
   }
 
   return ['**/*']
