@@ -1,0 +1,1 @@
+export declare const allowed: (obj = {}) => Record<string, any>

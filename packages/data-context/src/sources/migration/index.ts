@@ -4,5 +4,6 @@
 export * from './autoRename'
 export * from './codegen'
 export * from './format'
+export * from './initOldPlugins'
 export * from './regexps'
 export * from './shouldShowSteps'
