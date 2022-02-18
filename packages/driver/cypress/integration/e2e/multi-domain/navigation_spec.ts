@@ -72,7 +72,7 @@ describe('navigation events', { experimentalSessionSupport: true, experimentalMu
   describe('window:load', () => {
     it('reloads', () => {
       cy.switchToDomain('foobar.com', () => {
-        let logs: any[] = []
+        const logs: any[] = []
 
         cy.on('log:added', (attrs, log) => {
           logs.push(log)
@@ -108,7 +108,7 @@ describe('navigation events', { experimentalSessionSupport: true, experimentalMu
 
     it('navigates to a new page', () => {
       cy.switchToDomain('foobar.com', () => {
-        let logs: any[] = []
+        const logs: any[] = []
 
         cy.on('log:added', (attrs, log) => {
           logs.push(log)
