@@ -40,5 +40,15 @@ describe('<SelectCloudProjectModal />', () => {
     cy.contains('a', defaultMessages.runs.connect.modal.selectProject.createNewProject).click()
     cy.findByLabelText(`${defaultMessages.runs.connect.modal.selectProject.projectName }*${defaultMessages.runs.connect.modal.selectProject.projectNameDisclaimer}`)
     .should('have.value', 'Test Project')
+
+    cy.contains('a', defaultMessages.runs.connect.modal.selectProject.chooseExistingProject).should('be.visible')
+  })
+
+  it('can only choose an existing project if the organization has a project', () => {
+    mountDialog()
+    cy.get('[data-cy="selectOrganization"]').click()
+    cy.findByRole('listbox').within(() => cy.findAllByText('Test Org 2').click())
+
+    cy.contains('a', defaultMessages.runs.connect.modal.selectProject.chooseExistingProject).should('not.exist')
   })
 })
