@@ -619,7 +619,7 @@ describe('Launchpad: Setup Project', () => {
                 scaffoldAndOpenProject(testStorybook ? 'pristine-with-e2e-testing-and-storybook' : 'pristine-with-e2e-testing')
 
                 cy.withCtx(async (ctx, { packageJson }) => {
-                // @ts-ignore sinon is a global in the node process where this is executed
+                  // @ts-ignore sinon is a global in the node process where this is executed
                   sinon.stub(ctx.actions.wizard, 'initialize')
                   await ctx.actions.file.writeFileInProject('package.json', packageJson)
                 }, { packageJson })
@@ -690,7 +690,7 @@ describe('Launchpad: Setup Project', () => {
                   cy.findByRole('button', { name: `Bundler(Dev Server) ${bundler.name}` })
                 }
 
-                cy.findByRole('button', { name: 'JavaScript' })
+                cy.findByRole('button', { name: lang.name })
                 cy.findByRole('button', { name: 'Next Step' }).click()
 
                 cy.log('Go to next step and verify Install Dev Dependencies page')
