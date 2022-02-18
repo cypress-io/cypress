@@ -909,7 +909,7 @@ const systemTests = {
 
     if (!options.skipScaffold) {
       await Fixtures.scaffoldCommonNodeModules()
-      Fixtures.scaffoldProject(options.project)
+      await Fixtures.scaffoldProject(options.project)
       await Fixtures.scaffoldProjectNodeModules(options.project)
     }
 
@@ -932,7 +932,11 @@ const systemTests = {
       const { expectedExitCode } = options
 
       maybeVerifyExitCode(expectedExitCode, () => {
-        expect(code).to.eq(expectedExitCode, 'expected exit code')
+        if (expectedExitCode === 0) {
+          expect(code).to.eq(expectedExitCode, `Process errored: Exit code ${code}`)
+        } else {
+          expect(code).to.to.eq(expectedExitCode, `expected exit code ${expectedExitCode} but got ${code}`)
+        }
       })
 
       // snapshot the stdout!

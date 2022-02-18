@@ -179,7 +179,7 @@
     "inquirer-confirm": "2.0.3",
     "jest": "24.9.0",
     "js-codemod": "cpojer/js-codemod",
-    "jscodemods": "cypress-io/jscodemods#01b546e",
+    "jscodemods": "https://github.com/cypress-io/jscodemods.git#01b546e",
     "jscodeshift": "0.7.0",
     "konfig": "0.2.1",
     "lazy-ass": "1.6.0",
@@ -187,7 +187,7 @@
     "lint-staged": "11.1.2",
     "listr2": "3.8.3",
     "lodash": "^4.17.21",
-    "make-empty-github-commit": "cypress-io/make-empty-github-commit#4a592aedb776ba2f4cc88979055315a53eec42ee",
+    "make-empty-github-commit": "https://github.com/cypress-io/make-empty-github-commit.git#4a592aedb776ba2f4cc88979055315a53eec42ee",
     "minimist": "1.2.5",
     "mocha": "3.5.3",
     "mocha-banner": "1.1.2",
@@ -261,7 +261,10 @@
     ],
     "nohoist": [
       "**/webpack-preprocessor/babel-loader",
-      "**/webpack-batteries-included-preprocessor/ts-loader"
+      "**/webpack-batteries-included-preprocessor/ts-loader",
+      "**/jest",
+      "**/jest*",
+      "**/expect"
     ]
   },
   "lint-staged": {
