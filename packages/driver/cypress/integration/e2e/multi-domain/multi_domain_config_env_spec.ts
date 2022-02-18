@@ -13,15 +13,18 @@
 
     if (fnName === 'config') {
       it(`throws if mutating read-only config values with Cypress.config()`, () => {
-        // @ts-ignore
-        window.top.__cySkipValidateConfig = false
-        cy.on('fail', (err) => {
-          expect(err.message).to.include('`Cypress.config()` cannot mutate option `chromeWebSecurity` because it is a read-only property.')
-        })
-
-        cy.switchToDomain('foobar.com', () => {
+        return new Promise<void>((resolve) => {
           // @ts-ignore
-          Cypress.config('chromeWebSecurity', false)
+          window.top.__cySkipValidateConfig = false
+          cy.on('fail', (err) => {
+            expect(err.message).to.include('`Cypress.config()` cannot mutate option `chromeWebSecurity` because it is a read-only property.')
+            resolve()
+          })
+
+          cy.switchToDomain('foobar.com', () => {
+            // @ts-ignore
+            Cypress.config('chromeWebSecurity', false)
+          })
         })
       })
     }
