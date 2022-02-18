@@ -1,14 +1,17 @@
-import { objectType } from 'nexus'
+import { enumType, objectType } from 'nexus'
+import { authError } from '@packages/types'
+
+export const AuthStateNameEnum = enumType({
+  name: 'AuthStateNameEnum',
+  members: authError,
+})
 
 export const AuthState = objectType({
   name: 'AuthState',
   description: 'Represents state of auth based on most recent message from login flow',
   definition (t) {
-    t.nonNull.string('type', {
-      description: 'The type of the auth state, e.g. info, error',
-    })
-
-    t.string('name', {
+    t.field('name', {
+      type: AuthStateNameEnum,
       description: 'Name of auth state, e.g. AUTH_BROWSER_LAUNCHED',
     })
 

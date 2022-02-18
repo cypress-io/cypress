@@ -11,10 +11,13 @@ type AuthState {
   message: String
 
   """Name of auth state, e.g. AUTH_BROWSER_LAUNCHED"""
-  name: String
+  name: AuthStateNameEnum
+}
 
-  """The type of the auth state, e.g. info, error"""
-  type: String!
+enum AuthStateNameEnum {
+  AUTH_BROWSER_LAUNCHED
+  AUTH_COULD_NOT_LAUNCH_BROWSER
+  AUTH_ERROR_DURING_LOGIN
 }
 
 """Base error"""

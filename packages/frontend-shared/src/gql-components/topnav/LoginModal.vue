@@ -25,7 +25,7 @@
           class="font-normal p-24px text-gray-700"
         >
           <i18n-t
-            v-if="!viewer && !errorType"
+            v-if="!viewer && !error"
             scope="global"
             keypath="topNav.login.bodyInitial"
           >
@@ -47,7 +47,7 @@
               {{ viewer.fullName || viewer.email }}
             </ExternalLink>
           </i18n-t>
-          <div v-else-if="errorType === 'AUTH_COULD_NOT_LAUNCH_BROWSER'">
+          <div v-else-if="error === 'AUTH_COULD_NOT_LAUNCH_BROWSER'">
             <div
               class="rounded flex font-medium bg-red-100 mb-20px p-16px text-red-600 gap-8px items-center"
             >
@@ -62,7 +62,7 @@
               :text="props.gql.authState.message"
             />
           </div>
-          <div v-else-if="errorType === 'AUTH_ERROR_DURING_LOGIN'">
+          <div v-else-if="error === 'AUTH_ERROR_DURING_LOGIN'">
             {{ t('topNav.login.bodyError') }}
             <div
               class="rounded flex bg-red-100 mt-16px p-16px text-red-600 gap-8px items-center"
@@ -74,12 +74,12 @@
         </DialogDescription>
 
         <div
-          v-if="errorType !== 'AUTH_COULD_NOT_LAUNCH_BROWSER'"
+          v-if="showFooter"
           class="bg-gray-50 border-t-1px py-16px px-24px"
         >
           <Auth
             :gql="props.gql"
-            :error-type="errorType"
+            :show-retry="!!error"
             @continue="$emit('update:modelValue', false)"
           />
         </div>
@@ -107,7 +107,6 @@ import {
 } from '@headlessui/vue'
 
 import type { LoginModalFragment } from '../../generated/graphql'
-import type { AuthError } from '../shared-types'
 
 const online = useOnline()
 
@@ -145,26 +144,29 @@ const setIsOpen = (value: boolean) => {
 const { t } = useI18n()
 
 const viewer = computed(() => props.gql?.cloudViewer)
-const errorType = computed(() => {
-  const { name, type } = props.gql.authState
 
-  if (type === 'error') {
-    return name as AuthError
+const error = computed(() => {
+  const { name } = props.gql.authState
+
+  if (name !== 'AUTH_BROWSER_LAUNCHED') {
+    return name
   }
 
   return null
 })
+
+const showFooter = computed(() => error.value !== 'AUTH_COULD_NOT_LAUNCH_BROWSER')
 
 const title = computed(() => {
   if (viewer.value) {
     return t('topNav.login.titleSuccess')
   }
 
-  if (errorType.value === 'AUTH_COULD_NOT_LAUNCH_BROWSER') {
+  if (error.value === 'AUTH_COULD_NOT_LAUNCH_BROWSER') {
     return t('topNav.login.titleBrowserError')
   }
 
-  if (errorType.value === 'AUTH_ERROR_DURING_LOGIN') {
+  if (error.value === 'AUTH_ERROR_DURING_LOGIN') {
     return t('topNav.login.titleFailed')
   }
 

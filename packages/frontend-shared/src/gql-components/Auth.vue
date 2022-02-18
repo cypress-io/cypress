@@ -1,6 +1,6 @@
 <template>
   <div
-    v-if="props.errorType && props.errorType !== 'AUTH_COULD_NOT_LAUNCH_BROWSER'"
+    v-if="props.showRetry"
     class="flex gap-16px"
   >
     <Button
@@ -24,7 +24,7 @@
       {{ t('topNav.login.actionCancel') }}
     </Button>
   </div>
-  <div v-else-if="showLogout">
+  <div v-else-if="props.showLogout">
     <button
       class="bg-white border-rounded outline-transparent border-gray-100 border-1 w-full py-8px text-14px text-indigo-500 block whitespace-nowrap hocus:border-gray-200 hover:no-underline"
       @click="handleLogout"
@@ -32,7 +32,6 @@
       {{ t('topNav.login.actionLogout') }}
     </button>
   </div>
-
   <div v-else>
     <Button
       ref="loginButtonRef"
@@ -70,13 +69,13 @@ import {
 } from '../generated/graphql'
 import Button from '@cy/components/Button.vue'
 import { useI18n } from '@cy/i18n'
-import type { AuthError } from './shared-types'
+import type { AuthError } from '@packages/types'
 
 const isOnline = useOnline()
 
 const props = defineProps<{
   gql: AuthFragment,
-  errorType?: AuthError | null,
+  showRetry?: boolean,
   showLogout?: boolean
 }>()
 
@@ -91,7 +90,6 @@ fragment Auth on Query {
     browserOpened
     name
     message
-    type
   }
 }
 `
@@ -126,7 +124,6 @@ query Auth_BrowserOpened {
     browserOpened
     name
     message
-    type
   }
 }
 `
