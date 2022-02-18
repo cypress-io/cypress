@@ -190,7 +190,7 @@ const props = defineProps<{
   gql: SpecRunnerHeaderFragment
   eventManager: EventManager
   getAutIframe: () => AutIframe
-  width?: number
+  width: number
 }>()
 
 const autIframe = props.getAutIframe()

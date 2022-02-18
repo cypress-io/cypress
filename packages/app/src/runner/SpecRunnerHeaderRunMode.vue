@@ -62,7 +62,7 @@ import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLo
 
 const props = defineProps<{
   eventManager: EventManager
-  width?: number
+  width: number
 }>()
 
 const displayScale = computed(() => {
