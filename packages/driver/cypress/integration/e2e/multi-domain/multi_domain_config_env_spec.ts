@@ -95,19 +95,21 @@
         env: {
           baz: undefined,
         },
-      }, (done) => {
-        cy.switchToDomain('foobar.com', [fnName], ([fnName]) => {
-          setTimeout(() => {
-            // this value STILL gets set, but will be blown away on the next switchToDomain with whatever exists in the primary
-            Cypress[fnName]('baz', 'qux')
-          }, 100)
+      }, () => {
+        return new Promise<void>((resolve) => {
+          cy.switchToDomain('foobar.com', [fnName], ([fnName]) => {
+            setTimeout(() => {
+              // this value STILL gets set, but will be blown away on the next switchToDomain with whatever exists in the primary
+              Cypress[fnName]('baz', 'qux')
+            }, 100)
 
-          Cypress[fnName]('baz', 'quux')
-        }).then(() => {
-          const quux = Cypress[fnName]('baz')
+            Cypress[fnName]('baz', 'quux')
+          }).then(() => {
+            const quux = Cypress[fnName]('baz')
 
-          expect(quux).to.equal('quux')
-          done()
+            expect(quux).to.equal('quux')
+            resolve()
+          })
         })
       })
 
