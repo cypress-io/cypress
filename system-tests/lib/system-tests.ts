@@ -1019,7 +1019,7 @@ const systemTests = {
 
     debug('spawning Cypress %o', { args })
 
-    const cmd = options.command || options.withBinary ? 'cypress' : 'node'
+    const cmd = options.command || (options.withBinary ? 'cypress' : 'node')
 
     const env = _.chain(process.env)
     .omit('CYPRESS_DEBUG')
