@@ -18,7 +18,7 @@ import { handleSpecWindowEvents } from './events/spec_window_events'
 import { handleErrorEvent } from './events/errors'
 import { handleScreenshots } from './events/screenshots'
 import { handleTestEvents } from './events/test_events'
-import { handleMiscEvents } from './events/misc_events'
+import { handleMiscEvents } from './events/misc'
 
 const specBridgeCommunicator = new SpecBridgeDomainCommunicator()
 
