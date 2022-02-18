@@ -80,7 +80,7 @@ import Fixtures from '../lib/fixtures'
 
 describe('node versions', () => {
     systemTests.it('runs in node 12', {
-        dockerImage: 'cypress:node/12
+        dockerImage: 'cypress:node/12',
         project: 'todos',
         withBinary: true,
     })
