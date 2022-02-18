@@ -583,6 +583,12 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
       renameSupport()
       migrateAndVerifyConfig()
     })
+
+    it('handles a partially migrated codebase', () => {
+      startMigrationFor('migration-already-migrated')
+      cy.contains('[data-cy="migrate-before"]', 'cypress/tests/foo.cy.js')
+      cy.contains('[data-cy="migrate-after"]', 'cypress/tests/foo.cy.js')
+    })
   })
 })
 
