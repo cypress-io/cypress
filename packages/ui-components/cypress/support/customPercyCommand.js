@@ -4,6 +4,19 @@ const _ = require('lodash')
 class ElementOverrideManager {
   mutationStack = undefined
 
+  /**
+   * overrides are defined in selector/override pairs.
+   *
+   * {
+   *   // boolean values indicate elements should be 'visibility: hidden'
+   *   '.element-to-make-invisible': true,
+   *
+   *   // function values are called with the found elements for more complex overrides
+   *   '.element-to-change-color': ($el) => {
+   *     $el.css('color', 'blue')
+   *   }
+   * }
+   */
   performOverrides (cy, overrides) {
     const observer = new MutationObserver((mutations) => {
       this.mutationStack ??= []
@@ -64,10 +77,16 @@ class ElementOverrideManager {
       }
     })
 
+    // Clear out our mutation record references so we're not holding onto
+    // this memory.
     this.mutationStack = undefined
   }
 }
 
+/**
+ * Performs viewport and DOM mutations for a snapshot and returns a function
+ * that will revert those mutations.
+ */
 const applySnapshotMutations = ({
   log,
   snapshotWidth,
@@ -108,6 +127,17 @@ const applySnapshotMutations = ({
 }
 
 export const installCustomPercyCommand = ({ before, elementOverrides } = {}) => {
+  /**
+   * A custom Percy command that allows for additional mutations prior to snapshot generation. Mutations will be
+   * reset after snapshot generation so that the AUT is not polluted after the command executes.
+   *
+   * @param {string} name The name of the snapshot to generate. Will be generated from test's titlePath by default.
+   * @param {Object} options Object containing options for the snapshot command, including:
+   * @param {number} options.width The desired snapshot width. The test's viewportWidth will be used by default.
+   * @param {number} options.height The desired snapshot height. The test's viewportHeight will be used by default.
+   * @param {Object} options.elementOverrides The desired snapshot overrides. These will be merged with and take
+   *   precedence over the global override defined when the command was installed.
+   */
   const customPercySnapshot = (origFn, name, options = {}) => {
     if (_.isObject(name)) {
       options = name
@@ -123,6 +153,8 @@ export const installCustomPercyCommand = ({ before, elementOverrides } = {}) => 
 
     const screenshotName = titlePath.concat(name).filter(Boolean).join(' > ')
 
+    // viewport data is read from test state rather than config to ensure that
+    // the snapshot is presented at the test's expected size.
     const { viewportWidth, viewportHeight } = cy.state()
     const snapshotWidth = !_.isNil(options.width) ? options.width : viewportWidth
     const snapshotHeight = !_.isNil(options.height) ? options.height : viewportHeight
@@ -139,7 +171,9 @@ export const installCustomPercyCommand = ({ before, elementOverrides } = {}) => 
     }
 
     // If we're in interactive mode via 'cypress open', apply overrides,
-    // create log, reset overrides, and abort.
+    // create log, reset overrides, and abort. The log will hold a snapshot
+    // that is representative of the snapshot that would be taken by Percy and can be
+    // used for validation during development.
     if (Cypress.config().isInteractive) {
       return applySnapshotMutations({
         ...snapshotMutationOptions,
@@ -162,6 +196,8 @@ export const installCustomPercyCommand = ({ before, elementOverrides } = {}) => 
     // percy snapshot function, and then reset overrides
     return applySnapshotMutations(snapshotMutationOptions)
     .then((reset) => {
+      // Wrap in cy.then here to ensure that the original command is
+      // enqueued appropriately.
       cy.then(() => {
         return origFn(screenshotName, {
           widths: [snapshotWidth],
