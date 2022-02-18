@@ -1,4 +1,4 @@
-const { theme } = require('@packages/errors/src/errTemplate')
+const { theme } = require('@packages/errors')
 
 require('../spec_helper')
 
