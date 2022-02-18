@@ -57,36 +57,4 @@ describe('lib/connect', function () {
       })
     })
   })
-
-  context('.byPortAndAddress', function () {
-    it('destroy connection immediately onConnect', function () {
-      this.timeout(50)
-
-      const server = net.createServer()
-
-      const address = {
-        family: 4,
-        address: '127.0.0.1',
-      }
-
-      return Bluebird.fromCallback((cb) => {
-        server.listen(0, '127.0.0.1', cb)
-      })
-      .then(() => {
-        return connect.byPortAndAddress(server.address().port, address)
-      })
-      .then((address) => {
-        return Bluebird.fromCallback((cb) => {
-          expect(address).to.deep.eq(address)
-          server.getConnections((err, count) => {
-            expect(count).to.eq(0)
-            cb()
-          })
-        })
-      })
-      .then(() => {
-        server.close()
-      })
-    })
-  })
 })
