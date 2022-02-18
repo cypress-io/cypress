@@ -26,3 +26,5 @@ export const warning = errors.warning
 export const throwErr = errors.throwErr
 
 export const cloneErr = errors.cloneErr
+
+export const stripAnsi = errors.stripAnsi
