@@ -148,7 +148,6 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
             cleanup()
             reject(wrappedErr)
           } finally {
-            state('readyForMultidomain', false)
             // @ts-ignore
             cy.isAnticipatingMultiDomain(false)
           }
