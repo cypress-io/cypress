@@ -11,6 +11,13 @@
       window.top.__cySkipValidateConfig = true
     })
 
+    after(() => {
+      // @ts-ignore
+      Cypress.config.reset()
+      // @ts-ignore
+      Cypress.env.reset()
+    })
+
     if (fnName === 'config') {
       it(`throws if mutating read-only config values with Cypress.config()`, () => {
         return new Promise<void>((resolve) => {
