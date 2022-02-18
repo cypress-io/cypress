@@ -100,7 +100,7 @@ describe('App: Settings', () => {
       // doing invoke instead of `type` since `type` enters keys on-by-one, triggering a mutation
       // for each keystroke, making it hard to intercept **only** the final request, which I want to
       // assert contains `/usr/local/bin/vim'
-      cy.findByPlaceholderText('Custom path...').clear().invoke('val', '/usr/local/bin/vim').trigger('input').trigger('change')
+      cy.findByPlaceholderText('/path/to/editor').clear().invoke('val', '/usr/local/bin/vim').trigger('input').trigger('change')
       cy.wait('@SetPreferred').its('request.body.variables.value').should('include', '/usr/local/bin/vim')
 
       // navigate away and come back

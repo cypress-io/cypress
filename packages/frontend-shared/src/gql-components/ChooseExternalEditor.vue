@@ -42,7 +42,9 @@
         :placeholder="t('settingsPage.editor.customPathPlaceholder')"
       >
         <template #prefix>
-          <i-cy-terminal_x16 class="text-md text-gray-600" />
+          <i-cy-technology-command-line_x16
+            class="text-gray-500"
+          />
         </template>
       </Input>
       <label
