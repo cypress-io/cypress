@@ -19,7 +19,7 @@ import { urqlSchema } from '../generated/urql-introspection.gen'
 import { pubSubExchange } from './urqlExchangePubsub'
 import { namedRouteExchange } from './urqlExchangeNamedRoute'
 import { decodeBase64Unicode } from '../utils/decodeBase64'
-import type { SpecFile, AutomationElementId } from '@packages/types'
+import type { SpecFile, AutomationElementId, Browser } from '@packages/types'
 import { urqlFetchSocketAdapter } from './urqlFetchSocketAdapter'
 
 const toast = useToast()
@@ -41,6 +41,7 @@ declare global {
     __CYPRESS_MODE__: 'run' | 'open'
     __RUN_MODE_SPECS__: SpecFile[]
     __CYPRESS_TESTING_TYPE__: 'e2e' | 'component'
+    __CYPRESS_BROWSER__: Partial<Browser> & {majorVersion: string | number}
     __CYPRESS_CONFIG__: {
       base64Config: string
       namespace: AutomationElementId
