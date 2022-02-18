@@ -62,6 +62,8 @@ try {
   // https://github.com/cypress-io/cypress/issues/15814
   app.commandLine.appendSwitch('disable-dev-shm-usage')
 
+  app.commandLine.appendSwitch('disable-ipc-flooding-protection')
+
   if (os.platform() === 'linux') {
     app.disableHardwareAcceleration()
   }
