@@ -75,7 +75,6 @@ class DockerProcess extends EventEmitter implements SpawnerResult {
       // option docs: https://docs.docker.com/engine/api/v1.37/#operation/ContainerCreate
       {
         AutoRemove: true,
-        // override the entrypoint so we can run our bootstrap script
         Entrypoint: 'bash',
         Tty: false, // so we can use stdout and stderr
         Env: containerCreateEnv,
