@@ -1,11 +1,11 @@
 const _ = require('lodash')
 const cp = require('child_process')
 const path = require('path')
-const debug = require('debug')('cypress:server:plugins')
+const debug = require('debug')('cypress:data-context:sources:migration:plugins')
 const resolve = require('resolve')
 const Promise = require('bluebird')
 const inspector = require('inspector')
-const errors = require('../errors')
+const errors = require('./errors')
 const util = require('./util')
 const pkg = require('@packages/root')
 

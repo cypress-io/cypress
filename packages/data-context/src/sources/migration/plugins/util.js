@@ -1,6 +1,6 @@
 const _ = require('lodash')
 const EE = require('events')
-const debug = require('debug')('cypress:server:plugins')
+const debug = require('debug')('cypress:data-context:sources:migration:plugins')
 const Promise = require('bluebird')
 
 const UNDEFINED_SERIALIZED = '__cypress_undefined__'

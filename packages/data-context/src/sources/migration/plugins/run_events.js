@@ -1,6 +1,6 @@
 const Promise = require('bluebird')
 
-const errors = require('../errors')
+const errors = require('./errors')
 const plugins = require('../plugins')
 
 module.exports = {

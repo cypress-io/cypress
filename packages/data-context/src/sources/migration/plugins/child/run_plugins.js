@@ -1,13 +1,12 @@
 // this module is responsible for loading the plugins file
 // and running the exported function to register event handlers
 // and executing any tasks that the plugin registers
-const debug = require('debug')('cypress:server:plugins:child')
+const debug = require('debug')('cypress:data-context:sources:migration:plugins:child')
 const Promise = require('bluebird')
 
 const preprocessor = require('./preprocessor')
 const devServer = require('./dev-server')
-const resolve = require('../../util/resolve')
-const tsNodeUtil = require('../../util/ts_node')
+const tsNodeUtil = require('../ts_node')
 const browserLaunch = require('./browser_launch')
 const task = require('./task')
 const util = require('../util')
@@ -23,7 +22,7 @@ const invoke = (eventId, args = []) => {
 }
 
 const getDefaultPreprocessor = function (config) {
-  const tsPath = resolve.typescript(config.projectRoot)
+  const tsPath = require.resolve('typescript', { paths: [config.projectRoot] })
   const options = {
     typescript: tsPath,
   }

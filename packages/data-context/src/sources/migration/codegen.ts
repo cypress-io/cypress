@@ -3,13 +3,13 @@ import fs from 'fs-extra'
 import path from 'path'
 import globby from 'globby'
 import {
-  supportFileRegexps,
   formatMigrationFile,
 } from './format'
 import { substitute } from './autoRename'
 import type { TestingType } from '@packages/types'
 import prettier from 'prettier'
-import type { MigrationFile } from '..'
+import type { MigrationFile } from '../MigrationDataSource'
+import { supportFileRegexps } from './regexps'
 import Debug from 'debug'
 import { toPosix } from '../../util'
 

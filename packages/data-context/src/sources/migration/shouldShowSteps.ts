@@ -1,9 +1,9 @@
 import globby from 'globby'
 import path from 'path'
-import { MIGRATION_STEPS } from '@packages/types'
+import { MIGRATION_STEPS, TestingType } from '@packages/types'
 import { getSpecs, OldCypressConfig, tryGetDefaultLegacySupportFile } from '.'
 
-function getTestFilesGlobs (config: OldCypressConfig, type: 'component' | 'integration'): string[] {
+export function getTestFilesGlobs (config: OldCypressConfig, type: 'component' | 'integration'): string[] {
   // super awkward how we call it integration tests, but the key to override
   // the config is `e2e`
   const k = type === 'component' ? 'component' : 'e2e'
@@ -41,6 +41,22 @@ export function getPluginsFile (config: OldCypressConfig) {
   return config.e2e?.pluginsFile ?? config.pluginsFile ?? 'cypress/plugins/index.js'
 }
 
+export const OLD_NAMES = {
+  component: 'component',
+  e2e: 'integration',
+} as const
+
+export function getFolder (config: OldCypressConfig, testingType: TestingType) {
+  const oldName = OLD_NAMES[testingType]
+  const oldNameFolder = `${oldName}Folder` as const
+
+  if (config[testingType]?.[oldNameFolder] === false || config[oldNameFolder] === false) {
+    return false
+  }
+
+  return config[testingType]?.[oldNameFolder] ?? config[oldNameFolder] ?? `cypress/${oldName}`
+}
+
 export function getIntegrationFolder (config: OldCypressConfig) {
   if (config.e2e?.integrationFolder === false || config.integrationFolder === false) {
     return false
@@ -62,11 +78,12 @@ async function hasSpecFiles (projectRoot: string, dir: string, testFilesGlob: st
 
   return f.length > 0
 }
-export async function shouldShowAutoRenameStep (projectRoot: string, config: OldCypressConfig) {
-  const specsToAutoMigrate = await getSpecs(projectRoot, config)
+export async function shouldShowAutoRenameStep (projectRoot: string, configE2e: OldCypressConfig, configComponent: OldCypressConfig) {
+  const integration = await getSpecs(projectRoot, configE2e, 'e2e')
+  const component = await getSpecs(projectRoot, configComponent, 'component')
 
   // if we have at least one spec to auto migrate in either Ct or E2E, we return true.
-  return specsToAutoMigrate.integration.length > 0 || specsToAutoMigrate.component.length > 0
+  return integration.length > 0 || component.length > 0
 }
 
 async function anyComponentSpecsExist (projectRoot: string, config: OldCypressConfig) {
@@ -140,7 +157,7 @@ async function shouldShowRenameManual (projectRoot: string, config: OldCypressCo
 }
 
 // All projects must move from cypress.json to cypress.config.js!
-export function shouldShowConfigFileStep (config: OldCypressConfig) {
+export function shouldShowConfigFileStep () {
   return true
 }
 
@@ -148,30 +165,31 @@ export type Step = typeof MIGRATION_STEPS[number]
 
 export async function getStepsForMigration (
   projectRoot: string,
-  config: OldCypressConfig,
+  configE2e: OldCypressConfig,
+  configComponent: OldCypressConfig,
 ): Promise<Step[]> {
   const steps: Step[] = []
 
   for (const step of MIGRATION_STEPS) {
-    if (step === 'renameAuto' && await shouldShowAutoRenameStep(projectRoot, config)) {
+    if (step === 'renameAuto' && await shouldShowAutoRenameStep(projectRoot, configE2e, configComponent)) {
       steps.push(step)
     }
 
-    if (step === 'renameManual' && await shouldShowRenameManual(projectRoot, config)) {
+    if (step === 'renameManual' && await shouldShowRenameManual(projectRoot, configComponent)) {
       steps.push(step)
     }
 
-    if (step === 'renameSupport' && await shouldShowRenameSupport(projectRoot, config)) {
+    if (step === 'renameSupport' && await shouldShowRenameSupport(projectRoot, configE2e)) {
       steps.push(step)
     }
 
-    if (step === 'configFile' && shouldShowConfigFileStep(config)) {
+    if (step === 'configFile' && shouldShowConfigFileStep()) {
       steps.push(step)
     }
 
     // if we are showing rename manual, this implies
     // component testing is configured.
-    if (step === 'setupComponent' && await anyComponentSpecsExist(projectRoot, config)) {
+    if (step === 'setupComponent' && await anyComponentSpecsExist(projectRoot, configComponent)) {
       steps.push(step)
     }
   }

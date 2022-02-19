@@ -10,7 +10,6 @@ import {
   supportFilesForMigration,
   OldCypressConfig,
   hasSpecFile,
-  getSpecs,
   applyMigrationTransform,
   getStepsForMigration,
   shouldShowRenameSupport,
@@ -20,7 +19,11 @@ import {
   getComponentTestFilesGlobs,
   getComponentFolder,
   getIntegrationTestFilesGlobs,
+  getSpecs,
 } from './migration'
+
+import { allowed } from '@packages/config/lib'
+import { initOldPlugins } from './migration/plugins'
 
 import type { FilePart } from './migration/format'
 import Debug from 'debug'
@@ -75,6 +78,7 @@ export class MigrationDataSource {
   private componentTestingMigrationWatcher: chokidar.FSWatcher | null = null
   componentTestingMigrationStatus?: ComponentTestingMigrationStatus
   private _oldConfigPromise: Promise<OldCypressConfig> | null = null
+  private testTypeConfigPromise: Promise<void> | null = null
 
   constructor (private ctx: DataContext) { }
 
@@ -88,11 +92,14 @@ export class MigrationDataSource {
 
     this._config = null
     this._oldConfigPromise = null
-    const config = await this.parseCypressJson()
+    const configE2e = await this.getE2eConfigObject()
+    const configComponent = await this.getComponentConfigObject()
 
     await this.initializeFlags()
 
-    this.filteredSteps = await getStepsForMigration(this.ctx.currentProject, config)
+    debug('flags initialized')
+
+    this.filteredSteps = await getStepsForMigration(this.ctx.currentProject, configE2e, configComponent)
 
     if (!this.filteredSteps[0]) {
       throw Error(`Impossible to initialize a migration. No steps fit the configuration of this project.`)
@@ -165,10 +172,10 @@ export class MigrationDataSource {
       throw Error('Need this.ctx.currentProject')
     }
 
-    const config = await this.parseCypressJson()
+    const configE2e = await this.getE2eConfigObject()
 
-    debug('supportFilesForMigrationGuide: config %O', config)
-    if (!await shouldShowRenameSupport(this.ctx.currentProject, config)) {
+    debug('supportFilesForMigrationGuide: config %O', configE2e)
+    if (!await shouldShowRenameSupport(this.ctx.currentProject, configE2e)) {
       return null
     }
 
@@ -194,17 +201,19 @@ export class MigrationDataSource {
       throw Error(`Need this.ctx.projectRoot!`)
     }
 
-    const config = await this.parseCypressJson()
+    const configE2e = await this.getE2eConfigObject()
+    const configComponent = await this.getComponentConfigObject()
 
-    const specs = await getSpecs(this.ctx.currentProject, config)
+    const integrationSpecFiles = await getSpecs(this.ctx.currentProject, configE2e, 'e2e')
+    const componentSpecFiles = await getSpecs(this.ctx.currentProject, configComponent, 'component')
 
-    const canBeAutomaticallyMigrated: MigrationFile[] = specs.integration.map(applyMigrationTransform)
+    const canBeAutomaticallyMigrated: MigrationFile[] = integrationSpecFiles.map(applyMigrationTransform)
 
-    const defaultComponentPattern = isDefaultTestFiles(await this.parseCypressJson(), 'component')
+    const defaultComponentPattern = isDefaultTestFiles(configComponent, 'component')
 
     // Can only migration component specs if they use the default testFiles pattern.
     if (defaultComponentPattern) {
-      canBeAutomaticallyMigrated.push(...specs.component.map(applyMigrationTransform))
+      canBeAutomaticallyMigrated.push(...componentSpecFiles.map(applyMigrationTransform))
     }
 
     return canBeAutomaticallyMigrated
@@ -235,15 +244,56 @@ export class MigrationDataSource {
   }
 
   async integrationFolder () {
-    const config = await this.parseCypressJson()
+    const config = await this.getE2eConfigObject()
 
     return getIntegrationFolder(config)
   }
 
   async componentFolder () {
-    const config = await this.parseCypressJson()
+    const config = await this.getComponentConfigObject()
 
     return getComponentFolder(config)
+  }
+
+  private async getE2eConfigObject (): Promise<OldCypressConfig> {
+    if (this._configE2e) {
+      this._configE2e
+    }
+
+    if (!this.testTypeConfigPromise) {
+      this.testTypeConfigPromise = this.initializeTestTypesConfig()
+    }
+
+    await this.testTypeConfigPromise
+
+    this.testTypeConfigPromise = null
+
+    return this._configE2e || {}
+  }
+
+  private async getComponentConfigObject (): Promise<OldCypressConfig> {
+    if (this._configComponent) {
+      this._configComponent
+    }
+
+    if (!this.testTypeConfigPromise) {
+      this.testTypeConfigPromise = this.initializeTestTypesConfig()
+    }
+
+    await this.testTypeConfigPromise
+
+    this.testTypeConfigPromise = null
+
+    return this._configComponent || {}
+  }
+
+  private async initializeTestTypesConfig () {
+    const config = await this.parseCypressJson()
+
+    const [configE2e, configCt] = await this.initializePlugins(config)
+
+    this._configComponent = configCt || null
+    this._configE2e = configE2e || null
   }
 
   private async parseCypressJson (): Promise<OldCypressConfig> {
@@ -321,28 +371,31 @@ export class MigrationDataSource {
     }
   }
 
-  // async initializePlugins (cfg: OldCypressConfig): Promise<OldCypressConfig[]> {
-  //   return Promise.all((['e2e', 'component'] as const).map(async (type) => {
-  //     // only init plugins with the
-  //     // allowed config values to
-  //     // prevent tampering with the
-  //     // internals and breaking cypress
-  //     const allowedCfg = allowed(cfg)
+  async initializePlugins (cfg: OldCypressConfig): Promise<OldCypressConfig[]> {
+    return Promise.all((['e2e', 'component'] as const).map(async (type) => {
+      // only init plugins with the
+      // allowed config values to
+      // prevent tampering with the
+      // internals and breaking cypress
+      const allowedCfg = allowed(cfg)
 
-  //     const modifiedCfg = await plugins.init(allowedCfg, {
-  //       projectRoot: this.ctx.lifecycleManager?.projectRoot,
-  //       configFile: path.join(this.ctx.lifecycleManager?.projectRoot, 'cypress.json'),
-  //       testingType: type,
-  //       onError: (err: Error) => {
-  //         this.ctx.coreData.baseError = err
-  //       },
-  //     })
+      debug('plugin config will start with : %o', cfg)
 
-  //     debug('plugin config yielded: %o', modifiedCfg)
+      const modifiedCfg = await initOldPlugins(allowedCfg, {
+        projectRoot: this.ctx.lifecycleManager?.projectRoot,
+        configFile: path.join(this.ctx.lifecycleManager?.projectRoot, 'cypress.json'),
+        testingType: type,
+        onError: (err: Error) => {
+          this.ctx.coreData.baseError = err
+        },
+        onWarning: () => {},
+      })
 
-  //     return configModule.updateWithPluginValues(cfg, modifiedCfg) as any as OldCypressConfig
-  //   }))
-  // }
+      debug('plugin config yielded: %o', modifiedCfg)
+
+      return Object.assign(cfg, modifiedCfg || {})
+    }))
+  }
 
   get step (): MIGRATION_STEP {
     return this._step

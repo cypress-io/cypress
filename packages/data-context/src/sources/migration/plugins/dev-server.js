@@ -1,9 +1,9 @@
 require('../cwd')
 
 const EE = require('events')
-const debug = require('debug')('cypress:ct:dev-server')
+const debug = require('debug')('cypress:data-context:sources:migration:plugins:dev-server')
 const plugins = require('../plugins')
-const errors = require('../errors')
+const errors = require('./errors')
 
 const baseEmitter = new EE()
 
