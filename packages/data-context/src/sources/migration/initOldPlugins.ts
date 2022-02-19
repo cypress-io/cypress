@@ -1,7 +1,7 @@
 import Debug from 'debug'
 import path from 'path'
 import _ from 'lodash'
-import * as util from '@packages/server/lib/plugins/util'
+import EE from 'events'
 import type { OldCypressConfig } from '.'
 import cp from 'child_process'
 
@@ -21,7 +21,35 @@ const getChildOptions = (): cp.ForkOptions => {
   return childOptions
 }
 
-export const init = (config: OldCypressConfig, options: {
+function wrapIpc (aProcess: cp.ChildProcess) {
+  const emitter = new EE()
+
+  aProcess.on('message', (message: any) => {
+    return emitter.emit(message.event, ...message.args)
+  })
+
+  // prevent max listeners warning on ipc
+  // @see https://github.com/cypress-io/cypress/issues/1305#issuecomment-780895569
+  emitter.setMaxListeners(Infinity)
+
+  return {
+    send (event: string, ...args: any[]) {
+      if (aProcess.killed) {
+        return
+      }
+
+      return aProcess.send({
+        event,
+        args,
+      })
+    },
+
+    on: emitter.on.bind(emitter),
+    removeListener: emitter.removeListener.bind(emitter),
+  }
+}
+
+export const initOldPlugins = (config: OldCypressConfig, options: {
   projectRoot: string
   configFile: string
   testingType: 'e2e' | 'component'
@@ -55,10 +83,10 @@ export const init = (config: OldCypressConfig, options: {
       pluginsProcess.kill()
     }
 
-    const childDirPath = path.resolve('@packages/server/lib/plugins/child')
+    const childDirPath = require.resolve('@packages/server/lib/plugins/child/require_async_child')
 
     const pluginsFile = config.pluginsFile || path.join(childDirPath, 'default_plugins_file.js')
-    const childIndexFilename = path.join(childDirPath, 'index.js')
+    const childIndexFilename = require.resolve('@packages/server/lib/plugins/child/require_async_child')
     const childArguments = ['--file', pluginsFile, '--projectRoot', options.projectRoot]
     const childOptions = getChildOptions()
 
@@ -74,7 +102,7 @@ export const init = (config: OldCypressConfig, options: {
       debug('stdout and stderr not available on subprocess, the plugin launch should error')
     }
 
-    const ipc = util.wrapIpc(pluginsProcess)
+    const ipc = wrapIpc(pluginsProcess)
 
     _.extend(config, {
       projectRoot: options.projectRoot,
