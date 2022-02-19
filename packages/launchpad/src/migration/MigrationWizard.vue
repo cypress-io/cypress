@@ -207,12 +207,7 @@ const steps = computed(() => migration.value?.filteredSteps || [])
 gql`
 mutation MigrationWizard_Start {
   migrateStart {
-    migration {
-      filteredSteps {
-        id
-        ...MigrationStep
-      }
-    }
+    ...MigrationWizardData
   }
 }
 `

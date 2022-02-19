@@ -22,9 +22,17 @@ const invoke = (eventId, args = []) => {
 }
 
 const getDefaultPreprocessor = function (config) {
-  const tsPath = require.resolve('typescript', { paths: [config.projectRoot] })
-  const options = {
-    typescript: tsPath,
+  let options = {}
+
+  try {
+    const tsPath = require.resolve('typescript', { paths: [config.projectRoot] })
+
+    options = {
+      typescript: tsPath,
+    }
+  } catch (e) {
+    debug('no typrescript found', e)
+    options = {}
   }
 
   debug('creating webpack preprocessor with options %o', options)

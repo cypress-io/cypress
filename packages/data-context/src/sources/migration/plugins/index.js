@@ -62,7 +62,15 @@ const getChildOptions = (config) => {
 }
 
 const initOldPlugins = (config, options) => {
-  debug('plugins.init', config.pluginsFile)
+  const pluginsFile = config.pluginsFile === false
+    ? false
+    : (path.join(options.projectRoot, config.pluginsFile)
+    || path.join(__dirname, 'child', 'default_plugins_file.js'))
+
+  debug('plugins.init', pluginsFile)
+  if (!pluginsFile) {
+    return {}
+  }
 
   // test and warn for incompatible plugin
   try {
@@ -92,10 +100,6 @@ const initOldPlugins = (config, options) => {
     const resolve = fulfill(_resolve)
     const reject = fulfill(_reject)
 
-    if (!config.pluginsFile) {
-      debug('no user plugins file')
-    }
-
     if (pluginsProcess) {
       debug('kill existing plugins process')
       pluginsProcess.kill()
@@ -103,7 +107,6 @@ const initOldPlugins = (config, options) => {
 
     registeredEvents = {}
 
-    const pluginsFile = config.pluginsFile || path.join(__dirname, 'child', 'default_plugins_file.js')
     const childIndexFilename = path.join(__dirname, 'child', 'index.js')
     const childArguments = ['--file', pluginsFile, '--projectRoot', options.projectRoot]
     const childOptions = getChildOptions(config)

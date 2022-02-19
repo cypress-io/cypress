@@ -232,6 +232,8 @@ export class MigrationDataSource {
 
     const { hasTypescript } = this.ctx.lifecycleManager.metaState
 
+    debug('createConfigString', hasTypescript)
+
     const config = await this.parseCypressJson()
 
     return createConfigString(config, {
@@ -290,9 +292,9 @@ export class MigrationDataSource {
   private async initializeTestTypesConfig () {
     const config = await this.parseCypressJson()
 
-    const [configE2e, configCt] = await this.initializePlugins(config)
+    const { configE2e, configComponent } = await this.initializePlugins(config)
 
-    this._configComponent = configCt || null
+    this._configComponent = configComponent || null
     this._configE2e = configE2e || null
   }
 
@@ -371,30 +373,37 @@ export class MigrationDataSource {
     }
   }
 
-  async initializePlugins (cfg: OldCypressConfig): Promise<OldCypressConfig[]> {
-    return Promise.all((['e2e', 'component'] as const).map(async (type) => {
+  async initializePlugins (cfg: OldCypressConfig): Promise<{configE2e: OldCypressConfig, configComponent: OldCypressConfig}> {
+    const results: any = {}
+
+    await (['e2e', 'component'] as const).reduce(async (prevPromise, type) => {
+      await prevPromise
       // only init plugins with the
       // allowed config values to
       // prevent tampering with the
       // internals and breaking cypress
       const allowedCfg = allowed(cfg)
 
-      debug('plugin config will start with : %o', cfg)
+      debug(`plugin config will start with ${type}: %o`, cfg)
 
       const modifiedCfg = await initOldPlugins(allowedCfg, {
         projectRoot: this.ctx.lifecycleManager?.projectRoot,
         configFile: path.join(this.ctx.lifecycleManager?.projectRoot, 'cypress.json'),
         testingType: type,
         onError: (err: Error) => {
+          debug('error init plugin : %o', err)
           this.ctx.coreData.baseError = err
         },
         onWarning: () => {},
       })
 
       debug('plugin config yielded: %o', modifiedCfg)
+      results[type] = Object.assign({}, cfg, modifiedCfg || {})
 
-      return Object.assign(cfg, modifiedCfg || {})
-    }))
+      return
+    }, Promise.resolve())
+
+    return results
   }
 
   get step (): MIGRATION_STEP {
