@@ -584,10 +584,30 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
       migrateAndVerifyConfig()
     })
 
-    it('handles a partially migrated codebase', () => {
+    it('handles re-migrating a partially migrated codebase', () => {
       startMigrationFor('migration-already-migrated')
       cy.contains('[data-cy="migrate-before"]', 'cypress/tests/foo.cy.js')
       cy.contains('[data-cy="migrate-after"]', 'cypress/tests/foo.cy.js')
+
+      runAutoRename()
+
+      cy.wait(100)
+
+      cy.withCtx(async (ctx) => {
+        const specs = [
+          'cypress/tests/foo.cy.js',
+        ]
+
+        for (const spec of specs) {
+          const stats = await ctx.actions.file.checkIfFileExists(ctx.path.join(spec))
+
+          expect(stats).to.not.be.null
+        }
+      })
+
+      renameSupport()
+      migrateAndVerifyConfig()
+      finishMigrationAndContinue()
     })
   })
 })
