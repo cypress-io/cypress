@@ -1,5 +1,6 @@
 import { TestingType, MIGRATION_STEPS } from '@packages/types'
 import type chokidar from 'chokidar'
+import { pick, defaults } from 'lodash'
 import path from 'path'
 import type { DataContext } from '..'
 import {
@@ -21,7 +22,6 @@ import {
   getIntegrationTestFilesGlobs,
   getSpecs,
 } from './migration'
-
 import { allowed } from '@packages/config/lib'
 import { initOldPlugins } from './migration/plugins'
 
@@ -238,18 +238,24 @@ export class MigrationDataSource {
     const configE2e = await this.getE2eConfigObject()
     const configComponent = await this.getComponentConfigObject()
 
+    const breakingConfigProps = ['testFiles', 'supportFile']
+
     const config = { ...jsonConfig,
       integrationFolder: configE2e.integrationFolder ?? jsonConfig.integrationFolder,
       componentFolder: configComponent.componentFolder ?? jsonConfig.componentFolder,
       e2e: {
         ...jsonConfig.e2e || {},
-        testFiles: configE2e.testFiles,
-        supportFile: configE2e.supportFile,
+        ...defaults(
+          pick(configE2e.e2e, ...breakingConfigProps),
+          pick(configE2e, ...breakingConfigProps),
+        ),
       },
       component: {
         ...jsonConfig.component || {},
-        testFiles: configComponent.testFiles,
-        supportFile: configComponent.supportFile,
+        ...defaults(
+          pick(configComponent.component, ...breakingConfigProps),
+          pick(configComponent, ...breakingConfigProps),
+        ),
       },
     }
 
