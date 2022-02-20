@@ -4,7 +4,7 @@
     class="min-h-64px text-14px"
     :style="{ width: `${props.width}px` }"
   >
-    <div class="flex flex-wrap justify-end flex-grow p-16px gap-12px">
+    <div class="flex flex-wrap flex-grow p-16px gap-12px justify-end">
       <!--
         TODO: Studio. Out of scope for GA.
       <Button
@@ -20,7 +20,7 @@
       <div
         v-if="props.gql.currentTestingType === 'e2e'"
         data-cy="aut-url"
-        class="flex flex-grow overflow-hidden align-middle border border-gray-100 rounded border-1px h-32px"
+        class="border rounded flex flex-grow border-gray-100 border-1px h-32px overflow-hidden align-middle"
         :class="{
           'bg-gray-50': autStore.isLoadingUrl
         }"
@@ -28,7 +28,7 @@
         <Button
           data-cy="playground-activator"
           :disabled="isDisabled"
-          class="border-gray-100 rounded-none border-r-1px mr-12px"
+          class="rounded-none border-gray-100 border-r-1px mr-12px"
           variant="text"
           @click="togglePlayground"
         >
@@ -65,7 +65,7 @@
         </template>
 
         <template #default>
-          <div class="overflow-auto max-h-50vh">
+          <div class="max-h-50vh overflow-auto">
             <VerticalBrowserListItems
               :gql="props.gql"
               :spec-path="activeSpecPath"
@@ -82,13 +82,13 @@
           <span class="whitespace-nowrap">{{ autStore.viewportWidth }}x{{ autStore.viewportHeight }}</span>
           <span
             v-if="displayScale"
-            class="text-gray-500 -ml-6px"
+            class="-ml-6px text-gray-500"
           >
             ({{ displayScale }})
           </span>
         </template>
         <template #default>
-          <div class="overflow-auto text-gray-600 max-h-50vw p-16px leading-24px w-400px">
+          <div class="max-h-50vw p-16px text-gray-600 leading-24px w-400px overflow-auto">
             <!-- TODO: This copy is a placeholder based on the old message for this, we should confirm the exact copy and then move to i18n -->
             <p class="mb-16px">
               The
@@ -103,7 +103,7 @@
             </p>
 
             <ShikiHighlight
-              class="border-gray-200 rounded border-1 mb-16px"
+              class="rounded border-gray-200 border-1 mb-16px"
               lang="javascript"
               :code="code"
             />
@@ -190,7 +190,7 @@ const props = defineProps<{
   gql: SpecRunnerHeaderFragment
   eventManager: EventManager
   getAutIframe: () => AutIframe
-  width?: number
+  width: number
 }>()
 
 const autIframe = props.getAutIframe()

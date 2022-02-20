@@ -445,7 +445,7 @@
           "connectProject": "Connect project",
           "createProject": "Create project",
           "placeholderOrganizations": "Pick an organization",
-          "placeholderProjects": "Pick an project",
+          "placeholderProjects": "Pick a project",
           "placeholderProjectsPending": "Pick an organization first"
         },
         "connectManually": {
