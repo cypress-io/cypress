@@ -11,6 +11,9 @@ import {
   specRegexps,
 } from '.'
 import type { MigrationFile } from '../MigrationDataSource'
+import Debug from 'debug'
+
+const debug = Debug('cypress:data-context:sources:migration:autoRename')
 
 export interface MigrationSpec {
   relative: string
@@ -87,6 +90,7 @@ export function applyMigrationTransform (
 }
 
 export async function getSpecs (projectRoot: string, config: OldCypressConfig, testingType: TestingType): Promise<MigrationSpec[]> {
+  debug('getSpecs', { projectRoot, config, testingType })
   const oldTestingTypeName = OLD_NAMES[testingType]
   const oldDefaultFolderName = `cypress/${oldTestingTypeName}`
 
@@ -94,6 +98,8 @@ export async function getSpecs (projectRoot: string, config: OldCypressConfig, t
   const testFiles = getTestFilesGlobs(config, oldTestingTypeName)
 
   let specFiles: MigrationSpec[] = []
+
+  debug('getSpecs', { folder, testFiles })
 
   const globs = folder === false
     ? []
@@ -107,12 +113,17 @@ export async function getSpecs (projectRoot: string, config: OldCypressConfig, t
 
   const fullyCustom = folder !== oldDefaultFolderName && !isDefaultTestFiles(config, oldTestingTypeName)
 
+  debug('getSpecs', { specs, fullyCustom })
+
   // we cannot do a migration if either integrationFolder is false,
   // or if both the integrationFolder and testFiles are custom.
-  if (specs.length || fullyCustom) {
+  if (specs.length === 0 || fullyCustom) {
+    debug('getSpecs: no spec found, or custom folder')
     specFiles = []
   } else {
     specFiles = specs.map((relative) => {
+      debug('getSpecs: relative', relative)
+
       return {
         relative,
         usesDefaultFolder: folder === oldDefaultFolderName,
@@ -121,6 +132,8 @@ export async function getSpecs (projectRoot: string, config: OldCypressConfig, t
       }
     })
   }
+
+  debug('getSpecs', { specFiles })
 
   return specFiles
 }

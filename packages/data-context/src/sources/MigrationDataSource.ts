@@ -292,10 +292,10 @@ export class MigrationDataSource {
   private async initializeTestTypesConfig () {
     const config = await this.parseCypressJson()
 
-    const { configE2e, configComponent } = await this.initializePlugins(config)
+    const { e2e, component } = await this.initializePlugins(config)
 
-    this._configComponent = configComponent || null
-    this._configE2e = configE2e || null
+    this._configComponent = component || null
+    this._configE2e = e2e || null
   }
 
   private async parseCypressJson (): Promise<OldCypressConfig> {
@@ -373,7 +373,7 @@ export class MigrationDataSource {
     }
   }
 
-  async initializePlugins (cfg: OldCypressConfig): Promise<{configE2e: OldCypressConfig, configComponent: OldCypressConfig}> {
+  async initializePlugins (cfg: OldCypressConfig): Promise<{e2e: OldCypressConfig, component: OldCypressConfig}> {
     const results: any = {}
 
     await (['e2e', 'component'] as const).reduce(async (prevPromise, type) => {
