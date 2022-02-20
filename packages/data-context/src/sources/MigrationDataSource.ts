@@ -232,9 +232,28 @@ export class MigrationDataSource {
 
     const { hasTypescript } = this.ctx.lifecycleManager.metaState
 
-    debug('createConfigString', hasTypescript)
+    debug('createConfigString', { hasTypescript })
 
-    const config = await this.parseCypressJson()
+    const jsonConfig = await this.parseCypressJson()
+    const configE2e = await this.getE2eConfigObject()
+    const configComponent = await this.getComponentConfigObject()
+
+    const config = { ...jsonConfig,
+      integrationFolder: configE2e.integrationFolder ?? jsonConfig.integrationFolder,
+      componentFolder: configComponent.componentFolder ?? jsonConfig.componentFolder,
+      e2e: {
+        ...jsonConfig.e2e || {},
+        testFiles: configE2e.testFiles,
+        supportFile: configE2e.supportFile,
+      },
+      component: {
+        ...jsonConfig.component || {},
+        testFiles: configComponent.testFiles,
+        supportFile: configComponent.supportFile,
+      },
+    }
+
+    debug('createConfigString: config %O', config)
 
     return createConfigString(config, {
       hasComponentTesting: this.hasComponentTesting,
@@ -327,17 +346,19 @@ export class MigrationDataSource {
     }
 
     const config = await this.parseCypressJson()
+    const configComponent = await this.getComponentConfigObject()
+    const configE2e = await this.getE2eConfigObject()
 
     this.hasCustomIntegrationTestFiles = !isDefaultTestFiles(config, 'integration')
-    this.hasCustomIntegrationFolder = getIntegrationFolder(config) !== 'cypress/integration'
+    this.hasCustomIntegrationFolder = getIntegrationFolder(configE2e) !== 'cypress/integration'
 
-    const componentFolder = getComponentFolder(config)
+    const componentFolder = getComponentFolder(configComponent)
 
     this.hasCustomComponentFolder = componentFolder !== 'cypress/component'
 
-    const componentTestFiles = getComponentTestFilesGlobs(config)
+    const componentTestFiles = getComponentTestFilesGlobs(configComponent)
 
-    this.hasCustomComponentTestFiles = !isDefaultTestFiles(config, 'component')
+    this.hasCustomComponentTestFiles = !isDefaultTestFiles(configComponent, 'component')
 
     if (componentFolder === false) {
       this.hasComponentTesting = false
@@ -349,8 +370,8 @@ export class MigrationDataSource {
       )
     }
 
-    const integrationFolder = getIntegrationFolder(config)
-    const integrationTestFiles = getIntegrationTestFilesGlobs(config)
+    const integrationFolder = getIntegrationFolder(configE2e)
+    const integrationTestFiles = getIntegrationTestFilesGlobs(configE2e)
 
     if (integrationFolder === false) {
       this.hasE2ESpec = false
