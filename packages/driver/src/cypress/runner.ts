@@ -25,6 +25,12 @@ const RUNNABLE_PROPS = '_testConfig id order title _titlePath root hookName hook
 const debug = debugFn('cypress:driver:runner')
 const debugErrors = debugFn('cypress:driver:errors')
 
+const duration = (before: Date, after: Date) => {
+  // TypeScript doesn't allow subtraction between `Date`s.
+  // @ts-ignore
+  return before - after
+}
+
 const fire = (event, runnable, Cypress) => {
   debug('fire: %o', { event })
   if (runnable._fired == null) {
@@ -125,7 +131,7 @@ const setTestTimings = (test, name, obj) => {
 }
 
 const setWallClockDuration = (test) => {
-  return test.wallClockDuration = new Date() - test.wallClockStartedAt
+  return test.wallClockDuration = duration(new Date(), test.wallClockStartedAt)
 }
 
 // we need to optimize wrap by converting
@@ -1390,11 +1396,11 @@ export default {
         // runtime of a runnables fn execution duration
         // and also the run of the runnable:after:run:async event
         let lifecycleStart
-        let wallClockEnd = null
-        let fnDurationStart = null
-        let fnDurationEnd = null
-        let afterFnDurationStart = null
-        let afterFnDurationEnd = null
+        let wallClockEnd: Date | null = null
+        let fnDurationStart: Date | null = null
+        let fnDurationEnd: Date | null = null
+        let afterFnDurationStart: Date | null = null
+        let afterFnDurationEnd: Date | null = null
 
         // when this is a hook, capture the real start
         // date so we can calculate our test's duration
@@ -1440,12 +1446,12 @@ export default {
               // reset runnable duration to include lifecycle
               // and afterFn timings purely for the mocha runner.
               // this is what it 'feels' like to the user
-              runnable.duration = wallClockEnd - wallClockStartedAt
+              runnable.duration = duration(wallClockEnd, wallClockStartedAt)
 
               setTestTimingsForHook(test, hookName, {
                 hookId: runnable.hookId,
-                fnDuration: fnDurationEnd - fnDurationStart,
-                afterFnDuration: afterFnDurationEnd - afterFnDurationStart,
+                fnDuration: duration(fnDurationEnd!, fnDurationStart!),
+                afterFnDuration: duration(afterFnDurationEnd, afterFnDurationStart!),
               })
 
               break
@@ -1454,13 +1460,13 @@ export default {
               // if we are currently on a test then
               // recalculate its duration to be based
               // against that (purely for the mocha reporter)
-              test.duration = wallClockEnd - test.wallClockStartedAt
+              test.duration = duration(wallClockEnd, test.wallClockStartedAt)
 
               // but still preserve its actual function
               // body duration for timings
               setTestTimings(test, 'test', {
-                fnDuration: fnDurationEnd - fnDurationStart,
-                afterFnDuration: afterFnDurationEnd - afterFnDurationStart,
+                fnDuration: duration(fnDurationEnd!, fnDurationStart!),
+                afterFnDuration: duration(afterFnDurationEnd!, afterFnDurationStart!),
               })
 
               break
@@ -1566,7 +1572,7 @@ export default {
           if (lifecycleStart) {
             // capture how long the lifecycle took as part
             // of the overall wallClockDuration of our test
-            setTestTimings(test, 'lifecycle', new Date() - lifecycleStart)
+            setTestTimings(test, 'lifecycle', duration(new Date(), lifecycleStart))
           }
 
           // capture the moment we're about to invoke
