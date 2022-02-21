@@ -2,7 +2,8 @@ import os from 'os'
 import validate from './validation'
 // @ts-ignore
 import pkg from '@packages/root'
-import type { TestingType } from '@packages/types/src/modeOptions'
+
+type TestingType = 'e2e' | 'component'
 
 interface ResolvedConfigOption {
   name: string
