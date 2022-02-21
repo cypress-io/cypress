@@ -1,6 +1,5 @@
 import { TestingType, MIGRATION_STEPS } from '@packages/types'
 import type chokidar from 'chokidar'
-import { pick, defaults } from 'lodash'
 import path from 'path'
 import type { DataContext } from '..'
 import {
@@ -11,6 +10,7 @@ import {
   supportFilesForMigration,
   OldCypressConfig,
   hasSpecFile,
+  getSpecs,
   applyMigrationTransform,
   getStepsForMigration,
   shouldShowRenameSupport,
@@ -20,7 +20,6 @@ import {
   getComponentTestFilesGlobs,
   getComponentFolder,
   getIntegrationTestFilesGlobs,
-  getSpecs,
 } from './migration'
 import { allowed } from '@packages/config/lib'
 import { initOldPlugins } from './migration/plugins'
@@ -238,30 +237,11 @@ export class MigrationDataSource {
     const configE2e = await this.getE2eConfigObject()
     const configComponent = await this.getComponentConfigObject()
 
-    const breakingConfigProps = ['testFiles', 'supportFile']
-
-    const config = { ...jsonConfig,
-      integrationFolder: configE2e.integrationFolder ?? jsonConfig.integrationFolder,
-      componentFolder: configComponent.componentFolder ?? jsonConfig.componentFolder,
-      e2e: {
-        ...jsonConfig.e2e || {},
-        ...defaults(
-          pick(configE2e.e2e, ...breakingConfigProps),
-          pick(configE2e, ...breakingConfigProps),
-        ),
-      },
-      component: {
-        ...jsonConfig.component || {},
-        ...defaults(
-          pick(configComponent.component, ...breakingConfigProps),
-          pick(configComponent, ...breakingConfigProps),
-        ),
-      },
-    }
-
-    debug('createConfigString: config %O', config)
-
-    return createConfigString(config, {
+    return createConfigString({
+      jsonConf: jsonConfig,
+      e2eConf: configE2e,
+      componentConf: configComponent,
+    }, {
       hasComponentTesting: this.hasComponentTesting,
       hasE2ESpec: this.hasE2ESpec,
       hasPluginsFile: this.hasPluginsFile,

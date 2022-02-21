@@ -19,6 +19,15 @@ type ConfigOptions = {
   component: Record<string, unknown>
 }
 
+const BREAKING_CONFIG_PROPS = [
+  'testFiles',
+  'ignoreTestFiles',
+  'supportFile',
+  'integrationFolder',
+  'componentFolder',
+  'baseUrl',
+] as const
+
 /**
  * config format pre-10.0
  */
@@ -38,6 +47,12 @@ export interface OldCypressConfig {
   ignoreTestFiles?: string
 }
 
+interface OldCypressConfigCombo{
+  jsonConf: OldCypressConfig
+  e2eConf: OldCypressConfig
+  componentConf: OldCypressConfig
+}
+
 export class NonStandardMigrationError extends Error {
   constructor (fileType: 'support' | 'config') {
     super()
@@ -53,8 +68,10 @@ export interface CreateConfigOptions {
   hasTypescript: boolean
 }
 
-export async function createConfigString (cfg: OldCypressConfig, options: CreateConfigOptions) {
-  return createCypressConfig(reduceConfig(cfg), await getPluginRelativePath(cfg, options.projectRoot), options)
+export async function createConfigString (cfg: OldCypressConfigCombo, options: CreateConfigOptions) {
+  return createCypressConfig(reduceConfig(cfg),
+    await getPluginRelativePath(cfg.jsonConf, options.projectRoot),
+    options)
 }
 
 async function getPluginRelativePath (cfg: OldCypressConfig, projectRoot: string): Promise<string> {
@@ -235,7 +252,48 @@ export function renameSupportFilePath (relative: string) {
   return relative.replace(res.groups.name, 'e2e')
 }
 
-export function reduceConfig (cfg: OldCypressConfig): ConfigOptions {
+const keyHandlers: Record<typeof BREAKING_CONFIG_PROPS[number], (acc: ConfigOptions, cfg: OldCypressConfigCombo, val: any) => any> = {
+  integrationFolder: (acc, cfg) => {
+    return {
+      ...acc,
+      e2e: { ...acc.e2e, specPattern: getSpecPattern(cfg, 'e2e') },
+    }
+  },
+  componentFolder: (acc, cfg) => {
+    return {
+      ...acc,
+      component: { ...acc.component, specPattern: getSpecPattern(cfg, 'component') },
+    }
+  },
+  testFiles: (acc, cfg) => {
+    return {
+      ...acc,
+      e2e: { ...acc.e2e, specPattern: getSpecPattern(cfg, 'e2e') },
+      component: { ...acc.component, specPattern: getSpecPattern(cfg, 'component') },
+    }
+  },
+  ignoreTestFiles: (acc, cfg, val) => {
+    return {
+      ...acc,
+      e2e: { ...acc.e2e, specExcludePattern: val },
+      component: { ...acc.component, specExcludePattern: val },
+    }
+  },
+  supportFile: (acc, cfg, val) => {
+    return {
+      ...acc,
+      e2e: { ...acc.e2e, supportFile: val },
+    }
+  },
+  baseUrl: (acc, cfg, val) => {
+    return {
+      ...acc,
+      e2e: { ...acc.e2e, baseUrl: val },
+    }
+  },
+}
+
+export function reduceConfig (cfg: OldCypressConfigCombo): ConfigOptions {
   const excludedFields = ['pluginsFile', '$schema']
 
   const reducedConfig = Object.entries(cfg).reduce((acc, [key, val]) => {
@@ -276,48 +334,8 @@ export function reduceConfig (cfg: OldCypressConfig): ConfigOptions {
       }
     }
 
-    if (key === 'integrationFolder') {
-      return {
-        ...acc,
-        e2e: { ...acc.e2e, specPattern: getSpecPattern(cfg, 'e2e') },
-      }
-    }
-
-    if (key === 'componentFolder') {
-      return {
-        ...acc,
-        component: { ...acc.component, specPattern: getSpecPattern(cfg, 'component') },
-      }
-    }
-
-    if (key === 'testFiles') {
-      return {
-        ...acc,
-        e2e: { ...acc.e2e, specPattern: getSpecPattern(cfg, 'e2e') },
-        component: { ...acc.component, specPattern: getSpecPattern(cfg, 'component') },
-      }
-    }
-
-    if (key === 'ignoreTestFiles') {
-      return {
-        ...acc,
-        e2e: { ...acc.e2e, specExcludePattern: val },
-        component: { ...acc.component, specExcludePattern: val },
-      }
-    }
-
-    if (key === 'supportFile') {
-      return {
-        ...acc,
-        e2e: { ...acc.e2e, supportFile: val },
-      }
-    }
-
-    if (key === 'baseUrl') {
-      return {
-        ...acc,
-        e2e: { ...acc.e2e, [key]: val },
-      }
+    if (BREAKING_CONFIG_PROPS.includes(key as any)) {
+      return keyHandlers[key as any as typeof BREAKING_CONFIG_PROPS[number]](acc, cfg, val)
     }
 
     return { ...acc, global: { ...acc.global, [key]: val } }
@@ -328,16 +346,20 @@ export function reduceConfig (cfg: OldCypressConfig): ConfigOptions {
   return reducedConfig
 }
 
-function getSpecPattern (cfg: OldCypressConfig, testType: TestingType) {
-  const specPattern = cfg[testType]?.testFiles ?? cfg.testFiles ?? '**/*.cy.{js,jsx,ts,tsx}'
-  const customComponentFolder = cfg.component?.componentFolder ?? cfg.componentFolder ?? null
+function getSpecPattern (cfg: OldCypressConfigCombo, testType: TestingType) {
+  const configTyped = cfg[`${testType}Conf`]
+  const specPattern = configTyped[testType]?.testFiles ?? configTyped.testFiles ?? '**/*.cy.{js,jsx,ts,tsx}'
 
-  if (testType === 'component' && customComponentFolder) {
-    return `${customComponentFolder}/${specPattern}`
+  if (testType === 'component') {
+    const customComponentFolder = configTyped.component?.componentFolder ?? configTyped.componentFolder ?? null
+
+    return customComponentFolder
+      ? `${customComponentFolder}/${specPattern}`
+      : specPattern
   }
 
   if (testType === 'e2e') {
-    const customIntegrationFolder = cfg.e2e?.integrationFolder ?? cfg.integrationFolder ?? null
+    const customIntegrationFolder = configTyped.e2e?.integrationFolder ?? configTyped.integrationFolder ?? null
 
     if (customIntegrationFolder) {
       return `${customIntegrationFolder}/${specPattern}`
