@@ -328,7 +328,7 @@ const parseSpecArgv = (pattern) => {
  */
 const nestInvalidRootOptions = (config) => {
   getBreakingRootKeys().forEach(({ name, testingTypes }) => {
-    if (config[name]) {
+    if (config[name] && testingTypes) {
       testingTypes.forEach((testingType) => {
         if (!config[testingType]) {
           config[testingType] = {}

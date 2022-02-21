@@ -2,6 +2,7 @@ import os from 'os'
 import validate from './validation'
 // @ts-ignore
 import pkg from '@packages/root'
+import type { TestingType } from '@packages/types/src/modeOptions'
 
 interface ResolvedConfigOption {
   name: string
@@ -13,7 +14,7 @@ interface ResolvedConfigOption {
    * Can be mutated with Cypress.config() or test-specific configuration overrides
    */
   canUpdateDuringTestTime?: boolean
-  specificTestingType?: 'e2e' | 'component'
+  specificTestingType?: TestingType
 }
 
 interface RuntimeConfigOption {
@@ -36,6 +37,10 @@ interface BreakingOption {
    * String to summarize the error messaging that is logged.
    */
   errorKey: string
+  /**
+   * Array of testing types this config option is valid for
+   */
+  testingTypes?: TestingType[]
   /**
    * Configuration value of the configuration option to check against.
    */
