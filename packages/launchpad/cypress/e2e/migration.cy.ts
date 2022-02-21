@@ -686,7 +686,7 @@ describe.skip('component testing migration - defaults', () => {
   })
 })
 
-describe('Migration', { viewportWidth: 1200 }, () => {
+describe('Migration', { viewportWidth: 1200, retries: { openMode: 2, runMode: 2 } }, () => {
   it('should create the cypress.config.js file and delete old config', () => {
     startMigrationFor('migration')
 
