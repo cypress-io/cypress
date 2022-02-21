@@ -2,9 +2,9 @@
 
 // See ../guides/next-version.md for documentation.
 
+const path = require('path')
 const semver = require('semver')
 const bumpCb = require('conventional-recommended-bump')
-const path = require('path')
 const { promisify } = require('util')
 
 const currentVersion = require('../package.json').version
@@ -32,6 +32,8 @@ if (require.main !== module) {
 }
 
 (async () => {
+  process.chdir(path.join(__dirname, '..'))
+
   for (const path of paths) {
     const pathNextVersion = await getNextVersionForPath(path)
 
@@ -49,7 +51,7 @@ if (require.main !== module) {
 
     console.log(`Running '${cmd}'...`)
 
-    return require('child_process').execSync(cmd, { cwd: path.join(__dirname, '..') })
+    return require('child_process').execSync(cmd)
   }
 
   console.log(nextVersion)
