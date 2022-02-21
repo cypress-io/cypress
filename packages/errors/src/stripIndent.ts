@@ -32,7 +32,3 @@ export const stripIndent = (strings: TemplateStringsArray, ...args: any[]): stri
 
   return result
 }
-
-module.exports = {
-  stripIndent,
-}
