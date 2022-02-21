@@ -1,6 +1,16 @@
 ['config', 'env'].forEach((fnName) => {
   // @ts-ignore
   describe(`multi-domain - Cypress.${fnName}()`, { experimentalSessionSupport: true, experimentalMultiDomain: true }, () => {
+    const USED_KEYS = {
+      foo: 'multi-domain-foo',
+      bar: 'multi-domain-bar',
+      baz: 'multi-domain-baz',
+      qux: 'multi-domain-qux',
+      quux: 'multi-domain-quux',
+      unserializable: 'multi-domain-unserializable',
+      error: 'multi-domain-error',
+    }
+
     beforeEach(() => {
       cy.visit('/fixtures/multi-domain.html')
       cy.get('a[data-cy="multi-domain-secondary-link"]').click()
@@ -9,13 +19,6 @@
     afterEach(() => {
       // @ts-ignore
       window.top.__cySkipValidateConfig = true
-    })
-
-    after(() => {
-      // @ts-ignore
-      Cypress.config.reset()
-      // @ts-ignore
-      Cypress.env.reset()
     })
 
     if (fnName === 'config') {
@@ -38,38 +41,43 @@
 
     context('serializable', () => {
       it(`syncs initial Cypress.${fnName}() from the primary domain to the secondary (synchronously)`, () => {
-        Cypress[fnName]('foo', 'bar')
-        cy.switchToDomain('foobar.com', [fnName], ([fnName]) => {
-          const bar = Cypress[fnName]('foo')
+        Cypress[fnName](USED_KEYS.foo, 'bar')
+        cy.switchToDomain('foobar.com', [fnName, USED_KEYS], ([fnName, USED_KEYS]) => {
+          // @ts-ignore
+          const bar = Cypress[fnName](USED_KEYS.foo)
 
           expect(bar).to.equal('bar')
         })
       })
 
       it(`syncs serializable values in the Cypress.${fnName}() again to the secondary even after spec bridge is created`, () => {
-        Cypress[fnName]('foo', 'baz')
-        cy.switchToDomain('foobar.com', [fnName], ([fnName]) => {
-          const baz = Cypress[fnName]('foo')
+        Cypress[fnName](USED_KEYS.foo, 'baz')
+        cy.switchToDomain('foobar.com', [fnName, USED_KEYS], ([fnName, USED_KEYS]) => {
+          // @ts-ignore
+          const baz = Cypress[fnName](USED_KEYS.foo)
 
           expect(baz).to.equal('baz')
         })
       })
 
       it(`syncs serializable Cypress.${fnName}() values outwards from secondary (synchronously)`, () => {
-        cy.switchToDomain('foobar.com', [fnName], ([fnName]) => {
-          Cypress[fnName]('bar', 'baz')
+        cy.switchToDomain('foobar.com', [fnName, USED_KEYS], ([fnName, USED_KEYS]) => {
+          // @ts-ignore
+          Cypress[fnName](USED_KEYS.bar, 'baz')
         }).then(() => {
-          const baz = Cypress[fnName]('bar')
+          const baz = Cypress[fnName](USED_KEYS.bar)
 
           expect(baz).to.equal('baz')
         })
       })
 
       it(`syncs serializable Cypress.${fnName}() values outwards from secondary even if the value is undefined`, () => {
-        Cypress[fnName]('foo', 'bar')
+        // @ts-ignore
+        Cypress[fnName](USED_KEYS.foo, 'bar')
 
-        cy.switchToDomain('foobar.com', [fnName], ([fnName]) => {
-          Cypress[fnName]('foo', undefined)
+        cy.switchToDomain('foobar.com', [fnName, USED_KEYS], ([fnName, USED_KEYS]) => {
+          // @ts-ignore
+          Cypress[fnName](USED_KEYS.foo, undefined)
         }).then(() => {
           expect(Cypress[fnName]('foo')).to.be.undefined
         })
@@ -77,42 +85,45 @@
 
       // FIXME: unskip this test once tail-end waiting is implemented
       it.skip(`syncs serializable Cypress.${fnName}() values outwards from secondary (commands/async)`, () => {
-        cy.switchToDomain('foobar.com', [fnName], ([fnName]) => {
+        cy.switchToDomain('foobar.com', [fnName, USED_KEYS], ([fnName, USED_KEYS]) => {
           cy.then(() => {
-            Cypress[fnName]('bar', 'quux')
+            // @ts-ignore
+            Cypress[fnName](USED_KEYS.bar, 'quux')
           })
         }).then(() => {
-          const quux = Cypress[fnName]('bar')
+          const quux = Cypress[fnName](USED_KEYS.bar)
 
           expect(quux).to.equal('quux')
         })
       })
 
       it(`persists Cypress.${fnName}() changes made in the secondary, assuming primary has not overwritten with a serializable value`, () => {
-        cy.switchToDomain('foobar.com', [fnName], ([fnName]) => {
-          const baz = Cypress[fnName]('bar')
+        cy.switchToDomain('foobar.com', [fnName, USED_KEYS], ([fnName, USED_KEYS]) => {
+          // @ts-ignore
+          const baz = Cypress[fnName](USED_KEYS.bar)
 
           expect(baz).to.equal('baz')
         })
       })
 
       it(`does NOT sync Cypress.${fnName}() changes made in the secondary after the command queue is finished and the callback window is closed`, {
-        // @ts-ignore
-        baz: undefined,
+        [USED_KEYS.baz]: undefined,
         env: {
-          baz: undefined,
+          [USED_KEYS.baz]: undefined,
         },
       }, () => {
         return new Promise<void>((resolve) => {
-          cy.switchToDomain('foobar.com', [fnName], ([fnName]) => {
+          cy.switchToDomain('foobar.com', [fnName, USED_KEYS], ([fnName, USED_KEYS]) => {
             setTimeout(() => {
               // this value STILL gets set, but will be blown away on the next switchToDomain with whatever exists in the primary
-              Cypress[fnName]('baz', 'qux')
+              // @ts-ignore
+              Cypress[fnName](USED_KEYS.baz, 'qux')
             }, 100)
 
-            Cypress[fnName]('baz', 'quux')
+            // @ts-ignore
+            Cypress[fnName](USED_KEYS.baz, 'quux')
           }).then(() => {
-            const quux = Cypress[fnName]('baz')
+            const quux = Cypress[fnName](USED_KEYS.baz)
 
             expect(quux).to.equal('quux')
             resolve()
@@ -122,15 +133,16 @@
 
       it('overwrites different values in secondary if one exists in the primary', {
         // @ts-ignore
-        baz: 'quux',
+        [USED_KEYS.baz]: 'quux',
         env: {
-          baz: 'quux',
+          [USED_KEYS.baz]: 'quux',
         },
       }, () => {
-        cy.switchToDomain('foobar.com', [fnName], ([fnName]) => {
+        cy.switchToDomain('foobar.com', [fnName, USED_KEYS], ([fnName, USED_KEYS]) => {
           // in previous test, 'baz' was set to 'qux' after the callback window was closed.
           // this should be overwritten by 'quux' that exists in the primary
-          const quux = Cypress[fnName]('baz')
+          // @ts-ignore
+          const quux = Cypress[fnName](USED_KEYS.baz)
 
           expect(quux).to.equal('quux')
         })
@@ -138,13 +150,14 @@
 
       it(`overwrites different values in secondary, even if the Cypress.${fnName}() value does not exist in the primary`, {
         // @ts-ignore
-        baz: undefined,
+        [USED_KEYS.baz]: undefined,
         env: {
-          baz: undefined,
+          [USED_KEYS.baz]: undefined,
         },
       }, () => {
-        cy.switchToDomain('foobar.com', [fnName], ([fnName]) => {
-          const isNowUndefined = Cypress[fnName]('baz')
+        cy.switchToDomain('foobar.com', [fnName, USED_KEYS], ([fnName, USED_KEYS]) => {
+          // @ts-ignore
+          const isNowUndefined = Cypress[fnName](USED_KEYS.baz)
 
           expect(isNowUndefined).to.be.undefined
         })
@@ -155,62 +168,67 @@
       const unserializableFunc = () => undefined
 
       it('does not sync unserializable values from the primary to the secondary', () => {
-        Cypress[fnName]('unserializable', unserializableFunc)
-        cy.switchToDomain('foobar.com', [fnName], ([fnName]) => {
-          const isUndefined = Cypress[fnName]('unserializable')
+        Cypress[fnName](USED_KEYS.unserializable, unserializableFunc)
+        cy.switchToDomain('foobar.com', [fnName, USED_KEYS], ([fnName, USED_KEYS]) => {
+          // @ts-ignore
+          const isUndefined = Cypress[fnName](USED_KEYS.unserializable)
 
           expect(isUndefined).to.be.undefined
         })
       })
 
       it('does not overwrite unserializable values in the primary when none exist in the secondary', () => {
-        Cypress[fnName]('unserializable', unserializableFunc)
+        Cypress[fnName](USED_KEYS.unserializable, unserializableFunc)
         cy.switchToDomain('foobar.com', () => undefined)
 
-        const isFunc = Cypress[fnName]('unserializable')
+        const isFunc = Cypress[fnName](USED_KEYS.unserializable)
 
         expect(isFunc).to.equal(unserializableFunc)
       })
 
       it('overwrites unserializable values in the primary when serializable values of same key exist in secondary', () => {
-        Cypress[fnName]('unserializable', unserializableFunc)
-        cy.switchToDomain('foobar.com', [fnName], ([fnName]) => {
-          Cypress[fnName]('unserializable', undefined)
+        Cypress[fnName](USED_KEYS.unserializable, unserializableFunc)
+        cy.switchToDomain('foobar.com', [fnName, USED_KEYS], ([fnName, USED_KEYS]) => {
+          // @ts-ignore
+          Cypress[fnName](USED_KEYS.unserializable, undefined)
         }).then(() => {
-          const isNowUndefined = Cypress[fnName]('unserializable')
+          const isNowUndefined = Cypress[fnName](USED_KEYS.unserializable)
 
           expect(isNowUndefined).to.be.undefined
         })
       })
 
       it('overwrites unserializable values in the secondary when serializable values of same key exist in primary', () => {
-        cy.switchToDomain('foobar.com', [fnName], ([fnName]) => {
+        cy.switchToDomain('foobar.com', [fnName, USED_KEYS], ([fnName, USED_KEYS]) => {
           const unserializableFuncSecondary = () => undefined
 
-          Cypress[fnName]('unserializable', unserializableFuncSecondary)
+          // @ts-ignore
+          Cypress[fnName](USED_KEYS.unserializable, unserializableFuncSecondary)
         }).then(() => {
-          Cypress[fnName]('unserializable', undefined)
+          Cypress[fnName](USED_KEYS.unserializable, undefined)
         })
 
-        cy.switchToDomain('foobar.com', [fnName], ([fnName]) => {
-          const isUndefined = Cypress[fnName]('unserializable')
+        cy.switchToDomain('foobar.com', [fnName, USED_KEYS], ([fnName, USED_KEYS]) => {
+          // @ts-ignore
+          const isUndefined = Cypress[fnName](USED_KEYS.unserializable)
 
           expect(isUndefined).to.be.undefined
         }).then(() => {
-          const isUndefined = Cypress[fnName]('unserializable')
+          const isUndefined = Cypress[fnName](USED_KEYS.unserializable)
 
           expect(isUndefined).to.be.undefined
         })
       })
 
       it('does not overwrite unserializable values in the primary when unserializable values of same key exist in secondary', () => {
-        Cypress[fnName]('unserializable', unserializableFunc)
-        cy.switchToDomain('foobar.com', [fnName], ([fnName]) => {
+        Cypress[fnName](USED_KEYS.unserializable, unserializableFunc)
+        cy.switchToDomain('foobar.com', [fnName, USED_KEYS], ([fnName, USED_KEYS]) => {
           const unserializableFuncSecondary = () => undefined
 
-          Cypress[fnName]('unserializable', unserializableFuncSecondary)
+          // @ts-ignore
+          Cypress[fnName](USED_KEYS.unserializable, unserializableFuncSecondary)
         }).then(() => {
-          const isFunc = Cypress[fnName]('unserializable')
+          const isFunc = Cypress[fnName](USED_KEYS.unserializable)
 
           expect(isFunc).to.equal(unserializableFunc)
         })
@@ -222,19 +240,21 @@
           b: document.createElement('h1'),
         }
 
-        Cypress[fnName]('unserializable', partiallyUnserializableObject)
+        Cypress[fnName](USED_KEYS.unserializable, partiallyUnserializableObject)
 
-        cy.switchToDomain('foobar.com', [fnName], ([fnName]) => {
-          const doesNotContainPartialAProperty = Cypress[fnName]('unserializable')
+        cy.switchToDomain('foobar.com', [fnName, USED_KEYS], ([fnName, USED_KEYS]) => {
+          // @ts-ignore
+          const doesNotContainPartialAProperty = Cypress[fnName](USED_KEYS.unserializable)
 
           expect(doesNotContainPartialAProperty?.a).to.be.undefined
 
-          Cypress[fnName]('unserializable', {
+          // @ts-ignore
+          Cypress[fnName](USED_KEYS.unserializable, {
             a: 3,
             c: document.createElement('h1'),
           })
         }).then(() => {
-          const isPartiallyUnserializableObject = Cypress[fnName]('unserializable')
+          const isPartiallyUnserializableObject = Cypress[fnName](USED_KEYS.unserializable)
 
           expect(isPartiallyUnserializableObject.a).to.equal(1)
         })
@@ -245,10 +265,11 @@
       it('(firefox) uses native structuredClone in firefox and does NOT serialize Error objects in config', {
         browser: 'firefox',
       }, function () {
-        Cypress[fnName]('errorInConfig', new Error('error'))
+        Cypress[fnName](USED_KEYS.error, new Error('error'))
 
-        cy.switchToDomain('foobar.com', [fnName], ([fnName]) => {
-          const isUndefined = Cypress[fnName]('errorInConfig')
+        cy.switchToDomain('foobar.com', [fnName, USED_KEYS], ([fnName, USED_KEYS]) => {
+          // @ts-ignore
+          const isUndefined = Cypress[fnName](USED_KEYS.error)
 
           expect(isUndefined).to.be.undefined
         })
@@ -258,10 +279,11 @@
       it('(chromium) uses ponyfilled or native structuredClone that can serialize Error objects in config', {
         browser: { family: 'chromium' },
       }, () => {
-        Cypress[fnName]('errorInConfig', new Error('error'))
+        Cypress[fnName](USED_KEYS.error, new Error('error'))
 
-        cy.switchToDomain('foobar.com', [fnName], ([fnName]) => {
-          const isErrorObj = Cypress[fnName]('errorInConfig')
+        cy.switchToDomain('foobar.com', [fnName, USED_KEYS], ([fnName, USED_KEYS]) => {
+          // @ts-ignore
+          const isErrorObj = Cypress[fnName](USED_KEYS.error)
 
           expect(isErrorObj).to.be.an.instanceof(Error)
         })
