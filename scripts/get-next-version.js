@@ -4,6 +4,7 @@
 
 const semver = require('semver')
 const bumpCb = require('conventional-recommended-bump')
+const path = require('path')
 const { promisify } = require('util')
 
 const currentVersion = require('../package.json').version
@@ -48,7 +49,7 @@ if (require.main !== module) {
 
     console.log(`Running '${cmd}'...`)
 
-    return require('child_process').execSync(cmd)
+    return require('child_process').execSync(cmd, { cwd: path.join(__dirname, '..') })
   }
 
   console.log(nextVersion)
