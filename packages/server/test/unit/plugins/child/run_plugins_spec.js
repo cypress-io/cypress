@@ -66,7 +66,7 @@ describe.skip('lib/plugins/child/run_plugins', () => {
   it('sends error message if setupNodeEvents does not export a function', function () {
     mockery.registerMock('plugins-file', null)
     runPlugins(this.ipc, 'plugins-file', 'proj-root')
-    expect(this.ipc.send).to.be.calledWith('load:error', 'PLUGINS_DIDNT_EXPORT_FUNCTION', 'plugins-file')
+    expect(this.ipc.send).to.be.calledWith('load:error', 'SETUP_NODE_EVENTS_IS_NOT_FUNCTION', 'plugins-file')
   })
 
   it('sends error message if setupNodeEvents is not a function', function () {

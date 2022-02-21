@@ -242,10 +242,10 @@ export function updateWithPluginValues (cfg, overrides) {
     }
 
     if (_.isString(validationResult)) {
-      return errors.throwErr('CONFIG_VALIDATION_MSG_ERROR', 'pluginsFile', configFile, validationResult)
+      return errors.throwErr('CONFIG_VALIDATION_MSG_ERROR', 'configFile', configFile, validationResult)
     }
 
-    return errors.throwErr('CONFIG_VALIDATION_ERROR', 'pluginsFile', configFile, validationResult)
+    return errors.throwErr('CONFIG_VALIDATION_ERROR', 'configFile', configFile, validationResult)
     // return errors.throwErr('CONFIG_VALIDATION_ERROR', 'pluginsFile', relativePluginsPath, errMsg)
   })
 

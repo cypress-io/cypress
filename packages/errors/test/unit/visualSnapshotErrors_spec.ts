@@ -658,9 +658,9 @@ describe('visual error templates', () => {
     },
     SETUP_NODE_EVENTS_IS_NOT_FUNCTION: () => {
       return {
-        default: ['e2e', '/path/to/pluginsFile', { some: 'object' }],
-        string: ['e2e', '/path/to/pluginsFile', 'some string'],
-        array: ['e2e', '/path/to/pluginsFile', ['some', 'array']],
+        default: ['/path/to/pluginsFile', 'e2e', { some: 'object' }],
+        string: ['/path/to/pluginsFile', 'e2e', 'some string'],
+        array: ['/path/to/pluginsFile', 'e2e', ['some', 'array']],
       }
     },
     CONFIG_FILE_SETUP_NODE_EVENTS_ERROR: () => {

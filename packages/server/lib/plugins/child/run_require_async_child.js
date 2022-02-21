@@ -52,10 +52,10 @@ function run (ipc, configFile, projectRoot) {
     return false
   })
 
-  const isValidSetupNodeEvents = (setupNodeEvents) => {
-    if (setupNodeEvents && typeof setupNodeEvents !== 'function') {
+  const isValidSetupNodeEvents = (config, testingType) => {
+    if (config[testingType] && config[testingType].setupNodeEvents && typeof config[testingType].setupNodeEvents !== 'function') {
       ipc.send('setupTestingType:error', util.serializeError(
-        require('@packages/errors').getError('SETUP_NODE_EVENTS_IS_NOT_FUNCTION', configFile, setupNodeEvents),
+        require('@packages/errors').getError('SETUP_NODE_EVENTS_IS_NOT_FUNCTION', configFile, testingType, config[testingType].setupNodeEvents),
       ))
 
       return false
@@ -104,8 +104,12 @@ function run (ipc, configFile, projectRoot) {
 
         const runPlugins = new RunPlugins(ipc, projectRoot, configFile)
 
+        if (!isValidSetupNodeEvents(result, testingType)) {
+          return
+        }
+
         if (testingType === 'component') {
-          if (!isValidSetupNodeEvents(result.setupNodeEvents) || !isValidDevServer((result.component || {}))) {
+          if (!isValidDevServer((result.component || {}))) {
             return
           }
 
@@ -119,10 +123,6 @@ function run (ipc, configFile, projectRoot) {
             return setupNodeEvents(on, config)
           })
         } else if (testingType === 'e2e') {
-          if (!isValidSetupNodeEvents(result.e2e && result.e2e.setupNodeEvents)) {
-            return
-          }
-
           const setupNodeEvents = result.e2e && result.e2e.setupNodeEvents || ((on, config) => {})
 
           runPlugins.runSetupNodeEvents(options, setupNodeEvents)

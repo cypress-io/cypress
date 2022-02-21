@@ -34,15 +34,15 @@
     </style>
   
     </head>
-    <body><pre><span style="color:#e05561">Your <span style="color:#e5e510">pluginsFile<span style="color:#e05561"> did not export a valid function from: <span style="color:#4ec4ff">/path/to/pluginsFile<span style="color:#e05561"><span style="color:#e6e6e6">
+    <body><pre><span style="color:#e05561">Your <span style="color:#e5e510">configFile<span style="color:#e05561"> is invalid: <span style="color:#4ec4ff">/path/to/pluginsFile<span style="color:#e05561"><span style="color:#e6e6e6">
 <span style="color:#e05561"><span style="color:#e6e6e6">
-<span style="color:#e05561">It must export a function with the following signature:<span style="color:#e6e6e6">
+<span style="color:#e05561">The setupNodeEvents in your <span style="color:#e5e510">e2e<span style="color:#e05561"> config should define a function with the following signature:<span style="color:#e6e6e6">
 <span style="color:#e05561"><span style="color:#e6e6e6">
-<span style="color:#e05561"><span style="color:#4ec4ff">module.exports = (on, config) =&gt; {<span style="color:#e05561"><span style="color:#e6e6e6">
-<span style="color:#e05561"><span style="color:#4ec4ff">  <span style="color:#4f5666">// configure plugins here<span style="color:#4ec4ff"><span style="color:#e05561"><span style="color:#e6e6e6">
+<span style="color:#e05561"><span style="color:#4ec4ff">setupNodeEvents(on, config) {<span style="color:#e05561"><span style="color:#e6e6e6">
+<span style="color:#e05561"><span style="color:#4ec4ff">  <span style="color:#4f5666">// configure tasks / plugins here<span style="color:#4ec4ff"><span style="color:#e05561"><span style="color:#e6e6e6">
 <span style="color:#e05561"><span style="color:#4ec4ff">}<span style="color:#e05561"><span style="color:#e6e6e6">
 <span style="color:#e05561"><span style="color:#e6e6e6">
-<span style="color:#e05561">Instead it exported:<span style="color:#e6e6e6">
+<span style="color:#e05561">Instead we saw:<span style="color:#e6e6e6">
 <span style="color:#e05561"><span style="color:#e6e6e6">
 <span style="color:#e05561"><span style="color:#de73ff">[<span style="color:#e05561"><span style="color:#e6e6e6">
 <span style="color:#e05561"><span style="color:#de73ff">  &quot;some&quot;,<span style="color:#e05561"><span style="color:#e6e6e6">
@@ -50,5 +50,5 @@
 <span style="color:#e05561"><span style="color:#de73ff">]<span style="color:#e05561"><span style="color:#e6e6e6">
 <span style="color:#e05561"><span style="color:#e6e6e6">
 <span style="color:#e05561">https://on.cypress.io/plugins-api<span style="color:#e6e6e6">
-<span style="color:#e05561"><span style="color:#e6e6e6"></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>
+<span style="color:#e05561"><span style="color:#e6e6e6"></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>
 </pre></body></html>

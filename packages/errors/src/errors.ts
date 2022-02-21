@@ -602,20 +602,20 @@ export const AllCypressErrors = {
       `
   },
   // TODO: make this relative path, not absolute
-  SETUP_NODE_EVENTS_IS_NOT_FUNCTION: (testingType: string, pluginsFilePath: string, exported: any) => {
+  SETUP_NODE_EVENTS_IS_NOT_FUNCTION: (configFilePath: string, testingType: string, exported: any) => {
     const code = errPartial`
-      setupNodeEvents(on, config) => {
+      setupNodeEvents(on, config) {
         ${fmt.comment(`// configure tasks / plugins here`)}
       }`
 
     return errTemplate`\
-      The setupNodeEvents in your ${fmt.highlight(`configFile.${testingType}`)} config did not export a valid function
+      Your ${fmt.highlight(`configFile`)} is invalid: ${fmt.path(configFilePath)}
 
-      It must export a function with the following signature:
+      The setupNodeEvents in your ${fmt.highlight(testingType)} config should define a function with the following signature:
 
       ${fmt.code(code)}
 
-      Instead it exported:
+      Instead we saw:
 
       ${fmt.stringify(exported)}
 

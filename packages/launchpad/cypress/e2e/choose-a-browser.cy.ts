@@ -37,6 +37,10 @@ describe('Choose a Browser Page', () => {
         cy.validateExternalLink({
           href: 'https://on.cypress.io/customize-browsers',
         })
+
+        cy.validateExternalLink({
+          href: 'https://on.cypress.io/troubleshooting-launching-browsers',
+        })
       })
 
       // Ensure warning can be dismissed
