@@ -31,9 +31,10 @@ export const STORYBOOK_DEPS = [
  * Onc we know the library, dev server and (optional) tool, we can generate a config file
  * and instruct the user which dependencies to install.
  */
-export async function detect (dir: string) {
+export function detect (dir: string) {
+  const pkg = fs.readJsonSync(path.join(`${dir}`, 'package.json'))
+
   for (const framework of frontendFrameworks) {
-    const pkg = await fs.readJson(path.join(`${dir}`, 'package.json'))
     const hasAllDeps = framework.detectors.every(x => {
       const vers = pkg.dependencies?.[x.dependency] || pkg.devDependencies?.[x.dependency]
       return (vers && satisfies(vers, x.version)) ?? false
@@ -44,11 +45,15 @@ export async function detect (dir: string) {
       return framework
     }
   }
+
+  return undefined
 }
 
-export const frontendFrameworks = [
+export const frontendFrameworkPresets = [
   {
     id: 'vuecli4-vue2',
+    group: 'vuecli',
+    library: 'vue',
     type: 'preset',
     supportedBundlers: ['webpack'],
     glob: '*.{js,jsx,tsx}',
@@ -65,8 +70,10 @@ export const frontendFrameworks = [
   },
 
   {
+    group: 'vuecli',
     id: 'vuecli4-vue3',
     type: 'preset',
+    library: 'vue',
     supportedBundlers: ['webpack'],
     glob: '*.{js,jsx,tsx}',
     detectors: [
@@ -83,6 +90,8 @@ export const frontendFrameworks = [
 
   {
     id: 'vuecli5-vue2',
+    group: 'vuecli',
+    library: 'vue',
     type: 'preset',
     supportedBundlers: ['webpack'],
     glob: '*.{js,jsx,tsx}',
@@ -100,7 +109,9 @@ export const frontendFrameworks = [
 
   {
     id: 'vuecli5-vue3',
+    group: 'vuecli',
     type: 'preset',
+    library: 'vue',
     supportedBundlers: ['webpack'],
     glob: '*.{js,jsx,tsx}',
     detectors: [
@@ -117,7 +128,9 @@ export const frontendFrameworks = [
 
   {
     id: 'nextjs',
+    group: 'nextjs',
     type: 'preset',
+    library: 'react',
     supportedBundlers: ['webpack'],
     glob: '*.{js,jsx,tsx}',
     detectors: [
@@ -130,7 +143,9 @@ export const frontendFrameworks = [
 
   {
     id: 'create-react-app',
+    group: 'create-react-app',
     type: 'preset',
+    library: 'react',
     supportedBundlers: ['webpack'],
     glob: '*.{js,jsx,tsx}',
     detectors: [
@@ -142,8 +157,27 @@ export const frontendFrameworks = [
   },
 
   {
+    id: 'nuxt-2',
+    group: 'nuxt',
+    type: 'preset',
+    library: 'vue',
+    supportedBundlers: ['webpack'],
+    glob: '*.{js,jsx,tsx}',
+    detectors: [
+      { 
+        dependency: 'nuxt',
+        version: '^2.0.0',
+      },
+    ],
+  },
+]
+
+export const frontendFrameworkWithBundler = [
+  {
     id: 'react-vite',
+    group: 'react-vite',
     type: 'library-and-bundler',
+    library: 'react',
     supportedBundlers: ['vite'],
     glob: '*.{js,jsx,tsx}',
     detectors: [
@@ -164,7 +198,9 @@ export const frontendFrameworks = [
 
   {
     id: 'vue3-vite',
+    group: 'vue-vite',
     type: 'library-and-bundler',
+    library: 'vue',
     supportedBundlers: ['vite'],
     glob: '*.{js,jsx,tsx}',
     detectors: [
@@ -178,194 +214,161 @@ export const frontendFrameworks = [
       },
     ],
   },
+]
 
+export const frontendFrameworkWithoutBundler = [
   {
-    id: 'nuxt-2',
-    type: 'preset',
-    supportedBundlers: ['webpack'],
-    glob: '*.{js,jsx,tsx}',
+    id: 'react',
+    group: 'react',
+    type: 'library',
+    library: 'react',
+    supportedBundlers: ['vite', 'webpack'],
+    glob: '{*.js,*.jsx,*.ts,*.tsx}',
     detectors: [
       { 
-        dependency: 'nuxt',
-        version: '^2.0.0',
+        dependency: 'react',
+        version: '>=16.0.0',
+      },
+      { 
+        dependency: 'react-dom',
+        version: '>=16.0.0',
       },
     ],
   },
-
-  // {
-  //   type: 'vuecli',
-  //   name: 'Vue CLI v4',
-  //   supportedBundlers: ['webpack'],
-  //   package: '@cypress/vue',
-  //   defaultPackagePath: null,
-  //   detectors: [
-  //     {
-  //       path: 'package.json',
-  //       matchContent:
-  //         '"(dev)?(d|D)ependencies":\\s*{[^}]*"@vue\\/cli-service":\\s*".+?"[^}]*}',
-  //     },
-  //   ],
-  //   glob: '*.vue',
-  //   deps: ['@vue/cli-service', 'vue'],
-  //   category: FRONTEND_FRAMEWORK_CATEGORIES[1],
-  // },
-  // {
-  //   type: 'react',
-  //   name: 'React.js',
-  //   supportedBundlers: ['webpack', 'vite'] as readonly Bundler['type'][],
-  //   package: '@cypress/react',
-  //   defaultPackagePath: null,
-  //   glob: '*.{jsx,tsx}',
-  //   deps: ['react', 'react-dom'],
-  //   category: FRONTEND_FRAMEWORK_CATEGORIES[0],
-  //   storybookDep: 
-  // },
-  // {
-  //   type: 'vue',
-  //   name: 'Vue.js',
-  //   supportedBundlers: ['webpack', 'vite'] as readonly Bundler['type'][],
-  //   package: '@cypress/vue',
-  //   defaultPackagePath: null,
-  //   glob: '*.vue',
-  //   deps: ['vue'],
-  //   category: FRONTEND_FRAMEWORK_CATEGORIES[1],
-  //   storybookDep: STORYBOOK_DEPS[1],
-  // },
-  // {
-  //   type: 'nextjs',
-  //   name: 'Next.js',
-  //   supportedBundlers: ['webpack'] as readonly Bundler['type'][],
-  //   package: '@cypress/react',
-  //   defaultPackagePath: '@cypress/react/plugins/next',
-  //   glob: '*.{jsx,tsx}',
-  //   deps: ['next', 'react', 'react-dom'],
-  //   category: FRONTEND_FRAMEWORK_CATEGORIES[0],
-  //   storybookDep: STORYBOOK_DEPS[0],
-  // },
-  // {
-  //   type: 'nuxtjs',
-  //   name: 'Nuxt.js',
-  //   supportedBundlers: ['webpack'] as readonly Bundler['type'][],
-  //   package: '@cypress/vue',
-  //   defaultPackagePath: null,
-  //   glob: '*.vue',
-  //   deps: ['nuxt'],
-  //   category: FRONTEND_FRAMEWORK_CATEGORIES[1],
-  //   storybookDep: STORYBOOK_DEPS[1],
-  // },
-]
-
-type FrameworkType = typeof FRONTEND_FRAMEWORKS[number]['type']
-type Lang = `${'j'|'t'}s`
-
-type ConfigMap = {
-  [key in FrameworkType]: {
-    [key in Lang]: string
-  }
-}
-
-const frameworks = [
   {
-    name: 'cra',
-
-  }
+    id: 'vue2',
+    group: 'vue',
+    type: 'library',
+    library: 'vue',
+    supportedBundlers: ['vite', 'webpack'],
+    glob: '{*.vue,*.jsx,*.tsx}',
+    detectors: [
+      { 
+        dependency: 'vue',
+        version: '^2.0.0'
+      },
+    ],
+  },
+  {
+    id: 'vue3',
+    group: 'vue',
+    type: 'library',
+    library: 'vue',
+    supportedBundlers: ['vite', 'webpack'],
+    glob: '{*.vue,*.jsx,*.tsx}',
+    detectors: [
+      { 
+        dependency: 'vue',
+        version: '^3.0.0'
+      },
+    ],
+  },
 ]
 
-export const configFiles: ConfigMap = {
-  cra: {
-    js: dedent`
-      const { defineConfig } = require('cypress')
-      const { devServer } = require('@cypress/react/plugins/react-scripts')
+export const frontendFrameworks = [
+  ...frontendFrameworkPresets,
+  ...frontendFrameworkWithBundler,
+  ...frontendFrameworkWithoutBundler,
+] as const
 
-      module.exports = defineConfig({
-        'video': false,
-        'viewportWidth': 500,
-        'viewportHeight': 800,
-        'experimentalFetchPolyfill': true,
-        'component': {
-          devServer,
-        },
-      })
-  `,
-  ts: dedent`
-    import { defineConfig } from 'cypress'
-    import { devServer } from '@cypress/react/plugins/react-scripts'
 
-    export default defineConfig({
-      component: {
-        devServer,
-      },
-    })
-  `
-  },
+export const configFiles = {}
 
-  nextjs: {
-    js: dedent`
-    const { devServer } = require('@cypress/react/plugins/next')
+// export const configFiles: ConfigMap = {
+//   cra: {
+//     js: dedent`
+//       const { defineConfig } = require('cypress')
+//       const { devServer } = require('@cypress/react/plugins/react-scripts')
 
-    module.exports = {
-      component: {
-        devServer
-      }
-    }
-    `,
-    ts: dedent`
-    import { defineConfig } from 'cypress'
-    import { devServer } from '@cypress/react/plugins/next'
+//       module.exports = defineConfig({
+//         'video': false,
+//         'viewportWidth': 500,
+//         'viewportHeight': 800,
+//         'experimentalFetchPolyfill': true,
+//         'component': {
+//           devServer,
+//         },
+//       })
+//   `,
+//   ts: dedent`
+//     import { defineConfig } from 'cypress'
+//     import { devServer } from '@cypress/react/plugins/react-scripts'
 
-    export default defineConfig({
-      component: {
-        devServer,
-      },
-    })`
-  },
+//     export default defineConfig({
+//       component: {
+//         devServer,
+//       },
+//     })
+//   `
+//   },
 
-  vuecli: {
-    js: dedent`
-    const { devServer } = require('@cypress/webpack-dev-server')
-    const webpackConfig = require('@vue/cli-service/webpack.config')
+//   nextjs: {
+//     js: dedent`
+//     const { devServer } = require('@cypress/react/plugins/next')
 
-    module.exports = {
-      component: {
-        devServer,
-        devServerConfig: {
-          webpackConfig
-        }
-      }
-    }
-    `,
-    ts: dedent`
-    import { defineConfig } from 'cypress'
-    import { devServer } from '@cypress/webpack-dev-server'
-    import webpackConfig from '@vue/cli-service/webpack.config'
+//     module.exports = {
+//       component: {
+//         devServer
+//       }
+//     }
+//     `,
+//     ts: dedent`
+//     import { defineConfig } from 'cypress'
+//     import { devServer } from '@cypress/react/plugins/next'
 
-    export default defineConfig({
-      component: {
-        devServer,
-        devServerConfig: {
-          webpackConfig
-        }
-      }
-    })`
-  },
+//     export default defineConfig({
+//       component: {
+//         devServer,
+//       },
+//     })`
+//   },
 
-  nuxtjs: {
-    js: dedent`
-    const { defineConfig } = require("cypress")
-    const { devServer } = require("@cypress/webpack-dev-server")
-    const { getWebpackConfig } = require("nuxt")
+//   vuecli: {
+//     js: dedent`
+//     const { devServer } = require('@cypress/webpack-dev-server')
+//     const webpackConfig = require('@vue/cli-service/webpack.config')
 
-    module.exports = defineConfig({
-      component: {
-        async devServer(cypressDevServerConfig) {
-          const webpackConfig = await getWebpackConfig()
+//     module.exports = {
+//       component: {
+//         devServer,
+//         devServerConfig: {
+//           webpackConfig
+//         }
+//       }
+//     }
+//     `,
+//     ts: dedent`
+//     import { defineConfig } from 'cypress'
+//     import { devServer } from '@cypress/webpack-dev-server'
+//     import webpackConfig from '@vue/cli-service/webpack.config'
 
-          return devServer(cypressDevServerConfig, { webpackConfig })
-        }
-      }
-    })
-    `,
-    ts: dedent`
-    `
-  }
-}
+//     export default defineConfig({
+//       component: {
+//         devServer,
+//         devServerConfig: {
+//           webpackConfig
+//         }
+//       }
+//     })`
+//   },
+
+//   nuxtjs: {
+//     js: dedent`
+//     const { defineConfig } = require("cypress")
+//     const { devServer } = require("@cypress/webpack-dev-server")
+//     const { getWebpackConfig } = require("nuxt")
+
+//     module.exports = defineConfig({
+//       component: {
+//         async devServer(cypressDevServerConfig) {
+//           const webpackConfig = await getWebpackConfig()
+
+//           return devServer(cypressDevServerConfig, { webpackConfig })
+//         }
+//       }
+//     })
+//     `,
+//     ts: dedent`
+//     `
+//   }
+// }

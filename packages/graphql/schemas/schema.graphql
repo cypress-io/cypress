@@ -1153,9 +1153,6 @@ enum WizardConfigFileStatusEnum {
 
 """A frontend framework that we can setup within the app"""
 type WizardFrontendFramework implements Node {
-  """Classification or label of framework. e.g. React, Vue, or Other"""
-  category: FrontendFrameworkCategoryEnum!
-
   """Relay style Node ID field for the WizardFrontendFramework field"""
   id: ID!
 
@@ -1164,6 +1161,9 @@ type WizardFrontendFramework implements Node {
 
   """Whether this is the selected framework in the wizard"""
   isSelected: Boolean!
+
+  """The JS library used, eg React, Vue, etc."""
+  library: FrontendFrameworkCategoryEnum!
 
   """The name of the framework"""
   name: String!

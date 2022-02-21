@@ -17,6 +17,7 @@ import pDefer from 'p-defer'
 import fs from 'fs'
 
 import type { DataContext } from '..'
+import { detect, frontendFrameworks } from '@packages/scaffold-config'
 import { LoadConfigReply, SetupNodeEventsReply, ProjectConfigIpc, IpcHandler } from './ProjectConfigIpc'
 import assert from 'assert'
 import type { AllModeOptions, FoundBrowser, FullConfig, TestingType } from '@packages/types'
@@ -69,7 +70,7 @@ interface RequireWatchers {
 }
 
 export interface ProjectMetaState {
-  hasFrontendFramework: 'nuxt' | 'react' | 'react-scripts' | 'vue' | 'next' | false
+  frontendFramework: (typeof frontendFrameworks[number]) | undefined
   hasTypescript: boolean
   hasLegacyCypressJson: boolean
   hasCypressEnvFile: boolean
@@ -80,7 +81,7 @@ export interface ProjectMetaState {
 }
 
 const PROJECT_META_STATE: ProjectMetaState = {
-  hasFrontendFramework: false,
+  frontendFramework: undefined,
   hasTypescript: false,
   hasLegacyCypressJson: false,
   hasMultipleConfigPaths: false,
@@ -126,6 +127,9 @@ export class ProjectLifecycleManager {
     } else if (ctx.coreData.currentTestingType && this._projectRoot) {
       this.setCurrentTestingType(ctx.coreData.currentTestingType)
     }
+
+    this._projectMetaState.frontendFramework = detect(this.projectRoot)
+    console.log('meta!!!', this._projectMetaState.frontendFramework)
 
     // see timers/parent.js line #93 for why this is necessary
     process.on('exit', this.onProcessExit)
@@ -1111,12 +1115,6 @@ export class ProjectLifecycleManager {
         metaState.hasTypescript = true
       }
 
-      for (const framework of ['next', 'nuxt', 'react-scripts', 'react', 'vue'] as const) {
-        if (packageJson.dependencies?.[framework] || packageJson.devDependencies?.[framework]) {
-          metaState.hasFrontendFramework = framework
-          break
-        }
-      }
     } catch {
       // No need to handle
     }
