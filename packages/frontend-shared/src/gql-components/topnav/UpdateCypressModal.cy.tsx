@@ -16,6 +16,7 @@ describe('<UpdateCypressModal />', { viewportWidth: 1000, viewportHeight: 750 },
       installCommand="npm i "/>))
 
     cy.contains(`${defaultMessages.topNav.updateCypress.title} ${latestVersion}`).should('be.visible')
+    cy.contains('a', defaultMessages.links.needHelp).should('have.attr', 'href', 'https://on.cypress.io/changelog')
     cy.contains(defaultMessages.topNav.updateCypress.currentlyRunning
     .replace('{0}', installedVersion)).should('be.visible')
 

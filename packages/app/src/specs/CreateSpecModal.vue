@@ -4,6 +4,7 @@
     variant="bare"
     :title="title"
     :model-value="show"
+    help-link=""
     data-cy="create-spec-modal"
     @update:model-value="close"
   >
