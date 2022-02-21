@@ -3,6 +3,7 @@ const os = require('os')
 const path = require('path')
 const untildify = require('untildify')
 const debug = require('debug')('cypress:cli')
+const { buildInfo } = require('../../package.json')
 
 const fs = require('../fs')
 const util = require('../util')
@@ -51,6 +52,10 @@ const getBinaryDir = (version = util.pkgVersion()) => {
 }
 
 const getVersionDir = (version = util.pkgVersion()) => {
+  if (!buildInfo.stable) {
+    version = ['beta', buildInfo.commitBranch, buildInfo.commitSha]
+  }
+
   return path.join(getCacheDir(), version)
 }
 

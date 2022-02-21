@@ -1,6 +1,5 @@
 const _ = require('lodash')
 const os = require('os')
-const url = require('url')
 const path = require('path')
 const chalk = require('chalk')
 const debug = require('debug')('cypress:cli')
@@ -17,97 +16,14 @@ const logger = require('../logger')
 const { throwFormErrorText, errors } = require('../errors')
 const verbose = require('../VerboseRenderer')
 
-const getNpmArgv = () => {
-  const json = process.env.npm_config_argv
+const { buildInfo, version } = require('../../package.json')
 
-  if (!json) {
-    return
-  }
+function getBinaryUrlFromBuildInfo () {
+  const { commitSha, commitBranch } = buildInfo
 
-  debug('found npm argv json %o', json)
+  const arch = os.arch() === 'arm64' ? 'x64' : os.arch()
 
-  try {
-    return JSON.parse(json).original || []
-  } catch (e) {
-    return []
-  }
-}
-
-// attempt to discover the version specifier used to install Cypress
-// for example: "^5.0.0", "https://cdn.cypress.io/...", ...
-const getVersionSpecifier = (startDir = path.resolve(__dirname, '../..')) => {
-  const argv = getNpmArgv()
-
-  if ((process.env.npm_package_resolved || '').endsWith('cypress.tgz')) {
-    return process.env.npm_package_resolved
-  }
-
-  if (argv) {
-    const tgz = _.find(argv, (t) => t.endsWith('cypress.tgz'))
-
-    if (tgz) {
-      return tgz
-    }
-  }
-
-  const getVersionSpecifierFromPkg = (dir) => {
-    debug('looking for versionSpecifier %o', { dir })
-
-    const tryParent = () => {
-      const parentPath = path.resolve(dir, '..')
-
-      if (parentPath === dir) {
-        debug('reached FS root with no versionSpecifier found')
-
-        return
-      }
-
-      return getVersionSpecifierFromPkg(parentPath)
-    }
-
-    return fs.readJSON(path.join(dir, 'package.json'))
-    .catch(() => ({}))
-    .then((pkg) => {
-      const specifier = _.chain(['dependencies', 'devDependencies', 'optionalDependencies'])
-      .map((prop) => _.get(pkg, `${prop}.cypress`))
-      .compact().first().value()
-
-      return specifier || tryParent()
-    })
-  }
-
-  // recurse through parent directories until package.json with `cypress` is found
-  return getVersionSpecifierFromPkg(startDir)
-  .then((versionSpecifier) => {
-    debug('finished looking for versionSpecifier', { versionSpecifier })
-
-    return versionSpecifier
-  })
-}
-
-const betaNpmUrlRe = /^\/beta\/npm\/(?<version>[0-9.]+)\/(?<platformSlug>.+?)\/(?<artifactSlug>.+?)\/cypress\.tgz$/
-
-// convert a prerelease NPM package .tgz URL to the corresponding binary .zip URL
-const getBinaryUrlFromPrereleaseNpmUrl = (npmUrl) => {
-  let parsed
-
-  try {
-    parsed = url.parse(npmUrl)
-  } catch (e) {
-    return
-  }
-
-  const matches = betaNpmUrlRe.exec(parsed.pathname)
-
-  if (parsed.hostname !== 'cdn.cypress.io' || !matches) {
-    return
-  }
-
-  const { version, artifactSlug } = matches.groups
-
-  parsed.pathname = `/beta/binary/${version}/${os.platform()}-${os.arch()}/${artifactSlug}/cypress.zip`
-
-  return parsed.format()
+  return `https://cdn.cypress.io/beta/binary/${version}/${os.platform()}-${arch}/${commitBranch}-${commitSha}/cypress.zip`
 }
 
 const alreadyInstalledMsg = () => {
@@ -296,20 +212,12 @@ const start = (options = {}) => {
     ${err.message}
     `)
   })
-  .then(() => {
-    return Promise.all([
-      state.getBinaryPkgAsync(binaryDir).then(state.getBinaryPkgVersion),
-      getVersionSpecifier(),
-    ])
-  })
-  .then(([binaryVersion, versionSpecifier]) => {
-    if (!binaryUrlOverride && versionSpecifier) {
-      const computedBinaryUrl = getBinaryUrlFromPrereleaseNpmUrl(versionSpecifier)
+  .then(() => state.getBinaryPkgAsync(binaryDir).then(state.getBinaryPkgVersion))
+  .then((binaryVersion) => {
+    if (!binaryUrlOverride && !buildInfo.stable) {
+      const computedBinaryUrl = getBinaryUrlFromBuildInfo(buildInfo)
 
-      if (computedBinaryUrl) {
-        debug('computed binary url from version specifier %o', { computedBinaryUrl, needVersion })
-        binaryUrlOverride = computedBinaryUrl
-      }
+      binaryUrlOverride = computedBinaryUrl
     }
 
     needVersion = binaryUrlOverride || needVersion
@@ -431,8 +339,8 @@ const start = (options = {}) => {
 
 module.exports = {
   start,
-  _getVersionSpecifier: getVersionSpecifier,
-  _getBinaryUrlFromPrereleaseNpmUrl: getBinaryUrlFromPrereleaseNpmUrl,
+  // _getVersionSpecifier: getVersionSpecifier,
+  // _getBinaryUrlFromPrereleaseNpmUrl: getBinaryUrlFromPrereleaseNpmUrl,
 }
 
 const unzipTask = ({ zipFilePath, installDir, progress, rendererOptions }) => {
