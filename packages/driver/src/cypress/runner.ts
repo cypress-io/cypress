@@ -1,7 +1,4 @@
 /* eslint-disable prefer-rest-params */
-/* globals Cypress */
-
-// @ts-nocheck
 import _ from 'lodash'
 import dayjs from 'dayjs'
 import Promise from 'bluebird'
@@ -103,6 +100,8 @@ const testAfterRun = (test, Cypress) => {
     // prevent loop comprehension
     return null
   }
+
+  return null
 }
 
 const setTestTimingsForHook = (test, hookName, obj) => {
@@ -201,7 +200,7 @@ const eachHookInSuite = (suite, fn) => {
 
 // iterates over a suite's tests (including nested suites)
 // and will return as soon as the callback is true
-const findTestInSuite = (suite, fn = _.identity) => {
+const findTestInSuite = (suite, fn: any = _.identity) => {
   for (const test of suite.tests) {
     if (fn(test)) {
       return test
@@ -217,7 +216,7 @@ const findTestInSuite = (suite, fn = _.identity) => {
   }
 }
 
-const findSuiteInSuite = (suite, fn = _.identity) => {
+const findSuiteInSuite = (suite, fn: any = _.identity) => {
   if (fn(suite)) {
     return suite
   }
@@ -259,7 +258,7 @@ const findLastTestInSuite = (suite, fn = _.identity) => {
 }
 
 const getAllSiblingTests = (suite, getTestById) => {
-  const tests = []
+  const tests: any[] = []
 
   suite.eachTest((testRunnable) => {
     // iterate through each of our suites tests.
@@ -271,6 +270,8 @@ const getAllSiblingTests = (suite, getTestById) => {
     if (test) {
       return tests.push(test)
     }
+
+    return
   })
 
   return tests
@@ -300,7 +301,7 @@ const isLastSuite = (suite, tests) => {
 
   // grab all of the suites from our filtered tests
   // including all of their ancestor suites!
-  const suites = _.reduce(tests, (memo, test) => {
+  const suites = _.reduce<any, any[]>(tests, (memo, test) => {
     let parent
 
     while ((parent = test.parent)) {
@@ -309,8 +310,7 @@ const isLastSuite = (suite, tests) => {
     }
 
     return memo
-  }
-  , [])
+  }, [])
 
   // intersect them with our parent suites and see if the last one is us
   return _
@@ -357,7 +357,7 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
     const test = getTest()
     const allTests = getTests()
 
-    let shouldFireTestAfterRun = _.noop
+    let shouldFireTestAfterRun = () => false
 
     switch (name) {
       case 'afterEach':
@@ -375,6 +375,8 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
               return true
             }
           }
+
+          return false
         }
 
         break
@@ -395,7 +397,7 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
             // due to already being run on top navigation
             // https://github.com/cypress-io/cypress/issues/9026
             if (!testIsActuallyInSuite) {
-              return
+              return false
             }
 
             // 1. if we're the very last test in the entire allTests
@@ -410,6 +412,8 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
               return true
             }
           }
+
+          return false
         }
 
         break
@@ -449,7 +453,7 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
 
 const getTestResults = (tests) => {
   return _.map(tests, (test) => {
-    const obj = _.pick(test, 'id', 'duration', 'state')
+    const obj: any = _.pick(test, 'id', 'duration', 'state')
 
     obj.title = test.originalTitle
     // TODO FIX THIS!
@@ -659,6 +663,8 @@ const normalize = (runnable, tests, initialTests, onRunnable, onLogsById, getRun
           return normalizedChild
         }))
       }
+
+      return null
     })
 
     return normalizedRunnable
@@ -736,6 +742,8 @@ const normalize = (runnable, tests, initialTests, onRunnable, onLogsById, getRun
 
           return normalizedChildSuite
         }
+
+        return null
       }))
     }
 
@@ -1664,6 +1672,8 @@ export default {
         if (attrs) {
           return $Log.getSnapshotProps(attrs)
         }
+
+        return
       },
 
       resumeAtTest (id, emissions = {}) {
