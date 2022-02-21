@@ -11,11 +11,11 @@ export const handleMiscEvents = (Cypress: Cypress.Cypress, cy: $Cy, specBridgeCo
   })
 
   specBridgeCommunicator.on('viewport:changed:end', () => {
-    viewportChangedCallbackFn()
+    if (viewportChangedCallbackFn) viewportChangedCallbackFn()
   })
 
-  // TODO Should state syncing be built into cy.state instead of being explicitly called?
-  specBridgeCommunicator.on('sync:state', async (state) => {
+  // TODO: Should state syncing be built into cy.state instead of being explicitly called?
+  specBridgeCommunicator.on('sync:state', (state) => {
     cy.state(state)
   })
 

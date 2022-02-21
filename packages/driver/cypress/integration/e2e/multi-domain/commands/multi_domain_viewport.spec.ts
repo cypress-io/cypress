@@ -31,27 +31,71 @@ context('multi-domain viewport', { experimentalSessionSupport: true, experimenta
       })
     })
 
-    it('calls viewport:changed handler in switchToDomain', () => {
-      cy.switchToDomain('foobar.com', () => {
+    context('cy.on(\'viewport:changed\')', () => {
+      it('calls viewport:changed handler in switchToDomain', () => {
+        cy.switchToDomain('foobar.com', () => {
+          const viewportChangedSpy = cy.spy()
+
+          cy.on('viewport:changed', viewportChangedSpy)
+
+          cy.viewport(320, 480).then(() => {
+            expect(viewportChangedSpy).to.be.calledOnce
+          })
+        })
+      })
+
+      it('does NOT call viewport:changed handler of primary', () => {
         const viewportChangedSpy = cy.spy()
 
         cy.on('viewport:changed', viewportChangedSpy)
 
-        cy.viewport(320, 480).then(() => {
-          expect(viewportChangedSpy).to.be.calledOnce
+        cy.switchToDomain('foobar.com', () => {
+          cy.viewport(320, 480)
+        }).then(() => {
+          expect(viewportChangedSpy).not.to.be.called
         })
       })
     })
 
-    it('does NOT call viewport:changed handler of primary', () => {
-      const viewportChangedSpy = cy.spy()
+    context('Cypress.on(\'viewport:changed\')', () => {
+      let viewportChangedSpyPrimary
 
-      cy.on('viewport:changed', viewportChangedSpy)
+      before(() => {
+        viewportChangedSpyPrimary = cy.spy()
+        cy.switchToDomain('foobar.com', () => {
+          // using global since a function can't be passed to switchToDomain
+          // and we need to be able to remove the listener in the 'after' hook
+          globalThis.viewportChangedSpySecondary = cy.spy()
+        })
+      })
 
-      cy.switchToDomain('foobar.com', () => {
-        cy.viewport(320, 480)
-      }).then(() => {
-        expect(viewportChangedSpy).not.to.be.called
+      after(() => {
+        Cypress.off('viewport:changed', viewportChangedSpyPrimary)
+        cy.switchToDomain('foobar.com', () => {
+          Cypress.off('viewport:changed', globalThis.viewportChangedSpySecondary)
+        })
+
+        delete globalThis.viewportChangedSpySecondary
+      })
+
+      it('calls viewport:changed handler in switchToDomain', () => {
+        cy.switchToDomain('foobar.com', () => {
+          Cypress.on('viewport:changed', globalThis.viewportChangedSpySecondary)
+
+          cy.viewport(320, 480).then(() => {
+            expect(globalThis.viewportChangedSpySecondary).to.be.calledOnce
+          })
+        })
+      })
+
+      it('does NOT call viewport:changed handler of primary', () => {
+        Cypress.on('viewport:changed', viewportChangedSpyPrimary)
+
+        cy.switchToDomain('foobar.com', () => {
+          cy.viewport(320, 480)
+        }).then(() => {
+          expect(viewportChangedSpyPrimary).not.to.be.called
+        })
       })
     })
   })
