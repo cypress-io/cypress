@@ -1,5 +1,6 @@
 import type { CodeLanguageEnum, NexusGenEnums, NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
 import { Bundler, CodeLanguage, CODE_LANGUAGES, FrontendFramework, FRONTEND_FRAMEWORKS } from '@packages/types'
+import { configFiles } from '@packages/scaffold-config'
 import assert from 'assert'
 import dedent from 'dedent'
 import path from 'path'
@@ -316,25 +317,27 @@ export class WizardActions {
   }
 
   private wizardGetConfigCodeComponent (opts: WizardGetCodeComponent): string {
-    const codeBlocks: string[] = []
-    const { chosenBundler, chosenFramework, chosenLanguage } = opts
+    return configFiles[opts.chosenFramework.type][opts.chosenLanguage.type]
 
-    const requirePath = chosenFramework.defaultPackagePath ?? chosenBundler.package
+    // const codeBlocks: string[] = []
+    // const { chosenBundler, chosenFramework, chosenLanguage } = opts
 
-    codeBlocks.push(chosenLanguage.type === 'ts' ? `import { defineConfig } from 'cypress'` : `const { defineConfig } = require('cypress')`)
-    codeBlocks.push(chosenLanguage.type === 'ts' ? `import { devServer } from '${requirePath}'` : `const { devServer } = require('${requirePath}')`)
-    codeBlocks.push('')
-    codeBlocks.push(chosenLanguage.type === 'ts' ? `export default defineConfig({` : `module.exports = defineConfig({`)
-    codeBlocks.push(`  // Component testing, ${chosenLanguage.name}, ${chosenFramework.name}, ${chosenBundler.name}`)
+    // const requirePath = chosenFramework.defaultPackagePath ?? chosenBundler.package
 
-    codeBlocks.push(`  ${COMPONENT_SCAFFOLD_BODY({
-      lang: chosenLanguage.type,
-      configOptionsString: '{}',
-    }).replace(/\n/g, '\n  ')}`)
+    // codeBlocks.push(chosenLanguage.type === 'ts' ? `import { defineConfig } from 'cypress'` : `const { defineConfig } = require('cypress')`)
+    // codeBlocks.push(chosenLanguage.type === 'ts' ? `import { devServer } from '${requirePath}'` : `const { devServer } = require('${requirePath}')`)
+    // codeBlocks.push('')
+    // codeBlocks.push(chosenLanguage.type === 'ts' ? `export default defineConfig({` : `module.exports = defineConfig({`)
+    // codeBlocks.push(`  // Component testing, ${chosenLanguage.name}, ${chosenFramework.name}, ${chosenBundler.name}`)
 
-    codeBlocks.push(`})\n`)
+    // codeBlocks.push(`  ${COMPONENT_SCAFFOLD_BODY({
+    //   lang: chosenLanguage.type,
+    //   configOptionsString: '{}',
+    // }).replace(/\n/g, '\n  ')}`)
 
-    return codeBlocks.join('\n')
+    // codeBlocks.push(`})\n`)
+
+    // return codeBlocks.join('\n')
   }
 
   private async getComponentIndexHtml (opts: WizardGetCodeComponent): Promise<NexusGenObjects['ScaffoldedFile']> {
@@ -446,15 +449,6 @@ interface ComponentScaffoldOpts {
   lang: CodeLanguageEnum
   configOptionsString: string
   specPattern?: string
-}
-
-const COMPONENT_SCAFFOLD_BODY = (opts: ComponentScaffoldOpts) => {
-  return dedent`
-    component: {
-      devServer,
-      devServerConfig: ${opts.configOptionsString}
-    },
-  `
 }
 
 const FIXTURE_DATA = {
