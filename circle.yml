@@ -587,12 +587,13 @@ commands:
       - restore_cached_binary
       - run:
           name: "Cloning test project and checking out release branch: <<parameters.repo>>"
+          working_directory: ~/
           command: |
             git clone --depth 1 --no-single-branch https://github.com/cypress-io/<<parameters.repo>>.git /tmp/<<parameters.repo>>
 
             # install some deps for get-next-version
             npm i semver@7.3.2 conventional-recommended-bump@6.1.0 conventional-changelog-angular@5.0.12
-            NEXT_VERSION=$(node ./scripts/get-next-version.js)
+            NEXT_VERSION=$(node ./cypress/scripts/get-next-version.js)
 
             cd /tmp/<<parameters.repo>> && (git checkout $NEXT_VERSION || true)
 
