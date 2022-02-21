@@ -18,7 +18,7 @@ describe('Cypress In Cypress - run mode', { viewportWidth: 1200 }, () => {
 
     // confirm expected content is rendered
     cy.contains('1000x660').should('be.visible')
-    cy.contains('84%').should('be.visible')
+    cy.contains('71%').should('be.visible')
     cy.contains('Chrome 1').should('be.visible')
     cy.contains('http://localhost:4455/cypress/e2e/dom-content.html').should('be.visible')
 
