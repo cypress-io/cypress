@@ -33,17 +33,11 @@ describe('Choose a Browser Page', () => {
       cy.get('[data-cy="alert-body"]')
       .should('contain', 'Browser: doesNotExist was not found on your system or is not supported by Cypress.')
 
-      // TODO: revisit the embedded markdown linking
-      // cy.get('[data-cy="alert-body"]').within(() => {
-      //   cy.validateExternalLink({
-      //     name: 'use a custom browser',
-      //     href: 'https://on.cypress.io/customize-browsers',
-      //   })
-      //   cy.validateExternalLink({
-      //     name: 'how to troubleshoot launching browsers',
-      //     href: 'https://on.cypress.io/troubleshooting-launching-browsers',
-      //   })
-      // })
+      cy.get('[data-cy="alert-body"]').within(() => {
+        cy.validateExternalLink({
+          href: 'https://on.cypress.io/customize-browsers',
+        })
+      })
 
       // Ensure warning can be dismissed
       cy.get('[data-cy="alert-suffix-icon"]').click()
@@ -59,10 +53,9 @@ describe('Choose a Browser Page', () => {
 
       cy.get('[data-cy="alert-header"]').should('contain', 'Warning: Browser Not Found')
       cy.get('[data-cy="alert-body"]')
-      .should('contain', 'We could not identify a known browser at the path you specified: /path/does/not/exist')
+      .should('contain', 'We could not identify a known browser at the path you provided: /path/does/not/exist')
       .should('contain', 'spawn /path/does/not/exist ENOENT')
       .validateExternalLink({
-        name: 'how to troubleshoot launching browsers',
         href: 'https://on.cypress.io/troubleshooting-launching-browsers',
       })
 
