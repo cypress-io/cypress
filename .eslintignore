@@ -61,3 +61,7 @@ npm/cypress-schematic/src/**/*.js
 **/.next/**
 /npm/create-cypress-tests/initial-template
 /npm/create-cypress-tests/**/*.template.*
+# eslint does not like JSX files with a js extension,
+# but these are valid in some configurations so we need
+# to test them.
+system-tests/projects/create-react-app-js/src/Foo.js
