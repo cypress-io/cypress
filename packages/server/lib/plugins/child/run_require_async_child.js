@@ -148,11 +148,11 @@ function run (ipc, configFile, projectRoot) {
 
         err.originalMessage = err.message
         err.message = cleanMessage
-
-        ipc.send('loadConfig:error', util.serializeError(err))
-      } else {
-        ipc.send('loadConfig:error', util.serializeError(err))
       }
+
+      ipc.send('loadConfig:error', util.serializeError(
+        require('@packages/errors').getError('CONFIG_FILE_REQUIRE_ERROR', configFile, err),
+      ))
     }
   })
 }

@@ -419,7 +419,6 @@ Error: Async error from plugins file
 
 `
 
-
 exports['e2e plugins fails when invalid event is registered 1'] = `
 Your pluginsFile threw a validation error: /foo/bar/.projects/plugin-validation-error/cypress/plugins/index.js
 
@@ -539,7 +538,7 @@ If you have just renamed the extension of your pluginsFile, restart Cypress.
 `
 
 exports['e2e plugins fails when require throws synchronously 1'] = `
-Your pluginsFile is invalid: /foo/bar/.projects/plugins-root-sync-error/cypress/plugins/index.js
+Your configFile is invalid: /foo/bar/.projects/plugins-root-sync-error/cypress.config.js
 
 It threw an error when required, check the stack trace below:
 

@@ -649,7 +649,7 @@ describe('visual error templates', () => {
         default: ['/path/to/supportFile'],
       }
     },
-    PLUGINS_FILE_ERROR: () => {
+    CONFIG_FILE_REQUIRE_ERROR: () => {
       const err = makeErr()
 
       return {
