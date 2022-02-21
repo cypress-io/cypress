@@ -205,7 +205,7 @@ function formatObjectForConfig (obj: Record<string, unknown>) {
 }
 
 function createE2eTemplate (pluginPath: string, hasPluginsFile: boolean, options: Record<string, unknown>) {
-  const requirePlugins = `return require('./${pluginPath}')(on, config)`
+  const requirePlugins = `return require('./${pluginPath}').default(on, config)`
 
   const setupNodeEvents = `// We've imported your old cypress plugins here.
   // You may want to clean this up later by importing these.
