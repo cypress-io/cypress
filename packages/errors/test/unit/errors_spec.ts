@@ -61,7 +61,7 @@ describe('lib/errors', () => {
     it('logs err.details', () => {
       const userError = new Error('asdf')
 
-      const err = errors.get('PLUGINS_FUNCTION_ERROR', 'foo/bar/baz', userError)
+      const err = errors.get('CONFIG_FILE_UNEXPECTED_ERROR', 'foo/bar/baz', userError)
 
       const ret = errors.log(err)
 

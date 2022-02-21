@@ -225,7 +225,7 @@ describe.skip('lib/plugins/child/run_plugins', () => {
 
       this.ipc.send = _.once((event, errorType, pluginsFile, result) => {
         expect(event).to.eq('setupTestingType:error')
-        expect(errorType).to.eq('PLUGINS_FUNCTION_ERROR')
+        expect(errorType).to.eq('CHILD_PROCESS_UNEXPECTED_ERROR')
         expect(pluginsFile).to.eq('plugins-file')
         expect(result.stack).to.eq(err.stack)
 
@@ -260,7 +260,7 @@ describe.skip('lib/plugins/child/run_plugins', () => {
 
       this.ipc.send = _.once((event, errorType, pluginsFile, serializedErr) => {
         expect(event).to.eq('setupTestingType:error')
-        expect(errorType).to.eq('PLUGINS_FUNCTION_ERROR')
+        expect(errorType).to.eq('CHILD_PROCESS_UNEXPECTED_ERROR')
         expect(pluginsFile).to.eq('plugins-file')
         expect(serializedErr.stack).to.eq(err.stack)
 

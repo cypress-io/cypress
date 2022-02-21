@@ -67,7 +67,7 @@ class RunPlugins {
       if (!isValid) {
         const err = userEvents
           ? require('@packages/errors').getError('PLUGINS_INVALID_EVENT_NAME_ERROR', this.requiredFile, event, userEvents, error)
-          : require('@packages/errors').getError('PLUGINS_FUNCTION_ERROR', this.requiredFile, error)
+          : require('@packages/errors').getError('CONFIG_FILE_SETUP_NODE_EVENTS_ERROR', this.requiredFile, initialConfig.testingType, error)
 
         this.ipc.send('setupTestingType:error', util.serializeError(err))
 
@@ -134,8 +134,9 @@ class RunPlugins {
     .catch((err) => {
       debug('plugins file errored:', err && err.stack)
       this.ipc.send('setupTestingType:error', util.serializeError(require('@packages/errors').getError(
-        'PLUGINS_FUNCTION_ERROR',
+        'CONFIG_FILE_SETUP_NODE_EVENTS_ERROR',
         this.requiredFile,
+        initialConfig.testingType,
         err,
       )))
     })

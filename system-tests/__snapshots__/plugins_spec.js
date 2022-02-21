@@ -384,8 +384,9 @@ exports['e2e plugins fails when there is an async error inside an event handler 
                                                                                                     
   Running:  app.cy.js                                                                       (1 of 1)
 
+We stopped running your tests because your config file crashed.
 
-Your pluginsFile threw an error from: /foo/bar/.projects/plugins-async-error/cypress/plugins/index.js
+Your configFile threw an error from: cypress.config.js
 
 Error: Async error from plugins file
       [stack trace lines]
@@ -547,14 +548,18 @@ RootSyncError: Root sync error from plugins file
 `
 
 exports['e2e plugins fails when function throws synchronously 1'] = `
-Your pluginsFile threw an error from: /foo/bar/.projects/plugins-function-sync-error/cypress/plugins/index.js
+Your configFile threw an error from: /foo/bar/.projects/plugins-function-sync-error/cypress.config.js
+
+The error was thrown while executing your e2e.setupNodeEvents function:
 
 FunctionSyncError: Function sync error from plugins file
       [stack trace lines]
 `
 
 exports['e2e plugins fails when invalid event handler is registered 1'] = `
-Your pluginsFile threw an error from: /foo/bar/.projects/plugin-invalid-event-handler-error/cypress/plugins/index.js
+Your configFile threw an error from: /foo/bar/.projects/plugin-invalid-event-handler-error/cypress.config.js
+
+The error was thrown while executing your e2e.setupNodeEvents function:
 
 InvalidEventHandlerError: The handler for the event \`task\` must be an object
       [stack trace lines]

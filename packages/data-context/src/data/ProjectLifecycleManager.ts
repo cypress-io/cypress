@@ -1024,10 +1024,6 @@ export class ProjectLifecycleManager {
       return this.handleChildProcessError(err, ipc, dfd)
     })
 
-    ipc.on('setupTestingType:uncaughtError', (err) => {
-      return this.handleChildProcessError(err, ipc, dfd)
-    })
-
     ipc.once('loadConfig:reply', (val) => {
       debug('loadConfig:reply')
       dfd.resolve({ ...val, initialConfig: JSON.parse(val.initialConfig) })
@@ -1035,11 +1031,7 @@ export class ProjectLifecycleManager {
 
     ipc.once('loadConfig:error', (err) => {
       this.killChildProcess(child)
-      if (err.isCypressErr) {
-        dfd.reject(err)
-      } else {
-        dfd.reject(getError('CHILD_PROCESS_UNEXPECTED_ERROR', this.configFilePath, err))
-      }
+      dfd.reject(err)
     })
 
     debug('trigger the load of the file')
@@ -1053,7 +1045,7 @@ export class ProjectLifecycleManager {
 
     this._cleanupIpc(ipc)
 
-    err = getError('CHILD_PROCESS_UNEXPECTED_ERROR', this.configFile || '(unknown config file)', err)
+    err = getError('CONFIG_FILE_UNEXPECTED_ERROR', this.configFile || '(unknown config file)', err)
     err.title = 'Config process error'
 
     // this can sometimes trigger before the promise is fulfilled and

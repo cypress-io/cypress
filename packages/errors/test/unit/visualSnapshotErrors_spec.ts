@@ -656,26 +656,19 @@ describe('visual error templates', () => {
         default: ['/path/to/pluginsFile', err],
       }
     },
-    PLUGINS_FILE_NOT_FOUND: () => {
+    SETUP_NODE_EVENTS_IS_NOT_FUNCTION: () => {
       return {
-        default: ['/path/to/pluginsFile'],
+        default: ['e2e', '/path/to/pluginsFile', { some: 'object' }],
+        string: ['e2e', '/path/to/pluginsFile', 'some string'],
+        array: ['e2e', '/path/to/pluginsFile', ['some', 'array']],
       }
     },
-    PLUGINS_DIDNT_EXPORT_FUNCTION: () => {
+    CONFIG_FILE_SETUP_NODE_EVENTS_ERROR: () => {
       return {
-        default: ['/path/to/pluginsFile', { some: 'object' }],
-        string: ['/path/to/pluginsFile', 'some string'],
-        array: ['/path/to/pluginsFile', ['some', 'array']],
+        default: ['/path/to/pluginsFile', 'e2e', makeErr()],
       }
     },
-    PLUGINS_FUNCTION_ERROR: () => {
-      const err = makeErr()
-
-      return {
-        default: ['/path/to/pluginsFile', err],
-      }
-    },
-    CHILD_PROCESS_UNEXPECTED_ERROR: () => {
+    CONFIG_FILE_UNEXPECTED_ERROR: () => {
       const err = makeErr()
 
       return {
@@ -1090,6 +1083,11 @@ describe('visual error templates', () => {
     CT_CONFIG_NOT_SUPPORTED: () => {
       return {
         default: [{ name: 'baseUrl', configFile: '/path/to/configFile.ts' }],
+      }
+    },
+    COMPONENT_DEV_SERVER_IS_NOT_A_FUNCTION: () => {
+      return {
+        default: ['/path/to/config.ts', {}],
       }
     },
   })

@@ -15,8 +15,6 @@ let tsRegistered = false
  * @returns
  */
 function run (ipc, configFile, projectRoot) {
-  let areSetupNodeEventsLoaded = false
-
   debug('configFile:', configFile)
   debug('projectRoot:', projectRoot)
   if (!projectRoot) {
@@ -33,7 +31,7 @@ function run (ipc, configFile, projectRoot) {
 
   process.on('uncaughtException', (err) => {
     debug('uncaught exception:', util.serializeError(err))
-    ipc.send(areSetupNodeEventsLoaded ? 'childProcess:unhandledError' : 'setupTestingType:uncaughtError', util.serializeError(err))
+    ipc.send('childProcess:unhandledError', util.serializeError(err))
 
     return false
   })
@@ -106,7 +104,6 @@ function run (ipc, configFile, projectRoot) {
 
         const runPlugins = new RunPlugins(ipc, projectRoot, configFile)
 
-        areSetupNodeEventsLoaded = true
         if (testingType === 'component') {
           if (!isValidSetupNodeEvents(result.setupNodeEvents) || !isValidDevServer((result.component || {}))) {
             return
