@@ -142,7 +142,7 @@ const wrap = (runnable) => {
   return $utils.reduceProps(runnable, RUNNABLE_PROPS)
 }
 
-const wrapAll = (runnable) => {
+const wrapAll = (runnable): any => {
   return _.extend(
     {},
     $utils.reduceProps(runnable, RUNNABLE_PROPS),
@@ -245,7 +245,7 @@ const suiteHasSuite = (suite, suiteId) => {
 }
 
 // same as findTestInSuite but iterates backwards
-const findLastTestInSuite = (suite, fn = _.identity) => {
+const findLastTestInSuite = (suite, fn: any = _.identity) => {
   for (let i = suite.suites.length - 1; i >= 0; i--) {
     const test = findLastTestInSuite(suite.suites[i], fn)
 
@@ -497,7 +497,7 @@ const normalizeAll = (suite, initialTests = {}, setTestsById, setTests, onRunnab
   // we hand back a normalized object but also
   // create optimized lookups for the tests without
   // traversing through it multiple times
-  const tests = {}
+  const tests: Record<string, any> = {}
   const normalizedSuite = normalize(suite, tests, initialTests, onRunnable, onLogsById, getRunnableId, getHookId, getOnlyTestId, getOnlySuiteId, createEmptyOnlyTest)
 
   if (setTestsById) {
@@ -528,6 +528,8 @@ const normalizeAll = (suite, initialTests = {}, setTestsById, setTests, onRunnab
     }
 
     normalizedSuite.runtimeConfig[key] = v
+
+    return
   })
 
   return normalizedSuite
@@ -1030,8 +1032,8 @@ export default {
   create: (specWindow, mocha, Cypress, cy, state) => {
     let _runnableId = 0
     let _hookId = 0
-    let _uncaughtFn = null
-    let _resumedAtTestIndex = null
+    let _uncaughtFn: (() => never) | null = null
+    let _resumedAtTestIndex: number | null = null
 
     const _runner = mocha.getRunner()
 
@@ -1112,19 +1114,19 @@ export default {
     specWindow.addEventListener('unhandledrejection', onSpecError('unhandledrejection'))
 
     // hold onto the _runnables for faster lookup later
-    let _test = null
-    let _tests = []
-    let _testsById = {}
-    const _testsQueue = []
-    const _testsQueueById = {}
+    let _test: any = null
+    let _tests: any[] = []
+    let _testsById: Record<string, any> = {}
+    const _testsQueue: any[] = []
+    const _testsQueueById: Record<string, any> = {}
     // only used during normalization
-    const _runnables = []
-    const _logsById = {}
+    const _runnables: any[] = []
+    const _logsById: Record<string, any> = {}
     let _emissions = {
       started: {},
       ended: {},
     }
-    let _startTime = null
+    let _startTime: string | null = null
     let _onlyTestId = null
     let _onlySuiteId = null
 
@@ -1223,7 +1225,7 @@ export default {
       const r = runnable
       const isHook = r.type === 'hook'
       const isTest = r.type === 'test'
-      const test = getTest() || getTestFromHook(runnable, getTestById)
+      const test = getTest() || getTestFromHook(runnable)
       const hookName = isHook && getHookName(r)
       const isBeforeEachHook = isHook && !!hookName.match(/before each/)
       const isAfterEachHook = isHook && !!hookName.match(/after each/)
@@ -1682,7 +1684,7 @@ export default {
         return
       },
 
-      resumeAtTest (id, emissions = {}) {
+      resumeAtTest (id, emissions: any = {}) {
         _resumedAtTestIndex = getTestIndexFromId(id)
 
         _emissions = emissions
