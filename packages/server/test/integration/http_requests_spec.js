@@ -210,7 +210,6 @@ describe('Routes', () => {
   afterEach(function () {
     evilDns.clear()
     nock.cleanAll()
-    Fixtures.remove()
     this.session.destroy()
     preprocessor.close()
     this.project = null
@@ -220,6 +219,9 @@ describe('Routes', () => {
       httpsServer.stop(),
       ctx.actions.project.clearCurrentProject(),
     )
+    .then(() => {
+      Fixtures.remove()
+    })
   })
 
   context('GET /', () => {
