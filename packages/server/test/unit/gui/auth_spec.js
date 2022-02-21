@@ -111,12 +111,12 @@ describe('lib/gui/auth', function () {
 
       it('is still fulfilled when openExternal fails, but sendWarning is called', function () {
         sinon.stub(electron.shell, 'openExternal').rejects()
-        const sendWarning = sinon.stub()
+        const sendLaunchError = sinon.stub()
 
-        return auth._internal.launchNativeAuth(REDIRECT_URL, sendWarning)
+        return auth._internal.launchNativeAuth(REDIRECT_URL, sendLaunchError)
         .then(() => {
           expect(electron.shell.openExternal).to.be.calledWithMatch(REDIRECT_URL)
-          expect(sendWarning).to.be.calledWithMatch('warning', 'AUTH_COULD_NOT_LAUNCH_BROWSER', REDIRECT_URL)
+          expect(sendLaunchError).to.be.calledWithMatch('AUTH_COULD_NOT_LAUNCH_BROWSER', REDIRECT_URL)
         })
       })
     })
@@ -155,6 +155,23 @@ describe('lib/gui/auth', function () {
 
       expect(auth._internal.stopServer).to.be.calledOnce
       expect(windows.focusMainWindow).to.be.calledOnce
+    })
+
+    it('sends an AUTH_ERROR_DURING_LOGIN message on unhandled errors', async () => {
+      sinon.stub(user, 'getBaseLoginUrl').resolves('www.foo.bar')
+      sinon.stub(auth._internal, 'launchServer').rejects(new Error('unexpected error'))
+
+      const onMessageSpy = sinon.spy()
+
+      try {
+        await auth.start(onMessageSpy, 'code')
+      } catch (e) {
+        expect(onMessageSpy).to.be.calledWith({
+          name: 'AUTH_ERROR_DURING_LOGIN',
+          message: 'unexpected error',
+          browserOpened: false,
+        })
+      }
     })
   })
 })

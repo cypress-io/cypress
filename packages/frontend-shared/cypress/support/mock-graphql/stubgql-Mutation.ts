@@ -35,11 +35,17 @@ export const stubMutation: MaybeResolver<Mutation> = {
   resetLatestVersionTelemetry () {
     return true
   },
-  focusActiveBrowserWindow (sourc, args, ctx) {
+  focusActiveBrowserWindow (source, args, ctx) {
     return true
   },
   hideBrowserWindow (source, args, ctx) {
     return true
+  },
+
+  resetAuthState (source, args, ctx) {
+    ctx.authState = { browserOpened: false }
+
+    return { }
   },
   setProjectPreferences (source, args, ctx) {
     return {}

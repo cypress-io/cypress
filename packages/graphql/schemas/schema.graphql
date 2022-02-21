@@ -2,6 +2,24 @@
 ### Do not make changes to this file directly
 
 
+"""Represents state of auth based on most recent message from login flow"""
+type AuthState {
+  """Whether the browser was successfully opened for login"""
+  browserOpened: Boolean!
+
+  """Message for the auth state"""
+  message: String
+
+  """Name of auth state, e.g. AUTH_BROWSER_LAUNCHED"""
+  name: AuthStateNameEnum
+}
+
+enum AuthStateNameEnum {
+  AUTH_BROWSER_LAUNCHED
+  AUTH_COULD_NOT_LAUNCH_BROWSER
+  AUTH_ERROR_DURING_LOGIN
+}
+
 """Base error"""
 type BaseError {
   message: String
@@ -807,6 +825,9 @@ type Mutation {
   """Remove project from projects array and cache"""
   removeProject(path: String!): Query
 
+  """Reset the Auth State"""
+  resetAuthState: Query!
+
   """
   Resets the latest version call to capture additional telemetry for the current user
   """
@@ -910,6 +931,8 @@ type ProjectPreferences {
 
 """The root "Query" type containing all entry fields for our querying"""
 type Query {
+  """The latest state of the auth process"""
+  authState: AuthState!
   baseError: BaseError
 
   """Returns an object conforming to the Relay spec"""
@@ -938,9 +961,6 @@ type Query {
 
   """The state of any info related to local development of the runner"""
   dev: DevState!
-
-  """Whether the browser has been opened for auth or not"""
-  isAuthBrowserOpened: Boolean!
 
   """Whether the app is in global mode or not"""
   isInGlobalMode: Boolean!
