@@ -1447,6 +1447,7 @@ module.exports = {
     })
 
     if (browser.family !== 'chromium' && !options.config.chromeWebSecurity) {
+      console.log('')
       errors.warning('CHROME_WEB_SECURITY_NOT_SUPPORTED', browser.family)
     }
 
