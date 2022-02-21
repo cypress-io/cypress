@@ -299,7 +299,9 @@ export async function moveSpecFiles (projectRoot: string, specs: SpecToMove[]) {
     const from = path.join(projectRoot, spec.from)
     const to = path.join(projectRoot, spec.to)
 
-    await fs.move(from, to)
+    if (from !== to) {
+      await fs.move(from, to)
+    }
   }))
 }
 

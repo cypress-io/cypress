@@ -605,9 +605,8 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
         }
       })
 
-      renameSupport()
+      renameSupport('ts')
       migrateAndVerifyConfig()
-      finishMigrationAndContinue()
     })
   })
 })
