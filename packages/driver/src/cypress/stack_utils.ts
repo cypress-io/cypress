@@ -7,9 +7,9 @@ import { codeFrameColumns } from '@babel/code-frame'
 
 import $utils from './utils'
 import $sourceMapUtils from './source_map_utils'
-import { stackUtils } from '@packages/errors'
 
-const { getStackLines, replacedStack, stackWithoutMessage, splitStack, unsplitStack } = stackUtils
+// Intentionally deep-importing from @packages/errors so as to not bundle the entire @packages/errors in the client unnecessarily
+import { getStackLines, replacedStack, stackWithoutMessage, splitStack, unsplitStack } from '@packages/errors/src/stackUtils'
 
 const whitespaceRegex = /^(\s*)*/
 const stackLineRegex = /^\s*(at )?.*@?\(?.*\:\d+\:\d+\)?$/
