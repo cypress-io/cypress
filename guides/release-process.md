@@ -87,15 +87,22 @@ In the following instructions, "X.Y.Z" is used to denote the [next version of Cy
     - To find the link to the package file `cypress.tgz`:
         1. In GitHub, go to the latest commit (the one whose sha you used in the last step).
             ![commit-link](https://user-images.githubusercontent.com/1157043/80608728-33fe6100-8a05-11ea-8b53-375303757b67.png)
-        2. Scroll down past the changes to the comments. The first comment should be a `cypress-bot` comment that includes a line beginning `npm install ...`. Grab the `https://cdn.../npm/X.Y.Z/<platform>/<long sha>/cypress.tgz` link.
+        2. Scroll down past the changes to the comments. Find a comment from `cypress-bot` with an `npm install` command for `linux-x64`. Copy the `https://cdn.../npm/X.Y.Z/linux-x64/<long sha>/cypress.tgz` URL.
             ![commit-bot-comment](../assets/cypress-bot-pre-release-comment.png)
-    - Make sure the `linux-x64` binary and npm package are present at the commented locations. See [Before Publishing a New Version](#before-publishing-a-new-version).
-    - Publish the `linux-x64` distribution to the npm registry straight from the URL:
+    - Use the `create-stable-npm-package` script to create a stable NPM package from the pre-prod `cypress.tgz` URL:
 
         ```shell
-        npm publish https://cdn.cypress.io/beta/npm/X.Y.Z/<long sha>/cypress.tgz --tag dev
+        ./scripts/create-stable-npm-package.sh https://cdn.cypress.io/beta/npm/X.Y.Z/linux-x64/<long sha>/cypress.tgz
+        [...]
+        Prod NPM package built at:
+          /tmp/cypress-prod.tgz
         ```
-      :bangbang: Important :bangbang: Be sure to release the `linux-x64` distribution.
+
+    - Publish the created prod NPM package under the `dev` NPM tag:
+
+        ```shell
+        npm publish /tmp/cypress-prod.tgz --tag dev
+        ```
 
 5. Double-check that the new version has been published under the `dev` tag using `npm info cypress` or [available-versions](https://github.com/bahmutov/available-versions). `latest` should still point to the previous version. Example output:
 
