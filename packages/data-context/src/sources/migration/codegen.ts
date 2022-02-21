@@ -181,6 +181,7 @@ function createCypressConfig (config: ConfigOptions, pluginPath: string, options
     if (options.hasTypescript) {
       return formatConfig(
         `import { defineConfig } from 'cypress'
+        import setupNodeEvents from './${pluginPath}'
   
         export default defineConfig({${globalString}${e2eString}${componentString}})`,
       )
@@ -188,6 +189,7 @@ function createCypressConfig (config: ConfigOptions, pluginPath: string, options
 
     return formatConfig(
       `const { defineConfig } = require('cypress')
+      import setupNodeEvents from './${pluginPath}'
 
       module.exports = defineConfig({${globalString}${e2eString}${componentString}})`,
     )
@@ -205,16 +207,8 @@ function formatObjectForConfig (obj: Record<string, unknown>) {
 }
 
 function createE2eTemplate (pluginPath: string, hasPluginsFile: boolean, options: Record<string, unknown>) {
-  const requirePlugins = `return require('./${pluginPath}').default(on, config)`
-
-  const setupNodeEvents = `// We've imported your old cypress plugins here.
-  // You may want to clean this up later by importing these.
-  setupNodeEvents(on, config) {
-    ${hasPluginsFile ? requirePlugins : ''}
-  }`
-
   return `e2e: {
-    ${setupNodeEvents},${formatObjectForConfig(options)}
+    setupNodeEvents
   },`
 }
 
