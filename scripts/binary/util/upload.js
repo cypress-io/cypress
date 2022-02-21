@@ -20,10 +20,12 @@ const getUploadUrl = function () {
 }
 
 const formHashFromEnvironment = function () {
-  const { env } = process
+  const {
+    env,
+  } = process
 
   if (env.CIRCLECI) {
-    return `${env.CIRCLE_BRANCH}-build-${env.CIRCLE_BUILD_NUM}`
+    return `circle-${env.CIRCLE_BRANCH}-${env.CIRCLE_SHA1}`
   }
 
   throw new Error('Do not know how to form unique build hash on this CI')
