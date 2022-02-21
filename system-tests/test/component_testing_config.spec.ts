@@ -27,7 +27,7 @@ describe('component testing projects', function () {
     expectedExitCode: 0,
   })
 
-  systemTests.it.only('pristine-nuxtjs-vue2-configured', {
+  systemTests.it('pristine-nuxtjs-vue2-configured', {
     project: 'pristine-nuxtjs-vue2-configured',
     testingType: 'component',
     spec: 'components/Tutorial.cy.js',
