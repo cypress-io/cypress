@@ -36,5 +36,75 @@ export const configFiles: ConfigMap = {
       },
     })
   `
+  },
+
+  nextjs: {
+    js: dedent`
+    const { devServer } = require('@cypress/react/plugins/next')
+
+    module.exports = {
+      component: {
+        devServer
+      }
+    }
+    `,
+    ts: dedent`
+    import { defineConfig } from 'cypress'
+    import { devServer } from '@cypress/react/plugins/next'
+
+    export default defineConfig({
+      component: {
+        devServer,
+      },
+    })`
+  },
+
+  vuecli: {
+    js: dedent`
+    const { devServer } = require('@cypress/webpack-dev-server')
+    const webpackConfig = require('@vue/cli-service/webpack.config')
+
+    module.exports = {
+      component: {
+        devServer,
+        devServerConfig: {
+          webpackConfig
+        }
+      }
+    }
+    `,
+    ts: dedent`
+    import { defineConfig } from 'cypress'
+    import { devServer } from '@cypress/webpack-dev-server'
+    import webpackConfig from '@vue/cli-service/webpack.config'
+
+    export default defineConfig({
+      component: {
+        devServer,
+        devServerConfig: {
+          webpackConfig
+        }
+      }
+    })`
+  },
+
+  nuxtjs: {
+    js: dedent`
+    const { defineConfig } = require("cypress")
+    const { devServer } = require("@cypress/webpack-dev-server")
+    const { getWebpackConfig } = require("nuxt")
+
+    module.exports = defineConfig({
+      component: {
+        async devServer(cypressDevServerConfig) {
+          const webpackConfig = await getWebpackConfig()
+
+          return devServer(cypressDevServerConfig, { webpackConfig })
+        }
+      }
+    })
+    `,
+    ts: dedent`
+    `
   }
 }
