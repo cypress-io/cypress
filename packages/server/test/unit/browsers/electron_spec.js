@@ -190,7 +190,7 @@ describe('lib/browsers/electron', () => {
     it('sets menu.set whether or not its in headless mode', function () {
       return electron._launch(this.win, this.url, this.automation, { show: true })
       .then(() => {
-        expect(menu.set).to.be.calledWith({ withDevTools: true })
+        expect(menu.set).to.be.called
       }).then(() => {
         menu.set.reset()
 
@@ -439,7 +439,7 @@ describe('lib/browsers/electron', () => {
       let opts = electron._defaultOptions('/foo', this.state, { show: true, browser: {} })
 
       opts.onFocus()
-      expect(menu.set).to.be.calledWith({ withDevTools: true })
+      expect(menu.set).to.be.called
 
       menu.set.reset()
 
@@ -576,22 +576,18 @@ describe('lib/browsers/electron', () => {
       })
     })
 
-    it('sets menu with dev tools on creation', function () {
+    it('sets menu on creation', function () {
       return this.openNewWindow().then(() => {
         // once for main window, once for child
         expect(menu.set).to.be.calledTwice
-
-        expect(menu.set).to.be.calledWith({ withDevTools: true })
       })
     })
 
-    it('sets menu with dev tools on focus', function () {
+    it('sets menu on focus', function () {
       return this.openNewWindow().then(() => {
         Windows.create.lastCall.args[0].onFocus()
         // once for main window, once for child, once for focus
         expect(menu.set).to.be.calledThrice
-
-        expect(menu.set).to.be.calledWith({ withDevTools: true })
       })
     })
 

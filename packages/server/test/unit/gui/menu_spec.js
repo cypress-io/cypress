@@ -252,69 +252,57 @@ describe('gui/menu', function () {
   })
 
   context('Developer Tools', () => {
-    it('does not exist by default', () => {
+    beforeEach(function () {
       menu.set()
-      expect(getMenuItem('Developer Tools')).to.be.undefined
+      this.devSubmenu = getMenuItem('Developer Tools').submenu
     })
 
-    it('does not exist by when withDevTools is false', () => {
-      menu.set({ withDevTools: false })
-      expect(getMenuItem('Developer Tools')).to.be.undefined
+    it('exists and contains reload, toggle', function () {
+      const labels = getLabels(this.devSubmenu)
+
+      expect(labels).to.eql([
+        'Reload',
+        'Toggle Developer Tools',
+        'GraphQL requests over Fetch (off)',
+        'GraphiQL',
+        'View App Data',
+      ])
     })
 
-    describe('when withDevTools is true', () => {
-      beforeEach(function () {
-        menu.set({ withDevTools: true })
-        this.devSubmenu = getMenuItem('Developer Tools').submenu
-      })
+    it('sets shortcut for Reload', function () {
+      expect(this.devSubmenu[0].accelerator).to.equal('CmdOrCtrl+R')
+    })
 
-      it('exists and contains reload, toggle', function () {
-        const labels = getLabels(this.devSubmenu)
+    it('reloads focused window when Reload is clicked', function () {
+      const reload = sinon.stub()
 
-        expect(labels).to.eql([
-          'Reload',
-          'Toggle Developer Tools',
-          'GraphQL requests over Fetch (off)',
-          'GraphiQL',
-          'View App Data',
-        ])
-      })
+      this.devSubmenu[0].click(null, { reload })
+      expect(reload).to.be.called
+    })
 
-      it('sets shortcut for Reload', function () {
-        expect(this.devSubmenu[0].accelerator).to.equal('CmdOrCtrl+R')
-      })
+    it('is noop if no focused window when Reload is clicked', function () {
+      expect(() => this.devSubmenu[0].click()).not.to.throw()
+    })
 
-      it('reloads focused window when Reload is clicked', function () {
-        const reload = sinon.stub()
+    it('sets shortcut for Toggle Developer Tools when macOS', function () {
+      expect(this.devSubmenu[1].accelerator).to.equal('Alt+Command+I')
+    })
 
-        this.devSubmenu[0].click(null, { reload })
-        expect(reload).to.be.called
-      })
+    it('sets shortcut for Toggle Developer Tools when not macOS', () => {
+      os.platform.returns('linux')
+      menu.set()
+      expect(getMenuItem('Developer Tools').submenu[1].accelerator).to.equal('Ctrl+Shift+I')
+    })
 
-      it('is noop if no focused window when Reload is clicked', function () {
-        expect(() => this.devSubmenu[0].click()).not.to.throw()
-      })
+    it('toggles dev tools on focused window when Toggle Developer Tools is clicked', function () {
+      const toggleDevTools = sinon.stub()
 
-      it('sets shortcut for Toggle Developer Tools when macOS', function () {
-        expect(this.devSubmenu[1].accelerator).to.equal('Alt+Command+I')
-      })
+      this.devSubmenu[1].click(null, { toggleDevTools })
+      expect(toggleDevTools).to.be.called
+    })
 
-      it('sets shortcut for Toggle Developer Tools when not macOS', () => {
-        os.platform.returns('linux')
-        menu.set({ withDevTools: true })
-        expect(getMenuItem('Developer Tools').submenu[1].accelerator).to.equal('Ctrl+Shift+I')
-      })
-
-      it('toggles dev tools on focused window when Toggle Developer Tools is clicked', function () {
-        const toggleDevTools = sinon.stub()
-
-        this.devSubmenu[1].click(null, { toggleDevTools })
-        expect(toggleDevTools).to.be.called
-      })
-
-      it('is noop if no focused window when Toggle Developer Tools is clicked', function () {
-        expect(() => this.devSubmenu[1].click()).not.to.throw()
-      })
+    it('is noop if no focused window when Toggle Developer Tools is clicked', function () {
+      expect(() => this.devSubmenu[1].click()).not.to.throw()
     })
   })
 })

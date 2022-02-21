@@ -222,7 +222,7 @@ module.exports = {
 
   _launch (win, url, automation, options) {
     if (options.show) {
-      menu.set({ withDevTools: true })
+      menu.set()
     }
 
     ELECTRON_DEBUG_EVENTS.forEach((e) => {

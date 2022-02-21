@@ -128,7 +128,6 @@ export = {
     // TODO: potentially just pass an event emitter
     // instance here instead of callback functions
     menu.set({
-      withDevTools: true,
       onLogOutClicked () {
         return globalPubSub.emit('menu:item:clicked', 'log:out')
       },
