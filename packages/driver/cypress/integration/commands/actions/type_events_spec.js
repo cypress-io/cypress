@@ -134,6 +134,8 @@ describe('src/cy/commands/actions/type - #type events', () => {
       cy.get(':text:first').type('a')
     })
 
+    // https://github.com/cypress-io/cypress/issues/20283
+    // TODO: Implement tests below.
     it('fires events in the correct order')
 
     it('fires events for each key stroke')
@@ -348,6 +350,8 @@ describe('src/cy/commands/actions/type - #type events', () => {
       })
     })
 
+    // https://github.com/cypress-io/cypress/issues/20283
+    // TODO: implement this test
     it('fires when element is tabbed away from')//, ->
     //   changed = 0
 
