@@ -35,7 +35,7 @@ function preparePackageForNpmRelease (json) {
   _.extend(json, {
     version,
     buildInfo: {
-      commitBranch: getStdout('git branch --show-current'),
+      commitBranch: process.env.CIRCLE_BRANCH || getStdout('git branch --show-current'),
       commitSha: getStdout('git rev-parse HEAD'),
       commitDate: new Date(getStdout('git show -s --format=%ci')).toISOString(),
       stable: false,
