@@ -321,19 +321,22 @@ const parseSpecArgv = (pattern) => {
  * and can only be used inside a testing type. We want to be convenient
  * for the user though, so when they pass them in as CLI args, we
  * assume they're for the current testing type. This function moves
- * them from the root into the current testing type, eg:
+ * them from the root into the testing types they belong to, eg:
  * { specPattern: 'foo.js' }
  * ->
- * { e2e: { specPattern: 'foo.js' } }
+ * { e2e: { specPattern: 'foo.js' }, component: { specPattern: 'foo.js' } }
  */
-const hoistInvalidRootOptions = (config, testingType) => {
-  if (!config[testingType]) {
-    config[testingType] = {}
-  }
-
-  getBreakingRootKeys().forEach(({ name }) => {
+const nestInvalidRootOptions = (config) => {
+  getBreakingRootKeys().forEach(({ name, testingTypes }) => {
     if (config[name]) {
-      config[testingType][name] = config[name]
+      testingTypes.forEach((testingType) => {
+        if (!config[testingType]) {
+          config[testingType] = {}
+        }
+
+        config[testingType][name] = config[name]
+      })
+
       delete config[name]
     }
   })
@@ -485,9 +488,7 @@ module.exports = {
     // a specific testing type, but invalid at the root level.
     // We nest these automatically, making the assumption that
     // we know what they meant.
-    if (testingType) {
-      hoistInvalidRootOptions(options.config, testingType)
-    }
+    nestInvalidRootOptions(options.config, testingType)
 
     // get a list of the available config keys
     const configKeys = getPublicConfigKeys()

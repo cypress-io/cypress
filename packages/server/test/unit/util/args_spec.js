@@ -597,16 +597,16 @@ describe('lib/util/args', () => {
     })
 
     it('moves testing-type specific config options', function () {
-      const result = argsUtil.toObject(['--testingType', 'component', '--config', 'specPattern=**/*.test.js'])
+      const result = argsUtil.toObject(['--config', '{"baseUrl": "http://foobar.com", "specPattern":"**/*.test.js"}'])
 
       expect(result).to.deep.equal({
         cwd,
         _: [],
         invokedFromCli: false,
         config: {
+          e2e: { baseUrl: 'http://foobar.com', specPattern: '**/*.test.js' },
           component: { specPattern: '**/*.test.js' },
         },
-        testingType: 'component',
       })
     })
   })

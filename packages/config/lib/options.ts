@@ -534,21 +534,25 @@ export const breakingRootOptions: Array<BreakingOption> = [
     name: 'supportFile',
     errorKey: 'SUPPORT_FILE_ROOT_NOT_SUPPORTED',
     isWarning: false,
+    testingTypes: ['component', 'e2e'],
   },
   {
     name: 'specPattern',
     errorKey: 'SPEC_PATTERN_ROOT_NOT_SUPPORTED',
     isWarning: false,
+    testingTypes: ['component', 'e2e'],
   },
   {
     name: 'excludeSpecPattern',
     errorKey: 'SPEC_EXCLUDE_PATTERN_ROOT_NOT_SUPPORTED',
     isWarning: false,
+    testingTypes: ['component', 'e2e'],
   },
   {
     name: 'baseUrl',
     errorKey: 'BASE_URL_ROOT_NOT_SUPPORTED',
     isWarning: false,
+    testingTypes: ['e2e'],
   },
 ]
 
