@@ -170,7 +170,7 @@ export const frontendFrameworkPresets = [
       },
     ],
   },
-]
+] as const
 
 export const frontendFrameworkWithBundler = [
   {
@@ -214,7 +214,7 @@ export const frontendFrameworkWithBundler = [
       },
     ],
   },
-]
+] as const
 
 export const frontendFrameworkWithoutBundler = [
   {
@@ -263,7 +263,7 @@ export const frontendFrameworkWithoutBundler = [
       },
     ],
   },
-]
+] as const
 
 export const frontendFrameworks = [
   ...frontendFrameworkPresets,

@@ -1,6 +1,7 @@
 import { BUNDLERS, FoundBrowser, Editor, Warning, AllowedState, AllModeOptions, TestingType, PACKAGE_MANAGERS, BrowserStatus } from '@packages/types'
 import type { NexusGenEnums, NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
 import type { App, BrowserWindow } from 'electron'
+import type { frontendFrameworks } from '@packages/scaffold-config'
 import type { ChildProcess } from 'child_process'
 import type { SocketIOServer } from '@packages/socket'
 import type { Server } from 'http'
@@ -63,7 +64,7 @@ export interface AppDataShape {
 export interface WizardDataShape {
   chosenBundler: NexusGenEnums['SupportedBundlers'] | null
   allBundlers: typeof BUNDLERS
-  chosenFramework: NexusGenEnums['FrontendFrameworkEnum'] | null
+  chosenFramework: typeof frontendFrameworks[number]['group'] | null
   chosenLanguage: NexusGenEnums['CodeLanguageEnum']
   chosenManualInstall: boolean
   detectedLanguage: NexusGenEnums['CodeLanguageEnum'] | null
@@ -111,6 +112,7 @@ export interface CoreDataShape {
   localSettings: LocalSettingsDataShape
   app: AppDataShape
   currentProject: string | null
+  componentFrameworkMetadata: typeof frontendFrameworks[number] | null
   currentTestingType: TestingType | null
   wizard: WizardDataShape
   migration: MigrationDataShape | null

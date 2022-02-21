@@ -70,7 +70,6 @@ interface RequireWatchers {
 }
 
 export interface ProjectMetaState {
-  frontendFramework: (typeof frontendFrameworks[number]) | undefined
   hasTypescript: boolean
   hasLegacyCypressJson: boolean
   hasCypressEnvFile: boolean
@@ -81,7 +80,6 @@ export interface ProjectMetaState {
 }
 
 const PROJECT_META_STATE: ProjectMetaState = {
-  frontendFramework: undefined,
   hasTypescript: false,
   hasLegacyCypressJson: false,
   hasMultipleConfigPaths: false,
@@ -127,9 +125,6 @@ export class ProjectLifecycleManager {
     } else if (ctx.coreData.currentTestingType && this._projectRoot) {
       this.setCurrentTestingType(ctx.coreData.currentTestingType)
     }
-
-    this._projectMetaState.frontendFramework = detect(this.projectRoot)
-    console.log('meta!!!', this._projectMetaState.frontendFramework)
 
     // see timers/parent.js line #93 for why this is necessary
     process.on('exit', this.onProcessExit)
@@ -280,6 +275,10 @@ export class ProjectLifecycleManager {
     this.ctx.update((s) => {
       s.currentProject = projectRoot
       s.packageManager = packageManagerUsed
+      const componentFrameworkMetadata = detect(this.projectRoot) ?? null
+      s.componentFrameworkMetadata = componentFrameworkMetadata
+      s.wizard.chosenFramework = componentFrameworkMetadata?.group ?? null
+      s.wizard.chosenBundler = componentFrameworkMetadata?.supportedBundlers[0] ?? null
     })
 
     const { needsCypressJsonMigration } = this.refreshMetaState()
@@ -1114,7 +1113,6 @@ export class ProjectLifecycleManager {
       if (packageJson.dependencies?.typescript || packageJson.devDependencies?.typescript || fs.existsSync(this._pathToFile('tsconfig.json'))) {
         metaState.hasTypescript = true
       }
-
     } catch {
       // No need to handle
     }

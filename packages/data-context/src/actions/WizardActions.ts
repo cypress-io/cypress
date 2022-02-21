@@ -32,7 +32,8 @@ export class WizardActions {
   setFramework (framework: NexusGenEnums['FrontendFrameworkEnum'] | null) {
     const prevFramework = this.ctx.coreData.wizard.chosenFramework || ''
 
-    this.ctx.coreData.wizard.chosenFramework = framework
+    // UPDATE
+    // this.ctx.coreData.wizard.chosenFramework = framework
 
     if (framework !== 'react' && framework !== 'vue') {
       return this.setBundler('webpack')
@@ -111,49 +112,6 @@ export class WizardActions {
         ...Object.keys(packageJson.dependencies || {}),
         ...Object.keys(packageJson.devDependencies || {}),
       ]
-
-      this.detectFramework(dependencies)
-      debug('detectedFramework %s', this.data.detectedFramework)
-      this.detectBundler(dependencies)
-      debug('detectedBundler %s', this.data.detectedBundler)
-
-      this.data.chosenFramework = this.data.detectedFramework || null
-      this.data.chosenBundler = this.data.detectedBundler || null
-    }
-  }
-
-  private detectFramework (dependencies: string[]) {
-    // Detect full featured frameworks
-    if (dependencies.includes('next')) {
-      this.ctx.wizardData.detectedFramework = 'nextjs'
-    } else if (dependencies.includes('react-scripts')) {
-      this.ctx.wizardData.detectedFramework = 'cra'
-    } else if (dependencies.includes('nuxt')) {
-      this.ctx.wizardData.detectedFramework = 'nuxtjs'
-    } else if (dependencies.includes('@vue/cli-service')) {
-      this.ctx.wizardData.detectedFramework = 'vuecli'
-    } else if (dependencies.includes('react')) {
-      this.ctx.wizardData.detectedFramework = 'react'
-    } else if (dependencies.includes('vue')) {
-      this.ctx.wizardData.detectedFramework = 'vue'
-    }
-  }
-
-  private detectBundler (dependencies: string[]) {
-    const detectedFrameworkObject = FRONTEND_FRAMEWORKS.find((f) => f.type === this.ctx.wizardData.detectedFramework)
-
-    if (detectedFrameworkObject && detectedFrameworkObject.supportedBundlers.length === 1) {
-      this.ctx.wizardData.detectedBundler = detectedFrameworkObject.supportedBundlers[0] ?? null
-
-      return
-    }
-
-    if (dependencies.includes('webpack')) {
-      this.ctx.wizardData.detectedBundler = 'webpack'
-    }
-
-    if (dependencies.includes('vite')) {
-      this.ctx.wizardData.detectedBundler = 'vite'
     }
   }
 
@@ -317,6 +275,7 @@ export class WizardActions {
   }
 
   private wizardGetConfigCodeComponent (opts: WizardGetCodeComponent): string {
+    // AAHHHH
     return configFiles[opts.chosenFramework.type][opts.chosenLanguage.type]
 
     // const codeBlocks: string[] = []
