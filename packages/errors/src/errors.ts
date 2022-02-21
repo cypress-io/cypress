@@ -602,15 +602,6 @@ export const AllCypressErrors = {
       `
   },
   // TODO: make this relative path, not absolute
-  PLUGINS_FILE_NOT_FOUND: (pluginsFilePath: string) => {
-    return errTemplate`\
-        Your ${fmt.highlight(`pluginsFile`)} was not found at path: ${fmt.path(pluginsFilePath)}
-
-        Create this file, or set pluginsFile to ${fmt.highlightSecondary(`false`)} if a plugins file is not necessary for your project.
-
-        If you have just renamed the extension of your pluginsFile, restart Cypress.
-      `
-  },
   // TODO: make this relative path, not absolute
   PLUGINS_DIDNT_EXPORT_FUNCTION: (pluginsFilePath: string, exported: any) => {
     const code = errPartial`

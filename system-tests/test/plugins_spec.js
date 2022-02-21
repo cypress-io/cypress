@@ -174,16 +174,6 @@ describe('e2e plugins', function () {
     })
   })
 
-  it('fails when its set from config but does not exist', function () {
-    return systemTests.exec(this, {
-      spec: 'app_spec.js',
-      project: 'plugin-missing',
-      sanitizeScreenshotDimensions: true,
-      snapshot: true,
-      expectedExitCode: 1,
-    })
-  })
-
   it('fails when there is no function exported', function () {
     return systemTests.exec(this, {
       spec: 'app_spec.js',

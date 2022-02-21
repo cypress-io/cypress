@@ -68,7 +68,6 @@ export const e2eProjectDirs = [
   'plugin-extension',
   'plugin-filter-browsers',
   'plugin-invalid-event-handler-error',
-  'plugin-missing',
   'plugin-no-function-return',
   'plugin-retries',
   'plugin-returns-bad-config',
