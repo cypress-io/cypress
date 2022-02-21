@@ -1664,7 +1664,7 @@ describe('network stubbing', function () {
         const start = Date.now()
 
         return $.get('/timeout').then((responseText) => {
-          expect(Date.now() - start).to.be.closeTo(delay, 50)
+          expect(Date.now()).to.be.gte(start + delay)
           expect(responseText).to.eq('foo')
         })
       }
