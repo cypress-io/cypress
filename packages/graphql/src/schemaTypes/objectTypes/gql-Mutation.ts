@@ -340,6 +340,16 @@ export const mutation = mutationType({
       },
     })
 
+    t.nonNull.field('resetAuthState', {
+      type: Query,
+      description: 'Reset the Auth State',
+      resolve (_, args, ctx) {
+        ctx.actions.auth.resetAuthState()
+
+        return ctx.appData
+      },
+    })
+
     t.nonNull.field('resetWizard', {
       type: 'Boolean',
       description: 'Reset the Wizard to the starting position',
