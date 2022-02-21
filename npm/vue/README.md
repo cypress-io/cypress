@@ -82,6 +82,11 @@ describe('Hello.vue', () => {
 
 ## Usage and Examples
 
+### Note
+The most current 'Getting Started' examples for various kinds of Vue projects are located in the [Cypress Component Testing Examples](https://github.com/cypress-io/cypress-component-testing-examples) repo. That is a good place to see different ways to get component testing up and running with your setup.
+
+The examples contained in this repo, and the external examples linked below, are most useful when you are already up and running with component testing in your project. They cover details about how to achieve particular testing goals, like mounting passing props, using slots, or handling user input.
+
 ```js
 // components/HelloWorld.spec.js
 import { mount } from '@cypress/vue'
