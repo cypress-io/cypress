@@ -10,6 +10,38 @@ import $utils from './utils'
 const ERROR_PROPS = 'message type name stack sourceMappedStack parsedStack fileName lineNumber columnNumber host uncaught actual expected showDiff isPending docsUrl codeFrame'.split(' ')
 const ERR_PREPARED_FOR_SERIALIZATION = Symbol('ERR_PREPARED_FOR_SERIALIZATION')
 
+export type ErrorHandlerType = 'error' | 'unhandledrejection'
+
+export interface KnownException {
+  message: string
+  warning: string
+}
+
+// https://github.com/cypress-io/cypress/issues/8418
+// https://github.com/quasarframework/quasar/issues/2233#issuecomment-492975745
+export const knownExceptions: KnownException[] = [
+  {
+    message: 'ResizeObserver loop limit exceeded',
+    warning: 'Cypress is intentionally supressing and ignoring a unhandled ResizeObserver error. This can safely be ignored.',
+  },
+]
+
+export function shouldSuppressException (error: Error) {
+  const knownException = knownExceptions.find((x) => error.message.includes(x.message))
+
+  if (!knownException) {
+    return {
+      suppress: false,
+      warning: null,
+    }
+  }
+
+  return {
+    suppress: true,
+    warning: knownException.warning,
+  }
+}
+
 const crossOriginScriptRe = /^script error/i
 
 if (!Error.captureStackTrace) {
@@ -538,7 +570,13 @@ const errorFromUncaughtEvent = (handlerType, event) => {
     errorFromProjectRejectionEvent(event)
 }
 
-const logError = (Cypress, handlerType, err, handled = false) => {
+const logError = (Cypress, handlerType: ErrorHandlerType, err: Error, handled = false) => {
+  const { suppress } = shouldSuppressException(err)
+
+  if (suppress) {
+    return
+  }
+
   Cypress.log({
     message: `${err.name}: ${err.message}`,
     name: 'uncaught exception',

@@ -6,7 +6,7 @@ import { registerFetch } from 'unfetch'
 
 import $dom from '../dom'
 import $utils from './utils'
-import $errUtils, { ErrorFromProjectRejectionEvent } from './error_utils'
+import $errUtils, { ErrorFromProjectRejectionEvent, shouldSuppressException } from './error_utils'
 import $stackUtils from './stack_utils'
 
 import { create as createChai, IChai } from '../cy/chai'
@@ -797,6 +797,16 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     // AUT frame are the same
     if (frameType === 'app' || this.config('componentTesting')) {
       try {
+        const { suppress, warning } = shouldSuppressException(err)
+
+        if (suppress) {
+          // eslint-disable-next-line no-console
+          console.warn(warning)
+
+          // return undefined to skip logging the error and failing the test
+          return true
+        }
+
         const results = this.Cypress.action('app:uncaught:exception', err, runnable, promise)
 
         // dont do anything if any of our uncaught:exception

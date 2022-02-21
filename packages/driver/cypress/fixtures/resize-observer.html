@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+
+<!-- 
+  Minimal example to trigger ResizeObserver limit error in Chrome.
+  https://github.com/OliverJAsh/resize-observer-loop-tests/blob/master/simple.html
+-->
+
+<body></body>
+<script>
+  const createAndAppendElement = (tagName, parent) => {
+    if (!parent) {
+      parent = document.body;
+    }
+    const element = document.createElement(tagName);
+    parent.appendChild(element);
+    return element;
+  };
+
+  const t1 = createAndAppendElement("div");
+
+  const observer = new ResizeObserver((entries) => {
+    t1.style.width = "101px";
+
+    // give Cypress some time to capture and log the warning.
+    setTimeout(() => {
+      window.Cypress.emit('resize-observer-triggered')
+    }, 150)
+  });
+
+  observer.observe(t1);
+</script> 
