@@ -68,11 +68,11 @@ describe('<ResizablePanels />', { viewportWidth: 1500, defaultCommandTimeout: 40
       assertWidth('panel1', minPanel1Width)
 
       // drag panel 1 to the maximum space available and attempt to go above it
-      dragHandleToClientX('panel1', 680)
-      dragHandleToClientX('panel1', 691)
-      assertWidth('panel1', 680)
+      dragHandleToClientX('panel1', 550)
+      dragHandleToClientX('panel1', 561)
+      assertWidth('panel1', 550)
       dragHandleToClientX('panel1', 700)
-      assertWidth('panel1', 680)
+      assertWidth('panel1', 550)
 
       // panel 2 was not reduced
       assertWidth('panel2', defaultPanel2Width)
@@ -163,9 +163,10 @@ describe('<ResizablePanels />', { viewportWidth: 1500, defaultCommandTimeout: 40
 
       cy.contains('panel2').should('not.be.visible')
       assertWidth('panel1', defaultPanel1Width)
-      dragHandleToClientX('panel1', 1000)
-      assertWidth('panel1', 1000)
-      assertWidth('panel3', 500)
+      dragHandleToClientX('panel1', 950)
+      dragHandleToClientX('panel1', 955)
+      assertWidth('panel1', 950)
+      assertWidth('panel3', 550)
     })
 
     it('Panel 3 resizes correctly when both panels are hidden', () => {
