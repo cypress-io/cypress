@@ -1184,17 +1184,24 @@ export const AllCypressErrors = {
     `
   },
 
-  SETUP_NODE_EVENTS_DO_NOT_SUPPORT_DEV_SERVER: (configPath: string) => {
-    return errTemplate`\
-      The ${fmt.highlight('setupNodeEvents')} method does not support ${fmt.highlightSecondary('dev-server:start')}, use ${fmt.highlight('devServer')} instead:
-
-      Please update this file: ${fmt.path(configPath)}
-
-      ${fmt.code(`
-        devServer (cypressDevServerConfig, devServerConfig) {
-          // start dev server here
+  SETUP_NODE_EVENTS_DO_NOT_SUPPORT_DEV_SERVER: (configFilePath: string) => {
+    const code = errPartial`
+      {
+        component: {
+          devServer (cypressDevServerConfig, devServerConfig) {
+            ${fmt.comment(`// start dev server here`)
+          }
         }
-      `)}
+      }`
+
+    return errTemplate`\
+      Your ${fmt.highlightSecondary(`configFile`)} is invalid: ${fmt.path(configFilePath)}
+
+      Binding to the ${fmt.highlightSecondary(`on('dev-server:start')`)} event is no longer necessary.
+
+      Please update your code to use the ${fmt.highlight(`component.devServer()`)} function.
+
+      ${fmt.code(code)}
 
       Learn more: https://on.cypress.io/dev-server
     `
