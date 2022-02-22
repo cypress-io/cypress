@@ -2,6 +2,7 @@ import type { $Cy } from '../cypress/cy'
 import type { SpecBridgeDomainCommunicator } from './communicator'
 import $errUtils from '../cypress/error_utils'
 import $utils from '../cypress/utils'
+import { syncConfigToCurrentDomain, syncEnvToCurrentDomain } from '../util/config'
 
 export const handleDomainFn = (cy: $Cy, specBridgeCommunicator: SpecBridgeDomainCommunicator) => {
   const doneEarly = () => {
@@ -51,8 +52,15 @@ export const handleDomainFn = (cy: $Cy, specBridgeCommunicator: SpecBridgeDomain
     cy.state('ctx', cy.state('runnable').ctx)
   }
 
-  specBridgeCommunicator.on('run:domain:fn', async ({ data, fn, state, isDoneFnAvailable = false }: { data: any[], fn: string, isDoneFnAvailable: boolean, state: {}}) => {
+  specBridgeCommunicator.on('run:domain:fn', async ({ data, fn, config, env, state, isDoneFnAvailable = false, skipConfigValidation = false }: { data: any[], fn: string, config: Cypress.Config, env: Cypress.ObjectLike, state: {}, isDoneFnAvailable: boolean, skipConfigValidation: boolean}) => {
     reset(state)
+
+    // @ts-ignore
+    window.__cySkipValidateConfig = skipConfigValidation || false
+
+    // resync the config/env before running the domain:fn
+    syncConfigToCurrentDomain(config)
+    syncEnvToCurrentDomain(env)
 
     let fnWrapper = `(${fn})`
 
@@ -65,7 +73,8 @@ export const handleDomainFn = (cy: $Cy, specBridgeCommunicator: SpecBridgeDomain
 
         // signal to the primary domain that done has been called and to signal that the command queue is finished in the secondary domain
         specBridgeCommunicator.toPrimaryError('done:called', { err })
-        specBridgeCommunicator.toPrimary('queue:finished')
+
+        specBridgeCommunicator.toPrimaryQueueFinished()
 
         return null
       }
@@ -110,10 +119,17 @@ export const handleDomainFn = (cy: $Cy, specBridgeCommunicator: SpecBridgeDomain
       } else {
         const subject = await value
 
-        specBridgeCommunicator.toPrimaryRanDomainFn({ subject })
+        specBridgeCommunicator.toPrimaryRanDomainFn({
+          subject,
+          // only sync the config if there are no commands in queue (for instance, only assertions exist in the callback)
+          resyncConfig: cy.queue.length === 0,
+        })
       }
     } catch (err) {
-      specBridgeCommunicator.toPrimaryRanDomainFn({ err })
+      specBridgeCommunicator.toPrimaryRanDomainFn({
+        err,
+        resyncConfig: true,
+      })
     } finally {
       cy.state('done', undefined)
     }

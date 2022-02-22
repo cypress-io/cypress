@@ -38,7 +38,7 @@ export const handleCommands = (Cypress: Cypress.Cypress, cy: $Cy, specBridgeComm
     // the queue hasn't started yet, so run it
     cy.queue.run(false)
     .then(() => {
-      specBridgeCommunicator.toPrimary('queue:finished')
+      specBridgeCommunicator.toPrimaryQueueFinished()
     })
   }
 

@@ -21,30 +21,25 @@ import { handleTestEvents } from './events/test_events'
 
 const specBridgeCommunicator = new SpecBridgeDomainCommunicator()
 
-const setup = () => {
+specBridgeCommunicator.initialize(window)
+
+specBridgeCommunicator.once('initialize:cypress', ({ config, env }) => {
+  // eventually, setup will get called again on rerun and cy will
+  // get re-created
+  setup(config, env)
+})
+
+const setup = (cypressConfig: Cypress.Config, env: Cypress.ObjectLike) => {
   // @ts-ignore
   const Cypress = window.Cypress = $Cypress.create({
-    browser: {
-      channel: 'stable',
-      displayName: 'Chrome',
-      family: 'chromium',
-      isChosen: true,
-      isHeaded: true,
-      isHeadless: false,
-      majorVersion: 90,
-      name: 'chrome',
-      path: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
-      version: '90.0.4430.212',
-    },
-    defaultCommandTimeout: 4000,
-    execTimeout: 60000,
-    taskTimeout: 60000,
-    pageLoadTimeout: 60000,
-    requestTimeout: 5000,
-    responseTimeout: 30000,
-    // Set defaults to avoid warnings
-    waitForAnimations: true,
-    animationDistanceThreshold: 5,
+    ...cypressConfig,
+    env,
+    __isMultiDomain: true,
+    // never turn on video for multi-domain when syncing the config. This is handled in the primary.
+    video: false,
+    // multi-domain cannot be used in component testing and is only valid for e2e.
+    // This value is not synced with the config because it is omitted on big Cypress creation, as well as a few other key properties
+    testingType: 'e2e',
   }) as Cypress.Cypress
 
   // @ts-ignore
@@ -75,8 +70,6 @@ const setup = () => {
   handleTestEvents(Cypress, specBridgeCommunicator)
 
   cy.onBeforeAppWindowLoad = onBeforeAppWindowLoad(Cypress, cy)
-
-  specBridgeCommunicator.initialize(window)
 
   // TODO Should state syncing be built into cy.state instead of being explicitly called?
   specBridgeCommunicator.on('sync:state', async (state) => {
@@ -163,9 +156,5 @@ const onBeforeAppWindowLoad = (Cypress: Cypress.Cypress, cy: $Cy) => (autWindow:
     },
   })
 }
-
-// eventually, setup will get called again on rerun and cy will
-// get re-created
-setup()
 
 specBridgeCommunicator.toPrimary('bridge:ready')
