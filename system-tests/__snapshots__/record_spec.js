@@ -22,7 +22,7 @@ exports['e2e record passing passes 1'] = `
 
 Oops...we found an error preparing this test file:
 
-  > cypress/integration/record_error.cy.js
+  > cypress/e2e/record_error.cy.js
 
 The error was:
 
@@ -369,7 +369,7 @@ https://on.cypress.io/how-do-i-record-runs
 exports['e2e record projectId errors and exits without projectId 1'] = `
 You passed the --record flag but this project has not been setup to record.
 
-This project is missing the projectId inside of: cypress.json
+This project is missing the projectId inside of: cypress.config.js
 
 We cannot uniquely identify this project without this id.
 
@@ -554,7 +554,7 @@ Can't run because no spec files were found.
 
 We searched for specs matching this glob pattern:
 
-  > /foo/bar/.projects/e2e/cypress/integration/notfound/**
+  > /foo/bar/.projects/e2e/cypress/e2e/notfound/**
 
 `
 
@@ -727,7 +727,7 @@ exports['e2e record parallelization passes in parallel with group 2'] = `
 
 Oops...we found an error preparing this test file:
 
-  > cypress/integration/record_error.cy.js
+  > cypress/e2e/record_error.cy.js
 
 The error was:
 
@@ -2759,7 +2759,7 @@ Request Sent:
 {
   "ci": null,
   "specs": [
-    "cypress/integration/record_pass_spec.js"
+    "cypress/e2e/record_pass.cy.js"
   ],
   "commit": null,
   "group": null,
@@ -2768,7 +2768,7 @@ Request Sent:
   "ciBuildId": null,
   "projectId": "pid123",
   "recordKey": "f858a2bc-b469-4e48-be67-0876339ee7e1",
-  "specPattern": "cypress/integration/record_pass*",
+  "specPattern": "cypress/e2e/record_pass*",
   "tags": [
     ""
   ],

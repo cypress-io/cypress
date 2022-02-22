@@ -1152,7 +1152,7 @@ export const AllCypressErrors = {
     return errTemplate`\
       There are multiple support files.
 
-      Your supportFile is set to ${fmt.highlight(arg1)}, and we found ${fmt.highlightSecondary(arg2)}.
+      Your supportFile is set to ${fmt.highlight(arg1)}, and we found ${fmt.highlightSecondary(arg2)}
 
       Correct your supportFile config or merge the files into one.`
   },

@@ -566,7 +566,7 @@ InvalidEventHandlerError: The handler for the event \`task\` must be an object
 exports['e2e plugins fails when setupNodeEvents is not a function 1'] = `
 Your configFile is invalid: /foo/bar/.projects/plugin-empty/cypress.config.js
 
-The setupNodeEvents in your configFile.e2e should define a function with the following signature:
+The setupNodeEvents in your e2e config should define a function with the following signature:
 
 setupNodeEvents(on, config) {
   // configure tasks / plugins here
@@ -584,7 +584,7 @@ https://on.cypress.io/plugins-api
 exports['e2e plugins fails when there is no function exported 1'] = `
 Your configFile is invalid: /foo/bar/.projects/plugin-no-function-return/cypress.config.js
 
-The setupNodeEvents in your configFile.e2e should define a function with the following signature:
+The setupNodeEvents in your e2e config should define a function with the following signature:
 
 setupNodeEvents(on, config) {
   // configure tasks / plugins here

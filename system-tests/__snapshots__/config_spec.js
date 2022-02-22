@@ -141,7 +141,7 @@ exports['e2e config applies defaultCommandTimeout globally 1'] = `
 `
 
 exports['e2e config throws error when invalid viewportWidth in the configuration file 1'] = `
-Your configFile set an invalid value from: /foo/bar/.projects/config-with-invalid-viewport/cypress.config.js
+Your configFile at /foo/bar/.projects/config-with-invalid-viewport/cypress.config.js set an invalid value:
 
 Expected viewportWidth to be a number.
 
@@ -150,7 +150,7 @@ Instead the value was: "foo"
 `
 
 exports['e2e config throws error when invalid browser in the configuration file 1'] = `
-Your configFile set an invalid value from: /foo/bar/.projects/config-with-invalid-browser/cypress.config.js
+Your configFile at /foo/bar/.projects/config-with-invalid-browser/cypress.config.js set an invalid value:
 
 The error occurred while validating the browsers list.
 
