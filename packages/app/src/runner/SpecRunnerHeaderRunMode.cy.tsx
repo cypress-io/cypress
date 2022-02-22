@@ -1,0 +1,65 @@
+import SpecRunnerHeaderRunMode from './SpecRunnerHeaderRunMode.vue'
+import { useAutStore } from '../store'
+import { createEventManager } from '../../cypress/component/support/ctSupport'
+
+const browser = {
+  displayName: 'Chrome',
+  majorVersion: 1,
+}
+
+describe('SpecRunnerHeaderRunMode', { viewportHeight: 500 }, () => {
+  it('renders correctly for e2e', () => {
+    cy.window().then((win) => {
+      win.__CYPRESS_BROWSER__ = browser
+      win.__CYPRESS_TESTING_TYPE__ = 'e2e'
+      const autStore = useAutStore()
+      const eventManager = createEventManager()
+
+      autStore.updateUrl('http://localhost:4000')
+
+      cy.mount(<SpecRunnerHeaderRunMode eventManager={eventManager} width={800}/>)
+
+      cy.get('[data-cy="aut-url"]').should('be.visible')
+      cy.get('[data-cy="playground-activator"]').should('not.exist')
+      // confirm expected content is rendered
+      cy.contains('1000x660').should('be.visible')
+      cy.contains('Chrome 1').should('be.visible')
+      cy.contains('http://localhost:4000').should('be.visible')
+
+      // confirm no interactions are implemented
+      cy.get('[data-cy="viewport"]').click()
+      cy.contains('The viewport determines').should('not.exist')
+      cy.contains('Chrome 1').click()
+      cy.contains('Firefox').should('not.exist')
+
+      cy.percySnapshot()
+    })
+  })
+
+  it('renders correctly for component testing', () => {
+    cy.window().then((win) => {
+      win.__CYPRESS_BROWSER__ = browser
+      win.__CYPRESS_TESTING_TYPE__ = 'component'
+      const autStore = useAutStore()
+      const eventManager = createEventManager()
+
+      autStore.updateUrl('http://localhost:4000')
+
+      cy.mount(<SpecRunnerHeaderRunMode eventManager={eventManager} width={800} />)
+
+      cy.get('[data-cy="aut-url"]').should('not.exist')
+      cy.get('[data-cy="playground-activator"]').should('not.exist')
+      // confirm expected content is rendered
+      cy.contains('500x500').should('be.visible')
+      cy.contains('Chrome 1').should('be.visible')
+
+      // confirm no interactions are implemented
+      cy.get('[data-cy="viewport"]').click()
+      cy.contains('The viewport determines').should('not.exist')
+      cy.contains('Chrome 1').click()
+      cy.contains('Firefox').should('not.exist')
+
+      cy.percySnapshot()
+    })
+  })
+})

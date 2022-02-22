@@ -22,6 +22,9 @@ import {
 } from './migration'
 
 import type { FilePart } from './migration/format'
+import Debug from 'debug'
+
+const debug = Debug('cypress:data-context:sources:MigrationDataSource')
 
 export interface MigrationFile {
   testingType: TestingType
@@ -66,8 +69,9 @@ export class MigrationDataSource {
   hasE2ESpec: boolean = flags.hasE2ESpec
   hasPluginsFile: boolean = flags.hasPluginsFile
 
-  private componentTestingMigrationWatcher?: chokidar.FSWatcher
+  private componentTestingMigrationWatcher: chokidar.FSWatcher | null = null
   componentTestingMigrationStatus?: ComponentTestingMigrationStatus
+  private _oldConfigPromise: Promise<OldCypressConfig> | null = null
 
   constructor (private ctx: DataContext) { }
 
@@ -80,6 +84,7 @@ export class MigrationDataSource {
     }
 
     this._config = null
+    this._oldConfigPromise = null
     const config = await this.parseCypressConfig()
 
     await this.initializeFlags()
@@ -100,7 +105,9 @@ export class MigrationDataSource {
   }
 
   async getComponentTestingMigrationStatus () {
+    debug('getComponentTestingMigrationStatus: start')
     const config = await this.parseCypressConfig()
+
     const componentFolder = getComponentFolder(config)
 
     if (!config || !this.ctx.currentProject) {
@@ -114,15 +121,20 @@ export class MigrationDataSource {
       return null
     }
 
+    debug('getComponentTestingMigrationStatus: componentFolder', componentFolder)
+
     if (!this.componentTestingMigrationWatcher) {
-      const onFileMoved = (status: ComponentTestingMigrationStatus) => {
+      debug('getComponentTestingMigrationStatus: initializing watcher')
+      const onFileMoved = async (status: ComponentTestingMigrationStatus) => {
         this.componentTestingMigrationStatus = status
+        debug('getComponentTestingMigrationStatus: file moved %O', status)
 
         if (status.completed) {
-          this.componentTestingMigrationWatcher?.close()
+          await this.componentTestingMigrationWatcher?.close()
+          this.componentTestingMigrationWatcher = null
         }
 
-        // TODO(lachlan): is this the right plcae to use the emitter?
+        // TODO(lachlan): is this the right place to use the emitter?
         this.ctx.deref.emitter.toLaunchpad()
       }
 
@@ -135,6 +147,7 @@ export class MigrationDataSource {
 
       this.componentTestingMigrationStatus = status
       this.componentTestingMigrationWatcher = watcher
+      debug('getComponentTestingMigrationStatus: watcher initialized. Status: %o', status)
     }
 
     if (!this.componentTestingMigrationStatus) {
@@ -151,6 +164,7 @@ export class MigrationDataSource {
 
     const config = await this.parseCypressConfig()
 
+    debug('supportFilesForMigrationGuide: config %O', config)
     if (!await shouldShowRenameSupport(this.ctx.currentProject, config)) {
       return null
     }
@@ -162,8 +176,12 @@ export class MigrationDataSource {
     try {
       const supportFiles = await supportFilesForMigration(this.ctx.currentProject)
 
+      debug('supportFilesForMigrationGuide: supportFiles %O', supportFiles)
+
       return supportFiles
-    } catch {
+    } catch (err) {
+      debug('supportFilesForMigrationGuide: err %O', err)
+
       return null
     }
   }
@@ -230,10 +248,17 @@ export class MigrationDataSource {
       return this._config
     }
 
-    if (this.ctx.lifecycleManager.metaState.hasLegacyCypressJson) {
+    // avoid reading the same file over and over again before it was finished reading
+    if (this.ctx.lifecycleManager.metaState.hasLegacyCypressJson && !this._oldConfigPromise) {
       const cfgPath = path.join(this.ctx.lifecycleManager?.projectRoot, 'cypress.json')
 
-      this._config = await this.ctx.file.readJsonFile(cfgPath) as OldCypressConfig
+      this._oldConfigPromise = this.ctx.file.readJsonFile(cfgPath) as Promise<OldCypressConfig>
+    }
+
+    if (this._oldConfigPromise) {
+      this._config = await this._oldConfigPromise
+
+      this._oldConfigPromise = null
 
       return this._config
     }
@@ -294,6 +319,14 @@ export class MigrationDataSource {
 
   get step (): MIGRATION_STEP {
     return this._step
+  }
+
+  async closeManualRenameWatcher () {
+    if (this.componentTestingMigrationWatcher) {
+      debug('setStep: stopping watcher')
+      await this.componentTestingMigrationWatcher.close()
+      this.componentTestingMigrationWatcher = null
+    }
   }
 
   setStep (step: MIGRATION_STEP) {

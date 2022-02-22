@@ -5,7 +5,7 @@ This is the "kitchen sink" of migrations. It has E2E and Component Testing, a bu
 The following migration steps will be used during this migration:
 
 - [x] automatic folder rename of cypress/integration to cypress/e2e
-- [x] manual file rename
+- [ ] manual file rename
 - [x] rename support
 - [x] update config file
 - [x] setup component testing

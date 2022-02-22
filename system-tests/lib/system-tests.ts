@@ -3,6 +3,8 @@ const snapshot = require('snap-shot-it')
 import { SpawnOptions } from 'child_process'
 import { expect } from './spec_helper'
 
+const isCi = require('is-ci')
+
 require('mocha-banner').register()
 const chalk = require('chalk').default
 const _ = require('lodash')
@@ -525,7 +527,7 @@ const copy = function () {
   }
 }
 
-const getMochaItFn = function (only, skip, browser, specifiedBrowser) {
+const getMochaItFn = function (title, only, skip, browser, specifiedBrowser) {
   // if we've been told to skip this test
   // or if we specified a particular browser and this
   // doesn't match the one we're currently trying to run...
@@ -535,6 +537,12 @@ const getMochaItFn = function (only, skip, browser, specifiedBrowser) {
   }
 
   if (only) {
+    if (isCi) {
+      // fixes the problem where systemTests can accidentally by skipped using systemTests.it.only(...)
+      // https://github.com/cypress-io/cypress/pull/20276
+      throw new Error(`the system test: "${chalk.yellow(title)}" has been set to run with an it.only() which is not allowed in CI environments.\n\nPlease remove the it.only()`)
+    }
+
     return it.only
   }
 
@@ -605,7 +613,7 @@ const localItFn = function (title: string, opts: ItOptions) {
   const browsersToTest = getBrowsers(options.browser)
 
   const browserToTest = function (browser) {
-    const mochaItFn = getMochaItFn(options.only, options.skip, browser, specifiedBrowser)
+    const mochaItFn = getMochaItFn(title, options.only, options.skip, browser, specifiedBrowser)
 
     const testTitle = `${title} [${browser}]`
 
@@ -909,7 +917,7 @@ const systemTests = {
 
     if (!options.skipScaffold) {
       await Fixtures.scaffoldCommonNodeModules()
-      Fixtures.scaffoldProject(options.project)
+      await Fixtures.scaffoldProject(options.project)
       await Fixtures.scaffoldProjectNodeModules(options.project)
     }
 
@@ -932,7 +940,11 @@ const systemTests = {
       const { expectedExitCode } = options
 
       maybeVerifyExitCode(expectedExitCode, () => {
-        expect(code).to.eq(expectedExitCode, 'expected exit code')
+        if (expectedExitCode === 0) {
+          expect(code).to.eq(expectedExitCode, `Process errored: Exit code ${code}`)
+        } else {
+          expect(code).to.to.eq(expectedExitCode, `expected exit code ${expectedExitCode} but got ${code}`)
+        }
       })
 
       // snapshot the stdout!

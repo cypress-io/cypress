@@ -21,7 +21,7 @@ export const CODE_GEN_FRAMEWORKS = ['react', 'vue'] as const
 
 export type CodeGenFramework = typeof CODE_GEN_FRAMEWORKS[number]
 
-export const FRONTEND_FRAMEWORK_CATEGORIES = ['react', 'vue', 'other'] as const
+export const FRONTEND_FRAMEWORK_CATEGORIES = ['react', 'vue'] as const
 
 export const STORYBOOK_DEPS = [
   '@storybook/testing-react',
@@ -32,7 +32,7 @@ export const FRONTEND_FRAMEWORKS = [
   {
     type: 'cra',
     name: 'Create React App',
-    supportedBundlers: ['webpack'],
+    supportedBundlers: ['webpack'] as readonly Bundler['type'][],
     package: '@cypress/react',
     defaultPackagePath: '@cypress/react/plugins/react-scripts',
     glob: '*.{jsx,tsx}',
@@ -44,7 +44,7 @@ export const FRONTEND_FRAMEWORKS = [
   {
     type: 'vuecli',
     name: 'Vue CLI',
-    supportedBundlers: ['webpack'],
+    supportedBundlers: ['webpack'] as readonly Bundler['type'][],
     package: '@cypress/vue',
     defaultPackagePath: null,
     glob: '*.vue',
@@ -56,7 +56,7 @@ export const FRONTEND_FRAMEWORKS = [
   {
     type: 'react',
     name: 'React.js',
-    supportedBundlers: ['webpack', 'vite'],
+    supportedBundlers: ['webpack', 'vite'] as readonly Bundler['type'][],
     package: '@cypress/react',
     defaultPackagePath: null,
     glob: '*.{jsx,tsx}',
@@ -68,7 +68,7 @@ export const FRONTEND_FRAMEWORKS = [
   {
     type: 'vue',
     name: 'Vue.js',
-    supportedBundlers: ['webpack', 'vite'],
+    supportedBundlers: ['webpack', 'vite'] as readonly Bundler['type'][],
     package: '@cypress/vue',
     defaultPackagePath: null,
     glob: '*.vue',
@@ -80,7 +80,7 @@ export const FRONTEND_FRAMEWORKS = [
   {
     type: 'nextjs',
     name: 'Next.js',
-    supportedBundlers: ['webpack'],
+    supportedBundlers: ['webpack'] as readonly Bundler['type'][],
     package: '@cypress/react',
     defaultPackagePath: '@cypress/react/plugins/next',
     glob: '*.{jsx,tsx}',
@@ -92,7 +92,7 @@ export const FRONTEND_FRAMEWORKS = [
   {
     type: 'nuxtjs',
     name: 'Nuxt.js',
-    supportedBundlers: ['webpack'],
+    supportedBundlers: ['webpack'] as readonly Bundler['type'][],
     package: '@cypress/vue',
     defaultPackagePath: null,
     glob: '*.vue',

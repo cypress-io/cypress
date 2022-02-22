@@ -127,6 +127,10 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
   it('shows hint and modal to upgrade to latest version of cypress', () => {
     cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
       onResult: (result) => {
+        if (result.currentProject) {
+          result.currentProject.packageManager = 'yarn'
+        }
+
         result.versions = {
           __typename: 'VersionData',
           current: {
@@ -161,6 +165,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
 
     cy.contains(`${defaultMessages.topNav.updateCypress.title} 8.7.0`).should('be.visible')
     cy.contains('test-project').should('be.visible')
+    cy.contains('code', 'yarn add -D cypress').should('be.visible')
     cy.percySnapshot('after upgrade modal open')
 
     cy.get('body').type('{esc}') // dismiss modal with keyboard
@@ -205,7 +210,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
     cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
       onResult: (result) => {
         result.__typename = 'Query'
-        result.isAuthBrowserOpened = true
+        result.authState.browserOpened = true
         result.cloudViewer = cloudViewer
         result.cloudViewer.__typename = 'CloudUser'
       },

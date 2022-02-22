@@ -12,6 +12,8 @@ export * from './spec'
 
 export * from './editors'
 
+export * from './auth'
+
 export type {
   AllPackages,
   AllPackageTypes,

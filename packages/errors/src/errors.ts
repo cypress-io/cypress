@@ -637,7 +637,7 @@ export const AllCypressErrors = {
 
       Your ${fmt.highlight(`configFile`)} threw an error from: ${fmt.path(configFilePath)}
 
-      ${fmt.stackTrace(arg2)}
+      ${fmt.stackTrace(err)}
     `
   },
   // TODO: make this relative path, not absolute
