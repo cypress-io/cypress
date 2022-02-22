@@ -79,3 +79,4 @@ system-tests/projects/create-react-app-configured/**/*.js
 system-tests/projects/create-react-app-unconfigured/**/*.js
 system-tests/projects/vueclivue3-unconfigured/**/*
 system-tests/projects/vueclivue3-configured/**/*
+/system-tests/projects/nextjs-configured/**/*
