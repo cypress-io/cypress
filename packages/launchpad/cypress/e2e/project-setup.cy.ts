@@ -681,7 +681,7 @@ describe('Launchpad: Setup Project', () => {
                 cy.log('Go to next step and verify Install Dev Dependencies page')
                 cy.contains('h1', 'Install Dev Dependencies')
 
-                let installCommand = `npm install -D ${framework.package} ${bundler.package}`
+                let installCommand = `npm install -D ${[...framework.packages].map((x) => x.installer).join(' ')} ${bundler.package}`
 
                 if (hasStorybookDep) {
                   installCommand += ` ${framework.storybookDep}`
@@ -695,10 +695,12 @@ describe('Launchpad: Setup Project', () => {
                     href: `https://www.npmjs.com/package/${packageName}`,
                   })
 
-                  cy.contains(PACKAGES_DESCRIPTIONS[framework.package.name].split('<span')[0])
+                  ;[...framework.packages].forEach((pkg) => {
+                    cy.contains(PACKAGES_DESCRIPTIONS[pkg.name].split('<span')[0])
+                  })
                 }
 
-                validatePackage(framework.package)
+                // validatePackage(framework.package)
                 validatePackage(bundler.package)
                 if (hasStorybookDep) {
                   validatePackage(framework.storybookDep)

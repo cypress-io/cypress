@@ -50,4 +50,11 @@ describe('detect', () => {
     expect(actual.framework.type).to.eq('nextjs')
     expect(actual.bundler).to.eq(undefined)
   })
+
+  it(`no framework or library`, async () => {
+    const actual = detect({})
+
+    expect(actual.framework).to.be.undefined
+    expect(actual.bundler).to.be.undefined
+  })
 })
