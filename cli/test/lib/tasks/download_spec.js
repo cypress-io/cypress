@@ -72,6 +72,13 @@ describe('lib/tasks/download', function () {
       snapshot('desktop url from template', normalize(url))
     })
 
+    it('returns custom url from template without desktop', () => {
+      process.env.CYPRESS_DOWNLOAD_PATH_TEMPLATE = 'https://registry.npmmirror.com/binary.html?path=cypress/${version}/${platform}-${arch}/cypress.zip'
+      const url = download.getUrl('0.20.2')
+
+      snapshot('url from template without desktop', normalize(url))
+    })
+
     it('returns input if it is already an https link', () => {
       const url = 'https://somewhere.com'
       const result = download.getUrl(url)
