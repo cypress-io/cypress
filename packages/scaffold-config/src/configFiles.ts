@@ -85,11 +85,13 @@ export const FRONTEND_FRAMEWORKS = [
     type: 'cra',
     name: 'Create React App',
     supportedBundlers: ['webpack'] as readonly Bundler['type'][],
-    package: {
-      name: '@cypress/react',
-      version: 'latest',
-      installer: '@cypress/react@^5.0.0',
-    },
+    packages: [
+      {
+        name: '@cypress/react',
+        version: 'latest',
+        installer: '@cypress/react@^5.0.0',
+      },
+    ],
     defaultPackagePath: '@cypress/react/plugins/react-scripts',
     glob: '*.{jsx,tsx}',
     category: FRONTEND_FRAMEWORK_CATEGORIES[0],
@@ -129,11 +131,13 @@ export const FRONTEND_FRAMEWORKS = [
     type: 'vueclivue2',
     name: 'Vue CLI (Vue 2)',
     supportedBundlers: ['webpack'] as readonly Bundler['type'][],
-    package: {
-      name: '@cypress/vue',
-      version: '^2.0.0',
-      installer: '@cypress/vue@^2.0.0',
-    },
+    packages: [
+      {
+        name: '@cypress/vue',
+        version: '^2.0.0',
+        installer: '@cypress/vue@^2.0.0',
+      },
+    ],
     defaultPackagePath: null,
     glob: '*.vue',
     detectors: [
@@ -155,9 +159,9 @@ export const FRONTEND_FRAMEWORKS = [
       const { devServer } = require('@cypress/webpack-dev-server')
       const webpackConfig = require('@vue/cli-service/webpack.config')
 
-      module.exports = {
-        component: {
-          devServer,
+        module.exports = {
+          component: {
+            devServer,
           devServerConfig: {
             webpackConfig
           }
@@ -186,11 +190,13 @@ export const FRONTEND_FRAMEWORKS = [
     type: 'vueclivue3',
     name: 'Vue CLI (Vue 3)',
     supportedBundlers: ['webpack'] as readonly Bundler['type'][],
-    package: {
-      name: '@cypress/vue',
-      version: '^3.0.0',
-      installer: '@cypress/vue@^3.0.0',
-    },
+    packages: [
+      {
+        name: '@cypress/vue',
+        version: '^3.0.0',
+        installer: '@cypress/vue@^3.0.0',
+      },
+    ],
     defaultPackagePath: null,
     glob: '*.vue',
     detectors: [
@@ -243,11 +249,13 @@ export const FRONTEND_FRAMEWORKS = [
     type: 'react',
     name: 'React.js',
     supportedBundlers: ['webpack', 'vite'] as readonly Bundler['type'][],
-    package: {
-      name: '@cypress/react',
-      version: 'latest',
-      installer: '@cypress/react@^5.0.0',
-    },
+    packages: [
+      {
+        name: '@cypress/react',
+        version: 'latest',
+        installer: '@cypress/react@^5.0.0',
+      },
+    ],
     defaultPackagePath: null,
     glob: '*.{jsx,tsx}',
     detectors: [
@@ -341,11 +349,13 @@ export const FRONTEND_FRAMEWORKS = [
     type: 'vue2',
     name: 'Vue.js (v2)',
     supportedBundlers: ['webpack', 'vite'] as readonly Bundler['type'][],
-    package: {
-      name: '@cypress/vue',
-      version: '^2.0.0',
-      installer: '@cypress/vue@^2.0.0',
-    },
+    packages: [
+      {
+        name: '@cypress/vue',
+        version: '^2.0.0',
+        installer: '@cypress/vue@^2.0.0',
+      },
+    ],
     defaultPackagePath: null,
     glob: '*.vue',
     detectors: [
@@ -433,11 +443,13 @@ export const FRONTEND_FRAMEWORKS = [
     type: 'vue3',
     name: 'Vue.js (v3)',
     supportedBundlers: ['webpack', 'vite'] as readonly Bundler['type'][],
-    package: {
-      name: '@cypress/vue',
-      version: '^3.0.0',
-      installer: '@cypress/vue@^3.0.0',
-    },
+    packages: [
+      {
+        name: '@cypress/vue',
+        version: '^3.0.0',
+        installer: '@cypress/vue@^3.0.0',
+      },
+    ],
     defaultPackagePath: null,
     glob: '*.vue',
     detectors: [
@@ -524,11 +536,23 @@ export const FRONTEND_FRAMEWORKS = [
     type: 'nextjs',
     name: 'Next.js',
     supportedBundlers: ['webpack'] as readonly Bundler['type'][],
-    package: {
-      name: '@cypress/react',
-      version: 'latest',
-      installer: '@cypress/react@^5.0.0',
-    },
+    packages: [
+      {
+        name: '@cypress/react',
+        version: 'latest',
+        installer: '@cypress/react@^5.0.0',
+      },
+      {
+        name: 'webpack-dev-server',
+        version: '^4.0.0',
+        installer: 'webpack-dev-server@^4.0.0',
+      },
+      {
+        name: 'html-webpack-plugin',
+        version: 'latest',
+        installer: 'html-webpack-plugin@^4.0.0',
+      },
+    ],
     defaultPackagePath: '@cypress/react/plugins/next',
     glob: '*.{jsx,tsx}',
     category: FRONTEND_FRAMEWORK_CATEGORIES[0],
@@ -549,11 +573,13 @@ export const FRONTEND_FRAMEWORKS = [
     type: 'nuxtjs',
     name: 'Nuxt.js (v2)',
     supportedBundlers: ['webpack'] as readonly Bundler['type'][],
-    package: {
-      name: '@cypress/vue',
-      version: '^2.0.0',
-      installer: '@cypress/vue@^2.0.0',
-    },
+    packages: [
+      {
+        name: '@cypress/vue',
+        version: '^2.0.0',
+        installer: '@cypress/vue@^2.0.0',
+      },
+    ],
     defaultPackagePath: null,
     glob: '*.vue',
     detectors: [
