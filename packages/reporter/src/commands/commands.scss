@@ -9,6 +9,18 @@
     }
   }
 
+  .command {
+    cursor: default;
+    color: $gray-400;
+    min-height: 20px;
+    margin: 0;
+  }
+
+  .command-scaled {
+    font-size: 85%;
+    line-height: 14px;
+  }
+
   // System Command Styles
   .command-type-system.command-is-event {
     color: $gray-200;
@@ -33,18 +45,6 @@
         padding-left: 5px;
       }
     }
-  }
-
-  .command {
-    cursor: default;
-    color: $gray-400;
-    min-height: 20px;
-    margin: 0;
-  }
-
-  .command-scaled {
-    font-size: 85%;
-    line-height: 14px;
   }
 
   .command-wrapper {
@@ -123,6 +123,18 @@
       }
     }
 
+    .num-children,
+    .command-alias-count,
+    .command-interceptions-count {
+      background-color: $orange-700 !important;
+      border-radius: 5px;
+      color: $gray-400;
+      font-size: 90%;
+      font-style: normal;
+      line-height: 1;
+      margin-left: 0;
+    }
+
     .num-children.has-alias {
       border-radius: 10px;
       line-height: 1;
@@ -135,16 +147,8 @@
       padding: 2px 5px;
     }
 
-    .num-children,
-    .command-alias-count,
-    .command-interceptions-count {
-      background-color: $orange-700 !important;
-      border-radius: 5px;
-      color: $gray-400;
-      font-size: 90%;
-      font-style: normal;
-      line-height: 1;
-      margin-left: 0;
+    .command-progress {
+      height: 2px;
     }
   }
 
@@ -156,7 +160,8 @@
     flex-shrink: 0;
     min-height: 1px; // because some numbers are empty
     padding-right: 10px;
-    text-align: center;
+    // text-align: center;
+    text-align: right;
     width: 25px;
   }
 
@@ -227,6 +232,7 @@
     font-size: 11px;
     min-width: 80px;
     font-weight: 600;
+    color: $gray-200;
   }
 
   // Command State Styles
@@ -251,25 +257,21 @@
       }
     }
 
-    .command-progress {
-      height: 2px;
-  
-      span {
-        animation-fill-mode: forwards;
-        animation-iteration-count: 1;
-        animation-name: progress-bar;
-        animation-timing-function: linear;
-        background: $indigo-500;
-        display: block;
-        float: right;
-        height: 100%;
-        width: 100%;
-        transform-origin: right;
-  
-        @keyframes progress-bar {
-          100% {
-            transform: scaleX(0);
-          }
+    .command-progress > span {
+      animation-fill-mode: forwards;
+      animation-iteration-count: 1;
+      animation-name: progress-bar;
+      animation-timing-function: linear;
+      background: $indigo-500;
+      display: block;
+      float: right;
+      height: 100%;
+      width: 100%;
+      transform-origin: right;
+
+      @keyframes progress-bar {
+        100% {
+          transform: scaleX(0);
         }
       }
     }
@@ -445,10 +447,11 @@
     flex-shrink: 0;
     font-size: 14px;
     line-height: 1;
-    margin-left: -2px;
+    // margin-left: -2px;
     margin-right: 10px;
     outline: none;
     padding: 2px 0 0;
+    text-align: right;
     width: 15px;
 
     .icon-light {
@@ -504,11 +507,24 @@
     background-color: $gray-500;
   }
 
+  .command-num-children,
+  .command-num-elements {
+    display: inline-block
+  }
+
   // additional styles on top of the shared.scss styles
   .num-elements {
     background-color: $gray-600;
     display: inline;
     color: $black;
     vertical-align: text-top;
+  }
+
+  // utilizing element size queries: https://github.com/marcj/css-element-queries
+  // styles take effect when width is greater than or equal to the specified amount
+  &[min-width~="300px"] {
+    .command-wrapper-text {
+      flex-wrap: nowrap;
+    }
   }
 }

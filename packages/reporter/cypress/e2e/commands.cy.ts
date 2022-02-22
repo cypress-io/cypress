@@ -45,7 +45,8 @@ describe.skip('emily - commands', { viewportWidth: 400, viewportHeight: 900 }, (
 
     runner = new EventEmitter()
 
-    cy.visit('/').then((win) => {
+    cy.visit('http://localhost:5007/').then((win) => {
+    // cy.visit('/').then((win) => {
       win.render({
         runner,
         runnerStore: {
@@ -308,7 +309,10 @@ describe('commands', { viewportWidth: 400, viewportHeight: 900 }, () => {
     })
 
     it('displays number of duplicates', () => {
-      cy.contains('GET --- /dup').closest('.command').find('.num-children')
+      cy.contains('GET --- /dup')
+      .closest('.command')
+      .find('.num-children')
+      .should('be.visible')
       .should('have.text', '4')
     })
 

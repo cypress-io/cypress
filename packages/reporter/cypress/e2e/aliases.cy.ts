@@ -260,6 +260,7 @@ describe('aliases', () => {
         })
 
         cy.contains('.command-number', '2')
+        .should('be.visible')
         .closest('.command-wrapper')
         .within(() => {
           cy.contains('.command-alias-count', '2')
@@ -277,7 +278,7 @@ describe('aliases', () => {
         cy.get('.command-wrapper')
         .first()
         .within(() => {
-          cy.contains('.num-children', '2')
+          cy.contains('.num-children', '2').should('be.visible')
 
           cy.contains('.command-interceptions', 'getPosts')
         })
