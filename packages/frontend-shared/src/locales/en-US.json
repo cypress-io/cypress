@@ -494,7 +494,7 @@
     "modalTitle": "Choose a testing type",
     "e2e": {
       "name": "E2E Testing",
-      "description": "Build and test the entire experience of your application from end-to-end to each ensure each flow matches your expectations."
+      "description": "Build and test the entire experience of your application from end-to-end to ensure each flow matches your expectations."
     },
     "component": {
       "name": "Component Testing",
