@@ -1197,7 +1197,6 @@ jobs:
 
   system-tests-node-modules-install:
     <<: *defaults
-    resource_class: medium+ ## trying this out to see if it makes a difference since this is a critical blocking job
     steps:
       - restore_cached_workspace
       - update_cached_system_tests_deps
