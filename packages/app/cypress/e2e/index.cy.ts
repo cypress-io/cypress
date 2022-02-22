@@ -291,6 +291,9 @@ describe('App: Index', () => {
       context('scaffold example files', () => {
         it('should create example files on an empty project', () => {
           cy.contains('[data-cy="card"]', defaultMessages.createSpec.e2e.importFromScaffold.header).click()
+
+          cy.get('[data-cy="create-spec-modal"] a').should('have.attr', 'href').and('eq', 'https://on.cypress.io/writing-and-organizing-tests')
+
           // TODO: Check that the popup stays open
           cy.withCtx(async (ctx, o) => {
             const stats = await ctx.actions.file.checkIfFileExists(o.path)
