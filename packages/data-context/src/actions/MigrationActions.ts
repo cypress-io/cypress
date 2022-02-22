@@ -1,4 +1,5 @@
 import path from 'path'
+import assert from 'assert'
 import type { DataContext } from '..'
 import {
   cleanUpIntegrationFolder,
@@ -129,8 +130,20 @@ export class MigrationActions {
   }
 
   async assertSuccessfulConfigScaffold (configFile:  `cypress.config.${'js' | 'ts'}`) {
+    assert(this.ctx.currentProject)
+
+    // we assert the generated configuration file against one from a project that has
+    // been verified to run correctly.
+    // each project has an `unconfigured` and `configured` variant in `system-tests/projects`
+    // for example vueclivue2-configured and vueclivue2-unconfigured.
+    // after setting the project up with the launchpad, the two projects should contain the same files.
+
+    const configuredProject = this.ctx.project.projectTitle(
+      this.ctx.currentProject).replace('unconfigured', 'configured')
+
     const actual = formatConfig(await this.ctx.actions.file.readFileInProject(configFile))
-    const expected = formatConfig(await this.ctx.actions.file.readFileInProject(`expected-${configFile}`))
+    const expected = formatConfig(await this.ctx.fs.readFile(
+      path.join(__dirname, '..', '..', '..', '..', 'system-tests', 'projects', configuredProject, configFile), 'utf8'))
 
     if (actual !== expected) {
       throw Error(`Expected ${actual} to equal ${expected}`)
