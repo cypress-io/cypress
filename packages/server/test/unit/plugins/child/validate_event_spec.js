@@ -20,27 +20,15 @@ describe('lib/plugins/child/validate_event', () => {
     const { isValid, error } = validateEvent()
 
     expect(isValid).to.be.false
-    expect(error.message).to.equal(`You must pass a valid event name when registering a plugin.
-
-You passed: \`undefined\`
-
-The following are valid events:
-- after:run
-- after:screenshot
-- after:spec
-- before:browser:launch
-- before:run
-- before:spec
-- dev-server:start
-- file:preprocessor
-- task
-`)
+    expect(error.name).to.equal('InvalidEventNameError')
+    expect(error.message).to.equal(`invalid event name registered: undefined`)
   })
 
   it('returns error when called with no event handler', () => {
     const { isValid, error } = validateEvent('file:preprocessor')
 
     expect(isValid).to.be.false
+    expect(error.name).to.equal('InvalidEventHandlerError')
     expect(error.message).to.equal('The handler for the event `file:preprocessor` must be a function')
   })
 
@@ -48,21 +36,8 @@ The following are valid events:
     const { isValid, error } = validateEvent('invalid:event:name', {})
 
     expect(isValid).to.be.false
-    expect(error.message).to.equal(`You must pass a valid event name when registering a plugin.
-
-You passed: \`invalid:event:name\`
-
-The following are valid events:
-- after:run
-- after:screenshot
-- after:spec
-- before:browser:launch
-- before:run
-- before:spec
-- dev-server:start
-- file:preprocessor
-- task
-`)
+    expect(error.name).to.equal('InvalidEventNameError')
+    expect(error.message).to.equal(`invalid event name registered: invalid:event:name`)
   })
 
   _.each(events, ([event, type]) => {
@@ -70,6 +45,7 @@ The following are valid events:
       const { isValid, error } = validateEvent(event, 'invalid type')
 
       expect(isValid).to.be.false
+      expect(error.name).to.equal('InvalidEventHandlerError')
       expect(error.message).to.equal(`The handler for the event \`${event}\` must be ${type}`)
     })
   })

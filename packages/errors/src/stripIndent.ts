@@ -1,5 +1,5 @@
-const stripIndent = (strings, ...args) => {
-  const parts = []
+export const stripIndent = (strings: TemplateStringsArray, ...args: any[]): string => {
+  const parts: any[] = []
 
   for (let i = 0; i < strings.length; i++) {
     parts.push(strings[i])
@@ -10,7 +10,7 @@ const stripIndent = (strings, ...args) => {
   }
 
   const lines = parts.join('').split('\n')
-  const firstLine = lines[0].length === 0 ? lines[1] : lines[0]
+  const firstLine = (lines[0]?.length === 0 ? lines[1] : lines[0]) ?? ''
   let indentSize = 0
 
   for (let i = 0; i < firstLine.length; i++) {
@@ -31,8 +31,4 @@ const stripIndent = (strings, ...args) => {
   })
 
   return result
-}
-
-module.exports = {
-  stripIndent,
 }

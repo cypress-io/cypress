@@ -44,7 +44,7 @@ describe('Cypress static methods + props', () => {
 
   context('.env', () => {
     // https://github.com/cypress-io/cypress/issues/4952
-    it('doesn\'t die on <script> tags', () => {
+    it(`doesn't die on <script> tags`, () => {
       expect(Cypress.env('scriptlet')).to.eq('<script>alert(\'this should not break\')</script>')
     })
   })

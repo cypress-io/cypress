@@ -1004,6 +1004,7 @@ jobs:
       - run:
           name: Linting 🧹
           command: |
+            yarn clean
             git clean -df
             yarn lint
       - run:
@@ -1124,12 +1125,14 @@ jobs:
             # run type checking for each individual package
             - run: yarn lerna run types
             - verify-mocha-results:
-                expectedResultCount: 9
+                expectedResultCount: 10
       - store_test_results:
           path: /tmp/cypress
       # CLI tests generate HTML files with sample CLI command output
       - store_artifacts:
           path: cli/test/html
+      - store_artifacts:
+          path: packages/errors/__snapshot-images__
       - store-npm-logs
 
   unit-tests-release:
@@ -1987,14 +1990,6 @@ jobs:
           browser: "electron"
           pull_request_id: 524
 
-  test-binary-against-awesome-typescript-loader:
-    <<: *defaults
-    steps:
-      - test-binary-against-repo:
-          repo: cypress-test-awesome-typescript-loader
-          browser: "electron"
-          pull_request_id: 8
-
   test-binary-against-kitchensink-firefox:
     <<: *defaults
     resource_class: medium
@@ -2336,26 +2331,6 @@ linux-workflow: &linux-workflow
         requires:
           - create-build-artifacts
     - test-binary-against-kitchensink:
-        requires:
-          - create-build-artifacts
-    # when working on a feature or a fix,
-    # you are probably working in a branch
-    # and you want to run a specific PR in the cypress-example-recipes
-    # against this branch. This workflow job includes
-    # the job but only when it runs on specific branch
-    # DO NOT DELETE THIS JOB BEFORE MERGING TO DEVELOP
-    # on "develop" this branch will be ignored anyway
-    # and someone else might use this job definition for another
-    # feature branch and would just update the branch filter
-    # - test-binary-against-recipe-pull-request:
-    #     name: Test cypress run parsing
-    #     filters:
-    #       branches:
-    #         only:
-    #           - cli-to-module-api-7760
-        # requires:
-        #   - create-build-artifacts
-    - test-binary-against-awesome-typescript-loader:
         requires:
           - create-build-artifacts
     - test-binary-and-npm-against-other-projects:
