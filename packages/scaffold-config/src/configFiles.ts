@@ -1,8 +1,6 @@
-import path from 'path'
-import fs from 'fs-extra'
 import dedent from 'dedent'
 import { satisfies } from 'compare-versions'
-import type { Bundler } from './types'
+import type { Bundler, PkgJson } from './types'
 import { CODE_GEN_FRAMEWORKS, FRONTEND_FRAMEWORK_CATEGORIES, STORYBOOK_DEPS } from './constants'
 
 /**
@@ -27,9 +25,7 @@ import { CODE_GEN_FRAMEWORKS, FRONTEND_FRAMEWORK_CATEGORIES, STORYBOOK_DEPS } fr
  * Onc we know the library, dev server and (optional) tool, we can generate a config file
  * and instruct the user which dependencies to install.
  */
-export function detect (dir: string) {
-  const pkg = fs.readJsonSync(path.join(`${dir}`, 'package.json'))
-
+export function detect (pkg: PkgJson) {
   for (const framework of FRONTEND_FRAMEWORKS) {
     const hasAllDeps = [...framework.detectors].every((x) => {
       const vers = pkg.dependencies?.[x.dependency] || pkg.devDependencies?.[x.dependency]
