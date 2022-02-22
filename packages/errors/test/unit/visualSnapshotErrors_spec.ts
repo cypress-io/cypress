@@ -893,16 +893,6 @@ describe('visual error templates', () => {
         default: ['file', ['js', 'ts', 'json']],
       }
     },
-    AUTH_COULD_NOT_LAUNCH_BROWSER: () => {
-      return {
-        default: ['https://dashboard.cypress.io/login'],
-      }
-    },
-    AUTH_BROWSER_LAUNCHED: () => {
-      return {
-        default: [],
-      }
-    },
     BAD_POLICY_WARNING: () => {
       return {
         default: [[

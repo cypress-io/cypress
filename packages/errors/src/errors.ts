@@ -903,16 +903,6 @@ export const AllCypressErrors = {
 
         Provide a path to an existing fixture file.`
   },
-  // TODO: test this
-  AUTH_COULD_NOT_LAUNCH_BROWSER: (loginUrl: string) => {
-    return errTemplate`\
-      Cypress was unable to open your installed browser. To continue logging in, please open this URL in your web browser:
-
-      ${fmt.url(loginUrl)}`
-  },
-  AUTH_BROWSER_LAUNCHED: () => {
-    return errTemplate`Check your browser to continue logging in.`
-  },
   BAD_POLICY_WARNING: (policyKeys: string[]) => {
     return errTemplate`\
         Cypress detected policy settings on your computer that may cause issues.
