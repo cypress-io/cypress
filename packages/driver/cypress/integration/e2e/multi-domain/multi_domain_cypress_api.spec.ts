@@ -12,7 +12,7 @@ describe('multi-domain Cypress API', { experimentalSessionSupport: true, experim
       it('adds a custom command', () => {
         cy.switchToDomain('foobar.com', () => {
           // @ts-ignore
-          Cypress.Commands.add('foo', () => cy.wrap('bar'))
+          Cypress.Commands.add('foo', () => 'bar')
 
           // @ts-ignore
           cy.foo().should('equal', 'bar')
@@ -31,7 +31,7 @@ describe('multi-domain Cypress API', { experimentalSessionSupport: true, experim
       it('overwrites an existing command in the spec bridge', () => {
         cy.switchToDomain('foobar.com', () => {
           // @ts-ignore
-          Cypress.Commands.overwrite('foo', () => cy.wrap('baz'))
+          Cypress.Commands.overwrite('foo', () => 'baz')
 
           // @ts-ignore
           cy.foo().should('equal', 'baz')
