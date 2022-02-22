@@ -43,6 +43,33 @@ describe('scaffolding component testing', () => {
     })
   })
 
+  context('vueclivue3', () => {
+    it('scaffolds component testing for Vue CLI w/ Vue 3 project', () => {
+      startSetupFor('vueclivue3-unconfigured')
+
+      // should detect correctly
+      cy.get('button').should('be.visible').contains('Vue CLI (Vue 3)(detected)')
+      cy.get('button').contains('Next Step').click()
+      const deps = ['@cypress/vue', '@cypress/webpack-dev-server']
+
+      // correct install command and versions
+      cy.contains('yarn add -D @cypress/vue@^3.0.0 @cypress/webpack-dev-server@latest')
+
+      deps.forEach((dep) => {
+        cy.contains(dep)
+      })
+
+      cy.withCtx((ctx, { deps }) => {
+        ctx.update((coreData) => {
+          coreData.wizard.__fakeInstalledPackagesForTesting = deps
+        })
+      }, { deps })
+
+      cy.findByRole('button', { name: 'Continue' }).click()
+      verifyConfigFile(`cypress.config.js`)
+    })
+  })
+
   context('create-react-app', () => {
     it('scaffolds component testing for Vue CLI w/ Vue 2 project', () => {
       startSetupFor('create-react-app-unconfigured')
