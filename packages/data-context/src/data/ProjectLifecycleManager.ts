@@ -21,8 +21,8 @@ import type { DataContext } from '..'
 import { LoadConfigReply, SetupNodeEventsReply, ProjectConfigIpc, IpcHandler } from './ProjectConfigIpc'
 import assert from 'assert'
 import type { AllModeOptions, BreakingErrResult, BreakingOption, FoundBrowser, FullConfig, TestingType } from '@packages/types'
-import type { BaseErrorDataShape } from '.'
 import { autoBindDebug } from '../util/autoBindDebug'
+import type { ErrorWrapperSource } from '@packages/graphql'
 
 const debug = debugLib(`cypress:lifecycle:ProjectLifecycleManager`)
 
@@ -184,7 +184,7 @@ export class ProjectLifecycleManager {
     return null
   }
 
-  get errorLoadingConfigFile (): BaseErrorDataShape | null {
+  get errorLoadingConfigFile (): ErrorWrapperSource | null {
     if (this._configResult.state === 'errored') {
       return {
         title: 'Error Loading Config',
@@ -200,7 +200,7 @@ export class ProjectLifecycleManager {
     return null
   }
 
-  get errorLoadingNodeEvents (): BaseErrorDataShape | null {
+  get errorLoadingNodeEvents (): ErrorWrapperSource | null {
     if (this._eventsIpcResult.state === 'errored') {
       return {
         title: 'Error Loading Config',
