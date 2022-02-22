@@ -25,7 +25,7 @@ describe('<ManualInstall />', () => {
       ),
     })
 
-    const installCommand = `yarn add -D ${framework} ${bundler}`
+    const installCommand = `npm install -D @cypress/react @cypress/webpack-dev-server`
 
     // @ts-ignore
     cy.findByRole('button', { name: 'Copy' }).realClick()

@@ -105,7 +105,7 @@ describe('<SelectFwOrBundler />', () => {
     cy.mount(() => (
       <div>
         <div>click out</div>
-        <SelectFwOrBundler selectorType="framework" label="Front-end Framework" options={manyOptions} value="vue" />
+        <SelectFwOrBundler selectorType="framework" label="Front-end Framework" options={manyOptions} value="vue2" />
       </div>
     ))
 
