@@ -1,17 +1,5 @@
 import type { e2eProjectDirs } from '@packages/frontend-shared/cypress/e2e/support/e2eProjectDirs'
 
-// declare global {
-//   namespace Cypress {
-//     interface Chainable {
-//       waitForWizard(): Cypress.Chainable<JQuery<HTMLDivElement>>
-//     }
-//   }
-// }
-
-// Cypress.Commands.add('waitForWizard', () => {
-//   return cy.get('[data-cy="migration-wizard"]')
-// })
-
 function startSetupFor (project: typeof e2eProjectDirs[number]) {
   cy.scaffoldProject(project)
   cy.openProject(project)
@@ -39,12 +27,13 @@ describe('scaffolding component testing', () => {
       cy.get('button').should('be.visible').contains('Vue CLI (Vue 2)(detected)')
       cy.get('button').contains('Next Step').click()
       const deps = ['@cypress/vue', '@cypress/webpack-dev-server']
-      deps.forEach(dep => {
+
+      deps.forEach((dep) => {
         cy.contains(dep)
       })
 
       cy.withCtx((ctx, { deps }) => {
-        ctx.update(coreData => {
+        ctx.update((coreData) => {
           coreData.wizard.__fakeInstalledPackagesForTesting = deps
         })
       }, { deps })
