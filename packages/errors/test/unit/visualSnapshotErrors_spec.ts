@@ -1067,7 +1067,7 @@ describe('visual error templates', () => {
     },
     MULTIPLE_SUPPORT_FILES_FOUND: () => {
       return {
-        default: ['spec.{ts,js}', 'spec.ts,spec.js'],
+        default: ['spec.{ts,js}', ['support.ts', 'support.js']],
       }
     },
     REMOVED_ROOT_CONFIG_OPTION: () => {

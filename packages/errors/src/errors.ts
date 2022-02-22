@@ -1148,9 +1148,13 @@ export const AllCypressErrors = {
 
   // V10 Added:
 
-  MULTIPLE_SUPPORT_FILES_FOUND: (arg1: string, arg2: string) => {
+  MULTIPLE_SUPPORT_FILES_FOUND: (arg1: string, arg2: string[]) => {
     return errTemplate`\
-      There are multiple support files.
+      There were multiple support files found matching your ${fmt.highlightSecondary(`supportFile`)} pattern.
+
+      Your supportFile is set to: ${fmt.highlight(arg1)}
+
+      We found the following files:
 
       Your supportFile is set to ${fmt.highlight(arg1)}, and we found ${fmt.highlightSecondary(arg2)}
 
