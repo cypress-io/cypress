@@ -695,7 +695,7 @@ describe('Launchpad: Setup Project', () => {
                     href: `https://www.npmjs.com/package/${packageName}`,
                   })
 
-                  cy.contains(PACKAGES_DESCRIPTIONS[framework.package].split('<span')[0])
+                  cy.contains(PACKAGES_DESCRIPTIONS[framework.package.name].split('<span')[0])
                 }
 
                 validatePackage(framework.package)
