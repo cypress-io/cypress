@@ -61,6 +61,7 @@ npm/cypress-schematic/src/**/*.js
 **/.next/**
 /npm/create-cypress-tests/initial-template
 /npm/create-cypress-tests/**/*.template.*
+<<<<<<< HEAD
 
 # community templates we test against, no need to lint
 system-tests/projects/create-react-app-configured/**/*
@@ -75,3 +76,5 @@ system-tests/projects/nextjs-unconfigured/**/*
 system-tests/projects/nextjs-configured/**/*
 system-tests/projects/nuxtjs-vue2-unconfigured/**/*
 system-tests/projects/nuxtjs-vue2-configured/**/*
+system-tests/projects/create-react-app-configured/**/*.js
+system-tests/projects/create-react-app-unconfigured/**/*.js
