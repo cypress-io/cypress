@@ -162,7 +162,7 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
 
     it('errors if passed a non-string for the domain argument', (done) => {
       cy.on('fail', (err) => {
-        expect(err.message).to.equal('`cy.switchToDomain()` requires the first argument to be a string representing a domain that does not not include any sub domains. You passed: ``')
+        expect(err.message).to.equal('`cy.switchToDomain()` requires the first argument to be a string representing a domain that does not not include any subdomains. You passed: ``')
 
         done()
       })
@@ -173,7 +173,7 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
 
     it('fails on a bad domain name', (done) => {
       cy.on('fail', (err) => {
-        expect(err.message).to.equal('`cy.switchToDomain()` requires the first argument to be a string representing a domain that does not not include any sub domains. You passed: `foobar`')
+        expect(err.message).to.equal('`cy.switchToDomain()` requires the first argument to be a string representing a domain that does not not include any subdomains. You passed: `foobar`')
 
         done()
       })
@@ -183,7 +183,7 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
 
     it('fails on a domain name with a sub domain', (done) => {
       cy.on('fail', (err) => {
-        expect(err.message).to.equal('`cy.switchToDomain()` requires the first argument to be a string representing a domain that does not not include any sub domains. You passed: `eu.foobar.com`')
+        expect(err.message).to.equal('`cy.switchToDomain()` requires the first argument to be a string representing a domain that does not not include any subdomains. You passed: `eu.foobar.com`')
 
         done()
       })
