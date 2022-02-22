@@ -120,4 +120,31 @@ describe('scaffolding component testing', () => {
       verifyConfigFile(`cypress.config.ts`)
     })
   })
+
+  context('vue3-vite-ts-unconfigured', () => {
+    it('scaffolds component testing for Vue 3 and Vite', () => {
+      startSetupFor('vue3-vite-ts-unconfigured')
+
+      // should detect correctly
+      cy.get('button').should('be.visible').contains('Vue.js (v3)(detected)')
+      cy.get('button').contains('Next Step').click()
+      const deps = ['@cypress/vue', '@cypress/vite-dev-server']
+
+      // correct install command and versions
+      cy.contains('yarn add -D @cypress/vue@^3.0.0 @cypress/vite-dev-server@latest')
+
+      deps.forEach((dep) => {
+        cy.contains(dep)
+      })
+
+      cy.withCtx((ctx, { deps }) => {
+        ctx.update((coreData) => {
+          coreData.wizard.__fakeInstalledPackagesForTesting = deps
+        })
+      }, { deps })
+
+      cy.findByRole('button', { name: 'Continue' }).click()
+      verifyConfigFile(`cypress.config.ts`)
+    })
+  })
 })

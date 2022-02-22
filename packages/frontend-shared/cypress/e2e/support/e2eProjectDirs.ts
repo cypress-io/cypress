@@ -119,6 +119,8 @@ export const e2eProjectDirs = [
   'unify-plugin-errors',
   'various-file-types',
   'vite-ct',
+  'vue3-vite-ts-configured',
+  'vue3-vite-ts-unconfigured',
   'vueclivue2-configured',
   'vueclivue2-unconfigured',
   'vueclivue3-configured',
