@@ -5,28 +5,24 @@ describe('multi-domain Cypress API', { experimentalSessionSupport: true, experim
     cy.get('a[data-cy="multi-domain-secondary-link"]').click()
   })
 
+  // FIXME: Commands adding/overwriting should be condensed into one test with two switchToDomain tests
+  // once multiple switchToDomain calls are supported
   context('Commands', () => {
     context('add', () => {
       it('adds a custom command', () => {
         cy.switchToDomain('foobar.com', () => {
           // @ts-ignore
-          Cypress.Commands.add('foo', () => {
-            return cy.wrap('bar')
-          })
+          Cypress.Commands.add('foo', () => cy.wrap('bar'))
 
           // @ts-ignore
-          cy.foo().then((shouldBeBar) => {
-            expect(shouldBeBar).to.equal('bar')
-          })
+          cy.foo().should('equal', 'bar')
         })
       })
 
       it('persists defined commands through spec bridge', () => {
         cy.switchToDomain('foobar.com', () => {
           // @ts-ignore
-          cy.foo().then((shouldBeBar) => {
-            expect(shouldBeBar).to.equal('bar')
-          })
+          cy.foo().should('equal', 'bar')
         })
       })
     })
@@ -35,23 +31,17 @@ describe('multi-domain Cypress API', { experimentalSessionSupport: true, experim
       it('overwrites an existing command in the spec bridge', () => {
         cy.switchToDomain('foobar.com', () => {
           // @ts-ignore
-          Cypress.Commands.overwrite('foo', () => {
-            return cy.wrap('baz')
-          })
+          Cypress.Commands.overwrite('foo', () => cy.wrap('baz'))
 
           // @ts-ignore
-          cy.foo().then((shouldBeBaz) => {
-            expect(shouldBeBaz).to.equal('baz')
-          })
+          cy.foo().should('equal', 'baz')
         })
       })
 
       it('persists overwritten command through spec bridge', () => {
         cy.switchToDomain('foobar.com', () => {
           // @ts-ignore
-          cy.foo().then((shouldBeBaz) => {
-            expect(shouldBeBaz).to.equal('baz')
-          })
+          cy.foo().should('equal', 'baz')
         })
       })
     })
@@ -70,6 +60,8 @@ describe('multi-domain Cypress API', { experimentalSessionSupport: true, experim
       })
     })
 
+    // FIXME: Commands adding/overwriting should be condensed into one test with two switchToDomain tests
+    // once multiple switchToDomain calls are supported
     it('allows a user to configure defaults', () => {
       cy.switchToDomain('foobar.com', () => {
         const multiDomainKeyboardDefaults = Cypress.Keyboard.defaults({
@@ -114,6 +106,8 @@ describe('multi-domain Cypress API', { experimentalSessionSupport: true, experim
       })
     })
 
+    // FIXME: Commands adding/overwriting should be condensed into one test with two switchToDomain tests
+    // once multiple switchToDomain calls are supported
     it('allows a user to configure defaults', () => {
       cy.switchToDomain('foobar.com', () => {
         const multiDomainScreenshotDefaults = Cypress.Screenshot.defaults({
