@@ -54,7 +54,7 @@
       window.location.href = addTokenToRedirect(redirectHref, jwt)
     })
 
-    document.querySelector('[data-cy="login"]').addEventListener('click', () => {
+    document.querySelector('[data-cy="slow-login"]').addEventListener('click', () => {
       const jwt = createJwt(document.querySelector('[data-cy="username"]').value)
 
       const redirectHref = getRedirectHref()

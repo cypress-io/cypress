@@ -55,16 +55,16 @@ describe('basic login', { experimentalSessionSupport: true, experimentalMultiDom
   // @ts-ignore
   describe('visit secondary first', () => {
     describe('How to determine primary', () => {
-      // Enable to set the top domain to example.com before running the next test.
-      // it('example.com', () => {
-      //   cy.visit('http://www.example.com')
-      // })
+      // NOTE: Enable to set the top domain to example.com before running the next test.
+      it.skip('example.com', () => {
+         cy.visit('http://www.example.com')
+      })
 
       // Problem: where does the primary domain get established
       // @ts-ignore
       // TODO: This test will fail
       it.skip('A logs in with no primary - fail', { baseUrl: undefined }, () => {
-        cy.createDomain('idp.com', () => { // PrimaryDomain  is undefined: FAIL
+        cy.createDomain('idp.com', () => { // PrimaryDomain is undefined: FAIL
           cy.visit('http://www.idp.com:3500/fixtures/auth/idp.html')
           cy.get('[data-cy="username"]').type('FJohnson')
           cy.get('[data-cy="login"]').click()
@@ -187,7 +187,7 @@ describe('Multi-step Auth', { experimentalSessionSupport: true, experimentalMult
   it.skip('final auth redirects back to localhost - nested', () => {
     cy.visit('/fixtures/auth/index.html')
     cy.get('[data-cy="login-with-approval"]').click() // takes you to foobar.com.../approval
-    cy.url()//fail
+    cy.url() //fail
     cy.switchToDomain('foobar.com', () => { // Parent Domain is localhost
       cy.get('[data-cy="approve-orig"]').click() // takes you to idp.com
       cy.switchToDomain('idp.com', () => { // Parent domain is foobar.com
