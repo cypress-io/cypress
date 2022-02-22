@@ -6,7 +6,9 @@
     "sourceMap": false,
     "inlineSourceMap": true,
     "inlineSources": false,
-    "typeRoots": ["../../../../cli/types"],
-    // "types": ["cypress"]
+    "types": [
+      "cypress",
+      "node"
+    ]
   }
 }

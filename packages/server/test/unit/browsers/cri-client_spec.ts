@@ -1,6 +1,6 @@
 import Bluebird from 'bluebird'
-import { create } from '../../../lib/browsers/cri-client'
 import EventEmitter from 'events'
+import { create } from '../../../lib/browsers/cri-client'
 
 const { expect, proxyquire, sinon } = require('../../spec_helper')
 

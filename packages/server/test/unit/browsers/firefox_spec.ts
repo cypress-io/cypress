@@ -3,10 +3,11 @@ require('../../spec_helper')
 import 'chai-as-promised'
 import { expect } from 'chai'
 import { EventEmitter } from 'events'
-import Foxdriver from '@benmalka/foxdriver'
 import Marionette from 'marionette-client'
 import os from 'os'
 import sinon from 'sinon'
+import stripAnsi from 'strip-ansi'
+import Foxdriver from '@benmalka/foxdriver'
 import * as firefox from '../../../lib/browsers/firefox'
 import firefoxUtil from '../../../lib/browsers/firefox-util'
 
@@ -442,7 +443,11 @@ describe('lib/browsers/firefox', () => {
         }
 
         await expect(firefoxUtil.setupMarionette([], '', port))
-        .to.be.rejectedWith('An unexpected error was received from Marionette Socket:\n\nError: foo error')
+        .to.be.rejected.then((err) => {
+          expect(stripAnsi(err.message)).to.include(`An unexpected error was received from Marionette: Socket`)
+          expect(err.details).to.include('Error: foo error')
+          expect(err.originalError.message).to.eq('foo error')
+        })
       })
 
       it('rejects on errors from marionette commands', async () => {
@@ -451,14 +456,20 @@ describe('lib/browsers/firefox', () => {
         }
 
         await expect(firefoxUtil.setupMarionette([], '', port))
-        .to.be.rejectedWith('An unexpected error was received from Marionette commands:\n\nError: foo error')
+        .to.be.rejected.then((err) => {
+          expect(stripAnsi(err.message)).to.include('An unexpected error was received from Marionette: commands')
+          expect(err.details).to.include('Error: foo error')
+        })
       })
 
       it('rejects on errors during initial Marionette connection', async () => {
         marionetteDriver.connect.rejects(new Error('not connectable'))
 
         await expect(firefoxUtil.setupMarionette([], '', port))
-        .to.be.rejectedWith('An unexpected error was received from Marionette connection:\n\nError: not connectable')
+        .to.be.rejected.then((err) => {
+          expect(stripAnsi(err.message)).to.include('An unexpected error was received from Marionette: connection')
+          expect(err.details).to.include('Error: not connectable')
+        })
       })
     })
 
