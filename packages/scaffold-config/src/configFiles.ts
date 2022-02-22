@@ -225,8 +225,76 @@ export const FRONTEND_FRAMEWORKS = [
     codeGenFramework: CODE_GEN_FRAMEWORKS[0],
     storybookDep: STORYBOOK_DEPS[0],
     config: {
-      js: () => ``,
-      ts: () => ``,
+      js: (bundler: Bundler['type']) => {
+        if (bundler === 'webpack') {
+          return dedent`
+          const { devServer } = require('@cypress/webpack-dev-server')
+          // NOTE: ensure you are requiring your webpack config from the
+          // correct location.
+          const webpackConfig = require('./webpack.config.js')
+
+          module.exports = {
+            component: {
+              devServer,
+              devServerConfig: {
+                webpackConfig
+              }
+            }
+          }`
+        }
+
+        if (bundler === 'vite') {
+          return dedent`
+          const { devServer } = require('@cypress/vite-dev-server')
+
+          module.exports = {
+            component: {
+              devServer,
+              devServerConfig: {
+                // optionally provide your Vite config overrides.
+              }
+            }
+          }`
+        }
+
+        throw Error(`No config defined for ${bundler}`)
+      },
+
+      ts: (bundler: Bundler['type']) => {
+        if (bundler === 'webpack') {
+          return dedent`
+          import { defineConfig } from 'cypress'
+          import { devServer } from '@cypress/webpack-dev-server'
+          // NOTE: ensure you are requiring your webpack config from the
+          // correct location.
+          import webpackConfig from './webpack.config.js'
+
+          export default defineConfig({
+            component: {
+              devServer,
+              devServerConfig: {
+                webpackConfig
+              }
+            }
+          })`
+        }
+
+        if (bundler === 'vite') {
+          return dedent`
+          import { defineConfig } from 'cypress'
+          import { devServer } from '@cypress/vite-dev-server'
+
+          export default defineConfig({
+            component: {
+              devServer,
+                // optionally provide your Vite config overrides.
+              devServerConfig: {}
+            }
+          })`
+        }
+
+        throw Error(`No config defined for ${bundler}`)
+      },
     },
   },
 
