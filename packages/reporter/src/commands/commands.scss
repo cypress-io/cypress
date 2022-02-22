@@ -147,6 +147,7 @@
 
   .command-expander-column {
     padding-right: 10px;
+    padding-left: 5px;
     width: 25px;
     
     .command-expander {
@@ -217,7 +218,7 @@
 
   // Child Styles
   .command-type-child {
-    .command-method {
+    .command-display-name {
       &:before {
         float: left;
         content: "-";
@@ -239,7 +240,7 @@
     margin-left: 10px;
   }
 
-  .command-method {
+  .command-display-name {
     padding: 1px 2px 0;
     display: inline-block;
     font-size: 11px;
@@ -311,7 +312,7 @@
     &:hover {
       background-color: $warn-header-background;
     }
-     .command-method {
+     .command-display-name {
       color: $warn-text;
     }
   }
@@ -325,7 +326,7 @@
 
   // Custom Styles for Specific Commands
   .command-name-assert {
-    .command-method {
+    .command-display-name {
       span {
         border-radius: 2px;
         padding: 0 3px;
@@ -349,7 +350,7 @@
     }
 
     .command-state-pending {
-      .command-method {
+      .command-display-name {
         span {
           background-color: $pending;
           color: $black;
@@ -366,7 +367,7 @@
     }
 
     .command-state-failed {
-      .command-method {
+      .command-display-name {
         span {
           background-color: $fail;
           color: $black;
@@ -383,7 +384,7 @@
     }
 
     .command-state-passed {
-      .command-method {
+      .command-display-name {
         color: $pass;
 
         span {

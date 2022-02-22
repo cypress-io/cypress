@@ -281,7 +281,7 @@ class Command extends Component<Props> {
             onMouseLeave={() => this._snapshot(false)}
           >
             <CommandColumn model={model} />
-            <span className='command-method'>
+            <span className='command-display-name'>
               <span>{model.event && model.type !== 'system' ? `(${displayName(model)})` : displayName(model)}</span>
             </span>
             <span className='command-message'>
