@@ -29,7 +29,7 @@ function skipCTMigration () {
   cy.contains(`I'll do this later`).click()
 }
 
-function migrateAndVerifyConfig (configExtension: 'js' | 'ts' = 'js') {
+function migrateAndVerifyConfig (configExtension: 'js' | 'ts' | 'coffee' = 'js') {
   cy.contains('Migrate the configuration for me').click()
 
   cy.withCtx(async (ctx, o) => {
@@ -57,7 +57,7 @@ function runAutoRename () {
   cy.get('button').contains('Rename these specs for me').click()
 }
 
-function renameSupport (lang: 'js' | 'ts' = 'js') {
+function renameSupport (lang: 'js' | 'ts' | 'coffee' = 'js') {
   cy.contains(`Rename the support file for me`).click()
 
   // give to to finish the file rename
@@ -379,15 +379,6 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
     cy.get(setupComponentStep).should('not.exist')
     cy.get(configFileStep).should('exist')
 
-    // default testFiles but custom integration - can rename automatically
-    cy.get(renameAutoStep).should('exist')
-    // no CT
-    cy.get(renameManualStep).should('not.exist')
-    // supportFile is false - cannot migrate
-    cy.get(renameSupportStep).should('exist')
-    cy.get(setupComponentStep).should('not.exist')
-    cy.get(configFileStep).should('exist')
-
     // Migration workflow
     // before auto migration
     cy.contains('cypress/integration/foo.spec.coffee')
@@ -409,7 +400,7 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
       }
     })
 
-    renameSupport('ts')
+    renameSupport('coffee')
     migrateAndVerifyConfig()
     checkOutcome()
   })
