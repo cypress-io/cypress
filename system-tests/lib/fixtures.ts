@@ -9,7 +9,8 @@ const root = _path.join(__dirname, '..')
 
 const serverRoot = _path.join(__dirname, '../../packages/server/')
 const projects = _path.join(root, 'projects')
-const cyTmpDir = _path.join(tempDir, 'cy-projects')
+
+export const cyTmpDir = _path.join(tempDir, 'cy-projects')
 
 // copy contents instead of deleting+creating new file, which can cause
 // filewatchers to lose track of toFile.
