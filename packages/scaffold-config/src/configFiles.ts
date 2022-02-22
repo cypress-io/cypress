@@ -157,7 +157,7 @@ export const FRONTEND_FRAMEWORKS = [
     detectors: [
       {
         dependency: '@vue/cli-service',
-        version: '^5.0.0',
+        version: '^4.0.0',
       },
       {
         dependency: 'vue',

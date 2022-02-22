@@ -67,7 +67,6 @@ system-tests/projects/create-react-app-configured/**/*
 system-tests/projects/create-react-app-unconfigured/**/*
 system-tests/projects/vueclivue2-unconfigured/**/*
 system-tests/projects/vueclivue2-configured/**/*
-<<<<<<< HEAD
 system-tests/projects/vueclivue3-unconfigured/**/*
 system-tests/projects/vueclivue3-configured/**/*
 system-tests/projects/vue3-vite-ts-unconfigured/**/*
@@ -78,3 +77,5 @@ system-tests/projects/nuxtjs-vue2-unconfigured/**/*
 system-tests/projects/nuxtjs-vue2-configured/**/*
 system-tests/projects/create-react-app-configured/**/*.js
 system-tests/projects/create-react-app-unconfigured/**/*.js
+system-tests/projects/vueclivue3-unconfigured/**/*
+system-tests/projects/vueclivue3-configured/**/*
