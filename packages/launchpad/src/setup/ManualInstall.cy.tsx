@@ -1,6 +1,6 @@
 import { ManualInstallFragmentDoc } from '../generated/graphql-test'
 import ManualInstall from './ManualInstall.vue'
-import { PACKAGES_DESCRIPTIONS } from '../../../types/src/constants'
+import { PACKAGES_DESCRIPTIONS } from '@packages/scaffold-config'
 
 describe('<ManualInstall />', () => {
   it('playground', () => {
