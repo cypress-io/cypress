@@ -96,6 +96,9 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       logOut () {
         return user.logOut()
       },
+      resetAuthState () {
+        return ctx.actions.auth.resetAuthState()
+      },
     },
     projectApi: {
       launchProject (browser: FoundBrowser, spec: Cypress.Spec, options?: LaunchOpts) {

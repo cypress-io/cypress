@@ -17,7 +17,7 @@
 import CopyButton from './CopyButton.vue'
 
 defineProps<{
-  projectFolderName: string,
+  projectFolderName?: string,
   command: string
 }>()
 </script>
