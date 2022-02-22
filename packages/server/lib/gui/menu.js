@@ -167,61 +167,63 @@ module.exports = {
       })
     }
 
-    template.push(
-      {
-        label: 'Developer Tools',
-        submenu: [
-          {
-            label: 'Reload',
-            accelerator: 'CmdOrCtrl+R',
-            click: (item, focusedWindow) => {
-              if (focusedWindow) {
-                return focusedWindow.reload()
-              }
+    if (options.withDevTools) {
+      template.push(
+        {
+          label: 'Developer Tools',
+          submenu: [
+            {
+              label: 'Reload',
+              accelerator: 'CmdOrCtrl+R',
+              click: (item, focusedWindow) => {
+                if (focusedWindow) {
+                  return focusedWindow.reload()
+                }
+              },
             },
-          },
-          {
-            label: 'Toggle Developer Tools',
-            accelerator: (() => {
-              if (os.platform() === 'darwin') {
-                return 'Alt+Command+I'
-              }
+            {
+              label: 'Toggle Developer Tools',
+              accelerator: (() => {
+                if (os.platform() === 'darwin') {
+                  return 'Alt+Command+I'
+                }
 
-              return 'Ctrl+Shift+I'
-            })(),
-            click: (item, focusedWindow) => {
-              if (focusedWindow) {
-                return focusedWindow.toggleDevTools()
-              }
+                return 'Ctrl+Shift+I'
+              })(),
+              click: (item, focusedWindow) => {
+                if (focusedWindow) {
+                  return focusedWindow.toggleDevTools()
+                }
+              },
             },
-          },
-          {
-            label: `GraphQL requests over Fetch (${process.env.CYPRESS_INTERNAL_GQL_NO_SOCKET ? 'on' : 'off'})`,
-            click: (item, focusedWindow) => {
-              if (process.env.CYPRESS_INTERNAL_GQL_NO_SOCKET) {
-                delete process.env.CYPRESS_INTERNAL_GQL_NO_SOCKET
-              } else {
-                process.env.CYPRESS_INTERNAL_GQL_NO_SOCKET = '1'
-              }
+            {
+              label: `GraphQL requests over Fetch (${process.env.CYPRESS_INTERNAL_GQL_NO_SOCKET ? 'on' : 'off'})`,
+              click: (item, focusedWindow) => {
+                if (process.env.CYPRESS_INTERNAL_GQL_NO_SOCKET) {
+                  delete process.env.CYPRESS_INTERNAL_GQL_NO_SOCKET
+                } else {
+                  process.env.CYPRESS_INTERNAL_GQL_NO_SOCKET = '1'
+                }
 
-              this.set(opts)
+                this.set(opts)
+              },
             },
-          },
-          {
-            label: 'GraphiQL',
-            click () {
-              return shell.openExternal(`http://localhost:${options.getGraphQLPort()}/__launchpad/graphql`)
+            {
+              label: 'GraphiQL',
+              click () {
+                return shell.openExternal(`http://localhost:${options.getGraphQLPort()}/__launchpad/graphql`)
+              },
             },
-          },
-          {
-            label: 'View App Data',
-            click () {
-              return open.opn(appData.path())
+            {
+              label: 'View App Data',
+              click () {
+                return open.opn(appData.path())
+              },
             },
-          },
-        ],
-      },
-    )
+          ],
+        },
+      )
+    }
 
     const menu = Menu.buildFromTemplate(template)
 

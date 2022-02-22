@@ -131,6 +131,28 @@ describe('gui/interactive', () => {
       })
     })
 
+    it('calls menu.set withDevTools: true when in dev env', () => {
+      const env = process.env['CYPRESS_INTERNAL_ENV']
+
+      process.env['CYPRESS_INTERNAL_ENV'] = 'development'
+
+      return interactiveMode.ready({}).then(() => {
+        expect(menu.set.lastCall.args[0].withDevTools).to.be.true
+        process.env['CYPRESS_INTERNAL_ENV'] = env
+      })
+    })
+
+    it('calls menu.set withDevTools: true when not in dev env', () => {
+      const env = process.env['CYPRESS_INTERNAL_ENV']
+
+      process.env['CYPRESS_INTERNAL_ENV'] = 'production'
+
+      return interactiveMode.ready({}).then(() => {
+        expect(menu.set.lastCall.args[0].withDevTools).to.be.true
+        process.env['CYPRESS_INTERNAL_ENV'] = env
+      })
+    })
+
     it('resolves with win', function () {
       return interactiveMode.ready({}).then((win) => {
         expect(win).to.eq(this.win)
