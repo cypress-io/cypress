@@ -20,7 +20,7 @@
       <MigrationListItem>
         {{ t('migration.renameAuto.modals.step1.line2') }}
         <CodeTag class="text-jade-500">
-          [filename].cy.[ext]
+          [dfldkfldkfldd
         </CodeTag>
       </MigrationListItem>
       <MigrationListItem>
