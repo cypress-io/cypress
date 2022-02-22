@@ -1057,7 +1057,6 @@ jobs:
   cli-visual-tests:
     <<: *defaults
     resource_class: small
-    parallelism: 1
     steps:
       - restore_cached_workspace
       - run: mkdir -p cli/visual-snapshots
