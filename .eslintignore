@@ -67,3 +67,5 @@ system-tests/projects/create-react-app-configured/**/*
 system-tests/projects/create-react-app-unconfigured/**/*
 system-tests/projects/vueclivue2-unconfigured/**/*
 system-tests/projects/vueclivue2-configured/**/*
+system-tests/projects/vueclivue3-unconfigured/**/*
+system-tests/projects/vueclivue3-configured/**/*
