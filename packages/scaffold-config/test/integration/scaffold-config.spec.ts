@@ -18,20 +18,28 @@ describe('detect', () => {
     const pkg = await scaffoldMigrationProject('create-react-app-unconfigured')
     const actual = detect(pkg)
 
-    expect(actual.type).to.eq('cra')
+    expect(actual.framework.type).to.eq('cra')
   })
 
   it(`Vue CLI w/ Vue 2`, async () => {
     const pkg = await scaffoldMigrationProject('vueclivue2-unconfigured')
     const actual = detect(pkg)
 
-    expect(actual.type).to.eq('vueclivue2')
+    expect(actual.framework.type).to.eq('vueclivue2')
   })
 
   it(`Vue CLI w/ Vue 3`, async () => {
     const pkg = await scaffoldMigrationProject('vueclivue3-unconfigured')
     const actual = detect(pkg)
 
-    expect(actual.type).to.eq('vueclivue3')
+    expect(actual.framework.type).to.eq('vueclivue3')
+  })
+
+  it(`React with Vite`, async () => {
+    const pkg = await scaffoldMigrationProject('react-vite-ts-unconfigured')
+    const actual = detect(pkg)
+
+    expect(actual.framework.type).to.eq('react')
+    expect(actual.bundler).to.eq('vite')
   })
 })

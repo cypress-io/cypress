@@ -24,7 +24,7 @@ export const BUNDLERS = [
     type: 'vite',
     name: 'Vite',
     package: '@cypress/vite-dev-server',
-    installer: '@cypress/webpack-dev-server@latest',
+    installer: '@cypress/vite-dev-server@latest',
   },
 ] as const
 
