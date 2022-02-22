@@ -405,7 +405,6 @@ describe('App: Index', () => {
 
         it('shows input for file extension filter', () => {
           cy.get('@CreateFromStoryDialog').within(() => {
-            cy.pause()
             cy.findByTestId('file-match-indicator').should('contain', '1 Match')
             cy.percySnapshot('Create from story generator')
             cy.findByRole('button', { name: '*.stories.*' }).click()
