@@ -1,7 +1,6 @@
 import Debug from 'debug'
 import { CODE_LANGUAGES } from '@packages/types'
 import { BUNDLERS, FRONTEND_FRAMEWORKS, PACKAGES_DESCRIPTIONS } from '@packages/scaffold-config'
-import type { NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
 import type { DataContext } from '..'
 import path from 'path'
 import resolve from 'resolve-from'
@@ -39,8 +38,7 @@ export class WizardDataSource {
         name: storybookDep,
         description: PACKAGES_DESCRIPTIONS[storybookDep],
         package: storybookDep,
-        installer: ''
-        // installer: storybookDep.pa
+        installer: '',
       })
     }
 
