@@ -2,10 +2,6 @@ require('./util/fs')
 
 const os = require('os')
 
-// NOTE: by loading "./cwd" we are changing the current working directory
-// to the "packages/server" folder
-require('./cwd')
-
 const Promise = require('bluebird')
 const debug = require('debug')('cypress:server')
 
