@@ -13,7 +13,7 @@
     "test-watch": "yarn test-unit --watch"
   },
   "dependencies": {
-    "fs-extra": "8.1.0"
+    "fs-extra": "9.1.0"
   },
   "devDependencies": {
     "@packages/ts": "0.0.0-development",
