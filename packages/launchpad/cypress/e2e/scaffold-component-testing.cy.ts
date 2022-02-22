@@ -33,7 +33,7 @@ function verifyConfigFile (configFile: `cypress.config.${'js' | 'ts'}`) {
 describe('scaffolding component testing', () => {
   context('vueclivue2', () => {
     it('scaffolds component testing for Vue CLI w/ Vue 2 project', () => {
-      startSetupFor('unconfigured-vueclivue2')
+      startSetupFor('vueclivue2-unconfigured')
 
       // should detect correctly
       cy.get('button').should('be.visible').contains('Vue CLI (Vue 2)(detected)')
