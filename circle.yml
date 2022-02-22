@@ -467,8 +467,6 @@ commands:
             DEBUG=<<parameters.debug>> \
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$TEST_LAUNCHPAD_RECORD_KEY \
-            PERCY_TARGET_BRANCH="10.0-release" \
-            PERCY_TARGET_COMMIT=$(git log -n 1 origin/10.0-release --pretty="%H") \
             PERCY_PARALLEL_NONCE=$PLATFORM-$CIRCLE_SHA1 \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
@@ -1080,8 +1078,6 @@ jobs:
           # once we implement a more permanent solution.
           command: |
             PERCY_PARALLEL_NONCE=$PLATFORM-$CIRCLE_SHA1 \
-            PERCY_TARGET_BRANCH="10.0-release" \
-            PERCY_TARGET_COMMIT=$(git log -n 1 origin/10.0-release --pretty="%H") \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
             PERCY_TARGET_BRANCH="10.0-release" \
@@ -2146,7 +2142,7 @@ linux-workflow: &linux-workflow
           - reporter-integration-tests
           - npm-design-system
           - run-app-component-tests-chrome
-          # - run-app-integration-tests-chrome
+          - run-app-integration-tests-chrome
           - run-frontend-shared-component-tests-chrome
           - run-launchpad-component-tests-chrome
           - run-launchpad-integration-tests-chrome
@@ -2217,10 +2213,10 @@ linux-workflow: &linux-workflow
         context: test-runner:launchpad-tests
         requires:
           - build
-    # - run-app-integration-tests-chrome:
-    #     context: test-runner:launchpad-tests
-    #     requires:
-    #       - build
+    - run-app-integration-tests-chrome:
+        context: test-runner:launchpad-tests
+        requires:
+          - build
     - run-app-component-tests-chrome:
         context: test-runner:launchpad-tests
         requires:

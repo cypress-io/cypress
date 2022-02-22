@@ -2,7 +2,7 @@ import { EventEmitter } from 'events'
 import { RootRunnable } from './../../src/runnables/runnables-store'
 import { addCommand } from '../support/utils'
 
-describe('aliases', { viewportWidth: 400, viewportHeight: 900 }, () => {
+describe('aliases', () => {
   let runner: EventEmitter
   let runnables: RootRunnable
 

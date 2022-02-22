@@ -53,7 +53,7 @@ const CommandColumn = observer(({ model }) => {
 
   return (
     <div className='command-number-column'>
-      {<PinIcon className="command-pin" />}
+      {<PinIcon className='command-pin' />}
       {model._isPending() && <RunningIcon className='fa-spin' />}
       {!model._isPending() && <span className='command-number'>{model.number || ''}</span>}
     </div>
@@ -93,7 +93,7 @@ interface AliasesReferencesProps {
 const AliasesReferences = observer(({ model, aliasesWithDuplicates }: AliasesReferencesProps) => (
   <span>
     {_.map(([] as Array<AliasObject>).concat((model.referencesAlias as AliasObject)), (aliasObj) => (
-      <span className="command-alias-container" key={aliasObj.name + aliasObj.cardinal}>
+      <span className='command-alias-container' key={aliasObj.name + aliasObj.cardinal}>
         <AliasReference aliasObj={aliasObj} model={model} aliasesWithDuplicates={aliasesWithDuplicates} />
       </span>
     ))}
@@ -130,8 +130,11 @@ const Interceptions = observer(({ model }: InterceptionsProps) => {
   return (
     <Tooltip placement='top' title={getTitle()} className='cy-tooltip'>
       <span>
-        <span className={cs('command-interceptions', 'route', count > 1 && 'show-count')}>{model.renderProps.status ? <span className='status'>{model.renderProps.status} </span> : null}{displayAlias || <em className="no-alias">no alias</em>}</span>
-        {count > 1 ? <span className={'command-interceptions-count'}>{count}</span> : null}
+        <span className={cs('command-interceptions', 'route', count > 1 && 'show-count')}>
+          {model.renderProps.status && <span className='status'>{model.renderProps.status}</span>}
+          {displayAlias || <em className='no-alias'>no alias</em>}
+        </span>
+        {count > 1 && <span className={'command-interceptions-count'}>{count}</span>}
       </span>
     </Tooltip>
   )
@@ -281,7 +284,7 @@ class Command extends Component<Props> {
             onMouseEnter={() => this._snapshot(true)}
             onMouseLeave={() => this._snapshot(false)}
           >
-            <div className="command-wrapper-text">
+            <div className='command-wrapper-text'>
               <CommandColumn model={model} />
               <span className='command-method'>
                 <span>
@@ -298,7 +301,7 @@ class Command extends Component<Props> {
                 {!model.visible && (
                   <Tooltip placement='top' title={invisibleMessage(model)} className='cy-tooltip'>
                     <span>
-                      <HiddenIcon className="command-invisible" />
+                      <HiddenIcon className='command-invisible' />
                     </span>
                   </Tooltip>
                 )}

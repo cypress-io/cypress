@@ -12,8 +12,6 @@ export default defineConfig({
     openMode: 0,
   },
   e2e: {
-    viewportHeight: 1000,
-    viewportWidth: 400,
     'baseUrl': 'http://localhost:5006',
     setupNodeEvents (_on, config) {
       const express = require('express')
@@ -22,5 +20,7 @@ export default defineConfig({
 
       return config
     },
+    viewportHeight: 660,
+    viewportWidth: 400,
   },
 })

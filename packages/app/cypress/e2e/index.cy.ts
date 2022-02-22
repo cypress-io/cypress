@@ -15,7 +15,7 @@ function getRunnerHref (specPath: string) {
 }
 
 // FIXME: this is failing. IDK why. idc yet.
-describe.skip('App: Index', () => {
+describe('App: Index', () => {
   describe('Testing Type: E2E', () => {
     context('project with default spec pattern', () => {
       beforeEach(() => {
