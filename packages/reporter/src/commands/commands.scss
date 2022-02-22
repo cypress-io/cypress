@@ -23,16 +23,24 @@
 
   // System Command Styles
   .command-type-system.command-is-event {
-    color: $gray-200;
-    font-style: unset;
-    font-weight: 700;
     user-select: none;
+    font-style: unset;
+
+    .command-method,
+    .command-message {
+      color: $gray-200;
+      font-weight: 700;
+    }
   }
 
   // Event Styles
   .command-is-event {
-    color: $gray-500;
     font-style: italic;
+
+    .command-method,
+    .command-message {
+      color: $gray-500;
+    }
   }
 
   // Child Styles
@@ -71,6 +79,7 @@
     .command-wrapper-text {
       display: flex;
       flex-wrap: wrap;
+      padding: 2px 5px 0;
     }
 
     .command-interceptions {
@@ -163,6 +172,10 @@
     // text-align: center;
     text-align: right;
     width: 25px;
+
+    .command-number {
+      color: $gray-700;
+    }
   }
 
   .command-expander-column {

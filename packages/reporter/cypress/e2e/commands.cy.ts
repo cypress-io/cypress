@@ -3,7 +3,7 @@ import { RootRunnable } from '../../src/runnables/runnables-store'
 import { addCommand } from '../support/utils'
 
 // TODO: Add more and fix these.
-describe.skip('emily - commands', { viewportWidth: 400, viewportHeight: 900 }, () => {
+describe.skip('emily - commands', { viewportWidth: 400, viewportHeight: 500 }, () => {
   let runner: EventEmitter
   let runnables: RootRunnable
   const inProgressStartedAt = (new Date(2000, 0, 1)).toISOString()
@@ -125,7 +125,7 @@ describe('commands', { viewportWidth: 400, viewportHeight: 900 }, () => {
   })
 
   it('displays all the commands', () => {
-    cy.get('.command').should('have.length', 9)
+    cy.get('.command').should('have.length', 10)
 
     cy.percySnapshot()
   })
