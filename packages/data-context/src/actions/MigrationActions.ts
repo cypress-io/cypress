@@ -127,4 +127,13 @@ export class MigrationActions {
       throw Error(`Expected ${actual} to equal ${expected}`)
     }
   }
+
+  async assertSuccessfulConfigScaffold (configFile:  `cypress.config.${'js' | 'ts'}`) {
+    const actual = formatConfig(await this.ctx.actions.file.readFileInProject(configFile))
+    const expected = formatConfig(await this.ctx.actions.file.readFileInProject(`expected-${configFile}`))
+
+    if (actual !== expected) {
+      throw Error(`Expected ${actual} to equal ${expected}`)
+    }
+  }
 }
