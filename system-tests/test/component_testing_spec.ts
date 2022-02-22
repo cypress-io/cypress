@@ -34,4 +34,12 @@ describe('component testing projects', function () {
     browser: 'chrome',
     expectedExitCode: 0,
   })
+
+  systemTests.it('vue3-vite-ts-configured', {
+    project: 'vue3-vite-ts-configured',
+    testingType: 'component',
+    spec: 'src/components/HelloWorld.cy.ts',
+    browser: 'chrome',
+    expectedExitCode: 0,
+  })
 })
