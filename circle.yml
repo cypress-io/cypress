@@ -1332,6 +1332,7 @@ jobs:
 
   reporter-integration-tests:
     <<: *defaults
+    parallelism: 3
     steps:
       - restore_cached_workspace
       - run:
