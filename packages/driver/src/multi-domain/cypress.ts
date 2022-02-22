@@ -19,6 +19,7 @@ import { handleErrorEvent } from './events/errors'
 import { handleScreenshots } from './events/screenshots'
 import { handleTestEvents } from './events/test_events'
 import { handleMiscEvents } from './events/misc'
+import { handleUnsupportedAPIs } from './unsupported_apis'
 
 const specBridgeCommunicator = new SpecBridgeDomainCommunicator()
 
@@ -60,7 +61,10 @@ const setup = (cypressConfig: Cypress.Config, env: Cypress.ObjectLike) => {
 
   const { state, config } = Cypress
 
-  $Commands.create(Cypress, cy, state, config)
+  // @ts-ignore
+  Cypress.Commands = $Commands.create(Cypress, cy, state, config)
+  // @ts-ignore
+  Cypress.isCy = cy.isCy
 
   handleDomainFn(cy, specBridgeCommunicator)
   handleCommands(Cypress, cy, specBridgeCommunicator)
@@ -70,6 +74,7 @@ const setup = (cypressConfig: Cypress.Config, env: Cypress.ObjectLike) => {
   handleMiscEvents(Cypress, cy, specBridgeCommunicator)
   handleScreenshots(Cypress, specBridgeCommunicator)
   handleTestEvents(Cypress, specBridgeCommunicator)
+  handleUnsupportedAPIs(Cypress, cy)
 
   cy.onBeforeAppWindowLoad = onBeforeAppWindowLoad(Cypress, cy)
 
@@ -98,8 +103,7 @@ const onBeforeAppWindowLoad = (Cypress: Cypress.Cypress, cy: $Cy) => (autWindow:
     onBeforeUnload (e) {
       cy.isStable(false, 'beforeunload')
 
-      // TODO: implement these commented out bits
-      // Cookies.setInitial()
+      cy.Cookies.setInitial()
 
       cy.resetTimer()
 
