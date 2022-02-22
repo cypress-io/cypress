@@ -33,7 +33,7 @@ import {
 } from '../generated/graphql'
 import WarningList from '../warning/WarningList.vue'
 import { computed } from 'vue'
-import type { FrontendFramework, Bundler } from '@packages/types/src/constants'
+import type { FrontendFramework, Bundler } from '@packages/scaffold-config'
 import LaunchpadHeader from './LaunchpadHeader.vue'
 import { useI18n } from '@cy/i18n'
 import SelectLanguage from './SelectLanguage.vue'

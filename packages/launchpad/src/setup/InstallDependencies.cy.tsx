@@ -1,7 +1,7 @@
 import { defaultMessages } from '@cy/i18n'
 import InstallDependencies from './InstallDependencies.vue'
 import { InstallDependenciesFragmentDoc } from '../generated/graphql-test'
-import { PACKAGES_DESCRIPTIONS } from '../../../types/src/constants'
+import { PACKAGES_DESCRIPTIONS } from '@packages/scaffold-config'
 
 describe('<InstallDependencies />', () => {
   beforeEach(function () {
