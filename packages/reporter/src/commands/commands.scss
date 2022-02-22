@@ -33,8 +33,6 @@
 
   .command-wrapper {
     background-color: $reporter-section-background;
-    display: flex;
-    flex-wrap: wrap;
     min-height: 20px;
     padding: 2px 3px 0 10px;
 
@@ -94,7 +92,7 @@
       }
     }
 
-    // ensures alias & number of children cmds don't break if reporter
+    // ensures alias & number of children commands don't break if reporter
     // width is narrow
     .alias-container {
       white-space: nowrap;
@@ -135,6 +133,11 @@
     .command-wrapper {
       flex-wrap: nowrap;
     }
+  }
+
+  .command-wrapper-text {
+    display: flex;
+    flex-wrap: wrap;
   }
 
   .command-number-column {
@@ -206,10 +209,6 @@
     text-overflow: ellipsis;
   }
 
-  .command-progress {
-    height: 2px;
-  }
-
   // Event Styles
   .command-is-event.command-wrapper {
     color: $gray-500;
@@ -218,7 +217,7 @@
 
   // Child Styles
   .command-type-child {
-    .command-display-name {
+    .command-method {
       &:before {
         float: left;
         content: "-";
@@ -240,7 +239,7 @@
     margin-left: 10px;
   }
 
-  .command-display-name {
+  .command-method {
     padding: 1px 2px 0;
     display: inline-block;
     font-size: 11px;
@@ -249,7 +248,7 @@
   }
 
   // Command State Styles
-  .command-state-pending.command-wrapper {
+  .command-wrapper.command-state-pending {
     border-left: 2px solid $indigo-800;
     background-color: $gray-900;
     cursor: default;
@@ -271,9 +270,10 @@
     }
   }
 
-  .command-state-pending + .command-progress {
+  .command-progress {
     height: 2px;
-      span {
+
+    span {
       animation-fill-mode: forwards;
       animation-iteration-count: 1;
       animation-name: progress-bar;
@@ -290,21 +290,20 @@
           transform: scaleX(0);
         }
       }
-  }
+    }
   }
 
-  .command-state-failed.command-wrapper {
+  .command-wrapper.command-state-failed {
     border-left: 2px solid $fail;
     background-color: $err-header-background;
     color: $err-header-text;
-    // padding-left: 3px;
 
     &:hover {
       background: rgba($red-400, 0.3);
     }
   }
 
-  .command-state-warn.command-wrapper {
+  .command-wrapper.command-state-warn {
     font-style: unset;
     background-color: $warn-background;
     border-left: 2px solid $orange-700;
@@ -312,7 +311,7 @@
     &:hover {
       background-color: $warn-header-background;
     }
-     .command-display-name {
+     .command-method {
       color: $warn-text;
     }
   }
@@ -326,7 +325,7 @@
 
   // Custom Styles for Specific Commands
   .command-name-assert {
-    .command-display-name {
+    .command-method {
       span {
         border-radius: 2px;
         padding: 0 3px;
@@ -350,7 +349,7 @@
     }
 
     .command-state-pending {
-      .command-display-name {
+      .command-method {
         span {
           background-color: $pending;
           color: $black;
@@ -367,7 +366,7 @@
     }
 
     .command-state-failed {
-      .command-display-name {
+      .command-method {
         span {
           background-color: $fail;
           color: $black;
@@ -384,7 +383,7 @@
     }
 
     .command-state-passed {
-      .command-display-name {
+      .command-method {
         color: $pass;
 
         span {
@@ -479,7 +478,7 @@
     cursor: pointer;
   }
 
-  .command-is-pinned.command-wrapper {
+  .command-wrapper.command-is-pinned{
     background: $indigo-1000;
     border-left: 2px solid $pinned;
 

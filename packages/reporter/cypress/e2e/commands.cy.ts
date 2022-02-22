@@ -207,8 +207,7 @@ describe('commands', { viewportWidth: 400, viewportHeight: 900 }, () => {
     .should('have.class', 'command-message-indicator-bad')
   })
 
-  // FIXME: I broke this.
-  describe.skip('progress bar', () => {
+  describe('progress bar', () => {
     const getProgress = () => {
       return cy.contains('#in-progress')
       .closest('.command')
@@ -285,20 +284,20 @@ describe('commands', { viewportWidth: 400, viewportHeight: 900 }, () => {
 
   context('elements indicator', () => {
     it('shows number of elements when 0 or greater than 1', () => {
-      cy.contains('#doesnt-exist').closest('.command').find('.command-num-elements')
+      cy.contains('#doesnt-exist').closest('.command').find('.num-elements')
       .should('be.visible').and('have.text', '0')
 
-      cy.contains('.some-els').closest('.command').find('.command-num-elements')
+      cy.contains('.some-els').closest('.command').find('.num-elements')
       .should('be.visible').and('have.text', '4')
     })
 
     it('does not render number of elements when 1', () => {
-      cy.contains('#exist').closest('.command').find('.command-num-elements')
+      cy.contains('#exist').closest('.command').find('.num-elements')
       .should('not.exist')
     })
 
     it('renders a tooltip when hovering', () => {
-      cy.contains('.some-els').closest('.command').find('.command-num-elements').trigger('mouseover')
+      cy.contains('.some-els').closest('.command').find('.num-elements').trigger('mouseover')
       cy.get('.cy-tooltip').should('be.visible').should('have.text', '4 matched elements')
     })
   })
@@ -309,7 +308,7 @@ describe('commands', { viewportWidth: 400, viewportHeight: 900 }, () => {
     })
 
     it('displays number of duplicates', () => {
-      cy.contains('GET --- /dup').closest('.command').find('.command-num-children')
+      cy.contains('GET --- /dup').closest('.command').find('.num-children')
       .should('have.text', '4')
     })
 
