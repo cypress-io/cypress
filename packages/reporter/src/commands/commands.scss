@@ -57,6 +57,7 @@
 
   .command-wrapper {
     background-color: $reporter-section-background;
+    color: $gray-400;
     min-height: 20px;
     padding: 2px 3px 0 10px;
 
@@ -436,6 +437,7 @@
   }
 
   .command-pin {
+    color: $gray-500;
     display: none;
     flex-shrink: 0;
     font-size: 14px;
