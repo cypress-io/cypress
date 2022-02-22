@@ -1,7 +1,7 @@
 <template>
   <TerminalPrompt
     class="m-24px"
-    :command="installDependenciesCode"
+    :command="props.gql.wizard.installDependenciesCommand"
     :project-folder-name="projectFolder"
   />
   <div class="border-t border-t-gray-100 px-24px">
@@ -55,6 +55,7 @@ fragment ManualInstall on Query {
       description
       package
     }
+    installDependenciesCommand
   }
   currentProject {
     id
@@ -70,19 +71,4 @@ const props = defineProps<{
   gql: ManualInstallFragment
   packagesInstalled: string[]
 }>()
-
-const commands = {
-  'npm': 'npm install -D ',
-  'pnpm': 'pnpm install -D ',
-  'yarn': 'yarn add -D ',
-}
-
-const installDependenciesCode = computed(
-  () => {
-    return commands[props.gql.currentProject?.packageManager ?? 'npm'] +
-    (props.gql.wizard.packagesToInstall ?? [])
-    .map((pack) => `${pack.package}`)
-    .join(' ')
-  },
-)
 </script>

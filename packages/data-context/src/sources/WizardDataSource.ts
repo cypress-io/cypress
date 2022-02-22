@@ -1,5 +1,6 @@
 import Debug from 'debug'
-import { BUNDLERS, CODE_LANGUAGES, FRONTEND_FRAMEWORKS, PACKAGES_DESCRIPTIONS } from '@packages/types'
+import { CODE_LANGUAGES } from '@packages/types'
+import { BUNDLERS, FRONTEND_FRAMEWORKS, PACKAGES_DESCRIPTIONS } from '@packages/scaffold-config'
 import type { NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
 import type { DataContext } from '..'
 import path from 'path'
@@ -10,7 +11,7 @@ const debug = Debug('cypress:data-context:wizard-data-source')
 export class WizardDataSource {
   constructor (private ctx: DataContext) {}
 
-  async packagesToInstall (): Promise<Array<NexusGenObjects['WizardNpmPackage']> | null> {
+  async packagesToInstall () {
     if (!this.chosenFramework || !this.chosenBundler) {
       return null
     }
@@ -18,13 +19,15 @@ export class WizardDataSource {
     const packages = [
       {
         name: this.chosenFramework.name as string,
-        description: PACKAGES_DESCRIPTIONS[this.chosenFramework.package],
-        package: this.chosenFramework.package,
+        description: PACKAGES_DESCRIPTIONS[this.chosenFramework.package.name],
+        package: this.chosenFramework.package.name,
+        installer: this.chosenFramework.package.installer,
       },
       {
         name: this.chosenBundler.name as string,
         description: PACKAGES_DESCRIPTIONS[this.chosenBundler.package],
         package: this.chosenBundler.package as string,
+        installer: this.chosenBundler.installer as string,
       },
     ]
 
@@ -36,13 +39,33 @@ export class WizardDataSource {
         name: storybookDep,
         description: PACKAGES_DESCRIPTIONS[storybookDep],
         package: storybookDep,
+        installer: ''
+        // installer: storybookDep.pa
       })
     }
 
     return packages
   }
 
-  async resolvePackagesToInstall (): Promise<string[]> {
+  async installDependenciesCommand () {
+    const commands = {
+      'npm': 'npm install -D ',
+      'pnpm': 'pnpm install -D ',
+      'yarn': 'yarn add -D ',
+    }
+
+    const deps = (await this.ctx.wizard.packagesToInstall() ?? [])
+    .map((pack) => `${pack.installer}`)
+    .join(' ')
+
+    return `${commands[this.ctx.coreData.packageManager ?? 'npm']} ${deps}`
+  }
+
+  async installedPackages (): Promise<string[]> {
+    if (this.ctx.coreData.wizard.__fakeInstalledPackagesForTesting) {
+      return this.ctx.coreData.wizard.__fakeInstalledPackagesForTesting
+    }
+
     const packagesInitial = await this.packagesToInstall() || []
 
     if (!this.ctx.currentProject) {
@@ -51,7 +74,7 @@ export class WizardDataSource {
 
     debug('packages to install: %O', packagesInitial)
 
-    const installedPackages: (string|null)[] = packagesInitial.map((p) => {
+    const installedPackages: Array<string | null> = packagesInitial.map((p) => {
       if (this.ctx.currentProject) {
         debug('package checked: %s', p.package)
 

@@ -1,4 +1,5 @@
-import { FRONTEND_FRAMEWORKS, BUNDLERS, CODE_LANGUAGES, PACKAGES_DESCRIPTIONS } from '@packages/types/src/constants'
+import { CODE_LANGUAGES } from '@packages/types/src/constants'
+import { FRONTEND_FRAMEWORKS, BUNDLERS, PACKAGES_DESCRIPTIONS } from '@packages/scaffold-config'
 
 describe('Launchpad: Setup Project', () => {
   function scaffoldAndOpenProject (name: Parameters<typeof cy.scaffoldProject>[0], args?: Parameters<typeof cy.openProject>[1]) {

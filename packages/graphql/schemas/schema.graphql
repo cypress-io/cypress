@@ -497,8 +497,10 @@ enum FrontendFrameworkEnum {
   nextjs
   nuxtjs
   react
-  vue
-  vuecli
+  vue2
+  vue3
+  vueclivue2
+  vueclivue3
 }
 
 """Error from generated spec"""
@@ -1092,6 +1094,9 @@ type Wizard {
 
   """All of the component testing frameworks to choose from"""
   frameworks: [WizardFrontendFramework!]!
+
+  """Command to install required command"""
+  installDependenciesCommand: String!
 
   """The list of packages to install that are currently installed"""
   installedPackages: [String!]

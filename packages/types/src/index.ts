@@ -12,11 +12,6 @@ export * from './spec'
 
 export * from './editors'
 
-export type {
-  AllPackages,
-  AllPackageTypes,
-} from './constants'
-
 export * from './browser'
 
 export type { PlatformName } from './platform'
