@@ -114,12 +114,6 @@ export class PrimaryDomainCommunicator extends EventEmitter {
   }
 }
 
-interface SubjectAndErrData {
-  subject?: any
-  err?: any
-  unserializableSubjectType?: string
-}
-
 /**
  * Spec bridge domain communicator. Responsible for sending/receiving events to/from the
  * primary domain communicator, respectively.
@@ -133,22 +127,26 @@ interface SubjectAndErrData {
 export class SpecBridgeDomainCommunicator extends EventEmitter {
   private windowReference
 
-  private handleSubjectAndErr = ({ subject, err, ...rest }: SubjectAndErrData = {}) => {
-    if (!subject && !err) return rest
+  private handleSubjectAndErr = (data: any = {}, send: (data: any) => void) => {
+    const { subject, err, ...rest } = data
+
+    if (!subject && !err) {
+      return send(rest)
+    }
 
     try {
       // We always want to make sure errors are posted, so clean it up to send.
-      return { ...rest, subject, err: preprocessErrorForPostMessage(err) }
+      send({ ...rest, subject, err: preprocessErrorForPostMessage(err) })
     } catch (err: any) {
       if (subject && err.name === 'DataCloneError') {
         // Send the type of object that failed to serialize.
         // If the subject threw the 'DataCloneError', the subject cannot be
         // serialized, at which point try again with an undefined subject.
-        return this.handleSubjectAndErr({ ...rest, unserializableSubjectType: typeof subject })
+        return this.handleSubjectAndErr({ ...rest, unserializableSubjectType: typeof subject }, send)
       }
 
       // Try to send the message again, with the new error.
-      return this.handleSubjectAndErr({ ...rest, err })
+      this.handleSubjectAndErr({ ...rest, err }, send)
     }
   }
 
@@ -182,13 +180,13 @@ export class SpecBridgeDomainCommunicator extends EventEmitter {
    * @param {any} data - any meta data to be sent with the event.
    */
   toPrimary (event: string, data?: any, options = { syncConfig: false }) {
-    const prefixedEvent = `${CROSS_DOMAIN_PREFIX}${event}`
-
     if (options.syncConfig) this.syncConfigEnvToPrimary()
 
-    this.windowReference.top.postMessage({
-      event: prefixedEvent,
-      data: this.handleSubjectAndErr(data),
-    }, '*')
+    this.handleSubjectAndErr(data, (data: any) => {
+      this.windowReference.top.postMessage({
+        event: `${CROSS_DOMAIN_PREFIX}${event}`,
+        data,
+      }, '*')
+    })
   }
 }
