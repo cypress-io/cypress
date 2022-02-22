@@ -1,5 +1,6 @@
 import type { CodeLanguageEnum, NexusGenEnums, NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
-import { Bundler, CodeLanguage, CODE_LANGUAGES, FrontendFramework, FRONTEND_FRAMEWORKS } from '@packages/types'
+import { CodeLanguage, CODE_LANGUAGES } from '@packages/types'
+import { Bundler, FrontendFramework, FRONTEND_FRAMEWORKS, detect } from '@packages/scaffold-config'
 import assert from 'assert'
 import dedent from 'dedent'
 import path from 'path'
@@ -28,12 +29,13 @@ export class WizardActions {
     return this.ctx.wizardData
   }
 
-  setFramework (framework: NexusGenEnums['FrontendFrameworkEnum'] | null) {
+  setFramework (framework: typeof FRONTEND_FRAMEWORKS[number]['type'] | null) {
+    console.log('set framework')
     const prevFramework = this.ctx.coreData.wizard.chosenFramework || ''
 
     this.ctx.coreData.wizard.chosenFramework = framework
 
-    if (framework !== 'react' && framework !== 'vue') {
+    if (framework !== 'react' && !framework?.startsWith('vue')) {
       return this.setBundler('webpack')
     }
 
@@ -84,75 +86,34 @@ export class WizardActions {
 
   async initialize () {
     if (this.ctx.currentProject) {
-      this.data.detectedFramework = null
-      this.data.detectedBundler = null
-      this.data.detectedLanguage = null
+      this.ctx.update(coreData => {
+        coreData.wizard.detectedFramework = null
+        coreData.wizard.detectedBundler = null
+        coreData.wizard.detectedLanguage = null
+      })
 
       await this.detectLanguage()
       debug('detectedLanguage %s', this.data.detectedLanguage)
       this.data.chosenLanguage = this.data.detectedLanguage || 'js'
 
-      let hasPackageJson = true
+      const detectedFramework = detect(this.ctx.currentProject)
 
-      try {
-        await this.ctx.fs.access(path.join(this.ctx.currentProject, 'package.json'), this.ctx.fs.constants.R_OK)
-      } catch (e) {
-        debug('Could not read or find package.json: %O', e)
-        hasPackageJson = false
+      console.log({ detectedFramework })
+      debug('detectedFramework %o', detectedFramework)
+
+      if (detectedFramework) {
+        this.ctx.update(coreData => {
+          coreData.wizard.detectedFramework = detectedFramework.type 
+          coreData.wizard.chosenFramework =  detectedFramework.type
+
+          if (!detectedFramework.supportedBundlers[0]) {
+            return
+          }
+
+          coreData.wizard.detectedBundler =  detectedFramework.supportedBundlers[0] 
+          coreData.wizard.chosenBundler =  detectedFramework.supportedBundlers[0] 
+        })
       }
-      const packageJson: {
-        dependencies?: { [key: string]: string }
-        devDependencies?: { [key: string]: string }
-      } = hasPackageJson ? await this.ctx.fs.readJson(path.join(this.ctx.currentProject, 'package.json')) : {}
-
-      debug('packageJson %O', packageJson)
-      const dependencies = [
-        ...Object.keys(packageJson.dependencies || {}),
-        ...Object.keys(packageJson.devDependencies || {}),
-      ]
-
-      this.detectFramework(dependencies)
-      debug('detectedFramework %s', this.data.detectedFramework)
-      this.detectBundler(dependencies)
-      debug('detectedBundler %s', this.data.detectedBundler)
-
-      this.data.chosenFramework = this.data.detectedFramework || null
-      this.data.chosenBundler = this.data.detectedBundler || null
-    }
-  }
-
-  private detectFramework (dependencies: string[]) {
-    // Detect full featured frameworks
-    if (dependencies.includes('next')) {
-      this.ctx.wizardData.detectedFramework = 'nextjs'
-    } else if (dependencies.includes('react-scripts')) {
-      this.ctx.wizardData.detectedFramework = 'cra'
-    } else if (dependencies.includes('nuxt')) {
-      this.ctx.wizardData.detectedFramework = 'nuxtjs'
-    } else if (dependencies.includes('@vue/cli-service')) {
-      this.ctx.wizardData.detectedFramework = 'vuecli'
-    } else if (dependencies.includes('react')) {
-      this.ctx.wizardData.detectedFramework = 'react'
-    } else if (dependencies.includes('vue')) {
-      this.ctx.wizardData.detectedFramework = 'vue'
-    }
-  }
-
-  private detectBundler (dependencies: string[]) {
-    const detectedFrameworkObject = FRONTEND_FRAMEWORKS.find((f) => f.type === this.ctx.wizardData.detectedFramework)
-
-    if (detectedFrameworkObject && detectedFrameworkObject.supportedBundlers.length === 1) {
-      this.ctx.wizardData.detectedBundler = detectedFrameworkObject.supportedBundlers[0] ?? null
-
-      return
-    }
-
-    if (dependencies.includes('webpack')) {
-      this.ctx.wizardData.detectedBundler = 'webpack'
-    }
-
-    if (dependencies.includes('vite')) {
-      this.ctx.wizardData.detectedBundler = 'vite'
     }
   }
 
@@ -249,14 +210,20 @@ export class WizardActions {
       const chosenLanguage = CODE_LANGUAGES.find((f) => f.type === language)
 
       const { chosenBundler, chosenFramework } = this.ctx.wizard
+      assert(chosenBundler && chosenFramework && chosenLanguage)
+
+      const config = chosenFramework.config[chosenLanguage.type](chosenBundler.type)
+      return config
+      // const { chosenBundler, chosenFramework } = this.ctx.wizard
 
       assert(chosenFramework && chosenLanguage && chosenBundler)
 
-      return this.wizardGetConfigCodeComponent({
-        chosenLanguage,
-        chosenFramework,
-        chosenBundler,
-      })
+      // return FRONTEND_FRAMEWORKS.
+      // return this.wizardGetConfigCodeComponent({
+      //   chosenLanguage,
+      //   chosenFramework,
+      //   chosenBundler,
+      // })
     }
 
     return this.wizardGetConfigCodeE2E(language)

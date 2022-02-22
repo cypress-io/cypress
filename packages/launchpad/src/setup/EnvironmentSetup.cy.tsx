@@ -1,6 +1,7 @@
 import { EnvironmentSetupFragmentDoc } from '../generated/graphql-test'
 import EnvironmentSetup from './EnvironmentSetup.vue'
-import { FRONTEND_FRAMEWORKS, CODE_LANGUAGES } from '../../../types/src/constants'
+import { CODE_LANGUAGES } from '../../../types/src/constants'
+import { FRONTEND_FRAMEWORKS } from '@packages/scaffold-config'
 
 describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
   it('default component', () => {
