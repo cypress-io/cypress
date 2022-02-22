@@ -134,7 +134,7 @@ const customBinary = ref<string>(
     : props.gql.localSettings.preferences.preferredEditorBinary ?? '',
 )
 
-const editorToUse = ref<string>(
+const editorToUse = ref<EditorType>(
   customBinary.value ? 'custom' : 'found',
 )
 
