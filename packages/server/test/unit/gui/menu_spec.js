@@ -252,14 +252,25 @@ describe('gui/menu', function () {
   })
 
   context('Developer Tools', () => {
-    it('does not exist by default', () => {
+    it('exists by default', () => {
       menu.set()
-      expect(getMenuItem('Developer Tools')).to.be.undefined
+      expect(getMenuItem('Developer Tools')).to.be.defined
     })
 
-    it('does not exist by when withInternalDevTools is false', () => {
+    it('exists when withInternalDevTools is false', () => {
       menu.set({ withInternalDevTools: false })
-      expect(getMenuItem('Developer Tools')).to.be.undefined
+      expect(getMenuItem('Developer Tools')).to.be.defined
+    })
+
+    it('contains only Reload and Toggle Developer Tools items in expected order', () => {
+      menu.set()
+      const labels = getLabels(getMenuItem('Developer Tools').submenu)
+
+      expect(labels).to.eql([
+        'Reload',
+        'Toggle Developer Tools',
+        'View App Data',
+      ])
     })
 
     describe('when withInternalDevTools is true', () => {
@@ -274,9 +285,9 @@ describe('gui/menu', function () {
         expect(labels).to.eql([
           'Reload',
           'Toggle Developer Tools',
+          'View App Data',
           'GraphQL requests over Fetch (off)',
           'GraphiQL',
-          'View App Data',
         ])
       })
 

@@ -13,6 +13,10 @@ import type { LaunchArgs, PlatformName } from '@packages/types'
 import { EventEmitter } from 'events'
 import Events from '../gui/events'
 
+const isDev = () => {
+  return Boolean(process.env['CYPRESS_INTERNAL_ENV'] === 'development')
+}
+
 export = {
   isMac () {
     return os.platform() === 'darwin'
@@ -88,6 +92,10 @@ export = {
         return Windows.hideAllUnlessAnotherWindowIsFocused()
       },
       onFocus () {
+        // hide internal dev tools if in production and previously focused
+        // window was the electron browser
+        menu.set({ withInternalDevTools: isDev() })
+
         return Windows.showAll()
       },
       onClose () {
@@ -128,7 +136,7 @@ export = {
     // TODO: potentially just pass an event emitter
     // instance here instead of callback functions
     menu.set({
-      withInternalDevTools: true,
+      withInternalDevTools: isDev(),
       onLogOutClicked () {
         return globalPubSub.emit('menu:item:clicked', 'log:out')
       },
