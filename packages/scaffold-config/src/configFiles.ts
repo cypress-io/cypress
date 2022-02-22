@@ -168,8 +168,36 @@ export const FRONTEND_FRAMEWORKS = [
     codeGenFramework: CODE_GEN_FRAMEWORKS[1],
     storybookDep: STORYBOOK_DEPS[1],
     config: {
-      js: () => ``,
-      ts: () => ``,
+      js: (bundler: Bundler['type']) => {
+        return dedent`
+      const { devServer } = require('@cypress/webpack-dev-server')
+      const webpackConfig = require('@vue/cli-service/webpack.config')
+
+      module.exports = {
+        component: {
+          devServer,
+          devServerConfig: {
+            webpackConfig
+          }
+        }
+      }
+      `
+      },
+      ts: () => {
+        return dedent`
+      import { defineConfig } from 'cypress'
+      import { devServer } from '@cypress/webpack-dev-server'
+      import webpackConfig from '@vue/cli-service/webpack.config'
+
+      export default defineConfig({
+        component: {
+          devServer,
+          devServerConfig: {
+            webpackConfig
+          }
+        }
+      })`
+      },
     },
   },
   {
