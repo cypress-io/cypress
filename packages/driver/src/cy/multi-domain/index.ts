@@ -1,8 +1,9 @@
 import Bluebird from 'bluebird'
 import $errUtils from '../../cypress/error_utils'
 import { Validator } from './validator'
-import { serializeRunnable } from './util'
 import { createUnserializableSubjectProxy } from './unserializable_subject_proxy'
+import { serializeRunnable } from './util'
+import { preprocessConfig, preprocessEnv, syncConfigToCurrentDomain, syncEnvToCurrentDomain } from '../../util/config'
 
 export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: Cypress.State, config: Cypress.InternalConfig) {
   let timeoutId
@@ -71,7 +72,11 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
       })
 
       return new Bluebird((resolve, reject) => {
-        const onError = (err) => {
+        const _resolve = ({ subject, unserializableSubjectType }) => {
+          resolve(unserializableSubjectType ? createUnserializableSubjectProxy(unserializableSubjectType) : subject)
+        }
+
+        const _reject = (err) => {
           log.error(err)
           if (typeof err === 'object') {
             err.onFail = () => {}
@@ -82,31 +87,38 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
 
         const onQueueFinished = ({ err, subject, unserializableSubjectType }) => {
           if (err) {
-            return onError(err)
+            return _reject(err)
           }
 
-          resolve(unserializableSubjectType ? createUnserializableSubjectProxy(unserializableSubjectType) : subject)
+          _resolve({ subject, unserializableSubjectType })
         }
 
         const cleanup = () => {
           communicator.off('queue:finished', onQueueFinished)
         }
 
-        communicator.once('ran:domain:fn', ({ err, subject, unserializableSubjectType }) => {
+        communicator.once('sync:config', ({ config, env }) => {
+          syncConfigToCurrentDomain(config)
+          syncEnvToCurrentDomain(env)
+        })
+
+        communicator.once('ran:domain:fn', (details) => {
+          const { subject, unserializableSubjectType, err, finished } = details
+
           sendReadyForDomain()
 
           if (err) {
             cleanup()
 
-            return onError(err)
+            return _reject(err)
           }
 
           // if there are not commands and a synchronous return from the callback,
           // this resolves immediately
-          if (subject || unserializableSubjectType) {
+          if (finished || subject || unserializableSubjectType) {
             cleanup()
 
-            resolve(unserializableSubjectType ? createUnserializableSubjectProxy(unserializableSubjectType) : subject)
+            _resolve({ subject, unserializableSubjectType })
           }
         })
 
@@ -124,6 +136,12 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
 
         // fired once the spec bridge is set up and ready to receive messages
         communicator.once('bridge:ready', () => {
+          // now that the spec bridge is ready, instantiate Cypress with the current app config and environment variables for initial sync when creating the instance
+          communicator.toSpecBridge('initialize:cypress', {
+            config: preprocessConfig(Cypress.config()),
+            env: preprocessEnv(Cypress.env()),
+          })
+
           state('readyForMultiDomain', true)
 
           // once the secondary domain page loads, send along the
@@ -132,6 +150,10 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
             communicator.toSpecBridge('run:domain:fn', {
               data,
               fn: callbackFn.toString(),
+              // let the spec bridge version of Cypress know if config read-only values can be overwritten since window.top cannot be accessed in cross-origin iframes
+              // this should only be used for internal testing. Cast to boolean to guarantee serialization
+              // @ts-ignore
+              skipConfigValidation: !!window.top.__cySkipValidateConfig,
               state: {
                 viewportWidth: Cypress.state('viewportWidth'),
                 viewportHeight: Cypress.state('viewportHeight'),
@@ -139,6 +161,8 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
                 duringUserTestExecution: Cypress.state('duringUserTestExecution'),
                 hookId: state('hookId'),
               },
+              config: preprocessConfig(Cypress.config()),
+              env: preprocessEnv(Cypress.env()),
             })
           } catch (err: any) {
             const wrappedErr = $errUtils.errByPath('switchToDomain.run_domain_fn_errored', {

@@ -51,7 +51,7 @@ context('multi-domain spies, stubs, and clock', { experimentalSessionSupport: tr
       cy.switchToDomain('foobar.com', () => {
         const stubEnv = cy.spy(Cypress, 'env')
 
-        expect(Cypress.env()).to.deep.equal({})
+        Cypress.env()
         expect(stubEnv).to.be.calledOnce
         // @ts-ignore
         expect(Cypress.env.isSinonProxy).to.be.true
@@ -60,7 +60,6 @@ context('multi-domain spies, stubs, and clock', { experimentalSessionSupport: tr
 
     it('verifies the spy got restored', () => {
       cy.switchToDomain('foobar.com', () => {
-        expect(Cypress.env()).to.deep.equal({})
         // @ts-ignore
         expect(Cypress.env.isSinonProxy).to.be.undefined
       })

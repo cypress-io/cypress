@@ -81,8 +81,8 @@ context('multi-domain misc', { experimentalSessionSupport: true, experimentalMul
     })
   })
 
-  it('.pause()', () => {
-    cy.switchToDomain('foobar.com', () => {
+  it('.pause()', (done) => {
+    cy.switchToDomain('foobar.com', done, () => {
       const afterPaused = new Promise<void>((resolve) => {
         cy.once('paused', () => {
           Cypress.emit('resume:all')
@@ -90,7 +90,8 @@ context('multi-domain misc', { experimentalSessionSupport: true, experimentalMul
         })
       })
 
-      cy.pause()
+      // Otherwise, the subject of pause is returned in run mode and pause does NOT take effect
+      cy.pause().wrap({}).should('deep.eq', {})
       cy.wrap(afterPaused)
     })
   })

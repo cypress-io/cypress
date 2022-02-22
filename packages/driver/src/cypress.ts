@@ -137,16 +137,18 @@ class $Cypress {
 
     // TODO: env is unintentionally preserved between soft reruns unlike config.
     // change this in the NEXT_BREAKING
-    const { env } = config
+    const { env, __isMultiDomain } = config
 
-    config = _.omit(config, 'env', 'remote', 'resolved', 'scaffoldedFiles', 'state', 'testingType')
+    const isMultiDomainCypress: boolean = __isMultiDomain || false
+
+    config = _.omit(config, 'env', 'remote', 'resolved', 'scaffoldedFiles', 'state', 'testingType', '__isMultiDomain')
 
     _.extend(this, browserInfo(config))
 
     this.state = $SetterGetter.create({})
     this.originalConfig = _.cloneDeep(config)
     this.config = $SetterGetter.create(config, (config) => {
-      if (!window.top.__cySkipValidateConfig) {
+      if (isMultiDomainCypress ? !window.__cySkipValidateConfig : !window.top.__cySkipValidateConfig) {
         validateNoReadOnlyConfig(config, (errProperty) => {
           const errPath = this.state('runnable')
             ? 'config.invalid_cypress_config_override'

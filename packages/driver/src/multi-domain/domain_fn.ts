@@ -2,10 +2,14 @@ import type { $Cy } from '../cypress/cy'
 import type { SpecBridgeDomainCommunicator } from './communicator'
 import $errUtils from '../cypress/error_utils'
 import $utils from '../cypress/utils'
+import { syncConfigToCurrentDomain, syncEnvToCurrentDomain } from '../util/config'
 
 interface RunDomainFnOptions {
+  config: Cypress.Config
   data: any[]
+  env: Cypress.ObjectLike
   fn: string
+  skipConfigValidation: boolean
   state: {}
 }
 
@@ -36,22 +40,31 @@ export const handleDomainFn = (cy: $Cy, specBridgeCommunicator: SpecBridgeDomain
     cy.isStable(false, 'multi-domain-start')
   }
 
-  specBridgeCommunicator.on('run:domain:fn', async ({ data, fn, state }: RunDomainFnOptions) => {
+  specBridgeCommunicator.on('run:domain:fn', async (options: RunDomainFnOptions) => {
+    const { config, data, env, fn, state, skipConfigValidation } = options
+
     let queueFinished = false
 
     reset(state)
+
+    // @ts-ignore
+    window.__cySkipValidateConfig = skipConfigValidation || false
+
+    // resync the config/env before running the domain:fn
+    syncConfigToCurrentDomain(config)
+    syncEnvToCurrentDomain(env)
 
     cy.state('onFail', (err) => {
       if (queueFinished) {
         // If the queue is already finished, send this event instead because
         // the primary won't be listening for 'queue:finished' anymore
-        specBridgeCommunicator.toPrimaryWithError('uncaught:error', err)
+        specBridgeCommunicator.toPrimary('uncaught:error', { err }, { syncConfig: true })
 
         return
       }
 
       cy.stop()
-      specBridgeCommunicator.toPrimaryWithError('queue:finished', err)
+      specBridgeCommunicator.toPrimary('queue:finished', { err }, { syncConfig: true })
     })
 
     try {
@@ -63,24 +76,40 @@ export const handleDomainFn = (cy: $Cy, specBridgeCommunicator: SpecBridgeDomain
           args: { value: $utils.stringify(value) },
         })
       } else {
+        const hasCommands = !!cy.queue.length
+
         // If there are queued commands, their yielded value will be preferred
         // over the value resolved by a return promise. Don't send the subject
         // or the primary will think we're done already with a sync-returned
         // value
-        const subject = cy.queue.length ? undefined : await value
+        const subject = hasCommands ? undefined : await value
 
-        specBridgeCommunicator.toPrimaryWithSubject('ran:domain:fn', subject)
+        specBridgeCommunicator.toPrimary('ran:domain:fn', {
+          subject,
+          finished: !hasCommands,
+        }, {
+          // Only sync the config if there are no commands in queue
+          // (for instance, only assertions exist in the callback)
+          // since it means the callback is finished at this point
+          syncConfig: !hasCommands,
+        })
+
+        if (!hasCommands) return
       }
     } catch (err) {
-      specBridgeCommunicator.toPrimaryWithError('ran:domain:fn', err)
-    } finally {
-      cy.state('done', undefined)
+      specBridgeCommunicator.toPrimary('ran:domain:fn', { err }, { syncConfig: true })
+
+      return
     }
 
     cy.queue.run()
     .then(() => {
       queueFinished = true
-      specBridgeCommunicator.toPrimaryWithSubject('queue:finished', cy.state('subject'))
+      specBridgeCommunicator.toPrimary('queue:finished', {
+        subject: cy.state('subject'),
+      }, {
+        syncConfig: true,
+      })
     })
   })
 }
