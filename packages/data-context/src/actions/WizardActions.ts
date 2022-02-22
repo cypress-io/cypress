@@ -102,10 +102,10 @@ export class WizardActions {
 
       if (detected) {
         this.ctx.update((coreData) => {
-          coreData.wizard.detectedFramework = detected.framework.type
-          coreData.wizard.chosenFramework = detected.framework.type
+          coreData.wizard.detectedFramework = detected.framework?.type ?? null
+          coreData.wizard.chosenFramework = detected.framework?.type ?? null
 
-          if (!detected.framework.supportedBundlers[0]) {
+          if (!detected.framework?.supportedBundlers[0]) {
             return
           }
 
