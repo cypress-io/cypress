@@ -1,14 +1,15 @@
 <template>
   <!-- TODO: spread on props.gql is needed due to bug in mountFragment. Fix -->
-  <SpecPatterns
-    v-if="props.gql.currentProject"
-    :gql="{...props.gql.currentProject}"
-  />
+  <SpecPatterns :gql="{...props.gql}" />
 
   <div class="flex mt-32px gap-16px justify-center">
-    <OpenConfigFileInIDE>
+    <OpenConfigFileInIDE
+      v-slot="{onClick}"
+      :gql="props.gql"
+    >
       <Button
         size="lg"
+        @click="onClick"
       >
         <template #prefix>
           <i-cy-code-editor_x16 class="icon-dark-white" />
@@ -41,11 +42,11 @@ import OpenConfigFileInIDE from '@packages/frontend-shared/src/gql-components/Op
 const { t } = useI18n()
 
 gql`
-fragment CustomPatternNoSpecContent on Query {
-  currentProject {
-    id
-    ...SpecPatterns
-  }
+fragment CustomPatternNoSpecContent on CurrentProject {
+  id
+  ...SpecPatterns
+  ...OpenConfigFileInIDE
+  configFileAbsolutePath
 }
 `
 

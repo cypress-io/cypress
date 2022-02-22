@@ -10,7 +10,7 @@
         scope="global"
         keypath="settingsPage.config.description"
       >
-        <OpenConfigFileInIDE />
+        <OpenConfigFileInIDE :gql="props.gql" />
       </i18n-t>
     </template>
     <div class="flex w-full">
@@ -19,6 +19,7 @@
         :config="configObject"
       />
       <ConfigLegend
+        :gql="props.gql"
         data-cy="config-legend"
         class="rounded-tr-md rounded-br-md border-1 border-l-0 min-w-280px py-28px px-22px"
       />
@@ -39,11 +40,11 @@ import OpenConfigFileInIDE from '@packages/frontend-shared/src/gql-components/Op
 const { t } = useI18n()
 
 gql`
-fragment Config on Query {
-  currentProject {
-    id
-    config
-  }
+fragment Config on CurrentProject {
+  id
+  config
+  configFileAbsolutePath
+  ...OpenConfigFileInIDE
 }
 `
 
@@ -51,5 +52,5 @@ const props = defineProps<{
   gql: ConfigFragment
 }>()
 
-const configObject = computed(() => props.gql.currentProject?.config)
+const configObject = computed(() => props.gql.config)
 </script>

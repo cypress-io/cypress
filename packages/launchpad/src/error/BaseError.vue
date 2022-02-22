@@ -35,8 +35,7 @@
             />
             <ErrorCodeFrame
               v-if="baseError.fileToOpen"
-              :file="baseError.fileToOpen"
-              :gql="props.gql"
+              :gql="props.gql.fileToOpen"
             />
           </div>
           <div
@@ -119,7 +118,7 @@ import ErrorOutlineIcon from '~icons/cy/status-errored-outline_x16.svg'
 import ErrorCodeFrame from './ErrorCodeFrame.vue'
 
 gql`
-fragment BaseError_Data on ErrorWrapper {
+fragment BaseError on ErrorWrapper {
   title
   description
   errorType
@@ -134,15 +133,6 @@ fragment BaseError_Data on ErrorWrapper {
     stack
     message
   }
-}
-`
-
-gql`
-fragment BaseError on Query {
-  ...ErrorCodeFrame_ExternalEditor
-  baseError {
-    ...BaseError_Data
-  }
 }`
 
 const openDocs = useExternalLink('https://on.cypress.io/')
@@ -156,7 +146,7 @@ const props = defineProps<{
 }>()
 
 const markdownTarget = ref()
-const baseError = computed(() => props.gql.baseError)
+const baseError = computed(() => props.gql)
 const description = computed(() => baseError.value?.description || '')
 const { markdown } = useMarkdown(markdownTarget, description.value, { classes: { code: ['bg-error-200'] } })
 </script>

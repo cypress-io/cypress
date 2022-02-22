@@ -1,18 +1,18 @@
 <template>
-  <ProjectId :gql="props.gql.currentProject" />
+  <ProjectId :gql="props.gql" />
   <template
-    v-if="props.gql.currentProject?.cloudProject?.__typename === 'CloudProject'
-      && props.gql.currentProject.cloudProject.recordKeys?.length"
+    v-if="props.gql.cloudProject?.__typename === 'CloudProject'
+      && props.gql.cloudProject.recordKeys?.length"
   >
     <RecordKey
-      v-for="key of props.gql.currentProject.cloudProject.recordKeys"
+      v-for="key of props.gql.cloudProject.recordKeys"
       :key="key.id"
       :gql="key"
-      :manage-keys-url="props.gql.currentProject.cloudProject.cloudProjectSettingsUrl"
+      :manage-keys-url="props.gql.cloudProject.cloudProjectSettingsUrl"
     />
   </template>
-  <SpecPatterns :gql="props.gql.currentProject" />
-  <Experiments :gql="props.gql.currentProject" />
+  <SpecPatterns :gql="props.gql" />
+  <Experiments :gql="props.gql" />
   <Config :gql="props.gql" />
 </template>
 
@@ -26,24 +26,22 @@ import SpecPatterns from './SpecPatterns.vue'
 import type { ProjectSettingsFragment } from '../../generated/graphql'
 
 gql`
-fragment ProjectSettings on Query {
-  currentProject {
-    id
-    ...ProjectId
-    ...Experiments
-    cloudProject {
-      __typename
-      ... on CloudProject {
+fragment ProjectSettings on CurrentProject {
+  id
+  ...ProjectId
+  ...Experiments
+  cloudProject {
+    __typename
+    ... on CloudProject {
+      id
+      cloudProjectSettingsUrl
+      recordKeys {
         id
-        cloudProjectSettingsUrl
-        recordKeys {
-          id
-          ...RecordKey
-        }
+        ...RecordKey
       }
     }
-    ...SpecPatterns_Settings
   }
+  ...SpecPatterns_Settings
   ...Config
 }
 `

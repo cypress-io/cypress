@@ -577,6 +577,7 @@ enum ErrorTypeEnum {
   TESTS_DID_NOT_START_FAILED
   TESTS_DID_NOT_START_RETRYING
   UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES
+  UNKNOWN_ERROR
   UNSUPPORTED_BROWSER_VERSION
   VIDEO_POST_PROCESSING_FAILED
   VIDEO_RECORDING_FAILED
@@ -610,8 +611,12 @@ type ErrorWrapper {
 }
 
 input FileDetailsInput {
-  absolute: String!
   column: Int
+
+  """
+  When we open a file we take a filePath, either relative to the project root, or absolute on disk
+  """
+  filePath: String!
   line: Int
 }
 

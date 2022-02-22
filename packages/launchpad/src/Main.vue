@@ -106,7 +106,7 @@ fragment MainLaunchpadQueryData on Query {
   ...Wizard
   ...ScaffoldLanguageSelect
   baseError {
-    ...BaseError_Data
+    ...BaseError
   }
   currentTestingType
   currentProject {
@@ -118,10 +118,10 @@ fragment MainLaunchpadQueryData on Query {
     needsLegacyConfigMigration
     currentTestingType
     errorLoadingConfigFile {
-      ...BaseError_Data
+      ...BaseError
     }
     errorLoadingNodeEvents {
-      ...BaseError_Data
+      ...BaseError
     }
   }
   isInGlobalMode

@@ -21,8 +21,8 @@
         max-height="10000px"
       >
         <ProjectSettings
-          v-if="props.gql"
-          :gql="props.gql"
+          v-if="props.gql.currentProject"
+          :gql="props.gql.currentProject"
         />
       </SettingsCard>
     </div>
@@ -68,7 +68,10 @@ mutation SettingsContainer_ReconfigureProject {
 gql`
 fragment SettingsContainer on Query {
   ...TestingPreferences
-  ...ProjectSettings
+  currentProject {
+    id
+    ...ProjectSettings
+  }
   ...ExternalEditorSettings
   ...ProxySettings
 }`
