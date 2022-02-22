@@ -30,7 +30,6 @@ export class WizardActions {
   }
 
   setFramework (framework: typeof FRONTEND_FRAMEWORKS[number]['type'] | null) {
-    console.log('set framework')
     const prevFramework = this.ctx.coreData.wizard.chosenFramework || ''
 
     this.ctx.coreData.wizard.chosenFramework = framework
@@ -86,7 +85,7 @@ export class WizardActions {
 
   async initialize () {
     if (this.ctx.currentProject) {
-      this.ctx.update(coreData => {
+      this.ctx.update((coreData) => {
         coreData.wizard.detectedFramework = null
         coreData.wizard.detectedBundler = null
         coreData.wizard.detectedLanguage = null
@@ -98,20 +97,19 @@ export class WizardActions {
 
       const detectedFramework = detect(this.ctx.currentProject)
 
-      console.log({ detectedFramework })
       debug('detectedFramework %o', detectedFramework)
 
       if (detectedFramework) {
-        this.ctx.update(coreData => {
-          coreData.wizard.detectedFramework = detectedFramework.type 
-          coreData.wizard.chosenFramework =  detectedFramework.type
+        this.ctx.update((coreData) => {
+          coreData.wizard.detectedFramework = detectedFramework.type
+          coreData.wizard.chosenFramework = detectedFramework.type
 
           if (!detectedFramework.supportedBundlers[0]) {
             return
           }
 
-          coreData.wizard.detectedBundler =  detectedFramework.supportedBundlers[0] 
-          coreData.wizard.chosenBundler =  detectedFramework.supportedBundlers[0] 
+          coreData.wizard.detectedBundler = detectedFramework.supportedBundlers[0]
+          coreData.wizard.chosenBundler = detectedFramework.supportedBundlers[0]
         })
       }
     }
@@ -210,20 +208,10 @@ export class WizardActions {
       const chosenLanguage = CODE_LANGUAGES.find((f) => f.type === language)
 
       const { chosenBundler, chosenFramework } = this.ctx.wizard
+
       assert(chosenBundler && chosenFramework && chosenLanguage)
 
-      const config = chosenFramework.config[chosenLanguage.type](chosenBundler.type)
-      return config
-      // const { chosenBundler, chosenFramework } = this.ctx.wizard
-
-      assert(chosenFramework && chosenLanguage && chosenBundler)
-
-      // return FRONTEND_FRAMEWORKS.
-      // return this.wizardGetConfigCodeComponent({
-      //   chosenLanguage,
-      //   chosenFramework,
-      //   chosenBundler,
-      // })
+      return chosenFramework.config[chosenLanguage.type](chosenBundler.type)
     }
 
     return this.wizardGetConfigCodeE2E(language)
@@ -278,28 +266,6 @@ export class WizardActions {
     codeBlocks.push(`  ${E2E_SCAFFOLD_BODY.replace(/\n/g, '\n  ')}`)
 
     codeBlocks.push('})\n')
-
-    return codeBlocks.join('\n')
-  }
-
-  private wizardGetConfigCodeComponent (opts: WizardGetCodeComponent): string {
-    const codeBlocks: string[] = []
-    const { chosenBundler, chosenFramework, chosenLanguage } = opts
-
-    const requirePath = chosenFramework.defaultPackagePath ?? chosenBundler.package
-
-    codeBlocks.push(chosenLanguage.type === 'ts' ? `import { defineConfig } from 'cypress'` : `const { defineConfig } = require('cypress')`)
-    codeBlocks.push(chosenLanguage.type === 'ts' ? `import { devServer } from '${requirePath}'` : `const { devServer } = require('${requirePath}')`)
-    codeBlocks.push('')
-    codeBlocks.push(chosenLanguage.type === 'ts' ? `export default defineConfig({` : `module.exports = defineConfig({`)
-    codeBlocks.push(`  // Component testing, ${chosenLanguage.name}, ${chosenFramework.name}, ${chosenBundler.name}`)
-
-    codeBlocks.push(`  ${COMPONENT_SCAFFOLD_BODY({
-      lang: chosenLanguage.type,
-      configOptionsString: '{}',
-    }).replace(/\n/g, '\n  ')}`)
-
-    codeBlocks.push(`})\n`)
 
     return codeBlocks.join('\n')
   }
@@ -408,21 +374,6 @@ const E2E_SCAFFOLD_BODY = dedent`
     },
   },
 `
-
-interface ComponentScaffoldOpts {
-  lang: CodeLanguageEnum
-  configOptionsString: string
-  specPattern?: string
-}
-
-const COMPONENT_SCAFFOLD_BODY = (opts: ComponentScaffoldOpts) => {
-  return dedent`
-    component: {
-      devServer,
-      devServerConfig: ${opts.configOptionsString}
-    },
-  `
-}
 
 const FIXTURE_DATA = {
   'name': 'Using fixtures to represent data',
