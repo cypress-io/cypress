@@ -4,7 +4,7 @@ describe('basic login', { experimentalSessionSupport: true, experimentalMultiDom
   describe('visit primary first', () => {
     it('logs in with idp redirect', () => {
       cy.visit('/fixtures/auth/index.html') // Establishes Primary Domain
-      cy.get('[data-cy="login"]').click() // Takes you to foobar.com
+      cy.get('[data-cy="login-idp"]').click() // Takes you to idp.com
       cy.switchToDomain('idp.com', () => {
         cy.get('[data-cy="username"]').type('BJohnson')
         cy.get('[data-cy="login"]').click()
@@ -38,7 +38,7 @@ describe('basic login', { experimentalSessionSupport: true, experimentalMultiDom
     // TODO: this test 'passes' but acts strangely by showing no log and fails the subsequent test
     it.skip('visits foobar first', () => {
       cy.visit('http://www.foobar.com:3500/fixtures/auth/index.html') // Establishes Primary Domain
-      cy.get('[data-cy="login"]').click() // Takes you to identityProvider.com
+      cy.get('[data-cy="login-idp"]').click() // Takes you to idp.com
       cy.switchToDomain('idp.com', () => {
         cy.get('[data-cy="username"]').type('BJohnson')
         cy.get('[data-cy="login"]').click()
@@ -52,17 +52,14 @@ describe('basic login', { experimentalSessionSupport: true, experimentalMultiDom
   })
 
   // Scenario, Token based auth. Visit IDP hosted on secondary domain, login and redirect back to site.
-  // @ts-ignore
   describe('visit secondary first', () => {
-    describe('How to determine primary', () => {
+    describe('How to determine primary domain', () => {
       // NOTE: Enable to set the top domain to example.com before running the next test.
       it.skip('example.com', () => {
-         cy.visit('http://www.example.com')
+        cy.visit('http://www.example.com')
       })
 
-      // Problem: where does the primary domain get established
-      // @ts-ignore
-      // TODO: This test will fail
+      // TODO: This test will fail primary domain not established
       it.skip('A logs in with no primary - fail', { baseUrl: undefined }, () => {
         cy.createDomain('idp.com', () => { // PrimaryDomain is undefined: FAIL
           cy.visit('http://www.idp.com:3500/fixtures/auth/idp.html')
@@ -78,7 +75,6 @@ describe('basic login', { experimentalSessionSupport: true, experimentalMultiDom
       })
 
       // Primary established via base url
-      // @ts-ignore
       // TODO: Add createDomain
       it.skip('B logs in with primary set via baseurl', { baseUrl: 'http://localhost:3500' }, () => {
         cy.createDomain('idp.com', () => { // PrimaryDomain is localhost
@@ -108,7 +104,6 @@ describe('basic login', { experimentalSessionSupport: true, experimentalMultiDom
         .should('equal', 'Welcome FJohnson')
       })
 
-      // @ts-ignore
       // TODO: Add createDomain primary domain config does not exist yet
       it.skip('D logs in with primary set via switch to domain config', { primaryDomain: 'localhost' }, () => {
         cy.createDomain('idp.com', () => { // PrimaryDomain set to localhost
@@ -142,7 +137,6 @@ describe('basic login', { experimentalSessionSupport: true, experimentalMultiDom
       }
 
       // Scenario, Token based auth. Establish session using custom login command (login through IDP hosted on secondary domain), and verify to site.
-      // @ts-ignore
       // TODO: Create domain is not yet implemented
       it.skip('establishes a session', { primaryDomain: 'localhost' }, () => {
         login('BJohnson')
@@ -181,7 +175,7 @@ describe('basic login', { experimentalSessionSupport: true, experimentalMultiDom
   })
 })
 
-// @ts-ignore / session support is needed for visiting about:blank between tests
+// session support is needed for visiting about:blank between tests
 describe('Multi-step Auth', { experimentalSessionSupport: true, experimentalMultiDomain: true }, () => {
   // TODO: Switch to domain does not work in switch to domain yet.
   it.skip('final auth redirects back to localhost - nested', () => {
