@@ -1,4 +1,5 @@
-import { BUNDLERS, CODE_LANGUAGES, FRONTEND_FRAMEWORKS } from '@packages/types'
+import { CODE_LANGUAGES } from '@packages/types'
+import { BUNDLERS, FRONTEND_FRAMEWORKS } from '@packages/scaffold-config'
 import { enumType } from 'nexus'
 
 export const SupportedBundlerEnum = enumType({

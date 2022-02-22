@@ -65,7 +65,7 @@ describe('<SelectFwOrBundler />', () => {
             name: 'VueJs',
             id: 'vue',
             isSelected: false,
-            type: 'vuecli',
+            type: 'vuecli-vue3',
           },
         ]}
       />

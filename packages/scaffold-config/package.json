@@ -1,0 +1,26 @@
+{
+  "name": "@packages/scaffold-config",
+  "version": "0.0.0-development",
+  "description": "Logic related to scaffolding new projects using launchpad",
+  "main": "index.js",
+  "browser": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "build-prod": "tsc || echo 'built, with errors'",
+    "check-ts": "tsc --noEmit",
+    "clean-deps": "rm -rf node_modules",
+    "clean": "rm -f ./src/*.js ./src/**/*.js ./src/**/**/*.js ./test/**/*.js || echo 'cleaned'",
+    "test-unit": "mocha -r @packages/ts/register test/unit/**/*.spec.ts --config ./test/.mocharc.js --exit",
+    "test-integration": "mocha -r @packages/ts/register test/integration/**/*.spec.ts --config ./test/.mocharc.js --exit"
+  },
+  "files": [
+    "src"
+  ],
+  "dependencies": {},
+  "devDependencies": {
+    "mocha": "7.0.1",
+    "chai": "4.2.0",
+    "compare-versions": "4.1.3",
+    "@packages/ts": "0.0.0-development"
+  }
+}
