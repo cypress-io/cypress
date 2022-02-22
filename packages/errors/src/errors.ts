@@ -637,9 +637,9 @@ export const AllCypressErrors = {
   },
   CONFIG_FILE_UNEXPECTED_ERROR: (configFilePath: string, err: ErrorLike) => {
     return errTemplate`
-      We stopped running your tests because your config file crashed.
-
       Your ${fmt.highlight(`configFile`)} threw an error from: ${fmt.path(configFilePath)}
+
+      We stopped running your tests because your config file crashed.
 
       ${fmt.stackTrace(err)}
     `
