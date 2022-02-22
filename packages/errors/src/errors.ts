@@ -628,9 +628,9 @@ export const AllCypressErrors = {
   },
   CONFIG_FILE_SETUP_NODE_EVENTS_ERROR: (configFilePath: string, testingType: TestingType, err: ErrorLike) => {
     return errTemplate`
-      Your ${fmt.highlight(`configFile`)} threw an error from: ${fmt.path(configFilePath)}
+      Your ${fmt.highlightSecondary(`configFile`)} threw an error from: ${fmt.path(configFilePath)}
 
-      The error was thrown while executing your ${fmt.highlightSecondary(`${testingType}.setupNodeEvents`)} function:
+      The error was thrown while executing your ${fmt.highlight(`${testingType}.setupNodeEvents()`)} function:
 
       ${fmt.stackTrace(err)}
     `

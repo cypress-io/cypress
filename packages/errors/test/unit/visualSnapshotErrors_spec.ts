@@ -665,7 +665,8 @@ describe('visual error templates', () => {
     },
     CONFIG_FILE_SETUP_NODE_EVENTS_ERROR: () => {
       return {
-        default: ['/path/to/pluginsFile', 'e2e', makeErr()],
+        default: ['/path/to/cypress.config.js', 'e2e', makeErr()],
+        component: ['/path/to/cypress.config.js', 'component', makeErr()],
       }
     },
     CONFIG_FILE_UNEXPECTED_ERROR: () => {
