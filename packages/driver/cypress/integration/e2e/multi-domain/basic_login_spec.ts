@@ -1,4 +1,4 @@
-// @ts-ignore / session support is needed for visiting about:blank between tests
+// @ts-nocheck / session support is needed for visiting about:blank between tests
 describe('basic login', { experimentalSessionSupport: true, experimentalMultiDomain: true }, () => {
   // Scenario, Token based auth. Visit site, redirect to IDP hosted on secondary domain, login and redirect back to site.
   describe('visit primary first', () => {
@@ -35,7 +35,7 @@ describe('basic login', { experimentalSessionSupport: true, experimentalMultiDom
       .should('equal', 'Welcome FJohnson')
     })
 
-    // TODO this test 'passes' but acts strangely by showing no log and fails the subsequent test
+    // TODO: this test 'passes' but acts strangely by showing no log and fails the subsequent test
     it.skip('visits foobar first', () => {
       cy.visit('http://www.foobar.com:3500/fixtures/auth/index.html') // Establishes Primary Domain
       cy.get('[data-cy="login"]').click() // Takes you to identityProvider.com
