@@ -411,7 +411,7 @@ describe('commands', { viewportWidth: 400, viewportHeight: 900 }, () => {
     })
   })
 
-  // FIXME: When studio support is introduced we can re-address this.
+  // FIXME: When studio support is re-introduced we can enable these tests.
   context.skip('studio commands', () => {
     beforeEach(() => {
       addCommand(runner, {

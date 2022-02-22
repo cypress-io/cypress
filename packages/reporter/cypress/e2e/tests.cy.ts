@@ -134,7 +134,7 @@ describe('tests', () => {
     })
   })
 
-  // FIXME: when studio is supported
+  // FIXME: When studio support is re-introduced we can enable these tests.
   describe.skip('studio', () => {
     describe('button', () => {
       it('displays studio icon with half transparency when hovering over test title', { scrollBehavior: false }, () => {

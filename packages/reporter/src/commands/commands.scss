@@ -9,14 +9,30 @@
     }
   }
 
-  // rendered within ../attempts/attempts.tsx
-  .no-commands {
-    background-color: $gray-1000;
-    border: 1px solid $gray-900;
-    border-radius: 3px;
-    box-shadow: inset 0 1px 1px rgba($white, 0.05);
-    min-height: 20px;
-    padding: 9px;
+  // System Command Styles
+  .command-type-system.command-is-event {
+    color: $gray-200;
+    font-style: unset;
+    font-weight: 700;
+    user-select: none;
+  }
+
+  // Event Styles
+  .command-is-event {
+    color: $gray-500;
+    font-style: italic;
+  }
+
+  // Child Styles
+  .command-type-child {
+    .command-method {
+      &:before {
+        float: left;
+        content: "-";
+        margin-right: 2px;
+        padding-left: 5px;
+      }
+    }
   }
 
   .command {
@@ -50,6 +66,11 @@
       .command-expander > path {
         stroke: $gray-500;
       }
+    }
+
+    .command-wrapper-text {
+      display: flex;
+      flex-wrap: wrap;
     }
 
     .command-interceptions {
@@ -102,18 +123,6 @@
       }
     }
 
-    .num-children,
-    .command-alias-count,
-    .command-interceptions-count {
-      background-color: $orange-700 !important;
-      border-radius: 5px;
-      color: $gray-400;
-      font-size: 90%;
-      font-style: normal;
-      line-height: 1;
-      margin-left: 0;
-    }
-
     .num-children.has-alias {
       border-radius: 10px;
       line-height: 1;
@@ -125,19 +134,22 @@
       border-radius: 0 10px 10px 0;
       padding: 2px 5px;
     }
-  }
 
-  // utilizing element size queries: https://github.com/marcj/css-element-queries
-  // styles take effect when width is greater than or equal to the specified amount
-  &[min-width~="300px"] {
-    .command-wrapper {
-      flex-wrap: nowrap;
+    .num-children,
+    .command-alias-count,
+    .command-interceptions-count {
+      background-color: $orange-700 !important;
+      border-radius: 5px;
+      color: $gray-400;
+      font-size: 90%;
+      font-style: normal;
+      line-height: 1;
+      margin-left: 0;
     }
   }
 
-  .command-wrapper-text {
-    display: flex;
-    flex-wrap: wrap;
+  .command-child-container {
+    margin-left: 10px;
   }
 
   .command-number-column {
@@ -209,36 +221,6 @@
     text-overflow: ellipsis;
   }
 
-  // Event Styles
-  .command-is-event.command-wrapper {
-    color: $gray-500;
-    font-style: italic;
-  }
-
-  // Child Styles
-  .command-type-child {
-    .command-method {
-      &:before {
-        float: left;
-        content: "-";
-        margin-right: 2px;
-        padding-left: 5px;
-      }
-    }
-  }
-
-  // System Command Styles
-  .command-type-system.command-is-event {
-    color: $gray-200;
-    font-style: unset;
-    font-weight: 700;
-    user-select: none;
-  }
-
-  .command-child-container {
-    margin-left: 10px;
-  }
-
   .command-method {
     padding: 1px 2px 0;
     display: inline-block;
@@ -248,7 +230,7 @@
   }
 
   // Command State Styles
-  .command-wrapper.command-state-pending {
+  .command-state-pending {
     border-left: 2px solid $indigo-800;
     background-color: $gray-900;
     cursor: default;
@@ -268,32 +250,32 @@
         }
       }
     }
-  }
 
-  .command-progress {
-    height: 2px;
-
-    span {
-      animation-fill-mode: forwards;
-      animation-iteration-count: 1;
-      animation-name: progress-bar;
-      animation-timing-function: linear;
-      background: $indigo-500;
-      display: block;
-      float: right;
-      height: 100%;
-      width: 100%;
-      transform-origin: right;
-
-      @keyframes progress-bar {
-        100% {
-          transform: scaleX(0);
+    .command-progress {
+      height: 2px;
+  
+      span {
+        animation-fill-mode: forwards;
+        animation-iteration-count: 1;
+        animation-name: progress-bar;
+        animation-timing-function: linear;
+        background: $indigo-500;
+        display: block;
+        float: right;
+        height: 100%;
+        width: 100%;
+        transform-origin: right;
+  
+        @keyframes progress-bar {
+          100% {
+            transform: scaleX(0);
+          }
         }
       }
     }
   }
 
-  .command-wrapper.command-state-failed {
+  .command-state-failed {
     border-left: 2px solid $fail;
     background-color: $err-header-background;
     color: $err-header-text;
@@ -303,7 +285,7 @@
     }
   }
 
-  .command-wrapper.command-state-warn {
+  .command-state-warn {
     font-style: unset;
     background-color: $warn-background;
     border-left: 2px solid $orange-700;
@@ -311,7 +293,8 @@
     &:hover {
       background-color: $warn-header-background;
     }
-     .command-method {
+
+    .command-method {
       color: $warn-text;
     }
   }
@@ -478,7 +461,7 @@
     cursor: pointer;
   }
 
-  .command-wrapper.command-is-pinned{
+  .command-is-pinned {
     background: $indigo-1000;
     border-left: 2px solid $pinned;
 
@@ -503,6 +486,16 @@
     .command-pin + .command-number {
       display: none
     }
+  }
+
+  // rendered within ../attempts/attempts.tsx
+  .no-commands {
+    background-color: $gray-1000;
+    border: 1px solid $gray-900;
+    border-radius: 3px;
+    box-shadow: inset 0 1px 1px rgba($white, 0.05);
+    min-height: 20px;
+    padding: 9px;
   }
 
   // additional styles on top of the shared.scss styles

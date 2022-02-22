@@ -14,7 +14,6 @@ function getRunnerHref (specPath: string) {
   return `#/specs/runner?file=${specPath}`
 }
 
-// FIXME: this is failing. IDK why. idc yet.
 describe('App: Index', () => {
   describe('Testing Type: E2E', () => {
     context('project with default spec pattern', () => {
