@@ -8,7 +8,6 @@ import $Cypress from '../cypress'
 import { $Cy } from '../cypress/cy'
 import $Commands from '../cypress/commands'
 import $Log from '../cypress/log'
-import $errUtils from '../cypress/error_utils'
 import { bindToListeners } from '../cy/listeners'
 import { SpecBridgeDomainCommunicator } from './communicator'
 import { handleDomainFn } from './domain_fn'
@@ -19,6 +18,7 @@ import { handleSpecWindowEvents } from './events/spec_window_events'
 import { handleErrorEvent } from './events/errors'
 import { handleScreenshots } from './events/screenshots'
 import { handleTestEvents } from './events/test_events'
+import { handleUnsupportedAPIs } from './unsupported_apis'
 
 const specBridgeCommunicator = new SpecBridgeDomainCommunicator()
 
@@ -72,6 +72,7 @@ const setup = (cypressConfig: Cypress.Config, env: Cypress.ObjectLike) => {
   handleSpecWindowEvents(cy)
   handleScreenshots(Cypress, specBridgeCommunicator)
   handleTestEvents(Cypress, specBridgeCommunicator)
+  handleUnsupportedAPIs(Cypress, cy)
 
   cy.onBeforeAppWindowLoad = onBeforeAppWindowLoad(Cypress, cy)
 
@@ -91,21 +92,6 @@ const setup = (cypressConfig: Cypress.Config, env: Cypress.ObjectLike) => {
   Cypress.on('url:changed', (url) => {
     specBridgeCommunicator.toPrimary('url:changed', url)
   })
-
-  // outlaw the use of `route` and `server` within the multi-domain context and Cypress.Server.* configurations
-  // @ts-ignore
-  cy.route = () => $errUtils.throwErrByPath('switchToDomain.route.unsupported')
-  // @ts-ignore
-  cy.server = () => $errUtils.throwErrByPath('switchToDomain.server.unsupported')
-  Cypress.Server = new Proxy(Cypress.Server, {
-    get: () => $errUtils.throwErrByPath('switchToDomain.Server.unsupported'),
-    // @ts-ignore
-    set: () => $errUtils.throwErrByPath('switchToDomain.Server.unsupported'),
-  })
-
-  // outlaw the use of Cypress.Cookies.* configurations, but allow other cy cookies methods to be used
-  // @ts-ignore
-  Cypress.Cookies.preserveOnce = () => $errUtils.throwErrByPath('switchToDomain.Cookies.preserveOnce.unsupported')
 
   return cy
 }
