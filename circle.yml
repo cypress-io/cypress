@@ -1292,7 +1292,7 @@ jobs:
         type: string
         default: medium
     resource_class: << parameters.resource_class >>
-    parallelism: 4
+    parallelism: 8
     steps:
       - run-new-ui-tests:
           browser: chrome
