@@ -1109,19 +1109,21 @@ export const AllCypressErrors = {
   },
   CT_NO_DEV_START_EVENT: (pluginsFilePath: string) => {
     const code = errPartial`
-      ${fmt.comment(`// ${pluginsFilePath}`)}
       module.exports = (on, config) => {
-        on('dev-server:start', () => startDevServer(...)
+        on('dev-server:start', () => {
+          ${fmt.comment('// start dev server here')}
+          return startDevServer(...)
+        }
       }`
 
     return errTemplate`\
-        To run component-testing, cypress needs the ${fmt.highlight(`dev-server:start`)} event.
+        To run component tests, Cypress needs you to configure the ${fmt.highlight(`dev-server:start`)} event.
 
-        Please implement it by adding this code to your ${fmt.highlightSecondary(`pluginsFile`)}.
+        Please update this file: ${fmt.path(pluginsFilePath)}
 
         ${fmt.code(code)}
 
-        See https://on.cypress.io/component-testing for help on setting up component testing.`
+        https://on.cypress.io/component-testing`
   },
   UNSUPPORTED_BROWSER_VERSION: (errorMsg: string) => {
     return errTemplate`${fmt.off(errorMsg)}`
@@ -1208,47 +1210,82 @@ export const AllCypressErrors = {
   },
 
   REMOVED_ROOT_CONFIG_OPTION: (errShape: BreakingErrResult) => {
+    const code = errPartial`
+      {
+        e2e: {
+          specPattern: '...',
+        },
+        component: {
+          specPattern: '...',
+        },
+      }`
+
     return errTemplate`\
-      The ${fmt.highlight(errShape.name)} configuration option was removed from the root of the Cypress config object in version 10.0.0.
-      
-      Please update this option under each testing type property.
+      The ${fmt.highlight(errShape.name)} configuration option is now invalid when set from the root of the config object in ${fmt.cypressVersion(`10.0.0`)}.
+
+      It is now configured separately as a testing type property: ${fmt.highlightSecondary(`e2e.${errShape.name}`)} and ${fmt.highlightSecondary(`component.${errShape.name}`)}
+
+      ${fmt.code(code)}
 
       https://on.cypress.io/migration-guide`
   },
 
   REMOVED_ROOT_CONFIG_OPTION_E2E: (errShape: BreakingErrResult) => {
+    const code = errPartial`
+      {
+        e2e: {
+          ${fmt.off(errShape.name)}: '...',
+        }
+      }`
+
     return errTemplate`\
-      The ${fmt.highlight(errShape.name)} configuration option was removed from the root of the Cypress config object in version 10.0.0.
-      
-      Please update this option under the e2e testing type property.
+      The ${fmt.highlight(errShape.name)} configuration option is now invalid when set from the root of the config object in ${fmt.cypressVersion(`10.0.0`)}.
+
+      It is now configured separately as a testing type property: ${fmt.highlightSecondary(`e2e.${errShape.name}`)}
+
+      ${fmt.code(code)}
 
       https://on.cypress.io/migration-guide`
   },
 
   CT_CONFIG_NOT_SUPPORTED: (errShape: BreakingErrResult) => {
+    const code = errPartial`
+      {
+        e2e: {
+          ${fmt.off(errShape.name)}: '...',
+        }
+      }`
+
     return errTemplate`\
-      The ${fmt.highlight(errShape.name)} configuration option is not valid in Component testing. 
-      
-      Please remove or add this option under e2e testing type property.
+      The ${fmt.highlight(`component.${errShape.name}`)} configuration option is not valid for component testing.
+
+      Please remove this option or add this as an e2e testing type property: ${fmt.highlightSecondary(`e2e.${errShape.name}`)}
+
+      ${fmt.code(code)}
 
       https://on.cypress.io/migration-guide`
   },
 
   COMPONENT_DEV_SERVER_IS_NOT_A_FUNCTION: (configFile: string, setupNodeEvents: any) => {
-    return errTemplate`\
-      The ${fmt.highlight(`component.devServer`)} method must be a function with the following signature:
-
-      ${fmt.code(`
-        devServer (cypressDevServerConfig, devServerConfig) {
-          // start dev server here
+    const code = errPartial`
+      {
+        component: {
+          devServer (cypressDevServerConfig, devServerConfig) {
+            ${fmt.comment(`// start dev server here`)
+          }
         }
-      `)}
-      
-      Instead, we saw: 
-      
+      }`
+
+    return errTemplate`\
+      Your ${fmt.highlightSecondary(`configFile`)} is invalid: ${fmt.path(configFilePath)}
+
+      The ${fmt.highlight(`component.devServer()`)} must be a function with the following signature:
+
+      ${fmt.code(code)}
+
+      Instead, we saw:
+
       ${fmt.stringify(setupNodeEvents)}
-      
-      This error is from: ${fmt.highlightSecondary(configFile)}
 
       Learn more: https://on.cypress.io/dev-server
     `
