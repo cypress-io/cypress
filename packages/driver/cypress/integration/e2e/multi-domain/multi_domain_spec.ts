@@ -178,8 +178,7 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
         done()
       })
 
-      cy.switchToDomain('foobar', () => {
-      })
+      cy.switchToDomain('foobar', () => undefined)
     })
 
     it('fails on a domain name with a sub domain', (done) => {
@@ -189,8 +188,7 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
         done()
       })
 
-      cy.switchToDomain('eu.foobar.com', () => {
-      })
+      cy.switchToDomain('eu.foobar.com', () => undefined)
     })
 
     it('errors passing non-array to callback function', (done) => {

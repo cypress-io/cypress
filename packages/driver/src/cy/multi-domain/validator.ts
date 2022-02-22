@@ -13,7 +13,7 @@ export class Validator {
   }
 
   validate ({ callbackFn, data, domain, done, doneReference }) {
-    if (typeof domain !== 'string' || !(isValidDomain(domain, { allowUnicode: true, subdomain: false }))) {
+    if (!isValidDomain(domain, { allowUnicode: true, subdomain: false })) {
       this.onFailure()
 
       $errUtils.throwErrByPath('switchToDomain.invalid_domain_argument', {
