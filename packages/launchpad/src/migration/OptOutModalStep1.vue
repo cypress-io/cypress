@@ -2,6 +2,7 @@
   <StandardModal
     :model-value="true"
     :title="t('migration.renameAuto.modals.title')"
+    @close="emit('cancel')"
   >
     <Alert
       status="warning"
@@ -20,7 +21,7 @@
       <MigrationListItem>
         {{ t('migration.renameAuto.modals.step1.line2') }}
         <CodeTag class="text-jade-500">
-          [dfldkfldkfldd
+          [filename].cy.[ext]
         </CodeTag>
       </MigrationListItem>
       <MigrationListItem>

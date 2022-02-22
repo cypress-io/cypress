@@ -504,7 +504,6 @@
   "migration": {
     "before": "Before",
     "after": "After",
-    "heresWhy": "here's why:",
     "renameAuto": {
       "title": "If you change your default spec pattern, here's what you'll get...",
       "changeButton": "change",
@@ -522,9 +521,9 @@
           "line3": "Your E2E test naming will be consistent with any component tests you can create in the future.",
           "line4": "All documentation and example code will be using: ",
           "line5": "We've changed the placement of component specs to be next to their source files (e.g. src/Button.jsx and src/Button.cy.jsx)",
-          "line6": "Using `*.cy.*` ensures your tests (component or E2E) don't collide with your unit tests (e.g. Jest or Vitest).",
-          "buttonProceed": "Continue, please rename my specs to end in `*.cy.*`",
-          "buttonCancel": "Cancel, if I want to, I can change my spec pattern later"
+          "line6": "Using *.cy.* ensures your tests (component or E2E) don't collide with your unit tests (e.g. Jest or Vitest).",
+          "buttonProceed": "Continue, please rename my specs to end in *.cy.*",
+          "buttonCancel": "Cancel, keep the default extension"
         },
         "step2": {
           "warning": "You may need to change your specPattern later if you don't use the recommended filename extension.",

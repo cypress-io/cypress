@@ -2,6 +2,7 @@
   <StandardModal
     :model-value="true"
     :title="t('migration.renameAuto.modals.title')"
+    @close="emit('cancel')"
   >
     <Alert
       status="warning"

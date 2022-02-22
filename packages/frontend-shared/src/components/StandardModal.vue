@@ -62,6 +62,7 @@ import { defaultMessages } from '@cy/i18n'
 
 const emit = defineEmits<{
   (event: 'update:modelValue', value: boolean): void
+  (event: 'close'): void
 }>()
 
 const props = withDefaults(defineProps<{
@@ -87,6 +88,7 @@ const setIsOpen = (val: boolean) => {
 }
 
 const closeModal = () => {
+  emit('close')
   setIsOpen(false)
 }
 </script>
