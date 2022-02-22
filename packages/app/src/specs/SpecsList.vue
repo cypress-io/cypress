@@ -4,6 +4,7 @@
       v-model="search"
       class="pb-32px"
       :result-count="specs.length"
+      :spec-count="cachedSpecs.length"
       @show-create-spec-modal="emit('showCreateSpecModal')"
       @show-spec-pattern-modal="showSpecPatternModal = true"
     />
@@ -15,7 +16,7 @@
     />
     <div
       v-if="specs.length"
-      class="grid grid-cols-2 children:font-medium children:text-gray-800 "
+      class="mb-4 grid grid-cols-2 children:font-medium children:text-gray-800 "
     >
       <div
         class="flex items-center justify-between"
@@ -56,6 +57,7 @@
               :key="row.data.data?.absolute"
               class="focus:outline-transparent"
               :to="{ path: '/specs/runner', query: { file: row.data.data?.relative } }"
+              data-cy="spec-item-link"
               @click.meta.prevent="handleCtrlClick"
               @click.ctrl.prevent="handleCtrlClick"
             >
@@ -63,7 +65,7 @@
                 :file-name="row.data.data?.fileName || row.data.name"
                 :extension="row.data.data?.specFileExtension || ''"
                 :indexes="row.data.data?.fileIndexes"
-                :style="{ paddingLeft: `${((row.data.depth - 2) * 10) + 16 + 22}px` }"
+                :style="{ paddingLeft: `${((row.data.depth - 2) * 10) + 22}px` }"
               />
             </RouterLink>
 
@@ -72,7 +74,7 @@
               :name="row.data.name"
               :expanded="treeSpecList[row.index].expanded.value"
               :depth="row.data.depth - 2"
-              :style="{ paddingLeft: `${((row.data.depth - 2) * 10) + 16}px` }"
+              :style="{ paddingLeft: `${(row.data.depth - 2) * 10}px` }"
               :indexes="getDirIndexes(row.data)"
               :aria-controls="getIdIfDirectory(row)"
               @click="row.data.toggle"

@@ -1,4 +1,5 @@
 import { defineConfig } from 'cypress'
+import { devServer } from '@cypress/webpack-dev-server'
 
 export default defineConfig({
   'viewportWidth': 500,
@@ -13,7 +14,6 @@ export default defineConfig({
   'component': {
     excludeSpecPattern: 'examples/**/*',
     devServer (cypressDevServerConfig) {
-      const { startDevServer } = require('@cypress/webpack-dev-server')
       const webpackConfig = require('./webpack.config')
 
       if (!webpackConfig.resolve) {
@@ -25,7 +25,7 @@ export default defineConfig({
         '@vue/compiler-core$': '@vue/compiler-core/dist/compiler-core.cjs.js',
       }
 
-      return startDevServer({ options: cypressDevServerConfig, webpackConfig })
+      return devServer(cypressDevServerConfig, { webpackConfig })
     },
     setupNodeEvents (on, config) {
       require('@cypress/code-coverage/task')(on, config)

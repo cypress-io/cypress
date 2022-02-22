@@ -28,6 +28,9 @@
       </MigrationListItem>
       <MigrationListItem>
         {{ t('migration.renameAuto.modals.step1.line4') }}
+        <CodeTag class="text-jade-500">
+          [filename].cy.[ext]
+        </CodeTag>
       </MigrationListItem>
       <MigrationListItem>
         <i18n-t
@@ -39,10 +42,21 @@
           </CodeTag>
         </i18n-t>
       </MigrationListItem>
+      <MigrationListItem>
+        <i18n-t
+          scope="global"
+          keypath="migration.renameAuto.modals.step1.line6"
+        >
+          <CodeTag class="text-jade-500">
+            [filename].cy.[ext]
+          </CodeTag>
+        </i18n-t>
+      </MigrationListItem>
     </MigrationList>
     <template #footer>
       <div class="flex gap-16px">
         <Button
+          data-cy="migration-button-proceed"
           :suffix-icon="ArrowRightIcon"
           suffix-icon-class="w-16px h-16px icon-dark-white"
           @click="emit('proceed')"

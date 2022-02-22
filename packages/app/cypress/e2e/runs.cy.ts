@@ -50,7 +50,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
     it('if logged in and connected', { viewportWidth: 1200 }, () => {
       cy.loginUser()
-      cy.visitApp()
+      cy.__incorrectlyVisitAppWithIntercept()
       cy.intercept('mutation-ExternalLink_OpenExternal', { 'data': { 'openExternal': true } }).as('OpenExternal')
 
       cy.get('[href="#/runs"]').click()
@@ -161,17 +161,15 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
         return obj.result
       })
-
-      cy.visitApp()
-
-      cy.get('[href="#/runs"]').click()
     })
 
     it('if project Id is specified in config file that is not accessible, shows call to action', () => {
+      cy.visitApp('/runs')
       cy.findByText(defaultMessages.runs.errors.unauthorized.button).should('be.visible')
     })
 
     it('clicking on the call to action should call the mutation', () => {
+      cy.__incorrectlyVisitAppWithIntercept('/runs')
       cy.intercept('mutation-RunsErrorRenderer_RequestAccess').as('RequestAccess')
       cy.findByText(defaultMessages.runs.errors.unauthorized.button).click()
       cy.wait('@RequestAccess').then((interception: Interception) => {
@@ -334,7 +332,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
     it('opens the run page if a run is clicked', () => {
       cy.loginUser()
-      cy.visitApp()
+      cy.__incorrectlyVisitAppWithIntercept()
       cy.get('[href="#/runs"]').click()
       cy.intercept('mutation-ExternalLink_OpenExternal', { 'data': { 'openExternal': true } }).as('OpenExternal')
       cy.get('[data-cy^="runCard-"]').first().click()

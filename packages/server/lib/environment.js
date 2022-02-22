@@ -66,6 +66,10 @@ try {
   // https://github.com/cypress-io/cypress/issues/15814
   app.commandLine.appendSwitch('disable-dev-shm-usage')
 
+  // prevent navigation throttling when navigating in the browser rapid fire
+  // https://github.com/cypress-io/cypress/pull/20271
+  app.commandLine.appendSwitch('disable-ipc-flooding-protection')
+
   if (os.platform() === 'linux') {
     app.disableHardwareAcceleration()
   }

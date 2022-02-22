@@ -1,36 +1,19 @@
-import type { e2eProjectDirs } from '@packages/frontend-shared/cypress/e2e/support/e2eProjectDirs'
 import {
   getSpecs,
   applyMigrationTransform,
   MigrationSpec,
 } from '../../../../src/sources/migration/autoRename'
 import { expect } from 'chai'
-import tempDir from 'temp-dir'
 import path from 'path'
 import fs from 'fs-extra'
 import { MigrationFile } from '../../../../src/sources'
+import { scaffoldMigrationProject } from '../../helper'
 
-function scaffoldMigrationProject (project: typeof e2eProjectDirs[number]) {
-  const tmpDir = path.join(tempDir, 'cy-projects')
-  const testProject = path.join(__dirname, '..', '..', '..', '..', '..', '..', 'system-tests', 'projects', project)
-  const cwd = path.join(tmpDir, project)
-
-  try {
-    fs.rmSync(cwd, { recursive: true, force: true })
-  } catch (e) {
-    /* eslint-disable no-console */
-    console.error(`error, could not remove ${cwd}`, e.message)
-  }
-
-  fs.copySync(testProject, cwd, { recursive: true })
-
-  return cwd
-}
 describe('getSpecs', () => {
   it('handles custom folders', async () => {
     // CASE 1: E2E + CT, custom folders, default test files
     // We want to rename specs, but keep current folders.
-    const cwd = scaffoldMigrationProject('migration-e2e-component-default-test-files')
+    const cwd = await scaffoldMigrationProject('migration-e2e-component-default-test-files')
     const json = fs.readJsonSync(path.join(cwd, 'cypress.json'))
 
     const actual = await getSpecs(cwd, json)
@@ -57,7 +40,7 @@ describe('getSpecs', () => {
   it('handles default folder and custom testFiles', async () => {
     // CASE 1: E2E + CT, custom folders, default test files
     // We want to rename specs, but keep current folders.
-    const cwd = scaffoldMigrationProject('migration')
+    const cwd = await scaffoldMigrationProject('migration')
     const json = fs.readJsonSync(path.join(cwd, 'cypress.json'))
 
     const actual = await getSpecs(cwd, json)
@@ -126,7 +109,7 @@ describe('getSpecs', () => {
   it('handles default folders', async () => {
     // CASE 1: E2E + CT, custom folders, default test files
     // We want to rename specs, but keep current folders.
-    const cwd = scaffoldMigrationProject('migration-e2e-component-default-everything')
+    const cwd = await scaffoldMigrationProject('migration-e2e-component-default-everything')
     const json = fs.readJsonSync(path.join(cwd, 'cypress.json'))
 
     const actual = await getSpecs(cwd, json)

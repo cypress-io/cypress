@@ -99,7 +99,7 @@ export const mutation = mutationType({
     t.field('completeSetup', {
       type: 'Query',
       resolve: async (_, args, ctx) => {
-        ctx.actions.wizard.completeSetup()
+        await ctx.actions.wizard.completeSetup()
 
         return {}
       },
@@ -130,8 +130,18 @@ export const mutation = mutationType({
       args: {
         testingType: nonNull(arg({ type: TestingTypeEnum })),
       },
-      resolve: (source, args, ctx) => {
+      resolve: async (source, args, ctx) => {
         ctx.actions.project.setCurrentTestingType(args.testingType)
+
+        // if necessary init the wizard for configuration
+        if (ctx.coreData.currentTestingType
+          && !ctx.lifecycleManager.isTestingTypeConfigured(ctx.coreData.currentTestingType)) {
+          try {
+            await ctx.actions.wizard.initialize()
+          } catch (e) {
+            ctx.coreData.baseError = e as Error
+          }
+        }
 
         return {}
       },
@@ -212,6 +222,7 @@ export const mutation = mutationType({
 
     t.field('login', {
       type: Query,
+      slowLogThreshold: false,
       description: 'Auth with Cypress Cloud',
       resolve: async (_, args, ctx) => {
         await ctx.actions.auth.login()
@@ -329,6 +340,16 @@ export const mutation = mutationType({
       },
     })
 
+    t.nonNull.field('resetAuthState', {
+      type: Query,
+      description: 'Reset the Auth State',
+      resolve (_, args, ctx) {
+        ctx.actions.auth.resetAuthState()
+
+        return ctx.appData
+      },
+    })
+
     t.nonNull.field('resetWizard', {
       type: 'Boolean',
       description: 'Reset the Wizard to the starting position',
@@ -350,6 +371,16 @@ export const mutation = mutationType({
       },
     })
 
+    t.nonNull.field('resetLatestVersionTelemetry', {
+      type: 'Boolean',
+      description: 'Resets the latest version call to capture additional telemetry for the current user',
+      resolve: async (_, args, ctx) => {
+        ctx.actions.versions.resetLatestVersionTelemetry()
+
+        return true
+      },
+    })
+
     t.nonNull.field('focusActiveBrowserWindow', {
       type: 'Boolean',
       description: 'Sets focus to the active browser window',
@@ -364,7 +395,8 @@ export const mutation = mutationType({
       type: 'Boolean',
       description: 'show the launchpad windows',
       resolve: async (_, args, ctx) => {
-        await ctx.actions.project.reconfigureProject(true)
+        ctx.actions.project.setForceReconfigureProjectByTestingType({ forceReconfigureProject: true })
+        await ctx.actions.project.reconfigureProject()
 
         return true
       },
@@ -476,6 +508,30 @@ export const mutation = mutationType({
       },
     })
 
+    t.field('migrateRenameSpecsFolder', {
+      description: 'When the user decides to skip specs rename',
+      type: Query,
+      resolve: async (_, args, ctx) => {
+        try {
+          await ctx.actions.migration.renameSpecsFolder()
+        } catch (error) {
+          const e = error as Error
+
+          const message = e.message === 'dest already exists.' ? 'e2e folder already exists.' : e.message
+
+          ctx.coreData.baseError = {
+            title: 'Spec Folder Migration Error',
+            message,
+            stack: e.stack,
+          }
+        }
+
+        await ctx.actions.migration.nextStep()
+
+        return {}
+      },
+    })
+
     t.field('migrateSkipManualRename', {
       description: 'While migrating to 10+ skip manual rename step',
       type: Query,
@@ -483,6 +539,16 @@ export const mutation = mutationType({
         await ctx.actions.migration.nextStep()
 
         return {}
+      },
+    })
+
+    t.field('migrateCloseManualRenameWatcher', {
+      description: 'While migrating to 10+ skip manual rename step',
+      type: 'Boolean',
+      resolve: async (_, args, ctx) => {
+        await ctx.actions.migration.closeManualRenameWatcher()
+
+        return true
       },
     })
 
@@ -520,6 +586,7 @@ export const mutation = mutationType({
     t.field('migrateConfigFile', {
       description: 'Transforms cypress.json file into cypress.config.js file',
       type: Query,
+      slowLogThreshold: 5000, // This mutation takes a little time
       resolve: async (_, args, ctx) => {
         try {
           await ctx.actions.migration.createConfigFile()
@@ -589,6 +656,25 @@ export const mutation = mutationType({
         ctx.project.setRelaunchBrowser(true)
         ctx.actions.project.setCurrentTestingType(args.testingType)
         await ctx.actions.project.reconfigureProject()
+
+        return true
+      },
+    })
+
+    t.field('setTestingTypeAndReconfigureProject', {
+      description: 'Set the selected testing type, and reconfigure the project',
+      type: Query,
+      args: {
+        testingType: nonNull(arg({ type: TestingTypeEnum })),
+        isApp: nonNull(booleanArg()),
+      },
+      resolve: async (source, args, ctx) => {
+        ctx.actions.project.setForceReconfigureProjectByTestingType({ forceReconfigureProject: true, testingType: args.testingType })
+        ctx.actions.project.setCurrentTestingType(args.testingType)
+
+        if (args.isApp) {
+          await ctx.actions.project.reconfigureProject()
+        }
 
         return true
       },

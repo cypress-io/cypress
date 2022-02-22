@@ -2,6 +2,7 @@ import 'regenerator-runtime/runtime'
 import 'cypress-real-events/support'
 import '@percy/cypress'
 import './storybook'
+import 'normalize.css/normalize.css'
 
 // Need to register these once per app. Depending which components are consumed
 // from @cypress/design-system, different icons are required.

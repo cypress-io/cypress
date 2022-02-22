@@ -1,5 +1,6 @@
 import type { Socket } from '@packages/socket/lib/browser'
 import type MobX from 'mobx'
+import type { EventManager } from './src/runner/event-manager'
 
 export {}
 
@@ -18,20 +19,9 @@ export {}
  */
 declare global {
   interface Window {
-    ws: Socket
-
+    ws?: Socket
+    getEventManager: () => EventManager
     UnifiedRunner: {
-      /**
-       * decode config, which we receive as a base64 string
-       * This comes from Driver.utils
-       */
-      decodeBase64: (base64: string) => Record<string, unknown>
-
-      /**
-       * Proxy event to the reporter via `Reporter.defaultEvents.emit`
-       */
-      emit (evt: string, ...args: unknown[]): void
-
       /**
        * This is the config served from the back-end.
        * We will manage config using GraphQL going forward,
@@ -52,11 +42,7 @@ declare global {
        */
       React: any
       ReactDOM: any
-      logger: any
       dom: any
-      visitFailure: any
-      blankContents: any
-      _: any // lodash
       CypressJQuery: any
 
       MobX: typeof MobX
