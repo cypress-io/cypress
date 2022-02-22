@@ -1159,9 +1159,9 @@ export const AllCypressErrors = {
 
       We found the following files:
 
-      Your supportFile is set to ${fmt.highlight(arg1)}, and we found ${fmt.highlightSecondary(arg2)}
+      ${fmt.listItems(arg2)}
 
-      Correct your supportFile config or merge the files into one.`
+      Please remove or combine the support files into a single file.`
   },
 
   CONFIG_FILE_MIGRATION_NEEDED: (projectRoot: string) => {
