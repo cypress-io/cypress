@@ -4,7 +4,7 @@ import type { Bundler, PkgJson, FrontendFramework } from './types'
 import { CODE_GEN_FRAMEWORKS, FRONTEND_FRAMEWORK_CATEGORIES, STORYBOOK_DEPS } from './constants'
 
 interface DetectFramework {
-  framework: FrontendFramework
+  framework?: FrontendFramework
   bundler?: Bundler['type']
 }
 
@@ -41,7 +41,7 @@ interface Detector {
 // If we don't find a specific framework, but we do find a library and/or
 // bunlder, we return both the framework, which might just be "React",
 // and the bundler, which could be Vite.
-export function detect (pkg: PkgJson): DetectFramework | undefined {
+export function detect (pkg: PkgJson): DetectFramework {
   const inPkgJson = (detector: Detector) => {
     const vers = pkg.dependencies?.[detector.dependency] || pkg.devDependencies?.[detector.dependency]
     const found = (vers && satisfies(vers, detector.version)) ?? false
@@ -66,28 +66,35 @@ export function detect (pkg: PkgJson): DetectFramework | undefined {
   }
 
   // if not a template, they probably just installed/configured on their own.
-  for (const framework of FRONTEND_FRAMEWORKS.filter((x) => x.family === 'library')) {
+  for (const library of FRONTEND_FRAMEWORKS.filter((x) => x.family === 'library')) {
     // multiple bundlers supported, eg React works with webpack and Vite.
     // try to infer which one they are using.
-    for (const bundler of bundlers) {
-      const b = [...bundler.detectors].every(inPkgJson)
+    const hasLibrary = [...library.detectors].every(inPkgJson)
 
-      if (b) {
+    for (const bundler of bundlers) {
+      const hasBundler = [...bundler.detectors].every(inPkgJson)
+
+      if (hasLibrary && hasBundler) {
         return {
-          framework,
+          framework: library,
           bundler: bundler.type,
         }
       }
-    }
 
-    // unknown bundler, or we couldn't detect it
-    // just return the framework, leave the rest to the user.
-    return {
-      framework,
+      if (hasLibrary) {
+        // unknown bundler, or we couldn't detect it
+        // just return the framework, leave the rest to the user.
+        return {
+          framework: library,
+        }
+      }
     }
   }
 
-  return undefined
+  return {
+    framework: undefined,
+    bundler: undefined,
+  }
 }
 
 export const FRONTEND_FRAMEWORKS = [
