@@ -162,13 +162,35 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
 
     it('errors if passed a non-string for the domain argument', (done) => {
       cy.on('fail', (err) => {
-        expect(err.message).to.equal('`cy.switchToDomain()` requires the first argument to be a string. You passed: ``')
+        expect(err.message).to.equal('`cy.switchToDomain()` requires the first argument to be a string representing a domain that does not not include any sub domains. You passed: ``')
 
         done()
       })
 
       // @ts-ignore
       cy.switchToDomain()
+    })
+
+    it('fails on a bad domain name', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.equal('`cy.switchToDomain()` requires the first argument to be a string representing a domain that does not not include any sub domains. You passed: `foobar`')
+
+        done()
+      })
+
+      cy.switchToDomain('foobar', () => {
+      })
+    })
+
+    it('fails on a domain name with a sub domain', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.equal('`cy.switchToDomain()` requires the first argument to be a string representing a domain that does not not include any sub domains. You passed: `eu.foobar.com`')
+
+        done()
+      })
+
+      cy.switchToDomain('eu.foobar.com', () => {
+      })
     })
 
     it('errors passing non-array to callback function', (done) => {

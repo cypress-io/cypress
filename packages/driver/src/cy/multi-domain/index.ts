@@ -1,5 +1,4 @@
 import Bluebird from 'bluebird'
-import isValidDomain from 'is-valid-domain'
 import $errUtils from '../../cypress/error_utils'
 import { CommandsManager } from './commands_manager'
 import { LogsManager } from './logs_manager'
@@ -43,10 +42,6 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
 
       if (!config('experimentalMultiDomain')) {
         $errUtils.throwErrByPath('switchToDomain.experiment_not_enabled')
-      }
-
-      if (_.isString(domain) && !(isValidDomain(domain, { allowUnicode: true, subdomain: false }))) {
-        throw 'bad domain name'
       }
 
       let done

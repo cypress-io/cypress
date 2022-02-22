@@ -1,6 +1,7 @@
 import type $Log from '../../cypress/log'
 import $utils from '../../cypress/utils'
 import $errUtils from '../../cypress/error_utils'
+import isValidDomain from 'is-valid-domain'
 
 export class Validator {
   log: typeof $Log
@@ -12,7 +13,7 @@ export class Validator {
   }
 
   validate ({ callbackFn, data, domain, done, doneReference }) {
-    if (typeof domain !== 'string') {
+    if (typeof domain !== 'string' || !(isValidDomain(domain, { allowUnicode: true, subdomain: false }))) {
       this.onFailure()
 
       $errUtils.throwErrByPath('switchToDomain.invalid_domain_argument', {
