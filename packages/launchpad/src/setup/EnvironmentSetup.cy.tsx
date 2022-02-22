@@ -29,6 +29,10 @@ describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
         return 'react-logo'
       }
 
+      if (frameworkName.includes('Nuxt')) {
+        return 'nuxtjs-logo'
+      }
+
       if (frameworkName.includes('Vue')) {
         return 'vue-logo'
       }
