@@ -108,6 +108,11 @@ module.exports = defineConfig({
 
 ## Examples
 
+### Note
+The most current 'Getting Started' examples for various kinds of React projects are located in the [Cypress Component Testing Examples](https://github.com/cypress-io/cypress-component-testing-examples) repo. That is a good place to see different ways to get component testing up and running with your setup.
+
+The examples contained in this repo, and the external examples linked below, are most useful when you are already up and running with component testing in your project. They cover details about how to achieve particular testing goals such as visual testing, adding styles, using hooks, and how to use component testing in various other scenarios.
+
 ```js
 import React from 'react'
 import { mount } from '@cypress/react'
