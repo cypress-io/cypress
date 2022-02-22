@@ -12,7 +12,7 @@ describe('NextJS page', () => {
     cy.contains('.search-text', 'You are searching for: Cypress')
   })
 
-  it('It doesn\'t run the `.getInitialProps()`', () => {
+  it(`It doesn't run the .getInitialProps()`, () => {
     mount(<IndexPage />)
 
     cy.get('[data-testid="server-result"').should('not.exist')

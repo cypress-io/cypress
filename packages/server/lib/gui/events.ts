@@ -74,13 +74,13 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       // }
 
       // const onError = (err) => {
-      //   return bus.emit('project:error', errors.clone(err, { html: true }))
+      //   return bus.emit('project:error', errors.cloneErr(err, { html: true }))
       // }
 
       // const onWarning = function (warning) {
       //   warning.message = stripAnsi(warning.message)
 
-      //   return bus.emit('project:warning', errors.clone(warning, { html: true }))
+      //   return bus.emit('project:warning', errors.cloneErr(warning, { html: true }))
       // }
 
       // return browsers.getAllBrowsersWith(options.browser)
