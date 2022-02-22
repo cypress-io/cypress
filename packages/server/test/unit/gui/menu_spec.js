@@ -257,14 +257,14 @@ describe('gui/menu', function () {
       expect(getMenuItem('Developer Tools')).to.be.undefined
     })
 
-    it('does not exist by when withDevTools is false', () => {
-      menu.set({ withDevTools: false })
+    it('does not exist by when withInternalDevTools is false', () => {
+      menu.set({ withInternalDevTools: false })
       expect(getMenuItem('Developer Tools')).to.be.undefined
     })
 
-    describe('when withDevTools is true', () => {
+    describe('when withInternalDevTools is true', () => {
       beforeEach(function () {
-        menu.set({ withDevTools: true })
+        menu.set({ withInternalDevTools: true })
         this.devSubmenu = getMenuItem('Developer Tools').submenu
       })
 
@@ -301,7 +301,7 @@ describe('gui/menu', function () {
 
       it('sets shortcut for Toggle Developer Tools when not macOS', () => {
         os.platform.returns('linux')
-        menu.set({ withDevTools: true })
+        menu.set({ withInternalDevTools: true })
         expect(getMenuItem('Developer Tools').submenu[1].accelerator).to.equal('Ctrl+Shift+I')
       })
 
