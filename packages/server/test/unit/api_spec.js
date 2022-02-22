@@ -919,7 +919,6 @@ describe('lib/api', () => {
 
       return api.retryWithBackoff(fn)
       .then(() => {
-        console.log('gsd')
         expect(fn).to.be.calledTwice
         expect(fn.firstCall.args[0]).eq(0)
         expect(fn.secondCall.args[0]).eq(1)
@@ -1012,19 +1011,19 @@ describe('lib/api', () => {
         expect(errors.warning).to.be.calledThrice
         expect(errors.warning.firstCall.args[0]).to.eql('DASHBOARD_API_RESPONSE_FAILED_RETRYING')
         expect(errors.warning.firstCall.args[1]).to.eql({
-          delay: '30 seconds',
+          delay: 30000,
           tries: 3,
           response: err,
         })
 
         expect(errors.warning.secondCall.args[1]).to.eql({
-          delay: '1 minute',
+          delay: 60000,
           tries: 2,
           response: err,
         })
 
         expect(errors.warning.thirdCall.args[1]).to.eql({
-          delay: '2 minutes',
+          delay: 120000,
           tries: 1,
           response: err,
         })

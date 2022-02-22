@@ -1,7 +1,7 @@
 import debugModule from 'debug'
 import _ from 'lodash'
 import CRI from 'chrome-remote-interface'
-import errors from '../errors'
+import * as errors from '../errors'
 
 const debug = debugModule('cypress:server:browsers:cri-client')
 // debug using cypress-verbose:server:browsers:cri-client:send:*

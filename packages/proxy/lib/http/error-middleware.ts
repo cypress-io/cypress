@@ -1,10 +1,10 @@
 import debugModule from 'debug'
+import * as errors from '@packages/server/lib/errors'
+
 import type { HttpMiddleware } from '.'
 import type { Readable } from 'stream'
 import { InterceptError } from '@packages/net-stubbing'
 import type { Request } from '@cypress/request'
-import errors from '@packages/server/lib/errors'
-
 const debug = debugModule('cypress:proxy:http:error-middleware')
 
 export type ErrorMiddleware = HttpMiddleware<{
@@ -27,7 +27,7 @@ const SendToDriver: ErrorMiddleware = function () {
   if (this.req.browserPreRequest) {
     this.socket.toDriver('request:event', 'request:error', {
       requestId: this.req.browserPreRequest.requestId,
-      error: errors.clone(this.error),
+      error: errors.cloneErr(this.error),
     })
   }
 
