@@ -94,6 +94,8 @@ module.exports = {
 
   close: kill,
 
+  formatBrowsersToOptions: utils.formatBrowsersToOptions,
+
   _setInstance (_instance) {
     // for testing
     instance = _instance
