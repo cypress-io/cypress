@@ -10,3 +10,5 @@ export type Bundler = typeof BUNDLERS[number]
 export type CodeGenFramework = typeof CODE_GEN_FRAMEWORKS[number]
 
 export type FrontendFramework = typeof FRONTEND_FRAMEWORKS[number]
+
+export type PkgJson = { dependencies?: Record<string, string>, devDependencies?: Record<string, string> }
