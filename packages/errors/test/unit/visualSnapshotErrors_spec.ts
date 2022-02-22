@@ -653,7 +653,7 @@ describe('visual error templates', () => {
       const err = makeErr()
 
       return {
-        default: ['/path/to/pluginsFile', err],
+        default: ['/path/to/cypress.config.js', err],
       }
     },
     SETUP_NODE_EVENTS_IS_NOT_FUNCTION: () => {
@@ -673,7 +673,7 @@ describe('visual error templates', () => {
       const err = makeErr()
 
       return {
-        default: ['/path/to/configFile', err],
+        default: ['/path/to/cypress.config.js', err],
       }
     },
     PLUGINS_INVALID_EVENT_NAME_ERROR: () => {
@@ -681,7 +681,7 @@ describe('visual error templates', () => {
 
       return {
         default: [
-          '/path/to/configFile',
+          '/path/to/cypress.config.js',
           'invalid:event',
           ['foo', 'bar', 'baz'],
           err,
@@ -992,7 +992,7 @@ describe('visual error templates', () => {
     },
     EXPERIMENTAL_COMPONENT_TESTING_REMOVED: () => {
       return {
-        default: [{ configFile: '/path/to/configFile.json' }],
+        default: [{ configFile: '/path/to/cypress.config.js' }],
       }
     },
     EXPERIMENTAL_SHADOW_DOM_REMOVED: () => {
@@ -1073,17 +1073,17 @@ describe('visual error templates', () => {
     },
     CONFIG_FILE_INVALID_ROOT_CONFIG: () => {
       return {
-        default: [{ name: 'specPattern', configFile: '/path/to/configFile.ts' }],
+        default: [{ name: 'specPattern', configFile: '/path/to/cypress.config.js.ts' }],
       }
     },
     CONFIG_FILE_INVALID_ROOT_CONFIG_E2E: () => {
       return {
-        default: [{ name: 'baseUrl', configFile: '/path/to/configFile.ts' }],
+        default: [{ name: 'baseUrl', configFile: '/path/to/cypress.config.js.ts' }],
       }
     },
     CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_COMPONENT: () => {
       return {
-        default: [{ name: 'baseUrl', configFile: '/path/to/configFile.ts' }],
+        default: [{ name: 'baseUrl', configFile: '/path/to/cypress.config.js.ts' }],
       }
     },
     CONFIG_FILE_DEV_SERVER_IS_NOT_A_FUNCTION: () => {
