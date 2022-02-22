@@ -793,11 +793,10 @@ const systemTests = {
           return spec
         }
 
-        if (options.testingType === 'component') {
-          return path.join(projectPath, spec)
-        }
+        const specDir = options.specDir
+        || (options.testingType === 'component' ? '' : 'cypress/e2e')
 
-        return path.join(projectPath, 'cypress', 'e2e', spec)
+        return path.join(projectPath, specDir, spec)
       })
 
       // normalize the path to the spec
