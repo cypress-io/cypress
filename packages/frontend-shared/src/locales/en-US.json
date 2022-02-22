@@ -193,7 +193,8 @@
       "bodyInitial": "Logging in gives you access to the {0}. You can set up projects to be recorded and see test data from your project.",
       "bodySuccess": "You are now logged in as {0}.",
       "bodyError": "An error occurred while attempting to log in:",
-      "bodyBrowserError": "Cypress was unable to open your installed browser. To continue logging in, please paste this URL into your web browser:",
+      "bodyBrowserError": "The browser could not be opened.",
+      "bodyBrowserErrorDetails": "Cypress was unable to open your installed browser. To continue logging in, please paste this URL into your web browser:",
       "cloud": "Cypress Dashboard Service",
       "titleInitial": "Log in to Cypress",
       "titleSuccess": "Login Successful",
@@ -443,7 +444,7 @@
           "connectProject": "Connect project",
           "createProject": "Create project",
           "placeholderOrganizations": "Pick an organization",
-          "placeholderProjects": "Pick an project",
+          "placeholderProjects": "Pick a project",
           "placeholderProjectsPending": "Pick an organization first"
         },
         "connectManually": {
@@ -491,7 +492,7 @@
     "modalTitle": "Choose a testing type",
     "e2e": {
       "name": "E2E Testing",
-      "description": "Build and test the entire experience of your application from end-to-end to each ensure each flow matches your expectations."
+      "description": "Build and test the entire experience of your application from end-to-end to ensure each flow matches your expectations."
     },
     "component": {
       "name": "Component Testing",

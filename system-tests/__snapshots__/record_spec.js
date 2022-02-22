@@ -22,7 +22,7 @@ exports['e2e record passing passes 1'] = `
 
 Oops...we found an error preparing this test file:
 
-  cypress/e2e/record_error.cy.js
+  > cypress/e2e/record_error.cy.js
 
 The error was:
 
@@ -257,9 +257,9 @@ We dynamically generated a new test to display this failure.
 `
 
 exports['e2e record api interaction errors project 404 errors and exits 1'] = `
-We could not find a project with the ID: pid123
+We could not find a Dashboard project with the projectId: pid123
 
-This projectId came from your 'cypress-with-project-id.config.js' file or an environment variable.
+This projectId came from your cypress-with-project-id.config.js file or an environment variable.
 
 Please log into the Dashboard and find your project.
 
@@ -358,9 +358,9 @@ You passed the --record flag but did not provide us your Record Key.
 
 You can pass us your Record Key like this:
 
-  cypress run --record --key <record_key>
+  $ cypress run --record --key <record_key>
 
-You can also set the key as an environment variable with the name CYPRESS_RECORD_KEY.
+You can also set the key as an environment variable with the name: CYPRESS_RECORD_KEY
 
 https://on.cypress.io/how-do-i-record-runs
 
@@ -369,11 +369,11 @@ https://on.cypress.io/how-do-i-record-runs
 exports['e2e record projectId errors and exits without projectId 1'] = `
 You passed the --record flag but this project has not been setup to record.
 
-This project is missing the 'projectId' inside of 'cypress.config.js'.
+This project is missing the projectId inside of: cypress.config.js
 
 We cannot uniquely identify this project without this id.
 
-You need to setup this project to record. This will generate a unique 'projectId'.
+You need to setup this project to record. This will generate a unique projectId.
 
 Alternatively if you omit the --record flag this project will run without recording.
 
@@ -382,7 +382,7 @@ https://on.cypress.io/recording-project-runs
 `
 
 exports['e2e record api interaction errors recordKey and projectId errors and exits on 401 1'] = `
-Your Record Key f858a...ee7e1 is not valid with this project: pid123
+Your Record Key f858a...ee7e1 is not valid with this projectId: pid123
 
 It may have been recently revoked by you or another user.
 
@@ -552,20 +552,16 @@ exports['e2e record api interaction errors uploading assets warns but proceeds 1
 exports['e2e record misconfiguration errors and exits when no specs found 1'] = `
 Can't run because no spec files were found.
 
-We searched for any files matching this glob pattern:
+We searched for specs matching this glob pattern:
 
-cypress/e2e/notfound/**
-
-Relative to the project root folder:
-
-/foo/bar/.projects/e2e
+  > /foo/bar/.projects/e2e/cypress/e2e/notfound/**
 
 `
 
 exports['e2e record recordKey warns but does not exit when is forked pr 1'] = `
 Warning: It looks like you are trying to record this run from a forked PR.
 
-The 'Record Key' is missing. Your CI provider is likely not passing private environment variables to builds from forks.
+The Record Key is missing. Your CI provider is likely not passing private environment variables to builds from forks.
 
 These results will not be recorded.
 
@@ -731,7 +727,7 @@ exports['e2e record parallelization passes in parallel with group 2'] = `
 
 Oops...we found an error preparing this test file:
 
-  cypress/e2e/record_error.cy.js
+  > cypress/e2e/record_error.cy.js
 
 The error was:
 
@@ -1171,7 +1167,7 @@ StatusCodeError: 500 - "Internal Server Error"
 exports['e2e record recordKey warns but does not exit when is forked pr and parallel 1'] = `
 Warning: It looks like you are trying to record this run from a forked PR.
 
-The 'Record Key' is missing. Your CI provider is likely not passing private environment variables to builds from forks.
+The Record Key is missing. Your CI provider is likely not passing private environment variables to builds from forks.
 
 These results will not be recorded.
 
@@ -1454,6 +1450,7 @@ exports['e2e record api interaction warnings create run warnings unknown warning
 Warning from Cypress Dashboard: You are almost out of time
 
 Details:
+
 {
   "code": "OUT_OF_TIME",
   "name": "OutOfTime",
@@ -2639,14 +2636,17 @@ exports['e2e record empty specs succeeds when empty spec file 1'] = `
 `
 
 exports['e2e record misconfiguration errors and exits when no browser found 1'] = `
-The specified browser was not found on your system or is not supported by Cypress: \`browserDoesNotExist\`
+Can't run because you've entered an invalid browser name.
+
+Browser: browserDoesNotExist was not found on your system or is not supported by Cypress.
 
 Cypress supports the following browsers:
-- chrome
-- chromium
-- edge
-- electron
-- firefox
+ - electron
+ - chrome
+ - chromium
+ - chrome:canary
+ - edge
+ - firefox
 
 You can also use a custom browser: https://on.cypress.io/customize-browsers
 
@@ -2739,5 +2739,44 @@ exports['e2e record quiet mode respects quiet mode 1'] = `
   1 passing
   1 pending
 
+
+`
+
+exports['e2e record api interaction errors create run 412 errors and exits when request schema is invalid 1'] = `
+Recording this run failed because the request was invalid.
+
+request should follow postRunRequest@2.0.0 schema
+
+Errors:
+
+[
+  "data has additional properties: group, parallel, ciBuildId, tags, testingType, runnerCapabilities",
+  "data.platform is the wrong type"
+]
+
+Request Sent:
+
+{
+  "ci": null,
+  "specs": [
+    "cypress/e2e/record_pass.cy.js"
+  ],
+  "commit": null,
+  "group": null,
+  "platform": null,
+  "parallel": null,
+  "ciBuildId": null,
+  "projectId": "pid123",
+  "recordKey": "f858a2bc-b469-4e48-be67-0876339ee7e1",
+  "specPattern": "cypress/e2e/record_pass*",
+  "tags": [
+    ""
+  ],
+  "testingType": "e2e",
+  "runnerCapabilities": {
+    "dynamicSpecsInSerialMode": true,
+    "skipSpecAction": true
+  }
+}
 
 `

@@ -1,7 +1,7 @@
 import CRI from 'chrome-remote-interface'
 import Debug from 'debug'
 import { _connectAsync, _getDelayMsForRetry } from './protocol'
-import errors from '../errors'
+import * as errors from '../errors'
 import { create, CRIWrapper } from './cri-client'
 
 const HOST = '127.0.0.1'
@@ -36,7 +36,7 @@ const ensureLiveBrowser = async (port: number, browserName: string) => {
     await _connectAsync(connectOpts)
   } catch (err) {
     debug('failed to connect to CDP %o', { connectOpts, err })
-    errors.throw('CDP_COULD_NOT_CONNECT', port, err, browserName)
+    errors.throwErr('CDP_COULD_NOT_CONNECT', browserName, port, err)
   }
 }
 
@@ -94,7 +94,7 @@ export class BrowserCriClient {
     const minimum = getMajorMinorVersion(protocolVersion)
 
     if (!isVersionGte(actualVersion, minimum)) {
-      errors.throw('CDP_VERSION_TOO_OLD', protocolVersion, actualVersion)
+      errors.throwErr('CDP_VERSION_TOO_OLD', protocolVersion, actualVersion)
     }
   }
 

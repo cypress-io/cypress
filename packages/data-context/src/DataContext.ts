@@ -39,6 +39,7 @@ import { VersionsDataSource } from './sources/VersionsDataSource'
 import type { Socket, SocketIOServer } from '@packages/socket'
 import { globalPubSub } from '.'
 import { InjectedConfigApi, ProjectLifecycleManager } from './data/ProjectLifecycleManager'
+import type { CypressError } from '@packages/errors'
 
 const IS_DEV_ENV = process.env.CYPRESS_INTERNAL_ENV !== 'production'
 
@@ -48,12 +49,6 @@ export type CurrentProjectUpdater = (proj: Exclude<CoreDataShape['currentProject
 
 export interface InternalDataContextOptions {
   loadCachedProjects: boolean
-}
-
-export interface ErrorApiShape {
-  error: (type: string, ...args: any) => Error & { type: string, details: string, code?: string, isCypressErr: boolean}
-  message: (type: string, ...args: any) => string
-  warning: (type: string, ...args: any) => null
 }
 
 export interface DataContextConfig {
@@ -68,7 +63,6 @@ export interface DataContextConfig {
   appApi: AppApiShape
   localSettingsApi: LocalSettingsApiShape
   authApi: AuthApiShape
-  errorApi: ErrorApiShape
   configApi: InjectedConfigApi
   projectApi: ProjectApiShape
   electronApi: ElectronApiShape
@@ -315,7 +309,6 @@ export class DataContext {
       browserApi: this._config.browserApi,
       configApi: this._config.configApi,
       projectApi: this._config.projectApi,
-      errorApi: this._config.errorApi,
       electronApi: this._config.electronApi,
       localSettingsApi: this._config.localSettingsApi,
     }
@@ -366,14 +359,14 @@ export class DataContext {
     }
   }
 
-  onWarning = (err: { message: string, type?: string, details?: string }) => {
+  onWarning = (err: CypressError) => {
     if (this.isRunMode) {
       // eslint-disable-next-line
       console.log(chalk.yellow(err.message))
     } else {
       this.coreData.warnings.push({
         title: `Warning: ${s.titleize(s.humanize(err.type ?? ''))}`,
-        message: err.message,
+        message: err.messageMarkdown || err.message,
         details: err.details,
       })
 
@@ -453,14 +446,6 @@ export class DataContext {
     } else {
       throw new Error(`Missing DataContext config "mode" setting, expected run | open`)
     }
-  }
-
-  error (type: string, ...args: any[]) {
-    return this._apis.errorApi.error(type, ...args)
-  }
-
-  warning (type: string, ...args: any[]) {
-    return this._apis.errorApi.error(type, ...args)
   }
 
   private async initializeOpenMode () {
