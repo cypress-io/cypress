@@ -1,6 +1,6 @@
 import os from 'os'
 import type { ResolvedFromConfig, RESOLVED_FROM, FoundSpec } from '@packages/types'
-import { FrontendFramework, FRONTEND_FRAMEWORKS, } from '@packages/scaffold-config'
+import { FrontendFramework, FRONTEND_FRAMEWORKS } from '@packages/scaffold-config'
 import { scanFSForAvailableDependency } from 'create-cypress-tests'
 import minimatch from 'minimatch'
 import { debounce, isEqual } from 'lodash'
@@ -262,7 +262,7 @@ export class ProjectDataSource {
 
   private guessFramework (projectRoot: string) {
     const guess = FRONTEND_FRAMEWORKS.find((framework) => {
-      const lookingForDeps = framework.detectors.map(x => x.dependency).reduce(
+      const lookingForDeps = framework.detectors.map((x) => x.dependency).reduce(
         (acc, dep) => ({ ...acc, [dep]: '*' }),
         {},
       )

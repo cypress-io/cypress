@@ -1,6 +1,7 @@
-import type { AllPackages } from "./types"
+import type { AllPackages } from './types'
 
 export const CODE_GEN_FRAMEWORKS = ['react', 'vue'] as const
+
 export const FRONTEND_FRAMEWORK_CATEGORIES = ['react', 'vue'] as const
 
 export const PACKAGES_DESCRIPTIONS: Record<AllPackages, string> = {
