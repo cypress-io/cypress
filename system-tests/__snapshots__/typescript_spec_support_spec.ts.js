@@ -82,7 +82,7 @@ exports['e2e typescript in spec and support file spec fails with syntax error 1'
 
 Oops...we found an error preparing this test file:
 
-  cypress/e2e/typescript_syntax_error.cy.ts
+  > cypress/e2e/typescript_syntax_error.cy.ts
 
 The error was:
 

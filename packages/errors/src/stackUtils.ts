@@ -1,6 +1,9 @@
 import _ from 'lodash'
+import type { ErrorLike } from './errorTypes'
 
 const stackLineRegex = /^\s*(at )?.*@?\(?.*\:\d+\:\d+\)?$/
+
+type MessageLines = [string[], string[]] & {messageEnded?: boolean}
 
 // returns tuple of [message, stack]
 export const splitStack = (stack: string) => {
@@ -15,24 +18,28 @@ export const splitStack = (stack: string) => {
     }
 
     return memo
-  }, [[], []] as any[] & {messageEnded: boolean})
+  }, [[], []] as MessageLines)
 }
 
-export const unsplitStack = (messageLines, stackLines) => {
+export const unsplitStack = (messageLines: string | string[], stackLines: string[]) => {
   return _.castArray(messageLines).concat(stackLines).join('\n')
 }
 
-export const getStackLines = (stack) => {
+export const getStackLines = (stack: string) => {
   const [, stackLines] = splitStack(stack)
 
   return stackLines
 }
 
-export const stackWithoutMessage = (stack) => {
+/**
+ * Takes the stack and returns only the lines that contain stack-frame like entries,
+ * matching the `stackLineRegex` above
+ */
+export const stackWithoutMessage = (stack: string) => {
   return getStackLines(stack).join('\n')
 }
 
-export const replacedStack = (err, newStack) => {
+export const replacedStack = (err: ErrorLike, newStack: string) => {
   // if err already lacks a stack or we've removed the stack
   // for some reason, keep it stackless
   if (!err.stack) return err.stack

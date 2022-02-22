@@ -78,6 +78,7 @@ describe('e2e config', () => {
 
   it('throws error when multiple default config file are found in project', async function () {
     await Fixtures.scaffoldProject('pristine-with-e2e-testing')
+
     const projectRoot = Fixtures.projectPath('pristine-with-e2e-testing')
 
     return fs.writeFile(path.join(projectRoot, 'cypress.config.ts'), 'export default {}').then(() => {
@@ -91,6 +92,7 @@ describe('e2e config', () => {
 
   it('throws error when cypress.json is found in project and need migration', async function () {
     await Fixtures.scaffoldProject('pristine')
+
     const projectRoot = Fixtures.projectPath('pristine')
 
     return fs.writeFile(path.join(projectRoot, 'cypress.json'), '{}').then(() => {
@@ -104,7 +106,6 @@ describe('e2e config', () => {
 
   it('throws error when cypress.json is found in project and cypress.config.{ts|js} exists as well', async function () {
     await Fixtures.scaffoldProject('multiple-config-files-with-json')
-    Fixtures.projectPath('multiple-config-files-with-json')
 
     return systemTests.exec(this, {
       project: 'multiple-config-files-with-json',
@@ -115,7 +116,6 @@ describe('e2e config', () => {
 
   it('throws an error if supportFile is set on the root level', async function () {
     await Fixtures.scaffoldProject('invalid-root-level-config')
-    Fixtures.projectPath('invalid-root-level-config')
 
     return systemTests.exec(this, {
       project: 'invalid-root-level-config',
@@ -127,7 +127,6 @@ describe('e2e config', () => {
 
   it('throws an error if specPattern is set on the root level', async function () {
     await Fixtures.scaffoldProject('invalid-root-level-config')
-    Fixtures.projectPath('invalid-root-level-config')
 
     return systemTests.exec(this, {
       project: 'invalid-root-level-config',
@@ -139,7 +138,6 @@ describe('e2e config', () => {
 
   it('throws an error if excludeSpecPattern is set on the root level', async function () {
     await Fixtures.scaffoldProject('invalid-root-level-config')
-    Fixtures.projectPath('invalid-root-level-config')
 
     return systemTests.exec(this, {
       project: 'invalid-root-level-config',
@@ -151,7 +149,6 @@ describe('e2e config', () => {
 
   it('throws an error if baseUrl is set on the root level', async function () {
     await Fixtures.scaffoldProject('invalid-root-level-config')
-    Fixtures.projectPath('invalid-root-level-config')
 
     return systemTests.exec(this, {
       project: 'invalid-root-level-config',
@@ -163,7 +160,6 @@ describe('e2e config', () => {
 
   it('throws an error if baseUrl is set on the component level', async function () {
     await Fixtures.scaffoldProject('invalid-root-level-config')
-    Fixtures.projectPath('invalid-root-level-config')
 
     return systemTests.exec(this, {
       project: 'invalid-root-level-config',

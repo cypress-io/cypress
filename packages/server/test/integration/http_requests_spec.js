@@ -210,7 +210,6 @@ describe('Routes', () => {
   afterEach(function () {
     evilDns.clear()
     nock.cleanAll()
-    Fixtures.remove()
     this.session.destroy()
     preprocessor.close()
     this.project = null
@@ -220,6 +219,9 @@ describe('Routes', () => {
       httpsServer.stop(),
       ctx.actions.project.clearCurrentProject(),
     )
+    .then(() => {
+      Fixtures.remove()
+    })
   })
 
   context('GET /', () => {
@@ -456,7 +458,7 @@ describe('Routes', () => {
 
         if (i > 50) {
           throw Error(dedent`
-            setupNodeEvents and plugins did not complete after 10 seconds. 
+            setupNodeEvents and plugins did not complete after 10 seconds.
             There might be an endless loop or an uncaught exception that isn't bubbling up.`)
         }
       }, 200)
@@ -2006,7 +2008,7 @@ describe('Routes', () => {
         })
 
         // https://github.com/cypress-io/cypress/issues/4267
-        it('doesn\'t attach auth headers to a diff protection space on the same origin', function () {
+        it(`doesn't attach auth headers to a diff protection space on the same origin`, function () {
           return this.setup('http://beta.something.com')
           .then(() => {
             const username = 'u'
