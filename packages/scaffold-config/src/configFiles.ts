@@ -44,23 +44,29 @@ interface Detector {
 export function detect (pkg: PkgJson): DetectFramework | undefined {
   const inPkgJson = (detector: Detector) => {
     const vers = pkg.dependencies?.[detector.dependency] || pkg.devDependencies?.[detector.dependency]
+    const found = (vers && satisfies(vers, detector.version)) ?? false
 
-    return (vers && satisfies(vers, detector.version)) ?? false
+    return found
   }
 
-  for (const framework of FRONTEND_FRAMEWORKS) {
+  // first see if it's a template
+  for (const framework of FRONTEND_FRAMEWORKS.filter((x) => x.family === 'template')) {
     const hasAllDeps = [...framework.detectors].every(inPkgJson)
 
-    if (hasAllDeps) {
-      if (framework.supportedBundlers.length === 1) {
-        return {
-          framework,
-        }
+    // so far all the templates we support only have 1 bundler,
+    // for example CRA only works with webpack,
+    // but we want to consider in the future, tools like Nuxt ship
+    // both a webpack and vite dev-env.
+    // if we support this, we will also need to attempt to infer the dev server of choice.
+    if (hasAllDeps && framework.supportedBundlers.length === 1) {
+      return {
+        framework,
       }
     }
   }
 
-  for (const framework of FRONTEND_FRAMEWORKS) {
+  // if not a template, they probably just installed/configured on their own.
+  for (const framework of FRONTEND_FRAMEWORKS.filter((x) => x.family === 'library')) {
     // multiple bundlers supported, eg React works with webpack and Vite.
     // try to infer which one they are using.
     for (const bundler of bundlers) {
@@ -74,6 +80,8 @@ export function detect (pkg: PkgJson): DetectFramework | undefined {
       }
     }
 
+    // unknown bundler, or we couldn't detect it
+    // just return the framework, leave the rest to the user.
     return {
       framework,
     }
@@ -85,6 +93,7 @@ export function detect (pkg: PkgJson): DetectFramework | undefined {
 export const FRONTEND_FRAMEWORKS = [
   {
     type: 'cra',
+    family: 'template',
     name: 'Create React App',
     supportedBundlers: ['webpack'] as readonly Bundler['type'][],
     packages: [
@@ -132,6 +141,7 @@ export const FRONTEND_FRAMEWORKS = [
   {
     type: 'vueclivue2',
     name: 'Vue CLI (Vue 2)',
+    family: 'template',
     supportedBundlers: ['webpack'] as readonly Bundler['type'][],
     packages: [
       {
@@ -191,6 +201,7 @@ export const FRONTEND_FRAMEWORKS = [
   {
     type: 'vueclivue3',
     name: 'Vue CLI (Vue 3)',
+    family: 'template',
     supportedBundlers: ['webpack'] as readonly Bundler['type'][],
     packages: [
       {
@@ -250,6 +261,7 @@ export const FRONTEND_FRAMEWORKS = [
   {
     type: 'react',
     name: 'React.js',
+    family: 'library',
     supportedBundlers: ['webpack', 'vite'] as readonly Bundler['type'][],
     packages: [
       {
@@ -350,6 +362,7 @@ export const FRONTEND_FRAMEWORKS = [
   {
     type: 'vue2',
     name: 'Vue.js (v2)',
+    family: 'library',
     supportedBundlers: ['webpack', 'vite'] as readonly Bundler['type'][],
     packages: [
       {
@@ -444,6 +457,7 @@ export const FRONTEND_FRAMEWORKS = [
   {
     type: 'vue3',
     name: 'Vue.js (v3)',
+    family: 'library',
     supportedBundlers: ['webpack', 'vite'] as readonly Bundler['type'][],
     packages: [
       {
@@ -537,6 +551,7 @@ export const FRONTEND_FRAMEWORKS = [
   {
     type: 'nextjs',
     name: 'Next.js',
+    family: 'template',
     supportedBundlers: ['webpack'] as readonly Bundler['type'][],
     packages: [
       {
@@ -574,6 +589,7 @@ export const FRONTEND_FRAMEWORKS = [
   {
     type: 'nuxtjs',
     name: 'Nuxt.js (v2)',
+    family: 'template',
     supportedBundlers: ['webpack'] as readonly Bundler['type'][],
     packages: [
       {
