@@ -52,7 +52,7 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
         return await ensureAndGetByNameOrPath(nameOrPath, false, browsers)
       },
       async focusActiveBrowserWindow () {
-        return openProject.projectBase?.sendFocusBrowserMessage()
+        return openProject.sendFocusBrowserMessage()
       },
     },
     errorApi: {

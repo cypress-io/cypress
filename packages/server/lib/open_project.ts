@@ -295,6 +295,16 @@ export class OpenProject {
   __reset () {
     this.resetOpenProject()
   }
+
+  async sendFocusBrowserMessage () {
+    const isRunnerConnected = this.projectBase?.isRunnerSocketConnected()
+
+    if (isRunnerConnected) {
+      this.projectBase?.sendFocusBrowserMessage()
+    } else if (this.relaunchBrowser) {
+      this.relaunchBrowser()
+    }
+  }
 }
 
 export const openProject = new OpenProject()
