@@ -1045,7 +1045,7 @@ describe('visual error templates', () => {
         default: ['/path/to/project/cypress.config.js'],
       }
     },
-    CT_NO_DEV_START_EVENT: () => {
+    CONFIG_FILE_INVALID_DEV_START_EVENT: () => {
       return {
         default: ['/path/to/plugins/file.js'],
       }
@@ -1071,22 +1071,22 @@ describe('visual error templates', () => {
         default: ['spec.{ts,js}', ['support.ts', 'support.js']],
       }
     },
-    REMOVED_ROOT_CONFIG_OPTION: () => {
+    CONFIG_FILE_INVALID_ROOT_CONFIG: () => {
       return {
         default: [{ name: 'specPattern', configFile: '/path/to/configFile.ts' }],
       }
     },
-    REMOVED_ROOT_CONFIG_OPTION_E2E: () => {
+    CONFIG_FILE_INVALID_ROOT_CONFIG_E2E: () => {
       return {
         default: [{ name: 'baseUrl', configFile: '/path/to/configFile.ts' }],
       }
     },
-    CT_CONFIG_NOT_SUPPORTED: () => {
+    CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_COMPONENT: () => {
       return {
         default: [{ name: 'baseUrl', configFile: '/path/to/configFile.ts' }],
       }
     },
-    COMPONENT_DEV_SERVER_IS_NOT_A_FUNCTION: () => {
+    CONFIG_FILE_DEV_SERVER_IS_NOT_A_FUNCTION: () => {
       return {
         default: ['/path/to/config.ts', {}],
       }

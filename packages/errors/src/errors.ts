@@ -1107,7 +1107,7 @@ export const AllCypressErrors = {
 
         ${fmt.stackTrace(arg2)}`
   },
-  CT_NO_DEV_START_EVENT: (pluginsFilePath: string) => {
+  CONFIG_FILE_INVALID_DEV_START_EVENT: (pluginsFilePath: string) => {
     const code = errPartial`
       module.exports = (on, config) => {
         on('dev-server:start', () => {
@@ -1209,7 +1209,7 @@ export const AllCypressErrors = {
     `
   },
 
-  REMOVED_ROOT_CONFIG_OPTION: (errShape: BreakingErrResult) => {
+  CONFIG_FILE_INVALID_ROOT_CONFIG: (errShape: BreakingErrResult) => {
     const code = errPartial`
       {
         e2e: {
@@ -1230,7 +1230,7 @@ export const AllCypressErrors = {
       https://on.cypress.io/migration-guide`
   },
 
-  REMOVED_ROOT_CONFIG_OPTION_E2E: (errShape: BreakingErrResult) => {
+  CONFIG_FILE_INVALID_ROOT_CONFIG_E2E: (errShape: BreakingErrResult) => {
     const code = errPartial`
       {
         e2e: {
@@ -1248,7 +1248,8 @@ export const AllCypressErrors = {
       https://on.cypress.io/migration-guide`
   },
 
-  CT_CONFIG_NOT_SUPPORTED: (errShape: BreakingErrResult) => {
+  // TODO: add path to config file
+  CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_COMPONENT: (errShape: BreakingErrResult) => {
     const code = errPartial`
       {
         e2e: {
@@ -1266,7 +1267,7 @@ export const AllCypressErrors = {
       https://on.cypress.io/migration-guide`
   },
 
-  COMPONENT_DEV_SERVER_IS_NOT_A_FUNCTION: (configFile: string, setupNodeEvents: any) => {
+  CONFIG_FILE_DEV_SERVER_IS_NOT_A_FUNCTION: (configFilePath: string, setupNodeEvents: any) => {
     const code = errPartial`
       {
         component: {
