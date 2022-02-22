@@ -658,9 +658,9 @@ describe('visual error templates', () => {
     },
     SETUP_NODE_EVENTS_IS_NOT_FUNCTION: () => {
       return {
-        default: ['/path/to/pluginsFile', 'e2e', { some: 'object' }],
-        string: ['/path/to/pluginsFile', 'e2e', 'some string'],
-        array: ['/path/to/pluginsFile', 'e2e', ['some', 'array']],
+        default: ['/path/to/cypress.config.js', 'e2e', { some: 'object' }],
+        string: ['/path/to/cypress.config.js', 'component', 'some string'],
+        array: ['/path/to/cypress.config.js', 'component', ['some', 'array']],
       }
     },
     CONFIG_FILE_SETUP_NODE_EVENTS_ERROR: () => {

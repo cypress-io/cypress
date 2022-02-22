@@ -34,12 +34,16 @@
     </style>
   
     </head>
-    <body><pre><span style="color:#e05561">Your <span style="color:#e5e510">configFile<span style="color:#e05561"> is invalid: <span style="color:#4ec4ff">/path/to/pluginsFile<span style="color:#e05561"><span style="color:#e6e6e6">
+    <body><pre><span style="color:#e05561">Your <span style="color:#e5e510">configFile<span style="color:#e05561"> is invalid: <span style="color:#4ec4ff">/path/to/cypress.config.js<span style="color:#e05561"><span style="color:#e6e6e6">
 <span style="color:#e05561"><span style="color:#e6e6e6">
-<span style="color:#e05561">The setupNodeEvents in your <span style="color:#e5e510">e2e<span style="color:#e05561"> config should define a function with the following signature:<span style="color:#e6e6e6">
+<span style="color:#e05561">The <span style="color:#de73ff">e2e.setupNodeEvents()<span style="color:#e05561"> function must be defined with the following signature:<span style="color:#e6e6e6">
 <span style="color:#e05561"><span style="color:#e6e6e6">
-<span style="color:#e05561"><span style="color:#4ec4ff">setupNodeEvents(on, config) {<span style="color:#e05561"><span style="color:#e6e6e6">
-<span style="color:#e05561"><span style="color:#4ec4ff">  <span style="color:#4f5666">// configure tasks / plugins here<span style="color:#4ec4ff"><span style="color:#e05561"><span style="color:#e6e6e6">
+<span style="color:#e05561"><span style="color:#4ec4ff">{<span style="color:#e05561"><span style="color:#e6e6e6">
+<span style="color:#e05561"><span style="color:#4ec4ff">  e2e: {<span style="color:#e05561"><span style="color:#e6e6e6">
+<span style="color:#e05561"><span style="color:#4ec4ff">    setupNodeEvents(on, config) {<span style="color:#e05561"><span style="color:#e6e6e6">
+<span style="color:#e05561"><span style="color:#4ec4ff">      <span style="color:#4f5666">// configure tasks and plugins here<span style="color:#4ec4ff"><span style="color:#e05561"><span style="color:#e6e6e6">
+<span style="color:#e05561"><span style="color:#4ec4ff">    }<span style="color:#e05561"><span style="color:#e6e6e6">
+<span style="color:#e05561"><span style="color:#4ec4ff">  }<span style="color:#e05561"><span style="color:#e6e6e6">
 <span style="color:#e05561"><span style="color:#4ec4ff">}<span style="color:#e05561"><span style="color:#e6e6e6">
 <span style="color:#e05561"><span style="color:#e6e6e6">
 <span style="color:#e05561">Instead we saw:<span style="color:#e6e6e6">
@@ -49,5 +53,5 @@
 <span style="color:#e05561"><span style="color:#de73ff">}<span style="color:#e05561"><span style="color:#e6e6e6">
 <span style="color:#e05561"><span style="color:#e6e6e6">
 <span style="color:#e05561">https://on.cypress.io/plugins-api<span style="color:#e6e6e6">
-<span style="color:#e05561"><span style="color:#e6e6e6"></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>
+<span style="color:#e05561"><span style="color:#e6e6e6"></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>
 </pre></body></html>

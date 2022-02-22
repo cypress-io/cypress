@@ -604,14 +604,18 @@ export const AllCypressErrors = {
   // TODO: make this relative path, not absolute
   SETUP_NODE_EVENTS_IS_NOT_FUNCTION: (configFilePath: string, testingType: string, exported: any) => {
     const code = errPartial`
-      setupNodeEvents(on, config) {
-        ${fmt.comment(`// configure tasks / plugins here`)}
+      {
+        ${fmt.off(testingType)}: {
+          setupNodeEvents(on, config) {
+            ${fmt.comment(`// configure tasks and plugins here`)}
+          }
+        }
       }`
 
     return errTemplate`\
       Your ${fmt.highlight(`configFile`)} is invalid: ${fmt.path(configFilePath)}
 
-      The setupNodeEvents in your ${fmt.highlight(testingType)} config should define a function with the following signature:
+      The ${fmt.highlightSecondary(`${testingType}.setupNodeEvents()`)} function must be defined with the following signature:
 
       ${fmt.code(code)}
 
