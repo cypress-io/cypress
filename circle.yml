@@ -471,7 +471,6 @@ commands:
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARTIAL_BUILD=1 \
             PERCY_PARALLEL_TOTAL=-1 \
-            PERCY_PARTIAL_BUILD=1 \
             PERCY_TARGET_BRANCH="10.0-release" \
             PERCY_TARGET_COMMIT=$(git log -n 1 origin/10.0-release --pretty="%H") \
             $cmd yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --record --parallel --group <<parameters.package>>-<<parameters.type>>
@@ -1084,7 +1083,6 @@ jobs:
             PERCY_PARALLEL_NONCE=$PLATFORM-$CIRCLE_SHA1 \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
-            PERCY_PARTIAL_BUILD=1 \
             PERCY_TARGET_BRANCH="10.0-release" \
             PERCY_TARGET_COMMIT=$(git log -n 1 origin/10.0-release --pretty="%H") \
             yarn percy snapshot ./cli/visual-snapshots
@@ -1366,8 +1364,7 @@ jobs:
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
             PERCY_PARALLEL_NONCE=$PLATFORM-$CIRCLE_SHA1 \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
-            PERCY_PARALLEL_TOTAL=-1 \
-            PERCY_PARTIAL_BUILD=1 \
+            PERCY_PARALLEL_TOTAL=-1 
             PERCY_TARGET_BRANCH="10.0-release" \
             PERCY_TARGET_COMMIT=$(git log -n 1 origin/10.0-release --pretty="%H") \
             yarn percy exec --parallel -- -- \
@@ -1518,7 +1515,6 @@ jobs:
             PERCY_PARALLEL_NONCE=$PLATFORM-$CIRCLE_SHA1 \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
-            PERCY_PARTIAL_BUILD=1 \
             PERCY_TARGET_BRANCH="10.0-release" \
             PERCY_TARGET_COMMIT=$(git log -n 1 origin/10.0-release --pretty="%H") \
             yarn percy exec --parallel -- -- \
