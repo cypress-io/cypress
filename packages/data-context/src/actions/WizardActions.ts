@@ -96,21 +96,21 @@ export class WizardActions {
       debug('detectedLanguage %s', this.data.detectedLanguage)
       this.data.chosenLanguage = this.data.detectedLanguage || 'js'
 
-      const detectedFramework = detect(await fs.readJson(path.join(this.ctx.currentProject, 'package.json')))
+      const detected = detect(await fs.readJson(path.join(this.ctx.currentProject, 'package.json')))
 
-      debug('detectedFramework %o', detectedFramework)
+      debug('detected %o', detected)
 
-      if (detectedFramework) {
+      if (detected) {
         this.ctx.update((coreData) => {
-          coreData.wizard.detectedFramework = detectedFramework.type
-          coreData.wizard.chosenFramework = detectedFramework.type
+          coreData.wizard.detectedFramework = detected.framework.type
+          coreData.wizard.chosenFramework = detected.framework.type
 
-          if (!detectedFramework.supportedBundlers[0]) {
+          if (!detected.framework.supportedBundlers[0]) {
             return
           }
 
-          coreData.wizard.detectedBundler = detectedFramework.supportedBundlers[0]
-          coreData.wizard.chosenBundler = detectedFramework.supportedBundlers[0]
+          coreData.wizard.detectedBundler = detected.bundler || detected.framework.supportedBundlers[0]
+          coreData.wizard.chosenBundler = detected.bundler || detected.framework.supportedBundlers[0]
         })
       }
     }

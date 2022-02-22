@@ -93,4 +93,31 @@ describe('scaffolding component testing', () => {
       verifyConfigFile(`cypress.config.js`)
     })
   })
+
+  context('react-vite-ts-unconfigured', () => {
+    it('scaffolds component testing for React and Vite', () => {
+      startSetupFor('react-vite-ts-unconfigured')
+
+      // should detect correctly
+      cy.get('button').should('be.visible').contains('React.js(detected)')
+      cy.get('button').contains('Next Step').click()
+      const deps = ['@cypress/react', '@cypress/vite-dev-server']
+
+      // correct install command and versions
+      cy.contains('yarn add -D @cypress/react@^5.0.0 @cypress/vite-dev-server@latest')
+
+      deps.forEach((dep) => {
+        cy.contains(dep)
+      })
+
+      cy.withCtx((ctx, { deps }) => {
+        ctx.update((coreData) => {
+          coreData.wizard.__fakeInstalledPackagesForTesting = deps
+        })
+      }, { deps })
+
+      cy.findByRole('button', { name: 'Continue' }).click()
+      verifyConfigFile(`cypress.config.ts`)
+    })
+  })
 })
