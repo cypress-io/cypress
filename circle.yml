@@ -2140,10 +2140,6 @@ linux-workflow: &linux-workflow
         required_env_var: PERCY_TOKEN # skips job if not defined (external PR)
         requires:
           - cli-visual-tests
-          - npm-design-system
-          - run-frontend-shared-component-tests-chrome
-          - run-launchpad-component-tests-chrome
-          - run-launchpad-integration-tests-chrome
     - lint-types:
         requires:
           - build
