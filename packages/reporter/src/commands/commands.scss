@@ -178,26 +178,6 @@
     }
   }
 
-  .command-expander-column {
-    padding-right: 10px;
-    padding-left: 5px;
-    width: 25px;
-    
-    .command-expander {
-      color: $gray-500;
-      transform: rotate(-90deg);
-      transition: transform 150ms ease-out;
-
-      path {
-        stroke: $gray-700;
-      }
-    }
-
-    .command-expander-is-open {
-      transform: rotate(0deg);
-    }
-  }
-
   .command-message {
     flex-grow: 2;
     margin-left: 0;
@@ -472,6 +452,26 @@
     }
   }
 
+  .command-expander-column {
+    padding-right: 10px;
+    padding-left: 5px;
+    width: 25px;
+    
+    .command-expander {
+      color: $gray-500;
+      transform: rotate(-90deg);
+      transition: transform 150ms ease-out;
+
+      path {
+        stroke: $gray-700;
+      }
+    }
+
+    .command-expander-is-open {
+      transform: rotate(0deg);
+    }
+  }
+
   .command-has-snapshot:hover,
   .command-has-console-props {
     cursor: pointer;
@@ -517,18 +517,14 @@
   // additional styles on top of the shared.scss styles
   .num-children {
     color: $black;
+    display: inline-block;
     background-color: $gray-500;
-  }
-
-  .command-num-children,
-  .command-num-elements {
-    display: inline-block
   }
 
   // additional styles on top of the shared.scss styles
   .num-elements {
     background-color: $gray-600;
-    display: inline;
+    display: inline-block;
     color: $black;
     vertical-align: text-top;
   }
