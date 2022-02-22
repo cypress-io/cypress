@@ -46,13 +46,13 @@
 
     document.querySelector('[data-cy="approve-orig"]').addEventListener('click', () => {
 
-        const redirectHref = getRedirectHref()
+      const redirectHref = getRedirectHref()
 
-        window.location.href = `http://www.idp.com:3500/fixtures/auth/idp.html?redirect=${encodeURIComponent(redirectHref)}`
+      window.location.href = `http://www.idp.com:3500/fixtures/auth/idp.html?redirect=${encodeURIComponent(redirectHref)}`
     })
 
     document.querySelector('[data-cy="approve-me"]').addEventListener('click', () => {
-        window.location.href = `http://www.idp.com:3500/fixtures/auth/idp.html?redirect=${encodeURIComponent(window.location.href)}`
+      window.location.href = `http://www.idp.com:3500/fixtures/auth/idp.html?redirect=${encodeURIComponent(window.location.href)}`
     })
   </script>
 </body>

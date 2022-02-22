@@ -55,7 +55,8 @@ describe('basic login', { experimentalSessionSupport: true, experimentalMultiDom
   // @ts-ignore
   describe('visit secondary first', () => {
     describe('How to determine primary', () => {
-      // it.only('example.com', () => {
+      // Enable to set the top domain to example.com before running the next test.
+      // it('example.com', () => {
       //   cy.visit('http://www.example.com')
       // })
 
