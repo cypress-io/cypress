@@ -382,9 +382,9 @@ exports['e2e plugins fails when there is an async error inside an event handler 
                                                                                                     
   Running:  app.cy.js                                                                       (1 of 1)
 
-We stopped running your tests because your config file crashed.
-
 Your configFile threw an error from: cypress.config.js
+
+We stopped running your tests because your config file crashed.
 
 Error: Async error from plugins file
       [stack trace lines]
@@ -419,7 +419,7 @@ Error: Async error from plugins file
 `
 
 exports['e2e plugins fails when invalid event is registered 1'] = `
-Your configFile threw a validation error: /foo/bar/.projects/plugin-validation-error/cypress.config.js
+Your configFile threw a validation error from: /foo/bar/.projects/plugin-validation-error/cypress.config.js
 
 You must pass a valid event name when registering a plugin.
 
@@ -508,34 +508,6 @@ exports['e2e plugins does not report more screenshots than exist if user overwri
 
 `
 
-exports['e2e plugins fails when there is nothing exported 1'] = `
-Your pluginsFile did not export a valid function from: /foo/bar/.projects/plugin-empty/cypress/plugins/index.js
-
-It must export a function with the following signature:
-
-module.exports = (on, config) => {
-  // configure plugins here
-}
-
-Instead it exported:
-
-{}
-
-https://on.cypress.io/plugins-api
-
-
-`
-
-exports['e2e plugins fails when its set from config but does not exist 1'] = `
-Your pluginsFile was not found at path: /foo/bar/.projects/plugin-missing/cypress/plugins/does-not-exist.js
-
-Create this file, or set pluginsFile to false if a plugins file is not necessary for your project.
-
-If you have just renamed the extension of your pluginsFile, restart Cypress.
-
-
-`
-
 exports['e2e plugins fails when require throws synchronously 1'] = `
 Your configFile is invalid: /foo/bar/.projects/plugins-root-sync-error/cypress.config.js
 
@@ -548,7 +520,7 @@ RootSyncError: Root sync error from plugins file
 exports['e2e plugins fails when function throws synchronously 1'] = `
 Your configFile threw an error from: /foo/bar/.projects/plugins-function-sync-error/cypress.config.js
 
-The error was thrown while executing your e2e.setupNodeEvents function:
+The error was thrown while executing your e2e.setupNodeEvents() function:
 
 FunctionSyncError: Function sync error from plugins file
       [stack trace lines]
@@ -557,7 +529,7 @@ FunctionSyncError: Function sync error from plugins file
 exports['e2e plugins fails when invalid event handler is registered 1'] = `
 Your configFile threw an error from: /foo/bar/.projects/plugin-invalid-event-handler-error/cypress.config.js
 
-The error was thrown while executing your e2e.setupNodeEvents function:
+The error was thrown while executing your e2e.setupNodeEvents() function:
 
 InvalidEventHandlerError: The handler for the event \`task\` must be an object
       [stack trace lines]
@@ -566,10 +538,14 @@ InvalidEventHandlerError: The handler for the event \`task\` must be an object
 exports['e2e plugins fails when setupNodeEvents is not a function 1'] = `
 Your configFile is invalid: /foo/bar/.projects/plugin-empty/cypress.config.js
 
-The setupNodeEvents in your e2e config should define a function with the following signature:
+The e2e.setupNodeEvents() function must be defined with the following signature:
 
-setupNodeEvents(on, config) {
-  // configure tasks / plugins here
+{
+  e2e: {
+    setupNodeEvents(on, config) {
+      // configure tasks and plugins here
+    }
+  }
 }
 
 Instead we saw:
@@ -584,10 +560,14 @@ https://on.cypress.io/plugins-api
 exports['e2e plugins fails when there is no function exported 1'] = `
 Your configFile is invalid: /foo/bar/.projects/plugin-no-function-return/cypress.config.js
 
-The setupNodeEvents in your e2e config should define a function with the following signature:
+The e2e.setupNodeEvents() function must be defined with the following signature:
 
-setupNodeEvents(on, config) {
-  // configure tasks / plugins here
+{
+  e2e: {
+    setupNodeEvents(on, config) {
+      // configure tasks and plugins here
+    }
+  }
 }
 
 Instead we saw:

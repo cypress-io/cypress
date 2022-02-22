@@ -176,7 +176,6 @@ There is both a cypress.config.js and a cypress.config.ts at the location below:
 
 Cypress does not know which one to read for config. Please remove one of the two and try again.
 
-
 `
 
 exports['e2e config throws error when cypress.json is found in project and need migration 1'] = `
@@ -200,45 +199,84 @@ Cypress no longer supports cypress.json, please remove it from your project.
 `
 
 exports['e2e config throws an error if supportFile is set on the root level 1'] = `
-The supportFile configuration option was removed from the root of the Cypress config object in version 10.0.0.
+The supportFile configuration option is now invalid when set from the root of the config object in Cypress version 10.0.0.
 
-Please update this option under each testing type property.
+It is now configured separately as a testing type property: e2e.supportFile and component.supportFile
+
+{
+  e2e: {
+    specPattern: '...',
+  },
+  component: {
+    specPattern: '...',
+  },
+}
 
 https://on.cypress.io/migration-guide
 
 `
 
 exports['e2e config throws an error if specPattern is set on the root level 1'] = `
-The specPattern configuration option was removed from the root of the Cypress config object in version 10.0.0.
+The specPattern configuration option is now invalid when set from the root of the config object in Cypress version 10.0.0.
 
-Please update this option under each testing type property.
+It is now configured separately as a testing type property: e2e.specPattern and component.specPattern
+
+{
+  e2e: {
+    specPattern: '...',
+  },
+  component: {
+    specPattern: '...',
+  },
+}
 
 https://on.cypress.io/migration-guide
 
 `
 
 exports['e2e config throws an error if excludeSpecPattern is set on the root level 1'] = `
-The excludeSpecPattern configuration option was removed from the root of the Cypress config object in version 10.0.0.
+The excludeSpecPattern configuration option is now invalid when set from the root of the config object in Cypress version 10.0.0.
 
-Please update this option under each testing type property.
+It is now configured separately as a testing type property: e2e.excludeSpecPattern and component.excludeSpecPattern
+
+{
+  e2e: {
+    specPattern: '...',
+  },
+  component: {
+    specPattern: '...',
+  },
+}
 
 https://on.cypress.io/migration-guide
 
 `
 
 exports['e2e config throws an error if baseUrl is set on the root level 1'] = `
-The baseUrl configuration option was removed from the root of the Cypress config object in version 10.0.0.
+The baseUrl configuration option is now invalid when set from the root of the config object in Cypress version 10.0.0.
 
-Please update this option under the e2e testing type property.
+It is now configured separately as a testing type property: e2e.baseUrl
+
+{
+  e2e: {
+    baseUrl: '...',
+  }
+}
 
 https://on.cypress.io/migration-guide
 
 `
 
 exports['e2e config throws an error if baseUrl is set on the component level 1'] = `
-The baseUrl configuration option is not valid in Component testing. 
+The component.baseUrl configuration option is not valid for component testing.
 
-Please remove or add this option under e2e testing type property.
+Please remove this option or add this as an e2e testing type property: e2e.baseUrl
+
+{
+  e2e: {
+    baseUrl: '...',
+  }
+}
 
 https://on.cypress.io/migration-guide
 
