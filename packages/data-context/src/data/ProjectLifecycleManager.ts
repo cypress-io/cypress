@@ -1305,9 +1305,9 @@ export class ProjectLifecycleManager {
     this._pendingInitialize = pDefer()
 
     if (!this._currentTestingType) {
+      // e2e is assumed to be the default testing type if
+      // none is passed in run mode
       this.setCurrentTestingType('e2e')
-      // TODO: Warn on this
-      // this.ctx.onWarning(getError('TESTING_TYPE_NEEDED_FOR_RUN'))
     }
 
     if (!this.metaState.hasValidConfigFile) {
