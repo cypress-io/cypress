@@ -71,8 +71,7 @@ system-tests/projects/vueclivue3-unconfigured/**/*
 system-tests/projects/vueclivue3-configured/**/*
 system-tests/projects/vue3-vite-ts-unconfigured/**/*
 system-tests/projects/vue3-vite-ts-configured/**/*
+system-tests/projects/nextjs-unconfigured/**/*
 system-tests/projects/nextjs-configured/**/*
 system-tests/projects/nuxtjs-vue2-unconfigured/**/*
 system-tests/projects/nuxtjs-vue2-configured/**/*
-
-

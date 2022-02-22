@@ -57,23 +57,25 @@ export function detect (pkg: PkgJson): DetectFramework | undefined {
           framework,
         }
       }
+    }
+  }
 
-      // multiple bundlers supported, eg React works with webpack and Vite.
-      // try to infer which one they are using.
-      for (const bundler of bundlers) {
-        const b = [...bundler.detectors].every(inPkgJson)
+  for (const framework of FRONTEND_FRAMEWORKS) {
+    // multiple bundlers supported, eg React works with webpack and Vite.
+    // try to infer which one they are using.
+    for (const bundler of bundlers) {
+      const b = [...bundler.detectors].every(inPkgJson)
 
-        if (b) {
-          return {
-            framework,
-            bundler: bundler.type,
-          }
+      if (b) {
+        return {
+          framework,
+          bundler: bundler.type,
         }
       }
+    }
 
-      return {
-        framework,
-      }
+    return {
+      framework,
     }
   }
 
@@ -579,6 +581,11 @@ export const FRONTEND_FRAMEWORKS = [
         version: '^2.0.0',
         installer: '@cypress/vue@^2.0.0',
       },
+      {
+        name: 'html-webpack-plugin',
+        version: '^4.0.0',
+        installer: 'html-webpack-plugin@^4.0.0',
+      },
     ],
     defaultPackagePath: null,
     glob: '*.vue',
@@ -592,8 +599,38 @@ export const FRONTEND_FRAMEWORKS = [
     codeGenFramework: CODE_GEN_FRAMEWORKS[1],
     storybookDep: STORYBOOK_DEPS[1],
     config: {
-      js: () => ``,
-      ts: () => ``,
+      js: () => {
+        return dedent`
+        const { defineConfig } = require("cypress")
+        const { devServer } = require("@cypress/webpack-dev-server")
+        const { getWebpackConfig } = require("nuxt")
+
+        module.exports = defineConfig({
+          component: {
+            async devServer(cypressDevServerConfig) {
+              const webpackConfig = await getWebpackConfig()
+
+              return devServer(cypressDevServerConfig, { webpackConfig })
+            }
+          }
+        })`
+      },
+      ts: () => {
+        return dedent`
+        import { defineConfig } from "cypress"
+        import { devServer } from "@cypress/webpack-dev-server"
+        import { getWebpackConfig } from "nuxt"
+
+        export default defineConfig({
+          component: {
+            async devServer(cypressDevServerConfig) {
+              const webpackConfig = await getWebpackConfig()
+
+              return devServer(cypressDevServerConfig, { webpackConfig })
+            }
+          }
+        })`
+      },
     },
   },
 ] as const

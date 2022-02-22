@@ -147,4 +147,31 @@ describe('scaffolding component testing', () => {
       verifyConfigFile(`cypress.config.ts`)
     })
   })
+
+  context('nuxtjs-vue2-unconfigured', () => {
+    it('scaffolds component testing for Nuxt 2', () => {
+      startSetupFor('nuxtjs-vue2-unconfigured')
+
+      // should detect correctly
+      cy.get('button').should('be.visible').contains('Nuxt.js (v2)(detected)')
+      cy.get('button').contains('Next Step').click()
+      const deps = ['@cypress/vue', '@cypress/webpack-dev-server', 'html-webpack-plugin']
+
+      // correct install command and versions
+      cy.contains('yarn add -D @cypress/vue@^2.0.0 html-webpack-plugin@^4.0.0 @cypress/webpack-dev-server@latest')
+
+      deps.forEach((dep) => {
+        cy.contains(dep)
+      })
+
+      cy.withCtx((ctx, { deps }) => {
+        ctx.update((coreData) => {
+          coreData.wizard.__fakeInstalledPackagesForTesting = deps
+        })
+      }, { deps })
+
+      cy.findByRole('button', { name: 'Continue' }).click()
+      verifyConfigFile(`cypress.config.js`)
+    })
+  })
 })
