@@ -1,8 +1,4 @@
-// https://github.com/cypress-io/cypress/issues/18069
-// This fixture project is copied to packages/server/.project and executed there.
-// Because of that, the reference path is wrong here.
-/// <reference path="../../../../../../cli/types/mocha/index.d.ts" />
-/// <reference path="../../../../../../cli/types/jquery/index.d.ts" />
+/// <reference types="cypress" />
 
 /**
  * This tests the error UI for a certain webpack preprocessor setup.
@@ -21,6 +17,8 @@ import { fail, verify } from '../../../e2e/cypress/support/util'
 context('validation errors', function () {
   beforeEach(() => {
     // @ts-ignore
+    window.top.__cySkipValidateConfig = true
+    // @ts-ignore
     Cypress.config('isInteractive', true)
   })
 
@@ -30,7 +28,7 @@ context('validation errors', function () {
   })
 
   verify(this, {
-    line: 29,
+    line: 27,
     column: 8,
     message: 'can only accept a string preset or',
     stack: ['throwErrBadArgs', 'From Your Spec Code:'],

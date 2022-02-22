@@ -54,6 +54,13 @@
       "command": "yarn dev"
     },
     {
+      "name": "packages/app watch",
+      "focus": true,
+      "onlySingle": true,
+      "cwd": "[cwd]",
+      "command": "yarn watch"
+    },
+    {
       "name": "packages/server test-watch",
       "focus": true,
       "onlySingle": true,

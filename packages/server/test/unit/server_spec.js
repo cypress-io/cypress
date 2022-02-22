@@ -39,7 +39,7 @@ describe('lib/server', () => {
 // TODO: Figure out correct configuration to run these tests and/or which ones we need to keep.
 // The introducion of server-base/socket-base and the `ensureProp` function made unit testing
 // the server difficult.
-xdescribe('lib/server', () => {
+describe.skip('lib/server', () => {
   beforeEach(function () {
     this.fileServer = {
       close () {},
