@@ -647,7 +647,7 @@ export const AllCypressErrors = {
   // TODO: make this relative path, not absolute
   PLUGINS_INVALID_EVENT_NAME_ERROR: (pluginsFilePath: string, invalidEventName: string, validEventNames: string[], err: Error) => {
     return errTemplate`
-      Your ${fmt.highlightSecondary(`configFile`)} threw a validation error: ${fmt.path(pluginsFilePath)}
+      Your ${fmt.highlightSecondary(`configFile`)} threw a validation error from: ${fmt.path(pluginsFilePath)}
 
       You must pass a valid event name when registering a plugin.
 
