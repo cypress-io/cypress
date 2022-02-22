@@ -26,4 +26,12 @@ describe('component testing projects', function () {
     browser: 'chrome',
     expectedExitCode: 0,
   })
+
+  systemTests.it('react-vite-ts-configured', {
+    project: 'react-vite-ts-configured',
+    testingType: 'component',
+    spec: 'src/App.cy.tsx',
+    browser: 'chrome',
+    expectedExitCode: 0,
+  })
 })
