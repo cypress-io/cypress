@@ -61,3 +61,5 @@ npm/cypress-schematic/src/**/*.js
 **/.next/**
 /npm/create-cypress-tests/initial-template
 /npm/create-cypress-tests/**/*.template.*
+system-tests/projects/create-react-app-configured/**/*.js
+system-tests/projects/create-react-app-unconfigured/**/*.js

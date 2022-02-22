@@ -2,29 +2,28 @@ import path from 'path'
 import fs from 'fs-extra'
 import dedent from 'dedent'
 import { satisfies } from 'compare-versions'
-import { STORYBOOK_DEPS } from './constants'
 import type { Bundler } from './types'
-import { CODE_GEN_FRAMEWORKS, FRONTEND_FRAMEWORK_CATEGORIES } from './constants'
+import { CODE_GEN_FRAMEWORKS, FRONTEND_FRAMEWORK_CATEGORIES, STORYBOOK_DEPS } from './constants'
 
 /**
  * We need to detect a few things:
- * 
+ *
  * 1. Version of Library (Vue, React...)
- * 
+ *
  * This is required. You cannot configure component testing without a component library.
- * 
+ *
  * 2. Dev Server.
- * 
+ *
  * Are we using Webpack, Vite etc?
- * 
+ *
  * 3. Tool (eg Create React App, Vue CLI)
  *   3.1 Version of the tool
- * 
+ *
  * This is optional. It includes tools like Vue CLI, Create React App, etc.
- * 
+ *
  * If no library is detected, we cannot progress.
  * If a library is detected but no tool or dev server, let the user select.
- * 
+ *
  * Onc we know the library, dev server and (optional) tool, we can generate a config file
  * and instruct the user which dependencies to install.
  */
@@ -32,10 +31,10 @@ export function detect (dir: string) {
   const pkg = fs.readJsonSync(path.join(`${dir}`, 'package.json'))
 
   for (const framework of FRONTEND_FRAMEWORKS) {
-    const hasAllDeps = [...framework.detectors].every(x => {
+    const hasAllDeps = [...framework.detectors].every((x) => {
       const vers = pkg.dependencies?.[x.dependency] || pkg.devDependencies?.[x.dependency]
-      return (vers && satisfies(vers, x.version)) ?? false
 
+      return (vers && satisfies(vers, x.version)) ?? false
     })
 
     if (hasAllDeps) {
@@ -62,15 +61,15 @@ export const FRONTEND_FRAMEWORKS = [
     codeGenFramework: CODE_GEN_FRAMEWORKS[0],
     storybookDep: STORYBOOK_DEPS[0],
     detectors: [
-      { 
+      {
         dependency: 'react-scripts',
-        version: '^4.0.0',
+        version: '>=4.0.0',
       },
     ],
     config: {
       js: () => ``,
       ts: () => ``,
-    }
+    },
   },
   {
     type: 'vueclivue2',
@@ -84,20 +83,21 @@ export const FRONTEND_FRAMEWORKS = [
     defaultPackagePath: null,
     glob: '*.vue',
     detectors: [
-      { 
+      {
         dependency: '@vue/cli-service',
         version: '^4.0.0',
       },
       {
         dependency: 'vue',
-        version: '^2.0.0'
-      }
+        version: '^2.0.0',
+      },
     ],
     category: FRONTEND_FRAMEWORK_CATEGORIES[1],
     codeGenFramework: CODE_GEN_FRAMEWORKS[1],
     storybookDep: STORYBOOK_DEPS[1],
     config: {
-      js: (bundler: Bundler['type']) => dedent`
+      js: (bundler: Bundler['type']) => {
+        return dedent`
       const { devServer } = require('@cypress/webpack-dev-server')
       const webpackConfig = require('@vue/cli-service/webpack.config')
 
@@ -109,8 +109,10 @@ export const FRONTEND_FRAMEWORKS = [
           }
         }
       }
-      `,
-      ts: () => dedent`
+      `
+      },
+      ts: () => {
+        return dedent`
       import { defineConfig } from 'cypress'
       import { devServer } from '@cypress/webpack-dev-server'
       import webpackConfig from '@vue/cli-service/webpack.config'
@@ -123,7 +125,8 @@ export const FRONTEND_FRAMEWORKS = [
           }
         }
       })`
-    }
+      },
+    },
   },
   {
     type: 'vueclivue3',
@@ -137,14 +140,14 @@ export const FRONTEND_FRAMEWORKS = [
     defaultPackagePath: null,
     glob: '*.vue',
     detectors: [
-      { 
+      {
         dependency: '@vue/cli-service',
         version: '^5.0.0',
       },
       {
         dependency: 'vue',
-        version: '^3.0.0'
-      }
+        version: '^3.0.0',
+      },
     ],
     category: FRONTEND_FRAMEWORK_CATEGORIES[1],
     codeGenFramework: CODE_GEN_FRAMEWORKS[1],
@@ -152,7 +155,7 @@ export const FRONTEND_FRAMEWORKS = [
     config: {
       js: () => ``,
       ts: () => ``,
-    }
+    },
   },
   {
     type: 'react',
@@ -166,11 +169,11 @@ export const FRONTEND_FRAMEWORKS = [
     defaultPackagePath: null,
     glob: '*.{jsx,tsx}',
     detectors: [
-      { 
+      {
         dependency: 'react',
         version: '>=16.0.0',
       },
-      { 
+      {
         dependency: 'react-dom',
         version: '>=16.0.0',
       },
@@ -181,7 +184,7 @@ export const FRONTEND_FRAMEWORKS = [
     config: {
       js: () => ``,
       ts: () => ``,
-    }
+    },
   },
 
   {
@@ -198,8 +201,8 @@ export const FRONTEND_FRAMEWORKS = [
     detectors: [
       {
         dependency: 'vue',
-        version: '^2.0.0'
-      }
+        version: '^2.0.0',
+      },
     ],
     category: FRONTEND_FRAMEWORK_CATEGORIES[1],
     codeGenFramework: CODE_GEN_FRAMEWORKS[1],
@@ -272,8 +275,8 @@ export const FRONTEND_FRAMEWORKS = [
         }
 
         throw Error(`No config defined for ${bundler}`)
-      }
-    }
+      },
+    },
   },
 
   {
@@ -290,8 +293,8 @@ export const FRONTEND_FRAMEWORKS = [
     detectors: [
       {
         dependency: 'vue',
-        version: '^3.0.0'
-      }
+        version: '^3.0.0',
+      },
     ],
     category: FRONTEND_FRAMEWORK_CATEGORIES[1],
     codeGenFramework: CODE_GEN_FRAMEWORKS[1],
@@ -299,7 +302,7 @@ export const FRONTEND_FRAMEWORKS = [
     config: {
       js: () => ``,
       ts: () => ``,
-    }
+    },
   },
   {
     type: 'nextjs',
@@ -314,7 +317,7 @@ export const FRONTEND_FRAMEWORKS = [
     glob: '*.{jsx,tsx}',
     category: FRONTEND_FRAMEWORK_CATEGORIES[0],
     detectors: [
-      { 
+      {
         dependency: 'next',
         version: '>=11.0.0',
       },
@@ -324,7 +327,7 @@ export const FRONTEND_FRAMEWORKS = [
     config: {
       js: () => ``,
       ts: () => ``,
-    }
+    },
   },
   {
     type: 'nuxtjs',
@@ -338,7 +341,7 @@ export const FRONTEND_FRAMEWORKS = [
     defaultPackagePath: null,
     glob: '*.vue',
     detectors: [
-      { 
+      {
         dependency: 'nuxt',
         version: '^2.0.0',
       },
@@ -349,7 +352,7 @@ export const FRONTEND_FRAMEWORKS = [
     config: {
       js: () => ``,
       ts: () => ``,
-    }
+    },
   },
 ] as const
 
