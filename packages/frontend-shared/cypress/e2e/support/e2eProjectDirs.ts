@@ -14,6 +14,7 @@ export const e2eProjectDirs = [
   'config-with-ts',
   'configured-vueclivue2',
   'cookies',
+  'create-react-app-configured',
   'create-react-app-unconfigured',
   'cypress-in-cypress',
   'default-layout',

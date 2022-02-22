@@ -67,8 +67,27 @@ export const FRONTEND_FRAMEWORKS = [
       },
     ],
     config: {
-      js: () => ``,
-      ts: () => ``,
+      js: () => {
+        return dedent`
+      const { devServer } = require('@cypress/react/plugins/react-scripts')
+
+      module.exports = {
+        component: {
+          devServer,
+        }
+      }`
+      },
+      ts: () => {
+        return dedent`
+      import { defineConfig } from 'cypress'
+      import { devServer } from '@cypress/react/plugins/react-scripts'
+
+      export default defineConfig({
+        component: {
+          devServer,
+        }
+      })`
+      },
     },
   },
   {

@@ -42,4 +42,28 @@ describe('scaffolding component testing', () => {
       verifyConfigFile(`cypress.config.js`)
     })
   })
+
+  context('create-react-app', () => {
+    it('scaffolds component testing for Vue CLI w/ Vue 2 project', () => {
+      startSetupFor('create-react-app-unconfigured')
+
+      // should detect correctly
+      cy.get('button').should('be.visible').contains('Create React App(detected)')
+      cy.get('button').contains('Next Step').click()
+      const deps = ['@cypress/react', '@cypress/webpack-dev-server']
+
+      deps.forEach((dep) => {
+        cy.contains(dep)
+      })
+
+      cy.withCtx((ctx, { deps }) => {
+        ctx.update((coreData) => {
+          coreData.wizard.__fakeInstalledPackagesForTesting = deps
+        })
+      }, { deps })
+
+      cy.findByRole('button', { name: 'Continue' }).click()
+      verifyConfigFile(`cypress.config.js`)
+    })
+  })
 })
