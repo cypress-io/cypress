@@ -27,14 +27,4 @@ context.skip('multi-domain network requests', { experimentalSessionSupport: true
       cy.get('#result').should('contain', 'Added')
     })
   })
-
-  it('.server() and .route()', () => {
-    cy.switchToDomain('foobar.com', () => {
-      cy.server()
-      cy.route('POST', /post-only/, 'Added')
-
-      cy.get('#request').click()
-      cy.get('#result').should('contain', 'Added')
-    })
-  })
 })
