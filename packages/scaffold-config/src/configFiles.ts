@@ -1,40 +1,79 @@
 import dedent from 'dedent'
 import { satisfies } from 'compare-versions'
-import type { Bundler, PkgJson } from './types'
+import type { Bundler, PkgJson, FrontendFramework } from './types'
 import { CODE_GEN_FRAMEWORKS, FRONTEND_FRAMEWORK_CATEGORIES, STORYBOOK_DEPS } from './constants'
 
-/**
- * We need to detect a few things:
- *
- * 1. Version of Library (Vue, React...)
- *
- * This is required. You cannot configure component testing without a component library.
- *
- * 2. Dev Server.
- *
- * Are we using Webpack, Vite etc?
- *
- * 3. Tool (eg Create React App, Vue CLI)
- *   3.1 Version of the tool
- *
- * This is optional. It includes tools like Vue CLI, Create React App, etc.
- *
- * If no library is detected, we cannot progress.
- * If a library is detected but no tool or dev server, let the user select.
- *
- * Onc we know the library, dev server and (optional) tool, we can generate a config file
- * and instruct the user which dependencies to install.
- */
-export function detect (pkg: PkgJson) {
-  for (const framework of FRONTEND_FRAMEWORKS) {
-    const hasAllDeps = [...framework.detectors].every((x) => {
-      const vers = pkg.dependencies?.[x.dependency] || pkg.devDependencies?.[x.dependency]
+interface DetectFramework {
+  framework: FrontendFramework
+  bundler?: Bundler['type']
+}
 
-      return (vers && satisfies(vers, x.version)) ?? false
-    })
+const bundlers = [
+  {
+    type: 'vite',
+    detectors: [
+      {
+        dependency: 'vite',
+        version: '>=2.0.0',
+      },
+    ],
+  },
+  {
+    type: 'webpack',
+    detectors: [
+      {
+        dependency: 'webpack',
+        version: '>=4.0.0',
+      },
+    ],
+  },
+] as const
+
+interface Detector {
+  version: string
+  dependency: string
+}
+
+// Detect the framework, which can either be a tool like Create React App,
+// in which case we just return the framework. The user cannot change the
+// bundler.
+
+// If we don't find a specific framework, but we do find a library and/or
+// bunlder, we return both the framework, which might just be "React",
+// and the bundler, which could be Vite.
+export function detect (pkg: PkgJson): DetectFramework | undefined {
+  const inPkgJson = (detector: Detector) => {
+    const vers = pkg.dependencies?.[detector.dependency] || pkg.devDependencies?.[detector.dependency]
+
+    return (vers && satisfies(vers, detector.version)) ?? false
+  }
+
+  for (const framework of FRONTEND_FRAMEWORKS) {
+    const hasAllDeps = [...framework.detectors].every(inPkgJson)
 
     if (hasAllDeps) {
-      return framework
+      if (framework.supportedBundlers.length === 1) {
+        return {
+          framework,
+        }
+      }
+
+      // multiple bundlers supported, eg React works with webpack and Vite.
+      // try to infer which one they are using.
+      for (const bundler of bundlers) {
+        const b = [...bundler.detectors].every(inPkgJson)
+
+        if (b) {
+          return {
+            framework,
+            bundler: bundler.type,
+          }
+        }
+      }
+
+      return {
+        framework,
+      }
     }
   }
 
