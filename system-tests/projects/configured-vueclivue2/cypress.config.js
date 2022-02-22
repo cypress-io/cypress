@@ -5,7 +5,7 @@ module.exports = {
   component: {
     devServer,
     devServerConfig: {
-      webpackConfig
-    }
-  }
+      webpackConfig,
+    },
+  },
 }
