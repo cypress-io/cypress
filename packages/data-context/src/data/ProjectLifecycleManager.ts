@@ -1035,7 +1035,9 @@ export class ProjectLifecycleManager {
     })
 
     debug('trigger the load of the file')
-    ipc.send('loadConfig')
+    ipc.once('ready', () => {
+      ipc.send('loadConfig')
+    })
 
     return ipc
   }

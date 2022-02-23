@@ -152,6 +152,8 @@ function run (ipc, configFile, projectRoot) {
       ))
     }
   })
+
+  ipc.send('ready')
 }
 
 module.exports = run
