@@ -197,13 +197,13 @@ export class MigrationDataSource {
 
     const specs = await getSpecs(this.ctx.currentProject, config)
 
-    const canBeAutomaticallyMigrated: MigrationFile[] = specs.integration.map(applyMigrationTransform)
+    const canBeAutomaticallyMigrated: MigrationFile[] = specs.integration.map(applyMigrationTransform).filter((spec) => spec.before.relative !== spec.after.relative)
 
     const defaultComponentPattern = isDefaultTestFiles(await this.parseCypressConfig(), 'component')
 
     // Can only migration component specs if they use the default testFiles pattern.
     if (defaultComponentPattern) {
-      canBeAutomaticallyMigrated.push(...specs.component.map(applyMigrationTransform))
+      canBeAutomaticallyMigrated.push(...specs.component.map(applyMigrationTransform).filter((spec) => spec.before.relative !== spec.after.relative))
     }
 
     return canBeAutomaticallyMigrated
