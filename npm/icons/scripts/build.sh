@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 rm -rf dist && mkdir dist && mkdir dist/icons
 iconutil -c icns src/cypress.iconset -o dist/icons/cypress.icns
 cp -r src/* dist
