@@ -70,6 +70,22 @@ function renameSupport (lang: 'js' | 'ts' = 'js') {
   }, { lang })
 }
 
+describe('Opening unmigrated project', () => {
+  it('legacy project with --e2e', () => {
+    cy.scaffoldProject('migration')
+    cy.openProject('migration', ['--e2e'])
+    cy.visitLaunchpad()
+    cy.get('h1').should('contain', 'Migration')
+  })
+
+  it('legacy project with --component', () => {
+    cy.scaffoldProject('migration-component-testing')
+    cy.openProject('migration-component-testing', ['--component'])
+    cy.visitLaunchpad()
+    cy.get('h1').should('contain', 'Migration')
+  })
+})
+
 describe('Full migration flow for each project', { retries: { openMode: 2, runMode: 2 } }, () => {
   it('completes journey for migration-component-testing', () => {
     startMigrationFor('migration-component-testing')

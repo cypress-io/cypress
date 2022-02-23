@@ -18,34 +18,6 @@ describe('Launchpad: Open Mode', () => {
     })
   })
 
-  it('opens correctly in unconfigured project with --e2e', () => {
-    cy.scaffoldProject('pristine')
-    cy.openProject('pristine', ['--e2e'])
-    cy.visitLaunchpad()
-    cy.get('h1').should('contain', 'Project Setup')
-  })
-
-  it('opens correctly in unconfigured project with --component', () => {
-    cy.scaffoldProject('pristine')
-    cy.openProject('pristine', ['--component'])
-    cy.visitLaunchpad()
-    cy.get('h1').should('contain', 'Project Setup')
-  })
-
-  it('opens migration for legacy project with --e2e', () => {
-    cy.scaffoldProject('migration')
-    cy.openProject('migration', ['--e2e'])
-    cy.visitLaunchpad()
-    cy.get('h1').should('contain', 'Migration')
-  })
-
-  it('opens migration for legacy project with --component', () => {
-    cy.scaffoldProject('migration-component-testing')
-    cy.openProject('migration-component-testing', ['--component'])
-    cy.visitLaunchpad()
-    cy.get('h1').should('contain', 'Migration')
-  })
-
   it('goes directly to e2e tests when launched with --e2e', () => {
     cy.scaffoldProject('todos')
     cy.openProject('todos', ['--e2e'])
