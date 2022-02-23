@@ -33,7 +33,7 @@ describe('basic login', { experimentalSessionSupport: true, experimentalMultiDom
 
     // Scenario, Token based auth. Visit site, manually redirect to IDP hosted on secondary domain, login and redirect back to site.
     // TODO: these were being flaky on firefox, disable until we have a trailing wait
-    it('does not redirect', () => {
+    it.skip('does not redirect', () => {
       cy.visit('/fixtures/auth/index.html') // Establishes Primary Domain
       // Missing the call to go to idp.com
       cy.window().then((win) => {
@@ -56,7 +56,7 @@ describe('basic login', { experimentalSessionSupport: true, experimentalMultiDom
   describe('visit secondary first', () => {
     // Problem: where does the primary domain get established
     // TODO: these were being flaky on firefox, disable until we have a trailing wait
-    it('logs in with idp redirect', () => {
+    it.skip('logs in with idp redirect', () => {
       cy.window().then((win) => {
         win.location.href = 'http://www.foobar.com:3500/fixtures/auth/idp.html'
       })
