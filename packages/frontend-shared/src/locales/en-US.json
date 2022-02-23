@@ -516,12 +516,12 @@
         "title": "Migrating to a new spec file pattern",
         "step1": {
           "warning": "We strongly recommend having your spec files end in *.cy.* to avoid framework conflicts.",
-          "line1": "You can create new specs without leaving your browser.",
+          "line1": "You can create new specs without leaving your browser",
           "line2": "All new spec files created within Cypress will use the default pattern of: ",
-          "line3": "Your E2E test naming will be consistent with any component tests you can create in the future.",
+          "line3": "Your E2E test naming will be consistent with any component tests you can create in the future",
           "line4": "All documentation and example code will be using: ",
           "line5": "We've changed the placement of component specs to be next to their source files (e.g. src/Button.jsx and src/Button.cy.jsx)",
-          "line6": "Using *.cy.* ensures your tests (component or E2E) don't collide with your unit tests (e.g. Jest or Vitest).",
+          "line6": "Using *.cy.* ensures your tests (component or E2E) don't collide with your unit tests (e.g. Jest or Vitest)",
           "buttonProceed": "Continue, please rename my specs to end in *.cy.*",
           "buttonCancel": "Cancel, keep the default extension"
         },
