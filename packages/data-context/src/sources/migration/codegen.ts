@@ -319,11 +319,11 @@ export async function cleanUpIntegrationFolder (projectRoot: string) {
 export function renameSupportFilePath (relative: string) {
   const res = new RegExp(supportFileRegexps.e2e.beforeRegexp).exec(relative)
 
-  if (!res?.groups?.name) {
+  if (!res?.groups?.supportFileName) {
     throw new NonStandardMigrationError('support')
   }
 
-  return relative.replace(res.groups.name, 'e2e')
+  return relative.slice(0, res.index) + relative.slice(res.index).replace(res.groups.supportFileName, 'e2e')
 }
 
 export function reduceConfig (cfg: OldCypressConfig): ConfigOptions {

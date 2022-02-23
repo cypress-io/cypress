@@ -38,12 +38,12 @@ export function substitute (part: FilePart): FilePart {
   }
 
   // basic.spec.js -> basic.cy.js
-  if (part.group === 'extension') {
+  if (part.group === 'preExtension') {
     return { ...part, text: '.cy.' }
   }
 
   // support/index.js -> support/e2e.js
-  if (part.group === 'name' && part.text === 'index') {
+  if (part.group === 'supportFileName' && part.text === 'index') {
     return { ...part, text: 'e2e' }
   }
 

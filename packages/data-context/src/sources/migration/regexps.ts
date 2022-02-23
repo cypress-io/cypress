@@ -4,33 +4,33 @@
  *
  * matches
  * - file.spec.tsx -> ext=".spec."
- * - file_Spec.js -> ext="_Spec."
+ * - file_Spec.jsx -> ext="_Spec."
  * - file-spec.js -> ext="-spec."
- * - spec.js -> ext="."
+ * - spec.jsx -> ext="."
  *
- * The final objective being to be able to replace it with ".cy."
+ * The final objective being to be able to replace "ext" with ".cy."
  */
-const specExtRe = '(?<!\/)[._-]?[s|S]pec.|[.])(?=([j|t]s[x]|coffee)?'
+const specExtRe = '([._-]?[s|S]pec)?[.])(?<extension>([j|t]s[x]?|coffee)'
 
 export const regexps = {
   e2e: {
     before: {
-      defaultFolderDefaultTestFiles: `cypress\/(?<main>integration)\/.*?(?<ext>${specExtRe})`,
-      defaultFolderCustomTestFiles: `cypress\/(?<main>integration)\/.*`,
-      customFolderDefaultTestFiles: `.*?(?<ext>${specExtRe})`,
+      defaultFolderDefaultTestFiles: `cypress\/(?<folder>integration)\/(?<fileName>[^\/]+?)(?<preExtension>${specExtRe})$`,
+      defaultFolderCustomTestFiles: `cypress\/(?<folder>integration)\/(?<fileName>[^\/]+)$`,
+      customFolderDefaultTestFiles: `(?<fileName>[^\/]+?)(?<preExtension>${specExtRe})$`,
     },
   },
   component: {
     before: {
-      defaultFolderDefaultTestFiles: `cypress\/component\/.*?(?<ext>${specExtRe})`,
-      customFolderDefaultTestFiles: `.*?(?<ext>${specExtRe})`,
+      defaultFolderDefaultTestFiles: `(?<componentFolder>cypress\/component\/)(?<fileName>[^\/]+?)(?<preExtension>${specExtRe})`,
+      customFolderDefaultTestFiles: `(?<fileName>[^\/]+?)(?<preExtension>${specExtRe})`,
     },
   },
 } as const
 
 export const supportFileRegexps = {
   e2e: {
-    beforeRegexp: 'cypress[\\\\/]support[\\\\/](?<name>index)\.(?=(?:[j|t]sx?|coffee))',
-    afterRegexp: 'cypress[\\\\/]support[\\\\/](?<name>e2e)\.(?=(?:[j|t]sx?|coffee))',
+    beforeRegexp: 'cypress[\\\\/]support[\\\\/](?<supportFileName>index)(?<extension>\.(?:[j|t]sx?|coffee))',
+    afterRegexp: 'cypress[\\\\/]support[\\\\/](?<supportFileName>e2e)(?<extension>\.(?:[j|t]sx?|coffee))',
   },
 } as const
