@@ -58,7 +58,7 @@ export const handleDomainFn = (cy: $Cy, specBridgeCommunicator: SpecBridgeDomain
       if (queueFinished) {
         // If the queue is already finished, send this event instead because
         // the primary won't be listening for 'queue:finished' anymore
-        specBridgeCommunicator.toPrimary('uncaught:error', { err }, { syncConfig: true })
+        specBridgeCommunicator.toPrimary('uncaught:error', { err })
 
         return
       }
@@ -94,7 +94,11 @@ export const handleDomainFn = (cy: $Cy, specBridgeCommunicator: SpecBridgeDomain
           syncConfig: !hasCommands,
         })
 
-        if (!hasCommands) return
+        if (!hasCommands) {
+          queueFinished = true
+
+          return
+        }
       }
     } catch (err) {
       specBridgeCommunicator.toPrimary('ran:domain:fn', { err }, { syncConfig: true })
