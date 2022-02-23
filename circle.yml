@@ -61,8 +61,8 @@ executors:
   cy-doc:
     docker:
       - image: cypress/browsers:node16.5.0-chrome94-ff93
-    # by default, we use "small" to save on CI costs. bump on a per-job basis if needed.
-    resource_class: small
+    # by default, we use "medium" to balance performance + CI costs. bump or reduce on a per-job basis if needed.
+    resource_class: medium
     environment:
       PLATFORM: linux
 
@@ -1024,6 +1024,7 @@ jobs:
   # individual jobs are finished, it closes the Percy build
   percy-finalize:
     <<: *defaults
+    resource_class: small
     parameters:
       <<: *defaultsParameters
       required_env_var:
@@ -1056,7 +1057,7 @@ jobs:
 
   cli-visual-tests:
     <<: *defaults
-    parallelism: 8
+    resource_class: small
     steps:
       - restore_cached_workspace
       - run: mkdir -p cli/visual-snapshots
@@ -1133,7 +1134,7 @@ jobs:
 
   unit-tests-release:
     <<: *defaults
-    resource_class: medium
+    resource_class: small
     parallelism: 1
     steps:
       - restore_cached_workspace
@@ -1142,7 +1143,6 @@ jobs:
   lint-types:
     <<: *defaults
     parallelism: 1
-    resource_class: medium
     steps:
       - restore_cached_workspace
       - run:
@@ -1174,7 +1174,6 @@ jobs:
 
   server-integration-tests:
     <<: *defaults
-    resource_class: medium
     parallelism: 1
     steps:
       - restore_cached_workspace
@@ -1207,7 +1206,6 @@ jobs:
 
   system-tests-chrome:
     <<: *defaults
-    resource_class: medium
     parallelism: 8
     steps:
       - run-system-tests:
@@ -1215,7 +1213,6 @@ jobs:
 
   system-tests-electron:
     <<: *defaults
-    resource_class: medium
     parallelism: 8
     steps:
       - run-system-tests:
@@ -1223,7 +1220,6 @@ jobs:
 
   system-tests-firefox:
     <<: *defaults
-    resource_class: medium
     parallelism: 8
     steps:
       - run-system-tests:
@@ -1231,7 +1227,6 @@ jobs:
 
   system-tests-non-root:
     <<: *defaults
-    resource_class: medium
     steps:
       - restore_cached_workspace
       - run:
@@ -1245,8 +1240,7 @@ jobs:
 
   run-frontend-shared-component-tests-chrome:
     <<: *defaults
-    resource_class: medium
-    parallelism: 1
+    parallelism: 3
     steps:
       - run-new-ui-tests:
           browser: chrome
@@ -1256,7 +1250,6 @@ jobs:
 
   run-launchpad-component-tests-chrome:
     <<: *defaults
-    resource_class: medium
     parallelism: 7
     steps:
       - run-new-ui-tests:
@@ -1274,7 +1267,7 @@ jobs:
         type: string
         default: medium
     resource_class: << parameters.resource_class >>
-    parallelism: 2
+    parallelism: 3
     steps:
       - run-new-ui-tests:
           browser: chrome
@@ -1284,7 +1277,6 @@ jobs:
 
   run-app-component-tests-chrome:
     <<: *defaults
-    resource_class: medium
     parallelism: 7
     steps:
       - run-new-ui-tests:
@@ -1301,7 +1293,7 @@ jobs:
         type: string
         default: medium
     resource_class: << parameters.resource_class >>
-    parallelism: 4
+    parallelism: 8
     steps:
       - run-new-ui-tests:
           browser: chrome
@@ -1311,7 +1303,6 @@ jobs:
 
   driver-integration-tests-chrome:
     <<: *defaults
-    resource_class: medium
     parallelism: 5
     steps:
       - run-driver-integration-tests:
@@ -1320,7 +1311,6 @@ jobs:
 
   driver-integration-tests-chrome-beta:
     <<: *defaults
-    resource_class: medium
     parallelism: 5
     steps:
       - run-driver-integration-tests:
@@ -1329,7 +1319,6 @@ jobs:
 
   driver-integration-tests-firefox:
     <<: *defaults
-    resource_class: medium
     parallelism: 5
     steps:
       - run-driver-integration-tests:
@@ -1337,7 +1326,6 @@ jobs:
 
   driver-integration-tests-electron:
     <<: *defaults
-    resource_class: medium
     parallelism: 5
     steps:
       - run-driver-integration-tests:
@@ -1345,7 +1333,7 @@ jobs:
 
   reporter-integration-tests:
     <<: *defaults
-    resource_class: medium
+    parallelism: 3
     steps:
       - restore_cached_workspace
       - run:
@@ -1397,7 +1385,6 @@ jobs:
 
   npm-webpack-preprocessor:
     <<: *defaults
-    resource_class: medium
     steps:
       - restore_cached_workspace
       - run:
@@ -1435,7 +1422,6 @@ jobs:
 
   npm-webpack-dev-server:
     <<: *defaults
-    resource_class: medium
     steps:
       - restore_cached_workspace
       - run:
@@ -1458,6 +1444,7 @@ jobs:
 
   npm-webpack-batteries-included-preprocessor:
     <<: *defaults
+    resource_class: small
     steps:
       - restore_cached_workspace
       - run:
@@ -1466,8 +1453,6 @@ jobs:
 
   npm-vue:
     <<: *defaults
-    resource_class: medium
-    parallelism: 3
     steps:
       - restore_cached_workspace
       - run:
@@ -1493,7 +1478,6 @@ jobs:
 
   npm-design-system:
     <<: *defaults
-    resource_class: medium
     steps:
       - restore_cached_workspace
       - run:
@@ -1542,7 +1526,6 @@ jobs:
   npm-react:
     <<: *defaults
     parallelism: 8
-    resource_class: medium
     steps:
       - restore_cached_workspace
       - run:
@@ -1569,6 +1552,7 @@ jobs:
 
   npm-create-cypress-tests:
     <<: *defaults
+    resource_class: small
     steps:
       - restore_cached_workspace
       - run: yarn workspace create-cypress-tests build
@@ -1586,6 +1570,7 @@ jobs:
 
   npm-cypress-schematic:
       <<: *defaults
+      resource_class: small
       steps:
         - restore_cached_workspace
         - run:
@@ -1639,7 +1624,6 @@ jobs:
 
   test-kitchensink:
     <<: *defaults
-    resource_class: medium
     steps:
       - clone-repo-and-checkout-branch:
           repo: cypress-example-kitchensink
@@ -1680,7 +1664,6 @@ jobs:
 
   test-kitchensink-against-staging:
     <<: *defaults
-    resource_class: medium
     steps:
       - clone-repo-and-checkout-branch:
           repo: cypress-example-kitchensink
@@ -1706,7 +1689,6 @@ jobs:
 
   test-against-staging:
     <<: *defaults
-    resource_class: medium
     steps:
       - clone-repo-and-checkout-branch:
           repo: cypress-test-tiny
@@ -1790,6 +1772,7 @@ jobs:
 
   test-npm-module-on-minimum-node-version:
     <<: *defaults
+    resource_class: small
     docker:
       - image: cypress/base:12.0.0-libgbm
     steps:
@@ -1827,6 +1810,7 @@ jobs:
         type: string
         default: /root/test-cypress-and-jest
     <<: *defaults
+    resource_class: small
     steps:
       - restore_workspace_binaries
       - run: mkdir <<parameters.wd>>
@@ -1862,6 +1846,7 @@ jobs:
         type: string
         default: /root/test-full-typescript
     <<: *defaults
+    resource_class: small
     steps:
       - restore_workspace_binaries
       - run: mkdir <<parameters.wd>>
@@ -1979,7 +1964,6 @@ jobs:
 
   test-binary-against-kitchensink:
     <<: *defaults
-    resource_class: medium
     steps:
       - test-binary-against-repo:
           repo: cypress-example-kitchensink
@@ -1988,7 +1972,6 @@ jobs:
 
   test-binary-against-kitchensink-firefox:
     <<: *defaults
-    resource_class: medium
     steps:
       - test-binary-against-repo:
           repo: cypress-example-kitchensink
@@ -1997,7 +1980,6 @@ jobs:
 
   test-binary-against-kitchensink-chrome:
     <<: *defaults
-    resource_class: medium
     steps:
       - test-binary-against-repo:
           repo: cypress-example-kitchensink
@@ -2006,7 +1988,6 @@ jobs:
 
   test-binary-against-todomvc-firefox:
     <<: *defaults
-    resource_class: medium
     steps:
       - test-binary-against-repo:
           repo: cypress-example-todomvc
@@ -2014,7 +1995,6 @@ jobs:
 
   test-binary-against-conduit-chrome:
     <<: *defaults
-    resource_class: medium
     steps:
       - test-binary-against-repo:
           repo: cypress-example-conduit-app
@@ -2032,7 +2012,6 @@ jobs:
 
   test-binary-against-piechopper-firefox:
     <<: *defaults
-    resource_class: medium
     steps:
       - test-binary-against-repo:
           repo: cypress-example-piechopper
@@ -2050,7 +2029,6 @@ jobs:
 
   test-binary-as-specific-user:
     <<: *defaults
-    resource_class: medium
     steps:
       - restore_workspace_binaries
       # the user should be "node"
