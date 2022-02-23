@@ -1,5 +1,6 @@
 <template>
   <TerminalPrompt
+    v-if="props.gql.wizard.installDependenciesCommand"
     class="m-24px"
     :command="props.gql.wizard.installDependenciesCommand"
     :project-folder-name="projectFolder"
