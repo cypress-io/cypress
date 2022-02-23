@@ -30,7 +30,7 @@ export class WizardDataSource {
     }
 
     const packages: PackageToInstall[] = [
-      ...[...this.chosenFramework.packages].map((pkg) => {
+      ...this.chosenFramework.packages.map((pkg) => {
         return {
           name: pkg.name,
           description: PACKAGES_DESCRIPTIONS[pkg.package],
