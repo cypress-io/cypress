@@ -11,13 +11,12 @@ import $Log from '../cypress/log'
 import { bindToListeners } from '../cy/listeners'
 import { SpecBridgeDomainCommunicator } from './communicator'
 import { handleDomainFn } from './domain_fn'
-import { handleCommands } from './commands'
 import { handleLogs } from './events/logs'
 import { handleSocketEvents } from './events/socket'
-import { handleSpecWindowEvents } from './events/spec_window_events'
+import { handleSpecWindowEvents } from './events/spec_window'
 import { handleErrorEvent } from './events/errors'
 import { handleScreenshots } from './events/screenshots'
-import { handleTestEvents } from './events/test_events'
+import { handleTestEvents } from './events/test'
 import { handleMiscEvents } from './events/misc'
 import { handleUnsupportedAPIs } from './unsupported_apis'
 
@@ -67,7 +66,6 @@ const setup = (cypressConfig: Cypress.Config, env: Cypress.ObjectLike) => {
   Cypress.isCy = cy.isCy
 
   handleDomainFn(cy, specBridgeCommunicator)
-  handleCommands(Cypress, cy, specBridgeCommunicator)
   handleLogs(Cypress, specBridgeCommunicator)
   handleSocketEvents(Cypress)
   handleSpecWindowEvents(cy)

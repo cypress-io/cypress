@@ -252,39 +252,10 @@ export class CommandQueue extends Queue<Command> {
 
   // TypeScript doesn't allow overriding functions with different type signatures
   // @ts-ignore
-  run (autoRun = true) {
-    let pause = false
-
+  run () {
     const next = () => {
       // start at 0 index if one is not already set
       let index = this.state('index') || this.state('index', 0)
-
-      // if at the end of the queue when not auto-running, pause will be true
-      // but since there's nothing left in the queue to move things forward,
-      // ignore and reset the pause, then let the queue finish
-      if (!autoRun && pause && !this.at(index)) {
-        pause = false
-
-        return next()
-      }
-
-      // when running in a secondary domain (SD), the primary domain (PD)
-      // has proxy commands that represent the real commands run in the SD.
-      // for everything to sync up properly, the PD controls the running of
-      // the queue by running each proxy command which in turns communicates
-      // to its real command, telling it to run. this means in the SD, we
-      // need to pause the queue and wait for the signal to run the next
-      // command. this is done here by inserting this promise into the queue
-      // and resolving once state('next') is called (said signal)
-      if (!autoRun && pause) {
-        return new Promise((resolve) => {
-          this.state('next', () => {
-            this.state('next', null)
-            pause = false
-            resolve(next())
-          })
-        })
-      }
 
       // bail if we've been told to abort in case
       // an old command continues to run after
@@ -307,10 +278,6 @@ export class CommandQueue extends Queue<Command> {
         this.state('subject', command.get('subject'))
 
         Cypress.action('cy:skipped:command:end', command)
-
-        if (!autoRun) {
-          pause = true
-        }
 
         return next()
       }
@@ -364,10 +331,6 @@ export class CommandQueue extends Queue<Command> {
         Cypress.action('cy:command:end', command)
 
         fn = this.state('onPaused')
-
-        if (!autoRun) {
-          pause = true
-        }
 
         if (fn) {
           return new Bluebird((resolve) => {

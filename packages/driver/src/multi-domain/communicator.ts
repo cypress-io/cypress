@@ -127,30 +127,30 @@ export class PrimaryDomainCommunicator extends EventEmitter {
 export class SpecBridgeDomainCommunicator extends EventEmitter {
   private windowReference
 
-  private handleSubjectAndErr = (event, data) => {
-    const { subject, err, ...other } = data
+  private handleSubjectAndErr = (data: any = {}, send: (data: any) => void) => {
+    const { subject, err, ...rest } = data
+
+    if (!subject && !err) {
+      return send(rest)
+    }
 
     try {
       // We always want to make sure errors are posted, so clean it up to send.
-      const preProcessedError = preprocessErrorForPostMessage(err)
-
-      this.toPrimary(event, { subject, err: preProcessedError, ...other })
-    } catch (error: any) {
-      if (subject && error.name === 'DataCloneError') {
+      send({ ...rest, subject, err: preprocessErrorForPostMessage(err) })
+    } catch (err: any) {
+      if (subject && err.name === 'DataCloneError') {
         // Send the type of object that failed to serialize.
-        const failedToSerializeSubjectOfType = typeof subject
-
-        // If the subject threw the 'DataCloneError', the subject cannot be serialized at which point try again with an undefined subject.
-        this.handleSubjectAndErr(event, { failedToSerializeSubjectOfType, ...other })
-      } else {
-        // Try to send the message again, with the new error.
-        this.handleSubjectAndErr(event, { err: error, ...other })
-        throw error
+        // If the subject threw the 'DataCloneError', the subject cannot be
+        // serialized, at which point try again with an undefined subject.
+        return this.handleSubjectAndErr({ ...rest, unserializableSubjectType: typeof subject }, send)
       }
+
+      // Try to send the message again, with the new error.
+      this.handleSubjectAndErr({ ...rest, err }, send)
     }
   }
 
-  private resyncConfigEnvToPrimary = () => {
+  private syncConfigEnvToPrimary = () => {
     this.toPrimary('sync:config', {
       config: preprocessConfig(Cypress.config()),
       env: preprocessEnv(Cypress.env()),
@@ -179,31 +179,14 @@ export class SpecBridgeDomainCommunicator extends EventEmitter {
    * @param {string} event - the name of the event to be sent.
    * @param {any} data - any meta data to be sent with the event.
    */
-  toPrimary (event: string, data?: any) {
-    let prefixedEvent = `${CROSS_DOMAIN_PREFIX}${event}`
+  toPrimary (event: string, data?: any, options = { syncConfig: false }) {
+    if (options.syncConfig) this.syncConfigEnvToPrimary()
 
-    this.windowReference.top.postMessage({ event: prefixedEvent, data }, '*')
-  }
-
-  toPrimaryCommandEnd (data: {id: string, subject?: any, name: string, err?: any, logId: string }) {
-    this.handleSubjectAndErr('command:end', data)
-  }
-
-  toPrimaryRanDomainFn (data: { subject?: any, err?: any, resyncConfig: boolean }) {
-    if (data?.resyncConfig) {
-      this.resyncConfigEnvToPrimary()
-    }
-
-    this.handleSubjectAndErr('ran:domain:fn', data)
-  }
-
-  toPrimaryQueueFinished () {
-    this.resyncConfigEnvToPrimary()
-    this.toPrimary('queue:finished')
-  }
-
-  toPrimaryError (event, data: { subject?: any, err?: any}) {
-    this.resyncConfigEnvToPrimary()
-    this.handleSubjectAndErr(event, data)
+    this.handleSubjectAndErr(data, (data: any) => {
+      this.windowReference.top.postMessage({
+        event: `${CROSS_DOMAIN_PREFIX}${event}`,
+        data,
+      }, '*')
+    })
   }
 }

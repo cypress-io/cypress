@@ -37,7 +37,7 @@
     "eslint-plugin-json-format": "^2.0.1",
     "eslint-plugin-mocha": "^8.1.0",
     "eslint-plugin-react": "^7.22.0",
-    "fs-extra": "^9.0.1",
+    "fs-extra": "^9.1.0",
     "graphql": "14.0.0",
     "mocha": "^8.1.1",
     "react": "^16.13.1",

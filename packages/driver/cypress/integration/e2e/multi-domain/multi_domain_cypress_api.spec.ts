@@ -204,19 +204,28 @@ describe('multi-domain Cypress API', { experimentalSessionSupport: true, experim
       })
     })
 
-    it('log()', (done) => {
-      cy.on('log:changed', (changedLog) => {
-        if (changedLog?.message === 'test log' && changedLog.ended) {
-          // just make sure Big Cypress logs make their way back to the primary
-          done()
-        }
-      })
-
+    // FIXME: convert to cypress-in-cypress tests once possible
+    it('log()', () => {
       cy.switchToDomain('foobar.com', () => {
         Cypress.log({
           message: 'test log',
         })
       })
+
+      // logs in the secondary domain skip the primary driver, going through
+      // the runner to the reporter, so we have to break out of the AUT and
+      // test the actual command log.
+      // this is a bit convoluted since otherwise the test could falsely pass
+      // by finding its own log if we simply did `.contains('test log')`
+      cy.wrap(Cypress.$(window.top!.document.body))
+      .find('.reporter')
+      .contains('.runnable-title', 'log()')
+      .closest('.runnable')
+      .find('.runnable-commands-region .hook-item')
+      .eq(1)
+      .contains('.command-number', '2')
+      .closest('.command-wrapper-text')
+      .contains('test log')
     })
   })
 
