@@ -43,7 +43,7 @@ export class WizardActions {
 
     // if the previous bundler was incompatible with the
     // new framework, we need to reset it
-    if ((chosenBundler && !this.ctx.wizard.chosenFramework?.supportedBundlers.includes(chosenBundler))
+    if ((chosenBundler && new Set(this.ctx.wizard.chosenFramework?.supportedBundlers).has(chosenBundler))
     || !['react', 'vue'].includes(prevFramework)) {
       return this.setBundler(null)
     }
