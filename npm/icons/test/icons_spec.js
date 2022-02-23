@@ -8,10 +8,6 @@ describe('Cypress Icons', function () {
     expect(icons.getPathToFavicon('favicon-red.ico')).to.eq(`${cwd }/dist/favicon/favicon-red.ico`)
   })
 
-  it('returns path to tray', function () {
-    expect(icons.getPathToTray('mac-normal-inverse.png')).to.eq(`${cwd }/dist/tray/mac-normal-inverse.png`)
-  })
-
   it('returns path to icon', function () {
     expect(icons.getPathToIcon('cypress.icns')).to.eq(`${cwd }/dist/icons/cypress.icns`)
   })

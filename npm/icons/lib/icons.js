@@ -12,10 +12,6 @@ module.exports = {
     return distPath('favicon', filename)
   },
 
-  getPathToTray: (filename) => {
-    return distPath('tray', filename)
-  },
-
   getPathToIcon: (filename) => {
     return distPath('icons', filename)
   },
