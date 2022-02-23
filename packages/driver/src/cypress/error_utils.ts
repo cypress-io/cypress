@@ -52,8 +52,14 @@ const prepareErrorForSerialization = (err) => {
   return err
 }
 
+// some errors, probably from user callbacks, might be boolean, number or falsy values
+// which means serializing will not provide any useful context
+const isSerializableError = (err) => {
+  return !!err && (typeof err === 'object' || typeof err === 'string')
+}
+
 const wrapErr = (err) => {
-  if (!err) return
+  if (!isSerializableError(err)) return
 
   prepareErrorForSerialization(err)
 
