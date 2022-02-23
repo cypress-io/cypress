@@ -35,7 +35,9 @@ export const WizardFrontendFramework = objectType({
     t.nonNull.list.nonNull.field('supportedBundlers', {
       type: WizardBundler,
       description: 'All of the supported bundlers for this framework',
-      resolve: () => Array.from(BUNDLER_DEPS),
+      resolve: (source, args, ctx) => {
+        return BUNDLER_DEPS.filter((b) => source.supportedBundlers.some((x) => x === b.type))
+      },
     })
   },
 
