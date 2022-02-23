@@ -1,3 +1,5 @@
+const stripAnsi = require('strip-ansi')
+
 const { assertLogLength } = require('../../support/utils')
 const { Promise } = Cypress
 
@@ -129,6 +131,10 @@ describe('src/cy/commands/fixtures', () => {
 
           expect(err.message).to.include('A fixture file could not be found')
           expect(err.message).to.include('cypress/fixtures/err')
+
+          // ensure ansi color codes are not embedded in the error msg
+          // https://github.com/cypress-io/cypress/issues/20208
+          expect(err.message).to.eq(stripAnsi(err.message))
 
           done()
         })
