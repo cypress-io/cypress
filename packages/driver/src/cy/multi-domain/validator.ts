@@ -11,7 +11,7 @@ export class Validator {
     this.onFailure = onFailure
   }
 
-  validate ({ callbackFn, data, domain, done, doneReference }) {
+  validate ({ callbackFn, data, domain }) {
     if (typeof domain !== 'string') {
       this.onFailure()
 
@@ -36,15 +36,6 @@ export class Validator {
       $errUtils.throwErrByPath('switchToDomain.invalid_fn_argument', {
         onFail: this.log,
         args: { arg: $utils.stringify(callbackFn) },
-      })
-    }
-
-    // verifies the done argument is actually the done fn
-    if (done && done !== doneReference) {
-      this.onFailure()
-
-      $errUtils.throwErrByPath('switchToDomain.done_reference_mismatch', {
-        onFail: this.log,
       })
     }
   }
