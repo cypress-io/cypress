@@ -5,7 +5,7 @@
  * - file_Spec.js
  * - file-spec.js
  */
-const specExtRe = '(?<!\/)[._-]?(?:[s|S]pec|[t|T]est)?[.])(?=[j|t]s[x]?'
+const specExtRe = '(?<!\/)[._-]?(?:[s|S]pec|[t|T]est)?[.])(?=(?:[j|t]s[x]|coffee)?'
 
 export const regexps = {
   e2e: {
@@ -25,7 +25,7 @@ export const regexps = {
 
 export const supportFileRegexps = {
   e2e: {
-    beforeRegexp: 'cypress[\\\\/]support[\\\\/](?<name>index)\.(?=[j|t]sx?)',
-    afterRegexp: 'cypress[\\\\/]support[\\\\/](?<name>e2e)\.(?=[j|t]sx?)',
+    beforeRegexp: 'cypress[\\\\/]support[\\\\/](?<name>index)\.(?=(?:[j|t]sx?|coffee))',
+    afterRegexp: 'cypress[\\\\/]support[\\\\/](?<name>e2e)\.(?=(?:[j|t]sx?|coffee))',
   },
 } as const
