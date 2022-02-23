@@ -9,8 +9,7 @@
     "check-ts": "tsc --noEmit",
     "clean": "rm -f ./src/*.js ./src/**/*.js ./src/**/**/*.js ./test/**/*.js || echo 'cleaned'",
     "clean-deps": "rm -rf node_modules",
-    "test-integration": "mocha -r @packages/ts/register test/integration/**/*.spec.ts --config ./test/.mocharc.js --exit",
-    "test-unit": "mocha -r @packages/ts/register test/unit/**/*.spec.ts --config ./test/.mocharc.js --exit"
+    "test-unit": "mocha -r @packages/ts/register 'test/unit/**' --config ./test/.mocharc.js --exit"
   },
   "dependencies": {
     "compare-versions": "4.1.3"
