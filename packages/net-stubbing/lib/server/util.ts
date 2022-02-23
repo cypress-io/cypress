@@ -251,10 +251,6 @@ export function getBodyEncoding (req: CyHttpMessages.IncomingRequest): BodyEncod
     if (contentType.includes('charset=utf-8') || contentType.includes('charset="utf-8"')) {
       return 'utf8'
     }
-
-    if (contentType.includes('multipart/form-data')) {
-      return 'binary'
-    }
   }
 
   // with fallback to inspecting the buffer using
