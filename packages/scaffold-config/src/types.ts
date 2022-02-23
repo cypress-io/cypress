@@ -1,5 +1,5 @@
 import type { BUNDLER_DEPS, STORYBOOK_DEPS, CODE_GEN_FRAMEWORKS, DEPENDENCIES } from './constants'
-import type { FRONTEND_FRAMEWORKS } from './configFiles'
+import type { FRONTEND_FRAMEWORKS } from './frameworks'
 
 export type AllPackages = FrontendFramework['packages'][number]
 | typeof BUNDLER_DEPS[number]
