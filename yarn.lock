@@ -12461,7 +12461,7 @@ binary-extensions@^2.0.0:
   resolved "https://registry.yarnpkg.com/binary-extensions/-/binary-extensions-2.2.0.tgz#75f502eeaf9ffde42fc98829645be4ea76bd9e2d"
   integrity sha512-jDctJ/IVQbZoJykoeHbhXpOlNBqGNcwXJKJog42E5HDPUwQTSdjCHdihjj0DlnheQ7blbT6dHOafNAiS8ooQKA==
 
-binaryextensions@^4.18.0:
+binaryextensions@^4.15.0:
   version "4.18.0"
   resolved "https://registry.yarnpkg.com/binaryextensions/-/binaryextensions-4.18.0.tgz#22aeada2d14de062c60e8ca59a504a5636a76ceb"
   integrity sha512-PQu3Kyv9dM4FnwB7XGj1+HucW+ShvJzJqjuw1JkKVs1mWdwOKVcRjOi+pV9X52A0tNvrPCsPkbFFQb+wE1EAXw==
@@ -17376,6 +17376,13 @@ ecstatic@^3.3.2:
     mime "^1.6.0"
     minimist "^1.1.0"
     url-join "^2.0.5"
+
+editions@^6.1.0:
+  version "6.7.0"
+  resolved "https://registry.yarnpkg.com/editions/-/editions-6.7.0.tgz#2e54442e2f733770413a85f6682c5441e04a5249"
+  integrity sha512-c4277FrLdMcqEq/furtDBjXIhN+qPnBxng5IQRtJZEOttf0LTz7m5hm/D0GCwn9RXCBFgpTTc/x5DAuigZdBkw==
+  dependencies:
+    version-range "^1.2.0"
 
 editor@~1.0.0:
   version "1.0.0"
@@ -23884,13 +23891,14 @@ istanbul@0.4.5:
     which "^1.1.1"
     wordwrap "^1.0.0"
 
-istextorbinary@6.0.0:
-  version "6.0.0"
-  resolved "https://registry.yarnpkg.com/istextorbinary/-/istextorbinary-6.0.0.tgz#bc6e7541006bc203feffe16628d0a72893b2ad54"
-  integrity sha512-4j3UqQCa06GAf6QHlN3giz2EeFU7qc6Q5uB/aY7Gmb3xmLDLepDOtsZqkb4sCfJgFvTbLUinNw0kHgHs8XOHoQ==
+istextorbinary@5.12.0:
+  version "5.12.0"
+  resolved "https://registry.yarnpkg.com/istextorbinary/-/istextorbinary-5.12.0.tgz#2f84777838668fdf524c305a2363d6057aaeec84"
+  integrity sha512-wLDRWD7qpNTYubk04+q3en1+XZGS4vYWK0+SxNSXJLaITMMEK+J3o/TlOMyULeH1qozVZ9uUkKcyMA8odyxz8w==
   dependencies:
-    binaryextensions "^4.18.0"
-    textextensions "^5.14.0"
+    binaryextensions "^4.15.0"
+    editions "^6.1.0"
+    textextensions "^5.11.0"
 
 isurl@^1.0.0-alpha5:
   version "1.0.0"
@@ -38005,7 +38013,7 @@ text-table@0.2.0, text-table@^0.2.0, text-table@~0.2.0:
   resolved "https://registry.yarnpkg.com/text-table/-/text-table-0.2.0.tgz#7f5ee823ae805207c00af2df4a84ec3fcfa570b4"
   integrity sha1-f17oI66AUgfACvLfSoTsP8+lcLQ=
 
-textextensions@^5.14.0:
+textextensions@^5.11.0:
   version "5.14.0"
   resolved "https://registry.yarnpkg.com/textextensions/-/textextensions-5.14.0.tgz#a6ff6aee5faaa751e6157d422c722a2bfd59eedf"
   integrity sha512-4cAYwNFNYlIAHBUo7p6zw8POUvWbZor+/R0Tanv+rIhsauEyV9QSrEXL40pI+GfTQxKX8k6Tyw6CmdSDSmASrg==
@@ -39397,18 +39405,10 @@ url-parse-lax@^3.0.0:
   dependencies:
     prepend-http "^2.0.0"
 
-url-parse@1.5.6:
+url-parse@1.5.6, url-parse@^1.4.3, url-parse@^1.4.7:
   version "1.5.6"
   resolved "https://registry.yarnpkg.com/url-parse/-/url-parse-1.5.6.tgz#b2a41d5a233645f3c31204cc8be60e76a15230a2"
   integrity sha512-xj3QdUJ1DttD1LeSfvJlU1eiF1RvBSBfUu8GplFGdUzSO28y5yUtEl7wb//PI4Af6qh0o/K8545vUmucRrfWsw==
-  dependencies:
-    querystringify "^2.1.1"
-    requires-port "^1.0.0"
-
-url-parse@^1.4.3, url-parse@^1.4.7:
-  version "1.5.2"
-  resolved "https://registry.yarnpkg.com/url-parse/-/url-parse-1.5.2.tgz#a4eff6fd5ff9fe6ab98ac1f79641819d13247cda"
-  integrity sha512-6bTUPERy1muxxYClbzoRo5qtQuyoGEbzbQvi0SW4/8U8UyVkAQhWFBlnigqJkRm4su4x1zDQfNbEzWkt+vchcg==
   dependencies:
     querystringify "^2.1.1"
     requires-port "^1.0.0"
@@ -39689,6 +39689,18 @@ verror@^1.10.0:
     assert-plus "^1.0.0"
     core-util-is "1.0.2"
     extsprintf "^1.2.0"
+
+version-compare@^1.2.0:
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/version-compare/-/version-compare-1.4.0.tgz#6cbe26682ab6596b6f8e5f8a7ea3f46d2463ee27"
+  integrity sha512-mhSGH/W+zv2JuoeefqEbtfSCrHbQD4DhvYXplTnzIllJ58VMuMrRt+2zSmoUb0exBCSKVB05sTPirQwxFhUbbQ==
+
+version-range@^1.2.0:
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/version-range/-/version-range-1.4.0.tgz#f84cca416a6d99fc0ae59e7ca0ddc1b06cd43cb5"
+  integrity sha512-X5aUE7gsPxMld7+LENKEKolrtSDmF4xUcljaUz4uCZXQMj2D16UoyUkr4dYXhrsJjjgf7pe5SnDZQ1puz59kfw==
+  dependencies:
+    version-compare "^1.2.0"
 
 vfile-location@^3.0.0, vfile-location@^3.2.0:
   version "3.2.0"
