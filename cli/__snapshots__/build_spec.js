@@ -2,6 +2,7 @@ exports['package.json build outputs expected properties 1'] = {
   "name": "test",
   "engines": "test engines",
   "version": "x.y.z",
+  "buildInfo": "replaced by normalizePackageJson",
   "description": "Cypress.io end to end testing tool",
   "homepage": "https://github.com/cypress-io/cypress",
   "license": "MIT",
