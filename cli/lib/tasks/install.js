@@ -142,7 +142,7 @@ const validateOS = () => {
   })
 }
 
-const start = (options = {}) => {
+const start = async (options = {}) => {
   debug('installing with options %j', options)
 
   _.defaults(options, {
@@ -197,14 +197,11 @@ const start = (options = {}) => {
   const cacheDir = state.getCacheDir()
   const binaryDir = state.getBinaryDir(pkgVersion)
 
-  return validateOS().then((isValid) => {
-    if (!isValid) {
-      return throwFormErrorText(errors.invalidOS)()
-    }
-  })
-  .then(() => {
-    return fs.ensureDirAsync(cacheDir)
-  })
+  if (!(await validateOS())) {
+    return throwFormErrorText(errors.invalidOS)()
+  }
+
+  await fs.ensureDirAsync(cacheDir)
   .catch({ code: 'EACCES' }, (err) => {
     return throwFormErrorText(errors.invalidCacheDirectory)(stripIndent`
     Failed to access ${chalk.cyan(cacheDir)}:
@@ -212,18 +209,21 @@ const start = (options = {}) => {
     ${err.message}
     `)
   })
-  .then(() => state.getBinaryPkgAsync(binaryDir).then(state.getBinaryPkgVersion))
-  .then((binaryVersion) => {
-    if (!binaryUrlOverride && !buildInfo.stable) {
-      const computedBinaryUrl = getBinaryUrlFromBuildInfo(buildInfo)
 
-      binaryUrlOverride = computedBinaryUrl
-    }
+  const binaryPkg = await state.getBinaryPkgAsync(binaryDir)
+  const binaryVersion = await state.getBinaryPkgVersion(binaryPkg)
 
-    needVersion = binaryUrlOverride || needVersion
+  if (!binaryUrlOverride && buildInfo && !buildInfo.stable) {
+    const computedBinaryUrl = getBinaryUrlFromBuildInfo(buildInfo)
 
-    debug('installed version is', binaryVersion, 'version needed is', needVersion)
+    binaryUrlOverride = computedBinaryUrl
+  }
 
+  needVersion = binaryUrlOverride || needVersion
+
+  debug('installed version is', binaryVersion, 'version needed is', needVersion)
+
+  const shouldInstall = () => {
     if (!binaryVersion) {
       debug('no binary installed under cli version')
 
@@ -251,90 +251,84 @@ const start = (options = {}) => {
     }
 
     return true
-  })
-  .then((shouldInstall) => {
-    // noop if we've been told not to download
-    if (!shouldInstall) {
-      debug('Not downloading or installing binary')
+  }
 
-      return
-    }
+  // noop if we've been told not to download
+  if (!shouldInstall()) {
+    return debug('Not downloading or installing binary')
+  }
 
-    if (needVersion !== pkgVersion) {
-      logger.log(
-        chalk.yellow(stripIndent`
-          ${logSymbols.warning} Warning: Forcing a binary version different than the default.
+  if (needVersion !== pkgVersion) {
+    logger.log(
+      chalk.yellow(stripIndent`
+        ${logSymbols.warning} Warning: Forcing a binary version different than the default.
 
-            The CLI expected to install version: ${chalk.green(pkgVersion)}
+          The CLI expected to install version: ${chalk.green(pkgVersion)}
 
-            Instead we will install version: ${chalk.green(needVersion)}
+          Instead we will install version: ${chalk.green(needVersion)}
 
-            These versions may not work properly together.
-        `),
-      )
+          These versions may not work properly together.
+      `),
+    )
 
-      logger.log()
-    }
+    logger.log()
+  }
 
+  const getLocalFilePath = async () => {
     // see if version supplied is a path to a binary
-    return fs.pathExistsAsync(needVersion)
-    .then((exists) => {
-      if (exists) {
-        return path.extname(needVersion) === '.zip' ? needVersion : false
-      }
+    if (await fs.pathExistsAsync(needVersion)) {
+      return path.extname(needVersion) === '.zip' ? needVersion : false
+    }
 
-      const possibleFile = util.formAbsolutePath(needVersion)
+    const possibleFile = util.formAbsolutePath(needVersion)
 
-      debug('checking local file', possibleFile, 'cwd', process.cwd())
+    debug('checking local file', possibleFile, 'cwd', process.cwd())
 
-      return fs.pathExistsAsync(possibleFile)
-      .then((exists) => {
-        // if this exists return the path to it
-        // else false
-        if (exists && path.extname(possibleFile) === '.zip') {
-          return possibleFile
-        }
+    // if this exists return the path to it
+    // else false
+    if ((await fs.pathExistsAsync(possibleFile)) && path.extname(possibleFile) === '.zip') {
+      return possibleFile
+    }
 
-        return false
-      })
-    })
-    .then((pathToLocalFile) => {
-      if (pathToLocalFile) {
-        const absolutePath = path.resolve(needVersion)
+    return false
+  }
 
-        debug('found local file at', absolutePath)
-        debug('skipping download')
+  const pathToLocalFile = await getLocalFilePath()
 
-        const rendererOptions = getRendererOptions()
+  if (pathToLocalFile) {
+    const absolutePath = path.resolve(needVersion)
 
-        return new Listr([unzipTask({
-          progress: {
-            throttle: 100,
-            onProgress: null,
-          },
-          zipFilePath: absolutePath,
-          installDir,
-          rendererOptions,
-        })], { rendererOptions }).run()
-      }
+    debug('found local file at', absolutePath)
+    debug('skipping download')
 
-      if (options.force) {
-        debug('Cypress already installed at', installDir)
-        debug('but the installation was forced')
-      }
+    const rendererOptions = getRendererOptions()
 
-      debug('preparing to download and unzip version ', needVersion, 'to path', installDir)
+    return new Listr([unzipTask({
+      progress: {
+        throttle: 100,
+        onProgress: null,
+      },
+      zipFilePath: absolutePath,
+      installDir,
+      rendererOptions,
+    })], { rendererOptions }).run()
+  }
 
-      const downloadDir = os.tmpdir()
+  if (options.force) {
+    debug('Cypress already installed at', installDir)
+    debug('but the installation was forced')
+  }
 
-      return downloadAndUnzip({ version: needVersion, installDir, downloadDir })
-    })
-    // delay 1 sec for UX, unless we are testing
-    .then(() => {
-      return Promise.delay(1000)
-    })
-    .then(displayCompletionMsg)
-  })
+  debug('preparing to download and unzip version ', needVersion, 'to path', installDir)
+
+  const downloadDir = os.tmpdir()
+
+  await downloadAndUnzip({ version: needVersion, installDir, downloadDir })
+
+  // delay 1 sec for UX, unless we are testing
+  await Promise.delay(1000)
+
+  displayCompletionMsg()
 }
 
 module.exports = {
