@@ -3,7 +3,8 @@
   "baseUrl": "http://localhost:3500",
   "testFiles": "**/*",
   "hosts": {
-    "*.foobar.com": "127.0.0.1"
+    "*.foobar.com": "127.0.0.1",
+    "*.idp.com": "127.0.0.1"
   },
   "reporter": "cypress-multi-reporters",
   "reporterOptions": {
