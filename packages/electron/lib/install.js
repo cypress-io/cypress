@@ -6,6 +6,7 @@ const pkg = require('../package.json')
 const paths = require('./paths')
 const log = require('debug')('cypress:electron')
 const fs = require('fs-extra')
+const crypto = require('crypto')
 
 let electronVersion
 
@@ -37,8 +38,30 @@ module.exports = {
       // throw an error
       if (version !== electronVersion) {
         throw new Error(`Currently installed version: '${version}' does not match electronVersion: '${electronVersion}`)
-      } else {
-        return process.exit()
+      }
+    })
+  },
+
+  getFileHash (filePath) {
+    return fs.readFile(filePath).then((buf) => {
+      const hashSum = crypto.createHash('sha1')
+
+      hashSum.update(buf)
+      const hash = hashSum.digest('hex')
+
+      return hash
+    })
+  },
+
+  checkIconVersion () {
+    const mainIconsPath = this.icons().getPathToIcon('cypress.icns')
+    const cachedIconsPath = path.join(__dirname, '../dist/Cypress/Cypress.app/Contents/Resources/electron.icns')
+
+    return Promise.all([this.getFileHash(mainIconsPath), this.getFileHash(cachedIconsPath)])
+    .then(([mainHash, cachedHash]) => {
+      console.log({ mainHash, cachedHash })
+      if (mainHash !== cachedHash) {
+        throw new Error('Icon mismatch')
       }
     })
   },
@@ -117,11 +140,14 @@ module.exports = {
     return Promise.all([
       this.checkCurrentVersion(),
       this.checkExecExistence(),
+      this.checkIconVersion(),
     ])
   },
 
   check () {
     return this.ensure()
-    .catch(this.packageAndExit)
+    .catch(() => {
+      this.packageAndExit()
+    })
   },
 }
