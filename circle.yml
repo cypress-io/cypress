@@ -39,6 +39,7 @@ macWorkflowFilters: &mac-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ fix-darwin-win32-node-modules-install, << pipeline.git.branch >> ]
+    - equal: [ chore/beta-release-m1-support, << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
