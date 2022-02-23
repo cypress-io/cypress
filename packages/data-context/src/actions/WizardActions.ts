@@ -30,25 +30,28 @@ export class WizardActions {
     return this.ctx.wizardData
   }
 
-  setFramework (framework: typeof FRONTEND_FRAMEWORKS[number]['type'] | null) {
+  setFramework (framework: typeof FRONTEND_FRAMEWORKS[number]['type'] | null): void {
     const prevFramework = this.ctx.coreData.wizard.chosenFramework || ''
+
+    const prev = FRONTEND_FRAMEWORKS.find((x) => x.type === prevFramework)
 
     this.ctx.coreData.wizard.chosenFramework = framework
 
-    if (framework !== 'react' && !framework?.startsWith('vue')) {
-      return this.setBundler('webpack')
+    if (prev?.supportedBundlers?.length === 1) {
+      this.setBundler(prev?.supportedBundlers?.[0])
+
+      return
     }
 
     const { chosenBundler } = this.ctx.coreData.wizard
 
     // if the previous bundler was incompatible with the
-    // new framework, we need to reset it
-    if ((chosenBundler && new Set(this.ctx.wizard.chosenFramework?.supportedBundlers).has(chosenBundler))
-    || !['react', 'vue'].includes(prevFramework)) {
-      return this.setBundler(null)
-    }
+    // new framework that was selected, we need to reset it
+    const doesNotSupportChosenBundler = (chosenBundler && !new Set(this.ctx.wizard.chosenFramework?.supportedBundlers || []).has(chosenBundler)) ?? false
 
-    return
+    if (doesNotSupportChosenBundler || !['react', 'vue'].includes(prevFramework)) {
+      this.setBundler(null)
+    }
   }
 
   setBundler (bundler: NexusGenEnums['SupportedBundlers'] | null) {
