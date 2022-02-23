@@ -53,7 +53,7 @@ describe('scaffolding component testing', () => {
       const deps = ['@cypress/vue', '@cypress/webpack-dev-server']
 
       // correct install command and versions
-      cy.contains('yarn add -D @cypress/vue@^3.0.0 @cypress/webpack-dev-server@latest')
+      cy.contains('npm install -D @cypress/vue@^3.0.0 @cypress/webpack-dev-server@latest')
 
       deps.forEach((dep) => {
         cy.contains(dep)
@@ -104,7 +104,7 @@ describe('scaffolding component testing', () => {
       const deps = ['@cypress/react', '@cypress/vite-dev-server']
 
       // correct install command and versions
-      cy.contains('yarn add -D @cypress/react@^5.0.0 @cypress/vite-dev-server@latest')
+      cy.contains('npm install -D @cypress/react@^5.0.0 @cypress/vite-dev-server@latest')
 
       deps.forEach((dep) => {
         cy.contains(dep)
@@ -131,7 +131,7 @@ describe('scaffolding component testing', () => {
       const deps = ['@cypress/vue', '@cypress/vite-dev-server']
 
       // correct install command and versions
-      cy.contains('yarn add -D @cypress/vue@^3.0.0 @cypress/vite-dev-server@latest')
+      cy.contains('npm install -D @cypress/vue@^3.0.0 @cypress/vite-dev-server@latest')
 
       deps.forEach((dep) => {
         cy.contains(dep)
@@ -158,7 +158,7 @@ describe('scaffolding component testing', () => {
       const deps = ['@cypress/vue', '@cypress/webpack-dev-server', 'html-webpack-plugin']
 
       // correct install command and versions
-      cy.contains('yarn add -D @cypress/vue@^2.0.0 html-webpack-plugin@^4.0.0 @cypress/webpack-dev-server@latest')
+      cy.contains('npm install -D @cypress/vue@^2.0.0 html-webpack-plugin@^4.0.0 @cypress/webpack-dev-server@latest')
 
       deps.forEach((dep) => {
         cy.contains(dep)
