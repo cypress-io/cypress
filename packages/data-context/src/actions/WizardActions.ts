@@ -31,14 +31,12 @@ export class WizardActions {
   }
 
   setFramework (framework: typeof FRONTEND_FRAMEWORKS[number]['type'] | null): void {
-    const prevFramework = this.ctx.coreData.wizard.chosenFramework || ''
-
-    const prev = FRONTEND_FRAMEWORKS.find((x) => x.type === prevFramework)
+    const next = FRONTEND_FRAMEWORKS.find((x) => x.type === framework)
 
     this.ctx.coreData.wizard.chosenFramework = framework
 
-    if (prev?.supportedBundlers?.length === 1) {
-      this.setBundler(prev?.supportedBundlers?.[0])
+    if (next?.supportedBundlers?.length === 1) {
+      this.setBundler(next?.supportedBundlers?.[0])
 
       return
     }
@@ -48,6 +46,8 @@ export class WizardActions {
     // if the previous bundler was incompatible with the
     // new framework that was selected, we need to reset it
     const doesNotSupportChosenBundler = (chosenBundler && !new Set(this.ctx.wizard.chosenFramework?.supportedBundlers || []).has(chosenBundler)) ?? false
+
+    const prevFramework = this.ctx.coreData.wizard.chosenFramework || ''
 
     if (doesNotSupportChosenBundler || !['react', 'vue'].includes(prevFramework)) {
       this.setBundler(null)
