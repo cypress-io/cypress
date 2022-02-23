@@ -69,19 +69,5 @@ describe('net-stubbing util', () => {
 
       expect(getBodyEncoding(req), 'image').to.equal('binary')
     })
-
-    it('returns binary for form-data bodies', () => {
-      const formDataRequest = {
-        body: Buffer.from('hello world'),
-        headers: {
-          'content-type': 'multipart/form-data',
-        },
-        method: 'POST',
-        url: 'somewhere',
-        httpVersion: '1.1',
-      }
-
-      expect(getBodyEncoding(formDataRequest)).to.equal('binary')
-    })
   })
 })
