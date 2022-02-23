@@ -1,7 +1,9 @@
 const snapshot = require('snap-shot-it')
 
 import { SpawnOptions } from 'child_process'
+import stream from 'stream'
 import { expect } from './spec_helper'
+import { dockerSpawner } from './docker'
 
 const isCi = require('is-ci')
 
@@ -13,7 +15,6 @@ const path = require('path')
 const http = require('http')
 const human = require('human-interval')
 const morgan = require('morgan')
-const stream = require('stream')
 const express = require('express')
 const Bluebird = require('bluebird')
 const debug = require('debug')('cypress:system-tests')
@@ -21,7 +22,6 @@ const httpsProxy = require('@packages/https-proxy')
 const Fixtures = require('./fixtures')
 
 const { allowDestroy } = require(`@packages/server/lib/util/server_destroy`)
-const cypress = require(`@packages/server/lib/cypress`)
 const screenshots = require(`@packages/server/lib/screenshots`)
 const videoCapture = require(`@packages/server/lib/video_capture`)
 const settings = require(`@packages/server/lib/util/settings`)
@@ -42,7 +42,7 @@ type ExecResult = {
 
 type ExecFn = (options?: ExecOptions) => Promise<ExecResult>
 
-type ItOptions = ExecOptions & {
+export type ItOptions = ExecOptions & {
   /**
    * If a function is supplied, it will be executed instead of running the `systemTests.exec` function immediately.
    */
@@ -60,6 +60,14 @@ type ItOptions = ExecOptions & {
 }
 
 type ExecOptions = {
+  /**
+   * If set, `docker exec` will be used to run this test. Requires Docker.
+   */
+  dockerImage?: string
+  /*
+   * If set, test using the built Cypress CLI and binary. Expects a built CLI in `/cli/build` and packed binary in `/cypress.zip`.
+   */
+  withBinary?: boolean
   /**
    * Deprecated. Use `--cypress-inspect-brk` from command line instead.
    * @deprecated
@@ -86,6 +94,10 @@ type ExecOptions = {
    * The spec argument to pass to Cypress.
    */
   spec?: string
+  /**
+   * If set, use a non-default spec dir.
+   */
+  specDir?: string
   /**
    * The project fixture to scaffold and pass to Cypress.
    */
@@ -246,11 +258,31 @@ type SetupOptions = {
   settings?: CypressConfig
 }
 
+export type Spawner = (cmd, args, env, options: ExecOptions) => SpawnerResult | Promise<SpawnerResult>
+
+export type SpawnerResult = {
+  stdout: stream.Readable
+  stderr: stream.Readable
+  on(event: 'error', cb: (err: Error) => void): void
+  on(event: 'exit', cb: (exitCode: number) => void): void
+}
+
+const cpSpawner: Spawner = (cmd, args, env, options) => {
+  if (options.withBinary) {
+    throw new Error('withBinary is not supported without the use of dockerImage')
+  }
+
+  return cp.spawn(cmd, args, {
+    env,
+    ...options.spawnOpts,
+  })
+}
+
 const serverPath = path.dirname(require.resolve('@packages/server'))
 
 cp = Bluebird.promisifyAll(cp)
 
-const env = _.clone(process.env)
+const processEnvCache = _.clone(process.env)
 
 Bluebird.config({
   longStackTraces: true,
@@ -702,7 +734,7 @@ const systemTests = {
     })
 
     afterEach(async function () {
-      process.env = _.clone(env)
+      process.env = _.clone(processEnvCache)
 
       this.timeout(human('2 minutes'))
 
@@ -761,11 +793,10 @@ const systemTests = {
           return spec
         }
 
-        if (options.testingType === 'component') {
-          return path.join(projectPath, spec)
-        }
+        const specDir = options.specDir
+        || (options.testingType === 'component' ? '' : 'cypress/e2e')
 
-        return path.join(projectPath, 'cypress', 'e2e', spec)
+        return path.join(projectPath, specDir, spec)
       })
 
       // normalize the path to the spec
@@ -778,10 +809,15 @@ const systemTests = {
   args (options: ExecOptions) {
     debug('converting options to args %o', { options })
 
-    const args = [
+    const projectPath = Fixtures.projectPath(options.project)
+    const args = options.withBinary ? [
+      `run`,
+      `--project=${projectPath}`,
+    ] : [
+      require.resolve('@packages/server'),
       // hides a user warning to go through NPM module
       `--cwd=${serverPath}`,
-      `--run-project=${Fixtures.projectPath(options.project)}`,
+      `--run-project=${projectPath}`,
       `--testingType=${options.testingType || 'e2e'}`,
     ]
 
@@ -873,20 +909,6 @@ const systemTests = {
     return args
   },
 
-  start (ctx, options: ExecOptions) {
-    options = this.options(ctx, options)
-    const args = this.args(options)
-
-    return cypress.start(args)
-    .then(() => {
-      const { expectedExitCode } = options
-
-      maybeVerifyExitCode(expectedExitCode, () => {
-        expect(process.exit).to.be.calledWith(expectedExitCode)
-      })
-    })
-  },
-
   /**
    * Executes a given project and optionally sanitizes and checks output.
    * @example
@@ -907,7 +929,7 @@ const systemTests = {
     debug('systemTests.exec options %o', options)
     options = this.options(ctx, options)
     debug('processed options %o', options)
-    let args = this.args(options)
+    const args = options.args || this.args(options)
 
     const specifiedBrowser = process.env.BROWSER
 
@@ -916,7 +938,8 @@ const systemTests = {
     }
 
     if (!options.skipScaffold) {
-      await Fixtures.scaffoldCommonNodeModules()
+      // symlinks won't work via docker
+      options.dockerImage || await Fixtures.scaffoldCommonNodeModules()
       await Fixtures.scaffoldProject(options.project)
       await Fixtures.scaffoldProjectNodeModules(options.project)
     }
@@ -928,10 +951,6 @@ const systemTests = {
     if (ctx.settings) {
       await settings.writeForTesting(e2ePath, ctx.settings)
     }
-
-    const serverEntryFile = require.resolve('@packages/server')
-
-    args = options.args || [serverEntryFile].concat(args)
 
     let stdout = ''
     let stderr = ''
@@ -1012,41 +1031,43 @@ const systemTests = {
     }
 
     debug('spawning Cypress %o', { args })
-    const cmd = options.command || 'node'
-    const sp = cp.spawn(cmd, args, {
-      env: _.chain(process.env)
-      .omit('CYPRESS_DEBUG')
-      .extend({
-        // FYI: color will be disabled
-        // because we are piping the child process
-        COLUMNS: 100,
-        LINES: 24,
-      })
-      .defaults({
-        // match CircleCI's filesystem limits, so screenshot names in snapshots match
-        CYPRESS_MAX_SAFE_FILENAME_BYTES: 242,
-        FAKE_CWD_PATH: '/XXX/XXX/XXX',
-        DEBUG_COLORS: '1',
-        // prevent any Compression progress
-        // messages from showing up
-        VIDEO_COMPRESSION_THROTTLE: 120000,
 
-        // don't fail our own tests running from forked PR's
-        CYPRESS_INTERNAL_SYSTEM_TESTS: '1',
+    const cmd = options.command || (options.withBinary ? 'cypress' : 'node')
 
-        // Emulate no typescript environment
-        CYPRESS_INTERNAL_NO_TYPESCRIPT: options.noTypeScript ? '1' : '0',
-
-        // disable frame skipping to make quick Chromium tests have matching snapshots/working video
-        CYPRESS_EVERY_NTH_FRAME: 1,
-
-        // force file watching for use with --no-exit
-        ...(options.noExit ? { CYPRESS_INTERNAL_FORCE_FILEWATCH: '1' } : {}),
-      })
-      .extend(options.processEnv)
-      .value(),
-      ...options.spawnOpts,
+    const env = _.chain(process.env)
+    .omit('CYPRESS_DEBUG')
+    .extend({
+      // FYI: color will be disabled
+      // because we are piping the child process
+      COLUMNS: 100,
+      LINES: 24,
     })
+    .defaults({
+      // match CircleCI's filesystem limits, so screenshot names in snapshots match
+      CYPRESS_MAX_SAFE_FILENAME_BYTES: 242,
+      FAKE_CWD_PATH: '/XXX/XXX/XXX',
+      DEBUG_COLORS: '1',
+      // prevent any Compression progress
+      // messages from showing up
+      VIDEO_COMPRESSION_THROTTLE: 120000,
+
+      // don't fail our own tests running from forked PR's
+      CYPRESS_INTERNAL_SYSTEM_TESTS: '1',
+
+      // Emulate no typescript environment
+      CYPRESS_INTERNAL_NO_TYPESCRIPT: options.noTypeScript ? '1' : '0',
+
+      // disable frame skipping to make quick Chromium tests have matching snapshots/working video
+      CYPRESS_EVERY_NTH_FRAME: 1,
+
+      // force file watching for use with --no-exit
+      ...(options.noExit ? { CYPRESS_INTERNAL_FORCE_FILEWATCH: '1' } : {}),
+    })
+    .extend(options.processEnv)
+    .value()
+
+    const spawnerFn: Spawner = options.dockerImage ? dockerSpawner : cpSpawner
+    const sp: SpawnerResult = await spawnerFn(cmd, args, env, options)
 
     const ColorOutput = function () {
       const colorOutput = new stream.Transform()

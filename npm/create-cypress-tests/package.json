@@ -23,7 +23,7 @@
     "commander": "6.1.0",
     "fast-glob": "3.2.7",
     "find-up": "5.0.0",
-    "fs-extra": "^9.0.1",
+    "fs-extra": "^9.1.0",
     "glob": "^7.1.6",
     "inquirer": "7.3.3",
     "ora": "^5.1.0",

@@ -72,6 +72,7 @@ export class ProjectConfigIpc extends EventEmitter {
    * When the config is loaded, it comes back with either a "reply", or an "error" if there was a problem
    * sourcing the config (script error, etc.)
    */
+  once(evt: 'ready', listener: () => void): this
   once(evt: 'loadConfig:reply', listener: (payload: SerializedLoadConfigReply) => void): this
   once(evt: 'loadConfig:error', listener: (err: SerializedError) => void): this
 
