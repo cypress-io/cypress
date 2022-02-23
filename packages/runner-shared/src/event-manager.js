@@ -532,7 +532,11 @@ export const eventManager = {
 
     Cypress.multiDomainCommunicator.on('viewport:changed', (viewport) => {
       const callback = () => {
-        Cypress.multiDomainCommunicator.toSpecBridge('viewport:changed:end')
+        // HACK: use setTimeout because the window size is not updated quick enough in firefox
+        // to test if this can be removed, run the multi-domain viewport tests with setTimeout removed to verify they pass
+        setTimeout(() => {
+          Cypress.multiDomainCommunicator.toSpecBridge('viewport:changed:end')
+        }, 25)
       }
 
       localBus.emit('viewport:changed', viewport, callback)
