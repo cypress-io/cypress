@@ -131,7 +131,7 @@ const Interceptions = observer(({ model }: InterceptionsProps) => {
     <Tooltip placement='top' title={getTitle()} className='cy-tooltip'>
       <span>
         <span className={cs('command-interceptions', 'route', count > 1 && 'show-count')}>
-          {model.renderProps.status && <span className='status'>{model.renderProps.status}</span>}
+          {model.renderProps.status && <span className='status'>{model.renderProps.status} </span>}
           {displayAlias || <em className='no-alias'>no alias</em>}
         </span>
         {count > 1 && <span className={'command-interceptions-count'}>{count}</span>}

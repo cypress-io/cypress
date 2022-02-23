@@ -2,7 +2,6 @@ import { defineConfig } from 'cypress'
 
 export default defineConfig({
   projectId: 'ypt4pf',
-
   reporter: '../../node_modules/cypress-multi-reporters/index.js',
   reporterOptions: {
     configFile: '../../mocha-reporter-config.json',
@@ -21,6 +20,6 @@ export default defineConfig({
       return config
     },
     viewportHeight: 660,
-    viewportWidth: 400,
+    viewportWidth: 1000,
   },
 })

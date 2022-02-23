@@ -170,13 +170,13 @@ describe('src/cypress/runner', () => {
       })
 
       cy.contains('.test', 'never gets here').should('have.class', 'runnable-failed')
-      cy.contains('.command', 'beforeEach').find('command-state-failed')
+      cy.contains('.command', 'beforeEach').find('.command-state-failed')
       cy.contains('.runnable-err', 'beforeEach').scrollIntoView().should('be.visible')
 
       cy.contains('.test', 'is pending').should('have.class', 'runnable-pending')
 
       cy.contains('.test', 'fails this').should('have.class', 'runnable-failed')
-      cy.contains('.command', 'afterEach').find('command-state-failed')
+      cy.contains('.command', 'afterEach').find('.command-state-failed')
       cy.contains('.runnable-err', 'afterEach').scrollIntoView().should('be.visible')
 
       cy.contains('.test', 'does not run this').should('have.class', 'runnable-processing')
@@ -184,7 +184,7 @@ describe('src/cypress/runner', () => {
       cy.contains('.test', 'runs this').should('have.class', 'runnable-passed')
 
       cy.contains('.test', 'fails on this').should('have.class', 'runnable-failed')
-      cy.contains('.command', 'after').find('command-state-failed')
+      cy.contains('.command', 'after').find('.command-state-failed')
       cy.contains('.runnable-err', 'after').scrollIntoView().should('be.visible')
     })
 
