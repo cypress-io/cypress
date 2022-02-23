@@ -345,7 +345,9 @@
       "title": "External Editor",
       "description": "External editor to use for editing code opened when using Cypress.",
       "noEditorSelectedPlaceholder": "Choose your editor...",
-      "customPathPlaceholder": "/path/to/editor"
+      "editorRadioLabel": "Choose editor",
+      "customEditorRadioLabel": "Add custom editor by path",
+      "customPathPlaceholder": "Custom path..."
     },
     "projectId": {
       "title": "Project ID",
