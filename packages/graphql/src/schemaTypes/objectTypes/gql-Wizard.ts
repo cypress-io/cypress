@@ -3,7 +3,7 @@ import { WizardFrontendFramework } from './gql-WizardFrontendFramework'
 import { WizardNpmPackage } from './gql-WizardNpmPackage'
 import { objectType } from 'nexus'
 import { CODE_LANGUAGES } from '@packages/types'
-import { BUNDLERS, FRONTEND_FRAMEWORKS } from '@packages/scaffold-config'
+import { BUNDLER_DEPS, FRONTEND_FRAMEWORKS } from '@packages/scaffold-config'
 import { WizardCodeLanguage } from './gql-WizardCodeLanguage'
 
 export const Wizard = objectType({
@@ -13,7 +13,7 @@ export const Wizard = objectType({
     t.nonNull.list.nonNull.field('allBundlers', {
       type: WizardBundler,
       description: 'All of the bundlers to choose from',
-      resolve: () => Array.from(BUNDLERS),
+      resolve: () => Array.from(BUNDLER_DEPS),
     })
 
     t.field('bundler', {
@@ -54,7 +54,7 @@ export const Wizard = objectType({
       resolve: (source, args, ctx) => ctx.wizard.installedPackages(),
     })
 
-    t.nonNull.string('installDependenciesCommand', {
+    t.string('installDependenciesCommand', {
       description: 'Command to install required command',
       resolve: (source, args, ctx) => ctx.wizard.installDependenciesCommand(),
     })

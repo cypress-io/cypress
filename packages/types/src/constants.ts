@@ -2,11 +2,6 @@ export const PLUGINS_STATE = ['uninitialized', 'initializing', 'initialized', 'e
 
 export type PluginsState = typeof PLUGINS_STATE[number]
 
-export const STORYBOOK_DEPS = [
-  '@storybook/testing-react',
-  '@storybook/testing-vue3',
-] as const
-
 export const CODE_LANGUAGES = [
   {
     type: 'js',
