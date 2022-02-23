@@ -1,6 +1,7 @@
 import { WizardBundler } from './gql-WizardBundler'
 import { objectType } from 'nexus'
 import { FrontendFrameworkEnum, FrontendFrameworkCategoryEnum } from '../enumTypes/gql-WizardEnums'
+import { BUNDLER_DEPS } from '@packages/scaffold-config'
 
 export const WizardFrontendFramework = objectType({
   name: 'WizardFrontendFramework',
@@ -34,9 +35,7 @@ export const WizardFrontendFramework = objectType({
     t.nonNull.list.nonNull.field('supportedBundlers', {
       type: WizardBundler,
       description: 'All of the supported bundlers for this framework',
-      resolve: (source, args, ctx) => {
-        return ctx.wizardData.allBundlers.filter((b) => source.supportedBundlers.some((x) => x === b.type))
-      },
+      resolve: () => Array.from(BUNDLER_DEPS),
     })
   },
 
