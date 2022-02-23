@@ -27,14 +27,22 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
       _currentRetry: runnable._currentRetry,
       type: 'test',
       title: 'passes runnable state to the secondary domain',
+      titlePath: [
+        'multi-domain',
+        'passes runnable state to the secondary domain',
+      ],
       parent: {
         id: runnable.parent.id,
         type: 'suite',
         title: 'multi-domain',
+        titlePath: [
+          'multi-domain',
+        ],
         parent: {
           id: runnable.parent.parent.id,
           type: 'suite',
           title: '',
+          titlePath: undefined,
           ctx: {},
         },
         ctx: {},
@@ -50,6 +58,9 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
       expectedRunnable.isPending = actualRunnable.isPending
       expectedRunnable.resetTimeout = actualRunnable.resetTimeout
       expectedRunnable.timeout = actualRunnable.timeout
+
+      expect(actualRunnable.titlePath()).to.deep.equal(expectedRunnable.titlePath)
+      expectedRunnable.titlePath = actualRunnable.titlePath
 
       expect(actualRunnable).to.deep.equal(expectedRunnable)
     })

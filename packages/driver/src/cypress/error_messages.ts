@@ -1736,6 +1736,33 @@ export default {
       message: stripIndent`\
       ${cmd('switchToDomain')} could not serialize the subject due to symbols not being supported by the structured clone algorithm.`,
     },
+    // TODO: These deprecation warnings and forbidden use errors need to be audited before releasing multi-domain
+    route: {
+      unsupported: {
+        message: `${cmd('route')} has been deprecated and use is not supported in ${cmd('switchToDomain')}. Consider using ${cmd('intercept')} instead.`,
+        docsUrl: 'https://on.cypress.io/intercept',
+      },
+    },
+    server: {
+      unsupported: {
+        message: `${cmd('server')} has been deprecated and use is not supported in ${cmd('switchToDomain')}. Consider using ${cmd('intercept')} instead.`,
+        docsUrl: 'https://on.cypress.io/intercept',
+      },
+    },
+    Server: {
+      unsupported: {
+        message: `\`Cypress.Server.*\` has been deprecated and use is not supported in ${cmd('switchToDomain')}. Consider using ${cmd('intercept')} instead.`,
+        docsUrl: 'https://on.cypress.io/intercept',
+      },
+    },
+    Cookies: {
+      preserveOnce: {
+        unsupported: {
+          message: `\`Cypress.Cookies.preserveOnce\` use is not supported in ${cmd('switchToDomain')}. Consider using ${cmd('session')} instead.`,
+          docsUrl: 'https://on.cypress.io/session',
+        },
+      },
+    },
   },
 
   task: {
