@@ -28,7 +28,7 @@ mainBuildFilters: &mainBuildFilters
     branches:
       only:
         - develop
-        - 10.0-release
+        - chore/beta-release-m1-support
         - fix-darwin-win32-node-modules-install
 
 # usually we don't build Mac app - it takes a long time
@@ -1626,7 +1626,7 @@ jobs:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "fix-darwin-win32-node-modules-install" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "fix-darwin-win32-node-modules-install" && "$CIRCLE_BRANCH" != "- chore/beta-release-m1-support" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
