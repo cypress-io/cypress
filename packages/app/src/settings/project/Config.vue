@@ -16,7 +16,7 @@
     <div class="flex w-full">
       <ConfigCode
         data-cy="config-code"
-        :config="configObject"
+        :gql="props.gql"
       />
       <ConfigLegend
         :gql="props.gql"
@@ -42,15 +42,12 @@ const { t } = useI18n()
 gql`
 fragment Config on CurrentProject {
   id
-  config
-  configFileAbsolutePath
   ...OpenConfigFileInIDE
+  ...ConfigCode
 }
 `
 
 const props = defineProps<{
   gql: ConfigFragment
 }>()
-
-const configObject = computed(() => props.gql.config)
 </script>
