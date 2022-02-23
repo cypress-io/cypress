@@ -482,52 +482,52 @@ describe('network stubbing', function () {
       })
 
       // https://github.com/cypress-io/cypress/issues/16292
-      // describe('multibyte utf8', () => {
-      //   const multibyteUtf8 = [
-      //     // 1. When there's problem in the chunkEnd
-      //     // * 2 bytes
-      //     '12345678901234567890123Ф',
-      //     // * 3 bytes
-      //     '12345678901234567890123안',
-      //     '1234567890123456789012안',
-      //     // * 4 bytes
-      //     '12345678901234567890123😀',
-      //     '1234567890123456789012😀',
-      //     '123456789012345678901😀',
-      //     // 2. When there's a problem in the chunkBegin
-      //     // * 2 bytes
-      //     'dummyФ12345678901234567890123',
-      //     // * 3 bytes
-      //     'dummy안12345678901234567890123',
-      //     'dummy안1234567890123456789012',
-      //     // * 4 bytes
-      //     'dummy😀12345678901234567890123',
-      //     'dummy😀1234567890123456789012',
-      //     'dummy😀123456789012345678901',
-      //   ]
+      describe('multibyte utf8', () => {
+        const multibyteUtf8 = [
+          // 1. When there's problem in the chunkEnd
+          // * 2 bytes
+          '12345678901234567890123Ф',
+          // * 3 bytes
+          '12345678901234567890123안',
+          '1234567890123456789012안',
+          // * 4 bytes
+          '12345678901234567890123😀',
+          '1234567890123456789012😀',
+          '123456789012345678901😀',
+          // 2. When there's a problem in the chunkBegin
+          // * 2 bytes
+          'dummyФ12345678901234567890123',
+          // * 3 bytes
+          'dummy안12345678901234567890123',
+          'dummy안1234567890123456789012',
+          // * 4 bytes
+          'dummy😀12345678901234567890123',
+          'dummy😀1234567890123456789012',
+          'dummy😀123456789012345678901',
+        ]
 
-      //   multibyteUtf8.forEach((str) => {
-      //     it(str, () => {
-      //       cy.intercept('https://example.com/test', {
-      //         body: { result: 'ok' },
-      //       }).as('testRequest')
+        multibyteUtf8.forEach((str) => {
+          it(str, () => {
+            cy.intercept('https://example.com/test', {
+              body: { result: 'ok' },
+            }).as('testRequest')
 
-      //       cy.window().then(() => {
-      //         let xhr = new XMLHttpRequest()
+            cy.window().then(() => {
+              let xhr = new XMLHttpRequest()
 
-      //         xhr.open('POST', 'https://example.com/test')
-      //         xhr.setRequestHeader('Content-Type', 'application/json')
-      //         xhr.send(str)
-      //       })
+              xhr.open('POST', 'https://example.com/test')
+              xhr.setRequestHeader('Content-Type', 'application/json')
+              xhr.send(str)
+            })
 
-      //       cy.wait('@testRequest')
-      //       .its('request')
-      //       .then((req) => {
-      //         expect(req.body).to.eq(str)
-      //       })
-      //     })
-      //   })
-      // })
+            cy.wait('@testRequest')
+            .its('request')
+            .then((req) => {
+              expect(req.body).to.eq(str)
+            })
+          })
+        })
+      })
     })
 
     context('logging', function () {
