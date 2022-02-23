@@ -90,7 +90,7 @@ export class WizardDataSource {
       throw Error('currentProject is not defined')
     }
 
-    debug('packages to install: %O', packagesInitial)
+    debug('packages to install: %O in %s', packagesInitial, this.ctx.currentProject)
 
     const installedPackages: Array<string | null> = packagesInitial.map((p) => {
       if (this.ctx.currentProject) {
@@ -103,8 +103,13 @@ export class WizardDataSource {
         // `package.json`
         const packageJsonPath = path.join(p.package, 'package.json')
 
+        debug('package.json path: %s', packageJsonPath)
+
         try {
-          resolve(this.ctx.currentProject, packageJsonPath)
+          debug(`resolving ${this.ctx.currentProject, packageJsonPath}`)
+          const loc = resolve(this.ctx.currentProject, packageJsonPath)
+
+          debug('found at %s', loc)
 
           return p.package
         } catch (e) {
