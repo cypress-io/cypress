@@ -90,9 +90,11 @@ context('multi-domain misc', { experimentalSessionSupport: true, experimentalMul
         })
       })
 
-      // Otherwise, the subject of pause is returned in run mode and pause does NOT take effect
       cy.pause().wrap({}).should('deep.eq', {})
-      cy.wrap(afterPaused)
+      // pause is a noop in run mode, so only wait for it if in open mode
+      if (Cypress.config('isInteractive')) {
+        cy.wrap(afterPaused)
+      }
     })
   })
 
