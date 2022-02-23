@@ -44,6 +44,7 @@
           <StandardModal
             v-model="isTestingTypeModalOpen"
             class="h-full w-full sm:h-auto sm:mx-[5%] sm:w-auto"
+            help-link="https://on.cypress.io/choosing-testing-type"
           >
             <template #title>
               {{ t('welcomePage.compareTypes.modalTitle') }}
