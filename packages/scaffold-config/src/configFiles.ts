@@ -1,7 +1,17 @@
 import dedent from 'dedent'
 import { satisfies } from 'compare-versions'
 import type { Bundler, PkgJson, FrontendFramework } from './types'
-import { CODE_GEN_FRAMEWORKS, FRONTEND_FRAMEWORK_CATEGORIES, STORYBOOK_DEPS } from './constants'
+import {
+  CODE_GEN_FRAMEWORKS,
+  FRONTEND_FRAMEWORK_CATEGORIES,
+  CYPRESS_REACT_LATEST,
+  CYPRESS_VUE_2,
+  CYPRESS_VUE_3,
+  HTML_WEBPACK_PLUGIN_4,
+  STORYBOOK_REACT,
+  STORYBOOK_VUE,
+  WEBPACK_DEV_SERVER_4,
+} from './constants'
 
 interface DetectFramework {
   framework?: FrontendFramework
@@ -102,19 +112,13 @@ export const FRONTEND_FRAMEWORKS = [
     type: 'cra',
     family: 'template',
     name: 'Create React App',
-    supportedBundlers: ['webpack'] as readonly Bundler['type'][],
-    packages: [
-      {
-        name: '@cypress/react',
-        version: 'latest',
-        installer: '@cypress/react@^5.0.0',
-      },
-    ],
+    supportedBundlers: ['webpack'],
+    packages: [CYPRESS_REACT_LATEST],
     defaultPackagePath: '@cypress/react/plugins/react-scripts',
     glob: '*.{jsx,tsx}',
     category: FRONTEND_FRAMEWORK_CATEGORIES[0],
     codeGenFramework: CODE_GEN_FRAMEWORKS[0],
-    storybookDep: STORYBOOK_DEPS[0],
+    storybookDep: STORYBOOK_REACT,
     detectors: [
       {
         dependency: 'react-scripts',
@@ -149,14 +153,8 @@ export const FRONTEND_FRAMEWORKS = [
     type: 'vueclivue2',
     name: 'Vue CLI (Vue 2)',
     family: 'template',
-    supportedBundlers: ['webpack'] as readonly Bundler['type'][],
-    packages: [
-      {
-        name: '@cypress/vue',
-        version: '^2.0.0',
-        installer: '@cypress/vue@^2.0.0',
-      },
-    ],
+    supportedBundlers: ['webpack'],
+    packages: [CYPRESS_VUE_2],
     defaultPackagePath: null,
     glob: '*.vue',
     detectors: [
@@ -171,7 +169,7 @@ export const FRONTEND_FRAMEWORKS = [
     ],
     category: FRONTEND_FRAMEWORK_CATEGORIES[1],
     codeGenFramework: CODE_GEN_FRAMEWORKS[1],
-    storybookDep: STORYBOOK_DEPS[1],
+    storybookDep: STORYBOOK_VUE,
     config: {
       js: (bundler: Bundler['type']) => {
         return dedent`
@@ -209,14 +207,8 @@ export const FRONTEND_FRAMEWORKS = [
     type: 'vueclivue3',
     name: 'Vue CLI (Vue 3)',
     family: 'template',
-    supportedBundlers: ['webpack'] as readonly Bundler['type'][],
-    packages: [
-      {
-        name: '@cypress/vue',
-        version: '^3.0.0',
-        installer: '@cypress/vue@^3.0.0',
-      },
-    ],
+    supportedBundlers: ['webpack'],
+    packages: [CYPRESS_VUE_3],
     defaultPackagePath: null,
     glob: '*.vue',
     detectors: [
@@ -231,7 +223,7 @@ export const FRONTEND_FRAMEWORKS = [
     ],
     category: FRONTEND_FRAMEWORK_CATEGORIES[1],
     codeGenFramework: CODE_GEN_FRAMEWORKS[1],
-    storybookDep: STORYBOOK_DEPS[1],
+    storybookDep: STORYBOOK_VUE,
     config: {
       js: (bundler: Bundler['type']) => {
         return dedent`
@@ -269,14 +261,8 @@ export const FRONTEND_FRAMEWORKS = [
     type: 'react',
     name: 'React.js',
     family: 'library',
-    supportedBundlers: ['webpack', 'vite'] as readonly Bundler['type'][],
-    packages: [
-      {
-        name: '@cypress/react',
-        version: 'latest',
-        installer: '@cypress/react@^5.0.0',
-      },
-    ],
+    supportedBundlers: ['webpack', 'vite'],
+    packages: [CYPRESS_REACT_LATEST],
     defaultPackagePath: null,
     glob: '*.{jsx,tsx}',
     detectors: [
@@ -291,7 +277,7 @@ export const FRONTEND_FRAMEWORKS = [
     ],
     category: FRONTEND_FRAMEWORK_CATEGORIES[0],
     codeGenFramework: CODE_GEN_FRAMEWORKS[0],
-    storybookDep: STORYBOOK_DEPS[0],
+    storybookDep: STORYBOOK_REACT,
     config: {
       js: (bundler: Bundler['type']) => {
         if (bundler === 'webpack') {
@@ -370,14 +356,8 @@ export const FRONTEND_FRAMEWORKS = [
     type: 'vue2',
     name: 'Vue.js (v2)',
     family: 'library',
-    supportedBundlers: ['webpack', 'vite'] as readonly Bundler['type'][],
-    packages: [
-      {
-        name: '@cypress/vue',
-        version: '^2.0.0',
-        installer: '@cypress/vue@^2.0.0',
-      },
-    ],
+    supportedBundlers: ['webpack', 'vite'],
+    packages: [CYPRESS_VUE_2],
     defaultPackagePath: null,
     glob: '*.vue',
     detectors: [
@@ -388,7 +368,7 @@ export const FRONTEND_FRAMEWORKS = [
     ],
     category: FRONTEND_FRAMEWORK_CATEGORIES[1],
     codeGenFramework: CODE_GEN_FRAMEWORKS[1],
-    storybookDep: STORYBOOK_DEPS[1],
+    storybookDep: null,
     config: {
       js: (bundler: Bundler['type']) => {
         if (bundler === 'webpack') {
@@ -465,14 +445,8 @@ export const FRONTEND_FRAMEWORKS = [
     type: 'vue3',
     name: 'Vue.js (v3)',
     family: 'library',
-    supportedBundlers: ['webpack', 'vite'] as readonly Bundler['type'][],
-    packages: [
-      {
-        name: '@cypress/vue',
-        version: '^3.0.0',
-        installer: '@cypress/vue@^3.0.0',
-      },
-    ],
+    supportedBundlers: ['webpack', 'vite'],
+    packages: [CYPRESS_VUE_3],
     defaultPackagePath: null,
     glob: '*.vue',
     detectors: [
@@ -483,7 +457,7 @@ export const FRONTEND_FRAMEWORKS = [
     ],
     category: FRONTEND_FRAMEWORK_CATEGORIES[1],
     codeGenFramework: CODE_GEN_FRAMEWORKS[1],
-    storybookDep: STORYBOOK_DEPS[1],
+    storybookDep: STORYBOOK_VUE,
     config: {
       js: (bundler: Bundler['type']) => {
         if (bundler === 'webpack') {
@@ -559,23 +533,11 @@ export const FRONTEND_FRAMEWORKS = [
     type: 'nextjs',
     name: 'Next.js',
     family: 'template',
-    supportedBundlers: ['webpack'] as readonly Bundler['type'][],
+    supportedBundlers: ['webpack'],
     packages: [
-      {
-        name: '@cypress/react',
-        version: 'latest',
-        installer: '@cypress/react@^5.0.0',
-      },
-      {
-        name: 'webpack-dev-server',
-        version: '^4.0.0',
-        installer: 'webpack-dev-server@^4.0.0',
-      },
-      {
-        name: 'html-webpack-plugin',
-        version: 'latest',
-        installer: 'html-webpack-plugin@^4.0.0',
-      },
+      CYPRESS_REACT_LATEST,
+      WEBPACK_DEV_SERVER_4,
+      HTML_WEBPACK_PLUGIN_4,
     ],
     defaultPackagePath: '@cypress/react/plugins/next',
     glob: '*.{jsx,tsx}',
@@ -587,7 +549,7 @@ export const FRONTEND_FRAMEWORKS = [
       },
     ],
     codeGenFramework: CODE_GEN_FRAMEWORKS[0],
-    storybookDep: STORYBOOK_DEPS[0],
+    storybookDep: STORYBOOK_REACT,
     config: {
       js: () => ``,
       ts: () => ``,
@@ -597,18 +559,10 @@ export const FRONTEND_FRAMEWORKS = [
     type: 'nuxtjs',
     name: 'Nuxt.js (v2)',
     family: 'template',
-    supportedBundlers: ['webpack'] as readonly Bundler['type'][],
+    supportedBundlers: ['webpack'],
     packages: [
-      {
-        name: '@cypress/vue',
-        version: '^2.0.0',
-        installer: '@cypress/vue@^2.0.0',
-      },
-      {
-        name: 'html-webpack-plugin',
-        version: '^4.0.0',
-        installer: 'html-webpack-plugin@^4.0.0',
-      },
+      CYPRESS_VUE_2,
+      HTML_WEBPACK_PLUGIN_4,
     ],
     defaultPackagePath: null,
     glob: '*.vue',
@@ -620,7 +574,7 @@ export const FRONTEND_FRAMEWORKS = [
     ],
     category: FRONTEND_FRAMEWORK_CATEGORIES[1],
     codeGenFramework: CODE_GEN_FRAMEWORKS[1],
-    storybookDep: STORYBOOK_DEPS[1],
+    storybookDep: null,
     config: {
       js: () => {
         return dedent`

@@ -1,11 +1,17 @@
-import type { BUNDLERS, STORYBOOK_DEPS, CODE_GEN_FRAMEWORKS } from './constants'
+import type { BUNDLER_DEPS, STORYBOOK_DEPS, CODE_GEN_FRAMEWORKS, DEPENDENCIES } from './constants'
 import type { FRONTEND_FRAMEWORKS } from './configFiles'
 
-export type AllPackages = FrontendFramework['packages'][number]['name'] | Bundler['package'] | typeof STORYBOOK_DEPS[number]
+export type AllPackages = FrontendFramework['packages'][number]
+| typeof BUNDLER_DEPS[number]
+| typeof STORYBOOK_DEPS[number]
+
+export type AllPackageNames = typeof DEPENDENCIES[number]['name']
+
+export type AllPackagePackages = typeof DEPENDENCIES[number]['package']
 
 export type AllPackageTypes = FrontendFramework['type'] | Bundler['type']
 
-export type Bundler = typeof BUNDLERS[number]
+export type Bundler = typeof BUNDLER_DEPS[number]
 
 export type CodeGenFramework = typeof CODE_GEN_FRAMEWORKS[number]
 

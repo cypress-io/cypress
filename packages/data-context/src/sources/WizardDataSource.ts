@@ -1,34 +1,48 @@
 import Debug from 'debug'
 import { CODE_LANGUAGES } from '@packages/types'
-import { BUNDLERS, FRONTEND_FRAMEWORKS, PACKAGES_DESCRIPTIONS } from '@packages/scaffold-config'
+import {
+  AllPackageNames,
+  AllPackagePackages,
+  BUNDLER_DEPS,
+  DEPENDENCIES,
+  FRONTEND_FRAMEWORKS,
+  PACKAGES_DESCRIPTIONS,
+} from '@packages/scaffold-config'
 import type { DataContext } from '..'
 import path from 'path'
 import resolve from 'resolve-from'
 
 const debug = Debug('cypress:data-context:wizard-data-source')
 
+interface PackageToInstall {
+  name: AllPackageNames
+  description: typeof PACKAGES_DESCRIPTIONS[AllPackagePackages]
+  package: AllPackagePackages
+  installer: typeof DEPENDENCIES[number]['installer']
+}
+
 export class WizardDataSource {
   constructor (private ctx: DataContext) {}
 
-  async packagesToInstall () {
+  async packagesToInstall (): Promise<PackageToInstall[] | null> {
     if (!this.chosenFramework || !this.chosenBundler) {
       return null
     }
 
-    const packages = [
-      ...this.chosenFramework.packages.map((framework) => {
+    const packages: PackageToInstall[] = [
+      ...[...this.chosenFramework.packages].map((pkg) => {
         return {
-          name: framework.name,
-          description: PACKAGES_DESCRIPTIONS[framework.name],
-          package: framework.name,
-          installer: framework.installer,
+          name: pkg.name,
+          description: PACKAGES_DESCRIPTIONS[pkg.package],
+          package: pkg.package,
+          installer: pkg.installer,
         }
       }),
       {
-        name: this.chosenBundler.name as string,
+        name: this.chosenBundler.name,
         description: PACKAGES_DESCRIPTIONS[this.chosenBundler.package],
-        package: this.chosenBundler.package as string,
-        installer: this.chosenBundler.installer as string,
+        package: this.chosenBundler.package,
+        installer: this.chosenBundler.installer,
       },
     ]
 
@@ -37,10 +51,10 @@ export class WizardDataSource {
 
     if (storybookInfo && storybookDep) {
       packages.push({
-        name: storybookDep,
-        description: PACKAGES_DESCRIPTIONS[storybookDep],
-        package: storybookDep,
-        installer: '',
+        name: storybookDep.name,
+        installer: storybookDep.installer,
+        package: storybookDep.package,
+        description: PACKAGES_DESCRIPTIONS[storybookDep.package],
       })
     }
 
@@ -49,14 +63,18 @@ export class WizardDataSource {
 
   async installDependenciesCommand () {
     const commands = {
-      'npm': 'npm install -D ',
-      'pnpm': 'pnpm install -D ',
-      'yarn': 'yarn add -D ',
+      'npm': 'npm install -D',
+      'pnpm': 'pnpm install -D',
+      'yarn': 'yarn add -D',
     }
 
-    const deps = (await this.ctx.wizard.packagesToInstall() ?? [])
-    .map((pack) => `${pack.installer}`)
-    .join(' ')
+    let depsToInstall = (await this.ctx.wizard.packagesToInstall() ?? [])
+
+    if (!depsToInstall?.length) {
+      return null
+    }
+
+    const deps = depsToInstall.map((pack) => `${pack.installer}`).join(' ')
 
     return `${commands[this.ctx.coreData.packageManager ?? 'npm']} ${deps}`
   }
@@ -105,7 +123,7 @@ export class WizardDataSource {
   }
 
   get chosenBundler () {
-    return BUNDLERS.find((f) => f.type === this.ctx.wizardData.chosenBundler) || null
+    return BUNDLER_DEPS.find((f) => f.type === this.ctx.wizardData.chosenBundler) || null
   }
 
   get chosenLanguage () {
