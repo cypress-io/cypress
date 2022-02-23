@@ -114,6 +114,7 @@ export async function buildCypressApp (options: BuildCypressAppOpts) {
     meta.distDir('**', 'esprima', 'test'),
     meta.distDir('**', 'bmp-js', 'test'),
     meta.distDir('**', 'exif-parser', 'test'),
+    meta.distDir('**', 'app-module-path', 'test'),
   ], { force: true })
 
   console.log('Deleted excess directories')
