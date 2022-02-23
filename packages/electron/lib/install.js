@@ -2,13 +2,10 @@
 const _ = require('lodash')
 const os = require('os')
 const path = require('path')
-const Promise = require('bluebird')
 const pkg = require('../package.json')
 const paths = require('./paths')
 const log = require('debug')('cypress:electron')
-let fs = require('fs-extra')
-
-fs = Promise.promisifyAll(fs)
+const fs = require('fs-extra')
 
 let electronVersion
 
@@ -32,7 +29,7 @@ module.exports = {
     const pathToVersion = paths.getPathToVersion()
 
     // read in the version file
-    return fs.readFileAsync(pathToVersion, 'utf8')
+    return fs.readFile(pathToVersion, 'utf8')
     .then((str) => {
       const version = str.replace('v', '')
 
@@ -47,22 +44,22 @@ module.exports = {
   },
 
   checkExecExistence () {
-    return fs.statAsync(paths.getPathToExec())
+    return fs.stat(paths.getPathToExec())
   },
 
   move (src, dest) {
     // src  is ./tmp/Cypress-darwin-x64
     // dest is ./dist/Cypress
-    return fs.moveAsync(src, dest, { overwrite: true })
+    return fs.move(src, dest, { overwrite: true })
     .then(() => {
       // remove the tmp folder now
-      return fs.removeAsync(path.dirname(src))
+      return fs.remove(path.dirname(src))
     })
   },
 
   removeEmptyApp () {
     // nuke the temporary blank /app
-    return fs.removeAsync(paths.getPathToResources('app'))
+    return fs.remove(paths.getPathToResources('app'))
   },
 
   packageAndExit () {
@@ -117,15 +114,14 @@ module.exports = {
   },
 
   ensure () {
-    return Promise.join(
+    return Promise.all([
       this.checkCurrentVersion(),
       this.checkExecExistence(),
-    )
+    ])
   },
 
   check () {
     return this.ensure()
-    .bind(this)
     .catch(this.packageAndExit)
   },
 }
