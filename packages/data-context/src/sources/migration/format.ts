@@ -13,13 +13,6 @@ export interface FilePartHighlight {
 
 export type FilePart = FilePartNoHighlight | FilePartHighlight
 
-export const supportFileRegexps = {
-  e2e: {
-    beforeRegexp: 'cypress[\\\\/]support[\\\\/](?<name>index)\.(?=[j|t]sx?)',
-    afterRegexp: 'cypress[\\\\/]support[\\\\/](?<name>e2e)\.(?=[j|t]sx?)',
-  },
-} as const
-
 export function formatMigrationFile (file: string, regexp: RegExp): FilePart[] {
   const match = regexp.exec(file)
 

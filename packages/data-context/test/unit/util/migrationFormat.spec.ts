@@ -1,9 +1,8 @@
 import { expect } from 'chai'
 import {
   formatMigrationFile,
-  supportFileRegexps,
 } from '../../../src/sources/migration/format'
-import { regexps } from '../../../src/sources/migration/regexps'
+import { regexps, supportFileRegexps } from '../../../src/sources/migration/regexps'
 
 describe('formatMigrationFile', () => {
   describe('e2e - defaultFolderDefaultTestFiles', () => {

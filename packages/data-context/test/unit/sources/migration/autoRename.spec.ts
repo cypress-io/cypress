@@ -394,10 +394,10 @@ describe('applyMigrationTransform', () => {
       expect(result.after).to.eql(expected.after)
     })
 
-    it('handles .cy files', () => {
+    it('handles .test files', () => {
       const result = applyMigrationTransform(
         {
-          relative: 'cypress/tests/api-bankaccounts.cy.js',
+          relative: 'cypress/tests/api-bankaccounts.test.js',
           usesDefaultFolder: false,
           usesDefaultTestFiles: true,
           testingType: 'e2e',
@@ -407,16 +407,24 @@ describe('applyMigrationTransform', () => {
       const expected: MigrationFile = {
         testingType: 'e2e',
         before: {
-          relative: 'cypress/tests/api-bankaccounts.cy.js',
+          relative: 'cypress/tests/api-bankaccounts.test.js',
           parts: [
             {
               'highlight': false,
-              'text': 'cypress/tests/api-bankaccounts',
+              'text': 'cypress',
+            },
+            {
+              'highlight': false,
+              'text': '/tests',
+            },
+            {
+              'highlight': false,
+              'text': '/api-bankaccounts',
             },
             {
               'highlight': true,
               group: 'extension',
-              'text': '.cy.',
+              'text': '.test.',
             },
             {
               'highlight': false,
@@ -429,7 +437,15 @@ describe('applyMigrationTransform', () => {
           parts: [
             {
               'highlight': false,
-              'text': 'cypress/tests/api-bankaccounts',
+              'text': 'cypress',
+            },
+            {
+              'highlight': false,
+              'text': '/tests',
+            },
+            {
+              'highlight': false,
+              'text': '/api-bankaccounts',
             },
             {
               'highlight': true,

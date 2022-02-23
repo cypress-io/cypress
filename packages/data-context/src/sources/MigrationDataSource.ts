@@ -19,6 +19,8 @@ import {
   isDefaultTestFiles,
   getComponentTestFilesGlobs,
   getComponentFolder,
+  getIntegrationTestFilesGlobs,
+  getSpecPattern,
 } from './migration'
 
 import type { FilePart } from './migration/format'
@@ -273,15 +275,10 @@ export class MigrationDataSource {
 
     const config = await this.parseCypressConfig()
 
-    this.hasCustomIntegrationTestFiles = !isDefaultTestFiles(config, 'integration')
-    this.hasCustomIntegrationFolder = getIntegrationFolder(config) !== 'cypress/integration'
-
     const componentFolder = getComponentFolder(config)
-
-    this.hasCustomComponentFolder = componentFolder !== 'cypress/component'
-
     const componentTestFiles = getComponentTestFilesGlobs(config)
 
+    this.hasCustomComponentFolder = componentFolder !== 'cypress/component'
     this.hasCustomComponentTestFiles = !isDefaultTestFiles(config, 'component')
 
     if (componentFolder === false) {
@@ -292,9 +289,27 @@ export class MigrationDataSource {
         componentFolder,
         componentTestFiles,
       )
+
+      // if we don't find specs in the 9.X scope,
+      // let's check already migrated files.
+      // this allows users to stop migration halfway,
+      // then to pick up where they left migration off
+      if (!this.hasComponentTesting && (!this.hasCustomComponentTestFiles || !this.hasCustomComponentFolder)) {
+        const newComponentSpecPattern = getSpecPattern(config, 'component')
+
+        this.hasComponentTesting = await hasSpecFile(
+          this.ctx.currentProject,
+          '',
+          newComponentSpecPattern,
+        )
+      }
     }
 
     const integrationFolder = getIntegrationFolder(config)
+    const integrationTestFiles = getIntegrationTestFilesGlobs(config)
+
+    this.hasCustomIntegrationFolder = getIntegrationFolder(config) !== 'cypress/integration'
+    this.hasCustomIntegrationTestFiles = !isDefaultTestFiles(config, 'integration')
 
     if (integrationFolder === false) {
       this.hasE2ESpec = false
@@ -302,8 +317,22 @@ export class MigrationDataSource {
       this.hasE2ESpec = await hasSpecFile(
         this.ctx.currentProject,
         integrationFolder,
-        componentTestFiles,
+        integrationTestFiles,
       )
+
+      // if we don't find specs in the 9.X scope,
+      // let's check already migrated files.
+      // this allows users to stop migration halfway,
+      // then to pick up where they left migration off
+      if (!this.hasE2ESpec && (!this.hasCustomIntegrationTestFiles || !this.hasCustomIntegrationFolder)) {
+        const newE2eSpecPattern = getSpecPattern(config, 'e2e')
+
+        this.hasE2ESpec = await hasSpecFile(
+          this.ctx.currentProject,
+          '',
+          newE2eSpecPattern,
+        )
+      }
     }
 
     const pluginsFileMissing = (

@@ -4,17 +4,14 @@
  * - file.Test.tsx
  * - file_Spec.js
  * - file-spec.js
- *
- * but also matches
- *  file.cy.jsx
  */
-const specExtRe = '(?<!\/)([._-][t|T]est[.]|[._-]?[s|S]pec[.]|[.]cy[.]|[.])(?=[j|t]s[x]?)'
+const specExtRe = '(?<!\/)[._-]?(?:[s|S]pec|[t|T]est)?[.])(?=[j|t]s[x]?'
 
 export const regexps = {
   e2e: {
     before: {
       defaultFolderDefaultTestFiles: `cypress\/(?<main>integration)\/.*?(?<ext>${specExtRe})`,
-      defaultFolderCustomTestFiles: /cypress\/(?<main>integration)\/.*/,
+      defaultFolderCustomTestFiles: `cypress\/(?<main>integration)\/.*`,
       customFolderDefaultTestFiles: `.*?(?<ext>${specExtRe})`,
     },
   },
@@ -23,5 +20,12 @@ export const regexps = {
       defaultFolderDefaultTestFiles: `cypress\/component\/.*?(?<ext>${specExtRe})`,
       customFolderDefaultTestFiles: `.*?(?<ext>${specExtRe})`,
     },
+  },
+} as const
+
+export const supportFileRegexps = {
+  e2e: {
+    beforeRegexp: 'cypress[\\\\/]support[\\\\/](?<name>index)\.(?=[j|t]sx?)',
+    afterRegexp: 'cypress[\\\\/]support[\\\\/](?<name>e2e)\.(?=[j|t]sx?)',
   },
 } as const

@@ -2,17 +2,15 @@ import chokidar from 'chokidar'
 import fs from 'fs-extra'
 import path from 'path'
 import globby from 'globby'
-import {
-  supportFileRegexps,
-  formatMigrationFile,
-} from './format'
-import { substitute } from './autoRename'
-import type { TestingType } from '@packages/types'
 import prettier from 'prettier'
-import type { MigrationFile } from '..'
-import Debug from 'debug'
+import type { TestingType } from '@packages/types'
+import { formatMigrationFile } from './format'
+import { substitute } from './autoRename'
+import { supportFileRegexps } from './regexps'
+import type { MigrationFile } from '../MigrationDataSource'
 import { toPosix } from '../../util'
 
+import Debug from 'debug'
 const debug = Debug('cypress:data-context:sources:migration:codegen')
 
 type ConfigOptions = {
@@ -207,9 +205,9 @@ function formatObjectForConfig (obj: Record<string, unknown>) {
 function createE2eTemplate (pluginPath: string, hasPluginsFile: boolean, options: Record<string, unknown>) {
   const requirePlugins = `return require('./${pluginPath}')(on, config)`
 
-  const setupNodeEvents = `// We've imported your old cypress plugins here.
+  const setupNodeEvents = `${hasPluginsFile ? `// We've imported your old cypress plugins here.
   // You may want to clean this up later by importing these.
-  setupNodeEvents(on, config) {
+  ` : ''}setupNodeEvents(on, config) {
     ${hasPluginsFile ? requirePlugins : ''}
   }`
 
@@ -220,8 +218,6 @@ function createE2eTemplate (pluginPath: string, hasPluginsFile: boolean, options
 
 function createComponentTemplate (options: Record<string, unknown>) {
   return `component: {
-    // We've imported your old cypress plugins here.
-    // You may want to clean this up later by importing these.
     setupNodeEvents(on, config) {},${formatObjectForConfig(options)}
   },`
 }
@@ -417,7 +413,7 @@ export function reduceConfig (cfg: OldCypressConfig): ConfigOptions {
   }, { global: {}, e2e: {}, component: {} })
 }
 
-function getSpecPattern (cfg: OldCypressConfig, testType: TestingType) {
+export function getSpecPattern (cfg: OldCypressConfig, testType: TestingType) {
   const specPattern = cfg[testType]?.testFiles ?? cfg.testFiles ?? '**/*.cy.{js,jsx,ts,tsx}'
   const customComponentFolder = cfg.component?.componentFolder ?? cfg.componentFolder ?? null
 
