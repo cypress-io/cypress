@@ -20,14 +20,6 @@
           v-if="query.data.value.scaffoldedFiles"
           :gql="query.data.value"
         />
-        <BaseError
-          v-else-if="currentProject?.errorLoadingConfigFile"
-          :gql="currentProject.errorLoadingConfigFile"
-        />
-        <BaseError
-          v-else-if="currentProject?.errorLoadingNodeEvents"
-          :gql="currentProject.errorLoadingNodeEvents"
-        />
         <Spinner v-else-if="currentProject?.isLoadingConfigFile" />
         <template v-else-if="currentProject?.isLoadingNodeEvents">
           <LaunchpadHeader
@@ -118,12 +110,6 @@ fragment MainLaunchpadQueryData on Query {
     isLoadingNodeEvents
     needsLegacyConfigMigration
     currentTestingType
-    errorLoadingConfigFile {
-      ...BaseError
-    }
-    errorLoadingNodeEvents {
-      ...BaseError
-    }
   }
   isInGlobalMode
   ...GlobalPage

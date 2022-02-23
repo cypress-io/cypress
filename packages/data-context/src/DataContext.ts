@@ -338,7 +338,7 @@ export class DataContext {
     console.error(e)
   }
 
-  onError = (cypressError: CypressError) => {
+  onError = (cypressError: CypressError, title?: string) => {
     if (this.isRunMode) {
       if (this.lifecycleManager?.runModeExitEarly) {
         this.lifecycleManager.runModeExitEarly(cypressError)
@@ -346,7 +346,7 @@ export class DataContext {
         throw cypressError
       }
     } else {
-      this.coreData.baseError = { cypressError }
+      this.coreData.baseError = { title, cypressError }
       this.emitter.toLaunchpad()
     }
   }

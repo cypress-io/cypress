@@ -25,6 +25,8 @@ describe('<CreateSpecModal />', () => {
             },
             storybook: null,
             currentTestingType: 'component',
+            configFile: 'cypress.config.js',
+            configFileAbsolutePath: '/path/to/cypress.config.js',
             config: {
               e2e: {
                 specPattern: 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
@@ -91,6 +93,8 @@ describe('playground', () => {
             },
             storybook: null,
             currentTestingType: 'component',
+            configFile: 'cypress.config.js',
+            configFileAbsolutePath: '/path/to/cypress.config.js',
             config: {
               e2e: {
                 specPattern: 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',

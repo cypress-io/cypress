@@ -245,6 +245,7 @@ export const mutation = mutationType({
 
     t.field('launchOpenProject', {
       type: CurrentProject,
+      slowLogThreshold: false,
       description: 'Launches project from open_project global singleton',
       args: {
         specPath: stringArg(),

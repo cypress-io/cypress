@@ -63,7 +63,7 @@ describe('<BaseError />', () => {
   it('calls the retry function passed in', () => {
     const retrySpy = cy.spy().as('retry')
 
-    cy.mountFragment(BaseError_DataFragmentDoc, {
+    cy.mountFragment(BaseErrorFragmentDoc, {
       render: (gqlVal) => (<div class="p-16px">
         <BaseError gql={gqlVal} retry={retrySpy} />,
       </div>),

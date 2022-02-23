@@ -373,14 +373,6 @@ type CurrentProject implements Node & ProjectLike {
   """The mode the interactive runner was launched in"""
   currentTestingType: TestingTypeEnum
 
-  """If there is an error loading the config file, it is represented here"""
-  errorLoadingConfigFile: ErrorWrapper
-
-  """
-  If there is an error related to the node events, it is represented here
-  """
-  errorLoadingNodeEvents: ErrorWrapper
-
   """Whether the project has Typescript"""
   hasTypescript: Boolean
 

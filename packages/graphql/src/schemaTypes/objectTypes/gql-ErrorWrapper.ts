@@ -54,7 +54,7 @@ export const ErrorWrapper = objectType({
       description: 'Relative file path to open, if there is one associated with this error',
       resolve (source) {
         if (!source.cypressError.originalError?.isCypressErr) {
-          const stackLines = stackUtils.getStackLines(source.cypressError.stack)
+          const stackLines = stackUtils.getStackLines(source.cypressError.stack ?? '')
 
           return stackUtils.parseStackLine(stackLines[0] ?? '')
         }
@@ -67,7 +67,7 @@ export const ErrorWrapper = objectType({
       type: ErrorCodeFrame,
       resolve: (source) => {
         if (!source.cypressError.originalError?.isCypressErr) {
-          const stackLines = stackUtils.getStackLines(source.cypressError.stack)
+          const stackLines = stackUtils.getStackLines(source.cypressError.stack ?? '')
 
           return { filename: stackUtils.parseStackLine(stackLines[0] ?? '')?.absolute }
         }
