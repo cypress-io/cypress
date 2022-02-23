@@ -17,7 +17,7 @@
     "watch": "webpack --watch --progress"
   },
   "dependencies": {
-    "fs-extra": "8.1.0"
+    "fs-extra": "9.1.0"
   },
   "devDependencies": {
     "@cypress/design-system": "0.0.0-development",

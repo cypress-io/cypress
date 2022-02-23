@@ -41,43 +41,61 @@ context('multi-domain actions', { experimentalSessionSupport: true, experimental
     })
   })
 
-  it('.submit()', (done) => {
+  it('.submit()', () => {
     cy.get('a[data-cy="dom-link"]').click()
 
-    cy.switchToDomain('foobar.com', done, () => {
-      Cypress.once('form:submitted', () => done())
+    cy.switchToDomain('foobar.com', () => {
+      const afterFormSubmitted = new Promise<void>((resolve) => {
+        cy.once('form:submitted', resolve)
+      })
 
       cy.get('#input-type-submit').submit()
+      cy.wrap(afterFormSubmitted)
     })
   })
 
-  it('.click()', (done) => {
+  it('.click()', () => {
     cy.get('a[data-cy="dom-link"]').click()
 
-    cy.switchToDomain('foobar.com', done, () => {
-      cy.get('#button').then((btn) => {
-        btn.on('click', () => done())
-      }).click()
+    cy.switchToDomain('foobar.com', () => {
+      cy.get('#button').then(($btn) => {
+        const onClick = new Promise<void>((resolve) => {
+          $btn.on('click', () => resolve())
+        })
+
+        cy.wrap($btn).click()
+        cy.wrap(onClick)
+      })
     })
   })
 
-  it('.dblclick()', (done) => {
+  it('.dblclick()', () => {
     cy.get('a[data-cy="dom-link"]').click()
 
-    cy.switchToDomain('foobar.com', done, () => {
-      cy.get('#button').then((btn) => {
-        btn.on('dblclick', () => done())
-      }).dblclick()
+    cy.switchToDomain('foobar.com', () => {
+      cy.get('#button').then(($btn) => {
+        const afterDblClick = new Promise<void>((resolve) => {
+          $btn.on('dblclick', () => resolve())
+        })
+
+        cy.wrap($btn).dblclick()
+        cy.wrap(afterDblClick)
+      })
     })
   })
 
-  it('.rightclick()', (done) => {
+  it('.rightclick()', () => {
     cy.get('a[data-cy="dom-link"]').click()
 
-    cy.switchToDomain('foobar.com', done, () => {
-      cy.get('#button').then((btn) => {
-        btn.on('contextmenu', () => done())
-      }).rightclick()
+    cy.switchToDomain('foobar.com', () => {
+      cy.get('#button').then(($btn) => {
+        const afterContextmenu = new Promise<void>((resolve) => {
+          $btn.on('contextmenu', () => resolve())
+        })
+
+        cy.wrap($btn).rightclick()
+        cy.wrap(afterContextmenu)
+      })
     })
   })
 
@@ -129,13 +147,18 @@ context('multi-domain actions', { experimentalSessionSupport: true, experimental
     })
   })
 
-  it('.trigger()', (done) => {
+  it('.trigger()', () => {
     cy.get('a[data-cy="dom-link"]').click()
 
-    cy.switchToDomain('foobar.com', done, () => {
-      cy.get('#button').then((btn) => {
-        btn.on('click', () => done())
-      }).trigger('click')
+    cy.switchToDomain('foobar.com', () => {
+      cy.get('#button').then(($btn) => {
+        const afterClick = new Promise<void>((resolve) => {
+          $btn.on('click', () => resolve())
+        })
+
+        cy.wrap($btn).trigger('click')
+        cy.wrap(afterClick)
+      })
     })
   })
 

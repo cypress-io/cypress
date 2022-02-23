@@ -1,6 +1,9 @@
 import type $Log from '../../cypress/log'
 import $utils from '../../cypress/utils'
 import $errUtils from '../../cypress/error_utils'
+import isValidDomain from 'is-valid-domain'
+import { isIP } from 'is-ip'
+import { isString } from 'lodash'
 
 export class Validator {
   log: typeof $Log
@@ -11,8 +14,8 @@ export class Validator {
     this.onFailure = onFailure
   }
 
-  validate ({ callbackFn, data, domain, done, doneReference }) {
-    if (typeof domain !== 'string') {
+  validate ({ callbackFn, data, domain }) {
+    if (!isString(domain) || domain !== 'localhost' && !isIP(domain) && !isValidDomain(domain, { allowUnicode: true, subdomain: false })) {
       this.onFailure()
 
       $errUtils.throwErrByPath('switchToDomain.invalid_domain_argument', {
@@ -36,15 +39,6 @@ export class Validator {
       $errUtils.throwErrByPath('switchToDomain.invalid_fn_argument', {
         onFail: this.log,
         args: { arg: $utils.stringify(callbackFn) },
-      })
-    }
-
-    // verifies the done argument is actually the done fn
-    if (done && done !== doneReference) {
-      this.onFailure()
-
-      $errUtils.throwErrByPath('switchToDomain.done_reference_mismatch', {
-        onFail: this.log,
       })
     }
   }

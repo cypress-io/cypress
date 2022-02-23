@@ -139,7 +139,9 @@ const init = (config, options) => {
     Object.keys(config).sort().forEach((key) => orderedConfig[key] = config[key])
     config = orderedConfig
 
-    ipc.send('load', config)
+    ipc.on('ready', () => {
+      ipc.send('load', config)
+    })
 
     ipc.on('loaded', (newCfg, registrations) => {
       _.omit(config, 'projectRoot', 'configFile')

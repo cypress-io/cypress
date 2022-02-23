@@ -1,11 +1,9 @@
 import Bluebird from 'bluebird'
 import $errUtils from '../../cypress/error_utils'
-import { CommandsManager } from './commands_manager'
-import { LogsManager } from './logs_manager'
 import { Validator } from './validator'
-import { correctStackForCrossDomainError, serializeRunnable } from './util'
+import { createUnserializableSubjectProxy } from './unserializable_subject_proxy'
+import { serializeRunnable } from './util'
 import { preprocessConfig, preprocessEnv, syncConfigToCurrentDomain, syncEnvToCurrentDomain } from '../../util/config'
-import { failedToSerializeSubject } from './failedSerializeSubjectProxy'
 
 export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: Cypress.State, config: Cypress.InternalConfig) {
   let timeoutId
@@ -34,37 +32,25 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
   })
 
   Commands.addAll({
-    switchToDomain<T> (domain: string, doneOrDataOrFn: T[] | Mocha.Done | (() => {}), dataOrFn?: T[] | (() => {}), fn?: (data?: T[]) => {}) {
-      // store the invocation stack in the case that `switchToDomain` errors
-      const userInvocationStack = state('current').get('userInvocationStack')
-
+    switchToDomain<T> (domain: string, dataOrFn: T[] | (() => {}), fn?: (data?: T[]) => {}) {
       clearTimeout(timeoutId)
+      // this command runs for as long as the commands in the secondary
+      // domain run, so it can't have its own timeout
+      cy.clearTimeout()
 
       if (!config('experimentalMultiDomain')) {
         $errUtils.throwErrByPath('switchToDomain.experiment_not_enabled')
       }
 
-      let done
       let data
       let callbackFn
 
       if (fn) {
         callbackFn = fn
-        done = doneOrDataOrFn
         data = dataOrFn
-
-        // if done has been provided to the test, allow the user to call done
-        // from the switchToDomain context running in the secondary domain.
-      } else if (dataOrFn) {
-        callbackFn = dataOrFn
-
-        if (typeof doneOrDataOrFn === 'function') {
-          done = doneOrDataOrFn
-        } else {
-          data = doneOrDataOrFn
-        }
       } else {
-        callbackFn = doneOrDataOrFn
+        callbackFn = dataOrFn
+        data = []
       }
 
       const log = Cypress.log({
@@ -83,84 +69,69 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
         callbackFn,
         data,
         domain,
-        done,
-        doneReference: state('done'),
       })
-
-      const commandsManager = new CommandsManager({
-        communicator,
-        isDoneFnAvailable: !!done,
-        userInvocationStack,
-      })
-
-      const logsManager = new LogsManager({
-        communicator,
-        userInvocationStack,
-      })
-
-      const cleanup = () => {
-        commandsManager.cleanup()
-        logsManager.cleanup()
-      }
-
-      const doneAndCleanup = async ({ err }) => {
-        communicator.off('done:called', doneAndCleanup)
-        // If done is called, immediately unbind command listeners to prevent
-        // any commands from being enqueued, but wait for log updates to
-        // trickle in before invoking done
-        commandsManager.cleanup()
-        await logsManager.cleanup()
-        done(err ? correctStackForCrossDomainError(err, userInvocationStack) : err)
-      }
-
-      if (done) {
-        communicator.once('done:called', doneAndCleanup)
-      }
-
-      commandsManager.listen()
-      logsManager.listen()
 
       return new Bluebird((resolve, reject) => {
+        const _resolve = ({ subject, unserializableSubjectType }) => {
+          resolve(unserializableSubjectType ? createUnserializableSubjectProxy(unserializableSubjectType) : subject)
+        }
+
+        const _reject = (err) => {
+          log.error(err)
+          if (typeof err === 'object') {
+            err.onFail = () => {}
+          }
+
+          reject(err)
+        }
+
+        const onQueueFinished = ({ err, subject, unserializableSubjectType }) => {
+          if (err) {
+            return _reject(err)
+          }
+
+          _resolve({ subject, unserializableSubjectType })
+        }
+
+        const cleanup = () => {
+          communicator.off('queue:finished', onQueueFinished)
+        }
+
         communicator.once('sync:config', ({ config, env }) => {
           syncConfigToCurrentDomain(config)
           syncEnvToCurrentDomain(env)
         })
 
-        communicator.once('ran:domain:fn', ({ subject, failedToSerializeSubjectOfType, err }) => {
+        communicator.once('ran:domain:fn', (details) => {
+          const { subject, unserializableSubjectType, err, finished } = details
+
           sendReadyForDomain()
+
           if (err) {
-            if (done) {
-              communicator.off('done:called', doneAndCleanup)
-            } else {
-              communicator.off('queue:finished', cleanup)
-            }
-
             cleanup()
-            reject(err)
 
-            return
+            return _reject(err)
           }
 
-          // If done is passed into switchToDomain, wait to unbind any listeners
-          // Otherwise, all commands in the secondary domain (SD) should be
-          // enqueued by now. Go ahead and bind the cleanup method for when
-          // the command queue finishes in the SD. Otherwise, if no commands
-          // are enqueued, clean up the command and log listeners. This case
-          // is common if there are only assertions enqueued in the SD.
-          if (!commandsManager.hasCommands && !done) {
+          // if there are not commands and a synchronous return from the callback,
+          // this resolves immediately
+          if (finished || subject || unserializableSubjectType) {
             cleanup()
 
-            // This handles when a subject is returned synchronously
-            resolve(failedToSerializeSubjectOfType ? failedToSerializeSubject(failedToSerializeSubjectOfType) : subject)
-          } else {
-            resolve()
+            _resolve({ subject, unserializableSubjectType })
           }
         })
 
-        // If done is NOT passed into switchToDomain, wait for the command queue
-        // to finish in the secondary domain before starting any cleanup
-        if (!done) {
-          communicator.once('queue:finished', cleanup)
+        communicator.once('queue:finished', onQueueFinished)
+
+        // We don't unbind this even after queue:finished, because an async
+        // error could be thrown after the queue is done, but make sure not
+        // to stack up listeners on it after it's originally bound
+        if (!communicator.listeners('uncaught:error').length) {
+          communicator.once('uncaught:error', ({ err }) => {
+            // @ts-ignore
+            Cypress.runner.onSpecError('error')({ error: err })
+          })
         }
 
         // fired once the spec bridge is set up and ready to receive messages
@@ -179,7 +150,6 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
             communicator.toSpecBridge('run:domain:fn', {
               data,
               fn: callbackFn.toString(),
-              isDoneFnAvailable: !!done,
               // let the spec bridge version of Cypress know if config read-only values can be overwritten since window.top cannot be accessed in cross-origin iframes
               // this should only be used for internal testing. Cast to boolean to guarantee serialization
               // @ts-ignore
@@ -189,6 +159,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
                 viewportHeight: Cypress.state('viewportHeight'),
                 runnable: serializeRunnable(Cypress.state('runnable')),
                 duringUserTestExecution: Cypress.state('duringUserTestExecution'),
+                hookId: state('hookId'),
               },
               config: preprocessConfig(Cypress.config()),
               env: preprocessEnv(Cypress.env()),
@@ -201,7 +172,6 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
             cleanup()
             reject(wrappedErr)
           } finally {
-            state('readyForMultidomain', false)
             // @ts-ignore
             cy.isAnticipatingMultiDomain(false)
           }
