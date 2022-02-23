@@ -5,6 +5,17 @@
   >
     <div class="space-y-24px">
       <SettingsCard
+        :title="t('settingsPage.project.title')"
+        :description="t('settingsPage.project.description')"
+        :icon="IconFolder"
+        max-height="10000px"
+      >
+        <ProjectSettings
+          v-if="props.gql"
+          :gql="props.gql"
+        />
+      </SettingsCard>
+      <SettingsCard
         :title="t('settingsPage.device.title')"
         :description="t('settingsPage.device.description')"
         :icon="IconLaptop"
@@ -15,12 +26,12 @@
         <TestingPreferences :gql="props.gql" />
       </SettingsCard>
       <SettingsCard
-        :title="t('settingsPage.project.title')"
-        :description="t('settingsPage.project.description')"
-        :icon="IconFolder"
+        :title="t('settingsPage.cloud.title')"
+        :description="t('settingsPage.cloud.description')"
+        :icon="IconOdometer"
         max-height="10000px"
       >
-        <ProjectSettings
+        <CloudSettings
           v-if="props.gql"
           :gql="props.gql"
         />
@@ -49,11 +60,13 @@ import Button from '@cy/components/Button.vue'
 import ExternalEditorSettings from './device/ExternalEditorSettings.vue'
 import ProxySettings from './device/ProxySettings.vue'
 import SettingsCard from './SettingsCard.vue'
+import CloudSettings from './project/CloudSettings.vue'
 import ProjectSettings from './project/ProjectSettings.vue'
 import TestingPreferences from './device/TestingPreferences.vue'
 import type { SettingsContainerFragment } from '../generated/graphql'
 import { SettingsContainer_ReconfigureProjectDocument } from '../generated/graphql'
 import IconLaptop from '~icons/cy/laptop_x24.svg'
+import IconOdometer from '~icons/cy/object-odometer_x24.svg'
 import IconFolder from '~icons/cy/folder-outline_x24.svg'
 import SettingsIcon from '~icons/cy/settings_x16.svg'
 
@@ -69,6 +82,7 @@ gql`
 fragment SettingsContainer on Query {
   ...TestingPreferences
   ...ProjectSettings
+  ...CloudSettings
   ...ExternalEditorSettings
   ...ProxySettings
 }`

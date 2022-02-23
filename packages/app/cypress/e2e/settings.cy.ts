@@ -34,12 +34,12 @@ describe('App: Settings', () => {
     cy.wait('@ReconfigureProject')
   })
 
-  describe('Project Settings', () => {
+  describe('Cloud Settings', () => {
     it('shows the projectId section when there is a projectId', () => {
       cy.startAppServer('e2e')
       cy.visitApp()
       cy.findByText('Settings').click()
-      cy.findByText('Project Settings').click()
+      cy.findByText('Dashboard Settings').click()
       cy.findByText('Project ID').should('be.visible')
     })
 
@@ -49,7 +49,7 @@ describe('App: Settings', () => {
 
       cy.visitApp()
       cy.findByText('Settings').click()
-      cy.findByText('Project Settings').click()
+      cy.findByText('Dashboard Settings').click()
       cy.findByText('Record Key').should('be.visible')
     })
 
@@ -59,12 +59,26 @@ describe('App: Settings', () => {
 
       cy.visitApp()
       cy.findByText('Settings').click()
-      cy.findByText('Project Settings').click()
+      cy.findByText('Dashboard Settings').click()
       cy.get('[data-cy="record-key"]').should('contain', '***')
       cy.get('[aria-label="Record Key Visibility Toggle"]').click()
       cy.get('[data-cy="record-key"]').should('contain', '2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa')
     })
 
+    it('opens cloud settings when clicking on "Manage Keys"', () => {
+      cy.startAppServer('e2e')
+      cy.loginUser()
+      cy.intercept('mutation-ExternalLink_OpenExternal', { 'data': { 'openExternal': true } }).as('OpenExternal')
+      cy.__incorrectlyVisitAppWithIntercept('settings')
+      cy.findByText('Dashboard Settings').click()
+      cy.findByText('Manage Keys').click()
+      cy.wait('@OpenExternal')
+      .its('request.body.variables.url')
+      .should('equal', 'http:/test.cloud/cloud-project/settings')
+    })
+  })
+
+  describe('Project Settings', () => {
     it('shows the Spec Patterns section (default specPattern value)', () => {
       cy.scaffoldProject('simple-ct')
       cy.openProject('simple-ct')
@@ -143,18 +157,6 @@ describe('App: Settings', () => {
 
     // TODO: The Edit button isn't hooked up to do anything when it should trigger the openFileInIDE mutation (https://cypress-io.atlassian.net/browse/UNIFY-1164)
     it.skip('opens cypress.config.js file after clicking "Edit" button', () => {
-    })
-
-    it('opens cloud settings when clicking on "Manage Keys"', () => {
-      cy.startAppServer('e2e')
-      cy.loginUser()
-      cy.intercept('mutation-ExternalLink_OpenExternal', { 'data': { 'openExternal': true } }).as('OpenExternal')
-      cy.__incorrectlyVisitAppWithIntercept('settings')
-      cy.findByText('Project Settings').click()
-      cy.findByText('Manage Keys').click()
-      cy.wait('@OpenExternal')
-      .its('request.body.variables.url')
-      .should('equal', 'http:/test.cloud/cloud-project/settings')
     })
   })
 
@@ -239,7 +241,7 @@ describe('App: Settings without cloud', () => {
 
     cy.visitApp()
     cy.findByText('Settings').click()
-    cy.findByText('Project Settings').click()
+    cy.findByText('Dashboard Settings').click()
     cy.findByText('Project ID').should('not.exist')
   })
 
