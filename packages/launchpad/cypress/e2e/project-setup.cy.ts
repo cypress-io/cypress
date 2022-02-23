@@ -123,7 +123,7 @@ describe('Launchpad: Setup Project', () => {
       .within(() => {
         cy.validateExternalLink({
           name: 'Need help',
-          href: 'https://on.cypress.io',
+          href: 'https://on.cypress.io/choosing-testing-type',
         })
       })
     })

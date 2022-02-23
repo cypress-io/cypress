@@ -342,7 +342,9 @@ export default function (Commands, Cypress, cy, state, config) {
             // event.target is null when used with shadow DOM.
             (event.target && $elements.isButtonLike(event.target)) &&
             // When a space key is pressed for input radio elements, the click event is only fired when it's not checked.
-            !(event.target.tagName === 'INPUT' && event.target.type === 'radio' && event.target.checked === true)
+            !(event.target.tagName === 'INPUT' && event.target.type === 'radio' && event.target.checked === true) &&
+            // When event is prevented, the click event should not be emitted
+            !event.defaultPrevented
           ) {
             fireClickEvent(event.target)
           }
