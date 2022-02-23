@@ -345,9 +345,7 @@
       "title": "External Editor",
       "description": "External editor to use for editing code opened when using Cypress.",
       "noEditorSelectedPlaceholder": "Choose your editor...",
-      "editorRadioLabel": "Choose editor",
-      "customEditorRadioLabel": "Add custom editor by path",
-      "customPathPlaceholder": "Custom path..."
+      "customPathPlaceholder": "/path/to/editor"
     },
     "projectId": {
       "title": "Project ID",
@@ -494,7 +492,7 @@
     "modalTitle": "Choose a testing type",
     "e2e": {
       "name": "E2E Testing",
-      "description": "Build and test the entire experience of your application from end-to-end to each ensure each flow matches your expectations."
+      "description": "Build and test the entire experience of your application from end-to-end to ensure each flow matches your expectations."
     },
     "component": {
       "name": "Component Testing",
@@ -504,8 +502,9 @@
   "migration": {
     "before": "Before",
     "after": "After",
+    "heresWhy": "here's why:",
     "renameAuto": {
-      "title": "If you change your default spec pattern, here's what you'll get...",
+      "title": "We'll automatically rename your specs in this step",
       "changeButton": "change",
       "changedSpecFolder": "We've changed the default spec folder from:",
       "changedSpecExt": "We've changed the default spec file extension from:",
@@ -513,16 +512,16 @@
       "optedOutMessage": "You've opted not to rename your spec file extension",
       "folderRenameMessage": "You've opted not to rename your spec file extension, we're going to rename the folder",
       "modals": {
-        "title": "Migrating to a new spec file pattern",
+        "title": "Change the existing spec file extension",
         "step1": {
-          "warning": "We strongly recommend having your spec files end in *.cy.* to avoid framework conflicts.",
-          "line1": "You can create new specs without leaving your browser",
+          "warning": "We recommend using the default extension to avoid inconsistencies, framework conflicts, and confusion with your team.",
+          "line1": "Cypress now supports the ability to create new spec files from within the UI for both E2E and component specs.",
           "line2": "All new spec files created within Cypress will use the default pattern of: ",
-          "line3": "Your E2E test naming will be consistent with any component tests you can create in the future",
+          "line3": "We want to rename your existing specs so that they have a consistent filename pattern for both E2E and component testing.",
           "line4": "All documentation and example code will be using: ",
           "line5": "We've changed the placement of component specs to be next to their source files (e.g. src/Button.jsx and src/Button.cy.jsx)",
-          "line6": "Using *.cy.* ensures your tests (component or E2E) don't collide with your unit tests (e.g. Jest or Vitest)",
-          "buttonProceed": "Continue, please rename my specs to end in *.cy.*",
+          "line6": "The new default pattern of {0} prevents targeting conflicts with other testing frameworks. (e.g. Jest)",
+          "buttonProceed": "I still want to change the spec file extension",
           "buttonCancel": "Cancel, keep the default extension"
         },
         "step2": {
