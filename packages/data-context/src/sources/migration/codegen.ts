@@ -205,9 +205,9 @@ function formatObjectForConfig (obj: Record<string, unknown>) {
 function createE2eTemplate (pluginPath: string, hasPluginsFile: boolean, options: Record<string, unknown>) {
   const requirePlugins = `return require('./${pluginPath}')(on, config)`
 
-  const setupNodeEvents = `${hasPluginsFile ? `// We've imported your old cypress plugins here.
+  const setupNodeEvents = `// We've imported your old cypress plugins here.
   // You may want to clean this up later by importing these.
-  ` : ''}setupNodeEvents(on, config) {
+  setupNodeEvents(on, config) {
     ${hasPluginsFile ? requirePlugins : ''}
   }`
 
@@ -218,6 +218,8 @@ function createE2eTemplate (pluginPath: string, hasPluginsFile: boolean, options
 
 function createComponentTemplate (options: Record<string, unknown>) {
   return `component: {
+    // We've imported your old cypress plugins here.
+    // You may want to clean this up later by importing these.
     setupNodeEvents(on, config) {},${formatObjectForConfig(options)}
   },`
 }

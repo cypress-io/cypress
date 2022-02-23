@@ -1,11 +1,16 @@
 /**
+ * This partial regular expression is used to extract
+ * the extension from a spec file name:
+ *
  * matches
- * - file.spec.tsx
- * - file.Test.tsx
- * - file_Spec.js
- * - file-spec.js
+ * - file.spec.tsx -> ext=".spec."
+ * - file_Spec.js -> ext="_Spec."
+ * - file-spec.js -> ext="-spec."
+ * - spec.js -> ext="."
+ *
+ * The final objective being to be able to replace it with ".cy."
  */
-const specExtRe = '(?<!\/)[._-]?(?:[s|S]pec|[t|T]est)?[.])(?=(?:[j|t]s[x]|coffee)?'
+const specExtRe = '(?<!\/)[._-]?[s|S]pec.|[.])(?=([j|t]s[x]|coffee)?'
 
 export const regexps = {
   e2e: {

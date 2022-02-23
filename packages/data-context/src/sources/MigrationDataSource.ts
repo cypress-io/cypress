@@ -275,36 +275,6 @@ export class MigrationDataSource {
 
     const config = await this.parseCypressConfig()
 
-    const componentFolder = getComponentFolder(config)
-    const componentTestFiles = getComponentTestFilesGlobs(config)
-
-    this.hasCustomComponentFolder = componentFolder !== 'cypress/component'
-    this.hasCustomComponentTestFiles = !isDefaultTestFiles(config, 'component')
-
-    if (componentFolder === false) {
-      this.hasComponentTesting = false
-    } else {
-      this.hasComponentTesting = await hasSpecFile(
-        this.ctx.currentProject,
-        componentFolder,
-        componentTestFiles,
-      )
-
-      // if we don't find specs in the 9.X scope,
-      // let's check already migrated files.
-      // this allows users to stop migration halfway,
-      // then to pick up where they left migration off
-      if (!this.hasComponentTesting && (!this.hasCustomComponentTestFiles || !this.hasCustomComponentFolder)) {
-        const newComponentSpecPattern = getSpecPattern(config, 'component')
-
-        this.hasComponentTesting = await hasSpecFile(
-          this.ctx.currentProject,
-          '',
-          newComponentSpecPattern,
-        )
-      }
-    }
-
     const integrationFolder = getIntegrationFolder(config)
     const integrationTestFiles = getIntegrationTestFilesGlobs(config)
 
@@ -333,6 +303,26 @@ export class MigrationDataSource {
           newE2eSpecPattern,
         )
       }
+    }
+
+    const componentFolder = getComponentFolder(config)
+    const componentTestFiles = getComponentTestFilesGlobs(config)
+
+    this.hasCustomComponentFolder = componentFolder !== 'cypress/component'
+    this.hasCustomComponentTestFiles = !isDefaultTestFiles(config, 'component')
+
+    if (componentFolder === false) {
+      this.hasComponentTesting = false
+    } else {
+      this.hasComponentTesting = await hasSpecFile(
+        this.ctx.currentProject,
+        componentFolder,
+        componentTestFiles,
+      )
+
+      // We cannot check already migrated component specs since it would pick up e2e specs as well
+      // the default specPattern for CT is **/*.cy.js.
+      // since component testing has to be re-installed anyway, we can just skip this
     }
 
     const pluginsFileMissing = (
