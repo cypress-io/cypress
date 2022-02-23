@@ -11,13 +11,13 @@ import $Log from '../cypress/log'
 import { bindToListeners } from '../cy/listeners'
 import { SpecBridgeDomainCommunicator } from './communicator'
 import { handleDomainFn } from './domain_fn'
-import { handleCommands } from './commands'
 import { handleLogs } from './events/logs'
 import { handleSocketEvents } from './events/socket'
-import { handleSpecWindowEvents } from './events/spec_window_events'
+import { handleSpecWindowEvents } from './events/spec_window'
 import { handleErrorEvent } from './events/errors'
 import { handleScreenshots } from './events/screenshots'
-import { handleTestEvents } from './events/test_events'
+import { handleTestEvents } from './events/test'
+import { handleUnsupportedAPIs } from './unsupported_apis'
 
 const specBridgeCommunicator = new SpecBridgeDomainCommunicator()
 
@@ -59,15 +59,18 @@ const setup = (cypressConfig: Cypress.Config, env: Cypress.ObjectLike) => {
 
   const { state, config } = Cypress
 
-  $Commands.create(Cypress, cy, state, config)
+  // @ts-ignore
+  Cypress.Commands = $Commands.create(Cypress, cy, state, config)
+  // @ts-ignore
+  Cypress.isCy = cy.isCy
 
   handleDomainFn(cy, specBridgeCommunicator)
-  handleCommands(Cypress, cy, specBridgeCommunicator)
   handleLogs(Cypress, specBridgeCommunicator)
   handleSocketEvents(Cypress)
   handleSpecWindowEvents(cy)
   handleScreenshots(Cypress, specBridgeCommunicator)
   handleTestEvents(Cypress, specBridgeCommunicator)
+  handleUnsupportedAPIs(Cypress, cy)
 
   cy.onBeforeAppWindowLoad = onBeforeAppWindowLoad(Cypress, cy)
 
@@ -113,8 +116,7 @@ const onBeforeAppWindowLoad = (Cypress: Cypress.Cypress, cy: $Cy) => (autWindow:
     onBeforeUnload (e) {
       cy.isStable(false, 'beforeunload')
 
-      // TODO: implement these commented out bits
-      // Cookies.setInitial()
+      cy.Cookies.setInitial()
 
       cy.resetTimer()
 

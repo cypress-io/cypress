@@ -1,5 +1,3 @@
-import _ from 'lodash'
-
 // @ts-ignore / session support is needed for visiting about:blank between tests
 describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDomain: true }, () => {
   beforeEach(() => {
@@ -29,14 +27,22 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
       _currentRetry: runnable._currentRetry,
       type: 'test',
       title: 'passes runnable state to the secondary domain',
+      titlePath: [
+        'multi-domain',
+        'passes runnable state to the secondary domain',
+      ],
       parent: {
         id: runnable.parent.id,
         type: 'suite',
         title: 'multi-domain',
+        titlePath: [
+          'multi-domain',
+        ],
         parent: {
           id: runnable.parent.parent.id,
           type: 'suite',
           title: '',
+          titlePath: undefined,
           ctx: {},
         },
         ctx: {},
@@ -52,6 +58,9 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
       expectedRunnable.isPending = actualRunnable.isPending
       expectedRunnable.resetTimeout = actualRunnable.resetTimeout
       expectedRunnable.timeout = actualRunnable.timeout
+
+      expect(actualRunnable.titlePath()).to.deep.equal(expectedRunnable.titlePath)
+      expectedRunnable.titlePath = actualRunnable.titlePath
 
       expect(actualRunnable).to.deep.equal(expectedRunnable)
     })
@@ -131,18 +140,6 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
         expect(foo).to.equal('foo')
         expect(num).to.equal(1)
         expect(bool).to.be.true
-      })
-    })
-
-    it('works with done callback', (done) => {
-      cy.switchToDomain('foobar.com', done, [true], ([bool]) => {
-        expect(bool).to.be.true
-
-        Cypress.once('form:submitted', () => {
-          done()
-        })
-
-        cy.get('form').submit()
       })
     })
   })
@@ -282,62 +279,14 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
       })
     })
 
-    it('errors if three or more arguments are used and the second argument is not the done() fn', (done) => {
-      cy.on('fail', (err) => {
-        expect(err.message).to.equal('`cy.switchToDomain()` must have done as its second argument when three or more arguments are used.')
-
-        done()
-      })
-
-      cy.switchToDomain('foobar.com', () => {}, () => {})
-    })
-
-    it('waits for all logs to finish streaming in from switchToDomain, expecting commands to not be pending', (done) => {
-      const domain = 'foobar.com'
-      const logsAddedNeedingUpdate = {}
-      const logsChangedGivingUpdate = {}
-
-      cy.on('log:added', (addedLog) => {
-        if (!addedLog?.ended && addedLog?.id.includes(domain)) {
-          logsAddedNeedingUpdate[addedLog.id] = addedLog
-        }
-      })
-
-      cy.on('log:changed', (changedLog) => {
-        if (changedLog?.ended && changedLog?.id.includes(domain)) {
-          logsChangedGivingUpdate[changedLog.id] = changedLog
-        }
-
-        const addedLogsSize = _.size(logsAddedNeedingUpdate)
-        const changedLogsSize = _.size(logsChangedGivingUpdate)
-
-        // if all logs are done streaming
-        if (addedLogsSize === changedLogsSize && addedLogsSize > 0) {
-          // make sure each log added in the secondary domain is finished and has passed
-          _.forOwn(logsAddedNeedingUpdate, (_, key) => {
-            expect(logsChangedGivingUpdate[key].ended).to.be.true
-            expect(logsChangedGivingUpdate[key].state).to.not.equal('pending')
-          })
-
-          done()
-        }
-      })
-
-      cy.switchToDomain(domain, () => {
-        cy.get('form').submit()
-      })
-    })
-
     it('receives command failures from the secondary domain', (done) => {
-      const timeout = 1000
+      const timeout = 50
 
-      cy.on('fail', (e) => {
-        const errString = e.toString()
-
-        expect(errString).to.have.string(`Timed out retrying after ${timeout}ms: Expected to find element: \`#doesnt-exist\`, but never found it`)
+      cy.on('fail', (err) => {
+        expect(err.message).to.include(`Timed out retrying after ${timeout}ms: Expected to find element: \`#doesnt-exist\`, but never found it`)
         //  make sure that the secondary domain failures do NOT show up as spec failures or AUT failures
-        expect(errString).to.not.have.string(`The following error originated from your test code, not from Cypress`)
-        expect(errString).to.not.have.string(`The following error originated from your application code, not from Cypress`)
+        expect(err.message).not.to.include(`The following error originated from your test code, not from Cypress`)
+        expect(err.message).not.to.include(`The following error originated from your application code, not from Cypress`)
         done()
       })
 
@@ -347,10 +296,5 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
         })
       })
     })
-
-    // TODO: this following tests needs to be implemented in a cy-in-cy test or more e2e style test as we need to test the 'done' function
-    it('propagates user defined secondary domain errors to the primary')
-
-    it('short circuits the secondary domain command queue when "done()" is called early')
   })
 })

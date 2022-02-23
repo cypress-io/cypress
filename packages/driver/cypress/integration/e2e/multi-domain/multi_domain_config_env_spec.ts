@@ -83,8 +83,7 @@
         })
       })
 
-      // FIXME: unskip this test once tail-end waiting is implemented
-      it.skip(`syncs serializable Cypress.${fnName}() values outwards from secondary (commands/async)`, () => {
+      it(`syncs serializable Cypress.${fnName}() values outwards from secondary (commands/async)`, () => {
         cy.switchToDomain('foobar.com', [fnName, USED_KEYS], ([fnName, USED_KEYS]) => {
           cy.then(() => {
             // @ts-ignore
@@ -100,9 +99,9 @@
       it(`persists Cypress.${fnName}() changes made in the secondary, assuming primary has not overwritten with a serializable value`, () => {
         cy.switchToDomain('foobar.com', [fnName, USED_KEYS], ([fnName, USED_KEYS]) => {
           // @ts-ignore
-          const baz = Cypress[fnName](USED_KEYS.bar)
+          const quux = Cypress[fnName](USED_KEYS.bar)
 
-          expect(baz).to.equal('baz')
+          expect(quux).to.equal('quux')
         })
       })
 

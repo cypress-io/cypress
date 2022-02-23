@@ -1,5 +1,5 @@
 // @ts-ignore / session support is needed for visiting about:blank between tests
-context('screenshot specs', { experimentalSessionSupport: true, experimentalMultiDomain: true }, () => {
+context('multi-domain screenshot', { experimentalSessionSupport: true, experimentalMultiDomain: true }, () => {
   beforeEach(() => {
     this.serverResult = {
       path: '/path/to/screenshot',
@@ -68,7 +68,7 @@ context('screenshot specs', { experimentalSessionSupport: true, experimentalMult
 
       cy.screenshot()
       .then(() => {
-        expect(automationStub.args[0][1].titles).to.deep.equal(['screenshot specs', 'supports multiple titles'])
+        expect(automationStub.args[0][1].titles).to.deep.equal(['multi-domain screenshot', 'supports multiple titles'])
       })
     })
   })
