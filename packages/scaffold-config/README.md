@@ -10,7 +10,7 @@ We will also attempt to scaffold a configuration file for projects using React a
 
 | Name | Tool Version | Dev Server | Dev Server Version | Library Version (s) | Component Adaptor Version | Example Project
 | --- | ---- | ---- | --- | ---- | ---- | --- |
-| Create React App | 4.x, 5.x | Webpack | 4.x | React 16, React 17 | `@cypress/react@latest` | [Link](../../system-tests/projects/create-react-app-configured)
+| Create React App | 4.x | Webpack | 4.x | React 16, React 17 | `@cypress/react@latest` | [Link](../../system-tests/projects/create-react-app-configured)
 | React | - | Vite | 2.x | React 16, React 17 | `@cypress/react@latest` | [Link](../../system-tests/projects/react-vite-ts-configured)
 | Vue | - | Vite | 2.x | Vue 3 | `@cypress/vue@^3.0.0` | [Link](../../system-tests/projects/vue3-vite-ts-configured)
 | Vue CLI | 4.x | Webpack | 4.x | Vue 2 | `@cypress/vue@2.0.4` | [Link](../../system-tests/projects/vueclivue2-configured)
@@ -35,3 +35,5 @@ These should be supported but currently are not configured.
 | Name | Tool Version | Dev Server | Dev Server Version | Library Version (s) | Component Adaptor Version | Example Project
 | --- | ---- | ---- | --- | ---- | ---- | --- |
 | Next.js | 11.x, 12.x | Webpack | 4.x, 5.x | React 16, 17 | `@cypress/react@latest` | [Link](../../system-tests/projects/nextjs-configured)
+| Create React App | 5.x | Webpack | 5.x | React 16, 17 | `@cypress/react@latest` | [TODO]
+| Vue CLI | 5.x | Webpack | 5.x | Vue 3 | `@cypress/vue@^3.0.0` | [TODO]
