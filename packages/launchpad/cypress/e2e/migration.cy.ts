@@ -549,6 +549,26 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
     checkOutcome()
   })
 
+  it('handles re-migrating a partially migrated codebase', { retries: 0 }, () => {
+    startMigrationFor('migration-specs-already-migrated')
+    cy.get(renameAutoStep).should('not.exist')
+
+    cy.withCtx(async (ctx) => {
+      const specs = [
+        'cypress/tests/foo.cy.js',
+      ]
+
+      for (const spec of specs) {
+        const stats = await ctx.actions.file.checkIfFileExists(ctx.path.join(spec))
+
+        expect(stats).to.not.be.null
+      }
+    })
+
+    renameSupport('ts')
+    migrateAndVerifyConfig()
+  })
+
   context('migration-e2e-component-default-test-files', () => {
     it('completes journey', () => {
       startMigrationFor('migration-e2e-component-default-test-files')
