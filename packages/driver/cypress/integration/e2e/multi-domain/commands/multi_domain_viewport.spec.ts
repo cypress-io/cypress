@@ -124,6 +124,7 @@ context('multi-domain viewport', { experimentalSessionSupport: true, experimenta
           cy.viewport(320, 480)
         })
 
+        // changing the viewport to the same size shouldn't do anything
         cy.viewport(320, 480).then(() => {
           expect(viewportChangedSpy).not.to.be.called
         })

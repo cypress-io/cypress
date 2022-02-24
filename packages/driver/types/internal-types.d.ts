@@ -50,7 +50,7 @@ declare namespace Cypress {
     state: State
     events: Events
     emit: ((event: string, payload?: any) => void)
-    multiDomainCommunicator: PrimaryDomainCommunicator
+    multiDomainCommunicator: import('../src/multi-domain/communicator').PrimaryDomainCommunicator
   }
 
   interface CypressUtils {
