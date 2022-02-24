@@ -127,12 +127,17 @@ export const create = (Cypress, state, timeout, clearTimeout, whenStable, finish
       // the start since we need to retry
       // fresh once we become stable again!
       if (state('isStable') === false) {
+        Cypress.log({ message: 'removing start', end: true })
         options._start = undefined
       }
 
       // invoke the passed in retry fn
       // once we reach stability
-      return whenStable(fn)
+      return whenStable(() => {
+        Cypress.log({ message: 'stabilized second', end: true })
+
+        return fn()
+      })
     })
   },
 })
