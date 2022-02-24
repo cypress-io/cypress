@@ -29,7 +29,7 @@ mainBuildFilters: &mainBuildFilters
       only:
         - develop
         - 10.0-release
-        - elevatebart/test/windows
+        - fix-cache-state
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -39,6 +39,7 @@ macWorkflowFilters: &mac-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ '10.0-release', << pipeline.git.branch >> ]
+    - equal: [ fix-cache-state, << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -48,7 +49,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ '10.0-release', << pipeline.git.branch >> ]
-    - equal: [ 'elevatebart/test/windows', << pipeline.git.branch >> ]
+    - equal: [ fix-cache-state, << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -268,7 +269,7 @@ commands:
       - run:
           name: Bail if cache exists
           command: |
-            if [[ -f "/tmp/node_modules_installed" ]]; then
+            if [[ -f "node_modules_installed" ]]; then
               echo "Node modules already cached for dependencies, exiting"
               circleci-agent step halt
             fi
@@ -303,12 +304,12 @@ commands:
                 key: v{{ .Environment.CACHE_VERSION }}-{{ checksum "platform_key" }}-node-modules-cache-{{ checksum "circle_cache_key" }}
                 paths:
                   - /tmp/node_modules_cache
-      - run: touch /tmp/node_modules_installed
+      - run: touch node_modules_installed
       - save_cache:
           name: Saving node-modules cache state key
           key: v{{ .Environment.CACHE_VERSION }}-{{ checksum "platform_key" }}-node-modules-cache-state-{{ checksum "circle_cache_key" }}
           paths:
-            - /tmp/node_modules_installed
+            - node_modules_installed
       - save_cache:
           name: Save weekly yarn cache
           key: v{{ .Environment.CACHE_VERSION }}-{{ checksum "platform_key" }}-deps-root-weekly-{{ checksum "cache_date" }}
@@ -1662,7 +1663,7 @@ jobs:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "elevatebart/test/windows" && "$CIRCLE_BRANCH" != "10.0-release" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "fix-cache-state" && "$CIRCLE_BRANCH" != "10.0-release" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi

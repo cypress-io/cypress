@@ -14,7 +14,6 @@
     cursor: default;
     color: $gray-400;
     min-height: 20px;
-    // margin: 0;
   }
 
   .command-scaled {
@@ -62,7 +61,6 @@
     display: flex;
     min-height: 20px;
     padding-right: 2px;
-    // padding: 3px 5px 0;
     // padding: 3px 0 0;
 
     &:hover {
@@ -248,6 +246,14 @@
   }
 
   // Command State Styles
+  .command-state-passed {
+    border-left: 2px solid $reporter-section-background;
+
+    &:hover {
+      border-left: 2px solid $gray-900;
+    }
+  }
+
   .command-state-pending {
     border-left: 2px solid $indigo-800;
     background-color: $gray-900;
@@ -287,15 +293,6 @@
           transform: scaleX(0);
         }
       }
-    }
-  }
-
-  .command-state-passed {
-    // margin-left: 2px;
-    border-left: 2px solid $reporter-section-background;
-
-    &:hover {
-      border-left: 2px solid $gray-900;
     }
   }
 
@@ -457,6 +454,12 @@
       vertical-align: top;
     }
 
+    .command-invisible {
+      display: inline-block;
+      margin-left: 5px;
+      margin-right: 0;
+    }
+
     .command-alias,
     .command-interceptions {
       font-family: $open-sans;
@@ -467,12 +470,6 @@
 
     label {
       font-size: 85%;
-    }
-
-    .command-invisible {
-      display: inline-block;
-      margin-left: 5px;
-      margin-right: 0;
     }
   }
 

@@ -51,7 +51,8 @@ describe('aliases', () => {
       .find('.command-interceptions')
       .should('have.text', 'some status no alias')
       .trigger('mouseover')
-      .get('.cy-tooltip').should('have.text', 'This request matched:cy.intercept() spy with no alias')
+      .get('.cy-tooltip')
+      .should('have.text', 'This request matched:cy.intercept() spy with no alias')
       .percySnapshot()
     })
 

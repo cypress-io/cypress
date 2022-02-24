@@ -119,7 +119,7 @@ export class MigrationActions {
     await this.ctx.migration.closeManualRenameWatcher()
   }
 
-  async assertSuccessfulConfigMigration (configExtension: 'js' | 'ts' = 'js') {
+  async assertSuccessfulConfigMigration (configExtension: 'js' | 'ts' | 'coffee' = 'js') {
     const actual = formatConfig(await this.ctx.actions.file.readFileInProject(`cypress.config.${configExtension}`))
     const expected = formatConfig(await this.ctx.actions.file.readFileInProject(`expected-cypress.config.${configExtension}`))
 
