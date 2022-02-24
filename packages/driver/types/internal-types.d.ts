@@ -1,6 +1,8 @@
 // NOTE: this is for internal Cypress types that we don't want exposed in the public API but want for development
 // TODO: find a better place for this
 
+import type { PrimaryDomainCommunicator } from "../src/multi-domain/communicator"
+
 interface InternalWindowLoadDetails {
   type: 'same:domain' | 'cross:domain' | 'cross:domain:failure'
   error?: Error
@@ -50,6 +52,7 @@ declare namespace Cypress {
     state: State
     events: Events
     emit: ((event: string, payload?: any) => void)
+    multiDomainCommunicator: PrimaryDomainCommunicator
   }
 
   interface CypressUtils {

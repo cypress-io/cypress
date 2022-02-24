@@ -535,7 +535,7 @@ export const eventManager = {
         Cypress.multiDomainCommunicator.toSpecBridge('viewport:changed:end')
       }
 
-      Cypress.emit('sync:viewport', viewport)
+      Cypress.multiDomainCommunicator.emit('sync:viewport', viewport)
       localBus.emit('viewport:changed', viewport, callback)
     })
 

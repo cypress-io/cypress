@@ -65,7 +65,7 @@ const setup = (cypressConfig: Cypress.Config, env: Cypress.ObjectLike) => {
   // @ts-ignore
   Cypress.isCy = cy.isCy
 
-  handleDomainFn(cy, specBridgeCommunicator)
+  handleDomainFn(Cypress, cy, specBridgeCommunicator)
   handleLogs(Cypress, specBridgeCommunicator)
   handleSocketEvents(Cypress)
   handleSpecWindowEvents(cy)
