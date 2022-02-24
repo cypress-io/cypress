@@ -175,7 +175,7 @@ export default class Iframes extends Component {
 
     // if it already exists, don't add another one
     if (document.getElementById(id)) {
-      this.props.eventManager.notifyCrossDomainBridgeReady()
+      this.props.eventManager.notifyCrossDomainBridgeReady(domain)
 
       return
     }

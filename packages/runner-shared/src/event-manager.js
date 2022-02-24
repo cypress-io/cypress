@@ -513,7 +513,7 @@ export const eventManager = {
     })
 
     Cypress.on('test:before:run', (...args) => {
-      Cypress.multiDomainCommunicator.toSpecBridge('test:before:run', ...args)
+      Cypress.multiDomainCommunicator.toAllSpecBridges('test:before:run', ...args)
     })
 
     Cypress.on('test:before:run:async', (...args) => {
@@ -539,9 +539,9 @@ export const eventManager = {
       localBus.emit('viewport:changed', viewport, callback)
     })
 
-    Cypress.multiDomainCommunicator.on('before:screenshot', (config) => {
+    Cypress.multiDomainCommunicator.on('before:screenshot', (config, domain) => {
       const callback = () => {
-        Cypress.multiDomainCommunicator.toSpecBridge('before:screenshot:end')
+        Cypress.multiDomainCommunicator.toSpecBridge(domain, 'before:screenshot:end')
       }
 
       handleBeforeScreenshot(config, callback)
@@ -653,8 +653,9 @@ export const eventManager = {
     ws.emit('spec:changed', specFile)
   },
 
-  notifyCrossDomainBridgeReady () {
-    Cypress.multiDomainCommunicator.emit('bridge:ready')
+  notifyCrossDomainBridgeReady (domain) {
+    // Any multi-domain event appends the domain as the third parameter and we do the same here for this short circuit
+    Cypress.multiDomainCommunicator.emit('bridge:ready', undefined, domain)
   },
 
   focusTests () {
