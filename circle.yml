@@ -38,6 +38,7 @@ macWorkflowFilters: &mac-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
+    - equal: [ '10.0-release', << pipeline.git.branch >> ]
     - equal: [ fix-cache-state, << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
@@ -47,6 +48,7 @@ windowsWorkflowFilters: &windows-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
+    - equal: [ '10.0-release', << pipeline.git.branch >> ]
     - equal: [ fix-cache-state, << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
