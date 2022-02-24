@@ -1,12 +1,9 @@
 import Debug from 'debug'
 import { CODE_LANGUAGES } from '@packages/types'
 import {
-  AllPackageNames,
-  AllPackagePackages,
   BUNDLERS,
   DEPENDENCIES,
   FRONTEND_FRAMEWORKS,
-  AllPackagesDescriptions,
   CYPRESS_DEV_SERVERS,
 } from '@packages/scaffold-config'
 import type { DataContext } from '..'
@@ -16,10 +13,10 @@ import resolve from 'resolve-from'
 const debug = Debug('cypress:data-context:wizard-data-source')
 
 interface PackageToInstall {
-  name: AllPackageNames
-  description: AllPackagesDescriptions
-  package: AllPackagePackages
+  name: typeof DEPENDENCIES[number]['name']
   installer: typeof DEPENDENCIES[number]['installer']
+  description: typeof DEPENDENCIES[number]['description']
+  package: typeof DEPENDENCIES[number]['package']
 }
 
 export class WizardDataSource {
@@ -104,10 +101,7 @@ export class WizardDataSource {
         debug('package.json path: %s', packageJsonPath)
 
         try {
-          debug(`resolving ${this.ctx.currentProject, packageJsonPath}`)
-          const loc = resolve(this.ctx.currentProject, packageJsonPath)
-
-          debug('found at %s', loc)
+          resolve(this.ctx.currentProject, packageJsonPath)
 
           return p.package
         } catch (e) {
