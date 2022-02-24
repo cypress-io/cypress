@@ -3239,7 +3239,7 @@ describe('network stubbing', function () {
       .wait('@foo.bar.request')
     })
 
-    it('can timeout waiting on a single request using "alias.request"', function (done) {
+    it.only('can timeout waiting on a single request using "alias.request"', function (done) {
       testFailWaiting((err) => {
         expect(err.message).to.contain('No request ever occurred.')
         done()

@@ -2085,46 +2085,46 @@ linux-workflow: &linux-workflow
         requires:
           - build
     # unit, integration and e2e tests
-    - cli-visual-tests:
-        requires:
-          - build
-    - unit-tests:
-        requires:
-          - build
-    - unit-tests-release:
-        context: test-runner:npm-release
-        requires:
-          - build
-    - server-unit-tests:
-        requires:
-          - build
-    - server-integration-tests:
-        requires:
-          - build
-    - server-performance-tests:
-        requires:
-          - build
-    - system-tests-node-modules-install:
-        context: test-runner:performance-tracking
-        requires:
-          - build
-    - system-tests-chrome:
-        context: test-runner:performance-tracking
-        requires:
-          - system-tests-node-modules-install
-    - system-tests-electron:
-        context: test-runner:performance-tracking
-        requires:
-          - system-tests-node-modules-install
-    - system-tests-firefox:
-        context: test-runner:performance-tracking
-        requires:
-          - system-tests-node-modules-install
-    - system-tests-non-root:
-        context: test-runner:performance-tracking
-        executor: non-root-docker-user
-        requires:
-          - system-tests-node-modules-install
+    # - cli-visual-tests:
+    #     requires:
+    #       - build
+    # - unit-tests:
+    #     requires:
+    #       - build
+    # - unit-tests-release:
+    #     context: test-runner:npm-release
+    #     requires:
+    #       - build
+    # - server-unit-tests:
+    #     requires:
+    #       - build
+    # - server-integration-tests:
+    #     requires:
+    #       - build
+    # - server-performance-tests:
+    #     requires:
+    #       - build
+    # - system-tests-node-modules-install:
+    #     context: test-runner:performance-tracking
+    #     requires:
+    #       - build
+    # - system-tests-chrome:
+    #     context: test-runner:performance-tracking
+    #     requires:
+    #       - system-tests-node-modules-install
+    # - system-tests-electron:
+    #     context: test-runner:performance-tracking
+    #     requires:
+    #       - system-tests-node-modules-install
+    # - system-tests-firefox:
+    #     context: test-runner:performance-tracking
+    #     requires:
+    #       - system-tests-node-modules-install
+    # - system-tests-non-root:
+    #     context: test-runner:performance-tracking
+    #     executor: non-root-docker-user
+    #     requires:
+    #       - system-tests-node-modules-install
     - driver-integration-tests-chrome:
         requires:
           - build
@@ -2137,196 +2137,196 @@ linux-workflow: &linux-workflow
     - driver-integration-tests-electron:
         requires:
           - build
-    - runner-integration-tests-chrome:
-        requires:
-          - build
-    - runner-integration-tests-firefox:
-        requires:
-          - build
-    - runner-integration-tests-electron:
-        requires:
-          - build
-    - runner-ct-integration-tests-chrome:
-        requires:
-          - build
-    - desktop-gui-integration-tests-7x:
-        requires:
-          - build
-    - desktop-gui-component-tests:
-        requires:
-          - build
-    - reporter-integration-tests:
-        requires:
-          - build
-    - ui-components-integration-tests:
-        requires:
-          - build
-    - npm-webpack-dev-server:
-        requires:
-          - build
-    - npm-vite-dev-server:
-        requires:
-          - build
-    - npm-webpack-preprocessor:
-        requires:
-          - build
-    - npm-webpack-batteries-included-preprocessor:
-        requires:
-          - build
-    - npm-design-system:
-        requires:
-          - build
-    - npm-vue:
-        requires:
-          - build
-    - npm-react:
-        requires:
-          - build
-    - npm-angular:
-        requires:
-          - build
-    - npm-mount-utils:
-        requires:
-          - build
-    - npm-create-cypress-tests:
-        requires:
-          - build
-    - npm-eslint-plugin-dev:
-        requires:
-          - build
-    - npm-cypress-schematic:
-        requires:
-          - build
-    # This release definition must be updated with any new jobs
-    # Any attempts to automate this are welcome
-    # If CircleCI provided an "after all" hook, then this wouldn't be necessary
-    - npm-release:
-        context: test-runner:npm-release
-        requires:
-          - build
-          - npm-angular
-          - npm-eslint-plugin-dev
-          - npm-create-cypress-tests
-          - npm-react
-          - npm-mount-utils
-          - npm-vue
-          - npm-webpack-batteries-included-preprocessor
-          - npm-webpack-preprocessor
-          - npm-vite-dev-server
-          - npm-webpack-dev-server
-          - npm-cypress-schematic
-          - lint-types
-          - linux-lint
-          - percy-finalize
-          - runner-integration-tests-firefox
-          - runner-integration-tests-electron
-          - driver-integration-tests-firefox
-          - driver-integration-tests-chrome
-          - driver-integration-tests-chrome-beta
-          - driver-integration-tests-electron
-          - system-tests-non-root
-          - system-tests-firefox
-          - system-tests-electron
-          - system-tests-chrome
-          - server-performance-tests
-          - server-integration-tests
-          - server-unit-tests
-          - test-kitchensink
-          - ui-components-integration-tests
-          - unit-tests
-          - unit-tests-release
+    # - runner-integration-tests-chrome:
+    #     requires:
+    #       - build
+    # - runner-integration-tests-firefox:
+    #     requires:
+    #       - build
+    # - runner-integration-tests-electron:
+    #     requires:
+    #       - build
+    # - runner-ct-integration-tests-chrome:
+    #     requires:
+    #       - build
+    # - desktop-gui-integration-tests-7x:
+    #     requires:
+    #       - build
+    # - desktop-gui-component-tests:
+    #     requires:
+    #       - build
+    # - reporter-integration-tests:
+    #     requires:
+    #       - build
+    # - ui-components-integration-tests:
+    #     requires:
+    #       - build
+    # - npm-webpack-dev-server:
+    #     requires:
+    #       - build
+    # - npm-vite-dev-server:
+    #     requires:
+    #       - build
+    # - npm-webpack-preprocessor:
+    #     requires:
+    #       - build
+    # - npm-webpack-batteries-included-preprocessor:
+    #     requires:
+    #       - build
+    # - npm-design-system:
+    #     requires:
+    #       - build
+    # - npm-vue:
+    #     requires:
+    #       - build
+    # - npm-react:
+    #     requires:
+    #       - build
+    # - npm-angular:
+    #     requires:
+    #       - build
+    # - npm-mount-utils:
+    #     requires:
+    #       - build
+    # - npm-create-cypress-tests:
+    #     requires:
+    #       - build
+    # - npm-eslint-plugin-dev:
+    #     requires:
+    #       - build
+    # - npm-cypress-schematic:
+    #     requires:
+    #       - build
+    # # This release definition must be updated with any new jobs
+    # # Any attempts to automate this are welcome
+    # # If CircleCI provided an "after all" hook, then this wouldn't be necessary
+    # - npm-release:
+    #     context: test-runner:npm-release
+    #     requires:
+    #       - build
+    #       - npm-angular
+    #       - npm-eslint-plugin-dev
+    #       - npm-create-cypress-tests
+    #       - npm-react
+    #       - npm-mount-utils
+    #       - npm-vue
+    #       - npm-webpack-batteries-included-preprocessor
+    #       - npm-webpack-preprocessor
+    #       - npm-vite-dev-server
+    #       - npm-webpack-dev-server
+    #       - npm-cypress-schematic
+    #       - lint-types
+    #       - linux-lint
+    #       - percy-finalize
+    #       - runner-integration-tests-firefox
+    #       - runner-integration-tests-electron
+    #       - driver-integration-tests-firefox
+    #       - driver-integration-tests-chrome
+    #       - driver-integration-tests-chrome-beta
+    #       - driver-integration-tests-electron
+    #       - system-tests-non-root
+    #       - system-tests-firefox
+    #       - system-tests-electron
+    #       - system-tests-chrome
+    #       - server-performance-tests
+    #       - server-integration-tests
+    #       - server-unit-tests
+    #       - test-kitchensink
+    #       - ui-components-integration-tests
+    #       - unit-tests
+    #       - unit-tests-release
 
-    # various testing scenarios, like building full binary
-    # and testing it on a real project
-    - test-against-staging:
-        context: test-runner:record-tests
-        <<: *mainBuildFilters
-        requires:
-          - build
-    - test-kitchensink:
-        requires:
-          - build
-    - test-kitchensink-against-staging:
-        context: test-runner:record-tests
-        <<: *mainBuildFilters
-        requires:
-          - build
-    - create-build-artifacts:
-        context:
-          - test-runner:upload
-          - test-runner:commit-status-checks
-        requires:
-          - build
-    - test-npm-module-on-minimum-node-version:
-        requires:
-          - create-build-artifacts
-    - test-types-cypress-and-jest:
-        requires:
-          - create-build-artifacts
-    - test-cypress-scaffold:
-        requires:
-          - create-build-artifacts
-    - test-full-typescript-project:
-        requires:
-          - create-build-artifacts
-    - test-binary-against-kitchensink:
-        requires:
-          - create-build-artifacts
-    - test-binary-and-npm-against-other-projects:
-        context: test-runner:trigger-test-jobs
-        <<: *mainBuildFilters
-        requires:
-          - create-build-artifacts
-    - test-npm-module-and-verify-binary:
-        <<: *mainBuildFilters
-        requires:
-          - create-build-artifacts
-    - test-binary-against-staging:
-        context: test-runner:record-tests
-        <<: *mainBuildFilters
-        requires:
-          - create-build-artifacts
-    - test-binary-against-kitchensink-chrome:
-        <<: *mainBuildFilters
-        requires:
-          - create-build-artifacts
-    - test-binary-against-recipes-firefox:
-        <<: *mainBuildFilters
-        requires:
-          - create-build-artifacts
-    - test-binary-against-recipes-chrome:
-        <<: *mainBuildFilters
-        requires:
-          - create-build-artifacts
-    - test-binary-against-recipes:
-        <<: *mainBuildFilters
-        requires:
-          - create-build-artifacts
-    - test-binary-against-kitchensink-firefox:
-        <<: *mainBuildFilters
-        requires:
-          - create-build-artifacts
-    - test-binary-against-todomvc-firefox:
-        <<: *mainBuildFilters
-        requires:
-          - create-build-artifacts
-    - test-binary-against-cypress-realworld-app:
-        <<: *mainBuildFilters
-        requires:
-          - create-build-artifacts
-    - test-binary-as-specific-user:
-        name: "test binary as a non-root user"
-        executor: non-root-docker-user
-        requires:
-          - create-build-artifacts
-    - test-binary-as-specific-user:
-        name: "test binary as a root user"
-        requires:
-          - create-build-artifacts
-    - binary-system-tests:
-        requires:
-          - create-build-artifacts
-          - system-tests-node-modules-install
+    # # various testing scenarios, like building full binary
+    # # and testing it on a real project
+    # - test-against-staging:
+    #     context: test-runner:record-tests
+    #     <<: *mainBuildFilters
+    #     requires:
+    #       - build
+    # - test-kitchensink:
+    #     requires:
+    #       - build
+    # - test-kitchensink-against-staging:
+    #     context: test-runner:record-tests
+    #     <<: *mainBuildFilters
+    #     requires:
+    #       - build
+    # - create-build-artifacts:
+    #     context:
+    #       - test-runner:upload
+    #       - test-runner:commit-status-checks
+    #     requires:
+    #       - build
+    # - test-npm-module-on-minimum-node-version:
+    #     requires:
+    #       - create-build-artifacts
+    # - test-types-cypress-and-jest:
+    #     requires:
+    #       - create-build-artifacts
+    # - test-cypress-scaffold:
+    #     requires:
+    #       - create-build-artifacts
+    # - test-full-typescript-project:
+    #     requires:
+    #       - create-build-artifacts
+    # - test-binary-against-kitchensink:
+    #     requires:
+    #       - create-build-artifacts
+    # - test-binary-and-npm-against-other-projects:
+    #     context: test-runner:trigger-test-jobs
+    #     <<: *mainBuildFilters
+    #     requires:
+    #       - create-build-artifacts
+    # - test-npm-module-and-verify-binary:
+    #     <<: *mainBuildFilters
+    #     requires:
+    #       - create-build-artifacts
+    # - test-binary-against-staging:
+    #     context: test-runner:record-tests
+    #     <<: *mainBuildFilters
+    #     requires:
+    #       - create-build-artifacts
+    # - test-binary-against-kitchensink-chrome:
+    #     <<: *mainBuildFilters
+    #     requires:
+    #       - create-build-artifacts
+    # - test-binary-against-recipes-firefox:
+    #     <<: *mainBuildFilters
+    #     requires:
+    #       - create-build-artifacts
+    # - test-binary-against-recipes-chrome:
+    #     <<: *mainBuildFilters
+    #     requires:
+    #       - create-build-artifacts
+    # - test-binary-against-recipes:
+    #     <<: *mainBuildFilters
+    #     requires:
+    #       - create-build-artifacts
+    # - test-binary-against-kitchensink-firefox:
+    #     <<: *mainBuildFilters
+    #     requires:
+    #       - create-build-artifacts
+    # - test-binary-against-todomvc-firefox:
+    #     <<: *mainBuildFilters
+    #     requires:
+    #       - create-build-artifacts
+    # - test-binary-against-cypress-realworld-app:
+    #     <<: *mainBuildFilters
+    #     requires:
+    #       - create-build-artifacts
+    # - test-binary-as-specific-user:
+    #     name: "test binary as a non-root user"
+    #     executor: non-root-docker-user
+    #     requires:
+    #       - create-build-artifacts
+    # - test-binary-as-specific-user:
+    #     name: "test binary as a root user"
+    #     requires:
+    #       - create-build-artifacts
+    # - binary-system-tests:
+    #     requires:
+    #       - create-build-artifacts
+    #       - system-tests-node-modules-install
 
 mac-workflow: &mac-workflow
   jobs:
