@@ -1,9 +1,8 @@
 import { expect } from 'chai'
 import {
   formatMigrationFile,
-  supportFileRegexps,
-} from '../../../src/sources/migration/format'
-import { regexps } from '../../../src/sources/migration/regexps'
+} from '../../../../src/sources/migration/format'
+import { regexps, supportFileRegexps } from '../../../../src/sources/migration/regexps'
 
 describe('formatMigrationFile', () => {
   describe('e2e - defaultFolderDefaultTestFiles', () => {
@@ -16,7 +15,7 @@ describe('formatMigrationFile', () => {
         { text: 'cypress/', highlight: false },
         { text: 'integration', highlight: true, group: 'folder' },
         { text: '/app', highlight: false },
-        { text: '.spec.', highlight: true, group: 'extension' },
+        { text: '.spec.', highlight: true, group: 'preExtension' },
         { text: 'js', highlight: false },
       ])
     })
@@ -30,7 +29,7 @@ describe('formatMigrationFile', () => {
 
       expect(actual).to.eql([
         { text: 'cypress/support/', highlight: false },
-        { text: 'index', highlight: true, group: 'name' },
+        { text: 'index', highlight: true, group: 'supportFileName' },
         { text: `.${ext}`, highlight: false },
       ])
     })
@@ -42,7 +41,7 @@ describe('formatMigrationFile', () => {
 
       expect(actual).to.eql([
         { text: 'cypress/support/', highlight: false },
-        { text: 'e2e', highlight: true, group: 'name' },
+        { text: 'e2e', highlight: true, group: 'supportFileName' },
         { text: `.${ext}`, highlight: false },
       ])
     })

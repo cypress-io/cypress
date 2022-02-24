@@ -70,6 +70,22 @@ function renameSupport (lang: 'js' | 'ts' | 'coffee' = 'js') {
   }, { lang })
 }
 
+describe('Opening unmigrated project', () => {
+  it('legacy project with --e2e', () => {
+    cy.scaffoldProject('migration')
+    cy.openProject('migration', ['--e2e'])
+    cy.visitLaunchpad()
+    cy.get('h1').should('contain', 'Migration')
+  })
+
+  it('legacy project with --component', () => {
+    cy.scaffoldProject('migration-component-testing')
+    cy.openProject('migration-component-testing', ['--component'])
+    cy.visitLaunchpad()
+    cy.get('h1').should('contain', 'Migration')
+  })
+})
+
 describe('Full migration flow for each project', { retries: { openMode: 2, runMode: 2 } }, () => {
   it('completes journey for migration-component-testing', () => {
     startMigrationFor('migration-component-testing')
@@ -531,6 +547,26 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
     renameSupport()
     migrateAndVerifyConfig('ts')
     checkOutcome()
+  })
+
+  it('handles re-migrating a partially migrated codebase', { retries: 0 }, () => {
+    startMigrationFor('migration-specs-already-migrated')
+    cy.get(renameAutoStep).should('not.exist')
+
+    cy.withCtx(async (ctx) => {
+      const specs = [
+        'cypress/tests/foo.cy.js',
+      ]
+
+      for (const spec of specs) {
+        const stats = await ctx.actions.file.checkIfFileExists(ctx.path.join(spec))
+
+        expect(stats).to.not.be.null
+      }
+    })
+
+    renameSupport('ts')
+    migrateAndVerifyConfig()
   })
 
   context('migration-e2e-component-default-test-files', () => {

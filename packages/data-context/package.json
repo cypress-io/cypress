@@ -11,7 +11,7 @@
     "tslint": "tslint --config ../ts/tslint.json --project .",
     "clean": "rimraf './{src,test}/**/*.js'",
     "test": "yarn test-unit",
-    "test-unit": "mocha -r @packages/ts/register 'test/unit/**/*.spec.ts' --config ./test/.mocharc.js --exit"
+    "test-unit": "mocha -r @packages/ts/register --config ./test/.mocharc.js"
   },
   "dependencies": {
     "@storybook/csf-tools": "^6.4.0-alpha.38",

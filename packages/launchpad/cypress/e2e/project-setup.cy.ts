@@ -19,6 +19,20 @@ describe('Launchpad: Setup Project', () => {
     verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: false })
   })
 
+  it('opens correctly in unconfigured project with --e2e', () => {
+    cy.scaffoldProject('pristine')
+    cy.openProject('pristine', ['--e2e'])
+    cy.visitLaunchpad()
+    cy.get('h1').should('contain', 'Project Setup')
+  })
+
+  it('opens correctly in unconfigured project with --component', () => {
+    cy.scaffoldProject('pristine')
+    cy.openProject('pristine', ['--component'])
+    cy.visitLaunchpad()
+    cy.get('h1').should('contain', 'Project Setup')
+  })
+
   describe('"learn about testing types" modal', () => {
     beforeEach(() => {
       scaffoldAndOpenProject('pristine')
