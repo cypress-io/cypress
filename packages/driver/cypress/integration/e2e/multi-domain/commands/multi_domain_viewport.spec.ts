@@ -98,5 +98,36 @@ context('multi-domain viewport', { experimentalSessionSupport: true, experimenta
         })
       })
     })
+
+    context('syncs the viewport across domains', () => {
+      it('syncs the viewport from the primary to secondary', () => {
+        cy.viewport(320, 480)
+
+        cy.switchToDomain('foobar.com', () => {
+          const viewportChangedSpy = cy.spy()
+
+          cy.on('viewport:changed', viewportChangedSpy)
+
+          // changing the viewport to the same size shouldn't do anything
+          cy.viewport(320, 480).then(() => {
+            expect(viewportChangedSpy).not.to.be.called
+          })
+        })
+      })
+
+      it('syncs the viewport from the secondary to primary', () => {
+        const viewportChangedSpy = cy.spy()
+
+        cy.on('viewport:changed', viewportChangedSpy)
+
+        cy.switchToDomain('foobar.com', () => {
+          cy.viewport(320, 480)
+        })
+
+        cy.viewport(320, 480).then(() => {
+          expect(viewportChangedSpy).not.to.be.called
+        })
+      })
+    })
   })
 })

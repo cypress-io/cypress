@@ -30,6 +30,9 @@ export const handleDomainFn = (cy: $Cy, specBridgeCommunicator: SpecBridgeDomain
       },
     }
 
+    // the viewport could've changed in the primary, so sync it up in the secondary
+    Cypress.emit('sync:viewport', { viewportWidth: state.viewportWidth, viewportHeight: state.viewportHeight })
+
     // Update the state with the necessary values from the primary domain
     cy.state(stateUpdates)
 
