@@ -120,18 +120,14 @@ describe('commands', () => {
   it('shows message indicator when specified', () => {
     const indicators = ['successful', 'pending', 'aborted', 'bad']
 
-    indicators.forEach((indicator, index) => {
+    indicators.forEach((indicator) => {
       addCommand(runner, {
-        id: 150 + index,
         name: 'xhr',
         event: true,
-        state: 'passed',
-        timeout: 4000,
         renderProps: {
           indicator,
           message: `${indicator} indicator`,
         },
-        wallClockStartedAt: inProgressStartedAt,
       })
     })
 
