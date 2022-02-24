@@ -12,7 +12,6 @@
 
   .command {
     cursor: default;
-    color: $gray-400;
     min-height: 20px;
   }
 
@@ -171,10 +170,6 @@
     padding-right: 10px;
     text-align: right;
     width: 25px;
-
-    .command-number {
-      color: $gray-700;
-    }
   }
 
   .command-message {
@@ -224,7 +219,6 @@
     font-size: 11px;
     min-width: 80px;
     font-weight: 600;
-    color: $gray-200;
   }
 
   // Command State Styles
@@ -233,6 +227,22 @@
 
     &:hover {
       border-left: 2px solid $gray-900;
+    }
+
+    .command-pin {
+      color: $gray-500;
+    }
+
+    &:not(.command-is-event) .command-number {
+      color: $gray-700;
+    }
+  
+    &:not(.command-is-event) .command-method {
+      color: $gray-200;
+    }
+
+    .command-message {
+      color: $gray-400;
     }
   }
 
@@ -266,8 +276,8 @@
       display: block;
       float: right;
       height: 100%;
-      width: 100%;
       transform-origin: right;
+      width: 100%;
 
       @keyframes progress-bar {
         100% {
@@ -291,13 +301,10 @@
     font-style: unset;
     background-color: $warn-background;
     border-left: 2px solid $orange-700;
+    color: $warn-text;
 
     &:hover {
       background-color: $warn-header-background;
-    }
-
-    .command-method {
-      color: $warn-text;
     }
   }
 
@@ -448,14 +455,13 @@
   }
 
   .command-pin {
-    color: $gray-500;
     display: none;
     flex-shrink: 0;
     font-size: 14px;
     line-height: 1;
     margin-right: 10px;
     outline: none;
-    padding: 2px 0 0;
+    padding: 1px 0 0;
     text-align: right;
     width: 15px;
 
