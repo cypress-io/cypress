@@ -326,15 +326,15 @@ commands:
       - run:
           name: print yarn version
           command: yarn versions
-      - unless:
-          condition:
-            # stop-only does not correctly match on windows: https://github.com/bahmutov/stop-only/issues/78
-            equal: [ *windows-executor, << parameters.executor >> ]
-          steps:
-            - run:
-                name: Stop .only
-                 # this will catch ".only"s in js/coffee as well
-                command: yarn stop-only-all
+      # - unless:
+      #     condition:
+      #       # stop-only does not correctly match on windows: https://github.com/bahmutov/stop-only/issues/78
+      #       equal: [ *windows-executor, << parameters.executor >> ]
+      #     steps:
+      #       - run:
+      #           name: Stop .only
+      #            # this will catch ".only"s in js/coffee as well
+      #           command: yarn stop-only-all
       - run:
           name: Check terminal variables
           ## make sure the TERM is set to 'xterm' in node (Linux only)
