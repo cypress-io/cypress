@@ -55,7 +55,7 @@
 
   .command-wrapper {
     background-color: $reporter-section-background;
-    color: $gray-400;
+    color: $gray-500;
     display: flex;
     min-height: 20px;
     padding-right: 2px;
@@ -92,7 +92,7 @@
     .command-alias,
     .command-interceptions {
       border-radius: 10px;
-      color: $gray-400;
+      color: $gray-500;
       padding: 0 5px;
       display: inline-block;
 
@@ -136,7 +136,7 @@
     .command-interceptions-count {
       background-color: $orange-700 !important;
       border-radius: 5px;
-      color: $gray-400;
+      color: $gray-500;
       font-size: 90%;
       font-style: normal;
       line-height: 1;
@@ -165,7 +165,7 @@
     min-height: 1px; // because some numbers are empty
     padding-top: 3px;
     text-align: right;
-    width: 25px;
+    width: 24px;
   }
 
   .command-pin-target.command-group {
@@ -236,9 +236,9 @@
       border-left: 2px solid $gray-900;
     }
 
-    .command-pin {
-      color: $gray-500;
-    }
+    // .command-pin {
+    //   color: $gray-500;
+    // }
 
     &:not(.command-is-event) .command-number {
       color: $gray-700;
@@ -411,6 +411,7 @@
   }
 
   .command-message-text {
+    font-size: 12px;
     white-space: initial;
     word-wrap: break-word;
     line-height: 1.5;
@@ -464,7 +465,6 @@
     line-height: 1;
     margin-left: 10px;
     outline: none;
-    padding: 1px 0 0;
     text-align: right;
     width: 15px;
 

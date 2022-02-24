@@ -352,7 +352,7 @@ class Command extends Component<Props> {
     const { appState, events, model, runnablesStore } = this.props
 
     return (
-      <ul className='command-child-container'>
+      <ul>
         {_.map(model.children, (child) => (
           <Command
             key={child.id}

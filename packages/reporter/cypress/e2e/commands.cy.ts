@@ -180,7 +180,7 @@ describe('commands', () => {
       })
     })
 
-    cy.get('.command23', { timeout: 9000 }).should('have.length', 25)
+    cy.get('.command').should('have.length', 25)
 
     cy.percySnapshot()
   })
@@ -199,6 +199,12 @@ describe('commands', () => {
   })
 
   it('includes the state class', () => {
+    addCommand(runner, {
+      name: 'log',
+      message: 'command-warn-state',
+      state: 'warn',
+    })
+
     cy.contains('#exists').closest('.command-wrapper')
     .should('have.class', 'command-state-passed')
 
@@ -207,6 +213,9 @@ describe('commands', () => {
 
     cy.contains('#in-progress').closest('.command-wrapper')
     .should('have.class', 'command-state-pending')
+
+    cy.contains('command-warn-state').closest('.command-wrapper')
+    .should('have.class', 'command-state-warn')
   })
 
   it('displays the number for parent and child', () => {
