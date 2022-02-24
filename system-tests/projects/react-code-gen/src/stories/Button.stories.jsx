@@ -38,3 +38,9 @@ Small.args = {
   size: 'small',
   label: 'Button',
 };
+
+export const ExampleWithLongName = Template.bind({});
+ExampleWithLongName.args = {
+  size: 'small',
+  label: 'Button',
+};

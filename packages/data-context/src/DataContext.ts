@@ -454,10 +454,6 @@ export class DataContext {
     // load projects from cache on start
     toAwait.push(this.actions.project.loadProjects())
 
-    if (this.modeOptions.testingType) {
-      this.lifecycleManager.initializeConfig().catch(this.onError)
-    }
-
     return Promise.all(toAwait)
   }
 }
