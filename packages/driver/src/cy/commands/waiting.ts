@@ -78,6 +78,8 @@ export default (Commands, Cypress, cy, state) => {
       const req = waitForRoute(alias, state, type)
 
       if (req) {
+        Cypress.log({ message: 'found req', end: true })
+
         return req
       }
 
@@ -86,6 +88,8 @@ export default (Commands, Cypress, cy, state) => {
 
       // return our xhr object
       if (xhr) {
+        Cypress.log({ message: 'found xhr', end: true })
+
         return xhr
       }
 
