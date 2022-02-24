@@ -42,7 +42,7 @@
         :keypath="legendText.dynamic.descriptionKey"
       >
         <ExternalLink
-          href="https://on.cypress.io"
+          href="https://on.cypress.io/setup-node-events"
           class="text-purple-500"
         >
           setupNodeEvents

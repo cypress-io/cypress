@@ -147,15 +147,19 @@ describe.skip('lib/plugins/index', () => {
       })
     })
 
-    it('sends \'load\' event with config via ipc', () => {
-      ipc.on.withArgs('loaded').yields([])
+    it('sends \'load\' event with config via ipc once it receives \'ready\'', () => {
       const config = { pluginsFile: 'cypress-plugin', testingType: 'e2e' }
 
-      return plugins.init(config, getOptions({ testingType: 'e2e' }), ctx).then(() => {
-        expect(ipc.send).to.be.calledWith('load', {
-          ...config,
-          ...configExtras,
-        })
+      plugins.init(config, getOptions({ testingType: 'e2e' }))
+
+      expect(ipc.send).to.not.be.called
+
+      // simulate async ready event
+      ipc.on.withArgs('ready').firstCall.callback()
+
+      expect(ipc.send).to.be.calledWith('load', {
+        ...config,
+        ...configExtras,
       })
     })
 

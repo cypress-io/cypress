@@ -7,6 +7,7 @@ const legend = defaultMessages.settingsPage.config.legend
 describe('<ConfigLegend/>', () => {
   it('renders', () => {
     cy.mount(ConfigLegend)
+    cy.get('[data-cy="external"]').should('have.attr', 'href').and('eq', 'https://on.cypress.io/setup-node-events')
 
     each(legend, ({ label, description }) => {
       cy.contains(label)
