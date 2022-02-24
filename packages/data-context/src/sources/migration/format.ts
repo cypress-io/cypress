@@ -22,7 +22,7 @@ export function formatMigrationFile (file: string, regexp: RegExp): FilePart[] {
       Perhaps this isn't a spec file, or it is an unexpected format?`)
   }
 
-  const { folder, fileName, preExtension, extension, componentFolder, supportFileName } = match.groups
+  const { folder, fileName, preExtension, extension, supportFileName } = match.groups
 
   if (supportFileName && extension) {
     return [{
@@ -45,10 +45,6 @@ export function formatMigrationFile (file: string, regexp: RegExp): FilePart[] {
   },
   {
     text: folder ? 'cypress/' : '', // empty when using a custom integration folder or in component
-    highlight: false,
-  },
-  {
-    text: componentFolder || '', // in component testing, contains the component folder
     highlight: false,
   },
   {

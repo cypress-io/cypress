@@ -411,15 +411,7 @@ describe('applyMigrationTransform', () => {
           parts: [
             {
               'highlight': false,
-              'text': 'cypress',
-            },
-            {
-              'highlight': false,
-              'text': '/tests',
-            },
-            {
-              'highlight': false,
-              'text': '/api-bankaccounts',
+              'text': 'cypress/tests/api-bankaccounts',
             },
             {
               'highlight': true,
@@ -437,15 +429,7 @@ describe('applyMigrationTransform', () => {
           parts: [
             {
               'highlight': false,
-              'text': 'cypress',
-            },
-            {
-              'highlight': false,
-              'text': '/tests',
-            },
-            {
-              'highlight': false,
-              'text': '/api-bankaccounts',
+              'text': 'cypress/tests/api-bankaccounts',
             },
             {
               'highlight': true,
