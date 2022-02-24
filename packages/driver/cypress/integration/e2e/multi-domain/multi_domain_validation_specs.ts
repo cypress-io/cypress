@@ -14,8 +14,7 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
       cy.switchToDomain('0000:0000:0000:0000:0000:0000:0000:0001', () => undefined)
     })
 
-    // TODO: this was hanging in CI
-    it.skip('succeeds on a unicode domain', () => {
+    it('succeeds on a unicode domain', () => {
       cy.switchToDomain('はじめよう.みんな', () => undefined)
     })
   })
