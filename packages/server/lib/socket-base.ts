@@ -293,7 +293,7 @@ export class SocketBase {
       }
 
       this._isRunnerSocketConnected = () => {
-        return runnerSocket && runnerSocket.connected
+        return !!(runnerSocket && runnerSocket.connected)
       }
 
       socket.on('reporter:connected', () => {
