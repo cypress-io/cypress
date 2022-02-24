@@ -4,7 +4,7 @@ import { SupportedBundlerEnum } from '../enumTypes'
 export const WizardBundler = objectType({
   name: 'WizardBundler',
   description: 'Wizard bundler',
-  node: 'type',
+  node: 'package',
   definition (t) {
     t.boolean('isSelected', {
       description: 'Whether this is the selected framework bundler',
@@ -19,6 +19,11 @@ export const WizardBundler = objectType({
     t.nonNull.field('type', {
       type: SupportedBundlerEnum,
       description: 'The name of the framework',
+    })
+
+    t.nonNull.field('package', {
+      type: SupportedBundlerEnum,
+      description: 'Name of package on npm',
     })
 
     t.nonNull.string('name', {

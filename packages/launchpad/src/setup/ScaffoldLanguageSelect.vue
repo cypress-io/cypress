@@ -41,7 +41,7 @@ import { useMutation } from '@urql/vue'
 import WizardLayout from './WizardLayout.vue'
 
 export interface WizardSetupData {
-  bundler: Bundler['type'] | null
+  bundler: Bundler | null
   framework: FrontendFramework['type'] | null
   codeLanguage: CodeLanguageEnum
 }

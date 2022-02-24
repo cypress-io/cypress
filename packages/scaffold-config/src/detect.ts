@@ -9,7 +9,7 @@ export interface Detector {
 
 interface DetectFramework {
   framework?: FrontendFramework
-  bundler?: Bundler['type']
+  bundler?: Bundler
 }
 
 const bundlers = [
