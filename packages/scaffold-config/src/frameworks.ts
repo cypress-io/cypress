@@ -13,14 +13,16 @@ import {
   BUNDLER_WEBPACK_4,
   CYPRESS_WEBPACK,
 } from './constants'
-import { BUNDLER_WEBPACK_5, HTML_WEBPACK_PLUGIN_5 } from '.'
+import { BUNDLER_VITE, BUNDLER_WEBPACK_5, HTML_WEBPACK_PLUGIN_5 } from '.'
+
+const isWebpack = (bundler: Bundler) => ['webpack4', 'webpack5'].includes(bundler)
 
 export const FRONTEND_FRAMEWORKS = [
   {
     type: 'crav4',
     family: 'template',
     name: 'Create React App (v4)',
-    supportedBundlers: ['webpack'],
+    supportedBundlers: [BUNDLER_WEBPACK_4],
     packages: [
       CYPRESS_REACT_LATEST,
       BUNDLER_WEBPACK_4,
@@ -67,7 +69,7 @@ export const FRONTEND_FRAMEWORKS = [
     type: 'crav5',
     family: 'template',
     name: 'Create React App (v5)',
-    supportedBundlers: ['webpack'],
+    supportedBundlers: [BUNDLER_WEBPACK_5],
     packages: [
       CYPRESS_REACT_LATEST,
       BUNDLER_WEBPACK_5,
@@ -114,7 +116,7 @@ export const FRONTEND_FRAMEWORKS = [
     type: 'vueclivue2',
     name: 'Vue CLI (Vue 2)',
     family: 'template',
-    supportedBundlers: ['webpack'],
+    supportedBundlers: [BUNDLER_WEBPACK_4],
     packages: [CYPRESS_VUE_2, CYPRESS_WEBPACK],
     defaultPackagePath: null,
     glob: '*.vue',
@@ -168,7 +170,7 @@ export const FRONTEND_FRAMEWORKS = [
     type: 'vueclivue3',
     name: 'Vue CLI (Vue 3)',
     family: 'template',
-    supportedBundlers: ['webpack'],
+    supportedBundlers: [BUNDLER_WEBPACK_4],
     packages: [CYPRESS_VUE_3, CYPRESS_WEBPACK],
     defaultPackagePath: null,
     glob: '*.vue',
@@ -222,7 +224,7 @@ export const FRONTEND_FRAMEWORKS = [
     type: 'react',
     name: 'React.js',
     family: 'library',
-    supportedBundlers: ['webpack', 'vite'],
+    supportedBundlers: [BUNDLER_WEBPACK_4, BUNDLER_WEBPACK_5, BUNDLER_VITE],
     packages: [CYPRESS_REACT_LATEST],
     defaultPackagePath: null,
     glob: '*.{js,jsx,tsx}',
@@ -241,7 +243,7 @@ export const FRONTEND_FRAMEWORKS = [
     storybookDep: STORYBOOK_REACT,
     config: {
       js: (bundler: Bundler) => {
-        if (bundler === 'webpack') {
+        if (isWebpack(bundler)) {
           return dedent`
           const { devServer } = require('@cypress/webpack-dev-server')
           // NOTE: ensure you are requiring your webpack config from the
@@ -276,7 +278,7 @@ export const FRONTEND_FRAMEWORKS = [
       },
 
       ts: (bundler: Bundler) => {
-        if (bundler === 'webpack') {
+        if (isWebpack(bundler)) {
           return dedent`
           import { defineConfig } from 'cypress'
           import { devServer } from '@cypress/webpack-dev-server'
@@ -317,7 +319,7 @@ export const FRONTEND_FRAMEWORKS = [
     type: 'vue2',
     name: 'Vue.js (v2)',
     family: 'library',
-    supportedBundlers: ['webpack', 'vite'],
+    supportedBundlers: [BUNDLER_WEBPACK_4, BUNDLER_WEBPACK_5, BUNDLER_VITE],
     packages: [CYPRESS_VUE_2],
     defaultPackagePath: null,
     glob: '*.vue',
@@ -332,7 +334,7 @@ export const FRONTEND_FRAMEWORKS = [
     storybookDep: null,
     config: {
       js: (bundler: Bundler) => {
-        if (bundler === 'webpack') {
+        if (isWebpack(bundler)) {
           return dedent`
           const { devServer } = require('@cypress/webpack-dev-server')
           // NOTE: ensure you are requiring your webpack config from the
@@ -367,7 +369,7 @@ export const FRONTEND_FRAMEWORKS = [
       },
 
       ts: (bundler: Bundler) => {
-        if (bundler === 'webpack') {
+        if (isWebpack(bundler)) {
           return dedent`
           import { defineConfig } from 'cypress'
           import { devServer } from '@cypress/webpack-dev-server'
@@ -406,7 +408,7 @@ export const FRONTEND_FRAMEWORKS = [
     type: 'vue3',
     name: 'Vue.js (v3)',
     family: 'library',
-    supportedBundlers: ['webpack', 'vite'],
+    supportedBundlers: [BUNDLER_WEBPACK_4, BUNDLER_WEBPACK_5, BUNDLER_VITE],
     packages: [CYPRESS_VUE_3],
     defaultPackagePath: null,
     glob: '*.vue',
@@ -421,7 +423,7 @@ export const FRONTEND_FRAMEWORKS = [
     storybookDep: STORYBOOK_VUE,
     config: {
       js: (bundler: Bundler) => {
-        if (bundler === 'webpack') {
+        if (isWebpack(bundler)) {
           return dedent`
           const { devServer } = require('@cypress/webpack-dev-server')
           // NOTE: ensure you are requiring your webpack config from the
@@ -456,7 +458,7 @@ export const FRONTEND_FRAMEWORKS = [
       },
 
       ts: (bundler: Bundler) => {
-        if (bundler === 'webpack') {
+        if (isWebpack(bundler)) {
           return dedent`
           import { defineConfig } from 'cypress'
           import { devServer } from '@cypress/webpack-dev-server'
@@ -494,7 +496,7 @@ export const FRONTEND_FRAMEWORKS = [
     type: 'nextjs',
     name: 'Next.js',
     family: 'template',
-    supportedBundlers: ['webpack'],
+    supportedBundlers: [BUNDLER_WEBPACK_4],
     packages: [
       CYPRESS_REACT_LATEST,
       CYPRESS_WEBPACK,
@@ -521,7 +523,7 @@ export const FRONTEND_FRAMEWORKS = [
     type: 'nuxtjs',
     name: 'Nuxt.js (v2)',
     family: 'template',
-    supportedBundlers: ['webpack'],
+    supportedBundlers: [BUNDLER_WEBPACK_4],
     packages: [
       CYPRESS_VUE_2,
       BUNDLER_WEBPACK_4,

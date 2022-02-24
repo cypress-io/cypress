@@ -18,6 +18,16 @@ function verifyConfigFile (configFile: `cypress.config.${'js' | 'ts'}`) {
   }, { configFile })
 }
 
+function fakeInstalledDeps () {
+  cy.withCtx(async (ctx) => {
+    const deps = (await ctx.wizard.packagesToInstall() ?? []).map((x) => x.package)
+
+    ctx.update((coreData) => {
+      coreData.wizard.__fakeInstalledPackagesForTesting = deps
+    })
+  })
+}
+
 describe('scaffolding component testing', () => {
   context('vueclivue2', () => {
     it('scaffolds component testing for Vue CLI w/ Vue 2 project', () => {
@@ -26,17 +36,8 @@ describe('scaffolding component testing', () => {
       // should detect correctly
       cy.get('button').should('be.visible').contains('Vue CLI (Vue 2)(detected)')
       cy.get('button').contains('Next Step').click()
-      const deps = ['@cypress/vue', '@cypress/webpack-dev-server']
 
-      deps.forEach((dep) => {
-        cy.contains(dep)
-      })
-
-      cy.withCtx((ctx, { deps }) => {
-        ctx.update((coreData) => {
-          coreData.wizard.__fakeInstalledPackagesForTesting = deps
-        })
-      }, { deps })
+      fakeInstalledDeps()
 
       cy.findByRole('button', { name: 'Continue' }).click()
       verifyConfigFile(`cypress.config.js`)
@@ -50,20 +51,8 @@ describe('scaffolding component testing', () => {
       // should detect correctly
       cy.get('button').should('be.visible').contains('Vue CLI (Vue 3)(detected)')
       cy.get('button').contains('Next Step').click()
-      const deps = ['@cypress/vue', '@cypress/webpack-dev-server']
 
-      // correct install command and versions
-      cy.contains('npm install -D @cypress/vue@^3.0.0 @cypress/webpack-dev-server@latest')
-
-      deps.forEach((dep) => {
-        cy.contains(dep)
-      })
-
-      cy.withCtx((ctx, { deps }) => {
-        ctx.update((coreData) => {
-          coreData.wizard.__fakeInstalledPackagesForTesting = deps
-        })
-      }, { deps })
+      fakeInstalledDeps()
 
       cy.findByRole('button', { name: 'Continue' }).click()
       verifyConfigFile(`cypress.config.js`)
@@ -75,19 +64,10 @@ describe('scaffolding component testing', () => {
       startSetupFor('create-react-app-unconfigured')
 
       // should detect correctly
-      cy.get('button').should('be.visible').contains('Create React App(detected)')
+      cy.get('button').should('be.visible').contains('Create React App (v5)(detected)')
       cy.get('button').contains('Next Step').click()
-      const deps = ['@cypress/react', '@cypress/webpack-dev-server']
 
-      deps.forEach((dep) => {
-        cy.contains(dep)
-      })
-
-      cy.withCtx((ctx, { deps }) => {
-        ctx.update((coreData) => {
-          coreData.wizard.__fakeInstalledPackagesForTesting = deps
-        })
-      }, { deps })
+      fakeInstalledDeps()
 
       cy.findByRole('button', { name: 'Continue' }).click()
       verifyConfigFile(`cypress.config.js`)
@@ -101,20 +81,8 @@ describe('scaffolding component testing', () => {
       // should detect correctly
       cy.get('button').should('be.visible').contains('React.js(detected)')
       cy.get('button').contains('Next Step').click()
-      const deps = ['@cypress/react', '@cypress/vite-dev-server']
 
-      // correct install command and versions
-      cy.contains('npm install -D @cypress/react@^5.0.0 @cypress/vite-dev-server@latest')
-
-      deps.forEach((dep) => {
-        cy.contains(dep)
-      })
-
-      cy.withCtx((ctx, { deps }) => {
-        ctx.update((coreData) => {
-          coreData.wizard.__fakeInstalledPackagesForTesting = deps
-        })
-      }, { deps })
+      fakeInstalledDeps()
 
       cy.findByRole('button', { name: 'Continue' }).click()
       verifyConfigFile(`cypress.config.ts`)
@@ -128,20 +96,8 @@ describe('scaffolding component testing', () => {
       // should detect correctly
       cy.get('button').should('be.visible').contains('Vue.js (v3)(detected)')
       cy.get('button').contains('Next Step').click()
-      const deps = ['@cypress/vue', '@cypress/vite-dev-server']
 
-      // correct install command and versions
-      cy.contains('npm install -D @cypress/vue@^3.0.0 @cypress/vite-dev-server@latest')
-
-      deps.forEach((dep) => {
-        cy.contains(dep)
-      })
-
-      cy.withCtx((ctx, { deps }) => {
-        ctx.update((coreData) => {
-          coreData.wizard.__fakeInstalledPackagesForTesting = deps
-        })
-      }, { deps })
+      fakeInstalledDeps()
 
       cy.findByRole('button', { name: 'Continue' }).click()
       verifyConfigFile(`cypress.config.ts`)
@@ -155,20 +111,8 @@ describe('scaffolding component testing', () => {
       // should detect correctly
       cy.get('button').should('be.visible').contains('Nuxt.js (v2)(detected)')
       cy.get('button').contains('Next Step').click()
-      const deps = ['@cypress/vue', '@cypress/webpack-dev-server', 'html-webpack-plugin']
 
-      // correct install command and versions
-      cy.contains('npm install -D @cypress/vue@^2.0.0 html-webpack-plugin@^4.0.0 @cypress/webpack-dev-server@latest')
-
-      deps.forEach((dep) => {
-        cy.contains(dep)
-      })
-
-      cy.withCtx((ctx, { deps }) => {
-        ctx.update((coreData) => {
-          coreData.wizard.__fakeInstalledPackagesForTesting = deps
-        })
-      }, { deps })
+      fakeInstalledDeps()
 
       cy.findByRole('button', { name: 'Continue' }).click()
       verifyConfigFile(`cypress.config.js`)

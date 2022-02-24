@@ -11,7 +11,7 @@ export type AllPackagePackages = typeof DEPENDENCIES[number]['package']
 
 export type AllPackagesDescriptions = typeof DEPENDENCIES[number]['description']
 
-export type Bundler = typeof BUNDLERS[number]['package']
+export type Bundler = typeof BUNDLERS[number]['type']
 
 export type CodeGenFramework = typeof CODE_GEN_FRAMEWORKS[number]
 

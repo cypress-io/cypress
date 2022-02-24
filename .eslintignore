@@ -83,3 +83,4 @@ system-tests/projects/nextjs-configured/**/*
 system-tests/projects/nextjs-configured/**/*
 system-tests/projects/nuxtjs-vue2-unconfigured/**/*
 system-tests/projects/nuxtjs-vue2-configured/**/*
+system-tests/projects/react-app-webpack-5-unconfigured/**/*
