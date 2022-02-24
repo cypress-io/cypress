@@ -669,4 +669,41 @@ describe('Migration', { viewportWidth: 1200 }, () => {
     finishMigrationAndContinue()
     checkOutcome()
   })
+
+  it('should show spec pattern rename change modal', () => {
+    startMigrationFor('migration')
+
+    cy.get(renameAutoStep).should('exist')
+    cy.get(renameManualStep).should('not.exist')
+    cy.get(renameSupportStep).should('exist')
+    cy.get(setupComponentStep).should('exist')
+    cy.get(configFileStep).should('exist')
+
+    cy.findByText('change').click()
+    cy.get('h2').should('contain', 'Change the existing spec file extension')
+    cy.get('button').get('[aria-label="Close"]').click()
+    cy.get('h2').should('not.contain', 'Change the existing spec file extension')
+
+    cy.findByText('change').click()
+    cy.get('h2').should('contain', 'Change the existing spec file extension')
+    cy.get(renameAutoStep).click({ force: true })
+    cy.get('h2').should('not.contain', 'Change the existing spec file extension')
+
+    cy.findByText('change').click()
+    cy.get('h2').should('contain', 'Change the existing spec file extension')
+    cy.get('button').contains('Cancel, keep the default extension').click()
+    cy.get('h2').should('not.contain', 'Change the existing spec file extension')
+
+    cy.findByText('change').click()
+    cy.get('h2').should('contain', 'Change the existing spec file extension')
+    cy.get('button').contains('I still want to change the spec file extension').click()
+    cy.get('button').contains('Save Changes').click()
+    cy.get('h2').should('not.contain', 'Change the existing spec file extension')
+
+    cy.findByText('change').click()
+    cy.get('h2').should('contain', 'Change the existing spec file extension')
+    cy.get('button').contains('I still want to change the spec file extension').click()
+    cy.get('button').contains('Cancel').click()
+    cy.get('h2').should('not.contain', 'Change the existing spec file extension')
+  })
 })
