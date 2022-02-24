@@ -170,7 +170,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
 
               reject(wrappedErr)
             } finally {
-            // @ts-ignore
+              // @ts-ignore
               cy.isAnticipatingMultiDomain(false)
             }
           }
