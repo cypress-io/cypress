@@ -1,5 +1,5 @@
 <template>
-  <ProjectId :gql="props.gql.currentProject" />
+  <ProjectId :gql="props.gql" />
   <template
     v-if="props.gql.currentProject?.cloudProject?.__typename === 'CloudProject'
       && props.gql.currentProject.cloudProject.recordKeys?.length"
@@ -21,9 +21,9 @@ import type { CloudSettingsFragment } from '../../generated/graphql'
 
 gql`
 fragment CloudSettings on Query {
+  ...ProjectId
   currentProject {
     id
-    ...ProjectId
     cloudProject {
       __typename
       ... on CloudProject {

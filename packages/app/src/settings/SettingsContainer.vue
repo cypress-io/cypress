@@ -31,14 +31,11 @@
         :icon="IconOdometer"
         max-height="10000px"
       >
-        <CloudSettings
-          v-if="props.gql"
-          :gql="props.gql"
-        />
+        <CloudSettings :gql="props.gql" />
       </SettingsCard>
     </div>
     <hr class="border-gray-100">
-    <p class="font-light mx-auto text-center max-w-500px text-16px text-gray-500 leading-24px">
+    <p class="mx-auto font-light text-center text-gray-500 max-w-500px text-16px leading-24px">
       {{ t('settingsPage.footer.text') }}
     </p>
     <Button
