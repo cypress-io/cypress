@@ -145,7 +145,7 @@ describe('supportFilesForMigrationGuide', () => {
           {
             'text': 'index',
             'highlight': true,
-            group: 'name',
+            group: 'supportFileName',
           },
           {
             'text': '.js',
@@ -163,7 +163,7 @@ describe('supportFilesForMigrationGuide', () => {
           {
             'text': 'e2e',
             'highlight': true,
-            group: 'name',
+            group: 'supportFileName',
           },
           {
             'text': '.js',
