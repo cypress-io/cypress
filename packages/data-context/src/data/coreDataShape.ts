@@ -1,5 +1,5 @@
 import type { FoundBrowser, Editor, Warning, AllowedState, AllModeOptions, TestingType, BrowserStatus, PACKAGE_MANAGERS, AuthStateName } from '@packages/types'
-import { BUNDLER_DEPS, FRONTEND_FRAMEWORKS } from '@packages/scaffold-config'
+import { Bundler, BUNDLERS, FRONTEND_FRAMEWORKS } from '@packages/scaffold-config'
 import type { NexusGenEnums, NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
 import type { App, BrowserWindow } from 'electron'
 import type { ChildProcess } from 'child_process'
@@ -62,13 +62,13 @@ export interface AppDataShape {
 }
 
 export interface WizardDataShape {
-  chosenBundler: typeof BUNDLER_DEPS[number]['type'] | null
-  allBundlers: Array<typeof BUNDLER_DEPS[number]['type']>
+  chosenBundler: Bundler | null
+  allBundlers: Bundler[]
   chosenFramework: typeof FRONTEND_FRAMEWORKS[number]['type'] | null
   chosenLanguage: NexusGenEnums['CodeLanguageEnum']
   chosenManualInstall: boolean
   detectedLanguage: NexusGenEnums['CodeLanguageEnum'] | null
-  detectedBundler: NexusGenEnums['SupportedBundlers'] | null
+  detectedBundler: Bundler | null
   detectedFramework: typeof FRONTEND_FRAMEWORKS[number]['type'] | null
   __fakeInstalledPackagesForTesting: string[] | null
 }
@@ -170,7 +170,7 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
       chosenFramework: null,
       chosenLanguage: 'js',
       chosenManualInstall: false,
-      allBundlers: BUNDLER_DEPS.map((x) => x.type),
+      allBundlers: BUNDLERS.map((x) => x.package),
       detectedBundler: null,
       detectedFramework: null,
       __fakeInstalledPackagesForTesting: null,

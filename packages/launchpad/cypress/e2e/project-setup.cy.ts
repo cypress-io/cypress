@@ -1,4 +1,4 @@
-import { BUNDLER_DEPS, FRONTEND_FRAMEWORKS, PACKAGES_DESCRIPTIONS, DEPENDENCIES, AllPackagePackages } from '@packages/scaffold-config/src'
+import { BUNDLERS, FRONTEND_FRAMEWORKS, DEPENDENCIES, AllPackagePackages } from '@packages/scaffold-config/src'
 import { CODE_LANGUAGES } from '@packages/types/src'
 
 describe('Launchpad: Setup Project', () => {
@@ -590,7 +590,7 @@ describe('Launchpad: Setup Project', () => {
     FRONTEND_FRAMEWORKS.forEach((framework) => {
       hasStorybookPermutations.forEach((hasStorybookDep) => {
         framework.supportedBundlers.forEach((testBundler) => {
-          const bundler = BUNDLER_DEPS.find((b) => b.type === testBundler)
+          const bundler = BUNDLERS.find((b) => b.type === testBundler)
 
           if (!bundler) {
             throw new Error(`${framework.name} claims to support the bundler, ${testBundler}, however it is not a valid Cypress bundler.`)
@@ -690,7 +690,7 @@ describe('Launchpad: Setup Project', () => {
               }
 
               [...framework.packages].forEach((pkg) => {
-                cy.contains(PACKAGES_DESCRIPTIONS[pkg.package].split('<span')[0])
+                cy.contains(pkg.description.split('<span')[0])
                 validatePackage(pkg.package)
               })
 

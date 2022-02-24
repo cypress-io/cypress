@@ -3,20 +3,21 @@ import { CODE_LANGUAGES } from '@packages/types'
 import {
   AllPackageNames,
   AllPackagePackages,
-  BUNDLER_DEPS,
+  BUNDLERS,
   DEPENDENCIES,
   FRONTEND_FRAMEWORKS,
-  PACKAGES_DESCRIPTIONS,
+  AllPackagesDescriptions,
 } from '@packages/scaffold-config'
 import type { DataContext } from '..'
 import path from 'path'
 import resolve from 'resolve-from'
+import assert from 'assert'
 
 const debug = Debug('cypress:data-context:wizard-data-source')
 
 interface PackageToInstall {
   name: AllPackageNames
-  description: typeof PACKAGES_DESCRIPTIONS[AllPackagePackages]
+  description: AllPackagesDescriptions
   package: AllPackagePackages
   installer: typeof DEPENDENCIES[number]['installer']
 }
@@ -29,33 +30,20 @@ export class WizardDataSource {
       return null
     }
 
+    const chosenBundlerDetails = BUNDLERS.find((x) => x.package === this.chosenBundler?.package)
+
+    assert(chosenBundlerDetails)
+
     const packages: PackageToInstall[] = [
-      ...this.chosenFramework.packages.map((pkg) => {
-        return {
-          name: pkg.name,
-          description: PACKAGES_DESCRIPTIONS[pkg.package],
-          package: pkg.package,
-          installer: pkg.installer,
-        }
-      }),
-      {
-        name: this.chosenBundler.name,
-        description: PACKAGES_DESCRIPTIONS[this.chosenBundler.package],
-        package: this.chosenBundler.package,
-        installer: this.chosenBundler.installer,
-      },
+      ...this.chosenFramework.packages,
+      chosenBundlerDetails,
     ]
 
     const storybookInfo = await this.ctx.storybook.loadStorybookInfo()
     const { storybookDep } = this.chosenFramework
 
     if (storybookInfo && storybookDep) {
-      packages.push({
-        name: storybookDep.name,
-        installer: storybookDep.installer,
-        package: storybookDep.package,
-        description: PACKAGES_DESCRIPTIONS[storybookDep.package],
-      })
+      packages.push(storybookDep)
     }
 
     return packages
@@ -128,7 +116,7 @@ export class WizardDataSource {
   }
 
   get chosenBundler () {
-    return BUNDLER_DEPS.find((f) => f.type === this.ctx.wizardData.chosenBundler) || null
+    return BUNDLERS.find((f) => f.type === this.ctx.wizardData.chosenBundler) || null
   }
 
   get chosenLanguage () {
