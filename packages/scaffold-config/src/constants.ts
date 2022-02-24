@@ -11,6 +11,8 @@ export const PACKAGES_DESCRIPTIONS: Record<AllPackages, string> = {
   '@cypress/vite-dev-server': 'Allows Cypress to use your existing build configuration in order to bundle and run your tests',
   '@storybook/testing-react': 'Testing utilities that allow you to reuse your stories in your unit tests',
   '@storybook/testing-vue3': 'Testing utilities that allow you to reuse your stories in your unit tests',
+  'webpack-dev-server': 'Webpack Dev Server to bundle and run your tests',
+  'html-webpack-plugin': 'The HtmlWebpackPlugin simplifies creation of HTML files to serve your webpack bundles',
 } as const
 
 export const BUNDLERS = [
