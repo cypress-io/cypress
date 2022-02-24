@@ -14,7 +14,6 @@
     cursor: default;
     color: $gray-400;
     min-height: 20px;
-    margin: 0;
   }
 
   .command-scaled {
@@ -230,6 +229,14 @@
   }
 
   // Command State Styles
+  .command-state-passed {
+    border-left: 2px solid $reporter-section-background;
+
+    &:hover {
+      border-left: 2px solid $gray-900;
+    }
+  }
+
   .command-state-pending {
     border-left: 2px solid $indigo-800;
     background-color: $gray-900;
@@ -329,6 +336,8 @@
 
     .command-state-pending {
       .command-method {
+        color: $pending;
+
         span {
           background-color: $pending;
           color: $black;
@@ -346,6 +355,8 @@
 
     .command-state-failed {
       .command-method {
+        color: $fail;
+
         span {
           background-color: $fail;
           color: $black;
@@ -411,6 +422,7 @@
       color: $gray-600;
       cursor: pointer;
       margin: 0px 2px;
+      vertical-align: top;
     }
 
     .command-alias,
@@ -424,12 +436,12 @@
     label {
       font-size: 85%;
     }
-  }
 
-  .command-invisible {
-    display: inline-block;
-    margin-left: 5px;
-    margin-right: 0;
+    .command-invisible {
+      display: inline-block;
+      margin-left: 5px;
+      margin-right: 0;
+    }
   }
 
   .command-error {
@@ -489,6 +501,7 @@
 
     &:hover {
       background: $indigo-900;
+      border-left: 2px solid $pinned;
     }
 
     .command-pin {
