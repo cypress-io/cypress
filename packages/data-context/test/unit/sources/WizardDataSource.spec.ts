@@ -17,7 +17,7 @@ describe('packagesToInstall', () => {
 
     const actual = await ctx.wizard.installDependenciesCommand()
 
-    expect(actual).to.eq(`npm install -D @cypress/react@^5.0.0 @cypress/webpack-dev-server@latest`)
+    expect(actual).to.eq(`npm install -D @cypress/react@^5.0.0 webpack@^4.0.0 webpack-dev-server@^4.0.0 html-webpack-plugin@^4.0.0 @cypress/webpack-dev-server@latest' to equal 'npm install -D @cypress/react@^5.0.0 @cypress/webpack-dev-server@latest`)
   })
 
   it('vueclivue2-unconfigured', async () => {
