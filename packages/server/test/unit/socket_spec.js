@@ -551,6 +551,30 @@ describe('lib/socket', () => {
         })
       })
     })
+
+    context('#isRunnerSocketConnected', function () {
+      it('returns false when runner is not connected', function () {
+        expect(this.socket.isRunnerSocketConnected()).to.eq(false)
+      })
+
+      context('runner connected', () => {
+        beforeEach(function (done) {
+          this.socketClient.on('automation:client:connected', () => {
+            this.socketClient.on('runner:connected', () => {
+              return done()
+            })
+
+            this.client.emit('runner:connected')
+          })
+
+          return this.client.emit('automation:client:connected')
+        })
+
+        it('returns true when runner is connected', function () {
+          expect(this.socket.isRunnerSocketConnected()).to.eq(true)
+        })
+      })
+    })
   })
 
   context('unit', () => {
