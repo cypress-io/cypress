@@ -29,7 +29,7 @@ function skipCTMigration () {
   cy.contains(`I'll do this later`).click()
 }
 
-function migrateAndVerifyConfig (configExtension: 'js' | 'ts' = 'js') {
+function migrateAndVerifyConfig (configExtension: 'js' | 'ts' | 'coffee' = 'js') {
   cy.contains('Migrate the configuration for me').click()
 
   cy.withCtx(async (ctx, o) => {
@@ -57,7 +57,7 @@ function runAutoRename () {
   cy.get('button').contains('Rename these specs for me').click()
 }
 
-function renameSupport (lang: 'js' | 'ts' = 'js') {
+function renameSupport (lang: 'js' | 'ts' | 'coffee' = 'js') {
   cy.contains(`Rename the support file for me`).click()
 
   // give to to finish the file rename
@@ -69,6 +69,22 @@ function renameSupport (lang: 'js' | 'ts' = 'js') {
     ).not.to.be.null
   }, { lang })
 }
+
+describe('Opening unmigrated project', () => {
+  it('legacy project with --e2e', () => {
+    cy.scaffoldProject('migration')
+    cy.openProject('migration', ['--e2e'])
+    cy.visitLaunchpad()
+    cy.get('h1').should('contain', 'Migration')
+  })
+
+  it('legacy project with --component', () => {
+    cy.scaffoldProject('migration-component-testing')
+    cy.openProject('migration-component-testing', ['--component'])
+    cy.visitLaunchpad()
+    cy.get('h1').should('contain', 'Migration')
+  })
+})
 
 describe('Full migration flow for each project', { retries: { openMode: 2, runMode: 2 } }, () => {
   it('completes journey for migration-component-testing', () => {
@@ -367,6 +383,44 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
     checkOutcome()
   })
 
+  it('completes journey for migration-e2e-coffeescript', () => {
+    startMigrationFor('migration-e2e-coffeescript')
+    // defaults, rename all the things
+    // can rename integration->e2e
+    cy.get(renameAutoStep).should('exist')
+    // no CT
+    cy.get(renameManualStep).should('not.exist')
+    // supportFile is false - cannot migrate
+    cy.get(renameSupportStep).should('exist')
+    cy.get(setupComponentStep).should('not.exist')
+    cy.get(configFileStep).should('exist')
+
+    // Migration workflow
+    // before auto migration
+    cy.contains('cypress/integration/foo.spec.coffee')
+
+    // after auto migration
+    cy.contains('cypress/e2e/foo.cy.coffee')
+
+    runAutoRename()
+
+    cy.wait(100)
+
+    cy.withCtx(async (ctx) => {
+      const specs = ['cypress/e2e/foo.cy.coffee']
+
+      for (const spec of specs) {
+        const stats = await ctx.actions.file.checkIfFileExists(ctx.path.join(spec))
+
+        expect(stats, `spec file not renamed ${spec}`).to.not.be.null
+      }
+    })
+
+    renameSupport('coffee')
+    migrateAndVerifyConfig()
+    checkOutcome()
+  })
+
   it('completes journey for migration-e2e-no-plugins-support-file', () => {
     startMigrationFor('migration-e2e-no-plugins-support-file')
     // defaults, rename all the things
@@ -639,7 +693,7 @@ describe.skip('component testing migration - defaults', () => {
   })
 })
 
-describe('Migration', { viewportWidth: 1200 }, () => {
+describe('Migration', { viewportWidth: 1200, retries: { openMode: 2, runMode: 2 } }, () => {
   it('should create the cypress.config.js file and delete old config', () => {
     startMigrationFor('migration')
 

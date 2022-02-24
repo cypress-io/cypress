@@ -27,7 +27,7 @@ const mountSuccess = (viewer: TestCloudViewer = cloudViewer) => {
   cy.mountFragment(LoginModalFragmentDoc, {
     onResult: (result) => {
       result.__typename = 'Query'
-      result.isAuthBrowserOpened = true
+      result.authState.browserOpened = true
       result.cloudViewer = viewer
       result.cloudViewer.__typename = 'CloudUser'
     },
@@ -36,44 +36,103 @@ const mountSuccess = (viewer: TestCloudViewer = cloudViewer) => {
 }
 
 describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
-  it('renders and reaches "opening browser" status', () => {
-    cy.mountFragment(LoginModalFragmentDoc, {
-      render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><LoginModal gql={gqlVal} modelValue={true} /></div>,
+  describe('progress communication', () => {
+    it('renders and reaches "opening browser" status', () => {
+      cy.mountFragment(LoginModalFragmentDoc, {
+        render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><LoginModal gql={gqlVal} modelValue={true} /></div>,
+      })
+
+      cy.contains('h2', text.login.titleInitial).should('be.visible')
+
+      // begin the login process
+      cy.findByRole('button', { name: text.login.actionLogin }).click()
+
+      // ensure we reach "browser is opening" status on the CTA
+      cy.findByRole('button', { name: text.login.actionOpening })
+      .should('be.visible')
+      .and('be.disabled')
     })
 
-    cy.contains('h2', text.login.titleInitial).should('be.visible')
+    it('shows correct "waiting for login" status', () => {
+      cy.mountFragment(LoginModalFragmentDoc, {
+        render: (gqlVal) => {
+          gqlVal.authState.browserOpened = true
 
-    // begin the login process
-    cy.findByRole('button', { name: text.login.actionLogin }).click()
+          return <div class="border-current border-1 h-700px resize overflow-auto"><LoginModal gql={gqlVal} modelValue={true} /></div>
+        },
+      })
 
-    // ensure we reach "browser is opening" status on the CTA
-    cy.findByRole('button', { name: text.login.actionOpening })
-    .should('be.visible')
-    .and('be.disabled')
-  })
+      cy.findByRole('button', { name: text.login.actionLogin }).click()
 
-  it('shows correct "waiting for login" status', () => {
-    cy.mountFragment(LoginModalFragmentDoc, {
-      onResult: (result, ctx) => {
-        ctx.isAuthBrowserOpened = true
-        result.__typename = 'Query'
-        result.isAuthBrowserOpened = true
-      },
-      render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><LoginModal gql={gqlVal} modelValue={true} /></div>,
+      cy.findByRole('button', { name: text.login.actionWaiting })
+      .should('be.visible')
+      .and('be.disabled')
     })
 
-    cy.findByRole('button', { name: text.login.actionLogin }).click()
-
-    cy.findByRole('button', { name: text.login.actionWaiting })
-    .should('be.visible')
-    .and('be.disabled')
+    it('shows successful login status', () => {
+      mountSuccess()
+      cy.contains('h2', text.login.titleSuccess).should('be.visible')
+      cy.contains(text.login.bodySuccess.replace('{0}', cloudViewer.fullName)).should('be.visible')
+      cy.contains('a', cloudViewer.fullName).should('have.attr', 'href', 'https://on.cypress.io/dashboard/profile')
+    })
   })
 
-  it('shows successful login status', () => {
-    mountSuccess()
-    cy.contains('h2', text.login.titleSuccess).should('be.visible')
-    cy.contains(text.login.bodySuccess.replace('{0}', cloudViewer.fullName)).should('be.visible')
-    cy.contains('a', cloudViewer.fullName).should('have.attr', 'href', 'https://on.cypress.io/dashboard/profile')
+  describe('errors', () => {
+    it('shows an error state when browser cannot be launched', () => {
+      const authUrl = 'http://127.0.0.1:0000/redirect-to-auth'
+
+      cy.mountFragment(LoginModalFragmentDoc, {
+        onResult: (result) => {
+          result.__typename = 'Query'
+          result.authState.name = 'AUTH_COULD_NOT_LAUNCH_BROWSER'
+          result.authState.message = 'http://127.0.0.1:0000/redirect-to-auth'
+        },
+        render: (gqlVal) =>
+          (<div class="border-current border-1 h-700px resize overflow-auto">
+            <LoginModal gql={gqlVal} modelValue={true}/>
+          </div>),
+      })
+
+      cy.contains('button', text.login.actionTryAgain).should('not.exist')
+      cy.contains('button', text.login.actionCancel).should('not.exist')
+      cy.contains(text.login.titleBrowserError).should('be.visible')
+      cy.contains(text.login.bodyBrowserError).should('be.visible')
+      cy.contains(text.login.bodyBrowserErrorDetails).should('be.visible')
+      cy.contains(authUrl).should('be.visible')
+      cy.contains('button', 'Copy').should('be.visible')
+    })
+
+    it('shows non-browser errors from login process', () => {
+      const updateSpy = cy.spy().as('updateSpy')
+      const methods = {
+        'onUpdate:modelValue': (newValue) => {
+          updateSpy(newValue)
+        },
+      }
+      const errorText = 'The flux capacitor ran out of battery'
+
+      cy.mountFragment(LoginModalFragmentDoc, {
+        render: (gqlVal) => {
+          gqlVal.authState.name = 'AUTH_ERROR_DURING_LOGIN'
+          gqlVal.authState.message = errorText
+
+          return (<div class="border-current border-1 h-700px resize overflow-auto">
+            <LoginModal gql={gqlVal} modelValue={true} {...methods}/>
+          </div>)
+        },
+      })
+
+      cy.contains(text.login.titleFailed).should('be.visible')
+      cy.contains(text.login.bodyError).should('be.visible')
+      cy.contains(errorText).should('be.visible')
+
+      // we test the qql mutation behavior of these buttons from e2e tests
+      cy.contains('button', text.login.actionTryAgain).should('be.visible')
+
+      // but we can test that cancelling closes the modal here:
+      cy.contains('button', text.login.actionCancel).click()
+      cy.get('@updateSpy').should('have.been.calledWith', false)
+    })
   })
 
   it('shows successful login status with email if name not provided', () => {
