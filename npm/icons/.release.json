@@ -1,8 +1,0 @@
-{
-  "commitMessage": "release %s",
-  "tagAnnotation": "release %s",
-  "github": {
-    "release": false,
-    "releaseName": "release %s"
-  }
-}

@@ -23,7 +23,7 @@ module.exports = {
   // returns icons package so that the caller code can find
   // paths to the icons without hard-coding them
   icons () {
-    return require('@cypress/icons')
+    return require('@packages/icons')
   },
 
   checkCurrentVersion () {
@@ -96,7 +96,7 @@ module.exports = {
 
   package (options = {}) {
     const pkgr = require('electron-packager')
-    const icons = require('@cypress/icons')
+    const icons = require('@packages/icons')
 
     const iconPath = icons.getPathToIcon('cypress')
 

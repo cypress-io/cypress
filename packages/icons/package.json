@@ -1,5 +1,5 @@
 {
-  "name": "@cypress/icons",
+  "name": "@packages/icons",
   "version": "0.0.0-development",
   "description": "Cypress Icons",
   "main": "index.js",
