@@ -298,7 +298,7 @@ class Command extends Component<Props> {
                 }
               </span>
               <span className='command-controls'>
-                {!model.visible && (
+                {(model.visible != null && !model.visible) && (
                   <Tooltip placement='top' title={invisibleMessage(model)} className='cy-tooltip'>
                     <span>
                       <HiddenIcon className='command-invisible' />
