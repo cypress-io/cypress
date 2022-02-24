@@ -11,7 +11,7 @@ export default defineConfig({
     openMode: 0,
   },
   e2e: {
-    'baseUrl': 'http://localhost:5006',
+    baseUrl: 'http://localhost:5006',
     setupNodeEvents (_on, config) {
       const express = require('express')
 
