@@ -11,6 +11,7 @@ import {
   STORYBOOK_VUE,
   WEBPACK_DEV_SERVER_4,
 } from './constants'
+import { WEBPACK_4 } from '.'
 
 export const FRONTEND_FRAMEWORKS = [
   {
@@ -18,9 +19,14 @@ export const FRONTEND_FRAMEWORKS = [
     family: 'template',
     name: 'Create React App',
     supportedBundlers: ['webpack'],
-    packages: [CYPRESS_REACT_LATEST],
+    packages: [
+      CYPRESS_REACT_LATEST,
+      WEBPACK_4,
+      WEBPACK_DEV_SERVER_4,
+      HTML_WEBPACK_PLUGIN_4,
+    ],
     defaultPackagePath: '@cypress/react/plugins/react-scripts',
-    glob: '*.{jsx,tsx}',
+    glob: '*.{js,jsx,tsx}',
     category: FRONTEND_FRAMEWORK_CATEGORIES[0],
     codeGenFramework: CODE_GEN_FRAMEWORKS[0],
     storybookDep: STORYBOOK_REACT,
@@ -169,7 +175,7 @@ export const FRONTEND_FRAMEWORKS = [
     supportedBundlers: ['webpack', 'vite'],
     packages: [CYPRESS_REACT_LATEST],
     defaultPackagePath: null,
-    glob: '*.{jsx,tsx}',
+    glob: '*.{js,jsx,tsx}',
     detectors: [
       {
         dependency: 'react',
@@ -445,12 +451,12 @@ export const FRONTEND_FRAMEWORKS = [
       HTML_WEBPACK_PLUGIN_4,
     ],
     defaultPackagePath: '@cypress/react/plugins/next',
-    glob: '*.{jsx,tsx}',
+    glob: '*.{js,jsx,tsx}',
     category: FRONTEND_FRAMEWORK_CATEGORIES[0],
     detectors: [
       {
         dependency: 'next',
-        version: '>=11.0.0',
+        version: '>=10.0.0',
       },
     ],
     codeGenFramework: CODE_GEN_FRAMEWORKS[0],
