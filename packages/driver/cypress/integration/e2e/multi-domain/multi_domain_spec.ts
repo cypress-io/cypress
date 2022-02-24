@@ -223,38 +223,6 @@ describe('domain validation', { experimentalSessionSupport: true, experimentalMu
     .should('equal', 'Welcome TJohnson')
   })
 
-  it('finds the right spec bridge without a subdomain', () => {
-    cy.visit('/fixtures/auth/index.html') // Establishes Primary Domain
-    cy.window().then((win) => {
-      win.location.href = 'http://foobar.com:3500/fixtures/auth/idp.html'
-    })
-
-    cy.switchToDomain('foobar.com', () => {
-      cy.get('[data-cy="username"]').type('TJohnson')
-      cy.get('[data-cy="login"]').click()
-    })
-
-    cy.get('[data-cy="welcome"]')
-    .invoke('text')
-    .should('equal', 'Welcome TJohnson')
-  })
-
-  it('finds the right spec bridge with www', () => {
-    cy.visit('/fixtures/auth/index.html') // Establishes Primary Domain
-    cy.window().then((win) => {
-      win.location.href = 'http://www.foobar.com:3500/fixtures/auth/idp.html'
-    })
-
-    cy.switchToDomain('foobar.com', () => {
-      cy.get('[data-cy="username"]').type('TJohnson')
-      cy.get('[data-cy="login"]').click()
-    })
-
-    cy.get('[data-cy="welcome"]')
-    .invoke('text')
-    .should('equal', 'Welcome TJohnson')
-  })
-
   it('uses switchToDomain twice', () => {
     cy.visit('/fixtures/auth/index.html') // Establishes Primary Domain
     cy.get('[data-cy="login-idp"]').click() // Takes you to foobar.com
