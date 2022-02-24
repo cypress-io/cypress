@@ -39,7 +39,12 @@
           scope="global"
           keypath="setupPage.configFile.changesRequiredDescription"
         >
-          <span class="rounded bg-warning-200 px-1 text-warning-600 inline-block">{{ filePath }}</span>
+          <a
+            class="rounded cursor-pointer bg-warning-200 px-1 text-warning-600 inline-block"
+            @click="openFile"
+          >
+            {{ filePath }}
+          </a>
         </i18n-t>
       </p>
       <Button
@@ -76,6 +81,8 @@ export type StatusInfo = {
 <script lang="ts" setup>
 // eslint-disable-next-line no-duplicate-imports
 import { computed } from 'vue'
+import { gql, useMutation } from '@urql/vue'
+import { useExternalLink } from '@cy/gql-components/useExternalLink'
 import Button from '@cy/components/Button.vue'
 // eslint-disable-next-line no-duplicate-imports
 import Badge from '@cy/components/Badge.vue'
@@ -87,6 +94,7 @@ import AddedIcon from '~icons/cy/file-changes-added_x24.svg'
 import SkippedIcon from '~icons/cy/file-changes-skipped_x24.svg'
 import ErrorIcon from '~icons/cy/file-changes-error_x24.svg'
 import WarningIcon from '~icons/cy/file-changes-warning_x24.svg'
+import { OpenFileInIdeDocument } from '@packages/data-context/src/gen/all-operations.gen'
 
 const { t } = useI18n()
 
@@ -97,7 +105,25 @@ const props = defineProps<{
   description?: string
 }>()
 
-const openDocs = () => window.open('https://on.cypress.io/guides/configuration')
+const openDocs = useExternalLink('https://on.cypress.io/guides/configuration')
+
+gql`
+mutation OpenFileInIDE ($input: FileDetailsInput!) {
+  openFileInIDE (input: $input)
+}
+`
+
+const openFileInIDE = useMutation(OpenFileInIdeDocument)
+
+function openFile () {
+  openFileInIDE.executeMutation({
+    input: {
+      absolute: props.filePath,
+      line: 0,
+      column: 0,
+    },
+  })
+}
 
 // TODO: Remove this. Use FileParts when available
 const language = computed(() => {
