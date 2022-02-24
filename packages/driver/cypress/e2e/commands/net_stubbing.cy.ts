@@ -1650,7 +1650,7 @@ describe('network stubbing', function () {
         })
       }).then(() => {
         return $.get('/timeout').then((responseText) => {
-          expect(Date.now() - this.start).to.be.closeTo(250 + 100, 100)
+          expect(Date.now() - this.start).to.be.closeTo(delayMs + 100, 100)
 
           done()
         })
@@ -1665,7 +1665,7 @@ describe('network stubbing', function () {
         const start = Date.now()
 
         return $.get('/timeout').then((responseText) => {
-          expect(Date.now() - start).to.be.closeTo(delay, 50)
+          expect(Date.now() - start).to.be.closeTo(delay + 100, 100)
           expect(responseText).to.eq('foo')
         })
       }
@@ -2584,16 +2584,18 @@ describe('network stubbing', function () {
     })
 
     it('can delay a proxy response using res.setDelay', function (done) {
+      const delay = 1000
+
       cy.intercept('/timeout*', (req) => {
         req.reply((res) => {
           this.start = Date.now()
 
-          res.setDelay(1000).send('delay worked')
+          res.setDelay(delay).send('delay worked')
         })
       }).then(() => {
         $.get('/timeout')
         .done((responseText) => {
-          expect(Date.now() - this.start).to.be.closeTo(1100, 100)
+          expect(Date.now() - this.start).to.be.closeTo(delay + 100, 100)
           expect(responseText).to.include('delay worked')
 
           done()
@@ -2602,18 +2604,20 @@ describe('network stubbing', function () {
     })
 
     it('can \'delay\' a proxy response using Promise.delay', function (done) {
+      const delay = 1000
+
       cy.intercept('/timeout*', (req) => {
         req.reply((res) => {
           this.start = Date.now()
 
-          return Promise.delay(1000)
+          return Promise.delay(delay)
           .then(() => {
             res.send('Promise.delay worked')
           })
         })
       }).then(() => {
         $.get('/timeout').then((responseText) => {
-          expect(Date.now() - this.start).to.be.closeTo(1000, 100)
+          expect(Date.now() - this.start).to.be.closeTo(delay + 100, 100)
           expect(responseText).to.eq('Promise.delay worked')
 
           done()

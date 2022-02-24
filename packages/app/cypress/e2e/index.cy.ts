@@ -848,6 +848,7 @@ describe('App: Index', () => {
         cy.contains('Button.stories.jsx').click()
         cy.findByTestId('file-row').contains(getPathForPlatform('src/stories/Button.stories.cy.js')).click()
         cy.contains('composeStories')
+        cy.contains('ExampleWithLongName')
 
         cy.withCtx(async (ctx, o) => {
           const spec = (await ctx.project.findSpecs(ctx.currentProject ?? '', 'component', ['**/*.cy.jsx'], [], []))
