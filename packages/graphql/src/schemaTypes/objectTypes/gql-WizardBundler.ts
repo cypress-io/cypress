@@ -1,10 +1,10 @@
 import { objectType } from 'nexus'
-import { SupportedBundlerEnum } from '../enumTypes'
+import { SupportedBundlerEnum, SupportedPackageEnum } from '../enumTypes'
 
 export const WizardBundler = objectType({
   name: 'WizardBundler',
   description: 'Wizard bundler',
-  node: 'package',
+  node: 'type',
   definition (t) {
     t.boolean('isSelected', {
       description: 'Whether this is the selected framework bundler',
@@ -22,7 +22,7 @@ export const WizardBundler = objectType({
     })
 
     t.nonNull.field('package', {
-      type: SupportedBundlerEnum,
+      type: SupportedPackageEnum,
       description: 'Name of package on npm',
     })
 

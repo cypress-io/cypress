@@ -28,6 +28,14 @@ describe('detect', () => {
     expect(actual.framework.type).to.eq('crav5')
   })
 
+  it('React App with webpack 5', async () => {
+    const pkg = await scaffoldMigrationProject('react-app-webpack-5-unconfigured')
+    const actual = detect(pkg)
+
+    expect(actual.framework.type).to.eq('react')
+    expect(actual.bundler).to.eq('webpack5')
+  })
+
   it(`Vue CLI w/ Vue 2`, async () => {
     const pkg = await scaffoldMigrationProject('vueclivue2-unconfigured')
     const actual = detect(pkg)

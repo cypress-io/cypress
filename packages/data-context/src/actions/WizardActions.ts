@@ -14,7 +14,6 @@ import type { DataContext } from '..'
 interface WizardGetCodeComponent {
   chosenLanguage: CodeLanguage
   chosenFramework: FrontendFramework
-  chosenBundler: Bundler
 }
 
 export class WizardActions {
@@ -36,7 +35,7 @@ export class WizardActions {
     this.ctx.coreData.wizard.chosenFramework = framework
 
     if (next?.supportedBundlers?.length === 1) {
-      this.setBundler(next?.supportedBundlers?.[0])
+      this.setBundler(next?.supportedBundlers?.[0].type)
 
       return
     }
@@ -45,7 +44,9 @@ export class WizardActions {
 
     // if the previous bundler was incompatible with the
     // new framework that was selected, we need to reset it
-    const doesNotSupportChosenBundler = (chosenBundler && !new Set(this.ctx.wizard.chosenFramework?.supportedBundlers || []).has(chosenBundler)) ?? false
+    const doesNotSupportChosenBundler = (chosenBundler && !new Set(
+      this.ctx.wizard.chosenFramework?.supportedBundlers.map((x) => x.type) || [],
+    ).has(chosenBundler)) ?? false
 
     const prevFramework = this.ctx.coreData.wizard.chosenFramework || ''
 
@@ -54,7 +55,7 @@ export class WizardActions {
     }
   }
 
-  setBundler (bundler: NexusGenEnums['SupportedBundlers'] | null) {
+  setBundler (bundler: Bundler | null) {
     this.ctx.coreData.wizard.chosenBundler = bundler
 
     return this.data
@@ -112,8 +113,8 @@ export class WizardActions {
             return
           }
 
-          coreData.wizard.detectedBundler = detected.bundler || detected.framework.supportedBundlers[0]
-          coreData.wizard.chosenBundler = detected.bundler || detected.framework.supportedBundlers[0]
+          coreData.wizard.detectedBundler = detected.bundler || detected.framework.supportedBundlers[0].type
+          coreData.wizard.chosenBundler = detected.bundler || detected.framework.supportedBundlers[0].type
         })
       }
     }
@@ -181,7 +182,6 @@ export class WizardActions {
       this.scaffoldFixtures(),
       this.scaffoldSupport('component', chosenLanguage.type),
       this.getComponentIndexHtml({
-        chosenBundler: chosenBundler.type,
         chosenFramework,
         chosenLanguage,
       }),

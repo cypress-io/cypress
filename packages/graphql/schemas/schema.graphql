@@ -1056,6 +1056,13 @@ type Storybook implements Node {
 """The bundlers that we can use with Cypress"""
 enum SupportedBundlers {
   vite
+  webpack4
+  webpack5
+}
+
+"""The packages for bundlers that we can use with Cypress"""
+enum SupportedPackage {
+  vite
   webpack
 }
 
@@ -1144,7 +1151,7 @@ type WizardBundler implements Node {
   name: String!
 
   """Name of package on npm"""
-  package: SupportedBundlers!
+  package: SupportedPackage!
 
   """The name of the framework"""
   type: SupportedBundlers!
