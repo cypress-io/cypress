@@ -15,15 +15,12 @@ const unzip = require('./unzip')
 const logger = require('../logger')
 const { throwFormErrorText, errors } = require('../errors')
 const verbose = require('../VerboseRenderer')
+const arch = require('arch')
 
 const { buildInfo, version } = require('../../package.json')
 
-function getBinaryUrlFromBuildInfo () {
-  const { commitSha, commitBranch } = buildInfo
-
-  const arch = os.arch() === 'arm64' ? 'x64' : os.arch()
-
-  return `https://cdn.cypress.io/beta/binary/${version}/${os.platform()}-${arch}/${commitBranch}-${commitSha}/cypress.zip`
+function _getBinaryUrlFromBuildInfo ({ commitSha, commitBranch } = buildInfo) {
+  return `https://cdn.cypress.io/beta/binary/${version}/${os.platform()}-${arch()}/${commitBranch}-${commitSha}/cypress.zip`
 }
 
 const alreadyInstalledMsg = () => {
@@ -142,42 +139,54 @@ const validateOS = () => {
   })
 }
 
+/**
+ * Returns the version to install - either a string like `1.2.3` to be fetched
+ * from the download server or a file path or HTTP URL.
+ */
+function getVersionOverride ({ envVarVersion }) {
+  // let this environment variable reset the binary version we need
+  if (envVarVersion) {
+    return envVarVersion
+  }
+
+  if (buildInfo && !buildInfo.stable) {
+    return _getBinaryUrlFromBuildInfo(buildInfo)
+  }
+}
+
+function getEnvVarVersion () {
+  if (!util.getEnv('CYPRESS_INSTALL_BINARY')) return
+
+  // because passed file paths are often double quoted
+  // and might have extra whitespace around, be robust and trim the string
+  const trimAndRemoveDoubleQuotes = true
+  const envVarVersion = util.getEnv('CYPRESS_INSTALL_BINARY', trimAndRemoveDoubleQuotes)
+
+  debug('using environment variable CYPRESS_INSTALL_BINARY "%s"', envVarVersion)
+
+  return envVarVersion
+}
+
 const start = async (options = {}) => {
   debug('installing with options %j', options)
+
+  const envVarVersion = getEnvVarVersion()
+
+  if (envVarVersion === '0') {
+    debug('environment variable CYPRESS_INSTALL_BINARY = 0, skipping install')
+    logger.log(
+      stripIndent`
+        ${chalk.yellow('Note:')} Skipping binary installation: Environment variable CYPRESS_INSTALL_BINARY = 0.`,
+    )
+
+    logger.log()
+
+    return
+  }
 
   _.defaults(options, {
     force: false,
   })
-
-  const pkgVersion = util.pkgVersion()
-  let needVersion = pkgVersion
-  let binaryUrlOverride
-
-  debug('version in package.json is', needVersion)
-
-  // let this environment variable reset the binary version we need
-  if (util.getEnv('CYPRESS_INSTALL_BINARY')) {
-    // because passed file paths are often double quoted
-    // and might have extra whitespace around, be robust and trim the string
-    const trimAndRemoveDoubleQuotes = true
-    const envVarVersion = util.getEnv('CYPRESS_INSTALL_BINARY', trimAndRemoveDoubleQuotes)
-
-    debug('using environment variable CYPRESS_INSTALL_BINARY "%s"', envVarVersion)
-
-    if (envVarVersion === '0') {
-      debug('environment variable CYPRESS_INSTALL_BINARY = 0, skipping install')
-      logger.log(
-        stripIndent`
-        ${chalk.yellow('Note:')} Skipping binary installation: Environment variable CYPRESS_INSTALL_BINARY = 0.`,
-      )
-
-      logger.log()
-
-      return Promise.resolve()
-    }
-
-    binaryUrlOverride = envVarVersion
-  }
 
   if (util.getEnv('CYPRESS_CACHE_FOLDER')) {
     const envCache = util.getEnv('CYPRESS_CACHE_FOLDER')
@@ -192,6 +201,11 @@ const start = async (options = {}) => {
 
     logger.log()
   }
+
+  const pkgVersion = util.pkgVersion()
+  const versionToInstall = getVersionOverride({ envVarVersion }) || pkgVersion
+
+  debug('version in package.json is %s, version to install is %s', pkgVersion, versionToInstall)
 
   const installDir = state.getVersionDir(pkgVersion)
   const cacheDir = state.getCacheDir()
@@ -213,16 +227,6 @@ const start = async (options = {}) => {
   const binaryPkg = await state.getBinaryPkgAsync(binaryDir)
   const binaryVersion = await state.getBinaryPkgVersion(binaryPkg)
 
-  if (!binaryUrlOverride && buildInfo && !buildInfo.stable) {
-    const computedBinaryUrl = getBinaryUrlFromBuildInfo(buildInfo)
-
-    binaryUrlOverride = computedBinaryUrl
-  }
-
-  needVersion = binaryUrlOverride || needVersion
-
-  debug('installed version is', binaryVersion, 'version needed is', needVersion)
-
   const shouldInstall = () => {
     if (!binaryVersion) {
       debug('no binary installed under cli version')
@@ -243,7 +247,7 @@ const start = async (options = {}) => {
       return true
     }
 
-    if ((binaryVersion === needVersion) || !util.isSemver(needVersion)) {
+    if ((binaryVersion === versionToInstall) || !util.isSemver(versionToInstall)) {
       // our version matches, tell the user this is a noop
       alreadyInstalledMsg()
 
@@ -258,14 +262,14 @@ const start = async (options = {}) => {
     return debug('Not downloading or installing binary')
   }
 
-  if (needVersion !== pkgVersion) {
+  if (versionToInstall !== pkgVersion) {
     logger.log(
       chalk.yellow(stripIndent`
         ${logSymbols.warning} Warning: Forcing a binary version different than the default.
 
           The CLI expected to install version: ${chalk.green(pkgVersion)}
 
-          Instead we will install version: ${chalk.green(needVersion)}
+          Instead we will install version: ${chalk.green(versionToInstall)}
 
           These versions may not work properly together.
       `),
@@ -276,11 +280,11 @@ const start = async (options = {}) => {
 
   const getLocalFilePath = async () => {
     // see if version supplied is a path to a binary
-    if (await fs.pathExistsAsync(needVersion)) {
-      return path.extname(needVersion) === '.zip' ? needVersion : false
+    if (await fs.pathExistsAsync(versionToInstall)) {
+      return path.extname(versionToInstall) === '.zip' ? versionToInstall : false
     }
 
-    const possibleFile = util.formAbsolutePath(needVersion)
+    const possibleFile = util.formAbsolutePath(versionToInstall)
 
     debug('checking local file', possibleFile, 'cwd', process.cwd())
 
@@ -296,7 +300,7 @@ const start = async (options = {}) => {
   const pathToLocalFile = await getLocalFilePath()
 
   if (pathToLocalFile) {
-    const absolutePath = path.resolve(needVersion)
+    const absolutePath = path.resolve(versionToInstall)
 
     debug('found local file at', absolutePath)
     debug('skipping download')
@@ -319,11 +323,11 @@ const start = async (options = {}) => {
     debug('but the installation was forced')
   }
 
-  debug('preparing to download and unzip version ', needVersion, 'to path', installDir)
+  debug('preparing to download and unzip version ', versionToInstall, 'to path', installDir)
 
   const downloadDir = os.tmpdir()
 
-  await downloadAndUnzip({ version: needVersion, installDir, downloadDir })
+  await downloadAndUnzip({ version: versionToInstall, installDir, downloadDir })
 
   // delay 1 sec for UX, unless we are testing
   await Promise.delay(1000)
@@ -333,8 +337,7 @@ const start = async (options = {}) => {
 
 module.exports = {
   start,
-  // _getVersionSpecifier: getVersionSpecifier,
-  // _getBinaryUrlFromPrereleaseNpmUrl: getBinaryUrlFromPrereleaseNpmUrl,
+  _getBinaryUrlFromBuildInfo,
 }
 
 const unzipTask = ({ zipFilePath, installDir, progress, rendererOptions }) => {
