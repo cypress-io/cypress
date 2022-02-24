@@ -22,6 +22,7 @@ export function createI18n (opts = {}) {
     // Works in both electron and automated browsers
     locale: window.navigator.language,
     silentFallbackWarn: true,
+    missingWarn: false,
     messages: compiledMessages,
     ...opts,
   })
