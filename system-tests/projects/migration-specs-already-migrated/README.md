@@ -1,10 +1,10 @@
-## Migration E2E Defaults
+## Migration when spec files have already been migrated but not the config file
 
 An e2e project with all defaults. We rename the `integrationFolder` and spec extension.
 
 The following migration steps will be used during this migration:
 
-- [x] automatic file rename
+- [ ] automatic file rename
 - [ ] manual file rename
 - [x] rename support
 - [x] update config file
@@ -12,11 +12,7 @@ The following migration steps will be used during this migration:
 
 ## Automatic Migration
 
-Unless the user skips this step, after this step, the filesystem will be:
-
-| Before | After|
-|---|---|
-| `integration/basic.test.js` | `e2e/basic.cy.js` |
+This step should be hidden since the rename is already done.
 
 ## Manual Files
 

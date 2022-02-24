@@ -550,7 +550,7 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
   })
 
   it('handles re-migrating a partially migrated codebase', { retries: 0 }, () => {
-    startMigrationFor('migration-already-migrated')
+    startMigrationFor('migration-specs-already-migrated')
     cy.get(renameAutoStep).should('not.exist')
 
     cy.withCtx(async (ctx) => {
