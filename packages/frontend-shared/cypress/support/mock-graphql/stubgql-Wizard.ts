@@ -1,10 +1,10 @@
 import type { CodegenTypeMap, Wizard } from '../generated/test-graphql-types.gen'
 import { CODE_LANGUAGES } from '@packages/types/src/constants'
-import { BUNDLER_DEPS, FRONTEND_FRAMEWORKS, PACKAGES_DESCRIPTIONS } from '@packages/scaffold-config'
+import { BUNDLERS, CYPRESS_REACT_LATEST, CYPRESS_WEBPACK, FRONTEND_FRAMEWORKS } from '@packages/scaffold-config'
 import type { MaybeResolver } from './clientTestUtils'
 import { testNodeId } from './clientTestUtils'
 
-export const allBundlers = BUNDLER_DEPS.map((bundler, idx) => {
+export const allBundlers = BUNDLERS.map((bundler, idx) => {
   return {
     ...testNodeId('WizardBundler'),
     isSelected: idx === 0,
@@ -19,13 +19,13 @@ export const stubWizard: MaybeResolver<Wizard> = {
   packagesToInstall: [
     {
       ...testNodeId('WizardNpmPackage'),
-      description: PACKAGES_DESCRIPTIONS['@cypress/react'],
+      description: CYPRESS_REACT_LATEST.description,
       name: '@cypress/react',
       package: '@cypress/react',
     },
     {
       ...testNodeId('WizardNpmPackage'),
-      description: PACKAGES_DESCRIPTIONS['@cypress/webpack-dev-server'],
+      description: CYPRESS_WEBPACK.description,
       name: '@cypress/webpack-dev-server',
       package: '@cypress/webpack-dev-server',
     },

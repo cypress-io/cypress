@@ -3,7 +3,7 @@ import { WizardFrontendFramework } from './gql-WizardFrontendFramework'
 import { WizardNpmPackage } from './gql-WizardNpmPackage'
 import { objectType } from 'nexus'
 import { CODE_LANGUAGES } from '@packages/types'
-import { BUNDLER_DEPS, FRONTEND_FRAMEWORKS } from '@packages/scaffold-config'
+import { BUNDLERS, FRONTEND_FRAMEWORKS } from '@packages/scaffold-config'
 import { WizardCodeLanguage } from './gql-WizardCodeLanguage'
 
 export const Wizard = objectType({
@@ -13,7 +13,7 @@ export const Wizard = objectType({
     t.nonNull.list.nonNull.field('allBundlers', {
       type: WizardBundler,
       description: 'All of the bundlers to choose from',
-      resolve: () => Array.from(BUNDLER_DEPS),
+      resolve: () => Array.from(BUNDLERS),
     })
 
     t.field('bundler', {

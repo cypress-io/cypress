@@ -1142,6 +1142,9 @@ type WizardBundler implements Node {
   """Display name of the bundler"""
   name: String!
 
+  """Name of package on npm"""
+  package: SupportedBundlers!
+
   """The name of the framework"""
   type: SupportedBundlers!
 }

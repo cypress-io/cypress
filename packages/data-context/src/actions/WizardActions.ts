@@ -181,7 +181,7 @@ export class WizardActions {
       this.scaffoldFixtures(),
       this.scaffoldSupport('component', chosenLanguage.type),
       this.getComponentIndexHtml({
-        chosenBundler,
+        chosenBundler: chosenBundler.type,
         chosenFramework,
         chosenLanguage,
       }),

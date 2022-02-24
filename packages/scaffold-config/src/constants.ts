@@ -1,38 +1,26 @@
-import type { AllPackagePackages } from '.'
-
 export const CODE_GEN_FRAMEWORKS = ['react', 'vue'] as const
 
 export const FRONTEND_FRAMEWORK_CATEGORIES = ['react', 'vue'] as const
 
-export const PACKAGES_DESCRIPTIONS: Record<AllPackagePackages, string> = {
-  '@cypress/vue': 'Allows Cypress to mount each Vue component using <span class="text-purple-400">cy.mount()</span>',
-  '@cypress/react': 'Allows Cypress to mount each React component using <span class="text-purple-400">cy.mount()</span>',
-  '@cypress/webpack-dev-server': 'Allows Cypress to use your existing build configuration in order to bundle and run your tests',
-  '@cypress/vite-dev-server': 'Allows Cypress to use your existing build configuration in order to bundle and run your tests',
-  '@storybook/testing-react': 'Testing utilities that allow you to reuse your stories in your unit tests',
-  '@storybook/testing-vue3': 'Testing utilities that allow you to reuse your stories in your unit tests',
-  'webpack-dev-server': 'Webpack Dev Server to bundle and run your tests',
-  'webpack': 'Webpack is a module bundler',
-  'html-webpack-plugin': 'The HtmlWebpackPlugin simplifies creation of HTML files to serve your webpack bundles',
-} as const
-
-const BUNDLER_WEBPACK = {
-  type: 'webpack',
-  name: 'Webpack',
+export const CYPRESS_WEBPACK = {
+  type: 'cypress-dev-server',
+  name: 'Cypress Webpack Dev Server',
   package: '@cypress/webpack-dev-server',
   installer: '@cypress/webpack-dev-server@latest',
+  description: 'Allows Cypress to use your existing build configuration in order to bundle and run your tests',
 } as const
 
-const BUNDLER_VITE = {
-  type: 'vite',
-  name: 'Vite',
+export const CYPRESS_VITE = {
+  type: 'cypress-dev-server',
+  name: 'Cypress Vite Dev Server',
   package: '@cypress/vite-dev-server',
   installer: '@cypress/vite-dev-server@latest',
+  description: 'Allows Cypress to use your existing build configuration in order to bundle and run your tests',
 } as const
 
-export const BUNDLER_DEPS = [
-  BUNDLER_WEBPACK,
-  BUNDLER_VITE,
+export const CYPRESS_DEV_SERVERS = [
+  CYPRESS_WEBPACK,
+  CYPRESS_VITE,
 ] as const
 
 export const STORYBOOK_REACT = {
@@ -40,6 +28,7 @@ export const STORYBOOK_REACT = {
   name: ' Testing React',
   package: '@storybook/testing-react',
   installer: '@storybook/testing-react@latest',
+  description: 'Testing utilities that allow you to reuse your stories in your unit tests',
 } as const
 
 export const STORYBOOK_VUE = {
@@ -47,6 +36,7 @@ export const STORYBOOK_VUE = {
   name: ' Testing Vue 3',
   package: '@storybook/testing-vue3',
   installer: '@storybook/testing-vue3@latest',
+  description: 'Testing utilities that allow you to reuse your stories in your unit tests',
 } as const
 
 export const STORYBOOK_DEPS = [
@@ -59,6 +49,7 @@ export const CYPRESS_VUE_2 = {
   name: 'Cypress Vue',
   package: '@cypress/vue',
   installer: '@cypress/vue@^2.0.0',
+  description: 'Allows Cypress to mount each Vue component using <span class="text-purple-400">cy.mount()</span>',
 } as const
 
 export const CYPRESS_VUE_3 = {
@@ -66,6 +57,7 @@ export const CYPRESS_VUE_3 = {
   name: 'Cypress Vue',
   package: '@cypress/vue',
   installer: '@cypress/vue@^3.0.0',
+  description: 'Allows Cypress to mount each Vue component using <span class="text-purple-400">cy.mount()</span>',
 } as const
 
 export const WEBPACK_DEV_SERVER_4 = {
@@ -73,17 +65,28 @@ export const WEBPACK_DEV_SERVER_4 = {
   name: 'Webpack Dev Server',
   package: 'webpack-dev-server',
   installer: 'webpack-dev-server@^4.0.0',
+  description: 'Webpack Dev Server to bundle and run your tests',
 } as const
 
-export const WEBPACK_4 = {
-  type: 'bundler',
+export const BUNDLER_WEBPACK_4 = {
+  type: 'webpack',
   name: 'Webpack',
   package: 'webpack',
   installer: 'webpack@^4.0.0',
+  description: 'Webpack is a module bundler',
+} as const
+
+export const BUNDLER_VITE = {
+  type: 'vite',
+  name: 'Vite',
+  package: 'vite',
+  installer: 'vite@^2.0.0',
+  description: 'Vite is dev server that serves your source files over native ES modules',
 } as const
 
 export const BUNDLERS = [
-  WEBPACK_4,
+  BUNDLER_WEBPACK_4,
+  BUNDLER_VITE,
 ]
 
 export const HTML_WEBPACK_PLUGIN_4 = {
@@ -91,6 +94,7 @@ export const HTML_WEBPACK_PLUGIN_4 = {
   name: 'HTML Webpack Plugin',
   package: 'html-webpack-plugin',
   installer: 'html-webpack-plugin@^4.0.0',
+  description: 'The HtmlWebpackPlugin simplifies creation of HTML files to serve your webpack bundles',
 } as const
 
 export const CYPRESS_REACT_LATEST = {
@@ -98,6 +102,7 @@ export const CYPRESS_REACT_LATEST = {
   name: 'Cypress React',
   package: '@cypress/react',
   installer: '@cypress/react@^5.0.0',
+  description: 'Allows Cypress to mount each React component using <span class="text-purple-400">cy.mount()</span>',
 } as const
 
 export const CYPRESS_ADAPTER_DEPS = [
@@ -112,7 +117,7 @@ export const DEV_SERVERS = [
 
 export const DEPENDENCIES = [
   ...CYPRESS_ADAPTER_DEPS,
-  ...BUNDLER_DEPS,
+  ...CYPRESS_DEV_SERVERS,
   ...STORYBOOK_DEPS,
   ...DEV_SERVERS,
   ...BUNDLERS,

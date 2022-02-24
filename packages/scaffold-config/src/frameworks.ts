@@ -10,8 +10,8 @@ import {
   STORYBOOK_REACT,
   STORYBOOK_VUE,
   WEBPACK_DEV_SERVER_4,
+  BUNDLER_WEBPACK_4,
 } from './constants'
-import { WEBPACK_4 } from '.'
 
 export const FRONTEND_FRAMEWORKS = [
   {
@@ -21,7 +21,7 @@ export const FRONTEND_FRAMEWORKS = [
     supportedBundlers: ['webpack'],
     packages: [
       CYPRESS_REACT_LATEST,
-      WEBPACK_4,
+      BUNDLER_WEBPACK_4,
       WEBPACK_DEV_SERVER_4,
       HTML_WEBPACK_PLUGIN_4,
     ],
@@ -82,7 +82,7 @@ export const FRONTEND_FRAMEWORKS = [
     codeGenFramework: CODE_GEN_FRAMEWORKS[1],
     storybookDep: STORYBOOK_VUE,
     config: {
-      js: (bundler: Bundler['type']) => {
+      js: (bundler: Bundler) => {
         return dedent`
       const { devServer } = require('@cypress/webpack-dev-server')
       const webpackConfig = require('@vue/cli-service/webpack.config')
@@ -136,7 +136,7 @@ export const FRONTEND_FRAMEWORKS = [
     codeGenFramework: CODE_GEN_FRAMEWORKS[1],
     storybookDep: STORYBOOK_VUE,
     config: {
-      js: (bundler: Bundler['type']) => {
+      js: (bundler: Bundler) => {
         return dedent`
       const { devServer } = require('@cypress/webpack-dev-server')
       const webpackConfig = require('@vue/cli-service/webpack.config')
@@ -190,7 +190,7 @@ export const FRONTEND_FRAMEWORKS = [
     codeGenFramework: CODE_GEN_FRAMEWORKS[0],
     storybookDep: STORYBOOK_REACT,
     config: {
-      js: (bundler: Bundler['type']) => {
+      js: (bundler: Bundler) => {
         if (bundler === 'webpack') {
           return dedent`
           const { devServer } = require('@cypress/webpack-dev-server')
@@ -225,7 +225,7 @@ export const FRONTEND_FRAMEWORKS = [
         throw Error(`No config defined for ${bundler}`)
       },
 
-      ts: (bundler: Bundler['type']) => {
+      ts: (bundler: Bundler) => {
         if (bundler === 'webpack') {
           return dedent`
           import { defineConfig } from 'cypress'
@@ -281,7 +281,7 @@ export const FRONTEND_FRAMEWORKS = [
     codeGenFramework: CODE_GEN_FRAMEWORKS[1],
     storybookDep: null,
     config: {
-      js: (bundler: Bundler['type']) => {
+      js: (bundler: Bundler) => {
         if (bundler === 'webpack') {
           return dedent`
           const { devServer } = require('@cypress/webpack-dev-server')
@@ -316,7 +316,7 @@ export const FRONTEND_FRAMEWORKS = [
         throw Error(`No config defined for ${bundler}`)
       },
 
-      ts: (bundler: Bundler['type']) => {
+      ts: (bundler: Bundler) => {
         if (bundler === 'webpack') {
           return dedent`
           import { defineConfig } from 'cypress'
@@ -370,7 +370,7 @@ export const FRONTEND_FRAMEWORKS = [
     codeGenFramework: CODE_GEN_FRAMEWORKS[1],
     storybookDep: STORYBOOK_VUE,
     config: {
-      js: (bundler: Bundler['type']) => {
+      js: (bundler: Bundler) => {
         if (bundler === 'webpack') {
           return dedent`
           const { devServer } = require('@cypress/webpack-dev-server')
@@ -405,7 +405,7 @@ export const FRONTEND_FRAMEWORKS = [
         throw Error(`No config defined for ${bundler}`)
       },
 
-      ts: (bundler: Bundler['type']) => {
+      ts: (bundler: Bundler) => {
         if (bundler === 'webpack') {
           return dedent`
           import { defineConfig } from 'cypress'
