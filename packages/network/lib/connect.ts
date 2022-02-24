@@ -11,7 +11,7 @@ export function byPortAndAddress (port: number, address: net.Address) {
   // https://nodejs.org/api/net.html#net_net_connect_port_host_connectlistener
   return new Bluebird<net.Address>((resolve, reject) => {
     const onConnect = () => {
-      client.end()
+      client.destroy()
       resolve(address)
     }
 
