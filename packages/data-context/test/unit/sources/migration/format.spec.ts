@@ -29,7 +29,7 @@ describe('formatMigrationFile', () => {
 
       expect(actual).to.eql([
         { text: 'cypress/support/', highlight: false },
-        { text: 'index', highlight: true, group: 'name' },
+        { text: 'index', highlight: true, group: 'supportFileName' },
         { text: `.${ext}`, highlight: false },
       ])
     })
@@ -41,7 +41,7 @@ describe('formatMigrationFile', () => {
 
       expect(actual).to.eql([
         { text: 'cypress/support/', highlight: false },
-        { text: 'e2e', highlight: true, group: 'name' },
+        { text: 'e2e', highlight: true, group: 'supportFileName' },
         { text: `.${ext}`, highlight: false },
       ])
     })
