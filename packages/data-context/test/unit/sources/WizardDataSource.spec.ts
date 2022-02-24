@@ -13,7 +13,7 @@ describe('packagesToInstall', () => {
 
     ctx.coreData.currentProject = getCurrentProject('create-react-app-unconfigured')
     ctx.coreData.wizard.chosenFramework = 'crav5'
-    ctx.coreData.wizard.chosenBundler = 'webpack'
+    ctx.coreData.wizard.chosenBundler = 'webpack5'
 
     const actual = await ctx.wizard.installDependenciesCommand()
 
@@ -25,7 +25,7 @@ describe('packagesToInstall', () => {
 
     ctx.coreData.currentProject = getCurrentProject('vueclivue2-unconfigured')
     ctx.coreData.wizard.chosenFramework = 'vueclivue2'
-    ctx.coreData.wizard.chosenBundler = 'webpack'
+    ctx.coreData.wizard.chosenBundler = 'webpack4'
 
     const actual = await ctx.wizard.installDependenciesCommand()
 
@@ -37,7 +37,7 @@ describe('packagesToInstall', () => {
 
     ctx.coreData.currentProject = getCurrentProject('vueclivue3-unconfigured')
     ctx.coreData.wizard.chosenFramework = 'vueclivue3'
-    ctx.coreData.wizard.chosenBundler = 'webpack'
+    ctx.coreData.wizard.chosenBundler = 'webpack4'
 
     const actual = await ctx.wizard.installDependenciesCommand()
 
@@ -73,7 +73,7 @@ describe('packagesToInstall', () => {
 
     ctx.coreData.currentProject = getCurrentProject('nextjs-unconfigured')
     ctx.coreData.wizard.chosenFramework = 'nextjs'
-    ctx.coreData.wizard.chosenBundler = 'webpack'
+    ctx.coreData.wizard.chosenBundler = 'webpack4'
 
     const actual = await ctx.wizard.installDependenciesCommand()
 
@@ -85,7 +85,7 @@ describe('packagesToInstall', () => {
 
     ctx.coreData.currentProject = getCurrentProject('nuxtjs-vue2-unconfigured')
     ctx.coreData.wizard.chosenFramework = 'nuxtjs'
-    ctx.coreData.wizard.chosenBundler = 'webpack'
+    ctx.coreData.wizard.chosenBundler = 'webpack4'
 
     const actual = await ctx.wizard.installDependenciesCommand()
 
@@ -97,7 +97,7 @@ describe('packagesToInstall', () => {
 
     ctx.coreData.currentProject = getCurrentProject('pristine-with-e2e-testing-and-storybook')
     ctx.coreData.wizard.chosenFramework = 'react'
-    ctx.coreData.wizard.chosenBundler = 'webpack'
+    ctx.coreData.wizard.chosenBundler = 'webpack4'
 
     const actual = await ctx.wizard.installDependenciesCommand()
 
