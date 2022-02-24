@@ -71,18 +71,18 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
         domain,
       })
 
-      let onQueueFinished
-
-      const cleanup = () => {
-        communicator.off('queue:finished', onQueueFinished)
-      }
-
       return new Bluebird((resolve, reject) => {
+        const cleanup = () => {
+          communicator.off('queue:finished', onQueueFinished)
+        }
+
         const _resolve = ({ subject, unserializableSubjectType }) => {
+          cleanup()
           resolve(unserializableSubjectType ? createUnserializableSubjectProxy(unserializableSubjectType) : subject)
         }
 
         const _reject = (err) => {
+          cleanup()
           log.error(err)
           if (typeof err === 'object') {
             err.onFail = () => {}
@@ -91,7 +91,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
           reject(err)
         }
 
-        onQueueFinished = ({ err, subject, unserializableSubjectType }) => {
+        const onQueueFinished = ({ err, subject, unserializableSubjectType }) => {
           if (err) {
             return _reject(err)
           }
@@ -178,9 +178,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
 
         // this signals to the runner to create the spec bridge for
         // the specified domain
-        Cypress.emit('expect:domain', domain)
-      }).finally(() => {
-        cleanup()
+        communicator.emit('expect:domain', domain)
       })
     },
   })

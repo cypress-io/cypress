@@ -9,23 +9,25 @@
 
 import { createTimers } from './timers'
 
-let Cypress
+const findCypress = () => {
+  for (let index = 0; index < window.parent.frames.length; index++) {
+    const frame = window.parent.frames[index]
 
-for (let index = 0; index < window.parent.frames.length; index++) {
-  const frame = window.parent.frames[index]
-
-  try {
-    // If Cypress is defined and we haven't gotten a cross domain error we have found the correct bridge.
-    if (frame.Cypress) {
-      Cypress = frame.Cypress
-    }
-  } catch (error) {
-    // Catch DOMException: Blocked a frame from accessing a cross-origin frame.
-    if (error.name !== 'SecurityError') {
-      throw error
+    try {
+      // If Cypress is defined and we haven't gotten a cross domain error we have found the correct bridge.
+      if (frame.Cypress) {
+        return frame.Cypress
+      }
+    } catch (error) {
+      // Catch DOMException: Blocked a frame from accessing a cross-origin frame.
+      if (error.name !== 'SecurityError') {
+        throw error
+      }
     }
   }
 }
+
+const Cypress = findCypress()
 
 // TODO: If the spec bridge is not found we should throw some kind of error to main cypress, this should account for redirects so maybe wait a bit before throwing?
 // This may not be needed if we defer to the first command

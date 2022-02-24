@@ -522,7 +522,7 @@ export const eventManager = {
       Cypress.emit('internal:window:load', { type: 'cross:domain', url })
     })
 
-    Cypress.on('expect:domain', (domain) => {
+    Cypress.multiDomainCommunicator.on('expect:domain', (domain) => {
       localBus.emit('expect:domain', domain)
     })
 
