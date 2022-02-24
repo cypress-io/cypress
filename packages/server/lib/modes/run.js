@@ -168,7 +168,7 @@ const formatNodeVersion = ({ resolvedNodeVersion, resolvedNodePath }, width) => 
   debug('formatting Node version. %o', { version: resolvedNodeVersion, path: resolvedNodePath })
 
   if (resolvedNodePath) {
-    return formatPath(`v${resolvedNodeVersion} (${resolvedNodePath})`, width)
+    return formatPath(`v${resolvedNodeVersion} ${gray(`(${resolvedNodePath})`)}`, width)
   }
 }
 
@@ -672,7 +672,7 @@ const removeOldProfiles = (browser) => {
   return browserUtils.removeOldProfiles(browser)
   .catch((err) => {
     // dont make removing old browsers profiles break the build
-    return errors.warning('CANNOT_REMOVE_OLD_BROWSER_PROFILES', err.stack)
+    return errors.warning('CANNOT_REMOVE_OLD_BROWSER_PROFILES', err)
   })
 }
 
@@ -688,7 +688,7 @@ const trashAssets = Promise.method((config = {}) => {
   ])
   .catch((err) => {
     // dont make trashing assets fail the build
-    return errors.warning('CANNOT_TRASH_ASSETS', err.stack)
+    return errors.warning('CANNOT_TRASH_ASSETS', err)
   })
 })
 
@@ -698,7 +698,7 @@ const createVideoRecording = function (videoName, options = {}) {
   const onError = _.once((err) => {
     // catch video recording failures and log them out
     // but don't let this affect the run at all
-    return errors.warning('VIDEO_RECORDING_FAILED', err.stack)
+    return errors.warning('VIDEO_RECORDING_FAILED', err)
   })
 
   return fs
@@ -755,7 +755,7 @@ const maybeStartVideoRecording = Promise.method(function (options = {}) {
 const warnVideoRecordingFailed = (err) => {
   // log that post processing was attempted
   // but failed and dont let this change the run exit code
-  errors.warning('VIDEO_POST_PROCESSING_FAILED', err.stack)
+  errors.warning('VIDEO_POST_PROCESSING_FAILED', err)
 }
 
 module.exports = {
@@ -1447,6 +1447,7 @@ module.exports = {
     })
 
     if (browser.family !== 'chromium' && !options.config.chromeWebSecurity) {
+      console.log('')
       errors.warning('CHROME_WEB_SECURITY_NOT_SUPPORTED', browser.family)
     }
 
@@ -1564,13 +1565,13 @@ module.exports = {
         ])
         .spread(async (sys = {}, browser = {}) => {
           if (!project.ctx.project.specs.length) {
-            errors.throw('NO_SPECS_FOUND', projectRoot, specPattern)
+            errors.throwErr('NO_SPECS_FOUND', projectRoot, specPattern)
           }
 
           const specs = project.ctx.project.specs
 
           if (browser.unsupportedVersion && browser.warning) {
-            errors.throw('UNSUPPORTED_BROWSER_VERSION', browser.warning)
+            errors.throwErr('UNSUPPORTED_BROWSER_VERSION', browser.warning)
           }
 
           if (browser.family === 'chromium') {
@@ -1582,7 +1583,6 @@ module.exports = {
               beforeSpecRun,
               afterSpecRun,
               projectRoot,
-              specPattern,
               socketId,
               parallel,
               onError,
@@ -1594,6 +1594,7 @@ module.exports = {
               specs,
               sys,
               tag,
+              specPattern,
               videosFolder: config.videosFolder,
               video: config.video,
               videoCompression: config.videoCompression,

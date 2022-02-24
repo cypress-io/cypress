@@ -9,6 +9,7 @@ export const monorepoPaths = {
   pkgDataContext: path.join(__dirname, '../../packages/data-context'),
   pkgDriver: path.join(__dirname, '../../packages/driver'),
   pkgElectron: path.join(__dirname, '../../packages/electron'),
+  pkgErrors: path.join(__dirname, '../../packages/errors'),
   pkgExample: path.join(__dirname, '../../packages/example'),
   pkgExtension: path.join(__dirname, '../../packages/extension'),
   pkgFrontendShared: path.join(__dirname, '../../packages/frontend-shared'),

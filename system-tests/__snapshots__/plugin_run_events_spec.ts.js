@@ -160,12 +160,10 @@ exports['e2e plugin run events / fails run if event handler throws'] = `
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  run_event_throws.cy.js                                                          (1 of 1)
-An error was thrown in your plugins file while executing the handler for the 'before:spec' event.
+An error was thrown in your plugins file while executing the handler for the before:spec event.
 
 The error we received was:
 
 Error: error thrown in before:spec
       [stack trace lines]
-
-
 `

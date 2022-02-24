@@ -190,7 +190,7 @@ describe('lib/browsers/electron', () => {
     it('sets menu.set whether or not its in headless mode', function () {
       return electron._launch(this.win, this.url, this.automation, { show: true })
       .then(() => {
-        expect(menu.set).to.be.calledWith({ withDevTools: true })
+        expect(menu.set).to.be.calledWith({ withInternalDevTools: true })
       }).then(() => {
         menu.set.reset()
 
@@ -439,7 +439,7 @@ describe('lib/browsers/electron', () => {
       let opts = electron._defaultOptions('/foo', this.state, { show: true, browser: {} })
 
       opts.onFocus()
-      expect(menu.set).to.be.calledWith({ withDevTools: true })
+      expect(menu.set).to.be.calledWith({ withInternalDevTools: true })
 
       menu.set.reset()
 
@@ -581,7 +581,7 @@ describe('lib/browsers/electron', () => {
         // once for main window, once for child
         expect(menu.set).to.be.calledTwice
 
-        expect(menu.set).to.be.calledWith({ withDevTools: true })
+        expect(menu.set).to.be.calledWith({ withInternalDevTools: true })
       })
     })
 
@@ -591,7 +591,7 @@ describe('lib/browsers/electron', () => {
         // once for main window, once for child, once for focus
         expect(menu.set).to.be.calledThrice
 
-        expect(menu.set).to.be.calledWith({ withDevTools: true })
+        expect(menu.set).to.be.calledWith({ withInternalDevTools: true })
       })
     })
 

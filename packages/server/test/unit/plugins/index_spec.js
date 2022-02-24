@@ -1,3 +1,5 @@
+const stripAnsi = require('strip-ansi')
+
 require('../../spec_helper')
 
 const mockedEnv = require('mocked-env')
@@ -145,15 +147,19 @@ describe.skip('lib/plugins/index', () => {
       })
     })
 
-    it('sends \'load\' event with config via ipc', () => {
-      ipc.on.withArgs('loaded').yields([])
+    it('sends \'load\' event with config via ipc once it receives \'ready\'', () => {
       const config = { pluginsFile: 'cypress-plugin', testingType: 'e2e' }
 
-      return plugins.init(config, getOptions({ testingType: 'e2e' }), ctx).then(() => {
-        expect(ipc.send).to.be.calledWith('load', {
-          ...config,
-          ...configExtras,
-        })
+      plugins.init(config, getOptions({ testingType: 'e2e' }))
+
+      expect(ipc.send).to.not.be.called
+
+      // simulate async ready event
+      ipc.on.withArgs('ready').firstCall.callback()
+
+      expect(ipc.send).to.be.calledWith('load', {
+        ...config,
+        ...configExtras,
       })
     })
 
@@ -210,13 +216,16 @@ describe.skip('lib/plugins/index', () => {
     describe('load:error message', () => {
       context('PLUGINS_FILE_ERROR', () => {
         beforeEach(() => {
-          ipc.on.withArgs('load:error').yields('PLUGINS_FILE_ERROR', 'path/to/pluginsFile.js', 'error message stack')
+          const e = new Error('some error')
+
+          e.stack = 'error message stack'
+          ipc.on.withArgs('load:error').yields('PLUGINS_FILE_ERROR', 'path/to/pluginsFile.js', e)
         })
 
         it('rejects plugins.init', () => {
           return plugins.init({ pluginsFile: 'cypress-plugin' }, getOptions())
           .catch((err) => {
-            expect(err.message).to.contain('The plugins file is missing or invalid')
+            expect(stripAnsi(err.message)).to.contain('Your pluginsFile is invalid')
             expect(err.message).to.contain('path/to/pluginsFile.js')
 
             expect(err.details).to.contain('error message stack')
@@ -226,13 +235,16 @@ describe.skip('lib/plugins/index', () => {
 
       context('PLUGINS_FUNCTION_ERROR', () => {
         beforeEach(() => {
-          ipc.on.withArgs('load:error').yields('PLUGINS_FUNCTION_ERROR', 'path/to/pluginsFile.js', 'error message stack')
+          const e = new Error()
+
+          e.stack = 'error message stack'
+          ipc.on.withArgs('load:error').yields('PLUGINS_FUNCTION_ERROR', 'path/to/pluginsFile.js', e)
         })
 
         it('rejects plugins.init', () => {
           return plugins.init({ pluginsFile: 'cypress-plugin' }, getOptions())
           .catch((err) => {
-            expect(err.message).to.contain('The function exported by the plugins file threw an error.')
+            expect(stripAnsi(err.message)).to.contain('Your pluginsFile threw an error from:')
             expect(err.message).to.contain('path/to/pluginsFile.js')
 
             expect(err.details).to.contain('error message stack')
@@ -249,6 +261,7 @@ describe.skip('lib/plugins/index', () => {
         err = {
           name: 'error name',
           message: 'error message',
+          stack: 'error stack',
         }
 
         onError = sinon.spy()
@@ -272,19 +285,19 @@ describe.skip('lib/plugins/index', () => {
       it('calls onError when plugins process errors', () => {
         pluginsProcess.on.withArgs('error').yield(err)
         expect(onError).to.be.called
-        expect(onError.lastCall.args[0].title).to.equal('Error running plugin')
-        expect(onError.lastCall.args[0].stack).to.include('The following error was thrown by a plugin')
+        expect(onError.lastCall.args[0].title).to.equal('Config process error')
+        expect(stripAnsi(onError.lastCall.args[0].message)).to.include('Your pluginsFile threw an error from:')
 
-        expect(onError.lastCall.args[0].details).to.include(err.message)
+        expect(onError.lastCall.args[0].details).to.include(err.stack)
       })
 
       it('calls onError when ipc sends error', () => {
         ipc.on.withArgs('error').yield(err)
         expect(onError).to.be.called
-        expect(onError.lastCall.args[0].title).to.equal('Error running plugin')
-        expect(onError.lastCall.args[0].stack).to.include('The following error was thrown by a plugin')
+        expect(onError.lastCall.args[0].title).to.equal('Config process error')
+        expect(stripAnsi(onError.lastCall.args[0].message)).to.include('Your pluginsFile threw an error from:')
 
-        expect(onError.lastCall.args[0].details).to.include(err.message)
+        expect(onError.lastCall.args[0].details).to.include(err.stack)
       })
     })
 
@@ -295,6 +308,7 @@ describe.skip('lib/plugins/index', () => {
         err = {
           name: 'error name',
           message: 'error message',
+          stack: 'error stack',
         }
 
         pluginsProcess.on.withArgs('error').yields(err)
@@ -306,9 +320,9 @@ describe.skip('lib/plugins/index', () => {
           throw new Error('Should not resolve')
         })
         .catch((_err) => {
-          expect(_err.title).to.equal('Error running plugin')
-          expect(_err.stack).to.include('The following error was thrown by a plugin')
-          expect(_err.details).to.include(err.message)
+          expect(_err.title).to.equal('Config process error')
+          expect(stripAnsi(_err.message)).to.include('Your pluginsFile threw an error from:')
+          expect(_err.details).to.include(err.stack)
         })
       })
 
@@ -318,9 +332,9 @@ describe.skip('lib/plugins/index', () => {
           throw new Error('Should not resolve')
         })
         .catch((_err) => {
-          expect(_err.title).to.equal('Error running plugin')
-          expect(_err.stack).to.include('The following error was thrown by a plugin')
-          expect(_err.details).to.include(err.message)
+          expect(_err.title).to.equal('Config process error')
+          expect(stripAnsi(_err.message)).to.include('Your pluginsFile threw an error from:')
+          expect(_err.details).to.include(err.stack)
         })
       })
     })

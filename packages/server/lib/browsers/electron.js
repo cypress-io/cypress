@@ -146,7 +146,7 @@ module.exports = {
       },
       onFocus () {
         if (options.show) {
-          return menu.set({ withDevTools: true })
+          return menu.set({ withInternalDevTools: true })
         }
       },
       onNewWindow (e, url) {
@@ -222,7 +222,7 @@ module.exports = {
 
   _launch (win, url, automation, options) {
     if (options.show) {
-      menu.set({ withDevTools: true })
+      menu.set({ withInternalDevTools: true })
     }
 
     ELECTRON_DEBUG_EVENTS.forEach((e) => {

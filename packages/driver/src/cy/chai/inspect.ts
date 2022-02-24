@@ -54,6 +54,18 @@ export function create (chai) {
       typeof object.nodeName === 'string'
   }
 
+  // We can't just check if object instanceof ShadowRoot, because it might be the document of an iframe,
+  // which in Chrome 99+ is a separate class, and instanceof ShadowRoot returns false.
+  const isShadowRoot = function (object) {
+    return isDOMElement(object.host) && object.host.shadowRoot === object
+  }
+
+  // We can't just check if object instanceof Document, because it might be the document of an iframe,
+  // which in Chrome 99+ is a separate class, and instanceof Document returns false.
+  const isDocument = function (object) {
+    return object.defaultView && object.defaultView === object.defaultView.window
+  }
+
   let formatValueHook
 
   const setFormatValueHook = (fn) => formatValueHook = fn
@@ -122,6 +134,14 @@ export function create (chai) {
         //   continue with the normal flow:
         //   printing the element as if it is an object.
       }
+    }
+
+    if (isShadowRoot(value)) {
+      return value.innerHTML
+    }
+
+    if (isDocument(value)) {
+      return value.documentElement.outerHTML
     }
 
     // Look up the keys of the object.

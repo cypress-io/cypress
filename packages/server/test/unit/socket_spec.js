@@ -482,7 +482,7 @@ describe('lib/socket', () => {
         sinon.stub(this.options, 'onRequest').rejects(err)
 
         return this.client.emit('backend:request', 'http:request', 'foo', (resp) => {
-          expect(resp.error).to.deep.eq(errors.clone(err))
+          expect(resp.error).to.deep.eq(errors.cloneErr(err))
 
           return done()
         })

@@ -4,6 +4,7 @@
     :title="newProject
       ? t('runs.connect.modal.selectProject.createProject')
       : t('runs.connect.modal.title')"
+    help-link="https://on.cypress.io/adding-new-project"
     @update:model-value="emit('cancel')"
   >
     <div class="w-640px">
@@ -36,7 +37,7 @@
         </template>
       </Select>
       <Select
-        v-if="!newProject && projects.length > 0"
+        v-if="!newProject"
         v-model="pickedProject"
         class="mt-16px transition-all"
         :class="pickedOrganization ? undefined : 'opacity-50'"
@@ -85,6 +86,7 @@
             </span>
           </label>
           <a
+            v-if="projects.length > 0"
             class="cursor-pointer text-indigo-500 hover:underline"
             @click="newProject = false"
           >
@@ -230,7 +232,6 @@ const emit = defineEmits<{
   (event: 'update-projectId-failed', projectId: string): void
 }>()
 
-const newProject = ref(false)
 const projectName = ref(props.gql.currentProject?.title || '')
 const projectAccess = ref<'private' | 'public'>('private')
 const organizations = computed(() => {
@@ -244,6 +245,7 @@ const organizations = computed(() => {
 const pickedOrganization = ref(organizations.value.length >= 1 ? organizations.value[0] : undefined)
 
 const projects = computed(() => pickedOrganization.value?.projects?.nodes || [])
+const newProject = ref(projects.value.length === 0)
 const pickedProject = ref()
 
 const orgPlaceholder = t('runs.connect.modal.selectProject.placeholderOrganizations')

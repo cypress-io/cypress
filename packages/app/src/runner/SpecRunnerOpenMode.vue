@@ -20,7 +20,7 @@
           v-if="props.gql.currentProject"
           v-show="runnerUiStore.isSpecsListOpen"
           id="inline-spec-list"
-          class="h-full border-gray-900 bg-gray-1000 border-r-1 force-dark"
+          class="h-full bg-gray-1000 border-gray-900 border-r-1 force-dark"
           :class="{'pointer-events-none': isDragging}"
         >
           <InlineSpecList
@@ -48,7 +48,7 @@
       </template>
       <template #panel3="{width}">
         <HideDuringScreenshotOrRunMode class="bg-white">
-          <SpecRunnerHeader
+          <SpecRunnerHeaderOpenMode
             v-if="props.gql.currentProject"
             :gql="props.gql.currentProject"
             :event-manager="eventManager"
@@ -96,7 +96,7 @@ import { getAutIframeModel, getEventManager } from '.'
 import { useAutStore, useRunnerUiStore } from '../store'
 import type { FileDetails } from '@packages/types'
 import SnapshotControls from './SnapshotControls.vue'
-import SpecRunnerHeader from './SpecRunnerHeader.vue'
+import SpecRunnerHeaderOpenMode from './SpecRunnerHeaderOpenMode.vue'
 import HideDuringScreenshot from './screenshot/HideDuringScreenshot.vue'
 import RemoveClassesDuringScreenshotting from './screenshot/RemoveClassesDuringScreenshotting.vue'
 import RemovePositioningDuringScreenshot from './screenshot/RemovePositioningDuringScreenshot.vue'
