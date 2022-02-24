@@ -12,12 +12,12 @@ describe('packagesToInstall', () => {
     const ctx = createTestDataContext()
 
     ctx.coreData.currentProject = getCurrentProject('create-react-app-unconfigured')
-    ctx.coreData.wizard.chosenFramework = 'cra'
+    ctx.coreData.wizard.chosenFramework = 'crav5'
     ctx.coreData.wizard.chosenBundler = 'webpack'
 
     const actual = await ctx.wizard.installDependenciesCommand()
 
-    expect(actual).to.eq(`npm install -D @cypress/react@^5.0.0 webpack@^4.0.0 webpack-dev-server@^4.0.0 html-webpack-plugin@^4.0.0`)
+    expect(actual).to.eq(`npm install -D @cypress/react@^5.0.0 webpack@^5.0.0 @cypress/webpack-dev-server@latest webpack-dev-server@^4.0.0 html-webpack-plugin@^5.0.0`)
   })
 
   it('vueclivue2-unconfigured', async () => {
@@ -89,7 +89,7 @@ describe('packagesToInstall', () => {
 
     const actual = await ctx.wizard.installDependenciesCommand()
 
-    expect(actual).to.eq('npm install -D @cypress/vue@^2.0.0 @cypress/webpack-dev-server@latest html-webpack-plugin@^4.0.0')
+    expect(actual).to.eq('npm install -D @cypress/vue@^2.0.0 webpack@^4.0.0 @cypress/webpack-dev-server@latest html-webpack-plugin@^4.0.0')
   })
 
   it('pristine-with-e2e-testing-and-storybook', async () => {

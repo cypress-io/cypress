@@ -511,7 +511,8 @@ enum FrontendFrameworkCategoryEnum {
 }
 
 enum FrontendFrameworkEnum {
-  cra
+  crav4
+  crav5
   nextjs
   nuxtjs
   react
