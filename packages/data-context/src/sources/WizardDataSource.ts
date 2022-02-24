@@ -38,7 +38,9 @@ export class WizardDataSource {
     // only applicable for `library` - `template` like CRA, Next.js etc
     // only support 1 dev server, which is included in `framework.dependencies`.
     if (this.chosenFramework.family === 'library') {
-      const cypressDevServer = CYPRESS_DEV_SERVERS.find((x) => x.type === this.chosenBundler?.type)
+      const cypressDevServer = CYPRESS_DEV_SERVERS.find(
+        (devServer) => devServer.supports.some((bundler) => bundler.type === this.chosenBundler?.type),
+      )
 
       if (!cypressDevServer) {
         throw Error(`Could not find matching Cypress Dev Server for ${this.chosenBundler.type}`)

@@ -170,7 +170,7 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
       chosenFramework: null,
       chosenLanguage: 'js',
       chosenManualInstall: false,
-      allBundlers: BUNDLERS.map((x) => x.package),
+      allBundlers: BUNDLERS.map((x) => x.type),
       detectedBundler: null,
       detectedFramework: null,
       __fakeInstalledPackagesForTesting: null,

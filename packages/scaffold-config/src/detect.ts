@@ -23,11 +23,20 @@ const bundlers = [
     ],
   },
   {
-    type: 'webpack',
+    type: 'webpack4',
     detectors: [
       {
         dependency: 'webpack',
-        version: '>=4.0.0',
+        version: '^4.0.0',
+      },
+    ],
+  },
+  {
+    type: 'webpack5',
+    detectors: [
+      {
+        dependency: 'webpack',
+        version: '^5.0.0',
       },
     ],
   },
@@ -79,13 +88,13 @@ export function detect (pkg: PkgJson): DetectFramework {
           bundler: bundler.type,
         }
       }
+    }
 
-      if (hasLibrary) {
-        // unknown bundler, or we couldn't detect it
-        // just return the framework, leave the rest to the user.
-        return {
-          framework: library,
-        }
+    if (hasLibrary) {
+      // unknown bundler, or we couldn't detect it
+      // just return the framework, leave the rest to the user.
+      return {
+        framework: library,
       }
     }
   }

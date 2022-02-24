@@ -8,6 +8,12 @@ export const SupportedBundlerEnum = enumType({
   members: BUNDLERS.map((t) => t.type),
 })
 
+export const SupportedPackageEnum = enumType({
+  name: 'SupportedPackage',
+  description: 'The packages for bundlers that we can use with Cypress',
+  members: BUNDLERS.map((t) => t.package),
+})
+
 export const WizardConfigFileStatusEnum = enumType({
   name: 'WizardConfigFileStatusEnum',
   members: ['changes', 'valid', 'skipped', 'error'],
