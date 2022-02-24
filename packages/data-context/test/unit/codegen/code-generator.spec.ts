@@ -1,27 +1,59 @@
-import path from 'path'
-import {
-  codeGenerator,
-  Action,
-  CodeGenResults,
-  CodeGenResult,
-} from '../../src/codegen/code-generator'
-import templates from '../../src/codegen/templates'
+import { parse } from '@babel/parser'
+import { graphqlSchema } from '@packages/graphql/src/schema'
+import { FRONTEND_FRAMEWORKS } from '@packages/types'
 import { expect } from 'chai'
 import dedent from 'dedent'
 import fs from 'fs-extra'
-import { parse } from '@babel/parser'
+import path from 'path'
+import sinon from 'sinon'
+import { DataContext } from '../../../src'
+import { AppApiShape, AuthApiShape, ElectronApiShape, LocalSettingsApiShape, ProjectApiShape } from '../../../src/actions'
+import {
+  Action, codeGenerator, CodeGenResult, CodeGenResults,
+} from '../../../src/codegen/code-generator'
+import { SpecOptions } from '../../../src/codegen/spec-options'
+import templates from '../../../src/codegen/templates'
+import { InjectedConfigApi } from '../../../src/data'
+import { ErrorApiShape } from '../../../src/DataContext'
+import { BrowserApiShape } from '../../../src/sources'
 
 const tmpPath = path.join(__dirname, 'tmp/test-code-gen')
+
+const babelParse = (content: string) => parse(content, { sourceType: 'module', plugins: ['jsx', 'typescript'] })
 
 describe('code-generator', () => {
   before(async () => {
     await fs.remove(tmpPath)
   })
 
+  let ctx: DataContext
+
+  beforeEach(async () => {
+    ctx = new DataContext({
+      schema: graphqlSchema,
+      mode: 'run',
+      modeOptions: {},
+      appApi: {} as AppApiShape,
+      localSettingsApi: {} as LocalSettingsApiShape,
+      authApi: {} as AuthApiShape,
+      errorApi: {} as ErrorApiShape,
+      configApi: {
+        getServerPluginHandlers: () => [],
+      } as InjectedConfigApi,
+      projectApi: {} as ProjectApiShape,
+      electronApi: {} as ElectronApiShape,
+      browserApi: {} as BrowserApiShape,
+    })
+
+    ctx.update((s) => {
+      s.currentProject = tmpPath
+    })
+  })
+
   it('should generate files with ejs and preserve file structure', async () => {
     const target = path.join(tmpPath, 'test')
     const indexFileName = 'index.js'
-    const templateDir = path.join(__dirname, 'template-test')
+    const templateDir = path.join(__dirname, 'files', 'template-test')
 
     const action: Action = {
       templateDir,
@@ -129,7 +161,7 @@ describe('code-generator', () => {
 
     expect(fileContent).eq(expected.files[0].content)
 
-    expect(() => parse(fileContent)).not.throw()
+    expect(() => babelParse(fileContent)).not.throw()
   })
 
   it('should generate from component template', async () => {
@@ -179,12 +211,7 @@ describe('code-generator', () => {
 
     expect(fileContent).eq(expected.files[0].content)
 
-    expect(() => {
-      return parse(fileContent, {
-        sourceType: 'module',
-        plugins: ['jsx', 'typescript'],
-      })
-    }).not.throw()
+    expect(() => babelParse(fileContent)).not.throw()
   })
 
   it('should generate from story template', async () => {
@@ -239,9 +266,7 @@ describe('code-generator', () => {
 
     expect(fileContent).eq(expected.files[0].content)
 
-    expect(() => {
-      return parse(fileContent, { sourceType: 'module', plugins: ['jsx'] })
-    }).not.throw()
+    expect(() => babelParse(fileContent)).not.throw()
   })
 
   it('should generate from scaffoldIntegration', async () => {
@@ -261,12 +286,96 @@ describe('code-generator', () => {
       const shouldParse = ['js', 'ts'].some((ext) => res.file.endsWith(ext))
 
       if (shouldParse) {
-        expect(() => {
-          return parse(res.content, {
-            sourceType: 'module',
-          })
-        }).not.throw()
+        expect(() => babelParse(res.content)).not.throw()
       }
     }
+  })
+
+  it('should generate from react component', async () => {
+    const target = path.join(tmpPath, 'react-component')
+    const action: Action = {
+      templateDir: templates.component,
+      target,
+    }
+
+    sinon.stub(ctx.project.frameworkLoader, 'load').resolves(FRONTEND_FRAMEWORKS[0])
+
+    const newSpecCodeGenOptions = new SpecOptions(ctx, {
+      codeGenPath: path.join(__dirname, 'files', 'react', 'Button.jsx'),
+      codeGenType: 'component',
+      specFileExtension: '.cy',
+    })
+
+    let codeGenOptions = await newSpecCodeGenOptions.getCodeGenOptions()
+
+    const codeGenResult = await codeGenerator(action, codeGenOptions)
+
+    expect(() => babelParse(codeGenResult.files[0].content)).not.throw()
+  })
+
+  it('should generate from react story', async () => {
+    const target = path.join(tmpPath, 'react-component')
+    const action: Action = {
+      templateDir: templates.story,
+      target,
+    }
+
+    sinon.stub(ctx.project.frameworkLoader, 'load').resolves(FRONTEND_FRAMEWORKS[0])
+
+    const newSpecCodeGenOptions = new SpecOptions(ctx, {
+      codeGenPath: path.join(__dirname, 'files', 'react', 'Button.stories.jsx'),
+      codeGenType: 'story',
+      specFileExtension: '.cy',
+    })
+
+    let codeGenOptions = await newSpecCodeGenOptions.getCodeGenOptions()
+
+    const codeGenResult = await codeGenerator(action, codeGenOptions)
+
+    expect(() => babelParse(codeGenResult.files[0].content)).not.throw()
+  })
+
+  it('should generate from vue component', async () => {
+    const target = path.join(tmpPath, 'vue-component')
+    const action: Action = {
+      templateDir: templates.component,
+      target,
+    }
+
+    sinon.stub(ctx.project.frameworkLoader, 'load').resolves(FRONTEND_FRAMEWORKS[1])
+
+    const newSpecCodeGenOptions = new SpecOptions(ctx, {
+      codeGenPath: path.join(__dirname, 'files', 'vue', 'Button.vue'),
+      codeGenType: 'component',
+      specFileExtension: '.cy',
+    })
+
+    let codeGenOptions = await newSpecCodeGenOptions.getCodeGenOptions()
+
+    const codeGenResult = await codeGenerator(action, codeGenOptions)
+
+    expect(() => codeGenResult.files[0].content).not.throw()
+  })
+
+  it('should generate from vue story', async () => {
+    const target = path.join(tmpPath, 'vue-component')
+    const action: Action = {
+      templateDir: templates.story,
+      target,
+    }
+
+    sinon.stub(ctx.project.frameworkLoader, 'load').resolves(FRONTEND_FRAMEWORKS[1])
+
+    const newSpecCodeGenOptions = new SpecOptions(ctx, {
+      codeGenPath: path.join(__dirname, 'files', 'vue', 'Button.stories.js'),
+      codeGenType: 'story',
+      specFileExtension: '.cy',
+    })
+
+    let codeGenOptions = await newSpecCodeGenOptions.getCodeGenOptions()
+
+    const codeGenResult = await codeGenerator(action, codeGenOptions)
+
+    expect(() => babelParse(codeGenResult.files[0].content)).not.throw()
   })
 })
