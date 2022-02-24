@@ -145,7 +145,10 @@
       "rerun": "Re-run tests",
       "stop": "Stop tests",
       "toggle": "Toggle specs list"
-    }
+    },
+    "settings": "Settings",
+    "runs": "Runs",
+    "specs": "Specs"
   },
   "topNav": {
     "released": "Released",

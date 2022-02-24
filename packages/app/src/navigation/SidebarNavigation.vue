@@ -95,9 +95,9 @@ import SidebarNavigationHeader from './SidebarNavigationHeader.vue'
 const { t } = useI18n()
 
 const navigation = [
-  { name: 'Specs', icon: CodeIcon, href: '/specs' },
-  { name: 'Runs', icon: RunsIcon, href: '/runs' },
-  { name: 'Settings', icon: SettingsIcon, href: '/settings' },
+  { name: t('sideBar.specs'), icon: CodeIcon, href: '/specs' },
+  { name: t('sideBar.runs'), icon: RunsIcon, href: '/runs' },
+  { name: t('sideBar.settings'), icon: SettingsIcon, href: '/settings' },
 ]
 
 gql`

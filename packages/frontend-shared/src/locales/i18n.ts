@@ -18,7 +18,10 @@ export const VueI18n = createI18n()
 
 export function createI18n (opts = {}) {
   return _createI18n<MessageSchema, 'en-US'>({
-    locale: 'en-US',
+    fallbackLocale: 'en-US',
+    // Works in both electron and automated browsers
+    locale: window.navigator.language,
+    silentFallbackWarn: true,
     messages: compiledMessages,
     ...opts,
   })
