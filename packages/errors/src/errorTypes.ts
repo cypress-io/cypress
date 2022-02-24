@@ -3,7 +3,7 @@ import type { AllCypressErrors } from './errors'
 /**
  * A config validation result
 */
-export interface ConfigValidationError {
+export interface ConfigValidationFailureInfo {
   key: string
   type: string
   value: any

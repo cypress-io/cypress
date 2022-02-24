@@ -10,7 +10,7 @@ import { humanTime, logError, parseResolvedPattern, pluralize } from './errorUti
 import { errPartial, errTemplate, fmt, theme, PartialErr } from './errTemplate'
 import { stackWithoutMessage } from './stackUtils'
 
-import type { ClonedError, ConfigValidationError, CypressError, ErrTemplateResult, ErrorLike } from './errorTypes'
+import type { ClonedError, ConfigValidationFailureInfo, CypressError, ErrTemplateResult, ErrorLike } from './errorTypes'
 
 const ansi_up = new AU()
 
@@ -695,7 +695,7 @@ export const AllCypressErrors = {
       ${fmt.highlight(validationMsg)}`
   },
   // TODO: make this relative path, not absolute
-  CONFIG_VALIDATION_ERROR: (fileType: 'configFile' | 'pluginsFile' | null, filePath: string | null, validationResult: ConfigValidationError) => {
+  CONFIG_VALIDATION_ERROR: (fileType: 'configFile' | 'pluginsFile' | null, filePath: string | null, validationResult: ConfigValidationFailureInfo) => {
     const { key, type, value, list } = validationResult
 
     if (!fileType) {

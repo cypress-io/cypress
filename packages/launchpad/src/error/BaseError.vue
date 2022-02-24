@@ -16,7 +16,7 @@
 
       <slot name="message">
         <Alert
-          :title="baseError.title ?? 'Error'"
+          :title="baseError.errorName"
           status="error"
           body-class="px-0px bg-red-50"
           alert-class="bg-red-50"
@@ -120,11 +120,12 @@ import ErrorCodeFrame from './ErrorCodeFrame.vue'
 gql`
 fragment BaseError on ErrorWrapper {
   title
-  description
+  errorName
+  errorStack
   errorType
+  description
   isRetryable
   isUserCodeError
-  errorStack
   fileToOpen {
     id
     ...ErrorCodeFrame

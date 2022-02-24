@@ -1,6 +1,5 @@
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 
-// TODO: add when we land the lifecycle management
 describe('Config files error handling', () => {
   beforeEach(() => {
     cy.scaffoldProject('pristine')
@@ -90,5 +89,43 @@ describe('Config files error handling', () => {
     cy.get('body').should('contain.text', 'Something went wrong')
     cy.get('body').should('contain.text', 'It looks like there\'s some issues that need to be resolved before we continue.')
     cy.findByText('Error Loading Config')
+  })
+})
+
+describe('Launchpad: Error System Tests', () => {
+  it('Handles an error thrown from the root of the config file', () => {
+    cy.scaffoldProject('plugins-root-sync-error')
+    cy.openProject('plugins-root-sync-error', ['--e2e'])
+    cy.visitLaunchpad()
+    cy.get('h1').should('contain', 'Error')
+  })
+
+  it('Handles an error thrown asynchronously in the root of the config', () => {
+    cy.scaffoldProject('plugins-root-async-error')
+    cy.openProject('plugins-root-async-error', ['--e2e'])
+    cy.visitLaunchpad()
+    cy.get('h1').should('contain', 'Error')
+  })
+
+  it('Handles an error thrown asynchronously in the root of the config', () => {
+    cy.scaffoldProject('plugins-function-sync-error')
+    cy.openProject('plugins-function-sync-error', ['--e2e'])
+    cy.visitLaunchpad()
+    cy.get('h1').should('contain', 'Error')
+  })
+
+  it('Handles an error thrown while validating config', () => {
+    cy.scaffoldProject('config-with-invalid-browser')
+    cy.openProject('config-with-invalid-browser', ['--e2e'])
+    cy.visitLaunchpad()
+    cy.get('h1').should('contain', 'Error')
+    cy.get('[data-cy="stack-open-false"]')
+  })
+
+  it('Handles an error thrown from the tasks', () => {
+    cy.scaffoldProject('plugins-function-sync-error')
+    cy.openProject('plugins-function-sync-error', ['--e2e'])
+    cy.visitLaunchpad()
+    cy.get('h1').should('contain', 'Error')
   })
 })

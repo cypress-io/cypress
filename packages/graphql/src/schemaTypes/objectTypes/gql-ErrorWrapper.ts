@@ -12,7 +12,7 @@ export const ErrorWrapper = objectType({
     t.nonNull.string('title', {
       description: 'Formatted errorType',
       resolve (source) {
-        return source.title || str.humanize(source.cypressError.type)
+        return source.title || str.titleize(str.humanize(source.cypressError.type))
       },
     })
 
@@ -45,7 +45,7 @@ export const ErrorWrapper = objectType({
     t.nonNull.boolean('isUserCodeError', {
       description: 'Whether the error came from user code, can be used to determine whether to open a stack trace by default',
       resolve (source) {
-        return !source.cypressError.originalError?.isCypressErr
+        return Boolean(source.cypressError.originalError && !source.cypressError.originalError?.isCypressErr)
       },
     })
 
