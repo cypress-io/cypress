@@ -71,6 +71,12 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
         domain,
       })
 
+      let onQueueFinished
+
+      const cleanup = () => {
+        communicator.off('queue:finished', onQueueFinished)
+      }
+
       return new Bluebird((resolve, reject) => {
         const _resolve = ({ subject, unserializableSubjectType }) => {
           resolve(unserializableSubjectType ? createUnserializableSubjectProxy(unserializableSubjectType) : subject)
@@ -85,16 +91,12 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
           reject(err)
         }
 
-        const onQueueFinished = ({ err, subject, unserializableSubjectType }) => {
+        onQueueFinished = ({ err, subject, unserializableSubjectType }) => {
           if (err) {
             return _reject(err)
           }
 
           _resolve({ subject, unserializableSubjectType })
-        }
-
-        const cleanup = () => {
-          communicator.off('queue:finished', onQueueFinished)
         }
 
         communicator.once('sync:config', ({ config, env }) => {
@@ -108,16 +110,12 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
           sendReadyForDomain()
 
           if (err) {
-            cleanup()
-
             return _reject(err)
           }
 
           // if there are not commands and a synchronous return from the callback,
           // this resolves immediately
           if (finished || subject || unserializableSubjectType) {
-            cleanup()
-
             _resolve({ subject, unserializableSubjectType })
           }
         })
@@ -135,51 +133,54 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
         }
 
         // fired once the spec bridge is set up and ready to receive messages
-        communicator.once('bridge:ready', () => {
-          // now that the spec bridge is ready, instantiate Cypress with the current app config and environment variables for initial sync when creating the instance
-          communicator.toSpecBridge('initialize:cypress', {
-            config: preprocessConfig(Cypress.config()),
-            env: preprocessEnv(Cypress.env()),
-          })
-
-          state('readyForMultiDomain', true)
-
-          // once the secondary domain page loads, send along the
-          // user-specified callback to run in that domain
-          try {
-            communicator.toSpecBridge('run:domain:fn', {
-              data,
-              fn: callbackFn.toString(),
-              // let the spec bridge version of Cypress know if config read-only values can be overwritten since window.top cannot be accessed in cross-origin iframes
-              // this should only be used for internal testing. Cast to boolean to guarantee serialization
-              // @ts-ignore
-              skipConfigValidation: !!window.top.__cySkipValidateConfig,
-              state: {
-                viewportWidth: Cypress.state('viewportWidth'),
-                viewportHeight: Cypress.state('viewportHeight'),
-                runnable: serializeRunnable(Cypress.state('runnable')),
-                duringUserTestExecution: Cypress.state('duringUserTestExecution'),
-                hookId: state('hookId'),
-              },
+        communicator.once('bridge:ready', (_data, bridgeReadyDomain) => {
+          if (bridgeReadyDomain === domain) {
+            // now that the spec bridge is ready, instantiate Cypress with the current app config and environment variables for initial sync when creating the instance
+            communicator.toSpecBridge(domain, 'initialize:cypress', {
               config: preprocessConfig(Cypress.config()),
               env: preprocessEnv(Cypress.env()),
             })
-          } catch (err: any) {
-            const wrappedErr = $errUtils.errByPath('switchToDomain.run_domain_fn_errored', {
-              error: err.message,
-            })
 
-            cleanup()
-            reject(wrappedErr)
-          } finally {
+            state('readyForMultiDomain', true)
+
+            // once the secondary domain page loads, send along the
+            // user-specified callback to run in that domain
+            try {
+              communicator.toSpecBridge(domain, 'run:domain:fn', {
+                data,
+                fn: callbackFn.toString(),
+                // let the spec bridge version of Cypress know if config read-only values can be overwritten since window.top cannot be accessed in cross-origin iframes
+                // this should only be used for internal testing. Cast to boolean to guarantee serialization
+                // @ts-ignore
+                skipConfigValidation: !!window.top.__cySkipValidateConfig,
+                state: {
+                  viewportWidth: Cypress.state('viewportWidth'),
+                  viewportHeight: Cypress.state('viewportHeight'),
+                  runnable: serializeRunnable(Cypress.state('runnable')),
+                  duringUserTestExecution: Cypress.state('duringUserTestExecution'),
+                  hookId: state('hookId'),
+                },
+                config: preprocessConfig(Cypress.config()),
+                env: preprocessEnv(Cypress.env()),
+              })
+            } catch (err: any) {
+              const wrappedErr = $errUtils.errByPath('switchToDomain.run_domain_fn_errored', {
+                error: err.message,
+              })
+
+              reject(wrappedErr)
+            } finally {
             // @ts-ignore
-            cy.isAnticipatingMultiDomain(false)
+              cy.isAnticipatingMultiDomain(false)
+            }
           }
         })
 
         // this signals to the runner to create the spec bridge for
         // the specified domain
-        communicator.emit('expect:domain', domain)
+        Cypress.emit('expect:domain', domain)
+      }).finally(() => {
+        cleanup()
       })
     },
   })
