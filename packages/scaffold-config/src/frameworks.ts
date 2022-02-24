@@ -11,6 +11,7 @@ import {
   STORYBOOK_VUE,
   WEBPACK_DEV_SERVER_4,
   BUNDLER_WEBPACK_4,
+  CYPRESS_WEBPACK,
 } from './constants'
 
 export const FRONTEND_FRAMEWORKS = [
@@ -65,7 +66,7 @@ export const FRONTEND_FRAMEWORKS = [
     name: 'Vue CLI (Vue 2)',
     family: 'template',
     supportedBundlers: ['webpack'],
-    packages: [CYPRESS_VUE_2],
+    packages: [CYPRESS_VUE_2, CYPRESS_WEBPACK],
     defaultPackagePath: null,
     glob: '*.vue',
     detectors: [
@@ -119,7 +120,7 @@ export const FRONTEND_FRAMEWORKS = [
     name: 'Vue CLI (Vue 3)',
     family: 'template',
     supportedBundlers: ['webpack'],
-    packages: [CYPRESS_VUE_3],
+    packages: [CYPRESS_VUE_3, CYPRESS_WEBPACK],
     defaultPackagePath: null,
     glob: '*.vue',
     detectors: [
@@ -447,6 +448,7 @@ export const FRONTEND_FRAMEWORKS = [
     supportedBundlers: ['webpack'],
     packages: [
       CYPRESS_REACT_LATEST,
+      CYPRESS_WEBPACK,
       WEBPACK_DEV_SERVER_4,
       HTML_WEBPACK_PLUGIN_4,
     ],
@@ -473,6 +475,7 @@ export const FRONTEND_FRAMEWORKS = [
     supportedBundlers: ['webpack'],
     packages: [
       CYPRESS_VUE_2,
+      CYPRESS_WEBPACK,
       HTML_WEBPACK_PLUGIN_4,
     ],
     defaultPackagePath: null,
