@@ -1,4 +1,5 @@
 const _ = require('lodash')
+const arch = require('arch')
 const os = require('os')
 const path = require('path')
 const chalk = require('chalk')
@@ -15,7 +16,6 @@ const unzip = require('./unzip')
 const logger = require('../logger')
 const { throwFormErrorText, errors } = require('../errors')
 const verbose = require('../VerboseRenderer')
-const arch = require('arch')
 
 const { buildInfo, version } = require('../../package.json')
 
