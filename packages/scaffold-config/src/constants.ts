@@ -76,6 +76,14 @@ export const BUNDLER_WEBPACK_4 = {
   description: 'Webpack is a module bundler',
 } as const
 
+export const BUNDLER_WEBPACK_5 = {
+  type: 'webpack',
+  name: 'Webpack',
+  package: 'webpack',
+  installer: 'webpack@^5.0.0',
+  description: 'Webpack is a module bundler',
+} as const
+
 export const BUNDLER_VITE = {
   type: 'vite',
   name: 'Vite',
@@ -86,6 +94,7 @@ export const BUNDLER_VITE = {
 
 export const BUNDLERS = [
   BUNDLER_WEBPACK_4,
+  BUNDLER_WEBPACK_5,
   BUNDLER_VITE,
 ]
 
@@ -94,6 +103,14 @@ export const HTML_WEBPACK_PLUGIN_4 = {
   name: 'HTML Webpack Plugin',
   package: 'html-webpack-plugin',
   installer: 'html-webpack-plugin@^4.0.0',
+  description: 'The HtmlWebpackPlugin simplifies creation of HTML files to serve your webpack bundles',
+} as const
+
+export const HTML_WEBPACK_PLUGIN_5 = {
+  type: 'other',
+  name: 'HTML Webpack Plugin',
+  package: 'html-webpack-plugin',
+  installer: 'html-webpack-plugin@^5.0.0',
   description: 'The HtmlWebpackPlugin simplifies creation of HTML files to serve your webpack bundles',
 } as const
 
@@ -122,4 +139,5 @@ export const DEPENDENCIES = [
   ...DEV_SERVERS,
   ...BUNDLERS,
   HTML_WEBPACK_PLUGIN_4,
+  HTML_WEBPACK_PLUGIN_5,
 ] as const
