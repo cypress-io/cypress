@@ -51,6 +51,18 @@ describe('detect', () => {
     expect(actual.bundler).to.eq(undefined)
   })
 
+  ;['10', '11', '12'].forEach((v) => {
+    it(`Next.js v${v}`, async () => {
+      const pkg = await scaffoldMigrationProject('nextjs-unconfigured')
+      const actual = detect({ ...pkg, dependencies: {
+        'next': v,
+      } })
+
+      expect(actual.framework.type).to.eq('nextjs')
+      expect(actual.bundler).to.eq(undefined)
+    })
+  })
+
   it(`no framework or library`, async () => {
     const actual = detect({})
 

@@ -12,6 +12,7 @@ export const PACKAGES_DESCRIPTIONS: Record<AllPackagePackages, string> = {
   '@storybook/testing-react': 'Testing utilities that allow you to reuse your stories in your unit tests',
   '@storybook/testing-vue3': 'Testing utilities that allow you to reuse your stories in your unit tests',
   'webpack-dev-server': 'Webpack Dev Server to bundle and run your tests',
+  'webpack': 'Webpack is a module bundler',
   'html-webpack-plugin': 'The HtmlWebpackPlugin simplifies creation of HTML files to serve your webpack bundles',
 } as const
 
@@ -74,6 +75,17 @@ export const WEBPACK_DEV_SERVER_4 = {
   installer: 'webpack-dev-server@^4.0.0',
 } as const
 
+export const WEBPACK_4 = {
+  type: 'bundler',
+  name: 'Webpack',
+  package: 'webpack',
+  installer: 'webpack@^4.0.0',
+} as const
+
+export const BUNDLERS = [
+  WEBPACK_4,
+]
+
 export const HTML_WEBPACK_PLUGIN_4 = {
   type: 'other',
   name: 'HTML Webpack Plugin',
@@ -103,5 +115,6 @@ export const DEPENDENCIES = [
   ...BUNDLER_DEPS,
   ...STORYBOOK_DEPS,
   ...DEV_SERVERS,
+  ...BUNDLERS,
   HTML_WEBPACK_PLUGIN_4,
 ] as const

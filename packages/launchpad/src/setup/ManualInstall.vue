@@ -9,7 +9,7 @@
     <ul>
       <li
         v-for="dep in props.gql.wizard.packagesToInstall"
-        :key="dep.id"
+        :key="dep.package"
         class="border-b border-b-gray-100 py-16px last-of-type:border-b-0"
       >
         <i-cy-status-download-done_x24
