@@ -2,7 +2,7 @@ import { EventEmitter } from 'events'
 import { RootRunnable } from '../../src/runnables/runnables-store'
 import { addCommand } from '../support/utils'
 
-describe('commands', { viewportWidth: 400, viewportHeight: 500 }, () => {
+describe('commands', { viewportWidth: 400, viewportHeight: 700 }, () => {
   let runner: EventEmitter
   let runnables: RootRunnable
   const inProgressStartedAt = (new Date(2000, 0, 1)).toISOString()
@@ -43,8 +43,144 @@ describe('commands', { viewportWidth: 400, viewportHeight: 500 }, () => {
     cy.contains('http://localhost:3000') // ensure test content has loaded
   })
 
-  it('displays all the commands', () => {
-    cy.get('.command').should('have.length', 10)
+  it.only('displays all the commands', () => {
+    addCommand(runner, {
+      id: 102,
+      name: 'get',
+      message: '#element',
+      state: 'passed',
+      timeout: 4000,
+      wallClockStartedAt: inProgressStartedAt,
+    })
+
+    addCommand(runner, {
+      id: 124,
+      name: 'within',
+      state: 'passed',
+      type: 'child',
+      timeout: 4000,
+      wallClockStartedAt: inProgressStartedAt,
+    })
+
+    addCommand(runner, {
+      id: 125,
+      name: 'get',
+      message: '#my_element',
+      state: 'passed',
+      timeout: 4000,
+      group: 124,
+      wallClockStartedAt: inProgressStartedAt,
+    })
+
+    addCommand(runner, {
+      id: 129,
+      name: 'within',
+      state: 'passed',
+      type: 'child',
+      group: 124,
+      timeout: 4000,
+      wallClockStartedAt: inProgressStartedAt,
+    })
+
+    addCommand(runner, {
+      id: 130,
+      name: 'get',
+      message: '#my_element that _has_ a really long message to show **wrapping** works as expected',
+      state: 'passed',
+      timeout: 4000,
+      groupLevel: 1,
+      group: 129,
+      wallClockStartedAt: inProgressStartedAt,
+    })
+
+    addCommand(runner, {
+      id: 1229,
+      name: 'within',
+      state: 'passed',
+      type: 'child',
+      group: 130,
+      groupLevel: 1,
+      timeout: 4000,
+      wallClockStartedAt: inProgressStartedAt,
+    })
+
+    addCommand(runner, {
+      id: 1311,
+      name: 'get',
+      message: '#my_element_nested',
+      state: 'passed',
+      timeout: 4000,
+      groupLevel: 2,
+      group: 1229,
+      wallClockStartedAt: inProgressStartedAt,
+    })
+
+    addCommand(runner, {
+      id: 1291,
+      name: 'assert',
+      type: 'child',
+      message: 'has class named .omg',
+      state: 'passed',
+      timeout: 4000,
+      group: 1229,
+      groupLevel: 2,
+      wallClockStartedAt: inProgressStartedAt,
+    })
+
+    addCommand(runner, {
+      id: 1291,
+      name: 'log',
+      message: 'do something else',
+      state: 'passed',
+      timeout: 4000,
+      group: 130,
+      groupLevel: 1,
+      wallClockStartedAt: inProgressStartedAt,
+    })
+
+    addCommand(runner, {
+      id: 135,
+      name: 'and',
+      type: 'child',
+      message: 'has class named .lets-roll',
+      state: 'passed',
+      timeout: 4000,
+      group: 124,
+      wallClockStartedAt: inProgressStartedAt,
+    })
+
+    const indicators = ['successful', 'pending', 'aborted', 'bad']
+
+    indicators.forEach((indicator, index) => {
+      addCommand(runner, {
+        id: 1600 + index,
+        name: 'xhr',
+        event: true,
+        state: 'passed',
+        timeout: 4000,
+        renderProps: {
+          indicator,
+          message: `${indicator} indicator`,
+        },
+        wallClockStartedAt: inProgressStartedAt,
+      })
+    })
+
+    const assertStates = ['passed', 'pending', 'failed']
+
+    assertStates.forEach((state, index) => {
+      addCommand(runner, {
+        id: 1700 + index,
+        name: 'assert',
+        type: 'child',
+        message: 'expected **element** to have length of **16** but got **12** instead',
+        state,
+        timeout: 4000,
+        wallClockStartedAt: inProgressStartedAt,
+      })
+    })
+
+    cy.get('.command23', { timeout: 9000 }).should('have.length', 25)
 
     cy.percySnapshot()
   })

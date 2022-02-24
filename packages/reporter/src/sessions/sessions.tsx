@@ -34,7 +34,6 @@ class Sessions extends React.Component<SessionsProps> {
           'no-agents': !_.size(model),
         })}
       >
-
         <div className='instruments-container sessions-container'>
           <ul className='hooks-container'>
             <li className='hook-item'>
@@ -51,14 +50,16 @@ class Sessions extends React.Component<SessionsProps> {
                 contentClass='instrument-content'
               >
                 <div>
-                  {_.map(model, (sess) => {
-                    return (<FlashOnClick
+                  {_.map(model, (sess) => (
+                    <FlashOnClick
                       key={sess.name}
                       message='Printed output to your console'
                       onClick={() => this.printToConsole(sess.name)}
                       shouldShowMessage={() => true}
-                    ><div className="session-item" >{sess.name}</div></FlashOnClick>)
-                  })}
+                    >
+                      <div className="session-item" >{sess.name}</div>
+                    </FlashOnClick>
+                  ))}
                 </div>
               </Collapsible>
             </li>

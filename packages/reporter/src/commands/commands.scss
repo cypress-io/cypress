@@ -14,77 +14,80 @@
     cursor: default;
     color: $gray-400;
     min-height: 20px;
-    margin: 0;
+    // margin: 0;
   }
 
-  .command-scaled {
+  .cmd-scaled {
     font-size: 85%;
     line-height: 14px;
   }
 
   // System Command Styles
-  .command-type-system.command-is-event {
+  .cmd-type-system.cmd-is-event {
     user-select: none;
     font-style: unset;
 
-    .command-method,
-    .command-message {
+    .cmd-method,
+    .cmd-message {
       color: $gray-200;
       font-weight: 700;
     }
   }
 
   // Event Styles
-  .command-is-event {
+  .cmd-is-event {
     font-style: italic;
 
-    .command-method,
-    .command-message {
+    .cmd-method,
+    .cmd-message {
       color: $gray-500;
     }
   }
 
   // Child Styles
-  .command-type-child {
-    .command-method {
+  .cmd-type-child {
+    .cmd-method {
       &:before {
         float: left;
         content: "-";
         margin-right: 2px;
-        padding-left: 5px;
+        // padding-left: 5px;
       }
     }
   }
 
-  .command-wrapper {
+  .cmd-wrapper {
     background-color: $reporter-section-background;
     color: $gray-400;
+    display: flex;
     min-height: 20px;
-    padding: 2px 3px 0 10px;
+    padding-right: 2px;
+    // padding: 3px 5px 0;
+    // padding: 3px 0 0;
 
     &:hover {
       background-color: $gray-900;
 
-      .command-pin + .command-number {
+      .cmd-pin + .cmd-number {
         display: none;
       }
   
-      .command-pin {
+      .cmd-pin {
         display: block;
       }
 
-      .command-expander > path {
-        stroke: $gray-500;
+      .cmd-expander > path {
+        stroke: $gray-700;
       }
     }
 
-    .command-wrapper-text {
+    .cmd-wrapper-text {
       display: flex;
       flex-wrap: wrap;
-      padding: 2px 5px 0;
+      // padding: 2px 5px 0;
     }
 
-    .command-interceptions {
+    .cmd-interceptions {
       font-style: normal;
 
       .status {
@@ -92,15 +95,15 @@
       }
     }
 
-    .command-alias,
-    .command-interceptions {
+    .cmd-alias,
+    .cmd-interceptions {
       border-radius: 10px;
       color: $gray-400;
       padding: 0 5px;
       display: inline-block;
 
       &.route {
-        background-color: $yellow-medium;
+        background-color: $teal-500;
       }
 
       &.dom {
@@ -135,8 +138,8 @@
     }
 
     .num-children,
-    .command-alias-count,
-    .command-interceptions-count {
+    .cmd-alias-count,
+    .cmd-interceptions-count {
       background-color: $orange-700 !important;
       border-radius: 5px;
       color: $gray-400;
@@ -152,42 +155,56 @@
       padding: 3px 5px 3px 5px;
     }
 
-    .command-alias-count,
-    .command-interceptions-count {
+    .cmd-alias-count,
+    .cmd-interceptions-count {
       border-radius: 0 10px 10px 0;
       padding: 2px 5px;
     }
 
-    .command-progress {
+    .cmd-progress {
       height: 2px;
     }
   }
 
-  .command-child-container {
-    margin-left: 10px;
-  }
+  // .cmd-child-container {
+  //   margin-left: 10px;
+  // }
 
-  .command-number-column {
+  .cmd-number-column {
     flex-shrink: 0;
     min-height: 1px; // because some numbers are empty
-    padding-right: 10px;
+    // padding-right: 10px;
+    padding-top: 3px;
     text-align: right;
-    width: 25px;
+    width: 24px;
 
-    .command-number {
+    .cmd-number {
       color: $gray-700;
     }
   }
 
-  .command-message {
-    flex-grow: 2;
+  .cmd-pin-target.cmd-group {
+    border-left: 1px dotted $gray-600;
+    padding-left: 12px;
+
+    .cmd-group-block {
+      border-left: 1px dotted $gray-600;
+      width: 12px;
+      min-height: 20px;
+    }
+  }
+
+  .cmd-info {
+    display: flex;
+    padding-top: 2px;
     margin-left: 0;
     overflow: hidden;
-    white-space: nowrap;
+    width: 100%;
 
-    > span {
-      align-items: center;
+    .cmd-aliases,
+    .cmd-message {
       display: flex;
+      flex-grow: 2;
 
       .fa-circle {
         padding: 4px;
@@ -195,49 +212,51 @@
         display: inline-block;
       }
 
-      .fa-circle.command-message-indicator-successful {
-        color: $pending;
+      .fa-circle.cmd-message-indicator-successful {
+        color: $jade-400;
       }
 
-      .fa-circle.command-message-indicator-aborted {
-        color: $fail;
+      .fa-circle.cmd-message-indicator-aborted {
+        color: $orange-400;
       }
 
-      .fa-circle.command-message-indicator-bad {
-        color: $orange-500;
+      .fa-circle.cmd-message-indicator-bad {
+        color: $gray-500
       }
 
-      .fa-circle.command-message-indicator-pending {
-        color: $gray-500;
+      .fa-circle.cmd-message-indicator-pending {
+        color: $gray-400;
       }
     }
   }
 
-  .command-message-text {
+  .cmd-message-text {
     display: block;
     flex-grow: 2;
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
-  .command-method {
-    padding: 1px 2px 0;
-    display: inline-block;
+  .cmd-method {
+    // padding: 1px 2px 0;
+    // display: inline-block;
     font-size: 11px;
-    min-width: 80px;
+    margin-right: 12px;
+    // min-width: 80px;
     font-weight: 600;
     color: $gray-200;
   }
 
   // Command State Styles
-  .command-state-pending {
+  .cmd-state-pending {
     border-left: 2px solid $indigo-800;
     background-color: $gray-900;
     cursor: default;
     color: $indigo-200;
+    // padding: 2px 3px 0 8px;
 
-    .command-number-column {
-      .command-pin {
+    .cmd-number-column {
+      .cmd-pin {
         display: none;
       }
 
@@ -251,7 +270,7 @@
       }
     }
 
-    .command-progress > span {
+    .cmd-progress > span {
       animation-fill-mode: forwards;
       animation-iteration-count: 1;
       animation-name: progress-bar;
@@ -271,26 +290,38 @@
     }
   }
 
-  .command-state-failed {
+  .cmd-state-passed {
+    // margin-left: 2px;
+    border-left: 2px solid $reporter-section-background;
+
+    &:hover {
+      border-left: 2px solid $gray-900;
+    }
+  }
+
+  .cmd-state-failed {
     border-left: 2px solid $fail;
     background-color: $err-header-background;
     color: $err-header-text;
+    // padding: 2px 3px 0 0;
+    // padding: 2px 3px 0 8px;
 
     &:hover {
       background: rgba($red-400, 0.3);
     }
   }
 
-  .command-state-warn {
+  .cmd-state-warn {
     font-style: unset;
     background-color: $warn-background;
     border-left: 2px solid $orange-700;
+    padding: 2px 3px 0 8px;
 
     &:hover {
       background-color: $warn-header-background;
     }
 
-    .command-method {
+    .cmd-method {
       color: $warn-text;
     }
   }
@@ -303,8 +334,8 @@
   }
 
   // Custom Styles for Specific Commands
-  .command-name-assert {
-    .command-method {
+  .cmd-name-assert {
+    .cmd-method {
       span {
         border-radius: 2px;
         padding: 0 3px;
@@ -314,7 +345,7 @@
       }
     }
 
-    .command-message {
+    .cmd-message {
       color: $gray-200;
 
       strong {
@@ -323,19 +354,21 @@
       }
     }
 
-    .command-message-text {
+    .cmd-message-text {
       white-space: normal;
     }
 
-    .command-state-pending {
-      .command-method {
+    .cmd-state-pending {
+      .cmd-method {
+        color: $pending;
+
         span {
           background-color: $pending;
           color: $black;
         }
       }
 
-      .command-message {
+      .cmd-message {
         color: $pending;
 
         strong {
@@ -344,15 +377,17 @@
       }
     }
 
-    .command-state-failed {
-      .command-method {
+    .cmd-state-failed {
+      .cmd-method {
+        color: $fail;
+
         span {
           background-color: $fail;
           color: $black;
         }
       }
 
-      .command-message {
+      .cmd-message {
         color: $fail;
 
         strong {
@@ -361,8 +396,8 @@
       }
     }
 
-    .command-state-passed {
-      .command-method {
+    .cmd-state-passed {
+      .cmd-method {
         color: $pass;
 
         span {
@@ -371,7 +406,7 @@
         }
       }
 
-      .command-message {
+      .cmd-message {
         color: $jade-300;
 
         strong {
@@ -381,14 +416,19 @@
     }
   }
 
-  .command-name-log,
-  .command-name-get,
-  .command-name-download {
-    // we're wrapping the text, so override command-scaled
-    font-size: 100%;
-    line-height: 18px;
+  .cmd-pin-target {
+    width: 100%;
+    padding-top: 1px;
+  }
 
-    .command-message-text {
+  // .cmd-name-log,
+  // .cmd-name-get,
+  // .cmd-name-download {
+    // we're wrapping the text, so override cmd-scaled
+    // font-size: 100%;
+    // line-height: 18px;
+
+    .cmd-message-text {
       white-space: initial;
       word-wrap: break-word;
       line-height: 1.5;
@@ -396,25 +436,29 @@
       -webkit-line-clamp: 50;
       -webkit-box-orient: vertical;
     }
-  }
+  // }
 
   // Styles for Uncaught Exception
-  .command-name-uncaught-exception {
+  .cmd-name-uncaught-exception {
     // need extra spacing between (uncaught exception) and the error message
-    .command-message {
+    .cmd-info {
       margin-left: 5px;
     }
   }
 
-  .command-controls {
+  .cmd-controls {
+    // display: flex;
+    flex-grow: unset;
+  
     svg {
       color: $gray-600;
       cursor: pointer;
-      margin: 0px 2px;
+      // margin: 0px 2px;
+      vertical-align: top;
     }
 
-    .command-alias,
-    .command-interceptions {
+    .cmd-alias,
+    .cmd-interceptions {
       font-family: $open-sans;
       font-size: 10px;
       line-height: 1.75;
@@ -424,25 +468,24 @@
     label {
       font-size: 85%;
     }
+
+    .cmd-invisible {
+      display: inline-block;
+      margin-left: 5px;
+      margin-right: 0;
+    }
   }
 
-  .command-invisible {
-    display: inline-block;
-    margin-left: 5px;
-    margin-right: 0;
-  }
-
-  .command-error {
+  .cmd-error {
     font-style: normal;
   }
 
-  .command-pin {
-    color: $gray-500;
+  .cmd-pin {
     display: none;
     flex-shrink: 0;
     font-size: 14px;
     line-height: 1;
-    margin-right: 10px;
+    margin-left: 10px;
     outline: none;
     padding: 2px 0 0;
     text-align: right;
@@ -453,12 +496,14 @@
     }
   }
 
-  .command-expander-column {
-    padding-right: 10px;
-    padding-left: 5px;
+  .cmd-expander-column {
+    flex-shrink: 0;
+    padding-left: 10px;
+    padding-right: 5px;
+    padding-top: 3px;
     width: 25px;
-    
-    .command-expander {
+
+    .cmd-expander {
       color: $gray-500;
       transform: rotate(-90deg);
       transition: transform 150ms ease-out;
@@ -468,17 +513,17 @@
       }
     }
 
-    .command-expander-is-open {
+    .cmd-expander-is-open {
       transform: rotate(0deg);
     }
   }
 
-  .command-has-snapshot:hover,
-  .command-has-console-props {
+  .cmd-has-snapshot:hover,
+  .cmd-has-console-props {
     cursor: pointer;
   }
 
-  .command-is-pinned {
+  .cmd-is-pinned {
     background: $indigo-1000;
     border-left: 2px solid $pinned;
 
@@ -489,9 +534,10 @@
 
     &:hover {
       background: $indigo-900;
+      border-left: 2px solid $pinned;
     }
 
-    .command-pin {
+    .cmd-pin {
       color: $pinned;
       display: block;
   
@@ -500,7 +546,7 @@
       }
     }
 
-    .command-pin + .command-number {
+    .cmd-pin + .cmd-number {
       display: none
     }
   }
@@ -533,7 +579,7 @@
   // utilizing element size queries: https://github.com/marcj/css-element-queries
   // styles take effect when width is greater than or equal to the specified amount
   &[min-width~="300px"] {
-    .command-wrapper-text {
+    .cmd-wrapper-text {
       flex-wrap: nowrap;
     }
   }

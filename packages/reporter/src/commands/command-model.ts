@@ -32,6 +32,7 @@ export interface CommandProps extends InstrumentProps {
   isStudio?: boolean
   showError?: boolean
   group?: number
+  groupLevel?: number
   hasSnapshot?: boolean
   hasConsoleProps?: boolean
 }
@@ -51,6 +52,7 @@ export default class Command extends Instrument {
   @observable isStudio: boolean
   @observable showError?: boolean = false
   @observable group?: number
+  @observable groupLevel?: number
   @observable hasSnapshot?: boolean
   @observable hasConsoleProps?: boolean
   @observable _isOpen: boolean|null = null
@@ -66,6 +68,11 @@ export default class Command extends Instrument {
     // and one to include self so it's the total number of same events
     return this.event ? this.children.length + 1 : this.children.length
   }
+
+  // @computed get groupLevel () {
+  //   // cap the level of nesting supported in the UI
+  //   return this.groupLevel === undefined ? 0 : this.groupLevel < 6 ? this.groupLevel : 6
+  // }
 
   @computed get isOpen () {
     if (!this.hasChildren) return null
@@ -106,6 +113,7 @@ export default class Command extends Instrument {
     this.group = props.group
     this.hasSnapshot = !!props.hasSnapshot
     this.hasConsoleProps = !!props.hasConsoleProps
+    this.groupLevel = props.groupLevel || 0
 
     this._checkLongRunning()
   }
