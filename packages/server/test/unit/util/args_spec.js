@@ -368,9 +368,11 @@ describe('lib/util/args', () => {
       const options = this.setup('--config', 'foo=bar,port=1111,supportFile=path/to/support_file')
 
       expect(options.config.port).to.eq(1111)
-      expect(options.config.supportFile).to.eq('path/to/support_file')
+      expect(options.config.e2e.supportFile).to.eq('path/to/support_file')
+      expect(options.config.component.supportFile).to.eq('path/to/support_file')
 
       expect(options).not.to.have.property('foo')
+      expect(options.config).not.to.have.property('supportFile')
     })
 
     it('overrides port in config', function () {
