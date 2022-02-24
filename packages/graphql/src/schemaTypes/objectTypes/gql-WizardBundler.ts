@@ -21,13 +21,13 @@ export const WizardBundler = objectType({
       description: 'The name of the framework',
     })
 
+    t.nonNull.string('name', {
+      description: 'Display name of the bundler',
+    })
+
     t.nonNull.field('package', {
       type: SupportedPackageEnum,
       description: 'Name of package on npm',
-    })
-
-    t.nonNull.string('name', {
-      description: 'Display name of the bundler',
     })
   },
 })

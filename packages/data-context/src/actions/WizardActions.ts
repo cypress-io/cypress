@@ -213,7 +213,7 @@ export class WizardActions {
 
       const { chosenBundler, chosenFramework } = this.ctx.wizard
 
-      assert(chosenBundler && chosenFramework && chosenLanguage)
+      assert(chosenFramework && chosenLanguage && chosenBundler)
 
       return chosenFramework.config[chosenLanguage.type](chosenBundler.type)
     }
