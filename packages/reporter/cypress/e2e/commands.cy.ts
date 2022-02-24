@@ -256,7 +256,7 @@ describe('commands', () => {
   })
 
   context('event duplicates', () => {
-    it('collapses consecutive duplicate events into one', () => {
+    it('collapses consecutive duplicate events into group', () => {
       cy.get('.command-name-xhr').should('have.length', 3)
     })
 
@@ -266,12 +266,16 @@ describe('commands', () => {
       .find('.num-children')
       .should('be.visible')
       .should('have.text', '4')
+      .trigger('mouseover')
+      .get('.cy-tooltip').should('have.text', 'This event occurred 4 times')
     })
 
     it('expands all events after clicking arrow', () => {
       cy.contains('GET --- /dup').closest('.command').find('.command-child-container').should('not.exist')
-      cy.contains('GET --- /dup').closest('.command')
-      .find('.command-expander').click()
+      cy.contains('GET --- /dup')
+      .closest('.command')
+      .find('.command-expander')
+      .click()
 
       cy.get('.command-name-xhr').should('have.length', 6)
       cy.contains('GET --- /dup').closest('.command').find('.command-child-container')
@@ -373,7 +377,7 @@ describe('commands', () => {
       .find('.num-children')
       .should('have.text', '1')
       .trigger('mouseover')
-      .get('.cy-tooltip').should('have.text', '1 logs currently hidden.')
+      .get('.cy-tooltip').should('have.text', '1 logs currently hidden')
       .percySnapshot()
     })
 
@@ -464,11 +468,11 @@ describe('commands', () => {
     })
   })
 
-  context('mousing over command', () => {
+  context('mousing over', () => {
     beforeEach(() => {
       cy.spy(runner, 'emit')
       cy.clock()
-      cy.get('.command-wrapper').first()
+      cy.get('.command-wrapper').first().trigger('mouseover')
     })
 
     it('shows snapshot after 50ms passes', () => {

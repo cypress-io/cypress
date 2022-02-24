@@ -314,7 +314,7 @@ class Command extends Component<Props> {
                   <Interceptions model={model} />
                   <Aliases model={model} aliasesWithDuplicates={aliasesWithDuplicates} />
                   {displayNumOfChildren && (
-                    <Tooltip placement='top' title={model.event ? `This event occurred ${model.numChildren} times` : `${model.numChildren} logs currently hidden.`} className='cy-tooltip'>
+                    <Tooltip placement='top' title={model.event ? `This event occurred ${model.numChildren} times` : `${model.numChildren} logs currently hidden`} className='cy-tooltip'>
                       <span className={cs('num-children', 'command-num-children', { 'has-alias': model.alias })}>
                         {model.numChildren}
                       </span>
