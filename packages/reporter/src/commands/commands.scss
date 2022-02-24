@@ -12,7 +12,6 @@
 
   .command {
     cursor: default;
-    color: $gray-400;
     min-height: 20px;
   }
 
@@ -50,7 +49,6 @@
         float: left;
         content: "-";
         margin-right: 2px;
-        // padding-left: 5px;
       }
     }
   }
@@ -61,7 +59,6 @@
     display: flex;
     min-height: 20px;
     padding-right: 2px;
-    // padding: 3px 0 0;
 
     &:hover {
       background-color: $gray-900;
@@ -82,7 +79,6 @@
     .command-wrapper-text {
       display: flex;
       flex-wrap: wrap;
-      // padding: 2px 5px 0;
     }
 
     .command-interceptions {
@@ -164,21 +160,12 @@
     }
   }
 
-  // .command-child-container {
-  //   margin-left: 10px;
-  // }
-
   .command-number-column {
     flex-shrink: 0;
     min-height: 1px; // because some numbers are empty
-    // padding-right: 10px;
     padding-top: 3px;
     text-align: right;
-    width: 24px;
-
-    .command-number {
-      color: $gray-700;
-    }
+    width: 25px;
   }
 
   .command-pin-target.command-group {
@@ -236,13 +223,9 @@
   }
 
   .command-method {
-    // padding: 1px 2px 0;
-    // display: inline-block;
     font-size: 11px;
     margin-right: 12px;
-    // min-width: 80px;
     font-weight: 600;
-    color: $gray-200;
   }
 
   // Command State Styles
@@ -252,6 +235,22 @@
     &:hover {
       border-left: 2px solid $gray-900;
     }
+
+    .command-pin {
+      color: $gray-500;
+    }
+
+    &:not(.command-is-event) .command-number {
+      color: $gray-700;
+    }
+  
+    &:not(.command-is-event) .command-method {
+      color: $gray-200;
+    }
+
+    .command-message {
+      color: $gray-400;
+    }
   }
 
   .command-state-pending {
@@ -259,7 +258,6 @@
     background-color: $gray-900;
     cursor: default;
     color: $indigo-200;
-    // padding: 2px 3px 0 8px;
 
     .command-number-column {
       .command-pin {
@@ -285,8 +283,8 @@
       display: block;
       float: right;
       height: 100%;
-      width: 100%;
       transform-origin: right;
+      width: 100%;
 
       @keyframes progress-bar {
         100% {
@@ -300,8 +298,6 @@
     border-left: 2px solid $fail;
     background-color: $err-header-background;
     color: $err-header-text;
-    // padding: 2px 3px 0 0;
-    // padding: 2px 3px 0 8px;
 
     &:hover {
       background: rgba($red-400, 0.3);
@@ -312,14 +308,10 @@
     font-style: unset;
     background-color: $warn-background;
     border-left: 2px solid $orange-700;
-    padding: 2px 3px 0 8px;
+    color: $warn-text;
 
     &:hover {
       background-color: $warn-header-background;
-    }
-
-    .command-method {
-      color: $warn-text;
     }
   }
 
@@ -418,22 +410,14 @@
     padding-top: 1px;
   }
 
-  // .command-name-log,
-  // .command-name-get,
-  // .command-name-download {
-    // we're wrapping the text, so override command-scaled
-    // font-size: 100%;
-    // line-height: 18px;
-
-    .command-message-text {
-      white-space: initial;
-      word-wrap: break-word;
-      line-height: 1.5;
-      display: -webkit-box;
-      -webkit-line-clamp: 50;
-      -webkit-box-orient: vertical;
-    }
-  // }
+  .command-message-text {
+    white-space: initial;
+    word-wrap: break-word;
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 50;
+    -webkit-box-orient: vertical;
+  }
 
   // Styles for Uncaught Exception
   .command-name-uncaught-exception {
@@ -444,13 +428,9 @@
   }
 
   .command-controls {
-    // display: flex;
-    // flex-grow: unset;
-  
     svg {
       color: $gray-600;
       cursor: pointer;
-      // margin: 0px 2px;
       vertical-align: top;
     }
 
@@ -484,7 +464,7 @@
     line-height: 1;
     margin-left: 10px;
     outline: none;
-    padding: 2px 0 0;
+    padding: 1px 0 0;
     text-align: right;
     width: 15px;
 
