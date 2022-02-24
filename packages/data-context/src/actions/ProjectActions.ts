@@ -238,9 +238,7 @@ export class ProjectActions {
 
     this.ctx.coreData.currentTestingType = testingType
 
-    this.ctx.browser.setBrowserStatus('opening')
     await this.api.launchProject(browser, activeSpec ?? emptySpec, options)
-    this.ctx.browser.setBrowserStatus('open')
 
     return
   }
