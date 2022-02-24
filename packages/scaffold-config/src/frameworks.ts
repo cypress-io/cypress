@@ -13,16 +13,18 @@ import {
   BUNDLER_WEBPACK_4,
   CYPRESS_WEBPACK,
 } from './constants'
+import { BUNDLER_WEBPACK_5, HTML_WEBPACK_PLUGIN_5 } from '.'
 
 export const FRONTEND_FRAMEWORKS = [
   {
-    type: 'cra',
+    type: 'crav4',
     family: 'template',
-    name: 'Create React App',
+    name: 'Create React App (v4)',
     supportedBundlers: ['webpack'],
     packages: [
       CYPRESS_REACT_LATEST,
       BUNDLER_WEBPACK_4,
+      CYPRESS_WEBPACK,
       WEBPACK_DEV_SERVER_4,
       HTML_WEBPACK_PLUGIN_4,
     ],
@@ -34,7 +36,54 @@ export const FRONTEND_FRAMEWORKS = [
     detectors: [
       {
         dependency: 'react-scripts',
-        version: '>=4.0.0',
+        version: '^4.0.0',
+      },
+    ],
+    config: {
+      js: () => {
+        return dedent`
+      const { devServer } = require('@cypress/react/plugins/react-scripts')
+
+      module.exports = {
+        component: {
+          devServer,
+        }
+      }`
+      },
+      ts: () => {
+        return dedent`
+      import { defineConfig } from 'cypress'
+      import { devServer } from '@cypress/react/plugins/react-scripts'
+
+      export default defineConfig({
+        component: {
+          devServer,
+        }
+      })`
+      },
+    },
+  },
+  {
+    type: 'crav5',
+    family: 'template',
+    name: 'Create React App (v5)',
+    supportedBundlers: ['webpack'],
+    packages: [
+      CYPRESS_REACT_LATEST,
+      BUNDLER_WEBPACK_5,
+      CYPRESS_WEBPACK,
+      WEBPACK_DEV_SERVER_4,
+      HTML_WEBPACK_PLUGIN_5,
+    ],
+    defaultPackagePath: '@cypress/react/plugins/react-scripts',
+    glob: '*.{js,jsx,tsx}',
+    category: FRONTEND_FRAMEWORK_CATEGORIES[0],
+    codeGenFramework: CODE_GEN_FRAMEWORKS[0],
+    storybookDep: STORYBOOK_REACT,
+    detectors: [
+      {
+        dependency: 'react-scripts',
+        version: '^5.0.0',
       },
     ],
     config: {
@@ -88,9 +137,9 @@ export const FRONTEND_FRAMEWORKS = [
       const { devServer } = require('@cypress/webpack-dev-server')
       const webpackConfig = require('@vue/cli-service/webpack.config')
 
-        module.exports = {
-          component: {
-            devServer,
+      module.exports = {
+        component: {
+          devServer,
           devServerConfig: {
             webpackConfig
           }
@@ -475,6 +524,7 @@ export const FRONTEND_FRAMEWORKS = [
     supportedBundlers: ['webpack'],
     packages: [
       CYPRESS_VUE_2,
+      BUNDLER_WEBPACK_4,
       CYPRESS_WEBPACK,
       HTML_WEBPACK_PLUGIN_4,
     ],

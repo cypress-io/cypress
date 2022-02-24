@@ -14,11 +14,18 @@ export async function scaffoldMigrationProject (project: typeof e2eProjectDirs[n
 }
 
 describe('detect', () => {
-  it('Create React App', async () => {
+  it('Create React App v4', async () => {
+    const pkg = await scaffoldMigrationProject('create-react-app-unconfigured')
+    const actual = detect({ ...pkg, dependencies: { ...pkg.dependencies, 'react-scripts': '4.0.0' } })
+
+    expect(actual.framework.type).to.eq('crav4')
+  })
+
+  it('Create React App v5', async () => {
     const pkg = await scaffoldMigrationProject('create-react-app-unconfigured')
     const actual = detect(pkg)
 
-    expect(actual.framework.type).to.eq('cra')
+    expect(actual.framework.type).to.eq('crav5')
   })
 
   it(`Vue CLI w/ Vue 2`, async () => {
