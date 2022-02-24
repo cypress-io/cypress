@@ -141,11 +141,11 @@ import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWith
 import { useTimeout } from '@vueuse/core'
 import { computed } from 'vue'
 import type { DocsMenuVariant } from './DocsMenuContent.vue'
-import CircleCI from '../../assets/logos/circleci.svg?url'
-import GitHubActions from '../../assets/logos/github-actions.svg?url'
-import Bitbucket from '../../assets/logos/bitbucket.svg?url'
-import Gitlab from '../../assets/logos/gitlab.svg?url'
-import AwsCodeBuild from '../../assets/logos/aws-codebuild.svg?url'
+import CircleCI from '@packages/frontend-shared/src/assets/logos/circleci.svg?url'
+import GitHubActions from '@packages/frontend-shared/src/assets/logos/github-actions.svg?url'
+import Bitbucket from '@packages/frontend-shared/src/assets/logos/bitbucket.svg?url'
+import Gitlab from '@packages/frontend-shared/src/assets/logos/gitlab.svg?url'
+import AwsCodeBuild from '@packages/frontend-shared/src/assets/logos/aws-codebuild.svg?url'
 import ExternalLink from '../ExternalLink.vue'
 
 const props = defineProps<{

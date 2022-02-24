@@ -74,7 +74,7 @@ shikiWrapperClasses computed property.
 <script lang="ts">
 import type { Highlighter } from 'shiki'
 import { getHighlighter, setOnigasmWASM, setCDN } from 'shiki'
-import onigasm from '../../../../node_modules/onigasm/lib/onigasm.wasm?url'
+import onigasm from 'onigasm/lib/onigasm.wasm?url'
 
 setOnigasmWASM(onigasm)
 setCDN(`${import.meta.env.BASE_URL}shiki/`)
