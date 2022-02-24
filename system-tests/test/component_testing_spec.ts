@@ -10,4 +10,12 @@ describe('component testing projects', function () {
     browser: 'chrome',
     expectedExitCode: 0,
   })
+
+  systemTests.it('create-react-app-configured', {
+    project: 'create-react-app-configured',
+    testingType: 'component',
+    spec: 'src/App.cy.jsx',
+    browser: 'chrome',
+    expectedExitCode: 0,
+  })
 })
