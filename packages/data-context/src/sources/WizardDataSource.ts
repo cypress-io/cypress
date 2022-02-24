@@ -16,12 +16,14 @@ export class WizardDataSource {
     }
 
     const packages = [
-      {
-        name: this.chosenFramework.name as string,
-        description: PACKAGES_DESCRIPTIONS[this.chosenFramework.package.name],
-        package: this.chosenFramework.package.name,
-        installer: this.chosenFramework.package.installer,
-      },
+      ...this.chosenFramework.packages.map((framework) => {
+        return {
+          name: framework.name,
+          description: PACKAGES_DESCRIPTIONS[framework.name],
+          package: framework.name,
+          installer: framework.installer,
+        }
+      }),
       {
         name: this.chosenBundler.name as string,
         description: PACKAGES_DESCRIPTIONS[this.chosenBundler.package],
