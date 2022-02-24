@@ -12,7 +12,7 @@
         keypath="settingsPage.specPattern.description"
       >
         <ExternalLink
-          href="https://on.cypress.io"
+          href="https://on.cypress.io/test-type-options"
         >
           {{ t('links.learnMore') }}
         </ExternalLink>
