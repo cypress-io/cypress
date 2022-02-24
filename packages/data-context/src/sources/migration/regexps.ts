@@ -15,15 +15,15 @@ const specExtRe = '([._-]?Z(?:[s|S]pec|[T|t]est))?[.])(?<extension>([j|t]s[x]?|c
 export const regexps = {
   e2e: {
     before: {
-      defaultFolderDefaultTestFiles: `cypress\/(?<folder>integration)\/(?<fileName>[^\/]+?)(?<preExtension>${specExtRe})$`,
-      defaultFolderCustomTestFiles: `cypress\/(?<folder>integration)\/(?<fileName>[^\/]+)$`,
-      customFolderDefaultTestFiles: `(?<fileName>[^\/]+?)(?<preExtension>${specExtRe})$`,
+      defaultFolderDefaultTestFiles: `cypress\/(?<folder>integration)\/(?<fileName>.+?)(?<preExtension>${specExtRe})$`,
+      defaultFolderCustomTestFiles: `cypress\/(?<folder>integration)\/(?<fileName>.+)$`,
+      customFolderDefaultTestFiles: `(?<fileName>.+?)(?<preExtension>${specExtRe})$`,
     },
   },
   component: {
     before: {
-      defaultFolderDefaultTestFiles: `(?<componentFolder>cypress\/component\/)(?<fileName>[^\/]+?)(?<preExtension>${specExtRe})`,
-      customFolderDefaultTestFiles: `(?<fileName>[^\/]+?)(?<preExtension>${specExtRe})`,
+      defaultFolderDefaultTestFiles: `(?<componentFolder>cypress\/component\/)(?<fileName>.+?)(?<preExtension>${specExtRe})`,
+      customFolderDefaultTestFiles: `(?<fileName>.+?)(?<preExtension>${specExtRe})`,
     },
   },
 } as const
