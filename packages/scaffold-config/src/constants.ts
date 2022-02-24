@@ -3,7 +3,7 @@ export const CODE_GEN_FRAMEWORKS = ['react', 'vue'] as const
 export const FRONTEND_FRAMEWORK_CATEGORIES = ['react', 'vue'] as const
 
 export const CYPRESS_WEBPACK = {
-  type: 'cypress-dev-server',
+  type: 'webpack',
   name: 'Cypress Webpack Dev Server',
   package: '@cypress/webpack-dev-server',
   installer: '@cypress/webpack-dev-server@latest',
@@ -11,7 +11,7 @@ export const CYPRESS_WEBPACK = {
 } as const
 
 export const CYPRESS_VITE = {
-  type: 'cypress-dev-server',
+  type: 'vite',
   name: 'Cypress Vite Dev Server',
   package: '@cypress/vite-dev-server',
   installer: '@cypress/vite-dev-server@latest',
