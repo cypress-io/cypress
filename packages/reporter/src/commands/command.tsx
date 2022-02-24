@@ -245,11 +245,12 @@ class Command extends Component<Props> {
     const isSessionCommand = commandName === 'session'
     const displayNumOfChildren = !isSystemEvent && !isSessionCommand && model.hasChildren && !model.isOpen
 
-    let groupPlaceholder = []
+    let groupPlaceholder: Array<JSX.Element> = []
 
     if (model.groupLevel !== undefined) {
-      for (let i = model.groupLevel; i > 0; i--) {
-        // @ts-ignore
+      const level = model.groupLevel < 6 ? model.groupLevel : 5
+
+      for (let i = 0; i < level; i++) {
         groupPlaceholder.push(<span className='command-group-block' />)
       }
     }

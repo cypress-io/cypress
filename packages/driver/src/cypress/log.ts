@@ -261,10 +261,11 @@ const defaults = function (state, config, obj) {
     },
   })
 
-  const logGroup = _.last(state('logGroup'))
+  const logGroups = state('logGroup')
 
-  if (logGroup) {
-    obj.group = logGroup
+  if (logGroup.length) {
+    obj.group = _.last(logGroups)
+    obj.groupLevel = logGroups.length
   }
 
   if (obj.groupEnd) {

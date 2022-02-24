@@ -69,11 +69,6 @@ export default class Command extends Instrument {
     return this.event ? this.children.length + 1 : this.children.length
   }
 
-  // @computed get groupLevel () {
-  //   // cap the level of nesting supported in the UI
-  //   return this.groupLevel === undefined ? 0 : this.groupLevel < 6 ? this.groupLevel : 6
-  // }
-
   @computed get isOpen () {
     if (!this.hasChildren) return null
 
