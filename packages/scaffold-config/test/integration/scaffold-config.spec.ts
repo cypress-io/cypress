@@ -14,6 +14,13 @@ export async function scaffoldMigrationProject (project: typeof e2eProjectDirs[n
 }
 
 describe('detect', () => {
+  it('Create React App', async () => {
+    const pkg = await scaffoldMigrationProject('create-react-app-unconfigured')
+    const actual = detect(pkg)
+
+    expect(actual.type).to.eq('cra')
+  })
+
   it(`Vue CLI w/ Vue 2`, async () => {
     const pkg = await scaffoldMigrationProject('vueclivue2-unconfigured')
     const actual = detect(pkg)
@@ -21,10 +28,10 @@ describe('detect', () => {
     expect(actual.type).to.eq('vueclivue2')
   })
 
-  it('Create React App', async () => {
-    const pkg = await scaffoldMigrationProject('create-react-app-unconfigured')
+  it(`Vue CLI w/ Vue 3`, async () => {
+    const pkg = await scaffoldMigrationProject('vueclivue3-unconfigured')
     const actual = detect(pkg)
 
-    expect(actual.type).to.eq('cra')
+    expect(actual.type).to.eq('vueclivue3')
   })
 })
