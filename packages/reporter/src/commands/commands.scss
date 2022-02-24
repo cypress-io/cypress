@@ -425,6 +425,12 @@
       vertical-align: top;
     }
 
+    .command-invisible {
+      display: inline-block;
+      margin-left: 5px;
+      margin-right: 0;
+    }
+
     .command-alias,
     .command-interceptions {
       font-family: $open-sans;

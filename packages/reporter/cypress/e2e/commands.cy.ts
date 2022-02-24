@@ -143,6 +143,23 @@ describe('commands', () => {
     cy.percySnapshot()
   })
 
+  it('assert commands for each state', () => {
+    const assertStates = ['passed', 'pending', 'failed']
+
+    assertStates.forEach((state) => {
+      addCommand(runner, {
+        name: 'assert',
+        type: 'child',
+        message: `expected **element** to have **state of ${state}**`,
+        state,
+      })
+    })
+
+    cy.get('.command').should('have.length', 13)
+
+    cy.percySnapshot()
+  })
+
   describe('progress bar', () => {
     const getProgress = () => {
       return cy.contains('#in-progress')
@@ -445,23 +462,6 @@ describe('commands', () => {
 
       cy.percySnapshot()
     })
-  })
-
-  it('assert commands for each state', () => {
-    const assertStates = ['passed', 'pending', 'failed']
-
-    assertStates.forEach((state) => {
-      addCommand(runner, {
-        name: 'assert',
-        type: 'child',
-        message: `expected **element** to have **state of ${state}**`,
-        state,
-      })
-    })
-
-    cy.get('.command').should('have.length', 13)
-
-    cy.percySnapshot()
   })
 
   context('mousing over command', () => {
