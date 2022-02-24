@@ -170,7 +170,7 @@ describe('applyMigrationTransform', () => {
             },
             {
               'highlight': true,
-              group: 'extension',
+              group: 'preExtension',
               'text': '.spec.',
             },
             {
@@ -197,7 +197,7 @@ describe('applyMigrationTransform', () => {
             },
             {
               'highlight': true,
-              group: 'extension',
+              group: 'preExtension',
               'text': '.cy.',
             },
             {
@@ -233,7 +233,7 @@ describe('applyMigrationTransform', () => {
             },
             {
               'highlight': true,
-              group: 'extension',
+              group: 'preExtension',
               'text': '.spec.',
             },
             {
@@ -251,7 +251,7 @@ describe('applyMigrationTransform', () => {
             },
             {
               'highlight': true,
-              group: 'extension',
+              group: 'preExtension',
               'text': '.cy.',
             },
             {
@@ -350,7 +350,7 @@ describe('applyMigrationTransform', () => {
             },
             {
               'highlight': true,
-              group: 'extension',
+              group: 'preExtension',
               'text': '.',
             },
             {
@@ -377,7 +377,7 @@ describe('applyMigrationTransform', () => {
             },
             {
               'highlight': true,
-              group: 'extension',
+              group: 'preExtension',
               'text': '.cy.',
             },
             {
@@ -423,7 +423,7 @@ describe('applyMigrationTransform', () => {
             },
             {
               'highlight': true,
-              group: 'extension',
+              group: 'preExtension',
               'text': '.test.',
             },
             {
@@ -449,7 +449,7 @@ describe('applyMigrationTransform', () => {
             },
             {
               'highlight': true,
-              group: 'extension',
+              group: 'preExtension',
               'text': '.cy.',
             },
             {
@@ -485,7 +485,7 @@ describe('applyMigrationTransform', () => {
             },
             {
               'highlight': true,
-              group: 'extension',
+              group: 'preExtension',
               'text': '.spec.',
             },
             {
@@ -503,7 +503,7 @@ describe('applyMigrationTransform', () => {
             },
             {
               'highlight': true,
-              group: 'extension',
+              group: 'preExtension',
               'text': '.cy.',
             },
             {
@@ -542,7 +542,7 @@ describe('applyMigrationTransform', () => {
             {
               'text': '.spec.',
               'highlight': true,
-              'group': 'extension',
+              'group': 'preExtension',
             },
             {
               'text': 'js',
@@ -560,7 +560,7 @@ describe('applyMigrationTransform', () => {
             {
               'text': '.cy.',
               'highlight': true,
-              'group': 'extension',
+              'group': 'preExtension',
             },
             {
               'text': 'js',

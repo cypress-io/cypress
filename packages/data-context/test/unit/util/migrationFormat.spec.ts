@@ -15,7 +15,7 @@ describe('formatMigrationFile', () => {
         { text: 'cypress/', highlight: false },
         { text: 'integration', highlight: true, group: 'folder' },
         { text: '/app', highlight: false },
-        { text: '.spec.', highlight: true, group: 'extension' },
+        { text: '.spec.', highlight: true, group: 'preExtension' },
         { text: 'js', highlight: false },
       ])
     })
