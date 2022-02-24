@@ -431,7 +431,6 @@ commands:
               yarn cypress:run --browser <<parameters.browser>> --spec $TESTFILES
             fi
           working_directory: packages/driver
-      - verify-mocha-results
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
