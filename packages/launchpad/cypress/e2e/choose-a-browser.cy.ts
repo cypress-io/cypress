@@ -52,12 +52,16 @@ describe('Choose a Browser Page', () => {
       cy.get('h1').should('contain', 'Choose a Browser')
 
       cy.get('[data-cy="alert-header"]').should('contain', 'Warning: Browser Not Found')
-      cy.get('[data-cy="alert-body"]')
+      cy.get('[data-cy="alert-body"]').as('AlertBody')
       .should('contain', 'We could not identify a known browser at the path you provided: /path/does/not/exist')
-      .should('contain', 'spawn /path/does/not/exist ENOENT')
       .validateExternalLink({
         href: 'https://on.cypress.io/troubleshooting-launching-browsers',
       })
+
+      // The exception thrown is presented in the alert's second code element.
+      // We assert on the presence of the normalized path, as the thrown exception varies
+      // based on operating system
+      cy.get('@AlertBody').find('code').eq(1).contains(/([\\\/])path\1does\1not\1exist/)
 
       cy.percySnapshot()
 
