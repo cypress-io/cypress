@@ -8,6 +8,7 @@ const { errByPath, modifyErrMsg, throwErr, mergeErrProps } = $errUtils
 // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
 export const create = (Cypress, state, timeout, clearTimeout, whenStable, finishAssertions) => ({
   retry (fn, options, log) {
+    Cypress.log({ message: 'retrying', end: true })
     // remove the runnables timeout because we are now in retry
     // mode and should be handling timing out ourselves and dont
     // want to accidentally time out via mocha
@@ -109,12 +110,16 @@ export const create = (Cypress, state, timeout, clearTimeout, whenStable, finish
     .delay(interval)
     .then(() => {
       if (ended()) {
+        Cypress.log({ message: 'ended first', end: true })
+
         return
       }
 
       Cypress.action('cy:command:retry', options)
 
       if (ended()) {
+        Cypress.log({ message: 'ended second', end: true })
+
         return
       }
 
