@@ -475,6 +475,10 @@ export class ProjectBase<TServer extends Server> extends EE {
     return this.server.socket.resetBrowserState()
   }
 
+  isRunnerSocketConnected () {
+    return this.server.socket.isRunnerSocketConnected()
+  }
+
   async sendFocusBrowserMessage () {
     if (this.browser.family === 'firefox') {
       await browsers.setFocus()
