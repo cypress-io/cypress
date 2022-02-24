@@ -1,5 +1,15 @@
-import { BUNDLERS, FRONTEND_FRAMEWORKS, DEPENDENCIES, AllPackagePackages } from '@packages/scaffold-config/src'
+import { BUNDLERS, FRONTEND_FRAMEWORKS, AllPackagePackages } from '@packages/scaffold-config/src'
 import { CODE_LANGUAGES } from '@packages/types/src'
+
+function fakeInstalledDeps () {
+  cy.withCtx(async (ctx) => {
+    const deps = (await ctx.wizard.packagesToInstall() ?? []).map((x) => x.package)
+
+    ctx.update((coreData) => {
+      coreData.wizard.__fakeInstalledPackagesForTesting = deps
+    })
+  })
+}
 
 describe('Launchpad: Setup Project', () => {
   function scaffoldAndOpenProject (name: Parameters<typeof cy.scaffoldProject>[0], args?: Parameters<typeof cy.openProject>[1]) {
@@ -336,7 +346,7 @@ describe('Launchpad: Setup Project', () => {
         cy.findByText('Confirm the front-end framework and bundler used in your project.')
 
         cy.findByRole('button', { name: 'Front-end Framework Pick a framework' }).click()
-        cy.findByRole('option', { name: 'Create React App' }).click()
+        cy.findByRole('option', { name: 'Create React App (v4)' }).click()
 
         cy.get('[data-testid="select-bundler"').should('not.exist')
         cy.findByRole('button', { name: 'Next Step' }).should('not.have.disabled')
@@ -350,41 +360,22 @@ describe('Launchpad: Setup Project', () => {
         cy.findByRole('button', { name: 'Next Step' }).should('have.disabled')
 
         cy.findByRole('button', { name: 'Bundler(Dev Server) Pick a bundler' }).click()
-        cy.findByRole('option', { name: 'Webpack' }).click()
+        cy.findByRole('option', { name: 'Webpack (v4)' }).click()
         cy.findByRole('button', { name: 'Next Step' }).should('not.have.disabled')
 
         cy.findByRole('button', { name: 'Front-end Framework React.js' }).click()
-        cy.findByRole('option', { name: 'Create React App' }).click()
+        cy.findByRole('option', { name: 'Create React App (v4)' }).click()
         cy.findByRole('button', { name: 'Bundler(Dev Server) Webpack' }).should('not.exist')
         cy.findByRole('button', { name: 'Next Step' }).should('not.have.disabled')
 
         cy.findByRole('button', { name: 'TypeScript' }).click()
 
-        let calls = 0
-
-        // simulate progressive installation of modules
-        cy.intercept('query-Wizard_InstalledPackages', (req) => {
-          req.reply({ data: {
-            wizard: {
-              __typename: 'Wizard',
-              installedPackages: ++calls <= 2 ? [] :
-                calls <= 3 ? ['@cypress/react'] :
-                  ['@cypress/react', '@cypress/webpack-dev-server'],
-            },
-          } })
-        }).as('InstalledPackages')
-
         cy.findByRole('button', { name: 'Next Step' }).click()
         cy.findByRole('button', { name: 'Waiting for you to install the dependencies...' })
 
-        cy.wait('@InstalledPackages')
+        fakeInstalledDeps()
 
         cy.contains('li', '@cypress/react').findByLabelText('installed').should('be.visible')
-
-        cy.wait('@InstalledPackages')
-        cy.contains('li', '@cypress/webpack-dev-server').findByLabelText('installed').should('be.visible').then(() => {
-          expect(calls).to.eq(4)
-        })
 
         cy.findByRole('button', { name: 'Continue' }).click()
 
@@ -539,50 +530,8 @@ describe('Launchpad: Setup Project', () => {
       })
     })
 
-    describe('project that has not been configured for component testing', () => {
-      beforeEach(() => {
-        // simulate installation of modules
-        cy.intercept('query-Wizard_InstalledPackages', (req) => {
-          req.reply({ data: {
-            wizard: {
-              __typename: 'Wizard',
-              installedPackages: [
-                '@cypress/react',
-                '@cypress/vue',
-                '@cypress/webpack-dev-server',
-                '@cypress/vite-dev-server',
-                '@storybook/testing-react',
-                '@storybook/testing-vue',
-                '@storybook/testing-vue3',
-              ],
-            },
-          } })
-        }).as('InstalledPackages')
-      })
-
-      it('shows the first setup page for configuration when selecting component tests', () => {
-        scaffoldAndOpenProject('pristine-with-e2e-testing')
-        cy.visitLaunchpad()
-
-        verifyWelcomePage({ e2eIsConfigured: true, ctIsConfigured: false })
-
-        cy.get('[data-cy-testingtype="component"]').click()
-
-        cy.get('h1').should('contain', 'Project Setup')
-        cy.contains('Confirm the front-end framework and bundler used in your project.')
-
-        cy.findByRole('button', {
-          name: 'Front-end Framework Pick a framework',
-          expanded: false,
-        })
-        .should('have.attr', 'aria-haspopup', 'true')
-
-        cy.findByRole('button', { name: 'Next Step' }).should('have.disabled')
-
-        cy.findByRole('button', { name: 'Back' }).click()
-
-        verifyWelcomePage({ e2eIsConfigured: true, ctIsConfigured: false })
-      })
+    beforeEach(() => {
+      fakeInstalledDeps()
     })
 
     const hasStorybookPermutations = [false, true]
@@ -694,22 +643,7 @@ describe('Launchpad: Setup Project', () => {
                 validatePackage(pkg.package)
               })
 
-              const deps: Array<typeof DEPENDENCIES[number]['package']> = [
-                ...[...framework?.packages ?? []].map((x) => x.package),
-                bundler.package,
-              ]
-
-              if (framework?.storybookDep) {
-                deps.push(framework.storybookDep.package)
-              }
-
-              cy.withCtx(async (ctx) => {
-                const deps = await ctx.wizard.packagesToInstall()
-
-                ctx.update((coreData) => {
-                  coreData.wizard.__fakeInstalledPackagesForTesting = deps?.map((x) => x.package) ?? []
-                })
-              })
+              fakeInstalledDeps()
 
               if (hasStorybookDep && framework.storybookDep) {
                 validatePackage(framework.storybookDep.package)
@@ -755,7 +689,7 @@ describe('Launchpad: Setup Project', () => {
         cy.findByText('Confirm the front-end framework and bundler used in your project.')
 
         cy.findByRole('button', { name: 'Front-end Framework Pick a framework' }).click()
-        cy.findByRole('option', { name: 'Create React App' }).click()
+        cy.findByRole('option', { name: 'Create React App (v4)' }).click()
 
         cy.get('[data-testid="select-bundler"').should('not.exist')
         cy.findByRole('button', { name: 'Next Step' }).should('not.have.disabled')
@@ -769,17 +703,20 @@ describe('Launchpad: Setup Project', () => {
         cy.findByRole('button', { name: 'Next Step' }).should('have.disabled')
 
         cy.findByRole('button', { name: 'Bundler(Dev Server) Pick a bundler' }).click()
-        cy.findByRole('option', { name: 'Webpack' }).click()
+        cy.findByRole('option', { name: 'Webpack (v4)' }).click()
 
         cy.findByRole('button', { name: 'TypeScript' }).click()
         cy.findByRole('button', { name: 'Next Step' }).should('not.have.disabled')
 
         cy.findByRole('button', { name: 'Front-end Framework React.js' }).click()
-        cy.findByRole('option', { name: 'Create React App' }).click()
+        cy.findByRole('option', { name: 'Create React App (v4)' }).click()
         cy.findByRole('button', { name: 'Bundler(Dev Server) Webpack' }).should('not.exist')
         cy.findByRole('button', { name: 'Next Step' }).should('not.have.disabled')
 
         cy.findByRole('button', { name: 'Next Step' }).click()
+
+        fakeInstalledDeps()
+
         cy.findByRole('button', { name: 'Continue' }).click()
 
         cy.get('[data-cy=valid]').within(() => {
@@ -806,8 +743,11 @@ describe('Launchpad: Setup Project', () => {
         cy.findByText('Confirm the front-end framework and bundler used in your project.')
 
         cy.findByRole('button', { name: 'Front-end Framework Pick a framework' }).click()
-        cy.findByRole('option', { name: 'Create React App' }).click()
+        cy.findByRole('option', { name: 'Create React App (v4)' }).click()
         cy.findByRole('button', { name: 'TypeScript' }).click()
+
+        fakeInstalledDeps()
+
         cy.findByRole('button', { name: 'Next Step' }).click()
         cy.findByRole('button', { name: 'Continue' }).click()
 
@@ -832,7 +772,7 @@ describe('Launchpad: Setup Project', () => {
 
       cy.get('[data-cy-testingtype="component"]').click()
       cy.get('[data-testid="select-framework"]').click()
-      cy.findByText('Create React App').click()
+      cy.findByText('Create React App (v4)').click()
       cy.findByText('Next Step').click()
       cy.get('code').should('contain.text', 'yarn add -D ')
     })
@@ -844,7 +784,7 @@ describe('Launchpad: Setup Project', () => {
 
       cy.get('[data-cy-testingtype="component"]').click()
       cy.get('[data-testid="select-framework"]').click()
-      cy.findByText('Create React App').click()
+      cy.findByText('Create React App (v4)').click()
       cy.findByText('Next Step').click()
       cy.get('code').should('contain.text', 'pnpm install -D ')
     })
@@ -856,7 +796,7 @@ describe('Launchpad: Setup Project', () => {
 
       cy.get('[data-cy-testingtype="component"]').click()
       cy.get('[data-testid="select-framework"]').click()
-      cy.findByText('Create React App').click()
+      cy.findByText('Create React App (v4)').click()
       cy.findByText('Next Step').click()
       cy.get('code').should('contain.text', 'npm install -D ')
     })
