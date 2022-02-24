@@ -42,4 +42,12 @@ describe('detect', () => {
     expect(actual.framework.type).to.eq('react')
     expect(actual.bundler).to.eq('vite')
   })
+
+  it(`Next.js`, async () => {
+    const pkg = await scaffoldMigrationProject('nextjs-unconfigured')
+    const actual = detect(pkg)
+
+    expect(actual.framework.type).to.eq('nextjs')
+    expect(actual.bundler).to.eq(undefined)
+  })
 })
