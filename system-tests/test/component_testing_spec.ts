@@ -32,6 +32,7 @@ describe('component testing projects', function () {
     testingType: 'component',
     spec: 'src/App.cy.tsx',
     browser: 'chrome',
+    timeout: 150000,
     expectedExitCode: 0,
   })
 
@@ -40,6 +41,7 @@ describe('component testing projects', function () {
     testingType: 'component',
     spec: 'src/components/HelloWorld.cy.ts',
     browser: 'chrome',
+    timeout: 150000,
     expectedExitCode: 0,
   })
 
