@@ -1,5 +1,4 @@
 const util = require('../util')
-const errors = require('../../errors')
 
 const ARRAY_METHODS = ['concat', 'push', 'unshift', 'slice', 'pop', 'shift', 'slice', 'splice', 'filter', 'map', 'forEach', 'reduce', 'reverse', 'splice', 'includes']
 
@@ -21,7 +20,9 @@ module.exports = {
 
         hasEmittedWarning = true
 
-        const warning = errors.get('DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS')
+        const warning = require('@packages/errors').getError(
+          'DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS',
+        )
 
         ipc.send('warning', util.serializeError(warning))
 

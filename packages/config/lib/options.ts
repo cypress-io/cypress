@@ -538,25 +538,25 @@ export const breakingOptions: Array<BreakingOption> = [
 export const breakingRootOptions: Array<BreakingOption> = [
   {
     name: 'supportFile',
-    errorKey: 'SUPPORT_FILE_ROOT_NOT_SUPPORTED',
+    errorKey: 'CONFIG_FILE_INVALID_ROOT_CONFIG',
     isWarning: false,
     testingTypes: ['component', 'e2e'],
   },
   {
     name: 'specPattern',
-    errorKey: 'SPEC_PATTERN_ROOT_NOT_SUPPORTED',
+    errorKey: 'CONFIG_FILE_INVALID_ROOT_CONFIG',
     isWarning: false,
     testingTypes: ['component', 'e2e'],
   },
   {
     name: 'excludeSpecPattern',
-    errorKey: 'SPEC_EXCLUDE_PATTERN_ROOT_NOT_SUPPORTED',
+    errorKey: 'CONFIG_FILE_INVALID_ROOT_CONFIG',
     isWarning: false,
     testingTypes: ['component', 'e2e'],
   },
   {
     name: 'baseUrl',
-    errorKey: 'BASE_URL_ROOT_NOT_SUPPORTED',
+    errorKey: 'CONFIG_FILE_INVALID_ROOT_CONFIG_E2E',
     isWarning: false,
     testingTypes: ['e2e'],
   },
@@ -567,7 +567,7 @@ export const testingTypeBreakingOptions: { e2e: Array<BreakingOption>, component
   component: [
     {
       name: 'baseUrl',
-      errorKey: 'BASE_URL_CT_NOT_SUPPORTED',
+      errorKey: 'CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_COMPONENT',
       isWarning: false,
     },
   ],

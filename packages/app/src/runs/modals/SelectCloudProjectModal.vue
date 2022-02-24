@@ -4,6 +4,7 @@
     :title="newProject
       ? t('runs.connect.modal.selectProject.createProject')
       : t('runs.connect.modal.title')"
+    help-link="https://on.cypress.io/adding-new-project"
     @update:model-value="emit('cancel')"
   >
     <div class="w-640px">

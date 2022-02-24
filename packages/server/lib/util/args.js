@@ -163,8 +163,8 @@ const JSONOrCoerce = (str) => {
   return coerceUtil.coerce(str)
 }
 
-const sanitizeAndConvertNestedArgs = (str, argname) => {
-  la(is.unemptyString(argname), 'missing config argname to be parsed')
+const sanitizeAndConvertNestedArgs = (str, argName) => {
+  la(is.unemptyString(argName), 'missing config argName to be parsed')
 
   try {
     if (typeof str === 'object') {
@@ -197,10 +197,10 @@ const sanitizeAndConvertNestedArgs = (str, argname) => {
     .mapValues(JSONOrCoerce)
     .value()
   } catch (err) {
-    debug('could not pass config %s value %s', argname, str)
+    debug('could not pass config %s value %s', argName, str)
     debug('error %o', err)
 
-    return errors.throw('COULD_NOT_PARSE_ARGUMENTS', argname, str, 'Cannot parse as valid JSON')
+    return errors.throwErr('COULD_NOT_PARSE_ARGUMENTS', argName, str, 'Cannot parse as valid JSON')
   }
 }
 
@@ -447,7 +447,7 @@ module.exports = {
         debug('could not parse config spec value %s', spec)
         debug('error %o', err)
 
-        return errors.throw('COULD_NOT_PARSE_ARGUMENTS', 'spec', spec, 'spec must be a string or comma-separated list')
+        return errors.throwErr('COULD_NOT_PARSE_ARGUMENTS', 'spec', spec, 'spec must be a string or comma-separated list')
       }
     }
 

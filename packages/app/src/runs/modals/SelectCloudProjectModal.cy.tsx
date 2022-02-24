@@ -31,6 +31,7 @@ describe('<SelectCloudProjectModal />', () => {
   it('selects the first organization by default', () => {
     mountDialog()
     cy.get('[data-cy="selectOrganization"] button').should('contain.text', 'Test Org 1')
+    cy.get('[data-cy="external"]').should('have.attr', 'href').and('eq', 'https://on.cypress.io/adding-new-project')
     cy.get('[data-cy="selectProject"] button').click()
     cy.contains('Test Project').click()
   })

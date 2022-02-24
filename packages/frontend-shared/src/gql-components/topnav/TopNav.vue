@@ -78,7 +78,7 @@
 
     <TopNavListItem class="text-center p-16px text-indigo-600">
       <ExternalLink
-        :href="releasesUrl"
+        href="https://on.cypress.io/changelog"
         class="border-rounded border-gray-100 border-1 w-full py-8px text-12px block whitespace-nowrap hover:border-gray-200 hover:no-underline"
       >
         {{ t('topNav.seeAllReleases') }}

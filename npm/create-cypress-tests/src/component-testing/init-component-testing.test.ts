@@ -307,7 +307,7 @@ describe('init component tests script', () => {
     ).to.be.true
   })
 
-  it('Doesn\'t affect injected code if user has custom babel.config.js', async () => {
+  it(`Doesn't affect injected code if user has custom babel.config.js`, async () => {
     createTempFiles({
       '/cypress/plugins/index.js': 'module.exports = (on, config) => {}',
       '/cypress.config.ts': 'export default {}',

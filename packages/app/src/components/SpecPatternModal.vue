@@ -5,7 +5,7 @@
     :title="t('components.specPatternModal.title')"
     :model-value="show"
     data-cy="spec-pattern-modal"
-    help-link="https://on.cypress.io"
+    help-link="https://on.cypress.io/test-type-options"
     @update:model-value="emits('close')"
   >
     <div

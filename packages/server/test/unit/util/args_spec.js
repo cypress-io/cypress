@@ -726,7 +726,7 @@ describe('lib/util/args', () => {
       })
     })
 
-    it('doesn\'t mess with env vars if Windows registry doesn\'t have proxy', function () {
+    it(`doesn't mess with env vars if Windows registry doesn't have proxy`, function () {
       sinon.stub(getWindowsProxyUtil, 'getWindowsProxy').returns()
       sinon.stub(os, 'platform').returns('win32')
       const options = this.setup()
