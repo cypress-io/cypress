@@ -10,10 +10,10 @@ import {
   reduceConfig,
   renameSupportFilePath,
   OldCypressConfig,
-} from '../../../src/sources/migration'
+} from '../../../../src/sources/migration'
 import { expect } from 'chai'
-import { MigrationFile } from '../../../src/sources'
-import { scaffoldMigrationProject } from '../helper'
+import { MigrationFile } from '../../../../src/sources'
+import { scaffoldMigrationProject } from '../../helper'
 
 const root = path.join(__dirname, '..', '..', '..', '..', '..')
 
