@@ -1,12 +1,9 @@
 import { expect } from 'chai'
-import { graphqlSchema } from '@packages/graphql/src/schema'
 import os from 'os'
 import sinon from 'sinon'
 import { DataContext } from '../../../src'
-import { AppApiShape, AuthApiShape, ElectronApiShape, LocalSettingsApiShape, ProjectApiShape } from '../../../src/actions'
-import { InjectedConfigApi } from '../../../src/data'
-import { ErrorApiShape } from '../../../src/DataContext'
-import { BrowserApiShape, VersionsDataSource } from '../../../src/sources'
+import { VersionsDataSource } from '../../../src/sources'
+import { createTestDataContext } from '../helper'
 
 const pkg = require('@packages/root')
 const nmi = require('node-machine-id')
@@ -21,21 +18,7 @@ describe('VersionsDataSource', () => {
     let currentCypressVersion: string = pkg.version
 
     before(() => {
-      ctx = new DataContext({
-        schema: graphqlSchema,
-        mode: 'open',
-        modeOptions: {},
-        appApi: {} as AppApiShape,
-        localSettingsApi: {} as LocalSettingsApiShape,
-        authApi: {} as AuthApiShape,
-        errorApi: {} as ErrorApiShape,
-        configApi: {
-          getServerPluginHandlers: () => [],
-        } as InjectedConfigApi,
-        projectApi: {} as ProjectApiShape,
-        electronApi: {} as ElectronApiShape,
-        browserApi: {} as BrowserApiShape,
-      })
+      ctx = createTestDataContext('open')
 
       ctx.coreData.currentTestingType = 'e2e'
 
