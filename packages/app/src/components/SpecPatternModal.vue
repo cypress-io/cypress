@@ -5,7 +5,7 @@
     :title="t('components.specPatternModal.title')"
     :model-value="show"
     data-cy="spec-pattern-modal"
-    help-link="https://on.cypress.io"
+    help-link="https://on.cypress.io/test-type-options"
     @update:model-value="emits('close')"
   >
     <div
@@ -17,7 +17,7 @@
       />
     </div>
     <StandardModalFooter
-      class="flex h-72px gap-16px items-center"
+      class="flex gap-16px items-center"
     >
       <OpenConfigFileInIDE>
         <Button size="lg">

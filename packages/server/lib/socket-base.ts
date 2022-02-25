@@ -4,7 +4,7 @@ import _ from 'lodash'
 import { onNetStubbingEvent } from '@packages/net-stubbing'
 import * as socketIo from '@packages/socket'
 import firefoxUtil from './browsers/firefox-util'
-import errors from './errors'
+import * as errors from './errors'
 import exec from './exec'
 import files from './files'
 import fixture from './fixture'
@@ -77,6 +77,7 @@ const retry = (fn: (res: any) => void) => {
 export class SocketBase {
   private _sendCloseBrowserTabsMessage
   private _sendResetBrowserStateMessage
+  private _isRunnerSocketConnected
   private _sendFocusBrowserMessage
 
   protected ended: boolean
@@ -164,6 +165,7 @@ export class SocketBase {
     })
 
     let automationClient
+    let runnerSocket
 
     const { socketIoRoute, socketIoCookie } = config
 
@@ -274,7 +276,7 @@ export class SocketBase {
         .then((resp) => {
           return cb({ response: resp })
         }).catch((err) => {
-          return cb({ error: errors.clone(err) })
+          return cb({ error: errors.cloneErr(err) })
         })
       })
 
@@ -288,6 +290,10 @@ export class SocketBase {
 
       this._sendFocusBrowserMessage = async () => {
         await automationRequest('focus:browser:window', {})
+      }
+
+      this._isRunnerSocketConnected = () => {
+        return !!(runnerSocket && runnerSocket.connected)
       }
 
       socket.on('reporter:connected', () => {
@@ -306,6 +312,8 @@ export class SocketBase {
         if (socket.inRunnerRoom) {
           return
         }
+
+        runnerSocket = socket
 
         socket.inRunnerRoom = true
 
@@ -459,7 +467,7 @@ export class SocketBase {
         .then((resp) => {
           return cb({ response: resp })
         }).catch((err) => {
-          return cb({ error: errors.clone(err) })
+          return cb({ error: errors.cloneErr(err) })
         })
       })
 
@@ -566,6 +574,12 @@ export class SocketBase {
   async resetBrowserState () {
     if (this._sendResetBrowserStateMessage) {
       await this._sendResetBrowserStateMessage()
+    }
+  }
+
+  isRunnerSocketConnected () {
+    if (this._isRunnerSocketConnected) {
+      return this._isRunnerSocketConnected()
     }
   }
 

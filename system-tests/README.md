@@ -49,7 +49,7 @@ describe('my new project', () => {
     systemTests.setup()
 
     systemTests.it('fails as expected', {
-        project: Fixtures.projectPath('my-new-project'),
+        project: 'my-new-project',
         snapshot: true,
         spec: '*',
         expectedExitCode: 2
@@ -60,6 +60,36 @@ describe('my new project', () => {
 From here, you could run this test with `yarn test my-new-project`.
 
 There are many more options available for `systemTests.it` and `systemTests.setup`. You can massage the stdout, do pre-run tasks, set up HTTP/S servers, and more. Explore the typedocs in [`./lib/system-tests`](./lib/system-tests) for more information.
+
+These tests run in the `system-tests-*` CI jobs.
+
+### Developing Docker-based tests against built binary
+
+Specs in the [`./test`](./test) directory are run against an unbuilt Cypress App. They don't test `cypress` NPM package installation or other prod app behavior. This is done so that they can run as fast as possible in CI, without waiting for a full build of the Cypress App.
+
+Specs in [`./test-binary`](./test-binary) are run against the *built Cypress App*. They also run inside of their own Docker containers to give a blank slate environment for Cypress to run in. Before each test, the prod CLI is `npm install`ed along with the built Cypress `.zip`, and real `cypress run` commands are used to run the tests. There should be no functional difference between running a project in these tests and running real prod Cypress inside of Docker in CI.
+
+The purpose of these tests is to test things that we normally can't inside of regular `system-tests`, such as testing Cypress with different Node versions, with/without Xvfb, or inside of different operating system versions.
+
+An example of using `dockerImage` and `withBinary` to write a binary system test:
+
+```ts
+// ./test-binary/node-versions.spec.ts
+import systemTests from '../lib/system-tests'
+import Fixtures from '../lib/fixtures'
+
+describe('node versions', () => {
+    systemTests.it('runs in node 12', {
+        dockerImage: 'cypress:node/12',
+        project: 'todos',
+        withBinary: true,
+    })
+})
+```
+
+Running `yarn test node-versions` would spin up a local Docker container for `cypress:node/12`, install Cypress from `../cypress.zip` and `../cli/build`, and then call the regular `cypress run` command within the container. Other options for `systemTests.it` such as `onRun` and `expectedExitCode` still function normally.
+
+These tests run in the `binary-system-tests` CI job.
 
 ### Updating Snaphots
 

@@ -232,7 +232,8 @@ exports['e2e web security / firefox / displays warning when firefox and chromeWe
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  simple_passing.cy.js                                                            (1 of 1)
-Your project has set the configuration option: \`chromeWebSecurity: false\`
+
+Your project has set the configuration option: chromeWebSecurity to false
 
 This option will not have an effect in Firefox. Tests that rely on web security being disabled will not run as expected.
 

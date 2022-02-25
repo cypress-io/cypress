@@ -38,7 +38,7 @@
       <div>
         <StandardModalFooter
           v-if="result"
-          class="flex h-72px gap-16px items-center"
+          class="flex gap-16px items-center"
         >
           <router-link
             class="outline-none"
@@ -46,6 +46,7 @@
             "
           >
             <Button
+              size="lg"
               :prefix-icon="TestResultsIcon"
               prefix-icon-class="w-16px h-16px icon-dark-white"
               @click="emits('close')"
@@ -54,6 +55,7 @@
             </Button>
           </router-link>
           <Button
+            size="lg"
             :prefix-icon="PlusButtonIcon"
             prefix-icon-class="w-16px h-16px icon-dark-gray-500"
             variant="outline"

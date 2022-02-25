@@ -62,6 +62,8 @@ npm/cypress-schematic/src/**/*.js
 /npm/create-cypress-tests/initial-template
 /npm/create-cypress-tests/**/*.template.*
 
+packages/data-context/test/unit/codegen/files
+
 # community templates we test against, no need to lint
 system-tests/projects/create-react-app-configured/**/*
 system-tests/projects/create-react-app-unconfigured/**/*
