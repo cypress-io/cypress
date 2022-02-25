@@ -81,7 +81,7 @@ describe('src/cy/commands/querying/within', () => {
       })
     })
 
-    it('supports complicated nested withins', () => {
+    it.only('supports complicated nested withins', () => {
       const span1 = cy.$$('#button-text a span')
       const span2 = cy.$$('#button-text button span')
 

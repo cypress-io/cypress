@@ -7,12 +7,12 @@ const la = require('lazy-ass')
 const is = require('check-more-types')
 
 const hasVersion = (json) => {
-  return la(!is.semver(json.version), 'cannot find version', json)
+  return la(is.semver(json.version), 'cannot find version', json)
 }
 
 const changeVersion = (o) => ({ ...o, version: 'x.y.z' })
 
-describe.only('package.json build', () => {
+describe('package.json build', () => {
   beforeEach(function () {
     // stub package.json in CLI
     // with a few test props

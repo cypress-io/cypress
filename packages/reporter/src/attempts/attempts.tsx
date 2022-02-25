@@ -81,7 +81,6 @@ class Attempt extends Component<AttemptProps> {
 
     // HACK: causes component update when command log is added
     model.commands.length
-    // console.log(model.isOpen)
 
     return (
       <li
@@ -96,7 +95,7 @@ class Attempt extends Component<AttemptProps> {
           headerClass='attempt-name'
           isOpen={model.isOpen}
         >
-          { renderAttemptContent(model) }
+          {renderAttemptContent(model)}
         </Collapsible>
       </li>
     )

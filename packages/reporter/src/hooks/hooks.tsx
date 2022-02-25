@@ -70,6 +70,7 @@ const Hook = observer(({ model, showNumber }: HookProps) => (
     >
       <ul className='commands-container'>
         {_.map(model.commands, (command) => <Command key={command.id} model={command} aliasesWithDuplicates={model.aliasesWithDuplicates} />)}
+        {model.showStudioPrompt && <StudioNoCommands />}
       </ul>
     </Collapsible>
   </li>
