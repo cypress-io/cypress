@@ -89,17 +89,21 @@ export class WizardActions {
   }
 
   async initialize () {
-    if (this.ctx.currentProject) {
-      this.ctx.update((coreData) => {
-        coreData.wizard.detectedFramework = null
-        coreData.wizard.detectedBundler = null
-        coreData.wizard.detectedLanguage = null
-      })
+    if (!this.ctx.currentProject) {
+      return
+    }
 
-      await this.detectLanguage()
-      debug('detectedLanguage %s', this.data.detectedLanguage)
-      this.data.chosenLanguage = this.data.detectedLanguage || 'js'
+    this.ctx.update((coreData) => {
+      coreData.wizard.detectedFramework = null
+      coreData.wizard.detectedBundler = null
+      coreData.wizard.detectedLanguage = null
+    })
 
+    await this.detectLanguage()
+    debug('detectedLanguage %s', this.data.detectedLanguage)
+    this.data.chosenLanguage = this.data.detectedLanguage || 'js'
+
+    try {
       const detected = detect(await fs.readJson(path.join(this.ctx.currentProject, 'package.json')))
 
       debug('detected %o', detected)
@@ -117,6 +121,8 @@ export class WizardActions {
           coreData.wizard.chosenBundler = detected.bundler || detected.framework.supportedBundlers[0].type
         })
       }
+    } catch {
+      // Could not detect anything - no problem, no need to do anything.
     }
   }
 
