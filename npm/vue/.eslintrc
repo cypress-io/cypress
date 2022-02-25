@@ -10,9 +10,12 @@
   "parserOptions": {
     "parser": "@typescript-eslint/parser"
   },
+  "globals": {
+    "defineProps": "readonly",
+    "defineEmits": "readonly"
+  },
   "env": {
-    "cypress/globals": true,
-    "vue/setup-compiler-macros": true
+    "cypress/globals": true
   },
   "rules": {
     "mocha/no-global-tests": "off",

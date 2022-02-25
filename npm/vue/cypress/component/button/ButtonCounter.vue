@@ -1,15 +1,17 @@
 <template>
-  <button v-on:click="incrementCounter">{{ counter }}</button>
+  <button @click="incrementCounter">
+    {{ counter }}
+  </button>
 </template>
 
 <script>
 export default {
+  emits: ['increment'],
   data () {
     return {
       counter: 0,
     }
   },
-
   methods: {
     incrementCounter () {
       this.counter += 1

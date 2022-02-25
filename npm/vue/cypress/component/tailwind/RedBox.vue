@@ -1,13 +1,21 @@
 <template>
   <!-- classes come from tailwindcss -->
-  <div class="red m-8 p-8 font-sans" data-cy="box">
+  <div
+    class="font-sans m-8 p-8 red"
+    data-cy="box"
+  >
     <h1>{{ greeting }} RedBox</h1>
   </div>
 </template>
 
 <script>
 export default {
-  props: ['status'],
+  props: {
+    status: {
+      default: '',
+      type: String,
+    },
+  },
   computed: {
     greeting () {
       if (this.status) {

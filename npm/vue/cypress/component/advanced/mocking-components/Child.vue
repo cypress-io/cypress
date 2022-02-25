@@ -1,5 +1,7 @@
 <template>
-  <div class="a-child">Real child component</div>
+  <div class="a-child">
+    Real child component
+  </div>
 </template>
 
 <script>
