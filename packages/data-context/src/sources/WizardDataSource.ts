@@ -4,11 +4,11 @@ import {
   BUNDLERS,
   DEPENDENCIES,
   FRONTEND_FRAMEWORKS,
-  CYPRESS_DEV_SERVERS,
 } from '@packages/scaffold-config'
 import type { DataContext } from '..'
 import path from 'path'
 import resolve from 'resolve-from'
+import assert from 'assert'
 
 const debug = Debug('cypress:data-context:wizard-data-source')
 
@@ -32,19 +32,10 @@ export class WizardDataSource {
     // find the matching dev server
     // vite -> @cypress/vite-dev-server
     // webpack -> @cypress/webpack-dev-server
-    // only applicable for `library` - `template` like CRA, Next.js etc
-    // only support 1 dev server, which is included in `framework.dependencies`.
-    if (this.chosenFramework.family === 'library') {
-      const cypressDevServer = CYPRESS_DEV_SERVERS.find(
-        (devServer) => devServer.supports.some((bundler) => bundler.type === this.chosenBundler?.type),
-      )
+    const bundler = BUNDLERS.find((x) => x.type === this.chosenBundler?.type)
 
-      if (!cypressDevServer) {
-        throw Error(`Could not find matching Cypress Dev Server for ${this.chosenBundler.type}`)
-      }
-
-      packages.push(cypressDevServer)
-    }
+    assert(bundler)
+    packages.push(...bundler.dependencies)
 
     const storybookInfo = await this.ctx.storybook.loadStorybookInfo()
     const { storybookDep } = this.chosenFramework

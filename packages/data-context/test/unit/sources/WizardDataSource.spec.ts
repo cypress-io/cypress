@@ -29,7 +29,7 @@ describe('packagesToInstall', () => {
 
     const actual = await ctx.wizard.installDependenciesCommand()
 
-    expect(actual).to.eq(`npm install -D @cypress/vue@^2.0.0 @cypress/webpack-dev-server@latest webpack@^4.0.0 webpack-dev-server@^4.0.0 html-webpack-plugin@^4.0.0`)
+    expect(actual).to.eq(`npm install -D @cypress/vue@^2.0.0 webpack@^4.0.0 @cypress/webpack-dev-server@latest webpack-dev-server@^4.0.0 html-webpack-plugin@^4.0.0`)
   })
 
   it('vueclivue3-unconfigured', async () => {
@@ -41,7 +41,7 @@ describe('packagesToInstall', () => {
 
     const actual = await ctx.wizard.installDependenciesCommand()
 
-    expect(actual).to.eq(`npm install -D @cypress/vue@^3.0.0 @cypress/webpack-dev-server@latest webpack@^5.0.0 html-webpack-plugin@^5.0.0 webpack-dev-server@^4.0.0`)
+    expect(actual).to.eq(`npm install -D @cypress/vue@^3.0.0 webpack@^4.0.0 @cypress/webpack-dev-server@latest webpack-dev-server@^4.0.0 html-webpack-plugin@^4.0.0`)
   })
 
   it('regular react project with vite', async () => {
@@ -101,7 +101,7 @@ describe('packagesToInstall', () => {
 
     const actual = await ctx.wizard.installDependenciesCommand()
 
-    expect(actual).to.eq('npm install -D @cypress/react@^5.0.0 @cypress/webpack-dev-server@latest @storybook/testing-react@latest')
+    expect(actual).to.eq('npm install -D @cypress/react@^5.0.0 @cypress/webpack-dev-server@latest webpack-dev-server@^4.0.0 html-webpack-plugin@^4.0.0 @storybook/testing-react@latest')
   })
 
   it('framework and bundler are undefined', async () => {

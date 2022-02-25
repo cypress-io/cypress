@@ -6,14 +6,11 @@ import {
   CYPRESS_REACT_LATEST,
   CYPRESS_VUE_2,
   CYPRESS_VUE_3,
-  HTML_WEBPACK_PLUGIN_4,
   STORYBOOK_REACT,
   STORYBOOK_VUE,
-  WEBPACK_DEV_SERVER_4,
   BUNDLER_WEBPACK_4,
-  CYPRESS_WEBPACK,
 } from './constants'
-import { BUNDLER_VITE, BUNDLER_WEBPACK_5, HTML_WEBPACK_PLUGIN_5 } from '.'
+import { BUNDLER_VITE, BUNDLER_WEBPACK_5 } from '.'
 
 const isWebpack = (bundler: Bundler) => ['webpack4', 'webpack5'].includes(bundler)
 
@@ -26,9 +23,6 @@ export const FRONTEND_FRAMEWORKS = [
     packages: [
       CYPRESS_REACT_LATEST,
       BUNDLER_WEBPACK_4,
-      CYPRESS_WEBPACK,
-      WEBPACK_DEV_SERVER_4,
-      HTML_WEBPACK_PLUGIN_4,
     ],
     defaultPackagePath: '@cypress/react/plugins/react-scripts',
     glob: '*.{js,jsx,tsx}',
@@ -73,9 +67,6 @@ export const FRONTEND_FRAMEWORKS = [
     packages: [
       CYPRESS_REACT_LATEST,
       BUNDLER_WEBPACK_5,
-      CYPRESS_WEBPACK,
-      WEBPACK_DEV_SERVER_4,
-      HTML_WEBPACK_PLUGIN_5,
     ],
     defaultPackagePath: '@cypress/react/plugins/react-scripts',
     glob: '*.{js,jsx,tsx}',
@@ -119,10 +110,7 @@ export const FRONTEND_FRAMEWORKS = [
     supportedBundlers: [BUNDLER_WEBPACK_4],
     packages: [
       CYPRESS_VUE_2,
-      CYPRESS_WEBPACK,
       BUNDLER_WEBPACK_4,
-      WEBPACK_DEV_SERVER_4,
-      HTML_WEBPACK_PLUGIN_4,
     ],
     defaultPackagePath: null,
     glob: '*.vue',
@@ -179,10 +167,7 @@ export const FRONTEND_FRAMEWORKS = [
     supportedBundlers: [BUNDLER_WEBPACK_4],
     packages: [
       CYPRESS_VUE_3,
-      CYPRESS_WEBPACK,
-      BUNDLER_WEBPACK_5,
-      HTML_WEBPACK_PLUGIN_5,
-      WEBPACK_DEV_SERVER_4,
+      BUNDLER_WEBPACK_4,
     ],
     defaultPackagePath: null,
     glob: '*.vue',
@@ -512,9 +497,6 @@ export const FRONTEND_FRAMEWORKS = [
     packages: [
       CYPRESS_REACT_LATEST,
       BUNDLER_WEBPACK_4,
-      CYPRESS_WEBPACK,
-      WEBPACK_DEV_SERVER_4,
-      HTML_WEBPACK_PLUGIN_4,
     ],
     defaultPackagePath: '@cypress/react/plugins/next',
     glob: '*.{js,jsx,tsx}',
@@ -540,9 +522,6 @@ export const FRONTEND_FRAMEWORKS = [
     packages: [
       CYPRESS_VUE_2,
       BUNDLER_WEBPACK_4,
-      CYPRESS_WEBPACK,
-      WEBPACK_DEV_SERVER_4,
-      HTML_WEBPACK_PLUGIN_4,
     ],
     defaultPackagePath: null,
     glob: '*.vue',

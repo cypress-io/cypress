@@ -47,40 +47,17 @@ export const WEBPACK_DEV_SERVER_4 = {
   description: 'Webpack Dev Server to bundle and run your tests',
 } as const
 
-export const BUNDLER_WEBPACK_4 = {
-  type: 'webpack4',
-  name: 'Webpack (v4)',
-  package: 'webpack',
-  installer: 'webpack@^4.0.0',
-  description: 'Webpack is a module bundler',
+export const HTML_WEBPACK_PLUGIN_4 = {
+  type: 'other',
+  name: 'HTML Webpack Plugin',
+  package: 'html-webpack-plugin',
+  installer: 'html-webpack-plugin@^4.0.0',
+  description: 'The HtmlWebpackPlugin simplifies creation of HTML files to serve your webpack bundles',
 } as const
-
-export const BUNDLER_WEBPACK_5 = {
-  type: 'webpack5',
-  name: 'Webpack (v5)',
-  package: 'webpack',
-  installer: 'webpack@^5.0.0',
-  description: 'Webpack is a module bundler',
-} as const
-
-export const BUNDLER_VITE = {
-  type: 'vite',
-  name: 'Vite',
-  package: 'vite',
-  installer: 'vite@^2.0.0',
-  description: 'Vite is dev server that serves your source files over native ES modules',
-} as const
-
-export const BUNDLERS = [
-  BUNDLER_WEBPACK_4,
-  BUNDLER_WEBPACK_5,
-  BUNDLER_VITE,
-]
 
 export const CYPRESS_WEBPACK = {
   type: 'webpack',
   name: 'Cypress Webpack Dev Server',
-  supports: [BUNDLER_WEBPACK_4, BUNDLER_WEBPACK_5],
   package: '@cypress/webpack-dev-server',
   installer: '@cypress/webpack-dev-server@latest',
   description: 'Allows Cypress to use your existing build configuration in order to bundle and run your tests',
@@ -89,7 +66,6 @@ export const CYPRESS_WEBPACK = {
 export const CYPRESS_VITE = {
   type: 'vite',
   name: 'Cypress Vite Dev Server',
-  supports: [BUNDLER_VITE],
   package: '@cypress/vite-dev-server',
   installer: '@cypress/vite-dev-server@latest',
   description: 'Allows Cypress to use your existing build configuration in order to bundle and run your tests',
@@ -100,12 +76,17 @@ export const CYPRESS_DEV_SERVERS = [
   CYPRESS_VITE,
 ] as const
 
-export const HTML_WEBPACK_PLUGIN_4 = {
-  type: 'other',
-  name: 'HTML Webpack Plugin',
-  package: 'html-webpack-plugin',
-  installer: 'html-webpack-plugin@^4.0.0',
-  description: 'The HtmlWebpackPlugin simplifies creation of HTML files to serve your webpack bundles',
+export const BUNDLER_WEBPACK_4 = {
+  type: 'webpack4',
+  name: 'Webpack (v4)',
+  package: 'webpack',
+  installer: 'webpack@^4.0.0',
+  description: 'Webpack is a module bundler',
+  dependencies: [
+    CYPRESS_WEBPACK,
+    WEBPACK_DEV_SERVER_4,
+    HTML_WEBPACK_PLUGIN_4,
+  ],
 } as const
 
 export const HTML_WEBPACK_PLUGIN_5 = {
@@ -115,6 +96,34 @@ export const HTML_WEBPACK_PLUGIN_5 = {
   installer: 'html-webpack-plugin@^5.0.0',
   description: 'The HtmlWebpackPlugin simplifies creation of HTML files to serve your webpack bundles',
 } as const
+
+export const BUNDLER_WEBPACK_5 = {
+  type: 'webpack5',
+  name: 'Webpack (v5)',
+  package: 'webpack',
+  installer: 'webpack@^5.0.0',
+  description: 'Webpack is a module bundler',
+  dependencies: [
+    CYPRESS_WEBPACK,
+    WEBPACK_DEV_SERVER_4,
+    HTML_WEBPACK_PLUGIN_5,
+  ],
+} as const
+
+export const BUNDLER_VITE = {
+  type: 'vite',
+  name: 'Vite',
+  package: 'vite',
+  installer: 'vite@^2.0.0',
+  description: 'Vite is dev server that serves your source files over native ES modules',
+  dependencies: [CYPRESS_VITE],
+} as const
+
+export const BUNDLERS = [
+  BUNDLER_WEBPACK_4,
+  BUNDLER_WEBPACK_5,
+  BUNDLER_VITE,
+]
 
 export const CYPRESS_REACT_LATEST = {
   type: 'cypress-adapter',
