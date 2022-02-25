@@ -314,7 +314,7 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
     route.requests[requestId] = request as Interception
   }
 
-  if (!_.isFunction(userHandler) || proxyRequest.resourceType === 'other') {
+  if (!_.isFunction(userHandler) || proxyRequest.preRequest?.resourceType === 'other') {
     // notification-only
     return null
   }
