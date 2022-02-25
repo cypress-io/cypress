@@ -25,8 +25,6 @@ const reset = function () {
     server.restore()
   }
 
-  cancelPendingXhrs()
-
   server = null
 }
 
