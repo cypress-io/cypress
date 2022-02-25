@@ -58,6 +58,14 @@ describe('detect', () => {
     expect(actual.bundler).to.eq('vite')
   })
 
+  it(`Vue with Vite`, async () => {
+    const pkg = await scaffoldMigrationProject('vue3-vite-ts-unconfigured')
+    const actual = detect(pkg)
+
+    expect(actual.framework.type).to.eq('vue3')
+    expect(actual.bundler).to.eq('vite')
+  })
+
   it(`Next.js`, async () => {
     const pkg = await scaffoldMigrationProject('nextjs-unconfigured')
     const actual = detect(pkg)
