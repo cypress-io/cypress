@@ -59,7 +59,6 @@ module.exports = {
 
     return Promise.all([this.getFileHash(mainIconsPath), this.getFileHash(cachedIconsPath)])
     .then(([mainHash, cachedHash]) => {
-      console.log({ mainHash, cachedHash })
       if (mainHash !== cachedHash) {
         throw new Error('Icon mismatch')
       }
@@ -138,10 +137,16 @@ module.exports = {
 
   ensure () {
     return Promise.all([
+      // check the version of electron and re-build if updated
       this.checkCurrentVersion(),
+      // check if the dist folder exist and re-build if not
       this.checkExecExistence(),
+      // Compare the icon in dist with the one in the icons
+      // package. If different, force the re-build.
       this.checkIconVersion(),
     ])
+
+    // if all is good, then return without packaging a new electron app
   },
 
   check () {
