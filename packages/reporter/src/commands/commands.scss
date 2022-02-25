@@ -97,7 +97,7 @@
       display: inline-block;
 
       &.route {
-        background-color: $teal-500;
+        background-color: $orange-700;
       }
 
       &.dom {
@@ -226,6 +226,7 @@
     font-size: 11px;
     margin-right: 12px;
     font-weight: 600;
+    min-width: fit-content;
   }
 
   // Command State Styles
@@ -235,10 +236,6 @@
     &:hover {
       border-left: 2px solid $gray-900;
     }
-
-    // .command-pin {
-    //   color: $gray-500;
-    // }
 
     &:not(.command-is-event) .command-number {
       color: $gray-700;
@@ -478,12 +475,15 @@
     padding-left: 10px;
     padding-right: 5px;
     padding-top: 3px;
-    width: 25px;
+    // width: 25px;
+    display: flex;
+    min-width: 25px;
 
     .command-expander {
       color: $gray-500;
       transform: rotate(-90deg);
       transition: transform 150ms ease-out;
+      margin-top: 5px;
 
       path {
         stroke: $gray-700;

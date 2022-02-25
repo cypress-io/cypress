@@ -95,7 +95,7 @@ describe('commands', () => {
       name: 'within',
       state: 'passed',
       type: 'child',
-      group: 130,
+      group: 129,
       groupLevel: 1,
       timeout: 4000,
       wallClockStartedAt: inProgressStartedAt,
@@ -130,7 +130,7 @@ describe('commands', () => {
       message: 'do something else',
       state: 'passed',
       timeout: 4000,
-      group: 130,
+      group: 129,
       groupLevel: 1,
       wallClockStartedAt: inProgressStartedAt,
     })

@@ -40,7 +40,7 @@ const shouldShowCount = (aliasesWithDuplicates: Array<Alias> | null, aliasName: 
   return _.includes(aliasesWithDuplicates, aliasName)
 }
 
-const CommandColumn = observer(({ model }) => (
+const NavColumn = observer(({ model }) => (
   <>
     <div className='command-number-column'>
       {<PinIcon className='command-pin' />}
@@ -248,6 +248,7 @@ class Command extends Component<Props> {
     let groupPlaceholder: Array<JSX.Element> = []
 
     if (model.groupLevel !== undefined) {
+      // cap the group nesting to 6 levels keep the log text legible
       const level = model.groupLevel < 6 ? model.groupLevel : 5
 
       for (let i = 0; i < level; i++) {
@@ -260,10 +261,8 @@ class Command extends Component<Props> {
         className={cs(
           'command',
           `command-name-${commandName}`,
-          // `command-state-${model.state}`,
           {
             'command-scaled': message && message.length > 100,
-            // 'command-is-pinned': this._isPinned(),
           },
         )}
       >
@@ -281,27 +280,22 @@ class Command extends Component<Props> {
               },
             )
           }
-          onMouseEnter={() => this._snapshot(true)}
-          onMouseLeave={() => this._snapshot(false)}
         >
-          <CommandColumn model={model} isGrouped={!!this.props.groupId} />
+          <NavColumn model={model} isGroup={!!this.props.groupId}>
+            {groupPlaceholder}
+          </NavColumn>
           <FlashOnClick
             message='Printed output to your console'
             onClick={this._onClick}
             shouldShowMessage={this._shouldShowClickMessage}
-            wrapperClassName={cs('command-pin-target',
-              {
-                'command-group': !!this.props.groupId,
-              })}
+            wrapperClassName={cs('command-pin-target', { 'command-group': !!this.props.groupId })}
           >
             <div
               className='command-wrapper-text'
-              style={{ width: '100%' }}
               onMouseEnter={() => this._snapshot(true)}
               onMouseLeave={() => this._snapshot(false)}
             >
               {groupPlaceholder}
-              {/* <div >/ */}
               <span className={cs('command-info')}>
                 <span className='command-method'>
                   <span>
@@ -338,7 +332,6 @@ class Command extends Component<Props> {
                   </span>
                 </span>
               </span>
-              {/* </div> */}
               <Progress model={model} />
             </div>
           </FlashOnClick>
@@ -382,12 +375,6 @@ class Command extends Component<Props> {
 
   @action _onClick = () => {
     if (this.props.appState.isRunning) return
-
-    // if (this.props.model.hasChildren) {
-    //   this.props.model.toggleOpen()
-
-    //   return
-    // }
 
     const { id } = this.props.model
 
