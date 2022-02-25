@@ -1,17 +1,21 @@
 import { parse } from '@babel/parser'
-import { FRONTEND_FRAMEWORKS } from '@packages/scaffold-config'
+import { graphqlSchema } from '@packages/graphql/src/schema'
+import { FRONTEND_FRAMEWORKS } from '@packages/types'
 import { expect } from 'chai'
 import dedent from 'dedent'
 import fs from 'fs-extra'
 import path from 'path'
 import sinon from 'sinon'
 import { DataContext } from '../../../src'
+import { AppApiShape, AuthApiShape, ElectronApiShape, LocalSettingsApiShape, ProjectApiShape } from '../../../src/actions'
 import {
   Action, codeGenerator, CodeGenResult, CodeGenResults,
 } from '../../../src/codegen/code-generator'
 import { SpecOptions } from '../../../src/codegen/spec-options'
 import templates from '../../../src/codegen/templates'
-import { createTestDataContext } from '../helper'
+import { InjectedConfigApi } from '../../../src/data'
+import { ErrorApiShape } from '../../../src/DataContext'
+import { BrowserApiShape } from '../../../src/sources'
 
 const tmpPath = path.join(__dirname, 'tmp/test-code-gen')
 
@@ -25,7 +29,21 @@ describe('code-generator', () => {
   let ctx: DataContext
 
   beforeEach(async () => {
-    ctx = createTestDataContext()
+    ctx = new DataContext({
+      schema: graphqlSchema,
+      mode: 'run',
+      modeOptions: {},
+      appApi: {} as AppApiShape,
+      localSettingsApi: {} as LocalSettingsApiShape,
+      authApi: {} as AuthApiShape,
+      errorApi: {} as ErrorApiShape,
+      configApi: {
+        getServerPluginHandlers: () => [],
+      } as InjectedConfigApi,
+      projectApi: {} as ProjectApiShape,
+      electronApi: {} as ElectronApiShape,
+      browserApi: {} as BrowserApiShape,
+    })
 
     ctx.update((s) => {
       s.currentProject = tmpPath

@@ -1,12 +1,13 @@
 import { ref } from 'vue'
-import SelectFwOrBundler, { Option } from './SelectFwOrBundler.vue'
+import SelectFwOrBundler from './SelectFwOrBundler.vue'
 
-const manyOptions: Readonly<Option[]> = [
+const manyOptions = [
   {
     name: 'Vue.js',
     id: 'vue',
     isSelected: false,
-    type: 'vue2',
+    type: 'vue',
+    category: 'vue',
     isDetected: true,
   },
   {
@@ -15,6 +16,7 @@ const manyOptions: Readonly<Option[]> = [
     id: 'react',
     isSelected: false,
     type: 'react',
+    category: 'react',
   },
 ] as const
 
@@ -63,7 +65,7 @@ describe('<SelectFwOrBundler />', () => {
             name: 'VueJs',
             id: 'vue',
             isSelected: false,
-            type: 'vueclivue3',
+            type: 'vuecli',
           },
         ]}
       />
@@ -105,7 +107,7 @@ describe('<SelectFwOrBundler />', () => {
     cy.mount(() => (
       <div>
         <div>click out</div>
-        <SelectFwOrBundler selectorType="framework" label="Front-end Framework" options={manyOptions} value="vue2" />
+        <SelectFwOrBundler selectorType="framework" label="Front-end Framework" options={manyOptions} value="vue" />
       </div>
     ))
 

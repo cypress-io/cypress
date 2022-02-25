@@ -511,15 +511,12 @@ enum FrontendFrameworkCategoryEnum {
 }
 
 enum FrontendFrameworkEnum {
-  crav4
-  crav5
+  cra
   nextjs
   nuxtjs
   react
-  vue2
-  vue3
-  vueclivue2
-  vueclivue3
+  vue
+  vuecli
 }
 
 """Error from generated spec"""
@@ -1056,13 +1053,6 @@ type Storybook implements Node {
 """The bundlers that we can use with Cypress"""
 enum SupportedBundlers {
   vite
-  webpack4
-  webpack5
-}
-
-"""The packages for bundlers that we can use with Cypress"""
-enum SupportedPackage {
-  vite
   webpack
 }
 
@@ -1123,9 +1113,6 @@ type Wizard {
   """All of the component testing frameworks to choose from"""
   frameworks: [WizardFrontendFramework!]!
 
-  """Command to install required command"""
-  installDependenciesCommand: String
-
   """The list of packages to install that are currently installed"""
   installedPackages: [String!]
   language: WizardCodeLanguage
@@ -1150,8 +1137,8 @@ type WizardBundler implements Node {
   """Display name of the bundler"""
   name: String!
 
-  """Name of package on npm"""
-  package: SupportedPackage!
+  """Package to install associated with the bundler"""
+  package: String!
 
   """The name of the framework"""
   type: SupportedBundlers!

@@ -33,7 +33,7 @@ import {
 } from '../generated/graphql'
 import WarningList from '../warning/WarningList.vue'
 import { computed } from 'vue'
-import type { FrontendFramework, Bundler } from '@packages/scaffold-config'
+import type { FrontendFramework, Bundler } from '@packages/types/src/constants'
 import LaunchpadHeader from './LaunchpadHeader.vue'
 import { useI18n } from '@cy/i18n'
 import SelectLanguage from './SelectLanguage.vue'
@@ -41,7 +41,7 @@ import { useMutation } from '@urql/vue'
 import WizardLayout from './WizardLayout.vue'
 
 export interface WizardSetupData {
-  bundler: Bundler | null
+  bundler: Bundler['type'] | null
   framework: FrontendFramework['type'] | null
   codeLanguage: CodeLanguageEnum
 }

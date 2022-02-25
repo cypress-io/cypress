@@ -2,8 +2,7 @@ import { WizardBundler } from './gql-WizardBundler'
 import { WizardFrontendFramework } from './gql-WizardFrontendFramework'
 import { WizardNpmPackage } from './gql-WizardNpmPackage'
 import { objectType } from 'nexus'
-import { CODE_LANGUAGES } from '@packages/types'
-import { BUNDLERS, FRONTEND_FRAMEWORKS } from '@packages/scaffold-config'
+import { BUNDLERS, CODE_LANGUAGES, FRONTEND_FRAMEWORKS } from '@packages/types'
 import { WizardCodeLanguage } from './gql-WizardCodeLanguage'
 
 export const Wizard = objectType({
@@ -51,12 +50,7 @@ export const Wizard = objectType({
 
     t.list.nonNull.string('installedPackages', {
       description: 'The list of packages to install that are currently installed',
-      resolve: (source, args, ctx) => ctx.wizard.installedPackages(),
-    })
-
-    t.string('installDependenciesCommand', {
-      description: 'Command to install required command',
-      resolve: (source, args, ctx) => ctx.wizard.installDependenciesCommand(),
+      resolve: (source, args, ctx) => ctx.wizard.resolvePackagesToInstall(),
     })
   },
   sourceType: {

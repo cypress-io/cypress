@@ -1,6 +1,6 @@
 import { ManualInstallFragmentDoc } from '../generated/graphql-test'
 import ManualInstall from './ManualInstall.vue'
-import { CYPRESS_REACT_LATEST, CYPRESS_WEBPACK } from '@packages/scaffold-config'
+import { PACKAGES_DESCRIPTIONS } from '../../../types/src/constants'
 
 describe('<ManualInstall />', () => {
   it('playground', () => {
@@ -14,8 +14,8 @@ describe('<ManualInstall />', () => {
   })
 
   it('lists packages and can copy install command to clipboard', { viewportWidth: 800, viewportHeight: 600 }, () => {
-    const framework = CYPRESS_REACT_LATEST
-    const bundler = CYPRESS_WEBPACK
+    const framework = '@cypress/react'
+    const bundler = '@cypress/webpack-dev-server'
 
     cy.mountFragment(ManualInstallFragmentDoc, {
       render: (gqlVal) => (
@@ -25,7 +25,7 @@ describe('<ManualInstall />', () => {
       ),
     })
 
-    const installCommand = `npm install -D @cypress/react @cypress/webpack-dev-server`
+    const installCommand = `yarn add -D ${framework} ${bundler}`
 
     // @ts-ignore
     cy.findByRole('button', { name: 'Copy' }).realClick()
@@ -50,15 +50,15 @@ describe('<ManualInstall />', () => {
     .invoke('readText')
     .should('equal', installCommand)
 
-    const validatePackage = (packageName: string) => {
+    const validatePackage = (packageName) => {
       cy.findByRole('link', { name: packageName })
       .should('have.attr', 'href', `https://www.npmjs.com/package/${packageName}`)
 
-      cy.contains(framework.description.split('<span')[0])
+      cy.contains(PACKAGES_DESCRIPTIONS[framework].split('<span')[0])
     }
 
-    validatePackage(framework.package)
-    validatePackage(bundler.package)
+    validatePackage(framework)
+    validatePackage(bundler)
   })
 
   it('flags packages already installed', () => {
