@@ -26,9 +26,7 @@ const debug = debugFn('cypress:driver:runner')
 const debugErrors = debugFn('cypress:driver:errors')
 
 const duration = (before: Date, after: Date) => {
-  // TypeScript doesn't allow subtraction between `Date`s.
-  // @ts-ignore
-  return before - after
+  return Number(before) - Number(after)
 }
 
 const fire = (event, runnable, Cypress) => {
@@ -459,7 +457,7 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
 
 const getTestResults = (tests) => {
   return _.map(tests, (test) => {
-    const obj: any = _.pick(test, 'id', 'duration', 'state')
+    const obj: Record<string, any> = _.pick(test, 'id', 'duration', 'state')
 
     obj.title = test.originalTitle
     // TODO FIX THIS!

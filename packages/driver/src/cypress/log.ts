@@ -84,7 +84,7 @@ const getSnapshotProps = (attrs) => {
   return _.pick(attrs, SNAPSHOT_PROPS)
 }
 
-const countLogsByTests = function (tests: any = {}) {
+const countLogsByTests = function (tests: Record<string, any> = {}) {
   if (_.isEmpty(tests)) {
     return 0
   }

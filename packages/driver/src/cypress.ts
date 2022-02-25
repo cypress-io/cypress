@@ -158,7 +158,7 @@ class $Cypress {
     this.setConfig(config)
   }
 
-  setConfig (config: any = {}) {
+  setConfig (config: Record<string, any> = {}) {
     // config.remote
     // {
     //   origin: "http://localhost:2020"
