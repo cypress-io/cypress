@@ -59,7 +59,10 @@ class DockerProcess extends EventEmitter implements SpawnerResult {
       // skip problematic env vars that we don't wanna preserve from `process.env`
       if (
         ['DISPLAY', 'USER', 'HOME', 'USERNAME', 'PATH'].includes(k)
-        || k.startsWith('npm_')) continue
+        || k.startsWith('npm_')
+      ) {
+        continue
+      }
 
       containerCreateEnv.push([k, opts.env[k]].join('='))
     }
