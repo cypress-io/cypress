@@ -5,6 +5,7 @@
 
 /// <reference types="cypress" />
 import { mount } from '@cypress/vue'
+import { h } from 'vue'
 
 import Card from './Card.vue'
 
@@ -17,8 +18,8 @@ describe('Card', () => {
   it('renders slots', () => {
     mount(Card, {
       slots: {
-        header: '<h1>HEADER</h1>',
-        footer: '<div>FOOTER</div>',
+        header: () => h('h1', 'HEADER'),
+        footer: () => h('div', 'FOOTER'),
       },
     })
 
@@ -29,9 +30,9 @@ describe('Card', () => {
   it('renders scopedSlots', () => {
     mount(Card, {
       slots: {
-        default: `<template #default="props">
-          <p>Yay! {{props.content}}</p>
-        </template>`,
+        default: (props) => {
+          return h('p', `Yay! ${props.content}`)
+        },
       },
     })
 
