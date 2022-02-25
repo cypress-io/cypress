@@ -99,34 +99,78 @@ context('multi-domain viewport', { experimentalSessionSupport: true, experimenta
       })
     })
 
-    context('syncs the viewport across domains', () => {
-      it('syncs the viewport from the primary to secondary', () => {
-        cy.viewport(320, 480)
+    it('syncs the viewport from the primary to secondary', () => {
+      // change the viewport in the primary first
+      cy.viewport(320, 480)
 
-        cy.switchToDomain('foobar.com', () => {
-          const viewportChangedSpy = cy.spy()
-
-          cy.on('viewport:changed', viewportChangedSpy)
-
-          // changing the viewport to the same size shouldn't do anything
-          cy.viewport(320, 480).then(() => {
-            expect(viewportChangedSpy).not.to.be.called
-          })
-        })
-      })
-
-      it('syncs the viewport from the secondary to primary', () => {
+      cy.switchToDomain('foobar.com', () => {
         const viewportChangedSpy = cy.spy()
 
         cy.on('viewport:changed', viewportChangedSpy)
 
-        cy.switchToDomain('foobar.com', () => {
-          cy.viewport(320, 480)
+        // changing the viewport to the same size shouldn't do anything
+        cy.viewport(320, 480).then(() => {
+          expect(viewportChangedSpy).not.to.be.called
         })
+
+        cy.window().then((win) => {
+          expect(win.innerWidth).to.equal(320)
+          expect(win.innerHeight).to.equal(480)
+        })
+      })
+    })
+
+    it('syncs the viewport from the secondary to primary', () => {
+      const viewportChangedSpy = cy.spy()
+
+      cy.on('viewport:changed', viewportChangedSpy)
+
+      cy.switchToDomain('foobar.com', () => {
+        // change the viewport in the secondary first
+        cy.viewport(320, 480)
+
+        cy.window().then((win) => {
+          win.location.href = 'http://localhost:3500/fixtures/multi-domain.html'
+        })
+      })
+
+      // changing the viewport to the same size shouldn't do anything
+      cy.viewport(320, 480).then(() => {
+        expect(viewportChangedSpy).not.to.be.called
+      })
+
+      cy.window().then((win) => {
+        expect(win.innerWidth).to.equal(320)
+        expect(win.innerHeight).to.equal(480)
+      })
+    })
+
+    it('syncs across multiple domains', () => {
+      cy.switchToDomain('foobar.com', () => {
+        cy.viewport(320, 480)
+        cy.window().then((win) => {
+          expect(win.innerWidth).to.equal(320)
+          expect(win.innerHeight).to.equal(480)
+        })
+      })
+
+      cy.window().then((win) => {
+        win.location.href = 'http://www.idp.com:3500/fixtures/multi-domain.html'
+      })
+
+      cy.switchToDomain('idp.com', () => {
+        const viewportChangedSpy = cy.spy()
+
+        cy.on('viewport:changed', viewportChangedSpy)
 
         // changing the viewport to the same size shouldn't do anything
         cy.viewport(320, 480).then(() => {
           expect(viewportChangedSpy).not.to.be.called
+        })
+
+        cy.window().then((win) => {
+          expect(win.innerWidth).to.equal(320)
+          expect(win.innerHeight).to.equal(480)
         })
       })
     })

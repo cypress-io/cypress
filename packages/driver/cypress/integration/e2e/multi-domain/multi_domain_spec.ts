@@ -225,7 +225,7 @@ describe('domain validation', { experimentalSessionSupport: true, experimentalMu
 
   it('uses switchToDomain twice', () => {
     cy.visit('/fixtures/auth/index.html') // Establishes Primary Domain
-    cy.get('[data-cy="login-idp"]').click() // Takes you to foobar.com
+    cy.get('[data-cy="login-idp"]').click() // Takes you to idp.com
     cy.switchToDomain('idp.com', () => {
       cy.get('[data-cy="username"]').type('BJohnson')
       cy.get('[data-cy="login"]').click()

@@ -517,7 +517,7 @@ export const eventManager = {
     })
 
     Cypress.on('test:before:run:async', (...args) => {
-      Cypress.multiDomainCommunicator.toSpecBridge('test:before:run:async', ...args)
+      Cypress.multiDomainCommunicator.toAllSpecBridges('test:before:run:async', ...args)
     })
 
     Cypress.multiDomainCommunicator.initialize(window)
@@ -530,9 +530,9 @@ export const eventManager = {
       localBus.emit('expect:domain', domain)
     })
 
-    Cypress.multiDomainCommunicator.on('viewport:changed', (viewport) => {
+    Cypress.multiDomainCommunicator.on('viewport:changed', (viewport, domain) => {
       const callback = () => {
-        Cypress.multiDomainCommunicator.toSpecBridge('viewport:changed:end')
+        Cypress.multiDomainCommunicator.toSpecBridge(domain, 'viewport:changed:end')
       }
 
       Cypress.multiDomainCommunicator.emit('sync:viewport', viewport)
