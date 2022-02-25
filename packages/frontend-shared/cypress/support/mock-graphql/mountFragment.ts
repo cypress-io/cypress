@@ -33,10 +33,15 @@ export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
   Cypress.Commands.add(
     'mount',
     // @ts-ignore todo: figure out the correct types
-    <C extends Parameters<typeof mount>[0]>(comp: C, options: CyMountOptions<C> = {}) => {
+    <C extends Parameters<typeof mount>[0]>(comp: C, options: Parameters<typeof mount>[1] = {}) => {
       options.global = options.global || {}
       options.global.stubs = options.global.stubs || {}
-      options.global.stubs.transition = false
+      if (Array.isArray(options.global.stubs)) {
+        options.global.stubs.push('transition')
+      } else {
+        options.global.stubs.transition = false
+      }
+
       options.global.plugins = options.global.plugins || []
       each(plugins, (pluginFn: () => any) => {
         options?.global?.plugins?.push(pluginFn())
