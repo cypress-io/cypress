@@ -77,10 +77,10 @@ interface RunnablesListProps {
   runnables: RunnableArray
 }
 
-const RunnablesList = observer(({ appState, runnables }: RunnablesListProps) => (
+const RunnablesList = observer(({ runnables }: RunnablesListProps) => (
   <div className='wrap'>
     <ul className='runnables'>
-      {_.map(runnables, (runnable) => <Runnable appState={appState} key={runnable.id} model={runnable} />)}
+      {_.map(runnables, (runnable) => <Runnable key={runnable.id} model={runnable} />)}
     </ul>
   </div>
 ))
@@ -91,7 +91,7 @@ export interface RunnablesContentProps {
   error?: RunnablesErrorModel
 }
 
-const RunnablesContent = observer(({ appState, runnablesStore, spec, error }: RunnablesContentProps) => {
+const RunnablesContent = observer(({ runnablesStore, spec, error }: RunnablesContentProps) => {
   const { isReady, runnables, runnablesHistory } = runnablesStore
 
   if (!isReady) {
@@ -112,7 +112,7 @@ const RunnablesContent = observer(({ appState, runnablesStore, spec, error }: Ru
 
   const isRunning = specPath === runnablesStore.runningSpec
 
-  return <RunnablesList appState={appState} runnables={isRunning ? runnables : runnablesHistory[specPath]} />
+  return <RunnablesList runnables={isRunning ? runnables : runnablesHistory[specPath]} />
 })
 
 export interface RunnablesProps {
@@ -127,13 +127,12 @@ export interface RunnablesProps {
 @observer
 class Runnables extends Component<RunnablesProps> {
   render () {
-    const { error, runnablesStore, spec, appState } = this.props
+    const { error, runnablesStore, spec } = this.props
 
     return (
       <div ref='container' className='container'>
         <RunnableHeader spec={spec} statsStore={statsStore} />
         <RunnablesContent
-          appState={appState}
           runnablesStore={runnablesStore}
           spec={spec}
           error={error}

@@ -70,8 +70,7 @@ export default class Command extends Instrument {
 
   @computed get isOpen () {
     if (!this.hasChildren) return null
-    // console.log(this.group, this.hasChildren)
-    // console.log(_.some(this.children, (v) => v.hasChildren))
+
     return this._isOpen || (this._isOpen === null
       && (
         (this.group && this.hasChildren) ||

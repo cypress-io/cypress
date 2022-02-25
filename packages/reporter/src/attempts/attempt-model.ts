@@ -2,7 +2,7 @@ import _ from 'lodash'
 import { action, computed, observable } from 'mobx'
 
 import Agent, { AgentProps } from '../agents/agent-model'
-import Command, { CommandProps } from '../command-logs/command-model'
+import Command, { CommandProps } from '../commands/command-model'
 import Err from '../errors/err-model'
 import Route, { RouteProps } from '../routes/route-model'
 import Test, { UpdatableTestProps, TestProps, TestState } from '../test/test-model'

@@ -1,12 +1,11 @@
 import cs from 'classnames'
+import _ from 'lodash'
 import { observer } from 'mobx-react'
 import React from 'react'
 import { FileDetails } from '@packages/types'
 
 import appState, { AppState } from '../lib/app-state'
-import Command from '../command-logs/command'
-// import Command from '../commands/command'
-import NoCommands from '../command-logs/NoCommands'
+import Command from '../commands/command'
 import Collapsible from '../collapsible/collapsible'
 import HookModel, { HookName } from './hook-model'
 
@@ -61,7 +60,7 @@ export interface HookProps {
   showNumber: boolean
 }
 
-const Hook = observer(({ appState, model, showNumber }: HookProps) => (
+const Hook = observer(({ model, showNumber }: HookProps) => (
   <li className={cs('hook-item', { 'hook-failed': model.failed, 'hook-studio': model.isStudio })}>
     <Collapsible
       header={<HookHeader model={model} number={showNumber ? model.hookNumber : undefined} />}
@@ -70,9 +69,7 @@ const Hook = observer(({ appState, model, showNumber }: HookProps) => (
       isOpen={true}
     >
       <ul className='commands-container'>
-        {/* {model.commands.map((command) => <Command key={command.id} model={command} aliasesWithDuplicates={model.aliasesWithDuplicates} />)} */}
-        {_.map(model.commands, (command) => <Command appState={appState} key={command.id} model={command} aliasesWithDuplicates={model.aliasesWithDuplicates} />)}
-        {model.showStudioPrompt && <StudioNoCommands />}
+        {_.map(model.commands, (command) => <Command key={command.id} model={command} aliasesWithDuplicates={model.aliasesWithDuplicates} />)}
       </ul>
     </Collapsible>
   </li>
@@ -89,30 +86,17 @@ export interface HooksProps {
   model: HooksModel
 }
 
-const Hooks = observer(({ state = appState, model }: HooksProps) => {
-  console.log('hooks', model.hooks)
-  if (!model.hooks.length) {
-    return (
-      <ul className='hooks-container'>
-        <NoCommands />
-      </ul>
-    )
-  }
+const Hooks = observer(({ state = appState, model }: HooksProps) => (
+  <ul className='hooks-container'>
+    {_.map(model.hooks, (hook) => {
+      if (hook.commands.length || (hook.isStudio && state.studioActive && model.state === 'passed')) {
+        return <Hook key={hook.hookId} model={hook} showNumber={model.hookCount[hook.hookName] > 1} />
+      }
 
-  return (
-    <ul className='hooks-container'>
-      {model.hooks.map((hook) => {
-        console.log(hook.hookName)
-        console.log(hook.commands)
-        if (hook.commands.length || (hook.isStudio && state.studioActive && model.state === 'passed')) {
-          return <Hook appState={appState} key={hook.hookId} model={hook} showNumber={model.hookCount[hook.hookName] > 1} />
-        }
-
-        return null
-      })}
-    </ul>
-  )
-})
+      return null
+    })}
+  </ul>
+))
 
 export { Hook, HookHeader }
 

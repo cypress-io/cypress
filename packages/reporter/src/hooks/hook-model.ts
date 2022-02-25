@@ -5,7 +5,7 @@ import { FileDetails } from '@packages/types'
 
 import { Alias } from '../instruments/instrument-model'
 import Err from '../errors/err-model'
-import CommandModel from '../command-logs/command-model'
+import CommandModel from '../commands/command-model'
 
 export type HookName = 'before all' | 'before each' | 'after all' | 'after each' | 'test body' | 'studio commands'
 
@@ -88,22 +88,22 @@ export default class Hook implements HookProps {
     }
 
     if (command.group) {
-      console.log('GROUP!', command.name, command.group.id)
+      // console.log('GROUP!', command.name, command.group.id)
       // console.log(command)
-      console.log('this.commands', this.commands)
+      // console.log('this.commands', this.commands)
       this.commands.forEach((cmd) => {
-        console.log('GROUP!', command.name, command.group.id)
+        // console.log('GROUP!', command.name, command.group.id)
       })
 
       const groupCommand = _.find(this.commands, { id: command.group.id }) as CommandModel
 
-      console.log(groupCommand)
+      // console.log(groupCommand)
 
       if (groupCommand && groupCommand.addChild) {
         return groupCommand.addChild(command)
       }
 
-      console.log('treat this like an ordinary log')
+      // console.log('treat this like an ordinary log')
       // if we cant find a command to attach to, treat this like an ordinary log
       command.group = undefined
     }

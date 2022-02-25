@@ -11,7 +11,7 @@ import events from '../lib/events'
 import FlashOnClick from '../lib/flash-on-click'
 import { onEnterOrSpace } from '../lib/util'
 import Attempt from '../attempts/attempt-model'
-import CommandModel from '../command-logs/command-model'
+import Command from '../commands/command-model'
 
 import WarningIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/warning_x8.svg'
 import TerminalIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/technology-terminal_x16.svg'
@@ -35,7 +35,7 @@ const DocsUrl = ({ url }: DocsUrlProps) => {
 }
 
 interface TestErrorProps {
-  model: Attempt | CommandModel
+  model: Attempt | Command
   onPrintToConsole?: () => void
 }
 

@@ -1,4 +1,5 @@
 import cs from 'classnames'
+import _ from 'lodash'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 
@@ -14,6 +15,14 @@ import Sessions from '../sessions/sessions'
 import CollapseIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/collapse_x16.svg'
 import ExpandIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/expand_x16.svg'
 import StateIcon from '../lib/state-icon'
+
+const NoCommands = () => (
+  <ul className='hooks-container'>
+    <li className='no-commands'>
+      No commands were issued in this test.
+    </li>
+  </ul>
+)
 
 const AttemptHeader = ({ index, state }: {index: number, state: TestState }) => (
   <span className='attempt-tag'>
@@ -36,25 +45,25 @@ const StudioError = () => (
   </div>
 )
 
-// interface AttemptContentProps {
-//   model: AttemptModel
-// }
+function renderAttemptContent (model: AttemptModel) {
+  // performance optimization - don't render contents if not open
 
-// const AttemptContent = ({ model }: AttemptContentProps) => (
-//   <div className={`attempt-${model.id + 1}`}>
-//     <Sessions model={model.sessions} />
-//     <Agents model={model} />
-//     <Routes model={model} />
-//     <div ref='commands' className='runnable-commands-region'>
-//       <Hooks model={model} />
-//     </div>
+  return (
+    <div className={`attempt-${model.id + 1}`}>
+      <Sessions model={model.sessions} />
+      <Agents model={model} />
+      <Routes model={model} />
+      <div ref='commands' className='runnable-commands-region'>
+        {model.hasCommands ? <Hooks model={model} /> : <NoCommands />}
+      </div>
 
-//     <div className='attempt-error-region'>
-//       <TestError model={model} />
-//       <StudioError />
-//     </div>
-//   </div>
-// )
+      <div className='attempt-error-region'>
+        <TestError model={model} />
+        <StudioError />
+      </div>
+    </div>
+  )
+}
 
 interface AttemptProps {
   model: AttemptModel
@@ -68,10 +77,10 @@ class Attempt extends Component<AttemptProps> {
   }
 
   render () {
-    const { model, appState } = this.props
+    const { model } = this.props
 
     // HACK: causes component update when command log is added
-    // model.commands.length
+    model.commands.length
     // console.log(model.isOpen)
 
     return (
@@ -87,50 +96,29 @@ class Attempt extends Component<AttemptProps> {
           headerClass='attempt-name'
           isOpen={model.isOpen}
         >
-          {/* performance optimization - don't render contents if not open */}
-          {model.isOpen && (
-            <div className={`attempt-${model.id + 1}`}>
-              <Sessions model={model.sessions} />
-              <Agents model={model} />
-              <Routes model={model} />
-              <div ref='commands' className='runnable-commands-region'>
-                <Hooks state={appState} model={model} />
-              </div>
-
-              <div className='attempt-error-region'>
-                <TestError model={model} />
-                <StudioError />
-              </div>
-            </div>
-          )}
+          { renderAttemptContent(model) }
         </Collapsible>
       </li>
     )
   }
 }
 
-interface AttemptsProps {
-  test: TestModel
-  scrollIntoView: Function
-}
-
-const Attempts = observer(({ appState, test, scrollIntoView }: AttemptsProps) => {
-  // console.log('Attempts', test.attempts[0])
-
-  return (
-    <ul className={cs('attempts', { 'has-multiple-attempts': test.hasMultipleAttempts })}>
-      {test.attempts.map((attempt) => (
+const Attempts = observer(({ test, scrollIntoView }: {test: TestModel, scrollIntoView: Function}) => {
+  return (<ul className={cs('attempts', {
+    'has-multiple-attempts': test.hasMultipleAttempts,
+  })}>
+    {_.map(test.attempts, (attempt) => {
+      return (
         <Attempt
-          appState={appState}
           key={attempt.id}
           scrollIntoView={scrollIntoView}
           model={attempt}
         />
-      ))}
-    </ul>
-  )
+      )
+    })}
+  </ul>)
 })
 
-export { Attempt, AttemptHeader }
+export { Attempt, AttemptHeader, NoCommands }
 
 export default Attempts

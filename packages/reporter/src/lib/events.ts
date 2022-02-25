@@ -159,9 +159,9 @@ const events: Events = {
       runner.emit('runner:restart')
     }))
 
-    // localBus.on('show:command', (commandId) => {
-    //   runner.emit('runner:console:log', commandId)
-    // })
+    localBus.on('show:command', (commandId) => {
+      runner.emit('runner:console:log', commandId)
+    })
 
     localBus.on('show:error', (test: TestModel) => {
       const command = test.err.isCommandErr ? test.commandMatchingErr() : null
