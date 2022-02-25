@@ -516,6 +516,10 @@ export const eventManager = {
       Cypress.multiDomainCommunicator.toAllSpecBridges('test:before:run', ...args)
     })
 
+    Cypress.on('test:before:run:async', (...args) => {
+      Cypress.multiDomainCommunicator.toAllSpecBridges('test:before:run:async', ...args)
+    })
+
     Cypress.multiDomainCommunicator.initialize(window)
 
     Cypress.multiDomainCommunicator.on('window:load', ({ url }) => {
@@ -524,6 +528,16 @@ export const eventManager = {
 
     Cypress.multiDomainCommunicator.on('expect:domain', (domain) => {
       localBus.emit('expect:domain', domain)
+    })
+
+    Cypress.multiDomainCommunicator.on('viewport:changed', (viewport, domain) => {
+      const callback = () => {
+        Cypress.multiDomainCommunicator.toSpecBridge(domain, 'viewport:changed:end')
+      }
+
+      // TODO: Do we want to use the multiDomainCommunicator to send these types of messages or Cypress itself?
+      Cypress.multiDomainCommunicator.emit('sync:viewport', viewport)
+      localBus.emit('viewport:changed', viewport, callback)
     })
 
     Cypress.multiDomainCommunicator.on('before:screenshot', (config, domain) => {

@@ -13,7 +13,7 @@ interface RunDomainFnOptions {
   state: {}
 }
 
-export const handleDomainFn = (cy: $Cy, specBridgeCommunicator: SpecBridgeDomainCommunicator) => {
+export const handleDomainFn = (Cypress: Cypress.Cypress, cy: $Cy, specBridgeCommunicator: SpecBridgeDomainCommunicator) => {
   const reset = (state) => {
     cy.reset({})
 
@@ -29,6 +29,9 @@ export const handleDomainFn = (cy: $Cy, specBridgeCommunicator: SpecBridgeDomain
         isPending () {},
       },
     }
+
+    // the viewport could've changed in the primary, so sync it up in the secondary
+    Cypress.multiDomainCommunicator.emit('sync:viewport', { viewportWidth: state.viewportWidth, viewportHeight: state.viewportHeight })
 
     // Update the state with the necessary values from the primary domain
     cy.state(stateUpdates)

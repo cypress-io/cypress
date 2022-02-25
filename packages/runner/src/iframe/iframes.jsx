@@ -227,6 +227,10 @@ export default class Iframes extends Component {
   componentDidUpdate () {
     const cb = this.props.state.callbackAfterUpdate
 
+    // call the clientWidth to force the browser to repaint for viewport changes
+    // otherwise firefox may fail when changing the viewport in multi-domain
+    this.refs.container.clientWidth
+
     if (cb) {
       cb()
     }
