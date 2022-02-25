@@ -45,7 +45,9 @@ describe('Choose a Browser Page', () => {
     })
 
     it('shows warning when launched with --browser path option that cannot be matched to found browsers', () => {
-      cy.openProject('launchpad', ['--e2e', '--browser', '/path/does/not/exist'])
+      const path = '/path/does/not/exist'
+
+      cy.openProject('launchpad', ['--e2e', '--browser', path])
 
       cy.visitLaunchpad()
 
@@ -53,7 +55,7 @@ describe('Choose a Browser Page', () => {
 
       cy.get('[data-cy="alert-header"]').should('contain', 'Warning: Browser Not Found')
       cy.get('[data-cy="alert-body"]').as('AlertBody')
-      .should('contain', 'We could not identify a known browser at the path you provided: /path/does/not/exist')
+      .should('contain', `We could not identify a known browser at the path you provided: ${path}`)
       .validateExternalLink({
         href: 'https://on.cypress.io/troubleshooting-launching-browsers',
       })
@@ -61,9 +63,9 @@ describe('Choose a Browser Page', () => {
       // The exception thrown is presented in the alert's second code element and
       // varies depending on platform
       if (Cypress.platform === 'win32') {
-        cy.get('@AlertBody').find('code').eq(1).should('contain', 'win-version-info is unable to access file: \\\\path\\does\\not\\exist')
+        cy.get('@AlertBody').find('code').eq(1).should('contain', `win-version-info is unable to access file: \\${path.replaceAll('/', '\\')}`)
       } else {
-        cy.get('@AlertBody').find('code').eq(1).should('contain', 'spawn /path/does/not/exist ENOENT')
+        cy.get('@AlertBody').find('code').eq(1).should('contain', `spawn ${path} ENOENT`)
       }
 
       cy.percySnapshot()
