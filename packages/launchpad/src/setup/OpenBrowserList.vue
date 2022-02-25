@@ -164,6 +164,7 @@ import ArrowRightIcon from '~icons/cy/arrow-right_x16'
 import StatusRunningIcon from '~icons/cy/status-running_x16'
 import { RadioGroup, RadioGroupOption, RadioGroupLabel } from '@headlessui/vue'
 import UnsupportedBrowserTooltip from '@packages/frontend-shared/src/gql-components/topnav/UnsupportedBrowserTooltip.vue'
+import sortBrowsers from '@packages/frontend-shared/src/utils/sortBrowsers'
 
 import type { OpenBrowserListFragment } from '../generated/graphql'
 import { OpenBrowserList_SetBrowserDocument } from '../generated/graphql'
@@ -223,7 +224,7 @@ const browsers = computed(() => {
     return undefined
   }
 
-  return [...props.gql.browsers].sort((a, b) => a.name === 'Electron' ? 1 : -1)
+  return sortBrowsers([...props.gql.browsers])
 })
 
 const setBrowser = useMutation(OpenBrowserList_SetBrowserDocument)
