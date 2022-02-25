@@ -134,7 +134,7 @@ export const create = (Cypress, state, timeout, clearTimeout, whenStable, finish
       // invoke the passed in retry fn
       // once we reach stability
       return whenStable(() => {
-        Cypress.log({ message: 'stabilized second', end: true })
+        Cypress.log({ message: 'stabilized', end: true })
 
         return fn()
       })
