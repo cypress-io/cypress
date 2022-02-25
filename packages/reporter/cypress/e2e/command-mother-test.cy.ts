@@ -35,7 +35,7 @@ describe('commands', () => {
     cy.contains('http://localhost:3000') // ensure test content has loaded
   })
 
-  it.only('displays all the commands', () => {
+  it('displays all the commands', () => {
     addCommand(runner, {
       id: 9,
       name: 'get',
@@ -107,6 +107,21 @@ describe('commands', () => {
       message: '#my_element_nested',
       state: 'passed',
       timeout: 4000,
+      groupLevel: 2,
+      group: 1229,
+      wallClockStartedAt: inProgressStartedAt,
+    })
+
+    addCommand(runner, {
+      id: 182,
+      name: 'xhr',
+      event: true,
+      state: 'passed',
+      timeout: 4000,
+      renderProps: {
+        indicator: 'bad',
+        message: `bad indicator`,
+      },
       groupLevel: 2,
       group: 1229,
       wallClockStartedAt: inProgressStartedAt,
