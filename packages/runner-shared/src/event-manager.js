@@ -535,6 +535,7 @@ export const eventManager = {
         Cypress.multiDomainCommunicator.toSpecBridge(domain, 'viewport:changed:end')
       }
 
+      // TODO: Do we want to use the multiDomainCommunicator to send these types of messages or Cypress itself?
       Cypress.multiDomainCommunicator.emit('sync:viewport', viewport)
       localBus.emit('viewport:changed', viewport, callback)
     })
