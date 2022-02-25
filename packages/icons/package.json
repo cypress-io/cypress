@@ -5,13 +5,15 @@
   "main": "index.js",
   "scripts": {
     "build": "scripts/build.sh",
-    "postbuild": "node ./scripts/ico.js",
+    "postbuild": "ts-node ./src/ico.ts",
     "test": "NODE_ENV=test mocha",
     "test-watch": "NODE_ENV=test mocha --watch",
     "prepublish": "npm run build",
     "release": "releaser"
   },
   "devDependencies": {
+    "@types/mocha": "^9.1.0",
+    "@types/to-ico": "^1.1.1",
     "chai": "^4.2.0",
     "mocha": "^8.1.3",
     "to-ico": "^1.1.5"

@@ -9267,6 +9267,11 @@
   resolved "https://registry.yarnpkg.com/@types/mocha/-/mocha-9.0.0.tgz#3205bcd15ada9bc681ac20bef64e9e6df88fd297"
   integrity sha512-scN0hAWyLVAvLR9AyW7HoFF5sJZglyBsbPuHO4fv7JRvfmPBMfp1ozWqOf/e4wwPNxezBZXRfWzMb6iFLgEVRA==
 
+"@types/mocha@^9.1.0":
+  version "9.1.0"
+  resolved "https://registry.yarnpkg.com/@types/mocha/-/mocha-9.1.0.tgz#baf17ab2cca3fcce2d322ebc30454bff487efad5"
+  integrity sha512-QCWHkbMv4Y5U9oW10Uxbr45qMMSzl4OzijsozynUAgx3kEHUdXB00udx2dWDQ7f2TU2a2uuiFaRZjCe3unPpeg==
+
 "@types/mock-fs@4.10.0":
   version "4.10.0"
   resolved "https://registry.yarnpkg.com/@types/mock-fs/-/mock-fs-4.10.0.tgz#460061b186993d76856f669d5317cda8a007c24b"
@@ -9678,6 +9683,13 @@
   version "0.0.30"
   resolved "https://registry.yarnpkg.com/@types/through/-/through-0.0.30.tgz#e0e42ce77e897bd6aead6f6ea62aeb135b8a3895"
   integrity sha512-FvnCJljyxhPM3gkRgWmxmDZyAQSiBQQWLI0A0VFL0K7W1oRUrPJSqNO0NvTnLkBcotdlp3lKvaT0JrnyRDkzOg==
+  dependencies:
+    "@types/node" "*"
+
+"@types/to-ico@^1.1.1":
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@types/to-ico/-/to-ico-1.1.1.tgz#486397c906bddd8aee38e43cda1afe5c38cd1c05"
+  integrity sha512-WQbdkUB4RjE2rrM9rNqm5OutcxWWZ3J9olDtYA+zDxiPobD7o/RHC+GlGOM5rL1ASP/AoudkDLKw5DbFV3DO8w==
   dependencies:
     "@types/node" "*"
 

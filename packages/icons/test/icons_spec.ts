@@ -1,5 +1,5 @@
-const icons = require('../index')
-const expect = require('chai').expect
+import { expect } from 'chai'
+import * as icons from '../src/icons'
 
 const cwd = process.cwd()
 

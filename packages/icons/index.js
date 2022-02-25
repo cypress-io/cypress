@@ -1,1 +1,1 @@
-module.exports = require('./lib/icons')
+module.exports = require('./dist/icons')
