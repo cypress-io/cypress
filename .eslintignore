@@ -63,3 +63,24 @@ npm/cypress-schematic/src/**/*.js
 /npm/create-cypress-tests/**/*.template.*
 
 packages/data-context/test/unit/codegen/files
+
+# community templates we test against, no need to lint
+system-tests/projects/create-react-app-configured/**/*
+system-tests/projects/create-react-app-unconfigured/**/*
+
+system-tests/projects/vueclivue2-unconfigured/**/*
+system-tests/projects/vueclivue2-configured/**/*
+
+system-tests/projects/vueclivue3-unconfigured/**/*
+system-tests/projects/vueclivue3-configured/**/*
+
+system-tests/projects/vue3-vite-ts-unconfigured/**/*
+system-tests/projects/vue3-vite-ts-configured/**/*
+
+system-tests/projects/nextjs-unconfigured/**/*
+system-tests/projects/nextjs-configured/**/*
+
+system-tests/projects/nuxtjs-vue2-unconfigured/**/*
+system-tests/projects/nuxtjs-vue2-configured/**/*
+
+system-tests/projects/react-app-webpack-5-unconfigured/**/*
