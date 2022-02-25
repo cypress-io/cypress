@@ -1294,11 +1294,61 @@ export default {
       return test
     }
 
+    const getTestsState = () => {
+      const id = _test != null ? _test.id : undefined
+      const tests = {}
+
+      // bail if we dont have a current test
+      if (!id) {
+        return {}
+      }
+
+      // search through all of the tests  until we find the current test
+      // and break then
+      for (let testRunnable of _tests) {
+        if (testRunnable.id === id) {
+          break
+        } else {
+          const test = serializeTest(testRunnable)
+
+          test.prevAttempts = _.map(testRunnable.prevAttempts, serializeTest)
+
+          tests[test.id] = test
+        }
+      }
+
+      return tests
+    }
+
+    const countByTestState = (tests, state) => {
+      const count = _.filter(tests, (test) => test.state === state)
+
+      return count.length
+    }
+
+    const getRunState = () => {
+      const currentId = _test != null ? _test.id : undefined
+      const tests = getTestsState()
+
+      return {
+        currentId,
+        tests,
+        startTime: _startTime,
+        emissions: _emissions,
+        numLogs: $Log.countLogsByTests(tests),
+        passed: countByTestState(tests, 'passed'),
+        failed: countByTestState(tests, 'failed'),
+        pending: countByTestState(tests, 'pending'),
+      }
+    }
+
+    Cypress.on('collect:run:state', getRunState)
+
     return {
       onSpecError,
       setOnlyTestId,
       setOnlySuiteId,
-
+      getRunState,
       normalizeAll (tests) {
         // if we have an uncaught error then slice out
         // all of the tests and suites and just generate
@@ -1584,47 +1634,8 @@ export default {
         _startTime = iso
       },
 
-      countByTestState (tests, state) {
-        const count = _.filter(tests, (test, key) => {
-          return test.state === state
-        })
-
-        return count.length
-      },
-
-      setNumLogs (num) {
-        return $Log.setCounter(num)
-      },
-
       getEmissions () {
         return _emissions
-      },
-
-      getTestsState () {
-        const id = _test != null ? _test.id : undefined
-        const tests = {}
-
-        // bail if we dont have a current test
-        if (!id) {
-          return {}
-        }
-
-        // search through all of the tests
-        // until we find the current test
-        // and break then
-        for (let testRunnable of _tests) {
-          if (testRunnable.id === id) {
-            break
-          } else {
-            const test = serializeTest(testRunnable)
-
-            test.prevAttempts = _.map(testRunnable.prevAttempts, serializeTest)
-
-            tests[test.id] = test
-          }
-        }
-
-        return tests
       },
 
       stop () {
@@ -1646,6 +1657,10 @@ export default {
         // remove all the listeners
         // so no more events fire
         _runner.removeAllListeners()
+      },
+
+      setNumLogs (num) {
+        return $Log.setCounter(num)
       },
 
       getDisplayPropsForLog: $Log.getDisplayProps,

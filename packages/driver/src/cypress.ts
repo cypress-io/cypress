@@ -448,6 +448,7 @@ class $Cypress {
         }
 
         break
+
       case 'cy:before:all:screenshots':
         return this.emit('before:all:screenshots', ...args)
 
@@ -518,6 +519,10 @@ class $Cypress {
 
       case 'cy:collect:run:state':
         return this.emitThen('collect:run:state')
+        .then(([runnerState, reporterState]) => {
+          // merge all the states together holla'
+          return this.backend('preserve:run:state', { ...runnerState, ...reporterState })
+        })
 
       case 'cy:scrolled':
         return this.emit('scrolled', ...args)

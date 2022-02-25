@@ -5,14 +5,12 @@ import Promise from 'bluebird'
 
 import $utils from '../../cypress/utils'
 import $errUtils from '../../cypress/error_utils'
-import $Log from '../../cypress/log'
 import { bothUrlsMatchAndOneHasHash } from '../navigation'
 import { $Location } from '../../cypress/location'
 
 import debugFn from 'debug'
 const debug = debugFn('cypress:driver:navigation')
 
-let id = null
 let previousDomainVisited: boolean = false
 let hasVisitedAboutBlank: boolean = false
 let currentlyVisitingAboutBlank: boolean = false
@@ -25,7 +23,7 @@ const VISIT_OPTS = 'url log onBeforeLoad onLoad timeout requestTimeout'
 .split(' ')
 .concat(REQUEST_URL_OPTS)
 
-const reset = (test: any = {}) => {
+const reset = () => {
   knownCommandCausedInstability = false
 
   // continuously reset this
@@ -37,8 +35,6 @@ const reset = (test: any = {}) => {
   hasVisitedAboutBlank = false
 
   currentlyVisitingAboutBlank = false
-
-  id = test.id
 }
 
 const VALID_VISIT_METHODS = ['GET', 'POST']
@@ -1009,30 +1005,8 @@ export default (Commands, Cypress, cy, state, config) => {
             return cannotVisitDifferentOrigin(remote.origin, previousDomainVisited, remote, existing, options._log)
           }
 
-          // tell our backend we're changing domains
-          // TODO: add in other things we want to preserve
-          // state for like scrollTop
-          let s: Record<string, any> = {
-            currentId: id,
-            tests: Cypress.runner.getTestsState(),
-            startTime: Cypress.runner.getStartTime(),
-            emissions: Cypress.runner.getEmissions(),
-          }
-
-          s.passed = Cypress.runner.countByTestState(s.tests, 'passed')
-          s.failed = Cypress.runner.countByTestState(s.tests, 'failed')
-          s.pending = Cypress.runner.countByTestState(s.tests, 'pending')
-          s.numLogs = $Log.countLogsByTests(s.tests)
-
+          // collect state since we're changing domains
           return Cypress.action('cy:collect:run:state')
-          .then((a = []) => {
-            // merge all the states together holla'
-            s = _.reduce(a, (memo, obj) => {
-              return _.extend(memo, obj)
-            }, s)
-
-            return Cypress.backend('preserve:run:state', s)
-          })
           .then(() => {
             // and now we must change the url to be the new
             // origin but include the test that we're currently on
