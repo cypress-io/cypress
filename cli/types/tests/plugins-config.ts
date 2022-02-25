@@ -16,6 +16,8 @@ const pluginConfig2: Cypress.PluginConfig = (on, config) => {
   config.version // $ExpectType: string
   config.testingType // $ExpectType: TestingType
 
+  config.browsers // $ExpectType: false
+
   on('before:browser:launch', (browser, options) => {
     browser.displayName // $ExpectType string
     options.extensions // $ExpectType string[]

@@ -198,7 +198,7 @@ declare namespace Cypress {
   /**
    * The configuration for Cypress.
    */
-  type Config = ResolvedConfigOptions & RuntimeConfigOptions
+  type Config = ResolvedConfigOptions & RuntimeConfigOptions & RuntimeServerConfigOptions
 
   /**
    * Several libraries are bundled with Cypress by default.
@@ -2898,7 +2898,7 @@ declare namespace Cypress {
      */
     clientCertificates: ClientCertificate[]
 
-     /**
+    /**
      * Handle Cypress plugins
      */
     setupNodeEvents: (on: PluginEvents, config: PluginConfigOptions) => Promise<PluginConfigOptions> | PluginConfigOptions
@@ -2907,17 +2907,13 @@ declare namespace Cypress {
   /**
    * Options appended to config object on runtime.
    */
-  interface RuntimeConfigOptions {
+  interface RuntimeConfigOptions extends Partial<RuntimeServerConfigOptions> {
     /**
      * CPU architecture, from Node `os.arch()`
      *
      * @see https://nodejs.org/api/os.html#os_os_arch
      */
     arch: string
-    /**
-     * The browser Cypress is running on.
-     */
-    browser: Browser
     /**
      * Available browsers found on your system.
      */
@@ -2945,12 +2941,20 @@ declare namespace Cypress {
      * The Cypress version being used.
      */
     version: string
+  }
 
+  /**
+   * Options appended before the server starts
+   */
+  interface RuntimeServerConfigOptions {
+    /**
+     * The browser Cypress is running on.
+     */
+    browser: Browser
     // Internal or Unlisted at server/lib/config_options
     autoOpen: boolean
     browserUrl: string
     clientRoute: string
-    configFile: string
     cypressEnv: string
     devServerPublicPathRoute: string
     isNewProject: boolean
@@ -2997,7 +3001,7 @@ declare namespace Cypress {
    */
   type ConfigOptions<ComponentDevServerOpts = any> = Partial<ResolvedConfigOptions<ComponentDevServerOpts>>
 
-  interface PluginConfigOptions extends ResolvedConfigOptions {
+  interface PluginConfigOptions extends ResolvedConfigOptions, RuntimeConfigOptions {
     /**
     * Absolute path to the config file (default: <projectRoot>/cypress.config.{ts|js}) or false
     */
