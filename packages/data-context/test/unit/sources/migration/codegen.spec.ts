@@ -10,10 +10,10 @@ import {
   reduceConfig,
   renameSupportFilePath,
   OldCypressConfig,
-} from '../../../src/sources/migration'
+} from '../../../../src/sources/migration'
 import { expect } from 'chai'
-import { MigrationFile } from '../../../src/sources'
-import { scaffoldMigrationProject } from '../helper'
+import { MigrationFile } from '../../../../src/sources'
+import { scaffoldMigrationProject } from '../../helper'
 
 const root = path.join(__dirname, '..', '..', '..', '..', '..')
 
@@ -145,7 +145,7 @@ describe('supportFilesForMigrationGuide', () => {
           {
             'text': 'index',
             'highlight': true,
-            group: 'name',
+            group: 'supportFileName',
           },
           {
             'text': '.js',
@@ -163,7 +163,7 @@ describe('supportFilesForMigrationGuide', () => {
           {
             'text': 'e2e',
             'highlight': true,
-            group: 'name',
+            group: 'supportFileName',
           },
           {
             'text': '.js',
