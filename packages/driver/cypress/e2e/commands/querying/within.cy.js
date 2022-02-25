@@ -16,7 +16,7 @@ describe('src/cy/commands/querying/within', () => {
       })
     })
 
-    it.only('scopes additional GET finders to the subject', () => {
+    it('scopes additional GET finders to the subject', () => {
       cy.visit('/fixtures/dom.html')
       // const input = cy.$$('#by-name input:first')
 
