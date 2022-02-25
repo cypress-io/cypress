@@ -122,7 +122,7 @@ const props = defineProps<{
 }>()
 
 const filteredProjects = computed(() => {
-  return (props.gql.projects as GlobalProjectCardFragment[]).filter((p) => p.title.toLowerCase().indexOf(match.value.toLowerCase()) !== -1)
+  return ((props.gql.projects || []) as GlobalProjectCardFragment[]).filter((p) => p.title.toLowerCase().indexOf(match.value.toLowerCase()) !== -1)
 })
 
 const match = ref('')

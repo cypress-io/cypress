@@ -3,14 +3,16 @@
     "cypress"
   ],
   "extends": [
-    "plugin:@cypress/dev/tests"
+    "plugin:@cypress/dev/tests",
+    "plugin:vue/vue3-recommended"
   ],
   "parser": "vue-eslint-parser",
   "parserOptions": {
     "parser": "@typescript-eslint/parser"
   },
   "env": {
-    "cypress/globals": true
+    "cypress/globals": true,
+    "vue/setup-compiler-macros": true
   },
   "rules": {
     "mocha/no-global-tests": "off",
