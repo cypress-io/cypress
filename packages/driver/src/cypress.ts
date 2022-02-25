@@ -104,72 +104,43 @@ class $Cypress {
   emitThen: any
   emitMap: any
 
-  $Cypress: any
-  Cy: any
-  Chainer: any
-  Command: any
-  dom: any
-  errorMessages: any
-  Keyboard: any
-  Location: any
-  Log: any
-  LocalStorage: any
-  Mocha: any
-  resolveWindowReference: any
-  resolveLocationReference: any
-  Mouse: any
-  Runner: any
-  Server: any
-  Screenshot: any
-  SelectorPlayground: any
-  utils: any
-  _: any
-  Blob: any
-  Buffer: any
-  Promise: any
-  minimatch: any
-  sinon: any
-  lolex: any
+  // attach to $Cypress to access
+  // all of the constructors
+  // to enable users to monkeypatch
+  $Cypress = $Cypress
+  Cy = $Cy
+  Chainer = $Chainer
+  Command = $Command
+  dom = $dom
+  errorMessages = $errorMessages
+  Keyboard = $Keyboard
+  Location = $Location
+  Log = $Log
+  LocalStorage = $LocalStorage
+  Mocha = $Mocha
+  resolveWindowReference = resolvers.resolveWindowReference
+  resolveLocationReference = resolvers.resolveLocationReference
+  Mouse = {
+    create: createMouse,
+  }
+
+  Runner = $Runner
+  Server = $Server
+  Screenshot = $Screenshot
+  SelectorPlayground = $SelectorPlayground
+  utils = $utils
+  _ = _
+  Blob = blobUtil
+  Buffer = Buffer
+  Promise = Promise
+  minimatch = minimatch
+  sinon = sinon
+  lolex = fakeTimers
 
   static $: any
   static utils: any
 
   constructor (config = {}) {
-    // attach to $Cypress to access
-    // all of the constructors
-    // to enable users to monkeypatch
-    this.$Cypress = $Cypress
-    this.Cy = $Cy
-    this.Chainer = $Chainer
-    this.Cookies = $Cookies
-    this.Command = $Command
-    this.Commands = $Commands
-    this.dom = $dom
-    this.errorMessages = $errorMessages
-    this.Keyboard = $Keyboard
-    this.Location = $Location
-    this.Log = $Log
-    this.LocalStorage = $LocalStorage
-    this.Mocha = $Mocha
-    this.resolveWindowReference = resolvers.resolveWindowReference
-    this.resolveLocationReference = resolvers.resolveLocationReference
-    this.Mouse = {
-      create: createMouse,
-    }
-
-    this.Runner = $Runner
-    this.Server = $Server
-    this.Screenshot = $Screenshot
-    this.SelectorPlayground = $SelectorPlayground
-    this.utils = $utils
-    this._ = _
-    this.Blob = blobUtil
-    this.Buffer = Buffer
-    this.Promise = Promise
-    this.minimatch = minimatch
-    this.sinon = sinon
-    this.lolex = fakeTimers
-
     this.cy = null
     this.chai = null
     this.mocha = null
