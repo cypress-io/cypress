@@ -30,7 +30,7 @@ const classes = computed(() => {
 })
 
 const props = withDefaults(defineProps<{
-  href: string,
+  href: string | null,
   useDefaultHocus?: boolean
 }>(), {
   useDefaultHocus: true,
