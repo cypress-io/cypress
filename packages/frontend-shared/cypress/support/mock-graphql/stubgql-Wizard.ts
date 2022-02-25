@@ -19,15 +19,11 @@ export const stubWizard: MaybeResolver<Wizard> = {
   packagesToInstall: [
     {
       ...testNodeId('WizardNpmPackage'),
-      description: CYPRESS_REACT_LATEST.description,
-      name: '@cypress/react',
-      package: '@cypress/react',
+      ...CYPRESS_REACT_LATEST,
     },
     {
       ...testNodeId('WizardNpmPackage'),
-      description: CYPRESS_WEBPACK.description,
-      name: '@cypress/webpack-dev-server',
-      package: '@cypress/webpack-dev-server',
+      ...CYPRESS_WEBPACK,
     },
   ],
   allBundlers,
