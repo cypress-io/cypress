@@ -63,9 +63,9 @@ describe('Choose a Browser Page', () => {
       // The exception thrown is presented in the alert's second code element and
       // varies depending on platform
       if (Cypress.platform === 'win32') {
-        cy.get('@AlertBody').find('code').eq(1).should('contain', `win-version-info is unable to access file: \\${path.replaceAll('/', '\\')}`)
+        cy.get('@AlertBody').find('code').eq(1).should('have.text', `win-version-info is unable to access file: \\${path.replaceAll('/', '\\')}`)
       } else {
-        cy.get('@AlertBody').find('code').eq(1).should('contain', `spawn ${path} ENOENT`)
+        cy.get('@AlertBody').find('code').eq(1).should('have.text', `spawn ${path} ENOENT`)
       }
 
       cy.percySnapshot()
