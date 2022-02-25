@@ -9,7 +9,7 @@
     "check-ts": "tsc --noEmit && yarn -s tslint",
     "clean-deps": "rimraf node_modules",
     "tslint": "tslint --config ../ts/tslint.json --project .",
-    "clean": "rimraf './{src,test}/**/*.js'",
+    "clean": "rimraf './{src,test}/**/*(!.stories).js'",
     "test": "yarn test-unit",
     "test-unit": "mocha -r @packages/ts/register --config ./test/.mocharc.js"
   },
