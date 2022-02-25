@@ -2,6 +2,7 @@
 
 import AppInput from './AppInput.vue'
 import { mount } from '@cypress/vue'
+import { h } from 'vue'
 
 it('renders label', () => {
   mount(AppInput, {
@@ -11,7 +12,7 @@ it('renders label', () => {
     },
     // passing slots to the component #364
     slots: {
-      label: `<label for="username">Enter Username</label>`,
+      label: () => h('label', { for: 'username' }, 'Enter Username'),
     },
   })
 
