@@ -117,7 +117,13 @@ export const FRONTEND_FRAMEWORKS = [
     name: 'Vue CLI (Vue 2)',
     family: 'template',
     supportedBundlers: [BUNDLER_WEBPACK_4],
-    packages: [CYPRESS_VUE_2, CYPRESS_WEBPACK],
+    packages: [
+      CYPRESS_VUE_2,
+      CYPRESS_WEBPACK,
+      BUNDLER_WEBPACK_4,
+      WEBPACK_DEV_SERVER_4,
+      HTML_WEBPACK_PLUGIN_4,
+    ],
     defaultPackagePath: null,
     glob: '*.vue',
     detectors: [
@@ -171,7 +177,13 @@ export const FRONTEND_FRAMEWORKS = [
     name: 'Vue CLI (Vue 3)',
     family: 'template',
     supportedBundlers: [BUNDLER_WEBPACK_4],
-    packages: [CYPRESS_VUE_3, CYPRESS_WEBPACK],
+    packages: [
+      CYPRESS_VUE_3,
+      CYPRESS_WEBPACK,
+      BUNDLER_WEBPACK_5,
+      HTML_WEBPACK_PLUGIN_5,
+      WEBPACK_DEV_SERVER_4,
+    ],
     defaultPackagePath: null,
     glob: '*.vue',
     detectors: [
@@ -499,6 +511,7 @@ export const FRONTEND_FRAMEWORKS = [
     supportedBundlers: [BUNDLER_WEBPACK_4],
     packages: [
       CYPRESS_REACT_LATEST,
+      BUNDLER_WEBPACK_4,
       CYPRESS_WEBPACK,
       WEBPACK_DEV_SERVER_4,
       HTML_WEBPACK_PLUGIN_4,
@@ -528,6 +541,7 @@ export const FRONTEND_FRAMEWORKS = [
       CYPRESS_VUE_2,
       BUNDLER_WEBPACK_4,
       CYPRESS_WEBPACK,
+      WEBPACK_DEV_SERVER_4,
       HTML_WEBPACK_PLUGIN_4,
     ],
     defaultPackagePath: null,
