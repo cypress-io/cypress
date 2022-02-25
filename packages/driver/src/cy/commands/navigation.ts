@@ -7,7 +7,6 @@ import $utils from '../../cypress/utils'
 import $errUtils from '../../cypress/error_utils'
 import { bothUrlsMatchAndOneHasHash } from '../navigation'
 import { $Location } from '../../cypress/location'
-import type { RunState } from '../../cypress/runner'
 
 import debugFn from 'debug'
 const debug = debugFn('cypress:driver:navigation')

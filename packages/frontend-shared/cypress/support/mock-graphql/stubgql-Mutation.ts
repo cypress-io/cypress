@@ -32,11 +32,20 @@ export const stubMutation: MaybeResolver<Mutation> = {
 
     return {}
   },
-  focusActiveBrowserWindow (sourc, args, ctx) {
+  resetLatestVersionTelemetry () {
+    return true
+  },
+  focusActiveBrowserWindow (source, args, ctx) {
     return true
   },
   hideBrowserWindow (source, args, ctx) {
     return true
+  },
+
+  resetAuthState (source, args, ctx) {
+    ctx.authState = { browserOpened: false }
+
+    return { }
   },
   setProjectPreferences (source, args, ctx) {
     return {}
@@ -101,5 +110,13 @@ export const stubMutation: MaybeResolver<Mutation> = {
   },
   closeBrowser (src, args, ctx) {
     return true
+  },
+  switchTestingTypeAndRelaunch (src, args, ctx) {
+    return true
+  },
+  setPreferences (src, args, ctx) {
+    ctx.localSettings.preferences.isSideNavigationOpen = true
+
+    return {}
   },
 }

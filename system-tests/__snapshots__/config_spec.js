@@ -141,44 +141,143 @@ exports['e2e config applies defaultCommandTimeout globally 1'] = `
 `
 
 exports['e2e config throws error when invalid viewportWidth in the configuration file 1'] = `
-We found an invalid value in the file: \`cypress.config.js\`
+Your configFile at /foo/bar/.projects/config-with-invalid-viewport/cypress.config.js set an invalid value:
 
-Expected \`viewportWidth\` to be a number. Instead the value was: \`"foo"\`
+Expected viewportWidth to be a number.
+
+Instead the value was: "foo"
 
 `
 
 exports['e2e config throws error when invalid browser in the configuration file 1'] = `
-We found an invalid value in the file: \`cypress.config.js\`
+Your configFile at /foo/bar/.projects/config-with-invalid-browser/cypress.config.js set an invalid value:
 
-Found an error while validating the \`browsers\` list. Expected \`family\` to be either chromium or firefox. Instead the value was: \`{"name":"bad browser","family":"unknown family","displayName":"Bad browser","version":"no version","path":"/path/to","majorVersion":123}\`
+The error occurred while validating the browsers list.
+
+Expected family to be either chromium or firefox.
+
+Instead the value was: 
+
+{
+  "name": "bad browser",
+  "family": "unknown family",
+  "displayName": "Bad browser",
+  "version": "no version",
+  "path": "/path/to",
+  "majorVersion": 123
+}
 
 `
 
 exports['e2e config throws error when multiple default config file are found in project 1'] = `
-There is both a \`cypress.config.js\` and a \`cypress.config.ts\` at the location below:
-/foo/bar/.projects/pristine-with-e2e-testing
+There is both a cypress.config.js and a cypress.config.ts at the location below:
 
-This sometimes happens if you do not have cypress.config.ts excluded in your tsconfig.json.
+  > /foo/bar/.projects/pristine-with-e2e-testing
 
-Please add it to your "excludes" option, and remove from your project.
-
+Cypress does not know which one to read for config. Please remove one of the two and try again.
 
 `
 
 exports['e2e config throws error when cypress.json is found in project and need migration 1'] = `
-There is a cypress.json file at the location below:
-/foo/bar/.projects/pristine
+There is a cypress.json file at the path: /foo/bar/.projects/pristine
 
-Cypress no longer supports 'cypress.json', please migrate to 'cypress.config.{ts|js}'.
+Cypress version 10.0.0 no longer supports cypress.json.
+
+Please run cypress open to launch the migration tool to migrate to cypress.config.{ts|js}.
 
 
 `
 
 exports['e2e config throws error when cypress.json is found in project and cypress.config.{ts|js} exists as well 1'] = `
-There is both a \`cypress.config.js\` and a cypress.json file at the location below:
+There is both a cypress.config.js and a cypress.json file at the location below:
+
 /foo/bar/.projects/multiple-config-files-with-json
 
-Cypress no longer supports 'cypress.json' config, please remove it from your project.
+Cypress no longer supports cypress.json, please remove it from your project.
 
+
+`
+
+exports['e2e config throws an error if supportFile is set on the root level 1'] = `
+The supportFile configuration option is now invalid when set from the root of the config object in Cypress version 10.0.0.
+
+It is now configured separately as a testing type property: e2e.supportFile and component.supportFile
+
+{
+  e2e: {
+    specPattern: '...',
+  },
+  component: {
+    specPattern: '...',
+  },
+}
+
+https://on.cypress.io/migration-guide
+
+`
+
+exports['e2e config throws an error if specPattern is set on the root level 1'] = `
+The specPattern configuration option is now invalid when set from the root of the config object in Cypress version 10.0.0.
+
+It is now configured separately as a testing type property: e2e.specPattern and component.specPattern
+
+{
+  e2e: {
+    specPattern: '...',
+  },
+  component: {
+    specPattern: '...',
+  },
+}
+
+https://on.cypress.io/migration-guide
+
+`
+
+exports['e2e config throws an error if excludeSpecPattern is set on the root level 1'] = `
+The excludeSpecPattern configuration option is now invalid when set from the root of the config object in Cypress version 10.0.0.
+
+It is now configured separately as a testing type property: e2e.excludeSpecPattern and component.excludeSpecPattern
+
+{
+  e2e: {
+    specPattern: '...',
+  },
+  component: {
+    specPattern: '...',
+  },
+}
+
+https://on.cypress.io/migration-guide
+
+`
+
+exports['e2e config throws an error if baseUrl is set on the root level 1'] = `
+The baseUrl configuration option is now invalid when set from the root of the config object in Cypress version 10.0.0.
+
+It is now configured separately as a testing type property: e2e.baseUrl
+
+{
+  e2e: {
+    baseUrl: '...',
+  }
+}
+
+https://on.cypress.io/migration-guide
+
+`
+
+exports['e2e config throws an error if baseUrl is set on the component level 1'] = `
+The component.baseUrl configuration option is not valid for component testing.
+
+Please remove this option or add this as an e2e testing type property: e2e.baseUrl
+
+{
+  e2e: {
+    baseUrl: '...',
+  }
+}
+
+https://on.cypress.io/migration-guide
 
 `

@@ -16,7 +16,7 @@
       <div class="flex-grow">
         <div
           v-if="mutation.fetching.value"
-          class="inline-flex items-center justify-center w-full mt-48px"
+          class="mt-48px w-full inline-flex items-center justify-center"
         >
           <i-cy-loading_x16 class="h-48px mr-12px animate-spin w-48px" />
           <p class="text-lg">
@@ -36,13 +36,9 @@
         />
       </div>
       <div>
-        <div
-          v-if="!result"
-          class="w-full rounded-b h-24px"
-        />
         <StandardModalFooter
-          v-else
-          class="flex items-center h-72px gap-16px"
+          v-if="result"
+          class="flex gap-16px items-center"
         >
           <router-link
             class="outline-none"
@@ -50,6 +46,7 @@
             "
           >
             <Button
+              size="lg"
               :prefix-icon="TestResultsIcon"
               prefix-icon-class="w-16px h-16px icon-dark-white"
               @click="emits('close')"
@@ -58,6 +55,7 @@
             </Button>
           </router-link>
           <Button
+            size="lg"
             :prefix-icon="PlusButtonIcon"
             prefix-icon-class="w-16px h-16px icon-dark-gray-500"
             variant="outline"
@@ -66,6 +64,10 @@
             {{ t('createSpec.successPage.createAnotherSpecButton') }}
           </Button>
         </StandardModalFooter>
+        <div
+          v-else
+          class="bg-white rounded-b h-24px bottom-0 left-0 absolute ghost-div"
+        />
       </div>
     </template>
   </div>
@@ -78,7 +80,8 @@ import FileChooser from '../FileChooser.vue'
 import GeneratorSuccess from '../GeneratorSuccess.vue'
 import { computed, ref } from 'vue'
 import { gql, useQuery, useMutation } from '@urql/vue'
-import { ComponentGeneratorStepOneDocument, ComponentGeneratorStepOne_GenerateSpecDocument, GeneratorSuccessFileFragment } from '../../../generated/graphql'
+import type { GeneratorSuccessFileFragment } from '../../../generated/graphql'
+import { ComponentGeneratorStepOneDocument, ComponentGeneratorStepOne_GenerateSpecDocument } from '../../../generated/graphql'
 import StandardModalFooter from '@cy/components/StandardModalFooter.vue'
 import Button from '@cy/components/Button.vue'
 import PlusButtonIcon from '~icons/cy/add-large_x16.svg'
@@ -193,3 +196,9 @@ const cancelSpecNameCreation = () => {
 }
 
 </script>
+
+<style scoped>
+.ghost-div {
+  width: calc(100% - 24px);
+}
+</style>

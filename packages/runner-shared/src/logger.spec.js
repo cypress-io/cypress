@@ -1,5 +1,5 @@
-const sinon = require('sinon')
-const { logger } = require('./logger')
+import sinon from 'sinon'
+import { logger } from '@packages/app/src/runner/logger'
 import _ from 'lodash'
 
 describe('logger', () => {

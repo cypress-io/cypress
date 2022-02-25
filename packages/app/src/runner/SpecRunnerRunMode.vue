@@ -12,15 +12,15 @@
       @resize-end="handleResizeEnd"
       @panel-width-updated="handlePanelWidthUpdated"
     >
-      <!-- TODO(mark): - allow show-panel-2 to be true in screenshots if including the reporter is intended -->
       <template #panel1="{isDragging}">
         <HideDuringScreenshotOrRunMode
           v-show="runnerUiStore.isSpecsListOpen"
           id="inline-spec-list"
-          class="h-full bg-gray-1000 border-r-1 border-gray-900"
+          class="h-full bg-gray-1000 border-r-1 border-gray-900 force-dark"
           :class="{'pointer-events-none': isDragging}"
         />
       </template>
+      <!-- TODO(mark): UNIFY-1078 - allow show-panel-2 to be true in screenshots if including the reporter is intended -->
       <template #panel2>
         <HideDuringScreenshot
           class="h-full"
@@ -28,11 +28,18 @@
           <div
             v-once
             :id="REPORTER_ID"
-            class="w-full"
+            class="w-full force-dark"
           />
         </HideDuringScreenshot>
       </template>
-      <template #panel3>
+      <template #panel3="{width}">
+        <HideDuringScreenshot>
+          <SpecRunnerHeaderRunMode
+            :event-manager="eventManager"
+            :get-aut-iframe="getAutIframeModel"
+            :width="width"
+          />
+        </HideDuringScreenshot>
         <RemoveClassesDuringScreenshotting
           class="h-full bg-gray-100 p-16px"
         >
@@ -83,6 +90,7 @@ import AutomationMissing from './automation/AutomationMissing.vue'
 import AutomationElement from './automation/AutomationElement.vue'
 import { useResizablePanels, useRunnerStyle } from './useRunnerStyle'
 import { useEventManager } from './useEventManager'
+import SpecRunnerHeaderRunMode from './SpecRunnerHeaderRunMode.vue'
 
 const eventManager = getEventManager()
 
@@ -94,7 +102,6 @@ const {
   viewportStyle,
   windowWidth,
   reporterWidth,
-  specListWidth,
 } = useRunnerStyle()
 
 const {

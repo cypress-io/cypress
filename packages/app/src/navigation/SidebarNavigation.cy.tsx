@@ -1,15 +1,10 @@
-import { useMainStore } from '../store'
 import SidebarNavigation from './SidebarNavigation.vue'
 
 function mountComponent (initialNavExpandedVal = true) {
-  const mainStore = useMainStore()
-
-  mainStore.setNavBarExpandedByUser(initialNavExpandedVal)
-
   cy.mount(() => {
     return (
       <div>
-        <div class={[mainStore.navBarExpanded ? 'w-248px' : 'w-64px', 'transition-all', 'h-screen', 'grid', 'grid-rows-1']}>
+        <div class={[initialNavExpandedVal ? 'w-248px' : 'w-64px', 'transition-all', 'h-screen', 'grid', 'grid-rows-1']}>
           <SidebarNavigation />
         </div>
         <div id="tooltip-target"/>
@@ -21,9 +16,6 @@ function mountComponent (initialNavExpandedVal = true) {
 describe('SidebarNavigation', () => {
   it('expands the bar when clicking the expand button', () => {
     mountComponent()
-    cy.findByLabelText('toggle navigation', {
-      selector: 'button',
-    }).click()
 
     cy.get('[aria-expanded]').should('have.attr', 'aria-expanded', 'false')
     cy.findByText('test-project').should('not.be.visible')

@@ -1,22 +1,8 @@
 <template>
   <div class="flex items-center">
-    <input
-      id="editorToUse"
-      v-model="editorToUse"
-      type="radio"
-      class="mr-5px"
-      data-cy="use-well-known-editor"
-      value="found"
-      @change="saveEditor"
-    >
-    <label
-      for="editorToUse"
-      class="sr-only"
-    >{{ t('settingsPage.editor.editorRadioLabel') }}
-    </label>
     <Select
-      :model-value="selectedWellKnownEditor"
-      :options="externalEditors"
+      :model-value="selectedEditor"
+      :options="editorOptions"
       item-value="name"
       item-key="id"
       :placeholder="t('settingsPage.editor.noEditorSelectedPlaceholder')"
@@ -43,22 +29,10 @@
     </Select>
   </div>
 
-  <div class="flex py-2 items-center">
-    <input
-      id="customEditor"
-      v-model="editorToUse"
-      type="radio"
-      class="mr-5px"
-      value="custom"
-      data-cy="use-custom-editor"
-      @change="saveEditor"
-    >
-    <label
-      for="customEditor"
-      class="sr-only"
-    >{{ t('settingsPage.editor.customEditorRadioLabel') }}
-    </label>
-
+  <div
+    v-if="editorToUse === 'custom'"
+    class="flex py-2 items-center"
+  >
     <div class="w-400px">
       <Input
         id="customPath"
@@ -68,7 +42,9 @@
         :placeholder="t('settingsPage.editor.customPathPlaceholder')"
       >
         <template #prefix>
-          <i-cy-terminal_x16 class="text-md text-gray-600" />
+          <i-cy-technology-command-line_x16
+            class="text-gray-500"
+          />
         </template>
       </Input>
       <label
@@ -80,7 +56,8 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, watch, FunctionalComponent, SVGAttributes } from 'vue'
+import type { FunctionalComponent, SVGAttributes } from 'vue'
+import { ref, computed, watch } from 'vue'
 import Icon from '@cy/components/Icon.vue'
 import { useI18n } from '@cy/i18n'
 import Select from '@cy/components/Select.vue'
@@ -92,6 +69,7 @@ import Vim from '~icons/logos/vim'
 import Sublime from '~icons/logos/sublimetext-icon'
 import Computer from '~icons/mdi/computer'
 import Emacs from '~icons/logos/emacs'
+import Terminal from '~icons/cy/terminal_x16.svg'
 import { gql } from '@urql/core'
 import type { ChooseExternalEditorFragment } from '../generated/graphql'
 
@@ -108,10 +86,17 @@ const icons: Record<string, FunctionalComponent<SVGAttributes, {}>> = {
   'computer': Computer,
   'File Explorer': Computer,
   'File System': Computer,
+  'custom': Terminal,
 }
 
-const externalEditors = computed(() => {
-  return props.gql.localSettings.availableEditors?.map((x) => ({ ...x, icon: icons[x.id] })) || []
+const customEditor = { id: 'custom', icon: Terminal, name: 'Custom', binary: 'custom' }
+
+const editorOptions = computed(() => {
+  const editors = props.gql.localSettings.availableEditors?.map((x) => ({ ...x, icon: icons[x.id] })) || []
+
+  editors.push(customEditor)
+
+  return editors
 })
 
 gql`
@@ -139,33 +124,27 @@ type Editor = ChooseExternalEditorFragment['localSettings']['availableEditors'][
 
 type EditorType = 'found' | 'custom'
 
-const selectedWellKnownEditor = ref<Editor | undefined>(
-  props.gql.localSettings.availableEditors.find((editor) => {
-    return editor.binary === props.gql.localSettings.preferences.preferredEditorBinary
-  }),
-)
+const selectedWellKnownEditor: Editor | undefined = props.gql.localSettings.availableEditors.find((editor) => {
+  return editor.binary === props.gql.localSettings.preferences.preferredEditorBinary
+})
 
 const customBinary = ref<string>(
-  selectedWellKnownEditor.value
+  selectedWellKnownEditor
     ? ''
     : props.gql.localSettings.preferences.preferredEditorBinary ?? '',
 )
 
-const editorToUse = ref<EditorType>(customBinary.value ? 'custom' : 'found')
+const editorToUse = ref<EditorType>(
+  customBinary.value ? 'custom' : 'found',
+)
+
+const selectedEditor = ref<Editor | undefined>(
+  editorToUse.value === 'custom' ? customEditor : selectedWellKnownEditor,
+)
 
 const emit = defineEmits<{
   (e: 'choseEditor', binary: string): void
 }>()
-
-const saveEditor = () => {
-  if (editorToUse.value === 'found' && selectedWellKnownEditor.value) {
-    emit('choseEditor', selectedWellKnownEditor.value.binary)
-  }
-
-  if (editorToUse.value === 'custom' && customBinary.value) {
-    emit('choseEditor', customBinary.value)
-  }
-}
 
 watch(customBinary, (val) => {
   if (editorToUse.value !== 'custom') {
@@ -176,11 +155,16 @@ watch(customBinary, (val) => {
 })
 
 const updateEditor = (editor: Editor) => {
-  if (editorToUse.value !== 'found') {
-    editorToUse.value = 'found'
-  }
+  selectedEditor.value = editor
 
-  selectedWellKnownEditor.value = editor
-  emit('choseEditor', selectedWellKnownEditor.value.binary)
+  if (editor.id === 'custom') {
+    editorToUse.value = 'custom'
+    if (customBinary.value) {
+      emit('choseEditor', customBinary.value)
+    }
+  } else {
+    editorToUse.value = 'found'
+    emit('choseEditor', selectedEditor.value.binary)
+  }
 }
 </script>

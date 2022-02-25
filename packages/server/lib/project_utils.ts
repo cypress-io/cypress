@@ -1,15 +1,10 @@
 import Debug from 'debug'
 import path from 'path'
-
-import errors from './errors'
-import { fs } from './util/fs'
+import * as errors from './errors'
 import { escapeFilenameInUrl } from './util/escape_filename'
+import { fs } from './util/fs'
 
 const debug = Debug('cypress:server:project_utils')
-
-const multipleForwardSlashesRe = /[^:\/\/](\/{2,})/g
-const multipleForwardSlashesReplacer = (match: string) => match.replace('//', '/')
-const backSlashesRe = /\\/g
 
 // format is: http://localhost:<port>/__/#/specs/runner?file=<relative_url>
 export const getSpecUrl = ({
@@ -31,16 +26,14 @@ export const getSpecUrl = ({
   }
 
   const relativeSpecPath = path.relative(projectRoot, path.resolve(projectRoot, spec.relative))
-  .replace(backSlashesRe, '/')
 
   const escapedRelativePath = escapeFilenameInUrl(relativeSpecPath)
 
-  const normalized = `${browserUrl}/#/specs/runner?file=${escapedRelativePath}`
-  .replace(multipleForwardSlashesRe, multipleForwardSlashesReplacer)
+  const specUrl = `${browserUrl}#/specs/runner?file=${escapedRelativePath}`
 
-  debug('returning spec url %s', normalized)
+  debug('returning spec url %s', specUrl)
 
-  return normalized
+  return specUrl
 }
 
 export const checkSupportFile = async ({
@@ -54,7 +47,7 @@ export const checkSupportFile = async ({
     const found = await fs.pathExists(supportFile)
 
     if (!found) {
-      errors.throw('SUPPORT_FILE_NOT_FOUND', supportFile, configFile)
+      errors.throwErr('SUPPORT_FILE_NOT_FOUND', supportFile)
     }
   }
 

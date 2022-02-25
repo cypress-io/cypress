@@ -64,11 +64,11 @@ const { t } = useI18n()
 </script>
 
 <style scoped>
-.description /deep/ a code {
+.description :deep(a code) {
   @apply text-indigo-500;
 }
 
-.description /deep/ a {
+.description :deep(a) {
   @apply outline-none text-indigo-500 hocus:underline hocus:underline-indigo-500;
 }
 </style>

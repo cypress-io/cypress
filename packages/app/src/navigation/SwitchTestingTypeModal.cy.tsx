@@ -23,9 +23,11 @@ describe('SwitchTestingTypeModal', () => {
 
     cy.get('[data-cy="card"]').should('have.length', 2)
     cy.contains('h2', defaultMessages.testingType.modalTitle).should('be.visible')
+    cy.get('[data-cy="switch-modal"] a').should('have.attr', 'href').and('eq', 'https://on.cypress.io/choosing-testing-type')
     cy.percySnapshot()
 
     cy.findByLabelText('Close')
+    .focus()
     .type('{enter}')
 
     cy.get('@closeSpy').should('have.been.calledOnce')

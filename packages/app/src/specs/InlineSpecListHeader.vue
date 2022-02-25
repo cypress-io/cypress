@@ -40,9 +40,9 @@
       >
       <label
         for="inline-spec-list-header-search"
-        class="cursor-text font-light bottom-6px left-24px text-gray-700 select-none absolute"
+        class="cursor-text font-light bottom-4px left-24px text-gray-700 select-none absolute"
         :class="{
-          'hidden': props.search.length
+          'sr-only': inputFocused || props.search
         }"
       >
         {{ t('specPage.searchPlaceholder') }}
@@ -73,7 +73,7 @@
       class="sr-only"
       aria-live="polite"
     >
-      {{ resultCount }} {{ resultCount === 1 ? t('specPage.matchSingular') : t('specPage.matchPlural') }}
+      {{ t('components.fileSearch.matchesIndicatorEmptyFileSearch', { count: resultCount, denominator: resultCount}) }}
     </div>
   </div>
 </template>

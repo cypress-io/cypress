@@ -1,4 +1,7 @@
-import type { AuthMessage } from '../../../data-context/src/actions/AuthActions'
+import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
+import type { AuthStateShape } from '@packages/data-context/src/data'
+
+const loginText = defaultMessages.topNav.login
 
 describe('App Top Nav Workflows', () => {
   beforeEach(() => {
@@ -44,7 +47,7 @@ describe('App Top Nav Workflows', () => {
 
         cy.openProject('launchpad')
         cy.startAppServer()
-        cy.visitApp()
+        cy.__incorrectlyVisitAppWithIntercept()
       })
 
       it('shows the current browser in the top nav browser list button', () => {
@@ -67,20 +70,20 @@ describe('App Top Nav Workflows', () => {
         .should('exist')
 
         cy.get('@browserItems').eq(1)
-        .should('contain', 'Firefox')
-        .and('contain', 'Version 5.6.7')
-        .findByTestId('top-nav-browser-list-selected-item')
-        .should('not.exist')
-
-        cy.get('@browserItems').eq(2)
         .should('contain', 'Edge')
         .and('contain', 'Version 8.9.10')
         .findByTestId('top-nav-browser-list-selected-item')
         .should('not.exist')
 
-        cy.get('@browserItems').eq(3)
+        cy.get('@browserItems').eq(2)
         .should('contain', 'Electron')
         .and('contain', 'Version 12.13.14')
+        .findByTestId('top-nav-browser-list-selected-item')
+        .should('not.exist')
+
+        cy.get('@browserItems').eq(3)
+        .should('contain', 'Firefox')
+        .and('contain', 'Version 5.6.7')
         .findByTestId('top-nav-browser-list-selected-item')
         .should('not.exist')
       })
@@ -88,15 +91,12 @@ describe('App Top Nav Workflows', () => {
       it('performs mutations to update and relaunch browser', () => {
         cy.findByTestId('top-nav-active-browser').click()
 
-        cy.intercept('mutation-TopNav_SetBrowser').as('setBrowser')
-        cy.intercept('mutation-TopNav_LaunchOpenProject').as('launchOpenProject')
+        cy.intercept('mutation-VerticalBrowserListItems_SetBrowser').as('setBrowser')
 
         cy.findAllByTestId('top-nav-browser-list-item').eq(1).click().then(($element) => {
           cy.wait('@setBrowser').then(({ request }) => {
             expect(request.body.variables.id).to.eq($element.attr('data-browser-id'))
           })
-
-          cy.wait('@launchOpenProject')
         })
       })
     })
@@ -108,7 +108,7 @@ describe('App Top Nav Workflows', () => {
         cy.findBrowsers()
         cy.withCtx(async (ctx) => {
           // @ts-ignore sinon is a global in the node process where this is executed
-          sinon.stub(ctx, 'versions').resolves({
+          sinon.stub(ctx.versions, 'versionData').resolves({
             current: {
               id: '1',
               version: '10.0.0',
@@ -124,7 +124,7 @@ describe('App Top Nav Workflows', () => {
 
         cy.openProject('launchpad')
         cy.startAppServer()
-        cy.visitApp()
+        cy.__incorrectlyVisitAppWithIntercept()
 
         cy.findByTestId('app-header-bar').validateExternalLink({
           name: 'v10.0.0',
@@ -141,7 +141,7 @@ describe('App Top Nav Workflows', () => {
           const prevRelease = new Date(Date.UTC(2021, 9, 29))
 
           // @ts-ignore sinon is a global in the node process where this is executed
-          sinon.stub(ctx, 'versions').resolves({
+          sinon.stub(ctx.versions, 'versionData').resolves({
             current: {
               id: '1',
               version: '10.0.0',
@@ -177,7 +177,7 @@ describe('App Top Nav Workflows', () => {
 
         cy.findByTestId('cypress-update-popover').validateExternalLink({
           name: 'See all releases',
-          href: 'https://github.com/cypress-io/cypress/releases',
+          href: 'https://on.cypress.io/changelog',
         })
       })
 
@@ -197,9 +197,8 @@ describe('App Top Nav Workflows', () => {
         cy.findByTestId('cypress-update-popover').findByRole('button', { name: 'Update to 10.1.0' }).click()
 
         cy.findByRole('dialog', { name: 'Upgrade to Cypress 10.1.0' }).as('upgradeModal').within(() => {
-          cy.validateExternalLink({ name: 'Need help', href: 'https://on.cypress.io' })
           cy.contains('You are currently running Version 10.0.0 of Cypress').should('be.visible')
-          cy.contains('npm install --save-dev cypress@10.1.0').should('be.visible')
+          cy.contains('npm install -D cypress@10.1.0').should('be.visible')
           cy.findByRole('button', { name: 'Close' }).click()
         })
 
@@ -213,7 +212,7 @@ describe('App Top Nav Workflows', () => {
       cy.findBrowsers()
       cy.openProject('launchpad')
       cy.startAppServer()
-      cy.visitApp()
+      cy.__incorrectlyVisitAppWithIntercept()
 
       cy.findByTestId('app-header-bar').findByRole('button', { name: 'Docs', expanded: false }).as('docsButton')
     })
@@ -286,7 +285,7 @@ describe('App Top Nav Workflows', () => {
         cy.openProject('launchpad')
         cy.startAppServer()
         cy.loginUser()
-        cy.visitApp()
+        cy.__incorrectlyVisitAppWithIntercept()
 
         cy.findByTestId('app-header-bar').findByRole('button', { name: 'Profile and Log Out', expanded: false }).as('logInButton')
       })
@@ -315,7 +314,7 @@ describe('App Top Nav Workflows', () => {
           })
         })
 
-        cy.intercept('mutation-Logout').as('logout')
+        cy.intercept('mutation-Auth_Logout').as('logout')
 
         cy.findByRole('button', { name: 'Log Out' }).click()
 
@@ -341,7 +340,7 @@ describe('App Top Nav Workflows', () => {
         cy.withCtx((ctx, options) => {
         // @ts-ignore sinon is a global in the node process where this is executed
           sinon.stub(ctx._apis.authApi, 'logIn').callsFake(async (onMessage) => {
-            onMessage({ browserOpened: true } as AuthMessage)
+            onMessage({ browserOpened: true } as AuthStateShape)
 
             return new Promise((resolve) => {
               setTimeout(() => {
@@ -417,6 +416,116 @@ describe('App Top Nav Workflows', () => {
 
         cy.get('@logInModal').should('not.exist')
         cy.findByTestId('app-header-bar').findByTestId('user-avatar-title').should('be.visible')
+      })
+
+      it('shows correct error when browser cannot launch', () => {
+        cy.withCtx((ctx) => {
+          ctx.coreData.authState = {
+            name: 'AUTH_COULD_NOT_LAUNCH_BROWSER',
+            message: 'http://127.0.0.1:0000/redirect-to-auth',
+            browserOpened: false,
+          }
+        })
+
+        cy.findByTestId('app-header-bar').within(() => {
+          cy.findByTestId('user-avatar-title').should('not.exist')
+          cy.findByRole('button', { name: 'Log In' }).click()
+        })
+
+        cy.contains('http://127.0.0.1:0000/redirect-to-auth').should('be.visible')
+        cy.contains(loginText.titleBrowserError).should('be.visible')
+        cy.contains(loginText.bodyBrowserError).should('be.visible')
+        cy.contains(loginText.bodyBrowserErrorDetails).should('be.visible')
+
+        // in this state, there is no retry UI, we ask the user to visit the auth url on their own
+        cy.contains('button', loginText.actionTryAgain).should('not.exist')
+        cy.contains('button', loginText.actionCancel).should('not.exist')
+      })
+
+      it('shows correct error when error other than browser-launch happens', () => {
+        cy.withCtx((ctx) => {
+          ctx.coreData.authState = {
+            name: 'AUTH_ERROR_DURING_LOGIN',
+            message: 'An unexpected error occurred',
+            browserOpened: false,
+          }
+        })
+
+        cy.findByTestId('app-header-bar').within(() => {
+          cy.findByTestId('user-avatar-title').should('not.exist')
+          cy.findByRole('button', { name: 'Log In' }).click()
+        })
+
+        cy.contains(loginText.titleFailed).should('be.visible')
+        cy.contains(loginText.bodyError).should('be.visible')
+        cy.contains('An unexpected error occurred').should('be.visible')
+
+        cy.contains('button', loginText.actionTryAgain).should('be.visible').as('tryAgain')
+        cy.contains('button', loginText.actionCancel).should('be.visible')
+
+        cy.percySnapshot()
+
+        cy.withCtx((ctx) => {
+          ctx.coreData.authState = {
+            name: 'AUTH_BROWSER_LAUNCHED',
+            message: '',
+            browserOpened: true,
+          }
+        })
+
+        cy.get('@tryAgain').click()
+        cy.contains(loginText.titleInitial).should('be.visible')
+      })
+
+      it('cancel button correctly clears error state', () => {
+        cy.withCtx((ctx) => {
+          ctx.coreData.authState = {
+            name: 'AUTH_ERROR_DURING_LOGIN',
+            message: 'An unexpected error occurred',
+            browserOpened: false,
+          }
+        })
+
+        cy.findByTestId('app-header-bar').within(() => {
+          cy.findByTestId('user-avatar-title').should('not.exist')
+          cy.findByRole('button', { name: 'Log In' }).as('loginButton').click()
+        })
+
+        cy.contains(loginText.titleFailed).should('be.visible')
+        cy.contains(loginText.bodyError).should('be.visible')
+        cy.contains('An unexpected error occurred').should('be.visible')
+
+        cy.percySnapshot()
+
+        cy.contains('button', loginText.actionTryAgain).should('be.visible')
+        cy.contains('button', loginText.actionCancel).click()
+
+        cy.get('@loginButton').click()
+        cy.contains(loginText.titleInitial).should('be.visible')
+      })
+
+      it('closing modal correctly clears error state', () => {
+        cy.withCtx((ctx) => {
+          ctx.coreData.authState = {
+            name: 'AUTH_ERROR_DURING_LOGIN',
+            message: 'An unexpected error occurred',
+            browserOpened: false,
+          }
+        })
+
+        cy.findByTestId('app-header-bar').within(() => {
+          cy.findByTestId('user-avatar-title').should('not.exist')
+          cy.findByRole('button', { name: 'Log In' }).as('loginButton').click()
+        })
+
+        cy.contains(loginText.titleFailed).should('be.visible')
+        cy.contains(loginText.bodyError).should('be.visible')
+        cy.contains('An unexpected error occurred').should('be.visible')
+
+        cy.findByLabelText(defaultMessages.actions.close).click()
+
+        cy.get('@loginButton').click()
+        cy.contains(loginText.titleInitial).should('be.visible')
       })
     })
   })

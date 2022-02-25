@@ -1,5 +1,8 @@
-import { watch, Ref, ref, computed, shallowRef, CSSProperties } from 'vue'
-import { MaybeRef, useElementSize } from '@vueuse/core'
+import type { Ref, CSSProperties } from 'vue'
+import { watch, ref, computed, shallowRef } from 'vue'
+import type { MaybeRef } from '@vueuse/core'
+import { useElementSize } from '@vueuse/core'
+import { isEqual } from 'lodash'
 
 export type UseVirtualListApi = ReturnType<typeof useVirtualList>['api']
 
@@ -25,6 +28,7 @@ export type UseVirtualListItem<T> = {
 
 export function useVirtualList<T = any> (list: MaybeRef<T[]>, options: UseVirtualListOptions) {
   const containerRef: Ref = ref<HTMLElement | null>()
+
   const size = useElementSize(containerRef)
 
   const currentList: Ref<UseVirtualListItem<T>[]> = ref([])
@@ -104,8 +108,10 @@ export function useVirtualList<T = any> (list: MaybeRef<T[]>, options: UseVirtua
     }
   }
 
-  watch([size.width, size.height, list], () => {
-    calculateRange()
+  watch([size.height, list], (newVal, oldVal) => {
+    if (!isEqual(newVal, oldVal)) {
+      calculateRange()
+    }
   })
 
   const totalHeight = computed(() => {

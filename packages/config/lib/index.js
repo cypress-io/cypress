@@ -1,7 +1,7 @@
 const _ = require('lodash')
 const debug = require('debug')('cypress:config:validator')
 
-const { options, breakingOptions, breakingRootOptions } = require('./options')
+const { options, breakingOptions, breakingRootOptions, testingTypeBreakingOptions } = require('./options')
 
 const dashesOrUnderscoresRe = /^(_-)+/
 
@@ -26,7 +26,7 @@ const issuedWarnings = new Set()
 
 const validateNoBreakingOptions = (breakingCfgOptions, cfg, onWarning, onErr) => {
   breakingCfgOptions.forEach(({ name, errorKey, newName, isWarning, value }) => {
-    if (cfg.hasOwnProperty(name)) {
+    if (_.has(cfg, name)) {
       if (value && cfg[name] !== value) {
         // Bail if a value is specified but the config does not have that value.
         return
@@ -67,6 +67,10 @@ module.exports = {
 
   getBreakingKeys: () => {
     return breakingKeys
+  },
+
+  getBreakingRootKeys: () => {
+    return breakingRootOptions
   },
 
   getDefaultValues: (runtimeOptions = {}) => {
@@ -118,6 +122,12 @@ module.exports = {
 
   validateNoBreakingConfig: (cfg, onWarning, onErr) => {
     return validateNoBreakingOptions(breakingOptions, cfg, onWarning, onErr)
+  },
+
+  validateNoBreakingTestingTypeConfig: (cfg, testingType, onWarning, onErr) => {
+    const options = testingTypeBreakingOptions[testingType]
+
+    return validateNoBreakingOptions(options, cfg, onWarning, onErr)
   },
 
   validateNoReadOnlyConfig: (config, onErr) => {

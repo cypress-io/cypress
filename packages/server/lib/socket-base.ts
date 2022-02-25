@@ -4,7 +4,7 @@ import _ from 'lodash'
 import { onNetStubbingEvent } from '@packages/net-stubbing'
 import * as socketIo from '@packages/socket'
 import firefoxUtil from './browsers/firefox-util'
-import errors from './errors'
+import * as errors from './errors'
 import exec from './exec'
 import files from './files'
 import fixture from './fixture'
@@ -19,6 +19,7 @@ import * as session from './session'
 import type { Socket } from '@packages/socket'
 import path from 'path'
 import { getCtx } from '@packages/data-context'
+import { handleGraphQLSocketRequest } from '@packages/graphql/src/makeGraphQLServer'
 
 type StartListeningCallbacks = {
   onSocketConnection: (socket: any) => void
@@ -74,6 +75,9 @@ const retry = (fn: (res: any) => void) => {
 }
 
 export class SocketBase {
+  private _sendCloseBrowserTabsMessage
+  private _sendResetBrowserStateMessage
+  private _isRunnerSocketConnected
   private _sendFocusBrowserMessage
 
   protected ended: boolean
@@ -161,6 +165,7 @@ export class SocketBase {
     })
 
     let automationClient
+    let runnerSocket
 
     const { socketIoRoute, socketIoCookie } = config
 
@@ -271,12 +276,24 @@ export class SocketBase {
         .then((resp) => {
           return cb({ response: resp })
         }).catch((err) => {
-          return cb({ error: errors.clone(err) })
+          return cb({ error: errors.cloneErr(err) })
         })
       })
 
+      this._sendCloseBrowserTabsMessage = async () => {
+        await automationRequest('close:browser:tabs', {})
+      }
+
+      this._sendResetBrowserStateMessage = async () => {
+        await automationRequest('reset:browser:state', {})
+      }
+
       this._sendFocusBrowserMessage = async () => {
         await automationRequest('focus:browser:window', {})
+      }
+
+      this._isRunnerSocketConnected = () => {
+        return !!(runnerSocket && runnerSocket.connected)
       }
 
       socket.on('reporter:connected', () => {
@@ -296,10 +313,14 @@ export class SocketBase {
           return
         }
 
+        runnerSocket = socket
+
         socket.inRunnerRoom = true
 
         return socket.join('runner')
       })
+
+      socket.on('graphql:request', handleGraphQLSocketRequest)
 
       // TODO: what to do about runner disconnections?
 
@@ -446,7 +467,7 @@ export class SocketBase {
         .then((resp) => {
           return cb({ response: resp })
         }).catch((err) => {
-          return cb({ error: errors.clone(err) })
+          return cb({ error: errors.cloneErr(err) })
         })
       })
 
@@ -542,6 +563,24 @@ export class SocketBase {
 
   changeToUrl (url) {
     return this.toRunner('change:to:url', url)
+  }
+
+  async closeBrowserTabs () {
+    if (this._sendCloseBrowserTabsMessage) {
+      await this._sendCloseBrowserTabsMessage()
+    }
+  }
+
+  async resetBrowserState () {
+    if (this._sendResetBrowserStateMessage) {
+      await this._sendResetBrowserStateMessage()
+    }
+  }
+
+  isRunnerSocketConnected () {
+    if (this._isRunnerSocketConnected) {
+      return this._isRunnerSocketConnected()
+    }
   }
 
   async sendFocusBrowserMessage () {

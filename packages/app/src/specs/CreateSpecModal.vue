@@ -4,6 +4,7 @@
     variant="bare"
     :title="title"
     :model-value="show"
+    :help-link="helpLink"
     data-cy="create-spec-modal"
     @update:model-value="close"
   >
@@ -22,7 +23,7 @@
         :code-gen-glob="codeGenGlob"
         :gql="props.gql.currentProject"
         type="e2e"
-        spec-file-name="cypress/e2e/filename.cy.js"
+        :spec-file-name="specFileName"
         @restart="currentGeneratorId = undefined"
         @close="close"
       />
@@ -49,6 +50,7 @@ import type { CreateSpecModalFragment } from '../generated/graphql'
 import { gql } from '@urql/vue'
 import { not, whenever } from '@vueuse/core'
 import { useI18n } from '@cy/i18n'
+import { getPathForPlatform } from '../paths'
 
 const props = defineProps<{
   initialGenerator?: GeneratorId,
@@ -82,6 +84,16 @@ const generator = computed(() => {
 
   return null
 })
+
+const helpLink = computed(() => {
+  if (title.value === t('createSpec.e2e.importFromScaffold.specsAddedHeader')) {
+    return 'https://on.cypress.io/writing-and-organizing-tests'
+  }
+
+  return ''
+})
+
+const specFileName = computed(() => getPathForPlatform('cypress/e2e/filename.cy.js'))
 
 const codeGenGlob = computed(() => {
   if (!generator.value) {

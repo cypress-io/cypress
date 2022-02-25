@@ -16,7 +16,7 @@
   "dependencies": {
     "bluebird": "3.5.3",
     "debug": "^4.3.2",
-    "fs-extra": "8.1.0",
+    "fs-extra": "9.1.0",
     "lodash": "^4.17.21",
     "node-forge": "1.0.0",
     "rimraf": "3.0.2",

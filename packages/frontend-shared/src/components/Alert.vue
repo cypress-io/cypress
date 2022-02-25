@@ -4,11 +4,11 @@
     lazy
     :initially-open="initiallyOpen"
     :disable="!canCollapse"
-    class="rounded-t rounded-b outline-none overflow-hidden group"
+    class="overflow-hidden rounded-t rounded-b outline-none group"
     :class="[
       classes.headerClass,
       {[`hocus-default border-1 border-transparent rounded ${classes.ring}`]: canCollapse}]"
-    height="300"
+    :max-height="maxHeight"
   >
     <template #target="{ open }">
       <div
@@ -76,7 +76,8 @@ export type AlertClasses = {
 <script lang="ts" setup>
 import AlertHeader from './AlertHeader.vue'
 import DeleteIcon from '~icons/cy/delete_x16.svg'
-import { computed, useSlots, FunctionalComponent, SVGAttributes } from 'vue'
+import type { FunctionalComponent, SVGAttributes } from 'vue'
+import { computed, useSlots } from 'vue'
 import ChevronDown from '~icons/cy/chevron-down-small_x16.svg'
 import { useI18n } from '@cy/i18n'
 import Collapsible from './Collapsible.vue'
@@ -97,7 +98,8 @@ const props = withDefaults(defineProps<{
   dismissible?: boolean,
   collapsible?: boolean,
   modelValue?: boolean,
-  iconClasses?: string
+  iconClasses?: string,
+  maxHeight?: string,
 }>(), {
   title: undefined,
   modelValue: true,
@@ -106,6 +108,7 @@ const props = withDefaults(defineProps<{
   headerClass: undefined,
   bodyClass: undefined,
   iconClasses: '',
+  maxHeight: undefined,
 })
 
 const title = computed(() => props.title ?? 'Alert')

@@ -26,7 +26,7 @@ shikiWrapperClasses computed property.
         'shiki-wrapper',
 
         // All styles contain these utility classes
-        'overflow-scroll hover:border-indigo-200 relative text-14px leading-24px font-light',
+        'overflow-scroll hover:border-indigo-200 relative text-14px leading-24px font-normal',
 
         /**
          * 1. Single line is forced onto one line without any borders. It loses
@@ -56,14 +56,14 @@ shikiWrapperClasses computed property.
     />
     <pre
       v-else
-      class="border rounded font-light border-gray-100 py-8px text-14px leading-24px overflow-scroll"
+      class="border rounded font-normal border-gray-100 py-8px text-14px leading-24px overflow-scroll"
       :class="[props.class, lineNumbers ? 'pl-56px' : 'pl-8px' ]"
     >{{ trimmedCode }}</pre>
     <CopyButton
       v-if="copyButton && isSupported"
       variant="outline"
       tabindex="-1"
-      class="absolute"
+      class="bg-white absolute"
       :class="numberOfLines === 1 ? 'bottom-5px right-5px' : 'bottom-8px right-8px'"
       :text="code"
       no-icon
@@ -72,7 +72,8 @@ shikiWrapperClasses computed property.
 </template>
 
 <script lang="ts">
-import { Highlighter, getHighlighter, setOnigasmWASM, setCDN } from 'shiki'
+import type { Highlighter } from 'shiki'
+import { getHighlighter, setOnigasmWASM, setCDN } from 'shiki'
 import onigasm from 'onigasm/lib/onigasm.wasm?url'
 
 setOnigasmWASM(onigasm)
@@ -103,7 +104,8 @@ export { highlighter, inheritAttrs }
 </script>
 
 <script lang="ts" setup>
-import { computed, onBeforeMount, Ref, ref } from 'vue'
+import type { Ref } from 'vue'
+import { computed, onBeforeMount, ref } from 'vue'
 import { useClipboard } from '@vueuse/core'
 import CopyButton from './CopyButton.vue'
 

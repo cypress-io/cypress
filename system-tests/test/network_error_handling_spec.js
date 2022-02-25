@@ -239,7 +239,9 @@ describe('e2e network error handling', function () {
       },
     ],
     settings: {
-      baseUrl: `http://localhost:${PORT}/`,
+      e2e: {
+        baseUrl: `http://localhost:${PORT}/`,
+      },
     },
   })
 
@@ -454,8 +456,8 @@ describe('e2e network error handling', function () {
           spec: 'network_error_304_handling.cy.js',
           video: false,
           config: {
-            baseUrl: `http://localhost:${PORT}`,
             pageLoadTimeout: 4000,
+            baseUrl: `http://localhost:${PORT}`,
           },
           snapshot: true,
         })
@@ -474,8 +476,8 @@ describe('e2e network error handling', function () {
             spec: 'network_error_304_handling.cy.js',
             video: false,
             config: {
-              baseUrl: `http://localhost:${PORT}`,
               pageLoadTimeout: 4000,
+              baseUrl: `http://localhost:${PORT}`,
             },
             snapshot: true,
           })
@@ -498,11 +500,11 @@ describe('e2e network error handling', function () {
         await debugProxy.start(PROXY_PORT)
 
         await systemTests.exec(this, {
-          spec: 'network_error_304_handling_spec.js',
+          spec: 'network_error_304_handling.cy.js',
           video: false,
           config: {
-            baseUrl: `http://localhost:${PORT}`,
             pageLoadTimeout: 4000,
+            baseUrl: `http://localhost:${PORT}`,
           },
           snapshot: true,
         })

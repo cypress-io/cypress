@@ -24,6 +24,12 @@ const getNextVersionForPath = async (path) => {
   return semver.inc(currentVersion, releaseType || 'patch')
 }
 
+if (require.main !== module) {
+  module.exports.getNextVersionForPath = getNextVersionForPath
+
+  return
+}
+
 Bluebird.mapSeries(paths, async (path) => {
   const pathNextVersion = await getNextVersionForPath(path)
 

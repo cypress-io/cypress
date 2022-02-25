@@ -168,7 +168,7 @@ const formatNodeVersion = ({ resolvedNodeVersion, resolvedNodePath }, width) => 
   debug('formatting Node version. %o', { version: resolvedNodeVersion, path: resolvedNodePath })
 
   if (resolvedNodePath) {
-    return formatPath(`v${resolvedNodeVersion} (${resolvedNodePath})`, width)
+    return formatPath(`v${resolvedNodeVersion} ${gray(`(${resolvedNodePath})`)}`, width)
   }
 }
 
@@ -672,7 +672,7 @@ const removeOldProfiles = (browser) => {
   return browserUtils.removeOldProfiles(browser)
   .catch((err) => {
     // dont make removing old browsers profiles break the build
-    return errors.warning('CANNOT_REMOVE_OLD_BROWSER_PROFILES', err.stack)
+    return errors.warning('CANNOT_REMOVE_OLD_BROWSER_PROFILES', err)
   })
 }
 
@@ -688,7 +688,7 @@ const trashAssets = Promise.method((config = {}) => {
   ])
   .catch((err) => {
     // dont make trashing assets fail the build
-    return errors.warning('CANNOT_TRASH_ASSETS', err.stack)
+    return errors.warning('CANNOT_TRASH_ASSETS', err)
   })
 })
 
@@ -698,7 +698,7 @@ const createVideoRecording = function (videoName, options = {}) {
   const onError = _.once((err) => {
     // catch video recording failures and log them out
     // but don't let this affect the run at all
-    return errors.warning('VIDEO_RECORDING_FAILED', err.stack)
+    return errors.warning('VIDEO_RECORDING_FAILED', err)
   })
 
   return fs
@@ -755,7 +755,7 @@ const maybeStartVideoRecording = Promise.method(function (options = {}) {
 const warnVideoRecordingFailed = (err) => {
   // log that post processing was attempted
   // but failed and dont let this change the run exit code
-  errors.warning('VIDEO_POST_PROCESSING_FAILED', err.stack)
+  errors.warning('VIDEO_POST_PROCESSING_FAILED', err)
 }
 
 module.exports = {
@@ -957,7 +957,7 @@ module.exports = {
   },
 
   launchBrowser (options = {}) {
-    const { browser, spec, writeVideoFrame, setScreenshotMetadata, project, screenshots, projectRoot, onError } = options
+    const { browser, spec, writeVideoFrame, setScreenshotMetadata, project, screenshots, projectRoot, shouldLaunchNewTab, onError } = options
 
     const browserOpts = getDefaultBrowserOptsByFamily(browser, project, writeVideoFrame, onError)
 
@@ -988,6 +988,7 @@ module.exports = {
     const warnings = {}
 
     browserOpts.projectRoot = projectRoot
+    browserOpts.shouldLaunchNewTab = shouldLaunchNewTab
 
     browserOpts.onWarning = (err) => {
       const { message } = err
@@ -1007,12 +1008,6 @@ module.exports = {
     debug('browser launched')
 
     return openProject.launch(browser, spec, browserOpts)
-  },
-
-  navigateToNextSpec (spec) {
-    debug('navigating to next spec')
-
-    return openProject.changeUrlToSpec(spec)
   },
 
   listenForProjectEnd (project, exit) {
@@ -1086,7 +1081,7 @@ module.exports = {
     return this.currentWriteVideoFrameCallback(...arguments)
   },
 
-  waitForBrowserToConnect (options = {}, shouldLaunchBrowser = true) {
+  waitForBrowserToConnect (options = {}) {
     const { project, socketId, timeout, onError, writeVideoFrame, spec } = options
     const browserTimeout = process.env.CYPRESS_INTERNAL_BROWSER_CONNECT_TIMEOUT || timeout || 60000
     let attempts = 0
@@ -1113,13 +1108,6 @@ module.exports = {
 
     const wait = () => {
       debug('waiting for socket to connect and browser to launch...')
-
-      if (!shouldLaunchBrowser) {
-        // If we do not launch the browser,
-        // we tell it that we are ready
-        // to receive the next spec
-        return Promise.resolve(this.navigateToNextSpec(options.spec))
-      }
 
       return Promise.join(
         this.waitForSocketConnection(project, socketId)
@@ -1181,7 +1169,7 @@ module.exports = {
   },
 
   waitForTestsToFinishRunning (options = {}) {
-    const { project, screenshots, startedVideoCapture, endVideoCapture, videoName, compressedVideoName, videoCompression, videoUploadOnPasses, exit, spec, estimated, quiet, config, testingType } = options
+    const { project, screenshots, startedVideoCapture, endVideoCapture, videoName, compressedVideoName, videoCompression, videoUploadOnPasses, exit, spec, estimated, quiet, config } = options
 
     // https://github.com/cypress-io/cypress/issues/2370
     // delay 1 second if we're recording a video to give
@@ -1257,13 +1245,17 @@ module.exports = {
         }
       }
 
-      if (testingType === 'e2e') {
-        // always close the browser now as opposed to letting
-        // it exit naturally with the parent process due to
-        // electron bug in windows
-        debug('attempting to close the browser')
-        await openProject.closeBrowser()
-      }
+      // Close the browser if the environment variable is set to do so
+      // if (process.env.CYPRESS_INTERNAL_FORCE_BROWSER_RELAUNCH) {
+      //   debug('attempting to close the browser')
+      //   await openProject.closeBrowser()
+      // } else {
+      debug('attempting to close the browser tab')
+      await openProject.closeBrowserTabs()
+      // }
+
+      debug('resetting server state')
+      openProject.projectBase.server.reset()
 
       if (videoExists && !skippedSpec && endVideoCapture && !videoCaptureFailed) {
         const ffmpegChaptersConfig = videoCapture.generateFfmpegChaptersConfig(results.tests)
@@ -1455,6 +1447,7 @@ module.exports = {
     })
 
     if (browser.family !== 'chromium' && !options.config.chromeWebSecurity) {
+      console.log('')
       errors.warning('CHROME_WEB_SECURITY_NOT_SUPPORTED', browser.family)
     }
 
@@ -1490,7 +1483,7 @@ module.exports = {
           videoCompression: options.videoCompression,
           videoUploadOnPasses: options.videoUploadOnPasses,
           quiet: options.quiet,
-          testingType: options.testingType,
+          browser,
         }),
 
         connection: this.waitForBrowserToConnect({
@@ -1503,8 +1496,9 @@ module.exports = {
           socketId: options.socketId,
           webSecurity: options.webSecurity,
           projectRoot: options.projectRoot,
+          shouldLaunchNewTab: !firstSpec, // !process.env.CYPRESS_INTERNAL_FORCE_BROWSER_RELAUNCH && !firstSpec,
           // TODO(tim): investigate the socket disconnect
-        }, process.env.CYPRESS_INTERNAL_FORCE_BROWSER_RELAUNCH || options.testingType === 'e2e' || firstSpec),
+        }),
       })
     })
   },
@@ -1571,13 +1565,13 @@ module.exports = {
         ])
         .spread(async (sys = {}, browser = {}) => {
           if (!project.ctx.project.specs.length) {
-            errors.throw('NO_SPECS_FOUND', projectRoot, specPattern)
+            errors.throwErr('NO_SPECS_FOUND', projectRoot, specPattern)
           }
 
           const specs = project.ctx.project.specs
 
           if (browser.unsupportedVersion && browser.warning) {
-            errors.throw('UNSUPPORTED_BROWSER_VERSION', browser.warning)
+            errors.throwErr('UNSUPPORTED_BROWSER_VERSION', browser.warning)
           }
 
           if (browser.family === 'chromium') {
@@ -1589,7 +1583,6 @@ module.exports = {
               beforeSpecRun,
               afterSpecRun,
               projectRoot,
-              specPattern,
               socketId,
               parallel,
               onError,
@@ -1601,6 +1594,7 @@ module.exports = {
               specs,
               sys,
               tag,
+              specPattern,
               videosFolder: config.videosFolder,
               video: config.video,
               videoCompression: config.videoCompression,

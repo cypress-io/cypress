@@ -1,6 +1,8 @@
-import { nonNull, objectType, stringArg } from 'nexus'
+import { PACKAGE_MANAGERS } from '@packages/types'
+import { enumType, nonNull, objectType, stringArg } from 'nexus'
 import path from 'path'
 import { BaseError } from '.'
+import { BrowserStatusEnum } from '..'
 import { cloudProjectBySlug } from '../../stitching/remoteGraphQLCalls'
 import { TestingTypeEnum } from '../enumTypes/gql-WizardEnums'
 import { Browser } from './gql-Browser'
@@ -10,12 +12,22 @@ import { ProjectPreferences } from './gql-ProjectPreferences'
 import { Spec } from './gql-Spec'
 import { Storybook } from './gql-Storybook'
 
+export const PackageManagerEnum = enumType({
+  name: 'PackageManagerEnum',
+  members: PACKAGE_MANAGERS,
+})
+
 export const CurrentProject = objectType({
   name: 'CurrentProject',
   description: 'The currently opened Cypress project, represented by a cypress.config.{ts|js} file',
   node: 'projectRoot',
   definition (t) {
     t.implements('ProjectLike')
+
+    t.nonNull.field('packageManager', {
+      type: PackageManagerEnum,
+      resolve: (source, args, ctx) => ctx.coreData.packageManager,
+    })
 
     t.field('errorLoadingConfigFile', {
       type: BaseError,
@@ -56,7 +68,7 @@ export const CurrentProject = objectType({
 
     t.field('cloudProject', {
       type: 'CloudProjectResult',
-      description: 'The remote associated project from Cypress Cloud',
+      description: 'The remote associated project from Cypress Dashboard',
       resolve: async (source, args, ctx, info) => {
         const projectId = await ctx.project.projectId()
 
@@ -69,13 +81,19 @@ export const CurrentProject = objectType({
     })
 
     t.string('projectId', {
-      description: 'Used to associate project with Cypress cloud',
+      description: 'Used to associate project with Cypress dashboard',
       resolve: (source, args, ctx) => ctx.project.projectId(),
     })
 
     t.boolean('isCTConfigured', {
       description: 'Whether the user configured this project to use Component Testing',
       resolve: (source, args, ctx) => {
+        // If the forceReconfigureProject for component is set, we want to notify
+        // the client side that the wizard has to start from the beginning
+        if (ctx.coreData.forceReconfigureProject?.component) {
+          return false
+        }
+
         return ctx.lifecycleManager.isTestingTypeConfigured('component')
       },
     })
@@ -83,6 +101,12 @@ export const CurrentProject = objectType({
     t.boolean('isE2EConfigured', {
       description: 'Whether the user configured this project to use e2e Testing',
       resolve: (source, args, ctx) => {
+        // If the forceReconfigureProject for e2e is set, we want to notify
+        // the client side that the wizard has to start from the beginning
+        if (ctx.coreData.forceReconfigureProject?.e2e) {
+          return false
+        }
+
         return ctx.lifecycleManager.isTestingTypeConfigured('e2e')
       },
     })
@@ -101,9 +125,12 @@ export const CurrentProject = objectType({
       },
     })
 
-    // t.list.field('testingTypes', {
-    //   type: TestingTypeInfo,
-    // })
+    t.boolean('hasTypescript', {
+      description: 'Whether the project has Typescript',
+      resolve (source, args, ctx) {
+        return ctx.lifecycleManager.metaState.hasTypescript
+      },
+    })
 
     t.nonNull.list.nonNull.field('specs', {
       description: 'A list of specs for the currently open testing type of a project',
@@ -184,9 +211,10 @@ export const CurrentProject = objectType({
       resolve: async (source, args, ctx) => ctx.project.getIsDefaultSpecPattern(),
     })
 
-    t.nonNull.boolean('isBrowserOpen', {
+    t.nonNull.field('browserStatus', {
+      type: BrowserStatusEnum,
       description: 'If the browser is open or not',
-      resolve: (source, args, ctx) => ctx.coreData.app.isBrowserOpen,
+      resolve: (source, args, ctx) => ctx.coreData.app.browserStatus,
     })
   },
   sourceType: {

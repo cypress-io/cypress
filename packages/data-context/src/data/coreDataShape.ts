@@ -1,4 +1,4 @@
-import { BUNDLERS, FoundBrowser, Editor, Warning, AllowedState, AllModeOptions, TestingType } from '@packages/types'
+import { BUNDLERS, FoundBrowser, Editor, Warning, AllowedState, AllModeOptions, TestingType, PACKAGE_MANAGERS, BrowserStatus, AuthStateName } from '@packages/types'
 import type { NexusGenEnums, NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
 import type { App, BrowserWindow } from 'electron'
 import type { ChildProcess } from 'child_process'
@@ -56,7 +56,8 @@ export interface AppDataShape {
   refreshingBrowsers: Promise<FoundBrowser[]> | null
   refreshingNodePath: Promise<string> | null
   nodePath: Maybe<string>
-  isBrowserOpen: boolean
+  browserStatus: BrowserStatus
+  relaunchBrowser: boolean
 }
 
 export interface WizardDataShape {
@@ -65,6 +66,9 @@ export interface WizardDataShape {
   chosenFramework: NexusGenEnums['FrontendFrameworkEnum'] | null
   chosenLanguage: NexusGenEnums['CodeLanguageEnum']
   chosenManualInstall: boolean
+  detectedLanguage: NexusGenEnums['CodeLanguageEnum'] | null
+  detectedBundler: NexusGenEnums['SupportedBundlers'] | null
+  detectedFramework: NexusGenEnums['FrontendFrameworkEnum'] | null
 }
 
 export interface MigrationDataShape{
@@ -81,6 +85,17 @@ export interface BaseErrorDataShape {
   title?: string
   message: string
   stack?: string
+}
+
+export interface AuthStateShape {
+  name?: AuthStateName
+  message?: string
+  browserOpened: boolean
+}
+
+export interface ForceReconfigureProjectDataShape {
+  e2e?: boolean | null
+  component?: boolean | null
 }
 
 export interface CoreDataShape {
@@ -107,9 +122,11 @@ export interface CoreDataShape {
   migration: MigrationDataShape | null
   user: AuthenticatedUserShape | null
   electron: ElectronShape
-  isAuthBrowserOpened: boolean
+  authState: AuthStateShape
   scaffoldedFiles: NexusGenObjects['ScaffoldedFile'][] | null
   warnings: Warning[]
+  packageManager: typeof PACKAGE_MANAGERS[number]
+  forceReconfigureProject: ForceReconfigureProjectDataShape | null
 }
 
 /**
@@ -133,14 +150,17 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
       projects: [],
       refreshingNodePath: null,
       nodePath: modeOptions.userNodePath,
-      isBrowserOpen: false,
+      browserStatus: 'closed',
+      relaunchBrowser: false,
     },
     localSettings: {
       availableEditors: [],
       preferences: {},
       refreshing: null,
     },
-    isAuthBrowserOpened: false,
+    authState: {
+      browserOpened: false,
+    },
     currentProject: modeOptions.projectRoot ?? null,
     currentTestingType: modeOptions.testingType ?? null,
     wizard: {
@@ -149,6 +169,9 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
       chosenLanguage: 'js',
       chosenManualInstall: false,
       allBundlers: BUNDLERS,
+      detectedBundler: null,
+      detectedFramework: null,
+      detectedLanguage: null,
     },
     migration: {
       step: 'renameAuto',
@@ -161,5 +184,7 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
       browserWindow: null,
     },
     scaffoldedFiles: null,
+    packageManager: 'npm',
+    forceReconfigureProject: null,
   }
 }

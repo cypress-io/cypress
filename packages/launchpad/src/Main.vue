@@ -1,7 +1,7 @@
 <template>
   <template v-if="query.data.value">
     <HeaderBar
-      class="w-full z-30 fixed"
+      class="w-full z-10 fixed"
     />
     <div class="px-24px pt-86px">
       <BaseError
@@ -38,15 +38,16 @@
         </template>
         <template v-else-if="!currentProject?.currentTestingType">
           <LaunchpadHeader
-            title="Welcome to Cypress!"
+            :title="t('welcomePage.title')"
             description=""
           />
           <StandardModal
             v-model="isTestingTypeModalOpen"
             class="h-full w-full sm:h-auto sm:mx-[5%] sm:w-auto"
+            help-link="https://on.cypress.io/choosing-testing-type"
           >
             <template #title>
-              Key Differences
+              {{ t('welcomePage.compareTypes.modalTitle') }}
             </template>
             <CompareTestingTypes />
           </StandardModal>

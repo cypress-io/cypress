@@ -11,7 +11,7 @@ import { RunnablesStore, RunnableArray } from './runnables-store'
 import statsStore, { StatsStore } from '../header/stats-store'
 import { Scroller } from '../lib/scroller'
 import { AppState } from '../lib/app-state'
-import FileOpener from '../lib/file-opener'
+import OpenFileInIDE from '../lib/open-file-in-ide'
 
 import OpenIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/technology-code-editor_x16.svg'
 import StudioIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/object-magic-wand-dark-mode_x16.svg'
@@ -49,15 +49,19 @@ const RunnablesEmptyState = ({ spec, eventManager = events }: RunnablesEmptyStat
       <p>Cypress could not detect tests in this file.</p>
       { !isAllSpecs && (
         <>
-          <FileOpener fileDetails={{
+          <OpenFileInIDE fileDetails={{
             column: 0,
             line: 0,
             originalFile: spec.relative,
             relativeFile: spec.relative,
             absoluteFile: spec.absolute,
           }}>
-            <h3><OpenIcon />Open file in IDE</h3>
-          </FileOpener>
+            <a href="#" onClick={(event) => {
+              event.preventDefault()
+            }}>
+              <h3><OpenIcon />Open file in IDE</h3>
+            </a>
+          </OpenFileInIDE>
           <p className='text-muted'>Write a test using your preferred text editor.</p>
           <a className='open-studio' onClick={_launchStudio}><h3><StudioIcon /> Create test with Cypress Studio</h3></a>
           <p className='open-studio-desc text-muted'>Use an interactive tool to author a test right here.</p>

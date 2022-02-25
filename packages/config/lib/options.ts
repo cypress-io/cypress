@@ -3,6 +3,8 @@ import validate from './validation'
 // @ts-ignore
 import pkg from '@packages/root'
 
+type TestingType = 'e2e' | 'component'
+
 interface ResolvedConfigOption {
   name: string
   defaultValue?: any
@@ -13,6 +15,7 @@ interface ResolvedConfigOption {
    * Can be mutated with Cypress.config() or test-specific configuration overrides
    */
   canUpdateDuringTestTime?: boolean
+  specificTestingType?: TestingType
 }
 
 interface RuntimeConfigOption {
@@ -35,6 +38,10 @@ interface BreakingOption {
    * String to summarize the error messaging that is logged.
    */
   errorKey: string
+  /**
+   * Array of testing types this config option is valid for
+   */
+  testingTypes?: TestingType[]
   /**
    * Configuration value of the configuration option to check against.
    */
@@ -176,12 +183,6 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     isExperimental: true,
     canUpdateDuringTestTime: false,
   }, {
-    name: 'experimentalStudio',
-    defaultValue: false,
-    validation: validate.isBoolean,
-    isExperimental: true,
-    canUpdateDuringTestTime: false,
-  }, {
     name: 'fileServerFolder',
     defaultValue: '',
     validation: validate.isString,
@@ -194,8 +195,8 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     isFolder: true,
     canUpdateDuringTestTime: false,
   }, {
-    name: 'ignoreSpecPattern',
-    defaultValue: '*.hot-update.js',
+    name: 'excludeSpecPattern',
+    defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? ['**/__snapshots__/*', '**/__image_snapshots__/*'] : '*.hot-update.js',
     validation: validate.isStringOrArrayOfStrings,
     canUpdateDuringTestTime: true,
   }, {
@@ -537,7 +538,37 @@ export const breakingOptions: Array<BreakingOption> = [
 export const breakingRootOptions: Array<BreakingOption> = [
   {
     name: 'supportFile',
-    errorKey: 'SUPPORT_FILE_ROOT_NOT_SUPPORTED',
+    errorKey: 'CONFIG_FILE_INVALID_ROOT_CONFIG',
     isWarning: false,
+    testingTypes: ['component', 'e2e'],
+  },
+  {
+    name: 'specPattern',
+    errorKey: 'CONFIG_FILE_INVALID_ROOT_CONFIG',
+    isWarning: false,
+    testingTypes: ['component', 'e2e'],
+  },
+  {
+    name: 'excludeSpecPattern',
+    errorKey: 'CONFIG_FILE_INVALID_ROOT_CONFIG',
+    isWarning: false,
+    testingTypes: ['component', 'e2e'],
+  },
+  {
+    name: 'baseUrl',
+    errorKey: 'CONFIG_FILE_INVALID_ROOT_CONFIG_E2E',
+    isWarning: false,
+    testingTypes: ['e2e'],
   },
 ]
+
+export const testingTypeBreakingOptions: { e2e: Array<BreakingOption>, component: Array<BreakingOption> } = {
+  e2e: [],
+  component: [
+    {
+      name: 'baseUrl',
+      errorKey: 'CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_COMPONENT',
+      isWarning: false,
+    },
+  ],
+}

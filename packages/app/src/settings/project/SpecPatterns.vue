@@ -12,7 +12,7 @@
         keypath="settingsPage.specPattern.description"
       >
         <ExternalLink
-          href="https://on.cypress.io"
+          href="https://on.cypress.io/test-type-options"
         >
           {{ t('links.learnMore') }}
         </ExternalLink>
@@ -21,6 +21,7 @@
     <SpecPatterns
       v-if="props.gql"
       :gql="props.gql"
+      data-cy="spec-pattern"
     />
   </SettingsSection>
 </template>

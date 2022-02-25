@@ -6,11 +6,11 @@ import assert from 'assert'
 
 import { ProjectBase } from './project-base'
 import browsers from './browsers'
+import * as errors from './errors'
 import preprocessor from './plugins/preprocessor'
 import runEvents from './plugins/run_events'
 import * as session from './session'
 import { getSpecUrl } from './project_utils'
-import errors from './errors'
 import type { LaunchOpts, OpenProjectLaunchOptions, InitializeProjectOptions } from '@packages/types'
 import { DataContext, getCtx } from '@packages/data-context'
 import { autoBindDebug } from '@packages/data-context/src/util'
@@ -41,20 +41,6 @@ export class OpenProject {
 
   getProject () {
     return this.projectBase
-  }
-
-  changeUrlToSpec (spec: Cypress.Cypress['spec']) {
-    if (!this.projectBase) {
-      return
-    }
-
-    const newSpecUrl = getSpecUrl({
-      spec,
-      browserUrl: this.projectBase.cfg.browserUrl,
-      projectRoot: this.projectBase.projectRoot,
-    })
-
-    this.projectBase.changeToUrl(newSpecUrl)
   }
 
   async launch (browser, spec: Cypress.Cypress['spec'], options: LaunchOpts = {
@@ -183,7 +169,24 @@ export class OpenProject {
           return browsers.connectToExisting(browser, options, automation)
         }
 
+        if (options.shouldLaunchNewTab) {
+          const onInitializeNewBrowserTab = async () => {
+            await this.resetBrowserState()
+          }
+
+          // If we do not launch the browser,
+          // we tell it that we are ready
+          // to receive the next spec
+          return browsers.connectToNewSpec(browser, { onInitializeNewBrowserTab, ...options }, automation)
+        }
+
+        this._ctx?.browser.setBrowserStatus('opening')
+
         return browsers.open(browser, options, automation, this._ctx)
+      }).then((browserInstance) => {
+        this._ctx?.browser.setBrowserStatus('open')
+
+        return browserInstance
       })
     }
 
@@ -192,6 +195,14 @@ export class OpenProject {
 
   closeBrowser () {
     return browsers.close()
+  }
+
+  async closeBrowserTabs () {
+    return this.projectBase?.closeBrowserTabs()
+  }
+
+  async resetBrowserState () {
+    return this.projectBase?.resetBrowserState()
   }
 
   closeOpenProjectAndBrowsers () {
@@ -263,40 +274,20 @@ export class OpenProject {
     try {
       const cfg = await this.projectBase.initializeConfig()
 
-      const toArray = (val?: string | string[]) => val ? typeof val === 'string' ? [val] : val : undefined
-
-      let specPattern = options.spec || cfg[testingType].specPattern
-
-      specPattern = toArray(specPattern)
-
-      let ignoreSpecPattern = cfg[testingType].ignoreSpecPattern
-
-      ignoreSpecPattern = toArray(ignoreSpecPattern) || []
-
-      // exclude all specs matching e2e if in component testing
-      let additionalIgnorePattern = testingType === 'component' ? cfg?.e2e?.specPattern : undefined
-
-      additionalIgnorePattern = toArray(additionalIgnorePattern) || []
-
-      if (!specPattern) {
-        throw Error('could not find pattern to load specs')
-      }
-
-      const specs = await this._ctx.project.findSpecs(
+      const { specPattern, excludeSpecPattern, additionalIgnorePattern } = await this._ctx.actions.project.setSpecsFoundBySpecPattern({
         path,
         testingType,
-        specPattern,
-        ignoreSpecPattern,
-        additionalIgnorePattern,
-      )
+        specPattern: options.spec || cfg[testingType].specPattern,
+        excludeSpecPattern: cfg[testingType].excludeSpecPattern,
+        additionalIgnorePattern: testingType === 'component' ? cfg?.e2e?.specPattern : undefined,
+      })
 
-      this._ctx.actions.project.setSpecs(specs)
-      this._ctx.project.startSpecWatcher(path, testingType, specPattern, ignoreSpecPattern, additionalIgnorePattern)
+      this._ctx.project.startSpecWatcher(path, testingType, specPattern, excludeSpecPattern, additionalIgnorePattern)
 
       await this.projectBase.open()
     } catch (err: any) {
       if (err.isCypressErr && err.portInUse) {
-        errors.throw(err.type, err.port)
+        errors.throwErr(err.type, err.port)
       } else {
         // rethrow and handle elsewhere
         throw (err)
@@ -309,6 +300,20 @@ export class OpenProject {
   // for testing purposes
   __reset () {
     this.resetOpenProject()
+  }
+
+  async sendFocusBrowserMessage () {
+    const isRunnerConnected = this.projectBase?.isRunnerSocketConnected()
+
+    // If the runner's socket is active and connected, we focus the active window
+    if (isRunnerConnected) {
+      return this.projectBase?.sendFocusBrowserMessage()
+    }
+
+    // Otherwise, we relaunch the app in the current browser
+    if (this.relaunchBrowser) {
+      return this.relaunchBrowser()
+    }
   }
 }
 

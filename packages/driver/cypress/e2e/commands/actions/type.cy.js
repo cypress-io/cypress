@@ -360,25 +360,7 @@ describe('src/cy/commands/actions/type - #type', () => {
       cy.get(':text:first').type('foo', { animationDistanceThreshold: 1000 }).then(() => {
         const { args } = cy.ensureElementIsNotAnimating.firstCall
 
-        const plusMinusOne = (n) => [n - 1, n + 1]
-
-        for (const key of Object.keys(fromElWindow)) {
-          // TODO: These should be pixel perfect, but they are off
-          // by 1px, on CI, for Firefox only.
-          if (typeof fromElWindow[key] === 'number') {
-            if (Cypress.isBrowser({ family: 'firefox' })) {
-              expect(args[1][0][key]).to.be.within(...plusMinusOne(fromElWindow[key]))
-              expect(args[1][1][key]).to.be.within(...plusMinusOne(fromElWindow[key]))
-            } else {
-              expect(args[1][0][key]).to.eq(fromElWindow[key])
-              expect(args[1][1][key]).to.eq(fromElWindow[key])
-            }
-          } else {
-            // non number arg - just do the comparison
-            expect(args[1][0][key]).to.eq(fromElWindow[key])
-            expect(args[1][1][key]).to.eq(fromElWindow[key])
-          }
-        }
+        expect(args[1]).to.deep.eq([fromElWindow, fromElWindow])
 
         expect(args[2]).to.eq(1000)
       })
@@ -396,25 +378,7 @@ describe('src/cy/commands/actions/type - #type', () => {
       cy.get(':text:first').type('foo').then(() => {
         const { args } = cy.ensureElementIsNotAnimating.firstCall
 
-        const plusMinusOne = (n) => [n - 1, n + 1]
-
-        for (const key of Object.keys(fromElWindow)) {
-          // TODO: These should be pixel perfect, but they are off
-          // by 1px, on CI, for Firefox only.
-          if (typeof fromElWindow[key] === 'number') {
-            if (Cypress.isBrowser({ family: 'firefox' })) {
-              expect(args[1][0][key]).to.be.within(...plusMinusOne(fromElWindow[key]))
-              expect(args[1][1][key]).to.be.within(...plusMinusOne(fromElWindow[key]))
-            } else {
-              expect(args[1][0][key]).to.eq(fromElWindow[key])
-              expect(args[1][1][key]).to.eq(fromElWindow[key])
-            }
-          } else {
-            // non number arg - just do the comparison
-            expect(args[1][0][key]).to.eq(fromElWindow[key])
-            expect(args[1][1][key]).to.eq(fromElWindow[key])
-          }
-        }
+        expect(args[1]).to.deep.eq([fromElWindow, fromElWindow])
 
         expect(args[2]).to.eq(animationDistanceThreshold)
       })
@@ -588,6 +552,53 @@ describe('src/cy/commands/actions/type - #type', () => {
           .get(`#button-like-input-type-${type}`)
           .type('bar')
           .should('have.value', 'foo')
+        })
+      })
+    })
+  })
+
+  // https://github.com/cypress-io/cypress/issues/19541
+  describe(`type('{enter}') and click event on button-like elements`, () => {
+    beforeEach(() => {
+      cy.visit('fixtures/type-enter.html')
+    })
+
+    describe('triggers', () => {
+      const targets = [
+        'button-tag',
+        'input-button',
+        'input-image',
+        'input-reset',
+        'input-submit',
+      ]
+
+      targets.forEach((targetId) => {
+        it(`${targetId}`, () => {
+          cy.get(`#target-${targetId}`).focus()
+          cy.get(`#target-${targetId}`).type('{enter}')
+
+          cy.get('li').eq(0).should('have.text', 'keydown')
+          cy.get('li').eq(1).should('have.text', 'keypress')
+          cy.get('li').eq(2).should('have.text', 'click')
+          cy.get('li').eq(3).should('have.text', 'keyup')
+        })
+      })
+    })
+
+    describe('does not trigger', () => {
+      const targets = [
+        'input-checkbox',
+        'input-radio',
+      ]
+
+      targets.forEach((targetId) => {
+        it(`${targetId}`, () => {
+          cy.get(`#target-${targetId}`).focus()
+          cy.get(`#target-${targetId}`).type('{enter}')
+
+          cy.get('li').eq(0).should('have.text', 'keydown')
+          cy.get('li').eq(1).should('have.text', 'keypress')
+          cy.get('li').eq(2).should('have.text', 'keyup')
         })
       })
     })

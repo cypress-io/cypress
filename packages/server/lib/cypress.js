@@ -13,7 +13,6 @@ const Promise = require('bluebird')
 const debug = require('debug')('cypress:server:cypress')
 const { getPublicConfigKeys } = require('@packages/config')
 const argsUtils = require('./util/args')
-const chalk = require('chalk')
 const { openProject } = require('../lib/open_project')
 
 const warning = (code, args) => {
@@ -108,7 +107,10 @@ module.exports = {
 
         debug('electron open arguments %o', args)
 
-        return cypressElectron.open('.', args, fn)
+        // const mainEntryFile = require.main.filename
+        const serverMain = require('./cwd')()
+
+        return cypressElectron.open(serverMain, args, fn)
       })
     })
   },
@@ -239,7 +241,7 @@ module.exports = {
 
             if (isCanceled) {
               // eslint-disable-next-line no-console
-              console.log(chalk.magenta('\n  Exiting with non-zero exit code because the run was canceled.'))
+              console.log(require('chalk').magenta('\n  Exiting with non-zero exit code because the run was canceled.'))
 
               return 1
             }

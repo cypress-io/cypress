@@ -280,6 +280,13 @@ export default function (Commands, Cypress, cy, state, config) {
       const type = (type) => $elements.isInputType(options.$el.get(0), type)
       const sendClickEvent = type('button') || type('image') || type('submit') || type('reset')
 
+      const fireClickEvent = (el) => {
+        const ctor = $dom.getDocumentFromElement(el).defaultView!.PointerEvent
+        const event = new ctor('click')
+
+        el.dispatchEvent(event)
+      }
+
       return keyboard.type({
         $el: options.$el,
         chars,
@@ -320,7 +327,28 @@ export default function (Commands, Cypress, cy, state, config) {
           }
         },
 
-        onEvent: updateTable || _.noop,
+        onEvent (id, key, event, value) {
+          if (updateTable) {
+            updateTable(id, key, event, value)
+          }
+
+          if (
+            // Firefox sends a click event when the Space key is pressed.
+            // We don't want send it twice.
+            !Cypress.isBrowser('firefox') &&
+            // Click event is sent after keyup event with space key.
+            event.type === 'keyup' && event.code === 'Space' &&
+            // Click events should be only sent to button-like elements.
+            // event.target is null when used with shadow DOM.
+            (event.target && $elements.isButtonLike(event.target)) &&
+            // When a space key is pressed for input radio elements, the click event is only fired when it's not checked.
+            !(event.target.tagName === 'INPUT' && event.target.type === 'radio' && event.target.checked === true) &&
+            // When event is prevented, the click event should not be emitted
+            !event.defaultPrevented
+          ) {
+            fireClickEvent(event.target)
+          }
+        },
 
         // fires only when the 'value'
         // of input/text/contenteditable
@@ -368,10 +396,7 @@ export default function (Commands, Cypress, cy, state, config) {
           if (sendClickEvent) {
             // Firefox sends a click event automatically.
             if (!Cypress.isBrowser('firefox')) {
-              const ctor = $dom.getDocumentFromElement(el).defaultView?.PointerEvent
-              const event = new ctor!('click')
-
-              el.dispatchEvent(event)
+              fireClickEvent(el)
             }
           }
 

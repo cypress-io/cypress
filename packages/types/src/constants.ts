@@ -21,7 +21,7 @@ export const CODE_GEN_FRAMEWORKS = ['react', 'vue'] as const
 
 export type CodeGenFramework = typeof CODE_GEN_FRAMEWORKS[number]
 
-export const FRONTEND_FRAMEWORK_CATEGORIES = ['react', 'vue', 'other'] as const
+export const FRONTEND_FRAMEWORK_CATEGORIES = ['react', 'vue'] as const
 
 export const STORYBOOK_DEPS = [
   '@storybook/testing-react',
@@ -32,8 +32,9 @@ export const FRONTEND_FRAMEWORKS = [
   {
     type: 'cra',
     name: 'Create React App',
-    supportedBundlers: ['webpack'],
+    supportedBundlers: ['webpack'] as readonly Bundler['type'][],
     package: '@cypress/react',
+    defaultPackagePath: '@cypress/react/plugins/react-scripts',
     glob: '*.{jsx,tsx}',
     deps: ['react-scripts', 'react', 'react-dom'],
     category: FRONTEND_FRAMEWORK_CATEGORIES[0],
@@ -43,8 +44,9 @@ export const FRONTEND_FRAMEWORKS = [
   {
     type: 'vuecli',
     name: 'Vue CLI',
-    supportedBundlers: ['webpack'],
+    supportedBundlers: ['webpack'] as readonly Bundler['type'][],
     package: '@cypress/vue',
+    defaultPackagePath: null,
     glob: '*.vue',
     deps: ['@vue/cli-service', 'vue'],
     category: FRONTEND_FRAMEWORK_CATEGORIES[1],
@@ -54,8 +56,9 @@ export const FRONTEND_FRAMEWORKS = [
   {
     type: 'react',
     name: 'React.js',
-    supportedBundlers: ['webpack', 'vite'],
+    supportedBundlers: ['webpack', 'vite'] as readonly Bundler['type'][],
     package: '@cypress/react',
+    defaultPackagePath: null,
     glob: '*.{jsx,tsx}',
     deps: ['react', 'react-dom'],
     category: FRONTEND_FRAMEWORK_CATEGORIES[0],
@@ -65,8 +68,9 @@ export const FRONTEND_FRAMEWORKS = [
   {
     type: 'vue',
     name: 'Vue.js',
-    supportedBundlers: ['webpack', 'vite'],
+    supportedBundlers: ['webpack', 'vite'] as readonly Bundler['type'][],
     package: '@cypress/vue',
+    defaultPackagePath: null,
     glob: '*.vue',
     deps: ['vue'],
     category: FRONTEND_FRAMEWORK_CATEGORIES[1],
@@ -76,8 +80,9 @@ export const FRONTEND_FRAMEWORKS = [
   {
     type: 'nextjs',
     name: 'Next.js',
-    supportedBundlers: ['webpack'],
+    supportedBundlers: ['webpack'] as readonly Bundler['type'][],
     package: '@cypress/react',
+    defaultPackagePath: '@cypress/react/plugins/next',
     glob: '*.{jsx,tsx}',
     deps: ['next', 'react', 'react-dom'],
     category: FRONTEND_FRAMEWORK_CATEGORIES[0],
@@ -87,8 +92,9 @@ export const FRONTEND_FRAMEWORKS = [
   {
     type: 'nuxtjs',
     name: 'Nuxt.js',
-    supportedBundlers: ['webpack'],
+    supportedBundlers: ['webpack'] as readonly Bundler['type'][],
     package: '@cypress/vue',
+    defaultPackagePath: null,
     glob: '*.vue',
     deps: ['nuxt'],
     category: FRONTEND_FRAMEWORK_CATEGORIES[1],
@@ -126,3 +132,5 @@ export const PACKAGES_DESCRIPTIONS: Record<AllPackages, string> = {
   '@storybook/testing-react': 'Testing utilities that allow you to reuse your stories in your unit tests',
   '@storybook/testing-vue3': 'Testing utilities that allow you to reuse your stories in your unit tests',
 } as const
+
+export const PACKAGE_MANAGERS = ['npm', 'yarn', 'pnpm'] as const
