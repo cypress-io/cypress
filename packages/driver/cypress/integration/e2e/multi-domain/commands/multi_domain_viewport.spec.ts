@@ -145,7 +145,7 @@ context('multi-domain viewport', { experimentalSessionSupport: true, experimenta
       })
     })
 
-    it('syncs across multiple domains', () => {
+    it('syncs the viewport across multiple domains', () => {
       cy.switchToDomain('foobar.com', () => {
         cy.viewport(320, 480)
         cy.window().then((win) => {
