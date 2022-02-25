@@ -47,7 +47,7 @@ const bundlers = [
 // bundler.
 
 // If we don't find a specific framework, but we do find a library and/or
-// bunlder, we return both the framework, which might just be "React",
+// bundler, we return both the framework, which might just be "React",
 // and the bundler, which could be Vite.
 export function detect (pkg: PkgJson): DetectFramework {
   const inPkgJson = (detector: Detector) => {
