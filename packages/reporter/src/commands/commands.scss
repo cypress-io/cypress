@@ -49,15 +49,16 @@
         float: left;
         content: "-";
         margin-right: 2px;
-        padding-left: 5px;
       }
     }
   }
 
   .command-wrapper {
     background-color: $reporter-section-background;
-    color: $gray-400;
+    color: $gray-500;
+    display: flex;
     min-height: 20px;
+    padding-right: 2px;
 
     &:hover {
       background-color: $gray-900;
@@ -71,14 +72,13 @@
       }
 
       .command-expander > path {
-        stroke: $gray-500;
+        stroke: $gray-700;
       }
     }
 
     .command-wrapper-text {
       display: flex;
       flex-wrap: wrap;
-      padding: 2px 5px 0 3px;
     }
 
     .command-interceptions {
@@ -92,12 +92,12 @@
     .command-alias,
     .command-interceptions {
       border-radius: 10px;
-      color: $gray-400;
+      color: $gray-500;
       padding: 0 5px;
       display: inline-block;
 
       &.route {
-        background-color: $yellow-medium;
+        background-color: $teal-500;
       }
 
       &.dom {
@@ -121,8 +121,7 @@
       }
     }
 
-    // ensures alias & number of children commands don't break if reporter
-    // width is narrow
+    // ensures alias & number of children commands don't break if reporter width is narrow
     .alias-container {
       white-space: nowrap;
 
@@ -134,13 +133,17 @@
     .num-children,
     .command-alias-count,
     .command-interceptions-count {
-      background-color: $orange-700 !important;
       border-radius: 5px;
-      color: $gray-400;
       font-size: 90%;
       font-style: normal;
       line-height: 1;
       margin-left: 0;
+    }
+
+    .command-alias-count,
+    .command-interceptions-count {
+      background-color: $teal-500 !important;
+      color: $gray-500;
     }
 
     .num-children.has-alias {
@@ -160,27 +163,37 @@
     }
   }
 
-  .command-child-container {
-    margin-left: 10px;
-  }
-
   .command-number-column {
     flex-shrink: 0;
     min-height: 1px; // because some numbers are empty
-    padding-right: 10px;
+    padding-top: 4px;
     text-align: right;
-    width: 25px;
+    width: 24px;
   }
 
-  .command-message {
-    flex-grow: 2;
+  .command-pin-target.command-group {
+    border-left: 1px dotted $gray-600;
+    padding-left: 12px;
+
+    .command-group-block {
+      border-left: 1px dotted $gray-600;
+      width: 12px;
+      min-height: 20px;
+    }
+  }
+
+  .command-info {
+    display: flex;
+    padding-top: 2px;
+    padding-bottom: 2px;
     margin-left: 0;
     overflow: hidden;
-    white-space: nowrap;
+    width: 100%;
 
-    > span {
-      align-items: center;
+    .command-aliases,
+    .command-message {
       display: flex;
+      flex-grow: 2;
 
       .fa-circle {
         padding: 4px;
@@ -189,19 +202,19 @@
       }
 
       .fa-circle.command-message-indicator-successful {
-        color: $pending;
+        color: $jade-400;
       }
 
       .fa-circle.command-message-indicator-aborted {
-        color: $fail;
+        color: $orange-400;
       }
 
       .fa-circle.command-message-indicator-bad {
-        color: $orange-500;
+        color: $red-500
       }
 
       .fa-circle.command-message-indicator-pending {
-        color: $gray-500;
+        color: $indigo-400;
       }
     }
   }
@@ -214,11 +227,10 @@
   }
 
   .command-method {
-    padding: 1px 2px 0;
-    display: inline-block;
-    font-size: 11px;
-    min-width: 80px;
+    font-size: 12px;
+    margin-right: 12px;
     font-weight: 600;
+    min-width: fit-content;
   }
 
   // Command State Styles
@@ -227,10 +239,6 @@
 
     &:hover {
       border-left: 2px solid $gray-900;
-    }
-
-    .command-pin {
-      color: $gray-500;
     }
 
     &:not(.command-is-event) .command-number {
@@ -242,7 +250,7 @@
     }
 
     .command-message {
-      color: $gray-400;
+      color: $gray-500;
     }
   }
 
@@ -253,6 +261,9 @@
     color: $indigo-200;
 
     .command-number-column {
+      padding-top: 2px;
+      padding-bottom: 2px;
+
       .command-pin {
         display: none;
       }
@@ -321,14 +332,14 @@
       span {
         border-radius: 2px;
         padding: 0 3px;
-        font-size: 11px;
+        font-size: 12px;
         display: inline-block;
         line-height: 14px;
       }
     }
 
     .command-message {
-      color: $gray-200;
+      color: $gray-500;
 
       strong {
         font-weight: 600;
@@ -398,21 +409,19 @@
     }
   }
 
-  .command-name-log,
-  .command-name-get,
-  .command-name-download {
-    // we're wrapping the text, so override command-scaled
-    font-size: 100%;
-    line-height: 18px;
+  .command-pin-target {
+    width: 100%;
+    padding-top: 1px;
+  }
 
-    .command-message-text {
-      white-space: initial;
-      word-wrap: break-word;
-      line-height: 1.5;
-      display: -webkit-box;
-      -webkit-line-clamp: 50;
-      -webkit-box-orient: vertical;
-    }
+  .command-message-text {
+    font-size: 12px;
+    white-space: initial;
+    word-wrap: break-word;
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 50;
+    -webkit-box-orient: vertical;
   }
 
   // Styles for Uncaught Exception
@@ -427,7 +436,6 @@
     svg {
       color: $gray-600;
       cursor: pointer;
-      margin: 0px 2px;
       vertical-align: top;
     }
 
@@ -457,11 +465,10 @@
   .command-pin {
     display: none;
     flex-shrink: 0;
-    font-size: 14px;
+    font-size: 12px;
     line-height: 1;
-    margin-right: 10px;
+    margin-left: 10px;
     outline: none;
-    padding: 1px 0 0;
     text-align: right;
     width: 15px;
 
@@ -471,14 +478,19 @@
   }
 
   .command-expander-column {
-    padding-right: 10px;
-    padding-left: 5px;
+    flex-shrink: 0;
+    padding-left: 10px;
+    padding-right: 5px;
+    padding-top: 2px;
+    padding-bottom: 2px;
     width: 25px;
-    
+    display: flex;
+
     .command-expander {
       color: $gray-500;
       transform: rotate(-90deg);
       transition: transform 150ms ease-out;
+      margin-top: 5px;
 
       path {
         stroke: $gray-700;
@@ -534,13 +546,7 @@
   }
 
   // additional styles on top of the shared.scss styles
-  .num-children {
-    color: $black;
-    display: inline-block;
-    background-color: $gray-500;
-  }
-
-  // additional styles on top of the shared.scss styles
+  .num-children,
   .num-elements {
     background-color: $gray-600;
     display: inline-block;

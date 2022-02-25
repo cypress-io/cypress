@@ -17,6 +17,7 @@ export interface InstrumentProps {
   name?: string
   message?: string
   type?: string // 'event' | 'parent' | 'child' | 'system' | 'studio' ----> add? | 'nested'
+  // type?: 'parent' | 'child' | 'system'
   testCurrentRetry?: number
   // warn is specific to cy.session
   state?: TestState | 'warn' | null

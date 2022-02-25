@@ -32,6 +32,7 @@ export interface CommandProps extends InstrumentProps {
   isStudio?: boolean
   showError?: boolean
   group?: number
+  groupLevel?: number
   hasSnapshot?: boolean
   hasConsoleProps?: boolean
 }
@@ -51,6 +52,7 @@ export default class Command extends Instrument {
   @observable isStudio: boolean
   @observable showError?: boolean = false
   @observable group?: number
+  @observable groupLevel?: number
   @observable hasSnapshot?: boolean
   @observable hasConsoleProps?: boolean
   @observable _isOpen: boolean|null = true
@@ -106,6 +108,7 @@ export default class Command extends Instrument {
     this.group = props.group
     this.hasSnapshot = !!props.hasSnapshot
     this.hasConsoleProps = !!props.hasConsoleProps
+    this.groupLevel = props.groupLevel || 0
 
     this._checkLongRunning()
   }

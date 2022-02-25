@@ -44,7 +44,143 @@ describe('commands', () => {
   })
 
   it('displays all the commands', () => {
-    cy.get('.command').should('have.length', 10)
+    addCommand(runner, {
+      id: 102,
+      name: 'get',
+      message: '#element',
+      state: 'passed',
+      timeout: 4000,
+      wallClockStartedAt: inProgressStartedAt,
+    })
+
+    addCommand(runner, {
+      id: 124,
+      name: 'within',
+      state: 'passed',
+      type: 'child',
+      timeout: 4000,
+      wallClockStartedAt: inProgressStartedAt,
+    })
+
+    addCommand(runner, {
+      id: 125,
+      name: 'get',
+      message: '#my_element',
+      state: 'passed',
+      timeout: 4000,
+      group: 124,
+      wallClockStartedAt: inProgressStartedAt,
+    })
+
+    addCommand(runner, {
+      id: 129,
+      name: 'within',
+      state: 'passed',
+      type: 'child',
+      group: 124,
+      timeout: 4000,
+      wallClockStartedAt: inProgressStartedAt,
+    })
+
+    addCommand(runner, {
+      id: 130,
+      name: 'get',
+      message: '#my_element that _has_ a really long message to show **wrapping** works as expected',
+      state: 'passed',
+      timeout: 4000,
+      groupLevel: 1,
+      group: 129,
+      wallClockStartedAt: inProgressStartedAt,
+    })
+
+    addCommand(runner, {
+      id: 1229,
+      name: 'within',
+      state: 'passed',
+      type: 'child',
+      group: 130,
+      groupLevel: 1,
+      timeout: 4000,
+      wallClockStartedAt: inProgressStartedAt,
+    })
+
+    addCommand(runner, {
+      id: 1311,
+      name: 'get',
+      message: '#my_element_nested',
+      state: 'passed',
+      timeout: 4000,
+      groupLevel: 2,
+      group: 1229,
+      wallClockStartedAt: inProgressStartedAt,
+    })
+
+    addCommand(runner, {
+      id: 1291,
+      name: 'assert',
+      type: 'child',
+      message: 'has class named .omg',
+      state: 'passed',
+      timeout: 4000,
+      group: 1229,
+      groupLevel: 2,
+      wallClockStartedAt: inProgressStartedAt,
+    })
+
+    addCommand(runner, {
+      id: 1291,
+      name: 'log',
+      message: 'do something else',
+      state: 'passed',
+      timeout: 4000,
+      group: 130,
+      groupLevel: 1,
+      wallClockStartedAt: inProgressStartedAt,
+    })
+
+    addCommand(runner, {
+      id: 135,
+      name: 'and',
+      type: 'child',
+      message: 'has class named .lets-roll',
+      state: 'passed',
+      timeout: 4000,
+      group: 124,
+      wallClockStartedAt: inProgressStartedAt,
+    })
+
+    const indicators = ['successful', 'pending', 'aborted', 'bad']
+
+    indicators.forEach((indicator, index) => {
+      addCommand(runner, {
+        id: 1600 + index,
+        name: 'xhr',
+        event: true,
+        state: 'passed',
+        timeout: 4000,
+        renderProps: {
+          indicator,
+          message: `${indicator} indicator`,
+        },
+        wallClockStartedAt: inProgressStartedAt,
+      })
+    })
+
+    const assertStates = ['passed', 'pending', 'failed']
+
+    assertStates.forEach((state, index) => {
+      addCommand(runner, {
+        id: 1700 + index,
+        name: 'assert',
+        type: 'child',
+        message: 'expected **element** to have length of **16** but got **12** instead',
+        state,
+        timeout: 4000,
+        wallClockStartedAt: inProgressStartedAt,
+      })
+    })
+
+    cy.get('.command').should('have.length', 25)
 
     cy.percySnapshot()
   })
@@ -63,6 +199,12 @@ describe('commands', () => {
   })
 
   it('includes the state class', () => {
+    addCommand(runner, {
+      name: 'log',
+      message: 'command-warn-state',
+      state: 'warn',
+    })
+
     cy.contains('#exists').closest('.command-wrapper')
     .should('have.class', 'command-state-passed')
 
@@ -71,6 +213,9 @@ describe('commands', () => {
 
     cy.contains('#in-progress').closest('.command-wrapper')
     .should('have.class', 'command-state-pending')
+
+    cy.contains('command-warn-state').closest('.command-wrapper')
+    .should('have.class', 'command-state-warn')
   })
 
   it('displays the number for parent and child', () => {

@@ -273,37 +273,94 @@ const defaults = function (state, config, obj) {
     return t._currentRetry || 0
   }
 
+  // interface RenderProps {
+  //   message?: string
+  //   indicator?: string
+  //   interceptions?: Array<{
+  //     command: 'intercept' | 'route'
+  //     alias?: string
+  //     type: 'function' | 'stub' | 'spy'
+  //   }>
+  //   status?: string
+  //   wentToOrigin?: boolean
+  // }
+
+  // export interface LogAttributes {
+  //   id: number
+  //   alias?: Alias
+  //   aliasType?: string | null
+  //   displayName?: string
+  //   name?: string
+  //   message?: string
+  //   type?: string
+  //   testCurrentRetry?: number
+  //   // warn is specific to cy.session
+  //   state?: TestState | 'warn' | null
+  //   referencesAlias?: Alias
+  //   instrument?: 'agent' | 'command' | 'route'
+  //   testId: string
+
+  //   err?: ErrProps
+  //   event?: boolean
+  //   number?: number
+  //   numElements: number
+  //   renderProps?: RenderProps
+  //   timeout?: number
+  //   visible?: boolean
+  //   wallClockStartedAt?: string
+  //   hookId: string
+  //   isStudio?: boolean
+  //   showError?: boolean
+  //   group?: number
+  //   hasSnapshot?: boolean
+  //   hasConsoleProps?: boolean
+  // }
+
   _.defaults(obj, {
     id: (counter += 1),
-    state: 'pending',
-    instrument: 'command',
-    url: state('url'),
-    hookId: state('hookId'),
-    testId: runnable ? runnable.id : undefined,
-    testCurrentRetry: getTestAttemptFromRunnable(state('runnable')),
-    viewportWidth: state('viewportWidth'),
-    viewportHeight: state('viewportHeight'),
-    referencesAlias: undefined,
     alias: undefined,
     aliasType: undefined,
+    // displayName
+    // name
     message: undefined,
-    timeout: undefined,
-    wallClockStartedAt: new Date().toJSON(),
+    // type
+    testCurrentRetry: getTestAttemptFromRunnable(state('runnable')),
+    // type
+    state: 'pending',
+    referencesAlias: undefined,
+    instrument: 'command',
+    testId: runnable ? runnable.id : undefined,
+
+    event: false,
+    // number
+    // numElements
     renderProps () {
       return {}
     },
+    timeout: undefined,
+    visible: true,
+    wallClockStartedAt: new Date().toJSON(),
+    hookId: state('hookId'),
+    // isStudio: false,
+    // showError: false,
+    group: undefined,
+    // hasSnapshot
+    // hasConsoleProps
+
+    url: state('url'),
+    viewportWidth: state('viewportWidth'),
+    viewportHeight: state('viewportHeight'),
+
     consoleProps () {
       return {}
     },
   })
 
-  const logGroup = _.last(state('logGroup'))
-  // console.log('cmd', obj.name, 'in logGroup', logGroup)
+  const logGroups = state('logGroup')
 
-  if (logGroup) {
-    // obj.group = logGroup.name
-    // console.log(logGroup)
-    obj.group = logGroup
+  if (logGroup.length) {
+    obj.group = _.last(logGroups)
+    obj.groupLevel = logGroups.length
   }
 
   if (obj.groupEnd) {
@@ -646,6 +703,7 @@ export default {
         log._emittedAttrs = attrs
 
         log.emit(event, attrs)
+
         return Cypress.action(event, attrs, log)
       }
     }

@@ -40,25 +40,18 @@ const shouldShowCount = (aliasesWithDuplicates: Array<Alias> | null, aliasName: 
   return _.includes(aliasesWithDuplicates, aliasName)
 }
 
-const CommandColumn = observer(({ model }) => {
-  if (model.hasChildren) {
-    return (
-      <div className='command-expander-column'>
-        <ChevronIcon
-          className={cs('command-expander', { 'command-expander-is-open': model.hasChildren && !!model.isOpen })}
-        />
-      </div>
-    )
-  }
-
-  return (
+const NavColumn = observer(({ model }) => (
+  <>
     <div className='command-number-column'>
       {<PinIcon className='command-pin' />}
       {model._isPending() && <RunningIcon className='fa-spin' />}
       {!model._isPending() && <span className='command-number'>{model.number || ''}</span>}
     </div>
-  )
-})
+    <div className='command-expander-column' onClick={() => model.toggleOpen()}>
+      {model.hasChildren && <ChevronIcon className={cs('command-expander', { 'command-expander-is-open': model.hasChildren && !!model.isOpen })} />}
+    </div>
+  </>
+))
 
 interface AliasReferenceProps {
   aliasObj: AliasObject
@@ -91,7 +84,7 @@ interface AliasesReferencesProps {
 }
 
 const AliasesReferences = observer(({ model, aliasesWithDuplicates }: AliasesReferencesProps) => (
-  <span>
+  <span className='command-aliases'>
     {_.map(([] as Array<AliasObject>).concat((model.referencesAlias as AliasObject)), (aliasObj) => (
       <span className='command-alias-container' key={aliasObj.name + aliasObj.cardinal}>
         <AliasReference aliasObj={aliasObj} model={model} aliasesWithDuplicates={aliasesWithDuplicates} />
@@ -174,7 +167,7 @@ interface MessageProps {
 }
 
 const Message = observer(({ model }: MessageProps) => (
-  <span>
+  <span className='command-message'>
     {!!model.renderProps.indicator && (
       <i
         className={
@@ -252,6 +245,17 @@ class Command extends Component<Props> {
     const isSessionCommand = commandName === 'session'
     const displayNumOfChildren = !isSystemEvent && !isSessionCommand && model.hasChildren && !model.isOpen
 
+    let groupPlaceholder: Array<JSX.Element> = []
+
+    if (model.groupLevel !== undefined) {
+      // cap the group nesting to 6 levels keep the log text legible
+      const level = model.groupLevel < 6 ? model.groupLevel : 5
+
+      for (let i = 0; i < level; i++) {
+        groupPlaceholder.push(<span className='command-group-block' />)
+      }
+    }
+
     return (
       <li
         className={cs(
@@ -262,70 +266,76 @@ class Command extends Component<Props> {
           },
         )}
       >
-        <FlashOnClick
-          message='Printed output to your console'
-          onClick={this._onClick}
-          shouldShowMessage={this._shouldShowClickMessage}
+        <div
+          className={
+            cs(
+              'command-wrapper',
+              `command-type-${model.type}`,
+              `command-state-${model.state}`,
+              {
+                'command-is-pinned': this._isPinned(),
+                'command-is-event': !!model.event,
+                'command-has-console-props': model.hasConsoleProps,
+                'command-has-snapshot': model.hasSnapshot,
+              },
+            )
+          }
         >
-          <div
-            className={
-              cs(
-                'command-wrapper',
-                  `command-state-${model.state}`,
-                  `command-type-${model.type}`,
-                  {
-                    'command-is-event': !!model.event,
-                    'command-is-pinned': this._isPinned(),
-                    'command-has-console-props': model.hasConsoleProps,
-                    'command-has-snapshot': model.hasSnapshot,
-                  },
-              )
-            }
-            onMouseEnter={() => this._snapshot(true)}
-            onMouseLeave={() => this._snapshot(false)}
+          <NavColumn model={model} isGroup={!!this.props.groupId}>
+            {groupPlaceholder}
+          </NavColumn>
+          <FlashOnClick
+            message='Printed output to your console'
+            onClick={this._onClick}
+            shouldShowMessage={this._shouldShowClickMessage}
+            wrapperClassName={cs('command-pin-target', { 'command-group': !!this.props.groupId })}
           >
-            <div className='command-wrapper-text'>
-              <CommandColumn model={model} />
-              <span className='command-method'>
-                <span>
-                  {model.event && model.type !== 'system' ? `(${displayName(model)})` : displayName(model)}
+            <div
+              className='command-wrapper-text'
+              onMouseEnter={() => this._snapshot(true)}
+              onMouseLeave={() => this._snapshot(false)}
+            >
+              {groupPlaceholder}
+              <span className={cs('command-info')}>
+                <span className='command-method'>
+                  <span>
+                    {model.event && model.type !== 'system' ? `(${displayName(model)})` : displayName(model)}
+                  </span>
                 </span>
-              </span>
-              <span className='command-message'>
                 {model.referencesAlias ?
                   <AliasesReferences model={model} aliasesWithDuplicates={aliasesWithDuplicates} />
                   : <Message model={model} />
                 }
-              </span>
-              <span className='command-controls'>
-                {(model.visible != null && !model.visible) && (
-                  <Tooltip placement='top' title={invisibleMessage(model)} className='cy-tooltip'>
-                    <span>
-                      <HiddenIcon className='command-invisible' />
-                    </span>
-                  </Tooltip>
-                )}
-                {displayNumOfElements && (
-                  <Tooltip placement='top' title={`${model.numElements} matched elements`} className='cy-tooltip'>
-                    <span className={cs('num-elements', 'command-num-elements')}>{model.numElements}</span>
-                  </Tooltip>
-                )}
-                <span className='alias-container'>
-                  <Interceptions model={model} />
-                  <Aliases model={model} aliasesWithDuplicates={aliasesWithDuplicates} />
-                  {displayNumOfChildren && (
-                    <Tooltip placement='top' title={model.event ? `This event occurred ${model.numChildren} times` : `${model.numChildren} logs currently hidden`} className='cy-tooltip'>
-                      <span className={cs('num-children', 'command-num-children', { 'has-alias': model.alias })}>
-                        {model.numChildren}
+                <span className='command-controls'>
+                  {!model.visible && (
+                    <Tooltip placement='top' title={invisibleMessage(model)} className='cy-tooltip'>
+                      <span>
+                        <HiddenIcon className='command-invisible' />
                       </span>
                     </Tooltip>
                   )}
+                  {displayNumOfElements && (
+                    <Tooltip placement='top' title={`${model.numElements} matched elements`} className='cy-tooltip'>
+                      <span className={cs('num-elements', 'command-num-elements')}>{model.numElements}</span>
+                    </Tooltip>
+                  )}
+                  <span className='alias-container'>
+                    <Interceptions model={model} />
+                    <Aliases model={model} aliasesWithDuplicates={aliasesWithDuplicates} />
+                    {displayNumOfChildren && (
+                      <Tooltip placement='top' title={model.event ? `This event occurred ${model.numChildren} times` : `${model.numChildren} logs currently hidden`} className='cy-tooltip'>
+                        <span className={cs('num-children', 'command-num-children', { 'has-alias': model.alias })}>
+                          {model.numChildren}
+                        </span>
+                      </Tooltip>
+                    )}
+                  </span>
                 </span>
               </span>
+              <Progress model={model} />
             </div>
-            <Progress model={model} />
-          </div>
-        </FlashOnClick>
+          </FlashOnClick>
+        </div>
         {(model.hasChildren && model.isOpen) && this._children()}
       </li>
     )
@@ -335,7 +345,7 @@ class Command extends Component<Props> {
     const { appState, events, model, runnablesStore } = this.props
 
     return (
-      <ul className='command-child-container'>
+      <ul>
         {_.map(model.children, (child) => (
           <Command
             key={child.id}
@@ -365,12 +375,6 @@ class Command extends Component<Props> {
 
   @action _onClick = () => {
     if (this.props.appState.isRunning) return
-
-    if (this.props.model.hasChildren) {
-      this.props.model.toggleOpen()
-
-      return
-    }
 
     const { id } = this.props.model
 
