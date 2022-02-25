@@ -82,11 +82,11 @@ exports['darwin browser detection detects browsers as expected 1'] = [
     "versionRegex": {},
     "binary": "firefox",
     "minSupportedVersion": 86,
-    "path": "/Applications/Firefox.app/Contents/MacOS/firefox-bin",
+    "path": "/Applications/Firefox.app/Contents/MacOS/firefox",
     "version": "someVersion",
     "findAppParams": {
       "appName": "Firefox.app",
-      "executable": "Contents/MacOS/firefox-bin",
+      "executable": "Contents/MacOS/firefox",
       "appId": "org.mozilla.firefox",
       "versionProperty": "CFBundleShortVersionString"
     }
@@ -102,11 +102,11 @@ exports['darwin browser detection detects browsers as expected 1'] = [
       "firefox"
     ],
     "minSupportedVersion": 86,
-    "path": "/Applications/Firefox Developer Edition.app/Contents/MacOS/firefox-bin",
+    "path": "/Applications/Firefox Developer Edition.app/Contents/MacOS/firefox",
     "version": "someVersion",
     "findAppParams": {
       "appName": "Firefox Developer Edition.app",
-      "executable": "Contents/MacOS/firefox-bin",
+      "executable": "Contents/MacOS/firefox",
       "appId": "org.mozilla.firefoxdeveloperedition",
       "versionProperty": "CFBundleShortVersionString"
     }
@@ -122,11 +122,11 @@ exports['darwin browser detection detects browsers as expected 1'] = [
       "firefox-trunk"
     ],
     "minSupportedVersion": 86,
-    "path": "/Applications/Firefox Nightly.app/Contents/MacOS/firefox-bin",
+    "path": "/Applications/Firefox Nightly.app/Contents/MacOS/firefox",
     "version": "someVersion",
     "findAppParams": {
       "appName": "Firefox Nightly.app",
-      "executable": "Contents/MacOS/firefox-bin",
+      "executable": "Contents/MacOS/firefox",
       "appId": "org.mozilla.nightly",
       "versionProperty": "CFBundleShortVersionString"
     }

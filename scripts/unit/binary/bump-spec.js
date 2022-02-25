@@ -29,7 +29,7 @@ describe('bump', () => {
       )
     })
 
-    it('returns a filter function for circle and darwin', () => {
+    it('returns a filter function for circle and linux', () => {
       const projects = bump.remapProjects(bump._PROVIDERS)
 
       la(
@@ -38,11 +38,11 @@ describe('bump', () => {
         projects,
       )
 
-      const filter = bump.getFilterByProvider('circle', 'darwin')
+      const filter = bump.getFilterByProvider('circle', 'linux')
       const filtered = projects.filter(filter)
 
       la(filtered.length, 'there should be at least a few projects', filtered)
-      snapshot('should have just circle and darwin projects', filtered)
+      snapshot('should have just circle and linux projects', filtered)
     })
   })
 })

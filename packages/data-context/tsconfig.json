@@ -2,8 +2,10 @@
   "extends": "../ts/tsconfig.json",
   "include": ["src"],
   "exclude": [
-    "test",
     "script"
+  ],
+  "files": [
+    "./../ts/index.d.ts"
   ],
   "compilerOptions": {
     "lib": ["es2020"],
