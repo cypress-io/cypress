@@ -189,7 +189,7 @@ function createCypressConfig (config: ConfigOptions, pluginPath: string, options
 
     return formatConfig(
       `const { defineConfig } = require('cypress')
-      import setupNodeEvents from './${pluginPath}'
+      const setupNodeEvents = require('./${pluginPath}')
 
       module.exports = defineConfig({${globalString}${e2eString}${componentString}})`,
     )
