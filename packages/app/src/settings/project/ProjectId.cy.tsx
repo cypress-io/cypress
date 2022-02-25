@@ -11,7 +11,7 @@ describe('<ProjectId />', () => {
 
     cy.mountFragment(ProjectIdFragmentDoc, {
       onResult: (result) => {
-        result.projectId = givenProjectId
+        result.currentProject.projectId = givenProjectId
       },
       render: (gqlVal) => (
         <div class="py-4 px-8">

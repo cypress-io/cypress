@@ -234,7 +234,7 @@ describe('App: Settings', () => {
 })
 
 describe('App: Settings without cloud', () => {
-  it('hides the projectId section when there is no projectId', () => {
+  it('the projectId section shows a prompt to connect when there is no projectId', () => {
     cy.scaffoldProject('simple-ct')
     cy.openProject('simple-ct')
     cy.startAppServer('component')
@@ -242,7 +242,8 @@ describe('App: Settings without cloud', () => {
     cy.visitApp()
     cy.findByText('Settings').click()
     cy.findByText('Dashboard Settings').click()
-    cy.findByText('Project ID').should('not.exist')
+    cy.findByText('Project ID').should('exist')
+    cy.contains('button', 'Log in').should('be.visible')
   })
 
   it('have returned browsers', () => {

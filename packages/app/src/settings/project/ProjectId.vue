@@ -31,7 +31,10 @@
         variant="outline"
       />
     </div>
-    <CloudConnectButton :gql="props.gql" />
+    <CloudConnectButton
+      v-else
+      :gql="props.gql"
+    />
   </SettingsSection>
 </template>
 

@@ -21,7 +21,7 @@ describe('<CloudSettings />', () => {
     cy.percySnapshot()
   })
 
-  it('hides project Id, and record key when not present', () => {
+  it('shows connect button when projectId is not present', () => {
     cy.mountFragment(CloudSettingsFragmentDoc, {
       onResult (ctx) {
         if (ctx.currentProject?.cloudProject?.__typename === 'CloudProject') {
@@ -38,7 +38,30 @@ describe('<CloudSettings />', () => {
       },
     })
 
-    cy.findByText(defaultMessages.settingsPage.projectId.title).should('not.exist')
+    cy.findByText(defaultMessages.settingsPage.projectId.title).should('be.visible')
+    cy.findByText(defaultMessages.runs.connect.buttonUser).should('be.visible')
+    cy.findByText(defaultMessages.settingsPage.recordKey.title).should('not.exist')
+
+    cy.percySnapshot()
+  })
+
+  it('hides record key when not present', () => {
+    cy.mountFragment(CloudSettingsFragmentDoc, {
+      onResult (ctx) {
+        if (ctx.currentProject?.cloudProject?.__typename === 'CloudProject') {
+          ctx.currentProject.projectId = null
+          ctx.currentProject.cloudProject.recordKeys = []
+        }
+      },
+      render: (gqlVal) => {
+        return (
+          <div class="py-4 px-8 children:py-24px">
+            <CloudSettings gql={gqlVal}/>
+          </div>
+        )
+      },
+    })
+
     cy.findByText(defaultMessages.settingsPage.recordKey.title).should('not.exist')
 
     cy.percySnapshot()
