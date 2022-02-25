@@ -302,7 +302,9 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
     resolve = _resolve
   })
 
-  request.setLogFlag = Cypress.ProxyLogging.logInterception(request, route).setFlag
+  const proxyRequest = Cypress.ProxyLogging.logInterception(request, route)
+
+  request.setLogFlag = proxyRequest.setFlag
 
   // TODO: this misnomer is a holdover from XHR, should be numRequests
   route.log.set('numResponses', (route.log.get('numResponses') || 0) + 1)
@@ -312,7 +314,7 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
     route.requests[requestId] = request as Interception
   }
 
-  if (!_.isFunction(userHandler)) {
+  if (!_.isFunction(userHandler) || proxyRequest.resourceType === 'other') {
     // notification-only
     return null
   }
