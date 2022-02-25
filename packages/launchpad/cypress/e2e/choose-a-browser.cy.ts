@@ -58,10 +58,13 @@ describe('Choose a Browser Page', () => {
         href: 'https://on.cypress.io/troubleshooting-launching-browsers',
       })
 
-      // The exception thrown is presented in the alert's second code element.
-      // We assert on the presence of the normalized path, as the thrown exception varies
-      // based on operating system
-      cy.get('@AlertBody').find('code').eq(1).contains(/([\\\/])path\1does\1not\1exist/)
+      // The exception thrown is presented in the alert's second code element and
+      // varies depending on platform
+      if (Cypress.platform === 'win32') {
+        cy.get('@AlertBody').find('code').eq(1).should('contain', 'win-version-info is unable to access file: \\\\path\\does\\not\\exist')
+      } else {
+        cy.get('@AlertBody').find('code').eq(1).should('contain', 'spawn /path/does/not/exist ENOENT')
+      }
 
       cy.percySnapshot()
 
