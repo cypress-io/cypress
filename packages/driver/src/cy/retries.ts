@@ -110,16 +110,12 @@ export const create = (Cypress, state, timeout, clearTimeout, whenStable, finish
     .delay(interval)
     .then(() => {
       if (ended()) {
-        Cypress.log({ message: 'ended first', end: true })
-
         return
       }
 
       Cypress.action('cy:command:retry', options)
 
       if (ended()) {
-        Cypress.log({ message: 'ended second', end: true })
-
         return
       }
 
@@ -127,17 +123,12 @@ export const create = (Cypress, state, timeout, clearTimeout, whenStable, finish
       // the start since we need to retry
       // fresh once we become stable again!
       if (state('isStable') === false) {
-        Cypress.log({ message: 'removing start', end: true })
         options._start = undefined
       }
 
       // invoke the passed in retry fn
       // once we reach stability
-      return whenStable(() => {
-        Cypress.log({ message: 'stabilized', end: true })
-
-        return fn()
-      })
+      return whenStable(fn)
     })
   },
 })
