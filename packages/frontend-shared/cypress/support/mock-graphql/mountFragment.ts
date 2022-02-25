@@ -36,9 +36,7 @@ export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
     <C extends Parameters<typeof mount>[0]>(comp: C, options: Parameters<typeof mount>[1] = {}) => {
       options.global = options.global || {}
       options.global.stubs = options.global.stubs || {}
-      if (Array.isArray(options.global.stubs)) {
-        options.global.stubs.push('transition')
-      } else {
+      if (!Array.isArray(options.global.stubs)) {
         options.global.stubs.transition = false
       }
 
