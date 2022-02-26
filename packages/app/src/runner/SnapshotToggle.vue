@@ -27,7 +27,7 @@ interface ToggleMessage {
   id: string
 }
 
-const props = defineProps<{
+defineProps<{
   messages: ToggleMessage[]
 }>()
 

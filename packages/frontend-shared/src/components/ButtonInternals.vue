@@ -39,7 +39,7 @@ export default defineComponent({
 // eslint-disable-next-line no-duplicate-imports
 import type { FunctionalComponent, SVGAttributes } from 'vue'
 
-const props = defineProps<{
+defineProps<{
   prefixIcon?: FunctionalComponent<SVGAttributes>
   suffixIcon?: FunctionalComponent<SVGAttributes>
   prefixIconClass?: string

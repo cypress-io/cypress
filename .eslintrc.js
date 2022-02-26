@@ -24,29 +24,35 @@ const validators = specifiedRules
 )
 
 module.exports = {
-  'plugins': [
+  plugins: [
     '@cypress/dev',
     'graphql',
   ],
-  'extends': [
+  extends: [
     'plugin:@cypress/dev/general',
     'plugin:@cypress/dev/tests',
   ],
-  'rules': {
+  parser: '@typescript-eslint/parser',
+  rules: {
+    'no-duplicate-imports': 'off',
+    'import/no-duplicates': 'off',
+    '@typescript-eslint/no-duplicate-imports': [
+      'error',
+    ],
     'prefer-spread': 'off',
     'prefer-rest-params': 'off',
     'no-useless-constructor': 'off',
     'no-restricted-properties': [
       'error',
       {
-        'object': 'process',
-        'property': 'geteuid',
-        'message': 'process.geteuid() will throw on Windows. Do not use it unless you catch any potential errors.',
+        object: 'process',
+        property: 'geteuid',
+        message: 'process.geteuid() will throw on Windows. Do not use it unless you catch any potential errors.',
       },
       {
-        'object': 'os',
-        'property': 'userInfo',
-        'message': 'os.userInfo() will throw when there is not an `/etc/passwd` entry for the current user (like when running with --user 12345 in Docker). Do not use it unless you catch any potential errors.',
+        object: 'os',
+        property: 'userInfo',
+        message: 'os.userInfo() will throw when there is not an `/etc/passwd` entry for the current user (like when running with --user 12345 in Docker). Do not use it unless you catch any potential errors.',
       },
     ],
     'graphql/capitalized-type-name': ['warn', graphqlOpts],
@@ -57,9 +63,9 @@ module.exports = {
       { ...graphqlOpts, requiredFields: ['id'] },
     ],
   },
-  'settings': {
-    'react': {
-      'version': '16.8',
+  settings: {
+    react: {
+      version: '16.8',
     },
   },
 }

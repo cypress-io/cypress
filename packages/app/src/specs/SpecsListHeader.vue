@@ -65,7 +65,7 @@ const props = withDefaults(defineProps<{
 })
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: string): void,
+  (e: 'update:modelValue', value: string): void
   (e: 'showSpecPatternModal'): void
   (e: 'showCreateSpecModal'): void
 }>()

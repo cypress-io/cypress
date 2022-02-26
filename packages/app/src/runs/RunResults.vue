@@ -38,7 +38,7 @@ fragment RunResults on CloudRun {
 `
 
 const props = defineProps<{
-	gql: RunResultsFragment
+  gql: RunResultsFragment
 }>()
 
 const results = [

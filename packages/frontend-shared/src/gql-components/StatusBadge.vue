@@ -1,6 +1,6 @@
 <template>
   <template v-if="status">
-    <div class="border rounded-full font-medium p-5px pr-16px text-size-14px leading-20px inline-flex items-center relative text-jade-500">
+    <div class="border rounded-full font-medium p-5px pr-16px text-size-14px text-jade-500 leading-20px inline-flex items-center relative">
       <Menu>
         <MenuButton
           data-cy="status-badge-menu"
@@ -12,7 +12,7 @@
           />
           {{ titleOn }}
           <i-cy-chevron-down-small_x8
-            class="ml-8px h-8px w-8px icon-dark-gray-500"
+            class="h-8px ml-8px w-8px icon-dark-gray-500"
           />
         </MenuButton>
         <MenuItems
@@ -28,7 +28,7 @@
             <button
               :data-cy="item.name"
               :class="{ 'bg-gray-700': active }"
-              class="border-b border-b-gray-800 text-left py-8px px-16px min-w-max"
+              class="border-b min-w-max border-b-gray-800 text-left py-8px px-16px"
               @click.stop="handleMenuClick(item.event)"
             >
               {{ item.name }}
@@ -40,10 +40,10 @@
   </template>
   <template v-else>
     <span
-      class="border rounded-full font-medium p-5px pr-16px text-size-14px leading-20px inline-flex items-center text-gray-600"
+      class="border rounded-full font-medium p-5px pr-16px text-size-14px text-gray-600 leading-20px inline-flex items-center"
     >
       <i-cy-grommet_x16
-        class="mx-4px h-16px w-16px icon-dark-gray-200 icon-dark-gray-50"
+        class="h-16px mx-4px w-16px icon-dark-gray-200 icon-dark-gray-50"
       />
       {{ titleOff }}
     </span>
@@ -58,9 +58,9 @@ import { TestingTypeSelectionAndReconfigureDocument, TestingTypeEnum } from '../
 import { computed } from 'vue'
 
 const props = defineProps<{
-  status: boolean,
-  titleOn: string,
-  titleOff: string,
+  status: boolean
+  titleOn: string
+  titleOff: string
   testingType: TestingTypeEnum
   isRunning: boolean
   isApp: boolean
