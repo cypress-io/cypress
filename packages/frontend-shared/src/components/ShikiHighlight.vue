@@ -26,7 +26,7 @@ shikiWrapperClasses computed property.
         'shiki-wrapper',
 
         // All styles contain these utility classes
-        'overflow-scroll hover:border-indigo-200 relative text-14px leading-24px font-light',
+        'overflow-scroll hover:border-indigo-200 relative text-14px leading-24px font-normal',
 
         /**
          * 1. Single line is forced onto one line without any borders. It loses
@@ -56,7 +56,7 @@ shikiWrapperClasses computed property.
     />
     <pre
       v-else
-      class="border rounded font-light border-gray-100 py-8px text-14px leading-24px overflow-scroll"
+      class="border rounded font-normal border-gray-100 py-8px text-14px leading-24px overflow-scroll"
       :class="[props.class, lineNumbers ? 'pl-56px' : 'pl-8px' ]"
     >{{ trimmedCode }}</pre>
     <CopyButton
