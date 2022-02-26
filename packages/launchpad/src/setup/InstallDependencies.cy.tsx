@@ -1,7 +1,7 @@
 import { defaultMessages } from '@cy/i18n'
 import InstallDependencies from './InstallDependencies.vue'
 import { InstallDependenciesFragmentDoc } from '../generated/graphql-test'
-import { PACKAGES_DESCRIPTIONS } from '../../../types/src/constants'
+import { CYPRESS_REACT_LATEST, CYPRESS_WEBPACK } from '@packages/scaffold-config'
 
 describe('<InstallDependencies />', () => {
   beforeEach(function () {
@@ -24,8 +24,8 @@ describe('<InstallDependencies />', () => {
     .should('be.visible')
     .and('have.attr', 'href', 'https://www.npmjs.com/package/@cypress/webpack-dev-server')
 
-    cy.contains(PACKAGES_DESCRIPTIONS['@cypress/react'].split('<span')[0])
-    cy.contains(PACKAGES_DESCRIPTIONS['@cypress/webpack-dev-server'].split('<span')[0])
+    cy.contains(CYPRESS_REACT_LATEST.description.split('<span')[0])
+    cy.contains(CYPRESS_WEBPACK.description.split('<span')[0])
 
     cy.percySnapshot()
   })

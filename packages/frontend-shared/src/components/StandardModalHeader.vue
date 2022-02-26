@@ -20,10 +20,10 @@
     </div>
     <button
       :aria-label="t(`actions.close`)"
-      class="border-transparent rounded-full border-1 p-5px hocus-default hover:border-indigo-300"
+      class="border-transparent rounded-full outline-none border-1 group"
       @click="$emit('close')"
     >
-      <i-cy-delete_x12 class="h-12px m-4px w-12px icon-dark-gray-400" />
+      <i-cy-delete_x12 class="h-12px w-12px icon-dark-gray-400 group-hocus:icon-dark-indigo-400 children:transition-all" />
     </button>
   </div>
 </template>
@@ -36,7 +36,7 @@ import { useI18n } from '@cy/i18n'
 const { t } = useI18n()
 
 defineProps<{
-  helpLink: string,
+  helpLink: string
   helpText: string
 }>()
 

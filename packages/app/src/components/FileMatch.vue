@@ -96,7 +96,7 @@ type Matches = {
 }
 
 const props = defineProps<{
-  extensionPattern: string,
+  extensionPattern: string
   pattern: string
   matches: Matches
 }>()

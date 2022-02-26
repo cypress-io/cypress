@@ -24,7 +24,7 @@ const typeClasses: Record<StatusIndicatorType, string> = {
 }
 
 const props = defineProps<{
-  type: StatusIndicatorType,
+  type: StatusIndicatorType
 }>()
 
 const classes = computed(() => props.type ? typeClasses[props.type] : [])

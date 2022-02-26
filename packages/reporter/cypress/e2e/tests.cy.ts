@@ -134,7 +134,8 @@ describe('tests', () => {
     })
   })
 
-  describe('studio', () => {
+  // FIXME: When studio support is re-introduced we can enable these tests.
+  describe.skip('studio', () => {
     describe('button', () => {
       it('displays studio icon with half transparency when hovering over test title', { scrollBehavior: false }, () => {
         cy.contains('test 1')
