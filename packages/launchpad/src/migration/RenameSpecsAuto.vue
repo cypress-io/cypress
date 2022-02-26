@@ -133,7 +133,7 @@ const props = defineProps<{
 
 const emits = defineEmits<{
   (eventName: 'selectOption', value: PossibleOption): void
-  }>()
+}>()
 
 const step1Modal = ref(false)
 const step2Modal = ref(false)

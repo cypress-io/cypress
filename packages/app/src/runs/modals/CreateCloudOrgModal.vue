@@ -97,7 +97,7 @@ query CheckCloudOrganizations {
 `
 
 const props = defineProps<{
-  gql: CreateCloudOrgModalFragment,
+  gql: CreateCloudOrgModalFragment
 }>()
 
 const query = useQuery({

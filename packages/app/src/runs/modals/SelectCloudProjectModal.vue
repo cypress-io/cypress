@@ -223,7 +223,7 @@ mutation SelectCloudProjectModal_CreateCloudProject( $name: String!, $orgId: ID!
 `
 
 const props = defineProps<{
-  gql: SelectCloudProjectModalFragment,
+  gql: SelectCloudProjectModalFragment
 }>()
 
 const emit = defineEmits<{

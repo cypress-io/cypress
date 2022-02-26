@@ -194,12 +194,11 @@
 import TopNavListItem from './TopNavListItem.vue'
 import TopNavList from './TopNavList.vue'
 import PromptContent from './PromptContent.vue'
-import UnsupportedBrowserTooltip from './UnsupportedBrowserTooltip.vue'
 import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
 import { gql, useMutation } from '@urql/vue'
 import { TopNavFragment, TopNav_SetPromptShownDocument } from '../../generated/graphql'
 import { useI18n } from '@cy/i18n'
-import { computed, ref, Ref, ComponentPublicInstance, watch, watchEffect } from 'vue'
+import { computed, ref, ComponentPublicInstance, watch, watchEffect } from 'vue'
 import { onClickOutside, onKeyStroke, useTimeAgo } from '@vueuse/core'
 import type { DocsMenuVariant } from './DocsMenuContent.vue'
 import DocsMenuContent from './DocsMenuContent.vue'
@@ -250,13 +249,13 @@ mutation TopNav_SetPromptShown($slug: String!) {
 const setPromptShown = useMutation(TopNav_SetPromptShownDocument)
 
 const props = defineProps<{
-  gql: TopNavFragment,
-  showBrowsers?: boolean,
+  gql: TopNavFragment
+  showBrowsers?: boolean
   forceOpenDocs?: boolean
 }>()
 
 const emit = defineEmits<{
-  (e: 'clearForceOpen'): void,
+  (e: 'clearForceOpen'): void
 }>()
 const promptsEl = ref<ComponentPublicInstance | null>(null)
 

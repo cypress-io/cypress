@@ -1,5 +1,6 @@
 import _ from 'lodash'
-import { createContext, KeyboardEvent } from 'react'
+import { createContext } from 'react'
+import type { KeyboardEvent } from 'react'
 
 interface ContextValue {
   handleChange: (value: string) => any

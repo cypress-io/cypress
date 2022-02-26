@@ -67,7 +67,7 @@ const emit = defineEmits<{
 }>()
 
 const props = defineProps<{
-  gql: RunsConnectFragment,
+  gql: RunsConnectFragment
 }>()
 
 const isLoginOpen = ref(false)

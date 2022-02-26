@@ -33,7 +33,6 @@ import ShikiHighlight from '@cy/components/ShikiHighlight.vue'
 import Collapsible from '@cy/components/Collapsible.vue'
 import { gql } from '@urql/core'
 import type { GeneratorSuccessFileFragment } from '../../generated/graphql'
-import { ref } from 'vue'
 
 gql`
 fragment GeneratorSuccessFile on ScaffoldedFile {
