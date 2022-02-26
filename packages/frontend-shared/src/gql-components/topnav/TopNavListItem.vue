@@ -24,7 +24,7 @@
 <script setup lang="ts">
 
 defineProps<{
-  selectable?: Boolean,
+  selectable?: Boolean
 }>()
 
 </script>

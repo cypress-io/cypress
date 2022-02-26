@@ -38,7 +38,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import { gql } from '@urql/core'
 import TerminalPrompt from '@cy/components/TerminalPrompt.vue'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'

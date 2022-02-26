@@ -41,12 +41,12 @@ import type { FunctionalComponent, SVGAttributes } from 'vue'
 import SidebarTooltip from './SidebarTooltip.vue'
 
 withDefaults(defineProps <{
-  icon: FunctionalComponent<SVGAttributes, {}>,
-  name: string,
+  icon: FunctionalComponent<SVGAttributes, {}>
+  name: string
   // Currently active row (generally the current route)
   active?: boolean
   isNavBarExpanded: boolean
-  }>(), {
+}>(), {
   active: false,
 })
 

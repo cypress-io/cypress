@@ -36,7 +36,7 @@ import { useI18n } from '@cy/i18n'
 import NoResultsIllustration from '../assets/illustrations/no-results.svg'
 
 defineProps<{
-  search?: string,
+  search?: string
   message?: string
   emptySearch?: boolean
 }>()

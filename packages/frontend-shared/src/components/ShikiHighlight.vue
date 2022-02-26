@@ -117,14 +117,14 @@ onBeforeMount(async () => {
 })
 
 const props = withDefaults(defineProps<{
-  code: string;
-  lang: CyLangType | undefined;
-  lineNumbers?: boolean,
-  inline?: boolean,
-  wrap?: boolean,
-  copyOnClick?: boolean,
-  copyButton?: boolean,
-  skipTrim?: boolean,
+  code: string
+  lang: CyLangType | undefined
+  lineNumbers?: boolean
+  inline?: boolean
+  wrap?: boolean
+  copyOnClick?: boolean
+  copyButton?: boolean
+  skipTrim?: boolean
   class?: string | string[] | Record<string, any>
 }>(), {
   lineNumbers: false,

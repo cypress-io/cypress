@@ -21,6 +21,6 @@ export default {
 </script>
 <script lang="ts" setup>
 defineProps<{
-  label: string;
+  label: string
 }>()
 </script>

@@ -65,7 +65,7 @@
 export type AlertStatus = 'error' | 'warning' | 'info' | 'default' | 'success'
 
 export type AlertClasses = {
-  headerClass: string,
+  headerClass: string
   suffixIconClass: string
   suffixButtonClass: string
   bodyClass: string
@@ -92,14 +92,14 @@ defineEmits<{
 const props = withDefaults(defineProps<{
   title?: string
   status?: AlertStatus
-  icon?: FunctionalComponent<SVGAttributes, {}>,
-  headerClass?: string,
-  bodyClass?: string,
-  dismissible?: boolean,
-  collapsible?: boolean,
-  modelValue?: boolean,
-  iconClasses?: string,
-  maxHeight?: string,
+  icon?: FunctionalComponent<SVGAttributes, {}>
+  headerClass?: string
+  bodyClass?: string
+  dismissible?: boolean
+  collapsible?: boolean
+  modelValue?: boolean
+  iconClasses?: string
+  maxHeight?: string
 }>(), {
   title: undefined,
   modelValue: true,

@@ -163,9 +163,9 @@ const clearCurrentProject = () => {
 }
 
 const props = defineProps<{
-  gql: HeaderBar_HeaderBarContentFragment,
-  showBrowsers?: boolean,
-  pageName?: string,
+  gql: HeaderBar_HeaderBarContentFragment
+  showBrowsers?: boolean
+  pageName?: string
   allowAutomaticPromptOpen?: boolean
 }>()
 
@@ -194,7 +194,7 @@ const isShowablePromptInSavedState = computed(() => {
   return false
 })
 
-function shouldShowPrompt (prompt: { slug: string; noProjectId: boolean; interval?: number }) {
+function shouldShowPrompt (prompt: { slug: string, noProjectId: boolean, interval?: number }) {
   // we want the component using the header to control if the prompt shows at all
   if (props.allowAutomaticPromptOpen !== true) {
     return false
@@ -202,7 +202,7 @@ function shouldShowPrompt (prompt: { slug: string; noProjectId: boolean; interva
 
   const now = Date.now()
   const timeSinceOpened = now - savedState.value?.firstOpened
-  const allPromptShownTimes:number[] = Object.values(savedState.value?.promptsShown ?? {})
+  const allPromptShownTimes: number[] = Object.values(savedState.value?.promptsShown ?? {})
 
   // prompt has been shown
   if (savedState.value?.promptsShown?.[prompt.slug]) {
