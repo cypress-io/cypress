@@ -102,15 +102,16 @@ const waitForAllJobs = async (jobNames, workflowId) => {
   const blockedJobs = _.filter(response.items, { status: 'blocked' })
   const failedJobs = _.filter(response.items, { status: 'failed' })
 
-  if (requireAllJobsToPass && failedJobs.length) {
-    console.error('A failing job has prevented percy-finalize from running', failedJobs)
-    process.exit(1)
-  }
-
   const runningJobs = _.filter(response.items, { status: 'running' })
 
   const blockedJobNames = _.map(blockedJobs, 'name')
   const runningJobNames = _.map(runningJobs, 'name')
+  const failedJobNames = _.map(failedJobs, 'name')
+
+  if (requireAllJobsToPass && _.intersection(jobNames, failedJobNames).length) {
+    console.error('At least one failing job has prevented percy-finalize from running', failedJobs)
+    process.exit(1)
+  }
 
   debug('failed jobs %o', _.map(failedJobs, 'name'))
   debug('blocked jobs %o', blockedJobNames)
