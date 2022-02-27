@@ -15,9 +15,9 @@ const jobName = process.env.CIRCLE_JOB || 'wait-on-circle-jobs'
 
 const workflowId = process.env.CIRCLE_WORKFLOW_ID
 
-const branch = process.env.CIRCLE_BRANCH
+const branchesToAlwaysFinalize = ['develop', '10.0-release']
 
-console.log('wait-on-circle-jobs', branch)
+const requireAllJobsToPass = !branchesToAlwaysFinalize.includes(process.env.CIRCLE_BRANCH)
 
 const getAuth = () => `${process.env.CIRCLE_TOKEN}:`
 
@@ -101,6 +101,12 @@ const waitForAllJobs = async (jobNames, workflowId) => {
   // if a job is pending, its status will be "blocked"
   const blockedJobs = _.filter(response.items, { status: 'blocked' })
   const failedJobs = _.filter(response.items, { status: 'failed' })
+
+  if (requireAllJobsToPass && failedJobs.length) {
+    console.error('A failing job has prevented percy-finalize from running', failedJobs)
+    process.exit(1)
+  }
+
   const runningJobs = _.filter(response.items, { status: 'running' })
 
   const blockedJobNames = _.map(blockedJobs, 'name')
