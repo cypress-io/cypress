@@ -478,7 +478,7 @@ commands:
             DEBUG=<<parameters.debug>> \
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$TEST_LAUNCHPAD_RECORD_KEY \
-            PERCY_PARALLEL_NONCE=$PLATFORM-$CIRCLE_SHA1 \
+            PERCY_PARALLEL_NONCE=$PLATFORM-$CIRCLE_SHA1-$CIRCLE_PR_NUMBER \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
             $cmd yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --record --parallel --group <<parameters.package>>-<<parameters.type>>
@@ -1093,7 +1093,7 @@ jobs:
             run-launchpad-integration-tests-chrome
       - run:
           command: |
-            PERCY_PARALLEL_NONCE=$PLATFORM-$CIRCLE_SHA1 \
+            PERCY_PARALLEL_NONCE=$PLATFORM-$CIRCLE_SHA1-$CIRCLE_PR_NUMBER \
             yarn percy build:finalize
 
   cli-visual-tests:
@@ -1115,7 +1115,7 @@ jobs:
       - run:
           name: Upload CLI snapshots for diffing
           command: |
-            PERCY_PARALLEL_NONCE=$PLATFORM-$CIRCLE_SHA1 \
+            PERCY_PARALLEL_NONCE=$PLATFORM-$CIRCLE_SHA1-$CIRCLE_PR_NUMBER \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy snapshot ./cli/visual-snapshots
@@ -1391,7 +1391,7 @@ jobs:
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-            PERCY_PARALLEL_NONCE=$PLATFORM-$CIRCLE_SHA1 \
+            PERCY_PARALLEL_NONCE=$PLATFORM-$CIRCLE_SHA1-$CIRCLE_PR_NUMBER \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy exec --parallel -- -- \
@@ -1530,7 +1530,7 @@ jobs:
           #
           command: |
             CYPRESS_KONFIG_ENV=production \
-            PERCY_PARALLEL_NONCE=$PLATFORM-$CIRCLE_SHA1 \
+            PERCY_PARALLEL_NONCE=$PLATFORM-$CIRCLE_SHA1-$CIRCLE_PR_NUMBER \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy exec --parallel -- -- \
