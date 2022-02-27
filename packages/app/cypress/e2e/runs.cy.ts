@@ -15,6 +15,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.get('[href="#/runs"]', { timeout: 1000 }).click()
       cy.get('[data-cy="runs"]')
       cy.get('[data-cy="app-header-bar"]').findByText('Runs').should('be.visible')
+      cy.contains('INTENTIONALLY FAIL')
     })
 
     it('shows the loader', () => {
