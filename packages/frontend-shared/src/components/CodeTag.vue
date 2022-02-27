@@ -16,6 +16,6 @@ defineProps<{
    * NOTE: windi css does not allow specificity, so one
    * cannot "override" a css property
    */
-  bg?: boolean;
+  bg?: boolean
 }>()
 </script>

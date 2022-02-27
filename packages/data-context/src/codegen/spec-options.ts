@@ -3,7 +3,7 @@ import type { DataContext } from '../DataContext'
 import type { ParsedPath } from 'path'
 import { camelCase, capitalize } from 'lodash'
 import type { CodeGenType } from '@packages/graphql/src/gen/nxs.gen'
-import type { CodeGenFramework } from '@packages/types'
+import type { CodeGenFramework } from '@packages/scaffold-config'
 import { CsfFile, readCsfOrMdx } from '@storybook/csf-tools'
 
 interface CodeGenOptions {
@@ -154,6 +154,7 @@ export class SpecOptions {
 
   private getFrameworkStoryOptions (framework: CodeGenFramework, csf: CsfFile) {
     const storyPath = this.relativePath()
+    const removeSpaces = (val: string) => val.replace(/\s+/g, '')
 
     const frameworkOptions = {
       react: {
@@ -164,7 +165,7 @@ export class SpecOptions {
           `import * as stories from "${storyPath}"`,
         ],
         stories: csf.stories.map((story) => {
-          const component = story.name.replace(/\s+/, '')
+          const component = removeSpaces(story.name)
 
           return {
             component,
@@ -180,7 +181,7 @@ export class SpecOptions {
           `import * as stories from "${storyPath}"`,
         ],
         stories: csf.stories.map((story) => {
-          const component = story.name.replace(/\s+/, '')
+          const component = removeSpaces(story.name)
 
           return {
             component,

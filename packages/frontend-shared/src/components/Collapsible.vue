@@ -42,8 +42,8 @@ import { useToggle } from '@vueuse/core'
 const props = withDefaults(defineProps<{
   maxHeight?: string
   initiallyOpen?: boolean
-  lazy?: boolean,
-  disable?: boolean,
+  lazy?: boolean
+  disable?: boolean
 }>(), {
   initiallyOpen: false,
   maxHeight: '500px',

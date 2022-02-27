@@ -19,6 +19,8 @@ import {
   isDefaultTestFiles,
   getComponentTestFilesGlobs,
   getComponentFolder,
+  getIntegrationTestFilesGlobs,
+  getSpecPattern,
 } from './migration'
 
 import type { FilePart } from './migration/format'
@@ -195,13 +197,13 @@ export class MigrationDataSource {
 
     const specs = await getSpecs(this.ctx.currentProject, config)
 
-    const canBeAutomaticallyMigrated: MigrationFile[] = specs.integration.map(applyMigrationTransform)
+    const canBeAutomaticallyMigrated: MigrationFile[] = specs.integration.map(applyMigrationTransform).filter((spec) => spec.before.relative !== spec.after.relative)
 
     const defaultComponentPattern = isDefaultTestFiles(await this.parseCypressConfig(), 'component')
 
     // Can only migration component specs if they use the default testFiles pattern.
     if (defaultComponentPattern) {
-      canBeAutomaticallyMigrated.push(...specs.component.map(applyMigrationTransform))
+      canBeAutomaticallyMigrated.push(...specs.component.map(applyMigrationTransform).filter((spec) => spec.before.relative !== spec.after.relative))
     }
 
     return canBeAutomaticallyMigrated
@@ -273,15 +275,40 @@ export class MigrationDataSource {
 
     const config = await this.parseCypressConfig()
 
-    this.hasCustomIntegrationTestFiles = !isDefaultTestFiles(config, 'integration')
+    const integrationFolder = getIntegrationFolder(config)
+    const integrationTestFiles = getIntegrationTestFilesGlobs(config)
+
     this.hasCustomIntegrationFolder = getIntegrationFolder(config) !== 'cypress/integration'
+    this.hasCustomIntegrationTestFiles = !isDefaultTestFiles(config, 'integration')
+
+    if (integrationFolder === false) {
+      this.hasE2ESpec = false
+    } else {
+      this.hasE2ESpec = await hasSpecFile(
+        this.ctx.currentProject,
+        integrationFolder,
+        integrationTestFiles,
+      )
+
+      // if we don't find specs in the 9.X scope,
+      // let's check already migrated files.
+      // this allows users to stop migration halfway,
+      // then to pick up where they left migration off
+      if (!this.hasE2ESpec && (!this.hasCustomIntegrationTestFiles || !this.hasCustomIntegrationFolder)) {
+        const newE2eSpecPattern = getSpecPattern(config, 'e2e')
+
+        this.hasE2ESpec = await hasSpecFile(
+          this.ctx.currentProject,
+          '',
+          newE2eSpecPattern,
+        )
+      }
+    }
 
     const componentFolder = getComponentFolder(config)
-
-    this.hasCustomComponentFolder = componentFolder !== 'cypress/component'
-
     const componentTestFiles = getComponentTestFilesGlobs(config)
 
+    this.hasCustomComponentFolder = componentFolder !== 'cypress/component'
     this.hasCustomComponentTestFiles = !isDefaultTestFiles(config, 'component')
 
     if (componentFolder === false) {
@@ -292,18 +319,10 @@ export class MigrationDataSource {
         componentFolder,
         componentTestFiles,
       )
-    }
 
-    const integrationFolder = getIntegrationFolder(config)
-
-    if (integrationFolder === false) {
-      this.hasE2ESpec = false
-    } else {
-      this.hasE2ESpec = await hasSpecFile(
-        this.ctx.currentProject,
-        integrationFolder,
-        componentTestFiles,
-      )
+      // We cannot check already migrated component specs since it would pick up e2e specs as well
+      // the default specPattern for CT is **/*.cy.js.
+      // since component testing has to be re-installed anyway, we can just skip this
     }
 
     const pluginsFileMissing = (

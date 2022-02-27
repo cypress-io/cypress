@@ -2,6 +2,7 @@ import { BrowserCriClient } from '../../../lib/browsers/browser-cri-client'
 import * as CriClient from '../../../lib/browsers/cri-client'
 import { expect, proxyquire, sinon } from '../../spec_helper'
 import * as protocol from '../../../lib/browsers/protocol'
+import { stripAnsi } from '@packages/errors'
 
 const HOST = '127.0.0.1'
 const PORT = 50505
@@ -105,7 +106,9 @@ describe('lib/browsers/cri-client', function () {
 
       it('rejects if protocolVersion < current', function () {
         return expect(withProtocolVersion('1.2', '1.3')).to.be
-        .rejectedWith('A minimum CDP version of v1.3 is required, but the current browser has v1.2.')
+        .rejected.then((err) => {
+          expect(stripAnsi(err.message)).to.eq(`A minimum CDP version of 1.3 is required, but the current browser has 1.2.`)
+        })
       })
     })
 

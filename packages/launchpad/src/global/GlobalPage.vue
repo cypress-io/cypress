@@ -118,7 +118,7 @@ function handleRemoveProject (path: string) {
 }
 
 const props = defineProps<{
-  gql: GlobalPageFragment,
+  gql: GlobalPageFragment
 }>()
 
 const filteredProjects = computed(() => {

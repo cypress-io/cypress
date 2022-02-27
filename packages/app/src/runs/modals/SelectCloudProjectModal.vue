@@ -4,6 +4,7 @@
     :title="newProject
       ? t('runs.connect.modal.selectProject.createProject')
       : t('runs.connect.modal.title')"
+    help-link="https://on.cypress.io/adding-new-project"
     @update:model-value="emit('cancel')"
   >
     <div class="w-640px">
@@ -222,7 +223,7 @@ mutation SelectCloudProjectModal_CreateCloudProject( $name: String!, $orgId: ID!
 `
 
 const props = defineProps<{
-  gql: SelectCloudProjectModalFragment,
+  gql: SelectCloudProjectModalFragment
 }>()
 
 const emit = defineEmits<{

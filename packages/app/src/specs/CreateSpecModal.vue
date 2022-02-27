@@ -4,6 +4,7 @@
     variant="bare"
     :title="title"
     :model-value="show"
+    :help-link="helpLink"
     data-cy="create-spec-modal"
     @update:model-value="close"
   >
@@ -52,8 +53,8 @@ import { useI18n } from '@cy/i18n'
 import { getPathForPlatform } from '../paths'
 
 const props = defineProps<{
-  initialGenerator?: GeneratorId,
-  show: boolean,
+  initialGenerator?: GeneratorId
+  show: boolean
   gql: CreateSpecModalFragment
 }>()
 
@@ -82,6 +83,14 @@ const generator = computed(() => {
   if (currentGeneratorId.value) return generators[currentGeneratorId.value]
 
   return null
+})
+
+const helpLink = computed(() => {
+  if (title.value === t('createSpec.e2e.importFromScaffold.specsAddedHeader')) {
+    return 'https://on.cypress.io/writing-and-organizing-tests'
+  }
+
+  return ''
 })
 
 const specFileName = computed(() => getPathForPlatform('cypress/e2e/filename.cy.js'))

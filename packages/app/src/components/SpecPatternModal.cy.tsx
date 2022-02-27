@@ -24,7 +24,7 @@ describe('<SpecPatternModal />', () => {
 
     cy.get('[data-cy="spec-pattern-modal"]').should('be.visible')
     cy.contains('h2', defaultMessages.components.specPatternModal.title)
-    cy.get('[data-cy="external"]').should('have.attr', 'href').and('eq', 'https://on.cypress.io')
+    cy.get('[data-cy="external"]').should('have.attr', 'href').and('eq', 'https://on.cypress.io/test-type-options')
     cy.get('[data-cy="spec-pattern"]').should('be.visible')
 
     cy.percySnapshot()

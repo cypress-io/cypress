@@ -87,7 +87,7 @@ fragment RunCard on CloudRun {
 `
 
 const props = defineProps<{
-	gql: RunCardFragment
+  gql: RunCardFragment
 }>()
 
 const ICON_MAP = {

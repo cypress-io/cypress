@@ -38,8 +38,8 @@
 import { ref, nextTick, onMounted } from 'vue'
 
 const props = withDefaults(defineProps<{
-  placement?:string,
-  tooltipWidth?:number
+  placement?: string
+  tooltipWidth?: number
 }>(), {
   placement: 'bottom',
   tooltipWidth: 340,

@@ -106,7 +106,7 @@ fragment EnvironmentSetup on Wizard {
 
 const props = defineProps<{
   gql: EnvironmentSetupFragment
-  nextFn: () => void,
+  nextFn: () => void
 }>()
 
 const { t } = useI18n()

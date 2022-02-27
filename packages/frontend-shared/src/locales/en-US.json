@@ -345,13 +345,11 @@
       "title": "External Editor",
       "description": "External editor to use for editing code opened when using Cypress.",
       "noEditorSelectedPlaceholder": "Choose your editor...",
-      "editorRadioLabel": "Choose editor",
-      "customEditorRadioLabel": "Add custom editor by path",
-      "customPathPlaceholder": "Custom path..."
+      "customPathPlaceholder": "/path/to/editor"
     },
     "projectId": {
       "title": "Project ID",
-      "description": "The Project ID configured for this project inside of Cypress Cloud. {0}"
+      "description": "The Project ID configured for this project inside of Cypress Dashboard. {0}"
     },
     "specPattern": {
       "title": "Spec Patterns",
@@ -359,7 +357,7 @@
     },
     "recordKey": {
       "title": "Record Key",
-      "description": "The Record Key configured for this project inside of Cypress Cloud. {0}",
+      "description": "The Record Key configured for this project inside of Cypress Dashboard. {0}",
       "manageKeys": "Manage Keys",
       "errorEmpty": "You do not have permission to record on this project",
       "errorEmptyButton": "Request record rights",
@@ -494,7 +492,7 @@
     "modalTitle": "Choose a testing type",
     "e2e": {
       "name": "E2E Testing",
-      "description": "Build and test the entire experience of your application from end-to-end to each ensure each flow matches your expectations."
+      "description": "Build and test the entire experience of your application from end-to-end to ensure each flow matches your expectations."
     },
     "component": {
       "name": "Component Testing",

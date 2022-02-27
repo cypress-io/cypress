@@ -2,6 +2,7 @@
   <StandardModal
     model-value
     :title="t('runs.connect.modal.title')"
+    help-link="https://on.cypress.io/adding-new-project"
     @update:model-value="emit('cancel')"
   >
     <div class="border border-dashed rounded border-gray-100 text-center p-24px w-592px">
@@ -91,12 +92,12 @@ query CheckCloudOrganizations {
         id
       }
     }
-  } 
+  }
 }
 `
 
 const props = defineProps<{
-  gql: CreateCloudOrgModalFragment,
+  gql: CreateCloudOrgModalFragment
 }>()
 
 const query = useQuery({

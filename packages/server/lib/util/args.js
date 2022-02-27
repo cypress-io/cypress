@@ -4,7 +4,7 @@ const is = require('check-more-types')
 const path = require('path')
 const debug = require('debug')('cypress:server:args')
 const minimist = require('minimist')
-const { getPublicConfigKeys } = require('@packages/config')
+const { getBreakingRootKeys, getPublicConfigKeys } = require('@packages/config')
 
 const coerceUtil = require('./coerce')
 const proxyUtil = require('./proxy')
@@ -163,8 +163,8 @@ const JSONOrCoerce = (str) => {
   return coerceUtil.coerce(str)
 }
 
-const sanitizeAndConvertNestedArgs = (str, argname) => {
-  la(is.unemptyString(argname), 'missing config argname to be parsed')
+const sanitizeAndConvertNestedArgs = (str, argName) => {
+  la(is.unemptyString(argName), 'missing config argName to be parsed')
 
   try {
     if (typeof str === 'object') {
@@ -197,10 +197,10 @@ const sanitizeAndConvertNestedArgs = (str, argname) => {
     .mapValues(JSONOrCoerce)
     .value()
   } catch (err) {
-    debug('could not pass config %s value %s', argname, str)
+    debug('could not pass config %s value %s', argName, str)
     debug('error %o', err)
 
-    return errors.throw('COULD_NOT_PARSE_ARGUMENTS', argname, str, 'Cannot parse as valid JSON')
+    return errors.throwErr('COULD_NOT_PARSE_ARGUMENTS', argName, str, 'Cannot parse as valid JSON')
   }
 }
 
@@ -316,6 +316,32 @@ const parseSpecArgv = (pattern) => {
   return [...partial, sanitizeFinalPath(carry)]
 }
 
+/*
+ * Certain config options (such as specPattern) are invalid at the root,
+ * and can only be used inside a testing type. We want to be convenient
+ * for the user though, so when they pass them in as CLI args, we
+ * assume they're for the current testing type. This function moves
+ * them from the root into the testing types they belong to, eg:
+ * { specPattern: 'foo.js' }
+ * ->
+ * { e2e: { specPattern: 'foo.js' }, component: { specPattern: 'foo.js' } }
+ */
+const nestInvalidRootOptions = (config) => {
+  getBreakingRootKeys().forEach(({ name, testingTypes }) => {
+    if (config[name] && testingTypes) {
+      testingTypes.forEach((testingType) => {
+        if (!config[testingType]) {
+          config[testingType] = {}
+        }
+
+        config[testingType][name] = config[name]
+      })
+
+      delete config[name]
+    }
+  })
+}
+
 module.exports = {
   normalizeBackslashes,
 
@@ -384,7 +410,7 @@ module.exports = {
     }
 
     let { spec } = options
-    const { env, config, reporterOptions, outputPath, tag } = options
+    const { env, config, reporterOptions, outputPath, tag, testingType } = options
     let project = options.project || options.runProject
 
     // only accept project if it is a string
@@ -421,7 +447,7 @@ module.exports = {
         debug('could not parse config spec value %s', spec)
         debug('error %o', err)
 
-        return errors.throw('COULD_NOT_PARSE_ARGUMENTS', 'spec', spec, 'spec must be a string or comma-separated list')
+        return errors.throwErr('COULD_NOT_PARSE_ARGUMENTS', 'spec', spec, 'spec must be a string or comma-separated list')
       }
     }
 
@@ -454,6 +480,16 @@ module.exports = {
       options.config = sanitizeAndConvertNestedArgs(config, 'config')
     }
 
+    if (options.config == null) {
+      options.config = {}
+    }
+
+    // A user may pass in config options that are valid for
+    // a specific testing type, but invalid at the root level.
+    // We nest these automatically, making the assumption that
+    // we know what they meant.
+    nestInvalidRootOptions(options.config, testingType)
+
     // get a list of the available config keys
     const configKeys = getPublicConfigKeys()
 
@@ -464,10 +500,6 @@ module.exports = {
     // this solves situations where we accept
     // root level arguments which also can
     // be set in configuration
-    if (options.config == null) {
-      options.config = {}
-    }
-
     _.extend(options.config, configValues)
 
     // remove them from the root options object

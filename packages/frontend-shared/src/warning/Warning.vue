@@ -27,9 +27,9 @@ const emits = defineEmits<{
 }>()
 
 const props = withDefaults(defineProps<{
-  title: string,
-  message: string,
-  details?: string | null,
+  title: string
+  message: string
+  details?: string | null
   modelValue?: boolean
   dismissible?: boolean
 }>(), {
