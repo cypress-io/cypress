@@ -45,7 +45,7 @@ const emit = defineEmits<{
 }>()
 
 const props = defineProps<{
-  gql: CloudConnectButtonFragment,
+  gql: CloudConnectButtonFragment
   class?: string
 }>()
 
