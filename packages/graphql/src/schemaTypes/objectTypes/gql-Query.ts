@@ -1,5 +1,4 @@
 import { objectType } from 'nexus'
-import { ErrorWrapper } from '.'
 import { ProjectLike, ScaffoldedFile, TestingTypeEnum } from '..'
 import { CurrentProject } from './gql-CurrentProject'
 import { DevState } from './gql-DevState'
@@ -8,6 +7,7 @@ import { LocalSettings } from './gql-LocalSettings'
 import { Migration } from './gql-Migration'
 import { VersionData } from './gql-VersionData'
 import { Wizard } from './gql-Wizard'
+import { ErrorWrapper } from './gql-ErrorWrapper'
 
 export const Query = objectType({
   name: 'Query',

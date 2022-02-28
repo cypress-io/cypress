@@ -611,7 +611,10 @@ export class ProjectLifecycleManager {
       }
 
       if (shouldReloadConfig) {
-        this.ctx.coreData.baseError = null
+        this.ctx.update((coreData) => {
+          coreData.baseError = null
+        })
+
         this.reloadConfig().catch(this.onLoadError)
       }
     })
@@ -624,7 +627,10 @@ export class ProjectLifecycleManager {
     const cypressEnvFileWatcher = this.addWatcher(this.envFilePath)
 
     cypressEnvFileWatcher.on('all', () => {
-      this.ctx.coreData.baseError = null
+      this.ctx.update((coreData) => {
+        coreData.baseError = null
+      })
+
       this.reloadCypressEnvFile().catch(this.onLoadError)
     })
   }
