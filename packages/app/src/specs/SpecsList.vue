@@ -212,8 +212,8 @@ function getIdIfDirectory (row) {
   height: calc(100vh - 64px);
 }
 
-/** List header is 72px */
+/** Search bar is 72px + List header is 40px = 112px offset */
 .spec-list-container {
-  height: calc(100% - 72px)
+  height: calc(100% - 112px)
 }
 </style>
