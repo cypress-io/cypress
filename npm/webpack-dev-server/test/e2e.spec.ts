@@ -187,3 +187,4 @@ describe('#startDevServer', () => {
     })
   })
 })
+.timeout(5000)
