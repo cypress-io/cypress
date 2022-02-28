@@ -195,6 +195,7 @@ describe('Launchpad: Setup Project', () => {
 
         cy.get('[data-cy=valid]').within(() => {
           cy.containsPath('cypress/support/e2e.js')
+          cy.containsPath('cypress/support/commands.js')
           cy.containsPath('cypress/fixtures/example.json')
         })
       })
@@ -217,6 +218,7 @@ describe('Launchpad: Setup Project', () => {
 
         cy.get('[data-cy=valid]').within(() => {
           cy.containsPath('cypress/support/e2e.js')
+          cy.containsPath('cypress/support/commands.js')
           cy.containsPath('cypress/fixtures/example.json')
         })
       })
@@ -234,6 +236,7 @@ describe('Launchpad: Setup Project', () => {
 
         cy.get('[data-cy=valid]').within(() => {
           cy.containsPath('cypress/support/e2e.js')
+          cy.containsPath('cypress/support/commands.js')
           cy.containsPath('cypress/fixtures/example.json')
         })
       })
@@ -282,6 +285,7 @@ describe('Launchpad: Setup Project', () => {
         cy.get('[data-cy=valid]').within(() => {
           cy.contains('cypress.config.js')
           cy.containsPath('cypress/support/e2e.js')
+          cy.containsPath('cypress/support/commands.js')
           cy.containsPath('cypress/fixtures/example.json')
         })
 
@@ -400,6 +404,7 @@ describe('Launchpad: Setup Project', () => {
         cy.get('[data-cy=valid]').within(() => {
           cy.containsPath('cypress/component/index.html')
           cy.containsPath('cypress/support/component.ts')
+          cy.containsPath('cypress/support/commands.ts')
         })
 
         cy.findByRole('button', { name: 'Continue' }).should('have.disabled')
@@ -418,6 +423,7 @@ describe('Launchpad: Setup Project', () => {
 
         cy.get('[data-cy=valid]').within(() => {
           cy.containsPath('cypress/support/e2e.js')
+          cy.containsPath('cypress/support/commands.js')
           cy.containsPath('cypress/fixtures/example.json')
         })
       })
@@ -737,6 +743,7 @@ describe('Launchpad: Setup Project', () => {
           cy.contains('cypress.config.ts')
           cy.containsPath('cypress/component/index.html')
           cy.containsPath(`cypress/support/component.ts`)
+          cy.containsPath(`cypress/support/commands.ts`)
           cy.containsPath('cypress/fixtures/example.json')
         })
 
@@ -769,6 +776,7 @@ describe('Launchpad: Setup Project', () => {
           cy.contains('cypress.config.ts')
           cy.containsPath('cypress/component/index.html')
           cy.containsPath(`cypress/support/component.ts`)
+          cy.containsPath(`cypress/support/commands.ts`)
           cy.containsPath('cypress/fixtures/example.json')
         })
 

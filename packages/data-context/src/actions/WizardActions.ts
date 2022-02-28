@@ -171,6 +171,7 @@ export class WizardActions {
     const scaffolded = await Promise.all([
       this.scaffoldConfig('e2e'),
       this.scaffoldSupport('e2e', this.ctx.coreData.wizard.chosenLanguage),
+      this.scaffoldSupport('commands', this.ctx.coreData.wizard.chosenLanguage),
       this.scaffoldFixtures(),
     ])
 
@@ -187,6 +188,7 @@ export class WizardActions {
       this.scaffoldConfig('component'),
       this.scaffoldFixtures(),
       this.scaffoldSupport('component', chosenLanguage.type),
+      this.scaffoldSupport('commands', chosenLanguage.type),
       this.getComponentIndexHtml({
         chosenFramework,
         chosenLanguage,
@@ -194,19 +196,19 @@ export class WizardActions {
     ])
   }
 
-  private async scaffoldSupport (fileName: 'e2e' | 'component', language: CodeLanguageEnum): Promise<NexusGenObjects['ScaffoldedFile']> {
+  private async scaffoldSupport (fileName: 'e2e' | 'component' | 'commands', language: CodeLanguageEnum): Promise<NexusGenObjects['ScaffoldedFile']> {
     const supportFile = path.join(this.projectRoot, `cypress/support/${fileName}.${language}`)
     const supportDir = path.dirname(supportFile)
 
     // @ts-ignore
     await this.ctx.fs.mkdir(supportDir, { recursive: true })
     await this.scaffoldFile(supportFile, dedent`
-      // TODO: source the example support file
+      // TODO: source the example ${fileName === 'commands' ? 'commands' : 'support'} file
     `, 'Scaffold default support file')
 
     return {
       status: 'valid',
-      description: 'Added a support file, for extending the Cypress api',
+      description: `Added a ${fileName === 'commands' ? 'commands' : 'support'} file, for extending the Cypress api`,
       file: {
         absolute: supportFile,
       },
