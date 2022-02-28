@@ -3,7 +3,7 @@ import os from 'os'
 import { app, nativeImage as image } from 'electron'
 // eslint-disable-next-line no-duplicate-imports
 import type { WebContents } from 'electron'
-import cyIcons from '@cypress/icons'
+import * as cyIcons from '@packages/icons'
 import * as savedState from '../saved_state'
 import menu from '../gui/menu'
 import * as Windows from '../gui/windows'
