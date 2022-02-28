@@ -149,7 +149,7 @@ import AwsCodeBuild from '@packages/frontend-shared/src/assets/logos/aws-codebui
 import ExternalLink from '../ExternalLink.vue'
 
 const props = defineProps<{
-  type: DocsMenuVariant,
+  type: DocsMenuVariant
   automatic?: boolean
 }>()
 

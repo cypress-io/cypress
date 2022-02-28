@@ -154,6 +154,18 @@
           "testId": "r3",
           "timeout": 4000,
           "type": "parent"
+        },
+        {
+          "hookId": "r3",
+          "id": 240,
+          "instrument": "command",
+          "message": "System Event Command",
+          "name": "cmd",
+          "state": "passed",
+          "event": true,
+          "testId": "r3",
+          "timeout": 4000,
+          "type": "system"
         }
       ],
       "invocationDetails": {

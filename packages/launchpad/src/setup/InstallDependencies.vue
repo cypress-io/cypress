@@ -105,7 +105,7 @@ const canNavigateForward = ref(false)
 
 const props = defineProps<{
   gql: InstallDependenciesFragment
-  backFn: () => void,
+  backFn: () => void
 }>()
 
 const { t } = useI18n()

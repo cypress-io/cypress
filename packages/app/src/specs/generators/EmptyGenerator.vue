@@ -116,7 +116,7 @@ import TestResultsIcon from '~icons/cy/test-results_x24.svg'
 import PlusButtonIcon from '~icons/cy/add-large_x16.svg'
 
 const props = defineProps<{
-  title: string,
+  title: string
   gql: EmptyGeneratorFragment
   type: 'e2e' | 'component' | 'story'
   specFileName: string
@@ -147,7 +147,7 @@ mutation EmptyGenerator_generateSpec($codeGenCandidate: String!, $type: CodeGenT
 }`
 
 const emits = defineEmits<{
-  (event: 'update:title', value: string): void,
+  (event: 'update:title', value: string): void
   (event: 'update:description', value: string): void
   (event: 'restart'): void
   (event: 'close'): void

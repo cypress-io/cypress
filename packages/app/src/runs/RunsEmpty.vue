@@ -48,7 +48,7 @@ fragment RunsEmpty on CurrentProject {
 `
 
 const props = defineProps<{
-  gql: RunsEmptyFragment,
+  gql: RunsEmptyFragment
 }>()
 
 const projectName = computed(() => props.gql.title)

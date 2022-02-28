@@ -1,4 +1,5 @@
 import { observable } from 'mobx'
+import { TestState } from '../test/test-model'
 
 export interface AliasObject {
   name: string
@@ -17,7 +18,8 @@ export interface InstrumentProps {
   message?: string
   type?: string
   testCurrentRetry?: number
-  state?: string | null
+  // warn is specific to cy.session
+  state?: TestState | 'warn' | null
   referencesAlias?: Alias
   instrument?: 'agent' | 'command' | 'route'
   testId: string

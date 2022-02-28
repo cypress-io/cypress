@@ -29,7 +29,7 @@ const emit = defineEmits<{
   (event: 'select', type: CodeLanguageEnum)
 }>()
 
-const props = withDefaults(defineProps<{
+withDefaults(defineProps<{
   name: string
   value: string
   options: EnvironmentSetupFragment['allLanguages']

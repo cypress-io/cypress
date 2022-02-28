@@ -66,9 +66,9 @@ import type { FunctionalComponent, SVGAttributes, ComputedRef } from 'vue'
 export type FileRowStatus = 'changes' | 'valid' | 'skipped' | 'error';
 
 export type StatusInfo = {
-  badgeLabel?: string,
-  badgeType?: BadgeRowStatus,
-  icon: FunctionalComponent<SVGAttributes, {}>,
+  badgeLabel?: string
+  badgeType?: BadgeRowStatus
+  icon: FunctionalComponent<SVGAttributes, {}>
   initiallyOpen?: boolean
 }
 </script>
