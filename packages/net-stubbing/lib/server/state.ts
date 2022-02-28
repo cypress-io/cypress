@@ -12,7 +12,7 @@ export function state (): NetStubbingState {
         const request = this.requests[requestId]
 
         request.matchingRoutes = request.matchingRoutes.filter((route) => {
-          return !route.staticResponse
+          return !!route.staticResponse || !route.hasInterceptor
         })
 
         if (request.matchingRoutes.length === 0) {
