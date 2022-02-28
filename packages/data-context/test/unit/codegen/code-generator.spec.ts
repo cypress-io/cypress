@@ -349,7 +349,7 @@ describe('code-generator', () => {
     sinon.stub(ctx.project.frameworkLoader, 'load').resolves(FRONTEND_FRAMEWORKS[1])
 
     const newSpecCodeGenOptions = new SpecOptions(ctx, {
-      codeGenPath: path.join(__dirname, 'files', 'vue', 'Button.stories.js'),
+      codeGenPath: path.join(__dirname, 'files', 'vue', 'Button.stories.ts'),
       codeGenType: 'story',
       specFileExtension: '.cy',
     })

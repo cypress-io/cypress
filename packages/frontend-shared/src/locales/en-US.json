@@ -373,6 +373,10 @@
       "title": "Project Settings",
       "description": "Review the configuration settings currently in use for this project."
     },
+    "cloud": {
+      "title": "Dashboard Settings",
+      "description": "Review the configuration settings for recording to the Cypress Dashboard."
+    },
     "experiments": {
       "title": "Experiments",
       "description": "If you'd like to try out new features that we're working on, you can enable beta features for your project by turning on the experimental features you'd like to try. {0}",
