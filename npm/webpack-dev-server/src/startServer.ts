@@ -27,11 +27,7 @@ export async function start ({ webpackConfig: userWebpackConfig, indexHtml, opti
     debug('User did not pass in any webpack configuration')
   }
 
-  const { projectRoot, devServerPublicPathRoute = '', isTextTerminal } = options.config
-
-  if (!projectRoot) {
-    throw Error('Expected projectRoot to be defined on options.config. Did you forget to pass `config`?')
-  }
+  const { projectRoot, devServerPublicPathRoute, isTextTerminal } = options.config
 
   const webpackConfig = await makeWebpackConfig(userWebpackConfig || {}, {
     files: options.specs,
