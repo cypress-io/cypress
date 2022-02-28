@@ -12,6 +12,8 @@ export function state (): NetStubbingState {
         const request = this.requests[requestId]
 
         request.matchingRoutes = request.matchingRoutes.filter((route) => {
+          console.log(route)
+
           return !!route.staticResponse || !route.hasInterceptor
         })
 
