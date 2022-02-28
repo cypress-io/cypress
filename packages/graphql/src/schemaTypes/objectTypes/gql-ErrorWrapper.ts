@@ -64,7 +64,9 @@ export const ErrorWrapper = objectType({
 
           const stackLines = stackUtils.getStackLines(source.cypressError.stack ?? '')
 
-          return stackUtils.parseStackLine(stackLines[0] ?? '')
+          const filteredStackLines = stackLines.filter((stackLine) => !stackLine.includes('node:internal'))
+
+          return stackUtils.parseStackLine(filteredStackLines[0] ?? '')
         }
 
         return null

@@ -7,6 +7,7 @@ export const e2eProjectDirs = [
   'component-tests',
   'config-with-custom-file-js',
   'config-with-custom-file-ts',
+  'config-with-import-error',
   'config-with-invalid-browser',
   'config-with-invalid-viewport',
   'config-with-js',

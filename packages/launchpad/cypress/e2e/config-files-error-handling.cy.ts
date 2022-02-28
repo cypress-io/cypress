@@ -139,4 +139,14 @@ describe('Launchpad: Error System Tests', () => {
 
     cy.get('h1').should('contain', 'Welcome to Cypress')
   })
+
+  it('shows correct user file instead of node file', () => {
+    cy.scaffoldProject('config-with-import-error')
+    cy.openProject('config-with-import-error')
+    cy.visitLaunchpad()
+    cy.get('h1').should('contain', 'Error Loading Config')
+    cy.percySnapshot()
+
+    cy.get('[data-testid="error-code-frame"]').should('contain', 'cypress.config.js:4:23')
+  })
 })
