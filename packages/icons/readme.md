@@ -8,7 +8,7 @@ The public API will always reference these files.
 ## API
 
 ```js
-icons = require("@cypress/icons")
+const icons = require("@cypress/icons")
 
 // get the absolute path to default favicon
 icons.getPathToFavicon("favicon-blue.ico")
@@ -33,11 +33,11 @@ All the icons are in the assets directory.
 
 ```bash
 ## run build to dump to ./dist
-npm run build
+yarn build
 ```
 
 ## Testing
 
 ```bash
-npm test
+yarn test
 ```
