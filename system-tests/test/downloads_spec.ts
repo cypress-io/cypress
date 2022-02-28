@@ -26,7 +26,7 @@ describe('e2e downloads', () => {
     spec: '*',
     config: {
       downloadsFolder: 'cypress/dls',
-      video: false,
+      video: true,
     },
     onRun: async (exec) => {
       await exec()
