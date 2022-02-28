@@ -18,94 +18,96 @@ const BLACKLIST_PROPS = 'snapshots'.split(' ')
 
 let counter = 0
 
-// mutate attrs by nulling out
-// object properties
-const reduceMemory = (attrs) => {
-  return _.each(attrs, (value, key) => {
-    if (_.isObject(value)) {
-      attrs[key] = null
-    }
-  })
-}
+export const LogUtils = {
+  // mutate attrs by nulling out
+  // object properties
+  reduceMemory: (attrs) => {
+    return _.each(attrs, (value, key) => {
+      if (_.isObject(value)) {
+        attrs[key] = null
+      }
+    })
+  },
 
-const toSerializedJSON = function (attrs) {
-  const { isDom } = $dom
+  toSerializedJSON (attrs) {
+    const { isDom } = $dom
 
-  const stringify = function (value, key) {
-    if (BLACKLIST_PROPS.includes(key)) {
-      return null
-    }
-
-    if (_.isArray(value)) {
-      return _.map(value, stringify)
-    }
-
-    if (isDom(value)) {
-      return $dom.stringify(value, 'short')
-    }
-
-    if (!(!_.isFunction(value) || !groupsOrTableRe.test(key))) {
-      return value()
-    }
-
-    if (_.isFunction(value)) {
-      return value.toString()
-    }
-
-    if (_.isObject(value)) {
-      // clone to nuke circular references
-      // and blow away anything that throws
-      try {
-        return _.mapValues(clone(value), stringify)
-      } catch (err) {
+    const stringify = function (value, key) {
+      if (BLACKLIST_PROPS.includes(key)) {
         return null
       }
+
+      if (_.isArray(value)) {
+        return _.map(value, stringify)
+      }
+
+      if (isDom(value)) {
+        return $dom.stringify(value, 'short')
+      }
+
+      if (_.isFunction(value) && groupsOrTableRe.test(key)) {
+        return value()
+      }
+
+      if (_.isFunction(value)) {
+        return value.toString()
+      }
+
+      if (_.isObject(value)) {
+        // clone to nuke circular references
+        // and blow away anything that throws
+        try {
+          return _.mapValues(clone(value), stringify)
+        } catch (err) {
+          return null
+        }
+      }
+
+      return value
     }
 
-    return value
-  }
+    return _.mapValues(attrs, stringify)
+  },
 
-  return _.mapValues(attrs, stringify)
-}
+  getDisplayProps: (attrs) => {
+    return {
+      ..._.pick(attrs, DISPLAY_PROPS),
+      hasSnapshot: !!attrs.snapshots,
+      hasConsoleProps: !!attrs.consoleProps,
+    }
+  },
 
-const getDisplayProps = (attrs) => {
-  return {
-    ..._.pick(attrs, DISPLAY_PROPS),
-    hasSnapshot: !!attrs.snapshots,
-    hasConsoleProps: !!attrs.consoleProps,
-  }
-}
+  getConsoleProps: (attrs) => {
+    return attrs.consoleProps
+  },
 
-const getConsoleProps = (attrs) => {
-  return attrs.consoleProps
-}
+  getSnapshotProps: (attrs) => {
+    return _.pick(attrs, SNAPSHOT_PROPS)
+  },
 
-const getSnapshotProps = (attrs) => {
-  return _.pick(attrs, SNAPSHOT_PROPS)
-}
+  countLogsByTests (tests: Record<string, any> = {}) {
+    if (_.isEmpty(tests)) {
+      return 0
+    }
 
-const countLogsByTests = function (tests: Record<string, any> = {}) {
-  if (_.isEmpty(tests)) {
-    return 0
-  }
+    return _
+    .chain(tests)
+    .flatMap((test) => {
+      return [test, test.prevAttempts]
+    })
+    .flatMap<{id: number}>((tests) => {
+      return [].concat(tests.agents, tests.routes, tests.commands)
+    }).compact()
+    .union([{ id: 0 }])
+    .map('id')
+    .max()
+    .value()
+  },
 
-  return _
-  .chain(tests)
-  .flatMap((test) => {
-    return [test, test.prevAttempts]
-  })
-  .flatMap<{id: number}>((tests) => {
-    return [].concat(tests.agents, tests.routes, tests.commands)
-  }).compact()
-  .union([{ id: 0 }])
-  .map('id')
-  .max()
-  .value()
-}
-
-// TODO: fix this
-const setCounter = (num) => {
-  return counter = num
+  // TODO: fix this
+  setCounter: (num) => {
+    return counter = num
+  },
 }
 
 const defaults = function (state, config, obj) {
@@ -217,7 +219,7 @@ const defaults = function (state, config, obj) {
   return obj
 }
 
-function create (Cypress, cy, state, config) {
+export function create (Cypress, cy, state, config) {
   counter = 0
   const logManager = new LogManager()
 
@@ -330,6 +332,8 @@ class LogManager {
     this.logs[id] = true
   }
 
+  // only fire the log:state:changed event
+  // as fast as every 4ms
   fireChangeEvent (log) {
     const triggerStateChanged = () => {
       return this.trigger(log, 'command:log:changed')
@@ -630,22 +634,4 @@ class Log {
       return consoleObj
     }
   }
-}
-
-export default {
-  reduceMemory,
-
-  toSerializedJSON,
-
-  getDisplayProps,
-
-  getConsoleProps,
-
-  getSnapshotProps,
-
-  countLogsByTests,
-
-  setCounter,
-
-  create,
 }
