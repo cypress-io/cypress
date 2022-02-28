@@ -21,7 +21,7 @@ export const splitStack = (stack: string) => {
   }, [[], []] as MessageLines)
 }
 
-export const unsplitStack = (messageLines: string, stackLines: string[]) => {
+export const unsplitStack = (messageLines: string | string[], stackLines: string[]) => {
   return _.castArray(messageLines).concat(stackLines).join('\n')
 }
 

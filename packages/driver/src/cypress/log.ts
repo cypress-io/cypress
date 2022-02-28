@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import _ from 'lodash'
 import $ from 'jquery'
 import clone from 'clone'
@@ -86,7 +84,7 @@ const getSnapshotProps = (attrs) => {
   return _.pick(attrs, SNAPSHOT_PROPS)
 }
 
-const countLogsByTests = function (tests = {}) {
+const countLogsByTests = function (tests: Record<string, any> = {}) {
   if (_.isEmpty(tests)) {
     return 0
   }
@@ -96,7 +94,7 @@ const countLogsByTests = function (tests = {}) {
   .flatMap((test) => {
     return [test, test.prevAttempts]
   })
-  .flatMap((tests) => {
+  .flatMap<{id: number}>((tests) => {
     return [].concat(tests.agents, tests.routes, tests.commands)
   }).compact()
   .union([{ id: 0 }])
@@ -219,11 +217,12 @@ const defaults = function (state, config, obj) {
   return obj
 }
 
+// TODO: Change `Log` function to class.
 const Log = function (cy, state, config, obj) {
   obj = defaults(state, config, obj)
 
   // private attributes of each log
-  const attributes = {}
+  const attributes: Record<string, any> = {}
 
   return {
     get (attr) {
@@ -267,7 +266,7 @@ const Log = function (cy, state, config, obj) {
       .value()
     },
 
-    set (key, val) {
+    set (key, val?) {
       if (_.isString(key)) {
         obj = {}
         obj[key] = val
@@ -318,7 +317,7 @@ const Log = function (cy, state, config, obj) {
       return _.pick(attributes, args)
     },
 
-    snapshot (name, options = {}) {
+    snapshot (name?, options: any = {}) {
       // bail early and don't snapshot if we're in headless mode
       // or we're not storing tests
       if (!config('isInteractive') || (config('numTestsKeptInMemory') === 0)) {
@@ -467,7 +466,7 @@ const Log = function (cy, state, config, obj) {
       attributes.consoleProps = function (...args) {
         const key = _this.get('event') ? 'Event' : 'Command'
 
-        const consoleObj = {}
+        const consoleObj: Record<string, any> = {}
 
         consoleObj[key] = _this.get('name')
 
@@ -497,6 +496,128 @@ const Log = function (cy, state, config, obj) {
   }
 }
 
+function create (Cypress, cy, state, config) {
+  counter = 0
+  const logs = {}
+
+  const trigger = function (log, event) {
+  // bail if we never fired our initial log event
+    if (!log._hasInitiallyLogged) {
+      return
+    }
+
+    // bail if we've reset the logs due to a Cypress.abort
+    if (!logs[log.get('id')]) {
+      return
+    }
+
+    const attrs = log.toJSON()
+
+    // only trigger this event if our last stored
+    // emitted attrs do not match the current toJSON
+    if (!_.isEqual(log._emittedAttrs, attrs)) {
+      log._emittedAttrs = attrs
+
+      log.emit(event, attrs)
+
+      return Cypress.action(event, attrs, log)
+    }
+  }
+
+  const triggerLog = function (log) {
+    log._hasInitiallyLogged = true
+
+    return trigger(log, 'command:log:added')
+  }
+
+  const addToLogs = function (log) {
+    const id = log.get('id')
+
+    logs[id] = true
+  }
+
+  const logFn = function (options: any = {}) {
+    if (!_.isObject(options)) {
+      $errUtils.throwErrByPath('log.invalid_argument', { args: { arg: options } })
+    }
+
+    const log = Log(cy, state, config, options)
+
+    // add event emitter interface
+    $Events.extend(log)
+
+    const triggerStateChanged = () => {
+      return trigger(log, 'command:log:changed')
+    }
+
+    // only fire the log:state:changed event
+    // as fast as every 4ms
+    // @ts-ignore
+    log.fireChangeEvent = _.debounce(triggerStateChanged, 4)
+
+    log.set(options)
+
+    // if snapshot was passed
+    // in, go ahead and snapshot
+    if (log.get('snapshot')) {
+      log.snapshot()
+    }
+
+    // if end was passed in
+    // go ahead and end
+    if (log.get('end')) {
+      log.end()
+    }
+
+    if (log.get('error')) {
+      log.error(log.get('error'))
+    }
+
+    log.wrapConsoleProps()
+
+    const onBeforeLog = state('onBeforeLog')
+
+    // dont trigger log if this function
+    // explicitly returns false
+    if (_.isFunction(onBeforeLog)) {
+      if (onBeforeLog.call(cy, log) === false) {
+        return
+      }
+    }
+
+    // set the log on the command
+    const current = state('current')
+
+    if (current) {
+      current.log(log)
+    }
+
+    addToLogs(log)
+
+    if (options.sessionInfo) {
+      Cypress.emit('session:add', log.toJSON())
+    }
+
+    if (options.emitOnly) {
+      return
+    }
+
+    triggerLog(log)
+
+    // if not current state then the log is being run
+    // with no command reference, so just end the log
+    if (!current) {
+      log.end()
+    }
+
+    return log
+  }
+
+  logFn._logs = logs
+
+  return logFn
+}
+
 export default {
   reduceMemory,
 
@@ -512,124 +633,5 @@ export default {
 
   setCounter,
 
-  create (Cypress, cy, state, config) {
-    counter = 0
-    const logs = {}
-
-    const trigger = function (log, event) {
-    // bail if we never fired our initial log event
-      if (!log._hasInitiallyLogged) {
-        return
-      }
-
-      // bail if we've reset the logs due to a Cypress.abort
-      if (!logs[log.get('id')]) {
-        return
-      }
-
-      const attrs = log.toJSON()
-
-      // only trigger this event if our last stored
-      // emitted attrs do not match the current toJSON
-      if (!_.isEqual(log._emittedAttrs, attrs)) {
-        log._emittedAttrs = attrs
-
-        log.emit(event, attrs)
-
-        return Cypress.action(event, attrs, log)
-      }
-    }
-
-    const triggerLog = function (log) {
-      log._hasInitiallyLogged = true
-
-      return trigger(log, 'command:log:added')
-    }
-
-    const addToLogs = function (log) {
-      const id = log.get('id')
-
-      logs[id] = true
-    }
-
-    const logFn = function (options = {}) {
-      if (!_.isObject(options)) {
-        $errUtils.throwErrByPath('log.invalid_argument', { args: { arg: options } })
-      }
-
-      const log = Log(cy, state, config, options)
-
-      // add event emitter interface
-      $Events.extend(log)
-
-      const triggerStateChanged = () => {
-        return trigger(log, 'command:log:changed')
-      }
-
-      // only fire the log:state:changed event
-      // as fast as every 4ms
-      log.fireChangeEvent = _.debounce(triggerStateChanged, 4)
-
-      log.set(options)
-
-      // if snapshot was passed
-      // in, go ahead and snapshot
-      if (log.get('snapshot')) {
-        log.snapshot()
-      }
-
-      // if end was passed in
-      // go ahead and end
-      if (log.get('end')) {
-        log.end({ silent: true })
-      }
-
-      if (log.get('error')) {
-        log.error(log.get('error'), { silent: true })
-      }
-
-      log.wrapConsoleProps()
-
-      const onBeforeLog = state('onBeforeLog')
-
-      // dont trigger log if this function
-      // explicitly returns false
-      if (_.isFunction(onBeforeLog)) {
-        if (onBeforeLog.call(cy, log) === false) {
-          return
-        }
-      }
-
-      // set the log on the command
-      const current = state('current')
-
-      if (current) {
-        current.log(log)
-      }
-
-      addToLogs(log)
-
-      if (options.sessionInfo) {
-        Cypress.emit('session:add', log.toJSON())
-      }
-
-      if (options.emitOnly) {
-        return
-      }
-
-      triggerLog(log)
-
-      // if not current state then the log is being run
-      // with no command reference, so just end the log
-      if (!current) {
-        log.end({ silent: true })
-      }
-
-      return log
-    }
-
-    logFn._logs = logs
-
-    return logFn
-  },
+  create,
 }

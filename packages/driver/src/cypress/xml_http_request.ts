@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import $errUtils from './error_utils'
 
 const isCypressHeaderRe = /^X-Cypress-/i
@@ -15,6 +13,16 @@ const parseJSON = (text) => {
 // maybe rename this to XMLHttpRequest ?
 // so it shows up correctly as an instance in the console
 class XMLHttpRequest {
+  xhr: any
+  id: any
+  url: any
+  method: any
+  status: any
+  statusMessage: any
+  request: any
+  response: any
+  duration: any
+
   constructor (xhr) {
     this.xhr = xhr
     this.id = this.xhr.id

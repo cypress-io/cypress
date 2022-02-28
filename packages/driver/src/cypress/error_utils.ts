@@ -422,7 +422,11 @@ const preferredStackAndCodeFrameIndex = (err, userInvocationStack) => {
   return { stack, index }
 }
 
-const enhanceStack = ({ err, userInvocationStack, projectRoot }) => {
+const enhanceStack = ({ err, userInvocationStack, projectRoot }: {
+  err: any
+  userInvocationStack?: any
+  projectRoot?: any
+}) => {
   const { stack, index } = preferredStackAndCodeFrameIndex(err, userInvocationStack)
   const { sourceMapped, parsed } = $stackUtils.getSourceStack(stack, projectRoot)
 
