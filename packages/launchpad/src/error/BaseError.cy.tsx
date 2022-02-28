@@ -28,7 +28,7 @@ describe('<BaseError />', () => {
     .get(headerSelector)
     .should('contain.text', cy.gqlStub.ErrorWrapper.title)
     .get(messageSelector)
-    .should('contain.text', cy.gqlStub.ErrorWrapper.description.slice(0, 10))
+    .should('contain.text', cy.gqlStub.ErrorWrapper.errorMessage.slice(0, 10))
     .get(docsButtonSelector)
     .should('contain.text', messages.readTheDocsButton)
     .get(retryButtonSelector)
@@ -79,7 +79,7 @@ describe('<BaseError />', () => {
     cy.mountFragment(BaseErrorFragmentDoc, {
       onResult: (result) => {
         result.title = customHeaderMessage
-        result.description = customMessage
+        result.errorMessage = customMessage
         result.errorStack = customStack
       },
       render: (gqlVal) => (<div class="p-16px">
@@ -96,7 +96,7 @@ describe('<BaseError />', () => {
     cy.mountFragment(BaseErrorFragmentDoc, {
       onResult: (result) => {
         result.title = messages.header
-        result.description = messages.message
+        result.errorMessage = messages.message
       },
       render: (gqlVal) => (
         <BaseError

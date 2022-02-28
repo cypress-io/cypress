@@ -53,6 +53,7 @@ export const createTestCurrentProject = (title: string, currentProject: Partial<
     isDefaultSpecPattern: true,
     browserStatus: 'closed',
     packageManager: 'yarn',
+    configFileAbsolutePath: '/path/to/cypress.config.js',
     ...currentProject,
   }
 }

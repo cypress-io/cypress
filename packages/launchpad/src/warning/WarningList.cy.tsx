@@ -48,10 +48,10 @@ describe('<WarningList />', () => {
     })
 
     cy.get(warningSelector).should('have.length', 2)
-    cy.contains(firstWarning.description)
+    cy.contains(firstWarning.errorMessage)
 
     cy.findAllByLabelText(defaultMessages.components.modal.dismiss).first().click()
     cy.get(warningSelector).should('have.length', 1)
-    cy.contains(firstWarning.description).should('not.exist')
+    cy.contains(firstWarning.errorMessage).should('not.exist')
   })
 })

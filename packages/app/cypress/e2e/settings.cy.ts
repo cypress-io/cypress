@@ -74,13 +74,12 @@ describe('App: Settings', () => {
     it('opens cloud settings when clicking on "Manage Keys"', () => {
       cy.startAppServer('e2e')
       cy.loginUser()
-      cy.intercept('mutation-ExternalLink_OpenExternal', { 'data': { 'openExternal': true } }).as('OpenExternal')
-      cy.__incorrectlyVisitAppWithIntercept('settings')
+      cy.visitApp('settings')
       cy.findByText('Dashboard Settings').click()
       cy.findByText('Manage Keys').click()
-      cy.wait('@OpenExternal')
-      .its('request.body.variables.url')
-      .should('equal', 'http:/test.cloud/cloud-project/settings')
+      cy.withRetryableCtx((ctx) => {
+        expect((ctx.actions.electron.openExternal as SinonStub).lastCall.lastArg).to.eq('http:/test.cloud/cloud-project/settings')
+      })
     })
   })
 
@@ -173,17 +172,6 @@ describe('App: Settings', () => {
       cy.findByRole('button', { name: 'Edit' }).click()
       cy.withRetryableCtx((ctx) => {
         expect((ctx.actions.file.openFile as SinonStub).lastCall.args[0]).to.eq(ctx.lifecycleManager.configFilePath)
-      })
-    })
-
-    it('opens cloud settings when clicking on "Manage Keys"', () => {
-      cy.startAppServer('e2e')
-      cy.loginUser()
-      cy.visitApp('settings')
-      cy.findByText('Project Settings').click()
-      cy.findByText('Manage Keys').click()
-      cy.withRetryableCtx((ctx) => {
-        expect((ctx.actions.electron.openExternal as SinonStub).lastCall.lastArg).to.eq('http:/test.cloud/cloud-project/settings')
       })
     })
   })

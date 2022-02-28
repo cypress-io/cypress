@@ -25,6 +25,7 @@
       >
         <Button
           size="lg"
+          data-cy="open-config-file"
           @click="onClick"
         >
           <template #prefix>
