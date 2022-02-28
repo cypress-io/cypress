@@ -17,7 +17,7 @@
       />
     </div>
     <StandardModalFooter
-      class="flex h-72px gap-16px items-center"
+      class="flex gap-16px items-center"
     >
       <OpenConfigFileInIDE
         v-slot="{onClick}"

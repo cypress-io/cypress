@@ -3,7 +3,7 @@ import type { DataContext } from '../DataContext'
 import type { ParsedPath } from 'path'
 import { camelCase, capitalize } from 'lodash'
 import type { CodeGenType } from '@packages/graphql/src/gen/nxs.gen'
-import type { CodeGenFramework } from '@packages/types'
+import type { CodeGenFramework } from '@packages/scaffold-config'
 import { CsfFile, readCsfOrMdx } from '@storybook/csf-tools'
 
 interface CodeGenOptions {

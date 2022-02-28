@@ -66,9 +66,9 @@ import type { FunctionalComponent, SVGAttributes, ComputedRef } from 'vue'
 export type FileRowStatus = 'changes' | 'valid' | 'skipped' | 'error';
 
 export type StatusInfo = {
-  badgeLabel?: string,
-  badgeType?: BadgeRowStatus,
-  icon: FunctionalComponent<SVGAttributes, {}>,
+  badgeLabel?: string
+  badgeType?: BadgeRowStatus
+  icon: FunctionalComponent<SVGAttributes, {}>
   initiallyOpen?: boolean
 }
 </script>
@@ -80,7 +80,8 @@ import Button from '@cy/components/Button.vue'
 // eslint-disable-next-line no-duplicate-imports
 import Badge from '@cy/components/Badge.vue'
 import { useI18n } from '@cy/i18n'
-import ShikiHighlight, { CyLangType, langsSupported } from '@cy/components/ShikiHighlight.vue'
+import ShikiHighlight, { langsSupported } from '@cy/components/ShikiHighlight.vue'
+import type { CyLangType } from '@cy/components/ShikiHighlight.vue'
 import ListRowHeader from '@cy/components/ListRowHeader.vue'
 import Collapsible from '@cy/components/Collapsible.vue'
 import AddedIcon from '~icons/cy/file-changes-added_x24.svg'

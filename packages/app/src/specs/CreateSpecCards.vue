@@ -12,8 +12,6 @@
 
 <script lang="ts" setup>
 import { generatorList } from './generators'
-
-// eslint-disable-next-line no-duplicate-imports
 import type { GeneratorId } from './generators'
 import { computed } from 'vue'
 import type { CreateSpecCardsFragment } from '../generated/graphql'

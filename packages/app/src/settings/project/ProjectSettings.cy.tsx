@@ -3,7 +3,7 @@ import { ProjectSettingsFragmentDoc } from '../../generated/graphql-test'
 import ProjectSettings from './ProjectSettings.vue'
 
 describe('<ProjectSettings />', () => {
-  it('displays the project Id, record key, and experiments sections', () => {
+  it('displays the experiments section', () => {
     cy.mountFragment(ProjectSettingsFragmentDoc, {
 
       render: (gqlVal) => {
@@ -15,8 +15,6 @@ describe('<ProjectSettings />', () => {
       },
     })
 
-    cy.findByText(defaultMessages.settingsPage.projectId.title).should('be.visible')
-    cy.findByText(defaultMessages.settingsPage.recordKey.title).should('be.visible')
     cy.findByText(defaultMessages.settingsPage.experiments.title).should('be.visible')
 
     cy.percySnapshot()

@@ -64,7 +64,6 @@
 </template>
 
 <script setup lang="ts">
-import type { Ref, ComputedRef } from 'vue'
 import { computed, ref } from 'vue'
 import { debouncedWatch, useDebounce, useElementSize } from '@vueuse/core'
 import { useI18n } from '@cy/i18n'
@@ -77,7 +76,7 @@ import { gql } from '@urql/core'
 
 const props = withDefaults(defineProps<{
   files: any[]
-  extensionPattern: string,
+  extensionPattern: string
   loading?: boolean
 }>(), {
 

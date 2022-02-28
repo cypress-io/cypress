@@ -80,7 +80,8 @@ import MigrationTitle from './fragments/MigrationTitle.vue'
 import MigrationList from './fragments/MigrationList.vue'
 import MigrationListItem from './fragments/MigrationListItem.vue'
 import { gql, useMutation } from '@urql/vue'
-import { RenameSpecsManualFragment, RenameSpecsManual_CloseWatcherDocument } from '../generated/graphql'
+import { RenameSpecsManual_CloseWatcherDocument } from '../generated/graphql'
+import type { RenameSpecsManualFragment } from '../generated/graphql'
 
 gql`
 fragment RenameSpecsManual on Migration {

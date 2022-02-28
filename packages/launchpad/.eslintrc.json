@@ -15,12 +15,7 @@
   "env": {
     "cypress/globals": true
   },
-  "rules": {
-    "import/no-duplicates": "off",
-    "@typescript-eslint/no-duplicate-imports": [
-      "error"
-    ]
-  },
+  "rules": {},
   "overrides": [
     {
       "files": "**/*.vue",

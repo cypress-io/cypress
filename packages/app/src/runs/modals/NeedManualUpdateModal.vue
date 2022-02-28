@@ -69,7 +69,7 @@ import type { NeedManualUpdateModalFragment } from '../../generated/graphql'
 const { t } = useI18n()
 
 const emit = defineEmits<{
-  (event:'cancel'): void
+  (event: 'cancel'): void
 }>()
 
 gql`

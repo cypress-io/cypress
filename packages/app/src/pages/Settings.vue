@@ -6,26 +6,15 @@
 </template>
 
 <script lang="ts" setup>
-import { gql, useQuery, useMutation } from '@urql/vue'
+import { gql, useQuery } from '@urql/vue'
 import SettingsContainer from '../settings/SettingsContainer.vue'
-import { Settings_ReconfigureProjectDocument, SettingsDocument } from '../generated/graphql'
+import { SettingsDocument } from '../generated/graphql'
 
 gql`
 query Settings {
   ...SettingsContainer
 }`
 
-gql`
-mutation Settings_ReconfigureProject {
-  reconfigureProject
-}
-`
-
 const query = useQuery({ query: SettingsDocument })
 
-const openElectron = useMutation(Settings_ReconfigureProjectDocument)
-
-function reconfigure () {
-  openElectron.executeMutation({})
-}
 </script>
