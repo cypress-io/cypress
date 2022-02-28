@@ -177,14 +177,14 @@ describe('Launchpad: Setup Project', () => {
 
     // project has a cypress.configuration file with component testing configured
     describe('project that has not been configured for e2e', () => {
-      // FIXME: ProjectLifecycleManager is skipping straight to browser pages when it should show setup page.
-      it.skip('shows the configuration setup page when selecting e2e tests', () => {
+      it('shows the configuration setup page when selecting e2e tests', () => {
         scaffoldAndOpenProject('pristine-with-ct-testing')
         cy.visitLaunchpad()
 
         verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: true })
 
         cy.get('[data-cy-testingtype="e2e"]').click()
+        cy.findByRole('button', { name: 'Next Step' }).click()
 
         cy.contains('h1', 'Configuration Files')
         cy.findByText('We added the following files to your project.')
@@ -199,26 +199,26 @@ describe('Launchpad: Setup Project', () => {
         })
       })
 
-      // FIXME: ProjectLifecycleManager is skipping straight to browser pages when it should show setup page.
-      it.skip('moves to "Choose a Browser" page after clicking "Continue" button in first step in configuration page', () => {
-        scaffoldAndOpenProject('pristine-with-ct-testing')
+      it('moves to "Choose a Browser" page after clicking "Continue" button in first step in configuration page', () => {
+        scaffoldAndOpenProject('pristine')
         cy.visitLaunchpad()
 
-        verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: true })
+        verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: false })
 
         cy.get('[data-cy-testingtype="e2e"]').click()
+        cy.findByRole('button', { name: 'Next Step' }).click()
 
         cy.contains('h1', 'Configuration Files')
         cy.findByText('We added the following files to your project.')
 
-        cy.get('[data-cy=changes]').within(() => {
-          cy.contains('cypress.config.js')
-        })
-
         cy.get('[data-cy=valid]').within(() => {
+          cy.contains('cypress.config.js')
           cy.containsPath('cypress/support/e2e.js')
           cy.containsPath('cypress/fixtures/example.json')
         })
+
+        cy.findByRole('button', { name: 'Continue' }).click()
+        cy.contains('Choose a Browser')
       })
 
       it('shows the configuration setup page when opened via cli with --e2e flag', () => {

@@ -4,10 +4,11 @@
  * We could eventually use Shiki as a Markdown plugin, but I don't want to get into it right now.
  */
 import type { Ref } from 'vue'
-import { computed } from 'vue'
+import { computed, unref } from 'vue'
 import MarkdownIt from 'markdown-it'
 import MarkdownItClass from '@toycode/markdown-it-class'
 import { useEventListener, whenever } from '@vueuse/core'
+import type { MaybeRef } from '@vueuse/core'
 import { useExternalLink } from '../gql-components/useExternalLink'
 import { mapValues, isArray, flatten } from 'lodash'
 
@@ -81,7 +82,7 @@ const buildClasses = (options) => {
   return _classes
 }
 
-export const useMarkdown = (target: Ref<HTMLElement>, text: string, options: UseMarkdownOptions = {}) => {
+export const useMarkdown = (target: Ref<HTMLElement>, text: MaybeRef<string>, options: UseMarkdownOptions = {}) => {
   options.openExternal = options.openExternal || true
 
   const classes = buildClasses(options)
@@ -112,6 +113,6 @@ export const useMarkdown = (target: Ref<HTMLElement>, text: string, options: Use
   }
 
   return {
-    markdown: computed(() => md.render(text, { sanitize: true })),
+    markdown: computed(() => md.render(unref(text), { sanitize: true })),
   }
 }

@@ -16,7 +16,7 @@ import debugLib from 'debug'
 import pDefer from 'p-defer'
 import fs from 'fs'
 
-import { getError, CypressError, ConfigValidationError } from '@packages/errors'
+import { getError, CypressError, ConfigValidationFailureInfo } from '@packages/errors'
 import type { DataContext } from '..'
 import { LoadConfigReply, SetupNodeEventsReply, ProjectConfigIpc, IpcHandler } from './ProjectConfigIpc'
 import assert from 'assert'
@@ -47,7 +47,7 @@ type BreakingValidationFn<T> = (type: BreakingOption, val: BreakingErrResult) =>
 export interface InjectedConfigApi {
   cypressVersion: string
   getServerPluginHandlers: () => IpcHandler[]
-  validateConfig<T extends Cypress.ConfigOptions>(config: Partial<T>, onErr: (errMsg: ConfigValidationError | string) => never): T
+  validateConfig<T extends Cypress.ConfigOptions>(config: Partial<T>, onErr: (errMsg: ConfigValidationFailureInfo | string) => never): T
   allowedConfig(config: Cypress.ConfigOptions): Cypress.ConfigOptions
   updateWithPluginValues(config: FullConfig, modifiedConfig: Partial<Cypress.ConfigOptions>): FullConfig
   setupFullConfigWithDefaults(config: SetupFullConfigOptions): Promise<FullConfig>

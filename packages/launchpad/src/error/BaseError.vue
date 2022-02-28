@@ -5,6 +5,7 @@
   >
     <div>
       <h1
+        v-if="baseError.title"
         class="font-medium leading-snug pb-24px text-32px text-gray-900"
         data-testid="error-header"
       >
@@ -27,7 +28,6 @@
         >
           <div class="border-b-1 border-b-red-100 p-16px pt-0">
             <div
-              v-if="baseError.description"
               ref="markdownTarget"
               class="text-red-500"
               data-testid="error-message"
@@ -90,14 +90,6 @@
         >
           {{ t('launchpadErrors.generic.retryButton') }}
         </Button>
-        <Button
-          size="lg"
-          variant="outline"
-          data-testid="error-read-the-docs-button"
-          @click="openDocs"
-        >
-          {{ t('launchpadErrors.generic.readTheDocsButton') }}
-        </Button>
       </slot>
     </div>
   </div>
@@ -113,7 +105,6 @@ import Alert from '@cy/components/Alert.vue'
 import Collapsible from '@cy/components/Collapsible.vue'
 import { useMarkdown } from '@packages/frontend-shared/src/composables/useMarkdown'
 import RestartIcon from '~icons/cy/restart_x16.svg'
-import { useExternalLink } from '@packages/frontend-shared/src/gql-components/useExternalLink'
 import ErrorOutlineIcon from '~icons/cy/status-errored-outline_x16.svg'
 import ErrorCodeFrame from './ErrorCodeFrame.vue'
 
@@ -123,7 +114,7 @@ fragment BaseError on ErrorWrapper {
   errorName
   errorStack
   errorType
-  description
+  errorMessage
   isRetryable
   isUserCodeError
   fileToOpen {
@@ -132,8 +123,6 @@ fragment BaseError on ErrorWrapper {
   }
 }
 `
-
-const openDocs = useExternalLink('https://on.cypress.io/')
 
 const { t } = useI18n()
 
@@ -145,6 +134,5 @@ const props = defineProps<{
 
 const markdownTarget = ref()
 const baseError = computed(() => props.gql)
-const description = computed(() => baseError.value?.description || '')
-const { markdown } = useMarkdown(markdownTarget, description.value, { classes: { code: ['bg-error-200'] } })
+const { markdown } = useMarkdown(markdownTarget, computed(() => props.gql.errorMessage), { classes: { code: ['bg-error-200'] } })
 </script>

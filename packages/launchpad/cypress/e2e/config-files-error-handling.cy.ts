@@ -17,13 +17,12 @@ describe('Config files error handling', () => {
     cy.openProject('pristine-with-e2e-testing')
     cy.visitLaunchpad()
 
-    cy.get('body').should('contain.text', 'Something went wrong')
+    cy.get('body').should('contain.text', 'Please remove one of the two and try again')
     cy.withCtx(async (ctx) => {
       await ctx.actions.file.removeFileInProject('cypress.config.js')
     })
 
-    cy.get('body')
-    .should('not.contain.text', 'Something went wrong')
+    cy.get('h1').should('contain', 'Welcome to Cypress')
   })
 
   it('shows the upgrade screen if there is a legacy config file', () => {
@@ -56,23 +55,23 @@ describe('Config files error handling', () => {
       await ctx.actions.file.removeFileInProject('cypress.json')
     })
 
-    cy.get('body').should('not.contain.text', 'Cypress no longer supports')
+    cy.get('h1').should('contain', 'Welcome to Cypress')
   })
 
   it('handles deprecated config fields', () => {
     cy.openProject('pristine')
-
     cy.withCtx(async (ctx) => {
       await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = { experimentalComponentTesting: true, e2e: {} }')
     })
 
-    cy.openProject('pristine')
-
     cy.visitLaunchpad()
     cy.get('[data-cy-testingType=e2e]').click()
-    cy.get('body').should('contain.text', 'Something went wrong')
-    cy.get('body').should('contain.text', 'It looks like there\'s some issues that need to be resolved before we continue.')
-    cy.findByText('Error Loading Config')
+    cy.get('body').should('contain.text', 'was removed in Cypress version')
+    // cy.withCtx(async (ctx) => {
+    //   await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = { e2e: { supportFile: false } }')
+    // })
+
+    // cy.get('h1').should('contain', 'Choose a Browser')
   })
 
   it('handles deprecated fields on root config', () => {

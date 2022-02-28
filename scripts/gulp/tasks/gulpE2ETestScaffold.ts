@@ -1,6 +1,7 @@
 import chokidar from 'chokidar'
 import path from 'path'
 import fs from 'fs-extra'
+import _ from 'lodash'
 
 import { monorepoPaths } from '../monorepoPaths'
 
@@ -43,7 +44,7 @@ ${allDirs
 
 export async function e2eTestScaffoldWatch () {
   const fixtureWatcher = chokidar.watch(PROJECT_FIXTURE_DIRECTORY, {
-    cwd: monorepoPaths.pkgServer,
+    cwd: monorepoPaths.root,
     // ignoreInitial: true,
     depth: 0,
   })
@@ -52,9 +53,9 @@ export async function e2eTestScaffoldWatch () {
     e2eTestScaffold()
   })
 
-  fixtureWatcher.on('addDir', () => {
+  fixtureWatcher.on('addDir', _.debounce(() => {
     e2eTestScaffold()
-  })
+  }))
 
   await e2eTestScaffold()
 }

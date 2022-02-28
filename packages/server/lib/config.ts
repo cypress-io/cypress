@@ -12,7 +12,7 @@ import keys from './util/keys'
 import origin from './util/origin'
 import pathHelpers from './util/path_helpers'
 
-import type { ConfigValidationError } from '@packages/errors'
+import type { ConfigValidationFailureInfo } from '@packages/errors'
 
 import { getCtx } from './makeDataContext'
 
@@ -186,7 +186,7 @@ export function mergeDefaults (
 
   // validate config again here so that we catch configuration errors coming
   // from the CLI overrides or env var overrides
-  configUtils.validate(_.omit(config, 'browsers'), (validationResult: ConfigValidationError | string) => {
+  configUtils.validate(_.omit(config, 'browsers'), (validationResult: ConfigValidationFailureInfo | string) => {
     // return errors.throwErr('CONFIG_VALIDATION_ERROR', errMsg)
     if (_.isString(validationResult)) {
       return errors.throwErr('CONFIG_VALIDATION_MSG_ERROR', null, null, validationResult)
@@ -244,7 +244,7 @@ export function updateWithPluginValues (cfg, overrides) {
 
   // make sure every option returned from the plugins file
   // passes our validation functions
-  configUtils.validate(overrides, (validationResult: ConfigValidationError | string) => {
+  configUtils.validate(overrides, (validationResult: ConfigValidationFailureInfo | string) => {
     let configFile = getCtx().lifecycleManager.configFile
 
     if (configFile === false) {

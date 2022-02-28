@@ -581,7 +581,7 @@ type ErrorWrapper {
   codeFrame: ErrorCodeFrame
 
   """The markdown formatted content associated with the ErrorTypeEnum"""
-  description: String!
+  errorMessage: String!
 
   """Name of the error class"""
   errorName: String!
@@ -601,8 +601,10 @@ type ErrorWrapper {
   """
   isUserCodeError: Boolean!
 
-  """Formatted errorType"""
-  title: String!
+  """
+  Optional title of the error. Used to optionally display a title above the error
+  """
+  title: String
 }
 
 input FileDetailsInput {

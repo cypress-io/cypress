@@ -3,7 +3,7 @@
     v-for="warning in warnings"
     :key="warning.key"
     :title="warning.title"
-    :message="warning.description"
+    :message="warning.errorMessage"
     dismissible
     @update:modelValue="dismiss(warning.key)"
   />
@@ -19,7 +19,7 @@ gql`
 fragment WarningContent on ErrorWrapper {
   title
   errorType
-  description
+  errorMessage
 }
 `
 
@@ -47,7 +47,7 @@ const props = defineProps<{
 const dismissed = ref({})
 const warnings = computed(() => {
   return props.gql.warnings
-  .map((w) => ({ ...w, key: `${w.errorType}${w.description}` }))
+  .map((w) => ({ ...w, key: `${w.errorType}${w.errorMessage}` }))
   .filter((warning) => {
     const hasBeenDismissed = dismissed.value[warning.key]
 
