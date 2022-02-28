@@ -217,10 +217,11 @@ function createE2ETemplate (pluginPath: string, createConfigOptions: CreateConfi
 
   const pluginFile = fs.readFileSync(path.join(createConfigOptions.projectRoot, pluginPath), 'utf8')
   const hasExportDefault = pluginFile.includes('export default')
+  const relPluginsPath = path.normalize(`'./${pluginPath}'`)
 
   const requirePlugins = hasExportDefault
-    ? `return require('${pluginPath}').default(on, config)`
-    : `return require('${pluginPath}')(on, config)`
+    ? `return require(${relPluginsPath}).default(on, config)`
+    : `return require(${relPluginsPath})(on, config)`
 
   const setupNodeEvents = dedent`
   // We've imported your old cypress plugins here.

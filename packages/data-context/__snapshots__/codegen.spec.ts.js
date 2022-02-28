@@ -7,7 +7,7 @@ module.exports = defineConfig({
     // We've imported your old cypress plugins here.
     // You may want to clean this up later by importing these.
     setupNodeEvents(on, config) {
-      return require('cypress/plugins/index.js')(on, config)
+      return require('./cypress/plugins/index.js')(on, config)
     },
   },
 })
@@ -22,7 +22,7 @@ module.exports = defineConfig({
     // We've imported your old cypress plugins here.
     // You may want to clean this up later by importing these.
     setupNodeEvents(on, config) {
-      return require('cypress/plugins/index.js')(on, config)
+      return require('./cypress/plugins/index.js')(on, config)
     },
     baseUrl: 'localhost:3000',
   },
@@ -38,7 +38,7 @@ module.exports = defineConfig({
     // We've imported your old cypress plugins here.
     // You may want to clean this up later by importing these.
     setupNodeEvents(on, config) {
-      return require('cypress/plugins/index.js')(on, config)
+      return require('./cypress/plugins/index.js')(on, config)
     },
   },
 })
@@ -54,7 +54,7 @@ module.exports = defineConfig({
     // We've imported your old cypress plugins here.
     // You may want to clean this up later by importing these.
     setupNodeEvents(on, config) {
-      return require('cypress/plugins/index.js')(on, config)
+      return require('./cypress/plugins/index.js')(on, config)
     },
     retries: 2,
     baseUrl: 'localhost:300',
@@ -71,7 +71,7 @@ module.exports = defineConfig({
     // We've imported your old cypress plugins here.
     // You may want to clean this up later by importing these.
     setupNodeEvents(on, config) {
-      return require('cypress/plugins/index.js')(on, config)
+      return require('./cypress/plugins/index.js')(on, config)
     },
   },
 })
@@ -86,7 +86,7 @@ export default defineConfig({
     // We've imported your old cypress plugins here.
     // You may want to clean this up later by importing these.
     setupNodeEvents(on, config) {
-      return require('cypress/plugins/index.js')(on, config)
+      return require('./cypress/plugins/index.js')(on, config)
     },
   },
 })
