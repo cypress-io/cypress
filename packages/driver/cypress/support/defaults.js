@@ -8,7 +8,7 @@ if (!isActuallyInteractive) {
   // we want to only enable retries in runMode
   // and because we set `isInteractive` above
   // we have to set retries here
-  Cypress.config('retries', 0)
+  Cypress.config('retries', 2)
 }
 
 beforeEach(() => {
