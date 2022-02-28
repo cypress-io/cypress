@@ -384,6 +384,9 @@ const MaybeInjectHtml: ResponseMiddleware = function () {
 
   debug('injecting into HTML')
 
+  // TODO doc
+  this.res.setHeader('Origin-Agent-Cluster', '?0')
+
   this.makeResStreamPlainText()
 
   this.incomingResStream.pipe(concatStream(async (body) => {

@@ -33,6 +33,9 @@ export const serveRunner = (runnerPkg: RunnerPkg, config: Cfg, res: Response) =>
 
   const runnerPath = process.env.CYPRESS_INTERNAL_RUNNER_PATH || getPathToIndex(runnerPkg)
 
+  // TODO doc
+  res.setHeader('Origin-Agent-Cluster', '?0')
+
   return res.render(runnerPath, {
     base64Config,
     projectName: config.projectName,

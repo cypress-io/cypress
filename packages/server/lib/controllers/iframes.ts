@@ -31,6 +31,9 @@ export const iframesController = {
       extraOptions,
     })
 
+    // TODO doc
+    res.setHeader('Origin-Agent-Cluster', '?0')
+
     files.handleIframe(req, res, config, getRemoteState, extraOptions)
   },
 
@@ -41,6 +44,9 @@ export const iframesController = {
     // TODO: define a contract for dev-server plugins to configure this behavior
     req.headers.__cypress_spec_path = req.params[0]
     req.url = `${config.devServerPublicPathRoute}/index.html`
+
+    // TODO: doc
+    res.setHeader('Origin-Agent-Cluster', '?0')
 
     // user the node proxy here instead of the network proxy
     // to avoid the user accidentally intercepting and modifying
