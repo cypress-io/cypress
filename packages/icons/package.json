@@ -2,13 +2,13 @@
   "name": "@packages/icons",
   "version": "0.0.0-development",
   "description": "Cypress Icons",
+  "private": true,
   "main": "index.js",
   "scripts": {
-    "build": "scripts/build.sh",
-    "postbuild": "ts-node ./src/ico.ts",
+    "build-prod": "yarn build",
+    "build": "scripts/build.sh && ts-node ./src/ico.ts",
     "test": "NODE_ENV=test mocha",
     "test-watch": "NODE_ENV=test mocha --watch",
-    "prepublish": "npm run build",
     "release": "releaser"
   },
   "devDependencies": {
@@ -19,16 +19,5 @@
     "to-ico": "^1.1.5"
   },
   "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/cypress-io/cypress-icons.git"
-  },
-  "homepage": "https://github.com/cypress-io/cypress-icons#readme",
-  "author": "Brian Mann",
-  "bugs": {
-    "url": "https://github.com/cypress-io/cypress-icons/issues"
-  },
-  "publishConfig": {
-    "access": "public"
-  }
+  "author": "Brian Mann"
 }
