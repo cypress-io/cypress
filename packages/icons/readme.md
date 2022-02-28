@@ -29,7 +29,7 @@ Good news the macos is only needed to develop on MacOS.
 
 ## Developing
 
-All icons are in the assets directory
+All the icons are in the assets directory.
 
 ```bash
 ## run build to dump to ./dist
