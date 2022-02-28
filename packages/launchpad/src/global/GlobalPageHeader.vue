@@ -66,7 +66,7 @@ const showDropzone = ref(false)
 const { t } = useI18n()
 
 const props = defineProps<{
-  modelValue: string,
+  modelValue: string
   projectCount?: number | null
 }>()
 

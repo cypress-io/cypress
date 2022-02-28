@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { useRef, RefObject } from 'react'
+import type { RefObject } from 'react'
 import cs from 'classnames'
 
 import { useButton } from '@react-aria/button'
@@ -10,6 +10,8 @@ import { styledTextSizeClassNames } from 'core/text/styledText'
 import styles from './Button.module.scss'
 import { FocusRing } from '@react-aria/focus'
 import { focusClass } from 'css/derived/util'
+
+const { useRef } = React
 
 interface SharedButtonProps extends TextSizableComponent {
   /**

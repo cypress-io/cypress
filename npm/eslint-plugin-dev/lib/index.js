@@ -261,6 +261,7 @@ module.exports = {
           files: [
             '*.ts',
             '*.tsx',
+            '*.vue',
           ],
           parser: '@typescript-eslint/parser',
           plugins: [
@@ -271,6 +272,11 @@ module.exports = {
             'no-unused-vars': 'off',
             'indent': 'off',
             'no-useless-constructor': 'off',
+            'no-duplicate-imports': 'off',
+            'import/no-duplicates': 'off',
+            '@typescript-eslint/no-duplicate-imports': [
+              'error',
+            ],
             '@typescript-eslint/no-unused-vars': [
               'error',
               {

@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { SVGAttributes } from 'react'
+import type { SVGAttributes } from 'react'
 import cs from 'classnames'
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'

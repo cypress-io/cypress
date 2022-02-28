@@ -42,9 +42,9 @@
 import { ref, nextTick } from 'vue'
 
 const props = withDefaults(defineProps<{
-  disabled?:boolean,
-  popperTopOffset?:number,
-  popperClass?:string,
+  disabled?: boolean
+  popperTopOffset?: number
+  popperClass?: string
 }>(), {
   disabled: false,
   popperTopOffset: 0,

@@ -23,10 +23,10 @@ query HeaderBar_HeaderBarQuery {
 
 const props = withDefaults(
   defineProps<{
-  showBrowsers?: boolean,
-  pageName?: string,
-  allowAutomaticPromptOpen?: boolean
-}>(), {
+    showBrowsers?: boolean
+    pageName?: string
+    allowAutomaticPromptOpen?: boolean
+  }>(), {
     allowAutomaticPromptOpen: false,
     pageName: undefined,
   },

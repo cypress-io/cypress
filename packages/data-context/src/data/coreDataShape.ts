@@ -1,4 +1,5 @@
-import { BUNDLERS, FoundBrowser, Editor, Warning, AllowedState, AllModeOptions, TestingType, PACKAGE_MANAGERS, BrowserStatus, AuthStateName } from '@packages/types'
+import type { FoundBrowser, Editor, Warning, AllowedState, AllModeOptions, TestingType, BrowserStatus, PACKAGE_MANAGERS, AuthStateName } from '@packages/types'
+import type { Bundler, FRONTEND_FRAMEWORKS } from '@packages/scaffold-config'
 import type { NexusGenEnums, NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
 import type { App, BrowserWindow } from 'electron'
 import type { ChildProcess } from 'child_process'
@@ -61,14 +62,14 @@ export interface AppDataShape {
 }
 
 export interface WizardDataShape {
-  chosenBundler: NexusGenEnums['SupportedBundlers'] | null
-  allBundlers: typeof BUNDLERS
-  chosenFramework: NexusGenEnums['FrontendFrameworkEnum'] | null
+  chosenBundler: Bundler | null
+  chosenFramework: typeof FRONTEND_FRAMEWORKS[number]['type'] | null
   chosenLanguage: NexusGenEnums['CodeLanguageEnum']
   chosenManualInstall: boolean
   detectedLanguage: NexusGenEnums['CodeLanguageEnum'] | null
-  detectedBundler: NexusGenEnums['SupportedBundlers'] | null
-  detectedFramework: NexusGenEnums['FrontendFrameworkEnum'] | null
+  detectedBundler: Bundler | null
+  detectedFramework: typeof FRONTEND_FRAMEWORKS[number]['type'] | null
+  __fakeInstalledPackagesForTesting: string[] | null
 }
 
 export interface MigrationDataShape{
@@ -168,9 +169,9 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
       chosenFramework: null,
       chosenLanguage: 'js',
       chosenManualInstall: false,
-      allBundlers: BUNDLERS,
       detectedBundler: null,
       detectedFramework: null,
+      __fakeInstalledPackagesForTesting: null,
       detectedLanguage: null,
     },
     migration: {

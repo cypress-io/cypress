@@ -36,7 +36,7 @@ import { useI18n } from '@cy/i18n'
 const { t } = useI18n()
 
 defineProps<{
-  helpLink: string,
+  helpLink: string
   helpText: string
 }>()
 

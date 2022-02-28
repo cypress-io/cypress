@@ -78,15 +78,9 @@
 </template>
 
 <script lang="ts">
-// eslint-disable-next-line import/no-duplicates
-import { defineComponent } from 'vue'
 import ButtonInternals from './ButtonInternals.vue'
 import ExternalLink from '../gql-components/ExternalLink.vue'
 import BaseLink from '../components/BaseLink.vue'
-
-export default defineComponent({
-  inheritAttrs: true,
-})
 
 const VariantClassesTable = {
   primary: 'border-indigo-500 bg-indigo-500 text-white hocus-default',
@@ -98,8 +92,6 @@ const VariantClassesTable = {
   secondary: 'bg-jade-500 text-white hocus-secondary',
 } as const
 
-export type ButtonVariants = keyof(typeof VariantClassesTable)
-
 const SizeClassesTable = {
   sm: 'px-6px py-2px text-14px h-24px',
   md: 'px-12px py-8px text-14px h-32px',
@@ -107,17 +99,17 @@ const SizeClassesTable = {
   'lg-wide': 'px-32px py-8px',
 } as const
 
+export type ButtonVariants = keyof(typeof VariantClassesTable)
+
 export type ButtonSizes = keyof(typeof SizeClassesTable)
+
+export const inheritAttrs = true
 
 </script>
 
 <script lang="ts" setup>
-
-// eslint-disable-next-line import/no-duplicates
 import { computed, useAttrs } from 'vue'
 import { RouterLink } from 'vue-router'
-
-// eslint-disable-next-line no-duplicate-imports
 import type { ButtonHTMLAttributes, FunctionalComponent, SVGAttributes } from 'vue'
 
 const props = defineProps<{

@@ -30,14 +30,14 @@ import type { FunctionalComponent, SVGAttributes } from 'vue'
 import Button from '@cy/components/Button.vue'
 
 defineProps<{
-  icon: 'access' | 'error',
-  message: string,
-  buttonText: string,
-  buttonIcon: FunctionalComponent<SVGAttributes, {}>,
-  buttonDisabled?: boolean,
+  icon: 'access' | 'error'
+  message: string
+  buttonText: string
+  buttonIcon: FunctionalComponent<SVGAttributes, {}>
+  buttonDisabled?: boolean
 }>()
 
 const emit = defineEmits<{
-  (event: 'button-click'): void,
+  (event: 'button-click'): void
 }>()
 </script>

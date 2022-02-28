@@ -1,6 +1,5 @@
 <template>
   <SettingsSection
-    v-if="props.gql?.projectId"
     code="projectId"
     data-cy="settings-projectId"
   >
@@ -19,17 +18,23 @@
         </ExternalLink>
       </i18n-t>
     </template>
-    <div class="flex gap-10px items-center">
+    <div
+      v-if="props.gql.currentProject?.projectId"
+      class="flex gap-10px items-center"
+    >
       <CodeBox
-        :code="props.gql?.projectId || ''"
+        :code="props.gql.currentProject?.projectId"
         :prefix-icon="IconOctothorpe"
       />
       <CopyButton
-        v-if="props.gql?.projectId"
-        :text="props.gql?.projectId"
+        :text="props.gql.currentProject?.projectId"
         variant="outline"
       />
     </div>
+    <CloudConnectButton
+      v-else
+      :gql="props.gql"
+    />
   </SettingsSection>
 </template>
 
@@ -42,18 +47,21 @@ import SettingsSection from '../SettingsSection.vue'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import CodeBox from './CodeBox.vue'
 import type { ProjectIdFragment } from '../../generated/graphql'
+import CloudConnectButton from '../../runs/CloudConnectButton.vue'
 
 const { t } = useI18n()
 
 gql`
-fragment ProjectId on CurrentProject {
-  id
-  projectId
-}
-`
+fragment ProjectId on Query {
+  currentProject {
+    id
+    projectId
+  }
+  ...CloudConnectButton
+}`
 
 const props = defineProps<{
-  gql?: ProjectIdFragment | null
+  gql: ProjectIdFragment
 }>()
 
 </script>

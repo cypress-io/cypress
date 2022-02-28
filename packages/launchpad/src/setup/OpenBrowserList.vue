@@ -153,7 +153,6 @@
 import { useI18n } from '@cy/i18n'
 import Button from '@packages/frontend-shared/src/components/Button.vue'
 import { computed } from 'vue'
-import _clone from 'lodash/clone'
 import { useMutation, gql } from '@urql/vue'
 import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
 import TestingTypeComponentIcon from '~icons/cy/testing-type-component_x16'
@@ -207,7 +206,7 @@ fragment OpenBrowserList on CurrentProject {
 `
 
 const props = defineProps<{
-  gql: OpenBrowserListFragment,
+  gql: OpenBrowserListFragment
 }>()
 
 const emit = defineEmits<{
