@@ -593,9 +593,6 @@ type ErrorWrapper {
   """Relative file path to open, if there is one associated with this error"""
   fileToOpen: FileParts
 
-  """Whether we can retry the error from the UI"""
-  isRetryable: Boolean
-
   """
   Whether the error came from user code, can be used to determine whether to open a stack trace by default
   """
@@ -978,6 +975,9 @@ type Mutation {
 
   """show the launchpad windows"""
   reconfigureProject: Boolean!
+
+  """Re-initializes Cypress from the initial CLI options"""
+  reinitializeCypress: Boolean
 
   """Remove project from projects array and cache"""
   removeProject(path: String!): Query

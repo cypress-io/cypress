@@ -392,12 +392,7 @@ export class DataContext {
    * Resets all of the state for the data context,
    * so we can initialize fresh for each E2E test
    */
-  async resetForTest (modeOptions: Partial<AllModeOptions> = {}) {
-    this.debug('DataContext resetForTest')
-    if (!process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF) {
-      throw new Error(`DataContext.reset is only meant to be called in E2E testing mode, there's no good use for it outside of that`)
-    }
-
+  async reinitializeCypress (modeOptions: Partial<AllModeOptions> = {}) {
     await this._reset()
 
     this._modeOptions = modeOptions
@@ -409,12 +404,6 @@ export class DataContext {
   }
 
   private _reset () {
-    // this._gqlServer?.close()
-    // this.emitter.destroy()
-    // this._loadingManager.destroy()
-    // this._loadingManager = new LoadingManager(this)
-    // this.coreData.currentProject?.watcher
-    // this._coreData = makeCoreData({}, this._loadingManager)
     this.setAppSocketServer(undefined)
     this.setGqlSocketServer(undefined)
 

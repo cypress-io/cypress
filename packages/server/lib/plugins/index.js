@@ -33,7 +33,7 @@ const execute = (event, ...args) => {
 const _reset = () => {
   handlers = []
 
-  return getCtx().lifecycleManager.resetForTest()
+  return getCtx().lifecycleManager.reinitializeCypress()
 }
 
 module.exports = {

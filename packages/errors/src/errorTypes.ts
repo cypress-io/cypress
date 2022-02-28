@@ -31,7 +31,7 @@ export interface CypressError extends ErrorLike {
   messageMarkdown: string
   type: keyof typeof AllCypressErrors
   isCypressErr: boolean
-  originalError?: CypressError | ErrorLike
+  originalError?: SerializedError
   details?: string
   code?: string | number
   errno?: string | number
@@ -56,7 +56,7 @@ export interface ClonedError {
   [key: string]: any
 }
 
-export interface SerializedError {
+export interface SerializedError extends Omit<CypressError, 'messageMarkdown' | 'type' | 'isCypressErr'> {
   code?: string | number
   type?: string | number
   errorType?: string
@@ -65,6 +65,11 @@ export interface SerializedError {
   message: string
   name: string
   isCypressErr?: boolean
+  tsErrorLocation?: {
+    filePath?: string
+    column?: number
+    line?: number
+  }
 }
 
 /**

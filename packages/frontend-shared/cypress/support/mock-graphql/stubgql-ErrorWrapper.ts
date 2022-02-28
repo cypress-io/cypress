@@ -17,7 +17,6 @@ export const StubErrorWrapper = {
     Learn more at https://on.cypress.io/support-file-missing-or-invalid
   `,
   isUserCodeError: true,
-  isRetryable: false,
   errorType: 'SUPPORT_FILE_NOT_FOUND',
   errorStack: dedent`
     OriginalError: foobar

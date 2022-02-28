@@ -1,5 +1,6 @@
 import { stripAnsi, stackUtils, ErrorWrapperSource } from '@packages/errors'
 import { objectType } from 'nexus'
+import path from 'path'
 
 import { ErrorTypeEnum } from '../enumTypes/gql-ErrorTypeEnum'
 import { FileParts } from './gql-FileParts'
@@ -28,7 +29,7 @@ export const ErrorWrapper = objectType({
 
     t.nonNull.field('errorType', {
       type: ErrorTypeEnum,
-      resolve: (source) => source.cypressError.type,
+      resolve: (source) => source.cypressError.type ?? 'UNEXPECTED_INTERNAL_ERROR',
     })
 
     t.nonNull.string('errorMessage', {
@@ -48,8 +49,19 @@ export const ErrorWrapper = objectType({
     t.field('fileToOpen', {
       type: FileParts,
       description: 'Relative file path to open, if there is one associated with this error',
-      resolve (source) {
+      resolve (source, args, ctx) {
         if (isUserCodeError(source)) {
+          const tsErrorLocation = source.cypressError.originalError?.tsErrorLocation
+          const tsErrorPath = tsErrorLocation?.filePath
+
+          if (tsErrorPath && ctx.currentProject) {
+            return {
+              absolute: path.join(ctx.currentProject, tsErrorPath),
+              column: tsErrorLocation?.column,
+              line: tsErrorLocation?.line,
+            }
+          }
+
           const stackLines = stackUtils.getStackLines(source.cypressError.stack ?? '')
 
           return stackUtils.parseStackLine(stackLines[0] ?? '')
@@ -71,13 +83,6 @@ export const ErrorWrapper = objectType({
         return {
           filename: __filename,
         }
-      },
-    })
-
-    t.boolean('isRetryable', {
-      description: 'Whether we can retry the error from the UI',
-      resolve () {
-        return true
       },
     })
   },

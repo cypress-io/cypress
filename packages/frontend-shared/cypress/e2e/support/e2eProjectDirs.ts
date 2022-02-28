@@ -12,6 +12,7 @@ export const e2eProjectDirs = [
   'config-with-js',
   'config-with-short-timeout',
   'config-with-ts',
+  'config-with-ts-syntax-error',
   'cookies',
   'create-react-app-configured',
   'create-react-app-unconfigured',

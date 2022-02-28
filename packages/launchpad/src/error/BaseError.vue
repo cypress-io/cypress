@@ -80,7 +80,7 @@
     <div class="w-full gap-16px inline-flex">
       <slot name="footer">
         <Button
-          v-if="baseError.isRetryable"
+          v-if="props.retry"
           size="lg"
           variant="primary"
           data-testid="error-retry-button"
@@ -109,13 +109,18 @@ import ErrorOutlineIcon from '~icons/cy/status-errored-outline_x16.svg'
 import ErrorCodeFrame from './ErrorCodeFrame.vue'
 
 gql`
+mutation BaseError_RestartCypress {
+  reinitializeCypress
+}
+`
+
+gql`
 fragment BaseError on ErrorWrapper {
   title
   errorName
   errorStack
   errorType
   errorMessage
-  isRetryable
   isUserCodeError
   fileToOpen {
     id

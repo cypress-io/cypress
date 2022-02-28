@@ -7,6 +7,7 @@
       <BaseError
         v-if="query.data.value.baseError"
         :gql="query.data.value.baseError"
+        :retry="reinitializeCypress"
       />
       <GlobalPage
         v-else-if="query.data.value.isInGlobalMode || !query.data.value?.currentProject"
@@ -71,8 +72,8 @@
 </template>
 
 <script lang="ts" setup>
-import { gql, useQuery } from '@urql/vue'
-import { MainLaunchpadQueryDocument } from './generated/graphql'
+import { gql, useMutation, useQuery } from '@urql/vue'
+import { MainLaunchpadQueryDocument, Main_ReinitializeCypressDocument } from './generated/graphql'
 import TestingTypeCards from './setup/TestingTypeCards.vue'
 import Wizard from './setup/Wizard.vue'
 import ScaffoldLanguageSelect from './setup/ScaffoldLanguageSelect.vue'
@@ -122,6 +123,20 @@ query MainLaunchpadQuery {
   ...MainLaunchpadQueryData
 }
 `
+
+gql`
+mutation Main_ReinitializeCypress {
+  reinitializeCypress
+}
+`
+
+const mutation = useMutation(Main_ReinitializeCypressDocument)
+
+const reinitializeCypress = () => {
+  if (!mutation.fetching.value) {
+    mutation.executeMutation({})
+  }
+}
 
 const query = useQuery({ query: MainLaunchpadQueryDocument })
 const currentProject = computed(() => query.data.value?.currentProject)

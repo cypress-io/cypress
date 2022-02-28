@@ -35,12 +35,9 @@ describe('<BaseError />', () => {
     .should('not.exist')
   })
 
-  it('renders the retry button if isRetryable is true', () => {
+  it('renders the retry button if retry is passed', () => {
     cy.mountFragment(BaseErrorFragmentDoc, {
-      onResult (result) {
-        result.isRetryable = true
-      },
-      render: (gqlVal) => <BaseError gql={gqlVal} />,
+      render: (gqlVal) => <BaseError gql={gqlVal} retry={() => {}} />,
     })
     .get(retryButtonSelector)
     .should('contain.text', messages.retryButton)

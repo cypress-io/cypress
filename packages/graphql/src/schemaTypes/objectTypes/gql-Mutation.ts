@@ -11,6 +11,16 @@ import { ScaffoldedFile } from './gql-ScaffoldedFile'
 
 export const mutation = mutationType({
   definition (t) {
+    t.field('reinitializeCypress', {
+      type: 'Boolean',
+      description: 'Re-initializes Cypress from the initial CLI options',
+      resolve: async (_, args, ctx) => {
+        await ctx.reinitializeCypress(ctx.modeOptions)
+
+        return true
+      },
+    })
+
     t.field('devRelaunch', {
       type: 'Boolean',
       description: 'Development only: Triggers or dismisses a prompted refresh by touching the file watched by our development scripts',

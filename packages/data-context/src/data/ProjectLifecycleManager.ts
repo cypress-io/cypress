@@ -916,7 +916,7 @@ export class ProjectLifecycleManager {
     this._registeredEvents[event] = callback
   }
 
-  resetForTest () {
+  reinitializeCypress () {
     this.resetInternalState()
     this._registeredEvents = {}
     this._handlers = []

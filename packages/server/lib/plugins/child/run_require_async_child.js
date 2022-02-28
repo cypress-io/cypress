@@ -143,6 +143,10 @@ function run (ipc, configFile, projectRoot) {
         // replace the first line with better text (remove potentially misleading word TypeScript for example)
         .replace(/^.*\n/g, 'Error compiling file\n')
 
+        const tsErrorRegex = /\n(.*?)\((\d+),(\d+)\):/g
+        const failurePath = tsErrorRegex.exec(cleanMessage)
+
+        err.tsErrorLocation = { filePath: failurePath?.[1], column: failurePath?.[2], line: failurePath?.[3] }
         err.originalMessage = err.message
         err.message = cleanMessage
       }
