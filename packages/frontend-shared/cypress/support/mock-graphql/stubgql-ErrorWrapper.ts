@@ -32,9 +32,15 @@ export const StubErrorWrapper = {
   `,
   errorName: 'OriginalError',
   fileToOpen: {
+    __typename: 'FileParts',
     id: `FilePath:pathtoFoobarjs`,
     absolute: '/path/to/foo.bar.js',
     relative: './foo.bar.js',
+    fileName: 'foo',
+    contents: 'const x = 1',
+    name: 'foo.bar.js',
+    fileExtension: '.js',
+    baseName: 'foo.bar.js',
   },
 } as const
 

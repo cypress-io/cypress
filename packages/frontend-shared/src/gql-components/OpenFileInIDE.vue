@@ -59,6 +59,16 @@ const openFile = () => {
 }
 
 const maybeShowFileInIDE = () => {
+  // If we haven't fetched the data yet checking for the local binary,
+  // wait until we have it before possibly prompting
+  if (query.fetching.value) {
+    query.then(() => {
+      maybeShowFileInIDE()
+    })
+
+    return
+  }
+
   if (query.data?.value?.localSettings.preferences.preferredEditorBinary) {
     openFileInIDE()
   } else {
