@@ -121,8 +121,12 @@ const props = defineProps<{
   gql: GlobalPageFragment
 }>()
 
+function matchedGlobalProjects (project: typeof props.gql.projects[number]): project is GlobalProjectCardFragment {
+  return project.__typename === 'GlobalProject' && project.title.toLowerCase().includes(match.value.toLowerCase())
+}
+
 const filteredProjects = computed(() => {
-  return ((props.gql.projects || []) as GlobalProjectCardFragment[]).filter((p) => p.title.toLowerCase().indexOf(match.value.toLowerCase()) !== -1)
+  return (props.gql.projects || []).filter(matchedGlobalProjects)
 })
 
 const match = ref('')
