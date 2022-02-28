@@ -10,7 +10,7 @@ const verifyIdeOpen = ({ fileName, action, hasPreferredIde }) => {
     action()
 
     cy.wait('@OpenIDE').then(({ request }) => {
-      expect(request.body.variables.input.absolute).to.include(fileName)
+      expect(request.body.variables.input.filePath).to.include(fileName)
     })
   } else {
     action()

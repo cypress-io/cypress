@@ -72,7 +72,7 @@ describe('Config files error handling', () => {
 
     cy.visitLaunchpad()
     cy.get('[data-cy-testingType=e2e]').click()
-    cy.get('body').should('contain.text', 'was removed in Cypress version')
+    cy.get('body', { timeout: 10000 }).should('contain.text', 'was removed in Cypress version')
     expectStackToBe('closed')
     cy.withCtx(async (ctx) => {
       await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = { e2e: { supportFile: false } }')

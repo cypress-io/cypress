@@ -108,7 +108,7 @@ describe('src/cypress/runner', () => {
       .click()
 
       cy.wait('@OpenIDE').then(({ request }) => {
-        expect(request.body.variables.input.absolute).to.include('simple-cy-assert.runner.cy.js')
+        expect(request.body.variables.input.filePath).to.include('simple-cy-assert.runner.cy.js')
       })
 
       cy.get('[data-cy="runnable-header"] [data-cy="spec-duration"]').should('exist')

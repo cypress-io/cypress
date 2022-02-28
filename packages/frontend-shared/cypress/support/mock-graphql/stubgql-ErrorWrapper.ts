@@ -31,6 +31,11 @@ export const StubErrorWrapper = {
       at processTicksAndRejections (internal/process/task_queues.js:85:21)    
   `,
   errorName: 'OriginalError',
+  fileToOpen: {
+    id: `FilePath:pathtoFoobarjs`,
+    absolute: '/path/to/foo.bar.js',
+    relative: './foo.bar.js',
+  },
 } as const
 
 // For type checking

@@ -261,7 +261,7 @@ describe('App: Index', () => {
       })
 
       it('opens config file in ide from SpecPattern', () => {
-        cy.intercept('mutation-OpenConfigFile', { data: { openFileInIDE: true } }).as('OpenIDE')
+        cy.intercept('mutation-OpenFileInIDE_Mutation', { data: { openFileInIDE: true } }).as('OpenIDE')
 
         cy.findByRole('button', { name: 'cypress.config.js' }).click()
 
@@ -269,7 +269,7 @@ describe('App: Index', () => {
       })
 
       it('opens config file in ide from footer button', () => {
-        cy.intercept('mutation-OpenConfigFile', { data: { openFileInIDE: true } }).as('OpenIDE')
+        cy.intercept('mutation-OpenFileInIDE_Mutation', { data: { openFileInIDE: true } }).as('OpenIDE')
 
         cy.contains('button', defaultMessages.createSpec.updateSpecPattern).click()
 
@@ -699,7 +699,7 @@ describe('App: Index', () => {
       it('opens config file in ide from SpecPattern', () => {
         cy.intercept('mutation-OpenFileInIDE_Mutation', { data: { openFileInIDE: true } }).as('OpenIDE')
 
-        cy.contains('cypress.config.js').click()
+        cy.findByRole('button', { name: 'cypress.config.js' }).click()
 
         cy.wait('@OpenIDE')
       })

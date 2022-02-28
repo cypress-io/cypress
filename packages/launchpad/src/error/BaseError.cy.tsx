@@ -22,12 +22,12 @@ describe('<BaseError />', () => {
 
   it('renders the default error the correct messages', () => {
     cy.mountFragment(BaseErrorFragmentDoc, {
-      render: (gqlVal) => <BaseError gql={gqlVal} retry={() => {}} />,
+      render: (gqlVal) => <BaseError gql={gqlVal} />,
     })
     .get(headerSelector)
     .should('contain.text', cy.gqlStub.ErrorWrapper.title)
     .get(messageSelector)
-    .should('contain.text', cy.gqlStub.ErrorWrapper.errorMessage.slice(0, 10))
+    .should('contain.text', cy.gqlStub.ErrorWrapper.errorMessage.replace(/\`/g, '').slice(0, 10))
     .get(retryButtonSelector)
     .should('not.exist')
   })
