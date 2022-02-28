@@ -55,7 +55,10 @@ export interface CreateConfigOptions {
 }
 
 export async function createConfigString (cfg: OldCypressConfig, options: CreateConfigOptions) {
-  return createCypressConfig(reduceConfig(cfg), await getPluginRelativePath(cfg, options.projectRoot), options)
+  const newConfig = reduceConfig(cfg)
+  const relativePluginPath = await getPluginRelativePath(cfg, options.projectRoot)
+
+  return createCypressConfig(newConfig, relativePluginPath, options)
 }
 
 interface FileToBeMigratedManually {
@@ -216,8 +219,8 @@ function createE2ETemplate (pluginPath: string, createConfigOptions: CreateConfi
   const hasExportDefault = pluginFile.includes('export default')
 
   const requirePlugins = hasExportDefault
-    ? `return require('./${pluginPath}').default(on, config)`
-    : `return require('./${pluginPath}')(on, config)`
+    ? `return require('${pluginPath}').default(on, config)`
+    : `return require('${pluginPath}')(on, config)`
 
   const setupNodeEvents = dedent`
   // We've imported your old cypress plugins here.
