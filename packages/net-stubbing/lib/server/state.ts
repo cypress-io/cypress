@@ -9,12 +9,22 @@ export function state (): NetStubbingState {
     reset () {
       // clean up requests that are still pending
       for (const requestId in this.requests) {
-        const { res } = this.requests[requestId]
+        const request = this.requests[requestId]
 
-        res.removeAllListeners('finish')
-        res.removeAllListeners('error')
-        res.on('error', noop)
-        res.destroy()
+        request.matchingRoutes = request.matchingRoutes.filter((route) => {
+          return !!route.staticResponse
+        })
+
+        if (request.matchingRoutes.length === 0) {
+          const res = request.res
+
+          res.removeAllListeners('finish')
+          res.removeAllListeners('error')
+          res.on('error', noop)
+          res.destroy()
+        } else {
+          console.log('Not destroying everything')
+        }
       }
 
       this.pendingEventHandlers = {}
