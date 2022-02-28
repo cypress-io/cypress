@@ -88,7 +88,7 @@ const setup = (cypressConfig: Cypress.Config, env: Cypress.ObjectLike) => {
   // Forward url:changed Message to the primary domain to enable changing the url displayed in the AUT
   // @ts-ignore
   Cypress.on('url:changed', (url) => {
-    specBridgeCommunicator.toPrimary('url:changed', url)
+    specBridgeCommunicator.toPrimary('url:changed', { url })
   })
 
   return cy
