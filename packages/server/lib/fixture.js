@@ -4,6 +4,8 @@ const debug = require('debug')('cypress:server:fixture')
 const coffee = require('coffeescript')
 const Promise = require('bluebird')
 const jsonlint = require('jsonlint')
+const stripAnsi = require('strip-ansi')
+
 const errors = require('./errors')
 const { fs } = require('./util/fs')
 const glob = require('./util/glob')
@@ -60,7 +62,14 @@ module.exports = {
         if (matches.length === 0) {
           const relativePath = path.relative('.', p)
 
-          errors.throw('FIXTURE_NOT_FOUND', relativePath, extensions)
+          // TODO: there's no reason this error should be in
+          // the @packages/error list, it should be written in
+          // the driver since this error can only occur within
+          // driver commands and not outside of the test runner
+          const err = errors.get('FIXTURE_NOT_FOUND', relativePath, extensions)
+
+          err.message = stripAnsi(err.message)
+          throw err
         }
 
         debug('fixture matches found, using the first', matches)
