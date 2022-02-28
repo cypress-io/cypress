@@ -32,7 +32,7 @@ fragment ErrorCodeFrame on FileParts {
 }`
 
 const props = defineProps<{
-  gql: ErrorCodeFrameFragment,
+  gql: ErrorCodeFrameFragment
 }>()
 
 const fileText = computed(() => {

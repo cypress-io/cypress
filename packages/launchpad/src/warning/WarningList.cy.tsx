@@ -10,8 +10,8 @@ const createWarning = (props = {}) => ({
   ...props,
 })
 
-const firstWarning = createWarning({ title: faker.hacker.ingverb(), description: faker.hacker.phrase() })
-const secondWarning = createWarning({ title: faker.hacker.ingverb(), description: faker.hacker.phrase() })
+const firstWarning = createWarning({ title: faker.hacker.ingverb(), errorMessage: faker.hacker.phrase() })
+const secondWarning = createWarning({ title: faker.hacker.ingverb(), errorMessage: faker.hacker.phrase() })
 
 describe('<WarningList />', () => {
   it('does not render warning if there are none', () => {

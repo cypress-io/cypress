@@ -102,7 +102,7 @@ describe('src/cypress/runner', () => {
         hasPreferredIde: true,
       })
 
-      cy.intercept('mutation-OpenFileInIDE', { data: { 'openFileInIDE': true } }).as('OpenIDE')
+      cy.intercept('mutation-SpecRunnerOpenMode_OpenFileInIDE', { data: { 'openFileInIDE': true } }).as('OpenIDE')
 
       cy.contains('a', 'simple-cy-assert.runner')
       .click()

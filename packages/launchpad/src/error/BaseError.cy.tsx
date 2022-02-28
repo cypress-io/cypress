@@ -6,7 +6,6 @@ import { BaseErrorFragmentDoc } from '../generated/graphql-test'
 const headerSelector = '[data-testid=error-header]'
 const messageSelector = '[data-testid=error-message]'
 const retryButtonSelector = '[data-testid=error-retry-button]'
-const docsButtonSelector = '[data-testid=error-read-the-docs-button]'
 const customFooterSelector = '[data-testid=custom-error-footer]'
 
 // Constants
@@ -29,8 +28,6 @@ describe('<BaseError />', () => {
     .should('contain.text', cy.gqlStub.ErrorWrapper.title)
     .get(messageSelector)
     .should('contain.text', cy.gqlStub.ErrorWrapper.errorMessage.slice(0, 10))
-    .get(docsButtonSelector)
-    .should('contain.text', messages.readTheDocsButton)
     .get(retryButtonSelector)
     .should('not.exist')
   })

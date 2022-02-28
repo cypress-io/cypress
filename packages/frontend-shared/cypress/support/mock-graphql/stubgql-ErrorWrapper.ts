@@ -6,8 +6,6 @@ export const StubErrorWrapper = {
   __typename: 'ErrorWrapper',
   title: 'Error Loading Config',
   errorMessage: dedent`
-    The support file is missing or invalid.
-
     Your \`supportFile\` is set to \`foo.bar.js\`, but either the file is missing or it's invalid. The \`supportFile\` must be a \`.js\`, \`.ts\`, \`.coffee\` file or be supported by your preprocessor plugin (if configured).
 
     Correct your \`foo.bar.js\`, create the appropriate file, or set \`supportFile\` to \`false\` if a support file is not necessary for your project.
