@@ -20,7 +20,7 @@
     "lodash": "^4.17.21"
   },
   "devDependencies": {
-    "@cypress/icons": "0.7.0",
+    "@packages/icons": "0.0.0-development",
     "@packages/socket": "0.0.0-development",
     "chai": "3.5.0",
     "coffeescript": "1.12.7",
