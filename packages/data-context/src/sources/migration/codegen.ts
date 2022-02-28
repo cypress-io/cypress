@@ -206,7 +206,9 @@ function formatObjectForConfig (obj: Record<string, unknown>) {
 function createE2ETemplate (pluginPath: string, createConfigOptions: CreateConfigOptions, options: Record<string, unknown>) {
   if (!createConfigOptions.hasPluginsFile) {
     return dedent`
-      setupNodeEvents(on, config) {}
+      e2e: {
+        setupNodeEvents(on, config) {}
+      }
     `
   }
 
