@@ -7,11 +7,11 @@ const Promise = require('bluebird')
 const preprocessor = require('./preprocessor')
 const devServer = require('./dev-server')
 const resolve = require('../../util/resolve')
+const tsNodeUtil = require('../../util/ts_node')
 const browserLaunch = require('./browser_launch')
 const task = require('./task')
 const util = require('../util')
 const validateEvent = require('./validate_event')
-const tsNodeUtil = require('./ts_node')
 
 let registeredEventsById = {}
 let registeredEventsByName = {}
@@ -46,10 +46,14 @@ const load = (ipc, config, pluginsFile) => {
   // we track the register calls and then send them all at once
   // to the parent process
   const register = (event, handler) => {
-    const { isValid, error } = validateEvent(event, handler, config)
+    const { isValid, userEvents, error } = validateEvent(event, handler, config, register)
 
     if (!isValid) {
-      ipc.send('load:error', 'PLUGINS_VALIDATION_ERROR', pluginsFile, error.stack)
+      if (userEvents) {
+        ipc.send('load:error', 'PLUGINS_INVALID_EVENT_NAME_ERROR', pluginsFile, event, userEvents, util.serializeError(error))
+      } else {
+        ipc.send('load:error', 'PLUGINS_FUNCTION_ERROR', pluginsFile, util.serializeError(error))
+      }
 
       return
     }
@@ -101,7 +105,7 @@ const load = (ipc, config, pluginsFile) => {
   })
   .catch((err) => {
     debug('plugins file errored:', err && err.stack)
-    ipc.send('load:error', 'PLUGINS_FUNCTION_ERROR', pluginsFile, err.stack)
+    ipc.send('load:error', 'PLUGINS_FUNCTION_ERROR', pluginsFile, util.serializeError(err))
   })
 }
 
@@ -155,9 +159,16 @@ const runPlugins = (ipc, pluginsFile, projectRoot) => {
   })
 
   process.on('unhandledRejection', (event) => {
-    const err = (event && event.reason) || event
+    let err = event
 
-    debug('unhandled rejection:', util.serializeError(err))
+    debug('unhandled rejection:', event)
+
+    // Rejected Bluebird promises will return a reason object.
+    // OpenSSL error returns a reason as user-friendly string.
+    if (event && event.reason && typeof event.reason === 'object') {
+      err = event.reason
+    }
+
     ipc.send('error', util.serializeError(err))
 
     return false
@@ -180,7 +191,7 @@ const runPlugins = (ipc, pluginsFile, projectRoot) => {
     }
   } catch (err) {
     debug('failed to require pluginsFile:\n%s', err.stack)
-    ipc.send('load:error', 'PLUGINS_FILE_ERROR', pluginsFile, err.stack)
+    ipc.send('load:error', 'PLUGINS_FILE_ERROR', pluginsFile, util.serializeError(err))
 
     return
   }

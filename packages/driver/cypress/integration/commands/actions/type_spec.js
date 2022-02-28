@@ -408,6 +408,42 @@ describe('src/cy/commands/actions/type - #type', () => {
       })
     })
 
+    it('can specify scrollBehavior bottom in config', { scrollBehavior: 'bottom' }, () => {
+      cy.get(':text:first').then((el) => {
+        cy.spy(el[0], 'scrollIntoView')
+      })
+
+      cy.get(':text:first').type('foo')
+
+      cy.get(':text:first').then((el) => {
+        expect(el[0].scrollIntoView).to.be.calledWith({ block: 'end' })
+      })
+    })
+
+    it('can specify scrollBehavior center in config', { scrollBehavior: 'center' }, () => {
+      cy.get(':text:first').then((el) => {
+        cy.spy(el[0], 'scrollIntoView')
+      })
+
+      cy.get(':text:first').type('foo')
+
+      cy.get(':text:first').then((el) => {
+        expect(el[0].scrollIntoView).to.be.calledWith({ block: 'center' })
+      })
+    })
+
+    it('can specify scrollBehavior nearest in config', { scrollBehavior: 'nearest' }, () => {
+      cy.get(':text:first').then((el) => {
+        cy.spy(el[0], 'scrollIntoView')
+      })
+
+      cy.get(':text:first').type('foo')
+
+      cy.get(':text:first').then((el) => {
+        expect(el[0].scrollIntoView).to.be.calledWith({ block: 'nearest' })
+      })
+    })
+
     it('does not scroll when scrollBehavior is false in config', { scrollBehavior: false }, () => {
       cy.get(':text:first').then((el) => {
         cy.spy(el[0], 'scrollIntoView')
@@ -430,6 +466,13 @@ describe('src/cy/commands/actions/type - #type', () => {
       cy.get(':text:first').then((el) => {
         expect(el[0].scrollIntoView).to.be.calledWith({ block: 'start' })
       })
+    })
+
+    // https://github.com/cypress-io/cypress/issues/4233
+    it('can scroll to an element behind a sticky header', () => {
+      cy.viewport(400, 400)
+      cy.visit('./fixtures/sticky-header.html')
+      cy.get('input:first').type('foo')
     })
 
     it('errors when scrollBehavior is false and element is out of view and is clicked', (done) => {
@@ -510,6 +553,199 @@ describe('src/cy/commands/actions/type - #type', () => {
           .type('bar')
           .should('have.value', 'foo')
         })
+      })
+    })
+  })
+
+  // https://github.com/cypress-io/cypress/issues/19541
+  describe(`type('{enter}') and click event on button-like elements`, () => {
+    beforeEach(() => {
+      cy.visit('fixtures/click-event-by-type.html')
+    })
+
+    describe('triggers', () => {
+      const targets = [
+        'button-tag',
+        'input-button',
+        'input-image',
+        'input-reset',
+        'input-submit',
+      ]
+
+      targets.forEach((targetId) => {
+        it(`${targetId}`, () => {
+          cy.get(`#target-${targetId}`).focus().type('{enter}')
+
+          cy.get('li').eq(0).should('have.text', 'keydown')
+          cy.get('li').eq(1).should('have.text', 'keypress')
+          cy.get('li').eq(2).should('have.text', 'click')
+          cy.get('li').eq(3).should('have.text', 'keyup')
+        })
+      })
+    })
+
+    describe('does not trigger', () => {
+      const targets = [
+        'input-checkbox',
+        'input-radio',
+      ]
+
+      targets.forEach((targetId) => {
+        it(`${targetId}`, () => {
+          cy.get(`#target-${targetId}`).focus().type('{enter}')
+
+          cy.get('li').eq(0).should('have.text', 'keydown')
+          cy.get('li').eq(1).should('have.text', 'keypress')
+          cy.get('li').eq(2).should('have.text', 'keyup')
+        })
+      })
+    })
+  })
+
+  describe(`type(' ') fires click event on button-like elements`, () => {
+    beforeEach(() => {
+      cy.visit('fixtures/click-event-by-type.html')
+    })
+
+    const targets = [
+      '#target-button-tag',
+      '#target-input-button',
+      '#target-input-image',
+      '#target-input-reset',
+      '#target-input-submit',
+    ]
+
+    describe(`triggers with single space`, () => {
+      targets.forEach((target) => {
+        it(target, () => {
+          const events = []
+
+          $(target).on('keydown keypress keyup click', (evt) => {
+            events.push(evt.type)
+          })
+
+          cy.get(target).focus().type(' ').then(() => {
+            expect(events).to.deep.eq([
+              'keydown',
+              'keypress',
+              'keyup',
+              'click',
+            ])
+          })
+
+          cy.get('li').eq(0).should('have.text', 'keydown')
+          cy.get('li').eq(1).should('have.text', 'keypress')
+          cy.get('li').eq(2).should('have.text', 'keyup')
+          cy.get('li').eq(3).should('have.text', 'click')
+        })
+      })
+    })
+
+    describe(`does not trigger if keyup prevented`, () => {
+      targets.forEach((target) => {
+        it(`${target} does not fire click event`, () => {
+          const events = []
+
+          $(target)
+          .on('keydown keypress keyup click', (evt) => {
+            events.push(evt.type)
+          })
+          .on('keyup', (evt) => {
+            evt.preventDefault()
+          })
+
+          cy.get(target).focus().type(' ').then(() => {
+            expect(events).to.deep.eq([
+              'keydown',
+              'keypress',
+              'keyup',
+            ])
+          })
+
+          cy.get('li').should('have.length', 3)
+          cy.get('li').eq(0).should('have.text', 'keydown')
+          cy.get('li').eq(1).should('have.text', 'keypress')
+          cy.get('li').eq(2).should('have.text', 'keyup')
+        })
+      })
+    })
+
+    describe('triggers after other characters', () => {
+      targets.forEach((target) => {
+        it(target, () => {
+          const events = []
+
+          $(target).on('keydown keypress keyup click', (evt) => {
+            events.push(evt.type)
+          })
+
+          cy.get(target).focus().type('asd ').then(() => {
+            expect(events).to.deep.eq([
+              'keydown',
+              'keypress',
+              'keyup',
+              'keydown',
+              'keypress',
+              'keyup',
+              'keydown',
+              'keypress',
+              'keyup',
+              'keydown',
+              'keypress',
+              'keyup',
+              'click',
+            ])
+          })
+
+          cy.get('li').eq(12).should('have.text', 'click')
+        })
+      })
+    })
+
+    describe('checkbox', () => {
+      it('checkbox is checked/unchecked', () => {
+        cy.get(`#target-input-checkbox`).focus().type(' ')
+
+        cy.get('li').eq(0).should('have.text', 'keydown')
+        cy.get('li').eq(1).should('have.text', 'keypress')
+        cy.get('li').eq(2).should('have.text', 'keyup')
+        cy.get('li').eq(3).should('have.text', 'click')
+
+        cy.get('#target-input-checkbox').should('be.checked')
+
+        cy.get(`#target-input-checkbox`).type(' ')
+
+        cy.get('li').eq(4).should('have.text', 'keydown')
+        cy.get('li').eq(5).should('have.text', 'keypress')
+        cy.get('li').eq(6).should('have.text', 'keyup')
+        cy.get('li').eq(7).should('have.text', 'click')
+
+        cy.get('#target-input-checkbox').should('not.be.checked')
+      })
+    })
+
+    describe('radio', () => {
+      it('radio fires click event when it is not checked', () => {
+        cy.get(`#target-input-radio`).focus().type(' ')
+
+        cy.get('li').eq(0).should('have.text', 'keydown')
+        cy.get('li').eq(1).should('have.text', 'keypress')
+        cy.get('li').eq(2).should('have.text', 'keyup')
+        cy.get('li').eq(3).should('have.text', 'click')
+
+        cy.get('#target-input-radio').should('be.checked')
+      })
+
+      it('radio does not fire click event when it is checked', () => {
+        // We're clicking here first to make the radio element checked.
+        cy.get(`#target-input-radio`).click().type(' ')
+
+        // item 0 is click event. It's fired because we want to make sure our radio button is checked.
+        cy.get('li').eq(1).should('have.text', 'keydown')
+        cy.get('li').eq(2).should('have.text', 'keypress')
+        cy.get('li').eq(3).should('have.text', 'keyup')
+
+        cy.get('#target-input-radio').should('be.checked')
       })
     })
   })
@@ -1657,7 +1893,7 @@ describe('src/cy/commands/actions/type - #type', () => {
           href="#"
           target="_blank" alt="area" />
           </map>
-          <img usemap="#map" src="/__cypress/static/favicon.ico" alt="image" />
+          <img usemap="#map" src="/fixtures/media/cypress.png" alt="image" />
           `).prependTo(cy.$$('body'))
 
         let keydown = cy.stub()
@@ -3548,6 +3784,17 @@ describe('src/cy/commands/actions/type - #type', () => {
       .get('#shadow-element-1')
       .find('input', { includeShadowDom: true })
       .type('foo')
+    })
+
+    // https://github.com/cypress-io/cypress/issues/17531
+    it('text events propagate out of shadow root', () => {
+      cy.visit('fixtures/shadow-dom-type.html')
+
+      cy
+      .get('test-element').shadow()
+      .find('input').type('asdf')
+
+      cy.get('#result').should('have.text', 'typed')
     })
   })
 })

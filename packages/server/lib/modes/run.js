@@ -11,7 +11,6 @@ const logSymbols = require('log-symbols')
 
 const recordMode = require('./record')
 const errors = require('../errors')
-const ProjectStatic = require('../project_static')
 const Reporter = require('../reporter')
 const browserUtils = require('../browsers')
 const { openProject } = require('../open_project')
@@ -150,7 +149,7 @@ const formatNodeVersion = ({ resolvedNodeVersion, resolvedNodePath }, width) => 
   debug('formatting Node version. %o', { version: resolvedNodeVersion, path: resolvedNodePath })
 
   if (resolvedNodePath) {
-    return formatPath(`v${resolvedNodeVersion} (${resolvedNodePath})`, width)
+    return formatPath(`v${resolvedNodeVersion} ${gray(`(${resolvedNodePath})`)}`, width)
   }
 }
 
@@ -609,22 +608,34 @@ const openProjectCreate = (projectRoot, socketId, args) => {
   return openProject.create(projectRoot, args, options)
 }
 
-const createAndOpenProject = function (socketId, options) {
+async function checkAccess (folderPath) {
+  return fs.access(folderPath, fs.W_OK).catch((err) => {
+    if (['EACCES', 'EPERM'].includes(err.code)) {
+      // we cannot write due to folder permissions
+      return errors.warning('FOLDER_NOT_WRITABLE', folderPath)
+    }
+
+    throw err
+  })
+}
+
+const createAndOpenProject = async (socketId, options) => {
   const { projectRoot, projectId } = options
 
-  return ProjectStatic.ensureExists(projectRoot, options)
-  .then(() => {
-    // open this project without
-    // adding it to the global cache
-    return openProjectCreate(projectRoot, socketId, options)
-  })
-  .call('getProject')
+  await checkAccess(projectRoot)
+
+  return openProjectCreate(projectRoot, socketId, options)
+  .then((open_project) => open_project.getProject())
   .then((project) => {
-    return Promise.props({
+    return Promise.all([
       project,
-      config: project.getConfig(),
-      projectId: getProjectId(project, projectId),
-    })
+      project.getConfig(),
+      getProjectId(project, projectId),
+    ]).then(([project, config, projectId]) => ({
+      project,
+      config,
+      projectId,
+    }))
   })
 }
 
@@ -632,7 +643,7 @@ const removeOldProfiles = (browser) => {
   return browserUtils.removeOldProfiles(browser)
   .catch((err) => {
     // dont make removing old browsers profiles break the build
-    return errors.warning('CANNOT_REMOVE_OLD_BROWSER_PROFILES', err.stack)
+    return errors.warning('CANNOT_REMOVE_OLD_BROWSER_PROFILES', err)
   })
 }
 
@@ -648,7 +659,7 @@ const trashAssets = Promise.method((config = {}) => {
   ])
   .catch((err) => {
     // dont make trashing assets fail the build
-    return errors.warning('CANNOT_TRASH_ASSETS', err.stack)
+    return errors.warning('CANNOT_TRASH_ASSETS', err)
   })
 })
 
@@ -658,7 +669,7 @@ const createVideoRecording = function (videoName, options = {}) {
   const onError = _.once((err) => {
     // catch video recording failures and log them out
     // but don't let this affect the run at all
-    return errors.warning('VIDEO_RECORDING_FAILED', err.stack)
+    return errors.warning('VIDEO_RECORDING_FAILED', err)
   })
 
   return fs
@@ -715,7 +726,7 @@ const maybeStartVideoRecording = Promise.method(function (options = {}) {
 const warnVideoRecordingFailed = (err) => {
   // log that post processing was attempted
   // but failed and dont let this change the run exit code
-  errors.warning('VIDEO_POST_PROCESSING_FAILED', err.stack)
+  errors.warning('VIDEO_POST_PROCESSING_FAILED', err)
 }
 
 module.exports = {
@@ -1417,7 +1428,6 @@ module.exports = {
     })
 
     if (browser.family !== 'chromium' && !options.config.chromeWebSecurity) {
-      console.log()
       errors.warning('CHROME_WEB_SECURITY_NOT_SUPPORTED', browser.family)
     }
 
@@ -1449,7 +1459,7 @@ module.exports = {
           compressedVideoName: videoRecordProps.compressedVideoName,
           endVideoCapture: videoRecordProps.endVideoCapture,
           startedVideoCapture: videoRecordProps.startedVideoCapture,
-          exit: options.exit,
+          exit: config.exit,
           videoCompression: options.videoCompression,
           videoUploadOnPasses: options.videoUploadOnPasses,
           quiet: options.quiet,
@@ -1547,9 +1557,12 @@ module.exports = {
           trashAssets(config),
         ])
         .spread((sys = {}, browser = {}, specs = []) => {
-          // return only what is return to the specPattern
+          const originalSpecPattern = specPattern
+
           if (specPattern) {
-            specPattern = specsUtil.default.getPatternRelativeToProjectRoot(specPattern, projectRoot)
+            // remap the spec pattern for terminal display purposes
+            // relative to the projectRoot
+            specPattern = specsUtil.default.getPatternRelativeToPath(specPattern, projectRoot)
           }
 
           specs = specs.filter((spec) => {
@@ -1561,10 +1574,14 @@ module.exports = {
           if (!specs.length) {
             // did we use the spec pattern?
             if (specPattern) {
-              errors.throw('NO_SPECS_FOUND', projectRoot, specPattern)
+              // for error purposes: display the specPattern relative to the
+              // current working directly, not the project root as done above
+              const relativeCwdSpecPattern = specsUtil.default.getPatternRelativeToPath(originalSpecPattern, options.cwd)
+
+              errors.throw('NO_SPECS_FOUND', options.cwd, relativeCwdSpecPattern)
             } else {
               // else we looked in the integration folder
-              errors.throw('NO_SPECS_FOUND', config.integrationFolder, specPattern)
+              errors.throw('NO_SPECS_FOUND', config.integrationFolder)
             }
           }
 
@@ -1581,7 +1598,6 @@ module.exports = {
               beforeSpecRun,
               afterSpecRun,
               projectRoot,
-              specPattern,
               socketId,
               parallel,
               onError,
@@ -1593,11 +1609,11 @@ module.exports = {
               specs,
               sys,
               tag,
+              specPattern,
               videosFolder: config.videosFolder,
               video: config.video,
               videoCompression: config.videoCompression,
               videoUploadOnPasses: config.videoUploadOnPasses,
-              exit: options.exit,
               headed: options.headed,
               quiet: options.quiet,
               outputPath: options.outputPath,

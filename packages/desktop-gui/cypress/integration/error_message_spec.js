@@ -124,13 +124,33 @@ describe('Error Message', function () {
     .should('contain', 'this is markdown')
   })
 
-  it('shows error details if provided', function () {
+  it('shows error details collapsed if cypress originalError provided', function () {
+    this.detailsErr.originalError = {
+      ...this.detailsErr,
+      stack: this.detailsErr.details,
+      isCypressErr: true,
+    }
+
     cy.stub(this.ipc, 'onProjectError').yields(null, this.detailsErr)
     this.start()
 
     cy.get('.error').contains('ReferenceError: alsdkjf is not defined')
     cy.get('details.details-body').should('not.have.attr', 'open')
     cy.get('details.details-body').click().should('have.attr', 'open')
+    cy.get('details.details-body > summary').should('contain', 'ReferenceError')
+  })
+
+  it('shows error details open if non cypress originalError provided', function () {
+    this.detailsErr.originalError = {
+      ...this.detailsErr,
+      stack: this.detailsErr.details,
+    }
+
+    cy.stub(this.ipc, 'onProjectError').yields(null, this.detailsErr)
+    this.start()
+
+    cy.get('.error').contains('ReferenceError: alsdkjf is not defined')
+    cy.get('details.details-body').should('have.attr', 'open')
     cy.get('details.details-body > summary').should('contain', 'ReferenceError')
   })
 
@@ -173,7 +193,7 @@ describe('Error Message', function () {
     this.detailsErr = {
       name: 'Error',
       message: messageText,
-      stack: '[object Object]↵',
+      stack: 'ReferenceError: alsdkjf is not defined',
       details: 'ReferenceError: alsdkjf is not defined',
     }
 
@@ -219,7 +239,12 @@ describe('Error Message', function () {
   })
 
   it('does not overlay the nav/footer when long details are expanded (issue #4959)', function () {
-    this.detailsErr.details = `${this.detailsErr.details}${this.detailsErr.details}` // make details longer
+    this.detailsErr.originalError = {
+      ...this.detailsErr,
+      stack: `${this.detailsErr.details}${this.detailsErr.details}`, // make details longer
+      isCypressErr: true,
+    }
+
     this.ipc.openProject.rejects(this.detailsErr)
     this.start()
 
@@ -229,7 +254,12 @@ describe('Error Message', function () {
   })
 
   it('it scrolls the error details when details are expanded (issue #4959)', function () {
-    this.detailsErr.details = `${this.detailsErr.details}${this.detailsErr.details}` // make details longer
+    this.detailsErr.originalError = {
+      ...this.detailsErr,
+      stack: `${this.detailsErr.details}${this.detailsErr.details}`, // make details longer
+      isCypressErr: true,
+    }
+
     this.ipc.openProject.rejects(this.detailsErr)
     this.start()
 

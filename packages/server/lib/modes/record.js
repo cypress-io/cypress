@@ -7,6 +7,7 @@ const debugCiInfo = require('debug')('cypress:server:record:ci-info')
 const Promise = require('bluebird')
 const isForkPr = require('is-fork-pr')
 const commitInfo = require('@cypress/commit-info')
+
 const api = require('../api')
 const logger = require('../logger')
 const errors = require('../errors')
@@ -32,7 +33,7 @@ const logException = (err) => {
 // dont yell about any errors either
 
 const runningInternalTests = () => {
-  return env.get('CYPRESS_INTERNAL_E2E_TESTS') === '1'
+  return env.get('CYPRESS_INTERNAL_SYSTEM_TESTS') === '1'
 }
 
 const haveProjectIdAndKeyButNoRecordOption = (projectId, options) => {
@@ -252,14 +253,6 @@ const getCommitFromGitOrCi = (git) => {
   })
 }
 
-const usedTestsMessage = (limit, phrase) => {
-  if (_.isFinite(limit)) {
-    return `The limit is ${chalk.blue(limit)} ${phrase} results.`
-  }
-
-  return ''
-}
-
 const billingLink = (orgId) => {
   if (orgId) {
     return `https://on.cypress.io/dashboard/organizations/${orgId}/billing`
@@ -345,13 +338,15 @@ const createRun = Promise.method((options = {}) => {
       switch (warning.code) {
         case 'FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS':
           return errors.warning('FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS', {
-            usedTestsMessage: usedTestsMessage(warning.limit, 'private test'),
+            limit: warning.limit,
+            usedTestsMessage: 'private test',
             gracePeriodMessage: gracePeriodMessage(warning.gracePeriodEnds),
             link: billingLink(warning.orgId),
           })
         case 'FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_TESTS':
           return errors.warning('FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_TESTS', {
-            usedTestsMessage: usedTestsMessage(warning.limit, 'test'),
+            limit: warning.limit,
+            usedTestsMessage: 'test',
             gracePeriodMessage: gracePeriodMessage(warning.gracePeriodEnds),
             link: billingLink(warning.orgId),
           })
@@ -363,19 +358,22 @@ const createRun = Promise.method((options = {}) => {
         case 'FREE_PLAN_EXCEEDS_MONTHLY_TESTS_V2':
           return errors.warning('PLAN_EXCEEDS_MONTHLY_TESTS', {
             planType: 'free',
-            usedTestsMessage: usedTestsMessage(warning.limit, 'test'),
+            limit: warning.limit,
+            usedTestsMessage: 'test',
             link: billingLink(warning.orgId),
           })
         case 'PAID_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS':
           return errors.warning('PLAN_EXCEEDS_MONTHLY_TESTS', {
             planType: 'current',
-            usedTestsMessage: usedTestsMessage(warning.limit, 'private test'),
+            limit: warning.limit,
+            usedTestsMessage: 'private test',
             link: billingLink(warning.orgId),
           })
         case 'PAID_PLAN_EXCEEDS_MONTHLY_TESTS':
           return errors.warning('PLAN_EXCEEDS_MONTHLY_TESTS', {
             planType: 'current',
-            usedTestsMessage: usedTestsMessage(warning.limit, 'test'),
+            limit: warning.limit,
+            usedTestsMessage: 'test',
             link: billingLink(warning.orgId),
           })
         case 'PLAN_IN_GRACE_PERIOD_RUN_GROUPING_FEATURE_USED':
@@ -415,12 +413,14 @@ const createRun = Promise.method((options = {}) => {
         switch (code) {
           case 'FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS':
             return errors.throw('FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS', {
-              usedTestsMessage: usedTestsMessage(limit, 'private test'),
+              limit,
+              usedTestsMessage: 'private test',
               link: billingLink(orgId),
             })
           case 'FREE_PLAN_EXCEEDS_MONTHLY_TESTS':
             return errors.throw('FREE_PLAN_EXCEEDS_MONTHLY_TESTS', {
-              usedTestsMessage: usedTestsMessage(limit, 'test'),
+              limit,
+              usedTestsMessage: 'test',
               link: billingLink(orgId),
             })
           case 'PARALLEL_FEATURE_NOT_AVAILABLE_IN_PLAN':
@@ -749,7 +749,7 @@ const createRunAndRecordSpecs = (options = {}) => {
           return _.pick({
             ...v,
             clientId: v.id,
-            config: v._testConfig || null,
+            config: v._testConfig?.unverifiedTestConfig || null,
             title: v._titlePath,
             hookIds: v.hooks.map((hook) => hook.hookId),
           },

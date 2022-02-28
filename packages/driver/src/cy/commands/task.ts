@@ -7,7 +7,8 @@ import $stackUtils from '../../cypress/stack_utils'
 
 export default (Commands, Cypress, cy) => {
   Commands.addAll({
-    task (task, arg, options = {}) {
+    // TODO: any -> Partial<Cypress.Loggable & Cypress.Timeoutable>
+    task (task, arg, options: any = {}) {
       const userOptions = options
 
       options = _.defaults({}, userOptions, {

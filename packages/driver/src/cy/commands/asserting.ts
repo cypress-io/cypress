@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import _ from 'lodash'
 import Promise from 'bluebird'
 
@@ -27,7 +25,7 @@ export default function (Commands, Cypress, cy, state) {
 
   const shouldFn = function (subject, chainers, ...args) {
     if (_.isFunction(chainers)) {
-      return shouldFnWithCallback.apply(this, [subject, chainers, ...args]) // eslint-disable-line prefer-rest-params
+      return shouldFnWithCallback.apply(this, [subject, chainers])
     }
 
     let exp = cy.expect(subject).to
@@ -40,7 +38,7 @@ export default function (Commands, Cypress, cy, state) {
       const log = Cypress.log({
         name: 'should',
         type: 'child',
-        message: [].concat(originalChainers, args),
+        message: ([] as any[]).concat(originalChainers, args),
         end: true,
         snapshot: true,
         error: err,
@@ -69,7 +67,7 @@ export default function (Commands, Cypress, cy, state) {
         if (_.isFunction(cmd)) {
           try {
             return cmd.apply(memo, args)
-          } catch (err) {
+          } catch (err: any) {
             // if we made it all the way to the actual
             // assertion but its set to retry false then
             // we need to log out this .should since there
@@ -134,13 +132,15 @@ export default function (Commands, Cypress, cy, state) {
 
   Commands.addAll({ type: 'assertion', prevSubject: true }, {
     should () {
+      // Cast to `any` to pass all arguments
       // eslint-disable-next-line prefer-rest-params
-      return shouldFn.apply(this, arguments)
+      return shouldFn.apply(this, arguments as any)
     },
 
     and () {
+      // Cast to `any` to pass all arguments
       // eslint-disable-next-line prefer-rest-params
-      return shouldFn.apply(this, arguments)
+      return shouldFn.apply(this, arguments as any)
     },
   })
 }

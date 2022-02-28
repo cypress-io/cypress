@@ -1,11 +1,17 @@
 require('../../spec_helper')
 
+const chalk = require('chalk')
+const snapshot = require('snap-shot-it')
+const stripAnsi = require('strip-ansi')
 const browsers = require(`${root}../lib/browsers`)
 const utils = require(`${root}../lib/browsers/utils`)
-const snapshot = require('snap-shot-it')
+
+const normalizeSnapshot = (str) => {
+  return snapshot(stripAnsi(str))
+}
 
 const normalizeBrowsers = (message) => {
-  return message.replace(/(found are: ).*/, '$1chrome, firefox, electron')
+  return message.replace(/(found on your system are:)(?:\n - .*)*/, '$1\n - chrome\n - firefox\n - electron')
 }
 
 // When we added component testing mode, we added the option for electron to be omitted
@@ -64,7 +70,7 @@ describe('lib/browsers/index', () => {
       return expect(browsers.ensureAndGetByNameOrPath('browserNotGonnaBeFound'))
       .to.be.rejectedWith({ type: 'BROWSER_NOT_FOUND_BY_NAME' })
       .then((err) => {
-        return snapshot(normalizeBrowsers(err.message))
+        return normalizeSnapshot(normalizeBrowsers(stripAnsi(err.message)))
       })
     })
 
@@ -78,13 +84,13 @@ describe('lib/browsers/index', () => {
       return expect(browsers.ensureAndGetByNameOrPath('canary'))
       .to.be.rejectedWith({ type: 'BROWSER_NOT_FOUND_BY_NAME' })
       .then((err) => {
-        return snapshot(err.message)
+        return normalizeSnapshot(err.message)
       })
     })
   })
 
   context('.open', () => {
-    it('throws an error if browser family doesn\'t exist', () => {
+    it(`throws an error if browser family doesn't exist`, () => {
       return browsers.open({
         name: 'foo-bad-bang',
         family: 'foo-bad',
@@ -98,7 +104,7 @@ describe('lib/browsers/index', () => {
         // we will get good error message that includes the "err" object
         expect(err).to.have.property('type').to.eq('BROWSER_NOT_FOUND_BY_NAME')
 
-        expect(err).to.have.property('message').to.contain('\'foo-bad-bang\' was not found on your system')
+        expect(err).to.have.property('message').to.contain(`Browser: ${chalk.yellow('foo-bad-bang')} was not found on your system`)
       })
     })
   })

@@ -5,10 +5,13 @@ const { allowModuleSourceInPlace } = require('../utils/webpack-helpers')
 const { addCypressToWebpackEslintRulesInPlace } = require('../utils/eslint-helpers')
 const { getTranspileFolders } = require('../utils/get-transpile-folders')
 const { addFolderToBabelLoaderTranspileInPlace } = require('../utils/babel-helpers')
+const { reactScriptsFiveModifications, isReactScripts5 } = require('../../dist/react-scripts/reactScriptsFive')
 
-module.exports = function findReactScriptsWebpackConfig (config, {
-  webpackConfigPath,
-} = { webpackConfigPath: 'react-scripts/config/webpack.config' }) {
+module.exports = function findReactScriptsWebpackConfig (config, devServerOptions) {
+  const webpackConfigPath = (devServerOptions && devServerOptions.webpackConfigPath)
+    ? devServerOptions.webpackConfigPath
+    : 'react-scripts/config/webpack.config'
+
   // this is required because
   // 1) we use our own HMR and we don't need react-refresh transpiling overhead
   // 2) it doesn't work with process.env=test @see https://github.com/cypress-io/cypress-realworld-app/pull/832
@@ -27,6 +30,12 @@ module.exports = function findReactScriptsWebpackConfig (config, {
     allowModuleSourceInPlace(cypressFolder, webpackConfig)
     addFolderToBabelLoaderTranspileInPlace(cypressFolder, webpackConfig)
   })
+
+  if (isReactScripts5) {
+    debug('Modifying configuration for react-scripts@5')
+
+    reactScriptsFiveModifications(webpackConfig)
+  }
 
   debug('resolved webpack config: %o', webpackConfig)
 

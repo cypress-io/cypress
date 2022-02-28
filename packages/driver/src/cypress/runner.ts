@@ -17,11 +17,13 @@ const mochaCtxKeysRe = /^(_runnable|test)$/
 const betweenQuotesRe = /\"(.+?)\"/
 
 const HOOKS = 'beforeAll beforeEach afterEach afterAll'.split(' ')
+const TEST_BEFORE_RUN_ASYNC_EVENT = 'runner:test:before:run:async'
+// event fired before hooks and test execution
 const TEST_BEFORE_RUN_EVENT = 'runner:test:before:run'
 const TEST_AFTER_RUN_EVENT = 'runner:test:after:run'
 
 const RUNNABLE_LOGS = 'routes agents commands hooks'.split(' ')
-const RUNNABLE_PROPS = '_testConfig id order title _titlePath root hookName hookId err state failedFromHookId body speed type duration wallClockStartedAt wallClockDuration timings file originalTitle invocationDetails final currentRetry retries'.split(' ')
+const RUNNABLE_PROPS = '_testConfig id order title _titlePath root hookName hookId err state failedFromHookId body speed type duration wallClockStartedAt wallClockDuration timings file originalTitle invocationDetails final currentRetry retries _slow'.split(' ')
 
 const debug = debugFn('cypress:driver:runner')
 const debugErrors = debugFn('cypress:driver:errors')
@@ -48,8 +50,8 @@ const fired = (event, runnable) => {
 
 const testBeforeRunAsync = (test, Cypress) => {
   return Promise.try(() => {
-    if (!fired('runner:test:before:run:async', test)) {
-      return fire('runner:test:before:run:async', test, Cypress)
+    if (!fired(TEST_BEFORE_RUN_ASYNC_EVENT, test)) {
+      return fire(TEST_BEFORE_RUN_ASYNC_EVENT, test, Cypress)
     }
   })
 }
@@ -73,7 +75,7 @@ const testAfterRun = (test, Cypress) => {
       // if the test:after:run listener throws it's likely spec code
       // Since the test status has already been emitted this can't affect the test status.
       // Let's just log the error to console
-      // TODO: revist when we handle uncaught exceptions/rejections between tests
+      // TODO: revisit when we handle uncaught exceptions/rejections between tests
       // eslint-disable-next-line no-console
       console.error(e)
     }
@@ -336,7 +338,7 @@ const isRootSuite = (suite) => {
 }
 
 const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, getTests) => {
-  // bail if our _runner doesnt have a hook.
+  // bail if our _runner doesn't have a hook.
   // useful in tests
   if (!_runner.hook) {
     return
@@ -914,9 +916,9 @@ const _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, se
   // })
 
   /**
-     * Mocha retry event is only fired in Mocha version 6+
-     * https://github.com/mochajs/mocha/commit/2a76dd7589e4a1ed14dd2a33ab89f182e4c4a050
-     */
+   * Mocha retry event is only fired in Mocha version 6+
+   * https://github.com/mochajs/mocha/commit/2a76dd7589e4a1ed14dd2a33ab89f182e4c4a050
+   */
   _runner.on('retry', (test, err) => {
     test.err = $errUtils.wrapErr(err)
     Cypress.action('runner:retry', wrap(test), test.err)
@@ -1133,7 +1135,7 @@ export default {
     }
 
     const onRunnable = (r) => {
-      // set defualt retries at onRunnable time instead of onRunnableRun
+      // set default retries at onRunnable time instead of onRunnableRun
       return _runnables.push(r)
     }
 
@@ -1213,6 +1215,7 @@ export default {
       const isAfterEachHook = isHook && !!hookName.match(/after each/)
       const retryAbleRunnable = isTest || isBeforeEachHook || isAfterEachHook
       const willRetry = (test._currentRetry < test._retries) && retryAbleRunnable
+      const isTestConfigOverride = !fired(TEST_BEFORE_RUN_EVENT, test)
 
       const fail = function () {
         return err
@@ -1227,13 +1230,19 @@ export default {
           test.final = false
         }
 
-        if (willRetry && isBeforeEachHook) {
+        if (isTestConfigOverride) {
+          // let the runner handle the error
+          delete runnable.err
+        }
+
+        if ((willRetry || isTestConfigOverride) && isBeforeEachHook) {
           delete runnable.err
           test._retriesBeforeEachFailedTestFn = test.fn
 
           // this prevents afterEach hooks that exist at a deeper level than the failing one from running
           // we will always skip remaining beforeEach hooks since they will always be same level or deeper
           test._skipHooksWithLevelGreaterThan = runnable.titlePath().length
+
           setHookFailureProps(test, runnable, err)
           test.fn = function () {
             throw err
@@ -1243,7 +1252,7 @@ export default {
         }
 
         if (willRetry && isAfterEachHook) {
-          // if we've already failed this attempt from an afterEach hook then we've already enqueud another attempt
+          // if we've already failed this attempt from an afterEach hook then we've already enqueued another attempt
           // so return early
           if (test._retriedFromAfterEachHook) {
             return noFail()
@@ -1370,10 +1379,9 @@ export default {
         }
 
         // closure for calculating the actual
-        // runtime of a runnables fn exection duration
+        // runtime of a runnables fn execution duration
         // and also the run of the runnable:after:run:async event
         let lifecycleStart
-        let wallClockStartedAt = null
         let wallClockEnd = null
         let fnDurationStart = null
         let fnDurationEnd = null
@@ -1383,7 +1391,7 @@ export default {
         // when this is a hook, capture the real start
         // date so we can calculate our test's duration
         // including all of its hooks
-        wallClockStartedAt = new Date()
+        const wallClockStartedAt = new Date()
 
         if (!test.wallClockStartedAt) {
           // if we don't have lifecycle timings yet
@@ -1394,27 +1402,13 @@ export default {
           test.wallClockStartedAt = wallClockStartedAt
         }
 
-        // if this isnt a hook, then the name is 'test'
-        const hookName = runnable.type === 'hook' ? getHookName(runnable) : 'test'
+        const isHook = runnable.type === 'hook'
+
+        // if this isn't a hook, then the name is 'test'
+        const hookName = isHook ? getHookName(runnable) : 'test'
 
         // set hook id to hook id or test id
-        const hookId = runnable.type === 'hook' ? runnable.hookId : runnable.id
-
-        // if we haven't yet fired this event for this test
-        // that means that we need to reset the previous state
-        // of cy - since we now have a new 'test' and all of the
-        // associated _runnables will share this state
-        if (!fired(TEST_BEFORE_RUN_EVENT, test)) {
-          fire(TEST_BEFORE_RUN_EVENT, test, Cypress)
-
-          // this is the earliest we can set test._retries since test:before:run
-          // will load in testConfigOverrides (per test configuration)
-          const retries = Cypress.getTestRetries() ?? -1
-
-          test._retries = retries
-        }
-
-        const isHook = runnable.type === 'hook'
+        const hookId = isHook ? runnable.hookId : runnable.id
 
         const isAfterEachHook = isHook && hookName.match(/after each/)
         const isBeforeEachHook = isHook && hookName.match(/before each/)
@@ -1518,22 +1512,32 @@ export default {
           })
         }
 
-        cy.state('duringUserTestExecution', false)
-
-        // our runnable is about to run, so let cy know. this enables
-        // us to always have a correct runnable set even when we are
-        // running lifecycle events
-        // and also get back a function result handler that we use as
-        // an async seam
-        cy.setRunnable(runnable, hookId)
-
         // TODO: handle promise timeouts here!
         // whenever any runnable is about to run
         // we figure out what test its associated to
         // if its a hook, and then we fire the
         // test:before:run:async action if its not
         // been fired before for this test
-        return testBeforeRunAsync(test, Cypress)
+        return Promise.try(() => {
+          if (!fired(TEST_BEFORE_RUN_EVENT, test)) {
+            cy.reset(test)
+            test.slow(Cypress.config('slowTestThreshold'))
+            test._retries = Cypress.getTestRetries() ?? -1
+            fire(TEST_BEFORE_RUN_EVENT, test, Cypress)
+          }
+
+          cy.state('duringUserTestExecution', false)
+
+          // our runnable is about to run, so let cy know. this enables
+          // us to always have a correct runnable set even when we are
+          // running lifecycle events
+          // and also get back a function result handler that we use as
+          // an async seam
+          cy.setRunnable(runnable, hookId)
+        })
+        .then(() => {
+          return testBeforeRunAsync(test, Cypress)
+        })
         .catch((err) => {
           // TODO: if our async tasks fail
           // then allow us to cause the test

@@ -1,13 +1,11 @@
-// @ts-nocheck
-
 import _ from 'lodash'
 import Promise from 'bluebird'
 
 import $dom from '../../dom'
 import $utils from '../../cypress/utils'
-import $errUtils from '../../cypress/error_utils'
+import $errUtils, { CypressError } from '../../cypress/error_utils'
 
-const returnFalseIfThenable = (key, ...args) => {
+const returnFalseIfThenable = (key, ...args): boolean => {
   if ((key === 'then') && _.isFunction(args[0]) && _.isFunction(args[1])) {
     // https://github.com/cypress-io/cypress/issues/111
     // if we're inside of a promise then the promise lib will naturally
@@ -22,6 +20,8 @@ const returnFalseIfThenable = (key, ...args) => {
 
     return false
   }
+
+  return true
 }
 
 const primitiveToObject = (memo) => {
@@ -181,7 +181,7 @@ export default function (Commands, Cypress, cy, state) {
 
   const invokeFn = (subject, userOptionsOrStr, ...args) => {
     const userOptionsPassed = _.isObject(userOptionsOrStr) && !_.isFunction(userOptionsOrStr)
-    let userOptions = null
+    let userOptions: Record<string, any> | null = null
     let str = null
 
     if (!userOptionsPassed) {
@@ -219,7 +219,7 @@ export default function (Commands, Cypress, cy, state) {
 
     const message = getMessage()
 
-    let traversalErr = null
+    let traversalErr: CypressError | null = null
 
     // copy userOptions because _log is added below.
     const options = _.extend({}, userOptions)
@@ -568,7 +568,7 @@ export default function (Commands, Cypress, cy, state) {
           return ret
         }
 
-        return thenFn(el, userOptions, callback, state)
+        return thenFn(el, userOptions, callback)
       }
 
       // generate a real array since bluebird is finicky and
@@ -586,9 +586,9 @@ export default function (Commands, Cypress, cy, state) {
   // cy.resolve + cy.wrap are upgraded to handle
   // promises
   Commands.addAll({ prevSubject: 'optional' }, {
-    then () {
+    then (subject, userOptions, fn) {
       // eslint-disable-next-line prefer-rest-params
-      return thenFn.apply(this, arguments)
+      return thenFn.apply(this, [subject, userOptions, fn])
     },
   })
 

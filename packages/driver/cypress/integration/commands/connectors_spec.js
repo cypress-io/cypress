@@ -1,3 +1,4 @@
+const { assertLogLength } = require('../../support/utils')
 const { _, Promise, $ } = Cypress
 
 describe('src/cy/commands/connectors', () => {
@@ -240,7 +241,7 @@ describe('src/cy/commands/connectors', () => {
           cy.on('fail', (err) => {
             const { lastLog } = this
 
-            expect(this.logs.length).to.eq(1)
+            assertLogLength(this.logs, 1)
             expect(lastLog.get('error')).to.eq(err)
             expect(err.message).to.include('`cy.then()` timed out after waiting `150ms`.')
 
@@ -256,7 +257,7 @@ describe('src/cy/commands/connectors', () => {
           cy.on('fail', (err) => {
             const { lastLog } = this
 
-            expect(this.logs.length).to.eq(1)
+            assertLogLength(this.logs, 1)
             expect(lastLog.get('error')).to.eq(err)
             expect(err.message).to.include('`cy.then()` failed because you are mixing up async and sync code.')
 
@@ -276,7 +277,7 @@ describe('src/cy/commands/connectors', () => {
           cy.on('fail', () => {
             listeners.push(cy.listeners('command:enqueued').length)
 
-            expect(this.logs.length).to.eq(1)
+            assertLogLength(this.logs, 1)
             expect(listeners).to.deep.eq([1, 0])
 
             done()
@@ -404,7 +405,7 @@ describe('src/cy/commands/connectors', () => {
           }
 
           cy.on('fail', () => {
-            expect(this.logs.length).to.eq(3)
+            assertLogLength(this.logs, 3)
 
             done()
           })
@@ -1000,7 +1001,7 @@ describe('src/cy/commands/connectors', () => {
           cy.on('fail', (err) => {
             const { lastLog } = this
 
-            expect(this.logs.length).to.eq(1)
+            assertLogLength(this.logs, 1)
             expect(lastLog.get('error')).to.eq(err)
 
             done()
@@ -1956,7 +1957,7 @@ describe('src/cy/commands/connectors', () => {
         it('can time out', function (done) {
           cy.on('fail', (err) => {
             // get + each
-            expect(this.logs.length).to.eq(2)
+            assertLogLength(this.logs, 2)
             expect(err.message).to.include('`cy.each()` timed out after waiting `100ms`.\n\nYour callback function returned a promise that never resolved.')
             expect(err.docsUrl).to.include('https://on.cypress.io/each')
 
@@ -1977,7 +1978,7 @@ describe('src/cy/commands/connectors', () => {
 
           cy.on('fail', (err) => {
             // get + each
-            expect(this.logs.length).to.eq(2)
+            assertLogLength(this.logs, 2)
             expect(err.message).to.include('`cy.each()` must be passed a callback function.')
             expect(err.docsUrl).to.eq('https://on.cypress.io/each')
 
@@ -1990,7 +1991,7 @@ describe('src/cy/commands/connectors', () => {
         it('throws when not passed a number', function (done) {
           cy.on('fail', (err) => {
             // get + each
-            expect(this.logs.length).to.eq(2)
+            assertLogLength(this.logs, 2)
             expect(err.message).to.include('`cy.each()` can only operate on an array like subject. Your subject was: `100`')
             expect(err.docsUrl).to.eq('https://on.cypress.io/each')
 
@@ -2003,7 +2004,7 @@ describe('src/cy/commands/connectors', () => {
         it('throws when not passed an array like structure', function (done) {
           cy.on('fail', (err) => {
             // get + each
-            expect(this.logs.length).to.eq(2)
+            assertLogLength(this.logs, 2)
             expect(err.message).to.include('`cy.each()` can only operate on an array like subject. Your subject was: `{}`')
             expect(err.docsUrl).to.eq('https://on.cypress.io/each')
 

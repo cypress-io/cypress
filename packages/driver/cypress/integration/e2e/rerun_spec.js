@@ -4,12 +4,8 @@
 
 // store these on our outer top window
 // so they are globally preserved
-if (window.top.hasRunOnce == null) {
-  window.top.hasRunOnce = false
-}
-
-if (window.top.previousHash == null) {
-  window.top.previousHash = window.top.location.hash
+if (window.top.runCount == null) {
+  window.top.runCount = 0
 }
 
 const isTextTerminal = Cypress.config('isTextTerminal')
@@ -20,26 +16,19 @@ describe('rerun state bugs', () => {
   // but we get the hashchange coverage for free on this.
   it('stores viewport globally and does not hang on re-runs', () => {
     cy.viewport(500, 500).then(() => {
-      if (!window.top.hasRunOnce) {
+      window.top.runCount++
+      if (window.top.runCount === 1) {
         // turn off mocha events for a second
         Cypress.config('isTextTerminal', false)
 
-        // 1st time around
-        window.top.hasRunOnce = true
-
-        // cause a rerun event to occur
-        // by changing the hash
-        let { hash } = window.top.location
-
-        window.top.location.hash = `${hash}?rerun`
+        // cause a rerun event to occur by triggering a hash change
+        window.top.dispatchEvent(new Event('hashchange'))
+      } else if (window.top.runCount === 2) {
+        // Second time, do nothing, with mocha events still disabled
       } else {
-        if (window.top.location.hash === window.top.previousHash) {
-          // 3rd time around
-          // let the mocha end events fire if they're supposed to
-          Cypress.config('isTextTerminal', isTextTerminal)
-        }
-
-        window.top.location.hash = window.top.previousHash
+        // 3rd time around
+        // let the mocha end events fire if they're supposed to
+        Cypress.config('isTextTerminal', isTextTerminal)
       }
     })
   })

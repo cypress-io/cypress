@@ -33,7 +33,7 @@ export default (Commands, Cypress, cy, state) => {
   })
 
   Commands.addAll({
-    clearLocalStorage (keys, options = {}) {
+    clearLocalStorage (keys, options: Partial<Cypress.Loggable> = {}) {
       if (_.isPlainObject(keys)) {
         options = keys
         keys = null

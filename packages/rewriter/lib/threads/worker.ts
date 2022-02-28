@@ -61,7 +61,7 @@ parentPort!.on('message', async (req: RewriteRequest) => {
     const output = await _getOutput()
 
     _reply({ output, threadMs: _getThreadMs() })
-  } catch (error) {
+  } catch (error: any) {
     _reply({ error, threadMs: _getThreadMs() })
   }
 

@@ -1,0 +1,53 @@
+diff --git a/node_modules/snap-shot-it/src/index.js b/node_modules/snap-shot-it/src/index.js
+index 0fb68da..d1ff31a 100644
+--- a/node_modules/snap-shot-it/src/index.js
++++ b/node_modules/snap-shot-it/src/index.js
+@@ -16,8 +16,11 @@ const itsName = require('its-name')
+ 
+ // save current directory right away to avoid any surprises later
+ // when some random tests change it
+-const cwd = process.cwd()
+-const relativeToCwd = path.relative.bind(null, cwd)
++// cache CWD globally so we can reset it in the case where a test
++// changes cwd before/after this file is required in a non-deterministic
++// fashion (like in the autobalanced system tests)
++global.CACHED_CWD_FOR_SNAP_SHOT_IT = process.cwd()
++const relativeToCwd = (...args) => path.relative(global.CACHED_CWD_FOR_SNAP_SHOT_IT, ...args)
+ 
+ debug('loading snap-shot-it')
+ const EXTENSION = '.js'
+@@ -239,7 +242,7 @@ function snapshot (value) {
+     compare: R.noop,
+     store: R.noop
+   }
+-  const packageConfigOptions = utils.getPackageConfigOptions(cwd)
++  const packageConfigOptions = utils.getPackageConfigOptions(global.CACHED_CWD_FOR_SNAP_SHOT_IT)
+   const opts = utils.mergeConfigOptions(
+     defaultOptions,
+     packageConfigOptions,
+@@ -254,12 +257,12 @@ function snapshot (value) {
+   debug('prune options %o', pruneSnapshotsOptions)
+ 
+   const compare = opts.compare
+-    ? utils.load(cwd, opts.compare)
++    ? utils.load(global.CACHED_CWD_FOR_SNAP_SHOT_IT, opts.compare)
+     : require('snap-shot-compare')
+-  const store = opts.store ? utils.load(cwd, opts.store) : null
++  const store = opts.store ? utils.load(global.CACHED_CWD_FOR_SNAP_SHOT_IT, opts.store) : null
+ 
+   const preCompare = opts['pre-compare']
+-    ? utils.load(cwd, opts['pre-compare'])
++    ? utils.load(global.CACHED_CWD_FOR_SNAP_SHOT_IT, opts['pre-compare'])
+     : R.identity
+   const what = preCompare(value)
+ 
+@@ -323,6 +326,9 @@ function snapshot (value) {
+ 
+       const prevInfo = findExistingSnapshotKey(info)
+       if (prevInfo) {
++        if (info.allowDuplicate) {
++          return
++        }
+         debug('found duplicate snapshot name: %s', prevInfo.key)
+         console.error(
+           'Snapshot error was caused by the duplicate snapshot name'

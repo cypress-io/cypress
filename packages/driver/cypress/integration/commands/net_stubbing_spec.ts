@@ -11,8 +11,7 @@ const testFail = (cb, expectedDocsUrl = 'https://on.cypress.io/intercept') => {
   })
 }
 
-// TODO: Network retries leak between tests, causing flake.
-describe('network stubbing', { retries: 2 }, function () {
+describe('network stubbing', function () {
   const { $, _, sinon, state, Promise } = Cypress
 
   beforeEach(function () {
@@ -1320,6 +1319,61 @@ describe('network stubbing', { retries: 2 }, function () {
         cy.contains('#result', '""').should('be.visible')
       })
 
+      // @see https://github.com/cypress-io/cypress/issues/19330
+      // @see https://github.com/cypress-io/cypress/issues/19344
+      it('load fixture as Buffer when encoding is null', function () {
+        // call through normally on everything
+        cy.spy(Cypress, 'backend')
+
+        cy.intercept('/fixtures/media/small.mp4', {
+          fixture: 'media/small.mp4,null',
+        }).as('video')
+
+        cy.visit('/fixtures/video.html')
+        .then(() => {
+          // @ts-ignore .getCall is a Sinon spy command
+          expect(Cypress.backend.getCall(0)).to.be.calledWithMatch(
+            'net',
+            'route:added',
+            {
+              staticResponse: {
+                fixture: {
+                  filePath: 'media/small.mp4',
+                  encoding: null,
+                },
+              },
+            },
+          )
+        })
+      })
+
+      it('load fixture with specified encoding', function () {
+        // call through normally on everything
+        cy.spy(Cypress, 'backend')
+
+        cy.intercept('non-existing-image.png', {
+          headers: { 'content-type': 'image/jpeg' },
+          fixture: 'media/cypress.png,base64',
+        }).as('video')
+
+        cy.visit('/fixtures/img-embed.html')
+        .then(() => {
+          // @ts-ignore .getCall is a Sinon spy command
+          expect(Cypress.backend.getCall(0)).to.be.calledWithMatch(
+            'net',
+            'route:added',
+            {
+              staticResponse: {
+                fixture: {
+                  filePath: 'media/cypress.png',
+                  encoding: 'base64',
+                },
+              },
+            },
+          )
+        })
+      })
+
       // @see https://github.com/cypress-io/cypress/issues/8623
       it('works with images', function () {
         cy.visit('/fixtures/img-embed.html')
@@ -1638,12 +1692,10 @@ describe('network stubbing', { retries: 2 }, function () {
         delay: 5000,
       }).as('create')
 
-      cy.window().then((win) => {
-        win.eval(
-          `fetch("/post-only", {
-            method: 'POST', // *GET, POST, PUT, DELETE, etc.
-          });`,
-        )
+      cy.then(() => {
+        fetch('/post-only', {
+          method: 'POST', // *GET, POST, PUT, DELETE, etc.
+        })
       })
 
       cy.wait('@create', { timeout: 500 })
@@ -3129,7 +3181,7 @@ describe('network stubbing', { retries: 2 }, function () {
     })
   })
 
-  context('waiting and aliasing', function () {
+  context('waiting and aliasing', { defaultCommandTimeout: 10000 }, function () {
     const testFailWaiting = (cb) => testFail(cb, 'https://on.cypress.io/wait')
 
     it('can wait on a single response using "alias"', function () {
@@ -3223,8 +3275,8 @@ describe('network stubbing', { retries: 2 }, function () {
         $.get('/foo')
         $.get('/foo')
       })
-      .wait('@foo.bar', { timeout: 100 })
-      .wait('@foo.bar', { timeout: 100 })
+      .wait('@foo.bar', { timeout: 500 })
+      .wait('@foo.bar', { timeout: 500 })
     })
 
     it('can incrementally wait on requests', function () {

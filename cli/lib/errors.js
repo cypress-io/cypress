@@ -1,6 +1,5 @@
 const chalk = require('chalk')
 const { stripIndent, stripIndents } = require('common-tags')
-const { merge } = require('ramda')
 const la = require('lazy-ass')
 const is = require('check-more-types')
 
@@ -37,6 +36,13 @@ const invalidRunProjectPath = {
 
       ${chalk.blue(runDocumentationUrl)}
   `,
+}
+
+const invalidOS = {
+  description: 'The Cypress App could not be installed. Your machine does not meet the operating system requirements.',
+  solution: stripIndent`
+
+  ${chalk.blue('https://on.cypress.io/guides/getting-started/installing-cypress#system-requirements')}`,
 }
 
 const failedDownload = {
@@ -241,7 +247,7 @@ const CYPRESS_RUN_BINARY = {
 
 function addPlatformInformation (info) {
   return util.getPlatformInfo().then((platform) => {
-    return merge(info, { platform })
+    return { ...info, platform }
   })
 }
 
@@ -391,6 +397,7 @@ module.exports = {
     missingApp,
     notInstalledCI,
     missingDependency,
+    invalidOS,
     invalidSmokeTestDisplayError,
     versionMismatch,
     binaryNotExecutable,

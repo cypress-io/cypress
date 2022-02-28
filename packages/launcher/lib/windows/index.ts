@@ -1,7 +1,6 @@
 import * as fse from 'fs-extra'
 import os from 'os'
 import { join, normalize, win32 } from 'path'
-import { tap, trim, prop } from 'ramda'
 import { get } from 'lodash'
 import { notInstalledErr } from '../errors'
 import { log } from '../log'
@@ -151,7 +150,11 @@ function getWindowsBrowser (browser: Browser): Promise<FoundBrowser> {
       }
 
       return getVersionString(path)
-      .then(tap(log))
+      .then((val) => {
+        log(val)
+
+        return val
+      })
       .then(getVersion)
       .then((version: string) => {
         log('browser %s at \'%s\' version %s', browser.name, exePath, version)
@@ -193,8 +196,8 @@ export function getVersionString (path: string) {
   ]
 
   return utils.execa('wmic', args)
-  .then(prop('stdout'))
-  .then(trim)
+  .then((val) => val.stdout)
+  .then((val) => val.trim())
 }
 
 export function getVersionNumber (version: string) {

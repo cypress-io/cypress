@@ -7,10 +7,14 @@ import { webpackDevServerFacts } from './webpackDevServerFacts'
 export interface StartDevServer extends UserWebpackDevServerOptions {
   /* this is the Cypress dev server configuration object */
   options: Cypress.DevServerConfig
-  /* support passing a path to the user's webpack config */
-  webpackConfig?: Record<string, any>
+  /* Base webpack config object used for loading component testing */
+  webpackConfig?: WebpackConfigurationWithDevServer
   /* base html template to render in AUT */
   template?: string
+}
+
+export interface WebpackConfigurationWithDevServer extends webpack.Configuration {
+  devServer?: WebpackDevServer.Configuration
 }
 
 const debug = Debug('cypress:webpack-dev-server:start')
@@ -50,7 +54,7 @@ export async function start ({ webpackConfig: userWebpackConfig, template, optio
   debug('starting webpack dev server')
   let webpackDevServerConfig: WebpackDevServer.Configuration = {
     ...userWebpackConfig?.devServer,
-    hot: true,
+    hot: false,
   }
 
   if (webpackDevServerFacts.isV3()) {
@@ -79,7 +83,7 @@ export async function start ({ webpackConfig: userWebpackConfig, template, optio
       },
     }
 
-    // @ts-expect-error Webpack types are clashing between Webpack and WebpackDevServer
+    // @ts-ignore Webpack types are clashing between Webpack and WebpackDevServer
     return new WebpackDevServer(webpackDevServerConfig, compiler)
   }
 

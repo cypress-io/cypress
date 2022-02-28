@@ -9,7 +9,7 @@ const ProjectBase = require(`${root}lib/project-base`).ProjectBase
 const scaffold = require(`${root}lib/scaffold`)
 const { fs } = require(`${root}lib/util/fs`)
 const glob = require(`${root}lib/util/glob`)
-const Fixtures = require(`${root}/test/support/helpers/fixtures`)
+const Fixtures = require('@tooling/system-tests/lib/fixtures')
 
 describe('lib/scaffold', () => {
   beforeEach(() => {

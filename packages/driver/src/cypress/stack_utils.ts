@@ -7,7 +7,7 @@ import { codeFrameColumns } from '@babel/code-frame'
 
 import $utils from './utils'
 import $sourceMapUtils from './source_map_utils'
-import { getStackLines, replacedStack, stackWithoutMessage, splitStack, unsplitStack } from '@packages/server/lib/util/stack_utils'
+import { getStackLines, replacedStack, stackWithoutMessage, splitStack, unsplitStack } from '@packages/errors/src/stackUtils'
 
 const whitespaceRegex = /^(\s*)*/
 const stackLineRegex = /^\s*(at )?.*@?\(?.*\:\d+\:\d+\)?$/
@@ -66,7 +66,12 @@ const stackWithReplacementMarkerLineRemoved = (stack) => {
   })
 }
 
-const stackWithUserInvocationStackSpliced = (err, userInvocationStack) => {
+export type StackAndCodeFrameIndex = {
+  stack: string
+  index?: number
+}
+
+const stackWithUserInvocationStackSpliced = (err, userInvocationStack): StackAndCodeFrameIndex => {
   const stack = _.trim(err.stack, '\n') // trim newlines from end
   const [messageLines, stackLines] = splitStack(stack)
   const userInvocationStackWithoutMessage = stackWithoutMessage(userInvocationStack)
@@ -100,17 +105,16 @@ const getInvocationDetails = (specWindow, config) => {
 
     // firefox throws a different stack than chromium
     // which includes stackframes from cypress_runner.js.
-    // So we drop the lines until we get to the spec stackframe (incldues __cypress/tests)
+    // So we drop the lines until we get to the spec stackframe (includes __cypress/tests)
     if (specWindow.Cypress && specWindow.Cypress.isBrowser('firefox')) {
       stack = stackWithLinesDroppedFromMarker(stack, '__cypress/tests', true)
     }
 
-    const details = getSourceDetailsForFirstLine(stack, config('projectRoot'))
+    const details = getSourceDetailsForFirstLine(stack, config('projectRoot')) || {}
 
-    return {
-      details,
-      stack,
-    }
+    details.stack = stack
+
+    return details
   }
 }
 
@@ -136,9 +140,11 @@ const getCodeFrameFromSource = (sourceCode, { line, column, relativeFile, absolu
   }
 }
 
-const captureUserInvocationStack = (ErrorConstructor, userInvocationStack) => {
+const captureUserInvocationStack = (ErrorConstructor, userInvocationStack?) => {
   if (!userInvocationStack) {
     const newErr = new ErrorConstructor('userInvocationStack')
+
+    userInvocationStack = newErr.stack
 
     // if browser natively supports Error.captureStackTrace, use it (chrome) (must be bound)
     // otherwise use our polyfill on top.Error
@@ -146,7 +152,13 @@ const captureUserInvocationStack = (ErrorConstructor, userInvocationStack) => {
 
     captureStackTrace(newErr, captureUserInvocationStack)
 
-    userInvocationStack = newErr.stack
+    // On Chrome 99+, captureStackTrace strips away the whole stack,
+    // leaving nothing beyond the error message. If we get back a single line
+    // (just the error message with no stack trace), then use the original value
+    // instead of the trimmed one.
+    if (newErr.stack.match('\n')) {
+      userInvocationStack = newErr.stack
+    }
   }
 
   userInvocationStack = normalizedUserInvocationStack(userInvocationStack)
@@ -383,6 +395,7 @@ const normalizedUserInvocationStack = (userInvocationStack) => {
 export default {
   replacedStack,
   getCodeFrame,
+  getCodeFrameFromSource,
   getSourceStack,
   getStackLines,
   getSourceDetailsForFirstLine,

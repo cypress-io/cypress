@@ -3,6 +3,8 @@ const { createWebpackDevConfig } = require('@craco/craco')
 const { getLegacyDevServer } = require('../utils/legacy-setup-dev-server')
 
 function devServer (cypressDevServerConfig, cracoConfig) {
+  process.env.FAST_REFRESH = 'false'
+
   return startDevServer({
     options: cypressDevServerConfig,
     webpackConfig: createWebpackDevConfig(cracoConfig),

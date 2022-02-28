@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import _ from 'lodash'
 import Promise from 'bluebird'
 
@@ -110,7 +108,7 @@ export default function (Commands, Cypress, cy, state, config) {
     })
   }
 
-  const getAndClear = (log, timeout, options = {}) => {
+  const getAndClear = (log?, timeout?, options = {}) => {
     return automateCookies('get:cookies', options, log, timeout)
     .then((resp) => {
     // bail early if we got no cookies!
@@ -160,13 +158,14 @@ export default function (Commands, Cypress, cy, state, config) {
   // stuff, or handling this in the runner itself?
   // Cypress sessions will clear cookies on its own before each test
   Cypress.on('test:before:run:async', () => {
-    if (!Cypress.config.experimentalSessionSupport) {
+    if (!Cypress.config('experimentalSessionSupport')) {
       return getAndClear()
     }
   })
 
   return Commands.addAll({
-    getCookie (name, options = {}) {
+    // TODO: change the type of `any` to `Partial<Cypress.Loggable & Cypress.Timeoutable>`
+    getCookie (name, options: any = {}) {
       const userOptions = options
 
       options = _.defaults({}, userOptions, {
@@ -212,7 +211,8 @@ export default function (Commands, Cypress, cy, state, config) {
       .catch(handleBackendError('getCookie', 'reading the requested cookie from', onFail))
     },
 
-    getCookies (options = {}) {
+    // TODO: change the type of `any` to `Partial<Cypress.Loggable & Cypress.Timeoutable>`
+    getCookies (options: any = {}) {
       const userOptions = options
 
       options = _.defaults({}, userOptions, {
@@ -250,7 +250,8 @@ export default function (Commands, Cypress, cy, state, config) {
       .catch(handleBackendError('getCookies', 'reading cookies from', options._log))
     },
 
-    setCookie (name, value, options = {}) {
+    // TODO: change the type of `any` to `Partial<Cypress.SetCookieOptions>`
+    setCookie (name, value, options: any = {}) {
       const userOptions = options
 
       options = _.defaults({}, userOptions, {
@@ -331,7 +332,8 @@ export default function (Commands, Cypress, cy, state, config) {
       }).catch(handleBackendError('setCookie', 'setting the requested cookie in', onFail))
     },
 
-    clearCookie (name, options = {}) {
+    // TODO: change the type of `any` to `Partial<Cypress.Loggable & Cypress.Timeoutable>`
+    clearCookie (name, options: any = {}) {
       const userOptions = options
 
       options = _.defaults({}, userOptions, {
@@ -380,7 +382,8 @@ export default function (Commands, Cypress, cy, state, config) {
       .catch(handleBackendError('clearCookie', 'clearing the requested cookie in', onFail))
     },
 
-    clearCookies (options = {}) {
+    // TODO: change the type of `any` to `Partial<Cypress.Loggable & Cypress.Timeoutable>`
+    clearCookies (options: any = {}) {
       const userOptions = options
 
       options = _.defaults({}, userOptions, {

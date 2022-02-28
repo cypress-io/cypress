@@ -24,7 +24,7 @@ It uses [Vue Test Utils](https://github.com/vuejs/vue-test-utils) under the hood
 
 - Requires Cypress v7.0.0 or later
 - Requires [Node](https://nodejs.org/en/) version 12 or above
-- Supports webpack-based projects, vite in alpha, if you would like us to support another, please [create an issue](https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm:%20@cypress/vue&template=3-feature.md) or, if an issue already exists subscribe to it.
+- Supports projects built with Vue CLI, Vite, and Webpack. If you would like us to support another build configuration, please [create an issue](https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm:%20@cypress/vue&template=3-feature.md).
 
 Now you are ready to install.
 
@@ -61,8 +61,7 @@ module.exports = (on) => {
 Install dev dependencies
 
 ```shell
-npm i -D @cypress/webpack-dev-server \
-  vue-loader vue-template-compiler css-loader
+npm i -D @cypress/webpack-dev-server @cypress/vue
 ```
 
 And write a test
@@ -122,10 +121,10 @@ You can pass extensions (global components, mixins, modules to use)
 when mounting Vue component. Use `{ extensions: { ... }}` object inside
 the `options`.
 
-- `components` - object of 'id' and components to register globally, see [Components](cypress/component/basic/components) example
-- `use` (alias `plugins`) - list of plugins, see [Plugins](cypress/component/basic/plugins)
-- `mixin` (alias `mixins`) - list of global mixins, see [Mixins](cypress/component/basic/mixins) example
-- `filters` - hash of global filters, see [Filters](cypress/component/basic/filters) example
+- `components` - object of 'id' and components to register globally, see [Components](npm/vue/cypress/component/basic/components) example
+- `use` (alias `plugins`) - list of plugins, see [Plugins](npm/vue/cypress/component/basic/plugins)
+- `mixin` (alias `mixins`) - list of global mixins, see [Mixins](npm/vue/cypress/component/basic/mixins) example
+- `filters` - hash of global filters, see [Filters](npm/vue/cypress/component/basic/filters) example
 
 ### intro example
 
@@ -616,20 +615,6 @@ yarn workspace @cypress/vue cy:open
 ```
 
 Larger tests that use full application and run on CI (see [circle.yml](circle.yml)) are located in the folder [examples](examples).
-
-### Debugging
-
-Run Cypress with environment variable
-
-```
-DEBUG=@cypress/vue
-``` 
-
-If some deeply nested objects are abbreviated and do not print fully, set the maximum logging depth
-
-```
-DEBUG=@cypress/vue DEBUG_DEPTH=10
-```
 
 ## Related info
 

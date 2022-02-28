@@ -1,7 +1,6 @@
 import Bluebird from 'bluebird'
-import { compact, extend, find } from 'lodash'
+import _, { compact, extend, find } from 'lodash'
 import os from 'os'
-import { flatten, merge, pick, props, tap, uniqBy } from 'ramda'
 import { browsers } from './browsers'
 import * as darwinHelper from './darwin'
 import { needsDarwinWorkaround, darwinDetectionWorkaround } from './darwin/util'
@@ -17,7 +16,7 @@ import type {
 } from './types'
 import * as windowsHelper from './windows'
 
-type HasVersion = Partial<FoundBrowser> & {
+type HasVersion = Omit<Partial<FoundBrowser>, 'version' | 'name'> & {
   version: string
   name: string
 }
@@ -85,7 +84,7 @@ function lookup (
  * one for each binary. If Windows is detected, only one `checkOneBrowser` will be called, because
  * we don't use the `binary` field on Windows.
  */
-function checkBrowser (browser: Browser): Bluebird<(boolean | FoundBrowser)[]> {
+function checkBrowser (browser: Browser): Bluebird<(boolean | HasVersion)[]> {
   if (Array.isArray(browser.binary) && os.platform() !== 'win32') {
     return Bluebird.map(browser.binary, (binary: string) => {
       return checkOneBrowser(extend({}, browser, { binary }))
@@ -95,9 +94,9 @@ function checkBrowser (browser: Browser): Bluebird<(boolean | FoundBrowser)[]> {
   return Bluebird.map([browser], checkOneBrowser)
 }
 
-function checkOneBrowser (browser: Browser): Promise<boolean | FoundBrowser> {
+function checkOneBrowser (browser: Browser): Promise<boolean | HasVersion> {
   const platform = os.platform()
-  const pickBrowserProps = pick([
+  const pickBrowserProps = [
     'name',
     'family',
     'channel',
@@ -111,7 +110,7 @@ function checkOneBrowser (browser: Browser): Promise<boolean | FoundBrowser> {
     'info',
     'minSupportedVersion',
     'unsupportedVersion',
-  ])
+  ] as const
 
   const logBrowser = (props: any) => {
     log('setting major version for %j', props)
@@ -130,9 +129,13 @@ function checkOneBrowser (browser: Browser): Promise<boolean | FoundBrowser> {
   log('checking one browser %s', browser.name)
 
   return lookup(platform, browser)
-  .then(merge(browser))
-  .then(pickBrowserProps)
-  .then(tap(logBrowser))
+  .then((val) => ({ ...browser, ...val }))
+  .then((val) => _.pick(val, pickBrowserProps) as HasVersion)
+  .then((val) => {
+    logBrowser(val)
+
+    return val
+  })
   .then((browser) => setMajorVersion(browser))
   .catch(failed)
 }
@@ -176,9 +179,11 @@ export const detect = (goalBrowsers?: Browser[], useDarwinWorkaround = true): Bl
     })
   }
 
-  const removeDuplicates = uniqBy((browser: FoundBrowser) => {
-    return props(['name', 'version'], browser)
-  })
+  const removeDuplicates = (val) => {
+    return _.uniqBy(val, (browser: FoundBrowser) => {
+      return `${browser.name}-${browser.version}`
+    })
+  }
   const compactFalse = (browsers: any[]) => {
     return compact(browsers) as FoundBrowser[]
   }
@@ -186,7 +191,7 @@ export const detect = (goalBrowsers?: Browser[], useDarwinWorkaround = true): Bl
   log('detecting if the following browsers are present %o', goalBrowsers)
 
   return Bluebird.mapSeries(goalBrowsers, checkBrowser)
-  .then(flatten)
+  .then((val) => _.flatten(val))
   .then(compactFalse)
   .then(removeDuplicates)
 }

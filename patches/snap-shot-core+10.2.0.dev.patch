@@ -1,0 +1,59 @@
+diff --git a/node_modules/snap-shot-core/src/file-system.js b/node_modules/snap-shot-core/src/file-system.js
+index b2886cd..7d199a0 100644
+--- a/node_modules/snap-shot-core/src/file-system.js
++++ b/node_modules/snap-shot-core/src/file-system.js
+@@ -21,11 +21,14 @@ const exportObject = require('./utils').exportObject
+  * and we don't want the snapshots to randomly "jump" around and be
+  * saved in an unexpected location.
+  */
+-const cwd = process.cwd()
++// cache CWD globally so we can reset it in the case where a test
++// changes cwd before/after this file is required in a non-deterministic
++// fashion (like in the autobalanced system tests)
++global.CACHED_CWD_FOR_SNAP_SHOT_IT = process.cwd()
+ /**
+  * Returns a relative path to the original working directory.
+  */
+-const fromCurrentFolder = path.relative.bind(null, cwd)
++const fromCurrentFolder = (...args) => path.relative(global.CACHED_CWD_FOR_SNAP_SHOT_IT, ...args)
+ const snapshotsFolderName = '__snapshots__'
+ /**
+  * Given relative path, returns same relative path, but inside
+@@ -34,14 +37,14 @@ const snapshotsFolderName = '__snapshots__'
+  *  joinSnapshotsFolder('foo/bar')
+  *  // CWD/__snapshots__/foo/bar
+  */
+-const joinSnapshotsFolder = path.join.bind(null, cwd, snapshotsFolderName)
++const joinSnapshotsFolder = (...args) => path.join(global.CACHED_CWD_FOR_SNAP_SHOT_IT, snapshotsFolderName, ...args)
+ 
+ // TODO: expose the name of the snapshots folder to the outside world id:16
+ // - <https://github.com/bahmutov/snap-shot-core/issues/245>
+ // Gleb Bahmutov
+ // gleb.bahmutov@gmail.com
+ const snapshotsFolder = fromCurrentFolder(snapshotsFolderName)
+-debug('process cwd: %s', cwd)
++debug('process cwd: %s', global.CACHED_CWD_FOR_SNAP_SHOT_IT)
+ debug('snapshots folder: %s', snapshotsFolder)
+ 
+ /**
+@@ -52,7 +55,7 @@ debug('snapshots folder: %s', snapshotsFolder)
+  * we want to form snapshot filenames wrt to the original starting
+  * working directory.
+  */
+-const resolveToCwd = path.resolve.bind(null, cwd)
++const resolveToCwd = (...args) => path.resolve(global.CACHED_CWD_FOR_SNAP_SHOT_IT, ...args)
+ 
+ const isSaveOptions = is.schema({
+   sortSnapshots: is.bool
+diff --git a/node_modules/snap-shot-core/src/index.js b/node_modules/snap-shot-core/src/index.js
+index b0442f0..fbe55bf 100644
+--- a/node_modules/snap-shot-core/src/index.js
++++ b/node_modules/snap-shot-core/src/index.js
+@@ -332,6 +332,7 @@ function core (options) {
+     if (expected === undefined) {
+       if (opts.ci) {
+         console.log('current directory', process.cwd())
++        console.log('cached cwd', global.CACHED_CWD_FOR_SNAP_SHOT_IT)
+         console.log('new value to save: %j', value)
+         return throwCannotSaveOnCI({
+           value,

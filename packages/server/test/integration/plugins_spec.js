@@ -1,13 +1,14 @@
 require('../spec_helper')
 
 const plugins = require('../../lib/plugins')
-const Fixtures = require('../support/helpers/fixtures')
+const Fixtures = require('@tooling/system-tests/lib/fixtures')
 
 const pluginsFile = Fixtures.projectPath('plugin-before-browser-launch-deprecation/cypress/plugins/index.js')
 
 describe('lib/plugins', () => {
-  beforeEach(() => {
-    Fixtures.scaffold()
+  beforeEach(async () => {
+    Fixtures.scaffoldProject('plugin-before-browser-launch-deprecation')
+    await Fixtures.scaffoldCommonNodeModules()
   })
 
   afterEach(() => {
@@ -37,7 +38,7 @@ describe('lib/plugins', () => {
     })
     .then(() => {
       expect(onWarning).to.be.calledOnce
-      expect(onWarning.firstCall.args[0].message).to.include('Deprecation Warning: The `before:browser:launch` plugin event changed its signature in version `4.0.0`')
+      expect(onWarning.firstCall.args[0].message).to.include('Deprecation Warning: The before:browser:launch plugin event changed its signature in Cypress version 4.0.0')
     })
   })
 })

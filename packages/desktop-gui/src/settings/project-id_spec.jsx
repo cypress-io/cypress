@@ -44,4 +44,14 @@ describe('ProjectId', () => {
 
     cy.get('@externalOpen').should('have.been.called')
   })
+
+  it('shows a different output when configFile is js', () => {
+    mount(<ProjectId project={{ ...project, configFile: 'cypress.config.js' }} />, {
+      stylesheets: '/__root/dist/app.css',
+    })
+
+    cy.get('[data-cy=project-id] pre').then(($pre) => {
+      expect($pre.text()).to.contain('module.exports = ')
+    })
+  })
 })

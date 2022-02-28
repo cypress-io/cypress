@@ -36,7 +36,7 @@ const ALLOWED_PROXY_BYPASS_URLS = [
   '/',
   '/__cypress/runner/cypress_runner.css',
   '/__cypress/runner/cypress_runner.js', // TODO: fix this
-  '/__cypress/static/favicon.ico',
+  '/__cypress/runner/favicon.ico',
 ]
 const DEFAULT_DOMAIN_NAME = 'localhost'
 const fullyQualifiedRe = /^https?:\/\//
@@ -99,6 +99,7 @@ export interface OpenServerOptions {
   testingType: Cypress.TestingType
   onError: any
   onWarning: any
+  exit?: boolean
   getCurrentBrowser: () => Browser
   getSpec: () => Cypress.Cypress['spec'] | null
   shouldCorrelatePreRequests: () => boolean
@@ -177,6 +178,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     specsStore,
     testingType,
     SocketCtor,
+    exit,
   }: OpenServerOptions) {
     debug('server open')
 
@@ -221,6 +223,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
         getSpec,
         getCurrentBrowser,
         testingType,
+        exit,
       }
 
       const runnerSpecificRouter = testingType === 'e2e'

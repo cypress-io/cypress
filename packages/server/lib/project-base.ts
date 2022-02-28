@@ -3,34 +3,34 @@ import Debug from 'debug'
 import EE from 'events'
 import _ from 'lodash'
 import path from 'path'
-
-import browsers from './browsers'
+import { allowed } from '@packages/config'
 import pkg from '@packages/root'
-import { ServerCt } from './server-ct'
-import { SocketCt } from './socket-ct'
-import { SocketE2E } from './socket-e2e'
 import api from './api'
 import { Automation } from './automation'
+import browsers from './browsers'
 import * as config from './config'
-import cwd from './cwd'
 import errors from './errors'
-import Reporter from './reporter'
+import plugins from './plugins'
+import devServer from './plugins/dev-server'
+import preprocessor from './plugins/preprocessor'
 import runEvents from './plugins/run_events'
+import { checkSupportFile, getDefaultConfigFilePath } from './project_utils'
+import Reporter from './reporter'
 import savedState from './saved_state'
 import scaffold from './scaffold'
+import { ServerCt } from './server-ct'
 import { ServerE2E } from './server-e2e'
-import system from './util/system'
+import { SocketCt } from './socket-ct'
+import { SocketE2E } from './socket-e2e'
+import { SpecsStore } from './specs-store'
 import user from './user'
 import { ensureProp } from './util/class-helpers'
 import { fs } from './util/fs'
-import settings from './util/settings'
-import plugins from './plugins'
+import * as settings from './util/settings'
 import specsUtil from './util/specs'
+import system from './util/system'
 import Watchers from './watchers'
-import devServer from './plugins/dev-server'
-import preprocessor from './plugins/preprocessor'
-import { SpecsStore } from './specs-store'
-import { checkSupportFile } from './project_utils'
+
 import type { LaunchArgs } from './open_project'
 
 // Cannot just use RuntimeConfigOptions as is because some types are not complete.
@@ -43,6 +43,7 @@ type ReceivedCypressOptions =
 export interface Cfg extends ReceivedCypressOptions {
   projectRoot: string
   proxyServer?: Cypress.RuntimeConfigOptions['proxyUrl']
+  exit?: boolean
   state?: {
     firstOpened?: number
     lastOpened?: number
@@ -54,7 +55,7 @@ type WebSocketOptionsCallback = (...args: any[]) => any
 export interface OpenProjectLaunchOptions {
   args?: LaunchArgs
 
-  configFile?: string | boolean
+  configFile?: string | false
   browsers?: Cypress.Browser[]
 
   // Callback to reload the Desktop GUI when cypress.json is changed.
@@ -70,7 +71,7 @@ export interface OpenProjectLaunchOptions {
   [key: string]: any
 }
 
-const localCwd = cwd()
+const localCwd = process.cwd()
 
 const debug = Debug('cypress:server:project')
 const debugScaffold = Debug('cypress:server:scaffold')
@@ -83,6 +84,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   protected _server?: TServer
   protected _automation?: Automation
   private _recordTests?: any = null
+  private _isServerOpen: boolean = false
 
   public browser: any
   public options: OpenProjectLaunchOptions
@@ -212,6 +214,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     const [port, warning] = await this._server.open(cfg, {
       getCurrentBrowser: () => this.browser,
       getSpec: () => this.spec,
+      exit: this.options.args?.exit,
       onError: this.options.onError,
       onWarning: this.options.onWarning,
       shouldCorrelatePreRequests: this.shouldCorrelatePreRequests,
@@ -219,6 +222,8 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       SocketCtor: this.testingType === 'e2e' ? SocketE2E : SocketCt,
       specsStore,
     })
+
+    this._isServerOpen = true
 
     // if we didnt have a cfg.port
     // then get the port once we
@@ -340,6 +345,10 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     this.spec = null
     this.browser = null
 
+    if (!this._isServerOpen) {
+      return
+    }
+
     const closePreprocessor = (this.testingType === 'e2e' && preprocessor.close) ?? undefined
 
     await Promise.all([
@@ -347,6 +356,8 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       this.watchers?.close(),
       closePreprocessor?.(),
     ])
+
+    this._isServerOpen = false
 
     process.chdir(localCwd)
 
@@ -399,7 +410,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     // allowed config values to
     // prevent tampering with the
     // internals and breaking cypress
-    const allowedCfg = config.allowed(cfg)
+    const allowedCfg = allowed(cfg)
 
     const modifiedCfg = await plugins.init(allowedCfg, {
       projectRoot: this.projectRoot,
@@ -507,7 +518,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     projectRoot,
   }: {
     projectRoot: string
-    configFile?: string | boolean
+    configFile?: string | false
     onSettingsChanged?: false | (() => void)
   }) {
     // bail if we havent been told to
@@ -534,7 +545,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     }
 
     if (configFile !== false) {
-      this.watchers.watch(settings.pathToConfigFile(projectRoot, { configFile }), obj)
+      this.watchers.watchTree(settings.pathToConfigFile(projectRoot, { configFile }), obj)
     }
 
     return this.watchers.watch(settings.pathToCypressEnvJson(projectRoot), obj)
@@ -552,16 +563,12 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
     try {
       Reporter.loadReporter(reporter, projectRoot)
-    } catch (err) {
+    } catch (error: any) {
       const paths = Reporter.getSearchPathsForReporter(reporter, projectRoot)
-
-      // only include the message if this is the standard MODULE_NOT_FOUND
-      // else include the whole stack
-      const errorMsg = err.code === 'MODULE_NOT_FOUND' ? err.message : err.stack
 
       errors.throw('INVALID_REPORTER_NAME', {
         paths,
-        error: errorMsg,
+        error,
         name: reporter,
       })
     }
@@ -681,6 +688,12 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   }
 
   async initializeConfig (): Promise<Cfg> {
+    // set default for "configFile" if undefined
+    if (this.options.configFile === undefined
+  || this.options.configFile === null) {
+      this.options.configFile = await getDefaultConfigFilePath(this.projectRoot, !this.options.args?.runProject)
+    }
+
     let theCfg: Cfg = await config.get(this.projectRoot, this.options)
 
     if (theCfg.browsers) {
@@ -831,7 +844,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       return readSettings.projectId
     }
 
-    errors.throw('NO_PROJECT_ID', settings.configFile(this.options), this.projectRoot)
+    errors.throw('NO_PROJECT_ID', settings.pathToConfigFile(this.projectRoot, this.options))
   }
 
   async verifyExistence () {

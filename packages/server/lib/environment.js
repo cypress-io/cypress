@@ -2,10 +2,6 @@ require('./util/fs')
 
 const os = require('os')
 
-// NOTE: by loading "./cwd" we are changing the current working directory
-// to the "packages/server" folder
-require('./cwd')
-
 const Promise = require('bluebird')
 const debug = require('debug')('cypress:server')
 
@@ -24,6 +20,8 @@ const pkg = require('@packages/root')
 // use env from package first
 // or development as default
 const env = process.env['CYPRESS_INTERNAL_ENV'] || (process.env['CYPRESS_INTERNAL_ENV'] = pkg.env != null ? pkg.env : 'development')
+
+process.env['CYPRESS'] = 'true'
 
 const config = {
   // uses cancellation for automation timeouts

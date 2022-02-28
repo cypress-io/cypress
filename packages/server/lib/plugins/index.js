@@ -37,12 +37,36 @@ const registerHandler = (handler) => {
   handlers.push(handler)
 }
 
+const getChildOptions = (config) => {
+  const childOptions = {
+    stdio: 'pipe',
+    env: {
+      ...process.env,
+      NODE_OPTIONS: process.env.ORIGINAL_NODE_OPTIONS || '',
+    },
+  }
+
+  if (config.resolvedNodePath) {
+    debug('launching using custom node version %o', _.pick(config, ['resolvedNodePath', 'resolvedNodeVersion']))
+    childOptions.execPath = config.resolvedNodePath
+  }
+
+  if (inspector.url()) {
+    childOptions.execArgv = _.chain(process.execArgv.slice(0))
+    .remove('--inspect-brk')
+    .push(`--inspect=${process.debugPort + 1}`)
+    .value()
+  }
+
+  return childOptions
+}
+
 const init = (config, options) => {
   debug('plugins.init', config.pluginsFile)
 
   // test and warn for incompatible plugin
   try {
-    const retriesPluginPath = path.dirname(resolve.sync('cypress-plugin-retries', {
+    const retriesPluginPath = path.dirname(resolve.sync('cypress-plugin-retries/package.json', {
       basedir: options.projectRoot,
     }))
 
@@ -82,28 +106,9 @@ const init = (config, options) => {
     const pluginsFile = config.pluginsFile || path.join(__dirname, 'child', 'default_plugins_file.js')
     const childIndexFilename = path.join(__dirname, 'child', 'index.js')
     const childArguments = ['--file', pluginsFile, '--projectRoot', options.projectRoot]
-    const childOptions = {
-      stdio: 'pipe',
-      env: {
-        ...process.env,
-        NODE_OPTIONS: process.env.ORIGINAL_NODE_OPTIONS || '',
-      },
-    }
-
-    if (config.resolvedNodePath) {
-      debug('launching using custom node version %o', _.pick(config, ['resolvedNodePath', 'resolvedNodeVersion']))
-      childOptions.execPath = config.resolvedNodePath
-    }
+    const childOptions = getChildOptions(config)
 
     debug('forking to run %s', childIndexFilename)
-
-    if (inspector.url()) {
-      childOptions.execArgv = _.chain(process.execArgv.slice(0))
-      .remove('--inspect-brk')
-      .push(`--inspect=${process.debugPort + 1}`)
-      .value()
-    }
-
     pluginsProcess = cp.fork(childIndexFilename, childArguments, childOptions)
 
     if (pluginsProcess.stdout && pluginsProcess.stderr) {
@@ -186,7 +191,7 @@ const init = (config, options) => {
 
       killPluginsProcess()
 
-      err = errors.get('PLUGINS_UNEXPECTED_ERROR', config.pluginsFile, err.annotated || err.stack || err.message)
+      err = errors.get('PLUGINS_UNEXPECTED_ERROR', config.pluginsFile, err)
       err.title = 'Error running plugin'
 
       // this can sometimes trigger before the promise is fulfilled and
@@ -241,6 +246,7 @@ const _setPluginsProcess = (_pluginsProcess) => {
 }
 
 module.exports = {
+  getChildOptions,
   getPluginPid,
   execute,
   has,

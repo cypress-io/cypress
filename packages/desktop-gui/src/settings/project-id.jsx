@@ -3,6 +3,7 @@ import React from 'react'
 import Tooltip from '@cypress/react-tooltip'
 
 import ipc from '../lib/ipc'
+import { isFileJSON } from '../lib/utils'
 import { configFileFormatted } from '../lib/config-file-formatted'
 
 const openProjectIdHelp = (e) => {
@@ -19,10 +20,6 @@ const openProjectIdHelp = (e) => {
 const ProjectId = observer(({ project }) => {
   if (!project.id) return null
 
-  const projectIdJsonConfig = {
-    projectId: project.id,
-  }
-
   return (
     <div data-cy="project-id">
       <a href='#' className='learn-more' onClick={openProjectIdHelp}>
@@ -33,7 +30,7 @@ const ProjectId = observer(({ project }) => {
         It identifies your project and should not be changed.
       </p>
       <pre className='line-nums copy-to-clipboard'>
-        <a className="action-copy" onClick={() => ipc.setClipboardText(JSON.stringify(projectIdJsonConfig, null, 2))}>
+        <a className="action-copy" onClick={() => ipc.setClipboardText(document.querySelector('[data-cy="project-id"] pre').innerText)}>
           <Tooltip
             title='Copy to clipboard'
             placement='top'
@@ -42,9 +39,20 @@ const ProjectId = observer(({ project }) => {
             <i className='fas fa-clipboard' />
           </Tooltip>
         </a>
-        <span>{'{'}</span>
-        <span>{`  "projectId": "${project.id}"`}</span>
-        <span>{'}'}</span>
+        {
+          isFileJSON(project.configFile) ?
+            <>
+              <span>{'{'}</span>
+              <span>{`  "projectId": "${project.id}"`}</span>
+              <span>{'}'}</span>
+            </>
+            :
+            <>
+              <span>{'module.exports = {'}</span>
+              <span>{`  projectId: "${project.id}"`}</span>
+              <span>{'}'}</span>
+            </>
+        }
       </pre>
     </div>
   )

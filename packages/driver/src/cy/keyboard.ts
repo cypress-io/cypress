@@ -6,7 +6,7 @@ import $errUtils from '../cypress/error_utils'
 import { USKeyboard } from '../cypress/UsKeyboardLayout'
 import $dom from '../dom'
 import $document from '../dom/document'
-import $elements from '../dom/elements'
+import $elements, { HTMLTextLikeInputElement } from '../dom/elements'
 // eslint-disable-next-line no-duplicate-imports
 import type { HTMLTextLikeElement } from '../dom/elements'
 import $selection from '../dom/selection'
@@ -113,6 +113,13 @@ export type KeyEventType =
   | 'input'
   | 'textInput'
   | 'beforeinput'
+
+export type ModifiersEventOptions = {
+  altKey: boolean
+  ctrlKey: boolean
+  metaKey: boolean
+  shiftKey: boolean
+}
 
 const toModifiersEventOptions = (modifiers: KeyboardModifiers) => {
   return {
@@ -305,9 +312,9 @@ const shouldIgnoreEvent = <
   T extends KeyEventType,
   K extends { [key in T]?: boolean }
 >(
-    eventName: T,
-    options: K,
-  ) => {
+  eventName: T,
+  options: K,
+) => {
   return options[eventName] === false
 }
 
@@ -575,7 +582,7 @@ const simulatedDefaultKeyMap: { [key: string]: SimulatedDefault } = {
       $selection.replaceSelectionContents(el, '\n')
     }
 
-    options.onEnterPressed && options.onEnterPressed()
+    options.onEnterPressed && options.onEnterPressed(el)
   },
   Delete: (el, key) => {
     key.events.input = $selection.deleteRightOfCursor(el)
@@ -803,7 +810,7 @@ export class Keyboard {
                   debug('setting element value', valToSet, activeEl)
 
                   return $elements.setNativeProp(
-                    activeEl as $elements.HTMLTextLikeInputElement,
+                    activeEl as HTMLTextLikeInputElement,
                     'value',
                     valToSet,
                   )
@@ -960,6 +967,9 @@ export class Keyboard {
       ..._.omitBy(
         {
           bubbles: true,
+          // allow propagation out of root of shadow-dom
+          // https://developer.mozilla.org/en-US/docs/Web/API/Event/composed
+          composed: true,
           cancelable,
           key,
           code,
@@ -1312,10 +1322,6 @@ export class Keyboard {
   }
 }
 
-const create = (state) => {
-  return new Keyboard(state)
-}
-
 let _defaults
 
 const reset = () => {
@@ -1360,7 +1366,6 @@ const defaults = (props: Partial<Cypress.KeyboardDefaultsOptions>) => {
 }
 
 export default {
-  create,
   defaults,
   getConfig,
   getKeymap,
