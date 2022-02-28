@@ -1,7 +1,6 @@
 /* eslint-disable prefer-rest-params */
-// @ts-nocheck
 import _ from 'lodash'
-import $errUtils from './error_utils'
+import $errUtils, { CypressError } from './error_utils'
 import $utils from './utils'
 import $stackUtils from './stack_utils'
 
@@ -11,7 +10,7 @@ import * as mocha from 'mocha'
 
 const { getTestFromRunnable } = $utils
 
-const Mocha = mocha.Mocha != null ? mocha.Mocha : mocha
+const Mocha = (mocha as any).Mocha != null ? (mocha as any).Mocha : mocha
 
 const { Test, Runner, Runnable, Hook, Suite } = Mocha
 
@@ -33,8 +32,8 @@ const suiteAfterAll = Suite.prototype.afterAll
 const suiteAfterEach = Suite.prototype.afterEach
 
 // don't let mocha pollute the global namespace
-delete window.mocha
-delete window.Mocha
+delete (window as any).mocha
+delete (window as any).Mocha
 
 function invokeFnWithOriginalTitle (ctx, originalTitle, mochaArgs, fn, _testConfig) {
   const ret = fn.apply(ctx, mochaArgs)
@@ -68,7 +67,7 @@ function overloadMochaFnForConfig (fnName, specWindow) {
       const origFn = subFn ? _fn[subFn] : _fn
 
       if (args.length > 2 && _.isObject(args[1])) {
-        const _testConfig = _.extend({}, args[1])
+        const _testConfig = _.extend({}, args[1]) as any
 
         const mochaArgs = [args[0], args[2]]
 
@@ -447,15 +446,18 @@ const patchSuiteHooks = (specWindow, config) => {
         let invocationStack = hook.invocationDetails?.stack
 
         if (!hook.invocationDetails) {
-          const invocationDetails = $stackUtils.getInvocationDetails(specWindow, config)
+          const invocationDetails = $stackUtils.getInvocationDetails(specWindow, config)!
 
           hook.invocationDetails = invocationDetails
           invocationStack = invocationDetails.stack
         }
 
         if (this._condensedHooks) {
-          throw $errUtils.errByPath('mocha.hook_registered_late', { hookTitle: fnName })
-          .setUserInvocationStack(invocationStack)
+          const err = $errUtils.errByPath('mocha.hook_registered_late', { hookTitle: fnName }) as CypressError
+
+          err.setUserInvocationStack(invocationStack)
+
+          throw err
         }
 
         return hook

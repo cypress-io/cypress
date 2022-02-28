@@ -1,5 +1,4 @@
 // See: ./errorScenarios.md for details about error messages and stack traces
-// @ts-nocheck
 import _ from 'lodash'
 import path from 'path'
 import errorStackParser from 'error-stack-parser'
@@ -54,7 +53,7 @@ const stackWithLinesRemoved = (stack, cb) => {
 const stackWithLinesDroppedFromMarker = (stack, marker, includeLast = false) => {
   return stackWithLinesRemoved(stack, (lines) => {
     // drop lines above the marker
-    const withAboveMarkerRemoved = _.dropWhile(lines, (line) => {
+    const withAboveMarkerRemoved = _.dropWhile(lines, (line: any) => {
       return !_.includes(line, marker)
     })
 
@@ -98,6 +97,8 @@ const stackWithUserInvocationStackSpliced = (err, userInvocationStack): StackAnd
   }
 }
 
+type InvocationDetails = LineDetail | {}
+
 const getInvocationDetails = (specWindow, config) => {
   if (specWindow.Error) {
     let stack = (new specWindow.Error()).stack
@@ -112,12 +113,14 @@ const getInvocationDetails = (specWindow, config) => {
       stack = stackWithLinesDroppedFromMarker(stack, '__cypress/tests', true)
     }
 
-    const details = getSourceDetailsForFirstLine(stack, config('projectRoot')) || {}
+    const details: InvocationDetails = getSourceDetailsForFirstLine(stack, config('projectRoot')) || {};
 
-    details.stack = stack
+    (details as any).stack = stack
 
-    return details
+    return details as (InvocationDetails & { stack: any })
   }
+
+  return
 }
 
 const getLanguageFromExtension = (filePath) => {
@@ -242,7 +245,7 @@ const parseLine = (line) => {
 
   if (!isStackLine) return
 
-  const parsed = errorStackParser.parse({ stack: line })[0]
+  const parsed = errorStackParser.parse({ stack: line } as any)[0]
 
   if (!parsed) return
 
@@ -272,7 +275,23 @@ const stripCustomProtocol = (filePath) => {
   return filePath.replace(customProtocolRegex, '')
 }
 
-const getSourceDetailsForLine = (projectRoot, line) => {
+type LineDetail =
+{
+  message: any
+  whitespace: any
+} |
+{
+  function: any
+  fileUrl: any
+  originalFile: any
+  relativeFile: any
+  absoluteFile: any
+  line: any
+  column: number
+  whitespace: any
+}
+
+const getSourceDetailsForLine = (projectRoot, line): LineDetail => {
   const whitespace = getWhitespace(line)
   const generatedDetails = parseLine(line)
 
@@ -327,7 +346,7 @@ const reconstructStack = (parsedStack) => {
   }).join('\n')
 }
 
-const getSourceStack = (stack, projectRoot) => {
+const getSourceStack = (stack, projectRoot?) => {
   if (!_.isString(stack)) return {}
 
   const getSourceDetailsWithStackUtil = _.partial(getSourceDetailsForLine, projectRoot)

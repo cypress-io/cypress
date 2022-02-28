@@ -1,7 +1,4 @@
 /* eslint-disable prefer-rest-params */
-/* globals Cypress */
-
-// @ts-nocheck
 import _ from 'lodash'
 import dayjs from 'dayjs'
 import Promise from 'bluebird'
@@ -12,7 +9,7 @@ import $errUtils from './error_utils'
 import $stackUtils from './stack_utils'
 import { getResolvedTestConfigOverride } from '../cy/testConfigOverrides'
 import debugFn from 'debug'
-import { Emissions } from '@packages/types'
+import type { Emissions } from '@packages/types'
 
 const mochaCtxKeysRe = /^(_runnable|test)$/
 const betweenQuotesRe = /\"(.+?)\"/
@@ -28,6 +25,10 @@ const RUNNABLE_PROPS = '_testConfig id order title _titlePath root hookName hook
 
 const debug = debugFn('cypress:driver:runner')
 const debugErrors = debugFn('cypress:driver:errors')
+
+const duration = (before: Date, after: Date) => {
+  return Number(before) - Number(after)
+}
 
 const fire = (event, runnable, Cypress) => {
   debug('fire: %o', { event })
@@ -104,6 +105,8 @@ const testAfterRun = (test, Cypress) => {
     // prevent loop comprehension
     return null
   }
+
+  return null
 }
 
 const setTestTimingsForHook = (test, hookName, obj) => {
@@ -127,7 +130,7 @@ const setTestTimings = (test, name, obj) => {
 }
 
 const setWallClockDuration = (test) => {
-  return test.wallClockDuration = new Date() - test.wallClockStartedAt
+  return test.wallClockDuration = duration(new Date(), test.wallClockStartedAt)
 }
 
 // we need to optimize wrap by converting
@@ -138,7 +141,7 @@ const wrap = (runnable) => {
   return $utils.reduceProps(runnable, RUNNABLE_PROPS)
 }
 
-const wrapAll = (runnable) => {
+const wrapAll = (runnable): any => {
   return _.extend(
     {},
     $utils.reduceProps(runnable, RUNNABLE_PROPS),
@@ -202,7 +205,7 @@ const eachHookInSuite = (suite, fn) => {
 
 // iterates over a suite's tests (including nested suites)
 // and will return as soon as the callback is true
-const findTestInSuite = (suite, fn = _.identity) => {
+const findTestInSuite = (suite, fn: any = _.identity) => {
   for (const test of suite.tests) {
     if (fn(test)) {
       return test
@@ -218,7 +221,7 @@ const findTestInSuite = (suite, fn = _.identity) => {
   }
 }
 
-const findSuiteInSuite = (suite, fn = _.identity) => {
+const findSuiteInSuite = (suite, fn: any = _.identity) => {
   if (fn(suite)) {
     return suite
   }
@@ -241,7 +244,7 @@ const suiteHasSuite = (suite, suiteId) => {
 }
 
 // same as findTestInSuite but iterates backwards
-const findLastTestInSuite = (suite, fn = _.identity) => {
+const findLastTestInSuite = (suite, fn: any = _.identity) => {
   for (let i = suite.suites.length - 1; i >= 0; i--) {
     const test = findLastTestInSuite(suite.suites[i], fn)
 
@@ -260,7 +263,7 @@ const findLastTestInSuite = (suite, fn = _.identity) => {
 }
 
 const getAllSiblingTests = (suite, getTestById) => {
-  const tests = []
+  const tests: any[] = []
 
   suite.eachTest((testRunnable) => {
     // iterate through each of our suites tests.
@@ -272,6 +275,8 @@ const getAllSiblingTests = (suite, getTestById) => {
     if (test) {
       return tests.push(test)
     }
+
+    return
   })
 
   return tests
@@ -301,7 +306,7 @@ const isLastSuite = (suite, tests) => {
 
   // grab all of the suites from our filtered tests
   // including all of their ancestor suites!
-  const suites = _.reduce(tests, (memo, test) => {
+  const suites = _.reduce<any, any[]>(tests, (memo, test) => {
     let parent
 
     while ((parent = test.parent)) {
@@ -310,8 +315,7 @@ const isLastSuite = (suite, tests) => {
     }
 
     return memo
-  }
-  , [])
+  }, [])
 
   // intersect them with our parent suites and see if the last one is us
   return _
@@ -358,7 +362,7 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
     const test = getTest()
     const allTests = getTests()
 
-    let shouldFireTestAfterRun = _.noop
+    let shouldFireTestAfterRun = () => false
 
     switch (name) {
       case 'afterEach':
@@ -376,6 +380,8 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
               return true
             }
           }
+
+          return false
         }
 
         break
@@ -396,7 +402,7 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
             // due to already being run on top navigation
             // https://github.com/cypress-io/cypress/issues/9026
             if (!testIsActuallyInSuite) {
-              return
+              return false
             }
 
             // 1. if we're the very last test in the entire allTests
@@ -411,6 +417,8 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
               return true
             }
           }
+
+          return false
         }
 
         break
@@ -450,7 +458,7 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
 
 const getTestResults = (tests) => {
   return _.map(tests, (test) => {
-    const obj = _.pick(test, 'id', 'duration', 'state')
+    const obj: Record<string, any> = _.pick(test, 'id', 'duration', 'state')
 
     obj.title = test.originalTitle
     // TODO FIX THIS!
@@ -488,7 +496,7 @@ const normalizeAll = (suite, initialTests = {}, setTestsById, setTests, onRunnab
   // we hand back a normalized object but also
   // create optimized lookups for the tests without
   // traversing through it multiple times
-  const tests = {}
+  const tests: Record<string, any> = {}
   const normalizedSuite = normalize(suite, tests, initialTests, onRunnable, onLogsById, getRunnableId, getHookId, getOnlyTestId, getOnlySuiteId, createEmptyOnlyTest)
 
   if (setTestsById) {
@@ -519,6 +527,8 @@ const normalizeAll = (suite, initialTests = {}, setTestsById, setTests, onRunnab
     }
 
     normalizedSuite.runtimeConfig[key] = v
+
+    return
   })
 
   return normalizedSuite
@@ -660,6 +670,8 @@ const normalize = (runnable, tests, initialTests, onRunnable, onLogsById, getRun
           return normalizedChild
         }))
       }
+
+      return null
     })
 
     return normalizedRunnable
@@ -737,6 +749,8 @@ const normalize = (runnable, tests, initialTests, onRunnable, onLogsById, getRun
 
           return normalizedChildSuite
         }
+
+        return null
       }))
     }
 
@@ -1017,8 +1031,8 @@ export default {
   create: (specWindow, mocha, Cypress, cy, state) => {
     let _runnableId = 0
     let _hookId = 0
-    let _uncaughtFn = null
-    let _resumedAtTestIndex = null
+    let _uncaughtFn: (() => never) | null = null
+    let _resumedAtTestIndex: number | null = null
 
     const _runner = mocha.getRunner()
 
@@ -1099,19 +1113,19 @@ export default {
     specWindow.addEventListener('unhandledrejection', onSpecError('unhandledrejection'))
 
     // hold onto the _runnables for faster lookup later
-    let _test = null
-    let _tests = []
-    let _testsById = {}
-    const _testsQueue = []
-    const _testsQueueById = {}
+    let _test: any = null
+    let _tests: any[] = []
+    let _testsById: Record<string, any> = {}
+    const _testsQueue: any[] = []
+    const _testsQueueById: Record<string, any> = {}
     // only used during normalization
-    const _runnables = []
-    const _logsById = {}
+    const _runnables: any[] = []
+    const _logsById: Record<string, any> = {}
     let _emissions: Emissions = {
       started: {},
       ended: {},
     }
-    let _startTime = null
+    let _startTime: string | null = null
     let _onlyTestId = null
     let _onlySuiteId = null
 
@@ -1210,7 +1224,7 @@ export default {
       const r = runnable
       const isHook = r.type === 'hook'
       const isTest = r.type === 'test'
-      const test = getTest() || getTestFromHook(runnable, getTestById)
+      const test = getTest() || getTestFromHook(runnable)
       const hookName = isHook && getHookName(r)
       const isBeforeEachHook = isHook && !!hookName.match(/before each/)
       const isAfterEachHook = isHook && !!hookName.match(/after each/)
@@ -1383,11 +1397,11 @@ export default {
         // runtime of a runnables fn execution duration
         // and also the run of the runnable:after:run:async event
         let lifecycleStart
-        let wallClockEnd = null
-        let fnDurationStart = null
-        let fnDurationEnd = null
-        let afterFnDurationStart = null
-        let afterFnDurationEnd = null
+        let wallClockEnd: Date | null = null
+        let fnDurationStart: Date | null = null
+        let fnDurationEnd: Date | null = null
+        let afterFnDurationStart: Date | null = null
+        let afterFnDurationEnd: Date | null = null
 
         // when this is a hook, capture the real start
         // date so we can calculate our test's duration
@@ -1433,12 +1447,12 @@ export default {
               // reset runnable duration to include lifecycle
               // and afterFn timings purely for the mocha runner.
               // this is what it 'feels' like to the user
-              runnable.duration = wallClockEnd - wallClockStartedAt
+              runnable.duration = duration(wallClockEnd, wallClockStartedAt)
 
               setTestTimingsForHook(test, hookName, {
                 hookId: runnable.hookId,
-                fnDuration: fnDurationEnd - fnDurationStart,
-                afterFnDuration: afterFnDurationEnd - afterFnDurationStart,
+                fnDuration: duration(fnDurationEnd!, fnDurationStart!),
+                afterFnDuration: duration(afterFnDurationEnd, afterFnDurationStart!),
               })
 
               break
@@ -1447,13 +1461,13 @@ export default {
               // if we are currently on a test then
               // recalculate its duration to be based
               // against that (purely for the mocha reporter)
-              test.duration = wallClockEnd - test.wallClockStartedAt
+              test.duration = duration(wallClockEnd, test.wallClockStartedAt)
 
               // but still preserve its actual function
               // body duration for timings
               setTestTimings(test, 'test', {
-                fnDuration: fnDurationEnd - fnDurationStart,
-                afterFnDuration: afterFnDurationEnd - afterFnDurationStart,
+                fnDuration: duration(fnDurationEnd!, fnDurationStart!),
+                afterFnDuration: duration(afterFnDurationEnd!, afterFnDurationStart!),
               })
 
               break
@@ -1559,7 +1573,7 @@ export default {
           if (lifecycleStart) {
             // capture how long the lifecycle took as part
             // of the overall wallClockDuration of our test
-            setTestTimings(test, 'lifecycle', new Date() - lifecycleStart)
+            setTestTimings(test, 'lifecycle', duration(new Date(), lifecycleStart))
           }
 
           // capture the moment we're about to invoke
@@ -1665,6 +1679,8 @@ export default {
         if (attrs) {
           return $Log.getSnapshotProps(attrs)
         }
+
+        return
       },
 
       resumeAtTest (id, emissions: Emissions = {}) {
