@@ -2909,6 +2909,10 @@ declare namespace Cypress {
    */
   interface RuntimeConfigOptions extends Partial<RuntimeServerConfigOptions> {
     /**
+     * Absolute path to the config file (default: <projectRoot>/cypress.config.{ts|js}) or false
+     */
+    configFile: string | false
+    /**
      * CPU architecture, from Node `os.arch()`
      *
      * @see https://nodejs.org/api/os.html#os_os_arch
@@ -2941,10 +2945,15 @@ declare namespace Cypress {
      * The Cypress version being used.
      */
     version: string
+
+    // Internal or Unlisted at server/lib/config_options
+    namespace: string
+    projectRoot: string
+    devServerPublicPathRoute: string
   }
 
   /**
-   * Options appended before the server starts
+   * Optional options added before the server starts
    */
   interface RuntimeServerConfigOptions {
     /**
@@ -2956,15 +2965,12 @@ declare namespace Cypress {
     browserUrl: string
     clientRoute: string
     cypressEnv: string
-    devServerPublicPathRoute: string
     isNewProject: boolean
     isTextTerminal: boolean
     morgan: boolean
-    namespace: string
     parentTestsFolder: string
     parentTestsFolderDisplay: string
     projectName: string
-    projectRoot: string
     proxyUrl: string
     remote: RemoteState
     report: boolean
@@ -3002,10 +3008,6 @@ declare namespace Cypress {
   type ConfigOptions<ComponentDevServerOpts = any> = Partial<ResolvedConfigOptions<ComponentDevServerOpts>>
 
   interface PluginConfigOptions extends ResolvedConfigOptions, RuntimeConfigOptions {
-    /**
-    * Absolute path to the config file (default: <projectRoot>/cypress.config.{ts|js}) or false
-    */
-    configFile: string | false
     /**
     * Absolute path to the root of the project
     */
