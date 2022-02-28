@@ -227,7 +227,6 @@ export default (Commands, Cypress, cy, state) => {
         label: 'within',
         type: 'child',
         $el: subject,
-        message: subject,
         timeout: options.timeout,
         snapshotStart: true,
         emitOnly: !options.log,
