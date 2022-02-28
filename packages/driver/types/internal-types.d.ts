@@ -36,6 +36,8 @@ declare namespace Cypress {
     sinon: sinon.SinonApi
     utils: CypressUtils
     state: State
+
+    originalConfig: Record<string, any>
   }
 
   interface CypressUtils {

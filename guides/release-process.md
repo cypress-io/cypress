@@ -111,14 +111,7 @@ In the following instructions, "X.Y.Z" is used to denote the [next version of Cy
         - Go into a project, run a quick test, make sure things look right
     - Install the new version into an established project and run the tests there
         - [cypress-realworld-app](https://github.com/cypress-io/cypress-realworld-app) uses yarn and represents a typical consumer implementation.
-    - Optionally, do more thorough tests:
-        - Trigger test projects from the command line (if you have the appropriate permissions)
-
-        ```shell
-        node scripts/test-other-projects.js --npm cypress@X.Y.Z --binary X.Y.Z
-        ```
-
-        - Test the new version of Cypress against the Cypress dashboard repo.
+    - Optionally, do more thorough tests, for example test the new version of Cypress against the Cypress dashboard repo.
 
 7. Confirm that every issue labeled [stage: pending release](https://github.com/cypress-io/cypress/issues?q=label%3A%22stage%3A+pending+release%22+is%3Aclosed) has a ZenHub release set. **Tip:** there is a command in [`release-automations`](https://github.com/cypress-io/release-automations)'s `issues-in-release` tool to list and check such issues. Without a ZenHub release issues will not be included in the right changelog.
 

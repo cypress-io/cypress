@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import _ from 'lodash'
 
 import $utils from './utils'
@@ -13,8 +11,8 @@ const _reset = () => {
     screenshotOnRunFailure: true,
     blackout: [],
     overwrite: false,
-    onBeforeScreenshot () {},
-    onAfterScreenshot () {},
+    onBeforeScreenshot ($el) {},
+    onAfterScreenshot ($el, results) {},
   }
 }
 
@@ -111,8 +109,8 @@ const validateAndSetCallback = (props, values, cmd, log, option) => {
   values[option] = value
 }
 
-const validate = (props, cmd, log) => {
-  const values = {}
+const validate = (props, cmd, log?) => {
+  const values: Record<string, any> = {}
 
   if (!_.isPlainObject(props)) {
     $errUtils.throwErrByPath('screenshot.invalid_arg', {
