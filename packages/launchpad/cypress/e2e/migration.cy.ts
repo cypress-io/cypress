@@ -505,6 +505,25 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
     checkOutcome()
   })
 
+  it('completes journey for migration-e2e-export-default', () => {
+    startMigrationFor('migration-e2e-export-default')
+    // rename integration->e2e
+    cy.get(renameAutoStep).should('exist')
+    cy.get(renameManualStep).should('not.exist')
+
+    // cypress/support/index.ts -> cypress/support/e2e.ts
+    cy.get(renameSupportStep).should('exist')
+    // no component specs
+    cy.get(setupComponentStep).should('not.exist')
+
+    cy.get(configFileStep).should('exist')
+
+    runAutoRename()
+    renameSupport('ts')
+    migrateAndVerifyConfig('ts')
+    checkOutcome()
+  })
+
   it('completes journey for migration-typescript-project', () => {
     startMigrationFor('migration-typescript-project')
     // defaults, rename all the things

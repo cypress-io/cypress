@@ -11,6 +11,7 @@ import type { MigrationFile } from '../MigrationDataSource'
 import { toPosix } from '../../util'
 
 import Debug from 'debug'
+import dedent from 'dedent'
 const debug = Debug('cypress:data-context:sources:migration:codegen')
 
 type ConfigOptions = {
@@ -172,14 +173,13 @@ function createCypressConfig (config: ConfigOptions, pluginPath: string, options
   const globalString = Object.keys(config.global).length > 0 ? `${formatObjectForConfig(config.global)},` : ''
   const componentString = options.hasComponentTesting ? createComponentTemplate(config.component) : ''
   const e2eString = options.hasE2ESpec
-    ? createE2eTemplate(pluginPath, options.hasPluginsFile, config.e2e)
+    ? createE2ETemplate(pluginPath, options, config.e2e)
     : ''
 
   if (defineConfigAvailable(options.projectRoot)) {
     if (options.hasTypescript) {
       return formatConfig(
         `import { defineConfig } from 'cypress'
-        import setupNodeEvents from './${pluginPath}'
   
         export default defineConfig({${globalString}${e2eString}${componentString}})`,
       )
@@ -187,7 +187,6 @@ function createCypressConfig (config: ConfigOptions, pluginPath: string, options
 
     return formatConfig(
       `const { defineConfig } = require('cypress')
-      const setupNodeEvents = require('./${pluginPath}')
 
       module.exports = defineConfig({${globalString}${e2eString}${componentString}})`,
     )
@@ -204,10 +203,31 @@ function formatObjectForConfig (obj: Record<string, unknown>) {
   return JSON.stringify(obj, null, 2).replace(/^[{]|[}]$/g, '') // remove opening and closing {}
 }
 
-function createE2eTemplate (pluginPath: string, hasPluginsFile: boolean, options: Record<string, unknown>) {
-  return `e2e: {
-    setupNodeEvents
-  },`
+function createE2ETemplate (pluginPath: string, createConfigOptions: CreateConfigOptions, options: Record<string, unknown>) {
+  if (!createConfigOptions.hasPluginsFile) {
+    return dedent`
+      setupNodeEvents(on, config) {}
+    `
+  }
+
+  const pluginFile = fs.readFileSync(path.join(createConfigOptions.projectRoot, pluginPath), 'utf8')
+  const hasExportDefault = pluginFile.includes('export default')
+
+  const requirePlugins = hasExportDefault
+    ? `return require('./${pluginPath}').default(on, config)`
+    : `return require('./${pluginPath}')(on, config)`
+
+  const setupNodeEvents = dedent`
+  // We've imported your old cypress plugins here.
+  // You may want to clean this up later by importing these.
+  setupNodeEvents(on, config) {
+    ${requirePlugins}
+  }`
+
+  return dedent`
+    e2e: {
+      ${setupNodeEvents},${formatObjectForConfig(options)}
+    },`
 }
 
 function createComponentTemplate (options: Record<string, unknown>) {

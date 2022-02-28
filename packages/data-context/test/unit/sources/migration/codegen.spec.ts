@@ -15,11 +15,13 @@ import { expect } from 'chai'
 import { MigrationFile } from '../../../../src/sources'
 import { scaffoldMigrationProject } from '../../helper'
 
-const root = path.join(__dirname, '..', '..', '..', '..', '..')
-
-const projectRoot = path.join(root, 'system-tests', 'projects', 'migration-e2e-defaults')
+let projectRoot: string
 
 describe('cypress.config.js generation', () => {
+  before(async () => {
+    projectRoot = await scaffoldMigrationProject('migration-e2e-defaults')
+  })
+
   it('should create a string when passed only a global option', async () => {
     const config: OldCypressConfig = {
       viewportWidth: 300,
@@ -112,7 +114,7 @@ describe('cypress.config.js generation', () => {
   it('should exclude fields that are no longer valid', async () => {
     const config = {
       '$schema': 'http://someschema.com',
-      pluginsFile: 'path/to/plugin/file',
+      pluginsFile: './cypress/plugins/index.js',
       componentFolder: 'path/to/component/folder',
     }
 
@@ -122,6 +124,20 @@ describe('cypress.config.js generation', () => {
       hasPluginsFile: true,
       projectRoot,
       hasTypescript: false,
+    })
+
+    snapshot(generatedConfig)
+  })
+
+  it('should handle export default in plugins file', async () => {
+    const config = fs.readJsonSync(path.join(projectRoot, 'cypress.json'))
+
+    const generatedConfig = await createConfigString(config, {
+      hasE2ESpec: true,
+      hasComponentTesting: false,
+      hasPluginsFile: true,
+      projectRoot,
+      hasTypescript: true,
     })
 
     snapshot(generatedConfig)
