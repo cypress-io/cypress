@@ -219,132 +219,6 @@ const defaults = function (state, config, obj) {
   return obj
 }
 
-export function create (Cypress, cy, state, config) {
-  counter = 0
-  const logManager = new LogManager()
-
-  const logFn = function (options: any = {}) {
-    if (!_.isObject(options)) {
-      $errUtils.throwErrByPath('log.invalid_argument', { args: { arg: options } })
-    }
-
-    const log = new Log(cy, state, config, logManager, options)
-
-    log.set(options)
-
-    // if snapshot was passed
-    // in, go ahead and snapshot
-    if (log.get('snapshot')) {
-      log.snapshot()
-    }
-
-    // if end was passed in
-    // go ahead and end
-    if (log.get('end')) {
-      log.end()
-    }
-
-    if (log.get('error')) {
-      log.error(log.get('error'))
-    }
-
-    log.wrapConsoleProps()
-
-    const onBeforeLog = state('onBeforeLog')
-
-    // dont trigger log if this function
-    // explicitly returns false
-    if (_.isFunction(onBeforeLog)) {
-      if (onBeforeLog.call(cy, log) === false) {
-        return
-      }
-    }
-
-    // set the log on the command
-    const current = state('current')
-
-    if (current) {
-      current.log(log)
-    }
-
-    logManager.addToLogs(log)
-
-    if (options.sessionInfo) {
-      Cypress.emit('session:add', log.toJSON())
-    }
-
-    if (options.emitOnly) {
-      return
-    }
-
-    logManager.triggerLog(log)
-
-    // if not current state then the log is being run
-    // with no command reference, so just end the log
-    if (!current) {
-      log.end()
-    }
-
-    return log
-  }
-
-  logFn._logs = logManager.logs
-
-  return logFn
-}
-
-class LogManager {
-  logs: Record<string, any> = {}
-
-  trigger (log, event) {
-    // bail if we never fired our initial log event
-    if (!log._hasInitiallyLogged) {
-      return
-    }
-
-    // bail if we've reset the logs due to a Cypress.abort
-    if (!this.logs[log.get('id')]) {
-      return
-    }
-
-    const attrs = log.toJSON()
-
-    // only trigger this event if our last stored
-    // emitted attrs do not match the current toJSON
-    if (!_.isEqual(log._emittedAttrs, attrs)) {
-      log._emittedAttrs = attrs
-
-      log.emit(event, attrs)
-
-      return Cypress.action(event, attrs, log)
-    }
-  }
-
-  triggerLog (log) {
-    log._hasInitiallyLogged = true
-
-    return this.trigger(log, 'command:log:added')
-  }
-
-  addToLogs (log) {
-    const id = log.get('id')
-
-    this.logs[id] = true
-  }
-
-  // only fire the log:state:changed event
-  // as fast as every 4ms
-  fireChangeEvent (log) {
-    const triggerStateChanged = () => {
-      return this.trigger(log, 'command:log:changed')
-    }
-
-    const debounceFn = _.debounce(triggerStateChanged, 4)
-
-    return debounceFn()
-  }
-}
-
 class Log {
   cy: any
   state: any
@@ -634,4 +508,128 @@ class Log {
       return consoleObj
     }
   }
+}
+
+class LogManager {
+  logs: Record<string, any> = {}
+
+  trigger (log, event) {
+    // bail if we never fired our initial log event
+    if (!log._hasInitiallyLogged) {
+      return
+    }
+
+    // bail if we've reset the logs due to a Cypress.abort
+    if (!this.logs[log.get('id')]) {
+      return
+    }
+
+    const attrs = log.toJSON()
+
+    // only trigger this event if our last stored
+    // emitted attrs do not match the current toJSON
+    if (!_.isEqual(log._emittedAttrs, attrs)) {
+      log._emittedAttrs = attrs
+
+      log.emit(event, attrs)
+
+      return Cypress.action(event, attrs, log)
+    }
+  }
+
+  triggerLog (log) {
+    log._hasInitiallyLogged = true
+
+    return this.trigger(log, 'command:log:added')
+  }
+
+  addToLogs (log) {
+    const id = log.get('id')
+
+    this.logs[id] = true
+  }
+
+  // only fire the log:state:changed event
+  // as fast as every 4ms
+  fireChangeEvent (log) {
+    const triggerStateChanged = () => {
+      return this.trigger(log, 'command:log:changed')
+    }
+
+    const debounceFn = _.debounce(triggerStateChanged, 4)
+
+    return debounceFn()
+  }
+}
+
+export function create (Cypress, cy, state, config) {
+  counter = 0
+  const logManager = new LogManager()
+
+  const logFn = function (options: any = {}) {
+    if (!_.isObject(options)) {
+      $errUtils.throwErrByPath('log.invalid_argument', { args: { arg: options } })
+    }
+
+    const log = new Log(cy, state, config, logManager, options)
+
+    log.set(options)
+
+    // if snapshot was passed
+    // in, go ahead and snapshot
+    if (log.get('snapshot')) {
+      log.snapshot()
+    }
+
+    // if end was passed in
+    // go ahead and end
+    if (log.get('end')) {
+      log.end()
+    }
+
+    if (log.get('error')) {
+      log.error(log.get('error'))
+    }
+
+    log.wrapConsoleProps()
+
+    const onBeforeLog = state('onBeforeLog')
+
+    // dont trigger log if this function
+    // explicitly returns false
+    if (_.isFunction(onBeforeLog)) {
+      if (onBeforeLog.call(cy, log) === false) {
+        return
+      }
+    }
+
+    // set the log on the command
+    const current = state('current')
+
+    if (current) {
+      current.log(log)
+    }
+
+    logManager.addToLogs(log)
+
+    if (options.sessionInfo) {
+      Cypress.emit('session:add', log.toJSON())
+    }
+
+    if (options.emitOnly) {
+      return
+    }
+
+    logManager.triggerLog(log)
+
+    // if not current state then the log is being run
+    // with no command reference, so just end the log
+    if (!current) {
+      log.end()
+    }
+
+    return log
+  }
+
+  return logFn
 }
