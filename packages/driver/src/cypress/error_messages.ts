@@ -1694,7 +1694,7 @@ export default {
       message: `${cmd('switchToDomain')} requires enabling the experimentalMultiDomain flag`,
     },
     invalid_domain_argument: {
-      message: `${cmd('switchToDomain')} requires the first argument to be a string. You passed: \`{{arg}}\``,
+      message: `${cmd('switchToDomain')} requires the first argument to be either 'localhost', an ip address ('127.0.0.1') or a domain name ('example.com'). Domain names must not contain sub domains, ports or paths. You passed: \`{{arg}}\``,
     },
     invalid_data_argument: {
       message: `${cmd('switchToDomain')} requires the 'data' argument to be an array. You passed: \`{{arg}}\``,

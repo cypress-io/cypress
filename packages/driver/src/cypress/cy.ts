@@ -534,7 +534,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
         // not utilized
         try {
           this.Cypress.action('app:window:load', this.state('window'))
-          this.Cypress.multiDomainCommunicator.toSpecBridge('window:load', { url: this.getRemoteLocation('href') })
+          this.Cypress.multiDomainCommunicator.toAllSpecBridges('window:load', { url: this.getRemoteLocation('href') })
 
           signalStable()
         } catch (err: any) {

@@ -4,4 +4,8 @@ export const handleTestEvents = (Cypress: Cypress.Cypress, specBridgeCommunicato
   specBridgeCommunicator.on('test:before:run', (...args) => {
     Cypress.emit('test:before:run', ...args)
   })
+
+  specBridgeCommunicator.on('test:before:run:async', (...args) => {
+    Cypress.emit('test:before:run:async', ...args)
+  })
 }

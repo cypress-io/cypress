@@ -14,6 +14,7 @@ declare namespace Cypress {
     (action: 'request:event', data: any)
     (action: 'backend:request', fn: (...any) => void)
     (action: 'automation:request', fn: (...any) => void)
+    (action: 'viewport:changed', fn?: (viewport: { viewportWidth: string, viewportHeight: string }, callback: () => void) => void)
     (action: 'before:screenshot', fn: (config: {}, fn: () => void) => void)
     (action: 'after:screenshot', config: {})
   }
@@ -49,6 +50,7 @@ declare namespace Cypress {
     state: State
     events: Events
     emit: ((event: string, payload?: any) => void)
+    multiDomainCommunicator: import('../src/multi-domain/communicator').PrimaryDomainCommunicator
   }
 
   interface CypressUtils {

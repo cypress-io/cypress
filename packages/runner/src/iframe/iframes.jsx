@@ -175,7 +175,7 @@ export default class Iframes extends Component {
 
     // if it already exists, don't add another one
     if (document.getElementById(id)) {
-      this.props.eventManager.notifyCrossDomainBridgeReady()
+      this.props.eventManager.notifyCrossDomainBridgeReady(domain)
 
       return
     }
@@ -226,6 +226,10 @@ export default class Iframes extends Component {
 
   componentDidUpdate () {
     const cb = this.props.state.callbackAfterUpdate
+
+    // call the clientWidth to force the browser to repaint for viewport changes
+    // otherwise firefox may fail when changing the viewport in multi-domain
+    this.refs.container.clientWidth
 
     if (cb) {
       cb()

@@ -9,6 +9,10 @@ const debug = debugFn('cypress:driver:multi-domain')
 
 const CROSS_DOMAIN_PREFIX = 'cross:domain:'
 
+declare global {
+  interface Window { specBridgeDomain: string }
+}
+
 const preprocessErrorForPostMessage = (value) => {
   const { isDom } = $dom
 
@@ -62,20 +66,20 @@ const preprocessErrorForPostMessage = (value) => {
  * @extends EventEmitter
  */
 export class PrimaryDomainCommunicator extends EventEmitter {
-  private windowReference
-  private crossDomainDriverWindow
+  private windowReference: Window | undefined
+  private crossDomainDriverWindows: {[key: string]: Window} = {}
 
   /**
    * Initializes the event handler to receive messages from the spec bridge.
    * @param {Window} win - a reference to the window object in the primary domain.
    * @returns {Void}
    */
-  initialize (win) {
+  initialize (win: Window) {
     if (this.windowReference) return
 
     this.windowReference = win
 
-    this.windowReference.top.addEventListener('message', ({ data, source }) => {
+    this.windowReference.top?.addEventListener('message', ({ data, source }) => {
       // currently used for tests, can be removed later
       if (data?.actual) return
 
@@ -87,11 +91,11 @@ export class PrimaryDomainCommunicator extends EventEmitter {
         // NOTE: need a special case here for 'bridge:ready'
         // where we need to set the crossDomainDriverWindow to source to
         // communicate back to the iframe
-        if (messageName === 'bridge:ready') {
-          this.crossDomainDriverWindow = source
+        if (messageName === 'bridge:ready' && source) {
+          this.crossDomainDriverWindows[data.domain] = source as Window
         }
 
-        this.emit(messageName, data.data)
+        this.emit(messageName, data.data, data.domain)
 
         return
       }
@@ -105,9 +109,21 @@ export class PrimaryDomainCommunicator extends EventEmitter {
    * @param {string} event - the name of the event to be sent.
    * @param {any} data - any meta data to be sent with the event.
    */
-  toSpecBridge (event: string, data?: any) {
+  toAllSpecBridges (event: string, data?: any) {
+    debug('=> to all spec bridges', event, data)
     // If there is no crossDomainDriverWindow, there is no need to send the message.
-    this.crossDomainDriverWindow?.postMessage({
+    Object.values(this.crossDomainDriverWindows).forEach((win: Window) => {
+      win.postMessage({
+        event,
+        data,
+      }, '*')
+    })
+  }
+
+  toSpecBridge (domain: string, event: string, data?: any) {
+    debug('=> to spec bridge', domain, event, data)
+    // If there is no crossDomainDriverWindow, there is no need to send the message.
+    this.crossDomainDriverWindows[domain]?.postMessage({
       event,
       data,
     }, '*')
@@ -180,12 +196,15 @@ export class SpecBridgeDomainCommunicator extends EventEmitter {
    * @param {any} data - any meta data to be sent with the event.
    */
   toPrimary (event: string, data?: object, options = { syncConfig: false }) {
+    debug('<= to Primary %s %o %s', event, data, window.specBridgeDomain)
+
     if (options.syncConfig) this.syncConfigEnvToPrimary()
 
     this.handleSubjectAndErr(data, (data: any) => {
       this.windowReference.top.postMessage({
         event: `${CROSS_DOMAIN_PREFIX}${event}`,
         data,
+        domain: window.specBridgeDomain,
       }, '*')
     })
   }

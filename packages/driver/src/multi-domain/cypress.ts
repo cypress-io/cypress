@@ -17,6 +17,7 @@ import { handleSpecWindowEvents } from './events/spec_window'
 import { handleErrorEvent } from './events/errors'
 import { handleScreenshots } from './events/screenshots'
 import { handleTestEvents } from './events/test'
+import { handleMiscEvents } from './events/misc'
 import { handleUnsupportedAPIs } from './unsupported_apis'
 
 const specBridgeCommunicator = new SpecBridgeDomainCommunicator()
@@ -64,32 +65,16 @@ const setup = (cypressConfig: Cypress.Config, env: Cypress.ObjectLike) => {
   // @ts-ignore
   Cypress.isCy = cy.isCy
 
-  handleDomainFn(cy, specBridgeCommunicator)
+  handleDomainFn(Cypress, cy, specBridgeCommunicator)
   handleLogs(Cypress, specBridgeCommunicator)
   handleSocketEvents(Cypress)
   handleSpecWindowEvents(cy)
+  handleMiscEvents(Cypress, cy, specBridgeCommunicator)
   handleScreenshots(Cypress, specBridgeCommunicator)
   handleTestEvents(Cypress, specBridgeCommunicator)
   handleUnsupportedAPIs(Cypress, cy)
 
   cy.onBeforeAppWindowLoad = onBeforeAppWindowLoad(Cypress, cy)
-
-  // TODO Should state syncing be built into cy.state instead of being explicitly called?
-  specBridgeCommunicator.on('sync:state', async (state) => {
-    cy.state(state)
-  })
-
-  // Listen for window load events from the primary window to resolve page loads
-  specBridgeCommunicator.on('window:load', ({ url }) => {
-    cy.isStable(true, 'load')
-    Cypress.emit('internal:window:load', { type: 'cross:domain', url })
-  })
-
-  // Forward url:changed Message to the primary domain to enable changing the url displayed in the AUT
-  // @ts-ignore
-  Cypress.on('url:changed', (url) => {
-    specBridgeCommunicator.toPrimary('url:changed', { url })
-  })
 
   return cy
 }

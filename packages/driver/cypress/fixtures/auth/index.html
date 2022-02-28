@@ -20,11 +20,11 @@
       let newLocation = `${location.origin}${location.pathname}`
 
       if(newSearchParams){
-          newLocation = `${newLocation}?${newSearchParams}`
+        newLocation = `${newLocation}?${newSearchParams}`
       }
 
       if(location.hash){
-          newLocation = `${newLocation}${location.hash}`
+        newLocation = `${newLocation}${location.hash}`
       }
 
       location.replace(newLocation)
@@ -42,13 +42,31 @@
       body.appendChild(tag)
 
       // Add Login button that redirects to the idp
-      const btn = document.createElement("button");
-      btn.innerHTML = "Login"
-      btn.dataset.cy = "login"
-      btn.onclick = function () {
-          window.location.href = `http://www.foobar.com:3500/fixtures/auth/idp.html?redirect=${encodeURIComponent(window.location.href)}`
+      const loginBtn = document.createElement("button");
+      loginBtn.innerHTML = "Login IDP"
+      loginBtn.dataset.cy = "login-idp"
+      loginBtn.onclick = function () {
+        window.location.href = `http://www.idp.com:3500/fixtures/auth/idp.html?redirect=${encodeURIComponent(window.location.href)}`
       };
-      document.body.appendChild(btn);
+      document.body.appendChild(loginBtn);
+
+      // Add Login button that redirects to the idp
+      const loginFoobarBtn = document.createElement("button");
+      loginFoobarBtn.innerHTML = "Login Foobar"
+      loginFoobarBtn.dataset.cy = "login-foobar"
+      loginFoobarBtn.onclick = function () {
+        window.location.href = `http://www.foobar.com:3500/fixtures/auth/idp.html?redirect=${encodeURIComponent(window.location.href)}`
+      };
+      document.body.appendChild(loginFoobarBtn);
+
+      // Add Login button that redirects to the idp
+      const loginWithApprovalBtn = document.createElement("button");
+      loginWithApprovalBtn.innerHTML = "Login With Approval"
+      loginWithApprovalBtn.dataset.cy = "login-with-approval"
+      loginWithApprovalBtn.onclick = function () {
+        window.location.href = `http://foobar.com:3500/fixtures/auth/approval.html?redirect=${encodeURIComponent(window.location.href)}`
+      };
+      document.body.appendChild(loginWithApprovalBtn);
 
     } else {
       const token = JSON.parse(cypressAuthToken)
@@ -67,8 +85,8 @@
       btn.innerHTML = "Logout";
       btn.dataset.cy = "logout"
       btn.onclick = function () {
-          sessionStorage.removeItem('cypressAuthToken');
-          location.reload()
+        sessionStorage.removeItem('cypressAuthToken');
+        location.reload()
       };
       document.body.appendChild(btn);
     }

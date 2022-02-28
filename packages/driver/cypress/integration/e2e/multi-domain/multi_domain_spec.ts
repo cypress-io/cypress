@@ -145,80 +145,6 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
   })
 
   describe('errors', () => {
-    // @ts-ignore
-    it('errors if experimental flag is not enabled', { experimentalMultiDomain: false }, (done) => {
-      cy.on('fail', (err) => {
-        expect(err.message).to.equal('`cy.switchToDomain()` requires enabling the experimentalMultiDomain flag')
-
-        done()
-      })
-
-      // @ts-ignore
-      cy.switchToDomain()
-    })
-
-    it('errors if passed a non-string for the domain argument', (done) => {
-      cy.on('fail', (err) => {
-        expect(err.message).to.equal('`cy.switchToDomain()` requires the first argument to be a string. You passed: ``')
-
-        done()
-      })
-
-      // @ts-ignore
-      cy.switchToDomain()
-    })
-
-    it('errors passing non-array to callback function', (done) => {
-      cy.on('fail', (err) => {
-        expect(err.message).to.equal('`cy.switchToDomain()` requires the \'data\' argument to be an array. You passed: `foo`')
-
-        done()
-      })
-
-      // @ts-ignore
-      cy.switchToDomain('foobar.com', 'foo', () => {})
-    })
-
-    it('errors if passed a non-serializable data value', (done) => {
-      cy.on('fail', (err) => {
-        expect(err.message).to.include('data argument specified is not serializable')
-
-        if (Cypress.browser.family === 'chromium') {
-          expect(err.message).to.include('HTMLDivElement object could not be cloned')
-        } else if (Cypress.browser.family === 'firefox') {
-          expect(err.message).to.include('The object could not be cloned')
-        }
-
-        done()
-      })
-
-      const el = document.createElement('div')
-
-      cy.switchToDomain('foobar.com', ['foo', '1', el], () => {})
-    })
-
-    it('errors if last argument is absent', (done) => {
-      cy.on('fail', (err) => {
-        expect(err.message).to.equal('`cy.switchToDomain()` requires the last argument to be a function. You passed: ``')
-
-        done()
-      })
-
-      // @ts-ignore
-      cy.switchToDomain('foobar.com')
-    })
-
-    it('errors if last argument is not a function', (done) => {
-      cy.on('fail', (err) => {
-        expect(err.message).to.equal('`cy.switchToDomain()` requires the last argument to be a function. You passed: `{}`')
-
-        done()
-      })
-
-      // @ts-ignore
-      cy.switchToDomain('foobar.com', {})
-    })
-
     // TODO: Proper stack trace printing still needs to be addressed here
     it('propagates secondary domain errors to the primary that occur within the test', () => {
       return new Promise((resolve) => {
@@ -276,5 +202,54 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
         })
       })
     })
+  })
+})
+
+// @ts-ignore
+describe('domain validation', { experimentalSessionSupport: true, experimentalMultiDomain: true }, () => {
+  it('finds the right spec bridge with a subdomain', () => {
+    cy.visit('/fixtures/auth/index.html') // Establishes Primary Domain
+    cy.window().then((win) => {
+      win.location.href = 'http://baz.foobar.com:3500/fixtures/auth/idp.html'
+    })
+
+    cy.switchToDomain('foobar.com', () => {
+      cy.get('[data-cy="username"]').type('TJohnson')
+      cy.get('[data-cy="login"]').click()
+    })
+
+    cy.get('[data-cy="welcome"]')
+    .invoke('text')
+    .should('equal', 'Welcome TJohnson')
+  })
+
+  it('uses switchToDomain twice', () => {
+    cy.visit('/fixtures/auth/index.html') // Establishes Primary Domain
+    cy.get('[data-cy="login-idp"]').click() // Takes you to idp.com
+    cy.switchToDomain('idp.com', () => {
+      cy.get('[data-cy="username"]').type('BJohnson')
+      cy.get('[data-cy="login"]').click()
+    }) // Trailing edge wait, waiting to return to the primary domain
+
+    // Verify that the user has logged in on /siteA
+    cy.get('[data-cy="welcome"]')
+    .invoke('text')
+    .should('equal', 'Welcome BJohnson')
+
+    cy.get('[data-cy="logout"]').click()
+
+    cy.window().then((win) => {
+      win.location.href = 'http://baz.foobar.com:3500/fixtures/auth/idp.html'
+    })
+
+    cy.switchToDomain('foobar.com', () => {
+      cy.get('[data-cy="username"]').type('TJohnson')
+      cy.get('[data-cy="login"]').click()
+    }) // Trailing edge wait, waiting to return to the primary domain
+
+    // Verify that the user has logged in on /siteA
+    cy.get('[data-cy="welcome"]')
+    .invoke('text')
+    .should('equal', 'Welcome TJohnson')
   })
 })

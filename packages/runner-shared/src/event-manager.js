@@ -513,7 +513,11 @@ export const eventManager = {
     })
 
     Cypress.on('test:before:run', (...args) => {
-      Cypress.multiDomainCommunicator.toSpecBridge('test:before:run', ...args)
+      Cypress.multiDomainCommunicator.toAllSpecBridges('test:before:run', ...args)
+    })
+
+    Cypress.on('test:before:run:async', (...args) => {
+      Cypress.multiDomainCommunicator.toAllSpecBridges('test:before:run:async', ...args)
     })
 
     Cypress.multiDomainCommunicator.initialize(window)
@@ -526,9 +530,19 @@ export const eventManager = {
       localBus.emit('expect:domain', domain)
     })
 
-    Cypress.multiDomainCommunicator.on('before:screenshot', (config) => {
+    Cypress.multiDomainCommunicator.on('viewport:changed', (viewport, domain) => {
       const callback = () => {
-        Cypress.multiDomainCommunicator.toSpecBridge('before:screenshot:end')
+        Cypress.multiDomainCommunicator.toSpecBridge(domain, 'viewport:changed:end')
+      }
+
+      // TODO: Do we want to use the multiDomainCommunicator to send these types of messages or Cypress itself?
+      Cypress.multiDomainCommunicator.emit('sync:viewport', viewport)
+      localBus.emit('viewport:changed', viewport, callback)
+    })
+
+    Cypress.multiDomainCommunicator.on('before:screenshot', (config, domain) => {
+      const callback = () => {
+        Cypress.multiDomainCommunicator.toSpecBridge(domain, 'before:screenshot:end')
       }
 
       handleBeforeScreenshot(config, callback)
@@ -640,8 +654,9 @@ export const eventManager = {
     ws.emit('spec:changed', specFile)
   },
 
-  notifyCrossDomainBridgeReady () {
-    Cypress.multiDomainCommunicator.emit('bridge:ready')
+  notifyCrossDomainBridgeReady (domain) {
+    // Any multi-domain event appends the domain as the third parameter and we do the same here for this short circuit
+    Cypress.multiDomainCommunicator.emit('bridge:ready', undefined, domain)
   },
 
   focusTests () {
