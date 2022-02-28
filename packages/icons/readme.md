@@ -25,7 +25,7 @@ To build the MacOS icons you have to use the `iconutil` command line tool instal
 This command line tool is only installed on MacOS.
 
 If you are not on MacOS, the building of this icon will simply be skipped.
-Good news the macos is only needed to develop on MacOS.
+If you are not on MacOS, the building of this icon will be skipped instead of erroring. 
 
 ## Developing
 
