@@ -1,4 +1,3 @@
-// @ts-nocheck
 import _ from 'lodash'
 import capitalize from 'underscore.string/capitalize'
 import methods from 'methods'
@@ -46,7 +45,7 @@ const USER_FRIENDLY_TYPE_DETECTORS = _.map([
   [_.stubTrue, 'unknown'],
 ], ([fn, type]) => {
   return [fn, _.constant(type)]
-})
+}) as [(val: any) => boolean, (val: Function) => Function][]
 
 export default {
   warning (msg) {
@@ -78,7 +77,7 @@ export default {
     const item = [].concat(val)[0]
 
     if ($jquery.isJquery(item)) {
-      return item.first()
+      return (item as JQuery<any>).first()
     }
 
     return item
@@ -154,7 +153,7 @@ export default {
       memo.push(`${`${key}`.toLowerCase()}: ${this.stringifyActual(value)}`)
 
       return memo
-    }, [])
+    }, [] as string[])
 
     return `{${str.join(', ')}}`
   },
@@ -185,7 +184,7 @@ export default {
     if (_.isObject(value)) {
       // Cannot use $dom.isJquery here because it causes infinite recursion.
       if (value instanceof $) {
-        return `jQuery{${value.length}}`
+        return `jQuery{${(value as JQueryStatic).length}}`
       }
 
       const len = _.keys(value).length
@@ -396,7 +395,7 @@ export default {
   */
   encodeBase64Unicode (str) {
     return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (match, p1) => {
-      return String.fromCharCode(`0x${p1}`)
+      return String.fromCharCode(Number(`0x${p1}`))
     }))
   },
 
