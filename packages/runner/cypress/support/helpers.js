@@ -493,7 +493,22 @@ const containText = (text) => {
 }
 
 const getRunState = (Cypress) => {
-  return _.cloneDeep(Cypress.runner.getRunState)
+  const currentRunnable = Cypress.cy.state('runnable')
+  const currentId = currentRunnable && currentRunnable.id
+
+  const s = {
+    currentId,
+    tests: Cypress.runner.getTestsState(),
+    startTime: Cypress.runner.getStartTime(),
+    emissions: Cypress.runner.getEmissions(),
+  }
+
+  s.passed = Cypress.runner.countByTestState(s.tests, 'passed')
+  s.failed = Cypress.runner.countByTestState(s.tests, 'failed')
+  s.pending = Cypress.runner.countByTestState(s.tests, 'pending')
+  s.numLogs = Cypress.Log.countLogsByTests(s.tests)
+
+  return _.cloneDeep(s)
 }
 
 module.exports = {

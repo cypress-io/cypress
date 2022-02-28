@@ -14,7 +14,7 @@ interface DefaultAppState {
 // so only a subset of the initial values are declared here
 const defaults: DefaultAppState = {
   isPaused: false,
-  isRunning: true,
+  isRunning: false,
   isPreferencesMenuOpen: false,
   nextCommandName: null,
   pinnedSnapshotId: null,

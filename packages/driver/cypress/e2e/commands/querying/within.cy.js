@@ -4,9 +4,9 @@ const { _ } = Cypress
 
 describe('src/cy/commands/querying/within', () => {
   context('#within', () => {
-    // beforeEach(() => {
-    //   cy.visit('/fixtures/dom.html')
-    // })
+    beforeEach(() => {
+      cy.visit('/fixtures/dom.html')
+    })
 
     it('invokes callback function with runnable.ctx', function () {
       const ctx = this
@@ -17,23 +17,12 @@ describe('src/cy/commands/querying/within', () => {
     })
 
     it('scopes additional GET finders to the subject', () => {
-      cy.visit('/fixtures/dom.html')
-      // const input = cy.$$('#by-name input:first')
+      const input = cy.$$('#by-name input:first')
 
-      // cy.get('#by-name').withinOriginal(() => {
-      //   cy.get('input:first').then(($input) => {
-      //     expect($input.get(0)).to.eq(input.get(0))
-      //   })
-      // })
-
-      cy.get('#by-name')
-      .should('be.visible')
-      .within(() => {
-        expect(true).to.be.true
-
-        // cy.get('input:first').then(($input) => {
-        // expect($input.get(0)).to.eq(input.get(0))
-        // })
+      cy.get('#by-name').within(() => {
+        cy.get('input:first').then(($input) => {
+          expect($input.get(0)).to.eq(input.get(0))
+        })
       })
 
       cy.contains('foo')

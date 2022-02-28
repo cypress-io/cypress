@@ -1295,8 +1295,6 @@ export default {
       return test
     }
 
-    Cypress.on('collect:run:state', getRunState)
-
     return {
       onSpecError,
       setOnlyTestId,
