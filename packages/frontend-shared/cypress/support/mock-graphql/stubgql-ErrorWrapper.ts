@@ -4,8 +4,8 @@ import type { MaybeResolver } from './clientTestUtils'
 
 export const StubErrorWrapper = {
   __typename: 'ErrorWrapper',
-  title: 'Support File Missing or Invalid',
-  description: dedent`
+  title: 'Error Loading Config',
+  errorMessage: dedent`
     The support file is missing or invalid.
 
     Your \`supportFile\` is set to \`foo.bar.js\`, but either the file is missing or it's invalid. The \`supportFile\` must be a \`.js\`, \`.ts\`, \`.coffee\` file or be supported by your preprocessor plugin (if configured).

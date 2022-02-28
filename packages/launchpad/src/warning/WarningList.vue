@@ -2,7 +2,7 @@
   <Warning
     v-for="warning in warnings"
     :key="warning.key"
-    :title="warning.title"
+    :title="warning.title ?? 'Warning'"
     :message="warning.errorMessage"
     dismissible
     @update:modelValue="dismiss(warning.key)"

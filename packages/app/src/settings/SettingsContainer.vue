@@ -11,8 +11,8 @@
         max-height="10000px"
       >
         <ProjectSettings
-          v-if="props.gql"
-          :gql="props.gql"
+          v-if="props.gql.currentProject"
+          :gql="props.gql.currentProject"
         />
       </SettingsCard>
       <SettingsCard
@@ -58,6 +58,7 @@ import ExternalEditorSettings from './device/ExternalEditorSettings.vue'
 import ProxySettings from './device/ProxySettings.vue'
 import SettingsCard from './SettingsCard.vue'
 import ProjectSettings from './project/ProjectSettings.vue'
+import CloudSettings from '../settings/project/CloudSettings.vue'
 import TestingPreferences from './device/TestingPreferences.vue'
 import type { SettingsContainerFragment } from '../generated/graphql'
 import { SettingsContainer_ReconfigureProjectDocument } from '../generated/graphql'

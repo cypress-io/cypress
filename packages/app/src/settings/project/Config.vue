@@ -28,7 +28,6 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
 import { gql } from '@urql/vue'
 import SettingsSection from '../SettingsSection.vue'
 import { useI18n } from '@cy/i18n'
