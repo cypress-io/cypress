@@ -102,6 +102,7 @@ const props = defineProps<{
 
 const query = useQuery({
   query: CheckCloudOrganizationsDocument,
+  requestPolicy: 'network-only',
 })
 
 const polling = ref(false)
@@ -112,7 +113,7 @@ const { pause, resume } = useIntervalFn(() => {
   } else {
     query.executeQuery()
   }
-}, 3000)
+}, 4000)
 
 function startPolling () {
   if (!polling.value) {
@@ -123,7 +124,7 @@ function startPolling () {
   setTimeout(() => {
     pause()
     polling.value = false
-  }, 180000)
+  }, 120000)
 }
 
 const createOrgUrl = computed(() => props.gql.createCloudOrganizationUrl || '#')
