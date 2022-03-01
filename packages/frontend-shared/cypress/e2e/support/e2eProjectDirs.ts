@@ -48,6 +48,7 @@ export const e2eProjectDirs = [
   'migration-e2e-no-plugins-support-file',
   'migration-specs-already-migrated',
   'migration-typescript-project',
+  'module-api',
   'multiple-config-files-with-json',
   'multiple-support-files',
   'multiple-task-registrations',

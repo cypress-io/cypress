@@ -21,7 +21,7 @@
   </RunsError>
   <template v-else-if="currentProject?.cloudProject?.__typename === 'CloudProjectUnauthorized'">
     <RunsError
-      v-if="currentProject.cloudProject.hasRequestedAccess"
+      v-if="currentProject.cloudProject.hasRequestedAccess || hasRequestedAccess"
       icon="access"
       :button-text="t('runs.errors.unauthorizedRequested.button')"
       :button-icon="SendIcon"
@@ -91,6 +91,8 @@ const currentProject = computed(() => props.gql.currentProject)
 
 const showConnectDialog = ref(false)
 
+const hasRequestedAccess = ref(false)
+
 gql`
 mutation RunsErrorRenderer_RequestAccess( $projectId: String! ) {
   cloudProjectRequestAccess(projectSlug: $projectId)
@@ -99,11 +101,13 @@ mutation RunsErrorRenderer_RequestAccess( $projectId: String! ) {
 
 const requestAccessMutation = useMutation(RunsErrorRenderer_RequestAccessDocument)
 
-function requestAccess () {
+async function requestAccess () {
   const projectId = props.gql.currentProject?.projectId
 
   if (projectId) {
-    requestAccessMutation.executeMutation({ projectId })
+    const { data } = await requestAccessMutation.executeMutation({ projectId })
+
+    hasRequestedAccess.value = Boolean(data?.cloudProjectRequestAccess)
   }
 }
 
