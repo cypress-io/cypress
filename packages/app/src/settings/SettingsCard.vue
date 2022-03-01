@@ -44,8 +44,8 @@ import Collapsible from '@cy/components/Collapsible.vue'
 import ListRowHeader from '@cy/components/ListRowHeader.vue'
 
 defineProps<{
-  title: string,
-  description: string,
+  title: string
+  description: string
   icon: FunctionalComponent<SVGAttributes, {}>
   maxHeight: string
 }>()

@@ -237,4 +237,44 @@ describe('lib/open_project', () => {
       })
     })
   })
+
+  context('#sendFocusBrowserMessage', () => {
+    it('focuses browser if runner is connected', async () => {
+      // Stubbing out relaunchBrowser function created during launch
+      openProject.relaunchBrowser = sinon.stub()
+      sinon.stub(ProjectBase.prototype, 'isRunnerSocketConnected').returns(true)
+      sinon.stub(ProjectBase.prototype, 'sendFocusBrowserMessage').resolves()
+
+      await openProject.sendFocusBrowserMessage()
+
+      expect(ProjectBase.prototype.isRunnerSocketConnected).to.have.been.calledOnce
+      expect(ProjectBase.prototype.sendFocusBrowserMessage).to.have.been.calledOnce
+      expect(openProject.relaunchBrowser).not.to.have.been.called
+    })
+
+    it('relaunches browser if runner is not connected and relaunch exists', async () => {
+      // Stubbing out relaunchBrowser function created during launch
+      openProject.relaunchBrowser = sinon.stub()
+      sinon.stub(ProjectBase.prototype, 'isRunnerSocketConnected').returns(false)
+      sinon.stub(ProjectBase.prototype, 'sendFocusBrowserMessage').resolves()
+
+      await openProject.sendFocusBrowserMessage()
+
+      expect(ProjectBase.prototype.isRunnerSocketConnected).to.have.been.calledOnce
+      expect(ProjectBase.prototype.sendFocusBrowserMessage).not.to.have.been.called
+      expect(openProject.relaunchBrowser).to.have.been.calledOnce
+    })
+
+    it('does not throw if relaunch is not defined', async () => {
+      // Stubbing out relaunchBrowser function created during launch
+      openProject.relaunchBrowser = null
+      sinon.stub(ProjectBase.prototype, 'isRunnerSocketConnected').returns(false)
+      sinon.stub(ProjectBase.prototype, 'sendFocusBrowserMessage').resolves()
+
+      await openProject.sendFocusBrowserMessage()
+
+      expect(ProjectBase.prototype.isRunnerSocketConnected).to.have.been.calledOnce
+      expect(ProjectBase.prototype.sendFocusBrowserMessage).not.to.have.been.called
+    })
+  })
 })

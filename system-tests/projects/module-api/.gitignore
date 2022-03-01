@@ -1,0 +1,12 @@
+.DS_Store
+node_modules/
+cypress/videos/
+cypress/plugins/
+test/successful/cypress/videos/
+test/invalid/cypress/videos
+test/failing/cypress/videos
+test/failing/cypress/screenshots
+test/invalid/cypress/screenshots
+
+test/env/cypress/videos
+test/env/cypress/screenshots

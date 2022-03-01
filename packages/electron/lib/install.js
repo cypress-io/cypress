@@ -2,13 +2,11 @@
 const _ = require('lodash')
 const os = require('os')
 const path = require('path')
-const Promise = require('bluebird')
 const pkg = require('../package.json')
 const paths = require('./paths')
 const log = require('debug')('cypress:electron')
-let fs = require('fs-extra')
-
-fs = Promise.promisifyAll(fs)
+const fs = require('fs-extra')
+const crypto = require('crypto')
 
 let electronVersion
 
@@ -25,14 +23,14 @@ module.exports = {
   // returns icons package so that the caller code can find
   // paths to the icons without hard-coding them
   icons () {
-    return require('@cypress/icons')
+    return require('@packages/icons')
   },
 
   checkCurrentVersion () {
     const pathToVersion = paths.getPathToVersion()
 
     // read in the version file
-    return fs.readFileAsync(pathToVersion, 'utf8')
+    return fs.readFile(pathToVersion, 'utf8')
     .then((str) => {
       const version = str.replace('v', '')
 
@@ -40,29 +38,50 @@ module.exports = {
       // throw an error
       if (version !== electronVersion) {
         throw new Error(`Currently installed version: '${version}' does not match electronVersion: '${electronVersion}`)
-      } else {
-        return process.exit()
+      }
+    })
+  },
+
+  getFileHash (filePath) {
+    return fs.readFile(filePath).then((buf) => {
+      const hashSum = crypto.createHash('sha1')
+
+      hashSum.update(buf)
+      const hash = hashSum.digest('hex')
+
+      return hash
+    })
+  },
+
+  checkIconVersion () {
+    const mainIconsPath = this.icons().getPathToIcon('cypress.icns')
+    const cachedIconsPath = path.join(__dirname, '../dist/Cypress/Cypress.app/Contents/Resources/electron.icns')
+
+    return Promise.all([this.getFileHash(mainIconsPath), this.getFileHash(cachedIconsPath)])
+    .then(([mainHash, cachedHash]) => {
+      if (mainHash !== cachedHash) {
+        throw new Error('Icon mismatch')
       }
     })
   },
 
   checkExecExistence () {
-    return fs.statAsync(paths.getPathToExec())
+    return fs.stat(paths.getPathToExec())
   },
 
   move (src, dest) {
     // src  is ./tmp/Cypress-darwin-x64
     // dest is ./dist/Cypress
-    return fs.moveAsync(src, dest, { overwrite: true })
+    return fs.move(src, dest, { overwrite: true })
     .then(() => {
       // remove the tmp folder now
-      return fs.removeAsync(path.dirname(src))
+      return fs.remove(path.dirname(src))
     })
   },
 
   removeEmptyApp () {
     // nuke the temporary blank /app
-    return fs.removeAsync(paths.getPathToResources('app'))
+    return fs.remove(paths.getPathToResources('app'))
   },
 
   packageAndExit () {
@@ -76,7 +95,7 @@ module.exports = {
 
   package (options = {}) {
     const pkgr = require('electron-packager')
-    const icons = require('@cypress/icons')
+    const icons = require('@packages/icons')
 
     const iconPath = icons.getPathToIcon('cypress')
 
@@ -117,15 +136,23 @@ module.exports = {
   },
 
   ensure () {
-    return Promise.join(
+    return Promise.all([
+      // check the version of electron and re-build if updated
       this.checkCurrentVersion(),
+      // check if the dist folder exist and re-build if not
       this.checkExecExistence(),
-    )
+      // Compare the icon in dist with the one in the icons
+      // package. If different, force the re-build.
+      this.checkIconVersion(),
+    ])
+
+    // if all is good, then return without packaging a new electron app
   },
 
   check () {
     return this.ensure()
-    .bind(this)
-    .catch(this.packageAndExit)
+    .catch(() => {
+      this.packageAndExit()
+    })
   },
 }

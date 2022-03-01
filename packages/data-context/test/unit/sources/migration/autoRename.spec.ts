@@ -170,7 +170,7 @@ describe('applyMigrationTransform', () => {
             },
             {
               'highlight': true,
-              group: 'extension',
+              group: 'preExtension',
               'text': '.spec.',
             },
             {
@@ -197,7 +197,7 @@ describe('applyMigrationTransform', () => {
             },
             {
               'highlight': true,
-              group: 'extension',
+              group: 'preExtension',
               'text': '.cy.',
             },
             {
@@ -233,7 +233,7 @@ describe('applyMigrationTransform', () => {
             },
             {
               'highlight': true,
-              group: 'extension',
+              group: 'preExtension',
               'text': '.spec.',
             },
             {
@@ -251,7 +251,7 @@ describe('applyMigrationTransform', () => {
             },
             {
               'highlight': true,
-              group: 'extension',
+              group: 'preExtension',
               'text': '.cy.',
             },
             {
@@ -350,7 +350,7 @@ describe('applyMigrationTransform', () => {
             },
             {
               'highlight': true,
-              group: 'extension',
+              group: 'preExtension',
               'text': '.',
             },
             {
@@ -377,7 +377,7 @@ describe('applyMigrationTransform', () => {
             },
             {
               'highlight': true,
-              group: 'extension',
+              group: 'preExtension',
               'text': '.cy.',
             },
             {
@@ -389,6 +389,60 @@ describe('applyMigrationTransform', () => {
       }
 
       const result = applyMigrationTransform(input)
+
+      expect(result.before).to.eql(expected.before)
+      expect(result.after).to.eql(expected.after)
+    })
+
+    it('handles .test files', () => {
+      const result = applyMigrationTransform(
+        {
+          relative: 'cypress/tests/api-bankaccounts.test.js',
+          usesDefaultFolder: false,
+          usesDefaultTestFiles: true,
+          testingType: 'e2e',
+        },
+      )
+
+      const expected: MigrationFile = {
+        testingType: 'e2e',
+        before: {
+          relative: 'cypress/tests/api-bankaccounts.test.js',
+          parts: [
+            {
+              'highlight': false,
+              'text': 'cypress/tests/api-bankaccounts',
+            },
+            {
+              'highlight': true,
+              group: 'preExtension',
+              'text': '.test.',
+            },
+            {
+              'highlight': false,
+              'text': 'js',
+            },
+          ],
+        },
+        after: {
+          relative: 'cypress/tests/api-bankaccounts.cy.js',
+          parts: [
+            {
+              'highlight': false,
+              'text': 'cypress/tests/api-bankaccounts',
+            },
+            {
+              'highlight': true,
+              group: 'preExtension',
+              'text': '.cy.',
+            },
+            {
+              'highlight': false,
+              'text': 'js',
+            },
+          ],
+        },
+      }
 
       expect(result.before).to.eql(expected.before)
       expect(result.after).to.eql(expected.after)
@@ -415,7 +469,7 @@ describe('applyMigrationTransform', () => {
             },
             {
               'highlight': true,
-              group: 'extension',
+              group: 'preExtension',
               'text': '.spec.',
             },
             {
@@ -433,7 +487,7 @@ describe('applyMigrationTransform', () => {
             },
             {
               'highlight': true,
-              group: 'extension',
+              group: 'preExtension',
               'text': '.cy.',
             },
             {
@@ -472,7 +526,7 @@ describe('applyMigrationTransform', () => {
             {
               'text': '.spec.',
               'highlight': true,
-              'group': 'extension',
+              'group': 'preExtension',
             },
             {
               'text': 'js',
@@ -490,7 +544,7 @@ describe('applyMigrationTransform', () => {
             {
               'text': '.cy.',
               'highlight': true,
-              'group': 'extension',
+              'group': 'preExtension',
             },
             {
               'text': 'js',

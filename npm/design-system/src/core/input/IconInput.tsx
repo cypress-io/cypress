@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { RefAttributes } from 'react'
+import type { RefAttributes } from 'react'
 import cs from 'classnames'
 import { useFocusRing } from '@react-aria/focus'
 import { PressEvent } from '@react-types/shared'

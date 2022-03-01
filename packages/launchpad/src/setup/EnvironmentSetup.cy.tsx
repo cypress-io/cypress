@@ -1,6 +1,7 @@
 import { EnvironmentSetupFragmentDoc } from '../generated/graphql-test'
 import EnvironmentSetup from './EnvironmentSetup.vue'
-import { FRONTEND_FRAMEWORKS, CODE_LANGUAGES } from '../../../types/src/constants'
+import { CODE_LANGUAGES } from '../../../types/src/constants'
+import { FRONTEND_FRAMEWORKS } from '@packages/scaffold-config'
 
 describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
   it('default component', () => {
@@ -26,6 +27,10 @@ describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
     const frameworkIconName = (frameworkName) => {
       if (frameworkName.includes('React')) {
         return 'react-logo'
+      }
+
+      if (frameworkName.includes('Nuxt')) {
+        return 'nuxtjs-logo'
       }
 
       if (frameworkName.includes('Vue')) {
@@ -69,7 +74,7 @@ describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
       expanded: false,
     }).click()
 
-    cy.findByRole('option', { name: 'Create React App (detected)' }).should('be.visible')
+    cy.findByRole('option', { name: 'Create React App (v4) (detected)' }).should('be.visible')
   })
 
   it('shows the description of bundler as Dev Server', () => {

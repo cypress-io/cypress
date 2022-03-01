@@ -13,10 +13,16 @@
         {{ t('migration.after') }}
       </slot>
     </div>
-    <div class="bg-white">
+    <div
+      class="bg-white"
+      data-cy="migrate-before"
+    >
       <slot name="before" />
     </div>
-    <div class="bg-white">
+    <div
+      class="bg-white"
+      data-cy="migrate-after"
+    >
       <slot name="after" />
     </div>
   </div>

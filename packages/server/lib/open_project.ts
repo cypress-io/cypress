@@ -180,7 +180,13 @@ export class OpenProject {
           return browsers.connectToNewSpec(browser, { onInitializeNewBrowserTab, ...options }, automation)
         }
 
+        this._ctx?.browser.setBrowserStatus('opening')
+
         return browsers.open(browser, options, automation, this._ctx)
+      }).then((browserInstance) => {
+        this._ctx?.browser.setBrowserStatus('open')
+
+        return browserInstance
       })
     }
 
@@ -294,6 +300,20 @@ export class OpenProject {
   // for testing purposes
   __reset () {
     this.resetOpenProject()
+  }
+
+  async sendFocusBrowserMessage () {
+    const isRunnerConnected = this.projectBase?.isRunnerSocketConnected()
+
+    // If the runner's socket is active and connected, we focus the active window
+    if (isRunnerConnected) {
+      return this.projectBase?.sendFocusBrowserMessage()
+    }
+
+    // Otherwise, we relaunch the app in the current browser
+    if (this.relaunchBrowser) {
+      return this.relaunchBrowser()
+    }
   }
 }
 

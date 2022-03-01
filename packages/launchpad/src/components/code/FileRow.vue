@@ -44,7 +44,7 @@
       </p>
       <Button
         class="whitespace-nowrap"
-        @click="openDocs"
+        href="https://on.cypress.io/guides/configuration"
       >
         {{ t('links.learnMore') }}
       </Button>
@@ -66,9 +66,9 @@ import type { FunctionalComponent, SVGAttributes, ComputedRef } from 'vue'
 export type FileRowStatus = 'changes' | 'valid' | 'skipped' | 'error';
 
 export type StatusInfo = {
-  badgeLabel?: string,
-  badgeType?: BadgeRowStatus,
-  icon: FunctionalComponent<SVGAttributes, {}>,
+  badgeLabel?: string
+  badgeType?: BadgeRowStatus
+  icon: FunctionalComponent<SVGAttributes, {}>
   initiallyOpen?: boolean
 }
 </script>
@@ -96,8 +96,6 @@ const props = defineProps<{
   content: string
   description?: string
 }>()
-
-const openDocs = () => window.open('https://on.cypress.io/guides/configuration')
 
 // TODO: Remove this. Use FileParts when available
 const language = computed(() => {

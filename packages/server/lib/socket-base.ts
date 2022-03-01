@@ -77,6 +77,7 @@ const retry = (fn: (res: any) => void) => {
 export class SocketBase {
   private _sendCloseBrowserTabsMessage
   private _sendResetBrowserStateMessage
+  private _isRunnerSocketConnected
   private _sendFocusBrowserMessage
 
   protected ended: boolean
@@ -164,6 +165,7 @@ export class SocketBase {
     })
 
     let automationClient
+    let runnerSocket
 
     const { socketIoRoute, socketIoCookie } = config
 
@@ -290,6 +292,10 @@ export class SocketBase {
         await automationRequest('focus:browser:window', {})
       }
 
+      this._isRunnerSocketConnected = () => {
+        return !!(runnerSocket && runnerSocket.connected)
+      }
+
       socket.on('reporter:connected', () => {
         if (socket.inReporterRoom) {
           return
@@ -306,6 +312,8 @@ export class SocketBase {
         if (socket.inRunnerRoom) {
           return
         }
+
+        runnerSocket = socket
 
         socket.inRunnerRoom = true
 
@@ -566,6 +574,12 @@ export class SocketBase {
   async resetBrowserState () {
     if (this._sendResetBrowserStateMessage) {
       await this._sendResetBrowserStateMessage()
+    }
+  }
+
+  isRunnerSocketConnected () {
+    if (this._isRunnerSocketConnected) {
+      return this._isRunnerSocketConnected()
     }
   }
 

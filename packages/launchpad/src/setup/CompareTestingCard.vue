@@ -45,10 +45,10 @@ import ShikiHighlight from '@cy/components/ShikiHighlight.vue'
 import InlineCodeFragment from '@cy/components/InlineCodeFragment.vue'
 
 const props = withDefaults(defineProps<{
-    title: string
-    code: string
-    listItems: string[]
-    codeFragment: string
+  title: string
+  code: string
+  listItems: string[]
+  codeFragment: string
 }>(), {
   code: '',
 })

@@ -129,8 +129,18 @@ export function mergeDefaults (
   .omit('env')
   .omit('browsers')
   .each((val, key) => {
-    resolved[key] = 'cli'
-    config[key] = val
+    // If users pass in testing-type specific keys (eg, specPattern),
+    // we want to merge this with what we've read from the config file,
+    // rather than override it entirely.
+    if (typeof config[key] === 'object' && typeof val === 'object') {
+      if (Object.keys(val).length) {
+        resolved[key] = 'cli'
+        config[key] = { ...config[key], ...val }
+      }
+    } else {
+      resolved[key] = 'cli'
+      config[key] = val
+    }
   }).value()
 
   let url = config.baseUrl

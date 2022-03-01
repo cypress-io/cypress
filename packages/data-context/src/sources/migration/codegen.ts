@@ -2,17 +2,15 @@ import chokidar from 'chokidar'
 import fs from 'fs-extra'
 import path from 'path'
 import globby from 'globby'
-import {
-  supportFileRegexps,
-  formatMigrationFile,
-} from './format'
-import { substitute } from './autoRename'
-import type { TestingType } from '@packages/types'
 import prettier from 'prettier'
-import type { MigrationFile } from '..'
-import Debug from 'debug'
+import type { TestingType } from '@packages/types'
+import { formatMigrationFile } from './format'
+import { substitute } from './autoRename'
+import { supportFileRegexps } from './regexps'
+import type { MigrationFile } from '../MigrationDataSource'
 import { toPosix } from '../../util'
 
+import Debug from 'debug'
 const debug = Debug('cypress:data-context:sources:migration:codegen')
 
 type ConfigOptions = {
@@ -299,7 +297,9 @@ export async function moveSpecFiles (projectRoot: string, specs: SpecToMove[]) {
     const from = path.join(projectRoot, spec.from)
     const to = path.join(projectRoot, spec.to)
 
-    await fs.move(from, to)
+    if (from !== to) {
+      await fs.move(from, to)
+    }
   }))
 }
 
@@ -319,11 +319,11 @@ export async function cleanUpIntegrationFolder (projectRoot: string) {
 export function renameSupportFilePath (relative: string) {
   const res = new RegExp(supportFileRegexps.e2e.beforeRegexp).exec(relative)
 
-  if (!res?.groups?.name) {
+  if (!res?.groups?.supportFileName) {
     throw new NonStandardMigrationError('support')
   }
 
-  return relative.replace(res.groups.name, 'e2e')
+  return relative.slice(0, res.index) + relative.slice(res.index).replace(res.groups.supportFileName, 'e2e')
 }
 
 export function reduceConfig (cfg: OldCypressConfig): ConfigOptions {
@@ -415,7 +415,7 @@ export function reduceConfig (cfg: OldCypressConfig): ConfigOptions {
   }, { global: {}, e2e: {}, component: {} })
 }
 
-function getSpecPattern (cfg: OldCypressConfig, testType: TestingType) {
+export function getSpecPattern (cfg: OldCypressConfig, testType: TestingType) {
   const specPattern = cfg[testType]?.testFiles ?? cfg.testFiles ?? '**/*.cy.{js,jsx,ts,tsx}'
   const customComponentFolder = cfg.component?.componentFolder ?? cfg.componentFolder ?? null
 

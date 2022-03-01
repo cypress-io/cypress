@@ -65,9 +65,9 @@ fragment MigrationStep on MigrationStep {
 }`
 
 defineProps<{
-  step?: MigrationStepFragment,
-  title: string,
-  description: string,
+  step?: MigrationStepFragment
+  title: string
+  description: string
 }>()
 
 const emit = defineEmits(['toggle'])

@@ -69,6 +69,10 @@ module.exports = {
     return breakingKeys
   },
 
+  getBreakingRootKeys: () => {
+    return breakingRootOptions
+  },
+
   getDefaultValues: (runtimeOptions = {}) => {
     // Default values can be functions, in which case they are evaluated
     // at runtime - for example, slowTestThreshold where the default value

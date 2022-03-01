@@ -4,7 +4,7 @@ import _ from 'lodash'
 import path from 'path'
 import type webpack from 'webpack'
 import { getCommonConfig, HtmlWebpackPlugin, getCopyWebpackPlugin } from '@packages/web-config/webpack.config.base'
-import cyIcons from '@cypress/icons'
+import * as cyIcons from '@packages/icons'
 
 const commonConfig = getCommonConfig()
 const CopyWebpackPlugin = getCopyWebpackPlugin()

@@ -368,9 +368,11 @@ describe('lib/util/args', () => {
       const options = this.setup('--config', 'foo=bar,port=1111,supportFile=path/to/support_file')
 
       expect(options.config.port).to.eq(1111)
-      expect(options.config.supportFile).to.eq('path/to/support_file')
+      expect(options.config.e2e.supportFile).to.eq('path/to/support_file')
+      expect(options.config.component.supportFile).to.eq('path/to/support_file')
 
       expect(options).not.to.have.property('foo')
+      expect(options.config).not.to.have.property('supportFile')
     })
 
     it('overrides port in config', function () {
@@ -593,6 +595,20 @@ describe('lib/util/args', () => {
         _: [],
         invokedFromCli: false,
         config: {},
+      })
+    })
+
+    it('moves testing-type specific config options', function () {
+      const result = argsUtil.toObject(['--config', '{"baseUrl": "http://foobar.com", "specPattern":"**/*.test.js"}'])
+
+      expect(result).to.deep.equal({
+        cwd,
+        _: [],
+        invokedFromCli: false,
+        config: {
+          e2e: { baseUrl: 'http://foobar.com', specPattern: '**/*.test.js' },
+          component: { specPattern: '**/*.test.js' },
+        },
       })
     })
   })

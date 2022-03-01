@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col justify-between flex-grow">
+  <div class="flex flex-col flex-grow justify-between">
     <template v-if="!result">
       <div class="p-24px w-720px">
         <Input
@@ -23,14 +23,14 @@
         >
           <div
             v-if="hasError"
-            class="flex items-center font-medium rounded bg-error-100 mt-16px p-14px ring-2 ring-error-100 text-error-600 gap-8px"
+            class="rounded flex font-medium bg-error-100 mt-16px p-14px ring-2 ring-error-100 text-error-600 gap-8px items-center"
           >
             <i-cy-errored-outline_x16 class="icon-dark-error-600" />
             <span>{{ invalidSpecWarning }}<em class="font-medium">specPattern</em>:</span>
           </div>
           <div
             v-else-if="showExtensionWarning && props.type === 'e2e'"
-            class="flex items-center font-medium rounded bg-warning-100 mt-16px p-16px text-warning-600 gap-8px"
+            class="rounded flex font-medium bg-warning-100 mt-16px p-16px text-warning-600 gap-8px items-center"
           >
             <i-cy-errored-outline_x16 class="icon-dark-warning-600" />
             {{ t('createSpec.e2e.importEmptySpec.specExtensionWarning') }}<span class="rounded bg-warning-200 py-2px px-8px text-warning-700">{{ recommendedFileName }}</span>
@@ -48,7 +48,7 @@
         class="flex gap-16px"
       >
         <Button
-          class="w-110px"
+          size="lg"
           :disabled="!isValidSpecFile"
           @click="createSpec"
         >
@@ -56,6 +56,7 @@
         </Button>
 
         <Button
+          size="lg"
           variant="outline"
           @click="emits('restart')"
         >
@@ -69,7 +70,7 @@
         :file="result.file"
       />
       <StandardModalFooter
-        class="flex items-center h-72px gap-16px"
+        class="flex gap-16px items-center"
       >
         <router-link
           class="outline-none"
@@ -77,6 +78,7 @@
           "
         >
           <Button
+            size="lg"
             :prefix-icon="TestResultsIcon"
             prefix-icon-class="w-16px h-16px icon-dark-white"
             @click="emits('close')"
@@ -85,6 +87,7 @@
           </Button>
         </router-link>
         <Button
+          size="lg"
           :prefix-icon="PlusButtonIcon"
           prefix-icon-class="w-16px h-16px icon-dark-gray-500"
           variant="outline"
@@ -113,7 +116,7 @@ import TestResultsIcon from '~icons/cy/test-results_x24.svg'
 import PlusButtonIcon from '~icons/cy/add-large_x16.svg'
 
 const props = defineProps<{
-  title: string,
+  title: string
   gql: EmptyGeneratorFragment
   type: 'e2e' | 'component' | 'story'
   specFileName: string
@@ -144,7 +147,7 @@ mutation EmptyGenerator_generateSpec($codeGenCandidate: String!, $type: CodeGenT
 }`
 
 const emits = defineEmits<{
-  (event: 'update:title', value: string): void,
+  (event: 'update:title', value: string): void
   (event: 'update:description', value: string): void
   (event: 'restart'): void
   (event: 'close'): void

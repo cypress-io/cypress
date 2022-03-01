@@ -1,0 +1,20 @@
+{
+  "extends": "../ts/tsconfig.json",
+  "include": ["src"],
+  "exclude": [
+    "test",
+    "script"
+  ],
+  "compilerOptions": {
+    "lib": ["es2020"],
+    "strict": true,
+    "allowJs": false,
+    "noImplicitAny": true,
+    "resolveJsonModule": true,
+    "experimentalDecorators": true,
+    "noUnusedLocals": false,
+    "noUncheckedIndexedAccess": true,
+    "importsNotUsedAsValues": "error",
+    "types": [],
+  }
+}

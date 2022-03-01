@@ -223,7 +223,7 @@ export const mutation = mutationType({
     t.field('login', {
       type: Query,
       slowLogThreshold: false,
-      description: 'Auth with Cypress Cloud',
+      description: 'Auth with Cypress Dashboard',
       resolve: async (_, args, ctx) => {
         await ctx.actions.auth.login()
 
@@ -236,7 +236,7 @@ export const mutation = mutationType({
 
     t.field('logout', {
       type: Query,
-      description: 'Log out of Cypress Cloud',
+      description: 'Log out of Cypress Dashboard',
       resolve: async (_, args, ctx) => {
         await ctx.actions.auth.logout()
 

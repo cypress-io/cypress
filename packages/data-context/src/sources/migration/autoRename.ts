@@ -38,12 +38,12 @@ export function substitute (part: FilePart): FilePart {
   }
 
   // basic.spec.js -> basic.cy.js
-  if (part.group === 'extension') {
+  if (part.group === 'preExtension') {
     return { ...part, text: '.cy.' }
   }
 
   // support/index.js -> support/e2e.js
-  if (part.group === 'name' && part.text === 'index') {
+  if (part.group === 'supportFileName' && part.text === 'index') {
     return { ...part, text: 'e2e' }
   }
 
@@ -76,18 +76,28 @@ export function applyMigrationTransform (
     throw Error(`Cannot use applyMigrationTransform on a project with a custom folder and custom testFiles.`)
   }
 
-  const partsBefore = formatMigrationFile(spec.relative, regexp)
-  const partsAfter = partsBefore.map(substitute)
+  const partsBeforeMigration = formatMigrationFile(spec.relative, regexp)
+  const partsAfterMigration = partsBeforeMigration.map((part) => {
+    // avoid re-renaming files with the right preExtension
+    // it would make a myFile.cy.cy.js file
+    if (part.highlight
+      && part.group === 'preExtension'
+      && /\.cy\.([j|t]s[x]?|coffee)$/.test(spec.relative)) {
+      return part
+    }
+
+    return substitute(part)
+  })
 
   return {
     testingType: spec.testingType,
     before: {
       relative: spec.relative,
-      parts: partsBefore,
+      parts: partsBeforeMigration,
     },
     after: {
-      relative: partsAfter.map((x) => x.text).join(''),
-      parts: partsAfter,
+      relative: partsAfterMigration.map((x) => x.text).join(''),
+      parts: partsAfterMigration,
     },
   }
 }

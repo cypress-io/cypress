@@ -3,6 +3,8 @@ import validate from './validation'
 // @ts-ignore
 import pkg from '@packages/root'
 
+type TestingType = 'e2e' | 'component'
+
 interface ResolvedConfigOption {
   name: string
   defaultValue?: any
@@ -13,7 +15,7 @@ interface ResolvedConfigOption {
    * Can be mutated with Cypress.config() or test-specific configuration overrides
    */
   canUpdateDuringTestTime?: boolean
-  specificTestingType?: 'e2e' | 'component'
+  specificTestingType?: TestingType
 }
 
 interface RuntimeConfigOption {
@@ -36,6 +38,10 @@ interface BreakingOption {
    * String to summarize the error messaging that is logged.
    */
   errorKey: string
+  /**
+   * Array of testing types this config option is valid for
+   */
+  testingTypes?: TestingType[]
   /**
    * Configuration value of the configuration option to check against.
    */
@@ -534,21 +540,25 @@ export const breakingRootOptions: Array<BreakingOption> = [
     name: 'supportFile',
     errorKey: 'CONFIG_FILE_INVALID_ROOT_CONFIG',
     isWarning: false,
+    testingTypes: ['component', 'e2e'],
   },
   {
     name: 'specPattern',
     errorKey: 'CONFIG_FILE_INVALID_ROOT_CONFIG',
     isWarning: false,
+    testingTypes: ['component', 'e2e'],
   },
   {
     name: 'excludeSpecPattern',
     errorKey: 'CONFIG_FILE_INVALID_ROOT_CONFIG',
     isWarning: false,
+    testingTypes: ['component', 'e2e'],
   },
   {
     name: 'baseUrl',
     errorKey: 'CONFIG_FILE_INVALID_ROOT_CONFIG_E2E',
     isWarning: false,
+    testingTypes: ['e2e'],
   },
 ]
 

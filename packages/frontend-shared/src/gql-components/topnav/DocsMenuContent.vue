@@ -36,10 +36,10 @@
 
 <script lang="ts">
 export type DocsMenuVariant = 'ci1' | 'orchestration1' | 'main'
+
 </script>
 
 <script setup lang="ts">
-import Button from '@cy/components/Button.vue'
 import { useI18n } from '@cy/i18n'
 import type { LinkWithParams } from '../../utils/getUrlWithParams'
 import { getUrlWithParams } from '../../utils/getUrlWithParams'
@@ -48,11 +48,11 @@ import ExternalLink from '../ExternalLink.vue'
 const { t } = useI18n()
 
 const emit = defineEmits<{
-  (e: 'setDocsContent', value:DocsMenuVariant): void,
+  (e: 'setDocsContent', value: DocsMenuVariant): void
 }>()
 
 defineProps<{
-  currentProjectExists: boolean,
+  currentProjectExists: boolean
 }>()
 
 const utm_medium = 'Docs Menu'
@@ -69,9 +69,9 @@ const docsMenu: {
   title: string
   children: {
     text: string
-    link: LinkWithParams,
+    link: LinkWithParams
     changeContent?: DocsMenuVariant
-    }[]
+  }[]
 }[] = [{
   title: t('topNav.docsMenu.gettingStartedTitle'),
   children: [{

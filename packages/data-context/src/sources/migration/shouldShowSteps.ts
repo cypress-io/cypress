@@ -1,7 +1,7 @@
 import globby from 'globby'
 import path from 'path'
 import { MIGRATION_STEPS } from '@packages/types'
-import { getSpecs, OldCypressConfig, tryGetDefaultLegacySupportFile } from '.'
+import { applyMigrationTransform, getSpecs, OldCypressConfig, tryGetDefaultLegacySupportFile } from '.'
 
 function getTestFilesGlobs (config: OldCypressConfig, type: 'component' | 'integration'): string[] {
   // super awkward how we call it integration tests, but the key to override
@@ -62,11 +62,24 @@ async function hasSpecFiles (projectRoot: string, dir: string, testFilesGlob: st
 
   return f.length > 0
 }
+
 export async function shouldShowAutoRenameStep (projectRoot: string, config: OldCypressConfig) {
   const specsToAutoMigrate = await getSpecs(projectRoot, config)
 
+  const integrationCleaned = specsToAutoMigrate.integration.filter((spec) => {
+    const transformed = applyMigrationTransform(spec)
+
+    return transformed.before.relative !== transformed.after.relative
+  })
+
+  const componentCleaned = specsToAutoMigrate.component.filter((spec) => {
+    const transformed = applyMigrationTransform(spec)
+
+    return transformed.before.relative !== transformed.after.relative
+  })
+
   // if we have at least one spec to auto migrate in either Ct or E2E, we return true.
-  return specsToAutoMigrate.integration.length > 0 || specsToAutoMigrate.component.length > 0
+  return integrationCleaned.length > 0 || componentCleaned.length > 0
 }
 
 async function anyComponentSpecsExist (projectRoot: string, config: OldCypressConfig) {
