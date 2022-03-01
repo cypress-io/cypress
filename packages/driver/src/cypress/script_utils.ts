@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import _ from 'lodash'
 import Bluebird from 'bluebird'
 
@@ -14,7 +12,7 @@ const fetchScript = (scriptWindow, script) => {
 }
 
 const extractSourceMap = ([script, contents]) => {
-  script.fullyQualifiedUrl = `${window.top.location.origin}${script.relativeUrl}`.replace(/ /g, '%20')
+  script.fullyQualifiedUrl = `${window.top!.location.origin}${script.relativeUrl}`.replace(/ /g, '%20')
 
   const sourceMap = $sourceMapUtils.extractSourceMap(script, contents)
 
@@ -22,7 +20,7 @@ const extractSourceMap = ([script, contents]) => {
   .return([script, contents])
 }
 
-const evalScripts = (specWindow, scripts = []) => {
+const evalScripts = (specWindow, scripts: any = []) => {
   _.each(scripts, ([script, contents]) => {
     specWindow.eval(`${contents}\n//# sourceURL=${script.fullyQualifiedUrl}`)
   })
@@ -32,7 +30,7 @@ const evalScripts = (specWindow, scripts = []) => {
 
 const runScriptsFromUrls = (specWindow, scripts) => {
   return Bluebird
-  .map(scripts, (script) => fetchScript(specWindow, script))
+  .map<any, any>(scripts, (script) => fetchScript(specWindow, script))
   .map(extractSourceMap)
   .then((scripts) => evalScripts(specWindow, scripts))
 }
@@ -46,7 +44,7 @@ export default {
       // NOTE: since in evalScripts, scripts are evaluated in order,
       // we chose to respect this constraint here too.
       // indeed _.each goes through the array in order
-      return Bluebird.each(scripts, (script) => script())
+      return Bluebird.each(scripts, (script: any) => script())
     }
 
     return runScriptsFromUrls(specWindow, scripts)

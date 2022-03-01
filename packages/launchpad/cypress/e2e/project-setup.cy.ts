@@ -815,4 +815,24 @@ describe('Launchpad: Setup Project', () => {
       cy.get('code').should('contain.text', 'npm install -D ')
     })
   })
+
+  describe('openLink', () => {
+    it('opens docs link in the default browser', () => {
+      scaffoldAndOpenProject('pristine-with-e2e-testing')
+
+      cy.visitLaunchpad()
+
+      cy.get('[data-cy-testingtype="component"]').click()
+      cy.get('[data-testid="select-framework"]').click()
+      cy.findByText('Nuxt.js (v2)').click()
+      cy.findByText('Next Step').click()
+      fakeInstalledDeps()
+      cy.findByRole('button', { name: 'Continue' }).click()
+      cy.intercept('POST', 'mutation-ExternalLink_OpenExternal', { 'data': { 'openExternal': true } }).as('OpenExternal')
+      cy.findByText('Learn more.').click()
+      cy.wait('@OpenExternal')
+      .its('request.body.variables.url')
+      .should('equal', 'https://on.cypress.io/guides/configuration')
+    })
+  })
 })

@@ -24,7 +24,7 @@ describe('packagesToInstall', () => {
     const ctx = createTestDataContext()
 
     ctx.coreData.currentProject = getCurrentProject('vueclivue2-unconfigured')
-    ctx.coreData.wizard.chosenFramework = 'vueclivue2'
+    ctx.coreData.wizard.chosenFramework = 'vuecli4vue2'
     ctx.coreData.wizard.chosenBundler = 'webpack4'
 
     const actual = await ctx.wizard.installDependenciesCommand()
@@ -36,12 +36,24 @@ describe('packagesToInstall', () => {
     const ctx = createTestDataContext()
 
     ctx.coreData.currentProject = getCurrentProject('vueclivue3-unconfigured')
-    ctx.coreData.wizard.chosenFramework = 'vueclivue3'
+    ctx.coreData.wizard.chosenFramework = 'vuecli4vue3'
     ctx.coreData.wizard.chosenBundler = 'webpack4'
 
     const actual = await ctx.wizard.installDependenciesCommand()
 
     expect(actual).to.eq(`npm install -D @cypress/vue@^3.0.0 webpack@^4.0.0 @cypress/webpack-dev-server@latest webpack-dev-server@^4.0.0 html-webpack-plugin@^4.0.0`)
+  })
+
+  it('vuecli5vue3-unconfigured', async () => {
+    const ctx = createTestDataContext()
+
+    ctx.coreData.currentProject = getCurrentProject('vuecli5vue3-unconfigured')
+    ctx.coreData.wizard.chosenFramework = 'vuecli5vue3'
+    ctx.coreData.wizard.chosenBundler = 'webpack5'
+
+    const actual = await ctx.wizard.installDependenciesCommand()
+
+    expect(actual).to.eq(`npm install -D @cypress/vue@^3.0.0 webpack@^5.0.0 @cypress/webpack-dev-server@latest webpack-dev-server@^4.0.0 html-webpack-plugin@^5.0.0`)
   })
 
   it('regular react project with vite', async () => {
