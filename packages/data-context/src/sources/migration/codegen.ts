@@ -9,10 +9,10 @@ import { substitute } from './autoRename'
 import { supportFileRegexps } from './regexps'
 import type { MigrationFile } from '../MigrationDataSource'
 import { toPosix } from '../../util'
-
 import Debug from 'debug'
 import dedent from 'dedent'
 import { hasDefaultExport } from './parserUtils'
+
 const debug = Debug('cypress:data-context:sources:migration:codegen')
 
 type ConfigOptions = {

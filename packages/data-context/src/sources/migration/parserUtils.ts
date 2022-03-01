@@ -29,7 +29,7 @@ const babelParserOptions: ParserOptions = {
   ],
 }
 
-export function hasDefaultExport (src: string) {
+export function hasDefaultExport (src: string): boolean {
   const ast = parse(src, babelParserOptions) as bt.File
 
   if (!ast.tokens?.length) {
@@ -38,5 +38,12 @@ export function hasDefaultExport (src: string) {
 
   const tokens = ast.tokens as any[]
 
-  return tokens.find((token, idx) => token.keyword === 'export' && tokens[idx + 1]?.keyword === 'default')
+  const defaultExport = !!(tokens.find((token, idx) => {
+    const isExport = token.type?.keyword === 'export'
+    const next = tokens[idx + 1]?.type?.keyword === 'default'
+
+    return Boolean(isExport && next)
+  }))
+
+  return Boolean(defaultExport)
 }
