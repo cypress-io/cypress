@@ -1,7 +1,7 @@
 import gulp from 'gulp'
 import rimraf from 'rimraf'
 import webpack from 'webpack'
-import cypressIcons from '@cypress/icons'
+import * as cypressIcons from '@packages/icons'
 import webpackConfig from './webpack.config.js'
 
 const clean = (done) => {

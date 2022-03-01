@@ -44,7 +44,7 @@
       </p>
       <Button
         class="whitespace-nowrap"
-        @click="openDocs"
+        href="https://on.cypress.io/guides/configuration"
       >
         {{ t('links.learnMore') }}
       </Button>
@@ -96,8 +96,6 @@ const props = defineProps<{
   content: string
   description?: string
 }>()
-
-const openDocs = () => window.open('https://on.cypress.io/guides/configuration')
 
 // TODO: Remove this. Use FileParts when available
 const language = computed(() => {
