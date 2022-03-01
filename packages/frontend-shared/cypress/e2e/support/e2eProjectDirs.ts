@@ -132,6 +132,7 @@ export const e2eProjectDirs = [
   'vite-ct',
   'vue3-vite-ts-configured',
   'vue3-vite-ts-unconfigured',
+  'vuecli5vue3-configured',
   'vuecli5vue3-unconfigured',
   'vueclivue2-configured',
   'vueclivue2-unconfigured',

@@ -30,11 +30,11 @@ function fakeInstalledDeps () {
 
 describe('scaffolding component testing', () => {
   context('vuecli4vue2', () => {
-    it('scaffolds component testing for Vue CLI w/ Vue 2 project', () => {
+    it('scaffolds component testing for Vue CLI 4 w/ Vue 2 project', () => {
       startSetupFor('vueclivue2-unconfigured')
 
       // should detect correctly
-      cy.get('button').should('be.visible').contains('Vue CLI (Vue 2)(detected)')
+      cy.get('button').should('be.visible').contains('Vue CLI 4 (Vue 2)(detected)')
       cy.get('button').contains('Next Step').click()
 
       fakeInstalledDeps()
@@ -45,11 +45,26 @@ describe('scaffolding component testing', () => {
   })
 
   context('vuecli4vue3', () => {
-    it('scaffolds component testing for Vue CLI w/ Vue 3 project', () => {
+    it('scaffolds component testing for Vue CLI 4 w/ Vue 3 project', () => {
       startSetupFor('vueclivue3-unconfigured')
 
       // should detect correctly
-      cy.get('button').should('be.visible').contains('Vue CLI (Vue 3)(detected)')
+      cy.get('button').should('be.visible').contains('Vue CLI 4 (Vue 3)(detected)')
+      cy.get('button').contains('Next Step').click()
+
+      fakeInstalledDeps()
+
+      cy.findByRole('button', { name: 'Continue' }).click()
+      verifyConfigFile(`cypress.config.js`)
+    })
+  })
+
+  context('vuecli5vue3', () => {
+    it('scaffolds component testing for Vue CLI 5 w/ Vue 3 project', () => {
+      startSetupFor('vuecli5vue3-unconfigured')
+
+      // should detect correctly
+      cy.get('button').should('be.visible').contains('Vue CLI 5 (Vue 3)(detected)')
       cy.get('button').contains('Next Step').click()
 
       fakeInstalledDeps()
@@ -60,7 +75,7 @@ describe('scaffolding component testing', () => {
   })
 
   context('create-react-app', () => {
-    it('scaffolds component testing for Vue CLI w/ Vue 2 project', () => {
+    it('scaffolds component testing for Create React App v5 project', () => {
       startSetupFor('create-react-app-unconfigured')
 
       // should detect correctly
