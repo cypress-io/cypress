@@ -15,7 +15,7 @@ export const s3helpers = {
   makeS3 (aws) {
     la(is.unemptyString(aws.accessKeyId), 'missing aws accessKeyId')
     la(is.unemptyString(aws.secretAccessKey), 'missing aws secretAccessKey')
-    if (process.env.CIRCLECI) {
+    if (!process.env.CIRCLECI) {
       la(is.unemptyString(aws.sessionToken), 'missing aws sessionToken')
     }
 
