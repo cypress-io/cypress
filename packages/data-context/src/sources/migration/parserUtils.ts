@@ -25,6 +25,7 @@ const babelParserOptions: ParserOptions = {
     'optionalCatchBinding',
     'throwExpressions',
     'nullishCoalescingOperator',
+    'typescript',
   ],
 }
 
