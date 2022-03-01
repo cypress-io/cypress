@@ -4,6 +4,7 @@
       status="error"
       title="Spec not found"
       class="mb-16px"
+      :icon="WarningIcon"
     >
       <p class="mb-24px">
         There is no spec matching the following location: <InlineCodeFragment variant="error">
@@ -130,6 +131,7 @@ import SpecPatternModal from '../components/SpecPatternModal.vue'
 import { useDebounce } from '@vueuse/core'
 import Alert from '../../../frontend-shared/src/components/Alert.vue'
 import InlineCodeFragment from '../../../frontend-shared/src/components/InlineCodeFragment.vue'
+import WarningIcon from '~icons/cy/warning_x16.svg'
 
 const { t } = useI18n()
 
