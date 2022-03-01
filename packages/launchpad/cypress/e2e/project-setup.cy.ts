@@ -11,6 +11,16 @@ function fakeInstalledDeps () {
   })
 }
 
+function verifyFiles (relativePaths: string[]) {
+  cy.withCtx(async (ctx, o) => {
+    for (const relativePath of o.relativePaths) {
+      const stats = await ctx.actions.file.checkIfFileExists(relativePath)
+
+      expect(stats).to.not.be.null.and.not.be.undefined
+    }
+  }, { relativePaths })
+}
+
 describe('Launchpad: Setup Project', () => {
   function scaffoldAndOpenProject (name: Parameters<typeof cy.scaffoldProject>[0], args?: Parameters<typeof cy.openProject>[1]) {
     cy.scaffoldProject(name)
@@ -198,6 +208,13 @@ describe('Launchpad: Setup Project', () => {
           cy.containsPath('cypress/support/commands.js')
           cy.containsPath('cypress/fixtures/example.json')
         })
+
+        verifyFiles([
+          'cypress.config.js',
+          'cypress/support/e2e.js',
+          'cypress/support/commands.js',
+          'cypress/fixtures/example.json',
+        ])
       })
 
       // FIXME: ProjectLifecycleManager is skipping straight to browser pages when it should show setup page.
@@ -221,6 +238,13 @@ describe('Launchpad: Setup Project', () => {
           cy.containsPath('cypress/support/commands.js')
           cy.containsPath('cypress/fixtures/example.json')
         })
+
+        verifyFiles([
+          'cypress.config.js',
+          'cypress/support/e2e.js',
+          'cypress/support/commands.js',
+          'cypress/fixtures/example.json',
+        ])
       })
 
       it('shows the configuration setup page when opened via cli with --e2e flag', () => {
@@ -239,6 +263,13 @@ describe('Launchpad: Setup Project', () => {
           cy.containsPath('cypress/support/commands.js')
           cy.containsPath('cypress/fixtures/example.json')
         })
+
+        verifyFiles([
+          'cypress.config.js',
+          'cypress/support/e2e.js',
+          'cypress/support/commands.js',
+          'cypress/fixtures/example.json',
+        ])
       })
     })
 
@@ -289,6 +320,13 @@ describe('Launchpad: Setup Project', () => {
           cy.containsPath('cypress/fixtures/example.json')
         })
 
+        verifyFiles([
+          'cypress.config.js',
+          'cypress/support/e2e.js',
+          'cypress/support/commands.js',
+          'cypress/fixtures/example.json',
+        ])
+
         cy.findByRole('button', { name: 'Continue' })
         .should('not.have.disabled')
         .click()
@@ -318,8 +356,16 @@ describe('Launchpad: Setup Project', () => {
         cy.get('[data-cy=valid]').within(() => {
           cy.contains('cypress.config.ts')
           cy.containsPath('cypress/support/e2e.ts')
+          cy.containsPath('cypress/support/commands.ts')
           cy.containsPath('cypress/fixtures/example.json')
         })
+
+        verifyFiles([
+          'cypress.config.ts',
+          'cypress/support/e2e.ts',
+          'cypress/support/commands.ts',
+          'cypress/fixtures/example.json',
+        ])
       })
 
       it('can setup e2e testing for a project selecting TS when CT is configured and config file is JS', () => {
@@ -347,8 +393,16 @@ describe('Launchpad: Setup Project', () => {
 
         cy.get('[data-cy=valid]').within(() => {
           cy.containsPath('cypress/support/e2e.ts')
+          cy.containsPath('cypress/support/commands.ts')
           cy.containsPath('cypress/fixtures/example.json')
         })
+
+        verifyFiles([
+          'cypress.config.js',
+          'cypress/support/e2e.ts',
+          'cypress/support/commands.ts',
+          'cypress/fixtures/example.json',
+        ])
       })
 
       it('can setup CT testing for a project selecting TS when E2E is configured and config file is JS', () => {
@@ -407,6 +461,13 @@ describe('Launchpad: Setup Project', () => {
           cy.containsPath('cypress/support/commands.ts')
         })
 
+        verifyFiles([
+          'cypress.config.js',
+          'cypress/component/index.html',
+          'cypress/support/component.ts',
+          'cypress/support/commands.ts',
+        ])
+
         cy.findByRole('button', { name: 'Continue' }).should('have.disabled')
       })
 
@@ -426,6 +487,13 @@ describe('Launchpad: Setup Project', () => {
           cy.containsPath('cypress/support/commands.js')
           cy.containsPath('cypress/fixtures/example.json')
         })
+
+        verifyFiles([
+          'cypress.config.js',
+          'cypress/support/e2e.js',
+          'cypress/support/commands.js',
+          'cypress/fixtures/example.json',
+        ])
       })
 
       it('can reconfigure config after CT has been set up', () => {
@@ -679,8 +747,17 @@ describe('Launchpad: Setup Project', () => {
               cy.get('[data-cy=valid]').within(() => {
                 cy.containsPath('cypress/component/index.html')
                 cy.containsPath(`cypress/support/component.${lang.type}`)
+                cy.containsPath(`cypress/support/commands.${lang.type}`)
                 cy.containsPath('cypress/fixtures/example.json')
               })
+
+              verifyFiles([
+                'cypress.config.js',
+                'cypress/component/index.html',
+                `cypress/support/component.${lang.type}`,
+                `cypress/support/commands.${lang.type}`,
+                'cypress/fixtures/example.json',
+              ])
             })
           })
         })
@@ -775,10 +852,12 @@ describe('Launchpad: Setup Project', () => {
         cy.get('[data-cy=valid]').within(() => {
           cy.contains('cypress.config.ts')
           cy.containsPath('cypress/component/index.html')
-          cy.containsPath(`cypress/support/component.ts`)
-          cy.containsPath(`cypress/support/commands.ts`)
+          cy.containsPath('cypress/support/component.ts')
+          cy.containsPath('cypress/support/commands.ts')
           cy.containsPath('cypress/fixtures/example.json')
         })
+
+        verifyFiles(['cypress.config.ts', 'cypress/component/index.html', 'cypress/support/component.ts', 'cypress/support/commands.ts', 'cypress/fixtures/example.json'])
 
         cy.findByRole('button', { name: 'Continue' }).click()
         cy.contains(/(Initializing Config|Choose a Browser)/, { timeout: 10000 })
