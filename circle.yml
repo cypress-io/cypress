@@ -1705,39 +1705,6 @@ jobs:
             yarn cypress:run --project /tmp/cypress-test-tiny --record
       - store-npm-logs
 
-  test-binary-and-npm-against-other-projects:
-    <<: *defaults
-    parameters:
-      <<: *defaultsParameters
-      resource_class:
-        type: string
-        default: medium
-    resource_class: << parameters.resource_class >>
-    steps:
-      # needs uploaded NPM and test binary
-      - restore_cached_workspace
-      - run: ls -la
-      # make sure JSON files with uploaded urls are present
-      - run: ls -la binary-url.json npm-package-url.json
-      - run: cat binary-url.json
-      - run: cat npm-package-url.json
-      - run:
-          # install NPM from unique urls
-          name: Install Cypress Binary in Dummy Package
-          command: |
-            node scripts/test-unique-npm-and-binary.js \
-              --npm npm-package-url.json \
-              --binary binary-url.json \
-              --cwd /tmp/testing
-      - run:
-          name: Running other test projects with new NPM package and binary
-          command: |
-            node scripts/test-other-projects.js \
-              --npm npm-package-url.json \
-              --binary binary-url.json \
-              --provider circle
-      - store-npm-logs
-
   test-npm-module-and-verify-binary:
     <<: *defaults
     steps:
@@ -2278,11 +2245,6 @@ linux-workflow: &linux-workflow
     - test-binary-against-kitchensink:
         requires:
           - create-build-artifacts
-    - test-binary-and-npm-against-other-projects:
-        context: test-runner:trigger-test-jobs
-        <<: *mainBuildFilters
-        requires:
-          - create-build-artifacts
     - test-npm-module-and-verify-binary:
         <<: *mainBuildFilters
         requires:
@@ -2373,13 +2335,6 @@ mac-workflow: &mac-workflow
         requires:
           - darwin-build
 
-    - test-binary-and-npm-against-other-projects:
-        context: test-runner:trigger-test-jobs
-        name: darwin-test-binary-and-npm-against-other-projects
-        executor: mac
-        requires:
-          - darwin-create-build-artifacts
-
 windows-workflow: &windows-workflow
   jobs:
     - node_modules_install:
@@ -2418,14 +2373,6 @@ windows-workflow: &windows-workflow
           - test-runner:commit-status-checks
         requires:
           - windows-build
-
-    - test-binary-and-npm-against-other-projects:
-        context: test-runner:trigger-test-jobs
-        name: windows-test-binary-and-npm-against-other-projects
-        executor: windows
-        resource_class: windows.medium
-        requires:
-          - windows-create-build-artifacts
 
 workflows:
   linux:
