@@ -16,7 +16,6 @@ const rp = require('@cypress/request-promise')
 
 const zip = require('./zip')
 const ask = require('./ask')
-const bump = require('./bump')
 const meta = require('./meta')
 const build = require('./build')
 const upload = require('./upload')
@@ -102,23 +101,6 @@ const deploy = {
     debug(opts)
 
     return opts
-  },
-
-  bump () {
-    return ask.whichBumpTask()
-    .then((task) => {
-      switch (task) {
-        case 'run':
-          return bump.runTestProjects()
-        case 'version':
-          return ask.whichVersion(meta.distDir(''))
-          .then((v) => {
-            return bump.version(v)
-          })
-        default:
-          throw new Error('unknown task')
-      }
-    })
   },
 
   release () {

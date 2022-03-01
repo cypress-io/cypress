@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import $jquery from './jquery'
 import $document from './document'
 
