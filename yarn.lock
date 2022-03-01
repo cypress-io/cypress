@@ -7709,7 +7709,7 @@
     "@types/chai" "*"
     "@types/jquery" "*"
 
-"@types/chai@*", "@types/chai@4.3.0":
+"@types/chai@*":
   version "4.3.0"
   resolved "https://registry.npmjs.org/@types/chai/-/chai-4.3.0.tgz#23509ebc1fa32f1b4d50d6a66c4032d5b8eaabdc"
   integrity sha512-/ceqdqeRraGolFTcfoXNiqjyQhZzbINDngeoAq9GoHa8PPK1yNzTaxWjA6BFWp5Ua9JpXEMSS4s5i9tS0hOJtw==
