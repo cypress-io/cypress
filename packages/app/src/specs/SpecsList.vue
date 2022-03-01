@@ -1,5 +1,17 @@
 <template>
   <div class="p-24px spec-container">
+    <Alert
+      status="error"
+      title="Spec not found"
+      class="mb-16px"
+    >
+      <p class="mb-24px">
+        There is no spec matching the following location: <InlineCodeFragment variant="error">
+          path/to/spec
+        </InlineCodeFragment>
+      </p>
+      <p>It is possible that the file has been moved or deleted. Please choose from the list of specs below.</p>
+    </Alert>
     <SpecsListHeader
       v-model="search"
       class="pb-32px"
@@ -116,6 +128,8 @@ import { useVirtualList } from '@packages/frontend-shared/src/composables/useVir
 import NoResults from '@cy/components/NoResults.vue'
 import SpecPatternModal from '../components/SpecPatternModal.vue'
 import { useDebounce } from '@vueuse/core'
+import Alert from '../../../frontend-shared/src/components/Alert.vue'
+import InlineCodeFragment from '../../../frontend-shared/src/components/InlineCodeFragment.vue'
 
 const { t } = useI18n()
 
