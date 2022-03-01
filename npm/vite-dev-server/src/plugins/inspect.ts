@@ -4,12 +4,10 @@ import type { PluginOption } from 'vite'
 const debug = debugFn('cypress:vite-dev-server:plugins:inspect')
 
 console.log('anything')
-const noop = () => ({})
+export const CypressInspect = (): (() => PluginOption) | null => {
+  if (!process.env.DEBUG) return null
 
-export const CypressInspect = (): PluginOption => {
-  if (!process.env.DEBUG) return noop
-
-  let Inspect = noop
+  let Inspect
 
   try {
     Inspect = require('vite-plugin-inspect').default
@@ -18,7 +16,7 @@ export const CypressInspect = (): PluginOption => {
     debug(`Tried to import the inspect plugin 'vite-plugin-inspect'. It's an optional peerDependency so install it if you'd like.`)
     debug(err)
 
-    return noop
+    return null
   }
 
   return () => {

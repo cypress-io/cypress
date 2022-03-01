@@ -7,7 +7,7 @@ import { resolve } from 'pathe'
 
 import { mergeConfig } from 'vite'
 import { configFiles } from './constants'
-import { Cypress } from './plugins'
+import { Cypress, CypressInspect } from './plugins/index'
 import debugFn from 'debug'
 import type { StartDevServer } from './types'
 
@@ -33,7 +33,7 @@ export const createConfig = async ({ options, viteConfig: viteOverrides = {} }: 
     configFile,
     plugins: [
       Cypress(),
-      // CypressInspect(),
+      CypressInspect(),
     ],
   }
 
