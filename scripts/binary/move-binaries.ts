@@ -113,6 +113,8 @@ export const prompts = {
 export const moveBinaries = async (args = []) => {
   debug('moveBinaries with args %o', args)
   const options = arg({
+    '--s3bucket': String,
+    '--s3folder': String,
     '--commit': String,
     '--version': String,
     // optional, if passed, only the binary for that platform will be moved
@@ -136,8 +138,13 @@ export const moveBinaries = async (args = []) => {
     version: options['--version'],
   }
 
-  const aws = uploadUtils.getS3Credentials()
-  const s3 = s3helpers.makeS3(aws)
+  const credentials = await uploadUtils.getS3Credentials()
+  const aws = {
+    'bucket': options['--s3bucket'] || uploadUtils.S3Configuration.bucket,
+    'folder': options['--s3folder'] || uploadUtils.S3Configuration.releaseFolder,
+  }
+
+  const s3 = s3helpers.makeS3(credentials)
 
   // found s3 paths with last build for same commit for all platforms
   const lastBuilds: Desktop[] = []
@@ -169,7 +176,7 @@ export const moveBinaries = async (args = []) => {
     const list: string[] = await s3helpers.listS3Objects(uploadDir, aws.bucket, s3)
 
     if (debug.enabled) {
-      console.log('all found subfolders')
+      console.log('all found sub-folders')
       console.log(list.join('\n'))
     }
 

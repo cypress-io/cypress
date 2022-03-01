@@ -9,16 +9,7 @@ const upload = require('./upload')
 const uploadUtils = require('./util/upload')
 const { s3helpers } = require('./s3-api')
 
-const uploadTypes = {
-  binary: {
-    uploadFolder: 'binary',
-    uploadFileName: 'cypress.zip',
-  },
-  'npm-package': {
-    uploadFolder: 'npm',
-    uploadFileName: 'cypress.tgz',
-  },
-}
+const uploadTypes = uploadUtils.S3Configuration.betaUploadTypes
 
 const getCDN = function (uploadPath) {
   return [uploadUtils.getUploadUrl(), uploadPath].join('/')

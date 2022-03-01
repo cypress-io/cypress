@@ -11,45 +11,30 @@ The `@cypress/`-namespaced NPM packages that live inside the [`/npm`](../npm) di
 ### Prerequisites
 
 - Ensure you have the following permissions set up:
-  - An AWS account with permission to create AWS access keys for the Cypress CDN.
+  - An AWS account with permission to access and write to the AWS S3, i.e. the Cypress CDN.
   - Permissions for your npm account to publish the `cypress` package.
   - Permissions to update releases in ZenHub.
 
 - Set up the following environment variables:
-  - Cypress AWS access key and secret in `aws_credentials_json`, which looks like this:
-
+  - For the `release-automations` steps, you will need setup the following envs:
+    - GitHub token - generated yourself in github.
+    - [ZenHub API token](https://app.zenhub.com/dashboard/tokens) to interact with Zenhub. Found in 1Password.
+    - The `cypress-bot` GitHub app credentials. Found in 1Password.
     ```text
-    aws_credentials_json='{"bucket":"cdn.cypress.io","folder":"desktop","key":"...","secret":"..."}'
+    GITHUB_TOKEN="..."
+    ZENHUB_API_TOKEN="..."
+    GITHUB_APP_CYPRESS_INSTALLATION_ID=
+    GITHUB_APP_ID=
+    GITHUB_PRIVATE_KEY=
     ```
 
-    - A [GitHub token](https://github.com/settings/tokens) and a [CircleCI token](https://circleci.com/account/api) in `ci_json`:
-
-      ```text
-      ci_json='{"githubToken":"...","circleToken":"..."}'
-      ```
-
-  - You'll also need to put the GitHub token under its own variable and get a [ZenHub API token](https://app.zenhub.com/dashboard/tokens) for the `release-automations` step.
-
-      ```text
-      GITHUB_TOKEN="..."
-      ZENHUB_API_TOKEN="..."
-      ```
-
-  - The `cypress-bot` GitHub app credentials are also needed. Ask another team member who has done a deploy for those.
-
-      ```text
-      GITHUB_APP_CYPRESS_INSTALLATION_ID=
-      GITHUB_APP_ID=
-      GITHUB_PRIVATE_KEY=
-      ```
-
-  - For purging the Cloudflare cache (part of the `move-binaries` step), you'll need `CF_ZONEID` and `CF_TOKEN` set. These can be found in 1Password. If you don't have access, ask a team member who has done a deploy.
-
+  - For purging the Cloudflare cache (part of the `move-binaries` step), you'll need `CF_ZONEID` and `CF_TOKEN` set. These can be found in 1Password. 
       ```text
       CF_ZONEID="..."
       CF_TOKEN="..."
       ```
 
+  - If you don't have access to 1Password, ask a team member who has done a deploy.
   - Tip: Use [as-a](https://github.com/bahmutov/as-a) to manage environment variables for different situations.
 
 ### Before Publishing a New Version
@@ -67,21 +52,39 @@ of Cypress. You can see the progress of the test projects by opening the status 
 
 ![Screenshot of status checks](https://i.imgur.com/AsQwzgO.png)
 
-Once the `develop` branch for all test projects are reliably passing with the new changes and the `linux-x64` binary is present at `https://cdn.cypress.io/beta/binary/X.Y.Z/linux-x64/<sha>/cypress.zip`, and the `linux-x64` cypress npm package is present at `https://cdn.cypress.io/beta/binary/X.Y.Z/linux-x64/<sha>/cypress.tgz`, publishing can proceed.
-
 ### Steps to Publish a New Version
 
 In the following instructions, "X.Y.Z" is used to denote the [next version of Cypress being published](./next-version.md).
 
-1. `develop` should contain all of the changes made in `master`. However, this occasionally may not be the case. Ensure that `master` does not have any additional commits that are not on `develop` and all auto-generated pull requests designed to merge master into develop have been successfully merged.
+1. Confirm that every issue labeled [stage: pending release](https://github.com/cypress-io/cypress/issues?q=label%3A%22stage%3A+pending+release%22+is%3Aclosed) has a ZenHub release set. **Tip:** there is a command in [`release-automations`](https://github.com/cypress-io/release-automations)'s `issues-in-release` tool to list and check such issues. Without a ZenHub release issues will not be included in the right changelog.
 
-2. If there is a new [`cypress-example-kitchensink`](https://github.com/cypress-io/cypress-example-kitchensink/releases) version, update the corresponding dependency in [`packages/example`](../packages/example) to that new version.
+2. Create or review the release-specific documentation and changelog in [cypress-documentation](https://github.com/cypress-io/cypress-documentation). If there is not already a release-specific PR open, create one.
+     - Use [`release-automations`](https://github.com/cypress-io/release-automations)'s `issues-in-release` tool to generate a starting point for the changelog, based off of ZenHub:
+        ```shell
+        cd packages/issues-in-release
+        yarn do:changelog --release <release label>
+        ```
+    - Ensure the changelog is up-to-date and has the correct date.
+    - Merge any release-specific documentation changes into the main release PR.
+    - You can view the doc's [branch deploy preview](https://github.com/cypress-io/cypress-documentation/blob/master/CONTRIBUTING.md#pull-requests) by clicking 'Details' on the PR's `netlify-cypress-docs/deploy-preview` GitHub status check.
 
-3. Use the `move-binaries` script to move the binaries for `<commit sha>` from `beta` to the `desktop` folder for `<new target version>`. This also purges the cloudflare cache for this version.
+3. `develop` should contain all of the changes made in `master`. However, this occasionally may not be the case.
+   - Ensure that `master` does not have any additional commits that are not on `develop`.
+   - Ensure all auto-generated pull requests designed to merge master into develop have been successfully merged.
+
+4. If there is a new [`cypress-example-kitchensink`](https://github.com/cypress-io/cypress-example-kitchensink/releases) version, update the corresponding dependency in [`packages/example`](../packages/example) to that new version.
+
+5. Once the `develop` branch is passing for all test projects with the new changes and the `linux-x64` binary is present at `https://cdn.cypress.io/beta/binary/X.Y.Z/linux-x64/<sha>/cypress.zip`, and the `linux-x64` cypress npm package is present at `https://cdn.cypress.io/beta/binary/X.Y.Z/linux-x64/<sha>/cypress.tgz`, publishing can proceed.
+
+6. Log into AWS SSO with `aws sso login`.
+
+7. Use the `move-binaries` script to move the binaries for `<commit sha>` from `beta` to the `desktop` folder for `<new target version>`. This also purges the cloudflare cache for this version.
 
     ```shell
     yarn move-binaries --sha <commit sha> --version <new target version>
     ```
+
+8. Validate you are logged `npm` with `npm whoami`. Otherwise log in with `npm login`. 
 
 4. Publish the new npm package under the `dev` tag, using your personal npm account.
     - To find the link to the package file `cypress.tgz`:
@@ -112,21 +115,6 @@ In the following instructions, "X.Y.Z" is used to denote the [next version of Cy
     - Install the new version into an established project and run the tests there
         - [cypress-realworld-app](https://github.com/cypress-io/cypress-realworld-app) uses yarn and represents a typical consumer implementation.
     - Optionally, do more thorough tests, for example test the new version of Cypress against the Cypress dashboard repo.
-
-7. Confirm that every issue labeled [stage: pending release](https://github.com/cypress-io/cypress/issues?q=label%3A%22stage%3A+pending+release%22+is%3Aclosed) has a ZenHub release set. **Tip:** there is a command in [`release-automations`](https://github.com/cypress-io/release-automations)'s `issues-in-release` tool to list and check such issues. Without a ZenHub release issues will not be included in the right changelog.
-
-8. Deploy the release-specific documentation and changelog in [cypress-documentation](https://github.com/cypress-io/cypress-documentation).
-    - If there is not already a release-specific PR open, create one. You can use [`release-automations`](https://github.com/cypress-io/release-automations)'s `issues-in-release` tool to generate a starting point for the changelog, based off of ZenHub:
-
-        ```shell
-        cd packages/issues-in-release
-        yarn do:changelog --release <release label>
-        ```
-
-    - Ensure the changelog is up-to-date and has the correct date.
-    - Merge any release-specific documentation changes into the main release PR.
-    - You can view the doc's [branch deploy preview](https://github.com/cypress-io/cypress-documentation/blob/master/CONTRIBUTING.md#pull-requests) by clicking 'Details' on the PR's `netlify-cypress-docs/deploy-preview` GitHub status check.
-    - Merge this PR into `master` to deploy it to production.
 
 9. Make the new npm version the "latest" version by updating the dist-tag `latest` to point to the new version:
 
