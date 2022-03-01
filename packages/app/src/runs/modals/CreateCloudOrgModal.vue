@@ -113,7 +113,7 @@ const { pause, resume } = useIntervalFn(() => {
   } else {
     query.executeQuery()
   }
-}, 4000)
+}, 5000)
 
 function startPolling () {
   if (!polling.value) {
@@ -124,7 +124,7 @@ function startPolling () {
   setTimeout(() => {
     pause()
     polling.value = false
-  }, 120000)
+  }, 60000)
 }
 
 const createOrgUrl = computed(() => props.gql.createCloudOrganizationUrl || '#')
