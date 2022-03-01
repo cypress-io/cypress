@@ -29,6 +29,8 @@ const makeDismissibleProps = () => {
   return { modelValue, methods }
 }
 
+const alertRichTitle = () => <><span class="font-bold">Hello</span> world</>
+
 const prefixIcon = () => <CoffeeIcon data-cy="coffee-icon"/>
 const suffixIcon = () => <LoadingIcon data-cy="loading-icon" class="animate-spin"/>
 
@@ -39,6 +41,15 @@ describe('<Alert />', () => {
       cy.mount(() => <Alert headerClass="underline text-teal-500 bg-teal-100" bodyClass="bg-teal-50" icon={suffixIcon}>test</Alert>)
 
       cy.percySnapshot()
+    })
+  })
+
+  describe('title', () => {
+    it('can accept slot as title slot', () => {
+      cy.mount(() => (<Alert dismissible status="success"
+        vSlots={{
+          title: alertRichTitle,
+        }}></Alert>))
     })
   })
 
