@@ -627,6 +627,10 @@
     "switchTestingType": "Switch testing type"
   },
   "runner": {
+    "header": {
+      "reviewDocs": "Review the docs",
+      "troubleRendering": "if you're having trouble rendering your components properly."
+    },
     "snapshot": {
       "toggleHighlights": "Toggle highlights",
       "highlightsLabel": "Highlights",

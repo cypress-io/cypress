@@ -122,6 +122,20 @@
       :get-aut-iframe="getAutIframe"
       :event-manager="eventManager"
     />
+
+    <!-- TODO: don't show this all the time -->
+    <Alert
+      status="success"
+      dismissible
+    >
+      <template #title>
+        <ExternalLink href="https://on.cypress.io/mount">
+          <i-cy-book_x16 class="inline-block icon-dark-indigo-500 icon-light-indigo-200" />
+          {{ t('runner.header.reviewDocs') }}
+        </ExternalLink>
+        {{ t('runner.header.troubleRendering') }}
+      </template>
+    </Alert>
   </div>
 </template>
 
@@ -135,7 +149,9 @@ import { useSelectorPlaygroundStore } from '../store/selector-playground-store'
 import type { EventManager } from './event-manager'
 import type { AutIframe } from './aut-iframe'
 import { togglePlayground as _togglePlayground } from './utils'
+import { useI18n } from 'vue-i18n'
 import ExternalLink from '@packages/frontend-shared/src/gql-components/ExternalLink.vue'
+import Alert from '@packages/frontend-shared/src/components/Alert.vue'
 import Button from '@packages/frontend-shared/src/components/Button.vue'
 import ShikiHighlight from '@packages/frontend-shared/src/components/ShikiHighlight.vue'
 import VerticalBrowserListItems from '@packages/frontend-shared/src/gql-components/topnav/VerticalBrowserListItems.vue'
@@ -185,6 +201,8 @@ mutation SpecRunnerHeader_SetBrowser($browserId: ID!, $specPath: String!) {
   }
 }
 `
+
+const { t } = useI18n()
 
 const props = defineProps<{
   gql: SpecRunnerHeaderFragment
