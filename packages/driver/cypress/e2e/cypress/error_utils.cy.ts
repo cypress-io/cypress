@@ -1,11 +1,9 @@
-// @ts-nocheck
-
 import { allowTsModuleStubbing } from '../../support/helpers'
 
 allowTsModuleStubbing()
 
 import $stackUtils from '@packages/driver/src/cypress/stack_utils'
-import $errUtils from '@packages/driver/src/cypress/error_utils'
+import $errUtils, { CypressError } from '@packages/driver/src/cypress/error_utils'
 import $errorMessages from '@packages/driver/src/cypress/error_messages'
 
 describe('driver/src/cypress/error_utils', () => {
@@ -76,6 +74,7 @@ describe('driver/src/cypress/error_utils', () => {
     it('throws error when it is an error', () => {
       const err = new Error('Something unexpected')
 
+      // @ts-ignore
       err.extraProp = 'extra prop'
       const fn = () => {
         $errUtils.throwErr(err)
@@ -117,6 +116,7 @@ describe('driver/src/cypress/error_utils', () => {
 
   context('.errByPath', () => {
     beforeEach(() => {
+      // @ts-ignore
       $errorMessages.__test_errors = {
         obj: {
           message: 'This is a simple error message',
@@ -186,7 +186,7 @@ describe('driver/src/cypress/error_utils', () => {
 
     describe('when message value is an object', () => {
       it('has correct name, message, and docs url when path exists', () => {
-        const err = $errUtils.errByPath('__test_errors.obj')
+        const err = $errUtils.errByPath('__test_errors.obj') as CypressError
 
         expect(err.name).to.eq('CypressError')
         expect(err.message).to.include('This is a simple error message')
@@ -196,7 +196,7 @@ describe('driver/src/cypress/error_utils', () => {
       it('uses args provided for the error', () => {
         const err = $errUtils.errByPath('__test_errors.obj_with_args', {
           foo: 'foo', bar: ['bar', 'qux'],
-        })
+        }) as CypressError
 
         expect(err.message).to.include('This has args like \'foo\' and bar,qux')
         expect(err.docsUrl).to.include('https://on.link.io')
@@ -205,7 +205,7 @@ describe('driver/src/cypress/error_utils', () => {
       it('handles args being used multiple times in message', () => {
         const err = $errUtils.errByPath('__test_errors.obj_with_multi_args', {
           foo: 'foo', bar: ['bar', 'qux'],
-        })
+        }) as CypressError
 
         expect(err.message).to.include('This has args like \'foo\' and bar,qux, and \'foo\' is used twice')
         expect(err.docsUrl).to.include('https://on.link.io')
@@ -214,7 +214,7 @@ describe('driver/src/cypress/error_utils', () => {
       it('formats markdown in the error message', () => {
         const err = $errUtils.errByPath('__test_errors.obj_with_markdown', {
           foo: 'foo', bar: ['bar', 'qux'],
-        })
+        }) as CypressError
 
         expect(err.message).to.include('This has markdown like `foo`, *bar,qux*, **foo**, and _bar,qux_')
         expect(err.docsUrl).to.include('https://on.link.io')
@@ -223,7 +223,7 @@ describe('driver/src/cypress/error_utils', () => {
 
     describe('when message value is a string', () => {
       it('has correct name, message, and docs url', () => {
-        const err = $errUtils.errByPath('__test_errors.str')
+        const err = $errUtils.errByPath('__test_errors.str') as CypressError
 
         expect(err.name).to.eq('CypressError')
         expect(err.message).to.include('This is a simple error message')
@@ -299,7 +299,7 @@ describe('driver/src/cypress/error_utils', () => {
         })
 
         it('has the right message and docs url', () => {
-          const err = $errUtils.errByPath('__test_errors.fn_returns_obj')
+          const err = $errUtils.errByPath('__test_errors.fn_returns_obj') as CypressError
 
           expect(err.message).to.include('This is a simple error message')
           expect(err.docsUrl).to.include('https://on.link.io')
@@ -310,7 +310,7 @@ describe('driver/src/cypress/error_utils', () => {
         it('uses them in the error message', () => {
           const err = $errUtils.errByPath('__test_errors.fn_returns_obj_with_args', {
             foo: 'foo', bar: ['bar', 'qux'],
-          })
+          }) as CypressError
 
           expect(err.message).to.include('This has args like \'foo\' and bar,qux')
           expect(err.docsUrl).to.include('https://on.link.io')
@@ -321,7 +321,7 @@ describe('driver/src/cypress/error_utils', () => {
         it('uses them in the error message', () => {
           const err = $errUtils.errByPath('__test_errors.fn_returns_obj_with_multi_args', {
             foo: 'foo', bar: ['bar', 'qux'],
-          })
+          }) as CypressError
 
           expect(err.message).to.include('This has args like \'foo\' and bar,qux, and \'foo\' is used twice')
           expect(err.docsUrl).to.include('https://on.link.io')
@@ -334,6 +334,7 @@ describe('driver/src/cypress/error_utils', () => {
     let fn
 
     beforeEach(() => {
+      // @ts-ignore
       $errorMessages.__test_errors = {
         test: 'Simple error {{message}}',
       }
@@ -370,6 +371,7 @@ describe('driver/src/cypress/error_utils', () => {
 
   context('.throwErrByPath', () => {
     it('looks up error and throws it', () => {
+      // @ts-ignore
       $errorMessages.__test_error = 'simple error message'
 
       const fn = () => $errUtils.throwErrByPath('__test_error')
@@ -598,7 +600,7 @@ describe('driver/src/cypress/error_utils', () => {
   context('Error.captureStackTrace', () => {
     it('works - even where not natively support', () => {
       function removeMe2 () {
-        const err = {}
+        const err: Record<string, any> = {}
 
         Error.captureStackTrace(err, removeMeAndAbove)
 
