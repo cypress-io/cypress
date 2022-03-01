@@ -78,25 +78,25 @@ module.exports = defineConfig({
 
 `
 
-exports['cypress.config.js generation should exclude fields that are no longer valid 1'] = `
-const { defineConfig } = require('cypress')
+exports['cypress.config.js generation should handle export default in plugins file 1'] = `
+import { defineConfig } from 'cypress'
 
-module.exports = defineConfig({
+export default defineConfig({
   e2e: {
     // We've imported your old cypress plugins here.
     // You may want to clean this up later by importing these.
     setupNodeEvents(on, config) {
-      return require('././cypress/plugins/index.js')(on, config)
+      return require('./cypress/plugins/index.ts').default(on, config)
     },
   },
 })
 
 `
 
-exports['cypress.config.js generation should handle export default in plugins file 1'] = `
-import { defineConfig } from 'cypress'
+exports['cypress.config.js generation should exclude fields that are no longer valid 1'] = `
+const { defineConfig } = require('cypress')
 
-export default defineConfig({
+module.exports = defineConfig({
   e2e: {
     // We've imported your old cypress plugins here.
     // You may want to clean this up later by importing these.

@@ -13,15 +13,11 @@ import {
 } from '../../../../src/sources/migration'
 import { expect } from 'chai'
 import { MigrationFile } from '../../../../src/sources'
-import { scaffoldMigrationProject } from '../../helper'
+import { scaffoldMigrationProject, getSystemTestProject } from '../../helper'
 
-let projectRoot: string
+const projectRoot = getSystemTestProject('migration-e2e-defaults')
 
 describe('cypress.config.js generation', () => {
-  before(async () => {
-    projectRoot = await scaffoldMigrationProject('migration-e2e-defaults')
-  })
-
   it('should create a string when passed only a global option', async () => {
     const config: OldCypressConfig = {
       viewportWidth: 300,
@@ -130,6 +126,7 @@ describe('cypress.config.js generation', () => {
   })
 
   it('should handle export default in plugins file', async () => {
+    const projectRoot = getSystemTestProject('migration-e2e-export-default')
     const config = fs.readJsonSync(path.join(projectRoot, 'cypress.json'))
 
     const generatedConfig = await createConfigString(config, {

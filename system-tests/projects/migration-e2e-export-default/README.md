@@ -28,4 +28,4 @@ The project has a default support file, `cypress/support/index.js`. We can renam
 
 ## Update Config
 
-The expected output is in [`expected-cypress.config.js`](./expected-cypress.config.js).
+The expected output is in [`expected-cypress.config.ts`](./expected-cypress.config.ts).
