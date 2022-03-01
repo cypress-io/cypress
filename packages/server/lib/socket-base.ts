@@ -25,18 +25,7 @@ type StartListeningCallbacks = {
   onSocketConnection: (socket: any) => void
 }
 
-type RunnerEvent =
-  'reporter:restart:test:run'
-  | 'runnables:ready'
-  | 'run:start'
-  | 'test:before:run:async'
-  | 'reporter:log:add'
-  | 'reporter:log:state:changed'
-  | 'paused'
-  | 'test:after:hooks'
-  | 'run:end'
-
-const runnerEvents: RunnerEvent[] = [
+const runnerEvents = [
   'reporter:restart:test:run',
   'runnables:ready',
   'run:start',
@@ -46,18 +35,9 @@ const runnerEvents: RunnerEvent[] = [
   'paused',
   'test:after:hooks',
   'run:end',
-]
+] as const
 
-type ReporterEvent =
-  'runner:restart'
-  | 'runner:abort'
-  | 'runner:console:log'
-  | 'runner:console:error'
-  | 'runner:show:snapshot'
-  | 'runner:hide:snapshot'
-  | 'reporter:restarted'
-
-const reporterEvents: ReporterEvent[] = [
+const reporterEvents = [
   // "go:to:file"
   'runner:restart',
   'runner:abort',
@@ -66,7 +46,7 @@ const reporterEvents: ReporterEvent[] = [
   'runner:show:snapshot',
   'runner:hide:snapshot',
   'reporter:restarted',
-]
+] as const
 
 const debug = Debug('cypress:server:socket-base')
 
