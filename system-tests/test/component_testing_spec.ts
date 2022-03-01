@@ -59,4 +59,12 @@ describe('component testing projects', function () {
     browser: 'chrome',
     expectedExitCode: 0,
   })
+
+  systemTests.it('vuecli5vue3-configured', {
+    project: 'vuecli5vue3-configured',
+    testingType: 'component',
+    spec: 'src/components/HelloWorld.cy.ts',
+    browser: 'chrome',
+    expectedExitCode: 0,
+  })
 })

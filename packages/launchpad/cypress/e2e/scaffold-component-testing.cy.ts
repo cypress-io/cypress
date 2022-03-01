@@ -29,7 +29,7 @@ function fakeInstalledDeps () {
 }
 
 describe('scaffolding component testing', () => {
-  context('vueclivue2', () => {
+  context('vuecli4vue2', () => {
     it('scaffolds component testing for Vue CLI w/ Vue 2 project', () => {
       startSetupFor('vueclivue2-unconfigured')
 
@@ -44,7 +44,7 @@ describe('scaffolding component testing', () => {
     })
   })
 
-  context('vueclivue3', () => {
+  context('vuecli4vue3', () => {
     it('scaffolds component testing for Vue CLI w/ Vue 3 project', () => {
       startSetupFor('vueclivue3-unconfigured')
 
