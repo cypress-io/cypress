@@ -10,7 +10,7 @@ import { humanTime, logError, parseResolvedPattern, pluralize } from './errorUti
 import { errPartial, errTemplate, fmt, theme, PartialErr } from './errTemplate'
 import { stackWithoutMessage } from './stackUtils'
 
-import type { ClonedError, ConfigValidationFailureInfo, CypressError, ErrTemplateResult, ErrorLike } from './errorTypes'
+import type { ClonedError, SerializedError, ConfigValidationFailureInfo, CypressError, ErrTemplateResult, ErrorLike } from './errorTypes'
 
 const ansi_up = new AU()
 
@@ -1282,7 +1282,10 @@ export const AllCypressErrors = {
     `
   },
 
-  UNEXPECTED_MUTATION_ERROR: (mutationField: string, args: any, err: Error) => {
+  UNEXPECTED_MUTATION_ERROR: (mutationField: string, args: any, err: SerializedError) => {
+    // Unexpected errors should always have the stack trace opened
+    err.isCypressErr = false
+
     return errTemplate`
       An unexpected internal error occurred while executing the ${fmt.highlight(mutationField)} operation with payload:
 

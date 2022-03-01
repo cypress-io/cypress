@@ -78,10 +78,20 @@ function run (ipc, configFile, projectRoot) {
     return false
   }
 
-  ipc.on('loadConfig', () => {
+  ipc.on('loadConfig', async () => {
     try {
       debug('try loading', configFile)
-      const exp = require(configFile)
+      let exp
+
+      try {
+        exp = require(configFile)
+      } catch (e) {
+        if (e.code !== 'ERR_REQUIRE_ESM') {
+          throw e
+        }
+
+        exp = await import(configFile)
+      }
 
       const result = exp.default || exp
 
