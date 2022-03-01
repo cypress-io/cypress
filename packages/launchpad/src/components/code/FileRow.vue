@@ -44,7 +44,7 @@
       </p>
       <Button
         class="whitespace-nowrap"
-        @click="openDocs"
+        href="https://on.cypress.io/guides/configuration"
       >
         {{ t('links.learnMore') }}
       </Button>
@@ -83,7 +83,6 @@ import { useI18n } from '@cy/i18n'
 import ShikiHighlight, { CyLangType, langsSupported } from '@cy/components/ShikiHighlight.vue'
 import ListRowHeader from '@cy/components/ListRowHeader.vue'
 import Collapsible from '@cy/components/Collapsible.vue'
-import { useExternalLink } from '@cy/gql-components/useExternalLink'
 import AddedIcon from '~icons/cy/file-changes-added_x24.svg'
 import SkippedIcon from '~icons/cy/file-changes-skipped_x24.svg'
 import ErrorIcon from '~icons/cy/file-changes-error_x24.svg'
@@ -97,8 +96,6 @@ const props = defineProps<{
   content: string
   description?: string
 }>()
-
-const openDocs = useExternalLink('https://on.cypress.io/guides/configuration')
 
 // TODO: Remove this. Use FileParts when available
 const language = computed(() => {
