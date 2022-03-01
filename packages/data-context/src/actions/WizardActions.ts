@@ -310,8 +310,10 @@ export class WizardActions {
       bodyModifier,
     })
 
+    const relativeComponentIndexHtmlPath = path.join('cypress', 'support', 'component-index.html')
+
     return this.scaffoldFile(
-      path.join(this.projectRoot, 'cypress', 'component', 'index.html'),
+      path.join(this.projectRoot, relativeComponentIndexHtmlPath),
       template,
       'The HTML used as the wrapper for all component tests',
     )

@@ -101,7 +101,7 @@ const getPackageVersions = async (packages) => {
 }
 
 // updates a public package's package.json
-// replaces any local dependencies that have a * version
+// replaces any local dependencies that have a * or file: version
 // with the actual numbered version of that dependency
 // if that dependency is also going to be released from this run
 // it updates with the new version
@@ -116,7 +116,7 @@ const injectVersions = (packagesToRelease, versions, packages) => {
 
     if (packageJson.dependencies) {
       for (const dependency in packageJson.dependencies) {
-        if (packageJson.dependencies[dependency] === '0.0.0-development' || packageJson.dependencies[dependency] === '*') {
+        if (packageJson.dependencies[dependency] === '0.0.0-development' || packageJson.dependencies[dependency] === '*' || packageJson.dependencies[dependency].startsWith('file:')) {
           const version = versions[dependency].nextVersion || versions[dependency].currentVersion
 
           if (!version) {
