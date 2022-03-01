@@ -6,7 +6,7 @@ const check = require('check-more-types')
 const fse = require('fs-extra')
 const os = require('os')
 const Promise = require('bluebird')
-const { fromSSO } = require('@aws-sdk/credential-providers')
+const { fromSSO, fromEnv } = require('@aws-sdk/credential-providers')
 
 const konfig = require('../get-config')()
 const { purgeCloudflareCache } = require('./purge-cloudflare-cache')
@@ -48,9 +48,12 @@ const S3Configuration = {
 }
 
 const getS3Credentials = async function () {
-  const credentials = await fromSSO({ profile: 'production' })()
+  // sso is not required for CirceCI
+  if (process.env.CIRCLECI) {
+    return await fromEnv()()
+  }
 
-  return credentials
+  return await fromSSO({ profile: process.env.AWS_PROFILE || 'production' })()
 }
 
 const getPublisher = async function () {

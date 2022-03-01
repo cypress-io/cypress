@@ -119,7 +119,7 @@ const uploadArtifactToS3 = function (args = []) {
   .then(uploadUtils.saveUrl(`${options.type}-url.json`))
   .catch((e) => {
     console.error('There was an issue uploading the artifact.')
-    console.error(e)
+    throw e
   })
 }
 
