@@ -1,4 +1,5 @@
 import { parse, ParserOptions } from '@babel/parser'
+import { visit } from 'recast'
 import type * as bt from '@babel/types'
 
 const babelParserOptions: ParserOptions = {
@@ -32,18 +33,15 @@ const babelParserOptions: ParserOptions = {
 export function hasDefaultExport (src: string): boolean {
   const ast = parse(src, babelParserOptions) as bt.File
 
-  if (!ast.tokens?.length) {
-    return false
-  }
+  let hasDefault = false
 
-  const tokens = ast.tokens as any[]
+  visit(ast, {
+    visitExportDefaultDeclaration () {
+      hasDefault = true
 
-  const defaultExport = !!(tokens.find((token, idx) => {
-    const isExport = token.type?.keyword === 'export'
-    const next = tokens[idx + 1]?.type?.keyword === 'default'
+      return false
+    },
+  })
 
-    return Boolean(isExport && next)
-  }))
-
-  return Boolean(defaultExport)
+  return hasDefault
 }
