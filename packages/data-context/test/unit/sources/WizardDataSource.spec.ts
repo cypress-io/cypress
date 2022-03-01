@@ -1,17 +1,11 @@
 import { expect } from 'chai'
-import path from 'path'
-import { e2eProjectDirs } from '@packages/frontend-shared/cypress/e2e/support/e2eProjectDirs'
-import { createTestDataContext } from '../helper'
-
-function getCurrentProject (project: typeof e2eProjectDirs[number]) {
-  return path.join(__dirname, '..', '..', '..', '..', '..', 'system-tests', 'projects', project)
-}
+import { createTestDataContext, getSystemTestProject } from '../helper'
 
 describe('packagesToInstall', () => {
   it('create-react-app-unconfigured', async () => {
     const ctx = createTestDataContext()
 
-    ctx.coreData.currentProject = getCurrentProject('create-react-app-unconfigured')
+    ctx.coreData.currentProject = getSystemTestProject('create-react-app-unconfigured')
     ctx.coreData.wizard.chosenFramework = 'crav5'
     ctx.coreData.wizard.chosenBundler = 'webpack5'
 
@@ -23,7 +17,7 @@ describe('packagesToInstall', () => {
   it('vueclivue2-unconfigured', async () => {
     const ctx = createTestDataContext()
 
-    ctx.coreData.currentProject = getCurrentProject('vueclivue2-unconfigured')
+    ctx.coreData.currentProject = getSystemTestProject('vueclivue2-unconfigured')
     ctx.coreData.wizard.chosenFramework = 'vuecli4vue2'
     ctx.coreData.wizard.chosenBundler = 'webpack4'
 
@@ -35,7 +29,7 @@ describe('packagesToInstall', () => {
   it('vueclivue3-unconfigured', async () => {
     const ctx = createTestDataContext()
 
-    ctx.coreData.currentProject = getCurrentProject('vueclivue3-unconfigured')
+    ctx.coreData.currentProject = getSystemTestProject('vueclivue3-unconfigured')
     ctx.coreData.wizard.chosenFramework = 'vuecli4vue3'
     ctx.coreData.wizard.chosenBundler = 'webpack4'
 
@@ -47,7 +41,7 @@ describe('packagesToInstall', () => {
   it('vuecli5vue3-unconfigured', async () => {
     const ctx = createTestDataContext()
 
-    ctx.coreData.currentProject = getCurrentProject('vuecli5vue3-unconfigured')
+    ctx.coreData.currentProject = getSystemTestProject('vuecli5vue3-unconfigured')
     ctx.coreData.wizard.chosenFramework = 'vuecli5vue3'
     ctx.coreData.wizard.chosenBundler = 'webpack5'
 
@@ -59,7 +53,7 @@ describe('packagesToInstall', () => {
   it('regular react project with vite', async () => {
     const ctx = createTestDataContext()
 
-    ctx.coreData.currentProject = getCurrentProject('react-vite-ts-unconfigured')
+    ctx.coreData.currentProject = getSystemTestProject('react-vite-ts-unconfigured')
     ctx.coreData.wizard.chosenFramework = 'react'
     ctx.coreData.wizard.chosenBundler = 'vite'
 
@@ -71,7 +65,7 @@ describe('packagesToInstall', () => {
   it('regular vue project with vite', async () => {
     const ctx = createTestDataContext()
 
-    ctx.coreData.currentProject = getCurrentProject('vue3-vite-ts-unconfigured')
+    ctx.coreData.currentProject = getSystemTestProject('vue3-vite-ts-unconfigured')
     ctx.coreData.wizard.chosenFramework = 'vue3'
     ctx.coreData.wizard.chosenBundler = 'vite'
 
@@ -83,7 +77,7 @@ describe('packagesToInstall', () => {
   it('nextjs-unconfigured', async () => {
     const ctx = createTestDataContext()
 
-    ctx.coreData.currentProject = getCurrentProject('nextjs-unconfigured')
+    ctx.coreData.currentProject = getSystemTestProject('nextjs-unconfigured')
     ctx.coreData.wizard.chosenFramework = 'nextjs'
     ctx.coreData.wizard.chosenBundler = 'webpack4'
 
@@ -95,7 +89,7 @@ describe('packagesToInstall', () => {
   it('nuxtjs-vue2-unconfigured', async () => {
     const ctx = createTestDataContext()
 
-    ctx.coreData.currentProject = getCurrentProject('nuxtjs-vue2-unconfigured')
+    ctx.coreData.currentProject = getSystemTestProject('nuxtjs-vue2-unconfigured')
     ctx.coreData.wizard.chosenFramework = 'nuxtjs'
     ctx.coreData.wizard.chosenBundler = 'webpack4'
 
@@ -107,7 +101,7 @@ describe('packagesToInstall', () => {
   it('pristine-with-e2e-testing-and-storybook', async () => {
     const ctx = createTestDataContext()
 
-    ctx.coreData.currentProject = getCurrentProject('pristine-with-e2e-testing-and-storybook')
+    ctx.coreData.currentProject = getSystemTestProject('pristine-with-e2e-testing-and-storybook')
     ctx.coreData.wizard.chosenFramework = 'react'
     ctx.coreData.wizard.chosenBundler = 'webpack4'
 
@@ -120,7 +114,7 @@ describe('packagesToInstall', () => {
     const ctx = createTestDataContext()
 
     // this should never happen!
-    ctx.coreData.currentProject = getCurrentProject('pristine-with-e2e-testing-and-storybook')
+    ctx.coreData.currentProject = getSystemTestProject('pristine-with-e2e-testing-and-storybook')
     ctx.coreData.wizard.chosenFramework = undefined
     ctx.coreData.wizard.chosenBundler = undefined
 
