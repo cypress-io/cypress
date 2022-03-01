@@ -57,7 +57,7 @@ const setChecksum = async (filename, key) => {
 
   // by default s3.copyObject does not preserve ACL when copying
   // thus we need to reset it for our public files
-  return s3helpers.setUserMetadata(uploadUtils.S3.S3Configuration.bucket, key, metadata,
+  return s3helpers.setUserMetadata(uploadUtils.S3Configuration.bucket, key, metadata,
     'application/zip', 'public-read', s3)
 }
 
