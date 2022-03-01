@@ -12,6 +12,7 @@ import { toPosix } from '../../util'
 
 import Debug from 'debug'
 import dedent from 'dedent'
+import { hasDefaultExport } from './parserUtils'
 const debug = Debug('cypress:data-context:sources:migration:codegen')
 
 type ConfigOptions = {
@@ -213,9 +214,8 @@ function createE2ETemplate (pluginPath: string, createConfigOptions: CreateConfi
   }
 
   const pluginFile = fs.readFileSync(path.join(createConfigOptions.projectRoot, pluginPath), 'utf8')
-  const hasExportDefault = pluginFile.includes('export default')
 
-  const requirePlugins = hasExportDefault
+  const requirePlugins = hasDefaultExport(pluginFile)
     ? `return require('./${pluginPath}').default(on, config)`
     : `return require('./${pluginPath}')(on, config)`
 
