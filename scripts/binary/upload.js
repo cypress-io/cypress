@@ -146,7 +146,7 @@ module.exports = {
         'Cache-Control': 'no-cache',
       }
 
-      new Promise((resolve, reject) => {
+      return new Promise((resolve, reject) => {
         return gulp.src(file)
         .pipe(rename((p) => {
           // rename to standard filename for upload
