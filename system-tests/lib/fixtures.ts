@@ -2,7 +2,7 @@ import fs from 'fs-extra'
 import _path from 'path'
 import chokidar from 'chokidar'
 import cachedir from 'cachedir'
-import { execa } from 'execa'
+import execa from 'execa'
 import tempDir from 'temp-dir'
 
 const root = _path.join(__dirname, '..')

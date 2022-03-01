@@ -4,7 +4,7 @@ import stream from 'stream'
 import EventEmitter from 'events'
 import path from 'path'
 import { promises as fs } from 'fs'
-import { execa } from 'execa'
+import execa from 'execa'
 import Fixtures from './fixtures'
 import { nock } from './spec_helper'
 
