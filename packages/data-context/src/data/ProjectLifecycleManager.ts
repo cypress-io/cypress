@@ -1111,14 +1111,15 @@ export class ProjectLifecycleManager {
     }
 
     if (typeof configFile === 'string') {
-      metaState.hasSpecifiedConfigViaCLI = this._pathToFile(configFile)
+      const configFilePath = this._pathToFile(configFile)
+
+      this.setConfigFilePath(configFilePath)
+      metaState.hasSpecifiedConfigViaCLI = configFilePath
+
       if (configFile.endsWith('.json')) {
         metaState.needsCypressJsonMigration = true
-      } else {
-        this._configFilePath = this._pathToFile(configFile)
-        if (fs.existsSync(this._configFilePath)) {
-          metaState.hasValidConfigFile = true
-        }
+      } else if (this._configFilePath && fs.existsSync(this._configFilePath)) {
+        metaState.hasValidConfigFile = true
       }
 
       this._projectMetaState = metaState
@@ -1131,7 +1132,7 @@ export class ProjectLifecycleManager {
 
     if (fs.existsSync(configFileTs)) {
       metaState.hasValidConfigFile = true
-      this.setConfigFilePath('ts')
+      this.setConfigFilePath(configFileTs)
     }
 
     if (fs.existsSync(configFileJs)) {
@@ -1139,12 +1140,8 @@ export class ProjectLifecycleManager {
       if (this._configFilePath) {
         metaState.hasMultipleConfigPaths = true
       } else {
-        this.setConfigFilePath('js')
+        this.setConfigFilePath(configFileJs)
       }
-    }
-
-    if (!this._configFilePath) {
-      this.setConfigFilePath(metaState.hasTypescript ? 'ts' : 'js')
     }
 
     if (metaState.hasLegacyCypressJson && !metaState.hasValidConfigFile) {
@@ -1156,8 +1153,8 @@ export class ProjectLifecycleManager {
     return metaState
   }
 
-  setConfigFilePath (lang: 'ts' | 'js') {
-    this._configFilePath = this._pathToFile(`cypress.config.${lang}`)
+  setConfigFilePath (absolutePath: string) {
+    this._configFilePath = absolutePath
   }
 
   private _pathToFile (file: string) {

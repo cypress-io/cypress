@@ -14,9 +14,10 @@ export class MigrationActions {
   constructor (private ctx: DataContext) { }
 
   async createConfigFile () {
+    const { configFilePath } = this.ctx.lifecycleManager
     const config = await this.ctx.migration.createConfigString()
 
-    await this.ctx.fs.writeFile(this.ctx.lifecycleManager.configFilePath, config).catch((error) => {
+    await this.ctx.fs.writeFile(configFilePath, config).catch((error) => {
       throw error
     })
 
@@ -120,8 +121,9 @@ export class MigrationActions {
     await this.ctx.migration.closeManualRenameWatcher()
   }
 
-  async assertSuccessfulConfigMigration (configExtension: 'js' | 'ts' | 'coffee' = 'js') {
-    const actual = formatConfig(await this.ctx.actions.file.readFileInProject(`cypress.config.${configExtension}`))
+  async assertSuccessfulConfigMigration (configFilePath: string) {
+    const configExtension = this.ctx.path.extname(configFilePath)
+    const actual = formatConfig(await this.ctx.actions.file.readFileInProject(configFilePath))
     const expected = formatConfig(await this.ctx.actions.file.readFileInProject(`expected-cypress.config.${configExtension}`))
 
     if (actual !== expected) {

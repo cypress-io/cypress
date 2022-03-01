@@ -18,9 +18,9 @@ Cypress.Commands.add('waitForWizard', () => {
   return cy.get('[data-cy="migration-wizard"]')
 })
 
-function startMigrationFor (project: typeof e2eProjectDirs[number]) {
+function startMigrationFor (project: typeof e2eProjectDirs[number], args?: string[]) {
   cy.scaffoldProject(project)
-  cy.openProject(project)
+  cy.openProject(project, args)
   cy.visitLaunchpad()
   cy.waitForWizard()
 }
@@ -86,7 +86,7 @@ describe('Opening unmigrated project', () => {
   })
 })
 
-describe('Full migration flow for each project', { retries: { openMode: 2, runMode: 2 } }, () => {
+describe('Full migration flow for each project', { retries: 2 }, () => {
   it('completes journey for migration-component-testing', () => {
     startMigrationFor('migration-component-testing')
     // custom testFiles - cannot auto
@@ -658,6 +658,37 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
       migrateAndVerifyConfig()
     })
   })
+
+  it('completes journey for migration-config-file-argument', () => {
+    startMigrationFor('migration-config-file-arg', ['--config-file', 'cypress.dev.json'])
+    // defaults, rename all the things
+    // can rename integration->e2e
+    cy.get(renameAutoStep).should('not.exist')
+    // no CT
+    cy.get(renameManualStep).should('not.exist')
+    // supportFile is false - cannot migrate
+    cy.get(renameSupportStep).should('not.exist')
+    cy.get(setupComponentStep).should('not.exist')
+    cy.get(configFileStep).should('exist')
+
+    cy.contains('Migrate the configuration for me').click()
+
+    cy.withCtx(async (ctx) => {
+      const configStats = await ctx.actions.file.checkIfFileExists(`cypress.dev.config.js}`)
+
+      expect(configStats).to.not.be.null.and.not.be.undefined
+
+      const oldConfigStats = await ctx.actions.file.checkIfFileExists('cypress.dev.json')
+
+      expect(oldConfigStats).to.be.null
+
+      // await ctx.actions.migration.assertSuccessfulConfigMigration(o.configExtension)
+    })
+
+    // cy.withCtx((ctx) => {
+
+    // })
+  })
 })
 
 // TODO: toLaunchpad emitter not working in Cypress in Cypress.
@@ -713,7 +744,7 @@ describe.skip('component testing migration - defaults', () => {
   })
 })
 
-describe('Migration', { viewportWidth: 1200, retries: { openMode: 2, runMode: 2 } }, () => {
+describe('Migration', { viewportWidth: 1200, retries: 2 }, () => {
   it('should create the cypress.config.js file and delete old config', () => {
     startMigrationFor('migration')
 
