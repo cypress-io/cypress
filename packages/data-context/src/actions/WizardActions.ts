@@ -406,6 +406,7 @@ export class WizardActions {
 
   private commandsFileBody (language: CodeLanguageEnum) {
     return dedent`
+      ${language === 'ts' ? '/// <reference types="cypress" />' : ''}
       // ***********************************************
       // This example commands.${language} shows you how to
       // create various custom commands and overwrite
@@ -431,9 +432,24 @@ export class WizardActions {
       //
       // -- This will overwrite an existing command --
       // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
+      ${language === 'ts' ? COMMAND_TYPES : ''}
     `
   }
 }
+
+const COMMAND_TYPES = dedent`
+//
+// declare global {
+//   namespace Cypress {
+//     interface Chainable {
+//       login(email: string, password: string): Chainable<void>
+//       drag(subject: string, options?: Partial<TypeOptions>): Chainable<Element>
+//       dismiss(subject: string, options?: Partial<TypeOptions>): Chainable<Element>
+//       visit(originalFn: CommandOriginalFn, url: string, options: Partial<VisitOptions>): Chainable<Element>
+//     }
+//   }
+// }
+`
 
 const E2E_SCAFFOLD_BODY = dedent`
   e2e: {
