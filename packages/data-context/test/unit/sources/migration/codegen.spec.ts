@@ -126,6 +126,7 @@ describe('cypress.config.js generation', () => {
   })
 
   it('should handle export default in plugins file', async () => {
+    const projectRoot = await scaffoldMigrationProject('migration-e2e-export-default')
     const config = fs.readJsonSync(path.join(projectRoot, 'cypress.json'))
 
     const generatedConfig = await createConfigString(config, {
