@@ -12,7 +12,7 @@
 // the project's config changing)
 
 const _ = require('lodash')
-const execa = require('execa')
+const { execa } = require('execa')
 const util = require('util')
 const si = require('systeminformation')
 

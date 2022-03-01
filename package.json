@@ -38,7 +38,7 @@
     "get-next-version": "node scripts/get-next-version.js",
     "postinstall": "patch-package && ./scripts/run-if-not-ci.sh yarn-deduplicate --strategy=highest && ./scripts/run-if-not-ci.sh yarn build",
     "jscodeshift": "jscodeshift -t ./node_modules/js-codemod/transforms/arrow-function-arguments.js",
-    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json .",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json . && yarn lerna exec yarn lint --scope @tooling/system-tests",
     "lint-changed": "lint-changed",
     "move-binaries": "node ./scripts/binary.js move-binaries",
     "npm-release": "node scripts/npm-release.js",

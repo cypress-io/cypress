@@ -1,4 +1,4 @@
-import systemTests from '../lib/system-tests'
+import systemTests, { BrowserName } from '../lib/system-tests'
 
 describe('e2e headless', function () {
   systemTests.setup()
@@ -25,7 +25,7 @@ describe('e2e headless', function () {
 
     systemTests.it('pass for browsers that do not need xvfb', {
       ...baseSpec,
-      browser: ['chrome', 'chrome-beta', 'firefox'],
+      browser: ['chrome', 'firefox'],
       expectedExitCode: 0,
       onRun (exec) {
         return exec().then(({ stderr }) => {
@@ -60,10 +60,10 @@ describe('e2e headless', function () {
   // "can not record video in headed mode" error
   // this trick allows us to have 1 snapshot for electron
   // and 1 for every other browser
-  ;[
+  ;([
     'electron',
     '!electron',
-  ].map((b) => {
+  ] as BrowserName[]).map((b) => {
     systemTests.it(`tests in headed mode pass in ${b}`, {
       spec: 'headless_spec.js',
       config: {

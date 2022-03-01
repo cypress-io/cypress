@@ -5,6 +5,7 @@
   "private": true,
   "main": "index.js",
   "scripts": {
+    "lint": "tsc --project .",
     "projects:yarn:install": "node ./scripts/projects-yarn-install.js",
     "test": "node ./scripts/run.js --glob-in-dir='{test,test-binary}'",
     "test:ci": "node ./scripts/run.js"
@@ -46,7 +47,7 @@
     "dayjs": "^1.9.3",
     "debug": "^4.3.2",
     "dockerode": "3.3.1",
-    "execa": "1.0.0",
+    "execa": "6.1.0",
     "express": "4.17.1",
     "express-session": "1.16.1",
     "express-useragent": "1.0.15",

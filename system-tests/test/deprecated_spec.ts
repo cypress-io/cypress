@@ -2,6 +2,18 @@ import systemTests from '../lib/system-tests'
 
 const beforeBrowserLaunchProject = 'plugin-before-browser-launch-deprecation'
 
+const includesString = (s: string) => {
+  return (stdout: string) => {
+    expect(stdout).to.include(s)
+  }
+}
+
+const excludesString = (s: string) => {
+  return (stdout: string) => {
+    expect(stdout).to.include(s)
+  }
+}
+
 describe('deprecated before:browser:launch args', () => {
   systemTests.setup()
 
@@ -28,8 +40,7 @@ describe('deprecated before:browser:launch args', () => {
     project: beforeBrowserLaunchProject,
     spec: 'app_spec.js',
     snapshot: true,
-    stdoutInclude: 'Deprecation Warning:',
-    psInclude: ['--foo', '--bar'],
+    onStdout: includesString('Deprecation Warning:'),
   })
 
   systemTests.it('using non-deprecated API - no warning', {
@@ -46,8 +57,7 @@ describe('deprecated before:browser:launch args', () => {
     project: beforeBrowserLaunchProject,
     spec: 'app_spec.js',
     snapshot: true,
-    stdoutExclude: 'Deprecation Warning:',
-    psInclude: ['--foo', '--bar'],
+    onStdout: excludesString('Deprecation Warning:'),
   })
 
   systemTests.it('concat return returns once per spec', {
@@ -64,7 +74,7 @@ describe('deprecated before:browser:launch args', () => {
     project: beforeBrowserLaunchProject,
     spec: 'app_spec.js,app_spec2.js',
     snapshot: true,
-    stdoutInclude: 'Deprecation Warning:',
+    onStdout: includesString('Deprecation Warning:'),
   })
 
   systemTests.it('no mutate return', {
@@ -81,8 +91,7 @@ describe('deprecated before:browser:launch args', () => {
     project: beforeBrowserLaunchProject,
     spec: 'app_spec.js',
     snapshot: true,
-    stdoutInclude: 'Deprecation Warning:',
-    psInclude: '--foo',
+    onStdout: includesString('Deprecation Warning:'),
   })
 
   // TODO: these errors could be greatly improved by the code frame

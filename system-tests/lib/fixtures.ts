@@ -2,7 +2,7 @@ import fs from 'fs-extra'
 import _path from 'path'
 import chokidar from 'chokidar'
 import cachedir from 'cachedir'
-import execa from 'execa'
+import { execa } from 'execa'
 import tempDir from 'temp-dir'
 
 const root = _path.join(__dirname, '..')
@@ -174,7 +174,7 @@ export async function scaffoldProjectNodeModules (project: string, updateYarnLoc
 
   const runCmd = async (cmd) => {
     console.log(`📦 Running "${cmd}" in ${projectDir}`)
-    await execa.shell(cmd, { cwd: projectDir, stdio: 'inherit' })
+    await execa(cmd, { cwd: projectDir, stdio: 'inherit', shell: true })
   }
 
   const cacheDir = _path.join(cachedir('cy-system-tests-node-modules'), project, 'node_modules')
@@ -326,8 +326,8 @@ export function remove () {
 
 // returns the path to project fixture
 // in the cyTmpDir
-export function project (...args) {
-  return this.projectPath.apply(this, args)
+export function project (name) {
+  return projectPath(name)
 }
 
 export function projectPath (name) {

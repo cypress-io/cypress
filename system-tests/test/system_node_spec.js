@@ -1,5 +1,5 @@
 const systemTests = require('../lib/system-tests').default
-const execa = require('execa')
+const { execa } = require('execa')
 
 let expectedNodeVersion
 let expectedNodePath
