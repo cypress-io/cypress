@@ -32,7 +32,7 @@ const getUploadPath = function (options) {
   return [getUploadDirForPlatform(options), hash, uploadFileName].join('/')
 }
 
-const setChecksum = (filename, key) => {
+const setChecksum = async (filename, key) => {
   console.log('setting checksum for file %s', filename)
   console.log('on s3 object %s', key)
 
@@ -47,7 +47,7 @@ const setChecksum = (filename, key) => {
   console.log('SHA256 checksum %s', checksum)
   console.log('size', size)
 
-  const aws = uploadUtils.getS3Credentials()
+  const aws = await uploadUtils.getS3Credentials()
   const s3 = s3helpers.makeS3(aws)
   // S3 object metadata can only have string values
   const metadata = {
