@@ -11,13 +11,20 @@ export function state (): NetStubbingState {
       for (const requestId in this.requests) {
         const request = this.requests[requestId]
 
-        request.matchingRoutes = request.matchingRoutes.filter((route) => {
-          console.log(route)
+        let foundQualifiedResponseHandler = false
 
-          return !!route.staticResponse || !route.hasInterceptor
+        request.subscriptionsByRoute.forEach((subscriptionByRoute) => {
+          if (!subscriptionByRoute.immediateStaticResponse) {
+            subscriptionByRoute.subscriptions.forEach((subscription) => {
+              if ((subscription.eventName === 'response:callback' && subscription.await && !subscription.skip) ||
+                  !['before:response', 'response:callback', 'response'].includes(request.lastEvent!)) {
+                foundQualifiedResponseHandler = true
+              }
+            })
+          }
         })
 
-        if (request.matchingRoutes.length === 0) {
+        if (foundQualifiedResponseHandler) {
           const res = request.res
 
           res.removeAllListeners('finish')
