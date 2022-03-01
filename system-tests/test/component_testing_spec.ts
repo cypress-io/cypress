@@ -63,7 +63,7 @@ describe('component testing projects', function () {
   systemTests.it('vuecli5vue3-configured', {
     project: 'vuecli5vue3-configured',
     testingType: 'component',
-    spec: 'src/components/HelloWorld.cy.ts',
+    spec: 'src/components/HelloWorld.cy.js',
     browser: 'chrome',
     expectedExitCode: 0,
   })
