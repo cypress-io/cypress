@@ -510,8 +510,27 @@ export const FRONTEND_FRAMEWORKS = [
     codeGenFramework: CODE_GEN_FRAMEWORKS[0],
     storybookDep: STORYBOOK_REACT,
     config: {
-      js: () => ``,
-      ts: () => ``,
+      js: () => {
+        return dedent`
+      const { devServer } = require('@cypress/react/plugins/next')
+
+      module.exports = {
+        component: {
+          devServer,
+        }
+      }`
+      },
+      ts: () => {
+        return dedent`
+      import { defineConfig } from 'cypress'
+      import { devServer } from '@cypress/react/plugins/next'
+
+      export default defineConfig({
+        component: {
+          devServer,
+        }
+      })`
+      },
     },
   },
   {
