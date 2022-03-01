@@ -12,7 +12,7 @@ const reifyLogs = (logs) => {
 }
 
 // @ts-ignore / session support is needed for visiting about:blank between tests
-describe('navigation events', { experimentalSessionSupport: true, experimentalMultiDomain: true }, () => {
+describe('navigation events', { experimentalSessionSupport: true }, () => {
   let logs: any = []
 
   beforeEach(() => {
