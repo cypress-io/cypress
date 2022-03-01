@@ -1,6 +1,7 @@
 import { defineConfig } from 'cypress'
 import { devServer } from './dist'
 
+console.log('top level')
 export default defineConfig({
   'pluginsFile': 'cypress/plugins.js',
   'video': false,
@@ -8,6 +9,7 @@ export default defineConfig({
   'component': {
     'supportFile': 'cypress/support.js',
     devServer (cypressDevServerConfig) {
+      console.log('inside')
       const path = require('path')
 
       return devServer(cypressDevServerConfig, {

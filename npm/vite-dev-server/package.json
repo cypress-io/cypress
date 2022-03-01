@@ -2,7 +2,7 @@
   "name": "@cypress/vite-dev-server",
   "version": "0.0.0-development",
   "description": "Launches Vite Dev Server for Component Testing",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
     "build": "tsc || echo 'built, with type errors'",
     "build-prod": "tsc || echo 'built, with type errors'",
@@ -14,8 +14,12 @@
     "watch": "tsc -w"
   },
   "dependencies": {
-    "debug": "^4.3.2",
-    "get-port": "^5.1.1"
+    "debug": "4.3.3",
+    "dedent": "0.7.0",
+    "find-up": "6.3.0",
+    "get-port": "5.1.1",
+    "pathe": "0.2.0",
+    "ufo": "0.7.10"
   },
   "devDependencies": {
     "@cypress/react": "0.0.0-development",

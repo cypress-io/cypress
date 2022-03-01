@@ -1,31 +1,40 @@
-import { debug as debugFn } from 'debug'
-import { createServer, InlineConfig } from 'vite'
-import { resolveServerConfig, StartDevServerOptions } from './resolveServerConfig'
-const debug = debugFn('cypress:vite-dev-server:vite')
+import { createServer as viteCreateServer } from 'vite'
+import debugFn from 'debug'
+import getPort from 'get-port'
+import { createConfig } from './resolveConfig'
+import type { CypressViteDevServerConfig, StartDevServer } from './types'
 
-export { StartDevServerOptions }
+const debug = debugFn('cypress:vite-dev-server:index')
 
-export async function startDevServer (startDevServerArgs: StartDevServerOptions): Promise<Cypress.ResolvedDevServerConfig> {
-  if (!startDevServerArgs.viteConfig) {
-    debug('User did not pass in any Vite dev server configuration')
-    startDevServerArgs.viteConfig = {}
+console.log('top level index')
+export const startDevServer = async ({ options, viteConfig = {} }: StartDevServer) => {
+  console.log('start dev server')
+  debug('user has registered startDevServer for Vite')
+  let server
+
+  try {
+    console.log('inside of try')
+    const config = await createConfig({ options, viteConfig })
+
+    server = await viteCreateServer(config)
+    console.log('after server try', config)
+  } catch (err) {
+    console.log('err', err)
+    throw new Error(err as string)
   }
 
-  debug('starting vite dev server')
-  const resolvedConfig = await resolveServerConfig(startDevServerArgs)
-  const port = resolvedConfig.server!.port!
+  debug('vite server created successfully')
+  const port = await getPort({ port: 3000 })
 
-  const viteDevServer = await createServer(resolvedConfig)
+  await server.listen(port)
+  debug('successfully launched the vite server on port', port)
 
-  await viteDevServer.listen()
-
-  debug('Component testing vite server started on port', port)
-
-  return { port, close: viteDevServer.close }
+  return {
+    port,
+    close: server.close,
+  }
 }
 
-export type CypressViteDevServerConfig = Omit<InlineConfig, 'base' | 'root'>
-
-export function devServer (cypressDevServerConfig: Cypress.DevServerConfig, devServerConfig?: CypressViteDevServerConfig) {
-  return startDevServer({ options: cypressDevServerConfig, viteConfig: devServerConfig })
+export function devServer (options: Cypress.DevServerConfig, viteConfig?: CypressViteDevServerConfig) {
+  return startDevServer({ options, viteConfig })
 }
