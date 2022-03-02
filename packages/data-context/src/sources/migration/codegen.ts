@@ -238,8 +238,6 @@ function createE2ETemplate (pluginPath: string, createConfigOptions: CreateConfi
 
 function createComponentTemplate (options: Record<string, unknown>) {
   return `component: {
-    // We've imported your old cypress plugins here.
-    // You may want to clean this up later by importing these.
     setupNodeEvents(on, config) {},${formatObjectForConfig(options)}
   },`
 }
