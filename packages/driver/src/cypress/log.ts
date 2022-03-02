@@ -443,6 +443,10 @@ const Log = function (cy, state, config, obj) {
       return this
     },
 
+    endGroup () {
+      state('logGroup', _.slice(state('logGroup'), 0, -1))
+    },
+
     getError (err) {
       return err.stack || err.message
     },
