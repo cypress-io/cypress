@@ -56,7 +56,7 @@ export class VersionsDataSource {
     const latestVersionMetadata: Version = {
       id: latestVersion,
       version: latestVersion,
-      released: npmMetadata[latestVersion] ?? new Date().toISOString(),
+      released: npmMetadata ? npmMetadata[latestVersion] as string : new Date().toISOString(),
     }
 
     return {
@@ -64,7 +64,7 @@ export class VersionsDataSource {
       current: {
         id: pkg.version,
         version: pkg.version,
-        released: npmMetadata[pkg.version] ?? new Date().toISOString(),
+        released: npmMetadata ? npmMetadata[pkg.version] as string : new Date().toISOString(),
       },
     }
   }
@@ -77,14 +77,21 @@ export class VersionsDataSource {
     }
   }
 
-  private async getVersionMetadata (): Promise<Record<string, string>> {
+  private async getVersionMetadata (): Promise<Record<string, string> | null> {
     if (this.ctx.isRunMode) {
       return {
         [pkg.version]: new Date().toISOString(),
       }
     }
 
-    const response = await this.ctx.util.fetch(NPM_CYPRESS_REGISTRY)
+    const response = await this.ctx.util.fetch(NPM_CYPRESS_REGISTRY).catch((e) => {
+      // TODO check if offline
+    })
+
+    if (!response) {
+      return null
+    }
+
     const responseJson = await response.json() as { time: Record<string, string>}
 
     debug('NPM release dates %o', responseJson.time)
@@ -118,7 +125,13 @@ export class VersionsDataSource {
 
     const manifestResponse = await this.ctx.util.fetch(url, {
       headers: manifestHeaders,
+    }).catch((e) => {
+      // TODO check if offline
     })
+
+    if (!manifestResponse) {
+      return pkg.version
+    }
 
     debug('retrieving latest version information with headers: %o', manifestHeaders)
 
