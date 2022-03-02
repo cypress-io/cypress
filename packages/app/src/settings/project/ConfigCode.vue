@@ -47,7 +47,7 @@ import IconCode from '~icons/mdi/code'
 import { useI18n } from '@cy/i18n'
 import { CONFIG_LEGEND_COLOR_MAP } from './ConfigSourceColors'
 import Browsers from './renderers/Browsers.vue'
-import type { CypressResolvedConfig } from './projectSettings'
+import type { CypressResolvedConfig } from '../../types'
 import RenderObject from './renderers/RenderObject.vue'
 import { renderPrimitive } from './renderers/renderPrimitive'
 

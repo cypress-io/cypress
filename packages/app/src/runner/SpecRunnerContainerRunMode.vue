@@ -15,6 +15,7 @@ import SpecRunnerRunMode from './SpecRunnerRunMode.vue'
 import type { SpecFile } from '@packages/types/src'
 import { useUnifiedRunner } from './unifiedRunner'
 import { ref } from 'vue'
+import { getRunModeStaticCypressConfig } from '../utils'
 
 const props = defineProps<{
   runModeSpecs: SpecFile[]
@@ -22,7 +23,12 @@ const props = defineProps<{
 
 const specStore = useSpecStore()
 
-const { initialized, watchSpec } = useUnifiedRunner()
+const runModeConfig = getRunModeStaticCypressConfig()
+
+const { initialized, watchSpec } = useUnifiedRunner({
+  viewportHeight: runModeConfig.viewportHeight,
+  viewportWidth: runModeConfig.viewportWidth,
+})
 
 watchSpec(ref(props.runModeSpecs))
 </script>

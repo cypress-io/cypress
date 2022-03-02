@@ -18,7 +18,7 @@ import { urqlSchema } from '../generated/urql-introspection.gen'
 
 import { pubSubExchange } from './urqlExchangePubsub'
 import { namedRouteExchange } from './urqlExchangeNamedRoute'
-import { decodeBase64Unicode } from '../utils/decodeBase64'
+import { decodeBase64Unicode } from '../utils/base64'
 import type { SpecFile, AutomationElementId, Browser } from '@packages/types'
 import { urqlFetchSocketAdapter } from './urqlFetchSocketAdapter'
 

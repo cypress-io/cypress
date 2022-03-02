@@ -14,7 +14,8 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 import type { SpecRunnerFragment } from '../generated/graphql'
-import { useSpecStore } from '../store'
+import type { ResolvedConfigProp } from '../types'
+import { useSpecStore, viewportDefaults } from '../store'
 import SpecRunnerOpenMode from './SpecRunnerOpenMode.vue'
 import { useUnifiedRunner } from './unifiedRunner'
 
@@ -24,7 +25,12 @@ const props = defineProps<{
 
 const specStore = useSpecStore()
 
-const { initialized, watchSpec } = useUnifiedRunner()
+const { initialized, watchSpec } = useUnifiedRunner({
+  viewportHeight: props.gql.currentProject?.config?.find((x: ResolvedConfigProp) => x.field === 'viewportHeight')?.value
+    ?? viewportDefaults[window.__CYPRESS_TESTING_TYPE__].viewportHeight,
+  viewportWidth: props.gql.currentProject?.config?.find((x: ResolvedConfigProp) => x.field === 'viewportWidth')?.value
+    ?? viewportDefaults[window.__CYPRESS_TESTING_TYPE__].viewportWidth,
+})
 
 const specs = computed(() => {
   return props.gql.currentProject?.specs ?? []

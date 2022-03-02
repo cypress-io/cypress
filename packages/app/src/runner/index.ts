@@ -23,9 +23,9 @@ import { IframeModel } from './iframe-model'
 import { AutIframe } from './aut-iframe'
 import { EventManager } from './event-manager'
 import { client } from '@packages/socket/lib/browser'
-import { decodeBase64Unicode } from '@packages/frontend-shared/src/utils/base64'
 import type { AutomationElementId } from '@packages/types/src'
 import { useSnapshotStore } from './snapshot-store'
+import { getRunModeStaticCypressConfig } from '../utils'
 
 let _eventManager: EventManager | undefined
 
@@ -298,6 +298,11 @@ function runSpecE2E (spec: SpecFile) {
   getEventManager().initialize($autIframe, config)
 }
 
+export interface InitializeUnifiedRunnerConfig {
+  viewportHeight: number
+  viewportWidth: number
+}
+
 /**
  * Inject the global `UnifiedRunner` via a <script src="..."> tag.
  * which includes the event manager and AutIframe constructor.
@@ -305,12 +310,12 @@ function runSpecE2E (spec: SpecFile) {
  *
  * This only needs to happen once, prior to running the first spec.
  */
-async function initialize () {
+async function initialize (runnerConfig: InitializeUnifiedRunnerConfig) {
   await dfd.promise
 
   isTorndown = false
 
-  const config = JSON.parse(decodeBase64Unicode(window.__CYPRESS_CONFIG__.base64Config))
+  const config = getRunModeStaticCypressConfig()
 
   if (isTorndown) {
     return
@@ -321,7 +326,7 @@ async function initialize () {
   // TODO(lachlan): use GraphQL to get the viewport dimensions
   // once it is more practical to do so
   // find out if we need to continue managing viewportWidth/viewportHeight in MobX at all.
-  autStore.updateDimensions(config.viewportWidth, config.viewportHeight)
+  autStore.updateDimensions(runnerConfig.viewportWidth, runnerConfig.viewportHeight)
 
   // just stick config on window until we figure out how we are
   // going to manage it
@@ -334,7 +339,7 @@ async function initialize () {
   window.UnifiedRunner.MobX.runInAction(() => {
     const store = initializeMobxStore(window.UnifiedRunner.config.testingType)
 
-    store.updateDimensions(config.viewportWidth, config.viewportHeight)
+    store.updateDimensions(runnerConfig.viewportWidth, runnerConfig.viewportHeight)
   })
 
   window.UnifiedRunner.MobX.runInAction(() => setupRunner(config.namespace))

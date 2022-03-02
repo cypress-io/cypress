@@ -50,7 +50,7 @@ import type { CreateSpecModalFragment } from '../generated/graphql'
 import { gql } from '@urql/vue'
 import { not, whenever } from '@vueuse/core'
 import { useI18n } from '@cy/i18n'
-import { getPathForPlatform } from '../paths'
+import { getPathForPlatform } from '../utils'
 
 const props = defineProps<{
   initialGenerator?: GeneratorId

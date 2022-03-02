@@ -132,6 +132,7 @@ fragment SpecRunner on Query {
   ...Specs_InlineSpecList
   currentProject {
     id
+    config
     ...SpecRunnerHeader
   }
   ...ChooseExternalEditor
