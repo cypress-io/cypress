@@ -371,6 +371,35 @@ describe('http/response-middleware', function () {
         expect(appendStub).to.be.calledWith('Set-Cookie', 'cookie=value')
       })
 
+      it('does not force SameSite=None if the first AUT request', async function () {
+        const appendStub = sinon.stub()
+        const ctx = prepareContext({
+          incomingRes: {
+            headers: {
+              'content-type': 'text/html',
+              'set-cookie': 'cookie=value',
+            },
+          },
+          req: {
+            isAUTFrame: true,
+          },
+          res: {
+            append: appendStub,
+          },
+          getRemoteState () {
+            // nonsense, but it's the simplest way to match origin policy
+            return {
+              strategy: 'file',
+              origin: 'http',
+            }
+          },
+        })
+
+        await testMiddleware([CopyCookiesFromIncomingRes], ctx)
+
+        expect(appendStub).to.be.calledWith('Set-Cookie', 'cookie=value')
+      })
+
       it('does not force SameSite=None if an AUT request but not cross-origin', async function () {
         const appendStub = sinon.stub()
         const ctx1 = prepareContext({
