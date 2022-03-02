@@ -985,6 +985,11 @@ const getMsgByType = function (type, ...args) {
         The \`experimentalRunEvents\` configuration option was removed in Cypress version \`6.7.0\`. It is no longer necessary when listening to run events in the plugins file.
 
         You can safely remove this option from your config.`
+    case 'EXPERIMENTAL_STUDIO':
+      return stripIndent`\
+        We're ending the experimental phase of Cypress Studio and have learned a lot. Stay tuned for updates on Studio's official release in the future. You can leave feedback here: https://github.com/cypress-io/cypress/discussions/14339.
+
+        You can safely remove the \`experimentalStudio\` configuration option from your config.`
     case 'FIREFOX_GC_INTERVAL_REMOVED':
       return stripIndent`\
         The \`firefoxGcInterval\` configuration option was removed in Cypress version \`8.0.0\`. It was introduced to work around a bug in Firefox 79 and below.
