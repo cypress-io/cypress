@@ -6,12 +6,12 @@ import { executeExchange } from '@urql/exchange-execute'
 import { makeCacheExchange } from '@packages/frontend-shared/src/graphql/urqlClient'
 import { clientTestSchema } from './clientTestSchema'
 import type { ClientTestContext } from './clientTestContext'
-import type { FieldNode, GraphQLFieldResolver, GraphQLResolveInfo, GraphQLTypeResolver } from 'graphql'
+import type { GraphQLFieldResolver, GraphQLResolveInfo, GraphQLTypeResolver, FieldNode } from 'graphql'
 import { defaultTypeResolver, introspectionFromSchema, isNonNullType } from 'graphql'
 import type { CodegenTypeMap } from '../generated/test-graphql-types.gen'
+import { GQLStubRegistry } from './stubgql-Registry'
 import { pathToArray } from 'graphql/jsutils/Path'
 import dedent from 'dedent'
-import { GQLStubRegistry } from './stubgql-Registry'
 
 export function testUrqlClient (context: ClientTestContext, onResult?: (result: any, context: ClientTestContext) => any): Client {
   return createClient({
