@@ -118,7 +118,7 @@ export = {
         show: true,
         frame: true,
         transparent: false,
-        icon: image.createFromPath(cyIcons.getPathToIcon('icon_128x128.png')),
+        icon: image.createFromPath(cyIcons.getPathToIcon('icon_64x64.png')),
       },
     }
 
