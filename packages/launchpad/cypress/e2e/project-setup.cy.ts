@@ -909,7 +909,7 @@ describe('Launchpad: Setup Project', () => {
       cy.get('[data-cy-testingtype="component"]').click()
       cy.get('[data-testid="select-framework"]').click()
       cy.findByText('Nuxt.js (v2)').click()
-      cy.findByText('Next Step').click()
+      cy.findByRole('button', { name: 'Next Step' }).should('not.be.disabled').click()
       fakeInstalledDeps()
       cy.findByRole('button', { name: 'Continue' }).click()
       cy.intercept('POST', 'mutation-ExternalLink_OpenExternal', { 'data': { 'openExternal': true } }).as('OpenExternal')
