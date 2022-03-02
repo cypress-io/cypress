@@ -84,8 +84,11 @@ export class VersionsDataSource {
       }
     }
 
-    const response = await this.ctx.util.fetch(NPM_CYPRESS_REGISTRY).catch((e) => {
-      // TODO check if offline
+    const response = await this.ctx.util.fetch(NPM_CYPRESS_REGISTRY)
+    .catch((e) => {
+      // ignore any error from this fetch, they are gracefully handled
+      // by showing the current version only
+      debug('Error fetching %o', NPM_CYPRESS_REGISTRY, e)
     })
 
     if (!response) {
@@ -126,7 +129,9 @@ export class VersionsDataSource {
     const manifestResponse = await this.ctx.util.fetch(url, {
       headers: manifestHeaders,
     }).catch((e) => {
-      // TODO check if offline
+      // ignore any error from this fetch, they are gracefully handled
+      // by showing the current version only
+      debug('Error fetching %o', url, e)
     })
 
     if (!manifestResponse) {
