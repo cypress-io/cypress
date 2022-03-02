@@ -31,10 +31,12 @@ export const getStackLines = (stack: string) => {
   return stackLines
 }
 
-const reLineCapture = /^\s*(?:at )?.*@?\((.*?)\:(\d+)\:(\d+)\)?$/
-
+/**
+ * Captures & returns the absolute path, line, and column from a stack trace line
+ */
 export const parseStackLine = (line: string): null | { absolute: string, line: number, column: number } => {
-  const result = reLineCapture.exec(line)
+  const stackLineCapture = /^\s*(?:at )?.*@?\((.*?)\:(\d+)\:(\d+)\)?$/
+  const result = stackLineCapture.exec(line)
 
   if (!result?.[1]) {
     return null

@@ -9,7 +9,7 @@ const serializeError = (err) => {
     'name', 'message', 'stack', 'code', 'annotated', 'type',
     'details', 'isCypressErr', 'messageMarkdown',
     'originalError',
-    // Location of the error when a TSError
+    // Location of the error when a TSError occurs (parse error from ts-node)
     'tsErrorLocation')
 
   if (obj.originalError) {
