@@ -8,7 +8,7 @@ describe('multi-domain - cookie login', { experimentalSessionSupport: true, expe
 
   beforeEach(() => {
     cy.visit('/fixtures/multi-domain.html')
-    cy.get('[data-cy="login"]').click()
+    cy.get('[data-cy="cookie-login"]').click()
   })
 
   it('works with no SameSite, no Secure', () => {
