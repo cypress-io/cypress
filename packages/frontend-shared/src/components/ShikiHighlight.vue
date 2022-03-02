@@ -46,7 +46,8 @@ shikiWrapperClasses computed property.
           'inline': props.inline,
           'wrap': props.wrap,
           'line-numbers': props.lineNumbers,
-          'p-8px': !props.lineNumbers && !props.inline,
+          'p-8px': !props.lineNumbers && !props.inline && !props.codeframe,
+          'p-2px': props.codeframe,
         },
 
         props.class,
@@ -125,6 +126,7 @@ const props = withDefaults(defineProps<{
   wrap?: boolean
   copyOnClick?: boolean
   copyButton?: boolean
+  codeframe?: boolean
   skipTrim?: boolean
   class?: string | string[] | Record<string, any>
 }>(), {
@@ -132,6 +134,7 @@ const props = withDefaults(defineProps<{
   inline: false,
   wrap: false,
   copyOnClick: false,
+  codeframe: false,
   initialLine: 1,
   copyButton: false,
   skipTrim: false,

@@ -19,9 +19,8 @@
     v-if="props.gql.codeBlock"
     :code="props.gql.codeBlock"
     lang="js"
-    line-numbers
     skip-trim
-    :initial-line="props.gql.codeBlockStartLine ?? 0"
+    codeframe
   />
 </template>
 
@@ -37,7 +36,6 @@ fragment ErrorCodeFrame on CodeFrame {
   line
   column
   codeBlock
-  codeBlockStartLine
   file {
     id
     absolute

@@ -324,9 +324,6 @@ type CodeFrame {
   """Source of the code frame to display"""
   codeBlock: String
 
-  """The line number to display in the code block"""
-  codeBlockStartLine: Int
-
   """The column of the error to display"""
   column: Int
   file: FileParts!

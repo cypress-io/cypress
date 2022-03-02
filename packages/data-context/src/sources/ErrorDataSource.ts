@@ -1,6 +1,7 @@
 import { ErrorWrapperSource, stackUtils } from '@packages/errors'
 import path from 'path'
 import _ from 'lodash'
+import { codeFrameColumns } from '@babel/code-frame'
 
 import type { DataContext } from '..'
 
@@ -9,7 +10,6 @@ export interface CodeFrameShape {
   column: number
   absolute: string
   codeBlock: string
-  codeBlockStartLine: number
 }
 
 export class ErrorDataSource {
@@ -52,25 +52,17 @@ export class ErrorDataSource {
       return null
     }
 
-    const fileContents = await this.ctx.file.readFile(absolute)
-
-    const lines = fileContents.split('\n')
-
-    const linesAbove = 2
-    const linesBelow = 6
-
-    const startLine = Math.max(1, line - linesAbove)
-    const endLine = Math.min(lines.length, line + linesBelow)
-
-    // Start & end line start at 1, rather than being zero indexed, so we subtract 1 from the
-    // line numbers when slicing
-    const codeBlock = lines.slice(startLine - 1, endLine - 1).join('\n')
+    const codeBlock = codeFrameColumns(await this.ctx.file.readFile(absolute), {
+      start: { line, column },
+    }, {
+      linesAbove: 2,
+      linesBelow: 4,
+    })
 
     return {
       absolute,
       line,
       column,
-      codeBlockStartLine: startLine,
       codeBlock,
     }
   }

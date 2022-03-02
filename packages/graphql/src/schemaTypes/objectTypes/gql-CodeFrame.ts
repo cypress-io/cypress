@@ -17,10 +17,6 @@ export const CodeFrame = objectType({
       description: 'Source of the code frame to display',
     })
 
-    t.int('codeBlockStartLine', {
-      description: 'The line number to display in the code block',
-    })
-
     t.nonNull.field('file', {
       type: FileParts,
       resolve (source, args, ctx) {

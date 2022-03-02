@@ -1,3 +1,4 @@
+import { codeFrameColumns } from '@babel/code-frame'
 import BaseError from './BaseError.vue'
 import Button from '@cy/components/Button.vue'
 import { BaseErrorFragmentDoc } from '../generated/graphql-test'
@@ -117,14 +118,21 @@ describe('<BaseError />', () => {
           __typename: 'CodeFrame',
           line: 12,
           column: 25,
-          codeBlockStartLine: 10,
-          codeBlock: dedent`
+          codeBlock: codeFrameColumns(dedent`
             const x = 1;
             
-            throw new Error("Some Error")
+            throw new Error('Some Error');
 
-            const y = 1;
-          `,
+            const y = 2;
+          `, {
+            start: {
+              line: 3,
+              column: 5,
+            },
+          }, {
+            linesAbove: 2,
+            linesBelow: 4,
+          }),
           file: {
             id: `FileParts:/absolute/full/path/cypress/e2e/file.cy.js`,
             __typename: 'FileParts',

@@ -16,6 +16,7 @@ export const mutation = mutationType({
       description: 'Re-initializes Cypress from the initial CLI options',
       resolve: async (_, args, ctx) => {
         await ctx.reinitializeCypress(ctx.modeOptions)
+        await ctx.initializeMode()
 
         return {}
       },
