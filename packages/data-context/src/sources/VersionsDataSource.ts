@@ -26,7 +26,7 @@ export class VersionsDataSource {
   private _initialLaunch: boolean
   private _currentTestingType: TestingType | null
   private _latestVersion: Promise<string>
-  private _npmMetadata: Promise<Record<string, string>>
+  private _npmMetadata: Promise<Record<string, string> | null>
 
   constructor (private ctx: DataContext) {
     this._initialLaunch = true
@@ -84,12 +84,15 @@ export class VersionsDataSource {
       }
     }
 
-    const response = await this.ctx.util.fetch(NPM_CYPRESS_REGISTRY)
-    .catch((e) => {
+    let response
+
+    try {
+      response = await this.ctx.util.fetch(NPM_CYPRESS_REGISTRY)
+    } catch (e) {
       // ignore any error from this fetch, they are gracefully handled
       // by showing the current version only
       debug('Error fetching %o', NPM_CYPRESS_REGISTRY, e)
-    })
+    }
 
     if (!response) {
       return null
@@ -126,13 +129,17 @@ export class VersionsDataSource {
       manifestHeaders['x-machine-id'] = id
     }
 
-    const manifestResponse = await this.ctx.util.fetch(url, {
-      headers: manifestHeaders,
-    }).catch((e) => {
+    let manifestResponse
+
+    try {
+      manifestResponse = await this.ctx.util.fetch(url, {
+        headers: manifestHeaders,
+      })
+    } catch (e) {
       // ignore any error from this fetch, they are gracefully handled
       // by showing the current version only
       debug('Error fetching %o', url, e)
-    })
+    }
 
     if (!manifestResponse) {
       return pkg.version
