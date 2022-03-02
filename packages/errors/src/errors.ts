@@ -1284,7 +1284,7 @@ export const AllCypressErrors = {
 
   UNEXPECTED_MUTATION_ERROR: (mutationField: string, args: any, err: Error) => {
     return errTemplate`
-      An unexpected internal error occurred while executing the ${fmt.highlight(mutationField)} operation with payload
+      An unexpected internal error occurred while executing the ${fmt.highlight(mutationField)} operation with payload:
 
       ${fmt.stringify(args)}
 

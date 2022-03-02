@@ -1,9 +1,8 @@
-import { stripAnsi, stackUtils, ErrorWrapperSource } from '@packages/errors'
+import { stripAnsi } from '@packages/errors'
 import { objectType } from 'nexus'
-import path from 'path'
 
 import { ErrorTypeEnum } from '../enumTypes/gql-ErrorTypeEnum'
-import { FileParts } from './gql-FileParts'
+import { CodeFrame } from './gql-CodeFrame'
 
 export const ErrorWrapper = objectType({
   name: 'ErrorWrapper',
@@ -21,7 +20,7 @@ export const ErrorWrapper = objectType({
     })
 
     t.nonNull.string('errorStack', {
-      description: 'The error stack of either the original error from the user',
+      description: 'The error stack of either the original error from the user or from where the internal Cypress error was created',
       resolve (source) {
         return stripAnsi(source.cypressError.stack || '')
       },
@@ -41,66 +40,19 @@ export const ErrorWrapper = objectType({
 
     t.nonNull.boolean('isUserCodeError', {
       description: 'Whether the error came from user code, can be used to determine whether to open a stack trace by default',
-      resolve (source) {
-        return isUserCodeError(source)
-      },
-    })
-
-    t.field('fileToOpen', {
-      type: FileParts,
-      description: 'Relative file path to open, if there is one associated with this error',
       resolve (source, args, ctx) {
-        if (isUserCodeError(source)) {
-          const tsErrorLocation = source.cypressError.originalError?.tsErrorLocation
-          const tsErrorPath = tsErrorLocation?.filePath
-
-          if (tsErrorPath && ctx.currentProject) {
-            return {
-              absolute: path.join(ctx.currentProject, tsErrorPath),
-              column: tsErrorLocation?.column,
-              line: tsErrorLocation?.line,
-            }
-          }
-
-          const stackLines = stackUtils.getStackLines(source.cypressError.stack ?? '')
-
-          const filteredStackLines = stackLines.filter((stackLine) => !stackLine.includes('node:internal'))
-
-          return stackUtils.parseStackLine(filteredStackLines[0] ?? '')
-        }
-
-        return null
+        return ctx.error.isUserCodeError(source)
       },
     })
 
     t.field('codeFrame', {
-      type: ErrorCodeFrame,
-      resolve: (source) => {
-        if (isUserCodeError(source)) {
-          const stackLines = stackUtils.getStackLines(source.cypressError.stack ?? '')
-
-          return { filename: stackUtils.parseStackLine(stackLines[0] ?? '')?.absolute }
-        }
-
-        return {
-          filename: __filename,
-        }
-      },
+      type: CodeFrame,
+      description: 'The code frame to display in relation to the error',
+      resolve: (source, args, ctx) => ctx.error.codeFrame(source),
     })
   },
   sourceType: {
     module: '@packages/errors',
     export: 'ErrorWrapperSource',
-  },
-})
-
-function isUserCodeError (source: ErrorWrapperSource) {
-  return Boolean(source.cypressError.originalError && !source.cypressError.originalError?.isCypressErr)
-}
-
-export const ErrorCodeFrame = objectType({
-  name: 'ErrorCodeFrame',
-  definition (t) {
-    t.string('filename')
   },
 })

@@ -1,6 +1,7 @@
 import BaseError from './BaseError.vue'
 import Button from '@cy/components/Button.vue'
 import { BaseErrorFragmentDoc } from '../generated/graphql-test'
+import dedent from 'dedent'
 
 // Selectors
 const headerSelector = '[data-testid=error-header]'
@@ -112,13 +113,24 @@ describe('<BaseError />', () => {
     cy.mountFragment(BaseErrorFragmentDoc, {
       onResult: (result) => {
         result.title = messages.header
-        result.fileToOpen = {
-          __typename: 'FileParts',
-          id: '123',
-          relative: 'cypress/e2e/file.cy.js',
+        result.codeFrame = {
+          __typename: 'CodeFrame',
           line: 12,
           column: 25,
-          absolute: '/absolute/full/path/cypress/e2e/file.cy.js',
+          codeBlockStartLine: 10,
+          codeBlock: dedent`
+            const x = 1;
+            
+            throw new Error("Some Error")
+
+            const y = 1;
+          `,
+          file: {
+            id: `FileParts:/absolute/full/path/cypress/e2e/file.cy.js`,
+            __typename: 'FileParts',
+            relative: 'cypress/e2e/file.cy.js',
+            absolute: '/absolute/full/path/cypress/e2e/file.cy.js',
+          },
         }
       },
       render: (gqlVal) => (

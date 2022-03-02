@@ -34,8 +34,8 @@
               v-html="markdown"
             />
             <ErrorCodeFrame
-              v-if="baseError.fileToOpen"
-              :gql="baseError.fileToOpen"
+              v-if="baseError.codeFrame"
+              :gql="baseError.codeFrame"
             />
           </div>
           <div
@@ -109,12 +109,6 @@ import ErrorOutlineIcon from '~icons/cy/status-errored-outline_x16.svg'
 import ErrorCodeFrame from './ErrorCodeFrame.vue'
 
 gql`
-mutation BaseError_RestartCypress {
-  reinitializeCypress
-}
-`
-
-gql`
 fragment BaseError on ErrorWrapper {
   title
   errorName
@@ -122,8 +116,7 @@ fragment BaseError on ErrorWrapper {
   errorType
   errorMessage
   isUserCodeError
-  fileToOpen {
-    id
+  codeFrame {
     ...ErrorCodeFrame
   }
 }

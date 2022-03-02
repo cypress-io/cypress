@@ -40,6 +40,7 @@ import type { Socket, SocketIOServer } from '@packages/socket'
 import { globalPubSub } from '.'
 import { InjectedConfigApi, ProjectLifecycleManager } from './data/ProjectLifecycleManager'
 import type { CypressError } from '@packages/errors'
+import { ErrorDataSource } from './sources/ErrorDataSource'
 
 const IS_DEV_ENV = process.env.CYPRESS_INTERNAL_ENV !== 'production'
 
@@ -205,6 +206,11 @@ export class DataContext {
   @cached
   get html () {
     return new HtmlDataSource(this)
+  }
+
+  @cached
+  get error () {
+    return new ErrorDataSource(this)
   }
 
   @cached

@@ -126,7 +126,9 @@ query MainLaunchpadQuery {
 
 gql`
 mutation Main_ReinitializeCypress {
-  reinitializeCypress
+  reinitializeCypress {
+    ...MainLaunchpadQueryData
+  }
 }
 `
 

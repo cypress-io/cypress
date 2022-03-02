@@ -317,6 +317,24 @@ type CloudUser implements Node {
   userIsViewer: Boolean!
 }
 
+"""
+A code frame to display for a file, used when displaying code related to errors
+"""
+type CodeFrame {
+  """Source of the code frame to display"""
+  codeBlock: String
+
+  """The line number to display in the code block"""
+  codeBlockStartLine: Int
+
+  """The column of the error to display"""
+  column: Int
+  file: FileParts!
+
+  """The line number of the code snippet to display"""
+  line: Int
+}
+
 """Glob patterns for detecting files for code gen."""
 type CodeGenGlobs implements Node {
   component: String!
@@ -455,10 +473,6 @@ type Editor {
   name: String!
 }
 
-type ErrorCodeFrame {
-  filename: String
-}
-
 enum ErrorTypeEnum {
   AUTOMATION_SERVER_DISCONNECTED
   BAD_POLICY_WARNING
@@ -578,7 +592,8 @@ enum ErrorTypeEnum {
 
 """Base error"""
 type ErrorWrapper {
-  codeFrame: ErrorCodeFrame
+  """The code frame to display in relation to the error"""
+  codeFrame: CodeFrame
 
   """The markdown formatted content associated with the ErrorTypeEnum"""
   errorMessage: String!
@@ -586,12 +601,11 @@ type ErrorWrapper {
   """Name of the error class"""
   errorName: String!
 
-  """The error stack of either the original error from the user"""
+  """
+  The error stack of either the original error from the user or from where the internal Cypress error was created
+  """
   errorStack: String!
   errorType: ErrorTypeEnum!
-
-  """Relative file path to open, if there is one associated with this error"""
-  fileToOpen: FileParts
 
   """
   Whether the error came from user code, can be used to determine whether to open a stack trace by default
@@ -977,7 +991,7 @@ type Mutation {
   reconfigureProject: Boolean!
 
   """Re-initializes Cypress from the initial CLI options"""
-  reinitializeCypress: Boolean
+  reinitializeCypress: Query
 
   """Remove project from projects array and cache"""
   removeProject(path: String!): Query

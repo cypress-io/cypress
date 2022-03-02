@@ -13,13 +13,13 @@ export const mutationErrorPlugin = plugin({
 
     return (source, args, ctx: DataContext, info, next) => {
       return plugin.completeValue(next(source, args, ctx, info), (v) => v, (err) => {
-        if (!err.isCypressError) {
-          ctx.update((d) => {
-            d.baseError = {
-              cypressError: getError('UNEXPECTED_MUTATION_ERROR', def.fieldConfig.name, args, err),
-            }
-          })
-        }
+        ctx.update((d) => {
+          d.baseError = {
+            cypressError: err.isCypressErr
+              ? err
+              : getError('UNEXPECTED_MUTATION_ERROR', def.fieldConfig.name, args, err),
+          }
+        })
 
         const returnType = getNamedType(info.returnType)
 

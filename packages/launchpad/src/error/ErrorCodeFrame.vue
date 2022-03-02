@@ -1,7 +1,7 @@
 <template>
   <OpenFileInIDE
     v-slot="{onClick}"
-    :file-path="props.gql.absolute"
+    :file-path="props.gql.file.absolute"
     :line="props.gql.line ?? 0"
     :column="props.gql.column ?? 0"
   >
@@ -15,21 +15,34 @@
       <code>{{ fileText }}</code>
     </div>
   </OpenFileInIDE>
+  <ShikiHighlight
+    v-if="props.gql.codeBlock"
+    :code="props.gql.codeBlock"
+    lang="js"
+    line-numbers
+    skip-trim
+    :initial-line="props.gql.codeBlockStartLine ?? 0"
+  />
 </template>
 
 <script lang="ts" setup>
 import { gql } from '@urql/vue'
 import { computed } from 'vue'
+import ShikiHighlight from '@packages/frontend-shared/src/components/ShikiHighlight.vue'
 import OpenFileInIDE from '@packages/frontend-shared/src/gql-components/OpenFileInIDE.vue'
 import type { ErrorCodeFrameFragment } from '../generated/graphql'
 
 gql`
-fragment ErrorCodeFrame on FileParts {
-  id
-  absolute
-  relative
+fragment ErrorCodeFrame on CodeFrame {
   line
   column
+  codeBlock
+  codeBlockStartLine
+  file {
+    id
+    absolute
+    relative
+  }
 }`
 
 const props = defineProps<{
@@ -37,8 +50,8 @@ const props = defineProps<{
 }>()
 
 const fileText = computed(() => {
-  const { relative, line, column } = props.gql
+  const { file, line, column } = props.gql
 
-  return `${relative}${(line && column) ? `:${line}:${column}` : ''}`
+  return `${file.relative}${(line && column) ? `:${line}:${column}` : ''}`
 })
 </script>

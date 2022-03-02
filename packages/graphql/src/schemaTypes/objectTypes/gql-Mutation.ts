@@ -12,12 +12,12 @@ import { ScaffoldedFile } from './gql-ScaffoldedFile'
 export const mutation = mutationType({
   definition (t) {
     t.field('reinitializeCypress', {
-      type: 'Boolean',
+      type: 'Query',
       description: 'Re-initializes Cypress from the initial CLI options',
       resolve: async (_, args, ctx) => {
         await ctx.reinitializeCypress(ctx.modeOptions)
 
-        return true
+        return {}
       },
     })
 

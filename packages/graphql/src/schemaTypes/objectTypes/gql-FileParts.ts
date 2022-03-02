@@ -5,7 +5,8 @@ export interface FilePartsShape {
   line?: number
   column?: number
   absolute: string
-  // For when we're merging the file
+  // For when we're merging / creating the file and might not have the file contents on-disk yet
+  // used in the scaffolding
   contents?: string
 }
 

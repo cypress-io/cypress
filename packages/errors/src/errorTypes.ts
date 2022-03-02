@@ -68,9 +68,9 @@ export interface SerializedError extends Omit<CypressError, 'messageMarkdown' | 
   // If there's a parse error from TSNode, we strip out the first error separately from
   // the message body and provide here, since this is is the error we actually want to fix
   tsErrorLocation?: {
-    filePath: string
-    column: number
     line: number
+    column: number
+    filePath: string
   } | null
 }
 

@@ -22,6 +22,7 @@
     "clean-deps": "find . -depth -name node_modules -type d -exec rm -rf {} \\;",
     "clean-untracked-files": "git clean -d -f",
     "codegen": "yarn gulp codegen",
+    "precypress:open": "yarn ensure-deps",
     "cypress:open": "yarn gulp open --dev --global",
     "precypress:open:debug": "yarn ensure-deps",
     "cypress:open:debug": "node ./scripts/debug.js cypress:open",

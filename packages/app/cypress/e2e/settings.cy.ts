@@ -179,7 +179,7 @@ describe('App: Settings', () => {
   describe('external editor', () => {
     beforeEach(() => {
       cy.startAppServer('e2e')
-      cy.withCtx(async (ctx, o) => {
+      cy.withCtx((ctx, o) => {
         o.sinon.stub(ctx.actions.localSettings, 'setPreferences')
         o.sinon.stub(ctx.actions.file, 'openFile')
         ctx.coreData.localSettings.availableEditors = [
