@@ -261,13 +261,13 @@ export async function hasSpecFile (projectRoot: string, folder: string, glob: st
 }
 
 export async function tryGetDefaultLegacyPluginsFile (projectRoot: string) {
-  const files = await globby('cypress/plugins/index.*', { cwd: projectRoot, ignore: ['cypress/plugins/index.d.*'] })
+  const files = await globby('cypress/plugins/index.*', { cwd: projectRoot, ignore: ['cypress/plugins/index.d.ts'] })
 
   return files[0]
 }
 
 export async function tryGetDefaultLegacySupportFile (projectRoot: string) {
-  const files = await globby('cypress/support/index.*', { cwd: projectRoot, ignore: ['cypress/support/index.d.*'] })
+  const files = await globby('cypress/support/index.*', { cwd: projectRoot, ignore: ['cypress/support/index.d.ts'] })
 
   debug('tryGetDefaultLegacySupportFile: files %O', files)
 
