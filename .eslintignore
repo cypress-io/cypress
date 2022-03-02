@@ -74,6 +74,9 @@ system-tests/projects/vueclivue2-configured/**/*
 system-tests/projects/vueclivue3-unconfigured/**/*
 system-tests/projects/vueclivue3-configured/**/*
 
+system-tests/projects/vuecli5vue3-unconfigured/**/*
+system-tests/projects/vuecli5vue3-configured/**/*
+
 system-tests/projects/vue3-vite-ts-unconfigured/**/*
 system-tests/projects/vue3-vite-ts-configured/**/*
 

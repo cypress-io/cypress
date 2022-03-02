@@ -36,18 +36,25 @@ describe('detect', () => {
     expect(actual.bundler).to.eq('webpack5')
   })
 
-  it(`Vue CLI w/ Vue 2`, async () => {
+  it(`Vue CLI 4 w/ Vue 2`, async () => {
     const pkg = await scaffoldMigrationProject('vueclivue2-unconfigured')
     const actual = detect(pkg)
 
-    expect(actual.framework.type).to.eq('vueclivue2')
+    expect(actual.framework.type).to.eq('vuecli4vue2')
   })
 
-  it(`Vue CLI w/ Vue 3`, async () => {
+  it(`Vue CLI 4 w/ Vue 3`, async () => {
     const pkg = await scaffoldMigrationProject('vueclivue3-unconfigured')
     const actual = detect(pkg)
 
-    expect(actual.framework.type).to.eq('vueclivue3')
+    expect(actual.framework.type).to.eq('vuecli4vue3')
+  })
+
+  it(`Vue CLI 5 w/ Vue 3`, async () => {
+    const pkg = await scaffoldMigrationProject('vuecli5vue3-unconfigured')
+    const actual = detect(pkg)
+
+    expect(actual.framework.type).to.eq('vuecli5vue3')
   })
 
   it(`React with Vite`, async () => {
