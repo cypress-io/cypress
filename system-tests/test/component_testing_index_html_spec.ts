@@ -20,7 +20,7 @@ describe('component testing projects', function () {
   })
 
   // Doesn't pass locally, even on 10.0-release
-  systemTests.it.skip('vue3-vite-ts-custom-index-html', {
+  systemTests.it.only('vue3-vite-ts-custom-index-html', {
     project: 'vue3-vite-ts-custom-index-html',
     testingType: 'component',
     spec: 'src/components/HelloWorld.cy.ts',
