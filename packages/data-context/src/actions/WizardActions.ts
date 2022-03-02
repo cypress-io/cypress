@@ -171,6 +171,7 @@ export class WizardActions {
     const scaffolded = await Promise.all([
       this.scaffoldConfig('e2e'),
       this.scaffoldSupport('e2e', this.ctx.coreData.wizard.chosenLanguage),
+      this.scaffoldSupport('commands', this.ctx.coreData.wizard.chosenLanguage),
       this.scaffoldFixtures(),
     ])
 
@@ -187,6 +188,7 @@ export class WizardActions {
       this.scaffoldConfig('component'),
       this.scaffoldFixtures(),
       this.scaffoldSupport('component', chosenLanguage.type),
+      this.scaffoldSupport('commands', chosenLanguage.type),
       this.getComponentIndexHtml({
         chosenFramework,
         chosenLanguage,
@@ -194,19 +196,20 @@ export class WizardActions {
     ])
   }
 
-  private async scaffoldSupport (fileName: 'e2e' | 'component', language: CodeLanguageEnum): Promise<NexusGenObjects['ScaffoldedFile']> {
+  private async scaffoldSupport (fileName: 'e2e' | 'component' | 'commands', language: CodeLanguageEnum): Promise<NexusGenObjects['ScaffoldedFile']> {
     const supportFile = path.join(this.projectRoot, `cypress/support/${fileName}.${language}`)
     const supportDir = path.dirname(supportFile)
 
     // @ts-ignore
     await this.ctx.fs.mkdir(supportDir, { recursive: true })
-    await this.scaffoldFile(supportFile, dedent`
-      // TODO: source the example support file
-    `, 'Scaffold default support file')
+
+    const fileContent = fileName === 'commands' ? this.commandsFileBody(language) : this.supportFileBody(fileName, language)
+
+    await this.scaffoldFile(supportFile, fileContent, 'Scaffold default support file')
 
     return {
       status: 'valid',
-      description: 'Added a support file, for extending the Cypress api',
+      description: `Added a ${fileName === 'commands' ? 'commands' : 'support'} file, for extending the Cypress api`,
       file: {
         absolute: supportFile,
       },
@@ -377,7 +380,78 @@ export class WizardActions {
   private ensureDir (type: 'component' | 'e2e' | 'fixtures') {
     return this.ctx.fs.ensureDir(path.join(this.projectRoot, 'cypress', type))
   }
+
+  private supportFileBody (fileName: 'e2e' | 'component', language: CodeLanguageEnum) {
+    return dedent`
+      // ***********************************************************
+      // This example support/${fileName}.${language} is processed and
+      // loaded automatically before your test files.
+      //
+      // This is a great place to put global configuration and
+      // behavior that modifies Cypress.
+      //
+      // You can change the location of this file or turn off
+      // automatically serving support files with the
+      // 'supportFile' configuration option.
+      //
+      // You can read more here:
+      // https://on.cypress.io/configuration
+      // ***********************************************************
+  
+      // Import commands.js using ES2015 syntax:
+      import './commands'
+  
+      // Alternatively you can use CommonJS syntax:
+      // require('./commands')
+    `
+  }
+
+  private commandsFileBody (language: CodeLanguageEnum) {
+    return dedent`
+      ${language === 'ts' ? '/// <reference types="cypress" />' : ''}
+      // ***********************************************
+      // This example commands.${language} shows you how to
+      // create various custom commands and overwrite
+      // existing commands.
+      //
+      // For more comprehensive examples of custom
+      // commands please read more here:
+      // https://on.cypress.io/custom-commands
+      // ***********************************************
+      //
+      //
+      // -- This is a parent command --
+      // Cypress.Commands.add('login', (email, password) => { ... })
+      //
+      //
+      // -- This is a child command --
+      // Cypress.Commands.add('drag', { prevSubject: 'element'}, (subject, options) => { ... })
+      //
+      //
+      // -- This is a dual command --
+      // Cypress.Commands.add('dismiss', { prevSubject: 'optional'}, (subject, options) => { ... })
+      //
+      //
+      // -- This will overwrite an existing command --
+      // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
+      ${language === 'ts' ? COMMAND_TYPES : ''}
+    `
+  }
 }
+
+const COMMAND_TYPES = dedent`
+//
+// declare global {
+//   namespace Cypress {
+//     interface Chainable {
+//       login(email: string, password: string): Chainable<void>
+//       drag(subject: string, options?: Partial<TypeOptions>): Chainable<Element>
+//       dismiss(subject: string, options?: Partial<TypeOptions>): Chainable<Element>
+//       visit(originalFn: CommandOriginalFn, url: string, options: Partial<VisitOptions>): Chainable<Element>
+//     }
+//   }
+// }
+`
 
 const E2E_SCAFFOLD_BODY = dedent`
   e2e: {
