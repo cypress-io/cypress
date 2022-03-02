@@ -51,7 +51,10 @@ describe('src/cy/commands/querying/within', () => {
     it('can call child commands after within on the same subject', () => {
       const input = cy.$$('#by-name input:first')
 
-      cy.get('#by-name').within(() => {}).find('input:first').then(($input) => {
+      cy.get('#by-name')
+      .within(() => {})
+      .find('input:first')
+      .then(($input) => {
         expect($input.get(0)).to.eq(input.get(0))
       })
     })
@@ -72,7 +75,8 @@ describe('src/cy/commands/querying/within', () => {
       const span1 = cy.$$('#button-text a span')
       const span2 = cy.$$('#button-text button span')
 
-      cy.get('#button-text').within(() => {
+      cy.get('#button-text')
+      .within(() => {
         cy.get('a').within(() => {
           cy.get('span').then(($span) => {
             expect($span.get(0)).to.eq(span1.get(0))

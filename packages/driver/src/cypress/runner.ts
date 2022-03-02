@@ -1776,8 +1776,8 @@ export default {
         if (test) {
           // pluralize the instrument
           // as a property on the runnable
-          let name
-          const logs = test[name = `${instrument}s`] != null ? test[name] : (test[name] = [])
+          const name = `${instrument}s`
+          const logs = test[name] != null ? test[name] : (test[name] = [])
 
           // else push it onto the logs
           return logs.push(attrs)

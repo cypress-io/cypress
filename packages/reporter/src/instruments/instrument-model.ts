@@ -18,8 +18,8 @@ export interface InstrumentProps {
   message?: string
   type?: 'parent' | 'child' | 'system'
   testCurrentRetry?: number
-  // warn is specific to cy.session
-  state?: TestState | 'warn' | null
+  // warning is specific to cy.session
+  state?: TestState | 'warning' | null
   referencesAlias?: Alias
   instrument?: 'agent' | 'command' | 'route'
   testId: string

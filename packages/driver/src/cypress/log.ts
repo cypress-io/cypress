@@ -13,7 +13,7 @@ import $errUtils from './error_utils'
 const groupsOrTableRe = /^(groups|table)$/
 const parentOrChildRe = /parent|child|system/
 const SNAPSHOT_PROPS = 'id snapshots $el url coords highlightAttr scrollBy viewportWidth viewportHeight'.split(' ')
-const DISPLAY_PROPS = 'id alias aliasType callCount displayName end err event functionName hookId instrument isStubbed group message method name numElements showError numResponses referencesAlias renderProps state testId timeout type url visible wallClockStartedAt testCurrentRetry'.split(' ')
+const DISPLAY_PROPS = 'id alias aliasType callCount displayName end err event functionName groupLevel hookId instrument isStubbed group message method name numElements showError numResponses referencesAlias renderProps state testId timeout type url visible wallClockStartedAt testCurrentRetry'.split(' ')
 const BLACKLIST_PROPS = 'snapshots'.split(' ')
 
 let counter = 0
@@ -259,9 +259,9 @@ const defaults = function (state, config, obj) {
     },
   })
 
-  const logGroups = state('logGroup')
+  const logGroups = state('logGroup') || []
 
-  if (logGroup.length) {
+  if (logGroups.length) {
     obj.group = _.last(logGroups)
     obj.groupLevel = logGroups.length
   }
@@ -271,7 +271,7 @@ const defaults = function (state, config, obj) {
   }
 
   if (obj.groupStart) {
-    state('logGroup', (state('logGroup') || []).concat(obj.id))
+    state('logGroup', (logGroups).concat(obj.id))
   }
 
   return obj

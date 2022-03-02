@@ -48,7 +48,8 @@ const NavColumn = observer(({ model }) => (
       {!model._isPending() && <span className='command-number'>{model.number || ''}</span>}
     </div>
     <div className='command-expander-column' onClick={() => model.toggleOpen()}>
-      {model.hasChildren && <ChevronIcon className={cs('command-expander', { 'command-expander-is-open': model.hasChildren && !!model.isOpen })} />}
+      {/* if event occurred multiple types, no need render expand/collapse toggle & the children because the details are the same. */}
+      {!model.event && model.hasChildren && <ChevronIcon className={cs('command-expander', { 'command-expander-is-open': model.hasChildren && !!model.isOpen })} />}
     </div>
   </>
 ))
@@ -251,8 +252,8 @@ class Command extends Component<Props> {
       // cap the group nesting to 6 levels keep the log text legible
       const level = model.groupLevel < 6 ? model.groupLevel : 5
 
-      for (let i = 0; i < level; i++) {
-        groupPlaceholder.push(<span className='command-group-block' />)
+      for (let i = 1; i < level; i++) {
+        groupPlaceholder.push(<span key={level} className='command-group-block' />)
       }
     }
 
