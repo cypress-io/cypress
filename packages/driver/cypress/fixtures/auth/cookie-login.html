@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body>
+  <select data-cy="sameSite">
+    <option value="">Empty</option>
+    <option value="None">None</option>
+    <option value="Lax">Lax</option>
+    <option value="Strict">Strict</option>
+    <option value="Invalid">Invalid</option>
+  </select>
+  <label>
+    <input type="checkbox" data-cy="secure" /> Secure
+  </label>
+  <label for="name">Username: </label>
+  <input data-cy="username" type="text" required>
+  <button data-cy="login">Login</button>
+
+  <script>
+    document.querySelector('[data-cy="login"]').addEventListener('click', () => {
+      const queryString = window.location.search;
+      const urlParams = new URLSearchParams(queryString);
+      const redirect = urlParams.get('redirect')
+      const username = document.querySelector('[data-cy=username]').value
+      const sameSite = document.querySelector('[data-cy=sameSite]').value
+      const secure = document.querySelector('[data-cy=secure]').checked
+      // TODO: Use the following url instead once the multi-domain command
+      // has support for specifying http/https
+      // let url = `https://www.foobar.com:3502/cookie-login?redirect=${redirect}&username=${username}`
+      let url = `${redirect}?username=${username}`
+
+      if (sameSite) {
+        url += `&sameSite=${sameSite}`
+      }
+
+      if (secure) {
+        url += `&secure=true`
+      }
+
+      window.location.href = url
+    })
+  </script>
+</body>
+</html>

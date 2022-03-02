@@ -234,4 +234,314 @@ describe('http/response-middleware', function () {
       }
     }
   })
+
+  describe('CopyCookiesFromIncomingRes', function () {
+    const { CopyCookiesFromIncomingRes, SendResponseBodyToClient } = ResponseMiddleware
+
+    it('appends cookies on the response when an array', async function () {
+      const appendStub = sinon.stub()
+      const ctx = prepareContext({
+        incomingRes: {
+          headers: {
+            'set-cookie': ['cookie1=value1', 'cookie2=value2'],
+          },
+        },
+        res: {
+          append: appendStub,
+        },
+      })
+
+      await testMiddleware([CopyCookiesFromIncomingRes], ctx)
+
+      expect(appendStub).to.be.calledTwice
+      expect(appendStub).to.be.calledWith('Set-Cookie', 'cookie1=value1')
+      expect(appendStub).to.be.calledWith('Set-Cookie', 'cookie2=value2')
+    })
+
+    it('appends cookies on the response when a string', async function () {
+      const appendStub = sinon.stub()
+      const ctx = prepareContext({
+        incomingRes: {
+          headers: {
+            'set-cookie': 'cookie=value',
+          },
+        },
+        res: {
+          append: appendStub,
+        },
+      })
+
+      await testMiddleware([CopyCookiesFromIncomingRes], ctx)
+
+      expect(appendStub).to.be.calledOnce
+      expect(appendStub).to.be.calledWith('Set-Cookie', 'cookie=value')
+    })
+
+    it('is a noop when cookies are undefined', async function () {
+      const appendStub = sinon.stub()
+      const ctx = prepareContext({
+        res: {
+          append: appendStub,
+        },
+      })
+
+      await testMiddleware([CopyCookiesFromIncomingRes], ctx)
+
+      expect(appendStub).not.to.be.called
+    })
+
+    describe('SameSite', function () {
+      it('forces SameSite=None when an AUT request and does not match origin policy', async function () {
+        const appendStub = sinon.stub()
+        const ctx = prepareContext({
+          incomingRes: {
+            headers: {
+              'content-type': 'text/html',
+              'set-cookie': 'cookie=value',
+            },
+          },
+          req: {
+            isAUTFrame: true,
+          },
+          res: {
+            append: appendStub,
+          },
+        })
+
+        await testMiddleware([CopyCookiesFromIncomingRes], ctx)
+
+        expect(appendStub).to.be.calledOnce
+        expect(appendStub).to.be.calledWith('Set-Cookie', 'cookie=value; SameSite=None; Secure')
+      })
+
+      it('forces SameSite=None when an AUT request and last AUT request was a different origin', async function () {
+        const appendStub = sinon.stub()
+        const ctx1 = prepareContext({
+          req: {
+            isAUTFrame: true,
+            proxiedUrl: 'https://site1.com',
+          },
+        })
+        const ctx2 = prepareContext({
+          incomingRes: {
+            headers: {
+              'content-type': 'text/html',
+              'set-cookie': 'cookie=value',
+            },
+          },
+          req: {
+            isAUTFrame: true,
+            proxiedUrl: 'https://site2.com',
+          },
+          res: {
+            append: appendStub,
+          },
+          getRemoteState () {
+            // nonsense, but it's the simplest way to match origin policy
+            return {
+              strategy: 'file',
+              origin: 'http',
+            }
+          },
+        })
+
+        SendResponseBodyToClient.call(ctx1)
+        await testMiddleware([CopyCookiesFromIncomingRes], ctx2)
+
+        expect(appendStub).to.be.calledOnce
+        expect(appendStub).to.be.calledWith('Set-Cookie', 'cookie=value; SameSite=None; Secure')
+      })
+
+      it('does not force SameSite=None if not an AUT request', async function () {
+        const appendStub = sinon.stub()
+        const ctx = prepareContext({
+          incomingRes: {
+            headers: {
+              'content-type': 'text/html',
+              'set-cookie': 'cookie=value',
+            },
+          },
+          res: {
+            append: appendStub,
+          },
+        })
+
+        await testMiddleware([CopyCookiesFromIncomingRes], ctx)
+
+        expect(appendStub).to.be.calledWith('Set-Cookie', 'cookie=value')
+      })
+
+      it('does not force SameSite=None if an AUT request but not cross-origin', async function () {
+        const appendStub = sinon.stub()
+        const ctx1 = prepareContext({
+          req: {
+            isAUTFrame: true,
+          },
+        })
+        const ctx2 = prepareContext({
+          incomingRes: {
+            headers: {
+              'content-type': 'text/html',
+              'set-cookie': 'cookie=value',
+            },
+          },
+          req: {
+            isAUTFrame: true,
+          },
+          res: {
+            append: appendStub,
+          },
+          getRemoteState () {
+            // nonsense, but it's the simplest way to match origin policy
+            return {
+              strategy: 'file',
+              origin: 'http',
+            }
+          },
+        })
+
+        SendResponseBodyToClient.call(ctx1)
+        await testMiddleware([CopyCookiesFromIncomingRes], ctx2)
+
+        expect(appendStub).to.be.calledWith('Set-Cookie', 'cookie=value')
+      })
+
+      describe('cookie modification specifics', function () {
+        it('SameSite=Strict; Secure -> SameSite=None; Secure', async function () {
+          const { appendStub, ctx } = prepareContextWithCookie('cookie=value; SameSite=Strict; Secure')
+
+          await testMiddleware([CopyCookiesFromIncomingRes], ctx)
+
+          expect(appendStub).to.be.calledOnce
+          expect(appendStub).to.be.calledWith('Set-Cookie', 'cookie=value; SameSite=None; Secure')
+        })
+
+        it('SameSite=Strict -> SameSite=None; Secure', async function () {
+          const { appendStub, ctx } = prepareContextWithCookie('cookie=value; SameSite=Strict')
+
+          await testMiddleware([CopyCookiesFromIncomingRes], ctx)
+
+          expect(appendStub).to.be.calledOnce
+          expect(appendStub).to.be.calledWith('Set-Cookie', 'cookie=value; SameSite=None; Secure')
+        })
+
+        it('SameSite=Lax; Secure -> SameSite=None; Secure', async function () {
+          const { appendStub, ctx } = prepareContextWithCookie('cookie=value; SameSite=Lax; Secure')
+
+          await testMiddleware([CopyCookiesFromIncomingRes], ctx)
+
+          expect(appendStub).to.be.calledOnce
+          expect(appendStub).to.be.calledWith('Set-Cookie', 'cookie=value; SameSite=None; Secure')
+        })
+
+        it('SameSite=Lax -> SameSite=None; Secure', async function () {
+          const { appendStub, ctx } = prepareContextWithCookie('cookie=value; SameSite=Lax')
+
+          await testMiddleware([CopyCookiesFromIncomingRes], ctx)
+
+          expect(appendStub).to.be.calledOnce
+          expect(appendStub).to.be.calledWith('Set-Cookie', 'cookie=value; SameSite=None; Secure')
+        })
+
+        it('SameSite=Invalid; Secure -> SameSite=None; Secure', async function () {
+          const { appendStub, ctx } = prepareContextWithCookie('cookie=value; SameSite=Invalid; Secure')
+
+          await testMiddleware([CopyCookiesFromIncomingRes], ctx)
+
+          expect(appendStub).to.be.calledOnce
+          expect(appendStub).to.be.calledWith('Set-Cookie', 'cookie=value; SameSite=None; Secure')
+        })
+
+        it('SameSite=Invalid -> SameSite=None; Secure', async function () {
+          const { appendStub, ctx } = prepareContextWithCookie('cookie=value; SameSite=Invalid')
+
+          await testMiddleware([CopyCookiesFromIncomingRes], ctx)
+
+          expect(appendStub).to.be.calledOnce
+          expect(appendStub).to.be.calledWith('Set-Cookie', 'cookie=value; SameSite=None; Secure')
+        })
+
+        it('SameSite=None -> SameSite=None; Secure', async function () {
+          const { appendStub, ctx } = prepareContextWithCookie('cookie=value; SameSite=None')
+
+          await testMiddleware([CopyCookiesFromIncomingRes], ctx)
+
+          expect(appendStub).to.be.calledOnce
+          expect(appendStub).to.be.calledWith('Set-Cookie', 'cookie=value; SameSite=None; Secure')
+        })
+
+        it('no SameSite -> SameSite=None; Secure', async function () {
+          const { appendStub, ctx } = prepareContextWithCookie('cookie=value')
+
+          await testMiddleware([CopyCookiesFromIncomingRes], ctx)
+
+          expect(appendStub).to.be.calledOnce
+          expect(appendStub).to.be.calledWith('Set-Cookie', 'cookie=value; SameSite=None; Secure')
+        })
+
+        it('no SameSite; Secure -> Secure; SameSite=None', async function () {
+          const { appendStub, ctx } = prepareContextWithCookie('cookie=value; Secure')
+
+          await testMiddleware([CopyCookiesFromIncomingRes], ctx)
+
+          expect(appendStub).to.be.calledOnce
+          expect(appendStub).to.be.calledWith('Set-Cookie', 'cookie=value; Secure; SameSite=None')
+        })
+      })
+    })
+
+    function prepareContext (props) {
+      return {
+        incomingRes: {
+          headers: {},
+          ...props.incomingRes,
+        },
+        res: {
+          headers: {},
+          on () {},
+          ...props.res,
+        },
+        req: {
+          proxiedUrl: 'http:127.0.0.1:3501/multi-domain.html',
+          headers: {},
+          ...props.req,
+        },
+        incomingResStream: {
+          pipe () {
+            return { on () {} }
+          },
+        },
+        getRemoteState () {
+          return {
+            strategy: 'foo',
+          }
+        },
+        debug () {},
+        onError (error) {
+          throw error
+        },
+        ..._.omit(props, 'incomingRes', 'res', 'req'),
+      }
+    }
+
+    function prepareContextWithCookie (cookie) {
+      const appendStub = sinon.stub()
+      const ctx = prepareContext({
+        incomingRes: {
+          headers: {
+            'content-type': 'text/html',
+            'set-cookie': cookie,
+          },
+        },
+        req: {
+          isAUTFrame: true,
+        },
+        res: {
+          append: appendStub,
+        },
+      })
+
+      return { appendStub, ctx }
+    }
+  })
 })

@@ -10,7 +10,6 @@ const multer = require('multer')
 const upload = multer({ dest: 'cypress/_test-output/' })
 
 const PATH_TO_SERVER_PKG = path.dirname(require.resolve('@packages/server'))
-const { getPathToDist } = require('@packages/resolve-dist')
 
 const httpPorts = [3500, 3501]
 const httpsPort = 3502
@@ -27,6 +26,7 @@ const createApp = (port) => {
   })
 
   app.use(require('cors')())
+  app.use(require('cookie-parser')())
   app.use(require('compression')())
   app.use(bodyParser.urlencoded({ extended: false }))
   app.use(bodyParser.json())
@@ -190,9 +190,68 @@ const createApp = (port) => {
     .send('<html><body>server error</body></html>')
   })
 
-  app.get('/cypress_multi_domain_runner.js', (req, res) => {
-    res.type('application/javascript')
-    res.sendFile(getPathToDist('runner', 'cypress_multi_domain_runner.js'))
+  const getCookieAdditions = ({ sameSite, secure }) => {
+    let additions = ''
+
+    if (sameSite) additions += `; SameSite=${sameSite}`
+
+    if (secure) additions += '; Secure'
+
+    return additions
+  }
+
+  // NOTE: /cookie-login & /verify-cookie-login are currently bypassed in the
+  // multi-domain test they're meant for until there's support for specifying
+  // http/https in the multi-domain command
+  app.get('/cookie-login', (req, res) => {
+    const { username, redirect } = req.query
+
+    res
+    .header('Set-Cookie', `user=${username}${getCookieAdditions(req.query)}`)
+    .redirect(302, `/verify-cookie-login?username=${username}&redirect=${redirect}`)
+  })
+
+  app.get('/verify-cookie-login', (req, res) => {
+    if (!req.cookies.user) {
+      return res
+      .status(403)
+      .send('<html><body><h1>Not logged in</h1></body></html>')
+    }
+
+    const { username, redirect } = req.query
+
+    res.send(`
+      <html>
+        <body>
+          <h1>Redirecting ${username}...</h1>
+          <script>
+            setTimeout(() => {
+              window.location.href = '${redirect}?username=${username}'
+            }, 1000)
+          </script>
+        </body>
+      </html>
+    `)
+  })
+
+  app.get('/login', (req, res) => {
+    const { username } = req.query
+
+    // can't use res.cookie() because it won't allow setting an invalid
+    // SameSite value, which we want to test
+    res
+    .header('Set-Cookie', `user=${username}${getCookieAdditions(req.query)}`)
+    .redirect(302, '/welcome')
+  })
+
+  app.get('/welcome', (req, res) => {
+    if (!req.cookies.user) {
+      return res
+      .status(403)
+      .send('<html><body><h1>No user found</h1></body></html>')
+    }
+
+    res.send(`<html><body><h1>Welcome, ${req.cookies.user}!</h1></body></html>`)
   })
 
   let _var = ''

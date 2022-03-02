@@ -368,11 +368,52 @@ const MaybePreventCaching: ResponseMiddleware = function () {
   this.next()
 }
 
+const cookieSameSiteRegex = /SameSite=(\w+)/i
+const cookieSecureRegex = /Secure/i
+
+const forceSameSiteNone = (cookie) => {
+  if (cookieSameSiteRegex.test(cookie)) {
+    debug('set cookie SameSite=None')
+    cookie = cookie.replace(cookieSameSiteRegex, 'SameSite=None')
+  } else {
+    debug('add cookie SameSite=None')
+    cookie += '; SameSite=None'
+  }
+
+  // Secure is required browsers for SameSite=None to take effect
+  if (!cookieSecureRegex.test(cookie)) {
+    debug('add cookie Secure')
+    cookie += '; Secure'
+  }
+
+  return cookie
+}
+
+let previousAUTRequestUrl
+
 const CopyCookiesFromIncomingRes: ResponseMiddleware = function () {
   const cookies: string | string[] | undefined = this.incomingRes.headers['set-cookie']
+  // for the sake of multi-domain, force SameSite=None when it's an AUT
+  // request and either the request itself is cross-origin or the origins
+  // between requests don't match, since the browser won't set them in that
+  // case and if it's secondary-domain -> primary-domain, we don't recognize
+  // the request as cross-origin
+  const shouldForceSameSiteNone = (
+    !!this.req.isAUTFrame &&
+    (
+      (previousAUTRequestUrl && !cors.urlOriginsMatch(previousAUTRequestUrl, this.req.proxiedUrl))
+      || !reqMatchesOriginPolicy(this.req, this.getRemoteState())
+    )
+  )
+
+  debug('force SameSite=None?', shouldForceSameSiteNone)
 
   if (cookies) {
     ([] as string[]).concat(cookies).forEach((cookie) => {
+      if (shouldForceSameSiteNone) {
+        cookie = forceSameSiteNone(cookie)
+      }
+
       try {
         this.res.append('Set-Cookie', cookie)
       } catch (err) {
@@ -488,6 +529,12 @@ const GzipBody: ResponseMiddleware = function () {
 }
 
 const SendResponseBodyToClient: ResponseMiddleware = function () {
+  if (this.req.isAUTFrame) {
+    // track the previous AUT request URL so we know if the next requests
+    // is cross-origin
+    previousAUTRequestUrl = this.req.proxiedUrl
+  }
+
   this.incomingResStream.pipe(this.res).on('error', this.onError)
   this.res.on('end', () => this.end())
 }
