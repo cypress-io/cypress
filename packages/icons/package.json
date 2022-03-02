@@ -7,15 +7,15 @@
   "scripts": {
     "build-prod": "yarn build",
     "build": "scripts/build.sh && ts-node ./src/ico.ts",
-    "test": "NODE_ENV=test mocha",
-    "test-watch": "NODE_ENV=test mocha --watch",
-    "release": "releaser"
+    "test-unit": "NODE_ENV=test mocha -r @packages/ts/register test/*.ts",
+    "test": "yarn test-unit"
   },
   "devDependencies": {
     "@types/mocha": "^8.0.3",
     "@types/to-ico": "^1.1.1",
     "chai": "^4.2.0",
     "mocha": "^8.1.3",
+    "snap-shot-it": "7.9.6",
     "to-ico": "^1.1.5"
   },
   "files": [
