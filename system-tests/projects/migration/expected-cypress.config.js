@@ -16,8 +16,6 @@ module.exports = defineConfig({
     specPattern: 'cypress/e2e/**/*.spec.{tsx,js}',
   },
   component: {
-    // We've imported your old cypress plugins here.
-    // You may want to clean this up later by importing these.
     setupNodeEvents (on, config) {},
     slowTestThreshold: 5000,
     retries: 1,
