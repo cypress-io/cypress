@@ -1,7 +1,6 @@
 import { defineConfig } from 'cypress'
 import { devServer } from './dist'
 
-console.log('top level')
 export default defineConfig({
   'pluginsFile': 'cypress/plugins.js',
   'video': false,

@@ -7,8 +7,7 @@ import type { CypressViteDevServerConfig, StartDevServer } from './types'
 const debug = debugFn('cypress:vite-dev-server:index')
 
 export const startDevServer = async ({ options, viteConfig = {} }: StartDevServer) => {
-  debug('user has registered startDevServer for Vite')
-  debug('startDevServer has received options', options)
+  debug('Starting Vite Server')
   let server
 
   try {
@@ -19,11 +18,11 @@ export const startDevServer = async ({ options, viteConfig = {} }: StartDevServe
     throw new Error(err as string)
   }
 
-  debug('vite server created successfully')
+  debug('Vite server created')
   const port = await getPort({ port: 3000 })
 
   await server.listen(port)
-  debug('successfully launched the vite server on port', port)
+  debug('Successfully launched the vite server on port', port)
 
   return {
     port,

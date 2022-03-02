@@ -1,21 +1,18 @@
 // This file is merged in a <script type=module> into index.html
 // it will be used to load and kick start the selected spec
-import specLoaders from 'cypress:spec-loaders'
-import { hasSupportPath, originAutUrl } from 'cypress:config'
-
-const specPath = window.location.pathname.replace(originAutUrl, '')
-
-const specLoader = specLoaders[specPath]
-const importsToLoad = [specLoader || (() => import(/* @vite-ignore */ specPath))]
-
-if (hasSupportPath) {
-  importsToLoad.unshift(() => import('cypress:support-path'))
-}
+import { hasSupportPath } from '@cypress:config'
 
 const CypressInstance = window.Cypress = parent.Cypress
 
 if (!CypressInstance) {
   throw new Error('Tests cannot run without a reference to Cypress!')
+}
+
+const specPath = CypressInstance.spec.relative
+const importsToLoad = [() => import(/* @vite-ignore */ `/${specPath}`)]
+
+if (hasSupportPath) {
+  importsToLoad.unshift(() => import('@cypress:support-path'))
 }
 
 // load the support and spec
