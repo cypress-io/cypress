@@ -1,5 +1,6 @@
 import Debug from 'debug'
 import webpack from 'webpack'
+import * as path from 'path'
 import WebpackDevServer from 'webpack-dev-server'
 import { makeWebpackConfig, UserWebpackDevServerOptions } from './makeWebpackConfig'
 import { webpackDevServerFacts } from './webpackDevServerFacts'
@@ -20,6 +21,9 @@ export interface WebpackConfigurationWithDevServer extends webpack.Configuration
   devServer?: WebpackDevServer.Configuration
 }
 
+const OsSeparatorRE = RegExp(`\\${path.sep}`, 'g')
+const posixSeparator = '/'
+
 const debug = Debug('cypress:webpack-dev-server:start')
 
 export async function start ({ webpackConfig: userWebpackConfig, indexHtml, options, ...userOptions }: StartDevServer, exitProcess = process.exit): Promise<WebpackDevServer> {
@@ -29,11 +33,19 @@ export async function start ({ webpackConfig: userWebpackConfig, indexHtml, opti
 
   const { projectRoot, devServerPublicPathRoute, isTextTerminal } = options.config
 
+  const publicPath = (path.sep === posixSeparator)
+    ? path.join(devServerPublicPathRoute, posixSeparator)
+    // The second line here replaces backslashes on windows with posix compatible slash
+    // See https://github.com/cypress-io/cypress/issues/16097
+    : path.join(devServerPublicPathRoute, posixSeparator)
+    .replace(OsSeparatorRE, posixSeparator)
+
   const webpackConfig = await makeWebpackConfig(userWebpackConfig || {}, {
     files: options.specs,
     indexHtml,
     projectRoot,
     devServerPublicPathRoute,
+    publicPath,
     devServerEvents: options.devServerEvents,
     supportFile: options.config.supportFile as string,
     isOpenMode: !isTextTerminal,
@@ -87,7 +99,8 @@ export async function start ({ webpackConfig: userWebpackConfig, indexHtml, opti
     }
 
     // @ts-ignore Webpack types are clashing between Webpack and WebpackDevServer
-    return new WebpackDevServer(webpackDevServerConfig, compiler)
+    const server = new WebpackDevServer(webpackDevServerConfig, compiler)
+    return server
   }
 
   throw webpackDevServerFacts.unsupported()

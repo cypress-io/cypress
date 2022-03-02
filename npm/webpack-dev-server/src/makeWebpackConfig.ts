@@ -23,25 +23,14 @@ interface MakeWebpackConfigOptions extends CypressCTOptionsPluginOptionsWithEmit
   indexHtml?: string
 }
 
-const OsSeparatorRE = RegExp(`\\${path.sep}`, 'g')
-const posixSeparator = '/'
-
 export async function makeWebpackConfig (userWebpackConfig: webpack.Configuration, options: MakeWebpackConfigOptions): Promise<webpack.Configuration> {
-  const { projectRoot, devServerPublicPathRoute, files, supportFile, devServerEvents, indexHtml } = options
+  const { projectRoot, publicPath, files, supportFile, devServerEvents, indexHtml } = options
 
   debug(`User passed in webpack config with values %o`, userWebpackConfig)
 
   debug(`New webpack entries %o`, files)
   debug(`Project root`, projectRoot)
   debug(`Support file`, supportFile)
-
-  const entry = path.resolve(__dirname, './browser.js')
-  const publicPath = (path.sep === posixSeparator)
-    ? path.join(devServerPublicPathRoute, posixSeparator)
-    // The second line here replaces backslashes on windows with posix compatible slash
-    // See https://github.com/cypress-io/cypress/issues/16097
-    : path.join(devServerPublicPathRoute, posixSeparator)
-    .replace(OsSeparatorRE, posixSeparator)
 
   const dynamicWebpackConfig = {
     output: {
@@ -53,6 +42,7 @@ export async function makeWebpackConfig (userWebpackConfig: webpack.Configuratio
         projectRoot,
         devServerEvents,
         supportFile,
+        publicPath,
       }),
     ],
   }
@@ -84,7 +74,10 @@ export async function makeWebpackConfig (userWebpackConfig: webpack.Configuratio
     dynamicWebpackConfig,
   )
 
-  mergedConfig.entry = entry
+  mergedConfig.entry = {
+    main: path.resolve(__dirname, './browser.js')
+//     support: supportFile
+  }
 
   debug('Merged webpack config %o', mergedConfig)
 

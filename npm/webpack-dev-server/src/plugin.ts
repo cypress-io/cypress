@@ -13,15 +13,24 @@ export interface CypressCTOptionsPluginOptions {
   files: Cypress.Cypress['spec'][]
   projectRoot: string
   supportFile: string
+  publicPath?: string
+  devServerEvents?: EventEmitter
+}
+
+export interface CypressCTOptionsPluginState {
+  allFiles: Cypress.Cypress['spec'][]
+  projectRoot: string
+  supportFile: string
   devServerEvents?: EventEmitter
 }
 
 export type CypressCTOptionsPluginOptionsWithEmitter = CypressCTOptionsPluginOptions & {
+  publicPath: string
   devServerEvents: EventEmitter
 }
 
 export interface CypressCTWebpackContext {
-  _cypress: CypressCTOptionsPluginOptions
+  _cypress: CypressCTOptionsPluginState
 }
 
 export type Webpack45Compilation = Compilation & {
@@ -38,29 +47,51 @@ export const normalizeError = (error: Error | string) => {
 }
 
 export default class CypressCTOptionsPlugin {
-  private files: Cypress.Cypress['spec'][] = []
+  private active: Set<string> = new Set()
+  private allFiles: Cypress.Cypress['spec'][]
   private supportFile: string
+  private publicPath: string
   private errorEmitted = false
 
   private readonly projectRoot: string
   private readonly devServerEvents: EventEmitter
 
   constructor (options: CypressCTOptionsPluginOptionsWithEmitter) {
-    this.files = options.files
+    this.allFiles = options.files
     this.supportFile = options.supportFile
     this.projectRoot = options.projectRoot
     this.devServerEvents = options.devServerEvents
+    this.publicPath = options.publicPath
+    // Uncomment this one line to return to old behavior - all specs compiled initially,
+    // nothing incremental.
+    // Handy for comparing without reinstalling anything.
+//     this.allFiles.forEach(({absolute}) => this.active.add(absolute))
   }
 
   private pluginFunc = (context: CypressCTWebpackContext) => {
     context._cypress = {
-      files: this.files,
+      allFiles: this.allFiles,
       projectRoot: this.projectRoot,
       supportFile: this.supportFile,
     }
   };
 
+  private isSpecFile(path: string) { return Boolean(_.find(this.allFiles, ['absolute', path])) }
+
+  private ignoreInactive = (result: any) => {
+    if (this.isSpecFile(result.request) && !this.active.has(result.request)) {
+      console.log(`aborting ${result.request}, spec is not active`)
+      return null
+    }
+
+    return result
+  }
+
   private setupCustomHMR = (compiler: webpack.Compiler) => {
+    compiler.hooks.normalModuleFactory.tap("CypressCTOptionsPlugin", nmf => {
+      nmf.hooks.beforeResolve.tap("CypressCTOptionsPlugin", this.ignoreInactive);
+    });
+
     compiler.hooks.afterCompile.tap(
       'CypressCTOptionsPlugin',
       (compilation) => {
@@ -102,32 +133,49 @@ export default class CypressCTOptionsPlugin {
    */
   private plugin = (compilation: Webpack45Compilation) => {
     this.devServerEvents.on('dev-server:specs:changed', (specs) => {
-      if (_.isEqual(specs, this.files)) return
+      if (_.isEqual(specs, this.allFiles)) {
+        return
+      }
 
-      this.files = specs
-      const inputFileSystem = compilation.inputFileSystem
-      const utimesSync: UtimesSync = semver.gt('4.0.0', webpack.version) ? inputFileSystem.fileSystem.utimesSync : fs.utimesSync
-
-      utimesSync(path.resolve(__dirname, 'browser.js'), new Date(), new Date())
+      this.allFiles = specs
+      this.invalidate(compilation)
     })
 
-    // Webpack 5
     /* istanbul ignore next */
     if ('NormalModule' in webpack) {
+      // Webpack 5
       webpack.NormalModule.getCompilationHooks(compilation).loader.tap(
         'CypressCTOptionsPlugin',
         (context) => this.pluginFunc(context as CypressCTWebpackContext),
       )
-
-      return
+    } else {
+      // Webpack 4
+      compilation.hooks.normalModuleLoader.tap(
+        'CypressCTOptionsPlugin',
+        (context) => this.pluginFunc(context as CypressCTWebpackContext),
+      )
     }
 
-    // Webpack 4
-    compilation.hooks.normalModuleLoader.tap(
-      'CypressCTOptionsPlugin',
-      (context) => this.pluginFunc(context as CypressCTWebpackContext),
-    )
+
+    this.devServerEvents.on('webpack-dev-server:request', (url) => {
+      console.log(this.isSpecFile(url), url, this.active.has(url))
+
+      if (!this.isSpecFile(url) || this.active.has(url)) {
+        return
+      }
+
+      console.log('asking for new spec', url)
+      this.active.add(url)
+      this.invalidate(compilation)
+    })
   };
+
+  private invalidate = (compilation: Webpack45Compilation) => {
+    const inputFileSystem = compilation.inputFileSystem
+    const utimesSync: UtimesSync = semver.gt('4.0.0', webpack.version) ? inputFileSystem.fileSystem.utimesSync : fs.utimesSync
+
+    utimesSync(path.resolve(__dirname, 'browser.js'), new Date(), new Date())
+  }
 
   apply (compiler: Compiler): void {
     this.setupCustomHMR(compiler)

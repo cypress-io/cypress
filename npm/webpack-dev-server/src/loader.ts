@@ -39,14 +39,17 @@ const makeImport = (file: Cypress.Cypress['spec'], filename: string, chunkName: 
  *   }
  * }
  */
-function buildSpecs (projectRoot: string, files: Cypress.Cypress['spec'][] = []): string {
-  if (!Array.isArray(files)) return `{}`
+function buildSpecs (projectRoot: string, allFiles: Cypress.Cypress['spec'][] = []): string {
+  if (!Array.isArray(allFiles)) return `{}`
 
-  debug(`projectRoot: ${projectRoot}, files: ${files.map((f) => f.absolute).join(',')}`)
+  debug(`projectRoot: ${projectRoot}, allFiles: ${allFiles.map((f) => f.absolute).join(',')}`)
 
-  return `{${files.map((f, i) => {
-    return makeImport(f, f.name, `spec-${i}`, projectRoot)
-  }).join(',')}}`
+  const files = allFiles
+    .map((f, i) => makeImport(f, f.name, `spec-${i}`, projectRoot))
+    .filter(Boolean)
+    .join(',')
+
+  return `{${files}}`
 }
 
 // Runs the tests inside the iframe
@@ -55,13 +58,13 @@ export default function loader (this: CypressCTWebpackContext & LoaderContext<vo
   // be included in the compilation. Disabling the caching of this loader ensures
   // we regenerate our specs and include any new ones in the compilation.
   this.cacheable(false)
-  const { files, projectRoot, supportFile } = this._cypress
+  const { allFiles, projectRoot, supportFile } = this._cypress
 
   const supportFileAbsolutePath = supportFile ? JSON.stringify(path.resolve(projectRoot, supportFile)) : undefined
 
   return `
   var loadSupportFile = ${supportFile ? `() => import(${supportFileAbsolutePath})` : `() => Promise.resolve()`}
-  var allTheSpecs = ${buildSpecs(projectRoot, files)};
+  var allTheSpecs = ${buildSpecs(projectRoot, allFiles)};
 
   var { init } = require(${JSON.stringify(require.resolve('./aut-runner'))})
 
