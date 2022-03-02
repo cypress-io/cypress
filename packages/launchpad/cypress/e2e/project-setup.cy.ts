@@ -456,14 +456,14 @@ describe('Launchpad: Setup Project', () => {
         })
 
         cy.get('[data-cy=valid]').within(() => {
-          cy.containsPath('cypress/component/index.html')
+          cy.containsPath('cypress/support/component-index.html')
           cy.containsPath('cypress/support/component.ts')
           cy.containsPath('cypress/support/commands.ts')
         })
 
         verifyFiles([
           'cypress.config.js',
-          'cypress/component/index.html',
+          'cypress/support/component-index.html',
           'cypress/support/component.ts',
           'cypress/support/commands.ts',
         ])
@@ -745,7 +745,7 @@ describe('Launchpad: Setup Project', () => {
               cy.contains('[data-cy=changes]', `cypress.config.js`)
 
               cy.get('[data-cy=valid]').within(() => {
-                cy.containsPath('cypress/component/index.html')
+                cy.containsPath('cypress/support/component-index.html')
                 cy.containsPath(`cypress/support/component.${lang.type}`)
                 cy.containsPath(`cypress/support/commands.${lang.type}`)
                 cy.containsPath('cypress/fixtures/example.json')
@@ -753,7 +753,7 @@ describe('Launchpad: Setup Project', () => {
 
               verifyFiles([
                 'cypress.config.js',
-                'cypress/component/index.html',
+                'cypress/support/component-index.html',
                 `cypress/support/component.${lang.type}`,
                 `cypress/support/commands.${lang.type}`,
                 'cypress/fixtures/example.json',
@@ -818,7 +818,7 @@ describe('Launchpad: Setup Project', () => {
 
         cy.get('[data-cy=valid]').within(() => {
           cy.contains('cypress.config.ts')
-          cy.containsPath('cypress/component/index.html')
+          cy.containsPath('cypress/support/component-index.html')
           cy.containsPath(`cypress/support/component.ts`)
           cy.containsPath(`cypress/support/commands.ts`)
           cy.containsPath('cypress/fixtures/example.json')
@@ -851,13 +851,13 @@ describe('Launchpad: Setup Project', () => {
 
         cy.get('[data-cy=valid]').within(() => {
           cy.contains('cypress.config.ts')
-          cy.containsPath('cypress/component/index.html')
+          cy.containsPath('cypress/support/component-index.html')
           cy.containsPath('cypress/support/component.ts')
           cy.containsPath('cypress/support/commands.ts')
           cy.containsPath('cypress/fixtures/example.json')
         })
 
-        verifyFiles(['cypress.config.ts', 'cypress/component/index.html', 'cypress/support/component.ts', 'cypress/support/commands.ts', 'cypress/fixtures/example.json'])
+        verifyFiles(['cypress.config.ts', 'cypress/support/component-index.html', 'cypress/support/component.ts', 'cypress/support/commands.ts', 'cypress/fixtures/example.json'])
 
         cy.findByRole('button', { name: 'Continue' }).click()
         cy.contains(/(Initializing Config|Choose a Browser)/, { timeout: 10000 })

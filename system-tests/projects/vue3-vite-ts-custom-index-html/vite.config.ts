@@ -11,7 +11,8 @@ export default defineConfig({
       // to make everything fast, that Vite does
       // not seem to like.
       // https://vitejs.dev/config/#server-fs-allow
-      allow: ['/root/.cache/','/tmp/']
+      allow: ['/root/.cache/','/tmp/', '/Users/', '/private/']
     }
-  }
+  },
+  define: { 'process.env.BABEL_TYPES_8_BREAKING': 'false' }
 })

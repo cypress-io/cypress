@@ -267,9 +267,10 @@ export const FRONTEND_FRAMEWORKS = [
         component: {
           devServer,
           devServerConfig: {
-            webpackConfig
-          }
-        }
+            webpackConfig,
+            indexHtmlFile: 'cypress/support/component-index.html',
+          },
+        },
       }
       `
       },
@@ -283,9 +284,10 @@ export const FRONTEND_FRAMEWORKS = [
         component: {
           devServer,
           devServerConfig: {
-            webpackConfig
-          }
-        }
+            webpackConfig,
+            indexHtmlFile: 'cypress/support/component-index.html',
+          },
+        },
       })`
       },
     },
@@ -324,9 +326,10 @@ export const FRONTEND_FRAMEWORKS = [
         component: {
           devServer,
           devServerConfig: {
-            webpackConfig
-          }
-        }
+            webpackConfig,
+            indexHtmlFile: 'cypress/support/component-index.html',
+          },
+        },
       }
       `
       },
@@ -340,9 +343,10 @@ export const FRONTEND_FRAMEWORKS = [
         component: {
           devServer,
           devServerConfig: {
-            webpackConfig
-          }
-        }
+            webpackConfig,
+            indexHtmlFile: 'cypress/support/component-index.html',
+          },
+        },
       })`
       },
     },
