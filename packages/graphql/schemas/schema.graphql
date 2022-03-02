@@ -680,8 +680,10 @@ enum FrontendFrameworkEnum {
   react
   vue2
   vue3
-  vueclivue2
-  vueclivue3
+  vuecli4vue2
+  vuecli4vue3
+  vuecli5vue2
+  vuecli5vue3
 }
 
 """Error from generated spec"""
