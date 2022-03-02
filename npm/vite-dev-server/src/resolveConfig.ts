@@ -4,18 +4,18 @@
  * You can find it here https://github.com/vitest-dev/vitest/blob/main/packages/vitest/src/node/create.ts
  */
 import { resolve } from 'pathe'
-
 import { mergeConfig } from 'vite'
 import { configFiles } from './constants'
 import { Cypress, CypressInspect } from './plugins/index'
 import debugFn from 'debug'
 import type { StartDevServer } from './types'
+import { importModule } from 'local-pkg'
 
 const debug = debugFn('cypress:vite-dev-server:resolve-config')
 
 export const createConfig = async ({ options, viteConfig: viteOverrides = {} }: StartDevServer) => {
   const root = resolve(process.cwd())
-  const { findUp } = await import('find-up')
+  const { default: findUp } = await importModule('find-up')
   const configFile = await findUp(configFiles, { cwd: root } as { cwd: string })
 
   if (configFile) {
@@ -32,8 +32,8 @@ export const createConfig = async ({ options, viteConfig: viteOverrides = {} }: 
     root,
     configFile,
     plugins: [
-      Cypress(),
-      CypressInspect(),
+      Cypress(options),
+      await CypressInspect(),
     ],
   }
 

@@ -6,20 +6,16 @@ import type { CypressViteDevServerConfig, StartDevServer } from './types'
 
 const debug = debugFn('cypress:vite-dev-server:index')
 
-console.log('top level index')
 export const startDevServer = async ({ options, viteConfig = {} }: StartDevServer) => {
-  console.log('start dev server')
   debug('user has registered startDevServer for Vite')
+  debug('startDevServer has received options', options)
   let server
 
   try {
-    console.log('inside of try')
     const config = await createConfig({ options, viteConfig })
 
     server = await viteCreateServer(config)
-    console.log('after server try', config)
   } catch (err) {
-    console.log('err', err)
     throw new Error(err as string)
   }
 

@@ -112,5 +112,15 @@
   "engines": {
     "node": ">=12.0.0"
   },
-  "types": "types"
+  "types": "types",
+  "exports": {
+    ".": {
+      "import": "./index.mjs",
+      "require": "./index.js"
+    },
+    "./package.json": {
+      "import": "./package.json",
+      "require": "./package.json"
+    }
+  }
 }
