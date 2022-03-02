@@ -10,8 +10,6 @@ module.exports = defineConfig({
     specPattern: 'cypress/custom-integration/**/*.cy.{js,jsx,ts,tsx}',
   },
   component: {
-    // We've imported your old cypress plugins here.
-    // You may want to clean this up later by importing these.
     setupNodeEvents (on, config) {},
     specPattern: 'cypress/custom-component/**/*.cy.{js,jsx,ts,tsx}',
   },
