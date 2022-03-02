@@ -25,15 +25,15 @@ describe('gui/interactive', () => {
   })
 
   context('.getWindowArgs', () => {
-    it('quits app when onClose is called', () => {
+    it('quits app when onClose is called', async () => {
       electron.app.quit = sinon.stub()
-      interactiveMode.getWindowArgs({}).onClose()
+      (await interactiveMode.getWindowArgs({})).onClose()
 
       expect(electron.app.quit).to.be.called
     })
 
-    it('tracks state properties', () => {
-      const { trackState } = interactiveMode.getWindowArgs({})
+    it('tracks state properties', async () => {
+      const { trackState } = await interactiveMode.getWindowArgs({})
 
       const args = _.pick(trackState, 'width', 'height', 'x', 'y', 'devTools')
 
@@ -50,50 +50,50 @@ describe('gui/interactive', () => {
       // Choose preferred if you have no valid choice
       // Use the saved value if it's valid
       describe('when no dimension', () => {
-        it('renders with preferred width if no width saved', () => {
-          expect(interactiveMode.getWindowArgs({}).width).to.equal(1200)
+        it('renders with preferred width if no width saved', async () => {
+          expect(await interactiveMode.getWindowArgs({}).width).to.equal(1200)
         })
 
-        it('renders with preferred height if no height saved', () => {
-          expect(interactiveMode.getWindowArgs({}).height).to.equal(800)
+        it('renders with preferred height if no height saved', async () => {
+          expect(await interactiveMode.getWindowArgs({}).height).to.equal(800)
         })
       })
 
       describe('when saved dimension is too small', () => {
-        it('uses the preferred width', () => {
-          expect(interactiveMode.getWindowArgs({ appWidth: 1 }).width).to.equal(1200)
+        it('uses the preferred width', async () => {
+          expect((await interactiveMode.getWindowArgs({ appWidth: 1 })).width).to.equal(1200)
         })
 
         it('uses the preferred height', () => {
-          expect(interactiveMode.getWindowArgs({ appHeight: 1 }).height).to.equal(800)
+          expect((await interactiveMode.getWindowArgs({ appHeight: 1 })).height).to.equal(800)
         })
       })
 
       describe('when saved dimension is within min/max dimension', () => {
-        it('uses the saved width', () => {
-          expect(interactiveMode.getWindowArgs({ appWidth: 1500 }).width).to.equal(1500)
+        it('uses the saved width', async () => {
+          expect((await interactiveMode.getWindowArgs({ appWidth: 1500 })).width).to.equal(1500)
         })
 
-        it('uses the saved height', () => {
-          expect(interactiveMode.getWindowArgs({ appHeight: 1500 }).height).to.equal(1500)
+        it('uses the saved height', async () => {
+          expect((await interactiveMode.getWindowArgs({ appHeight: 1500 })).height).to.equal(1500)
         })
       })
     })
 
-    it('renders with saved x if it exists', () => {
-      expect(interactiveMode.getWindowArgs({ appX: 3 }).x).to.equal(3)
+    it('renders with saved x if it exists', async () => {
+      expect(await (interactiveMode.getWindowArgs({ appX: 3 })).x).to.equal(3)
     })
 
-    it('renders with no x if no x saved', () => {
-      expect(interactiveMode.getWindowArgs({}).x).to.be.undefined
+    it('renders with no x if no x saved', async () => {
+      expect(await (interactiveMode.getWindowArgs({})).x).to.be.undefined
     })
 
-    it('renders with saved y if it exists', () => {
-      expect(interactiveMode.getWindowArgs({ appY: 4 }).y).to.equal(4)
+    it('renders with saved y if it exists', async () => {
+      expect(await (interactiveMode.getWindowArgs({ appY: 4 })).y).to.equal(4)
     })
 
-    it('renders with no y if no y saved', () => {
-      expect(interactiveMode.getWindowArgs({}).y).to.be.undefined
+    it('renders with no y if no y saved', async () => {
+      expect(await (interactiveMode.getWindowArgs({})).y).to.be.undefined
     })
 
     describe('on window focus', () => {
@@ -101,20 +101,20 @@ describe('gui/interactive', () => {
         sinon.stub(menu, 'set')
       })
 
-      it('calls menu.set withInternalDevTools: true when in dev env', () => {
+      it('calls menu.set withInternalDevTools: true when in dev env', async () => {
         const env = process.env['CYPRESS_INTERNAL_ENV']
 
         process.env['CYPRESS_INTERNAL_ENV'] = 'development'
-        interactiveMode.getWindowArgs({}).onFocus()
+        await (interactiveMode.getWindowArgs({})).onFocus()
         expect(menu.set.lastCall.args[0].withInternalDevTools).to.be.true
         process.env['CYPRESS_INTERNAL_ENV'] = env
       })
 
-      it('calls menu.set withInternalDevTools: false when not in dev env', () => {
+      it('calls menu.set withInternalDevTools: false when not in dev env', async () => {
         const env = process.env['CYPRESS_INTERNAL_ENV']
 
         process.env['CYPRESS_INTERNAL_ENV'] = 'production'
-        interactiveMode.getWindowArgs({}).onFocus()
+        await (interactiveMode.getWindowArgs({})).onFocus()
         expect(menu.set.lastCall.args[0].withInternalDevTools).to.be.false
         process.env['CYPRESS_INTERNAL_ENV'] = env
       })

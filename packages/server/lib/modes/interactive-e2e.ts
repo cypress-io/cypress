@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import os from 'os'
-import { app, nativeImage as image } from 'electron'
+import { app, nativeImage } from 'electron'
 // eslint-disable-next-line no-duplicate-imports
 import type { WebContents } from 'electron'
 import * as cyIcons from '@packages/icons'
@@ -17,12 +17,23 @@ const isDev = () => {
   return Boolean(process.env['CYPRESS_INTERNAL_ENV'] === 'development')
 }
 
+// Generate a NativeImage with all available icon sizes and let the OS choose the best one.
+async function getIconNativeImage () {
+  const image = nativeImage.createEmpty()
+
+  ;(await cyIcons.getIconsAsDataURLs()).forEach(icon => {
+    image.addRepresentation(icon)
+  })
+
+  return image
+}
+
 export = {
   isMac () {
     return os.platform() === 'darwin'
   },
 
-  getWindowArgs (state) {
+  async getWindowArgs (state) {
     // Electron Window's arguments
     // These options are passed to Electron's BrowserWindow
     const minWidth = Math.round(/* 13" MacBook Air */ 1792 / 3) // Thirds
@@ -103,10 +114,10 @@ export = {
       },
     }
 
-    return _.extend(common, this.platformArgs())
+    return _.extend(common, await this.platformArgs())
   },
 
-  platformArgs () {
+  async platformArgs () {
     const args = {
       darwin: {
         show: true,
@@ -118,7 +129,7 @@ export = {
         show: true,
         frame: true,
         transparent: false,
-        icon: image.createFromPath(cyIcons.getPathToIcon('icon_128x128.png')),
+        icon: await getIconNativeImage()
       },
     }
 
@@ -146,8 +157,8 @@ export = {
     })
 
     return savedState.create(projectRoot, false).then((state) => state.get())
-    .then((state) => {
-      return Windows.open(projectRoot, port, this.getWindowArgs(state))
+    .then(async (state) => {
+      return Windows.open(projectRoot, port, await this.getWindowArgs(state))
       .then((win) => {
         ctx?.actions.electron.setBrowserWindow(win)
         Events.start({
