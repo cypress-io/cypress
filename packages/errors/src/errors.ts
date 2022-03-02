@@ -1057,6 +1057,12 @@ export const AllCypressErrors = {
 
         You can safely remove this option from your config.`
   },
+  EXPERIMENTAL_STUDIO_REMOVED: () => {
+    return errTemplate`\
+        We're ending the experimental phase of Cypress Studio and have learned a lot. Stay tuned for updates on Studio's official release in the future. You can leave feedback here: https://github.com/cypress-io/cypress/discussions/14339.
+
+        You can safely remove the ${fmt.highlight(`experimentalStudio`)} configuration option from your config.`
+  },
   FIREFOX_GC_INTERVAL_REMOVED: () => {
     return errTemplate`\
         The ${fmt.highlight(`firefoxGcInterval`)} configuration option was removed in ${fmt.cypressVersion(`8.0.0`)}. It was introduced to work around a bug in Firefox 79 and below.
