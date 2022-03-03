@@ -108,8 +108,6 @@ describe('e2e screenshots', () => {
             sizeOf(screenshot5),
             sizeOf(screenshot6),
             sizeOf(screenshot7),
-            sizeOf(screenshot8),
-            sizeOf(screenshot9),
           ])
         }).then((dimensions = []) => {
           if (browser === 'electron') {
