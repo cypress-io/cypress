@@ -901,7 +901,7 @@ type Mutation {
   cloudProjectCreate(ciProviders: [String!], name: String!, orgId: ID!, public: Boolean!): CloudProject
 
   """Request access to an organization from a projectId"""
-  cloudProjectRequestAccess(projectSlug: String!): Boolean
+  cloudProjectRequestAccess(projectSlug: String!): CloudProjectResult
   completeSetup: Query
 
   """
