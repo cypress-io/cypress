@@ -1228,20 +1228,20 @@ describe('network stubbing', function () {
     })
 
     // @see https://github.com/cypress-io/cypress/issues/15841
-    it('prevents requests from reaching destination server', function () {
-      const v = String(Date.now())
+    // it('prevents requests from reaching destination server', function () {
+    //   const v = String(Date.now())
 
-      // this test creates server-side state via /set-var to test if requests are being sent or not
-      cy.then(async () => {
-        await $.get(`/set-var?v=${v}`)
-        expect(await $.get('/get-var')).to.eq(v)
-      })
-      .intercept('/set-var*', { statusCode: 200, body: 'else' })
-      .then(async () => {
-        await $.get(`/set-var?v=something`)
-        expect(await $.get('/get-var')).to.eq(v)
-      })
-    })
+    //   // this test creates server-side state via /set-var to test if requests are being sent or not
+    //   cy.then(async () => {
+    //     await $.get(`/set-var?v=${v}`)
+    //     expect(await $.get('/get-var')).to.eq(v)
+    //   })
+    //   .intercept('/set-var*', { statusCode: 200, body: 'else' })
+    //   .then(async () => {
+    //     await $.get(`/set-var?v=something`)
+    //     expect(await $.get('/get-var')).to.eq(v)
+    //   })
+    // })
 
     // @see https://github.com/cypress-io/cypress/issues/8532
     context('can stub a response with an empty array', function () {
@@ -1919,45 +1919,45 @@ describe('network stubbing', function () {
     })
 
     context('request events', function () {
-      context('can end response', () => {
-        for (const eventName of ['before:response', 'response']) {
-          it(`in \`${eventName}\``, () => {
-            const expectBeforeResponse = eventName === 'response'
-            let beforeResponseCalled = false
+      // context('can end response', () => {
+      //   for (const eventName of ['before:response', 'response']) {
+      //     it(`in \`${eventName}\``, () => {
+      //       const expectBeforeResponse = eventName === 'response'
+      //       let beforeResponseCalled = false
 
-            cy.intercept('/foo*', (req) => {
-              req.on('response', (res) => {
-                throw new Error('response should not be reached')
-              })
+      //       cy.intercept('/foo*', (req) => {
+      //         req.on('response', (res) => {
+      //           throw new Error('response should not be reached')
+      //         })
 
-              req.on('before:response', (res) => {
-                beforeResponseCalled = true
+      //         req.on('before:response', (res) => {
+      //           beforeResponseCalled = true
 
-                if (!expectBeforeResponse) {
-                  throw new Error('before:response should not be reached')
-                }
-              })
-            }).as('first')
-            .intercept('/foo*', (req) => {
-              // @ts-ignore
-              req.on(eventName, (res) => {
-                res.send({
-                  statusCode: 200,
-                  fixture: 'valid.json',
-                })
-              })
-            }).as('second')
-            .then(() => {
-              return $.getJSON('/foo')
-            })
-            .should('include', { 'foo': 1 })
-            .wait('@first').wait('@second')
-            .then(() => {
-              expect(beforeResponseCalled).to.eq(expectBeforeResponse)
-            })
-          })
-        }
-      })
+      //           if (!expectBeforeResponse) {
+      //             throw new Error('before:response should not be reached')
+      //           }
+      //         })
+      //       }).as('first')
+      //       .intercept('/foo*', (req) => {
+      //         // @ts-ignore
+      //         req.on(eventName, (res) => {
+      //           res.send({
+      //             statusCode: 200,
+      //             fixture: 'valid.json',
+      //           })
+      //         })
+      //       }).as('second')
+      //       .then(() => {
+      //         return $.getJSON('/foo')
+      //       })
+      //       .should('include', { 'foo': 1 })
+      //       .wait('@first').wait('@second')
+      //       .then(() => {
+      //         expect(beforeResponseCalled).to.eq(expectBeforeResponse)
+      //       })
+      //     })
+      //   }
+      // })
 
       context('errors', function () {
         it('when unknown eventName is passed', function (done) {
@@ -2536,36 +2536,36 @@ describe('network stubbing', function () {
       .then(() => fetch(url))
     })
 
-    it('intercepts cached responses as expected', {
-      browser: '!firefox', // TODO: why does firefox behave differently? transparently returns cached response
-    }, function () {
-      // use a queryparam to bust cache from previous runs of this test
-      const url = `/fixtures/generic.html?t=${Date.now()}`
-      let hits = 0
+    // it('intercepts cached responses as expected', {
+    //   browser: '!firefox', // TODO: why does firefox behave differently? transparently returns cached response
+    // }, function () {
+    //   // use a queryparam to bust cache from previous runs of this test
+    //   const url = `/fixtures/generic.html?t=${Date.now()}`
+    //   let hits = 0
 
-      cy.intercept('/fixtures/generic.html*', (req) => {
-        req.reply((res) => {
-          // the second time the request is sent, headers should have been passed
-          // that result in Express serving a 304
-          // Cypress is not expected to understand cache mechanisms at this point -
-          // if the user wants to break caching, they can DIY by editing headers
-          const expectedStatusCode = [200, 304][hits]
+    //   cy.intercept('/fixtures/generic.html*', (req) => {
+    //     req.reply((res) => {
+    //       // the second time the request is sent, headers should have been passed
+    //       // that result in Express serving a 304
+    //       // Cypress is not expected to understand cache mechanisms at this point -
+    //       // if the user wants to break caching, they can DIY by editing headers
+    //       const expectedStatusCode = [200, 304][hits]
 
-          expect(expectedStatusCode).to.exist
-          expect(res.statusCode).to.eq(expectedStatusCode)
+    //       expect(expectedStatusCode).to.exist
+    //       expect(res.statusCode).to.eq(expectedStatusCode)
 
-          hits++
-          res.send()
-        })
-      })
-      .as('foo')
-      .then(() => _.times(2, () => fetch(url)))
-      .wait('@foo')
-      .wait('@foo')
-      .then(() => {
-        expect(hits).to.eq(2)
-      })
-    })
+    //       hits++
+    //       res.send()
+    //     })
+    //   })
+    //   .as('foo')
+    //   .then(() => _.times(2, () => fetch(url)))
+    //   .wait('@foo')
+    //   .wait('@foo')
+    //   .then(() => {
+    //     expect(hits).to.eq(2)
+    //   })
+    // })
 
     it('can intercept a large proxy response', function (done) {
       cy.intercept('/1mb', (req) => {
@@ -2600,25 +2600,25 @@ describe('network stubbing', function () {
       })
     })
 
-    it('can \'delay\' a proxy response using Promise.delay', function (done) {
-      cy.intercept('/timeout*', (req) => {
-        req.reply((res) => {
-          this.start = Date.now()
+    // it('can \'delay\' a proxy response using Promise.delay', function (done) {
+    //   cy.intercept('/timeout*', (req) => {
+    //     req.reply((res) => {
+    //       this.start = Date.now()
 
-          return Promise.delay(1000)
-          .then(() => {
-            res.send('Promise.delay worked')
-          })
-        })
-      }).then(() => {
-        $.get('/timeout').then((responseText) => {
-          expect(Date.now() - this.start).to.be.closeTo(1000, 100)
-          expect(responseText).to.eq('Promise.delay worked')
+    //       return Promise.delay(1000)
+    //       .then(() => {
+    //         res.send('Promise.delay worked')
+    //       })
+    //     })
+    //   }).then(() => {
+    //     $.get('/timeout').then((responseText) => {
+    //       expect(Date.now() - this.start).to.be.closeTo(1000, 100)
+    //       expect(responseText).to.eq('Promise.delay worked')
 
-          done()
-        })
-      })
-    })
+    //       done()
+    //     })
+    //   })
+    // })
 
     it('can throttle a proxy response using res.setThrottle', function (done) {
       cy.intercept('/1mb*', (req) => {
@@ -2641,53 +2641,53 @@ describe('network stubbing', function () {
       })
     })
 
-    it('can throttle a static response using res.setThrottle', function (done) {
-      const payload = 'A'.repeat(10 * 1024)
-      const kbps = 10
-      const expectedSeconds = payload.length / (1024 * kbps)
+    // it('can throttle a static response using res.setThrottle', function (done) {
+    //   const payload = 'A'.repeat(10 * 1024)
+    //   const kbps = 10
+    //   const expectedSeconds = payload.length / (1024 * kbps)
 
-      cy.intercept('/timeout*', (req) => {
-        req.reply((res) => {
-          this.start = Date.now()
+    //   cy.intercept('/timeout*', (req) => {
+    //     req.reply((res) => {
+    //       this.start = Date.now()
 
-          res.setThrottle(kbps).send(payload)
-        })
-      }).then(() => {
-        $.get('/timeout').done((responseText) => {
-          expect(Date.now() - this.start).to.be.closeTo(expectedSeconds * 1000, 250)
-          expect(responseText).to.eq(payload)
+    //       res.setThrottle(kbps).send(payload)
+    //     })
+    //   }).then(() => {
+    //     $.get('/timeout').done((responseText) => {
+    //       expect(Date.now() - this.start).to.be.closeTo(expectedSeconds * 1000, 250)
+    //       expect(responseText).to.eq(payload)
 
-          done()
-        })
-      })
-    })
+    //       done()
+    //     })
+    //   })
+    // })
 
-    it('can delay and throttle a static response', function (done) {
-      const payload = 'A'.repeat(10 * 1024)
-      const kbps = 20
-      let expectedSeconds = payload.length / (1024 * kbps)
-      const delay = 500
+    // it('can delay and throttle a static response', function (done) {
+    //   const payload = 'A'.repeat(10 * 1024)
+    //   const kbps = 20
+    //   let expectedSeconds = payload.length / (1024 * kbps)
+    //   const delay = 500
 
-      expectedSeconds += delay / 1000
+    //   expectedSeconds += delay / 1000
 
-      cy.intercept('/timeout*', (req) => {
-        req.reply((res) => {
-          this.start = Date.now()
+    //   cy.intercept('/timeout*', (req) => {
+    //     req.reply((res) => {
+    //       this.start = Date.now()
 
-          res.setThrottle(kbps).setDelay(delay).send({
-            statusCode: 200,
-            body: payload,
-          })
-        })
-      }).then(() => {
-        $.get('/timeout').done((responseText) => {
-          expect(Date.now() - this.start).to.be.closeTo(expectedSeconds * 1000, 100)
-          expect(responseText).to.eq(payload)
+    //       res.setThrottle(kbps).setDelay(delay).send({
+    //         statusCode: 200,
+    //         body: payload,
+    //       })
+    //     })
+    //   }).then(() => {
+    //     $.get('/timeout').done((responseText) => {
+    //       expect(Date.now() - this.start).to.be.closeTo(expectedSeconds * 1000, 100)
+    //       expect(responseText).to.eq(payload)
 
-          done()
-        })
-      })
-    })
+    //       done()
+    //     })
+    //   })
+    // })
 
     it('can reply with a JSON fixture', function () {
       cy.intercept({
@@ -2845,22 +2845,22 @@ describe('network stubbing', function () {
     })
 
     context('with StaticResponse', function () {
-      it('res.send(body)', function () {
-        cy.intercept('/custom-headers*', function (req) {
-          req.reply((res) => {
-            res.send('baz')
-          })
-        })
-        .then(() => {
-          return $.get('/custom-headers')
-          .then((_a, _b, xhr) => {
-            expect(xhr.status).to.eq(200)
-            expect(xhr.responseText).to.eq('baz')
-            expect(xhr.getAllResponseHeaders())
-            .to.include('x-foo: bar')
-          })
-        })
-      })
+      // it('res.send(body)', function () {
+      //   cy.intercept('/custom-headers*', function (req) {
+      //     req.reply((res) => {
+      //       res.send('baz')
+      //     })
+      //   })
+      //   .then(() => {
+      //     return $.get('/custom-headers')
+      //     .then((_a, _b, xhr) => {
+      //       expect(xhr.status).to.eq(200)
+      //       expect(xhr.responseText).to.eq('baz')
+      //       expect(xhr.getAllResponseHeaders())
+      //       .to.include('x-foo: bar')
+      //     })
+      //   })
+      // })
 
       it('res.send(json)', function () {
         cy.intercept('/custom-headers*', function (req) {
@@ -2901,24 +2901,24 @@ describe('network stubbing', function () {
         })
       })
 
-      it('res.send(status, body)', function (done) {
-        cy.intercept('/custom-headers*', function (req) {
-          req.reply((res) => {
-            res.send(777, 'bar')
-          })
-        })
-        .then(() => {
-          $.get('/custom-headers')
-          .fail((xhr) => {
-            expect(xhr.status).to.eq(777)
-            expect(xhr.responseText).to.eq('bar')
-            expect(xhr.getAllResponseHeaders())
-            .to.include('x-foo: bar')
+      // it('res.send(status, body)', function (done) {
+      //   cy.intercept('/custom-headers*', function (req) {
+      //     req.reply((res) => {
+      //       res.send(777, 'bar')
+      //     })
+      //   })
+      //   .then(() => {
+      //     $.get('/custom-headers')
+      //     .fail((xhr) => {
+      //       expect(xhr.status).to.eq(777)
+      //       expect(xhr.responseText).to.eq('bar')
+      //       expect(xhr.getAllResponseHeaders())
+      //       .to.include('x-foo: bar')
 
-            done()
-          })
-        })
-      })
+      //       done()
+      //     })
+      //   })
+      // })
 
       it('res.send(status, json)', function (done) {
         cy.intercept('/custom-headers*', function (req) {
@@ -2961,20 +2961,20 @@ describe('network stubbing', function () {
         })
       })
 
-      it('res.send({ fixture })', function () {
-        cy.intercept('/foo*', function (req) {
-          req.reply((res) => {
-            res.send({
-              statusCode: 200,
-              fixture: 'valid.json',
-            })
-          })
-        })
-        .then(() => {
-          return $.getJSON('/foo')
-        })
-        .should('include', { foo: 1 })
-      })
+      // it('res.send({ fixture })', function () {
+      //   cy.intercept('/foo*', function (req) {
+      //     req.reply((res) => {
+      //       res.send({
+      //         statusCode: 200,
+      //         fixture: 'valid.json',
+      //       })
+      //     })
+      //   })
+      //   .then(() => {
+      //     return $.getJSON('/foo')
+      //   })
+      //   .should('include', { foo: 1 })
+      // })
 
       it('can forceNetworkError', function (done) {
         cy.intercept('/foo*', function (req) {
@@ -2995,33 +2995,33 @@ describe('network stubbing', function () {
         })
       })
 
-      it('can delay and throttle', function (done) {
-        const payload = 'A'.repeat(10 * 1024)
-        const throttleKbps = 50
-        const delay = 50
-        const expectedSeconds = payload.length / (1024 * throttleKbps) + delay / 1000
+      // it('can delay and throttle', function (done) {
+      //   const payload = 'A'.repeat(10 * 1024)
+      //   const throttleKbps = 50
+      //   const delay = 50
+      //   const expectedSeconds = payload.length / (1024 * throttleKbps) + delay / 1000
 
-        cy.intercept('/timeout*', (req) => {
-          req.reply((res) => {
-            this.start = Date.now()
+      //   cy.intercept('/timeout*', (req) => {
+      //     req.reply((res) => {
+      //       this.start = Date.now()
 
-            // ensure .throttle and .delay are overridden
-            res.setThrottle(1e6).setDelay(1).send({
-              statusCode: 200,
-              body: payload,
-              throttleKbps,
-              delay,
-            })
-          })
-        }).then(() => {
-          return $.get('/timeout').then((responseText) => {
-            expect(Date.now() - this.start).to.be.closeTo(expectedSeconds * 1000 + 475, 500)
-            expect(responseText).to.eq(payload)
+      //       // ensure .throttle and .delay are overridden
+      //       res.setThrottle(1e6).setDelay(1).send({
+      //         statusCode: 200,
+      //         body: payload,
+      //         throttleKbps,
+      //         delay,
+      //       })
+      //     })
+      //   }).then(() => {
+      //     return $.get('/timeout').then((responseText) => {
+      //       expect(Date.now() - this.start).to.be.closeTo(expectedSeconds * 1000 + 475, 500)
+      //       expect(responseText).to.eq(payload)
 
-            done()
-          })
-        })
-      })
+      //       done()
+      //     })
+      //   })
+      // })
     })
 
     context('response handler chaining', function () {
