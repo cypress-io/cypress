@@ -143,7 +143,7 @@ async function makeE2ETasks () {
       await globalPubSub.emitThen('test:cleanup')
       await ctx.actions.app.removeAppDataDir()
       await ctx.actions.app.ensureAppDataDirExists()
-      await ctx.resetForTest()
+      await ctx.reinitializeCypress()
       sinon.reset()
       sinon.restore()
       remoteGraphQLIntercept = undefined
@@ -239,7 +239,7 @@ async function makeE2ETasks () {
       const modeOptions = argUtils.toObject(processedArgv)
 
       // Reset the state of the context
-      await ctx.resetForTest(modeOptions)
+      await ctx.reinitializeCypress(modeOptions)
 
       // Handle any pre-loading that should occur based on the launch arg settings
       await ctx.initializeMode()
@@ -263,7 +263,7 @@ async function makeE2ETasks () {
       const modeOptions = argUtils.toObject(processedArgv)
 
       // Reset the state of the context
-      await ctx.resetForTest(modeOptions)
+      await ctx.reinitializeCypress(modeOptions)
 
       // Handle any pre-loading that should occur based on the launch arg settings
       await ctx.initializeMode()

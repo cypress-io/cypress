@@ -160,7 +160,7 @@ describe('code-generator', () => {
         'import Button from "./Button"',
       ],
       componentName: 'Button',
-      docsLink: '// see: https://reactjs.org/docs/test-utils.html',
+      docsLink: '// see: https://on.cypress.io/component-testing',
       mount: 'mount(<Button />)',
       fileName,
     }
@@ -178,7 +178,7 @@ describe('code-generator', () => {
             
             describe('<Button />', () => {
               it('renders', () => {
-                // see: https://reactjs.org/docs/test-utils.html
+                // see: https://on.cypress.io/component-testing
                 mount(<Button />)
               })
             })`,
