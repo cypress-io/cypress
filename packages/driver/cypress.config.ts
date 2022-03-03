@@ -1,6 +1,7 @@
 import { defineConfig } from 'cypress'
 
 export default defineConfig({
+  viewportWidth: 1005,
   'projectId': 'ypt4pf',
   'hosts': {
     '*.foobar.com': '127.0.0.1',

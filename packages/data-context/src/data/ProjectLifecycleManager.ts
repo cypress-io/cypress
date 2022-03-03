@@ -871,7 +871,7 @@ export class ProjectLifecycleManager {
   addWatcherFor (groupName: 'config' | 'setupNodeEvents', file: string) {
     const w = this.addWatcher(file)
 
-    w.on('all', (evt) => {
+    const fileChangeHandle = (evt: string) => {
       debug(`changed ${file}: ${evt}`)
       // TODO: in the future, we will make this more specific to the individual process we need to load
       if (groupName === 'config') {
@@ -889,7 +889,10 @@ export class ProjectLifecycleManager {
         })
         .catch(this.onLoadError)
       }
-    })
+    }
+
+    // Debounced because this can trigger many times rapidly.
+    w.on('all', _.debounce(fileChangeHandle, 100))
 
     return w
   }

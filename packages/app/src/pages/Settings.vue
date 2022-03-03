@@ -15,6 +15,9 @@ query Settings {
   ...SettingsContainer
 }`
 
-const query = useQuery({ query: SettingsDocument })
+const query = useQuery({
+  query: SettingsDocument,
+  requestPolicy: 'network-only',
+})
 
 </script>

@@ -11,7 +11,7 @@ export const pubSubExchange = (io: Socket): Exchange => {
       watchedOperations.forEach((op) => {
         client.reexecuteOperation(
           client.createRequestOperation('query', op, {
-            requestPolicy: 'cache-and-network',
+            requestPolicy: 'network-only',
           }),
         )
       })

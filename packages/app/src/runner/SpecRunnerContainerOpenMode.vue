@@ -18,6 +18,8 @@ import type { ResolvedConfigProp } from '../types'
 import { useAutStore, useSpecStore, viewportDefaults } from '../store'
 import SpecRunnerOpenMode from './SpecRunnerOpenMode.vue'
 import { useUnifiedRunner } from './unifiedRunner'
+import { getEventManager } from '../runner'
+import debounce from 'lodash/debounce'
 
 const props = defineProps<{
   gql: SpecRunnerFragment
@@ -36,6 +38,10 @@ watchEffect(() => {
    * such as viewportHeight, viewportWidth, etc.
    * Unfortunately, we  still rely on the static window.UnifiedRunner.config
    * when initializing the driver, so we need to update that, too.
+   *
+   * TODO: Consider if putting all these in a store (eg configStore)
+   * is a good way to centralize these and alleviate the need for
+   * window.UnifiedRunner.config.
    */
   const fields = ['viewportWidth', 'viewportHeight'] as const
   const [viewportWidth, viewportHeight] = fields.map((field) => {
@@ -51,14 +57,28 @@ watchEffect(() => {
   }
 
   for (const prop of (props.gql.currentProject?.config as ResolvedConfigProp[])) {
-    // // Don't change things from null -> undefined.
-    // if (prop.value === null || prop.value === undefined) {
-    //   continue
-    // }
+    // Don't change things from null -> undefined.
+    if (prop.value === null || prop.value === undefined) {
+      continue
+    }
 
     window.UnifiedRunner.config[prop.field] = prop.value
   }
+
+  // Sometimes data-context-push is fired many times in rapid
+  // succession. We don't want to trigger runner:restart every time,
+  // so we debounce this function so ensure it's only called once with the
+  // latest values from GraphQL.
+  rerunCurrentSpec()
 })
+
+const rerunCurrentSpec = debounce(() => {
+  if (!specStore.activeSpec || !initialized.value) {
+    return
+  }
+
+  getEventManager().reporterBus.emit('runner:restart')
+}, 50)
 
 const { initialized, watchSpec } = useUnifiedRunner()
 

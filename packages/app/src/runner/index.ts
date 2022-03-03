@@ -320,6 +320,9 @@ async function initialize () {
   // going to manage it
   window.UnifiedRunner.config = config
 
+  const autStore = useAutStore()
+
+  autStore.updateDimensions(config.viewportWidth, config.viewportHeight)
   // window.UnifiedRunner exists now, since the Webpack bundle with
   // the UnifiedRunner namespace was injected by `injectBundle`.
   initializeEventManager(window.UnifiedRunner)
