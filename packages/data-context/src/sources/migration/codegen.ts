@@ -329,7 +329,7 @@ export async function cleanUpIntegrationFolder (projectRoot: string) {
   } catch (e: any) {
     // only throw if the folder exists
     if (e.code !== 'ENOENT') {
-      throw Error(`Failed to remove ${integrationPath}`)
+      throw e
     }
   }
 }

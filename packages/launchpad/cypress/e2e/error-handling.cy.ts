@@ -9,7 +9,6 @@ describe('Error handling', () => {
     cy.get('[data-cy-testingType=e2e]').click()
 
     cy.get('body')
-    .should('contain.text', 'Please confirm that everything looks correct in your cypress.config.js file.')
     .and('contain.text', 'threw an error from')
 
     cy.get('[data-cy="collapsible-header"]')
@@ -42,7 +41,6 @@ describe('Error handling', () => {
     cy.visitLaunchpad()
 
     cy.get('body')
-    .should('contain.text', 'Please confirm that everything looks correct in your cypress.config.js file.')
     .should('contain.text', 'Error Loading Config')
     .and('contain.text', 'Error thrown from Config')
 
