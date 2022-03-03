@@ -61,12 +61,8 @@ export class MigrationActions {
 
     const projectRoot = this.ctx.path.join(this.ctx.currentProject)
 
-    try {
-      await moveSpecFiles(projectRoot, specsToMove)
-      await cleanUpIntegrationFolder(this.ctx.currentProject)
-    } catch (err: any) {
-      this.ctx.coreData.baseError = err
-    }
+    await moveSpecFiles(projectRoot, specsToMove)
+    await cleanUpIntegrationFolder(this.ctx.currentProject)
   }
 
   async renameSupportFile () {

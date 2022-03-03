@@ -74,7 +74,8 @@
 </template>
 <script setup lang="ts">
 import { useI18n } from '@cy/i18n'
-import { VerticalBrowserListItemsFragment, VerticalBrowserListItems_SetBrowserDocument } from '../../generated/graphql'
+import { VerticalBrowserListItems_SetBrowserDocument } from '../../generated/graphql'
+import type { VerticalBrowserListItemsFragment } from '../../generated/graphql'
 import { computed } from 'vue'
 import { gql, useMutation } from '@urql/vue'
 import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
