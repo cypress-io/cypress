@@ -825,7 +825,7 @@ describe('src/cy/commands/navigation', () => {
         onLoad,
       })
       .then((win) => {
-        expect(win.bar).to.not.exist
+        expect(win.foo).to.equal('bar')
         expect(onLoad).not.to.have.been.called
       })
     })

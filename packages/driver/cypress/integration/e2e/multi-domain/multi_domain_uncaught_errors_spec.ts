@@ -6,7 +6,7 @@ describe('multi-domain - uncaught errors', { experimentalSessionSupport: true, e
   })
 
   describe('sync errors', () => {
-    it('fails the current test/command if sync errors are thrown from the switchToDomain callback', () => {
+    it('fails the current test/command if sync errors are thrown from the switchToDomain callback', (done) => {
       const uncaughtExceptionSpy = cy.spy()
       const r = cy.state('runnable')
 
@@ -25,6 +25,8 @@ describe('multi-domain - uncaught errors', { experimentalSessionSupport: true, e
         // lastly, make sure the `uncaught:exception' handler is NOT called in the primary
         expect(uncaughtExceptionSpy).not.to.be.called
         expect(runnable).to.be.equal(r)
+
+        done()
       })
 
       cy.switchToDomain('foobar.com', () => {
@@ -49,7 +51,7 @@ describe('multi-domain - uncaught errors', { experimentalSessionSupport: true, e
       })
     })
 
-    it('returns true from cy.on(uncaught:exception), resulting in cy:fail to be called in the primary', () => {
+    it('returns true from cy.on(uncaught:exception), resulting in cy:fail to be called in the primary', (done) => {
       cy.on('fail', (err) => {
         expect(err.name).to.eq('Error')
         expect(err.message).to.include('sync error')
@@ -57,6 +59,8 @@ describe('multi-domain - uncaught errors', { experimentalSessionSupport: true, e
         expect(err.message).to.not.include('https://on.cypress.io/uncaught-exception-from-application')
         // @ts-ignore
         expect(err.docsUrl).to.deep.eq(['https://on.cypress.io/uncaught-exception-from-application'])
+
+        done()
       })
 
       cy.switchToDomain('foobar.com', () => {
@@ -99,7 +103,7 @@ describe('multi-domain - uncaught errors', { experimentalSessionSupport: true, e
       })
     })
 
-    it('fails the current test/command if async errors are thrown from the secondary domain AUT', () => {
+    it('fails the current test/command if async errors are thrown from the secondary domain AUT', (done) => {
       const uncaughtExceptionSpy = cy.spy()
       const r = cy.state('runnable')
 
@@ -115,6 +119,8 @@ describe('multi-domain - uncaught errors', { experimentalSessionSupport: true, e
 
         expect(uncaughtExceptionSpy).not.to.be.called
         expect(runnable).to.be.equal(r)
+
+        done()
       })
 
       cy.switchToDomain('foobar.com', () => {

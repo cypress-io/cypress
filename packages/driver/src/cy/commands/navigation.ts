@@ -431,18 +431,21 @@ const stabilityChanged = (Cypress, state, config, stable) => {
   }
 }
 
+// filter the options to only the REQUEST_URL_OPTS options, normalize the timeout
+// value to the responseTimeout, and add the isMultiDomain value.
+//
 // there are really two timeout values - pageLoadTimeout
 // and the underlying responseTimeout. for the purposes
-// of resolving resolving the url, we only care about
+// of resolving the url, we only care about
 // responseTimeout - since pageLoadTimeout is a driver
 // and browser concern. therefore we normalize the options
 // object and send 'responseTimeout' as options.timeout
 // for the backend.
-const normalizeTimeoutOptions = (options) => {
+const normalizeOptions = (options) => {
   return _
   .chain(options)
   .pick(REQUEST_URL_OPTS)
-  .extend({ timeout: options.responseTimeout })
+  .extend({ timeout: options.responseTimeout, isMultiDomain: !!Cypress.state('isMultiDomain') })
   .value()
 }
 
@@ -493,7 +496,7 @@ export default (Commands, Cypress, cy, state, config) => {
     return Cypress.backend(
       'resolve:url',
       url,
-      normalizeTimeoutOptions(options),
+      normalizeOptions(options),
     )
     .then((resp: any = {}) => {
       if (!resp.isOkStatusCode) {
@@ -538,6 +541,10 @@ export default (Commands, Cypress, cy, state, config) => {
     try {
       cy.$$('body', contentWindow.document)
     } catch (e) {} // eslint-disable-line no-empty
+  })
+
+  Cypress.multiDomainCommunicator.on('visit:url', ({ url }, _domain) => {
+    $utils.iframeSrc(Cypress.$autIframe, url)
   })
 
   Commands.addAll({
@@ -894,6 +901,12 @@ export default (Commands, Cypress, cy, state, config) => {
 
           knownCommandCausedInstability = true
 
+          // if this is multi-domain, we need to tell the primary to change
+          // the AUT iframe since we don't have access to it
+          if (Cypress.state('isMultiDomain')) {
+            return Cypress.emit('multi:domain:visit:url', { url })
+          }
+
           return $utils.iframeSrc($autIframe, url)
         })
       }
@@ -969,24 +982,36 @@ export default (Commands, Cypress, cy, state, config) => {
           return cannotVisitDifferentOrigin(remote.origin, previousDomainVisited, remote, existing, options._log)
         }
 
-        const current = $Location.create(win.location.href)
+        // in multi-domain, the window may not have been set yet if nothing has been loaded in the secondary domain,
+        // it's also possible for a new test to start and for a cross-domain failure to occur if the win is set but
+        // the AUT hasn't yet navigated to the secondary domain
+        if (win) {
+          try {
+            const current = $Location.create(win.location.href)
 
-        // if all that is changing is the hash then we know
-        // the browser won't actually make a new http request
-        // for this, and so we need to resolve onLoad immediately
-        // and bypass the actual visit resolution stuff
-        if (bothUrlsMatchAndOneHasHash(current, remote)) {
-          // https://github.com/cypress-io/cypress/issues/1311
-          if (current.hash === remote.hash) {
-            consoleProps['Note'] = 'Because this visit was to the same hash, the page did not reload and the onBeforeLoad and onLoad callbacks did not fire.'
+            // if all that is changing is the hash then we know
+            // the browser won't actually make a new http request
+            // for this, and so we need to resolve onLoad immediately
+            // and bypass the actual visit resolution stuff
+            if (bothUrlsMatchAndOneHasHash(current, remote)) {
+              // https://github.com/cypress-io/cypress/issues/1311
+              if (current.hash === remote.hash) {
+                consoleProps['Note'] = 'Because this visit was to the same hash, the page did not reload and the onBeforeLoad and onLoad callbacks did not fire.'
 
-            return onLoad({ runOnLoadCallback: false })
+                return onLoad({ runOnLoadCallback: false })
+              }
+
+              return changeIframeSrc(remote.href, 'hashchange')
+              .then(() => {
+                return onLoad({})
+              })
+            }
+          } catch (e) {
+            // if this is a cross-domain error, skip it
+            if (e.name !== 'SecurityError') {
+              throw e
+            }
           }
-
-          return changeIframeSrc(remote.href, 'hashchange')
-          .then(() => {
-            return onLoad({})
-          })
         }
 
         if (existingHash) {
@@ -1035,7 +1060,6 @@ export default (Commands, Cypress, cy, state, config) => {
           // if the origin currently matches
           // then go ahead and change the iframe's src
           // and we're good to go
-          // if origin is existing.origin
           if (remote.originPolicy === existing.originPolicy) {
             previousDomainVisited = remote.origin
 
@@ -1045,6 +1069,14 @@ export default (Commands, Cypress, cy, state, config) => {
             .then(() => {
               return onLoad(resp)
             })
+          }
+
+          // if we are in multi-domain and the origin policies weren't the same,
+          // we need to throw an error since the user tried to visit a new
+          // domain which isn't allowed within a multi-domain block
+          if (Cypress.state('isMultiDomain') && win) {
+            // TODO: need a better error message
+            return cannotVisitDifferentOrigin(remote.origin, previousDomainVisited, remote, existing, options._log)
           }
 
           // if we've already visited a new origin
@@ -1162,7 +1194,8 @@ export default (Commands, Cypress, cy, state, config) => {
         // so that we nuke the previous state. subsequent
         // visits will not navigate to about:blank so that
         // our history entries are intact
-        if (!hasVisitedAboutBlank) {
+        // TODO: is this okay to skip for multi-domain?
+        if (!hasVisitedAboutBlank && !Cypress.state('isMultiDomain')) {
           hasVisitedAboutBlank = true
           currentlyVisitingAboutBlank = true
 

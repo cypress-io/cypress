@@ -11,7 +11,10 @@ export const handleMiscEvents = (Cypress: Cypress.Cypress, cy: $Cy, specBridgeCo
   })
 
   specBridgeCommunicator.on('viewport:changed:end', () => {
-    if (viewportChangedCallbackFn) viewportChangedCallbackFn()
+    if (viewportChangedCallbackFn) {
+      viewportChangedCallbackFn()
+      viewportChangedCallbackFn = null
+    }
   })
 
   // TODO: Should state syncing be built into cy.state instead of being explicitly called?
@@ -29,5 +32,9 @@ export const handleMiscEvents = (Cypress: Cypress.Cypress, cy: $Cy, specBridgeCo
   // @ts-ignore
   Cypress.on('url:changed', (url) => {
     specBridgeCommunicator.toPrimary('url:changed', url)
+  })
+
+  Cypress.on('multi:domain:visit:url', (args) => {
+    specBridgeCommunicator.toPrimary('visit:url', args)
   })
 }

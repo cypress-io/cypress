@@ -10,7 +10,10 @@ export const handleScreenshots = (Cypress: Cypress.Cypress, specBridgeCommunicat
   })
 
   specBridgeCommunicator.on('before:screenshot:end', () => {
-    if (beforeScreenshotCallback) beforeScreenshotCallback()
+    if (beforeScreenshotCallback) {
+      beforeScreenshotCallback()
+      beforeScreenshotCallback = null
+    }
   })
 
   Cypress.on('after:screenshot', (config) => {

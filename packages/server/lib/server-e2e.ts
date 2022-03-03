@@ -304,9 +304,11 @@ export class ServerE2E extends ServerBase<SocketE2E> {
                 // and set the domain vs not
                 if (isOk && details.isHtml) {
                   // reset the domain to the new url if we're not
-                  // handling a local file
-                  if (!handlingLocalFile) {
+                  // handling a local file and we aren't in multi-domain
+                  if (!handlingLocalFile && !options.isMultiDomain) {
                     this._onDomainSet(newUrl, options)
+                  } else {
+                    restorePreviousState()
                   }
 
                   const responseBufferStream = new stream.PassThrough({
@@ -321,6 +323,7 @@ export class ServerE2E extends ServerBase<SocketE2E> {
                     details,
                     originalUrl,
                     response: incomingRes,
+                    isMultiDomain: options.isMultiDomain,
                   })
                 } else {
                   // TODO: move this logic to the driver too for

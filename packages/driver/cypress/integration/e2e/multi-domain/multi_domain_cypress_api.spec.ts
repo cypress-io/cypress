@@ -5,44 +5,36 @@ describe('multi-domain Cypress API', { experimentalSessionSupport: true, experim
     cy.get('a[data-cy="multi-domain-secondary-link"]').click()
   })
 
-  // FIXME: Commands adding/overwriting should be condensed into one test with two switchToDomain tests
-  // once multiple switchToDomain calls are supported
   context('Commands', () => {
-    context('add', () => {
-      it('adds a custom command', () => {
-        cy.switchToDomain('foobar.com', () => {
-          // @ts-ignore
-          Cypress.Commands.add('foo', () => 'bar')
+    it('adds a custom command', () => {
+      cy.switchToDomain('foobar.com', () => {
+        // @ts-ignore
+        Cypress.Commands.add('foo', () => 'bar')
 
-          // @ts-ignore
-          cy.foo().should('equal', 'bar')
-        })
+        // @ts-ignore
+        cy.foo().should('equal', 'bar')
       })
 
-      it('persists defined commands through spec bridge', () => {
-        cy.switchToDomain('foobar.com', () => {
-          // @ts-ignore
-          cy.foo().should('equal', 'bar')
-        })
+      // persists added command through spec bridge
+      cy.switchToDomain('foobar.com', () => {
+        // @ts-ignore
+        cy.foo().should('equal', 'bar')
       })
     })
 
-    context('overwrite', () => {
-      it('overwrites an existing command in the spec bridge', () => {
-        cy.switchToDomain('foobar.com', () => {
-          // @ts-ignore
-          Cypress.Commands.overwrite('foo', () => 'baz')
+    it('overwrites an existing command in the spec bridge', () => {
+      cy.switchToDomain('foobar.com', () => {
+        // @ts-ignore
+        Cypress.Commands.overwrite('foo', () => 'baz')
 
-          // @ts-ignore
-          cy.foo().should('equal', 'baz')
-        })
+        // @ts-ignore
+        cy.foo().should('equal', 'baz')
       })
 
-      it('persists overwritten command through spec bridge', () => {
-        cy.switchToDomain('foobar.com', () => {
-          // @ts-ignore
-          cy.foo().should('equal', 'baz')
-        })
+      // persists overwritten command through spec bridge
+      cy.switchToDomain('foobar.com', () => {
+        // @ts-ignore
+        cy.foo().should('equal', 'baz')
       })
     })
   })
@@ -60,8 +52,6 @@ describe('multi-domain Cypress API', { experimentalSessionSupport: true, experim
       })
     })
 
-    // FIXME: Commands adding/overwriting should be condensed into one test with two switchToDomain tests
-    // once multiple switchToDomain calls are supported
     it('allows a user to configure defaults', () => {
       cy.switchToDomain('foobar.com', () => {
         const multiDomainKeyboardDefaults = Cypress.Keyboard.defaults({
@@ -72,9 +62,8 @@ describe('multi-domain Cypress API', { experimentalSessionSupport: true, experim
           keystrokeDelay: 60,
         })
       })
-    })
 
-    it('persists default configuration changes through spec bridge', () => {
+      // persists default configuration changes through spec bridge
       cy.switchToDomain('foobar.com', () => {
         const multiDomainKeyboardDefaults = Cypress.Keyboard.defaults({})
 
@@ -106,8 +95,6 @@ describe('multi-domain Cypress API', { experimentalSessionSupport: true, experim
       })
     })
 
-    // FIXME: Commands adding/overwriting should be condensed into one test with two switchToDomain tests
-    // once multiple switchToDomain calls are supported
     it('allows a user to configure defaults', () => {
       cy.switchToDomain('foobar.com', () => {
         const multiDomainScreenshotDefaults = Cypress.Screenshot.defaults({
@@ -120,9 +107,8 @@ describe('multi-domain Cypress API', { experimentalSessionSupport: true, experim
           overwrite: true,
         })
       })
-    })
 
-    it('persists default configuration changes through spec bridge', () => {
+      // persists default configuration changes through spec bridge
       cy.switchToDomain('foobar.com', () => {
         const multiDomainScreenshotDefaults = Cypress.Screenshot.defaults({})
 

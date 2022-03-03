@@ -17,6 +17,7 @@ declare namespace Cypress {
     (action: 'viewport:changed', fn?: (viewport: { viewportWidth: string, viewportHeight: string }, callback: () => void) => void)
     (action: 'before:screenshot', fn: (config: {}, fn: () => void) => void)
     (action: 'after:screenshot', config: {})
+    (action: 'multi:domain:visit:url', fn: ({ url: string }) => void)
   }
 
   interface cy {

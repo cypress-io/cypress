@@ -11,6 +11,7 @@ interface RunDomainFnOptions {
   fn: string
   skipConfigValidation: boolean
   state: {}
+  isStable: boolean
 }
 
 export const handleDomainFn = (Cypress: Cypress.Cypress, cy: $Cy, specBridgeCommunicator: SpecBridgeDomainCommunicator) => {
@@ -39,17 +40,18 @@ export const handleDomainFn = (Cypress: Cypress.Cypress, cy: $Cy, specBridgeComm
     // Set the state ctx to the runnable ctx to ensure they remain in sync
     cy.state('ctx', cy.state('runnable').ctx)
 
-    // Stability is always false when we start as the page will always be
-    // loading at this point
-    cy.isStable(false, 'multi-domain-start')
+    cy.state('isMultiDomain', true)
   }
 
   specBridgeCommunicator.on('run:domain:fn', async (options: RunDomainFnOptions) => {
-    const { config, data, env, fn, state, skipConfigValidation } = options
+    const { config, data, env, fn, state, skipConfigValidation, isStable } = options
 
     let queueFinished = false
 
     reset(state)
+
+    // Stability is sync'd with the primary stability
+    cy.isStable(isStable, 'multi:domain:fn')
 
     // @ts-ignore
     window.__cySkipValidateConfig = skipConfigValidation || false
