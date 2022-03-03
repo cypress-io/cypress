@@ -5,7 +5,12 @@ const Promise = require('bluebird')
 const UNDEFINED_SERIALIZED = '__cypress_undefined__'
 
 const serializeError = (err) => {
-  const obj = _.pick(err, 'name', 'message', 'stack', 'code', 'annotated', 'type', 'details', 'isCypressErr', 'messageMarkdown', 'originalError')
+  const obj = _.pick(err,
+    'name', 'message', 'stack', 'code', 'annotated', 'type',
+    'details', 'isCypressErr', 'messageMarkdown',
+    'originalError',
+    // Location of the error when a TSError occurs (parse error from ts-node)
+    'tsErrorLocation')
 
   if (obj.originalError) {
     obj.originalError = serializeError(obj.originalError)

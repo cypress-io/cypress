@@ -1086,5 +1086,20 @@ describe('visual error templates', () => {
         default: ['/path/to/config.ts', {}],
       }
     },
+    UNEXPECTED_INTERNAL_ERROR: () => {
+      return {
+        default: [makeErr()],
+      }
+    },
+    UNEXPECTED_MUTATION_ERROR: () => {
+      return {
+        default: ['wizardUpdate', {}, makeErr()],
+      }
+    },
+    DASHBOARD_GRAPHQL_ERROR: () => {
+      return {
+        default: [makeErr()],
+      }
+    },
   })
 })

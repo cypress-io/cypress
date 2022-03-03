@@ -31,7 +31,7 @@ describe('<Config/>', { viewportWidth: 1200, viewportHeight: 1600 }, () => {
         const sourceTypes = ['default', 'config', 'env', 'cli', 'plugin']
 
         sourceTypes.forEach((sourceType) => {
-          result.currentProject?.config?.unshift({
+          result.config?.unshift({
             field: sourceType,
             value: `testValue-${sourceType}`,
             from: sourceType,
