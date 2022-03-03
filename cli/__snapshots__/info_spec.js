@@ -71,6 +71,23 @@ This is a pre-release build of Cypress.
 Build info:
   Commit SHA: abc123
   Commit Branch: someBranchName
-  Commit Date: Wed Feb 02 2022 xx:xx:xx GMT-0500 (Eastern Standard Time)
+  Commit Date: 2022-02-02Txx:xx:xx.000Z
+
+`
+
+exports['logs additional info about development'] = `
+
+Proxy Settings: none detected
+Environment Variables: none detected
+
+Application Data: /user/app/data/path
+Browser Profiles: /user/app/data/path/to/browsers
+Binary Caches: /user/path/to/binary/cache
+
+Cypress Version: 0.0.0-development (pre-release)
+System Platform: linux (Foo-OsVersion)
+System Memory: 1.2 GB free 400 MB
+
+This is the development (un-built) Cypress CLI.
 
 `

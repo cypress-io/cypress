@@ -78,9 +78,15 @@ describe('exec info', function () {
       stable: false,
       commitSha: 'abc123',
       commitBranch: 'someBranchName',
-      commitDate: new Date('02-02-2022'),
+      commitDate: new Date('02-02-2022').toISOString(),
     })
 
     await startInfoAndSnapshot('logs additional info about pre-releases')
+  })
+
+  it('logs if unbuilt development', async () => {
+    util.pkgBuildInfo.returns(undefined)
+
+    await startInfoAndSnapshot('logs additional info about development')
   })
 })
