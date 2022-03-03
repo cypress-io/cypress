@@ -73,6 +73,32 @@ describe('/lib/tasks/install', function () {
       })
     })
 
+    describe('non-stable builds', () => {
+      function runInstall () {
+        return install.start({
+          buildInfo: {
+            stable: false,
+            commitSha: 'abc123',
+            commitBranch: 'aBranchName',
+            commitDate: new Date('11-27-1996').toISOString(),
+          },
+        })
+      }
+
+      it('install from a constructed CDN URL', async function () {
+        await runInstall()
+
+        expect(download.start).to.be.calledWithMatch({
+          version: 'https://cdn.cypress.io/beta/binary/0.0.0-development/darwin-x64/aBranchName-abc123/cypress.zip',
+        })
+      })
+
+      it('logs a warning about installing a pre-release', async function () {
+        await runInstall()
+        snapshot(normalize(this.stdout.toString()))
+      })
+    })
+
     describe('override version', function () {
       it('warns when specifying cypress version in env', function () {
         const version = '0.12.1'

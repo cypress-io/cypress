@@ -3,7 +3,6 @@ const os = require('os')
 const path = require('path')
 const untildify = require('untildify')
 const debug = require('debug')('cypress:cli')
-const { buildInfo } = require('../../package.json')
 
 const fs = require('../fs')
 const util = require('../util')
@@ -51,7 +50,7 @@ const getBinaryDir = (version = util.pkgVersion()) => {
   return path.join(getVersionDir(version), getPlatFormBinaryFolder())
 }
 
-const getVersionDir = (version = util.pkgVersion()) => {
+const getVersionDir = (version = util.pkgVersion(), buildInfo = util.pkgBuildInfo()) => {
   if (buildInfo && !buildInfo.stable) {
     version = ['beta', version, buildInfo.commitBranch, buildInfo.commitSha].join('-')
   }
