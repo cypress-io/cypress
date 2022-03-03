@@ -94,7 +94,13 @@ const showConnectDialog = ref(false)
 
 gql`
 mutation RunsErrorRenderer_RequestAccess( $projectId: String! ) {
-  cloudProjectRequestAccess(projectSlug: $projectId)
+  cloudProjectRequestAccess(projectSlug: $projectId) {
+    __typename
+    ... on CloudProjectUnauthorized {
+      message
+      hasRequestedAccess
+    }
+  }
 }
 `
 
