@@ -135,7 +135,7 @@ export function makeUrqlClient (config: UrqlClientConfig): Client {
 
   return createClient({
     url,
-    requestPolicy: cypressInRunMode ? 'cache-only' : 'cache-first',
+    requestPolicy: cypressInRunMode ? 'cache-only' : 'network-only',
     exchanges,
 
     // Rather than authoring a custom exchange, let's just polyfill the "fetch"

@@ -26,6 +26,7 @@
 
 <script lang="ts" setup>
 import { gql, useQuery } from '@urql/vue'
+import { onMounted } from 'vue'
 import { SpecPageContainerDocument } from '../../generated/graphql'
 import { getAutIframeModel } from '../../runner'
 import SpecRunnerContainerOpenMode from '../../runner/SpecRunnerContainerOpenMode.vue'
@@ -49,6 +50,10 @@ const query = useQuery({
   query: SpecPageContainerDocument,
   requestPolicy: isRunMode ? 'cache-only' : 'network-only',
   pause: isRunMode && window.top === window,
+})
+
+onMounted(() => {
+  query.executeQuery()
 })
 
 // because we are not using GraphQL in run mode, and we still need

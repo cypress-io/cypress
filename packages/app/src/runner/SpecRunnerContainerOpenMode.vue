@@ -28,6 +28,16 @@ const props = defineProps<{
 const specStore = useSpecStore()
 const autStore = useAutStore()
 
+const { initialized, watchSpec } = useUnifiedRunner()
+
+const rerunCurrentSpec = debounce(() => {
+  if (!specStore.activeSpec || !initialized.value) {
+    return
+  }
+
+  getEventManager().reporterBus.emit('runner:restart')
+}, 50)
+
 watchEffect(() => {
   /**
    * In open mode, we want to support updating cypress.config.js
@@ -71,16 +81,6 @@ watchEffect(() => {
   // latest values from GraphQL.
   rerunCurrentSpec()
 })
-
-const rerunCurrentSpec = debounce(() => {
-  if (!specStore.activeSpec || !initialized.value) {
-    return
-  }
-
-  getEventManager().reporterBus.emit('runner:restart')
-}, 50)
-
-const { initialized, watchSpec } = useUnifiedRunner()
 
 const specs = computed(() => {
   return props.gql.currentProject?.specs ?? []

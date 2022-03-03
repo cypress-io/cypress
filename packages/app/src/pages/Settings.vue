@@ -9,6 +9,7 @@
 import { gql, useQuery } from '@urql/vue'
 import SettingsContainer from '../settings/SettingsContainer.vue'
 import { SettingsDocument } from '../generated/graphql'
+import { onMounted } from 'vue'
 
 gql`
 query Settings {
@@ -17,7 +18,9 @@ query Settings {
 
 const query = useQuery({
   query: SettingsDocument,
-  requestPolicy: 'network-only',
 })
 
+onMounted(() => {
+  query.executeQuery({})
+})
 </script>

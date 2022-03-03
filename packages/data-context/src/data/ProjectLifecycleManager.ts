@@ -534,6 +534,7 @@ export class ProjectLifecycleManager {
       }
 
       this.ctx.emitter.toLaunchpad()
+      this.ctx.emitter.toApp()
     })
     .catch((err) => {
       debug(`catch %o`, err)
@@ -804,6 +805,7 @@ export class ProjectLifecycleManager {
     // allow for more granular concurrent notifications then our current
     // notify the frontend & refetch approach
     const toLaunchpad = this.ctx.emitter.toLaunchpad
+    const toApp = this.ctx.emitter.toApp
 
     this.ctx.emitter.toLaunchpad = () => {}
 
@@ -826,7 +828,9 @@ export class ProjectLifecycleManager {
     })
     .finally(() => {
       this.ctx.emitter.toLaunchpad = toLaunchpad
+      this.ctx.emitter.toApp = toApp
       this.ctx.emitter.toLaunchpad()
+      this.ctx.emitter.toApp()
     })
   }
 
@@ -875,19 +879,11 @@ export class ProjectLifecycleManager {
       debug(`changed ${file}: ${evt}`)
       // TODO: in the future, we will make this more specific to the individual process we need to load
       if (groupName === 'config') {
-        this.reloadConfig()
-        .then(() => {
-          return this.ctx.emitter.toApp()
-        })
-        .catch(this.onLoadError)
+        this.reloadConfig().catch(this.onLoadError)
       } else {
         // If we've edited the setupNodeEvents file, we need to re-execute
         // the config file to get a fresh ipc process to swap with
-        this.reloadConfig()
-        .then(() => {
-          return this.ctx.emitter.toApp()
-        })
-        .catch(this.onLoadError)
+        this.reloadConfig().catch(this.onLoadError)
       }
     }
 

@@ -316,13 +316,17 @@ async function initialize () {
     return
   }
 
+  const autStore = useAutStore()
+
+  // TODO(lachlan): use GraphQL to get the viewport dimensions
+  // once it is more practical to do so
+  // find out if we need to continue managing viewportWidth/viewportHeight in MobX at all.
+  autStore.updateDimensions(config.viewportWidth, config.viewportHeight)
+
   // just stick config on window until we figure out how we are
   // going to manage it
   window.UnifiedRunner.config = config
 
-  const autStore = useAutStore()
-
-  autStore.updateDimensions(config.viewportWidth, config.viewportHeight)
   // window.UnifiedRunner exists now, since the Webpack bundle with
   // the UnifiedRunner namespace was injected by `injectBundle`.
   initializeEventManager(window.UnifiedRunner)
