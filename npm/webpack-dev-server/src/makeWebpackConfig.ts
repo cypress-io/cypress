@@ -78,6 +78,14 @@ export async function makeWebpackConfig (userWebpackConfig: webpack.Configuratio
     })
   }
 
+  if (typeof userWebpackConfig?.module?.unsafeCache === 'function') {
+    const nextCache = userWebpackConfig.module.unsafeCache
+
+    userWebpackConfig.module.unsafeCache = (module: any) => {
+      return nextCache(module) && !/[\\/]webpack-dev-server[\\/]dist[\\/]browser\.js/.test(module.resource)
+    }
+  }
+
   const mergedConfig = merge<webpack.Configuration>(
     userWebpackConfig,
     makeDefaultWebpackConfig(indexHtml),
