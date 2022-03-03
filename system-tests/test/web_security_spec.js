@@ -83,7 +83,6 @@ describe('e2e web security', () => {
       },
       snapshot: true,
       browser: ['chrome', 'electron'],
-      expectedExitCode: 0,
     })
   })
 

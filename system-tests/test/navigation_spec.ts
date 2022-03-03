@@ -44,8 +44,6 @@ describe('e2e cross origin navigation', () => {
       expect(res.stdout).to.contain('You may need to restructure some of your test code to avoid this problem.')
       expect(res.stdout).to.contain('Alternatively you can also disable Chrome Web Security in Chromium-based browsers which will turn off this restriction by setting { chromeWebSecurity: false } in `cypress.json`.')
       expect(res.stdout).to.contain('https://on.cypress.io/cross-origin-violation')
-
-      expect(res.code).to.eq(1)
     },
   })
 })
