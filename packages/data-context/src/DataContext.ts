@@ -4,7 +4,7 @@ import path from 'path'
 import util from 'util'
 import chalk from 'chalk'
 import assert from 'assert'
-import s from 'underscore.string'
+import str from 'underscore.string'
 
 import 'server-destroy'
 
@@ -40,6 +40,7 @@ import type { Socket, SocketIOServer } from '@packages/socket'
 import { globalPubSub } from '.'
 import { InjectedConfigApi, ProjectLifecycleManager } from './data/ProjectLifecycleManager'
 import type { CypressError } from '@packages/errors'
+import { ErrorDataSource } from './sources/ErrorDataSource'
 
 const IS_DEV_ENV = process.env.CYPRESS_INTERNAL_ENV !== 'production'
 
@@ -125,16 +126,7 @@ export class DataContext {
   }
 
   get baseError () {
-    if (!this.coreData.baseError) {
-      return null
-    }
-
-    // TODO: Standardize approach to serializing errors
-    return {
-      title: this.coreData.baseError.title,
-      message: this.coreData.baseError.message,
-      stack: this.coreData.baseError.stack,
-    }
+    return this.coreData.baseError
   }
 
   @cached
@@ -214,6 +206,11 @@ export class DataContext {
   @cached
   get html () {
     return new HtmlDataSource(this)
+  }
+
+  @cached
+  get error () {
+    return new ErrorDataSource(this)
   }
 
   @cached
@@ -347,15 +344,19 @@ export class DataContext {
     console.error(e)
   }
 
-  onError = (err: Error) => {
+  onError = (cypressError: CypressError, title?: string) => {
     if (this.isRunMode) {
       if (this.lifecycleManager?.runModeExitEarly) {
-        this.lifecycleManager.runModeExitEarly(err)
+        this.lifecycleManager.runModeExitEarly(cypressError)
       } else {
-        throw err
+        throw cypressError
       }
     } else {
-      this.coreData.baseError = err
+      this.update((coreData) => {
+        coreData.baseError = { title, cypressError }
+      })
+
+      this.emitter.toLaunchpad()
     }
   }
 
@@ -365,9 +366,8 @@ export class DataContext {
       console.log(chalk.yellow(err.message))
     } else {
       this.coreData.warnings.push({
-        title: `Warning: ${s.titleize(s.humanize(err.type ?? ''))}`,
-        message: err.messageMarkdown || err.message,
-        details: err.details,
+        title: `Warning: ${str.titleize(str.humanize(err.type ?? ''))}`,
+        cypressError: err,
       })
 
       this.emitter.toLaunchpad()
@@ -401,12 +401,7 @@ export class DataContext {
    * Resets all of the state for the data context,
    * so we can initialize fresh for each E2E test
    */
-  async resetForTest (modeOptions: Partial<AllModeOptions> = {}) {
-    this.debug('DataContext resetForTest')
-    if (!process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF) {
-      throw new Error(`DataContext.reset is only meant to be called in E2E testing mode, there's no good use for it outside of that`)
-    }
-
+  async reinitializeCypress (modeOptions: Partial<AllModeOptions> = {}) {
     await this._reset()
 
     this._modeOptions = modeOptions
@@ -418,12 +413,6 @@ export class DataContext {
   }
 
   private _reset () {
-    // this._gqlServer?.close()
-    // this.emitter.destroy()
-    // this._loadingManager.destroy()
-    // this._loadingManager = new LoadingManager(this)
-    // this.coreData.currentProject?.watcher
-    // this._coreData = makeCoreData({}, this._loadingManager)
     this.setAppSocketServer(undefined)
     this.setGqlSocketServer(undefined)
 
