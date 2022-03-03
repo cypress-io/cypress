@@ -139,6 +139,10 @@ mutation ComponentGeneratorStepOne_generateSpec($codeGenCandidate: String!, $typ
     currentProject {
       id
       ...EmptyGenerator
+      specs {
+        id
+        ...SpecsList
+      }
     }
     generatedSpecResult {
       ... on GeneratedSpecError {
