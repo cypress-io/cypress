@@ -48,6 +48,23 @@ describe('src/cy/commands/querying/within', () => {
       })
     })
 
+    it('can be chained off an alias', () => {
+      const form = cy.$$('#by-name')
+
+      cy.get('#by-name').as('nameForm')
+      .within(() => {})
+      .then(($form) => {
+        expect($form.get(0)).to.eq(form.get(0))
+      })
+
+      cy.get('#by-name').as('nameForm')
+      .within(() => {
+        cy.get('input').should('be.visible')
+      })
+
+      cy.get('@nameForm').should('be.visible')
+    })
+
     it('can call child commands after within on the same subject', () => {
       const input = cy.$$('#by-name input:first')
 
