@@ -1172,7 +1172,7 @@ export const AllCypressErrors = {
 
       ${fmt.path(projectRoot)}
 
-      Cypress no longer supports ${fmt.highlight(legacyConfigFile)}, please remove it from your project.
+      Cypress no longer supports ${fmt.off(legacyConfigFile)}, please remove it from your project.
     `
   },
 
