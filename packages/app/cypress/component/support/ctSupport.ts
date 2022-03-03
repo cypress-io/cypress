@@ -45,3 +45,5 @@ export const createTestAutIframe = (eventManager = createEventManager()) => {
     eventManager.studioRecorder,
   )
 }
+
+window.__CYPRESS_TESTING_TYPE__ = 'component'

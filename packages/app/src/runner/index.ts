@@ -328,7 +328,7 @@ async function initialize () {
     initializeMobxStore(window.UnifiedRunner.config.testingType)
   })
 
-  window.UnifiedRunner.MobX.runInAction(() => setupRunner(config.namespace))
+  window.UnifiedRunner.MobX.runInAction(() => setupRunner(config.namespace as AutomationElementId))
 }
 
 /**
