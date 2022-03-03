@@ -10,15 +10,16 @@
         scope="global"
         keypath="settingsPage.config.description"
       >
-        <OpenConfigFileInIDE />
+        <OpenConfigFileInIDE :gql="props.gql" />
       </i18n-t>
     </template>
     <div class="flex w-full">
       <ConfigCode
         data-cy="config-code"
-        :config="configObject"
+        :gql="props.gql"
       />
       <ConfigLegend
+        :gql="props.gql"
         data-cy="config-legend"
         class="rounded-tr-md rounded-br-md border-1 border-l-0 min-w-280px py-28px px-22px"
       />
@@ -27,7 +28,6 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
 import { gql } from '@urql/vue'
 import SettingsSection from '../SettingsSection.vue'
 import { useI18n } from '@cy/i18n'
@@ -39,17 +39,14 @@ import OpenConfigFileInIDE from '@packages/frontend-shared/src/gql-components/Op
 const { t } = useI18n()
 
 gql`
-fragment Config on Query {
-  currentProject {
-    id
-    config
-  }
+fragment Config on CurrentProject {
+  id
+  ...OpenConfigFileInIDE
+  ...ConfigCode
 }
 `
 
 const props = defineProps<{
   gql: ConfigFragment
 }>()
-
-const configObject = computed(() => props.gql.currentProject?.config)
 </script>

@@ -9,7 +9,8 @@ const root = _path.join(__dirname, '..')
 
 const serverRoot = _path.join(__dirname, '../../packages/server/')
 const projects = _path.join(root, 'projects')
-const cyTmpDir = _path.join(tempDir, 'cy-projects')
+
+export const cyTmpDir = _path.join(tempDir, 'cy-projects')
 
 const safeRemove = (path) => {
   try {
@@ -54,7 +55,7 @@ export async function scaffoldProject (project: string): Promise<void> {
   const to = _path.join(cyTmpDir, project)
   const from = _path.join(projects, project)
 
-  fs.copySync(from, to)
+  await fs.copy(from, to)
 }
 
 /**

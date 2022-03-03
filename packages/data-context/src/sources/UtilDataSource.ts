@@ -3,6 +3,13 @@ import crypto from 'crypto'
 import fetch from 'cross-fetch'
 import type { DataContext } from '../DataContext'
 
+// Require rather than import since data-context is stricter than network and there are a fair amount of errors in agent.
+const { agent } = require('@packages/network')
+
+// @ts-ignore agent isn't a part of cross-fetch's API since it's not a part of the browser's fetch but it is a part of node-fetch
+// which is what will be used here
+const proxiedFetch = (input: RequestInfo, init?: RequestInit) => fetch(input, { agent, ...init })
+
 /**
  * this.ctx.util....
  *
@@ -56,6 +63,6 @@ export class UtilDataSource {
   }
 
   get fetch () {
-    return fetch
+    return proxiedFetch
   }
 }

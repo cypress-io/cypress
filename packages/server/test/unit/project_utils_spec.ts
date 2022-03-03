@@ -2,6 +2,7 @@ import Chai from 'chai'
 import path from 'path'
 import { getSpecUrl, checkSupportFile } from '../../lib/project_utils'
 import Fixtures from '@tooling/system-tests/lib/fixtures'
+import stripAnsi from 'strip-ansi'
 
 const todosPath = Fixtures.projectPath('todos')
 
@@ -110,7 +111,7 @@ describe('lib/project_utils', () => {
           supportFile: '/this/file/does/not/exist/foo/bar/cypress/support/e2e.js',
         })
       } catch (e) {
-        expect(e.message).to.include('The support file is missing or invalid.')
+        expect(stripAnsi(e.message)).to.include('Your supportFile is missing or invalid')
       }
     })
   })

@@ -81,6 +81,16 @@ export const makeCypressPlugin = (
           tags: [],
         }
       }
+      const indexHtmlPath = indexHtml ? resolve(projectRoot, indexHtml) : resolve(__dirname, '..', 'index.html')
+      const indexHtmlContent = await readFile(indexHtmlPath, { encoding: 'utf8' })
+      // find </body> last index
+      const endOfBody = indexHtmlContent.lastIndexOf('</body>')
+
+      // insert the script in the end of the body
+      return `${indexHtmlContent.substring(0, endOfBody)
+    }<script src="${base}cypress:client-init-test" type="module"></script>${
+      indexHtmlContent.substring(endOfBody)
+    }`
     },
     resolveId (id) {
       if (id === 'cypress:config') {

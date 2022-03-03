@@ -2,6 +2,8 @@ require('../spec_helper')
 
 const _ = require('lodash')
 const debug = require('debug')('test')
+const stripAnsi = require('strip-ansi')
+const { stripIndent } = require('common-tags')
 const Fixtures = require('@tooling/system-tests/lib/fixtures')
 const { getCtx } = require('@packages/data-context')
 
@@ -24,7 +26,7 @@ describe('lib/config', () => {
 
   context('environment name check', () => {
     it('throws an error for unknown CYPRESS_INTERNAL_ENV', () => {
-      sinon.stub(errors, 'throw').withArgs('INVALID_CYPRESS_INTERNAL_ENV', 'foo-bar')
+      sinon.stub(errors, 'throwErr').withArgs('INVALID_CYPRESS_INTERNAL_ENV', 'foo-bar')
       process.env.CYPRESS_INTERNAL_ENV = 'foo-bar'
       const cfg = {
         projectRoot: '/foo/bar/',
@@ -37,11 +39,11 @@ describe('lib/config', () => {
         //
       }
 
-      expect(errors.throw).have.been.calledOnce
+      expect(errors.throwErr).have.been.calledOnce
     })
 
     it('allows production CYPRESS_INTERNAL_ENV', () => {
-      sinon.stub(errors, 'throw')
+      sinon.stub(errors, 'throwErr')
       process.env.CYPRESS_INTERNAL_ENV = 'production'
       const cfg = {
         projectRoot: '/foo/bar/',
@@ -50,7 +52,7 @@ describe('lib/config', () => {
 
       config.mergeDefaults(cfg, options)
 
-      expect(errors.throw).not.to.be.called
+      expect(errors.throwErr).not.to.be.called
     })
   })
 
@@ -140,7 +142,7 @@ describe('lib/config', () => {
           .then(() => {
             throw new Error('should throw validation error')
           }).catch((err) => {
-            expect(err.message).to.include(errorMessage)
+            expect(stripAnsi(err.message)).to.include(stripIndent`${errorMessage}`)
           })
         }
       })
@@ -180,9 +182,17 @@ describe('lib/config', () => {
 
         it('fails if not a number', function () {
           this.setup({ animationDistanceThreshold: { foo: 'bar' } })
-          this.expectValidationFails('be a number')
 
-          return this.expectValidationFails('the value was: \`{"foo":"bar"}\`')
+          return this.expectValidationFails('be a number')
+          .then(() => {
+            return this.expectValidationFails(`
+            the value was: \
+
+
+            {
+              "foo": "bar"
+            }`)
+          })
         })
       })
 
@@ -214,7 +224,7 @@ describe('lib/config', () => {
         it('fails if it is set on root level', function () {
           this.setup({ baseUrl: 'localhost' })
 
-          return this.expectValidationFails('Please update this option under e2e testing type property')
+          return this.expectValidationFails('It is now configured separately as a testing type property: e2e.baseUrl')
         })
       })
 
@@ -227,9 +237,11 @@ describe('lib/config', () => {
 
         it('fails if not a boolean', function () {
           this.setup({ chromeWebSecurity: 42 })
-          this.expectValidationFails('be a boolean')
 
-          return this.expectValidationFails('the value was: `42`')
+          return this.expectValidationFails('be a boolean')
+          .then(() => {
+            return this.expectValidationFails('the value was: 42')
+          })
         })
       })
 
@@ -242,9 +254,11 @@ describe('lib/config', () => {
 
         it('fails if not a boolean', function () {
           this.setup({ modifyObstructiveCode: 42 })
-          this.expectValidationFails('be a boolean')
 
-          return this.expectValidationFails('the value was: `42`')
+          return this.expectValidationFails('be a boolean')
+          .then(() => {
+            return this.expectValidationFails('the value was: 42')
+          })
         })
       })
 
@@ -261,16 +275,20 @@ describe('lib/config', () => {
 
         it('fails if not a plain object', function () {
           this.setup({ component: false })
-          this.expectValidationFails('to be a plain object')
 
-          return this.expectValidationFails('the value was: `false`')
+          return this.expectValidationFails('to be a plain object')
+          .then(() => {
+            return this.expectValidationFails('the value was: false')
+          })
         })
 
         it('fails if nested property is incorrect', function () {
           this.setup({ component: { baseUrl: false } })
-          this.expectValidationFails('Expected `component.baseUrl` to be a fully qualified URL (starting with `http://` or `https://`).')
 
-          return this.expectValidationFails('the value was: `false`')
+          return this.expectValidationFails('Expected component.baseUrl to be a fully qualified URL (starting with `http://` or `https://`).')
+          .then(() => {
+            return this.expectValidationFails('the value was: false')
+          })
         })
       })
 
@@ -286,23 +304,29 @@ describe('lib/config', () => {
 
         it('fails if not a plain object', function () {
           this.setup({ e2e: false })
-          this.expectValidationFails('to be a plain object')
 
-          return this.expectValidationFails('the value was: `false`')
+          return this.expectValidationFails('to be a plain object')
+          .then(() => {
+            return this.expectValidationFails('the value was: false')
+          })
         })
 
         it('fails if nested property is incorrect', function () {
           this.setup({ e2e: { animationDistanceThreshold: 'this is definitely not a number' } })
-          this.expectValidationFails('Expected `e2e.animationDistanceThreshold` to be a number')
 
-          return this.expectValidationFails('the value was: `"this is definitely not a number"`')
+          return this.expectValidationFails('Expected e2e.animationDistanceThreshold to be a number')
+          .then(() => {
+            return this.expectValidationFails('the value was: "this is definitely not a number"')
+          })
         })
 
         it('fails if nested property is incorrect', function () {
           this.setup({ component: { baseUrl: false } })
-          this.expectValidationFails('Expected `component.baseUrl` to be a fully qualified URL (starting with `http://` or `https://`).')
 
-          return this.expectValidationFails('the value was: `false`')
+          return this.expectValidationFails('Expected component.baseUrl to be a fully qualified URL (starting with `http://` or `https://`).')
+          .then(() => {
+            return this.expectValidationFails('the value was: false')
+          })
         })
       })
 
@@ -315,9 +339,11 @@ describe('lib/config', () => {
 
         it('fails if not a number', function () {
           this.setup({ defaultCommandTimeout: 'foo' })
-          this.expectValidationFails('be a number')
 
-          return this.expectValidationFails('the value was: `"foo"`')
+          return this.expectValidationFails('be a number')
+          .then(() => {
+            return this.expectValidationFails('the value was: "foo"')
+          })
         })
       })
 
@@ -372,9 +398,11 @@ describe('lib/config', () => {
 
         it('fails if not a string', function () {
           this.setup({ fileServerFolder: true })
-          this.expectValidationFails('be a string')
 
-          return this.expectValidationFails('the value was: `true`')
+          return this.expectValidationFails('be a string')
+          .then(() => {
+            return this.expectValidationFails('the value was: true')
+          })
         })
       })
 
@@ -419,9 +447,17 @@ describe('lib/config', () => {
 
         it('fails if not an array of strings', function () {
           this.setup({ e2e: { excludeSpecPattern: [5] } })
-          this.expectValidationFails('be a string or an array of strings')
 
-          return this.expectValidationFails('the value was: `[5]`')
+          return this.expectValidationFails('be a string or an array of strings')
+          .then(() => {
+            return this.expectValidationFails(`
+            the value was: \
+
+
+            [
+              5
+            ]`)
+          })
         })
       })
 
@@ -557,8 +593,8 @@ describe('lib/config', () => {
         })
       })
 
-      // TODO(lachlan): after mega PR
-      xcontext('specPattern', () => {
+      // TODO:(lachlan): after mega PR
+      context.skip('specPattern', () => {
         it('passes if a string', function () {
           this.setup({ e2e: { specPattern: '**/*.coffee' } })
 
@@ -579,9 +615,17 @@ describe('lib/config', () => {
 
         it('fails if not an array of strings', function () {
           this.setup({ e2e: { specPattern: [5] } })
-          this.expectValidationFails('be a string or an array of strings')
 
-          return this.expectValidationFails('the value was: `[5]`')
+          return this.expectValidationFails('be a string or an array of strings')
+          .then(() => {
+            return this.expectValidationFails(`
+            the value was: \
+
+
+            [
+              5
+            ]`)
+          })
         })
       })
 
@@ -601,7 +645,10 @@ describe('lib/config', () => {
         it('fails if is set at root level', function () {
           this.setup({ supportFile: false })
 
-          return this.expectValidationFails('was removed from the root in Cypress version `10.0.0`')
+          return this.expectValidationFails('The supportFile configuration option is now invalid when set from the root of the config object in')
+          .then(() => {
+            return this.expectValidationFails('It is now configured separately as a testing type property: e2e.supportFile and component.supportFile')
+          })
         })
       })
 
@@ -822,9 +869,17 @@ describe('lib/config', () => {
 
         it('fails if not an array of strings', function () {
           this.setup({ blockHosts: [5] })
-          this.expectValidationFails('be a string or an array of strings')
 
-          return this.expectValidationFails('the value was: `[5]`')
+          return this.expectValidationFails('be a string or an array of strings')
+          .then(() => {
+            return this.expectValidationFails(`
+            the value was: \
+
+
+            [
+              5
+            ]`)
+          })
         })
       })
 
@@ -910,7 +965,7 @@ describe('lib/config', () => {
           cfg.clientCertificates[0].url = null
           this.setup(cfg)
 
-          return this.expectValidationFails('`clientCertificates[0].url` to be a URL matcher')
+          return this.expectValidationFails('clientCertificates[0].url to be a URL matcher.\n\nInstead the value was: null')
         })
 
         it('detects invalid config with no certs', function () {
@@ -919,7 +974,7 @@ describe('lib/config', () => {
           cfg.clientCertificates[0].certs = null
           this.setup(cfg)
 
-          return this.expectValidationFails('`clientCertificates[0].certs` to be an array of certs')
+          return this.expectValidationFails('clientCertificates[0].certs to be an array of certs.\n\nInstead the value was: null')
         })
 
         it('detects invalid config with no cert', function () {
@@ -946,7 +1001,7 @@ describe('lib/config', () => {
           cfg.clientCertificates[0].certs[0].key = null
           this.setup(cfg)
 
-          return this.expectValidationFails('`clientCertificates[0].certs[0].key` to be a key filepath')
+          return this.expectValidationFails('clientCertificates[0].certs[0].key to be a key filepath.\n\nInstead the value was: null')
         })
 
         it('detects PEM cert absolute path', function () {
@@ -955,7 +1010,7 @@ describe('lib/config', () => {
           cfg.clientCertificates[0].certs[0].cert = '/home/files/a_file'
           this.setup(cfg)
 
-          return this.expectValidationFails('`clientCertificates[0].certs[0].cert` to be a relative filepath')
+          return this.expectValidationFails('clientCertificates[0].certs[0].cert to be a relative filepath.\n\nInstead the value was: "/home/files/a_file"')
         })
 
         it('detects PEM key absolute path', function () {
@@ -964,7 +1019,7 @@ describe('lib/config', () => {
           cfg.clientCertificates[0].certs[0].key = '/home/files/a_file'
           this.setup(cfg)
 
-          return this.expectValidationFails('`clientCertificates[0].certs[0].key` to be a relative filepath')
+          return this.expectValidationFails('clientCertificates[0].certs[0].key to be a relative filepath.\n\nInstead the value was: "/home/files/a_file"')
         })
 
         it('detects PFX absolute path', function () {
@@ -974,7 +1029,7 @@ describe('lib/config', () => {
           cfg.clientCertificates[0].certs[0].pfx = '/home/files/a_file'
           this.setup(cfg)
 
-          return this.expectValidationFails('`clientCertificates[0].certs[0].pfx` to be a relative filepath')
+          return this.expectValidationFails('clientCertificates[0].certs[0].pfx to be a relative filepath.\n\nInstead the value was: "/home/files/a_file"')
         })
 
         it('detects CA absolute path', function () {
@@ -983,7 +1038,7 @@ describe('lib/config', () => {
           cfg.clientCertificates[0].ca[0] = '/home/files/a_file'
           this.setup(cfg)
 
-          return this.expectValidationFails('`clientCertificates[0].ca[0]` to be a relative filepath')
+          return this.expectValidationFails('clientCertificates[0].ca[0] to be a relative filepath.\n\nInstead the value was: "/home/files/a_file"')
         })
       })
     })
@@ -1407,8 +1462,8 @@ describe('lib/config', () => {
       expect(warning).to.be.calledWith('FIREFOX_GC_INTERVAL_REMOVED')
     })
 
-    // todo(lachlan): after mega PR
-    xdescribe('.resolved', () => {
+    // TODO:(lachlan) after mega PR
+    describe.skip('.resolved', () => {
       it('sets reporter and port to cli', () => {
         const obj = {
           projectRoot: '/foo/bar',
@@ -1819,6 +1874,8 @@ describe('lib/config', () => {
       }
 
       const cfg = {
+        projectRoot: '/foo/bar',
+        pluginsFile: '/foo/bar/cypress/plugins/index.js',
         browsers: [browser],
         resolved: {
           browsers: {
@@ -1832,10 +1889,10 @@ describe('lib/config', () => {
         browsers: null,
       }
 
-      sinon.stub(errors, 'throw')
+      sinon.stub(errors, 'throwErr')
       config.updateWithPluginValues(cfg, overrides)
 
-      expect(errors.throw).to.have.been.calledWith('CONFIG_VALIDATION_ERROR')
+      expect(errors.throwErr).to.have.been.calledWith('CONFIG_VALIDATION_MSG_ERROR')
     })
 
     it('allows user to filter browsers', () => {
@@ -2080,7 +2137,7 @@ describe('lib/config', () => {
 
       return config.setSupportFileAndFolder(obj, mockSupportDefaults)
       .catch((err) => {
-        expect(err.message).to.include('The support file is missing or invalid.')
+        expect(stripAnsi(err.message)).to.include('Your supportFile is missing or invalid:')
       })
     })
 

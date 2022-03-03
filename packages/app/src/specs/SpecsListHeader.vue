@@ -12,12 +12,12 @@
     >
       <template #suffix>
         <button
-          class="rounded-r-md outline-none h-40px mr-[-0.75rem] transition-all group"
+          class="rounded-r-md outline-none h-38px mr-[-0.75rem] group"
           aria-live="polite"
           @click="emit('showSpecPatternModal')"
         >
           <span
-            class="border-transparent rounded-r flex h-full border-t-1 border-b-1 border-r-1 mr-1px px-16px items-center matches-button group-hocus:bg-indigo-50 group-hocus:border-indigo-300  group-hocus:text-indigo-500"
+            class="bg-white border-transparent rounded-r flex h-full border-t-1 border-b-1 border-r-1 mr-1px px-16px transition-all items-center matches-button group-hocus:bg-indigo-50 group-hocus:text-indigo-500"
           >
             <span v-if="props.modelValue">
               {{ t('components.fileSearch.matchesIndicator', { count: specCount, denominator: specCount, numerator: resultCount}) }}
@@ -65,7 +65,7 @@ const props = withDefaults(defineProps<{
 })
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: string): void,
+  (e: 'update:modelValue', value: string): void
   (e: 'showSpecPatternModal'): void
   (e: 'showCreateSpecModal'): void
 }>()
@@ -80,8 +80,8 @@ const onInput = (e: Event) => {
 <style scoped>
 
 .matches-button:before {
-  @apply h-full bg-gray-100 transform transition ease-in w-1px
-  scale-y-50 duration-150 group-hocus:bg-indigo-300 group-hocus:scale-y-100;
+  @apply h-full bg-gray-100 transform transition w-1px
+  scale-y-50 duration-150 group-hocus:bg-transparent;
   display: block;
   position: absolute;
   left: 0;

@@ -1,25 +1,25 @@
 import { objectType } from 'nexus'
-import { BaseError } from '.'
 import { ProjectLike, ScaffoldedFile, TestingTypeEnum } from '..'
 import { CurrentProject } from './gql-CurrentProject'
 import { DevState } from './gql-DevState'
+import { AuthState } from './gql-AuthState'
 import { LocalSettings } from './gql-LocalSettings'
 import { Migration } from './gql-Migration'
 import { VersionData } from './gql-VersionData'
 import { Wizard } from './gql-Wizard'
-import { Warning } from './gql-Warning'
+import { ErrorWrapper } from './gql-ErrorWrapper'
 
 export const Query = objectType({
   name: 'Query',
   description: 'The root "Query" type containing all entry fields for our querying',
   definition (t) {
     t.field('baseError', {
-      type: BaseError,
+      type: ErrorWrapper,
       resolve: (root, args, ctx) => ctx.baseError,
     })
 
     t.nonNull.list.nonNull.field('warnings', {
-      type: Warning,
+      type: ErrorWrapper,
       description: 'A list of warnings',
       resolve: (source, args, ctx) => {
         return ctx.coreData.warnings
@@ -48,7 +48,7 @@ export const Query = objectType({
       type: VersionData,
       description: 'Previous versions of cypress and their release date',
       resolve: (root, args, ctx) => {
-        return ctx.versions()
+        return ctx.versions.versionData()
       },
     })
 
@@ -75,9 +75,10 @@ export const Query = objectType({
       resolve: (source, args, ctx) => !ctx.currentProject,
     })
 
-    t.nonNull.boolean('isAuthBrowserOpened', {
-      description: 'Whether the browser has been opened for auth or not',
-      resolve: (source, args, ctx) => ctx.coreData.isAuthBrowserOpened,
+    t.nonNull.field('authState', {
+      type: AuthState,
+      description: 'The latest state of the auth process',
+      resolve: (source, args, ctx) => ctx.coreData.authState,
     })
 
     t.nonNull.field('localSettings', {

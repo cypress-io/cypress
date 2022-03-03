@@ -34,15 +34,21 @@ describe('Launchpad: Open Mode', () => {
     cy.get('h1').should('contain', 'Project Setup')
   })
 
-  it('auto-selects the browser when launched with --browser', () => {
-    cy.scaffoldProject('launchpad')
-    cy.openProject('launchpad', ['--browser', 'firefox', '--e2e'])
-    // Need to visit after args have been configured, todo: fix in #18776
-    cy.visitLaunchpad()
-    cy.get('h1').should('contain', 'Choose a Browser')
-    cy.get('[data-cy-browser=firefox]').should('have.attr', 'aria-checked', 'true')
-    cy.get('button[data-cy=launch-button]').invoke('text').should('include', 'Start E2E Testing in Firefox')
-  })
+  // since circle cannot have firefox installed by default,
+  // we need to skip this test relying on it
+  // It is very unlikely that it would only fail on Windows though
+  // (tested manually on Windows and it works fine)
+  if (Cypress.platform !== 'win32') {
+    it('auto-selects the browser when launched with --browser', () => {
+      cy.scaffoldProject('launchpad')
+      cy.openProject('launchpad', ['--browser', 'firefox', '--e2e'])
+      // Need to visit after args have been configured, todo: fix in #18776
+      cy.visitLaunchpad()
+      cy.get('h1').should('contain', 'Choose a Browser')
+      cy.get('[data-cy-browser=firefox]').should('have.attr', 'aria-checked', 'true')
+      cy.get('button[data-cy=launch-button]').invoke('text').should('include', 'Start E2E Testing in Firefox')
+    })
+  }
 
   describe('when there is a list of projects', () => {
     it('goes to an active project if one is added', () => {

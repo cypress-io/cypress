@@ -2,11 +2,22 @@
 ### Do not make changes to this file directly
 
 
-"""Base error"""
-type BaseError {
+"""Represents state of auth based on most recent message from login flow"""
+type AuthState {
+  """Whether the browser was successfully opened for login"""
+  browserOpened: Boolean!
+
+  """Message for the auth state"""
   message: String
-  stack: String
-  title: String
+
+  """Name of auth state, e.g. AUTH_BROWSER_LAUNCHED"""
+  name: AuthStateNameEnum
+}
+
+enum AuthStateNameEnum {
+  AUTH_BROWSER_LAUNCHED
+  AUTH_COULD_NOT_LAUNCH_BROWSER
+  AUTH_ERROR_DURING_LOGIN
 }
 
 """Container representing a browser"""
@@ -306,6 +317,21 @@ type CloudUser implements Node {
   userIsViewer: Boolean!
 }
 
+"""
+A code frame to display for a file, used when displaying code related to errors
+"""
+type CodeFrame {
+  """Source of the code frame to display"""
+  codeBlock: String
+
+  """The column of the error to display"""
+  column: Int
+  file: FileParts!
+
+  """The line number of the code snippet to display"""
+  line: Int
+}
+
 """Glob patterns for detecting files for code gen."""
 type CodeGenGlobs implements Node {
   component: String!
@@ -340,7 +366,7 @@ type CurrentProject implements Node & ProjectLike {
   """Browsers found that are compatible with Cypress"""
   browsers: [Browser!]
 
-  """The remote associated project from Cypress Cloud"""
+  """The remote associated project from Cypress Dashboard"""
   cloudProject: CloudProjectResult
 
   """List of all code generation candidates stories"""
@@ -361,14 +387,6 @@ type CurrentProject implements Node & ProjectLike {
 
   """The mode the interactive runner was launched in"""
   currentTestingType: TestingTypeEnum
-
-  """If there is an error loading the config file, it is represented here"""
-  errorLoadingConfigFile: BaseError
-
-  """
-  If there is an error related to the node events, it is represented here
-  """
-  errorLoadingNodeEvents: BaseError
 
   """Whether the project has Typescript"""
   hasTypescript: Boolean
@@ -401,7 +419,7 @@ type CurrentProject implements Node & ProjectLike {
   """Cached preferences for this project"""
   preferences: ProjectPreferences
 
-  """Used to associate project with Cypress cloud"""
+  """Used to associate project with Cypress dashboard"""
   projectId: String
 
   """Absolute path to the project on the filesystem"""
@@ -452,9 +470,158 @@ type Editor {
   name: String!
 }
 
+enum ErrorTypeEnum {
+  AUTOMATION_SERVER_DISCONNECTED
+  BAD_POLICY_WARNING
+  BAD_POLICY_WARNING_TOOLTIP
+  BROWSER_NOT_FOUND_BY_NAME
+  BROWSER_NOT_FOUND_BY_PATH
+  BUNDLE_ERROR
+  CANNOT_CONNECT_BASE_URL
+  CANNOT_CONNECT_BASE_URL_RETRYING
+  CANNOT_CONNECT_BASE_URL_WARNING
+  CANNOT_CREATE_PROJECT_TOKEN
+  CANNOT_FETCH_PROJECT_TOKEN
+  CANNOT_RECORD_NO_PROJECT_ID
+  CANNOT_REMOVE_OLD_BROWSER_PROFILES
+  CANNOT_TRASH_ASSETS
+  CDP_COULD_NOT_CONNECT
+  CDP_COULD_NOT_RECONNECT
+  CDP_RETRYING_CONNECTION
+  CDP_VERSION_TOO_OLD
+  CHROME_WEB_SECURITY_NOT_SUPPORTED
+  CONFIG_FILES_LANGUAGE_CONFLICT
+  CONFIG_FILE_DEV_SERVER_IS_NOT_A_FUNCTION
+  CONFIG_FILE_INVALID_DEV_START_EVENT
+  CONFIG_FILE_INVALID_ROOT_CONFIG
+  CONFIG_FILE_INVALID_ROOT_CONFIG_E2E
+  CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_COMPONENT
+  CONFIG_FILE_MIGRATION_NEEDED
+  CONFIG_FILE_NOT_FOUND
+  CONFIG_FILE_REQUIRE_ERROR
+  CONFIG_FILE_SETUP_NODE_EVENTS_ERROR
+  CONFIG_FILE_UNEXPECTED_ERROR
+  CONFIG_VALIDATION_ERROR
+  CONFIG_VALIDATION_MSG_ERROR
+  COULD_NOT_FIND_SYSTEM_NODE
+  COULD_NOT_PARSE_ARGUMENTS
+  DASHBOARD_ALREADY_COMPLETE
+  DASHBOARD_API_RESPONSE_FAILED_RETRYING
+  DASHBOARD_CANCEL_SKIPPED_SPEC
+  DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE
+  DASHBOARD_CANNOT_PROCEED_IN_PARALLEL
+  DASHBOARD_CANNOT_PROCEED_IN_SERIAL
+  DASHBOARD_CANNOT_UPLOAD_RESULTS
+  DASHBOARD_GRAPHQL_ERROR
+  DASHBOARD_INVALID_RUN_REQUEST
+  DASHBOARD_PARALLEL_DISALLOWED
+  DASHBOARD_PARALLEL_GROUP_PARAMS_MISMATCH
+  DASHBOARD_PARALLEL_REQUIRED
+  DASHBOARD_PROJECT_NOT_FOUND
+  DASHBOARD_RECORD_KEY_NOT_VALID
+  DASHBOARD_RUN_GROUP_NAME_NOT_UNIQUE
+  DASHBOARD_STALE_RUN
+  DASHBOARD_UNKNOWN_CREATE_RUN_WARNING
+  DASHBOARD_UNKNOWN_INVALID_REQUEST
+  DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS
+  DUPLICATE_TASK_KEY
+  ERROR_READING_FILE
+  ERROR_WRITING_FILE
+  EXPERIMENTAL_COMPONENT_TESTING_REMOVED
+  EXPERIMENTAL_NETWORK_STUBBING_REMOVED
+  EXPERIMENTAL_RUN_EVENTS_REMOVED
+  EXPERIMENTAL_SAMESITE_REMOVED
+  EXPERIMENTAL_SHADOW_DOM_REMOVED
+  EXTENSION_NOT_LOADED
+  FIREFOX_COULD_NOT_CONNECT
+  FIREFOX_GC_INTERVAL_REMOVED
+  FIREFOX_MARIONETTE_FAILURE
+  FIXTURE_NOT_FOUND
+  FOLDER_NOT_WRITABLE
+  FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS
+  FREE_PLAN_EXCEEDS_MONTHLY_TESTS
+  FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS
+  FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_TESTS
+  FREE_PLAN_IN_GRACE_PERIOD_PARALLEL_FEATURE
+  INCOMPATIBLE_PLUGIN_RETRIES
+  INCORRECT_CI_BUILD_ID_USAGE
+  INDETERMINATE_CI_BUILD_ID
+  INVALID_CONFIG_OPTION
+  INVALID_CYPRESS_INTERNAL_ENV
+  INVALID_REPORTER_NAME
+  INVOKED_BINARY_OUTSIDE_NPM_MODULE
+  LEGACY_CONFIG_FILE
+  MULTIPLE_SUPPORT_FILES_FOUND
+  NODE_VERSION_DEPRECATION_BUNDLED
+  NODE_VERSION_DEPRECATION_SYSTEM
+  NOT_LOGGED_IN
+  NO_DEFAULT_CONFIG_FILE_FOUND
+  NO_PROJECT_FOUND_AT_PROJECT_ROOT
+  NO_PROJECT_ID
+  NO_SPECS_FOUND
+  PAID_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS
+  PARALLEL_FEATURE_NOT_AVAILABLE_IN_PLAN
+  PLAN_EXCEEDS_MONTHLY_TESTS
+  PLAN_IN_GRACE_PERIOD_RUN_GROUPING_FEATURE_USED
+  PLUGINS_INVALID_EVENT_NAME_ERROR
+  PLUGINS_RUN_EVENT_ERROR
+  PORT_IN_USE_LONG
+  PORT_IN_USE_SHORT
+  PROJECT_ID_AND_KEY_BUT_MISSING_RECORD_OPTION
+  RECORDING_FROM_FORK_PR
+  RECORD_KEY_MISSING
+  RECORD_PARAMS_WITHOUT_RECORDING
+  RENAMED_CONFIG_OPTION
+  RENDERER_CRASHED
+  RUN_GROUPING_FEATURE_NOT_AVAILABLE_IN_PLAN
+  SETUP_NODE_EVENTS_DO_NOT_SUPPORT_DEV_SERVER
+  SETUP_NODE_EVENTS_IS_NOT_FUNCTION
+  SUPPORT_FILE_NOT_FOUND
+  TESTS_DID_NOT_START_FAILED
+  TESTS_DID_NOT_START_RETRYING
+  UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES
+  UNEXPECTED_INTERNAL_ERROR
+  UNEXPECTED_MUTATION_ERROR
+  UNSUPPORTED_BROWSER_VERSION
+  VIDEO_POST_PROCESSING_FAILED
+  VIDEO_RECORDING_FAILED
+}
+
+"""Base error"""
+type ErrorWrapper {
+  """The code frame to display in relation to the error"""
+  codeFrame: CodeFrame
+
+  """The markdown formatted content associated with the ErrorTypeEnum"""
+  errorMessage: String!
+
+  """Name of the error class"""
+  errorName: String!
+
+  """
+  The error stack of either the original error from the user or from where the internal Cypress error was created
+  """
+  errorStack: String!
+  errorType: ErrorTypeEnum!
+
+  """
+  Whether the error came from user code, can be used to determine whether to open a stack trace by default
+  """
+  isUserCodeError: Boolean!
+
+  """
+  Optional title of the error. Used to optionally display a title above the error
+  """
+  title: String
+}
+
 input FileDetailsInput {
-  absolute: String!
   column: Int
+
+  """
+  When we open a file we take a filePath, either relative to the project root, or absolute on disk
+  """
+  filePath: String!
   line: Int
 }
 
@@ -468,6 +635,11 @@ type FileParts implements Node {
   """Full name of the file (e.g. MySpec.test.tsx)"""
   baseName: String!
 
+  """
+  If provided, used to specify the column of the file to open in openFileInIDE
+  """
+  column: Int
+
   """The contents of the file"""
   contents: String!
 
@@ -479,6 +651,11 @@ type FileParts implements Node {
 
   """Relay style Node ID field for the FileParts field"""
   id: ID!
+
+  """
+  If provided, used to specify the line of the file to open in openFileInIDE
+  """
+  line: Int
 
   """Full name of spec file (e.g. MySpec.test.tsx)"""
   name: String!
@@ -493,12 +670,17 @@ enum FrontendFrameworkCategoryEnum {
 }
 
 enum FrontendFrameworkEnum {
-  cra
+  crav4
+  crav5
   nextjs
   nuxtjs
   react
-  vue
-  vuecli
+  vue2
+  vue3
+  vuecli4vue2
+  vuecli4vue3
+  vuecli5vue2
+  vuecli5vue3
 }
 
 """Error from generated spec"""
@@ -535,7 +717,7 @@ type GlobalProject implements Node & ProjectLike {
   """Relay style Node ID field for the GlobalProject field"""
   id: ID!
 
-  """Used to associate project with Cypress cloud"""
+  """Used to associate project with Cypress dashboard"""
   projectId: String
 
   """Absolute path to the project on the filesystem"""
@@ -719,13 +901,16 @@ type Mutation {
   cloudProjectCreate(ciProviders: [String!], name: String!, orgId: ID!, public: Boolean!): CloudProject
 
   """Request access to an organization from a projectId"""
-  cloudProjectRequestAccess(projectSlug: String!): Boolean
+  cloudProjectRequestAccess(projectSlug: String!): CloudProjectResult
   completeSetup: Query
 
   """
   Development only: Triggers or dismisses a prompted refresh by touching the file watched by our development scripts
   """
   devRelaunch(action: DevRelaunchAction!): Boolean
+
+  """Dismisses a warning displayed by the frontend"""
+  dismissWarning: Query
 
   """user has finished migration component specs - move to next step"""
   finishedRenamingComponentSpecs: Query
@@ -751,14 +936,17 @@ type Mutation {
     id: ID!
   ): CurrentProject
 
-  """Auth with Cypress Cloud"""
+  """Auth with Cypress Dashboard"""
   login: Query
 
-  """Log out of Cypress Cloud"""
+  """Log out of Cypress Dashboard"""
   logout: Query
 
   """Check if a give spec file will match the project spec pattern"""
   matchesSpecPattern(specFile: String!): Boolean!
+
+  """While migrating to 10+ skip manual rename step"""
+  migrateCloseManualRenameWatcher: Boolean
 
   """Merges the component testing config in cypress.config.{js,ts}"""
   migrateComponentTesting: Query
@@ -775,6 +963,9 @@ type Mutation {
     before: [String!]
     skip: Boolean
   ): Query
+
+  """When the user decides to skip specs rename"""
+  migrateRenameSpecsFolder: Query
 
   """While migrating to 10+ launch renaming of support file"""
   migrateRenameSupport: Query
@@ -798,8 +989,19 @@ type Mutation {
   """show the launchpad windows"""
   reconfigureProject: Boolean!
 
+  """Re-initializes Cypress from the initial CLI options"""
+  reinitializeCypress: Query
+
   """Remove project from projects array and cache"""
   removeProject(path: String!): Query
+
+  """Reset the Auth State"""
+  resetAuthState: Query!
+
+  """
+  Resets the latest version call to capture additional telemetry for the current user
+  """
+  resetLatestVersionTelemetry: Boolean!
 
   """Reset the Wizard to the starting position"""
   resetWizard: Boolean!
@@ -880,7 +1082,7 @@ enum PluginsState {
 
 """Common base fields inherited by GlobalProject / CurrentProject"""
 interface ProjectLike {
-  """Used to associate project with Cypress cloud"""
+  """Used to associate project with Cypress dashboard"""
   projectId: String
 
   """Absolute path to the project on the filesystem"""
@@ -899,7 +1101,9 @@ type ProjectPreferences {
 
 """The root "Query" type containing all entry fields for our querying"""
 type Query {
-  baseError: BaseError
+  """The latest state of the auth process"""
+  authState: AuthState!
+  baseError: ErrorWrapper
 
   """Returns an object conforming to the Relay spec"""
   cloudNode(
@@ -928,9 +1132,6 @@ type Query {
   """The state of any info related to local development of the runner"""
   dev: DevState!
 
-  """Whether the browser has been opened for auth or not"""
-  isAuthBrowserOpened: Boolean!
-
   """Whether the app is in global mode or not"""
   isInGlobalMode: Boolean!
 
@@ -950,7 +1151,7 @@ type Query {
   versions: VersionData
 
   """A list of warnings"""
-  warnings: [Warning!]!
+  warnings: [ErrorWrapper!]!
 
   """Metadata about the wizard"""
   wizard: Wizard!
@@ -1022,6 +1223,13 @@ type Storybook implements Node {
 """The bundlers that we can use with Cypress"""
 enum SupportedBundlers {
   vite
+  webpack4
+  webpack5
+}
+
+"""The packages for bundlers that we can use with Cypress"""
+enum SupportedPackage {
+  vite
   webpack
 }
 
@@ -1060,13 +1268,6 @@ type VersionData {
   latest: Version!
 }
 
-"""A generic warning"""
-type Warning {
-  details: String
-  message: String!
-  title: String!
-}
-
 """
 The Wizard is a container for any state associated with initial onboarding to Cypress
 """
@@ -1081,6 +1282,9 @@ type Wizard {
 
   """All of the component testing frameworks to choose from"""
   frameworks: [WizardFrontendFramework!]!
+
+  """Command to install required command"""
+  installDependenciesCommand: String
 
   """The list of packages to install that are currently installed"""
   installedPackages: [String!]
@@ -1106,8 +1310,8 @@ type WizardBundler implements Node {
   """Display name of the bundler"""
   name: String!
 
-  """Package to install associated with the bundler"""
-  package: String!
+  """Name of package on npm"""
+  package: SupportedPackage!
 
   """The name of the framework"""
   type: SupportedBundlers!

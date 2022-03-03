@@ -4,7 +4,7 @@ import path from 'path'
 import util from 'util'
 import chalk from 'chalk'
 import assert from 'assert'
-import s from 'underscore.string'
+import str from 'underscore.string'
 
 import 'server-destroy'
 
@@ -39,6 +39,8 @@ import { VersionsDataSource } from './sources/VersionsDataSource'
 import type { Socket, SocketIOServer } from '@packages/socket'
 import { globalPubSub } from '.'
 import { InjectedConfigApi, ProjectLifecycleManager } from './data/ProjectLifecycleManager'
+import type { CypressError } from '@packages/errors'
+import { ErrorDataSource } from './sources/ErrorDataSource'
 
 const IS_DEV_ENV = process.env.CYPRESS_INTERNAL_ENV !== 'production'
 
@@ -48,12 +50,6 @@ export type CurrentProjectUpdater = (proj: Exclude<CoreDataShape['currentProject
 
 export interface InternalDataContextOptions {
   loadCachedProjects: boolean
-}
-
-export interface ErrorApiShape {
-  error: (type: string, ...args: any) => Error & { type: string, details: string, code?: string, isCypressErr: boolean}
-  message: (type: string, ...args: any) => string
-  warning: (type: string, ...args: any) => null
 }
 
 export interface DataContextConfig {
@@ -68,7 +64,6 @@ export interface DataContextConfig {
   appApi: AppApiShape
   localSettingsApi: LocalSettingsApiShape
   authApi: AuthApiShape
-  errorApi: ErrorApiShape
   configApi: InjectedConfigApi
   projectApi: ProjectApiShape
   electronApi: ElectronApiShape
@@ -131,16 +126,7 @@ export class DataContext {
   }
 
   get baseError () {
-    if (!this.coreData.baseError) {
-      return null
-    }
-
-    // TODO: Standardize approach to serializing errors
-    return {
-      title: this.coreData.baseError.title,
-      message: this.coreData.baseError.message,
-      stack: this.coreData.baseError.stack,
-    }
+    return this.coreData.baseError
   }
 
   @cached
@@ -153,8 +139,9 @@ export class DataContext {
     return new GitDataSource(this)
   }
 
-  async versions () {
-    return new VersionsDataSource().versions()
+  @cached
+  get versions () {
+    return new VersionsDataSource(this)
   }
 
   @cached
@@ -219,6 +206,11 @@ export class DataContext {
   @cached
   get html () {
     return new HtmlDataSource(this)
+  }
+
+  @cached
+  get error () {
+    return new ErrorDataSource(this)
   }
 
   @cached
@@ -314,7 +306,6 @@ export class DataContext {
       browserApi: this._config.browserApi,
       configApi: this._config.configApi,
       projectApi: this._config.projectApi,
-      errorApi: this._config.errorApi,
       electronApi: this._config.electronApi,
       localSettingsApi: this._config.localSettingsApi,
     }
@@ -353,27 +344,30 @@ export class DataContext {
     console.error(e)
   }
 
-  onError = (err: Error) => {
+  onError = (cypressError: CypressError, title?: string) => {
     if (this.isRunMode) {
       if (this.lifecycleManager?.runModeExitEarly) {
-        this.lifecycleManager.runModeExitEarly(err)
+        this.lifecycleManager.runModeExitEarly(cypressError)
       } else {
-        throw err
+        throw cypressError
       }
     } else {
-      this.coreData.baseError = err
+      this.update((coreData) => {
+        coreData.baseError = { title, cypressError }
+      })
+
+      this.emitter.toLaunchpad()
     }
   }
 
-  onWarning = (err: { message: string, type?: string, details?: string }) => {
+  onWarning = (err: CypressError) => {
     if (this.isRunMode) {
       // eslint-disable-next-line
       console.log(chalk.yellow(err.message))
     } else {
       this.coreData.warnings.push({
-        title: `Warning: ${s.titleize(s.humanize(err.type ?? ''))}`,
-        message: err.message,
-        details: err.details,
+        title: `Warning: ${str.titleize(str.humanize(err.type ?? ''))}`,
+        cypressError: err,
       })
 
       this.emitter.toLaunchpad()
@@ -407,12 +401,7 @@ export class DataContext {
    * Resets all of the state for the data context,
    * so we can initialize fresh for each E2E test
    */
-  async resetForTest (modeOptions: Partial<AllModeOptions> = {}) {
-    this.debug('DataContext resetForTest')
-    if (!process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF) {
-      throw new Error(`DataContext.reset is only meant to be called in E2E testing mode, there's no good use for it outside of that`)
-    }
-
+  async reinitializeCypress (modeOptions: Partial<AllModeOptions> = {}) {
     await this._reset()
 
     this._modeOptions = modeOptions
@@ -424,12 +413,6 @@ export class DataContext {
   }
 
   private _reset () {
-    // this._gqlServer?.close()
-    // this.emitter.destroy()
-    // this._loadingManager.destroy()
-    // this._loadingManager = new LoadingManager(this)
-    // this.coreData.currentProject?.watcher
-    // this._coreData = makeCoreData({}, this._loadingManager)
     this.setAppSocketServer(undefined)
     this.setGqlSocketServer(undefined)
 
@@ -454,14 +437,6 @@ export class DataContext {
     }
   }
 
-  error (type: string, ...args: any[]) {
-    return this._apis.errorApi.error(type, ...args)
-  }
-
-  warning (type: string, ...args: any[]) {
-    return this._apis.errorApi.error(type, ...args)
-  }
-
   private async initializeOpenMode () {
     if (IS_DEV_ENV && !process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF) {
       this.actions.dev.watchForRelaunch()
@@ -476,12 +451,6 @@ export class DataContext {
 
     // load projects from cache on start
     toAwait.push(this.actions.project.loadProjects())
-
-    if (this.modeOptions.testingType) {
-      this.lifecycleManager.initializeConfig().catch((err) => {
-        this.coreData.baseError = err
-      })
-    }
 
     return Promise.all(toAwait)
   }

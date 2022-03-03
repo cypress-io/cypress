@@ -10,6 +10,20 @@ describe('<SettingsContainer />', { viewportHeight: 800, viewportWidth: 900 }, (
     cy.percySnapshot()
   })
 
+  it('expands and collapses project settings', () => {
+    mountSettingsContainer()
+
+    cy.contains('Project Settings').click()
+
+    cy.findByText(defaultMessages.settingsPage.experiments.title).scrollIntoView().should('be.visible')
+    cy.findByText(defaultMessages.settingsPage.specPattern.title).scrollIntoView().should('be.visible')
+    cy.findByText(defaultMessages.settingsPage.config.title).scrollIntoView().should('be.visible')
+    cy.percySnapshot()
+    cy.findByText('Project Settings').click()
+
+    cy.findByText(defaultMessages.settingsPage.experiments.title).should('not.exist')
+  })
+
   it('expands and collapses device settings', () => {
     mountSettingsContainer()
 
@@ -25,17 +39,14 @@ describe('<SettingsContainer />', { viewportHeight: 800, viewportWidth: 900 }, (
     cy.findByText(defaultMessages.settingsPage.editor.title).should('not.exist')
   })
 
-  it('expands and collapses project settings', () => {
+  it('expands and collapses cloud settings', () => {
     mountSettingsContainer()
 
-    cy.contains('Project Settings').click()
+    cy.contains('Dashboard Settings').click()
 
     cy.findByText(defaultMessages.settingsPage.projectId.title).scrollIntoView().should('be.visible')
-    cy.findByText(defaultMessages.settingsPage.experiments.title).scrollIntoView().should('be.visible')
-    cy.findByText(defaultMessages.settingsPage.specPattern.title).scrollIntoView().should('be.visible')
-    cy.findByText(defaultMessages.settingsPage.config.title).scrollIntoView().should('be.visible')
     cy.percySnapshot()
-    cy.findByText('Project Settings').click()
+    cy.findByText('Dashboard Settings').click()
 
     cy.findByText(defaultMessages.settingsPage.projectId.title).should('not.exist')
   })

@@ -11,7 +11,7 @@ import gravatar from 'gravatar'
 import { computed } from 'vue'
 
 const props = defineProps<{
-  email?: string,
+  email?: string
 }>()
 
 const gravatarUrl = computed(() => {

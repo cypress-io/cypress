@@ -42,19 +42,19 @@ export const browsers: Detectors = {
   firefox: {
     stable: {
       appName: 'Firefox.app',
-      executable: 'Contents/MacOS/firefox-bin',
+      executable: 'Contents/MacOS/firefox',
       appId: 'org.mozilla.firefox',
       versionProperty: 'CFBundleShortVersionString',
     },
     dev: {
       appName: 'Firefox Developer Edition.app',
-      executable: 'Contents/MacOS/firefox-bin',
+      executable: 'Contents/MacOS/firefox',
       appId: 'org.mozilla.firefoxdeveloperedition',
       versionProperty: 'CFBundleShortVersionString',
     },
     nightly: {
       appName: 'Firefox Nightly.app',
-      executable: 'Contents/MacOS/firefox-bin',
+      executable: 'Contents/MacOS/firefox',
       appId: 'org.mozilla.nightly',
       versionProperty: 'CFBundleShortVersionString',
     },

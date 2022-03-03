@@ -1,12 +1,11 @@
 // See: ./errorScenarios.md for details about error messages and stack traces
 
-import _ from 'lodash'
 import chai from 'chai'
-
+import _ from 'lodash'
 import $dom from '../dom'
-import $utils from './utils'
-import $stackUtils, { StackAndCodeFrameIndex } from './stack_utils'
 import $errorMessages from './error_messages'
+import $stackUtils, { StackAndCodeFrameIndex } from './stack_utils'
+import $utils from './utils'
 
 const ERROR_PROPS = 'message type name stack sourceMappedStack parsedStack fileName lineNumber columnNumber host uncaught actual expected showDiff isPending docsUrl codeFrame'.split(' ')
 const ERR_PREPARED_FOR_SERIALIZATION = Symbol('ERR_PREPARED_FOR_SERIALIZATION')
@@ -53,8 +52,14 @@ const prepareErrorForSerialization = (err) => {
   return err
 }
 
+// some errors, probably from user callbacks, might be boolean, number or falsy values
+// which means serializing will not provide any useful context
+const isSerializableError = (err) => {
+  return !!err && (typeof err === 'object' || typeof err === 'string')
+}
+
 const wrapErr = (err) => {
-  if (!err) return
+  if (!isSerializableError(err)) return
 
   prepareErrorForSerialization(err)
 
@@ -405,7 +410,7 @@ const stackAndCodeFrameIndex = (err, userInvocationStack): StackAndCodeFrameInde
     return $stackUtils.stackWithUserInvocationStackSpliced(err, userInvocationStack)
   }
 
-  return { stack: $stackUtils.replacedStack(err, userInvocationStack) }
+  return { stack: $stackUtils.replacedStack(err, userInvocationStack) || '' }
 }
 
 const preferredStackAndCodeFrameIndex = (err, userInvocationStack) => {
@@ -417,7 +422,11 @@ const preferredStackAndCodeFrameIndex = (err, userInvocationStack) => {
   return { stack, index }
 }
 
-const enhanceStack = ({ err, userInvocationStack, projectRoot }) => {
+const enhanceStack = ({ err, userInvocationStack, projectRoot }: {
+  err: any
+  userInvocationStack?: any
+  projectRoot?: any
+}) => {
   const { stack, index } = preferredStackAndCodeFrameIndex(err, userInvocationStack)
   const { sourceMapped, parsed } = $stackUtils.getSourceStack(stack, projectRoot)
 

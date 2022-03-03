@@ -1,6 +1,6 @@
 const _ = require('lodash')
 const path = require('path')
-const stackUtils = require('./util/stack_utils')
+const { stackUtils } = require('@packages/errors')
 // mocha-* is used to allow us to have later versions of mocha specified in devDependencies
 // and prevents accidently upgrading this one
 // TODO: look into upgrading this to version in driver

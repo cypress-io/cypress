@@ -95,7 +95,7 @@ describe('e2e web security', () => {
         chromeWebSecurity: false,
       },
       onStdout (stdout) {
-        expect(stdout).include('Your project has set the configuration option: `chromeWebSecurity: false`\n\nThis option will not have an effect in Firefox.')
+        expect(stdout).include('Your project has set the configuration option: chromeWebSecurity to false\n\nThis option will not have an effect in Firefox.')
       },
     })
   })

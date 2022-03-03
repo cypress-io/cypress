@@ -12,6 +12,10 @@ const _ = require('lodash')
 describe('lib/modes/info', () => {
   beforeEach(() => {
     capture.restore()
+
+    sinon.stub(browserUtils, 'getBrowserPath')
+    .withArgs(chromeStable).returns('/path/to/user/chrome/profile')
+    .withArgs(firefoxDev).returns('/path/to/user/firefox/profile')
   })
 
   afterEach(() => {
@@ -54,6 +58,7 @@ describe('lib/modes/info', () => {
 
   it('prints 1 found browser', async () => {
     sinon.stub(detect, 'detect').resolves([chromeStable])
+
     await infoAndSnapshot('single chrome:stable')
   })
 
@@ -73,9 +78,6 @@ describe('lib/modes/info', () => {
 
   it('adds profile for browser if folder exists', async () => {
     sinon.stub(detect, 'detect').resolves([chromeStable, firefoxDev])
-    sinon.stub(browserUtils, 'getBrowserPath')
-    .withArgs(chromeStable).returns('/path/to/user/chrome/profile')
-    .withArgs(firefoxDev).returns('/path/to/user/firefox/profile')
 
     sinon.stub(fs, 'statAsync')
     .withArgs('/path/to/user/chrome/profile').throws('No Chrome profile folder')

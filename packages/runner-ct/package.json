@@ -26,7 +26,6 @@
     "@types/http-proxy": "1.17.4",
     "@types/node": "14.14.31",
     "@types/sockjs-client": "1.1.0",
-    "ansi-to-html": "0.6.14",
     "babel-loader": "8.1.0",
     "bluebird": "3.5.3",
     "cash-dom": "^8.1.0",

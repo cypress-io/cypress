@@ -1,21 +1,22 @@
+import Bluebird from 'bluebird'
+import Debug from 'debug'
 import _ from 'lodash'
 import path from 'path'
-import Bluebird from 'bluebird'
 import deepDiff from 'return-deep-diff'
 import type { ResolvedFromConfig, ResolvedConfigurationOptionSource, AllModeOptions, FullConfig } from '@packages/types'
 import configUtils from '@packages/config'
-
-import errors from './errors'
+import * as errors from './errors'
+import { getProcessEnvVars, CYPRESS_SPECIAL_ENV_VARS } from './util/config'
 import { fs } from './util/fs'
 import keys from './util/keys'
 import origin from './util/origin'
-import Debug from 'debug'
 import pathHelpers from './util/path_helpers'
 
-const debug = Debug('cypress:server:config')
+import type { ConfigValidationFailureInfo } from '@packages/errors'
 
-import { getProcessEnvVars, CYPRESS_SPECIAL_ENV_VARS } from './util/config'
 import { getCtx } from './makeDataContext'
+
+const debug = Debug('cypress:server:config')
 
 const folders = _(configUtils.options).filter({ isFolder: true }).map('name').value()
 
@@ -128,8 +129,18 @@ export function mergeDefaults (
   .omit('env')
   .omit('browsers')
   .each((val, key) => {
-    resolved[key] = 'cli'
-    config[key] = val
+    // If users pass in testing-type specific keys (eg, specPattern),
+    // we want to merge this with what we've read from the config file,
+    // rather than override it entirely.
+    if (typeof config[key] === 'object' && typeof val === 'object') {
+      if (Object.keys(val).length) {
+        resolved[key] = 'cli'
+        config[key] = { ...config[key], ...val }
+      }
+    } else {
+      resolved[key] = 'cli'
+      config[key] = val
+    }
   }).value()
 
   let url = config.baseUrl
@@ -152,7 +163,7 @@ export function mergeDefaults (
   config.cypressEnv = process.env.CYPRESS_INTERNAL_ENV
   debug('using CYPRESS_INTERNAL_ENV %s', config.cypressEnv)
   if (!isValidCypressInternalEnvValue(config.cypressEnv)) {
-    throw errors.throw('INVALID_CYPRESS_INTERNAL_ENV', config.cypressEnv)
+    throw errors.throwErr('INVALID_CYPRESS_INTERNAL_ENV', config.cypressEnv)
   }
 
   delete config.envFile
@@ -175,8 +186,13 @@ export function mergeDefaults (
 
   // validate config again here so that we catch configuration errors coming
   // from the CLI overrides or env var overrides
-  configUtils.validate(_.omit(config, 'browsers'), (errMsg) => {
-    throw errors.throw('CONFIG_VALIDATION_ERROR', errMsg)
+  configUtils.validate(_.omit(config, 'browsers'), (validationResult: ConfigValidationFailureInfo | string) => {
+    // return errors.throwErr('CONFIG_VALIDATION_ERROR', errMsg)
+    if (_.isString(validationResult)) {
+      return errors.throwErr('CONFIG_VALIDATION_MSG_ERROR', null, null, validationResult)
+    }
+
+    return errors.throwErr('CONFIG_VALIDATION_ERROR', null, null, validationResult)
   })
 
   config = setAbsolutePaths(config)
@@ -228,14 +244,19 @@ export function updateWithPluginValues (cfg, overrides) {
 
   // make sure every option returned from the plugins file
   // passes our validation functions
-  configUtils.validate(overrides, (errMsg) => {
-    const configFile = getCtx().lifecycleManager.configFile
+  configUtils.validate(overrides, (validationResult: ConfigValidationFailureInfo | string) => {
+    let configFile = getCtx().lifecycleManager.configFile
 
-    if (configFile) {
-      return errors.throw('PLUGINS_CONFIG_VALIDATION_ERROR', configFile, errMsg)
+    if (configFile === false) {
+      configFile = '--config file set to "false" via CLI--'
     }
 
-    return errors.throw('CONFIG_VALIDATION_ERROR', errMsg)
+    if (_.isString(validationResult)) {
+      return errors.throwErr('CONFIG_VALIDATION_MSG_ERROR', 'configFile', configFile, validationResult)
+    }
+
+    return errors.throwErr('CONFIG_VALIDATION_ERROR', 'configFile', configFile, validationResult)
+    // return errors.throwErr('CONFIG_VALIDATION_ERROR', 'pluginsFile', relativePluginsPath, errMsg)
   })
 
   let originalResolvedBrowsers = cfg && cfg.resolved && cfg.resolved.browsers && _.cloneDeep(cfg.resolved.browsers)
@@ -360,13 +381,11 @@ export async function setSupportFileAndFolder (obj, defaults) {
   const supportFilesByGlob = await ctx.file.getFilesByGlob(obj.projectRoot, obj.supportFile, { absolute: false })
 
   if (supportFilesByGlob.length > 1) {
-    return errors.throw('MULTIPLE_SUPPORT_FILES_FOUND', obj.supportFile, supportFilesByGlob.join(', '))
+    return errors.throwErr('MULTIPLE_SUPPORT_FILES_FOUND', obj.supportFile, supportFilesByGlob)
   }
 
   if (supportFilesByGlob.length === 0) {
-    const configFile = obj.configFile || defaults.configFile
-
-    return errors.throw('SUPPORT_FILE_NOT_FOUND', path.resolve(obj.projectRoot, obj.supportFile), configFile)
+    return errors.throwErr('SUPPORT_FILE_NOT_FOUND', path.resolve(obj.projectRoot, obj.supportFile))
   }
 
   // TODO move this logic to find support file into util/path_helpers
@@ -399,7 +418,7 @@ export async function setSupportFileAndFolder (obj, defaults) {
     return fs.pathExists(obj.supportFile)
     .then((found) => {
       if (!found) {
-        errors.throw('SUPPORT_FILE_NOT_FOUND', obj.supportFile, obj.configFile || defaults.configFile)
+        errors.throwErr('SUPPORT_FILE_NOT_FOUND', obj.supportFile)
       }
 
       return debug('switching to found file %s', obj.supportFile)
@@ -413,9 +432,7 @@ export async function setSupportFileAndFolder (obj, defaults) {
     })
     .then((result) => {
       if (result === null) {
-        const configFile = obj.configFile || defaults.configFile
-
-        return errors.throw('SUPPORT_FILE_NOT_FOUND', path.resolve(obj.projectRoot, sf), configFile)
+        return errors.throwErr('SUPPORT_FILE_NOT_FOUND', path.resolve(obj.projectRoot, sf))
       }
 
       debug('setting support file to %o', { result })

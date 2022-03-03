@@ -11,17 +11,12 @@ const path = require('path')
 const str = JSON.stringify
 const { isArray, isString, isFinite: isNumber } = _
 
-/**
- * Forms good Markdown-like string message.
- * @param {string} key - The key that caused the error
- * @param {string} type - The expected type name
- * @param {any} value - The actual value
- * @returns {string} Formatted error message
-*/
 const errMsg = (key, value, type) => {
-  return `Expected \`${key}\` to be ${type}. Instead the value was: \`${str(
+  return {
+    key,
     value,
-  )}\``
+    type,
+  }
 }
 
 const isFullyQualifiedUrl = (value) => {
@@ -91,10 +86,12 @@ const isValidBrowserList = (key, browsers) => {
   }
 
   for (let k = 0; k < browsers.length; k += 1) {
-    const err = isValidBrowser(browsers[k])
+    const validationResult = isValidBrowser(browsers[k])
 
-    if (err !== true) {
-      return `Found an error while validating the \`browsers\` list. ${err}`
+    if (validationResult !== true) {
+      validationResult.list = 'browsers'
+
+      return validationResult
     }
   }
 

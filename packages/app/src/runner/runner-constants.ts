@@ -1,4 +1,4 @@
 export const runnerConstants = {
   defaultSpecListWidth: 280,
-  defaultReporterWidth: 320,
+  defaultReporterWidth: 450,
 }

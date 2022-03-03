@@ -1,4 +1,5 @@
 const _ = require('lodash')
+const arch = require('arch')
 const os = require('os')
 const url = require('url')
 const path = require('path')
@@ -105,7 +106,7 @@ const getBinaryUrlFromPrereleaseNpmUrl = (npmUrl) => {
 
   const { version, artifactSlug } = matches.groups
 
-  parsed.pathname = `/beta/binary/${version}/${os.platform()}-${os.arch()}/${artifactSlug}/cypress.zip`
+  parsed.pathname = `/beta/binary/${version}/${os.platform()}-${arch()}/${artifactSlug}/cypress.zip`
 
   return parsed.format()
 }

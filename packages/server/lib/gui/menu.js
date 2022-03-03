@@ -167,63 +167,68 @@ module.exports = {
       })
     }
 
-    if (options.withDevTools) {
-      template.push(
-        {
-          label: 'Developer Tools',
-          submenu: [
-            {
-              label: 'Reload',
-              accelerator: 'CmdOrCtrl+R',
-              click: (item, focusedWindow) => {
-                if (focusedWindow) {
-                  return focusedWindow.reload()
-                }
-              },
-            },
-            {
-              label: 'Toggle Developer Tools',
-              accelerator: (() => {
-                if (os.platform() === 'darwin') {
-                  return 'Alt+Command+I'
-                }
-
-                return 'Ctrl+Shift+I'
-              })(),
-              click: (item, focusedWindow) => {
-                if (focusedWindow) {
-                  return focusedWindow.toggleDevTools()
-                }
-              },
-            },
-            {
-              label: `GraphQL requests over Fetch (${process.env.CYPRESS_INTERNAL_GQL_NO_SOCKET ? 'on' : 'off'})`,
-              click: (item, focusedWindow) => {
-                if (process.env.CYPRESS_INTERNAL_GQL_NO_SOCKET) {
-                  delete process.env.CYPRESS_INTERNAL_GQL_NO_SOCKET
-                } else {
-                  process.env.CYPRESS_INTERNAL_GQL_NO_SOCKET = '1'
-                }
-
-                this.set(opts)
-              },
-            },
-            {
-              label: 'GraphiQL',
-              click () {
-                return shell.openExternal(`http://localhost:${options.getGraphQLPort()}/__launchpad/graphql`)
-              },
-            },
-            {
-              label: 'View App Data',
-              click () {
-                return open.opn(appData.path())
-              },
-            },
-          ],
+    let devToolsSubmenu = [
+      {
+        label: 'Reload',
+        accelerator: 'CmdOrCtrl+R',
+        click: (item, focusedWindow) => {
+          if (focusedWindow) {
+            return focusedWindow.reload()
+          }
         },
-      )
+      },
+      {
+        label: 'Toggle Developer Tools',
+        accelerator: (() => {
+          if (os.platform() === 'darwin') {
+            return 'Alt+Command+I'
+          }
+
+          return 'Ctrl+Shift+I'
+        })(),
+        click: (item, focusedWindow) => {
+          if (focusedWindow) {
+            return focusedWindow.toggleDevTools()
+          }
+        },
+      },
+      {
+        label: 'View App Data',
+        click () {
+          return open.opn(appData.path())
+        },
+      },
+    ]
+
+    if (options.withInternalDevTools) {
+      devToolsSubmenu = devToolsSubmenu.concat([
+        {
+          label: `GraphQL requests over Fetch (${process.env.CYPRESS_INTERNAL_GQL_NO_SOCKET ? 'on' : 'off'})`,
+          click: (item, focusedWindow) => {
+            if (process.env.CYPRESS_INTERNAL_GQL_NO_SOCKET) {
+              delete process.env.CYPRESS_INTERNAL_GQL_NO_SOCKET
+            } else {
+              process.env.CYPRESS_INTERNAL_GQL_NO_SOCKET = '1'
+            }
+
+            this.set(opts)
+          },
+        },
+        {
+          label: 'GraphiQL',
+          click () {
+            return shell.openExternal(`http://localhost:${options.getGraphQLPort()}/__launchpad/graphql`)
+          },
+        },
+      ])
     }
+
+    template.push(
+      {
+        label: 'Developer Tools',
+        submenu: devToolsSubmenu,
+      },
+    )
 
     const menu = Menu.buildFromTemplate(template)
 

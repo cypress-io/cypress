@@ -6,7 +6,7 @@
   "main": "index.js",
   "scripts": {
     "projects:yarn:install": "node ./scripts/projects-yarn-install.js",
-    "test": "node ./scripts/run.js --glob-in-dir=test",
+    "test": "node ./scripts/run.js --glob-in-dir='{test,test-binary}'",
     "test:ci": "node ./scripts/run.js"
   },
   "devDependencies": {
@@ -44,12 +44,13 @@
     "cors": "2.8.5",
     "dayjs": "^1.9.3",
     "debug": "^4.3.2",
+    "dockerode": "3.3.1",
     "execa": "1.0.0",
     "express": "4.17.1",
     "express-session": "1.16.1",
     "express-useragent": "1.0.15",
     "fluent-ffmpeg": "2.1.2",
-    "fs-extra": "8.1.0",
+    "fs-extra": "9.1.0",
     "glob": "7.2.0",
     "https-proxy-agent": "3.0.1",
     "human-interval": "1.0.0",

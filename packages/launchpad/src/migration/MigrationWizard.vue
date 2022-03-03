@@ -4,7 +4,7 @@
       {{ t('migration.wizard.title') }}
     </h1>
     <p
-      class="text-center mx-42px mt-12px mb-32px text-body-gray-600 text-18px"
+      class="mx-42px mt-12px text-center mb-32px text-body-gray-600 text-18px"
     >
       {{ t('migration.wizard.description') }}
     </p>
@@ -18,7 +18,7 @@
       >
         <RenameSpecsAuto
           :gql="migration"
-          @skipChange="(newVal) => skipRename = newVal"
+          @selectOption="(newVal) => selectedOption = newVal"
         />
         <template #footer>
           <Button
@@ -27,7 +27,7 @@
             suffix-icon-class="w-16px h-16px icon-dark-white"
             @click="renameSpecs"
           >
-            {{ skipRename ? t('migration.wizard.step1.buttonSkip') : t('migration.wizard.step1.button') }}
+            {{ buttonTitle }}
           </Button>
         </template>
       </MigrationStep>
@@ -134,12 +134,17 @@
         </template>
       </MigrationStep>
     </template>
+    <Spinner
+      v-else
+      class="mx-auto mt-100px"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, onBeforeMount, ref } from 'vue'
 import { gql, useMutation, useQuery } from '@urql/vue'
+import Spinner from '@cy/components/Spinner.vue'
 import Button from '@cy/components/Button.vue'
 import ArrowRightIcon from '~icons/cy/arrow-right_x16.svg'
 import MigrationStep from './fragments/MigrationStep.vue'
@@ -157,10 +162,19 @@ import {
   MigrationWizard_RenameSupportDocument,
   MigrationWizard_SkipManualRenameDocument,
   MigrationWizard_StartDocument,
+  MigrationWizard_RenameSpecsFolderDocument,
 } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
 
 const { t } = useI18n()
+
+gql`
+fragment MigrationBaseError on Query {
+  baseError {
+    ...BaseError
+  }
+}
+`
 
 gql`
 fragment MigrationWizardData on Query {
@@ -196,6 +210,7 @@ mutation MigrationWizard_Start {
     migration {
       filteredSteps {
         id
+        ...MigrationStep
       }
     }
   }
@@ -211,11 +226,12 @@ onBeforeMount(async () => {
 
 // specs rename
 
-const skipRename = ref(false)
+const selectedOption = ref<'rename' | 'renameFolder' | 'skip'>()
 
 gql`
 mutation MigrationWizard_RenameSpecs($skip: Boolean, $before: [String!], $after: [String!]) {
   migrateRenameSpecs(skip: $skip, before: $before, after: $after) {
+    ...MigrationBaseError
     migration {
       filteredSteps {
         id
@@ -227,15 +243,34 @@ mutation MigrationWizard_RenameSpecs($skip: Boolean, $before: [String!], $after:
 }
 `
 
+gql`
+mutation MigrationWizard_RenameSpecsFolder {
+  migrateRenameSpecsFolder {
+    ...MigrationBaseError
+    migration {
+      ...RenameSpecsManual
+      filteredSteps {
+        id
+        isCurrentStep
+        isCompleted
+      }
+    }
+  }
+}
+`
+
 const renameMutation = useMutation(MigrationWizard_RenameSpecsDocument)
+const renameFolderMutation = useMutation(MigrationWizard_RenameSpecsFolderDocument)
 
 function renameSpecs () {
-  if (skipRename.value) {
+  if (selectedOption.value === 'skip') {
     renameMutation.executeMutation({
-      skip: skipRename.value,
+      skip: true,
       before: null,
       after: null,
     })
+  } else if (selectedOption.value === 'renameFolder') {
+    renameFolderMutation.executeMutation({})
   } else {
     // we are renaming!
     interface BeforeAfterPairs {
@@ -368,4 +403,16 @@ const launchReconfigureMutation = useMutation(MigrationWizard_ReconfigureCompone
 function launchReconfigureComponentTesting () {
   launchReconfigureMutation.executeMutation({})
 }
+
+const buttonTitle = computed(() => {
+  if (selectedOption.value === 'skip') {
+    return t('migration.wizard.step1.buttonSkip')
+  }
+
+  if (selectedOption.value === 'renameFolder') {
+    return t('migration.wizard.step1.buttonRenameFolder')
+  }
+
+  return t('migration.wizard.step1.button')
+})
 </script>

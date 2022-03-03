@@ -4,6 +4,7 @@
     variant="bare"
     :title="title"
     :model-value="show"
+    :help-link="helpLink"
     data-cy="create-spec-modal"
     @update:model-value="close"
   >
@@ -40,11 +41,13 @@
 </template>
 
 <script lang  ="ts" setup>
-import { generators, GeneratorId } from './generators'
+import { generators } from './generators'
+import type { GeneratorId } from './generators'
 import { DialogOverlay } from '@headlessui/vue'
 import StandardModal from '@cy/components/StandardModal.vue'
 import CreateSpecCards from './CreateSpecCards.vue'
-import { ref, computed, Ref } from 'vue'
+import { ref, computed } from 'vue'
+import type { Ref } from 'vue'
 import type { CreateSpecModalFragment } from '../generated/graphql'
 import { gql } from '@urql/vue'
 import { not, whenever } from '@vueuse/core'
@@ -52,8 +55,8 @@ import { useI18n } from '@cy/i18n'
 import { getPathForPlatform } from '../paths'
 
 const props = defineProps<{
-  initialGenerator?: GeneratorId,
-  show: boolean,
+  initialGenerator?: GeneratorId
+  show: boolean
   gql: CreateSpecModalFragment
 }>()
 
@@ -82,6 +85,14 @@ const generator = computed(() => {
   if (currentGeneratorId.value) return generators[currentGeneratorId.value]
 
   return null
+})
+
+const helpLink = computed(() => {
+  if (title.value === t('createSpec.e2e.importFromScaffold.specsAddedHeader')) {
+    return 'https://on.cypress.io/writing-and-organizing-tests'
+  }
+
+  return ''
 })
 
 const specFileName = computed(() => getPathForPlatform('cypress/e2e/filename.cy.js'))

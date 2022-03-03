@@ -40,7 +40,7 @@
       >
       <label
         for="inline-spec-list-header-search"
-        class="cursor-text font-light bottom-6px left-24px text-gray-700 select-none absolute"
+        class="cursor-text font-light bottom-4px left-24px text-gray-700 select-none absolute"
         :class="{
           'sr-only': inputFocused || props.search
         }"
@@ -79,8 +79,6 @@
 </template>
 
 <script lang="ts" setup>
-import Input from '@cy/components/Input.vue'
-import Button from '@cy/components/Button.vue'
 import { ref } from 'vue'
 import { useI18n } from '@cy/i18n'
 

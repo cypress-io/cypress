@@ -7,7 +7,7 @@ import IconComponentSolid from '~icons/cy/testing-type-component-solid_x64.svg'
 describe('Card', { viewportHeight: 400 }, () => {
   it('renders with icons, text, and focus state', () => {
     const e2eTitle = 'E2E Testing'
-    const e2eDescription = 'Build and test the entire experience of your application from end-to-end to each ensure each flow matches your expectations.'
+    const e2eDescription = 'Build and test the entire experience of your application from end-to-end to ensure each flow matches your expectations.'
     const ctTitle = 'Component Testing'
     const ctDescription = 'Build and test your components from your design system in isolation in order to ensure each state matches your expectations.'
 

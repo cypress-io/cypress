@@ -5,7 +5,7 @@ A project with E2E and CT, both using custom folders. Everything else default.
 The following migration steps will be used during this migration:
 
 - [x] automatic folder rename of cypress/integration to cypress/e2e
-- [x] manual file rename
+- [ ] manual file rename
 - [x] rename support
 - [x] update config file
 - [x] setup component testing
@@ -21,7 +21,7 @@ Unless the user skips this step, after this step, the filesystem will be:
 
 ## Manual Files
 
-The user will need to rename and/or move their only component spec, `button.cy.js` to its new location.
+No manual migration, since the user has a non default componentFolder.
 
 ## Rename supportFile
 

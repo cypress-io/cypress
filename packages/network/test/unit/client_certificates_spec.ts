@@ -554,7 +554,7 @@ describe('lib/client-certificates', () => {
       }
 
       expect(act).to.throw(
-        'Cannot decrypt PEM key with supplied passphrase (check the passphrase file content and that it doesn\'t have unexpected whitespace at the end)',
+        `Cannot decrypt PEM key with supplied passphrase (check the passphrase file content and that it doesn't have unexpected whitespace at the end)`,
       )
     })
 

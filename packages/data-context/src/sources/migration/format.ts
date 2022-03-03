@@ -7,18 +7,11 @@ export interface FilePartNoHighlight {
 
 export interface FilePartHighlight {
   text: string
-  group: 'folder' | 'extension' | 'name'
+  group: 'folder' | 'preExtension' | 'supportFileName'
   highlight: true
 }
 
 export type FilePart = FilePartNoHighlight | FilePartHighlight
-
-export const supportFileRegexps = {
-  e2e: {
-    beforeRegexp: 'cypress/\support\/(?<name>index)\.(?=[j|t]s[x]?)',
-    afterRegexp: 'cypress/\support\/(?<name>e2e)\.(?=[j|t]s[x]?)',
-  },
-} as const
 
 export function formatMigrationFile (file: string, regexp: RegExp): FilePart[] {
   const match = regexp.exec(file)
@@ -29,38 +22,46 @@ export function formatMigrationFile (file: string, regexp: RegExp): FilePart[] {
       Perhaps this isn't a spec file, or it is an unexpected format?`)
   }
 
-  // sometimes `.` gets in here as the <ext> group
-  // filter it out
-  const highlights = Object.values(match.groups)
-  .filter((x) => x.length > 0)
-  .map((d) => d === '.' ? `[${d}]` : d) // period is wildcard so surround with [] to use character
+  const { folder, fileName, preExtension, extension, supportFileName } = match.groups
 
-  const delimiters = highlights.join('|')
-  const re = new RegExp(`(${delimiters})`)
-  const split = file.split(re)
-
-  return split.map<FilePart>((text) => {
-    const group = text === match.groups?.main
-      ? 'folder'
-      : text === match.groups?.ext
-        ? 'extension'
-        : text === match.groups?.name
-          ? 'name'
-          : undefined
-
-    const hasHighlight = text === '.' || highlights.includes(text)
-
-    if (hasHighlight && group) {
-      return {
-        text,
-        highlight: true,
-        group,
-      }
-    }
-
-    return {
-      text,
+  if (supportFileName && extension) {
+    return [{
+      text: `${file.slice(0, match.index)}cypress/support/`, // user/cypress/support/index.js -> user/cypress/support/
       highlight: false,
-    }
-  })
+    }, {
+      text: supportFileName, // user/cypress/support/index.js -> index
+      highlight: true,
+      group: 'supportFileName',
+    },
+    {
+      text: extension, // user/cypress/support/index.js -> .js
+      highlight: false,
+    }]
+  }
+
+  return [{
+    text: file.slice(0, match.index), // user/cypress/integration/file.spec.tsx -> user/
+    highlight: false,
+  },
+  {
+    text: folder ? 'cypress/' : '', // empty when using a custom integration folder or in component
+    highlight: false,
+  },
+  {
+    text: folder || '', // user/cypress/integration/file.spec.tsx -> integration
+    highlight: true,
+    group: 'folder',
+  },
+  {
+    text: (folder ? '/' : '') + fileName, // user/cypress/integration/file.spec.tsx -> /file
+    highlight: false,
+  },
+  {
+    text: preExtension || '', // user/cypress/integration/file.spec.tsx -> .spec.
+    highlight: true,
+    group: 'preExtension',
+  }, {
+    text: extension || '', // user/cypress/integration/file.spec.tsx -> tsx
+    highlight: false,
+  }].filter((f) => f.text.length) as FilePart[]
 }

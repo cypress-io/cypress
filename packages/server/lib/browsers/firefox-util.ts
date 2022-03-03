@@ -227,7 +227,7 @@ export default {
       this.setupFoxdriver(foxdriverPort),
       this.setupMarionette(extensions, url, marionettePort),
       remotePort && setupRemote(remotePort, automation, onError),
-    ]).then(([,, browserCriClient]) => browserCriClient)
+    ]).then(([,, browserCriClient]) => navigateToUrl(url).then(() => browserCriClient))
   },
 
   connectToNewSpec,
@@ -351,9 +351,6 @@ export default {
             parameters: { path, temporary: true },
           })
         }))
-      })
-      .then(() => {
-        return navigateToUrl(url)
       })
       .then(resolve)
       .catch(_onError('commands'))

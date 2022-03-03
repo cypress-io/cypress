@@ -19,9 +19,14 @@ import {
   isDefaultTestFiles,
   getComponentTestFilesGlobs,
   getComponentFolder,
+  getIntegrationTestFilesGlobs,
+  getSpecPattern,
 } from './migration'
 
 import type { FilePart } from './migration/format'
+import Debug from 'debug'
+
+const debug = Debug('cypress:data-context:sources:MigrationDataSource')
 
 export interface MigrationFile {
   testingType: TestingType
@@ -66,7 +71,7 @@ export class MigrationDataSource {
   hasE2ESpec: boolean = flags.hasE2ESpec
   hasPluginsFile: boolean = flags.hasPluginsFile
 
-  private componentTestingMigrationWatcher?: chokidar.FSWatcher
+  private componentTestingMigrationWatcher: chokidar.FSWatcher | null = null
   componentTestingMigrationStatus?: ComponentTestingMigrationStatus
   private _oldConfigPromise: Promise<OldCypressConfig> | null = null
 
@@ -102,7 +107,9 @@ export class MigrationDataSource {
   }
 
   async getComponentTestingMigrationStatus () {
+    debug('getComponentTestingMigrationStatus: start')
     const config = await this.parseCypressConfig()
+
     const componentFolder = getComponentFolder(config)
 
     if (!config || !this.ctx.currentProject) {
@@ -116,15 +123,20 @@ export class MigrationDataSource {
       return null
     }
 
+    debug('getComponentTestingMigrationStatus: componentFolder', componentFolder)
+
     if (!this.componentTestingMigrationWatcher) {
-      const onFileMoved = (status: ComponentTestingMigrationStatus) => {
+      debug('getComponentTestingMigrationStatus: initializing watcher')
+      const onFileMoved = async (status: ComponentTestingMigrationStatus) => {
         this.componentTestingMigrationStatus = status
+        debug('getComponentTestingMigrationStatus: file moved %O', status)
 
         if (status.completed) {
-          this.componentTestingMigrationWatcher?.close()
+          await this.componentTestingMigrationWatcher?.close()
+          this.componentTestingMigrationWatcher = null
         }
 
-        // TODO(lachlan): is this the right plcae to use the emitter?
+        // TODO(lachlan): is this the right place to use the emitter?
         this.ctx.deref.emitter.toLaunchpad()
       }
 
@@ -137,6 +149,7 @@ export class MigrationDataSource {
 
       this.componentTestingMigrationStatus = status
       this.componentTestingMigrationWatcher = watcher
+      debug('getComponentTestingMigrationStatus: watcher initialized. Status: %o', status)
     }
 
     if (!this.componentTestingMigrationStatus) {
@@ -153,6 +166,7 @@ export class MigrationDataSource {
 
     const config = await this.parseCypressConfig()
 
+    debug('supportFilesForMigrationGuide: config %O', config)
     if (!await shouldShowRenameSupport(this.ctx.currentProject, config)) {
       return null
     }
@@ -164,8 +178,12 @@ export class MigrationDataSource {
     try {
       const supportFiles = await supportFilesForMigration(this.ctx.currentProject)
 
+      debug('supportFilesForMigrationGuide: supportFiles %O', supportFiles)
+
       return supportFiles
-    } catch {
+    } catch (err) {
+      debug('supportFilesForMigrationGuide: err %O', err)
+
       return null
     }
   }
@@ -179,13 +197,13 @@ export class MigrationDataSource {
 
     const specs = await getSpecs(this.ctx.currentProject, config)
 
-    const canBeAutomaticallyMigrated: MigrationFile[] = specs.integration.map(applyMigrationTransform)
+    const canBeAutomaticallyMigrated: MigrationFile[] = specs.integration.map(applyMigrationTransform).filter((spec) => spec.before.relative !== spec.after.relative)
 
     const defaultComponentPattern = isDefaultTestFiles(await this.parseCypressConfig(), 'component')
 
     // Can only migration component specs if they use the default testFiles pattern.
     if (defaultComponentPattern) {
-      canBeAutomaticallyMigrated.push(...specs.component.map(applyMigrationTransform))
+      canBeAutomaticallyMigrated.push(...specs.component.map(applyMigrationTransform).filter((spec) => spec.before.relative !== spec.after.relative))
     }
 
     return canBeAutomaticallyMigrated
@@ -257,15 +275,40 @@ export class MigrationDataSource {
 
     const config = await this.parseCypressConfig()
 
-    this.hasCustomIntegrationTestFiles = !isDefaultTestFiles(config, 'integration')
+    const integrationFolder = getIntegrationFolder(config)
+    const integrationTestFiles = getIntegrationTestFilesGlobs(config)
+
     this.hasCustomIntegrationFolder = getIntegrationFolder(config) !== 'cypress/integration'
+    this.hasCustomIntegrationTestFiles = !isDefaultTestFiles(config, 'integration')
+
+    if (integrationFolder === false) {
+      this.hasE2ESpec = false
+    } else {
+      this.hasE2ESpec = await hasSpecFile(
+        this.ctx.currentProject,
+        integrationFolder,
+        integrationTestFiles,
+      )
+
+      // if we don't find specs in the 9.X scope,
+      // let's check already migrated files.
+      // this allows users to stop migration halfway,
+      // then to pick up where they left migration off
+      if (!this.hasE2ESpec && (!this.hasCustomIntegrationTestFiles || !this.hasCustomIntegrationFolder)) {
+        const newE2eSpecPattern = getSpecPattern(config, 'e2e')
+
+        this.hasE2ESpec = await hasSpecFile(
+          this.ctx.currentProject,
+          '',
+          newE2eSpecPattern,
+        )
+      }
+    }
 
     const componentFolder = getComponentFolder(config)
-
-    this.hasCustomComponentFolder = componentFolder !== 'cypress/component'
-
     const componentTestFiles = getComponentTestFilesGlobs(config)
 
+    this.hasCustomComponentFolder = componentFolder !== 'cypress/component'
     this.hasCustomComponentTestFiles = !isDefaultTestFiles(config, 'component')
 
     if (componentFolder === false) {
@@ -276,18 +319,10 @@ export class MigrationDataSource {
         componentFolder,
         componentTestFiles,
       )
-    }
 
-    const integrationFolder = getIntegrationFolder(config)
-
-    if (integrationFolder === false) {
-      this.hasE2ESpec = false
-    } else {
-      this.hasE2ESpec = await hasSpecFile(
-        this.ctx.currentProject,
-        integrationFolder,
-        componentTestFiles,
-      )
+      // We cannot check already migrated component specs since it would pick up e2e specs as well
+      // the default specPattern for CT is **/*.cy.js.
+      // since component testing has to be re-installed anyway, we can just skip this
     }
 
     const pluginsFileMissing = (
@@ -303,6 +338,14 @@ export class MigrationDataSource {
 
   get step (): MIGRATION_STEP {
     return this._step
+  }
+
+  async closeManualRenameWatcher () {
+    if (this.componentTestingMigrationWatcher) {
+      debug('setStep: stopping watcher')
+      await this.componentTestingMigrationWatcher.close()
+      this.componentTestingMigrationWatcher = null
+    }
   }
 
   setStep (step: MIGRATION_STEP) {

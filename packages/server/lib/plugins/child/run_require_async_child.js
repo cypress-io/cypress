@@ -15,8 +15,6 @@ let tsRegistered = false
  * @returns
  */
 function run (ipc, configFile, projectRoot) {
-  let areSetupNodeEventsLoaded = false
-
   debug('configFile:', configFile)
   debug('projectRoot:', projectRoot)
   if (!projectRoot) {
@@ -33,7 +31,7 @@ function run (ipc, configFile, projectRoot) {
 
   process.on('uncaughtException', (err) => {
     debug('uncaught exception:', util.serializeError(err))
-    ipc.send(areSetupNodeEventsLoaded ? 'childProcess:unhandledError' : 'setupTestingType:uncaughtError', util.serializeError(err))
+    ipc.send('childProcess:unhandledError', util.serializeError(err))
 
     return false
   })
@@ -54,9 +52,11 @@ function run (ipc, configFile, projectRoot) {
     return false
   })
 
-  const isValidSetupNodeEvents = (setupNodeEvents) => {
-    if (setupNodeEvents && typeof setupNodeEvents !== 'function') {
-      ipc.send('setupTestingType:error', 'SETUP_NODE_EVENTS_IS_NOT_FUNCTION', configFile, setupNodeEvents)
+  const isValidSetupNodeEvents = (config, testingType) => {
+    if (config[testingType] && config[testingType].setupNodeEvents && typeof config[testingType].setupNodeEvents !== 'function') {
+      ipc.send('setupTestingType:error', util.serializeError(
+        require('@packages/errors').getError('SETUP_NODE_EVENTS_IS_NOT_FUNCTION', configFile, testingType, config[testingType].setupNodeEvents),
+      ))
 
       return false
     }
@@ -71,7 +71,9 @@ function run (ipc, configFile, projectRoot) {
       return true
     }
 
-    ipc.send('setupTestingType:error', 'COMPONENT_DEV_SERVER_IS_NOT_A_FUNCTION', configFile, config)
+    ipc.send('setupTestingType:error', util.serializeError(
+      require('@packages/errors').getError('CONFIG_FILE_DEV_SERVER_IS_NOT_A_FUNCTION', configFile, config),
+    ))
 
     return false
   }
@@ -102,9 +104,12 @@ function run (ipc, configFile, projectRoot) {
 
         const runPlugins = new RunPlugins(ipc, projectRoot, configFile)
 
-        areSetupNodeEventsLoaded = true
+        if (!isValidSetupNodeEvents(result, testingType)) {
+          return
+        }
+
         if (testingType === 'component') {
-          if (!isValidSetupNodeEvents(result.setupNodeEvents) || !isValidDevServer((result.component || {}))) {
+          if (!isValidDevServer((result.component || {}))) {
             return
           }
 
@@ -118,10 +123,6 @@ function run (ipc, configFile, projectRoot) {
             return setupNodeEvents(on, config)
           })
         } else if (testingType === 'e2e') {
-          if (!isValidSetupNodeEvents(result.e2e && result.e2e.setupNodeEvents)) {
-            return
-          }
-
           const setupNodeEvents = result.e2e && result.e2e.setupNodeEvents || ((on, config) => {})
 
           runPlugins.runSetupNodeEvents(options, setupNodeEvents)
@@ -142,16 +143,22 @@ function run (ipc, configFile, projectRoot) {
         // replace the first line with better text (remove potentially misleading word TypeScript for example)
         .replace(/^.*\n/g, 'Error compiling file\n')
 
-        ipc.send('loadConfig:error', err.name, configFile, cleanMessage)
-      } else {
-        const realErrorCode = err.code || err.name
+        // Regex to pull out the error from the message body of a TSError. It displays the relative path to a file
+        const tsErrorRegex = /\n(.*?)\((\d+),(\d+)\):/g
+        const failurePath = tsErrorRegex.exec(cleanMessage)
 
-        debug('failed to load file:%s\n%s: %s', configFile, realErrorCode, err.message)
-
-        ipc.send('loadConfig:error', realErrorCode, configFile, err.message)
+        err.tsErrorLocation = failurePath ? { filePath: failurePath[1], line: Number(failurePath[2]), column: Number(failurePath[3]) } : null
+        err.originalMessage = err.message
+        err.message = cleanMessage
       }
+
+      ipc.send('loadConfig:error', util.serializeError(
+        require('@packages/errors').getError('CONFIG_FILE_REQUIRE_ERROR', configFile, err),
+      ))
     }
   })
+
+  ipc.send('ready')
 }
 
 module.exports = run

@@ -145,7 +145,7 @@ describe('<StandardModal />', { viewportWidth: 800, viewportHeight: 400 }, () =>
       cy.get('@updateSpy').should('not.have.been.called')
     })
 
-    it('doesn\'t close with click inside', () => {
+    it(`doesn't close with click inside`, () => {
       cy.contains(title).click()
       cy.get('@updateSpy').should('not.have.been.called')
     })

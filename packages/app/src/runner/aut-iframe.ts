@@ -1,5 +1,4 @@
 import { useSelectorPlaygroundStore } from '../store/selector-playground-store'
-import type JQuery from 'jquery'
 import { blankContents } from './blank-contents'
 import { visitFailure } from './visit-failure'
 import { logger } from './logger'

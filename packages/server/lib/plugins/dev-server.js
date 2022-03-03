@@ -33,7 +33,7 @@ const API = {
 
   start ({ specs, config }) {
     if (!plugins.has('dev-server:start')) {
-      throw errors.get('CT_NO_DEV_START_EVENT', config.pluginsFile)
+      throw errors.get('CONFIG_FILE_INVALID_DEV_START_EVENT', config.pluginsFile)
     }
 
     return plugins.execute('dev-server:start', { specs, config })

@@ -1,188 +1,65 @@
 require('../spec_helper')
 
-const style = require('ansi-styles')
-const chalk = require('chalk')
-const errors = require(`../../lib/errors`)
 const exception = require(`../../lib/exception`)
-const snapshot = require('snap-shot-it')
+const chalk = require('chalk')
+const errors = require('../../lib/errors')
 
-describe('lib/errors', () => {
+context('.logException', () => {
   beforeEach(() => {
-    return sinon.spy(console, 'log')
+    sinon.stub(console, 'log')
   })
 
-  context('.log', () => {
-    it('uses red by default', () => {
-      const err = errors.get('NOT_LOGGED_IN')
+  it('calls exception.create with unknown error', () => {
+    sinon.stub(exception, 'create').resolves()
+    sinon.stub(process.env, 'CYPRESS_INTERNAL_ENV').value('production')
 
-      const ret = errors.log(err)
+    const err = new Error('foo')
 
-      expect(ret).to.be.undefined
+    return errors.logException(err)
+    .then(() => {
+      expect(console.log).to.be.calledWith(chalk.red(err.stack ?? ''))
 
-      const {
-        red,
-      } = style
-
-      expect(console.log).to.be.calledWithMatch(red.open)
-
-      expect(console.log).to.be.calledWithMatch(red.close)
-    })
-
-    it('can change the color', () => {
-      const err = errors.get('NOT_LOGGED_IN')
-
-      const ret = errors.log(err, 'yellow')
-
-      expect(ret).to.be.undefined
-
-      const {
-        yellow,
-      } = style
-
-      expect(console.log).to.be.calledWithMatch(yellow.open)
-
-      expect(console.log).to.be.calledWithMatch(yellow.close)
-    })
-
-    it('logs err.message', () => {
-      const err = errors.get('NO_PROJECT_ID', 'foo/bar/baz')
-
-      const ret = errors.log(err)
-
-      expect(ret).to.be.undefined
-
-      expect(console.log).to.be.calledWithMatch('foo/bar/baz')
-    })
-
-    it('converts markdown links in err.message', () => {
-      const err = errors.get('NO_PROJECT_ID', `
-        This line has [linked text](https://on.cypress.io) in it. There's a period in the middle.
-
-        This line has [linked text at the end](https://on.cypress.io).
-
-        This line has [linked text](https://on.cypress.io) with no period
-      `)
-
-      errors.log(err)
-
-      expect(console.log).to.be.calledWithMatch('This line has linked text in it. There\'s a period in the middle: https://on.cypress.io')
-      expect(console.log).to.be.calledWithMatch('This line has linked text at the end: https://on.cypress.io')
-      expect(console.log).to.be.calledWithMatch('This line has linked text with no period: https://on.cypress.io')
-    })
-
-    it('logs err.details', () => {
-      const err = errors.get('PLUGINS_FUNCTION_ERROR', 'foo/bar/baz', 'details huh')
-
-      const ret = errors.log(err)
-
-      expect(ret).to.be.undefined
-
-      expect(console.log).to.be.calledWithMatch('foo/bar/baz')
-
-      expect(console.log).to.be.calledWithMatch('\n', 'details huh')
-    })
-
-    it('logs err.stack in development', () => {
-      process.env.CYPRESS_INTERNAL_ENV = 'development'
-
-      const err = new Error('foo')
-
-      const ret = errors.log(err)
-
-      expect(ret).to.eq(err)
-
-      expect(console.log).to.be.calledWith(chalk.red(err.stack))
+      expect(exception.create).to.be.calledWith(err)
     })
   })
 
-  context('.logException', () => {
-    it('calls exception.create with unknown error', () => {
-      sinon.stub(exception, 'create').resolves()
-      sinon.stub(process.env, 'CYPRESS_INTERNAL_ENV').value('production')
+  it('does not call exception.create when known error', () => {
+    sinon.stub(exception, 'create').resolves()
+    sinon.stub(process.env, 'CYPRESS_INTERNAL_ENV').value('production')
 
-      const err = new Error('foo')
+    const err = errors.get('NOT_LOGGED_IN')
 
-      return errors.logException(err)
-      .then(() => {
-        expect(console.log).to.be.calledWith(chalk.red(err.stack))
+    return errors.logException(err)
+    .then(() => {
+      expect(console.log).not.to.be.calledWith(err.stack)
 
-        expect(exception.create).to.be.calledWith(err)
-      })
-    })
-
-    it('does not call exception.create when known error', () => {
-      sinon.stub(exception, 'create').resolves()
-      sinon.stub(process.env, 'CYPRESS_INTERNAL_ENV').value('production')
-
-      const err = errors.get('NOT_LOGGED_IN')
-
-      return errors.logException(err)
-      .then(() => {
-        expect(console.log).not.to.be.calledWith(err.stack)
-
-        expect(exception.create).not.to.be.called
-      })
-    })
-
-    it('does not call exception.create when not in production env', () => {
-      sinon.stub(exception, 'create').resolves()
-      sinon.stub(process.env, 'CYPRESS_INTERNAL_ENV').value('development')
-
-      const err = new Error('foo')
-
-      return errors.logException(err)
-      .then(() => {
-        expect(console.log).not.to.be.calledWith(err.stack)
-
-        expect(exception.create).not.to.be.called
-      })
-    })
-
-    it('swallows creating exception errors', () => {
-      sinon.stub(exception, 'create').rejects(new Error('foo'))
-      sinon.stub(process.env, 'CYPRESS_INTERNAL_ENV').value('production')
-
-      const err = errors.get('NOT_LOGGED_IN')
-
-      return errors.logException(err)
-      .then((ret) => {
-        expect(ret).to.be.undefined
-      })
+      expect(exception.create).not.to.be.called
     })
   })
 
-  context('.clone', () => {
-    it('converts err.message from ansi to html with span classes when html true', () => {
-      const err = new Error(`foo${chalk.blue('bar')}${chalk.yellow('baz')}`)
-      const obj = errors.clone(err, { html: true })
+  it('does not call exception.create when not in production env', () => {
+    sinon.stub(exception, 'create').resolves()
+    sinon.stub(process.env, 'CYPRESS_INTERNAL_ENV').value('development')
 
-      expect(obj.message).to.eq('foo<span class="ansi-blue-fg">bar</span><span class="ansi-yellow-fg">baz</span>')
-    })
+    const err = new Error('foo')
 
-    it('does not convert err.message from ansi to html when no html option', () => {
-      const err = new Error(`foo${chalk.blue('bar')}${chalk.yellow('baz')}`)
-      const obj = errors.clone(err)
+    return errors.logException(err)
+    .then(() => {
+      expect(console.log).not.to.be.calledWith(err.stack)
 
-      expect(obj.message).to.eq('foo\u001b[34mbar\u001b[39m\u001b[33mbaz\u001b[39m')
+      expect(exception.create).not.to.be.called
     })
   })
 
-  context('.displayFlags', () => {
-    it('returns string formatted from selected keys', () => {
-      const options = {
-        tags: 'nightly,staging',
-        name: 'my tests',
-        unused: 'some other value',
-      }
-      // we are only interested in showig tags and name values
-      // and prepending them with custom prefixes
-      const mapping = {
-        tags: '--tag',
-        name: '--name',
-      }
-      const text = errors.displayFlags(options, mapping)
+  it('swallows creating exception errors', () => {
+    sinon.stub(exception, 'create').rejects(new Error('foo'))
+    sinon.stub(process.env, 'CYPRESS_INTERNAL_ENV').value('production')
 
-      return snapshot('tags and name only', text)
+    const err = errors.get('NOT_LOGGED_IN')
+
+    return errors.logException(err)
+    .then((ret) => {
+      expect(ret).to.be.undefined
     })
   })
 })

@@ -38,7 +38,7 @@
       <div>
         <StandardModalFooter
           v-if="result"
-          class="flex h-72px gap-16px items-center"
+          class="flex gap-16px items-center"
         >
           <router-link
             class="outline-none"
@@ -46,6 +46,7 @@
             "
           >
             <Button
+              size="lg"
               :prefix-icon="TestResultsIcon"
               prefix-icon-class="w-16px h-16px icon-dark-white"
               @click="emits('close')"
@@ -54,6 +55,7 @@
             </Button>
           </router-link>
           <Button
+            size="lg"
             :prefix-icon="PlusButtonIcon"
             prefix-icon-class="w-16px h-16px icon-dark-gray-500"
             variant="outline"
@@ -87,14 +89,14 @@ import TestResultsIcon from '~icons/cy/test-results_x24.svg'
 import EmptyGenerator from '../EmptyGenerator.vue'
 
 const props = defineProps<{
-  title: string,
+  title: string
   codeGenGlob: string
 }>()
 
 const { t } = useI18n()
 
 const emits = defineEmits<{
-  (event: 'update:title', value: string): void,
+  (event: 'update:title', value: string): void
   (event: 'update:description', value: string): void
   (event: 'restart'): void
   (event: 'close'): void

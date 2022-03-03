@@ -7,6 +7,7 @@
   >
     <div
       v-show="showPanel1"
+      data-cy="specs-list-panel"
       class="h-full flex-shrink-0 relative"
       :style="{width: `${panel1Width}px`}"
     >
@@ -24,6 +25,7 @@
 
     <div
       v-show="showPanel2"
+      data-cy="reporter-panel"
       class="h-full flex-shrink-0 relative"
       :style="{width: `${panel2Width}px`}"
     >
@@ -37,6 +39,7 @@
     </div>
 
     <div
+      data-cy="aut-panel"
       class="flex-grow h-full relative"
       :class="{'pointer-events-none':panel2IsDragging}"
       :style="{
@@ -71,7 +74,7 @@ const props = withDefaults(defineProps<{
   minPanel2Width?: number
   minPanel3Width?: number
   maxTotalWidth?: number // windowWidth in runner
-  offsetLeft?: number,
+  offsetLeft?: number
 }>(), {
   showPanel1: true,
   showPanel2: true,
@@ -85,8 +88,8 @@ const props = withDefaults(defineProps<{
 })
 
 const emit = defineEmits<{
-  (e: 'resizeEnd', value: DraggablePanel): void,
-  (e: 'panelWidthUpdated', value: {panel:string, width: number}): void,
+  (e: 'resizeEnd', value: DraggablePanel): void
+  (e: 'panelWidthUpdated', value: {panel: DraggablePanel, width: number}): void
 }>()
 
 const panel1HandleX = ref(props.initialPanel1Width)
@@ -155,7 +158,7 @@ function handleResizeEnd (panel: DraggablePanel) {
   emit('resizeEnd', panel)
 }
 
-function isNewWidthAllowed (mouseClientX:number, panel: DraggablePanel) {
+function isNewWidthAllowed (mouseClientX: number, panel: DraggablePanel) {
   if (panel === 'panel1') {
     const newWidth = mouseClientX - props.offsetLeft
     const result = panel1IsDragging.value && newWidth >= props.minPanel1Width && newWidth <= maxPanel1Width.value

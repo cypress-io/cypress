@@ -11,6 +11,7 @@ import {
   DevActions,
   AuthActions,
 } from './actions'
+import { VersionsActions } from './actions/VersionsActions'
 import { cached } from './util'
 
 export class DataActions {
@@ -64,5 +65,10 @@ export class DataActions {
   @cached
   get browser () {
     return new BrowserActions(this.ctx)
+  }
+
+  @cached
+  get versions () {
+    return new VersionsActions(this.ctx)
   }
 }

@@ -1,12 +1,11 @@
 import type { DataContext } from '..'
-import type { AuthenticatedUserShape } from '../data'
-
-export interface AuthMessage {type: string, browserOpened: boolean, name: string, message: string}
+import type { AuthenticatedUserShape, AuthStateShape } from '../data'
 
 export interface AuthApiShape {
   getUser(): Promise<Partial<AuthenticatedUserShape>>
-  logIn(onMessage: (message: AuthMessage) => void): Promise<AuthenticatedUserShape>
+  logIn(onMessage: (message: AuthStateShape) => void): Promise<AuthenticatedUserShape>
   logOut(): Promise<void>
+  resetAuthState(): Promise<void>
 }
 
 export class AuthActions {
@@ -45,14 +44,25 @@ export class AuthActions {
   }
 
   async login () {
-    this.setAuthenticatedUser(await this.authApi.logIn(({ browserOpened }) => {
-      this.ctx.coreData.isAuthBrowserOpened = browserOpened
+    this.setAuthenticatedUser(await this.authApi.logIn((authState) => {
+      this.ctx.update((coreData) => {
+        coreData.authState = authState
+      })
     }))
+  }
+
+  resetAuthState () {
+    this.ctx.update((coreData) => {
+      coreData.authState = { browserOpened: false }
+    })
   }
 
   async logout () {
     try {
-      this.ctx.coreData.isAuthBrowserOpened = false
+      this.ctx.update((coreData) => {
+        coreData.authState.browserOpened = false
+      })
+
       await this.authApi.logOut()
     } catch (e) {
       this.ctx.logTraceError(e)

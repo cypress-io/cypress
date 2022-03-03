@@ -92,7 +92,7 @@ gulp.task(
     // /graphql to auto-restart the server
     startCypressWatch,
 
-    // Before dev, fetch the latest "remote" schema from the Cypress cloud
+    // Before dev, fetch the latest "remote" schema from the Cypress dashboard
     syncRemoteGraphQL,
   ),
 )

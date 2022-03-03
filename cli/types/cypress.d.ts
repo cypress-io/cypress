@@ -198,7 +198,7 @@ declare namespace Cypress {
   /**
    * The configuration for Cypress.
    */
-  type Config = ResolvedConfigOptions & RuntimeConfigOptions
+  type Config = ResolvedConfigOptions & RuntimeConfigOptions & RuntimeServerConfigOptions
 
   /**
    * Several libraries are bundled with Cypress by default.
@@ -2898,7 +2898,7 @@ declare namespace Cypress {
      */
     clientCertificates: ClientCertificate[]
 
-     /**
+    /**
      * Handle Cypress plugins
      */
     setupNodeEvents: (on: PluginEvents, config: PluginConfigOptions) => Promise<PluginConfigOptions> | PluginConfigOptions
@@ -2907,17 +2907,17 @@ declare namespace Cypress {
   /**
    * Options appended to config object on runtime.
    */
-  interface RuntimeConfigOptions {
+  interface RuntimeConfigOptions extends Partial<RuntimeServerConfigOptions> {
+    /**
+     * Absolute path to the config file (default: <projectRoot>/cypress.config.{ts|js}) or false
+     */
+    configFile: string | false
     /**
      * CPU architecture, from Node `os.arch()`
      *
      * @see https://nodejs.org/api/os.html#os_os_arch
      */
     arch: string
-    /**
-     * The browser Cypress is running on.
-     */
-    browser: Browser
     /**
      * Available browsers found on your system.
      */
@@ -2947,20 +2947,30 @@ declare namespace Cypress {
     version: string
 
     // Internal or Unlisted at server/lib/config_options
+    namespace: string
+    projectRoot: string
+    devServerPublicPathRoute: string
+  }
+
+  /**
+   * Optional options added before the server starts
+   */
+  interface RuntimeServerConfigOptions {
+    /**
+     * The browser Cypress is running on.
+     */
+    browser: Browser
+    // Internal or Unlisted at server/lib/config_options
     autoOpen: boolean
     browserUrl: string
     clientRoute: string
-    configFile: string
     cypressEnv: string
-    devServerPublicPathRoute: string
     isNewProject: boolean
     isTextTerminal: boolean
     morgan: boolean
-    namespace: string
     parentTestsFolder: string
     parentTestsFolderDisplay: string
     projectName: string
-    projectRoot: string
     proxyUrl: string
     remote: RemoteState
     report: boolean
@@ -2997,11 +3007,7 @@ declare namespace Cypress {
    */
   type ConfigOptions<ComponentDevServerOpts = any> = Partial<ResolvedConfigOptions<ComponentDevServerOpts>>
 
-  interface PluginConfigOptions extends ResolvedConfigOptions {
-    /**
-    * Absolute path to the config file (default: <projectRoot>/cypress.config.{ts|js}) or false
-    */
-    configFile: string | false
+  interface PluginConfigOptions extends ResolvedConfigOptions, RuntimeConfigOptions {
     /**
     * Absolute path to the root of the project
     */

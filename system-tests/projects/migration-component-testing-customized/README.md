@@ -7,7 +7,7 @@ The following migration steps will be used during this migration:
 Steps:
 
 - [ ] automatic file rename
-- [x] manual file rename
+- [ ] manual file rename
 - [ ] rename support
 - [x] update config file
 - [x] setup component testing
@@ -18,7 +18,7 @@ Not used.
 
 ## Manual Files
 
-The user will need to rename and/or move their only component specs, `button.spec.js` and `input-spec.tsx`, to their new location. As long as these files are removed, this step is considered complete. We do not verify where it went, or what the new name and and extension are.
+Since the user has a custom componentFolder and testFiles pattern, we won't ask them to migrate away. We only do this if they are using the defaults.
 
 ## Rename supportFile
 

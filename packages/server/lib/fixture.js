@@ -54,12 +54,13 @@ module.exports = {
       return glob(pattern, {
         nosort: true,
         nodir: true,
-      }).bind(this)
+      })
+      .bind(this)
       .then(function (matches) {
         if (matches.length === 0) {
           const relativePath = path.relative('.', p)
 
-          errors.throw('FIXTURE_NOT_FOUND', relativePath, extensions)
+          errors.throwErr('FIXTURE_NOT_FOUND', relativePath, extensions)
         }
 
         debug('fixture matches found, using the first', matches)

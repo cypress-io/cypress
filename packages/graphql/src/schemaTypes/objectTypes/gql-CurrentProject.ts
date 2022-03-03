@@ -1,7 +1,6 @@
 import { PACKAGE_MANAGERS } from '@packages/types'
 import { enumType, nonNull, objectType, stringArg } from 'nexus'
 import path from 'path'
-import { BaseError } from '.'
 import { BrowserStatusEnum } from '..'
 import { cloudProjectBySlug } from '../../stitching/remoteGraphQLCalls'
 import { TestingTypeEnum } from '../enumTypes/gql-WizardEnums'
@@ -27,16 +26,6 @@ export const CurrentProject = objectType({
     t.nonNull.field('packageManager', {
       type: PackageManagerEnum,
       resolve: (source, args, ctx) => ctx.coreData.packageManager,
-    })
-
-    t.field('errorLoadingConfigFile', {
-      type: BaseError,
-      description: 'If there is an error loading the config file, it is represented here',
-    })
-
-    t.field('errorLoadingNodeEvents', {
-      type: BaseError,
-      description: 'If there is an error related to the node events, it is represented here',
     })
 
     t.boolean('isLoadingConfigFile', {
@@ -68,7 +57,7 @@ export const CurrentProject = objectType({
 
     t.field('cloudProject', {
       type: 'CloudProjectResult',
-      description: 'The remote associated project from Cypress Cloud',
+      description: 'The remote associated project from Cypress Dashboard',
       resolve: async (source, args, ctx, info) => {
         const projectId = await ctx.project.projectId()
 
@@ -81,7 +70,7 @@ export const CurrentProject = objectType({
     })
 
     t.string('projectId', {
-      description: 'Used to associate project with Cypress cloud',
+      description: 'Used to associate project with Cypress dashboard',
       resolve: (source, args, ctx) => ctx.project.projectId(),
     })
 

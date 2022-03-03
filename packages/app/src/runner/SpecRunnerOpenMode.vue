@@ -20,7 +20,7 @@
           v-if="props.gql.currentProject"
           v-show="runnerUiStore.isSpecsListOpen"
           id="inline-spec-list"
-          class="h-full border-gray-900 bg-gray-1000 border-r-1 force-dark"
+          class="h-full bg-gray-1000 border-gray-900 border-r-1 force-dark"
           :class="{'pointer-events-none': isDragging}"
         >
           <InlineSpecList
@@ -48,7 +48,7 @@
       </template>
       <template #panel3="{width}">
         <HideDuringScreenshotOrRunMode class="bg-white">
-          <SpecRunnerHeader
+          <SpecRunnerHeaderOpenMode
             v-if="props.gql.currentProject"
             :gql="props.gql.currentProject"
             :event-manager="eventManager"
@@ -96,7 +96,7 @@ import { getAutIframeModel, getEventManager } from '.'
 import { useAutStore, useRunnerUiStore } from '../store'
 import type { FileDetails } from '@packages/types'
 import SnapshotControls from './SnapshotControls.vue'
-import SpecRunnerHeader from './SpecRunnerHeader.vue'
+import SpecRunnerHeaderOpenMode from './SpecRunnerHeaderOpenMode.vue'
 import HideDuringScreenshot from './screenshot/HideDuringScreenshot.vue'
 import RemoveClassesDuringScreenshotting from './screenshot/RemoveClassesDuringScreenshotting.vue'
 import RemovePositioningDuringScreenshot from './screenshot/RemovePositioningDuringScreenshot.vue'
@@ -104,14 +104,12 @@ import ScreenshotHelperPixels from './screenshot/ScreenshotHelperPixels.vue'
 import { useScreenshotStore } from '../store/screenshot-store'
 import ChooseExternalEditorModal from '@packages/frontend-shared/src/gql-components/ChooseExternalEditorModal.vue'
 import { useMutation, gql } from '@urql/vue'
-import { OpenFileInIdeDocument } from '@packages/data-context/src/gen/all-operations.gen'
+import { SpecRunnerOpenMode_OpenFileInIdeDocument } from '../generated/graphql'
 import type { SpecRunnerFragment } from '../generated/graphql'
 import { usePreferences } from '../composables/usePreferences'
 import ScriptError from './ScriptError.vue'
 import ResizablePanels from './ResizablePanels.vue'
 import HideDuringScreenshotOrRunMode from './screenshot/HideDuringScreenshotOrRunMode.vue'
-import AutomationDisconnected from './automation/AutomationDisconnected.vue'
-import AutomationMissing from './automation/AutomationMissing.vue'
 import AutomationElement from './automation/AutomationElement.vue'
 import { useResizablePanels, useRunnerStyle } from './useRunnerStyle'
 import { useEventManager } from './useEventManager'
@@ -143,7 +141,7 @@ fragment SpecRunner on Query {
 `
 
 gql`
-mutation OpenFileInIDE ($input: FileDetailsInput!) {
+mutation SpecRunnerOpenMode_OpenFileInIDE ($input: FileDetailsInput!) {
   openFileInIDE (input: $input)
 }
 `
@@ -191,7 +189,7 @@ preferences.update('specListWidth', specListWidth.value)
 
 let fileToOpen: FileDetails
 
-const openFileInIDE = useMutation(OpenFileInIdeDocument)
+const openFileInIDE = useMutation(SpecRunnerOpenMode_OpenFileInIdeDocument)
 
 function openFile () {
   runnerUiStore.setShowChooseExternalEditorModal(false)
@@ -203,7 +201,7 @@ function openFile () {
 
   openFileInIDE.executeMutation({
     input: {
-      absolute: fileToOpen.absoluteFile,
+      filePath: fileToOpen.absoluteFile,
       line: fileToOpen.line,
       column: fileToOpen.column,
     },

@@ -3,7 +3,7 @@ import os from 'os'
 import { app, nativeImage as image } from 'electron'
 // eslint-disable-next-line no-duplicate-imports
 import type { WebContents } from 'electron'
-import cyIcons from '@cypress/icons'
+import * as cyIcons from '@packages/icons'
 import * as savedState from '../saved_state'
 import menu from '../gui/menu'
 import * as Windows from '../gui/windows'
@@ -92,9 +92,9 @@ export = {
         return Windows.hideAllUnlessAnotherWindowIsFocused()
       },
       onFocus () {
-        // hide dev tools if in production and previously focused
+        // hide internal dev tools if in production and previously focused
         // window was the electron browser
-        menu.set({ withDevTools: isDev() })
+        menu.set({ withInternalDevTools: isDev() })
 
         return Windows.showAll()
       },
@@ -118,7 +118,7 @@ export = {
         show: true,
         frame: true,
         transparent: false,
-        icon: image.createFromPath(cyIcons.getPathToIcon('icon_128x128.png')),
+        icon: image.createFromPath(cyIcons.getPathToIcon('icon_64x64.png')),
       },
     }
 
@@ -136,7 +136,7 @@ export = {
     // TODO: potentially just pass an event emitter
     // instance here instead of callback functions
     menu.set({
-      withDevTools: isDev(),
+      withInternalDevTools: isDev(),
       onLogOutClicked () {
         return globalPubSub.emit('menu:item:clicked', 'log:out')
       },

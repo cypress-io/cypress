@@ -1,21 +1,39 @@
+// necessary to have mocha types working correctly
+import 'mocha'
 import path from 'path'
-import fs from 'fs-extra'
-import tempDir from 'temp-dir'
 import { e2eProjectDirs } from '@packages/frontend-shared/cypress/e2e/support/e2eProjectDirs'
+import Fixtures from '@tooling/system-tests/lib/fixtures'
+import { DataContext, DataContextConfig } from '../../src'
+import { graphqlSchema } from '@packages/graphql/src/schema'
+import type { BrowserApiShape } from '../../src/sources/BrowserDataSource'
+import type { AppApiShape, AuthApiShape, ElectronApiShape, LocalSettingsApiShape, ProjectApiShape } from '../../src/actions'
+import { InjectedConfigApi } from '../../src/data'
 
-export function scaffoldMigrationProject (project: typeof e2eProjectDirs[number]) {
-  const tmpDir = path.join(tempDir, 'cy-projects')
-  const testProject = path.join(__dirname, '..', '..', '..', '..', 'system-tests', 'projects', project)
-  const cwd = path.join(tmpDir, project)
+export function getSystemTestProject (project: typeof e2eProjectDirs[number]) {
+  return path.join(__dirname, '..', '..', '..', '..', 'system-tests', 'projects', project)
+}
 
-  try {
-    fs.rmSync(cwd, { recursive: true, force: true })
-  } catch (e) {
-    /* eslint-disable no-console */
-    console.error(`error, could not remove ${cwd}`, e.message)
-  }
+export async function scaffoldMigrationProject (project: typeof e2eProjectDirs[number]) {
+  Fixtures.removeProject(project)
 
-  fs.copySync(testProject, cwd, { recursive: true })
+  await Fixtures.scaffoldProject(project)
 
-  return cwd
+  return Fixtures.projectPath(project)
+}
+
+export function createTestDataContext (mode: DataContextConfig['mode'] = 'run') {
+  return new DataContext({
+    schema: graphqlSchema,
+    mode,
+    modeOptions: {},
+    appApi: {} as AppApiShape,
+    localSettingsApi: {} as LocalSettingsApiShape,
+    authApi: {} as AuthApiShape,
+    configApi: {
+      getServerPluginHandlers: () => [],
+    } as InjectedConfigApi,
+    projectApi: {} as ProjectApiShape,
+    electronApi: {} as ElectronApiShape,
+    browserApi: {} as BrowserApiShape,
+  })
 }

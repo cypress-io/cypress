@@ -7,6 +7,7 @@
       <BaseError
         v-if="query.data.value.baseError"
         :gql="query.data.value.baseError"
+        :retry="reinitializeCypress"
       />
       <GlobalPage
         v-else-if="query.data.value.isInGlobalMode || !query.data.value?.currentProject"
@@ -19,14 +20,6 @@
         <ScaffoldedFiles
           v-if="query.data.value.scaffoldedFiles"
           :gql="query.data.value"
-        />
-        <BaseError
-          v-else-if="currentProject?.errorLoadingConfigFile"
-          :gql="currentProject.errorLoadingConfigFile"
-        />
-        <BaseError
-          v-else-if="currentProject?.errorLoadingNodeEvents"
-          :gql="currentProject.errorLoadingNodeEvents"
         />
         <Spinner v-else-if="currentProject?.isLoadingConfigFile" />
         <template v-else-if="currentProject?.isLoadingNodeEvents">
@@ -44,6 +37,7 @@
           <StandardModal
             v-model="isTestingTypeModalOpen"
             class="h-full w-full sm:h-auto sm:mx-[5%] sm:w-auto"
+            help-link="https://on.cypress.io/choosing-testing-type"
           >
             <template #title>
               {{ t('welcomePage.compareTypes.modalTitle') }}
@@ -78,8 +72,8 @@
 </template>
 
 <script lang="ts" setup>
-import { gql, useQuery } from '@urql/vue'
-import { MainLaunchpadQueryDocument } from './generated/graphql'
+import { gql, useMutation, useQuery } from '@urql/vue'
+import { MainLaunchpadQueryDocument, Main_ReinitializeCypressDocument } from './generated/graphql'
 import TestingTypeCards from './setup/TestingTypeCards.vue'
 import Wizard from './setup/Wizard.vue'
 import ScaffoldLanguageSelect from './setup/ScaffoldLanguageSelect.vue'
@@ -106,7 +100,7 @@ fragment MainLaunchpadQueryData on Query {
   ...Wizard
   ...ScaffoldLanguageSelect
   baseError {
-    ...BaseError_Data
+    ...BaseError
   }
   currentTestingType
   currentProject {
@@ -117,12 +111,6 @@ fragment MainLaunchpadQueryData on Query {
     isLoadingNodeEvents
     needsLegacyConfigMigration
     currentTestingType
-    errorLoadingConfigFile {
-      ...BaseError_Data
-    }
-    errorLoadingNodeEvents {
-      ...BaseError_Data
-    }
   }
   isInGlobalMode
   ...GlobalPage
@@ -135,6 +123,22 @@ query MainLaunchpadQuery {
   ...MainLaunchpadQueryData
 }
 `
+
+gql`
+mutation Main_ReinitializeCypress {
+  reinitializeCypress {
+    ...MainLaunchpadQueryData
+  }
+}
+`
+
+const mutation = useMutation(Main_ReinitializeCypressDocument)
+
+const reinitializeCypress = () => {
+  if (!mutation.fetching.value) {
+    mutation.executeMutation({})
+  }
+}
 
 const query = useQuery({ query: MainLaunchpadQueryDocument })
 const currentProject = computed(() => query.data.value?.currentProject)

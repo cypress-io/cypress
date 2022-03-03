@@ -11,7 +11,7 @@ defaults: &defaults
       type: boolean
       default: false
   executor: <<parameters.executor>>
-  environment:
+  environment: &defaultsEnvironment
     ## set specific timezone
     TZ: "/usr/share/zoneinfo/America/New_York"
 
@@ -29,8 +29,7 @@ mainBuildFilters: &mainBuildFilters
       only:
         - develop
         - 10.0-release
-        - unify-1001-windows-app-e2e-tests
-        - ryanm/fix/windows-builds
+        - merge-develop-2-28-22
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -40,8 +39,7 @@ macWorkflowFilters: &mac-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ '10.0-release', << pipeline.git.branch >> ]
-    - equal: [ unify-1001-windows-app-e2e-tests, << pipeline.git.branch >> ]
-    - equal: [ ryanm/fix/windows-builds, << pipeline.git.branch >> ]
+    - equal: [ merge-develop-2-28-22, << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -51,8 +49,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ '10.0-release', << pipeline.git.branch >> ]
-    - equal: [ unify-1001-windows-app-e2e-tests, << pipeline.git.branch >> ]
-    - equal: [ ryanm/fix/windows-builds, << pipeline.git.branch >> ]
+    - equal: [ merge-develop-2-28-22, << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -65,8 +62,8 @@ executors:
   cy-doc:
     docker:
       - image: cypress/browsers:node16.5.0-chrome94-ff93
-    # by default, we use "small" to save on CI costs. bump on a per-job basis if needed.
-    resource_class: small
+    # by default, we use "medium" to balance performance + CI costs. bump or reduce on a per-job basis if needed.
+    resource_class: medium
     environment:
       PLATFORM: linux
 
@@ -174,9 +171,12 @@ commands:
       - run:
           name: Generate Circle Cache Key
           command: node scripts/circle-cache.js --action cacheKey > circle_cache_key
+      - run:
+          name: Generate platform key
+          command: echo $PLATFORM > platform_key
       - restore_cache:
           name: Restore cache state, to check for known modules cache existence
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-test2-node-modules-cache-{{ checksum "circle_cache_key" }}
+          key: v{{ .Environment.CACHE_VERSION }}-{{ checksum "platform_key" }}-node-modules-cache-{{ checksum "circle_cache_key" }}
       - run:
           name: Move node_modules back from /tmp
           command: |
@@ -197,11 +197,14 @@ commands:
       - run:
           name: Generate Circle Cache key for system tests
           command: ./system-tests/scripts/cache-key.sh > system_tests_cache_key
+      - run:
+          name: Generate platform key
+          command: echo $PLATFORM > platform_key
       - restore_cache:
           name: Restore system tests node_modules cache
           keys:
-            - v{{ .Environment.CACHE_VERSION }}-{{ arch }}-system-tests-projects-node-modules-cache-{{ checksum "system_tests_cache_key" }}
-            - v{{ .Environment.CACHE_VERSION }}-{{ arch }}-system-tests-projects-node-modules-cache-
+            - v{{ .Environment.CACHE_VERSION }}-{{ checksum "platform_key" }}-system-tests-projects-node-modules-cache-{{ checksum "system_tests_cache_key" }}
+            - v{{ .Environment.CACHE_VERSION }}-{{ checksum "platform_key" }}-system-tests-projects-node-modules-cache-
 
   update_cached_system_tests_deps:
     description: 'Update the cached node_modules for projects in "system-tests/projects/**"'
@@ -209,36 +212,42 @@ commands:
       - run:
           name: Generate Circle Cache key for system tests
           command: ./system-tests/scripts/cache-key.sh > system_tests_cache_key
+      - run:
+          name: Generate platform key
+          command: echo $PLATFORM > platform_key
       - restore_cache:
           name: Restore cache state, to check for known modules cache existence
           keys:
-            - v{{ .Environment.CACHE_VERSION }}-{{ arch }}-system-tests-projects-node-modules-cache-state-{{ checksum "system_tests_cache_key" }}
+            - v{{ .Environment.CACHE_VERSION }}-{{ checksum "platform_key" }}-system-tests-projects-node-modules-cache-state-{{ checksum "system_tests_cache_key" }}
+      - run:
+          name: Send root honeycomb event for this CI build
+          command: cd system-tests/scripts && node ./send-root-honecomb-event.js
       - run:
           name: Bail if specific cache exists
           command: |
-            if [[ -f "system_tests_node_modules_installed" ]]; then
+            if [[ -f "/tmp/system_tests_node_modules_installed" ]]; then
               echo "No updates to system tests node modules, exiting"
               circleci-agent step halt
             fi
       - restore_cache:
           name: Restore system tests node_modules cache
           keys:
-            - v{{ .Environment.CACHE_VERSION }}-{{ arch }}-system-tests-projects-node-modules-cache-{{ checksum "system_tests_cache_key" }}
-            - v{{ .Environment.CACHE_VERSION }}-{{ arch }}-system-tests-projects-node-modules-cache-
+            - v{{ .Environment.CACHE_VERSION }}-{{ checksum "platform_key" }}-system-tests-projects-node-modules-cache-{{ checksum "system_tests_cache_key" }}
+            - v{{ .Environment.CACHE_VERSION }}-{{ checksum "platform_key" }}-system-tests-projects-node-modules-cache-
       - run:
           name: Update system-tests node_modules cache
           command: yarn workspace @tooling/system-tests projects:yarn:install
       - save_cache:
           name: Save system tests node_modules cache
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-system-tests-projects-node-modules-cache-{{ checksum "system_tests_cache_key" }}
+          key: v{{ .Environment.CACHE_VERSION }}-{{ checksum "platform_key" }}-system-tests-projects-node-modules-cache-{{ checksum "system_tests_cache_key" }}
           paths:
             - ~/.cache/cy-system-tests-node-modules
-      - run: touch system_tests_node_modules_installed
+      - run: touch /tmp/system_tests_node_modules_installed
       - save_cache:
           name: Save system tests node_modules cache state key
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-system-tests-projects-node-modules-cache-state-{{ checksum "system_tests_cache_key" }}
+          key: v{{ .Environment.CACHE_VERSION }}-{{ checksum "platform_key" }}-system-tests-projects-node-modules-cache-state-{{ checksum "system_tests_cache_key" }}
           paths:
-            - system_tests_node_modules_installed
+            - /tmp/system_tests_node_modules_installed
 
   caching-dependency-installer:
     description: 'Installs & caches the dependencies based on yarn lock & package json dependencies'
@@ -251,9 +260,12 @@ commands:
       - run:
           name: Generate Circle Cache Key
           command: node scripts/circle-cache.js --action cacheKey > circle_cache_key
+      - run:
+          name: Generate platform key
+          command: echo $PLATFORM > platform_key
       - restore_cache:
           name: Restore cache state, to check for known modules cache existence
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-test2-node-modules-cache-state-{{ checksum "circle_cache_key" }}
+          key: v{{ .Environment.CACHE_VERSION }}-{{ checksum "platform_key" }}-node-modules-cache-state-{{ checksum "circle_cache_key" }}
       - run:
           name: Bail if cache exists
           command: |
@@ -265,7 +277,7 @@ commands:
       - restore_cache:
           name: Restore weekly yarn cache
           keys:
-            - v{{ .Environment.CACHE_VERSION }}-{{ arch }}-test2-deps-root-weekly-{{ checksum "cache_date" }}
+            - v{{ .Environment.CACHE_VERSION }}-{{ checksum "platform_key" }}-deps-root-weekly-{{ checksum "cache_date" }}
       - run:
           name: Install Node Modules
           command: |
@@ -278,7 +290,7 @@ commands:
           steps:
             - save_cache:
                 name: Saving node modules for root, cli, and all globbed workspace packages
-                key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-test2-node-modules-cache-{{ checksum "circle_cache_key" }}
+                key: v{{ .Environment.CACHE_VERSION }}-{{ checksum "platform_key" }}-node-modules-cache-{{ checksum "circle_cache_key" }}
                 paths:
                   - node_modules
                   - cli/node_modules
@@ -289,18 +301,18 @@ commands:
           steps:
             - save_cache:
                 name: Saving node modules for root, cli, and all globbed workspace packages
-                key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-test2-node-modules-cache-{{ checksum "circle_cache_key" }}
+                key: v{{ .Environment.CACHE_VERSION }}-{{ checksum "platform_key" }}-node-modules-cache-{{ checksum "circle_cache_key" }}
                 paths:
                   - /tmp/node_modules_cache
       - run: touch node_modules_installed
       - save_cache:
           name: Saving node-modules cache state key
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-test2-node-modules-cache-state-{{ checksum "circle_cache_key" }}
+          key: v{{ .Environment.CACHE_VERSION }}-{{ checksum "platform_key" }}-node-modules-cache-state-{{ checksum "circle_cache_key" }}
           paths:
             - node_modules_installed
       - save_cache:
           name: Save weekly yarn cache
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-test2-deps-root-weekly-{{ checksum "cache_date" }}
+          key: v{{ .Environment.CACHE_VERSION }}-{{ checksum "platform_key" }}-deps-root-weekly-{{ checksum "cache_date" }}
           paths:
             - ~/.yarn
 
@@ -455,10 +467,17 @@ commands:
       - restore_cached_workspace
       - run:
           # TODO: How can we have preinstalled browsers on CircleCI?
-          name: 'Install Chrome on Windows' 
+          name: 'Install Chrome on Windows'
           command: |
-            [[ $PLATFORM == 'windows' && '<<parameters.browser>>' == 'chrome' ]] && choco install googlechrome || [[ $PLATFORM != 'windows' ]]
+            # install with `--ignore-checksums` to avoid checksum error
+            # https://www.gep13.co.uk/blog/chocolatey-error-hashes-do-not-match
+            [[ $PLATFORM == 'windows' && '<<parameters.browser>>' == 'chrome' ]] && choco install googlechrome --ignore-checksums || [[ $PLATFORM != 'windows' ]]
       - run:
+          # the PERCY_TARGET_BRANCH and PERCY_TARGET_COMMIT env vars
+          # are a temporary hack to workaround percy issues with
+          # PR's not diffing the right base branch due to other problems
+          # upstream with finalizing builds. These will be removed
+          # once we implement a more permanent solution.
           command: |
             cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --parallel -- --') || true
             DEBUG=<<parameters.debug>> \
@@ -467,6 +486,8 @@ commands:
             PERCY_PARALLEL_NONCE=$PLATFORM-$CIRCLE_SHA1 \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
+            PERCY_TARGET_BRANCH="10.0-release" \
+            PERCY_TARGET_COMMIT=$(git log -n 1 origin/10.0-release --pretty="%H") \
             $cmd yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --record --parallel --group <<parameters.package>>-<<parameters.type>>
       - store_test_results:
           path: /tmp/cypress
@@ -498,6 +519,24 @@ commands:
             SPECS=`echo $SPECS | xargs -n 1 | circleci tests split --split-by=timings`
             echo SPECS=$SPECS
             yarn workspace @tooling/system-tests test:ci $SPECS --browser <<parameters.browser>>
+      - verify-mocha-results
+      - store_test_results:
+          path: /tmp/cypress
+      - store_artifacts:
+          path: /tmp/artifacts
+      - store-npm-logs
+
+  run-binary-system-tests:
+    steps:
+      - restore_cached_workspace
+      - restore_cached_system_tests_deps
+      - run:
+          name: Run system tests
+          command: |
+            ALL_SPECS=`circleci tests glob "$HOME/cypress/system-tests/test-binary/*spec*"`
+            SPECS=`echo $ALL_SPECS | xargs -n 1 | circleci tests split --split-by=timings`
+            echo SPECS=$SPECS
+            yarn workspace @tooling/system-tests test:ci $SPECS
       - verify-mocha-results
       - store_test_results:
           path: /tmp/cypress
@@ -546,10 +585,16 @@ commands:
     steps:
       - restore_cached_binary
       - run:
-          name: "Cloning test project: <<parameters.repo>>"
+          name: "Cloning test project and checking out release branch: <<parameters.repo>>"
+          working_directory: ~/
           command: |
             git clone --depth 1 --no-single-branch https://github.com/cypress-io/<<parameters.repo>>.git /tmp/<<parameters.repo>>
-            cd /tmp/<<parameters.repo>> && (git checkout $(node ./scripts/get-next-version.js) || true)
+
+            # install some deps for get-next-version
+            npm i semver@7.3.2 conventional-recommended-bump@6.1.0 conventional-changelog-angular@5.0.12
+            NEXT_VERSION=$(node ./cypress/scripts/get-next-version.js)
+
+            cd /tmp/<<parameters.repo>> && (git checkout $NEXT_VERSION || true)
       - when:
             condition: <<parameters.pull_request_id>>
             steps:
@@ -997,6 +1042,7 @@ jobs:
       - run:
           name: Linting 🧹
           command: |
+            yarn clean
             git clean -df
             yarn lint
       - run:
@@ -1018,6 +1064,7 @@ jobs:
   # individual jobs are finished, it closes the Percy build
   percy-finalize:
     <<: *defaults
+    resource_class: small
     parameters:
       <<: *defaultsParameters
       required_env_var:
@@ -1036,11 +1083,21 @@ jobs:
               echo "This is an external PR, cannot access other services"
               circleci-agent step halt
             fi
-      - run: PERCY_PARALLEL_NONCE=$PLATFORM-$CIRCLE_SHA1 yarn percy build:finalize
+      - run:
+          # the PERCY_TARGET_BRANCH and PERCY_TARGET_COMMIT env vars
+          # are a temporary hack to workaround percy issues with
+          # PR's not diffing the right base branch due to other problems
+          # upstream with finalizing builds. These will be removed
+          # once we implement a more permanent solution.
+          command: |
+            PERCY_PARALLEL_NONCE=$PLATFORM-$CIRCLE_SHA1 \
+            PERCY_TARGET_BRANCH="10.0-release" \
+            PERCY_TARGET_COMMIT=$(git log -n 1 origin/10.0-release --pretty="%H") \
+            yarn percy build:finalize
 
   cli-visual-tests:
     <<: *defaults
-    parallelism: 8
+    resource_class: small
     steps:
       - restore_cached_workspace
       - run: mkdir -p cli/visual-snapshots
@@ -1056,10 +1113,17 @@ jobs:
           path: cli/visual-snapshots
       - run:
           name: Upload CLI snapshots for diffing
+          # the PERCY_TARGET_BRANCH and PERCY_TARGET_COMMIT env vars
+          # are a temporary hack to workaround percy issues with
+          # PR's not diffing the right base branch due to other problems
+          # upstream with finalizing builds. These will be removed
+          # once we implement a more permanent solution.
           command: |
             PERCY_PARALLEL_NONCE=$PLATFORM-$CIRCLE_SHA1 \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
+            PERCY_TARGET_BRANCH="10.0-release" \
+            PERCY_TARGET_COMMIT=$(git log -n 1 origin/10.0-release --pretty="%H") \
             yarn percy snapshot ./cli/visual-snapshots
 
   unit-tests:
@@ -1098,17 +1162,19 @@ jobs:
             # run type checking for each individual package
             - run: yarn lerna run types
             - verify-mocha-results:
-                expectedResultCount: 9
+                expectedResultCount: 10
       - store_test_results:
           path: /tmp/cypress
       # CLI tests generate HTML files with sample CLI command output
       - store_artifacts:
           path: cli/test/html
+      - store_artifacts:
+          path: packages/errors/__snapshot-images__
       - store-npm-logs
 
   unit-tests-release:
     <<: *defaults
-    resource_class: medium
+    resource_class: small
     parallelism: 1
     steps:
       - restore_cached_workspace
@@ -1117,7 +1183,6 @@ jobs:
   lint-types:
     <<: *defaults
     parallelism: 1
-    resource_class: medium
     steps:
       - restore_cached_workspace
       - run:
@@ -1149,7 +1214,6 @@ jobs:
 
   server-integration-tests:
     <<: *defaults
-    resource_class: medium
     parallelism: 1
     steps:
       - restore_cached_workspace
@@ -1180,9 +1244,22 @@ jobs:
       - restore_cached_workspace
       - update_cached_system_tests_deps
 
+  binary-system-tests:
+    parallelism: 2
+    working_directory: ~/cypress
+    environment:
+      <<: *defaultsEnvironment
+      PLATFORM: linux
+    machine:
+      # using `machine` gives us a Linux VM that can run Docker
+      image: ubuntu-2004:202111-02
+      docker_layer_caching: true
+    resource_class: medium
+    steps:
+      - run-binary-system-tests
+
   system-tests-chrome:
     <<: *defaults
-    resource_class: medium
     parallelism: 8
     steps:
       - run-system-tests:
@@ -1190,7 +1267,6 @@ jobs:
 
   system-tests-electron:
     <<: *defaults
-    resource_class: medium
     parallelism: 8
     steps:
       - run-system-tests:
@@ -1198,7 +1274,6 @@ jobs:
 
   system-tests-firefox:
     <<: *defaults
-    resource_class: medium
     parallelism: 8
     steps:
       - run-system-tests:
@@ -1206,7 +1281,6 @@ jobs:
 
   system-tests-non-root:
     <<: *defaults
-    resource_class: medium
     steps:
       - restore_cached_workspace
       - run:
@@ -1220,8 +1294,7 @@ jobs:
 
   run-frontend-shared-component-tests-chrome:
     <<: *defaults
-    resource_class: medium
-    parallelism: 1
+    parallelism: 3
     steps:
       - run-new-ui-tests:
           browser: chrome
@@ -1231,7 +1304,6 @@ jobs:
 
   run-launchpad-component-tests-chrome:
     <<: *defaults
-    resource_class: medium
     parallelism: 7
     steps:
       - run-new-ui-tests:
@@ -1243,8 +1315,13 @@ jobs:
 
   run-launchpad-integration-tests-chrome:
     <<: *defaults
-    resource_class: medium
-    parallelism: 2
+    parameters:
+      <<: *defaultsParameters
+      resource_class:
+        type: string
+        default: medium
+    resource_class: << parameters.resource_class >>
+    parallelism: 3
     steps:
       - run-new-ui-tests:
           browser: chrome
@@ -1254,7 +1331,6 @@ jobs:
 
   run-app-component-tests-chrome:
     <<: *defaults
-    resource_class: medium
     parallelism: 7
     steps:
       - run-new-ui-tests:
@@ -1271,7 +1347,7 @@ jobs:
         type: string
         default: medium
     resource_class: << parameters.resource_class >>
-    parallelism: 4
+    parallelism: 8
     steps:
       - run-new-ui-tests:
           browser: chrome
@@ -1281,7 +1357,6 @@ jobs:
 
   driver-integration-tests-chrome:
     <<: *defaults
-    resource_class: medium
     parallelism: 5
     steps:
       - run-driver-integration-tests:
@@ -1290,7 +1365,6 @@ jobs:
 
   driver-integration-tests-chrome-beta:
     <<: *defaults
-    resource_class: medium
     parallelism: 5
     steps:
       - run-driver-integration-tests:
@@ -1299,7 +1373,6 @@ jobs:
 
   driver-integration-tests-firefox:
     <<: *defaults
-    resource_class: medium
     parallelism: 5
     steps:
       - run-driver-integration-tests:
@@ -1307,7 +1380,6 @@ jobs:
 
   driver-integration-tests-electron:
     <<: *defaults
-    resource_class: medium
     parallelism: 5
     steps:
       - run-driver-integration-tests:
@@ -1315,19 +1387,26 @@ jobs:
 
   reporter-integration-tests:
     <<: *defaults
-    resource_class: medium
+    parallelism: 3
     steps:
       - restore_cached_workspace
       - run:
           command: yarn build-for-tests
           working_directory: packages/reporter
       - run:
+          # the PERCY_TARGET_BRANCH and PERCY_TARGET_COMMIT env vars
+          # are a temporary hack to workaround percy issues with
+          # PR's not diffing the right base branch due to other problems
+          # upstream with finalizing builds. These will be removed
+          # once we implement a more permanent solution.
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
             PERCY_PARALLEL_NONCE=$PLATFORM-$CIRCLE_SHA1 \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
+            PERCY_TARGET_BRANCH="10.0-release" \
+            PERCY_TARGET_COMMIT=$(git log -n 1 origin/10.0-release --pretty="%H") \
             yarn percy exec --parallel -- -- \
             yarn cypress:run --record --parallel --group reporter
           working_directory: packages/reporter
@@ -1360,7 +1439,6 @@ jobs:
 
   npm-webpack-preprocessor:
     <<: *defaults
-    resource_class: medium
     steps:
       - restore_cached_workspace
       - run:
@@ -1398,7 +1476,6 @@ jobs:
 
   npm-webpack-dev-server:
     <<: *defaults
-    resource_class: medium
     steps:
       - restore_cached_workspace
       - run:
@@ -1421,6 +1498,7 @@ jobs:
 
   npm-webpack-batteries-included-preprocessor:
     <<: *defaults
+    resource_class: small
     steps:
       - restore_cached_workspace
       - run:
@@ -1429,8 +1507,6 @@ jobs:
 
   npm-vue:
     <<: *defaults
-    resource_class: medium
-    parallelism: 3
     steps:
       - restore_cached_workspace
       - run:
@@ -1456,7 +1532,6 @@ jobs:
 
   npm-design-system:
     <<: *defaults
-    resource_class: medium
     steps:
       - restore_cached_workspace
       - run:
@@ -1465,11 +1540,19 @@ jobs:
       - run:
           name: Run tests
           # will use PERCY_TOKEN environment variable if available
+          #
+          # the PERCY_TARGET_BRANCH and PERCY_TARGET_COMMIT env vars
+          # are a temporary hack to workaround percy issues with
+          # PR's not diffing the right base branch due to other problems
+          # upstream with finalizing builds. These will be removed
+          # once we implement a more permanent solution.
           command: |
             CYPRESS_KONFIG_ENV=production \
             PERCY_PARALLEL_NONCE=$PLATFORM-$CIRCLE_SHA1 \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
+            PERCY_TARGET_BRANCH="10.0-release" \
+            PERCY_TARGET_COMMIT=$(git log -n 1 origin/10.0-release --pretty="%H") \
             yarn percy exec --parallel -- -- \
             yarn test --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json
           working_directory: npm/design-system
@@ -1497,7 +1580,6 @@ jobs:
   npm-react:
     <<: *defaults
     parallelism: 8
-    resource_class: medium
     steps:
       - restore_cached_workspace
       - run:
@@ -1524,6 +1606,7 @@ jobs:
 
   npm-create-cypress-tests:
     <<: *defaults
+    resource_class: small
     steps:
       - restore_cached_workspace
       - run: yarn workspace create-cypress-tests build
@@ -1541,6 +1624,7 @@ jobs:
 
   npm-cypress-schematic:
       <<: *defaults
+      resource_class: small
       steps:
         - restore_cached_workspace
         - run:
@@ -1585,7 +1669,7 @@ jobs:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "unify-1001-windows-app-e2e-tests" && "$CIRCLE_BRANCH" != "10.0-release" && "$CIRCLE_BRANCH" != "ryanm/fix/windows-builds" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "merge-develop-2-28-22" && "$CIRCLE_BRANCH" != "10.0-release" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -1594,7 +1678,6 @@ jobs:
 
   test-kitchensink:
     <<: *defaults
-    resource_class: medium
     steps:
       - clone-repo-and-checkout-branch:
           repo: cypress-example-kitchensink
@@ -1635,7 +1718,6 @@ jobs:
 
   test-kitchensink-against-staging:
     <<: *defaults
-    resource_class: medium
     steps:
       - clone-repo-and-checkout-branch:
           repo: cypress-example-kitchensink
@@ -1661,7 +1743,6 @@ jobs:
 
   test-against-staging:
     <<: *defaults
-    resource_class: medium
     steps:
       - clone-repo-and-checkout-branch:
           repo: cypress-test-tiny
@@ -1672,39 +1753,6 @@ jobs:
             CYPRESS_RECORD_KEY=$TEST_TINY_RECORD_KEY \
             CYPRESS_INTERNAL_ENV=staging \
             yarn cypress:run --project /tmp/cypress-test-tiny --record
-      - store-npm-logs
-
-  test-binary-and-npm-against-other-projects:
-    <<: *defaults
-    parameters:
-      <<: *defaultsParameters
-      resource_class:
-        type: string
-        default: medium
-    resource_class: << parameters.resource_class >>
-    steps:
-      # needs uploaded NPM and test binary
-      - restore_cached_workspace
-      - run: ls -la
-      # make sure JSON files with uploaded urls are present
-      - run: ls -la binary-url.json npm-package-url.json
-      - run: cat binary-url.json
-      - run: cat npm-package-url.json
-      - run:
-          # install NPM from unique urls
-          name: Install Cypress Binary in Dummy Package
-          command: |
-            node scripts/test-unique-npm-and-binary.js \
-              --npm npm-package-url.json \
-              --binary binary-url.json \
-              --cwd /tmp/testing
-      - run:
-          name: Running other test projects with new NPM package and binary
-          command: |
-            node scripts/test-other-projects.js \
-              --npm npm-package-url.json \
-              --binary binary-url.json \
-              --provider circle
       - store-npm-logs
 
   test-npm-module-and-verify-binary:
@@ -1745,6 +1793,7 @@ jobs:
 
   test-npm-module-on-minimum-node-version:
     <<: *defaults
+    resource_class: small
     docker:
       - image: cypress/base:12.0.0-libgbm
     steps:
@@ -1782,6 +1831,7 @@ jobs:
         type: string
         default: /root/test-cypress-and-jest
     <<: *defaults
+    resource_class: small
     steps:
       - restore_workspace_binaries
       - run: mkdir <<parameters.wd>>
@@ -1817,6 +1867,7 @@ jobs:
         type: string
         default: /root/test-full-typescript
     <<: *defaults
+    resource_class: small
     steps:
       - restore_workspace_binaries
       - run: mkdir <<parameters.wd>>
@@ -1903,13 +1954,21 @@ jobs:
           repo: cypress-example-recipes
           command: npm run test:ci:firefox
 
-  "test-binary-against-recipes-chrome":
+  test-binary-against-recipes-chrome:
     <<: *defaults
+    parallelism: 3
     steps:
       - test-binary-against-repo:
           repo: cypress-example-recipes
-          browser: chrome
           command: npm run test:ci:chrome
+
+  test-binary-against-recipes:
+    <<: *defaults
+    parallelism: 3
+    steps:
+      - test-binary-against-repo:
+          repo: cypress-example-recipes
+          command: npm run test:ci
 
   # This is a special job. It allows you to test the current
   # built test runner against a pull request in the repo
@@ -1934,24 +1993,14 @@ jobs:
 
   test-binary-against-kitchensink:
     <<: *defaults
-    resource_class: medium
     steps:
       - test-binary-against-repo:
           repo: cypress-example-kitchensink
           browser: "electron"
           pull_request_id: 524
 
-  test-binary-against-awesome-typescript-loader:
-    <<: *defaults
-    steps:
-      - test-binary-against-repo:
-          repo: cypress-test-awesome-typescript-loader
-          browser: "electron"
-          pull_request_id: 8
-
   test-binary-against-kitchensink-firefox:
     <<: *defaults
-    resource_class: medium
     steps:
       - test-binary-against-repo:
           repo: cypress-example-kitchensink
@@ -1960,7 +2009,6 @@ jobs:
 
   test-binary-against-kitchensink-chrome:
     <<: *defaults
-    resource_class: medium
     steps:
       - test-binary-against-repo:
           repo: cypress-example-kitchensink
@@ -1969,7 +2017,6 @@ jobs:
 
   test-binary-against-todomvc-firefox:
     <<: *defaults
-    resource_class: medium
     steps:
       - test-binary-against-repo:
           repo: cypress-example-todomvc
@@ -1977,7 +2024,6 @@ jobs:
 
   test-binary-against-conduit-chrome:
     <<: *defaults
-    resource_class: medium
     steps:
       - test-binary-against-repo:
           repo: cypress-example-conduit-app
@@ -1995,7 +2041,6 @@ jobs:
 
   test-binary-against-piechopper-firefox:
     <<: *defaults
-    resource_class: medium
     steps:
       - test-binary-against-repo:
           repo: cypress-example-piechopper
@@ -2013,7 +2058,6 @@ jobs:
 
   test-binary-as-specific-user:
     <<: *defaults
-    resource_class: medium
     steps:
       - restore_workspace_binaries
       # the user should be "node"
@@ -2128,6 +2172,7 @@ linux-workflow: &linux-workflow
         requires:
           - build
     - system-tests-node-modules-install:
+        context: test-runner:performance-tracking
         requires:
           - build
     - system-tests-chrome:
@@ -2292,31 +2337,6 @@ linux-workflow: &linux-workflow
     - test-binary-against-kitchensink:
         requires:
           - create-build-artifacts
-    # when working on a feature or a fix,
-    # you are probably working in a branch
-    # and you want to run a specific PR in the cypress-example-recipes
-    # against this branch. This workflow job includes
-    # the job but only when it runs on specific branch
-    # DO NOT DELETE THIS JOB BEFORE MERGING TO DEVELOP
-    # on "develop" this branch will be ignored anyway
-    # and someone else might use this job definition for another
-    # feature branch and would just update the branch filter
-    # - test-binary-against-recipe-pull-request:
-    #     name: Test cypress run parsing
-    #     filters:
-    #       branches:
-    #         only:
-    #           - cli-to-module-api-7760
-        # requires:
-        #   - create-build-artifacts
-    - test-binary-against-awesome-typescript-loader:
-        requires:
-          - create-build-artifacts
-    - test-binary-and-npm-against-other-projects:
-        context: test-runner:trigger-test-jobs
-        <<: *mainBuildFilters
-        requires:
-          - create-build-artifacts
     - test-npm-module-and-verify-binary:
         <<: *mainBuildFilters
         requires:
@@ -2326,22 +2346,19 @@ linux-workflow: &linux-workflow
         <<: *mainBuildFilters
         requires:
           - create-build-artifacts
-
     - test-binary-against-kitchensink-chrome:
         <<: *mainBuildFilters
         requires:
           - create-build-artifacts
-    # Re-enable when the cypress-example-conduit-app project is fixed.
-    # https://github.com/cypress-io/cypress-example-conduit-app/issues/346
-    # - test-binary-against-conduit-chrome:
-    #     <<: *mainBuildFilters
-    #     requires:
-    #       - create-build-artifacts
     - test-binary-against-recipes-firefox:
         <<: *mainBuildFilters
         requires:
           - create-build-artifacts
     - test-binary-against-recipes-chrome:
+        <<: *mainBuildFilters
+        requires:
+          - create-build-artifacts
+    - test-binary-against-recipes:
         <<: *mainBuildFilters
         requires:
           - create-build-artifacts
@@ -2353,29 +2370,23 @@ linux-workflow: &linux-workflow
         <<: *mainBuildFilters
         requires:
           - create-build-artifacts
-    - test-binary-against-api-testing-firefox:
-        <<: *mainBuildFilters
-        requires:
-          - create-build-artifacts
-    - test-binary-against-piechopper-firefox:
-        <<: *mainBuildFilters
-        requires:
-          - create-build-artifacts
     - test-binary-against-cypress-realworld-app:
         <<: *mainBuildFilters
         requires:
           - create-build-artifacts
-
     - test-binary-as-specific-user:
         name: "test binary as a non-root user"
         executor: non-root-docker-user
         requires:
           - create-build-artifacts
-
     - test-binary-as-specific-user:
         name: "test binary as a root user"
         requires:
           - create-build-artifacts
+    - binary-system-tests:
+        requires:
+          - create-build-artifacts
+          - system-tests-node-modules-install
 
 mac-workflow: &mac-workflow
   jobs:
@@ -2416,26 +2427,6 @@ mac-workflow: &mac-workflow
         requires:
           - darwin-build
 
-    - test-binary-against-kitchensink:
-        name: darwin-test-binary-against-kitchensink
-        executor: mac
-        requires:
-          - darwin-create-build-artifacts
-
-    - test-binary-against-staging:
-        context: test-runner:record-tests
-        name: darwin-test-binary-against-staging
-        executor: mac
-        requires:
-          - darwin-create-build-artifacts
-
-    - test-binary-and-npm-against-other-projects:
-        context: test-runner:trigger-test-jobs
-        name: darwin-test-binary-and-npm-against-other-projects
-        executor: mac
-        requires:
-          - darwin-create-build-artifacts
-
 windows-workflow: &windows-workflow
   jobs:
     - node_modules_install:
@@ -2453,6 +2444,14 @@ windows-workflow: &windows-workflow
 
     - run-app-integration-tests-chrome:
         name: windows-run-app-integration-tests-chrome
+        executor: windows
+        resource_class: windows.medium
+        context: test-runner:launchpad-tests
+        requires:
+          - windows-build
+
+    - run-launchpad-integration-tests-chrome:
+        name: windows-run-launchpad-integration-tests-chrome
         executor: windows
         resource_class: windows.medium
         context: test-runner:launchpad-tests
@@ -2482,14 +2481,6 @@ windows-workflow: &windows-workflow
           - test-runner:commit-status-checks
         requires:
           - windows-build
-
-    - test-binary-and-npm-against-other-projects:
-        context: test-runner:trigger-test-jobs
-        name: windows-test-binary-and-npm-against-other-projects
-        executor: windows
-        resource_class: windows.medium
-        requires:
-          - windows-create-build-artifacts
 
 workflows:
   linux:

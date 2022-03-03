@@ -1,9 +1,30 @@
 <template>
-  <div v-if="error">
-    An error occurred while authenticating: {{ error }}
+  <div
+    v-if="props.showRetry"
+    class="flex gap-16px"
+  >
+    <Button
+      size="lg"
+      @click="handleTryAgain"
+    >
+      <template
+        #prefix
+      >
+        <i-cy-action-restart_x16
+          class=" icon-light-white"
+        />
+      </template>
+      {{ t('topNav.login.actionTryAgain') }}
+    </Button>
+    <Button
+      variant="outline"
+      size="lg"
+      @click="handleCancel"
+    >
+      {{ t('topNav.login.actionCancel') }}
+    </Button>
   </div>
-
-  <div v-else-if="showLogout">
+  <div v-else-if="props.showLogout">
     <button
       class="bg-white border-rounded outline-transparent border-gray-100 border-1 w-full py-8px text-14px text-indigo-500 block whitespace-nowrap hocus:border-gray-200 hover:no-underline"
       @click="handleLogout"
@@ -11,7 +32,6 @@
       {{ t('topNav.login.actionLogout') }}
     </button>
   </div>
-
   <div v-else>
     <Button
       ref="loginButtonRef"
@@ -26,7 +46,6 @@
         #prefix
       >
         <i-cy-loading_x16
-          v-if="isLoggingIn"
           class="animate-spin icon-dark-white icon-light-gray-400"
         />
       </template>
@@ -42,10 +61,13 @@ import { useMutation, useQuery } from '@urql/vue'
 import { useOnline } from '@vueuse/core'
 
 import {
-  LoginDocument,
-  LogoutDocument,
+  Auth_LoginDocument,
+  Auth_LogoutDocument,
+  Auth_ResetAuthStateDocument,
+  Auth_BrowserOpenedDocument,
+} from '../generated/graphql'
+import type {
   AuthFragment,
-  BrowserOpenedDocument,
 } from '../generated/graphql'
 import Button from '@cy/components/Button.vue'
 import { useI18n } from '@cy/i18n'
@@ -53,7 +75,8 @@ import { useI18n } from '@cy/i18n'
 const isOnline = useOnline()
 
 const props = defineProps<{
-  gql: AuthFragment,
+  gql: AuthFragment
+  showRetry?: boolean
   showLogout?: boolean
 }>()
 
@@ -64,12 +87,16 @@ fragment Auth on Query {
     email
     fullName
   }
-  isAuthBrowserOpened
+  authState {
+    browserOpened
+    name
+    message
+  }
 }
 `
 
 gql`
-mutation Logout {
+mutation Auth_Logout {
   logout {
     ...Auth
   }
@@ -77,7 +104,7 @@ mutation Logout {
 `
 
 gql`
-mutation Login {
+mutation Auth_Login {
   login {
     ...Auth
   }
@@ -85,20 +112,32 @@ mutation Login {
 `
 
 gql`
-query BrowserOpened {
-  isAuthBrowserOpened
+mutation Auth_ResetAuthState {
+  resetAuthState {
+    ...Auth
+  }
 }
 `
 
-const login = useMutation(LoginDocument)
-const logout = useMutation(LogoutDocument)
+gql`
+query Auth_BrowserOpened {
+  authState {
+    browserOpened
+    name
+    message
+  }
+}
+`
+
+const login = useMutation(Auth_LoginDocument)
+const logout = useMutation(Auth_LogoutDocument)
+const reset = useMutation(Auth_ResetAuthStateDocument)
 const loginButtonRef = ref(Button)
 
 onMounted(() => {
   loginButtonRef?.value?.$el?.focus()
 })
 
-const error = ref<string>()
 const clickedOnce = ref(false)
 
 const emit = defineEmits<{
@@ -106,11 +145,11 @@ const emit = defineEmits<{
 }>()
 
 const viewer = computed(() => props.gql.cloudViewer)
-const isBrowserOpened = computed(() => props.gql.isAuthBrowserOpened)
+const isBrowserOpened = computed(() => props.gql.authState.browserOpened)
 const isLoggingIn = computed(() => clickedOnce.value && !viewer.value)
 
 const query = useQuery({
-  query: BrowserOpenedDocument,
+  query: Auth_BrowserOpenedDocument,
   requestPolicy: 'cache-and-network',
 })
 
@@ -130,14 +169,10 @@ const handleAuth = async () => {
     }
   }, 1500)
 
-  const result = await login.executeMutation({})
-
-  error.value = result.error?.message ?? undefined
+  await login.executeMutation({})
 }
 
 const handleLogout = async () => {
-  // clear this for good measure
-  error.value = undefined
   await logout.executeMutation({})
 }
 
@@ -169,6 +204,16 @@ const buttonVariant = computed(() => {
 
   return 'primary'
 })
+
+const handleTryAgain = () => {
+  reset.executeMutation({})
+  login.executeMutation({})
+}
+
+const handleCancel = () => {
+  reset.executeMutation({})
+  emit('continue', true)
+}
 
 const { t } = useI18n()
 

@@ -1,5 +1,5 @@
 import Debug from 'debug'
-import { createServer, ViteDevServer, InlineConfig } from 'vite'
+import { InlineConfig } from 'vite'
 import { dirname, resolve } from 'path'
 import getPort from 'get-port'
 import { makeCypressPlugin } from './makeCypressPlugin'

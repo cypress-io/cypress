@@ -179,10 +179,6 @@ export class CombinedAgent {
         hostname: options.host,
         port: options.port,
       }) + options.path
-
-      if (!options.uri) {
-        options.uri = url.parse(options.href)
-      }
     }
 
     debug('addRequest called %o', { isHttps, ..._.pick(options, 'href') })
@@ -281,6 +277,23 @@ class HttpsAgent extends https.Agent {
   constructor (opts: https.AgentOptions = {}) {
     opts.keepAlive = true
     super(opts)
+  }
+
+  addRequest (req: http.ClientRequest, options: http.RequestOptions) {
+    if (!options.uri) {
+      options.uri = url.parse(options.href)
+    }
+
+    // Ensure we have a proper port defined otherwise node has assumed we are port 80
+    // (https://github.com/nodejs/node/blob/master/lib/_http_client.js#L164) since we are a combined agent
+    // rather than an http or https agent. This will cause issues with fetch requests (@cypress/request already handles it:
+    // https://github.com/cypress-io/request/blob/master/request.js#L301-L303)
+    if (!options.uri.port && options.uri.protocol === 'https:') {
+      options.uri.port = String(443)
+      options.port = 443
+    }
+
+    super.addRequest(req, options)
   }
 
   createConnection (options: HttpsRequestOptions, cb: http.SocketCallback) {

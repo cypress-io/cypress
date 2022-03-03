@@ -451,13 +451,13 @@ describe('lib/modes/record', () => {
 
       api.createRun.rejects(err)
 
-      sinon.spy(errors, 'throw')
+      sinon.spy(errors, 'throwErr')
       await expect(recordMode.createRun({
         git: {},
         recordKey: true, // instead of a string
       })).to.be.rejected
 
-      expect(errors.throw).to.have.been.calledWith('DASHBOARD_RECORD_KEY_NOT_VALID', 'undefined')
+      expect(errors.throwErr).to.have.been.calledWith('DASHBOARD_RECORD_KEY_NOT_VALID', 'undefined')
     })
   })
 
