@@ -28,17 +28,15 @@
   resolved "https://registry.yarnpkg.com/@babel/parser/-/parser-7.17.3.tgz#b07702b982990bf6fdc1da5049a23fece4c5c3d0"
   integrity "sha1-sHcCuYKZC/b9wdpQSaI/7OTFw9A= sha512-7yJPvPV+ESz2IUTPbOL+YkIGyCqOyNIzdguKQuJGnH7bg1WTIifuM21YqokFt/THWh1AkCRn9IgoykTRCBVpzA=="
 
-"@cypress/mount-utils@1.0.2":
+"@cypress/mount-utils@*":
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/@cypress/mount-utils/-/mount-utils-1.0.2.tgz#afbc4f8c350b7cd86edc5ad0db0cbe1e0181edc8"
   integrity "sha1-r7xPjDULfNhu3FrQ2wy+HgGB7cg= sha512-Fn3fdTiyayHoy8Ol0RSu4MlBH2maQ2ZEXeEVKl/zHHXEQpld5HX3vdNLhK5YLij8cLynA4DxOT/nO9iEnIiOXw=="
 
-"@cypress/vue@^3.0.0":
-  version "3.1.1"
-  resolved "https://registry.yarnpkg.com/@cypress/vue/-/vue-3.1.1.tgz#0e6b4a1cb972d2f271ba05209c55e9101a96d0a4"
-  integrity "sha1-DmtKHLly0vJxugUgnFXpEBqW0KQ= sha512-wD1vunuPFPLC8FZtgwdq+mcSEOs27qquuJJdGcY8aAN0y38rqYuuaj+N4UxKoAjhkSwthaOeZehjBtvDvv9C6w=="
+"@cypress/vue@file:../../../npm/vue":
+  version "0.0.0-development"
   dependencies:
-    "@cypress/mount-utils" "1.0.2"
+    "@cypress/mount-utils" "*"
     "@vue/test-utils" "^2.0.0-rc.10"
 
 "@cypress/webpack-dev-server@file:../../../npm/webpack-dev-server":

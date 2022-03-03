@@ -11,7 +11,7 @@ describe('component testing projects', function () {
     expectedExitCode: 0,
   })
 
-  systemTests.it('vueclivue3-custom-index-html', {
+  systemTests.it.only('vueclivue3-custom-index-html', {
     project: 'vueclivue3-custom-index-html',
     testingType: 'component',
     spec: 'src/components/HelloWorld.cy.js',

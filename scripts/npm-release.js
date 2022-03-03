@@ -101,7 +101,7 @@ const getPackageVersions = async (packages) => {
 }
 
 // updates a public package's package.json
-// replaces any local dependencies that have a * or file: version
+// replaces any local dependencies that have a * version
 // with the actual numbered version of that dependency
 // if that dependency is also going to be released from this run
 // it updates with the new version
