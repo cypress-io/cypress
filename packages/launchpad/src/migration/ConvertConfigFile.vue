@@ -5,11 +5,11 @@
       <MigrationListItem>
         {{ t("migration.configFile.changedDefault") }}
         <CodeTag class="text-red-500">
-          cypress.json
+          {{ props.gql.configFileNameBefore }}
         </CodeTag>
         <i-cy-arrow-right_x16 class="inline-block h-16px w-16px icon-dark-gray-300" />
         <CodeTag class="text-jade-500">
-          {{ fileName }}
+          {{ props.gql.configFileNameAfter }}
         </CodeTag>
       </MigrationListItem>
       <MigrationListItem v-if="props.gql.hasCustomIntegrationFolder || props.gql.hasCustomIntegrationTestFiles">
@@ -81,12 +81,12 @@
         >
           <template #jsonFile>
             <CodeTag class="text-red-500">
-              cypress.json
+              {{ props.gql.configFileNameBefore }}
             </CodeTag>
           </template>
           <template #jsFile>
             <CodeTag class="text-jade-500">
-              {{ fileName }}
+              {{ props.gql.configFileNameAfter }}
             </CodeTag>
           </template>
         </i18n-t>
@@ -99,7 +99,7 @@
           bg
           class="text-red-600 bg-red-100"
         >
-          cypress.json
+          {{ props.gql.configFileNameBefore }}
         </CodeTag>
       </template>
       <template #afterHeader>
@@ -108,7 +108,7 @@
           bg
           class="bg-jade-100 text-jade-600"
         >
-          {{ fileName }}
+          {{ props.gql.configFileNameAfter }}
         </CodeTag>
       </template>
       <template #before>
@@ -147,13 +147,14 @@ const { t } = useI18n()
 
 gql`
 fragment ConvertConfigFile on Migration {
+  configFileNameBefore
+  configFileNameAfter
   configBeforeCode
   configAfterCode
   hasCustomIntegrationFolder
   hasCustomIntegrationTestFiles
   hasCustomComponentFolder
   hasCustomComponentTestFiles
-  hasTypescript
 }`
 
 const props = defineProps<{
@@ -172,7 +173,6 @@ const codeAfter = computed(() => {
   return props.gql.configAfterCode + Array(gqlCodeMaxLines.value - gqlCodeAfterLines.value).fill('\n').join('')
 })
 
-const fileName = computed(() => props.gql.hasTypescript ? 'cypress.config.ts' : 'cypress.config.js')
 </script>
 
 <style lang="scss" scoped>

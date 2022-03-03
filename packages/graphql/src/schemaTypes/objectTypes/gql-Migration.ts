@@ -199,6 +199,20 @@ export const Migration = objectType({
       },
     })
 
+    t.nonNull.string('configFileNameBefore', {
+      description: 'the name of the config file to be migrated',
+      resolve: (source, args, ctx) => {
+        return ctx.lifecycleManager.legacyConfigFile
+      },
+    })
+
+    t.nonNull.string('configFileNameAfter', {
+      description: 'the name of the config file after the migration',
+      resolve: (source, args, ctx) => {
+        return ctx.migration.configFileNameAfter
+      },
+    })
+
     t.nonNull.string('configBeforeCode', {
       description: 'contents of the cypress.json file before conversion',
       resolve: (source, args, ctx) => {

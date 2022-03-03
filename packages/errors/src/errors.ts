@@ -1166,13 +1166,13 @@ export const AllCypressErrors = {
       `
   },
 
-  LEGACY_CONFIG_FILE: (baseFileName: string, projectRoot: string) => {
+  LEGACY_CONFIG_FILE: (baseFileName: string, projectRoot: string, legacyConfigFile: string = 'cypress.json') => {
     return errTemplate`
-      There is both a ${fmt.highlight(baseFileName)} and a ${fmt.highlight(`cypress.json`)} file at the location below:
+      There is both a ${fmt.highlight(baseFileName)} and a ${fmt.highlight(legacyConfigFile)} file at the location below:
 
       ${fmt.path(projectRoot)}
 
-      Cypress no longer supports cypress.json, please remove it from your project.
+      Cypress no longer supports ${fmt.highlight(legacyConfigFile)}, please remove it from your project.
     `
   },
 

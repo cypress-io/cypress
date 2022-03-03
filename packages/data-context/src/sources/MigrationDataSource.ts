@@ -252,7 +252,7 @@ export class MigrationDataSource {
 
     // avoid reading the same file over and over again before it was finished reading
     if (this.ctx.lifecycleManager.metaState.hasLegacyCypressJson && !this._oldConfigPromise) {
-      const cfgPath = path.join(this.ctx.lifecycleManager?.projectRoot, 'cypress.json')
+      const cfgPath = path.join(this.ctx.lifecycleManager?.projectRoot, this.ctx.lifecycleManager.legacyConfigFile)
 
       this._oldConfigPromise = this.ctx.file.readJsonFile(cfgPath) as Promise<OldCypressConfig>
     }
@@ -350,5 +350,9 @@ export class MigrationDataSource {
 
   setStep (step: MIGRATION_STEP) {
     this._step = step
+  }
+
+  get configFileNameAfter () {
+    return this.ctx.lifecycleManager.legacyConfigFile.replace('.json', `.config.${this.ctx.lifecycleManager.metaState.hasTypescript ? 'ts' : 'js'}`)
   }
 }

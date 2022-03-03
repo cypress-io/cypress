@@ -781,6 +781,12 @@ type Migration {
   """contents of the cypress.json file before conversion"""
   configBeforeCode: String!
 
+  """the name of the config file after the migration"""
+  configFileNameAfter: String!
+
+  """the name of the config file to be migrated"""
+  configFileNameBefore: String!
+
   """Steps filtered with the current context"""
   filteredSteps: [MigrationStep!]!
 
