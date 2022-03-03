@@ -1,7 +1,7 @@
 import path from 'path'
 import sinon from 'sinon'
 import { expect } from 'chai'
-import { EventEmitter } from 'events'
+import { once, EventEmitter } from 'events'
 import http from 'http'
 import fs from 'fs'
 import { webpackDevServerFacts } from '../src/webpackDevServerFacts'
@@ -71,9 +71,7 @@ describe('#startDevServer', () => {
 
     expect(response).to.eq('const foo = () => {}\n')
 
-    return new Promise((res) => {
-      close(() => res())
-    })
+    await close()
   })
 
   it('emits dev-server:compile:success event on successful compilation', async () => {
@@ -87,11 +85,8 @@ describe('#startDevServer', () => {
       },
     })
 
-    return new Promise((res) => {
-      devServerEvents.on('dev-server:compile:success', () => {
-        close(() => res())
-      })
-    })
+    await once(devServerEvents, 'dev-server:compile:success')
+    await close()
   })
 
   it('emits dev-server:compile:error event on error compilation', async () => {
@@ -99,15 +94,16 @@ describe('#startDevServer', () => {
 
     const exitSpy = sinon.stub()
 
+    const badSpec = `${root}/test/fixtures/compilation-fails.spec.js`
     const { close } = await startDevServer({
       webpackConfig,
       options: {
         config,
         specs: [
           {
-            name: `${root}/test/fixtures/compilation-fails.spec.js`,
-            relative: `${root}/test/fixtures/compilation-fails.spec.js`,
-            absolute: `${root}/test/fixtures/compilation-fails.spec.js`,
+            name: badSpec,
+            relative: badSpec,
+            absolute: badSpec,
           },
         ],
         devServerEvents,
@@ -116,19 +112,19 @@ describe('#startDevServer', () => {
 
     exitSpy()
 
-    return new Promise((res) => {
-      devServerEvents.on('dev-server:compile:error', (err: string) => {
-        if (webpackDevServerFacts.isV3()) {
-          expect(err).to.contain('./test/fixtures/compilation-fails.spec.js 1:5')
-        }
+    // The initial compilation does not include the bad spec, so it will succeed.
+    await once(devServerEvents, 'dev-server:compile:success')
 
-        expect(err).to.contain('Module parse failed: Unexpected token (1:5)')
-        expect(err).to.contain('You may need an appropriate loader to handle this file type, currently no loaders are configured to process this file. See https://webpack.js.org/concepts#loaders')
-        expect(err).to.contain('> this is an invalid spec file')
-        expect(exitSpy.calledOnce).to.be.true
-        close(() => res())
-      })
-    })
+    // Once we activate the bad spec however, it should fail.
+    devServerEvents.emit('webpack-dev-server:request', badSpec)
+    const [err] = await once(devServerEvents, 'dev-server:compile:error')
+
+    expect(err).to.contain('Module parse failed: Unexpected token (1:5)')
+    expect(err).to.contain('You may need an appropriate loader to handle this file type, currently no loaders are configured to process this file. See https://webpack.js.org/concepts#loaders')
+    expect(err).to.contain('> this is an invalid spec file')
+    expect(exitSpy.calledOnce).to.be.true
+
+    await close()
   })
 
   it('touches browser.js when a spec file is added and recompile', async function () {
@@ -150,21 +146,15 @@ describe('#startDevServer', () => {
 
     const oldmtime = fs.statSync('./dist/browser.js').mtimeMs
 
-    let firstCompile = true
+    await once(devServerEvents, 'dev-server:compile:success')
+    devServerEvents.emit('dev-server:specs:changed', [newSpec])
 
-    return new Promise((res) => {
-      devServerEvents.on('dev-server:compile:success', () => {
-        if (firstCompile) {
-          firstCompile = false
-          devServerEvents.emit('dev-server:specs:changed', [newSpec])
-          const updatedmtime = fs.statSync('./dist/browser.js').mtimeMs
+    await once(devServerEvents, 'dev-server:compile:success')
+    const updatedmtime = fs.statSync('./dist/browser.js').mtimeMs
 
-          expect(oldmtime).to.not.equal(updatedmtime)
-        } else {
-          close(() => res())
-        }
-      })
-    })
+    expect(oldmtime).to.not.equal(updatedmtime)
+
+    await close()
   })
 
   it('accepts the devServer signature', async function () {
@@ -182,8 +172,6 @@ describe('#startDevServer', () => {
 
     expect(response).to.eq('const foo = () => {}\n')
 
-    return new Promise((res) => {
-      close(() => res())
-    })
+    await close()
   })
 })

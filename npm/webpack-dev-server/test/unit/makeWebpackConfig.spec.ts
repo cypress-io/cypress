@@ -11,7 +11,7 @@ describe('makeWebpackConfig', () => {
       },
     }, {
       devServerEvents: new EventEmitter(),
-      devServerPublicPathRoute: '/test-public-path',
+      publicPath: '/test-public-path/',
       isOpenMode: true,
       supportFile: '/support.js',
       projectRoot: '.',

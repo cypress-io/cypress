@@ -44,7 +44,6 @@ export async function start ({ webpackConfig: userWebpackConfig, indexHtml, opti
     files: options.specs,
     indexHtml,
     projectRoot,
-    devServerPublicPathRoute,
     publicPath,
     devServerEvents: options.devServerEvents,
     supportFile: options.config.supportFile as string,
@@ -100,6 +99,7 @@ export async function start ({ webpackConfig: userWebpackConfig, indexHtml, opti
 
     // @ts-ignore Webpack types are clashing between Webpack and WebpackDevServer
     const server = new WebpackDevServer(webpackDevServerConfig, compiler)
+
     return server
   }
 

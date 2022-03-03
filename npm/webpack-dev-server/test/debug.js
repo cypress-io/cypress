@@ -1,11 +1,11 @@
 const path = require('path')
 const { EventEmitter } = require('events')
-const { devServer, startDevServer } = require('../')
+const { startDevServer } = require('../')
 
 const root = path.join(__dirname, '..')
 
 const webpackConfig = {
-  devServer:{ static: { directory: root } },
+  devServer: { static: { directory: root } },
 }
 
 const specs = [
@@ -18,7 +18,7 @@ const specs = [
 
 const config = {
   projectRoot: root,
-  supportFile: `${root}/test/fixtures/foo.spec.js`,
+  supportFile: `${root}/test/fixtures/bar.spec.js`,
   isTextTerminal: true,
   devServerPublicPathRoute: root,
 }
@@ -34,13 +34,9 @@ const run = async () => {
     },
   })
 
-
-  devServerEvents.on('dev-server:compile:success', () => {
-    console.log('dev-server:compile:success')
-  })
   return server
 }
 
-run().then(s => {
+run().then((s) => {
   global.server = s
 })

@@ -6,7 +6,8 @@ exports['makeWebpackConfig ignores userland webpack `output.publicPath` 1'] = {
   "mode": "development",
   "optimization": {
     "splitChunks": {
-      "chunks": "all"
+      "chunks": "async",
+      "maxAsyncRequests": 2
     }
   },
   "plugins": [

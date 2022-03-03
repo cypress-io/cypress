@@ -4,8 +4,11 @@ import _ from 'lodash'
 import semver from 'semver'
 import fs, { PathLike } from 'fs'
 import path from 'path'
+import debugFn from 'debug'
 // eslint-disable-next-line no-duplicate-imports
 import type { Compilation } from 'webpack'
+
+const debug = debugFn('cypress:webpack-dev-server:webpack')
 
 type UtimesSync = (path: PathLike, atime: string | number | Date, mtime: string | number | Date) => void
 
@@ -13,7 +16,6 @@ export interface CypressCTOptionsPluginOptions {
   files: Cypress.Cypress['spec'][]
   projectRoot: string
   supportFile: string
-  publicPath?: string
   devServerEvents?: EventEmitter
 }
 
@@ -25,7 +27,6 @@ export interface CypressCTOptionsPluginState {
 }
 
 export type CypressCTOptionsPluginOptionsWithEmitter = CypressCTOptionsPluginOptions & {
-  publicPath: string
   devServerEvents: EventEmitter
 }
 
@@ -50,7 +51,6 @@ export default class CypressCTOptionsPlugin {
   private active: Set<string> = new Set()
   private allFiles: Cypress.Cypress['spec'][]
   private supportFile: string
-  private publicPath: string
   private errorEmitted = false
 
   private readonly projectRoot: string
@@ -61,11 +61,10 @@ export default class CypressCTOptionsPlugin {
     this.supportFile = options.supportFile
     this.projectRoot = options.projectRoot
     this.devServerEvents = options.devServerEvents
-    this.publicPath = options.publicPath
-    // Uncomment this one line to return to old behavior - all specs compiled initially,
-    // nothing incremental.
-    // Handy for comparing without reinstalling anything.
-//     this.allFiles.forEach(({absolute}) => this.active.add(absolute))
+
+    // Uncomment this line to compile all specs immediately.
+    // Sometimes useful for testing performance
+    // this.allFiles.forEach(({absolute}) => this.active.add(absolute))
   }
 
   private pluginFunc = (context: CypressCTWebpackContext) => {
@@ -76,21 +75,30 @@ export default class CypressCTOptionsPlugin {
     }
   };
 
-  private isSpecFile(path: string) { return Boolean(_.find(this.allFiles, ['absolute', path])) }
+  private isSpecFile (path: string) {
+    return Boolean(_.find(this.allFiles, ['absolute', path]))
+  }
 
   private ignoreInactive = (result: any) => {
     if (this.isSpecFile(result.request) && !this.active.has(result.request)) {
-      console.log(`aborting ${result.request}, spec is not active`)
-      return null
+      debug(`blocking compilation of ${result.request}, spec is not active`)
+
+      return false
     }
 
+    if ('NormalModule' in webpack) {
+      // Webpack 5
+      return
+    }
+
+    // Webpack 4
     return result
   }
 
   private setupCustomHMR = (compiler: webpack.Compiler) => {
-    compiler.hooks.normalModuleFactory.tap("CypressCTOptionsPlugin", nmf => {
-      nmf.hooks.beforeResolve.tap("CypressCTOptionsPlugin", this.ignoreInactive);
-    });
+    compiler.hooks.normalModuleFactory.tap('CypressCTOptionsPlugin', (nmf) => {
+      nmf.hooks.beforeResolve.tap('CypressCTOptionsPlugin', this.ignoreInactive)
+    })
 
     compiler.hooks.afterCompile.tap(
       'CypressCTOptionsPlugin',
@@ -126,20 +134,37 @@ export default class CypressCTOptionsPlugin {
     )
   }
 
+  private onSpecsChanged (specs: Cypress.Cypress['spec'][], compilation: Webpack45Compilation) {
+    if (_.isEqual(specs, this.allFiles)) {
+      return
+    }
+
+    this.allFiles = specs
+    this.invalidate(compilation)
+  }
+
+  private onSpecRequest (url: string, compilation: Webpack45Compilation) {
+    if (!this.isSpecFile(url) || this.active.has(url)) {
+      return
+    }
+
+    debug('compiling new spec', url)
+    this.active.add(url)
+    this.invalidate(compilation)
+  }
+
   /**
    *
    * @param compilation webpack 4 `compilation.Compilation`, webpack 5
    *   `Compilation`
    */
   private plugin = (compilation: Webpack45Compilation) => {
-    this.devServerEvents.on('dev-server:specs:changed', (specs) => {
-      if (_.isEqual(specs, this.allFiles)) {
-        return
-      }
-
-      this.allFiles = specs
-      this.invalidate(compilation)
-    })
+    // This function gets invoked every time compilation is invoked; we need to clean up
+    // any previous ones so we're not leaking event listeners
+    this.devServerEvents.off('dev-server:specs:changed', this.onSpecsChanged)
+    this.devServerEvents.off('webpack-dev-server:request', this.onSpecRequest)
+    this.devServerEvents.on('dev-server:specs:changed', (specs) => this.onSpecsChanged(specs, compilation))
+    this.devServerEvents.on('webpack-dev-server:request', (url) => this.onSpecRequest(url, compilation))
 
     /* istanbul ignore next */
     if ('NormalModule' in webpack) {
@@ -155,20 +180,7 @@ export default class CypressCTOptionsPlugin {
         (context) => this.pluginFunc(context as CypressCTWebpackContext),
       )
     }
-
-
-    this.devServerEvents.on('webpack-dev-server:request', (url) => {
-      console.log(this.isSpecFile(url), url, this.active.has(url))
-
-      if (!this.isSpecFile(url) || this.active.has(url)) {
-        return
-      }
-
-      console.log('asking for new spec', url)
-      this.active.add(url)
-      this.invalidate(compilation)
-    })
-  };
+  }
 
   private invalidate = (compilation: Webpack45Compilation) => {
     const inputFileSystem = compilation.inputFileSystem
@@ -179,6 +191,6 @@ export default class CypressCTOptionsPlugin {
 
   apply (compiler: Compiler): void {
     this.setupCustomHMR(compiler)
-    compiler.hooks.compilation.tap('CypressCTOptionsPlugin', (compilation) => this.plugin(compilation as Webpack45Compilation))
+    compiler.hooks.thisCompilation.tap('CypressCTOptionsPlugin', (compilation) => this.plugin(compilation as Webpack45Compilation))
   }
 }

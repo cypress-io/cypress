@@ -48,6 +48,7 @@ export async function startDevServer (startDevServerArgs: StartDevServer, exitPr
       // at the top of the express app's routing stack. There's no official way to do this, therefore we use a dirty hack.
       webpackDevServer.app?.get('*', recompileMiddleware(webpackDevServer, startDevServerArgs.options))
       const [ourMiddleware] = webpackDevServer.app?._router.stack.splice(-1, 1)
+
       webpackDevServer.app?._router.stack.splice(2, 0, ourMiddleware)
 
       resolve({
@@ -66,12 +67,11 @@ export async function startDevServer (startDevServerArgs: StartDevServer, exitPr
   })
 }
 
-function recompileMiddleware(webpackDevServer: WebpackDevServer, options: any) {
+function recompileMiddleware (webpackDevServer: WebpackDevServer, options: any) {
   return (req: any, res: any, next: any) => {
-    console.log('incoming request', req.url, req.get('referer'))
-    if (req.url === "/__cypress/src/runtime-main.js") {
+    if (req.url === '/__cypress/src/runtime-main.js') {
       const spec = _.last(req.get('referer').split('/__cypress/iframes/'))
-      console.log(spec)
+
       options.devServerEvents.emit('webpack-dev-server:request', spec)
     }
 

@@ -18,13 +18,13 @@ export interface UserWebpackDevServerOptions {
 }
 
 interface MakeWebpackConfigOptions extends CypressCTOptionsPluginOptionsWithEmitter, UserWebpackDevServerOptions {
-  devServerPublicPathRoute: string
+  publicPath: string
   isOpenMode: boolean
   indexHtml?: string
 }
 
 export async function makeWebpackConfig (userWebpackConfig: webpack.Configuration, options: MakeWebpackConfigOptions): Promise<webpack.Configuration> {
-  const { projectRoot, publicPath, files, supportFile, devServerEvents, indexHtml } = options
+  const { publicPath, projectRoot, files, supportFile, devServerEvents, indexHtml } = options
 
   debug(`User passed in webpack config with values %o`, userWebpackConfig)
 
@@ -33,6 +33,22 @@ export async function makeWebpackConfig (userWebpackConfig: webpack.Configuratio
   debug(`Support file`, supportFile)
 
   const dynamicWebpackConfig = {
+    optimization: {
+      splitChunks: {
+        chunks: 'async' as any,
+        // Two async module requests: The support file, and the spec being loaded.
+        // This setting forces the spec file into its own chunk,
+        // rather than letting it get split out into various chunks depending
+        // on which specs we're actually compiling. This means it doesn't need to get
+        // rebuilt between requests, saving compilation time.
+
+        // Not allowing modules to share dependencies increases the total size
+        // of compiled javascript, but decreases compilation time and increases
+        // cacheability significantly, because the chunks needed to load specs
+        // don't change based on what order compilation is requested in.
+        maxAsyncRequests: 2,
+      },
+    },
     output: {
       publicPath,
     },
@@ -42,7 +58,6 @@ export async function makeWebpackConfig (userWebpackConfig: webpack.Configuratio
         projectRoot,
         devServerEvents,
         supportFile,
-        publicPath,
       }),
     ],
   }
@@ -75,8 +90,11 @@ export async function makeWebpackConfig (userWebpackConfig: webpack.Configuratio
   )
 
   mergedConfig.entry = {
-    main: path.resolve(__dirname, './browser.js')
-//     support: supportFile
+    main: path.resolve(__dirname, './browser.js'),
+  }
+
+  if (supportFile) {
+    mergedConfig.entry.support = path.resolve(projectRoot, supportFile)
   }
 
   debug('Merged webpack config %o', mergedConfig)
