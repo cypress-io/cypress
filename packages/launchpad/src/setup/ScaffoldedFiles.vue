@@ -41,9 +41,6 @@ const { t } = useI18n()
 gql`
 mutation ScaffoldedFiles_completeSetup {
   completeSetup {
-    baseError {
-      ...BaseError_Data
-    }
     currentProject {
       id
       isLoadingConfigFile
