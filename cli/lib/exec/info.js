@@ -87,12 +87,16 @@ methods.start = async (options = {}) => {
 
   const osVersion = await util.getOsVersionAsync()
   const buildInfo = util.pkgBuildInfo()
+  const isStable = buildInfo && buildInfo.stable
 
-  console.log('Cypress Version: %s', g(util.pkgVersion()), buildInfo.stable ? g('(stable)') : red('(pre-release)'))
+  console.log('Cypress Version: %s', g(util.pkgVersion()), isStable ? g('(stable)') : red('(pre-release)'))
   console.log('System Platform: %s (%s)', g(os.platform()), g(osVersion))
   console.log('System Memory: %s free %s', g(prettyBytes(os.totalmem())), g(prettyBytes(os.freemem())))
 
-  if (!buildInfo.stable) {
+  if (!buildInfo) {
+    console.log()
+    console.log('This is the', red('development'), '(un-built) Cypress CLI.')
+  } else if (!isStable) {
     console.log()
     console.log('This is a', red('pre-release'), 'build of Cypress.')
     console.log('Build info:')
