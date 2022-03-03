@@ -592,6 +592,10 @@ export default {
     },
   },
 
+  group: {
+    missing_fn: '`group` API must be called with a function.',
+  },
+
   hover: {
     not_implemented: {
       message: [

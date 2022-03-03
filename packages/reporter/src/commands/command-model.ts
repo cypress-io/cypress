@@ -84,7 +84,8 @@ export default class Command extends Instrument {
 
     return this._isOpen || (this._isOpen === null
       && (
-        (this.group && this.hasChildren && !this.event) ||
+        (this.group && this.type === 'system' && this.hasChildren) ||
+        (this.hasChildren && !this.event && this.type !== 'system') ||
         _.some(this.children, (v) => v.hasChildren) ||
         _.last(this.children)?.isOpen ||
         (_.some(this.children, (v) => v.isLongRunning) && _.last(this.children)?.state === 'pending') ||

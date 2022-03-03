@@ -2,7 +2,7 @@ import _ from 'lodash'
 
 import { $Command } from '../../../cypress/command'
 import $errUtils from '../../../cypress/error_utils'
-import LogGroup from '../../logGroup'
+import group from '../../logGroup'
 
 export default (Commands, Cypress, cy, state) => {
   const withinFn = (subject, fn) => {
@@ -90,16 +90,16 @@ export default (Commands, Cypress, cy, state) => {
 
       options = _.defaults({}, userOptions, { log: true })
 
-      let group = new LogGroup(cy, {
+      const groupOptions = {
         log: options.log,
         $el: subject,
         message: '',
         timeout: options.timeout,
-      })
+      }
 
-      return group.run(() => {
+      return group(Cypress, groupOptions, (log) => {
         if (!_.isFunction(fn)) {
-          $errUtils.throwErrByPath('within.invalid_argument', { onFail: group.log })
+          $errUtils.throwErrByPath('within.invalid_argument', { onFail: log })
         }
 
         return withinFn(subject, fn)

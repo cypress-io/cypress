@@ -1774,8 +1774,7 @@ export default {
         test = getTestById(testId)
 
         if (test) {
-          // pluralize the instrument
-          // as a property on the runnable
+          // pluralize the instrument as a property on the runnable
           const name = `${instrument}s`
           const logs = test[name] != null ? test[name] : (test[name] = [])
 

@@ -1,40 +1,40 @@
-import Promise from 'bluebird'
+import { $Command } from '../cypress/command'
 import $errUtils from '../cypress/error_utils'
 
-export default class LogGroup {
-  private cy
-  log
+export default (Cypress, userOptions, fn) => {
+  const cy = Cypress.cy
 
-  constructor (cy, userOptions) {
-    this.cy = cy
-
-    const current = cy.state('current')
-    const options = _.defaults({}, userOptions, {
-      name: current.get('name'),
-      type: current.get('type'),
-      log: true,
-    })
-
-    this.log = Cypress.log({
-      ...options,
-      groupStart: true,
-      emitOnly: !options.log,
-    })
+  const options = {
+    log: true,
+    ...userOptions,
+    groupStart: true,
   }
 
-  run (fn) {
-    if (!_.isFunction(fn)) {
-      // update this to be a logGroup error message
-      $errUtils.throwErrByPath('within.invalid_argument', { onFail: this.log })
-    }
+  options.emitOnly = !options.log
 
-    return this.cy.then(() => Promise.try(fn))
-    .then((subject) => {
-      if (this.log) {
-        this.log.endGroup()
+  const subject = userOptions.$el || null
+
+  const log = Cypress.log(options)
+
+  if (!_.isFunction(fn)) {
+    $errUtils.throwErrByPath('group.missing_fn', { onFail: log })
+  }
+
+  // An internal command is inserted to create a divider between
+  // commands inside group() callback and commands chained to it.
+  const restoreCmdIndex = cy.state('index') + 1
+
+  cy.queue.insert(restoreCmdIndex, $Command.create({
+    args: [subject],
+    name: 'group-restore',
+    fn: (subject) => {
+      if (log) {
+        log.endGroup()
       }
 
       return subject
-    })
-  }
+    },
+  }))
+
+  return fn(log)
 }
