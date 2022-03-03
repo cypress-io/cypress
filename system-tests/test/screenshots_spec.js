@@ -95,8 +95,11 @@ describe('e2e screenshots', () => {
           fs.statAsync(screenshot9).get('size'),
         ])
         .then((sizes) => {
-          // make sure all of the values are unique
-          expect(sizes).to.deep.eq(_.uniq(sizes))
+          // make sure all of the values are unique. Ignore comparing 6 and 7 since they can sometimes be the same since the
+          // visual state of the reporter is the same in both cases
+          const sizesToCompare = [...sizes.slice(0, 5), ...sizes.slice(7, -1)]
+
+          expect(sizesToCompare).to.deep.eq(_.uniq(sizesToCompare))
         }).then(() => {
           return Promise.all([
             sizeOf(screenshot1),
@@ -106,6 +109,8 @@ describe('e2e screenshots', () => {
             sizeOf(screenshot5),
             sizeOf(screenshot6),
             sizeOf(screenshot7),
+            sizeOf(screenshot8),
+            sizeOf(screenshot9),
           ])
         }).then((dimensions = []) => {
           if (browser === 'electron') {
