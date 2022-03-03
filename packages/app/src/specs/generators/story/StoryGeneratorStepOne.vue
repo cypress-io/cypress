@@ -139,6 +139,10 @@ mutation StoryGeneratorStepOne_generateSpec($codeGenCandidate: String!, $type: C
     currentProject {
       id
       ...EmptyGenerator
+      specs {
+        id
+        ...SpecsList
+      }
     }
     generatedSpecResult {
       ... on GeneratedSpecError {

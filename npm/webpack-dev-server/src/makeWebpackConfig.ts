@@ -78,27 +78,6 @@ export async function makeWebpackConfig (userWebpackConfig: webpack.Configuratio
     })
   }
 
-  if (typeof userWebpackConfig?.module?.unsafeCache === 'function') {
-    const nextCache = userWebpackConfig.module.unsafeCache
-
-    userWebpackConfig.module.unsafeCache = (module: any) => {
-      return nextCache(module) && !/[\\/]webpack-dev-server[\\/]dist[\\/]browser\.js/.test(module.resource)
-    }
-  }
-
-  if (userWebpackConfig.watchOptions) {
-    userWebpackConfig.watchOptions = {
-      ...userWebpackConfig.watchOptions,
-      ignored: Array.isArray(userWebpackConfig.watchOptions.ignored)
-        ? [...userWebpackConfig.watchOptions.ignored, '!(**/@cypress/webpack-dev-server/dist/browser.js)']
-        : typeof userWebpackConfig.watchOptions.ignored === 'string'
-          ? [userWebpackConfig.watchOptions.ignored, '!(**/node_modules/@cypress/webpack-dev-server/dist/browser.js)']
-          : userWebpackConfig.watchOptions.ignored,
-    }
-
-    debug('watchOptions.ignored %O', userWebpackConfig.watchOptions.ignored)
-  }
-
   const mergedConfig = merge<webpack.Configuration>(
     userWebpackConfig,
     makeDefaultWebpackConfig(indexHtml),
