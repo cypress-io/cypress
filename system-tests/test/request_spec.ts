@@ -2,7 +2,7 @@ import bodyParser from 'body-parser'
 import cookieParser from 'cookie-parser'
 import systemTests from '../lib/system-tests'
 
-let counts = null
+let counts: Record<string, number> | null = null
 
 const urlencodedParser = bodyParser.urlencoded({ extended: false })
 const jsonParser = bodyParser.json()
