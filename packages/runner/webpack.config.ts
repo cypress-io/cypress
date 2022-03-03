@@ -84,11 +84,11 @@ mainConfig.resolve = {
 }
 
 // @ts-ignore
-const injectionConfig: webpack.Configuration = {
+const multiDomainConfig: webpack.Configuration = {
+  mode: 'development',
   ...getSimpleConfig(),
-  mode: 'production',
   entry: {
-    injection: [path.resolve(__dirname, 'injection/index.js')],
+    cypress_multi_domain_runner: [path.resolve(__dirname, 'src/multi-domain.js')],
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
@@ -96,4 +96,35 @@ const injectionConfig: webpack.Configuration = {
   },
 }
 
-export default [mainConfig, injectionConfig]
+// @ts-ignore
+const mainInjectionConfig: webpack.Configuration = {
+  ...getSimpleConfig(),
+  mode: 'production',
+  entry: {
+    injection: [path.resolve(__dirname, 'injection/main.js')],
+  },
+  output: {
+    path: path.resolve(__dirname, 'dist'),
+    filename: '[name].js',
+  },
+}
+
+// @ts-ignore
+const multiDomainInjectionConfig: webpack.Configuration = {
+  ...getSimpleConfig(),
+  mode: 'production',
+  entry: {
+    injection_multi_domain: [path.resolve(__dirname, 'injection/multi-domain.js')],
+  },
+  output: {
+    path: path.resolve(__dirname, 'dist'),
+    filename: '[name].js',
+  },
+}
+
+export default [
+  mainConfig,
+  mainInjectionConfig,
+  multiDomainConfig,
+  multiDomainInjectionConfig,
+]

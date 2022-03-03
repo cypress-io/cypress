@@ -102,8 +102,6 @@ export const Iframes = namedObserver('Iframes', ({
 
   useEffect(() => {
     eventManager.on('visit:failed', autIframe.current.showVisitFailure)
-    eventManager.on('before:screenshot', autIframe.current.beforeScreenshot)
-    eventManager.on('after:screenshot', autIframe.current.afterScreenshot)
     eventManager.on('script:error', _setScriptError)
 
     // TODO: need to take headless mode into account

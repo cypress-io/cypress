@@ -3,7 +3,7 @@ import $utils from '../cypress/utils'
 
 // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
 export const create = (state) => ({
-  getRemoteLocation (key, win) {
+  getRemoteLocation (key?: string | undefined, win?: Window) {
     try {
       const remoteUrl = $utils.locToString(win ?? state('window'))
       const location = $Location.create(remoteUrl)

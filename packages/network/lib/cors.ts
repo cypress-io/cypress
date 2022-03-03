@@ -2,17 +2,12 @@ import _ from 'lodash'
 import * as uri from './uri'
 import debugModule from 'debug'
 import _parseDomain, { ParsedDomain } from '@cypress/parse-domain'
+import type { ParsedHost } from './types'
 
 const debug = debugModule('cypress:network:cors')
 
 // match IP addresses or anything following the last .
 const customTldsRe = /(^[\d\.]+$|\.[^\.]+$)/
-
-type ParsedHost = {
-  port?: string
-  tld?: string
-  domain?: string
-}
 
 export function getSuperDomain (url) {
   const parsed = parseUrlIntoDomainTldPort(url)
@@ -64,6 +59,16 @@ export function parseUrlIntoDomainTldPort (str) {
   debug('Parsed URL %o', obj)
 
   return obj
+}
+
+export function getDomainNameFromUrl (url: string) {
+  const parsedHost = parseUrlIntoDomainTldPort(url)
+
+  return getDomainNameFromParsedHost(parsedHost)
+}
+
+export function getDomainNameFromParsedHost (parsedHost: ParsedHost) {
+  return _.compact([parsedHost.domain, parsedHost.tld]).join('.')
 }
 
 export function urlMatchesOriginPolicyProps (urlStr, props) {

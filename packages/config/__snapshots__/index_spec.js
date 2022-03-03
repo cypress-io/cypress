@@ -1,4 +1,4 @@
-exports['src/index .getBreakingKeys returns list of breaking config keys 1'] = [
+exports['config/lib/index .getBreakingKeys returns list of breaking config keys 1'] = [
   "blacklistHosts",
   "experimentalComponentTesting",
   "experimentalGetCookiesSameSite",
@@ -10,7 +10,7 @@ exports['src/index .getBreakingKeys returns list of breaking config keys 1'] = [
   "nodeVersion"
 ]
 
-exports['src/index .getDefaultValues returns list of public config keys 1'] = {
+exports['config/lib/index .getDefaultValues returns list of public config keys 1'] = {
   "animationDistanceThreshold": 5,
   "baseUrl": null,
   "blockHosts": null,
@@ -26,6 +26,7 @@ exports['src/index .getDefaultValues returns list of public config keys 1'] = {
   "exit": true,
   "experimentalFetchPolyfill": false,
   "experimentalInteractiveRunEvents": false,
+  "experimentalMultiDomain": false,
   "experimentalSessionSupport": false,
   "experimentalSourceRewriting": false,
   "experimentalStudio": false,
@@ -87,7 +88,7 @@ exports['src/index .getDefaultValues returns list of public config keys 1'] = {
   "xhrRoute": "/xhrs/"
 }
 
-exports['src/index .getPublicConfigKeys returns list of public config keys 1'] = [
+exports['config/lib/index .getPublicConfigKeys returns list of public config keys 1'] = [
   "animationDistanceThreshold",
   "baseUrl",
   "blockHosts",
@@ -103,6 +104,7 @@ exports['src/index .getPublicConfigKeys returns list of public config keys 1'] =
   "exit",
   "experimentalFetchPolyfill",
   "experimentalInteractiveRunEvents",
+  "experimentalMultiDomain",
   "experimentalSessionSupport",
   "experimentalSourceRewriting",
   "experimentalStudio",

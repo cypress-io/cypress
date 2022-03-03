@@ -1,6 +1,7 @@
 import Bluebird from 'bluebird'
 import Debug from 'debug'
 import _ from 'lodash'
+import EventEmitter from 'events'
 import { onNetStubbingEvent } from '@packages/net-stubbing'
 import * as socketIo from '@packages/socket'
 import firefoxUtil from './browsers/firefox-util'
@@ -74,9 +75,12 @@ export class SocketBase {
   protected _io?: socketIo.SocketIOServer
   protected testsDir: string | null
 
+  localBus: EventEmitter
+
   constructor (config: Record<string, any>) {
     this.ended = false
     this.testsDir = null
+    this.localBus = new EventEmitter()
   }
 
   protected ensureProp = ensureProp
@@ -410,6 +414,10 @@ export class SocketBase {
 
               return
             }
+            case 'ready:for:domain':
+              this.localBus.emit('ready:for:domain', args[0])
+
+              return
             default:
               throw new Error(
                 `You requested a backend event we cannot handle: ${eventName}`,

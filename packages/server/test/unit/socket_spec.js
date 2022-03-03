@@ -109,6 +109,8 @@ describe('lib/socket', () => {
         let chrome
 
         before(() => {
+          global.window = {}
+
           chrome = global.chrome = {
             cookies: {
               set () {},
@@ -132,6 +134,11 @@ describe('lib/socket', () => {
             tabs: {
               query () {},
               executeScript () {},
+            },
+            webRequest: {
+              onBeforeSendHeaders: {
+                addListener () {},
+              },
             },
           }
 
@@ -552,6 +559,18 @@ describe('lib/socket', () => {
 
           return done()
         })
+      })
+    })
+
+    context('on(ready:for:domain)', () => {
+      it('emits ready:for:domain on local bus', function (done) {
+        this.server.socket.localBus.once('ready:for:domain', (arg) => {
+          expect(arg).to.deep.equal({ shouldInject: true })
+
+          done()
+        })
+
+        this.client.emit('backend:request', 'ready:for:domain', { shouldInject: true }, () => {})
       })
     })
   })

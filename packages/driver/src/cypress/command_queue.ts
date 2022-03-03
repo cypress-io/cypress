@@ -63,16 +63,16 @@ const commandRunningFailed = (Cypress, state, err) => {
 export class CommandQueue extends Queue<Command> {
   state: any
   timeout: any
-  whenStable: any
+  stability: any
   cleanup: any
   fail: any
   isCy: any
 
-  constructor (state, timeout, whenStable, cleanup, fail, isCy) {
+  constructor (state, timeout, stability, cleanup, fail, isCy) {
     super()
     this.state = state
     this.timeout = timeout
-    this.whenStable = whenStable
+    this.stability = stability
     this.cleanup = cleanup
     this.fail = fail
     this.isCy = isCy
@@ -135,7 +135,7 @@ export class CommandQueue extends Queue<Command> {
     this.state('current', command)
     this.state('chainerId', command.get('chainerId'))
 
-    return this.whenStable(() => {
+    return this.stability.whenStableOrAnticipatingMultiDomain(() => {
       this.state('nestedIndex', this.state('index'))
 
       return command.get('args')
@@ -197,7 +197,7 @@ export class CommandQueue extends Queue<Command> {
         // if we got a return value and we enqueued
         // a new command and we didn't return cy
         // or an undefined value then throw
-        return $errUtils.throwErrByPath(
+        $errUtils.throwErrByPath(
           'miscellaneous.returned_value_and_commands_from_custom_command', {
             args: {
               current: command.get('name'),
@@ -254,20 +254,18 @@ export class CommandQueue extends Queue<Command> {
   // @ts-ignore
   run () {
     const next = () => {
+      // start at 0 index if one is not already set
+      let index = this.state('index') || this.state('index', 0)
+
       // bail if we've been told to abort in case
       // an old command continues to run after
       if (this.stopped) {
         return
       }
 
-      // start at 0 index if we dont have one
-      let index = this.state('index') || this.state('index', 0)
-
       const command = this.at(index)
 
-      // if the command should be skipped
-      // just bail and increment index
-      // and set the subject
+      // if the command should be skipped, just bail and increment index
       if (command && command.get('skip')) {
         // must set prev + next since other
         // operations depend on this state being correct
@@ -278,6 +276,8 @@ export class CommandQueue extends Queue<Command> {
 
         this.state('index', index + 1)
         this.state('subject', command.get('subject'))
+
+        Cypress.action('cy:skipped:command:end', command)
 
         return next()
       }
@@ -291,7 +291,7 @@ export class CommandQueue extends Queue<Command> {
         // finished running if the application under
         // test is no longer stable because we cannot
         // move onto the next test until its finished
-        return this.whenStable(() => {
+        return this.stability.whenStableOrAnticipatingMultiDomain(() => {
           Cypress.action('cy:command:queue:end')
 
           return null

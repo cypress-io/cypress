@@ -6,14 +6,22 @@ export type RunnerPkg = 'runner' | 'runner-ct'
 
 type FoldersWithDist = 'static' | 'driver' | RunnerPkg
 
+const getRunnerContents = (filename) => {
+  fs ??= require('fs-extra') as typeof import('fs-extra')
+
+  return fs.readFile(getPathToDist('runner', filename))
+}
+
 export const getPathToDist = (folder: FoldersWithDist, ...args: string[]) => {
   return path.join(...[__dirname, '..', '..', folder, 'dist', ...args])
 }
 
 export const getRunnerInjectionContents = () => {
-  fs ??= require('fs-extra') as typeof import('fs-extra')
+  return getRunnerContents('injection.js')
+}
 
-  return fs.readFile(getPathToDist('runner', 'injection.js'))
+export const getRunnerMultiDomainInjectionContents = () => {
+  return getRunnerContents('injection_multi_domain.js')
 }
 
 export const getPathToIndex = (pkg: RunnerPkg) => {

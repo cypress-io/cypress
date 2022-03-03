@@ -1,3 +1,4 @@
+/* global window */
 const map = require('lodash/map')
 const pick = require('lodash/pick')
 const once = require('lodash/once')
@@ -19,6 +20,8 @@ const firstOrNull = (cookies) => {
 }
 
 const connect = function (host, path, extraOpts) {
+  const isChromeLike = !!window.chrome && !window.browser
+
   const listenToCookieChanges = once(() => {
     return browser.cookies.onChanged.addListener((info) => {
       if (info.cause !== 'overwrite') {
@@ -44,6 +47,32 @@ const connect = function (host, path, extraOpts) {
         id: `${downloadDelta.id}`,
       })
     })
+  })
+
+  const listenToOnBeforeHeaders = once(() => {
+    // adds a header to the request to mark it as a request for the AUT frame
+    // itself, so the proxy can utilize that for injection purposes
+    browser.webRequest.onBeforeSendHeaders.addListener((details) => {
+      if (
+        // parentFrameId: 0 means the parent is the top-level, so if it isn't
+        // 0, it's nested inside the AUT and can't be the AUT itself
+        details.parentFrameId !== 0
+        // isn't an iframe
+        || details.type !== 'sub_frame'
+        // is the spec frame, not the AUT
+        || details.url.includes('__cypress')
+      ) return
+
+      return {
+        requestHeaders: [
+          ...details.requestHeaders,
+          {
+            name: 'X-Cypress-Is-AUT-Frame',
+            value: 'true',
+          },
+        ],
+      }
+    }, { urls: ['<all_urls>'] }, ['blocking', 'requestHeaders'])
   })
 
   const fail = (id, err) => {
@@ -95,9 +124,13 @@ const connect = function (host, path, extraOpts) {
 
   ws.on('connect', () => {
     listenToCookieChanges()
-    listenToDownloads()
+    // chrome-like browsers use CDP instead
+    if (!isChromeLike) {
+      listenToDownloads()
+      listenToOnBeforeHeaders()
+    }
 
-    return ws.emit('automation:client:connected')
+    ws.emit('automation:client:connected')
   })
 
   return ws

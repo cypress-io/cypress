@@ -2,6 +2,7 @@ import './cwd'
 import Bluebird from 'bluebird'
 import compression from 'compression'
 import Debug from 'debug'
+import EventEmitter from 'events'
 import evilDns from 'evil-dns'
 import express, { Express } from 'express'
 import http from 'http'
@@ -12,7 +13,7 @@ import url from 'url'
 import la from 'lazy-ass'
 import type httpsProxy from '@packages/https-proxy'
 import { netStubbingState, NetStubbingState } from '@packages/net-stubbing'
-import { agent, clientCertificates, cors, httpUtils, uri } from '@packages/network'
+import { agent, clientCertificates, cors, httpUtils, uri, ParsedHost } from '@packages/network'
 import { NetworkProxy, BrowserPreRequest } from '@packages/proxy'
 import type { SocketCt } from './socket-ct'
 import errors from './errors'
@@ -118,9 +119,10 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
   protected _networkProxy?: NetworkProxy
   protected _netStubbingState?: NetStubbingState
   protected _httpsProxy?: httpsProxy
+  protected _eventBus: EventEmitter
 
   protected _remoteAuth: unknown
-  protected _remoteProps: unknown
+  protected _remoteProps: ParsedHost | undefined | null
   protected _remoteOrigin: unknown
   protected _remoteStrategy: unknown
   protected _remoteVisitingUrl: unknown
@@ -132,9 +134,18 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     // @ts-ignore
     this.request = Request()
     this.socketAllowed = new SocketAllowed()
+    this._eventBus = new EventEmitter()
     this._middleware = null
     this._baseUrl = null
     this._fileServer = null
+
+    this._eventBus.on('cross:domain:delaying:html', () => {
+      this.socket.localBus.once('ready:for:domain', () => {
+        this._eventBus.emit('ready:for:domain')
+      })
+
+      this.socket.toDriver('cross:domain:delaying:html')
+    })
   }
 
   ensureProp = ensureProp
@@ -308,6 +319,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
       socket: this.socket,
       netStubbingState: this.netStubbingState,
       request: this.request,
+      serverBus: this._eventBus,
     })
   }
 
@@ -474,9 +486,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
       // set an object with port, tld, and domain properties
       // as the remoteHostAndPort
       this._remoteProps = cors.parseUrlIntoDomainTldPort(this._remoteOrigin)
-
-      // @ts-ignore
-      this._remoteDomainName = _.compact([this._remoteProps.domain, this._remoteProps.tld]).join('.')
+      this._remoteDomainName = cors.getDomainNameFromParsedHost(this._remoteProps)
 
       l('remoteOrigin', this._remoteOrigin)
       l('remoteHostAndPort', this._remoteProps)

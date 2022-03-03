@@ -74,8 +74,6 @@ export default class Iframes extends Component {
     this.autIframe = new AutIframe(this.props.config)
 
     this.props.eventManager.on('visit:failed', this.autIframe.showVisitFailure)
-    this.props.eventManager.on('before:screenshot', this.autIframe.beforeScreenshot)
-    this.props.eventManager.on('after:screenshot', this.autIframe.afterScreenshot)
     this.props.eventManager.on('script:error', this._setScriptError)
     this.props.eventManager.on('visit:blank', this.autIframe.visitBlank)
 
@@ -93,6 +91,8 @@ export default class Iframes extends Component {
     })
 
     this.props.eventManager.on('print:selector:elements:to:console', this._printSelectorElementsToConsole)
+
+    this.props.eventManager.on('expect:domain', this._addCrossDomainIframe)
 
     this._disposers.push(autorun(() => {
       this.autIframe.toggleSelectorPlayground(selectorPlaygroundModel.isEnabled)
@@ -155,16 +155,48 @@ export default class Iframes extends Component {
     const $container = $(this.refs.container).empty()
     const $autIframe = this.autIframe.create(this.props.config).appendTo($container)
 
+    // Remove the spec bridge iframe
+    $('iframe.spec-bridge-iframe').remove()
+
     this.autIframe.showInitialBlankContents()
 
-    const $specIframe = $('<iframe />', {
-      id: `Your Spec: '${specSrc}'`,
-      class: 'spec-iframe',
-    }).appendTo($container)
-
-    $specIframe.prop('src', specSrc)
+    this._addIframe({
+      $container,
+      id: `Your Spec: ${specSrc}`,
+      className: 'spec-iframe',
+      src: specSrc,
+    })
 
     return $autIframe
+  }
+
+  _addCrossDomainIframe = (domain) => {
+    const id = `Spec Bridge: ${domain}`
+
+    // if it already exists, don't add another one
+    if (document.getElementById(id)) {
+      this.props.eventManager.notifyCrossDomainBridgeReady(domain)
+
+      return
+    }
+
+    this._addIframe({
+      id,
+      // the cross domain iframe is added to the document body instead of the
+      // container since it needs to match the size of the top window for screenshots
+      $container: $(document.body),
+      className: 'spec-bridge-iframe',
+      src: `//${domain}/${this.props.config.namespace}/multi-domain-iframes/${encodeURIComponent(domain)}`,
+    })
+  }
+
+  _addIframe ({ $container, id, src, className }) {
+    const $specIframe = $('<iframe />', {
+      id,
+      class: className,
+    }).appendTo($container)
+
+    $specIframe.prop('src', src)
   }
 
   _toggleSnapshotHighlights = (snapshotProps) => {
@@ -194,6 +226,10 @@ export default class Iframes extends Component {
 
   componentDidUpdate () {
     const cb = this.props.state.callbackAfterUpdate
+
+    // call the clientWidth to force the browser to repaint for viewport changes
+    // otherwise firefox may fail when changing the viewport in multi-domain
+    this.refs.container.clientWidth
 
     if (cb) {
       cb()

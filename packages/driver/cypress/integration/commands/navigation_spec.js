@@ -508,7 +508,7 @@ describe('src/cy/commands/navigation', () => {
       })
 
       it('only logs once on error', function (done) {
-        cy.on('fail', (err) => {
+        cy.once('fail', (err) => {
           assertLogLength(this.logs, 1)
           expect(this.logs[0].get('error')).to.eq(err)
 
@@ -2134,7 +2134,8 @@ describe('src/cy/commands/navigation', () => {
         .get('#does-not-exist', { timeout: 200 }).should('have.class', 'foo')
       })
 
-      it('captures cross origin failures', function (done) {
+      // TODO: This test is currently being skipped for multidomain and needs to be fixed. See issue #19632.
+      it.skip('captures cross origin failures', function (done) {
         cy.once('fail', (err) => {
           const { lastLog } = this
 

@@ -563,7 +563,7 @@ describe('src/cy/commands/actions/select', () => {
           done()
         })
 
-        cy.get('select[name=fielset-disabled]').select('foo')
+        cy.get('select[name=fieldset-disabled]').select('foo')
       })
 
       it('throws when optgroup is disabled', (done) => {

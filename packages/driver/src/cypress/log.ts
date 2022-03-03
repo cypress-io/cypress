@@ -48,7 +48,7 @@ const toSerializedJSON = function (attrs) {
       return value()
     }
 
-    if (_.isFunction(value)) {
+    if (_.isFunction(value) || _.isSymbol(value)) {
       return value.toString()
     }
 
@@ -103,7 +103,6 @@ const countLogsByTests = function (tests: Record<string, any> = {}) {
   .value()
 }
 
-// TODO: fix this
 const setCounter = (num) => {
   return counter = num
 }
@@ -176,8 +175,10 @@ const defaults = function (state, config, obj) {
     return t._currentRetry || 0
   }
 
+  counter++
+
   _.defaults(obj, {
-    id: (counter += 1),
+    id: `log-${window.location.origin}-${counter}`,
     state: 'pending',
     instrument: 'command',
     url: state('url'),

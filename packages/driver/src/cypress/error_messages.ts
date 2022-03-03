@@ -1685,6 +1685,86 @@ export default {
     },
   },
 
+  switchToDomain: {
+    docsUrl: 'https://on.cypress.io/switchToDomain',
+    done_reference_mismatch: {
+      message: `${cmd('switchToDomain')} must have done as its second argument when three or more arguments are used.`,
+    },
+    experiment_not_enabled: {
+      message: `${cmd('switchToDomain')} requires enabling the experimentalMultiDomain flag`,
+    },
+    invalid_domain_argument: {
+      message: `${cmd('switchToDomain')} requires the first argument to be either 'localhost', an ip address ('127.0.0.1') or a domain name ('example.com'). Domain names must not contain sub domains, ports or paths. You passed: \`{{arg}}\``,
+    },
+    invalid_data_argument: {
+      message: `${cmd('switchToDomain')} requires the 'data' argument to be an array. You passed: \`{{arg}}\``,
+    },
+    invalid_fn_argument: {
+      message: `${cmd('switchToDomain')} requires the last argument to be a function. You passed: \`{{arg}}\``,
+    },
+    run_domain_fn_errored: {
+      message: stripIndent`
+      ${cmd('switchToDomain')} failed with the following error:
+
+        > {{error}}
+
+      This is likely because the data argument specified is not serializable. Note that functions and DOM objects cannot be serialized.`,
+    },
+    callback_mixes_sync_and_async: {
+      message: stripIndent`\
+        ${cmd('switchToDomain')} failed because you are mixing up async and sync code.
+
+        In your callback function you invoked one or more cy commands but then returned a synchronous value.
+
+        Cypress commands are asynchronous and it doesn't make sense to queue cy commands and yet return a synchronous value.
+
+        You likely forgot to properly chain the cy commands using another \`cy.then()\`.
+
+        The value you synchronously returned was: \`{{value}}\``,
+    },
+    failed_to_serialize_object: {
+      message: stripIndent`\
+      ${cmd('switchToDomain')} could not serialize the subject due to one of its properties not being supported by the structured clone algorithm.
+
+      To properly serialize this subject, remove or serialize any unsupported properties.`,
+    },
+    failed_to_serialize_function: {
+      message: stripIndent`\
+      ${cmd('switchToDomain')} could not serialize the subject due to functions not being supported by the structured clone algorithm.`,
+    },
+    failed_to_serialize_symbol: {
+      message: stripIndent`\
+      ${cmd('switchToDomain')} could not serialize the subject due to symbols not being supported by the structured clone algorithm.`,
+    },
+    // TODO: These deprecation warnings and forbidden use errors need to be audited before releasing multi-domain
+    route: {
+      unsupported: {
+        message: `${cmd('route')} has been deprecated and use is not supported in ${cmd('switchToDomain')}. Consider using ${cmd('intercept')} instead.`,
+        docsUrl: 'https://on.cypress.io/intercept',
+      },
+    },
+    server: {
+      unsupported: {
+        message: `${cmd('server')} has been deprecated and use is not supported in ${cmd('switchToDomain')}. Consider using ${cmd('intercept')} instead.`,
+        docsUrl: 'https://on.cypress.io/intercept',
+      },
+    },
+    Server: {
+      unsupported: {
+        message: `\`Cypress.Server.*\` has been deprecated and use is not supported in ${cmd('switchToDomain')}. Consider using ${cmd('intercept')} instead.`,
+        docsUrl: 'https://on.cypress.io/intercept',
+      },
+    },
+    Cookies: {
+      preserveOnce: {
+        unsupported: {
+          message: `\`Cypress.Cookies.preserveOnce\` use is not supported in ${cmd('switchToDomain')}. Consider using ${cmd('session')} instead.`,
+          docsUrl: 'https://on.cypress.io/session',
+        },
+      },
+    },
+  },
+
   task: {
     docsUrl: 'https://on.cypress.io/api/task',
     known_error: stripIndent`

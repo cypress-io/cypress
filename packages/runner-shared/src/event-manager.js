@@ -126,8 +126,15 @@ export const eventManager = {
 
     _.each(socketToDriverEvents, (event) => {
       ws.on(event, (...args) => {
-        Cypress.emit(event, ...args)
+        // these events are set up before Cypress is instantiated, so it's
+        // possible it's undefined when an event fires, but it's okay to
+        // ignore at that point
+        Cypress?.emit(event, ...args)
       })
+    })
+
+    ws.on('cross:domain:delaying:html', () => {
+      Cypress.multiDomainCommunicator.emit('delaying:html')
     })
 
     _.each(localToReporterEvents, (event) => {
@@ -438,7 +445,7 @@ export const eventManager = {
       reporterBus.emit('reporter:log:state:changed', displayProps)
     })
 
-    Cypress.on('before:screenshot', (config, cb) => {
+    const handleBeforeScreenshot = (config, cb) => {
       const beforeThenCb = () => {
         localBus.emit('before:screenshot', config)
         cb()
@@ -455,11 +462,15 @@ export const eventManager = {
       }
 
       if (!wait) beforeThenCb()
-    })
+    }
 
-    Cypress.on('after:screenshot', (config) => {
+    Cypress.on('before:screenshot', handleBeforeScreenshot)
+
+    const handleAfterScreenshot = (config) => {
       localBus.emit('after:screenshot', config)
-    })
+    }
+
+    Cypress.on('after:screenshot', handleAfterScreenshot)
 
     _.each(driverToReporterEvents, (event) => {
       Cypress.on(event, (...args) => {
@@ -499,6 +510,56 @@ export const eventManager = {
       if (studioRecorder.isOpen && test.state !== 'passed') {
         studioRecorder.testFailed()
       }
+    })
+
+    Cypress.on('test:before:run', (...args) => {
+      Cypress.multiDomainCommunicator.toAllSpecBridges('test:before:run', ...args)
+    })
+
+    Cypress.on('test:before:run:async', (...args) => {
+      Cypress.multiDomainCommunicator.toAllSpecBridges('test:before:run:async', ...args)
+    })
+
+    Cypress.multiDomainCommunicator.initialize(window)
+
+    Cypress.multiDomainCommunicator.on('window:load', ({ url }) => {
+      Cypress.emit('internal:window:load', { type: 'cross:domain', url })
+    })
+
+    Cypress.multiDomainCommunicator.on('expect:domain', (domain) => {
+      localBus.emit('expect:domain', domain)
+    })
+
+    Cypress.multiDomainCommunicator.on('viewport:changed', (viewport, domain) => {
+      const callback = () => {
+        Cypress.multiDomainCommunicator.toSpecBridge(domain, 'viewport:changed:end')
+      }
+
+      // TODO: Do we want to use the multiDomainCommunicator to send these types of messages or Cypress itself?
+      Cypress.multiDomainCommunicator.emit('sync:viewport', viewport)
+      localBus.emit('viewport:changed', viewport, callback)
+    })
+
+    Cypress.multiDomainCommunicator.on('before:screenshot', (config, domain) => {
+      const callback = () => {
+        Cypress.multiDomainCommunicator.toSpecBridge(domain, 'before:screenshot:end')
+      }
+
+      handleBeforeScreenshot(config, callback)
+    })
+
+    Cypress.multiDomainCommunicator.on('url:changed', (url) => {
+      localBus.emit('url:changed', url)
+    })
+
+    Cypress.multiDomainCommunicator.on('after:screenshot', handleAfterScreenshot)
+
+    Cypress.multiDomainCommunicator.on('log:added', (attrs) => {
+      reporterBus.emit('reporter:log:add', attrs)
+    })
+
+    Cypress.multiDomainCommunicator.on('log:changed', (attrs) => {
+      reporterBus.emit('reporter:log:state:changed', attrs)
     })
   },
 
@@ -544,6 +605,7 @@ export const eventManager = {
       // but we want to be aggressive here
       // and force GC early and often
       Cypress.removeAllListeners()
+      Cypress.multiDomainCommunicator.removeAllListeners()
 
       localBus.emit('restart')
     })
@@ -590,6 +652,11 @@ export const eventManager = {
 
   notifyRunningSpec (specFile) {
     ws.emit('spec:changed', specFile)
+  },
+
+  notifyCrossDomainBridgeReady (domain) {
+    // Any multi-domain event appends the domain as the third parameter and we do the same here for this short circuit
+    Cypress.multiDomainCommunicator.emit('bridge:ready', undefined, domain)
   },
 
   focusTests () {

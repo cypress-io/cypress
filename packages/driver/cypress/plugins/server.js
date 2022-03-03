@@ -10,6 +10,8 @@ const multer = require('multer')
 const upload = multer({ dest: 'cypress/_test-output/' })
 
 const PATH_TO_SERVER_PKG = path.dirname(require.resolve('@packages/server'))
+const { getPathToDist } = require('@packages/resolve-dist')
+
 const httpPorts = [3500, 3501]
 const httpsPort = 3502
 
@@ -186,6 +188,11 @@ const createApp = (port) => {
     return res
     .status(500)
     .send('<html><body>server error</body></html>')
+  })
+
+  app.get('/cypress_multi_domain_runner.js', (req, res) => {
+    res.type('application/javascript')
+    res.sendFile(getPathToDist('runner', 'cypress_multi_domain_runner.js'))
   })
 
   let _var = ''

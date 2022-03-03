@@ -1,10 +1,22 @@
 // NOTE: this is for internal Cypress types that we don't want exposed in the public API but want for development
 // TODO: find a better place for this
 
+interface InternalWindowLoadDetails {
+  type: 'same:domain' | 'cross:domain' | 'cross:domain:failure'
+  error?: Error
+  window?: AUTWindow
+}
+
 declare namespace Cypress {
   interface Actions {
+    (action: 'internal:window:load', fn: (details: InternalWindowLoadDetails) => void)
     (action: 'net:stubbing:event', frame: any)
     (action: 'request:event', data: any)
+    (action: 'backend:request', fn: (...any) => void)
+    (action: 'automation:request', fn: (...any) => void)
+    (action: 'viewport:changed', fn?: (viewport: { viewportWidth: string, viewportHeight: string }, callback: () => void) => void)
+    (action: 'before:screenshot', fn: (config: {}, fn: () => void) => void)
+    (action: 'after:screenshot', config: {})
   }
 
   interface cy {
@@ -36,8 +48,10 @@ declare namespace Cypress {
     sinon: sinon.SinonApi
     utils: CypressUtils
     state: State
-
     originalConfig: Record<string, any>
+    events: Events
+    emit: ((event: string, payload?: any) => void)
+    multiDomainCommunicator: import('../src/multi-domain/communicator').PrimaryDomainCommunicator
   }
 
   interface CypressUtils {
@@ -48,24 +62,86 @@ declare namespace Cypress {
 
   type Log = ReturnType<Cypress.log>
 
+  type ReferenceAlias = {
+    cardinal: number,
+    name: string,
+    ordinal: string,
+  }
+
+  type Snapshot = {
+    body?: {get: () => any},
+    htmlAttrs?: {[key: string]: any},
+    name?: string
+  }
+
+  type ConsoleProps = {
+    Command?: string
+    Snapshot?: string
+    Elements?: number
+    Selector?: string
+    Yielded?: HTMLElement
+    Event?: string
+    Message?: string
+    actual?: any
+    expected?: any
+  }
+
+  type RenderProps = {
+    indicator?: 'aborted' | 'pending' | 'successful' | 'bad'
+    message?: string
+  }
+
   interface LogConfig {
-    message: any[]
-    instrument?: 'route'
+    $el?: jQuery<any> | string
+    message: any
+    instrument?: 'route' | 'command'
     isStubbed?: boolean
     alias?: string
     aliasType?: 'route'
+    referencesAlias?: ReferenceAlias[]
+    chainerId?: string
     commandName?: string
-    type?: 'parent'
+    coords?: {
+      left: number
+      leftCenter: number
+      top: number
+      topCenter: number
+      x: number
+      y: number
+    }
+    count?: number
+    callCount?: number
+    type?: 'parent' | 'child'
     event?: boolean
+    end?: boolean
+    ended?: boolean
+    expected?: string
+    functionName?: string
+    name?: string
+    id?: string
+    hookId?: number
     method?: string
     url?: string
     status?: number
+    state?: "failed" | "passed" | "pending" // representative of Mocha.Runnable.constants (not publicly exposed by Mocha types)
+    numResponses?: number
+    numElements?: number
     numResponses?: number
     response?: string | object
-    renderProps?: () => {
-      indicator?: 'aborted' | 'pending' | 'successful' | 'bad'
-      message?: string
-    }
+    testCurrentRetry?: number
+    timeout?: number
+    testId?: string
+    err?: Error
+    error?: Error
+    snapshot?: boolean
+    snapshots?: []
+    selector?: any
+    viewportHeight?: number
+    viewportWidth?: number
+    visible?: boolean
+    wallClockStartedAt?: string
+    renderProps?: () => RenderProps | RenderProps
+    consoleProps?: () => Command | Command
     browserPreRequest?: any
   }
 
@@ -79,10 +155,15 @@ declare namespace Cypress {
     state: Cypress.state
   }
 
+  interface InternalConfig {
+    (k: keyof ResolvedConfigOptions, v?: any): any
+  }
+
   // Extend Cypress.state properties here
   interface ResolvedConfigOptions {
     $autIframe: JQuery<HTMLIFrameElement>
     document: Document
+    projectRoot?: string
   }
 }
 
@@ -90,3 +171,6 @@ type AliasedRequest = {
   alias: string
   request: any
 }
+
+// utility types
+type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>

@@ -37,6 +37,7 @@ import ProxyLogging from './cypress/proxy-logging'
 import * as $Events from './cypress/events'
 import $Keyboard from './cy/keyboard'
 import * as resolvers from './cypress/resolvers'
+import { PrimaryDomainCommunicator } from './multi-domain/communicator'
 
 const debug = debugFn('cypress:driver:cypress')
 
@@ -149,6 +150,7 @@ class $Cypress {
     this.Commands = null
     this.$autIframe = null
     this.onSpecReady = null
+    this.multiDomainCommunicator = new PrimaryDomainCommunicator()
 
     this.events = $Events.extend(this)
     this.$ = jqueryProxyFn.bind(this)
@@ -218,16 +220,18 @@ class $Cypress {
 
     // TODO: env is unintentionally preserved between soft reruns unlike config.
     // change this in the NEXT_BREAKING
-    const { env } = config
+    const { env, __isMultiDomain } = config
 
-    config = _.omit(config, 'env', 'remote', 'resolved', 'scaffoldedFiles', 'state', 'testingType')
+    const isMultiDomainCypress: boolean = __isMultiDomain || false
+
+    config = _.omit(config, 'env', 'remote', 'resolved', 'scaffoldedFiles', 'state', 'testingType', '__isMultiDomain')
 
     _.extend(this, browserInfo(config))
 
     this.state = $SetterGetter.create({})
     this.originalConfig = _.cloneDeep(config)
     this.config = $SetterGetter.create(config, (config) => {
-      if (!window.top!.__cySkipValidateConfig) {
+      if (isMultiDomainCypress ? !window.__cySkipValidateConfig : !window.top!.__cySkipValidateConfig) {
         validateNoReadOnlyConfig(config, (errProperty) => {
           const errPath = this.state('runnable')
             ? 'config.invalid_cypress_config_override'
@@ -587,6 +591,9 @@ class $Cypress {
       case 'cy:command:end':
         return this.emit('command:end', ...args)
 
+      case 'cy:skipped:command:end':
+        return this.emit('skipped:command:end', ...args)
+
       case 'cy:command:retry':
         return this.emit('command:retry', ...args)
 
@@ -598,6 +605,9 @@ class $Cypress {
 
       case 'cy:command:queue:end':
         return this.emit('command:queue:end')
+
+      case 'cy:enqueue:command':
+        return this.emit('enqueue:command', ...args)
 
       case 'cy:url:changed':
         return this.emit('url:changed', args[0])
@@ -641,6 +651,11 @@ class $Cypress {
         return this.emit('form:submitted', args[0])
 
       case 'app:window:load':
+        this.emit('internal:window:load', {
+          type: 'same:domain',
+          window: args[0],
+        })
+
         return this.emit('window:load', args[0])
 
       case 'app:window:before:unload':

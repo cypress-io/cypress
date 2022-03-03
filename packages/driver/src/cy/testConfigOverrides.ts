@@ -143,7 +143,9 @@ export class TestConfigOverride {
   restoreAndSetTestConfigOverrides (test, config, env) {
     if (this.restoreTestConfigFn) this.restoreTestConfigFn()
 
-    const resolvedTestConfig = test._testConfig || {}
+    const resolvedTestConfig = test._testConfig || {
+      unverifiedTestConfig: [],
+    }
 
     if (Object.keys(resolvedTestConfig.unverifiedTestConfig).length > 0) {
       this.restoreTestConfigFn = mutateConfiguration(resolvedTestConfig, config, env)

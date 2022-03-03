@@ -201,4 +201,16 @@ describe('src/util/queue', () => {
       expect(queue.stopped).to.false
     })
   })
+
+  context('.last', () => {
+    it('returns the last item', () => {
+      expect(queue.last()).to.deep.equal({ id: '3' })
+
+      queue.add({ id: '4' })
+      expect(queue.last()).to.deep.equal({ id: '4' })
+
+      queue.clear()
+      expect(queue.last()).to.equal(undefined)
+    })
+  })
 })
