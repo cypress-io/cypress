@@ -199,6 +199,20 @@ describe('src/cy/commands/querying/within', () => {
           expect(lastLog.get('snapshots')[0]).to.be.an('object')
         })
       })
+
+      it('provides additional information in console prop', () => {
+        cy.get('div').within(() => {})
+        .then(function () {
+          const { lastLog } = this
+
+          const consoleProps = lastLog.get('consoleProps')()
+
+          expect(consoleProps).to.be.an('object')
+          expect(consoleProps.Command).to.eq('within')
+          expect(consoleProps.Yielded).to.not.be.null
+          expect(consoleProps.Yielded).to.have.length(55)
+        })
+      })
     })
 
     describe('errors', {
