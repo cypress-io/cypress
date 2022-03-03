@@ -445,7 +445,10 @@ const normalizeOptions = (options) => {
   return _
   .chain(options)
   .pick(REQUEST_URL_OPTS)
-  .extend({ timeout: options.responseTimeout, isMultiDomain: !!Cypress.state('isMultiDomain') })
+  .extend({
+    timeout: options.responseTimeout,
+    isMultiDomain: !!Cypress.state('isMultiDomain'),
+  })
   .value()
 }
 
@@ -543,7 +546,7 @@ export default (Commands, Cypress, cy, state, config) => {
     } catch (e) {} // eslint-disable-line no-empty
   })
 
-  Cypress.multiDomainCommunicator.on('visit:url', ({ url }, _domain) => {
+  Cypress.multiDomainCommunicator.on('visit:url', ({ url }) => {
     $utils.iframeSrc(Cypress.$autIframe, url)
   })
 

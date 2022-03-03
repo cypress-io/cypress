@@ -1,5 +1,3 @@
-import _ from 'lodash'
-
 // @ts-ignore / session support is needed for visiting about:blank between tests
 context('multi-domain misc', { experimentalSessionSupport: true, experimentalMultiDomain: true }, () => {
   beforeEach(() => {
@@ -77,7 +75,7 @@ context('multi-domain misc', { experimentalSessionSupport: true, experimentalMul
 it('verifies number of cy commands', () => {
   // @ts-ignore
   // remove 'getAll' command since it's a custom command we add for our own testing and not an actual cy command
-  const actualCommands = _.reject(Object.keys(cy.commandFns), (command) => command === 'getAll')
+  const actualCommands = Cypress._.reject(Object.keys(cy.commandFns), (command) => command === 'getAll')
   const expectedCommands = [
     'check', 'uncheck', 'click', 'dblclick', 'rightclick', 'focus', 'blur', 'hover', 'scrollIntoView', 'scrollTo', 'select',
     'selectFile', 'submit', 'type', 'clear', 'trigger', 'as', 'ng', 'should', 'and', 'clock', 'tick', 'spread', 'each', 'then',
