@@ -1,3 +1,10 @@
+# [@cypress/react-v5.12.4](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.12.3...@cypress/react-v5.12.4) (2022-03-03)
+
+
+### Bug Fixes
+
+* avoid nextjs unsafeCache and watchOptions ([#20440](https://github.com/cypress-io/cypress/issues/20440)) ([9f60901](https://github.com/cypress-io/cypress/commit/9f6090170b0675d25b26b98cd0f987a5e395ab78))
+
 # [@cypress/react-v5.12.3](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.12.2...@cypress/react-v5.12.3) (2022-02-10)
 
 
