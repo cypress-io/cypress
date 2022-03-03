@@ -19,7 +19,7 @@ import { useAutStore, useSpecStore, viewportDefaults } from '../store'
 import SpecRunnerOpenMode from './SpecRunnerOpenMode.vue'
 import { useUnifiedRunner } from './unifiedRunner'
 import { getEventManager } from '../runner'
-import debounce from 'lodash/debounce'
+import { debounce } from 'lodash'
 
 const props = defineProps<{
   gql: SpecRunnerFragment
