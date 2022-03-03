@@ -7,6 +7,10 @@ import type { DataContext } from '../DataContext'
 export class EnvDataSource {
   constructor (private ctx: DataContext) {}
 
+  get isProduction () {
+    return process.env.CYPRESS_INTERNAL_ENV === 'production'
+  }
+
   get HTTP_PROXY () {
     return process.env.HTTPS_PROXY || process.env.HTTP_PROXY
   }
