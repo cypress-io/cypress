@@ -307,8 +307,6 @@ export class ServerE2E extends ServerBase<SocketE2E> {
                   // handling a local file and we aren't in multi-domain
                   if (!handlingLocalFile && !options.isMultiDomain) {
                     this._onDomainSet(newUrl, options)
-                  } else {
-                    restorePreviousState()
                   }
 
                   const responseBufferStream = new stream.PassThrough({
