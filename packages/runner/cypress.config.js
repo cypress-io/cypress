@@ -1,5 +1,4 @@
 module.exports = {
-  viewporWidth: 1003,
   'projectId': 'ypt4pf',
   'retries': {
     'runMode': 2,

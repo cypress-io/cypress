@@ -298,11 +298,6 @@ function runSpecE2E (spec: SpecFile) {
   getEventManager().initialize($autIframe, config)
 }
 
-export interface InitializeUnifiedRunnerConfig {
-  viewportHeight: number
-  viewportWidth: number
-}
-
 /**
  * Inject the global `UnifiedRunner` via a <script src="..."> tag.
  * which includes the event manager and AutIframe constructor.
