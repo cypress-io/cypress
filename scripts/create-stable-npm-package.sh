@@ -1,6 +1,13 @@
 #!/bin/bash
 set -e # exit on error
 
+PLATFORM=$(node -p 'process.platform')
+if [[ $PLATFORM != "linux" && $PLATFORM != "darwin" ]]; then
+  echo "Currently, create-stable-npm-package is only supported on Linux and MacOS."
+  echo "See https://github.com/cypress-io/cypress/pull/20296#discussion_r817115583"
+  exit 1
+fi
+
 if [[ ! $1 ]]; then
   echo "publish-npm-package takes the .tgz URL as the first argument"
   exit 1
