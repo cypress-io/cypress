@@ -47,6 +47,8 @@ export const normalizeError = (error: Error | string) => {
   return typeof error === 'string' ? error : error.message
 }
 
+const pluginName = 'CypressCTOptionsPlugin'
+
 export default class CypressCTOptionsPlugin {
   private active: Set<string> = new Set()
   private allFiles: Cypress.Cypress['spec'][]
@@ -67,13 +69,13 @@ export default class CypressCTOptionsPlugin {
     // this.allFiles.forEach(({absolute}) => this.active.add(absolute))
   }
 
-  private pluginFunc = (context: CypressCTWebpackContext) => {
+  private setLoaderContext (context: CypressCTWebpackContext) {
     context._cypress = {
       allFiles: this.allFiles,
       projectRoot: this.projectRoot,
       supportFile: this.supportFile,
     }
-  };
+  }
 
   private isSpecFile (path: string) {
     return Boolean(_.find(this.allFiles, ['absolute', path]))
@@ -93,45 +95,6 @@ export default class CypressCTOptionsPlugin {
 
     // Webpack 4
     return result
-  }
-
-  private setupCustomHMR = (compiler: webpack.Compiler) => {
-    compiler.hooks.normalModuleFactory.tap('CypressCTOptionsPlugin', (nmf) => {
-      nmf.hooks.beforeResolve.tap('CypressCTOptionsPlugin', this.ignoreInactive)
-    })
-
-    compiler.hooks.afterCompile.tap(
-      'CypressCTOptionsPlugin',
-      (compilation) => {
-        const stats = compilation.getStats()
-
-        if (stats.hasErrors()) {
-          this.errorEmitted = true
-
-          // webpack 4: string[]
-          // webpack 5: Error[]
-          const errors = stats.toJson().errors as Array<Error | string> | undefined
-
-          if (!errors || !errors.length) {
-            return
-          }
-
-          this.devServerEvents.emit('dev-server:compile:error', normalizeError(errors[0]))
-        } else if (this.errorEmitted) {
-          // compilation succeed but assets haven't emitted to the output yet
-          this.devServerEvents.emit('dev-server:compile:error', null)
-        }
-      },
-    )
-
-    compiler.hooks.afterEmit.tap(
-      'CypressCTOptionsPlugin',
-      (compilation) => {
-        if (!compilation.getStats().hasErrors()) {
-          this.devServerEvents.emit('dev-server:compile:success')
-        }
-      },
-    )
   }
 
   private onSpecsChanged (specs: Cypress.Cypress['spec'][], compilation: Webpack45Compilation) {
@@ -158,9 +121,9 @@ export default class CypressCTOptionsPlugin {
    * @param compilation webpack 4 `compilation.Compilation`, webpack 5
    *   `Compilation`
    */
-  private plugin = (compilation: Webpack45Compilation) => {
+  private setupCompilationHooks (compilation: Webpack45Compilation) {
     // This function gets invoked every time compilation is invoked; we need to clean up
-    // any previous ones so we're not leaking event listeners
+    // any previous listeners so we don't leak them.
     this.devServerEvents.off('dev-server:specs:changed', this.onSpecsChanged)
     this.devServerEvents.off('webpack-dev-server:request', this.onSpecRequest)
     this.devServerEvents.on('dev-server:specs:changed', (specs) => this.onSpecsChanged(specs, compilation))
@@ -170,14 +133,14 @@ export default class CypressCTOptionsPlugin {
     if ('NormalModule' in webpack) {
       // Webpack 5
       webpack.NormalModule.getCompilationHooks(compilation).loader.tap(
-        'CypressCTOptionsPlugin',
-        (context) => this.pluginFunc(context as CypressCTWebpackContext),
+        pluginName,
+        (context) => this.setLoaderContext(context as CypressCTWebpackContext),
       )
     } else {
       // Webpack 4
       compilation.hooks.normalModuleLoader.tap(
-        'CypressCTOptionsPlugin',
-        (context) => this.pluginFunc(context as CypressCTWebpackContext),
+        pluginName,
+        (context) => this.setLoaderContext(context as CypressCTWebpackContext),
       )
     }
   }
@@ -189,8 +152,40 @@ export default class CypressCTOptionsPlugin {
     utimesSync(path.resolve(__dirname, 'browser.js'), new Date(), new Date())
   }
 
+  private afterCompile (compilation: Webpack45Compilation) {
+    const stats = compilation.getStats()
+
+    if (stats.hasErrors()) {
+      this.errorEmitted = true
+
+      // webpack 4: string[]
+      // webpack 5: Error[]
+      const errors = stats.toJson().errors as Array<Error | string> | undefined
+
+      if (!errors || !errors.length) {
+        return
+      }
+
+      this.devServerEvents.emit('dev-server:compile:error', normalizeError(errors[0]))
+    } else if (this.errorEmitted) {
+      // compilation succeed but assets haven't emitted to the output yet
+      this.devServerEvents.emit('dev-server:compile:error', null)
+    }
+  }
+
+  private afterEmit (compilation: Webpack45Compilation) {
+    if (!compilation.getStats().hasErrors()) {
+      this.devServerEvents.emit('dev-server:compile:success')
+    }
+  }
+
   apply (compiler: Compiler): void {
-    this.setupCustomHMR(compiler)
-    compiler.hooks.thisCompilation.tap('CypressCTOptionsPlugin', (compilation) => this.plugin(compilation as Webpack45Compilation))
+    compiler.hooks.normalModuleFactory.tap(pluginName, (nmf) => {
+      nmf.hooks.beforeResolve.tap(pluginName, this.ignoreInactive)
+    })
+
+    compiler.hooks.thisCompilation.tap(pluginName, (c) => this.setupCompilationHooks(c as Webpack45Compilation))
+    compiler.hooks.afterCompile.tap(pluginName, (c) => this.afterCompile(c as Webpack45Compilation))
+    compiler.hooks.afterEmit.tap(pluginName, (c) => this.afterEmit(c as Webpack45Compilation))
   }
 }

@@ -67,6 +67,12 @@ export async function startDevServer (startDevServerArgs: StartDevServer, exitPr
   })
 }
 
+// This express middleware watches incomping requests to the dev server, and
+// if they are coming from the AUT iframe, parses the 'referer' header
+// to see which spec is under test.
+
+// plugin.ts listens for the 'webpack-dev-server:request' event, and may
+// trigger recompilation if this is for a spec we haven't already compiled.
 function recompileMiddleware (webpackDevServer: WebpackDevServer, options: any) {
   return (req: any, res: any, next: any) => {
     if (req.url === '/__cypress/src/runtime-main.js') {

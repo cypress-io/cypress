@@ -93,6 +93,10 @@ export async function makeWebpackConfig (userWebpackConfig: webpack.Configuratio
     main: path.resolve(__dirname, './browser.js'),
   }
 
+  // While the spec file is `import`ed in browser.js, having it as a separate
+  // entrypoint ensures that it's assigned its own chunk. This ensures it
+  // doesn't get reemitted, even when the list of active specs changes (and
+  // browser.js is recompiled).
   if (supportFile) {
     mergedConfig.entry.support = path.resolve(projectRoot, supportFile)
   }
