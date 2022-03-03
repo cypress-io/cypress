@@ -11,6 +11,8 @@ const testFail = (cb, expectedDocsUrl = 'https://on.cypress.io/intercept') => {
   })
 }
 
+// Due to an issue with requests leaking between tests, we need to ensure that routes are unique from test to test
+// See https://github.com/cypress-io/cypress/issues/20397
 let routeCount = 0
 const uniqueRoute = (route) => {
   routeCount += 1
