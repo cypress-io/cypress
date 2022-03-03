@@ -9,7 +9,6 @@
   "reporterOptions": {
     "configFile": "../../mocha-reporter-config.json"
   },
-  "experimentalSessionSupport": true,
   "retries": {
     "runMode": 2,
     "openMode": 0

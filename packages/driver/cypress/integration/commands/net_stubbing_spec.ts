@@ -11,7 +11,7 @@ const testFail = (cb, expectedDocsUrl = 'https://on.cypress.io/intercept') => {
   })
 }
 
-describe('network stubbing', function () {
+describe('network stubbing', { experimentalSessionSupport: true }, function () {
   const { $, _, sinon, state, Promise } = Cypress
 
   beforeEach(function () {
