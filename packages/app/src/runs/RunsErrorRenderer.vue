@@ -54,7 +54,8 @@
 import { computed, ref } from 'vue'
 import { gql, useMutation } from '@urql/vue'
 import RunsError from './RunsError.vue'
-import { RunsErrorRendererFragment, RunsErrorRenderer_RequestAccessDocument } from '../generated/graphql'
+import { RunsErrorRenderer_RequestAccessDocument } from '../generated/graphql'
+import type { RunsErrorRendererFragment } from '../generated/graphql'
 import ConnectIcon from '~icons/cy/chain-link_x16.svg'
 import SendIcon from '~icons/cy/paper-airplane_x16.svg'
 import { useI18n } from '@cy/i18n'
@@ -93,7 +94,9 @@ const showConnectDialog = ref(false)
 
 gql`
 mutation RunsErrorRenderer_RequestAccess( $projectId: String! ) {
-  cloudProjectRequestAccess(projectSlug: $projectId)
+  cloudProjectRequestAccess(projectSlug: $projectId) {
+    __typename
+  }
 }
 `
 

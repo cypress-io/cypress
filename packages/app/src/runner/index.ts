@@ -310,7 +310,7 @@ export interface InitializeUnifiedRunnerConfig {
  *
  * This only needs to happen once, prior to running the first spec.
  */
-async function initialize (runnerConfig: InitializeUnifiedRunnerConfig) {
+async function initialize () {
   await dfd.promise
 
   isTorndown = false
@@ -321,13 +321,6 @@ async function initialize (runnerConfig: InitializeUnifiedRunnerConfig) {
     return
   }
 
-  const autStore = useAutStore()
-
-  // TODO(lachlan): use GraphQL to get the viewport dimensions
-  // once it is more practical to do so
-  // find out if we need to continue managing viewportWidth/viewportHeight in MobX at all.
-  autStore.updateDimensions(runnerConfig.viewportWidth, runnerConfig.viewportHeight)
-
   // just stick config on window until we figure out how we are
   // going to manage it
   window.UnifiedRunner.config = config
@@ -337,9 +330,7 @@ async function initialize (runnerConfig: InitializeUnifiedRunnerConfig) {
   initializeEventManager(window.UnifiedRunner)
 
   window.UnifiedRunner.MobX.runInAction(() => {
-    const store = initializeMobxStore(window.UnifiedRunner.config.testingType)
-
-    store.updateDimensions(runnerConfig.viewportWidth, runnerConfig.viewportHeight)
+    initializeMobxStore(window.UnifiedRunner.config.testingType)
   })
 
   window.UnifiedRunner.MobX.runInAction(() => setupRunner(config.namespace))

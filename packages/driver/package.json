@@ -58,6 +58,7 @@
     "js-cookie": "2.2.1",
     "jsdom": "14.1.0",
     "json-stable-stringify": "1.0.1",
+    "kill-port": "1.6.1",
     "lodash": "^4.17.21",
     "md5": "2.3.0",
     "method-override": "3.0.0",

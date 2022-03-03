@@ -32,7 +32,8 @@ import SettingsSection from '../SettingsSection.vue'
 import { useI18n } from '@cy/i18n'
 import Switch from '@packages/frontend-shared/src/components/Switch.vue'
 import { gql, useMutation } from '@urql/vue'
-import { SetTestingPreferencesDocument, TestingPreferencesFragment } from '../../generated/graphql'
+import type { TestingPreferencesFragment } from '../../generated/graphql'
+import { SetTestingPreferencesDocument } from '../../generated/graphql'
 
 const { t } = useI18n()
 

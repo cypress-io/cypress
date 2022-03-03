@@ -41,11 +41,13 @@
 </template>
 
 <script lang  ="ts" setup>
-import { generators, GeneratorId } from './generators'
+import { generators } from './generators'
+import type { GeneratorId } from './generators'
 import { DialogOverlay } from '@headlessui/vue'
 import StandardModal from '@cy/components/StandardModal.vue'
 import CreateSpecCards from './CreateSpecCards.vue'
-import { ref, computed, Ref } from 'vue'
+import type { Ref } from 'vue'
+import { ref, computed } from 'vue'
 import type { CreateSpecModalFragment } from '../generated/graphql'
 import { gql } from '@urql/vue'
 import { not, whenever } from '@vueuse/core'

@@ -893,12 +893,18 @@ export class ProjectLifecycleManager {
       // TODO: in the future, we will make this more specific to the individual process we need to load
       if (groupName === 'config') {
         this.reloadConfig()
-        .then(this.ctx.emitter.toApp)
+        .then(() => {
+          return this.ctx.emitter.toApp()
+        })
         .catch(this.onLoadError)
       } else {
         // If we've edited the setupNodeEvents file, we need to re-execute
         // the config file to get a fresh ipc process to swap with
-        this.reloadConfig().catch(this.onLoadError)
+        this.reloadConfig()
+        .then(() => {
+          return this.ctx.emitter.toApp()
+        })
+        .catch(this.onLoadError)
       }
     })
 

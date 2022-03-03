@@ -157,7 +157,8 @@ import ConnectIcon from '~icons/cy/chain-link_x16.svg'
 import CreateIcon from '~icons/cy/add-large_x16.svg'
 import FolderIcon from '~icons/cy/folder-outline_x16.svg'
 import OrganizationIcon from '~icons/cy/office-building_x16.svg'
-import { SelectCloudProjectModalFragment, SelectCloudProjectModal_CreateCloudProjectDocument, SelectCloudProjectModal_SetProjectIdDocument } from '../../generated/graphql'
+import type { SelectCloudProjectModalFragment } from '../../generated/graphql'
+import { SelectCloudProjectModal_CreateCloudProjectDocument, SelectCloudProjectModal_SetProjectIdDocument } from '../../generated/graphql'
 import { useI18n } from '@cy/i18n'
 
 const { t } = useI18n()

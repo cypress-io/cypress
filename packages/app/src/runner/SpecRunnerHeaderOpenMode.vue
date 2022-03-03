@@ -214,8 +214,10 @@ const activeSpecPath = specStore.activeSpec?.absolute
 
 const isDisabled = computed(() => autStore.isRunning || autStore.isLoading)
 
-const code = `{
-  "viewportWidth": ${autStore.defaultViewportWidth},
-  "viewportHeight": ${autStore.defaultViewportHeight}
+const code = computed(() => {
+  return `{
+  "viewportWidth": ${autStore.viewportWidth},
+  "viewportHeight": ${autStore.viewportHeight}
 }`
+})
 </script>

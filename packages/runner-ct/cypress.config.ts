@@ -11,6 +11,7 @@ export default defineConfig({
     configFile: '../../mocha-reporter-config.json',
   },
   component: {
+    viewportHeight: 399,
     devServer (cypressDevServerConfig) {
       function injectStylesInlineForPercyInPlace (webpackConfig) {
         webpackConfig.module.rules = webpackConfig.module.rules.map((rule) => {

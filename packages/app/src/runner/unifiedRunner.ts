@@ -2,16 +2,15 @@ import type { Ref } from 'vue'
 import { onMounted, ref, watch, onBeforeUnmount, readonly } from 'vue'
 import { useRoute } from 'vue-router'
 import { getAutIframeModel, UnifiedRunnerAPI } from '../runner'
-import type { InitializeUnifiedRunnerConfig } from '../runner'
 import { useSpecStore } from '../store'
 import { useSelectorPlaygroundStore } from '../store/selector-playground-store'
 import type { SpecFile } from '@packages/types/src'
 
 const initialized = ref(false)
 
-export function useUnifiedRunner (runnerConfig: InitializeUnifiedRunnerConfig) {
+export function useUnifiedRunner () {
   onMounted(async () => {
-    await UnifiedRunnerAPI.initialize(runnerConfig)
+    await UnifiedRunnerAPI.initialize()
     initialized.value = true
   })
 

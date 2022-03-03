@@ -32,7 +32,8 @@
 </template>
 
 <script lang="ts" setup>
-import { FunctionalComponent, ref, SVGAttributes } from 'vue'
+import type { FunctionalComponent, SVGAttributes } from 'vue'
+import { ref } from 'vue'
 
 const props = defineProps<{
   code: string

@@ -8,6 +8,7 @@ const path = require('path')
 const Promise = require('bluebird')
 const multer = require('multer')
 const upload = multer({ dest: 'cypress/_test-output/' })
+const kill = require('kill-port')
 
 const PATH_TO_SERVER_PKG = path.dirname(require.resolve('@packages/server'))
 const httpPorts = [3500, 3501]
@@ -211,19 +212,25 @@ const createApp = (port) => {
 }
 
 httpPorts.forEach((port) => {
-  const app = createApp(port)
-  const server = http.Server(app)
+  kill(port, 'tcp')
+  .then(() => {
+    const app = createApp(port)
+    const server = http.Server(app)
 
-  return server.listen(app.get('port'), () => {
-    // eslint-disable-next-line no-console
-    return console.log('Express server listening on port', app.get('port'))
+    return server.listen(app.get('port'), () => {
+      // eslint-disable-next-line no-console
+      return console.log('Express server listening on port', app.get('port'))
+    })
   })
 })
 
-const httpsApp = createApp(httpsPort)
-const httpsServer = httpsProxy.httpsServer(httpsApp)
+kill(httpsPort, 'tcp')
+.then(() => {
+  const httpsApp = createApp(httpsPort)
+  const httpsServer = httpsProxy.httpsServer(httpsApp)
 
-httpsServer.listen(httpsPort, () => {
-  // eslint-disable-next-line no-console
-  return console.log('Express server listening on port', httpsPort, '(HTTPS)')
+  httpsServer.listen(httpsPort, () => {
+    // eslint-disable-next-line no-console
+    return console.log('Express server listening on port', httpsPort, '(HTTPS)')
+  })
 })
