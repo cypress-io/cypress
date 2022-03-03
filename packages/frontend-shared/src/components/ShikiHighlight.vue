@@ -46,7 +46,8 @@ shikiWrapperClasses computed property.
           'inline': props.inline,
           'wrap': props.wrap,
           'line-numbers': props.lineNumbers,
-          'p-8px': !props.lineNumbers && !props.inline,
+          'p-8px': !props.lineNumbers && !props.inline && !props.codeframe,
+          'p-2px': props.codeframe,
         },
 
         props.class,
@@ -118,12 +119,14 @@ onBeforeMount(async () => {
 
 const props = withDefaults(defineProps<{
   code: string
+  initialLine?: number
   lang: CyLangType | undefined
   lineNumbers?: boolean
   inline?: boolean
   wrap?: boolean
   copyOnClick?: boolean
   copyButton?: boolean
+  codeframe?: boolean
   skipTrim?: boolean
   class?: string | string[] | Record<string, any>
 }>(), {
@@ -131,6 +134,8 @@ const props = withDefaults(defineProps<{
   inline: false,
   wrap: false,
   copyOnClick: false,
+  codeframe: false,
+  initialLine: 1,
   copyButton: false,
   skipTrim: false,
   class: undefined,
@@ -196,7 +201,7 @@ $offset: 1.1em;
     @apply py-8px;
     code {
       counter-reset: step;
-      counter-increment: step 0;
+      counter-increment: step calc(v-bind('props.initialLine') - 1);
 
       // Keep bg-gray-50 synced with the box-shadows.
       .line::before, .line:first-child::before {
