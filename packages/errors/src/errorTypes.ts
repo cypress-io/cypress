@@ -3,7 +3,7 @@ import type { AllCypressErrors } from './errors'
 /**
  * A config validation result
 */
-export interface ConfigValidationError {
+export interface ConfigValidationFailureInfo {
   key: string
   type: string
   value: any
@@ -25,13 +25,13 @@ export interface ErrorLike {
 /**
  * An error originating from the @cypress/errors package,
  * includes the `type` of the error, the `originalError`
- * if one exists, and an isCypressError for duck-type checking
+ * if one exists, and an isCypressErr for duck-type checking
  */
 export interface CypressError extends ErrorLike {
   messageMarkdown: string
   type: keyof typeof AllCypressErrors
   isCypressErr: boolean
-  originalError?: CypressError | ErrorLike
+  originalError?: SerializedError
   details?: string
   code?: string | number
   errno?: string | number
@@ -56,7 +56,7 @@ export interface ClonedError {
   [key: string]: any
 }
 
-export interface SerializedError {
+export interface SerializedError extends Omit<CypressError, 'messageMarkdown' | 'type' | 'isCypressErr'> {
   code?: string | number
   type?: string | number
   errorType?: string
@@ -65,4 +65,19 @@ export interface SerializedError {
   message: string
   name: string
   isCypressErr?: boolean
+  // If there's a parse error from TSNode, we strip out the first error separately from
+  // the message body and provide here, since this is is the error we actually want to fix
+  tsErrorLocation?: {
+    line: number
+    column: number
+    filePath: string
+  } | null
+}
+
+/**
+ * Used in the GraphQL Error / Warning objects
+ */
+export interface ErrorWrapperSource {
+  title?: string | null
+  cypressError: CypressError
 }

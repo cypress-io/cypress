@@ -79,4 +79,10 @@ describe('<ShikiHighlight/>', { viewportWidth: 800, viewportHeight: 500 }, () =>
     cy.get('.shiki').should('be.visible')
     cy.percySnapshot()
   })
+
+  it('show line numbers with initial line when the prop is passed', () => {
+    cy.mount(() => <div class="p-12"><ShikiHighlight code={code} lang="ts" lineNumbers initialLine={10} /></div>)
+    cy.get('.shiki').should('be.visible')
+    cy.percySnapshot()
+  })
 })
