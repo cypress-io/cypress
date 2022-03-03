@@ -166,7 +166,7 @@ const getResponse = function (responseSchema) {
 }
 
 const sendResponse = function (req, res, responseBody) {
-  return new Promise((resolve) => {
+  return new Promise<void>((resolve) => {
     const _writeRaw = res._writeRaw
 
     res._writeRaw = function () {
