@@ -87,7 +87,7 @@ export class SpecOptions {
       react: {
         imports: ['import React from "react"', 'import { mount } from "@cypress/react"', `import ${componentName} from "${componentPath}"`],
         componentName,
-        docsLink: '// see: https://reactjs.org/docs/test-utils.html',
+        docsLink: '// see: https://on.cypress.io/component-testing',
         mount: `mount(<${componentName} />)`,
         fileName: this.getFilename(this.parsedPath.ext),
       },

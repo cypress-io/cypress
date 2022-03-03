@@ -4,6 +4,7 @@
 export * from './BrowserDataSource'
 export * from './CloudDataSource'
 export * from './EnvDataSource'
+export * from './ErrorDataSource'
 export * from './FileDataSource'
 export * from './GitDataSource'
 export * from './GraphQLDataSource'

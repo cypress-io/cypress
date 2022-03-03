@@ -4,19 +4,14 @@ import faker from 'faker'
 import { defaultMessages } from '@cy/i18n'
 
 const warningSelector = '[data-cy=warning-alert]'
-const message = faker.hacker.phrase()
-const title = faker.hacker.ingverb()
 
 const createWarning = (props = {}) => ({
-  __typename: 'Warning' as const,
-  title,
-  message,
-  details: null,
+  ...cy.gqlStub.ErrorWrapper,
   ...props,
 })
 
-const firstWarning = createWarning({ title: faker.hacker.ingverb(), message: faker.hacker.phrase(), setupStep: null })
-const secondWarning = createWarning({ title: faker.hacker.ingverb(), message: faker.hacker.phrase(), setupStep: null })
+const firstWarning = createWarning({ title: faker.hacker.ingverb(), errorMessage: faker.hacker.phrase() })
+const secondWarning = createWarning({ title: faker.hacker.ingverb(), errorMessage: faker.hacker.phrase() })
 
 describe('<WarningList />', () => {
   it('does not render warning if there are none', () => {
@@ -33,7 +28,10 @@ describe('<WarningList />', () => {
   it('renders multiple warnings', () => {
     cy.mountFragment(WarningListFragmentDoc, {
       onResult (result) {
-        result.warnings = [firstWarning, secondWarning]
+        result.warnings = [
+          firstWarning,
+          secondWarning,
+        ]
       },
       render: (gqlVal) => <div class="p-4"><WarningList gql={gqlVal} /></div>,
     })
@@ -50,10 +48,10 @@ describe('<WarningList />', () => {
     })
 
     cy.get(warningSelector).should('have.length', 2)
-    cy.contains(firstWarning.message)
+    cy.contains(firstWarning.errorMessage)
 
     cy.findAllByLabelText(defaultMessages.components.modal.dismiss).first().click()
     cy.get(warningSelector).should('have.length', 1)
-    cy.contains(firstWarning.message).should('not.exist')
+    cy.contains(firstWarning.errorMessage).should('not.exist')
   })
 })
