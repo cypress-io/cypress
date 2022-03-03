@@ -25,6 +25,10 @@ describe('exec info', function () {
     .withArgs('browsers').returns('/user/app/data/path/to/browsers')
     .withArgs().returns('/user/app/data/path')
 
+    sinon.stub(util, 'pkgBuildInfo').returns({
+      stable: true,
+    })
+
     sinon.stub(state, 'getCacheDir').returns('/user/path/to/binary/cache')
   })
 
@@ -67,5 +71,16 @@ describe('exec info', function () {
     })
 
     await startInfoAndSnapshot('cypress redacts sensitive vars')
+  })
+
+  it('logs additional info about pre-releases', async () => {
+    util.pkgBuildInfo.returns({
+      stable: false,
+      commitSha: 'abc123',
+      commitBranch: 'someBranchName',
+      commitDate: new Date('02-02-2022'),
+    })
+
+    await startInfoAndSnapshot('logs additional info about pre-releases')
   })
 })

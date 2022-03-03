@@ -11,6 +11,7 @@ const _ = require('lodash')
 const g = chalk.green
 // color for paths
 const p = chalk.cyan
+const red = chalk.red
 // urls
 const link = chalk.blue.underline
 
@@ -85,10 +86,20 @@ methods.start = async (options = {}) => {
   console.log()
 
   const osVersion = await util.getOsVersionAsync()
+  const buildInfo = util.pkgBuildInfo()
 
-  console.log('Cypress Version: %s', g(util.pkgVersion()))
+  console.log('Cypress Version: %s', g(util.pkgVersion()), buildInfo.stable ? g('(stable)') : red('(pre-release)'))
   console.log('System Platform: %s (%s)', g(os.platform()), g(osVersion))
   console.log('System Memory: %s free %s', g(prettyBytes(os.totalmem())), g(prettyBytes(os.freemem())))
+
+  if (!buildInfo.stable) {
+    console.log()
+    console.log('This is a', red('pre-release'), 'build of Cypress.')
+    console.log('Build info:')
+    console.log('  Commit SHA:', g(buildInfo.commitSha))
+    console.log('  Commit Branch:', g(buildInfo.commitBranch))
+    console.log('  Commit Date:', g(buildInfo.commitDate))
+  }
 }
 
 module.exports = methods

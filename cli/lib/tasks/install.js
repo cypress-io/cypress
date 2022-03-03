@@ -19,7 +19,7 @@ const verbose = require('../VerboseRenderer')
 
 const { buildInfo, version } = require('../../package.json')
 
-function _getBinaryUrlFromBuildInfo ({ commitSha, commitBranch } = buildInfo) {
+function _getBinaryUrlFromBuildInfo ({ commitSha, commitBranch }) {
   return `https://cdn.cypress.io/beta/binary/${version}/${os.platform()}-${arch()}/${commitBranch}-${commitSha}/cypress.zip`
 }
 
@@ -143,13 +143,28 @@ const validateOS = () => {
  * Returns the version to install - either a string like `1.2.3` to be fetched
  * from the download server or a file path or HTTP URL.
  */
-function getVersionOverride ({ envVarVersion }) {
+function getVersionOverride ({ envVarVersion, buildInfo }) {
   // let this environment variable reset the binary version we need
   if (envVarVersion) {
     return envVarVersion
   }
 
   if (buildInfo && !buildInfo.stable) {
+    logger.log(
+      chalk.yellow(stripIndent`
+        ${logSymbols.warning} Warning: You are installing a pre-release build of Cypress.
+
+        Bugs may be present which do not exist in production builds.
+
+        This build was created from:
+          * Commit SHA: ${buildInfo.commitSha}
+          * Commit Branch: ${buildInfo.commitBranch}
+          * Commit Timestamp: ${buildInfo.commitDate}
+      `),
+    )
+
+    logger.log()
+
     return _getBinaryUrlFromBuildInfo(buildInfo)
   }
 }
@@ -186,6 +201,7 @@ const start = async (options = {}) => {
 
   _.defaults(options, {
     force: false,
+    buildInfo,
   })
 
   if (util.getEnv('CYPRESS_CACHE_FOLDER')) {
@@ -203,11 +219,12 @@ const start = async (options = {}) => {
   }
 
   const pkgVersion = util.pkgVersion()
-  const versionToInstall = getVersionOverride({ envVarVersion }) || pkgVersion
+  const versionOverride = getVersionOverride({ envVarVersion, buildInfo: options.buildInfo })
+  const versionToInstall = versionOverride || pkgVersion
 
   debug('version in package.json is %s, version to install is %s', pkgVersion, versionToInstall)
 
-  const installDir = state.getVersionDir(pkgVersion)
+  const installDir = state.getVersionDir(pkgVersion, options.buildInfo)
   const cacheDir = state.getCacheDir()
   const binaryDir = state.getBinaryDir(pkgVersion)
 
@@ -262,7 +279,7 @@ const start = async (options = {}) => {
     return debug('Not downloading or installing binary')
   }
 
-  if (versionToInstall !== pkgVersion) {
+  if (envVarVersion) {
     logger.log(
       chalk.yellow(stripIndent`
         ${logSymbols.warning} Warning: Forcing a binary version different than the default.
