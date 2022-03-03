@@ -90,16 +90,15 @@ describe('e2e screenshots', () => {
           fs.statAsync(screenshot4).get('size'),
           fs.statAsync(screenshot5).get('size'),
           fs.statAsync(screenshot6).get('size'),
-          fs.statAsync(screenshot7).get('size'),
+          // Ignore comparing 6 and 7 since they can sometimes be the same since we take the screenshot as close to the failure as possible and
+          // the test run error may not have displayed yet. Leaving this commented in case we want to change this behavior in the future
+          // fs.statAsync(screenshot7).get('size'),
           fs.statAsync(screenshot8).get('size'),
           fs.statAsync(screenshot9).get('size'),
         ])
         .then((sizes) => {
-          // make sure all of the values are unique. Ignore comparing 6 and 7 since they can sometimes be the same since the
-          // visual state of the reporter is the same in both cases
-          const sizesToCompare = [...sizes.slice(0, 5), ...sizes.slice(7, -1)]
-
-          expect(sizesToCompare).to.deep.eq(_.uniq(sizesToCompare))
+          // make sure all of the values are unique
+          expect(sizes).to.deep.eq(_.uniq(sizes))
         }).then(() => {
           return Promise.all([
             sizeOf(screenshot1),
