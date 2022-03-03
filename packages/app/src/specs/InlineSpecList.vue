@@ -28,8 +28,8 @@ import type { Specs_InlineSpecListFragment } from '../generated/graphql'
 import InlineSpecListHeader from './InlineSpecListHeader.vue'
 import InlineSpecListTree from './InlineSpecListTree.vue'
 import CreateSpecModal from './CreateSpecModal.vue'
-import type { FuzzyFoundSpec } from '@packages/frontend-shared/src/utils/spec-utils'
 import { fuzzySortSpecs, makeFuzzyFoundSpec, useCachedSpecs } from '@packages/frontend-shared/src/utils/spec-utils'
+import type { FuzzyFoundSpec } from '@packages/frontend-shared/src/utils/spec-utils'
 import { useDebounce } from '@vueuse/core'
 
 gql`

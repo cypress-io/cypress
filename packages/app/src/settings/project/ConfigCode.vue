@@ -1,20 +1,26 @@
 <template>
   <div class="rounded-bl-md rounded-tl-md mx-auto border-1 w-full min-w-100px relative hide-scrollbar overflow-auto grow-1">
-    <Button
-      variant="outline"
-      class="top-4 right-4 absolute"
-      :prefix-icon="IconCode"
-      prefix-icon-class="text-gray-500"
+    <OpenConfigFileInIDE
+      v-slot="{onClick}"
+      :gql="props.gql"
     >
-      {{ t('file.edit') }}
-    </Button>
+      <Button
+        variant="outline"
+        class="top-4 right-4 absolute"
+        :prefix-icon="IconCode"
+        prefix-icon-class="text-gray-500"
+        @click="onClick"
+      >
+        {{ t('file.edit') }}
+      </Button>
+    </OpenConfigFileInIDE>
     <code
       class="font-thin p-16px text-gray-600 text-size-14px leading-24px block"
     >
       {<br>
       <div class="pl-24px">
         <span
-          v-for="{ field, value, from } in config"
+          v-for="{ field, value, from } in props.gql.config"
           :key="field"
         >
           {{ field }}:
@@ -47,12 +53,22 @@ import IconCode from '~icons/mdi/code'
 import { useI18n } from '@cy/i18n'
 import { CONFIG_LEGEND_COLOR_MAP } from './ConfigSourceColors'
 import Browsers from './renderers/Browsers.vue'
-import type { CypressResolvedConfig } from '../../types'
 import RenderObject from './renderers/RenderObject.vue'
 import { renderPrimitive } from './renderers/renderPrimitive'
+import { gql } from '@urql/core'
+import OpenConfigFileInIDE from '@packages/frontend-shared/src/gql-components/OpenConfigFileInIDE.vue'
+import type { ConfigCodeFragment } from '../../generated/graphql'
 
-defineProps<{
-  config: CypressResolvedConfig
+gql`
+fragment ConfigCode on CurrentProject {
+  id
+  config
+  ...OpenConfigFileInIDE
+}
+`
+
+const props = defineProps<{
+  gql: ConfigCodeFragment
 }>()
 
 // a bug in vite demands that we do this passthrough

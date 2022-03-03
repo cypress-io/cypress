@@ -5,12 +5,12 @@ import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 // whether the test has a preferred IDE defined.
 const verifyIdeOpen = ({ fileName, action, hasPreferredIde }) => {
   if (hasPreferredIde) {
-    cy.intercept('mutation-OpenFileInIDE', { data: { 'openFileInIDE': true } }).as('OpenIDE')
+    cy.intercept('mutation-SpecRunnerOpenMode_OpenFileInIDE', { data: { 'openFileInIDE': true } }).as('OpenIDE')
 
     action()
 
     cy.wait('@OpenIDE').then(({ request }) => {
-      expect(request.body.variables.input.absolute).to.include(fileName)
+      expect(request.body.variables.input.filePath).to.include(fileName)
     })
   } else {
     action()

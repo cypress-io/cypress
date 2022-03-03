@@ -1,7 +1,6 @@
 import { PACKAGE_MANAGERS } from '@packages/types'
 import { enumType, nonNull, objectType, stringArg } from 'nexus'
 import path from 'path'
-import { BaseError } from '.'
 import { BrowserStatusEnum } from '..'
 import { cloudProjectBySlug } from '../../stitching/remoteGraphQLCalls'
 import { TestingTypeEnum } from '../enumTypes/gql-WizardEnums'
@@ -27,16 +26,6 @@ export const CurrentProject = objectType({
     t.nonNull.field('packageManager', {
       type: PackageManagerEnum,
       resolve: (source, args, ctx) => ctx.coreData.packageManager,
-    })
-
-    t.field('errorLoadingConfigFile', {
-      type: BaseError,
-      description: 'If there is an error loading the config file, it is represented here',
-    })
-
-    t.field('errorLoadingNodeEvents', {
-      type: BaseError,
-      description: 'If there is an error related to the node events, it is represented here',
     })
 
     t.boolean('isLoadingConfigFile', {

@@ -1,6 +1,6 @@
 <template>
-  <SpecPatterns :gql="props.gql.currentProject" />
-  <Experiments :gql="props.gql.currentProject" />
+  <SpecPatterns :gql="props.gql" />
+  <Experiments :gql="props.gql" />
   <Config :gql="props.gql" />
 </template>
 
@@ -12,12 +12,10 @@ import SpecPatterns from './SpecPatterns.vue'
 import type { ProjectSettingsFragment } from '../../generated/graphql'
 
 gql`
-fragment ProjectSettings on Query {
-  currentProject {
-    id
-    ...Experiments
-    ...SpecPatterns_Settings
-  }
+fragment ProjectSettings on CurrentProject {
+  id
+  ...Experiments
+  ...SpecPatterns_Settings
   ...Config
 }
 `

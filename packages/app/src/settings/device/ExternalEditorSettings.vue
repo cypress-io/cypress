@@ -20,7 +20,8 @@ import SettingsSection from '../SettingsSection.vue'
 import ChooseExternalEditor from '@packages/frontend-shared/src/gql-components/ChooseExternalEditor.vue'
 import { useI18n } from '@cy/i18n'
 import { gql } from '@urql/core'
-import type { ExternalEditorSettingsFragment, ExternalEditorSettings_SetPreferredEditorBinaryDocument } from '../../generated/graphql'
+import { ExternalEditorSettings_SetPreferredEditorBinaryDocument } from '../../generated/graphql'
+import type { ExternalEditorSettingsFragment } from '../../generated/graphql'
 import { useMutation } from '@urql/vue'
 
 gql`

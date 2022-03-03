@@ -60,12 +60,14 @@ import { gql } from '@urql/core'
 import { useMutation, useQuery } from '@urql/vue'
 import { useOnline } from '@vueuse/core'
 
-import type { AuthFragment } from '../generated/graphql'
 import {
   Auth_LoginDocument,
   Auth_LogoutDocument,
   Auth_ResetAuthStateDocument,
   Auth_BrowserOpenedDocument,
+} from '../generated/graphql'
+import type {
+  AuthFragment,
 } from '../generated/graphql'
 import Button from '@cy/components/Button.vue'
 import { useI18n } from '@cy/i18n'
