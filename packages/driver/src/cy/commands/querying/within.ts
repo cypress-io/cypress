@@ -102,8 +102,6 @@ export default (Commands, Cypress, cy, state) => {
           $errUtils.throwErrByPath('within.invalid_argument', { onFail: log })
         }
 
-        log?.set('message', 'I can be updated')
-
         return withinFn(subject, fn)
       })
     },
