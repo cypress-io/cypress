@@ -1,5 +1,5 @@
 import ConfigCode from './ConfigCode.vue'
-import config from '../../../../frontend-shared/cypress/fixtures/config.json'
+import config from '@packages/frontend-shared/cypress/fixtures/config.json'
 import { defaultMessages } from '@cy/i18n'
 
 const selector = '[data-cy=code]'
@@ -16,11 +16,16 @@ describe('<ConfigCode />', () => {
   context('with mock values', () => {
     it('shows the arrayTest nicely', () => {
       cy.mount(() => (<div class="p-12 overflow-auto">
-        <ConfigCode data-cy="code" config={[{
-          field: 'arrayTest',
-          value: arrayTest,
-          from: 'plugin',
-        }]} />
+        <ConfigCode data-cy="code" gql={{
+          id: 'project-id',
+          configFile: 'cypress.config.js',
+          configFileAbsolutePath: '/path/to/cypress.config.js',
+          config: [{
+            field: 'arrayTest',
+            value: arrayTest,
+            from: 'plugin',
+          }],
+        }} />
       </div>))
 
       cy.contains(`arrayTest:`).should('contain.text', `['${arrayTest.join('\', \'')}', ]`)
@@ -28,11 +33,16 @@ describe('<ConfigCode />', () => {
 
     it('shows the objectTest nicely', () => {
       cy.mount(() => (<div class="p-12 overflow-auto">
-        <ConfigCode data-cy="code" config={[{
-          field: 'objectTest',
-          value: objectTest,
-          from: 'env',
-        }]} />
+        <ConfigCode data-cy="code" gql={{
+          id: 'project-id',
+          configFile: 'cypress.config.js',
+          configFileAbsolutePath: '/path/to/cypress.config.js',
+          config: [{
+            field: 'objectTest',
+            value: objectTest,
+            from: 'env',
+          }],
+        }} />
       </div>))
 
       const expectedText = `{${Object.entries(objectTest).map(([key, value]) => `'${key}': '${value}'`).join(',')},}`
@@ -44,7 +54,12 @@ describe('<ConfigCode />', () => {
   context('with real config file', () => {
     beforeEach(() => {
       cy.mount(() => (<div class="p-12 overflow-auto">
-        <ConfigCode data-cy="code" config={config as any} />
+        <ConfigCode data-cy="code" gql={{
+          id: 'project-id',
+          configFile: 'cypress.config.js',
+          configFileAbsolutePath: '/path/to/cypress.config.js',
+          config,
+        }} />
       </div>))
     })
 
