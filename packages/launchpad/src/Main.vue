@@ -4,6 +4,7 @@
       class="w-full z-10 fixed"
     />
     <div class="px-24px pt-86px">
+      <WarningList :gql="query.data.value" />
       <BaseError
         v-if="query.data.value.baseError"
         :gql="query.data.value.baseError"
@@ -86,6 +87,7 @@ import Wizard from './setup/Wizard.vue'
 import ScaffoldLanguageSelect from './setup/ScaffoldLanguageSelect.vue'
 import GlobalPage from './global/GlobalPage.vue'
 import BaseError from './error/BaseError.vue'
+import WarningList from '../warning/WarningList.vue'
 import StandardModal from '@cy/components/StandardModal.vue'
 import HeaderBar from '@cy/gql-components/HeaderBar.vue'
 import Spinner from '@cy/components/Spinner.vue'
@@ -128,6 +130,7 @@ fragment MainLaunchpadQueryData on Query {
   isInGlobalMode
   ...GlobalPage
   ...ScaffoldedFiles
+  ...WarningList
 }
 `
 
