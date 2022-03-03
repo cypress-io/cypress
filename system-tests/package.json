@@ -5,7 +5,7 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "lint": "tsc --project .",
+    "type-check": "tsc --project .",
     "projects:yarn:install": "node ./scripts/projects-yarn-install.js",
     "test": "node ./scripts/run.js --glob-in-dir='{test,test-binary}'",
     "test:ci": "node ./scripts/run.js"
