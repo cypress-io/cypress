@@ -306,9 +306,9 @@ function runSpecE2E (spec: SpecFile) {
  * This only needs to happen once, prior to running the first spec.
  */
 async function initialize () {
-  await dfd.promise
-
   isTorndown = false
+
+  await dfd.promise
 
   const config = getRunModeStaticCypressConfig()
 
@@ -321,18 +321,24 @@ async function initialize () {
   // TODO(lachlan): use GraphQL to get the viewport dimensions
   // once it is more practical to do so
   // find out if we need to continue managing viewportWidth/viewportHeight in MobX at all.
-  autStore.updateDimensions(config.viewportWidth, config.viewportHeight)
+  // autStore.updateDimensions(config.viewportWidth, config.viewportHeight)
 
   // just stick config on window until we figure out how we are
   // going to manage it
-  window.UnifiedRunner.config = config
+  window.UnifiedRunner.config = {
+    ...config,
+    viewportHeight: autStore.viewportHeight,
+    viewportWidth: autStore.viewportWidth,
+  }
 
   // window.UnifiedRunner exists now, since the Webpack bundle with
   // the UnifiedRunner namespace was injected by `injectBundle`.
   initializeEventManager(window.UnifiedRunner)
 
   window.UnifiedRunner.MobX.runInAction(() => {
-    initializeMobxStore(window.UnifiedRunner.config.testingType)
+    const store = initializeMobxStore(window.UnifiedRunner.config.testingType)
+
+    store.updateDimensions(autStore.viewportWidth, autStore.viewportHeight)
   })
 
   window.UnifiedRunner.MobX.runInAction(() => setupRunner(config.namespace as AutomationElementId))

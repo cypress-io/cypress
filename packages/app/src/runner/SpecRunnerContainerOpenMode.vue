@@ -31,7 +31,9 @@ const autStore = useAutStore()
 const { initialized, watchSpec } = useUnifiedRunner()
 
 const rerunCurrentSpec = debounce(() => {
-  if (!specStore.activeSpec || !initialized.value) {
+  const shouldRerun = specStore.activeSpec && initialized.value
+
+  if (!shouldRerun) {
     return
   }
 

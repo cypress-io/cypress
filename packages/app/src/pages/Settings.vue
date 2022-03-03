@@ -18,9 +18,12 @@ query Settings {
 
 const query = useQuery({
   query: SettingsDocument,
+  requestPolicy: 'network-only',
 })
 
 onMounted(() => {
-  query.executeQuery({})
+  query.executeQuery({
+    requestPolicy: 'network-only',
+  })
 })
 </script>
