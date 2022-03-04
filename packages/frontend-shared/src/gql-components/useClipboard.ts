@@ -8,7 +8,12 @@ mutation Clipboard_CopyToClipboard($text: String!) {
 }
 `
 
-export function useClipboard () {
+interface ClipboardOptions {
+  // time it takes in MS for the copied message to disappear
+  copiedDuring?: number
+}
+
+export function useClipboard (options: ClipboardOptions = {}) {
   const copyMutation = useMutation(Clipboard_CopyToClipboardDocument)
   const copied = ref(false)
 
@@ -25,8 +30,8 @@ export function useClipboard () {
     timer = setTimeout(() => {
       copied.value = false
       timer = undefined
-    }, 2000)
+    }, options.copiedDuring || 2000)
   }
 
-  return { copy, copied, isSupported: true }
+  return { copy, copied }
 }
