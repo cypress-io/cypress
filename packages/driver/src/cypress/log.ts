@@ -203,7 +203,6 @@ const defaults = function (state, config, obj) {
     instrument: 'command',
     url: state('url'),
     hookId: state('hookId'),
-    group: undefined,
     testId: runnable ? runnable.id : undefined,
     testCurrentRetry: getTestAttemptFromRunnable(state('runnable')),
     viewportWidth: state('viewportWidth'),
@@ -214,8 +213,6 @@ const defaults = function (state, config, obj) {
     message: undefined,
     timeout: undefined,
     wallClockStartedAt: new Date().toJSON(),
-    event: false,
-    visible: true,
     renderProps () {
       return {}
     },
