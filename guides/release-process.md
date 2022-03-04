@@ -78,7 +78,7 @@ In the following instructions, "X.Y.Z" is used to denote the [next version of Cy
 
 6. Log into AWS SSO with `aws sso login --profile <name_of_profile>`. The release scripts assumes you are using the `production` profile. If you have setup your credentials under a different profile, be sure to set the `AWS_PROFILE` environment variable.
 
-7. Use the `prepare-release-artifacts` script to prepare the latest commit to a stable release. When you run this script, the following happens:
+7. Use the `prepare-release-artifacts` script (Mac/Linux only) to prepare the latest commit to a stable release. When you run this script, the following happens:
     * the binaries for `<commit sha>` are moved from `beta` to the `desktop` folder for `<new target version>` in S3
     * the Cloudflare cache for this version is purged
     * the pre-prod `cypress.tgz` NPM package is converted to a stable NPM package ready for release
