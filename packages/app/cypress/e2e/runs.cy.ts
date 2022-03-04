@@ -262,8 +262,9 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
     })
 
     it('displays a copy button', () => {
-      cy.withCtx(async (ctx) => {
+      cy.withCtx(async (ctx, o) => {
         await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {projectId: \'abcdef\'}')
+        ctx.electronApi.copyTextToClipboard = o.sinon.stub()
       })
 
       cy.loginUser()
