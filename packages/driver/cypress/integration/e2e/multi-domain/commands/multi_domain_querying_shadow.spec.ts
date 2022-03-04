@@ -1,5 +1,5 @@
 // @ts-ignore / session support is needed for visiting about:blank between tests
-context('multi-domain shadow dom', { experimentalSessionSupport: true, experimentalMultiDomain: true }, () => {
+context('multi-domain shadow dom', { experimentalSessionSupport: true }, () => {
   beforeEach(() => {
     cy.visit('/fixtures/multi-domain.html')
     cy.get('a[data-cy="shadow-dom-link"]').click()

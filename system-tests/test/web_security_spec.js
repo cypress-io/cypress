@@ -40,7 +40,7 @@ const onServer = function (app) {
 
   app.get('/cors', (req, res) => {
     res.send(`<script>
-      fetch('https://127.0.0.2:44665/cross_origin')
+      fetch('https://www.foo.com:44665/cross_origin')
       .then((res) => res.text())
       .then(text => {
         if (text.includes('cross origin')) document.write('success!')

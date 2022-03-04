@@ -3,7 +3,7 @@
 // You must enable the experimentalSessionSupport flag in order to use Cypress session commands
 // at throwIfNoSessionSupport(webpack:///../driver/src/cy/commands/sessions.ts?:287:76)
 // at session(webpack:///../driver/src/cy/commands/sessions.ts?:516:7)
-context.skip('multi-domain session', { experimentalSessionSupport: true, experimentalMultiDomain: true }, () => {
+context.skip('multi-domain session', { experimentalSessionSupport: true }, () => {
   before(() => {
     cy.visit('/fixtures/multi-domain.html')
     cy.get('a[data-cy="dom-link"]').click()
