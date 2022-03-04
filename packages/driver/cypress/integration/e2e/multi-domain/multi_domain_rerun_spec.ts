@@ -1,5 +1,5 @@
 // @ts-ignore
-describe('multi-domain - rerun', { experimentalMultiDomain: true }, () => {
+describe('multi-domain - rerun', { }, () => {
   beforeEach(() => {
     cy.visit('/fixtures/multi-domain.html')
     cy.get('a[data-cy="multi-domain-secondary-link"]').click()

@@ -1,5 +1,5 @@
 // @ts-ignore / session support is needed for visiting about:blank between tests
-describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDomain: true }, () => {
+describe('multi-domain', { experimentalSessionSupport: true }, () => {
   beforeEach(() => {
     cy.visit('/fixtures/multi-domain.html')
     cy.get('a[data-cy="multi-domain-secondary-link"]').click()
@@ -206,7 +206,7 @@ describe('multi-domain', { experimentalSessionSupport: true, experimentalMultiDo
 })
 
 // @ts-ignore
-describe('domain validation', { experimentalSessionSupport: true, experimentalMultiDomain: true }, () => {
+describe('domain validation', { experimentalSessionSupport: true }, () => {
   it('finds the right spec bridge with a subdomain', () => {
     cy.visit('/fixtures/auth/index.html') // Establishes Primary Domain
     cy.window().then((win) => {

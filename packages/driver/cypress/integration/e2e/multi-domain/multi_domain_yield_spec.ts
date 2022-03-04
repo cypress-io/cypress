@@ -1,7 +1,7 @@
 import { assertLogLength } from '../../../support/utils'
 
 // @ts-ignore / session support is needed for visiting about:blank between tests
-describe('multi-domain yields', { experimentalSessionSupport: true, experimentalMultiDomain: true }, () => {
+describe('multi-domain yields', { experimentalSessionSupport: true }, () => {
   let logs: any = []
 
   beforeEach(() => {

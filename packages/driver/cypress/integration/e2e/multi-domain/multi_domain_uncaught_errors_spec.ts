@@ -1,5 +1,5 @@
 // @ts-ignore / session support is needed for visiting about:blank between tests
-describe('multi-domain - uncaught errors', { experimentalSessionSupport: true, experimentalMultiDomain: true }, () => {
+describe('multi-domain - uncaught errors', { experimentalSessionSupport: true }, () => {
   beforeEach(() => {
     cy.visit('/fixtures/multi-domain.html')
     cy.get('a[data-cy="errors-link"]').click()

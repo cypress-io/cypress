@@ -1,6 +1,6 @@
 // @ts-ignore / session support is needed for visiting about:blank between tests
 // FIXME: received cross-origin errors
-context.skip('multi-domain network requests', { experimentalSessionSupport: true, experimentalMultiDomain: true }, () => {
+context.skip('multi-domain network requests', { experimentalSessionSupport: true }, () => {
   beforeEach(() => {
     cy.visit('/fixtures/multi-domain.html')
     cy.get('a[data-cy="request-link"]').click()

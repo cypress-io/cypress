@@ -1,5 +1,5 @@
 // @ts-ignore / session support is needed for visiting about:blank between tests
-context('multi-domain screenshot', { experimentalSessionSupport: true, experimentalMultiDomain: true }, () => {
+context('multi-domain screenshot', { experimentalSessionSupport: true }, () => {
   beforeEach(() => {
     this.serverResult = {
       path: '/path/to/screenshot',
