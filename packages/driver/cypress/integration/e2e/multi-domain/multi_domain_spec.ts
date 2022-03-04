@@ -25,6 +25,7 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
       timeout: null,
       id: runnable.id,
       _currentRetry: runnable._currentRetry,
+      _timeout: 4000,
       type: 'test',
       title: 'passes runnable state to the secondary domain',
       titlePath: [
@@ -53,16 +54,19 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
     cy.switchToDomain('foobar.com', [expectedRunnable], ([expectedRunnable]) => {
       const actualRunnable = cy.state('runnable')
 
-      // these functions are set in the secondary domain so just set them on the expectedRunnable
-      expectedRunnable.clearTimeout = actualRunnable.clearTimeout
-      expectedRunnable.isPending = actualRunnable.isPending
-      expectedRunnable.resetTimeout = actualRunnable.resetTimeout
-      expectedRunnable.timeout = actualRunnable.timeout
-
       expect(actualRunnable.titlePath()).to.deep.equal(expectedRunnable.titlePath)
       expectedRunnable.titlePath = actualRunnable.titlePath
 
-      expect(actualRunnable).to.deep.equal(expectedRunnable)
+      expect(actualRunnable.title).to.equal(expectedRunnable.title)
+      expect(actualRunnable.id).to.equal(expectedRunnable.id)
+      expect(actualRunnable.ctx).to.deep.equal(expectedRunnable.ctx)
+      expect(actualRunnable._timeout).to.equal(expectedRunnable._timeout)
+      expect(actualRunnable.type).to.equal(expectedRunnable.type)
+      expect(actualRunnable.callback).to.exist
+      expect(actualRunnable.timeout).to.exist
+      expect(actualRunnable.parent.title).to.equal(expectedRunnable.parent.title)
+      expect(actualRunnable.parent.type).to.equal(expectedRunnable.parent.type)
+      // expect(actualRunnable).to.deep.equal(expectedRunnable)
     })
   })
 

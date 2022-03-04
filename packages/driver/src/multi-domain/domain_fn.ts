@@ -31,6 +31,7 @@ const rehydrateRunnable = (data: serializedRunnable): Runnable|Test => {
     runnable = Cypress.mocha.createTest(data.title, () => {})
   } else {
     runnable = new Cypress.mocha._mocha.Mocha.Runnable(data.title)
+    runnable.type = data.type
   }
 
   runnable.ctx = data.ctx
@@ -48,8 +49,6 @@ const rehydrateRunnable = (data: serializedRunnable): Runnable|Test => {
   // This is normally setup in the run command, but we don't call run.
   // Any errors this would be reporting will already have been reported previously
   runnable.callback = () => {}
-
-  console.log('subdomain runnable', runnable)
 
   return runnable
 }
