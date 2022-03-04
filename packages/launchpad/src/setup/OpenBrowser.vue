@@ -39,7 +39,6 @@ query OpenBrowser {
     ...OpenBrowserList
   }
   ...WarningList
-  currentTestingType
 }
 `
 
@@ -48,7 +47,6 @@ const query = useQuery({ query: OpenBrowserDocument })
 gql`
 mutation OpenBrowser_ClearTestingType {
   clearCurrentTestingType {
-    currentTestingType
     currentProject {
       id
       currentTestingType

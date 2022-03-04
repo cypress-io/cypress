@@ -1126,9 +1126,6 @@ type Query {
   """The currently opened project"""
   currentProject: CurrentProject
 
-  """The mode the interactive runner was launched in"""
-  currentTestingType: TestingTypeEnum
-
   """The state of any info related to local development of the runner"""
   dev: DevState!
 
