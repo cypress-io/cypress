@@ -5,7 +5,7 @@ import { parse, join } from 'path'
 import debugFn from 'debug'
 import type { Connect, ViteDevServer } from 'vite'
 import { normalizePath } from 'vite'
-import { commonSpecExtensions } from '../constants'
+// import { commonSpecExtensions } from '../constants'
 import { IncomingMessage, ServerResponse } from 'http'
 import { pathToFileURL } from 'url'
 
@@ -50,13 +50,13 @@ const cleanSpecFileName = (file) => {
 
   let cleanPath
 
-  commonSpecExtensions.some((extension) => {
-    if (file.name.endsWith(extension)) {
-      cleanPath = join(`/${ file.dir}`, file.name.slice(0, -extension.length))
+  // commonSpecExtensions.some((extension) => {
+  //   if (file.name.endsWith(extension)) {
+  //     cleanPath = join(`/${ file.dir}`, file.name.slice(0, -extension.length))
 
-      return true
-    }
-  })
+  //     return true
+  //   }
+  // })
 
   return cleanPath
 }

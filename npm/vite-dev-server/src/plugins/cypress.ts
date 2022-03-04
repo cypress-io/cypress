@@ -60,6 +60,7 @@ export const Cypress = (
   const indexHtml = options.indexHtml
 
   let specsPathsSet = getSpecsPathsSet(specs)
+  let loader
 
   devServerEvents.on('dev-server:specs:changed', (specs: Spec[]) => {
     specsPathsSet = getSpecsPathsSet(specs)
@@ -82,16 +83,25 @@ export const Cypress = (
 
       // insert the script in the end of the body
       return `${indexHtmlContent.substring(0, endOfBody)
-    }<script src="/@cypress:client-init-test" type="module"></script>${
+    }<script>
+    ${loader}
+    </script>${
       indexHtmlContent.substring(endOfBody)
     }`
     },
     resolveId (id) {
       if (id === '/@cypress:client-init-test') {
-        return INIT_FILEPATH
+        return `
+        const h1 = document.createElement('h1');
+          h1.innerText = 'Looking good';
+          document.body.appendChild(h1);
+
+        `
       }
     },
     configureServer: async (server: ViteDevServer) => {
+      loader = await readFile(INIT_FILEPATH)
+
       server.middlewares.use(`${base}index.html`, async (req, res) => {
         const transformedIndexHtml = await server.transformIndexHtml(base, '')
 

@@ -53,6 +53,10 @@ const makePlugins = (plugins) => {
         cy: FileSystemIconLoader(path.resolve(__dirname, './src/assets/icons')),
         ...plugins.iconsOptions?.customCollections,
       },
+      iconCustomizer (_, __, props) {
+        props.width = '1em'
+        props.height = '1em'
+      },
       ...plugins.iconsOptions,
     }),
     Components({
@@ -109,6 +113,14 @@ export const makeConfig = (config: Partial<UserConfig> = {}, plugins: PluginOpti
         '@urql/exchange-graphcache',
         '@urql/vue',
       ],
+    },
+    server: {
+      fs: {
+        // Since we're in a monorepo, we're going to serve packages from
+        // npm/vue/dist/* and other local places. This enables us to do that.
+        // https://vitejs.dev/config/#server-fs-strict
+        strict: false,
+      },
     },
 
     // You cannot add or remove arbitrary options from shared plugins.
