@@ -57,7 +57,7 @@ export const Cypress = (
   const supportFilePath = options.config.supportFile
   const devServerEvents = options.devServerEvents
   const specs = options.specs
-  const indexHtml = options.indexHtml
+  const indexHtmlFile = options.indexHtmlFile
 
   let specsPathsSet = getSpecsPathsSet(specs)
   let loader
@@ -67,7 +67,7 @@ export const Cypress = (
   })
 
   const posixSupportFilePath = supportFilePath ? convertPathToPosix(resolve(projectRoot, supportFilePath)) : undefined
-  const posixIndexHtml = indexHtml ? convertPathToPosix(resolve(projectRoot, indexHtml)) : undefined
+  const posixIndexHtml = indexHtmlFile ? convertPathToPosix(resolve(projectRoot, indexHtmlFile)) : undefined
 
   return {
     name: pluginName,
@@ -76,7 +76,7 @@ export const Cypress = (
       base = config.base
     },
     async transformIndexHtml () {
-      const indexHtmlPath = indexHtml ? resolve(projectRoot, indexHtml) : resolve(__dirname, '..', '..', 'index.html')
+      const indexHtmlPath = indexHtmlFile ? resolve(projectRoot, indexHtmlFile) : resolve(__dirname, '..', '..', 'index.html')
       const indexHtmlContent = await readFile(indexHtmlPath, { encoding: 'utf8' })
       // find </body> last index
       const endOfBody = indexHtmlContent.lastIndexOf('</body>')

@@ -9,8 +9,6 @@
     "build": "node ./scripts/build.js",
     "dtslint": "dtslint types",
     "postinstall": "node ./scripts/post-install.js",
-    "prerelease": "yarn build",
-    "release": "cd build && releaser --no-node --no-changelog",
     "size": "t=\"cypress-v0.0.0.tgz\"; yarn pack --filename \"${t}\"; wc -c \"${t}\"; tar tvf \"${t}\"; rm \"${t}\";",
     "test": "yarn test-unit",
     "test-debug": "node --inspect-brk $(yarn bin mocha)",

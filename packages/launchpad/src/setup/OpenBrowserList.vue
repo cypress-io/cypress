@@ -153,7 +153,6 @@
 import { useI18n } from '@cy/i18n'
 import Button from '@packages/frontend-shared/src/components/Button.vue'
 import { computed } from 'vue'
-import _clone from 'lodash/clone'
 import { useMutation, gql } from '@urql/vue'
 import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
 import TestingTypeComponentIcon from '~icons/cy/testing-type-component_x16'
@@ -164,6 +163,7 @@ import ArrowRightIcon from '~icons/cy/arrow-right_x16'
 import StatusRunningIcon from '~icons/cy/status-running_x16'
 import { RadioGroup, RadioGroupOption, RadioGroupLabel } from '@headlessui/vue'
 import UnsupportedBrowserTooltip from '@packages/frontend-shared/src/gql-components/topnav/UnsupportedBrowserTooltip.vue'
+import sortBrowsers from '@packages/frontend-shared/src/utils/sortBrowsers'
 
 import type { OpenBrowserListFragment } from '../generated/graphql'
 import { OpenBrowserList_SetBrowserDocument } from '../generated/graphql'
@@ -206,7 +206,7 @@ fragment OpenBrowserList on CurrentProject {
 `
 
 const props = defineProps<{
-  gql: OpenBrowserListFragment,
+  gql: OpenBrowserListFragment
 }>()
 
 const emit = defineEmits<{
@@ -223,7 +223,7 @@ const browsers = computed(() => {
     return undefined
   }
 
-  return [...props.gql.browsers].sort((a, b) => a.name === 'Electron' ? 1 : -1)
+  return sortBrowsers([...props.gql.browsers])
 })
 
 const setBrowser = useMutation(OpenBrowserList_SetBrowserDocument)

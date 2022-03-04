@@ -89,8 +89,8 @@ describe('agents', () => {
       cy.contains('Spies / Stubs (3)').click()
 
       cy.get('.agent-item').eq(0).find('td').first().should('have.text', 'spy')
-      cy.get('.agent-item').eq(1).find('td').first().should('have.text', 'stub')
-      cy.get('.agent-item').eq(2).find('td').first().should('have.text', 'stub')
+      cy.get('.agent-item').eq(1).find('td').first().should('have.text', 'stub-1')
+      cy.get('.agent-item').eq(2).find('td').first().should('have.text', 'stub-2')
     })
 
     it('displays the function name', () => {

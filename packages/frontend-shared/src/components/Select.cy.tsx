@@ -1,5 +1,3 @@
-import Icon from './Icon.vue'
-import IconHeart from '~icons/mdi/heart'
 import { defaultMessages } from '@cy/i18n'
 import { h } from 'vue'
 
@@ -170,19 +168,19 @@ describe('<Select />', () => {
     it('renders all of the slots', () => {
       const vSlots = {
         'item-body': () => 'Item Body',
-        'item-prefix': () => <Icon icon={IconHeart} data-testid="item-prefix" />,
-        'item-suffix': () => <Icon icon={IconHeart} data-testid="item-suffix" />,
+        'item-prefix': () => <div data-testid="item-prefix"></div>,
+        'item-suffix': () => <div data-testid="item-suffix"></div>,
         'selected': () => 'Selected',
-        'input-prefix': () => <Icon icon={IconHeart} data-testid="input-prefix" />,
-        'input-suffix': () => <Icon icon={IconHeart} data-testid="input-suffix" />,
+        'input-prefix': () => <div data-testid="input-prefix"></div>,
+        'input-suffix': () => <div data-testid="input-suffix"></div>,
       }
 
       mountSelect({ vSlots })
 
       // The input and tis prefixes and suffixes should be visible
       cy.findByText('Selected').should('be.visible')
-      .get(`[data-testid=input-prefix]`).should('be.visible')
-      .get(`[data-testid=input-suffix]`).should('be.visible')
+      .get(`[data-testid=input-prefix]`).should('exist')
+      .get(`[data-testid=input-suffix]`).should('exist')
 
       // The caret icon shouldn't exist because we overwrote it
       .get(caretIconSelector).should('not.exist')
@@ -192,8 +190,8 @@ describe('<Select />', () => {
 
       // The options and their prefixes + suffixes should be visible
       .get(optionsSelector).should('be.visible')
-      .get(`[data-testid=item-prefix]`).should('be.visible')
-      .get(`[data-testid=item-suffix]`).should('be.visible')
+      .get(`[data-testid=item-prefix]`).should('exist')
+      .get(`[data-testid=item-suffix]`).should('exist')
       .percySnapshot()
 
       // Choose an option

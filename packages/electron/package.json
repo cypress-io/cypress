@@ -15,7 +15,7 @@
     "test-watch": "yarn test-unit --watch"
   },
   "dependencies": {
-    "@cypress/icons": "0.7.0",
+    "@packages/icons": "0.0.0-development",
     "bluebird": "3.5.3",
     "debug": "^4.3.2",
     "fs-extra": "9.1.0",

@@ -17,10 +17,17 @@
       />
     </div>
     <StandardModalFooter
-      class="flex h-72px gap-16px items-center"
+      class="flex gap-16px items-center"
     >
-      <OpenConfigFileInIDE>
-        <Button size="lg">
+      <OpenConfigFileInIDE
+        v-slot="{onClick}"
+        :gql="props.gql"
+      >
+        <Button
+          size="lg"
+          data-cy="open-config-file"
+          @click="onClick"
+        >
           <template #prefix>
             <i-cy-code-editor_x16 class="icon-dark-white" />
           </template>
@@ -52,6 +59,7 @@ gql`
 fragment SpecPatternModal on CurrentProject {
   id
   ...SpecPatterns
+  ...OpenConfigFileInIDE
 }
 `
 

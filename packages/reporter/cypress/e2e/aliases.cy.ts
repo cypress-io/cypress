@@ -46,10 +46,13 @@ describe('aliases', () => {
         },
       })
 
-      cy.contains('.command-number', '1').parent().find('.command-interceptions')
+      cy.contains('.command-number', '1')
+      .closest('.command-wrapper')
+      .find('.command-interceptions')
       .should('have.text', 'some status no alias')
       .trigger('mouseover')
-      .get('.cy-tooltip').should('have.text', 'This request matched:cy.intercept() spy with no alias')
+      .get('.cy-tooltip')
+      .should('have.text', 'This request matched:cy.intercept() spy with no alias')
       .percySnapshot()
     })
 
@@ -69,7 +72,9 @@ describe('aliases', () => {
         },
       })
 
-      cy.contains('.command-number', '1').parent().find('.command-interceptions')
+      cy.contains('.command-number', '1')
+      .closest('.command-wrapper')
+      .find('.command-interceptions')
       .should('have.text', 'some status no alias')
       .parent().find('.command-interceptions-count')
       .should('have.text', '2')
@@ -97,7 +102,9 @@ describe('aliases', () => {
         },
       })
 
-      cy.contains('.command-number', '1').parent().find('.command-interceptions')
+      cy.contains('.command-number', '1')
+      .closest('.command-wrapper')
+      .find('.command-interceptions')
       .should('have.text', 'some status myAlias')
       .parent().find('.command-interceptions-count')
       .should('have.text', '2')
@@ -121,7 +128,9 @@ describe('aliases', () => {
         },
       })
 
-      cy.contains('.command-number', '1').parent().find('.command-interceptions')
+      cy.contains('.command-number', '1')
+      .closest('.command-wrapper')
+      .find('.command-interceptions')
       .should('have.text', 'some status myAlias')
       .trigger('mouseover')
       .get('.cy-tooltip').should('have.text', 'This request matched:cy.intercept() spy with alias @myAlias')
@@ -140,7 +149,7 @@ describe('aliases', () => {
           name: 'xhr',
           renderProps: {
             message: 'GET --- /users',
-            indicator: 'passed',
+            indicator: 'successful',
             wentToOrigin: false,
             interceptions: [{
               type: 'stub',
@@ -164,14 +173,14 @@ describe('aliases', () => {
 
       it('has correct alias class', () => {
         cy.contains('.command-number', '1')
-        .parent()
+        .closest('.command-wrapper')
         .find('.command-alias')
         .should('have.class', 'route')
       })
 
       it('render without a count', () => {
         cy.contains('.command-number', '1')
-        .parent()
+        .closest('.command-wrapper')
         .within(() => {
           cy.get('.command-alias-count').should('not.exist')
 
@@ -196,7 +205,7 @@ describe('aliases', () => {
           event: true,
           name: 'xhr',
           // @ts-ignore
-          renderProps: { message: 'GET --- /posts', indicator: 'passed', interceptions: [{ alias: 'getPosts' }] },
+          renderProps: { message: 'GET --- /posts', indicator: 'successful', interceptions: [{ alias: 'getPosts' }] },
         })
 
         addCommand(runner, {
@@ -206,7 +215,7 @@ describe('aliases', () => {
           event: true,
           name: 'xhr',
           // @ts-ignore
-          renderProps: { message: 'GET --- /posts', indicator: 'passed', interceptions: [{ alias: 'getPosts' }] },
+          renderProps: { message: 'GET --- /posts', indicator: 'successful', interceptions: [{ alias: 'getPosts' }] },
         })
 
         addCommand(runner, {
@@ -239,7 +248,7 @@ describe('aliases', () => {
 
       it('render with counts in non-event commands', () => {
         cy.contains('.command-number', '1')
-        .parent()
+        .closest('.command-wrapper')
         .within(() => {
           cy.contains('.command-alias-count', '1')
 
@@ -252,7 +261,8 @@ describe('aliases', () => {
         })
 
         cy.contains('.command-number', '2')
-        .parent()
+        .should('be.visible')
+        .closest('.command-wrapper')
         .within(() => {
           cy.contains('.command-alias-count', '2')
 
@@ -269,7 +279,7 @@ describe('aliases', () => {
         cy.get('.command-wrapper')
         .first()
         .within(() => {
-          cy.contains('.num-children', '2')
+          cy.contains('.num-children', '2').should('be.visible')
 
           cy.contains('.command-interceptions', 'getPosts')
         })
@@ -283,7 +293,7 @@ describe('aliases', () => {
         cy.get('.command-wrapper')
         .first()
         .within(() => {
-          cy.get('.num-children').should('not.be.visible')
+          cy.get('.num-children').should('not.exist')
 
           cy.contains('.command-interceptions', 'getPosts')
         })
@@ -300,7 +310,7 @@ describe('aliases', () => {
           name: 'xhr',
           renderProps: {
             message: 'GET --- /users',
-            indicator: 'passed',
+            indicator: 'successful',
             wentToOrigin: false,
             interceptions: [{
               type: 'stub',
@@ -318,7 +328,7 @@ describe('aliases', () => {
           name: 'xhr',
           renderProps: {
             message: 'GET --- /users',
-            indicator: 'passed',
+            indicator: 'successful',
             wentToOrigin: false,
             interceptions: [{
               type: 'stub',
@@ -336,7 +346,7 @@ describe('aliases', () => {
           name: 'xhr',
           renderProps: {
             message: 'GET --- /posts',
-            indicator: 'passed',
+            indicator: 'successful',
             wentToOrigin: false,
             interceptions: [{
               type: 'stub',
@@ -382,7 +392,7 @@ describe('aliases', () => {
 
       it('render with counts', () => {
         cy.contains('.command-number', '1')
-        .parent()
+        .closest('.command-wrapper')
         .within(() => {
           cy.contains('.command-alias-count', '1')
 
@@ -395,7 +405,7 @@ describe('aliases', () => {
         })
 
         cy.contains('.command-number', '3')
-        .parent()
+        .closest('.command-wrapper')
         .within(() => {
           cy.contains('.command-alias-count', '2')
 
@@ -422,7 +432,7 @@ describe('aliases', () => {
           alias: 'barAlias',
           aliasType: 'dom',
           event: true,
-          renderProps: { message: '', indicator: 'passed' },
+          renderProps: { message: '', indicator: 'successful' },
         })
 
         addCommand(runner, {
@@ -439,14 +449,14 @@ describe('aliases', () => {
 
       it('has correct alias class', () => {
         cy.contains('.command-number', '1')
-        .parent()
+        .closest('.command-wrapper')
         .find('.command-alias')
         .should('have.class', 'dom')
       })
 
       it('render without a count', () => {
         cy.contains('.command-number', '1')
-        .parent()
+        .closest('.command-wrapper')
         .within(() => {
           cy.get('.command-alias-count').should('not.exist')
 
@@ -469,7 +479,7 @@ describe('aliases', () => {
           alias: 'dropdown',
           aliasType: 'dom',
           event: true,
-          renderProps: { message: '', indicator: 'passed' },
+          renderProps: { message: '', indicator: 'successful' },
         })
 
         addCommand(runner, {
@@ -479,7 +489,7 @@ describe('aliases', () => {
           alias: 'dropdown',
           aliasType: 'dom',
           event: true,
-          renderProps: { message: '', indicator: 'passed' },
+          renderProps: { message: '', indicator: 'successful' },
         })
 
         addCommand(runner, {
@@ -507,7 +517,7 @@ describe('aliases', () => {
 
       it('render without a count in non-event commands', () => {
         cy.contains('.command-number', '1')
-        .parent()
+        .closest('.command-wrapper')
         .within(() => {
           cy.get('.command-alias-count').should('not.exist')
 
@@ -520,7 +530,7 @@ describe('aliases', () => {
         })
 
         cy.contains('.command-number', '2')
-        .parent()
+        .closest('.command-wrapper')
         .within(() => {
           cy.get('.command-alias-count').should('not.exist')
 
@@ -537,7 +547,7 @@ describe('aliases', () => {
         cy.get('.command-wrapper')
         .first()
         .within(() => {
-          cy.get('.num-children').should('not.be.visible')
+          cy.get('.num-children').should('not.exist')
 
           cy.contains('.command-alias', 'dropdown')
         })
@@ -553,7 +563,7 @@ describe('aliases', () => {
           alias: 'dropdown',
           aliasType: 'dom',
           event: true,
-          renderProps: { message: '', indicator: 'passed' },
+          renderProps: { message: '', indicator: 'successful' },
         })
 
         addCommand(runner, {
@@ -563,7 +573,7 @@ describe('aliases', () => {
           alias: 'modal',
           aliasType: 'dom',
           event: true,
-          renderProps: { message: '', indicator: 'passed' },
+          renderProps: { message: '', indicator: 'successful' },
         })
 
         addCommand(runner, {
@@ -573,7 +583,7 @@ describe('aliases', () => {
           alias: 'dropdown',
           aliasType: 'dom',
           event: true,
-          renderProps: { message: '', indicator: 'passed' },
+          renderProps: { message: '', indicator: 'successful' },
         })
 
         addCommand(runner, {
@@ -616,7 +626,7 @@ describe('aliases', () => {
 
       it('render without counts', () => {
         cy.contains('.command-number', '1')
-        .parent()
+        .closest('.command-wrapper')
         .within(() => {
           cy.get('.command-alias-count').should('not.exist')
 
@@ -629,7 +639,7 @@ describe('aliases', () => {
         })
 
         cy.contains('.command-number', '3')
-        .parent()
+        .closest('.command-wrapper')
         .within(() => {
           cy.get('.command-alias-count').should('not.exist')
 

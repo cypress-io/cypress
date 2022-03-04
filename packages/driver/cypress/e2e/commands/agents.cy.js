@@ -470,7 +470,6 @@ describe('src/cy/commands/agents', () => {
 
       it('logs agent on creation', function () {
         expect(this.agentLogs[0].get('name')).to.eq('stub-1')
-        expect(this.agentLogs[0].get('type')).to.eq('stub-1')
         expect(this.agentLogs[0].get('instrument')).to.eq('agent')
       })
 
@@ -687,7 +686,6 @@ describe('src/cy/commands/agents', () => {
       // same as cy.stub() except for name and type
       it('logs agent on creation', function () {
         expect(this.logs[0].get('name')).to.eq('spy-1')
-        expect(this.logs[0].get('type')).to.eq('spy-1')
         expect(this.logs[0].get('instrument')).to.eq('agent')
       })
 

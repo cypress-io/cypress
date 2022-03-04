@@ -15,7 +15,7 @@
     "test:ci:ct": "node ../../scripts/run-ct-examples.js --examplesList=./examples.env"
   },
   "dependencies": {
-    "@cypress/mount-utils": "0.0.0-development",
+    "@cypress/mount-utils": "*",
     "@vue/test-utils": "^2.0.0-rc.10"
   },
   "devDependencies": {
@@ -38,7 +38,7 @@
     "css-loader": "3.4.2",
     "cypress": "0.0.0-development",
     "debug": "^4.3.2",
-    "eslint-plugin-vue": "7.18.0",
+    "eslint-plugin-vue": "8.5.0",
     "find-webpack": "2.1.0",
     "mocha": "7.1.1",
     "mocha-junit-reporter": "^2.0.0",

@@ -1,3 +1,5 @@
+import type { SinonStub } from 'sinon'
+
 describe('App: Settings', () => {
   before(() => {
     cy.scaffoldProject('todos', { timeout: 50 * 1000 })
@@ -27,19 +29,23 @@ describe('App: Settings', () => {
 
   it('can reconfigure a project', () => {
     cy.startAppServer('e2e')
-    cy.__incorrectlyVisitAppWithIntercept('settings')
+    cy.visitApp('settings')
+    cy.withCtx((ctx, o) => {
+      o.sinon.stub(ctx.actions.project, 'reconfigureProject')
+    })
 
-    cy.intercept('mutation-SettingsContainer_ReconfigureProject', { 'data': { 'reconfigureProject': true } }).as('ReconfigureProject')
     cy.findByText('Reconfigure Project').click()
-    cy.wait('@ReconfigureProject')
+    cy.withRetryableCtx((ctx) => {
+      expect(ctx.actions.project.reconfigureProject).to.have.been.called
+    })
   })
 
-  describe('Project Settings', () => {
+  describe('Cloud Settings', () => {
     it('shows the projectId section when there is a projectId', () => {
       cy.startAppServer('e2e')
       cy.visitApp()
       cy.findByText('Settings').click()
-      cy.findByText('Project Settings').click()
+      cy.findByText('Dashboard Settings').click()
       cy.findByText('Project ID').should('be.visible')
     })
 
@@ -49,7 +55,7 @@ describe('App: Settings', () => {
 
       cy.visitApp()
       cy.findByText('Settings').click()
-      cy.findByText('Project Settings').click()
+      cy.findByText('Dashboard Settings').click()
       cy.findByText('Record Key').should('be.visible')
     })
 
@@ -59,12 +65,25 @@ describe('App: Settings', () => {
 
       cy.visitApp()
       cy.findByText('Settings').click()
-      cy.findByText('Project Settings').click()
+      cy.findByText('Dashboard Settings').click()
       cy.get('[data-cy="record-key"]').should('contain', '***')
       cy.get('[aria-label="Record Key Visibility Toggle"]').click()
       cy.get('[data-cy="record-key"]').should('contain', '2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa')
     })
 
+    it('opens cloud settings when clicking on "Manage Keys"', () => {
+      cy.startAppServer('e2e')
+      cy.loginUser()
+      cy.visitApp('settings')
+      cy.findByText('Dashboard Settings').click()
+      cy.findByText('Manage Keys').click()
+      cy.withRetryableCtx((ctx) => {
+        expect((ctx.actions.electron.openExternal as SinonStub).lastCall.lastArg).to.eq('http:/test.cloud/cloud-project/settings')
+      })
+    })
+  })
+
+  describe('Project Settings', () => {
     it('shows the Spec Patterns section (default specPattern value)', () => {
       cy.scaffoldProject('simple-ct')
       cy.openProject('simple-ct')
@@ -141,27 +160,28 @@ describe('App: Settings', () => {
       })
     })
 
-    // TODO: The Edit button isn't hooked up to do anything when it should trigger the openFileInIDE mutation (https://cypress-io.atlassian.net/browse/UNIFY-1164)
-    it.skip('opens cypress.config.js file after clicking "Edit" button', () => {
-    })
-
-    it('opens cloud settings when clicking on "Manage Keys"', () => {
+    it('opens cypress.config.js file after clicking "Edit" button', () => {
       cy.startAppServer('e2e')
-      cy.loginUser()
-      cy.intercept('mutation-ExternalLink_OpenExternal', { 'data': { 'openExternal': true } }).as('OpenExternal')
-      cy.__incorrectlyVisitAppWithIntercept('settings')
+      cy.withCtx((ctx, o) => {
+        ctx.coreData.localSettings.preferences.preferredEditorBinary = 'computer'
+        o.sinon.stub(ctx.actions.file, 'openFile')
+      })
+
+      cy.visitApp('/settings')
       cy.findByText('Project Settings').click()
-      cy.findByText('Manage Keys').click()
-      cy.wait('@OpenExternal')
-      .its('request.body.variables.url')
-      .should('equal', 'http:/test.cloud/cloud-project/settings')
+      cy.findByRole('button', { name: 'Edit' }).click()
+      cy.withRetryableCtx((ctx) => {
+        expect((ctx.actions.file.openFile as SinonStub).lastCall.args[0]).to.eq(ctx.lifecycleManager.configFilePath)
+      })
     })
   })
 
   describe('external editor', () => {
     beforeEach(() => {
       cy.startAppServer('e2e')
-      cy.withCtx(async (ctx) => {
+      cy.withCtx((ctx, o) => {
+        o.sinon.stub(ctx.actions.localSettings, 'setPreferences')
+        o.sinon.stub(ctx.actions.file, 'openFile')
         ctx.coreData.localSettings.availableEditors = [
           ...ctx.coreData.localSettings.availableEditors,
           // don't rely on CI machines to have specific editors installed
@@ -181,15 +201,15 @@ describe('App: Settings', () => {
     })
 
     it('selects well known editor', () => {
-      cy.intercept('POST', 'mutation-ExternalEditorSettings_SetPreferredEditorBinary').as('SetPreferred')
-
       cy.contains('Choose your editor...').click()
       cy.contains('Well known editor').click()
-      cy.wait('@SetPreferred').its('request.body.variables.value').should('include', '/usr/bin/well-known')
+      cy.withRetryableCtx((ctx) => {
+        expect((ctx.actions.localSettings.setPreferences as SinonStub).lastCall.lastArg).to.include('/usr/bin/well-known')
+      })
 
       // navigate away and come back
       // preferred editor selected from dropdown should have been persisted
-      cy.__incorrectlyVisitAppWithIntercept()
+      cy.visitApp()
       cy.get('[href="#/settings"]').click()
       cy.wait(200)
       cy.get('[data-cy="Device Settings"]').click()
@@ -198,8 +218,6 @@ describe('App: Settings', () => {
     })
 
     it('allows custom editor', () => {
-      cy.intercept('POST', 'mutation-ExternalEditorSettings_SetPreferredEditorBinary').as('SetPreferred')
-
       cy.contains('Choose your editor...').click()
       cy.contains('Custom').click()
 
@@ -207,7 +225,9 @@ describe('App: Settings', () => {
       // for each keystroke, making it hard to intercept **only** the final request, which I want to
       // assert contains `/usr/local/bin/vim'
       cy.findByPlaceholderText('/path/to/editor').clear().invoke('val', '/usr/local/bin/vim').trigger('input').trigger('change')
-      cy.wait('@SetPreferred').its('request.body.variables.value').should('include', '/usr/local/bin/vim')
+      cy.withRetryableCtx((ctx) => {
+        expect((ctx.actions.localSettings.setPreferences as SinonStub).lastCall.lastArg).to.include('/usr/local/bin/vim')
+      })
 
       // navigate away and come back
       // preferred editor entered from input should have been persisted
@@ -219,12 +239,12 @@ describe('App: Settings', () => {
     })
 
     it('lists file browser as available editor', () => {
-      cy.intercept('POST', 'mutation-ExternalEditorSettings_SetPreferredEditorBinary').as('SetPreferred')
-
       cy.contains('Choose your editor...').click()
       cy.get('[data-cy="computer"]').click()
 
-      cy.wait('@SetPreferred').its('request.body.variables.value').should('include', 'computer')
+      cy.withRetryableCtx((ctx) => {
+        expect((ctx.actions.localSettings.setPreferences as SinonStub).lastCall.lastArg).to.include('computer')
+      })
 
       cy.get('[data-cy="custom-editor"]').should('not.exist')
     })
@@ -232,15 +252,16 @@ describe('App: Settings', () => {
 })
 
 describe('App: Settings without cloud', () => {
-  it('hides the projectId section when there is no projectId', () => {
+  it('the projectId section shows a prompt to connect when there is no projectId', () => {
     cy.scaffoldProject('simple-ct')
     cy.openProject('simple-ct')
     cy.startAppServer('component')
 
     cy.visitApp()
     cy.findByText('Settings').click()
-    cy.findByText('Project Settings').click()
-    cy.findByText('Project ID').should('not.exist')
+    cy.findByText('Dashboard Settings').click()
+    cy.findByText('Project ID').should('exist')
+    cy.contains('button', 'Log in to the Cypress Dashboard').should('be.visible')
   })
 
   it('have returned browsers', () => {

@@ -59,6 +59,8 @@ describe('<SpecsListHeader />', { keystrokeDelay: 0 }, () => {
     .click()
     .get('@show-spec-pattern-modal')
     .should('have.been.called')
+
+    cy.percySnapshot()
   })
 
   it('shows the count correctly when not searching', () => {
@@ -74,10 +76,17 @@ describe('<SpecsListHeader />', { keystrokeDelay: 0 }, () => {
     .should('be.visible')
     .and('have.attr', 'aria-live', 'polite')
 
+    cy.percySnapshot('No Matches')
+
     mountWithSpecCount(1)
     cy.contains('1 Match').should('be.visible')
+
+    cy.percySnapshot('Singular Match')
+
     mountWithSpecCount(100)
     cy.contains('100 Matches').should('be.visible')
+
+    cy.percySnapshot('Plural Match')
   })
 
   it('shows the count correctly while searching', () => {
@@ -103,5 +112,7 @@ describe('<SpecsListHeader />', { keystrokeDelay: 0 }, () => {
 
     mountWithCounts(5, 22)
     cy.contains('5 of 22 Matches').should('be.visible')
+
+    cy.percySnapshot()
   })
 })

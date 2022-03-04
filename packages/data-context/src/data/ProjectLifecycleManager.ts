@@ -16,12 +16,11 @@ import debugLib from 'debug'
 import pDefer from 'p-defer'
 import fs from 'fs'
 
-import { getError, CypressError, ConfigValidationError } from '@packages/errors'
+import { getError, CypressError, ConfigValidationFailureInfo } from '@packages/errors'
 import type { DataContext } from '..'
 import { LoadConfigReply, SetupNodeEventsReply, ProjectConfigIpc, IpcHandler } from './ProjectConfigIpc'
 import assert from 'assert'
 import type { AllModeOptions, BreakingErrResult, BreakingOption, FoundBrowser, FullConfig, TestingType } from '@packages/types'
-import type { BaseErrorDataShape } from '.'
 import { autoBindDebug } from '../util/autoBindDebug'
 
 const debug = debugLib(`cypress:lifecycle:ProjectLifecycleManager`)
@@ -48,7 +47,7 @@ type BreakingValidationFn<T> = (type: BreakingOption, val: BreakingErrResult) =>
 export interface InjectedConfigApi {
   cypressVersion: string
   getServerPluginHandlers: () => IpcHandler[]
-  validateConfig<T extends Cypress.ConfigOptions>(config: Partial<T>, onErr: (errMsg: ConfigValidationError | string) => never): T
+  validateConfig<T extends Cypress.ConfigOptions>(config: Partial<T>, onErr: (errMsg: ConfigValidationFailureInfo | string) => never): T
   allowedConfig(config: Cypress.ConfigOptions): Cypress.ConfigOptions
   updateWithPluginValues(config: FullConfig, modifiedConfig: Partial<Cypress.ConfigOptions>): FullConfig
   setupFullConfigWithDefaults(config: SetupFullConfigOptions): Promise<FullConfig>
@@ -184,30 +183,6 @@ export class ProjectLifecycleManager {
     return null
   }
 
-  get errorLoadingConfigFile (): BaseErrorDataShape | null {
-    if (this._configResult.state === 'errored') {
-      return {
-        title: 'Error Loading Config',
-        message: this._configResult.value?.messageMarkdown || '',
-        stack: this._configResult.value?.stack,
-      }
-    }
-
-    return null
-  }
-
-  get errorLoadingNodeEvents (): BaseErrorDataShape | null {
-    if (this._eventsIpcResult.state === 'errored') {
-      return {
-        title: 'Error Loading Config',
-        message: this._eventsIpcResult.value?.messageMarkdown || '',
-        stack: this._eventsIpcResult.value?.stack,
-      }
-    }
-
-    return null
-  }
-
   get isLoadingConfigFile () {
     return this._configResult.state === 'loading'
   }
@@ -325,6 +300,8 @@ export class ProjectLifecycleManager {
   setCurrentTestingType (testingType: TestingType | null) {
     this.ctx.update((d) => {
       d.currentTestingType = testingType
+      d.wizard.chosenBundler = null
+      d.wizard.chosenFramework = null
     })
 
     if (this._currentTestingType === testingType) {
@@ -634,18 +611,26 @@ export class ProjectLifecycleManager {
       }
 
       if (shouldReloadConfig) {
-        this.ctx.coreData.baseError = null
+        this.ctx.update((coreData) => {
+          coreData.baseError = null
+        })
+
         this.reloadConfig().catch(this.onLoadError)
       }
-    }).on('error', (err) => {
+    })
+
+    legacyFileWatcher.on('error', (err) => {
       debug('error watching config files %O', err)
-      this.ctx.coreData.baseError = err
+      this.ctx.onWarning(getError('UNEXPECTED_INTERNAL_ERROR', err))
     })
 
     const cypressEnvFileWatcher = this.addWatcher(this.envFilePath)
 
     cypressEnvFileWatcher.on('all', () => {
-      this.ctx.coreData.baseError = null
+      this.ctx.update((coreData) => {
+        coreData.baseError = null
+      })
+
       this.reloadCypressEnvFile().catch(this.onLoadError)
     })
   }
@@ -937,7 +922,7 @@ export class ProjectLifecycleManager {
     this._registeredEvents[event] = callback
   }
 
-  resetForTest () {
+  reinitializeCypress () {
     this.resetInternalState()
     this._registeredEvents = {}
     this._handlers = []
@@ -1326,19 +1311,19 @@ export class ProjectLifecycleManager {
   private configFileWarningCheck () {
     // Only if they've explicitly specified a config file path do we error, otherwise they'll go through onboarding
     if (!this.metaState.hasValidConfigFile && this.metaState.hasSpecifiedConfigViaCLI !== false && this.ctx.isRunMode) {
-      this.ctx.onError(getError('CONFIG_FILE_NOT_FOUND', path.basename(this.metaState.hasSpecifiedConfigViaCLI), path.dirname(this.metaState.hasSpecifiedConfigViaCLI)))
+      this.onLoadError(getError('CONFIG_FILE_NOT_FOUND', path.basename(this.metaState.hasSpecifiedConfigViaCLI), path.dirname(this.metaState.hasSpecifiedConfigViaCLI)))
     }
 
     if (this.metaState.hasLegacyCypressJson && !this.metaState.hasValidConfigFile && this.ctx.isRunMode) {
-      this.ctx.onError(getError('CONFIG_FILE_MIGRATION_NEEDED', this.projectRoot))
+      this.onLoadError(getError('CONFIG_FILE_MIGRATION_NEEDED', this.projectRoot))
     }
 
     if (this.metaState.hasMultipleConfigPaths) {
-      this.ctx.onError(getError('CONFIG_FILES_LANGUAGE_CONFLICT', this.projectRoot, 'cypress.config.js', 'cypress.config.ts'))
+      this.onLoadError(getError('CONFIG_FILES_LANGUAGE_CONFLICT', this.projectRoot, 'cypress.config.js', 'cypress.config.ts'))
     }
 
     if (this.metaState.hasValidConfigFile && this.metaState.hasLegacyCypressJson) {
-      this.ctx.onError(getError('LEGACY_CONFIG_FILE', path.basename(this.configFilePath), this.projectRoot))
+      this.onLoadError(getError('LEGACY_CONFIG_FILE', path.basename(this.configFilePath), this.projectRoot))
     }
   }
 
@@ -1349,7 +1334,11 @@ export class ProjectLifecycleManager {
    * for run mode
    */
   private onLoadError = (err: any) => {
-    this._pendingInitialize?.reject(err)
+    if (this.ctx.isRunMode && this._pendingInitialize) {
+      this._pendingInitialize.reject(err)
+    } else {
+      this.ctx.onError(err, 'Error Loading Config')
+    }
   }
 }
 

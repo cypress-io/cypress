@@ -1,21 +1,17 @@
 import { parse } from '@babel/parser'
-import { graphqlSchema } from '@packages/graphql/src/schema'
-import { FRONTEND_FRAMEWORKS } from '@packages/types'
+import { FRONTEND_FRAMEWORKS } from '@packages/scaffold-config'
 import { expect } from 'chai'
 import dedent from 'dedent'
 import fs from 'fs-extra'
 import path from 'path'
 import sinon from 'sinon'
 import { DataContext } from '../../../src'
-import { AppApiShape, AuthApiShape, ElectronApiShape, LocalSettingsApiShape, ProjectApiShape } from '../../../src/actions'
 import {
   Action, codeGenerator, CodeGenResult, CodeGenResults,
 } from '../../../src/codegen/code-generator'
 import { SpecOptions } from '../../../src/codegen/spec-options'
 import templates from '../../../src/codegen/templates'
-import { InjectedConfigApi } from '../../../src/data'
-import { ErrorApiShape } from '../../../src/DataContext'
-import { BrowserApiShape } from '../../../src/sources'
+import { createTestDataContext } from '../helper'
 
 const tmpPath = path.join(__dirname, 'tmp/test-code-gen')
 
@@ -29,21 +25,7 @@ describe('code-generator', () => {
   let ctx: DataContext
 
   beforeEach(async () => {
-    ctx = new DataContext({
-      schema: graphqlSchema,
-      mode: 'run',
-      modeOptions: {},
-      appApi: {} as AppApiShape,
-      localSettingsApi: {} as LocalSettingsApiShape,
-      authApi: {} as AuthApiShape,
-      errorApi: {} as ErrorApiShape,
-      configApi: {
-        getServerPluginHandlers: () => [],
-      } as InjectedConfigApi,
-      projectApi: {} as ProjectApiShape,
-      electronApi: {} as ElectronApiShape,
-      browserApi: {} as BrowserApiShape,
-    })
+    ctx = createTestDataContext()
 
     ctx.update((s) => {
       s.currentProject = tmpPath
@@ -178,7 +160,7 @@ describe('code-generator', () => {
         'import Button from "./Button"',
       ],
       componentName: 'Button',
-      docsLink: '// see: https://reactjs.org/docs/test-utils.html',
+      docsLink: '// see: https://on.cypress.io/component-testing',
       mount: 'mount(<Button />)',
       fileName,
     }
@@ -196,7 +178,7 @@ describe('code-generator', () => {
             
             describe('<Button />', () => {
               it('renders', () => {
-                // see: https://reactjs.org/docs/test-utils.html
+                // see: https://on.cypress.io/component-testing
                 mount(<Button />)
               })
             })`,
@@ -367,7 +349,7 @@ describe('code-generator', () => {
     sinon.stub(ctx.project.frameworkLoader, 'load').resolves(FRONTEND_FRAMEWORKS[1])
 
     const newSpecCodeGenOptions = new SpecOptions(ctx, {
-      codeGenPath: path.join(__dirname, 'files', 'vue', 'Button.stories.js'),
+      codeGenPath: path.join(__dirname, 'files', 'vue', 'Button.stories.ts'),
       codeGenType: 'story',
       specFileExtension: '.cy',
     })

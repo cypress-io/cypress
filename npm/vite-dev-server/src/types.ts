@@ -1,6 +1,12 @@
 import type { InlineConfig } from 'vite'
 
-export type CypressViteDevServerConfig = Omit<InlineConfig, 'base' | 'root'>
+export type CypressViteDevServerConfig = Omit<InlineConfig, 'base' | 'root'> & {
+  /**
+   * Path to an index.html file that will serve as the template in
+   * which your components will be rendered.
+   */
+  indexHtmlFile?: string
+}
 
 export interface StartDevServer {
   /* this is the Cypress dev server configuration object */

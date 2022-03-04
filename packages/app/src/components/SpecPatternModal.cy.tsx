@@ -29,7 +29,7 @@ describe('<SpecPatternModal />', () => {
 
     cy.percySnapshot()
 
-    cy.get('[data-cy="open-config-file"').should('be.visible')
+    cy.get('[data-cy="open-config-file"]').should('be.visible')
     cy.contains('button', defaultMessages.createSpec.updateSpecPattern)
 
     cy.contains('button', defaultMessages.components.modal.dismiss).click()

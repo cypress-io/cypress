@@ -2,8 +2,9 @@ import * as React from 'react'
 import { mount } from '@cypress/react'
 
 import { SearchInput } from './SearchInput'
-import { useCallback, useState } from 'react'
 import { mountAndSnapshot } from 'util/testing'
+
+const { useCallback, useState } = React
 
 describe('SearchInput', () => {
   const StatefulWrapper: React.FC<{onInput?: (input: string) => void}> = ({ onInput }) => {

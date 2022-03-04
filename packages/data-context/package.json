@@ -9,11 +9,13 @@
     "check-ts": "tsc --noEmit && yarn -s tslint",
     "clean-deps": "rimraf node_modules",
     "tslint": "tslint --config ../ts/tslint.json --project .",
-    "clean": "rimraf './{src,test}/**/*.js'",
+    "clean": "rimraf './{src,test}/**/*(!.stories).js'",
     "test": "yarn test-unit",
     "test-unit": "mocha -r @packages/ts/register --config ./test/.mocharc.js"
   },
   "dependencies": {
+    "@babel/code-frame": "7.8.3",
+    "@babel/parser": "7.13.0",
     "@storybook/csf-tools": "^6.4.0-alpha.38",
     "@urql/core": "2.3.1",
     "@urql/exchange-execute": "1.1.0",
@@ -46,6 +48,7 @@
     "wonka": "^4.0.15"
   },
   "devDependencies": {
+    "@babel/types": "7.17.0",
     "@packages/config": "0.0.0-development",
     "@packages/errors": "0.0.0-development",
     "@packages/example": "0.0.0-development",
@@ -55,6 +58,7 @@
     "@packages/ts": "0.0.0-development",
     "@packages/types": "0.0.0-development",
     "@tooling/system-tests": "0.0.0-development",
+    "@types/babel__code-frame": "^7.0.3",
     "@types/dedent": "^0.7.0",
     "@types/ejs": "^3.1.0",
     "@types/fs-extra": "^8.0.1",

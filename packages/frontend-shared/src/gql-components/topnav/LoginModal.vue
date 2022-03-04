@@ -115,7 +115,7 @@ const emit = defineEmits<{
 }>()
 
 const props = defineProps<{
-  modelValue: boolean,
+  modelValue: boolean
   gql: LoginModalFragment
 }>()
 

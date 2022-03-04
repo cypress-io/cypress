@@ -19,7 +19,7 @@
 import type { FilePart } from '../../utils/stringToRegexp'
 import HighlightedFile from './HighlightedFile.vue'
 
-const props = withDefaults(defineProps<{
+withDefaults(defineProps<{
   files: Readonly<Array<{ parts: readonly FilePart[] }>>
   highlightClass?: string
 }>(), {

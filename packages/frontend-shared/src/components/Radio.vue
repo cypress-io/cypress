@@ -32,14 +32,14 @@
 
 <script lang="ts" setup>
 const props = defineProps<{
-  name: string,
-  label: string,
-  value?: string,
+  name: string
+  label: string
+  value?: string
   options: Array<{
-    label: string,
-    value: string,
-    description?: string,
-  }>,
+    label: string
+    value: string
+    description?: string
+  }>
 }>()
 
 const emits = defineEmits<{

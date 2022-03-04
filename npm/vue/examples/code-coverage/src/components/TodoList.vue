@@ -40,14 +40,21 @@ export default {
 <template>
   <div>
     <BaseInputText
-      data-cy="input"
       v-model="newTodoText"
+      data-cy="input"
       placeholder="New todo"
       @keydown.enter="addTodo"
     />
     <ul v-if="todos.length">
-      <TodoListItem v-for="todo in todos" :key="todo.id" :todo="todo" @remove="removeTodo"/>
+      <TodoListItem
+        v-for="todo in todos"
+        :key="todo.id"
+        :todo="todo"
+        @remove="removeTodo"
+      />
     </ul>
-    <p v-else>Nothing left in the list. Add a new todo in the input above.</p>
+    <p v-else>
+      Nothing left in the list. Add a new todo in the input above.
+    </p>
   </div>
 </template>

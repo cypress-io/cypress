@@ -40,7 +40,7 @@ export const createConfig = async ({ options, viteConfig: viteOverrides = {} }: 
     },
     plugins: [
       Cypress(options),
-      // await CypressInspect(),
+      await CypressInspect(),
     ],
   }
 

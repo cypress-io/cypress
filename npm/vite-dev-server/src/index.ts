@@ -30,6 +30,8 @@ export const startDevServer = async ({ options, viteConfig = {} }: StartDevServe
   }
 }
 
-export function devServer (options: Cypress.DevServerConfig, viteConfig?: CypressViteDevServerConfig) {
-  return startDevServer({ options, viteConfig })
+export function devServer (cypressDevServerConfig: Cypress.DevServerConfig, devServerConfig?: CypressViteDevServerConfig) {
+  const { indexHtmlFile, ...viteConfig } = devServerConfig ?? {}
+
+  return startDevServer({ options: cypressDevServerConfig, viteConfig, indexHtmlFile })
 }

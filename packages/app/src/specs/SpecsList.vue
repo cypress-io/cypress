@@ -108,7 +108,8 @@ import { gql } from '@urql/vue'
 import { computed, ref, watch } from 'vue'
 import type { Specs_SpecsListFragment, SpecListRowFragment } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
-import { buildSpecTree, FuzzyFoundSpec, fuzzySortSpecs, getDirIndexes, makeFuzzyFoundSpec, useCachedSpecs } from '@packages/frontend-shared/src/utils/spec-utils'
+import { buildSpecTree, fuzzySortSpecs, getDirIndexes, makeFuzzyFoundSpec, useCachedSpecs } from '@packages/frontend-shared/src/utils/spec-utils'
+import type { FuzzyFoundSpec } from '@packages/frontend-shared/src/utils/spec-utils'
 import { useCollapsibleTree } from '@packages/frontend-shared/src/composables/useCollapsibleTree'
 import RowDirectory from './RowDirectory.vue'
 import SpecItem from './SpecItem.vue'
@@ -212,8 +213,8 @@ function getIdIfDirectory (row) {
   height: calc(100vh - 64px);
 }
 
-/** List header is 72px */
+/** Search bar is 72px + List header is 40px = 112px offset */
 .spec-list-container {
-  height: calc(100% - 72px)
+  height: calc(100% - 112px)
 }
 </style>

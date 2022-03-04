@@ -349,7 +349,7 @@
     },
     "projectId": {
       "title": "Project ID",
-      "description": "The Project ID configured for this project inside of Cypress Cloud. {0}"
+      "description": "The Project ID configured for this project inside of Cypress Dashboard. {0}"
     },
     "specPattern": {
       "title": "Spec Patterns",
@@ -357,7 +357,7 @@
     },
     "recordKey": {
       "title": "Record Key",
-      "description": "The Record Key configured for this project inside of Cypress Cloud. {0}",
+      "description": "The Record Key configured for this project inside of Cypress Dashboard. {0}",
       "manageKeys": "Manage Keys",
       "errorEmpty": "You do not have permission to record on this project",
       "errorEmptyButton": "Request record rights",
@@ -372,6 +372,10 @@
     "project": {
       "title": "Project Settings",
       "description": "Review the configuration settings currently in use for this project."
+    },
+    "cloud": {
+      "title": "Dashboard Settings",
+      "description": "Review the configuration settings for recording to the Cypress Dashboard."
     },
     "experiments": {
       "title": "Experiments",

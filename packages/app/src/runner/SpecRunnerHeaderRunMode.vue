@@ -56,7 +56,6 @@
 import { computed } from 'vue'
 import { useAutStore } from '../store'
 import type { EventManager } from './event-manager'
-import { togglePlayground as _togglePlayground } from './utils'
 import SpecRunnerDropdown from './SpecRunnerDropdown.vue'
 import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
 

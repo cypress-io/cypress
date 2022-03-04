@@ -10,13 +10,12 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted } from 'vue'
 import { getEventManager } from '..'
 import { useScreenshotStore } from '../../store/screenshot-store'
 
 const screenshotStore = useScreenshotStore()
 
-const eventManager = getEventManager()
+getEventManager()
 </script>
 
 <style scoped lang="scss">

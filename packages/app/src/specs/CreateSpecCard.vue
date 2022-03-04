@@ -17,13 +17,13 @@ import type { FunctionalComponent, SVGAttributes } from 'vue'
 import Card from '@cy/components/Card.vue'
 
 defineProps<{
-  icon: FunctionalComponent<SVGAttributes>,
-  header: string,
-  description: string,
+  icon: FunctionalComponent<SVGAttributes>
+  header: string
+  description: string
   disabled?: boolean
 }>()
 
 const emits = defineEmits<{
-  (eventName:'click'): void
+  (eventName: 'click'): void
 }>()
 </script>

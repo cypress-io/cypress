@@ -1,4 +1,5 @@
-import { MutableRefObject, RefCallback, useEffect } from 'react'
+import type { MutableRefObject, RefCallback } from 'react'
+import { useEffect } from 'react'
 
 /**
  * Joins the `externalRef` to receive the same boxed value as `localRef`
