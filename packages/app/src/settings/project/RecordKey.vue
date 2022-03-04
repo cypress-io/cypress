@@ -43,7 +43,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import { gql } from '@urql/core'
 import Button from '@cy/components/Button.vue'
 import CopyButton from '@cy/components/CopyButton.vue'

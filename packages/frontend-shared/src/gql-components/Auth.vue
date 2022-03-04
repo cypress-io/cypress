@@ -73,8 +73,8 @@ import { useI18n } from '@cy/i18n'
 const isOnline = useOnline()
 
 const props = defineProps<{
-  gql: AuthFragment,
-  showRetry?: boolean,
+  gql: AuthFragment
+  showRetry?: boolean
   showLogout?: boolean
 }>()
 

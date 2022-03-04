@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { CSSProperties } from 'react'
+import type { CSSProperties } from 'react'
 import cs from 'classnames'
 
 import { LineHeight, TextSize } from 'css'

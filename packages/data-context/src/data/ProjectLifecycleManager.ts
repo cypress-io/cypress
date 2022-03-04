@@ -325,6 +325,8 @@ export class ProjectLifecycleManager {
   setCurrentTestingType (testingType: TestingType | null) {
     this.ctx.update((d) => {
       d.currentTestingType = testingType
+      d.wizard.chosenBundler = null
+      d.wizard.chosenFramework = null
     })
 
     if (this._currentTestingType === testingType) {

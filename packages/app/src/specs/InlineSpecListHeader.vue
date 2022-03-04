@@ -79,8 +79,6 @@
 </template>
 
 <script lang="ts" setup>
-import Input from '@cy/components/Input.vue'
-import Button from '@cy/components/Button.vue'
 import { ref } from 'vue'
 import { useI18n } from '@cy/i18n'
 

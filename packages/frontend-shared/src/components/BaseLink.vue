@@ -7,16 +7,10 @@
 </template>
 
 <script lang="ts">
-// eslint-disable-next-line import/no-duplicates
-import { defineComponent } from 'vue'
-
-export default defineComponent({
-  inheritAttrs: true,
-})
+export const inheritAttrs = true
 </script>
 
 <script setup lang="ts">
-// eslint-disable-next-line import/no-duplicates
 import { computed, useAttrs } from 'vue'
 import type { AnchorHTMLAttributes } from 'vue'
 
@@ -30,10 +24,11 @@ const classes = computed(() => {
 })
 
 const props = withDefaults(defineProps<{
-  href: string,
+  href?: string
   useDefaultHocus?: boolean
 }>(), {
   useDefaultHocus: true,
+  href: '',
 })
 
 </script>

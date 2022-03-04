@@ -33,6 +33,7 @@
     "cypress:run:debug": "node ./scripts/debug.js cypress:run",
     "cypress:verify": "cypress verify --dev",
     "dev": "gulp dev",
+    "dev:vite": "CYPRESS_INTERNAL_VITE_DEV=1 yarn dev",
     "dev:clean": "gulp dev:clean",
     "gulp:debug": "node --inspect-brk ./node_modules/.bin/gulp",
     "dev-debug": "node ./scripts/debug.js dev",

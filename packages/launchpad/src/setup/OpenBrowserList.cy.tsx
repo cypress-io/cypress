@@ -56,7 +56,7 @@ describe('<OpenBrowserList />', () => {
         </div>),
     })
 
-    cy.get('[data-cy-browser="firefox"]:nth(1) [data-cy="unsupported-browser-tooltip"]')
+    cy.get('[data-cy-browser="firefox"]:nth(2) [data-cy="unsupported-browser-tooltip"]')
     .trigger('mouseenter')
     .contains('Cypress does not support running Firefox Developer Edition version 69.')
 

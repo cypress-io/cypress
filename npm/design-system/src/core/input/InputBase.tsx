@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { CSSProperties, InputHTMLAttributes, MutableRefObject, ReactNode, RefObject, TextareaHTMLAttributes, useMemo, useRef } from 'react'
+import type { CSSProperties, InputHTMLAttributes, MutableRefObject, ReactNode, RefObject, TextareaHTMLAttributes } from 'react'
 import { useTextField } from 'react-aria'
 import cs from 'classnames'
 
@@ -10,6 +10,8 @@ import { SizingProps } from 'core/shared'
 
 import styles from './InputBase.module.scss'
 import { useCombinedRefs } from 'hooks/useCombinedRefs'
+
+const { useMemo, useRef } = React
 
 export interface SharedInputBaseProps extends SizingProps, Omit<InputHTMLAttributes<HTMLInputElement>, 'size'> {
   inputRef?: MutableRefObject<HTMLTextAreaElement | HTMLInputElement | null> | null

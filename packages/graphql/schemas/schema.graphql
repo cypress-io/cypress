@@ -358,7 +358,7 @@ type CurrentProject implements Node & ProjectLike {
   """Browsers found that are compatible with Cypress"""
   browsers: [Browser!]
 
-  """The remote associated project from Cypress Cloud"""
+  """The remote associated project from Cypress Dashboard"""
   cloudProject: CloudProjectResult
 
   """List of all code generation candidates stories"""
@@ -419,7 +419,7 @@ type CurrentProject implements Node & ProjectLike {
   """Cached preferences for this project"""
   preferences: ProjectPreferences
 
-  """Used to associate project with Cypress cloud"""
+  """Used to associate project with Cypress dashboard"""
   projectId: String
 
   """Absolute path to the project on the filesystem"""
@@ -511,12 +511,15 @@ enum FrontendFrameworkCategoryEnum {
 }
 
 enum FrontendFrameworkEnum {
-  cra
+  crav4
+  crav5
   nextjs
   nuxtjs
   react
-  vue
-  vuecli
+  vue2
+  vue3
+  vueclivue2
+  vueclivue3
 }
 
 """Error from generated spec"""
@@ -553,7 +556,7 @@ type GlobalProject implements Node & ProjectLike {
   """Relay style Node ID field for the GlobalProject field"""
   id: ID!
 
-  """Used to associate project with Cypress cloud"""
+  """Used to associate project with Cypress dashboard"""
   projectId: String
 
   """Absolute path to the project on the filesystem"""
@@ -769,10 +772,10 @@ type Mutation {
     id: ID!
   ): CurrentProject
 
-  """Auth with Cypress Cloud"""
+  """Auth with Cypress Dashboard"""
   login: Query
 
-  """Log out of Cypress Cloud"""
+  """Log out of Cypress Dashboard"""
   logout: Query
 
   """Check if a give spec file will match the project spec pattern"""
@@ -912,7 +915,7 @@ enum PluginsState {
 
 """Common base fields inherited by GlobalProject / CurrentProject"""
 interface ProjectLike {
-  """Used to associate project with Cypress cloud"""
+  """Used to associate project with Cypress dashboard"""
   projectId: String
 
   """Absolute path to the project on the filesystem"""
@@ -1053,6 +1056,13 @@ type Storybook implements Node {
 """The bundlers that we can use with Cypress"""
 enum SupportedBundlers {
   vite
+  webpack4
+  webpack5
+}
+
+"""The packages for bundlers that we can use with Cypress"""
+enum SupportedPackage {
+  vite
   webpack
 }
 
@@ -1113,6 +1123,9 @@ type Wizard {
   """All of the component testing frameworks to choose from"""
   frameworks: [WizardFrontendFramework!]!
 
+  """Command to install required command"""
+  installDependenciesCommand: String
+
   """The list of packages to install that are currently installed"""
   installedPackages: [String!]
   language: WizardCodeLanguage
@@ -1137,8 +1150,8 @@ type WizardBundler implements Node {
   """Display name of the bundler"""
   name: String!
 
-  """Package to install associated with the bundler"""
-  package: String!
+  """Name of package on npm"""
+  package: SupportedPackage!
 
   """The name of the framework"""
   type: SupportedBundlers!

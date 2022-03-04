@@ -85,12 +85,14 @@ import { useScreenshotStore } from '../store/screenshot-store'
 import ScriptError from './ScriptError.vue'
 import ResizablePanels from './ResizablePanels.vue'
 import HideDuringScreenshotOrRunMode from './screenshot/HideDuringScreenshotOrRunMode.vue'
-import AutomationDisconnected from './automation/AutomationDisconnected.vue'
-import AutomationMissing from './automation/AutomationMissing.vue'
 import AutomationElement from './automation/AutomationElement.vue'
 import { useResizablePanels, useRunnerStyle } from './useRunnerStyle'
 import { useEventManager } from './useEventManager'
 import SpecRunnerHeaderRunMode from './SpecRunnerHeaderRunMode.vue'
+
+// See TODO comments within the template block of this file.
+// import AutomationDisconnected from './automation/AutomationDisconnected.vue'
+// import AutomationMissing from './automation/AutomationMissing.vue'
 
 const eventManager = getEventManager()
 

@@ -158,11 +158,11 @@ const { t } = useI18n()
 
 interface Option {
   [key: string]: any
-  disabled?: boolean,
+  disabled?: boolean
 }
 
 const props = withDefaults(defineProps<{
-  options: Option[] | readonly Option[],
+  options: Option[] | readonly Option[]
   modelValue?: Option // Current object being selected
   placeholder?: string
   label?: string

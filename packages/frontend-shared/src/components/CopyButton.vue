@@ -33,10 +33,10 @@ import Button from '../components/Button.vue'
 import TransitionQuickFade from '../components/transitions/TransitionQuickFade.vue'
 
 const props = withDefaults(defineProps<{
-  text: string,
-  noIcon?: boolean,
-  variant?: ButtonVariants,
-  size?: ButtonSizes,
+  text: string
+  noIcon?: boolean
+  variant?: ButtonVariants
+  size?: ButtonSizes
 }>(), {
   noIcon: false,
   variant: 'tertiary',

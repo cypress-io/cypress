@@ -84,7 +84,7 @@ mutation ScaffoldGeneratorStepOne_scaffoldIntegration {
 `
 
 const emits = defineEmits<{
-  (event: 'update:title', value: string): void,
+  (event: 'update:title', value: string): void
   (event: 'update:description', value: string): void
   (event: 'close'): void
 }>()

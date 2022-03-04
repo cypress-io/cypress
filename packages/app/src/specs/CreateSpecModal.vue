@@ -53,8 +53,8 @@ import { useI18n } from '@cy/i18n'
 import { getPathForPlatform } from '../paths'
 
 const props = defineProps<{
-  initialGenerator?: GeneratorId,
-  show: boolean,
+  initialGenerator?: GeneratorId
+  show: boolean
   gql: CreateSpecModalFragment
 }>()
 

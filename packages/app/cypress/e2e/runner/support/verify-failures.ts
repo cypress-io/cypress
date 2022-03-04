@@ -137,7 +137,7 @@ const verifyFailure = (options) => {
       cy.log('uncaught error has an associated log for the original error')
       cy.get('.command-name-uncaught-exception')
       .should('have.length', 1)
-      .should('have.class', 'command-state-failed')
+      .find('.command-state-failed')
       .find('.command-message-text')
       .should('include.text', uncaughtMessage || originalMessage)
     } else {
