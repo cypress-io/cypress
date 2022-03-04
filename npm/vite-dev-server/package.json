@@ -34,7 +34,7 @@
     "react": "17.0.2",
     "vite": "2.8.0",
     "vite-plugin-inspect": "0.4.3",
-    "vue": "3.2.13",
+    "vue": "3.2.31",
     "vue-eslint-parser": "7.11.0"
   },
   "peerDependencies": {
