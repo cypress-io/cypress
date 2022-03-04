@@ -81,6 +81,7 @@ executors:
     macos:
       # Executor should have Node >= required version
       xcode: "13.0.0"
+    resource_class: macos.x86.medium.gen2
     environment:
       PLATFORM: mac
 
@@ -2301,12 +2302,13 @@ mac-workflow: &mac-workflow
     - node_modules_install:
         name: darwin-node-modules-install
         executor: mac
+        resource_class: macos.x86.medium.gen2
         only-cache-for-root-user: true
 
     - build:
         name: darwin-build
         executor: mac
-        resource_class: medium
+        resource_class: macos.x86.medium.gen2
         requires:
           - darwin-node-modules-install
 
@@ -2325,7 +2327,7 @@ mac-workflow: &mac-workflow
           - test-runner:upload
           - test-runner:commit-status-checks
         executor: mac
-        resource_class: medium
+        resource_class: macos.x86.medium.gen2
         requires:
           - darwin-build
 
