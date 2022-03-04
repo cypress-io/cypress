@@ -52,7 +52,7 @@ shikiWrapperClasses computed property.
 
         props.class,
       ]"
-      @click="copyOnClick && isSupported ? () => copyCode() : () => {}"
+      @click="copyOnClick ? () => copyCode() : () => {}"
       v-html="highlightedCode"
     />
     <pre
@@ -61,7 +61,7 @@ shikiWrapperClasses computed property.
       :class="[props.class, lineNumbers ? 'pl-56px' : 'pl-8px' ]"
     >{{ trimmedCode }}</pre>
     <CopyButton
-      v-if="copyButton && isSupported"
+      v-if="copyButton"
       variant="outline"
       tabindex="-1"
       class="bg-white absolute"
@@ -107,7 +107,7 @@ export { highlighter, inheritAttrs }
 <script lang="ts" setup>
 import type { Ref } from 'vue'
 import { computed, onBeforeMount, ref } from 'vue'
-import CopyButton from '../gql-components/CopyButton.vue'
+import CopyButton from '@cy/gql-components/CopyButton.vue'
 import { useClipboard } from '@cy/gql-components/useClipboard'
 
 const highlighterInitialized = ref(false)
