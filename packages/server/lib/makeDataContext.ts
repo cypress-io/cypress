@@ -91,7 +91,7 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
         return user.logOut()
       },
       resetAuthState () {
-        return ctx.actions.auth.resetAuthState()
+        auth.stopServer()
       },
     },
     projectApi: {

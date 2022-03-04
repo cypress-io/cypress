@@ -32,6 +32,9 @@ const props = withDefaults(
   },
 )
 
-const query = useQuery({ query: HeaderBar_HeaderBarQueryDocument })
+const query = useQuery({
+  query: HeaderBar_HeaderBarQueryDocument,
+  requestPolicy: 'cache-and-network',
+})
 
 </script>

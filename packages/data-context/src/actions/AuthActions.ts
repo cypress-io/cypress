@@ -5,7 +5,7 @@ export interface AuthApiShape {
   getUser(): Promise<Partial<AuthenticatedUserShape>>
   logIn(onMessage: (message: AuthStateShape) => void): Promise<AuthenticatedUserShape>
   logOut(): Promise<void>
-  resetAuthState(): Promise<void>
+  resetAuthState(): void
 }
 
 export class AuthActions {
@@ -48,10 +48,15 @@ export class AuthActions {
       this.ctx.update((coreData) => {
         coreData.authState = authState
       })
+
+      this.ctx.emitter.toApp()
+      this.ctx.emitter.toLaunchpad()
     }))
   }
 
   resetAuthState () {
+    this.authApi.resetAuthState()
+
     this.ctx.update((coreData) => {
       coreData.authState = { browserOpened: false }
     })

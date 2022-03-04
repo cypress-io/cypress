@@ -228,5 +228,6 @@ const start = (onMessage, utmCode, onLogin) => {
 
 export = {
   start,
+  stopServer,
   _internal,
 }
