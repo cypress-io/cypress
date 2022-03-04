@@ -14,9 +14,17 @@ export function state (): NetStubbingState {
         res.removeAllListeners('finish')
         res.removeAllListeners('error')
         res.on('error', noop)
-        await res.end('', () => {
-          res.destroy()
-        })
+        if (!res.destroyed) {
+          await new Promise((resolve) => {
+            if (res.writable) {
+              res.end('', () => {
+                resolve(res.destroy())
+              })
+            } else {
+              resolve(res.destroy())
+            }
+          })
+        }
       }
 
       this.pendingEventHandlers = {}
