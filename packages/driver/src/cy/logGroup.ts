@@ -20,7 +20,7 @@ export interface LogGroupConfig {
 export default (Cypress, userOptions: LogGroupConfig, fn: (log) => any) => {
   const cy = Cypress.cy
 
-  const shouldEmitLog = userOptions.log || true
+  const shouldEmitLog = userOptions.log === undefined ? true : userOptions.log
 
   const options: LogConfig = {
     ...userOptions,
