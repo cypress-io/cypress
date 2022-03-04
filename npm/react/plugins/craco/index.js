@@ -2,13 +2,13 @@ const { startDevServer } = require('@cypress/webpack-dev-server')
 const { createWebpackDevConfig } = require('@craco/craco')
 const { getLegacyDevServer } = require('../utils/legacy-setup-dev-server')
 
-function devServer (cypressDevServerConfig, cracoConfig, indexHtml) {
+function devServer (cypressDevServerConfig, cracoConfig, indexHtmlFile) {
   process.env.FAST_REFRESH = 'false'
 
   return startDevServer({
     options: cypressDevServerConfig,
     webpackConfig: createWebpackDevConfig(cracoConfig),
-    indexHtml,
+    indexHtmlFile,
   })
 }
 
@@ -21,6 +21,6 @@ module.exports = getLegacyDevServer(devServer, (config) => {
 
 // New signature
 // - Note that this also includes a change to the second argument!
-module.exports.devServer = (cypressDevServerConfig, { cracoConfig, indexHtml }) => {
-  return devServer(cypressDevServerConfig, cracoConfig, indexHtml)
+module.exports.devServer = (cypressDevServerConfig, { cracoConfig, indexHtmlFile }) => {
+  return devServer(cypressDevServerConfig, cracoConfig, indexHtmlFile)
 }

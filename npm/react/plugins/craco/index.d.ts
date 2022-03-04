@@ -9,7 +9,7 @@ declare namespace CypressCracoDevServer {
      * Path to an index.html file that will serve as the template in
      * which your components will be rendered.
      */
-    indexHtml?: string
+    indexHtmlFile?: string
   }
 
   /**

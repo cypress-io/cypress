@@ -44,6 +44,6 @@ export = (mode, options) => {
 
   if (mode === 'interactive') {
     // Either launchpad or straight to e2e tests
-    return require('./interactive-e2e').run(options, loadingPromise)
+    return require('./interactive').run(options, loadingPromise)
   }
 }
