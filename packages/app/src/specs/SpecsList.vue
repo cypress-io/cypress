@@ -1,14 +1,17 @@
 <template>
   <div class="p-24px spec-container">
     <Alert
+      v-if="isAlertOpen"
+      v-model="isAlertOpen"
       status="error"
       title="Spec not found"
       class="mb-16px"
       :icon="WarningIcon"
+      dismissible
     >
       <p class="mb-24px">
         There is no spec matching the following location: <InlineCodeFragment variant="error">
-          path/to/spec
+          {{ route.params?.unrunnable }}
         </InlineCodeFragment>
       </p>
       <p>It is possible that the file has been moved or deleted. Please choose from the list of specs below.</p>
@@ -133,7 +136,9 @@ import { useDebounce } from '@vueuse/core'
 import Alert from '../../../frontend-shared/src/components/Alert.vue'
 import InlineCodeFragment from '../../../frontend-shared/src/components/InlineCodeFragment.vue'
 import WarningIcon from '~icons/cy/warning_x16.svg'
+import { useRoute } from 'vue-router'
 
+const route = useRoute()
 const { t } = useI18n()
 
 gql`
@@ -179,6 +184,8 @@ const emit = defineEmits<{
 
 const showSpecPatternModal = ref(false)
 
+const isAlertOpen = ref(!!route.params?.unrunnable)
+
 const cachedSpecs = useCachedSpecs(computed(() => props.gql.currentProject?.specs || []))
 
 const search = ref('')
@@ -219,6 +226,7 @@ function getIdIfDirectory (row) {
 
   return `speclist-${row.data.data.relative.replace(row.data.data.baseName, '')}`
 }
+
 </script>
 
 <style scoped>
