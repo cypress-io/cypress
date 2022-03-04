@@ -9,7 +9,7 @@ import {
 } from '@urql/core'
 import { devtoolsExchange } from '@urql/devtools'
 import { useToast } from 'vue-toastification'
-import type { Socket } from '@packages/socket/lib/browser'
+import { client, Socket } from '@packages/socket/lib/browser'
 import { createClient as createWsClient } from 'graphql-ws'
 
 import { cacheExchange as graphcacheExchange } from '@urql/exchange-graphcache'
@@ -141,6 +141,8 @@ export function makeUrqlClient (config: UrqlClientConfig): Client {
 
   const url = config.target === 'launchpad' ? `/__launchpad/graphql` : `/${config.namespace}/graphql`
 
+  const io = window.ws ?? getPubSubSource(config)
+
   return createClient({
     url,
     requestPolicy: cypressInRunMode ? 'cache-only' : 'cache-first',
@@ -150,6 +152,31 @@ export function makeUrqlClient (config: UrqlClientConfig): Client {
     // exchange to adapt to a similar interface. This way it'll be simple to
     // swap in-and-out during integration tests.
     fetch: config.target === 'launchpad' || window.__CYPRESS_GQL_NO_SOCKET__ ? window.fetch : urqlFetchSocketAdapter(io),
+  })
+}
+
+interface LaunchpadPubSubConfig {
+  target: 'launchpad'
+}
+
+interface AppPubSubConfig {
+  target: 'app'
+  socketIoRoute: string
+}
+
+type PubSubConfig = LaunchpadPubSubConfig | AppPubSubConfig
+
+function getPubSubSource (config: PubSubConfig) {
+  if (config.target === 'launchpad') {
+    return client({
+      path: '/__launchpad/socket',
+      transports: ['websocket'],
+    })
+  }
+
+  return client({
+    path: config.socketIoRoute,
+    transports: ['websocket'],
   })
 }
 
