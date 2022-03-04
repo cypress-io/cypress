@@ -2,7 +2,7 @@
   <Dialog
     :open="modelValue"
     class="inset-0 z-10 fixed overflow-y-auto"
-    @close="clickOutside && closeModal()"
+    @close="closeModal()"
   >
     <div class="flex min-h-screen items-center justify-center">
       <slot
@@ -68,12 +68,10 @@ const props = withDefaults(defineProps<{
   modelValue?: boolean
   helpLink?: string
   helpText?: string
-  clickOutside?: boolean
   variant?: 'bare'
   title?: string
   class?: string | string[] | Record<string, any>
 }>(), {
-  clickOutside: true,
   modelValue: false,
   helpText: `${defaultMessages.links.needHelp}`,
   helpLink: 'https://on.cypress.io',

@@ -18,6 +18,27 @@ const BLACKLIST_PROPS = 'snapshots'.split(' ')
 
 let counter = 0
 
+export interface LogConfig {
+  // defaults to command
+  instrument?: 'agent' | 'command' | 'route'
+  // name of the log
+  name?: string
+  // additional information to include in the log if not overridden
+  // the render props message
+  // defaults to command arguments for command instrument
+  message?: string
+  // the JQuery element for the command. This will highlight the command
+  // in the main window when debugging
+  $el?: JQuery
+  // whether or not to show the log in the Reporter UI or only
+  // store the log details on the command and log manager
+  emitOnly?: boolean
+  // whether or not to start a new log group
+  groupStart?: boolean
+  // timeout of the group command - defaults to defaultCommandTimeout
+  timeout?: number
+}
+
 // mutate attrs by nulling out
 // object properties
 const reduceMemory = (attrs) => {
