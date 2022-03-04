@@ -3,6 +3,7 @@ import type { SpecBridgeDomainCommunicator } from './communicator'
 import $errUtils from '../cypress/error_utils'
 import $utils from '../cypress/utils'
 import { syncConfigToCurrentDomain, syncEnvToCurrentDomain } from '../util/config'
+import type { Runnable, Test } from 'mocha'
 
 interface RunDomainFnOptions {
   config: Cypress.Config
@@ -13,6 +14,46 @@ interface RunDomainFnOptions {
   state: {}
 }
 
+interface serializedRunnable {
+  id: string
+  type: string
+  title: string
+  parent: serializedRunnable
+  ctx: {}
+  _timeout: number
+  titlePath: string
+}
+
+const rehydrateRunnable = (data: serializedRunnable): Runnable|Test => {
+  let runnable
+
+  if (data.type === 'test') {
+    runnable = Cypress.mocha.createTest(data.title, () => {})
+  } else {
+    runnable = new Cypress.mocha._mocha.Mocha.Runnable(data.title)
+  }
+
+  runnable.ctx = data.ctx
+  runnable.id = data.id
+  runnable._timeout = data._timeout
+  // Short circuit title path to avoid implementing it up the parent chain.
+  runnable.titlePath = () => {
+    return data.titlePath
+  }
+
+  if (data.parent) {
+    runnable.parent = rehydrateRunnable(data.parent)
+  }
+
+  // This is normally setup in the run command, but we don't call run.
+  // Any errors this would be reporting will already have been reported previously
+  runnable.callback = () => {}
+
+  console.log('subdomain runnable', runnable)
+
+  return runnable
+}
+
 export const handleDomainFn = (Cypress: Cypress.Cypress, cy: $Cy, specBridgeCommunicator: SpecBridgeDomainCommunicator) => {
   const reset = (state) => {
     cy.reset({})
@@ -20,15 +61,10 @@ export const handleDomainFn = (Cypress: Cypress.Cypress, cy: $Cy, specBridgeComm
     const stateUpdates = {
       ...state,
       redirectionCount: {}, // This is fine to set to an empty object, we want to refresh this count on each switchToDomain command.
-      runnable: {
-        ...state.runnable,
-        titlePath: () => state.runnable.titlePath,
-        clearTimeout () {},
-        resetTimeout () {},
-        timeout () {},
-        isPending () {},
-      },
     }
+
+    // Setup the runnable
+    stateUpdates.runnable = rehydrateRunnable(state.runnable)
 
     // the viewport could've changed in the primary, so sync it up in the secondary
     Cypress.multiDomainCommunicator.emit('sync:viewport', { viewportWidth: state.viewportWidth, viewportHeight: state.viewportHeight })
@@ -42,6 +78,12 @@ export const handleDomainFn = (Cypress: Cypress.Cypress, cy: $Cy, specBridgeComm
     // Stability is always false when we start as the page will always be
     // loading at this point
     cy.isStable(false, 'multi-domain-start')
+  }
+
+  const setRunnableState = () => {
+    // TODO: We're telling the runnable that it has passed to avoid a timeout on the last (empty) command. Normally this would be set inherently by running (runnable.run) the test.
+    // Set this to passed regardless of the state of the test, the runnable isn't responsible for reporting success.
+    cy.state('runnable').state = 'passed'
   }
 
   specBridgeCommunicator.on('run:domain:fn', async (options: RunDomainFnOptions) => {
@@ -59,6 +101,7 @@ export const handleDomainFn = (Cypress: Cypress.Cypress, cy: $Cy, specBridgeComm
     syncEnvToCurrentDomain(env)
 
     cy.state('onFail', (err) => {
+      setRunnableState()
       if (queueFinished) {
         // If the queue is already finished, send this event instead because
         // the primary won't be listening for 'queue:finished' anymore
@@ -100,11 +143,13 @@ export const handleDomainFn = (Cypress: Cypress.Cypress, cy: $Cy, specBridgeComm
 
         if (!hasCommands) {
           queueFinished = true
+          setRunnableState()
 
           return
         }
       }
     } catch (err) {
+      setRunnableState()
       specBridgeCommunicator.toPrimary('ran:domain:fn', { err }, { syncConfig: true })
 
       return
@@ -113,6 +158,7 @@ export const handleDomainFn = (Cypress: Cypress.Cypress, cy: $Cy, specBridgeComm
     cy.queue.run()
     .then(() => {
       queueFinished = true
+      setRunnableState()
       specBridgeCommunicator.toPrimary('queue:finished', {
         subject: cy.state('subject'),
       }, {
