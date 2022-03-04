@@ -6,7 +6,7 @@ export function state (): NetStubbingState {
     requests: {},
     routes: [],
     pendingEventHandlers: {},
-    reset () {
+    async reset () {
       // clean up requests that are still pending
       for (const requestId in this.requests) {
         const { res } = this.requests[requestId]
@@ -14,7 +14,9 @@ export function state (): NetStubbingState {
         res.removeAllListeners('finish')
         res.removeAllListeners('error')
         res.on('error', noop)
-        res.end()
+        await res.end('', () => {
+          res.destroy()
+        })
       }
 
       this.pendingEventHandlers = {}
