@@ -28,7 +28,7 @@ export = {
     const minWidth = Math.round(/* 13" MacBook Air */ 1792 / 3) // Thirds
 
     const preferredWidth = 1200
-    const minHeight = 800
+    const minHeight = 400
     const preferredHeight = 800
 
     const chooseDimensions = ({ preferred, previous, minimum }) => {
