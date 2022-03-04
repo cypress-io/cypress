@@ -40,7 +40,7 @@ export const resolveServerConfig = async ({ viteConfig, options, indexHtml }: St
     supportFile,
     options.devServerEvents,
     options.specs,
-    isTextTerminal,
+    Boolean(isTextTerminal),
     options.config.namespace,
     indexHtml,
   )]

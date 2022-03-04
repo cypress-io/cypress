@@ -81,6 +81,7 @@ export const makeCypressPlugin = (
           tags: [],
         }
       }
+
       const indexHtmlPath = indexHtml ? resolve(projectRoot, indexHtml) : resolve(__dirname, '..', 'index.html')
       const indexHtmlContent = await readFile(indexHtmlPath, { encoding: 'utf8' })
       // find </body> last index
