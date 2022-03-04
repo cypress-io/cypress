@@ -1109,15 +1109,17 @@ export class ProjectLifecycleManager {
 
     if (typeof configFile === 'string') {
       try {
-        this.ctx.fs.statSync(this._pathToFile(this.legacyConfigFile))
+        this.ctx.fs.statSync(this._pathToFile(configFile))
       } catch (e) {
-        const configFileNameAfterMigration = this.legacyConfigFile.replace('.json', `.config.${metaState.hasTypescript ? 'ts' : 'js'}`)
+        if (configFile.endsWith('.json')) {
+          const configFileNameAfterMigration = configFile.replace('.json', `.config.${metaState.hasTypescript ? 'ts' : 'js'}`)
 
-        try {
-          this.ctx.fs.statSync(this._pathToFile(configFileNameAfterMigration))
-          this.ctx.onError(getError('MIGRATION_ALREADY_OCURRED', configFileNameAfterMigration, this.legacyConfigFile))
-        } catch {
+          try {
+            this.ctx.fs.statSync(this._pathToFile(configFileNameAfterMigration))
+            this.ctx.onError(getError('MIGRATION_ALREADY_OCURRED', configFileNameAfterMigration, configFile))
+          } catch {
           // No need to handle
+          }
         }
       }
 

@@ -1311,8 +1311,11 @@ export const AllCypressErrors = {
 
   MIGRATION_ALREADY_OCURRED: (configFile: string, legacyConfigFile: string) => {
     return errTemplate`
-      The migration for ${fmt.highlight(legacyConfigFile)} already ocurred. Use
-      ${fmt.highlight(configFile)} which is already created for your config file.
+      You are attempting to use Cypress with an older config file: ${fmt.highlight(legacyConfigFile)}
+      When you upgraded to Cypress v10.0 the config file was updated and moved to a new location: ${fmt.highlight(configFile)}
+
+      You may need to update any CLI scripts to ensure that they are referring the new version. This would typically look something like:
+      "${fmt.highlight(`cypress open --config-file=${configFile}`)}"
 
       https://on.cypress.io/migration-guide
     `

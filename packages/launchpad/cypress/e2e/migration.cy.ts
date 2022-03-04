@@ -39,7 +39,7 @@ function migrateAndVerifyConfig (migratedConfigFile: string = 'cypress.config.js
 
     const oldConfigStats = await ctx.lifecycleManager.checkIfLegacyConfigFileExist()
 
-    expect(oldConfigStats).to.be.null
+    expect(oldConfigStats).to.be.false
 
     await ctx.actions.migration.assertSuccessfulConfigMigration(o.migratedConfigFile)
   }, { migratedConfigFile })
@@ -1014,6 +1014,7 @@ describe('Migrate custom config files', () => {
     cy.openProject('migration-custom-config-file-migration-already-ocurred', ['--config-file', 'customConfig.json'])
     cy.visitLaunchpad()
 
-    cy.contains('The migration for customConfig.json already ocurred. Use customConfig.config.js which is already created for your config file.')
+    cy.contains('You are attempting to use Cypress with an older config file: customConfig.json')
+    cy.contains('When you upgraded to Cypress v10.0 the config file was updated and moved to a new location: customConfig.config.js')
   })
 })
