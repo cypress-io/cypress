@@ -316,7 +316,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     options.netStubbingState = this.netStubbingState
     options.getRenderedHTMLOrigins = this._networkProxy?.http.getRenderedHTMLOrigins
 
-    options.onResetServerState = async () => {
+    options.onResetServerState = () => {
       this.networkProxy.reset()
       this.netStubbingState.reset()
     }
