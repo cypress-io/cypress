@@ -34,7 +34,7 @@ import { cached } from './util/cached'
 import type { GraphQLSchema } from 'graphql'
 import type { Server } from 'http'
 import type { AddressInfo } from 'net'
-import type { App as ElectronApp } from 'electron'
+import { App as ElectronApp, clipboard } from 'electron'
 import { VersionsDataSource } from './sources/VersionsDataSource'
 import type { Socket, SocketIOServer } from '@packages/socket'
 import { globalPubSub } from '.'
@@ -225,6 +225,10 @@ export class DataContext {
 
   get projectsList () {
     return this.coreData.app.projects
+  }
+
+  copyTextToClipboard (text: string) {
+    clipboard.writeText(text)
   }
 
   // Servers
