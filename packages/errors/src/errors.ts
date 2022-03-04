@@ -1309,6 +1309,15 @@ export const AllCypressErrors = {
     `
   },
 
+  MIGRATION_ALREADY_OCURRED: (configFile: string, legacyConfigFile: string) => {
+    return errTemplate`
+      The migration for ${fmt.highlight(legacyConfigFile)} already ocurred. Use
+      ${fmt.highlight(configFile)} which is already created for your config file.
+
+      https://on.cypress.io/migration-guide
+    `
+  },
+
 } as const
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars

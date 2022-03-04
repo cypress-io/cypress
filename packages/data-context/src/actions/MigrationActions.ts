@@ -16,7 +16,7 @@ export class MigrationActions {
 
   async createConfigFile () {
     const config = await this.ctx.migration.createConfigString()
-    const configFileNameAfterMigration = this.ctx.migration.configFileNameAfter
+    const configFileNameAfterMigration = this.ctx.migration.configFileNameAfterMigration
 
     const checkIfFileExists = await this.ctx.actions.file.checkIfFileExists(configFileNameAfterMigration)
 
@@ -37,7 +37,7 @@ export class MigrationActions {
     })
 
     // @ts-ignore configFile needs to be updated with the new one, so it finds the correct one
-    this.ctx.modeOptions.configFile = this.ctx.migration.configFileNameAfter
+    this.ctx.modeOptions.configFile = this.ctx.migration.configFileNameAfterMigration
 
     return true
   }

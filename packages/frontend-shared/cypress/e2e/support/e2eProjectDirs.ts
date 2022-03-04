@@ -40,6 +40,7 @@ export const e2eProjectDirs = [
   'migration-component-testing',
   'migration-component-testing-customized',
   'migration-component-testing-defaults',
+  'migration-custom-config-file-migration-already-ocurred',
   'migration-custom-config-file-respect-dirname',
   'migration-custom-config-file-respect-pathname',
   'migration-custom-config-file-root-level',

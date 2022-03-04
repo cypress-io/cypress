@@ -25,6 +25,7 @@ import {
 
 import type { FilePart } from './migration/format'
 import Debug from 'debug'
+import { getError } from '@packages/errors'
 
 const debug = Debug('cypress:data-context:sources:MigrationDataSource')
 
@@ -210,6 +211,18 @@ export class MigrationDataSource {
   }
 
   async getConfig () {
+    const legacyConfigFileExist = await this.ctx.deref.actions.file.checkIfFileExists(this.ctx.lifecycleManager.legacyConfigFile)
+
+    if (!legacyConfigFileExist) {
+      const configFileAfterMigrationExist = await this.ctx.deref.actions.file.checkIfFileExists(this.configFileNameAfterMigration)
+
+      if (configFileAfterMigrationExist) {
+        this.ctx.onError(getError('MIGRATION_ALREADY_OCURRED', this.configFileNameAfterMigration, this.ctx.lifecycleManager.legacyConfigFile))
+
+        return
+      }
+    }
+
     const config = await this.parseCypressConfig()
 
     return JSON.stringify(config, null, 2)
@@ -352,7 +365,7 @@ export class MigrationDataSource {
     this._step = step
   }
 
-  get configFileNameAfter () {
+  get configFileNameAfterMigration () {
     return this.ctx.lifecycleManager.legacyConfigFile.replace('.json', `.config.${this.ctx.lifecycleManager.metaState.hasTypescript ? 'ts' : 'js'}`)
   }
 }

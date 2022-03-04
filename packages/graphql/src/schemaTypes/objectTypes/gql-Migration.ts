@@ -209,7 +209,7 @@ export const Migration = objectType({
     t.nonNull.string('configFileNameAfter', {
       description: 'the name of the config file after the migration',
       resolve: (source, args, ctx) => {
-        return ctx.migration.configFileNameAfter
+        return ctx.migration.configFileNameAfterMigration
       },
     })
 

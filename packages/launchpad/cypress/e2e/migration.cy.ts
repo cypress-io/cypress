@@ -1008,4 +1008,12 @@ describe('Migrate custom config files', () => {
     migrateAndVerifyConfig('config/cypress.foo.config.js', 'config/cypress.foo.json')
     checkOutcome()
   })
+
+  it('shows error for migration-custom-config-file-migration-already-ocurred', () => {
+    cy.scaffoldProject('migration-custom-config-file-migration-already-ocurred')
+    cy.openProject('migration-custom-config-file-migration-already-ocurred', ['--config-file', 'customConfig.json'])
+    cy.visitLaunchpad()
+
+    cy.contains('The migration for customConfig.json already ocurred. Use customConfig.config.js which is already created for your config file.')
+  })
 })
