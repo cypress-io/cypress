@@ -99,9 +99,10 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
           _resolve({ subject, unserializableSubjectType })
         }
 
-        communicator.once('sync:config', ({ config, env }) => {
+        communicator.once('sync:globals', ({ config, env, state }) => {
           syncConfigToCurrentDomain(config)
           syncEnvToCurrentDomain(env)
+          Cypress.state(state)
         })
 
         communicator.once('ran:domain:fn', (details) => {
@@ -159,6 +160,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
                   runnable: serializeRunnable(Cypress.state('runnable')),
                   duringUserTestExecution: Cypress.state('duringUserTestExecution'),
                   hookId: state('hookId'),
+                  hasVisitedAboutBlank: state('hasVisitedAboutBlank'),
                 },
                 config: preprocessConfig(Cypress.config()),
                 env: preprocessEnv(Cypress.env()),

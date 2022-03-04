@@ -43,6 +43,8 @@ const setup = (cypressConfig: Cypress.Config, env: Cypress.ObjectLike) => {
     testingType: 'e2e',
   }) as Cypress.Cypress
 
+  Cypress.specBridgeCommunicator.initialize(window)
+
   // @ts-ignore
   const cy = window.cy = new $Cy(window, Cypress, Cypress.Cookies, Cypress.state, Cypress.config, false)
 

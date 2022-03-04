@@ -1,5 +1,5 @@
-// @ts-ignore / session support is needed for visiting about:blank between tests
-context('multi-domain navigation', { experimentalSessionSupport: true, experimentalMultiDomain: true }, () => {
+// @ts-ignore
+context('multi-domain navigation', { experimentalMultiDomain: true }, () => {
   it('.go()', () => {
     cy.visit('/fixtures/multi-domain.html')
     cy.get('a[data-cy="multi-domain-secondary-link"]').click()

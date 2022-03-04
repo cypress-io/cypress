@@ -14,7 +14,6 @@ const debug = debugFn('cypress:driver:navigation')
 
 let id = null
 let previousDomainVisited: boolean = false
-let hasVisitedAboutBlank: boolean = false
 let currentlyVisitingAboutBlank: boolean = false
 let knownCommandCausedInstability: boolean = false
 
@@ -34,7 +33,7 @@ const reset = (test: any = {}) => {
 
   // make sure we reset that we haven't
   // visited about blank again
-  hasVisitedAboutBlank = false
+  Cypress.state('hasVisitedAboutBlank', false)
 
   currentlyVisitingAboutBlank = false
 
@@ -96,8 +95,24 @@ const specifyFileByRelativePath = (url, log) => {
 }
 
 const aboutBlank = (cy, win) => {
+  currentlyVisitingAboutBlank = true
+
+  if (Cypress.state('isMultiDomain')) {
+    return new Promise((resolve) => {
+      Cypress.specBridgeCommunicator.once('visit:about:blank:end', () => {
+        currentlyVisitingAboutBlank = false
+        resolve()
+      })
+
+      Cypress.specBridgeCommunicator.toPrimary('visit:about:blank')
+    })
+  }
+
   return new Promise((resolve) => {
-    cy.once('window:load', resolve)
+    cy.once('window:load', () => {
+      currentlyVisitingAboutBlank = false
+      resolve()
+    })
 
     return $utils.locHref('about:blank', win)
   })
@@ -485,6 +500,12 @@ export default (Commands, Cypress, cy, state, config) => {
 
   Cypress.on('form:submitted', (e) => {
     formSubmitted(Cypress, e)
+  })
+
+  Cypress.multiDomainCommunicator.on('visit:about:blank', (_, domain) => {
+    aboutBlank(cy, Cypress.state('window')).then(() => {
+      Cypress.multiDomainCommunicator.toSpecBridge(domain, 'visit:about:blank:end')
+    })
   })
 
   const visitFailedByErr = (err, url, fn) => {
@@ -907,7 +928,7 @@ export default (Commands, Cypress, cy, state, config) => {
           // if this is multi-domain, we need to tell the primary to change
           // the AUT iframe since we don't have access to it
           if (Cypress.state('isMultiDomain')) {
-            return Cypress.emit('multi:domain:visit:url', { url })
+            return Cypress.specBridgeCommunicator.toPrimary('visit:url', { url })
           }
 
           return $utils.iframeSrc($autIframe, url)
@@ -1197,15 +1218,11 @@ export default (Commands, Cypress, cy, state, config) => {
         // so that we nuke the previous state. subsequent
         // visits will not navigate to about:blank so that
         // our history entries are intact
-        // TODO: is this okay to skip for multi-domain?
-        if (!hasVisitedAboutBlank && !Cypress.state('isMultiDomain')) {
-          hasVisitedAboutBlank = true
-          currentlyVisitingAboutBlank = true
+        if (!Cypress.state('hasVisitedAboutBlank')) {
+          Cypress.state('hasVisitedAboutBlank', true)
 
           return aboutBlank(cy, win)
           .then(() => {
-            currentlyVisitingAboutBlank = false
-
             return go()
           })
         }

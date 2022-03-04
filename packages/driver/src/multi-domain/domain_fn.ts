@@ -70,7 +70,7 @@ export const handleDomainFn = (Cypress: Cypress.Cypress, cy: $Cy, specBridgeComm
       }
 
       cy.stop()
-      specBridgeCommunicator.toPrimary('queue:finished', { err }, { syncConfig: true })
+      specBridgeCommunicator.toPrimary('queue:finished', { err }, { syncGlobals: true })
     })
 
     try {
@@ -94,10 +94,10 @@ export const handleDomainFn = (Cypress: Cypress.Cypress, cy: $Cy, specBridgeComm
           subject,
           finished: !hasCommands,
         }, {
-          // Only sync the config if there are no commands in queue
+          // Only sync the globals if there are no commands in queue
           // (for instance, only assertions exist in the callback)
           // since it means the callback is finished at this point
-          syncConfig: !hasCommands,
+          syncGlobals: !hasCommands,
         })
 
         if (!hasCommands) {
@@ -107,7 +107,7 @@ export const handleDomainFn = (Cypress: Cypress.Cypress, cy: $Cy, specBridgeComm
         }
       }
     } catch (err) {
-      specBridgeCommunicator.toPrimary('ran:domain:fn', { err }, { syncConfig: true })
+      specBridgeCommunicator.toPrimary('ran:domain:fn', { err }, { syncGlobals: true })
 
       return
     }
@@ -118,7 +118,7 @@ export const handleDomainFn = (Cypress: Cypress.Cypress, cy: $Cy, specBridgeComm
       specBridgeCommunicator.toPrimary('queue:finished', {
         subject: cy.state('subject'),
       }, {
-        syncConfig: true,
+        syncGlobals: true,
       })
     })
   })
