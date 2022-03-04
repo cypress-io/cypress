@@ -6,7 +6,7 @@ export function state (): NetStubbingState {
     requests: {},
     routes: [],
     pendingEventHandlers: {},
-    async reset () {
+    reset () {
       // clean up requests that are still pending
       for (const requestId in this.requests) {
         const { res } = this.requests[requestId]
