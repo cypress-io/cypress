@@ -57,7 +57,6 @@ export const Cypress = (
   const supportFilePath = options.config.supportFile
   const devServerEvents = options.devServerEvents
   const specs = options.specs
-  const namespace = options.namespace
   const indexHtml = options.indexHtml
 
   let specsPathsSet = getSpecsPathsSet(specs)
@@ -83,37 +82,13 @@ export const Cypress = (
 
       // insert the script in the end of the body
       return `${indexHtmlContent.substring(0, endOfBody)
-    }<script src="/@cypress:client-init-test" type="module"></script>${
+    }<script src="@cypress:client-init-test" type="module"></script>${
       indexHtmlContent.substring(endOfBody)
     }`
     },
     resolveId (id) {
-      if (id === '@cypress:config') {
-        return id
-      }
-
-      if (id === '@cypress:support-path') {
-        return posixSupportFilePath
-      }
-
-      if (id === '@cypress:spec-loaders') {
-        return id
-      }
-
-      if (id === '/@cypress:client-init-test') {
+      if (id === '@cypress:client-init-test') {
         return INIT_FILEPATH
-      }
-    },
-    load (id) {
-      if (id === '@cypress:spec-loaders') {
-        return `export default {\n${specs.map((s) => {
-          return `${JSON.stringify(s.relative)}:()=>import(${JSON.stringify(s.absolute)})`
-        }).join(',\n')}\n}`
-      }
-
-      if (id === '@cypress:config') {
-        return `
-export const hasSupportPath = ${JSON.stringify(!!supportFilePath)}`
       }
     },
     configureServer: async (server: ViteDevServer) => {
@@ -157,7 +132,7 @@ export const hasSupportPath = ${JSON.stringify(!!supportFilePath)}`
             devServerEvents.emit('dev-server:compile:success')
 
             // if we update support we know we have to re-run it all
-            // no need to ckeck further
+            // no need to check further
             return []
           }
 

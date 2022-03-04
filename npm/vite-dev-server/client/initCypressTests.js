@@ -1,18 +1,22 @@
 // This file is merged in a <script type=module> into index.html
 // it will be used to load and kick start the selected spec
-import { hasSupportPath } from '@cypress:config'
 
 const CypressInstance = window.Cypress = parent.Cypress
 
-if (!CypressInstance) {
-  throw new Error('Tests cannot run without a reference to Cypress!')
+const importsToLoad = []
+
+const supportFile = CypressInstance.config('supportFile')
+
+console.log(supportFile)
+
+if (supportFile) {
+  importsToLoad.push(() => import(supportFile))
 }
 
-const specPath = CypressInstance.spec.relative
-const importsToLoad = [() => import(/* @vite-ignore */ `/${specPath}`)]
+importsToLoad.push(() => import(`/${CypressInstance.spec.relative}`))
 
-if (hasSupportPath) {
-  importsToLoad.unshift(() => import('@cypress:support-path'))
+if (!CypressInstance) {
+  throw new Error('Tests cannot run without a reference to Cypress!')
 }
 
 // load the support and spec
