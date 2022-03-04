@@ -171,7 +171,7 @@ export const moveBinaries = async (args = []) => {
       platformArch,
     })
 
-    console.log('finding binary for %s in %s', platformArch, uploadDir)
+    console.log('finding binary in %s for %s in %s', aws.bucket, platformArch, uploadDir)
 
     const list: string[] = await s3helpers.listS3Objects(uploadDir, aws.bucket, s3)
 
