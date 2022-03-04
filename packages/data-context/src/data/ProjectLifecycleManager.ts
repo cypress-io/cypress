@@ -217,6 +217,12 @@ export class ProjectLifecycleManager {
     return path.basename(this.projectRoot)
   }
 
+  async checkIfLegacyConfigFileExist () {
+    const legacyConfigFileExist = await this.ctx.deref.actions.file.checkIfFileExists(this.legacyConfigFile)
+
+    return Boolean(legacyConfigFileExist)
+  }
+
   clearCurrentProject () {
     this.resetInternalState()
     this._initializedProject = undefined
@@ -1294,6 +1300,12 @@ export class ProjectLifecycleManager {
     }
 
     return true
+  }
+
+  async needsCypressJsonMigration () {
+    const legacyConfigFileExist = await this.checkIfLegacyConfigFileExist()
+
+    return this.metaState.needsCypressJsonMigration && Boolean(legacyConfigFileExist)
   }
 
   private _pendingInitialize?: pDefer.DeferredPromise<FullConfig>

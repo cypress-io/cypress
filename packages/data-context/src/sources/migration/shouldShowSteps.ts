@@ -152,16 +152,12 @@ async function shouldShowRenameManual (projectRoot: string, config: OldCypressCo
   return anyComponentSpecsExist(projectRoot, config)
 }
 
-// All projects must move from cypress.json to cypress.config.js!
-export function shouldShowConfigFileStep (config: OldCypressConfig) {
-  return true
-}
-
 export type Step = typeof MIGRATION_STEPS[number]
 
 export async function getStepsForMigration (
   projectRoot: string,
   config: OldCypressConfig,
+  configFileExist: boolean,
 ): Promise<Step[]> {
   const steps: Step[] = []
 
@@ -178,7 +174,7 @@ export async function getStepsForMigration (
       steps.push(step)
     }
 
-    if (step === 'configFile' && shouldShowConfigFileStep(config)) {
+    if (step === 'configFile' && configFileExist) {
       steps.push(step)
     }
 

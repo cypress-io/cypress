@@ -29,7 +29,7 @@ function skipCTMigration () {
   cy.contains(`I'll do this later`).click()
 }
 
-function migrateAndVerifyConfig (migratedConfigFile: string = 'cypress.config.js', legacyConfigFile: string = 'cypress.json') {
+function migrateAndVerifyConfig (migratedConfigFile: string = 'cypress.config.js') {
   cy.contains('Migrate the configuration for me').click()
 
   cy.withCtx(async (ctx, o) => {
@@ -37,12 +37,12 @@ function migrateAndVerifyConfig (migratedConfigFile: string = 'cypress.config.js
 
     expect(configStats).to.not.be.null.and.not.be.undefined
 
-    const oldConfigStats = await ctx.actions.file.checkIfFileExists(o.legacyConfigFile)
+    const oldConfigStats = await ctx.lifecycleManager.checkIfLegacyConfigFileExist()
 
     expect(oldConfigStats).to.be.null
 
     await ctx.actions.migration.assertSuccessfulConfigMigration(o.migratedConfigFile)
-  }, { migratedConfigFile, legacyConfigFile })
+  }, { migratedConfigFile })
 }
 
 function finishMigrationAndContinue () {
@@ -901,7 +901,7 @@ describe('Migrate custom config files', () => {
     cy.contains('customConfig.json')
     cy.contains('customConfig.config.js')
 
-    migrateAndVerifyConfig('customConfig.config.js', 'customConfig.json')
+    migrateAndVerifyConfig('customConfig.config.js')
     checkOutcome()
   })
 
@@ -953,7 +953,7 @@ describe('Migrate custom config files', () => {
     cy.contains('cypress.foo.json')
     cy.contains('cypress.foo.config.js')
 
-    migrateAndVerifyConfig('cypress.foo.config.js', 'cypress.foo.json')
+    migrateAndVerifyConfig('cypress.foo.config.js')
     checkOutcome()
   })
 
@@ -1005,7 +1005,7 @@ describe('Migrate custom config files', () => {
     cy.contains('config/cypress.foo.json')
     cy.contains('config/cypress.foo.config.js')
 
-    migrateAndVerifyConfig('config/cypress.foo.config.js', 'config/cypress.foo.json')
+    migrateAndVerifyConfig('config/cypress.foo.config.js')
     checkOutcome()
   })
 

@@ -25,7 +25,6 @@ import {
 
 import type { FilePart } from './migration/format'
 import Debug from 'debug'
-import { getError } from '@packages/errors'
 
 const debug = Debug('cypress:data-context:sources:MigrationDataSource')
 
@@ -92,7 +91,9 @@ export class MigrationDataSource {
 
     await this.initializeFlags()
 
-    this.filteredSteps = await getStepsForMigration(this.ctx.currentProject, config)
+    const legacyConfigFileExist = await this.ctx.lifecycleManager.checkIfLegacyConfigFileExist()
+
+    this.filteredSteps = await getStepsForMigration(this.ctx.currentProject, config, Boolean(legacyConfigFileExist))
 
     if (!this.filteredSteps[0]) {
       throw Error(`Impossible to initialize a migration. No steps fit the configuration of this project.`)
@@ -211,17 +212,17 @@ export class MigrationDataSource {
   }
 
   async getConfig () {
-    const legacyConfigFileExist = await this.ctx.deref.actions.file.checkIfFileExists(this.ctx.lifecycleManager.legacyConfigFile)
+    // const legacyConfigFileExist = await this.ctx.deref.actions.file.checkIfFileExists(this.ctx.lifecycleManager.legacyConfigFile)
 
-    if (!legacyConfigFileExist) {
-      const configFileAfterMigrationExist = await this.ctx.deref.actions.file.checkIfFileExists(this.configFileNameAfterMigration)
+    // if (!legacyConfigFileExist) {
+    //   const configFileAfterMigrationExist = await this.ctx.deref.actions.file.checkIfFileExists(this.configFileNameAfterMigration)
 
-      if (configFileAfterMigrationExist) {
-        this.ctx.onError(getError('MIGRATION_ALREADY_OCURRED', this.configFileNameAfterMigration, this.ctx.lifecycleManager.legacyConfigFile))
+    //   if (configFileAfterMigrationExist) {
+    //     this.ctx.onError(getError('MIGRATION_ALREADY_OCURRED', this.configFileNameAfterMigration, this.ctx.lifecycleManager.legacyConfigFile))
 
-        return JSON.stringify({})
-      }
-    }
+    //     return JSON.stringify({})
+    //   }
+    // }
 
     const config = await this.parseCypressConfig()
 
