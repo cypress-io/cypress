@@ -4,10 +4,13 @@ const { getWebpackConfig } = require("nuxt")
 
 module.exports = defineConfig({
   component: {
-    async devServer(cypressDevServerConfig) {
+    async devServer(cypressDevServerConfig, devServerConfig) {
       const webpackConfig = await getWebpackConfig()
 
-      return devServer(cypressDevServerConfig, { webpackConfig })
-    }
-  }
+      return devServer(cypressDevServerConfig, { webpackConfig, ...devServerConfig })
+    },
+    devServerConfig: {
+      indexHtmlFile: 'cypress/support/component-index.html'
+    },
+  },
 })
