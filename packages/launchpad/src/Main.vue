@@ -113,7 +113,6 @@ fragment MainLaunchpadQueryData on Query {
     currentTestingType
   }
   isInGlobalMode
-  projectRootFromCI
   ...GlobalPage
   ...ScaffoldedFiles
 }
