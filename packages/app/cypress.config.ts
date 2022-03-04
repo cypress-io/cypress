@@ -57,7 +57,6 @@ export default defineConfig({
   // @ts-ignore We are setting these namespaces in order to properly test Cypress in Cypress
   clientRoute: '/__app/',
   namespace: '__cypress-app',
-  socketIoRoute: '/__app-socket.io',
   socketIoCookie: '__app-socket.io',
   devServerPublicPathRoute: '/__cypress-app/src',
 })

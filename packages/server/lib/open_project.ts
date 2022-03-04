@@ -74,7 +74,7 @@ export class OpenProject {
       userAgent: cfg.userAgent,
       proxyUrl: cfg.proxyUrl,
       proxyServer: cfg.proxyServer,
-      socketIoRoute: cfg.socketIoRoute,
+      clientRoute: cfg.clientRoute,
       chromeWebSecurity: cfg.chromeWebSecurity,
       isTextTerminal: cfg.isTextTerminal,
       downloadsFolder: cfg.downloadsFolder,

@@ -339,12 +339,12 @@ export = {
 
   throwBrowserNotFound,
 
-  writeExtension (browser, isTextTerminal, proxyUrl, socketIoRoute) {
+  writeExtension (browser, isTextTerminal, proxyUrl, clientRoute) {
     debug('writing extension')
 
     // debug('writing extension to chrome browser')
     // get the string bytes for the final extension file
-    return extension.setHostAndPath(proxyUrl, socketIoRoute)
+    return extension.setHostAndPath(proxyUrl, clientRoute)
     .then((str) => {
       const extensionDest = getExtensionDir(browser, isTextTerminal)
       const extensionBg = path.join(extensionDest, 'background.js')

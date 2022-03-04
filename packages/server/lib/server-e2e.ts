@@ -56,7 +56,7 @@ export class ServerE2E extends ServerBase<SocketE2E> {
 
   createServer (app, config, onWarning): Bluebird<[number, WarningErr?]> {
     return new Bluebird((resolve, reject) => {
-      const { port, fileServerFolder, socketIoRoute, baseUrl } = config
+      const { port, fileServerFolder, clientRoute, baseUrl } = config
 
       this._server = this._createHttpServer(app)
 
@@ -72,7 +72,7 @@ export class ServerE2E extends ServerBase<SocketE2E> {
       debug('createServer connecting to server')
 
       this.server.on('connect', this.onConnect.bind(this))
-      this.server.on('upgrade', (req, socket, head) => this.onUpgrade(req, socket, head, socketIoRoute))
+      this.server.on('upgrade', (req, socket, head) => this.onUpgrade(req, socket, head, clientRoute))
       this.server.once('error', onError)
 
       return this._listen(port, (err) => {

@@ -78,14 +78,14 @@ describe('lib/socket', () => {
           return done()
         })
 
-        const { proxyUrl, socketIoRoute } = this.cfg
+        const { proxyUrl, clientRoute } = this.cfg
 
         // force node into legit proxy mode like a browser
         this.agent = new httpsAgent(`http://localhost:${this.cfg.port}`)
 
         this.client = socketIo.client(proxyUrl, {
           agent: this.agent,
-          path: socketIoRoute,
+          path: clientRoute,
           transports: ['websocket'],
         })
       })
@@ -158,7 +158,7 @@ describe('lib/socket', () => {
             })
           })
 
-          return extensionBackgroundPage.connect(this.cfg.proxyUrl, this.cfg.socketIoRoute, { agent: this.agent })
+          return extensionBackgroundPage.connect(this.cfg.proxyUrl, this.cfg.clientRoute, { agent: this.agent })
         })
 
         afterEach(function () {

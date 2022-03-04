@@ -235,7 +235,7 @@ describe('Web Sockets', () => {
 
           this.wsClient = socketIo.client(wsUrl || this.cfg.proxyUrl, {
             agent,
-            path: this.cfg.socketIoRoute,
+            path: this.cfg.clientRoute,
             transports: ['websocket'],
             rejectUnauthorized: false,
           })
@@ -269,7 +269,7 @@ describe('Web Sockets', () => {
 
         it('fails to connect via websocket', function (done) {
           this.wsClient = socketIo.client(wsUrl || this.cfg.proxyUrl, {
-            path: this.cfg.socketIoRoute,
+            path: this.cfg.clientRoute,
             transports: ['websocket'],
             rejectUnauthorized: false,
             reconnection: false,
@@ -286,7 +286,7 @@ describe('Web Sockets', () => {
 
         it('fails to connect via polling', function (done) {
           this.wsClient = socketIo.client(wsUrl || this.cfg.proxyUrl, {
-            path: this.cfg.socketIoRoute,
+            path: this.cfg.clientRoute,
             transports: ['polling'],
             rejectUnauthorized: false,
             reconnection: false,

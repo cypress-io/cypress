@@ -29,9 +29,9 @@ import { useSnapshotStore } from './snapshot-store'
 
 let _eventManager: EventManager | undefined
 
-export function createWebsocket (socketIoRoute: string) {
+export function createWebsocket (clientRoute: string) {
   const socketConfig = {
-    path: socketIoRoute,
+    path: clientRoute,
     transports: ['websocket'],
   }
 

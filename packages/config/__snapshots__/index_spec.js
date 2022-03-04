@@ -83,7 +83,6 @@ exports['src/index .getDefaultValues returns list of public config keys 1'] = {
   "reporterRoute": "/__cypress/reporter",
   "socketId": null,
   "socketIoCookie": "__socket.io",
-  "socketIoRoute": "/__socket.io",
   "xhrRoute": "/xhrs/"
 }
 

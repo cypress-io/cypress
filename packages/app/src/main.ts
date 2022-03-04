@@ -23,7 +23,7 @@ const app = createApp(App)
 
 const config = JSON.parse(decodeBase64Unicode(window.__CYPRESS_CONFIG__.base64Config)) as Cypress.Config
 
-const ws = createWebsocket(config.socketIoRoute)
+const ws = createWebsocket(config.clientRoute)
 
 window.ws = ws
 
@@ -36,7 +36,7 @@ app.use(Toast, {
   position: POSITION.BOTTOM_RIGHT,
 })
 
-app.use(urql, makeUrqlClient({ target: 'app', namespace: config.namespace, socketIoRoute: config.socketIoRoute }))
+app.use(urql, makeUrqlClient({ target: 'app', namespace: config.namespace, clientRoute: config.clientRoute }))
 app.use(createRouter())
 app.use(createI18n())
 app.use(createPinia())

@@ -130,7 +130,7 @@ describe('lib/browsers/firefox', () => {
 
       this.options = {
         proxyUrl: 'http://proxy-url',
-        socketIoRoute: 'socket/io/route',
+        clientRoute: 'socket/io/route',
         browser: this.browser,
       }
 
@@ -237,7 +237,7 @@ describe('lib/browsers/firefox', () => {
 
     it('writes extension', function () {
       return firefox.open(this.browser, 'http://', this.options, this.automation).then(() => {
-        expect(utils.writeExtension).to.be.calledWith(this.options.browser, this.options.isTextTerminal, this.options.proxyUrl, this.options.socketIoRoute)
+        expect(utils.writeExtension).to.be.calledWith(this.options.browser, this.options.isTextTerminal, this.options.proxyUrl, this.options.clientRoute)
       })
     })
 

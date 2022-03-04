@@ -167,9 +167,9 @@ export class SocketBase {
     let automationClient
     let runnerSocket
 
-    const { socketIoRoute, socketIoCookie } = config
+    const { clientRoute, socketIoCookie } = config
 
-    const io = this._io = this.createIo(server, socketIoRoute, socketIoCookie)
+    const io = this._io = this.createIo(server, clientRoute, socketIoCookie)
 
     automation.use({
       onPush: (message, data) => {

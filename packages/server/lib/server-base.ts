@@ -483,10 +483,10 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return this._getRemoteState()
   }
 
-  proxyWebsockets (proxy, socketIoRoute, req, socket, head) {
+  proxyWebsockets (proxy, clientRoute, req, socket, head) {
     // bail if this is our own namespaced socket.io request
 
-    if (req.url.startsWith(socketIoRoute)) {
+    if (req.url.startsWith(clientRoute)) {
       if (!this.socketAllowed.isRequestAllowed(req)) {
         socket.write('HTTP/1.1 400 Bad Request\r\n\r\nRequest not made via a Cypress-launched browser.')
         socket.end()
@@ -593,10 +593,10 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     })
   }
 
-  onUpgrade (req, socket, head, socketIoRoute) {
+  onUpgrade (req, socket, head, clientRoute) {
     debug('Got UPGRADE request from %s', req.url)
 
-    return this.proxyWebsockets(this.nodeProxy, socketIoRoute, req, socket, head)
+    return this.proxyWebsockets(this.nodeProxy, clientRoute, req, socket, head)
   }
 
   callListeners (req, res) {

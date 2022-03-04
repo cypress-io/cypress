@@ -2978,7 +2978,6 @@ declare namespace Cypress {
     reporterUrl: string
     socketId: null | string
     socketIoCookie: string
-    socketIoRoute: string
     spec: Cypress['spec'] | null
     specs: Array<Cypress['spec']>
     xhrRoute: string

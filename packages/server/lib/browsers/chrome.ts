@@ -361,7 +361,7 @@ export = {
     }
 
     // get the string bytes for the final extension file
-    const str = await extension.setHostAndPath(options.proxyUrl, options.socketIoRoute)
+    const str = await extension.setHostAndPath(options.proxyUrl, options.clientRoute)
     const extensionDest = utils.getExtensionDir(browser, options.isTextTerminal)
     const extensionBg = path.join(extensionDest, 'background.js')
 

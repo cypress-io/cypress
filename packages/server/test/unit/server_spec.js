@@ -133,7 +133,7 @@ describe.skip('lib/server', () => {
       })
     })
 
-    it('calls #createServer with port + fileServerFolder + socketIoRoute + app', function () {
+    it('calls #createServer with port + fileServerFolder + clientRoute + app', function () {
       const obj = {}
 
       sinon.stub(this.server, 'createRoutes')
@@ -335,7 +335,7 @@ describe.skip('lib/server', () => {
       this.head = {}
     })
 
-    it('is noop if req.url startsWith socketIoRoute', function () {
+    it('is noop if req.url startsWith clientRoute', function () {
       const socket = {
         remotePort: 12345,
         remoteAddress: '127.0.0.1',

@@ -68,7 +68,7 @@ interface LaunchpadUrqlClientConfig {
 interface AppUrqlClientConfig {
   target: 'app'
   namespace: string
-  socketIoRoute: string
+  clientRoute: string
 }
 
 export type UrqlClientConfig = LaunchpadUrqlClientConfig | AppUrqlClientConfig
@@ -151,7 +151,7 @@ interface LaunchpadPubSubConfig {
 
 interface AppPubSubConfig {
   target: 'app'
-  socketIoRoute: string
+  clientRoute: string
 }
 
 type PubSubConfig = LaunchpadPubSubConfig | AppPubSubConfig
@@ -165,7 +165,7 @@ function getPubSubSource (config: PubSubConfig) {
   }
 
   return client({
-    path: config.socketIoRoute,
+    path: config.clientRoute,
     transports: ['websocket'],
   })
 }

@@ -11,9 +11,9 @@ module.exports = {
         'get:tmp:path': () => {
           return os.tmpdir()
         },
-        'assert:ws:fails': ({ proxyUrl, socketIoRoute }) => {
+        'assert:ws:fails': ({ proxyUrl, clientRoute }) => {
           const wsClient = socketIo.client(proxyUrl, {
-            path: socketIoRoute,
+            path: clientRoute,
             transports: ['websocket'],
           })
 
@@ -29,12 +29,12 @@ module.exports = {
             return null
           })
         },
-        'assert:proxied:ws:works': ({ proxyUrl, socketIoRoute }) => {
+        'assert:proxied:ws:works': ({ proxyUrl, clientRoute }) => {
           const agent = new HttpsProxyAgent(proxyUrl)
 
           const wsClient = socketIo.client(proxyUrl, {
             agent,
-            path: socketIoRoute,
+            path: clientRoute,
             transports: ['websocket'],
           })
 

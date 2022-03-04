@@ -468,12 +468,6 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     isInternal: true,
     canUpdateDuringTestTime: false,
   }, {
-    name: 'socketIoRoute',
-    defaultValue: '/__socket.io',
-    validation: validate.isString,
-    isInternal: true,
-    canUpdateDuringTestTime: false,
-  }, {
     name: 'version',
     defaultValue: pkg.version,
     validation: validate.isString,
