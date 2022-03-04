@@ -108,7 +108,7 @@ export { highlighter, inheritAttrs }
 import type { Ref } from 'vue'
 import { computed, onBeforeMount, ref } from 'vue'
 import { useClipboard } from '@vueuse/core'
-import CopyButton from './CopyButton.vue'
+import CopyButton from '../gql-components/CopyButton.vue'
 
 const highlighterInitialized = ref(false)
 
