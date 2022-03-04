@@ -10,7 +10,6 @@ import {
 import { devtoolsExchange } from '@urql/devtools'
 import { useToast } from 'vue-toastification'
 import type { Socket } from '@packages/socket/lib/browser'
-import { client } from '@packages/socket/lib/browser'
 import { createClient as createWsClient } from 'graphql-ws'
 
 import { cacheExchange as graphcacheExchange } from '@urql/exchange-graphcache'
@@ -18,7 +17,6 @@ import { urqlCacheKeys } from '@packages/data-context/src/util/urqlCacheKeys'
 
 import { urqlSchema } from '../generated/urql-introspection.gen'
 
-import { pubSubExchange } from './urqlExchangePubsub'
 import { namedRouteExchange } from './urqlExchangeNamedRoute'
 import { decodeBase64Unicode } from '../utils/decodeBase64'
 import type { SpecFile, AutomationElementId, Browser } from '@packages/types'
@@ -80,18 +78,7 @@ export function makeUrqlClient (config: UrqlClientConfig): Client {
 
   const exchanges: Exchange[] = [dedupExchange]
 
-  const io = window.ws ?? getPubSubSource(config)
-
   const socketClient = getSocketSource(config)
-
-  // GraphQL and urql are not used in app + run mode, so we don't add the
-  // pub sub exchange.
-  if (config.target === 'launchpad' || config.target === 'app' && !cypressInRunMode) {
-    // If we're in the launchpad, we connect to the known GraphQL Socket port,
-    // otherwise we connect to the /__socket of the current domain, unless we've explicitly
-
-    exchanges.push(pubSubExchange(io))
-  }
 
   exchanges.push(
     errorExchange({
@@ -163,31 +150,6 @@ export function makeUrqlClient (config: UrqlClientConfig): Client {
     // exchange to adapt to a similar interface. This way it'll be simple to
     // swap in-and-out during integration tests.
     fetch: config.target === 'launchpad' || window.__CYPRESS_GQL_NO_SOCKET__ ? window.fetch : urqlFetchSocketAdapter(io),
-  })
-}
-
-interface LaunchpadPubSubConfig {
-  target: 'launchpad'
-}
-
-interface AppPubSubConfig {
-  target: 'app'
-  socketIoRoute: string
-}
-
-type PubSubConfig = LaunchpadPubSubConfig | AppPubSubConfig
-
-function getPubSubSource (config: PubSubConfig) {
-  if (config.target === 'launchpad') {
-    return client({
-      path: '/__launchpad/socket',
-      transports: ['websocket'],
-    })
-  }
-
-  return client({
-    path: config.socketIoRoute,
-    transports: ['websocket'],
   })
 }
 
