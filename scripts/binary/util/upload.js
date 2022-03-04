@@ -50,10 +50,10 @@ const S3Configuration = {
 const getS3Credentials = async function () {
   // sso is not required for CirceCI
   if (process.env.CIRCLECI) {
-    return await fromEnv()()
+    return fromEnv()()
   }
 
-  return await fromSSO({ profile: process.env.AWS_PROFILE || 'production' })()
+  return fromSSO({ profile: process.env.AWS_PROFILE || 'production' })()
 }
 
 const getPublisher = async function () {
