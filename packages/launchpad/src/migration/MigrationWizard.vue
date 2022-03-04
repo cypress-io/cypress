@@ -197,7 +197,7 @@ query MigrationWizardQuery {
 }
 `
 
-const query = useQuery({ query: MigrationWizardQueryDocument })
+const query = useQuery({ query: MigrationWizardQueryDocument, requestPolicy: 'cache-and-network' })
 
 const migration = computed(() => query.data.value?.migration)
 const steps = computed(() => migration.value?.filteredSteps || [])

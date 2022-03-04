@@ -1108,6 +1108,19 @@ export class ProjectLifecycleManager {
     }
 
     if (typeof configFile === 'string') {
+      try {
+        this.ctx.fs.statSync(this._pathToFile(this.legacyConfigFile))
+      } catch (e) {
+        const configFileNameAfterMigration = this.legacyConfigFile.replace('.json', `.config.${metaState.hasTypescript ? 'ts' : 'js'}`)
+
+        try {
+          this.ctx.fs.statSync(this._pathToFile(configFileNameAfterMigration))
+          this.ctx.onError(getError('MIGRATION_ALREADY_OCURRED', configFileNameAfterMigration, this.legacyConfigFile))
+        } catch {
+          // No need to handle
+        }
+      }
+
       metaState.hasSpecifiedConfigViaCLI = this._pathToFile(configFile)
       if (configFile.endsWith('.json')) {
         metaState.needsCypressJsonMigration = true

@@ -212,18 +212,6 @@ export class MigrationDataSource {
   }
 
   async getConfig () {
-    // const legacyConfigFileExist = await this.ctx.deref.actions.file.checkIfFileExists(this.ctx.lifecycleManager.legacyConfigFile)
-
-    // if (!legacyConfigFileExist) {
-    //   const configFileAfterMigrationExist = await this.ctx.deref.actions.file.checkIfFileExists(this.configFileNameAfterMigration)
-
-    //   if (configFileAfterMigrationExist) {
-    //     this.ctx.onError(getError('MIGRATION_ALREADY_OCURRED', this.configFileNameAfterMigration, this.ctx.lifecycleManager.legacyConfigFile))
-
-    //     return JSON.stringify({})
-    //   }
-    // }
-
     const config = await this.parseCypressConfig()
 
     return JSON.stringify(config, null, 2)
