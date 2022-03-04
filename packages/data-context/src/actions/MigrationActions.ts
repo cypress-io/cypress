@@ -37,6 +37,7 @@ export class MigrationActions {
     })
 
     // @ts-ignore configFile needs to be updated with the new one, so it finds the correct one
+    // with the new file, instead of the deleted one which is not supported anymore
     this.ctx.modeOptions.configFile = this.ctx.migration.configFileNameAfterMigration
 
     return true
