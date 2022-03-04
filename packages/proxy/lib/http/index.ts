@@ -44,6 +44,8 @@ type HttpMiddlewareCtx<T> = {
   middleware: HttpMiddlewareStacks
   deferSourceMapRewrite: (opts: { js: string, url: string }) => string
   getPreRequest: (cb: GetPreRequestCb) => void
+  getPreviousAUTRequestUrl: Http['getPreviousAUTRequestUrl']
+  setPreviousAUTRequestUrl: Http['setPreviousAUTRequestUrl']
 } & T
 
 export const defaultMiddleware = {
@@ -203,6 +205,7 @@ export class Http {
   socket: CyServer.Socket
   serverBus: EventEmitter
   renderedHTMLOrigins: {[key: string]: boolean} = {}
+  previousAUTRequestUrl?: string
 
   constructor (opts: ServerCtx & { middleware?: HttpMiddlewareStacks }) {
     this.buffers = new HttpBuffers()
@@ -247,6 +250,8 @@ export class Http {
         })
       },
       getRenderedHTMLOrigins: this.getRenderedHTMLOrigins,
+      getPreviousAUTRequestUrl: this.getPreviousAUTRequestUrl,
+      setPreviousAUTRequestUrl: this.setPreviousAUTRequestUrl,
       getPreRequest: (cb) => {
         this.preRequests.get(ctx.req, ctx.debug, cb)
       },
@@ -280,6 +285,14 @@ export class Http {
     return this.renderedHTMLOrigins
   }
 
+  getPreviousAUTRequestUrl = () => {
+    return this.previousAUTRequestUrl
+  }
+
+  setPreviousAUTRequestUrl = (url) => {
+    this.previousAUTRequestUrl = url
+  }
+
   async handleSourceMapRequest (req: Request, res: Response) {
     try {
       const sm = await this.deferredSourceMapCache.resolve(req.params.id, req.headers)
@@ -296,6 +309,7 @@ export class Http {
 
   reset () {
     this.buffers.reset()
+    this.setPreviousAUTRequestUrl(undefined)
   }
 
   setBuffer (buffer) {

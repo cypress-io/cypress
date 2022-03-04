@@ -389,8 +389,6 @@ const forceSameSiteNone = (cookie) => {
   return cookie
 }
 
-let previousAUTRequestUrl
-
 const CopyCookiesFromIncomingRes: ResponseMiddleware = function () {
   const cookies: string | string[] | undefined = this.incomingRes.headers['set-cookie']
   // for the sake of multi-domain, force SameSite=None when it's an AUT
@@ -398,6 +396,7 @@ const CopyCookiesFromIncomingRes: ResponseMiddleware = function () {
   // between requests don't match, since the browser won't set them in that
   // case and if it's secondary-domain -> primary-domain, we don't recognize
   // the request as cross-origin
+  const previousAUTRequestUrl = this.getPreviousAUTRequestUrl()
   const shouldForceSameSiteNone = (
     !!this.req.isAUTFrame &&
     (
@@ -532,7 +531,7 @@ const SendResponseBodyToClient: ResponseMiddleware = function () {
   if (this.req.isAUTFrame) {
     // track the previous AUT request URL so we know if the next requests
     // is cross-origin
-    previousAUTRequestUrl = this.req.proxiedUrl
+    this.setPreviousAUTRequestUrl(this.req.proxiedUrl)
   }
 
   this.incomingResStream.pipe(this.res).on('error', this.onError)
