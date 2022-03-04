@@ -47,6 +47,8 @@ describe('App: Settings', () => {
       cy.findByText('Settings').click()
       cy.findByText('Dashboard Settings').click()
       cy.findByText('Project ID').should('be.visible')
+      cy.findByText('Copy').click()
+      cy.findByText('Copied!').should('be.visible')
     })
 
     it('shows the Record Keys section', () => {

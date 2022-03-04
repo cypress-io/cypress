@@ -261,7 +261,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.contains('--record --key 2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa')
     })
 
-    it('displays a copy button', { browser: 'electron' }, () => {
+    it('displays a copy button', () => {
       cy.withCtx(async (ctx) => {
         await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {projectId: \'abcdef\'}')
       })
