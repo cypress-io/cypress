@@ -7,8 +7,6 @@ const importsToLoad = []
 
 const supportFile = CypressInstance.config('supportFile')
 
-console.log(supportFile)
-
 if (supportFile) {
   importsToLoad.push(() => import(supportFile))
 }

@@ -6,5 +6,3 @@ export const configFiles = [
   'vite.config.js',
   'vite.config.mjs',
 ]
-
-export const commonSpecExtensions = ['.cy', '.spec', '.test', '-spec', '-test', '_spec']
