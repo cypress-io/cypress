@@ -105,6 +105,8 @@ const waitForAllJobs = async (jobNames, workflowId) => {
   const futureOrRunning = _.union(blockedJobs, runningJobNames)
   const jobsToWaitFor = _.intersection(jobNames, futureOrRunning)
 
+  console.log(`waiting for jobs, jobs outstanding:${ response.items}`)
+
   debug('jobs to wait for %o', jobsToWaitFor)
 
   if (!jobsToWaitFor.length) {
