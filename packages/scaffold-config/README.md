@@ -16,6 +16,8 @@ We will also attempt to scaffold a configuration file for projects using React a
 | Vue | - | Vite | 2.x | Vue 3 | `@cypress/vue@^3.0.0` | [Link](../../system-tests/projects/vue3-vite-ts-configured)
 | Vue CLI | 4.x | Webpack | 4.x | Vue 2 | `@cypress/vue@2.0.4` | [Link](../../system-tests/projects/vueclivue2-configured)
 | Vue CLI | 4.x | Webpack | 4.x | Vue 3 | `@cypress/vue@latest` | [Link](../../system-tests/projects/vueclivue3-configured)
+| Vue CLI | 5.x | Webpack | 5.x | Vue 2 | `@cypress/vue@^2.0.0` | Covered by other Vue CLI test projects.
+| Vue CLI | 5.x | Webpack | 5.x | Vue 3 | `@cypress/vue@^3.0.0` | [Link](../../system-tests/projects/vuecli5vue3-configured)
 | Nuxt.js | 2.x | Webpack | 4.x, 5.x | Vue 2 | `@cypress/vue@2.0.4` | [Link](../../system-tests/projects/pristine-nuxtjs-vue2-configured)
 
 ### Adding More Projects
@@ -36,4 +38,3 @@ These should be supported but currently are not configured.
 | Name | Tool Version | Dev Server | Dev Server Version | Library Version (s) | Component Adaptor Version | Example Project
 | --- | ---- | ---- | --- | ---- | ---- | --- |
 | Next.js | 11.x, 12.x | Webpack | 4.x, 5.x | React 16, 17 | `@cypress/react@latest` | [Link](../../system-tests/projects/nextjs-configured)
-| Vue CLI | 5.x | Webpack | 5.x | Vue 3 | `@cypress/vue@^3.0.0` | [TODO]

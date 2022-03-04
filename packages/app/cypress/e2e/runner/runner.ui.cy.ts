@@ -102,13 +102,13 @@ describe('src/cypress/runner', () => {
         hasPreferredIde: true,
       })
 
-      cy.intercept('mutation-OpenFileInIDE', { data: { 'openFileInIDE': true } }).as('OpenIDE')
+      cy.intercept('mutation-SpecRunnerOpenMode_OpenFileInIDE', { data: { 'openFileInIDE': true } }).as('OpenIDE')
 
       cy.contains('a', 'simple-cy-assert.runner')
       .click()
 
       cy.wait('@OpenIDE').then(({ request }) => {
-        expect(request.body.variables.input.absolute).to.include('simple-cy-assert.runner.cy.js')
+        expect(request.body.variables.input.filePath).to.include('simple-cy-assert.runner.cy.js')
       })
 
       cy.get('[data-cy="runnable-header"] [data-cy="spec-duration"]').should('exist')
