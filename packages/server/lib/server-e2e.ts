@@ -7,6 +7,8 @@ import url from 'url'
 import httpsProxy from '@packages/https-proxy'
 import { getRouteForRequest } from '@packages/net-stubbing'
 import { concatStream, cors } from '@packages/network'
+import { graphqlWS } from '@packages/graphql/src/makeGraphQLServer'
+
 import * as errors from './errors'
 import fileServer from './file_server'
 import { OpenServerOptions, ServerBase } from './server-base'
@@ -70,6 +72,8 @@ export class ServerE2E extends ServerBase<SocketE2E> {
       }
 
       debug('createServer connecting to server')
+
+      graphqlWS(this.server, `${socketIoRoute}-graphql`)
 
       this.server.on('connect', this.onConnect.bind(this))
       this.server.on('upgrade', (req, socket, head) => this.onUpgrade(req, socket, head, socketIoRoute))

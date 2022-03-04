@@ -1220,6 +1220,10 @@ type Storybook implements Node {
   storybookRoot: String!
 }
 
+type Subscription {
+  ping: Boolean
+}
+
 """The bundlers that we can use with Cypress"""
 enum SupportedBundlers {
   vite
