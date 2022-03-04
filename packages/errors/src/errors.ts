@@ -10,7 +10,7 @@ import { humanTime, logError, parseResolvedPattern, pluralize } from './errorUti
 import { errPartial, errTemplate, fmt, theme, PartialErr } from './errTemplate'
 import { stackWithoutMessage } from './stackUtils'
 
-import type { ClonedError, ConfigValidationError, CypressError, ErrTemplateResult, ErrorLike } from './errorTypes'
+import type { ClonedError, ConfigValidationFailureInfo, CypressError, ErrTemplateResult, ErrorLike } from './errorTypes'
 
 const ansi_up = new AU()
 
@@ -695,7 +695,7 @@ export const AllCypressErrors = {
       ${fmt.highlight(validationMsg)}`
   },
   // TODO: make this relative path, not absolute
-  CONFIG_VALIDATION_ERROR: (fileType: 'configFile' | 'pluginsFile' | null, filePath: string | null, validationResult: ConfigValidationError) => {
+  CONFIG_VALIDATION_ERROR: (fileType: 'configFile' | 'pluginsFile' | null, filePath: string | null, validationResult: ConfigValidationFailureInfo) => {
     const { key, type, value, list } = validationResult
 
     if (!fileType) {
@@ -1279,6 +1279,33 @@ export const AllCypressErrors = {
       ${fmt.stringify(setupNodeEvents)}
 
       Learn more: https://on.cypress.io/dev-server
+    `
+  },
+
+  UNEXPECTED_MUTATION_ERROR: (mutationField: string, args: any, err: Error) => {
+    return errTemplate`
+      An unexpected internal error occurred while executing the ${fmt.highlight(mutationField)} operation with payload:
+
+      ${fmt.stringify(args)}
+
+      ${fmt.stackTrace(err)}
+    `
+  },
+
+  DASHBOARD_GRAPHQL_ERROR: (err: Error) => {
+    return errTemplate`
+      We received an unexpected error response from the request to the Cypress dashboard:
+
+      ${fmt.stringify(err.message)}
+    `
+  },
+
+  UNEXPECTED_INTERNAL_ERROR: (err: Error) => {
+    return errTemplate`
+      We encountered an unexpected internal error. Please check GitHub or open a new issue 
+      if you don't see one already with the details below:
+
+      ${fmt.stackTrace(err)}
     `
   },
 

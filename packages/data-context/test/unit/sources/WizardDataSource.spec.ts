@@ -1,17 +1,11 @@
 import { expect } from 'chai'
-import path from 'path'
-import { e2eProjectDirs } from '@packages/frontend-shared/cypress/e2e/support/e2eProjectDirs'
-import { createTestDataContext } from '../helper'
-
-function getCurrentProject (project: typeof e2eProjectDirs[number]) {
-  return path.join(__dirname, '..', '..', '..', '..', '..', 'system-tests', 'projects', project)
-}
+import { createTestDataContext, getSystemTestProject } from '../helper'
 
 describe('packagesToInstall', () => {
   it('create-react-app-unconfigured', async () => {
     const ctx = createTestDataContext()
 
-    ctx.coreData.currentProject = getCurrentProject('create-react-app-unconfigured')
+    ctx.coreData.currentProject = getSystemTestProject('create-react-app-unconfigured')
     ctx.coreData.wizard.chosenFramework = 'crav5'
     ctx.coreData.wizard.chosenBundler = 'webpack5'
 
@@ -23,8 +17,8 @@ describe('packagesToInstall', () => {
   it('vueclivue2-unconfigured', async () => {
     const ctx = createTestDataContext()
 
-    ctx.coreData.currentProject = getCurrentProject('vueclivue2-unconfigured')
-    ctx.coreData.wizard.chosenFramework = 'vueclivue2'
+    ctx.coreData.currentProject = getSystemTestProject('vueclivue2-unconfigured')
+    ctx.coreData.wizard.chosenFramework = 'vuecli4vue2'
     ctx.coreData.wizard.chosenBundler = 'webpack4'
 
     const actual = await ctx.wizard.installDependenciesCommand()
@@ -35,8 +29,8 @@ describe('packagesToInstall', () => {
   it('vueclivue3-unconfigured', async () => {
     const ctx = createTestDataContext()
 
-    ctx.coreData.currentProject = getCurrentProject('vueclivue3-unconfigured')
-    ctx.coreData.wizard.chosenFramework = 'vueclivue3'
+    ctx.coreData.currentProject = getSystemTestProject('vueclivue3-unconfigured')
+    ctx.coreData.wizard.chosenFramework = 'vuecli4vue3'
     ctx.coreData.wizard.chosenBundler = 'webpack4'
 
     const actual = await ctx.wizard.installDependenciesCommand()
@@ -44,10 +38,22 @@ describe('packagesToInstall', () => {
     expect(actual).to.eq(`npm install -D @cypress/vue@^3.0.0 webpack@^4.0.0 @cypress/webpack-dev-server@latest webpack-dev-server@^4.0.0 html-webpack-plugin@^4.0.0`)
   })
 
+  it('vuecli5vue3-unconfigured', async () => {
+    const ctx = createTestDataContext()
+
+    ctx.coreData.currentProject = getSystemTestProject('vuecli5vue3-unconfigured')
+    ctx.coreData.wizard.chosenFramework = 'vuecli5vue3'
+    ctx.coreData.wizard.chosenBundler = 'webpack5'
+
+    const actual = await ctx.wizard.installDependenciesCommand()
+
+    expect(actual).to.eq(`npm install -D @cypress/vue@^3.0.0 webpack@^5.0.0 @cypress/webpack-dev-server@latest webpack-dev-server@^4.0.0 html-webpack-plugin@^5.0.0`)
+  })
+
   it('regular react project with vite', async () => {
     const ctx = createTestDataContext()
 
-    ctx.coreData.currentProject = getCurrentProject('react-vite-ts-unconfigured')
+    ctx.coreData.currentProject = getSystemTestProject('react-vite-ts-unconfigured')
     ctx.coreData.wizard.chosenFramework = 'react'
     ctx.coreData.wizard.chosenBundler = 'vite'
 
@@ -59,7 +65,7 @@ describe('packagesToInstall', () => {
   it('regular vue project with vite', async () => {
     const ctx = createTestDataContext()
 
-    ctx.coreData.currentProject = getCurrentProject('vue3-vite-ts-unconfigured')
+    ctx.coreData.currentProject = getSystemTestProject('vue3-vite-ts-unconfigured')
     ctx.coreData.wizard.chosenFramework = 'vue3'
     ctx.coreData.wizard.chosenBundler = 'vite'
 
@@ -71,7 +77,7 @@ describe('packagesToInstall', () => {
   it('nextjs-unconfigured', async () => {
     const ctx = createTestDataContext()
 
-    ctx.coreData.currentProject = getCurrentProject('nextjs-unconfigured')
+    ctx.coreData.currentProject = getSystemTestProject('nextjs-unconfigured')
     ctx.coreData.wizard.chosenFramework = 'nextjs'
     ctx.coreData.wizard.chosenBundler = 'webpack4'
 
@@ -83,7 +89,7 @@ describe('packagesToInstall', () => {
   it('nuxtjs-vue2-unconfigured', async () => {
     const ctx = createTestDataContext()
 
-    ctx.coreData.currentProject = getCurrentProject('nuxtjs-vue2-unconfigured')
+    ctx.coreData.currentProject = getSystemTestProject('nuxtjs-vue2-unconfigured')
     ctx.coreData.wizard.chosenFramework = 'nuxtjs'
     ctx.coreData.wizard.chosenBundler = 'webpack4'
 
@@ -95,7 +101,7 @@ describe('packagesToInstall', () => {
   it('pristine-with-e2e-testing-and-storybook', async () => {
     const ctx = createTestDataContext()
 
-    ctx.coreData.currentProject = getCurrentProject('pristine-with-e2e-testing-and-storybook')
+    ctx.coreData.currentProject = getSystemTestProject('pristine-with-e2e-testing-and-storybook')
     ctx.coreData.wizard.chosenFramework = 'react'
     ctx.coreData.wizard.chosenBundler = 'webpack4'
 
@@ -108,7 +114,7 @@ describe('packagesToInstall', () => {
     const ctx = createTestDataContext()
 
     // this should never happen!
-    ctx.coreData.currentProject = getCurrentProject('pristine-with-e2e-testing-and-storybook')
+    ctx.coreData.currentProject = getSystemTestProject('pristine-with-e2e-testing-and-storybook')
     ctx.coreData.wizard.chosenFramework = undefined
     ctx.coreData.wizard.chosenBundler = undefined
 

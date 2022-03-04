@@ -8,7 +8,7 @@ module.exports = defineConfig({
     // We've imported your old cypress plugins here.
     // You may want to clean this up later by importing these.
     setupNodeEvents (on, config) {
-      return require('./cypress/plugins/index.ts')(on, config)
+      return require('./cypress/plugins/index.js')(on, config)
     },
     defaultCommandTimeout: 10000,
     slowTestThreshold: 5000,
@@ -16,8 +16,6 @@ module.exports = defineConfig({
     specPattern: 'cypress/e2e/**/*.spec.{tsx,js}',
   },
   component: {
-    // We've imported your old cypress plugins here.
-    // You may want to clean this up later by importing these.
     setupNodeEvents (on, config) {},
     slowTestThreshold: 5000,
     retries: 1,

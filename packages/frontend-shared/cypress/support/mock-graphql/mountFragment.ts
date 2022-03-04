@@ -146,8 +146,16 @@ type ResultType<T> = T extends TypedDocumentNode<infer U, any> ? U : never
 
 type MountFragmentConfig<T extends TypedDocumentNode> = {
   variables?: T['__variablesType']
-  render: (frag: Exclude<T['__resultType'], undefined>) => JSX.Element
+  /**
+   * When we are mounting a GraphQL Fragment, we can use `onResult`
+   * to intercept the result and modify the contents on the fragment
+   * before rendering the component
+   */
   onResult?: (result: ResultType<T>, ctx: ClientTestContext) => ResultType<T> | void
+  /**
+   * Render is passed the result of the "frag" and mounts the component under test
+   */
+  render: (frag: Exclude<T['__resultType'], undefined>) => JSX.Element
   expectError?: boolean
 } & CyMountOptions<unknown>
 

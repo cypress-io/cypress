@@ -17,6 +17,7 @@ import {
   RequestPolicy,
 } from '@urql/core'
 import _ from 'lodash'
+import { getError } from '@packages/errors'
 
 const cloudEnv = getenv('CYPRESS_INTERNAL_CLOUD_ENV', process.env.CYPRESS_INTERNAL_ENV || 'development') as keyof typeof REMOTE_SCHEMA_URLS
 
@@ -104,13 +105,11 @@ export class CloudDataSource {
             }
           } else if ((!_.isEqual(resolvedData.data, res.data) || !_.isEqual(resolvedData.error, res.error)) && !res.error?.networkError) {
             if (res.error) {
-              this.ctx.coreData.baseError = {
-                title: res.error.graphQLErrors?.[0]?.originalError?.name,
-                message: res.error.message,
-                stack: res.error.stack,
+              this.ctx.coreData.dashboardGraphQLError = {
+                cypressError: getError('DASHBOARD_GRAPHQL_ERROR', res.error),
               }
             } else {
-              this.ctx.coreData.baseError = null
+              this.ctx.coreData.dashboardGraphQLError = null
             }
 
             // TODO(tim): send a signal to the frontend so when it refetches it does 'cache-only' request,

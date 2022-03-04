@@ -1,7 +1,6 @@
 <template>
   <StandardModal
     class="transition transition-all duration-200"
-    :click-outside="false"
     variant="bare"
     :title="t('sideBar.keyboardShortcuts.title')"
     :model-value="show"
