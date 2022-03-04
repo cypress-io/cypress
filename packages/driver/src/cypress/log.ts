@@ -223,16 +223,16 @@ class Log {
   cy: any
   state: any
   config: any
-  logManager: LogManager
+  fireChangeEvent: ((log) => (void | undefined))
   obj: any
 
   private attributes: Record<string, any> = {}
 
-  constructor (cy, state, config, logManager, obj) {
+  constructor (cy, state, config, fireChangeEvent, obj) {
     this.cy = cy
     this.state = state
     this.config = config
-    this.logManager = logManager
+    this.fireChangeEvent = fireChangeEvent
     this.obj = defaults(state, config, obj)
 
     extendEvents(this)
@@ -321,7 +321,7 @@ class Log {
       this.setElAttrs()
     }
 
-    this.logManager.fireChangeEvent(this)
+    this.fireChangeEvent(this)
 
     return this
   }
@@ -513,6 +513,10 @@ class Log {
 class LogManager {
   logs: Record<string, any> = {}
 
+  constructor () {
+    this.fireChangeEvent = this.fireChangeEvent.bind(this)
+  }
+
   trigger (log, event) {
     // bail if we never fired our initial log event
     if (!log._hasInitiallyLogged) {
@@ -560,76 +564,78 @@ class LogManager {
 
     return debounceFn()
   }
+
+  createLogFn (cy, state, config) {
+    return (options: any = {}) => {
+      if (!_.isObject(options)) {
+        $errUtils.throwErrByPath('log.invalid_argument', { args: { arg: options } })
+      }
+
+      const log = new Log(cy, state, config, this.fireChangeEvent, options)
+
+      log.set(options)
+
+      // if snapshot was passed
+      // in, go ahead and snapshot
+      if (log.get('snapshot')) {
+        log.snapshot()
+      }
+
+      // if end was passed in
+      // go ahead and end
+      if (log.get('end')) {
+        log.end()
+      }
+
+      if (log.get('error')) {
+        log.error(log.get('error'))
+      }
+
+      log.wrapConsoleProps()
+
+      const onBeforeLog = state('onBeforeLog')
+
+      // dont trigger log if this function
+      // explicitly returns false
+      if (_.isFunction(onBeforeLog)) {
+        if (onBeforeLog.call(cy, log) === false) {
+          return
+        }
+      }
+
+      // set the log on the command
+      const current = state('current')
+
+      if (current) {
+        current.log(log)
+      }
+
+      this.addToLogs(log)
+
+      if (options.sessionInfo) {
+        Cypress.emit('session:add', log.toJSON())
+      }
+
+      if (options.emitOnly) {
+        return
+      }
+
+      this.triggerLog(log)
+
+      // if not current state then the log is being run
+      // with no command reference, so just end the log
+      if (!current) {
+        log.end()
+      }
+
+      return log
+    }
+  }
 }
 
 export function create (Cypress, cy, state, config) {
   counter = 0
   const logManager = new LogManager()
 
-  const logFn = function (options: any = {}) {
-    if (!_.isObject(options)) {
-      $errUtils.throwErrByPath('log.invalid_argument', { args: { arg: options } })
-    }
-
-    const log = new Log(cy, state, config, logManager, options)
-
-    log.set(options)
-
-    // if snapshot was passed
-    // in, go ahead and snapshot
-    if (log.get('snapshot')) {
-      log.snapshot()
-    }
-
-    // if end was passed in
-    // go ahead and end
-    if (log.get('end')) {
-      log.end()
-    }
-
-    if (log.get('error')) {
-      log.error(log.get('error'))
-    }
-
-    log.wrapConsoleProps()
-
-    const onBeforeLog = state('onBeforeLog')
-
-    // dont trigger log if this function
-    // explicitly returns false
-    if (_.isFunction(onBeforeLog)) {
-      if (onBeforeLog.call(cy, log) === false) {
-        return
-      }
-    }
-
-    // set the log on the command
-    const current = state('current')
-
-    if (current) {
-      current.log(log)
-    }
-
-    logManager.addToLogs(log)
-
-    if (options.sessionInfo) {
-      Cypress.emit('session:add', log.toJSON())
-    }
-
-    if (options.emitOnly) {
-      return
-    }
-
-    logManager.triggerLog(log)
-
-    // if not current state then the log is being run
-    // with no command reference, so just end the log
-    if (!current) {
-      log.end()
-    }
-
-    return log
-  }
-
-  return logFn
+  return logManager.createLogFn(cy, state, config)
 }
