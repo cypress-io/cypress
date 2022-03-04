@@ -26,8 +26,7 @@
     "@cypress/react": "0.0.0-development",
     "@cypress/vue": "0.0.0-development",
     "@testing-library/cypress": "7.0.4",
-    "@vitejs/plugin-vue": "1.2.4",
-    "@vue/compiler-sfc": "3.2.6",
+    "@vitejs/plugin-vue": "2.2.4",
     "cypress": "0.0.0-development",
     "eslint-plugin-vue": "7.18.0",
     "mocha-junit-reporter": "^2.0.0",
@@ -35,7 +34,7 @@
     "react": "17.0.2",
     "vite": "2.8.0",
     "vite-plugin-inspect": "0.4.3",
-    "vue": "3.2.6",
+    "vue": "3.2.13",
     "vue-eslint-parser": "7.11.0"
   },
   "peerDependencies": {

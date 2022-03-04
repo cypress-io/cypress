@@ -82,12 +82,12 @@ export const Cypress = (
 
       // insert the script in the end of the body
       return `${indexHtmlContent.substring(0, endOfBody)
-    }<script src="@cypress:client-init-test" type="module"></script>${
+    }<script src="/@cypress:client-init-test" type="module"></script>${
       indexHtmlContent.substring(endOfBody)
     }`
     },
     resolveId (id) {
-      if (id === '@cypress:client-init-test') {
+      if (id === '/@cypress:client-init-test') {
         return INIT_FILEPATH
       }
     },
