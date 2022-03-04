@@ -18,7 +18,7 @@ export const mutation = mutationType({
         text: nonNull(stringArg()),
       },
       resolve: (_, { text }, ctx) => {
-        ctx.copyTextToClipboard(text)
+        ctx.electronApi.copyTextToClipboard(text)
 
         return true
       },
