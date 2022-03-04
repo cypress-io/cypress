@@ -219,7 +219,7 @@ export class MigrationDataSource {
       if (configFileAfterMigrationExist) {
         this.ctx.onError(getError('MIGRATION_ALREADY_OCURRED', this.configFileNameAfterMigration, this.ctx.lifecycleManager.legacyConfigFile))
 
-        return
+        return JSON.stringify({})
       }
     }
 
