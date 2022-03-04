@@ -234,9 +234,6 @@ export const mutation = mutationType({
       resolve: async (_, args, ctx) => {
         await ctx.actions.auth.login()
 
-        ctx.emitter.toApp()
-        ctx.emitter.toLaunchpad()
-
         return {}
       },
     })
@@ -246,9 +243,6 @@ export const mutation = mutationType({
       description: 'Log out of Cypress Dashboard',
       resolve: async (_, args, ctx) => {
         await ctx.actions.auth.logout()
-
-        ctx.emitter.toApp()
-        ctx.emitter.toLaunchpad()
 
         return {}
       },
