@@ -25,7 +25,7 @@ const formHashFromEnvironment = function () {
   } = process
 
   if (env.CIRCLECI) {
-    return `circle-${env.CIRCLE_BRANCH}-${env.CIRCLE_SHA1}`
+    return `${env.CIRCLE_BRANCH}-${env.CIRCLE_SHA1}`
   }
 
   throw new Error('Do not know how to form unique build hash on this CI')

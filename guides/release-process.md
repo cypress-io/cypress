@@ -78,27 +78,24 @@ In the following instructions, "X.Y.Z" is used to denote the [next version of Cy
 
 6. Log into AWS SSO with `aws sso login --profile <name_of_profile>`. The release scripts assumes you are using the `production` profile. If you have setup your credentials under a different profile, be sure to set the `AWS_PROFILE` environment variable.
 
-7. Use the `move-binaries` script to move the binaries for `<commit sha>` from `beta` to the `desktop` folder for `<new target version>`. This also purges the cloudflare cache for this version.
+7. Use the `prepare-release-artifacts` script (Mac/Linux only) to prepare the latest commit to a stable release. When you run this script, the following happens:
+    * the binaries for `<commit sha>` are moved from `beta` to the `desktop` folder for `<new target version>` in S3
+    * the Cloudflare cache for this version is purged
+    * the pre-prod `cypress.tgz` NPM package is converted to a stable NPM package ready for release
 
     ```shell
-    yarn move-binaries --sha <commit sha> --version <new target version>
+    yarn prepare-release-artifacts --sha <commit sha> --version <new target version>
     ```
 
-8. Validate you are logged `npm` with `npm whoami`. Otherwise log in with `npm login`. 
+    You can pass `--dry-run` to see the commands this would run under the hood.
 
-9. Publish the new npm package under the `dev` tag, using your personal npm account.
-    - To find the link to the package file `cypress.tgz`:
-        1. In GitHub, go to the latest commit (the one whose sha you used in the last step).
-            ![commit-link](https://user-images.githubusercontent.com/1157043/80608728-33fe6100-8a05-11ea-8b53-375303757b67.png)
-        2. Scroll down past the changes to the comments. The first comment should be a `cypress-bot` comment that includes a line beginning `npm install ...`. Grab the `https://cdn.../npm/X.Y.Z/<platform>/<long sha>/cypress.tgz` link.
-            ![commit-bot-comment](../assets/cypress-bot-pre-release-comment.png)
-    - Make sure the `linux-x64` binary and npm package are present at the commented locations. See [Before Publishing a New Version](#before-publishing-a-new-version).
-    - Publish the `linux-x64` distribution to the npm registry straight from the URL:
+8. Validate you are logged in to `npm` with `npm whoami`. Otherwise log in with `npm login`.
 
-        ```shell
-        npm publish https://cdn.cypress.io/beta/npm/X.Y.Z/<long sha>/cypress.tgz --tag dev
-        ```
-      :bangbang: Important :bangbang: Be sure to release the `linux-x64` distribution.
+9. Publish the generated npm package under the `dev` tag, using your personal npm account.
+
+    ```shell
+    npm publish /tmp/cypress-prod.tgz --tag dev
+    ```
 
 10. Double-check that the new version has been published under the `dev` tag using `npm info cypress` or [available-versions](https://github.com/bahmutov/available-versions). `latest` should still point to the previous version. Example output:
 

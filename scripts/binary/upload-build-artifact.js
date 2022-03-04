@@ -23,9 +23,9 @@ const getUploadDirForPlatform = function (options) {
 // the artifact will be uploaded for every platform and uploaded into under a unique folder
 // https://cdn.cypress.io/beta/(binary|npm)/<version>/<platform>/<some unique version info>/cypress.zip
 // For binary:
-//     beta/binary/9.4.2/win32-x64/circle-develop-219138ca4e952edc4af831f2ae16ce659ebdb50b/cypress.zip
+//     beta/binary/9.4.2/win32-x64/develop-219138ca4e952edc4af831f2ae16ce659ebdb50b/cypress.zip
 // For NPM package:
-//     beta/npm/9.4.2/circle-develop-219138ca4e952edc4af831f2ae16ce659ebdb50b/cypress.tgz
+//     beta/npm/9.4.2/develop-219138ca4e952edc4af831f2ae16ce659ebdb50b/cypress.tgz
 const getUploadPath = function (options) {
   const { hash, uploadFileName } = options
 
