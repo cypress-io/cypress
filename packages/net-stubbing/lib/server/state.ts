@@ -14,7 +14,7 @@ export function state (): NetStubbingState {
         res.removeAllListeners('finish')
         res.removeAllListeners('error')
         res.on('error', noop)
-        res.destroy()
+        res.end()
       }
 
       this.pendingEventHandlers = {}
