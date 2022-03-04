@@ -2,7 +2,7 @@ import Bluebird from 'bluebird'
 import $errUtils from '../../cypress/error_utils'
 import { Validator } from './validator'
 import { createUnserializableSubjectProxy } from './unserializable_subject_proxy'
-import { serializeRunnable } from './util'
+import { reifyCrossDomainError, serializeRunnable } from './util'
 import { preprocessConfig, preprocessEnv, syncConfigToCurrentDomain, syncEnvToCurrentDomain } from '../../util/config'
 
 export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: Cypress.State, config: Cypress.InternalConfig) {
@@ -33,6 +33,9 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
 
   Commands.addAll({
     switchToDomain<T> (domain: string, dataOrFn: T[] | (() => {}), fn?: (data?: T[]) => {}) {
+      // store the invocation stack in the case that `switchToDomain` errors
+      const userInvocationStack = state('current').get('userInvocationStack')
+
       clearTimeout(timeoutId)
       // this command runs for as long as the commands in the secondary
       // domain run, so it can't have its own timeout
@@ -84,16 +87,12 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
         const _reject = (err) => {
           cleanup()
           log.error(err)
-          if (typeof err === 'object') {
-            err.onFail = () => {}
-          }
-
           reject(err)
         }
 
-        const onQueueFinished = ({ err, subject, unserializableSubjectType }) => {
-          if (err) {
-            return _reject(err)
+        const onQueueFinished = ({ err, subject, unserializableSubjectType, hasMultiDomainError }) => {
+          if (hasMultiDomainError) {
+            return _reject(reifyCrossDomainError(err, userInvocationStack))
           }
 
           _resolve({ subject, unserializableSubjectType })
@@ -105,12 +104,12 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
         })
 
         communicator.once('ran:domain:fn', (details) => {
-          const { subject, unserializableSubjectType, err, finished } = details
+          const { subject, unserializableSubjectType, err, finished, hasMultiDomainError } = details
 
           sendReadyForDomain()
 
-          if (err) {
-            return _reject(err)
+          if (hasMultiDomainError) {
+            return _reject(reifyCrossDomainError(err, userInvocationStack))
           }
 
           // if there are not commands and a synchronous return from the callback,

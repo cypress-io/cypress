@@ -1,17 +1,27 @@
 import _ from 'lodash'
-import { AssertionError } from 'chai'
 import $stackUtils from '../../cypress/stack_utils'
+import $errUtils from '../../cypress/error_utils'
+import { UNSERIALIZABLE } from '../../util/serialization'
 
-export const correctStackForCrossDomainError = (serializedError: any, userInvocationStack: string) => {
-  //  Since Errors sent over postMessage need to be serialized to Objects, we need to serialize them back into Error instances
-  const ErrorClass = serializedError?.name === 'AssertionError' ? AssertionError : Error
+export const reifyCrossDomainError = (serializedError: any, userInvocationStack: string) => {
+  // we have no idea what type the error this is... could be 'undefined', a plain old object, or something else entirely
 
-  // only assign missing properties on the object to reify the error properly
-  const reifiedError = _.assignWith(new ErrorClass(serializedError?.message), serializedError, (objValue, srcValue) => {
-    return _.isUndefined(objValue) ? srcValue : objValue
-  })
+  let reifiedError = $errUtils.errByPath('switchToDomain.failed_to_serialize_or_map_thrown_value')
 
-  reifiedError.name = serializedError?.name ?? reifiedError.name
+  if (_.isArray(serializedError)) {
+    // if the error is an array of anything, create a normal error with the stringified values of the passed in array
+    reifiedError = new Error(serializedError.toString())
+  } else if (_.isObject(serializedError as any)) {
+    // otherwise, try to determine if there are any error details in the object and merge the error objects together
+    let errorToMerge = serializedError?.message ? new Error(serializedError?.message || '') : reifiedError
+
+    reifiedError = _.assignWith(errorToMerge, serializedError)
+  } else if (serializedError !== UNSERIALIZABLE) {
+    reifiedError = new Error(`${serializedError}`)
+  }
+
+  // @ts-ignore
+  reifiedError.onFail = () => {}
 
   reifiedError.stack = $stackUtils.replacedStack(reifiedError, userInvocationStack)
 

@@ -1736,6 +1736,10 @@ export default {
       message: stripIndent`\
       ${cmd('switchToDomain')} could not serialize the subject due to symbols not being supported by the structured clone algorithm.`,
     },
+    failed_to_serialize_or_map_thrown_value: {
+      message: stripIndent`\
+      ${cmd('switchToDomain')} could not serialize or map the thrown value. Please make sure the value being thrown is supported by the structured clone algorithm.`,
+    },
     // TODO: These deprecation warnings and forbidden use errors need to be audited before releasing multi-domain
     route: {
       unsupported: {

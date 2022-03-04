@@ -1,9 +1,7 @@
-import clone from 'clone'
 import debugFn from 'debug'
 import { EventEmitter } from 'events'
-import _ from 'lodash'
-import $dom from '../dom'
 import { preprocessConfig, preprocessEnv } from '../util/config'
+import { preprocessErrorsForSerialization } from '../util/serialization'
 
 const debug = debugFn('cypress:driver:multi-domain')
 
@@ -11,47 +9,6 @@ const CROSS_DOMAIN_PREFIX = 'cross:domain:'
 
 declare global {
   interface Window { specBridgeDomain: string }
-}
-
-const preprocessErrorForPostMessage = (value) => {
-  const { isDom } = $dom
-
-  if (_.isError(value)) {
-    const serializableError = _.mapValues(clone(value), preprocessErrorForPostMessage)
-
-    return {
-      ... serializableError,
-      // Native Error types currently cannot be cloned in Firefox when using 'postMessage'.
-      // Please see https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm for more details
-      name: value.name,
-      message: value.message,
-      stack: value.stack,
-    }
-  }
-
-  if (_.isArray(value)) {
-    return _.map(value, preprocessErrorForPostMessage)
-  }
-
-  if (isDom(value)) {
-    return $dom.stringify(value, 'short')
-  }
-
-  if (_.isFunction(value)) {
-    return value.toString()
-  }
-
-  if (_.isObject(value)) {
-    // clone to nuke circular references
-    // and blow away anything that throws
-    try {
-      return _.mapValues(clone(value), preprocessErrorForPostMessage)
-    } catch (err) {
-      return null
-    }
-  }
-
-  return value
 }
 
 /**
@@ -144,15 +101,26 @@ export class SpecBridgeDomainCommunicator extends EventEmitter {
   private windowReference
 
   private handleSubjectAndErr = (data: any = {}, send: (data: any) => void) => {
-    const { subject, err, ...rest } = data
+    let { subject, err, ...rest } = data
 
-    if (!subject && !err) {
+    // check to see if the 'err' key is defined, and if it is, we have an error of any type
+    const hasMultiDomainError = !!Object.getOwnPropertyDescriptor(data, 'err')
+
+    if (!subject && !hasMultiDomainError) {
       return send(rest)
     }
 
     try {
+      if (hasMultiDomainError) {
+        try {
+          err = preprocessErrorsForSerialization(err)
+        } catch (e) {
+          err = e
+        }
+      }
+
       // We always want to make sure errors are posted, so clean it up to send.
-      send({ ...rest, subject, err: preprocessErrorForPostMessage(err) })
+      send({ ...rest, subject, err, hasMultiDomainError })
     } catch (err: any) {
       if (subject && err.name === 'DataCloneError') {
         // Send the type of object that failed to serialize.
