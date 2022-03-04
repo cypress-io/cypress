@@ -36,7 +36,7 @@ import type { Server } from 'http'
 import type { AddressInfo } from 'net'
 import type { App as ElectronApp } from 'electron'
 import { VersionsDataSource } from './sources/VersionsDataSource'
-import type { SocketIOServer } from '@packages/socket'
+import type { Socket, SocketIOServer } from '@packages/socket'
 import { globalPubSub } from '.'
 import { InjectedConfigApi, ProjectLifecycleManager } from './data/ProjectLifecycleManager'
 import type { CypressError } from '@packages/errors'
@@ -237,6 +237,11 @@ export class DataContext {
 
   setAppSocketServer (socketServer: SocketIOServer | undefined) {
     this.update((d) => {
+      if (d.servers.appSocketServer !== socketServer) {
+        d.servers.appSocketServer?.off('connection', this.initialPush)
+        socketServer?.on('connection', this.initialPush)
+      }
+
       d.servers.appSocketServer = socketServer
     })
   }
@@ -250,8 +255,21 @@ export class DataContext {
 
   setGqlSocketServer (socketServer: SocketIOServer | undefined) {
     this.update((d) => {
+      if (d.servers.gqlSocketServer !== socketServer) {
+        d.servers.gqlSocketServer?.off('connection', this.initialPush)
+        socketServer?.on('connection', this.initialPush)
+      }
+
       d.servers.gqlSocketServer = socketServer
     })
+  }
+
+  initialPush = (socket: Socket) => {
+    // TODO: This is a hack that will go away when we refine the whole socket communication
+    // layer w/ GraphQL subscriptions, we shouldn't be pushing so much
+    setTimeout(() => {
+      socket.emit('data-context-push')
+    }, 100)
   }
 
   /**
