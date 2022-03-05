@@ -12,7 +12,7 @@
 </template>
 
 <script lang="ts" setup>
-import CopyButton from '@cy/gql-components/CopyButton.vue'
+import CopyButton from '../gql-components/CopyButton.vue'
 
 const props = defineProps<{
   text: string

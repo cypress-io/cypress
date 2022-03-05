@@ -107,8 +107,8 @@ export { highlighter, inheritAttrs }
 <script lang="ts" setup>
 import type { Ref } from 'vue'
 import { computed, onBeforeMount, ref } from 'vue'
-import CopyButton from '@cy/gql-components/CopyButton.vue'
-import { useClipboard } from '@cy/gql-components/useClipboard'
+import CopyButton from '../gql-components/CopyButton.vue'
+import { useClipboard } from '../gql-components/useClipboard'
 
 const highlighterInitialized = ref(false)
 
