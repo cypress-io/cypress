@@ -23,10 +23,11 @@ import BaseLink from '../components/BaseLink.vue'
 import { useExternalLink } from '../gql-components/useExternalLink'
 
 const props = withDefaults(defineProps<{
-  href: string
+  href?: string
   useDefaultHocus?: boolean
 }>(), {
   useDefaultHocus: true,
+  href: '',
 })
 
 const open = useExternalLink(props.href)

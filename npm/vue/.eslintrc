@@ -3,11 +3,16 @@
     "cypress"
   ],
   "extends": [
-    "plugin:@cypress/dev/tests"
+    "plugin:@cypress/dev/tests",
+    "plugin:vue/vue3-recommended"
   ],
   "parser": "vue-eslint-parser",
   "parserOptions": {
     "parser": "@typescript-eslint/parser"
+  },
+  "globals": {
+    "defineProps": "readonly",
+    "defineEmits": "readonly"
   },
   "env": {
     "cypress/globals": true
@@ -16,6 +21,7 @@
     "mocha/no-global-tests": "off",
     "no-unused-vars": "off",
     "no-console": "off",
-    "@typescript-eslint/no-unused-vars": "off"
+    "@typescript-eslint/no-unused-vars": "off",
+    "vue/multi-word-component-names": "off"
   }
 }
