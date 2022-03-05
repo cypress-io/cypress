@@ -25,6 +25,10 @@ describe('<ManualInstall />', () => {
       ),
     })
 
+    cy.withCtx(async (ctx, o) => {
+      ctx.electronApi.copyTextToClipboard = o.sinon.stub()
+    })
+
     const installCommand = `npm install -D @cypress/react @cypress/webpack-dev-server`
 
     // @ts-ignore
