@@ -139,11 +139,6 @@ export const installCustomPercyCommand = ({ before, elementOverrides } = {}) => 
    *   precedence over the global override defined when the command was installed.
    */
   const customPercySnapshot = (origFn, name, options = {}) => {
-    // in run mode, only take snapshots on linux to avoid duplicates when windows tests run
-    if (Cypress.platform !== 'linux' && !Cypress.config().isInteractive) {
-      return Cypress.log({ message: 'percy: skipping snapshot on non-linux platform' })
-    }
-
     if (_.isObject(name)) {
       options = name
       name = null
