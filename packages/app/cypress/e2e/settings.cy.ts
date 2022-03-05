@@ -42,6 +42,10 @@ describe('App: Settings', () => {
 
   describe('Cloud Settings', () => {
     it('shows the projectId section when there is a projectId', () => {
+      cy.withCtx(async (ctx, o) => {
+        ctx.electronApi.copyTextToClipboard = o.sinon.stub()
+      })
+
       cy.startAppServer('e2e')
       cy.visitApp()
       cy.findByText('Settings').click()
