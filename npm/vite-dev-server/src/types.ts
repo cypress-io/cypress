@@ -16,5 +16,5 @@ export interface StartDevServer {
   /* base html template to render in AUT */
   template?: string
   /* base html template to render in AUT */
-  indexHtml?: string
+  indexHtmlFile?: string
 }

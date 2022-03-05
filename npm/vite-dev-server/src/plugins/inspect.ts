@@ -3,7 +3,7 @@ import type { PluginOption } from 'vite'
 
 const debug = debugFn('cypress:vite-dev-server:plugins:inspect')
 
-export const CypressInspect = async (): (() => PluginOption) | null => {
+export const CypressInspect = async (): Promise<(() => PluginOption) | null> => {
   if (!process.env.DEBUG) return null
 
   let Inspect

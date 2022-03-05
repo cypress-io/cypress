@@ -15,12 +15,10 @@
   },
   "dependencies": {
     "debug": "4.3.3",
-    "dedent": "0.7.0",
     "find-up": "6.3.0",
     "get-port": "5.1.1",
     "local-pkg": "0.4.1",
-    "pathe": "0.2.0",
-    "ufo": "0.7.10"
+    "pathe": "0.2.0"
   },
   "devDependencies": {
     "@cypress/react": "0.0.0-development",

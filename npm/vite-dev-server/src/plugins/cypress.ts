@@ -1,30 +1,10 @@
-// import { Plugin, ViteDevServer } from 'vite'
-// import { CypressViteDevServer } from './server'
-
-// export const Cypress = (options): Plugin => {
-//   return {
-//     name: 'cypress:main',
-//     enforce: 'pre',
-
-//     // configureServer (viteServer: ViteDevServer) {
-//     //   return () => {
-//     //     const cyServer = new CypressViteDevServer(viteServer, options)
-
-//     //     viteServer.middlewares.use('/', cyServer.handleAllRoutes.bind(cyServer))
-
-//     // viteServer.middlewares.use('/', cyServer.handle404.bind(cyServer))
-//     // }
-//     // },
-//   }
-// }
-import { resolve, sep } from 'path'
-import { readFile } from 'fs/promises'
 import Debug from 'debug'
-import { ModuleNode, normalizePath, Plugin, ViteDevServer } from 'vite'
+import { readFile } from 'fs/promises'
+import { resolve, sep } from 'pathe'
+import { ModuleNode, Plugin, ViteDevServer } from 'vite'
 
-const debug = Debug('cypress:vite-dev-server:plugin')
+const debug = Debug('cypress:vite-dev-server:plugins')
 
-const pluginName = 'cypress-transform-html'
 const OSSepRE = new RegExp(`\\${sep}`, 'g')
 
 function convertPathToPosix (path: string): string {
@@ -70,7 +50,7 @@ export const Cypress = (
   const posixIndexHtml = indexHtmlFile ? convertPathToPosix(resolve(projectRoot, indexHtmlFile)) : undefined
 
   return {
-    name: pluginName,
+    name: 'cypress:main',
     enforce: 'pre',
     configResolved (config) {
       base = config.base

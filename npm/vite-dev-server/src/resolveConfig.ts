@@ -3,13 +3,13 @@
  * Vitest's own config resolution logic.
  * You can find it here https://github.com/vitest-dev/vitest/blob/main/packages/vitest/src/node/create.ts
  */
-import { resolve, relative } from 'pathe'
+import debugFn from 'debug'
+import { importModule } from 'local-pkg'
+import { relative, resolve } from 'pathe'
 import { mergeConfig } from 'vite'
 import { configFiles } from './constants'
 import { Cypress, CypressInspect } from './plugins/index'
-import debugFn from 'debug'
 import type { StartDevServer } from './types'
-import { importModule } from 'local-pkg'
 
 const debug = debugFn('cypress:vite-dev-server:resolve-config')
 
