@@ -13,7 +13,7 @@ describe('e2e downloads', () => {
     project: 'downloads',
     spec: 'downloads_spec.ts',
     config: {
-      video: false,
+      video: true,
     },
   })
 
@@ -26,7 +26,7 @@ describe('e2e downloads', () => {
     spec: '*',
     config: {
       downloadsFolder: 'cypress/dls',
-      video: false,
+      video: true,
     },
     onRun: async (exec) => {
       await exec()
