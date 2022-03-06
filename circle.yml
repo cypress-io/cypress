@@ -1361,9 +1361,6 @@ jobs:
     <<: *defaults
     parameters:
       <<: *defaultsParameters
-      percy:
-        type: boolean
-        default: false
       resource_class:
         type: string
         default: medium
@@ -2218,19 +2215,16 @@ linux-workflow: &linux-workflow
         requires:
           - build
     - run-launchpad-component-tests-chrome:
-        percy: true
         context: test-runner:launchpad-tests
         percy: true
         requires:
           - build
     - run-app-integration-tests-chrome:
-        percy: true
         context: test-runner:launchpad-tests
         percy: true
         requires:
           - build
     - run-app-component-tests-chrome:
-        percy: true
         context: test-runner:launchpad-tests
         percy: true
         requires:
