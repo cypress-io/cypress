@@ -15,7 +15,7 @@ import dedent from 'dedent'
 
 export type MutationResolverCallback<T extends TypedDocumentNode> = (
   defineResult: (input: ResultType<T>) => ResultType<T>,
-  variables: Exclude<T['__variablesType'], undefined>) => ResultType<T>
+  variables: Exclude<T['__variablesType'], undefined>) => ResultType<T> | void
 
 export type ResultType<T> = T extends TypedDocumentNode<infer U, any> ? U : never
 
