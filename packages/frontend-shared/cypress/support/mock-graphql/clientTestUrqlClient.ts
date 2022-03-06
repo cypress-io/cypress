@@ -15,13 +15,13 @@ import dedent from 'dedent'
 
 export type MutationResolverCallback<T extends TypedDocumentNode> = (
   defineResult: (input: ResultType<T>) => ResultType<T>,
-  variables: Exclude<T['__variablesType'], undefined>) => Promise<ResultType<T>> | ResultType<T>
+  variables: Exclude<T['__variablesType'], undefined>) => ResultType<T> | void
 
 export type ResultType<T> = T extends TypedDocumentNode<infer U, any> ? U : never
 
 export function testUrqlClient (context: ClientTestContext,
   onResult?: (result: any, context: ClientTestContext) => any,
-  mutationResolvers?: Record<string, MutationResolverCallback<any>>): Client {
+  mutationResolvers?: Map<string, MutationResolverCallback<any>>): Client {
   return createClient({
     url: '/__cypress/graphql',
     exchanges: [
