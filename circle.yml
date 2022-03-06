@@ -1099,7 +1099,7 @@ jobs:
             run-launchpad-integration-tests-chrome
       - run:
           command: |
-            PERCY_PARALLEL_NONCE=$PLATFORM-$CIRCLE_SHA1 \
+            PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
             yarn percy build:finalize
 
   cli-visual-tests:
