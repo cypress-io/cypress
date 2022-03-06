@@ -1,7 +1,6 @@
 <template>
   <StandardModal
     class="transition-all transition duration-200"
-    :click-outside="false"
     variant="bare"
     :title="t('testingType.modalTitle')"
     help-link="https://on.cypress.io/choosing-testing-type"
