@@ -18,6 +18,15 @@ describe('<ManualInstall />', () => {
     const bundler = CYPRESS_WEBPACK
 
     cy.mountFragment(ManualInstallFragmentDoc, {
+      onMutate: (ctx, mutationName) => {
+        if (mutationName === 'Clipboard_CopyToClipboard') {
+          return {
+            copyTextToClipboard: true,
+          }
+        }
+
+        return
+      },
       render: (gqlVal) => (
         <div class="rounded border-1 border-gray-400 m-10">
           <ManualInstall gql={gqlVal} packagesInstalled={[]} />
@@ -28,7 +37,8 @@ describe('<ManualInstall />', () => {
     const installCommand = `npm install -D @cypress/react @cypress/webpack-dev-server`
 
     cy.findByText(installCommand).should('be.visible')
-    cy.findByRole('button', { name: 'Copy' }).should('be.visible')
+    cy.findByRole('button', { name: 'Copy' }).click()
+    cy.findByRole('button', { name: 'Copied!' }).should('be.visible')
 
     const validatePackage = (packageName: string) => {
       cy.findByRole('link', { name: packageName })
