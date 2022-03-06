@@ -483,7 +483,7 @@ commands:
             DEBUG=<<parameters.debug>> \
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$TEST_LAUNCHPAD_RECORD_KEY \
-            PERCY_PARALLEL_NONCE=$PLATFORM-$CIRCLE_SHA1 \
+            PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
             PERCY_TARGET_BRANCH="10.0-release" \
@@ -1090,7 +1090,7 @@ jobs:
           # upstream with finalizing builds. These will be removed
           # once we implement a more permanent solution.
           command: |
-            PERCY_PARALLEL_NONCE=$PLATFORM-$CIRCLE_SHA1 \
+            PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
             PERCY_TARGET_BRANCH="10.0-release" \
             PERCY_TARGET_COMMIT=$(git log -n 1 origin/10.0-release --pretty="%H") \
             yarn percy build:finalize
@@ -1119,7 +1119,7 @@ jobs:
           # upstream with finalizing builds. These will be removed
           # once we implement a more permanent solution.
           command: |
-            PERCY_PARALLEL_NONCE=$PLATFORM-$CIRCLE_SHA1 \
+            PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
             PERCY_TARGET_BRANCH="10.0-release" \
@@ -1294,21 +1294,31 @@ jobs:
 
   run-frontend-shared-component-tests-chrome:
     <<: *defaults
+    parameters:
+      <<: *defaultsParameters
+      percy:
+        type: boolean
+        default: false
     parallelism: 3
     steps:
       - run-new-ui-tests:
           browser: chrome
-          percy: true
+          percy: << parameters.percy >>
           package: frontend-shared
           type: ct
 
   run-launchpad-component-tests-chrome:
     <<: *defaults
+    parameters:
+      <<: *defaultsParameters
+      percy:
+        type: boolean
+        default: false
     parallelism: 7
     steps:
       - run-new-ui-tests:
           browser: chrome
-          percy: true
+          percy: << parameters.percy >>
           package: launchpad
           type: ct
           # debug: cypress:*,engine:socket
@@ -1320,22 +1330,30 @@ jobs:
       resource_class:
         type: string
         default: medium
+      percy:
+        type: boolean
+        default: false
     resource_class: << parameters.resource_class >>
     parallelism: 3
     steps:
       - run-new-ui-tests:
           browser: chrome
-          percy: true
+          percy: << parameters.percy >>
           package: launchpad
           type: e2e
 
   run-app-component-tests-chrome:
     <<: *defaults
+    parameters:
+      <<: *defaultsParameters
+      percy:
+        type: boolean
+        default: false
     parallelism: 7
     steps:
       - run-new-ui-tests:
           browser: chrome
-          percy: true
+          percy: << parameters.percy >>
           package: app
           type: ct
 
@@ -1346,12 +1364,15 @@ jobs:
       resource_class:
         type: string
         default: medium
+      percy:
+        type: boolean
+        default: false
     resource_class: << parameters.resource_class >>
     parallelism: 8
     steps:
       - run-new-ui-tests:
           browser: chrome
-          percy: true
+          percy: << parameters.percy >>
           package: app
           type: e2e
 
@@ -1402,7 +1423,7 @@ jobs:
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-            PERCY_PARALLEL_NONCE=$PLATFORM-$CIRCLE_SHA1 \
+            PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
             PERCY_TARGET_BRANCH="10.0-release" \
@@ -1548,7 +1569,7 @@ jobs:
           # once we implement a more permanent solution.
           command: |
             CYPRESS_KONFIG_ENV=production \
-            PERCY_PARALLEL_NONCE=$PLATFORM-$CIRCLE_SHA1 \
+            PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
             PERCY_TARGET_BRANCH="10.0-release" \
@@ -2206,21 +2227,26 @@ linux-workflow: &linux-workflow
           - build
     - run-frontend-shared-component-tests-chrome:
         context: test-runner:launchpad-tests
+        percy: true
         requires:
           - build
     - run-launchpad-integration-tests-chrome:
         context: test-runner:launchpad-tests
+        percy: true
         requires:
           - build
     - run-launchpad-component-tests-chrome:
+        percy: true
         context: test-runner:launchpad-tests
         requires:
           - build
     - run-app-integration-tests-chrome:
+        percy: true
         context: test-runner:launchpad-tests
         requires:
           - build
     - run-app-component-tests-chrome:
+        percy: true
         context: test-runner:launchpad-tests
         requires:
           - build
