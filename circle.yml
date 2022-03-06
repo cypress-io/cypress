@@ -478,7 +478,7 @@ commands:
             DEBUG=<<parameters.debug>> \
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$TEST_LAUNCHPAD_RECORD_KEY \
-            PERCY_PARALLEL_NONCE=$PLATFORM-$CIRCLE_SHA1 \
+            PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
             $cmd yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --record --parallel --group <<parameters.package>>-<<parameters.type>>
@@ -1121,7 +1121,7 @@ jobs:
       - run:
           name: Upload CLI snapshots for diffing
           command: |
-            PERCY_PARALLEL_NONCE=$PLATFORM-$CIRCLE_SHA1 \
+            PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy snapshot ./cli/visual-snapshots
@@ -1367,6 +1367,9 @@ jobs:
       resource_class:
         type: string
         default: medium
+      percy:
+        type: boolean
+        default: false
     resource_class: << parameters.resource_class >>
     parallelism: 8
     steps:
@@ -1418,7 +1421,7 @@ jobs:
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-            PERCY_PARALLEL_NONCE=$PLATFORM-$CIRCLE_SHA1 \
+            PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy exec --parallel -- -- \
@@ -1557,7 +1560,7 @@ jobs:
           #
           command: |
             CYPRESS_KONFIG_ENV=production \
-            PERCY_PARALLEL_NONCE=$PLATFORM-$CIRCLE_SHA1 \
+            PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy exec --parallel -- -- \
@@ -2215,16 +2218,19 @@ linux-workflow: &linux-workflow
         requires:
           - build
     - run-launchpad-component-tests-chrome:
+        percy: true
         context: test-runner:launchpad-tests
         percy: true
         requires:
           - build
     - run-app-integration-tests-chrome:
+        percy: true
         context: test-runner:launchpad-tests
         percy: true
         requires:
           - build
     - run-app-component-tests-chrome:
+        percy: true
         context: test-runner:launchpad-tests
         percy: true
         requires:
