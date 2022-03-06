@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import { pipe, map } from 'wonka'
-import type { Client } from '@urql/core'
+import type { Client, TypedDocumentNode } from '@urql/core'
 import { createClient, dedupExchange, errorExchange } from '@urql/core'
 import { executeExchange } from '@urql/exchange-execute'
 import { makeCacheExchange } from '@packages/frontend-shared/src/graphql/urqlClient'
@@ -13,9 +13,15 @@ import { GQLStubRegistry } from './stubgql-Registry'
 import { pathToArray } from 'graphql/jsutils/Path'
 import dedent from 'dedent'
 
+export type MutationResolverCallback<T extends TypedDocumentNode> = (
+  defineResult: (input: ResultType<T>) => ResultType<T>,
+  variables: Exclude<T['__variablesType'], undefined>) => Promise<ResultType<T>> | ResultType<T>
+
+export type ResultType<T> = T extends TypedDocumentNode<infer U, any> ? U : never
+
 export function testUrqlClient (context: ClientTestContext,
   onResult?: (result: any, context: ClientTestContext) => any,
-  onMutate?: (result: any, name: string, context: ClientTestContext) => any): Client {
+  mutationResolvers?: Record<string, MutationResolverCallback<any>>): Client {
   return createClient({
     url: '/__cypress/graphql',
     exchanges: [
@@ -40,19 +46,17 @@ export function testUrqlClient (context: ClientTestContext,
                 },
               }).end()
 
-              if (onMutate) {
-                if (result.operation.kind === 'mutation') {
-                  const firstMutation = result.operation.query.definitions[0]
+              if (mutationResolvers && result.operation.kind === 'mutation') {
+                const firstMutation = result.operation.query.definitions[0]
 
-                  if (firstMutation.kind === 'OperationDefinition') {
-                    const mutationName = firstMutation.name?.value
+                if (firstMutation.kind === 'OperationDefinition') {
+                  const mutationName = firstMutation.name?.value
 
-                    if (mutationName) {
-                      const val = onMutate(result.data, mutationName, context)
+                  if (mutationName) {
+                    const val = mutationResolvers[mutationName]?.((conf: any) => (conf), result.operation.variables)
 
-                      if (val) {
-                        result.data = val
-                      }
+                    if (val) {
+                      result.data = val
                     }
                   }
                 }

@@ -1,6 +1,8 @@
+import sinon from 'sinon'
 import { ManualInstallFragmentDoc } from '../generated/graphql-test'
 import ManualInstall from './ManualInstall.vue'
 import { CYPRESS_REACT_LATEST, CYPRESS_WEBPACK } from '@packages/scaffold-config'
+import { Clipboard_CopyToClipboardDocument } from '../generated/graphql'
 
 describe('<ManualInstall />', () => {
   it('playground', () => {
@@ -17,16 +19,17 @@ describe('<ManualInstall />', () => {
     const framework = CYPRESS_REACT_LATEST
     const bundler = CYPRESS_WEBPACK
 
-    cy.mountFragment(ManualInstallFragmentDoc, {
-      onMutate: (ctx, mutationName) => {
-        if (mutationName === 'Clipboard_CopyToClipboard') {
-          return {
-            copyTextToClipboard: true,
-          }
-        }
+    const stubCopy = sinon.stub()
 
-        return
-      },
+    cy.setMutationResolver(Clipboard_CopyToClipboardDocument, (defineResult, { text }) => {
+      stubCopy(text)
+
+      return defineResult({
+        copyTextToClipboard: true,
+      })
+    })
+
+    cy.mountFragment(ManualInstallFragmentDoc, {
       render: (gqlVal) => (
         <div class="rounded border-1 border-gray-400 m-10">
           <ManualInstall gql={gqlVal} packagesInstalled={[]} />
@@ -38,7 +41,9 @@ describe('<ManualInstall />', () => {
 
     cy.findByText(installCommand).should('be.visible')
     cy.findByRole('button', { name: 'Copy' }).click()
-    cy.findByRole('button', { name: 'Copied!' }).should('be.visible')
+    cy.findByRole('button', { name: 'Copied!' }).should('be.visible').then(() => {
+      cy.wrap(stubCopy).should('have.been.calledWith', installCommand)
+    })
 
     const validatePackage = (packageName: string) => {
       cy.findByRole('link', { name: packageName })
