@@ -21,7 +21,7 @@ export type ResultType<T> = T extends TypedDocumentNode<infer U, any> ? U : neve
 
 export function testUrqlClient (context: ClientTestContext,
   onResult?: (result: any, context: ClientTestContext) => any,
-  mutationResolvers?: Record<string, MutationResolverCallback<any>>): Client {
+  mutationResolvers?: Map<string, MutationResolverCallback<any>>): Client {
   return createClient({
     url: '/__cypress/graphql',
     exchanges: [
