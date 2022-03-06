@@ -35,7 +35,9 @@ const specs = computed(() => {
 watchSpec(specs)
 
 watchEffect(() => {
-  if (specStore && !specStore.activeSpec) {
+  const specPath = router.currentRoute.value.query.file
+
+  if (specPath && specStore && !specStore.activeSpec) {
     router.push({ name: 'Specs', params: {
       unrunnable: router.currentRoute.value.query.file as string,
     } })

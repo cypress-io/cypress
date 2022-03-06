@@ -11,7 +11,7 @@
     >
       <p class="mb-24px">
         There is no spec matching the following location: <InlineCodeFragment variant="error">
-          {{ route.params?.unrunnable }}
+          {{ route.params.unrunnable }}
         </InlineCodeFragment>
       </p>
       <p>It is possible that the file has been moved or deleted. Please choose from the list of specs below.</p>
