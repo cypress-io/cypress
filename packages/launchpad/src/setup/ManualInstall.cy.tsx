@@ -21,14 +21,6 @@ describe('<ManualInstall />', () => {
 
     const stubCopy = sinon.stub()
 
-    cy.setMutationResolver(Clipboard_CopyToClipboardDocument, (defineResult, { text }) => {
-      stubCopy(text)
-
-      return defineResult({
-        copyTextToClipboard: true,
-      })
-    })
-
     cy.mountFragment(ManualInstallFragmentDoc, {
       render: (gqlVal) => (
         <div class="rounded border-1 border-gray-400 m-10">
@@ -37,13 +29,21 @@ describe('<ManualInstall />', () => {
       ),
     })
 
+    cy.setMutationResolver(Clipboard_CopyToClipboardDocument, (defineResult, { text }) => {
+      stubCopy(text)
+
+      return defineResult({
+        copyTextToClipboard: true,
+      })
+    })
+
     const installCommand = `npm install -D @cypress/react @cypress/webpack-dev-server`
 
     cy.findByText(installCommand).should('be.visible')
     cy.findByRole('button', { name: 'Copy' }).click()
-    cy.findByRole('button', { name: 'Copied!' }).should('be.visible').then(() => {
-      cy.wrap(stubCopy).should('have.been.calledWith', installCommand)
-    })
+    cy.findByRole('button', { name: 'Copied!' }).should('be.visible')
+
+    cy.wrap(stubCopy).should('have.been.calledWith', installCommand)
 
     const validatePackage = (packageName: string) => {
       cy.findByRole('link', { name: packageName })
