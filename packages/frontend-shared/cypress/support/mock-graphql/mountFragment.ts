@@ -73,7 +73,7 @@ export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
           createI18n(),
           {
             install (app) {
-              app.use(urql, testUrqlClient(context, options.onResult))
+              app.use(urql, testUrqlClient(context, options.onResult, options.onMutate))
             },
           },
         ],
@@ -152,6 +152,7 @@ type MountFragmentConfig<T extends TypedDocumentNode> = {
    * before rendering the component
    */
   onResult?: (result: ResultType<T>, ctx: ClientTestContext) => ResultType<T> | void
+  onMutate?: (ctx: ClientTestContext, name: string) => any | void
   /**
    * Render is passed the result of the "frag" and mounts the component under test
    */

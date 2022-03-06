@@ -13,7 +13,9 @@ import { GQLStubRegistry } from './stubgql-Registry'
 import { pathToArray } from 'graphql/jsutils/Path'
 import dedent from 'dedent'
 
-export function testUrqlClient (context: ClientTestContext, onResult?: (result: any, context: ClientTestContext) => any): Client {
+export function testUrqlClient (context: ClientTestContext,
+  onResult?: (result: any, context: ClientTestContext) => any,
+  onMutate?: (result: any, name: string, context: ClientTestContext) => any): Client {
   return createClient({
     url: '/__cypress/graphql',
     exchanges: [
@@ -37,6 +39,24 @@ export function testUrqlClient (context: ClientTestContext, onResult?: (result: 
                   return result
                 },
               }).end()
+
+              if (onMutate) {
+                if (result.operation.kind === 'mutation') {
+                  const firstMutation = result.operation.query.definitions[0]
+
+                  if (firstMutation.kind === 'OperationDefinition') {
+                    const mutationName = firstMutation.name?.value
+
+                    if (mutationName) {
+                      const val = onMutate(result.data, mutationName, context)
+
+                      if (val) {
+                        result.data = val
+                      }
+                    }
+                  }
+                }
+              }
 
               if (onResult) {
                 if (result.data.testFragmentMember) {
