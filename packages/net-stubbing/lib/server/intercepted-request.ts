@@ -145,6 +145,8 @@ export class InterceptedRequest {
         }
 
         const eventId = _.uniqueId('event')
+
+        subscription.eventId = eventId
         const eventFrame: NetEvent.ToDriver.Event<any> = {
           eventId,
           subscription,

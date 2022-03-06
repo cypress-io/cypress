@@ -7,7 +7,6 @@ export function state (): NetStubbingState {
     routes: [],
     pendingEventHandlers: {},
     reset () {
-      // clean up requests that are still pending
       for (const requestId in this.requests) {
         const request = this.requests[requestId]
         const inResponsePhase = ['before:response', 'response:callback', 'response'].includes(request.lastEvent!)
@@ -17,7 +16,9 @@ export function state (): NetStubbingState {
         request.subscriptionsByRoute.forEach((subscriptionByRoute) => {
           if (!subscriptionByRoute.immediateStaticResponse) {
             subscriptionByRoute.subscriptions.forEach((subscription) => {
+              console.log(subscription)
               if (subscription.await && !subscription.skip && (subscription.eventName === 'response:callback' || !inResponsePhase)) {
+                console.log('Destroying')
                 shouldDestroyResponse = true
               }
             })

@@ -236,6 +236,7 @@ export interface Subscription {
    */
   id?: string
   routeId: string
+  eventId: string
   eventName: string
   await: boolean
   skip?: boolean
