@@ -265,7 +265,7 @@ export class MigrationActions {
 
   async nextStep () {
     const filteredSteps = this.ctx.coreData.migration.filteredSteps
-    const index = filteredSteps.indexOf(this.ctx.migration.step)
+    const index = filteredSteps.indexOf(this.ctx.coreData.migration.step)
 
     if (index === -1) {
       throw new Error('Invalid step')
@@ -273,8 +273,10 @@ export class MigrationActions {
 
     const nextIndex = index + 1
 
+    console.log({ nextIndex })
     if (nextIndex < filteredSteps.length) {
       const nextStep = filteredSteps[nextIndex]
+    console.log({ nextStep })
 
       if (nextStep) {
         this.ctx.update((coreData) => {

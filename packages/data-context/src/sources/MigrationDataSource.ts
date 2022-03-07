@@ -39,11 +39,8 @@ export interface MigrationFile {
   }
 }
 
-export type MigrationStep = typeof MIGRATION_STEPS[number]
 
 export class MigrationDataSource {
-  private _step: MigrationStep = 'renameAuto'
-
   private componentTestingMigrationWatcher: chokidar.FSWatcher | null = null
   componentTestingMigrationStatus?: ComponentTestingMigrationStatus
 
@@ -178,19 +175,10 @@ export class MigrationDataSource {
     return getComponentFolder(this.legacyConfig)
   }
 
-  get step (): MigrationStep {
-    return this._step
-  }
-
   async closeManualRenameWatcher () {
     if (this.componentTestingMigrationWatcher) {
-      debug('setStep: stopping watcher')
       await this.componentTestingMigrationWatcher.close()
       this.componentTestingMigrationWatcher = null
     }
-  }
-
-  setStep (step: MigrationStep) {
-    this._step = step
   }
 }

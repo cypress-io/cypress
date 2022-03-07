@@ -20,7 +20,7 @@ export const MigrationStep = objectType({
     t.nonNull.boolean('isCurrentStep', {
       description: 'This is the current step',
       resolve: (source, args, ctx) => {
-        return ctx.migration.step === source.name
+        return ctx.coreData.migration.step === source.name
       },
     })
 
@@ -28,7 +28,7 @@ export const MigrationStep = objectType({
       description: 'Has the current step been completed',
       resolve: (source, args, ctx) => {
         const indexOfObservedStep = ctx.coreData.migration.filteredSteps.indexOf(source.name)
-        const indexOfCurrentStep = ctx.coreData.migration.filteredSteps.indexOf(ctx.migration.step)
+        const indexOfCurrentStep = ctx.coreData.migration.filteredSteps.indexOf(ctx.coreData.migration.step)
 
         return indexOfObservedStep < indexOfCurrentStep
       },
@@ -171,7 +171,7 @@ export const Migration = objectType({
       type: ManualMigration,
       resolve: async (source, args, ctx) => {
         // avoid starting the watcher when not on this step
-        if (ctx.migration.step !== 'renameManual') {
+        if (ctx.coreData.migration.step !== 'renameManual') {
           return null
         }
 
