@@ -9,16 +9,7 @@ const upload = require('./upload')
 const uploadUtils = require('./util/upload')
 const { s3helpers } = require('./s3-api')
 
-const uploadTypes = {
-  binary: {
-    uploadFolder: 'binary',
-    uploadFileName: 'cypress.zip',
-  },
-  'npm-package': {
-    uploadFolder: 'npm',
-    uploadFileName: 'cypress.tgz',
-  },
-}
+const uploadTypes = uploadUtils.S3Configuration.betaUploadTypes
 
 const getCDN = function (uploadPath) {
   return [uploadUtils.getUploadUrl(), uploadPath].join('/')
@@ -32,16 +23,16 @@ const getUploadDirForPlatform = function (options) {
 // the artifact will be uploaded for every platform and uploaded into under a unique folder
 // https://cdn.cypress.io/beta/(binary|npm)/<version>/<platform>/<some unique version info>/cypress.zip
 // For binary:
-//     beta/binary/9.4.2/win32-x64/circle-develop-219138ca4e952edc4af831f2ae16ce659ebdb50b/cypress.zip
+//     beta/binary/9.4.2/win32-x64/develop-219138ca4e952edc4af831f2ae16ce659ebdb50b/cypress.zip
 // For NPM package:
-//     beta/npm/9.4.2/circle-develop-219138ca4e952edc4af831f2ae16ce659ebdb50b/cypress.tgz
+//     beta/npm/9.4.2/develop-219138ca4e952edc4af831f2ae16ce659ebdb50b/cypress.tgz
 const getUploadPath = function (options) {
   const { hash, uploadFileName } = options
 
   return [getUploadDirForPlatform(options), hash, uploadFileName].join('/')
 }
 
-const setChecksum = (filename, key) => {
+const setChecksum = async (filename, key) => {
   console.log('setting checksum for file %s', filename)
   console.log('on s3 object %s', key)
 
@@ -56,7 +47,7 @@ const setChecksum = (filename, key) => {
   console.log('SHA256 checksum %s', checksum)
   console.log('size', size)
 
-  const aws = uploadUtils.getS3Credentials()
+  const aws = await uploadUtils.getS3Credentials()
   const s3 = s3helpers.makeS3(aws)
   // S3 object metadata can only have string values
   const metadata = {
@@ -66,7 +57,7 @@ const setChecksum = (filename, key) => {
 
   // by default s3.copyObject does not preserve ACL when copying
   // thus we need to reset it for our public files
-  return s3helpers.setUserMetadata(aws.bucket, key, metadata,
+  return s3helpers.setUserMetadata(uploadUtils.S3Configuration.bucket, key, metadata,
     'application/zip', 'public-read', s3)
 }
 
@@ -128,7 +119,7 @@ const uploadArtifactToS3 = function (args = []) {
   .then(uploadUtils.saveUrl(`${options.type}-url.json`))
   .catch((e) => {
     console.error('There was an issue uploading the artifact.')
-    console.error(e)
+    throw e
   })
 }
 
