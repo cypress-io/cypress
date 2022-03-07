@@ -29,7 +29,7 @@ describe('<ManualInstall />', () => {
       ),
     })
 
-    cy.setMutationResolver(Clipboard_CopyToClipboardDocument, (defineResult, { text }) => {
+    cy.stubMutationResolver(Clipboard_CopyToClipboardDocument, (defineResult, { text }) => {
       stubCopy(text)
 
       return defineResult({
