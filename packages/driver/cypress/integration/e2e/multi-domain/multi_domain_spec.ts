@@ -207,9 +207,9 @@ describe('multi-domain', { experimentalSessionSupport: true }, () => {
       })
     })
 
-    it('receives command failures from the secondary domain with the default timeout', (done) => {
+    it('receives command failures from the secondary domain with the default timeout', { defaultCommandTimeout: 50 }, (done) => {
       cy.on('fail', (err) => {
-        expect(err.message).to.include(`Timed out retrying after 4000ms: Expected to find element: \`#doesnt-exist\`, but never found it`)
+        expect(err.message).to.include(`Timed out retrying after 50ms: Expected to find element: \`#doesnt-exist\`, but never found it`)
         //  make sure that the secondary domain failures do NOT show up as spec failures or AUT failures
         expect(err.message).not.to.include(`The following error originated from your test code, not from Cypress`)
         expect(err.message).not.to.include(`The following error originated from your application code, not from Cypress`)

@@ -79,7 +79,7 @@ export const handleDomainFn = (Cypress: Cypress.Cypress, cy: $Cy, specBridgeComm
     cy.isStable(false, 'multi-domain-start')
   }
 
-  const setRunnableState = () => {
+  const setRunnableStateToPassed = () => {
     // TODO: We're telling the runnable that it has passed to avoid a timeout on the last (empty) command. Normally this would be set inherently by running (runnable.run) the test.
     // Set this to passed regardless of the state of the test, the runnable isn't responsible for reporting success.
     cy.state('runnable').state = 'passed'
@@ -100,7 +100,7 @@ export const handleDomainFn = (Cypress: Cypress.Cypress, cy: $Cy, specBridgeComm
     syncEnvToCurrentDomain(env)
 
     cy.state('onFail', (err) => {
-      setRunnableState()
+      setRunnableStateToPassed()
       if (queueFinished) {
         // If the queue is already finished, send this event instead because
         // the primary won't be listening for 'queue:finished' anymore
@@ -142,13 +142,13 @@ export const handleDomainFn = (Cypress: Cypress.Cypress, cy: $Cy, specBridgeComm
 
         if (!hasCommands) {
           queueFinished = true
-          setRunnableState()
+          setRunnableStateToPassed()
 
           return
         }
       }
     } catch (err) {
-      setRunnableState()
+      setRunnableStateToPassed()
       specBridgeCommunicator.toPrimary('ran:domain:fn', { err }, { syncConfig: true })
 
       return
@@ -157,7 +157,7 @@ export const handleDomainFn = (Cypress: Cypress.Cypress, cy: $Cy, specBridgeComm
     cy.queue.run()
     .then(() => {
       queueFinished = true
-      setRunnableState()
+      setRunnableStateToPassed()
       specBridgeCommunicator.toPrimary('queue:finished', {
         subject: cy.state('subject'),
       }, {
