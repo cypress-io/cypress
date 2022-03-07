@@ -20,11 +20,11 @@ export interface UserWebpackDevServerOptions {
 interface MakeWebpackConfigOptions extends CypressCTOptionsPluginOptionsWithEmitter, UserWebpackDevServerOptions {
   publicPath: string
   isOpenMode: boolean
-  indexHtml?: string
+  indexHtmlFile?: string
 }
 
 export async function makeWebpackConfig (userWebpackConfig: webpack.Configuration, options: MakeWebpackConfigOptions): Promise<webpack.Configuration> {
-  const { publicPath, projectRoot, files, supportFile, devServerEvents, indexHtml } = options
+  const { publicPath, projectRoot, files, supportFile, devServerEvents, indexHtmlFile } = options
 
   debug(`User passed in webpack config with values %o`, userWebpackConfig)
 
@@ -85,7 +85,7 @@ export async function makeWebpackConfig (userWebpackConfig: webpack.Configuratio
 
   const mergedConfig = merge<webpack.Configuration>(
     userWebpackConfig,
-    makeDefaultWebpackConfig(indexHtml),
+    makeDefaultWebpackConfig(indexHtmlFile),
     dynamicWebpackConfig,
   )
 

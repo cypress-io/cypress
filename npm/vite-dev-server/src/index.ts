@@ -24,8 +24,16 @@ export async function startDevServer (startDevServerArgs: StartDevServerOptions)
   return { port, close: viteDevServer.close }
 }
 
-export type CypressViteDevServerConfig = Omit<InlineConfig, 'base' | 'root'>
+export type CypressViteDevServerConfig = Omit<InlineConfig, 'base' | 'root'> & {
+  /**
+   * Path to an index.html file that will serve as the template in
+   * which your components will be rendered.
+   */
+  indexHtmlFile?: string
+}
 
 export function devServer (cypressDevServerConfig: Cypress.DevServerConfig, devServerConfig?: CypressViteDevServerConfig) {
-  return startDevServer({ options: cypressDevServerConfig, viteConfig: devServerConfig })
+  const { indexHtmlFile, ...viteConfig } = devServerConfig ?? {}
+
+  return startDevServer({ options: cypressDevServerConfig, viteConfig, indexHtmlFile })
 }

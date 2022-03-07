@@ -25,7 +25,6 @@ describe('e2e firefox', function () {
     config: {
       video: false,
     },
-    exit: false,
     onRun: (exec) => {
       return exec()
       .then(() => {

@@ -175,3 +175,4 @@ describe('#startDevServer', () => {
     await close()
   })
 })
+.timeout(5000)
