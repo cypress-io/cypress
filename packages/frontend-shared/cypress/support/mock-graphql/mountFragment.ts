@@ -214,7 +214,7 @@ declare global {
       setMutationResolver<Result, Variables, T extends TypedDocumentNode<Result, Variables>>(
         document: T,
         resolver: MutationResolver<T>
-      ): Cypress.Chainable<ClientTestContext>
+      ): Chainable<null>
       /**
        * Mount helper for a component with a GraphQL fragment, as a list
        */
