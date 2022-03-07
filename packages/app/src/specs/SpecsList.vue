@@ -4,17 +4,17 @@
       v-if="isAlertOpen"
       v-model="isAlertOpen"
       status="error"
-      title="Spec not found"
+      :title="t('specPage.noSpecErrorTitle')"
       class="mb-16px"
       :icon="WarningIcon"
       dismissible
     >
       <p class="mb-24px">
-        There is no spec matching the following location: <InlineCodeFragment variant="error">
+        {{ t('specPage.noSpecErrorIntro') }} <InlineCodeFragment variant="error">
           {{ route.params.unrunnable }}
         </InlineCodeFragment>
       </p>
-      <p>It is possible that the file has been moved or deleted. Please choose from the list of specs below.</p>
+      <p>{{ t('specPage.noSpecErrorExplainer') }}</p>
     </Alert>
     <SpecsListHeader
       v-model="search"
