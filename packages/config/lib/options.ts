@@ -559,6 +559,12 @@ export const breakingRootOptions: Array<BreakingOption> = [
     testingTypes: ['component', 'e2e'],
   },
   {
+    name: 'experimentalStudio',
+    errorKey: 'EXPERIMENTAL_STUDIO_REMOVED',
+    isWarning: true,
+    testingTypes: ['component', 'e2e'],
+  },
+  {
     name: 'baseUrl',
     errorKey: 'CONFIG_FILE_INVALID_ROOT_CONFIG_E2E',
     isWarning: false,
