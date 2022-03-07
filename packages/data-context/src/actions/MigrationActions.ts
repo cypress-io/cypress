@@ -70,7 +70,6 @@ export class MigrationActions {
 
   async initialize (config: Partial<Cypress.Config>) {
     const legacyConfigForMigration = await this.setLegacyConfigForMigration(config)
-    console.log({legacyConfigForMigration })
 
     // for testing mainly, we want to ensure the flags are reset each test
     this.resetFlags()
@@ -273,10 +272,8 @@ export class MigrationActions {
 
     const nextIndex = index + 1
 
-    console.log({ nextIndex })
     if (nextIndex < filteredSteps.length) {
       const nextStep = filteredSteps[nextIndex]
-    console.log({ nextStep })
 
       if (nextStep) {
         this.ctx.update((coreData) => {

@@ -132,8 +132,8 @@ export async function initComponentTestingMigration (
   })
 }
 
-async function getPluginRelativePath (cfg: Partial<Cypress.Config>, projectRoot: string): Promise<string> {
-  return cfg.pluginsFile ? cfg.pluginsFile : await tryGetDefaultLegacyPluginsFile(projectRoot) || ''
+async function getPluginRelativePath (cfg: Partial<Cypress.Config>, projectRoot: string): Promise<string | undefined> {
+  return cfg.pluginsFile ? cfg.pluginsFile : await tryGetDefaultLegacyPluginsFile(projectRoot)
 }
 
 // If they are running an old version of Cypress
@@ -154,7 +154,7 @@ function defineConfigAvailable (projectRoot: string) {
   }
 }
 
-function createCypressConfig (config: ConfigOptions, pluginPath: string, options: CreateConfigOptions): string {
+function createCypressConfig (config: ConfigOptions, pluginPath: string | undefined, options: CreateConfigOptions): string {
   const globalString = Object.keys(config.global).length > 0 ? `${formatObjectForConfig(config.global)},` : ''
   const componentString = options.hasComponentTesting ? createComponentTemplate(config.component) : ''
   const e2eString = options.hasE2ESpec
@@ -188,8 +188,8 @@ function formatObjectForConfig (obj: Record<string, unknown>) {
   return JSON.stringify(obj, null, 2).replace(/^[{]|[}]$/g, '') // remove opening and closing {}
 }
 
-function createE2ETemplate (pluginPath: string, createConfigOptions: CreateConfigOptions, options: Record<string, unknown>) {
-  if (!createConfigOptions.hasPluginsFile) {
+function createE2ETemplate (pluginPath: string | undefined, createConfigOptions: CreateConfigOptions, options: Record<string, unknown>) {
+  if (!createConfigOptions.hasPluginsFile || !pluginPath) {
     return dedent`
       e2e: {
         setupNodeEvents(on, config) {}
