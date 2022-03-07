@@ -1,7 +1,12 @@
 <template>
   <li data-cy="todo">
     {{ todo.text }}
-    <button data-cy="remove" @click="$emit('remove', todo.id)">X</button>
+    <button
+      data-cy="remove"
+      @click="$emit('remove', todo.id)"
+    >
+      X
+    </button>
   </li>
 </template>
 
@@ -13,5 +18,6 @@ export default {
       required: true,
     },
   },
+  emits: ['remove'],
 }
 </script>

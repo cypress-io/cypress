@@ -33,10 +33,13 @@ export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
   Cypress.Commands.add(
     'mount',
     // @ts-ignore todo: figure out the correct types
-    <C extends Parameters<typeof mount>[0]>(comp: C, options: CyMountOptions<C> = {}) => {
+    <C extends Parameters<typeof mount>[0]>(comp: C, options: Parameters<typeof mount>[1] = {}) => {
       options.global = options.global || {}
       options.global.stubs = options.global.stubs || {}
-      options.global.stubs.transition = false
+      if (!Array.isArray(options.global.stubs)) {
+        options.global.stubs.transition = false
+      }
+
       options.global.plugins = options.global.plugins || []
       each(plugins, (pluginFn: () => any) => {
         options?.global?.plugins?.push(pluginFn())
@@ -143,8 +146,16 @@ type ResultType<T> = T extends TypedDocumentNode<infer U, any> ? U : never
 
 type MountFragmentConfig<T extends TypedDocumentNode> = {
   variables?: T['__variablesType']
-  render: (frag: Exclude<T['__resultType'], undefined>) => JSX.Element
+  /**
+   * When we are mounting a GraphQL Fragment, we can use `onResult`
+   * to intercept the result and modify the contents on the fragment
+   * before rendering the component
+   */
   onResult?: (result: ResultType<T>, ctx: ClientTestContext) => ResultType<T> | void
+  /**
+   * Render is passed the result of the "frag" and mounts the component under test
+   */
+  render: (frag: Exclude<T['__resultType'], undefined>) => JSX.Element
   expectError?: boolean
 } & CyMountOptions<unknown>
 
