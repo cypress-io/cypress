@@ -207,7 +207,7 @@ export class ProjectActions {
     testingType = testingType || this.ctx.coreData.currentTestingType
 
     if (!testingType) {
-      return null
+      throw new Error('Missing testingType in launchProject')
     }
 
     let activeSpec: FoundSpec | undefined
@@ -224,7 +224,7 @@ export class ProjectActions {
     const browser = this.ctx.coreData.chosenBrowser ?? this.ctx.appData.browsers?.[0]
 
     if (!browser) {
-      return null
+      throw new Error('Missing browser in launchProject')
     }
 
     // launchProject expects a spec when opening browser for url navigation.
@@ -253,10 +253,6 @@ export class ProjectActions {
     this.projects = this.projects.filter((project) => project.projectRoot !== projectRoot)
 
     return this.api.removeProjectFromCache(projectRoot)
-  }
-
-  syncProjects () {
-    //
   }
 
   async createConfigFile (type?: 'component' | 'e2e' | null) {
