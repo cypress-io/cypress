@@ -1310,17 +1310,62 @@ export const AllCypressErrors = {
   },
 
   MIGRATED_OPTION_INVALID: (optionKey: string, err: Error) => {
-    return errTemplate`
-      The ${fmt.highlight(optionKey)} option is invalid
+    if (optionKey === 'baseUrl') {
+      return errTemplate`
+      The option ${fmt.highlight(optionKey)} is no longer supported on the root of the config object. 
 
+      Since it is only relevant in e2e testing, you will need to move it in the e2e object.
+      
+      ${fmt.stackTrace(err)}
+      `
+    }
+
+    if (optionKey === 'integrationFolder' || optionKey.endsWith('.integrationFolder')
+      || optionKey === 'componentFolder' || optionKey.endsWith('.componentFolder')) {
+      return errTemplate`
+      The option ${fmt.highlight(optionKey)} is no longer supported. 
+      It was merged with ${fmt.highlight('testFiles')} into the ${fmt.highlight('specFiles')} option.
+
+      NOTE: ${fmt.highlight('testFiles')} has to be set as a member of the ${fmt.highlight('e2e')} or ${fmt.highlight('component')} property.
+    
       ${fmt.stackTrace(err)}
     `
+    }
+
+    if (optionKey === 'testFiles') {
+      return errTemplate`
+      The option ${fmt.highlight(optionKey)} is no longer supported. 
+      It was merged with ${fmt.highlight('integrationFolder')} into the ${fmt.highlight('specFiles')} option.
+      
+      ${fmt.stackTrace(err)}
+      `
+    }
+
+    if (optionKey === 'supportFile') {
+      return errTemplate`
+      The option ${fmt.highlight(optionKey)} is no longer supported in the root of the config object. 
+      Set a specific ${fmt.highlight('supportFile')} in the ${fmt.highlight('e2e')} or ${fmt.highlight('component')} object.
+      
+      ${fmt.stackTrace(err)}
+      `
+    }
+
+    if (optionKey === 'pluginFile' || optionKey.endsWith('.pluginsFile')) {
+      return errTemplate`
+      The option ${fmt.highlight(optionKey)} is no longer supported. 
+      All plugins are now run within the config file using the ${fmt.highlight('setupNodeEvents()')} function.
+      
+      ${fmt.stackTrace(err)}`
+    }
+
+    return errTemplate`
+      The option ${fmt.highlight(optionKey)} is no longer supported.
+
+      ${fmt.stackTrace(err)}
+      `
   },
 
-} as const
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const _typeCheck: Record<keyof AllCypressErrorObj, (...args: any[]) => ErrTemplateResult> = AllCypressErrors
+}
 
 type AllCypressErrorObj = typeof AllCypressErrors
 

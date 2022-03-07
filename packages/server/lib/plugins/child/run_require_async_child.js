@@ -165,7 +165,6 @@ function run (ipc, configFile, projectRoot) {
 
 const optionsNonValidFor10Anywhere = ['integrationFolder', 'componentFolder', 'pluginsFile']
 const optionsNonValidFor10Global = ['baseUrl', 'supportFile']
-const optionsNonValidFor10Component = ['baseUrl']
 
 function throwInvalidOptionError (key) {
   const errInternal = new Error()
@@ -196,10 +195,6 @@ function wrapNonMigratedOptions (options) {
       options[testingType] = options[testingType] || {}
       setInvalidPropSetterWarning(options[testingType], key)
     })
-  })
-
-  optionsNonValidFor10Component.forEach((key) => {
-    setInvalidPropSetterWarning(options.component, key)
   })
 }
 
