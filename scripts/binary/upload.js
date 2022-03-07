@@ -15,17 +15,13 @@ fs = Promise.promisifyAll(fs)
 // TODO: refactor this
 // system expects desktop application to be inside a file
 // with this name
-const zipName = 'cypress.zip'
+const zipName = uploadUtils.S3Configuration.binaryZipName
 
 module.exports = {
   zipName,
 
-  getPublisher () {
-    return uploadUtils.getPublisher(this.getAwsObj)
-  },
-
-  getAwsObj () {
-    return uploadUtils.getS3Credentials()
+  async getPublisher () {
+    return uploadUtils.getPublisher()
   },
 
   // returns desktop folder for a given folder without platform
@@ -43,7 +39,7 @@ module.exports = {
     let { folder, version, platformArch, name } = options
 
     if (!folder) {
-      folder = this.getAwsObj().folder
+      folder = uploadUtils.S3Configuration.releaseFolder
     }
 
     la(check.unemptyString(folder), 'missing folder', options)
@@ -104,34 +100,34 @@ module.exports = {
   },
 
   s3Manifest (version) {
-    const publisher = this.getPublisher()
+    return this.getPublisher()
+    .then((publisher) => {
+      const { releaseFolder } = uploadUtils.S3Configuration
 
-    const aws = this.getAwsObj()
+      const headers = {
+        'Cache-Control': 'no-cache',
+      }
+      let manifest = null
 
-    const headers = {}
+      return new Promise((resolve, reject) => {
+        return this.createRemoteManifest(releaseFolder, version)
+        .then((src) => {
+          manifest = src
 
-    headers['Cache-Control'] = 'no-cache'
+          return gulp.src(src)
+          .pipe(rename((p) => {
+            p.dirname = `${releaseFolder}/${p.dirname}`
 
-    let manifest = null
-
-    return new Promise((resolve, reject) => {
-      return this.createRemoteManifest(aws.folder, version)
-      .then((src) => {
-        manifest = src
-
-        return gulp.src(src)
-        .pipe(rename((p) => {
-          p.dirname = `${aws.folder}/${p.dirname}`
-
-          return p
-        })).pipe(gulpDebug())
-        .pipe(publisher.publish(headers))
-        .pipe(awspublish.reporter())
-        .on('error', reject)
-        .on('end', resolve)
+            return p
+          })).pipe(gulpDebug())
+          .pipe(publisher.publish(headers))
+          .pipe(awspublish.reporter())
+          .on('error', reject)
+          .on('end', resolve)
+        })
+      }).finally(() => {
+        return fs.removeAsync(manifest)
       })
-    }).finally(() => {
-      return fs.removeAsync(manifest)
     })
   },
 
@@ -144,26 +140,27 @@ module.exports = {
     la(check.extension(path.extname(uploadPath))(file),
       'invalid file to upload extension', file)
 
-    return new Promise((resolve, reject) => {
-      const publisher = this.getPublisher()
+    return this.getPublisher()
+    .then((publisher) => {
+      const headers = {
+        'Cache-Control': 'no-cache',
+      }
 
-      const headers = {}
+      return new Promise((resolve, reject) => {
+        return gulp.src(file)
+        .pipe(rename((p) => {
+          // rename to standard filename for upload
+          p.basename = path.basename(uploadPath, path.extname(uploadPath))
+          p.dirname = path.dirname(uploadPath)
 
-      headers['Cache-Control'] = 'no-cache'
-
-      return gulp.src(file)
-      .pipe(rename((p) => {
-        // rename to standard filename for upload
-        p.basename = path.basename(uploadPath, path.extname(uploadPath))
-        p.dirname = path.dirname(uploadPath)
-
-        return p
-      }))
-      .pipe(gulpDebug())
-      .pipe(publisher.publish(headers))
-      .pipe(awspublish.reporter())
-      .on('error', reject)
-      .on('end', resolve)
+          return p
+        }))
+        .pipe(gulpDebug())
+        .pipe(publisher.publish(headers))
+        .pipe(awspublish.reporter())
+        .on('error', reject)
+        .on('end', resolve)
+      })
     })
   },
 }
