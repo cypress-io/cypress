@@ -16,7 +16,6 @@ import {
   hasSpecFile,
   getStepsForMigration,
   getIntegrationFolder,
-  getPluginsFile,
   isDefaultTestFiles,
   getComponentTestFilesGlobs,
   getComponentFolder,
@@ -90,7 +89,6 @@ export class MigrationActions {
       coreData.migration.filteredSteps = filteredSteps
       coreData.migration.step = filteredSteps[0]
     })
-
   }
 
   /**
@@ -99,6 +97,7 @@ export class MigrationActions {
    */
   private async initializeFlags () {
     const legacyConfigForMigration = this.ctx.coreData.migration.legacyConfigForMigration
+
     if (!this.ctx.currentProject || !legacyConfigForMigration) {
       throw Error('Need currentProject to do migration')
     }
@@ -132,7 +131,7 @@ export class MigrationActions {
     const hasComponentTesting = componentFolder
       ? await hasSpecFile(this.ctx.currentProject, componentFolder, componentTestFiles)
       : false
-    
+
     this.ctx.update((coreData) => {
       coreData.migration.flags = {
         hasCustomIntegrationFolder,
@@ -175,9 +174,11 @@ export class MigrationActions {
   async setLegacyConfigForMigration (config: Partial<Cypress.Config>) {
     assert(this.ctx.currentProject)
     const legacyConfigForMigration = await processConfigViaLegacyPlugins(this.ctx.currentProject, config)
+
     this.ctx.update((coreData) => {
       coreData.migration.legacyConfigForMigration = legacyConfigForMigration
     })
+
     return legacyConfigForMigration
   }
 

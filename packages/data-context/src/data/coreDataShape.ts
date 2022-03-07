@@ -1,4 +1,4 @@
-import { FoundBrowser, Editor, AllowedState, AllModeOptions, TestingType, BrowserStatus, PACKAGE_MANAGERS, AuthStateName, MIGRATION_STEPS } from '@packages/types'
+import { FoundBrowser, Editor, AllowedState, AllModeOptions, TestingType, BrowserStatus, PACKAGE_MANAGERS, AuthStateName, MIGRATION_STEPS, MigrationStep } from '@packages/types'
 import type { Bundler, FRONTEND_FRAMEWORKS } from '@packages/scaffold-config'
 import type { NexusGenEnums, NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
 import type { App, BrowserWindow } from 'electron'
@@ -6,7 +6,6 @@ import type { ChildProcess } from 'child_process'
 import type { SocketIOServer } from '@packages/socket'
 import type { Server } from 'http'
 import type { ErrorWrapperSource } from '@packages/errors'
-import type { MigrationStep } from '../sources'
 import pDefer from 'p-defer'
 
 export type Maybe<T> = T | null | undefined
@@ -202,7 +201,7 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
         hasComponentTesting: true,
         hasE2ESpec: true,
         hasPluginsFile: true,
-      }
+      },
     },
     warnings: [],
     chosenBrowser: null,

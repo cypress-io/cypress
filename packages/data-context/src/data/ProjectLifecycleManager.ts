@@ -124,7 +124,7 @@ export class ProjectLifecycleManager {
     this.watchers = new Set()
 
     if (ctx.coreData.currentProject) {
-      this.setCurrentProject(ctx.coreData.currentProject)
+      this.setCurrentProject(ctx.coreData.currentProject).catch(this.onLoadError)
     } else if (ctx.coreData.currentTestingType && this._projectRoot) {
       this.setCurrentTestingType(ctx.coreData.currentTestingType)
     }
@@ -261,15 +261,10 @@ export class ProjectLifecycleManager {
     if (needsCypressJsonMigration) {
       const cfgPath = path.join(projectRoot, 'cypress.json')
       const legacyConfig = this.ctx.fs.readJsonSync(cfgPath) as Partial<Cypress.Config>
+
       // should never throw, unless there existing pluginsFile errors out,
       // in which case they are attempting to migrate an already broken project.
       await this.ctx.actions.migration.initialize(legacyConfig)
-        // .then(() => {
-        //   // notify anyone waiting (eg GraphQL that the migration is now initialized and ready to go
-        //   console.log('Done init!!!')
-        //   this.ctx.coreData.migration.legacyConfigPromise.resolve()
-        // })
-        // .catch(this.onLoadError)
     }
 
     this.configFileWarningCheck()
@@ -1110,7 +1105,7 @@ export class ProjectLifecycleManager {
     if (typeof configFile === 'string') {
       metaState.hasSpecifiedConfigViaCLI = this._pathToFile(configFile)
       if (configFile.endsWith('.json')) {
-        metaState.needsCypressJsonMigration = true 
+        metaState.needsCypressJsonMigration = true
       } else {
         this._configFilePath = this._pathToFile(configFile)
         if (fs.existsSync(this._configFilePath)) {
