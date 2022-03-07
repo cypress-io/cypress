@@ -10,7 +10,7 @@
 import { computed } from 'vue'
 
 const props = withDefaults(defineProps<{
-  variant: 'default' | 'error'
+  variant?: 'default' | 'error'
 }>(), { variant: 'default' })
 
 const colorClasses = {
