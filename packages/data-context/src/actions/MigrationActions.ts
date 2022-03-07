@@ -9,7 +9,6 @@ import {
   SpecToMove,
   supportFilesForMigration,
 } from '../sources'
-import { getError } from '@packages/errors'
 
 export class MigrationActions {
   constructor (private ctx: DataContext) { }
@@ -17,14 +16,6 @@ export class MigrationActions {
   async createConfigFile () {
     const config = await this.ctx.migration.createConfigString()
     const configFileNameAfterMigration = this.ctx.migration.configFileNameAfterMigration
-
-    const checkIfFileExists = await this.ctx.actions.file.checkIfFileExists(configFileNameAfterMigration)
-
-    if (checkIfFileExists) {
-      this.ctx.onError(getError('LEGACY_CONFIG_FILE', configFileNameAfterMigration, this.ctx.lifecycleManager.projectRoot, this.ctx.lifecycleManager.legacyConfigFile))
-
-      return false
-    }
 
     this.ctx.lifecycleManager.setConfigFilePath(configFileNameAfterMigration)
 
@@ -39,8 +30,6 @@ export class MigrationActions {
     // @ts-ignore configFile needs to be updated with the new one, so it finds the correct one
     // with the new file, instead of the deleted one which is not supported anymore
     this.ctx.modeOptions.configFile = this.ctx.migration.configFileNameAfterMigration
-
-    return true
   }
 
   initialize () {

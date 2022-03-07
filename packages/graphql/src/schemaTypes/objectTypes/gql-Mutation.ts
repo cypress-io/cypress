@@ -548,11 +548,8 @@ export const mutation = mutationType({
       type: Query,
       slowLogThreshold: 5000, // This mutation takes a little time
       resolve: async (_, args, ctx) => {
-        const configFileCreated = await ctx.actions.migration.createConfigFile()
-
-        if (configFileCreated) {
-          await ctx.actions.migration.nextStep()
-        }
+        await ctx.actions.migration.createConfigFile()
+        await ctx.actions.migration.nextStep()
 
         return {}
       },

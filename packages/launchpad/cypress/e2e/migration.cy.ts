@@ -1017,4 +1017,13 @@ describe('Migrate custom config files', () => {
     cy.contains('You are attempting to use Cypress with an older config file: customConfig.json')
     cy.contains('When you upgraded to Cypress v10.0 the config file was updated and moved to a new location: customConfig.config.js')
   })
+
+  it('shows error for migration-custom-config-file-with-existing-v10-config-file', () => {
+    cy.scaffoldProject('migration-custom-config-file-with-existing-v10-config-file')
+    cy.openProject('migration-custom-config-file-with-existing-v10-config-file', ['--config-file', 'customConfig.json'])
+    cy.visitLaunchpad()
+
+    cy.contains('There is both a customConfig.config.js and a customConfig.json file at the location below:')
+    cy.contains('ypress no longer supports customConfig.json, please remove it from your project.')
+  })
 })

@@ -1108,24 +1108,19 @@ export class ProjectLifecycleManager {
     }
 
     if (typeof configFile === 'string') {
-      try {
-        this.ctx.fs.statSync(this._pathToFile(configFile))
-      } catch (e) {
-        if (configFile.endsWith('.json')) {
-          const configFileNameAfterMigration = configFile.replace('.json', `.config.${metaState.hasTypescript ? 'ts' : 'js'}`)
-
-          try {
-            this.ctx.fs.statSync(this._pathToFile(configFileNameAfterMigration))
-            this.ctx.onError(getError('MIGRATION_ALREADY_OCURRED', configFileNameAfterMigration, configFile))
-          } catch {
-          // No need to handle
-          }
-        }
-      }
-
       metaState.hasSpecifiedConfigViaCLI = this._pathToFile(configFile)
       if (configFile.endsWith('.json')) {
         metaState.needsCypressJsonMigration = true
+
+        const configFileNameAfterMigration = configFile.replace('.json', `.config.${metaState.hasTypescript ? 'ts' : 'js'}`)
+
+        if (this.ctx.fs.existsSync(this._pathToFile(configFileNameAfterMigration))) {
+          if (this.ctx.fs.existsSync(this._pathToFile(configFile))) {
+            this.ctx.onError(getError('LEGACY_CONFIG_FILE', configFileNameAfterMigration, this.projectRoot, configFile))
+          } else {
+            this.ctx.onError(getError('MIGRATION_ALREADY_OCURRED', configFileNameAfterMigration, configFile))
+          }
+        }
       } else {
         this._configFilePath = this._pathToFile(configFile)
         if (fs.existsSync(this._configFilePath)) {
