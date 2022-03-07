@@ -10,6 +10,7 @@ import type { DataContext } from '..'
 import { codeGenerator, SpecOptions } from '../codegen'
 import templates from '../codegen/templates'
 import { insertValuesInConfigFile } from '../util'
+import { getError } from '@packages/errors'
 
 export interface ProjectApiShape {
   /**
@@ -34,6 +35,7 @@ export interface ProjectApiShape {
   getDevServer (): {
     updateSpecs: (specs: FoundSpec[]) => void
   }
+  isListening: (url: string) => Promise<void>
 }
 
 type SetSpecsFoundBySpecPattern = {
@@ -510,5 +512,21 @@ export class ProjectActions {
         description: 'Generated spec',
       }
     })
+  }
+
+  async pingBaseUrl () {
+    const baseUrl = this.ctx.project.getConfig()?.baseUrl
+
+    // Should never happen
+    if (!baseUrl) {
+      throw new Error('Cannot ping url without a valid baseUrl')
+    }
+
+    this.ctx.update((d) => {
+      d.warnings = d.warnings.filter((w) => w.cypressError.type !== 'CANNOT_CONNECT_BASE_URL_WARNING')
+    })
+
+    return this.api.isListening(baseUrl)
+    .catch(() => this.ctx.onWarning(getError('CANNOT_CONNECT_BASE_URL_WARNING', baseUrl)))
   }
 }

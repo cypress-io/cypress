@@ -4,7 +4,6 @@
     :dismissible="dismissible"
     status="warning"
     data-cy="warning-alert"
-    header-class="text-warning-600"
     :title="title"
     :icon="ErrorOutlineIcon"
   >
@@ -12,6 +11,16 @@
       ref="markdownTarget"
       v-html="markdown"
     />
+    <Button
+      v-if="retryable"
+      size="md"
+      variant="outline"
+      :prefix-icon="RefreshIcon"
+      prefix-icon-class="icon-dark-indigo-500"
+      @click="emits('retry')"
+    >
+      Retry
+    </Button>
   </Alert>
 </template>
 
@@ -19,11 +28,14 @@
 import ErrorOutlineIcon from '~icons/cy/status-errored-outline_x16.svg'
 import { useMarkdown } from '@packages/frontend-shared/src/composables/useMarkdown'
 import Alert from '@cy/components/Alert.vue'
+import Button from '@cy/components/Button.vue'
+import RefreshIcon from '~icons/cy/refresh_x16'
 import { computed, ref } from 'vue'
 import { useVModels } from '@vueuse/core'
 
 const emits = defineEmits<{
   (eventName: 'update:modelValue', value: boolean): void
+  (eventName: 'retry'): void
 }>()
 
 const props = withDefaults(defineProps<{
@@ -32,10 +44,12 @@ const props = withDefaults(defineProps<{
   details?: string | null
   modelValue?: boolean
   dismissible?: boolean
+  retryable?: boolean
 }>(), {
   modelValue: true,
   details: undefined,
   dismissible: true,
+  retryable: false,
 })
 
 const { modelValue: show } = useVModels(props, emits)

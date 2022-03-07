@@ -6,7 +6,12 @@ describe('baseUrl', () => {
 
     cy.get('[data-cy-testingtype="e2e"]').click()
     cy.get('[data-cy="alert"]').contains('Warning: Cannot Connect Base Url Warning')
-    cy.findByLabelText('Dismiss').click()
+
+    cy.withCtx((ctx) => {
+      ctx._apis.projectApi.isListening = sinon.stub().resolves(null)
+    })
+
+    cy.contains('button', 'Retry').click()
     cy.get('[data-cy="alert"]').should('not.exist')
   })
 })
