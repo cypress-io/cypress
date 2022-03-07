@@ -907,6 +907,56 @@ describe('Server', () => {
           })
         })
       })
+
+      it('can serve a multi-domain request', function () {
+        nock('http://www.cypress.io/')
+        .get('/')
+        .reply(200, '<html>content</html>', {
+          'Content-Type': 'text/html',
+        })
+
+        expect(this.server._getRemoteState()).to.deep.eq({
+          auth: undefined,
+          props: null,
+          origin: 'http://localhost:2000',
+          strategy: 'file',
+          visiting: undefined,
+          domainName: 'localhost',
+          fileServer: this.fileServer,
+        })
+
+        return this.server._onResolveUrl('http://www.cypress.io/', {}, this.automationRequest, { isMultiDomain: true })
+        .then((obj = {}) => {
+          expectToEqDetails(obj, {
+            isOkStatusCode: true,
+            isHtml: true,
+            contentType: 'text/html',
+            url: 'http://www.cypress.io/',
+            originalUrl: 'http://www.cypress.io/',
+            status: 200,
+            statusText: 'OK',
+            cookies: [],
+            redirects: [],
+          })
+
+          // Verify the multi-domain request was buffered
+          const buffer = this.buffers.take('http://www.cypress.io/')
+
+          expect(buffer).to.not.be.empty
+          expect(buffer.isMultiDomain).to.be.true
+
+          // Verify the remote state was not updated with the multi-domain request
+          expect(this.server._getRemoteState()).to.deep.eq({
+            auth: undefined,
+            props: null,
+            origin: 'http://localhost:2000',
+            strategy: 'file',
+            visiting: false,
+            domainName: 'localhost',
+            fileServer: this.fileServer,
+          })
+        })
+      })
     })
 
     describe('both', () => {

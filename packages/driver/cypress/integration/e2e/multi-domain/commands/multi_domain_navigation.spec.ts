@@ -227,6 +227,48 @@ context('multi-domain navigation', { experimentalMultiDomain: true }, () => {
       })
     })
 
+    it('does not navigate to about:blank in secondary if already visited in primary', () => {
+      Cypress.state('hasVisitedAboutBlank', true)
+
+      cy.switchToDomain('foobar.com', () => {
+        const urlChangedSpy = cy.spy(Cypress, 'emit').log(false).withArgs('url:changed')
+        const aboutBlankSpy = cy.spy(Cypress.specBridgeCommunicator, 'toPrimary').log(false).withArgs('visit:about:blank')
+
+        cy.visit('http://www.foobar.com:3500/fixtures/multi-domain-secondary.html').then(() => {
+          expect(urlChangedSpy).to.have.been.calledOnce
+          expect(urlChangedSpy.firstCall).to.be.calledWith(
+            'url:changed',
+            'http://www.foobar.com:3500/fixtures/multi-domain-secondary.html',
+          )
+
+          expect(aboutBlankSpy).to.not.have.been.called
+        })
+      })
+    })
+
+    it('navigates to about:blank in secondary if not already visited in primary', () => {
+      Cypress.state('hasVisitedAboutBlank', false)
+
+      cy.switchToDomain('foobar.com', () => {
+        const urlChangedSpy = cy.spy(Cypress, 'emit').log(false).withArgs('url:changed')
+        const aboutBlankSpy = cy.spy(Cypress.specBridgeCommunicator, 'toPrimary').log(false).withArgs('visit:about:blank')
+
+        cy.visit('http://www.foobar.com:3500/fixtures/multi-domain-secondary.html').then(() => {
+          expect(urlChangedSpy).to.have.been.calledOnce
+          expect(urlChangedSpy.firstCall).to.be.calledWith(
+            'url:changed',
+            'http://www.foobar.com:3500/fixtures/multi-domain-secondary.html',
+          )
+
+          expect(aboutBlankSpy).to.have.been.calledOnce
+        })
+      })
+
+      cy.then(() => {
+        expect(Cypress.state('hasVisitedAboutBlank')).to.equal(true)
+      })
+    })
+
     // TODO: un-skip once multiple remote states are supported
     it.skip('supports auth options and adding auth to subsequent requests', () => {
       cy.switchToDomain('foobar.com', () => {
