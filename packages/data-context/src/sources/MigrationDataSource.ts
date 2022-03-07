@@ -1,4 +1,4 @@
-import { TestingType, MIGRATION_STEPS } from '@packages/types'
+import type { TestingType, MIGRATION_STEPS } from '@packages/types'
 import type chokidar from 'chokidar'
 import type { DataContext } from '..'
 import {
@@ -7,7 +7,6 @@ import {
   ComponentTestingMigrationStatus,
   tryGetDefaultLegacyPluginsFile,
   supportFilesForMigration,
-  OldCypressConfig,
   hasSpecFile,
   getSpecs,
   applyMigrationTransform,
@@ -24,6 +23,7 @@ import {
 
 import type { FilePart } from './migration/format'
 import Debug from 'debug'
+import pDefer from 'p-defer'
 
 const debug = Debug('cypress:data-context:sources:MigrationDataSource')
 
@@ -39,75 +39,22 @@ export interface MigrationFile {
   }
 }
 
-type MIGRATION_STEP = typeof MIGRATION_STEPS[number]
-
-const flags = {
-  hasCustomIntegrationFolder: false,
-  hasCustomIntegrationTestFiles: false,
-
-  hasCustomComponentFolder: false,
-  hasCustomComponentTestFiles: false,
-
-  hasCustomSupportFile: false,
-  hasComponentTesting: true,
-  hasE2ESpec: true,
-  hasPluginsFile: true,
-} as const
+export type MigrationStep = typeof MIGRATION_STEPS[number]
 
 export class MigrationDataSource {
-  private _legacyConfig: OldCypressConfig | null = null
-  private _step: MIGRATION_STEP = 'renameAuto'
-  filteredSteps: MIGRATION_STEP[] = MIGRATION_STEPS.filter(() => true)
-
-  hasCustomIntegrationFolder: boolean = flags.hasCustomIntegrationFolder
-  hasCustomIntegrationTestFiles: boolean = flags.hasCustomIntegrationTestFiles
-
-  hasCustomComponentFolder: boolean = flags.hasCustomComponentFolder
-  hasCustomComponentTestFiles: boolean = flags.hasCustomComponentTestFiles
-
-  hasCustomSupportFile: boolean = flags.hasCustomSupportFile
-  hasComponentTesting: boolean = flags.hasComponentTesting
-  hasE2ESpec: boolean = flags.hasE2ESpec
-  hasPluginsFile: boolean = flags.hasPluginsFile
+  private _step: MigrationStep = 'renameAuto'
 
   private componentTestingMigrationWatcher: chokidar.FSWatcher | null = null
   componentTestingMigrationStatus?: ComponentTestingMigrationStatus
 
   constructor (private ctx: DataContext) { }
 
-  async initialize () {
-    // for testing mainly, we want to ensure the flags are reset each test
-    this.resetFlags()
-
-    if (!this.ctx.currentProject) {
-      throw Error('cannot do migration without currentProject!')
-    }
-
-    this._legacyConfig = await this.ctx.actions.migration.parseLegacyConfig()
-
-    await this.initializeFlags()
-
-    this.filteredSteps = await getStepsForMigration(this.ctx.currentProject, this.legacyConfig)
-
-    if (!this.filteredSteps[0]) {
-      throw Error(`Impossible to initialize a migration. No steps fit the configuration of this project.`)
-    }
-
-    this.setStep(this.filteredSteps[0])
-  }
-
-  private resetFlags () {
-    for (const [k, v] of Object.entries(flags)) {
-      this[k as keyof typeof flags] = v
-    }
-  }
-
   get legacyConfig () {
-    if (!this._legacyConfig) {
-      throw Error(`Expected _legacyConfig to be set. Did you forget to call MigrationActions#initialize?`)
+    if (!this.ctx.coreData.migration.legacyConfigForMigration) {
+      throw Error(`Expected _legacyConfig to be set. Did you forget to call MigrationDataSource#initialize?`)
     }
 
-    return this._legacyConfig
+    return this.ctx.coreData.migration.legacyConfigForMigration
   }
 
   async getComponentTestingMigrationStatus () {
@@ -215,9 +162,9 @@ export class MigrationDataSource {
     const { hasTypescript } = this.ctx.lifecycleManager.metaState
 
     return createConfigString(this.legacyConfig, {
-      hasComponentTesting: this.hasComponentTesting,
-      hasE2ESpec: this.hasE2ESpec,
-      hasPluginsFile: this.hasPluginsFile,
+      hasComponentTesting: this.ctx.coreData.migration.flags.hasComponentTesting,
+      hasE2ESpec: this.ctx.coreData.migration.flags.hasE2ESpec,
+      hasPluginsFile: this.ctx.coreData.migration.flags.hasPluginsFile,
       projectRoot: this.ctx.currentProject,
       hasTypescript,
     })
@@ -231,73 +178,7 @@ export class MigrationDataSource {
     return getComponentFolder(this.legacyConfig)
   }
 
-  private async initializeFlags () {
-    if (!this.ctx.currentProject) {
-      throw Error('Need currentProject to do migration')
-    }
-
-    const integrationFolder = getIntegrationFolder(this.legacyConfig)
-    const integrationTestFiles = getIntegrationTestFilesGlobs(this.legacyConfig)
-
-    this.hasCustomIntegrationFolder = getIntegrationFolder(this.legacyConfig) !== 'cypress/integration'
-    this.hasCustomIntegrationTestFiles = !isDefaultTestFiles(this.legacyConfig, 'integration')
-
-    if (integrationFolder === false) {
-      this.hasE2ESpec = false
-    } else {
-      this.hasE2ESpec = await hasSpecFile(
-        this.ctx.currentProject,
-        integrationFolder,
-        integrationTestFiles,
-      )
-
-      // if we don't find specs in the 9.X scope,
-      // let's check already migrated files.
-      // this allows users to stop migration halfway,
-      // then to pick up where they left migration off
-      if (!this.hasE2ESpec && (!this.hasCustomIntegrationTestFiles || !this.hasCustomIntegrationFolder)) {
-        const newE2eSpecPattern = getSpecPattern(this.legacyConfig, 'e2e')
-
-        this.hasE2ESpec = await hasSpecFile(
-          this.ctx.currentProject,
-          '',
-          newE2eSpecPattern,
-        )
-      }
-    }
-
-    const componentFolder = getComponentFolder(this.legacyConfig)
-    const componentTestFiles = getComponentTestFilesGlobs(this.legacyConfig)
-
-    this.hasCustomComponentFolder = componentFolder !== 'cypress/component'
-    this.hasCustomComponentTestFiles = !isDefaultTestFiles(this.legacyConfig, 'component')
-
-    if (componentFolder === false) {
-      this.hasComponentTesting = false
-    } else {
-      this.hasComponentTesting = await hasSpecFile(
-        this.ctx.currentProject,
-        componentFolder,
-        componentTestFiles,
-      )
-
-      // We cannot check already migrated component specs since it would pick up e2e specs as well
-      // the default specPattern for CT is **/*.cy.js.
-      // since component testing has to be re-installed anyway, we can just skip this
-    }
-
-    const pluginsFileMissing = (
-      (this.legacyConfig.e2e?.pluginsFile ?? undefined) === undefined &&
-      this.legacyConfig.pluginsFile === undefined &&
-      !await tryGetDefaultLegacyPluginsFile(this.ctx.currentProject)
-    )
-
-    if (getPluginsFile(this.legacyConfig) === false || pluginsFileMissing) {
-      this.hasPluginsFile = false
-    }
-  }
-
-  get step (): MIGRATION_STEP {
+  get step (): MigrationStep {
     return this._step
   }
 
@@ -309,7 +190,7 @@ export class MigrationDataSource {
     }
   }
 
-  setStep (step: MIGRATION_STEP) {
+  setStep (step: MigrationStep) {
     this._step = step
   }
 }

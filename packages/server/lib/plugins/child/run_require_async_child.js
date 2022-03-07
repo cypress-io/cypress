@@ -85,6 +85,12 @@ function run (ipc, file, projectRoot) {
       legacyPlugins = legacyPlugins.default
     }
 
+    // invalid or empty plugins file
+    if (typeof legacyPlugins !== 'function') {
+      ipc.send('loadLegacyPlugins:reply', { config: legacyConfig })
+      return
+    }
+
     // we do not want to execute any tasks - the purpose
     // of this is to get any modified config returned
     // by plugins.

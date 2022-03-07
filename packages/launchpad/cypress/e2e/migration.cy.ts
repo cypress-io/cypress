@@ -102,7 +102,7 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
     checkOutcome()
   })
 
-  it('completes journey for migration-component-testing-defaults', () => {
+  it.only('completes journey for migration-component-testing-defaults', () => {
     startMigrationFor('migration-component-testing-defaults')
     // default testFiles - auto
     cy.get(renameAutoStep).should('exist')
