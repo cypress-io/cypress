@@ -6,7 +6,7 @@ const devServer = (cypressDevServerConfig) => {
 
   const { config } = cypressDevServerConfig
 
-  const cracoConfig = config.cracoConfig = config.cracoConfig || {}
+  const cracoConfig = config.cracoConfig || {}
 
   return startDevServer({
     options: cypressDevServerConfig,
