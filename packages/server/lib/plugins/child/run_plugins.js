@@ -114,6 +114,8 @@ class RunPlugins {
     Promise
     .try(() => {
       debug('Calling setupNodeEvents')
+      // setup all setters for 10.X+ non-supported config options
+      wrapNonMigratedOptions(initialConfig)
 
       return setupNodeEvents(registerChildEvent, initialConfig)
     })
@@ -125,6 +127,7 @@ class RunPlugins {
     })
     .then((modifiedCfg) => {
       debug('plugins file successfully loaded')
+      modifiedCfg && validateNonMigratedOptions(modifiedCfg)
       this.ipc.send('setupTestingType:reply', {
         setupConfig: modifiedCfg,
         registrations: this.registrations,
@@ -259,6 +262,63 @@ class RunPlugins {
       this.execute(event, ids, args)
     })
   }
+}
+
+const optionsNonValidFor10Anywhere = ['integrationFolder', 'componentFolder', 'pluginsFile']
+const optionsNonValidFor10Global = ['baseUrl', 'supportFile']
+
+function throwInvalidOptionError (key, stackBoundary = throwInvalidOptionError) {
+  const errInternal = new Error()
+
+  Error.captureStackTrace(errInternal, stackBoundary)
+  const err = require('@packages/errors').getError('MIGRATED_OPTION_INVALID', key, errInternal)
+
+  throw err
+}
+
+function setInvalidPropSetterWarning (opts, key, keyForError = key) {
+  Object.defineProperty(opts, key, {
+    set: throwInvalidOptionError.bind(null, keyForError),
+  })
+}
+
+function wrapNonMigratedOptions (options) {
+  optionsNonValidFor10Global.forEach((key) => {
+    setInvalidPropSetterWarning(options, key)
+  })
+
+  optionsNonValidFor10Anywhere.forEach((key) => {
+    setInvalidPropSetterWarning(options, key)
+
+    const testingTypes = ['component', 'e2e']
+
+    testingTypes.forEach((testingType) => {
+      options[testingType] = options[testingType] || {}
+      setInvalidPropSetterWarning(options[testingType], key, `${testingType}.${key}`)
+    })
+  })
+}
+
+function validateNonMigratedOptions (options) {
+  optionsNonValidFor10Global.forEach((key) => {
+    if (options[key]) {
+      throwInvalidOptionError(key)
+    }
+  })
+
+  optionsNonValidFor10Anywhere.forEach((key) => {
+    const testingTypes = ['component', 'e2e']
+
+    if (options[key]) {
+      throwInvalidOptionError(key)
+    }
+
+    testingTypes.forEach((testingType) => {
+      if (options[testingType] && options[testingType][key]) {
+        throwInvalidOptionError(`${testingType}.${key}`)
+      }
+    })
+  })
 }
 
 exports.RunPlugins = RunPlugins

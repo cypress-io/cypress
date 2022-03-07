@@ -108,8 +108,6 @@ function run (ipc, configFile, projectRoot) {
           return
         }
 
-        wrapNonMigratedOptions(options)
-
         if (testingType === 'component') {
           if (!isValidDevServer((result.component || {}))) {
             return
@@ -161,41 +159,6 @@ function run (ipc, configFile, projectRoot) {
   })
 
   ipc.send('ready')
-}
-
-const optionsNonValidFor10Anywhere = ['integrationFolder', 'componentFolder', 'pluginsFile']
-const optionsNonValidFor10Global = ['baseUrl', 'supportFile']
-
-function throwInvalidOptionError (key) {
-  const errInternal = new Error()
-
-  Error.captureStackTrace(errInternal, throwInvalidOptionError)
-  const err = require('@packages/errors').getError('MIGRATED_OPTION_INVALID', key, errInternal)
-
-  throw err
-}
-
-function setInvalidPropSetterWarning (opts, key) {
-  Object.defineProperty(opts, key, {
-    set: throwInvalidOptionError.bind(null, key),
-  })
-}
-
-function wrapNonMigratedOptions (options) {
-  optionsNonValidFor10Global.forEach((key) => {
-    setInvalidPropSetterWarning(options, key)
-  })
-
-  optionsNonValidFor10Anywhere.forEach((key) => {
-    setInvalidPropSetterWarning(options, key)
-
-    const testingTypes = ['component', 'e2e']
-
-    testingTypes.forEach((testingType) => {
-      options[testingType] = options[testingType] || {}
-      setInvalidPropSetterWarning(options[testingType], key)
-    })
-  })
 }
 
 module.exports = run
