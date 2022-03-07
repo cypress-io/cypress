@@ -9,7 +9,8 @@ export function state (): NetStubbingState {
     reset () {
       for (const requestId in this.requests) {
         const request = this.requests[requestId]
-        const inResponsePhase = ['before:response', 'response:callback', 'response'].includes(request.lastEvent!)
+        const responseEvents = ['before:response', 'response:callback', 'response']
+        const inResponsePhase = responseEvents.includes(request.lastEvent!)
 
         let shouldDestroyResponse = false
 
@@ -17,7 +18,7 @@ export function state (): NetStubbingState {
           if (!subscriptionByRoute.immediateStaticResponse) {
             subscriptionByRoute.subscriptions.forEach((subscription) => {
               console.log(subscription)
-              if (subscription.await && !subscription.skip && (subscription.eventName === 'response:callback' || !inResponsePhase)) {
+              if (subscription.await && !subscription.skip && (responseEvents.includes(subscription.eventName) || !inResponsePhase)) {
                 console.log('Destroying')
                 shouldDestroyResponse = true
               }
