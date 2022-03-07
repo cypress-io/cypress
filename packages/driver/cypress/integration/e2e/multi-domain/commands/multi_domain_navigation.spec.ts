@@ -226,6 +226,39 @@ context('multi-domain navigation', { experimentalMultiDomain: true }, () => {
         cy.get('[data-cy="dom-check"]').should('have.text', 'From a secondary domain')
       })
     })
+
+    // TODO: un-skip once multiple remote states are supported
+    it.skip('supports auth options and adding auth to subsequent requests', () => {
+      cy.switchToDomain('foobar.com', () => {
+        cy.visit('http://www.foobar.com:3500/basic_auth', {
+          auth: {
+            username: 'cypress',
+            password: 'password123',
+          },
+        })
+
+        cy.get('body').should('have.text', 'basic auth worked')
+
+        cy.window().then({ timeout: 60000 }, (win) => {
+          return new Cypress.Promise(((resolve, reject) => {
+            const xhr = new win.XMLHttpRequest()
+
+            xhr.open('GET', '/basic_auth')
+            xhr.onload = function () {
+              try {
+                expect(this.responseText).to.include('basic auth worked')
+
+                return resolve(win)
+              } catch (err) {
+                return reject(err)
+              }
+            }
+
+            return xhr.send()
+          }))
+        })
+      })
+    })
   })
 
   it('supports navigating through changing the window.location.href', () => {
