@@ -6,7 +6,6 @@ import type { ChildProcess } from 'child_process'
 import type { SocketIOServer } from '@packages/socket'
 import type { Server } from 'http'
 import type { ErrorWrapperSource } from '@packages/errors'
-import pDefer from 'p-defer'
 
 export type Maybe<T> = T | null | undefined
 
@@ -78,7 +77,6 @@ export interface MigrationDataShape {
   // TODO: have the model of migration here
   step: MigrationStep
   legacyConfigForMigration?: Partial<Cypress.Config> | null
-  legacyConfigPromise: pDefer.DeferredPromise<void>
   filteredSteps: MigrationStep[]
   flags: {
     hasCustomIntegrationFolder: boolean
@@ -190,7 +188,6 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
     migration: {
       step: 'renameAuto',
       legacyConfigForMigration: null,
-      legacyConfigPromise: pDefer(),
       filteredSteps: [...MIGRATION_STEPS],
       flags: {
         hasCustomIntegrationFolder: false,

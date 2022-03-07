@@ -63,8 +63,6 @@ export function processConfigViaLegacyPlugins (projectRoot: string, legacyConfig
 }
 
 export class MigrationActions {
-  private _oldConfigPromise: Promise<Partial<Cypress.Config>> | null = null
-
   constructor (private ctx: DataContext) { }
 
   async initialize (config: Partial<Cypress.Config>) {

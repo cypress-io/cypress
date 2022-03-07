@@ -1,29 +1,22 @@
-import type { TestingType, MIGRATION_STEPS } from '@packages/types'
+import type { TestingType } from '@packages/types'
 import type chokidar from 'chokidar'
 import type { DataContext } from '..'
 import {
   createConfigString,
   initComponentTestingMigration,
   ComponentTestingMigrationStatus,
-  tryGetDefaultLegacyPluginsFile,
   supportFilesForMigration,
-  hasSpecFile,
   getSpecs,
   applyMigrationTransform,
-  getStepsForMigration,
   shouldShowRenameSupport,
   getIntegrationFolder,
-  getPluginsFile,
   isDefaultTestFiles,
   getComponentTestFilesGlobs,
   getComponentFolder,
-  getIntegrationTestFilesGlobs,
-  getSpecPattern,
 } from './migration'
 
 import type { FilePart } from './migration/format'
 import Debug from 'debug'
-import pDefer from 'p-defer'
 
 const debug = Debug('cypress:data-context:sources:MigrationDataSource')
 
@@ -38,7 +31,6 @@ export interface MigrationFile {
     parts: FilePart[]
   }
 }
-
 
 export class MigrationDataSource {
   private componentTestingMigrationWatcher: chokidar.FSWatcher | null = null
