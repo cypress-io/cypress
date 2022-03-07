@@ -4,6 +4,7 @@ export const e2eProjectDirs = [
   'browser-extensions',
   'busted-support-file',
   'chrome-browser-preferences',
+  'component-nextjs',
   'component-tests',
   'config-with-custom-file-js',
   'config-with-custom-file-ts',
