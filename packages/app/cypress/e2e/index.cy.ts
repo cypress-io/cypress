@@ -877,5 +877,20 @@ describe('App: Index', () => {
         }, { path: getPathForPlatform('src/stories/Button.stories.cy.jsx') })
       })
     })
+
+    describe('NextJs Project', () => {
+      beforeEach(() => {
+        cy.scaffoldProject('component-nextjs')
+        cy.openProject('component-nextjs')
+        cy.startAppServer('component')
+        cy.__incorrectlyVisitAppWithIntercept()
+      })
+
+      it('should see a newly created spec file', () => {
+        cy.contains('Create from component').click()
+        cy.findByText('paragraph').click()
+        cy.findByRole('button', { name: 'Okay, run the spec' }).click()
+      })
+    })
   })
 })
