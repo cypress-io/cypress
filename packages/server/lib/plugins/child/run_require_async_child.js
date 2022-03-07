@@ -108,6 +108,8 @@ function run (ipc, configFile, projectRoot) {
           return
         }
 
+        wrapNonMigratedOptions(options)
+
         if (testingType === 'component') {
           if (!isValidDevServer((result.component || {}))) {
             return
@@ -159,6 +161,20 @@ function run (ipc, configFile, projectRoot) {
   })
 
   ipc.send('ready')
+}
+
+const optionsNonValidFor10 = {
+  'integrationFolder': 'error blah',
+}
+
+function wrapNonMigratedOptions (options) {
+  Object.entries(optionsNonValidFor10).forEach(([key, value]) => {
+    Object.defineProperty(options, key, {
+      set () {
+        throw new Error(value)
+      },
+    })
+  })
 }
 
 module.exports = run
