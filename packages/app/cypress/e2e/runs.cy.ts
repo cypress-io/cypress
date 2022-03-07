@@ -61,6 +61,36 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
     })
   })
 
+  context('Runs - Connect Org', () => {
+    it('opens create Org modal after clicking Connect Project button', () => {
+      cy.intercept('query-Runs', (req) => {
+        req.on('before:response', (res) => {
+          res.body.data.cloudViewer.organizationControl.nodes = []
+          res.body.data.cloudViewer.organizations.nodes = []
+        })
+      })
+
+      cy.scaffoldProject('component-tests')
+      cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js'])
+      cy.startAppServer('component')
+
+      cy.loginUser()
+      cy.visitApp()
+
+      cy.get('[href="#/runs"]').click()
+
+      cy.findByText(defaultMessages.runs.connect.buttonProject).click()
+      cy.get('[aria-modal="true"]').should('exist')
+
+      cy.findByText(defaultMessages.runs.connect.modal.createOrg.button).click()
+      cy.contains('button', defaultMessages.runs.connect.modal.createOrg.waitingButton).should('be.visible')
+      cy.contains('a', defaultMessages.links.needHelp).should('have.attr', 'href', 'https://on.cypress.io/adding-new-project')
+
+      cy.get('button').get('[aria-label="Close"').click()
+      cy.get('[aria-modal="true"]').should('not.exist')
+    })
+  })
+
   context('Runs - Connect Project', () => {
     it('when no project Id in the config file, shows call to action', () => {
       cy.withCtx(async (ctx) => {
