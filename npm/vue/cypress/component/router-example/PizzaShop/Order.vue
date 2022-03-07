@@ -1,15 +1,26 @@
 <template>
   <div class="pizza-order">
-    <router-link class="home" :to="{ name: 'home' }">Go Home</router-link><br>
-    <div class="toppings" style="float: left; width: 50%">
+    <router-link
+      class="home"
+      :to="{ name: 'home' }"
+    >
+      Go Home
+    </router-link><br>
+    <div
+      class="toppings"
+      style="float: left; width: 50%"
+    >
       <h4>Select Your Toppings</h4>
       <ul>
-        <li v-for="topping in toppings" :key="topping.name">
+        <li
+          v-for="topping in toppings"
+          :key="topping.name"
+        >
           <input
-            type="checkbox"
             :id="topping.name"
-            :value="topping"
             v-model="selected"
+            type="checkbox"
+            :value="topping"
           >
           <label :for="topping.name">
             {{ topping.icon }} {{ topping.name }}
@@ -17,10 +28,16 @@
         </li>
       </ul>
     </div>
-    <div class="order-overview" style="float: left; width: 50%">
+    <div
+      class="order-overview"
+      style="float: left; width: 50%"
+    >
       <h4>Order Overview</h4>
       <ul v-if="selected.length">
-        <li v-for="topping in selected" :key="topping.name">
+        <li
+          v-for="topping in selected"
+          :key="topping.name"
+        >
           {{ topping.icon }} {{ topping.name }}
         </li>
       </ul>
@@ -46,15 +63,6 @@ export default {
     }
   },
 
-  methods: {
-    hasTopping (name) {
-      return !!filterByName(this.selected, name)[0]
-    },
-    getTopping (name) {
-      return filterByName(ALL_TOPPINGS, name)[0]
-    },
-  },
-
   created () {
     const presetName = this.$route.params.preset
 
@@ -69,6 +77,15 @@ export default {
         this.selected.push(topping)
       }
     }
+  },
+
+  methods: {
+    hasTopping (name) {
+      return !!filterByName(this.selected, name)[0]
+    },
+    getTopping (name) {
+      return filterByName(ALL_TOPPINGS, name)[0]
+    },
   },
 }
 </script>
