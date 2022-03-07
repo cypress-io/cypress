@@ -2,8 +2,6 @@ import systemTests from './system-tests'
 import dayjs from 'dayjs'
 import _ from 'lodash'
 
-const expect = global.expect as unknown as Chai.ExpectStatic
-
 const STATIC_DATE = '2018-02-01T20:14:19.323Z'
 
 const expectDurationWithin = function (obj, duration, low, high, reset) {
