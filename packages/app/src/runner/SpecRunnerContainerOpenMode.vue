@@ -5,10 +5,6 @@
       :gql="props.gql"
     />
   </div>
-
-  <div v-else>
-    Error, no spec matched!
-  </div>
 </template>
 
 <script lang="ts" setup>
