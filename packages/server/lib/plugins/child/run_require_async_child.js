@@ -88,6 +88,7 @@ function run (ipc, file, projectRoot) {
     // invalid or empty plugins file
     if (typeof legacyPlugins !== 'function') {
       ipc.send('loadLegacyPlugins:reply', { config: legacyConfig })
+
       return
     }
 
@@ -101,11 +102,17 @@ function run (ipc, file, projectRoot) {
     const mergedLegacyConfig = {
       ...legacyConfig,
       ...legacyPluginsConfig,
-      e2e: {
+    }
+
+    if (legacyConfig.e2e || legacyPluginsConfig.e2e) {
+      mergedLegacyConfig.e2e = {
         ...(legacyConfig.e2e || {}),
         ...(legacyPluginsConfig.e2e || {}),
-      },
-      component: {
+      }
+    }
+
+    if (legacyConfig.component || legacyPluginsConfig.component) {
+      mergedLegacyConfig.component = {
         ...(legacyConfig.component || {}),
         ...(legacyPluginsConfig.component || {}),
       }
