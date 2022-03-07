@@ -159,7 +159,7 @@ export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
     return mountFragment(source, options, true)
   })
 
-  afterEach(() => {
+  beforeEach(() => {
     // clean all resolvers after each test
     mutationResolvers.clear()
   })
