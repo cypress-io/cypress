@@ -53,7 +53,7 @@
     "terser-webpack-plugin": "^5.2.5",
     "web-vitals": "^2.1.0",
     "webpack": "^5.64.4",
-    "webpack-dev-server": "^4.6.0",
+    "webpack-dev-server": "^4.0.0",
     "webpack-manifest-plugin": "^4.0.2",
     "workbox-webpack-plugin": "^6.4.1"
   },
