@@ -1,4 +1,4 @@
-## Migration E2E Defaults
+## Migration E2E Plugins Modify Config
 
 An e2e project where `cypress/plugins/index.js` modifies the `config`, specifically `integrationFolder` and `testFiles`.
 
@@ -12,7 +12,7 @@ The following migration steps will be used during this migration:
 
 ## Automatic Migration
 
-This step is not shown - we do not rename `integrationFolder`, nor your spec files, if you have customized both of those.
+We do not show this step because both `integrationFolder` and `testFiles` are custom (via plugins).
 
 ## Manual Files
 

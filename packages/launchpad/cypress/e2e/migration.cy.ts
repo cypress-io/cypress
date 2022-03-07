@@ -472,6 +472,21 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
     checkOutcome()
   })
 
+  it('completes journey for migration-e2e-plugins-modify-config', () => {
+    startMigrationFor('migration-e2e-plugins-modify-config')
+    // No rename, integrationFolder and testFiles are custom (via plugins)
+    cy.get(renameAutoStep).should('not.exist')
+    // no CT
+    cy.get(renameManualStep).should('not.exist')
+    cy.get(renameSupportStep).should('exist')
+    cy.get(setupComponentStep).should('not.exist')
+    cy.get(configFileStep).should('exist')
+
+    renameSupport()
+    migrateAndVerifyConfig()
+    checkOutcome()
+  })
+
   it('completes journey for migration-e2e-no-plugins-support-file', () => {
     startMigrationFor('migration-e2e-no-plugins-support-file')
     // defaults, rename all the things
