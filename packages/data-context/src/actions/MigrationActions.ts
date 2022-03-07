@@ -6,11 +6,14 @@ import {
   formatConfig,
   moveSpecFiles,
   NonStandardMigrationError,
+  OldCypressConfig,
   SpecToMove,
   supportFilesForMigration,
 } from '../sources'
 
 export class MigrationActions {
+  private _oldConfigPromise: Promise<OldCypressConfig> | null = null
+
   constructor (private ctx: DataContext) { }
 
   async createConfigFile () {
@@ -25,8 +28,23 @@ export class MigrationActions {
     })
   }
 
-  initialize () {
-    return this.ctx.migration.initialize()
+  async parseLegacyConfig (): Promise<OldCypressConfig> {
+    // avoid reading the same file over and over again before it was finished reading
+    if (this.ctx.lifecycleManager.metaState.hasLegacyCypressJson && !this._oldConfigPromise) {
+      const cfgPath = path.join(this.ctx.lifecycleManager?.projectRoot, 'cypress.json')
+
+      this._oldConfigPromise = this.ctx.file.readJsonFile(cfgPath) as Promise<OldCypressConfig>
+    }
+
+    if (this._oldConfigPromise) {
+      const _legacyConfig = await this._oldConfigPromise
+
+      this._oldConfigPromise = null
+
+      return _legacyConfig
+    }
+
+    return {}
   }
 
   async renameSpecsFolder () {

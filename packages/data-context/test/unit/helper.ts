@@ -9,8 +9,11 @@ import type { BrowserApiShape } from '../../src/sources/BrowserDataSource'
 import type { AppApiShape, AuthApiShape, ElectronApiShape, LocalSettingsApiShape, ProjectApiShape } from '../../src/actions'
 import { InjectedConfigApi } from '../../src/data'
 
-export function getSystemTestProject (project: typeof e2eProjectDirs[number]) {
-  return path.join(__dirname, '..', '..', '..', '..', 'system-tests', 'projects', project)
+type SystemTestProject = typeof e2eProjectDirs[number]
+type SystemTestProjectPath<T extends SystemTestProject> = `${string}/system-tests/projects/${T}`
+
+export function getSystemTestProject<T extends typeof e2eProjectDirs[number]> (project: T): SystemTestProjectPath<T> {
+  return path.join(__dirname, '..', '..', '..', '..', 'system-tests', 'projects', project) as SystemTestProjectPath<T>
 }
 
 export async function scaffoldMigrationProject (project: typeof e2eProjectDirs[number]) {

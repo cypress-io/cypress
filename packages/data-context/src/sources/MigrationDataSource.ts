@@ -1,6 +1,5 @@
 import { TestingType, MIGRATION_STEPS } from '@packages/types'
 import type chokidar from 'chokidar'
-import path from 'path'
 import type { DataContext } from '..'
 import {
   createConfigString,
@@ -56,7 +55,7 @@ const flags = {
 } as const
 
 export class MigrationDataSource {
-  private _config: OldCypressConfig | null = null
+  private _legacyConfig: OldCypressConfig | null = null
   private _step: MIGRATION_STEP = 'renameAuto'
   filteredSteps: MIGRATION_STEP[] = MIGRATION_STEPS.filter(() => true)
 
@@ -73,7 +72,6 @@ export class MigrationDataSource {
 
   private componentTestingMigrationWatcher: chokidar.FSWatcher | null = null
   componentTestingMigrationStatus?: ComponentTestingMigrationStatus
-  private _oldConfigPromise: Promise<OldCypressConfig> | null = null
 
   constructor (private ctx: DataContext) { }
 
@@ -85,13 +83,11 @@ export class MigrationDataSource {
       throw Error('cannot do migration without currentProject!')
     }
 
-    this._config = null
-    this._oldConfigPromise = null
-    const config = await this.parseCypressConfig()
+    this._legacyConfig = await this.ctx.actions.migration.parseLegacyConfig()
 
     await this.initializeFlags()
 
-    this.filteredSteps = await getStepsForMigration(this.ctx.currentProject, config)
+    this.filteredSteps = await getStepsForMigration(this.ctx.currentProject, this.legacyConfig)
 
     if (!this.filteredSteps[0]) {
       throw Error(`Impossible to initialize a migration. No steps fit the configuration of this project.`)
@@ -106,13 +102,19 @@ export class MigrationDataSource {
     }
   }
 
+  get legacyConfig () {
+    if (!this._legacyConfig) {
+      throw Error(`Expected _legacyConfig to be set. Did you forget to call MigrationActions#initialize?`)
+    }
+
+    return this._legacyConfig
+  }
+
   async getComponentTestingMigrationStatus () {
     debug('getComponentTestingMigrationStatus: start')
-    const config = await this.parseCypressConfig()
+    const componentFolder = getComponentFolder(this.legacyConfig)
 
-    const componentFolder = getComponentFolder(config)
-
-    if (!config || !this.ctx.currentProject) {
+    if (!this.legacyConfig || !this.ctx.currentProject) {
       throw Error('Need currentProject and config to continue')
     }
 
@@ -143,7 +145,7 @@ export class MigrationDataSource {
       const { status, watcher } = await initComponentTestingMigration(
         this.ctx.currentProject,
         componentFolder,
-        getComponentTestFilesGlobs(config),
+        getComponentTestFilesGlobs(this.legacyConfig),
         onFileMoved,
       )
 
@@ -164,10 +166,8 @@ export class MigrationDataSource {
       throw Error('Need this.ctx.currentProject')
     }
 
-    const config = await this.parseCypressConfig()
-
-    debug('supportFilesForMigrationGuide: config %O', config)
-    if (!await shouldShowRenameSupport(this.ctx.currentProject, config)) {
+    debug('supportFilesForMigrationGuide: config %O', this.legacyConfig)
+    if (!await shouldShowRenameSupport(this.ctx.currentProject, this.legacyConfig)) {
       return null
     }
 
@@ -193,13 +193,11 @@ export class MigrationDataSource {
       throw Error(`Need this.ctx.projectRoot!`)
     }
 
-    const config = await this.parseCypressConfig()
-
-    const specs = await getSpecs(this.ctx.currentProject, config)
+    const specs = await getSpecs(this.ctx.currentProject, this.legacyConfig)
 
     const canBeAutomaticallyMigrated: MigrationFile[] = specs.integration.map(applyMigrationTransform).filter((spec) => spec.before.relative !== spec.after.relative)
 
-    const defaultComponentPattern = isDefaultTestFiles(await this.parseCypressConfig(), 'component')
+    const defaultComponentPattern = isDefaultTestFiles(this.legacyConfig, 'component')
 
     // Can only migration component specs if they use the default testFiles pattern.
     if (defaultComponentPattern) {
@@ -209,12 +207,6 @@ export class MigrationDataSource {
     return canBeAutomaticallyMigrated
   }
 
-  async getConfig () {
-    const config = await this.parseCypressConfig()
-
-    return JSON.stringify(config, null, 2)
-  }
-
   async createConfigString () {
     if (!this.ctx.currentProject) {
       throw Error('Need currentProject!')
@@ -222,9 +214,7 @@ export class MigrationDataSource {
 
     const { hasTypescript } = this.ctx.lifecycleManager.metaState
 
-    const config = await this.parseCypressConfig()
-
-    return createConfigString(config, {
+    return createConfigString(this.legacyConfig, {
       hasComponentTesting: this.hasComponentTesting,
       hasE2ESpec: this.hasE2ESpec,
       hasPluginsFile: this.hasPluginsFile,
@@ -234,38 +224,11 @@ export class MigrationDataSource {
   }
 
   async integrationFolder () {
-    const config = await this.parseCypressConfig()
-
-    return getIntegrationFolder(config)
+    return getIntegrationFolder(this.legacyConfig)
   }
 
   async componentFolder () {
-    const config = await this.parseCypressConfig()
-
-    return getComponentFolder(config)
-  }
-
-  private async parseCypressConfig (): Promise<OldCypressConfig> {
-    if (this._config) {
-      return this._config
-    }
-
-    // avoid reading the same file over and over again before it was finished reading
-    if (this.ctx.lifecycleManager.metaState.hasLegacyCypressJson && !this._oldConfigPromise) {
-      const cfgPath = path.join(this.ctx.lifecycleManager?.projectRoot, 'cypress.json')
-
-      this._oldConfigPromise = this.ctx.file.readJsonFile(cfgPath) as Promise<OldCypressConfig>
-    }
-
-    if (this._oldConfigPromise) {
-      this._config = await this._oldConfigPromise
-
-      this._oldConfigPromise = null
-
-      return this._config
-    }
-
-    return {}
+    return getComponentFolder(this.legacyConfig)
   }
 
   private async initializeFlags () {
@@ -273,13 +236,11 @@ export class MigrationDataSource {
       throw Error('Need currentProject to do migration')
     }
 
-    const config = await this.parseCypressConfig()
+    const integrationFolder = getIntegrationFolder(this.legacyConfig)
+    const integrationTestFiles = getIntegrationTestFilesGlobs(this.legacyConfig)
 
-    const integrationFolder = getIntegrationFolder(config)
-    const integrationTestFiles = getIntegrationTestFilesGlobs(config)
-
-    this.hasCustomIntegrationFolder = getIntegrationFolder(config) !== 'cypress/integration'
-    this.hasCustomIntegrationTestFiles = !isDefaultTestFiles(config, 'integration')
+    this.hasCustomIntegrationFolder = getIntegrationFolder(this.legacyConfig) !== 'cypress/integration'
+    this.hasCustomIntegrationTestFiles = !isDefaultTestFiles(this.legacyConfig, 'integration')
 
     if (integrationFolder === false) {
       this.hasE2ESpec = false
@@ -295,7 +256,7 @@ export class MigrationDataSource {
       // this allows users to stop migration halfway,
       // then to pick up where they left migration off
       if (!this.hasE2ESpec && (!this.hasCustomIntegrationTestFiles || !this.hasCustomIntegrationFolder)) {
-        const newE2eSpecPattern = getSpecPattern(config, 'e2e')
+        const newE2eSpecPattern = getSpecPattern(this.legacyConfig, 'e2e')
 
         this.hasE2ESpec = await hasSpecFile(
           this.ctx.currentProject,
@@ -305,11 +266,11 @@ export class MigrationDataSource {
       }
     }
 
-    const componentFolder = getComponentFolder(config)
-    const componentTestFiles = getComponentTestFilesGlobs(config)
+    const componentFolder = getComponentFolder(this.legacyConfig)
+    const componentTestFiles = getComponentTestFilesGlobs(this.legacyConfig)
 
     this.hasCustomComponentFolder = componentFolder !== 'cypress/component'
-    this.hasCustomComponentTestFiles = !isDefaultTestFiles(config, 'component')
+    this.hasCustomComponentTestFiles = !isDefaultTestFiles(this.legacyConfig, 'component')
 
     if (componentFolder === false) {
       this.hasComponentTesting = false
@@ -326,12 +287,12 @@ export class MigrationDataSource {
     }
 
     const pluginsFileMissing = (
-      (config.e2e?.pluginsFile ?? undefined) === undefined &&
-      config.pluginsFile === undefined &&
+      (this.legacyConfig.e2e?.pluginsFile ?? undefined) === undefined &&
+      this.legacyConfig.pluginsFile === undefined &&
       !await tryGetDefaultLegacyPluginsFile(this.ctx.currentProject)
     )
 
-    if (getPluginsFile(config) === false || pluginsFileMissing) {
+    if (getPluginsFile(this.legacyConfig) === false || pluginsFileMissing) {
       this.hasPluginsFile = false
     }
   }
