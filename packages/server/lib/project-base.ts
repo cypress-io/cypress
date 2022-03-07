@@ -105,7 +105,7 @@ export class ProjectBase<TServer extends Server> extends EE {
       ...options,
     }
 
-    this.ctx.lifecycleManager.setCurrentProject(this.projectRoot)
+    this.ctx.lifecycleManager.setCurrentProject(this.projectRoot).catch(this.ctx.onError)
   }
 
   protected ensureProp = ensureProp
