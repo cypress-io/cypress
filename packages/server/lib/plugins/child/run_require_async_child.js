@@ -78,7 +78,7 @@ function run (ipc, file, projectRoot) {
     return false
   }
 
-  ipc.on('loadLegacyPlugins', () => {
+  ipc.on('loadLegacyPlugins', async (legacyConfig) => {
     let legacyPlugins = require(file)
 
     if (legacyPlugins && typeof legacyPlugins.default === 'function') {
@@ -89,7 +89,7 @@ function run (ipc, file, projectRoot) {
     // of this is to get any modified config returned
     // by plugins.
     const noop = () => {}
-    const legacyPluginsConfig = legacyPlugins(noop, {})
+    const legacyPluginsConfig = await legacyPlugins(noop, legacyConfig)
 
     ipc.send('loadLegacyPlugins:reply', { config: legacyPluginsConfig })
   })

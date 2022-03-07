@@ -1,4 +1,6 @@
 import path from 'path'
+import { fork } from 'child_process'
+import type { ForkOptions } from 'child_process'
 import assert from 'assert'
 import type { DataContext } from '..'
 import {
@@ -9,7 +11,47 @@ import {
   OldCypressConfig,
   SpecToMove,
   supportFilesForMigration,
+  tryGetDefaultLegacyPluginsFile,
 } from '../sources'
+
+export function processConfigViaLegacyPlugins (projectRoot: string, legacyConfig: Partial<OldCypressConfig>) {
+  return new Promise(async (resolve, reject) => {
+    const pluginFile = legacyConfig.pluginsFile ?? await tryGetDefaultLegacyPluginsFile(projectRoot)
+
+    // couldn't find a pluginsFile
+    // just bail with initial config
+    if (!pluginFile) {
+      return resolve(legacyConfig)
+    }
+
+    const cwd = path.join(projectRoot, pluginFile)
+
+    const childOptions: ForkOptions = {
+      stdio: 'inherit',
+      cwd: path.dirname(cwd),
+      env: process.env,
+    }
+
+    const configProcessArgs = ['--projectRoot', projectRoot, '--file', cwd]
+    const CHILD_PROCESS_FILE_PATH = require.resolve('@packages/server/lib/plugins/child/require_async_child')
+    const proc = fork(CHILD_PROCESS_FILE_PATH, configProcessArgs, childOptions)
+
+    proc.addListener('message', ({ event, args }: { event: 'ready' | 'loadLegacyPlugins:reply', args: [{ config: Partial<OldCypressConfig> }] }) => {
+      if (event === 'ready') {
+        proc.send({ event: 'loadLegacyPlugins', args: [legacyConfig] })
+      } else if (event === 'loadLegacyPlugins:reply') {
+        resolve(args[0].config)
+        proc.kill()
+      } else if (event === 'childProcess:unhandledError') {
+        reject(args)
+      } else {
+        throw Error(`Got unexpected event from ipc: ${event}`)
+      }
+    })
+
+    return
+  })
+}
 
 export class MigrationActions {
   private _oldConfigPromise: Promise<OldCypressConfig> | null = null

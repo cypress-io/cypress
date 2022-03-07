@@ -202,7 +202,7 @@ export const Migration = objectType({
     t.nonNull.string('configBeforeCode', {
       description: 'contents of the cypress.json file before conversion',
       resolve: (source, args, ctx) => {
-        return ctx.migration.getConfig()
+        return JSON.stringify(ctx.migration.legacyConfig, null, 2)
       },
     })
 
