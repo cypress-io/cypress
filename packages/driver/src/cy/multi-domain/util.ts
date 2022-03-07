@@ -21,7 +21,7 @@ export const correctStackForCrossDomainError = (serializedError: any, userInvoca
 export const serializeRunnable = (runnable) => {
   if (!runnable) return undefined
 
-  const fields = _.pick(runnable, ['id', '_currentRetry', 'type', 'title', 'parent', 'ctx', 'titlePath'])
+  const fields = _.pick(runnable, ['id', 'type', 'title', 'parent', 'ctx', 'titlePath', '_timeout'])
 
   fields.ctx = _.pick(runnable.ctx, ['currentTest.id', 'currentTest._currentRetry', 'currentTest.type', 'currentTest.title'])
 
