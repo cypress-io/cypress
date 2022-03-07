@@ -264,10 +264,14 @@ class RunPlugins {
   }
 }
 
-// values not allowed in 10.X+ in the root, e2e and component config
+/**
+ * Values not allowed in 10.X+ in the root, e2e and component config
+ */
 const optionsNonValidFor10Anywhere = ['integrationFolder', 'componentFolder', 'pluginsFile']
 
-// values not allowed in 10.X+ in the root that have moved in one of the testingTypes
+/**
+ * values not allowed in 10.X+ in the root that have moved in one of the testingTypes
+ */
 const optionsNonValidFor10Global = ['baseUrl', 'supportFile']
 
 function throwInvalidOptionError (key, stackBoundary = throwInvalidOptionError) {
