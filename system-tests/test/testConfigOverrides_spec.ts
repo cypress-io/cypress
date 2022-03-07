@@ -1,6 +1,6 @@
 import fs from 'fs-extra'
 import path from 'path'
-import systemTests, { expect } from '../lib/system-tests'
+import systemTests, { expect, BrowserName } from '../lib/system-tests'
 import Fixtures from '../lib/fixtures'
 
 const e2ePath = Fixtures.projectPath('e2e')
@@ -35,7 +35,7 @@ describe('testConfigOverrides', () => {
 
   // window.Error throws differently for firefox. break into
   // browser permutations for snapshot comparisons
-  const permutations = [
+  const permutations: BrowserName[][] = [
     ['chrome', 'electron'],
     ['firefox'],
   ]
