@@ -48,7 +48,8 @@ export type ItOptions = ExecOptions & {
    * If a function is supplied, it will be executed instead of running the `systemTests.exec` function immediately.
    */
   onRun?: (
-    execFn: ExecFn
+    execFn: ExecFn,
+    browser: BrowserName
   ) => Promise<any> | any
   /**
    * Same as using `systemTests.it.only`.
