@@ -95,6 +95,8 @@ describe('Cypress In Cypress', { viewportWidth: 1500 }, () => {
     .its('href')
     .should('eq', 'http://localhost:4455/__/#/specs')
 
+    cy.percySnapshot()
+
     // should clear after reload
     cy.reload()
     cy.contains(noSpecErrorTitle).should('not.exist')
