@@ -49,7 +49,6 @@ windowsWorkflowFilters: &windows-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ '10.0-release', << pipeline.git.branch >> ]
-    - equal: [ merge-develop-2-28-22, << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -473,21 +472,14 @@ commands:
             # https://www.gep13.co.uk/blog/chocolatey-error-hashes-do-not-match
             [[ $PLATFORM == 'windows' && '<<parameters.browser>>' == 'chrome' ]] && choco install googlechrome --ignore-checksums || [[ $PLATFORM != 'windows' ]]
       - run:
-          # the PERCY_TARGET_BRANCH and PERCY_TARGET_COMMIT env vars
-          # are a temporary hack to workaround percy issues with
-          # PR's not diffing the right base branch due to other problems
-          # upstream with finalizing builds. These will be removed
-          # once we implement a more permanent solution.
           command: |
             cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --parallel -- --') || true
             DEBUG=<<parameters.debug>> \
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$TEST_LAUNCHPAD_RECORD_KEY \
-            PERCY_PARALLEL_NONCE=$PLATFORM-$CIRCLE_SHA1 \
+            PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
-            PERCY_TARGET_BRANCH="10.0-release" \
-            PERCY_TARGET_COMMIT=$(git log -n 1 origin/10.0-release --pretty="%H") \
             $cmd yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --record --parallel --group <<parameters.package>>-<<parameters.type>>
       - store_test_results:
           path: /tmp/cypress
@@ -881,6 +873,17 @@ commands:
                 path: /tmp/<<parameters.repo>>/cypress/videos
       - store-npm-logs
 
+  wait-on-circle-jobs:
+    description: Polls certain Circle CI jobs until they finish
+    parameters:
+      job-names:
+        description: comma separated list of circle ci job names to wait for
+        type: string
+    steps:
+      - run:
+          name: "Waiting on Circle CI jobs: <<parameters.job-names>>"
+          command: node ./scripts/wait-on-circle-jobs.js --job-names="<<parameters.job-names>>"
+
   build-binary:
     steps:
       - run:
@@ -1083,16 +1086,19 @@ jobs:
               echo "This is an external PR, cannot access other services"
               circleci-agent step halt
             fi
+      - wait-on-circle-jobs:
+          job-names: >
+            cli-visual-tests,
+            reporter-integration-tests,
+            npm-design-system,
+            run-app-component-tests-chrome,
+            run-app-integration-tests-chrome,
+            run-frontend-shared-component-tests-chrome,
+            run-launchpad-component-tests-chrome,
+            run-launchpad-integration-tests-chrome
       - run:
-          # the PERCY_TARGET_BRANCH and PERCY_TARGET_COMMIT env vars
-          # are a temporary hack to workaround percy issues with
-          # PR's not diffing the right base branch due to other problems
-          # upstream with finalizing builds. These will be removed
-          # once we implement a more permanent solution.
           command: |
-            PERCY_PARALLEL_NONCE=$PLATFORM-$CIRCLE_SHA1 \
-            PERCY_TARGET_BRANCH="10.0-release" \
-            PERCY_TARGET_COMMIT=$(git log -n 1 origin/10.0-release --pretty="%H") \
+            PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
             yarn percy build:finalize
 
   cli-visual-tests:
@@ -1113,17 +1119,10 @@ jobs:
           path: cli/visual-snapshots
       - run:
           name: Upload CLI snapshots for diffing
-          # the PERCY_TARGET_BRANCH and PERCY_TARGET_COMMIT env vars
-          # are a temporary hack to workaround percy issues with
-          # PR's not diffing the right base branch due to other problems
-          # upstream with finalizing builds. These will be removed
-          # once we implement a more permanent solution.
           command: |
-            PERCY_PARALLEL_NONCE=$PLATFORM-$CIRCLE_SHA1 \
+            PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
-            PERCY_TARGET_BRANCH="10.0-release" \
-            PERCY_TARGET_COMMIT=$(git log -n 1 origin/10.0-release --pretty="%H") \
             yarn percy snapshot ./cli/visual-snapshots
 
   unit-tests:
@@ -1294,21 +1293,31 @@ jobs:
 
   run-frontend-shared-component-tests-chrome:
     <<: *defaults
+    parameters:
+      <<: *defaultsParameters
+      percy:
+        type: boolean
+        default: false
     parallelism: 3
     steps:
       - run-new-ui-tests:
           browser: chrome
-          percy: true
+          percy: << parameters.percy >>
           package: frontend-shared
           type: ct
 
   run-launchpad-component-tests-chrome:
     <<: *defaults
+    parameters:
+      <<: *defaultsParameters
+      percy:
+        type: boolean
+        default: false
     parallelism: 7
     steps:
       - run-new-ui-tests:
           browser: chrome
-          percy: true
+          percy: << parameters.percy >>
           package: launchpad
           type: ct
           # debug: cypress:*,engine:socket
@@ -1320,22 +1329,30 @@ jobs:
       resource_class:
         type: string
         default: medium
+      percy:
+        type: boolean
+        default: false
     resource_class: << parameters.resource_class >>
     parallelism: 3
     steps:
       - run-new-ui-tests:
           browser: chrome
-          percy: true
+          percy: << parameters.percy >>
           package: launchpad
           type: e2e
 
   run-app-component-tests-chrome:
     <<: *defaults
+    parameters:
+      <<: *defaultsParameters
+      percy:
+        type: boolean
+        default: false
     parallelism: 7
     steps:
       - run-new-ui-tests:
           browser: chrome
-          percy: true
+          percy: << parameters.percy >>
           package: app
           type: ct
 
@@ -1346,12 +1363,15 @@ jobs:
       resource_class:
         type: string
         default: medium
+      percy:
+        type: boolean
+        default: false
     resource_class: << parameters.resource_class >>
     parallelism: 8
     steps:
       - run-new-ui-tests:
           browser: chrome
-          percy: true
+          percy: << parameters.percy >>
           package: app
           type: e2e
 
@@ -1394,19 +1414,12 @@ jobs:
           command: yarn build-for-tests
           working_directory: packages/reporter
       - run:
-          # the PERCY_TARGET_BRANCH and PERCY_TARGET_COMMIT env vars
-          # are a temporary hack to workaround percy issues with
-          # PR's not diffing the right base branch due to other problems
-          # upstream with finalizing builds. These will be removed
-          # once we implement a more permanent solution.
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-            PERCY_PARALLEL_NONCE=$PLATFORM-$CIRCLE_SHA1 \
+            PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
-            PERCY_TARGET_BRANCH="10.0-release" \
-            PERCY_TARGET_COMMIT=$(git log -n 1 origin/10.0-release --pretty="%H") \
             yarn percy exec --parallel -- -- \
             yarn cypress:run --record --parallel --group reporter
           working_directory: packages/reporter
@@ -1541,18 +1554,11 @@ jobs:
           name: Run tests
           # will use PERCY_TOKEN environment variable if available
           #
-          # the PERCY_TARGET_BRANCH and PERCY_TARGET_COMMIT env vars
-          # are a temporary hack to workaround percy issues with
-          # PR's not diffing the right base branch due to other problems
-          # upstream with finalizing builds. These will be removed
-          # once we implement a more permanent solution.
           command: |
             CYPRESS_KONFIG_ENV=production \
-            PERCY_PARALLEL_NONCE=$PLATFORM-$CIRCLE_SHA1 \
+            PERCY_PARALLEL_NONCE=$CIRCLE_SHA1 \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
-            PERCY_TARGET_BRANCH="10.0-release" \
-            PERCY_TARGET_COMMIT=$(git log -n 1 origin/10.0-release --pretty="%H") \
             yarn percy exec --parallel -- -- \
             yarn test --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json
           working_directory: npm/design-system
@@ -2140,14 +2146,7 @@ linux-workflow: &linux-workflow
         context: test-runner:poll-circle-workflow
         required_env_var: PERCY_TOKEN # skips job if not defined (external PR)
         requires:
-          - cli-visual-tests
-          - reporter-integration-tests
-          - npm-design-system
-          - run-app-component-tests-chrome
-          - run-app-integration-tests-chrome
-          - run-frontend-shared-component-tests-chrome
-          - run-launchpad-component-tests-chrome
-          - run-launchpad-integration-tests-chrome
+          - build
     - lint-types:
         requires:
           - build
@@ -2206,22 +2205,27 @@ linux-workflow: &linux-workflow
           - build
     - run-frontend-shared-component-tests-chrome:
         context: test-runner:launchpad-tests
+        percy: true
         requires:
           - build
     - run-launchpad-integration-tests-chrome:
         context: test-runner:launchpad-tests
+        percy: true
         requires:
           - build
     - run-launchpad-component-tests-chrome:
         context: test-runner:launchpad-tests
+        percy: true
         requires:
           - build
     - run-app-integration-tests-chrome:
         context: test-runner:launchpad-tests
+        percy: true
         requires:
           - build
     - run-app-component-tests-chrome:
         context: test-runner:launchpad-tests
+        percy: true
         requires:
           - build
     - reporter-integration-tests:
@@ -2303,6 +2307,14 @@ linux-workflow: &linux-workflow
           - ui-components-integration-tests
           - unit-tests
           - unit-tests-release
+          - cli-visual-tests
+          - reporter-integration-tests
+          - npm-design-system
+          - run-app-component-tests-chrome
+          - run-app-integration-tests-chrome
+          - run-frontend-shared-component-tests-chrome
+          - run-launchpad-component-tests-chrome
+          - run-launchpad-integration-tests-chrome
 
     # various testing scenarios, like building full binary
     # and testing it on a real project
