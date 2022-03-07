@@ -123,8 +123,8 @@
       :event-manager="eventManager"
     />
 
-    <!-- TODO: don't show this all the time -->
     <Alert
+      v-model="showAlert"
       status="success"
       dismissible
     >
@@ -140,7 +140,8 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
+import { computed, ref, watchEffect } from 'vue'
+import { useRoute } from 'vue-router'
 import { useAutStore, useSpecStore } from '../store'
 import { gql } from '@urql/vue'
 import type { SpecRunnerHeaderFragment } from '../generated/graphql'
@@ -204,12 +205,24 @@ mutation SpecRunnerHeader_SetBrowser($browserId: ID!, $specPath: String!) {
 
 const { t } = useI18n()
 
+const autStore = useAutStore()
+
+const specStore = useSpecStore()
+
+const route = useRoute()
+
 const props = defineProps<{
   gql: SpecRunnerHeaderFragment
   eventManager: EventManager
   getAutIframe: () => AutIframe
   width: number
 }>()
+
+const showAlert = ref(false)
+
+watchEffect(() => {
+  showAlert.value = route.params.shouldShowTroubleRenderingAlert === 'true'
+})
 
 const autIframe = props.getAutIframe()
 
@@ -223,10 +236,6 @@ const togglePlayground = () => _togglePlayground(autIframe)
 
 // Have to spread gql props since binding it to v-model causes error when testing
 const selectedBrowser = ref({ ...props.gql.currentBrowser })
-
-const autStore = useAutStore()
-
-const specStore = useSpecStore()
 
 const activeSpecPath = specStore.activeSpec?.absolute
 

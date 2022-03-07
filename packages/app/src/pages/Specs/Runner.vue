@@ -69,6 +69,8 @@ window.__showSelectorPlaygroundForTestingPurposes = () => {
 
 <route>
   {
+    name: 'SpecsRunner',
+    props: true,
     meta: {
       header: false,
       navBarExpandedAllowed: false
