@@ -15,9 +15,8 @@ export class MigrationActions {
 
   async createConfigFile () {
     const config = await this.ctx.migration.createConfigString()
-    const configFileNameAfterMigration = this.ctx.migration.configFileNameAfterMigration
 
-    this.ctx.lifecycleManager.setConfigFilePath(configFileNameAfterMigration)
+    this.ctx.lifecycleManager.setConfigFilePath(this.ctx.migration.configFileNameAfterMigration)
 
     await this.ctx.fs.writeFile(this.ctx.lifecycleManager.configFilePath, config).catch((error) => {
       throw error
