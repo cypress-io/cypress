@@ -151,7 +151,7 @@ export const handleDomainFn = (Cypress: Cypress.Cypress, cy: $Cy, specBridgeComm
       }
     } catch (err) {
       setRunnableStateToPassed()
-      specBridgeCommunicator.toPrimary('ran:domain:fn', { err }, { syncConfig: true })
+      specBridgeCommunicator.toPrimary('ran:domain:fn', { err }, { syncGlobals: true })
 
       return
     }
