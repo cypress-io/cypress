@@ -95,24 +95,16 @@ const specifyFileByRelativePath = (url, log) => {
 }
 
 const aboutBlank = (cy, win) => {
-  currentlyVisitingAboutBlank = true
-
   if (Cypress.state('isMultiDomain')) {
     return new Promise((resolve) => {
-      Cypress.specBridgeCommunicator.once('visit:about:blank:end', () => {
-        currentlyVisitingAboutBlank = false
-        resolve()
-      })
+      Cypress.specBridgeCommunicator.once('visit:about:blank:end', resolve)
 
       Cypress.specBridgeCommunicator.toPrimary('visit:about:blank')
     })
   }
 
   return new Promise((resolve) => {
-    cy.once('window:load', () => {
-      currentlyVisitingAboutBlank = false
-      resolve()
-    })
+    cy.once('window:load', resolve)
 
     return $utils.locHref('about:blank', win)
   })
@@ -503,7 +495,9 @@ export default (Commands, Cypress, cy, state, config) => {
   })
 
   Cypress.multiDomainCommunicator.on('visit:about:blank', (_, domain) => {
+    currentlyVisitingAboutBlank = true
     aboutBlank(cy, Cypress.state('window')).then(() => {
+      currentlyVisitingAboutBlank = false
       Cypress.multiDomainCommunicator.toSpecBridge(domain, 'visit:about:blank:end')
     })
   })
@@ -1220,9 +1214,12 @@ export default (Commands, Cypress, cy, state, config) => {
         // our history entries are intact
         if (!Cypress.state('hasVisitedAboutBlank')) {
           Cypress.state('hasVisitedAboutBlank', true)
+          currentlyVisitingAboutBlank = true
 
           return aboutBlank(cy, win)
           .then(() => {
+            currentlyVisitingAboutBlank = false
+
             return go()
           })
         }
