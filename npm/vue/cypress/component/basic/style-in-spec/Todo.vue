@@ -1,6 +1,13 @@
 <template>
-  <div class="todo" v-bind:class="{ done: isDone }">
-    <input type="checkbox" v-model="isDone" id="checkbox">
+  <div
+    class="todo"
+    :class="{ done: isDone }"
+  >
+    <input
+      id="checkbox"
+      v-model="isDone"
+      type="checkbox"
+    >
     <label for="checkbox">{{ title }}</label>
   </div>
 </template>
