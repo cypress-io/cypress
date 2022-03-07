@@ -6,6 +6,8 @@
   "main": "lib/index.js",
   "scripts": {
     "build-prod": "tsc --project .",
+    "build-schema": "ts-node scripts/generate-schema.ts",
+    "build-types": "ts-node scripts/generate-types.ts",
     "clean": "rm lib/options.js || echo 'ok'",
     "test": "yarn test-unit",
     "test-debug": "yarn test-unit --inspect-brk=5566",

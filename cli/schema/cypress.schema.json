@@ -106,23 +106,10 @@
           "default": "cypress/fixtures",
           "description": "Path to folder containing fixture files (Pass false to disable)"
         },
-        "integrationFolder": {
-          "type": "string",
-          "default": "cypress/integration",
-          "description": "Path to folder containing integration test files"
-        },
         "downloadsFolder": {
           "type": "string",
           "default": "cypress/downloads",
           "description": "Path to folder where files downloaded during a test are saved"
-        },
-        "componentFolder": {
-          "type": [
-            "string",
-            "boolean"
-          ],
-          "default": false,
-          "description": "Path to folder containing component test files (Pass false to disable)"
         },
         "pluginsFile": {
           "type": [
@@ -360,7 +347,8 @@
             ]
           }
         }
-      }
+      },
+      "additionalProperties": false
     }
   },
   "allOf": [
@@ -371,11 +359,13 @@
       "properties": {
         "component": {
           "description": "Any component runner specific overrides",
-          "$ref": "#/definitions/cypressConfig"
+          "$ref": "#/definitions/cypressConfig",
+          "properties": {}
         },
         "e2e": {
           "description": "Any e2e runner specific overrides",
-          "$ref": "#/definitions/cypressConfig"
+          "$ref": "#/definitions/cypressConfig",
+          "properties": {}
         }
       }
     }

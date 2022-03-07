@@ -18,7 +18,7 @@ import { getCtx } from './makeDataContext'
 
 const debug = Debug('cypress:server:config')
 
-const folders = _(configUtils.options).filter({ isFolder: true }).map('name').value()
+const folders = _(configUtils.options).filter(({ name }) => name.endsWith('Folder')).map('name').value()
 
 const convertRelativeToAbsolutePaths = (projectRoot, obj) => {
   return _.reduce(folders, (memo, folder) => {

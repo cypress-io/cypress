@@ -731,6 +731,12 @@ export const AllCypressErrors = {
 
         Please rename ${fmt.highlight(arg1.name)} to ${fmt.highlightSecondary(arg1.newName)}`
   },
+  REMOVED_CONFIG_OPTION: (arg1: {name: string, details: string}) => {
+    return errTemplate`\
+        The ${fmt.highlight(arg1.name)} configuration option you have supplied has been removed as a configuration option.
+
+        You can safely remove this option from your config.`
+  },
   CANNOT_CONNECT_BASE_URL: () => {
     return errTemplate`\
         Cypress failed to verify that your server is running.
@@ -1220,6 +1226,29 @@ export const AllCypressErrors = {
       https://on.cypress.io/migration-guide`
   },
 
+  RENAMED_CONFIG_OPTION_AND_MOVE_SCOPE: (errShape: BreakingErrResult) => {
+    const code = errPartial`
+    {
+      e2e: {
+        specPattern: '...',
+      },
+      component: {
+        specPattern: '...',
+      },
+    }`
+
+    return errTemplate`\
+        The ${fmt.highlight(errShape.name)} configuration option you have supplied has been renamed and is now invalid when set from the root of the config object in ${fmt.cypressVersion(`10.0.0`)}.
+
+        It is now configured separately as a testing type property: ${fmt.highlightSecondary(`e2e.${errShape.newName}`)} and ${fmt.highlightSecondary(`component.${errShape.newName}`)}
+
+        Please rename ${fmt.highlight(errShape.name)} to ${fmt.highlightSecondary(errShape.newName || '')} and move to the correct testing type configuration object.
+
+        ${fmt.code(code)}
+
+        https://on.cypress.io/migration-guide`
+  },
+
   CONFIG_FILE_INVALID_ROOT_CONFIG_E2E: (errShape: BreakingErrResult) => {
     const code = errPartial`
       {
@@ -1232,6 +1261,24 @@ export const AllCypressErrors = {
       The ${fmt.highlight(errShape.name)} configuration option is now invalid when set from the root of the config object in ${fmt.cypressVersion(`10.0.0`)}.
 
       It is now configured separately as a testing type property: ${fmt.highlightSecondary(`e2e.${errShape.name}`)}
+
+      ${fmt.code(code)}
+
+      https://on.cypress.io/migration-guide`
+  },
+
+  CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_E2E: (errShape: BreakingErrResult) => {
+    const code = errPartial`
+      {
+        component: {
+          ${fmt.off(errShape.name)}: '...',
+        }
+      }`
+
+    return errTemplate`\
+      The ${fmt.highlight(`e2e.${errShape.name}`)} configuration option is not valid for e2e testing.
+
+      Please remove this option or add this as an component testing type property: ${fmt.highlightSecondary(`component.${errShape.name}`)}
 
       ${fmt.code(code)}
 
