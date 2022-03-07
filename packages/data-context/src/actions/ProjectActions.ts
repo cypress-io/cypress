@@ -238,9 +238,7 @@ export class ProjectActions {
 
     this.ctx.coreData.currentTestingType = testingType
 
-    this.ctx.browser.setBrowserStatus('opening')
     await this.api.launchProject(browser, activeSpec ?? emptySpec, options)
-    this.ctx.browser.setBrowserStatus('open')
 
     return
   }
@@ -302,20 +300,6 @@ export class ProjectActions {
 
   setPromptShown (slug: string) {
     this.api.setPromptShown(slug)
-  }
-
-  async createComponentIndexHtml (template: string) {
-    const project = this.ctx.currentProject
-
-    if (!project) {
-      throw Error(`Cannot create index.html without currentProject.`)
-    }
-
-    if (this.ctx.lifecycleManager.isTestingTypeConfigured('component')) {
-      const indexHtmlPath = path.resolve(project, 'cypress/component/support/index.html')
-
-      await this.ctx.fs.outputFile(indexHtmlPath, template)
-    }
   }
 
   setSpecs (specs: FoundSpec[]) {

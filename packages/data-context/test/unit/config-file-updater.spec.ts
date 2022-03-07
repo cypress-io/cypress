@@ -1,5 +1,5 @@
-import { stripIndent } from '@packages/server/lib/util/strip_indent'
 import { expect } from 'chai'
+import { stripIndent } from 'common-tags'
 import { insertValueInJSString } from '../../src/util/config-file-updater'
 
 const errors = {

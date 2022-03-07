@@ -24,7 +24,7 @@ import { createPinia } from '../../../src/store'
 import { setActivePinia } from 'pinia'
 import type { Pinia } from 'pinia'
 import 'cypress-real-events/support'
-import installCustomPercyCommand from '@packages/ui-components/cypress/support/customPercyCommand'
+import { installCustomPercyCommand } from '@packages/ui-components/cypress/support/customPercyCommand'
 
 let pinia: Pinia
 

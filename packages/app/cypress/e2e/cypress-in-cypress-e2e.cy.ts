@@ -1,6 +1,7 @@
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
+import { snapshotAUTPanel } from './support/snapshot-aut-panel'
 
-describe('Cypress In Cypress', { viewportWidth: 1200 }, () => {
+describe('Cypress In Cypress', { viewportWidth: 1500 }, () => {
   beforeEach(() => {
     cy.scaffoldProject('cypress-in-cypress')
     cy.findBrowsers()
@@ -20,22 +21,30 @@ describe('Cypress In Cypress', { viewportWidth: 1200 }, () => {
     cy.findByTestId('playground-activator').should('be.visible')
     cy.findByTestId('select-browser').click()
 
-    cy.contains('Firefox').should('be.visible')
-    cy.findByTestId('viewport').click()
+    cy.contains('Canary').should('be.visible')
+    cy.findByTestId('select-browser').click()
+    cy.get('[data-cy="viewport"]').click()
 
-    cy.percySnapshot('browsers open')
-    cy.contains('Firefox').should('be.hidden')
+    cy.contains('Chrome 1')
+    .focus()
+    .type('{esc}')
+
+    snapshotAUTPanel('browsers open')
+
+    cy.contains('Canary').should('be.hidden')
+
+    cy.get('[data-cy="viewport"]').click()
     cy.contains('The viewport determines the width and height of your application. By default the viewport will be 1000px by 660px for End-to-end Testing unless specified by a cy.viewport command.')
     .should('be.visible')
 
-    cy.percySnapshot('viewport info open')
+    snapshotAUTPanel('viewport info open')
 
     cy.get('body').click()
 
     cy.findByTestId('playground-activator').click()
     cy.findByTestId('playground-selector').clear().type('li')
 
-    cy.percySnapshot('cy.get selector')
+    snapshotAUTPanel('cy.get selector')
 
     cy.findByTestId('playground-num-elements').contains('3 Matches')
 
@@ -44,7 +53,7 @@ describe('Cypress In Cypress', { viewportWidth: 1200 }, () => {
 
     cy.findByTestId('playground-selector').clear().type('Item 1')
 
-    cy.percySnapshot('cy.contains selector')
+    snapshotAUTPanel('cy.contains selector')
 
     cy.findByTestId('playground-num-elements').contains('1 Match')
 

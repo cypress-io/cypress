@@ -46,7 +46,7 @@ describe('lib/gui/events', () => {
           expect(this.send).to.be.calledWith('response', { id, data })
         },
         sendErrCalledWith: (err) => {
-          expect(this.send).to.be.calledWith('response', { id, __error: errors.clone(err, { html: true }) })
+          expect(this.send).to.be.calledWith('response', { id, __error: errors.cloneErr(err, { html: true }) })
         },
       })
     }
@@ -60,7 +60,8 @@ describe('lib/gui/events', () => {
     })
   })
 
-  xcontext('.start', () => {
+  // TODO:(tgriesser) originally skipped this, not sure why
+  context.skip('.start', () => {
     it('ipc attaches callback on request', () => {
       sinon.stub(events, 'handleEvent')
 

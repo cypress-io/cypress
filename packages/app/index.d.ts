@@ -1,5 +1,6 @@
 import type { Socket } from '@packages/socket/lib/browser'
 import type MobX from 'mobx'
+import type { EventManager } from './src/runner/event-manager'
 
 export {}
 
@@ -19,7 +20,7 @@ export {}
 declare global {
   interface Window {
     ws?: Socket
-
+    getEventManager: () => EventManager
     UnifiedRunner: {
       /**
        * This is the config served from the back-end.

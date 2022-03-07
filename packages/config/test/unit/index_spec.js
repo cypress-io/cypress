@@ -101,7 +101,8 @@ describe('src/index', () => {
         'baseUrl': ' ',
       }, errorFn)
 
-      expect(errorFn).to.have.been.calledWithMatch(/Expected `baseUrl`/)
+      expect(errorFn).to.have.been.calledWithMatch({ key: 'baseUrl' })
+      expect(errorFn).to.have.been.calledWithMatch({ type: 'a fully qualified URL (starting with `http://` or `https://`)' })
     })
   })
 

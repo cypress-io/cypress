@@ -782,11 +782,15 @@ describe('src/cy/commands/actions/trigger', () => {
 
     describe('position argument', () => {
       it('can trigger event on center by default', (done) => {
-        const $button = cy.$$('<button />').css({ width: 200, height: 100 }).prependTo(cy.$$('body'))
+        const height = 100
+        const $button = cy.$$('<button />').css({ width: 200, height }).prependTo(cy.$$('body'))
 
         const onMouseover = function (e) {
           expect(e.clientX).to.equal(108)
-          expect(e.clientY).to.equal(50)
+
+          // NOTE: in firefox, the element's top value can vary depending on how the AUT is scaled.
+          // So we factor the top value into our assertion in a manner similar to the coordinate calculations.
+          expect(e.clientY).to.equal((height / 2) + Math.floor(e.target.getBoundingClientRect().top))
 
           done()
         }
@@ -797,17 +801,20 @@ describe('src/cy/commands/actions/trigger', () => {
       })
 
       it('can trigger event on center', (done) => {
-        const $button = cy.$$('<button />').css({ width: 200, height: 100 }).prependTo(cy.$$('body'))
+        const height = 100
+        const $button = cy.$$('<button />').css({ width: 200, height }).prependTo(cy.$$('body'))
 
         const onMouseover = function (e) {
           expect(e.clientX).to.equal(108)
-          expect(e.clientY).to.equal(50)
+
+          // NOTE: in firefox, the element's top value varies depending on how the AUT is scaled. So we factor
+          // the top value into our assertion in a manner similar to the coordinate calculations.
+          expect(e.clientY).to.equal((height / 2) + Math.floor(e.target.getBoundingClientRect().top))
 
           done()
         }
 
         $button.on('mouseover', onMouseover)
-
         cy.get('button:first').trigger('mouseover', 'center')
       })
 
@@ -815,7 +822,9 @@ describe('src/cy/commands/actions/trigger', () => {
         const $button = cy.$$('<button />').css({ width: 200, height: 100 }).prependTo(cy.$$('body'))
         const onMouseover = function (e) {
           expect(e.clientX).to.equal(8)
-          // NOTE: firefox leaves 1px on top of element on scroll, so add top offset
+
+          // NOTE: in firefox, the element's top value varies depending on how the AUT is scaled. So we factor
+          // the top value into our assertion in a manner similar to the coordinate calculations.
           expect(e.clientY).to.equal(0 + Math.ceil(e.target.getBoundingClientRect().top))
 
           done()
@@ -831,6 +840,9 @@ describe('src/cy/commands/actions/trigger', () => {
 
         const onMouseover = function (e) {
           expect(e.clientX).to.equal(207)
+
+          // NOTE: in firefox, the element's top value varies depending on how the AUT is scaled. So we factor
+          // the top value into our assertion in a manner similar to the coordinate calculations.
           expect(e.clientY).to.equal(0 + Math.ceil(e.target.getBoundingClientRect().top))
 
           done()
@@ -842,11 +854,15 @@ describe('src/cy/commands/actions/trigger', () => {
       })
 
       it('can trigger event on bottomLeft', (done) => {
-        const $button = cy.$$('<button />').css({ width: 200, height: 100 }).prependTo(cy.$$('body'))
+        const height = 100
+        const $button = cy.$$('<button />').css({ width: 200, height }).prependTo(cy.$$('body'))
 
         const onMouseover = function (e) {
           expect(e.clientX).to.equal(8)
-          expect(e.clientY).to.equal(99)
+
+          // NOTE: in firefox, the element's top value varies depending on how the AUT is scaled. So we factor
+          // the top value into our assertion in a manner similar to the coordinate calculations.
+          expect(e.clientY).to.equal(height + (Math.floor(e.target.getBoundingClientRect().top) - 1))
 
           done()
         }
@@ -857,11 +873,15 @@ describe('src/cy/commands/actions/trigger', () => {
       })
 
       it('can trigger event on bottomRight', (done) => {
-        const $button = cy.$$('<button />').css({ width: 200, height: 100 }).prependTo(cy.$$('body'))
+        const height = 100
+        const $button = cy.$$('<button />').css({ width: 200, height }).prependTo(cy.$$('body'))
 
         const onMouseover = function (e) {
           expect(e.clientX).to.equal(207)
-          expect(e.clientY).to.equal(99)
+
+          // NOTE: in firefox, the element's top value varies depending on how the AUT is scaled. So we factor
+          // the top value into our assertion in a manner similar to the coordinate calculations.
+          expect(e.clientY).to.equal(height + (Math.floor(e.target.getBoundingClientRect().top) - 1))
 
           done()
         }
@@ -872,11 +892,15 @@ describe('src/cy/commands/actions/trigger', () => {
       })
 
       it('can pass options along with position', (done) => {
-        const $button = cy.$$('<button />').css({ width: 200, height: 100 }).prependTo(cy.$$('body'))
+        const height = 100
+        const $button = cy.$$('<button />').css({ width: 200, height }).prependTo(cy.$$('body'))
 
         const onMouseover = function (e) {
           expect(e.clientX).to.equal(207)
-          expect(e.clientY).to.equal(99)
+
+          // NOTE: in firefox, the element's top value varies depending on how the AUT is scaled. So we factor
+          // the top value into our assertion in a manner similar to the coordinate calculations.
+          expect(e.clientY).to.equal(height + (Math.floor(e.target.getBoundingClientRect().top) - 1))
 
           done()
         }

@@ -11,8 +11,8 @@ export const statusClassesObject: Record<BadgeRowStatus, string> = {
 </script>
 
 <script setup lang="ts">
-const props = defineProps<{
-  label: string | undefined,
+defineProps<{
+  label: string | undefined
   status?: BadgeRowStatus
 }>()
 

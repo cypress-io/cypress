@@ -65,7 +65,7 @@ const throwDashboardCannotProceed = ({ parallel, ciBuildId, group, err }) => {
 
 const throwIfIndeterminateCiBuildId = (ciBuildId, parallel, group) => {
   if ((!ciBuildId && !ciProvider.provider()) && (parallel || group)) {
-    errors.throw(
+    errors.throwErr(
       'INDETERMINATE_CI_BUILD_ID',
       {
         group,
@@ -78,7 +78,7 @@ const throwIfIndeterminateCiBuildId = (ciBuildId, parallel, group) => {
 
 const throwIfRecordParamsWithoutRecording = (record, ciBuildId, parallel, group, tag) => {
   if (!record && _.some([ciBuildId, parallel, group, tag])) {
-    errors.throw('RECORD_PARAMS_WITHOUT_RECORDING', {
+    errors.throwErr('RECORD_PARAMS_WITHOUT_RECORDING', {
       ciBuildId,
       tag,
       group,
@@ -91,13 +91,13 @@ const throwIfIncorrectCiBuildIdUsage = (ciBuildId, parallel, group) => {
   // we've been given an explicit ciBuildId
   // but no parallel or group flag
   if (ciBuildId && (!parallel && !group)) {
-    errors.throw('INCORRECT_CI_BUILD_ID_USAGE', { ciBuildId })
+    errors.throwErr('INCORRECT_CI_BUILD_ID_USAGE', { ciBuildId })
   }
 }
 
 const throwIfNoProjectId = (projectId, configFile) => {
   if (!projectId) {
-    errors.throw('CANNOT_RECORD_NO_PROJECT_ID', configFile)
+    errors.throwErr('CANNOT_RECORD_NO_PROJECT_ID', configFile)
   }
 }
 
@@ -245,14 +245,6 @@ const getCommitFromGitOrCi = (git) => {
   })
 }
 
-const usedTestsMessage = (limit, phrase) => {
-  if (_.isFinite(limit)) {
-    return `The limit is ${chalk.blue(limit)} ${phrase} results.`
-  }
-
-  return ''
-}
-
 const billingLink = (orgId) => {
   if (orgId) {
     return `https://on.cypress.io/dashboard/organizations/${orgId}/billing`
@@ -289,7 +281,7 @@ const createRun = Promise.method((options = {}) => {
     }
 
     // else throw
-    errors.throw('RECORD_KEY_MISSING')
+    errors.throwErr('RECORD_KEY_MISSING')
   }
 
   // go back to being a string
@@ -338,13 +330,15 @@ const createRun = Promise.method((options = {}) => {
       switch (warning.code) {
         case 'FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS':
           return errors.warning('FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS', {
-            usedTestsMessage: usedTestsMessage(warning.limit, 'private test'),
+            limit: warning.limit,
+            usedTestsMessage: 'private test',
             gracePeriodMessage: gracePeriodMessage(warning.gracePeriodEnds),
             link: billingLink(warning.orgId),
           })
         case 'FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_TESTS':
           return errors.warning('FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_TESTS', {
-            usedTestsMessage: usedTestsMessage(warning.limit, 'test'),
+            limit: warning.limit,
+            usedTestsMessage: 'test',
             gracePeriodMessage: gracePeriodMessage(warning.gracePeriodEnds),
             link: billingLink(warning.orgId),
           })
@@ -356,19 +350,22 @@ const createRun = Promise.method((options = {}) => {
         case 'FREE_PLAN_EXCEEDS_MONTHLY_TESTS_V2':
           return errors.warning('PLAN_EXCEEDS_MONTHLY_TESTS', {
             planType: 'free',
-            usedTestsMessage: usedTestsMessage(warning.limit, 'test'),
+            limit: warning.limit,
+            usedTestsMessage: 'test',
             link: billingLink(warning.orgId),
           })
         case 'PAID_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS':
           return errors.warning('PLAN_EXCEEDS_MONTHLY_TESTS', {
             planType: 'current',
-            usedTestsMessage: usedTestsMessage(warning.limit, 'private test'),
+            limit: warning.limit,
+            usedTestsMessage: 'private test',
             link: billingLink(warning.orgId),
           })
         case 'PAID_PLAN_EXCEEDS_MONTHLY_TESTS':
           return errors.warning('PLAN_EXCEEDS_MONTHLY_TESTS', {
             planType: 'current',
-            usedTestsMessage: usedTestsMessage(warning.limit, 'test'),
+            limit: warning.limit,
+            usedTestsMessage: 'test',
             link: billingLink(warning.orgId),
           })
         case 'PLAN_IN_GRACE_PERIOD_RUN_GROUPING_FEATURE_USED':
@@ -398,7 +395,7 @@ const createRun = Promise.method((options = {}) => {
           recordKey = 'undefined'
         }
 
-        return errors.throw('DASHBOARD_RECORD_KEY_NOT_VALID', recordKey, projectId)
+        return errors.throwErr('DASHBOARD_RECORD_KEY_NOT_VALID', recordKey, projectId)
       case 402: {
         const { code, payload } = err.error
 
@@ -407,25 +404,27 @@ const createRun = Promise.method((options = {}) => {
 
         switch (code) {
           case 'FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS':
-            return errors.throw('FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS', {
-              usedTestsMessage: usedTestsMessage(limit, 'private test'),
+            return errors.throwErr('FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS', {
+              limit,
+              usedTestsMessage: 'private test',
               link: billingLink(orgId),
             })
           case 'FREE_PLAN_EXCEEDS_MONTHLY_TESTS':
-            return errors.throw('FREE_PLAN_EXCEEDS_MONTHLY_TESTS', {
-              usedTestsMessage: usedTestsMessage(limit, 'test'),
+            return errors.throwErr('FREE_PLAN_EXCEEDS_MONTHLY_TESTS', {
+              limit,
+              usedTestsMessage: 'test',
               link: billingLink(orgId),
             })
           case 'PARALLEL_FEATURE_NOT_AVAILABLE_IN_PLAN':
-            return errors.throw('PARALLEL_FEATURE_NOT_AVAILABLE_IN_PLAN', {
+            return errors.throwErr('PARALLEL_FEATURE_NOT_AVAILABLE_IN_PLAN', {
               link: billingLink(orgId),
             })
           case 'RUN_GROUPING_FEATURE_NOT_AVAILABLE_IN_PLAN':
-            return errors.throw('RUN_GROUPING_FEATURE_NOT_AVAILABLE_IN_PLAN', {
+            return errors.throwErr('RUN_GROUPING_FEATURE_NOT_AVAILABLE_IN_PLAN', {
               link: billingLink(orgId),
             })
           default:
-            return errors.throw('DASHBOARD_UNKNOWN_INVALID_REQUEST', {
+            return errors.throwErr('DASHBOARD_UNKNOWN_INVALID_REQUEST', {
               response: err,
               flags: {
                 group,
@@ -437,9 +436,9 @@ const createRun = Promise.method((options = {}) => {
         }
       }
       case 404:
-        return errors.throw('DASHBOARD_PROJECT_NOT_FOUND', projectId, path.basename(options.configFile))
+        return errors.throwErr('DASHBOARD_PROJECT_NOT_FOUND', projectId, path.basename(options.configFile))
       case 412:
-        return errors.throw('DASHBOARD_INVALID_RUN_REQUEST', err.error)
+        return errors.throwErr('DASHBOARD_INVALID_RUN_REQUEST', err.error)
       case 422: {
         const { code, payload } = err.error
 
@@ -447,7 +446,7 @@ const createRun = Promise.method((options = {}) => {
 
         switch (code) {
           case 'RUN_GROUP_NAME_NOT_UNIQUE':
-            return errors.throw('DASHBOARD_RUN_GROUP_NAME_NOT_UNIQUE', {
+            return errors.throwErr('DASHBOARD_RUN_GROUP_NAME_NOT_UNIQUE', {
               group,
               runUrl,
               ciBuildId,
@@ -455,7 +454,7 @@ const createRun = Promise.method((options = {}) => {
           case 'PARALLEL_GROUP_PARAMS_MISMATCH': {
             const { browserName, browserVersion, osName, osVersion } = platform
 
-            return errors.throw('DASHBOARD_PARALLEL_GROUP_PARAMS_MISMATCH', {
+            return errors.throwErr('DASHBOARD_PARALLEL_GROUP_PARAMS_MISMATCH', {
               group,
               runUrl,
               ciBuildId,
@@ -469,21 +468,21 @@ const createRun = Promise.method((options = {}) => {
             })
           }
           case 'PARALLEL_DISALLOWED':
-            return errors.throw('DASHBOARD_PARALLEL_DISALLOWED', {
+            return errors.throwErr('DASHBOARD_PARALLEL_DISALLOWED', {
               tags,
               group,
               runUrl,
               ciBuildId,
             })
           case 'PARALLEL_REQUIRED':
-            return errors.throw('DASHBOARD_PARALLEL_REQUIRED', {
+            return errors.throwErr('DASHBOARD_PARALLEL_REQUIRED', {
               tags,
               group,
               runUrl,
               ciBuildId,
             })
           case 'ALREADY_COMPLETE':
-            return errors.throw('DASHBOARD_ALREADY_COMPLETE', {
+            return errors.throwErr('DASHBOARD_ALREADY_COMPLETE', {
               runUrl,
               tags,
               group,
@@ -491,7 +490,7 @@ const createRun = Promise.method((options = {}) => {
               ciBuildId,
             })
           case 'STALE_RUN':
-            return errors.throw('DASHBOARD_STALE_RUN', {
+            return errors.throwErr('DASHBOARD_STALE_RUN', {
               runUrl,
               tags,
               group,
@@ -499,7 +498,7 @@ const createRun = Promise.method((options = {}) => {
               ciBuildId,
             })
           default:
-            return errors.throw('DASHBOARD_UNKNOWN_INVALID_REQUEST', {
+            return errors.throwErr('DASHBOARD_UNKNOWN_INVALID_REQUEST', {
               response: err,
               flags: {
                 tags,

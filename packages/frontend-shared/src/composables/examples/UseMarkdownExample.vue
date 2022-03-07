@@ -11,7 +11,7 @@ import { useMarkdown } from '../useMarkdown'
 import { ref } from 'vue'
 
 const props = defineProps<{
-  text: string,
+  text: string
   options: UseMarkdownOptions
 }>()
 

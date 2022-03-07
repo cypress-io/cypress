@@ -1,15 +1,16 @@
-import { configure } from '@testing-library/cypress'
 import '@testing-library/cypress/add-commands'
+import { browsers } from '@packages/types/src/browser'
+import { installCustomPercyCommand } from '@packages/ui-components/cypress/support/customPercyCommand'
+import { configure } from '@testing-library/cypress'
 import i18n from '../../../src/locales/en-US.json'
-import type { DataContext } from '@packages/data-context'
+import { addNetworkCommands } from '../../support/onlineNetwork'
 import { e2eProjectDirs } from './e2eProjectDirs'
+
+import type { DataContext } from '@packages/data-context'
 import type { AuthenticatedUserShape } from '@packages/data-context/src/data'
 import type { DocumentNode, ExecutionResult } from 'graphql'
 import type { Browser, FoundBrowser, OpenModeOptions } from '@packages/types'
-import { browsers } from '@packages/types/src/browser'
 import type { E2ETaskMap } from '../e2ePluginSetup'
-import installCustomPercyCommand from '@packages/ui-components/cypress/support/customPercyCommand'
-import { addNetworkCommands } from '../../support/onlineNetwork'
 import type { SinonStub } from 'sinon'
 import type sinon from 'sinon'
 import type pDefer from 'p-defer'
@@ -180,9 +181,9 @@ beforeEach(() => {
   taskInternal('__internal__beforeEach', undefined)
 })
 
-function scaffoldProject (projectName: ProjectFixture) {
+function scaffoldProject (projectName: ProjectFixture, options: { timeout?: number} = {}) {
   return logInternal({ name: 'scaffoldProject', message: projectName }, () => {
-    return taskInternal('__internal_scaffoldProject', projectName)
+    return taskInternal('__internal_scaffoldProject', projectName, options)
   })
 }
 
@@ -222,10 +223,10 @@ function openProject (projectName: ProjectFixture, argv: string[] = []) {
 }
 
 function startAppServer (mode: 'component' | 'e2e' = 'e2e') {
-  const browser = Cypress.browser.name
+  const { name, family } = Cypress.browser
 
-  if (browser !== 'chrome') {
-    throw new Error(`Cypress in cypress does not support running in the ${browser} browser`)
+  if (family !== 'chromium' || name === 'electron') {
+    throw new Error(`Cypress in cypress does not support running in the ${name} browser`)
   }
 
   return logInternal('startAppServer', (log) => {
@@ -344,7 +345,7 @@ function withCtx<T extends Partial<WithCtxOptions>, R> (fn: (ctx: DataContext, o
   const { log, timeout, ...rest } = opts
 
   const _log = log === false ? { end () {}, set (key: string, val: any) {} } : Cypress.log({
-    name: opts.retry ? 'withCtx' : 'withRetryableCtx',
+    name: opts.retry ? 'withRetryableCtx' : 'withCtx',
     message: '(view in console)',
     consoleProps () {
       return {
@@ -435,10 +436,10 @@ type Resolved<V> = V extends Promise<infer U> ? U : V
  * Run an internal task, as defined by e2ePluginSetup. Automatically tracks the types
  *
  */
-function taskInternal<T extends keyof E2ETaskMap> (name: T, arg: Parameters<E2ETaskMap[T]>[0]) {
+function taskInternal<T extends keyof E2ETaskMap> (name: T, arg: Parameters<E2ETaskMap[T]>[0], options: { timeout?: number } = {}): Cypress.Chainable<Resolved<ReturnType<E2ETaskMap[T]>>> {
   const isDebugging = Boolean(Cypress.env('e2e_isDebugging'))
 
-  return cy.task<Resolved<ReturnType<E2ETaskMap[T]>>>(name, arg, { log: isDebugging, timeout: isDebugging ? NO_TIMEOUT : TEN_SECONDS })
+  return cy.task<Resolved<ReturnType<E2ETaskMap[T]>>>(name, arg, { log: isDebugging, timeout: options.timeout ?? (isDebugging ? NO_TIMEOUT : TEN_SECONDS) })
 }
 
 function logInternal<T> (name: string | Partial<Cypress.LogConfig>, cb: (log: Cypress.Log) => Cypress.Chainable<T>, opts: Partial<Cypress.Loggable> = {}): Cypress.Chainable<T> {
@@ -524,4 +525,5 @@ Cypress.Commands.add('tabUntil', tabUntil)
 Cypress.Commands.add('validateExternalLink', { prevSubject: ['optional', 'element'] }, validateExternalLink)
 
 installCustomPercyCommand()
+
 addNetworkCommands()

@@ -8,12 +8,18 @@ import LogoReact from '../images/logos/react.svg'
 import type { FrontendFrameworkEnum, SupportedBundlers } from '../generated/graphql'
 
 export const FrameworkBundlerLogos: Record<FrontendFrameworkEnum | SupportedBundlers, string> = {
-  webpack: LogoWebpack,
+  webpack4: LogoWebpack,
+  webpack5: LogoWebpack,
   vite: LogoVite,
-  vue: LogoVue,
-  vuecli: LogoVue,
+  vue2: LogoVue,
+  vue3: LogoVue,
+  vuecli4vue2: LogoVue,
+  vuecli4vue3: LogoVue,
+  vuecli5vue2: LogoVue,
+  vuecli5vue3: LogoVue,
   nextjs: LogoNext,
   nuxtjs: LogoNuxt,
   react: LogoReact,
-  cra: LogoReact,
+  crav4: LogoReact,
+  crav5: LogoReact,
 }

@@ -1,5 +1,4 @@
 // See: ./errorScenarios.md for details about error messages and stack traces
-// @ts-nocheck
 import _ from 'lodash'
 import path from 'path'
 import errorStackParser from 'error-stack-parser'
@@ -7,7 +6,9 @@ import { codeFrameColumns } from '@babel/code-frame'
 
 import $utils from './utils'
 import $sourceMapUtils from './source_map_utils'
-import { getStackLines, replacedStack, stackWithoutMessage, splitStack, unsplitStack } from '@packages/server/lib/util/stack_utils'
+
+// Intentionally deep-importing from @packages/errors so as to not bundle the entire @packages/errors in the client unnecessarily
+import { getStackLines, replacedStack, stackWithoutMessage, splitStack, unsplitStack } from '@packages/errors/src/stackUtils'
 
 const whitespaceRegex = /^(\s*)*/
 const stackLineRegex = /^\s*(at )?.*@?\(?.*\:\d+\:\d+\)?$/
@@ -52,7 +53,7 @@ const stackWithLinesRemoved = (stack, cb) => {
 const stackWithLinesDroppedFromMarker = (stack, marker, includeLast = false) => {
   return stackWithLinesRemoved(stack, (lines) => {
     // drop lines above the marker
-    const withAboveMarkerRemoved = _.dropWhile(lines, (line) => {
+    const withAboveMarkerRemoved = _.dropWhile(lines, (line: any) => {
       return !_.includes(line, marker)
     })
 
@@ -96,6 +97,8 @@ const stackWithUserInvocationStackSpliced = (err, userInvocationStack): StackAnd
   }
 }
 
+type InvocationDetails = LineDetail | {}
+
 const getInvocationDetails = (specWindow, config) => {
   if (specWindow.Error) {
     let stack = (new specWindow.Error()).stack
@@ -110,12 +113,14 @@ const getInvocationDetails = (specWindow, config) => {
       stack = stackWithLinesDroppedFromMarker(stack, '__cypress/tests', true)
     }
 
-    const details = getSourceDetailsForFirstLine(stack, config('projectRoot')) || {}
+    const details: InvocationDetails = getSourceDetailsForFirstLine(stack, config('projectRoot')) || {};
 
-    details.stack = stack
+    (details as any).stack = stack
 
-    return details
+    return details as (InvocationDetails & { stack: any })
   }
+
+  return
 }
 
 const getLanguageFromExtension = (filePath) => {
@@ -144,13 +149,21 @@ const captureUserInvocationStack = (ErrorConstructor, userInvocationStack?) => {
   if (!userInvocationStack) {
     const newErr = new ErrorConstructor('userInvocationStack')
 
+    userInvocationStack = newErr.stack
+
     // if browser natively supports Error.captureStackTrace, use it (chrome) (must be bound)
     // otherwise use our polyfill on top.Error
     const captureStackTrace = ErrorConstructor.captureStackTrace ? ErrorConstructor.captureStackTrace.bind(ErrorConstructor) : Error.captureStackTrace
 
     captureStackTrace(newErr, captureUserInvocationStack)
 
-    userInvocationStack = newErr.stack
+    // On Chrome 99+, captureStackTrace strips away the whole stack,
+    // leaving nothing beyond the error message. If we get back a single line
+    // (just the error message with no stack trace), then use the original value
+    // instead of the trimmed one.
+    if (newErr.stack.match('\n')) {
+      userInvocationStack = newErr.stack
+    }
   }
 
   userInvocationStack = normalizedUserInvocationStack(userInvocationStack)
@@ -232,7 +245,7 @@ const parseLine = (line) => {
 
   if (!isStackLine) return
 
-  const parsed = errorStackParser.parse({ stack: line })[0]
+  const parsed = errorStackParser.parse({ stack: line } as any)[0]
 
   if (!parsed) return
 
@@ -262,7 +275,23 @@ const stripCustomProtocol = (filePath) => {
   return filePath.replace(customProtocolRegex, '')
 }
 
-const getSourceDetailsForLine = (projectRoot, line) => {
+type LineDetail =
+{
+  message: any
+  whitespace: any
+} |
+{
+  function: any
+  fileUrl: any
+  originalFile: any
+  relativeFile: any
+  absoluteFile: any
+  line: any
+  column: number
+  whitespace: any
+}
+
+const getSourceDetailsForLine = (projectRoot, line): LineDetail => {
   const whitespace = getWhitespace(line)
   const generatedDetails = parseLine(line)
 
@@ -317,7 +346,7 @@ const reconstructStack = (parsedStack) => {
   }).join('\n')
 }
 
-const getSourceStack = (stack, projectRoot) => {
+const getSourceStack = (stack, projectRoot?) => {
   if (!_.isString(stack)) return {}
 
   const getSourceDetailsWithStackUtil = _.partial(getSourceDetailsForLine, projectRoot)

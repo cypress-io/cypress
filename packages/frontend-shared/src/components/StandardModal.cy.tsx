@@ -47,27 +47,6 @@ describe('<StandardModal />', { viewportWidth: 800, viewportHeight: 400 }, () =>
       cy.percySnapshot()
     })
 
-    it('click-outside can be turned off', () => {
-      const updateSpy = cy.spy().as('updateSpy')
-      const props = {
-        'onUpdate:modelValue': (value) => updateSpy(value),
-      }
-
-      cy.mount(<StandardModal
-        class="w-400px"
-        modelValue={true}
-        title={title}
-        clickOutside={false}
-        {...props}
-      >{body}
-      </StandardModal>)
-
-      cy.contains(title).should('be.visible')
-      cy.get('body').click()
-
-      cy.get('@updateSpy').should('not.have.been.called')
-    })
-
     it('optional classes pass through to the modal root element', () => {
       const testClass = 'text-pink-400'
 
@@ -75,7 +54,6 @@ describe('<StandardModal />', { viewportWidth: 800, viewportHeight: 400 }, () =>
         class={`${testClass } w-400px`}
         modelValue={true}
         title={title}
-        clickOutside={false}
       >{body}
       </StandardModal>)
 
@@ -135,7 +113,7 @@ describe('<StandardModal />', { viewportWidth: 800, viewportHeight: 400 }, () =>
       cy.get('@updateSpy').should('have.been.calledOnceWith', false)
     })
 
-    it('closes with click-outside by default', () => {
+    it('closes with click-outside', () => {
       cy.get('body').click()
       cy.get('@updateSpy').should('have.been.calledOnceWith', false)
     })
@@ -145,7 +123,7 @@ describe('<StandardModal />', { viewportWidth: 800, viewportHeight: 400 }, () =>
       cy.get('@updateSpy').should('not.have.been.called')
     })
 
-    it('doesn\'t close with click inside', () => {
+    it(`doesn't close with click inside`, () => {
       cy.contains(title).click()
       cy.get('@updateSpy').should('not.have.been.called')
     })

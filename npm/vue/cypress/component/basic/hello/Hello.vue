@@ -1,7 +1,15 @@
 <template>
   <div>
-    <input v-model="username" data-cy="username" />
-    <div v-if="error" class="error">{{ error }}</div>
+    <input
+      v-model="username"
+      data-cy="username"
+    >
+    <div
+      v-if="error"
+      class="error"
+    >
+      {{ error }}
+    </div>
   </div>
 </template>
 

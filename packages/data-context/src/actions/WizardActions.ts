@@ -1,8 +1,10 @@
 import type { CodeLanguageEnum, NexusGenEnums, NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
-import { Bundler, CodeLanguage, CODE_LANGUAGES, FrontendFramework, FRONTEND_FRAMEWORKS } from '@packages/types'
+import { CodeLanguage, CODE_LANGUAGES } from '@packages/types'
+import { Bundler, FrontendFramework, FRONTEND_FRAMEWORKS, detect } from '@packages/scaffold-config'
 import assert from 'assert'
 import dedent from 'dedent'
 import path from 'path'
+import fs from 'fs-extra'
 import Debug from 'debug'
 
 const debug = Debug('cypress:data-context:wizard-actions')
@@ -12,7 +14,6 @@ import type { DataContext } from '..'
 interface WizardGetCodeComponent {
   chosenLanguage: CodeLanguage
   chosenFramework: FrontendFramework
-  chosenBundler: Bundler
 }
 
 export class WizardActions {
@@ -28,28 +29,33 @@ export class WizardActions {
     return this.ctx.wizardData
   }
 
-  setFramework (framework: NexusGenEnums['FrontendFrameworkEnum'] | null) {
-    const prevFramework = this.ctx.coreData.wizard.chosenFramework || ''
+  setFramework (framework: typeof FRONTEND_FRAMEWORKS[number]['type'] | null): void {
+    const next = FRONTEND_FRAMEWORKS.find((x) => x.type === framework)
 
     this.ctx.coreData.wizard.chosenFramework = framework
 
-    if (framework !== 'react' && framework !== 'vue') {
-      return this.setBundler('webpack')
+    if (next?.supportedBundlers?.length === 1) {
+      this.setBundler(next?.supportedBundlers?.[0].type)
+
+      return
     }
 
     const { chosenBundler } = this.ctx.coreData.wizard
 
     // if the previous bundler was incompatible with the
-    // new framework, we need to reset it
-    if ((chosenBundler && !this.ctx.wizard.chosenFramework?.supportedBundlers.includes(chosenBundler))
-    || !['react', 'vue'].includes(prevFramework)) {
-      return this.setBundler(null)
-    }
+    // new framework that was selected, we need to reset it
+    const doesNotSupportChosenBundler = (chosenBundler && !new Set(
+      this.ctx.wizard.chosenFramework?.supportedBundlers.map((x) => x.type) || [],
+    ).has(chosenBundler)) ?? false
 
-    return
+    const prevFramework = this.ctx.coreData.wizard.chosenFramework || ''
+
+    if (doesNotSupportChosenBundler || !['react', 'vue'].includes(prevFramework)) {
+      this.setBundler(null)
+    }
   }
 
-  setBundler (bundler: NexusGenEnums['SupportedBundlers'] | null) {
+  setBundler (bundler: Bundler | null) {
     this.ctx.coreData.wizard.chosenBundler = bundler
 
     return this.data
@@ -83,76 +89,40 @@ export class WizardActions {
   }
 
   async initialize () {
-    if (this.ctx.currentProject) {
-      this.data.detectedFramework = null
-      this.data.detectedBundler = null
-      this.data.detectedLanguage = null
-
-      await this.detectLanguage()
-      debug('detectedLanguage %s', this.data.detectedLanguage)
-      this.data.chosenLanguage = this.data.detectedLanguage || 'js'
-
-      let hasPackageJson = true
-
-      try {
-        await this.ctx.fs.access(path.join(this.ctx.currentProject, 'package.json'), this.ctx.fs.constants.R_OK)
-      } catch (e) {
-        debug('Could not read or find package.json: %O', e)
-        hasPackageJson = false
-      }
-      const packageJson: {
-        dependencies?: { [key: string]: string }
-        devDependencies?: { [key: string]: string }
-      } = hasPackageJson ? await this.ctx.fs.readJson(path.join(this.ctx.currentProject, 'package.json')) : {}
-
-      debug('packageJson %O', packageJson)
-      const dependencies = [
-        ...Object.keys(packageJson.dependencies || {}),
-        ...Object.keys(packageJson.devDependencies || {}),
-      ]
-
-      this.detectFramework(dependencies)
-      debug('detectedFramework %s', this.data.detectedFramework)
-      this.detectBundler(dependencies)
-      debug('detectedBundler %s', this.data.detectedBundler)
-
-      this.data.chosenFramework = this.data.detectedFramework || null
-      this.data.chosenBundler = this.data.detectedBundler || null
-    }
-  }
-
-  private detectFramework (dependencies: string[]) {
-    // Detect full featured frameworks
-    if (dependencies.includes('next')) {
-      this.ctx.wizardData.detectedFramework = 'nextjs'
-    } else if (dependencies.includes('react-scripts')) {
-      this.ctx.wizardData.detectedFramework = 'cra'
-    } else if (dependencies.includes('nuxt')) {
-      this.ctx.wizardData.detectedFramework = 'nuxtjs'
-    } else if (dependencies.includes('@vue/cli-service')) {
-      this.ctx.wizardData.detectedFramework = 'vuecli'
-    } else if (dependencies.includes('react')) {
-      this.ctx.wizardData.detectedFramework = 'react'
-    } else if (dependencies.includes('vue')) {
-      this.ctx.wizardData.detectedFramework = 'vue'
-    }
-  }
-
-  private detectBundler (dependencies: string[]) {
-    const detectedFrameworkObject = FRONTEND_FRAMEWORKS.find((f) => f.type === this.ctx.wizardData.detectedFramework)
-
-    if (detectedFrameworkObject && detectedFrameworkObject.supportedBundlers.length === 1) {
-      this.ctx.wizardData.detectedBundler = detectedFrameworkObject.supportedBundlers[0] ?? null
-
+    if (!this.ctx.currentProject) {
       return
     }
 
-    if (dependencies.includes('webpack')) {
-      this.ctx.wizardData.detectedBundler = 'webpack'
-    }
+    this.ctx.update((coreData) => {
+      coreData.wizard.detectedFramework = null
+      coreData.wizard.detectedBundler = null
+      coreData.wizard.detectedLanguage = null
+    })
 
-    if (dependencies.includes('vite')) {
-      this.ctx.wizardData.detectedBundler = 'vite'
+    await this.detectLanguage()
+    debug('detectedLanguage %s', this.data.detectedLanguage)
+    this.data.chosenLanguage = this.data.detectedLanguage || 'js'
+
+    try {
+      const detected = detect(await fs.readJson(path.join(this.ctx.currentProject, 'package.json')))
+
+      debug('detected %o', detected)
+
+      if (detected) {
+        this.ctx.update((coreData) => {
+          coreData.wizard.detectedFramework = detected.framework?.type ?? null
+          coreData.wizard.chosenFramework = detected.framework?.type ?? null
+
+          if (!detected.framework?.supportedBundlers[0]) {
+            return
+          }
+
+          coreData.wizard.detectedBundler = detected.bundler || detected.framework.supportedBundlers[0].type
+          coreData.wizard.chosenBundler = detected.bundler || detected.framework.supportedBundlers[0].type
+        })
+      }
+    } catch {
+      // Could not detect anything - no problem, no need to do anything.
     }
   }
 
@@ -201,6 +171,7 @@ export class WizardActions {
     const scaffolded = await Promise.all([
       this.scaffoldConfig('e2e'),
       this.scaffoldSupport('e2e', this.ctx.coreData.wizard.chosenLanguage),
+      this.scaffoldSupport('commands', this.ctx.coreData.wizard.chosenLanguage),
       this.scaffoldFixtures(),
     ])
 
@@ -217,27 +188,28 @@ export class WizardActions {
       this.scaffoldConfig('component'),
       this.scaffoldFixtures(),
       this.scaffoldSupport('component', chosenLanguage.type),
+      this.scaffoldSupport('commands', chosenLanguage.type),
       this.getComponentIndexHtml({
-        chosenBundler,
         chosenFramework,
         chosenLanguage,
       }),
     ])
   }
 
-  private async scaffoldSupport (fileName: 'e2e' | 'component', language: CodeLanguageEnum): Promise<NexusGenObjects['ScaffoldedFile']> {
+  private async scaffoldSupport (fileName: 'e2e' | 'component' | 'commands', language: CodeLanguageEnum): Promise<NexusGenObjects['ScaffoldedFile']> {
     const supportFile = path.join(this.projectRoot, `cypress/support/${fileName}.${language}`)
     const supportDir = path.dirname(supportFile)
 
     // @ts-ignore
     await this.ctx.fs.mkdir(supportDir, { recursive: true })
-    await this.scaffoldFile(supportFile, dedent`
-      // TODO: source the example support file
-    `, 'Scaffold default support file')
+
+    const fileContent = fileName === 'commands' ? this.commandsFileBody(language) : this.supportFileBody(fileName, language)
+
+    await this.scaffoldFile(supportFile, fileContent, 'Scaffold default support file')
 
     return {
       status: 'valid',
-      description: 'Added a support file, for extending the Cypress api',
+      description: `Added a ${fileName === 'commands' ? 'commands' : 'support'} file, for extending the Cypress api`,
       file: {
         absolute: supportFile,
       },
@@ -252,11 +224,7 @@ export class WizardActions {
 
       assert(chosenFramework && chosenLanguage && chosenBundler)
 
-      return this.wizardGetConfigCodeComponent({
-        chosenLanguage,
-        chosenFramework,
-        chosenBundler,
-      })
+      return chosenFramework.config[chosenLanguage.type](chosenBundler.type)
     }
 
     return this.wizardGetConfigCodeE2E(language)
@@ -315,28 +283,6 @@ export class WizardActions {
     return codeBlocks.join('\n')
   }
 
-  private wizardGetConfigCodeComponent (opts: WizardGetCodeComponent): string {
-    const codeBlocks: string[] = []
-    const { chosenBundler, chosenFramework, chosenLanguage } = opts
-
-    const requirePath = chosenFramework.defaultPackagePath ?? chosenBundler.package
-
-    codeBlocks.push(chosenLanguage.type === 'ts' ? `import { defineConfig } from 'cypress'` : `const { defineConfig } = require('cypress')`)
-    codeBlocks.push(chosenLanguage.type === 'ts' ? `import { devServer } from '${requirePath}'` : `const { devServer } = require('${requirePath}')`)
-    codeBlocks.push('')
-    codeBlocks.push(chosenLanguage.type === 'ts' ? `export default defineConfig({` : `module.exports = defineConfig({`)
-    codeBlocks.push(`  // Component testing, ${chosenLanguage.name}, ${chosenFramework.name}, ${chosenBundler.name}`)
-
-    codeBlocks.push(`  ${COMPONENT_SCAFFOLD_BODY({
-      lang: chosenLanguage.type,
-      configOptionsString: '{}',
-    }).replace(/\n/g, '\n  ')}`)
-
-    codeBlocks.push(`})\n`)
-
-    return codeBlocks.join('\n')
-  }
-
   private async getComponentIndexHtml (opts: WizardGetCodeComponent): Promise<NexusGenObjects['ScaffoldedFile']> {
     const [storybookInfo] = await Promise.all([
       this.ctx.storybook.loadStorybookInfo(),
@@ -367,8 +313,10 @@ export class WizardActions {
       bodyModifier,
     })
 
+    const componentIndexHtmlPath = path.join(this.projectRoot, 'cypress', 'support', 'component-index.html')
+
     return this.scaffoldFile(
-      path.join(this.projectRoot, 'cypress', 'component', 'index.html'),
+      componentIndexHtmlPath,
       template,
       'The HTML used as the wrapper for all component tests',
     )
@@ -432,7 +380,78 @@ export class WizardActions {
   private ensureDir (type: 'component' | 'e2e' | 'fixtures') {
     return this.ctx.fs.ensureDir(path.join(this.projectRoot, 'cypress', type))
   }
+
+  private supportFileBody (fileName: 'e2e' | 'component', language: CodeLanguageEnum) {
+    return dedent`
+      // ***********************************************************
+      // This example support/${fileName}.${language} is processed and
+      // loaded automatically before your test files.
+      //
+      // This is a great place to put global configuration and
+      // behavior that modifies Cypress.
+      //
+      // You can change the location of this file or turn off
+      // automatically serving support files with the
+      // 'supportFile' configuration option.
+      //
+      // You can read more here:
+      // https://on.cypress.io/configuration
+      // ***********************************************************
+  
+      // Import commands.js using ES2015 syntax:
+      import './commands'
+  
+      // Alternatively you can use CommonJS syntax:
+      // require('./commands')
+    `
+  }
+
+  private commandsFileBody (language: CodeLanguageEnum) {
+    return dedent`
+      ${language === 'ts' ? '/// <reference types="cypress" />' : ''}
+      // ***********************************************
+      // This example commands.${language} shows you how to
+      // create various custom commands and overwrite
+      // existing commands.
+      //
+      // For more comprehensive examples of custom
+      // commands please read more here:
+      // https://on.cypress.io/custom-commands
+      // ***********************************************
+      //
+      //
+      // -- This is a parent command --
+      // Cypress.Commands.add('login', (email, password) => { ... })
+      //
+      //
+      // -- This is a child command --
+      // Cypress.Commands.add('drag', { prevSubject: 'element'}, (subject, options) => { ... })
+      //
+      //
+      // -- This is a dual command --
+      // Cypress.Commands.add('dismiss', { prevSubject: 'optional'}, (subject, options) => { ... })
+      //
+      //
+      // -- This will overwrite an existing command --
+      // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
+      ${language === 'ts' ? COMMAND_TYPES : ''}
+    `
+  }
 }
+
+const COMMAND_TYPES = dedent`
+//
+// declare global {
+//   namespace Cypress {
+//     interface Chainable {
+//       login(email: string, password: string): Chainable<void>
+//       drag(subject: string, options?: Partial<TypeOptions>): Chainable<Element>
+//       dismiss(subject: string, options?: Partial<TypeOptions>): Chainable<Element>
+//       visit(originalFn: CommandOriginalFn, url: string, options: Partial<VisitOptions>): Chainable<Element>
+//     }
+//   }
+// }
+`
 
 const E2E_SCAFFOLD_BODY = dedent`
   e2e: {
@@ -441,21 +460,6 @@ const E2E_SCAFFOLD_BODY = dedent`
     },
   },
 `
-
-interface ComponentScaffoldOpts {
-  lang: CodeLanguageEnum
-  configOptionsString: string
-  specPattern?: string
-}
-
-const COMPONENT_SCAFFOLD_BODY = (opts: ComponentScaffoldOpts) => {
-  return dedent`
-    component: {
-      devServer,
-      devServerConfig: ${opts.configOptionsString}
-    },
-  `
-}
 
 const FIXTURE_DATA = {
   'name': 'Using fixtures to represent data',

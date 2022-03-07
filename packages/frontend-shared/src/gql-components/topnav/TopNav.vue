@@ -78,7 +78,7 @@
 
     <TopNavListItem class="text-center p-16px text-indigo-600">
       <ExternalLink
-        :href="releasesUrl"
+        href="https://on.cypress.io/changelog"
         class="border-rounded border-gray-100 border-1 w-full py-8px text-12px block whitespace-nowrap hover:border-gray-200 hover:no-underline"
       >
         {{ t('topNav.seeAllReleases') }}
@@ -194,12 +194,13 @@
 import TopNavListItem from './TopNavListItem.vue'
 import TopNavList from './TopNavList.vue'
 import PromptContent from './PromptContent.vue'
-import UnsupportedBrowserTooltip from './UnsupportedBrowserTooltip.vue'
 import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
 import { gql, useMutation } from '@urql/vue'
-import { TopNavFragment, TopNav_SetPromptShownDocument } from '../../generated/graphql'
+import { TopNav_SetPromptShownDocument } from '../../generated/graphql'
+import type { TopNavFragment } from '../../generated/graphql'
 import { useI18n } from '@cy/i18n'
-import { computed, ref, Ref, ComponentPublicInstance, watch, watchEffect } from 'vue'
+import { computed, ref, watch, watchEffect } from 'vue'
+import type { ComponentPublicInstance } from 'vue'
 import { onClickOutside, onKeyStroke, useTimeAgo } from '@vueuse/core'
 import type { DocsMenuVariant } from './DocsMenuContent.vue'
 import DocsMenuContent from './DocsMenuContent.vue'
@@ -250,13 +251,13 @@ mutation TopNav_SetPromptShown($slug: String!) {
 const setPromptShown = useMutation(TopNav_SetPromptShownDocument)
 
 const props = defineProps<{
-  gql: TopNavFragment,
-  showBrowsers?: boolean,
+  gql: TopNavFragment
+  showBrowsers?: boolean
   forceOpenDocs?: boolean
 }>()
 
 const emit = defineEmits<{
-  (e: 'clearForceOpen'): void,
+  (e: 'clearForceOpen'): void
 }>()
 const promptsEl = ref<ComponentPublicInstance | null>(null)
 

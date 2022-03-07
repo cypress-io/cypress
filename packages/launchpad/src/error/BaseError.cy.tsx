@@ -1,17 +1,17 @@
-import { defaultMessages } from '@cy/i18n'
+import { codeFrameColumns } from '@babel/code-frame'
 import BaseError from './BaseError.vue'
 import Button from '@cy/components/Button.vue'
-import { BaseError_DataFragmentDoc } from '../generated/graphql-test'
+import { BaseErrorFragmentDoc } from '../generated/graphql-test'
+import dedent from 'dedent'
 
 // Selectors
 const headerSelector = '[data-testid=error-header]'
 const messageSelector = '[data-testid=error-message]'
 const retryButtonSelector = '[data-testid=error-retry-button]'
-const docsButtonSelector = '[data-testid=error-read-the-docs-button]'
 const customFooterSelector = '[data-testid=custom-error-footer]'
 
 // Constants
-const messages = defaultMessages.launchpadErrors.generic
+const messages = cy.i18n.launchpadErrors.generic
 const customHeaderMessage = 'Well, this was unexpected!'
 const customMessage = `Don't worry, just click the "It's fixed now" button to try again.`
 const customFooterText = `Yikes, try again!`
@@ -23,30 +23,43 @@ describe('<BaseError />', () => {
   })
 
   it('renders the default error the correct messages', () => {
-    cy.mountFragment(BaseError_DataFragmentDoc, {
-      onResult: (result) => {
-        result.title = messages.header
-      },
-      render: (gqlVal) => <BaseError gql={gqlVal} retry={() => {}} />,
+    cy.mountFragment(BaseErrorFragmentDoc, {
+      render: (gqlVal) => <BaseError gql={gqlVal} />,
     })
     .get(headerSelector)
-    .should('contain.text', messages.header)
+    .should('contain.text', cy.gqlStub.ErrorWrapper.title)
     .get(messageSelector)
-    .should('contain.text', `It looks like there's some issues that need to be resolved before we continue`)
+    .should('contain.text', cy.gqlStub.ErrorWrapper.errorMessage.replace(/\`/g, '').slice(0, 10))
+    .get(retryButtonSelector)
+    .should('not.exist')
+  })
+
+  it('renders the retry button if retry is passed', () => {
+    cy.mountFragment(BaseErrorFragmentDoc, {
+      render: (gqlVal) => <BaseError gql={gqlVal} retry={() => {}} />,
+    })
     .get(retryButtonSelector)
     .should('contain.text', messages.retryButton)
-    .get(docsButtonSelector)
-    .should('contain.text', messages.readTheDocsButton)
+  })
+
+  it('does not open the stack by default if it is not a user error', () => {
+    cy.mountFragment(BaseErrorFragmentDoc, {
+      onResult (result) {
+        result.isUserCodeError = false
+      },
+      render: (gqlVal) => <BaseError gql={gqlVal} />,
+    }).then(() => {
+      cy.get('[data-cy=stack-open-true]').should('not.exist')
+      cy.contains('Stack Trace').click()
+      cy.contains('Error: foobar').should('be.visible')
+      cy.get('[data-cy=stack-open-true]')
+    })
   })
 
   it('calls the retry function passed in', () => {
     const retrySpy = cy.spy().as('retry')
 
-    cy.mountFragment(BaseError_DataFragmentDoc, {
-      onResult: (result) => {
-        result.title = messages.header
-        result.message = null
-      },
+    cy.mountFragment(BaseErrorFragmentDoc, {
       render: (gqlVal) => (<div class="p-16px">
         <BaseError gql={gqlVal} retry={retrySpy} />,
       </div>),
@@ -59,11 +72,11 @@ describe('<BaseError />', () => {
   })
 
   it('renders custom error messages and headers with props', () => {
-    cy.mountFragment(BaseError_DataFragmentDoc, {
+    cy.mountFragment(BaseErrorFragmentDoc, {
       onResult: (result) => {
         result.title = customHeaderMessage
-        result.message = customMessage
-        result.stack = customStack
+        result.errorMessage = customMessage
+        result.errorStack = customStack
       },
       render: (gqlVal) => (<div class="p-16px">
         <BaseError gql={gqlVal} />
@@ -76,10 +89,10 @@ describe('<BaseError />', () => {
   })
 
   it('renders the header, message, and footer slots', () => {
-    cy.mountFragment(BaseError_DataFragmentDoc, {
+    cy.mountFragment(BaseErrorFragmentDoc, {
       onResult: (result) => {
         result.title = messages.header
-        result.message = messages.message
+        result.errorMessage = messages.message
       },
       render: (gqlVal) => (
         <BaseError
@@ -95,5 +108,43 @@ describe('<BaseError />', () => {
     .and('contain.text', customMessage)
     .get(customFooterSelector)
     .should('contain.text', customFooterText)
+  })
+
+  it('renders the header, message, and footer slots', () => {
+    cy.mountFragment(BaseErrorFragmentDoc, {
+      onResult: (result) => {
+        result.title = messages.header
+        result.codeFrame = {
+          __typename: 'CodeFrame',
+          line: 12,
+          column: 25,
+          codeBlock: codeFrameColumns(dedent`
+            const x = 1;
+            
+            throw new Error('Some Error');
+
+            const y = 2;
+          `, {
+            start: {
+              line: 3,
+              column: 5,
+            },
+          }, {
+            linesAbove: 2,
+            linesBelow: 4,
+          }),
+          file: {
+            id: `FileParts:/absolute/full/path/cypress/e2e/file.cy.js`,
+            __typename: 'FileParts',
+            relative: 'cypress/e2e/file.cy.js',
+            absolute: '/absolute/full/path/cypress/e2e/file.cy.js',
+          },
+        }
+      },
+      render: (gqlVal) => (
+        <BaseError gql={gqlVal} />),
+    })
+
+    cy.findByText('cypress/e2e/file.cy.js:12:25').should('be.visible')
   })
 })

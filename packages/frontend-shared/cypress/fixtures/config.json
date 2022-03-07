@@ -32,7 +32,7 @@
         "channel": "stable",
         "displayName": "Firefox",
         "version": "95.0.2",
-        "path": "/Applications/Firefox.app/Contents/MacOS/firefox-bin",
+        "path": "/Applications/Firefox.app/Contents/MacOS/firefox",
         "minSupportedVersion": 86,
         "majorVersion": 95
       },

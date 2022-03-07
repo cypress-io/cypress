@@ -31,17 +31,11 @@ describe('Choose a Browser Page', () => {
       cy.get('h1').should('contain', 'Choose a Browser')
       cy.get('[data-cy="alert-header"]').should('contain', 'Warning: Browser Not Found')
       cy.get('[data-cy="alert-body"]')
-      .should('contain', 'The specified browser was not found on your system or is not supported by Cypress: doesNotExist')
+      .should('contain', 'Browser: doesNotExist was not found on your system or is not supported by Cypress.')
 
       cy.get('[data-cy="alert-body"]').within(() => {
         cy.validateExternalLink({
-          name: 'use a custom browser',
           href: 'https://on.cypress.io/customize-browsers',
-        })
-
-        cy.validateExternalLink({
-          name: 'how to troubleshoot launching browsers',
-          href: 'https://on.cypress.io/troubleshooting-launching-browsers',
         })
       })
 
@@ -51,20 +45,28 @@ describe('Choose a Browser Page', () => {
     })
 
     it('shows warning when launched with --browser path option that cannot be matched to found browsers', () => {
-      cy.openProject('launchpad', ['--e2e', '--browser', '/path/does/not/exist'])
+      const path = '/path/does/not/exist'
+
+      cy.openProject('launchpad', ['--e2e', '--browser', path])
 
       cy.visitLaunchpad()
 
       cy.get('h1').should('contain', 'Choose a Browser')
 
       cy.get('[data-cy="alert-header"]').should('contain', 'Warning: Browser Not Found')
-      cy.get('[data-cy="alert-body"]')
-      .should('contain', 'We could not identify a known browser at the path you specified: /path/does/not/exist')
-      .should('contain', 'spawn /path/does/not/exist ENOENT')
+      cy.get('[data-cy="alert-body"]').as('AlertBody')
+      .should('contain', `We could not identify a known browser at the path you provided: ${path}`)
       .validateExternalLink({
-        name: 'how to troubleshoot launching browsers',
         href: 'https://on.cypress.io/troubleshooting-launching-browsers',
       })
+
+      // The exception thrown is presented in the alert's second code element and
+      // varies depending on platform
+      if (Cypress.platform === 'win32') {
+        cy.get('@AlertBody').find('code').eq(1).should('have.text', `win-version-info is unable to access file: \\${path.replaceAll('/', '\\')}`)
+      } else {
+        cy.get('@AlertBody').find('code').eq(1).should('have.text', `spawn ${path} ENOENT`)
+      }
 
       cy.percySnapshot()
 

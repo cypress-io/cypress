@@ -2,13 +2,14 @@
 
 // See ../guides/next-version.md for documentation.
 
+const path = require('path')
 const semver = require('semver')
-const Bluebird = require('bluebird')
 const bumpCb = require('conventional-recommended-bump')
+const { promisify } = require('util')
 
 const currentVersion = require('../package.json').version
 
-const bump = Bluebird.promisify(bumpCb)
+const bump = promisify(bumpCb)
 const paths = ['packages', 'cli']
 
 let nextVersion
@@ -24,14 +25,23 @@ const getNextVersionForPath = async (path) => {
   return semver.inc(currentVersion, releaseType || 'patch')
 }
 
-Bluebird.mapSeries(paths, async (path) => {
-  const pathNextVersion = await getNextVersionForPath(path)
+if (require.main !== module) {
+  module.exports.getNextVersionForPath = getNextVersionForPath
 
-  if (!nextVersion || semver.gt(pathNextVersion, nextVersion)) {
-    nextVersion = pathNextVersion
+  return
+}
+
+(async () => {
+  process.chdir(path.join(__dirname, '..'))
+
+  for (const path of paths) {
+    const pathNextVersion = await getNextVersionForPath(path)
+
+    if (!nextVersion || semver.gt(pathNextVersion, nextVersion)) {
+      nextVersion = pathNextVersion
+    }
   }
-})
-.then(() => {
+
   if (!nextVersion) {
     throw new Error('Unable to determine next version.')
   }
@@ -45,4 +55,4 @@ Bluebird.mapSeries(paths, async (path) => {
   }
 
   console.log(nextVersion)
-})
+})()

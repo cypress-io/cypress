@@ -24,6 +24,7 @@
     <code
       class="text-size-14px"
       :class="{ 'text-gray-500': localConfidential }"
+      data-cy="record-key"
     >
       {{ localConfidential ? '*'.repeat(code.length) : code }}
     </code>
@@ -34,8 +35,8 @@
 import { FunctionalComponent, ref, SVGAttributes } from 'vue'
 
 const props = defineProps<{
-  code: string,
-  prefixIcon: FunctionalComponent<SVGAttributes, {}>,
+  code: string
+  prefixIcon: FunctionalComponent<SVGAttributes, {}>
   confidential?: boolean
 }>()
 

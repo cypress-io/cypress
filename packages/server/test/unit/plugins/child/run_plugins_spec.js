@@ -1,14 +1,18 @@
 require('../../../spec_helper')
 
 const _ = require('lodash')
+const snapshot = require('snap-shot-it')
 const Promise = require('bluebird')
 
 const preprocessor = require(`../../../../lib/plugins/child/preprocessor`)
 const util = require(`../../../../lib/plugins/util`)
 const resolve = require(`../../../../lib/util/resolve`)
 const browserUtils = require(`../../../../lib/browsers/utils`)
-
+const Fixtures = require('@tooling/system-tests/lib/fixtures')
 const { RunPlugins } = require(`../../../../lib/plugins/child/run_plugins`)
+
+const colorCodeRe = /\[[0-9;]+m/gm
+const pathRe = /\/?([a-z0-9_-]+\/)*[a-z0-9_-]+\/([a-z_]+\.\w+)[:0-9]+/gmi
 
 const deferred = () => {
   let reject
@@ -19,6 +23,13 @@ const deferred = () => {
   })
 
   return { promise, resolve, reject }
+}
+
+const withoutColorCodes = (str) => {
+  return str.replace(colorCodeRe, '<color-code>')
+}
+const withoutPath = (str) => {
+  return str.replace(pathRe, '<path>$2)')
 }
 
 // TODO: tim, come back to this later
@@ -37,6 +48,25 @@ describe.skip('lib/plugins/child/run_plugins', () => {
 
   afterEach(() => {
     mockery.deregisterMock('@cypress/webpack-batteries-included-preprocessor')
+  })
+
+  it('sends error message if configFile has syntax error', function () {
+    // path for substitute is relative to lib/plugins/child/plugins_child.js
+    mockery.registerSubstitute(
+      'plugins-file',
+      Fixtures.path('server/syntax_error.js'),
+    )
+
+    runPlugins(this.ipc, 'plugins-file', 'proj-root')
+    expect(this.ipc.send).to.be.calledWith('load:error', 'PLUGINS_FILE_ERROR', 'plugins-file')
+
+    return snapshot(withoutColorCodes(withoutPath(this.ipc.send.lastCall.args[3].stack.replace(/( +at[^$]+$)+/g, '[stack trace]'))))
+  })
+
+  it('sends error message if setupNodeEvents does not export a function', function () {
+    mockery.registerMock('plugins-file', null)
+    runPlugins(this.ipc, 'plugins-file', 'proj-root')
+    expect(this.ipc.send).to.be.calledWith('load:error', 'SETUP_NODE_EVENTS_IS_NOT_FUNCTION', 'plugins-file')
   })
 
   it('sends error message if setupNodeEvents is not a function', function () {
@@ -193,10 +223,11 @@ describe.skip('lib/plugins/child/run_plugins', () => {
       this.ipc.on.withArgs('load:plugins').yields({})
       runPlugins.runSetupNodeEvents(setupNodeEventsFn)
 
-      this.ipc.send = _.once((event, errorType, stack) => {
+      this.ipc.send = _.once((event, errorType, pluginsFile, result) => {
         expect(event).to.eq('setupTestingType:error')
-        expect(errorType).to.eq('PLUGINS_FUNCTION_ERROR')
-        expect(stack).to.eq(err.stack)
+        expect(errorType).to.eq('CHILD_PROCESS_UNEXPECTED_ERROR')
+        expect(pluginsFile).to.eq('plugins-file')
+        expect(result.stack).to.eq(err.stack)
 
         return done()
       })
@@ -227,10 +258,11 @@ describe.skip('lib/plugins/child/run_plugins', () => {
 
       this.ipc.on.withArgs('load:plugins').yield({})
 
-      this.ipc.send = _.once((event, errorType, stack) => {
+      this.ipc.send = _.once((event, errorType, pluginsFile, serializedErr) => {
         expect(event).to.eq('setupTestingType:error')
-        expect(errorType).to.eq('PLUGINS_FUNCTION_ERROR')
-        expect(stack).to.eq(err.stack)
+        expect(errorType).to.eq('CHILD_PROCESS_UNEXPECTED_ERROR')
+        expect(pluginsFile).to.eq('plugins-file')
+        expect(serializedErr.stack).to.eq(err.stack)
 
         return done()
       })
@@ -403,7 +435,7 @@ describe.skip('lib/plugins/child/run_plugins', () => {
         expect(result).to.equal('result')
       })
 
-      it('returns __cypress_unhandled__ if the task doesn\'t exist', function () {
+      it(`returns __cypress_unhandled__ if the task doesn't exist`, function () {
         runPlugins.taskExecute(this.ids, ['nope'])
 
         expect(util.wrapChildPromise.lastCall.args[1]('1')).to.equal('__cypress_unhandled__')

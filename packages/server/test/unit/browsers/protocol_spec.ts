@@ -1,13 +1,13 @@
 import '../../spec_helper'
-import _ from 'lodash'
-import 'chai-as-promised'
-import { connect } from '@packages/network'
+import 'chai-as-promised' // for the types!
 import { expect } from 'chai'
 import humanInterval from 'human-interval'
-import * as protocol from '../../../lib/browsers/protocol'
+import _ from 'lodash'
 import sinon from 'sinon'
 import snapshot from 'snap-shot-it'
 import stripAnsi from 'strip-ansi'
+import { connect } from '@packages/network'
+import * as protocol from '../../../lib/browsers/protocol'
 
 describe('lib/browsers/protocol', () => {
   context('._getDelayMsForRetry', () => {
@@ -18,7 +18,7 @@ describe('lib/browsers/protocol', () => {
       let delay: number
       let i = 0
 
-      while ((delay = protocol._getDelayMsForRetry(i, 'FooBrowser'))) {
+      while ((delay = protocol._getDelayMsForRetry(i, 'foobrowser'))) {
         delays.push(delay)
         i++
       }
@@ -28,7 +28,7 @@ describe('lib/browsers/protocol', () => {
       log.getCalls().forEach((log, i) => {
         const line = stripAnsi(log.args[0])
 
-        expect(line).to.include(`Still waiting to connect to FooBrowser, retrying in 1 second (attempt ${i + 18}/62)`)
+        expect(line).to.include(`Still waiting to connect to Foobrowser, retrying in 1 second (attempt ${i + 18}/62)`)
       })
 
       snapshot(delays)

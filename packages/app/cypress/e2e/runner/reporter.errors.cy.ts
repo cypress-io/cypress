@@ -1,60 +1,19 @@
+import * as specLoader from './support/spec-loader'
 import { createVerify, verifyInternalFailure } from './support/verify-failures'
-
-type LoadSpecOptions = {
-  fileName: string
-  onLoadStatsMessage: string
-  hasPreferredIde?: boolean
-}
 
 type VerifyFunc = (specTitle: string, verifyOptions: any) => void
 
 /**
- * Navigates to desired spec file within Cypress app and waits for completion.
+ * Navigates to desired error spec file within Cypress app and waits for completion.
  * Returns scoped verify function to aid inner spec validation.
  */
-function loadSpec (options: LoadSpecOptions): VerifyFunc {
+function loadErrorSpec (options: specLoader.LoadSpecOptions): VerifyFunc {
   const {
     fileName,
-    onLoadStatsMessage,
     hasPreferredIde = false,
   } = options
 
-  cy.scaffoldProject('runner-e2e-specs')
-  cy.openProject('runner-e2e-specs')
-  cy.startAppServer()
-
-  cy.withCtx((ctx, options) => {
-    if (options.hasPreferredIde) {
-      // set preferred editor to bypass IDE selection dialog
-      ctx.coreData.localSettings.availableEditors = [
-        ...ctx.coreData.localSettings.availableEditors,
-        {
-          id: 'test-editor',
-          binary: '/usr/bin/test-editor',
-          name: 'Test editor',
-        },
-      ]
-
-      ctx.coreData.localSettings.preferences.preferredEditorBinary = 'test-editor'
-    }
-
-    ctx.coreData.localSettings.preferences.isSpecsListOpen = false
-  }, { hasPreferredIde })
-
-  // directly visiting the spec will sometimes hang, going through
-  // specs page first to mitigate
-  // cy.visitApp(`specs/runner?file=cypress/e2e/errors/${fileName}`)
-
-  cy.__incorrectlyVisitAppWithIntercept()
-  cy.contains('[data-cy=spec-item]', fileName).click()
-
-  cy.location().should((location) => {
-    expect(location.hash).to.contain(fileName)
-  })
-
-  // Wait for specs to complete
-  cy.findByLabelText('Stats', { timeout: 10000 })
-  .get('.failed', { timeout: 10000 }).should('have.text', onLoadStatsMessage)
+  specLoader.loadSpec(options)
 
   // Return scoped verify function with spec options baked in
   return createVerify({ fileName, hasPreferredIde })
@@ -68,10 +27,10 @@ describe('errors ui', {
   numTestsKeptInMemory: 1,
 }, () => {
   it('assertion failures', () => {
-    const verify = loadSpec({
+    const verify = loadErrorSpec({
       fileName: 'assertions.cy.js',
       hasPreferredIde: true,
-      onLoadStatsMessage: 'Failed:3',
+      failCount: 3,
     })
 
     verify('with expect().<foo>', {
@@ -94,9 +53,9 @@ describe('errors ui', {
   })
 
   it('assertion failures - no preferred IDE', () => {
-    const verify = loadSpec({
+    const verify = loadErrorSpec({
       fileName: 'assertions.cy.js',
-      onLoadStatsMessage: 'Failed:3',
+      failCount: 3,
     })
 
     verify('with expect().<foo>', {
@@ -108,9 +67,9 @@ describe('errors ui', {
   })
 
   it('exception failures', () => {
-    const verify = loadSpec({
+    const verify = loadErrorSpec({
       fileName: 'exceptions.cy.js',
-      onLoadStatsMessage: 'Failed:2',
+      failCount: 2,
     })
 
     verify('in spec file', {
@@ -126,9 +85,9 @@ describe('errors ui', {
   })
 
   it('hooks', { viewportHeight: 900 }, () => {
-    const verify = loadSpec({
+    const verify = loadErrorSpec({
       fileName: 'hooks.cy.js',
-      onLoadStatsMessage: 'Failed:1',
+      failCount: 1,
     })
 
     // https://github.com/cypress-io/cypress/issues/8214
@@ -142,9 +101,9 @@ describe('errors ui', {
   })
 
   it('commands', () => {
-    const verify = loadSpec({
+    const verify = loadErrorSpec({
       fileName: 'commands.cy.js',
-      onLoadStatsMessage: 'Failed:2',
+      failCount: 2,
     })
 
     verify('failure', {
@@ -159,9 +118,9 @@ describe('errors ui', {
   })
 
   it('cy.then', () => {
-    const verify = loadSpec({
+    const verify = loadErrorSpec({
       fileName: 'then.cy.js',
-      onLoadStatsMessage: 'Failed:3',
+      failCount: 3,
     })
 
     verify('assertion failure', {
@@ -181,9 +140,9 @@ describe('errors ui', {
   })
 
   it('cy.should', () => {
-    const verify = loadSpec({
+    const verify = loadErrorSpec({
       fileName: 'should.cy.js',
-      onLoadStatsMessage: 'Failed:8',
+      failCount: 8,
     })
 
     verify('callback assertion failure', {
@@ -231,9 +190,9 @@ describe('errors ui', {
   })
 
   it('cy.each', () => {
-    const verify = loadSpec({
+    const verify = loadErrorSpec({
       fileName: 'each.cy.js',
-      onLoadStatsMessage: 'Failed:3',
+      failCount: 3,
     })
 
     verify('assertion failure', {
@@ -253,9 +212,9 @@ describe('errors ui', {
   })
 
   it('cy.spread', () => {
-    const verify = loadSpec({
+    const verify = loadErrorSpec({
       fileName: 'spread.cy.js',
-      onLoadStatsMessage: 'Failed:3',
+      failCount: 3,
     })
 
     verify('assertion failure', {
@@ -275,9 +234,9 @@ describe('errors ui', {
   })
 
   it('cy.within', () => {
-    const verify = loadSpec({
+    const verify = loadErrorSpec({
       fileName: 'within.cy.js',
-      onLoadStatsMessage: 'Failed:3',
+      failCount: 3,
     })
 
     verify('assertion failure', {
@@ -297,9 +256,9 @@ describe('errors ui', {
   })
 
   it('cy.wrap', () => {
-    const verify = loadSpec({
+    const verify = loadErrorSpec({
       fileName: 'wrap.cy.js',
-      onLoadStatsMessage: 'Failed:3',
+      failCount: 3,
     })
 
     verify('assertion failure', {
@@ -319,9 +278,9 @@ describe('errors ui', {
   })
 
   it('cy.visit', () => {
-    const verify = loadSpec({
+    const verify = loadErrorSpec({
       fileName: 'visit.cy.js',
-      onLoadStatsMessage: 'Failed:3',
+      failCount: 3,
     })
 
     verify('onBeforeLoad assertion failure', {
@@ -350,9 +309,9 @@ describe('errors ui', {
   })
 
   it('cy.intercept', () => {
-    const verify = loadSpec({
+    const verify = loadErrorSpec({
       fileName: 'intercept.cy.ts',
-      onLoadStatsMessage: 'Failed:3',
+      failCount: 3,
     })
 
     verify('assertion failure in request callback', {
@@ -393,9 +352,9 @@ describe('errors ui', {
   })
 
   it('cy.route', () => {
-    const verify = loadSpec({
+    const verify = loadErrorSpec({
       fileName: 'route.cy.js',
-      onLoadStatsMessage: 'Failed:9',
+      failCount: 9,
     })
 
     verify('callback assertion failure', {
@@ -451,9 +410,9 @@ describe('errors ui', {
   })
 
   it('cy.server', () => {
-    const verify = loadSpec({
+    const verify = loadErrorSpec({
       fileName: 'server.cy.js',
-      onLoadStatsMessage: 'Failed:6',
+      failCount: 6,
     })
 
     verify('onAbort assertion failure', {
@@ -494,9 +453,9 @@ describe('errors ui', {
   })
 
   it('cy.readFile', () => {
-    const verify = loadSpec({
+    const verify = loadErrorSpec({
       fileName: 'readfile.cy.js',
-      onLoadStatsMessage: 'Failed:1',
+      failCount: 1,
     })
 
     verify('existence failure', {
@@ -506,9 +465,9 @@ describe('errors ui', {
   })
 
   it('validation errors', () => {
-    const verify = loadSpec({
+    const verify = loadErrorSpec({
       fileName: 'validation.cy.js',
-      onLoadStatsMessage: 'Failed:3',
+      failCount: 3,
     })
 
     verify('from cypress', {
@@ -530,9 +489,9 @@ describe('errors ui', {
   })
 
   it('event handlers', () => {
-    const verify = loadSpec({
+    const verify = loadErrorSpec({
       fileName: 'events.cy.js',
-      onLoadStatsMessage: 'Failed:4',
+      failCount: 4,
     })
 
     verify('event assertion failure', {
@@ -557,9 +516,9 @@ describe('errors ui', {
   })
 
   it('uncaught errors', () => {
-    const verify = loadSpec({
+    const verify = loadErrorSpec({
       fileName: 'uncaught.cy.js',
-      onLoadStatsMessage: 'Failed:11',
+      failCount: 11,
     })
 
     verify('sync app visit exception', {
@@ -706,9 +665,9 @@ describe('errors ui', {
   })
 
   it('uncaught errors: outside test', () => {
-    const verify = loadSpec({
+    const verify = loadErrorSpec({
       fileName: 'uncaught_outside_test.cy.js',
-      onLoadStatsMessage: 'Failed:1',
+      failCount: 1,
     })
 
     // NOTE: the following 2 test don't have uncaught: true because we don't
@@ -727,9 +686,9 @@ describe('errors ui', {
   })
 
   it('uncaught errors: outside test only suite', () => {
-    const verify = loadSpec({
+    const verify = loadErrorSpec({
       fileName: 'uncaught_outside_test_only_suite.cy.js',
-      onLoadStatsMessage: 'Failed:1',
+      failCount: 1,
     })
 
     verify('An uncaught error was detected outside of a test', {
@@ -744,9 +703,9 @@ describe('errors ui', {
   })
 
   it('custom commands', () => {
-    const verify = loadSpec({
+    const verify = loadErrorSpec({
       fileName: 'custom_commands.cy.js',
-      onLoadStatsMessage: 'Failed:3',
+      failCount: 3,
     })
 
     verify('assertion failure', {
@@ -769,9 +728,9 @@ describe('errors ui', {
   })
 
   it('typescript', () => {
-    const verify = loadSpec({
+    const verify = loadErrorSpec({
       fileName: 'typescript.cy.ts',
-      onLoadStatsMessage: 'Failed:3',
+      failCount: 3,
     })
 
     verify('assertion failure', {
@@ -808,9 +767,9 @@ describe('errors ui', {
     it('docs url validation', { retries: 1 }, () => {
       const docsUrl = 'https://on.cypress.io/viewport'
 
-      const verify = loadSpec({
+      const verify = loadErrorSpec({
         fileName: 'docs_url.cy.js',
-        onLoadStatsMessage: 'Failed:2',
+        failCount: 2,
       })
 
       verify('displays as link in interactive mode', {
@@ -845,9 +804,9 @@ describe('errors ui', {
   // instead of the invocation stack. we test this by monkey-patching internal
   // methods to make them throw an error
   it('unexpected errors', () => {
-    const verify = loadSpec({
+    const verify = loadErrorSpec({
       fileName: 'unexpected.cy.js',
-      onLoadStatsMessage: 'Failed:1',
+      failCount: 1,
     })
 
     // FIXME: the eval doesn't seem to take effect and overwrite the method

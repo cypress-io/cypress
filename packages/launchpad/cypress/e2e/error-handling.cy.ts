@@ -1,5 +1,5 @@
 describe('Error handling', () => {
-  it('it handles a plugin error', () => {
+  it('it handles a config error', () => {
     cy.scaffoldProject('unify-plugin-errors')
     cy.openProject('unify-plugin-errors')
     cy.loginUser()
@@ -9,9 +9,7 @@ describe('Error handling', () => {
     cy.get('[data-cy-testingType=e2e]').click()
 
     cy.get('body')
-    .should('contain.text', 'Please confirm that everything looks correct in your cypress.config.js file.')
-    .should('contain.text', 'Error Loading Config')
-    .and('contain.text', 'The function exported by the plugins file threw an error')
+    .and('contain.text', 'threw an error from')
 
     cy.get('[data-cy="collapsible-header"]')
     .should('have.attr', 'aria-expanded', 'true')
@@ -43,7 +41,6 @@ describe('Error handling', () => {
     cy.visitLaunchpad()
 
     cy.get('body')
-    .should('contain.text', 'Please confirm that everything looks correct in your cypress.config.js file.')
     .should('contain.text', 'Error Loading Config')
     .and('contain.text', 'Error thrown from Config')
 

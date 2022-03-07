@@ -1,4 +1,4 @@
-import type { AuthenticatedUserShape } from '@packages/data-context/src/data'
+import type { AuthenticatedUserShape, AuthStateShape } from '@packages/data-context/src/data'
 import type {
   CurrentProject,
   Browser,
@@ -22,7 +22,7 @@ export interface ClientTestContext {
     browsers: Browser[] | null
   }
   versions: VersionData
-  isAuthBrowserOpened: boolean
+  authState: AuthStateShape
   localSettings: LocalSettings
   wizard: {
     chosenBundler: WizardBundler | null
@@ -69,7 +69,9 @@ export function makeClientTestContext (): ClientTestContext {
         released: '2021-10-11T19:40:49.036Z',
       },
     },
-    isAuthBrowserOpened: false,
+    authState: {
+      browserOpened: false,
+    },
     wizard: {
       chosenBundler: null,
       chosenFramework: null,

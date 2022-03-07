@@ -44,7 +44,8 @@ describe('CLI Interface', () => {
     })
   })
 
-  xit('writes out package.json and exits', (done) => {
+  // TODO:(tgriesser) originally skipped this, not sure why
+  it.skip('writes out package.json and exits', (done) => {
     return cp.exec('npm run dev -- --return-pkg', { env }, (err, stdout, stderr) => {
       if (err) {
         done(err)

@@ -42,8 +42,8 @@ const props = withDefaults(
     canNavigateForward?: boolean
     noContainer?: boolean
     altFn?: (val: boolean) => void
-    nextFn?: (...args: unknown[]) => any,
-    backFn?: (...args: unknown[]) => any,
+    nextFn?: (...args: unknown[]) => any
+    backFn?: (...args: unknown[]) => any
     mainButtonVariant?: ButtonVariants
   }>(), {
     next: undefined,

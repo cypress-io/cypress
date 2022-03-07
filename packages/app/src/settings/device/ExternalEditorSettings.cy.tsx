@@ -54,12 +54,14 @@ describe('<ExternalEditorSettings />', () => {
       },
     })
 
-    cy.findByPlaceholderText('Custom path...').type('/usr/bin')
-    cy.get('[data-cy="use-custom-editor"]').as('custom')
-    cy.get('@custom').click()
+    const inputSelector = '[aria-haspopup=true]'
 
-    cy.get('@custom').should('be.focused')
-    cy.get('[data-cy="use-well-known-editor"]').should('not.be.focused')
+    cy.get(inputSelector).click()
+
+    cy.contains('Custom').click()
+    cy.get('[data-cy="custom-editor"]').should('exist')
+
+    cy.findByPlaceholderText(editorText.customPathPlaceholder).type('/usr/bin').should('have.value', '/usr/bin')
 
     cy.percySnapshot()
   })

@@ -97,7 +97,7 @@ module.exports = {
     debug('dest path %s', dest)
 
     // make sure this path exists!
-    return fs.statAsync(appPath)
+    return fs.accessAsync(appPath)
     .then(() => {
       debug('appPath exists %s', appPath)
 

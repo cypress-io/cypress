@@ -1,9 +1,11 @@
-import { BUNDLERS, FoundBrowser, Editor, Warning, AllowedState, AllModeOptions, TestingType, PACKAGE_MANAGERS, BrowserStatus } from '@packages/types'
+import type { FoundBrowser, Editor, AllowedState, AllModeOptions, TestingType, BrowserStatus, PACKAGE_MANAGERS, AuthStateName } from '@packages/types'
+import type { Bundler, FRONTEND_FRAMEWORKS } from '@packages/scaffold-config'
 import type { NexusGenEnums, NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
 import type { App, BrowserWindow } from 'electron'
 import type { ChildProcess } from 'child_process'
 import type { SocketIOServer } from '@packages/socket'
 import type { Server } from 'http'
+import type { ErrorWrapperSource } from '@packages/errors'
 
 export type Maybe<T> = T | null | undefined
 
@@ -61,14 +63,14 @@ export interface AppDataShape {
 }
 
 export interface WizardDataShape {
-  chosenBundler: NexusGenEnums['SupportedBundlers'] | null
-  allBundlers: typeof BUNDLERS
-  chosenFramework: NexusGenEnums['FrontendFrameworkEnum'] | null
+  chosenBundler: Bundler | null
+  chosenFramework: typeof FRONTEND_FRAMEWORKS[number]['type'] | null
   chosenLanguage: NexusGenEnums['CodeLanguageEnum']
   chosenManualInstall: boolean
   detectedLanguage: NexusGenEnums['CodeLanguageEnum'] | null
-  detectedBundler: NexusGenEnums['SupportedBundlers'] | null
-  detectedFramework: NexusGenEnums['FrontendFrameworkEnum'] | null
+  detectedBundler: Bundler | null
+  detectedFramework: typeof FRONTEND_FRAMEWORKS[number]['type'] | null
+  __fakeInstalledPackagesForTesting: string[] | null
 }
 
 export interface MigrationDataShape{
@@ -81,10 +83,10 @@ export interface ElectronShape {
   browserWindow: BrowserWindow | null
 }
 
-export interface BaseErrorDataShape {
-  title?: string
-  message: string
-  stack?: string
+export interface AuthStateShape {
+  name?: AuthStateName
+  message?: string
+  browserOpened: boolean
 }
 
 export interface ForceReconfigureProjectDataShape {
@@ -106,7 +108,8 @@ export interface CoreDataShape {
     gqlSocketServer?: Maybe<SocketIOServer>
   }
   hasInitializedMode: 'run' | 'open' | null
-  baseError: BaseErrorDataShape | null
+  baseError: ErrorWrapperSource | null
+  dashboardGraphQLError: ErrorWrapperSource | null
   dev: DevStateShape
   localSettings: LocalSettingsDataShape
   app: AppDataShape
@@ -116,9 +119,9 @@ export interface CoreDataShape {
   migration: MigrationDataShape | null
   user: AuthenticatedUserShape | null
   electron: ElectronShape
-  isAuthBrowserOpened: boolean
+  authState: AuthStateShape
   scaffoldedFiles: NexusGenObjects['ScaffoldedFile'][] | null
-  warnings: Warning[]
+  warnings: ErrorWrapperSource[]
   packageManager: typeof PACKAGE_MANAGERS[number]
   forceReconfigureProject: ForceReconfigureProjectDataShape | null
 }
@@ -134,6 +137,7 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
     machineBrowsers: null,
     hasInitializedMode: null,
     baseError: null,
+    dashboardGraphQLError: null,
     dev: {
       refreshState: null,
     },
@@ -152,7 +156,9 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
       preferences: {},
       refreshing: null,
     },
-    isAuthBrowserOpened: false,
+    authState: {
+      browserOpened: false,
+    },
     currentProject: modeOptions.projectRoot ?? null,
     currentTestingType: modeOptions.testingType ?? null,
     wizard: {
@@ -160,9 +166,9 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
       chosenFramework: null,
       chosenLanguage: 'js',
       chosenManualInstall: false,
-      allBundlers: BUNDLERS,
       detectedBundler: null,
       detectedFramework: null,
+      __fakeInstalledPackagesForTesting: null,
       detectedLanguage: null,
     },
     migration: {

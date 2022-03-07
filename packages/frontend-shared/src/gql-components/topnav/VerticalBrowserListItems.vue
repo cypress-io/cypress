@@ -1,7 +1,7 @@
 <template>
   <template v-if="props.gql">
     <li
-      v-for="browser in props.gql.browsers"
+      v-for="browser of browsers"
       :key="browser.id"
       class="border-b border-transparent cursor-pointer flex border-b-gray-50 border-1px min-w-240px py-12px px-16px transition-colors duration-300 group focus-within-default"
       :class="{
@@ -74,10 +74,13 @@
 </template>
 <script setup lang="ts">
 import { useI18n } from '@cy/i18n'
-import { VerticalBrowserListItemsFragment, VerticalBrowserListItems_SetBrowserDocument } from '../../generated/graphql'
+import { VerticalBrowserListItems_SetBrowserDocument } from '../../generated/graphql'
+import type { VerticalBrowserListItemsFragment } from '../../generated/graphql'
+import { computed } from 'vue'
 import { gql, useMutation } from '@urql/vue'
 import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
 import UnsupportedBrowserTooltip from './UnsupportedBrowserTooltip.vue'
+import sortBrowsers from '@packages/frontend-shared/src/utils/sortBrowsers'
 
 const { t } = useI18n()
 
@@ -116,6 +119,14 @@ const props = withDefaults(defineProps <{
 }>(), {
   selectable: false,
   specPath: undefined,
+})
+
+const browsers = computed(() => {
+  if (!props.gql.browsers) {
+    return undefined
+  }
+
+  return sortBrowsers([...props.gql.browsers])
 })
 
 const setBrowser = useMutation(VerticalBrowserListItems_SetBrowserDocument)

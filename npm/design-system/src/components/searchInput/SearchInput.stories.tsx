@@ -3,7 +3,7 @@ import * as React from 'react'
 import { createStory, createStorybookConfig } from 'stories/util'
 
 import { SearchInput as SearchInputComponent } from './SearchInput'
-import { useState } from 'react'
+const { useState } = React
 
 export default createStorybookConfig({
   title: 'Components/SearchInput',

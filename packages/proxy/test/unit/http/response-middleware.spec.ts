@@ -48,7 +48,7 @@ describe('http/response-middleware', function () {
         prepareContext()
       })
 
-      it('doesn\'t do anything', function () {
+      it(`doesn't do anything`, function () {
         return testMiddleware([MaybeStripDocumentDomainFeaturePolicy], ctx)
         .then(() => {
           expect(ctx.res.set).not.to.be.called
@@ -62,7 +62,7 @@ describe('http/response-middleware', function () {
         prepareContext()
       })
 
-      it('doesn\'t do anything', function () {
+      it(`doesn't do anything`, function () {
         return testMiddleware([MaybeStripDocumentDomainFeaturePolicy], ctx)
         .then(() => {
           expect(ctx.res.set).not.to.be.called
@@ -126,5 +126,67 @@ describe('http/response-middleware', function () {
         },
       }
     }
+  })
+
+  describe('SetInjectionLevel', function () {
+    const { SetInjectionLevel } = ResponseMiddleware
+
+    let ctx
+
+    beforeEach(function () {
+      ctx = {
+        req: {
+          proxiedUrl: 'http://proxy.com',
+          cookies: {
+            '__cypress.initial': true,
+          },
+          headers: {
+            accept: ['text/html', 'application/xhtml+xml'],
+          },
+        },
+        res: {
+          setHeader: sinon.stub(),
+        },
+        getRemoteState: () => {
+          return {
+            strategy: 'http',
+            props: {
+              domain: 'proxy',
+              port: '80',
+              tld: 'com',
+            },
+          }
+        },
+        getRenderedHTMLOrigins: () => {
+          return {}
+        },
+      }
+    })
+
+    it('does not set Origin-Agent-Cluster header to false when injection is not expected', function () {
+      ctx.incomingRes = {
+        headers: {
+          'content-type': 'foo/bar',
+        },
+      }
+
+      return testMiddleware([SetInjectionLevel], ctx)
+      .then(() => {
+        expect(ctx.res.setHeader).not.to.be.calledWith('Origin-Agent-Cluster', '?0')
+      })
+    })
+
+    it('sets Origin-Agent-Cluster header to false when injection is expected', function () {
+      ctx.incomingRes = {
+        headers: {
+          'content-type': 'text/html',
+        },
+      }
+
+      return testMiddleware([SetInjectionLevel], ctx)
+      .then(() => {
+        expect(ctx.res.setHeader).to.be.calledWith('Origin-Agent-Cluster', '?0')
+      })
+    })
   })
 })

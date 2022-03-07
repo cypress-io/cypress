@@ -1,4 +1,5 @@
 import path from 'path'
+import assert from 'assert'
 import type { DataContext } from '..'
 import {
   cleanUpIntegrationFolder,
@@ -28,6 +29,18 @@ export class MigrationActions {
     return this.ctx.migration.initialize()
   }
 
+  async renameSpecsFolder () {
+    if (!this.ctx.currentProject) {
+      throw Error('Need to set currentProject before you can rename specs folder')
+    }
+
+    const projectRoot = this.ctx.path.join(this.ctx.currentProject)
+    const from = path.join(projectRoot, 'cypress', 'integration')
+    const to = path.join(projectRoot, 'cypress', 'e2e')
+
+    await this.ctx.fs.move(from, to)
+  }
+
   async renameSpecFiles (beforeSpecs: string[], afterSpecs: string[]) {
     if (!this.ctx.currentProject) {
       throw Error('Need to set currentProject before you can rename files')
@@ -48,12 +61,8 @@ export class MigrationActions {
 
     const projectRoot = this.ctx.path.join(this.ctx.currentProject)
 
-    try {
-      await moveSpecFiles(projectRoot, specsToMove)
-      await cleanUpIntegrationFolder(this.ctx.currentProject)
-    } catch (err: any) {
-      this.ctx.coreData.baseError = err
-    }
+    await moveSpecFiles(projectRoot, specsToMove)
+    await cleanUpIntegrationFolder(this.ctx.currentProject)
   }
 
   async renameSupportFile () {
@@ -107,9 +116,29 @@ export class MigrationActions {
     await this.ctx.migration.closeManualRenameWatcher()
   }
 
-  async assertSuccessfulConfigMigration (configExtension: 'js' | 'ts' = 'js') {
+  async assertSuccessfulConfigMigration (configExtension: 'js' | 'ts' | 'coffee' = 'js') {
     const actual = formatConfig(await this.ctx.actions.file.readFileInProject(`cypress.config.${configExtension}`))
     const expected = formatConfig(await this.ctx.actions.file.readFileInProject(`expected-cypress.config.${configExtension}`))
+
+    if (actual !== expected) {
+      throw Error(`Expected ${actual} to equal ${expected}`)
+    }
+  }
+
+  async assertSuccessfulConfigScaffold (configFile: `cypress.config.${'js'|'ts'}`) {
+    assert(this.ctx.currentProject)
+
+    // we assert the generated configuration file against one from a project that has
+    // been verified to run correctly.
+    // each project has an `unconfigured` and `configured` variant in `system-tests/projects`
+    // for example vueclivue2-configured and vueclivue2-unconfigured.
+    // after setting the project up with the launchpad, the two projects should contain the same files.
+
+    const configuredProject = this.ctx.project.projectTitle(this.ctx.currentProject).replace('unconfigured', 'configured')
+    const expectedProjectConfig = path.join(__dirname, '..', '..', '..', '..', 'system-tests', 'projects', configuredProject, configFile)
+
+    const actual = formatConfig(await this.ctx.actions.file.readFileInProject(configFile))
+    const expected = formatConfig(await this.ctx.fs.readFile(expectedProjectConfig, 'utf8'))
 
     if (actual !== expected) {
       throw Error(`Expected ${actual} to equal ${expected}`)

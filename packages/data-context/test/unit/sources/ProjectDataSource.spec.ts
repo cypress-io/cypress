@@ -4,7 +4,6 @@ import path from 'path'
 import { DataContext } from '../../../src'
 import { graphqlSchema } from '@packages/graphql/src/schema'
 import { AppApiShape, AuthApiShape, ElectronApiShape, LocalSettingsApiShape, ProjectApiShape } from '../../../src/actions'
-import { ErrorApiShape } from '../../../src/DataContext'
 import { InjectedConfigApi } from '../../../src/data'
 
 describe('matchedSpecs', () => {
@@ -145,7 +144,6 @@ describe('findSpecs', () => {
       appApi: {} as AppApiShape,
       localSettingsApi: {} as LocalSettingsApiShape,
       authApi: {} as AuthApiShape,
-      errorApi: {} as ErrorApiShape,
       configApi: {
         getServerPluginHandlers: () => [],
       } as InjectedConfigApi,

@@ -14,7 +14,7 @@ export const ProjectLike = interfaceType({
     })
 
     t.string('projectId', {
-      description: 'Used to associate project with Cypress cloud',
+      description: 'Used to associate project with Cypress dashboard',
       resolve: (source, args, ctx) => ctx.project.projectId().then((val) => val ?? null, () => null),
     })
 

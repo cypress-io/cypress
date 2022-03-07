@@ -29,28 +29,24 @@ describe('ChooseExternalEditor', { viewportHeight: 400, viewportWidth: 300 }, ()
     cy.contains('Atom').should('be.visible')
     cy.contains('Vim').should('be.visible')
 
-    // open
-    cy.percySnapshot()
+    cy.percySnapshot('open')
 
     cy.contains('Vim').click()
     cy.contains('Vim').should('be.visible')
     cy.contains('Atom').should('not.exist')
 
-    // selected
-    cy.percySnapshot()
+    cy.percySnapshot('selected')
 
-    cy.findByLabelText(defaultMessages.settingsPage.editor.editorRadioLabel)
-    .should('be.checked')
-    .as('editorRadio')
+    cy.get('[data-cy="custom-editor"]').should('not.exist')
 
-    cy.findByLabelText(defaultMessages.settingsPage.editor.customEditorRadioLabel)
-    .click()
-    .should('be.checked')
-
-    cy.get('@editorRadio').should('not.be.checked')
+    cy.get('@chooseEditor').click()
+    cy.contains('Custom').click()
+    cy.get('[data-cy="custom-editor"]').should('exist')
 
     cy.findByLabelText(defaultMessages.settingsPage.editor.customPathPlaceholder)
     .type('test/path')
     .should('have.value', 'test/path')
+
+    cy.percySnapshot('custom editor input')
   })
 })

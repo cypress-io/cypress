@@ -18,7 +18,7 @@ exports['e2e busted support file passes 1'] = `
 
 Oops...we found an error preparing this test file:
 
-  cypress/support/e2e.js
+  > cypress/support/e2e.js
 
 The error was:
 

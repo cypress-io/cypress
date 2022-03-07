@@ -22,7 +22,7 @@ const ciProvider = require(`../../lib/util/ci_provider`)
 const settings = require(`../../lib/util/settings`)
 const Events = require(`../../lib/gui/events`)
 const Windows = require(`../../lib/gui/windows`)
-const interactiveMode = require(`../../lib/modes/interactive-e2e`)
+const interactiveMode = require(`../../lib/modes/interactive`)
 const runMode = require(`../../lib/modes/run`)
 const api = require(`../../lib/api`)
 const cwd = require(`../../lib/cwd`)
@@ -160,11 +160,11 @@ describe('lib/cypress', () => {
       const err = errors.log.getCall(0).args[0]
 
       if (msg1) {
-        expect(err.message, 'error text').to.include(msg1)
+        expect(stripAnsi(err.message), 'error text').to.include(msg1)
       }
 
       if (msg2) {
-        expect(err.message, 'second error text').to.include(msg2)
+        expect(stripAnsi(err.message), 'second error text').to.include(msg2)
       }
 
       return err
@@ -260,7 +260,8 @@ describe('lib/cypress', () => {
       return cypress.start(['--config=test=false', '--cwd=/foo/bar'])
       .then(() => {
         expect(errors.warning).to.be.calledWith('INVALID_CONFIG_OPTION')
-        expect(console.log).to.be.calledWithMatch('`test` is not a valid configuration option')
+        expect(console.log).to.be.calledWithMatch('The following configuration option is invalid:')
+        expect(console.log).to.be.calledWithMatch(`test`)
         expect(console.log).to.be.calledWithMatch('https://on.cypress.io/configuration')
       })
     })
@@ -269,8 +270,9 @@ describe('lib/cypress', () => {
       return cypress.start(['--config=test=false,foo=bar', '--cwd=/foo/bar'])
       .then(() => {
         expect(errors.warning).to.be.calledWith('INVALID_CONFIG_OPTION')
-        expect(console.log).to.be.calledWithMatch('`test` is not a valid configuration option')
-        expect(console.log).to.be.calledWithMatch('`foo` is not a valid configuration option')
+        expect(console.log).to.be.calledWithMatch('The following configuration options are invalid:')
+        expect(console.log).to.be.calledWithMatch('test')
+        expect(console.log).to.be.calledWithMatch('foo')
         expect(console.log).to.be.calledWithMatch('https://on.cypress.io/configuration')
 
         snapshotConsoleLogs('INVALID_CONFIG_OPTION')
@@ -592,7 +594,7 @@ describe('lib/cypress', () => {
       return cypress.start([`--run-project=${this.todosPath}`, '--key=asdf'])
       .then(() => {
         expect(errors.warning).to.be.calledWith('PROJECT_ID_AND_KEY_BUT_MISSING_RECORD_OPTION', 'abc123')
-        expect(console.log).to.be.calledWithMatch('You also provided your Record Key, but you did not pass the --record flag.')
+        expect(console.log).to.be.calledWithMatch('You also provided your Record Key, but you did not pass the')
         expect(console.log).to.be.calledWithMatch('cypress run --record')
         expect(console.log).to.be.calledWithMatch('https://on.cypress.io/recording-project-runs')
       })
@@ -605,7 +607,7 @@ describe('lib/cypress', () => {
 
       return cypress.start([`--run-project=${this.todosPath}`])
       .then(() => {
-        expect(errors.warning).to.be.calledWith('CANNOT_REMOVE_OLD_BROWSER_PROFILES', err.stack)
+        expect(errors.warning).to.be.calledWith('CANNOT_REMOVE_OLD_BROWSER_PROFILES', err)
         expect(console.log).to.be.calledWithMatch('Warning: We failed to remove old browser profiles from previous runs.')
         expect(console.log).to.be.calledWithMatch(err.message)
       })
@@ -631,8 +633,9 @@ describe('lib/cypress', () => {
       return settings.writeForTesting(this.idsPath, { e2e: { supportFile: '/does/not/exist' } })
       .then(() => {
         return cypress.start([`--run-project=${this.idsPath}`])
-      }).then(() => {
-        this.expectExitWithErr('SUPPORT_FILE_NOT_FOUND', 'Your `supportFile` is set to `/does/not/exist`,')
+      })
+      .then(() => {
+        this.expectExitWithErr('SUPPORT_FILE_NOT_FOUND', `Your supportFile is missing or invalid: /does/not/exist`)
       })
     })
 
@@ -648,17 +651,17 @@ describe('lib/cypress', () => {
 
         const found1 = _.find(argsSet, (args) => {
           return _.find(args, (arg) => {
-            return arg.message && arg.message.includes(
-              'The specified browser was not found on your system or is not supported by Cypress: `foo`',
+            return arg.message && stripAnsi(arg.message).includes(
+              `Browser: foo was not found on your system or is not supported by Cypress.`,
             )
           })
         })
 
-        expect(found1, 'foo should not be found').to.be.ok
+        expect(found1, `foo should not be found`).to.be.ok
 
         const found2 = _.find(argsSet, (args) => {
           return _.find(args, (arg) => {
-            return arg.message && arg.message.includes(
+            return arg.message && stripAnsi(arg.message).includes(
               'Cypress supports the following browsers:',
             )
           })
@@ -668,8 +671,8 @@ describe('lib/cypress', () => {
 
         const found3 = _.find(argsSet, (args) => {
           return _.find(args, (arg) => {
-            return arg.message && arg.message.includes(
-              'Available browsers found on your system are:\n- chrome\n- chromium\n- chrome:canary\n- electron',
+            return arg.message && stripAnsi(arg.message).includes(
+              'Available browsers found on your system are:\n - chrome\n - chromium\n - chrome:canary\n - electron',
             )
           })
         })
@@ -680,26 +683,62 @@ describe('lib/cypress', () => {
 
     describe('no specs found', function () {
       it('logs error and exits when spec file was specified and does not exist', function () {
-        return cypress.start([`--run-project=${this.todosPath}`, '--spec=path/to/spec'])
+        const cwd = process.cwd()
+
+        return cypress.start([
+          `--cwd=${cwd}`,
+          `--run-project=${this.todosPath}`,
+          '--spec=path/to/spec',
+        ])
         .then(() => {
           // includes the search spec
-          this.expectExitWithErr('NO_SPECS_FOUND', 'path/to/spec')
-          this.expectExitWithErr('NO_SPECS_FOUND', 'We searched for any files matching this glob pattern:')
+          this.expectExitWithErr('NO_SPECS_FOUND', 'We searched for specs matching this glob pattern:')
           // includes the project path
-          this.expectExitWithErr('NO_SPECS_FOUND', this.todosPath)
+          this.expectExitWithErr('NO_SPECS_FOUND', path.join(cwd, 'path/to/spec'))
+        })
+      })
+
+      it('logs error and exits when spec file was specified and does not exist using ../ pattern', function () {
+        const cwd = process.cwd()
+
+        return cypress.start([
+          `--cwd=${cwd}`,
+          `--run-project=${this.todosPath}`,
+          '--spec=../path/to/spec',
+        ])
+        .then(() => {
+          // includes the search spec
+          this.expectExitWithErr('NO_SPECS_FOUND', 'We searched for specs matching this glob pattern:')
+          // includes the project path
+          this.expectExitWithErr('NO_SPECS_FOUND', path.join(cwd, '../path/to/spec'))
+        })
+      })
+
+      it('logs error and exits when spec file was specified with glob and does not exist using ../ pattern', function () {
+        const cwd = process.cwd()
+
+        return cypress.start([
+          `--cwd=${cwd}`,
+          `--run-project=${this.todosPath}`,
+          '--spec=../path/to/**/*',
+        ])
+        .then(() => {
+          // includes the search spec
+          this.expectExitWithErr('NO_SPECS_FOUND', 'We searched for specs matching this glob pattern:')
+          // includes the project path
+          this.expectExitWithErr('NO_SPECS_FOUND', path.join(cwd, '../path/to/**/*'))
         })
       })
 
       it('logs error and exits when spec absolute file was specified and does not exist', function () {
         return cypress.start([
           `--run-project=${this.todosPath}`,
-          `--spec=${this.todosPath}/tests/path/to/spec`,
+          `--spec=/path/to/spec`,
         ])
         .then(() => {
-          // includes path to the spec
-          this.expectExitWithErr('NO_SPECS_FOUND', 'tests/path/to/spec')
-          // includes folder name
-          this.expectExitWithErr('NO_SPECS_FOUND', this.todosPath)
+          // includes folder name + path to the spec
+          this.expectExitWithErr('NO_SPECS_FOUND', `/path/to/spec`)
+          expect(errors.log).not.to.be.calledWithMatch(this.todospath)
         })
       })
 
@@ -709,7 +748,7 @@ describe('lib/cypress', () => {
           '--spec=/this/does/not/exist/**/*',
         ])
         .then(() => {
-          this.expectExitWithErr('NO_SPECS_FOUND', 'We searched for any files matching this glob pattern')
+          this.expectExitWithErr('NO_SPECS_FOUND', 'We searched for specs matching this glob pattern')
           this.expectExitWithErr('NO_SPECS_FOUND', 'this/does/not/exist/**/*')
         })
       })
@@ -739,7 +778,7 @@ describe('lib/cypress', () => {
       .then(() => {
         return cypress.start([`--run-project=${this.todosPath}`])
       }).then(() => {
-        this.expectExitWithErr('SETTINGS_VALIDATION_ERROR', 'cypress.config.js')
+        this.expectExitWithErr('CONFIG_VALIDATION_ERROR', 'cypress.config.js')
       })
     })
 
@@ -750,7 +789,7 @@ describe('lib/cypress', () => {
       ])
       .then(() => {
         this.expectExitWithErr('CONFIG_VALIDATION_ERROR', 'localhost:9999')
-        this.expectExitWithErr('CONFIG_VALIDATION_ERROR', 'We found an invalid configuration value')
+        this.expectExitWithErr('CONFIG_VALIDATION_ERROR', 'An invalid configuration value was set.')
       })
     })
 
@@ -760,7 +799,7 @@ describe('lib/cypress', () => {
       return cypress.start([`--run-project=${this.todosPath}`])
       .then(() => {
         this.expectExitWithErr('CONFIG_VALIDATION_ERROR', 'localhost:9999')
-        this.expectExitWithErr('CONFIG_VALIDATION_ERROR', 'We found an invalid configuration value')
+        this.expectExitWithErr('CONFIG_VALIDATION_ERROR', 'An invalid configuration value was set.')
       })
     })
 
@@ -1145,7 +1184,7 @@ describe('lib/cypress', () => {
           ]).then(() => {
             // uses default specPattern which is cypress/integration/**/*
             // exits with 1 since there are not specs for this pristine project.
-            this.expectExitWithErr('NO_SPECS_FOUND', 'We searched for any files matching this glob pattern:')
+            this.expectExitWithErr('NO_SPECS_FOUND', 'We searched for specs matching this glob pattern:')
             this.expectExitWithErr('NO_SPECS_FOUND', 'Can\'t run because no spec files were found')
             this.expectExitWith(1)
           })
@@ -1764,19 +1803,23 @@ describe('lib/cypress', () => {
         this.open = sinon.stub(ServerE2E.prototype, 'open').resolves([])
       })
 
-      it('reads config from a custom config file', function () {
+      // TODO: (tgriesser) needs a system test, the mocking here no longer is correct
+      it.skip('reads config from a custom config file', function () {
+        const bus = new EE()
+
         return fs.writeJson(path.join(this.pristinePath, this.filename), {
           env: { foo: 'bar' },
           port: 2020,
         }).then(() => {
-          cypress.start([
+          return cypress.start([
           `--config-file=${this.filename}`,
           ])
           .then(() => {
             const options = Events.start.firstCall.args[0]
 
-            return Events.handleEvent(options, {}, {}, 123, 'open:project', this.pristinePath)
-          }).then(() => {
+            return Events.handleEvent(options, bus, {}, 123, 'open:project', this.pristinePath)
+          })
+          .then(() => {
             expect(this.open).to.be.called
 
             const cfg = this.open.getCall(0).args[0]

@@ -8,7 +8,6 @@ const humanInterval = require('human-interval')
 const { agent } = require('@packages/network')
 const pkg = require('@packages/root')
 const machineId = require('./util/machine_id')
-const humanTime = require('./util/human_time')
 const errors = require('./errors')
 const { apiRoutes } = require('./util/routes')
 
@@ -116,7 +115,7 @@ const retryWithBackoff = (fn) => {
 
       errors.warning(
         'DASHBOARD_API_RESPONSE_FAILED_RETRYING', {
-          delay: humanTime.long(delay, false),
+          delay,
           tries: DELAYS.length - retryIndex,
           response: err,
         },

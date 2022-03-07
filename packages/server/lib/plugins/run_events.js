@@ -11,7 +11,7 @@ module.exports = {
     .catch((err) => {
       err = err || {}
 
-      errors.throw('PLUGINS_RUN_EVENT_ERROR', eventName, err.stack || err.message || err)
+      errors.throwErr('PLUGINS_RUN_EVENT_ERROR', eventName, err)
     })
   }),
 }

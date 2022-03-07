@@ -90,7 +90,7 @@ describe('lib/gui/windows', () => {
           height: 'someHeight',
           x: 'anX',
           y: 'aY',
-          devTools: 'whatsUpWithDevTools',
+          devTools: 'whatsUpwithInternalDevTools',
         }
       })
     })
@@ -167,7 +167,7 @@ describe('lib/gui/windows', () => {
       return Promise
       .delay(100)
       .then(() => {
-        expect(this.state.set).to.be.calledWith({ whatsUpWithDevTools: true })
+        expect(this.state.set).to.be.calledWith({ whatsUpwithInternalDevTools: true })
       })
     })
 
@@ -178,7 +178,7 @@ describe('lib/gui/windows', () => {
       return Promise
       .delay(100)
       .then(() => {
-        expect(this.state.set).to.be.calledWith({ whatsUpWithDevTools: false })
+        expect(this.state.set).to.be.calledWith({ whatsUpwithInternalDevTools: false })
       })
     })
   })

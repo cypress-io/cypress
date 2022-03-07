@@ -119,35 +119,45 @@ exports['e2e plugins can modify config from plugins 1'] = `
 `
 
 exports['e2e plugins catches invalid browsers list returned from plugins 1'] = `
-An invalid configuration value returned from the setupNodeEvents on config file: \`cypress.config.js\`
+Your configFile as cypress.config.js set an invalid value:
 
 Expected at least one browser
 
 `
 
 exports['e2e plugins catches invalid browser returned from plugins 1'] = `
-An invalid configuration value returned from the setupNodeEvents on config file: \`cypress.config.js\`
+Your configFile at cypress.config.js set an invalid value:
 
-Found an error while validating the \`browsers\` list. Expected \`displayName\` to be a non-empty string. Instead the value was: \`{"name":"browser name","family":"chromium"}\`
+The error occurred while validating the browsers list.
+
+Expected displayName to be a non-empty string.
+
+Instead the value was: 
+
+{
+  "name": "browser name",
+  "family": "chromium"
+}
 
 `
 
 exports['e2e plugins can filter browsers from config 1'] = `
-The specified browser was not found on your system or is not supported by Cypress: \`chrome\`
+Can't run because you've entered an invalid browser name.
+
+Browser: chrome was not found on your system or is not supported by Cypress.
 
 Cypress supports the following browsers:
-- chrome
-- chromium
-- edge
-- electron
-- firefox
+ - electron
+ - chrome
+ - chromium
+ - chrome:canary
+ - edge
+ - firefox
 
 You can also use a custom browser: https://on.cypress.io/customize-browsers
 
 Available browsers found on your system are:
-- electron
-
-Read more about how to troubleshoot launching browsers: https://on.cypress.io/troubleshooting-launching-browsers
+ - electron
 
 `
 
@@ -346,9 +356,11 @@ exports['e2e plugins calls after:screenshot for cy.screenshot() and failure scre
 `
 
 exports['e2e plugins catches invalid viewportWidth returned from plugins 1'] = `
-An invalid configuration value returned from the setupNodeEvents on config file: \`cypress.config.js\`
+Your configFile at cypress.config.js set an invalid value:
 
-Expected \`viewportWidth\` to be a number. Instead the value was: \`"foo"\`
+Expected viewportWidth to be a number.
+
+Instead the value was: "foo"
 
 `
 
@@ -370,10 +382,11 @@ exports['e2e plugins fails when there is an async error inside an event handler 
                                                                                                     
   Running:  app.cy.js                                                                       (1 of 1)
 
+Your configFile threw an error from: cypress.config.js
 
-The following error was thrown by a plugin. We stopped running your tests because a plugin crashed. Please check your e2e.setupNodeEvents method in \`cypress.config.js\`
+We stopped running your tests because your config file crashed.
 
- Error: Async error from plugins file
+Error: Async error from plugins file
       [stack trace lines]
 
   (Results)
@@ -405,43 +418,26 @@ The following error was thrown by a plugin. We stopped running your tests becaus
 
 `
 
-exports['e2e plugins fails when setupNodeEvents is not a function 1'] = `
-The \`setupNodeEvents\` method must BE a function with the following signature:
-
-\`\`\`
-setupNodeEvents (on, config) {
-  // configure plugins here
-}
-\`\`\`
-
-Learn more: https://on.cypress.io/plugins-api
-
-We loaded the \`setupNodeEvents\` from: \`/foo/bar/.projects/plugin-empty/cypress.config.js\`
-
-It exported:
-
- "foo"
-
-`
-
 exports['e2e plugins fails when invalid event is registered 1'] = `
-The following validation error was thrown by your plugins file (\`/foo/bar/.projects/plugin-validation-error/cypress.config.js\`).
+Your configFile threw a validation error from: /foo/bar/.projects/plugin-validation-error/cypress.config.js
 
- Error: You must pass a valid event name when registering a plugin.
+You must pass a valid event name when registering a plugin.
 
-You passed: \`invalid:event\`
+You passed: invalid:event
 
 The following are valid events:
-- after:run
-- after:screenshot
-- after:spec
-- before:browser:launch
-- before:run
-- before:spec
-- dev-server:start
-- file:preprocessor
-- task
 
+ - after:run
+ - after:screenshot
+ - after:spec
+ - before:browser:launch
+ - before:run
+ - before:spec
+ - dev-server:start
+ - file:preprocessor
+ - task
+
+InvalidEventNameError: invalid event name registered: invalid:event
       [stack trace lines]
 `
 
@@ -508,6 +504,80 @@ exports['e2e plugins does not report more screenshots than exist if user overwri
   │ ✔  after_screenshot_overwrite.cy.js         XX:XX        3        3        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        3        3        -        -        -  
+
+
+`
+
+exports['e2e plugins fails when require throws synchronously 1'] = `
+Your configFile is invalid: /foo/bar/.projects/plugins-root-sync-error/cypress.config.js
+
+It threw an error when required, check the stack trace below:
+
+RootSyncError: Root sync error from plugins file
+      [stack trace lines]
+`
+
+exports['e2e plugins fails when function throws synchronously 1'] = `
+Your configFile threw an error from: /foo/bar/.projects/plugins-function-sync-error/cypress.config.js
+
+The error was thrown while executing your e2e.setupNodeEvents() function:
+
+FunctionSyncError: Function sync error from plugins file
+      [stack trace lines]
+`
+
+exports['e2e plugins fails when invalid event handler is registered 1'] = `
+Your configFile threw an error from: /foo/bar/.projects/plugin-invalid-event-handler-error/cypress.config.js
+
+The error was thrown while executing your e2e.setupNodeEvents() function:
+
+InvalidEventHandlerError: The handler for the event \`task\` must be an object
+      [stack trace lines]
+`
+
+exports['e2e plugins fails when setupNodeEvents is not a function 1'] = `
+Your configFile is invalid: /foo/bar/.projects/plugin-empty/cypress.config.js
+
+The e2e.setupNodeEvents() function must be defined with the following signature:
+
+{
+  e2e: {
+    setupNodeEvents(on, config) {
+      // configure tasks and plugins here
+    }
+  }
+}
+
+Instead we saw:
+
+"foo"
+
+https://on.cypress.io/plugins-api
+
+
+`
+
+exports['e2e plugins fails when there is no function exported 1'] = `
+Your configFile is invalid: /foo/bar/.projects/plugin-no-function-return/cypress.config.js
+
+The e2e.setupNodeEvents() function must be defined with the following signature:
+
+{
+  e2e: {
+    setupNodeEvents(on, config) {
+      // configure tasks and plugins here
+    }
+  }
+}
+
+Instead we saw:
+
+{
+  "foo": "foo",
+  "bar": "bar"
+}
+
+https://on.cypress.io/plugins-api
 
 
 `

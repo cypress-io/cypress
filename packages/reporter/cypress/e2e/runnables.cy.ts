@@ -206,9 +206,7 @@ describe('runnables', () => {
     })
   })
 
-  // TODO: Skipped until unified run mode is in
-  // JIRA: UNIFY-603
-  describe.skip('runnable-header (unified)', () => {
+  describe('runnable-header (unified)', () => {
     beforeEach(() => {
       cy.window().then((win) => win.__vite__ = true)
 

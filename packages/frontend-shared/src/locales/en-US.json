@@ -193,7 +193,8 @@
       "bodyInitial": "Logging in gives you access to the {0}. You can set up projects to be recorded and see test data from your project.",
       "bodySuccess": "You are now logged in as {0}.",
       "bodyError": "An error occurred while attempting to log in:",
-      "bodyBrowserError": "Cypress was unable to open your installed browser. To continue logging in, please paste this URL into your web browser:",
+      "bodyBrowserError": "The browser could not be opened.",
+      "bodyBrowserErrorDetails": "Cypress was unable to open your installed browser. To continue logging in, please paste this URL into your web browser:",
       "cloud": "Cypress Dashboard Service",
       "titleInitial": "Log in to Cypress",
       "titleSuccess": "Login Successful",
@@ -344,13 +345,11 @@
       "title": "External Editor",
       "description": "External editor to use for editing code opened when using Cypress.",
       "noEditorSelectedPlaceholder": "Choose your editor...",
-      "editorRadioLabel": "Choose editor",
-      "customEditorRadioLabel": "Add custom editor by path",
-      "customPathPlaceholder": "Custom path..."
+      "customPathPlaceholder": "/path/to/editor"
     },
     "projectId": {
       "title": "Project ID",
-      "description": "The Project ID configured for this project inside of Cypress Cloud. {0}"
+      "description": "The Project ID configured for this project inside of Cypress Dashboard. {0}"
     },
     "specPattern": {
       "title": "Spec Patterns",
@@ -358,7 +357,7 @@
     },
     "recordKey": {
       "title": "Record Key",
-      "description": "The Record Key configured for this project inside of Cypress Cloud. {0}",
+      "description": "The Record Key configured for this project inside of Cypress Dashboard. {0}",
       "manageKeys": "Manage Keys",
       "errorEmpty": "You do not have permission to record on this project",
       "errorEmptyButton": "Request record rights",
@@ -373,6 +372,10 @@
     "project": {
       "title": "Project Settings",
       "description": "Review the configuration settings currently in use for this project."
+    },
+    "cloud": {
+      "title": "Dashboard Settings",
+      "description": "Review the configuration settings for recording to the Cypress Dashboard."
     },
     "experiments": {
       "title": "Experiments",
@@ -445,7 +448,7 @@
           "connectProject": "Connect project",
           "createProject": "Create project",
           "placeholderOrganizations": "Pick an organization",
-          "placeholderProjects": "Pick an project",
+          "placeholderProjects": "Pick a project",
           "placeholderProjectsPending": "Pick an organization first"
         },
         "connectManually": {
@@ -493,7 +496,7 @@
     "modalTitle": "Choose a testing type",
     "e2e": {
       "name": "E2E Testing",
-      "description": "Build and test the entire experience of your application from end-to-end to each ensure each flow matches your expectations."
+      "description": "Build and test the entire experience of your application from end-to-end to ensure each flow matches your expectations."
     },
     "component": {
       "name": "Component Testing",
@@ -503,7 +506,7 @@
   "migration": {
     "before": "Before",
     "after": "After",
-    "heresWhy": "here's why",
+    "heresWhy": "here's why:",
     "renameAuto": {
       "title": "We'll automatically rename your specs in this step",
       "changeButton": "change",
@@ -511,6 +514,7 @@
       "changedSpecExt": "We've changed the default spec file extension from:",
       "changedSpecPatternExplain": "We've made the default spec file extension to {0} in order to avoid conflicts with any existing testing frameworks.",
       "optedOutMessage": "You've opted not to rename your spec file extension",
+      "folderRenameMessage": "You've opted not to rename your spec file extension, we're going to rename the folder",
       "modals": {
         "title": "Change the existing spec file extension",
         "step1": {
@@ -518,8 +522,9 @@
           "line1": "Cypress now supports the ability to create new spec files from within the UI for both E2E and component specs.",
           "line2": "All new spec files created within Cypress will use the default pattern of: ",
           "line3": "We want to rename your existing specs so that they have a consistent filename pattern for both E2E and component testing.",
-          "line4": "We've changed the placement of component specs to be next to their source files (e.g. src/Button.jsx and src/Button.cy.jsx)",
-          "line5": "The new default pattern of {0} prevents targeting conflicts with other testing frameworks. (e.g. Jest)",
+          "line4": "All documentation and example code will be using: ",
+          "line5": "We've changed the placement of component specs to be next to their source files (e.g. src/Button.jsx and src/Button.cy.jsx)",
+          "line6": "The new default pattern of {0} prevents targeting conflicts with other testing frameworks. (e.g. Jest)",
           "buttonProceed": "I still want to change the spec file extension",
           "buttonCancel": "Cancel, keep the default extension"
         },
@@ -528,6 +533,7 @@
           "label": "Choose from the following filename patterns:",
           "option1": "{0} (Recommended)",
           "option2": "Don't rename anything — keep what I have.",
+          "option3": "Rename folder only.",
           "buttonSave": "Save Changes",
           "buttonCancel": "Cancel"
         }
@@ -546,7 +552,7 @@
       "changedSupportFile": "We've renamed the E2E support file from:"
     },
     "configFile": {
-      "title": "We need to move the Cypress configuration file",
+      "title": "We need to migrate to the new Cypress configuration file",
       "changedDefault": "We've changed the default Cypress config file from:",
       "customOptions": "We've set a custom {specPattern} option based on your {options}.",
       "willConvert": "We'll automatically create a new {jsFile} file and seed it with your options from your existing {jsonFile}."
@@ -562,13 +568,14 @@
       "title": "Migration Helper",
       "description": "Complete the steps below to migrate your project to Cypress 10",
       "step1": {
-        "title": "Automatically rename existing specs",
+        "title": "Rename existing specs",
         "description": "In this step, we'll automatically rename and move your existing spec files.",
         "button": "Rename these specs for me",
-        "buttonSkip": "Skip renaming specs"
+        "buttonSkip": "Skip renaming specs",
+        "buttonRenameFolder": "Rename the folder for me"
       },
       "step2": {
-        "title": "Manually move your existing component specs",
+        "title": "Move your existing component specs",
         "description": "In this step, you'll manually move your existing component specs to their new default location.",
         "buttonWait": "Waiting for you to move your component specs...",
         "buttonDone": "Continue to next step",
@@ -580,7 +587,7 @@
         "button": "Rename the support file for me"
       },
       "step4": {
-        "title": "Automatically migrate the Cypress configuration file",
+        "title": "Migrate to the new Cypress configuration file",
         "description": "In this step, we'll automatically migrate your existing cypress configuration to the new Cypress configuration file.",
         "button": "Migrate the configuration for me"
       },

@@ -11,17 +11,10 @@
         v-for="row in list"
         :key="row.index"
         class="
-        border-transparent cursor-pointer
+        cursor-pointer
         flex
-        border-1
-        relative
         group
-        hover:border-gray-900
-        focus-within:border-indigo-300
-        hover:focus-within:border-indigo-300"
-        :class="{
-          'hover:border-gray-1000': isCurrentSpec(row.data),
-        }"
+        relative"
         data-testid="spec-row-item"
         :data-selected-spec="isCurrentSpec(row.data)"
         @click.self="submit(row.data, row.index)"
@@ -31,9 +24,10 @@
           :key="row.data.data?.absolute"
           :tabindex="isTabbable(row, row.index) ? '0' : '-1'"
           :style="{ paddingLeft: `${(row.data.depth - 2) * 10 + 16}px` }"
-          class="outline-none w-full group before:(border-r-4 h-27px rounded-r-4px absolute left-[-4px] w-8px) "
-          :class="{'before:border-r-indigo-300 before:border-r-4': isCurrentSpec(row.data),
-                   'group-hocus:bg-gray-900 focus:bg-gray-900 before:focus-within:(border-r-0) before:(border-r-gray-1000) before:group-hover:(h-26px border-r-gray-900)': !isCurrentSpec(row.data)
+          class="border-transparent outline-none border-1 w-full group focus-visible:bg-gray-900 before:(border-r-4 border-transparent h-28px rounded-r-4px absolute left-[-4px] w-8px) "
+          :class="{
+            'before:border-r-indigo-300': isCurrentSpec(row.data),
+            'before:focus:border-r-indigo-300 before:focus-visible:border-r-transparent before:hover:border-r-indigo-300': !isCurrentSpec(row.data)
           }"
           :to="{ path: '/specs/runner', query: { file: row.data.data?.relative } }"
           @focus="resetFocusIfNecessary(row, row.index)"
@@ -65,8 +59,10 @@
 </template>
 
 <script setup lang="ts">
-import { useCollapsibleTree, UseCollapsibleTreeNode } from '@packages/frontend-shared/src/composables/useCollapsibleTree'
-import { buildSpecTree, FuzzyFoundSpec, SpecTreeNode, getDirIndexes } from '@packages/frontend-shared/src/utils/spec-utils'
+import { useCollapsibleTree } from '@packages/frontend-shared/src/composables/useCollapsibleTree'
+import type { UseCollapsibleTreeNode } from '@packages/frontend-shared/src/composables/useCollapsibleTree'
+import { buildSpecTree, getDirIndexes } from '@packages/frontend-shared/src/utils/spec-utils'
+import type { SpecTreeNode, FuzzyFoundSpec } from '@packages/frontend-shared/src/utils/spec-utils'
 import SpecFileItem from './SpecFileItem.vue'
 import { computed, watch, onMounted } from 'vue'
 import DirectoryItem from './DirectoryItem.vue'

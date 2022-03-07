@@ -308,6 +308,7 @@ describe('taking screenshots', () => {
     cy.visit('http://localhost:3322/color/yellow')
     cy.screenshot('overwrite-test', {
       overwrite: false,
+      capture: 'viewport',
       clip: { x: 10, y: 10, width: 160, height: 80 },
     })
 
@@ -320,6 +321,7 @@ describe('taking screenshots', () => {
 
     cy.screenshot('overwrite-test', {
       overwrite: true,
+      capture: 'viewport',
       clip: { x: 10, y: 10, width: 100, height: 50 },
     })
 
@@ -342,6 +344,7 @@ describe('taking screenshots', () => {
     cy.viewport(600, 200)
     cy.visit('http://localhost:3322/color/yellow')
     cy.screenshot('overwrite-test', {
+      capture: 'viewport',
       clip: { x: 10, y: 10, width: 160, height: 80 },
     })
 
@@ -353,6 +356,7 @@ describe('taking screenshots', () => {
     })
 
     cy.screenshot('overwrite-test', {
+      capture: 'viewport',
       clip: { x: 10, y: 10, width: 100, height: 50 },
     })
 

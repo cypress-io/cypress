@@ -1,3 +1,10 @@
+# [@cypress/react-v5.12.3](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.12.2...@cypress/react-v5.12.3) (2022-02-10)
+
+
+### Bug Fixes
+
+* set correct default when using react-scripts plugin ([#20141](https://github.com/cypress-io/cypress/issues/20141)) ([9b967e0](https://github.com/cypress-io/cypress/commit/9b967e06f5df1e8ae2c5b13d5c7f7170b069f5bc))
+
 # [@cypress/react-v5.12.2](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.12.1...@cypress/react-v5.12.2) (2022-02-08)
 
 
