@@ -75,10 +75,12 @@ export async function startDevServer (startDevServerArgs: StartDevServer, exitPr
 // trigger recompilation if this is for a spec we haven't already compiled.
 function recompileMiddleware (webpackDevServer: WebpackDevServer, options: any) {
   return (req: any, res: any, next: any) => {
-    if (req.url === '/__cypress/src/runtime-main.js') {
+    if (req.url.match(/\/__cypress\/src\/.*\.js/) && req.get('referer')) {
       const spec = _.last(req.get('referer').split('/__cypress/iframes/'))
 
-      options.devServerEvents.emit('webpack-dev-server:request', spec)
+      options.devServerEvents.emit('webpack-dev-server:request', spec, next)
+
+      return
     }
 
     next()

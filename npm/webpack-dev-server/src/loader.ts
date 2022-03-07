@@ -45,9 +45,9 @@ function buildSpecs (projectRoot: string, allFiles: Cypress.Cypress['spec'][] = 
   debug(`projectRoot: ${projectRoot}, allFiles: ${allFiles.map((f) => f.absolute).join(',')}`)
 
   const files = allFiles
-    .map((f, i) => makeImport(f, f.name, `spec-${i}`, projectRoot))
-    .filter(Boolean)
-    .join(',')
+  .map((f, i) => makeImport(f, f.name, `spec-${i}`, projectRoot))
+  .filter(Boolean)
+  .join(',')
 
   return `{${files}}`
 }

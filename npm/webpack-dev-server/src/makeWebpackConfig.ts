@@ -35,7 +35,7 @@ export async function makeWebpackConfig (userWebpackConfig: webpack.Configuratio
   const dynamicWebpackConfig = {
     optimization: {
       splitChunks: {
-        chunks: 'async' as any,
+        chunks: 'async' as 'async',
         // Two async module requests: The support file, and the spec being loaded.
         // This setting forces the spec file into its own chunk,
         // rather than letting it get split out into various chunks depending

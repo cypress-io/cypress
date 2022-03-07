@@ -54,6 +54,9 @@ export default class CypressCTOptionsPlugin {
   private allFiles: Cypress.Cypress['spec'][]
   private supportFile: string
   private errorEmitted = false
+  private pendingRequests: (() => void)[] = []
+  private compilation: Webpack45Compilation | null = null
+  private compiling = false
 
   private readonly projectRoot: string
   private readonly devServerEvents: EventEmitter
@@ -97,23 +100,31 @@ export default class CypressCTOptionsPlugin {
     return result
   }
 
-  private onSpecsChanged (specs: Cypress.Cypress['spec'][], compilation: Webpack45Compilation) {
+  private onSpecsChanged = (specs: Cypress.Cypress['spec'][]) => {
     if (_.isEqual(specs, this.allFiles)) {
       return
     }
 
     this.allFiles = specs
-    this.invalidate(compilation)
+    this.invalidate()
   }
 
-  private onSpecRequest (url: string, compilation: Webpack45Compilation) {
+  private onSpecRequest = (url: string, done: () => void) => {
     if (!this.isSpecFile(url) || this.active.has(url)) {
+      if (this.compiling) {
+        this.pendingRequests.push(done)
+      } else {
+        done()
+      }
+
       return
     }
 
     debug('compiling new spec', url)
     this.active.add(url)
-    this.invalidate(compilation)
+    this.compiling = true
+    this.pendingRequests.push(done)
+    this.invalidate()
   }
 
   /**
@@ -124,10 +135,11 @@ export default class CypressCTOptionsPlugin {
   private setupCompilationHooks (compilation: Webpack45Compilation) {
     // This function gets invoked every time compilation is invoked; we need to clean up
     // any previous listeners so we don't leak them.
+    this.compilation = compilation
     this.devServerEvents.off('dev-server:specs:changed', this.onSpecsChanged)
     this.devServerEvents.off('webpack-dev-server:request', this.onSpecRequest)
-    this.devServerEvents.on('dev-server:specs:changed', (specs) => this.onSpecsChanged(specs, compilation))
-    this.devServerEvents.on('webpack-dev-server:request', (url) => this.onSpecRequest(url, compilation))
+    this.devServerEvents.on('dev-server:specs:changed', this.onSpecsChanged)
+    this.devServerEvents.on('webpack-dev-server:request', this.onSpecRequest)
 
     /* istanbul ignore next */
     if ('NormalModule' in webpack) {
@@ -145,14 +157,19 @@ export default class CypressCTOptionsPlugin {
     }
   }
 
-  private invalidate = (compilation: Webpack45Compilation) => {
-    const inputFileSystem = compilation.inputFileSystem
+  private invalidate = () => {
+    if (!this.compilation) {
+      return
+    }
+
+    const inputFileSystem = this.compilation.inputFileSystem
     const utimesSync: UtimesSync = semver.gt('4.0.0', webpack.version) ? inputFileSystem.fileSystem.utimesSync : fs.utimesSync
 
     utimesSync(path.resolve(__dirname, 'browser.js'), new Date(), new Date())
   }
 
   private afterCompile (compilation: Webpack45Compilation) {
+    this.compiling = false
     const stats = compilation.getStats()
 
     if (stats.hasErrors()) {
@@ -171,6 +188,9 @@ export default class CypressCTOptionsPlugin {
       // compilation succeed but assets haven't emitted to the output yet
       this.devServerEvents.emit('dev-server:compile:error', null)
     }
+
+    this.pendingRequests.forEach((done) => done())
+    this.pendingRequests = []
   }
 
   private afterEmit (compilation: Webpack45Compilation) {
@@ -185,6 +205,7 @@ export default class CypressCTOptionsPlugin {
     })
 
     compiler.hooks.thisCompilation.tap(pluginName, (c) => this.setupCompilationHooks(c as Webpack45Compilation))
+    compiler.hooks.beforeCompile.tap(pluginName, (c) => this.compiling = true)
     compiler.hooks.afterCompile.tap(pluginName, (c) => this.afterCompile(c as Webpack45Compilation))
     compiler.hooks.afterEmit.tap(pluginName, (c) => this.afterEmit(c as Webpack45Compilation))
   }
