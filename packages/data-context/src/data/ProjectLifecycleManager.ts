@@ -563,12 +563,24 @@ export class ProjectLifecycleManager {
   }
 
   private validateConfigRoot (config: Cypress.ConfigOptions) {
+    // debugger
+
     return this.ctx._apis.configApi.validateRootConfigBreakingChanges(
       config,
       (type, obj) => {
+        const error = getError(type, obj)
+
+        // console.log('WARNING: ', error)
+        this.ctx.onWarning(error)
+
         return getError(type, obj)
       },
       (type, obj) => {
+        const error = getError(type, obj)
+
+        // console.log('ERROR: ', error)
+        this.ctx.onWarning(error)
+
         throw getError(type, obj)
       },
     )
