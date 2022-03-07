@@ -97,7 +97,21 @@ function run (ipc, file, projectRoot) {
     const noop = () => {}
     const legacyPluginsConfig = await legacyPlugins(noop, legacyConfig)
 
-    ipc.send('loadLegacyPlugins:reply', { config: legacyPluginsConfig })
+    // match merging strategy from 9.x
+    const mergedLegacyConfig = {
+      ...legacyConfig,
+      ...legacyPluginsConfig,
+      e2e: {
+        ...(legacyConfig.e2e || {}),
+        ...(legacyPluginsConfig.e2e || {}),
+      },
+      component: {
+        ...(legacyConfig.component || {}),
+        ...(legacyPluginsConfig.component || {}),
+      }
+    }
+
+    ipc.send('loadLegacyPlugins:reply', { config: mergedLegacyConfig })
   })
 
   ipc.on('loadConfig', () => {

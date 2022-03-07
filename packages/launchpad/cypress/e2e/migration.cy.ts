@@ -102,7 +102,7 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
     checkOutcome()
   })
 
-  it.only('completes journey for migration-component-testing-defaults', () => {
+  it('completes journey for migration-component-testing-defaults', () => {
     startMigrationFor('migration-component-testing-defaults')
     // default testFiles - auto
     cy.get(renameAutoStep).should('exist')
@@ -472,7 +472,8 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
     checkOutcome()
   })
 
-  it('completes journey for migration-e2e-no-plugins-support-file', () => {
+  // TODO
+  it.only('completes journey for migration-e2e-no-plugins-support-file', () => {
     startMigrationFor('migration-e2e-no-plugins-support-file')
     // defaults, rename all the things
     // can rename integration->e2e
