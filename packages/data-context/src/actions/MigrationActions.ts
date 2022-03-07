@@ -141,22 +141,9 @@ export class MigrationActions {
         hasCustomSupportFile: false,
         hasComponentTesting,
         hasE2ESpec,
-        hasPluginsFile: true, // TODO
+        hasPluginsFile: true,
       }
     })
-
-    // // We cannot check already migrated component specs since it would pick up e2e specs as well
-    // // the default specPattern for CT is **/*.cy.js.
-    // // since component testing has to be re-installed anyway, we can just skip this
-    // const pluginsFileMissing = (
-    //   (legacyConfigForMigration.e2e?.pluginsFile ?? undefined) === undefined &&
-    //   legacyConfigForMigration.pluginsFile === undefined &&
-    //   !await tryGetDefaultLegacyPluginsFile(this.ctx.currentProject)
-    // )
-
-    // if (getPluginsFile(this.legacyConfig) === false || pluginsFileMissing) {
-    //   this.hasPluginsFile = false
-    // }
   }
 
   async createConfigFile () {
@@ -180,25 +167,6 @@ export class MigrationActions {
     })
 
     return legacyConfigForMigration
-  }
-
-  async parseLegacyConfig (): Promise<Partial<Cypress.Config>> {
-    // avoid reading the same file over and over again before it was finished reading
-    if (this.ctx.lifecycleManager.metaState.hasLegacyCypressJson && !this._oldConfigPromise) {
-      const cfgPath = path.join(this.ctx.lifecycleManager?.projectRoot, 'cypress.json')
-
-      this._oldConfigPromise = this.ctx.file.readJsonFile(cfgPath) as Promise<Partial<Cypress.Config>>
-    }
-
-    if (this._oldConfigPromise) {
-      const _legacyConfig = await this._oldConfigPromise
-
-      this._oldConfigPromise = null
-
-      return _legacyConfig
-    }
-
-    return {}
   }
 
   async renameSpecsFolder () {
