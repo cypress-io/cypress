@@ -1,11 +1,9 @@
 require('../../spec_helper')
-const _ = require('lodash')
 const os = require('os')
 const path = require('path')
 const chalk = require('chalk')
 const Promise = require('bluebird')
 const mockfs = require('mock-fs')
-const mockedEnv = require('mocked-env')
 const snapshot = require('../../support/snapshot')
 
 const stdout = require('../../support/stdout')
@@ -72,6 +70,32 @@ describe('/lib/tasks/install', function () {
             normalize(this.stdout.toString()),
           )
         })
+      })
+    })
+
+    describe('non-stable builds', () => {
+      function runInstall () {
+        return install.start({
+          buildInfo: {
+            stable: false,
+            commitSha: 'abc123',
+            commitBranch: 'aBranchName',
+            commitDate: new Date('11-27-1996').toISOString(),
+          },
+        })
+      }
+
+      it('install from a constructed CDN URL', async function () {
+        await runInstall()
+
+        expect(download.start).to.be.calledWithMatch({
+          version: 'https://cdn.cypress.io/beta/binary/0.0.0-development/darwin-x64/aBranchName-abc123/cypress.zip',
+        })
+      })
+
+      it('logs a warning about installing a pre-release', async function () {
+        await runInstall()
+        snapshot(normalize(this.stdout.toString()))
       })
     })
 
@@ -460,145 +484,18 @@ describe('/lib/tasks/install', function () {
     })
   })
 
-  context('._getBinaryUrlFromPrereleaseNpmUrl', function () {
-    beforeEach(() => {
+  context('._getBinaryUrlFromBuildInfo', function () {
+    const buildInfo = {
+      commitSha: 'abc123',
+      commitBranch: 'aBranchName',
+    }
+
+    it('generates the expected URL', () => {
       os.platform.returns('linux')
       sinon.stub(os, 'arch').returns('x64')
-    })
 
-    it('returns binary url for prerelease npm url', function () {
-      expect(install._getBinaryUrlFromPrereleaseNpmUrl('https://cdn.cypress.io/beta/npm/5.1.1/linux-x64/ciprovider-branchname-sha/cypress.tgz'))
-      .to.eq('https://cdn.cypress.io/beta/binary/5.1.1/linux-x64/ciprovider-branchname-sha/cypress.zip')
-
-      expect(install._getBinaryUrlFromPrereleaseNpmUrl('https://cdn.cypress.io/beta/npm/5.1.1/inux-x64/circle-develop-3fdfc3b453eb38ad3c0b079531e4dde6668e3dd0-436710/cypress.tgz'))
-      .to.eq('https://cdn.cypress.io/beta/binary/5.1.1/linux-x64/circle-develop-3fdfc3b453eb38ad3c0b079531e4dde6668e3dd0-436710/cypress.zip')
-
-      expect(install._getBinaryUrlFromPrereleaseNpmUrl('https://cdn.cypress.io/beta/npm/5.1.1/inux-x64/circle-develop/some/branch-3fdfc3b453eb38ad3c0b079531e4dde6668e3dd0-436710/cypress.tgz'))
-      .to.eq('https://cdn.cypress.io/beta/binary/5.1.1/linux-x64/circle-develop/some/branch-3fdfc3b453eb38ad3c0b079531e4dde6668e3dd0-436710/cypress.zip')
-    })
-
-    it('returns nothing for an invalid url', function () {
-      expect(install._getBinaryUrlFromPrereleaseNpmUrl('1.2.3')).to.be.undefined
-      expect(install._getBinaryUrlFromPrereleaseNpmUrl(null)).to.be.undefined
-    })
-  })
-
-  context('._getVersionSpecifier', function () {
-    let restoreEnv
-
-    beforeEach(function () {
-      sinon.stub(fs, 'readJSON').rejects()
-      restoreEnv && restoreEnv()
-    })
-
-    it('resolves undefined if no versionSpecifier found', async function () {
-      expect(await install._getVersionSpecifier('/foo/bar/baz')).to.be.undefined
-    })
-
-    it('resolves with cypress.tgz URL if specified in npm argv', async function () {
-      restoreEnv = mockedEnv({
-        npm_config_argv: JSON.stringify({
-          original: ['npm', 'i', 'https://foo.com/cypress.tgz'],
-        }),
-      })
-
-      expect(await install._getVersionSpecifier('/foo/bar/baz')).to.eq('https://foo.com/cypress.tgz')
-    })
-
-    it('resolves with cypress.tgz URL if specified in npm env npm_package_resolved', async function () {
-      restoreEnv = mockedEnv({
-        npm_package_resolved: 'https://foo.com/cypress.tgz',
-      })
-
-      expect(await install._getVersionSpecifier('/foo/bar/baz')).to.eq('https://foo.com/cypress.tgz')
-    })
-
-    it('resolves with versionSpecifier from parent pkg.json', async function () {
-      fs.readJSON.withArgs('/foo/bar/baz/package.json').resolves({
-        dependencies: {
-          'cypress': '1.2.3',
-        },
-      })
-
-      fs.readJSON.withArgs('/foo/bar/package.json').resolves({
-        dependencies: {
-          'cypress': 'wrong',
-        },
-      })
-
-      expect(await install._getVersionSpecifier('/foo/bar/baz')).to.eq('1.2.3')
-    })
-
-    it('resolves with devDependencies too', async function () {
-      fs.readJSON.withArgs('/foo/bar/baz/package.json').resolves({
-        devDependencies: {
-          'cypress': '4.5.6',
-        },
-      })
-
-      expect(await install._getVersionSpecifier('/foo/bar/baz')).to.eq('4.5.6')
-    })
-
-    it('resolves with optionalDependencies too', async function () {
-      fs.readJSON.withArgs('/foo/bar/baz/package.json').resolves({
-        optionalDependencies: {
-          'cypress': '6.7.8',
-        },
-      })
-
-      expect(await install._getVersionSpecifier('/foo/bar/baz')).to.eq('6.7.8')
-    })
-
-    context('with win32 path functions and paths', async function () {
-      const oldPath = _.clone(path)
-
-      beforeEach(() => {
-        _.assign(path, path.win32)
-      })
-
-      afterEach(() => {
-        _.assign(path, oldPath)
-      })
-
-      it('resolves undefined if no versionSpecifier found', async function () {
-        expect(await install._getVersionSpecifier('C:\\foo\\bar\\baz')).to.be.undefined
-      })
-
-      it('resolves with versionSpecifier from parent pkg.json', async function () {
-        fs.readJSON.withArgs('C:\\foo\\bar\\baz\\package.json').resolves({
-          dependencies: {
-            'cypress': '1.2.3',
-          },
-        })
-
-        fs.readJSON.withArgs('C:\\foo\\bar\\package.json').resolves({
-          dependencies: {
-            'cypress': 'wrong',
-          },
-        })
-
-        expect(await install._getVersionSpecifier('C:\\foo\\bar\\baz')).to.eq('1.2.3')
-      })
-
-      it('resolves with devDependencies too', async function () {
-        fs.readJSON.withArgs('C:\\foo\\bar\\baz\\package.json').resolves({
-          devDependencies: {
-            'cypress': '4.5.6',
-          },
-        })
-
-        expect(await install._getVersionSpecifier('C:\\foo\\bar\\baz')).to.eq('4.5.6')
-      })
-
-      it('resolves with optionalDependencies too', async function () {
-        fs.readJSON.withArgs('C:\\foo\\bar\\baz\\package.json').resolves({
-          optionalDependencies: {
-            'cypress': '6.7.8',
-          },
-        })
-
-        expect(await install._getVersionSpecifier('C:\\foo\\bar\\baz')).to.eq('6.7.8')
-      })
+      expect(install._getBinaryUrlFromBuildInfo(buildInfo))
+      .to.eq(`https://cdn.cypress.io/beta/binary/0.0.0-development/linux-x64/aBranchName-abc123/cypress.zip`)
     })
   })
 })
