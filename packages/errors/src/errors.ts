@@ -1309,6 +1309,14 @@ export const AllCypressErrors = {
     `
   },
 
+  MIGRATED_OPTION_INVALID: (optionKey: string, err: Error) => {
+    return errTemplate`
+      The ${fmt.highlight(optionKey)} option is invalid
+
+      ${fmt.stackTrace(err)}
+    `
+  },
+
 } as const
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars

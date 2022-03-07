@@ -133,12 +133,14 @@ class RunPlugins {
     })
     .catch((err) => {
       debug('plugins file errored:', err && err.stack)
-      this.ipc.send('setupTestingType:error', util.serializeError(require('@packages/errors').getError(
+      const processedError = err.isCypressErr ? err : require('@packages/errors').getError(
         'CONFIG_FILE_SETUP_NODE_EVENTS_ERROR',
         this.requiredFile,
         initialConfig.testingType,
         err,
-      )))
+      )
+
+      this.ipc.send('setupTestingType:error', util.serializeError(processedError))
     })
   }
 

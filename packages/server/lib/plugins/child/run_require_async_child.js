@@ -163,16 +163,21 @@ function run (ipc, configFile, projectRoot) {
   ipc.send('ready')
 }
 
-const optionsNonValidFor10 = {
-  'integrationFolder': 'error blah',
-}
+const optionsNonValidFor10 = ['integrationFolder']
 
 function wrapNonMigratedOptions (options) {
-  Object.entries(optionsNonValidFor10).forEach(([key, value]) => {
+  function throwInvalidOptionError (key) {
+    const errInternal = new Error(`Invalid option ${key}`)
+
+    Error.captureStackTrace(errInternal, throwInvalidOptionError)
+    const err = require('@packages/errors').getError('MIGRATED_OPTION_INVALID', key, errInternal)
+
+    throw err
+  }
+
+  optionsNonValidFor10.forEach((key) => {
     Object.defineProperty(options, key, {
-      set () {
-        throw new Error(value)
-      },
+      set: throwInvalidOptionError.bind(null, key),
     })
   })
 }
