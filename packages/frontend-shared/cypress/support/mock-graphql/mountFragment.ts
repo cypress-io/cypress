@@ -137,7 +137,7 @@ export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
 
   const mutationResolvers: Map<string, MutationResolver<any>> = new Map()
 
-  function setMutationResolver<Result, Variables, T extends TypedDocumentNode<Result, Variables>> (
+  function stubMutationResolver<Result, Variables, T extends TypedDocumentNode<Result, Variables>> (
     document: T,
     resolver: MutationResolver<T>,
   ) {
@@ -146,13 +146,13 @@ export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
     if (definition.kind === 'OperationDefinition' && definition.name) {
       mutationResolvers[definition.name.value] = resolver
     } else {
-      throw new Error('only use mutation documents in setMutationResolver first argument')
+      throw new Error('only use mutation documents in stubMutationResolver first argument')
     }
   }
 
   Cypress.Commands.add('mountFragment', mountFragment)
 
-  Cypress.Commands.add('setMutationResolver', setMutationResolver)
+  Cypress.Commands.add('stubMutationResolver', stubMutationResolver)
 
   Cypress.Commands.add('mountFragmentList', (source, options) => {
     // @ts-expect-error - todo: tim fix
@@ -211,7 +211,7 @@ declare global {
        * @param document
        * @param resolver
        */
-      setMutationResolver<Result, Variables, T extends TypedDocumentNode<Result, Variables>>(
+      stubMutationResolver<Result, Variables, T extends TypedDocumentNode<Result, Variables>>(
         document: T,
         resolver: MutationResolver<T>
       ): Cypress.Chainable<ClientTestContext>
