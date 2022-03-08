@@ -113,7 +113,7 @@ export async function getSpecs (projectRoot: string, config: Partial<Cypress.Con
 
   const globs = integrationFolder
     ? integrationFolder === 'cypress/integration'
-      ? ['**/*'].map((glob) => `${integrationFolder}/${glob}`)
+      ? ['**/*.{js,ts,jsx,tsx,coffee}'].map((glob) => `${integrationFolder}/${glob}`)
       : integrationTestFiles.map((glob) => `${integrationFolder}/${glob}`)
     : []
 

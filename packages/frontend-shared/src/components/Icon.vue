@@ -5,8 +5,6 @@
   >
     <component
       :is="icon"
-      :height="height"
-      :width="width"
     />
   </span>
 </template>
@@ -22,7 +20,5 @@ import type { FunctionalComponent, SVGAttributes } from 'vue'
 
 defineProps<{
   icon?: FunctionalComponent<SVGAttributes, {}>
-  height?: number | string
-  width?: number | string
 }>()
 </script>

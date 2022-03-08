@@ -1,10 +1,9 @@
-import Icon from './Icon.vue'
-import IconHeart from '~icons/mdi/heart'
 import { defaultMessages } from '@cy/i18n'
 import { h } from 'vue'
 
 // Subject Under Test
 import Select from './Select.vue'
+import IconHeart from '~icons/mdi/heart'
 
 const selectText = defaultMessages.components.select
 
@@ -170,11 +169,11 @@ describe('<Select />', () => {
     it('renders all of the slots', () => {
       const vSlots = {
         'item-body': () => 'Item Body',
-        'item-prefix': () => <Icon icon={IconHeart} data-testid="item-prefix" />,
-        'item-suffix': () => <Icon icon={IconHeart} data-testid="item-suffix" />,
+        'item-prefix': () => <IconHeart data-testid="item-prefix"></IconHeart>,
+        'item-suffix': () => <IconHeart data-testid="item-suffix"></IconHeart>,
         'selected': () => 'Selected',
-        'input-prefix': () => <Icon icon={IconHeart} data-testid="input-prefix" />,
-        'input-suffix': () => <Icon icon={IconHeart} data-testid="input-suffix" />,
+        'input-prefix': () => <IconHeart data-testid="input-prefix"></IconHeart>,
+        'input-suffix': () => <IconHeart data-testid="input-suffix"></IconHeart>,
       }
 
       mountSelect({ vSlots })
