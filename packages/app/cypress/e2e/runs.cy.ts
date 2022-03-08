@@ -63,19 +63,20 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
   context('Runs - Connect Org', () => {
     it('opens create Org modal after clicking Connect Project button', () => {
-      cy.intercept('query-Runs', (req) => {
-        req.on('before:response', (res) => {
-          res.body.data.cloudViewer.organizationControl.nodes = []
-          res.body.data.cloudViewer.organizations.nodes = []
-        })
-      })
-
       cy.scaffoldProject('component-tests')
       cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js'])
       cy.startAppServer('component')
 
       cy.loginUser()
       cy.visitApp()
+
+      cy.remoteGraphQLIntercept(async (obj) => {
+        if (obj.result.data?.cloudViewer?.organizations?.nodes) {
+          obj.result.data.cloudViewer.organizations.nodes = []
+        }
+
+        return obj.result
+      })
 
       cy.get('[href="#/runs"]').click()
 
