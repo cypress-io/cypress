@@ -14,7 +14,7 @@
     "@cypress/react-tooltip": "0.5.3",
     "@fontsource/mulish": "4.3.0",
     "@fontsource/open-sans": "4.3.0",
-    "@fortawesome/fontawesome-free": "5.11.2",
+    "@fortawesome/fontawesome-free": "6.0.0",
     "@packages/driver": "0.0.0-development",
     "@packages/resolve-dist": "0.0.0-development",
     "@packages/socket": "0.0.0-development",
