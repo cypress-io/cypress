@@ -53,6 +53,9 @@ describe('App: Settings', () => {
       cy.findByText('Project ID').should('be.visible')
       cy.findByText('Copy').click()
       cy.findByText('Copied!').should('be.visible')
+      cy.withRetryableCtx((ctx) => {
+        expect(ctx.electronApi.copyTextToClipboard as SinonStub).to.have.been.calledWith('abc123')
+      })
     })
 
     it('shows the Record Keys section', () => {
