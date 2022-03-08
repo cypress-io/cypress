@@ -7,7 +7,33 @@ import CypressCTOptionsPlugin, { CypressCTOptionsPluginOptionsWithEmitter } from
 
 const debug = debugFn('cypress:webpack-dev-server:makeWebpackConfig')
 
-const removeList = ['HtmlWebpackPlugin', 'PreloadPlugin', 'HtmlPwaPlugin']
+const removeList = [
+  // We provide a webpack-html-plugin config pinned to a specific version (4.x)
+  // that we have tested and are confident works with all common configurations.
+  // https://github.com/cypress-io/cypress/issues/15865
+  'HtmlWebpackPlugin',
+
+  // This plugin is an opitimization for HtmlWebpackPlugin for use in
+  // production environments, not relevent for testing.
+  'PreloadPlugin',
+
+  // Another optimization not relevent in a testing environment.
+  'HtmlPwaPlugin',
+
+  // We already reload when webpack recomplies (via listeners on
+  // devServerEvents). Removing this plugin can prevent double-refreshes
+  // in some setups.
+  'HotModuleReplacementPlugin',
+]
+
+// CaseSensitivePathsPlugin checks the paths of every loaded module to enforce
+// case sensitivity - this helps developers on mac catch issues that will bite
+// them later, but on linux the OS already does this by default. The plugin
+// is somewhat slow, accounting for ~15% of compile time on a couple of CRA
+// based projects (where it's included by default) tested.
+if (process.platform === 'linux') {
+  removeList.push('CaseSensitivePathsPlugin')
+}
 
 export interface UserWebpackDevServerOptions {
   /**
@@ -57,14 +83,6 @@ export async function makeWebpackConfig (userWebpackConfig: webpack.Configuratio
     ],
   }
 
-  // certain plugins conflict with HtmlWebpackPlugin and cause
-  // problems for some setups.
-  // most of these are application optimizations that are not relevant in a
-  // testing environment.
-  // remove those plugins to ensure a smooth configuration experience.
-  // we provide a webpack-html-plugin config pinned to a specific version (4.x)
-  // that we have tested and are confident works with all common configurations.
-  // https://github.com/cypress-io/cypress/issues/15865
   if (userWebpackConfig?.plugins) {
     userWebpackConfig.plugins = userWebpackConfig.plugins.filter((plugin) => {
       if (removeList.includes(plugin.constructor.name)) {
