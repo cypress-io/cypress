@@ -78,12 +78,13 @@ import {
   Main_ReinitializeCypressDocument,
   Main_GlobalProjectUpdateDocument,
   Main_CurrentProjectUpdateDocument,
+  Main_GlobalAlertUpdateDocument,
 } from './generated/graphql'
 import TestingTypeCards from './setup/TestingTypeCards.vue'
 import Wizard from './setup/Wizard.vue'
 import ScaffoldLanguageSelect from './setup/ScaffoldLanguageSelect.vue'
 import GlobalPage from './global/GlobalPage.vue'
-import BaseError from './error/BaseError.vue'
+import BaseError from '@cy/gql-components/error/BaseError.vue'
 import StandardModal from '@cy/components/StandardModal.vue'
 import HeaderBar from '@cy/gql-components/HeaderBar.vue'
 import Spinner from '@cy/components/Spinner.vue'
@@ -106,6 +107,21 @@ subscription Main_GlobalProjectUpdate {
   }
 }
 `
+
+gql`
+subscription Main_GlobalAlertUpdate {
+  globalAlert {
+    baseError {
+      ...BaseError
+    }
+    ...WarningList
+  }
+}
+`
+
+useSubscription({
+  query: Main_GlobalAlertUpdateDocument,
+})
 
 gql`
 subscription Main_CurrentProjectUpdate {

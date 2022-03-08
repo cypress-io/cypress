@@ -19,15 +19,26 @@
 </template>
 
 <script lang="ts" setup>
-import { useMutation, gql, useQuery } from '@urql/vue'
+import { useMutation, gql, useQuery, useSubscription } from '@urql/vue'
 import OpenBrowserList from './OpenBrowserList.vue'
 import WarningList from '../warning/WarningList.vue'
-import { OpenBrowserDocument, OpenBrowser_CloseBrowserDocument, OpenBrowser_ClearTestingTypeDocument, OpenBrowser_LaunchProjectDocument, OpenBrowser_FocusActiveBrowserWindowDocument, OpenBrowser_ResetLatestVersionTelemetryDocument } from '../generated/graphql'
+import { OpenBrowserDocument, OpenBrowser_CloseBrowserDocument, OpenBrowser_ClearTestingTypeDocument, OpenBrowser_LaunchProjectDocument, OpenBrowser_FocusActiveBrowserWindowDocument, OpenBrowser_ResetLatestVersionTelemetryDocument, OpenBrowser_ChangeStatusDocument } from '../generated/graphql'
 import LaunchpadHeader from './LaunchpadHeader.vue'
 import { useI18n } from '@cy/i18n'
 import { computed, ref, onMounted } from 'vue'
 
 const { t } = useI18n()
+
+gql`
+subscription OpenBrowser_ChangeStatus {
+  changeBrowserStatus {
+    id
+    ...OpenBrowserList
+  }
+}
+`
+
+useSubscription({ query: OpenBrowser_ChangeStatusDocument })
 
 gql`
 query OpenBrowser {

@@ -1,5 +1,5 @@
 import { enumType, objectType, subscriptionType } from 'nexus'
-import { FileParts } from '.'
+import { DevState, FileParts } from '.'
 import { CurrentProject } from './gql-CurrentProject'
 import { Query } from './gql-Query'
 
@@ -53,10 +53,10 @@ export const Subscription = subscriptionType({
     })
 
     t.field('devChange', {
-      type: Query,
+      type: DevState,
       description: 'Issued for internal development changes',
       subscribe: (source, args, ctx) => ctx.emitter.subscribeTo('devChange'),
-      resolve: () => ({}),
+      resolve: (source, args, ctx) => ctx.coreData.dev,
     })
 
     t.field('globalProjectListUpdate', {
@@ -64,6 +64,26 @@ export const Subscription = subscriptionType({
       description: 'Issued when the authState field changes',
       subscribe: (source, args, ctx) => ctx.emitter.subscribeTo('globalProjectListUpdate'),
       resolve: () => ({}),
+    })
+
+    t.field('changeBrowserStatus', {
+      type: CurrentProject,
+      description: 'Changes the browser status',
+      subscribe: (source, args, ctx) => ctx.emitter.subscribeTo('changeBrowserStatus'),
+      resolve: (source, args, ctx) => {
+        if (ctx.coreData.currentProject) {
+          return ctx.lifecycleManager
+        }
+
+        return null
+      },
+    })
+
+    t.field('globalAlert', {
+      type: Query,
+      description: 'Triggered when the state of errors / warnings are changed',
+      subscribe: (source, args, ctx) => ctx.emitter.subscribeTo('globalAlert'),
+      resolve: (source, args, ctx) => ({}),
     })
   },
 })

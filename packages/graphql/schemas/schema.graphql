@@ -1230,8 +1230,14 @@ type Subscription {
   """Issued when the authState field changes"""
   authChange: Query
 
+  """Changes the browser status"""
+  changeBrowserStatus: CurrentProject
+
   """Issued for internal development changes"""
-  devChange: Query
+  devChange: DevState
+
+  """Triggered when the state of errors / warnings are changed"""
+  globalAlert: Query
 
   """Issued when the authState field changes"""
   globalProjectListUpdate: Query

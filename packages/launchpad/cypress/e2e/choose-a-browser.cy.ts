@@ -179,13 +179,12 @@ describe('Choose a Browser Page', () => {
     })
 
     it('performs mutation to close browser', () => {
-      cy.intercept('query-OpenBrowser', (req) => {
-        req.on('before:response', (res) => {
-          res.body.data.currentProject.browserStatus = 'open'
+      cy.openProject('launchpad', ['--e2e'])
+      cy.withCtx((ctx) => {
+        ctx.update((d) => {
+          d.app.browserStatus = 'open'
         })
       })
-
-      cy.openProject('launchpad', ['--e2e'])
 
       cy.visitLaunchpad()
 
@@ -197,13 +196,12 @@ describe('Choose a Browser Page', () => {
     })
 
     it('performs mutation to focus open browser when focus button is pressed', () => {
-      cy.intercept('query-OpenBrowser', (req) => {
-        req.on('before:response', (res) => {
-          res.body.data.currentProject.browserStatus = 'open'
+      cy.openProject('launchpad', ['--e2e'])
+      cy.withCtx((ctx) => {
+        ctx.update((d) => {
+          d.app.browserStatus = 'open'
         })
       })
-
-      cy.openProject('launchpad', ['--e2e'])
 
       cy.visitLaunchpad()
 

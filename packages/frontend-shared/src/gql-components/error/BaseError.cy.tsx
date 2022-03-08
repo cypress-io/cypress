@@ -1,7 +1,7 @@
 import { codeFrameColumns } from '@babel/code-frame'
 import BaseError from './BaseError.vue'
-import Button from '@cy/components/Button.vue'
-import { BaseErrorFragmentDoc } from '../generated/graphql-test'
+import Button from '../../components/Button.vue'
+import { BaseErrorFragmentDoc } from '../../generated/graphql-test'
 import dedent from 'dedent'
 
 // Selectors
