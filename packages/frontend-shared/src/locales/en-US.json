@@ -645,6 +645,6 @@
     }
   },
   "warnings": {
-    "retry": "Retry"
+    "retry": "Try again"
   }
 }
