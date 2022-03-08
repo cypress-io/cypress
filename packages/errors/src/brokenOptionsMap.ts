@@ -27,7 +27,7 @@ function getSpecPatternAdditionalHelp (optionKey: string) {
 }
 
 /**
- * Only listing of values that have broken configs between 9.X and 10.X
+ * List of options that have used to work in 9.X and not in 10.X not, breaking changes.
  * `brokenOnlyAtRoot` means that the option is only broken
  * at the root of the config object and can still
  * be used in e2e or component configs
