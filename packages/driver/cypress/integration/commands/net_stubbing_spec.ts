@@ -3752,6 +3752,146 @@ describe('network stubbing', function () {
     })
   })
 
+  context('reset', function () {
+    context('reply with static response', function () {
+      let fooRequest
+
+      it('reply callbacks', function () {
+        cy.intercept('/timeout*', (req) => {
+          req.reply((res) => {
+            res.body = 'bar'
+          })
+        })
+        .as('foo')
+        .then(() => {
+          fooRequest = fetch('/timeout?ms=1000')
+        })
+        .wait('@foo.request')
+      })
+
+      it('ends the outstanding request', async function () {
+        const response = await fooRequest
+
+        expect(response.status).to.eq(200)
+        expect(await response.text()).not.to.eq('bar')
+      })
+    })
+
+    context('continue callbacks', function () {
+      let fooRequest
+
+      it('intercepts a continue callback', function () {
+        cy.intercept('/timeout*', (req) => {
+          req.continue((res) => {
+            res.body = 'bar'
+          })
+        })
+        .as('foo')
+        .then(() => {
+          fooRequest = fetch('/timeout?ms=1000')
+        })
+        .wait('@foo.request')
+      })
+
+      it('ends the outstanding request', async function () {
+        const response = await fooRequest
+
+        expect(response.status).to.eq(200)
+        expect(await response.text()).not.to.eq('bar')
+      })
+    })
+
+    context('before:response callbacks', function () {
+      let fooRequest
+
+      it('intercepts a before:response callback', function () {
+        cy.intercept('/timeout*', (req) => {
+          req.on('before:response', (res) => {
+            res.body = 'bar'
+          })
+        })
+        .as('foo')
+        .then(() => {
+          fooRequest = fetch('/timeout?ms=1000')
+        })
+        .wait('@foo.request')
+      })
+
+      it('ends the outstanding request', async function () {
+        const response = await fooRequest
+
+        expect(response.status).to.eq(200)
+        expect(await response.text()).not.to.eq('bar')
+      })
+    })
+
+    context('response callbacks', function () {
+      let fooRequest
+
+      it('intercepts a response callback', function () {
+        cy.intercept('/timeout*', (req) => {
+          req.on('response', (res) => {
+            res.body = 'bar'
+          })
+        })
+        .as('foo')
+        .then(() => {
+          fooRequest = fetch('/timeout?ms=1000')
+        })
+        .wait('@foo.request')
+      })
+
+      it('ends the outstanding request', async function () {
+        const response = await fooRequest
+
+        expect(response.status).to.eq(200)
+        expect(await response.text()).not.to.eq('bar')
+      })
+    })
+
+    context('static replies', function () {
+      let fooRequest
+
+      it('intercepts a reply', function () {
+        cy.intercept('/timeout*', {
+          body: 'bar',
+        })
+        .as('foo')
+        .then(() => {
+          fooRequest = fetch('/timeout?ms=1000')
+        })
+        .wait('@foo.request')
+      })
+
+      it('does not end the outstanding request', async function () {
+        const response = await fooRequest
+
+        expect(response.status).to.eq(200)
+        expect(await response.text()).to.eq('bar')
+      })
+    })
+
+    context('spies', function () {
+      let fooRequest
+
+      it('intercepts a spy', function () {
+        cy.intercept('/timeout*')
+        .as('foo')
+        .then(() => {
+          fooRequest = fetch('/timeout?ms=1000')
+        })
+        .wait('@foo.request')
+      })
+
+      it('does not end the outstanding request', async function () {
+        const response = await fooRequest
+
+        expect(response.status).to.eq(200)
+        expect(await response.text()).to.eq('<html><body>timeout</body></html>')
+      })
+    })
+  })
+
   context('unit tests', function () {
     context('#getDisplayUrlMatcher', function () {
       function testDisplayUrl (title: string, expectedDisplayUrl: string, matcher: Partial<RouteMatcherOptions>) {

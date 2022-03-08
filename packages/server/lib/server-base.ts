@@ -316,9 +316,9 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     options.netStubbingState = this.netStubbingState
     options.getRenderedHTMLOrigins = this._networkProxy?.http.getRenderedHTMLOrigins
 
-    options.onResetServerState = () => {
+    options.onResetServerState = async () => {
       this.networkProxy.reset()
-      this.netStubbingState.reset()
+      await this.netStubbingState.reset()
     }
 
     const io = this.socket.startListening(this.server, automation, config, options)

@@ -1,4 +1,3 @@
-import { noop } from 'lodash'
 import type { NetStubbingState } from './types'
 
 export function state (): NetStubbingState {
@@ -6,20 +5,22 @@ export function state (): NetStubbingState {
     requests: {},
     routes: [],
     pendingEventHandlers: {},
-    reset () {
-      for (const requestId in this.requests) {
-        const request = this.requests[requestId]
+    async reset () {
+      await Promise.all(Object.values(this.requests).map((request) => {
         const responseEvents = ['before:response', 'response:callback', 'response']
         const inResponsePhase = responseEvents.includes(request.lastEvent!)
+        const { res } = request
+
+        if (res.destroyed) {
+          return Promise.resolve()
+        }
 
         let shouldDestroyResponse = false
 
         request.subscriptionsByRoute.forEach((subscriptionByRoute) => {
           if (!subscriptionByRoute.immediateStaticResponse) {
             subscriptionByRoute.subscriptions.forEach((subscription) => {
-              console.log(subscription)
               if (subscription.await && !subscription.skip && (responseEvents.includes(subscription.eventName) || !inResponsePhase)) {
-                console.log('Destroying')
                 shouldDestroyResponse = true
               }
             })
@@ -27,15 +28,26 @@ export function state (): NetStubbingState {
         })
 
         if (shouldDestroyResponse) {
-          const { res } = request
-
           res.removeAllListeners('finish')
           res.removeAllListeners('error')
-          res.on('error', noop)
-          res.end()
-          res.destroy()
+
+          return new Promise<void>((resolve) => {
+            res.once('finish', () => {
+              res.destroy()
+              resolve()
+            })
+
+            res.once('error', () => {
+              res.destroy()
+              resolve()
+            })
+
+            res.end()
+          })
         }
-      }
+
+        return Promise.resolve()
+      }))
 
       this.pendingEventHandlers = {}
       this.requests = {}
