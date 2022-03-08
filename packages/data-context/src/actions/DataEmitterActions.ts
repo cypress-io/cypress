@@ -1,3 +1,4 @@
+import type { SpecChangeType } from '@packages/graphql/src/gen/nxs.gen'
 import pDefer from 'p-defer'
 import { EventEmitter } from 'stream'
 
@@ -14,10 +15,20 @@ abstract class DataEmitterEvents {
   }
 
   /**
+   * Emitted when we have changed the current project config
+   */
+  specChange (data: {
+    absolute: string
+    specChange: SpecChangeType
+  }) {
+    this._emit('specChange', data)
+  }
+
+  /**
    * Emitted when we have added / removed specs from the spec list
    */
-  specsChanged () {
-    this._emit('specsChanged')
+  specListChanged () {
+    this._emit('specListChanged')
   }
 
   /**
@@ -31,33 +42,40 @@ abstract class DataEmitterEvents {
   /**
    * Emitted when we have added/removed an item from the list of Global Projects
    */
-  globalUpdate () {
-    this._emit('globalUpdate')
+  globalProjectListUpdate () {
+    this._emit('globalProjectListUpdate')
   }
 
   /**
-   * Emitted when we have changed the current project config
+   * Emitted when the project is updated (we have changed the current project config, etc.)
    */
   projectUpdate () {
     this._emit('projectUpdate')
   }
 
-  private _emit (evt: keyof DataEmitterEvents) {
-    this.pub.emit(evt)
+  /**
+   * Emitted when there is a change to the "baseError" or "warnings"
+   * properties on query
+   */
+  globalAlert () {
+    this._emit('globalAlert')
+  }
+
+  /**
+   * Emitted when there is an update to the browser's status
+   */
+  changeBrowserStatus () {
+    this._emit('changeBrowserStatus')
+  }
+
+  private _emit <Evt extends keyof DataEmitterEvents> (evt: Evt, ...args: Parameters<DataEmitterEvents[Evt]>) {
+    this.pub.emit(evt, ...args)
   }
 }
 
 export class DataEmitterActions extends DataEmitterEvents {
   constructor (private ctx: DataContext) {
     super()
-  }
-
-  /**
-   * Broadcasts a signal to the "launchpad" (Electron GUI) via Socket.io,
-   * typically used to trigger a re-query of data on the frontend
-   */
-  toLaunchpad (...args: any[]) {
-    this.ctx.coreData.servers.gqlSocketServer?.emit('data-context-push', ...args)
   }
 
   /**
@@ -106,5 +124,5 @@ export class DataEmitterActions extends DataEmitterEvents {
     }
 
     return iterator
-  }p
+  }
 }

@@ -54,11 +54,6 @@ describe('Launchpad: Open Mode', () => {
     it('goes to an active project if one is added', () => {
       cy.openProject('todos')
       cy.visitLaunchpad()
-
-      cy.withCtx(async (ctx, o) => {
-        ctx.emitter.toLaunchpad()
-      })
-
       cy.get('h1').should('contain', 'Welcome to Cypress!')
     })
   })

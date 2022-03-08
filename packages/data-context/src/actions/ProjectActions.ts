@@ -165,7 +165,7 @@ export class ProjectActions {
 
     await this.addProject({ path })
 
-    this.ctx.emitter.toLaunchpad()
+    this.ctx.emitter.globalProjectListUpdate()
   }
 
   async addProject (args: AddProject) {

@@ -104,9 +104,10 @@
 import SpecsListHeader from './SpecsListHeader.vue'
 import SpecListGitInfo from './SpecListGitInfo.vue'
 import SpecsListRowItem from './SpecsListRowItem.vue'
-import { gql } from '@urql/vue'
+import { gql, useSubscription } from '@urql/vue'
 import { computed, ref, watch } from 'vue'
 import type { Specs_SpecsListFragment, SpecListRowFragment } from '../generated/graphql'
+import { SpecsList_SubscriptionDocument } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
 import { buildSpecTree, fuzzySortSpecs, getDirIndexes, makeFuzzyFoundSpec, useCachedSpecs } from '@packages/frontend-shared/src/utils/spec-utils'
 import type { FuzzyFoundSpec } from '@packages/frontend-shared/src/utils/spec-utils'
@@ -119,6 +120,22 @@ import SpecPatternModal from '../components/SpecPatternModal.vue'
 import { useDebounce } from '@vueuse/core'
 
 const { t } = useI18n()
+
+gql`
+subscription SpecsList_Subscription {
+  specListChanged {
+    id
+    specs {
+      id
+      ...SpecsList
+    }
+  }
+}
+`
+
+useSubscription({
+  query: SpecsList_SubscriptionDocument,
+})
 
 gql`
 fragment SpecsList on Spec {

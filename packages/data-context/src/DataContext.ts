@@ -339,7 +339,7 @@ export class DataContext {
         coreData.baseError = { title, cypressError }
       })
 
-      this.emitter.toLaunchpad()
+      this.emitter.globalAlert()
     }
   }
 
@@ -353,7 +353,7 @@ export class DataContext {
         cypressError: err,
       })
 
-      this.emitter.toLaunchpad()
+      this.emitter.globalAlert()
     }
   }
 

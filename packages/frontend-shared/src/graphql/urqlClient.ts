@@ -80,6 +80,10 @@ export function makeUrqlClient (config: UrqlClientConfig): Client {
 
   const socketClient = getSocketSource(config)
 
+  const initialState = (window.__CYPRESS_INITIAL_DATA_ENCODED__
+    ? JSON.parse(decodeBase64Unicode(window.__CYPRESS_INITIAL_DATA_ENCODED__))
+    : window.__CYPRESS_INITIAL_DATA__) || {}
+
   exchanges.push(
     errorExchange({
       onError (error) {
@@ -110,9 +114,7 @@ export function makeUrqlClient (config: UrqlClientConfig): Client {
     ssrExchange({
       isClient: true,
       // @ts-ignore - this seems fine locally, but on CI tsc is failing - bizarre.
-      initialState: (window.__CYPRESS_INITIAL_DATA_ENCODED__
-        ? JSON.parse(decodeBase64Unicode(window.__CYPRESS_INITIAL_DATA_ENCODED__))
-        : window.__CYPRESS_INITIAL_DATA__) || {},
+      initialState,
     }),
     namedRouteExchange,
     fetchExchange,

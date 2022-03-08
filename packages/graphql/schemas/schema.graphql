@@ -419,6 +419,9 @@ type CurrentProject implements Node & ProjectLike {
   """Cached preferences for this project"""
   preferences: ProjectPreferences
 
+  """Error associated with the current project"""
+  projectError: ErrorWrapper
+
   """Used to associate project with Cypress dashboard"""
   projectId: String
 
@@ -1203,6 +1206,12 @@ type Spec implements Node {
   specType: SpecType!
 }
 
+enum SpecChangeType {
+  add
+  changed
+  remove
+}
+
 enum SpecType {
   component
   integration
@@ -1218,7 +1227,26 @@ type Storybook implements Node {
 }
 
 type Subscription {
-  ping: Boolean
+  """Issued when the authState field changes"""
+  authChange: Query
+
+  """Issued for internal development changes"""
+  devChange: Query
+
+  """Issued when the authState field changes"""
+  globalProjectListUpdate: Query
+
+  """Issued when general internal state of the project changes"""
+  projectUpdate: CurrentProject
+  specChange: SubscriptionSpecChange
+
+  """Issues when specs are added/removed from the project"""
+  specListChanged: CurrentProject
+}
+
+type SubscriptionSpecChange {
+  changeType: SpecChangeType
+  file: FileParts
 }
 
 """The bundlers that we can use with Cypress"""

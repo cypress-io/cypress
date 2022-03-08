@@ -103,8 +103,8 @@ import RemovePositioningDuringScreenshot from './screenshot/RemovePositioningDur
 import ScreenshotHelperPixels from './screenshot/ScreenshotHelperPixels.vue'
 import { useScreenshotStore } from '../store/screenshot-store'
 import ChooseExternalEditorModal from '@packages/frontend-shared/src/gql-components/ChooseExternalEditorModal.vue'
-import { useMutation, gql } from '@urql/vue'
-import { SpecRunnerOpenMode_OpenFileInIdeDocument } from '../generated/graphql'
+import { useMutation, gql, useSubscription } from '@urql/vue'
+import { SpecRunnerOpenMode_OpenFileInIdeDocument, SpecRunnerOpenMode_SpecListSubscriptionDocument } from '../generated/graphql'
 import type { SpecRunnerFragment } from '../generated/graphql'
 import { usePreferences } from '../composables/usePreferences'
 import ScriptError from './ScriptError.vue'
@@ -113,6 +113,22 @@ import HideDuringScreenshotOrRunMode from './screenshot/HideDuringScreenshotOrRu
 import AutomationElement from './automation/AutomationElement.vue'
 import { useResizablePanels, useRunnerStyle } from './useRunnerStyle'
 import { useEventManager } from './useEventManager'
+
+gql`
+subscription SpecRunnerOpenMode_SpecListSubscription {
+  specListChanged {
+    id
+    specs {
+      id
+      ...SpecNode_InlineSpecList
+    }
+  }
+}
+`
+
+useSubscription({
+  query: SpecRunnerOpenMode_SpecListSubscriptionDocument,
+})
 
 gql`
 fragment SpecRunner_Preferences on Query {

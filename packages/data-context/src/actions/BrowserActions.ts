@@ -1,3 +1,4 @@
+import type { BrowserStatus } from '@packages/types'
 import type { DataContext } from '..'
 
 export class BrowserActions {
@@ -13,5 +14,13 @@ export class BrowserActions {
 
   async focusActiveBrowserWindow () {
     await this.browserApi.focusActiveBrowserWindow()
+  }
+
+  setBrowserStatus (browserStatus: BrowserStatus) {
+    this.ctx.update((o) => {
+      o.app.browserStatus = browserStatus
+    })
+
+    this.ctx.emitter.changeBrowserStatus()
   }
 }

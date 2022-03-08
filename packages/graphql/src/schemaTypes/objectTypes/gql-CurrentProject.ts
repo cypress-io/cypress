@@ -1,6 +1,7 @@
 import { PACKAGE_MANAGERS } from '@packages/types'
 import { enumType, nonNull, objectType, stringArg } from 'nexus'
 import path from 'path'
+import { ErrorWrapper } from '.'
 import { BrowserStatusEnum } from '..'
 import { cloudProjectBySlug } from '../../stitching/remoteGraphQLCalls'
 import { TestingTypeEnum } from '../enumTypes/gql-WizardEnums'
@@ -22,6 +23,11 @@ export const CurrentProject = objectType({
   node: 'projectRoot',
   definition (t) {
     t.implements('ProjectLike')
+
+    t.field('projectError', {
+      type: ErrorWrapper,
+      description: 'Error associated with the current project',
+    })
 
     t.nonNull.field('packageManager', {
       type: PackageManagerEnum,

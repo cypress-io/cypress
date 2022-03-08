@@ -73,7 +73,12 @@
 
 <script lang="ts" setup>
 import { gql, useMutation, useQuery, useSubscription } from '@urql/vue'
-import { MainLaunchpadQueryDocument, Main_ReinitializeCypressDocument, TimDocument } from './generated/graphql'
+import {
+  MainLaunchpadQueryDocument,
+  Main_ReinitializeCypressDocument,
+  Main_GlobalProjectUpdateDocument,
+  Main_CurrentProjectUpdateDocument,
+} from './generated/graphql'
 import TestingTypeCards from './setup/TestingTypeCards.vue'
 import Wizard from './setup/Wizard.vue'
 import ScaffoldLanguageSelect from './setup/ScaffoldLanguageSelect.vue'
@@ -87,7 +92,7 @@ import MigrationWizard from './migration/MigrationWizard.vue'
 import ScaffoldedFiles from './setup/ScaffoldedFiles.vue'
 
 import { useI18n } from '@cy/i18n'
-import { computed, ref, watch } from 'vue'
+import { computed, ref } from 'vue'
 import LaunchpadHeader from './setup/LaunchpadHeader.vue'
 import OpenBrowser from './setup/OpenBrowser.vue'
 
@@ -95,17 +100,26 @@ const { t } = useI18n()
 const isTestingTypeModalOpen = ref(false)
 
 gql`
-subscription Tim {
-  ping
+subscription Main_GlobalProjectUpdate {
+  globalProjectListUpdate {
+    ...GlobalPage
+  }
 }
 `
 
-const { data } = useSubscription({ query: TimDocument })
-
-watch(data, () => {
-  // eslint-disable-next-line no-console
-  console.log(data.value)
-})
+gql`
+subscription Main_CurrentProjectUpdate {
+  projectUpdate {
+    id
+    isCTConfigured
+    isE2EConfigured
+    isLoadingConfigFile
+    isLoadingNodeEvents
+    needsLegacyConfigMigration
+    currentTestingType
+  }
+}
+`
 
 gql`
 fragment MainLaunchpadQueryData on Query {
@@ -143,6 +157,14 @@ mutation Main_ReinitializeCypress {
   }
 }
 `
+
+useSubscription({
+  query: Main_GlobalProjectUpdateDocument,
+})
+
+useSubscription({
+  query: Main_CurrentProjectUpdateDocument,
+})
 
 const mutation = useMutation(Main_ReinitializeCypressDocument)
 

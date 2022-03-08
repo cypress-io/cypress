@@ -147,7 +147,6 @@ gql`
 fragment SpecRunnerHeader on CurrentProject {
   id
   currentTestingType
-
   currentBrowser {
     id
     displayName

@@ -184,10 +184,6 @@ export const mutation = mutationType({
           ctx.actions.wizard.setCodeLanguage(args.input.codeLanguage)
         }
 
-        // TODO: remove when live-mutations are implements
-        // signal to launchpad to reload the data context
-        ctx.emitter.toLaunchpad()
-
         return ctx.wizardData
       },
     })
@@ -269,6 +265,7 @@ export const mutation = mutationType({
         path: stringArg(),
         open: booleanArg({ description: 'Whether to open the project when added' }),
       },
+      slowLogThreshold: false,
       resolve: async (_, args, ctx) => {
         ctx.actions.wizard.resetWizard()
         let path = args.path

@@ -177,7 +177,7 @@ module.exports = {
         // so that there is a default for each browser but
         // enable the browser to configure the interface
         instance.once('exit', () => {
-          ctx.browser.setBrowserStatus('closed')
+          ctx.actions.browser.setBrowserStatus('closed')
           options.onBrowserClose()
           instance = null
         })

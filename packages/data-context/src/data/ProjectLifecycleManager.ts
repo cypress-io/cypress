@@ -524,6 +524,7 @@ export class ProjectLifecycleManager {
 
     this._cachedFullConfig = undefined
     this._configResult = { state: 'loading', value: promise }
+    this.ctx.emitter.projectUpdate()
 
     promise.then((result) => {
       if (this._configResult.value === promise) {
@@ -533,7 +534,7 @@ export class ProjectLifecycleManager {
         this.onConfigLoaded(child, ipc, result)
       }
 
-      this.ctx.emitter.toLaunchpad()
+      this.ctx.emitter.projectUpdate()
     })
     .catch((err) => {
       debug(`catch %o`, err)
@@ -541,7 +542,6 @@ export class ProjectLifecycleManager {
       this._configResult = { state: 'errored', value: err }
 
       this.onLoadError(err)
-      this.ctx.emitter.toLaunchpad()
     })
 
     return promise.then((v) => v.initialConfig)
@@ -695,7 +695,7 @@ export class ProjectLifecycleManager {
       throw e
     })
     .finally(() => {
-      this.ctx.emitter.toLaunchpad()
+      this.ctx.emitter.projectUpdate()
     })
 
     this._envFileResult = { state: 'loading', value: promise }
@@ -785,7 +785,7 @@ export class ProjectLifecycleManager {
       this.ctx.coreData.scaffoldedFiles.filter((f) => {
         if (f.file.absolute === this.configFilePath && f.status !== 'valid') {
           f.status = 'valid'
-          this.ctx.emitter.toLaunchpad()
+          this.ctx.emitter.projectUpdate()
         }
       })
     }
@@ -799,13 +799,7 @@ export class ProjectLifecycleManager {
     const promise = this.callSetupNodeEventsWithConfig(ipc)
 
     this._eventsIpcResult = { state: 'loading', value: promise }
-
-    // This is a terrible hack until we land GraphQL subscriptions which will
-    // allow for more granular concurrent notifications then our current
-    // notify the frontend & refetch approach
-    const toLaunchpad = this.ctx.emitter.toLaunchpad
-
-    this.ctx.emitter.toLaunchpad = () => {}
+    this.ctx.emitter.projectUpdate()
 
     return promise.then(async (val) => {
       if (this._eventsIpcResult.value === promise) {
@@ -825,8 +819,7 @@ export class ProjectLifecycleManager {
       throw err
     })
     .finally(() => {
-      this.ctx.emitter.toLaunchpad = toLaunchpad
-      this.ctx.emitter.toLaunchpad()
+      this.ctx.emitter.projectUpdate()
     })
   }
 

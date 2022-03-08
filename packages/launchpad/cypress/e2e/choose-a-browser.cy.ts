@@ -125,13 +125,13 @@ describe('Choose a Browser Page', () => {
       })
 
       cy.withCtx((ctx) => {
-        ctx.browser.setBrowserStatus('opening')
+        ctx.actions.browser.setBrowserStatus('opening')
       })
 
       cy.contains('button', 'Opening E2E Testing in Chrome')
 
       cy.withCtx((ctx) => {
-        ctx.browser.setBrowserStatus('open')
+        ctx.actions.browser.setBrowserStatus('open')
       })
 
       cy.contains('button', 'Running Chrome')
