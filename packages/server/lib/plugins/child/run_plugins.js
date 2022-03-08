@@ -274,10 +274,10 @@ const optionsNonValidFor10Anywhere = ['integrationFolder', 'componentFolder', 'p
  */
 const optionsNonValidFor10Global = ['baseUrl', 'supportFile']
 
-function throwInvalidOptionError (key, stackBoundary = throwInvalidOptionError) {
+function throwInvalidOptionError (key) {
   const errInternal = new Error()
 
-  Error.captureStackTrace(errInternal, stackBoundary)
+  Error.captureStackTrace(errInternal, throwInvalidOptionError)
   const err = require('@packages/errors').getError('MIGRATED_OPTION_INVALID', key, errInternal)
 
   throw err
