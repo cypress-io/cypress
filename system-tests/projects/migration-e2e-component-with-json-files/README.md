@@ -1,11 +1,13 @@
-## Migration E2E Component Default Test Files
+## Migration E2E Component With JSON files
 
-A project with E2E and CT, both using custom folders. Everything else default.
+A project with E2E and CT, both using default folders. Everything is default. It 
+includes JSON files in the integration and component folders, migrating those, 
+without changing the file extension.
 
 The following migration steps will be used during this migration:
 
 - [x] automatic folder rename of cypress/integration to cypress/e2e
-- [ ] manual file rename
+- [x] manual file rename
 - [x] rename support
 - [x] update config file
 - [x] setup component testing
@@ -16,12 +18,13 @@ Unless the user skips this step, after this step, the filesystem will be:
 
 | Before | After|
 |---|---|
-| `cypress/custom-integration/foo.spec.ts` | `cypress/custom-integration/foo.cy.ts` |
-| `cypress/custom-component/button.spec.js` | `cypress/custom-component/button.cy.js` |
+| `integration/foo.spec.ts` | `e2e/foo.cy.ts` |
+| `integration/spec.ts` | `e2e/spec.cy.ts` |
+| `component/button.spec.js` | `component/button.cy.js` |
 
 ## Manual Files
 
-No manual migration, since the user has a non default componentFolder.
+The user will need to rename and/or move their only component spec, `button.cy.js` to its new location.
 
 ## Rename supportFile
 
