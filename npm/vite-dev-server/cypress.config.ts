@@ -8,7 +8,6 @@ export default defineConfig({
   'component': {
     'supportFile': 'cypress/support.js',
     devServer (cypressDevServerConfig) {
-      console.log('inside')
       const path = require('path')
 
       return devServer(cypressDevServerConfig, {
