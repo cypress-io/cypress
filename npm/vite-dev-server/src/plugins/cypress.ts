@@ -1,4 +1,3 @@
-import type { BaseSpec } from '@packages/types'
 import debugFn from 'debug'
 import { readFile } from 'fs/promises'
 import { resolve } from 'pathe'
@@ -11,7 +10,12 @@ const INIT_FILEPATH = resolve(__dirname, '../../client/initCypressTests.js')
 
 const HMR_DEPENDENCY_LOOKUP_MAX_ITERATION = 50
 
-function getSpecsPathsSet (specs: BaseSpec[]) {
+interface Spec {
+  absolute: string
+  relative: string
+}
+
+function getSpecsPathsSet (specs: Spec[]) {
   return new Set<string>(
     specs.map((spec) => spec.absolute),
   )
@@ -31,7 +35,7 @@ export const Cypress = (
   let specsPathsSet = getSpecsPathsSet(specs)
   let loader
 
-  devServerEvents.on('dev-server:specs:changed', (specs: BaseSpec[]) => {
+  devServerEvents.on('dev-server:specs:changed', (specs: Spec[]) => {
     specsPathsSet = getSpecsPathsSet(specs)
   })
 
