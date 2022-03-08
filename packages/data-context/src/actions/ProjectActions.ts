@@ -515,7 +515,7 @@ export class ProjectActions {
   }
 
   async pingBaseUrl () {
-    const baseUrl = this.ctx.project.getConfig()?.baseUrl
+    const baseUrl = (await this.ctx.project.getConfig())?.baseUrl
 
     // Should never happen
     if (!baseUrl) {
