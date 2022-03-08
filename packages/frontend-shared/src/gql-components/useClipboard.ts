@@ -1,3 +1,8 @@
+/**
+ * Using the clipboard API from electron instead of the browser's navigator API,
+ * we avoid the safety measures from the browser.
+ * This way, regardless of the browser, we can use and test the clipboard.
+ */
 import { Clipboard_CopyToClipboardDocument } from '../generated/graphql'
 import { gql, useMutation } from '@urql/vue'
 import { ref } from 'vue'
