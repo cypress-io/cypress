@@ -8,8 +8,8 @@ export function state (): NetStubbingState {
     pendingEventHandlers: {},
     async reset () {
       await Promise.all(Object.values <InterceptedRequest>(this.requests).map((request) => {
-        const responseOrErrorEvents = ['before:response', 'response:callback', 'response', 'network:error']
-        const inResponseOrErrorPhase = responseOrErrorEvents.includes(request.lastEvent!)
+        const responseEvents = ['before:response', 'response:callback', 'response', 'network:error']
+        const inResponsePhase = responseEvents.includes(request.lastEvent!)
         const { res } = request
 
         if (res.destroyed) {
@@ -23,7 +23,7 @@ export function state (): NetStubbingState {
         request.subscriptionsByRoute.forEach((subscriptionByRoute) => {
           if (!subscriptionByRoute.immediateStaticResponse) {
             subscriptionByRoute.subscriptions.forEach((subscription) => {
-              if (subscription.await && !subscription.skip && (responseOrErrorEvents.includes(subscription.eventName) || !inResponseOrErrorPhase)) {
+              if (subscription.await && !subscription.skip && (responseEvents.includes(subscription.eventName) || !inResponsePhase)) {
                 shouldDestroyResponse = true
               }
             })
