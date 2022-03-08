@@ -12,6 +12,7 @@ interface RunDomainFnOptions {
   fn: string
   skipConfigValidation: boolean
   state: {}
+  isStable: boolean
 }
 
 interface serializedRunnable {
@@ -74,9 +75,7 @@ export const handleDomainFn = (Cypress: Cypress.Cypress, cy: $Cy, specBridgeComm
     // Set the state ctx to the runnable ctx to ensure they remain in sync
     cy.state('ctx', cy.state('runnable').ctx)
 
-    // Stability is always false when we start as the page will always be
-    // loading at this point
-    cy.isStable(false, 'multi-domain-start')
+    cy.state('isMultiDomain', true)
   }
 
   const setRunnableStateToPassed = () => {
@@ -86,11 +85,14 @@ export const handleDomainFn = (Cypress: Cypress.Cypress, cy: $Cy, specBridgeComm
   }
 
   specBridgeCommunicator.on('run:domain:fn', async (options: RunDomainFnOptions) => {
-    const { config, data, env, fn, state, skipConfigValidation } = options
+    const { config, data, env, fn, state, skipConfigValidation, isStable } = options
 
     let queueFinished = false
 
     reset(state)
+
+    // Stability is sync'd with the primary stability
+    cy.isStable(isStable, 'multi:domain:fn')
 
     // @ts-ignore
     window.__cySkipValidateConfig = skipConfigValidation || false
@@ -110,7 +112,7 @@ export const handleDomainFn = (Cypress: Cypress.Cypress, cy: $Cy, specBridgeComm
       }
 
       cy.stop()
-      specBridgeCommunicator.toPrimary('queue:finished', { err }, { syncConfig: true })
+      specBridgeCommunicator.toPrimary('queue:finished', { err }, { syncGlobals: true })
     })
 
     try {
@@ -134,10 +136,10 @@ export const handleDomainFn = (Cypress: Cypress.Cypress, cy: $Cy, specBridgeComm
           subject,
           finished: !hasCommands,
         }, {
-          // Only sync the config if there are no commands in queue
+          // Only sync the globals if there are no commands in queue
           // (for instance, only assertions exist in the callback)
           // since it means the callback is finished at this point
-          syncConfig: !hasCommands,
+          syncGlobals: !hasCommands,
         })
 
         if (!hasCommands) {
@@ -149,7 +151,7 @@ export const handleDomainFn = (Cypress: Cypress.Cypress, cy: $Cy, specBridgeComm
       }
     } catch (err) {
       setRunnableStateToPassed()
-      specBridgeCommunicator.toPrimary('ran:domain:fn', { err }, { syncConfig: true })
+      specBridgeCommunicator.toPrimary('ran:domain:fn', { err }, { syncGlobals: true })
 
       return
     }
@@ -161,7 +163,7 @@ export const handleDomainFn = (Cypress: Cypress.Cypress, cy: $Cy, specBridgeComm
       specBridgeCommunicator.toPrimary('queue:finished', {
         subject: cy.state('subject'),
       }, {
-        syncConfig: true,
+        syncGlobals: true,
       })
     })
   })

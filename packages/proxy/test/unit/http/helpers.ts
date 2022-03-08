@@ -2,6 +2,7 @@ import { HttpMiddleware, _runStage } from '../../../lib/http'
 
 export function testMiddleware (middleware: HttpMiddleware<any>[], ctx = {}) {
   const fullCtx = {
+    debug: () => {},
     req: {},
     res: {},
     config: {},
