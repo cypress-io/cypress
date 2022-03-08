@@ -54,6 +54,10 @@ interface BreakingOption {
    * Whether to log the error message as a warning instead of throwing an error.
    */
   isWarning?: boolean
+  /**
+    * Whether to show the error message in the launchpad
+    */
+  showInLaunchpad?: boolean
 }
 
 const isValidConfig = (key: string, config: any) => {
@@ -522,6 +526,7 @@ export const breakingOptions: Array<BreakingOption> = [
     name: 'experimentalStudio',
     errorKey: 'EXPERIMENTAL_STUDIO_REMOVED',
     isWarning: true,
+    showInLaunchpad: true,
   }, {
     name: 'firefoxGcInterval',
     errorKey: 'FIREFOX_GC_INTERVAL_REMOVED',

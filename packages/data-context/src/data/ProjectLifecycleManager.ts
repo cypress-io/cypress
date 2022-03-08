@@ -52,6 +52,7 @@ export interface InjectedConfigApi {
   updateWithPluginValues(config: FullConfig, modifiedConfig: Partial<Cypress.ConfigOptions>): FullConfig
   setupFullConfigWithDefaults(config: SetupFullConfigOptions): Promise<FullConfig>
   validateRootConfigBreakingChanges<T extends Cypress.ConfigOptions>(config: Partial<T>, onWarning: BreakingValidationFn<CypressError>, onErr: BreakingValidationFn<never>): T
+  validateLaunchpadConfigBreakingChanges<T extends Cypress.ConfigOptions>(config: Partial<T>, onWarning: BreakingValidationFn<CypressError>, onErr: BreakingValidationFn<never>): T
   validateTestingTypeConfigBreakingChanges<T extends Cypress.ConfigOptions>(config: Partial<T>, testingType: Cypress.TestingType, onWarning: BreakingValidationFn<CypressError>, onErr: BreakingValidationFn<never>): T
 }
 
@@ -566,6 +567,26 @@ export class ProjectLifecycleManager {
     return this.ctx._apis.configApi.validateRootConfigBreakingChanges(
       config,
       (type, obj) => {
+        return getError(type, obj)
+      },
+      (type, obj) => {
+        throw getError(type, obj)
+      },
+    )
+  }
+
+  private validateConfigFile (file: string | false, config: Cypress.ConfigOptions) {
+    this.ctx._apis.configApi.validateConfig(config, (errMsg) => {
+      if (_.isString(errMsg)) {
+        throw getError('CONFIG_VALIDATION_MSG_ERROR', 'configFile', file || null, errMsg)
+      }
+
+      throw getError('CONFIG_VALIDATION_ERROR', 'configFile', file || null, errMsg)
+    })
+
+    return this.ctx._apis.configApi.validateLaunchpadConfigBreakingChanges(
+      config,
+      (type, obj) => {
         const error = getError(type, obj)
 
         this.ctx.onWarning(error)
@@ -580,16 +601,6 @@ export class ProjectLifecycleManager {
         throw getError(type, obj)
       },
     )
-  }
-
-  private validateConfigFile (file: string | false, config: Cypress.ConfigOptions) {
-    this.ctx._apis.configApi.validateConfig(config, (errMsg) => {
-      if (_.isString(errMsg)) {
-        throw getError('CONFIG_VALIDATION_MSG_ERROR', 'configFile', file || null, errMsg)
-      }
-
-      throw getError('CONFIG_VALIDATION_ERROR', 'configFile', file || null, errMsg)
-    })
   }
 
   /**

@@ -130,6 +130,10 @@ module.exports = {
     return validateNoBreakingOptions(options, cfg, onWarning, onErr)
   },
 
+  validateNoBreakingConfigLaunchpad: (cfg, onWarning, onErr) => {
+    return validateNoBreakingOptions(breakingOptions.filter((option) => option.showInLaunchpad), cfg, onWarning, onErr)
+  },
+
   validateNoReadOnlyConfig: (config, onErr) => {
     let errProperty
 
