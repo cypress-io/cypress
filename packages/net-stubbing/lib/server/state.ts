@@ -1,3 +1,4 @@
+import type { InterceptedRequest } from './intercepted-request'
 import type { NetStubbingState } from './types'
 
 export function state (): NetStubbingState {
@@ -6,7 +7,7 @@ export function state (): NetStubbingState {
     routes: [],
     pendingEventHandlers: {},
     async reset () {
-      await Promise.all(Object.values(this.requests).map((request) => {
+      await Promise.all(Object.values <InterceptedRequest>(this.requests).map((request) => {
         const responseEvents = ['before:response', 'response:callback', 'response']
         const inResponsePhase = responseEvents.includes(request.lastEvent!)
         const { res } = request
