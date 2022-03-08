@@ -9,7 +9,8 @@ import {
 } from '@urql/core'
 import { devtoolsExchange } from '@urql/devtools'
 import { useToast } from 'vue-toastification'
-import { client, Socket } from '@packages/socket/lib/browser'
+import { client } from '@packages/socket/lib/browser'
+import type { Socket } from '@packages/socket/lib/browser'
 import { createClient as createWsClient } from 'graphql-ws'
 
 import { cacheExchange as graphcacheExchange } from '@urql/exchange-graphcache'
