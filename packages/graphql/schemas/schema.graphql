@@ -1148,7 +1148,7 @@ type Query {
   """Metadata about the migration, null if we aren't showing it"""
   migration: Migration
 
-  """Whether the project was specified from --project flag"""
+  """Whether the project was specified from the --project flag"""
   projectRootFromCI: Boolean!
 
   """All known projects for the app"""

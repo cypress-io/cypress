@@ -157,7 +157,7 @@ export type Step = typeof MIGRATION_STEPS[number]
 export async function getStepsForMigration (
   projectRoot: string,
   config: OldCypressConfig,
-  configFileExist: boolean,
+  configFileExists: boolean,
 ): Promise<Step[]> {
   const steps: Step[] = []
 
@@ -174,7 +174,7 @@ export async function getStepsForMigration (
       steps.push(step)
     }
 
-    if (step === 'configFile' && configFileExist) {
+    if (step === 'configFile' && configFileExists) {
       steps.push(step)
     }
 

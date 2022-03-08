@@ -76,7 +76,7 @@ export const Query = objectType({
     })
 
     t.nonNull.boolean('projectRootFromCI', {
-      description: 'Whether the project was specified from --project flag',
+      description: 'Whether the project was specified from the --project flag',
       resolve: (source, args, ctx) => Boolean(ctx.modeOptions.projectRoot),
     })
 
