@@ -66,10 +66,6 @@ export class WizardDataSource {
   }
 
   async installedPackages (): Promise<string[]> {
-    if (this.ctx.coreData.wizard.__fakeInstalledPackagesForTesting) {
-      return this.ctx.coreData.wizard.__fakeInstalledPackagesForTesting
-    }
-
     const packagesInitial = await this.packagesToInstall() || []
 
     if (!this.ctx.currentProject) {
