@@ -1,6 +1,6 @@
 require('../spec_helper')
 
-const { serveRunner } = require('../../lib/controllers/runner')
+const { serveRunner } = require(`${root}/lib/controllers/runner`)
 
 describe('controllers/runner', () => {
   describe('serveRunner', () => {
