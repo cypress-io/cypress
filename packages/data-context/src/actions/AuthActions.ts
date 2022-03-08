@@ -11,7 +11,7 @@ export interface AuthApiShape {
 export class AuthActions {
   constructor (private ctx: DataContext) {}
 
-  _cancelActiveLogin?: () => void | undefined
+  private cancelActiveLogin?: () => void | undefined
 
   async getUser () {
     return this.authApi.getUser().then((obj) => {
@@ -50,7 +50,7 @@ export class AuthActions {
       // A resolver is exposed to the instance so that we can
       // resolve this promise and the original mutation promise
       // if a reset occurs
-      this._cancelActiveLogin = () => {
+      this.cancelActiveLogin = () => {
         resolve(null)
       }
 
@@ -72,22 +72,29 @@ export class AuthActions {
 
     const user = await loginPromise
 
-    // user may be null if the promise is resolved due to a reset
-    if (user) {
-      this.setAuthenticatedUser(user as AuthenticatedUserShape)
-      this._cancelActiveLogin = undefined
+    if (!user) {
+      // if the user is null, this promise is resolving due to a
+      // login mutation cancellation. the state should already
+      // be reset, so abort early.
+      return
     }
+
+    this.setAuthenticatedUser(user as AuthenticatedUserShape)
+
+    this.cancelActiveLogin = undefined
+
+    this.resetAuthState()
   }
 
   resetAuthState () {
-    // closes the express server opened during login
+    // closes the express server opened during login, if it's still open
     this.authApi.resetAuthState()
 
     // if a login mutation is still in progress, we
-    // forcefully resolve it so that it persist
-    if (this._cancelActiveLogin) {
-      this._cancelActiveLogin()
-      this._cancelActiveLogin = undefined
+    // forcefully resolve it so that the mutation does not persist
+    if (this.cancelActiveLogin) {
+      this.cancelActiveLogin()
+      this.cancelActiveLogin = undefined
     }
 
     this.ctx.update((coreData) => {

@@ -34,7 +34,7 @@
   </div>
   <div v-else>
     <Button
-      v-if="!cloudViewer && (login.fetching.value || props.gql.authState.browserOpened)"
+      v-if="loginMutationIsPending"
       size="lg"
       variant="pending"
       aria-live="polite"
@@ -47,7 +47,7 @@
           class="animate-spin icon-dark-white icon-light-gray-400"
         />
       </template>
-      {{ !props.gql.authState.browserOpened ? t('topNav.login.actionOpening') : t('topNav.login.actionWaiting') }}
+      {{ browserOpened ? t('topNav.login.actionWaiting') : t('topNav.login.actionOpening') }}
     </Button>
     <Button
       v-else
@@ -58,7 +58,7 @@
       :disabled="!cloudViewer && !isOnline"
       @click="handleLoginOrContinue"
     >
-      {{ !cloudViewer ? t('topNav.login.actionLogin') : t('topNav.login.actionContinue') }}
+      {{ cloudViewer ? t('topNav.login.actionContinue') : t('topNav.login.actionLogin') }}
     </Button>
   </div>
 </template>
@@ -130,14 +130,24 @@ mutation Auth_ResetAuthState {
 const login = useMutation(Auth_LoginDocument)
 const logout = useMutation(Auth_LogoutDocument)
 const reset = useMutation(Auth_ResetAuthStateDocument)
+
 const loginButtonRef = ref(Button)
+const loginInitiated = ref(false)
 
 onMounted(() => {
   loginButtonRef?.value?.$el?.focus()
 })
 
 onBeforeUnmount(() => {
-  if (login.fetching.value) {
+  // If a log in was initiated from this component instance, then the auth state
+  // may be polluted, due to the mutation still being fetched or due to
+  // errors returned during the login process. So a reset occurs when
+  // this instance unmounts to cover all scenarios where the LoginModal may be dismissed.
+  //
+  // We only perform the reset for the component that triggered a login
+  // to prevent state conflicts when LoginModals are presented within the launchpad
+  // and app simultaneously.
+  if (loginInitiated.value) {
     reset.executeMutation({})
   }
 })
@@ -150,12 +160,28 @@ const cloudViewer = computed(() => {
   return props.gql.cloudViewer
 })
 
+const browserOpened = computed(() => {
+  return props.gql.authState.browserOpened
+})
+
+// We determine that a login is pending if there is no current cloudViewer and
+// either a login has been initiated from this component, or the browser has been
+// successfully opened.
+//
+// It is possible for the browser to be open but not due to actions by this component,
+// particularly when LoginModals are presented in both the launchpad and app simultaneously.
+const loginMutationIsPending = computed(() => {
+  return !cloudViewer.value && (loginInitiated.value || browserOpened.value)
+})
+
 const handleLoginOrContinue = async () => {
   if (cloudViewer.value) {
     emit('continue', true)
 
     return
   }
+
+  loginInitiated.value = true
 
   login.executeMutation({})
 }

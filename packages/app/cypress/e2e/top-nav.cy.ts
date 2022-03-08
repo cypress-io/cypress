@@ -1,5 +1,4 @@
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
-import type { AuthStateShape } from '@packages/data-context/src/data'
 
 const loginText = defaultMessages.topNav.login
 
@@ -340,7 +339,7 @@ describe('App Top Nav Workflows', () => {
         cy.withCtx((ctx, options) => {
         // @ts-ignore sinon is a global in the node process where this is executed
           sinon.stub(ctx._apis.authApi, 'logIn').callsFake(async (onMessage) => {
-            onMessage({ browserOpened: true } as AuthStateShape)
+            onMessage({ browserOpened: true })
 
             return new Promise((resolve) => {
               setTimeout(() => {
@@ -420,11 +419,17 @@ describe('App Top Nav Workflows', () => {
 
       it('shows correct error when browser cannot launch', () => {
         cy.withCtx((ctx) => {
-          ctx.coreData.authState = {
-            name: 'AUTH_COULD_NOT_LAUNCH_BROWSER',
-            message: 'http://127.0.0.1:0000/redirect-to-auth',
-            browserOpened: false,
-          }
+          // @ts-ignore
+          sinon.stub(ctx._apis.authApi, 'logIn').callsFake(async (onMessage) => {
+            onMessage({
+              name: 'AUTH_COULD_NOT_LAUNCH_BROWSER',
+              message: 'http://127.0.0.1:0000/redirect-to-auth',
+              browserOpened: false,
+
+            })
+
+            return Promise.resolve()
+          })
         })
 
         cy.findByTestId('app-header-bar').within(() => {
@@ -432,23 +437,32 @@ describe('App Top Nav Workflows', () => {
           cy.findByRole('button', { name: 'Log In' }).click()
         })
 
-        cy.contains('http://127.0.0.1:0000/redirect-to-auth').should('be.visible')
-        cy.contains(loginText.titleBrowserError).should('be.visible')
-        cy.contains(loginText.bodyBrowserError).should('be.visible')
-        cy.contains(loginText.bodyBrowserErrorDetails).should('be.visible')
+        cy.findByRole('dialog', { name: 'Log in to Cypress' }).within(() => {
+          cy.findByRole('button', { name: 'Log In' }).click()
 
-        // in this state, there is no retry UI, we ask the user to visit the auth url on their own
-        cy.contains('button', loginText.actionTryAgain).should('not.exist')
-        cy.contains('button', loginText.actionCancel).should('not.exist')
+          cy.contains('http://127.0.0.1:0000/redirect-to-auth').should('be.visible')
+          cy.contains(loginText.titleBrowserError).should('be.visible')
+          cy.contains(loginText.bodyBrowserError).should('be.visible')
+          cy.contains(loginText.bodyBrowserErrorDetails).should('be.visible')
+
+          // in this state, there is no retry UI, we ask the user to visit the auth url on their own
+          cy.contains('button', loginText.actionTryAgain).should('not.be.visible')
+          cy.contains('button', loginText.actionCancel).should('not.be.visible')
+        })
       })
 
       it('shows correct error when error other than browser-launch happens', () => {
         cy.withCtx((ctx) => {
-          ctx.coreData.authState = {
-            name: 'AUTH_ERROR_DURING_LOGIN',
-            message: 'An unexpected error occurred',
-            browserOpened: false,
-          }
+          // @ts-ignore
+          sinon.stub(ctx._apis.authApi, 'logIn').callsFake(async (onMessage) => {
+            onMessage({
+              name: 'AUTH_ERROR_DURING_LOGIN',
+              message: 'An unexpected error occurred',
+              browserOpened: false,
+            })
+
+            return Promise.resolve()
+          })
         })
 
         cy.findByTestId('app-header-bar').within(() => {
@@ -456,34 +470,49 @@ describe('App Top Nav Workflows', () => {
           cy.findByRole('button', { name: 'Log In' }).click()
         })
 
-        cy.contains(loginText.titleFailed).should('be.visible')
-        cy.contains(loginText.bodyError).should('be.visible')
-        cy.contains('An unexpected error occurred').should('be.visible')
+        cy.findByRole('dialog', { name: 'Log in to Cypress' }).within(() => {
+          cy.findByRole('button', { name: 'Log In' }).click()
 
-        cy.contains('button', loginText.actionTryAgain).should('be.visible').as('tryAgain')
-        cy.contains('button', loginText.actionCancel).should('be.visible')
+          cy.contains(loginText.titleFailed).should('be.visible')
+          cy.contains(loginText.bodyError).should('be.visible')
+          cy.contains('An unexpected error occurred').should('be.visible')
+
+          cy.contains('button', loginText.actionTryAgain).should('be.visible').as('tryAgain')
+          cy.contains('button', loginText.actionCancel).should('be.visible')
+        })
 
         cy.percySnapshot()
 
         cy.withCtx((ctx) => {
-          ctx.coreData.authState = {
-            name: 'AUTH_BROWSER_LAUNCHED',
-            message: '',
-            browserOpened: true,
-          }
+          // @ts-ignore
+          ctx._apis.authApi.logIn.callsFake(async (onMessage) => {
+            onMessage({
+              name: 'AUTH_BROWSER_LAUNCHED',
+              message: '',
+              browserOpened: true,
+            })
+
+            return Promise.resolve()
+          })
         })
 
         cy.get('@tryAgain').click()
         cy.contains(loginText.titleInitial).should('be.visible')
+        cy.contains(loginText.actionWaiting).should('be.visible')
       })
 
       it('cancel button correctly clears error state', () => {
         cy.withCtx((ctx) => {
-          ctx.coreData.authState = {
-            name: 'AUTH_ERROR_DURING_LOGIN',
-            message: 'An unexpected error occurred',
-            browserOpened: false,
-          }
+          // @ts-ignore
+          sinon.stub(ctx._apis.authApi, 'logIn').callsFake(async (onMessage) => {
+            onMessage({
+              name: 'AUTH_ERROR_DURING_LOGIN',
+              message: 'An unexpected error occurred',
+              browserOpened: false,
+            })
+
+            return Promise.resolve()
+          })
         })
 
         cy.findByTestId('app-header-bar').within(() => {
@@ -491,14 +520,20 @@ describe('App Top Nav Workflows', () => {
           cy.findByRole('button', { name: 'Log In' }).as('loginButton').click()
         })
 
-        cy.contains(loginText.titleFailed).should('be.visible')
-        cy.contains(loginText.bodyError).should('be.visible')
-        cy.contains('An unexpected error occurred').should('be.visible')
+        cy.findByRole('dialog', { name: 'Log in to Cypress' }).within(() => {
+          cy.findByRole('button', { name: 'Log In' }).click()
+
+          cy.contains(loginText.titleFailed).should('be.visible')
+          cy.contains(loginText.bodyError).should('be.visible')
+          cy.contains('An unexpected error occurred').should('be.visible')
+        })
 
         cy.percySnapshot()
 
-        cy.contains('button', loginText.actionTryAgain).should('be.visible')
-        cy.contains('button', loginText.actionCancel).click()
+        cy.findByRole('dialog', { name: loginText.titleFailed }).within(() => {
+          cy.contains('button', loginText.actionTryAgain).should('be.visible')
+          cy.contains('button', loginText.actionCancel).click()
+        })
 
         cy.get('@loginButton').click()
         cy.contains(loginText.titleInitial).should('be.visible')
@@ -506,11 +541,16 @@ describe('App Top Nav Workflows', () => {
 
       it('closing modal correctly clears error state', () => {
         cy.withCtx((ctx) => {
-          ctx.coreData.authState = {
-            name: 'AUTH_ERROR_DURING_LOGIN',
-            message: 'An unexpected error occurred',
-            browserOpened: false,
-          }
+          // @ts-ignore
+          sinon.stub(ctx._apis.authApi, 'logIn').callsFake(async (onMessage) => {
+            onMessage({
+              name: 'AUTH_ERROR_DURING_LOGIN',
+              message: 'An unexpected error occurred',
+              browserOpened: false,
+            })
+
+            return Promise.resolve()
+          })
         })
 
         cy.findByTestId('app-header-bar').within(() => {
@@ -518,11 +558,14 @@ describe('App Top Nav Workflows', () => {
           cy.findByRole('button', { name: 'Log In' }).as('loginButton').click()
         })
 
-        cy.contains(loginText.titleFailed).should('be.visible')
-        cy.contains(loginText.bodyError).should('be.visible')
-        cy.contains('An unexpected error occurred').should('be.visible')
+        cy.findByRole('dialog', { name: 'Log in to Cypress' }).within(() => {
+          cy.findByRole('button', { name: 'Log In' }).click()
+          cy.contains(loginText.titleFailed).should('be.visible')
+          cy.contains(loginText.bodyError).should('be.visible')
+          cy.contains('An unexpected error occurred').should('be.visible')
 
-        cy.findByLabelText(defaultMessages.actions.close).click()
+          cy.findByLabelText(defaultMessages.actions.close).click()
+        })
 
         cy.get('@loginButton').click()
         cy.contains(loginText.titleInitial).should('be.visible')
