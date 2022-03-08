@@ -1,90 +1,106 @@
-const svg_cy = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="isolation:isolate" viewBox="-242.64 -94.483 73.294 73.293" width="73.294" height="73.293"><path d=" M -205.993 -94.483 C -185.753 -94.483 -169.346 -78.076 -169.346 -57.837 C -169.346 -37.597 -185.753 -21.19 -205.993 -21.19 C -226.232 -21.19 -242.64 -37.597 -242.64 -57.837 C -242.64 -78.076 -226.232 -94.483 -205.993 -94.483 L -205.993 -94.483 Z  M -186.526 -41.702 C -187.818 -37.625 -189.847 -34.476 -192.612 -32.256 C -195.377 -30.036 -199.121 -28.764 -203.844 -28.441 L -204.753 -34.618 C -201.685 -35.021 -199.434 -35.749 -198.001 -36.798 C -197.408 -37.232 -196.37 -38.389 -196.36 -38.401 L -196.36 -38.401 L -207.417 -73.856 L -198.274 -73.856 L -191.855 -47.334 L -185.073 -73.856 L -176.172 -73.856 L -186.526 -41.702 L -186.526 -41.702 Z  M -218.619 -74.825 C -216.48 -74.825 -214.552 -74.512 -212.836 -73.886 C -211.12 -73.26 -209.496 -72.282 -207.962 -70.949 L -211.716 -65.863 C -212.766 -66.67 -213.785 -67.255 -214.774 -67.619 C -215.763 -67.982 -216.843 -68.164 -218.014 -68.164 C -222.576 -68.164 -224.856 -64.652 -224.856 -57.627 C -224.856 -54.075 -224.271 -51.532 -223.1 -49.998 C -221.929 -48.464 -220.254 -47.697 -218.075 -47.697 C -216.944 -47.697 -215.914 -47.869 -214.986 -48.212 C -214.058 -48.555 -212.967 -49.13 -211.716 -49.937 L -207.962 -44.548 C -211.03 -42.046 -214.542 -40.794 -218.498 -40.794 C -221.647 -40.794 -224.382 -41.48 -226.703 -42.853 C -229.025 -44.225 -230.811 -46.173 -232.062 -48.696 C -233.313 -51.22 -233.939 -54.176 -233.939 -57.567 C -233.939 -60.958 -233.313 -63.955 -232.062 -66.559 C -230.811 -69.163 -229.025 -71.192 -226.703 -72.644 C -224.382 -74.098 -221.687 -74.825 -218.619 -74.825 L -218.619 -74.825" fill-rule="evenodd" fill="#6b6b6b"/></svg>`
+const svg_cy = `<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M16.877 19.0494C18.8191 19.0494 20.401 20.085 21.2139 21.8915L21.2782 22.0329L24.5398 20.9253L24.4704 20.7583C23.2074 17.6823 20.2981 15.7704 16.877 15.7704C14.4719 15.7704 12.5169 16.5414 10.9015 18.1243C9.29635 19.697 8.48353 21.6757 8.48353 24.0064C8.48353 26.3166 9.29635 28.285 10.9015 29.8577C12.5169 31.4407 14.4719 32.2116 16.877 32.2116C20.2981 32.2116 23.2074 30.2997 24.4704 27.2263L24.5398 27.0593L21.273 25.9491L21.2113 26.0956C20.4833 27.8713 18.8628 28.9326 16.877 28.9326C15.5239 28.9326 14.3818 28.4598 13.4763 27.5295C12.5606 26.5864 12.0976 25.4018 12.0976 24.009C12.0976 22.6059 12.5503 21.4444 13.4763 20.4576C14.3792 19.5222 15.5239 19.0494 16.877 19.0494Z" fill="#1B1E2E"/>
+<path d="M37.3061 16.0737L32.658 27.8353L27.979 16.0737H24.1514L30.7133 32.1268L26.0446 43.449L25.828 43.963C25.6788 44.3224 25.3533 44.5752 24.9776 44.6273C24.6537 44.6424 24.3277 44.65 24 44.65C23.9323 44.65 23.8647 44.6497 23.7972 44.649C12.4859 44.5402 3.35 35.337 3.35 24C3.35 12.5953 12.5953 3.35 24 3.35C35.4047 3.35 44.65 12.5953 44.65 24C44.65 32.5719 39.4271 39.924 31.99 43.0474L30.7772 45.9958C30.5987 46.43 30.3755 46.8377 30.1141 47.2142C40.4075 44.5105 48 35.1419 48 24C48 10.7452 37.2548 0 24 0C10.7452 0 0 10.7452 0 24C0 37.1872 10.6357 47.8902 23.7972 47.9992C23.8247 47.9994 25.0196 47.9794 25.0177 47.9794C26.736 47.9075 28.2717 46.8308 28.9276 45.235L29.4694 43.9179L40.9228 16.0737H37.3061Z" fill="#1B1E2E"/>
+</svg>
+`
+
+const defaultStyles = `
+  body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input,button,textarea,p,blockquote,th,td{margin:0;padding:0;}table{border-collapse:collapse;border-spacing:0;}fieldset,img,a img{border:none;}address,caption,cite,code,dfn,em,strong,th,var,optgroup{font-style:inherit;font-weight:inherit;}del,ins{text-decoration:none;}li{list-style:none;}caption,th{text-align:left;}h1,h2,h3,h4,h5,h6{font-size:100%;font-weight:normal;}q:before,q:after{content:'';}abbr,acronym{border:0;font-variant:normal;}sup{vertical-align:baseline;}sub{vertical-align:baseline;}legend{color:#000;}
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    color: #1b1e2e;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.4;
+    padding: 20px;
+    width: 100%;
+    height: 100%;
+  }
+
+  pre {
+    text-align: left;
+    display: flex;
+  }
+
+  code {
+    font-family: 'Fira Code', monospace;
+  }
+
+  pre code {
+    margin: 0 auto;
+  }
+
+  .container {
+    background-color: #f3f4fa;
+    border-radius: 8px;
+    border: 2px dashed #e1e3ed;
+    padding: 32px 16px;
+    text-align: center;
+    height: 100%;
+  }
+
+  svg {
+    display: inline-block;
+    stroke-width: 0;
+    stroke: currentColor;
+    fill: currentColor;
+    margin: 16px 0;
+    width: 64px;
+  }
+
+  p {
+    font-size: 21px;
+    font-weight: 200;
+    line-height: 1.4;
+  }
+
+  kbd {
+    background-color: #747994;
+    border-radius: 3px;
+    box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.25);
+    color: #fff;
+    display: inline-block;
+    font-size: 85%;
+    padding: 2px 4px;
+  }
+
+  a {
+    color: #FFF;
+    text-decoration: none;
+  }
+
+  a:hover,
+  a:focus,
+  a:active {
+    text-decoration: underline;
+  }
+`
+
+const listStyles = `
+ul {
+  text-align: left;
+  margin: 0 auto 10px;
+  display: inline-block;
+  padding: 20px 20px 20px 40px;
+}
+
+li {
+  list-style: decimal;
+  list-style-position: outside;
+  margin: 4px 0;
+}
+`
 
 export const initial = () => {
   return `
     <style>
-      body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input,button,textarea,p,blockquote,th,td{margin:0;padding:0;}table{border-collapse:collapse;border-spacing:0;}fieldset,img,a img{border:none;}address,caption,cite,code,dfn,em,strong,th,var,optgroup{font-style:inherit;font-weight:inherit;}del,ins{text-decoration:none;}li{list-style:none;}caption,th{text-align:left;}h1,h2,h3,h4,h5,h6{font-size:100%;font-weight:normal;}q:before,q:after{content:'';}abbr,acronym{border:0;font-variant:normal;}sup{vertical-align:baseline;}sub{vertical-align:baseline;}legend{color:#000;}
+      ${defaultStyles}
 
-      * {
-        box-sizing: border-box;
-      }
-
-      body {
-        color: #111;
-        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-        font-size: 16px;
-        line-height: 1.4;
-        padding: 20px;
-        width: 100%;
-        height: 100%;
-      }
-
-      pre {
-        text-align: left;
-        display: flex;
-      }
-
-      pre code {
-        margin: 0 auto;
-      }
-
-      .container {
-        background-color: #f3f3f3;
-        border-radius: 6px;
-        border: 2px dashed #ddd;
-        padding: 30px 15px;
-        text-align: center;
-        height: 100%;
-      }
-
-      svg {
-        display: inline-block;
-        stroke-width: 0;
-        stroke: currentColor;
-        fill: currentColor;
-        margin: 20px 0 10px;
-        width: 62px;
-      }
-
-      p {
-        font-size: 21px;
-        font-weight: 200;
-        line-height: 1.4;
-      }
-
-      kbd {
-        background-color: #6b6b6b;
-        border-radius: 3px;
-        box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.25);
-        color: #fff;
-        display: inline-block;
-        font-size: 85%;
-        padding: 2px 4px;
-      }
-
-      a {
-        color: #FFF;
-        text-decoration: none;
-      }
-
-      a:hover,
-      a:focus,
-      a:active {
-        text-decoration: underline;
-      }
-
-      ul {
-        text-align: left;
-        margin: 0 auto 10px;
-        display: inline-block;
-        padding: 20px 20px 20px 40px;
-      }
-
-      li {
-        list-style: decimal;
-        list-style-position: outside;
-        margin: 4px 0;
-      }
+      ${listStyles}
     </style>
 
     <div class='container'>
@@ -108,99 +124,22 @@ export const initial = () => {
 export const sessionLifecycle = () => {
   return `
     <style>
-      body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input,button,textarea,p,blockquote,th,td{margin:0;padding:0;}table{border-collapse:collapse;border-spacing:0;}fieldset,img,a img{border:none;}address,caption,cite,code,dfn,em,strong,th,var,optgroup{font-style:inherit;font-weight:inherit;}del,ins{text-decoration:none;}li{list-style:none;}caption,th{text-align:left;}h1,h2,h3,h4,h5,h6{font-size:100%;font-weight:normal;}q:before,q:after{content:'';}abbr,acronym{border:0;font-variant:normal;}sup{vertical-align:baseline;}sub{vertical-align:baseline;}legend{color:#000;}
 
-      * {
-        box-sizing: border-box;
-      }
+      ${defaultStyles}
 
-      body {
-        color: #111;
-        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-        font-size: 16px;
-        line-height: 1.4;
-        padding: 20px;
-        width: 100%;
-        height: 100%;
-      }
-
-      pre {
-        text-align: left;
-        display: flex;
-      }
-
-      pre code {
-        margin: 0 auto;
-      }
-
-      .container {
-        background-color: #f3f3f3;
-        border-radius: 6px;
-        border: 2px dashed #ddd;
-        padding: 30px 15px;
-        text-align: center;
-        height: 100%;
-      }
-
-      svg {
-        display: inline-block;
-        stroke-width: 0;
-        stroke: currentColor;
-        fill: currentColor;
-        margin: 20px 0 10px;
-        width: 62px;
-      }
-
-      p {
-        font-size: 21px;
-        font-weight: 200;
-        line-height: 1.4;
-      }
-
-      kbd {
-        background-color: #6b6b6b;
-        border-radius: 3px;
-        box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.25);
-        color: #fff;
-        display: inline-block;
-        font-size: 85%;
-        padding: 2px 4px;
-      }
-
-      a {
-        color: #FFF;
-        text-decoration: none;
-      }
-
-      a:hover,
-      a:focus,
-      a:active {
-        text-decoration: underline;
-      }
-
-      ul {
-        text-align: left;
-        margin: 0 auto 10px;
-        display: inline-block;
-        padding: 20px 20px 20px 40px;
-      }
-
-      li {
-        list-style: decimal;
-        list-style-position: outside;
-        margin: 4px 0;
-      }
+      ${listStyles}
 
       .warn {
-        color: #0000007a;
-        background-color: #ffa5007a;
-        border-left: 4px solid #ffa500;
+        color: #bd5800;
+        background-color: #f5f4d7;
         font-size: 15px;
-        padding: 10px 6px;
+        font-weight: normal;
+        padding: 16px;
         max-width: 600px;
-        margin: 0 auto 6px;
+        margin: 0 16px 8px;
         display: inline-block;
         text-align: left;
+        width: 90%;
       }
 
       .em {
@@ -231,76 +170,9 @@ export const sessionLifecycle = () => {
 export const session = () => {
   return `
     <style>
-      body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input,button,textarea,p,blockquote,th,td{margin:0;padding:0;}table{border-collapse:collapse;border-spacing:0;}fieldset,img,a img{border:none;}address,caption,cite,code,dfn,em,strong,th,var,optgroup{font-style:inherit;font-weight:inherit;}del,ins{text-decoration:none;}li{list-style:none;}caption,th{text-align:left;}h1,h2,h3,h4,h5,h6{font-size:100%;font-weight:normal;}q:before,q:after{content:'';}abbr,acronym{border:0;font-variant:normal;}sup{vertical-align:baseline;}sub{vertical-align:baseline;}legend{color:#000;}
+      ${defaultStyles}
 
-      * {
-        box-sizing: border-box;
-      }
-
-      body {
-        color: #111;
-        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-        font-size: 16px;
-        line-height: 1.4;
-        padding: 20px;
-        width: 100%;
-        height: 100%;
-      }
-
-      pre {
-        text-align: left;
-        display: flex;
-      }
-
-      pre code {
-        margin: 0 auto;
-      }
-
-      .container {
-        background-color: #f3f3f3;
-        border-radius: 6px;
-        border: 2px dashed #ddd;
-        padding: 30px 15px;
-        text-align: center;
-        height: 100%;
-      }
-
-      svg {
-        display: inline-block;
-        stroke-width: 0;
-        stroke: currentColor;
-        fill: currentColor;
-        margin: 20px 0 10px;
-        width: 62px;
-      }
-
-      p {
-        font-size: 21px;
-        font-weight: 200;
-        line-height: 1.4;
-      }
-
-
-      kbd {
-        background-color: #6b6b6b;
-        border-radius: 3px;
-        box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.25);
-        color: #fff;
-        display: inline-block;
-        font-size: 85%;
-        padding: 2px 4px;
-      }
-
-      a {
-        color: #FFF;
-        text-decoration: none;
-      }
-
-      a:hover,
-      a:focus,
-      a:active {
-        text-decoration: underline;
-      }
+      ${listStyles}
 
     </style>
 
@@ -312,12 +184,12 @@ export const session = () => {
       <a href='https://on.cypress.io/visit' target='_blank'><kbd>cy.visit()</kbd></a>
       </p>
 <pre><code>
-1 | 
+1 |
 2 | cy.session(...)
 3 | <b>cy.visit(...)</b>
-4 | 
+4 |
 </code></pre>
-      
+
     </div>
   `
 }
