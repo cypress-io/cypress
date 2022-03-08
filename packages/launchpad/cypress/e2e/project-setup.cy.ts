@@ -613,10 +613,6 @@ describe('Launchpad: Setup Project', () => {
       })
     })
 
-    beforeEach(() => {
-      fakeInstalledDeps()
-    })
-
     const hasStorybookPermutations = [false, true]
 
     FRONTEND_FRAMEWORKS.forEach((framework) => {
