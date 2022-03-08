@@ -339,7 +339,7 @@ export const mutation = mutationType({
       resolve (_, args, ctx) {
         ctx.actions.auth.resetAuthState()
 
-        return ctx.appData
+        return {}
       },
     })
 

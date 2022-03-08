@@ -11,6 +11,8 @@ export interface AuthApiShape {
 export class AuthActions {
   constructor (private ctx: DataContext) {}
 
+  _cancelActiveLogin?: () => void | undefined
+
   async getUser () {
     return this.authApi.getUser().then((obj) => {
       if (obj.authToken) {
@@ -44,18 +46,49 @@ export class AuthActions {
   }
 
   async login () {
-    this.setAuthenticatedUser(await this.authApi.logIn((authState) => {
-      this.ctx.update((coreData) => {
-        coreData.authState = authState
-      })
+    const loginPromise = new Promise((resolve, reject) => {
+      // A resolver is exposed to the instance so that we can
+      // resolve this promise and the original mutation promise
+      // if a reset occurs
+      this._cancelActiveLogin = () => {
+        resolve(null)
+      }
 
-      this.ctx.emitter.toApp()
-      this.ctx.emitter.toLaunchpad()
-    }))
+      this.authApi.logIn((authState) => {
+        this.ctx.update((coreData) => {
+          coreData.authState = authState
+        })
+
+        // Ensure auth state changes during the login lifecycle
+        // are propagated to the clients
+        this.ctx.emitter.toApp()
+        this.ctx.emitter.toLaunchpad()
+      }).then((user: AuthenticatedUserShape) => {
+        resolve(user)
+      }).catch((e) => {
+        reject(e)
+      })
+    })
+
+    const user = await loginPromise
+
+    // user may be null if the promise is resolved due to a reset
+    if (user) {
+      this.setAuthenticatedUser(user as AuthenticatedUserShape)
+      this._cancelActiveLogin = undefined
+    }
   }
 
   resetAuthState () {
+    // closes the express server opened during login
     this.authApi.resetAuthState()
+
+    // if a login mutation is still in progress, we
+    // forcefully resolve it so that it persist
+    if (this._cancelActiveLogin) {
+      this._cancelActiveLogin()
+      this._cancelActiveLogin = undefined
+    }
 
     this.ctx.update((coreData) => {
       coreData.authState = { browserOpened: false }
@@ -78,7 +111,9 @@ export class AuthActions {
   }
 
   private setAuthenticatedUser (authUser: AuthenticatedUserShape | null) {
-    this.ctx.coreData.user = authUser
+    this.ctx.update((coreData) => {
+      coreData.user = authUser
+    })
 
     return this
   }

@@ -34,7 +34,7 @@
   </div>
   <div v-else>
     <Button
-      v-if="login.fetching.value"
+      v-if="!cloudViewer && (login.fetching.value || props.gql.authState.browserOpened)"
       size="lg"
       variant="pending"
       aria-live="polite"
@@ -56,7 +56,7 @@
       variant="primary"
       aria-live="polite"
       :disabled="!cloudViewer && !isOnline"
-      @click="handleAuth"
+      @click="handleLoginOrContinue"
     >
       {{ !cloudViewer ? t('topNav.login.actionLogin') : t('topNav.login.actionContinue') }}
     </Button>
@@ -64,7 +64,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, onMounted } from 'vue'
+import { computed, ref, onMounted, onBeforeUnmount } from 'vue'
 import { gql } from '@urql/core'
 import { useMutation } from '@urql/vue'
 import { useOnline } from '@vueuse/core'
@@ -136,6 +136,12 @@ onMounted(() => {
   loginButtonRef?.value?.$el?.focus()
 })
 
+onBeforeUnmount(() => {
+  if (login.fetching.value) {
+    reset.executeMutation({})
+  }
+})
+
 const emit = defineEmits<{
   (event: 'continue', value: boolean): void
 }>()
@@ -144,7 +150,7 @@ const cloudViewer = computed(() => {
   return props.gql.cloudViewer
 })
 
-const handleAuth = () => {
+const handleLoginOrContinue = async () => {
   if (cloudViewer.value) {
     emit('continue', true)
 
@@ -154,17 +160,17 @@ const handleAuth = () => {
   login.executeMutation({})
 }
 
-const handleLogout = async () => {
-  await logout.executeMutation({})
+const handleLogout = () => {
+  logout.executeMutation({})
 }
 
-const handleTryAgain = () => {
-  reset.executeMutation({})
+const handleTryAgain = async () => {
+  await reset.executeMutation({})
+
   login.executeMutation({})
 }
 
 const handleCancel = () => {
-  reset.executeMutation({})
   emit('continue', true)
 }
 
