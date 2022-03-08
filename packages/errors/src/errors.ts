@@ -1319,6 +1319,18 @@ export const AllCypressErrors = {
 
     const errorObj = brokenOptionsMap[rootKey]
 
+    if (!errorObj) {
+      return errTemplate`
+        The ${fmt.highlight(optionKey)} option is invalid.
+
+        The map of broken options is missing a mapping for ${fmt.highlight(rootKey)}.
+
+        Please consider adding an issue to the [Cypress Github repo](https://github.com/cypress-io/cypress/issues/new/choose).
+        
+        ${stackTrace}
+      `
+    }
+
     const message = errorObj.brokenOnlyAtRoot ? errPrefixRootOnly(optionKey) : errPrefix(optionKey)
 
     return errTemplate`
