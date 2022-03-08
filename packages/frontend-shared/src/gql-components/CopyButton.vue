@@ -1,6 +1,5 @@
 <template>
   <Button
-    v-if="isSupported"
     :size="size"
     :variant="variant"
     data-cy="copy-button"
@@ -26,11 +25,11 @@
 </template>
 
 <script setup lang="ts">
-import { useClipboard } from '@vueuse/core'
+import { useClipboard } from './useClipboard'
 import { useI18n } from '@cy/i18n'
-import type { ButtonSizes, ButtonVariants } from '../components/Button.vue'
-import Button from '../components/Button.vue'
-import TransitionQuickFade from '../components/transitions/TransitionQuickFade.vue'
+import type { ButtonSizes, ButtonVariants } from '@cy/components/Button.vue'
+import Button from '@cy/components/Button.vue'
+import TransitionQuickFade from '@cy/components/transitions/TransitionQuickFade.vue'
 
 const props = withDefaults(defineProps<{
   text: string
@@ -43,7 +42,7 @@ const props = withDefaults(defineProps<{
   size: 'md',
 })
 
-const { copy, copied, isSupported } = useClipboard({ copiedDuring: 2000 })
+const { copy, copied } = useClipboard({ copiedDuring: 2000 })
 const copyToClipboard = () => {
   if (props.text) {
     copy(props.text)

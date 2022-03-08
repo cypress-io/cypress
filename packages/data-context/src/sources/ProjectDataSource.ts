@@ -119,8 +119,8 @@ export class ProjectDataSource {
     return path.basename(projectRoot)
   }
 
-  getConfig () {
-    return this.ctx.lifecycleManager.loadedFullConfig
+  async getConfig () {
+    return await this.ctx.lifecycleManager.getFullInitialConfig()
   }
 
   getCurrentProjectSavedState () {
@@ -145,11 +145,7 @@ export class ProjectDataSource {
   }> {
     const toArray = (val?: string | string[]) => val ? typeof val === 'string' ? [val] : val : undefined
 
-    const config = this.getConfig()
-
-    if (!config) {
-      throw Error(`Config for ${projectRoot} was not loaded`)
-    }
+    const config = await this.getConfig()
 
     return {
       specPattern: toArray(config[testingType]?.specPattern),
