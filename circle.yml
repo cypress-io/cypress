@@ -29,8 +29,7 @@ mainBuildFilters: &mainBuildFilters
       only:
         - develop
         - 10.0-release
-        - rebase/develop-10.0-release-2022-03-04
-        - fix-beta-build-caching
+        - marktnoonan/backmerge-develop-3-8-22
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -40,8 +39,7 @@ macWorkflowFilters: &mac-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ '10.0-release', << pipeline.git.branch >> ]
-    - equal: [ rebase/develop-10.0-release-2022-03-04, << pipeline.git.branch >> ]
-    - equal: [ fix-beta-build-caching, << pipeline.git.branch >> ]
+    - equal: [ marktnoonan/backmerge-develop-3-8-22, << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -51,7 +49,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ '10.0-release', << pipeline.git.branch >> ]
-    - equal: [ fix-beta-build-caching, << pipeline.git.branch >> ]
+    - equal: [ marktnoonan/backmerge-develop-3-8-22, << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -1679,7 +1677,7 @@ jobs:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "rebase/develop-10.0-release-2022-03-04" && "$CIRCLE_BRANCH" != "10.0-release" && "$CIRCLE_BRANCH" != "fix-beta-build-caching" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "marktnoonan/backmerge-develop-3-8-22" && "$CIRCLE_BRANCH" != "10.0-release" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
