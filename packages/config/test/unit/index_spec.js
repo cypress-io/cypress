@@ -15,11 +15,13 @@ describe('src/index', () => {
         'baseUrl': 'https://url.com',
         'blacklistHosts': 'breaking option',
         'devServerPublicPathRoute': 'internal key',
+        'projectId': '232',
         'random': 'not a config option',
+        'viewportHeight': 200,
       })
 
       expect(keys).to.deep.eq({
-        'baseUrl': 'https://url.com',
+        'projectId': '232',
         'blacklistHosts': 'breaking option',
       })
     })
@@ -72,8 +74,8 @@ describe('src/index', () => {
 
       expect(normalizedKey).to.eq('execTimeout')
 
-      normalizedKey = configUtil.matchesConfigKey('Base-url')
-      expect(normalizedKey).to.eq('baseUrl')
+      normalizedKey = configUtil.matchesConfigKey('project-ID')
+      expect(normalizedKey).to.eq('projectId')
     })
 
     it('returns nothing when config key does not has a default value', () => {
@@ -88,7 +90,7 @@ describe('src/index', () => {
       const errorFn = sinon.spy()
 
       configUtil.validate({
-        'baseUrl': 'https://',
+        'projectId': '232342',
       }, errorFn)
 
       expect(errorFn).to.have.callCount(0)
@@ -98,11 +100,11 @@ describe('src/index', () => {
       const errorFn = sinon.spy()
 
       configUtil.validate({
-        'baseUrl': ' ',
+        'responseTimeout': '0',
       }, errorFn)
 
-      expect(errorFn).to.have.been.calledWithMatch({ key: 'baseUrl' })
-      expect(errorFn).to.have.been.calledWithMatch({ type: 'a fully qualified URL (starting with `http://` or `https://`)' })
+      expect(errorFn).to.have.been.calledWithMatch({ key: 'responseTimeout' })
+      expect(errorFn).to.have.been.calledWithMatch({ type: 'a number' })
     })
   })
 
