@@ -36,7 +36,7 @@ export const brokenOptionsMap = {
   baseUrl: {
     brokenOnlyAtRoot: true,
     additionalHelp: errPartial`
-      Since 10.0, this option is no longer supported on the root of the config object. 
+      It has moved to the inside of the ${fmt.highlight('e2e')} object.
     `,
   },
   supportFile: {
