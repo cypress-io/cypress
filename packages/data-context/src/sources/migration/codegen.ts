@@ -211,7 +211,7 @@ function createE2ETemplate (pluginPath: string, createConfigOptions: CreateConfi
   if (!createConfigOptions.hasPluginsFile) {
     return dedent`
       e2e: {
-        setupNodeEvents(on, config) {}
+        setupNodeEvents(on, config) {},${formatObjectForConfig(options)}
       }
     `
   }
