@@ -2,7 +2,7 @@
   "name": "@cypress/vite-dev-server",
   "version": "0.0.0-development",
   "description": "Launches Vite Dev Server for Component Testing",
-  "main": "dist/index.js",
+  "main": "index.js",
   "scripts": {
     "build": "tsc || echo 'built, with type errors'",
     "build-prod": "tsc || echo 'built, with type errors'",
