@@ -106,6 +106,11 @@ describe('Proxy Logging', () => {
     it('xhr log has response body/status code', (done) => {
       cy.window()
       .then({ timeout: 10000 }, (win) => {
+        const xhr = new win.XMLHttpRequest()
+
+        xhr.open('GET', '/some-url')
+        xhr.send()
+
         cy.on('log:changed', (log) => {
           try {
             expect(log.snapshots.map((v) => v.name)).to.deep.eq(['request', 'response'])
@@ -131,11 +136,6 @@ describe('Proxy Logging', () => {
             console.log('assertion error, retrying', err)
           }
         })
-
-        const xhr = new win.XMLHttpRequest()
-
-        xhr.open('GET', '/some-url')
-        xhr.send()
       })
     })
 
