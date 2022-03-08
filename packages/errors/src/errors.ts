@@ -11,6 +11,7 @@ import { errPartial, errTemplate, fmt, theme, PartialErr } from './errTemplate'
 import { stackWithoutMessage } from './stackUtils'
 
 import type { ClonedError, ConfigValidationFailureInfo, CypressError, ErrTemplateResult, ErrorLike } from './errorTypes'
+import { brokenOptionsMap, errPrefix, errPrefixRootOnly } from './brokenOptionsMap'
 
 const ansi_up = new AU()
 
@@ -1309,60 +1310,24 @@ export const AllCypressErrors = {
     `
   },
 
-  MIGRATED_OPTION_INVALID: (optionKey: string, err: Error) => {
-    if (optionKey === 'baseUrl') {
-      return errTemplate`
-      The option ${fmt.highlight(optionKey)} is no longer supported on the root of the config object. 
+  MIGRATED_OPTION_INVALID: (optionKey: string, err?: Error) => {
+    const stackTrace = err ? fmt.stackTrace(err) : null
 
-      Since it is only relevant in e2e testing, you will need to move it in the e2e object.
-      
-      ${fmt.stackTrace(err)}
-      `
-    }
+    // some keys come prefixed with a `component.` or `e2e.` but they are not referenced
+    // in the errors maps with this prefix. strip it out.
+    const rootKey = optionKey.replace(/^(component|e2e)\./, '') as keyof typeof brokenOptionsMap
 
-    if (optionKey === 'integrationFolder' || optionKey.endsWith('.integrationFolder')
-      || optionKey === 'componentFolder' || optionKey.endsWith('.componentFolder')) {
-      return errTemplate`
-      The option ${fmt.highlight(optionKey)} is no longer supported. 
-      It was merged with ${fmt.highlight('testFiles')} into the ${fmt.highlight('specFiles')} option.
+    const errorObj = brokenOptionsMap[rootKey]
 
-      NOTE: ${fmt.highlight('testFiles')} has to be set as a member of the ${fmt.highlight('e2e')} or ${fmt.highlight('component')} property.
-    
-      ${fmt.stackTrace(err)}
-    `
-    }
-
-    if (optionKey === 'testFiles') {
-      return errTemplate`
-      The option ${fmt.highlight(optionKey)} is no longer supported. 
-      It was merged with ${fmt.highlight('integrationFolder')} into the ${fmt.highlight('specFiles')} option.
-      
-      ${fmt.stackTrace(err)}
-      `
-    }
-
-    if (optionKey === 'supportFile') {
-      return errTemplate`
-      The option ${fmt.highlight(optionKey)} is no longer supported in the root of the config object. 
-      Set a specific ${fmt.highlight('supportFile')} in the ${fmt.highlight('e2e')} or ${fmt.highlight('component')} object.
-      
-      ${fmt.stackTrace(err)}
-      `
-    }
-
-    if (optionKey === 'pluginFile' || optionKey.endsWith('.pluginsFile')) {
-      return errTemplate`
-      The option ${fmt.highlight(optionKey)} is no longer supported. 
-      All plugins are now run within the config file using the ${fmt.highlight('setupNodeEvents()')} function.
-      
-      ${fmt.stackTrace(err)}`
-    }
+    const message = errorObj.brokenOnlyAtRoot ? errPrefixRootOnly(optionKey) : errPrefix(optionKey)
 
     return errTemplate`
-      The option ${fmt.highlight(optionKey)} is no longer supported.
+      ${message}
 
-      ${fmt.stackTrace(err)}
-      `
+      ${errorObj.additionalHelp}
+
+      ${stackTrace}
+    `
   },
 
 }

@@ -7,6 +7,7 @@ export const e2eProjectDirs = [
   'component-tests',
   'config-update-non-migrated-value',
   'config-update-non-migrated-value-clone',
+  'config-update-non-migrated-value-e2e',
   'config-with-custom-file-js',
   'config-with-custom-file-ts',
   'config-with-import-error',

@@ -14,6 +14,7 @@ const resolve = require('../../util/resolve')
 const browserLaunch = require('./browser_launch')
 const util = require('../util')
 const validateEvent = require('./validate_event')
+const errors = require('@packages/errors')
 
 const UNDEFINED_SERIALIZED = '__cypress_undefined__'
 
@@ -267,18 +268,26 @@ class RunPlugins {
 /**
  * Values not allowed in 10.X+ in the root, e2e and component config
  */
-const optionsNonValidFor10Anywhere = ['integrationFolder', 'componentFolder', 'pluginsFile']
+const optionsNonValidFor10Anywhere = Object.keys(errors.brokenOptionsMap).filter((key) => {
+  return errors.brokenOptionsMap[key].brokenOnlyAtRoot === false
+})
 
 /**
- * values not allowed in 10.X+ in the root that have moved in one of the testingTypes
+ * Values not allowed in 10.X+ in the root that have moved in one of the testingTypes
  */
-const optionsNonValidFor10Global = ['baseUrl', 'supportFile']
+const optionsNonValidFor10Root = Object.keys(errors.brokenOptionsMap).filter((key) => {
+  return errors.brokenOptionsMap[key].brokenOnlyAtRoot
+})
+
+function getNonMigratedOptionsErr (key, errInternal) {
+  return errors.getError('MIGRATED_OPTION_INVALID', key, errInternal)
+}
 
 function throwInvalidOptionError (key) {
   const errInternal = new Error()
 
   Error.captureStackTrace(errInternal, throwInvalidOptionError)
-  const err = require('@packages/errors').getError('MIGRATED_OPTION_INVALID', key, errInternal)
+  const err = getNonMigratedOptionsErr(key, errInternal)
 
   throw err
 }
@@ -290,7 +299,7 @@ function setInvalidPropSetterWarning (opts, key, keyForError = key) {
 }
 
 function wrapNonMigratedOptions (options) {
-  optionsNonValidFor10Global.forEach((key) => {
+  optionsNonValidFor10Root.forEach((key) => {
     setInvalidPropSetterWarning(options, key)
   })
 
@@ -307,9 +316,9 @@ function wrapNonMigratedOptions (options) {
 }
 
 function validateNonMigratedOptions (options) {
-  optionsNonValidFor10Global.forEach((key) => {
+  optionsNonValidFor10Root.forEach((key) => {
     if (options[key]) {
-      throwInvalidOptionError(key)
+      throw getNonMigratedOptionsErr(key)
     }
   })
 
@@ -317,12 +326,12 @@ function validateNonMigratedOptions (options) {
     const testingTypes = ['component', 'e2e']
 
     if (options[key]) {
-      throwInvalidOptionError(key)
+      throw getNonMigratedOptionsErr(key)
     }
 
     testingTypes.forEach((testingType) => {
       if (options[testingType] && options[testingType][key]) {
-        throwInvalidOptionError(`${testingType}.${key}`)
+        throw getNonMigratedOptionsErr(`${testingType}.${key}`)
       }
     })
   })
