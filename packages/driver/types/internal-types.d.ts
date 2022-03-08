@@ -51,6 +51,8 @@ declare namespace Cypress {
     events: Events
     emit: ((event: string, payload?: any) => void)
     multiDomainCommunicator: import('../src/multi-domain/communicator').PrimaryDomainCommunicator
+    specBridgeCommunicator: import('../src/multi-domain/communicator').SpecBridgeDomainCommunicator
+    mocha: $Mocha
   }
 
   interface CypressUtils {

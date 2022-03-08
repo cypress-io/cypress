@@ -134,10 +134,13 @@ export class SpecBridgeDomainCommunicator extends EventEmitter {
     }
   }
 
-  private syncConfigEnvToPrimary = () => {
-    this.toPrimary('sync:config', {
+  private syncGlobalsToPrimary = () => {
+    this.toPrimary('sync:globals', {
       config: preprocessConfig(Cypress.config()),
       env: preprocessEnv(Cypress.env()),
+      state: {
+        hasVisitedAboutBlank: Cypress.state('hasVisitedAboutBlank'),
+      },
     })
   }
 
@@ -163,9 +166,9 @@ export class SpecBridgeDomainCommunicator extends EventEmitter {
    * @param {string} event - the name of the event to be sent.
    * @param {any} data - any meta data to be sent with the event.
    */
-  toPrimary (event: string, data?: any, options = { syncConfig: false }) {
+  toPrimary (event: string, data?: any, options = { syncGlobals: false }) {
     debug('<= to Primary ', event, data, window.specBridgeDomain)
-    if (options.syncConfig) this.syncConfigEnvToPrimary()
+    if (options.syncGlobals) this.syncGlobalsToPrimary()
 
     this.handleSubjectAndErr(data, (data: any) => {
       this.windowReference.top.postMessage({

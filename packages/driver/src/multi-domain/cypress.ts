@@ -19,6 +19,7 @@ import { handleScreenshots } from './events/screenshots'
 import { handleTestEvents } from './events/test'
 import { handleMiscEvents } from './events/misc'
 import { handleUnsupportedAPIs } from './unsupported_apis'
+import $Mocha from '../cypress/mocha'
 
 const specBridgeCommunicator = new SpecBridgeDomainCommunicator()
 
@@ -43,11 +44,16 @@ const setup = (cypressConfig: Cypress.Config, env: Cypress.ObjectLike) => {
     testingType: 'e2e',
   }) as Cypress.Cypress
 
+  Cypress.specBridgeCommunicator.initialize(window)
+
   // @ts-ignore
   const cy = window.cy = new $Cy(window, Cypress, Cypress.Cookies, Cypress.state, Cypress.config, false)
 
   // @ts-ignore
   Cypress.log = $Log.create(Cypress, cy, Cypress.state, Cypress.config)
+
+  Cypress.mocha = $Mocha.create(window, Cypress, Cypress.config)
+
   // @ts-ignore
   Cypress.runner = {
     addLog () {},
