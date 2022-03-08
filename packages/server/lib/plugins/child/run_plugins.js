@@ -14,7 +14,6 @@ const resolve = require('../../util/resolve')
 const browserLaunch = require('./browser_launch')
 const util = require('../util')
 const validateEvent = require('./validate_event')
-const errors = require('@packages/errors')
 
 const UNDEFINED_SERIALIZED = '__cypress_undefined__'
 
@@ -268,19 +267,15 @@ class RunPlugins {
 /**
  * Values not allowed in 10.X+ in the root, e2e and component config
  */
-const optionsNonValidFor10Anywhere = Object.keys(errors.brokenOptionsMap).filter((key) => {
-  return errors.brokenOptionsMap[key].brokenOnlyAtRoot === false
-})
+const optionsNonValidFor10Anywhere = ['integrationFolder', 'componentFolder', 'pluginsFile']
 
 /**
- * Values not allowed in 10.X+ in the root that have moved in one of the testingTypes
+ * values not allowed in 10.X+ in the root that have moved in one of the testingTypes
  */
-const optionsNonValidFor10Root = Object.keys(errors.brokenOptionsMap).filter((key) => {
-  return errors.brokenOptionsMap[key].brokenOnlyAtRoot
-})
+const optionsNonValidFor10Root = ['baseUrl', 'supportFile']
 
 function getNonMigratedOptionsErr (key, errInternal) {
-  return errors.getError('MIGRATED_OPTION_INVALID', key, errInternal)
+  return require('@packages/errors').getError('MIGRATED_OPTION_INVALID', key, errInternal)
 }
 
 function throwInvalidOptionError (key) {
