@@ -1,10 +1,9 @@
 // FIXME: sync thrown errors inside of multi-domain cause cross origin errors in firefox when using experimentalSessionSupport
-// This is likely due to cypress being redeclared while on a cross origin iframe before the application navigates back.
+// This is likely due to cypress being re declared while on a cross origin iframe before the application navigates back.
 // To reproduce, just add "experimentalSessionSupport" = true into the describe block below
 
-// @ts-ignore / session support is needed for visiting about:blank between tests
+// @ts-ignore
 describe('multi-domain - uncaught errors', () => {
-  // TODO: add system test for codeFrame/ cy.switchToDomain('foobar.com', () => { as stack
   beforeEach(() => {
     cy.visit('/fixtures/multi-domain.html')
     cy.get('a[data-cy="errors-link"]').click()
@@ -18,7 +17,7 @@ describe('multi-domain - uncaught errors', () => {
       })
 
       cy.switchToDomain('foobar.com', () => {
-        cy.wrap({}).then(() => {
+        cy.then(() => {
           expect(true).to.be.false
         })
       })
@@ -308,13 +307,16 @@ describe('multi-domain - uncaught errors', () => {
 
   describe('serializable errors', () => {
     it('handles users throwing complex errors/classes', (done) => {
-      cy.on('fail', (err) => {
+      cy.on('fail', (err: any) => {
         expect(err.name).to.equal('CustomError')
         expect(err.message).to.equal('custom error')
-        // @ts-ignore
         expect(err._name).to.equal('CustomError')
-        // @ts-ignore
-        expect(err.customProp).to.equal('foobar')
+        expect(err.foo).to.equal('bar')
+
+        const { writable } = Object.getOwnPropertyDescriptor(err, 'name') || {}
+
+        // After serialization, read-only properties are now writable
+        expect(writable).to.be.true
         done()
       })
 
@@ -333,23 +335,23 @@ describe('multi-domain - uncaught errors', () => {
         const customErrorInstance = new CustomError('custom error')
 
         // @ts-ignore
-        customErrorInstance.customProp = 'foobar'
+        customErrorInstance.foo = 'bar'
+
+        const { writable } = Object.getOwnPropertyDescriptor(CustomError, 'name') || {}
+
+        // make sure the name property is read-only before serializing it through postMessage
+        expect(writable).to.be.false
 
         throw customErrorInstance
       })
     })
 
     it('handles users throwing complex objects/classes', (done) => {
-      cy.on('fail', (err) => {
-        // @ts-ignore
+      cy.on('fail', (err: any) => {
         expect(err.customMethod).to.be.undefined
-        // @ts-ignore
         expect(err.customProp).to.equal('foobar')
-        // @ts-ignore
         expect(err._metasyntaticList).to.deep.equal(['foo', 'bar'])
-        // @ts-ignore
         expect(err.metasyntaticList).to.deep.equal(['foo', 'bar'])
-        // TODO: assert method
         done()
       })
 
@@ -365,12 +367,10 @@ describe('multi-domain - uncaught errors', () => {
           }
         }
 
-        const foobarInstance = new FooBar
+        const foobarInstance: any = new FooBar
 
-        // @ts-ignore
         foobarInstance.customProp = 'foobar'
         foobarInstance.metasyntaticList = ['bar']
-        // @ts-ignore
         foobarInstance.customMethod = () => undefined
 
         throw foobarInstance
@@ -465,26 +465,6 @@ describe('multi-domain - uncaught errors', () => {
       // @ts-ignore
       cy.switchToDomain('foobar.com', () => {
         throw new Date()
-      })
-    })
-  })
-
-  it('does not fail if thrown custom error has a readonly name', (done) => {
-    cy.once('fail', (err) => {
-      expect(err.name).to.include('CustomError')
-      expect(err.message).to.include('custom error')
-
-      done()
-    })
-
-    // @ts-ignore
-    cy.switchToDomain('foobar.com', () => {
-      cy.then(() => {
-        throw new class CustomError extends Error {
-          get name () {
-            return 'CustomError'
-          }
-        }('custom error')
       })
     })
   })

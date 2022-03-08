@@ -1,7 +1,7 @@
 import debugFn from 'debug'
 import { EventEmitter } from 'events'
 import { preprocessConfig, preprocessEnv } from '../util/config'
-import { preprocessErrorsForSerialization } from '../util/serialization'
+import { preprocessForSerialization } from '../util/serialization'
 
 const debug = debugFn('cypress:driver:multi-domain')
 
@@ -113,7 +113,7 @@ export class SpecBridgeDomainCommunicator extends EventEmitter {
     try {
       if (hasMultiDomainError) {
         try {
-          err = preprocessErrorsForSerialization(err)
+          err = preprocessForSerialization(err)
         } catch (e) {
           err = e
         }

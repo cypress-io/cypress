@@ -63,17 +63,6 @@ const convertObjectToSerializableLiteral = (obj): typeof obj => {
 }
 
 /**
- * Sanitizes any unserializable values from a object to prep for postMessage serialization
- * @param objectToSanitize Object that might have unserializable properties
- * @returns a copy of this object with all unserializable keys omitted from the object.
- *
- * NOTE: If an object nested inside objectToSanitize contains an unserializable property, the whole object is deemed as unserializable
- */
-export const omitUnserializablePropertiesFromObj = <T>(objectToSanitize: { [key: string]: any }): T => {
-  return _.pickBy(objectToSanitize, isSerializableInCurrentBrowser) as T
-}
-
-/**
  * Sanitizes any unserializable values to prep for postMessage serialization. All Objects, including Errors, are mapped to an Object literal with
  * whatever serialization properties they have, including their prototype hierarchy.
  * This keeps behavior consistent between browsers without having to worry about the inner workings of structuredClone(). For example:
@@ -90,18 +79,20 @@ export const omitUnserializablePropertiesFromObj = <T>(objectToSanitize: { [key:
  * firefox
  * structuredClone(new Error('myError')) -> throws error as native error cannot be serialized
  *
- * This method takes a similar the 'chromium' approach to structuredClone, except that hte prototype chain is walked and ANY serializable value, including getters, are serialized.
+ * This method takes a similar the 'chromium' approach to structuredClone, except that the prototype chain is walked and ANY serializable value, including getters, is serialized.
  * Please see https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm#things_that_dont_work_with_structured_clone.
+ *
+ *  NOTE: If an object nested inside valueToSanitize contains an unserializable property, the whole object is deemed as unserializable
  * @param valueToSanitize subject of sanitization that might be unserializable or have unserializable properties
- * @returns a serializable form of the Error/Object. If the value passed in cannot be serialized, an error is thrown
- * @throws 'unserializable'
+ * @returns a serializable form of the subject. If the value passed in cannot be serialized, an error is thrown
+ * @throws '__cypress_unserializable_value'
  */
-export const preprocessErrorsForSerialization = <T>(valueToSanitize: { [key: string]: any }): T | undefined => {
+export const preprocessForSerialization = <T>(valueToSanitize: { [key: string]: any }): T | undefined => {
 // Even if native errors can be serialized through postMessage, many properties are omitted on structuredClone(), including prototypical hierarchy
 // because of this, we preprocess native errors to objects and postprocess them once they come back to the primary domain
 
   if (_.isArray(valueToSanitize)) {
-    return _.filter(valueToSanitize, preprocessErrorsForSerialization) as unknown as T
+    return _.filter(valueToSanitize, preprocessForSerialization) as unknown as T
   }
 
   if (_.isObject(valueToSanitize)) {

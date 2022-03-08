@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import { options } from '@packages/config'
-import { omitUnserializablePropertiesFromObj } from './serialization'
+import { preprocessForSerialization } from './serialization'
 
 /**
  * Mutates the config/env object serialized from the other domain to omit read-only values
@@ -54,9 +54,9 @@ export const syncEnvToCurrentDomain = (env: Cypress.ObjectLike) => {
 }
 
 export const preprocessConfig = (config: Cypress.Config) => {
-  return omitUnserializablePropertiesFromObj(config) as Cypress.Config
+  return preprocessForSerialization(config) as Cypress.Config
 }
 
 export const preprocessEnv = (env: Cypress.ObjectLike) => {
-  return omitUnserializablePropertiesFromObj(env) as Cypress.Config
+  return preprocessForSerialization(env) as Cypress.Config
 }
