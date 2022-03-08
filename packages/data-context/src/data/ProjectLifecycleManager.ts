@@ -272,6 +272,7 @@ export class ProjectLifecycleManager {
       this.ctx.actions.migration.initialize(legacyConfig)
       .then(this._pendingMigrationInitialize?.resolve)
       .finally(() => this._pendingMigrationInitialize = undefined)
+      .catch(this.onLoadError)
     }
 
     this.configFileWarningCheck()
