@@ -1096,5 +1096,18 @@ describe('visual error templates', () => {
         default: [makeErr()],
       }
     },
+    MIGRATED_OPTION_INVALID: () => {
+      const keyChanging = ['integrationFolder', 'componentFolder', 'testFiles', 'pluginsFile', 'supportFile', 'baseUrl'],
+      const err = makeErr()
+
+      return keyChanging.reduce((acc: ErrorGenerator<'MIGRATED_OPTION_INVALID'>, key) => {
+        acc[key] = [key, err]
+        acc[`${key}PostValidation`] = [key]
+
+        return acc
+      }, {
+        default: ['integrationFolder', makeErr()],
+      })
+    },
   })
 })
