@@ -3753,10 +3753,10 @@ describe('network stubbing', function () {
   })
 
   context('reset', function () {
-    context('reply with static response', function () {
+    context('reply callbacks', function () {
       let fooRequest
 
-      it('reply callbacks', function () {
+      it('intercepts a reply callback', function () {
         cy.intercept('/timeout*', (req) => {
           req.reply((res) => {
             res.body = 'bar'
