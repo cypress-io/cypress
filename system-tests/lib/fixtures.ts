@@ -351,8 +351,8 @@ export function removeProject (name) {
 
 // returns the path to project fixture
 // in the cyTmpDir
-export function project (...args) {
-  return this.projectPath.apply(this, args)
+export function project (name) {
+  return projectPath(name)
 }
 
 export function projectPath (name) {
