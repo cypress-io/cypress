@@ -71,18 +71,6 @@ For developer-facing behavior - props received, events emitted, any other side e
 ### E2E Tests
 Certain side effects, like GraphQL mutations, do not fire from component tests, but can be monitored from an E2E test with `cy.intercept`. And some entire packages, like `reporter` are independent apps that can be mounted in an E2E test and tested for interactions with other parts of the system.
 
-
-## Percy Snapshots
-Percy snapshot diffs are reviewed and approved by somebody doing a PR review.
-
-
-### Limitations and Notes
-Percy snapshots confirm that the appearance of a given state matches the last approved snapshot of that state. They don't in and of themselves contain any information about correctness.
-
-If a test only contains a percy snapshot, prefer a general name for that test as opposed to a specific detail of the snapshot. For example prefer "has expected appearance" to "has a purple outline" since nothing in the test is actually asserting that.
-
-NOTE: 👆 This section needs more thought/discussion. Maybe "has a purple outline" is a good thing to have in the test name because it might alert somebody reviewing the snapshot about a change they should look for, or the thing we expected the snapshot to confirm. Ideally here we would end up with instructions and examples of what Percy tests we expect with new features and any conventions we have.
-
 ## Testing Style Guide
 
 ### String constants
