@@ -22,6 +22,7 @@ interface RuntimeConfigOption {
   defaultValue: any
   validation: Function
   isInternal?: boolean
+  canUpdateDuringTestTime?: boolean
 }
 
 interface BreakingOption {
@@ -347,12 +348,6 @@ const projectConfigOptions: Array<ResolvedConfigOption> = [
     validation: validate.isOneOf('center', 'top', 'bottom', 'nearest', false),
     canUpdateDuringTestTime: true,
   }, {
-    name: 'supportFile',
-    defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? 'cypress/support/component.{js,jsx,ts,tsx}' : 'cypress/support/e2e.{js,jsx,ts,tsx}',
-    validation: validate.isStringOrFalse,
-    isFolder: true,
-    canUpdateDuringTestTime: false,
-  }, {
     name: 'taskTimeout',
     defaultValue: 60000,
     validation: validate.isNumber,
@@ -420,20 +415,24 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     name: 'arch',
     defaultValue: () => os.arch(),
     validation: validate.isString,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'autoOpen',
     defaultValue: false,
     validation: validate.isBoolean,
     isInternal: true,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'browsers',
     defaultValue: [],
     validation: validate.isValidBrowserList,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'clientRoute',
     defaultValue: '/__/',
     validation: validate.isString,
     isInternal: true,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'configFile',
     defaultValue: 'cypress.config.js',
@@ -441,11 +440,13 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     // not truly internal, but can only be set via cli,
     // so we don't consider it a "public" option
     isInternal: true,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'devServerPublicPathRoute',
     defaultValue: '/__cypress/src',
     validation: validate.isString,
     isInternal: true,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'exit',
     defaultValue: true,
@@ -455,59 +456,71 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     name: 'hosts',
     defaultValue: null,
     validation: validate.isPlainObject,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'isInteractive',
     defaultValue: true,
     validation: validate.isBoolean,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'isTextTerminal',
     defaultValue: false,
     validation: validate.isBoolean,
     isInternal: true,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'morgan',
     defaultValue: true,
     validation: validate.isBoolean,
     isInternal: true,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'namespace',
     defaultValue: '__cypress',
     validation: validate.isString,
     isInternal: true,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'platform',
     defaultValue: () => os.platform(),
     validation: validate.isString,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'reporterRoute',
     defaultValue: '/__cypress/reporter',
     validation: validate.isString,
     isInternal: true,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'socketId',
     defaultValue: null,
     validation: validate.isString,
     isInternal: true,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'socketIoCookie',
     defaultValue: '__socket.io',
     validation: validate.isString,
     isInternal: true,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'socketIoRoute',
     defaultValue: '/__socket.io',
     validation: validate.isString,
     isInternal: true,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'version',
     defaultValue: pkg.version,
     validation: validate.isString,
     isInternal: true,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'xhrRoute',
     defaultValue: '/xhrs/',
     validation: validate.isString,
     isInternal: true,
+    canUpdateDuringTestTime: false,
   },
 ]
 

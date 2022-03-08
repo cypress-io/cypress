@@ -326,118 +326,120 @@
         "component": {
           "description": "Any component runner specific overrides",
           "$ref": "#/definitions/cypressConfig",
-          "devServer": {
-            "default": null,
-            "description": "All functionality related to starting a component testing dev server (previously in the pluginsFile) has moved here.",
-            "type": "object"
-          },
-          "devServerConfig": {
-            "default": {},
-            "description": "Configuration specific to starting a component testing dev server in the pluginsFile has moved here.",
-            "type": "object"
-          },
-          "excludeSpecPattern": {
-            "default": [
-              "**/__snapshots__/*",
-              "**/__image_snapshots__/*"
-            ],
-            "description": "A String or Array of glob patterns used to ignore test files that would otherwise be shown in your list of tests. Cypress uses minimatch with the options: {dot: true, matchBase: true}. We suggest using http://globtester.com to test what files would match.",
-            "type": [
-              "string",
-              "array"
-            ]
-          },
-          "setupNodeEvents": {
-            "description": "All functionality related to setting up events or modifying the config (previously in the pluginsFile) has moved here.",
-            "type": "object"
-          },
-          "slowTestThreshold": {
-            "default": 250,
-            "description": "Slow test threshold in milliseconds. Only affects the visual output of some reporters. For example, the spec reporter will display the test time in yellow if over the threshold. See https://on.cypress.io/configuration#Timeouts",
-            "type": "number"
-          },
-          "specPattern": {
-            "default": "**/*.cy.{js,jsx,ts,tsx}",
-            "description": "A String or Array of glob patterns used to fine your list of test files. Cypress uses minimatch with the options: {dot: true, matchBase: true}. We suggest using http://globtester.com to test what files would match.",
-            "type": [
-              "string",
-              "array"
-            ]
-          },
-          "supportFile": {
-            "default": "cypress/support/component.{js,jsx,ts,tsx}",
-            "description": "Path to file to load before test files load. This file is compiled and bundled. (Pass false to disable)",
-            "type": [
-              "string",
-              "boolean"
-            ]
-          },
-          "viewportHeight": {
-            "default": 500,
-            "description": "Default height in pixels for the application under tests’ viewport.",
-            "type": "number"
-          },
-          "viewportWidth": {
-            "default": 500,
-            "description": "Default width in pixels for the application under tests’ viewport.",
-            "type": "number"
+          "properties": {
+            "devServer": {
+              "default": null,
+              "description": "All functionality related to starting a component testing dev server (previously in the pluginsFile) has moved here.",
+              "type": "object"
+            },
+            "devServerConfig": {
+              "default": {},
+              "description": "Configuration specific to starting a component testing dev server in the pluginsFile has moved here.",
+              "type": "object"
+            },
+            "excludeSpecPattern": {
+              "default": [
+                "**/__snapshots__/*",
+                "**/__image_snapshots__/*"
+              ],
+              "description": "A String or Array of glob patterns used to ignore test files that would otherwise be shown in your list of tests. Cypress uses minimatch with the options: {dot: true, matchBase: true}. We suggest using http://globtester.com to test what files would match.",
+              "type": [
+                "string",
+                "array"
+              ]
+            },
+            "setupNodeEvents": {
+              "description": "All functionality related to setting up events or modifying the config (previously in the pluginsFile) has moved here.",
+              "type": "object"
+            },
+            "slowTestThreshold": {
+              "default": 250,
+              "description": "Slow test threshold in milliseconds. Only affects the visual output of some reporters. For example, the spec reporter will display the test time in yellow if over the threshold. See https://on.cypress.io/configuration#Timeouts",
+              "type": "number"
+            },
+            "specPattern": {
+              "default": "**/*.cy.{js,jsx,ts,tsx}",
+              "description": "A String or Array of glob patterns used to fine your list of test files. Cypress uses minimatch with the options: {dot: true, matchBase: true}. We suggest using http://globtester.com to test what files would match.",
+              "type": [
+                "string",
+                "array"
+              ]
+            },
+            "supportFile": {
+              "default": "cypress/support/component.{js,jsx,ts,tsx}",
+              "description": "Path to file to load before test files load. This file is compiled and bundled. (Pass false to disable)",
+              "type": [
+                "string",
+                "boolean"
+              ]
+            },
+            "viewportHeight": {
+              "default": 500,
+              "description": "Default height in pixels for the application under tests’ viewport.",
+              "type": "number"
+            },
+            "viewportWidth": {
+              "default": 500,
+              "description": "Default width in pixels for the application under tests’ viewport.",
+              "type": "number"
+            }
           }
-        }
-      },
-      "e2e": {
-        "description": "Any e2e runner specific overrides",
-        "$ref": "#/definitions/cypressConfig",
-        "properties": {
-          "baseUrl": {
-            "default": null,
-            "description": "Url used as prefix for cy.visit() or cy.request() command’s url. Example http://localhost:3030 or https://test.my-domain.com",
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "excludeSpecPattern": {
-            "default": "*.hot-update.js",
-            "description": "A String or Array of glob patterns used to ignore test files that would otherwise be shown in your list of tests. Cypress uses minimatch with the options: {dot: true, matchBase: true}. We suggest using http://globtester.com to test what files would match.",
-            "type": [
-              "string",
-              "array"
-            ]
-          },
-          "setupNodeEvents": {
-            "description": "All functionality related to setting up events or modifying the config (previously in the pluginsFile) has moved here.",
-            "type": "object"
-          },
-          "slowTestThreshold": {
-            "default": 10000,
-            "description": "Slow test threshold in milliseconds. Only affects the visual output of some reporters. For example, the spec reporter will display the test time in yellow if over the threshold. See https://on.cypress.io/configuration#Timeouts",
-            "type": "number"
-          },
-          "specPattern": {
-            "default": "cypress/support/e2e.{js,jsx,ts,tsx}",
-            "description": "A String or Array of glob patterns used to fine your list of test files. Cypress uses minimatch with the options: {dot: true, matchBase: true}. We suggest using http://globtester.com to test what files would match.",
-            "type": [
-              "string",
-              "array"
-            ]
-          },
-          "supportFile": {
-            "default": "cypress/support/e2e.{js,jsx,ts,tsx}",
-            "description": "Path to file to load before test files load. This file is compiled and bundled. (Pass false to disable)",
-            "type": [
-              "string",
-              "boolean"
-            ]
-          },
-          "viewportHeight": {
-            "default": 660,
-            "description": "Default height in pixels for the application under tests’ viewport.",
-            "type": "number"
-          },
-          "viewportWidth": {
-            "default": 1000,
-            "description": "Default width in pixels for the application under tests’ viewport.",
-            "type": "number"
+        },
+        "e2e": {
+          "description": "Any e2e runner specific overrides",
+          "$ref": "#/definitions/cypressConfig",
+          "properties": {
+            "baseUrl": {
+              "default": null,
+              "description": "Url used as prefix for cy.visit() or cy.request() command’s url. Example http://localhost:3030 or https://test.my-domain.com",
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "excludeSpecPattern": {
+              "default": "*.hot-update.js",
+              "description": "A String or Array of glob patterns used to ignore test files that would otherwise be shown in your list of tests. Cypress uses minimatch with the options: {dot: true, matchBase: true}. We suggest using http://globtester.com to test what files would match.",
+              "type": [
+                "string",
+                "array"
+              ]
+            },
+            "setupNodeEvents": {
+              "description": "All functionality related to setting up events or modifying the config (previously in the pluginsFile) has moved here.",
+              "type": "object"
+            },
+            "slowTestThreshold": {
+              "default": 10000,
+              "description": "Slow test threshold in milliseconds. Only affects the visual output of some reporters. For example, the spec reporter will display the test time in yellow if over the threshold. See https://on.cypress.io/configuration#Timeouts",
+              "type": "number"
+            },
+            "specPattern": {
+              "default": "cypress/e2e/**/*.{js,jsx,ts,tsx}",
+              "description": "A String or Array of glob patterns used to fine your list of test files. Cypress uses minimatch with the options: {dot: true, matchBase: true}. We suggest using http://globtester.com to test what files would match.",
+              "type": [
+                "string",
+                "array"
+              ]
+            },
+            "supportFile": {
+              "default": "cypress/support/e2e.{js,jsx,ts,tsx}",
+              "description": "Path to file to load before test files load. This file is compiled and bundled. (Pass false to disable)",
+              "type": [
+                "string",
+                "boolean"
+              ]
+            },
+            "viewportHeight": {
+              "default": 660,
+              "description": "Default height in pixels for the application under tests’ viewport.",
+              "type": "number"
+            },
+            "viewportWidth": {
+              "default": 1000,
+              "description": "Default width in pixels for the application under tests’ viewport.",
+              "type": "number"
+            }
           }
         }
       }
