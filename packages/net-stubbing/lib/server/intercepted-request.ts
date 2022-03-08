@@ -92,6 +92,7 @@ export class InterceptedRequest {
   }
 
   static resolveEventHandler (state: NetStubbingState, options: { eventId: string, changedData: any, stopPropagation: boolean }) {
+    console.log('Resolving')
     const pendingEventHandler = state.pendingEventHandlers[options.eventId]
 
     if (!pendingEventHandler) {
@@ -174,6 +175,7 @@ export class InterceptedRequest {
         }
 
         const p = new Promise((resolve) => {
+          console.log('setting resolve')
           this.state.pendingEventHandlers[eventId] = resolve
         })
 
