@@ -1,5 +1,6 @@
 import type { Interception } from '@packages/net-stubbing/lib/external-types'
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
+import type { SinonStub } from 'sinon'
 
 describe('App: Runs', { viewportWidth: 1200 }, () => {
   beforeEach(() => {
@@ -284,6 +285,9 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.get('[href="#/runs"]').click()
       cy.get('[data-cy="copy-button"]').click()
       cy.contains('Copied!')
+      cy.withRetryableCtx((ctx) => {
+        expect(ctx.electronApi.copyTextToClipboard as SinonStub).to.have.been.calledWith('cypress run --record --key 2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa')
+      })
     })
   })
 
