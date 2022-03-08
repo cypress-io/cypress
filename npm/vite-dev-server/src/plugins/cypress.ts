@@ -1,31 +1,20 @@
-import Debug from 'debug'
+import type { BaseSpec } from '@packages/types'
+import debugFn from 'debug'
 import { readFile } from 'fs/promises'
-import { resolve, sep } from 'pathe'
-import { ModuleNode, Plugin, ViteDevServer } from 'vite'
+import { resolve } from 'pathe'
+import type { ModuleNode, Plugin, ViteDevServer } from 'vite'
+import { normalizePath } from 'vite'
 
-const debug = Debug('cypress:vite-dev-server:plugins')
-
-const OSSepRE = new RegExp(`\\${sep}`, 'g')
-
-function convertPathToPosix (path: string): string {
-  return sep === '/'
-    ? path
-    : path.replace(OSSepRE, '/')
-}
+const debug = debugFn('cypress:vite-dev-server:plugins:cypress')
 
 const INIT_FILEPATH = resolve(__dirname, '../../client/initCypressTests.js')
 
 const HMR_DEPENDENCY_LOOKUP_MAX_ITERATION = 50
 
-function getSpecsPathsSet (specs: Spec[]) {
+function getSpecsPathsSet (specs: BaseSpec[]) {
   return new Set<string>(
     specs.map((spec) => spec.absolute),
   )
-}
-
-interface Spec{
-  absolute: string
-  relative: string
 }
 
 export const Cypress = (
@@ -42,12 +31,9 @@ export const Cypress = (
   let specsPathsSet = getSpecsPathsSet(specs)
   let loader
 
-  devServerEvents.on('dev-server:specs:changed', (specs: Spec[]) => {
+  devServerEvents.on('dev-server:specs:changed', (specs: BaseSpec[]) => {
     specsPathsSet = getSpecsPathsSet(specs)
   })
-
-  const posixSupportFilePath = supportFilePath ? convertPathToPosix(resolve(projectRoot, supportFilePath)) : undefined
-  const posixIndexHtml = indexHtmlFile ? convertPathToPosix(resolve(projectRoot, indexHtmlFile)) : undefined
 
   return {
     name: 'cypress:main',
@@ -69,16 +55,6 @@ export const Cypress = (
       indexHtmlContent.substring(endOfBody)
     }`
     },
-    resolveId (id) {
-      if (id === '/@cypress:client-init-test') {
-        return `
-        const h1 = document.createElement('h1');
-          h1.innerText = 'Looking good';
-          document.body.appendChild(h1);
-
-        `
-      }
-    },
     configureServer: async (server: ViteDevServer) => {
       loader = await readFile(INIT_FILEPATH)
 
@@ -92,7 +68,7 @@ export const Cypress = (
       debug('handleHotUpdate - file', file)
 
       // If the user provided IndexHtml is changed, do a full-reload
-      if (file === posixIndexHtml) {
+      if (normalizePath(file) === resolve(projectRoot, indexHtmlFile)) {
         server.ws.send({
           type: 'full-reload',
         })

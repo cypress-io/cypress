@@ -146,7 +146,6 @@ export const e2eProjectDirs = [
   'vueclivue3-custom-index-html',
   'vueclivue3-unconfigured',
   'webpack-preprocessor',
-  'webpack-preprocessor-2',
   'webpack-preprocessor-awesome-typescript-loader',
   'webpack-preprocessor-ts-loader',
   'webpack-preprocessor-ts-loader-compiler-options',
