@@ -50,7 +50,11 @@ const getBinaryDir = (version = util.pkgVersion()) => {
   return path.join(getVersionDir(version), getPlatFormBinaryFolder())
 }
 
-const getVersionDir = (version = util.pkgVersion()) => {
+const getVersionDir = (version = util.pkgVersion(), buildInfo = util.pkgBuildInfo()) => {
+  if (buildInfo && !buildInfo.stable) {
+    version = ['beta', version, buildInfo.commitBranch, buildInfo.commitSha].join('-')
+  }
+
   return path.join(getCacheDir(), version)
 }
 
