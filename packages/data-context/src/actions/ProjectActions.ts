@@ -179,7 +179,7 @@ export class ProjectActions {
     }
 
     if (args.open) {
-      this.setCurrentProject(projectRoot)
+      this.setCurrentProject(projectRoot).catch(this.ctx.onError)
     }
   }
 

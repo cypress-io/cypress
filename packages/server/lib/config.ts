@@ -87,7 +87,7 @@ export async function get (
 
   options ??= ctx.modeOptions
 
-  ctx.lifecycleManager.setCurrentProject(projectRoot).catch(ctx.onError)
+  ctx.lifecycleManager.setCurrentProject(projectRoot)
 
   return ctx.lifecycleManager.getFullInitialConfig(options, false)
 }
