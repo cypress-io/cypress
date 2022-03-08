@@ -1,5 +1,4 @@
-import type { Ref } from 'vue'
-import { onMounted, ref, watch, onBeforeUnmount, readonly } from 'vue'
+import { Ref, watchEffect, onMounted, ref, watch, onBeforeUnmount, readonly } from 'vue'
 import { useRoute } from 'vue-router'
 import { getAutIframeModel, UnifiedRunnerAPI } from '../runner'
 import { useSpecStore } from '../store'
@@ -7,6 +6,7 @@ import { useSelectorPlaygroundStore } from '../store/selector-playground-store'
 import type { SpecFile } from '@packages/types/src'
 
 const initialized = ref(false)
+const newSpecs = ref<ReadonlyArray<SpecFile>>([])
 
 export function useUnifiedRunner () {
   onMounted(async () => {
@@ -23,12 +23,18 @@ export function useUnifiedRunner () {
     initialized: readonly(initialized),
 
     watchSpec: (specs: Ref<ReadonlyArray<SpecFile>>) => {
+      // Making specs reactive, we ensure that the value is up to date
+      // with the latest specs coming from gql
+      watchEffect(() => {
+        newSpecs.value = specs.value
+      })
+
       const specStore = useSpecStore()
       const route = useRoute()
       const selectorPlaygroundStore = useSelectorPlaygroundStore()
 
       return watch(() => route.query.file, (queryParam) => {
-        const spec = specs.value.find((x) => x.relative === queryParam)
+        const spec = newSpecs.value.find((x) => x.relative === queryParam)
 
         if (selectorPlaygroundStore.show) {
           const autIframe = getAutIframeModel()
