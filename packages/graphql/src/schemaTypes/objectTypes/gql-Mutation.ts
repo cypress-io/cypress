@@ -11,8 +11,21 @@ import { ScaffoldedFile } from './gql-ScaffoldedFile'
 
 export const mutation = mutationType({
   definition (t) {
+    t.field('copyTextToClipboard', {
+      type: 'Boolean',
+      description: 'add the passed text to the local clipboard',
+      args: {
+        text: nonNull(stringArg()),
+      },
+      resolve: (_, { text }, ctx) => {
+        ctx.electronApi.copyTextToClipboard(text)
+
+        return true
+      },
+    })
+
     t.field('reinitializeCypress', {
-      type: 'Query',
+      type: Query,
       description: 'Re-initializes Cypress from the initial CLI options',
       resolve: async (_, args, ctx) => {
         await ctx.reinitializeCypress(ctx.modeOptions)
