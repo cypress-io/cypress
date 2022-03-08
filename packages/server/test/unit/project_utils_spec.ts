@@ -97,7 +97,7 @@ describe('lib/project_utils', () => {
   describe('checkSupportFile', () => {
     it('does nothing when {supportFile: false}', async () => {
       const ret = await checkSupportFile({
-        configFile: 'cypress.config.ts',
+        projectRoot: './',
         supportFile: false,
       })
 
@@ -107,7 +107,7 @@ describe('lib/project_utils', () => {
     it('throws when support file does not exist', async () => {
       try {
         await checkSupportFile({
-          configFile: 'cypress.config.ts',
+          projectRoot: './',
           supportFile: '/this/file/does/not/exist/foo/bar/cypress/support/e2e.js',
         })
       } catch (e) {

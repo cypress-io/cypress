@@ -300,7 +300,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     it('calls checkSupportFile with server config when scaffolding is finished', function () {
       return this.project.open().then(() => {
         expect(this.checkSupportFileStub).to.be.calledWith({
-          configFile: 'cypress.config.js',
+          projectRoot: this.todosPath,
           supportFile: false,
         })
       })
