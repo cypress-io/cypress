@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "9.5.0",
+  "version": "9.5.1",
   "description": "Cypress.io end to end testing tool",
   "private": true,
   "scripts": {
@@ -44,7 +44,7 @@
     "jscodeshift": "jscodeshift -t ./node_modules/js-codemod/transforms/arrow-function-arguments.js",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json,.vue .",
     "lint-changed": "lint-changed",
-    "move-binaries": "node ./scripts/binary.js move-binaries",
+    "prepare-release-artifacts": "node ./scripts/prepare-release-artifacts.js",
     "npm-release": "node scripts/npm-release.js",
     "prestart": "yarn ensure-deps",
     "start": "cypress open --dev --global",
@@ -66,7 +66,7 @@
     "test-unit": "lerna exec yarn test-unit --ignore \"'{@packages/{driver,root,static,web-config,net-stubbing,rewriter,ui-components},@cypress/{webpack-dev-server,eslint-plugin-dev}}'\"",
     "pretest-watch": "yarn ensure-deps",
     "test-watch": "lerna exec yarn test-watch --ignore \"'@packages/{driver,root,static,web-config}'\"",
-    "type-check": "node scripts/type_check",
+    "type-check": "yarn lerna exec yarn type-check --scope @tooling/system-tests && node scripts/type_check",
     "verify:mocha:results": "node ./scripts/verify_mocha_results",
     "watch": "yarn gulp dev:watch",
     "prepare": "husky install"
@@ -75,6 +75,7 @@
     "nvm": "0.0.4"
   },
   "devDependencies": {
+    "@aws-sdk/credential-providers": "3.53.0",
     "@cypress/commit-message-install": "3.1.3",
     "@cypress/env-or-json-file": "2.0.0",
     "@cypress/github-commit-status-check": "1.5.0",
