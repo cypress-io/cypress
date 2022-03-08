@@ -118,13 +118,14 @@ export class ProjectLifecycleManager {
   private _cachedFullConfig: FullConfig | undefined
 
   private _projectMetaState: ProjectMetaState = { ...PROJECT_META_STATE }
+  _pendingMigrationInitialize?: pDefer.DeferredPromise<void>
 
   constructor (private ctx: DataContext) {
     this._handlers = this.ctx._apis.configApi.getServerPluginHandlers()
     this.watchers = new Set()
 
     if (ctx.coreData.currentProject) {
-      this.setCurrentProject(ctx.coreData.currentProject).catch(this.onLoadError)
+      this.setCurrentProject(ctx.coreData.currentProject)
     } else if (ctx.coreData.currentTestingType && this._projectRoot) {
       this.setCurrentTestingType(ctx.coreData.currentTestingType)
     }
@@ -238,13 +239,14 @@ export class ProjectLifecycleManager {
    * we can call it from legacy code and it'll be a no-op if the `projectRoot`
    * is already the same, otherwise it'll do the necessary cleanup
    */
-  async setCurrentProject (projectRoot: string) {
+  setCurrentProject (projectRoot: string) {
     if (this._projectRoot === projectRoot) {
       return
     }
 
     this._projectRoot = projectRoot
     this._initializedProject = undefined
+    this._pendingMigrationInitialize = pDefer()
     this.legacyPluginGuard()
     Promise.resolve(this.ctx.browser.machineBrowsers()).catch(this.onLoadError)
     this.verifyProjectRoot(projectRoot)
@@ -258,13 +260,18 @@ export class ProjectLifecycleManager {
 
     const { needsCypressJsonMigration } = this.refreshMetaState()
 
-    if (needsCypressJsonMigration) {
+    if (needsCypressJsonMigration && !this.ctx.isRunMode) {
+      // we run the legacy plugins/index.js in a child process
+      // and mutate the config based on the return value for migration
+      // only used in open mode (cannot migrate via terminal)
       const cfgPath = path.join(projectRoot, 'cypress.json')
       const legacyConfig = this.ctx.fs.readJsonSync(cfgPath) as Partial<Cypress.Config>
 
       // should never throw, unless there existing pluginsFile errors out,
       // in which case they are attempting to migrate an already broken project.
-      await this.ctx.actions.migration.initialize(legacyConfig)
+      this.ctx.actions.migration.initialize(legacyConfig)
+      .then(this._pendingMigrationInitialize?.resolve)
+      .finally(() => this._pendingMigrationInitialize = undefined)
     }
 
     this.configFileWarningCheck()
