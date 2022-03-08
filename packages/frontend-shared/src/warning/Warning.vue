@@ -4,6 +4,7 @@
     :dismissible="dismissible"
     status="warning"
     data-cy="warning-alert"
+    icon-classes="icon-dark-orange-400 h-16px w-16px"
     :title="title"
     :icon="ErrorOutlineIcon"
   >
@@ -13,10 +14,11 @@
     />
     <Button
       v-if="retryable"
+      class="bg-indigo-500 text-white"
       size="md"
       variant="outline"
       :prefix-icon="RefreshIcon"
-      prefix-icon-class="icon-dark-indigo-500"
+      prefix-icon-class="icon-dark-white"
       @click="emits('retry')"
     >
       Retry
