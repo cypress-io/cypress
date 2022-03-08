@@ -517,26 +517,6 @@ describe('lib/config', () => {
         })
       })
 
-      context('pluginsFile', () => {
-        it('passes if a string', function () {
-          this.setup({ pluginsFile: 'cypress/plugins' })
-
-          return this.expectValidationPasses()
-        })
-
-        it('passes if false', function () {
-          this.setup({ pluginsFile: false })
-
-          return this.expectValidationPasses()
-        })
-
-        it('fails if not a string or false', function () {
-          this.setup({ pluginsFile: 42 })
-
-          return this.expectValidationFails('be a string')
-        })
-      })
-
       context('port', () => {
         it('passes if a number', function () {
           this.setup({ port: 10 })
@@ -1506,7 +1486,6 @@ describe('lib/config', () => {
             modifyObstructiveCode: { value: true, from: 'default' },
             numTestsKeptInMemory: { value: 50, from: 'default' },
             pageLoadTimeout: { value: 60000, from: 'default' },
-            pluginsFile: { value: 'cypress/plugins', from: 'default' },
             port: { value: 1234, from: 'cli' },
             projectId: { value: null, from: 'default' },
             redirectionLimit: { value: 20, from: 'default' },
@@ -1617,7 +1596,6 @@ describe('lib/config', () => {
             modifyObstructiveCode: { value: true, from: 'default' },
             numTestsKeptInMemory: { value: 50, from: 'default' },
             pageLoadTimeout: { value: 60000, from: 'default' },
-            pluginsFile: { value: 'cypress/plugins', from: 'default' },
             port: { value: 2020, from: 'config' },
             projectId: { value: 'projectId123', from: 'env' },
             redirectionLimit: { value: 20, from: 'default' },
@@ -1875,7 +1853,6 @@ describe('lib/config', () => {
 
       const cfg = {
         projectRoot: '/foo/bar',
-        pluginsFile: '/foo/bar/cypress/plugins/index.js',
         browsers: [browser],
         resolved: {
           browsers: {
@@ -2218,7 +2195,7 @@ describe('lib/config', () => {
       expect(config.setAbsolutePaths(obj)).to.deep.eq(obj)
     })
 
-    return ['fileServerFolder', 'fixturesFolder', 'supportFile', 'pluginsFile'].forEach((folder) => {
+    return ['fileServerFolder', 'fixturesFolder', 'supportFile'].forEach((folder) => {
       it(`converts relative ${folder} to absolute path`, () => {
         const obj = {
           projectRoot: '/_test-output/path/to/project',

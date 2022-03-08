@@ -2720,11 +2720,6 @@ declare namespace Cypress {
      */
     nodeVersion: 'system' | 'bundled'
     /**
-     * Path to plugins file. (Pass false to disable)
-     * @default "cypress/plugins/index.js"
-     */
-    pluginsFile: string | false
-    /**
      * The application under test cannot redirect more than this limit.
      * @default 20
      */

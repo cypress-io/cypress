@@ -649,15 +649,7 @@ const getMsgByType = function (type, ...args) {
         We found an invalid value in the file: ${chalk.blue(filePath)}
 
         ${chalk.yellow(arg2)}`
-    // happens when there is an invalid config value is returned from the
-    // project's plugins file like "cypress/plugins.index.js"
-    case 'PLUGINS_CONFIG_VALIDATION_ERROR':
-      filePath = `\`${arg1}\``
 
-      return stripIndent`\
-        An invalid configuration value returned from the setupNodeEvents on config file: ${chalk.blue(filePath)}
-
-        ${chalk.yellow(arg2)}`
     // general configuration error not-specific to configuration or plugins files
     case 'CONFIG_VALIDATION_ERROR':
       return stripIndent`\

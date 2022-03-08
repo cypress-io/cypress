@@ -9,7 +9,6 @@ const pluginConfig2: Cypress.PluginConfig = (on, config) => {
   config.baseUrl // $ExpectType string | null
   config.configFile // $ExpectType string | false
   config.fixturesFolder // $ExpectType string | false
-  config.pluginsFile // $ExpectType string | false
   config.screenshotsFolder // $ExpectType string | false
   config.videoCompression // $ExpectType number | false
   config.projectRoot // $ExpectType string

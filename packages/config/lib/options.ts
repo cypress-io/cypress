@@ -234,12 +234,6 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     validation: validate.isNumber,
     canUpdateDuringTestTime: true,
   }, {
-    name: 'pluginsFile',
-    defaultValue: 'cypress/plugins',
-    validation: validate.isStringOrFalse,
-    isFolder: true,
-    canUpdateDuringTestTime: false,
-  }, {
     name: 'port',
     defaultValue: null,
     validation: validate.isNumber,
@@ -532,6 +526,10 @@ export const breakingOptions: Array<BreakingOption> = [
     value: 'bundled',
     errorKey: 'NODE_VERSION_DEPRECATION_BUNDLED',
     isWarning: true,
+  },
+  {
+    name: 'pluginsFile',
+    errorKey: 'PLUGINS_FILE_CONFIG_OPTION_REMOVED',
   },
 ]
 

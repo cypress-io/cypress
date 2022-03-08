@@ -949,7 +949,7 @@ export class ProjectLifecycleManager {
   }
 
   private forkConfigProcess () {
-    const configProcessArgs = ['--projectRoot', this.projectRoot, '--file', this.configFilePath]
+    const configProcessArgs = ['--projectRoot', this.projectRoot, '--configFilePath', this.configFilePath]
 
     const childOptions: ForkOptions = {
       stdio: 'pipe',
