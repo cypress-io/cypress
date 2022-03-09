@@ -222,9 +222,9 @@ function createE2ETemplate (pluginPath: string, createConfigOptions: CreateConfi
   const startsWithDotSlash = new RegExp(/^.\//)
 
   if (startsWithDotSlash.test(pluginPath)) {
-    relPluginsPath = pluginPath
+    relPluginsPath = `'${pluginPath}'`
   } else {
-    relPluginsPath = `./${ pluginPath}`
+    relPluginsPath = `'./${pluginPath}'`
   }
 
   const requirePlugins = hasDefaultExport(pluginFile)
