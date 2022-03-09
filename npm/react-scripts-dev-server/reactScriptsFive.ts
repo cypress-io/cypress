@@ -25,7 +25,7 @@ export function reactScriptsFiveModifications (webpackConfig: Configuration) {
   // There is a conflict when settings process.env.NODE_ENV = "test" since DefinePlugin
   // uses the "development" configuration and expects process.env.NODE_ENV = "development".
   const definePlugin: DefinePlugin = webpackConfig.plugins?.find(
-    (plugin) => plugin.constructor.name === 'DefinePlugin'
+    (plugin) => plugin.constructor.name === 'DefinePlugin',
   ) as unknown as DefinePlugin
 
   if (definePlugin) {
@@ -39,7 +39,7 @@ export function reactScriptsFiveModifications (webpackConfig: Configuration) {
   // React-Scripts v5 no longers uses a loader to configure eslint, so we add globals
   // to the plugin.
   const eslintPlugin = webpackConfig.plugins?.find(
-    (plugin) => plugin.constructor.name === 'ESLintWebpackPlugin'
+    (plugin) => plugin.constructor.name === 'ESLintWebpackPlugin',
   ) as unknown as ESLintWebpackPlugin
 
   if (eslintPlugin) {

@@ -1,11 +1,11 @@
 // @ts-check
 const debug = require('debug')('@cypress/react')
-const tryLoadWebpackConfig = require('../utils/tryLoadWebpackConfig')
-const { allowModuleSourceInPlace } = require('../utils/webpack-helpers')
-const { addCypressToWebpackEslintRulesInPlace } = require('../utils/eslint-helpers')
-const { getTranspileFolders } = require('../utils/get-transpile-folders')
-const { addFolderToBabelLoaderTranspileInPlace } = require('../utils/babel-helpers')
-const { reactScriptsFiveModifications, isReactScripts5 } = require('../../dist/react-scripts/reactScriptsFive')
+const tryLoadWebpackConfig = require('./utils/tryLoadWebpackConfig')
+const { allowModuleSourceInPlace } = require('./utils/webpack-helpers')
+const { addCypressToWebpackEslintRulesInPlace } = require('./utils/eslint-helpers')
+const { getTranspileFolders } = require('./utils/get-transpile-folders')
+const { addFolderToBabelLoaderTranspileInPlace } = require('./utils/babel-helpers')
+const { reactScriptsFiveModifications, isReactScripts5 } = require('./reactScriptsFive')
 
 module.exports = function findReactScriptsWebpackConfig (config, devServerOptions) {
   const webpackConfigPath = (devServerOptions && devServerOptions.webpackConfigPath)

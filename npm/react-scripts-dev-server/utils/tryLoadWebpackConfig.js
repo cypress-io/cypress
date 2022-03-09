@@ -33,6 +33,7 @@ module.exports = function tryLoadWebpackConfig (webpackConfigPath) {
     debug('error %s', err.message)
     debug(err)
 
+    // eslint-disable-next-line no-console
     console.error(err)
 
     return null

@@ -1,4 +1,4 @@
-const { devServer } = require('@cypress/react/plugins/react-scripts')
+const { devServer } = require('@cypress/react-scripts-dev-server')
 
 module.exports = {
   component: {
