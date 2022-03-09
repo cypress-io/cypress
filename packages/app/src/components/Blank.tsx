@@ -130,7 +130,7 @@ export const initialCT = () => {
       <ul>
         <li>Mount your component with
           <kbd>
-            <a href='https://on.cypress.io/mount' target='_blank'>cy.mount()</a>
+            <a href='https://on.cypress.io/mount' target='_blank'>mount()</a>
           </kbd>
         </li>
         <li>Begin writing tests</li>
