@@ -619,6 +619,10 @@
       "description": "Choose your preferred browser for {testingType} testing."
     }
   },
+  "e2eProjectSetup": {
+    "title": "Project Setup",
+    "description": "Confirm your project's preferred language."
+  },
   "openBrowser": {
     "startComponent": "Start Component Testing in {browser}",
     "startE2E": "Start E2E Testing in {browser}",

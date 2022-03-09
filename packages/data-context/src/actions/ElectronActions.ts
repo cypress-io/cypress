@@ -10,6 +10,7 @@ export interface ElectronApiShape {
   showItemInFolder(folder: string): void
   showOpenDialog(props: OpenDialogOptions): Promise<OpenDialogReturnValue>
   showSaveDialog(window: BrowserWindow, props: SaveDialogOptions): Promise<SaveDialogReturnValue>
+  copyTextToClipboard(text: string): void
 }
 
 export class ElectronActions {
