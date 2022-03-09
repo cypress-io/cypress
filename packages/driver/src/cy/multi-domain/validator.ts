@@ -7,7 +7,7 @@ import { isString } from 'lodash'
 
 export class Validator {
   log: typeof $Log
-  onFailure: () => {}
+  onFailure: (hasHandler: boolean) => {}
 
   constructor ({ log, onFailure }) {
     this.log = log
@@ -16,7 +16,7 @@ export class Validator {
 
   validate ({ callbackFn, data, domain }) {
     if (!isString(domain) || domain !== 'localhost' && !isIP(domain) && !isValidDomain(domain, { allowUnicode: true, subdomain: false })) {
-      this.onFailure()
+      this.onFailure(false)
 
       $errUtils.throwErrByPath('switchToDomain.invalid_domain_argument', {
         onFail: this.log,
@@ -25,7 +25,7 @@ export class Validator {
     }
 
     if (data && !Array.isArray(data)) {
-      this.onFailure()
+      this.onFailure(false)
 
       $errUtils.throwErrByPath('switchToDomain.invalid_data_argument', {
         onFail: this.log,
@@ -34,7 +34,7 @@ export class Validator {
     }
 
     if (typeof callbackFn !== 'function') {
-      this.onFailure()
+      this.onFailure(false)
 
       $errUtils.throwErrByPath('switchToDomain.invalid_fn_argument', {
         onFail: this.log,

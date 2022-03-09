@@ -234,8 +234,9 @@ const MaybeDelayForMultiDomain: ResponseMiddleware = function () {
   if (this.config.experimentalMultiDomain && isCrossDomain && isAUTFrame && (isHTML || isRenderedHTML)) {
     this.debug('is cross-domain, delay until domain:ready event')
 
-    this.serverBus.once('ready:for:domain', () => {
-      this.debug('ready for domain, let it go')
+    this.serverBus.once('ready:for:domain', (hasHandler = false) => {
+      this.debug(`ready for domain. Does domain have a registered callback: ${hasHandler}.`)
+      this.res.locals.shouldInjectMultiDomain = hasHandler
 
       this.next()
     })
@@ -272,7 +273,7 @@ const SetInjectionLevel: ResponseMiddleware = function () {
     const isHTML = resContentTypeIs(this.incomingRes, 'text/html')
     const isAUTFrame = this.req.isAUTFrame
 
-    if (this.config.experimentalMultiDomain && !isReqMatchOriginPolicy && isAUTFrame && (isHTML || isRenderedHTML)) {
+    if (this.config.experimentalMultiDomain && !isReqMatchOriginPolicy && isAUTFrame && (isHTML || isRenderedHTML) && this.res.locals.shouldInjectMultiDomain) {
       this.debug('- multi-domain injection')
 
       return 'fullMultiDomain'

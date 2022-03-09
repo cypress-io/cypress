@@ -303,6 +303,7 @@ const stabilityChanged = (Cypress, state, config, stable) => {
           configFile: Cypress.config('configFile'),
           message: err.message,
           originPolicy,
+          isExperimentalMultiDomain: Cypress.config('experimentalMultiDomain'),
         },
       })
     } catch (error) {

@@ -11,10 +11,11 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
   // @ts-ignore
   const communicator = Cypress.multiDomainCommunicator
 
-  const sendReadyForDomain = () => {
+  const sendReadyForDomain = (hasHandler = false) => {
     // lets the proxy know to allow the response for the secondary
     // domain html through, so the page will finish loading
-    Cypress.backend('ready:for:domain')
+    // @ts-ignore
+    Cypress.backend('ready:for:domain', hasHandler)
   }
 
   communicator.on('delaying:html', () => {
@@ -108,7 +109,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
         communicator.once('ran:domain:fn', (details) => {
           const { subject, unserializableSubjectType, err, finished } = details
 
-          sendReadyForDomain()
+          sendReadyForDomain(true)
 
           if (err) {
             return _reject(err)

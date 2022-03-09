@@ -7,8 +7,6 @@ const onServer = function (app) {
   })
 }
 
-// FIXME: This partially solves https://github.com/cypress-io/cypress/issues/19632 but only when "experimentalMultiDomain" is false.
-// TODO: This will be further solved by https://github.com/cypress-io/cypress/issues/20428
 describe('e2e cross origin navigation', () => {
   systemTests.setup({
     servers: [{

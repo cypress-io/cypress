@@ -942,7 +942,7 @@ export default {
   },
 
   navigation: {
-    cross_origin ({ message, originPolicy, configFile }) {
+    cross_origin ({ message, originPolicy, configFile, isExperimentalMultiDomain }) {
       return {
         message: stripIndent`\
           Cypress detected a cross origin error happened on page load:
@@ -957,12 +957,17 @@ export default {
 
           A new URL does not match the origin policy if the 'protocol', 'port' (if specified), and/or 'host' (unless of the same superdomain) are different.
 
-          Cypress does not allow you to navigate to a different origin URL within a single test.
-
+          ${isExperimentalMultiDomain ? `If cross origin navigation was intentional, ${cmd('switchToDomain')} needs to immediately follow a cross origin navigation event.` : ''}  
+          
+          ${isExperimentalMultiDomain ? `Otherwise, ` : ''}Cypress does not allow you to navigate to a different origin URL within a single test.
+          
+          ${isExperimentalMultiDomain ? '' : `
           You may need to restructure some of your test code to avoid this problem.
 
-          Alternatively you can also disable Chrome Web Security in Chromium-based browsers which will turn off this restriction by setting { chromeWebSecurity: false } in ${formatConfigFile(configFile)}.`,
-        docsUrl: 'https://on.cypress.io/cross-origin-violation',
+          Alternatively you can also disable Chrome Web Security in Chromium-based browsers which will turn off this restriction by setting { chromeWebSecurity: false } in ${formatConfigFile(configFile)}.,
+          `}`,
+        // TODO: audit switchToDomain docs url
+        docsUrl: isExperimentalMultiDomain ? 'https://on.cypress.io/switch-to-domain' : 'https://on.cypress.io/cross-origin-violation',
       }
     },
     timed_out ({ ms, configFile }) {

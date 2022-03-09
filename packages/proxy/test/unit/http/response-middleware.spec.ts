@@ -182,6 +182,9 @@ describe('http/response-middleware', function () {
         req: {
           isAUTFrame: true,
         },
+        res: {
+          locals: {},
+        },
         config: {
           experimentalMultiDomain: true,
         },
@@ -190,8 +193,9 @@ describe('http/response-middleware', function () {
       const promise = testMiddleware([MaybeDelayForMultiDomain], ctx)
 
       expect(ctx.serverBus.emit).to.be.calledWith('cross:domain:delaying:html')
-
       ctx.serverBus.once.withArgs('ready:for:domain').args[0][1]()
+
+      expect(ctx.res.locals.shouldInjectMultiDomain).to.be.false
 
       return promise
     })
@@ -207,6 +211,9 @@ describe('http/response-middleware', function () {
           },
           isAUTFrame: true,
         },
+        res: {
+          locals: {},
+        },
         config: {
           experimentalMultiDomain: true,
         },
@@ -219,6 +226,34 @@ describe('http/response-middleware', function () {
       ctx.serverBus.once.withArgs('ready:for:domain').args[0][1]()
 
       expect(ctx.res.wantsInjection).to.be.undefined
+      expect(ctx.res.locals.shouldInjectMultiDomain).to.be.false
+
+      return promise
+    })
+
+    it('sets response locals "shouldInjectMultiDomain" to true if "ready:for:domain" emits true, indicating a bound domain callback exists', function () {
+      prepareContext({
+        incomingRes: {
+          headers: {
+            'content-type': 'text/html',
+          },
+        },
+        req: {
+          isAUTFrame: true,
+        },
+        res: {
+          locals: {},
+        },
+        config: {
+          experimentalMultiDomain: true,
+        },
+      })
+
+      const promise = testMiddleware([MaybeDelayForMultiDomain], ctx)
+
+      ctx.serverBus.once.withArgs('ready:for:domain').args[0][1](true)
+
+      expect(ctx.res.locals.shouldInjectMultiDomain).to.be.true
 
       return promise
     })
@@ -337,13 +372,18 @@ describe('http/response-middleware', function () {
       })
     })
 
-    it('injects "fullMultiDomain" when "experimentalMultiDomain" config flag is set to true for cross-domain html"', function () {
+    it('injects "fullMultiDomain" when "experimentalMultiDomain" config flag is set to true for cross-domain html and a callback handler exists', function () {
       prepareContext({
         req: {
           proxiedUrl: 'http://foobar.com',
           isAUTFrame: true,
           cookies: {},
           headers: {},
+        },
+        res: {
+          locals: {
+            shouldInjectMultiDomain: true,
+          },
         },
         incomingRes: {
           headers: {
@@ -358,6 +398,44 @@ describe('http/response-middleware', function () {
       return testMiddleware([SetInjectionLevel], ctx)
       .then(() => {
         expect(ctx.res.wantsInjection).to.equal('fullMultiDomain')
+      })
+    })
+
+    it('injects default behavior when "experimentalMultiDomain" config flag is set to true for cross-domain html, but no callback handler exists for multi-domain', function () {
+      prepareContext({
+        renderedHTMLOrigins: {},
+        getRenderedHTMLOrigins () {
+          return this.renderedHTMLOrigins
+        },
+        req: {
+          proxiedUrl: 'http://foobar.com',
+          isAUTFrame: true,
+          cookies: {},
+          headers: {
+            'accept': [
+              'text/html',
+              'application/xhtml+xml',
+            ],
+          },
+        },
+        res: {
+          locals: {
+            shouldInjectMultiDomain: false,
+          },
+        },
+        incomingRes: {
+          headers: {
+            'content-type': 'text/html',
+          },
+        },
+        config: {
+          experimentalMultiDomain: true,
+        },
+      })
+
+      return testMiddleware([SetInjectionLevel], ctx)
+      .then(() => {
+        expect(ctx.res.wantsInjection).to.equal('partial')
       })
     })
 
