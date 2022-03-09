@@ -217,7 +217,15 @@ function createE2ETemplate (pluginPath: string, createConfigOptions: CreateConfi
   }
 
   const pluginFile = fs.readFileSync(path.join(createConfigOptions.projectRoot, pluginPath), 'utf8')
-  const relPluginsPath = path.normalize(`'./${pluginPath}'`)
+  let relPluginsPath
+
+  const startsWithDotSlash = new RegExp(/^.\//)
+
+  if (startsWithDotSlash.test(pluginPath)) {
+    relPluginsPath = pluginPath
+  } else {
+    relPluginsPath = `./${ pluginPath}`
+  }
 
   const requirePlugins = hasDefaultExport(pluginFile)
     ? `return require(${relPluginsPath}).default(on, config)`
