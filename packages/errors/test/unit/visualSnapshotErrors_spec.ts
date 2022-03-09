@@ -1097,7 +1097,7 @@ describe('visual error templates', () => {
       }
     },
     MIGRATED_OPTION_INVALID: () => {
-      const keyChanging = ['integrationFolder', 'componentFolder', 'testFiles', 'pluginsFile', 'supportFile', 'baseUrl']
+      const keyChanging = ['integrationFolder', 'componentFolder', 'testFiles', 'pluginsFile']
       const err = makeErr()
 
       return keyChanging.reduce((acc: ErrorGenerator<'MIGRATED_OPTION_INVALID'>, key) => {

@@ -11,7 +11,6 @@ import { errPartial, errTemplate, fmt, theme, PartialErr } from './errTemplate'
 import { stackWithoutMessage } from './stackUtils'
 
 import type { ClonedError, ConfigValidationFailureInfo, CypressError, ErrTemplateResult, ErrorLike } from './errorTypes'
-import { brokenOptionsMap, errPrefix, errPrefixRootOnly } from './brokenOptionsMap'
 
 const ansi_up = new AU()
 
@@ -1315,28 +1314,17 @@ export const AllCypressErrors = {
 
     // some keys come prefixed with a `component.` or `e2e.` but they are not referenced
     // in the errors maps with this prefix. strip it out.
-    const rootKey = optionKey.replace(/^(component|e2e)\./, '') as keyof typeof brokenOptionsMap
+    const rootKey = optionKey.replace(/^(component|e2e)\./, '')
 
-    const errorObj = brokenOptionsMap[rootKey]
-
-    if (!errorObj) {
-      return errTemplate`
-        The ${fmt.highlight(optionKey)} option is invalid.
-
-        The map of broken options is missing a mapping for ${fmt.highlight(rootKey)}.
-
-        Please consider adding an issue to the [Cypress Github repo](https://github.com/cypress-io/cypress/issues/new/choose).
-        
-        ${stackTrace}
-      `
-    }
-
-    const message = errorObj.brokenOnlyAtRoot ? errPrefixRootOnly(optionKey) : errPrefix(optionKey)
+    const mergedOptionKey = 'testFiles' === rootKey ? 'integrationFolder' : 'testFiles'
 
     return errTemplate`
-      ${message}
+      During the ${fmt.highlight('setupNodeEvents()')}, the option ${fmt.highlight(optionKey)} gets updated.
+      Since 10.0, this option is no longer supported.
 
-      ${errorObj.additionalHelp}
+      It was merged with ${fmt.highlight(mergedOptionKey)} into the ${fmt.highlight('specPattern')} option.
+
+      **NOTE** ${fmt.highlight('specPattern')} has to be set as a member of the ${fmt.highlight('e2e')} or ${fmt.highlight('component')} property.
 
       ${stackTrace}
     `
