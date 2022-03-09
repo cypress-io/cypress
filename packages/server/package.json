@@ -120,7 +120,7 @@
     "ts-node": "^10.2.1",
     "tslib": "2.3.1",
     "underscore.string": "3.3.5",
-    "url-parse": "1.5.8",
+    "url-parse": "1.5.9",
     "uuid": "8.3.2",
     "which": "2.0.2",
     "widest-line": "3.1.0"
