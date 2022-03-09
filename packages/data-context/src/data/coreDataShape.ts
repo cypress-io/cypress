@@ -71,7 +71,6 @@ export interface WizardDataShape {
   detectedLanguage: NexusGenEnums['CodeLanguageEnum'] | null
   detectedBundler: Bundler | null
   detectedFramework: typeof FRONTEND_FRAMEWORKS[number]['type'] | null
-  __fakeInstalledPackagesForTesting: string[] | null
 }
 
 export interface MigrationDataShape {
@@ -183,7 +182,6 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
       chosenManualInstall: false,
       detectedBundler: null,
       detectedFramework: null,
-      __fakeInstalledPackagesForTesting: null,
       detectedLanguage: null,
     },
     migration: {
