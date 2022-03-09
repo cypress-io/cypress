@@ -1672,7 +1672,7 @@ jobs:
           name: Release packages after all jobs pass
           command: yarn npm-release
 
-  create-build-artifacts:`
+  create-build-artifacts:
     <<: *defaults
     parameters:
       <<: *defaultsParameters
