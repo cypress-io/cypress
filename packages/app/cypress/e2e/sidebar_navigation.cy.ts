@@ -14,15 +14,16 @@ describe('Sidebar Navigation', () => {
     })
 
     it('highlights indicator on hover showing you can click to expand', () => {
-      cy.findByLabelText('toggle navigation', {
-        selector: 'button',
-      }).should('not.have.css', 'outline', 'rgba(0, 0, 0, 0) solid 2px')
+      const navIndicatorSelector = '[data-testid=sidebar-nav-indicator]'
+      const navExpansionToggleSelector = '[aria-label="toggle navigation"]'
 
-      cy.findByLabelText('toggle navigation', {
-        selector: 'button',
-      }).realHover().should('have.css', 'outline', 'rgba(0, 0, 0, 0) solid 2px')
-
-      cy.percySnapshot()
+      cy.get(navIndicatorSelector)
+      .should('not.be.visible')
+      .get(navExpansionToggleSelector)
+      .realHover()
+      .get(navIndicatorSelector)
+      .should('be.visible')
+      .percySnapshot()
     })
 
     it('closes the left nav bar when clicking the expand button (if expanded)', () => {

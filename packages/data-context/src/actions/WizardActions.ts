@@ -251,7 +251,7 @@ export class WizardActions {
     const configCode = this.configCode(testingType, this.ctx.coreData.wizard.chosenLanguage)
 
     // only do this if config file doesn't exist
-    this.ctx.lifecycleManager.setConfigFilePath(this.ctx.coreData.wizard.chosenLanguage)
+    this.ctx.lifecycleManager.setConfigFilePath(`cypress.config.${this.ctx.coreData.wizard.chosenLanguage}`)
 
     return this.scaffoldFile(
       this.ctx.lifecycleManager.configFilePath,
