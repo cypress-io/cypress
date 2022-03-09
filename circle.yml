@@ -39,8 +39,7 @@ macWorkflowFilters: &mac-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ '10.0-release', << pipeline.git.branch >> ]
-    - equal: [ rebase/develop-10.0-release-2022-03-04, << pipeline.git.branch >> ]
-    - equal: [ fix-beta-build-caching, << pipeline.git.branch >> ]
+    - equal: [ new-cmd-log-styles, << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
