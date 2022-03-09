@@ -5,11 +5,11 @@
       <MigrationListItem>
         {{ t("migration.configFile.changedDefault") }}
         <CodeTag class="text-red-500">
-          {{ props.gql.configFileNameBefore }}
+          cypress.json
         </CodeTag>
         <i-cy-arrow-right_x16 class="inline-block h-16px w-16px icon-dark-gray-300" />
         <CodeTag class="text-jade-500">
-          {{ props.gql.configFileNameAfter }}
+          {{ fileName }}
         </CodeTag>
       </MigrationListItem>
       <MigrationListItem v-if="props.gql.hasCustomIntegrationFolder || props.gql.hasCustomIntegrationTestFiles">
@@ -155,6 +155,7 @@ fragment ConvertConfigFile on Migration {
   hasCustomIntegrationTestFiles
   hasCustomComponentFolder
   hasCustomComponentTestFiles
+  hasTypescript
 }`
 
 const props = defineProps<{
@@ -172,6 +173,8 @@ const codeBefore = computed(() => {
 const codeAfter = computed(() => {
   return props.gql.configAfterCode + Array(gqlCodeMaxLines.value - gqlCodeAfterLines.value).fill('\n').join('')
 })
+
+const fileName = computed(() => props.gql.hasTypescript ? 'cypress.config.ts' : 'cypress.config.js')
 
 </script>
 
