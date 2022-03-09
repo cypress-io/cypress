@@ -168,6 +168,9 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       showSaveDialog (window: BrowserWindow, props: SaveDialogOptions) {
         return electron.dialog.showSaveDialog(window, props)
       },
+      copyTextToClipboard (text: string) {
+        electron.clipboard.writeText(text)
+      },
     },
     localSettingsApi: {
       async setPreferences (object: AllowedState) {
