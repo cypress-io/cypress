@@ -1096,5 +1096,10 @@ describe('visual error templates', () => {
         default: [makeErr()],
       }
     },
+    MIGRATION_ALREADY_OCURRED: () => {
+      return {
+        default: ['custom.config.js', 'custom.json'],
+      }
+    },
   })
 })

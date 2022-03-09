@@ -152,4 +152,6 @@ export const stubMigration: MaybeResolver<Migration> = {
   hasCustomComponentTestFiles: false,
   hasCustomIntegrationFolder: false,
   hasCustomIntegrationTestFiles: false,
+  configFileNameAfter: 'cypress.config.js',
+  configFileNameBefore: 'cypress.json',
 }
