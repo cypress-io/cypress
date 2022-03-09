@@ -63,13 +63,13 @@
     &:hover {
       background-color: $gray-900;
 
-      .command-pin + .command-number {
-        display: none;
-      }
+      // .command-pin + .command-number {
+      //   display: none;
+      // }
   
-      .command-pin {
-        display: block;
-      }
+      // .command-pin {
+      //   display: block;
+      // }
 
       .command-expander > path {
         stroke: $gray-700;
@@ -78,7 +78,7 @@
 
     .command-wrapper-text {
       display: flex;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
     }
 
     .command-interceptions {
@@ -124,7 +124,7 @@
     // ensures alias & number of children commands don't break if reporter width is narrow
     .alias-container {
       white-space: nowrap;
-
+      
       > {
         display: inline-block;
       }
@@ -177,13 +177,15 @@
 
     .command-group-block {
       border-left: 1px dotted $gray-600;
-      width: 12px;
+      width: 11px;
       min-height: 20px;
+      min-width: 11px;
     }
   }
 
   .command-info {
     display: flex;
+    flex-wrap: wrap;
     padding-top: 2px;
     padding-bottom: 2px;
     margin-left: 0;
@@ -305,6 +307,11 @@
 
     &:hover {
       background: rgba($red-400, 0.3);
+    }
+
+    .command-group,
+    .command-group-block {
+      border-color: $err-header-text;
     }
   }
 
@@ -433,6 +440,8 @@
   }
 
   .command-controls {
+    padding-right: 2px;
+
     svg {
       color: $gray-600;
       cursor: pointer;
@@ -552,13 +561,5 @@
     display: inline-block;
     color: $black;
     vertical-align: text-top;
-  }
-
-  // utilizing element size queries: https://github.com/marcj/css-element-queries
-  // styles take effect when width is greater than or equal to the specified amount
-  &[min-width~="300px"] {
-    .command-wrapper-text {
-      flex-wrap: nowrap;
-    }
   }
 }

@@ -98,7 +98,10 @@ const getDisplayProps = (attrs) => {
 }
 
 const getConsoleProps = (attrs) => {
-  return attrs.consoleProps
+  return {
+    ...!!attrs.group && { group: attrs.group },
+    ...attrs.consoleProps,
+  }
 }
 
 const getSnapshotProps = (attrs) => {

@@ -40,9 +40,9 @@ const shouldShowCount = (aliasesWithDuplicates: Array<Alias> | null, aliasName: 
   return _.includes(aliasesWithDuplicates, aliasName)
 }
 
-const NavColumn = observer(({ model }) => (
+const NavColumn = observer(({ model, toggleColumnPin }) => (
   <>
-    <div className='command-number-column'>
+    <div className='command-number-column' onClick={toggleColumnPin}>
       {<PinIcon className='command-pin' />}
       {model._isPending() && <RunningIcon className='fa-spin' />}
       {!model._isPending() && <span className='command-number'>{model.number || ''}</span>}
@@ -237,7 +237,7 @@ class Command extends Component<Props> {
     }
 
     if (model.showError) {
-      return <TestError model={model} onPrintToConsole={this._onClick}/>
+      return <TestError model={model} onPrintToConsole={this._toggleColumnPin}/>
     }
 
     const commandName = model.name ? nameClassName(model.name) : ''
@@ -253,7 +253,7 @@ class Command extends Component<Props> {
       const level = model.groupLevel < 6 ? model.groupLevel : 5
 
       for (let i = 1; i < level; i++) {
-        groupPlaceholder.push(<span key={level} className='command-group-block' />)
+        groupPlaceholder.push(<span key={`${this.props.groupId}-${level}`} className='command-group-block' />)
       }
     }
 
@@ -282,12 +282,10 @@ class Command extends Component<Props> {
             )
           }
         >
-          <NavColumn model={model} isGroup={!!this.props.groupId}>
-            {groupPlaceholder}
-          </NavColumn>
+          <NavColumn model={model} toggleColumnPin={this._toggleColumnPin} />
           <FlashOnClick
             message='Printed output to your console'
-            onClick={this._onClick}
+            onClick={this._toggleColumnPin}
             shouldShowMessage={this._shouldShowClickMessage}
             wrapperClassName={cs('command-pin-target', { 'command-group': !!this.props.groupId })}
           >
@@ -374,7 +372,7 @@ class Command extends Component<Props> {
     return !this.props.appState.isRunning && !!this.props.model.hasConsoleProps
   }
 
-  @action _onClick = () => {
+  @action _toggleColumnPin = () => {
     if (this.props.appState.isRunning) return
 
     const { id } = this.props.model
