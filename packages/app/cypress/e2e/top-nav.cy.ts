@@ -497,8 +497,10 @@ describe('App Top Nav Workflows', () => {
         })
 
         cy.get('@tryAgain').click()
-        cy.contains(loginText.titleInitial).should('be.visible')
-        cy.contains(loginText.actionWaiting).should('be.visible')
+
+        cy.findByRole('dialog', { name: loginText.titleInitial }).within(() => {
+          cy.contains(loginText.actionWaiting).should('be.visible')
+        })
       })
 
       it('cancel button correctly clears error state', () => {
