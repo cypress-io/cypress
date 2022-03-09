@@ -128,6 +128,11 @@ query ComponentGeneratorStepOne($glob: String!) {
       relative
       baseName
     }
+    # Add the specs, so we can keep the list up to date with the cache
+    specs {
+      id
+      ...SpecNode_InlineSpecList
+    }
   }
 }
 `
