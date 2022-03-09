@@ -10,6 +10,4 @@ export * from './errors'
 
 export * from './errorTypes'
 
-export * from './brokenOptionsMap'
-
 export default errorsApi

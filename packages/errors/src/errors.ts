@@ -1319,8 +1319,8 @@ export const AllCypressErrors = {
     const mergedOptionKey = 'testFiles' === rootKey ? 'integrationFolder' : 'testFiles'
 
     return errTemplate`
-      During the ${fmt.highlight('setupNodeEvents()')}, the option ${fmt.highlight(optionKey)} gets updated.
-      Since 10.0, this option is no longer supported.
+      ${fmt.highlight(optionKey)} is updated in ${fmt.highlight('setupNodeEvents()')}.
+      Cypress 10.X, no longer supports this option.
 
       It was merged with ${fmt.highlight(mergedOptionKey)} into the ${fmt.highlight('specPattern')} option.
 
