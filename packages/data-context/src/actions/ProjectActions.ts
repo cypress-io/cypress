@@ -519,7 +519,7 @@ export class ProjectActions {
 
     // Should never happen
     if (!baseUrl) {
-      throw new Error('Cannot ping url without a valid baseUrl')
+      return
     }
 
     this.ctx.update((d) => {
