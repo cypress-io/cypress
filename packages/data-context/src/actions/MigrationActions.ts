@@ -6,6 +6,7 @@ import type { DataContext } from '..'
 import {
   cleanUpIntegrationFolder,
   formatConfig,
+  LegacyCypressConfigJson,
   moveSpecFiles,
   NonStandardMigrationError,
   SpecToMove,
@@ -23,7 +24,7 @@ import {
   getSpecPattern,
 } from '../sources/migration'
 
-export function processConfigViaLegacyPlugins (projectRoot: string, legacyConfig: Partial<Cypress.Config>): Promise<Partial<Cypress.Config>> {
+export function processConfigViaLegacyPlugins (projectRoot: string, legacyConfig: LegacyCypressConfigJson): Promise<LegacyCypressConfigJson> {
   return new Promise(async (resolve, reject) => {
     const pluginFile = legacyConfig.pluginsFile ?? await tryGetDefaultLegacyPluginsFile(projectRoot)
 
@@ -45,7 +46,7 @@ export function processConfigViaLegacyPlugins (projectRoot: string, legacyConfig
     const CHILD_PROCESS_FILE_PATH = require.resolve('@packages/server/lib/plugins/child/require_async_child')
     const proc = fork(CHILD_PROCESS_FILE_PATH, configProcessArgs, childOptions)
 
-    proc.addListener('message', ({ event, args }: { event: 'ready' | 'loadLegacyPlugins:reply', args: [{ config: Partial<Partial<Cypress.Config>> }] }) => {
+    proc.addListener('message', ({ event, args }: { event: 'ready' | 'loadLegacyPlugins:reply', args: [{ config: Partial<LegacyCypressConfigJson> }] }) => {
       if (event === 'ready') {
         proc.send({ event: 'loadLegacyPlugins', args: [legacyConfig] })
       } else if (event === 'loadLegacyPlugins:reply') {
@@ -65,7 +66,7 @@ export function processConfigViaLegacyPlugins (projectRoot: string, legacyConfig
 export class MigrationActions {
   constructor (private ctx: DataContext) { }
 
-  async initialize (config: Partial<Cypress.Config>) {
+  async initialize (config: LegacyCypressConfigJson) {
     const legacyConfigForMigration = await this.setLegacyConfigForMigration(config)
 
     // for testing mainly, we want to ensure the flags are reset each test
@@ -156,7 +157,7 @@ export class MigrationActions {
     })
   }
 
-  async setLegacyConfigForMigration (config: Partial<Cypress.Config>) {
+  async setLegacyConfigForMigration (config: LegacyCypressConfigJson) {
     assert(this.ctx.currentProject)
     const legacyConfigForMigration = await processConfigViaLegacyPlugins(this.ctx.currentProject, config)
 

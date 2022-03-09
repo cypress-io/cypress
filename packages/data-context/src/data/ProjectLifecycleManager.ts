@@ -22,6 +22,7 @@ import { LoadConfigReply, SetupNodeEventsReply, ProjectConfigIpc, IpcHandler } f
 import assert from 'assert'
 import type { AllModeOptions, BreakingErrResult, BreakingOption, FoundBrowser, FullConfig, TestingType } from '@packages/types'
 import { autoBindDebug } from '../util/autoBindDebug'
+import type { LegacyCypressConfigJson } from '../sources'
 
 const debug = debugLib(`cypress:lifecycle:ProjectLifecycleManager`)
 
@@ -265,7 +266,7 @@ export class ProjectLifecycleManager {
       // and mutate the config based on the return value for migration
       // only used in open mode (cannot migrate via terminal)
       const cfgPath = path.join(projectRoot, 'cypress.json')
-      const legacyConfig = this.ctx.fs.readJsonSync(cfgPath) as Partial<Cypress.Config>
+      const legacyConfig = this.ctx.fs.readJsonSync(cfgPath) as LegacyCypressConfigJson
 
       // should never throw, unless there existing pluginsFile errors out,
       // in which case they are attempting to migrate an already broken project.

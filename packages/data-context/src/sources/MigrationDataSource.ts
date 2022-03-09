@@ -20,6 +20,17 @@ import Debug from 'debug'
 
 const debug = Debug('cypress:data-context:sources:MigrationDataSource')
 
+export type LegacyCypressConfigJson = Partial<{
+  component: Omit<LegacyCypressConfigJson, 'component' | 'e2e'>
+  e2e: Omit<LegacyCypressConfigJson, 'component' | 'e2e'>
+  pluginsFile: string | false
+  supportFile: string | false
+  componentFolder: string | false
+  integrationFolder: string
+  testFiles: string | string[]
+  ignoreTestFiles: string | string[]
+}>
+
 export interface MigrationFile {
   testingType: TestingType
   before: {

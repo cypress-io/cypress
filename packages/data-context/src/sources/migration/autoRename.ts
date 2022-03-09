@@ -11,6 +11,7 @@ import {
   regexps,
 } from '.'
 import type { MigrationFile } from '../MigrationDataSource'
+import type { LegacyCypressConfigJson } from '..'
 
 export interface MigrationSpec {
   relative: string
@@ -101,7 +102,7 @@ export function applyMigrationTransform (
   }
 }
 
-export async function getSpecs (projectRoot: string, config: Partial<Cypress.Config>): Promise<GetSpecs> {
+export async function getSpecs (projectRoot: string, config: LegacyCypressConfigJson): Promise<GetSpecs> {
   const integrationFolder = getIntegrationFolder(config)
   const integrationTestFiles = getIntegrationTestFilesGlobs(config)
 

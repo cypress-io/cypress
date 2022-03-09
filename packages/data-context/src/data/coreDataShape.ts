@@ -6,6 +6,7 @@ import type { ChildProcess } from 'child_process'
 import type { SocketIOServer } from '@packages/socket'
 import type { Server } from 'http'
 import type { ErrorWrapperSource } from '@packages/errors'
+import type { LegacyCypressConfigJson } from '../sources'
 
 export type Maybe<T> = T | null | undefined
 
@@ -76,7 +77,7 @@ export interface WizardDataShape {
 export interface MigrationDataShape {
   // TODO: have the model of migration here
   step: MigrationStep
-  legacyConfigForMigration?: Partial<Cypress.Config> | null
+  legacyConfigForMigration?: LegacyCypressConfigJson | null
   filteredSteps: MigrationStep[]
   flags: {
     hasCustomIntegrationFolder: boolean

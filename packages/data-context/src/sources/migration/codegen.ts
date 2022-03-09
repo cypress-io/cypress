@@ -12,6 +12,7 @@ import { toPosix } from '../../util'
 import Debug from 'debug'
 import dedent from 'dedent'
 import { hasDefaultExport } from './parserUtils'
+import type { LegacyCypressConfigJson } from '..'
 
 const debug = Debug('cypress:data-context:sources:migration:codegen')
 
@@ -36,7 +37,7 @@ export interface CreateConfigOptions {
   hasTypescript: boolean
 }
 
-export async function createConfigString (cfg: Partial<Cypress.Config>, options: CreateConfigOptions) {
+export async function createConfigString (cfg: LegacyCypressConfigJson, options: CreateConfigOptions) {
   const newConfig = reduceConfig(cfg)
   const relativePluginPath = await getPluginRelativePath(cfg, options.projectRoot)
 
@@ -132,7 +133,7 @@ export async function initComponentTestingMigration (
   })
 }
 
-async function getPluginRelativePath (cfg: Partial<Cypress.Config>, projectRoot: string): Promise<string | undefined> {
+async function getPluginRelativePath (cfg: LegacyCypressConfigJson, projectRoot: string): Promise<string | undefined> {
   return cfg.pluginsFile ? cfg.pluginsFile : await tryGetDefaultLegacyPluginsFile(projectRoot)
 }
 
@@ -325,7 +326,7 @@ export function renameSupportFilePath (relative: string) {
   return relative.slice(0, res.index) + relative.slice(res.index).replace(res.groups.supportFileName, 'e2e')
 }
 
-export function reduceConfig (cfg: Partial<Cypress.Config>): ConfigOptions {
+export function reduceConfig (cfg: LegacyCypressConfigJson): ConfigOptions {
   const excludedFields = ['pluginsFile', '$schema']
 
   return Object.entries(cfg).reduce((acc, [key, val]) => {
@@ -414,7 +415,7 @@ export function reduceConfig (cfg: Partial<Cypress.Config>): ConfigOptions {
   }, { global: {}, e2e: {}, component: {} })
 }
 
-export function getSpecPattern (cfg: Partial<Cypress.Config>, testType: TestingType) {
+export function getSpecPattern (cfg: LegacyCypressConfigJson, testType: TestingType) {
   const specPattern = cfg[testType]?.testFiles ?? cfg.testFiles ?? '**/*.cy.{js,jsx,ts,tsx}'
   const customComponentFolder = cfg.component?.componentFolder ?? cfg.componentFolder ?? null
 
