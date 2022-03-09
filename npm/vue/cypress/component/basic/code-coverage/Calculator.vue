@@ -1,7 +1,15 @@
 <template>
   <div>
-    <input v-model="a" type="number" data-cy="a" /> +
-    <input v-model="b" type="number" data-cy="b" />
+    <input
+      v-model="a"
+      type="number"
+      data-cy="a"
+    > +
+    <input
+      v-model="b"
+      type="number"
+      data-cy="b"
+    >
     = {{ sum }}
   </div>
 </template>

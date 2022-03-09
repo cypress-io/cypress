@@ -302,20 +302,6 @@ export class ProjectActions {
     this.api.setPromptShown(slug)
   }
 
-  async createComponentIndexHtml (template: string) {
-    const project = this.ctx.currentProject
-
-    if (!project) {
-      throw Error(`Cannot create index.html without currentProject.`)
-    }
-
-    if (this.ctx.lifecycleManager.isTestingTypeConfigured('component')) {
-      const indexHtmlPath = path.resolve(project, 'cypress/component/support/index.html')
-
-      await this.ctx.fs.outputFile(indexHtmlPath, template)
-    }
-  }
-
   setSpecs (specs: FoundSpec[]) {
     this.ctx.project.setSpecs(specs)
   }
@@ -418,7 +404,7 @@ export class ProjectActions {
 
     const [newSpec] = codeGenResults.files
 
-    const cfg = this.ctx.project.getConfig()
+    const cfg = await this.ctx.project.getConfig()
 
     if (cfg && this.ctx.currentProject) {
       const testingType = (codeGenType === 'component' || codeGenType === 'story') ? 'component' : 'e2e'

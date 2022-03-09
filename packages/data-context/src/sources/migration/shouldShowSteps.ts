@@ -14,7 +14,7 @@ function getTestFilesGlobs (config: OldCypressConfig, type: 'component' | 'integ
     return ([] as string[]).concat(glob)
   }
 
-  return ['**/*']
+  return ['**/*.{js,ts,jsx,tsx,coffee}']
 }
 
 export function getIntegrationTestFilesGlobs (config: OldCypressConfig): string[] {
@@ -30,7 +30,7 @@ export function isDefaultTestFiles (config: OldCypressConfig, type: 'component' 
     ? getComponentTestFilesGlobs(config)
     : getIntegrationTestFilesGlobs(config)
 
-  return testFiles.length === 1 && testFiles[0] === '**/*'
+  return testFiles.length === 1 && testFiles[0] === '**/*.{js,ts,jsx,tsx,coffee}'
 }
 
 export function getPluginsFile (config: OldCypressConfig) {

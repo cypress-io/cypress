@@ -24,10 +24,11 @@ const classes = computed(() => {
 })
 
 const props = withDefaults(defineProps<{
-  href: string
+  href?: string
   useDefaultHocus?: boolean
 }>(), {
   useDefaultHocus: true,
+  href: '',
 })
 
 </script>

@@ -42,11 +42,20 @@ describe('App: Settings', () => {
 
   describe('Cloud Settings', () => {
     it('shows the projectId section when there is a projectId', () => {
+      cy.withCtx(async (ctx, o) => {
+        ctx.electronApi.copyTextToClipboard = o.sinon.stub()
+      })
+
       cy.startAppServer('e2e')
       cy.visitApp()
       cy.findByText('Settings').click()
       cy.findByText('Dashboard Settings').click()
       cy.findByText('Project ID').should('be.visible')
+      cy.findByText('Copy').click()
+      cy.findByText('Copied!').should('be.visible')
+      cy.withRetryableCtx((ctx) => {
+        expect(ctx.electronApi.copyTextToClipboard as SinonStub).to.have.been.calledWith('abc123')
+      })
     })
 
     it('shows the Record Keys section', () => {

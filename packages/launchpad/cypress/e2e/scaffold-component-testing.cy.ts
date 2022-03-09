@@ -19,12 +19,10 @@ function verifyConfigFile (configFile: `cypress.config.${'js' | 'ts'}`) {
 }
 
 function fakeInstalledDeps () {
-  cy.withCtx(async (ctx) => {
+  cy.withCtx(async (ctx, o) => {
     const deps = (await ctx.wizard.packagesToInstall() ?? []).map((x) => x.package)
 
-    ctx.update((coreData) => {
-      coreData.wizard.__fakeInstalledPackagesForTesting = deps
-    })
+    o.sinon.stub(ctx.wizard, 'installedPackages').resolves(deps)
   })
 }
 

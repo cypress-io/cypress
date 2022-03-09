@@ -2,12 +2,10 @@ import { BUNDLERS, FRONTEND_FRAMEWORKS, AllPackagePackages } from '@packages/sca
 import { CODE_LANGUAGES } from '@packages/types/src'
 
 function fakeInstalledDeps () {
-  cy.withCtx(async (ctx) => {
+  cy.withCtx(async (ctx, o) => {
     const deps = (await ctx.wizard.packagesToInstall() ?? []).map((x) => x.package)
 
-    ctx.update((coreData) => {
-      coreData.wizard.__fakeInstalledPackagesForTesting = deps
-    })
+    o.sinon.stub(ctx.wizard, 'installedPackages').resolves(deps)
   })
 }
 
@@ -304,6 +302,7 @@ describe('Launchpad: Setup Project', () => {
         .realPress('Enter')
 
         cy.contains('h1', 'Project Setup')
+        cy.contains('p', 'Confirm your project\'s preferred language.')
         cy.findByRole('button', { name: 'JavaScript' }).click()
         cy.findByRole('button', { name: 'Next Step' }).click()
 
@@ -344,6 +343,7 @@ describe('Launchpad: Setup Project', () => {
         .realPress('Enter')
 
         cy.contains('h1', 'Project Setup')
+        cy.contains('p', 'Confirm your project\'s preferred language.')
         cy.findByRole('button', { name: 'TypeScript' }).click()
         cy.findByRole('button', { name: 'Next Step' }).click()
 
@@ -453,14 +453,14 @@ describe('Launchpad: Setup Project', () => {
         })
 
         cy.get('[data-cy=valid]').within(() => {
-          cy.containsPath('cypress/component/index.html')
+          cy.containsPath('cypress/support/component-index.html')
           cy.containsPath('cypress/support/component.ts')
           cy.containsPath('cypress/support/commands.ts')
         })
 
         verifyFiles([
           'cypress.config.js',
-          'cypress/component/index.html',
+          'cypress/support/component-index.html',
           'cypress/support/component.ts',
           'cypress/support/commands.ts',
         ])
@@ -615,10 +615,6 @@ describe('Launchpad: Setup Project', () => {
       })
     })
 
-    beforeEach(() => {
-      fakeInstalledDeps()
-    })
-
     const hasStorybookPermutations = [false, true]
 
     FRONTEND_FRAMEWORKS.forEach((framework) => {
@@ -742,7 +738,7 @@ describe('Launchpad: Setup Project', () => {
               cy.contains('[data-cy=changes]', `cypress.config.js`)
 
               cy.get('[data-cy=valid]').within(() => {
-                cy.containsPath('cypress/component/index.html')
+                cy.containsPath('cypress/support/component-index.html')
                 cy.containsPath(`cypress/support/component.${lang.type}`)
                 cy.containsPath(`cypress/support/commands.${lang.type}`)
                 cy.containsPath('cypress/fixtures/example.json')
@@ -750,7 +746,7 @@ describe('Launchpad: Setup Project', () => {
 
               verifyFiles([
                 'cypress.config.js',
-                'cypress/component/index.html',
+                'cypress/support/component-index.html',
                 `cypress/support/component.${lang.type}`,
                 `cypress/support/commands.${lang.type}`,
                 'cypress/fixtures/example.json',
@@ -815,7 +811,7 @@ describe('Launchpad: Setup Project', () => {
 
         cy.get('[data-cy=valid]').within(() => {
           cy.contains('cypress.config.ts')
-          cy.containsPath('cypress/component/index.html')
+          cy.containsPath('cypress/support/component-index.html')
           cy.containsPath(`cypress/support/component.ts`)
           cy.containsPath(`cypress/support/commands.ts`)
           cy.containsPath('cypress/fixtures/example.json')
@@ -848,13 +844,13 @@ describe('Launchpad: Setup Project', () => {
 
         cy.get('[data-cy=valid]').within(() => {
           cy.contains('cypress.config.ts')
-          cy.containsPath('cypress/component/index.html')
+          cy.containsPath('cypress/support/component-index.html')
           cy.containsPath('cypress/support/component.ts')
           cy.containsPath('cypress/support/commands.ts')
           cy.containsPath('cypress/fixtures/example.json')
         })
 
-        verifyFiles(['cypress.config.ts', 'cypress/component/index.html', 'cypress/support/component.ts', 'cypress/support/commands.ts', 'cypress/fixtures/example.json'])
+        verifyFiles(['cypress.config.ts', 'cypress/support/component-index.html', 'cypress/support/component.ts', 'cypress/support/commands.ts', 'cypress/fixtures/example.json'])
 
         cy.findByRole('button', { name: 'Continue' }).click()
         cy.contains(/(Initializing Config|Choose a Browser)/, { timeout: 10000 })

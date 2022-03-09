@@ -7,7 +7,7 @@ const savedState = require(`../../../lib/saved_state`)
 const menu = require(`../../../lib/gui/menu`)
 const Events = require(`../../../lib/gui/events`)
 const Windows = require(`../../../lib/gui/windows`)
-const interactiveMode = require(`../../../lib/modes/interactive-e2e`)
+const interactiveMode = require(`../../../lib/modes/interactive`)
 
 describe('gui/interactive', () => {
   context('.isMac', () => {
