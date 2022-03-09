@@ -18,6 +18,9 @@ export const createConfig = async ({ options, viteConfig: viteOverrides = {} }: 
   const { default: findUp } = await importModule('find-up')
   const configFile = await findUp(configFiles, { cwd: root } as { cwd: string })
 
+  // INFO logging, a lot is logged here.
+  // debug('all dev-server options are', options)
+
   if (configFile) {
     debug('resolved config file at', configFile, 'using root', root)
   } else if (viteOverrides) {

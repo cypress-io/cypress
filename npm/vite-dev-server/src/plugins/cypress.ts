@@ -30,7 +30,7 @@ export const Cypress = (
   const supportFilePath = options.config.supportFile
   const devServerEvents = options.devServerEvents
   const specs = options.specs
-  const indexHtmlFile = options.indexHtmlFile
+  const indexHtmlFile = options.config.devServerConfig?.indexHtmlFile
 
   let specsPathsSet = getSpecsPathsSet(specs)
   let loader
@@ -47,6 +47,8 @@ export const Cypress = (
     },
     async transformIndexHtml () {
       const indexHtmlPath = indexHtmlFile ? resolve(projectRoot, indexHtmlFile) : resolve(__dirname, '..', '..', 'index.html')
+
+      debug('resolved the indexHtmlPath as', indexHtmlPath, 'from', indexHtmlFile)
       const indexHtmlContent = await readFile(indexHtmlPath, { encoding: 'utf8' })
       // find </body> last index
       const endOfBody = indexHtmlContent.lastIndexOf('</body>')
