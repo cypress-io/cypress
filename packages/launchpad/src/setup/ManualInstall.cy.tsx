@@ -1,6 +1,8 @@
+import sinon from 'sinon'
 import { ManualInstallFragmentDoc } from '../generated/graphql-test'
 import ManualInstall from './ManualInstall.vue'
 import { CYPRESS_REACT_LATEST, CYPRESS_WEBPACK } from '@packages/scaffold-config'
+import { Clipboard_CopyToClipboardDocument } from '../generated/graphql'
 
 describe('<ManualInstall />', () => {
   it('playground', () => {
@@ -17,6 +19,8 @@ describe('<ManualInstall />', () => {
     const framework = CYPRESS_REACT_LATEST
     const bundler = CYPRESS_WEBPACK
 
+    const stubCopy = sinon.stub()
+
     cy.mountFragment(ManualInstallFragmentDoc, {
       render: (gqlVal) => (
         <div class="rounded border-1 border-gray-400 m-10">
@@ -25,30 +29,21 @@ describe('<ManualInstall />', () => {
       ),
     })
 
+    cy.stubMutationResolver(Clipboard_CopyToClipboardDocument, (defineResult, { text }) => {
+      stubCopy(text)
+
+      return defineResult({
+        copyTextToClipboard: true,
+      })
+    })
+
     const installCommand = `npm install -D @cypress/react @cypress/webpack-dev-server`
 
-    // @ts-ignore
-    cy.findByRole('button', { name: 'Copy' }).realClick()
+    cy.findByText(installCommand).should('be.visible')
+    cy.findByRole('button', { name: 'Copy' }).click()
+    cy.findByRole('button', { name: 'Copied!' }).should('be.visible')
 
-    cy.findByRole('button', { name: 'Copied!' })
-
-    if (Cypress.config('browser').name === 'chrome') {
-      cy.wrap(Cypress.automation('remote:debugger:protocol', {
-        command: 'Browser.grantPermissions',
-        params: {
-          permissions: ['clipboardReadWrite', 'clipboardSanitizedWrite'],
-          origin: window.location.origin,
-        },
-      }))
-    }
-
-    cy.window().its('navigator.permissions')
-    .invoke('query', { name: 'clipboard-read' })
-    .its('state').then(cy.log)
-
-    cy.window().its('navigator.clipboard')
-    .invoke('readText')
-    .should('equal', installCommand)
+    cy.wrap(stubCopy).should('have.been.calledWith', installCommand)
 
     const validatePackage = (packageName: string) => {
       cy.findByRole('link', { name: packageName })
