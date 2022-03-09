@@ -69,13 +69,7 @@ const defaultStyles = `
   }
 
   a {
-    color: #FFF;
-    text-decoration: none;
-  }
-
-  a:hover,
-  a:focus,
-  a:active {
+    color: currentColor;
     text-decoration: underline;
   }
 `
@@ -114,6 +108,30 @@ export const initial = () => {
             <a href='https://on.cypress.io/visit' target='_blank'>cy.visit()</a>
           </kbd>
           your app
+        </li>
+        <li>Begin writing tests</li>
+      </ul>
+    </div>
+  `
+}
+
+export const initialCT = () => {
+  return `
+    <style>
+      ${defaultStyles}
+
+      ${listStyles}
+    </style>
+
+    <div class='container'>
+      ${svg_cy}
+      <p>This is the default blank page.</p>
+      <p>To test your web application:</p>
+      <ul>
+        <li>Mount your component with
+          <kbd>
+            <a href='https://on.cypress.io/mount' target='_blank'>cy.mount()</a>
+          </kbd>
         </li>
         <li>Begin writing tests</li>
       </ul>
@@ -181,7 +199,7 @@ export const session = () => {
       <p>This is a blank page.</p>
       <p>We always navigate you here after <kbd>cy.session()</kbd></p>
       <p>To continue your test, follow up the command with
-      <a href='https://on.cypress.io/visit' target='_blank'><kbd>cy.visit()</kbd></a>
+      <kbd><a href='https://on.cypress.io/visit' target='_blank'>cy.visit()</a></kbd>
       </p>
 <pre><code>
 1 |
@@ -196,6 +214,7 @@ export const session = () => {
 
 export const blankContents = {
   initial,
+  initialCT,
   session,
   sessionLifecycle,
 }

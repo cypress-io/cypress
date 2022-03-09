@@ -1,5 +1,5 @@
 import { useSelectorPlaygroundStore } from '../store/selector-playground-store'
-import { blankContents } from './blank-contents'
+import { blankContents } from '../components/Blank'
 import { visitFailure } from './visit-failure'
 import { logger } from './logger'
 import _ from 'lodash'
@@ -37,6 +37,10 @@ export class AutIframe {
 
   showInitialBlankContents () {
     this._showContents(blankContents.initial())
+  }
+
+  showInitialBlankContentsCT () {
+    this._showContents(blankContents.initialCT())
   }
 
   showSessionBlankContents () {
