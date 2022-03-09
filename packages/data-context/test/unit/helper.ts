@@ -33,7 +33,9 @@ export function createTestDataContext (mode: DataContextConfig['mode'] = 'run') 
       getServerPluginHandlers: () => [],
     } as InjectedConfigApi,
     projectApi: {} as ProjectApiShape,
-    electronApi: {} as ElectronApiShape,
+    electronApi: {
+      copyTextToClipboard: (text) => {},
+    } as ElectronApiShape,
     browserApi: {} as BrowserApiShape,
   })
 }
