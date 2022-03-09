@@ -40,8 +40,8 @@
 
 <script lang="ts" setup>
 import { gql } from '@urql/core'
-import CopyButton from '@cy/components/CopyButton.vue'
 import { useI18n } from '@cy/i18n'
+import CopyButton from '@cy/gql-components/CopyButton.vue'
 import IconOctothorpe from '~icons/cy/octothorpe_x16.svg'
 import SettingsSection from '../SettingsSection.vue'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'

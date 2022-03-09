@@ -911,6 +911,9 @@ type Mutation {
   cloudProjectRequestAccess(projectSlug: String!): CloudProjectResult
   completeSetup: Query
 
+  """add the passed text to the local clipboard"""
+  copyTextToClipboard(text: String!): Boolean
+
   """
   Development only: Triggers or dismisses a prompted refresh by touching the file watched by our development scripts
   """

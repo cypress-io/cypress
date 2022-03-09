@@ -21,7 +21,7 @@
     "@cypress/design-system": "0.0.0-development",
     "@cypress/react-tooltip": "0.5.3",
     "@fortawesome/free-regular-svg-icons": "5.15.2",
-    "@fortawesome/react-fontawesome": "^0.1.14",
+    "@fortawesome/react-fontawesome": "^0.1.17",
     "@packages/driver": "0.0.0-development",
     "@types/http-proxy": "1.17.4",
     "@types/node": "14.14.31",
