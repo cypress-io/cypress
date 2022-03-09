@@ -284,16 +284,6 @@ export default function (Commands, Cypress, cy, state, config) {
 
       let keydownEvents: any[] = []
 
-      const keydownFiredOnThisElement = (el) => {
-        for (let i = 0; i < keydownEvents.length; i++) {
-          if (keydownEvents[i].type === 'keydown' && keydownEvents[i].el === el) {
-            return true
-          }
-        }
-
-        return false
-      }
-
       return keyboard.type({
         $el: options.$el,
         chars,
@@ -340,10 +330,7 @@ export default function (Commands, Cypress, cy, state, config) {
           }
 
           if (event.type === 'keydown') {
-            keydownEvents.push({
-              el: event.target,
-              type: event.type,
-            })
+            keydownEvents.push(event.target)
           }
 
           if (
@@ -360,7 +347,7 @@ export default function (Commands, Cypress, cy, state, config) {
             // When a space key is pressed for input radio elements, the click event is only fired when it's not checked.
             !(event.target.tagName === 'INPUT' && event.target.type === 'radio' && event.target.checked === true) &&
             // When a space key is pressed on another element, the click event should not be fired.
-            keydownFiredOnThisElement(event.target)
+            keydownEvents.includes(event.target)
           ) {
             fireClickEvent(event.target)
 
