@@ -404,7 +404,7 @@ export class ProjectActions {
 
     const [newSpec] = codeGenResults.files
 
-    const cfg = this.ctx.project.getConfig()
+    const cfg = await this.ctx.project.getConfig()
 
     if (cfg && this.ctx.currentProject) {
       const testingType = (codeGenType === 'component' || codeGenType === 'story') ? 'component' : 'e2e'

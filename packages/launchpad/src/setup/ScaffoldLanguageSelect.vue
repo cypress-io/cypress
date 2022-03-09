@@ -117,8 +117,8 @@ fragment ScaffoldLanguageSelect on Query {
   }
 }`
 
-const title = computed(() => t(`setupWizard.selectFramework.title`))
-const description = computed(() => t(`setupWizard.selectFramework.description`))
+const title = computed(() => t(`e2eProjectSetup.title`))
+const description = computed(() => t(`e2eProjectSetup.description`))
 
 const languages = computed(() => props.gql.wizard.allLanguages ?? [])
 
