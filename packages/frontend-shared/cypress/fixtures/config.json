@@ -281,7 +281,7 @@
   {
     "value": {
       "specPattern": "cypress/e2e/**/*.cy.{js,jsx,ts,tsx}",
-      "supportFile": "cypress/e2e/support/e2eSupport.ts",
+      "supportFile": "cypress/e2e/support/e2eSupport.ts"
     },
     "from": "config",
     "field": "e2e"

@@ -647,7 +647,7 @@ export const AllCypressErrors = {
   // TODO: make this relative path, not absolute
   SETUP_NODE_EVENTS_INVALID_EVENT_NAME_ERROR: (configFilePath: string, invalidEventName: string, validEventNames: string[], err: Error) => {
     return errTemplate`
-      Your ${fmt.highlightSecondary(`configFile`)} threw an error from: ${fmt.path(configFilePath)}
+      Your ${fmt.highlightSecondary(`configFile`)} threw a validation error from: ${fmt.path(configFilePath)}
 
       You must pass a valid event name when registering either a node event or plugin.
 
@@ -1199,7 +1199,7 @@ export const AllCypressErrors = {
     `
   },
 
-  PLUGINS_FILE_CONFIG_OPTION_REMOVED: (_errShape: BreakingErrResult) => {
+  PLUGINS_FILE_CONFIG_OPTION_REMOVED: () => {
     const code = errPartial`
     {
       e2e: {

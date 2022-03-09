@@ -2,7 +2,6 @@ import { defineConfig } from 'cypress'
 import { devServer } from './dist'
 
 export default defineConfig({
-  'pluginsFile': 'cypress/plugins.js',
   'video': false,
   'fixturesFolder': false,
   'component': {
