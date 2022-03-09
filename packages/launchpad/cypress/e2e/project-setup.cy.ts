@@ -302,6 +302,7 @@ describe('Launchpad: Setup Project', () => {
         .realPress('Enter')
 
         cy.contains('h1', 'Project Setup')
+        cy.contains('p', 'Confirm your project\'s preferred language.')
         cy.findByRole('button', { name: 'JavaScript' }).click()
         cy.findByRole('button', { name: 'Next Step' }).click()
 
@@ -342,6 +343,7 @@ describe('Launchpad: Setup Project', () => {
         .realPress('Enter')
 
         cy.contains('h1', 'Project Setup')
+        cy.contains('p', 'Confirm your project\'s preferred language.')
         cy.findByRole('button', { name: 'TypeScript' }).click()
         cy.findByRole('button', { name: 'Next Step' }).click()
 
