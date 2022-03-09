@@ -14,7 +14,7 @@
 </template>
 
 <script lang="ts" setup>
-import CopyButton from './CopyButton.vue'
+import CopyButton from '../gql-components/CopyButton.vue'
 
 defineProps<{
   projectFolderName?: string
