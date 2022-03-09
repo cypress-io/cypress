@@ -4,7 +4,7 @@
     class="border-t border-b bg-gray-50 border-gray-200 h-56px grid py-12px px-16px gap-12px grid-cols-[40px,1fr,auto] items-center "
   >
     <button
-      class="flex items-center justify-center h-full text-white transition duration-150 border rounded-md outline-none w-40px hover:default-ring"
+      class="border rounded-md flex h-full outline-none text-white transition w-40px duration-150 items-center justify-center hover:default-ring"
       :class="[ selectorPlaygroundStore.isEnabled ? 'default-ring' : 'border-gray-200']"
       data-cy="playground-toggle"
       @click="toggleEnabled"
@@ -12,22 +12,22 @@
       <i-cy-selector_x16 :class="{ 'icon-dark-indigo-500': selectorPlaygroundStore.isEnabled, 'icon-dark-gray-500': !selectorPlaygroundStore.isEnabled }" />
     </button>
     <div
-      class="relative flex items-center flex-1 w-full h-full"
+      class="flex h-full flex-1 w-full relative items-center"
       @mouseover="setShowingHighlight"
     >
       <Menu #="{ open }">
         <MenuButton
           :aria-label="t('runner.selectorPlayground.selectorMethodsLabel')"
-          class="flex items-center justify-center h-full text-white border border-gray-200 outline-none rounded-l-md w-40px hocus-default border-r-transparent"
+          class="border border-r-transparent rounded-l-md flex h-full outline-none border-gray-200 text-white w-40px items-center justify-center hocus-default"
           @click.stop
         >
           <i-cy-chevron-down-small_x16
-            class="transition duration-300 transition-color"
+            class="transition transition-color duration-300"
             :class="open ? 'icon-dark-indigo-500' : 'icon-dark-gray-500'"
           />
         </MenuButton>
         <MenuItems
-          class="absolute z-40 flex flex-col overflow-scroll text-white bg-gray-900 rounded outline-transparent top-34px"
+          class="rounded flex flex-col outline-transparent bg-gray-900 text-white top-34px z-40 absolute overflow-scroll"
         >
           <MenuItem
             v-for="method in methods"
@@ -36,7 +36,7 @@
           >
             <button
               :class="{ 'bg-gray-700': active }"
-              class="text-left border-b border-b-gray-800 py-8px px-16px"
+              class="border-b border-b-gray-800 text-left py-8px px-16px"
               @click="selectorPlaygroundStore.setMethod(method.value)"
             >
               {{ method.display }}
@@ -44,10 +44,10 @@
           </MenuItem>
         </MenuItems>
       </Menu>
-      <code class="relative flex-1 h-full">
+      <code class="h-full flex-1 relative">
         <span
           ref="ghostLeft"
-          class="absolute inset-y-0 flex items-center text-gray-600 pointer-events-none pl-12px"
+          class="flex pl-12px inset-y-0 text-gray-600 absolute items-center pointer-events-none"
           data-cy="selected-playground-method"
         >
           <span class="text-gray-800">cy</span>.<span class="text-purple-500">{{ selectorPlaygroundStore.method }}</span>(‘
@@ -57,7 +57,7 @@
           class="font-medium left-[-9999px] absolute inline-block"
         >{{ selector.replace(/\s/g, '&nbsp;') }}</span>
         <span
-          class="absolute inset-y-0 flex items-center text-gray-600 pointer-events-none"
+          class="flex inset-y-0 text-gray-600 absolute items-center pointer-events-none"
           :style="{left: inputRightOffset + 'px'}"
         >‘)</span>
         <input
@@ -65,12 +65,12 @@
           v-model="selector"
           data-cy="playground-selector"
           :style="{paddingLeft: inputLeftOffset + 'px', paddingRight: matcherWidth + 32 + 24 + 'px'}"
-          class="w-full h-full font-medium text-indigo-500 border border-gray-200 outline-none rounded-r-md hocus-default overflow-ellipsis"
+          class="border rounded-r-md font-medium h-full outline-none border-gray-200 w-full text-indigo-500 hocus-default overflow-ellipsis"
           :class="{'hocus-default': selectorPlaygroundStore.isValid, 'hocus-error': !selectorPlaygroundStore.isValid}"
         >
         <div
           ref="match"
-          class="absolute inset-y-0 right-0 flex items-center font-sans text-gray-600 border-l border-l-gray-200 my-6px px-16px"
+          class="border-l flex font-sans border-l-gray-200 my-6px px-16px inset-y-0 right-0 text-gray-600 absolute items-center"
           data-cy="playground-num-elements"
         >
           <template v-if="!selectorPlaygroundStore.isValid">
@@ -84,7 +84,7 @@
     </div>
 
     <div class="flex gap-12px">
-      <SelectorPlaygroundTooltip v-if="isSupported">
+      <SelectorPlaygroundTooltip>
         <Button
           size="md"
           variant="outline"
@@ -134,9 +134,10 @@ import type { AutIframe } from '../aut-iframe'
 import type { EventManager } from '../event-manager'
 import Button from '@packages/frontend-shared/src/components/Button.vue'
 import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
-import { useClipboard, useElementSize } from '@vueuse/core'
+import { useElementSize } from '@vueuse/core'
 import SelectorPlaygroundTooltip from './SelectorPlaygroundTooltip.vue'
 import { useI18n } from 'vue-i18n'
+import { useClipboard } from '@cy/gql-components/useClipboard'
 
 const { t } = useI18n()
 
@@ -218,7 +219,7 @@ function printSelected () {
   props.getAutIframe().printSelectorElementsToConsole()
 }
 
-const { copy, isSupported } = useClipboard({ copiedDuring: 2000 })
+const { copy } = useClipboard({ copiedDuring: 2000 })
 const copyToClipboard = () => {
   copy(selector.value)
 }
