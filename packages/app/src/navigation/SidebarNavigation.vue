@@ -12,7 +12,10 @@
       aria-label="toggle navigation"
       @click="toggleNavbarIfAllowed"
     >
-      <div class="flex h-full transform origin-left transition-transform w-16px scale-x-0 duration-300 items-center group-hocus:scale-x-100">
+      <div
+        data-testid="sidebar-nav-indicator"
+        class="flex h-full transform origin-left transition-transform w-16px scale-x-0 duration-300 items-center group-hocus:scale-x-100"
+      >
         <div class="h-full bg-indigo-400 w-3px" />
         <i-cy-chevron-right_x16
           class="h-16px w-16px icon-dark-indigo-400"

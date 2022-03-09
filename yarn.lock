@@ -4578,7 +4578,7 @@
   resolved "https://registry.yarnpkg.com/@iarna/toml/-/toml-2.2.5.tgz#b32366c89b43c6f8cefbdefac778b9c828e3ba8c"
   integrity sha512-trnsAYxU3xnS1gPHPyU961coFyLkh4gAD/0zQ5mymY4yOZ+CYvsPqUbOFSw0aDM4y0tV7tiFxL/1XfXPNC6IPg==
 
-"@iconify/iconify@2.1.2":
+"@iconify/iconify@2.1.2", "@iconify/iconify@>=2.0.0-rc.6":
   version "2.1.2"
   resolved "https://registry.yarnpkg.com/@iconify/iconify/-/iconify-2.1.2.tgz#978e8f08c3b834816c82ae2933b3a70f143f7685"
   integrity sha512-QcUzFeEWkE/mW+BVtEGmcWATClcCOIJFiYUD/PiCWuTcdEA297o8D4oN6Ra44WrNOHu1wqNW4J0ioaDIiqaFOQ==
@@ -7142,6 +7142,13 @@
   version "2.9.2"
   resolved "https://registry.yarnpkg.com/@popperjs/core/-/core-2.9.2.tgz#adea7b6953cbb34651766b0548468e743c6a2353"
   integrity sha512-VZMYa7+fXHdwIq1TDhSXoVmSPEGM/aa+6Aiq3nVVJ9bXr24zScr+NlKFKC3iPljA7ho/GAZr+d2jOf5GIRC30Q==
+
+"@purge-icons/generated@0.8.1":
+  version "0.8.1"
+  resolved "https://registry.yarnpkg.com/@purge-icons/generated/-/generated-0.8.1.tgz#15544a9c9b2436e436d884828077f9d88df660e7"
+  integrity sha512-rIExGA33EGKEToqtc8WfpboaR7or1XRp+KV1Y5v/P0Rq7G5Me95DmP3ow/MpG7ql+XZ9xPzyS2naGRx5358+6Q==
+  dependencies:
+    "@iconify/iconify" ">=2.0.0-rc.6"
 
 "@reach/dialog@0.10.5":
   version "0.10.5"

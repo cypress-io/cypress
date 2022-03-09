@@ -28,6 +28,7 @@
     "@intlify/vite-plugin-vue-i18n": "2.4.0",
     "@packages/frontend-shared": "0.0.0-development",
     "@percy/cypress": "^3.1.0",
+    "@purge-icons/generated": "0.8.1",
     "@testing-library/cypress": "8.0.0",
     "@toycode/markdown-it-class": "1.2.3",
     "@urql/core": "2.3.1",
