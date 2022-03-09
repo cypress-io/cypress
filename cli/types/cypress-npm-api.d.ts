@@ -146,11 +146,9 @@ declare namespace CypressCommandLine {
     /**
      * Path to the config file to be used.
      *
-     * If `false` is passed, no config file will be used.
-     *
-     * @default "cypress.config.{ts|js}"
+     * @default "cypress.config.{js|ts}"
      */
-    configFile: string | false
+    configFile: string
     /**
      * Specify environment variables.
      * TODO: isn't this duplicate of config.env?!

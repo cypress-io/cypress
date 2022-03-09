@@ -392,7 +392,7 @@ declare namespace Cypress {
 
     // no real way to type without generics
     /**
-     * Returns all environment variables set with CYPRESS_ prefix or in "env" object in "cypress.config.{ts|js}"
+     * Returns all environment variables set with CYPRESS_ prefix or in "env" object in "cypress.config.{js|ts}"
      *
      * @see https://on.cypress.io/env
      */
@@ -2838,7 +2838,7 @@ declare namespace Cypress {
     retries: Nullable<number | { runMode?: Nullable<number>, openMode?: Nullable<number> }>
     /**
      * Enables including elements within the shadow DOM when using querying
-     * commands (e.g. cy.get(), cy.find()). Can be set globally in cypress.config.{ts|js},
+     * commands (e.g. cy.get(), cy.find()). Can be set globally in cypress.config.{js|ts},
      * per-suite or per-test in the test configuration object, or programmatically
      * with Cypress.config()
      * @default false
@@ -2909,9 +2909,9 @@ declare namespace Cypress {
    */
   interface RuntimeConfigOptions extends Partial<RuntimeServerConfigOptions> {
     /**
-     * Absolute path to the config file (default: <projectRoot>/cypress.config.{ts|js}) or false
+     * Absolute path to the config file (default: <projectRoot>/cypress.config.{js|ts})
      */
-    configFile: string | false
+    configFile: string
     /**
      * CPU architecture, from Node `os.arch()`
      *

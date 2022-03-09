@@ -7,7 +7,7 @@ const pluginConfig: Cypress.PluginConfig = (on, config) => {}
 const pluginConfig2: Cypress.PluginConfig = (on, config) => {
   config // $ExpectType PluginConfigOptions
   config.baseUrl // $ExpectType string | null
-  config.configFile // $ExpectType string | false
+  config.configFile // $ExpectType string
   config.fixturesFolder // $ExpectType string | false
   config.pluginsFile // $ExpectType string | false
   config.screenshotsFolder // $ExpectType string | false
