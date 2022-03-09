@@ -267,18 +267,14 @@ class RunPlugins {
 /**
  * Values not allowed in 10.X+ in the root, e2e and component config
  */
-const optionsNonValidFor10Anywhere = ['integrationFolder', 'componentFolder', 'pluginsFile']
-
-/**
- * values not allowed in 10.X+ in the root that have moved in one of the testingTypes
- */
-const optionsNonValidFor10Root = ['baseUrl', 'supportFile']
+const optionsNonValidFor10Anywhere = ['integrationFolder', 'componentFolder', 'pluginsFile', 'testFiles']
 
 function getNonMigratedOptionsErr (key, errInternal) {
-  return require('@packages/errors').getError('MIGRATED_OPTION_INVALID', key, errInternal)
+  return require('@packages/errors').getError('SETUP_NODE_EVENTS_RESOLVED_CONFIG_INVALID', key, errInternal)
 }
 
 function throwInvalidOptionError (key) {
+  debug('throwing err %s', key)
   const errInternal = new Error()
 
   Error.captureStackTrace(errInternal, throwInvalidOptionError)
@@ -288,16 +284,14 @@ function throwInvalidOptionError (key) {
 }
 
 function setInvalidPropSetterWarning (opts, key, keyForError = key) {
+  debug('setting invalid property %s', key)
   Object.defineProperty(opts, key, {
     set: throwInvalidOptionError.bind(null, keyForError),
   })
 }
 
 function wrapNonMigratedOptions (options) {
-  optionsNonValidFor10Root.forEach((key) => {
-    setInvalidPropSetterWarning(options, key)
-  })
-
+  debug('wrapping non-migrated options')
   optionsNonValidFor10Anywhere.forEach((key) => {
     setInvalidPropSetterWarning(options, key)
 
@@ -311,12 +305,6 @@ function wrapNonMigratedOptions (options) {
 }
 
 function validateNonMigratedOptions (options) {
-  optionsNonValidFor10Root.forEach((key) => {
-    if (options[key]) {
-      throw getNonMigratedOptionsErr(key)
-    }
-  })
-
   optionsNonValidFor10Anywhere.forEach((key) => {
     const testingTypes = ['component', 'e2e']
 
@@ -325,7 +313,7 @@ function validateNonMigratedOptions (options) {
     }
 
     testingTypes.forEach((testingType) => {
-      if (options[testingType] && options[testingType][key]) {
+      if (options[testingType]?.[key]) {
         throw getNonMigratedOptionsErr(`${testingType}.${key}`)
       }
     })

@@ -1309,7 +1309,7 @@ export const AllCypressErrors = {
     `
   },
 
-  MIGRATED_OPTION_INVALID: (optionKey: string, err?: Error) => {
+  SETUP_NODE_EVENTS_RESOLVED_CONFIG_INVALID: (optionKey: string, err?: Error) => {
     const stackTrace = err ? fmt.stackTrace(err) : null
 
     // some keys come prefixed with a `component.` or `e2e.` but they are not referenced
@@ -1319,10 +1319,10 @@ export const AllCypressErrors = {
     const mergedOptionKey = 'testFiles' === rootKey ? 'integrationFolder' : 'testFiles'
 
     return errTemplate`
-      ${fmt.highlight(optionKey)} is updated in ${fmt.highlight('setupNodeEvents()')}.
-      Cypress 10.X, no longer supports this option.
-
-      It was merged with ${fmt.highlight(mergedOptionKey)} into the ${fmt.highlight('specPattern')} option.
+      Option ${fmt.highlight(optionKey)} can't be updated in ${fmt.highlight('setupNodeEvents()')}.
+      
+      Since 10.X, Cypress no longer supports this option.
+      ${fmt.highlight(optionKey)} was merged with ${fmt.highlight(mergedOptionKey)} into the ${fmt.highlight('specPattern')} option.
 
       **NOTE** ${fmt.highlight('specPattern')} has to be set as a member of the ${fmt.highlight('e2e')} or ${fmt.highlight('component')} property.
 

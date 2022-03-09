@@ -1096,11 +1096,11 @@ describe('visual error templates', () => {
         default: [makeErr()],
       }
     },
-    MIGRATED_OPTION_INVALID: () => {
+    SETUP_NODE_EVENTS_RESOLVED_CONFIG_INVALID: () => {
       const keyChanging = ['integrationFolder', 'componentFolder', 'testFiles', 'pluginsFile']
       const err = makeErr()
 
-      return keyChanging.reduce((acc: ErrorGenerator<'MIGRATED_OPTION_INVALID'>, key) => {
+      return keyChanging.reduce((acc: ErrorGenerator<'SETUP_NODE_EVENTS_RESOLVED_CONFIG_INVALID'>, key) => {
         acc[key] = [key, err]
         acc[`${key}PostValidation`] = [key]
 
