@@ -251,7 +251,7 @@ class $Cypress {
         // and those leak out into the stdout formatting.
         const errMsg = _.isString(errResult)
           ? errResult
-          : `Expected ${format(errResult.key)} to be ${errResult.type}.\n\nInstead the value was: ${stringify(errResult.value)}\``
+          : `Expected ${format(errResult.key)} to be ${errResult.type}.\n\nInstead the value was: ${stringify(errResult.value)}`
 
         throw new this.state('specWindow').Error(errMsg)
       })
