@@ -83,7 +83,7 @@ describe('Cypress In Cypress', { viewportWidth: 1500 }, () => {
     cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
   })
 
-  it('redirects to the specs list with error if a spec is not found when navigating', () => {
+  it('redirects to the specs list with error if a spec is not found when navigating', { defaultCommandTimeout: 10000 }, () => {
     const { noSpecErrorTitle, noSpecErrorIntro, noSpecErrorExplainer } = defaultMessages.specPage
     const badFilePath = 'cypress/e2e/does-not-exist.spec.js'
 
@@ -103,7 +103,7 @@ describe('Cypress In Cypress', { viewportWidth: 1500 }, () => {
     cy.contains(noSpecErrorTitle).should('not.exist')
   })
 
-  it('redirects to the specs list with error if an open spec is not found when specs list updates', () => {
+  it('redirects to the specs list with error if an open spec is not found when specs list updates', { defaultCommandTimeout: 10000 }, () => {
     const { noSpecErrorTitle, noSpecErrorIntro, noSpecErrorExplainer } = defaultMessages.specPage
 
     const goodFilePath = 'cypress/e2e/dom-content.spec.js'
