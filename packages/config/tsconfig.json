@@ -5,9 +5,16 @@
   ],
   "compilerOptions": {
     "outDir": "./dist",
-    "declaration": true,
     "lib": [
       "dom",
+      "ES2020",
     ],
-  },
+    "types": [
+      "node"
+    ],
+    "typeRoots":[
+      "../../node_modules/@types",
+      "./node_modules/@types"
+    ]
+  }
 }

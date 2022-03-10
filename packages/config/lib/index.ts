@@ -1,12 +1,11 @@
 import _ from 'lodash'
-import type errors from '@packages/errors'
 import Debug from 'debug'
 import { options, breakingOptions, breakingRootOptions, testingTypeBreakingOptions } from './options'
-import type { BreakingOption } from './options'
+import type { BreakingOptionObj, BreakingOption } from './options'
 
 export * as validation from './validation'
 
-export { breakingOptions }
+export { breakingOptions, BreakingOptionObj, BreakingOption }
 
 const debug = Debug('cypress:config:validator')
 
@@ -31,16 +30,19 @@ const testConfigOverrideOptions = createIndex(options, 'name', 'canUpdateDuringT
 
 const issuedWarnings = new Set()
 
-type ErrorHandler = (
-  key: keyof typeof errors.AllCypressErrors,
-  options: {
-    name: string
-    newName?: string
-    value?: string
-    configFile: string
-  }) => void
+export type BreakingErrResult = {
+  name: string
+  newName?: string
+  value?: any
+  configFile: string
+}
 
-const validateNoBreakingOptions = (breakingCfgOptions: BreakingOption[], cfg, onWarning: ErrorHandler, onErr: ErrorHandler) => {
+type ErrorHandler = (
+  key: BreakingOption,
+  options: BreakingErrResult
+) => void
+
+const validateNoBreakingOptions = (breakingCfgOptions: BreakingOptionObj[], cfg, onWarning: ErrorHandler, onErr: ErrorHandler) => {
   breakingCfgOptions.forEach(({ name, errorKey, newName, isWarning, value }) => {
     if (_.has(cfg, name)) {
       if (value && cfg[name] !== value) {

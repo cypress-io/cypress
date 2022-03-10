@@ -20,8 +20,9 @@ import { getError, CypressError, ConfigValidationFailureInfo } from '@packages/e
 import type { DataContext } from '..'
 import { LoadConfigReply, SetupNodeEventsReply, ProjectConfigIpc, IpcHandler } from './ProjectConfigIpc'
 import assert from 'assert'
-import type { AllModeOptions, BreakingErrResult, BreakingOption, FoundBrowser, FullConfig, TestingType } from '@packages/types'
+import type { AllModeOptions, FoundBrowser, FullConfig, TestingType } from '@packages/types'
 import { autoBindDebug } from '../util/autoBindDebug'
+import type { BreakingOption, BreakingErrResult } from '@packages/config'
 
 const debug = debugLib(`cypress:lifecycle:ProjectLifecycleManager`)
 
