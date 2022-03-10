@@ -223,6 +223,7 @@ class ProxyRequest {
     // details on response
     let resBody
 
+    Cypress.backend('debug', 'updateConsoleProps %o', { xhr: this.xhr, xhrDrill: this.xhr?.xhr })
     if (this.xhr) {
       if (!consoleProps['Response Headers']) consoleProps['Response Headers'] = this.xhr.responseHeaders
 
