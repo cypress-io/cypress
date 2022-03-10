@@ -8,10 +8,10 @@ describe('basic login', { experimentalSessionSupport: true }, () => {
       cy.switchToDomain('idp.com', () => {
         cy.get('[data-cy="username"]').type('BJohnson')
         cy.get('[data-cy="login"]').click()
-      }) // Stability is false switchToDomain does not exit until the primary domain loads.
+      })
 
       // Verify that the user has logged in on localhost
-      cy.get('[data-cy="welcome"]')
+      cy.get('[data-cy="welcome"]') // Stability is false, this command is prevented from running until stability is achieved.
       .invoke('text')
       .should('equal', 'Welcome BJohnson')
     })
@@ -41,10 +41,10 @@ describe('basic login', { experimentalSessionSupport: true }, () => {
       cy.switchToDomain('idp.com', () => {
         cy.get('[data-cy="username"]').type('BJohnson')
         cy.get('[data-cy="login"]').click()
-      }) /// Stability is false switchToDomain does not exit until the primary domain loads.
+      })
 
       // Verify that the user has logged in on localhost
-      cy.get('[data-cy="welcome"]')
+      cy.get('[data-cy="welcome"]') // Stability is false, this command is prevented from running until stability is achieved.
       .invoke('text')
       .should('equal', 'Welcome BJohnson')
     })
@@ -72,7 +72,6 @@ describe('basic login', { experimentalSessionSupport: true }, () => {
         .should('equal', 'Welcome FJohnson')
       })
 
-      // NOTE: Enable to set the top domain to foobar before running the next test.
       it('reset top', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/auth/index.html')
       })
@@ -113,6 +112,7 @@ describe('basic login', { experimentalSessionSupport: true }, () => {
     // Custom login command that establishes a session
       const login = (name) => {
         cy.session(name, () => {
+          // Note, this assumes localhost is the primary domain, ideally we'd be able to specify this directly.
           cy.switchToDomain('idp.com', [name], ([name]) => {
             cy.visit('http://www.idp.com:3500/fixtures/auth/idp.html')
             cy.get('[data-cy="username"]').type(name)
@@ -153,7 +153,6 @@ describe('basic login', { experimentalSessionSupport: true }, () => {
 
     // What we don't want them to do, but should still work
     // Visit IDP first
-    // TODO: this breaks tests after it and looks wonky
     it('logs in and runs the test in switchToDomain', () => { // Setting the base url
       cy.visit('http://www.idp.com:3500/fixtures/auth/idp.html') // Visit idp.com
       cy.get('[data-cy="username"]').type('FJohnson')
@@ -189,19 +188,17 @@ describe('Multi-step Auth', { experimentalSessionSupport: true }, () => {
     .should('equal', 'Welcome MarkyMark')
   })
 
-  // TODO: Switch to domain does not work multiple times in a test
   it('final-auth redirects back to localhost - flat', () => {
     cy.visit('/fixtures/auth/index.html')
     cy.get('[data-cy="login-with-approval"]').click() // takes you to foobar.com.../approval
     cy.switchToDomain('foobar.com', () => { // Parent Domain is localhost
       cy.get('[data-cy="approve-orig"]').click() // takes you to idp.com
-    }) // waits on localhost forever, this breaks
+    }) // Exits and moves on to the next command
 
     cy.switchToDomain('idp.com', () => { // Parent Domain is localhost
-      // cy.wait(50)
       cy.get('[data-cy="username"]').type('MarkyMark')
       cy.get('[data-cy="login"]').click() // Takes you back to localhost
-    }) // waits on localhost
+    }) // Exits and moves on to the next command
 
     // Verify that the user has logged in
     cy.get('[data-cy="welcome"]')
@@ -218,7 +215,7 @@ describe('Multi-step Auth', { experimentalSessionSupport: true }, () => {
         cy.get('[data-cy="username"]').type('MarkyMark')
         cy.get('[data-cy="login"]').click() // Takes you back to localhost
       }) // Does not wait on foobar.com because there are no subsequent commands (would wait forever)
-    }) // Waits on localhost because there are subsequent commands
+    }) // Exits and moves on to the next command
 
     // Verify that the user has logged in
     cy.get('[data-cy="welcome"]')
@@ -235,10 +232,10 @@ describe('Multi-step Auth', { experimentalSessionSupport: true }, () => {
       cy.switchToDomain('idp.com', () => { // Parent domain is foobar.com
         cy.get('[data-cy="username"]').type('MarkyMark')
         cy.get('[data-cy="login"]').click() // Takes you back to foobar.com.../approval
-      }) // Waits on foobar because there are subsequent commands
+      }) // Exits and moves on to the next command
 
       cy.get('[data-cy="login-success"]').click() // Takes you back to localhost
-    }) // Waits on localhost because there are subsequent commands
+    }) // Exits and moves on to the next command
 
     // Verify that the user has logged in
     cy.get('[data-cy="welcome"]')
@@ -246,22 +243,21 @@ describe('Multi-step Auth', { experimentalSessionSupport: true }, () => {
     .should('equal', 'Welcome MarkyMark')
   })
 
-  // TODO: Switch to domain does not work multiple times in a test
   it('final auth redirects back to approval page - flat', () => {
     cy.visit('/fixtures/auth/index.html')
     cy.get('[data-cy="login-with-approval"]').click() // takes you to foobar.com.../approval
     cy.switchToDomain('foobar.com', () => { // Parent Domain is localhost
       cy.get('[data-cy="approve-me"]').click() // takes you to idp.com
-    }) // waits on localhost forever, this breaks
+    }) // Exits and moves on to the next command
 
     cy.switchToDomain('idp.com', () => { // Parent Domain is localhost
       cy.get('[data-cy="username"]').type('MarkyMark')
       cy.get('[data-cy="login"]').click() // Takes you back to foobar.com.../approval
-    }) // waits on foobar forever, this breaks
+    }) // Exits and moves on to the next command
 
     cy.switchToDomain('foobar.com', () => { // Parent Domain is localhost
       cy.get('[data-cy="login-success"]').click() // Takes you back to localhost
-    }) // Waits on localhost because there are subsequent commands
+    }) // Exits and moves on to the next command
 
     // Verify that the user has logged in
     cy.get('[data-cy="welcome"]')
@@ -271,13 +267,12 @@ describe('Multi-step Auth', { experimentalSessionSupport: true }, () => {
 })
 
 describe('errors', { experimentalSessionSupport: true, experimentalMultiDomain: true }, () => {
-  // NOTE: Enable to set the top domain to foobar before running the next test.
   it('reset top', () => {
     cy.visit('http://www.foobar.com:3500/fixtures/auth/index.html')
   })
 
   // This test will fail primary domain not established
-  it('A logs in with no primary - fail', { baseUrl: undefined, pageLoadTimeout: 5000 }, (done) => {
+  it('logs in with no primary - fail', { baseUrl: undefined, pageLoadTimeout: 5000 }, (done) => {
     cy.on('fail', (err) => {
       expect(err.message).to.include(`Timed out after waiting \`5000ms\` for your remote page to load.`)
       done()
@@ -286,10 +281,10 @@ describe('errors', { experimentalSessionSupport: true, experimentalMultiDomain: 
     cy.switchToDomain('idp.com', () => { // Implicitly primary domain is foobar since the previous test set it to foobar. This command times out because we return to localhost, not foobar.
       cy.visit('http://www.idp.com:3500/fixtures/auth/idp.html')
       cy.get('[data-cy="username"]').type('FJohnson')
-      cy.get('[data-cy="login"]').click()
-    }) // Stability is false switchToDomain does not exit until the primary domain load and since it never does, this fails.
+      cy.get('[data-cy="login"]').click() // Redirects to localhost
+    })
 
-    cy.get('[data-cy="welcome"]')
+    cy.get('[data-cy="welcome"]') // Timeout on command, cannot find element (sorry, your element is in another domain)
     .invoke('text')
     .should('equal', 'Welcome FJohnson')
   })
