@@ -1096,18 +1096,17 @@ describe('visual error templates', () => {
         default: [makeErr()],
       }
     },
-    SETUP_NODE_EVENTS_RESOLVED_CONFIG_INVALID: () => {
-      const keyChanging = ['integrationFolder', 'componentFolder', 'testFiles', 'pluginsFile']
-      const err = makeErr()
-
-      return keyChanging.reduce((acc: ErrorGenerator<'SETUP_NODE_EVENTS_RESOLVED_CONFIG_INVALID'>, key) => {
-        acc[key] = [key, err]
-        acc[`${key}PostValidation`] = [key]
-
-        return acc
-      }, {
-        default: ['integrationFolder', makeErr()],
-      })
+    SETUP_NODE_EVENTS_INVALID_OPTIONS_PLUGINS_FILE: () => {
+      return {
+        default: [{ name: 'pluginsFile' }, makeErr()],
+      }
+    },
+    SETUP_NODE_EVENTS_INVALID_OPTIONS_SPEC_PATTERN: () => {
+      return {
+        default: [{ name: 'integrationFolder' }, makeErr()],
+        testFiles: [{ name: 'testFiles' }, makeErr()],
+        componentFolder: [{ name: 'componentFolder' }, makeErr()],
+      }
     },
   })
 })
