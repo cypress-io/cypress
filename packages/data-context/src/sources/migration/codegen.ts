@@ -354,7 +354,7 @@ export function renameSupportFilePath (relative: string) {
 }
 
 export function reduceConfig (cfg: OldCypressConfig): ConfigOptions {
-  const reducer = (acc, [key, val]) => {
+  return Object.entries(cfg).reduce((acc, [key, val]) => {
     switch (key) {
       case 'pluginsFile':
       case '$schema':
@@ -434,9 +434,7 @@ export function reduceConfig (cfg: OldCypressConfig): ConfigOptions {
       default:
         return { ...acc, global: { ...acc.global, [key]: val } }
     }
-  }
-
-  return Object.entries(cfg).reduce(reducer, { global: {}, e2e: {}, component: {} })
+  }, { global: {}, e2e: {}, component: {} })
 }
 
 export function getSpecPattern (cfg: OldCypressConfig, testType: TestingType) {
