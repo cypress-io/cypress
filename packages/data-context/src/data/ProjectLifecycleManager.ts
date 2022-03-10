@@ -1142,13 +1142,19 @@ export class ProjectLifecycleManager {
 
     for (const fileName of potentialFiles) {
       const filePath = this._pathToFile(fileName)
+      const fileExists = fs.existsSync(filePath)
 
-      if (this._configFilePath && fs.existsSync(filePath)) {
+      // If you've already set the file path AND we've found yet another config file,
+      // we don't know which one to use. We mark it here and then handle this case
+      // later on in the flow
+      if (this._configFilePath && fileExists) {
         metaState.hasMultipleConfigPaths = true
         break
       }
 
-      if (fs.existsSync(filePath)) {
+      // We've found a config file. We'll continue looping to make sure there's
+      // only one. This is solely so that we can provide rich errors and warnings.
+      if (fileExists) {
         metaState.hasValidConfigFile = true
         this.setConfigFilePath(fileName)
       }
