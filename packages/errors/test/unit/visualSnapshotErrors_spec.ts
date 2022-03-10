@@ -1108,5 +1108,10 @@ describe('visual error templates', () => {
         componentFolder: [{ name: 'componentFolder' }, makeErr()],
       }
     },
+    MIGRATION_ALREADY_OCURRED: () => {
+      return {
+        default: ['custom.config.js', 'custom.json'],
+      }
+    },
   })
 })

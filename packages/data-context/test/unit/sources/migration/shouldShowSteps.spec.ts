@@ -71,7 +71,7 @@ describe('getStepsForMigration', () => {
     const cwd = await scaffoldMigrationProject('migration-e2e-fully-custom')
     const config = fs.readJsonSync(path.join(cwd, 'cypress.json'))
 
-    const actual = await getStepsForMigration(cwd, config)
+    const actual = await getStepsForMigration(cwd, config, true)
     const expected: Step[] = ['configFile']
 
     expect(actual).to.eql(expected)
@@ -81,7 +81,7 @@ describe('getStepsForMigration', () => {
     const cwd = await scaffoldMigrationProject('migration-e2e-defaults')
     const config = fs.readJsonSync(path.join(cwd, 'cypress.json'))
 
-    const actual = await getStepsForMigration(cwd, config)
+    const actual = await getStepsForMigration(cwd, config, true)
     const expected: Step[] = ['renameAuto', 'renameSupport', 'configFile']
 
     expect(actual).to.eql(expected)
@@ -91,7 +91,7 @@ describe('getStepsForMigration', () => {
     const cwd = await scaffoldMigrationProject('migration-e2e-custom-test-files')
     const config = fs.readJsonSync(path.join(cwd, 'cypress.json'))
 
-    const actual = await getStepsForMigration(cwd, config)
+    const actual = await getStepsForMigration(cwd, config, true)
     const expected: Step[] = ['renameAuto', 'renameSupport', 'configFile']
 
     expect(actual).to.eql(expected)
@@ -101,7 +101,7 @@ describe('getStepsForMigration', () => {
     const cwd = await scaffoldMigrationProject('migration')
     const config = fs.readJsonSync(path.join(cwd, 'cypress.json'))
 
-    const actual = await getStepsForMigration(cwd, config)
+    const actual = await getStepsForMigration(cwd, config, true)
     const expected: Step[] = ['renameAuto', 'renameSupport', 'configFile', 'setupComponent']
 
     expect(actual).to.eql(expected)
@@ -111,7 +111,7 @@ describe('getStepsForMigration', () => {
     const cwd = await scaffoldMigrationProject('migration-component-testing-defaults')
     const config = fs.readJsonSync(path.join(cwd, 'cypress.json'))
 
-    const actual = await getStepsForMigration(cwd, config)
+    const actual = await getStepsForMigration(cwd, config, true)
     const expected: Step[] = ['renameAuto', 'renameManual', 'configFile', 'setupComponent']
 
     expect(actual).to.eql(expected)
@@ -121,7 +121,7 @@ describe('getStepsForMigration', () => {
     const cwd = await scaffoldMigrationProject('migration-component-testing-customized')
     const config = fs.readJsonSync(path.join(cwd, 'cypress.json'))
 
-    const actual = await getStepsForMigration(cwd, config)
+    const actual = await getStepsForMigration(cwd, config, true)
     const expected: Step[] = ['configFile', 'setupComponent']
 
     expect(actual).to.eql(expected)

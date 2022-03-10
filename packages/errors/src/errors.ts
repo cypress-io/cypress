@@ -1166,13 +1166,13 @@ export const AllCypressErrors = {
       `
   },
 
-  LEGACY_CONFIG_FILE: (baseFileName: string, projectRoot: string) => {
+  LEGACY_CONFIG_FILE: (baseFileName: string, projectRoot: string, legacyConfigFile: string = 'cypress.json') => {
     return errTemplate`
-      There is both a ${fmt.highlight(baseFileName)} and a ${fmt.highlight(`cypress.json`)} file at the location below:
+      There is both a ${fmt.highlight(baseFileName)} and a ${fmt.highlight(legacyConfigFile)} file at the location below:
 
       ${fmt.path(projectRoot)}
 
-      Cypress no longer supports cypress.json, please remove it from your project.
+      Cypress no longer supports ${fmt.off(legacyConfigFile)}, please remove it from your project.
     `
   },
 
@@ -1342,7 +1342,19 @@ export const AllCypressErrors = {
       ${stackTrace}
     `
   },
-}
+    
+  MIGRATION_ALREADY_OCURRED: (configFile: string, legacyConfigFile: string) => {
+    return errTemplate`
+      You are attempting to use Cypress with an older config file: ${fmt.highlight(legacyConfigFile)}
+      When you upgraded to Cypress v10.0 the config file was updated and moved to a new location: ${fmt.highlight(configFile)}
+
+      You may need to update any CLI scripts to ensure that they are referring the new version. This would typically look something like:
+      "${fmt.highlight(`cypress open --config-file=${configFile}`)}"
+
+      https://on.cypress.io/migration-guide
+    `
+  },
+} as const
 
 type AllCypressErrorObj = typeof AllCypressErrors
 
