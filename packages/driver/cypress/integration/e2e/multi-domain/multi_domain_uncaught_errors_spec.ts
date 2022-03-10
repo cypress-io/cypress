@@ -319,7 +319,7 @@ describe('multi-domain - uncaught errors', () => {
         expect(err._name).to.equal('CustomError')
         expect(err.foo).to.equal('bar')
 
-        const { writable } = Object.getOwnPropertyDescriptor(err, 'name') || {}
+        const { writable } = Object.getOwnPropertyDescriptor(err, 'name') as PropertyDescriptor
 
         // After serialization, read-only properties are now writable
         expect(writable).to.be.true
@@ -343,7 +343,7 @@ describe('multi-domain - uncaught errors', () => {
         // @ts-ignore
         customErrorInstance.foo = 'bar'
 
-        const { writable } = Object.getOwnPropertyDescriptor(CustomError, 'name') || {}
+        const { writable } = Object.getOwnPropertyDescriptor(CustomError, 'name') as PropertyDescriptor
 
         // make sure the name property is read-only before serializing it through postMessage
         expect(writable).to.be.false

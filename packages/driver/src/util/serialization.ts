@@ -79,7 +79,7 @@ const convertObjectToSerializableLiteral = (obj): typeof obj => {
  * firefox
  * structuredClone(new Error('myError')) -> throws error as native error cannot be serialized
  *
- * This method takes a similar the 'chromium' approach to structuredClone, except that the prototype chain is walked and ANY serializable value, including getters, is serialized.
+ * This method takes a similar approach as the 'chromium' structuredClone algorithm, except that the prototype chain is walked and ANY serializable value, including getters, is serialized.
  * Please see https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm#things_that_dont_work_with_structured_clone.
  *
  *  NOTE: If an object nested inside valueToSanitize contains an unserializable property, the whole object is deemed as unserializable
