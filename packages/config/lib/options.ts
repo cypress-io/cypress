@@ -44,7 +44,7 @@ interface RuntimeConfigOption {
   canUpdateDuringTestTime?: boolean
 }
 
-export interface BreakingOptionObj {
+export interface BreakingOption {
   /**
    * The non-passive configuration option.
    */
@@ -505,7 +505,7 @@ export const options: Array<ResolvedConfigOption | RuntimeConfigOption> = [
 /**
  * Values not allowed in 10.X+ in the root, e2e and component config
  */
-export const breakingOptions: Array<BreakingOptionObj> = [
+export const breakingOptions: Array<BreakingOption> = [
   {
     name: 'integrationFolder',
     errorKey: 'SETUP_NODE_EVENTS_INVALID_OPTIONS_SPEC_PATTERN',
@@ -555,7 +555,7 @@ export const breakingOptions: Array<BreakingOptionObj> = [
   },
 ]
 
-export const breakingRootOptions: Array<BreakingOptionObj> = [
+export const breakingRootOptions: Array<BreakingOption> = [
   {
     name: 'supportFile',
     errorKey: 'CONFIG_FILE_INVALID_ROOT_CONFIG',
@@ -582,7 +582,7 @@ export const breakingRootOptions: Array<BreakingOptionObj> = [
   },
 ]
 
-export const testingTypeBreakingOptions: { e2e: Array<BreakingOptionObj>, component: Array<BreakingOptionObj> } = {
+export const testingTypeBreakingOptions: { e2e: Array<BreakingOption>, component: Array<BreakingOption> } = {
   e2e: [],
   component: [
     {

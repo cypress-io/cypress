@@ -1,11 +1,11 @@
 import _ from 'lodash'
 import Debug from 'debug'
 import { options, breakingOptions, breakingRootOptions, testingTypeBreakingOptions } from './options'
-import type { BreakingOptionObj, BreakingOptionErrorKey } from './options'
+import type { BreakingOption, BreakingOptionErrorKey } from './options'
 
 export * as validation from './validation'
 
-export { breakingOptions, BreakingOptionObj, BreakingOptionErrorKey }
+export { breakingOptions, BreakingOption, BreakingOptionErrorKey }
 
 const debug = Debug('cypress:config:validator')
 
@@ -42,7 +42,7 @@ type ErrorHandler = (
   options: BreakingErrResult
 ) => void
 
-const validateNoBreakingOptions = (breakingCfgOptions: BreakingOptionObj[], cfg: any, onWarning: ErrorHandler, onErr: ErrorHandler) => {
+const validateNoBreakingOptions = (breakingCfgOptions: BreakingOption[], cfg: any, onWarning: ErrorHandler, onErr: ErrorHandler) => {
   breakingCfgOptions.forEach(({ name, errorKey, newName, isWarning, value }) => {
     if (_.has(cfg, name)) {
       if (value && cfg[name] !== value) {
