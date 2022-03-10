@@ -22,7 +22,7 @@ import { LoadConfigReply, SetupNodeEventsReply, ProjectConfigIpc, IpcHandler } f
 import assert from 'assert'
 import type { AllModeOptions, FoundBrowser, FullConfig, TestingType } from '@packages/types'
 import { autoBindDebug } from '../util/autoBindDebug'
-import type { BreakingOption, BreakingErrResult } from '@packages/config'
+import type { BreakingOptionErrorKey, BreakingErrResult } from '@packages/config'
 
 const debug = debugLib(`cypress:lifecycle:ProjectLifecycleManager`)
 
@@ -39,7 +39,7 @@ export interface SetupFullConfigOptions {
   options: Partial<AllModeOptions>
 }
 
-type BreakingValidationFn<T> = (type: BreakingOption, val: BreakingErrResult) => T
+type BreakingValidationFn<T> = (type: BreakingOptionErrorKey, val: BreakingErrResult) => T
 
 /**
  * All of the APIs injected from @packages/server & @packages/config
