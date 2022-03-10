@@ -426,7 +426,9 @@ const stabilityChanged = (Cypress, state, config, stable) => {
       err.onFail()
     }
 
-    throw err
+    if (window.specBridgeDomain) {
+      Cypress.specBridgeCommunicator.toPrimary('navigation:error', { err })
+    }
   }
 
   try {

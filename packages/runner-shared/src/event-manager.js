@@ -534,6 +534,14 @@ export const eventManager = {
       cy.state('isStable', false)
     })
 
+    Cypress.multiDomainCommunicator.on('navigation:error', ({ err }) => {
+      const r = cy.queue.state('reject')
+
+      delete err.onFail
+
+      r(err)
+    })
+
     Cypress.multiDomainCommunicator.on('expect:domain', (domain) => {
       localBus.emit('expect:domain', domain)
     })
