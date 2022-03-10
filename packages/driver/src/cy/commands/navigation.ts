@@ -14,6 +14,7 @@ const debug = debugFn('cypress:driver:navigation')
 
 let id = null
 let previousDomainVisited: boolean = false
+let hasVisitedAboutBlank: boolean = false
 let currentlyVisitingAboutBlank: boolean = false
 let knownCommandCausedInstability: boolean = false
 
@@ -33,7 +34,7 @@ const reset = (test: any = {}) => {
 
   // make sure we reset that we haven't
   // visited about blank again
-  Cypress.state('hasVisitedAboutBlank', false)
+  hasVisitedAboutBlank = false
 
   currentlyVisitingAboutBlank = false
 
@@ -95,14 +96,6 @@ const specifyFileByRelativePath = (url, log) => {
 }
 
 const aboutBlank = (cy, win) => {
-  if (Cypress.isMultiDomain) {
-    return new Promise((resolve) => {
-      Cypress.specBridgeCommunicator.once('visit:about:blank:end', resolve)
-
-      Cypress.specBridgeCommunicator.toPrimary('visit:about:blank')
-    })
-  }
-
   return new Promise((resolve) => {
     cy.once('window:load', resolve)
 
@@ -492,14 +485,6 @@ export default (Commands, Cypress, cy, state, config) => {
 
   Cypress.on('form:submitted', (e) => {
     formSubmitted(Cypress, e)
-  })
-
-  Cypress.multiDomainCommunicator.on('visit:about:blank', (_, domain) => {
-    currentlyVisitingAboutBlank = true
-    aboutBlank(cy, Cypress.state('window')).then(() => {
-      currentlyVisitingAboutBlank = false
-      Cypress.multiDomainCommunicator.toSpecBridge(domain, 'visit:about:blank:end')
-    })
   })
 
   const visitFailedByErr = (err, url, fn) => {
@@ -1212,8 +1197,11 @@ export default (Commands, Cypress, cy, state, config) => {
         // so that we nuke the previous state. subsequent
         // visits will not navigate to about:blank so that
         // our history entries are intact
-        if (!Cypress.state('hasVisitedAboutBlank')) {
-          Cypress.state('hasVisitedAboutBlank', true)
+        // skip for multi-domain since multi-domain requires
+        // experimentalSessionSupport which already visits
+        // about:blank between tests
+        if (!hasVisitedAboutBlank && !Cypress.isMultiDomain) {
+          hasVisitedAboutBlank = true
           currentlyVisitingAboutBlank = true
 
           return aboutBlank(cy, win)

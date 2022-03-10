@@ -170,9 +170,6 @@ export class SpecBridgeDomainCommunicator extends EventEmitter {
     this.toPrimary('sync:globals', {
       config: preprocessConfig(Cypress.config()),
       env: preprocessEnv(Cypress.env()),
-      state: {
-        hasVisitedAboutBlank: Cypress.state('hasVisitedAboutBlank'),
-      },
     })
   }
 

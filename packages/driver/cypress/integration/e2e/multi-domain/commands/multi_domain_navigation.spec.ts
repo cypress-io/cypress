@@ -1,5 +1,5 @@
 // @ts-ignore
-context('multi-domain navigation', { experimentalMultiDomain: true }, () => {
+context('multi-domain navigation', { experimentalMultiDomain: true, experimentalSessionSupport: true }, () => {
   it('.go()', () => {
     cy.visit('/fixtures/multi-domain.html')
     cy.get('a[data-cy="multi-domain-secondary-link"]').click()
@@ -227,45 +227,24 @@ context('multi-domain navigation', { experimentalMultiDomain: true }, () => {
       })
     })
 
-    it('does not navigate to about:blank in secondary if already visited in primary', () => {
-      Cypress.state('hasVisitedAboutBlank', true)
+    it('does not navigate to about:blank in secondary', () => {
+      const primaryCyLoadSpy = cy.spy()
+
+      cy.on('window:load', primaryCyLoadSpy)
 
       cy.switchToDomain('foobar.com', () => {
-        const urlChangedSpy = cy.spy(Cypress, 'emit').log(false).withArgs('url:changed')
-        const aboutBlankSpy = cy.spy(Cypress.specBridgeCommunicator, 'toPrimary').log(false).withArgs('visit:about:blank')
+        const secondaryCyLoadSpy = cy.spy()
+
+        cy.on('window:load', secondaryCyLoadSpy)
 
         cy.visit('http://www.foobar.com:3500/fixtures/multi-domain-secondary.html').then(() => {
-          expect(urlChangedSpy).to.have.been.calledOnce
-          expect(urlChangedSpy.firstCall).to.be.calledWith(
-            'url:changed',
-            'http://www.foobar.com:3500/fixtures/multi-domain-secondary.html',
-          )
-
-          expect(aboutBlankSpy).to.not.have.been.called
-        })
-      })
-    })
-
-    it('navigates to about:blank in secondary if not already visited in primary', () => {
-      Cypress.state('hasVisitedAboutBlank', false)
-
-      cy.switchToDomain('foobar.com', () => {
-        const urlChangedSpy = cy.spy(Cypress, 'emit').log(false).withArgs('url:changed')
-        const aboutBlankSpy = cy.spy(Cypress.specBridgeCommunicator, 'toPrimary').log(false).withArgs('visit:about:blank')
-
-        cy.visit('http://www.foobar.com:3500/fixtures/multi-domain-secondary.html').then(() => {
-          expect(urlChangedSpy).to.have.been.calledOnce
-          expect(urlChangedSpy.firstCall).to.be.calledWith(
-            'url:changed',
-            'http://www.foobar.com:3500/fixtures/multi-domain-secondary.html',
-          )
-
-          expect(aboutBlankSpy).to.have.been.calledOnce
+          expect(secondaryCyLoadSpy).to.have.been.calledOnce
+          expect(secondaryCyLoadSpy.args[0][0].location.href).to.equal('http://www.foobar.com:3500/fixtures/multi-domain-secondary.html')
         })
       })
 
       cy.then(() => {
-        expect(Cypress.state('hasVisitedAboutBlank')).to.equal(true)
+        expect(primaryCyLoadSpy).to.not.have.been.called
       })
     })
 
