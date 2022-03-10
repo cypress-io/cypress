@@ -99,7 +99,6 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500 }, () => {
 
     cy.contains('TestComponent.spec').click()
     cy.get('[data-model-state="passed"]').should('contain', 'renders the test component')
-
     cy.contains('renders the test component').should('be.visible')
 
     cy.withCtx((ctx) => {
@@ -116,7 +115,7 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500 }, () => {
       cy.contains(noSpecErrorTitle).should('be.visible')
       cy.contains(noSpecErrorIntro).should('be.visible')
       cy.contains(noSpecErrorExplainer).should('be.visible')
-      cy.contains(goodFilePath).should('be.visible')
+      cy.contains('src/TestComponent.spec.jsx').should('be.visible')
       cy.location()
       .its('href')
       .should('eq', 'http://localhost:4455/__/#/specs')
