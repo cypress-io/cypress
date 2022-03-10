@@ -56,6 +56,7 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500 }, () => {
   })
 
   it('navigation between specs and other parts of the app works', () => {
+    cy.visitApp()
     cy.contains('TestComponent.spec').click()
     cy.get('[data-model-state="passed"]').should('contain', 'renders the test component')
 
@@ -96,9 +97,8 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500 }, () => {
   it('redirects to the specs list with error if an open spec is not found when specs list updates', () => {
     const { noSpecErrorTitle, noSpecErrorIntro, noSpecErrorExplainer } = defaultMessages.specPage
 
-    const goodFilePath = 'src/TestComponent.spec.jsx'
-
-    cy.__incorrectlyVisitAppWithIntercept(`/specs/runner?file=${goodFilePath}`)
+    cy.contains('TestComponent.spec').click()
+    cy.get('[data-model-state="passed"]').should('contain', 'renders the test component')
 
     cy.contains('renders the test component').should('be.visible')
 

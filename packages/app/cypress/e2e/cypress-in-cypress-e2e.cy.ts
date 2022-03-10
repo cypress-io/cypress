@@ -108,10 +108,9 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500 }, () => {
 
     const goodFilePath = 'cypress/e2e/dom-content.spec.js'
 
-    cy.__incorrectlyVisitAppWithIntercept(`/specs/runner?file=${goodFilePath}`)
-
-    cy.contains('Dom Content')
-    .should('be.visible')
+    cy.visitApp()
+    cy.contains('dom-content.spec').click()
+    cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
 
     cy.withCtx((ctx) => {
       // rename relative path for any specs that happen to be found
