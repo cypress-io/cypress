@@ -1,4 +1,4 @@
-import { initial, initialCT, session, sessionLifecycle } from './Blank'
+import { initial, initialCT, session, sessionLifecycle, visitFailure } from './Blank'
 import { ROOT_ID } from '@cypress/mount-utils'
 
 describe('initial - e2e', () => {
@@ -31,7 +31,7 @@ describe('initial - ct', () => {
 
     root.innerHTML = initialCT()
 
-    cy.contains('cy.mount').should('have.attr', 'href', 'https://on.cypress.io/mount')
+    cy.contains('mount').should('have.attr', 'href', 'https://on.cypress.io/mount')
   })
 
   it('works with small viewport', () => {
@@ -61,6 +61,24 @@ describe('sessionLifecycle', () => {
     root.innerHTML = sessionLifecycle()
 
     cy.get('.warn').contains('experimentalSessionSupport')
+
+    cy.percySnapshot()
+  })
+})
+
+describe('visitFailure', () => {
+  it('works', () => {
+    const root = document.getElementById(ROOT_ID)!
+
+    root.innerHTML = visitFailure({ url: 'http://foo.cypress.io' })
+
+    cy.percySnapshot()
+  })
+
+  it('works with details', () => {
+    const root = document.getElementById(ROOT_ID)!
+
+    root.innerHTML = visitFailure({ url: 'http://foo.cypress.io', status: 404, statusText: 'Not Found', contentType: 'text/html' })
 
     cy.percySnapshot()
   })

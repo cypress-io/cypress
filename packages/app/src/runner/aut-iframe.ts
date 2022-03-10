@@ -1,6 +1,5 @@
 import { useSelectorPlaygroundStore } from '../store/selector-playground-store'
 import { blankContents } from '../components/Blank'
-import { visitFailure } from './visit-failure'
 import { logger } from './logger'
 import _ from 'lodash'
 /* eslint-disable no-duplicate-imports */
@@ -52,7 +51,7 @@ export class AutIframe {
   }
 
   showVisitFailure = (props) => {
-    this._showContents(visitFailure(props))
+    this._showContents(blankContents.visitFailure(props))
   }
 
   _showContents (contents) {
