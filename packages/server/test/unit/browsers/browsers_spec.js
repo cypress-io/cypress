@@ -30,6 +30,8 @@ after(() => {
   process.versions.electron = originalElectronVersion
 })
 
+const ctx = { browser: { setBrowserStatus () {} } }
+
 describe('lib/browsers/index', () => {
   context('.getBrowserInstance', () => {
     it('returns instance', () => {
@@ -135,7 +137,7 @@ describe('lib/browsers/index', () => {
         family: 'foo-bad',
       }, {
         browsers: [],
-      })
+      }, null, ctx)
       .then((e) => {
         throw new Error('should\'ve failed')
       })
@@ -224,6 +226,35 @@ describe('lib/browsers/index', () => {
 
       expect(util.promisify).to.be.calledWith(exec)
       expect(mockExec).to.be.calledWith(`(New-Object -ComObject WScript.Shell).AppActivate(((Get-WmiObject -Class win32_process -Filter "ParentProcessID = '3333'") | Select -ExpandProperty ProcessId))`, { shell: 'powershell.exe' })
+    })
+  })
+
+  context('kill', () => {
+    it('allows registered emitter events to fire before kill', () => {
+      const ee = new EventEmitter()
+
+      ee.kill = () => {
+        ee.emit('exit')
+      }
+
+      const removeAllListenersSpy = sinon.spy()
+
+      ee.removeAllListeners = removeAllListenersSpy
+
+      const instance = ee
+
+      browsers._setInstance(instance)
+
+      const exitSpy = sinon.spy()
+
+      ee.once('exit', () => {
+        exitSpy()
+      })
+
+      return browsers.close().then(() => {
+        expect(exitSpy.calledBefore(removeAllListenersSpy)).to.be.true
+        expect(browsers.getBrowserInstance()).to.eq(null)
+      })
     })
   })
 })
