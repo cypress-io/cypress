@@ -181,6 +181,10 @@ export const isValidClientCertificatesSet = (_key: string, certsForUrls: Array<{
     debug(`Processing clientCertificates: ${i}`)
     let certsForUrl = certsForUrls[i]
 
+    if (!certsForUrl) {
+      continue
+    }
+
     if (!certsForUrl.url) {
       return errMsg(`clientCertificates[${i}].url`, certsForUrl.url, 'a URL matcher')
     }
@@ -214,6 +218,10 @@ export const isValidClientCertificatesSet = (_key: string, certsForUrls: Array<{
     for (let j = 0; j < certsForUrl.certs.length; j++) {
       let certInfo = certsForUrl.certs[j]
 
+      if (!certInfo) {
+        continue
+      }
+
       // Only one of PEM or PFX cert allowed
       if (certInfo.cert && certInfo.pfx) {
         return `\`clientCertificates[${i}].certs[${j}]\` has both PEM and PFX defined`
@@ -245,7 +253,7 @@ export const isValidClientCertificatesSet = (_key: string, certsForUrls: Array<{
     }
 
     for (let k = 0; k < certsForUrl.ca.length; k++) {
-      if (path.isAbsolute(certsForUrl.ca[k])) {
+      if (path.isAbsolute(certsForUrl.ca[k] || '')) {
         return errMsg(`clientCertificates[${k}].ca[${k}]`, certsForUrl.ca[k], 'a relative filepath')
       }
     }

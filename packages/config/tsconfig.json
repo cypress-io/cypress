@@ -6,6 +6,13 @@
   "compilerOptions": {
     "outDir": "./dist",
     "noImplicitAny": true,
+    "strict": true,
+    "allowJs": false,
+    "noUnusedLocals": false,
+    "resolveJsonModule": true,
+    "experimentalDecorators": true,
+    "noUncheckedIndexedAccess": true,
+    "importsNotUsedAsValues": "error",
     "lib": [
       "dom",
       "ES2020",
