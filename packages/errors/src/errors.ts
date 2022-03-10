@@ -1309,20 +1309,20 @@ export const AllCypressErrors = {
     `
   },
 
-  SETUP_NODE_EVENTS_RESOLVED_CONFIG_INVALID: (optionKey: string, err?: Error) => {
+  SETUP_NODE_EVENTS_INVALID_OPTIONS_SPEC_PATTERN: ({ name }: {name: string}, err?: Error) => {
     const stackTrace = err ? fmt.stackTrace(err) : null
 
     // some keys come prefixed with a `component.` or `e2e.` but they are not referenced
     // in the errors maps with this prefix. strip it out.
-    const rootKey = optionKey.replace(/^(component|e2e)\./, '')
+    const rootKey = name.replace(/^(component|e2e)\./, '')
 
     const mergedOptionKey = 'testFiles' === rootKey ? 'integrationFolder' : 'testFiles'
 
     return errTemplate`
-      Option ${fmt.highlight(optionKey)} can't be updated in ${fmt.highlight('setupNodeEvents()')}.
+      Option ${fmt.highlight(name)} can't be updated in ${fmt.highlight('setupNodeEvents()')}.
       
       Since 10.X, Cypress no longer supports this option.
-      ${fmt.highlight(optionKey)} was merged with ${fmt.highlight(mergedOptionKey)} into the ${fmt.highlight('specPattern')} option.
+      ${fmt.highlight(name)} was merged with ${fmt.highlight(mergedOptionKey)} into the ${fmt.highlight('specPattern')} option.
 
       **NOTE** ${fmt.highlight('specPattern')} has to be set as a member of the ${fmt.highlight('e2e')} or ${fmt.highlight('component')} property.
 
@@ -1330,6 +1330,18 @@ export const AllCypressErrors = {
     `
   },
 
+  SETUP_NODE_EVENTS_INVALID_OPTIONS_PLUGINS_FILE: ({ name }: {name: string}, err?: Error) => {
+    const stackTrace = err ? fmt.stackTrace(err) : null
+
+    return errTemplate`
+      Option ${fmt.highlight(name)} can't be updated in ${fmt.highlight('setupNodeEvents()')}.
+      
+      Since 10.X, Cypress no longer supports this option.
+      Instead, use the ${fmt.highlight('setupNodeEvents()')} function in the config file.
+
+      ${stackTrace}
+    `
+  },
 }
 
 type AllCypressErrorObj = typeof AllCypressErrors
