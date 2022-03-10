@@ -52,7 +52,7 @@
 
 <script lang="ts" setup>
 import { useI18n } from '@cy/i18n'
-import { gql, useMutation, useSubscription } from '@urql/vue'
+import { gql, useMutation } from '@urql/vue'
 import Button from '@cy/components/Button.vue'
 import ExternalEditorSettings from './device/ExternalEditorSettings.vue'
 import ProxySettings from './device/ProxySettings.vue'
@@ -61,25 +61,11 @@ import ProjectSettings from './project/ProjectSettings.vue'
 import CloudSettings from '../settings/project/CloudSettings.vue'
 import TestingPreferences from './device/TestingPreferences.vue'
 import type { SettingsContainerFragment } from '../generated/graphql'
-import { SettingsContainer_ReconfigureProjectDocument, TimAppDocument } from '../generated/graphql'
+import { SettingsContainer_ReconfigureProjectDocument } from '../generated/graphql'
 import IconLaptop from '~icons/cy/laptop_x24.svg'
 import IconOdometer from '~icons/cy/object-odometer_x24.svg'
 import IconFolder from '~icons/cy/folder-outline_x24.svg'
 import SettingsIcon from '~icons/cy/settings_x16.svg'
-import { watch } from 'vue'
-
-gql`
-subscription TimApp {
-  ping
-}
-`
-
-const { data } = useSubscription({ query: TimAppDocument })
-
-watch(data, () => {
-  // eslint-disable-next-line no-console
-  console.log(data.value)
-})
 
 const { t } = useI18n()
 

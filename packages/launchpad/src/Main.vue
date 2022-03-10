@@ -72,8 +72,8 @@
 </template>
 
 <script lang="ts" setup>
-import { gql, useMutation, useQuery, useSubscription } from '@urql/vue'
-import { MainLaunchpadQueryDocument, Main_ReinitializeCypressDocument, TimDocument } from './generated/graphql'
+import { gql, useMutation, useQuery } from '@urql/vue'
+import { MainLaunchpadQueryDocument, Main_ReinitializeCypressDocument } from './generated/graphql'
 import TestingTypeCards from './setup/TestingTypeCards.vue'
 import Wizard from './setup/Wizard.vue'
 import ScaffoldLanguageSelect from './setup/ScaffoldLanguageSelect.vue'
@@ -87,25 +87,12 @@ import MigrationWizard from './migration/MigrationWizard.vue'
 import ScaffoldedFiles from './setup/ScaffoldedFiles.vue'
 
 import { useI18n } from '@cy/i18n'
-import { computed, ref, watch } from 'vue'
+import { computed, ref } from 'vue'
 import LaunchpadHeader from './setup/LaunchpadHeader.vue'
 import OpenBrowser from './setup/OpenBrowser.vue'
 
 const { t } = useI18n()
 const isTestingTypeModalOpen = ref(false)
-
-gql`
-subscription Tim {
-  ping
-}
-`
-
-const { data } = useSubscription({ query: TimDocument })
-
-watch(data, () => {
-  // eslint-disable-next-line no-console
-  console.log(data.value)
-})
 
 gql`
 fragment MainLaunchpadQueryData on Query {

@@ -1231,7 +1231,8 @@ type Storybook implements Node {
 }
 
 type Subscription {
-  ping: Boolean
+  """Issued for internal development changes"""
+  devChange: DevState
 }
 
 """The bundlers that we can use with Cypress"""

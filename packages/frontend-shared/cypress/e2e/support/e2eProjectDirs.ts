@@ -24,7 +24,6 @@ export const e2eProjectDirs = [
   'downloads',
   'e2e',
   'empty-folders',
-  'esmodules-vite-dev-server',
   'failures',
   'firefox-memory',
   'fixture-subfolder-of-integration',
