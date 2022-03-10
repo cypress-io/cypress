@@ -32,7 +32,6 @@ mainBuildFilters: &mainBuildFilters
       only:
         - develop
         - 10.0-release
-        - rebase/develop-10.0-release-2022-03-04
         - marktnoonan/backmerge-develop-3-8-22
         - kevin/add-ct-component-examples-to-circle
 
