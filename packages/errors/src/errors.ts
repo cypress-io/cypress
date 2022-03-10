@@ -783,9 +783,11 @@ export const AllCypressErrors = {
         Could not find a Cypress configuration file in this folder: ${fmt.path(arg1)}`
   },
   // TODO: verify these are configBaseName and not configPath
-  CONFIG_FILES_LANGUAGE_CONFLICT: (projectRoot: string, configFileBaseName1: string, configFileBaseName2: string) => {
+  CONFIG_FILES_LANGUAGE_CONFLICT: (projectRoot: string, filesFound: string[]) => {
     return errTemplate`
-      There is both a ${fmt.highlight(configFileBaseName1)} and a ${fmt.highlight(configFileBaseName2)} at the location below:
+      We've found ${fmt.highlight(filesFound.length)} Cypress configuration files.
+
+      ${fmt.highlight(filesFound)} at the location below:
 
       ${fmt.listItem(projectRoot)}
 
