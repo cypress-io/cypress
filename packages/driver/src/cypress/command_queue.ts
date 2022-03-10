@@ -139,7 +139,7 @@ export class CommandQueue extends Queue<Command> {
       this.state('nestedIndex', this.state('index'))
 
       return command.get('args')
-    })
+    }, command)
     .then((args) => {
       // store this if we enqueue new commands
       // to check for promise violations
@@ -287,6 +287,13 @@ export class CommandQueue extends Queue<Command> {
         // trigger queue is almost finished
         Cypress.action('cy:command:queue:before:end')
 
+        // If we're in multi-domain we no longer have to wait for stability at the end of the command queue.
+        if (Cypress.config('experimentalMultiDomain')) {
+          Cypress.action('cy:command:queue:end')
+
+          return null
+        }
+
         // we need to wait after all commands have
         // finished running if the application under
         // test is no longer stable because we cannot
@@ -373,7 +380,11 @@ export class CommandQueue extends Queue<Command> {
     const { promise, reject, cancel } = super.run({
       onRun: next,
       onError,
-      onFinish: this.cleanup,
+      onFinish: () => {
+        // By removing the reject state, we can handle navigation timeouts after the command queue has finished.
+        this.state('reject', undefined)
+        this.cleanup
+      },
     })
 
     this.state('promise', promise)

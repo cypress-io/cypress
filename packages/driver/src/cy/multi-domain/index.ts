@@ -17,15 +17,16 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
     Cypress.backend('ready:for:domain')
   }
 
-  communicator.on('delaying:html', () => {
+  communicator.on('delaying:html', (request) => {
+    console.log('Delaying Request', request.href)
     // when a secondary domain is detected by the proxy, it holds it up
     // to provide time for the spec bridge to be set up. normally, the queue
     // will not continue until the page is stable, but this signals it to go
     // ahead because we're anticipating multi-domain
     // @ts-ignore
-    cy.isAnticipatingMultiDomain(true)
+    cy.isAnticipatingMultiDomain(request.href)
 
-    // cy.isAnticipatingMultiDomain(true) will free the queue to move forward.
+    // cy.isAnticipatingMultiDomain(href) will free the queue to move forward.
     // if the next command isn't switchToDomain, this timeout will hit and
     // the test will fail with a cross-origin error
     timeoutId = setTimeout(sendReadyForDomain, 2000)
@@ -74,6 +75,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
       return new Bluebird((resolve, reject) => {
         const cleanup = () => {
           communicator.off('queue:finished', onQueueFinished)
+          communicator.off('window:load', onWindowLoad)
         }
 
         const _resolve = ({ subject, unserializableSubjectType }) => {
@@ -98,6 +100,15 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
 
           _resolve({ subject, unserializableSubjectType })
         }
+
+        const onWindowLoad = ({ url }, windowLoadDomain) => {
+          if (windowLoadDomain === domain) {
+            cy.isStable(true, 'load')
+            Cypress.emit('internal:window:load', { type: 'cross:domain', url })
+          }
+        }
+
+        communicator.on('window:load', onWindowLoad)
 
         communicator.once('sync:globals', ({ config, env, state }) => {
           syncConfigToCurrentDomain(config)
@@ -142,8 +153,6 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
               env: preprocessEnv(Cypress.env()),
             })
 
-            state('readyForMultiDomain', true)
-
             // once the secondary domain page loads, send along the
             // user-specified callback to run in that domain
             try {
@@ -174,7 +183,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
               reject(wrappedErr)
             } finally {
               // @ts-ignore
-              cy.isAnticipatingMultiDomain(false)
+              cy.isAnticipatingMultiDomain(undefined)
             }
           }
         })

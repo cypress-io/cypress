@@ -240,7 +240,11 @@ const MaybeDelayForMultiDomain: ResponseMiddleware = function () {
       this.next()
     })
 
-    this.serverBus.emit('cross:domain:delaying:html')
+    const url = new URL(`${this.req.protocol}://${this.req.get('host')}${this.req.originalUrl}`)
+
+    this.serverBus.emit('cross:domain:delaying:html', {
+      href: url,
+    })
 
     return
   }

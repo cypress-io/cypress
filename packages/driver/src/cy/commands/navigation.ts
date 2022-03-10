@@ -418,6 +418,10 @@ const stabilityChanged = (Cypress, state, config, stable) => {
     if (r) {
       return r(err)
     }
+
+    // // If the command queue has been cleaned up, throw the error ourselves
+    err?.onFail()
+    throw err
   }
 
   try {

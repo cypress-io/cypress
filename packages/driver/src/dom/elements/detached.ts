@@ -9,7 +9,7 @@ export const isDetached = ($el) => {
 
 export const isAttached = function ($el) {
   // if we're being given window
-  // then these are automaticallyed attached
+  // then these are automatically attached
   if ($window.isWindow($el)) {
     // there is a code path when forcing focus and
     // blur on the window where this check is necessary.
@@ -28,6 +28,8 @@ export const isAttached = function ($el) {
 
   // if there are no nodes, nothing is attached
   if (nodes.length === 0) {
+    // console.log('nothing attached')
+
     return false
   }
 
@@ -37,6 +39,8 @@ export const isAttached = function ($el) {
     const doc = $document.getDocumentFromElement(node)
 
     if (!$document.hasActiveWindow(doc)) {
+      console.log('no active window', $document, window.specBridgeDomain)
+
       return false
     }
 

@@ -39,29 +39,30 @@ export const create = (Cypress, state) => ({
     })
   },
 
-  isAnticipatingMultiDomain (anticipating) {
-    if (state('anticipatingMultiDomain') === anticipating) {
+  isAnticipatingMultiDomain (href: string): void {
+    if (state('anticipatingMultiDomain') === href) {
       return
     }
 
     const whenAnticipatingMultiDomain = state('whenAnticipatingMultiDomain')
 
-    if (anticipating && whenAnticipatingMultiDomain) {
+    if (!!href && whenAnticipatingMultiDomain) {
       whenAnticipatingMultiDomain()
     }
 
-    state('anticipatingMultiDomain', anticipating)
+    state('anticipatingMultiDomain', href)
   },
 
-  whenStableOrAnticipatingMultiDomain (fn) {
-    if (state('anticipatingMultiDomain') || state('isStable') !== false) {
+  whenStableOrAnticipatingMultiDomain (fn, command) {
+    // switchToDomain is a special command that can continue even when unstable.
+    if ((!!state('anticipatingMultiDomain') && command?.get('name') === 'switchToDomain') || state('isStable') !== false) {
       return Promise.try(fn)
     }
 
     return new Promise((resolve, reject) => {
       let fulfilled = false
 
-      const onSignal = () => {
+      const onSignal = (type) => {
         if (fulfilled) return
 
         fulfilled = true
@@ -75,7 +76,11 @@ export const create = (Cypress, state) => ({
       }
 
       state('whenStable', onSignal)
-      state('whenAnticipatingMultiDomain', onSignal)
+
+      // We only care to listen for anticipating multi-domain when the command we're waiting for is switchToDomain
+      if (command?.get('name') === 'switchToDomain') {
+        state('whenAnticipatingMultiDomain', onSignal)
+      }
     })
   },
 })

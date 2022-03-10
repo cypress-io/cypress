@@ -563,12 +563,9 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
         // we failed setting the remote window props which
         // means the page navigated to a different domain
 
-        // we expect a cross-origin error and are setting things up
-        // elsewhere to handle running cross-domain, so don't fail
-        // because of it
-        if (this.state('readyForMultiDomain')) {
-          signalStable()
-
+        // With multi-domain this is an expected error that may or may not be bad, we will rely on the page load timeout to throw if we don't end up where we expect to be.
+        if (this.config('experimentalMultiDomain') && err.name === 'SecurityError') {
+          // TODO: capture that this security error has happened to provide better error messages.
           return
         }
 

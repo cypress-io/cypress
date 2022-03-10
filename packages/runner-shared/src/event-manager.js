@@ -133,8 +133,8 @@ export const eventManager = {
       })
     })
 
-    ws.on('cross:domain:delaying:html', () => {
-      Cypress.multiDomainCommunicator.emit('delaying:html')
+    ws.on('cross:domain:delaying:html', (request) => {
+      Cypress.multiDomainCommunicator.emit('delaying:html', request)
     })
 
     _.each(localToReporterEvents, (event) => {
@@ -512,6 +512,8 @@ export const eventManager = {
       }
     })
 
+    Cypress.multiDomainCommunicator.initialize(window)
+
     Cypress.on('test:before:run', (...args) => {
       Cypress.multiDomainCommunicator.toAllSpecBridges('test:before:run', ...args)
     })
@@ -520,10 +522,9 @@ export const eventManager = {
       Cypress.multiDomainCommunicator.toAllSpecBridges('test:before:run:async', ...args)
     })
 
-    Cypress.multiDomainCommunicator.initialize(window)
-
-    Cypress.multiDomainCommunicator.on('window:load', ({ url }) => {
-      Cypress.emit('internal:window:load', { type: 'cross:domain', url })
+    Cypress.multiDomainCommunicator.on('before:unload', (domain) => {
+      // We specifically don't call 'cy.isStable' here because we don't want to inject another load event.
+      cy.state('isStable', false)
     })
 
     Cypress.multiDomainCommunicator.on('expect:domain', (domain) => {

@@ -61,6 +61,8 @@ export const handleDomainFn = (Cypress: Cypress.Cypress, cy: $Cy, specBridgeComm
     const stateUpdates = {
       ...state,
       redirectionCount: {}, // This is fine to set to an empty object, we want to refresh this count on each switchToDomain command.
+      window: undefined, // reset the window and document, these will be reset when the AUT loads.
+      document: undefined, // If the document is not reset you can still query the document when it is not loaded in the AUT
     }
 
     // Setup the runnable
@@ -91,9 +93,6 @@ export const handleDomainFn = (Cypress: Cypress.Cypress, cy: $Cy, specBridgeComm
 
     reset(state)
 
-    // Stability is sync'd with the primary stability
-    cy.isStable(isStable, 'multi:domain:fn')
-
     // @ts-ignore
     window.__cySkipValidateConfig = skipConfigValidation || false
 
@@ -114,6 +113,10 @@ export const handleDomainFn = (Cypress: Cypress.Cypress, cy: $Cy, specBridgeComm
       cy.stop()
       specBridgeCommunicator.toPrimary('queue:finished', { err }, { syncGlobals: true })
     })
+
+    // Stability is sync'd with the primary stability
+    // We specifically don't call 'cy.isStable' here because we don't want to inject another load event.
+    cy.state('isStable', isStable)
 
     try {
       const value = window.eval(`(${fn})`)(data)
