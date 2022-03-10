@@ -1,22 +1,19 @@
-import { resolve, sep } from 'path'
+import debugFn from 'debug'
 import { readFile } from 'fs/promises'
-import Debug from 'debug'
-import { ModuleNode, normalizePath, Plugin, ViteDevServer } from 'vite'
+import { resolve } from 'pathe'
+import type { ModuleNode, Plugin, ViteDevServer } from 'vite'
+import { normalizePath } from 'vite'
 
-const debug = Debug('cypress:vite-dev-server:plugin')
+const debug = debugFn('cypress:vite-dev-server:plugins:cypress')
 
-const pluginName = 'cypress-transform-html'
-const OSSepRE = new RegExp(`\\${sep}`, 'g')
-
-function convertPathToPosix (path: string): string {
-  return sep === '/'
-    ? path
-    : path.replace(OSSepRE, '/')
-}
-
-const INIT_FILEPATH = resolve(__dirname, '../client/initCypressTests.js')
+const INIT_FILEPATH = resolve(__dirname, '../../client/initCypressTests.js')
 
 const HMR_DEPENDENCY_LOOKUP_MAX_ITERATION = 50
+
+interface Spec {
+  absolute: string
+  relative: string
+}
 
 function getSpecsPathsSet (specs: Spec[]) {
   return new Set<string>(
@@ -24,79 +21,49 @@ function getSpecsPathsSet (specs: Spec[]) {
   )
 }
 
-interface Spec{
-  absolute: string
-  relative: string
-}
-
-export const makeCypressPlugin = (
-  projectRoot: string,
-  supportFilePath: string | false,
-  devServerEvents: NodeJS.EventEmitter,
-  specs: Spec[],
-  namespace: string,
-  indexHtmlFile?: string,
+export const Cypress = (
+  options,
 ): Plugin => {
   let base = '/'
 
+  const projectRoot = options.config.projectRoot
+  const supportFilePath = options.config.supportFile
+  const devServerEvents = options.devServerEvents
+  const specs = options.specs
+  const indexHtmlFile = options.config.devServerConfig?.indexHtmlFile
+
   let specsPathsSet = getSpecsPathsSet(specs)
+  let loader
 
   devServerEvents.on('dev-server:specs:changed', (specs: Spec[]) => {
     specsPathsSet = getSpecsPathsSet(specs)
   })
 
-  const posixSupportFilePath = supportFilePath ? convertPathToPosix(resolve(projectRoot, supportFilePath)) : undefined
-  const posixIndexHtml = indexHtmlFile ? convertPathToPosix(resolve(projectRoot, indexHtmlFile)) : undefined
-
   return {
-    name: pluginName,
+    name: 'cypress:main',
     enforce: 'pre',
     configResolved (config) {
       base = config.base
     },
     async transformIndexHtml () {
-      const indexHtmlPath = indexHtmlFile ? resolve(projectRoot, indexHtmlFile) : resolve(__dirname, '..', 'index.html')
+      const indexHtmlPath = indexHtmlFile ? resolve(projectRoot, indexHtmlFile) : resolve(__dirname, '..', '..', 'index.html')
+
+      debug('resolved the indexHtmlPath as', indexHtmlPath, 'from', indexHtmlFile)
       const indexHtmlContent = await readFile(indexHtmlPath, { encoding: 'utf8' })
       // find </body> last index
       const endOfBody = indexHtmlContent.lastIndexOf('</body>')
 
       // insert the script in the end of the body
       return `${indexHtmlContent.substring(0, endOfBody)
-    }<script src="${base}cypress:client-init-test" type="module"></script>${
+    }<script>
+    ${loader}
+    </script>${
       indexHtmlContent.substring(endOfBody)
     }`
     },
-    resolveId (id) {
-      if (id === 'cypress:config') {
-        return id
-      }
-
-      if (id === 'cypress:support-path') {
-        return posixSupportFilePath
-      }
-
-      if (id === 'cypress:spec-loaders') {
-        return id
-      }
-
-      if (id === '/cypress:client-init-test') {
-        return INIT_FILEPATH
-      }
-    },
-    load (id) {
-      if (id === 'cypress:spec-loaders') {
-        return `export default {\n${specs.map((s) => {
-          return `${JSON.stringify(s.relative)}:()=>import(${JSON.stringify(s.absolute)})`
-        }).join(',\n')}\n}`
-      }
-
-      if (id === 'cypress:config') {
-        return `
-export const hasSupportPath = ${JSON.stringify(!!supportFilePath)}
-export const originAutUrl = ${JSON.stringify(`/${namespace}/iframes/${normalizePath(projectRoot)}/`)}`
-      }
-    },
     configureServer: async (server: ViteDevServer) => {
+      loader = await readFile(INIT_FILEPATH)
+
       server.middlewares.use(`${base}index.html`, async (req, res) => {
         const transformedIndexHtml = await server.transformIndexHtml(base, '')
 
@@ -107,7 +74,7 @@ export const originAutUrl = ${JSON.stringify(`/${namespace}/iframes/${normalizeP
       debug('handleHotUpdate - file', file)
 
       // If the user provided IndexHtml is changed, do a full-reload
-      if (file === posixIndexHtml) {
+      if (normalizePath(file) === resolve(projectRoot, indexHtmlFile)) {
         server.ws.send({
           type: 'full-reload',
         })
@@ -137,7 +104,7 @@ export const originAutUrl = ${JSON.stringify(`/${namespace}/iframes/${normalizeP
             devServerEvents.emit('dev-server:compile:success')
 
             // if we update support we know we have to re-run it all
-            // no need to ckeck further
+            // no need to check further
             return []
           }
 
