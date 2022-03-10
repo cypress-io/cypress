@@ -1324,7 +1324,7 @@ export const AllCypressErrors = {
       Since 10.X, Cypress no longer supports this option.
       ${fmt.highlight(name)} was merged with ${fmt.highlight(mergedOptionKey)} into the ${fmt.highlight('specPattern')} option.
 
-      **NOTE** ${fmt.highlight('specPattern')} has to be set as a member of the ${fmt.highlight('e2e')} or ${fmt.highlight('component')} property.
+      **NOTE: ** ${fmt.highlight('specPattern')} has to be set as a member of the ${fmt.highlight('e2e')} or ${fmt.highlight('component')} property.
 
       ${stackTrace}
     `

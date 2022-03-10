@@ -287,7 +287,7 @@ function setInvalidPropSetterWarning (opts, errorKey, optionName, optionNameForE
 
 function wrapNonMigratedOptions (options) {
   debug('wrapping non-migrated options')
-  breakingOptions.forEach(({ name, errorKey }) => {
+  breakingOptions.filter((opt) => !opt.isWarning).forEach(({ name, errorKey }) => {
     setInvalidPropSetterWarning(options, errorKey, name)
 
     const testingTypes = ['component', 'e2e']
