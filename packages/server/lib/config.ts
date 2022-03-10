@@ -511,7 +511,7 @@ export function parseEnv (cfg: Record<string, any>, envCLI: Record<string, any>,
   envCLI = envCLI != null ? envCLI : {}
 
   const configFromEnv = _.reduce(envProc, (memo: string[], val, key) => {
-    let cfgKey: string
+    let cfgKey: string | undefined
 
     cfgKey = configUtils.matchesConfigKey(key)
 

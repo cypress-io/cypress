@@ -12,17 +12,6 @@
     "resolveJsonModule": true,
     "experimentalDecorators": true,
     "noUncheckedIndexedAccess": true,
-    "importsNotUsedAsValues": "error",
-    "lib": [
-      "dom",
-      "ES2020",
-    ],
-    "types": [
-      "node"
-    ],
-    "typeRoots":[
-      "../../node_modules/@types",
-      "./node_modules/@types"
-    ]
+    "importsNotUsedAsValues": "error"
   }
 }
