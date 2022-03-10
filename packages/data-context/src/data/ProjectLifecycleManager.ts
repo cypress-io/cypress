@@ -275,11 +275,12 @@ export class ProjectLifecycleManager {
 
     const { needsCypressJsonMigration } = this.refreshMetaState()
 
-    if (needsCypressJsonMigration && !this.ctx.isRunMode) {
+    const cfgPath = path.join(projectRoot, this.legacyConfigFile)
+
+    if (needsCypressJsonMigration && !this.ctx.isRunMode && this.ctx.fs.existsSync(cfgPath)) {
       // we run the legacy plugins/index.js in a child process
       // and mutate the config based on the return value for migration
       // only used in open mode (cannot migrate via terminal)
-      const cfgPath = path.join(projectRoot, this.legacyConfigFile)
       const legacyConfig = this.ctx.fs.readJsonSync(cfgPath) as LegacyCypressConfigJson
 
       // should never throw, unless there existing pluginsFile errors out,
