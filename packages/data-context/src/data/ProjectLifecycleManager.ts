@@ -119,6 +119,8 @@ export class ProjectLifecycleManager {
 
   private _projectMetaState: ProjectMetaState = { ...PROJECT_META_STATE }
 
+  private _configFile: string | false = 'cypress.config.js'
+
   constructor (private ctx: DataContext) {
     this._handlers = this.ctx._apis.configApi.getServerPluginHandlers()
     this.watchers = new Set()
@@ -170,7 +172,7 @@ export class ProjectLifecycleManager {
   }
 
   get configFile () {
-    return this.ctx.modeOptions.configFile ?? 'cypress.config.js'
+    return this.ctx.modeOptions.configFile ?? this._configFile
   }
 
   get configFilePath () {
@@ -1164,6 +1166,8 @@ export class ProjectLifecycleManager {
   }
 
   setConfigFilePath (fileName: string) {
+    this._configFile = fileName
+
     this._configFilePath = this._pathToFile(fileName)
   }
 
