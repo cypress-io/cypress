@@ -2867,12 +2867,6 @@ declare namespace Cypress {
      */
     specPattern: string | string[]
     /**
-     * Glob pattern to determine what test files to load.
-     *
-     * @deprecated Use `specPattern` under `component` or `e2e`
-     */
-    testFiles: string | string[]
-    /**
      * The user agent the browser sends in all request headers.
      */
     userAgent: null | string
