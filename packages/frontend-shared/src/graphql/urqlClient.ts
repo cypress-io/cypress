@@ -198,7 +198,10 @@ function getSocketSource (config: UrqlClientConfig) {
     })
   }
 
+  // http: -> ws:  &  https: -> wss:
+  const protocol = window.location.protocol.replace('http', 'ws')
+
   return createWsClient({
-    url: `ws://${window.location.host}${config.socketIoRoute}-graphql`,
+    url: `${protocol}//${window.location.host}${config.socketIoRoute}-graphql`,
   })
 }

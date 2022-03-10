@@ -7,6 +7,13 @@ abstract class DataEmitterEvents {
   protected pub = new EventEmitter()
 
   /**
+   * Emitted when we have logged in / logged out of the application
+   */
+  authChange () {
+    this._emit('authChange')
+  }
+
+  /**
    * Emitted when we have modified part of the backend and want to show
    * a notification to possibly restart the app
    */

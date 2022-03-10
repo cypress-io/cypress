@@ -105,10 +105,13 @@
 </template>
 
 <script setup lang="ts">
-import { gql, useMutation } from '@urql/vue'
+import { gql, useMutation, useSubscription } from '@urql/vue'
 import { ref, computed } from 'vue'
 import type { HeaderBar_HeaderBarContentFragment } from '../generated/graphql'
-import { GlobalPageHeader_ClearCurrentProjectDocument } from '../generated/graphql'
+import {
+  GlobalPageHeader_ClearCurrentProjectDocument,
+  HeaderBarContent_AuthChangeDocument,
+} from '../generated/graphql'
 import TopNav from './topnav/TopNav.vue'
 import LoginModal from './topnav/LoginModal.vue'
 import UserAvatar from './topnav/UserAvatar.vue'
@@ -117,6 +120,20 @@ import { useI18n } from '@cy/i18n'
 import ExternalLink from './ExternalLink.vue'
 import interval from 'human-interval'
 import { sortBy } from 'lodash'
+
+gql`
+subscription HeaderBarContent_authChange {
+  authChange {
+    ...Auth
+  }
+}
+`
+
+useSubscription({ query: HeaderBarContent_AuthChangeDocument }, (current, next) => {
+  // console.log(current, next)
+
+  return next
+})
 
 gql`
 mutation GlobalPageHeader_clearCurrentProject {
