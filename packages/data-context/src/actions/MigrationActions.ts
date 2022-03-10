@@ -1,5 +1,6 @@
+/* eslint-disable no-dupe-class-members */
 import path from 'path'
-import { fork } from 'child_process'
+import { ChildProcess, fork } from 'child_process'
 import type { ForkOptions } from 'child_process'
 import assert from 'assert'
 import type { DataContext } from '..'
@@ -23,6 +24,38 @@ import {
   getIntegrationTestFilesGlobs,
   getSpecPattern,
 } from '../sources/migration'
+import EventEmitter from 'events'
+import type { CypressError } from '@packages/errors'
+
+class LegacyPluginsIpc extends EventEmitter {
+  constructor (readonly childProcess: ChildProcess) {
+    super()
+    childProcess.on('message', (msg: { event: string, args: any[] }) => {
+      this.emit(msg.event, ...msg.args)
+    })
+
+    childProcess.once('disconnect', () => {
+      this.emit('disconnect')
+    })
+  }
+
+  send(event: 'loadLegacyPlugins', legacyConfig: LegacyCypressConfigJson): boolean
+  send (event: string, ...args: any[]) {
+    if (this.childProcess.killed) {
+      return false
+    }
+
+    return this.childProcess.send({ event, args })
+  }
+
+  on(event: 'ready', listener: () => void): this
+  on(event: 'loadLegacyPlugins:error', listener: (error: CypressError) => void): this
+  on(event: 'childProcess:unhandledError', listener: (legacyConfig: LegacyCypressConfigJson) => void): this
+  on(event: 'loadLegacyPlugins:reply', listener: (legacyConfig: LegacyCypressConfigJson) => void): this
+  on (evt: string, listener: (...args: any[]) => void) {
+    return super.on(evt, listener)
+  }
+}
 
 export async function processConfigViaLegacyPlugins (projectRoot: string, legacyConfig: LegacyCypressConfigJson): Promise<LegacyCypressConfigJson> {
   const pluginFile = legacyConfig.pluginsFile ?? await tryGetDefaultLegacyPluginsFile(projectRoot)
@@ -44,25 +77,25 @@ export async function processConfigViaLegacyPlugins (projectRoot: string, legacy
 
     const configProcessArgs = ['--projectRoot', projectRoot, '--file', cwd]
     const CHILD_PROCESS_FILE_PATH = require.resolve('@packages/server/lib/plugins/child/require_async_child')
-    const proc = fork(CHILD_PROCESS_FILE_PATH, configProcessArgs, childOptions)
+    const ipc = new LegacyPluginsIpc(fork(CHILD_PROCESS_FILE_PATH, configProcessArgs, childOptions))
 
-    proc.addListener('message', ({ event, args }: { event: 'ready' | 'loadLegacyPlugins:reply', args: [{ config: Partial<LegacyCypressConfigJson> }] }) => {
-      if (event === 'ready') {
-        proc.send({ event: 'loadLegacyPlugins', args: [legacyConfig] })
-      } else if (event === 'loadLegacyPlugins:reply') {
-        resolve(args[0].config)
-        proc.kill()
-      } else if (event === 'loadLegacyPlugins:error') {
-        reject(args[0])
-        proc.kill()
-      } else if (event === 'childProcess:unhandledError') {
-        reject(args)
-      } else {
-        throw Error(`Got unexpected event from ipc: ${event}`)
-      }
+    ipc.on('ready', () => {
+      ipc.send('loadLegacyPlugins', legacyConfig)
     })
 
-    return
+    ipc.on('loadLegacyPlugins:reply', (modifiedLegacyConfig) => {
+      resolve(modifiedLegacyConfig)
+      ipc.childProcess.kill()
+    })
+
+    ipc.on('loadLegacyPlugins:error', (error) => {
+      reject(error)
+      ipc.childProcess.kill()
+    })
+
+    ipc.on('childProcess:unhandledError', (error) => {
+      reject(error)
+    })
   })
 }
 

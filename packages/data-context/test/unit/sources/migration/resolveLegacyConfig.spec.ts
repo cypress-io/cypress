@@ -26,6 +26,16 @@ describe('processConfigViaLegacyPlugins', () => {
     })
   })
 
+  it('catches error', (done) => {
+    const projectRoot = getSystemTestProject('migration-e2e-legacy-plugins-throws-error')
+
+    processConfigViaLegacyPlugins(projectRoot, {})
+    .catch((e) => {
+      expect(e.originalError.message).to.eq('Uh oh, there was an error!')
+      done()
+    })
+  })
+
   it('handles pluginsFile: false', async () => {
     const projectRoot = getSystemTestProject('launchpad')
     const result = await processConfigViaLegacyPlugins(projectRoot, {
