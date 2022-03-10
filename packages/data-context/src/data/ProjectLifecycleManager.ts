@@ -1133,20 +1133,24 @@ export class ProjectLifecycleManager {
       return metaState
     }
 
-    const configFileTs = this._pathToFile('cypress.config.ts')
-    const configFileJs = this._pathToFile('cypress.config.js')
+    const potentialFiles = [
+      'cypress.config.ts',
+      'cypress.config.mjs',
+      'cypress.config.cjs',
+      'cypress.config.js',
+    ]
 
-    if (fs.existsSync(configFileTs)) {
-      metaState.hasValidConfigFile = true
-      this.setConfigFilePath('cypress.config.ts')
-    }
+    for (const fileName of potentialFiles) {
+      const filePath = this._pathToFile(fileName)
 
-    if (fs.existsSync(configFileJs)) {
-      metaState.hasValidConfigFile = true
-      if (this._configFilePath) {
+      if (this._configFilePath && fs.existsSync(filePath)) {
         metaState.hasMultipleConfigPaths = true
-      } else {
-        this.setConfigFilePath('cypress.config.js')
+        break
+      }
+
+      if (fs.existsSync(filePath)) {
+        metaState.hasValidConfigFile = true
+        this.setConfigFilePath(fileName)
       }
     }
 
