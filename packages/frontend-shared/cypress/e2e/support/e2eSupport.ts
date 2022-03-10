@@ -359,7 +359,7 @@ function withCtx<T extends Partial<WithCtxOptions>, R> (fn: (ctx: DataContext, o
   return cy.task<CyTaskResult<R>>('__internal_withCtx', {
     fn: fn.toString(),
     options: rest,
-  }, { timeout: timeout ?? Cypress.env('e2e_isDebugging') ? NO_TIMEOUT : TEN_SECONDS, log: Boolean(Cypress.env('e2e_isDebugging')) }).then((result) => {
+  }, { timeout: timeout ?? Cypress.env('e2e_isDebugging') ? NO_TIMEOUT : TEN_SECONDS, log: true }).then((result) => {
     _log.set('result', result)
     _log.end()
 

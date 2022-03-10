@@ -108,30 +108,29 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500 }, () => {
 
     const goodFilePath = 'cypress/e2e/dom-content.spec.js'
 
-    cy.visit(`http://localhost:4455/__/#/specs/runner?file=${goodFilePath}`)
+    cy.__incorrectlyVisitAppWithIntercept(`/specs/runner?file=${goodFilePath}`)
 
     cy.contains('Dom Content')
     .should('be.visible')
-    .then(() => {
-      cy.withCtx((ctx) => {
-        // rename relative path for any specs that happen to be found
-        const specs = [...ctx.project.specs]
 
-        specs.forEach((spec) => {
-          spec.relative += '-updated'
-        })
+    cy.withCtx((ctx) => {
+      // rename relative path for any specs that happen to be found
+      const specs = [...ctx.project.specs]
 
-        ctx.actions.project.setSpecs(specs)
-        ctx.emitter.toApp()
-      }).then(() => {
-        cy.contains(noSpecErrorTitle).should('be.visible')
-        cy.contains(noSpecErrorIntro).should('be.visible')
-        cy.contains(noSpecErrorExplainer).should('be.visible')
-        cy.contains(goodFilePath).should('be.visible')
-        cy.location()
-        .its('href')
-        .should('eq', 'http://localhost:4455/__/#/specs')
+      specs.forEach((spec) => {
+        spec.relative += '-updated'
       })
+
+      ctx.actions.project.setSpecs(specs)
+      ctx.emitter.toApp()
+    }).then(() => {
+      cy.contains(noSpecErrorTitle).should('be.visible')
+      cy.contains(noSpecErrorIntro).should('be.visible')
+      cy.contains(noSpecErrorExplainer).should('be.visible')
+      cy.contains(goodFilePath).should('be.visible')
+      cy.location()
+      .its('href')
+      .should('eq', 'http://localhost:4455/__/#/specs')
     })
   })
 })
