@@ -98,6 +98,9 @@ describe('Cypress In Cypress', { viewportWidth: 1500 }, () => {
 
     const goodFilePath = 'src/TestComponent.spec.jsx'
 
+    // TODO: Figure out why test is flaky without wait
+    // see: https://cypress-io.atlassian.net/browse/UNIFY-1294
+    cy.wait(1000)
     cy.visit(`http://localhost:4455/__/#/specs/runner?file=${goodFilePath}`)
 
     cy.contains('renders the test component').should('be.visible')
