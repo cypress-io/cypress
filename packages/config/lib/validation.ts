@@ -67,7 +67,7 @@ export const isValidBrowser = (browser): ErrResult | true => {
     return errMsg('path', browser, 'a string')
   }
 
-  if (typeof browser.majorVersion !== 'string' && !(is.number(browser.majorVersion) && browser.majorVersion < 0)) {
+  if (typeof browser.majorVersion !== 'string' && !(is.number(browser.majorVersion) && browser.majorVersion > 0)) {
     return errMsg('majorVersion', browser, 'a string or a positive number')
   }
 
