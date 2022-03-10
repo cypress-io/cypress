@@ -52,6 +52,7 @@ export const e2eProjectDirs = [
   'migration-e2e-export-default',
   'migration-e2e-false-plugins-support-file',
   'migration-e2e-fully-custom',
+  'migration-e2e-legacy-plugins-throws-error',
   'migration-e2e-no-plugins-support-file',
   'migration-e2e-plugins-modify-config',
   'migration-specs-already-migrated',

@@ -79,46 +79,52 @@ function run (ipc, file, projectRoot) {
   }
 
   ipc.on('loadLegacyPlugins', async (legacyConfig) => {
-    let legacyPlugins = require(file)
+    try {
+      let legacyPlugins = require(file)
 
-    if (legacyPlugins && typeof legacyPlugins.default === 'function') {
-      legacyPlugins = legacyPlugins.default
-    }
-
-    // invalid or empty plugins file
-    if (typeof legacyPlugins !== 'function') {
-      ipc.send('loadLegacyPlugins:reply', { config: legacyConfig })
-
-      return
-    }
-
-    // we do not want to execute any tasks - the purpose
-    // of this is to get any modified config returned
-    // by plugins.
-    const noop = () => {}
-    const legacyPluginsConfig = await legacyPlugins(noop, legacyConfig)
-
-    // match merging strategy from 9.x
-    const mergedLegacyConfig = {
-      ...legacyConfig,
-      ...legacyPluginsConfig,
-    }
-
-    if (legacyConfig.e2e || legacyPluginsConfig.e2e) {
-      mergedLegacyConfig.e2e = {
-        ...(legacyConfig.e2e || {}),
-        ...(legacyPluginsConfig.e2e || {}),
+      if (legacyPlugins && typeof legacyPlugins.default === 'function') {
+        legacyPlugins = legacyPlugins.default
       }
-    }
 
-    if (legacyConfig.component || legacyPluginsConfig.component) {
-      mergedLegacyConfig.component = {
-        ...(legacyConfig.component || {}),
-        ...(legacyPluginsConfig.component || {}),
+      // invalid or empty plugins file
+      if (typeof legacyPlugins !== 'function') {
+        ipc.send('loadLegacyPlugins:reply', { config: legacyConfig })
+
+        return
       }
-    }
 
-    ipc.send('loadLegacyPlugins:reply', { config: mergedLegacyConfig })
+      // we do not want to execute any tasks - the purpose
+      // of this is to get any modified config returned
+      // by plugins.
+      const noop = () => {}
+      const legacyPluginsConfig = await legacyPlugins(noop, legacyConfig)
+
+      // match merging strategy from 9.x
+      const mergedLegacyConfig = {
+        ...legacyConfig,
+        ...legacyPluginsConfig,
+      }
+
+      if (legacyConfig.e2e || legacyPluginsConfig.e2e) {
+        mergedLegacyConfig.e2e = {
+          ...(legacyConfig.e2e || {}),
+          ...(legacyPluginsConfig.e2e || {}),
+        }
+      }
+
+      if (legacyConfig.component || legacyPluginsConfig.component) {
+        mergedLegacyConfig.component = {
+          ...(legacyConfig.component || {}),
+          ...(legacyPluginsConfig.component || {}),
+        }
+      }
+
+      ipc.send('loadLegacyPlugins:reply', { config: mergedLegacyConfig })
+    } catch (e) {
+      ipc.send('loadLegacyPlugins:error', util.serializeError(
+        require('@packages/errors').getError('LEGACY_CONFIG_ERROR_DURING_MIGRATION', file, e),
+      ))
+    }
   })
 
   ipc.on('loadConfig', () => {

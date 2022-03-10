@@ -24,10 +24,10 @@ import {
   getSpecPattern,
 } from '../sources/migration'
 
-export function processConfigViaLegacyPlugins (projectRoot: string, legacyConfig: LegacyCypressConfigJson): Promise<LegacyCypressConfigJson> {
-  return new Promise(async (resolve, reject) => {
-    const pluginFile = legacyConfig.pluginsFile ?? await tryGetDefaultLegacyPluginsFile(projectRoot)
+export async function processConfigViaLegacyPlugins (projectRoot: string, legacyConfig: LegacyCypressConfigJson): Promise<LegacyCypressConfigJson> {
+  const pluginFile = legacyConfig.pluginsFile ?? await tryGetDefaultLegacyPluginsFile(projectRoot)
 
+  return new Promise((resolve, reject) => {
     // couldn't find a pluginsFile
     // just bail with initial config
     if (!pluginFile) {
@@ -51,6 +51,9 @@ export function processConfigViaLegacyPlugins (projectRoot: string, legacyConfig
         proc.send({ event: 'loadLegacyPlugins', args: [legacyConfig] })
       } else if (event === 'loadLegacyPlugins:reply') {
         resolve(args[0].config)
+        proc.kill()
+      } else if (event === 'loadLegacyPlugins:error') {
+        reject(args[0])
         proc.kill()
       } else if (event === 'childProcess:unhandledError') {
         reject(args)

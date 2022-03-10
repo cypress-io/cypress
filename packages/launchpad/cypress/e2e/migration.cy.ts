@@ -18,10 +18,14 @@ Cypress.Commands.add('waitForWizard', () => {
   return cy.get('[data-cy="migration-wizard"]')
 })
 
-function startMigrationFor (project: typeof e2eProjectDirs[number]) {
+function scaffoldAndVisitLaunchpad (project: typeof e2eProjectDirs[number]) {
   cy.scaffoldProject(project)
   cy.openProject(project)
   cy.visitLaunchpad()
+}
+
+function startMigrationFor (project: typeof e2eProjectDirs[number]) {
+  scaffoldAndVisitLaunchpad(project)
   cy.waitForWizard()
 }
 
@@ -827,6 +831,22 @@ describe('Full migration flow for each project', { retries: { openMode: 2, runMo
       renameSupport()
       migrateAndVerifyConfig()
     })
+  })
+
+  it('completes journey for migration-e2e-legacy-plugins-throws-error', () => {
+    scaffoldAndVisitLaunchpad('migration-e2e-legacy-plugins-throws-error')
+    // no steps are shown - we show the error that surfaced when executing pluginsFile.
+    cy.get(renameAutoStep).should('not.exist')
+    cy.get(renameManualStep).should('not.exist')
+    cy.get(renameSupportStep).should('not.exist')
+    cy.get(setupComponentStep).should('not.exist')
+    cy.get(configFileStep).should('not.exist')
+
+    cy.contains('Error Loading Config')
+    // correct location of error
+    cy.get('[data-testid="error-code-frame"]').contains(`cypress/plugins/index.js:2:9`)
+    // correct error from pluginsFile
+    cy.contains(`throw Error('Uh oh, there was an error!')`)
   })
 })
 
