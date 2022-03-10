@@ -1,3 +1,4 @@
+import path from 'path'
 import {
   isObject,
   isArray, every, isNull,
@@ -8,7 +9,6 @@ import {
 } from 'lodash'
 import * as is from 'check-more-types'
 import { commaListsOr } from 'common-tags'
-import path from 'path'
 import Debug from 'debug'
 
 const debug = Debug('cypress:server:validation')

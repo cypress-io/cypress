@@ -1,11 +1,11 @@
 import _ from 'lodash'
 import Debug from 'debug'
 import { options, breakingOptions, breakingRootOptions, testingTypeBreakingOptions } from './options'
-import type { BreakingOptionObj, BreakingOption } from './options'
+import type { BreakingOptionObj, BreakingOptionErrorKey } from './options'
 
 export * as validation from './validation'
 
-export { breakingOptions, BreakingOptionObj, BreakingOption }
+export { breakingOptions, BreakingOptionObj, BreakingOptionErrorKey }
 
 const debug = Debug('cypress:config:validator')
 
@@ -38,7 +38,7 @@ export type BreakingErrResult = {
 }
 
 type ErrorHandler = (
-  key: BreakingOption,
+  key: BreakingOptionErrorKey,
   options: BreakingErrResult
 ) => void
 

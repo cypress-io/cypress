@@ -12,6 +12,6 @@
     "resolveJsonModule": true,
     "experimentalDecorators": true,
     "noUncheckedIndexedAccess": true,
-    "importsNotUsedAsValues": "error"
+    "importsNotUsedAsValues": "error",
   }
 }

@@ -3,7 +3,7 @@ import * as validate from './validation'
 // @ts-ignore
 import pkg from '@packages/root'
 
-export type BreakingOption =
+export type BreakingOptionErrorKey =
   | 'RENAMED_CONFIG_OPTION'
   | 'EXPERIMENTAL_COMPONENT_TESTING_REMOVED'
   | 'EXPERIMENTAL_SAMESITE_REMOVED'
@@ -17,7 +17,6 @@ export type BreakingOption =
   | 'CONFIG_FILE_INVALID_ROOT_CONFIG_E2E'
   | 'CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_COMPONENT'
   | 'SETUP_NODE_EVENTS_INVALID_OPTIONS_SPEC_PATTERN'
-  | 'SETUP_NODE_EVENTS_INVALID_OPTIONS_PLUGINS_FILE'
 
 type TestingType = 'e2e' | 'component'
 
@@ -53,7 +52,7 @@ export interface BreakingOptionObj {
   /**
    * String to summarize the error messaging that is logged.
    */
-  errorKey: BreakingOption
+  errorKey: BreakingOptionErrorKey
   /**
    * Array of testing types this config option is valid for
    */
@@ -517,16 +516,12 @@ export const breakingOptions: Array<BreakingOptionObj> = [
     name: 'testFiles',
     errorKey: 'SETUP_NODE_EVENTS_INVALID_OPTIONS_SPEC_PATTERN',
   }, {
-    name: 'pluginsFile',
-    errorKey: 'SETUP_NODE_EVENTS_INVALID_OPTIONS_PLUGINS_FILE',
-  }, {
     name: 'blacklistHosts',
     errorKey: 'RENAMED_CONFIG_OPTION',
     newName: 'blockHosts',
   }, {
     name: 'experimentalComponentTesting',
     errorKey: 'EXPERIMENTAL_COMPONENT_TESTING_REMOVED',
-    isWarning: false,
   }, {
     name: 'experimentalGetCookiesSameSite',
     errorKey: 'EXPERIMENTAL_SAMESITE_REMOVED',
