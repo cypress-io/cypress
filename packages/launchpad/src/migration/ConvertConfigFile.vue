@@ -81,12 +81,12 @@
         >
           <template #jsonFile>
             <CodeTag class="text-red-500">
-              cypress.json
+              {{ props.gql.configFileNameBefore }}
             </CodeTag>
           </template>
           <template #jsFile>
             <CodeTag class="text-jade-500">
-              {{ fileName }}
+              {{ props.gql.configFileNameAfter }}
             </CodeTag>
           </template>
         </i18n-t>
@@ -99,7 +99,7 @@
           bg
           class="text-red-600 bg-red-100"
         >
-          cypress.json
+          {{ props.gql.configFileNameBefore }}
         </CodeTag>
       </template>
       <template #afterHeader>
@@ -108,7 +108,7 @@
           bg
           class="bg-jade-100 text-jade-600"
         >
-          {{ fileName }}
+          {{ props.gql.configFileNameAfter }}
         </CodeTag>
       </template>
       <template #before>
@@ -147,6 +147,8 @@ const { t } = useI18n()
 
 gql`
 fragment ConvertConfigFile on Migration {
+  configFileNameBefore
+  configFileNameAfter
   configBeforeCode
   configAfterCode
   hasCustomIntegrationFolder
@@ -173,6 +175,7 @@ const codeAfter = computed(() => {
 })
 
 const fileName = computed(() => props.gql.hasTypescript ? 'cypress.config.ts' : 'cypress.config.js')
+
 </script>
 
 <style lang="scss" scoped>
