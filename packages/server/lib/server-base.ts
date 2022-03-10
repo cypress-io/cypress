@@ -50,13 +50,19 @@ const _forceProxyMiddleware = function (clientRoute, namespace = '__cypress') {
     `/${namespace}/runner/favicon.ico`,
   ]
 
+  const APP_ASSETS_PATH = `/assets/assets`
+
+  const isAllowedPath = (path) => {
+    return ALLOWED_PROXY_BYPASS_URLS.includes(path) || path.includes(APP_ASSETS_PATH)
+  }
+
   // normalize clientRoute to help with comparison
   const trimmedClientRoute = _.trimEnd(clientRoute, '/')
 
   return function (req, res, next) {
     const trimmedUrl = _.trimEnd(req.proxiedUrl, '/')
 
-    if (_isNonProxiedRequest(req) && !ALLOWED_PROXY_BYPASS_URLS.includes(trimmedUrl) && (trimmedUrl !== trimmedClientRoute)) {
+    if (_isNonProxiedRequest(req) && !isAllowedPath(trimmedUrl) && (trimmedUrl !== trimmedClientRoute)) {
       // this request is non-proxied and non-allowed, redirect to the runner error page
       return res.redirect(clientRoute)
     }
