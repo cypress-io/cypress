@@ -5,6 +5,7 @@
   ],
   "compilerOptions": {
     "outDir": "./dist",
+    "noImplicitAny": true,
     "lib": [
       "dom",
       "ES2020",

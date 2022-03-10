@@ -4,7 +4,8 @@ import chalk from 'chalk'
 import _ from 'lodash'
 import path from 'path'
 import stripAnsi from 'strip-ansi'
-import type { BreakingErrResult, TestingType } from '@packages/types'
+import type { TestingType } from '@packages/types'
+import type { BreakingErrResult } from '@packages/config'
 
 import { humanTime, logError, parseResolvedPattern, pluralize } from './errorUtils'
 import { errPartial, errTemplate, fmt, theme, PartialErr } from './errTemplate'
@@ -1324,7 +1325,7 @@ export const AllCypressErrors = {
       Since 10.X, Cypress no longer supports this option.
       ${fmt.highlight(name)} was merged with ${fmt.highlight(mergedOptionKey)} into the ${fmt.highlight('specPattern')} option.
 
-      **NOTE: ** ${fmt.highlight('specPattern')} has to be set as a member of the ${fmt.highlight('e2e')} or ${fmt.highlight('component')} property.
+      **NOTE:** ${fmt.highlight('specPattern')} has to be set as a member of the ${fmt.highlight('e2e')} or ${fmt.highlight('component')} property.
 
       ${stackTrace}
     `

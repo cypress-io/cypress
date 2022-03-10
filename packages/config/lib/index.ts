@@ -12,10 +12,10 @@ const debug = Debug('cypress:config:validator')
 const dashesOrUnderscoresRe = /^(_-)+/
 
 // takes an array and creates an index object of [keyKey]: [valueKey]
-const createIndex = (arr, keyKey, valueKey) => {
+function createIndex<T extends Record<string, any>> (arr: Array<T>, keyKey: keyof T, valueKey: keyof T) {
   return _.reduce(arr, (memo: Record<string, any>, item) => {
     if (item[valueKey] !== undefined) {
-      memo[item[keyKey]] = item[valueKey]
+      memo[item[keyKey] as string] = item[valueKey]
     }
 
     return memo
@@ -42,7 +42,7 @@ type ErrorHandler = (
   options: BreakingErrResult
 ) => void
 
-const validateNoBreakingOptions = (breakingCfgOptions: BreakingOptionObj[], cfg, onWarning: ErrorHandler, onErr: ErrorHandler) => {
+const validateNoBreakingOptions = (breakingCfgOptions: BreakingOptionObj[], cfg: any, onWarning: ErrorHandler, onErr: ErrorHandler) => {
   breakingCfgOptions.forEach(({ name, errorKey, newName, isWarning, value }) => {
     if (_.has(cfg, name)) {
       if (value && cfg[name] !== value) {
@@ -101,7 +101,7 @@ export const getPublicConfigKeys = () => {
   return publicConfigKeys
 }
 
-export const matchesConfigKey = (key) => {
+export const matchesConfigKey = (key: string) => {
   if (_.has(defaultValues, key)) {
     return key
   }
@@ -112,11 +112,13 @@ export const matchesConfigKey = (key) => {
   if (_.has(defaultValues, key)) {
     return key
   }
+
+  return
 }
 
 export { options }
 
-export const validate = (cfg, onErr) => {
+export const validate = (cfg: any, onErr: (property: string) => void) => {
   debug('validating configuration', cfg)
 
   return _.each(cfg, (value, key) => {
@@ -133,21 +135,21 @@ export const validate = (cfg, onErr) => {
   })
 }
 
-export const validateNoBreakingConfigRoot = (cfg, onWarning: ErrorHandler, onErr: ErrorHandler) => {
+export const validateNoBreakingConfigRoot = (cfg: any, onWarning: ErrorHandler, onErr: ErrorHandler) => {
   return validateNoBreakingOptions(breakingRootOptions, cfg, onWarning, onErr)
 }
 
-export const validateNoBreakingConfig = (cfg, onWarning: ErrorHandler, onErr: ErrorHandler) => {
+export const validateNoBreakingConfig = (cfg: any, onWarning: ErrorHandler, onErr: ErrorHandler) => {
   return validateNoBreakingOptions(breakingOptions, cfg, onWarning, onErr)
 }
 
-export const validateNoBreakingTestingTypeConfig = (cfg, testingType: keyof typeof testingTypeBreakingOptions, onWarning: ErrorHandler, onErr: ErrorHandler) => {
+export const validateNoBreakingTestingTypeConfig = (cfg: any, testingType: keyof typeof testingTypeBreakingOptions, onWarning: ErrorHandler, onErr: ErrorHandler) => {
   const options = testingTypeBreakingOptions[testingType]
 
   return validateNoBreakingOptions(options, cfg, onWarning, onErr)
 }
 
-export const validateNoReadOnlyConfig = (config, onErr: (property: string) => void) => {
+export const validateNoReadOnlyConfig = (config: any, onErr: (property: string) => void) => {
   let errProperty
 
   Object.keys(config).some((option) => {

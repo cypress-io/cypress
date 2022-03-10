@@ -19,7 +19,7 @@ const debug = Debug('cypress:server:validation')
 
 const str = JSON.stringify
 
-const errMsg = (key, value, type) => {
+const errMsg = (key: string, value: any, type: string) => {
   return {
     key,
     value,
@@ -27,15 +27,15 @@ const errMsg = (key, value, type) => {
   }
 }
 
-const _isFullyQualifiedUrl = (value) => {
+const _isFullyQualifiedUrl = (value: any) => {
   return _isString(value) && /^https?\:\/\//.test(value)
 }
 
-const isArrayOfStrings = (value) => {
+const isArrayOfStrings = (value: any) => {
   return isArray(value) && every(value, isString)
 }
 
-const isFalse = (value) => {
+const isFalse = (value: any) => {
   return value === false
 }
 
@@ -43,7 +43,7 @@ const isFalse = (value) => {
  * Validates a single browser object.
  * @returns {string|true} Returns `true` if the object is matching browser object schema. Returns an error message if it does not.
  */
-export const isValidBrowser = (browser): ErrResult | true => {
+export const isValidBrowser = (browser: any): ErrResult | true => {
   if (!is.unemptyString(browser.name)) {
     return errMsg('name', browser, 'a non-empty string')
   }
@@ -108,8 +108,8 @@ export const isValidBrowserList = (key: string, browsers: any): ErrResult | true
 
 export const isValidRetriesConfig = (key: string, value: any): ErrResult | true => {
   const optionalKeys = ['runMode', 'openMode']
-  const isValidRetryValue = (val) => isNull(val) || (Number.isInteger(val) && val >= 0)
-  const optionalKeysAreValid = (val, k) => optionalKeys.includes(k) && isValidRetryValue(val)
+  const isValidRetryValue = (val: any) => isNull(val) || (Number.isInteger(val) && val >= 0)
+  const optionalKeysAreValid = (val: any, k: string) => optionalKeys.includes(k) && isValidRetryValue(val)
 
   if (isValidRetryValue(value)) {
     return true
@@ -163,7 +163,7 @@ type ErrResult = {
 // _key: string, certsForUrls: any[]): ErrResult | true {}
 export const isValidClientCertificatesSet = (_key: string, certsForUrls: Array<{
   url: string
-  ca: string
+  ca: string[]
   certs: Array<{
     key: string
     cert: string
@@ -254,7 +254,7 @@ export const isValidClientCertificatesSet = (_key: string, certsForUrls: Array<{
   return true
 }
 
-export const isPlainObject = (key, value) => {
+export const isPlainObject = (key: string, value: any) => {
   if (value == null || _isPlainObject(value)) {
     return true
   }
@@ -262,7 +262,7 @@ export const isPlainObject = (key, value) => {
   return errMsg(key, value, 'a plain object')
 }
 
-export function isBoolean (key, value): ErrResult | true {
+export function isBoolean (key: string, value: any): ErrResult | true {
   if (value == null || _isBoolean(value)) {
     return true
   }
@@ -270,7 +270,7 @@ export function isBoolean (key, value): ErrResult | true {
   return errMsg(key, value, 'a boolean')
 }
 
-export function isNumber (key, value): ErrResult | true {
+export function isNumber (key: string, value: any): ErrResult | true {
   if (value == null || _isNumber(value)) {
     return true
   }
@@ -278,7 +278,7 @@ export function isNumber (key, value): ErrResult | true {
   return errMsg(key, value, 'a number')
 }
 
-export function isString (key, value): ErrResult | true {
+export function isString (key: string, value: any): ErrResult | true {
   if (value == null || _isString(value)) {
     return true
   }
@@ -286,7 +286,7 @@ export function isString (key, value): ErrResult | true {
   return errMsg(key, value, 'a string')
 }
 
-export function isNumberOrFalse (key, value): ErrResult | true {
+export function isNumberOrFalse (key: string, value: any): ErrResult | true {
   if (_isNumber(value) || isFalse(value)) {
     return true
   }
@@ -294,7 +294,7 @@ export function isNumberOrFalse (key, value): ErrResult | true {
   return errMsg(key, value, 'a number or false')
 }
 
-export function isStringOrFalse (key, value): ErrResult | true {
+export function isStringOrFalse (key: string, value: any): ErrResult | true {
   if (_isString(value) || isFalse(value)) {
     return true
   }
@@ -302,7 +302,7 @@ export function isStringOrFalse (key, value): ErrResult | true {
   return errMsg(key, value, 'a string or false')
 }
 
-export function isFullyQualifiedUrl (key, value): ErrResult | true {
+export function isFullyQualifiedUrl (key: string, value: any): ErrResult | true {
   if (value == null || _isFullyQualifiedUrl(value)) {
     return true
   }
@@ -314,7 +314,7 @@ export function isFullyQualifiedUrl (key, value): ErrResult | true {
   )
 }
 
-export function isStringOrArrayOfStrings (key, value): ErrResult | true {
+export function isStringOrArrayOfStrings (key: string, value: any): ErrResult | true {
   if (_isString(value) || isArrayOfStrings(value)) {
     return true
   }
