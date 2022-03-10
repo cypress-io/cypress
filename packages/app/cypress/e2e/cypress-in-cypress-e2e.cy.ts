@@ -110,19 +110,21 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500 }, () => {
 
     cy.visit(`http://localhost:4455/__/#/specs/runner?file=${goodFilePath}`)
 
-    cy.contains('Dom Content').should('be.visible')
-
-    cy.withCtx((ctx) => {
-      ctx.actions.project.setSpecs([])
-      ctx.emitter.toApp()
-    }).then(() => {
-      cy.contains(noSpecErrorTitle).should('be.visible')
-      cy.contains(noSpecErrorIntro).should('be.visible')
-      cy.contains(noSpecErrorExplainer).should('be.visible')
-      cy.contains(goodFilePath).should('be.visible')
-      cy.location()
-      .its('href')
-      .should('eq', 'http://localhost:4455/__/#/specs')
+    cy.contains('Dom Content')
+    .should('be.visible')
+    .then(() => {
+      cy.withCtx((ctx) => {
+        ctx.actions.project.setSpecs([])
+        ctx.emitter.toApp()
+      }).then(() => {
+        cy.contains(noSpecErrorTitle).should('be.visible')
+        cy.contains(noSpecErrorIntro).should('be.visible')
+        cy.contains(noSpecErrorExplainer).should('be.visible')
+        cy.contains(goodFilePath).should('be.visible')
+        cy.location()
+        .its('href')
+        .should('eq', 'http://localhost:4455/__/#/specs')
+      })
     })
   })
 })
